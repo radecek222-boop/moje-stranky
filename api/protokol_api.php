@@ -59,37 +59,15 @@ function savePdfDocument($data) {
         throw new Exception('Chybí PDF data');
     }
 
-    // Dekódování base64
-    $pdfData = base64_decode($pdfBase64);
-    if ($pdfData === false) {
-        throw new Exception('Nepodařilo se dekódovat PDF');
+    // BEZPEČNOST: Validace reklamace_id - musí být pouze alfanumerické znaky
+    if (!preg_match('/^[a-zA-Z0-9_-]+$/', $reklamaceId)) {
+        throw new Exception('Neplatné ID reklamace');
     }
-
-    // Vytvoření uploads/protokoly adresáře
-    $uploadsDir = __DIR__ . '/../uploads/protokoly';
-    if (!is_dir($uploadsDir)) {
-        mkdir($uploadsDir, 0755, true);
-    }
-
-    // Název souboru
-    $filename = $reklamaceId . '.pdf';
-    $filePath = $uploadsDir . '/' . $filename;
-
-    // Uložení souboru
-    if (file_put_contents($filePath, $pdfData) === false) {
-        throw new Exception('Nepodařilo se uložit PDF soubor');
-    }
-
-    // Relativní cesta pro databázi
-    $relativePathForDb = "uploads/protokoly/{$filename}";
-
-    // Velikost souboru
-    $fileSize = filesize($filePath);
 
     // Databázové připojení
     $pdo = getDbConnection();
 
-    // Získání claim_id z reklamace_id
+    // BEZPEČNOST: Ověření existence reklamace PŘED zápisem souboru
     $stmt = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE reklamace_id = :reklamace_id OR cislo = :cislo LIMIT 1");
     $stmt->execute([
         ':reklamace_id' => $reklamaceId,
@@ -102,6 +80,33 @@ function savePdfDocument($data) {
     }
 
     $claimId = $reklamace['id'];
+
+    // Dekódování base64
+    $pdfData = base64_decode($pdfBase64);
+    if ($pdfData === false) {
+        throw new Exception('Nepodařilo se dekódovat PDF');
+    }
+
+    // Vytvoření uploads/protokoly adresáře
+    $uploadsDir = __DIR__ . '/../uploads/protokoly';
+    if (!is_dir($uploadsDir)) {
+        mkdir($uploadsDir, 0755, true);
+    }
+
+    // Název souboru (basename pro extra bezpečnost)
+    $filename = basename($reklamaceId) . '.pdf';
+    $filePath = $uploadsDir . '/' . $filename;
+
+    // Uložení souboru
+    if (file_put_contents($filePath, $pdfData) === false) {
+        throw new Exception('Nepodařilo se uložit PDF soubor');
+    }
+
+    // Relativní cesta pro databázi
+    $relativePathForDb = "uploads/protokoly/{$filename}";
+
+    // Velikost souboru
+    $fileSize = filesize($filePath);
 
     // Kontrola zda už PDF existuje
     $stmt = $pdo->prepare("
