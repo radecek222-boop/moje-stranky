@@ -7,22 +7,26 @@ on:
 
 jobs:
   deploy:
-    name: Deploy via SFTP to Český hosting
     runs-on: ubuntu-latest
+    name: Deploy via SFTP to Český hosting
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Deploy files via SFTP
-        uses: appleboy/scp-action@v0.1.4
+      - name: Deploy to Český hosting via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-          host: ${{ secrets.FTP_HOST }}
+          server: ${{ secrets.FTP_HOST }}
+          port: 22
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          port: 22
-          source: "./"
-          target: "www"   # nebo "www/" podle struktury u Českého hostingu
-          overwrite: true
-          strip_components: 0
+          local_path: "./"
+          remote_path: "www/"
+          sftp_only: true
+          delete_remote_files: false
+          exclude: |
+            .git*
+            .github/*
+            docs/*
 
