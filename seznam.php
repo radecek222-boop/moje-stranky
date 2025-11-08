@@ -14,6 +14,10 @@ $currentUserData = [
 ];
 
 // Redirect nepřihlášené na login
+if (!$isLoggedIn) {
+    header('Location: login.php?redirect=seznam.php');
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="cs">

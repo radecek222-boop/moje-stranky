@@ -1,4 +1,13 @@
-<?php require_once "init.php"; ?>
+<?php
+require_once "init.php";
+
+// BEZPEČNOST: Kontrola admin přihlášení
+$isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+if (!$isAdmin) {
+    header('Location: login.php?redirect=protokol.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>

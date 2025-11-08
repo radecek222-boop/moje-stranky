@@ -9,6 +9,17 @@ require_once __DIR__ . '/../init.php';
 header('Content-Type: application/json');
 
 try {
+    // BEZPEČNOST: Kontrola přihlášení (admin nebo technik)
+    $isLoggedIn = isset($_SESSION['user_id']) || (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true);
+    if (!$isLoggedIn) {
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Neautorizovaný přístup. Přihlaste se prosím.'
+        ]);
+        exit;
+    }
+
     // Kontrola metody
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         throw new Exception('Povolena pouze POST metoda');
