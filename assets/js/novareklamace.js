@@ -403,6 +403,21 @@ const WGS = {
       e.preventDefault();
       await this.submitForm();
     });
+
+    // Funkce pro změnu fakturace
+    const fakturaceSelect = document.getElementById('fakturace_firma');
+    const fakturaHint = document.getElementById('faktura_hint');
+
+    if (fakturaceSelect && fakturaHint) {
+      fakturaceSelect.addEventListener('change', (e) => {
+        const value = e.target.value;
+        if (value === 'CZ') {
+          fakturaHint.textContent = 'Tato objednávka se bude fakturovat na CZ firmu';
+        } else if (value === 'SK') {
+          fakturaHint.textContent = 'Tato objednávka se bude fakturovat na SK firmu';
+        }
+      });
+    }
   },
   
   async submitForm() {
