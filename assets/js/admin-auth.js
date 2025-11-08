@@ -1,5 +1,7 @@
 
 async function checkAdminAuth() {
+  // BEZPEČNOST: POUZE serverová session je důvěryhodná
+  // localStorage fallbacky odstraněny - umožňovaly bypass autentizace
   try {
     const response = await fetch('app/admin_session_check.php');
     if (response.ok) {
@@ -9,25 +11,16 @@ async function checkAdminAuth() {
           name: result.username || result.email || 'Administrator',
           email: result.email || 'admin@wgs-service.cz',
           role: result.role || 'admin',
-          id: 'ADMIN_SESSION'
+          id: result.user_id || 'ADMIN_SESSION'
         };
         return true;
       }
     }
-  } catch (err) {}
-  
-  if (localStorage.getItem('wgsAdmin') === '1') {
-    CURRENT_USER = { name: 'ADMIN', email: 'admin@wgs-service.cz', role: 'admin', id: 'ADMIN_LOCAL' };
-    return true;
+  } catch (err) {
+    console.error('Admin auth check failed:', err);
   }
-  
-  const userId = localStorage.getItem('wgsCurrent');
-  if (userId) {
-    const users = JSON.parse(localStorage.getItem('wgsUsers') || '[]');
-    CURRENT_USER = users.find(u => u.id === userId);
-    if (CURRENT_USER) return true;
-  }
-  
+
+  // Pokud server session check selhal, uživatel NENÍ přihlášen
   return false;
 }
 
@@ -44,14 +37,6 @@ async function initAuth() {
 
 async function handleLogout() {
   if (!confirm('Opravdu se chcete odhlásit?')) return;
-  try {
-    await fetch('api/admin_api.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'logout' })
-    });
-  } catch (err) {}
-  localStorage.removeItem('wgsAdmin');
-  localStorage.removeItem('wgsCurrent');
-  window.location.href = 'login.php';
+  // OPRAVENO: Přesměrování na logout.php místo neexistujícího API
+  window.location.href = 'logout.php';
 }

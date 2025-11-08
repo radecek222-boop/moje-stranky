@@ -115,7 +115,7 @@ if (!$isLoggedIn) {
   <!-- TLAČÍTKA -->
   <div class="btn-group">
     <button class="btn" id="btnSaveToProtocol">Odeslat do protokolu</button>
-    <button class="btn btn-secondary" data-navigate="seznam.html">Zpět</button>
+    <button class="btn btn-secondary" data-navigate="seznam.php">Zpět</button>
   </div>
   
 </div>
@@ -132,7 +132,8 @@ if (!$isLoggedIn) {
 <div class="alert" id="alert"></div>
 
 <!-- HIDDEN FILE INPUT -->
-<input type="file" id="mediaInput" accept="assets/img/*,video/*" capture="environment" multiple>
+<!-- OPRAVENO: accept="image/*,video/*" místo špatného "assets/img/*" -->
+<input type="file" id="mediaInput" accept="image/*,video/*" capture="environment" multiple>
 
 
 </main>
