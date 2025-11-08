@@ -7,27 +7,22 @@ on:
 
 jobs:
   deploy:
+    name: Deploy via SFTP to Český hosting
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Deploy via SFTP to Český hosting
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy files via SFTP
+        uses: appleboy/scp-action@v0.1.4
         with:
-          server: ${{ secrets.FTP_HOST }}
+          host: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
           port: 22
-          server-dir: ${{ secrets.FTP_TARGET }}
-          local-dir: ./
-          exclude: |
-            **/.git*
-            **/.github*
-            **/docs/**
-            **/logs/**
-            **/README.md
-            **/deploy.yml
+          source: "./"
+          target: "www"   # nebo "www/" podle struktury u Českého hostingu
+          overwrite: true
+          strip_components: 0
 
