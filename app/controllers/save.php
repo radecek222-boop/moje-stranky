@@ -30,7 +30,8 @@ try {
     $datumProdeje = sanitizeInput($_POST['datum_prodeje'] ?? null);
     $datumReklamace = sanitizeInput($_POST['datum_reklamace'] ?? null);
     $jmeno = sanitizeInput($_POST['jmeno'] ?? '');
-    $email = filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL);
+    // Email - pouze trim, ne sanitizeInput (kvůli zachování formátu)
+    $email = trim($_POST['email'] ?? '');
     $telefon = sanitizeInput($_POST['telefon'] ?? '');
     $adresa = sanitizeInput($_POST['adresa'] ?? '');
     $model = sanitizeInput($_POST['model'] ?? '');
@@ -41,9 +42,14 @@ try {
     $doplnujiciInfo = sanitizeInput($_POST['doplnujici_info'] ?? '');
     $fakturaceFirma = sanitizeInput($_POST['fakturace_firma'] ?? 'CZ');
 
-    // Dodatečná validace emailu
-    if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        throw new Exception('Neplatný formát emailu');
+    // Dodatečná validace emailu - pouze pokud je vyplněn
+    if (!empty($email)) {
+        // Validace formátu
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new Exception('Neplatný formát emailu');
+        }
+        // Sanitizace pro bezpečné uložení do DB
+        $email = filter_var($email, FILTER_SANITIZE_EMAIL);
     }
 
     // Validace povinných polí
