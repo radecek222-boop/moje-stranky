@@ -76,6 +76,14 @@ function savePdfDocument($data) {
         throw new Exception('Chybí PDF data');
     }
 
+    // BEZPEČNOST: Kontrola velikosti base64 dat (max 15MB = ~11MB PDF)
+    $base64Size = strlen($pdfBase64);
+    $maxBase64Size = 15 * 1024 * 1024; // 15MB
+
+    if ($base64Size > $maxBase64Size) {
+        throw new Exception('PDF je příliš velké. Maximální velikost je 11 MB.');
+    }
+
     // BEZPEČNOST: Validace reklamace_id - musí být pouze alfanumerické znaky
     if (!preg_match('/^[a-zA-Z0-9_-]+$/', $reklamaceId)) {
         throw new Exception('Neplatné ID reklamace');

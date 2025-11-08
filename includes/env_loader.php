@@ -6,7 +6,9 @@
 
 function loadEnvFile($path) {
     if (!file_exists($path)) {
-        die('CHYBA: .env soubor nenalezen na cestě: ' . $path);
+        // BEZPEČNOST: Neodhalovat absolutní cestu
+        error_log('CRITICAL: .env file not found at: ' . $path);
+        die('Chyba konfigurace serveru. Kontaktujte správce.');
     }
     
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);

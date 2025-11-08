@@ -9,11 +9,11 @@ require_once __DIR__ . '/../init.php';
 header('Content-Type: application/json');
 
 try {
-    // Získání API klíče z environment variables
-    $apiKey = getenv('GEOAPIFY_API_KEY') ?: $_ENV['GEOAPIFY_API_KEY'] ?? null;
+    // Získání API klíče - použít konstantu z config.php
+    $apiKey = defined('GEOAPIFY_KEY') ? GEOAPIFY_KEY : null;
 
     if (!$apiKey) {
-        throw new Exception('GEOAPIFY_API_KEY není nastaveno');
+        throw new Exception('GEOAPIFY_KEY není nastaveno v konfiguraci');
     }
 
     // Získání akce
@@ -71,6 +71,12 @@ try {
 
             if ($z < 0 || $z > 20 || $x < 0 || $y < 0) {
                 throw new Exception('Neplatné tile souřadnice');
+            }
+
+            // BEZPEČNOST: Uzavřít session pro tile requesty
+            // Prevence session locking - Leaflet načítá mnoho tiles současně
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
             }
 
             $url = "https://maps.geoapify.com/v1/tile/osm-carto/{$z}/{$x}/{$y}.png?apiKey={$apiKey}";

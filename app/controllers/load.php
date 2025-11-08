@@ -9,6 +9,16 @@ require_once __DIR__ . '/../../init.php';
 header('Content-Type: application/json');
 
 try {
+    // BEZPEČNOST: Kontrola autentizace - reklamace jsou citlivá data
+    if (!isset($_SESSION['user_id'])) {
+        http_response_code(401);
+        echo json_encode([
+            'status' => 'error',
+            'error' => 'Neautorizovaný přístup. Přihlaste se prosím.'
+        ]);
+        exit;
+    }
+
     // Získání filtru status
     $status = $_GET['status'] ?? 'all';
 

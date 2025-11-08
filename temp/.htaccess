@@ -1,0 +1,3 @@
+# BEZPEČNOST: Zákaz přístupu k temp/ adresáři
+# Tento adresář obsahuje rate limiting data a dočasné soubory
+Deny from all
