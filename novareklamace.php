@@ -353,22 +353,19 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-i
       <div class="footer-column">
         <h2 class="footer-title">White Glove Service</h2>
         <p class="footer-text">
-          Specializovaný servis pro luxusní nábytek Natuzzi.<br>
-          Profesionální opravy, reklamace a montáže.
+          Specializovaný servis Natuzzi.
         </p>
       </div>
       <div class="footer-column">
         <h2 class="footer-title">Kontakt</h2>
         <p class="footer-text">
-          <strong>Tel:</strong> +420 725 965 826<br>
-          <strong>Email:</strong> reklamace@wgs-service.cz | <strong>Web:</strong> www.wgs-service.cz
+          <strong>Tel:</strong> <a href="tel:+420725965826" class="footer-link">+420 725 965 826</a>, <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
         </p>
       </div>
       <div class="footer-column">
         <h2 class="footer-title">Adresa</h2>
         <p class="footer-text">
-          Do Dubče 364, Běchovice 190 11<br>
-          Česká republika
+          Do Dubče 364, Běchovice 190 11 CZ
         </p>
       </div>
     </div>

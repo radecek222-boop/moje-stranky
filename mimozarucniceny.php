@@ -237,23 +237,20 @@
     <div class="footer-grid">
       <div class="footer-column">
         <h2 class="footer-title">White Glove Service</h2>
-        <p class="footer-text" data-lang-cs="Specializovaný servis pro luxusní nábytek Natuzzi.<br>Profesionální opravy, reklamace a montáže." data-lang-en="Specialized service for luxury Natuzzi furniture.<br>Professional repairs, complaints and assembly." data-lang-it="Servizio specializzato per mobili di lusso Natuzzi.<br>Riparazioni, reclami e montaggio professionali.">
-          Specializovaný servis pro luxusní nábytek Natuzzi.<br>
-          Profesionální opravy, reklamace a montáže.
+        <p class="footer-text" data-lang-cs="Specializovaný servis Natuzzi." data-lang-en="Natuzzi specialized service." data-lang-it="Servizio specializzato Natuzzi.">
+          Specializovaný servis Natuzzi.
         </p>
       </div>
       <div class="footer-column">
         <h2 class="footer-title" data-lang-cs="Kontakt" data-lang-en="Contact" data-lang-it="Contatto">Kontakt</h2>
         <p class="footer-text">
-          <strong data-lang-cs="Tel:" data-lang-en="Phone:" data-lang-it="Telefono:">Tel:</strong> +420 725 965 826<br>
-          <strong>Email:</strong> reklamace@wgs-service.cz | <strong>Web:</strong> www.wgs-service.cz
+          <strong data-lang-cs="Tel:" data-lang-en="Phone:" data-lang-it="Telefono:">Tel:</strong> <a href="tel:+420725965826" class="footer-link">+420 725 965 826</a>, <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
         </p>
       </div>
       <div class="footer-column">
         <h2 class="footer-title" data-lang-cs="Adresa" data-lang-en="Address" data-lang-it="Indirizzo">Adresa</h2>
-        <p class="footer-text" data-lang-cs="Do Dubče 364, Běchovice 190 11, Česká republika" data-lang-en="Do Dubče 364, Běchovice 190 11, Czech Republic" data-lang-it="Do Dubče 364, Běchovice 190 11, Repubblica Ceca">
-          Do Dubče 364, Běchovice 190 11<br>
-          Česká republika
+        <p class="footer-text" data-lang-cs="Do Dubče 364, Běchovice 190 11 CZ" data-lang-en="Do Dubče 364, Běchovice 190 11 CZ" data-lang-it="Do Dubče 364, Běchovice 190 11 CZ">
+          Do Dubče 364, Běchovice 190 11 CZ
         </p>
       </div>
     </div>
