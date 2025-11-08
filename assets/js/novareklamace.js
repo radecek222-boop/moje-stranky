@@ -33,13 +33,13 @@ const WGS = {
     
     try {
       this.map = L.map('mapContainer').setView([49.8, 15.5], 7);
-      
-      const key = 'a4b2955eeb674dd8b6601f54da2e80a8';
-      L.tileLayer('https://maps.geoapify.com/v1/tile/osm-carto/{z}/{x}/{y}.png?apiKey=' + key, {
+
+      // BEZPEČNOST: API klíč je skrytý v proxy, ne v JavaScriptu
+      L.tileLayer('api/geocode_proxy.php?action=tile&z={z}&x={x}&y={y}', {
         maxZoom: 20,
         attribution: '© OpenStreetMap'
       }).addTo(this.map);
-      
+
       logger.log('✅ Map initialized');
       this.initAddressGeocoding();
       
@@ -403,6 +403,21 @@ const WGS = {
       e.preventDefault();
       await this.submitForm();
     });
+
+    // Funkce pro změnu fakturace
+    const fakturaceSelect = document.getElementById('fakturace_firma');
+    const fakturaHint = document.getElementById('faktura_hint');
+
+    if (fakturaceSelect && fakturaHint) {
+      fakturaceSelect.addEventListener('change', (e) => {
+        const value = e.target.value;
+        if (value === 'CZ') {
+          fakturaHint.textContent = 'Tato objednávka se bude fakturovat na CZ firmu';
+        } else if (value === 'SK') {
+          fakturaHint.textContent = 'Tato objednávka se bude fakturovat na SK firmu';
+        }
+      });
+    }
   },
   
   async submitForm() {

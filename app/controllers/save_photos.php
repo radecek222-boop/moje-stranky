@@ -14,6 +14,23 @@ try {
         throw new Exception('Povolena pouze POST metoda');
     }
 
+    // BEZPEČNOST: Rate limiting - ochrana proti DoS útokům
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $rateLimit = checkRateLimit("upload_photos_$ip", 20, 3600); // 20 uploadů za hodinu
+
+    if (!$rateLimit['allowed']) {
+        http_response_code(429);
+        echo json_encode([
+            'status' => 'error',
+            'error' => 'Příliš mnoho požadavků. Zkuste to za ' . ceil($rateLimit['retry_after'] / 60) . ' minut.',
+            'retry_after' => $rateLimit['retry_after']
+        ]);
+        exit;
+    }
+
+    // Zaznamenat pokus o upload
+    recordLoginAttempt("upload_photos_$ip");
+
     // Získání reklamace ID
     $reklamaceId = $_POST['reklamace_id'] ?? null;
     if (!$reklamaceId) {

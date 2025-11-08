@@ -14,6 +14,23 @@ try {
         throw new Exception('Povolena pouze POST metoda');
     }
 
+    // BEZPEČNOST: Rate limiting - ochrana proti DoS útokům
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $rateLimit = checkRateLimit("upload_pdf_$ip", 10, 3600); // 10 PDF za hodinu
+
+    if (!$rateLimit['allowed']) {
+        http_response_code(429);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Příliš mnoho požadavků. Zkuste to za ' . ceil($rateLimit['retry_after'] / 60) . ' minut.',
+            'retry_after' => $rateLimit['retry_after']
+        ]);
+        exit;
+    }
+
+    // Zaznamenat pokus o upload
+    recordLoginAttempt("upload_pdf_$ip");
+
     // Načtení JSON dat
     $jsonData = file_get_contents('php://input');
     $data = json_decode($jsonData, true);

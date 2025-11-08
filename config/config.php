@@ -139,16 +139,52 @@ function sanitizeInput($data) {
     return $data;
 }
 
+/**
+ * Kontrola síly hesla podle bezpečnostních standardů
+ * @param string $password Heslo ke kontrole
+ * @return true|array True pokud je heslo silné, jinak array s chybami
+ */
 function isStrongPassword($password) {
-    if (strlen($password) < 8) {
-        return false;
+    $errors = [];
+
+    // Minimální délka 12 znaků
+    if (strlen($password) < 12) {
+        $errors[] = 'Minimálně 12 znaků';
     }
-    
-    if (!preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password)) {
-        return false;
+
+    // Alespoň jedno velké písmeno
+    if (!preg_match('/[A-Z]/', $password)) {
+        $errors[] = 'Alespoň 1 velké písmeno (A-Z)';
     }
-    
-    return true;
+
+    // Alespoň jedno malé písmeno
+    if (!preg_match('/[a-z]/', $password)) {
+        $errors[] = 'Alespoň 1 malé písmeno (a-z)';
+    }
+
+    // Alespoň jedno číslo
+    if (!preg_match('/[0-9]/', $password)) {
+        $errors[] = 'Alespoň 1 číslo (0-9)';
+    }
+
+    // Alespoň jeden speciální znak
+    if (!preg_match('/[^A-Za-z0-9]/', $password)) {
+        $errors[] = 'Alespoň 1 speciální znak (!@#$%^&*...)';
+    }
+
+    // Kontrola proti běžným heslům
+    $commonPasswords = [
+        'password', 'password123', 'heslo', 'heslo123', 'admin123',
+        '12345678', '123456789', 'qwerty123', 'abc123456',
+        'password1234', 'admin1234', 'natuzzi123'
+    ];
+
+    if (in_array(strtolower($password), $commonPasswords)) {
+        $errors[] = 'Heslo je příliš běžné, zvolte unikátnější';
+    }
+
+    // Vrátit true nebo pole s chybami
+    return empty($errors) ? true : $errors;
 }
 
 function generateCSRFToken() {

@@ -70,12 +70,12 @@ const CALC = {
   
   initMap() {
     if (typeof L === 'undefined') return;
-    
+
     try {
       this.map = L.map('mapContainer').setView([49.8, 15.5], 7);
-      
-      const key = 'a4b2955eeb674dd8b6601f54da2e80a8';
-      L.tileLayer(`https://maps.geoapify.com/v1/tile/osm-carto/{z}/{x}/{y}.png?apiKey=${key}`, {
+
+      // BEZPEČNOST: API klíč je skrytý v proxy, ne v JavaScriptu
+      L.tileLayer('api/geocode_proxy.php?action=tile&z={z}&x={x}&y={y}', {
         maxZoom: 20,
         attribution: '© OpenStreetMap'
       }).addTo(this.map);
@@ -255,10 +255,10 @@ const CALC = {
   },
   
   async calculateRoute() {
-    const key = 'a4b2955eeb674dd8b6601f54da2e80a8';
-    
+    // BEZPEČNOST: API klíč je skrytý v proxy
     try {
-      const url = `https://api.geoapify.com/v1/routing?waypoints=${this.warehouse.lat},${this.warehouse.lon}|${this.customerAddress.lat},${this.customerAddress.lon}&mode=drive&apiKey=${key}`;
+      const waypoints = `${this.warehouse.lat},${this.warehouse.lon}|${this.customerAddress.lat},${this.customerAddress.lon}`;
+      const url = `api/geocode_proxy.php?action=routing&waypoints=${waypoints}&mode=drive`;
       const res = await fetch(url);
       const data = await res.json();
       

@@ -12,9 +12,18 @@ function switchLanguage(lang) {
     if (text) {
       if (el.tagName === 'BR') return;
 
-      // Handle elements with <br> tags
+      // BEZPEČNOST: Handle elements with <br> tags - sanitizace XSS
       if (text.includes('<br>')) {
-        el.innerHTML = text;
+        // Povolit POUZE <br> tagy, vše ostatní escapovat
+        const sanitized = text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;')
+          // Povolit zpět pouze <br> a <br/> tagy
+          .replace(/&lt;br\s*\/?&gt;/gi, '<br>');
+        el.innerHTML = sanitized;
       } else if (el.tagName === 'A' || el.tagName === 'BUTTON') {
         // Pro odkazy a tlačítka zachovat pouze text, ne HTML strukturu
         if (el.querySelector('span')) {
