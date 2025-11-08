@@ -85,16 +85,23 @@ try {
         // Relativní cesta pro databázi
         $relativePathForDb = "uploads/reklamace_{$reklamaceId}/{$filename}";
 
-        // Vložení do databáze
+        // Vložení do databáze (s file_path a file_name podle PHOTOS_FIX_REPORT.md)
         $stmt = $pdo->prepare("
-            INSERT INTO wgs_photos (reklamace_id, section_name, photo_path, photo_type, created_at)
-            VALUES (:reklamace_id, :section_name, :photo_path, :photo_type, NOW())
+            INSERT INTO wgs_photos (
+                reklamace_id, section_name, photo_path, file_path, file_name,
+                photo_type, created_at
+            ) VALUES (
+                :reklamace_id, :section_name, :photo_path, :file_path, :file_name,
+                :photo_type, NOW()
+            )
         ");
 
         $stmt->execute([
             ':reklamace_id' => $reklamaceId,
             ':section_name' => $photoType,
             ':photo_path' => $relativePathForDb,
+            ':file_path' => $relativePathForDb,
+            ':file_name' => $filename,
             ':photo_type' => 'image'
         ]);
 
