@@ -334,7 +334,15 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-i
         </div>
         <div id="photoPreviewMain"></div>
       </div>
-      
+
+      <!-- GDPR CONSENT -->
+      <div class="form-consent" style="margin: 2rem 0 1.5rem 0; padding: 1rem; border: 1px solid #ddd; background: #f9f9f9;">
+        <label style="display: flex; align-items: flex-start; cursor: pointer; font-size: 0.75rem; line-height: 1.5; color: #666;">
+          <input type="checkbox" id="gdpr_consent" name="gdpr_consent" required style="margin-right: 0.75rem; margin-top: 0.2rem; flex-shrink: 0;">
+          <span>SOUHLASÍM SE ZPRACOVÁNÍM OSOBNÍCH ÚDAJŮ SPOLEČNOSTÍ WHITE GLOVE SERVICE, S.R.O. ZA ÚČELEM VYŘÍZENÍ SERVISNÍHO POŽADAVKU A PŘEDÁNÍ NEZBYTNÝCH INFORMACÍ VÝROBCI, PRODEJCI ČI AUTORIZOVANÝM TECHNIKŮM. PODROBNOSTI O ZACHÁZENÍ S ÚDAJI JSOU UVEDENY NA STRÁNCE <a href="gdpr.php" target="_blank" style="color: #000; text-decoration: underline;">ZPRACOVÁNÍ OSOBNÍCH ÚDAJŮ</a>. SOUHLAS LZE KDYKOLI ODVOLAT PROSTŘEDNICTVÍM E-MAILU <a href="mailto:reklamace@wgs-service.cz" style="color: #000; text-decoration: underline;">reklamace@wgs-service.cz</a>. BEZ SOUHLASU NEMŮŽEME ŽÁDOST ZPRACOVAT.</span>
+        </label>
+      </div>
+
       <!-- BUTTONS -->
       <div class="form-actions">
         <button type="submit" class="btn">ODESLAT POŽADAVEK</button>

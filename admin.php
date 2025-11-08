@@ -45,8 +45,15 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
   
   <h1 class="page-title">Admin Panel</h1>
   <p class="page-subtitle">Správa systému White Glove Service</p>
-  
+
   <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" data-tab="dashboard">Dashboard</button>
+    <button class="tab" data-tab="notifications">Notifikace</button>
+    <button class="tab" data-tab="keys">Klíče</button>
+    <button class="tab" data-tab="users">Uživatelé</button>
+    <button class="tab" data-tab="online">Online</button>
+  </div>
   </div>
   
   <!-- TAB: DASHBOARD -->
