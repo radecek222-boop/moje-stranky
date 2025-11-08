@@ -25,6 +25,11 @@ try {
     // Získání akce
     $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
+    // BEZPEČNOST: CSRF ochrana pro state-changing operace
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'DELETE' || $_SERVER['REQUEST_METHOD'] === 'PUT') {
+        requireCSRF();
+    }
+
     // Routing podle akce
     switch ($action) {
         case 'list_keys':
@@ -150,11 +155,13 @@ function handleCreateKey() {
  * DELETE KEY - Smazat/zneplatnit registrační klíč
  */
 function handleDeleteKey() {
-    if ($_SERVER['REQUEST_METHOD'] !== 'DELETE' && $_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Pouze DELETE nebo POST metoda');
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        throw new Exception('Pouze POST metoda');
     }
 
-    $keyCode = $_GET['key_code'] ?? $_POST['key_code'] ?? '';
+    // Načíst data z JSON body
+    $input = json_decode(file_get_contents('php://input'), true);
+    $keyCode = $input['key_code'] ?? '';
 
     if (empty($keyCode)) {
         throw new Exception('Chybí key_code');

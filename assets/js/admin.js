@@ -3,6 +3,25 @@
  */
 
 // ============================================================
+// CSRF TOKEN HELPER
+// ============================================================
+let csrfTokenCache = null;
+
+async function getCSRFToken() {
+  if (csrfTokenCache) return csrfTokenCache;
+
+  try {
+    const response = await fetch("app/controllers/get_csrf_token.php");
+    const data = await response.json();
+    csrfTokenCache = data.token;
+    return data.token;
+  } catch (err) {
+    logger.error("Chyba získání CSRF tokenu:", err);
+    return null;
+  }
+}
+
+// ============================================================
 // TAB MANAGEMENT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -114,36 +133,46 @@ async function loadKeys() {
 async function createKey() {
   const keyType = prompt('Typ (admin/technik/prodejce/partner):');
   if (!keyType) return;
-  
+
   try {
+    const csrfToken = await getCSRFToken();
     const response = await fetch('api/admin_api.php?action=create_key', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({key_type: keyType})
+      body: JSON.stringify({key_type: keyType, csrf_token: csrfToken})
     });
     const data = await response.json();
     if (data.status === 'success') {
-      alert('Vytvořeno: ' + data.key_code);
+      alert('Vytvořeno: ' + data.key.key_code);
       loadKeys();
+    } else {
+      alert('Chyba: ' + (data.message || 'Neznámá chyba'));
     }
   } catch (error) {
     console.error('Error:', error);
+    alert('Chyba při vytváření klíče');
   }
 }
 
 async function deleteKey(keyCode) {
   if (!confirm('Smazat?')) return;
-  
+
   try {
-    const csrf = document.querySelector('meta[name="csrf-token"]');
-    const response = await fetch('api/admin_api.php?action=delete_key&key_code=' + keyCode, {
-      method: 'DELETE',
-      headers: {'X-CSRF-Token': csrf ? csrf.content : ''}
+    const csrfToken = await getCSRFToken();
+    const response = await fetch('api/admin_api.php?action=delete_key', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({key_code: keyCode, csrf_token: csrfToken})
     });
     const data = await response.json();
-    if (data.status === 'success') loadKeys();
+    if (data.status === 'success') {
+      loadKeys();
+    } else {
+      alert('Chyba: ' + (data.message || 'Neznámá chyba'));
+    }
   } catch (error) {
     console.error('Error:', error);
+    alert('Chyba při mazání klíče');
   }
 }
 
