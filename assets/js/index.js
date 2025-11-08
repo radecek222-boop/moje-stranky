@@ -10,9 +10,13 @@ function switchLanguage(lang) {
   document.querySelectorAll('[data-lang-cs]').forEach(el => {
     const text = el.getAttribute('data-lang-' + lang);
     if (text) {
-      // Pro odkazy a tlačítka zachovat pouze text, ne HTML strukturu
-      if (el.tagName === 'A' || el.tagName === 'BUTTON') {
-        // Pokud má element vnořené prvky (jako logo se spanem), přeskočit
+      if (el.tagName === 'BR') return;
+
+      // Handle elements with <br> tags
+      if (text.includes('<br>')) {
+        el.innerHTML = text;
+      } else if (el.tagName === 'A' || el.tagName === 'BUTTON') {
+        // Pro odkazy a tlačítka zachovat pouze text, ne HTML strukturu
         if (el.querySelector('span')) {
           return;
         }
