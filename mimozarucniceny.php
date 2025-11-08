@@ -246,15 +246,13 @@
         <h2 class="footer-title" data-lang-cs="Kontakt" data-lang-en="Contact" data-lang-it="Contatto">Kontakt</h2>
         <p class="footer-text">
           <strong data-lang-cs="Tel:" data-lang-en="Phone:" data-lang-it="Telefono:">Tel:</strong> +420 725 965 826<br>
-          <strong>Email:</strong> reklamace@wgs-service.cz<br>
-          <strong>Web:</strong> www.wgs-service.cz
+          <strong>Email:</strong> reklamace@wgs-service.cz | <strong>Web:</strong> www.wgs-service.cz
         </p>
       </div>
       <div class="footer-column">
         <h2 class="footer-title" data-lang-cs="Adresa" data-lang-en="Address" data-lang-it="Indirizzo">Adresa</h2>
-        <p class="footer-text" data-lang-cs="Do Dubče 364<br>Běchovice 190 11<br>Česká republika" data-lang-en="To Dubče 364<br>Běchovice 190 11<br>Czech Republic" data-lang-it="A Dubče 364<br>Běchovice 190 11<br>Repubblica Ceca">
-          Do Dubče 364<br>
-          Běchovice 190 11<br>
+        <p class="footer-text" data-lang-cs="Do Dubče 364, Běchovice 190 11, Česká republika" data-lang-en="Do Dubče 364, Běchovice 190 11, Czech Republic" data-lang-it="Do Dubče 364, Běchovice 190 11, Repubblica Ceca">
+          Do Dubče 364, Běchovice 190 11<br>
           Česká republika
         </p>
       </div>

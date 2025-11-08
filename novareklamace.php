@@ -361,15 +361,13 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-i
         <h2 class="footer-title">Kontakt</h2>
         <p class="footer-text">
           <strong>Tel:</strong> +420 725 965 826<br>
-          <strong>Email:</strong> reklamace@wgs-service.cz<br>
-          <strong>Web:</strong> www.wgs-service.cz
+          <strong>Email:</strong> reklamace@wgs-service.cz | <strong>Web:</strong> www.wgs-service.cz
         </p>
       </div>
       <div class="footer-column">
         <h2 class="footer-title">Adresa</h2>
         <p class="footer-text">
-          Do Dubče 364<br>
-          Běchovice 190 11<br>
+          Do Dubče 364, Běchovice 190 11<br>
           Česká republika
         </p>
       </div>
