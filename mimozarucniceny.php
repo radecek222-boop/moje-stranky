@@ -244,7 +244,8 @@
       <div class="footer-column">
         <h2 class="footer-title" data-lang-cs="Kontakt" data-lang-en="Contact" data-lang-it="Contatto">Kontakt</h2>
         <p class="footer-text">
-          <strong data-lang-cs="Tel:" data-lang-en="Phone:" data-lang-it="Telefono:">Tel:</strong> <a href="tel:+420725965826" class="footer-link">+420 725 965 826</a>, <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
+          <strong data-lang-cs="Tel:" data-lang-en="Phone:" data-lang-it="Telefono:">Tel:</strong> <a href="tel:+420725965826" class="footer-link">+420 725 965 826</a><br>
+          <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
         </p>
       </div>
       <div class="footer-column">
