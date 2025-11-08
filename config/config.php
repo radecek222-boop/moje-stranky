@@ -18,9 +18,10 @@ require_once __DIR__ . '/../includes/env_loader.php';
 
 // ========== DATABÁZE ==========
 // Načítáme z environment variables (.env soubor)
-define('DB_HOST', getenv('DB_HOST') ?: $_ENV['DB_HOST'] ?: '127.0.0.1');
-define('DB_NAME', getenv('DB_NAME') ?: $_ENV['DB_NAME'] ?: 'wgs-servicecz01');
-define('DB_USER', getenv('DB_USER') ?: $_ENV['DB_USER'] ?: 'wgs-servicecz002');
+// BEZPEČNOST: Žádné fallbacky pro credentials - pokud chybí, aplikace musí spadnout
+define('DB_HOST', getenv('DB_HOST') ?: $_ENV['DB_HOST'] ?: die('CHYBA: DB_HOST není nastaveno v prostředí! Zkontrolujte .env soubor.'));
+define('DB_NAME', getenv('DB_NAME') ?: $_ENV['DB_NAME'] ?: die('CHYBA: DB_NAME není nastaveno v prostředí! Zkontrolujte .env soubor.'));
+define('DB_USER', getenv('DB_USER') ?: $_ENV['DB_USER'] ?: die('CHYBA: DB_USER není nastaveno v prostředí! Zkontrolujte .env soubor.'));
 define('DB_PASS', getenv('DB_PASS') ?: $_ENV['DB_PASS'] ?: die('CHYBA: DB_PASS není nastaveno v prostředí! Zkontrolujte .env soubor.'));
 
 // ========== ADMIN KLÍČ ==========
@@ -28,11 +29,12 @@ define('DB_PASS', getenv('DB_PASS') ?: $_ENV['DB_PASS'] ?: die('CHYBA: DB_PASS n
 define('ADMIN_KEY_HASH', getenv('ADMIN_KEY_HASH') ?: $_ENV['ADMIN_KEY_HASH'] ?: die('CHYBA: ADMIN_KEY_HASH není nastaveno v prostředí! Zkontrolujte .env soubor.'));
 
 // ========== EMAIL / SMTP ==========
-define('SMTP_HOST', getenv('SMTP_HOST') ?: $_ENV['SMTP_HOST'] ?: 'smtp.ceskyhosting.cz');
-define('SMTP_PORT', getenv('SMTP_PORT') ?: $_ENV['SMTP_PORT'] ?: 587);
-define('SMTP_FROM', getenv('SMTP_FROM') ?: $_ENV['SMTP_FROM'] ?: 'reklamace@wgs-service.cz');
+// BEZPEČNOST: Žádné fallbacky pro SMTP credentials
+define('SMTP_HOST', getenv('SMTP_HOST') ?: $_ENV['SMTP_HOST'] ?: die('CHYBA: SMTP_HOST není nastaveno v prostředí! Zkontrolujte .env soubor.'));
+define('SMTP_PORT', getenv('SMTP_PORT') ?: $_ENV['SMTP_PORT'] ?: die('CHYBA: SMTP_PORT není nastaveno v prostředí! Zkontrolujte .env soubor.'));
+define('SMTP_FROM', getenv('SMTP_FROM') ?: $_ENV['SMTP_FROM'] ?: die('CHYBA: SMTP_FROM není nastaveno v prostředí! Zkontrolujte .env soubor.'));
 define('SMTP_FROM_NAME', 'White Glove Service');
-define('SMTP_USER', getenv('SMTP_USER') ?: $_ENV['SMTP_USER'] ?: 'reklamace@wgs-service.cz');
+define('SMTP_USER', getenv('SMTP_USER') ?: $_ENV['SMTP_USER'] ?: die('CHYBA: SMTP_USER není nastaveno v prostředí! Zkontrolujte .env soubor.'));
 define('SMTP_PASS', getenv('SMTP_PASS') ?: $_ENV['SMTP_PASS'] ?: die('CHYBA: SMTP_PASS není nastaveno v prostředí! Zkontrolujte .env soubor.'));
 
 // ========== PATHS ==========
@@ -269,4 +271,5 @@ define('DEEPL_API_KEY', getenv('DEEPL_API_KEY') ?: $_ENV['DEEPL_API_KEY'] ?: 'op
 // ========== JWT SECRET ==========
 define('JWT_SECRET', getenv('JWT_SECRET') ?: $_ENV['JWT_SECRET'] ?: die('CHYBA: JWT_SECRET není nastaveno v prostředí! Zkontrolujte .env soubor.'));
 // ========== GEOAPIFY API (MAPY) ==========
-define('GEOAPIFY_KEY', getenv('GEOAPIFY_KEY') ?: ($_ENV["GEOAPIFY_KEY"] ?? "a4b2955eeb674dd8b6601f54da2e80a8"));
+// BEZPEČNOST: Žádný hardcodovaný API klíč - musí být v .env
+define('GEOAPIFY_KEY', getenv('GEOAPIFY_KEY') ?: $_ENV['GEOAPIFY_KEY'] ?: die('CHYBA: GEOAPIFY_KEY není nastaveno v prostředí! Zkontrolujte .env soubor.'));

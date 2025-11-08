@@ -56,6 +56,20 @@ try {
         throw new Exception('Žádné fotky k nahrání');
     }
 
+    // BEZPEČNOST: Kontrola počtu fotek (max 50 fotek celkově)
+    $totalPhotos = 0;
+    foreach ($sections as $photos) {
+        $totalPhotos += count($photos);
+    }
+
+    if ($totalPhotos > 50) {
+        throw new Exception('Příliš mnoho fotek. Maximum je 50 fotek na upload.');
+    }
+
+    if ($totalPhotos === 0) {
+        throw new Exception('Žádné fotky k nahrání');
+    }
+
     // Databázové připojení
     $pdo = getDbConnection();
 
@@ -93,6 +107,14 @@ try {
         }
 
         foreach ($photos as $index => $photoData) {
+            // BEZPEČNOST: Kontrola velikosti base64 dat (max 13MB = ~10MB obrázek)
+            $base64Size = strlen($photoData);
+            $maxBase64Size = 13 * 1024 * 1024; // 13MB
+
+            if ($base64Size > $maxBase64Size) {
+                throw new Exception("Fotka v sekci '$sectionName' (index $index) je příliš velká. Maximální velikost je 10 MB.");
+            }
+
             // Dekódování base64
             // Data jsou ve formátu: data:image/jpeg;base64,/9j/4AAQ...
             if (preg_match('/^data:image\/(\w+);base64,/', $photoData, $matches)) {

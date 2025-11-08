@@ -1,0 +1,3 @@
+# BEZPEČNOST: Zákaz přístupu k logs/ adresáři
+# Tento adresář obsahuje logy s citlivými informacemi (IP adresy, chyby, atd.)
+Deny from all

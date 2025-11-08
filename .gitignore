@@ -2,10 +2,15 @@
 api
 app
 
+# BEZPEČNOST: Credentials a secrets
+.env
+
 # Uploaded files
 uploads/
 
-# Logs
+# Logs a temp soubory
+logs/
+temp/
 *.log
 
 # Temporary files
