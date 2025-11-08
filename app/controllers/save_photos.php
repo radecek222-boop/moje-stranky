@@ -20,6 +20,11 @@ try {
         throw new Exception('Chybí reklamace_id');
     }
 
+    // BEZPEČNOST: Validace reklamace_id - musí být pouze alfanumerické znaky
+    if (!preg_match('/^[a-zA-Z0-9_-]+$/', $reklamaceId)) {
+        throw new Exception('Neplatné ID reklamace');
+    }
+
     // Získání typu fotek
     $photoType = $_POST['photo_type'] ?? 'problem';
     $photoCount = intval($_POST['photo_count'] ?? 0);
@@ -28,20 +33,32 @@ try {
         throw new Exception('Žádné fotky k nahrání');
     }
 
+    // Databázové připojení
+    $pdo = getDbConnection();
+
+    // BEZPEČNOST: Ověření existence reklamace PŘED zápisem souborů
+    $stmt = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE reklamace_id = :reklamace_id OR cislo = :cislo LIMIT 1");
+    $stmt->execute([
+        ':reklamace_id' => $reklamaceId,
+        ':cislo' => $reklamaceId
+    ]);
+    $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$reklamace) {
+        throw new Exception('Reklamace nebyla nalezena');
+    }
+
     // Vytvoření uploads adresáře, pokud neexistuje
     $uploadsDir = __DIR__ . '/../../uploads';
     if (!is_dir($uploadsDir)) {
         mkdir($uploadsDir, 0755, true);
     }
 
-    // Vytvoření podadresáře pro konkrétní reklamaci
-    $reklamaceDir = $uploadsDir . '/reklamace_' . $reklamaceId;
+    // Vytvoření podadresáře pro konkrétní reklamaci (basename pro extra bezpečnost)
+    $reklamaceDir = $uploadsDir . '/reklamace_' . basename($reklamaceId);
     if (!is_dir($reklamaceDir)) {
         mkdir($reklamaceDir, 0755, true);
     }
-
-    // Databázové připojení
-    $pdo = getDbConnection();
 
     $savedPhotos = [];
 
