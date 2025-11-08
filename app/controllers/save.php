@@ -24,22 +24,27 @@ try {
         throw new Exception('Neplatná akce');
     }
 
-    // Získání dat z formuláře
-    $typ = $_POST['typ'] ?? 'servis';
-    $cislo = $_POST['cislo'] ?? '';
-    $datumProdeje = $_POST['datum_prodeje'] ?? null;
-    $datumReklamace = $_POST['datum_reklamace'] ?? null;
-    $jmeno = $_POST['jmeno'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $telefon = $_POST['telefon'] ?? '';
-    $adresa = $_POST['adresa'] ?? '';
-    $model = $_POST['model'] ?? '';
-    $provedeni = $_POST['provedeni'] ?? '';
-    $barva = $_POST['barva'] ?? '';
-    $serioveCislo = $_POST['seriove_cislo'] ?? '';
-    $popisProblemu = $_POST['popis_problemu'] ?? '';
-    $doplnujiciInfo = $_POST['doplnujici_info'] ?? '';
-    $fakturaceFirma = $_POST['fakturace_firma'] ?? 'CZ';
+    // Získání dat z formuláře - BEZPEČNOST: Sanitizace všech vstupů
+    $typ = sanitizeInput($_POST['typ'] ?? 'servis');
+    $cislo = sanitizeInput($_POST['cislo'] ?? '');
+    $datumProdeje = sanitizeInput($_POST['datum_prodeje'] ?? null);
+    $datumReklamace = sanitizeInput($_POST['datum_reklamace'] ?? null);
+    $jmeno = sanitizeInput($_POST['jmeno'] ?? '');
+    $email = filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL);
+    $telefon = sanitizeInput($_POST['telefon'] ?? '');
+    $adresa = sanitizeInput($_POST['adresa'] ?? '');
+    $model = sanitizeInput($_POST['model'] ?? '');
+    $provedeni = sanitizeInput($_POST['provedeni'] ?? '');
+    $barva = sanitizeInput($_POST['barva'] ?? '');
+    $serioveCislo = sanitizeInput($_POST['seriove_cislo'] ?? '');
+    $popisProblemu = sanitizeInput($_POST['popis_problemu'] ?? '');
+    $doplnujiciInfo = sanitizeInput($_POST['doplnujici_info'] ?? '');
+    $fakturaceFirma = sanitizeInput($_POST['fakturace_firma'] ?? 'CZ');
+
+    // Dodatečná validace emailu
+    if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        throw new Exception('Neplatný formát emailu');
+    }
 
     // Validace povinných polí
     if (empty($jmeno)) {
