@@ -1354,6 +1354,7 @@ async function showCustomerDetail(id) {
   const provedeni = CURRENT_RECORD.provedeni || '';
   const barva = CURRENT_RECORD.barva || '';
   const doplnujici_info = CURRENT_RECORD.doplnujici_info || '';
+  const fakturace_firma = CURRENT_RECORD.fakturace_firma || 'CZ';
 
   const dbPhotos = await loadPhotosFromDB(id);
   let fotky = dbPhotos.length > 0 ? dbPhotos : [];
@@ -1411,6 +1412,12 @@ async function showCustomerDetail(id) {
         <div class="editable-field">
           <label class="field-label">Číslo objednávky/reklamace</label>
           <input type="text" class="field-input" id="edit_cislo" value="${Utils.escapeHtml(cislo)}">
+        </div>
+        <div class="editable-field">
+          <label class="field-label">Fakturace</label>
+          <div style="padding: 0.5rem 0; font-weight: 600; color: ${fakturace_firma === 'SK' ? '#059669' : '#0066cc'};">
+            ${fakturace_firma === 'CZ' ? '🇨🇿 Česká republika (CZ)' : '🇸🇰 Slovensko (SK)'}
+          </div>
         </div>
         <div class="editable-field">
           <label class="field-label">Datum prodeje</label>
