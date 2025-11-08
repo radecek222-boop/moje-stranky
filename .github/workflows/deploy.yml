@@ -1,0 +1,33 @@
+name: 🚀 Deploy to Český hosting (WGS)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy via SFTP to Český hosting
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: sftp
+          port: 22
+          server-dir: ${{ secrets.FTP_TARGET }}
+          local-dir: ./
+          exclude: |
+            **/.git*
+            **/.github*
+            **/docs/**
+            **/logs/**
+            **/README.md
+            **/deploy.yml
+
