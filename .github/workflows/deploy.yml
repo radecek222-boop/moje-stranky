@@ -22,11 +22,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local_path: "./"
-          remote_path: "www/"
+          remote_path: "/wgs-service.cz/www/"
           sftp_only: true
           delete_remote_files: false
-          exclude: |
-            .git*
-            .github/*
-            docs/*
 
