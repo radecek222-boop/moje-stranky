@@ -41,6 +41,33 @@ try {
     $popisProblemu = sanitizeInput($_POST['popis_problemu'] ?? '');
     $doplnujiciInfo = sanitizeInput($_POST['doplnujici_info'] ?? '');
     $fakturaceFirma = sanitizeInput($_POST['fakturace_firma'] ?? 'CZ');
+    $gdprConsentRaw = $_POST['gdpr_consent'] ?? null;
+    $gdprConsent = filter_var($gdprConsentRaw, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+    if ($gdprConsent !== true) {
+        throw new Exception('Je nutné potvrdit souhlas se zpracováním osobních údajů.');
+    }
+
+    $gdprConsentAt = date('Y-m-d H:i:s');
+    $gdprConsentIp = $_SERVER['REMOTE_ADDR'] ?? '';
+    $gdprNoteParts = ["GDPR souhlas udělen {$gdprConsentAt}"];
+
+    if (!empty($gdprConsentIp)) {
+        $gdprNoteParts[] = 'IP: ' . $gdprConsentIp;
+    }
+
+    if (!empty($_SERVER['HTTP_USER_AGENT'])) {
+        $userAgent = substr($_SERVER['HTTP_USER_AGENT'], 0, 200);
+        $gdprNoteParts[] = 'UA: ' . $userAgent;
+    }
+
+    $gdprNote = sanitizeInput(implode(' | ', $gdprNoteParts));
+
+    if (!empty($doplnujiciInfo)) {
+        $doplnujiciInfo = trim($doplnujiciInfo) . "\n\n" . $gdprNote;
+    } else {
+        $doplnujiciInfo = $gdprNote;
+    }
 
     // Dodatečná validace emailu - pouze pokud je vyplněn
     if (!empty($email)) {
