@@ -1,0 +1,3 @@
+// V submitForm před this.uploadPhotos přidej:
+console.log('🔍 DEBUG: this.photos =', this.photos);
+console.log('🔍 DEBUG: this.photos.length =', this.photos ? this.photos.length : 'undefined');

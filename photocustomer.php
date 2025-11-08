@@ -1,0 +1,134 @@
+<?php require_once "init.php"; ?>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <!-- Logger Utility (must be loaded first) -->
+<script src="assets/js/logger.js" defer></script>
+
+<script src="assets/js/admin-auth.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="WGS">
+  
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icon192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="./icon512.png">
+  
+  <title>Fotodokumentace – White Glove Service</title>
+  <meta name="description" content="Fotodokumentace servisu White Glove Service. Pořizování a správa fotek před, během a po opravě nábytku.">
+  
+  <!-- Google Fonts - Natuzzi style -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+  
+  <!-- External CSS -->
+    <!-- Unified Design System -->
+  <link rel="preload" href="assets/css/styles.min.css" as="style">
+  <link rel="preload" href="assets/css/photocustomer.min.css" as="style">
+
+  <link rel="stylesheet" href="assets/css/styles.min.css">
+  <link rel="stylesheet" href="assets/css/photocustomer.min.css">
+</head>
+
+<body>
+<?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
+<!-- ČERNÁ HORNÍ PANEL -->
+
+<!-- HLAVNÍ OBSAH -->
+<div class="main-content">
+  
+  <!-- HLAVIČKA STRÁNKY -->
+  <div class="page-header">
+    <h1 class="page-title">Fotodokumentace</h1>
+    <p class="page-subtitle">Pořízení fotografií a videa ze servisu</p>
+  </div>
+  
+  <!-- INFORMACE O ZAKÁZCE -->
+  <div class="info-box">
+    <div class="info-row">
+      <span class="info-label">Zákazník</span>
+      <span class="info-value" id="customerName">-</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Adresa</span>
+      <span class="info-value" id="customerAddress">-</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Model</span>
+      <span class="info-value" id="customerModel">-</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Kontakt</span>
+      <span class="info-value" id="customerContact">-</span>
+    </div>
+  </div>
+  
+  <!-- SEKCE FOTOGRAFIÍ -->
+  <div class="photo-section" onclick="openMediaCapture('before')">
+    <div class="section-header">Before</div>
+    <div id="preview-before" class="photo-preview"></div>
+  </div>
+  
+  <div class="photo-section" onclick="openMediaCapture('id')">
+    <div class="section-header">ID</div>
+    <div id="preview-id" class="photo-preview"></div>
+  </div>
+  
+  <div class="photo-section" onclick="openMediaCapture('problem')">
+    <div class="section-header">Detail Bug</div>
+    <div id="preview-problem" class="photo-preview"></div>
+  </div>
+  
+  <div class="photo-section" onclick="openMediaCapture('repair')">
+    <div class="section-header">Repair</div>
+    <div id="preview-repair" class="photo-preview"></div>
+  </div>
+  
+  <div class="photo-section" onclick="openMediaCapture('after')">
+    <div class="section-header">After</div>
+    <div id="preview-after" class="photo-preview"></div>
+  </div>
+  
+  <!-- PROGRESS BAR -->
+  <div class="progress-container">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressBar"></div>
+    </div>
+    <div class="progress-text" id="compressionInfo">Celkem nahráno: 0 souborů (max 30 doporučeno)</div>
+  </div>
+  
+  <!-- TLAČÍTKA -->
+  <div class="btn-group">
+    <button class="btn" id="btnSaveToProtocol">Odeslat do protokolu</button>
+    <button class="btn btn-secondary" data-navigate="seznam.html">Zpět</button>
+  </div>
+  
+</div>
+
+<!-- WAIT DIALOG -->
+<div class="wait-dialog" id="waitDialog">
+  <div class="wait-content">
+    <div class="spinner"></div>
+    <div class="wait-text" id="waitMsg">Čekejte...</div>
+  </div>
+</div>
+
+<!-- ALERT -->
+<div class="alert" id="alert"></div>
+
+<!-- HIDDEN FILE INPUT -->
+<input type="file" id="mediaInput" accept="assets/img/*,video/*" capture="environment" multiple>
+
+
+</main>
+
+<!-- External JavaScript -->
+<script src="assets/js/photocustomer.min.js" defer></script>
+</body>
+</html>

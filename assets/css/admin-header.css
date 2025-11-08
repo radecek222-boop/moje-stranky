@@ -1,0 +1,94 @@
+.admin-header {
+    background: #222 !important;
+    padding: 1rem 0 !important;
+    border-bottom: 2px solid #fff !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+    display: block !important;
+}
+
+.header-container {
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    padding: 0 2rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 2rem !important;
+}
+
+.logo {
+    flex-shrink: 0 !important;
+}
+
+.logo h1 {
+    color: white !important;
+    font-size: 1.5rem !important;
+    margin: 0 !important;
+    font-weight: 700 !important;
+}
+
+.logo p {
+    color: #999 !important;
+    font-size: 0.75rem !important;
+    margin: 0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 2px !important;
+}
+
+.admin-nav {
+    flex: 1 !important;
+    display: flex !important;
+    gap: 0 !important;
+    overflow-x: auto !important;
+}
+
+.nav-link {
+    color: #ccc !important;
+    text-decoration: none !important;
+    padding: 1rem 1.5rem !important;
+    border-bottom: 3px solid transparent !important;
+    transition: all 0.3s !important;
+    white-space: nowrap !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    display: inline-block !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.nav-link:hover {
+    color: white !important;
+    border-bottom-color: #fff !important;
+    background: transparent !important;
+}
+
+.nav-link.active {
+    color: white !important;
+    border-bottom-color: #fff !important;
+    background: transparent !important;
+}
+
+.header-actions {
+    flex-shrink: 0 !important;
+}
+
+.btn-logout {
+    background: transparent !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.5rem 1rem !important;
+    cursor: pointer !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    transition: all 0.3s !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.btn-logout:hover {
+    color: #ccc !important;
+    opacity: 0.8 !important;
+}

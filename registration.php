@@ -1,0 +1,73 @@
+<?php require_once "init.php"; ?>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>White Glove Service – Registrace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.min.css">
+  <link rel="stylesheet" href="assets/css/login.min.css">
+</head>
+<body>
+
+
+<main class="main-content">
+<div class="container">
+  <div class="logo">
+    <h1>Registrace</h1>
+    <div class="subtitle">Vyplňte registrační formulář</div>
+  </div>
+
+  <div id="notification" class="notification"></div>
+
+  <form id="registrationForm">
+    <div class="form-group">
+      <label for="regKey">Registrační klíč *</label>
+      <input type="password" id="regKey" name="registration_key" placeholder="Zadejte klíč" required>
+      <div class="helper-text">Klíč dostáváte od administátora</div>
+    </div>
+
+    <div class="form-group">
+      <label for="regName">Jméno a příjmení</label>
+      <input type="text" id="regName" name="name" placeholder="Jan Novák" required>
+    </div>
+
+    <div class="form-group">
+      <label for="regEmail">Email</label>
+      <input type="email" id="regEmail" name="email" placeholder="vas@email.cz" required>
+    </div>
+
+    <div class="form-group">
+      <label for="regPhone">Telefon (volitelně)</label>
+      <input type="tel" id="regPhone" name="phone" placeholder="+420 777 777 777">
+    </div>
+
+    <div class="form-group">
+      <label for="regPassword">Heslo</label>
+      <input type="password" id="regPassword" name="password" placeholder="••••••••" required>
+      <div class="helper-text">Minimálně 8 znaků</div>
+    </div>
+
+    <div class="form-group">
+      <label for="regPasswordConfirm">Potvrzení hesla</label>
+      <input type="password" id="regPasswordConfirm" name="passwordConfirm" placeholder="••••••••" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="width: 100%;">Zaregistrovat se</button>
+  </form>
+
+  <div class="links" style="text-align: center; margin-top: 2rem;">
+    <p>Již máte účet? <a href="login.php">Přihlaste se</a></p>
+  </div>
+
+</div>
+</main>
+
+<script src="assets/js/logger.js" defer></script>
+<script src="assets/js/registration.js" defer></script>
+
+</body>
+</html>

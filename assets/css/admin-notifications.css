@@ -1,0 +1,599 @@
+/* ============================================
+   NOTIFICATION CARDS
+   ============================================ */
+
+.notification-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.notification-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 1.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.notification-header:hover {
+  background: #f8f9fa;
+}
+
+.notification-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.notification-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.toggle-switch {
+  width: 48px;
+  height: 24px;
+  background: #ccc;
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: left 0.3s;
+}
+
+.toggle-switch.active {
+  background: #4CAF50;
+}
+
+.toggle-switch.active::after {
+  left: 26px;
+}
+
+.notification-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding: 0 1.5rem;
+}
+
+.notification-body.expanded {
+  max-height: 2000px;
+  padding: 0 1.5rem 1.5rem;
+}
+
+.notification-info {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.notification-info-label {
+  font-size: 0.85rem;
+  color: #666;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.notification-info-value {
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.template-preview {
+  background: #f5f5f5;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ============================================
+   BADGES
+   ============================================ */
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-active {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge-inactive {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* ============================================
+   VARIABLE TAGS
+   ============================================ */
+
+.variable-tag {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-family: monospace;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.variable-tag:hover {
+  background: #bbdefb;
+}
+
+/* ============================================
+   EMAIL TAGS
+   ============================================ */
+
+.email-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+}
+
+.email-tag-remove {
+  cursor: pointer;
+  color: #999;
+  font-weight: bold;
+  font-size: 1.2rem;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.email-tag-remove:hover {
+  color: #e53935;
+}
+
+/* ============================================
+   MODAL STYLES
+   ============================================ */
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.modal .modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modal .modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modal .modal-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #999;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal .modal-close:hover {
+  color: #333;
+}
+
+.modal .modal-body {
+  padding: 1.5rem;
+}
+
+.modal .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #2196F3;
+}
+
+textarea.form-input {
+  resize: vertical;
+  min-height: 100px;
+  font-family: monospace;
+}
+
+/* ============================================
+   MESSAGES
+   ============================================ */
+
+.error-message,
+.success-message {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef5350;
+}
+
+.success-message {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #66bb6a;
+}
+
+/* ============================================
+   LOADING STATE
+   ============================================ */
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #999;
+  font-style: italic;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .notification-info {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal .modal-content {
+    max-width: 100%;
+  }
+}
+
+/* Email tags - better styling */
+.email-tag {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  background: #d4edda !important;
+  border: 1px solid #28a745 !important;
+  color: #155724 !important;
+  padding: 0.5rem 0.8rem !important;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.email-tag-remove {
+  cursor: pointer;
+  color: #721c24;
+  font-weight: bold;
+  font-size: 1.3rem;
+  line-height: 1;
+  transition: color 0.2s;
+  margin-left: 0.3rem;
+}
+
+.email-tag-remove:hover {
+  color: #e53935;
+  transform: scale(1.2);
+}
+
+/* ============================================
+   CONTAINER & LAYOUT
+   ============================================ */
+
+#tab-notifications {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+#tab-notifications .page-title {
+  margin-bottom: 0.5rem;
+}
+
+#tab-notifications .page-subtitle {
+  margin-bottom: 2rem;
+  color: #666;
+}
+
+#notifications-container {
+  padding: 0;
+}
+
+.notification-card {
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.notification-card:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #tab-notifications {
+    padding: 1rem;
+  }
+  
+  .notification-card {
+    margin-bottom: 1rem;
+  }
+}
+
+/* ============================================
+   FULLSCREEN MODAL
+   ============================================ */
+
+.modal {
+  backdrop-filter: blur(3px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal .modal-content {
+  max-width: 900px !important;
+  max-height: 95vh;
+  margin: 2rem auto;
+  animation: slideUp 0.3s ease;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal .modal-body {
+  max-height: calc(95vh - 200px);
+  overflow-y: auto;
+}
+
+/* Smooth scrolling */
+.modal .modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal .modal-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.modal .modal-body::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.modal .modal-body::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Notification card - jednodušší vzhled */
+.notification-card {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.notification-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.notification-header {
+  cursor: pointer;
+}
+
+/* Skryjeme rozbalovací obsah - už ho nepotřebujeme */
+.notification-body {
+  display: none !important;
+}
+
+/* ============================================
+   BIGGER FULLSCREEN MODAL
+   ============================================ */
+
+
+
+
+
+
+
+
+
+
+
+/* ============================================
+   REALLY BIG MODAL - 90% x 80%
+   ============================================ */
+
+
+
+
+
+
+/* ============================================
+   FINAL OVERRIDE - ABSOLUTE FULLSCREEN
+   ============================================ */
+
+
+
+/* EDIT NOTIFICATION MODAL - FINAL */
+#editNotificationModal {
+  display: none;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0,0,0,0.5) !important;
+  z-index: 9999 !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#editNotificationModal .modal-content {
+  background: white !important;
+  width: 90vw !important;
+  height: 80vh !important;
+  max-width: 90vw !important;
+  max-height: 80vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+#editNotificationModal .modal-body {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 2rem !important;
+}
+
+#editNotificationModal .modal-header,
+#editNotificationModal .modal-footer {
+  flex-shrink: 0 !important;
+  padding: 1.5rem 2rem !important;
+}
+
+/* FIX: Box sizing pro modal */
+#editNotificationModal * {
+  box-sizing: border-box !important;
+}
+
+#editNotificationModal .modal-content {
+  box-sizing: border-box !important;
+  width: 90vw !important;
+  height: 80vh !important;
+  max-width: 90vw !important;
+  max-height: 80vh !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 8px !important;
+}
+
+/* WGS MODAL - Kosmetická úprava */
+.wgs-modal {
+  padding: 2rem 0 !important;
+}
+
+.wgs-modal .modal-content {
+  margin-top: 1rem !important;
+  max-height: 75vh !important;
+  height: auto !important;
+  min-height: 60vh !important;
+}
+
+/* WGS MODAL - Lepší centrování kvůli hornímu menu */
+.wgs-modal {
+  align-items: flex-start !important;
+  padding-top: 5rem !important;
+}
+
+.wgs-modal .modal-content {
+  margin: 0 auto !important;
+}

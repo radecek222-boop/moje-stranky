@@ -1,0 +1,90 @@
+<?php require_once "init.php"; ?>
+<?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics | White Glove Service</title>
+  <meta name="description" content="Analytics dashboard White Glove Service. Pokročilá analytika servisu, trendy, výkonnost a business intelligence.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+
+    <!-- External CSS -->
+    <!-- Unified Design System -->
+  <link rel="preload" href="assets/css/styles.min.css" as="style">
+  <link rel="preload" href="assets/css/analytics.min.css" as="style">
+
+  <link rel="stylesheet" href="assets/css/styles.min.css">
+  <link rel="stylesheet" href="assets/css/analytics.min.css">
+</head>
+<body>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+  
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Web Analytics</h1>
+      <p class="page-subtitle">Komplexní analýza návštěvnosti a chování na webu</p>
+    </div>
+    
+    <div class="time-selector">
+      <button class="time-btn" data-timeperiod="today">Dnes</button>
+      <button class="time-btn active" data-timeperiod="week">Týden</button>
+      <button class="time-btn" data-timeperiod="month">Měsíc</button>
+      <button class="time-btn" data-timeperiod="year">Rok</button>
+    </div>
+  </div>
+  
+  <!-- HLAVNÍ METRIKY -->
+  <div class="stats-grid">
+    <div class="stat-card blue">
+      <div class="stat-label">Celkem návštěv</div>
+      <div class="stat-value" id="total-visits">-</div>
+      <div class="stat-change" id="visits-change">Načítání...</div>
+    </div>
+    
+    <div class="stat-card success">
+      <div class="stat-label">Unikátní návštěvníci</div>
+      <div class="stat-value" id="unique-visitors">-</div>
+      <div class="stat-change" id="unique-change">Načítání...</div>
+    </div>
+    
+    <div class="stat-card purple">
+      <div class="stat-label">Průměrná doba</div>
+      <div class="stat-value" id="avg-duration">-</div>
+      <div class="stat-change" id="duration-change">Načítání...</div>
+    </div>
+    
+    <div class="stat-card teal">
+      <div class="stat-label">Bounce Rate</div>
+      <div class="stat-value" id="bounce-rate">-</div>
+      <div class="stat-change" id="bounce-change">Načítání...</div>
+    </div>
+    
+    <div class="stat-card warning">
+      <div class="stat-label">Konverze</div>
+      <div class="stat-value" id="conversion-rate">-</div>
+      <div class="stat-change" id="conversion-change">Načítání...</div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-label">Online teď</div>
+      <div class="stat-value" id="online-now">-</div>
+      <div class="stat-change">Real-time</div>
+    </div>
+  </div>
+  
+  <p style="text-align: center; color: #999; margin-top: 2rem;">Analytics data loading...</p>
+  
+</div>
+
+<script src="assets/js/logger.js" defer></script>
+<script src="assets/js/analytics.min.js" defer></script>
+</body>
+</html>

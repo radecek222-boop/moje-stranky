@@ -1,0 +1,15 @@
+  renderPhotos() {
+    const container = document.getElementById('photoPreviewMain');
+    container.innerHTML = '';
+    this.photos.forEach((photo, index) => {
+      const div = document.createElement('div');
+      div.className = 'photo-thumb';
+      div.innerHTML = `<img src="${photo.data}" alt="Photo ${index + 1}"><button class="photo-remove" data-index="${index}">×</button>`;
+      div.querySelector('.photo-remove').addEventListener('click', () => {
+        this.photos.splice(index, 1);
+        this.renderPhotos();
+        this.toast('✓ Fotka odstraněna', 'info');
+      });
+      container.appendChild(div);
+    });
+  },

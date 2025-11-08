@@ -1,0 +1,78 @@
+<?php require_once "init.php"; ?>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>White Glove Service – Reset Hesla</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.min.css">
+  <link rel="stylesheet" href="assets/css/login.min.css">
+</head>
+<body>
+
+
+<main class="main-content">
+<div class="container">
+  <div class="logo">
+    <h1>Reset Hesla</h1>
+    <div class="subtitle">Obnovte si heslo pomocí registračního klíče</div>
+  </div>
+
+  <div id="notification" class="notification"></div>
+
+  <!-- STEP 1: Verify -->
+  <div id="step1-verify">
+    <form id="verifyForm">
+      <div class="form-group">
+        <label for="resetEmail">Email</label>
+        <input type="email" id="resetEmail" name="email" placeholder="vas@email.cz" required>
+      </div>
+
+      <div class="form-group">
+        <label for="resetKey">Registrační klíč</label>
+        <input type="password" id="resetKey" name="registration_key" placeholder="Váš registrační klíč" required>
+        <div class="helper-text">Klíč, kterým jste se registrovali</div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%;">Ověřit identitu</button>
+    </form>
+  </div>
+
+  <!-- STEP 2: Change Password -->
+  <div id="step2-change" style="display: none;">
+    <form id="changePasswordForm">
+      <p style="color: #666; margin-bottom: 1.5rem;">
+        <strong id="userNameDisplay"></strong>, nyní si můžeš nastavit nové heslo.
+      </p>
+
+      <div class="form-group">
+        <label for="newPassword">Nové heslo</label>
+        <input type="password" id="newPassword" name="new_password" placeholder="••••••••" required minlength="8">
+        <div class="helper-text">Minimálně 8 znaků</div>
+      </div>
+
+      <div class="form-group">
+        <label for="newPasswordConfirm">Potvrzení hesla</label>
+        <input type="password" id="newPasswordConfirm" name="new_password_confirm" placeholder="••••••••" required minlength="8">
+      </div>
+
+      <button type="submit" class="btn btn-success" style="width: 100%;">Nastavit nové heslo</button>
+      <button type="button" class="btn" style="width: 100%; margin-top: 0.5rem;" onclick="goBack()">Zpět</button>
+    </form>
+  </div>
+
+  <div class="links" style="text-align: center; margin-top: 2rem;">
+    <p>Chceš se přihlásit? <a href="login.php">Přihlášení</a></p>
+  </div>
+
+</div>
+</main>
+
+<script src="assets/js/logger.js" defer></script>
+<script src="assets/js/password-reset.js" defer></script>
+
+</body>
+</html>

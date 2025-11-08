@@ -1,0 +1,288 @@
+{
+  "config": {
+    "salaryRate": 150,
+    "invoiceRate": 250,
+    "company": "White Glove Service",
+    "currency": "CZK"
+  },
+  "employees": [
+    {
+      "id": 1,
+      "name": "Nevečný Tomáš",
+      "hours": 87,
+      "account": "1528062183",
+      "bank": "0800",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "Stana",
+      "hours": 0,
+      "account": "7122546660",
+      "bank": "5500",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 3,
+      "name": "Anastasia",
+      "hours": 0,
+      "account": "6647340003",
+      "bank": "5500",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 4,
+      "name": "Maryna Sosovuik",
+      "hours": 0,
+      "account": "306903309",
+      "bank": "0300",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 5,
+      "name": "Naksin Seninec",
+      "hours": 0,
+      "account": "5795877043",
+      "bank": "0800",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 6,
+      "name": "Ivana Senynets",
+      "hours": 0,
+      "account": "5795877043",
+      "bank": "0800",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 7,
+      "name": "Olha Shkudor",
+      "hours": 195,
+      "account": "UA913052990000026207520148665",
+      "bank": "PBANUA2XXXX",
+      "type": "swift",
+      "active": true,
+      "swiftData": {
+        "iban": "UA913052990000026207520148665",
+        "swift": "PBANUA2XXXX",
+        "bankName": "JSC CB PRIVATBANK",
+        "bankAddress": "1D HRUSHEVSKOHO STR., KYIV, 01001, UKRAINE",
+        "beneficiary": "Olha Shkudor",
+        "fees": "OUR",
+        "note": "Poplatky hradí odesílatel"
+      }
+    },
+    {
+      "id": 8,
+      "name": "Roman Liakh",
+      "hours": 0,
+      "account": "2187259002",
+      "bank": "5500",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 9,
+      "name": "Maksim Seninec",
+      "hours": 195.5,
+      "account": "5795877043",
+      "bank": "0800",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 10,
+      "name": "Ivan Lichtej",
+      "hours": 194.5,
+      "account": "325021694",
+      "bank": "0300",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 11,
+      "name": "Piven Tetiana",
+      "hours": 193,
+      "account": "2848333004",
+      "bank": "5500",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 12,
+      "name": "Vitalina",
+      "hours": 0,
+      "account": "2409720010",
+      "bank": "3030",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 13,
+      "name": "Tetiana",
+      "hours": 0,
+      "account": "",
+      "bank": "5500",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 14,
+      "name": "Kataryna",
+      "hours": 0,
+      "account": "6829917002",
+      "bank": "5500",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 15,
+      "name": "Petr Danek",
+      "hours": 0,
+      "account": "2052322019",
+      "bank": "3030",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 16,
+      "name": "Ruslana",
+      "hours": 194.5,
+      "account": "3531394338",
+      "bank": "0300",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 17,
+      "name": "Roman Zhabko",
+      "hours": 0,
+      "account": "2167257018",
+      "bank": "3030",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 18,
+      "name": "Václav Stárek",
+      "hours": 24,
+      "account": "7122546660",
+      "bank": "5500",
+      "type": "standard",
+      "active": true
+    },
+    {
+      "id": 19,
+      "name": "Marek",
+      "hours": 0,
+      "account": "",
+      "bank": "0800",
+      "type": "special",
+      "active": true,
+      "note": "Bonus 20 Kč za každou odpracovanou hodinu všech ostatních zaměstnanců"
+    },
+    {
+      "id": 20,
+      "name": "Lenka",
+      "hours": 0,
+      "account": "270791797",
+      "bank": "0300",
+      "type": "pausalni",
+      "active": true,
+      "pausalni": {
+        "rate": 1500000,
+        "tax": 8716,
+        "description": "Paušální daň do 1.5M Kč obratu ročně, pevná daň 8 716 Kč/měsíc"
+      }
+    },
+    {
+      "id": 21,
+      "name": "Radek",
+      "hours": 0,
+      "account": "188784838",
+      "bank": "0300",
+      "type": "special2",
+      "active": true,
+      "note": "Bonus 20 Kč za každou odpracovanou hodinu všech ostatních zaměstnanců + skryté prémie holek"
+    }
+  ],
+  "periods": {
+    "2025-10": {
+      "employees": [
+        {
+          "id": 1,
+          "name": "Nevečný Tomáš",
+          "hours": 87,
+          "type": "standard"
+        },
+        {
+          "id": 7,
+          "name": "Olha Shkudor",
+          "hours": 195,
+          "type": "swift"
+        },
+        {
+          "id": 9,
+          "name": "Maksim Seninec",
+          "hours": 195.5,
+          "type": "standard"
+        },
+        {
+          "id": 10,
+          "name": "Ivan Lichtej",
+          "hours": 194.5,
+          "type": "standard"
+        },
+        {
+          "id": 11,
+          "name": "Piven Tetiana",
+          "hours": 193,
+          "type": "standard"
+        },
+        {
+          "id": 16,
+          "name": "Ruslana",
+          "hours": 194.5,
+          "type": "standard"
+        },
+        {
+          "id": 18,
+          "name": "Václav Stárek",
+          "hours": 24,
+          "type": "standard"
+        }
+      ],
+      "totalHours": 1083.5,
+      "totalSalary": 214602.5,
+      "totalInvoice": 270875,
+      "profit": 56272.5,
+      "marekBonus": 21670,
+      "radekBonus": 21670,
+      "girlsBonus": 8737.5,
+      "radekTotal": 30407.5,
+      "lastModified": "2025-11-04T11:30:00Z"
+    }
+  },
+  "metadata": {
+    "version": "1.1",
+    "lastModified": "2025-11-04T11:30:00Z",
+    "createdBy": "PSA Kalkulátor",
+    "bankCodes": {
+      "0100": "Komerční banka",
+      "0300": "ČSOB",
+      "0600": "MONETA Money Bank",
+      "0800": "Česká spořitelna",
+      "2010": "Fio banka",
+      "2070": "AirBank",
+      "2700": "UniCredit Bank",
+      "3030": "PPF banka",
+      "5500": "Raiffeisenbank"
+    }
+  }
+}

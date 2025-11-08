@@ -1,0 +1,4 @@
+      this.photos.forEach((photo, index) => {
+        formData.append(`photo_${index}`, photo.data);
+        formData.append(`filename_${index}`, `photo_${index + 1}.jpg`);
+      });

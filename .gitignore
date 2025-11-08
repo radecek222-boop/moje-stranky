@@ -1,0 +1,12 @@
+# Symlinks (created during deployment)
+api
+app
+
+# Uploaded files
+uploads/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
