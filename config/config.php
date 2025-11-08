@@ -272,4 +272,4 @@ define('DEEPL_API_KEY', getenv('DEEPL_API_KEY') ?: $_ENV['DEEPL_API_KEY'] ?: 'op
 define('JWT_SECRET', getenv('JWT_SECRET') ?: $_ENV['JWT_SECRET'] ?: die('CHYBA: JWT_SECRET není nastaveno v prostředí! Zkontrolujte .env soubor.'));
 // ========== GEOAPIFY API (MAPY) ==========
 // BEZPEČNOST: Žádný hardcodovaný API klíč - musí být v .env
-define('GEOAPIFY_KEY', getenv('GEOAPIFY_KEY') ?: $_ENV['GEOAPIFY_KEY'] ?: die('CHYBA: GEOAPIFY_KEY není nastaveno v prostředí! Zkontrolujte .env soubor.'));
+define('GEOAPIFY_KEY', getenv('GEOAPIFY_API_KEY') ?: $_ENV['GEOAPIFY_API_KEY'] ?: die('CHYBA: GEOAPIFY_API_KEY není nastaveno v prostředí! Zkontrolujte .env soubor.'));
