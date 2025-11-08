@@ -1,0 +1,122 @@
+<?php
+/**
+ * Save Photos Controller
+ * Ukládání fotek z formuláře novareklamace.php
+ */
+
+require_once __DIR__ . '/../../init.php';
+
+header('Content-Type: application/json');
+
+try {
+    // Kontrola metody
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        throw new Exception('Povolena pouze POST metoda');
+    }
+
+    // Získání reklamace ID
+    $reklamaceId = $_POST['reklamace_id'] ?? null;
+    if (!$reklamaceId) {
+        throw new Exception('Chybí reklamace_id');
+    }
+
+    // Získání typu fotek
+    $photoType = $_POST['photo_type'] ?? 'problem';
+    $photoCount = intval($_POST['photo_count'] ?? 0);
+
+    if ($photoCount === 0) {
+        throw new Exception('Žádné fotky k nahrání');
+    }
+
+    // Vytvoření uploads adresáře, pokud neexistuje
+    $uploadsDir = __DIR__ . '/../../uploads';
+    if (!is_dir($uploadsDir)) {
+        mkdir($uploadsDir, 0755, true);
+    }
+
+    // Vytvoření podadresáře pro konkrétní reklamaci
+    $reklamaceDir = $uploadsDir . '/reklamace_' . $reklamaceId;
+    if (!is_dir($reklamaceDir)) {
+        mkdir($reklamaceDir, 0755, true);
+    }
+
+    // Databázové připojení
+    $pdo = getDbConnection();
+
+    $savedPhotos = [];
+
+    // Procházení všech fotek
+    for ($i = 0; $i < $photoCount; $i++) {
+        $photoDataKey = "photo_$i";
+        $filenameKey = "filename_$i";
+
+        if (!isset($_POST[$photoDataKey])) {
+            continue;
+        }
+
+        $photoData = $_POST[$photoDataKey];
+        $originalFilename = $_POST[$filenameKey] ?? "photo_$i.jpg";
+
+        // Dekódování base64
+        // Data jsou ve formátu: data:image/jpeg;base64,/9j/4AAQ...
+        if (preg_match('/^data:image\/(\w+);base64,/', $photoData, $matches)) {
+            $imageType = $matches[1];
+            $photoData = substr($photoData, strpos($photoData, ',') + 1);
+        } else {
+            $imageType = 'jpeg';
+        }
+
+        $photoData = base64_decode($photoData);
+        if ($photoData === false) {
+            throw new Exception("Nepodařilo se dekódovat fotku $i");
+        }
+
+        // Generování unikátního názvu souboru
+        $timestamp = time();
+        $randomString = bin2hex(random_bytes(4));
+        $filename = "photo_{$reklamaceId}_{$timestamp}_{$randomString}.{$imageType}";
+        $filePath = $reklamaceDir . '/' . $filename;
+
+        // Uložení souboru
+        if (file_put_contents($filePath, $photoData) === false) {
+            throw new Exception("Nepodařilo se uložit fotku $i");
+        }
+
+        // Relativní cesta pro databázi
+        $relativePathForDb = "uploads/reklamace_{$reklamaceId}/{$filename}";
+
+        // Vložení do databáze
+        $stmt = $pdo->prepare("
+            INSERT INTO wgs_photos (reklamace_id, section_name, photo_path, photo_type, created_at)
+            VALUES (:reklamace_id, :section_name, :photo_path, :photo_type, NOW())
+        ");
+
+        $stmt->execute([
+            ':reklamace_id' => $reklamaceId,
+            ':section_name' => $photoType,
+            ':photo_path' => $relativePathForDb,
+            ':photo_type' => 'image'
+        ]);
+
+        $savedPhotos[] = [
+            'photo_id' => $pdo->lastInsertId(),
+            'path' => $relativePathForDb,
+            'filename' => $filename
+        ];
+    }
+
+    // Úspěšná odpověď
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Fotky úspěšně nahrány',
+        'photos' => $savedPhotos,
+        'count' => count($savedPhotos)
+    ]);
+
+} catch (Exception $e) {
+    http_response_code(400);
+    echo json_encode([
+        'status' => 'error',
+        'error' => $e->getMessage()
+    ]);
+}
