@@ -359,7 +359,8 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-i
       <div class="footer-column">
         <h2 class="footer-title">Kontakt</h2>
         <p class="footer-text">
-          <strong>Tel:</strong> <a href="tel:+420725965826" class="footer-link">+420 725 965 826</a>, <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
+          <strong>Tel:</strong> <a href="tel:+420725965826" class="footer-link">+420 725 965 826</a><br>
+          <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
         </p>
       </div>
       <div class="footer-column">
