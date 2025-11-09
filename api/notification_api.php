@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
 
 header('Content-Type: application/json');
 
@@ -24,6 +25,9 @@ try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         throw new Exception('Povolena pouze POST metoda');
     }
+
+    // BEZPEČNOST: CSRF ochrana pro POST operace
+    requireCSRF();
 
     // Načtení akce
     $action = $_GET['action'] ?? '';

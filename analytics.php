@@ -7,17 +7,16 @@ if (!$isAdmin) {
     header('Location: login.php?redirect=analytics.php');
     exit;
 }
-
-require_once __DIR__ . "/includes/hamburger-menu.php";
 ?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
   <title>Analytics | White Glove Service</title>
   <meta name="description" content="Analytics dashboard White Glove Service. Pokročilá analytika servisu, trendy, výkonnost a business intelligence.">
-  
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

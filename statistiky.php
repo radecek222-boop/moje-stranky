@@ -15,7 +15,8 @@ if (!$isAdmin) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Statistiky | White Glove Service</title>
   <meta name="description" content="Statistiky a přehledy White Glove Service. Sledujte metriky servisu, úspěšnost oprav, spokojenost zákazníků a výkonnost techniků.">
-  
+  <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

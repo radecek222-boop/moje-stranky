@@ -28,6 +28,7 @@ if (!$isLoggedIn && !$isAdmin) {
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
+  <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
   <title>Přehled reklamací | White Glove Service</title>
   <meta name="description" content="Seznam reklamací a servisních zakázek White Glove Service. Správa, filtrování a přehledy všech servisních požadavků.">
   

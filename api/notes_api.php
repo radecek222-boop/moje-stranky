@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
 
 header('Content-Type: application/json');
 
@@ -26,6 +27,9 @@ try {
         $action = $_GET['action'] ?? '';
     } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
+
+        // BEZPEČNOST: CSRF ochrana pro POST operace
+        requireCSRF();
     } else {
         throw new Exception('Povolena pouze GET nebo POST metoda');
     }
@@ -82,6 +86,9 @@ try {
             if (strlen($text) < 1 || strlen($text) > 5000) {
                 throw new Exception('Text poznámky musí mít 1-5000 znaků');
             }
+
+            // BEZPEČNOST: XSS ochrana - sanitizace HTML
+            $text = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 
             // Zjištění autora
             $createdBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';

@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
 
 header('Content-Type: application/json');
 
@@ -25,6 +26,9 @@ try {
     $isGet = $_SERVER['REQUEST_METHOD'] === 'GET';
 
     if ($isPost) {
+        // BEZPEČNOST: CSRF ochrana pro POST operace
+        requireCSRF();
+
         // Načtení JSON dat
         $jsonData = file_get_contents('php://input');
         $data = json_decode($jsonData, true);
