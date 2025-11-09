@@ -28,6 +28,7 @@ if (!$isAdmin) {
 
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/statistiky.min.css">
+  <link rel="stylesheet" href="assets/css/statistiky-fixes.css">
 </head>
 
 <body>
@@ -36,9 +37,19 @@ if (!$isAdmin) {
 <!-- MAIN CONTENT -->
 <main>
 <div class="container">
-  
-  <h1 class="page-title">Statistiky</h1>
-  <p class="page-subtitle">Analýza a reporty reklamací</p>
+
+  <!-- USER INFO BAR -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 1rem; background: var(--c-white); border: 1px solid var(--c-border);">
+    <div>
+      <h1 class="page-title" style="margin-bottom: 0;">Statistiky</h1>
+      <p class="page-subtitle" style="margin-bottom: 0;">Analýza a reporty reklamací</p>
+    </div>
+    <div class="user-info">
+      <span class="user-name" id="userName">
+        <?php echo htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['admin_name'] ?? 'Admin'); ?>
+      </span>
+    </div>
+  </div>
   
   
   <!-- FILTRY -->

@@ -17,13 +17,15 @@ $isLoggedIn = isset($_SESSION['user_id']) || isset($_SESSION['admin_id']);
 if ($isAdmin && $isLoggedIn) {
     echo json_encode([
         'authenticated' => true,
+        'logged_in' => true,  // For backward compatibility
         'username' => $_SESSION['user_name'] ?? $_SESSION['admin_name'] ?? 'Admin',
         'email' => $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'admin@wgs-service.cz',
         'role' => 'admin'
     ]);
 } else {
     echo json_encode([
-        'authenticated' => false
+        'authenticated' => false,
+        'logged_in' => false
     ]);
 }
 ?>

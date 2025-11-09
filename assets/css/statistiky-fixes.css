@@ -1,0 +1,8 @@
+/* Z-INDEX FIX pro multi-select modals */
+.multi-select-modal {
+  z-index: 11000 !important; /* Vyšší než hamburger-header (10001) */
+}
+
+.custom-calendar {
+  z-index: 11001 !important; /* Ještě vyšší než modaly */
+}
