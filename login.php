@@ -1,15 +1,23 @@
 <?php require_once "init.php"; ?>
-<?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
+  <meta name="description" content="Přihlášení do klientského portálu White Glove Service. Správa reklamací Natuzzi, sledování servisních zásahů a přístup k dokumentům.">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="WGS">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icon192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="./icon512.png">
   <title>White Glove Service – Přihlášení</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/login.min.css">
   <style>
@@ -21,7 +29,7 @@
   </style>
 </head>
 <body>
-
+<?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
 <main class="main-content">
 <div class="container">
@@ -70,10 +78,9 @@
 </div>
 </main>
 
-<script src="assets/js/logger.js"></script>
-<script src="assets/js/csrf-auto-inject.js"></script>
-<script src="assets/js/login.js"></script>
-
-<script src="assets/js/welcome-modal.js"></script>
+<script src="assets/js/logger.js" defer></script>
+<script src="assets/js/csrf-auto-inject.js" defer></script>
+<script src="assets/js/login.js" defer></script>
+<script src="assets/js/welcome-modal.js" defer></script>
 </body>
 </html>
