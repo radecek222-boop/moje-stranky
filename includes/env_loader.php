@@ -6,9 +6,9 @@
 
 function loadEnvFile($path) {
     if (!file_exists($path)) {
-        // BEZPEČNOST: Neodhalovat absolutní cestu
-        error_log('CRITICAL: .env file not found at: ' . $path);
-        die('Chyba konfigurace serveru. Kontaktujte správce.');
+        // BEZPEČNOST: Neodhalovat absolutní cestu, ale zaznamenat problém
+        error_log('WARNING: .env file not found at expected path: ' . $path);
+        return false;
     }
     
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -34,6 +34,7 @@ function loadEnvFile($path) {
             $_SERVER[$key] = $value;
         }
     }
+    return true;
 }
 
 // Load .env file from www directory

@@ -544,9 +544,14 @@ const WGS = {
   
   initPhotos() {
     const btn = document.getElementById('uploadPhotosBtn');
-    const input = document.getElementById('photoInput');
-    btn.addEventListener('click', () => input.click());
-    input.addEventListener('change', async (e) => {
+    const photoInput = document.getElementById('photoInput');
+    if (!btn || !photoInput) {
+      logger.warn('📷 Upload prvky nebyly nalezeny, initPhotos se přeskočí');
+      return;
+    }
+
+    btn.addEventListener('click', () => photoInput.click());
+    photoInput.addEventListener('change', async (e) => {
       const files = Array.from(e.target.files);
       if (this.photos.length + files.length > 10) {
         this.toast('❌ Maximálně 10 fotografií', 'error');

@@ -8,6 +8,44 @@ if (session_status() === PHP_SESSION_NONE) { session_start(); }
 // ========== NAČTENÍ .ENV SOUBORU ==========
 require_once __DIR__ . '/../includes/env_loader.php';
 
+if (!function_exists('getEnvValue')) {
+    /**
+     * Vrátí hodnotu proměnné prostředí, pokud je k dispozici.
+     */
+    function getEnvValue($key) {
+        $value = getenv($key);
+        if ($value !== false && $value !== '') {
+            return $value;
+        }
+
+        if (isset($_ENV[$key]) && $_ENV[$key] !== '') {
+            return $_ENV[$key];
+        }
+
+        if (isset($_SERVER[$key]) && $_SERVER[$key] !== '') {
+            return $_SERVER[$key];
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('requireEnvValue')) {
+    /**
+     * Vrátí hodnotu povinné proměnné prostředí nebo ukončí aplikaci s chybou.
+     */
+    function requireEnvValue($key, $message) {
+        $value = getEnvValue($key);
+
+        if ($value === null) {
+            error_log("CRITICAL: Missing required environment variable: {$key}");
+            die($message);
+        }
+
+        return $value;
+    }
+}
+
 // ========== SESSION KONFIGURACE ==========
 // Session je spouštěna v init.php, zde už není třeba
 // Tato konfigurace byla přesunuta do init.php pro zajištění správného pořadí načítání
@@ -19,25 +57,25 @@ require_once __DIR__ . '/../includes/env_loader.php';
 // ========== DATABÁZE ==========
 // Načítáme z environment variables (.env soubor)
 // BEZPEČNOST: Žádné fallbacky pro credentials - pokud chybí, aplikace musí spadnout
-define('DB_HOST', getenv('DB_HOST') ?: $_ENV['DB_HOST'] ?: die('CHYBA: DB_HOST není nastaveno v prostředí! Zkontrolujte .env soubor.'));
-define('DB_NAME', getenv('DB_NAME') ?: $_ENV['DB_NAME'] ?: die('CHYBA: DB_NAME není nastaveno v prostředí! Zkontrolujte .env soubor.'));
-define('DB_USER', getenv('DB_USER') ?: $_ENV['DB_USER'] ?: die('CHYBA: DB_USER není nastaveno v prostředí! Zkontrolujte .env soubor.'));
-define('DB_PASS', getenv('DB_PASS') ?: $_ENV['DB_PASS'] ?: die('CHYBA: DB_PASS není nastaveno v prostředí! Zkontrolujte .env soubor.'));
+define('DB_HOST', requireEnvValue('DB_HOST', 'CHYBA: DB_HOST není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+define('DB_NAME', requireEnvValue('DB_NAME', 'CHYBA: DB_NAME není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+define('DB_USER', requireEnvValue('DB_USER', 'CHYBA: DB_USER není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+define('DB_PASS', requireEnvValue('DB_PASS', 'CHYBA: DB_PASS není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
 
 // ========== ADMIN KLÍČ ==========
 // Admin se přihlašuje pouze registračním klíčem (hashovaný v .env)
-define('ADMIN_KEY_HASH', getenv('ADMIN_KEY_HASH') ?: $_ENV['ADMIN_KEY_HASH'] ?: die('CHYBA: ADMIN_KEY_HASH není nastaveno v prostředí! Zkontrolujte .env soubor.'));
-$adminHighKeyHash = getenv('ADMIN_HIGH_KEY_HASH') ?: (isset($_ENV['ADMIN_HIGH_KEY_HASH']) ? $_ENV['ADMIN_HIGH_KEY_HASH'] : null);
+define('ADMIN_KEY_HASH', requireEnvValue('ADMIN_KEY_HASH', 'CHYBA: ADMIN_KEY_HASH není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+$adminHighKeyHash = getEnvValue('ADMIN_HIGH_KEY_HASH');
 define('ADMIN_HIGH_KEY_HASH', $adminHighKeyHash ?: null);
 
 // ========== EMAIL / SMTP ==========
 // BEZPEČNOST: Žádné fallbacky pro SMTP credentials
-define('SMTP_HOST', getenv('SMTP_HOST') ?: $_ENV['SMTP_HOST'] ?: die('CHYBA: SMTP_HOST není nastaveno v prostředí! Zkontrolujte .env soubor.'));
-define('SMTP_PORT', getenv('SMTP_PORT') ?: $_ENV['SMTP_PORT'] ?: die('CHYBA: SMTP_PORT není nastaveno v prostředí! Zkontrolujte .env soubor.'));
-define('SMTP_FROM', getenv('SMTP_FROM') ?: $_ENV['SMTP_FROM'] ?: die('CHYBA: SMTP_FROM není nastaveno v prostředí! Zkontrolujte .env soubor.'));
+define('SMTP_HOST', requireEnvValue('SMTP_HOST', 'CHYBA: SMTP_HOST není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+define('SMTP_PORT', requireEnvValue('SMTP_PORT', 'CHYBA: SMTP_PORT není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+define('SMTP_FROM', requireEnvValue('SMTP_FROM', 'CHYBA: SMTP_FROM není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
 define('SMTP_FROM_NAME', 'White Glove Service');
-define('SMTP_USER', getenv('SMTP_USER') ?: $_ENV['SMTP_USER'] ?: die('CHYBA: SMTP_USER není nastaveno v prostředí! Zkontrolujte .env soubor.'));
-define('SMTP_PASS', getenv('SMTP_PASS') ?: $_ENV['SMTP_PASS'] ?: die('CHYBA: SMTP_PASS není nastaveno v prostředí! Zkontrolujte .env soubor.'));
+define('SMTP_USER', requireEnvValue('SMTP_USER', 'CHYBA: SMTP_USER není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+define('SMTP_PASS', requireEnvValue('SMTP_PASS', 'CHYBA: SMTP_PASS není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
 
 // ========== PATHS ==========
 define('ROOT_PATH', dirname(__DIR__));
@@ -224,7 +262,14 @@ function setSecurityHeaders() {
     header("X-Frame-Options: SAMEORIGIN");
     header("X-XSS-Protection: 1; mode=block");
     // CSP - odstraněn 'unsafe-eval' pro lepší bezpečnost
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: blob: https://maps.geoapify.com; font-src 'self' data: https://fonts.googleapis.com; connect-src 'self' https://api.geoapify.com https://maps.geoapify.com;");
+    header("Content-Security-Policy: " .
+        "default-src 'self'; " .
+        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; " .
+        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com; " .
+        "img-src 'self' data: blob: https://maps.geoapify.com; " .
+        "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com; " .
+        "connect-src 'self' https://api.geoapify.com https://maps.geoapify.com https://fonts.googleapis.com https://fonts.gstatic.com;"
+    );
     header("Referrer-Policy: strict-origin-when-cross-origin");
 }
 
@@ -268,10 +313,10 @@ if (rand(1, 100) === 1) {
 }
 
 // ========== DEEPL API PRO PŘEKLADY ==========
-define('DEEPL_API_KEY', getenv('DEEPL_API_KEY') ?: $_ENV['DEEPL_API_KEY'] ?: 'optional_later');
+define('DEEPL_API_KEY', getEnvValue('DEEPL_API_KEY') ?: 'optional_later');
 
 // ========== JWT SECRET ==========
-define('JWT_SECRET', getenv('JWT_SECRET') ?: $_ENV['JWT_SECRET'] ?: die('CHYBA: JWT_SECRET není nastaveno v prostředí! Zkontrolujte .env soubor.'));
+define('JWT_SECRET', requireEnvValue('JWT_SECRET', 'CHYBA: JWT_SECRET není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
 // ========== GEOAPIFY API (MAPY) ==========
 // BEZPEČNOST: Žádný hardcodovaný API klíč - musí být v .env
-define('GEOAPIFY_KEY', getenv('GEOAPIFY_API_KEY') ?: $_ENV['GEOAPIFY_API_KEY'] ?: die('CHYBA: GEOAPIFY_API_KEY není nastaveno v prostředí! Zkontrolujte .env soubor.'));
+define('GEOAPIFY_KEY', requireEnvValue('GEOAPIFY_API_KEY', 'CHYBA: GEOAPIFY_API_KEY není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
