@@ -22,6 +22,27 @@ try {
 
     $pdo = getDbConnection();
 
+    // Kontrola zda tabulka existuje
+    $tableExists = false;
+    try {
+        $pdo->query("SELECT 1 FROM wgs_notifications LIMIT 1");
+        $tableExists = true;
+    } catch (PDOException $e) {
+        // Tabulka neexistuje nebo nemáme oprávnění
+        error_log("wgs_notifications table check failed: " . $e->getMessage());
+    }
+
+    if (!$tableExists) {
+        // Vrátit prázdný seznam pokud tabulka neexistuje
+        echo json_encode([
+            'status' => 'success',
+            'data' => [],
+            'count' => 0,
+            'message' => 'Notification system not initialized'
+        ]);
+        exit;
+    }
+
     // Načtení všech notifikačních šablon
     $stmt = $pdo->query("
         SELECT
