@@ -284,17 +284,6 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-i
             <input type="tel" class="form-control" id="telefon" name="telefon" required>
           </div>
         </div>
-        <div class="form-consent" id="gdprConsentContainer">
-          <label class="consent-label" for="gdpr_consent">
-            <input type="checkbox" id="gdpr_consent" name="gdpr_consent" required>
-            <span>
-              Souhlasím se zpracováním osobních údajů společností White Glove Service, s.r.o. za účelem vyřízení servisního požadavku
-              a předání nezbytných informací výrobci, prodejci či autorizovaným technikům. Podrobnosti o zacházení s údaji jsou uvedeny
-              na stránce <a href="gdpr.php" class="footer-link" target="_blank" rel="noopener">Zpracování osobních údajů</a>.
-            </span>
-          </label>
-          <p class="consent-note">Souhlas lze kdykoli odvolat prostřednictvím e-mailu <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>. Bez souhlasu nemůžeme žádost zpracovat.</p>
-        </div>
       </div>
       
      <!-- ADRESA ZÁKAZNÍKA -->
@@ -376,9 +365,9 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-i
 
       <!-- GDPR CONSENT -->
       <div class="form-consent" style="margin: 2rem 0 1.5rem 0; padding: 1rem; border: 1px solid #ddd; background: #f9f9f9;">
-        <label style="display: flex; align-items: flex-start; cursor: pointer; font-size: 0.75rem; line-height: 1.5; color: #666;">
+        <label style="display: flex; align-items: flex-start; cursor: pointer; font-size: 0.65rem; line-height: 1.3; color: #666;">
           <input type="checkbox" id="gdpr_consent" name="gdpr_consent" required style="margin-right: 0.75rem; margin-top: 0.2rem; flex-shrink: 0;">
-          <span>SOUHLASÍM SE ZPRACOVÁNÍM OSOBNÍCH ÚDAJŮ SPOLEČNOSTÍ WHITE GLOVE SERVICE, S.R.O. ZA ÚČELEM VYŘÍZENÍ SERVISNÍHO POŽADAVKU A PŘEDÁNÍ NEZBYTNÝCH INFORMACÍ VÝROBCI, PRODEJCI ČI AUTORIZOVANÝM TECHNIKŮM. PODROBNOSTI O ZACHÁZENÍ S ÚDAJI JSOU UVEDENY NA STRÁNCE <a href="gdpr.php" target="_blank" style="color: #000; text-decoration: underline;">ZPRACOVÁNÍ OSOBNÍCH ÚDAJŮ</a>. SOUHLAS LZE KDYKOLI ODVOLAT PROSTŘEDNICTVÍM E-MAILU <a href="mailto:reklamace@wgs-service.cz" style="color: #000; text-decoration: underline;">reklamace@wgs-service.cz</a>. BEZ SOUHLASU NEMŮŽEME ŽÁDOST ZPRACOVAT.</span>
+          <span>Souhlasím se zpracováním osobních údajů společností White Glove Service, s.r.o. za účelem vyřízení servisního požadavku a předání nezbytných informací výrobci, prodejci či autorizovaným technikům. Podrobnosti o zacházení s údaji jsou uvedeny na stránce <a href="gdpr.php" target="_blank" style="color: #000; text-decoration: underline;">Zpracování osobních údajů</a>. Souhlas lze kdykoli odvolat prostřednictvím e-mailu <a href="mailto:reklamace@wgs-service.cz" style="color: #000; text-decoration: underline;">reklamace@wgs-service.cz</a>. Bez souhlasu nemůžeme žádost zpracovat.</span>
         </label>
       </div>
 
