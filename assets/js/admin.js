@@ -3,6 +3,25 @@
  */
 
 // ============================================================
+// CSRF TOKEN HELPER
+// ============================================================
+let csrfTokenCache = null;
+
+async function getCSRFToken() {
+  if (csrfTokenCache) return csrfTokenCache;
+
+  try {
+    const response = await fetch("app/controllers/get_csrf_token.php");
+    const data = await response.json();
+    csrfTokenCache = data.token;
+    return data.token;
+  } catch (err) {
+    logger.error("Chyba získání CSRF tokenu:", err);
+    return null;
+  }
+}
+
+// ============================================================
 // TAB MANAGEMENT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -153,7 +172,7 @@ async function loadKeys() {
 async function createKey() {
   const keyType = prompt('Typ (admin/technik/prodejce/partner):');
   if (!keyType) return;
-  
+
   try {
     const csrfToken = await getCSRFToken();
     if (!csrfToken) throw new Error('CSRF token not available');
@@ -180,7 +199,7 @@ async function createKey() {
 
 async function deleteKey(keyCode) {
   if (!confirm('Smazat?')) return;
-  
+
   try {
     const csrfToken = await getCSRFToken();
     if (!csrfToken) throw new Error('CSRF token not available');

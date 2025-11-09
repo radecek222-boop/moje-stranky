@@ -290,6 +290,21 @@ try {
         throw new Exception('Popis problému je povinný');
     }
 
+    // GDPR: Kontrola souhlasu se zpracováním osobních údajů
+    $gdprConsent = filter_var($_POST['gdpr_consent'] ?? null, FILTER_VALIDATE_BOOLEAN);
+    if ($gdprConsent !== true) {
+        throw new Exception('Je nutné potvrdit souhlas se zpracováním osobních údajů.');
+    }
+
+    // GDPR: Metadata pro dokumentaci souhlasu
+    $gdprConsentAt = date('Y-m-d H:i:s');
+    $gdprConsentIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $gdprUserAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+
+    // Připojit GDPR metadata k doplňujícím informacím
+    $gdprNote = "\n\n[GDPR] Souhlas udělen: {$gdprConsentAt} | IP: {$gdprConsentIp} | UA: {$gdprUserAgent}";
+    $doplnujiciInfo = trim($doplnujiciInfo . $gdprNote);
+
     // Formátování dat pro databázi
     $datumProdejeForDb = null;
     if (!empty($datumProdeje) && $datumProdeje !== 'nevyplňuje se') {
