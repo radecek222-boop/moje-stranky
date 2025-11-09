@@ -1,10 +1,8 @@
 <?php
-require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/init.php';
 
 $isLoggedIn = isset($_SESSION['user_id']);
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
-
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://maps.geoapify.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://maps.geoapify.com https://api.geoapify.com;");
 ?>
 <!DOCTYPE html>
 <html lang="cs" data-page="novareklamace">
