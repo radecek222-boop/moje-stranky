@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#000000">
   <meta name="description" content="Kalkulačka ceny mimozáručního servisu White Glove Service. Spočítejte si orientační náklady na opravu nábytku včetně dopravy a náhradních dílů.">
+  <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
   <title>Kalkulačka ceny servisu | WGS</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
