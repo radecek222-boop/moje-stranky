@@ -26,6 +26,7 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       margin-bottom: 1rem;
+      color: #fff !important;
     }
 
     .gdpr-hero p {
@@ -33,6 +34,7 @@
       max-width: 720px;
       margin: 0 auto;
       opacity: 0.85;
+      color: #fff !important;
     }
 
     .gdpr-content {
