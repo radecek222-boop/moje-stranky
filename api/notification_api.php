@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
 
 header('Content-Type: application/json');
 
@@ -25,16 +26,27 @@ try {
         throw new Exception('Povolena pouze POST metoda');
     }
 
-    // Načtení akce
-    $action = $_GET['action'] ?? '';
-
-    // Načtení JSON dat
+    // Načtení JSON dat PŘED CSRF kontrolou
     $jsonData = file_get_contents('php://input');
     $data = json_decode($jsonData, true);
 
     if (!$data) {
         throw new Exception('Neplatná JSON data');
     }
+
+    // BEZPEČNOST: CSRF ochrana pro POST operace
+    $csrfToken = $data['csrf_token'] ?? $_POST['csrf_token'] ?? '';
+    if (!validateCSRFToken($csrfToken)) {
+        http_response_code(403);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Neplatný CSRF token. Obnovte stránku a zkuste znovu.'
+        ]);
+        exit;
+    }
+
+    // Načtení akce
+    $action = $_GET['action'] ?? '';
 
     $pdo = getDbConnection();
 

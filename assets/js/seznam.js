@@ -1,14 +1,14 @@
 // BEZPEČNOST: Cache CSRF tokenu pro prevenci nekonečné smyčky
-let csrfTokenCache = null;
+window.csrfTokenCache = window.csrfTokenCache || null;
 
 async function getCSRFToken() {
-  if (csrfTokenCache) return csrfTokenCache;
+  if (window.csrfTokenCache) return window.csrfTokenCache;
 
   try {
     // Použít originalFetch aby se předešlo rekurzi
     const response = await window.fetch("app/controllers/get_csrf_token.php");
     const data = await response.json();
-    csrfTokenCache = data.token;
+    window.csrfTokenCache = data.token;
     return data.token;
   } catch (err) {
     logger.error("Chyba získání CSRF tokenu:", err);
