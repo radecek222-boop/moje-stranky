@@ -28,6 +28,7 @@ if (!$isAdmin) {
 
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/statistiky.min.css">
+  <link rel="stylesheet" href="assets/css/statistiky-fixes.css">
 </head>
 
 <body>
