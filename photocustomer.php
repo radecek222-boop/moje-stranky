@@ -135,9 +135,6 @@ if (!$isLoggedIn) {
 <!-- OPRAVENO: accept="image/*,video/*" místo špatného "assets/img/*" -->
 <input type="file" id="mediaInput" accept="image/*,video/*" capture="environment" multiple>
 
-
-</main>
-
 <!-- External JavaScript -->
 <script src="assets/js/photocustomer.min.js" defer></script>
 </body>
