@@ -1,5 +1,6 @@
 <?php
 require_once "init.php";
+require_once __DIR__ . '/includes/admin_navigation.php';
 
 // BEZPEČNOST: Kontrola admin přihlášení
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
@@ -48,13 +49,13 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
   <p class="page-subtitle">Správa systému White Glove Service</p>
 
   <?php
-    $tabs = [
-      'dashboard' => 'Přehled',
-      'notifications' => 'Notifikace',
-      'keys' => 'Registrační klíče',
-      'users' => 'Uživatelé',
-      'online' => 'Online'
-    ];
+    $tabConfig = loadAdminTabNavigation();
+    $tabs = [];
+    foreach ($tabConfig as $item) {
+      if (!empty($item['tab']) && !empty($item['tab_label'])) {
+        $tabs[$item['tab']] = $item['tab_label'];
+      }
+    }
   ?>
 
   <nav class="tab-nav" role="tablist" aria-label="Sekce administrace">
