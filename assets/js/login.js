@@ -2,6 +2,18 @@
  * UNIFIED LOGIN SYSTEM WITH RECOVERY
  */
 
+// CSRF Token helper
+async function getCSRFToken() {
+  try {
+    const response = await fetch('app/controllers/get_csrf_token.php');
+    const data = await response.json();
+    return data.token || '';
+  } catch (err) {
+    logger.error('CSRF token error:', err);
+    return '';
+  }
+}
+
 const isAdminCheckbox = document.getElementById('isAdmin');
 const userLoginFields = document.getElementById('userLoginFields');
 const adminLoginFields = document.getElementById('adminLoginFields');
@@ -91,6 +103,7 @@ async function handleAdminLogin() {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       credentials: 'include',
+      const csrfToken = await getCSRFToken();
       body: `admin_key=${encodeURIComponent(adminKey)}&csrf_token=${encodeURIComponent(csrfToken)}`
     });
     
@@ -142,10 +155,12 @@ async function handleUserLogin() {
   }
 
   try {
+    const csrfToken = await getCSRFToken();
     const response = await fetch('app/controllers/login_controller.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       credentials: 'include',
+      body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`&csrf_token=${encodeURIComponent(csrfToken)}`
       body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&csrf_token=${encodeURIComponent(csrfToken)}`
     });
     
@@ -217,6 +232,7 @@ async function verifyHighKey() {
   }
   
   try {
+    const csrfToken = await getCSRFToken();
     const csrfToken = await getCsrfTokenFromForm(loginForm);
     if (!csrfToken) {
       showNotification('Nepodařilo se získat bezpečnostní token. Obnovte stránku.', 'error');
@@ -227,6 +243,7 @@ async function verifyHighKey() {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       credentials: 'include',
+      body: `high_key=${encodeURIComponent(highKey)}`&csrf_token=${encodeURIComponent(csrfToken)}`
       body: `high_key=${encodeURIComponent(highKey)}&csrf_token=${encodeURIComponent(csrfToken)}`
     });
     
@@ -308,6 +325,7 @@ async function createNewAdminKey() {
   }
   
   try {
+    const csrfToken = await getCSRFToken();
     const csrfToken = await getCsrfTokenFromForm(loginForm);
     if (!csrfToken) {
       showNotification('Nepodařilo se získat bezpečnostní token. Obnovte stránku.', 'error');
@@ -318,6 +336,7 @@ async function createNewAdminKey() {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       credentials: 'include',
+      body: `action=create_new_admin_key&new_admin_key=${encodeURIComponent(key)}&new_admin_key_confirm=${encodeURIComponent(keyConfirm)}`&csrf_token=${encodeURIComponent(csrfToken)}`
       body: `action=create_new_admin_key&new_admin_key=${encodeURIComponent(key)}&new_admin_key_confirm=${encodeURIComponent(keyConfirm)}&csrf_token=${encodeURIComponent(csrfToken)}`
     });
     
