@@ -88,7 +88,7 @@ const Utils = {
   },
   
   getOrderId: (record, index = 0) => {
-    return record.id || record.reklamacniCislo || ('WGS-' + (index + 1));
+    return record.cislo || record.reklamacniCislo || record.id || ('WGS-' + (index + 1));
   },
   
   isCompleted: (record) => {
