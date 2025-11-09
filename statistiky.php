@@ -389,7 +389,7 @@ if (!$isAdmin) {
 <!-- External JavaScript -->
 <!-- Logger Utility (must be loaded first) -->
 <script src="assets/js/logger.js" defer></script>
-
+<script src="assets/js/statistiky-debug.js" defer></script>
 <script src="assets/js/statistiky.min.js" defer></script>
 </body>
 </html>
