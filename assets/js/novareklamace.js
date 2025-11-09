@@ -421,6 +421,13 @@ const WGS = {
   },
   
   async submitForm() {
+    const consentCheckbox = document.getElementById('gdpr_consent');
+    if (consentCheckbox && !consentCheckbox.checked) {
+      consentCheckbox.focus();
+      this.toast('Pro odeslání je nutný souhlas se zpracováním osobních údajů.', 'error');
+      return;
+    }
+
     this.toast('Odesílám...', 'info');
     try {
       const formData = new FormData();
@@ -445,10 +452,14 @@ const WGS = {
       formData.append('seriove_cislo', '');
       formData.append('popis_problemu', document.getElementById('popis_problemu')?.value || '');
       formData.append('doplnujici_info', document.getElementById('doplnujici_info')?.value || '');
-      
+
       const fakturaceFirma = document.getElementById('fakturace_firma')?.value || 'CZ';
       formData.append('fakturace_firma', fakturaceFirma);
-      
+
+      if (consentCheckbox) {
+        formData.append('gdpr_consent', consentCheckbox.checked ? '1' : '0');
+      }
+
       // Získat CSRF token
       const csrfResponse = await fetch('app/controllers/get_csrf_token.php');
       const csrfData = await csrfResponse.json();

@@ -256,7 +256,14 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <p data-lang-cs="© 2025 White Glove Service. Všechna práva vyhrazena." data-lang-en="© 2025 White Glove Service. All rights reserved." data-lang-it="© 2025 White Glove Service. Tutti i diritti riservati.">&copy; 2025 White Glove Service. Všechna práva vyhrazena.</p>
+      <p data-lang-cs="© 2025 White Glove Service. Všechna práva vyhrazena." data-lang-en="© 2025 White Glove Service. All rights reserved." data-lang-it="© 2025 White Glove Service. Tutti i diritti riservati.">
+        &copy; 2025 White Glove Service. Všechna práva vyhrazena.
+        <span aria-hidden="true"> • </span>
+        <a href="gdpr.php" class="footer-link"
+           data-lang-cs="Zpracování osobních údajů (GDPR)"
+           data-lang-en="Personal data processing (GDPR)"
+           data-lang-it="Trattamento dei dati personali (GDPR)">Zpracování osobních údajů (GDPR)</a>
+      </p>
     </div>
   </div>
 </footer>
