@@ -25,10 +25,25 @@ try {
 
     $method = $_SERVER['REQUEST_METHOD'];
     $action = $_GET['action'] ?? '';
+    $data = [];
 
-    // BEZPEČNOST: CSRF ochrana pro POST operace
+    // Pro POST operace načíst JSON data PŘED CSRF kontrolou
     if ($method === 'POST') {
-        requireCSRF();
+        $jsonData = file_get_contents('php://input');
+        if ($jsonData) {
+            $data = json_decode($jsonData, true);
+        }
+
+        // BEZPEČNOST: CSRF ochrana pro POST operace
+        $csrfToken = $data['csrf_token'] ?? $_POST['csrf_token'] ?? '';
+        if (!validateCSRFToken($csrfToken)) {
+            http_response_code(403);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Neplatný CSRF token. Obnovte stránku a zkuste znovu.'
+            ]);
+            exit;
+        }
     }
 
     if ($method === 'GET' && $action === 'list') {
@@ -75,10 +90,7 @@ try {
         ]);
 
     } elseif ($method === 'POST' && $action === 'add') {
-        // Přidání nového uživatele
-        $jsonData = file_get_contents('php://input');
-        $data = json_decode($jsonData, true);
-
+        // Přidání nového uživatele (data už načtena výše)
         $name = $data['name'] ?? '';
         $email = $data['email'] ?? '';
         $phone = $data['phone'] ?? '';
@@ -137,10 +149,7 @@ try {
         ]);
 
     } elseif ($method === 'POST' && $action === 'delete') {
-        // Smazání uživatele
-        $jsonData = file_get_contents('php://input');
-        $data = json_decode($jsonData, true);
-
+        // Smazání uživatele (data už načtena výše)
         $userId = $data['user_id'] ?? null;
 
         if (!$userId || !is_numeric($userId)) {
@@ -156,10 +165,7 @@ try {
         ]);
 
     } elseif ($method === 'POST' && $action === 'update_status') {
-        // Změna statusu uživatele (active/inactive)
-        $jsonData = file_get_contents('php://input');
-        $data = json_decode($jsonData, true);
-
+        // Změna statusu uživatele (active/inactive - data už načtena výše)
         $userId = $data['user_id'] ?? null;
         $status = $data['status'] ?? '';
 

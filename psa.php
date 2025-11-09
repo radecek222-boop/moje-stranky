@@ -1,5 +1,4 @@
 <?php require_once "init.php"; ?>
-<?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -17,15 +16,21 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <link rel="stylesheet" href="assets/css/psa-kalkulator.css">
-<link rel="stylesheet" href="assets/css/admin-header.css">
+  <link rel="stylesheet" href="assets/css/admin-header.css">
 </head>
 <body>
-<!-- <?php ?> -->
-<main>
-<link rel="stylesheet" href="assets/css/admin-header.css">
+<?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
-  </div>
-</div>
+<main class="main-content">
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <h1 class="page-title">PSA Kalkulátor</h1>
+    <div class="period-selector">
+      <select class="form-select" id="periodSelect" data-onchange="changePeriod">
+        <option value="2025-11">Listopad 2025</option>
+        <option value="2025-12">Prosinec 2025</option>
       </select>
       <div class="period-display" id="periodDisplay">Listopad 2025</div>
     </div>
@@ -34,6 +39,16 @@
   <!-- KONFIGURACE SAZEB -->
   <div class="card">
     <div class="card-header">
+      <h2 class="card-title">Konfigurace sazeb</h2>
+    </div>
+    <div class="card-body">
+      <div class="rates-grid">
+        <div class="form-group">
+          <label class="form-label">Sazba výplaty (Kč/hodina)</label>
+          <input type="number" class="form-input" id="salaryRate" value="150" min="0" data-onchange="updateRates">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sazba fakturace (Kč/hodina)</label>
           <input type="number" class="form-input" id="invoiceRate" value="250" min="0" data-onchange="updateRates">
         </div>
         <div class="form-group">
@@ -156,6 +171,7 @@
   </div>
 
 </div>
+</main>
 
 <!-- Logger Utility (must be loaded first) -->
 <script src="assets/js/logger.js" defer></script>

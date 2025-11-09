@@ -26,15 +26,23 @@ try {
     $isGet = $_SERVER['REQUEST_METHOD'] === 'GET';
 
     if ($isPost) {
-        // BEZPEČNOST: CSRF ochrana pro POST operace
-        requireCSRF();
-
-        // Načtení JSON dat
+        // Načtení JSON dat PŘED CSRF kontrolou
         $jsonData = file_get_contents('php://input');
         $data = json_decode($jsonData, true);
 
         if (!$data) {
             throw new Exception('Neplatná JSON data');
+        }
+
+        // BEZPEČNOST: CSRF ochrana pro POST operace
+        $csrfToken = $data['csrf_token'] ?? $_POST['csrf_token'] ?? '';
+        if (!validateCSRFToken($csrfToken)) {
+            http_response_code(403);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Neplatný CSRF token. Obnovte stránku a zkuste znovu.'
+            ]);
+            exit;
         }
 
         $action = $data['action'] ?? '';

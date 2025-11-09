@@ -50,15 +50,26 @@ try {
                 throw new Exception('Neplatné ID reklamace');
             }
 
+            // Převést reklamace_id na claim_id (číselné ID)
+            $stmt = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE reklamace_id = :reklamace_id OR cislo = :cislo LIMIT 1");
+            $stmt->execute([':reklamace_id' => $reklamaceId, ':cislo' => $reklamaceId]);
+            $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$reklamace) {
+                throw new Exception('Reklamace nebyla nalezena');
+            }
+
+            $claimId = $reklamace['id'];
+
             // Načtení poznámek z databáze
             $stmt = $pdo->prepare("
                 SELECT
-                    id, reklamace_id, note_text, created_by, created_at
+                    id, claim_id, note_text, created_by, created_at
                 FROM wgs_notes
-                WHERE reklamace_id = :reklamace_id
+                WHERE claim_id = :claim_id
                 ORDER BY created_at DESC
             ");
-            $stmt->execute([':reklamace_id' => $reklamaceId]);
+            $stmt->execute([':claim_id' => $claimId]);
             $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             echo json_encode([
@@ -90,19 +101,30 @@ try {
             // BEZPEČNOST: XSS ochrana - sanitizace HTML
             $text = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 
+            // Převést reklamace_id na claim_id (číselné ID)
+            $stmt = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE reklamace_id = :reklamace_id OR cislo = :cislo LIMIT 1");
+            $stmt->execute([':reklamace_id' => $reklamaceId, ':cislo' => $reklamaceId]);
+            $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$reklamace) {
+                throw new Exception('Reklamace nebyla nalezena');
+            }
+
+            $claimId = $reklamace['id'];
+
             // Zjištění autora
             $createdBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
 
             // Vložení do databáze
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_notes (
-                    reklamace_id, note_text, created_by, created_at
+                    claim_id, note_text, created_by, created_at
                 ) VALUES (
-                    :reklamace_id, :note_text, :created_by, NOW()
+                    :claim_id, :note_text, :created_by, NOW()
                 )
             ");
             $stmt->execute([
-                ':reklamace_id' => $reklamaceId,
+                ':claim_id' => $claimId,
                 ':note_text' => $text,
                 ':created_by' => $createdBy
             ]);
