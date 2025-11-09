@@ -9,8 +9,21 @@ if (!$isAdmin) {
     exit;
 }
 
-// Získat záložku z URL
+$tabs = [
+  'dashboard' => 'Přehled',
+  'notifications' => 'Notifikace',
+  'keys' => 'Registrační klíče',
+  'users' => 'Uživatelé',
+  'online' => 'Online'
+];
+
+// Získat záložku z URL a ověřit platnost
 $activeTab = $_GET['tab'] ?? 'dashboard';
+if (!array_key_exists($activeTab, $tabs)) {
+  $activeTab = 'dashboard';
+}
+
+$activeTabLabel = $tabs[$activeTab];
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -77,7 +90,13 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
   </nav>
 
   <!-- TAB: DASHBOARD -->
-  <div id="tab-dashboard" class="tab-content<?php echo $activeTab === 'dashboard' ? '' : ' hidden'; ?>" role="tabpanel" aria-labelledby="tab-btn-dashboard" aria-hidden="<?php echo $activeTab === 'dashboard' ? 'false' : 'true'; ?>">
+  <div
+    id="tab-dashboard"
+    class="tab-content<?php echo $activeTab === 'dashboard' ? '' : ' hidden'; ?>"
+    role="region"
+    aria-label="<?php echo htmlspecialchars($tabs['dashboard'], ENT_QUOTES, 'UTF-8'); ?>"
+    aria-hidden="<?php echo $activeTab === 'dashboard' ? 'false' : 'true'; ?>"
+  >
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-label">Reklamace</div>
@@ -102,7 +121,13 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
   </div>
   
   <!-- TAB: NOTIFICATIONS -->
-  <div id="tab-notifications" class="tab-content<?php echo $activeTab === 'notifications' ? '' : ' hidden'; ?>" role="tabpanel" aria-labelledby="tab-btn-notifications" aria-hidden="<?php echo $activeTab === 'notifications' ? 'false' : 'true'; ?>">
+  <div
+    id="tab-notifications"
+    class="tab-content<?php echo $activeTab === 'notifications' ? '' : ' hidden'; ?>"
+    role="region"
+    aria-label="<?php echo htmlspecialchars($tabs['notifications'], ENT_QUOTES, 'UTF-8'); ?>"
+    aria-hidden="<?php echo $activeTab === 'notifications' ? 'false' : 'true'; ?>"
+  >
     <h2 class="page-title" style="font-size: 1.8rem; margin-bottom: 1rem;">Správa Emailů & SMS</h2>
     <p class="page-subtitle">Editace šablon, nastavení příjemců a správa automatických notifikací</p>
     
@@ -112,7 +137,13 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
   </div>
   
   <!-- TAB: KEYS -->
-  <div id="tab-keys" class="tab-content<?php echo $activeTab === 'keys' ? '' : ' hidden'; ?>" role="tabpanel" aria-labelledby="tab-btn-keys" aria-hidden="<?php echo $activeTab === 'keys' ? 'false' : 'true'; ?>">
+  <div
+    id="tab-keys"
+    class="tab-content<?php echo $activeTab === 'keys' ? '' : ' hidden'; ?>"
+    role="region"
+    aria-label="<?php echo htmlspecialchars($tabs['keys'], ENT_QUOTES, 'UTF-8'); ?>"
+    aria-hidden="<?php echo $activeTab === 'keys' ? 'false' : 'true'; ?>"
+  >
     <div class="table-container">
       <div class="table-header">
         <h3 class="table-title">Registrační klíče</h3>
@@ -129,7 +160,13 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
   </div>
   
   <!-- TAB: USERS -->
-  <div id="tab-users" class="tab-content<?php echo $activeTab === 'users' ? '' : ' hidden'; ?>" role="tabpanel" aria-labelledby="tab-btn-users" aria-hidden="<?php echo $activeTab === 'users' ? 'false' : 'true'; ?>">
+  <div
+    id="tab-users"
+    class="tab-content<?php echo $activeTab === 'users' ? '' : ' hidden'; ?>"
+    role="region"
+    aria-label="<?php echo htmlspecialchars($tabs['users'], ENT_QUOTES, 'UTF-8'); ?>"
+    aria-hidden="<?php echo $activeTab === 'users' ? 'false' : 'true'; ?>"
+  >
     <div class="table-container">
       <div class="table-header">
         <h3 class="table-title">Všichni uživatelé</h3>
@@ -162,7 +199,13 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
   </div>
   
   <!-- TAB: ONLINE -->
-  <div id="tab-online" class="tab-content<?php echo $activeTab === 'online' ? '' : ' hidden'; ?>" role="tabpanel" aria-labelledby="tab-btn-online" aria-hidden="<?php echo $activeTab === 'online' ? 'false' : 'true'; ?>">
+  <div
+    id="tab-online"
+    class="tab-content<?php echo $activeTab === 'online' ? '' : ' hidden'; ?>"
+    role="region"
+    aria-label="<?php echo htmlspecialchars($tabs['online'], ENT_QUOTES, 'UTF-8'); ?>"
+    aria-hidden="<?php echo $activeTab === 'online' ? 'false' : 'true'; ?>"
+  >
     <div class="table-container">
       <div class="table-header">
         <h3 class="table-title">Online uživatelé</h3>
@@ -254,23 +297,25 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
 // Zobraz správnou záložku při načtení stránky
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
-  const tab = urlParams.get('tab');
+  const requestedTab = urlParams.get('tab');
+  const defaultTab = <?php echo json_encode($activeTab, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
 
-  if (tab) {
-    // Skryj všechny záložky
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  const showTab = (slug) => {
+    document.querySelectorAll('.tab-content').forEach(el => {
+      const isTarget = el.id === `tab-${slug}`;
+      el.classList.toggle('hidden', !isTarget);
+      el.setAttribute('aria-hidden', isTarget ? 'false' : 'true');
+    });
 
-    // Zobraz vybranou záložku
-    const tabContent = document.getElementById(`tab-${tab}`);
-    if (tabContent) {
-      tabContent.classList.remove('hidden');
-      console.log('Zobrazena záložka:', tab);
-
-      // Načti notifikace pokud je to notifications tab
-      if (tab === 'notifications' && typeof loadNotifications === 'function') {
-        loadNotifications();
-      }
+    if (slug === 'notifications' && typeof loadNotifications === 'function') {
+      loadNotifications();
     }
+  };
+
+  if (requestedTab && document.getElementById(`tab-${requestedTab}`)) {
+    showTab(requestedTab);
+  } else {
+    showTab(defaultTab);
   }
 });
 </script>
