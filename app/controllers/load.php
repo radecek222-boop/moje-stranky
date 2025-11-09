@@ -5,12 +5,13 @@
  */
 
 require_once __DIR__ . '/../../init.php';
+require_once __DIR__ . '/../../includes/db_metadata.php';
 
 header('Content-Type: application/json');
 
 try {
-    // BEZPEČNOST: Kontrola autentizace - reklamace jsou citlivá data
-    if (!isset($_SESSION['user_id'])) {
+    $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+    if (!isset($_SESSION['user_id']) && !$isAdmin) {
         http_response_code(401);
         echo json_encode([
             'status' => 'error',
@@ -19,19 +20,52 @@ try {
         exit;
     }
 
-    // Získání filtru status
     $status = $_GET['status'] ?? 'all';
 
-    // Databázové připojení
     $pdo = getDbConnection();
+    $columns = db_get_table_columns($pdo, 'wgs_reklamace');
 
-    // Sestavení WHERE klauzule podle statusu
-    $whereClause = '';
+    $whereParts = [];
+    $params = [];
+
     if ($status !== 'all') {
-        $whereClause = "WHERE r.status = :status";
+        $statusMap = [
+            'wait' => 'ČEKÁ',
+            'open' => 'DOMLUVENÁ',
+            'done' => 'HOTOVO'
+        ];
+        $statusValue = $statusMap[$status] ?? $status;
+        if (in_array('stav', $columns, true)) {
+            $whereParts[] = 'r.stav = :stav';
+        } elseif (in_array('status', $columns, true)) {
+            $whereParts[] = 'r.status = :stav';
+        }
+        $params[':stav'] = $statusValue;
     }
 
-    // Načtení reklamací
+    if (!$isAdmin) {
+        $userId = $_SESSION['user_id'] ?? null;
+        $userEmail = $_SESSION['user_email'] ?? null;
+
+        if ($userId !== null && in_array('created_by', $columns, true)) {
+            $whereParts[] = 'r.created_by = :created_by';
+            $params[':created_by'] = $userId;
+        } elseif ($userId !== null && in_array('assigned_to', $columns, true)) {
+            $whereParts[] = 'r.assigned_to = :assigned_to';
+            $params[':assigned_to'] = $userId;
+        } elseif ($userEmail && in_array('prodejce_email', $columns, true)) {
+            $whereParts[] = 'r.prodejce_email = :user_email';
+            $params[':user_email'] = $userEmail;
+        } else {
+            throw new Exception('Nelze ověřit oprávnění pro načtení reklamací.');
+        }
+    }
+
+    $whereClause = '';
+    if (!empty($whereParts)) {
+        $whereClause = 'WHERE ' . implode(' AND ', $whereParts);
+    }
+
     $sql = "
         SELECT
             r.*,
@@ -42,11 +76,7 @@ try {
     ";
 
     $stmt = $pdo->prepare($sql);
-    if ($status !== 'all') {
-        $stmt->execute([':status' => $status]);
-    } else {
-        $stmt->execute();
-    }
+    $stmt->execute($params);
 
     $reklamace = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

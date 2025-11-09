@@ -72,6 +72,7 @@
 </main>
 
 <script src="assets/js/logger.js" defer></script>
+<script src="assets/js/csrf-auto-inject.js" defer></script>
 <script src="assets/js/password-reset.js" defer></script>
 
 </body>

@@ -6,6 +6,182 @@
 
 require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
+require_once __DIR__ . '/../../includes/db_metadata.php';
+
+function generateWorkflowId(PDO $pdo): string
+{
+    $attempts = 0;
+    do {
+        $candidate = 'WGS' . date('ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM wgs_reklamace WHERE reklamace_id = :id');
+        $stmt->execute([':id' => $candidate]);
+        if ((int) $stmt->fetchColumn() === 0) {
+            return $candidate;
+        }
+        $attempts++;
+    } while ($attempts < 5);
+
+    throw new Exception('Nepodařilo se vygenerovat interní ID reklamace.');
+}
+
+function normalizeDateInput(?string $value): ?string
+{
+    if ($value === null) {
+        return null;
+    }
+
+    $trimmed = trim($value);
+    if ($trimmed === '' || strcasecmp($trimmed, 'nevyplňuje se') === 0) {
+        return null;
+    }
+
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $trimmed)) {
+        return $trimmed;
+    }
+
+    if (preg_match('/^(\d{2})\.(\d{2})\.(\d{4})$/', $trimmed, $matches)) {
+        return sprintf('%s-%s-%s', $matches[3], $matches[2], $matches[1]);
+    }
+
+    throw new Exception('Neplatný formát data: ' . $value);
+}
+
+function handleUpdate(PDO $pdo, array $input): array
+{
+    $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+    $userId = $_SESSION['user_id'] ?? null;
+
+    if (!$isAdmin && !$userId) {
+        throw new Exception('Neautorizovaný přístup.');
+    }
+
+    $columns = db_get_table_columns($pdo, 'wgs_reklamace');
+    if (empty($columns)) {
+        throw new Exception('Nelze načíst strukturu tabulky reklamací.');
+    }
+
+    $identifier = $input['id'] ?? $input['reklamace_id'] ?? $input['claim_id'] ?? null;
+    if ($identifier === null || $identifier === '') {
+        throw new Exception('Chybí identifikátor reklamace.');
+    }
+
+    $identifierColumn = 'id';
+    if (!ctype_digit((string) $identifier) || !in_array('id', $columns, true)) {
+        if (!empty($input['reklamace_id']) && in_array('reklamace_id', $columns, true)) {
+            $identifier = $input['reklamace_id'];
+            $identifierColumn = 'reklamace_id';
+        } elseif (!empty($input['reference']) && in_array('cislo', $columns, true)) {
+            $identifier = $input['reference'];
+            $identifierColumn = 'cislo';
+        } elseif (in_array('reklamace_id', $columns, true)) {
+            $identifierColumn = 'reklamace_id';
+        } elseif (in_array('cislo', $columns, true)) {
+            $identifierColumn = 'cislo';
+        }
+    } else {
+        $identifier = (int) $identifier;
+    }
+
+    $allowedFields = [
+        'cislo',
+        'datum_prodeje',
+        'datum_reklamace',
+        'jmeno',
+        'telefon',
+        'email',
+        'adresa',
+        'model',
+        'provedeni',
+        'barva',
+        'doplnujici_info',
+        'popis_problemu',
+        'stav',
+        'termin',
+        'cas_navstevy',
+        'fakturace_firma'
+    ];
+
+    $updateData = [];
+
+    $markAsCompleted = isset($input['mark_as_completed']) && in_array(strtolower((string) $input['mark_as_completed']), ['1', 'true', 'yes'], true);
+    if ($markAsCompleted && in_array('stav', $columns, true)) {
+        $updateData['stav'] = 'HOTOVO';
+        if (db_table_has_column($pdo, 'wgs_reklamace', 'completed_at')) {
+            $updateData['completed_at'] = date('Y-m-d H:i:s');
+        }
+    }
+
+    foreach ($allowedFields as $field) {
+        if (!array_key_exists($field, $input)) {
+            continue;
+        }
+
+        if (!in_array($field, $columns, true)) {
+            continue;
+        }
+
+        $value = $input[$field];
+
+        switch ($field) {
+            case 'datum_prodeje':
+            case 'datum_reklamace':
+                $updateData[$field] = normalizeDateInput($value);
+                break;
+            case 'email':
+                $email = trim((string) $value);
+                if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    throw new Exception('Neplatný formát emailu.');
+                }
+                $updateData[$field] = $email === '' ? null : $email;
+                break;
+            case 'termin':
+                $trimmed = trim((string) $value);
+                $updateData[$field] = $trimmed === '' ? null : $trimmed;
+                break;
+            case 'cas_navstevy':
+                $time = trim((string) $value);
+                $updateData[$field] = $time === '' ? null : $time;
+                break;
+            default:
+                $sanitized = sanitizeInput((string) $value);
+                $updateData[$field] = $sanitized === '' ? null : $sanitized;
+        }
+    }
+
+    if (empty($updateData)) {
+        throw new Exception('Nebyla poskytnuta žádná data ke změně.');
+    }
+
+    if (db_table_has_column($pdo, 'wgs_reklamace', 'updated_at')) {
+        $updateData['updated_at'] = date('Y-m-d H:i:s');
+    }
+
+    $setParts = [];
+    $params = [':identifier' => $identifier];
+
+    foreach ($updateData as $column => $value) {
+        $setParts[] = '`' . $column . '` = :' . $column;
+        $params[':' . $column] = $value;
+    }
+
+    if (empty($setParts)) {
+        throw new Exception('Nebyla nalezena žádná platná pole pro aktualizaci.');
+    }
+
+    $sql = 'UPDATE wgs_reklamace SET ' . implode(', ', $setParts) . ' WHERE `' . $identifierColumn . '` = :identifier';
+    if ($identifierColumn === 'id') {
+        $sql .= ' LIMIT 1';
+    }
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    return [
+        'status' => 'success',
+        'message' => 'Reklamace byla aktualizována.',
+        'updated_fields' => array_keys($updateData)
+    ];
+}
 
 header('Content-Type: application/json');
 
@@ -18,11 +194,35 @@ try {
     // Kontrola CSRF tokenu
     requireCSRF();
 
-    // Kontrola action
-    $action = $_POST['action'] ?? '';
-    if ($action !== 'create') {
+    $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+    $requestData = $_POST;
+
+    if (stripos($contentType, 'application/json') !== false) {
+        $rawBody = file_get_contents('php://input');
+        $decoded = json_decode($rawBody ?? '', true);
+        if (is_array($decoded)) {
+            $requestData = array_merge($requestData, $decoded);
+        }
+    }
+
+    $action = $requestData['action'] ?? '';
+    if ($action === '') {
         throw new Exception('Neplatná akce');
     }
+
+    $pdo = getDbConnection();
+
+    if ($action === 'update') {
+        $response = handleUpdate($pdo, $requestData);
+        echo json_encode($response);
+        return;
+    }
+
+    if ($action !== 'create') {
+        throw new Exception('Neznámá akce.');
+    }
+
+    $isLoggedIn = isset($_SESSION['user_id']) || (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true);
 
     // Získání dat z formuláře - BEZPEČNOST: Sanitizace všech vstupů
     $typ = sanitizeInput($_POST['typ'] ?? 'servis');
@@ -121,56 +321,82 @@ try {
         }
     }
 
-    // Databázové připojení
-    $pdo = getDbConnection();
+    $hasReklamaceId = db_table_has_column($pdo, 'wgs_reklamace', 'reklamace_id');
+    $hasCreatedBy = db_table_has_column($pdo, 'wgs_reklamace', 'created_by');
+    $hasCreatedByRole = db_table_has_column($pdo, 'wgs_reklamace', 'created_by_role');
+    $hasCreatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'created_at');
+    $hasUpdatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'updated_at');
 
-    // Vložení do databáze
-    $stmt = $pdo->prepare("
-        INSERT INTO wgs_reklamace (
-            typ, cislo, datum_prodeje, datum_reklamace,
-            jmeno, email, telefon, adresa,
-            model, provedeni, barva, seriove_cislo,
-            popis_problemu, doplnujici_info, fakturace_firma,
-            created_at, updated_at
-        ) VALUES (
-            :typ, :cislo, :datum_prodeje, :datum_reklamace,
-            :jmeno, :email, :telefon, :adresa,
-            :model, :provedeni, :barva, :seriove_cislo,
-            :popis_problemu, :doplnujici_info, :fakturace_firma,
-            NOW(), NOW()
-        )
-    ");
+    $workflowId = null;
+    if ($hasReklamaceId) {
+        $workflowId = generateWorkflowId($pdo);
+    }
 
-    $result = $stmt->execute([
-        ':typ' => $typ,
-        ':cislo' => $cislo,
-        ':datum_prodeje' => $datumProdejeForDb,
-        ':datum_reklamace' => $datumReklamaceForDb,
-        ':jmeno' => $jmeno,
-        ':email' => $email,
-        ':telefon' => $telefon,
-        ':adresa' => $adresa,
-        ':model' => $model,
-        ':provedeni' => $provedeni,
-        ':barva' => $barva,
-        ':seriove_cislo' => $serioveCislo,
-        ':popis_problemu' => $popisProblemu,
-        ':doplnujici_info' => $doplnujiciInfo,
-        ':fakturace_firma' => $fakturaceFirma
-    ]);
+    $now = date('Y-m-d H:i:s');
 
-    if (!$result) {
+    $columns = [
+        'typ' => $typ,
+        'cislo' => $cislo,
+        'datum_prodeje' => $datumProdejeForDb,
+        'datum_reklamace' => $datumReklamaceForDb,
+        'jmeno' => $jmeno,
+        'email' => $email,
+        'telefon' => $telefon,
+        'adresa' => $adresa,
+        'model' => $model,
+        'provedeni' => $provedeni,
+        'barva' => $barva,
+        'seriove_cislo' => $serioveCislo,
+        'popis_problemu' => $popisProblemu,
+        'doplnujici_info' => $doplnujiciInfo,
+        'fakturace_firma' => $fakturaceFirma
+    ];
+
+    if ($hasReklamaceId && $workflowId !== null) {
+        $columns['reklamace_id'] = $workflowId;
+    }
+
+    if ($hasCreatedBy) {
+        $columns['created_by'] = $_SESSION['user_id'] ?? null;
+    }
+
+    if ($hasCreatedByRole) {
+        $columns['created_by_role'] = $_SESSION['role'] ?? ($isLoggedIn ? 'user' : 'guest');
+    }
+
+    if ($hasCreatedAt) {
+        $columns['created_at'] = $now;
+    }
+
+    if ($hasUpdatedAt) {
+        $columns['updated_at'] = $now;
+    }
+
+    $columnNames = array_keys($columns);
+    $placeholders = array_map(fn($col) => ':' . $col, $columnNames);
+
+    $sql = 'INSERT INTO wgs_reklamace (' . implode(', ', $columnNames) . ') VALUES (' . implode(', ', $placeholders) . ')';
+    $stmt = $pdo->prepare($sql);
+
+    $parameters = [];
+    foreach ($columns as $column => $value) {
+        $parameters[':' . $column] = $value === '' ? null : $value;
+    }
+
+    if (!$stmt->execute($parameters)) {
         throw new Exception('Chyba při ukládání do databáze');
     }
 
-    $reklamaceId = $pdo->lastInsertId();
+    $primaryId = $pdo->lastInsertId();
+    $identifierForClient = $workflowId ?? $primaryId;
 
-    // Úspěšná odpověď
     echo json_encode([
         'status' => 'success',
         'message' => 'Reklamace byla úspěšně vytvořena',
-        'reklamace_id' => $reklamaceId,
-        'id' => $reklamaceId
+        'reklamace_id' => $identifierForClient,
+        'id' => $primaryId,
+        'workflow_id' => $identifierForClient,
+        'reference' => $cislo
     ]);
 
 } catch (Exception $e) {

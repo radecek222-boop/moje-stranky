@@ -27,6 +27,8 @@ define('DB_PASS', getenv('DB_PASS') ?: $_ENV['DB_PASS'] ?: die('CHYBA: DB_PASS n
 // ========== ADMIN KLÍČ ==========
 // Admin se přihlašuje pouze registračním klíčem (hashovaný v .env)
 define('ADMIN_KEY_HASH', getenv('ADMIN_KEY_HASH') ?: $_ENV['ADMIN_KEY_HASH'] ?: die('CHYBA: ADMIN_KEY_HASH není nastaveno v prostředí! Zkontrolujte .env soubor.'));
+$adminHighKeyHash = getenv('ADMIN_HIGH_KEY_HASH') ?: (isset($_ENV['ADMIN_HIGH_KEY_HASH']) ? $_ENV['ADMIN_HIGH_KEY_HASH'] : null);
+define('ADMIN_HIGH_KEY_HASH', $adminHighKeyHash ?: null);
 
 // ========== EMAIL / SMTP ==========
 // BEZPEČNOST: Žádné fallbacky pro SMTP credentials

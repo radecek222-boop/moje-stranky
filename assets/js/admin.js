@@ -28,40 +28,50 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTabs();
   logger.log('✅ Admin panel initialized');
   setupNavigation();
+  initKeyManagement();
 });
 
 function setupTabs() {
-  const tabs = document.querySelectorAll('.tab');
-  
-  tabs.forEach(tab => {
-    tab.addEventListener('click', (e) => {
-      e.preventDefault();
-      
-      const tabName = tab.dataset.tab;
-      if (!tabName) return;
-      
-      logger.log('🔓 Switching to tab:', tabName);
-      
-      // Deaktivuj všechny taxy
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      
-      // Skrej všechny tab-content
-      document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.add('hidden');
-      });
-      
-      // Aktivuj kliknutou tab
-      tab.classList.add('active');
-      
-      // Zobraz obsah
-      const tabContent = document.getElementById(`tab-${tabName}`);
-      if (tabContent) {
-        tabContent.classList.remove('hidden');
-        logger.log('✅ Tab activated:', tabName);
-      }
+  const tabs = Array.from(document.querySelectorAll('.tab'));
+  if (!tabs.length) {
+    logger.warn('⚠️ Nenalezeny žádné taby v admin panelu');
+    return;
+  }
+
+  const activateTab = (tab) => {
+    const tabName = tab.dataset.tab;
+    if (!tabName) {
+      return;
+    }
+
+    logger.log('🔓 Switching to tab:', tabName);
+
+    tabs.forEach((t) => {
+      const isCurrent = t === tab;
+      t.classList.toggle('active', isCurrent);
+      t.setAttribute('aria-selected', isCurrent ? 'true' : 'false');
+      t.setAttribute('tabindex', isCurrent ? '0' : '-1');
+    });
+
+    document.querySelectorAll('.tab-content').forEach((content) => {
+      const isTarget = content.id === `tab-${tabName}`;
+      content.classList.toggle('hidden', !isTarget);
+      content.setAttribute('aria-hidden', isTarget ? 'false' : 'true');
+    });
+  };
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', (event) => {
+      event.preventDefault();
+      activateTab(tab);
     });
   });
-  
+
+  const defaultTab = document.querySelector('.tab.active') || tabs[0];
+  if (defaultTab) {
+    activateTab(defaultTab);
+  }
+
   logger.log('✅ Tabs setup complete');
 }
 
@@ -86,6 +96,33 @@ function setupNavigation() {
 
 // ============================================================
 
+// CSRF TOKEN HELPER
+// ============================================================
+let csrfTokenCache = null;
+
+async function getCSRFToken() {
+  if (csrfTokenCache) return csrfTokenCache;
+
+  try {
+    const response = await fetch('app/controllers/get_csrf_token.php', {
+      credentials: 'same-origin'
+    });
+    if (!response.ok) throw new Error('CSRF token fetch failed');
+
+    const data = await response.json();
+    if (data.status !== 'success' || !data.token) throw new Error('Missing token in response');
+
+    csrfTokenCache = data.token;
+    return data.token;
+  } catch (error) {
+    logger.error('Chyba získání CSRF tokenu:', error);
+    return null;
+  }
+}
+
+function invalidateCsrfToken() {
+  csrfTokenCache = null;
+}
 
 // ============================================================
 // REGISTRAČNÍ KLÍČE - CLEAN VERSION
@@ -96,7 +133,9 @@ async function loadKeys() {
   
   try {
     container.innerHTML = '<div class="loading">Načítání klíčů...</div>';
-    const response = await fetch('api/admin_api.php?action=list_keys');
+    const response = await fetch('api/admin_api.php?action=list_keys', {
+      credentials: 'same-origin'
+    });
     const data = await response.json();
     
     if (data.status === 'success') {
@@ -136,21 +175,25 @@ async function createKey() {
 
   try {
     const csrfToken = await getCSRFToken();
+    if (!csrfToken) throw new Error('CSRF token not available');
+
     const response = await fetch('api/admin_api.php?action=create_key', {
       method: 'POST',
+      credentials: 'same-origin',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({key_type: keyType, csrf_token: csrfToken})
     });
     const data = await response.json();
     if (data.status === 'success') {
-      alert('Vytvořeno: ' + data.key.key_code);
+      alert('Vytvořeno: ' + data.key_code);
+      invalidateCsrfToken();
       loadKeys();
     } else {
-      alert('Chyba: ' + (data.message || 'Neznámá chyba'));
+      alert(data.message || 'Nepodařilo se vytvořit klíč');
     }
   } catch (error) {
     console.error('Error:', error);
-    alert('Chyba při vytváření klíče');
+    alert('Chyba při vytváření klíče. Zkuste to prosím znovu.');
   }
 }
 
@@ -159,20 +202,24 @@ async function deleteKey(keyCode) {
 
   try {
     const csrfToken = await getCSRFToken();
+    if (!csrfToken) throw new Error('CSRF token not available');
+
     const response = await fetch('api/admin_api.php?action=delete_key', {
       method: 'POST',
+      credentials: 'same-origin',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({key_code: keyCode, csrf_token: csrfToken})
     });
     const data = await response.json();
     if (data.status === 'success') {
+      invalidateCsrfToken();
       loadKeys();
     } else {
-      alert('Chyba: ' + (data.message || 'Neznámá chyba'));
+      alert(data.message || 'Klíč se nepodařilo smazat');
     }
   } catch (error) {
     console.error('Error:', error);
-    alert('Chyba při mazání klíče');
+    alert('Chyba při mazání klíče.');
   }
 }
 
@@ -180,40 +227,39 @@ function copyToClipboard(text) {
   navigator.clipboard.writeText(text).then(() => alert('Zkopírováno!'));
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function initKeyManagement() {
   const createBtn = document.getElementById('createKeyBtn');
   const refreshBtn = document.getElementById('refreshKeysBtn');
-  if (createBtn) createBtn.onclick = createKey;
-  if (refreshBtn) refreshBtn.onclick = loadKeys;
-  
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', (e) => {
-      if (e.target.textContent.includes('REGISTRA')) {
-        setTimeout(loadKeys, 100);
-      }
+
+  if (createBtn) {
+    createBtn.addEventListener('click', createKey);
+  }
+
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', loadKeys);
+  }
+
+  const tabs = document.querySelectorAll('.tab');
+  if (tabs.length) {
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        setTimeout(() => {
+          const keysTab = document.getElementById('tab-keys');
+          if (keysTab && !keysTab.classList.contains('hidden')) {
+            loadKeys();
+          }
+        }, 200);
+      });
     });
-  });
-});
+  }
 
-console.log('✅ Keys loaded');
-
-// Tab click listener
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', function() {
-    setTimeout(() => {
-      const keysTab = document.getElementById('tab-keys');
-      if (keysTab && !keysTab.classList.contains('hidden')) {
-        console.log('Tab visible, loading keys...');
-        loadKeys();
-      }
-    }, 200);
-  });
-});
-
-// Automatické načtení klíčů pokud jsme na správném tabu
-if (window.location.search.includes('tab=keys') || window.location.hash === '#keys') {
-  setTimeout(() => {
-    console.log('Auto-loading keys...');
+  const keysTab = document.getElementById('tab-keys');
+  if (keysTab && !keysTab.classList.contains('hidden')) {
     loadKeys();
-  }, 500);
+    return;
+  }
+
+  if (window.location.search.includes('tab=keys') || window.location.hash === '#keys') {
+    setTimeout(loadKeys, 300);
+  }
 }

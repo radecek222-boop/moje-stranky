@@ -291,10 +291,11 @@ const WGS = {
       }
       
       if (cisloInput) {
-        cisloInput.value = 'Mimozáruční servis';
-        cisloInput.readOnly = true;
-        cisloInput.style.backgroundColor = '#f5f5f5';
-        cisloInput.style.cursor = 'not-allowed';
+        cisloInput.removeAttribute('readonly');
+        cisloInput.value = '';
+        cisloInput.placeholder = 'Číslo objednávky/reklamace od prodejce (pokud máte)';
+        cisloInput.style.backgroundColor = '';
+        cisloInput.style.cursor = 'text';
       }
       
       if (datumProdejeInput) {
@@ -478,19 +479,24 @@ const WGS = {
       }
       
       const result = await response.json();
-      
+
       if (result.status === 'success') {
-        const reklamaceId = result.reklamace_id || result.id;
+        const workflowId = result.reklamace_id || result.workflow_id || result.id;
+        const referenceNumber = result.reference || (document.getElementById('cislo')?.value || '').trim();
+
         if (this.photos && this.photos.length > 0) {
-          await this.uploadPhotos(reklamaceId);
+          await this.uploadPhotos(workflowId);
         }
-        
+
         this.toast('✓ Požadavek byl úspěšně odeslán!', 'success');
         setTimeout(() => {
           if (this.isLoggedIn) {
             window.location.href = 'seznam.php';
           } else {
-            alert(`Děkujeme! Vaše objednávka byla přijata.\n\nČíslo zakázky: ${reklamaceId}\n\nBrzy vás budeme kontaktovat.`);
+            const referenceText = referenceNumber
+              ? `Číslo reklamace: ${referenceNumber}`
+              : 'Číslo reklamace vám zašleme e-mailem.';
+            alert(`Děkujeme! Vaše objednávka byla přijata.\n\n${referenceText}\n\nBrzy vás budeme kontaktovat.`);
             window.location.href = 'index.php';
           }
         }, 1500);
