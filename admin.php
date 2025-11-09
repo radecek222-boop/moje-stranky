@@ -187,8 +187,9 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
       </table>
     </div>
   </div>
-  
+
 </div>
+</main>
 
 <!-- MODAL: Add User -->
 <div class="modal" id="addUserModal">
@@ -240,14 +241,37 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
   </div>
 </div>
 
-<!-- MODAL: Edit Notification -->
-<script src="assets/js/csrf-auto-inject.js" defer></script>
-
 <!-- External JavaScript -->
+<script src="assets/js/csrf-auto-inject.js" defer></script>
 <script src="assets/js/logger.js" defer></script>
 <script src="assets/js/admin-notifications.js" defer></script>
 <script src="assets/js/admin.js" defer></script>
 
+<!-- Tab switcher script -->
+<script>
+// Zobraz správnou záložku při načtení stránky
+document.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tab = urlParams.get('tab');
+
+  if (tab) {
+    // Skryj všechny záložky
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+
+    // Zobraz vybranou záložku
+    const tabContent = document.getElementById(`tab-${tab}`);
+    if (tabContent) {
+      tabContent.classList.remove('hidden');
+      console.log('Zobrazena záložka:', tab);
+
+      // Načti notifikace pokud je to notifications tab
+      if (tab === 'notifications' && typeof loadNotifications === 'function') {
+        loadNotifications();
+      }
+    }
+  }
+});
+</script>
 
 <!-- MODAL: Edit Notification -->
 <div class="wgs-modal" id="editNotificationModal" style="display: none;">
@@ -308,28 +332,3 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
 </div>
 </body>
 </html>
-
-<script>
-// Zobraz správnou záložku při načtení stránky
-document.addEventListener('DOMContentLoaded', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const tab = urlParams.get('tab');
-  
-  if (tab) {
-    // Skryj všechny záložky
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-    
-    // Zobraz vybranou záložku
-    const tabContent = document.getElementById(`tab-${tab}`);
-    if (tabContent) {
-      tabContent.classList.remove('hidden');
-      console.log('Zobrazena záložka:', tab);
-      
-      // Načti notifikace pokud je to notifications tab
-      if (tab === 'notifications' && typeof loadNotifications === 'function') {
-        loadNotifications();
-      }
-    }
-  }
-});
-</script>

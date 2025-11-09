@@ -43,10 +43,23 @@
     }
 
     .gdpr-container {
-      max-width: 960px;
+      max-width: 1200px;
       margin: 0 auto;
       display: grid;
+      grid-template-columns: 1fr;
       gap: 2rem;
+    }
+
+    /* Na střední obrazovkách 2 sloupce */
+    @media (min-width: 768px) {
+      .gdpr-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      /* První karta přes celou šířku */
+      .gdpr-card:first-child {
+        grid-column: 1 / -1;
+      }
     }
 
     .gdpr-card {
@@ -55,6 +68,8 @@
       padding: 2.5rem;
       box-shadow: 0 25px 60px rgba(15, 23, 42, 0.08);
       border: 1px solid rgba(148, 163, 184, 0.15);
+      display: flex;
+      flex-direction: column;
     }
 
     .gdpr-card h2 {
@@ -63,6 +78,7 @@
       text-transform: uppercase;
       margin-bottom: 1.25rem;
       color: #111827;
+      flex-shrink: 0;
     }
 
     .gdpr-card p,
@@ -72,25 +88,40 @@
       color: #374151;
     }
 
+    .gdpr-card p {
+      margin-bottom: 1rem;
+    }
+
+    .gdpr-card p:last-child {
+      margin-bottom: 0;
+    }
+
     .gdpr-card ul {
       list-style: none;
       padding-left: 0;
       margin: 0;
       display: grid;
       gap: 0.75rem;
+      flex: 1;
+    }
+
+    .gdpr-card ul li {
+      display: flex;
+      align-items: flex-start;
     }
 
     .gdpr-card ul li::before {
       content: "•";
       color: #111827;
       font-weight: 600;
-      display: inline-block;
-      width: 1.5rem;
+      margin-right: 1rem;
+      flex-shrink: 0;
     }
 
     .gdpr-highlight {
       border-left: 4px solid #111827;
       padding-left: 1.5rem;
+      margin-bottom: 1rem;
     }
 
     .gdpr-meta {

@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   logger.log('✅ Admin panel initialized');
   setupNavigation();
   initKeyManagement();
+  initUserManagement();
 });
 
 function setupTabs() {
@@ -95,38 +96,13 @@ function setupNavigation() {
 }
 
 // ============================================================
-
-// CSRF TOKEN HELPER
+// REGISTRAČNÍ KLÍČE - CLEAN VERSION
 // ============================================================
-let csrfTokenCache = null;
-
-async function getCSRFToken() {
-  if (csrfTokenCache) return csrfTokenCache;
-
-  try {
-    const response = await fetch('app/controllers/get_csrf_token.php', {
-      credentials: 'same-origin'
-    });
-    if (!response.ok) throw new Error('CSRF token fetch failed');
-
-    const data = await response.json();
-    if (data.status !== 'success' || !data.token) throw new Error('Missing token in response');
-
-    csrfTokenCache = data.token;
-    return data.token;
-  } catch (error) {
-    logger.error('Chyba získání CSRF tokenu:', error);
-    return null;
-  }
-}
-
 function invalidateCsrfToken() {
   csrfTokenCache = null;
 }
 
-// ============================================================
-// REGISTRAČNÍ KLÍČE - CLEAN VERSION
-// ============================================================
+
 async function loadKeys() {
   const container = document.getElementById('keys-container');
   if (!container) return;
@@ -262,4 +238,273 @@ function initKeyManagement() {
   if (window.location.search.includes('tab=keys') || window.location.hash === '#keys') {
     setTimeout(loadKeys, 300);
   }
+}
+
+// ============================================================
+// DASHBOARD STATISTICS
+// ============================================================
+async function loadDashboard() {
+  try {
+    const response = await fetch('api/admin_stats_api.php', {
+      credentials: 'same-origin'
+    });
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      document.getElementById('stat-claims').textContent = data.stats.claims || 0;
+      document.getElementById('stat-users').textContent = data.stats.users || 0;
+      document.getElementById('stat-online').textContent = data.stats.online || 0;
+      document.getElementById('stat-keys').textContent = data.stats.keys || 0;
+    }
+  } catch (error) {
+    logger.error('Dashboard load error:', error);
+  }
+}
+
+// ============================================================
+// USERS MANAGEMENT
+// ============================================================
+async function loadUsers() {
+  const tbody = document.getElementById('users-table');
+  if (!tbody) return;
+
+  try {
+    tbody.innerHTML = '<tr><td colspan="7" class="loading">Načítání...</td></tr>';
+
+    const response = await fetch('api/admin_users_api.php?action=list', {
+      credentials: 'same-origin'
+    });
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      if (data.users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;">Žádní uživatelé</td></tr>';
+        return;
+      }
+
+      let html = '';
+      data.users.forEach(user => {
+        const statusClass = user.status === 'active' ? 'badge-active' : 'badge-inactive';
+        const statusText = user.status === 'active' ? 'Aktivní' : 'Neaktivní';
+        const createdDate = new Date(user.created_at).toLocaleDateString('cs-CZ');
+
+        html += '<tr>';
+        html += '<td>' + user.id + '</td>';
+        html += '<td>' + escapeHtml(user.name) + '</td>';
+        html += '<td>' + escapeHtml(user.email) + '</td>';
+        html += '<td>' + escapeHtml(user.role) + '</td>';
+        html += '<td><span class="badge ' + statusClass + '">' + statusText + '</span></td>';
+        html += '<td>' + createdDate + '</td>';
+        html += '<td>';
+        html += '<button class="btn btn-sm btn-danger" onclick="deleteUser(' + user.id + ')">Smazat</button>';
+        html += '</td>';
+        html += '</tr>';
+      });
+      tbody.innerHTML = html;
+    }
+  } catch (error) {
+    tbody.innerHTML = '<tr><td colspan="7" class="error-message">Chyba načítání</td></tr>';
+    logger.error('Users load error:', error);
+  }
+}
+
+async function addUser() {
+  const modal = document.getElementById('addUserModal');
+  const errorDiv = document.getElementById('modal-error');
+  errorDiv.classList.add('hidden');
+
+  const name = document.getElementById('add-name').value.trim();
+  const email = document.getElementById('add-email').value.trim();
+  const phone = document.getElementById('add-phone').value.trim();
+  const address = document.getElementById('add-address').value.trim();
+  const role = document.getElementById('add-role').value;
+  const password = document.getElementById('add-password').value;
+
+  if (!name || !email || !password) {
+    errorDiv.textContent = 'Jméno, email a heslo jsou povinné';
+    errorDiv.classList.remove('hidden');
+    return;
+  }
+
+  if (password.length < 8) {
+    errorDiv.textContent = 'Heslo musí mít alespoň 8 znaků';
+    errorDiv.classList.remove('hidden');
+    return;
+  }
+
+  try {
+    const response = await fetch('api/admin_users_api.php?action=add', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ name, email, phone, address, role, password })
+    });
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      modal.style.display = 'none';
+
+      // Reset formuláře
+      document.getElementById('add-name').value = '';
+      document.getElementById('add-email').value = '';
+      document.getElementById('add-phone').value = '';
+      document.getElementById('add-address').value = '';
+      document.getElementById('add-password').value = '';
+
+      loadUsers();
+    } else {
+      errorDiv.textContent = data.message || 'Chyba při vytváření uživatele';
+      errorDiv.classList.remove('hidden');
+    }
+  } catch (error) {
+    errorDiv.textContent = 'Chyba při vytváření uživatele';
+    errorDiv.classList.remove('hidden');
+    logger.error('Add user error:', error);
+  }
+}
+
+async function deleteUser(userId) {
+  if (!confirm('Opravdu smazat tohoto uživatele?')) return;
+
+  try {
+    const response = await fetch('api/admin_users_api.php?action=delete', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ user_id: userId })
+    });
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      loadUsers();
+    } else {
+      alert(data.message || 'Chyba při mazání');
+    }
+  } catch (error) {
+    alert('Chyba při mazání uživatele');
+    logger.error('Delete user error:', error);
+  }
+}
+
+// ============================================================
+// ONLINE USERS
+// ============================================================
+async function loadOnline() {
+  const tbody = document.getElementById('online-table');
+  if (!tbody) return;
+
+  try {
+    tbody.innerHTML = '<tr><td colspan="5" class="loading">Načítání...</td></tr>';
+
+    const response = await fetch('api/admin_users_api.php?action=online', {
+      credentials: 'same-origin'
+    });
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      if (data.users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">Nikdo online</td></tr>';
+        return;
+      }
+
+      let html = '';
+      data.users.forEach(user => {
+        const lastActivity = new Date(user.last_activity);
+        const minutesAgo = Math.floor((Date.now() - lastActivity.getTime()) / 60000);
+        const timeText = minutesAgo === 0 ? 'Nyní' : minutesAgo + ' min';
+
+        html += '<tr>';
+        html += '<td><span class="badge badge-active">Online</span></td>';
+        html += '<td>' + escapeHtml(user.name) + '</td>';
+        html += '<td>' + escapeHtml(user.role) + '</td>';
+        html += '<td>' + escapeHtml(user.email) + '</td>';
+        html += '<td>' + timeText + '</td>';
+        html += '</tr>';
+      });
+      tbody.innerHTML = html;
+    }
+  } catch (error) {
+    tbody.innerHTML = '<tr><td colspan="5" class="error-message">Chyba načítání</td></tr>';
+    logger.error('Online load error:', error);
+  }
+}
+
+// ============================================================
+// HELPER FUNCTIONS
+// ============================================================
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ============================================================
+// INIT USER MANAGEMENT
+// ============================================================
+function initUserManagement() {
+  const addUserBtn = document.getElementById('addUserBtn');
+  const refreshUsersBtn = document.getElementById('refreshUsersBtn');
+  const submitUserBtn = document.getElementById('submitUserBtn');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const cancelModalBtn = document.getElementById('cancelModalBtn');
+  const refreshOnlineBtn = document.getElementById('refreshOnlineBtn');
+
+  if (addUserBtn) {
+    addUserBtn.addEventListener('click', () => {
+      document.getElementById('addUserModal').style.display = 'flex';
+    });
+  }
+
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', () => {
+      document.getElementById('addUserModal').style.display = 'none';
+    });
+  }
+
+  if (cancelModalBtn) {
+    cancelModalBtn.addEventListener('click', () => {
+      document.getElementById('addUserModal').style.display = 'none';
+    });
+  }
+
+  if (submitUserBtn) {
+    submitUserBtn.addEventListener('click', addUser);
+  }
+
+  if (refreshUsersBtn) {
+    refreshUsersBtn.addEventListener('click', loadUsers);
+  }
+
+  if (refreshOnlineBtn) {
+    refreshOnlineBtn.addEventListener('click', loadOnline);
+  }
+
+  // Auto-load based on active tab
+  const urlParams = new URLSearchParams(window.location.search);
+  const tab = urlParams.get('tab');
+
+  if (!tab || tab === 'dashboard') {
+    loadDashboard();
+  } else if (tab === 'users') {
+    loadUsers();
+  } else if (tab === 'online') {
+    loadOnline();
+  }
+
+  // Tab switching with auto-load
+  document.querySelectorAll('.tab').forEach(tabBtn => {
+    tabBtn.addEventListener('click', () => {
+      const tabName = tabBtn.dataset.tab;
+
+      setTimeout(() => {
+        if (tabName === 'dashboard') {
+          loadDashboard();
+        } else if (tabName === 'users') {
+          loadUsers();
+        } else if (tabName === 'online') {
+          loadOnline();
+        }
+      }, 100);
+    });
+  });
 }

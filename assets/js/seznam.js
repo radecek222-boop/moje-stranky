@@ -1538,10 +1538,10 @@ async function showCustomerDetail(id) {
           </div>
         `}
   
-      ${true ? `
+      ${CURRENT_USER.is_admin ? `
         <div style="background: #fff5f5; border: 2px solid #ff4444; padding: 1rem; margin-top: 1.5rem; border-radius: 4px;">
           <h3 style="color: #ff4444; font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;">⚠️ ADMIN PANEL</h3>
-          <button onclick="deleteReklamace('${id}')" 
+          <button onclick="deleteReklamace('${id}')"
                   style="width: 100%; padding: 1rem; background: #ff4444; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">
             🗑️ Smazat celou reklamaci
           </button>
@@ -1768,10 +1768,10 @@ async function showNotes(record) {
           </div>
         `}
   
-      ${true ? `
+      ${CURRENT_USER.is_admin ? `
         <div style="background: #fff5f5; border: 2px solid #ff4444; padding: 1rem; margin-top: 1.5rem; border-radius: 4px;">
           <h3 style="color: #ff4444; font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;">⚠️ ADMIN PANEL</h3>
-          <button onclick="deleteReklamace('${id}')" 
+          <button onclick="deleteReklamace('${id}')"
                   style="width: 100%; padding: 1rem; background: #ff4444; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">
             🗑️ Smazat celou reklamaci
           </button>
