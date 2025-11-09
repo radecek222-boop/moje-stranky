@@ -1,190 +1,180 @@
 <?php
-/**
- * Password Reset Controller
- * Reset hesla pomocí registračního klíče
- */
-
 require_once __DIR__ . '/../../init.php';
+require_once __DIR__ . '/../../includes/csrf_helper.php';
+require_once __DIR__ . '/../../includes/db_metadata.php';
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
 try {
-    // Kontrola metody
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Povolena pouze POST metoda');
+        throw new RuntimeException('Povolena je pouze metoda POST.');
     }
 
-    // BEZPEČNOST: Rate limiting - ochrana proti brute-force
-    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $rateLimit = checkRateLimit("password_reset_$ip", 5, 1800); // 5 pokusů za 30 minut
+    requireCSRF();
 
-    if (!$rateLimit['allowed']) {
-        http_response_code(429);
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Příliš mnoho pokusů o reset hesla. Zkuste to za ' . ceil($rateLimit['retry_after'] / 60) . ' minut.'
-        ]);
-        exit;
-    }
-
-    // Získání akce
     $action = $_POST['action'] ?? '';
+    $email = trim($_POST['email'] ?? '');
+    $registrationKey = trim($_POST['registration_key'] ?? '');
 
-    if ($action === 'verify') {
-        handleVerifyIdentity($_POST, $ip);
-    } elseif ($action === 'change_password') {
-        handleChangePassword($_POST, $ip);
-    } else {
-        throw new Exception('Neplatná akce');
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        throw new InvalidArgumentException('Zadejte platný email.');
+    }
+    if ($registrationKey === '') {
+        throw new InvalidArgumentException('Zadejte registrační klíč.');
     }
 
-} catch (Exception $e) {
-    // Zaznamenat neúspěšný pokus
-    if (isset($ip)) {
-        recordLoginAttempt("password_reset_$ip");
-    }
+    $pdo = getDbConnection();
 
+    switch ($action) {
+        case 'verify':
+            handleVerification($pdo, $email, $registrationKey);
+            break;
+        case 'change_password':
+            $newPassword = $_POST['new_password'] ?? '';
+            $newPasswordConfirm = $_POST['new_password_confirm'] ?? '';
+            handlePasswordChange($pdo, $email, $registrationKey, $newPassword, $newPasswordConfirm);
+            break;
+        default:
+            throw new InvalidArgumentException('Neznámá akce.');
+    }
+} catch (InvalidArgumentException $e) {
+    http_response_code(422);
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+} catch (RuntimeException $e) {
     http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+} catch (Throwable $e) {
+    error_log('Password reset controller error: ' . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'Došlo k neočekávané chybě. Zkuste to prosím znovu.'], JSON_UNESCAPED_UNICODE);
+}
+
+function handleVerification(PDO $pdo, string $email, string $registrationKey): void
+{
+    $user = findUserByEmail($pdo, $email);
+    if (!$user) {
+        respondUserNotFound();
+        return;
+    }
+
+    if (!userMatchesRegistrationKey($pdo, $user, $registrationKey)) {
+        respondUserNotFound();
+        return;
+    }
+
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Identita ověřena. Můžete nastavit nové heslo.',
+        'user' => [
+            'id' => $user['id'] ?? $user['user_id'] ?? null,
+            'name' => $user['name'] ?? '',
+            'role' => $user['role'] ?? 'user'
+        ]
+    ], JSON_UNESCAPED_UNICODE);
+}
+
+function handlePasswordChange(PDO $pdo, string $email, string $registrationKey, string $newPassword, string $confirm): void
+{
+    if ($newPassword === '' || $confirm === '') {
+        throw new InvalidArgumentException('Vyplňte nové heslo i potvrzení.');
+    }
+    if (!hash_equals($newPassword, $confirm)) {
+        throw new InvalidArgumentException('Zadaná hesla se neshodují.');
+    }
+    if (strlen($newPassword) < 8) {
+        throw new InvalidArgumentException('Heslo musí mít alespoň 8 znaků.');
+    }
+    $strength = isStrongPassword($newPassword);
+    if ($strength !== true) {
+        throw new InvalidArgumentException('Heslo nesplňuje požadavky: ' . implode(', ', (array) $strength));
+    }
+
+    $user = findUserByEmail($pdo, $email);
+    if (!$user) {
+        respondUserNotFound();
+        return;
+    }
+
+    if (!userMatchesRegistrationKey($pdo, $user, $registrationKey)) {
+        respondUserNotFound();
+        return;
+    }
+
+    $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+    $columns = db_get_table_columns($pdo, 'wgs_users');
+
+    $fields = [];
+    if (in_array('password_hash', $columns, true)) {
+        $fields['password_hash'] = $passwordHash;
+    } elseif (in_array('password', $columns, true)) {
+        $fields['password'] = $passwordHash;
+    } elseif (in_array('heslo', $columns, true)) {
+        $fields['heslo'] = $passwordHash;
+    } else {
+        throw new RuntimeException('Tabulka wgs_users neobsahuje sloupec pro heslo.');
+    }
+
+    $now = date('Y-m-d H:i:s');
+    if (in_array('updated_at', $columns, true)) {
+        $fields['updated_at'] = $now;
+    }
+    if (in_array('password_changed_at', $columns, true)) {
+        $fields['password_changed_at'] = $now;
+    }
+    if (in_array('must_change_password', $columns, true)) {
+        $fields['must_change_password'] = 0;
+    }
+
+    $setParts = [];
+    $params = [':email' => $email];
+    foreach ($fields as $column => $value) {
+        $setParts[] = $column . ' = :' . $column;
+        $params[':' . $column] = $value;
+    }
+
+    $updateSql = 'UPDATE wgs_users SET ' . implode(', ', $setParts) . ' WHERE email = :email LIMIT 1';
+    $stmt = $pdo->prepare($updateSql);
+    $stmt->execute($params);
+
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Heslo bylo úspěšně změněno.'
+    ], JSON_UNESCAPED_UNICODE);
+}
+
+function findUserByEmail(PDO $pdo, string $email): ?array
+{
+    $stmt = $pdo->prepare('SELECT * FROM wgs_users WHERE email = :email LIMIT 1');
+    $stmt->execute([':email' => $email]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $user ?: null;
+}
+
+function userMatchesRegistrationKey(PDO $pdo, array $user, string $registrationKey): bool
+{
+    $columns = db_get_table_columns($pdo, 'wgs_users');
+
+    if (in_array('registration_key_code', $columns, true) && isset($user['registration_key_code'])) {
+        return hash_equals($user['registration_key_code'], $registrationKey);
+    }
+
+    if (in_array('registration_key', $columns, true) && isset($user['registration_key'])) {
+        return hash_equals($user['registration_key'], $registrationKey);
+    }
+
+    if (in_array('registration_key_hash', $columns, true) && isset($user['registration_key_hash'])) {
+        $hash = hash('sha256', $registrationKey);
+        return hash_equals($user['registration_key_hash'], $hash);
+    }
+
+    return false;
+}
+
+function respondUserNotFound(): void
+{
+    http_response_code(404);
     echo json_encode([
         'status' => 'error',
-        'message' => $e->getMessage()
-    ]);
+        'message' => 'Uživatel nebo registrační klíč nebyl nalezen.'
+    ], JSON_UNESCAPED_UNICODE);
 }
-
-/**
- * STEP 1: Ověření identity pomocí emailu a registračního klíče
- */
-function handleVerifyIdentity($data, $ip) {
-    $email = trim($data['email'] ?? '');
-    $registrationKey = $data['registration_key'] ?? '';
-
-    // Validace
-    if (empty($email) || empty($registrationKey)) {
-        throw new Exception('Email a registrační klíč jsou povinné');
-    }
-
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        throw new Exception('Neplatný formát emailu');
-    }
-
-    // Získat registrační klíč hash z .env
-    $registrationKeyHash = getenv('REGISTRATION_KEY_HASH') ?: $_ENV['REGISTRATION_KEY_HASH'] ?? null;
-
-    if (!$registrationKeyHash) {
-        throw new Exception('Reset hesla není momentálně dostupný. Kontaktujte administrátora.');
-    }
-
-    // Ověření registračního klíče
-    $providedHash = hash('sha256', $registrationKey);
-
-    if (!hash_equals($registrationKeyHash, $providedHash)) {
-        recordLoginAttempt("password_reset_$ip");
-        throw new Exception('Neplatný registrační klíč');
-    }
-
-    // Databázové připojení
-    $pdo = getDbConnection();
-
-    // Najít uživatele podle emailu
-    $stmt = $pdo->prepare("SELECT id, name, email, role FROM wgs_users WHERE email = :email LIMIT 1");
-    $stmt->execute([':email' => $email]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$user) {
-        throw new Exception('Uživatel s tímto emailem nebyl nalezen');
-    }
-
-    // Úspěšné ověření
-    echo json_encode([
-        'status' => 'success',
-        'message' => 'Identita ověřena',
-        'user' => [
-            'id' => $user['id'],
-            'name' => $user['name'],
-            'email' => $user['email'],
-            'role' => $user['role']
-        ]
-    ]);
-}
-
-/**
- * STEP 2: Změna hesla po ověření
- */
-function handleChangePassword($data, $ip) {
-    $email = trim($data['email'] ?? '');
-    $registrationKey = $data['registration_key'] ?? '';
-    $newPassword = $data['new_password'] ?? '';
-    $newPasswordConfirm = $data['new_password_confirm'] ?? '';
-
-    // Validace
-    if (empty($email) || empty($registrationKey) || empty($newPassword) || empty($newPasswordConfirm)) {
-        throw new Exception('Všechna pole jsou povinná');
-    }
-
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        throw new Exception('Neplatný formát emailu');
-    }
-
-    if ($newPassword !== $newPasswordConfirm) {
-        throw new Exception('Hesla se neshodují');
-    }
-
-    if (strlen($newPassword) < 8) {
-        throw new Exception('Heslo musí mít alespoň 8 znaků');
-    }
-
-    // BEZPEČNOST: Kontrola síly hesla
-    if (!preg_match('/[A-Z]/', $newPassword) || !preg_match('/[a-z]/', $newPassword) || !preg_match('/[0-9]/', $newPassword)) {
-        throw new Exception('Heslo musí obsahovat velké písmeno, malé písmeno a číslo');
-    }
-
-    // Znovu ověřit registrační klíč (bezpečnostní opatření)
-    $registrationKeyHash = getenv('REGISTRATION_KEY_HASH') ?: $_ENV['REGISTRATION_KEY_HASH'] ?? null;
-
-    if (!$registrationKeyHash) {
-        throw new Exception('Reset hesla není momentálně dostupný. Kontaktujte administrátora.');
-    }
-
-    $providedHash = hash('sha256', $registrationKey);
-
-    if (!hash_equals($registrationKeyHash, $providedHash)) {
-        recordLoginAttempt("password_reset_$ip");
-        throw new Exception('Neplatný registrační klíč');
-    }
-
-    // Databázové připojení
-    $pdo = getDbConnection();
-
-    // Najít uživatele
-    $stmt = $pdo->prepare("SELECT id FROM wgs_users WHERE email = :email LIMIT 1");
-    $stmt->execute([':email' => $email]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$user) {
-        throw new Exception('Uživatel nenalezen');
-    }
-
-    // Hash nového hesla
-    $passwordHash = password_hash($newPassword, PASSWORD_BCRYPT, ['cost' => 12]);
-
-    // Aktualizace hesla
-    $updateStmt = $pdo->prepare("UPDATE wgs_users SET password = :password, updated_at = NOW() WHERE id = :id");
-    $result = $updateStmt->execute([
-        ':password' => $passwordHash,
-        ':id' => $user['id']
-    ]);
-
-    if (!$result) {
-        throw new Exception('Chyba při aktualizaci hesla');
-    }
-
-    // Log změny hesla
-    error_log("Password reset successful for user ID: {$user['id']}, IP: {$ip}");
-
-    // Úspěch
-    echo json_encode([
-        'status' => 'success',
-        'message' => 'Heslo bylo úspěšně změněno. Nyní se můžete přihlásit.'
-    ]);
-}
-?>

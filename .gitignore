@@ -1,6 +1,5 @@
 # Symlinks (created during deployment)
-api
-app
+# (adresáře api/ a app/ jsou verzované, nesmí být ignorovány)
 
 # BEZPEČNOST: Credentials a secrets
 .env

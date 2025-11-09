@@ -19,6 +19,30 @@ const userLoginFields = document.getElementById('userLoginFields');
 const adminLoginFields = document.getElementById('adminLoginFields');
 const loginForm = document.getElementById('loginForm');
 
+async function getCsrfTokenFromForm(form) {
+  if (!form) return null;
+  const tokenInput = form.querySelector('input[name="csrf_token"]');
+  if (tokenInput && tokenInput.value) {
+    return tokenInput.value;
+  }
+
+  try {
+    const response = await fetch('app/controllers/get_csrf_token.php', {
+      credentials: 'same-origin'
+    });
+    const data = await response.json();
+    if (data.status === 'success' && data.token) {
+      if (tokenInput) {
+        tokenInput.value = data.token;
+      }
+      return data.token;
+    }
+  } catch (error) {
+    logger.error('CSRF fetch failed:', error);
+  }
+  return null;
+}
+
 // ============================================================
 // FORM SWITCHER
 // ============================================================
@@ -56,9 +80,15 @@ if (loginForm) {
 // ============================================================
 async function handleAdminLogin() {
   const adminKey = document.getElementById('adminKey').value.trim();
-  
+
   if (!adminKey) {
     showNotification('Vyplňte admin klíč', 'error');
+    return;
+  }
+
+  const csrfToken = await getCsrfTokenFromForm(loginForm);
+  if (!csrfToken) {
+    showNotification('Nepodařilo se získat bezpečnostní token. Obnovte stránku.', 'error');
     return;
   }
   
@@ -118,6 +148,12 @@ async function handleUserLogin() {
     return;
   }
   
+  const csrfToken = await getCsrfTokenFromForm(loginForm);
+  if (!csrfToken) {
+    showNotification('Nepodařilo se získat bezpečnostní token. Obnovte stránku.', 'error');
+    return;
+  }
+
   try {
     const csrfToken = await getCSRFToken();
     const response = await fetch('app/controllers/login_controller.php', {
@@ -125,6 +161,7 @@ async function handleUserLogin() {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       credentials: 'include',
       body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`&csrf_token=${encodeURIComponent(csrfToken)}`
+      body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&csrf_token=${encodeURIComponent(csrfToken)}`
     });
     
     const data = await response.json();
@@ -196,11 +233,18 @@ async function verifyHighKey() {
   
   try {
     const csrfToken = await getCSRFToken();
+    const csrfToken = await getCsrfTokenFromForm(loginForm);
+    if (!csrfToken) {
+      showNotification('Nepodařilo se získat bezpečnostní token. Obnovte stránku.', 'error');
+      return;
+    }
+
     const response = await fetch('app/controllers/login_controller.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       credentials: 'include',
       body: `high_key=${encodeURIComponent(highKey)}`&csrf_token=${encodeURIComponent(csrfToken)}`
+      body: `high_key=${encodeURIComponent(highKey)}&csrf_token=${encodeURIComponent(csrfToken)}`
     });
     
     const data = await response.json();
@@ -282,11 +326,18 @@ async function createNewAdminKey() {
   
   try {
     const csrfToken = await getCSRFToken();
+    const csrfToken = await getCsrfTokenFromForm(loginForm);
+    if (!csrfToken) {
+      showNotification('Nepodařilo se získat bezpečnostní token. Obnovte stránku.', 'error');
+      return;
+    }
+
     const response = await fetch('app/controllers/login_controller.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       credentials: 'include',
       body: `action=create_new_admin_key&new_admin_key=${encodeURIComponent(key)}&new_admin_key_confirm=${encodeURIComponent(keyConfirm)}`&csrf_token=${encodeURIComponent(csrfToken)}`
+      body: `action=create_new_admin_key&new_admin_key=${encodeURIComponent(key)}&new_admin_key_confirm=${encodeURIComponent(keyConfirm)}&csrf_token=${encodeURIComponent(csrfToken)}`
     });
     
     const data = await response.json();

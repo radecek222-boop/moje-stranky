@@ -1,46 +1,150 @@
+const originalFetch = window.fetch.bind(window);
+
+let csrfTokenCache = null;
+let csrfTokenPromise = null;
+
 async function getCSRFToken() {
-  try {
-    const response = await fetch("app/get_csrf_token.php");
-    const data = await response.json();
-    return data.token;
-  } catch (err) {
-    logger.error("Chyba získání CSRF tokenu:", err);
-    return "";
+  if (csrfTokenCache) {
+    return csrfTokenCache;
   }
+
+  if (csrfTokenPromise) {
+    return csrfTokenPromise;
+  }
+
+  csrfTokenPromise = (async () => {
+    try {
+      const response = await originalFetch('app/controllers/get_csrf_token.php', {
+        credentials: 'same-origin'
+      });
+      if (!response.ok) {
+        throw new Error('CSRF endpoint neodpověděl');
+      }
+      const data = await response.json();
+      if (data.status === 'success' && data.token) {
+        csrfTokenCache = data.token;
+        return data.token;
+      }
+      throw new Error('CSRF token chybí v odpovědi');
+    } catch (err) {
+      logger.error('Chyba získání CSRF tokenu:', err);
+      return '';
+    } finally {
+      csrfTokenPromise = null;
+    }
+  })();
+
+  return csrfTokenPromise;
 }
 
-const originalFetch = window.fetch;
-window.fetch = async function(...args) {
-  let [url, config = {}] = args;
-  
-  if (config.method === "POST" || config.method === "post") {
-    const token = await getCSRFToken();
-    if (!config.headers) config.headers = {};
-    config.headers["X-CSRF-Token"] = token;
+function resetCsrfToken() {
+  csrfTokenCache = null;
+}
+
+const CSRF_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+window.fetch = async function(resource, init = {}) {
+  let requestUrl = resource;
+  let config = { ...init };
+
+  if (resource instanceof Request) {
+    requestUrl = resource.url;
+    config = {
+      method: resource.method,
+      headers: resource.headers,
+      body: resource.body,
+      mode: resource.mode,
+      credentials: resource.credentials,
+      cache: resource.cache,
+      redirect: resource.redirect,
+      referrer: resource.referrer,
+      referrerPolicy: resource.referrerPolicy,
+      integrity: resource.integrity,
+      keepalive: resource.keepalive,
+      signal: resource.signal,
+      ...init
+    };
   }
-  
-  return originalFetch(url, config);
+
+  const method = (config.method || (resource instanceof Request ? resource.method : 'GET') || 'GET').toUpperCase();
+
+  if (CSRF_METHODS.has(method)) {
+    const token = await getCSRFToken();
+    if (token) {
+      const headers = new Headers(config.headers || {});
+      headers.set('X-CSRF-Token', token);
+
+      if (config.body instanceof FormData) {
+        if (!config.body.has('csrf_token')) {
+          config.body.append('csrf_token', token);
+        }
+      } else if (config.body instanceof URLSearchParams) {
+        if (!config.body.has('csrf_token')) {
+          config.body.set('csrf_token', token);
+        }
+        config.body = config.body.toString();
+        if (!headers.has('Content-Type')) {
+          headers.set('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+        }
+      } else if (typeof config.body === 'string' && config.body.length) {
+        const contentType = headers.get('Content-Type') || '';
+        if (contentType.includes('application/json')) {
+          try {
+            const payload = JSON.parse(config.body);
+            if (!payload.csrf_token) {
+              payload.csrf_token = token;
+              config.body = JSON.stringify(payload);
+            }
+          } catch (e) {
+            logger.warn('Neplatný JSON při přidávání CSRF tokenu:', e);
+          }
+        } else {
+          const params = new URLSearchParams(config.body);
+          if (!params.has('csrf_token')) {
+            params.set('csrf_token', token);
+            config.body = params.toString();
+            if (!contentType) {
+              headers.set('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+            }
+          }
+        }
+      } else if (!config.body) {
+        const params = new URLSearchParams();
+        params.set('csrf_token', token);
+        config.body = params.toString();
+        headers.set('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+      }
+
+      config.headers = headers;
+      config.credentials = config.credentials || 'same-origin';
+    }
+  }
+
+  return originalFetch(requestUrl, config);
 };
 
 // 🔒 KRITICKÁ BEZPEČNOSTNÍ KONTROLA
 (async function() {
-    try {
-        const response = await fetch("includes/user_session_check.php");
-        const data = await response.json();
-        
-        if (!data.logged_in) {
-            logger.log("❌ Nepřihlášen - přesměrování na login");
-            console.log("User authenticated");
-            throw new Error("Not authenticated");
-        }
-        
-        logger.log("✅ Přihlášen jako:", data.email);
-        
-    } catch (err) {
-        logger.error("❌ Chyba kontroly session:", err);
-        console.log("User authenticated");
-        throw new Error("Auth check failed");
+  try {
+    const response = await originalFetch('includes/user_session_check.php', {
+      credentials: 'same-origin'
+    });
+    if (!response.ok) {
+      throw new Error('Kontrola session selhala');
     }
+
+    const data = await response.json();
+    if (!data.logged_in) {
+      logger.warn('❌ Nepřihlášený uživatel – přesměrování na login');
+      window.location.replace('login.php?redirect=seznam.php');
+      return;
+    }
+
+    logger.log('✅ Přihlášen jako:', data.email || 'neznámý');
+  } catch (err) {
+    logger.error('❌ Chyba kontroly session:', err);
+    window.location.replace('login.php?redirect=seznam.php');
+  }
 })();
 
 // === GLOBÁLNÍ PROMĚNNÉ ===
@@ -251,7 +355,9 @@ function updateCounts(items) {
 async function loadAll(status = 'all') {
   console.log('🚀 loadAll() START, status:', status);
   try {
-   const response = await fetch(`app/controllers/load.php?status=${status}`);
+    const response = await originalFetch(`app/controllers/load.php?status=${encodeURIComponent(status)}`, {
+      credentials: 'same-origin'
+    });
     if (!response.ok) throw new Error('Chyba načítání');
     
     const json = await response.json();
@@ -1543,6 +1649,83 @@ async function saveAllCustomerData(id) {
 
   await saveData(data, 'Všechny údaje byly aktualizovány');
 }
+
+async function deleteReklamace(reklamaceId) {
+  if (!CURRENT_USER || !CURRENT_USER.is_admin) {
+    alert('Mazání je povoleno pouze administrátorům.');
+    return;
+  }
+
+  let record = null;
+  if (reklamaceId) {
+    record = WGS_DATA_CACHE.find(item => item.id == reklamaceId || item.reklamace_id == reklamaceId) || null;
+  }
+  if (!record && window.CURRENT_RECORD) {
+    record = window.CURRENT_RECORD;
+  }
+
+  if (!record) {
+    alert('Reklamace nebyla nalezena.');
+    return;
+  }
+
+  const displayReference = record.cislo || record.reklamace_id || record.id;
+  const backendIdentifier = record.reklamace_id || record.id || record.cislo;
+
+  const confirmed = window.confirm(
+    '⚠️ Opravdu chcete smazat tuto reklamaci?\n\n' +
+    `Reklamace: ${displayReference}\n` +
+    `Zákazník: ${Utils.getCustomerName(record)}\n\n` +
+    'Tato akce odstraní veškerá data, fotografie i dokumenty.'
+  );
+  if (!confirmed) {
+    return;
+  }
+
+  const typed = window.prompt('Pro potvrzení zadejte číslo reklamace/objednávky přesně tak, jak je uvedeno:', displayReference);
+  if (!typed || typed.trim() !== String(displayReference)) {
+    alert('Zadané číslo nesouhlasí. Akce byla zrušena.');
+    return;
+  }
+
+  try {
+    const response = await fetch('api/delete_reklamace.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        reklamace_id: backendIdentifier,
+        reference: displayReference
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server vrátil chybu ${response.status}`);
+    }
+
+    const result = await response.json();
+    if (result.status !== 'success') {
+      throw new Error(result.message || result.error || 'Smazání se nepodařilo');
+    }
+
+    alert(result.message || 'Reklamace byla úspěšně smazána.');
+
+    if (Array.isArray(WGS_DATA_CACHE)) {
+      WGS_DATA_CACHE = WGS_DATA_CACHE.filter(item =>
+        item.id != record.id && item.reklamace_id !== record.reklamace_id
+      );
+    }
+
+    resetCsrfToken();
+    await loadAll(ACTIVE_FILTER);
+    closeDetail();
+  } catch (error) {
+    logger.error('Chyba při mazání reklamace:', error);
+    alert('Chyba při mazání reklamace: ' + error.message);
+  }
+}
+
+window.deleteReklamace = deleteReklamace;
 
 // === ODESLÁNÍ POTVRZENÍ TERMÍNU ===
 async function sendAppointmentConfirmation(customer, date, time) {

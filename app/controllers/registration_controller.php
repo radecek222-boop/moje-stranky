@@ -1,143 +1,182 @@
 <?php
-/**
- * Registration Controller
- * Registrace nových uživatelů (prodejci, technici) s registračním klíčem
- */
-
 require_once __DIR__ . '/../../init.php';
+require_once __DIR__ . '/../../includes/csrf_helper.php';
+require_once __DIR__ . '/../../includes/db_metadata.php';
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
 try {
-    // Kontrola metody
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Povolena pouze POST metoda');
+        throw new RuntimeException('Povolena je pouze metoda POST.');
     }
 
-    // BEZPEČNOST: Rate limiting - ochrana proti brute-force
-    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $rateLimit = checkRateLimit("registration_$ip", 5, 3600); // 5 pokusů za hodinu
+    requireCSRF();
 
-    if (!$rateLimit['allowed']) {
-        http_response_code(429);
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Příliš mnoho pokusů o registraci. Zkuste to za ' . ceil($rateLimit['retry_after'] / 60) . ' minut.'
-        ]);
-        exit;
-    }
-
-    // Získání dat z formuláře
-    $registrationKey = $_POST['registration_key'] ?? '';
+    $registrationKey = trim($_POST['registration_key'] ?? '');
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    // Validace povinných polí
-    if (empty($registrationKey)) {
-        throw new Exception('Registrační klíč je povinný');
+    if ($registrationKey === '') {
+        throw new InvalidArgumentException('Registrační klíč je povinný.');
     }
-    if (empty($name)) {
-        throw new Exception('Jméno je povinné');
+    if ($name === '') {
+        throw new InvalidArgumentException('Zadejte jméno.');
     }
-    if (empty($email)) {
-        throw new Exception('Email je povinný');
-    }
-    if (empty($password)) {
-        throw new Exception('Heslo je povinné');
-    }
-
-    // Validace emailu
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        throw new Exception('Neplatný formát emailu');
+        throw new InvalidArgumentException('Zadejte platný email.');
     }
-
-    // Validace hesla
     if (strlen($password) < 8) {
-        throw new Exception('Heslo musí mít alespoň 8 znaků');
+        throw new InvalidArgumentException('Heslo musí mít alespoň 8 znaků.');
     }
 
-    // BEZPEČNOST: Kontrola síly hesla
-    if (!preg_match('/[A-Z]/', $password) || !preg_match('/[a-z]/', $password) || !preg_match('/[0-9]/', $password)) {
-        throw new Exception('Heslo musí obsahovat velké písmeno, malé písmeno a číslo');
+    $strength = isStrongPassword($password);
+    if ($strength !== true) {
+        throw new InvalidArgumentException('Heslo nesplňuje požadavky: ' . implode(', ', (array) $strength));
     }
 
-    // Ověření registračního klíče
-    // POZNÁMKA: Nyní používáme hash z .env, v budoucnu lze rozšířit o databázové klíče
-    $registrationKeyHash = getenv('REGISTRATION_KEY_HASH') ?: $_ENV['REGISTRATION_KEY_HASH'] ?? null;
-
-    if (!$registrationKeyHash) {
-        throw new Exception('Registrace není momentálně povolena. Kontaktujte administrátora.');
-    }
-
-    // Kontrola hash
-    $providedHash = hash('sha256', $registrationKey);
-
-    if (!hash_equals($registrationKeyHash, $providedHash)) {
-        // Zaznamenat neúspěšný pokus
-        recordLoginAttempt("registration_$ip");
-        throw new Exception('Neplatný registrační klíč');
-    }
-
-    // Databázové připojení
     $pdo = getDbConnection();
+    $pdo->beginTransaction();
 
-    // Kontrola, zda email již není použit
-    $stmt = $pdo->prepare("SELECT id FROM wgs_users WHERE email = :email LIMIT 1");
-    $stmt->execute([':email' => $email]);
-    if ($stmt->fetch()) {
-        throw new Exception('Tento email je již zaregistrován');
+    $keyStmt = $pdo->prepare('SELECT * FROM wgs_registration_keys WHERE key_code = :code LIMIT 1');
+    $keyStmt->execute([':code' => $registrationKey]);
+    $keyRow = $keyStmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$keyRow) {
+        throw new InvalidArgumentException('Registrační klíč nebyl nalezen.');
+    }
+    if (isset($keyRow['is_active']) && (int) $keyRow['is_active'] === 0) {
+        throw new InvalidArgumentException('Registrační klíč byl deaktivován.');
+    }
+    if (isset($keyRow['max_usage']) && $keyRow['max_usage'] !== null) {
+        $max = (int) $keyRow['max_usage'];
+        $used = (int) ($keyRow['usage_count'] ?? 0);
+        if ($max > 0 && $used >= $max) {
+            throw new InvalidArgumentException('Registrační klíč již byl vyčerpán.');
+        }
     }
 
-    // Hash hesla pomocí BCrypt
-    $passwordHash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
+    $role = $keyRow['key_type'] ?? 'user';
 
-    // Určení role (výchozí: prodejce, admin může změnit)
-    $role = 'prodejce';
-
-    // Vložení nového uživatele
-    $insertStmt = $pdo->prepare("
-        INSERT INTO wgs_users (
-            name, email, phone, password, role, is_active, created_at, last_login
-        ) VALUES (
-            :name, :email, :phone, :password, :role, 1, NOW(), NULL
-        )
-    ");
-
-    $result = $insertStmt->execute([
-        ':name' => $name,
-        ':email' => $email,
-        ':phone' => $phone,
-        ':password' => $passwordHash,
-        ':role' => $role
-    ]);
-
-    if (!$result) {
-        throw new Exception('Chyba při vytváření účtu');
+    $existingStmt = $pdo->prepare('SELECT 1 FROM wgs_users WHERE email = :email LIMIT 1');
+    $existingStmt->execute([':email' => $email]);
+    if ($existingStmt->fetchColumn()) {
+        throw new InvalidArgumentException('Uživatel s tímto emailem již existuje.');
     }
 
-    // Získat ID nového uživatele
-    $newUserId = $pdo->lastInsertId();
+    $columns = db_get_table_columns($pdo, 'wgs_users');
+    $now = date('Y-m-d H:i:s');
 
-    // Úspěch
-    http_response_code(201);
+    $userData = [];
+    if (in_array('name', $columns, true)) {
+        $userData['name'] = $name;
+    }
+    if (in_array('email', $columns, true)) {
+        $userData['email'] = $email;
+    }
+    if (in_array('phone', $columns, true)) {
+        $userData['phone'] = $phone;
+    } elseif (in_array('telefon', $columns, true)) {
+        $userData['telefon'] = $phone;
+    }
+
+    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+    if (in_array('password_hash', $columns, true)) {
+        $userData['password_hash'] = $passwordHash;
+    } elseif (in_array('password', $columns, true)) {
+        $userData['password'] = $passwordHash;
+    } elseif (in_array('heslo', $columns, true)) {
+        $userData['heslo'] = $passwordHash;
+    }
+
+    if (in_array('role', $columns, true)) {
+        $userData['role'] = $role;
+    }
+    if (in_array('status', $columns, true)) {
+        $userData['status'] = 'active';
+    }
+    if (in_array('is_active', $columns, true)) {
+        $userData['is_active'] = 1;
+    }
+    if (in_array('registration_key_code', $columns, true)) {
+        $userData['registration_key_code'] = $registrationKey;
+    }
+    if (in_array('registration_key_type', $columns, true)) {
+        $userData['registration_key_type'] = $role;
+    }
+    if (in_array('must_change_password', $columns, true)) {
+        $userData['must_change_password'] = 0;
+    }
+    if (in_array('created_at', $columns, true)) {
+        $userData['created_at'] = $now;
+    }
+    if (in_array('updated_at', $columns, true)) {
+        $userData['updated_at'] = $now;
+    }
+    if (in_array('password_changed_at', $columns, true)) {
+        $userData['password_changed_at'] = $now;
+    }
+
+    $hasPassword = isset($userData['password_hash']) || isset($userData['password']) || isset($userData['heslo']);
+    if (empty($userData['email']) || !$hasPassword) {
+        throw new RuntimeException('Struktura tabulky wgs_users neobsahuje očekávané sloupce.');
+    }
+
+    $fieldNames = array_keys($userData);
+    $placeholders = array_map(fn($name) => ':' . $name, $fieldNames);
+    $insertSql = 'INSERT INTO wgs_users (' . implode(', ', $fieldNames) . ') VALUES (' . implode(', ', $placeholders) . ')';
+
+    $insertStmt = $pdo->prepare($insertSql);
+    $params = [];
+    foreach ($userData as $column => $value) {
+        $params[':' . $column] = $value;
+    }
+
+    if (!$insertStmt->execute($params)) {
+        throw new RuntimeException('Nepodařilo se vytvořit uživatele.');
+    }
+
+    $userId = $pdo->lastInsertId();
+
+    if (isset($keyRow['id']) && in_array('usage_count', db_get_table_columns($pdo, 'wgs_registration_keys'), true)) {
+        $updateKey = $pdo->prepare('UPDATE wgs_registration_keys SET usage_count = COALESCE(usage_count, 0) + 1 WHERE id = :id');
+        $updateKey->execute([':id' => $keyRow['id']]);
+
+        if (isset($keyRow['max_usage']) && $keyRow['max_usage'] !== null) {
+            $max = (int) $keyRow['max_usage'];
+            $used = ((int) ($keyRow['usage_count'] ?? 0)) + 1;
+            if ($max > 0 && $used >= $max) {
+                $deactivate = $pdo->prepare('UPDATE wgs_registration_keys SET is_active = 0 WHERE id = :id');
+                $deactivate->execute([':id' => $keyRow['id']]);
+            }
+        }
+    }
+
+    $pdo->commit();
+
     echo json_encode([
         'status' => 'success',
-        'message' => 'Registrace úspěšná! Nyní se můžete přihlásit.',
-        'user_id' => $newUserId
-    ]);
-
-} catch (Exception $e) {
-    // Zaznamenat neúspěšný pokus (pokud ještě nebyl zaznamenán)
-    if (isset($ip) && !isset($providedHash)) {
-        recordLoginAttempt("registration_$ip");
+        'message' => 'Registrace byla úspěšně dokončena.',
+        'user_id' => $userId
+    ], JSON_UNESCAPED_UNICODE);
+} catch (InvalidArgumentException $e) {
+    if (isset($pdo) && $pdo->inTransaction()) {
+        $pdo->rollBack();
     }
-
+    http_response_code(422);
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+} catch (RuntimeException $e) {
+    if (isset($pdo) && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     http_response_code(400);
-    echo json_encode([
-        'status' => 'error',
-        'message' => $e->getMessage()
-    ]);
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+} catch (Throwable $e) {
+    if (isset($pdo) && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    error_log('Registration controller error: ' . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'Došlo k neočekávané chybě. Zkuste to prosím znovu.'], JSON_UNESCAPED_UNICODE);
 }
-?>

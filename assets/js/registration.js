@@ -5,6 +5,28 @@
 
 const registrationForm = document.getElementById('registrationForm');
 
+async function getCsrfToken(form) {
+  if (!form) return null;
+  const input = form.querySelector('input[name="csrf_token"]');
+  if (input && input.value) {
+    return input.value;
+  }
+
+  try {
+    const response = await fetch('app/controllers/get_csrf_token.php', {
+      credentials: 'same-origin'
+    });
+    const data = await response.json();
+    if (data.status === 'success' && data.token) {
+      if (input) input.value = data.token;
+      return data.token;
+    }
+  } catch (error) {
+    logger.error('CSRF fetch failed:', error);
+  }
+  return null;
+}
+
 registrationForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   
@@ -32,13 +54,19 @@ registrationForm.addEventListener('submit', async (e) => {
   }
   
   try {
+    const csrfToken = await getCsrfToken(registrationForm);
+    if (!csrfToken) {
+      showNotification('Nepodařilo se ověřit bezpečnostní token. Obnovte stránku a zkuste to znovu.', 'error');
+      return;
+    }
+
     const response = await fetch('app/controllers/registration_controller.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       credentials: 'include',
-      body: `registration_key=${encodeURIComponent(key)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(password)}`
+      body: `registration_key=${encodeURIComponent(key)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(password)}&csrf_token=${encodeURIComponent(csrfToken)}`
     });
     
     const data = await response.json();

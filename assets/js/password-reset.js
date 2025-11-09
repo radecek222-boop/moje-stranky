@@ -5,6 +5,28 @@
 
 let currentUserData = null;
 
+async function getCsrfTokenFromForm(form) {
+  if (!form) return null;
+  const input = form.querySelector('input[name="csrf_token"]');
+  if (input && input.value) {
+    return input.value;
+  }
+
+  try {
+    const response = await fetch('app/controllers/get_csrf_token.php', {
+      credentials: 'same-origin'
+    });
+    const data = await response.json();
+    if (data.status === 'success' && data.token) {
+      if (input) input.value = data.token;
+      return data.token;
+    }
+  } catch (error) {
+    logger.error('CSRF fetch failed:', error);
+  }
+  return null;
+}
+
 // ============================================================
 // STEP 1: VERIFY IDENTITY
 // ============================================================
@@ -22,11 +44,17 @@ if (verifyForm) {
     }
     
     try {
+      const csrfToken = await getCsrfTokenFromForm(verifyForm);
+      if (!csrfToken) {
+        showNotification('Nepodařilo se získat bezpečnostní token. Obnovte stránku a zkuste to znovu.', 'error');
+        return;
+      }
+
       const response = await fetch('app/controllers/password_reset_controller.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         credentials: 'include',
-        body: `action=verify&email=${encodeURIComponent(email)}&registration_key=${encodeURIComponent(registrationKey)}`
+        body: `action=verify&email=${encodeURIComponent(email)}&registration_key=${encodeURIComponent(registrationKey)}&csrf_token=${encodeURIComponent(csrfToken)}`
       });
       
       const data = await response.json();
@@ -82,11 +110,17 @@ if (changePasswordForm) {
     }
     
     try {
+      const csrfToken = await getCsrfTokenFromForm(changePasswordForm);
+      if (!csrfToken) {
+        showNotification('Nepodařilo se získat bezpečnostní token. Obnovte stránku a zkuste to znovu.', 'error');
+        return;
+      }
+
       const response = await fetch('app/controllers/password_reset_controller.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         credentials: 'include',
-        body: `action=change_password&email=${encodeURIComponent(currentUserData.email)}&registration_key=${encodeURIComponent(currentUserData.registrationKey)}&new_password=${encodeURIComponent(newPassword)}&new_password_confirm=${encodeURIComponent(newPasswordConfirm)}`
+        body: `action=change_password&email=${encodeURIComponent(currentUserData.email)}&registration_key=${encodeURIComponent(currentUserData.registrationKey)}&new_password=${encodeURIComponent(newPassword)}&new_password_confirm=${encodeURIComponent(newPasswordConfirm)}&csrf_token=${encodeURIComponent(csrfToken)}`
       });
       
       const data = await response.json();
