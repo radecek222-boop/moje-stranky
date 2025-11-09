@@ -341,6 +341,29 @@ function sendEmailToCustomer($data) {
         throw new Exception('Neplatné ID reklamace');
     }
 
+    // BEZPEČNOST: Kontrola velikosti base64 příloh (max 15MB každá = ~11MB PDF)
+    $maxBase64Size = 15 * 1024 * 1024; // 15MB
+
+    if ($protocolPdf) {
+        $protocolSize = strlen($protocolPdf);
+        if ($protocolSize > $maxBase64Size) {
+            throw new Exception('Příloha protokolu je příliš velká. Maximální velikost je 11 MB.');
+        }
+    }
+
+    if ($photosPdf) {
+        $photosSize = strlen($photosPdf);
+        if ($photosSize > $maxBase64Size) {
+            throw new Exception('Příloha fotodokumentace je příliš velká. Maximální velikost je 11 MB.');
+        }
+    }
+
+    // BEZPEČNOST: Celková velikost příloh max 30MB (2x 15MB)
+    $totalSize = strlen($protocolPdf ?? '') + strlen($photosPdf ?? '');
+    if ($totalSize > 30 * 1024 * 1024) {
+        throw new Exception('Celková velikost příloh je příliš velká. Maximum je 22 MB celkem.');
+    }
+
     $pdo = getDbConnection();
 
     // Načtení reklamace a zákazníka
