@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupTabs() {
   const tabs = Array.from(document.querySelectorAll('.tab'));
   if (!tabs.length) {
-    logger.warn('⚠️ Nenalezeny žádné taby v admin panelu');
+    logger.log('ℹ️ Taby nejsou přítomny, navigace je řízena horním headerem');
     return;
   }
 
