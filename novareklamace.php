@@ -13,8 +13,9 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-i
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Reklamace luxusního nábytku Natuzzi. Rychlé a profesionální vyřízení reklamací sedaček a souprav. Autorizovaný servis v Praze, Brně, Bratislavě.">
   <meta name="theme-color" content="#000000">
+  <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
   <title>Objednat servis | WGS</title>
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   

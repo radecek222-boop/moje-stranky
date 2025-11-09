@@ -24,6 +24,7 @@ if (!$isLoggedIn) {
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="WGS">
 <meta name="description" content="Servisní protokol White Glove Service pro záznám údajů o reklamacích, opravách a údržbě nábytku Natuzzi. Profesionální dokumentace servisu.">
+<meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
 
 <!-- PWA -->
 <link rel="manifest" href="./manifest.json">
