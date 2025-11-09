@@ -1,5 +1,6 @@
 <?php
 require_once "init.php";
+require_once __DIR__ . '/includes/admin_navigation.php';
 
 // BEZPEČNOST: Kontrola admin přihlášení
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
@@ -59,9 +60,34 @@ $activeTabLabel = $tabs[$activeTab];
 
   <h1 class="page-title">Admin Panel</h1>
   <p class="page-subtitle">Správa systému White Glove Service</p>
-  <p class="page-subtitle" style="margin-top: 0.5rem; font-size: 0.95rem; opacity: 0.8;">
-    Aktuální sekce: <strong><?php echo htmlspecialchars($activeTabLabel, ENT_QUOTES, 'UTF-8'); ?></strong>
-  </p>
+
+  <?php
+    $tabConfig = loadAdminTabNavigation();
+    $tabs = [];
+    foreach ($tabConfig as $item) {
+      if (!empty($item['tab']) && !empty($item['tab_label'])) {
+        $tabs[$item['tab']] = $item['tab_label'];
+      }
+    }
+  ?>
+
+  <nav class="tab-nav" role="tablist" aria-label="Sekce administrace">
+    <?php foreach ($tabs as $slug => $label):
+      $isActive = ($activeTab === $slug);
+    ?>
+      <button
+        type="button"
+        class="tab <?php echo $isActive ? 'active' : ''; ?>"
+        data-tab="<?php echo htmlspecialchars($slug, ENT_QUOTES, 'UTF-8'); ?>"
+        id="tab-btn-<?php echo htmlspecialchars($slug, ENT_QUOTES, 'UTF-8'); ?>"
+        aria-controls="tab-<?php echo htmlspecialchars($slug, ENT_QUOTES, 'UTF-8'); ?>"
+        aria-selected="<?php echo $isActive ? 'true' : 'false'; ?>"
+        tabindex="<?php echo $isActive ? '0' : '-1'; ?>"
+      >
+        <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
+      </button>
+    <?php endforeach; ?>
+  </nav>
 
   <!-- TAB: DASHBOARD -->
   <div
