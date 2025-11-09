@@ -79,7 +79,9 @@ define('SMTP_PASS', requireEnvValue('SMTP_PASS', 'CHYBA: SMTP_PASS není nastave
 
 // ========== PATHS ==========
 define('ROOT_PATH', dirname(__DIR__));
-define('LOGS_PATH', ROOT_PATH . '/logs');
+if (!defined('LOGS_PATH')) {
+    define('LOGS_PATH', ROOT_PATH . '/logs');
+}
 // TEMP_PATH je již definována v init.php - nemusíme ji zde znovu definovat
 
 // ========== SECURITY LOGGING ==========
