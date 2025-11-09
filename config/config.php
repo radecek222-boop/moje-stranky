@@ -230,7 +230,7 @@ function setSecurityHeaders() {
         "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com; " .
         "img-src 'self' data: blob: https://maps.geoapify.com; " .
         "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com; " .
-        "connect-src 'self' https://api.geoapify.com https://maps.geoapify.com;"
+        "connect-src 'self' https://api.geoapify.com https://maps.geoapify.com https://fonts.googleapis.com https://fonts.gstatic.com;"
     );
     header("Referrer-Policy: strict-origin-when-cross-origin");
 }

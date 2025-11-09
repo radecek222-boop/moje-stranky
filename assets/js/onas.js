@@ -1,5 +1,5 @@
 // === LANGUAGE SWITCHER ===
-// currentLang is already declared globally in index.js
+let currentLang = localStorage.getItem('wgs-lang') || 'cs';
 
 function switchLanguage(lang) {
   currentLang = lang;
@@ -53,45 +53,46 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // === MOBILE MENU ===
-const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-const nav = document.querySelector('.nav');
+const mobileMenuBtn = document.getElementById('hamburger-toggle');
+const nav = document.getElementById('hamburger-nav');
+const menuOverlay = document.getElementById('hamburger-overlay');
 
-// Vytvořit overlay pro zavření menu
-let menuOverlay = document.createElement('div');
-menuOverlay.className = 'menu-overlay';
-document.body.appendChild(menuOverlay);
+// Kontrola zda elementy existují
+if (mobileMenuBtn && nav && menuOverlay) {
+  // Funkce pro otevření/zavření menu
+  function toggleMenu() {
+    const isActive = nav.classList.contains('active');
+    nav.classList.toggle('active');
+    menuOverlay.classList.toggle('active');
+    mobileMenuBtn.setAttribute('aria-expanded', !isActive ? 'true' : 'false');
 
-// Funkce pro otevření/zavření menu
-function toggleMenu() {
-  const isActive = nav.classList.contains('active');
-  nav.classList.toggle('active');
-  menuOverlay.classList.toggle('active');
-  mobileMenuBtn.textContent = !isActive ? '✕' : '☰';
-  
-  // Zabránit scrollování těla když je menu otevřené
-  if (!isActive) {
-    document.body.style.overflow = 'hidden';
-  } else {
-    document.body.style.overflow = '';
-  }
-}
-
-// Kliknutí na hamburger tlačítko
-mobileMenuBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  toggleMenu();
-});
-
-// Zavřít menu kliknutím na overlay
-menuOverlay.addEventListener('click', () => {
-  toggleMenu();
-});
-
-// Zavřít menu kliknutím na odkaz v menu
-nav.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', () => {
-    if (nav.classList.contains('active')) {
-      toggleMenu();
+    // Zabránit scrollování těla když je menu otevřené
+    if (!isActive) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
     }
+  }
+
+  // Kliknutí na hamburger tlačítko
+  mobileMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMenu();
   });
-});
+
+  // Zavřít menu kliknutím na overlay
+  menuOverlay.addEventListener('click', () => {
+    toggleMenu();
+  });
+
+  // Zavřít menu kliknutím na odkaz v menu
+  nav.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (nav.classList.contains('active')) {
+        toggleMenu();
+      }
+    });
+  });
+} else {
+  console.warn('Mobile menu elements not found - hamburger menu disabled');
+}
