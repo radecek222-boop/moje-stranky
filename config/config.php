@@ -224,7 +224,14 @@ function setSecurityHeaders() {
     header("X-Frame-Options: SAMEORIGIN");
     header("X-XSS-Protection: 1; mode=block");
     // CSP - odstraněn 'unsafe-eval' pro lepší bezpečnost
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: blob: https://maps.geoapify.com; font-src 'self' data: https://fonts.googleapis.com; connect-src 'self' https://api.geoapify.com https://maps.geoapify.com;");
+    header("Content-Security-Policy: " .
+        "default-src 'self'; " .
+        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; " .
+        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com; " .
+        "img-src 'self' data: blob: https://maps.geoapify.com; " .
+        "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com; " .
+        "connect-src 'self' https://api.geoapify.com https://maps.geoapify.com;"
+    );
     header("Referrer-Policy: strict-origin-when-cross-origin");
 }
 
