@@ -25,56 +25,11 @@ async function getCSRFToken() {
 // TAB MANAGEMENT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
-  setupTabs();
   logger.log('✅ Admin panel initialized');
   setupNavigation();
   initKeyManagement();
   initUserManagement();
 });
-
-function setupTabs() {
-  const tabs = Array.from(document.querySelectorAll('.tab'));
-  if (!tabs.length) {
-    logger.warn('⚠️ Nenalezeny žádné taby v admin panelu');
-    return;
-  }
-
-  const activateTab = (tab) => {
-    const tabName = tab.dataset.tab;
-    if (!tabName) {
-      return;
-    }
-
-    logger.log('🔓 Switching to tab:', tabName);
-
-    tabs.forEach((t) => {
-      const isCurrent = t === tab;
-      t.classList.toggle('active', isCurrent);
-      t.setAttribute('aria-selected', isCurrent ? 'true' : 'false');
-      t.setAttribute('tabindex', isCurrent ? '0' : '-1');
-    });
-
-    document.querySelectorAll('.tab-content').forEach((content) => {
-      const isTarget = content.id === `tab-${tabName}`;
-      content.classList.toggle('hidden', !isTarget);
-      content.setAttribute('aria-hidden', isTarget ? 'false' : 'true');
-    });
-  };
-
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', (event) => {
-      event.preventDefault();
-      activateTab(tab);
-    });
-  });
-
-  const defaultTab = document.querySelector('.tab.active') || tabs[0];
-  if (defaultTab) {
-    activateTab(defaultTab);
-  }
-
-  logger.log('✅ Tabs setup complete');
-}
 
 logger.log('✅ admin.js loaded');
 
@@ -215,28 +170,9 @@ function initKeyManagement() {
     refreshBtn.addEventListener('click', loadKeys);
   }
 
-  const tabs = document.querySelectorAll('.tab');
-  if (tabs.length) {
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        setTimeout(() => {
-          const keysTab = document.getElementById('tab-keys');
-          if (keysTab && !keysTab.classList.contains('hidden')) {
-            loadKeys();
-          }
-        }, 200);
-      });
-    });
-  }
-
   const keysTab = document.getElementById('tab-keys');
-  if (keysTab && !keysTab.classList.contains('hidden')) {
+  if (keysTab) {
     loadKeys();
-    return;
-  }
-
-  if (window.location.search.includes('tab=keys') || window.location.hash === '#keys') {
-    setTimeout(loadKeys, 300);
   }
 }
 
@@ -483,28 +419,15 @@ function initUserManagement() {
   const urlParams = new URLSearchParams(window.location.search);
   const tab = urlParams.get('tab');
 
-  if (!tab || tab === 'dashboard') {
+  const hasDashboard = document.getElementById('tab-dashboard');
+  const hasUsers = document.getElementById('tab-users');
+  const hasOnline = document.getElementById('tab-online');
+
+  if ((!tab || tab === 'dashboard') && hasDashboard) {
     loadDashboard();
-  } else if (tab === 'users') {
+  } else if (tab === 'users' && hasUsers) {
     loadUsers();
-  } else if (tab === 'online') {
+  } else if (tab === 'online' && hasOnline) {
     loadOnline();
   }
-
-  // Tab switching with auto-load
-  document.querySelectorAll('.tab').forEach(tabBtn => {
-    tabBtn.addEventListener('click', () => {
-      const tabName = tabBtn.dataset.tab;
-
-      setTimeout(() => {
-        if (tabName === 'dashboard') {
-          loadDashboard();
-        } else if (tabName === 'users') {
-          loadUsers();
-        } else if (tabName === 'online') {
-          loadOnline();
-        }
-      }, 100);
-    });
-  });
 }
