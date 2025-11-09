@@ -67,6 +67,14 @@ try {
             handleDeleteKey($pdo, $payload);
             break;
 
+        case 'list_users':
+            handleListUsers($pdo);
+            break;
+
+        case 'list_reklamace':
+            handleListReklamace($pdo);
+            break;
+
         default:
             respondError('Neznámá akce.', 400);
     }
@@ -197,5 +205,96 @@ function respondError(string $message, int $code = 400, array $extra = []): void
         'message' => $message,
     ], $extra), JSON_UNESCAPED_UNICODE);
     exit;
+}
+
+/**
+ * Vrátí seznam uživatelů
+ */
+function handleListUsers(PDO $pdo): void
+{
+    $stmt = $pdo->prepare(
+        'SELECT id, name, email, role, is_active, created_at
+         FROM wgs_users
+         WHERE is_active = 1
+         ORDER BY name ASC'
+    );
+    $stmt->execute();
+
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+    respondSuccess([
+        'status' => 'success',
+        'data' => array_map(static function (array $user): array {
+            return [
+                'id' => (int) ($user['id'] ?? 0),
+                'user_id' => (int) ($user['id'] ?? 0),
+                'name' => $user['name'] ?? '',
+                'email' => $user['email'] ?? '',
+                'role' => $user['role'] ?? 'prodejce',
+                'is_active' => isset($user['is_active']) ? (bool) $user['is_active'] : true,
+                'created_at' => $user['created_at'] ?? null,
+            ];
+        }, $users)
+    ]);
+}
+
+/**
+ * Vrátí seznam reklamací
+ */
+function handleListReklamace(PDO $pdo): void
+{
+    $sql = "
+        SELECT
+            r.*,
+            r.id as claim_id
+        FROM wgs_reklamace r
+        ORDER BY r.created_at DESC
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+
+    $reklamace = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+    // Pro každou reklamaci načíst fotky a dokumenty
+    foreach ($reklamace as &$record) {
+        $reklamaceId = $record['reklamace_id'] ?? $record['cislo'] ?? $record['id'];
+
+        // Načtení fotek
+        $stmt = $pdo->prepare("
+            SELECT
+                id, photo_id, reklamace_id, section_name,
+                photo_path, file_path, file_name,
+                photo_order, photo_type, uploaded_at
+            FROM wgs_photos
+            WHERE reklamace_id = :reklamace_id
+            ORDER BY photo_order ASC, uploaded_at ASC
+        ");
+        $stmt->execute([':reklamace_id' => $reklamaceId]);
+        $photos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $record['photos'] = $photos;
+
+        // Načtení dokumentů (PDF protokoly)
+        $stmt = $pdo->prepare("
+            SELECT
+                id, claim_id, document_name, document_path as file_path,
+                document_type, file_size, uploaded_by, uploaded_at
+            FROM wgs_documents
+            WHERE claim_id = :claim_id
+            ORDER BY uploaded_at DESC
+        ");
+        $stmt->execute([':claim_id' => $record['id']]);
+        $documents = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $record['documents'] = $documents;
+    }
+
+    respondSuccess([
+        'status' => 'success',
+        'data' => $reklamace,
+        'reklamace' => $reklamace,
+        'count' => count($reklamace)
+    ]);
 }
 
