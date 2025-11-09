@@ -1,13 +1,10 @@
 # Kontrola bezpečnostních hlaviček (15. ledna 2025)
 
 ## Zjištěný problém
-- `Content-Security-Policy` v `config/config.php` nepovoluje `connect-src` k `https://fonts.googleapis.com` a `https://fonts.gstatic.com`, přestože přihlašovací a registrační stránky využívají `<link rel="preconnect">` na tyto domény. Prohlížeč proto hlásí porušení CSP a optimalizace preconnect je blokována.
+- `Content-Security-Policy` v `config/config.php` nepovolovala `connect-src` k `https://fonts.googleapis.com` a `https://fonts.gstatic.com`, přestože přihlašovací a registrační stránky využívají `<link rel="preconnect">` na tyto domény. Prohlížeč proto hlásil porušení CSP a optimalizace preconnect byla blokována.
 
-## Doporučení
-- Rozšířit direktivu `connect-src` o domény Google Fonts, například:
-  ```php
-  "connect-src 'self' https://api.geoapify.com https://maps.geoapify.com https://fonts.googleapis.com https://fonts.gstatic.com;"
-  ```
+## Opatření
+- Direktiva `connect-src` byla rozšířena o domény Google Fonts, takže preconnect odkazy fungují bez porušení CSP.
 
 ---
 

@@ -4,7 +4,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
   <meta name="description" content="Registrace do portálu White Glove Service. Získejte přístup k online správě servisních požadavků Natuzzi a sledujte stav reklamací.">
   <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
