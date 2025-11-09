@@ -32,8 +32,10 @@ require_once __DIR__ . "/includes/hamburger-menu.php";
   <link rel="stylesheet" href="assets/css/analytics.min.css">
 </head>
 <body>
+<?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
 <!-- MAIN CONTENT -->
+<main>
 <div class="container">
   
   <!-- PAGE HEADER -->
@@ -91,8 +93,9 @@ require_once __DIR__ . "/includes/hamburger-menu.php";
   </div>
   
   <p style="text-align: center; color: #999; margin-top: 2rem;">Analytics data loading...</p>
-  
+
 </div>
+</main>
 
 <script src="assets/js/logger.js" defer></script>
 <script src="assets/js/analytics.min.js" defer></script>

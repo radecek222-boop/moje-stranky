@@ -32,19 +32,9 @@ if (!$isAdmin) {
 
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
-<!-- Removed broken try block -->
-
-
-
-    
-    <div class="user-info">
-      <span class="user-name" id="userName">Admin</span>
-      <button class="btn-logout" data-action="logout">Odhlásit se</button>
-    </div>
-  </div>
-</div>
 
 <!-- MAIN CONTENT -->
+<main>
 <div class="container">
   
   <h1 class="page-title">Statistiky</h1>
@@ -382,7 +372,7 @@ if (!$isAdmin) {
   </div>
 </div>
 
-
+</div>
 </main>
 
 <!-- External JavaScript -->
