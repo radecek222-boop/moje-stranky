@@ -42,15 +42,40 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
 <!-- MAIN CONTENT -->
 <main>
 <div class="container">
-  
+
   <h1 class="page-title">Admin Panel</h1>
   <p class="page-subtitle">Správa systému White Glove Service</p>
-  
-  <!-- TABS -->
-  </div>
-  
+
+  <?php
+    $tabs = [
+      'dashboard' => 'Přehled',
+      'notifications' => 'Notifikace',
+      'keys' => 'Registrační klíče',
+      'users' => 'Uživatelé',
+      'online' => 'Online'
+    ];
+  ?>
+
+  <nav class="tab-nav" role="tablist" aria-label="Sekce administrace">
+    <?php foreach ($tabs as $slug => $label):
+      $isActive = ($activeTab === $slug);
+    ?>
+      <button
+        type="button"
+        class="tab <?php echo $isActive ? 'active' : ''; ?>"
+        data-tab="<?php echo htmlspecialchars($slug, ENT_QUOTES, 'UTF-8'); ?>"
+        id="tab-btn-<?php echo htmlspecialchars($slug, ENT_QUOTES, 'UTF-8'); ?>"
+        aria-controls="tab-<?php echo htmlspecialchars($slug, ENT_QUOTES, 'UTF-8'); ?>"
+        aria-selected="<?php echo $isActive ? 'true' : 'false'; ?>"
+        tabindex="<?php echo $isActive ? '0' : '-1'; ?>"
+      >
+        <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
+      </button>
+    <?php endforeach; ?>
+  </nav>
+
   <!-- TAB: DASHBOARD -->
-  <div id="tab-dashboard" class="tab-content">
+  <div id="tab-dashboard" class="tab-content<?php echo $activeTab === 'dashboard' ? '' : ' hidden'; ?>" role="tabpanel" aria-labelledby="tab-btn-dashboard" aria-hidden="<?php echo $activeTab === 'dashboard' ? 'false' : 'true'; ?>">
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-label">Reklamace</div>
@@ -75,7 +100,7 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
   </div>
   
   <!-- TAB: NOTIFICATIONS -->
-  <div id="tab-notifications" class="tab-content hidden">
+  <div id="tab-notifications" class="tab-content<?php echo $activeTab === 'notifications' ? '' : ' hidden'; ?>" role="tabpanel" aria-labelledby="tab-btn-notifications" aria-hidden="<?php echo $activeTab === 'notifications' ? 'false' : 'true'; ?>">
     <h2 class="page-title" style="font-size: 1.8rem; margin-bottom: 1rem;">Správa Emailů & SMS</h2>
     <p class="page-subtitle">Editace šablon, nastavení příjemců a správa automatických notifikací</p>
     
@@ -85,7 +110,7 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
   </div>
   
   <!-- TAB: KEYS -->
-  <div id="tab-keys" class="tab-content hidden">
+  <div id="tab-keys" class="tab-content<?php echo $activeTab === 'keys' ? '' : ' hidden'; ?>" role="tabpanel" aria-labelledby="tab-btn-keys" aria-hidden="<?php echo $activeTab === 'keys' ? 'false' : 'true'; ?>">
     <div class="table-container">
       <div class="table-header">
         <h3 class="table-title">Registrační klíče</h3>
@@ -102,7 +127,7 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
   </div>
   
   <!-- TAB: USERS -->
-  <div id="tab-users" class="tab-content hidden">
+  <div id="tab-users" class="tab-content<?php echo $activeTab === 'users' ? '' : ' hidden'; ?>" role="tabpanel" aria-labelledby="tab-btn-users" aria-hidden="<?php echo $activeTab === 'users' ? 'false' : 'true'; ?>">
     <div class="table-container">
       <div class="table-header">
         <h3 class="table-title">Všichni uživatelé</h3>
@@ -135,7 +160,7 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
   </div>
   
   <!-- TAB: ONLINE -->
-  <div id="tab-online" class="tab-content hidden">
+  <div id="tab-online" class="tab-content<?php echo $activeTab === 'online' ? '' : ' hidden'; ?>" role="tabpanel" aria-labelledby="tab-btn-online" aria-hidden="<?php echo $activeTab === 'online' ? 'false' : 'true'; ?>">
     <div class="table-container">
       <div class="table-header">
         <h3 class="table-title">Online uživatelé</h3>

@@ -35,3 +35,25 @@ if (!function_exists('db_table_has_column')) {
         return in_array($column, $columns, true);
     }
 }
+
+if (!function_exists('db_table_exists')) {
+    function db_table_exists(PDO $pdo, string $table): bool
+    {
+        static $cache = [];
+
+        if (array_key_exists($table, $cache)) {
+            return $cache[$table];
+        }
+
+        try {
+            $stmt = $pdo->prepare('SHOW TABLES LIKE :table');
+            $stmt->execute([':table' => $table]);
+            $exists = (bool) $stmt->fetchColumn();
+        } catch (Throwable $e) {
+            error_log('Table existence check failed for ' . $table . ': ' . $e->getMessage());
+            $exists = false;
+        }
+
+        return $cache[$table] = $exists;
+    }
+}

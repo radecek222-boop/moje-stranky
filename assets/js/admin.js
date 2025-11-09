@@ -13,37 +13,46 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupTabs() {
-  const tabs = document.querySelectorAll('.tab');
-  
-  tabs.forEach(tab => {
-    tab.addEventListener('click', (e) => {
-      e.preventDefault();
-      
-      const tabName = tab.dataset.tab;
-      if (!tabName) return;
-      
-      logger.log('🔓 Switching to tab:', tabName);
-      
-      // Deaktivuj všechny taxy
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      
-      // Skrej všechny tab-content
-      document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.add('hidden');
-      });
-      
-      // Aktivuj kliknutou tab
-      tab.classList.add('active');
-      
-      // Zobraz obsah
-      const tabContent = document.getElementById(`tab-${tabName}`);
-      if (tabContent) {
-        tabContent.classList.remove('hidden');
-        logger.log('✅ Tab activated:', tabName);
-      }
+  const tabs = Array.from(document.querySelectorAll('.tab'));
+  if (!tabs.length) {
+    logger.warn('⚠️ Nenalezeny žádné taby v admin panelu');
+    return;
+  }
+
+  const activateTab = (tab) => {
+    const tabName = tab.dataset.tab;
+    if (!tabName) {
+      return;
+    }
+
+    logger.log('🔓 Switching to tab:', tabName);
+
+    tabs.forEach((t) => {
+      const isCurrent = t === tab;
+      t.classList.toggle('active', isCurrent);
+      t.setAttribute('aria-selected', isCurrent ? 'true' : 'false');
+      t.setAttribute('tabindex', isCurrent ? '0' : '-1');
+    });
+
+    document.querySelectorAll('.tab-content').forEach((content) => {
+      const isTarget = content.id === `tab-${tabName}`;
+      content.classList.toggle('hidden', !isTarget);
+      content.setAttribute('aria-hidden', isTarget ? 'false' : 'true');
+    });
+  };
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', (event) => {
+      event.preventDefault();
+      activateTab(tab);
     });
   });
-  
+
+  const defaultTab = document.querySelector('.tab.active') || tabs[0];
+  if (defaultTab) {
+    activateTab(defaultTab);
+  }
+
   logger.log('✅ Tabs setup complete');
 }
 
