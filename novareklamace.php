@@ -135,6 +135,34 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-i
   letter-spacing: 0.05em;
 }
 
+.form-consent {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f9fafb;
+}
+
+.consent-label {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.consent-label input {
+  margin-top: 0.3rem;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.consent-note {
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
 #warrantyWarning {
   margin-top: 1rem;
   padding: 1rem;
@@ -256,6 +284,17 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-i
             <input type="tel" class="form-control" id="telefon" name="telefon" required>
           </div>
         </div>
+        <div class="form-consent" id="gdprConsentContainer">
+          <label class="consent-label" for="gdpr_consent">
+            <input type="checkbox" id="gdpr_consent" name="gdpr_consent" required>
+            <span>
+              Souhlasím se zpracováním osobních údajů společností White Glove Service, s.r.o. za účelem vyřízení servisního požadavku
+              a předání nezbytných informací výrobci, prodejci či autorizovaným technikům. Podrobnosti o zacházení s údaji jsou uvedeny
+              na stránce <a href="gdpr.php" class="footer-link" target="_blank" rel="noopener">Zpracování osobních údajů</a>.
+            </span>
+          </label>
+          <p class="consent-note">Souhlas lze kdykoli odvolat prostřednictvím e-mailu <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>. Bez souhlasu nemůžeme žádost zpracovat.</p>
+        </div>
       </div>
       
      <!-- ADRESA ZÁKAZNÍKA -->
@@ -371,7 +410,11 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-i
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2025 White Glove Service. Všechna práva vyhrazena.</p>
+      <p>
+        &copy; 2025 White Glove Service. Všechna práva vyhrazena.
+        <span aria-hidden="true"> • </span>
+        <a href="gdpr.php" class="footer-link">Zpracování osobních údajů (GDPR)</a>
+      </p>
     </div>
   </div>
 </footer>

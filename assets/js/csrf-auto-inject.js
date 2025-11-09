@@ -1,5 +1,7 @@
 (function() {
-    fetch('app/get_csrf_token.php')
+    fetch('app/controllers/get_csrf_token.php', {
+        credentials: 'same-origin'
+    })
         .then(r => r.json())
         .then(data => {
             if (data.status === 'success') {

@@ -6,6 +6,23 @@
 
 require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
+require_once __DIR__ . '/../../includes/db_metadata.php';
+
+function generateWorkflowId(PDO $pdo): string
+{
+    $attempts = 0;
+    do {
+        $candidate = 'WGS' . date('ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM wgs_reklamace WHERE reklamace_id = :id');
+        $stmt->execute([':id' => $candidate]);
+        if ((int) $stmt->fetchColumn() === 0) {
+            return $candidate;
+        }
+        $attempts++;
+    } while ($attempts < 5);
+
+    throw new Exception('Nepodařilo se vygenerovat interní ID reklamace.');
+}
 
 header('Content-Type: application/json');
 
@@ -24,6 +41,8 @@ try {
         throw new Exception('Neplatná akce');
     }
 
+    $isLoggedIn = isset($_SESSION['user_id']) || (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true);
+
     // Získání dat z formuláře - BEZPEČNOST: Sanitizace všech vstupů
     $typ = sanitizeInput($_POST['typ'] ?? 'servis');
     $cislo = sanitizeInput($_POST['cislo'] ?? '');
@@ -41,6 +60,33 @@ try {
     $popisProblemu = sanitizeInput($_POST['popis_problemu'] ?? '');
     $doplnujiciInfo = sanitizeInput($_POST['doplnujici_info'] ?? '');
     $fakturaceFirma = sanitizeInput($_POST['fakturace_firma'] ?? 'CZ');
+    $gdprConsentRaw = $_POST['gdpr_consent'] ?? null;
+    $gdprConsent = filter_var($gdprConsentRaw, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+    if ($gdprConsent !== true) {
+        throw new Exception('Je nutné potvrdit souhlas se zpracováním osobních údajů.');
+    }
+
+    $gdprConsentAt = date('Y-m-d H:i:s');
+    $gdprConsentIp = $_SERVER['REMOTE_ADDR'] ?? '';
+    $gdprNoteParts = ["GDPR souhlas udělen {$gdprConsentAt}"];
+
+    if (!empty($gdprConsentIp)) {
+        $gdprNoteParts[] = 'IP: ' . $gdprConsentIp;
+    }
+
+    if (!empty($_SERVER['HTTP_USER_AGENT'])) {
+        $userAgent = substr($_SERVER['HTTP_USER_AGENT'], 0, 200);
+        $gdprNoteParts[] = 'UA: ' . $userAgent;
+    }
+
+    $gdprNote = sanitizeInput(implode(' | ', $gdprNoteParts));
+
+    if (!empty($doplnujiciInfo)) {
+        $doplnujiciInfo = trim($doplnujiciInfo) . "\n\n" . $gdprNote;
+    } else {
+        $doplnujiciInfo = $gdprNote;
+    }
 
     // Dodatečná validace emailu - pouze pokud je vyplněn
     if (!empty($email)) {
@@ -82,53 +128,82 @@ try {
     // Databázové připojení
     $pdo = getDbConnection();
 
-    // Vložení do databáze
-    $stmt = $pdo->prepare("
-        INSERT INTO wgs_reklamace (
-            typ, cislo, datum_prodeje, datum_reklamace,
-            jmeno, email, telefon, adresa,
-            model, provedeni, barva, seriove_cislo,
-            popis_problemu, doplnujici_info, fakturace_firma,
-            created_at, updated_at
-        ) VALUES (
-            :typ, :cislo, :datum_prodeje, :datum_reklamace,
-            :jmeno, :email, :telefon, :adresa,
-            :model, :provedeni, :barva, :seriove_cislo,
-            :popis_problemu, :doplnujici_info, :fakturace_firma,
-            NOW(), NOW()
-        )
-    ");
+    $hasReklamaceId = db_table_has_column($pdo, 'wgs_reklamace', 'reklamace_id');
+    $hasCreatedBy = db_table_has_column($pdo, 'wgs_reklamace', 'created_by');
+    $hasCreatedByRole = db_table_has_column($pdo, 'wgs_reklamace', 'created_by_role');
+    $hasCreatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'created_at');
+    $hasUpdatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'updated_at');
 
-    $result = $stmt->execute([
-        ':typ' => $typ,
-        ':cislo' => $cislo,
-        ':datum_prodeje' => $datumProdejeForDb,
-        ':datum_reklamace' => $datumReklamaceForDb,
-        ':jmeno' => $jmeno,
-        ':email' => $email,
-        ':telefon' => $telefon,
-        ':adresa' => $adresa,
-        ':model' => $model,
-        ':provedeni' => $provedeni,
-        ':barva' => $barva,
-        ':seriove_cislo' => $serioveCislo,
-        ':popis_problemu' => $popisProblemu,
-        ':doplnujici_info' => $doplnujiciInfo,
-        ':fakturace_firma' => $fakturaceFirma
-    ]);
+    $workflowId = null;
+    if ($hasReklamaceId) {
+        $workflowId = generateWorkflowId($pdo);
+    }
 
-    if (!$result) {
+    $now = date('Y-m-d H:i:s');
+
+    $columns = [
+        'typ' => $typ,
+        'cislo' => $cislo,
+        'datum_prodeje' => $datumProdejeForDb,
+        'datum_reklamace' => $datumReklamaceForDb,
+        'jmeno' => $jmeno,
+        'email' => $email,
+        'telefon' => $telefon,
+        'adresa' => $adresa,
+        'model' => $model,
+        'provedeni' => $provedeni,
+        'barva' => $barva,
+        'seriove_cislo' => $serioveCislo,
+        'popis_problemu' => $popisProblemu,
+        'doplnujici_info' => $doplnujiciInfo,
+        'fakturace_firma' => $fakturaceFirma
+    ];
+
+    if ($hasReklamaceId && $workflowId !== null) {
+        $columns['reklamace_id'] = $workflowId;
+    }
+
+    if ($hasCreatedBy) {
+        $columns['created_by'] = $_SESSION['user_id'] ?? null;
+    }
+
+    if ($hasCreatedByRole) {
+        $columns['created_by_role'] = $_SESSION['role'] ?? ($isLoggedIn ? 'user' : 'guest');
+    }
+
+    if ($hasCreatedAt) {
+        $columns['created_at'] = $now;
+    }
+
+    if ($hasUpdatedAt) {
+        $columns['updated_at'] = $now;
+    }
+
+    $columnNames = array_keys($columns);
+    $placeholders = array_map(fn($col) => ':' . $col, $columnNames);
+
+    $sql = 'INSERT INTO wgs_reklamace (' . implode(', ', $columnNames) . ') VALUES (' . implode(', ', $placeholders) . ')';
+    $stmt = $pdo->prepare($sql);
+
+    $parameters = [];
+    foreach ($columns as $column => $value) {
+        $parameters[':' . $column] = $value === '' ? null : $value;
+    }
+
+    if (!$stmt->execute($parameters)) {
         throw new Exception('Chyba při ukládání do databáze');
     }
 
-    $reklamaceId = $pdo->lastInsertId();
+    $primaryId = $pdo->lastInsertId();
+    $identifierForClient = $workflowId ?? $primaryId;
 
-    // Úspěšná odpověď
     echo json_encode([
         'status' => 'success',
         'message' => 'Reklamace byla úspěšně vytvořena',
-        'reklamace_id' => $reklamaceId,
-        'id' => $reklamaceId
+        'reklamace_id' => $identifierForClient,
+        'id' => $primaryId,
+        'workflow_id' => $identifierForClient,
+        'reference' => $cislo
     ]);
 
 } catch (Exception $e) {

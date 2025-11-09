@@ -291,10 +291,11 @@ const WGS = {
       }
       
       if (cisloInput) {
-        cisloInput.value = 'Mimozáruční servis';
-        cisloInput.readOnly = true;
-        cisloInput.style.backgroundColor = '#f5f5f5';
-        cisloInput.style.cursor = 'not-allowed';
+        cisloInput.removeAttribute('readonly');
+        cisloInput.value = '';
+        cisloInput.placeholder = 'Číslo objednávky/reklamace od prodejce (pokud máte)';
+        cisloInput.style.backgroundColor = '';
+        cisloInput.style.cursor = 'text';
       }
       
       if (datumProdejeInput) {
@@ -421,6 +422,13 @@ const WGS = {
   },
   
   async submitForm() {
+    const consentCheckbox = document.getElementById('gdpr_consent');
+    if (consentCheckbox && !consentCheckbox.checked) {
+      consentCheckbox.focus();
+      this.toast('Pro odeslání je nutný souhlas se zpracováním osobních údajů.', 'error');
+      return;
+    }
+
     this.toast('Odesílám...', 'info');
     try {
       const formData = new FormData();
@@ -445,10 +453,14 @@ const WGS = {
       formData.append('seriove_cislo', '');
       formData.append('popis_problemu', document.getElementById('popis_problemu')?.value || '');
       formData.append('doplnujici_info', document.getElementById('doplnujici_info')?.value || '');
-      
+
       const fakturaceFirma = document.getElementById('fakturace_firma')?.value || 'CZ';
       formData.append('fakturace_firma', fakturaceFirma);
-      
+
+      if (consentCheckbox) {
+        formData.append('gdpr_consent', consentCheckbox.checked ? '1' : '0');
+      }
+
       // Získat CSRF token
       const csrfResponse = await fetch('app/controllers/get_csrf_token.php');
       const csrfData = await csrfResponse.json();
@@ -467,19 +479,24 @@ const WGS = {
       }
       
       const result = await response.json();
-      
+
       if (result.status === 'success') {
-        const reklamaceId = result.reklamace_id || result.id;
+        const workflowId = result.reklamace_id || result.workflow_id || result.id;
+        const referenceNumber = result.reference || (document.getElementById('cislo')?.value || '').trim();
+
         if (this.photos && this.photos.length > 0) {
-          await this.uploadPhotos(reklamaceId);
+          await this.uploadPhotos(workflowId);
         }
-        
+
         this.toast('✓ Požadavek byl úspěšně odeslán!', 'success');
         setTimeout(() => {
           if (this.isLoggedIn) {
             window.location.href = 'seznam.php';
           } else {
-            alert(`Děkujeme! Vaše objednávka byla přijata.\n\nČíslo zakázky: ${reklamaceId}\n\nBrzy vás budeme kontaktovat.`);
+            const referenceText = referenceNumber
+              ? `Číslo reklamace: ${referenceNumber}`
+              : 'Číslo reklamace vám zašleme e-mailem.';
+            alert(`Děkujeme! Vaše objednávka byla přijata.\n\n${referenceText}\n\nBrzy vás budeme kontaktovat.`);
             window.location.href = 'index.php';
           }
         }, 1500);
