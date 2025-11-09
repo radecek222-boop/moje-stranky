@@ -70,6 +70,7 @@
       border: 1px solid rgba(148, 163, 184, 0.15);
       display: flex;
       flex-direction: column;
+      gap: 1.25rem;
     }
 
     .gdpr-card h2 {
@@ -97,8 +98,8 @@
     }
 
     .gdpr-card ul {
-      list-style: none;
-      padding-left: 0;
+      list-style: disc;
+      padding-left: 1.5rem;
       margin: 0;
       display: grid;
       gap: 1rem;
@@ -152,8 +153,10 @@
 
     .gdpr-highlight {
       border-left: 4px solid #111827;
-      padding-left: 1.5rem;
-      margin-bottom: 1rem;
+      padding: 1.25rem 1.5rem;
+      margin: 0;
+      background: linear-gradient(135deg, rgba(17, 24, 39, 0.08) 0%, rgba(17, 24, 39, 0.02) 100%);
+      border-radius: 12px;
     }
 
     .gdpr-meta {
@@ -163,6 +166,42 @@
       margin-top: 2rem;
     }
 
+    .gdpr-link {
+      color: #111827;
+      font-weight: 600;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(17, 24, 39, 0.35);
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .gdpr-link:hover {
+      color: #000000;
+      border-color: #000000;
+    }
+
+    .gdpr-card .gdpr-link {
+      align-self: flex-start;
+    }
+
+    .gdpr-contact-callout {
+      border-radius: 12px;
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+      padding: 1.25rem 1.5rem;
+    }
+
+    .gdpr-contact-callout strong {
+      display: block;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      color: #111827;
+      margin-bottom: 0.35rem;
+    }
+
+    .gdpr-contact-callout span {
+      display: block;
+    }
+
     @media (max-width: 768px) {
       .gdpr-card {
         padding: 1.75rem;
@@ -170,6 +209,10 @@
 
       .gdpr-card h2 {
         font-size: 1.2rem;
+      }
+
+      .gdpr-highlight {
+        padding: 1rem 1.25rem;
       }
 
       .gdpr-hero {
