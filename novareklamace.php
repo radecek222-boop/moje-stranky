@@ -365,7 +365,7 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-i
 
       <!-- GDPR CONSENT -->
       <div class="form-consent" style="margin: 2rem 0 1.5rem 0; padding: 1rem; border: 1px solid #ddd; background: #f9f9f9;">
-        <label style="display: flex; align-items: flex-start; cursor: pointer; font-size: 0.7rem; line-height: 1.4; color: #666;">
+        <label style="display: flex; align-items: flex-start; cursor: pointer; font-size: 0.65rem; line-height: 1.3; color: #666;">
           <input type="checkbox" id="gdpr_consent" name="gdpr_consent" required style="margin-right: 0.75rem; margin-top: 0.2rem; flex-shrink: 0;">
           <span>Souhlasím se zpracováním osobních údajů společností White Glove Service, s.r.o. za účelem vyřízení servisního požadavku a předání nezbytných informací výrobci, prodejci či autorizovaným technikům. Podrobnosti o zacházení s údaji jsou uvedeny na stránce <a href="gdpr.php" target="_blank" style="color: #000; text-decoration: underline;">Zpracování osobních údajů</a>. Souhlas lze kdykoli odvolat prostřednictvím e-mailu <a href="mailto:reklamace@wgs-service.cz" style="color: #000; text-decoration: underline;">reklamace@wgs-service.cz</a>. Bez souhlasu nemůžeme žádost zpracovat.</span>
         </label>
