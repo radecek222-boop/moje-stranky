@@ -20,46 +20,66 @@ try {
         exit;
     }
 
-    // Kontrola metody
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Povolena pouze POST metoda');
-    }
-
-    // BEZPEČNOST: Rate limiting - ochrana proti DoS útokům
-    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $rateLimit = checkRateLimit("upload_pdf_$ip", 10, 3600); // 10 PDF za hodinu
-
-    if (!$rateLimit['allowed']) {
-        http_response_code(429);
-        echo json_encode([
-            'success' => false,
-            'error' => 'Příliš mnoho požadavků. Zkuste to za ' . ceil($rateLimit['retry_after'] / 60) . ' minut.',
-            'retry_after' => $rateLimit['retry_after']
-        ]);
-        exit;
-    }
-
-    // Zaznamenat pokus o upload
-    recordLoginAttempt("upload_pdf_$ip");
-
-    // Načtení JSON dat
-    $jsonData = file_get_contents('php://input');
-    $data = json_decode($jsonData, true);
-
-    if (!$data) {
-        throw new Exception('Neplatná JSON data');
-    }
-
     // Získání akce
-    $action = $data['action'] ?? '';
+    $isPost = $_SERVER['REQUEST_METHOD'] === 'POST';
+    $isGet = $_SERVER['REQUEST_METHOD'] === 'GET';
+
+    if ($isPost) {
+        // Načtení JSON dat
+        $jsonData = file_get_contents('php://input');
+        $data = json_decode($jsonData, true);
+
+        if (!$data) {
+            throw new Exception('Neplatná JSON data');
+        }
+
+        $action = $data['action'] ?? '';
+    } elseif ($isGet) {
+        // Pro GET požadavky (load_reklamace)
+        $action = $_GET['action'] ?? '';
+        $data = $_GET;
+    } else {
+        throw new Exception('Povolena pouze POST nebo GET metoda');
+    }
+
+    // Rate limiting pouze pro POST operace (upload, save, send)
+    if ($isPost && in_array($action, ['save_pdf_document', 'save_protokol', 'send_email'])) {
+        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $rateLimit = checkRateLimit("upload_pdf_$ip", 10, 3600); // 10 operací za hodinu
+
+        if (!$rateLimit['allowed']) {
+            http_response_code(429);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Příliš mnoho požadavků. Zkuste to za ' . ceil($rateLimit['retry_after'] / 60) . ' minut.',
+                'retry_after' => $rateLimit['retry_after']
+            ]);
+            exit;
+        }
+
+        // Zaznamenat pokus o upload
+        recordLoginAttempt("upload_pdf_$ip");
+    }
 
     switch ($action) {
+        case 'load_reklamace':
+            $result = loadReklamace($data);
+            break;
+
+        case 'save_protokol':
+            $result = saveProtokolData($data);
+            break;
+
+        case 'send_email':
+            $result = sendEmailToCustomer($data);
+            break;
+
         case 'save_pdf_document':
             $result = savePdfDocument($data);
             break;
 
         default:
-            throw new Exception('Neplatná akce');
+            throw new Exception('Neplatná akce: ' . $action);
     }
 
     echo json_encode($result);
@@ -201,5 +221,217 @@ function savePdfDocument($data) {
         'path' => $relativePathForDb,
         'document_id' => $documentId,
         'file_size' => $fileSize
+    ];
+}
+
+/**
+ * Načtení dat reklamace
+ */
+function loadReklamace($data) {
+    $reklamaceId = $data['id'] ?? null;
+
+    if (!$reklamaceId) {
+        throw new Exception('Chybí ID reklamace');
+    }
+
+    // BEZPEČNOST: Validace ID
+    if (!preg_match('/^[a-zA-Z0-9_-]+$/', $reklamaceId)) {
+        throw new Exception('Neplatné ID reklamace');
+    }
+
+    $pdo = getDbConnection();
+
+    // Načtení reklamace
+    $stmt = $pdo->prepare("
+        SELECT * FROM wgs_reklamace
+        WHERE reklamace_id = :reklamace_id OR cislo = :cislo OR id = :id
+        LIMIT 1
+    ");
+    $stmt->execute([
+        ':reklamace_id' => $reklamaceId,
+        ':cislo' => $reklamaceId,
+        ':id' => $reklamaceId
+    ]);
+    $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$reklamace) {
+        throw new Exception('Reklamace nebyla nalezena');
+    }
+
+    return [
+        'status' => 'success',
+        'reklamace' => $reklamace
+    ];
+}
+
+/**
+ * Uložení dat protokolu
+ */
+function saveProtokolData($data) {
+    $reklamaceId = $data['reklamace_id'] ?? null;
+    $problemDescription = $data['problem_description'] ?? '';
+    $repairProposal = $data['repair_proposal'] ?? '';
+    $solved = $data['solved'] ?? '';
+
+    if (!$reklamaceId) {
+        throw new Exception('Chybí reklamace_id');
+    }
+
+    // BEZPEČNOST: Validace ID
+    if (!preg_match('/^[a-zA-Z0-9_-]+$/', $reklamaceId)) {
+        throw new Exception('Neplatné ID reklamace');
+    }
+
+    $pdo = getDbConnection();
+
+    // Najít reklamaci
+    $stmt = $pdo->prepare("
+        SELECT id FROM wgs_reklamace
+        WHERE reklamace_id = :reklamace_id OR cislo = :cislo
+        LIMIT 1
+    ");
+    $stmt->execute([
+        ':reklamace_id' => $reklamaceId,
+        ':cislo' => $reklamaceId
+    ]);
+    $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$reklamace) {
+        throw new Exception('Reklamace nebyla nalezena');
+    }
+
+    // Aktualizovat protokol data
+    $stmt = $pdo->prepare("
+        UPDATE wgs_reklamace
+        SET
+            popis_problemu = :problem_description,
+            navrh_reseni = :repair_proposal,
+            vyreseno = :solved,
+            updated_at = NOW()
+        WHERE id = :id
+    ");
+
+    $stmt->execute([
+        ':problem_description' => $problemDescription,
+        ':repair_proposal' => $repairProposal,
+        ':solved' => $solved,
+        ':id' => $reklamace['id']
+    ]);
+
+    return [
+        'status' => 'success',
+        'message' => 'Protokol uložen'
+    ];
+}
+
+/**
+ * Odeslání emailu zákazníkovi
+ */
+function sendEmailToCustomer($data) {
+    $reklamaceId = $data['reklamace_id'] ?? null;
+    $protocolPdf = $data['protokol_pdf'] ?? null;
+    $photosPdf = $data['photos_pdf'] ?? null;
+
+    if (!$reklamaceId) {
+        throw new Exception('Chybí reklamace_id');
+    }
+
+    // BEZPEČNOST: Validace ID
+    if (!preg_match('/^[a-zA-Z0-9_-]+$/', $reklamaceId)) {
+        throw new Exception('Neplatné ID reklamace');
+    }
+
+    $pdo = getDbConnection();
+
+    // Načtení reklamace a zákazníka
+    $stmt = $pdo->prepare("
+        SELECT * FROM wgs_reklamace
+        WHERE reklamace_id = :reklamace_id OR cislo = :cislo
+        LIMIT 1
+    ");
+    $stmt->execute([
+        ':reklamace_id' => $reklamaceId,
+        ':cislo' => $reklamaceId
+    ]);
+    $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$reklamace) {
+        throw new Exception('Reklamace nebyla nalezena');
+    }
+
+    $customerEmail = $reklamace['email'] ?? null;
+    if (!$customerEmail || !filter_var($customerEmail, FILTER_VALIDATE_EMAIL)) {
+        throw new Exception('Neplatná emailová adresa zákazníka');
+    }
+
+    // Příprava emailu
+    $subject = "Servisní protokol WGS - Reklamace č. {$reklamaceId}";
+    $customerName = $reklamace['jmeno'] ?? $reklamace['zakaznik'] ?? 'Zákazník';
+
+    $message = "
+Dobrý den {$customerName},
+
+zasíláme Vám servisní protokol k reklamaci č. {$reklamaceId}.
+
+V příloze naleznete:
+- Servisní protokol
+" . ($photosPdf ? "- Fotodokumentace" : "") . "
+
+V případě dotazů nás prosím kontaktujte.
+
+S pozdravem,
+White Glove Service
+reklamace@wgs-service.cz
++420 725 965 826
+";
+
+    $headers = "From: White Glove Service <reklamace@wgs-service.cz>\r\n";
+    $headers .= "Reply-To: reklamace@wgs-service.cz\r\n";
+    $headers .= "MIME-Version: 1.0\r\n";
+    $headers .= "Content-Type: multipart/mixed; boundary=\"WGS_BOUNDARY\"\r\n";
+
+    $body = "--WGS_BOUNDARY\r\n";
+    $body .= "Content-Type: text/plain; charset=UTF-8\r\n";
+    $body .= "Content-Transfer-Encoding: 8bit\r\n\r\n";
+    $body .= $message . "\r\n\r\n";
+
+    // Přiložit PDF protokolu
+    if ($protocolPdf) {
+        $body .= "--WGS_BOUNDARY\r\n";
+        $body .= "Content-Type: application/pdf; name=\"Protokol_{$reklamaceId}.pdf\"\r\n";
+        $body .= "Content-Transfer-Encoding: base64\r\n";
+        $body .= "Content-Disposition: attachment; filename=\"Protokol_{$reklamaceId}.pdf\"\r\n\r\n";
+        $body .= chunk_split($protocolPdf) . "\r\n";
+    }
+
+    // Přiložit PDF fotek
+    if ($photosPdf) {
+        $body .= "--WGS_BOUNDARY\r\n";
+        $body .= "Content-Type: application/pdf; name=\"Fotodokumentace_{$reklamaceId}.pdf\"\r\n";
+        $body .= "Content-Transfer-Encoding: base64\r\n";
+        $body .= "Content-Disposition: attachment; filename=\"Fotodokumentace_{$reklamaceId}.pdf\"\r\n\r\n";
+        $body .= chunk_split($photosPdf) . "\r\n";
+    }
+
+    $body .= "--WGS_BOUNDARY--";
+
+    // Odeslat email
+    $emailSent = mail($customerEmail, $subject, $body, $headers);
+
+    if (!$emailSent) {
+        throw new Exception('Nepodařilo se odeslat email');
+    }
+
+    // Aktualizovat stav reklamace
+    $stmt = $pdo->prepare("
+        UPDATE wgs_reklamace
+        SET db_stav = 'HOTOVO', updated_at = NOW()
+        WHERE id = :id
+    ");
+    $stmt->execute([':id' => $reklamace['id']]);
+
+    return [
+        'status' => 'success',
+        'message' => 'Email byl úspěšně odeslán'
     ];
 }
