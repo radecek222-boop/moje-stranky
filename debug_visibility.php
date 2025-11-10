@@ -391,18 +391,91 @@ if (isset($_GET['simulate_user_id'])) {
     echo '</div>';
 }
 
-// Formulář pro simulaci
+// Formulář pro simulaci - načtení skutečných uživatelů
 echo '<div class="section">';
-echo '<h2>SIMULOVAT LOAD.PHP</h2>';
+echo '<h2>SIMULOVAT LOAD.PHP - VÝBĚR KONKRÉTNÍHO UŽIVATELE</h2>';
+
+// Načíst všechny uživatele podle rolí
+$sql = "SELECT id, email, name, role FROM wgs_users ORDER BY role, name";
+$stmt = $pdo->query($sql);
+$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Seskupit podle rolí
+$usersByRole = [
+    'prodejce' => [],
+    'technik' => [],
+    'admin' => []
+];
+
+foreach ($users as $user) {
+    $userRole = strtolower(trim($user['role'] ?? 'user'));
+    if (in_array($userRole, ['prodejce', 'user'])) {
+        $usersByRole['prodejce'][] = $user;
+    } elseif (in_array($userRole, ['technik', 'technician'])) {
+        $usersByRole['technik'][] = $user;
+    } elseif ($userRole === 'admin') {
+        $usersByRole['admin'][] = $user;
+    }
+}
+
+echo '<p style="margin-bottom: 1rem;">Vyber konkrétního uživatele a zjisti co uvidí v seznam.php:</p>';
+
 echo '<form method="GET">';
-echo '<input type="number" name="simulate_user_id" placeholder="User ID" required>';
-echo '<select name="simulate_role">';
-echo '<option value="prodejce">prodejce</option>';
-echo '<option value="technik">technik</option>';
-echo '<option value="admin">admin</option>';
+echo '<select name="simulate_user_id" required style="padding: 0.75rem; border: 2px solid #000; font-family: \'Poppins\', sans-serif; font-size: 1rem; margin-right: 0.5rem; min-width: 300px;">';
+echo '<option value="">-- Vyber uživatele --</option>';
+
+// PRODEJCI
+if (!empty($usersByRole['prodejce'])) {
+    echo '<optgroup label="👤 PRODEJCI">';
+    foreach ($usersByRole['prodejce'] as $user) {
+        $userName = $user['name'] ?? $user['email'];
+        echo '<option value="' . $user['id'] . '" data-role="prodejce">';
+        echo htmlspecialchars($userName) . ' (' . $user['email'] . ') [ID:' . $user['id'] . ']';
+        echo '</option>';
+    }
+    echo '</optgroup>';
+}
+
+// TECHNICI
+if (!empty($usersByRole['technik'])) {
+    echo '<optgroup label="🔧 TECHNICI">';
+    foreach ($usersByRole['technik'] as $user) {
+        $userName = $user['name'] ?? $user['email'];
+        echo '<option value="' . $user['id'] . '" data-role="technik">';
+        echo htmlspecialchars($userName) . ' (' . $user['email'] . ') [ID:' . $user['id'] . ']';
+        echo '</option>';
+    }
+    echo '</optgroup>';
+}
+
+// ADMINI
+if (!empty($usersByRole['admin'])) {
+    echo '<optgroup label="⚙️ ADMINISTRÁTOŘI">';
+    foreach ($usersByRole['admin'] as $user) {
+        $userName = $user['name'] ?? $user['email'];
+        echo '<option value="' . $user['id'] . '" data-role="admin">';
+        echo htmlspecialchars($userName) . ' (' . $user['email'] . ') [ID:' . $user['id'] . ']';
+        echo '</option>';
+    }
+    echo '</optgroup>';
+}
+
 echo '</select>';
+
+echo '<select name="simulate_role" style="padding: 0.75rem; border: 2px solid #000; font-family: \'Poppins\', sans-serif; font-size: 1rem; margin-right: 0.5rem;">';
+echo '<option value="prodejce">Jako PRODEJCE</option>';
+echo '<option value="technik">Jako TECHNIK</option>';
+echo '<option value="admin">Jako ADMIN</option>';
+echo '</select>';
+
 echo '<button type="submit">SIMULOVAT</button>';
 echo '</form>';
+
+// Pokud jsou data z databáze prázdná
+if (empty($users)) {
+    echo '<p style="color: red; margin-top: 1rem;">⚠️ Žádní uživatelé nenalezeni v databázi wgs_users</p>';
+}
+
 echo '</div>';
 
 ?>

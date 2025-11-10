@@ -235,87 +235,220 @@ try {
         <?php endif; ?>
       </div>
 
-      <!-- DEBUG NÁSTROJE -->
+      <!-- KOMPLETNÍ NÁSTROJE - VŠE NA JEDNÉ STRÁNCE -->
       <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #000;">
-        <div style="margin-bottom: 1rem;">
-          <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333; font-weight: 600; letter-spacing: 0.05em;">DEBUG NÁSTROJE</h3>
-          <p style="margin: 0; color: #666; font-size: 0.9rem;">Diagnostika databáze, reklamací, fotek a struktur</p>
+        <div style="margin-bottom: 1.5rem;">
+          <h3 style="margin: 0 0 0.5rem 0; font-size: 1.3rem; color: #000; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">🔧 NÁSTROJE PRO OPRAVU A DIAGNOSTIKU</h3>
+          <p style="margin: 0; color: #666; font-size: 0.9rem;">Vše na jednom místě - opravy, statistiky, simulace</p>
         </div>
 
-        <div style="margin-bottom: 1rem;">
-          <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
-            <strong>Dostupné nástroje:</strong>
+        <?php
+        // ===== ZPRACOVÁNÍ AUTO-OPRAVY =====
+        $fixMessage = '';
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['auto_fix_all_visibility'])) {
+            try {
+                $stmt = $pdo->query("SELECT id, email FROM wgs_users WHERE email IS NOT NULL AND email != ''");
+                $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                $totalFixed = 0;
+                $details = [];
+
+                foreach ($users as $user) {
+                    $stmt = $pdo->prepare("UPDATE wgs_reklamace
+                                          SET created_by = :user_id,
+                                              created_by_role = 'prodejce'
+                                          WHERE LOWER(TRIM(email)) = LOWER(:email)
+                                          AND (created_by IS NULL OR created_by = 0)");
+                    $stmt->execute([':user_id' => $user['id'], ':email' => $user['email']]);
+
+                    $affected = $stmt->rowCount();
+                    if ($affected > 0) {
+                        $totalFixed += $affected;
+                        $details[] = "{$user['email']}: $affected";
+                    }
+                }
+
+                $fixMessage = "<div style='background: #0a0; color: white; padding: 1.5rem; margin-bottom: 1.5rem; border-radius: 8px; font-weight: 600;'>
+                    ✓ AUTO-OPRAVA DOKONČENA!<br>
+                    Celkem opraveno: <strong>$totalFixed reklamací</strong><br>
+                    " . (count($details) > 0 ? '<br>' . implode('<br>', $details) : '') . "
+                </div>";
+            } catch (Exception $e) {
+                $fixMessage = "<div style='background: #d00; color: white; padding: 1.5rem; margin-bottom: 1.5rem; border-radius: 8px;'>
+                    ✗ CHYBA: " . htmlspecialchars($e->getMessage()) . "
+                </div>";
+            }
+        }
+
+        // ZPRACOVÁNÍ INDIVIDUÁLNÍ OPRAVY
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fix_email'])) {
+            $emailToFix = trim($_POST['fix_email']);
+            $userIdToSet = (int)$_POST['fix_user_id'];
+
+            try {
+                $stmt = $pdo->prepare("UPDATE wgs_reklamace
+                                      SET created_by = :user_id,
+                                          created_by_role = 'prodejce'
+                                      WHERE LOWER(TRIM(email)) = LOWER(:email)
+                                      AND (created_by IS NULL OR created_by = 0)");
+                $stmt->execute([':user_id' => $userIdToSet, ':email' => $emailToFix]);
+
+                $affected = $stmt->rowCount();
+                $fixMessage = "<div style='background: #0a0; color: white; padding: 1.5rem; margin-bottom: 1.5rem; border-radius: 8px; font-weight: 600;'>
+                    ✓ OPRAVENO! $affected reklamací pro $emailToFix (created_by nastaveno na $userIdToSet)
+                </div>";
+            } catch (Exception $e) {
+                $fixMessage = "<div style='background: #d00; color: white; padding: 1.5rem; margin-bottom: 1.5rem; border-radius: 8px;'>
+                    ✗ CHYBA: " . htmlspecialchars($e->getMessage()) . "
+                </div>";
+            }
+        }
+
+        echo $fixMessage;
+        ?>
+
+        <!-- 1. STATISTIKA -->
+        <div style="background: #f8f8f8; border: 2px solid #000; padding: 1.5rem; margin-bottom: 1.5rem;">
+          <h4 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 700; text-transform: uppercase;">📊 STATISTIKA REKLAMACÍ</h4>
+
+          <?php
+          $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_reklamace");
+          $totalClaims = $stmt->fetchColumn();
+
+          $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_reklamace WHERE created_by IS NULL OR created_by = 0");
+          $nullCreatedBy = $stmt->fetchColumn();
+
+          $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_reklamace WHERE created_by IS NOT NULL AND created_by > 0");
+          $hasCreatedBy = $stmt->fetchColumn();
+
+          if ($nullCreatedBy > 0): ?>
+            <div style="background: #fff3e0; border: 2px solid #f57c00; padding: 1rem; margin-bottom: 1rem;">
+              <strong style="color: #e65100;">⚠️ PROBLÉM NALEZEN!</strong><br>
+              <span style="color: #e65100; font-size: 1.1rem; font-weight: 700;"><?= $nullCreatedBy ?> reklamací</span> z celkových <strong><?= $totalClaims ?></strong> nemá vyplněné created_by<br>
+              → Prodejci tyto reklamace NEVIDÍ v seznam.php
+            </div>
+
+            <form method="POST" style="margin-top: 1rem;">
+              <button type="submit" name="auto_fix_all_visibility" onclick="return confirm('OPRAVIT všechny reklamace s NULL created_by?')" style="width: 100%; padding: 1rem; background: #0a0; color: white; border: 3px solid #0a0; font-size: 1rem; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;">
+                ⚡ AUTO-OPRAVA VŠECH (<?= $nullCreatedBy ?> reklamací)
+              </button>
+            </form>
+          <?php else: ?>
+            <div style="background: #e8f5e9; border: 2px solid #4caf50; padding: 1rem; color: #2e7d32; font-weight: 600;">
+              ✓ V POŘÁDKU: Všechny reklamace mají vyplněné created_by
+            </div>
+          <?php endif; ?>
+
+          <div style="margin-top: 1rem; font-size: 0.9rem;">
+            <strong>Celkem reklamací:</strong> <?= $totalClaims ?><br>
+            <strong>created_by = NULL:</strong> <span style="color: <?= $nullCreatedBy > 0 ? 'red' : 'green' ?>; font-weight: bold;"><?= $nullCreatedBy ?></span><br>
+            <strong>created_by vyplněno:</strong> <span style="color: green; font-weight: bold;"><?= $hasCreatedBy ?></span>
           </div>
-          <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem; color: #666;">
-            <li>Struktura tabulek</li>
-            <li>Debug reklamací a viditelnosti</li>
-            <li>Debug fotek a propojení</li>
-            <li>Test databázového připojení</li>
-          </ul>
         </div>
 
-        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-          <span style="background: #e8f5e9; color: #388e3c; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Bezpečné</span>
-          <span style="background: #fff3e0; color: #f57c00; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Pouze čtení</span>
+        <!-- 2. REKLAMACE PODLE EMAILU -->
+        <?php if ($nullCreatedBy > 0): ?>
+        <div style="background: #f8f8f8; border: 2px solid #000; padding: 1.5rem; margin-bottom: 1.5rem;">
+          <h4 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 700; text-transform: uppercase;">📧 REKLAMACE S CHYBĚJÍCÍM created_by</h4>
+
+          <?php
+          $stmt = $pdo->query("SELECT
+              r.email,
+              COUNT(*) as total,
+              SUM(CASE WHEN r.created_by IS NULL OR r.created_by = 0 THEN 1 ELSE 0 END) as null_count,
+              u.id as user_id,
+              u.name as user_name,
+              u.role
+          FROM wgs_reklamace r
+          LEFT JOIN wgs_users u ON LOWER(TRIM(u.email)) = LOWER(TRIM(r.email))
+          WHERE r.email IS NOT NULL AND r.email != ''
+          GROUP BY r.email, u.id, u.name, u.role
+          HAVING null_count > 0
+          ORDER BY null_count DESC, total DESC");
+
+          $emailGroups = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+          if (!empty($emailGroups)): ?>
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+              <tr style="background: #000; color: white;">
+                <th style="padding: 0.75rem; text-align: left; border: 1px solid #000;">EMAIL</th>
+                <th style="padding: 0.75rem; text-align: left; border: 1px solid #000;">JMÉNO</th>
+                <th style="padding: 0.75rem; text-align: left; border: 1px solid #000;">NULL</th>
+                <th style="padding: 0.75rem; text-align: left; border: 1px solid #000;">AKCE</th>
+              </tr>
+              <?php foreach ($emailGroups as $row): ?>
+              <tr style="background: white;">
+                <td style="padding: 0.75rem; border: 1px solid #ddd;"><?= htmlspecialchars($row['email']) ?></td>
+                <td style="padding: 0.75rem; border: 1px solid #ddd;"><?= htmlspecialchars($row['user_name'] ?? '-') ?></td>
+                <td style="padding: 0.75rem; border: 1px solid #ddd; color: red; font-weight: bold;"><?= $row['null_count'] ?></td>
+                <td style="padding: 0.75rem; border: 1px solid #ddd;">
+                  <?php if ($row['user_id']): ?>
+                    <form method="POST" style="display: inline;">
+                      <input type="hidden" name="fix_email" value="<?= htmlspecialchars($row['email']) ?>">
+                      <input type="hidden" name="fix_user_id" value="<?= $row['user_id'] ?>">
+                      <button type="submit" style="padding: 0.5rem 1rem; background: #0a0; color: white; border: none; cursor: pointer; font-weight: 600; font-size: 0.8rem;">
+                        OPRAVIT (<?= $row['null_count'] ?>)
+                      </button>
+                    </form>
+                  <?php else: ?>
+                    <span style="color: red;">⚠️ User neexistuje</span>
+                  <?php endif; ?>
+                </td>
+              </tr>
+              <?php endforeach; ?>
+            </table>
+          <?php endif; ?>
+        </div>
+        <?php endif; ?>
+
+        <!-- 3. PŘEHLED VŠECH REKLAMACÍ -->
+        <div style="background: #f8f8f8; border: 2px solid #000; padding: 1.5rem; margin-bottom: 1.5rem;">
+          <h4 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 700; text-transform: uppercase;">📋 VŠECHNY REKLAMACE (poslední 30)</h4>
+
+          <?php
+          $stmt = $pdo->query("SELECT
+              id,
+              reklamace_id,
+              cislo,
+              email,
+              jmeno,
+              created_by,
+              created_by_role,
+              created_at
+          FROM wgs_reklamace
+          ORDER BY created_at DESC
+          LIMIT 30");
+
+          $allClaims = $stmt->fetchAll(PDO::FETCH_ASSOC);
+          ?>
+
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
+              <tr style="background: #000; color: white;">
+                <th style="padding: 0.5rem; text-align: left; border: 1px solid #000;">ID</th>
+                <th style="padding: 0.5rem; text-align: left; border: 1px solid #000;">REK_ID</th>
+                <th style="padding: 0.5rem; text-align: left; border: 1px solid #000;">EMAIL</th>
+                <th style="padding: 0.5rem; text-align: left; border: 1px solid #000;">JMÉNO</th>
+                <th style="padding: 0.5rem; text-align: left; border: 1px solid #000;">CREATED_BY</th>
+                <th style="padding: 0.5rem; text-align: left; border: 1px solid #000;">ROLE</th>
+              </tr>
+              <?php foreach ($allClaims as $claim):
+                $isNull = ($claim['created_by'] === null || $claim['created_by'] == 0);
+                $bgColor = $isNull ? '#fdd' : 'white';
+              ?>
+              <tr style="background: <?= $bgColor ?>;">
+                <td style="padding: 0.5rem; border: 1px solid #ddd;"><?= $claim['id'] ?></td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.7rem;"><?= $claim['reklamace_id'] ?? '-' ?></td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;"><?= htmlspecialchars($claim['email'] ?? '-') ?></td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;"><?= htmlspecialchars($claim['jmeno'] ?? '-') ?></td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; font-weight: bold; <?= $isNull ? 'color: red;' : '' ?>"><?= $isNull ? 'NULL ⚠️' : $claim['created_by'] ?></td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;"><?= $claim['created_by_role'] ?? '-' ?></td>
+              </tr>
+              <?php endforeach; ?>
+            </table>
+          </div>
         </div>
 
-        <div style="margin-bottom: 1rem;">
-          <a
-            href="fix_visibility.php"
-            target="_blank"
-            style="display: block; width: 100%; padding: 0.875rem 0.75rem; background: #d00; color: white; border: 2px solid #d00; border-radius: 0; font-size: 0.9rem; font-weight: 700; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; text-align: center; text-decoration: none; margin-bottom: 0.5rem;"
-          >
-            🔧 OPRAVA VIDITELNOSTI
-          </a>
-
-          <a
-            href="diagnostic_access_active.php"
-            target="_blank"
-            style="display: block; width: 100%; padding: 0.875rem 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-size: 0.8rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; text-align: center; text-decoration: none; margin-bottom: 0.5rem;"
-          >
-            ⚡ AKTIVNÍ DIAGNOSTIKA
-          </a>
-
-          <a
-            href="diagnostic_tool.php"
-            target="_blank"
-            style="display: block; width: 100%; padding: 0.875rem 0.75rem; background: #555; color: white; border: 2px solid #555; border-radius: 0; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; text-align: center; text-decoration: none; margin-bottom: 0.5rem;"
-          >
-            SQL/PHP Debug
-          </a>
-
-          <a
-            href="diagnostic_access_control.php"
-            target="_blank"
-            style="display: block; width: 100%; padding: 0.875rem 0.75rem; background: #555; color: white; border: 2px solid #555; border-radius: 0; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; text-align: center; text-decoration: none;"
-          >
-            Dokumentace systému
-          </a>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
-          <a
-            href="show_table_structure.php"
-            target="_blank"
-            style="display: block; padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; text-align: center; text-decoration: none; white-space: normal; line-height: 1.3;"
-          >
-            STRUKTURA
-          </a>
-          <a
-            href="debug_photos.php"
-            target="_blank"
-            style="display: block; padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; text-align: center; text-decoration: none; white-space: normal; line-height: 1.3;"
-          >
-            FOTKY
-          </a>
-          <a
-            href="validate_tools.php"
-            target="_blank"
-            style="display: block; padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; text-align: center; text-decoration: none; white-space: normal; line-height: 1.3;"
-          >
-            TEST ✓
-          </a>
-        </div>
       </div>
 
       <!-- TESTOVÁNÍ ROLÍ -->
@@ -326,62 +459,40 @@ try {
         </div>
 
         <?php
-        // OBSLUHA SIMULACE ROLÍ
+        // OBSLUHA SIMULACE ROLÍ - DYNAMICKÉ NAČÍTÁNÍ SKUTEČNÝCH UŽIVATELŮ
         if (!isset($_SESSION['_original_admin_session'])) {
             $_SESSION['_original_admin_session'] = [
                 'user_id' => $_SESSION['user_id'] ?? null,
-                'user_email' => $_SESSION['user_email'] ?? null,  // OPRAVENO: user_email
+                'user_email' => $_SESSION['user_email'] ?? null,
                 'role' => $_SESSION['role'] ?? null,
                 'is_admin' => $_SESSION['is_admin'] ?? null,
-                'name' => $_SESSION['user_name'] ?? null,  // OPRAVENO: user_name
+                'name' => $_SESSION['user_name'] ?? null,
             ];
         }
 
         $roleAction = $_POST['role_action'] ?? null;
 
         if ($roleAction === 'simulate') {
-            $simulateRole = $_POST['simulate_role'] ?? null;
+            $simulateUserId = (int)($_POST['simulate_user_id'] ?? 0);
 
-            switch ($simulateRole) {
-                case 'admin':
-                    $_SESSION['user_id'] = 1;
-                    $_SESSION['user_email'] = 'admin@wgs-service.cz';  // OPRAVENO: user_email
-                    $_SESSION['role'] = 'admin';
-                    $_SESSION['is_admin'] = true;
-                    $_SESSION['user_name'] = 'Admin (TEST)';  // OPRAVENO: user_name
-                    $_SESSION['_simulating'] = 'admin';
-                    break;
+            if ($simulateUserId > 0) {
+                // Načíst skutečného uživatele z databáze
+                $stmt = $pdo->prepare("SELECT id, email, name, role FROM wgs_users WHERE id = :id LIMIT 1");
+                $stmt->execute([':id' => $simulateUserId]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                case 'prodejce':
-                    $_SESSION['user_id'] = 7;
-                    $_SESSION['user_email'] = 'naty@naty.cz';  // OPRAVENO: user_email
-                    $_SESSION['role'] = 'prodejce';
-                    $_SESSION['is_admin'] = false;
-                    $_SESSION['user_name'] = 'Naty Prodejce (TEST)';  // OPRAVENO: user_name
-                    $_SESSION['_simulating'] = 'prodejce';
-                    break;
+                if ($user) {
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['user_email'] = $user['email'];
+                    $_SESSION['role'] = $user['role'];
+                    $_SESSION['is_admin'] = (strtolower($user['role']) === 'admin');
+                    $_SESSION['user_name'] = $user['name'] . ' (TEST)';
+                    $_SESSION['_simulating'] = strtolower($user['role']);
 
-                case 'technik':
-                    $_SESSION['user_id'] = 15;
-                    $_SESSION['user_email'] = 'milan@technik.cz';  // OPRAVENO: user_email
-                    $_SESSION['role'] = 'technik';
-                    $_SESSION['is_admin'] = false;
-                    $_SESSION['user_name'] = 'Milan Technik (TEST)';  // OPRAVENO: user_name
-                    $_SESSION['_simulating'] = 'technik';
-                    break;
-
-                case 'guest':
-                    $_SESSION['user_id'] = null;
-                    $_SESSION['user_email'] = 'jiri@novacek.cz';  // OPRAVENO: user_email
-                    $_SESSION['role'] = 'guest';
-                    $_SESSION['is_admin'] = false;
-                    $_SESSION['user_name'] = 'Jiří Nováček (TEST)';  // OPRAVENO: user_name
-                    $_SESSION['_simulating'] = 'guest';
-                    break;
+                    header('Location: admin.php?tab=tools&simulated=' . urlencode($user['name']));
+                    exit;
+                }
             }
-
-            header('Location: admin.php?tab=tools&simulated=' . urlencode($simulateRole));
-            exit;
         }
 
         if ($roleAction === 'reset') {
@@ -433,40 +544,77 @@ try {
           <?php endif; ?>
         </div>
 
-        <!-- Role výběr -->
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
-          <form method="POST" style="margin: 0;">
-            <input type="hidden" name="role_action" value="simulate">
-            <input type="hidden" name="simulate_role" value="admin">
-            <button type="submit" style="width: 100%; padding: 0.75rem 0.5rem; background: <?= $currentSimulation === 'admin' ? '#000' : '#fff' ?>; color: <?= $currentSimulation === 'admin' ? '#fff' : '#000' ?>; border: 2px solid #000; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3;">
-              Admin
-            </button>
-          </form>
+        <!-- Role výběr - VÝBĚR KONKRÉTNÍHO UŽIVATELE -->
+        <?php
+        // Načíst všechny uživatele podle rolí
+        $stmt = $pdo->query("SELECT id, email, name, role FROM wgs_users ORDER BY role, name");
+        $allUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-          <form method="POST" style="margin: 0;">
-            <input type="hidden" name="role_action" value="simulate">
-            <input type="hidden" name="simulate_role" value="prodejce">
-            <button type="submit" style="width: 100%; padding: 0.75rem 0.5rem; background: <?= $currentSimulation === 'prodejce' ? '#000' : '#fff' ?>; color: <?= $currentSimulation === 'prodejce' ? '#fff' : '#000' ?>; border: 2px solid #000; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3;">
-              Prodejce
-            </button>
-          </form>
+        // Seskupit podle rolí
+        $usersByRole = [
+            'admin' => [],
+            'prodejce' => [],
+            'technik' => []
+        ];
 
-          <form method="POST" style="margin: 0;">
-            <input type="hidden" name="role_action" value="simulate">
-            <input type="hidden" name="simulate_role" value="technik">
-            <button type="submit" style="width: 100%; padding: 0.75rem 0.5rem; background: <?= $currentSimulation === 'technik' ? '#000' : '#fff' ?>; color: <?= $currentSimulation === 'technik' ? '#fff' : '#000' ?>; border: 2px solid #000; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3;">
-              Technik
-            </button>
-          </form>
+        foreach ($allUsers as $u) {
+            $uRole = strtolower(trim($u['role'] ?? 'user'));
+            if ($uRole === 'admin') {
+                $usersByRole['admin'][] = $u;
+            } elseif (in_array($uRole, ['prodejce', 'user'])) {
+                $usersByRole['prodejce'][] = $u;
+            } elseif (in_array($uRole, ['technik', 'technician'])) {
+                $usersByRole['technik'][] = $u;
+            }
+        }
+        ?>
 
-          <form method="POST" style="margin: 0;">
-            <input type="hidden" name="role_action" value="simulate">
-            <input type="hidden" name="simulate_role" value="guest">
-            <button type="submit" style="width: 100%; padding: 0.75rem 0.5rem; background: <?= $currentSimulation === 'guest' ? '#000' : '#fff' ?>; color: <?= $currentSimulation === 'guest' ? '#fff' : '#000' ?>; border: 2px solid #000; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3;">
-              Guest
-            </button>
-          </form>
-        </div>
+        <form method="POST" style="margin-bottom: 1rem;">
+          <input type="hidden" name="role_action" value="simulate">
+
+          <div style="margin-bottom: 0.75rem;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">
+              Vyber uživatele pro simulaci:
+            </label>
+            <select name="simulate_user_id" required style="width: 100%; padding: 0.75rem; border: 2px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.9rem; background: white;">
+              <option value="">-- Vyber uživatele --</option>
+
+              <?php if (!empty($usersByRole['admin'])): ?>
+              <optgroup label="⚙️ ADMINISTRÁTOŘI">
+                <?php foreach ($usersByRole['admin'] as $u): ?>
+                <option value="<?= $u['id'] ?>">
+                  <?= htmlspecialchars($u['name'] ?? $u['email']) ?> (<?= $u['email'] ?>)
+                </option>
+                <?php endforeach; ?>
+              </optgroup>
+              <?php endif; ?>
+
+              <?php if (!empty($usersByRole['prodejce'])): ?>
+              <optgroup label="👤 PRODEJCI">
+                <?php foreach ($usersByRole['prodejce'] as $u): ?>
+                <option value="<?= $u['id'] ?>">
+                  <?= htmlspecialchars($u['name'] ?? $u['email']) ?> (<?= $u['email'] ?>)
+                </option>
+                <?php endforeach; ?>
+              </optgroup>
+              <?php endif; ?>
+
+              <?php if (!empty($usersByRole['technik'])): ?>
+              <optgroup label="🔧 TECHNICI">
+                <?php foreach ($usersByRole['technik'] as $u): ?>
+                <option value="<?= $u['id'] ?>">
+                  <?= htmlspecialchars($u['name'] ?? $u['email']) ?> (<?= $u['email'] ?>)
+                </option>
+                <?php endforeach; ?>
+              </optgroup>
+              <?php endif; ?>
+            </select>
+          </div>
+
+          <button type="submit" style="width: 100%; padding: 0.875rem; background: #000; color: white; border: 2px solid #000; font-size: 0.85rem; font-weight: 700; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; white-space: normal; line-height: 1.3;">
+            SIMULOVAT TOHOTO UŽIVATELE
+          </button>
+        </form>
 
         <!-- Reset button -->
         <?php if ($currentSimulation): ?>
