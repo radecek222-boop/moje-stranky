@@ -14,7 +14,7 @@ header('Content-Type: text/plain; charset=utf-8');
 
 echo "=== DEBUG SESSION & LOAD.PHP ===\n\n";
 
-echo "📋 SESSION DATA:\n";
+echo "[SESSION DATA]\n";
 echo "  user_id: " . var_export($_SESSION['user_id'] ?? null, true) . "\n";
 echo "  user_email: " . var_export($_SESSION['user_email'] ?? null, true) . "\n";
 echo "  user_name: " . var_export($_SESSION['user_name'] ?? null, true) . "\n";
@@ -31,7 +31,7 @@ try {
     $userId = $_SESSION['user_id'] ?? null;
     $userEmail = $_SESSION['user_email'] ?? null;
 
-    echo "🔍 LOAD.PHP FILTRY:\n";
+    echo "[LOAD.PHP FILTRY]\n";
     echo "  Je admin? " . ($isAdmin ? "ANO (vidí vše)" : "NE (filtruje)") . "\n";
     echo "  User ID pro filtr: " . var_export($userId, true) . "\n";
     echo "  Email pro filtr: " . var_export($userEmail, true) . "\n";
@@ -53,7 +53,7 @@ try {
     ");
     $allClaims = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo "📊 VŠECHNY REKLAMACE V DB (" . count($allClaims) . "):\n";
+    echo "[VŠECHNY REKLAMACE V DB] Celkem: " . count($allClaims) . "\n";
     echo str_repeat("-", 100) . "\n";
 
     foreach ($allClaims as $claim) {
@@ -70,7 +70,7 @@ try {
     echo "\n";
 
     if (!$isAdmin && $userEmail) {
-        echo "🎯 FILTROVÁNÍ PRO UŽIVATELE (email={$userEmail}):\n";
+        echo "[FILTROVÁNÍ PRO UŽIVATELE] email={$userEmail}\n";
         echo "  Normalized user email: '" . strtolower(trim($userEmail)) . "'\n\n";
 
         // Test email match
@@ -91,7 +91,7 @@ try {
 
         echo "  Testování email match:\n";
         foreach ($claims as $claim) {
-            $match = $claim['email_match'] ? '✅ MATCH' : '❌ NO MATCH';
+            $match = $claim['email_match'] ? '[OK] MATCH' : '[X] NO MATCH';
             echo sprintf("    ID %d: email='%s' normalized='%s' -> %s\n",
                 $claim['id'],
                 $claim['email'] ?? 'NULL',
@@ -119,7 +119,7 @@ try {
         if (!empty($whereParts)) {
             $whereClause = 'WHERE (' . implode(' OR ', $whereParts) . ')';
 
-            echo "📝 SQL DOTAZ (load.php):\n";
+            echo "[SQL DOTAZ] load.php\n";
             echo "  WHERE: " . $whereClause . "\n";
             echo "  PARAMS: " . json_encode($params, JSON_UNESCAPED_UNICODE) . "\n\n";
 
@@ -134,9 +134,9 @@ try {
             $stmt->execute($params);
             $visible = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            echo "✅ VIDITELNÉ REKLAMACE (" . count($visible) . "):\n";
+            echo "[VIDITELNÉ REKLAMACE] Celkem: " . count($visible) . "\n";
             if (empty($visible)) {
-                echo "  ⚠️ ŽÁDNÉ!\n";
+                echo "  [VAROVÁNÍ] ŽÁDNÉ!\n";
             } else {
                 foreach ($visible as $claim) {
                     echo sprintf("  ID %d: %s (%s) - created_by=%s\n",
@@ -151,7 +151,7 @@ try {
     }
 
 } catch (Exception $e) {
-    echo "\n❌ CHYBA: " . $e->getMessage() . "\n";
+    echo "\n[CHYBA] " . $e->getMessage() . "\n";
 }
 
 echo "\n=== KONEC DEBUGU ===\n";
