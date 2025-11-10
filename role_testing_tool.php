@@ -285,16 +285,18 @@ $currentSimulation = $_SESSION['_simulating'] ?? null;
             background: var(--wgs-black);
             color: var(--wgs-white);
             border: 2px solid var(--wgs-black);
-            padding: 0.75rem 2rem;
-            font-size: 0.75rem;
+            padding: 0.875rem 1.5rem;
+            font-size: 0.8rem;
             font-weight: 600;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
             cursor: pointer;
             transition: all 0.3s;
             width: 100%;
             margin-top: 1rem;
             font-family: 'Poppins', sans-serif;
+            white-space: normal;
+            line-height: 1.4;
         }
 
         button:hover {
