@@ -1389,7 +1389,9 @@ async function showCustomerDetail(id) {
   const doplnujici_info = CURRENT_RECORD.doplnujici_info || '';
   const fakturace_firma = CURRENT_RECORD.fakturace_firma || 'CZ';
 
-  const dbPhotos = await loadPhotosFromDB(id);
+  // Použij reklamace_id (alfanumerické), ne číselné id
+  const reklamaceId = CURRENT_RECORD.reklamace_id || CURRENT_RECORD.cislo || id;
+  const dbPhotos = await loadPhotosFromDB(reklamaceId);
   let fotky = dbPhotos.length > 0 ? dbPhotos : [];
 
   if (fotky.length === 0) {
