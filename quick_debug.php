@@ -1,9 +1,16 @@
 <?php
 /**
  * QUICK DEBUG - Proč naty@naty.cz nevidí obě reklamace?
+ * BEZPEČNOST: Pouze pro přihlášené uživatele
  */
 
 require_once __DIR__ . '/init.php';
+
+// BEZPEČNOST: Kontrola přihlášení
+if (!isset($_SESSION['user_id']) && !(isset($_SESSION['is_admin']) && $_SESSION['is_admin'])) {
+    http_response_code(401);
+    die('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Přístup odepřen</title></head><body style="font-family: Arial; padding: 40px; text-align: center;"><h1>🔒 Přístup odepřen</h1><p>Musíte být přihlášeni pro zobrazení této stránky.</p><p><a href="/login" style="color: #2196F3;">Přihlásit se</a></p></body></html>');
+}
 
 header('Content-Type: text/html; charset=utf-8');
 ?>
