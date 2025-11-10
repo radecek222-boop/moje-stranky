@@ -36,7 +36,14 @@ if (!$isAdmin) {
 <!-- MAIN CONTENT -->
 <main>
 <div class="container">
-  
+
+  <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 1.5rem; padding: 1rem; background: var(--c-white); border: 1px solid var(--c-border); border-radius: 12px;">
+    <div class="user-info" style="font-weight: 600; letter-spacing: 0.03em; color: var(--c-text-primary, #1d1f2c); text-transform: uppercase; font-size: 0.85rem;">
+      <span style="font-weight: 400; margin-right: 0.5rem; color: var(--c-text-secondary, #6b7280); text-transform: none;">Přihlášený uživatel:</span>
+      <span class="user-name" id="userName" style="font-size: 1rem; color: var(--c-accent, #0f766e);"><?php echo htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['admin_name'] ?? 'Admin', ENT_QUOTES, 'UTF-8'); ?></span>
+    </div>
+  </div>
+
   <!-- PAGE HEADER -->
   <div class="page-header">
     <div>

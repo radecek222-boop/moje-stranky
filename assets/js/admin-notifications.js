@@ -9,22 +9,69 @@ let notificationState = {
   bccEmails: []
 };
 
+const ADMIN_SESSION_EXPIRED_MESSAGE = 'Vaše administrátorská relace vypršela. Přihlaste se prosím znovu.';
+
+function redirectToAdminLogin(tab = '') {
+  const redirectTarget = tab ? `admin.php?tab=${tab}` : 'admin.php';
+  window.location.href = `login.php?redirect=${encodeURIComponent(redirectTarget)}`;
+}
+
+function handleNotificationsUnauthorized(response, container, tab = 'notifications') {
+  if (response && (response.status === 401 || response.status === 403)) {
+    if (container) {
+      container.innerHTML = `<div class="error-message">${ADMIN_SESSION_EXPIRED_MESSAGE}</div>`;
+    } else {
+      alert(ADMIN_SESSION_EXPIRED_MESSAGE);
+    }
+
+    setTimeout(() => redirectToAdminLogin(tab), 800);
+    return true;
+  }
+
+  return false;
+}
+
 // ============================================
 // LOAD NOTIFICATIONS
 // ============================================
 async function loadNotifications() {
+  const container = document.getElementById('notifications-container');
+  if (!container) return;
+
   try {
-    const res = await fetch('/api/notification_list_direct.php');
-    const result = await res.json();
-    
+    const res = await fetch('/api/notification_list_direct.php', {
+      credentials: 'same-origin'
+    });
+
+    let result;
+
+    if (!res.ok) {
+      if (handleNotificationsUnauthorized(res, container)) {
+        return;
+      }
+
+      try {
+        result = await res.json();
+      } catch (parseErr) {
+        result = null;
+      }
+
+      const message = result?.message ? `: ${result.message}` : '';
+      throw new Error(`HTTP ${res.status}${message}`);
+    }
+
+    result = await res.json();
+
     if (result.status === 'success') {
       notificationState.notifications = result.data || [];
       renderNotifications();
+    } else {
+      container.innerHTML = `<div class="error-message">${result.message || 'Chyba při načítání notifikací'}</div>`;
     }
   } catch (err) {
     console.error('Load notifications failed:', err);
-    document.getElementById('notifications-container').innerHTML = 
-      '<div class="error-message">Chyba při načítání notifikací</div>';
+    const message = err && err.message ? err.message : 'Chyba při načítání notifikací';
+    container.innerHTML = `<div class="error-message">${message}</div>`;
   }
 }
 
@@ -106,16 +153,31 @@ function toggleNotificationBody(notificationId) {
 async function toggleNotification(notificationId) {
   const notif = notificationState.notifications.find(n => n.id == notificationId);
   if (!notif) return;
-  
+
   const newActive = !notif.active;
-  
+
   try {
+    const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() : null;
+    if (!csrfToken) {
+      throw new Error('CSRF token not available');
+    }
+
     const res = await fetch('/api/notification_api.php?action=toggle', {
       method: 'POST',
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notification_id: notificationId, active: newActive })
+      body: JSON.stringify({ notification_id: notificationId, active: newActive, csrf_token: csrfToken })
     });
-    
+
+    if (!res.ok) {
+      if (handleNotificationsUnauthorized(res, null, 'notifications')) {
+        return;
+      }
+
+      const message = await res.text();
+      throw new Error(message || 'Chyba při změně stavu notifikace');
+    }
+
     const result = await res.json();
     if (result.status === 'success') {
       notif.active = newActive;
@@ -129,9 +191,10 @@ async function toggleNotification(notificationId) {
 
 // Load on tab switch
 document.addEventListener('DOMContentLoaded', () => {
-  // Check if we're on notifications tab
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('tab') === 'notifications') {
+  const hasContainer = document.getElementById('notifications-container');
+
+  if (hasContainer && (urlParams.get('tab') === 'notifications' || window.location.pathname.endsWith('admin.php'))) {
     loadNotifications();
   }
 });
@@ -260,17 +323,32 @@ async function saveNotificationTemplate() {
   }
   
   try {
+    const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() : null;
+    if (!csrfToken) {
+      throw new Error('CSRF token not available');
+    }
+
     const res = await fetch('/api/notification_api.php?action=update', {
       method: 'POST',
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: notificationState.currentEditing.id, ...data })
+      body: JSON.stringify({ id: notificationState.currentEditing.id, ...data, csrf_token: csrfToken })
     });
-    
+
+    if (!res.ok) {
+      if (handleNotificationsUnauthorized(res, null, 'notifications')) {
+        return;
+      }
+
+      const message = await res.text();
+      throw new Error(message || 'Chyba při ukládání šablony');
+    }
+
     const result = await res.json();
     if (result.status === 'success') {
       successDiv.textContent = 'Šablona byla úspěšně uložena!';
       successDiv.style.display = 'block';
-      
+
       // Update state
       notificationState.notifications = notificationState.notifications.map(n => 
         n.id === notificationState.currentEditing.id 

@@ -121,8 +121,26 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     $_SESSION['user_id'] = $userId;
     $_SESSION['user_name'] = $user['name'] ?? ($user['email'] ?? 'Uživatel');
     $_SESSION['user_email'] = $user['email'] ?? '';
-    $_SESSION['role'] = $user['role'] ?? 'user';
-    $_SESSION['is_admin'] = ($_SESSION['role'] === 'admin');
+
+    $rawRole = $user['role'] ?? 'user';
+    $_SESSION['role'] = $rawRole;
+
+    $normalizedRole = strtolower(trim((string) $rawRole));
+    $adminRoles = ['admin', 'administrator', 'superadmin'];
+    $isAdminColumn = false;
+
+    if (array_key_exists('is_admin', $user)) {
+        $isAdminColumn = in_array($user['is_admin'], [1, '1', true, 'true', 'yes', 'on'], true);
+    }
+
+    $isAdminUser = $isAdminColumn || in_array($normalizedRole, $adminRoles, true);
+
+    $_SESSION['is_admin'] = $isAdminUser;
+
+    if ($isAdminUser) {
+        $_SESSION['admin_id'] = $_SESSION['admin_id'] ?? $userId;
+        $_SESSION['admin_name'] = $_SESSION['user_name'];
+    }
 
     if (db_table_has_column($pdo, 'wgs_users', 'last_login_at')) {
         $update = $pdo->prepare('UPDATE wgs_users SET last_login_at = NOW() WHERE email = :email');
