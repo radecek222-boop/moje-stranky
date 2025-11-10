@@ -63,55 +63,30 @@ try {
     $stmt->execute([':reklamace_id' => $reklamaceId]);
     $photos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Seskupení podle sekcí
-    $sections = [
-        'before' => [],
-        'id' => [],
-        'problem' => [],
-        'repair' => [],
-        'after' => []
-    ];
-
-    $totalPhotos = 0;
+    // Připravit pole fotek s cestami
+    $photosList = [];
 
     foreach ($photos as $photo) {
-        $sectionName = $photo['section_name'];
-        $photoPath = __DIR__ . '/../' . $photo['photo_path'];
+        $photoPath = $photo['photo_path'];
 
-        // Kontrola existence souboru
-        if (!file_exists($photoPath)) {
-            continue;
-        }
-
-        // Načtení obrázku a převod na base64
-        $imageData = file_get_contents($photoPath);
-        if ($imageData === false) {
-            continue;
-        }
-
-        // Detekce MIME typu
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $photoPath);
-        finfo_close($finfo);
-
-        // Převod na base64 data URI
-        $base64Data = 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
-
-        // Přidání do příslušné sekce
-        if (isset($sections[$sectionName])) {
-            $sections[$sectionName][] = [
-                'type' => $photo['photo_type'],
-                'data' => $base64Data
+        // Kontrola existence souboru na disku
+        $fullPath = __DIR__ . '/../' . $photoPath;
+        if (file_exists($fullPath)) {
+            $photosList[] = [
+                'id' => $photo['id'],
+                'photo_path' => $photoPath,
+                'section_name' => $photo['section_name'],
+                'photo_type' => $photo['photo_type'],
+                'photo_order' => $photo['photo_order']
             ];
-            $totalPhotos++;
         }
     }
 
     // Úspěšná odpověď
     echo json_encode([
         'success' => true,
-        'total_photos' => $totalPhotos,
-        'sections' => $sections
+        'total_photos' => count($photosList),
+        'photos' => $photosList
     ]);
 
 } catch (Exception $e) {
@@ -120,12 +95,6 @@ try {
         'success' => false,
         'error' => $e->getMessage(),
         'total_photos' => 0,
-        'sections' => [
-            'before' => [],
-            'id' => [],
-            'problem' => [],
-            'repair' => [],
-            'after' => []
-        ]
+        'photos' => []
     ]);
 }
