@@ -283,7 +283,7 @@ async function loadUsers() {
   try {
     tbody.innerHTML = '<tr><td colspan="7" class="loading">Načítání...</td></tr>';
 
-    const response = await fetch('api/admin_users_api.php?action=list', {
+    const response = await fetch('/api/admin_users_api.php?action=list', {
       credentials: 'same-origin'
     });
     if (!response.ok) {
@@ -362,7 +362,7 @@ async function addUser() {
       throw new Error('CSRF token not available');
     }
 
-    const response = await fetch('api/admin_users_api.php?action=add', {
+    const response = await fetch('/api/admin_users_api.php?action=add', {
       method: 'POST',
       credentials: 'same-origin',
       headers: {'Content-Type': 'application/json'},
@@ -414,7 +414,7 @@ async function deleteUser(userId) {
       throw new Error('CSRF token not available');
     }
 
-    const response = await fetch('api/admin_users_api.php?action=delete', {
+    const response = await fetch('/api/admin_users_api.php?action=delete', {
       method: 'POST',
       credentials: 'same-origin',
       headers: {'Content-Type': 'application/json'},
@@ -455,7 +455,7 @@ async function loadOnline() {
   try {
     tbody.innerHTML = '<tr><td colspan="5" class="loading">Načítání...</td></tr>';
 
-    const response = await fetch('api/admin_users_api.php?action=online', {
+    const response = await fetch('/api/admin_users_api.php?action=online', {
       credentials: 'same-origin'
     });
     if (!response.ok) {
