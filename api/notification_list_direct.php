@@ -47,7 +47,7 @@ try {
     $stmt = $pdo->query("
         SELECT
             id,
-            name,
+            trigger_event AS name,
             description,
             trigger_event,
             recipient_type,
@@ -61,7 +61,7 @@ try {
             created_at,
             updated_at
         FROM wgs_notifications
-        ORDER BY name ASC
+        ORDER BY trigger_event ASC
     ");
 
     $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
