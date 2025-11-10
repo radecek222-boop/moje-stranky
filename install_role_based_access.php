@@ -15,6 +15,18 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 $step = $_GET['step'] ?? 'start';
 $action = $_POST['action'] ?? null;
 
+// Zkontroluj jestli už je nainstalováno
+$isInstalled = false;
+try {
+    $pdo = getDbConnection();
+    $stmt = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'created_by'");
+    if ($stmt->rowCount() > 0) {
+        $isInstalled = true;
+    }
+} catch (Exception $e) {
+    // Ignoruj chyby při kontrole
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -309,7 +321,41 @@ $action = $_POST['action'] ?? null;
 </head>
 <body>
     <div class="container">
-        <?php if ($step === 'start'): ?>
+        <?php if ($isInstalled && $action !== 'install'): ?>
+            <!-- JIŽ NAINSTALOVÁNO -->
+            <div class="header">
+                <h1>ROLE-BASED ACCESS JE NAINSTALOVÁN</h1>
+                <p class="subtitle">Systém je již aktivní a funkční</p>
+            </div>
+
+            <div class="content">
+                <div class="success">
+                    <h3>ÚSPĚCH!</h3>
+                    <p>Role-Based Access Control systém je již nainstalován a funkční.</p>
+                    <p style="margin-top: 0.75rem;">Všechny potřebné sloupce a indexy jsou v databázi.</p>
+                </div>
+
+                <div class="info">
+                    <strong>CO JE AKTIVNÍ:</strong><br>
+                    <ul style="margin-top: 0.75rem;">
+                        <li>Sloupce <code>created_by</code> a <code>created_by_role</code> existují</li>
+                        <li>Systém podporuje neomezený počet prodejců a techniků</li>
+                        <li>Prodejci vidí všechny reklamace, technici pouze přiřazené</li>
+                    </ul>
+                </div>
+
+                <div class="button-grid">
+                    <a href="/admin.php?tab=tools" class="button button-secondary">
+                        ZPĚT NA ADMIN
+                    </a>
+                    <a href="/seznam.php" class="button">
+                        SEZNAM REKLAMACÍ
+                    </a>
+                </div>
+            </div>
+
+        <?php elseif ($step === 'start' && !$isInstalled): ?>
+            <!-- FORMULÁŘ PRO INSTALACI -->
             <div class="header">
                 <h1>INSTALACE ROLE-BASED ACCESS</h1>
                 <p class="subtitle">Automatická migrace databáze pro škálovatelný systém rolí</p>
@@ -333,13 +379,14 @@ $action = $_POST['action'] ?? null;
                     Prodejci uvidí všechny reklamace, technici pouze přiřazené.
                 </div>
 
-                <form method="POST">
+                <form method="POST" action="" id="installForm">
                     <input type="hidden" name="action" value="install">
-                    <button type="submit">SPUSTIT INSTALACI</button>
+                    <button type="submit" id="installBtn">SPUSTIT INSTALACI</button>
                 </form>
             </div>
 
         <?php elseif ($action === 'install'): ?>
+            <!-- INSTALACE PROBÍHÁ -->
             <div class="header">
                 <h1>PROBÍHÁ INSTALACE...</h1>
             </div>
@@ -549,5 +596,34 @@ $action = $_POST['action'] ?? null;
             </div>
         </div>
     </div>
+
+    <script>
+        // Debug pro formulář
+        const form = document.getElementById('installForm');
+        const btn = document.getElementById('installBtn');
+
+        if (form && btn) {
+            console.log('Formulář nalezen, přidávám event listener');
+
+            form.addEventListener('submit', function(e) {
+                console.log('Formulář se odesílá...');
+                console.log('Action:', form.action);
+                console.log('Method:', form.method);
+                console.log('FormData:', new FormData(form));
+
+                // Změň text tlačítka
+                btn.textContent = 'SPOUŠTÍM...';
+                btn.disabled = true;
+
+                // Nech formulář odeslat normálně (nepoužívej e.preventDefault())
+            });
+
+            btn.addEventListener('click', function(e) {
+                console.log('Tlačítko bylo kliknuto');
+            });
+        } else {
+            console.log('Formulář nebo tlačítko nenalezeno - pravděpodobně již nainstalováno');
+        }
+    </script>
 </body>
 </html>

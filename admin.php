@@ -16,6 +16,18 @@ if (!array_key_exists($activeTab, $tabConfig)) {
 }
 $currentTabMeta = $tabConfig[$activeTab];
 $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
+
+// Zkontroluj jestli je RBAC nainstalován
+$rbacInstalled = false;
+try {
+    $pdo = getDbConnection();
+    $stmt = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'created_by'");
+    if ($stmt->rowCount() > 0) {
+        $rbacInstalled = true;
+    }
+} catch (Exception $e) {
+    // Ignoruj chyby
+}
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -161,31 +173,66 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
           <p style="margin: 0; color: #666; font-size: 0.9rem;">Škálovatelný systém rolí pro neomezený počet prodejců a techniků</p>
         </div>
 
-        <div style="margin-bottom: 1rem;">
-          <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
-            <strong>Co se nainstaluje:</strong>
+        <?php if ($rbacInstalled): ?>
+          <!-- JIŽ NAINSTALOVÁNO -->
+          <div style="background: #e8f5e9; border: 2px solid #4CAF50; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <div style="font-size: 0.85rem; color: #2e7d32; font-weight: 600; margin-bottom: 0.5rem;">
+              ✓ SYSTÉM JE AKTIVNÍ
+            </div>
+            <div style="font-size: 0.8rem; color: #555;">
+              Role-Based Access Control je nainstalován a funkční.
+            </div>
           </div>
-          <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem; color: #666;">
-            <li>Sloupce <code>created_by</code> a <code>created_by_role</code></li>
-            <li>Naplnění existujících dat</li>
-            <li>Indexy pro rychlé vyhledávání</li>
-            <li>Nastavení rolí pro uživatele</li>
-          </ul>
-        </div>
 
-        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-          <span style="background: #e3f2fd; color: #1976d2; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">v2.0</span>
-          <span style="background: #f3e5f5; color: #7b1fa2; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Vyžaduje migraci</span>
-        </div>
+          <div style="margin-bottom: 1rem;">
+            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
+              <strong>Co je aktivní:</strong>
+            </div>
+            <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem; color: #666;">
+              <li>Sloupce <code>created_by</code> a <code>created_by_role</code></li>
+              <li>Indexy pro rychlé vyhledávání</li>
+              <li>Podpora neomezeného počtu uživatelů</li>
+              <li>Role prodejce, technik, admin, guest</li>
+            </ul>
+          </div>
 
-        <button
-          onclick="window.location.href='install_role_based_access.php'"
-          style="width: 100%; padding: 0.875rem 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.8rem; transition: all 0.3s; white-space: normal; line-height: 1.3;"
-          onmouseover="this.style.background='#fff'; this.style.color='#000'"
-          onmouseout="this.style.background='#000'; this.style.color='#fff'"
-        >
-          SPUSTIT INSTALACI
-        </button>
+          <button
+            onclick="window.location.href='install_role_based_access.php'"
+            style="width: 100%; padding: 0.875rem 0.75rem; background: #fff; color: #000; border: 2px solid #000; border-radius: 0; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.8rem; transition: all 0.3s; white-space: normal; line-height: 1.3;"
+            onmouseover="this.style.background='#000'; this.style.color='#fff'"
+            onmouseout="this.style.background='#fff'; this.style.color='#000'"
+          >
+            ZOBRAZIT DETAIL
+          </button>
+
+        <?php else: ?>
+          <!-- JEŠTĚ NENÍ NAINSTALOVÁNO -->
+          <div style="margin-bottom: 1rem;">
+            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
+              <strong>Co se nainstaluje:</strong>
+            </div>
+            <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem; color: #666;">
+              <li>Sloupce <code>created_by</code> a <code>created_by_role</code></li>
+              <li>Naplnění existujících dat</li>
+              <li>Indexy pro rychlé vyhledávání</li>
+              <li>Nastavení rolí pro uživatele</li>
+            </ul>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+            <span style="background: #e3f2fd; color: #1976d2; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">v2.0</span>
+            <span style="background: #f3e5f5; color: #7b1fa2; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Vyžaduje migraci</span>
+          </div>
+
+          <button
+            onclick="window.location.href='install_role_based_access.php'"
+            style="width: 100%; padding: 0.875rem 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.8rem; transition: all 0.3s; white-space: normal; line-height: 1.3;"
+            onmouseover="this.style.background='#fff'; this.style.color='#000'"
+            onmouseout="this.style.background='#000'; this.style.color='#fff'"
+          >
+            SPUSTIT INSTALACI
+          </button>
+        <?php endif; ?>
       </div>
 
       <!-- DEBUG NÁSTROJE -->
