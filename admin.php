@@ -155,7 +155,7 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
 
       <!-- INSTALÁTOR: Role-Based Access -->
-      <div class="tool-card" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #667eea;">
+      <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #667eea;">
         <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
           <div style="font-size: 2.5rem;">🔐</div>
           <div style="flex: 1;">
@@ -192,7 +192,7 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
       </div>
 
       <!-- DEBUG NÁSTROJE -->
-      <div class="tool-card" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #2196F3;">
+      <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #2196F3;">
         <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
           <div style="font-size: 2.5rem;">🔍</div>
           <div style="flex: 1;">
@@ -235,7 +235,7 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
       </div>
 
       <!-- TESTY -->
-      <div class="tool-card" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #ff9800;">
+      <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #ff9800;">
         <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
           <div style="font-size: 2.5rem;">🧪</div>
           <div style="flex: 1;">
@@ -290,7 +290,7 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
       </div>
 
       <!-- DOKUMENTACE -->
-      <div class="tool-card" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #4CAF50;">
+      <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #4CAF50;">
         <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
           <div style="font-size: 2.5rem;">📚</div>
           <div style="flex: 1;">

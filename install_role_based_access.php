@@ -200,7 +200,9 @@ $action = $_POST['action'] ?? null;
             <div class="log" id="log"></div>
 
             <?php
-            $logs = [];
+            // DŮLEŽITÉ: Vypnout output buffering pro real-time feedback
+            if (ob_get_level()) ob_end_flush();
+
             $errors = [];
             $success = true;
 
@@ -208,12 +210,16 @@ $action = $_POST['action'] ?? null;
                 $pdo = getDbConnection();
 
                 function addLog($message, $type = 'info') {
-                    global $logs;
-                    $logs[] = ['msg' => $message, 'type' => $type];
+                    $msg = htmlspecialchars($message, ENT_QUOTES);
+                    echo "<script>document.getElementById('log').innerHTML += '<div class=\"{$type}\">{$msg}</div>'; document.getElementById('log').scrollTop = document.getElementById('log').scrollHeight;</script>";
+                    echo str_repeat(' ', 1024); // Flush buffer
+                    flush();
+                    usleep(300000); // 300ms delay pro vizuální efekt
                 }
 
                 function updateProgress($percent) {
                     echo "<script>document.getElementById('progress').style.width = '{$percent}%'; document.getElementById('progress').textContent = '{$percent}%';</script>";
+                    echo str_repeat(' ', 1024); // Flush buffer
                     flush();
                 }
 
@@ -292,48 +298,95 @@ $action = $_POST['action'] ?? null;
                 }
                 updateProgress(90);
 
-                // Krok 3: Ověření
-                addLog('🔍 Ověřuji instalaci...', 'info');
+                // Krok 3: Zpětná validace
+                addLog('', 'info');
+                addLog('🔍 ZPĚTNÁ VALIDACE - Ověřuji instalaci...', 'info');
+                updateProgress(90);
+
+                // Kontrola existence sloupců
+                $stmt = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'created_by'");
+                if ($stmt->rowCount() > 0) {
+                    addLog('✅ Sloupec created_by existuje', 'ok');
+                } else {
+                    throw new Exception('Sloupec created_by nebyl vytvořen!');
+                }
+
+                $stmt = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'created_by_role'");
+                if ($stmt->rowCount() > 0) {
+                    addLog('✅ Sloupec created_by_role existuje', 'ok');
+                } else {
+                    throw new Exception('Sloupec created_by_role nebyl vytvořen!');
+                }
+
+                // Kontrola dat
                 $stmt = $pdo->query("SELECT COUNT(*) as total FROM wgs_reklamace WHERE created_by IS NOT NULL OR created_by_role IS NOT NULL");
                 $result = $stmt->fetch(PDO::FETCH_ASSOC);
-                addLog("✅ Ověřeno: {$result['total']} reklamací má nastavené role", 'ok');
-                updateProgress(100);
+                addLog("✅ Reklamací s nastavenou rolí: {$result['total']}", 'ok');
 
+                // Kontrola role naty@naty.cz
+                $stmt = $pdo->query("SELECT role FROM wgs_users WHERE email = 'naty@naty.cz'");
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($user) {
+                    addLog("✅ Role naty@naty.cz: {$user['role']}", 'ok');
+                } else {
+                    addLog('⚠️ Uživatel naty@naty.cz nenalezen v databázi', 'info');
+                }
+
+                // Kontrola indexů
+                $stmt = $pdo->query("SHOW INDEX FROM wgs_reklamace WHERE Key_name = 'idx_created_by'");
+                if ($stmt->rowCount() > 0) {
+                    addLog('✅ Index idx_created_by existuje', 'ok');
+                }
+
+                $stmt = $pdo->query("SHOW INDEX FROM wgs_reklamace WHERE Key_name = 'idx_created_by_role'");
+                if ($stmt->rowCount() > 0) {
+                    addLog('✅ Index idx_created_by_role existuje', 'ok');
+                }
+
+                updateProgress(100);
                 addLog('', 'info');
                 addLog('🎉 INSTALACE DOKONČENA ÚSPĚŠNĚ!', 'ok');
+                addLog('✅ Všechny validace prošly', 'ok');
 
             } catch (Exception $e) {
                 $success = false;
                 addLog('❌ CHYBA: ' . $e->getMessage(), 'error');
                 addLog('📄 Stack trace: ' . $e->getTraceAsString(), 'error');
             }
-
-            // Vypsat všechny logy
-            echo "<script>";
-            foreach ($logs as $log) {
-                $msg = htmlspecialchars($log['msg'], ENT_QUOTES);
-                $type = $log['type'];
-                echo "document.getElementById('log').innerHTML += '<div class=\"{$type}\">{$msg}</div>';";
-            }
-            echo "</script>";
             ?>
 
             <?php if ($success): ?>
                 <div class="success">
                     <h3>✅ Instalace byla úspěšná!</h3>
                     <p>Systém je nyní připravený pro neomezený počet prodejců a techniků.</p>
+                    <p style="margin-top: 10px; font-size: 14px;">✅ Všechny validační kontroly prošly úspěšně.</p>
                 </div>
-                <a href="/seznam.php" style="display: block; text-align: center; margin-top: 20px; padding: 16px; background: #28a745; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
-                    🎯 Otevřít seznam reklamací
-                </a>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                    <a href="/admin.php?tab=tools" style="display: flex; align-items: center; justify-content: center; padding: 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        ⚙️ Zpět na Admin
+                    </a>
+                    <a href="/seznam.php" style="display: flex; align-items: center; justify-content: center; padding: 16px; background: #28a745; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        🎯 Seznam reklamací
+                    </a>
+                </div>
+
+                <button onclick="window.close()" style="margin-top: 15px; background: #6c757d; border: none; padding: 12px; color: white; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%;">
+                    ❌ Zavřít okno
+                </button>
             <?php else: ?>
                 <div class="error">
                     <h3>❌ Instalace selhala</h3>
                     <p>Zkontroluj chybovou zprávu výše a kontaktuj podporu.</p>
                 </div>
-                <a href="?step=start" style="display: block; text-align: center; margin-top: 20px; padding: 16px; background: #dc3545; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
-                    🔄 Zkusit znovu
-                </a>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                    <a href="?step=start" style="display: flex; align-items: center; justify-content: center; padding: 16px; background: #dc3545; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                        🔄 Zkusit znovu
+                    </a>
+                    <a href="/admin.php?tab=tools" style="display: flex; align-items: center; justify-content: center; padding: 16px; background: #6c757d; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                        ⚙️ Zpět na Admin
+                    </a>
+                </div>
             <?php endif; ?>
 
         <?php endif; ?>
