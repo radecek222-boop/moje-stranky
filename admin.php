@@ -261,6 +261,15 @@ try {
 
         <div style="margin-bottom: 1rem;">
           <button
+            onclick="window.open('debug_visibility.php', '_blank')"
+            style="width: 100%; padding: 0.875rem 0.75rem; background: #d00; color: white; border: 2px solid #d00; border-radius: 0; font-size: 0.8rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3; margin-bottom: 0.5rem;"
+            onmouseover="this.style.background='#fff'; this.style.color='#d00'"
+            onmouseout="this.style.background='#d00'; this.style.color='#fff'"
+          >
+            🔍 DEBUG VIDITELNOSTI
+          </button>
+
+          <button
             onclick="window.open('diagnostic_access_active.php', '_blank')"
             style="width: 100%; padding: 0.875rem 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-size: 0.8rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3; margin-bottom: 0.5rem;"
             onmouseover="this.style.background='#fff'; this.style.color='#000'"
