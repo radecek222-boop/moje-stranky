@@ -47,21 +47,44 @@ try {
         $userId = $_SESSION['user_id'] ?? null;
         $userEmail = $_SESSION['user_email'] ?? null;
 
+        $userConditions = [];
+
+        // Filter by created_by (user ID)
         if ($userId !== null && in_array('created_by', $columns, true)) {
-            $whereParts[] = 'r.created_by = :created_by';
+            $userConditions[] = 'r.created_by = :created_by';
             $params[':created_by'] = $userId;
-        } elseif ($userId !== null && in_array('assigned_to', $columns, true)) {
-            $whereParts[] = 'r.assigned_to = :assigned_to';
+        }
+
+        // Filter by assigned_to (assigned user ID)
+        if ($userId !== null && in_array('assigned_to', $columns, true)) {
+            $userConditions[] = 'r.assigned_to = :assigned_to';
             $params[':assigned_to'] = $userId;
-        } elseif ($userId !== null && in_array('zpracoval_id', $columns, true)) {
-            $whereParts[] = 'r.zpracoval_id = :zpracoval_id';
+        }
+
+        // Filter by zpracoval_id (processed by user ID)
+        if ($userId !== null && in_array('zpracoval_id', $columns, true)) {
+            $userConditions[] = 'r.zpracoval_id = :zpracoval_id';
             $params[':zpracoval_id'] = $userId;
-        } elseif ($userEmail && in_array('prodejce_email', $columns, true)) {
-            $whereParts[] = 'r.prodejce_email = :user_email';
+        }
+
+        // Filter by customer email (for claims created without login)
+        if ($userEmail && in_array('email', $columns, true)) {
+            $userConditions[] = 'r.email = :user_email';
             $params[':user_email'] = $userEmail;
-        } else {
+        }
+
+        // Filter by prodejce_email (seller email)
+        if ($userEmail && in_array('prodejce_email', $columns, true)) {
+            $userConditions[] = 'r.prodejce_email = :prodejce_email';
+            $params[':prodejce_email'] = $userEmail;
+        }
+
+        if (empty($userConditions)) {
             throw new Exception('Nelze ověřit oprávnění pro načtení reklamací.');
         }
+
+        // Combine all user conditions with OR (user sees claims matching ANY condition)
+        $whereParts[] = '(' . implode(' OR ', $userConditions) . ')';
     }
 
     $whereClause = '';
