@@ -24,22 +24,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fix_email'])) {
     $userIdToSet = (int)$_POST['fix_user_id'];
 
     try {
-        // Aktualizace
+        // Načíst SKUTEČNOU roli uživatele z databáze
+        $stmt = $pdo->prepare("SELECT role FROM wgs_users WHERE id = :user_id LIMIT 1");
+        $stmt->execute([':user_id' => $userIdToSet]);
+        $userRecord = $stmt->fetch(PDO::FETCH_ASSOC);
+        $userRole = strtolower(trim($userRecord['role'] ?? 'user'));
+
+        // Aktualizace s SKUTEČNOU rolí
         $sql = "UPDATE wgs_reklamace
                 SET created_by = :user_id,
-                    created_by_role = 'prodejce'
+                    created_by_role = :role
                 WHERE LOWER(TRIM(email)) = LOWER(:email)
                 AND (created_by IS NULL OR created_by = 0)";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
             ':user_id' => $userIdToSet,
-            ':email' => $emailToFix
+            ':email' => $emailToFix,
+            ':role' => $userRole
         ]);
 
         $affected = $stmt->rowCount();
         $message = "<div style='background: #0a0; color: white; padding: 2rem; margin: 2rem 0; font-size: 1.2rem; font-weight: bold;'>
-            ✓ ÚSPĚCH! Opraveno $affected reklamací pro $emailToFix (created_by nastaveno na $userIdToSet)
+            ✓ ÚSPĚCH! Opraveno $affected reklamací pro $emailToFix<br>
+            (created_by = $userIdToSet, role = $userRole)
         </div>";
     } catch (Exception $e) {
         $message = "<div style='background: #d00; color: white; padding: 2rem; margin: 2rem 0;'>
@@ -51,8 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fix_email'])) {
 // AUTO-FIX ALL
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['auto_fix_all'])) {
     try {
-        // Najít všechny uživatele s emailem
-        $sql = "SELECT id, email FROM wgs_users WHERE email IS NOT NULL AND email != ''";
+        // Najít všechny uživatele s emailem A ROLÍ
+        $sql = "SELECT id, email, role FROM wgs_users WHERE email IS NOT NULL AND email != ''";
         $stmt = $pdo->query($sql);
         $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -60,22 +68,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['auto_fix_all'])) {
         $details = [];
 
         foreach ($users as $user) {
+            // Použít SKUTEČNOU roli uživatele
+            $userRole = strtolower(trim($user['role'] ?? 'user'));
+
             $sql = "UPDATE wgs_reklamace
                     SET created_by = :user_id,
-                        created_by_role = 'prodejce'
+                        created_by_role = :role
                     WHERE LOWER(TRIM(email)) = LOWER(:email)
                     AND (created_by IS NULL OR created_by = 0)";
 
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 ':user_id' => $user['id'],
-                ':email' => $user['email']
+                ':email' => $user['email'],
+                ':role' => $userRole
             ]);
 
             $affected = $stmt->rowCount();
             if ($affected > 0) {
                 $totalFixed += $affected;
-                $details[] = "{$user['email']}: $affected reklamací";
+                $details[] = "{$user['email']} ({$userRole}): $affected reklamací";
             }
         }
 
