@@ -21,6 +21,17 @@ async function getCSRFToken() {
   }
 }
 
+const SESSION_EXPIRED_MESSAGE = 'Vaše administrátorská relace vypršela. Přihlaste se prosím znovu.';
+
+function isUnauthorizedStatus(status) {
+  return status === 401 || status === 403;
+}
+
+function redirectToLogin(redirectTarget = '') {
+  const query = redirectTarget ? `?redirect=${encodeURIComponent(redirectTarget)}` : '';
+  window.location.href = `login.php${query}`;
+}
+
 // ============================================================
 // TAB MANAGEMENT
 // ============================================================
@@ -61,20 +72,31 @@ function invalidateCsrfToken() {
 async function loadKeys() {
   const container = document.getElementById('keys-container');
   if (!container) return;
-  
+
   try {
     container.innerHTML = '<div class="loading">Načítání klíčů...</div>';
     const response = await fetch('api/admin_api.php?action=list_keys', {
       credentials: 'same-origin'
     });
+
+    if (!response.ok) {
+      if (isUnauthorizedStatus(response.status)) {
+        container.innerHTML = `<div class="error-message">${SESSION_EXPIRED_MESSAGE}</div>`;
+        setTimeout(() => redirectToLogin('admin.php?tab=keys'), 800);
+        return;
+      }
+
+      throw new Error(`HTTP ${response.status}`);
+    }
+
     const data = await response.json();
-    
+
     if (data.status === 'success') {
       if (data.keys.length === 0) {
         container.innerHTML = '<p style="text-align:center;color:#999;padding:2rem;">Žádné klíče</p>';
         return;
       }
-      
+
       let html = '';
       data.keys.forEach(key => {
         html += '<div class="key-display" style="margin-bottom:1.5rem;">';
@@ -93,9 +115,12 @@ async function loadKeys() {
         html += '</div></div>';
       });
       container.innerHTML = html;
+      return;
     }
+
+    container.innerHTML = `<div class="error-message">${data.message || 'Nepodařilo se načíst klíče.'}</div>`;
   } catch (error) {
-    container.innerHTML = '<div class="error-message">Chyba</div>';
+    container.innerHTML = '<div class="error-message">Chyba při načítání klíčů.</div>';
     console.error('Error:', error);
   }
 }
@@ -114,13 +139,31 @@ async function createKey() {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({key_type: keyType, csrf_token: csrfToken})
     });
-    const data = await response.json();
-    if (data.status === 'success') {
+    let data = null;
+
+    try {
+      data = await response.json();
+    } catch (err) {
+      data = null;
+    }
+
+    if (!response.ok) {
+      if (isUnauthorizedStatus(response.status)) {
+        alert(SESSION_EXPIRED_MESSAGE);
+        redirectToLogin('admin.php?tab=keys');
+        return;
+      }
+
+      const message = data?.message || 'Nepodařilo se vytvořit klíč.';
+      throw new Error(message);
+    }
+
+    if (data?.status === 'success') {
       alert('Vytvořeno: ' + data.key_code);
       invalidateCsrfToken();
       loadKeys();
     } else {
-      alert(data.message || 'Nepodařilo se vytvořit klíč');
+      alert(data?.message || 'Nepodařilo se vytvořit klíč');
     }
   } catch (error) {
     console.error('Error:', error);
@@ -141,12 +184,30 @@ async function deleteKey(keyCode) {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({key_code: keyCode, csrf_token: csrfToken})
     });
-    const data = await response.json();
-    if (data.status === 'success') {
+    let data = null;
+
+    try {
+      data = await response.json();
+    } catch (err) {
+      data = null;
+    }
+
+    if (!response.ok) {
+      if (isUnauthorizedStatus(response.status)) {
+        alert(SESSION_EXPIRED_MESSAGE);
+        redirectToLogin('admin.php?tab=keys');
+        return;
+      }
+
+      const message = data?.message || 'Klíč se nepodařilo smazat';
+      throw new Error(message);
+    }
+
+    if (data?.status === 'success') {
       invalidateCsrfToken();
       loadKeys();
     } else {
-      alert(data.message || 'Klíč se nepodařilo smazat');
+      alert(data?.message || 'Klíč se nepodařilo smazat');
     }
   } catch (error) {
     console.error('Error:', error);
@@ -184,6 +245,21 @@ async function loadDashboard() {
     const response = await fetch('api/admin_stats_api.php', {
       credentials: 'same-origin'
     });
+    if (!response.ok) {
+      if (isUnauthorizedStatus(response.status)) {
+        ['stat-claims', 'stat-users', 'stat-online', 'stat-keys'].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.textContent = '—';
+          }
+        });
+        setTimeout(() => redirectToLogin('admin.php'), 800);
+        return;
+      }
+
+      throw new Error(`HTTP ${response.status}`);
+    }
+
     const data = await response.json();
 
     if (data.status === 'success') {
@@ -210,6 +286,16 @@ async function loadUsers() {
     const response = await fetch('api/admin_users_api.php?action=list', {
       credentials: 'same-origin'
     });
+    if (!response.ok) {
+      if (isUnauthorizedStatus(response.status)) {
+        tbody.innerHTML = `<tr><td colspan="7" class="error-message">${SESSION_EXPIRED_MESSAGE}</td></tr>`;
+        setTimeout(() => redirectToLogin('admin.php?tab=users'), 800);
+        return;
+      }
+
+      throw new Error(`HTTP ${response.status}`);
+    }
+
     const data = await response.json();
 
     if (data.status === 'success') {
@@ -237,6 +323,8 @@ async function loadUsers() {
         html += '</tr>';
       });
       tbody.innerHTML = html;
+    } else {
+      tbody.innerHTML = `<tr><td colspan="7" class="error-message">${data.message || 'Nepodařilo se načíst uživatele.'}</td></tr>`;
     }
   } catch (error) {
     tbody.innerHTML = '<tr><td colspan="7" class="error-message">Chyba načítání</td></tr>';
@@ -269,12 +357,30 @@ async function addUser() {
   }
 
   try {
+    const csrfToken = await getCSRFToken();
+    if (!csrfToken) {
+      throw new Error('CSRF token not available');
+    }
+
     const response = await fetch('api/admin_users_api.php?action=add', {
       method: 'POST',
       credentials: 'same-origin',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ name, email, phone, address, role, password })
+      body: JSON.stringify({ name, email, phone, address, role, password, csrf_token: csrfToken })
     });
+
+    if (!response.ok) {
+      if (isUnauthorizedStatus(response.status)) {
+        errorDiv.textContent = SESSION_EXPIRED_MESSAGE;
+        errorDiv.classList.remove('hidden');
+        setTimeout(() => redirectToLogin('admin.php?tab=users'), 800);
+        return;
+      }
+
+      const message = await response.text();
+      throw new Error(message || 'Nepodařilo se vytvořit uživatele');
+    }
+
     const data = await response.json();
 
     if (data.status === 'success') {
@@ -303,12 +409,29 @@ async function deleteUser(userId) {
   if (!confirm('Opravdu smazat tohoto uživatele?')) return;
 
   try {
+    const csrfToken = await getCSRFToken();
+    if (!csrfToken) {
+      throw new Error('CSRF token not available');
+    }
+
     const response = await fetch('api/admin_users_api.php?action=delete', {
       method: 'POST',
       credentials: 'same-origin',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ user_id: userId })
+      body: JSON.stringify({ user_id: userId, csrf_token: csrfToken })
     });
+
+    if (!response.ok) {
+      if (isUnauthorizedStatus(response.status)) {
+        alert(SESSION_EXPIRED_MESSAGE);
+        redirectToLogin('admin.php?tab=users');
+        return;
+      }
+
+      const message = await response.text();
+      throw new Error(message || 'Chyba při mazání uživatele');
+    }
+
     const data = await response.json();
 
     if (data.status === 'success') {
@@ -335,6 +458,16 @@ async function loadOnline() {
     const response = await fetch('api/admin_users_api.php?action=online', {
       credentials: 'same-origin'
     });
+    if (!response.ok) {
+      if (isUnauthorizedStatus(response.status)) {
+        tbody.innerHTML = `<tr><td colspan="5" class="error-message">${SESSION_EXPIRED_MESSAGE}</td></tr>`;
+        setTimeout(() => redirectToLogin('admin.php?tab=online'), 800);
+        return;
+      }
+
+      throw new Error(`HTTP ${response.status}`);
+    }
+
     const data = await response.json();
 
     if (data.status === 'success') {
@@ -358,6 +491,8 @@ async function loadOnline() {
         html += '</tr>';
       });
       tbody.innerHTML = html;
+    } else {
+      tbody.innerHTML = `<tr><td colspan="5" class="error-message">${data.message || 'Nepodařilo se načíst online uživatele.'}</td></tr>`;
     }
   } catch (error) {
     tbody.innerHTML = '<tr><td colspan="5" class="error-message">Chyba načítání</td></tr>';

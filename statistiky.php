@@ -393,5 +393,6 @@ if (!$isAdmin) {
 <script src="assets/js/statistiky-debug.js" defer></script>
 <script src="assets/js/statistiky.min.js" defer></script>
 <script src="assets/js/statistiky-event-fix.js" defer></script>
+<script src="assets/js/statistiky-overrides.js" defer></script>
 </body>
 </html>
