@@ -286,55 +286,174 @@ try {
         </div>
       </div>
 
-      <!-- TESTY -->
+      <!-- TESTOVÁNÍ ROLÍ -->
       <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #000;">
         <div style="margin-bottom: 1rem;">
-          <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333; font-weight: 600; letter-spacing: 0.05em;">TESTY & VALIDACE</h3>
-          <p style="margin: 0; color: #666; font-size: 0.9rem;">Automatické testy funkcionality a integrity</p>
+          <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333; font-weight: 600; letter-spacing: 0.05em;">TESTOVÁNÍ ROLÍ</h3>
+          <p style="margin: 0; color: #666; font-size: 0.9rem;">Simulace různých uživatelských rolí pro testování přístupů</p>
         </div>
 
-        <div style="margin-bottom: 1rem;">
-          <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
-            <strong>Dostupné testy:</strong>
+        <?php
+        // OBSLUHA SIMULACE ROLÍ
+        if (!isset($_SESSION['_original_admin_session'])) {
+            $_SESSION['_original_admin_session'] = [
+                'user_id' => $_SESSION['user_id'] ?? null,
+                'email' => $_SESSION['email'] ?? null,
+                'role' => $_SESSION['role'] ?? null,
+                'is_admin' => $_SESSION['is_admin'] ?? null,
+                'name' => $_SESSION['name'] ?? null,
+            ];
+        }
+
+        $roleAction = $_POST['role_action'] ?? null;
+
+        if ($roleAction === 'simulate') {
+            $simulateRole = $_POST['simulate_role'] ?? null;
+
+            switch ($simulateRole) {
+                case 'admin':
+                    $_SESSION['user_id'] = 1;
+                    $_SESSION['email'] = 'admin@wgs-service.cz';
+                    $_SESSION['role'] = 'admin';
+                    $_SESSION['is_admin'] = true;
+                    $_SESSION['name'] = 'Admin (TEST)';
+                    $_SESSION['_simulating'] = 'admin';
+                    break;
+
+                case 'prodejce':
+                    $_SESSION['user_id'] = 7;
+                    $_SESSION['email'] = 'naty@naty.cz';
+                    $_SESSION['role'] = 'prodejce';
+                    $_SESSION['is_admin'] = false;
+                    $_SESSION['name'] = 'Naty Prodejce (TEST)';
+                    $_SESSION['_simulating'] = 'prodejce';
+                    break;
+
+                case 'technik':
+                    $_SESSION['user_id'] = 15;
+                    $_SESSION['email'] = 'milan@technik.cz';
+                    $_SESSION['role'] = 'technik';
+                    $_SESSION['is_admin'] = false;
+                    $_SESSION['name'] = 'Milan Technik (TEST)';
+                    $_SESSION['_simulating'] = 'technik';
+                    break;
+
+                case 'guest':
+                    $_SESSION['user_id'] = null;
+                    $_SESSION['email'] = 'jiri@novacek.cz';
+                    $_SESSION['role'] = 'guest';
+                    $_SESSION['is_admin'] = false;
+                    $_SESSION['name'] = 'Jiří Nováček (TEST)';
+                    $_SESSION['_simulating'] = 'guest';
+                    break;
+            }
+
+            header('Location: admin.php?tab=tools&simulated=' . urlencode($simulateRole));
+            exit;
+        }
+
+        if ($roleAction === 'reset') {
+            $originalSession = $_SESSION['_original_admin_session'];
+            $_SESSION['user_id'] = $originalSession['user_id'];
+            $_SESSION['email'] = $originalSession['email'];
+            $_SESSION['role'] = $originalSession['role'];
+            $_SESSION['is_admin'] = $originalSession['is_admin'];
+            $_SESSION['name'] = $originalSession['name'];
+            unset($_SESSION['_simulating']);
+
+            header('Location: admin.php?tab=tools&reset=1');
+            exit;
+        }
+
+        $currentSimulation = $_SESSION['_simulating'] ?? null;
+        ?>
+
+        <!-- Upozornění -->
+        <?php if (isset($_GET['simulated'])): ?>
+          <div style="background: #fff3e0; border: 2px solid #f57c00; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <div style="font-size: 0.85rem; color: #e65100; font-weight: 600;">
+              SIMULACE AKTIVNÍ: <?= htmlspecialchars($_GET['simulated']) ?>
+            </div>
           </div>
-          <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem; color: #666;">
-            <li>Test databázového připojení</li>
-            <li>Test emailových notifikací</li>
-            <li>Test upload fotek</li>
-            <li>Diagnostický nástroj pro testování rolí</li>
-          </ul>
+        <?php elseif (isset($_GET['reset'])): ?>
+          <div style="background: #e8f5e9; border: 2px solid #4CAF50; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <div style="font-size: 0.85rem; color: #2e7d32; font-weight: 600;">
+              ✓ RESET NA ADMIN SESSION
+            </div>
+          </div>
+        <?php elseif ($currentSimulation): ?>
+          <div style="background: #fff3e0; border: 2px solid #f57c00; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <div style="font-size: 0.85rem; color: #e65100; font-weight: 600;">
+              POZOR: Simuluješ roli "<?= htmlspecialchars($currentSimulation) ?>"
+            </div>
+          </div>
+        <?php endif; ?>
+
+        <!-- Aktuální session -->
+        <div style="background: #f8f8f8; border: 1px solid #E0E0E0; padding: 1rem; margin-bottom: 1rem; font-size: 0.8rem; font-family: monospace;">
+          <div style="margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #000;">Aktuální Session:</div>
+          <div style="color: #555;">user_id: <strong><?= isset($_SESSION['user_id']) ? htmlspecialchars($_SESSION['user_id']) : 'NULL' ?></strong></div>
+          <div style="color: #555;">email: <strong><?= isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : 'NULL' ?></strong></div>
+          <div style="color: #555;">role: <strong><?= isset($_SESSION['role']) ? htmlspecialchars($_SESSION['role']) : 'NULL' ?></strong></div>
+          <div style="color: #555;">is_admin: <strong><?= isset($_SESSION['is_admin']) && $_SESSION['is_admin'] ? 'true' : 'false' ?></strong></div>
+          <?php if ($currentSimulation): ?>
+          <div style="color: #f57c00;">_simulating: <strong><?= htmlspecialchars($currentSimulation) ?></strong></div>
+          <?php endif; ?>
         </div>
 
-        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-          <span style="background: #fff3e0; color: #f57c00; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Beta</span>
-          <span style="background: #e8f5e9; color: #388e3c; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Bezpečné</span>
+        <!-- Role výběr -->
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
+          <form method="POST" style="margin: 0;">
+            <input type="hidden" name="role_action" value="simulate">
+            <input type="hidden" name="simulate_role" value="admin">
+            <button type="submit" style="width: 100%; padding: 0.75rem 0.5rem; background: <?= $currentSimulation === 'admin' ? '#000' : '#fff' ?>; color: <?= $currentSimulation === 'admin' ? '#fff' : '#000' ?>; border: 2px solid #000; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3;">
+              Admin
+            </button>
+          </form>
+
+          <form method="POST" style="margin: 0;">
+            <input type="hidden" name="role_action" value="simulate">
+            <input type="hidden" name="simulate_role" value="prodejce">
+            <button type="submit" style="width: 100%; padding: 0.75rem 0.5rem; background: <?= $currentSimulation === 'prodejce' ? '#000' : '#fff' ?>; color: <?= $currentSimulation === 'prodejce' ? '#fff' : '#000' ?>; border: 2px solid #000; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3;">
+              Prodejce
+            </button>
+          </form>
+
+          <form method="POST" style="margin: 0;">
+            <input type="hidden" name="role_action" value="simulate">
+            <input type="hidden" name="simulate_role" value="technik">
+            <button type="submit" style="width: 100%; padding: 0.75rem 0.5rem; background: <?= $currentSimulation === 'technik' ? '#000' : '#fff' ?>; color: <?= $currentSimulation === 'technik' ? '#fff' : '#000' ?>; border: 2px solid #000; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3;">
+              Technik
+            </button>
+          </form>
+
+          <form method="POST" style="margin: 0;">
+            <input type="hidden" name="role_action" value="simulate">
+            <input type="hidden" name="simulate_role" value="guest">
+            <button type="submit" style="width: 100%; padding: 0.75rem 0.5rem; background: <?= $currentSimulation === 'guest' ? '#000' : '#fff' ?>; color: <?= $currentSimulation === 'guest' ? '#fff' : '#000' ?>; border: 2px solid #000; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3;">
+              Guest
+            </button>
+          </form>
         </div>
 
-        <!-- Role Testing Tool - Hlavní diagnostický nástroj -->
-        <div style="margin-bottom: 1rem;">
-          <button
-            onclick="window.open('role_testing_tool.php', '_blank')"
-            style="padding: 0.875rem 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-size: 0.8rem; font-weight: 600; cursor: pointer; width: 100%; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3;"
-            onmouseover="this.style.background='#fff'; this.style.color='#000'"
-            onmouseout="this.style.background='#000'; this.style.color='#fff'"
-          >
-            ROLE TESTING TOOL
+        <!-- Reset button -->
+        <?php if ($currentSimulation): ?>
+        <form method="POST" style="margin-bottom: 1rem;">
+          <input type="hidden" name="role_action" value="reset">
+          <button type="submit" style="width: 100%; padding: 0.75rem; background: #555; color: white; border: 2px solid #555; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3;">
+            RESET NA ADMIN
           </button>
-        </div>
+        </form>
+        <?php endif; ?>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-          <button
-            onclick="window.open('test_db_connection.php', '_blank')"
-            style="padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; white-space: normal; line-height: 1.3;"
-          >
-            TEST DB
-          </button>
-          <button
-            onclick="alert('Test email notifikací bude brzy dostupný')"
-            style="padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; white-space: normal; line-height: 1.3;"
-          >
-            TEST EMAIL
-          </button>
+        <!-- Testovací odkazy -->
+        <div style="background: #f8f8f8; border: 1px solid #E0E0E0; padding: 1rem;">
+          <div style="margin-bottom: 0.5rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #000;">Testuj v novém okně:</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+            <a href="/seznam.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: #000; color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;">SEZNAM</a>
+            <a href="/show_table_structure.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: #000; color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;">DB</a>
+            <a href="/diagnostic_web.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: #000; color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;">DIAGNOSTIKA</a>
+          </div>
         </div>
       </div>
 
