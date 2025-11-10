@@ -284,7 +284,7 @@ try {
           </button>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
           <button
             onclick="window.open('show_table_structure.php', '_blank')"
             style="padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; white-space: normal; line-height: 1.3;"
@@ -296,6 +296,12 @@ try {
             style="padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; white-space: normal; line-height: 1.3;"
           >
             FOTKY
+          </button>
+          <button
+            onclick="window.open('validate_tools.php', '_blank')"
+            style="padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; white-space: normal; line-height: 1.3;"
+          >
+            TEST ✓
           </button>
         </div>
       </div>
