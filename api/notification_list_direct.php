@@ -44,34 +44,26 @@ try {
     }
 
     // Načtení všech notifikačních šablon
+    // Použijeme SELECT * aby to fungovalo i když se struktura tabulky mění
     $stmt = $pdo->query("
-        SELECT
-            id,
-            trigger_event AS name,
-            description,
-            trigger_event,
-            recipient_type,
-            type,
-            subject,
-            template,
-            variables,
-            cc_emails,
-            bcc_emails,
-            active,
-            created_at,
-            updated_at
+        SELECT *
         FROM wgs_notifications
-        ORDER BY trigger_event ASC
+        ORDER BY id ASC
     ");
 
     $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Dekóduj JSON pole
+    // Dekóduj JSON pole a přidej pole 'name' pokud neexistuje
     foreach ($notifications as &$notif) {
-        $notif['variables'] = $notif['variables'] ? json_decode($notif['variables'], true) : [];
-        $notif['cc_emails'] = $notif['cc_emails'] ? json_decode($notif['cc_emails'], true) : [];
-        $notif['bcc_emails'] = $notif['bcc_emails'] ? json_decode($notif['bcc_emails'], true) : [];
-        $notif['active'] = (bool)$notif['active'];
+        // Pokud neexistuje 'name', použij něco jiného
+        if (!isset($notif['name'])) {
+            $notif['name'] = $notif['type'] ?? $notif['subject'] ?? 'Notifikace #' . $notif['id'];
+        }
+
+        $notif['variables'] = isset($notif['variables']) && $notif['variables'] ? json_decode($notif['variables'], true) : [];
+        $notif['cc_emails'] = isset($notif['cc_emails']) && $notif['cc_emails'] ? json_decode($notif['cc_emails'], true) : [];
+        $notif['bcc_emails'] = isset($notif['bcc_emails']) && $notif['bcc_emails'] ? json_decode($notif['bcc_emails'], true) : [];
+        $notif['active'] = isset($notif['active']) ? (bool)$notif['active'] : false;
     }
 
     echo json_encode([
