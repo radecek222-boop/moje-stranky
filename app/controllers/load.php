@@ -43,49 +43,79 @@ try {
         $params[':stav'] = $statusValue;
     }
 
+    // ŠKÁLOVATELNÁ LOGIKA PRO VÍCE PRODEJCŮ A TECHNIKŮ
     if (!$isAdmin) {
         $userId = $_SESSION['user_id'] ?? null;
         $userEmail = $_SESSION['user_email'] ?? null;
+        $userRole = strtolower(trim($_SESSION['role'] ?? 'guest'));
 
-        $userConditions = [];
+        // Rozlišení podle role:
+        // - 'prodejce', 'user' → vidí VŠECHNY reklamace (vytvářejí pro zákazníky)
+        // - 'technik' → vidí pouze přiřazené reklamace (zpracoval_id)
+        // - 'guest' → vidí pouze své (email match)
 
-        // Filter by created_by (user ID)
-        if ($userId !== null && in_array('created_by', $columns, true)) {
-            $userConditions[] = 'r.created_by = :created_by';
-            $params[':created_by'] = $userId;
+        $isProdejce = in_array($userRole, ['prodejce', 'user'], true);
+        $isTechnik = in_array($userRole, ['technik', 'technician'], true);
+
+        if ($isProdejce) {
+            // PRODEJCE: Vidí všechny reklamace (žádný filtr)
+            // Prodejci vytvářejí reklamace pro zákazníky, takže potřebují vidět všechny
+            // Žádné WHERE podmínky pro prodejce
+        } elseif ($isTechnik) {
+            // TECHNIK: Vidí pouze přiřazené reklamace
+            if ($userId !== null) {
+                $technikConditions = [];
+
+                // Filtry pro technika
+                if (in_array('zpracoval_id', $columns, true)) {
+                    $technikConditions[] = 'r.zpracoval_id = :zpracoval_id';
+                    $params[':zpracoval_id'] = $userId;
+                }
+
+                if (in_array('assigned_to', $columns, true)) {
+                    $technikConditions[] = 'r.assigned_to = :assigned_to';
+                    $params[':assigned_to'] = $userId;
+                }
+
+                if (!empty($technikConditions)) {
+                    $whereParts[] = '(' . implode(' OR ', $technikConditions) . ')';
+                } else {
+                    // Pokud technik nemá žádný způsob filtrování, nevidí nic
+                    $whereParts[] = '1 = 0';
+                }
+            } else {
+                // Technik bez user_id nevidí nic
+                $whereParts[] = '1 = 0';
+            }
+        } else {
+            // GUEST nebo NEZNÁMÁ ROLE: Vidí pouze své (email match)
+            $guestConditions = [];
+
+            // Filter podle created_by
+            if ($userId !== null && in_array('created_by', $columns, true)) {
+                $guestConditions[] = 'r.created_by = :created_by';
+                $params[':created_by'] = $userId;
+            }
+
+            // Filter podle customer email (case-insensitive)
+            if ($userEmail && in_array('email', $columns, true)) {
+                $guestConditions[] = 'LOWER(TRIM(r.email)) = LOWER(TRIM(:user_email))';
+                $params[':user_email'] = $userEmail;
+            }
+
+            // Filter podle prodejce_email
+            if ($userEmail && in_array('prodejce_email', $columns, true)) {
+                $guestConditions[] = 'LOWER(TRIM(r.prodejce_email)) = LOWER(TRIM(:prodejce_email))';
+                $params[':prodejce_email'] = $userEmail;
+            }
+
+            if (!empty($guestConditions)) {
+                $whereParts[] = '(' . implode(' OR ', $guestConditions) . ')';
+            } else {
+                // Guest bez jakéhokoliv identifikátoru nevidí nic
+                $whereParts[] = '1 = 0';
+            }
         }
-
-        // Filter by assigned_to (assigned user ID)
-        if ($userId !== null && in_array('assigned_to', $columns, true)) {
-            $userConditions[] = 'r.assigned_to = :assigned_to';
-            $params[':assigned_to'] = $userId;
-        }
-
-        // Filter by zpracoval_id (processed by user ID)
-        if ($userId !== null && in_array('zpracoval_id', $columns, true)) {
-            $userConditions[] = 'r.zpracoval_id = :zpracoval_id';
-            $params[':zpracoval_id'] = $userId;
-        }
-
-        // Filter by customer email (for claims created without login)
-        // OPRAVA: Case-insensitive a trim porovnání emailů
-        if ($userEmail && in_array('email', $columns, true)) {
-            $userConditions[] = 'LOWER(TRIM(r.email)) = LOWER(TRIM(:user_email))';
-            $params[':user_email'] = $userEmail;
-        }
-
-        // Filter by prodejce_email (seller email)
-        if ($userEmail && in_array('prodejce_email', $columns, true)) {
-            $userConditions[] = 'LOWER(TRIM(r.prodejce_email)) = LOWER(TRIM(:prodejce_email))';
-            $params[':prodejce_email'] = $userEmail;
-        }
-
-        if (empty($userConditions)) {
-            throw new Exception('Nelze ověřit oprávnění pro načtení reklamací.');
-        }
-
-        // Combine all user conditions with OR (user sees claims matching ANY condition)
-        $whereParts[] = '(' . implode(' OR ', $userConditions) . ')';
     }
 
     $whereClause = '';

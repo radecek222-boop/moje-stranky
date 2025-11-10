@@ -1,0 +1,8 @@
+-- DEPRECATED: Tento skript je zastaralý!
+-- Použij místo něj: migration_add_created_by.sql
+--
+-- Důvod: Původní řešení bylo pouze pro jednoho uživatele (user_id=7)
+-- Nové řešení používá role-based přístup který škáluje pro stovky prodejců a techniků
+--
+-- NEPOUŠTĚJ TENTO SKRIPT!
+-- Místo toho spusť: migration_add_created_by.sql
