@@ -43,15 +43,24 @@ async function loadNotifications() {
       credentials: 'same-origin'
     });
 
+    let result;
+
     if (!res.ok) {
       if (handleNotificationsUnauthorized(res, container)) {
         return;
       }
 
-      throw new Error(`HTTP ${res.status}`);
+      try {
+        result = await res.json();
+      } catch (parseErr) {
+        result = null;
+      }
+
+      const message = result?.message ? `: ${result.message}` : '';
+      throw new Error(`HTTP ${res.status}${message}`);
     }
 
-    const result = await res.json();
+    result = await res.json();
 
     if (result.status === 'success') {
       notificationState.notifications = result.data || [];
@@ -61,7 +70,8 @@ async function loadNotifications() {
     }
   } catch (err) {
     console.error('Load notifications failed:', err);
-    container.innerHTML = '<div class="error-message">Chyba při načítání notifikací</div>';
+    const message = err && err.message ? err.message : 'Chyba při načítání notifikací';
+    container.innerHTML = `<div class="error-message">${message}</div>`;
   }
 }
 
@@ -181,9 +191,10 @@ async function toggleNotification(notificationId) {
 
 // Load on tab switch
 document.addEventListener('DOMContentLoaded', () => {
-  // Check if we're on notifications tab
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('tab') === 'notifications') {
+  const hasContainer = document.getElementById('notifications-container');
+
+  if (hasContainer && (urlParams.get('tab') === 'notifications' || window.location.pathname.endsWith('admin.php'))) {
     loadNotifications();
   }
 });
