@@ -68,14 +68,15 @@ try {
         }
 
         // Filter by customer email (for claims created without login)
+        // OPRAVA: Case-insensitive a trim porovnání emailů
         if ($userEmail && in_array('email', $columns, true)) {
-            $userConditions[] = 'r.email = :user_email';
+            $userConditions[] = 'LOWER(TRIM(r.email)) = LOWER(TRIM(:user_email))';
             $params[':user_email'] = $userEmail;
         }
 
         // Filter by prodejce_email (seller email)
         if ($userEmail && in_array('prodejce_email', $columns, true)) {
-            $userConditions[] = 'r.prodejce_email = :prodejce_email';
+            $userConditions[] = 'LOWER(TRIM(r.prodejce_email)) = LOWER(TRIM(:prodejce_email))';
             $params[':prodejce_email'] = $userEmail;
         }
 
