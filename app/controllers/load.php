@@ -53,6 +53,9 @@ try {
         } elseif ($userId !== null && in_array('assigned_to', $columns, true)) {
             $whereParts[] = 'r.assigned_to = :assigned_to';
             $params[':assigned_to'] = $userId;
+        } elseif ($userId !== null && in_array('zpracoval_id', $columns, true)) {
+            $whereParts[] = 'r.zpracoval_id = :zpracoval_id';
+            $params[':zpracoval_id'] = $userId;
         } elseif ($userEmail && in_array('prodejce_email', $columns, true)) {
             $whereParts[] = 'r.prodejce_email = :user_email';
             $params[':user_email'] = $userEmail;
