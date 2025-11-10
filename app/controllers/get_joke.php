@@ -1,6 +1,6 @@
 <?php
 /**
- * Generátor vtipů - každý den jiný pro každého uživatele
+ * Generátor vtipů - POKAŽDÉ JINÝ při každém přihlášení
  * Kombinuje external API + lokální databázi vtipů
  */
 
@@ -11,14 +11,10 @@ header('Content-Type: application/json; charset=utf-8');
 // Získat user info
 $userId = $_SESSION['user_id'] ?? 0;
 $userName = $_SESSION['user_name'] ?? 'Host';
-$currentDate = date('Y-m-d');
-
-// Seed pro deterministický random = každý den stejný vtip pro daného uživatele
-$seed = crc32($userId . '-' . $currentDate);
 
 try {
-    // Pokus o načtení z JokeAPI (externí API)
-    $joke = fetchFromJokeAPI($seed);
+    // Pokus o načtení z JokeAPI (externí API) - VŽDY náhodný
+    $joke = fetchFromJokeAPI();
 
     if ($joke) {
         echo json_encode([
@@ -32,8 +28,8 @@ try {
     error_log("JokeAPI failed: " . $e->getMessage());
 }
 
-// Fallback: Použij lokální databázi vtipů
-$joke = getLocalJoke($seed);
+// Fallback: Použij lokální databázi vtipů - NÁHODNÝ vtip
+$joke = getLocalJoke();
 
 echo json_encode([
     'status' => 'success',
@@ -42,9 +38,9 @@ echo json_encode([
 ], JSON_UNESCAPED_UNICODE);
 
 /**
- * Získá vtip z JokeAPI.dev
+ * Získá vtip z JokeAPI.dev - VŽDY náhodný
  */
-function fetchFromJokeAPI(int $seed): ?string {
+function fetchFromJokeAPI(): ?string {
     // JokeAPI v2 endpoint s češtinou
     $url = 'https://v2.jokeapi.dev/joke/Any?lang=cs&type=single&format=json';
 
@@ -76,10 +72,9 @@ function fetchFromJokeAPI(int $seed): ?string {
 }
 
 /**
- * Vrátí vtip z lokální databáze
- * Používá seed aby byl každý den stejný pro daného uživatele
+ * Vrátí NÁHODNÝ vtip z lokální databáze
  */
-function getLocalJoke(int $seed): string {
+function getLocalJoke(): string {
     $jokes = [
         // Pracovní humor
         "Proč programátoři nemají rádi přírodu?\nProtože tam je moc bugů! 🐛",
@@ -117,12 +112,14 @@ function getLocalJoke(int $seed): string {
         "Dnes je krásný den na to být úžasný! 🌟",
         "Usmívej se! Dáváš všem najevo že jsi silnější než včera. 😊",
         "Tvůj jediný limit jsi ty sám. Překroč ho! 🎯",
-        "Malé kroky každý den vedou k velkým výsledkům! 👣"
+        "Malé kroky každý den vedou k velkým výsledkům! 👣",
+
+        // Vtip z příkladu uživatele - přidáme ho do databáze!
+        "Znám spoustu vtipů ve znakové řeči, které nikdo neslyšel! 🤟😄"
     ];
 
-    // Použij seed pro deterministický výběr
-    mt_srand($seed);
-    $index = mt_rand(0, count($jokes) - 1);
+    // NÁHODNÝ výběr - pokaždé jiný!
+    $index = array_rand($jokes);
 
     return $jokes[$index];
 }

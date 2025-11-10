@@ -48,20 +48,42 @@ try {
 
     if ($method === 'GET' && $action === 'list') {
         // Seznam všech uživatelů
-        $stmt = $pdo->query("
-            SELECT
-                id,
-                name,
-                email,
-                phone,
-                address,
-                role,
-                status,
-                created_at
-            FROM wgs_users
-            ORDER BY created_at DESC
-        ");
+        // BEZPEČNOST: Nejdřív zjistit jaké sloupce existují
+        $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
+        $existingColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        // Základní sloupce které MUSÍ existovat
+        $requiredColumns = ['id', 'email'];
+        $optionalColumns = ['name', 'phone', 'address', 'role', 'status', 'created_at'];
+
+        // Sestavit SELECT pouze z existujících sloupců
+        $selectColumns = [];
+        foreach (array_merge($requiredColumns, $optionalColumns) as $col) {
+            if (in_array($col, $existingColumns)) {
+                $selectColumns[] = $col;
+            }
+        }
+
+        if (empty($selectColumns)) {
+            throw new Exception('Tabulka wgs_users nemá požadované sloupce');
+        }
+
+        $sql = "SELECT " . implode(', ', $selectColumns) . "
+                FROM wgs_users
+                ORDER BY " . (in_array('created_at', $selectColumns) ? 'created_at DESC' : 'id DESC');
+
+        $stmt = $pdo->query($sql);
         $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Doplnit chybějící sloupce s defaultními hodnotami
+        foreach ($users as &$user) {
+            if (!isset($user['name'])) $user['name'] = $user['email'];
+            if (!isset($user['phone'])) $user['phone'] = null;
+            if (!isset($user['address'])) $user['address'] = null;
+            if (!isset($user['role'])) $user['role'] = 'user';
+            if (!isset($user['status'])) $user['status'] = 'active';
+            if (!isset($user['created_at'])) $user['created_at'] = null;
+        }
 
         echo json_encode([
             'status' => 'success',
@@ -70,19 +92,37 @@ try {
 
     } elseif ($method === 'GET' && $action === 'online') {
         // Online uživatelé (aktivity za posledních 15 minut)
-        $stmt = $pdo->query("
-            SELECT DISTINCT
-                u.id,
-                u.name,
-                u.email,
-                u.role,
-                s.last_activity
-            FROM wgs_sessions s
-            JOIN wgs_users u ON s.user_id = u.id
-            WHERE s.last_activity >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)
-            ORDER BY s.last_activity DESC
-        ");
-        $onlineUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // BEZPEČNOST: Zkontrolovat zda tabulka wgs_sessions existuje
+        $tableCheck = $pdo->query("SHOW TABLES LIKE 'wgs_sessions'");
+        if ($tableCheck->rowCount() === 0) {
+            // Tabulka neexistuje - vrátit prázdný seznam
+            echo json_encode([
+                'status' => 'success',
+                'users' => [],
+                'message' => 'Session tracking not enabled'
+            ]);
+            exit;
+        }
+
+        try {
+            $stmt = $pdo->query("
+                SELECT DISTINCT
+                    u.id,
+                    u.name,
+                    u.email,
+                    u.role,
+                    s.last_activity
+                FROM wgs_sessions s
+                JOIN wgs_users u ON s.user_id = u.id
+                WHERE s.last_activity >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)
+                ORDER BY s.last_activity DESC
+            ");
+            $onlineUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            // Sloupec last_activity neexistuje - vrátit prázdný seznam
+            error_log("wgs_sessions query failed: " . $e->getMessage());
+            $onlineUsers = [];
+        }
 
         echo json_encode([
             'status' => 'success',
