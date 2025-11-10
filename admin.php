@@ -155,13 +155,10 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
 
       <!-- INSTALÁTOR: Role-Based Access -->
-      <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #667eea;">
-        <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
-          <div style="font-size: 2.5rem;">🔐</div>
-          <div style="flex: 1;">
-            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333;">Role-Based Access Control</h3>
-            <p style="margin: 0; color: #666; font-size: 0.9rem;">Škálovatelný systém rolí pro neomezený počet prodejců a techniků</p>
-          </div>
+      <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #000;">
+        <div style="margin-bottom: 1rem;">
+          <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333; font-weight: 600; letter-spacing: 0.05em;">ROLE-BASED ACCESS CONTROL</h3>
+          <p style="margin: 0; color: #666; font-size: 0.9rem;">Škálovatelný systém rolí pro neomezený počet prodejců a techniků</p>
         </div>
 
         <div style="margin-bottom: 1rem;">
@@ -183,22 +180,19 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
 
         <button
           onclick="window.location.href='install_role_based_access.php'"
-          style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.2s;"
-          onmouseover="this.style.transform='translateY(-2px)'"
-          onmouseout="this.style.transform='translateY(0)'"
+          style="width: 100%; padding: 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-weight: 600; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.75rem; transition: all 0.3s;"
+          onmouseover="this.style.background='#fff'; this.style.color='#000'"
+          onmouseout="this.style.background='#000'; this.style.color='#fff'"
         >
-          🚀 Spustit instalaci
+          SPUSTIT INSTALACI
         </button>
       </div>
 
       <!-- DEBUG NÁSTROJE -->
-      <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #2196F3;">
-        <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
-          <div style="font-size: 2.5rem;">🔍</div>
-          <div style="flex: 1;">
-            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333;">Debug Nástroje</h3>
-            <p style="margin: 0; color: #666; font-size: 0.9rem;">Diagnostika databáze, reklamací, fotek a struktur</p>
-          </div>
+      <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #000;">
+        <div style="margin-bottom: 1rem;">
+          <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333; font-weight: 600; letter-spacing: 0.05em;">DEBUG NÁSTROJE</h3>
+          <p style="margin: 0; color: #666; font-size: 0.9rem;">Diagnostika databáze, reklamací, fotek a struktur</p>
         </div>
 
         <div style="margin-bottom: 1rem;">
@@ -218,30 +212,38 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
           <span style="background: #fff3e0; color: #f57c00; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Pouze čtení</span>
         </div>
 
+        <div style="margin-bottom: 1rem;">
+          <button
+            onclick="window.open('diagnostic_tool.php', '_blank')"
+            style="width: 100%; padding: 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.3s;"
+            onmouseover="this.style.background='#fff'; this.style.color='#000'"
+            onmouseout="this.style.background='#000'; this.style.color='#fff'"
+          >
+            AI DIAGNOSTICKÝ NÁSTROJ
+          </button>
+        </div>
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
           <button
             onclick="window.open('show_table_structure.php', '_blank')"
-            style="padding: 0.5rem; background: #2196F3; color: white; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer;"
+            style="padding: 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase;"
           >
-            📊 Struktura
+            Struktura
           </button>
           <button
             onclick="window.open('debug_photos.php', '_blank')"
-            style="padding: 0.5rem; background: #2196F3; color: white; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer;"
+            style="padding: 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase;"
           >
-            📸 Fotky
+            Fotky
           </button>
         </div>
       </div>
 
       <!-- TESTY -->
-      <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #ff9800;">
-        <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
-          <div style="font-size: 2.5rem;">🧪</div>
-          <div style="flex: 1;">
-            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333;">Testy & Validace</h3>
-            <p style="margin: 0; color: #666; font-size: 0.9rem;">Automatické testy funkcionality a integrity</p>
-          </div>
+      <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #000;">
+        <div style="margin-bottom: 1rem;">
+          <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333; font-weight: 600; letter-spacing: 0.05em;">TESTY & VALIDACE</h3>
+          <p style="margin: 0; color: #666; font-size: 0.9rem;">Automatické testy funkcionality a integrity</p>
         </div>
 
         <div style="margin-bottom: 1rem;">
@@ -252,7 +254,7 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
             <li>Test databázového připojení</li>
             <li>Test emailových notifikací</li>
             <li>Test upload fotek</li>
-            <li>🎭 Diagnostický nástroj pro testování rolí</li>
+            <li>Diagnostický nástroj pro testování rolí</li>
           </ul>
         </div>
 
@@ -265,38 +267,35 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
         <div style="margin-bottom: 1rem;">
           <button
             onclick="window.open('role_testing_tool.php', '_blank')"
-            style="padding: 0.75rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); transition: all 0.2s;"
-            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.5)'"
-            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'"
+            style="padding: 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-size: 0.75rem; font-weight: 600; cursor: pointer; width: 100%; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.3s;"
+            onmouseover="this.style.background='#fff'; this.style.color='#000'"
+            onmouseout="this.style.background='#000'; this.style.color='#fff'"
           >
-            🎭 Role Testing Tool
+            ROLE TESTING TOOL
           </button>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
           <button
             onclick="window.open('test_db_connection.php', '_blank')"
-            style="padding: 0.5rem; background: #ff9800; color: white; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer;"
+            style="padding: 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase;"
           >
-            🔌 Test DB
+            TEST DB
           </button>
           <button
             onclick="alert('Test email notifikací bude brzy dostupný')"
-            style="padding: 0.5rem; background: #ff9800; color: white; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer;"
+            style="padding: 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase;"
           >
-            📧 Test Email
+            TEST EMAIL
           </button>
         </div>
       </div>
 
       <!-- DOKUMENTACE -->
-      <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #4CAF50;">
-        <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
-          <div style="font-size: 2.5rem;">📚</div>
-          <div style="flex: 1;">
-            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333;">Dokumentace</h3>
-            <p style="margin: 0; color: #666; font-size: 0.9rem;">Návody, postupy a technická dokumentace systému</p>
-          </div>
+      <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #000;">
+        <div style="margin-bottom: 1rem;">
+          <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333; font-weight: 600; letter-spacing: 0.05em;">DOKUMENTACE</h3>
+          <p style="margin: 0; color: #666; font-size: 0.9rem;">Návody, postupy a technická dokumentace systému</p>
         </div>
 
         <div style="margin-bottom: 1rem;">
@@ -317,26 +316,23 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
 
         <button
           onclick="window.open('ADMIN_TOOLS_README.md', '_blank')"
-          style="width: 100%; padding: 0.75rem; background: #4CAF50; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;"
+          style="width: 100%; padding: 0.75rem; background: #555; color: white; border: none; border-radius: 0; font-weight: 600; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.75rem;"
         >
-          📖 Otevřít dokumentaci
+          OTEVŘÍT DOKUMENTACI
         </button>
       </div>
 
     </div>
 
     <!-- Info box -->
-    <div style="margin-top: 2rem; background: #e3f2fd; border-left: 4px solid #2196F3; border-radius: 8px; padding: 1.5rem;">
-      <div style="display: flex; align-items: start; gap: 1rem;">
-        <div style="font-size: 1.5rem;">ℹ️</div>
-        <div>
-          <h4 style="margin: 0 0 0.5rem 0; color: #1976d2;">Jak to funguje?</h4>
-          <p style="margin: 0; color: #0d47a1; line-height: 1.6;">
-            Po každém merge na GitHubu se zde automaticky objeví nové instalace a migrace.
-            Stačí kliknout na tlačítko "Spustit instalaci" a systém se automaticky aktualizuje.
-            <strong>Žádné SQL příkazy nejsou potřeba!</strong>
-          </p>
-        </div>
+    <div style="margin-top: 2rem; background: #f8f8f8; border-left: 4px solid #000; border-radius: 0; padding: 1.5rem;">
+      <div>
+        <h4 style="margin: 0 0 0.5rem 0; color: #000; font-weight: 600; letter-spacing: 0.05em;">JAK TO FUNGUJE?</h4>
+        <p style="margin: 0; color: #555; line-height: 1.6; font-size: 0.9rem;">
+          Po každém merge na GitHubu se zde automaticky objeví nové instalace a migrace.
+          Stačí kliknout na tlačítko "Spustit instalaci" a systém se automaticky aktualizuje.
+          <strong>Žádné SQL příkazy nejsou potřeba!</strong>
+        </p>
       </div>
     </div>
   </div>
