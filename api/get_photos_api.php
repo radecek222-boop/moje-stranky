@@ -63,30 +63,60 @@ try {
     $stmt->execute([':reklamace_id' => $reklamaceId]);
     $photos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Připravit pole fotek s cestami
+    // Připravit oba formáty: sections (pro zpětnou kompatibilitu) a photos (pro seznam.js)
     $photosList = [];
+    $sections = [
+        'before' => [],
+        'id' => [],
+        'problem' => [],
+        'repair' => [],
+        'after' => []
+    ];
 
     foreach ($photos as $photo) {
         $photoPath = $photo['photo_path'];
+        $sectionName = $photo['section_name'];
 
         // Kontrola existence souboru na disku
         $fullPath = __DIR__ . '/../' . $photoPath;
         if (file_exists($fullPath)) {
+            // Pro seznam.js - jednoduché pole s cestami
             $photosList[] = [
                 'id' => $photo['id'],
                 'photo_path' => $photoPath,
-                'section_name' => $photo['section_name'],
+                'section_name' => $sectionName,
                 'photo_type' => $photo['photo_type'],
                 'photo_order' => $photo['photo_order']
             ];
+
+            // Pro protokol.min.js - sections s base64 daty (zpětná kompatibilita)
+            if (isset($sections[$sectionName])) {
+                // Načtení obrázku a převod na base64
+                $imageData = file_get_contents($fullPath);
+                if ($imageData !== false) {
+                    // Detekce MIME typu
+                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                    $mimeType = finfo_file($finfo, $fullPath);
+                    finfo_close($finfo);
+
+                    // Převod na base64 data URI
+                    $base64Data = 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
+
+                    $sections[$sectionName][] = [
+                        'type' => $photo['photo_type'],
+                        'data' => $base64Data
+                    ];
+                }
+            }
         }
     }
 
-    // Úspěšná odpověď
+    // Úspěšná odpověď s oběma formáty
     echo json_encode([
         'success' => true,
         'total_photos' => count($photosList),
-        'photos' => $photosList
+        'photos' => $photosList,          // Pro seznam.js (nový formát)
+        'sections' => $sections            // Pro protokol.min.js (původní formát)
     ]);
 
 } catch (Exception $e) {
@@ -95,6 +125,13 @@ try {
         'success' => false,
         'error' => $e->getMessage(),
         'total_photos' => 0,
-        'photos' => []
+        'photos' => [],
+        'sections' => [
+            'before' => [],
+            'id' => [],
+            'problem' => [],
+            'repair' => [],
+            'after' => []
+        ]
     ]);
 }

@@ -46,7 +46,7 @@ try {
     // ŠKÁLOVATELNÁ LOGIKA PRO VÍCE PRODEJCŮ A TECHNIKŮ
     if (!$isAdmin) {
         $userId = $_SESSION['user_id'] ?? null;
-        $userEmail = $_SESSION['user_email'] ?? null;
+        $userEmail = $_SESSION['email'] ?? null;  // OPRAVENO: user_email → email
         $userRole = strtolower(trim($_SESSION['role'] ?? 'guest'));
 
         // Rozlišení podle role:
