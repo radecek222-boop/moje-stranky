@@ -9,19 +9,19 @@ require_once __DIR__ . '/init.php';
 // BEZPEČNOST: Kontrola přihlášení
 if (!isset($_SESSION['user_id']) && !(isset($_SESSION['is_admin']) && $_SESSION['is_admin'])) {
     http_response_code(401);
-    die("🔒 PŘÍSTUP ODEPŘEN\nMusíte být přihlášeni pro zobrazení diagnostiky.\n");
+    die("PŘÍSTUP ODEPŘEN\nMusíte být přihlášeni pro zobrazení diagnostiky.\n");
 }
 
 echo "=== DIAGNOSTIKA REKLAMACÍ ===\n\n";
 
 try {
     $pdo = getDbConnection();
-    echo "✅ Připojení k databázi úspěšné\n\n";
+    echo "[OK] Připojení k databázi úspěšné\n\n";
 
     // 1. Celkový počet reklamací
     $stmt = $pdo->query("SELECT COUNT(*) as total FROM wgs_reklamace");
     $total = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-    echo "📊 Celkový počet reklamací: {$total}\n\n";
+    echo "[DATA] Celkový počet reklamací: {$total}\n\n";
 
     // 2. Seznam všech reklamací s důležitými poli
     $stmt = $pdo->query("
@@ -39,7 +39,7 @@ try {
     ");
     $reklamace = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo "📋 Seznam reklamací:\n";
+    echo "[SEZNAM] Seznam reklamací:\n";
     echo str_repeat("-", 120) . "\n";
     printf("%-5s %-18s %-12s %-25s %-30s %-12s %-20s %-12s\n",
         "ID", "REKL_ID", "CISLO", "JMENO", "EMAIL", "CREATED_BY", "CREATED_AT", "STAV");
@@ -61,7 +61,7 @@ try {
     echo "\n\n";
 
     // 3. Informace o session
-    echo "🔐 SESSION informace:\n";
+    echo "[SESSION] SESSION informace:\n";
     echo "  - user_id: " . ($_SESSION['user_id'] ?? 'NENÍ NASTAVENO') . "\n";
     echo "  - user_email: " . ($_SESSION['user_email'] ?? 'NENÍ NASTAVENO') . "\n";
     echo "  - is_admin: " . (($_SESSION['is_admin'] ?? false) ? 'ANO' : 'NE') . "\n";
@@ -73,7 +73,7 @@ try {
         $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 
         if ($isAdmin) {
-            echo "👑 Jsi admin - vidíš VŠECHNY reklamace ({$total})\n";
+            echo "[ADMIN] Jsi admin - vidíš VŠECHNY reklamace ({$total})\n";
         } else {
             $userId = $_SESSION['user_id'] ?? null;
             $userEmail = $_SESSION['user_email'] ?? null;
@@ -97,7 +97,7 @@ try {
                 $stmt->execute($params);
                 $visible = $stmt->fetch(PDO::FETCH_ASSOC)['visible'];
 
-                echo "👤 Jako přihlášený uživatel vidíš: {$visible} reklamací\n";
+                echo "[USER] Jako přihlášený uživatel vidíš: {$visible} reklamací\n";
                 echo "   (Filtr: created_by={$userId} OR email={$userEmail})\n\n";
 
                 // Detail viditelných reklamací
@@ -111,17 +111,17 @@ try {
                 $visibleRecords = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 if (!empty($visibleRecords)) {
-                    echo "📄 Detail viditelných reklamací:\n";
+                    echo "[DETAIL] Detail viditelných reklamací:\n";
                     foreach ($visibleRecords as $r) {
                         echo "  - ID {$r['id']}: {$r['jmeno']} ({$r['email']}) - created_by: " . ($r['created_by'] ?? 'NULL') . "\n";
                     }
                 }
             } else {
-                echo "⚠️  NEMÁŠ nastavený user_id ani email - neuvidíš ŽÁDNÉ reklamace!\n";
+                echo "[VAROVÁNÍ] NEMÁŠ nastavený user_id ani email - neuvidíš ŽÁDNÉ reklamace!\n";
             }
         }
     } else {
-        echo "⚠️  NEJSI PŘIHLÁŠENÝ - přihlaš se pro zobrazení reklamací\n";
+        echo "[VAROVÁNÍ] NEJSI PŘIHLÁŠENÝ - přihlaš se pro zobrazení reklamací\n";
     }
 
     echo "\n";
@@ -131,7 +131,7 @@ try {
     $orphaned = $stmt->fetch(PDO::FETCH_ASSOC)['orphaned'];
 
     if ($orphaned > 0) {
-        echo "⚠️  PROBLÉM: {$orphaned} reklamací má created_by = NULL\n";
+        echo "[PROBLÉM] {$orphaned} reklamací má created_by = NULL\n";
         echo "   Tyto reklamace se nezobrazí uživatelům, kteří je vytvořili!\n";
         echo "   ŘEŠENÍ: Buď přiřadit created_by, nebo přihlásit se emailem použitým v reklamaci\n\n";
 
@@ -143,17 +143,17 @@ try {
         ");
         $orphanedRecords = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        echo "📄 Reklamace bez created_by:\n";
+        echo "[DETAIL] Reklamace bez created_by:\n";
         foreach ($orphanedRecords as $r) {
             echo "  - ID {$r['id']}: {$r['jmeno']} ({$r['email']}) - {$r['created_at']}\n";
         }
     } else {
-        echo "✅ Všechny reklamace mají přiřazené created_by\n";
+        echo "[OK] Všechny reklamace mají přiřazené created_by\n";
     }
 
-    echo "\n✅ Diagnostika dokončena!\n";
+    echo "\n[OK] Diagnostika dokončena!\n";
 
 } catch (Exception $e) {
-    echo "❌ CHYBA: " . $e->getMessage() . "\n";
+    echo "[CHYBA] " . $e->getMessage() . "\n";
     exit(1);
 }
