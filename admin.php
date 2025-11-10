@@ -318,10 +318,10 @@ try {
         if (!isset($_SESSION['_original_admin_session'])) {
             $_SESSION['_original_admin_session'] = [
                 'user_id' => $_SESSION['user_id'] ?? null,
-                'email' => $_SESSION['email'] ?? null,
+                'user_email' => $_SESSION['user_email'] ?? null,  // OPRAVENO: user_email
                 'role' => $_SESSION['role'] ?? null,
                 'is_admin' => $_SESSION['is_admin'] ?? null,
-                'name' => $_SESSION['name'] ?? null,
+                'name' => $_SESSION['user_name'] ?? null,  // OPRAVENO: user_name
             ];
         }
 
@@ -333,37 +333,37 @@ try {
             switch ($simulateRole) {
                 case 'admin':
                     $_SESSION['user_id'] = 1;
-                    $_SESSION['email'] = 'admin@wgs-service.cz';
+                    $_SESSION['user_email'] = 'admin@wgs-service.cz';  // OPRAVENO: user_email
                     $_SESSION['role'] = 'admin';
                     $_SESSION['is_admin'] = true;
-                    $_SESSION['name'] = 'Admin (TEST)';
+                    $_SESSION['user_name'] = 'Admin (TEST)';  // OPRAVENO: user_name
                     $_SESSION['_simulating'] = 'admin';
                     break;
 
                 case 'prodejce':
                     $_SESSION['user_id'] = 7;
-                    $_SESSION['email'] = 'naty@naty.cz';
+                    $_SESSION['user_email'] = 'naty@naty.cz';  // OPRAVENO: user_email
                     $_SESSION['role'] = 'prodejce';
                     $_SESSION['is_admin'] = false;
-                    $_SESSION['name'] = 'Naty Prodejce (TEST)';
+                    $_SESSION['user_name'] = 'Naty Prodejce (TEST)';  // OPRAVENO: user_name
                     $_SESSION['_simulating'] = 'prodejce';
                     break;
 
                 case 'technik':
                     $_SESSION['user_id'] = 15;
-                    $_SESSION['email'] = 'milan@technik.cz';
+                    $_SESSION['user_email'] = 'milan@technik.cz';  // OPRAVENO: user_email
                     $_SESSION['role'] = 'technik';
                     $_SESSION['is_admin'] = false;
-                    $_SESSION['name'] = 'Milan Technik (TEST)';
+                    $_SESSION['user_name'] = 'Milan Technik (TEST)';  // OPRAVENO: user_name
                     $_SESSION['_simulating'] = 'technik';
                     break;
 
                 case 'guest':
                     $_SESSION['user_id'] = null;
-                    $_SESSION['email'] = 'jiri@novacek.cz';
+                    $_SESSION['user_email'] = 'jiri@novacek.cz';  // OPRAVENO: user_email
                     $_SESSION['role'] = 'guest';
                     $_SESSION['is_admin'] = false;
-                    $_SESSION['name'] = 'Jiří Nováček (TEST)';
+                    $_SESSION['user_name'] = 'Jiří Nováček (TEST)';  // OPRAVENO: user_name
                     $_SESSION['_simulating'] = 'guest';
                     break;
             }
@@ -375,10 +375,10 @@ try {
         if ($roleAction === 'reset') {
             $originalSession = $_SESSION['_original_admin_session'];
             $_SESSION['user_id'] = $originalSession['user_id'];
-            $_SESSION['email'] = $originalSession['email'];
+            $_SESSION['user_email'] = $originalSession['user_email'];  // OPRAVENO: user_email
             $_SESSION['role'] = $originalSession['role'];
             $_SESSION['is_admin'] = $originalSession['is_admin'];
-            $_SESSION['name'] = $originalSession['name'];
+            $_SESSION['user_name'] = $originalSession['name'];  // OPRAVENO: user_name
             unset($_SESSION['_simulating']);
 
             header('Location: admin.php?tab=tools&reset=1');
@@ -413,7 +413,7 @@ try {
         <div style="background: #f8f8f8; border: 1px solid #E0E0E0; padding: 1rem; margin-bottom: 1rem; font-size: 0.8rem; font-family: monospace;">
           <div style="margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #000;">Aktuální Session:</div>
           <div style="color: #555;">user_id: <strong><?= isset($_SESSION['user_id']) ? htmlspecialchars($_SESSION['user_id']) : 'NULL' ?></strong></div>
-          <div style="color: #555;">email: <strong><?= isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : 'NULL' ?></strong></div>
+          <div style="color: #555;">user_email: <strong><?= isset($_SESSION['user_email']) ? htmlspecialchars($_SESSION['user_email']) : 'NULL' ?></strong></div>
           <div style="color: #555;">role: <strong><?= isset($_SESSION['role']) ? htmlspecialchars($_SESSION['role']) : 'NULL' ?></strong></div>
           <div style="color: #555;">is_admin: <strong><?= isset($_SESSION['is_admin']) && $_SESSION['is_admin'] ? 'true' : 'false' ?></strong></div>
           <?php if ($currentSimulation): ?>
