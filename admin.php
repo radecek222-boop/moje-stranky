@@ -252,13 +252,25 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
             <li>Test databázového připojení</li>
             <li>Test emailových notifikací</li>
             <li>Test upload fotek</li>
-            <li>Test role-based přístupu</li>
+            <li>🎭 Diagnostický nástroj pro testování rolí</li>
           </ul>
         </div>
 
         <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
           <span style="background: #fff3e0; color: #f57c00; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Beta</span>
           <span style="background: #e8f5e9; color: #388e3c; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Bezpečné</span>
+        </div>
+
+        <!-- Role Testing Tool - Hlavní diagnostický nástroj -->
+        <div style="margin-bottom: 1rem;">
+          <button
+            onclick="window.open('role_testing_tool.php', '_blank')"
+            style="padding: 0.75rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); transition: all 0.2s;"
+            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.5)'"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'"
+          >
+            🎭 Role Testing Tool
+          </button>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
