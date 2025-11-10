@@ -8,7 +8,11 @@
 require_once __DIR__ . '/init.php';
 
 // BEZPEČNOST: Pouze admin
-if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+// Kontrola PŘED simulací - kontroluj původní admin status nebo aktuální
+$isRealAdmin = (isset($_SESSION['_original_admin_diagnostic']['is_admin']) && $_SESSION['_original_admin_diagnostic']['is_admin'] === true)
+    || (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true);
+
+if (!$isRealAdmin) {
     http_response_code(403);
     die('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Přístup odepřen</title></head><body style="font-family: Poppins; padding: 40px; text-align: center;"><h1>Přístup odepřen</h1><p>Pouze admin může používat diagnostické nástroje.</p><p><a href="/login">Přihlásit se jako admin</a></p></body></html>');
 }
@@ -16,6 +20,102 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 $tab = $_GET['tab'] ?? 'sql';
 $autorun = $_GET['autorun'] ?? false;
 $generateReport = $_GET['report'] ?? false;
+
+// ADMIN ROLE SIMULATION
+// Uložit původní admin session
+if (!isset($_SESSION['_original_admin_diagnostic'])) {
+    $_SESSION['_original_admin_diagnostic'] = [
+        'user_id' => $_SESSION['user_id'] ?? null,
+        'email' => $_SESSION['email'] ?? null,
+        'role' => $_SESSION['role'] ?? null,
+        'is_admin' => $_SESSION['is_admin'] ?? null,
+        'name' => $_SESSION['name'] ?? null,
+    ];
+}
+
+// Akce: Simulovat roli nebo uživatele
+$simulateAction = $_GET['simulate'] ?? null;
+if ($simulateAction === 'reset') {
+    // Reset na původní admin session
+    $original = $_SESSION['_original_admin_diagnostic'];
+    $_SESSION['user_id'] = $original['user_id'];
+    $_SESSION['email'] = $original['email'];
+    $_SESSION['role'] = $original['role'];
+    $_SESSION['is_admin'] = $original['is_admin'];
+    $_SESSION['name'] = $original['name'];
+    unset($_SESSION['_simulating_diagnostic']);
+    header('Location: diagnostic_tool.php?tab=simulate');
+    exit;
+} elseif ($simulateAction === 'role') {
+    $roleToSimulate = $_GET['role'] ?? null;
+
+    switch ($roleToSimulate) {
+        case 'admin':
+            $_SESSION['user_id'] = 1;
+            $_SESSION['email'] = 'admin@wgs-service.cz';
+            $_SESSION['role'] = 'admin';
+            $_SESSION['is_admin'] = true;
+            $_SESSION['name'] = 'Admin (SIMULACE)';
+            $_SESSION['_simulating_diagnostic'] = 'admin';
+            break;
+
+        case 'prodejce':
+            $_SESSION['user_id'] = 7;
+            $_SESSION['email'] = 'naty@naty.cz';
+            $_SESSION['role'] = 'prodejce';
+            $_SESSION['is_admin'] = false;
+            $_SESSION['name'] = 'Naty Prodejce (SIMULACE)';
+            $_SESSION['_simulating_diagnostic'] = 'prodejce';
+            break;
+
+        case 'technik':
+            $_SESSION['user_id'] = 15;
+            $_SESSION['email'] = 'milan@technik.cz';
+            $_SESSION['role'] = 'technik';
+            $_SESSION['is_admin'] = false;
+            $_SESSION['name'] = 'Milan Technik (SIMULACE)';
+            $_SESSION['_simulating_diagnostic'] = 'technik';
+            break;
+
+        case 'guest':
+            $_SESSION['user_id'] = null;
+            $_SESSION['email'] = 'jiri@novacek.cz';
+            $_SESSION['role'] = 'guest';
+            $_SESSION['is_admin'] = false;
+            $_SESSION['name'] = 'Jiří Nováček (SIMULACE)';
+            $_SESSION['_simulating_diagnostic'] = 'guest';
+            break;
+    }
+
+    header('Location: diagnostic_tool.php?tab=simulate');
+    exit;
+} elseif ($simulateAction === 'user') {
+    // Simulovat konkrétního uživatele z databáze
+    $userId = $_GET['user_id'] ?? null;
+    if ($userId) {
+        try {
+            $pdo = getDbConnection();
+            $stmt = $pdo->prepare("SELECT id, email, role, name FROM wgs_users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($user) {
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['email'] = $user['email'];
+                $_SESSION['role'] = $user['role'] ?? 'user';
+                $_SESSION['is_admin'] = false;
+                $_SESSION['name'] = ($user['name'] ?? $user['email']) . ' (SIMULACE)';
+                $_SESSION['_simulating_diagnostic'] = 'user:' . $user['id'];
+            }
+        } catch (Exception $e) {
+            // Ignore
+        }
+    }
+    header('Location: diagnostic_tool.php?tab=simulate');
+    exit;
+}
+
+$currentSimulation = $_SESSION['_simulating_diagnostic'] ?? null;
 
 // Zpracování akcí
 $result = null;
@@ -737,6 +837,11 @@ if ($autorun) {
         <div class="diagnostic-header-content">
             <h1>DIAGNOSTICKÝ NÁSTROJ</h1>
             <p>AI testovací prostředí pro WGS Service - PHP, SQL, Cesty, Session, Auto-diagnostika</p>
+            <?php if ($currentSimulation): ?>
+                <div style="margin-top: 0.75rem; padding: 0.5rem 1rem; background: #fff3e0; color: #000; border-left: 4px solid #f57c00; font-size: 0.85rem; font-weight: 600;">
+                    SIMULACE AKTIVNÍ: <?= htmlspecialchars($_SESSION['name'] ?? $_SESSION['email'] ?? 'neznámý') ?> &nbsp;|&nbsp; <a href="?simulate=reset" style="color: #000; text-decoration: underline;">Reset na Admin</a>
+                </div>
+            <?php endif; ?>
         </div>
         <a href="?report=1" class="btn-download-report">STÁHNOUT REPORT</a>
     </div>
@@ -760,6 +865,9 @@ if ($autorun) {
             </button>
             <button class="tab <?= $tab === 'auto' ? 'active' : '' ?>" onclick="window.location.href='?tab=auto&autorun=1'">
                 AUTO-DIAGNOSTIKA
+            </button>
+            <button class="tab <?= $tab === 'simulate' ? 'active' : '' ?>" onclick="window.location.href='?tab=simulate'">
+                SIMULACE ROLÍ
             </button>
         </div>
 
@@ -914,6 +1022,122 @@ if ($autorun) {
             <?php else: ?>
                 <a href="?tab=auto&autorun=1" class="btn-execute" style="display: inline-block; text-decoration: none;">SPUSTIT AUTO-DIAGNOSTIKU</a>
             <?php endif; ?>
+        </div>
+
+        <!-- SIMULACE ROLÍ TAB -->
+        <div class="tab-content <?= $tab === 'simulate' ? 'active' : '' ?>">
+            <h2 style="margin-bottom: 1rem; font-size: 1.5rem;">SIMULACE ROLÍ A UŽIVATELŮ</h2>
+            <p style="color: var(--wgs-grey); margin-bottom: 2rem;">Admin může testovat aplikaci z pohledu různých rolí a uživatelů bez přepínání účtů</p>
+
+            <?php if ($currentSimulation): ?>
+                <div style="background: #fff3e0; border-left: 4px solid #000; padding: 1rem; margin-bottom: 2rem;">
+                    <strong style="color: #000;">AKTIVNÍ SIMULACE:</strong>
+                    <span style="color: #555; margin-left: 0.5rem;">Momentálně testuješ aplikaci jako <strong><?= htmlspecialchars($_SESSION['name'] ?? $_SESSION['email'] ?? 'neznámý uživatel') ?></strong></span>
+                </div>
+            <?php else: ?>
+                <div style="background: #f8f8f8; border-left: 4px solid #000; padding: 1rem; margin-bottom: 2rem;">
+                    <strong style="color: #000;">NORMÁLNÍ REŽIM:</strong>
+                    <span style="color: #555; margin-left: 0.5rem;">Jsi přihlášen jako admin - všechna práva</span>
+                </div>
+            <?php endif; ?>
+
+            <!-- Aktuální SESSION -->
+            <div style="background: #f8f8f8; border: 1px solid var(--wgs-border); padding: 1.5rem; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem; font-size: 1rem; font-weight: 600; letter-spacing: 0.05em; color: #000;">AKTUÁLNÍ SESSION</h3>
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="font-weight: 600; color: #000; width: 150px;">user_id:</td>
+                        <td style="color: #555;"><?= isset($_SESSION['user_id']) ? htmlspecialchars($_SESSION['user_id']) : 'NULL' ?></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; color: #000;">email:</td>
+                        <td style="color: #555;"><?= isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : 'NULL' ?></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; color: #000;">role:</td>
+                        <td style="color: #555;"><?= isset($_SESSION['role']) ? htmlspecialchars($_SESSION['role']) : 'NULL' ?></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; color: #000;">is_admin:</td>
+                        <td style="color: #555;"><?= isset($_SESSION['is_admin']) && $_SESSION['is_admin'] ? 'true' : 'false' ?></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; color: #000;">name:</td>
+                        <td style="color: #555;"><?= isset($_SESSION['name']) ? htmlspecialchars($_SESSION['name']) : 'NULL' ?></td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Simulace rolí -->
+            <h3 style="margin-bottom: 1rem; font-size: 1rem; font-weight: 600; letter-spacing: 0.05em; color: #000;">RYCHLÁ SIMULACE ROLÍ</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <a href="?simulate=role&role=admin" style="display: block; padding: 1.5rem; border: 2px solid var(--wgs-border); background: <?= $currentSimulation === 'admin' ? '#000' : '#fff' ?>; color: <?= $currentSimulation === 'admin' ? '#fff' : '#000' ?>; text-decoration: none; transition: all 0.3s;">
+                    <div style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem;">ADMIN</div>
+                    <div style="font-size: 0.85rem; opacity: 0.8;">Vidí vše, může vše</div>
+                </a>
+
+                <a href="?simulate=role&role=prodejce" style="display: block; padding: 1.5rem; border: 2px solid var(--wgs-border); background: <?= $currentSimulation === 'prodejce' ? '#000' : '#fff' ?>; color: <?= $currentSimulation === 'prodejce' ? '#fff' : '#000' ?>; text-decoration: none; transition: all 0.3s;">
+                    <div style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem;">PRODEJCE</div>
+                    <div style="font-size: 0.85rem; opacity: 0.8;">Vidí všechny reklamace</div>
+                </a>
+
+                <a href="?simulate=role&role=technik" style="display: block; padding: 1.5rem; border: 2px solid var(--wgs-border); background: <?= $currentSimulation === 'technik' ? '#000' : '#fff' ?>; color: <?= $currentSimulation === 'technik' ? '#fff' : '#000' ?>; text-decoration: none; transition: all 0.3s;">
+                    <div style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem;">TECHNIK</div>
+                    <div style="font-size: 0.85rem; opacity: 0.8;">Vidí pouze přiřazené</div>
+                </a>
+
+                <a href="?simulate=role&role=guest" style="display: block; padding: 1.5rem; border: 2px solid var(--wgs-border); background: <?= $currentSimulation === 'guest' ? '#000' : '#fff' ?>; color: <?= $currentSimulation === 'guest' ? '#fff' : '#000' ?>; text-decoration: none; transition: all 0.3s;">
+                    <div style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem;">GUEST</div>
+                    <div style="font-size: 0.85rem; opacity: 0.8;">Vidí pouze své (email)</div>
+                </a>
+            </div>
+
+            <!-- Simulace konkrétního uživatele -->
+            <h3 style="margin-bottom: 1rem; font-size: 1rem; font-weight: 600; letter-spacing: 0.05em; color: #000;">SIMULACE KONKRÉTNÍHO UŽIVATELE</h3>
+            <?php
+            try {
+                $pdo = getDbConnection();
+                $stmt = $pdo->query("SELECT id, email, role, name FROM wgs_users ORDER BY email");
+                $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            ?>
+                <form method="GET" style="margin-bottom: 2rem;">
+                    <input type="hidden" name="simulate" value="user">
+                    <div style="display: flex; gap: 1rem; align-items: end;">
+                        <div style="flex: 1;">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #555; margin-bottom: 0.5rem;">VYBER UŽIVATELE</label>
+                            <select name="user_id" style="width: 100%; padding: 0.75rem; border: 1px solid var(--wgs-border); background: #fff; font-family: 'Poppins', sans-serif; font-size: 0.9rem;">
+                                <option value="">-- Vyber uživatele --</option>
+                                <?php foreach ($users as $user): ?>
+                                    <option value="<?= $user['id'] ?>"><?= htmlspecialchars($user['email']) ?> (<?= htmlspecialchars($user['role'] ?? 'user') ?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-execute" style="white-space: nowrap;">SIMULOVAT UŽIVATELE</button>
+                    </div>
+                </form>
+            <?php
+            } catch (Exception $e) {
+                echo '<p style="color: #555;">Nelze načíst seznam uživatelů: ' . htmlspecialchars($e->getMessage()) . '</p>';
+            }
+            ?>
+
+            <!-- Reset -->
+            <?php if ($currentSimulation): ?>
+                <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--wgs-border);">
+                    <a href="?simulate=reset" class="btn-execute btn-secondary" style="display: inline-block; text-decoration: none; background: #555; border-color: #555; color: white;">RESET NA ADMIN</a>
+                </div>
+            <?php endif; ?>
+
+            <!-- Test odkazy -->
+            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--wgs-border);">
+                <h3 style="margin-bottom: 1rem; font-size: 1rem; font-weight: 600; letter-spacing: 0.05em; color: #000;">TESTOVACÍ ODKAZY</h3>
+                <p style="color: #555; margin-bottom: 1rem; font-size: 0.9rem;">Otevři tyto stránky v novém okně a uvidíš je z pohledu simulované role:</p>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="/seznam.php" target="_blank" style="padding: 0.5rem 1rem; background: #000; color: white; text-decoration: none; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;">SEZNAM REKLAMACÍ</a>
+                    <a href="/admin.php" target="_blank" style="padding: 0.5rem 1rem; background: #555; color: white; text-decoration: none; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;">ADMIN PANEL</a>
+                    <a href="/nova-reklamace.php" target="_blank" style="padding: 0.5rem 1rem; background: #555; color: white; text-decoration: none; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;">NOVÁ REKLAMACE</a>
+                </div>
+            </div>
         </div>
 
         <!-- VÝSLEDKY -->
