@@ -15,6 +15,10 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 $step = $_GET['step'] ?? 'start';
 $action = $_POST['action'] ?? null;
 
+// DEBUG - zapiš do error logu
+error_log("INSTALL RBAC - Step: $step, Action: " . ($action ?? 'NULL'));
+error_log("INSTALL RBAC - POST data: " . print_r($_POST, true));
+
 // Zkontroluj jestli už je nainstalováno
 $isInstalled = false;
 try {
@@ -22,9 +26,12 @@ try {
     $stmt = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'created_by'");
     if ($stmt->rowCount() > 0) {
         $isInstalled = true;
+        error_log("INSTALL RBAC - Already installed!");
+    } else {
+        error_log("INSTALL RBAC - NOT installed yet");
     }
 } catch (Exception $e) {
-    // Ignoruj chyby při kontrole
+    error_log("INSTALL RBAC - Error checking: " . $e->getMessage());
 }
 
 ?>
@@ -354,7 +361,7 @@ try {
                 </div>
             </div>
 
-        <?php elseif ($step === 'start' && !$isInstalled): ?>
+        <?php elseif ($step === 'start' && !$isInstalled && $action !== 'install'): ?>
             <!-- FORMULÁŘ PRO INSTALACI -->
             <div class="header">
                 <h1>INSTALACE ROLE-BASED ACCESS</h1>
