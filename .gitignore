@@ -12,5 +12,8 @@ logs/
 temp/
 *.log
 
+# Build artifacts from local tooling
+config/node_modules/
+
 # Temporary files
 *.tmp

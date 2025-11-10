@@ -1,5 +1,6 @@
 <?php
 require_once "init.php";
+require_once __DIR__ . '/includes/admin_navigation.php';
 
 // BEZPEČNOST: Kontrola admin přihlášení
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
@@ -8,8 +9,13 @@ if (!$isAdmin) {
     exit;
 }
 
-// Získat záložku z URL
+$tabConfig = loadAdminTabNavigation();
 $activeTab = $_GET['tab'] ?? 'dashboard';
+if (!array_key_exists($activeTab, $tabConfig)) {
+    $activeTab = 'dashboard';
+}
+$currentTabMeta = $tabConfig[$activeTab];
+$currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -37,8 +43,7 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
 </head>
 
 <body>
-<?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
-<!-- <?php require_once __DIR__ . "/includes/admin_header.php"; ?> -->
+<?php require_once __DIR__ . "/includes/admin_header.php"; ?>
 
 <!-- MAIN CONTENT -->
 <main>
@@ -46,72 +51,50 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
 
   <h1 class="page-title">Admin Panel</h1>
   <p class="page-subtitle">Správa systému White Glove Service</p>
+  <p class="page-subtitle">Sekce: <?php echo htmlspecialchars($currentTabLabel, ENT_QUOTES, 'UTF-8'); ?></p>
 
-  <?php
-    $tabs = [
-      'dashboard' => 'Přehled',
-      'notifications' => 'Notifikace',
-      'keys' => 'Registrační klíče',
-      'users' => 'Uživatelé',
-      'online' => 'Online'
-    ];
-  ?>
-
-  <nav class="tab-nav" role="tablist" aria-label="Sekce administrace">
-    <?php foreach ($tabs as $slug => $label):
-      $isActive = ($activeTab === $slug);
-    ?>
-      <button
-        type="button"
-        class="tab <?php echo $isActive ? 'active' : ''; ?>"
-        data-tab="<?php echo htmlspecialchars($slug, ENT_QUOTES, 'UTF-8'); ?>"
-        id="tab-btn-<?php echo htmlspecialchars($slug, ENT_QUOTES, 'UTF-8'); ?>"
-        aria-controls="tab-<?php echo htmlspecialchars($slug, ENT_QUOTES, 'UTF-8'); ?>"
-        aria-selected="<?php echo $isActive ? 'true' : 'false'; ?>"
-        tabindex="<?php echo $isActive ? '0' : '-1'; ?>"
-      >
-        <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
-      </button>
-    <?php endforeach; ?>
-  </nav>
-
+  <?php if ($activeTab === 'dashboard'): ?>
   <!-- TAB: DASHBOARD -->
-  <div id="tab-dashboard" class="tab-content<?php echo $activeTab === 'dashboard' ? '' : ' hidden'; ?>" role="tabpanel" aria-labelledby="tab-btn-dashboard" aria-hidden="<?php echo $activeTab === 'dashboard' ? 'false' : 'true'; ?>">
+  <div id="tab-dashboard" class="tab-content">
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-label">Reklamace</div>
         <div class="stat-value" id="stat-claims">0</div>
       </div>
-      
+
       <div class="stat-card">
         <div class="stat-label">Uživatelé</div>
         <div class="stat-value" id="stat-users">0</div>
       </div>
-      
+
       <div class="stat-card">
         <div class="stat-label">Online</div>
         <div class="stat-value" id="stat-online">0</div>
       </div>
-      
+
       <div class="stat-card">
         <div class="stat-label">Aktivní klíče</div>
         <div class="stat-value" id="stat-keys">0</div>
       </div>
     </div>
   </div>
+  <?php endif; ?>
   
+  <?php if ($activeTab === 'notifications'): ?>
   <!-- TAB: NOTIFICATIONS -->
-  <div id="tab-notifications" class="tab-content<?php echo $activeTab === 'notifications' ? '' : ' hidden'; ?>" role="tabpanel" aria-labelledby="tab-btn-notifications" aria-hidden="<?php echo $activeTab === 'notifications' ? 'false' : 'true'; ?>">
+  <div id="tab-notifications" class="tab-content">
     <h2 class="page-title" style="font-size: 1.8rem; margin-bottom: 1rem;">Správa Emailů & SMS</h2>
     <p class="page-subtitle">Editace šablon, nastavení příjemců a správa automatických notifikací</p>
-    
+
     <div id="notifications-container">
       <div class="loading">Načítání notifikací...</div>
     </div>
   </div>
+  <?php endif; ?>
   
+  <?php if ($activeTab === 'keys'): ?>
   <!-- TAB: KEYS -->
-  <div id="tab-keys" class="tab-content<?php echo $activeTab === 'keys' ? '' : ' hidden'; ?>" role="tabpanel" aria-labelledby="tab-btn-keys" aria-hidden="<?php echo $activeTab === 'keys' ? 'false' : 'true'; ?>">
+  <div id="tab-keys" class="tab-content">
     <div class="table-container">
       <div class="table-header">
         <h3 class="table-title">Registrační klíče</h3>
@@ -126,9 +109,11 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
       </div>
     </div>
   </div>
+  <?php endif; ?>
   
+  <?php if ($activeTab === 'users'): ?>
   <!-- TAB: USERS -->
-  <div id="tab-users" class="tab-content<?php echo $activeTab === 'users' ? '' : ' hidden'; ?>" role="tabpanel" aria-labelledby="tab-btn-users" aria-hidden="<?php echo $activeTab === 'users' ? 'false' : 'true'; ?>">
+  <div id="tab-users" class="tab-content">
     <div class="table-container">
       <div class="table-header">
         <h3 class="table-title">Všichni uživatelé</h3>
@@ -159,9 +144,11 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
       </table>
     </div>
   </div>
+  <?php endif; ?>
   
+  <?php if ($activeTab === 'online'): ?>
   <!-- TAB: ONLINE -->
-  <div id="tab-online" class="tab-content<?php echo $activeTab === 'online' ? '' : ' hidden'; ?>" role="tabpanel" aria-labelledby="tab-btn-online" aria-hidden="<?php echo $activeTab === 'online' ? 'false' : 'true'; ?>">
+  <div id="tab-online" class="tab-content">
     <div class="table-container">
       <div class="table-header">
         <h3 class="table-title">Online uživatelé</h3>
@@ -188,6 +175,7 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
       </table>
     </div>
   </div>
+  <?php endif; ?>
 
 </div>
 </main>
@@ -247,32 +235,6 @@ $activeTab = $_GET['tab'] ?? 'dashboard';
 <script src="assets/js/logger.js" defer></script>
 <script src="assets/js/admin-notifications.js" defer></script>
 <script src="assets/js/admin.js" defer></script>
-
-<!-- Tab switcher script -->
-<script>
-// Zobraz správnou záložku při načtení stránky
-document.addEventListener('DOMContentLoaded', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const tab = urlParams.get('tab');
-
-  if (tab) {
-    // Skryj všechny záložky
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-
-    // Zobraz vybranou záložku
-    const tabContent = document.getElementById(`tab-${tab}`);
-    if (tabContent) {
-      tabContent.classList.remove('hidden');
-      console.log('Zobrazena záložka:', tab);
-
-      // Načti notifikace pokud je to notifications tab
-      if (tab === 'notifications' && typeof loadNotifications === 'function') {
-        loadNotifications();
-      }
-    }
-  }
-});
-</script>
 
 <!-- MODAL: Edit Notification -->
 <div class="wgs-modal" id="editNotificationModal" style="display: none;">

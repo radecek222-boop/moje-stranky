@@ -1,7 +1,17 @@
 <?php
-$current = basename($_SERVER["PHP_SELF"]);
+$currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+if ($currentPath === false || $currentPath === null) {
+    $currentPath = $_SERVER['PHP_SELF'] ?? '';
+}
+$current = basename($currentPath);
 $isLoggedIn = isset($_SESSION["user_id"]);
 $isAdmin = isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] === true;
+$currentAdminTab = $_GET['tab'] ?? 'dashboard';
+
+if ($isAdmin) {
+    require_once __DIR__ . '/admin_navigation.php';
+    $adminNavigation = loadAdminNavigation();
+}
 ?>
 
 <header class="hamburger-header">
@@ -13,15 +23,19 @@ $isAdmin = isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] === true;
     <?php
     if ($isAdmin):
     ?>
-      <a href="admin.php" <?php if($current == "admin.php" && !isset($_GET['tab'])) echo 'class="active"'; ?>>DASHBOARD</a>
-      <a href="statistiky.php" <?php if($current == "statistiky.php") echo 'class="active"'; ?>>STATISTIKY</a>
-      <a href="analytics.php" <?php if($current == "analytics.php") echo 'class="active"'; ?>>ANALYTICS</a>
-      <a href="admin.php?tab=notifications" <?php if($current == "admin.php" && isset($_GET['tab']) && $_GET['tab'] == 'notifications') echo 'class="active"'; ?>>EMAILY & SMS</a>
-      <a href="admin.php?tab=keys" <?php if($current == "admin.php" && isset($_GET['tab']) && $_GET['tab'] == 'keys') echo 'class="active"'; ?>>REGISTRAČNÍ KLÍČE</a>
-      <a href="admin.php?tab=users" <?php if($current == "admin.php" && isset($_GET['tab']) && $_GET['tab'] == 'users') echo 'class="active"'; ?>>UŽIVATELÉ</a>
-      <a href="admin.php?tab=online" <?php if($current == "admin.php" && isset($_GET['tab']) && $_GET['tab'] == 'online') echo 'class="active"'; ?>>ONLINE</a>
-      <a href="seznam.php" <?php if($current == "seznam.php") echo 'class="active"'; ?>>REKLAMACE</a>
-      <a href="psa.php" <?php if($current == "psa.php") echo 'class="active"'; ?>>PSA</a>
+      <?php foreach ($adminNavigation as $item):
+        if (empty($item['header_label'])) {
+            continue;
+        }
+        $isActiveLink = isAdminNavigationActive($item, $current, $currentAdminTab);
+      ?>
+        <a
+          href="<?php echo htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8'); ?>"
+          <?php echo $isActiveLink ? 'class="active"' : ''; ?>
+        >
+          <?php echo htmlspecialchars($item['header_label'], ENT_QUOTES, 'UTF-8'); ?>
+        </a>
+      <?php endforeach; ?>
       <a href="logout.php" class="hamburger-logout">ODHLÁŠENÍ</a>
     <?php
     elseif ($isLoggedIn):

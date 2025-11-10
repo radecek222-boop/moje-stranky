@@ -22,7 +22,7 @@
     }
 
     .gdpr-hero h1 {
-      font-size: clamp(2rem, 4vw, 3rem);
+      font-size: clamp(1.8rem, 3.2vw, 2.6rem);
       letter-spacing: 0.12em;
       text-transform: uppercase;
       margin-bottom: 1rem;
@@ -101,21 +101,53 @@
       padding-left: 0;
       margin: 0;
       display: grid;
-      gap: 0.75rem;
+      gap: 1rem;
       flex: 1;
     }
 
     .gdpr-card ul li {
-      display: flex;
-      align-items: flex-start;
+      position: relative;
+      padding-left: 1.75rem;
+      line-height: 1.75;
     }
 
     .gdpr-card ul li::before {
       content: "•";
       color: #111827;
       font-weight: 600;
-      margin-right: 1rem;
-      flex-shrink: 0;
+      position: absolute;
+      left: 0;
+      top: 0.55rem;
+    }
+
+    .gdpr-card ul li strong {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      color: #111827;
+    }
+
+    .gdpr-link {
+      color: #0f172a;
+      font-weight: 600;
+      text-decoration: underline;
+      text-decoration-thickness: 0.08em;
+      text-underline-offset: 4px;
+    }
+
+    .gdpr-link:hover,
+    .gdpr-link:focus {
+      color: #2563eb;
+    }
+
+    .gdpr-contact-note {
+      display: block;
+      margin-top: 0.35rem;
+      font-weight: 500;
+      color: #1f2937;
     }
 
     .gdpr-highlight {
@@ -161,7 +193,7 @@
         <h2>Správce údajů</h2>
         <p class="gdpr-highlight">
           White Glove Service, s.r.o., Do Dubče 364, 190 11 Praha 9 – Běchovice, IČ: 177 51 781<br>
-          E-mail: <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>, Tel.: <a href="tel:+420725965826" class="footer-link">+420 725 965 826</a>
+          E-mail: <a href="mailto:reklamace@wgs-service.cz" class="gdpr-link">reklamace@wgs-service.cz</a>, Tel.: <a href="tel:+420725965826" class="gdpr-link">+420 725 965 826</a>
         </p>
         <p>Správce zajišťuje servisní služby značky Natuzzi a dalších prémiových výrobců nábytku v České republice a na Slovensku.</p>
       </article>
@@ -169,20 +201,44 @@
       <article class="gdpr-card">
         <h2>Jaké údaje zpracováváme</h2>
         <ul>
-          <li>Identifikační údaje: jméno, případně název společnosti a fakturační údaje.</li>
-          <li>Kontaktní údaje: e-mail, telefon, doručovací adresa, preferovaný jazyk komunikace.</li>
-          <li>Údaje o zakázce: číslo reklamace/servisu, datum nákupu, popis závady, fotodokumentace a čísla modelů.</li>
-          <li>Provozní metadata: IP adresa, čas odeslání formuláře a použité zařízení pro prokázání uděleného souhlasu.</li>
+          <li>
+            <strong>Identifikační údaje</strong>
+            Jméno, případně název společnosti a fakturační údaje.
+          </li>
+          <li>
+            <strong>Kontaktní údaje</strong>
+            E-mail, telefon, doručovací adresa, preferovaný jazyk komunikace.
+          </li>
+          <li>
+            <strong>Údaje o zakázce</strong>
+            Číslo reklamace/servisu, datum nákupu, popis závady, fotodokumentace a čísla modelů.
+          </li>
+          <li>
+            <strong>Provozní metadata</strong>
+            IP adresa, čas odeslání formuláře a použité zařízení pro prokázání uděleného souhlasu.
+          </li>
         </ul>
       </article>
 
       <article class="gdpr-card">
         <h2>Účely a právní důvody</h2>
         <ul>
-          <li>Vyřízení servisní zakázky, reklamace nebo technické konzultace (plnění smlouvy).</li>
-          <li>Komunikace s výrobcem, prodejcem nebo importérem nutná k vyřízení požadavku (oprávněný zájem).</li>
-          <li>Evidence plnění, fakturace a účetnictví (právní povinnost).</li>
-          <li>Uchování souhlasu uděleného ve formuláři <em>Objednat servis</em> pro doložení splnění povinností dle GDPR.</li>
+          <li>
+            <strong>Vyřízení zakázky</strong>
+            Servisní zakázka, reklamace nebo technická konzultace (plnění smlouvy).
+          </li>
+          <li>
+            <strong>Komunikace s partnery</strong>
+            Výrobce, prodejce nebo importér nutný k vyřízení požadavku (oprávněný zájem).
+          </li>
+          <li>
+            <strong>Evidence a účetnictví</strong>
+            Evidence plnění, fakturace a účetnictví (právní povinnost).
+          </li>
+          <li>
+            <strong>Doložení souhlasu</strong>
+            Uchování souhlasu uděleného ve formuláři <em>Objednat servis</em> pro prokázání splnění povinností dle GDPR.
+          </li>
         </ul>
       </article>
 
@@ -204,18 +260,37 @@
       <article class="gdpr-card">
         <h2>Vaše práva</h2>
         <ul>
-          <li>Požadovat přístup k osobním údajům a získat kopii ve strojově čitelné podobě.</li>
-          <li>Požádat o opravu nepřesných nebo neaktuálních údajů.</li>
-          <li>Vznést námitku proti zpracování nebo požádat o omezení zpracování, pokud jsou splněny zákonné podmínky.</li>
-          <li>Požádat o výmaz údajů, jakmile pominou důvody jejich zpracování.</li>
-          <li>Odvolat souhlas poskytnutý ve formuláři <em>Objednat servis</em> – kontaktujte nás na <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>.</li>
-          <li>Podat stížnost u dozorového úřadu: Úřad pro ochranu osobních údajů, Pplk. Sochora 27, 170 00 Praha 7.</li>
+          <li>
+            <strong>Přístup k údajům</strong>
+            Požadovat přístup k osobním údajům a získat kopii ve strojově čitelné podobě.
+          </li>
+          <li>
+            <strong>Oprava údajů</strong>
+            Požádat o opravu nepřesných nebo neaktuálních údajů.
+          </li>
+          <li>
+            <strong>Námitka a omezení</strong>
+            Vznést námitku proti zpracování nebo požádat o omezení zpracování, pokud jsou splněny zákonné podmínky.
+          </li>
+          <li>
+            <strong>Výmaz údajů</strong>
+            Požádat o výmaz údajů, jakmile pominou důvody jejich zpracování.
+          </li>
+          <li>
+            <strong>Odvolání souhlasu</strong>
+            Souhlas udělený ve formuláři <em>Objednat servis</em> můžete odvolat –
+            <span class="gdpr-contact-note">kontaktujte nás na <a href="mailto:reklamace@wgs-service.cz" class="gdpr-link">reklamace@wgs-service.cz</a>.</span>
+          </li>
+          <li>
+            <strong>Stížnost u dozorového úřadu</strong>
+            Úřad pro ochranu osobních údajů, Pplk. Sochora 27, 170 00 Praha 7.
+          </li>
         </ul>
       </article>
 
       <article class="gdpr-card">
         <h2>Jak nás kontaktovat</h2>
-        <p>Máte-li dotazy k ochraně soukromí nebo chcete uplatnit svá práva, napište na <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a> nebo volejte <a href="tel:+420725965826" class="footer-link">+420 725 965 826</a>. Vaše požadavky zpracujeme bez zbytečného odkladu, nejpozději do 30 dnů.</p>
+        <p>Máte-li dotazy k ochraně soukromí nebo chcete uplatnit svá práva, napište na <a href="mailto:reklamace@wgs-service.cz" class="gdpr-link">reklamace@wgs-service.cz</a> nebo volejte <a href="tel:+420725965826" class="gdpr-link">+420 725 965 826</a>. Vaše požadavky zpracujeme bez zbytečného odkladu, nejpozději do 30 dnů.</p>
         <p class="gdpr-meta">Poslední aktualizace: <?php echo date('d.m.Y'); ?></p>
       </article>
     </div>

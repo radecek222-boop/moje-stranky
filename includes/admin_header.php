@@ -2,6 +2,16 @@
 /**
  * ADMIN HEADER - Shared across all admin pages
  */
+
+require_once __DIR__ . '/admin_navigation.php';
+
+$adminNavigation = loadAdminNavigation();
+$currentPathValue = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+if ($currentPathValue === false || $currentPathValue === null) {
+    $currentPathValue = $_SERVER['PHP_SELF'] ?? '';
+}
+$currentPath = basename($currentPathValue);
+$currentAdminTab = $_GET['tab'] ?? 'dashboard';
 ?>
 
 <header class="admin-header">
@@ -10,19 +20,24 @@
             <h1>WGS</h1>
             <p>ADMINISTRACE</p>
         </div>
-        
+
         <nav class="admin-nav">
-            <a href="admin.php" class="nav-link" data-page="dashboard">DASHBOARD</a>
-            <a href="statistiky.php" class="nav-link" data-page="statistics">STATISTIKY</a>
-            <a href="analytics.php" class="nav-link" data-page="analytics">ANALYTICS</a>
-            <a href="admin.php?tab=notifications" class="nav-link" data-page="notifications">EMAILY & SMS</a>
-            <a href="admin.php?tab=keys" class="nav-link" data-page="keys">REGISTRAČNÍ KLÍČE</a>
-            <a href="admin.php?tab=users" class="nav-link" data-page="users">UŽIVATELÉ</a>
-            <a href="admin.php?tab=online" class="nav-link" data-page="online">ONLINE</a>
-            <a href="seznam.php" class="nav-link" data-page="complaints">REKLAMACE</a>
-            <a href="psa.php" class="nav-link" data-page="psa">PSA</a>
+            <?php foreach ($adminNavigation as $item):
+                if (empty($item['header_label'])) {
+                    continue;
+                }
+                $isActive = isAdminNavigationActive($item, $currentPath, $currentAdminTab);
+            ?>
+                <a
+                    href="<?php echo htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8'); ?>"
+                    class="nav-link<?php echo $isActive ? ' active' : ''; ?>"
+                    data-page="<?php echo htmlspecialchars($item['tab'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                >
+                    <?php echo htmlspecialchars($item['header_label'], ENT_QUOTES, 'UTF-8'); ?>
+                </a>
+            <?php endforeach; ?>
         </nav>
-        
+
         <div class="header-actions">
             <button id="logoutBtn" class="btn-logout" title="Odhlásit se">Odhlásit</button>
         </div>
@@ -31,28 +46,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Zjisti aktuální stránku z URL
-    const path = window.location.pathname;
-    const params = new URLSearchParams(window.location.search);
-    
-    // Zvýraznění aktivního linku
-    document.querySelectorAll('.nav-link').forEach(link => {
-        const href = link.getAttribute('href');
-        
-        // Pokud je aktuální URL rovna href, zvýrazni
-        if (href === path || href === path.split('/').pop()) {
-            link.classList.add('active');
-        }
-        // Speciální případ pro ?tab=XXX
-        else if (href.includes('?tab=')) {
-            const tabParam = params.get('tab');
-            if (href.includes('tab=' + tabParam)) {
-                link.classList.add('active');
-            }
-        }
-    });
-    
-    // Logout button
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
