@@ -1,25 +1,8 @@
--- FIX: Nastavení zpracoval_id pro existující reklamace
--- Důvod: Reklamace bez zpracoval_id se nezobrazují v load.php
--- Datum: 2025-11-10
-
--- 1. Nastav zpracoval_id=7 pro všechny reklamace které nemají nastaveno
---    (user_id 7 = naty@naty.cz)
-UPDATE wgs_reklamace
-SET zpracoval_id = 7
-WHERE zpracoval_id IS NULL OR zpracoval_id = '';
-
--- 2. Ověř výsledek
-SELECT
-    id,
-    reklamace_id,
-    jmeno,
-    email,
-    zpracoval_id,
-    created_at
-FROM wgs_reklamace
-ORDER BY created_at DESC;
-
--- Očekávaný výsledek:
--- Všechny reklamace by měly mít zpracoval_id=7
--- Jiří Nováček (id=17) by měl mít zpracoval_id=7
--- Gustav Sechter (id=2) už má zpracoval_id=7
+-- DEPRECATED: Tento skript je zastaralý!
+-- Použij místo něj: migration_add_created_by.sql
+--
+-- Důvod: Původní řešení bylo pouze pro jednoho uživatele (user_id=7)
+-- Nové řešení používá role-based přístup který škáluje pro stovky prodejců a techniků
+--
+-- NEPOUŠTĚJ TENTO SKRIPT!
+-- Místo toho spusť: migration_add_created_by.sql
