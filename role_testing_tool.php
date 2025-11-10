@@ -10,7 +10,7 @@ require_once __DIR__ . '/init.php';
 // BEZPEČNOST: Pouze admin může používat tento nástroj
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     http_response_code(403);
-    die('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Přístup odepřen</title></head><body style="font-family: Arial; padding: 40px; text-align: center;"><h1>🔒 Přístup odepřen</h1><p>Pouze admin může používat testovací nástroje.</p><p><a href="/login" style="color: #2196F3;">Přihlásit se jako admin</a></p></body></html>');
+    die('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Přístup odepřen</title><link rel="stylesheet" href="assets/css/styles.min.css"></head><body style="font-family: Poppins, sans-serif; padding: 40px; text-align: center;"><h1 style="font-weight: 600; letter-spacing: 0.05em;">PŘÍSTUP ODEPŘEN</h1><p>Pouze admin může používat testovací nástroje.</p><p><a href="/login" style="color: #000;">Přihlásit se jako admin</a></p></body></html>');
 }
 
 // Uložit původní admin session před simulací
@@ -104,204 +104,324 @@ $currentSimulation = $_SESSION['_simulating'] ?? null;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Role Testing Tool - WGS Service</title>
+    <link rel="stylesheet" href="assets/css/styles.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+        :root {
+            --wgs-white: #FFFFFF;
+            --wgs-black: #000000;
+            --wgs-dark-grey: #222222;
+            --wgs-grey: #555555;
+            --wgs-light-grey: #999999;
+            --wgs-border: #E0E0E0;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--wgs-white);
+            color: var(--wgs-black);
+            padding: 0;
+            margin: 0;
+        }
+
+        .header {
+            background: var(--wgs-black);
+            color: var(--wgs-white);
+            padding: 2rem;
+            border-bottom: 2px solid var(--wgs-black);
+        }
+
+        .header h1 {
+            color: var(--wgs-white);
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .header p {
+            color: var(--wgs-light-grey);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
+            padding: 2rem;
         }
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 32px;
-        }
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 16px;
-        }
+
         .alert {
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--wgs-black);
+            background: #f8f8f8;
+        }
+
+        .alert strong {
             font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--wgs-black);
         }
+
         .alert-warning {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            color: #856404;
+            background: #fff3e0;
+            border-left-color: #f57c00;
         }
-        .alert-info {
-            background: #d1ecf1;
-            border: 2px solid #17a2b8;
-            color: #0c5460;
+
+        .session-info {
+            background: #f8f8f8;
+            border: 1px solid var(--wgs-border);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
         }
-        .alert-success {
-            background: #d4edda;
-            border: 2px solid #28a745;
-            color: #155724;
+
+        .session-info h3 {
+            margin-bottom: 1rem;
+            color: var(--wgs-black);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
         }
+
+        .session-info table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .session-info td {
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .session-info td:first-child {
+            font-weight: 600;
+            color: var(--wgs-black);
+            width: 150px;
+        }
+
+        .session-info td:last-child {
+            color: var(--wgs-grey);
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            color: var(--wgs-black);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
         .role-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
+
         .role-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 25px;
-            border: 3px solid #dee2e6;
-            transition: all 0.3s;
+            background: var(--wgs-white);
+            border: 2px solid var(--wgs-border);
+            padding: 2rem;
             cursor: pointer;
+            transition: all 0.3s;
         }
+
         .role-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-color: var(--wgs-black);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
+
         .role-card.active {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            background: var(--wgs-black);
+            border-color: var(--wgs-black);
         }
+
+        .role-card.active * {
+            color: var(--wgs-white) !important;
+        }
+
         .role-card h3 {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #333;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--wgs-black);
+            margin-bottom: 0.75rem;
         }
+
         .role-card p {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 15px;
+            font-size: 0.85rem;
+            color: var(--wgs-grey);
+            margin-bottom: 1rem;
             line-height: 1.5;
         }
+
         .role-card ul {
             list-style: none;
-            font-size: 13px;
-            color: #666;
+            font-size: 0.8rem;
+            color: var(--wgs-grey);
         }
+
         .role-card ul li {
-            padding: 5px 0;
+            padding: 0.25rem 0;
+            padding-left: 1rem;
+            position: relative;
         }
+
         .role-card ul li:before {
-            content: "✓ ";
-            color: #28a745;
+            content: "—";
+            position: absolute;
+            left: 0;
             font-weight: bold;
         }
+
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 14px 30px;
-            font-size: 16px;
+            background: var(--wgs-black);
+            color: var(--wgs-white);
+            border: 2px solid var(--wgs-black);
+            padding: 0.75rem 2rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            border-radius: 8px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
             width: 100%;
-            margin-top: 15px;
+            margin-top: 1rem;
+            font-family: 'Poppins', sans-serif;
         }
+
         button:hover {
+            background: var(--wgs-white);
+            color: var(--wgs-black);
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
+
         .btn-reset {
-            background: #dc3545;
+            background: var(--wgs-grey);
+            border-color: var(--wgs-grey);
         }
-        .btn-reset:hover {
-            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.4);
-        }
+
         .test-links {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 25px;
-            margin-top: 30px;
+            background: #f8f8f8;
+            border: 1px solid var(--wgs-border);
+            padding: 1.5rem;
+            margin-top: 2rem;
         }
+
         .test-links h2 {
-            color: #333;
-            margin-bottom: 15px;
+            margin-bottom: 1rem;
         }
+
+        .test-links p {
+            color: var(--wgs-grey);
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+        }
+
         .test-links a {
             display: inline-block;
-            margin: 5px 10px 5px 0;
-            padding: 10px 20px;
-            background: #667eea;
-            color: white;
+            margin: 0.25rem 0.5rem 0.25rem 0;
+            padding: 0.5rem 1rem;
+            background: var(--wgs-black);
+            color: var(--wgs-white);
             text-decoration: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: all 0.3s;
         }
+
         .test-links a:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
+            background: var(--wgs-grey);
         }
-        .session-info {
-            background: #e9ecef;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 30px;
-            font-family: monospace;
-            font-size: 13px;
+
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.5rem 0;
+            color: var(--wgs-grey);
+            text-decoration: none;
+            font-size: 0.85rem;
+            border-bottom: 1px solid transparent;
+            transition: all 0.3s;
         }
-        .session-info div {
-            margin: 5px 0;
-        }
-        .session-info strong {
-            color: #667eea;
+
+        .back-link:hover {
+            color: var(--wgs-black);
+            border-bottom-color: var(--wgs-black);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎭 Role Testing Tool</h1>
-        <p class="subtitle">Diagnostický nástroj pro testování přístupových práv různých rolí</p>
+    <div class="header">
+        <h1>ROLE TESTING TOOL</h1>
+        <p>Diagnostický nástroj pro testování přístupových práv různých rolí</p>
+    </div>
 
+    <div class="container">
         <?php if (isset($_GET['simulated'])): ?>
-            <div class="alert alert-success">
-                ✅ Simulace role <strong><?= htmlspecialchars($_GET['simulated']) ?></strong> aktivována!
+            <div class="alert">
+                <strong>Úspěch:</strong> Simulace role <strong><?= htmlspecialchars($_GET['simulated']) ?></strong> aktivována!
             </div>
         <?php elseif (isset($_GET['reset'])): ?>
-            <div class="alert alert-info">
-                🔄 Obnovena původní admin session.
+            <div class="alert">
+                <strong>Informace:</strong> Obnovena původní admin session.
             </div>
         <?php endif; ?>
 
         <?php if ($currentSimulation): ?>
             <div class="alert alert-warning">
-                ⚠️ <strong>POZOR:</strong> Momentálně simuluješ roli <strong><?= htmlspecialchars($currentSimulation) ?></strong>.<br>
-                Všechny stránky vidíš z pohledu této role!
+                <strong>Pozor:</strong> Momentálně simuluješ roli <strong><?= htmlspecialchars($currentSimulation) ?></strong>. Všechny stránky vidíš z pohledu této role!
             </div>
         <?php else: ?>
-            <div class="alert alert-info">
-                ℹ️ Momentálně jsi přihlášen jako <strong>Admin</strong> (normální režim).
+            <div class="alert">
+                <strong>Informace:</strong> Momentálně jsi přihlášen jako <strong>Admin</strong> (normální režim).
             </div>
         <?php endif; ?>
 
         <!-- Aktuální session info -->
         <div class="session-info">
-            <h3 style="margin-bottom: 10px; color: #333;">📊 Aktuální SESSION</h3>
-            <div><strong>user_id:</strong> <?= isset($_SESSION['user_id']) ? htmlspecialchars($_SESSION['user_id']) : 'NULL' ?></div>
-            <div><strong>email:</strong> <?= isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : 'NULL' ?></div>
-            <div><strong>role:</strong> <?= isset($_SESSION['role']) ? htmlspecialchars($_SESSION['role']) : 'NULL' ?></div>
-            <div><strong>is_admin:</strong> <?= isset($_SESSION['is_admin']) && $_SESSION['is_admin'] ? 'true' : 'false' ?></div>
-            <div><strong>name:</strong> <?= isset($_SESSION['name']) ? htmlspecialchars($_SESSION['name']) : 'NULL' ?></div>
-            <?php if ($currentSimulation): ?>
-                <div><strong>_simulating:</strong> <span style="color: #dc3545;"><?= htmlspecialchars($currentSimulation) ?></span></div>
-            <?php endif; ?>
+            <h3>Aktuální Session</h3>
+            <table>
+                <tr>
+                    <td>user_id:</td>
+                    <td><?= isset($_SESSION['user_id']) ? htmlspecialchars($_SESSION['user_id']) : 'NULL' ?></td>
+                </tr>
+                <tr>
+                    <td>email:</td>
+                    <td><?= isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : 'NULL' ?></td>
+                </tr>
+                <tr>
+                    <td>role:</td>
+                    <td><?= isset($_SESSION['role']) ? htmlspecialchars($_SESSION['role']) : 'NULL' ?></td>
+                </tr>
+                <tr>
+                    <td>is_admin:</td>
+                    <td><?= isset($_SESSION['is_admin']) && $_SESSION['is_admin'] ? 'true' : 'false' ?></td>
+                </tr>
+                <tr>
+                    <td>name:</td>
+                    <td><?= isset($_SESSION['name']) ? htmlspecialchars($_SESSION['name']) : 'NULL' ?></td>
+                </tr>
+                <?php if ($currentSimulation): ?>
+                <tr>
+                    <td>_simulating:</td>
+                    <td style="color: #f57c00;"><?= htmlspecialchars($currentSimulation) ?></td>
+                </tr>
+                <?php endif; ?>
+            </table>
         </div>
 
-        <h2 style="margin-bottom: 20px; color: #333;">🎯 Vyber roli k testování</h2>
+        <h2>Vyber roli k testování</h2>
 
         <div class="role-grid">
             <!-- ADMIN -->
@@ -309,7 +429,7 @@ $currentSimulation = $_SESSION['_simulating'] ?? null;
                 <input type="hidden" name="action" value="simulate">
                 <input type="hidden" name="simulate_role" value="admin">
                 <div class="role-card <?= $currentSimulation === 'admin' ? 'active' : '' ?>">
-                    <h3>🔵 ADMIN</h3>
+                    <h3>Admin</h3>
                     <p>Vidí a může upravovat vše</p>
                     <ul>
                         <li>Všechny reklamace</li>
@@ -317,7 +437,7 @@ $currentSimulation = $_SESSION['_simulating'] ?? null;
                         <li>Nastavení systému</li>
                         <li>Debug nástroje</li>
                     </ul>
-                    <button type="submit">🔵 Testovat jako Admin</button>
+                    <button type="submit">Testovat jako Admin</button>
                 </div>
             </form>
 
@@ -326,7 +446,7 @@ $currentSimulation = $_SESSION['_simulating'] ?? null;
                 <input type="hidden" name="action" value="simulate">
                 <input type="hidden" name="simulate_role" value="prodejce">
                 <div class="role-card <?= $currentSimulation === 'prodejce' ? 'active' : '' ?>">
-                    <h3>🟢 PRODEJCE</h3>
+                    <h3>Prodejce</h3>
                     <p>Vytváří reklamace pro zákazníky</p>
                     <ul>
                         <li>Vidí VŠECHNY reklamace</li>
@@ -334,7 +454,7 @@ $currentSimulation = $_SESSION['_simulating'] ?? null;
                         <li>Může editovat vlastní</li>
                         <li>Nemůže měnit nastavení</li>
                     </ul>
-                    <button type="submit">🟢 Testovat jako Prodejce</button>
+                    <button type="submit">Testovat jako Prodejce</button>
                 </div>
             </form>
 
@@ -343,7 +463,7 @@ $currentSimulation = $_SESSION['_simulating'] ?? null;
                 <input type="hidden" name="action" value="simulate">
                 <input type="hidden" name="simulate_role" value="technik">
                 <div class="role-card <?= $currentSimulation === 'technik' ? 'active' : '' ?>">
-                    <h3>🟡 TECHNIK</h3>
+                    <h3>Technik</h3>
                     <p>Opravuje přiřazené reklamace</p>
                     <ul>
                         <li>Vidí JEN přiřazené</li>
@@ -351,16 +471,16 @@ $currentSimulation = $_SESSION['_simulating'] ?? null;
                         <li>Může měnit stav</li>
                         <li>Nemůže vidět cizí</li>
                     </ul>
-                    <button type="submit">🟡 Testovat jako Technik</button>
+                    <button type="submit">Testovat jako Technik</button>
                 </div>
             </form>
 
-            <!-- GUEST (Registrovaný zákazník) -->
+            <!-- GUEST -->
             <form method="POST" style="margin: 0;">
                 <input type="hidden" name="action" value="simulate">
                 <input type="hidden" name="simulate_role" value="guest">
                 <div class="role-card <?= $currentSimulation === 'guest' ? 'active' : '' ?>">
-                    <h3>🔴 GUEST</h3>
+                    <h3>Guest</h3>
                     <p>Zákazník s účtem</p>
                     <ul>
                         <li>Vidí JEN svoje reklamace</li>
@@ -368,7 +488,7 @@ $currentSimulation = $_SESSION['_simulating'] ?? null;
                         <li>Může vytvářet nové</li>
                         <li>Nemůže editovat</li>
                     </ul>
-                    <button type="submit">🔴 Testovat jako Guest</button>
+                    <button type="submit">Testovat jako Guest</button>
                 </div>
             </form>
 
@@ -377,7 +497,7 @@ $currentSimulation = $_SESSION['_simulating'] ?? null;
                 <input type="hidden" name="action" value="simulate">
                 <input type="hidden" name="simulate_role" value="unregistered">
                 <div class="role-card <?= $currentSimulation === 'unregistered' ? 'active' : '' ?>">
-                    <h3>⚪ NEPŘIHLÁŠENÝ</h3>
+                    <h3>Nepřihlášený</h3>
                     <p>Nepřihlášený uživatel</p>
                     <ul>
                         <li>Omezený přístup</li>
@@ -385,39 +505,33 @@ $currentSimulation = $_SESSION['_simulating'] ?? null;
                         <li>Nemůže vytvářet</li>
                         <li>Nemůže vidět seznam</li>
                     </ul>
-                    <button type="submit">⚪ Testovat Nepřihlášený</button>
+                    <button type="submit">Testovat Nepřihlášený</button>
                 </div>
             </form>
         </div>
 
         <?php if ($currentSimulation): ?>
-            <form method="POST" style="margin-top: 30px;">
+            <form method="POST" style="margin-top: 2rem;">
                 <input type="hidden" name="action" value="reset">
-                <button type="submit" class="btn-reset">🔄 Reset na Admin Session</button>
+                <button type="submit" class="btn-reset">Reset na Admin Session</button>
             </form>
         <?php endif; ?>
 
         <!-- Test Links -->
         <div class="test-links">
-            <h2>🔗 Testovací odkazy</h2>
-            <p style="color: #666; margin-bottom: 15px; font-size: 14px;">
-                Otevři tyto stránky v novém okně a uvidíš je z pohledu simulované role:
-            </p>
-            <a href="/seznam.php" target="_blank">📋 Seznam reklamací</a>
-            <a href="/admin.php" target="_blank">⚙️ Admin panel</a>
-            <a href="/show_table_structure.php" target="_blank">📊 Struktura DB</a>
-            <a href="/debug_photos.php" target="_blank">📸 Debug fotek</a>
-            <a href="/quick_debug.php" target="_blank">🔍 Rychlý debug</a>
+            <h2>Testovací odkazy</h2>
+            <p>Otevři tyto stránky v novém okně a uvidíš je z pohledu simulované role:</p>
+            <a href="/seznam.php" target="_blank">Seznam reklamací</a>
+            <a href="/admin.php" target="_blank">Admin panel</a>
+            <a href="/show_table_structure.php" target="_blank">Struktura DB</a>
+            <a href="/debug_photos.php" target="_blank">Debug fotek</a>
+            <a href="/quick_debug.php" target="_blank">Rychlý debug</a>
         </div>
 
-        <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee; text-align: center;">
-            <a href="/admin.php?tab=tools" style="color: #667eea; text-decoration: none; font-weight: 600;">
-                ← Zpět na Admin Tools
-            </a>
-        </div>
+        <a href="/admin.php?tab=tools" class="back-link">Zpět na Admin Tools</a>
 
-        <div style="margin-top: 20px; text-align: center; color: #999; font-size: 14px;">
-            <small>WGS Service - Role Testing Tool © 2025</small>
+        <div style="margin-top: 2rem; text-align: center; color: var(--wgs-light-grey); font-size: 0.8rem;">
+            <small>WGS Service - Role Testing Tool</small>
         </div>
     </div>
 </body>
