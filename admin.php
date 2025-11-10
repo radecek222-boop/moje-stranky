@@ -262,11 +262,20 @@ try {
         <div style="margin-bottom: 1rem;">
           <button
             onclick="window.open('diagnostic_tool.php', '_blank')"
+            style="width: 100%; padding: 0.875rem 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-size: 0.8rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3; margin-bottom: 0.5rem;"
+            onmouseover="this.style.background='#fff'; this.style.color='#000'"
+            onmouseout="this.style.background='#000'; this.style.color='#fff'"
+          >
+            DIAGNOSTIKA SQL/PHP
+          </button>
+
+          <button
+            onclick="window.open('diagnostic_access_control.php', '_blank')"
             style="width: 100%; padding: 0.875rem 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-size: 0.8rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3;"
             onmouseover="this.style.background='#fff'; this.style.color='#000'"
             onmouseout="this.style.background='#000'; this.style.color='#fff'"
           >
-            DIAGNOSTICKÝ NÁSTROJ
+            DIAGNOSTIKA PŘÍSTUPŮ
           </button>
         </div>
 

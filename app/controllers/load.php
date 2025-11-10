@@ -46,47 +46,30 @@ try {
     // ŠKÁLOVATELNÁ LOGIKA PRO VÍCE PRODEJCŮ A TECHNIKŮ
     if (!$isAdmin) {
         $userId = $_SESSION['user_id'] ?? null;
-        $userEmail = $_SESSION['email'] ?? null;  // OPRAVENO: user_email → email
+        $userEmail = $_SESSION['user_email'] ?? null;  // SPRÁVNĚ: login_controller používá 'user_email'
         $userRole = strtolower(trim($_SESSION['role'] ?? 'guest'));
 
         // Rozlišení podle role:
-        // - 'prodejce', 'user' → vidí VŠECHNY reklamace (vytvářejí pro zákazníky)
-        // - 'technik' → vidí pouze přiřazené reklamace (zpracoval_id)
+        // - 'prodejce' → vidí POUZE SVÉ reklamace (created_by = user_id)
+        // - 'technik' → vidí VŠECHNY reklamace (žádný filtr)
         // - 'guest' → vidí pouze své (email match)
 
         $isProdejce = in_array($userRole, ['prodejce', 'user'], true);
         $isTechnik = in_array($userRole, ['technik', 'technician'], true);
 
         if ($isProdejce) {
-            // PRODEJCE: Vidí všechny reklamace (žádný filtr)
-            // Prodejci vytvářejí reklamace pro zákazníky, takže potřebují vidět všechny
-            // Žádné WHERE podmínky pro prodejce
-        } elseif ($isTechnik) {
-            // TECHNIK: Vidí pouze přiřazené reklamace
-            if ($userId !== null) {
-                $technikConditions = [];
-
-                // Filtry pro technika
-                if (in_array('zpracoval_id', $columns, true)) {
-                    $technikConditions[] = 'r.zpracoval_id = :zpracoval_id';
-                    $params[':zpracoval_id'] = $userId;
-                }
-
-                if (in_array('assigned_to', $columns, true)) {
-                    $technikConditions[] = 'r.assigned_to = :assigned_to';
-                    $params[':assigned_to'] = $userId;
-                }
-
-                if (!empty($technikConditions)) {
-                    $whereParts[] = '(' . implode(' OR ', $technikConditions) . ')';
-                } else {
-                    // Pokud technik nemá žádný způsob filtrování, nevidí nic
-                    $whereParts[] = '1 = 0';
-                }
+            // PRODEJCE: Vidí pouze SVÉ reklamace
+            // Filtrace podle created_by (ID prodejce který vytvořil reklamaci)
+            if ($userId !== null && in_array('created_by', $columns, true)) {
+                $whereParts[] = 'r.created_by = :created_by';
+                $params[':created_by'] = $userId;
             } else {
-                // Technik bez user_id nevidí nic
+                // Pokud nemá user_id nebo neexistuje sloupec created_by, nevidí nic
                 $whereParts[] = '1 = 0';
             }
+        } elseif ($isTechnik) {
+            // TECHNIK: Vidí VŠECHNY reklamace (žádný filtr)
+            // Technici mají přístup ke všem reklamacím pro diagnostiku a opravu
         } else {
             // GUEST nebo NEZNÁMÁ ROLE: Vidí pouze své (email match)
             $guestConditions = [];
