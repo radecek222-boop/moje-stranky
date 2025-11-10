@@ -12,6 +12,23 @@ try {
         throw new Exception('Povolena je pouze metoda POST.');
     }
 
+    // DŮLEŽITÉ: Načíst JSON PŘED CSRF kontrolou
+    $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+    $input = $_POST;
+
+    if (stripos($contentType, 'application/json') !== false) {
+        $raw = file_get_contents('php://input');
+        $decoded = json_decode($raw ?? '', true);
+        if (is_array($decoded)) {
+            $input = array_merge($input, $decoded);
+            // CSRF token z JSON musíme přesunout do $_POST aby ho requireCSRF() našel
+            if (isset($decoded['csrf_token'])) {
+                $_POST['csrf_token'] = $decoded['csrf_token'];
+            }
+        }
+    }
+
+    // TEĎ kontrolujeme CSRF (token je už v $_POST)
     requireCSRF();
 
     $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
@@ -22,17 +39,6 @@ try {
             'message' => 'Mazání je povoleno pouze administrátorům.'
         ], JSON_UNESCAPED_UNICODE);
         return;
-    }
-
-    $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
-    $input = $_POST;
-
-    if (stripos($contentType, 'application/json') !== false) {
-        $raw = file_get_contents('php://input');
-        $decoded = json_decode($raw ?? '', true);
-        if (is_array($decoded)) {
-            $input = array_merge($input, $decoded);
-        }
     }
 
     $reklamaceId = $input['reklamace_id'] ?? $input['id'] ?? null;

@@ -1970,12 +1970,18 @@ async function deleteReklamace(reklamaceId) {
   }
   
   logger.log('🗑️ Mazání reklamace:', reklamaceId);
-  
+
   try {
+    // Získat CSRF token
+    const csrfToken = await getCSRFToken();
+
     const response = await fetch('api/delete_reklamace.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reklamace_id: reklamaceId })
+      body: JSON.stringify({
+        reklamace_id: reklamaceId,
+        csrf_token: csrfToken
+      })
     });
     
     const result = await response.json();
