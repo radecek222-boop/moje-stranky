@@ -540,18 +540,19 @@ if ($autorun) {
         }
 
         .tab {
-            padding: 1rem 2rem;
+            padding: 1rem 1.5rem;
             background: var(--wgs-white);
             border: none;
             cursor: pointer;
             font-family: 'Poppins', sans-serif;
             font-size: 0.75rem;
             font-weight: 600;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
             color: var(--wgs-grey);
             transition: all 0.3s;
             border-bottom: 3px solid transparent;
+            white-space: nowrap;
         }
 
         .tab:hover {
@@ -608,14 +609,16 @@ if ($autorun) {
             background: var(--wgs-black);
             color: var(--wgs-white);
             border: 2px solid var(--wgs-black);
-            padding: 0.8rem 2rem;
+            padding: 0.875rem 1.5rem;
             font-family: 'Poppins', sans-serif;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 600;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
             cursor: pointer;
             transition: all 0.3s;
+            white-space: normal;
+            line-height: 1.4;
         }
 
         .btn-execute:hover {

@@ -180,7 +180,7 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
 
         <button
           onclick="window.location.href='install_role_based_access.php'"
-          style="width: 100%; padding: 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-weight: 600; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.75rem; transition: all 0.3s;"
+          style="width: 100%; padding: 0.875rem 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.8rem; transition: all 0.3s; white-space: normal; line-height: 1.3;"
           onmouseover="this.style.background='#fff'; this.style.color='#000'"
           onmouseout="this.style.background='#000'; this.style.color='#fff'"
         >
@@ -215,26 +215,26 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
         <div style="margin-bottom: 1rem;">
           <button
             onclick="window.open('diagnostic_tool.php', '_blank')"
-            style="width: 100%; padding: 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.3s;"
+            style="width: 100%; padding: 0.875rem 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-size: 0.8rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3;"
             onmouseover="this.style.background='#fff'; this.style.color='#000'"
             onmouseout="this.style.background='#000'; this.style.color='#fff'"
           >
-            AI DIAGNOSTICKÝ NÁSTROJ
+            DIAGNOSTICKÝ NÁSTROJ
           </button>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
           <button
             onclick="window.open('show_table_structure.php', '_blank')"
-            style="padding: 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase;"
+            style="padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; white-space: normal; line-height: 1.3;"
           >
-            Struktura
+            STRUKTURA
           </button>
           <button
             onclick="window.open('debug_photos.php', '_blank')"
-            style="padding: 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase;"
+            style="padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; white-space: normal; line-height: 1.3;"
           >
-            Fotky
+            FOTKY
           </button>
         </div>
       </div>
@@ -267,7 +267,7 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
         <div style="margin-bottom: 1rem;">
           <button
             onclick="window.open('role_testing_tool.php', '_blank')"
-            style="padding: 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-size: 0.75rem; font-weight: 600; cursor: pointer; width: 100%; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.3s;"
+            style="padding: 0.875rem 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-size: 0.8rem; font-weight: 600; cursor: pointer; width: 100%; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3;"
             onmouseover="this.style.background='#fff'; this.style.color='#000'"
             onmouseout="this.style.background='#000'; this.style.color='#fff'"
           >
@@ -278,13 +278,13 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
           <button
             onclick="window.open('test_db_connection.php', '_blank')"
-            style="padding: 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase;"
+            style="padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; white-space: normal; line-height: 1.3;"
           >
             TEST DB
           </button>
           <button
             onclick="alert('Test email notifikací bude brzy dostupný')"
-            style="padding: 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase;"
+            style="padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; white-space: normal; line-height: 1.3;"
           >
             TEST EMAIL
           </button>

@@ -121,7 +121,7 @@ $action = $_POST['action'] ?? null;
             background: var(--wgs-black);
             color: var(--wgs-white);
             border: 2px solid var(--wgs-black);
-            padding: 1rem 2rem;
+            padding: 1rem 1.5rem;
             font-size: 0.875rem;
             font-weight: 600;
             cursor: pointer;
@@ -130,11 +130,13 @@ $action = $_POST['action'] ?? null;
             margin-top: 1.5rem;
             font-family: 'Poppins', sans-serif;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
             text-decoration: none;
             display: flex;
             align-items: center;
             justify-content: center;
+            white-space: normal;
+            line-height: 1.4;
         }
 
         button:hover, .button:hover {
