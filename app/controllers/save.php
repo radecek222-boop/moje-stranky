@@ -324,6 +324,7 @@ try {
     $hasReklamaceId = db_table_has_column($pdo, 'wgs_reklamace', 'reklamace_id');
     $hasCreatedBy = db_table_has_column($pdo, 'wgs_reklamace', 'created_by');
     $hasCreatedByRole = db_table_has_column($pdo, 'wgs_reklamace', 'created_by_role');
+    $hasZpracovalId = db_table_has_column($pdo, 'wgs_reklamace', 'zpracoval_id');
     $hasCreatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'created_at');
     $hasUpdatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'updated_at');
 
@@ -362,6 +363,14 @@ try {
 
     if ($hasCreatedByRole) {
         $columns['created_by_role'] = $_SESSION['role'] ?? ($isLoggedIn ? 'user' : 'guest');
+    }
+
+    // OPRAVA: Nastavit zpracoval_id pro viditelnost v load.php
+    if ($hasZpracovalId) {
+        $userId = $_SESSION['user_id'] ?? null;
+        if ($userId !== null) {
+            $columns['zpracoval_id'] = $userId;
+        }
     }
 
     if ($hasCreatedAt) {
