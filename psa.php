@@ -13,7 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=optional" rel="stylesheet">
 
   <!-- QR Code Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"></script>
 
   <link rel="stylesheet" href="assets/css/psa-kalkulator.css">
   <link rel="stylesheet" href="assets/css/admin-header.css">

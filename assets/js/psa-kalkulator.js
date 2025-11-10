@@ -23,8 +23,15 @@ function initializePeriod() {
   currentPeriod.month = now.getMonth() + 1;
   currentPeriod.year = now.getFullYear();
 
-  document.getElementById('monthSelect').value = currentPeriod.month;
-  document.getElementById('yearSelect').value = currentPeriod.year;
+  const monthSelect = document.getElementById('monthSelect');
+  const yearSelect = document.getElementById('yearSelect');
+
+  if (monthSelect) {
+    monthSelect.value = currentPeriod.month;
+  }
+  if (yearSelect) {
+    yearSelect.value = currentPeriod.year;
+  }
 
   updatePeriodDisplay();
 }
