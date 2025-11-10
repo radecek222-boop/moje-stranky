@@ -1,9 +1,16 @@
 <?php
 /**
  * Test databázového připojení
+ * BEZPEČNOST: Pouze pro přihlášené uživatele
  */
 
-require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/init.php';
+
+// BEZPEČNOST: Kontrola přihlášení
+if (!isset($_SESSION['user_id']) && !(isset($_SESSION['is_admin']) && $_SESSION['is_admin'])) {
+    http_response_code(401);
+    die("🔒 PŘÍSTUP ODEPŘEN\nMusíte být přihlášeni pro zobrazení této stránky.\n");
+}
 
 echo "=== Test připojení k databázi ===\n\n";
 
