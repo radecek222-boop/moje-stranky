@@ -260,58 +260,61 @@ try {
         </div>
 
         <div style="margin-bottom: 1rem;">
-          <button
-            onclick="window.open('debug_visibility.php', '_blank')"
-            style="width: 100%; padding: 0.875rem 0.75rem; background: #d00; color: white; border: 2px solid #d00; border-radius: 0; font-size: 0.8rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3; margin-bottom: 0.5rem;"
-            onmouseover="this.style.background='#fff'; this.style.color='#d00'"
-            onmouseout="this.style.background='#d00'; this.style.color='#fff'"
+          <a
+            href="fix_visibility.php"
+            target="_blank"
+            style="display: block; width: 100%; padding: 0.875rem 0.75rem; background: #d00; color: white; border: 2px solid #d00; border-radius: 0; font-size: 0.9rem; font-weight: 700; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; text-align: center; text-decoration: none; margin-bottom: 0.5rem;"
           >
-            🔍 DEBUG VIDITELNOSTI
-          </button>
+            🔧 OPRAVA VIDITELNOSTI
+          </a>
 
-          <button
-            onclick="window.open('diagnostic_access_active.php', '_blank')"
-            style="width: 100%; padding: 0.875rem 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-size: 0.8rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3; margin-bottom: 0.5rem;"
-            onmouseover="this.style.background='#fff'; this.style.color='#000'"
-            onmouseout="this.style.background='#000'; this.style.color='#fff'"
+          <a
+            href="diagnostic_access_active.php"
+            target="_blank"
+            style="display: block; width: 100%; padding: 0.875rem 0.75rem; background: #000; color: white; border: 2px solid #000; border-radius: 0; font-size: 0.8rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; text-align: center; text-decoration: none; margin-bottom: 0.5rem;"
           >
             ⚡ AKTIVNÍ DIAGNOSTIKA
-          </button>
+          </a>
 
-          <button
-            onclick="window.open('diagnostic_tool.php', '_blank')"
-            style="width: 100%; padding: 0.875rem 0.75rem; background: #555; color: white; border: 2px solid #555; border-radius: 0; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3; margin-bottom: 0.5rem;"
+          <a
+            href="diagnostic_tool.php"
+            target="_blank"
+            style="display: block; width: 100%; padding: 0.875rem 0.75rem; background: #555; color: white; border: 2px solid #555; border-radius: 0; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; text-align: center; text-decoration: none; margin-bottom: 0.5rem;"
           >
             SQL/PHP Debug
-          </button>
+          </a>
 
-          <button
-            onclick="window.open('diagnostic_access_control.php', '_blank')"
-            style="width: 100%; padding: 0.875rem 0.75rem; background: #555; color: white; border: 2px solid #555; border-radius: 0; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; white-space: normal; line-height: 1.3;"
+          <a
+            href="diagnostic_access_control.php"
+            target="_blank"
+            style="display: block; width: 100%; padding: 0.875rem 0.75rem; background: #555; color: white; border: 2px solid #555; border-radius: 0; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; text-align: center; text-decoration: none;"
           >
             Dokumentace systému
-          </button>
+          </a>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
-          <button
-            onclick="window.open('show_table_structure.php', '_blank')"
-            style="padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; white-space: normal; line-height: 1.3;"
+          <a
+            href="show_table_structure.php"
+            target="_blank"
+            style="display: block; padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; text-align: center; text-decoration: none; white-space: normal; line-height: 1.3;"
           >
             STRUKTURA
-          </button>
-          <button
-            onclick="window.open('debug_photos.php', '_blank')"
-            style="padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; white-space: normal; line-height: 1.3;"
+          </a>
+          <a
+            href="debug_photos.php"
+            target="_blank"
+            style="display: block; padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; text-align: center; text-decoration: none; white-space: normal; line-height: 1.3;"
           >
             FOTKY
-          </button>
-          <button
-            onclick="window.open('validate_tools.php', '_blank')"
-            style="padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; white-space: normal; line-height: 1.3;"
+          </a>
+          <a
+            href="validate_tools.php"
+            target="_blank"
+            style="display: block; padding: 0.625rem 0.5rem; background: #555; color: white; border: none; border-radius: 0; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.03em; text-transform: uppercase; text-align: center; text-decoration: none; white-space: normal; line-height: 1.3;"
           >
             TEST ✓
-          </button>
+          </a>
         </div>
       </div>
 
