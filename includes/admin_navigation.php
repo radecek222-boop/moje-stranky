@@ -28,6 +28,12 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab_label' => 'Uživatelé',
                 'tab' => 'users',
             ],
+            'tools' => [
+                'href' => 'admin.php?tab=tools',
+                'header_label' => 'NÁSTROJE',
+                'tab_label' => 'Nástroje & Migrace',
+                'tab' => 'tools',
+            ],
             'online' => [
                 'href' => 'admin.php?tab=online',
                 'header_label' => 'ONLINE',

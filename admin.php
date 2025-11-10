@@ -145,7 +145,203 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
     </div>
   </div>
   <?php endif; ?>
-  
+
+  <?php if ($activeTab === 'tools'): ?>
+  <!-- TAB: TOOLS & MIGRATIONS -->
+  <div id="tab-tools" class="tab-content">
+    <h2 class="page-title" style="font-size: 1.8rem; margin-bottom: 0.5rem;">Nástroje & Migrace</h2>
+    <p class="page-subtitle" style="margin-bottom: 2rem;">Správa databáze, instalace nových funkcí a debug nástroje</p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+
+      <!-- INSTALÁTOR: Role-Based Access -->
+      <div class="tool-card" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #667eea;">
+        <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
+          <div style="font-size: 2.5rem;">🔐</div>
+          <div style="flex: 1;">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333;">Role-Based Access Control</h3>
+            <p style="margin: 0; color: #666; font-size: 0.9rem;">Škálovatelný systém rolí pro neomezený počet prodejců a techniků</p>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
+            <strong>Co se nainstaluje:</strong>
+          </div>
+          <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem; color: #666;">
+            <li>Sloupce <code>created_by</code> a <code>created_by_role</code></li>
+            <li>Naplnění existujících dat</li>
+            <li>Indexy pro rychlé vyhledávání</li>
+            <li>Nastavení rolí pro uživatele</li>
+          </ul>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+          <span style="background: #e3f2fd; color: #1976d2; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">v2.0</span>
+          <span style="background: #f3e5f5; color: #7b1fa2; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Vyžaduje migraci</span>
+        </div>
+
+        <button
+          onclick="window.location.href='install_role_based_access.php'"
+          style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.2s;"
+          onmouseover="this.style.transform='translateY(-2px)'"
+          onmouseout="this.style.transform='translateY(0)'"
+        >
+          🚀 Spustit instalaci
+        </button>
+      </div>
+
+      <!-- DEBUG NÁSTROJE -->
+      <div class="tool-card" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #2196F3;">
+        <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
+          <div style="font-size: 2.5rem;">🔍</div>
+          <div style="flex: 1;">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333;">Debug Nástroje</h3>
+            <p style="margin: 0; color: #666; font-size: 0.9rem;">Diagnostika databáze, reklamací, fotek a struktur</p>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
+            <strong>Dostupné nástroje:</strong>
+          </div>
+          <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem; color: #666;">
+            <li>Struktura tabulek</li>
+            <li>Debug reklamací a viditelnosti</li>
+            <li>Debug fotek a propojení</li>
+            <li>Test databázového připojení</li>
+          </ul>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+          <span style="background: #e8f5e9; color: #388e3c; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Bezpečné</span>
+          <span style="background: #fff3e0; color: #f57c00; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Pouze čtení</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+          <button
+            onclick="window.open('show_table_structure.php', '_blank')"
+            style="padding: 0.5rem; background: #2196F3; color: white; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer;"
+          >
+            📊 Struktura
+          </button>
+          <button
+            onclick="window.open('debug_photos.php', '_blank')"
+            style="padding: 0.5rem; background: #2196F3; color: white; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer;"
+          >
+            📸 Fotky
+          </button>
+        </div>
+      </div>
+
+      <!-- TESTY -->
+      <div class="tool-card" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #ff9800;">
+        <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
+          <div style="font-size: 2.5rem;">🧪</div>
+          <div style="flex: 1;">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333;">Testy & Validace</h3>
+            <p style="margin: 0; color: #666; font-size: 0.9rem;">Automatické testy funkcionality a integrity</p>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
+            <strong>Dostupné testy:</strong>
+          </div>
+          <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem; color: #666;">
+            <li>Test databázového připojení</li>
+            <li>Test emailových notifikací</li>
+            <li>Test upload fotek</li>
+            <li>🎭 Diagnostický nástroj pro testování rolí</li>
+          </ul>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+          <span style="background: #fff3e0; color: #f57c00; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Beta</span>
+          <span style="background: #e8f5e9; color: #388e3c; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Bezpečné</span>
+        </div>
+
+        <!-- Role Testing Tool - Hlavní diagnostický nástroj -->
+        <div style="margin-bottom: 1rem;">
+          <button
+            onclick="window.open('role_testing_tool.php', '_blank')"
+            style="padding: 0.75rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); transition: all 0.2s;"
+            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.5)'"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'"
+          >
+            🎭 Role Testing Tool
+          </button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+          <button
+            onclick="window.open('test_db_connection.php', '_blank')"
+            style="padding: 0.5rem; background: #ff9800; color: white; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer;"
+          >
+            🔌 Test DB
+          </button>
+          <button
+            onclick="alert('Test email notifikací bude brzy dostupný')"
+            style="padding: 0.5rem; background: #ff9800; color: white; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer;"
+          >
+            📧 Test Email
+          </button>
+        </div>
+      </div>
+
+      <!-- DOKUMENTACE -->
+      <div class="tool-card" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #4CAF50;">
+        <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
+          <div style="font-size: 2.5rem;">📚</div>
+          <div style="flex: 1;">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333;">Dokumentace</h3>
+            <p style="margin: 0; color: #666; font-size: 0.9rem;">Návody, postupy a technická dokumentace systému</p>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
+            <strong>Dostupné dokumenty:</strong>
+          </div>
+          <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem; color: #666;">
+            <li>Admin Tools README</li>
+            <li>Role-Based Access README</li>
+            <li>PDF Protokol System</li>
+            <li>Security Review</li>
+          </ul>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+          <span style="background: #e8f5e9; color: #388e3c; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">Aktuální</span>
+        </div>
+
+        <button
+          onclick="window.open('ADMIN_TOOLS_README.md', '_blank')"
+          style="width: 100%; padding: 0.75rem; background: #4CAF50; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;"
+        >
+          📖 Otevřít dokumentaci
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Info box -->
+    <div style="margin-top: 2rem; background: #e3f2fd; border-left: 4px solid #2196F3; border-radius: 8px; padding: 1.5rem;">
+      <div style="display: flex; align-items: start; gap: 1rem;">
+        <div style="font-size: 1.5rem;">ℹ️</div>
+        <div>
+          <h4 style="margin: 0 0 0.5rem 0; color: #1976d2;">Jak to funguje?</h4>
+          <p style="margin: 0; color: #0d47a1; line-height: 1.6;">
+            Po každém merge na GitHubu se zde automaticky objeví nové instalace a migrace.
+            Stačí kliknout na tlačítko "Spustit instalaci" a systém se automaticky aktualizuje.
+            <strong>Žádné SQL příkazy nejsou potřeba!</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
   <?php if ($activeTab === 'online'): ?>
   <!-- TAB: ONLINE -->
   <div id="tab-online" class="tab-content">
