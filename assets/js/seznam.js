@@ -159,9 +159,8 @@ function initSearch() {
     SEARCH_QUERY = e.target.value.trim().toLowerCase();
     
     searchClear.classList.toggle('visible', SEARCH_QUERY.length > 0);
-    
+
     let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-    console.log('🎨 Volám renderOrders s', userItems.length, 'položkami');
     renderOrders(userItems);
   });
   
@@ -179,9 +178,8 @@ function clearSearch() {
   searchInput.value = '';
   SEARCH_QUERY = '';
   searchClear.classList.remove('visible');
-  
+
   let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-  console.log('🎨 Volám renderOrders s', userItems.length, 'položkami');
     renderOrders(userItems);
 }
 
@@ -220,9 +218,8 @@ function initFilters() {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       ACTIVE_FILTER = btn.dataset.filter;
-      
+
       let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-      console.log('🎨 Volám renderOrders s', userItems.length, 'položkami');
     renderOrders(userItems);
     });
   });
@@ -254,13 +251,11 @@ function updateCounts(items) {
 
 // === NAČTENÍ DAT ===
 async function loadAll(status = 'all') {
-  console.log('🚀 loadAll() START, status:', status);
   try {
    const response = await fetch(`app/controllers/load.php?status=${status}`);
     if (!response.ok) throw new Error('Chyba načítání');
-    
+
     const json = await response.json();
-    console.log('📦 JSON načteno:', json);
     
     let items = [];
     if (json.status === 'success' && Array.isArray(json.data)) {
@@ -272,15 +267,8 @@ async function loadAll(status = 'all') {
     WGS_DATA_CACHE = items;
     
     let userItems = Utils.filterByUserRole(items);
-    
-    if (CURRENT_USER.role === 'prodejce') {
-      logger.log('📊 Filtr prodejce:', userItems.length, 'reklamací');
-    } else {
-      console.log(`📋 ${CURRENT_USER.role === 'admin' ? 'Admin' : 'Uživatel'} vidí všechny:`, userItems.length, 'reklamací');
-    }
-    
+
     updateCounts(userItems);
-    console.log('🎨 Volám renderOrders s', userItems.length, 'položkami');
     renderOrders(userItems);
   } catch (err) {
     logger.error('Chyba:', err);
@@ -295,9 +283,7 @@ async function loadAll(status = 'all') {
 
 // === VYKRESLENÍ OBJEDNÁVEK ===
 function renderOrders(items = null) {
-  console.log('🎨 renderOrders() START, items:', items ? items.length : 'null');
   const grid = document.getElementById('orderGrid');
-  console.log('📍 Grid element:', grid);
   const searchResultsInfo = document.getElementById('searchResultsInfo');
   
   if (!items) {
