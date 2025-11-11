@@ -230,7 +230,6 @@ try {
                          onclick="ccModal.openStatistics()"
                          onmouseenter="this.style.transform='translateX(3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseleave="this.style.transform=''; this.style.boxShadow='';">
-                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📊</div>
                         <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.1rem;">Statistiky reklamací</div>
                         <div style="font-size: 0.85rem; color: var(--c-grey); margin-bottom: 1rem;">
                             Filtry, grafy, export do Excel/PDF
@@ -244,7 +243,6 @@ try {
                          onclick="ccModal.openAnalytics()"
                          onmouseenter="this.style.transform='translateX(3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseleave="this.style.transform=''; this.style.boxShadow='';">
-                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📈</div>
                         <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.1rem;">Web Analytics</div>
                         <div style="font-size: 0.85rem; color: var(--c-grey); margin-bottom: 1rem;">
                             Návštěvnost, konverze, real-time metriky
@@ -355,7 +353,6 @@ try {
                          onclick="ccModal.openNotifications()"
                          onmouseenter="this.style.transform='translateX(3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseleave="this.style.transform=''; this.style.boxShadow='';">
-                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📧</div>
                         <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.1rem;">Správa notifikací</div>
                         <div style="font-size: 0.85rem; color: var(--c-grey); margin-bottom: 1rem;">
                             Šablony emailů, SMS nastavení, automatické notifikace
@@ -499,7 +496,6 @@ try {
                          onclick="ccModal.openTools()"
                          onmouseenter="this.style.transform='translateX(3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseleave="this.style.transform=''; this.style.boxShadow='';">
-                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🛠️</div>
                         <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.1rem;">Nástroje & Diagnostika</div>
                         <div style="font-size: 0.85rem; color: var(--c-grey); margin-bottom: 1rem;">
                             System health, logy, migrace, údržba
@@ -544,7 +540,7 @@ try {
         <div class="cc-header">
             <div class="cc-title-wrapper">
                 <div>
-                    <div class="cc-title">🧪 Testovací prostředí</div>
+                    <div class="cc-title">Testovací prostředí</div>
                     <div class="cc-subtitle">E2E testování celého workflow aplikace</div>
                 </div>
             </div>
@@ -557,7 +553,6 @@ try {
                          onclick="ccModal.openTesting()"
                          onmouseenter="this.style.transform='translateX(3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseleave="this.style.transform=''; this.style.boxShadow='';">
-                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🧪</div>
                         <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.1rem;">E2E Workflow Tester</div>
                         <div style="font-size: 0.85rem; color: var(--c-grey); margin-bottom: 1rem;">
                             9-krokový test celého workflow reklamací s cleanup
