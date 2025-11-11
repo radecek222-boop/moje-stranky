@@ -175,11 +175,7 @@ try {
             require_once __DIR__ . '/includes/control_center_actions.php';
             break;
         case 'content':
-            // TODO: implementovat
-            echo '<div class="control-detail active">';
-            echo '<div class="control-detail-header"><button class="control-detail-back" onclick="window.location.href=\'admin.php?tab=control_center\'"><span>‹</span><span>Zpět</span></button><h2 class="control-detail-title">📝 Obsah & Texty</h2></div>';
-            echo '<div class="control-detail-content"><div class="cc-alert info"><div class="cc-alert-icon">🚧</div><div class="cc-alert-content"><div class="cc-alert-title">V přípravě</div><div class="cc-alert-message">Tato sekce bude dokončena v příští verzi.</div></div></div></div>';
-            echo '</div>';
+            require_once __DIR__ . '/includes/control_center_content.php';
             break;
         case 'users':
             // Redirect na existující users tab
@@ -190,11 +186,7 @@ try {
             header('Location: admin.php?tab=notifications');
             exit;
         case 'configuration':
-            // TODO: implementovat
-            echo '<div class="control-detail active">';
-            echo '<div class="control-detail-header"><button class="control-detail-back" onclick="window.location.href=\'admin.php?tab=control_center\'"><span>‹</span><span>Zpět</span></button><h2 class="control-detail-title">⚙️ Konfigurace</h2></div>';
-            echo '<div class="control-detail-content"><div class="cc-alert warning"><div class="cc-alert-icon">🚧</div><div class="cc-alert-content"><div class="cc-alert-title">V přípravě</div><div class="cc-alert-message">Konfigurace SMTP a API klíčů bude dokončena v příští verzi.</div></div></div></div>';
-            echo '</div>';
+            require_once __DIR__ . '/includes/control_center_configuration.php';
             break;
         case 'analytics':
             // Redirect na existující statistiky

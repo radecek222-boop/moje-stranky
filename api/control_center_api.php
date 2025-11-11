@@ -373,6 +373,34 @@ try {
             ]);
             break;
 
+        // ==========================================
+        // TEST EMAIL
+        // ==========================================
+        case 'send_test_email':
+            $email = $data['email'] ?? null;
+
+            if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                throw new Exception('Valid email required');
+            }
+
+            // Simple test email
+            $subject = 'WGS Control Center - Test Email';
+            $message = "Hello!\n\nThis is a test email from WGS Control Center.\n\nIf you received this email, your SMTP settings are working correctly.\n\nTimestamp: " . date('Y-m-d H:i:s') . "\n\nBest regards,\nWhite Glove Service";
+            $headers = "From: White Glove Service <reklamace@wgs-service.cz>\r\n";
+            $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+
+            $sent = mail($email, $subject, $message, $headers);
+
+            if (!$sent) {
+                throw new Exception('Failed to send email. Check SMTP settings.');
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Test email sent to ' . $email
+            ]);
+            break;
+
         default:
             http_response_code(400);
             echo json_encode([

@@ -91,6 +91,7 @@ INSERT INTO wgs_system_config (config_key, config_value, config_group, is_sensit
 ('smtp_from_name', 'White Glove Service', 'email', FALSE, FALSE, 'FROM name for emails'),
 ('geoapify_api_key', '', 'api_keys', TRUE, FALSE, 'Geoapify API key for maps'),
 ('deepl_api_key', '', 'api_keys', TRUE, FALSE, 'DeepL API key for translations'),
+('github_webhook_secret', '', 'api_keys', TRUE, FALSE, 'GitHub webhook secret for signature validation'),
 ('rate_limit_login', '5', 'security', FALSE, TRUE, 'Max login attempts per 15 minutes'),
 ('rate_limit_upload', '20', 'security', FALSE, TRUE, 'Max photo uploads per hour'),
 ('session_timeout', '86400', 'security', FALSE, TRUE, 'Session timeout in seconds (24 hours)'),
@@ -109,12 +110,15 @@ CREATE TABLE IF NOT EXISTS wgs_pending_actions (
     priority ENUM('low', 'medium', 'high', 'critical') DEFAULT 'medium',
     status ENUM('pending', 'in_progress', 'completed', 'failed', 'dismissed') DEFAULT 'pending',
     requires_admin BOOLEAN DEFAULT TRUE,
+    source_type VARCHAR(50) DEFAULT NULL COMMENT 'github_webhook, manual, system',
+    source_id INT DEFAULT NULL COMMENT 'ID záznamu ve zdrojové tabulce',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP NULL,
     completed_by INT DEFAULT NULL,
     INDEX idx_status (status),
     INDEX idx_priority (priority),
-    INDEX idx_type (action_type)
+    INDEX idx_type (action_type),
+    INDEX idx_source (source_type, source_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Příklad pending actions
