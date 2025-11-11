@@ -34,6 +34,9 @@ require_once INCLUDES_PATH . '/security_headers.php';
 // Load helper functions
 require_once INCLUDES_PATH . '/csrf_helper.php';
 
+// Load advanced error handler (with detailed error reporting)
+require_once INCLUDES_PATH . '/error_handler.php';
+
 // Set error reporting based on environment
 if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
     error_reporting(E_ALL);
