@@ -907,7 +907,7 @@ async function getDistance(fromAddress, toAddress) {
     
     if (response.ok) {
       const data = await response.json();
-      if (data.status === 'success' && data.distance) {
+      if ((data.status === 'success' || data.success === true) && data.distance) {
         const result = {
           km: (data.distance.value / 1000).toFixed(1),
           text: data.distance.text,
@@ -1351,7 +1351,7 @@ async function loadMapAndRoute() {
     
     if (response.ok) {
       const data = await response.json();
-      if (data.status === 'success' && data.distance && data.duration) {
+      if ((data.status === 'success' || data.success === true) && data.distance && data.duration) {
         document.getElementById('mapDistance').textContent = data.distance.text;
         document.getElementById('mapDuration').textContent = data.duration.text;
       } else {
@@ -1649,7 +1649,7 @@ async function getNotes(orderId) {
     const response = await fetch(`api/notes_api.php?action=get&reklamace_id=${encodeURIComponent(reklamaceId)}`);
     const data = await response.json();
 
-    if (data.status === 'success') {
+    if (data.status === 'success' || data.success === true) {
       return data.notes || [];
     }
     return [];
@@ -1679,7 +1679,7 @@ async function addNote(orderId, text) {
 
     const data = await response.json();
 
-    if (data.status === 'success') {
+    if (data.status === 'success' || data.success === true) {
       return { success: true, note_id: data.note_id };
     } else {
       throw new Error(data.message || 'Chyba při přidávání poznámky');
