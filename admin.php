@@ -470,6 +470,110 @@ try {
 
       </div>
 
+      <!-- CZ/SK FAKTURACE MIGRACE -->
+      <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #059669;">
+        <div style="margin-bottom: 1rem;">
+          <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333; font-weight: 600; letter-spacing: 0.05em;">🇨🇿🇸🇰 CZ/SK FAKTURACE</h3>
+          <p style="margin: 0; color: #666; font-size: 0.9rem;">Přidání sloupce pro rozlišení CZ a SK zákazníků</p>
+        </div>
+
+        <?php
+        // Kontrola zda sloupec fakturace_firma existuje
+        $fakturaceInstalled = false;
+        try {
+          $stmt = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'fakturace_firma'");
+          $fakturaceInstalled = $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+          // Ignorovat chybu
+        }
+        ?>
+
+        <?php if ($fakturaceInstalled): ?>
+          <!-- JIŽ NAINSTALOVÁNO -->
+          <div style="background: #e8f5e9; border: 2px solid #4CAF50; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <div style="font-size: 0.85rem; color: #2e7d32; font-weight: 600; margin-bottom: 0.5rem;">
+              ✓ SLOUPEC JE NAINSTALOVÁN
+            </div>
+            <div style="font-size: 0.8rem; color: #555;">
+              Sloupec <code>fakturace_firma</code> existuje v tabulce <code>wgs_reklamace</code>.
+            </div>
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
+              <strong>Co je aktivní:</strong>
+            </div>
+            <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem; color: #666;">
+              <li>Sloupec <code>fakturace_firma VARCHAR(2)</code></li>
+              <li>Index pro rychlé vyhledávání</li>
+              <li>Výchozí hodnota: 'CZ'</li>
+              <li>Zobrazení v seznamu a protokolu</li>
+            </ul>
+          </div>
+
+        <?php else: ?>
+          <!-- JEŠTĚ NENÍ NAINSTALOVÁNO -->
+          <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <div style="font-size: 0.85rem; color: #856404; font-weight: 600; margin-bottom: 0.5rem;">
+              ⚠️ VYŽADUJE INSTALACI
+            </div>
+            <div style="font-size: 0.8rem; color: #555;">
+              Spusťte SQL migraci pro přidání sloupce.
+            </div>
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
+              <strong>SQL příkaz pro migraci:</strong>
+            </div>
+            <div style="background: #f5f5f5; padding: 1rem; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.75rem; overflow-x: auto; border: 1px solid #ddd;">
+              <code>ALTER TABLE wgs_reklamace<br>
+ADD COLUMN IF NOT EXISTS fakturace_firma VARCHAR(2) DEFAULT 'CZ'<br>
+COMMENT 'CZ nebo SK firma pro fakturaci';<br><br>
+
+CREATE INDEX IF NOT EXISTS idx_fakturace_firma<br>
+ON wgs_reklamace(fakturace_firma);<br><br>
+
+UPDATE wgs_reklamace<br>
+SET fakturace_firma = 'CZ'<br>
+WHERE fakturace_firma IS NULL OR fakturace_firma = '';</code>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
+              <strong>Jak spustit:</strong>
+            </div>
+            <ol style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem; color: #666;">
+              <li>Otevřít PHPMyAdmin nebo MySQL klienta</li>
+              <li>Vybrat databázi</li>
+              <li>Zkopírovat SQL příkaz výše</li>
+              <li>Spustit jako SQL dotaz</li>
+            </ol>
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
+              <strong>Dokumentace:</strong>
+            </div>
+            <div style="font-size: 0.8rem; color: #666;">
+              📄 Soubor: <code>CZ_SK_FAKTURACE_README.md</code><br>
+              📄 Migrace: <code>migration_add_fakturace_firma.sql</code>
+            </div>
+          </div>
+
+        <?php endif; ?>
+
+        <button
+          onclick="location.reload()"
+          style="width: 100%; padding: 0.875rem 0.75rem; background: #059669; color: white; border: 2px solid #059669; border-radius: 0; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.8rem; transition: all 0.3s;"
+          onmouseover="this.style.background='#047857'"
+          onmouseout="this.style.background='#059669'"
+        >
+          <?= $fakturaceInstalled ? 'REFRESH STATUS' : 'ZKONTROLOVAT PO INSTALACI' ?>
+        </button>
+      </div>
+
       <!-- TESTOVÁNÍ ROLÍ -->
       <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #000;">
         <div style="margin-bottom: 1rem;">

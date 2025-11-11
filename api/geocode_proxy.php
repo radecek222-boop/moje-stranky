@@ -41,8 +41,68 @@ try {
 
             break;
 
+        case 'autocomplete':
+            // Našeptávač adres
+            $text = $_GET['text'] ?? '';
+            $type = $_GET['type'] ?? 'street'; // street, city, postcode
+
+            if (empty($text)) {
+                throw new Exception('Chybí parametr text');
+            }
+
+            // Validace - max 100 znaků
+            if (strlen($text) > 100) {
+                throw new Exception('Text je příliš dlouhý');
+            }
+
+            $params = [
+                'text' => $text,
+                'apiKey' => $apiKey,
+                'format' => 'geojson',
+                'limit' => 5
+            ];
+
+            // Filtr podle typu
+            if ($type === 'street') {
+                $params['type'] = 'street';
+            } elseif ($type === 'city') {
+                $params['type'] = 'city';
+            }
+
+            $url = 'https://api.geoapify.com/v1/geocode/autocomplete?' . http_build_query($params);
+
+            break;
+
+        case 'route':
+            // Výpočet trasy - jednodušší rozhraní
+            $startLat = $_GET['start_lat'] ?? '';
+            $startLon = $_GET['start_lon'] ?? '';
+            $endLat = $_GET['end_lat'] ?? '';
+            $endLon = $_GET['end_lon'] ?? '';
+            $mode = $_GET['mode'] ?? 'drive';
+
+            if (empty($startLat) || empty($startLon) || empty($endLat) || empty($endLon)) {
+                throw new Exception('Chybí parametry start_lat, start_lon, end_lat, end_lon');
+            }
+
+            // Validace souřadnic
+            if (!is_numeric($startLat) || !is_numeric($startLon) || !is_numeric($endLat) || !is_numeric($endLon)) {
+                throw new Exception('Neplatné souřadnice');
+            }
+
+            // Formát pro Geoapify: lat1,lon1|lat2,lon2
+            $waypoints = "{$startLat},{$startLon}|{$endLat},{$endLon}";
+
+            $url = 'https://api.geoapify.com/v1/routing?' . http_build_query([
+                'waypoints' => $waypoints,
+                'mode' => $mode,
+                'apiKey' => $apiKey
+            ]);
+
+            break;
+
         case 'routing':
-            // Výpočet trasy mezi dvěma body
+            // Výpočet trasy mezi dvěma body (původní verze)
             $waypoints = $_GET['waypoints'] ?? '';
             $mode = $_GET['mode'] ?? 'drive';
 

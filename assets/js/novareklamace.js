@@ -3,6 +3,8 @@ const WGS = {
   photos: [],
   map: null,
   marker: null,
+  routeLayer: null,
+  companyLocation: { lat: 50.080312092724114, lon: 14.598113797415476 }, // Do Dubče 364, Běchovice
   isLoggedIn: false,
   
   init() {
@@ -109,70 +111,107 @@ const WGS = {
     const mestoInput = document.getElementById('mesto');
     const dropdownUlice = document.getElementById('autocompleteDropdownUlice');
     const dropdownMesto = document.getElementById('autocompleteDropdown');
-    
+
     let uliceTimeout;
     let mestoTimeout;
-    
+
+    // Funkce pro zvýraznění shody v textu
+    const highlightMatch = (text, query) => {
+      if (!query) return text;
+      const regex = new RegExp(`(${query})`, 'gi');
+      return text.replace(regex, '<strong>$1</strong>');
+    };
+
     if (uliceInput && dropdownUlice) {
       uliceInput.addEventListener('input', async (e) => {
         clearTimeout(uliceTimeout);
         const query = e.target.value.trim();
-        
-        if (query.length < 3) {
+
+        // Sníženo z 3 na 2 pro rychlejší návrhy
+        if (query.length < 2) {
           dropdownUlice.style.display = 'none';
           return;
         }
-        
+
+        // Zrychleno z 300ms na 150ms
         uliceTimeout = setTimeout(async () => {
           try {
             const mesto = document.getElementById('mesto').value.trim();
-            const searchText = mesto ? `${query}, ${mesto}, Czech Republic` : `${query}, Czech Republic`;
-            
+            const psc = document.getElementById('psc').value.trim();
+
+            // Lepší vyhledávání - zahrnout PSČ pokud je vyplněno
+            let searchText = query;
+            if (mesto) searchText += `, ${mesto}`;
+            if (psc) searchText += `, ${psc}`;
+            searchText += ', Czech Republic';
+
             const response = await fetch(
               `api/geocode_proxy.php?action=autocomplete&text=${encodeURIComponent(searchText)}&type=street`
             );
-            
+
             if (response.ok) {
               const data = await response.json();
-              
+
               if (data.features && data.features.length > 0) {
                 dropdownUlice.innerHTML = '';
                 dropdownUlice.style.display = 'block';
-                
-                data.features.forEach(feature => {
+
+                // Seřadit podle relevance - preferovat úplné adresy
+                const sortedFeatures = data.features.sort((a, b) => {
+                  const aComplete = (a.properties.housenumber ? 1 : 0) + (a.properties.postcode ? 1 : 0);
+                  const bComplete = (b.properties.housenumber ? 1 : 0) + (b.properties.postcode ? 1 : 0);
+                  return bComplete - aComplete;
+                });
+
+                sortedFeatures.forEach(feature => {
                   const div = document.createElement('div');
                   div.style.padding = '0.8rem';
                   div.style.cursor = 'pointer';
                   div.style.borderBottom = '1px solid #eee';
                   div.style.fontSize = '0.9rem';
-                  
-                  const street = feature.properties.street || '';
+                  div.style.transition = 'all 0.2s';
+
+                  const street = feature.properties.street || feature.properties.name || '';
                   const houseNumber = feature.properties.housenumber || '';
                   const city = feature.properties.city || '';
                   const postcode = feature.properties.postcode || '';
-                  
-                  div.textContent = `${street} ${houseNumber}, ${city}`;
-                  
+
+                  // Formátování s zvýrazněním
+                  const addressText = `${street} ${houseNumber}`.trim();
+                  const locationText = postcode ? `${city} (${postcode})` : city;
+
+                  div.innerHTML = `
+                    <div style="font-weight: 500; color: #333;">${highlightMatch(addressText, query)}</div>
+                    ${locationText ? `<div style="font-size: 0.85rem; color: #666; margin-top: 0.2rem;">${locationText}</div>` : ''}
+                  `;
+
                   div.addEventListener('mouseenter', () => {
-                    div.style.background = '#f5f5f5';
+                    div.style.background = '#f0f7ff';
+                    div.style.transform = 'translateX(4px)';
                   });
-                  
+
                   div.addEventListener('mouseleave', () => {
                     div.style.background = 'white';
+                    div.style.transform = 'translateX(0)';
                   });
-                  
+
                   div.addEventListener('click', () => {
-                    uliceInput.value = `${street} ${houseNumber}`.trim();
-                    document.getElementById('mesto').value = city;
-                    document.getElementById('psc').value = postcode;
-                    
+                    uliceInput.value = addressText;
+                    if (city) document.getElementById('mesto').value = city;
+                    if (postcode) document.getElementById('psc').value = postcode;
+
                     const [lon, lat] = feature.geometry.coordinates;
                     this.updateMapWithGPS(lat, lon);
-                    
+
+                    // Spustit výpočet trasy ze sídla
+                    if (this.calculateRoute) {
+                      this.calculateRoute(lat, lon);
+                    }
+
                     dropdownUlice.style.display = 'none';
                     this.toast('✓ Adresa vyplněna', 'success');
                   });
-                  
+
                   dropdownUlice.appendChild(div);
                 });
               } else {
@@ -191,55 +230,76 @@ const WGS = {
       mestoInput.addEventListener('input', async (e) => {
         clearTimeout(mestoTimeout);
         const query = e.target.value.trim();
-        
+
         if (query.length < 2) {
           dropdownMesto.style.display = 'none';
           return;
         }
-        
+
+        // Zrychleno z 300ms na 150ms
         mestoTimeout = setTimeout(async () => {
           try {
             const response = await fetch(
-              `api/geocode_proxy.php?action=autocomplete&text=${encodeURIComponent(query)}&type=city`
+              `api/geocode_proxy.php?action=autocomplete&text=${encodeURIComponent(query + ', Czech Republic')}&type=city`
             );
-            
+
             if (response.ok) {
               const data = await response.json();
-              
+
               if (data.features && data.features.length > 0) {
                 dropdownMesto.innerHTML = '';
                 dropdownMesto.style.display = 'block';
-                
-                data.features.forEach(feature => {
+
+                // Seřadit podle relevance - preferovat s PSČ
+                const sortedFeatures = data.features.sort((a, b) => {
+                  const aHasPostcode = a.properties.postcode ? 1 : 0;
+                  const bHasPostcode = b.properties.postcode ? 1 : 0;
+                  return bHasPostcode - aHasPostcode;
+                });
+
+                sortedFeatures.forEach(feature => {
                   const div = document.createElement('div');
                   div.style.padding = '0.8rem';
                   div.style.cursor = 'pointer';
                   div.style.borderBottom = '1px solid #eee';
                   div.style.fontSize = '0.9rem';
-                  
+                  div.style.transition = 'all 0.2s';
+
                   const city = feature.properties.city || feature.properties.name || '';
                   const postcode = feature.properties.postcode || '';
-                  
-                  div.textContent = postcode ? `${city} (${postcode})` : city;
-                  
+
+                  // Formátování s zvýrazněním
+                  div.innerHTML = `
+                    <div style="font-weight: 500; color: #333;">${highlightMatch(city, query)}</div>
+                    ${postcode ? `<div style="font-size: 0.85rem; color: #666; margin-top: 0.2rem;">PSČ: ${postcode}</div>` : ''}
+                  `;
+
                   div.addEventListener('mouseenter', () => {
-                    div.style.background = '#f5f5f5';
+                    div.style.background = '#f0f7ff';
+                    div.style.transform = 'translateX(4px)';
                   });
-                  
+
                   div.addEventListener('mouseleave', () => {
                     div.style.background = 'white';
+                    div.style.transform = 'translateX(0)';
                   });
-                  
+
                   div.addEventListener('click', () => {
                     mestoInput.value = city;
                     if (postcode) {
                       document.getElementById('psc').value = postcode;
                     }
-                    
+
                     dropdownMesto.style.display = 'none';
                     this.toast('✓ Město vybráno', 'success');
+
+                    // Pokud je město vybráno, pokus se najít souřadnice
+                    if (feature.geometry && feature.geometry.coordinates) {
+                      const [lon, lat] = feature.geometry.coordinates;
+                      this.updateMapWithGPS(lat, lon);
+                    }
                   });
-                  
+
                   dropdownMesto.appendChild(div);
                 });
               } else {
@@ -250,7 +310,7 @@ const WGS = {
             logger.error('Autocomplete error:', err);
             dropdownMesto.style.display = 'none';
           }
-        }, 300);
+        }, 150);
       });
     }
     
@@ -263,7 +323,75 @@ const WGS = {
       }
     });
   },
-  
+
+  async calculateRoute(destLat, destLon) {
+    if (!this.map) {
+      logger.warn('⚠️ Mapa není inicializována');
+      return;
+    }
+
+    try {
+      logger.log('🚗 Počítám trasu ze sídla firmy...');
+
+      // Odebrat předchozí trasu pokud existuje
+      if (this.routeLayer) {
+        this.map.removeLayer(this.routeLayer);
+        this.routeLayer = null;
+      }
+
+      const start = this.companyLocation;
+
+      // OSRM API přes proxy pro výpočet trasy
+      const response = await fetch(
+        `api/geocode_proxy.php?action=route&start_lon=${start.lon}&start_lat=${start.lat}&end_lon=${destLon}&end_lat=${destLat}`
+      );
+
+      if (!response.ok) {
+        throw new Error('Nepodařilo se vypočítat trasu');
+      }
+
+      const data = await response.json();
+
+      if (data.routes && data.routes.length > 0) {
+        const route = data.routes[0];
+        const coordinates = route.geometry.coordinates.map(coord => [coord[1], coord[0]]); // GeoJSON používá [lon, lat], Leaflet [lat, lon]
+
+        // Nakreslit trasu na mapu
+        this.routeLayer = L.polyline(coordinates, {
+          color: '#2563eb',
+          weight: 4,
+          opacity: 0.7
+        }).addTo(this.map);
+
+        // Přidat markery pro start a cíl
+        const startMarker = L.marker([start.lat, start.lon], {
+          icon: L.divIcon({
+            className: 'custom-marker-start',
+            html: '<div style="background: #10b981; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">🏢</div>',
+            iconSize: [30, 30]
+          })
+        }).addTo(this.map);
+
+        // Přizpůsobit zoom aby byla vidět celá trasa
+        const bounds = L.latLngBounds(coordinates);
+        this.map.fitBounds(bounds, { padding: [50, 50] });
+
+        // Zobrazit info o trase
+        const distance = (route.distance / 1000).toFixed(1); // metry na kilometry
+        const duration = Math.ceil(route.duration / 60); // sekundy na minuty
+
+        this.toast(`🚗 Trasa: ${distance} km, cca ${duration} min`, 'info');
+        logger.log(`✅ Trasa vypočítána: ${distance} km, ${duration} min`);
+
+        // Uložit info o trase pro pozdější použití
+        this.routeInfo = { distance, duration };
+      }
+    } catch (err) {
+      logger.error('❌ Chyba při výpočtu trasy:', err);
+      // Tiché selhání - trasa není kritická
+    }
+  },
+
   checkAndUpdateMapFromAddress() {
     const uliceInput = document.getElementById('ulice');
     if (uliceInput && uliceInput.value.trim()) {
