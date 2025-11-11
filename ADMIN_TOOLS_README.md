@@ -1,35 +1,65 @@
-# 🛠️ Admin Panel - Sekce "NÁSTROJE & MIGRACE"
+# 🛠️ Admin Control Center - Sekce "DIAGNOSTIKA"
 
 ## 📋 ÚČEL
 
-Sekce **"NÁSTROJE"** v admin panelu je centrální místo pro:
+**Sekce Diagnostika** v Admin Control Center je centrální místo pro:
 - ✅ **Instalace a migrace databáze** - bez SQL znalostí
-- ✅ **Debug nástroje** - diagnostika systému
-- ✅ **Dokumentace** - technické návody
+- ✅ **System Health Monitoring** - real-time diagnostika
+- ✅ **Údržba** - cache, logy, optimalizace DB
+- ✅ **Debug nástroje** - pokročilé ladění
 
 ## 🎯 PRO AI ASISTENTY
 
 **DŮLEŽITÉ:** Když provádíš změny v databázi nebo přidáváš nové funkce:
 
-1. **Vytvoř webový instalátor** (viz `install_role_based_access.php`)
-2. **Přidej kartu do admin.php** v sekci `<?php if ($activeTab === 'tools'): ?>`
-3. **Commitni a pushni** - po merge na GitHubu se instalátor objeví v admin panelu
+1. **Vytvoř webový instalátor** (viz `install_admin_control_center.php`)
+2. **Přidej kartu do Control Center → Sekce 10: Diagnostika**
+3. **Commitni a pushni** - po merge na GitHubu se instalátor objeví v Control Center
 
 ### **Workflow:**
 ```
 1. AI vytvoří novou funkci/migraci
-2. AI vytvoří webový instalátor (*.php)
-3. AI přidá kartu do admin.php sekce "tools"
+2. AI vytvoří webový instalátor (install_*.php)
+3. AI přidá kartu do control_center_unified.php → Sekce 10
 4. Uživatel merge na GitHubu
-5. Uživatel otevře Admin → NÁSTROJE → klikne "Spustit instalaci"
+5. Uživatel otevře Admin Control Center → Diagnostika → klikne "Spustit instalaci"
 6. Hotovo! Žádné SQL příkazy potřeba.
 ```
 
 ## 📍 UMÍSTĚNÍ
 
-Admin panel → **NÁSTROJE** tab → Sekce "Nástroje & Migrace"
+**Admin Control Center → Sekce 10: DIAGNOSTIKA**
 
-URL: `https://wgs-service.cz/admin.php?tab=tools`
+### ⚠️ ZMĚNA V V3.0:
+- **Před v3.0:** admin.php?tab=tools
+- **V3.0:** admin.php (výchozí) → rozkliknout "DIAGNOSTIKA" sekci
+- **Důvod:** Unified interface - všechny admin funkce v jednom Control Center
+
+URL: `https://wgs-service.cz/admin.php` (výchozí stránka)
+
+## 🧭 NAVIGACE V CONTROL CENTER
+
+### Admin stránka je nyní přímo Control Center:
+```
+admin.php (bez ?tab=)
+  └── Control Center (12 sekcí)
+      ├── 1. Statistiky & Analytics
+      ├── 2. Registrační klíče
+      ├── 3. Uživatelé
+      ├── 4. Online uživatelé
+      ├── 5. Email & SMS notifikace
+      ├── 6. Reklamace
+      ├── 7. Vzhled & Design
+      ├── 8. Obsah & Texty
+      ├── 9. Konfigurace systému
+      ├── 10. Diagnostika ← NÁSTROJE & MIGRACE JSOU TADY
+      ├── 11. Akce & Úkoly
+      └── 12. Testovací prostředí
+```
+
+**Header obsahuje pouze:**
+- Logo: "WGS CONTROL CENTER"
+- Tlačítko: "Odhlásit"
 
 ## 🔧 JAK PŘIDAT NOVÝ INSTALÁTOR
 
@@ -53,126 +83,162 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 // - CREATE INDEX
 // - atd.
 ?>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Instalace - Název funkce</title>
+    <style>
+        /* WGS minimalistický styl */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .container { max-width: 800px; margin: 2rem auto; padding: 2rem; }
+        .status { padding: 1rem; margin: 1rem 0; border-left: 4px solid; }
+        .success { background: #d4edda; border-color: #28a745; }
+        .error { background: #f8d7da; border-color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Instalace - Název funkce</h1>
+        <!-- Instalační výstup zde -->
+    </div>
+</body>
+</html>
 ```
 
-### **Krok 2: Přidej kartu do admin.php**
+### **Krok 2: Přidej kartu do Control Center**
 
-V souboru `admin.php`, v sekci `<?php if ($activeTab === 'tools'): ?>`, přidej novou kartu:
+V souboru `includes/control_center_unified.php`, v sekci **SEKCE 10: DIAGNOSTIKA**, přidej novou kartu:
 
 ```php
-<!-- INSTALÁTOR: Název funkce -->
-<div class="tool-card" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #667eea;">
-  <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
-    <div style="font-size: 2.5rem;">🎯</div>
-    <div style="flex: 1;">
-      <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #333;">Název Funkce</h3>
-      <p style="margin: 0; color: #666; font-size: 0.9rem;">Krátký popis co funkce dělá</p>
-    </div>
-  </div>
+<!-- Instalátory a migrace -->
+<div class="mini-stats" style="margin-top: 1.5rem;">
+    <!-- EXISTUJÍCÍ INSTALÁTORY -->
 
-  <div style="margin-bottom: 1rem;">
-    <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
-      <strong>Co se nainstaluje:</strong>
+    <!-- NOVÝ INSTALÁTOR -->
+    <div class="mini-stat" style="padding: 1.5rem; cursor: pointer; transition: all 0.3s;"
+         onclick="window.open('install_nova_funkce.php', '_blank')">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎯</div>
+        <div style="font-weight: 600; margin-bottom: 0.5rem;">Název Funkce</div>
+        <div style="font-size: 0.8rem; color: var(--c-grey); margin-bottom: 1rem;">
+            Krátký popis co instalátor dělá
+        </div>
+        <button class="btn btn-sm btn-success" style="width: 100%;">
+            🚀 Instalovat
+        </button>
     </div>
-    <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem; color: #666;">
-      <li>Položka 1</li>
-      <li>Položka 2</li>
-      <li>Položka 3</li>
-    </ul>
-  </div>
-
-  <button
-    onclick="window.location.href='install_nova_funkce.php'"
-    style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;"
-  >
-    🚀 Spustit instalaci
-  </button>
 </div>
 ```
 
 ### **Krok 3: Commitni změny**
 
 ```bash
-git add install_nova_funkce.php admin.php
-git commit -m "Přidána instalace pro [název funkce]"
+git add install_nova_funkce.php includes/control_center_unified.php
+git commit -m "FEAT: Instalace pro [název funkce]"
 git push
 ```
 
 ### **Krok 4: Uživatel merge na GitHubu**
 
-Po merge se nový instalátor automaticky objeví v admin panelu.
+Po merge se nový instalátor automaticky objeví v Control Center → Diagnostika.
 
-## 📦 PŘÍKLAD - Role-Based Access
+## 📦 PŘÍKLADY
 
-Aktuálně dostupný instalátor:
+### Aktuálně dostupné instalátory:
 
-**Název:** Role-Based Access Control
-**Soubor:** `install_role_based_access.php`
-**Popis:** Škálovatelný systém rolí pro neomezený počet prodejců a techniků
+#### 1. **Admin Control Center**
+- **Soubor:** `install_admin_control_center.php`
+- **Popis:** Instalace 6 tabulek pro Control Center
+- **Co dělá:**
+  - `wgs_theme_settings` - Barvy, fonty
+  - `wgs_content_texts` - Multi-jazyčnost
+  - `wgs_system_config` - Konfigurace
+  - `wgs_pending_actions` - Úkoly
+  - `wgs_action_history` - Historie
+  - `wgs_github_webhooks` - GitHub integrace
 
-**Co dělá:**
-- Přidá sloupce `created_by` a `created_by_role`
-- Naplní existující data
-- Vytvoří indexy
-- Nastaví role pro uživatele
+#### 2. **Role-Based Access Control**
+- **Soubor:** `install_role_based_access.php`
+- **Popis:** Škálovatelný systém rolí
+- **Co dělá:**
+  - Přidá sloupce `created_by` a `created_by_role`
+  - Naplní existující data
+  - Vytvoří indexy
 
 **Jak spustit:**
-1. Admin → NÁSTROJE
-2. Najdi kartu "Role-Based Access Control"
-3. Klikni "🚀 Spustit instalaci"
-4. Čekej ~5 sekund
-5. Hotovo!
+1. Otevřít **admin.php** (automaticky Control Center)
+2. Rozkliknout **Sekce 10: DIAGNOSTIKA**
+3. Najít požadovaný instalátor
+4. Kliknout "🚀 Instalovat"
+5. Čekat na dokončení
+6. Hotovo!
+
+## 🏥 SYSTEM HEALTH MONITORING
+
+Sekce Diagnostika také obsahuje **real-time monitoring**:
+
+### Monitorované komponenty:
+- **🗄️ Databáze** - Připojení, ping time, status
+- **🐘 PHP** - Verze, konfigurace, extensions
+- **🧩 Extensions** - pdo, pdo_mysql, mbstring, json, gd
+- **📁 Oprávnění** - logs/, uploads/, temp/ writeable?
+- **💾 Disk** - Volné místo, celková kapacita
+
+### Status indikátory:
+- **✅ Zelená** - Vše funguje
+- **⚠️ Žlutá** - Varování (např. málo místa)
+- **❌ Červená** - Kritická chyba
 
 ## 🔍 DEBUG NÁSTROJE
 
-V sekci jsou také dostupné debug nástroje:
+V sekci Diagnostika jsou dostupné:
 
-- **📊 Struktura** → `show_table_structure.php` - zobrazí strukturu tabulek
-- **📸 Fotky** → `debug_photos.php` - debug fotek a propojení
-- **🔍 Quick Debug** → `quick_debug.php` - rychlá diagnostika
-- **🔌 Test DB** → `test_db_connection.php` - test připojení
+### **Údržba:**
+- **Vymazat cache** - Smaže dočasné soubory
+- **Archivovat logy** - Zazipuje staré logy
+- **Optimalizovat databázi** - `OPTIMIZE TABLE` všech tabulek
 
-Všechny vyžadují přihlášení (bezpečnost).
+### **Logy:**
+- **PHP Error Log** - `logs/php_errors.log`
+- **JavaScript Error Log** - `logs/js_errors.log`
+- **Security Log** - `logs/security.log`
+- **Audit Log** - `logs/audit.log`
 
-## 📚 DOKUMENTACE
+### **Debug skripty:**
+- `show_table_structure.php` - Struktura tabulek
+- `debug_photos.php` - Debug fotek
+- `quick_debug.php` - Rychlá diagnostika
+- `test_db_connection.php` - Test připojení
 
-Sekce obsahuje odkazy na:
-- `ROLE_BASED_ACCESS_README.md`
-- `PDF_PROTOKOL_SYSTEM.md`
-- `SECURITY_REVIEW_FEEDBACK.md`
-- `PSA_CALCULATOR_SPECIFICATION.md`
+Všechny vyžadují admin přihlášení.
 
 ## 🎨 DESIGN GUIDELINES
 
-### **Barvy pro karty:**
+### **Barvy pro karty (WGS styl):**
 
-```php
-// Instalace/Migrace
-border-left: 4px solid #667eea;  // Fialová
+```css
+/* Instalace/Migrace */
+background: var(--c-white);
+border: 1px solid var(--c-border);
+border-left: 4px solid var(--c-success);
 
-// Debug nástroje
-border-left: 4px solid #2196F3;  // Modrá
+/* Varování */
+border-left: 4px solid var(--c-warning);
 
-// Dokumentace
-border-left: 4px solid #4CAF50;  // Zelená
-
-// Varování/Critical
-border-left: 4px solid #ff9800;  // Oranžová
-
-// Error/Deprecated
-border-left: 4px solid #f44336;  // Červená
+/* Error/Critical */
+border-left: 4px solid var(--c-error);
 ```
 
-### **Ikony (emoji):**
+### **Status indikátory:**
 
-- 🔐 Security/Auth
-- 🚀 Instalace
-- 🔍 Debug/Diagnostika
-- 📚 Dokumentace
-- 🛠️ Nástroje
-- ⚙️ Konfigurace
-- 📊 Statistiky
-- 🎯 Features
+```php
+✅ - Success / OK
+⚠️ - Warning / Attention
+❌ - Error / Failed
+⏳ - In Progress
+🔄 - Reloading
+```
 
 ## ⚠️ BEZPEČNOST
 
@@ -181,62 +247,112 @@ border-left: 4px solid #f44336;  // Červená
 - Všechny debug nástroje **MUSÍ** kontrolovat přihlášení
 - SQL příkazy **MUSÍ** používat prepared statements
 - **NIKDY** nepoužívat `eval()` nebo podobné nebezpečné funkce
+- **VŽDY** validovat vstupy
 
 Příklad bezpečné kontroly:
 
 ```php
+// Na začátku každého instalátoru
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     http_response_code(403);
-    die('Přístup odepřen');
+    die('Přístup odepřen. Pouze admin.');
 }
+
+// Pro SQL operace - VŽDY prepared statements
+$stmt = $pdo->prepare("INSERT INTO table (column) VALUES (?)");
+$stmt->execute([$value]);
 ```
 
 ## 📖 PRO UŽIVATELE
 
-### **Jak použít:**
+### **Jak použít Control Center:**
 
 1. Přihlaš se jako **admin**
-2. Jdi na **Admin panel**
-3. Klikni na **NÁSTROJE** v menu
-4. Vyber instalátor který chceš spustit
-5. Klikni **"🚀 Spustit instalaci"**
+2. Automaticky se zobrazí **Control Center**
+3. Najdi a rozklikni **Sekce 10: DIAGNOSTIKA**
+4. Vyber instalátor nebo nástroj
+5. Klikni **"🚀 Instalovat"** nebo jiné tlačítko
 6. Čekej na dokončení
 7. Hotovo!
 
 ### **Co když něco selže?**
 
-- Instalátor zobrazí chybovou zprávu
-- Můžeš zkusit znovu
-- Kontaktuj podporu s chybovou zprávou
+1. **Zobrazí se detailní chybová zpráva** s file:line
+2. **Klikni "📋 Kopírovat pro Claude Code nebo Codex"**
+3. **CTRL+V** do zprávy pro AI asistenta
+4. AI ti pomůže opravit problém
+
+## 🧪 TESTOVACÍ PROSTŘEDÍ
+
+**NOVÉ v3.0:** Sekce 12 obsahuje E2E Testing Environment
+
+- **Spustit před instalací** - Ověřit že systém funguje
+- **Spustit po instalaci** - Ověřit že instalace proběhla OK
+- **9-krokový test workflow** - Kompletní validace
+- **Real testy** - Skutečné připojení k databázi
+- **Cleanup** - Potvrzení a smazání test dat
+
+**URL:** admin.php → Sekce 12: Testovací prostředí
 
 ## 🔄 AUTOMATIZACE
 
-V budoucnu plánujeme:
+Plánované vylepšení:
 - 🔄 Auto-update po GitHub merge
 - 📬 Notifikace o dostupných instalacích
 - 📊 Historie instalací
 - ✅ Automatické rollback při chybě
+- 🤖 AI-assisted installation troubleshooting
 
-## 💡 TIPY
+## 💡 TIPY PRO AI ASISTENTY
 
-- **Vždy** testuj instalátory na dev prostředí před produkcí
-- **Vždy** commitni současně instalátor i kartu v admin.php
-- **Vždy** přidej dokumentaci (README)
-- **Vždy** použij progress bar a logování
+- **Vždy** testuj instalátory na dev prostředí
+- **Vždy** používej WGS minimalistický design (černá/bílá/zelená)
+- **Vždy** přidej progress indikátor
+- **Vždy** loguj každý krok
 - **Vždy** kontroluj bezpečnost (admin check)
+- **Vždy** použij error handler s "Copy for Claude Code" funkcí
+- **Vždy** přidej dokumentaci (README)
+- **Vždy** commitni instalátor + Control Center update společně
+
+## 📚 SOUVISEJÍCÍ DOKUMENTACE
+
+- `CONTROL_CENTER_README.md` - Kompletní Control Center dokumentace
+- `ERROR_HANDLING_README.md` - Error handling systém
+- `ROLE_BASED_ACCESS_README.md` - RBAC systém
+- `PDF_PROTOKOL_SYSTEM.md` - PDF protokoly
+- `SECURITY_REVIEW_FEEDBACK.md` - Bezpečnostní review
+
+## 🎯 PRIORITY PRO NOVÉ INSTALÁTORY
+
+### High Priority:
+- Database schema changes
+- Security patches
+- Critical bug fixes
+
+### Medium Priority:
+- New features
+- Performance optimizations
+- UI/UX improvements
+
+### Low Priority:
+- Optional enhancements
+- Experimental features
+- Debug tools
 
 ---
 
 ## 📞 PODPORA
 
 Pokud máš otázky:
-1. Přečti tento README
-2. Podívej se na existující instalátory (např. `install_role_based_access.php`)
-3. Kontaktuj AI asistenta nebo tech support
+1. Přečti `CONTROL_CENTER_README.md` (hlavní dokumentace)
+2. Přečti tento soubor (instalátory)
+3. Použij **Testovací prostředí** (Sekce 12) pro validaci
+4. Použij **Error Handler** "Copy for Claude Code" button
+5. Kontaktuj AI asistenta s error reportem
 
 ---
 
 *Vytvořeno: 2025-11-10*
+*Aktualizováno: 2025-11-11 (v3.0 - Unified Interface)*
 *Autor: Claude AI*
-*Verze: 1.0*
-*Poslední update: 2025-11-10*
+*Verze: 2.0*

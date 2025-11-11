@@ -10,12 +10,12 @@ if (!$isAdmin) {
 }
 
 $tabConfig = loadAdminTabNavigation();
-$activeTab = $_GET['tab'] ?? 'dashboard';
+$activeTab = $_GET['tab'] ?? 'control_center';
 if (!array_key_exists($activeTab, $tabConfig)) {
-    $activeTab = 'dashboard';
+    $activeTab = 'control_center';
 }
 $currentTabMeta = $tabConfig[$activeTab];
-$currentTabLabel = $currentTabMeta['tab_label'] ?? 'Přehled';
+$currentTabLabel = $currentTabMeta['tab_label'] ?? 'Control Center';
 
 // Zkontroluj jestli je RBAC nainstalován
 $rbacInstalled = false;
@@ -64,9 +64,10 @@ try {
 <main>
 <div class="container">
 
-  <h1 class="page-title">Admin Panel</h1>
+  <?php if ($activeTab !== 'control_center' && $activeTab !== 'control_center_testing'): ?>
+  <h1 class="page-title"><?php echo htmlspecialchars($currentTabLabel, ENT_QUOTES, 'UTF-8'); ?></h1>
   <p class="page-subtitle">Správa systému White Glove Service</p>
-  <p class="page-subtitle">Sekce: <?php echo htmlspecialchars($currentTabLabel, ENT_QUOTES, 'UTF-8'); ?></p>
+  <?php endif; ?>
 
   <?php if ($activeTab === 'dashboard'): ?>
   <!-- TAB: DASHBOARD -->
