@@ -585,54 +585,88 @@ function isSuccess(data) {
 // Accordion functionality
 document.querySelectorAll('.cc-header').forEach(header => {
     header.addEventListener('click', function() {
+        console.log('[Control Center] 🔍 Header clicked!');
         const section = this.closest('.cc-section');
+        console.log('[Control Center] 🔍 Section:', section);
+        console.log('[Control Center] 🔍 Section dataset:', section.dataset);
+
         const isExpanded = section.classList.contains('expanded');
+        console.log('[Control Center] 🔍 Was expanded?', isExpanded);
 
         // Collapse all other sections (optional - remove if you want multiple open)
         // document.querySelectorAll('.cc-section').forEach(s => s.classList.remove('expanded'));
 
         // Toggle current section
         if (isExpanded) {
+            console.log('[Control Center] ✅ Collapsing section');
             section.classList.remove('expanded');
         } else {
+            console.log('[Control Center] ✅ Expanding section');
             section.classList.add('expanded');
+
+            // Check if class was actually added
+            console.log('[Control Center] 🔍 Class added?', section.classList.contains('expanded'));
+            console.log('[Control Center] 🔍 Section classes:', section.className);
 
             // Load data when section is opened
             const sectionName = section.dataset.section;
+            console.log('[Control Center] ✅ Loading section data for:', sectionName);
             loadSectionData(sectionName);
+        }
+
+        // Debug: Check body visibility
+        const body = section.querySelector('.cc-body');
+        if (body) {
+            const computedStyle = window.getComputedStyle(body);
+            console.log('[Control Center] 🔍 .cc-body display:', computedStyle.display);
+            console.log('[Control Center] 🔍 .cc-body visibility:', computedStyle.visibility);
+            console.log('[Control Center] 🔍 .cc-body height:', computedStyle.height);
         }
     });
 });
 
 function loadSectionData(section) {
+    console.log('[Control Center] 📋 loadSectionData() called with:', section);
+
     switch(section) {
         case 'statistics':
+            console.log('[Control Center] ➡️ Routing to loadStatsIframe()');
             loadStatsIframe();
             break;
         case 'keys':
+            console.log('[Control Center] ➡️ Routing to loadKeys()');
             loadKeys();
             break;
         case 'users':
+            console.log('[Control Center] ➡️ Routing to loadUsers()');
             loadUsers();
             break;
         case 'online':
+            console.log('[Control Center] ➡️ Routing to loadOnlineUsers()');
             loadOnlineUsers();
             break;
         case 'notifications':
+            console.log('[Control Center] ➡️ Routing to loadNotificationsIframe()');
             loadNotificationsIframe();
             break;
         case 'claims':
+            console.log('[Control Center] ➡️ Routing to loadClaimsStats()');
             loadClaimsStats();
             break;
         case 'diagnostics':
+            console.log('[Control Center] ➡️ Routing to loadToolsIframe()');
             loadToolsIframe();
             break;
         case 'actions':
+            console.log('[Control Center] ➡️ Routing to loadActions()');
             loadActions();
             break;
         case 'testing':
+            console.log('[Control Center] ➡️ Routing to loadTestingIframe()');
             loadTestingIframe();
             break;
+        default:
+            console.warn('[Control Center] ⚠️ Unknown section:', section);
     }
 }
 
@@ -805,13 +839,17 @@ function loadUsers() {
 // Load online users
 function loadOnlineUsers() {
     const container = document.getElementById('ccOnlineTable');
+    console.log('[Control Center] 🔍 loadOnlineUsers() called');
+    console.log('[Control Center] 🔍 Container element:', container);
+    console.log('[Control Center] 🔍 Container visible?', container ? window.getComputedStyle(container).display : 'N/A');
+
     if (!container) {
-        console.error('[Control Center] ccOnlineTable element not found');
+        console.error('[Control Center] ❌ ccOnlineTable element not found');
         return;
     }
 
     console.log('[Control Center] Loading online users...');
-    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--c-grey);">Načítání online uživatelů...</div>';
+    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #DC3545; font-size: 1.2rem; font-weight: bold; background: yellow;">⏳ NAČÍTÁNÍ ONLINE UŽIVATELŮ...</div>';
 
     fetch('api/admin_users_api.php?action=online')
         .then(r => {
@@ -821,8 +859,12 @@ function loadOnlineUsers() {
         })
         .then(data => {
             console.log('[Control Center] Online users data:', data);
+            console.log('[Control Center] 🔍 isSuccess(data)?', isSuccess(data));
+            console.log('[Control Center] 🔍 data.users?', data.users);
+            console.log('[Control Center] 🔍 data.users.length?', data.users ? data.users.length : 'N/A');
 
             if (isSuccess(data) && data.users && data.users.length > 0) {
+                console.log('[Control Center] ✅ Rendering', data.users.length, 'users');
                 let html = '<table class="cc-table"><thead><tr>';
                 html += '<th>Jméno</th><th>Role</th><th>Email</th><th>Poslední aktivita</th>';
                 html += '</tr></thead><tbody>';
@@ -838,15 +880,27 @@ function loadOnlineUsers() {
 
                 html += '</tbody></table>';
                 container.innerHTML = html;
+                console.log('[Control Center] ✅ Table HTML set, length:', html.length);
             } else if (isSuccess(data)) {
-                container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádní online uživatelé</p>';
+                console.log('[Control Center] ✅ No users - showing empty state');
+                const emptyHtml = '<p style="color: red; text-align: center; padding: 3rem; font-size: 1.5rem; background: lightyellow; border: 3px solid red;">❌ Žádní online uživatelé (tento text by měl být VELKÝ a ČERVENÝ)</p>';
+                container.innerHTML = emptyHtml;
+                console.log('[Control Center] ✅ Empty state HTML set');
+                console.log('[Control Center] 🔍 Container after update:', container.innerHTML.substring(0, 100));
             } else {
-                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba: ' + (data.error || data.message || 'Neplatná odpověď') + '</p>';
+                console.log('[Control Center] ❌ API error - showing error');
+                container.innerHTML = '<p style="color: red; font-size: 2rem; background: yellow; padding: 2rem; text-align: center; border: 5px solid red;">⚠️ CHYBA API</p>';
             }
+
+            // Force repaint
+            container.style.display = 'none';
+            container.offsetHeight; // trigger reflow
+            container.style.display = 'block';
+            console.log('[Control Center] 🔍 Forced repaint');
         })
         .catch(err => {
             console.error('[Control Center] Online users load error:', err);
-            container.innerHTML = `<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba: ${err.message}</p>`;
+            container.innerHTML = `<p style="color: white; background: red; font-size: 2rem; padding: 3rem; text-align: center;">⚠️ CHYBA: ${err.message}</p>`;
         });
 }
 
