@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
 require_once __DIR__ . '/../../includes/db_metadata.php';
+require_once __DIR__ . '/../../includes/audit_logger.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -72,6 +73,12 @@ function handleAdminLogin(string $adminKey): void
     $_SESSION['user_name'] = 'Administrátor';
     $_SESSION['user_email'] = 'admin@wgs-service.cz';
     $_SESSION['role'] = 'admin';
+
+    // Audit log
+    auditLog('admin_login', [
+        'method' => 'admin_key',
+        'ip' => $identifier
+    ]);
 
     respondSuccess([
         'message' => 'Přihlášení úspěšné.',
@@ -147,6 +154,12 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
         $update->execute([':email' => $email]);
     }
 
+    // Audit log
+    auditLog('user_login', [
+        'email' => $email,
+        'role' => $_SESSION['role']
+    ], $userId);
+
     respondSuccess([
         'message' => 'Přihlášení úspěšné.',
         'user' => [
@@ -176,6 +189,11 @@ function handleHighKeyVerification(string $highKey): void
 
     $_SESSION['admin_high_key_verified_at'] = time();
 
+    // Audit log
+    auditLog('high_key_verified', [
+        'timestamp' => time()
+    ]);
+
     respondSuccess([
         'message' => 'High key ověřen. Můžete vytvořit nový admin klíč.'
     ]);
@@ -203,6 +221,12 @@ function handleAdminKeyRotation(string $newKey, string $confirmation): void
     $hash = hash('sha256', $newKey);
     $_SESSION['pending_admin_key_hash'] = $hash;
     unset($_SESSION['admin_high_key_verified_at']);
+
+    // Audit log
+    auditLog('admin_key_rotated', [
+        'new_hash' => $hash,
+        'timestamp' => time()
+    ]);
 
     respondSuccess([
         'message' => 'Nový klíč byl vygenerován. Aktualizujte prosím konfigurační soubor (.env).',

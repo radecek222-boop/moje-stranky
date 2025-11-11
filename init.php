@@ -28,10 +28,8 @@ require_once INCLUDES_PATH . '/env_loader.php';
 // Load configuration
 require_once CONFIG_PATH . '/config.php';
 
-// ✅ NASTAVIT BEZPEČNOSTNÍ HLAVIČKY - MUSÍ BÝT PRVNÍ!
-if (function_exists('setSecurityHeaders')) {
-    setSecurityHeaders();
-}
+// ✅ SECURITY HEADERS - načíst před jakýmkoli outputem
+require_once INCLUDES_PATH . '/security_headers.php';
 
 // Load helper functions
 require_once INCLUDES_PATH . '/csrf_helper.php';

@@ -322,3 +322,24 @@ define('JWT_SECRET', requireEnvValue('JWT_SECRET', 'CHYBA: JWT_SECRET není nast
 // ========== GEOAPIFY API (MAPY) ==========
 // BEZPEČNOST: Žádný hardcodovaný API klíč - musí být v .env
 define('GEOAPIFY_KEY', requireEnvValue('GEOAPIFY_API_KEY', 'CHYBA: GEOAPIFY_API_KEY není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+
+// ========== ENVIRONMENT CONFIGURATION ==========
+// Určení prostředí (development, staging, production)
+$environment = getEnvValue('ENVIRONMENT') ?? 'production';
+define('APP_ENV', $environment);
+define('IS_PRODUCTION', $environment === 'production');
+define('IS_DEVELOPMENT', $environment === 'development');
+define('IS_STAGING', $environment === 'staging');
+
+// Error reporting podle prostředí
+if (IS_DEVELOPMENT) {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+} else {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 0);
+    ini_set('display_startup_errors', 0);
+    ini_set('log_errors', 1);
+    ini_set('error_log', LOGS_PATH . '/php_errors.log');
+}

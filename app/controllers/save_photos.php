@@ -118,6 +118,25 @@ try {
             throw new Exception("Nepodařilo se dekódovat fotku $i");
         }
 
+        // BEZPEČNOST: MIME type validace
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_buffer($finfo, $photoData);
+        finfo_close($finfo);
+
+        $allowedMimes = [
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'video/mp4',
+            'video/quicktime' // iPhone videa
+        ];
+
+        if (!in_array($mimeType, $allowedMimes, true)) {
+            throw new Exception("Nepodařilo se uložit fotku $i: Nepovolený typ souboru ($mimeType). Povolené typy: JPG, PNG, GIF, WebP, MP4.");
+        }
+
         // Generování unikátního názvu souboru
         $timestamp = time();
         $randomString = bin2hex(random_bytes(4));
