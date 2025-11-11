@@ -1,19 +1,31 @@
-# Symlinks (created during deployment)
-# (adresáře api/ a app/ jsou verzované, nesmí být ignorovány)
+.gitignore
 
-# BEZPEČNOST: Credentials a secrets
+# Sensitive files
 .env
 
-# Uploaded files
-uploads/
-
-# Logs a temp soubory
-logs/
-temp/
+# Log files
 *.log
 
-# Build artifacts from local tooling
-config/node_modules/
+# PHP debug files
+debug_*.php
+diagnostic_*.php
 
-# Temporary files
+# Test files
+**/*_test.php
+
+# Node.js dependencies
+node_modules/
+
+# PHP dependencies
+vendor/
+
+# System Files
+.DS_Store
+
+# IDE files
+.idea/
+.vscode/
+
+# Other Development Artifacts
 *.tmp
+*.cache
