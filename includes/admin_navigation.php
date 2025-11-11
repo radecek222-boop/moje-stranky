@@ -28,6 +28,12 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab_label' => 'Uživatelé',
                 'tab' => 'users',
             ],
+            'control_center' => [
+                'href' => 'admin.php?tab=control_center',
+                'header_label' => 'CONTROL CENTER',
+                'tab_label' => 'Control Center',
+                'tab' => 'control_center',
+            ],
             'tools' => [
                 'href' => 'admin.php?tab=tools',
                 'header_label' => 'NÁSTROJE',

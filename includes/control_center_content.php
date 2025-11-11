@@ -1,0 +1,399 @@
+<?php
+/**
+ * Control Center - Obsah & Texty
+ * Editace textů na stránkách (CZ/EN/SK)
+ */
+
+// Bezpečnostní kontrola
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    die('Unauthorized');
+}
+
+$pdo = getDbConnection();
+
+// Načtení všech textů
+$contentTexts = [];
+try {
+    $stmt = $pdo->query("
+        SELECT * FROM wgs_content_texts
+        ORDER BY page, section, text_key
+    ");
+    $contentTexts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $contentTexts = [];
+}
+
+// Seskupení podle stránek
+$pages = [];
+foreach ($contentTexts as $text) {
+    $page = $text['page'];
+    if (!isset($pages[$page])) {
+        $pages[$page] = [];
+    }
+    $pages[$page][] = $text;
+}
+
+// Překlad názvů stránek
+$pageNames = [
+    'index' => '🏠 Úvodní stránka',
+    'novareklamace' => '📝 Nová reklamace',
+    'mimozarucniceny' => '💰 Kalkulačka ceny',
+    'onas' => 'ℹ️ O nás',
+    'nasesluzby' => '🛠️ Naše služby',
+    'email' => '📧 Email šablony',
+    'gdpr' => '🔒 GDPR'
+];
+?>
+
+<link rel="stylesheet" href="/assets/css/control-center.css">
+
+<div class="control-detail active">
+    <!-- Header -->
+    <div class="control-detail-header">
+        <button class="control-detail-back" onclick="window.location.href='admin.php?tab=control_center'">
+            <span>‹</span>
+            <span>Zpět</span>
+        </button>
+        <h2 class="control-detail-title">📝 Obsah & Texty</h2>
+    </div>
+
+    <div class="control-detail-content">
+
+        <!-- Alert -->
+        <div class="cc-alert info">
+            <div class="cc-alert-icon">💡</div>
+            <div class="cc-alert-content">
+                <div class="cc-alert-title">Editace obsahu</div>
+                <div class="cc-alert-message">
+                    Upravte texty na stránkách ve třech jazycích: Čeština, Angličtina, Slovenština.
+                    Změny se projeví okamžitě po uložení.
+                </div>
+            </div>
+        </div>
+
+        <?php if (empty($pages)): ?>
+            <!-- Prázdný stav -->
+            <div class="cc-alert warning">
+                <div class="cc-alert-icon">⚠️</div>
+                <div class="cc-alert-content">
+                    <div class="cc-alert-title">Žádné texty nenalezeny</div>
+                    <div class="cc-alert-message">
+                        Tabulka wgs_content_texts je prázdná. Spusťte migraci pro naimportování výchozích textů.
+                    </div>
+                </div>
+            </div>
+        <?php else: ?>
+
+            <!-- Výběr stránky -->
+            <div class="setting-group">
+                <h3 class="setting-group-title">Vyberte stránku</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; padding: 1rem 1.5rem;">
+                    <?php foreach ($pages as $page => $texts): ?>
+                        <button class="cc-btn cc-btn-sm cc-btn-secondary page-selector"
+                                data-page="<?= htmlspecialchars($page) ?>"
+                                onclick="showPage('<?= htmlspecialchars($page) ?>')">
+                            <?= $pageNames[$page] ?? ucfirst($page) ?>
+                            <span style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 10px; margin-left: 0.5rem; font-size: 0.8rem;">
+                                <?= count($texts) ?>
+                            </span>
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <!-- Stránky -->
+            <?php foreach ($pages as $page => $texts): ?>
+                <div class="page-content" id="page-<?= htmlspecialchars($page) ?>" style="display: none;">
+
+                    <div class="setting-group">
+                        <h3 class="setting-group-title">
+                            <?= $pageNames[$page] ?? ucfirst($page) ?>
+                        </h3>
+
+                        <?php foreach ($texts as $text): ?>
+                            <div class="setting-item" style="display: block; padding: 1.5rem;">
+                                <div class="setting-item-label" style="margin-bottom: 1rem;">
+                                    <strong><?= htmlspecialchars($text['section']) ?></strong> › <?= htmlspecialchars($text['text_key']) ?>
+                                </div>
+
+                                <!-- Taby pro jazyky -->
+                                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--cc-border);">
+                                    <button class="lang-tab active"
+                                            data-text-id="<?= $text['id'] ?>"
+                                            data-lang="cz"
+                                            onclick="switchLang(<?= $text['id'] ?>, 'cz')">
+                                        🇨🇿 Čeština
+                                    </button>
+                                    <button class="lang-tab"
+                                            data-text-id="<?= $text['id'] ?>"
+                                            data-lang="en"
+                                            onclick="switchLang(<?= $text['id'] ?>, 'en')">
+                                        🇬🇧 Angličtina
+                                    </button>
+                                    <button class="lang-tab"
+                                            data-text-id="<?= $text['id'] ?>"
+                                            data-lang="sk"
+                                            onclick="switchLang(<?= $text['id'] ?>, 'sk')">
+                                        🇸🇰 Slovenština
+                                    </button>
+                                </div>
+
+                                <!-- Čeština -->
+                                <div class="lang-content active" id="text-<?= $text['id'] ?>-cz">
+                                    <textarea class="cc-input cc-textarea"
+                                              id="input-<?= $text['id'] ?>-cz"
+                                              rows="4"
+                                              placeholder="České znění..."
+                                              <?= !$text['editable'] ? 'disabled' : '' ?>><?= htmlspecialchars($text['value_cz']) ?></textarea>
+                                </div>
+
+                                <!-- Angličtina -->
+                                <div class="lang-content" id="text-<?= $text['id'] ?>-en" style="display: none;">
+                                    <textarea class="cc-input cc-textarea"
+                                              id="input-<?= $text['id'] ?>-en"
+                                              rows="4"
+                                              placeholder="English text..."
+                                              <?= !$text['editable'] ? 'disabled' : '' ?>><?= htmlspecialchars($text['value_en']) ?></textarea>
+                                </div>
+
+                                <!-- Slovenština -->
+                                <div class="lang-content" id="text-<?= $text['id'] ?>-sk" style="display: none;">
+                                    <textarea class="cc-input cc-textarea"
+                                              id="input-<?= $text['id'] ?>-sk"
+                                              rows="4"
+                                              placeholder="Slovenský text..."
+                                              <?= !$text['editable'] ? 'disabled' : '' ?>><?= htmlspecialchars($text['value_sk']) ?></textarea>
+                                </div>
+
+                                <?php if ($text['editable']): ?>
+                                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                                        <button class="cc-btn cc-btn-sm cc-btn-primary"
+                                                onclick="saveText(<?= $text['id'] ?>)">
+                                            💾 Uložit
+                                        </button>
+                                        <button class="cc-btn cc-btn-sm cc-btn-secondary"
+                                                onclick="translateText(<?= $text['id'] ?>)">
+                                            🌐 Auto-překlad
+                                        </button>
+                                    </div>
+                                <?php else: ?>
+                                    <div style="margin-top: 1rem; color: #999; font-size: 0.85rem;">
+                                        🔒 Tento text není editovatelný
+                                    </div>
+                                <?php endif; ?>
+
+                                <div id="save-status-<?= $text['id'] ?>" style="margin-top: 0.5rem; display: none;"></div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                </div>
+            <?php endforeach; ?>
+
+        <?php endif; ?>
+
+        <!-- Hromadné akce -->
+        <?php if (!empty($pages)): ?>
+            <div class="setting-group">
+                <h3 class="setting-group-title">Hromadné akce</h3>
+
+                <div class="setting-item">
+                    <div class="setting-item-left">
+                        <div class="setting-item-label">💾 Uložit všechny změny</div>
+                        <div class="setting-item-description">Uložit veškerý editovaný obsah najednou</div>
+                    </div>
+                    <div class="setting-item-right">
+                        <button class="cc-btn cc-btn-sm cc-btn-primary" onclick="saveAllTexts()">
+                            Uložit vše
+                        </button>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-item-left">
+                        <div class="setting-item-label">🌐 Přeložit vše do EN/SK</div>
+                        <div class="setting-item-description">Automaticky přeložit všechny texty (DeepL API)</div>
+                    </div>
+                    <div class="setting-item-right">
+                        <button class="cc-btn cc-btn-sm cc-btn-secondary" onclick="translateAll()">
+                            Přeložit vše
+                        </button>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-item-left">
+                        <div class="setting-item-label">📥 Export / Import</div>
+                        <div class="setting-item-description">Export do JSON nebo import z JSON souboru</div>
+                    </div>
+                    <div class="setting-item-right">
+                        <button class="cc-btn cc-btn-sm cc-btn-secondary" onclick="exportTexts()">
+                            📥 Export
+                        </button>
+                        <button class="cc-btn cc-btn-sm cc-btn-secondary" onclick="importTexts()">
+                            📤 Import
+                        </button>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
+    </div>
+</div>
+
+<script src="/assets/js/csrf-auto-inject.js"></script>
+<script>
+// Show page
+function showPage(page) {
+    // Hide all pages
+    document.querySelectorAll('.page-content').forEach(el => {
+        el.style.display = 'none';
+    });
+
+    // Deactivate all buttons
+    document.querySelectorAll('.page-selector').forEach(btn => {
+        btn.classList.remove('cc-btn-primary');
+        btn.classList.add('cc-btn-secondary');
+    });
+
+    // Show selected page
+    const pageEl = document.getElementById('page-' + page);
+    if (pageEl) {
+        pageEl.style.display = 'block';
+    }
+
+    // Activate button
+    const btn = document.querySelector(`[data-page="${page}"]`);
+    if (btn) {
+        btn.classList.add('cc-btn-primary');
+        btn.classList.remove('cc-btn-secondary');
+    }
+}
+
+// Switch language tab
+function switchLang(textId, lang) {
+    // Hide all lang contents for this text
+    document.querySelectorAll(`[id^="text-${textId}-"]`).forEach(el => {
+        el.style.display = 'none';
+    });
+
+    // Deactivate all tabs for this text
+    document.querySelectorAll(`[data-text-id="${textId}"]`).forEach(tab => {
+        tab.classList.remove('active');
+    });
+
+    // Show selected lang
+    const contentEl = document.getElementById(`text-${textId}-${lang}`);
+    if (contentEl) {
+        contentEl.style.display = 'block';
+    }
+
+    // Activate tab
+    const tab = document.querySelector(`[data-text-id="${textId}"][data-lang="${lang}"]`);
+    if (tab) {
+        tab.classList.add('active');
+    }
+}
+
+// Save text
+async function saveText(textId) {
+    const statusEl = document.getElementById(`save-status-${textId}`);
+    statusEl.style.display = 'block';
+    statusEl.innerHTML = '<span class="cc-loading"></span> Ukládám...';
+
+    try {
+        const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() : null;
+
+        const valueCz = document.getElementById(`input-${textId}-cz`).value;
+        const valueEn = document.getElementById(`input-${textId}-en`).value;
+        const valueSk = document.getElementById(`input-${textId}-sk`).value;
+
+        const response = await fetch('/api/control_center_api.php?action=save_content_text', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id: textId,
+                value_cz: valueCz,
+                value_en: valueEn,
+                value_sk: valueSk,
+                csrf_token: csrfToken
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            statusEl.innerHTML = '<span style="color: #28A745;">✅ Uloženo!</span>';
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 2000);
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        statusEl.innerHTML = '<span style="color: #DC3545;">❌ Chyba: ' + error.message + '</span>';
+    }
+}
+
+// Translate text (placeholder)
+async function translateText(textId) {
+    alert('Auto-překlad přes DeepL API bude implementován v příští verzi.\n\nMomentálně prosím překládejte manuálně.');
+}
+
+// Save all texts
+async function saveAllTexts() {
+    if (!confirm('Uložit všechny změny?')) {
+        return;
+    }
+
+    alert('Funkce bude implementována v příští verzi.\n\nMomentálně prosím ukládejte jednotlivé texty samostatně.');
+}
+
+// Translate all
+async function translateAll() {
+    alert('Hromadný překlad přes DeepL API bude implementován v příští verzi.');
+}
+
+// Export texts
+function exportTexts() {
+    alert('Export do JSON bude implementován v příští verzi.');
+}
+
+// Import texts
+function importTexts() {
+    alert('Import z JSON bude implementován v příští verzi.');
+}
+
+// Show first page on load
+document.addEventListener('DOMContentLoaded', () => {
+    const firstPage = document.querySelector('.page-selector');
+    if (firstPage) {
+        firstPage.click();
+    }
+});
+
+console.log('✅ Content section loaded');
+</script>
+
+<style>
+.lang-tab {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--cc-text-secondary);
+    transition: var(--cc-transition);
+    border-bottom: 2px solid transparent;
+}
+
+.lang-tab:hover {
+    color: var(--cc-text-primary);
+}
+
+.lang-tab.active {
+    color: var(--cc-primary);
+    border-bottom-color: var(--cc-primary);
+}
+</style>

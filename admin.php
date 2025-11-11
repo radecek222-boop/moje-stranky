@@ -158,6 +158,48 @@ try {
   </div>
   <?php endif; ?>
 
+  <?php if ($activeTab === 'control_center'): ?>
+  <!-- TAB: CONTROL CENTER -->
+  <?php
+    // Control Center Routing
+    $section = $_GET['section'] ?? 'main';
+
+    switch ($section) {
+        case 'appearance':
+            require_once __DIR__ . '/includes/control_center_appearance.php';
+            break;
+        case 'diagnostics':
+            require_once __DIR__ . '/includes/control_center_diagnostics.php';
+            break;
+        case 'actions':
+            require_once __DIR__ . '/includes/control_center_actions.php';
+            break;
+        case 'content':
+            require_once __DIR__ . '/includes/control_center_content.php';
+            break;
+        case 'users':
+            // Redirect na existující users tab
+            header('Location: admin.php?tab=users');
+            exit;
+        case 'notifications':
+            // Redirect na existující notifications tab
+            header('Location: admin.php?tab=notifications');
+            exit;
+        case 'configuration':
+            require_once __DIR__ . '/includes/control_center_configuration.php';
+            break;
+        case 'analytics':
+            // Redirect na existující statistiky
+            header('Location: statistiky.php');
+            exit;
+        case 'main':
+        default:
+            require_once __DIR__ . '/includes/control_center_main.php';
+            break;
+    }
+  ?>
+  <?php endif; ?>
+
   <?php if ($activeTab === 'tools'): ?>
   <!-- TAB: TOOLS & MIGRATIONS -->
   <div id="tab-tools" class="tab-content">
@@ -756,7 +798,7 @@ WHERE fakturace_firma IS NULL OR fakturace_firma = '';</code>
             <a href="/seznam.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: #000; color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;">SEZNAM</a>
             <a href="/show_table_structure.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: #000; color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;">DB</a>
             <a href="/diagnostic_web.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: #000; color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;">DIAGNOSTIKA</a>
-            <a href="/install_notifications.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: #dc3545; color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;">🔧 INSTALOVAT NOTIFIKACE</a>
+            <a href="/install_admin_control_center.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);">🎨 INSTALOVAT CONTROL CENTER</a>
           </div>
         </div>
       </div>
