@@ -116,7 +116,8 @@ class ControlCenterModal {
             section = null,
             url = null,
             content = null,
-            type = 'iframe' // 'iframe', 'html', 'ajax'
+            type = 'iframe', // 'iframe', 'html', 'ajax'
+            testMode = false // Nový parametr pro test mode
         } = options;
 
         this.currentSection = section;
@@ -133,6 +134,21 @@ class ControlCenterModal {
         this.modal.classList.add('active');
         document.body.classList.add('cc-modal-open');
 
+        // Pokud je test mode, přidej speciální styling
+        if (testMode) {
+            document.body.classList.add('cc-modal-test-mode');
+
+            // Přidej test badge do headeru
+            const header = this.modal.querySelector('.cc-modal-header');
+            if (header && !header.querySelector('.cc-modal-test-badge')) {
+                const badge = document.createElement('div');
+                badge.className = 'cc-modal-test-badge';
+                badge.textContent = 'TEST MODE';
+                header.style.position = 'relative';
+                header.appendChild(badge);
+            }
+        }
+
         // Načti obsah
         if (type === 'iframe' && url) {
             this.loadIframe(url);
@@ -146,7 +162,7 @@ class ControlCenterModal {
 
         // Analytics
         if (section) {
-            console.log(`[Control Center] Opened section: ${section}`);
+            console.log(`[Control Center] Opened section: ${section}${testMode ? ' (TEST MODE)' : ''}`);
         }
     }
 
@@ -154,11 +170,18 @@ class ControlCenterModal {
         this.overlay.classList.remove('active');
         this.modal.classList.remove('active');
         document.body.classList.remove('cc-modal-open');
+        document.body.classList.remove('cc-modal-test-mode');
 
         // Clear content po zavření
         setTimeout(() => {
             this.modalBody.innerHTML = this.getLoadingHTML();
             this.currentSection = null;
+
+            // Remove test badge if exists
+            const badge = this.modal.querySelector('.cc-modal-test-badge');
+            if (badge) {
+                badge.remove();
+            }
         }, 300);
 
         console.log('[Control Center] Modal closed');
@@ -318,17 +341,18 @@ class ControlCenterModal {
             subtitle: 'Vizuální průchod workflow s diagnostikou',
             section: 'testing',
             url: 'admin.php?tab=control_center_testing_interactive',
-            type: 'iframe'
+            type: 'iframe',
+            testMode: true // Aktivovat test mode s 80% velikostí
         });
     }
 }
 
-// Vytvoř globální instanci
-const ccModal = new ControlCenterModal();
+// Vytvoř globální instanci - MUSÍ být window.ccModal pro inline event handlers
+window.ccModal = new ControlCenterModal();
 
 // Export pro použití v jiných skriptech
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ControlCenterModal;
 }
 
-console.log('[Control Center Modal] System initialized');
+console.log('[Control Center Modal] System initialized - ccModal exposed globally');
