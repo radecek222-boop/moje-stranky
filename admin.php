@@ -756,6 +756,7 @@ WHERE fakturace_firma IS NULL OR fakturace_firma = '';</code>
             <a href="/seznam.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: #000; color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;">SEZNAM</a>
             <a href="/show_table_structure.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: #000; color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;">DB</a>
             <a href="/diagnostic_web.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: #000; color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;">DIAGNOSTIKA</a>
+            <a href="/install_notifications.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: #dc3545; color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;">🔧 INSTALOVAT NOTIFIKACE</a>
           </div>
         </div>
       </div>

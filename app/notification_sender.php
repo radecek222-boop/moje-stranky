@@ -1,7 +1,9 @@
 <?php
 /**
- * Notification Sender
+ * Notification Sender - Database-Driven Version
  * Posílá email a SMS notifikace zákazníkům a adminům
+ *
+ * ZMĚNA (2025-11-11): Přepsáno z hardcoded switch na databázové šablony
  */
 
 require_once __DIR__ . '/../init.php';
@@ -55,51 +57,51 @@ try {
 
     recordLoginAttempt("notification_$ip");
 
-    // Příprava emailu podle typu notifikace
-    $subject = '';
-    $message = '';
-    $to = '';
+    // ============================================
+    // NAČTENÍ ŠABLONY Z DATABÁZE
+    // ============================================
+    $pdo = getDbConnection();
 
-    switch ($notificationId) {
-        case 'appointment_confirmed':
-            $customerName = $notificationData['customer_name'] ?? 'Zákazník';
-            $appointmentDate = $notificationData['appointment_date'] ?? 'neuvedeno';
-            $appointmentTime = $notificationData['appointment_time'] ?? 'neuvedeno';
-            $orderId = $notificationData['order_id'] ?? 'neuvedeno';
+    $stmt = $pdo->prepare("
+        SELECT * FROM wgs_notifications
+        WHERE id = :notification_id AND active = 1
+        LIMIT 1
+    ");
+    $stmt->execute(['notification_id' => $notificationId]);
+    $notification = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            $subject = "Potvrzení termínu návštěvy - WGS Servis";
-            $message = "Dobrý den {$customerName},\n\n";
-            $message .= "potvrzujeme termín návštěvy technika:\n\n";
-            $message .= "Datum: {$appointmentDate}\n";
-            $message .= "Čas: {$appointmentTime}\n";
-            $message .= "Číslo zakázky: {$orderId}\n\n";
-            $message .= "V případě jakýchkoli dotazů nás prosím kontaktujte.\n\n";
-            $message .= "S pozdravem,\nWhite Glove Service\n";
-            $message .= "Tel: +420 725 965 826\n";
-            $message .= "Email: reklamace@wgs-service.cz";
+    if (!$notification) {
+        throw new Exception('Notifikace nenalezena nebo je neaktivní: ' . $notificationId);
+    }
 
-            // Email zákazníka
+    // Dekódování JSON polí
+    $ccEmails = !empty($notification['cc_emails']) ? json_decode($notification['cc_emails'], true) : [];
+    $bccEmails = !empty($notification['bcc_emails']) ? json_decode($notification['bcc_emails'], true) : [];
+
+    // ============================================
+    // URČENÍ PŘÍJEMCE
+    // ============================================
+    $to = null;
+
+    switch ($notification['recipient_type']) {
+        case 'customer':
             $to = $notificationData['customer_email'] ?? null;
             break;
 
-        case 'order_reopened':
-            $customerName = $notificationData['customer_name'] ?? 'Zákazník';
-            $orderId = $notificationData['order_id'] ?? 'neuvedeno';
-            $reopenedBy = $notificationData['reopened_by'] ?? 'admin';
-            $reopenedAt = $notificationData['reopened_at'] ?? date('d.m.Y H:i');
-
-            $subject = "Zakázka #{$orderId} byla znovu otevřena";
-            $message = "Zákazník: {$customerName}\n";
-            $message .= "Zakázka č.: {$orderId}\n\n";
-            $message .= "Zakázka byla znovu otevřena uživatelem {$reopenedBy} dne {$reopenedAt}.\n\n";
-            $message .= "Stav byl změněn na NOVÁ. Termín byl vymazán.\n";
-
-            // Email pro adminy/techniky
+        case 'admin':
             $to = 'reklamace@wgs-service.cz';
             break;
 
+        case 'technician':
+            $to = $notificationData['technician_email'] ?? null;
+            break;
+
+        case 'seller':
+            $to = $notificationData['seller_email'] ?? null;
+            break;
+
         default:
-            throw new Exception('Neznámý typ notifikace: ' . $notificationId);
+            throw new Exception('Neznámý typ příjemce: ' . $notification['recipient_type']);
     }
 
     // Validace emailu
@@ -107,15 +109,71 @@ try {
         // Pokud není validní email, nepošleme (možná někdy email chybí)
         echo json_encode([
             'success' => true,
-            'message' => 'Email nebyl odeslán (chybí validní adresa)',
-            'sent' => false
+            'message' => 'Email nebyl odeslán (chybí validní adresa příjemce)',
+            'sent' => false,
+            'notification_id' => $notificationId,
+            'recipient_type' => $notification['recipient_type']
         ]);
         exit;
     }
 
-    // Příprava hlaviček
+    // ============================================
+    // NÁHRADA PROMĚNNÝCH V ŠABLONĚ
+    // ============================================
+    $subject = $notification['subject'] ?? 'Notifikace z WGS';
+    $message = $notification['template'];
+
+    // Mapování klíčů dat na template proměnné
+    $variableMap = [
+        '{{customer_name}}' => $notificationData['customer_name'] ?? 'Zákazník',
+        '{{customer_email}}' => $notificationData['customer_email'] ?? '',
+        '{{customer_phone}}' => $notificationData['customer_phone'] ?? '',
+        '{{date}}' => $notificationData['appointment_date'] ?? $notificationData['date'] ?? '',
+        '{{time}}' => $notificationData['appointment_time'] ?? $notificationData['time'] ?? '',
+        '{{order_id}}' => $notificationData['order_id'] ?? '',
+        '{{address}}' => $notificationData['address'] ?? '',
+        '{{product}}' => $notificationData['product'] ?? '',
+        '{{description}}' => $notificationData['description'] ?? '',
+        '{{reopened_by}}' => $notificationData['reopened_by'] ?? '',
+        '{{reopened_at}}' => $notificationData['reopened_at'] ?? '',
+        '{{technician_name}}' => $notificationData['technician_name'] ?? '',
+        '{{seller_name}}' => $notificationData['seller_name'] ?? '',
+        '{{created_at}}' => $notificationData['created_at'] ?? date('d.m.Y H:i'),
+        '{{completed_at}}' => $notificationData['completed_at'] ?? '',
+    ];
+
+    // Replace variables in subject and message
+    foreach ($variableMap as $variable => $value) {
+        $subject = str_replace($variable, $value, $subject);
+        $message = str_replace($variable, $value, $message);
+    }
+
+    // ============================================
+    // PŘÍPRAVA A ODESLÁNÍ EMAILU
+    // ============================================
     $headers = "From: White Glove Service <reklamace@wgs-service.cz>\r\n";
     $headers .= "Reply-To: reklamace@wgs-service.cz\r\n";
+
+    // Přidání CC emailů
+    if (!empty($ccEmails) && is_array($ccEmails)) {
+        $validCcEmails = array_filter($ccEmails, function($email) {
+            return filter_var($email, FILTER_VALIDATE_EMAIL);
+        });
+        if (!empty($validCcEmails)) {
+            $headers .= "Cc: " . implode(', ', $validCcEmails) . "\r\n";
+        }
+    }
+
+    // Přidání BCC emailů
+    if (!empty($bccEmails) && is_array($bccEmails)) {
+        $validBccEmails = array_filter($bccEmails, function($email) {
+            return filter_var($email, FILTER_VALIDATE_EMAIL);
+        });
+        if (!empty($validBccEmails)) {
+            $headers .= "Bcc: " . implode(', ', $validBccEmails) . "\r\n";
+        }
+    }
+
     $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
     $headers .= "X-Mailer: PHP/" . phpversion();
 
@@ -126,12 +184,23 @@ try {
         throw new Exception('Nepodařilo se odeslat email');
     }
 
+    // Logování úspěšného odeslání
+    error_log(sprintf(
+        "Notification sent: %s -> %s (subject: %s)",
+        $notificationId,
+        $to,
+        $subject
+    ));
+
     // Úspěšná odpověď
     echo json_encode([
         'success' => true,
         'message' => 'Notifikace odeslána',
         'sent' => true,
-        'to' => $to
+        'notification_id' => $notificationId,
+        'to' => $to,
+        'cc' => $ccEmails ?? [],
+        'bcc_count' => count($bccEmails ?? [])
     ]);
 
 } catch (Exception $e) {
