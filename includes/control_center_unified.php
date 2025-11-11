@@ -1,7 +1,9 @@
 <?php
 /**
  * Control Center - Centrální řídicí panel
- * Obsahuje VŠECHNY admin funkce v jednom místě
+ * Mod
+
+ern card-based design s overlay systémem
  */
 
 // Načtení dat ze session
@@ -34,129 +36,256 @@ try {
 ?>
 
 <style>
-/* Control Center Accordion Styles */
+/* Control Center - Modern Card Design */
 .control-center {
     max-width: 1400px;
     margin: 0 auto;
+    padding: 0 1rem;
 }
 
-.cc-section {
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--c-black);
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    font-size: 0.95rem;
+    color: var(--c-grey);
+}
+
+/* Card Grid */
+.cc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+/* Card Styles */
+.cc-card {
     background: var(--c-white);
     border: 1px solid var(--c-border);
-    margin-bottom: 1.5rem;
-    transition: all 0.3s ease;
-}
-
-.cc-section:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-.cc-header {
+    border-radius: 8px;
     padding: 1.5rem;
-    border-bottom: 1px solid var(--c-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     cursor: pointer;
-    user-select: none;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.cc-header:hover {
-    background: rgba(0,0,0,0.02);
+.cc-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border-color: var(--c-primary);
 }
 
-.cc-title-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex: 1;
-}
-
-.cc-title {
-    font-size: 1.1rem;
+.cc-card-title {
+    font-size: 1.05rem;
     font-weight: 600;
     color: var(--c-black);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
 }
 
-.cc-subtitle {
+.cc-card-description {
     font-size: 0.85rem;
     color: var(--c-grey);
-    margin-top: 0.3rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
 }
 
-.cc-badge {
-    display: inline-flex;
+.cc-card-stats {
+    display: flex;
     align-items: center;
-    justify-content: center;
-    min-width: 24px;
-    height: 24px;
-    padding: 0 8px;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--c-grey);
+}
+
+.cc-card-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--c-primary);
+}
+
+.cc-card-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
     background: var(--c-error);
     color: white;
-    border-radius: 12px;
     font-size: 0.75rem;
     font-weight: 600;
-}
-
-.cc-chevron {
-    font-size: 1.2rem;
-    color: var(--c-grey);
-    transition: transform 0.3s ease;
-}
-
-.cc-section.expanded .cc-chevron {
-    transform: rotate(180deg);
-}
-
-.cc-body {
-    display: none;
-    padding: 0;
-    border-top: 1px solid var(--c-border);
-}
-
-.cc-section.expanded .cc-body {
-    display: block;
-}
-
-.cc-content {
-    padding: 1.5rem;
-}
-
-/* Mini stats in sections */
-.mini-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.mini-stat {
-    background: var(--c-bg);
-    border: 1px solid var(--c-border);
-    padding: 1rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    min-width: 24px;
     text-align: center;
 }
 
-.mini-stat-value {
-    font-size: 2rem;
-    font-weight: 600;
+/* Card States */
+.cc-card-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cc-card-disabled:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--c-border);
+}
+
+.cc-coming-soon {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--c-grey);
+    color: white;
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Overlay System */
+.cc-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9998;
+    backdrop-filter: blur(4px);
+}
+
+.cc-overlay.active {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+.cc-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 1200px;
+    max-height: 85vh;
+    background: var(--c-white);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    z-index: 9999;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.cc-modal.active {
+    display: flex;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -45%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.cc-modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--c-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.cc-modal-back {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--c-grey);
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.cc-modal-back:hover {
+    background: rgba(0,0,0,0.05);
     color: var(--c-black);
 }
 
-.mini-stat-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--c-grey);
-    margin-top: 0.5rem;
+.cc-modal-title-section {
+    flex: 1;
+    margin-left: 1rem;
 }
 
-/* Data tables in accordion */
+.cc-modal-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--c-black);
+    margin: 0;
+}
+
+.cc-modal-subtitle {
+    font-size: 0.85rem;
+    color: var(--c-grey);
+    margin-top: 0.25rem;
+}
+
+.cc-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.cc-modal-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    color: var(--c-grey);
+}
+
+.cc-modal-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--c-border);
+    border-top-color: var(--c-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Table Styles */
 .cc-table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 1rem;
 }
 
 .cc-table th {
@@ -168,45 +297,21 @@ try {
     letter-spacing: 0.05em;
     color: var(--c-grey);
     border-bottom: 1px solid var(--c-border);
+    font-weight: 600;
 }
 
 .cc-table td {
     padding: 1rem;
     border-bottom: 1px solid var(--c-border);
+    font-size: 0.9rem;
 }
 
 .cc-table tr:hover td {
     background: rgba(0,0,0,0.02);
 }
 
-/* Action buttons in sections */
-.cc-actions {
-    display: flex;
-    gap: 0.8rem;
-    flex-wrap: wrap;
-    margin-bottom: 1.5rem;
-}
-
-/* Inline iframe containers pro accordion sekce */
-.cc-inline-iframe {
-    width: 100%;
-    height: 600px;
-    border: 2px solid var(--c-border);
-    border-radius: 4px;
-    background: var(--c-white);
-    margin-top: 1rem;
-}
-
-.cc-iframe-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 400px;
-    color: var(--c-grey);
-    font-size: 0.9rem;
-}
-
-.cc-section-tabs {
+/* Tabs */
+.cc-tabs {
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1.5rem;
@@ -222,9 +327,7 @@ try {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.05em;
+    font-size: 0.9rem;
 }
 
 .cc-tab:hover {
@@ -233,8 +336,8 @@ try {
 }
 
 .cc-tab.active {
-    color: var(--c-success);
-    border-bottom-color: var(--c-success);
+    color: var(--c-primary);
+    border-bottom-color: var(--c-primary);
 }
 
 .cc-tab-content {
@@ -244,358 +347,201 @@ try {
 .cc-tab-content.active {
     display: block;
 }
+
+/* Iframe container */
+.cc-iframe-container {
+    width: 100%;
+    height: 600px;
+    border: 1px solid var(--c-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cc-iframe-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Mini stats grid */
+.cc-mini-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.cc-mini-stat {
+    background: var(--c-bg);
+    border: 1px solid var(--c-border);
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.cc-mini-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--c-primary);
+}
+
+.cc-mini-stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--c-grey);
+    margin-top: 0.5rem;
+}
+
+/* Actions */
+.cc-actions {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .cc-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cc-modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .cc-modal-body {
+        padding: 1rem;
+    }
+}
 </style>
 
 <div class="control-center">
-    <h1 class="page-title">Control Center</h1>
-    <p class="page-subtitle">Centrální řídicí panel pro správu celé aplikace</p>
-
-    <!-- Quick Stats -->
-    <div class="stats-grid" style="margin-bottom: 2rem;">
-        <div class="stat-card">
-            <div class="stat-label">Reklamace celkem</div>
-            <div class="stat-value"><?= $totalClaims ?></div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Uživatelé</div>
-            <div class="stat-value"><?= $totalUsers ?></div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Online nyní</div>
-            <div class="stat-value"><?= $onlineUsers ?></div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Nevyřízené úkoly</div>
-            <div class="stat-value"><?= $pendingActions ?></div>
-        </div>
+    <div class="page-header">
+        <h1 class="page-title">Control Center</h1>
+        <p class="page-subtitle">Centrální řídicí panel pro správu celé aplikace</p>
     </div>
 
-    <!-- SEKCE 1: STATISTIKY & ANALYTICS -->
-    <div class="cc-section" data-section="statistics">
-        <div class="cc-header">
-            <div class="cc-title-wrapper">
-                <div>
-                    <div class="cc-title">Statistiky & Analytics</div>
-                    <div class="cc-subtitle">Přehledy, grafy, výkonnostní metriky</div>
-                </div>
-            </div>
-            <span class="cc-chevron">▼</span>
+    <!-- Card Grid -->
+    <div class="cc-grid">
+
+        <!-- Statistiky & Analytics -->
+        <div class="cc-card cc-card-statistics" onclick="openCCModal('statistics')">
+            <div class="cc-card-title">Statistiky & Analytics</div>
+            <div class="cc-card-description">Přehledy, grafy a výkonnostní metriky</div>
         </div>
-        <div class="cc-body">
-            <div class="cc-content">
-                <!-- Tabs pro přepínání mezi statistikami a analytics -->
-                <div class="cc-section-tabs">
-                    <button class="cc-tab active" onclick="switchStatsTab('claims')">Statistiky reklamací</button>
-                    <button class="cc-tab" onclick="switchStatsTab('web')">Web Analytics</button>
-                </div>
 
-                <!-- Tab Content: Statistiky reklamací -->
-                <div id="statsTabClaims" class="cc-tab-content active">
-                    <iframe id="statsIframe" class="cc-inline-iframe" src=""
-                            sandbox="allow-scripts allow-same-origin"
-                            title="Statistiky reklamací"></iframe>
-                </div>
+        <!-- Registrační klíče -->
+        <div class="cc-card cc-card-keys" onclick="openCCModal('keys')">
+            <?php if ($activeKeys > 0): ?>
+                <div class="cc-card-badge"><?= $activeKeys ?></div>
+            <?php endif; ?>
+            <div class="cc-card-title">Registrační klíče</div>
+            <div class="cc-card-description">Správa přístupových klíčů pro registraci</div>
+            <div class="cc-card-number"><?= $activeKeys ?></div>
+        </div>
 
-                <!-- Tab Content: Web Analytics -->
-                <div id="statsTabWeb" class="cc-tab-content">
-                    <iframe id="analyticsIframe" class="cc-inline-iframe" src=""
-                            sandbox="allow-scripts allow-same-origin"
-                            title="Web Analytics"></iframe>
-                </div>
-            </div>
+        <!-- Správa uživatelů -->
+        <div class="cc-card cc-card-users" onclick="openCCModal('users')">
+            <div class="cc-card-title">Správa uživatelů</div>
+            <div class="cc-card-description">Technici, prodejci, administrátoři</div>
+            <div class="cc-card-number"><?= $totalUsers ?></div>
+        </div>
+
+        <!-- Online uživatelé -->
+        <div class="cc-card cc-card-online" onclick="openCCModal('online')">
+            <?php if ($onlineUsers > 0): ?>
+                <div class="cc-card-badge" style="background: var(--c-success);"><?= $onlineUsers ?></div>
+            <?php endif; ?>
+            <div class="cc-card-title">Online uživatelé</div>
+            <div class="cc-card-description">Aktivní v posledních 15 minutách</div>
+            <div class="cc-card-number"><?= $onlineUsers ?></div>
+        </div>
+
+        <!-- Email & SMS -->
+        <div class="cc-card cc-card-notifications" onclick="openCCModal('notifications')">
+            <div class="cc-card-title">Email & SMS</div>
+            <div class="cc-card-description">Šablony emailů a SMS notifikace</div>
+        </div>
+
+        <!-- Reklamace -->
+        <div class="cc-card cc-card-claims" onclick="openCCModal('claims')">
+            <div class="cc-card-title">Správa reklamací</div>
+            <div class="cc-card-description">Přehled všech servisních požadavků</div>
+            <div class="cc-card-number"><?= $totalClaims ?></div>
+        </div>
+
+        <!-- Akce & Úkoly -->
+        <div class="cc-card cc-card-actions" onclick="openCCModal('actions')">
+            <?php if ($pendingActions > 0): ?>
+                <div class="cc-card-badge"><?= $pendingActions ?></div>
+            <?php endif; ?>
+            <div class="cc-card-title">Akce & Úkoly</div>
+            <div class="cc-card-description">Nevyřešené úkoly a plánované akce</div>
+            <div class="cc-card-number"><?= $pendingActions ?></div>
+        </div>
+
+        <!-- Diagnostika -->
+        <div class="cc-card cc-card-diagnostics" onclick="openCCModal('diagnostics')">
+            <div class="cc-card-title">Diagnostika</div>
+            <div class="cc-card-description">Nástroje, logy a system health</div>
+        </div>
+
+        <!-- Testovací prostředí -->
+        <div class="cc-card cc-card-testing" onclick="openCCModal('testing')">
+            <div class="cc-card-title">Testovací prostředí</div>
+            <div class="cc-card-description">E2E testování celého workflow</div>
+        </div>
+
+        <!-- Vzhled & Design (disabled) -->
+        <div class="cc-card cc-card-appearance cc-card-disabled">
+            <div class="cc-coming-soon">Soon</div>
+            <div class="cc-card-title">Vzhled & Design</div>
+            <div class="cc-card-description">Barvy, fonty, logo, branding</div>
+        </div>
+
+        <!-- Obsah & Texty (disabled) -->
+        <div class="cc-card cc-card-content cc-card-disabled">
+            <div class="cc-coming-soon">Soon</div>
+            <div class="cc-card-title">Obsah & Texty</div>
+            <div class="cc-card-description">Editace textů CZ/EN/SK</div>
+        </div>
+
+        <!-- Konfigurace (disabled) -->
+        <div class="cc-card cc-card-config cc-card-disabled">
+            <div class="cc-coming-soon">Soon</div>
+            <div class="cc-card-title">Konfigurace systému</div>
+            <div class="cc-card-description">SMTP, API klíče, bezpečnost</div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Overlay & Modal -->
+<div class="cc-overlay" id="ccOverlay" onclick="closeCCModal()"></div>
+<div class="cc-modal" id="ccModal">
+    <div class="cc-modal-header">
+        <div class="cc-modal-back" onclick="closeCCModal()">
+            <span>←</span>
+            <span>Zpět</span>
+        </div>
+        <div class="cc-modal-title-section">
+            <h2 class="cc-modal-title" id="ccModalTitle">Loading...</h2>
+            <div class="cc-modal-subtitle" id="ccModalSubtitle"></div>
         </div>
     </div>
-
-    <!-- SEKCE 2: REGISTRAČNÍ KLÍČE -->
-    <div class="cc-section" data-section="keys">
-        <div class="cc-header">
-            <div class="cc-title-wrapper">
-                <div>
-                    <div class="cc-title">Registrační klíče</div>
-                    <div class="cc-subtitle">Správa přístupových klíčů pro registraci uživatelů</div>
-                </div>
-                <?php if ($activeKeys > 0): ?>
-                    <span class="cc-badge"><?= $activeKeys ?></span>
-                <?php endif; ?>
-            </div>
-            <span class="cc-chevron">▼</span>
-        </div>
-        <div class="cc-body">
-            <div class="cc-content">
-                <div class="cc-actions">
-                    <button class="btn btn-sm btn-success" id="ccCreateKey">+ Vytvořit nový klíč</button>
-                    <button class="btn btn-sm" id="ccRefreshKeys">Obnovit seznam</button>
-                </div>
-                <div id="ccKeysTable">
-                    <div style="text-align: center; padding: 2rem; color: var(--c-grey);">
-                        <em>Klikněte na "Obnovit seznam" nebo rozbalte sekci znovu pro načtení dat</em>
-                    </div>
-                </div>
-            </div>
+    <div class="cc-modal-body" id="ccModalBody">
+        <div class="cc-modal-loading">
+            <div class="cc-modal-spinner"></div>
+            <div style="margin-top: 1rem;">Načítání...</div>
         </div>
     </div>
-
-    <!-- SEKCE 3: UŽIVATELÉ -->
-    <div class="cc-section" data-section="users">
-        <div class="cc-header">
-            <div class="cc-title-wrapper">
-                <div>
-                    <div class="cc-title">Správa uživatelů</div>
-                    <div class="cc-subtitle">Technici, prodejci, administrátoři, partneři</div>
-                </div>
-                <span class="cc-badge"><?= $totalUsers ?></span>
-            </div>
-            <span class="cc-chevron">▼</span>
-        </div>
-        <div class="cc-body">
-            <div class="cc-content">
-                <div class="cc-actions">
-                    <input type="text" class="search-box" id="ccSearchUsers" placeholder="Hledat uživatele...">
-                    <button class="btn btn-sm btn-success" id="ccAddUser">+ Přidat uživatele</button>
-                    <button class="btn btn-sm" id="ccRefreshUsers">Obnovit</button>
-                </div>
-                <div id="ccUsersTable">
-                    <div style="text-align: center; padding: 2rem; color: var(--c-grey);">
-                        <em>Klikněte na "Obnovit" nebo rozbalte sekci znovu pro načtení dat</em>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SEKCE 4: ONLINE UŽIVATELÉ -->
-    <div class="cc-section" data-section="online">
-        <div class="cc-header">
-            <div class="cc-title-wrapper">
-                <div>
-                    <div class="cc-title">Online uživatelé</div>
-                    <div class="cc-subtitle">Aktivní uživatelé v posledních 15 minutách</div>
-                </div>
-                <?php if ($onlineUsers > 0): ?>
-                    <span class="cc-badge" style="background: var(--c-success);"><?= $onlineUsers ?></span>
-                <?php endif; ?>
-            </div>
-            <span class="cc-chevron">▼</span>
-        </div>
-        <div class="cc-body">
-            <div class="cc-content">
-                <div class="cc-actions">
-                    <button class="btn btn-sm" id="ccRefreshOnline">Obnovit</button>
-                </div>
-                <div id="ccOnlineTable">
-                    <div style="text-align: center; padding: 2rem; color: var(--c-grey);">
-                        <em>Klikněte na "Obnovit" nebo rozbalte sekci znovu pro načtení dat</em>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SEKCE 5: EMAIL & SMS NOTIFIKACE -->
-    <div class="cc-section" data-section="notifications">
-        <div class="cc-header">
-            <div class="cc-title-wrapper">
-                <div>
-                    <div class="cc-title">Email & SMS notifikace</div>
-                    <div class="cc-subtitle">Šablony emailů, SMS, automatické notifikace</div>
-                </div>
-            </div>
-            <span class="cc-chevron">▼</span>
-        </div>
-        <div class="cc-body">
-            <div class="cc-content">
-                <iframe id="notificationsIframe" class="cc-inline-iframe" src=""
-                        sandbox="allow-scripts allow-same-origin"
-                        title="Email & SMS notifikace"></iframe>
-            </div>
-        </div>
-    </div>
-
-    <!-- SEKCE 6: REKLAMACE -->
-    <div class="cc-section" data-section="claims">
-        <div class="cc-header">
-            <div class="cc-title-wrapper">
-                <div>
-                    <div class="cc-title">Správa reklamací</div>
-                    <div class="cc-subtitle">Přehled všech servisních požadavků a reklamací</div>
-                </div>
-                <span class="cc-badge"><?= $totalClaims ?></span>
-            </div>
-            <span class="cc-chevron">▼</span>
-        </div>
-        <div class="cc-body">
-            <div class="cc-content">
-                <div class="mini-stats">
-                    <div class="mini-stat">
-                        <div class="mini-stat-value" id="ccClaimsWait">-</div>
-                        <div class="mini-stat-label">Čekající</div>
-                    </div>
-                    <div class="mini-stat">
-                        <div class="mini-stat-value" id="ccClaimsOpen">-</div>
-                        <div class="mini-stat-label">Otevřené</div>
-                    </div>
-                    <div class="mini-stat">
-                        <div class="mini-stat-value" id="ccClaimsDone">-</div>
-                        <div class="mini-stat-label">Dokončené</div>
-                    </div>
-                    <div class="mini-stat">
-                        <div class="mini-stat-value" id="ccClaimsTotal"><?= $totalClaims ?></div>
-                        <div class="mini-stat-label">Celkem</div>
-                    </div>
-                </div>
-                <div class="cc-actions">
-                    <button class="btn btn-sm" onclick="ccModal.openClaims()">Otevřít seznam reklamací</button>
-                    <a href="novareklamace.php" class="btn btn-sm btn-success">+ Nová reklamace</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SEKCE 7: VZHLED & DESIGN -->
-    <div class="cc-section" data-section="appearance">
-        <div class="cc-header">
-            <div class="cc-title-wrapper">
-                <div>
-                    <div class="cc-title">Vzhled & Design</div>
-                    <div class="cc-subtitle">Barvy, fonty, logo, branding</div>
-                </div>
-            </div>
-            <span class="cc-chevron">▼</span>
-        </div>
-        <div class="cc-body">
-            <div class="cc-content">
-                <p style="color: var(--c-grey); margin-bottom: 1rem;">
-                    <strong>COMING SOON:</strong> Editace barev, fontů a designu aplikace
-                </p>
-                <div class="cc-actions">
-                    <button class="btn btn-sm" disabled>Upravit barvy</button>
-                    <button class="btn btn-sm" disabled>Upravit fonty</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SEKCE 8: OBSAH & TEXTY -->
-    <div class="cc-section" data-section="content">
-        <div class="cc-header">
-            <div class="cc-title-wrapper">
-                <div>
-                    <div class="cc-title">Obsah & Texty</div>
-                    <div class="cc-subtitle">Editace textů na stránkách (CZ/EN/SK)</div>
-                </div>
-            </div>
-            <span class="cc-chevron">▼</span>
-        </div>
-        <div class="cc-body">
-            <div class="cc-content">
-                <p style="color: var(--c-grey); margin-bottom: 1rem;">
-                    <strong>COMING SOON:</strong> Multi-jazyčný editor textů
-                </p>
-                <div class="cc-actions">
-                    <button class="btn btn-sm" disabled>Upravit texty</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SEKCE 9: KONFIGURACE SYSTÉMU -->
-    <div class="cc-section" data-section="configuration">
-        <div class="cc-header">
-            <div class="cc-title-wrapper">
-                <div>
-                    <div class="cc-title">Konfigurace systému</div>
-                    <div class="cc-subtitle">SMTP, API klíče, bezpečnost, maintenance</div>
-                </div>
-            </div>
-            <span class="cc-chevron">▼</span>
-        </div>
-        <div class="cc-body">
-            <div class="cc-content">
-                <p style="color: var(--c-grey); margin-bottom: 1rem;">
-                    <strong>COMING SOON:</strong> Kompletní systémová konfigurace
-                </p>
-                <div class="cc-actions">
-                    <button class="btn btn-sm" disabled>SMTP nastavení</button>
-                    <button class="btn btn-sm" disabled>API klíče</button>
-                    <button class="btn btn-sm" disabled>Bezpečnost</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SEKCE 10: DIAGNOSTIKA -->
-    <div class="cc-section" data-section="diagnostics">
-        <div class="cc-header">
-            <div class="cc-title-wrapper">
-                <div>
-                    <div class="cc-title">Diagnostika systému</div>
-                    <div class="cc-subtitle">Zdraví systému, logy, údržba</div>
-                </div>
-            </div>
-            <span class="cc-chevron">▼</span>
-        </div>
-        <div class="cc-body">
-            <div class="cc-content">
-                <iframe id="toolsIframe" class="cc-inline-iframe" src=""
-                        sandbox="allow-scripts allow-same-origin"
-                        title="Diagnostika systému"></iframe>
-            </div>
-        </div>
-    </div>
-
-    <!-- SEKCE 11: AKCE & ÚKOLY -->
-    <div class="cc-section" data-section="actions">
-        <div class="cc-header">
-            <div class="cc-title-wrapper">
-                <div>
-                    <div class="cc-title">Akce & Úkoly</div>
-                    <div class="cc-subtitle">Nevyřešené úkoly, GitHub webhooks, plánované akce</div>
-                </div>
-                <?php if ($pendingActions > 0): ?>
-                    <span class="cc-badge"><?= $pendingActions ?></span>
-                <?php endif; ?>
-            </div>
-            <span class="cc-chevron">▼</span>
-        </div>
-        <div class="cc-body">
-            <div class="cc-content">
-                <div class="cc-actions">
-                    <button class="btn btn-sm" id="ccRefreshActions">Obnovit</button>
-                </div>
-                <div id="ccActionsTable">
-                    <div style="text-align: center; padding: 2rem; color: var(--c-grey);">
-                        <em>Klikněte na "Obnovit" nebo rozbalte sekci znovu pro načtení dat</em>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SEKCE 12: TESTOVACÍ PROSTŘEDÍ -->
-    <div class="cc-section" data-section="testing">
-        <div class="cc-header">
-            <div class="cc-title-wrapper">
-                <div>
-                    <div class="cc-title">Testovací prostředí</div>
-                    <div class="cc-subtitle">E2E testování celého workflow aplikace</div>
-                </div>
-            </div>
-            <span class="cc-chevron">▼</span>
-        </div>
-        <div class="cc-body">
-            <div class="cc-content">
-                <iframe id="testingIframe" class="cc-inline-iframe" src=""
-                        sandbox="allow-scripts allow-same-origin allow-forms"
-                        title="Testovací prostředí"></iframe>
-            </div>
-        </div>
-    </div>
-
 </div>
 
 <script>
 // Helper function to check if API response is successful
-// Handles both {success: true} and {status: 'success'} formats
 function isSuccess(data) {
     return (data && (data.success === true || data.status === 'success'));
 }
@@ -607,150 +553,138 @@ function getCSRFToken() {
     return metaTag.getAttribute('content');
 }
 
-// Accordion functionality
-document.querySelectorAll('.cc-header').forEach(header => {
-    header.addEventListener('click', function() {
-        const section = this.closest('.cc-section');
-        const isExpanded = section.classList.contains('expanded');
+// Open modal with specific section
+function openCCModal(section) {
+    const overlay = document.getElementById('ccOverlay');
+    const modal = document.getElementById('ccModal');
+    const modalBody = document.getElementById('ccModalBody');
+    const modalTitle = document.getElementById('ccModalTitle');
+    const modalSubtitle = document.getElementById('ccModalSubtitle');
 
-        // Toggle current section
-        if (isExpanded) {
-            section.classList.remove('expanded');
-        } else {
-            section.classList.add('expanded');
+    // Show overlay and modal
+    overlay.classList.add('active');
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
 
-            // Load data when section is opened
-            const sectionName = section.dataset.section;
-            loadSectionData(sectionName);
-        }
-    });
-});
+    // Show loading
+    modalBody.innerHTML = '<div class="cc-modal-loading"><div class="cc-modal-spinner"></div><div style="margin-top: 1rem;">Načítání...</div></div>';
 
-function loadSectionData(section) {
+    // Load section content
     switch(section) {
         case 'statistics':
-            loadStatsIframe();
+            modalTitle.textContent = 'Statistiky & Analytics';
+            modalSubtitle.textContent = 'Přehledy, grafy a výkonnostní metriky';
+            loadStatisticsModal();
             break;
         case 'keys':
-            loadKeys();
+            modalTitle.textContent = 'Registrační klíče';
+            modalSubtitle.textContent = 'Správa přístupových klíčů pro registraci uživatelů';
+            loadKeysModal();
             break;
         case 'users':
-            loadUsers();
+            modalTitle.textContent = 'Správa uživatelů';
+            modalSubtitle.textContent = 'Technici, prodejci, administrátoři, partneři';
+            loadUsersModal();
             break;
         case 'online':
-            loadOnlineUsers();
+            modalTitle.textContent = 'Online uživatelé';
+            modalSubtitle.textContent = 'Aktivní uživatelé v posledních 15 minutách';
+            loadOnlineModal();
             break;
         case 'notifications':
-            loadNotificationsIframe();
+            modalTitle.textContent = 'Email & SMS notifikace';
+            modalSubtitle.textContent = 'Šablony emailů, SMS, automatické notifikace';
+            loadNotificationsModal();
             break;
         case 'claims':
-            loadClaimsStats();
-            break;
-        case 'diagnostics':
-            loadToolsIframe();
+            modalTitle.textContent = 'Správa reklamací';
+            modalSubtitle.textContent = 'Přehled všech servisních požadavků a reklamací';
+            loadClaimsModal();
             break;
         case 'actions':
-            loadActions();
+            modalTitle.textContent = 'Akce & Úkoly';
+            modalSubtitle.textContent = 'Nevyřešené úkoly, GitHub webhooks, plánované akce';
+            loadActionsModal();
+            break;
+        case 'diagnostics':
+            modalTitle.textContent = 'Diagnostika systému';
+            modalSubtitle.textContent = 'Nástroje, migrace a system health';
+            loadDiagnosticsModal();
             break;
         case 'testing':
-            loadTestingIframe();
+            modalTitle.textContent = 'Testovací prostředí';
+            modalSubtitle.textContent = 'E2E testování celého workflow aplikace';
+            loadTestingModal();
             break;
     }
 }
 
-// Load Statistics iframe (default: claims stats)
-function loadStatsIframe() {
-    const iframe = document.getElementById('statsIframe');
+// Close modal
+function closeCCModal() {
+    const overlay = document.getElementById('ccOverlay');
+    const modal = document.getElementById('ccModal');
 
-    if (iframe && !iframe.dataset.loaded) {
-        iframe.src = 'statistiky.php?embed=1';
-        iframe.dataset.loaded = 'true';
-    }
+    overlay.classList.remove('active');
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
 }
 
-// Load Notifications iframe
-function loadNotificationsIframe() {
-    const iframe = document.getElementById('notificationsIframe');
+// === MODAL LOADERS ===
 
-    if (iframe && !iframe.dataset.loaded) {
-        iframe.src = 'admin.php?tab=notifications&embed=1';
-        iframe.dataset.loaded = 'true';
-    }
+function loadStatisticsModal() {
+    const modalBody = document.getElementById('ccModalBody');
+
+    modalBody.innerHTML = `
+        <div class="cc-tabs">
+            <button class="cc-tab active" onclick="switchStatTab('claims')">Statistiky reklamací</button>
+            <button class="cc-tab" onclick="switchStatTab('web')">Web Analytics</button>
+        </div>
+        <div id="statTabClaims" class="cc-tab-content active">
+            <div class="cc-iframe-container">
+                <iframe src="statistiky.php?embed=1" sandbox="allow-scripts allow-same-origin" title="Statistiky reklamací"></iframe>
+            </div>
+        </div>
+        <div id="statTabWeb" class="cc-tab-content">
+            <div class="cc-iframe-container">
+                <iframe src="analytics.php?embed=1" sandbox="allow-scripts allow-same-origin" title="Web Analytics"></iframe>
+            </div>
+        </div>
+    `;
 }
 
-// Load Tools/Diagnostics iframe
-function loadToolsIframe() {
-    const iframe = document.getElementById('toolsIframe');
-
-    if (iframe && !iframe.dataset.loaded) {
-        iframe.src = 'admin.php?tab=tools&embed=1';
-        iframe.dataset.loaded = 'true';
-    }
-}
-
-// Load Testing iframe
-function loadTestingIframe() {
-    const iframe = document.getElementById('testingIframe');
-
-    if (iframe && !iframe.dataset.loaded) {
-        iframe.src = 'admin.php?tab=control_center_testing_simulator&embed=1';
-        iframe.dataset.loaded = 'true';
-    }
-}
-
-// Switch between Statistics tabs
-function switchStatsTab(tab) {
-    // Update tab buttons
-    document.querySelectorAll('.cc-section-tabs .cc-tab').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    event.target.classList.add('active');
-
-    // Update tab content
-    document.querySelectorAll('.cc-tab-content').forEach(content => {
-        content.classList.remove('active');
-    });
+function switchStatTab(tab) {
+    document.querySelectorAll('.cc-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.cc-tab-content').forEach(c => c.classList.remove('active'));
 
     if (tab === 'claims') {
-        document.getElementById('statsTabClaims').classList.add('active');
-        const iframe = document.getElementById('statsIframe');
-        if (iframe && !iframe.dataset.loaded) {
-            iframe.src = 'statistiky.php?embed=1';
-            iframe.dataset.loaded = 'true';
-        }
+        document.querySelectorAll('.cc-tab')[0].classList.add('active');
+        document.getElementById('statTabClaims').classList.add('active');
     } else if (tab === 'web') {
-        document.getElementById('statsTabWeb').classList.add('active');
-        const iframe = document.getElementById('analyticsIframe');
-        if (iframe && !iframe.dataset.loaded) {
-            iframe.src = 'analytics.php?embed=1';
-            iframe.dataset.loaded = 'true';
-        }
+        document.querySelectorAll('.cc-tab')[1].classList.add('active');
+        document.getElementById('statTabWeb').classList.add('active');
     }
 }
 
-// Load registration keys
-function loadKeys() {
-    const container = document.getElementById('ccKeysTable');
-    if (!container) return;
+function loadKeysModal() {
+    const modalBody = document.getElementById('ccModalBody');
 
-    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--c-grey);">Načítání klíčů...</div>';
+    modalBody.innerHTML = `
+        <div class="cc-actions">
+            <button class="btn btn-sm btn-success" onclick="createKey()">+ Vytvořit nový klíč</button>
+            <button class="btn btn-sm" onclick="loadKeysModal()">Obnovit</button>
+        </div>
+        <div id="keysTableContainer">Načítání klíčů...</div>
+    `;
 
+    // Load keys
     fetch('api/admin_api.php?action=list_keys')
         .then(async r => {
-            if (!r.ok) {
-                // Try to parse error message from response
-                let errorMsg = `HTTP ${r.status}: ${r.statusText}`;
-                try {
-                    const errorData = await r.json();
-                    errorMsg = errorData.message || errorData.error || errorMsg;
-                } catch (e) {
-                    // JSON parse failed, use default message
-                }
-                throw new Error(errorMsg);
-            }
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
             return r.json();
         })
         .then(data => {
+            const container = document.getElementById('keysTableContainer');
+
             if (isSuccess(data) && data.keys && data.keys.length > 0) {
                 let html = '<table class="cc-table"><thead><tr>';
                 html += '<th>Klíč</th><th>Typ</th><th>Použití</th><th>Status</th><th>Vytvořen</th><th>Akce</th>';
@@ -772,35 +706,40 @@ function loadKeys() {
             } else if (isSuccess(data) && data.keys && data.keys.length === 0) {
                 container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádné registrační klíče<br><small>Vytvořte nový klíč pomocí tlačítka výše</small></p>';
             } else {
-                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba: ' + (data.error || data.message || 'Neplatná odpověď') + '</p>';
+                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání</p>';
             }
         })
         .catch(err => {
             console.error('[Control Center] Keys load error:', err);
-            container.innerHTML = `<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba načítání</p>`;
+            document.getElementById('keysTableContainer').innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba načítání</p>';
         });
 }
 
-// Load users
-function loadUsers() {
-    const container = document.getElementById('ccUsersTable');
-    if (!container) return;
+function loadUsersModal() {
+    const modalBody = document.getElementById('ccModalBody');
 
-    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--c-grey);">Načítání uživatelů...</div>';
+    modalBody.innerHTML = `
+        <div class="cc-actions">
+            <input type="text" class="search-box" id="ccSearchUsers" placeholder="Hledat uživatele..." style="flex: 1; max-width: 300px;">
+            <button class="btn btn-sm btn-success" onclick="window.location.href='admin.php?tab=users'">+ Přidat uživatele</button>
+            <button class="btn btn-sm" onclick="loadUsersModal()">Obnovit</button>
+        </div>
+        <div id="usersTableContainer">Načítání uživatelů...</div>
+    `;
 
+    // Load users
     fetch('api/admin_api.php?action=list_users')
         .then(r => {
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
             return r.json();
         })
         .then(data => {
-            // API returns data.data (not data.users) - support both formats
+            const container = document.getElementById('usersTableContainer');
             const users = data.data || data.users || [];
 
             if (isSuccess(data) && users.length > 0) {
                 let html = '<table class="cc-table"><thead><tr>';
-                html += '<th>ID</th><th>Jméno</th><th>Email</th><th>Role</th><th>Status</th><th>Akce</th>';
-                html += '</tr></thead><tbody>';
+                html += '<th>ID</th><th>Jméno</th><th>Email</th><th>Role</th><th>Status</th><th>Vytvořen</th></tr></thead><tbody>';
 
                 users.forEach(user => {
                     html += '<tr>';
@@ -809,7 +748,7 @@ function loadUsers() {
                     html += `<td>${user.email || ''}</td>`;
                     html += `<td><span class="badge badge-${user.role}">${user.role || ''}</span></td>`;
                     html += `<td><span class="badge badge-${user.is_active ? 'active' : 'inactive'}">${user.is_active ? 'Aktivní' : 'Neaktivní'}</span></td>`;
-                    html += `<td><button class="btn btn-sm">Upravit</button></td>`;
+                    html += `<td>${user.created_at ? new Date(user.created_at).toLocaleDateString('cs-CZ') : '—'}</td>`;
                     html += '</tr>';
                 });
 
@@ -818,28 +757,34 @@ function loadUsers() {
             } else if (isSuccess(data)) {
                 container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádní uživatelé</p>';
             } else {
-                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání uživatelů</p>';
+                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání</p>';
             }
         })
         .catch(err => {
             console.error('[Control Center] Users load error:', err);
-            container.innerHTML = `<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba načítání</p>`;
+            document.getElementById('usersTableContainer').innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba načítání</p>';
         });
 }
 
-// Load online users
-function loadOnlineUsers() {
-    const container = document.getElementById('ccOnlineTable');
-    if (!container) return;
+function loadOnlineModal() {
+    const modalBody = document.getElementById('ccModalBody');
 
-    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--c-grey);">Načítání online uživatelů...</div>';
+    modalBody.innerHTML = `
+        <div class="cc-actions">
+            <button class="btn btn-sm" onclick="loadOnlineModal()">Obnovit</button>
+        </div>
+        <div id="onlineTableContainer">Načítání online uživatelů...</div>
+    `;
 
+    // Load online users
     fetch('api/admin_users_api.php?action=online')
         .then(r => {
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
             return r.json();
         })
         .then(data => {
+            const container = document.getElementById('onlineTableContainer');
+
             if (isSuccess(data) && data.users && data.users.length > 0) {
                 let html = '<table class="cc-table"><thead><tr>';
                 html += '<th>Jméno</th><th>Role</th><th>Email</th><th>Poslední aktivita</th>';
@@ -847,7 +792,7 @@ function loadOnlineUsers() {
 
                 data.users.forEach(user => {
                     html += '<tr>';
-                    html += `<td><span class="online-indicator"></span>${user.full_name || user.name || ''}</td>`;
+                    html += `<td><span class="online-indicator" style="display: inline-block; width: 8px; height: 8px; background: var(--c-success); border-radius: 50%; margin-right: 0.5rem;"></span>${user.full_name || user.name || ''}</td>`;
                     html += `<td><span class="badge badge-${user.role}">${user.role || ''}</span></td>`;
                     html += `<td>${user.email || ''}</td>`;
                     html += `<td>${new Date(user.last_activity).toLocaleString('cs-CZ')}</td>`;
@@ -864,12 +809,44 @@ function loadOnlineUsers() {
         })
         .catch(err => {
             console.error('[Control Center] Online users load error:', err);
-            container.innerHTML = `<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba načítání</p>`;
+            document.getElementById('onlineTableContainer').innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba načítání</p>';
         });
 }
 
-// Load claims stats
-function loadClaimsStats() {
+function loadNotificationsModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=notifications&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Email & SMS notifikace"></iframe></div>';
+}
+
+function loadClaimsModal() {
+    const modalBody = document.getElementById('ccModalBody');
+
+    modalBody.innerHTML = `
+        <div class="cc-mini-stats">
+            <div class="cc-mini-stat">
+                <div class="cc-mini-stat-value" id="ccClaimsWait">-</div>
+                <div class="cc-mini-stat-label">Čekající</div>
+            </div>
+            <div class="cc-mini-stat">
+                <div class="cc-mini-stat-value" id="ccClaimsOpen">-</div>
+                <div class="cc-mini-stat-label">Otevřené</div>
+            </div>
+            <div class="cc-mini-stat">
+                <div class="cc-mini-stat-value" id="ccClaimsDone">-</div>
+                <div class="cc-mini-stat-label">Dokončené</div>
+            </div>
+            <div class="cc-mini-stat">
+                <div class="cc-mini-stat-value" id="ccClaimsTotal"><?= $totalClaims ?></div>
+                <div class="cc-mini-stat-label">Celkem</div>
+            </div>
+        </div>
+        <div class="cc-actions">
+            <a href="seznam.php" class="btn btn-sm">Otevřít seznam reklamací</a>
+            <a href="novareklamace.php" class="btn btn-sm btn-success">+ Nová reklamace</a>
+        </div>
+    `;
+
+    // Load claims stats
     fetch('api/admin_api.php?action=list_reklamace')
         .then(r => {
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -892,17 +869,20 @@ function loadClaimsStats() {
         });
 }
 
-// Load pending actions
-function loadActions() {
-    const container = document.getElementById('ccActionsTable');
-    if (!container) return;
+function loadActionsModal() {
+    const modalBody = document.getElementById('ccModalBody');
 
-    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--c-grey);">Načítání úkolů...</div>';
+    modalBody.innerHTML = `
+        <div class="cc-actions">
+            <button class="btn btn-sm" onclick="loadActionsModal()">Obnovit</button>
+        </div>
+        <div id="actionsTableContainer">Načítání úkolů...</div>
+    `;
 
+    // Load actions
     fetch('api/control_center_api.php?action=get_pending_actions')
         .then(r => {
             if (!r.ok) {
-                // If 400/500, probably table doesn't exist - treat as no actions
                 if (r.status === 400 || r.status === 500) {
                     return { success: true, actions: [] };
                 }
@@ -911,6 +891,8 @@ function loadActions() {
             return r.json();
         })
         .then(data => {
+            const container = document.getElementById('actionsTableContainer');
+
             if (isSuccess(data) && data.actions && data.actions.length > 0) {
                 let html = '<table class="cc-table"><thead><tr>';
                 html += '<th>Priorita</th><th>Název</th><th>Popis</th><th>Vytvořeno</th><th>Akce</th>';
@@ -938,19 +920,29 @@ function loadActions() {
                 html += '</tbody></table>';
                 container.innerHTML = html;
             } else if (isSuccess(data)) {
-                container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">✅ Žádné nevyřízené úkoly</p>';
+                container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádné nevyřízené úkoly</p>';
             } else {
                 container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání</p>';
             }
         })
         .catch(err => {
             console.error('[Control Center] Actions load error:', err);
-            // Show empty state instead of error for better UX
-            container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">✅ Žádné nevyřízené úkoly</p>';
+            document.getElementById('actionsTableContainer').innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádné nevyřízené úkoly</p>';
         });
 }
 
-// Action handlers
+function loadDiagnosticsModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=tools&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Diagnostika systému"></iframe></div>';
+}
+
+function loadTestingModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_testing_simulator&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Testovací prostředí"></iframe></div>';
+}
+
+// === ACTION HANDLERS ===
+
 function deleteKey(keyId) {
     if (!confirm('Opravdu chcete smazat tento klíč?')) return;
 
@@ -971,7 +963,39 @@ function deleteKey(keyId) {
     .then(r => r.json())
     .then(data => {
         if (isSuccess(data)) {
-            loadKeys();
+            loadKeysModal(); // Reload
+        } else {
+            alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+        }
+    })
+    .catch(err => {
+        alert('Chyba: ' + err.message);
+    });
+}
+
+function createKey() {
+    const keyType = prompt('Typ klíče (admin/technik/prodejce/partner):');
+    if (!keyType) return;
+
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        return;
+    }
+
+    fetch('api/admin_api.php?action=create_key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            key_type: keyType,
+            csrf_token: csrfToken
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (isSuccess(data)) {
+            alert('Vytvořeno: ' + data.key_code);
+            loadKeysModal(); // Reload
         } else {
             alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
         }
@@ -999,8 +1023,7 @@ function completeAction(actionId) {
     .then(r => r.json())
     .then(data => {
         if (isSuccess(data)) {
-            loadActions();
-            // Refresh badge count
+            loadActionsModal();
             location.reload();
         } else {
             alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
@@ -1029,7 +1052,7 @@ function dismissAction(actionId) {
     .then(r => r.json())
     .then(data => {
         if (isSuccess(data)) {
-            loadActions();
+            loadActionsModal();
             location.reload();
         } else {
             alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
@@ -1040,25 +1063,10 @@ function dismissAction(actionId) {
     });
 }
 
-// Button handlers
-document.getElementById('ccCreateKey')?.addEventListener('click', () => {
-    window.location.href = 'admin.php?tab=keys';
-});
-
-document.getElementById('ccRefreshKeys')?.addEventListener('click', loadKeys);
-document.getElementById('ccRefreshUsers')?.addEventListener('click', loadUsers);
-document.getElementById('ccRefreshOnline')?.addEventListener('click', loadOnlineUsers);
-document.getElementById('ccRefreshActions')?.addEventListener('click', loadActions);
-
-document.getElementById('ccAddUser')?.addEventListener('click', () => {
-    window.location.href = 'admin.php?tab=users';
-});
-
-// AUTO-LOAD: Load data for sections that are already expanded on page load
-document.querySelectorAll('.cc-section.expanded').forEach(section => {
-    const sectionName = section.dataset.section;
-    if (sectionName) {
-        loadSectionData(sectionName);
+// Close modal on ESC key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeCCModal();
     }
 });
 </script>
