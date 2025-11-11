@@ -603,203 +603,103 @@ function isSuccess(data) {
 // Helper function to get CSRF token from meta tag
 function getCSRFToken() {
     const metaTag = document.querySelector('meta[name="csrf-token"]');
-    if (!metaTag) {
-        console.error('[Control Center] CSRF token meta tag not found!');
-        return null;
-    }
+    if (!metaTag) return null;
     return metaTag.getAttribute('content');
 }
 
 // Accordion functionality
 document.querySelectorAll('.cc-header').forEach(header => {
     header.addEventListener('click', function() {
-        console.log('[Control Center] 🔍 Header clicked!');
         const section = this.closest('.cc-section');
-        console.log('[Control Center] 🔍 Section:', section);
-        console.log('[Control Center] 🔍 Section dataset:', section.dataset);
-
         const isExpanded = section.classList.contains('expanded');
-        console.log('[Control Center] 🔍 Was expanded?', isExpanded);
-
-        // Collapse all other sections (optional - remove if you want multiple open)
-        // document.querySelectorAll('.cc-section').forEach(s => s.classList.remove('expanded'));
 
         // Toggle current section
         if (isExpanded) {
-            console.log('[Control Center] ✅ Collapsing section');
             section.classList.remove('expanded');
         } else {
-            console.log('[Control Center] ✅ Expanding section');
             section.classList.add('expanded');
-
-            // Check if class was actually added
-            console.log('[Control Center] 🔍 Class added?', section.classList.contains('expanded'));
-            console.log('[Control Center] 🔍 Section classes:', section.className);
 
             // Load data when section is opened
             const sectionName = section.dataset.section;
-            console.log('[Control Center] ✅ Loading section data for:', sectionName);
             loadSectionData(sectionName);
-        }
-
-        // Debug: Check body visibility
-        const body = section.querySelector('.cc-body');
-        if (body) {
-            const computedStyle = window.getComputedStyle(body);
-            console.log('[Control Center] 🔍 .cc-body display:', computedStyle.display);
-            console.log('[Control Center] 🔍 .cc-body visibility:', computedStyle.visibility);
-            console.log('[Control Center] 🔍 .cc-body height:', computedStyle.height);
         }
     });
 });
 
 function loadSectionData(section) {
-    console.log('[Control Center] 📋 loadSectionData() called with:', section);
-
     switch(section) {
         case 'statistics':
-            console.log('[Control Center] ➡️ Routing to loadStatsIframe()');
             loadStatsIframe();
             break;
         case 'keys':
-            console.log('[Control Center] ➡️ Routing to loadKeys()');
             loadKeys();
             break;
         case 'users':
-            console.log('[Control Center] ➡️ Routing to loadUsers()');
             loadUsers();
             break;
         case 'online':
-            console.log('[Control Center] ➡️ Routing to loadOnlineUsers()');
             loadOnlineUsers();
             break;
         case 'notifications':
-            console.log('[Control Center] ➡️ Routing to loadNotificationsIframe()');
             loadNotificationsIframe();
             break;
         case 'claims':
-            console.log('[Control Center] ➡️ Routing to loadClaimsStats()');
             loadClaimsStats();
             break;
         case 'diagnostics':
-            console.log('[Control Center] ➡️ Routing to loadToolsIframe()');
             loadToolsIframe();
             break;
         case 'actions':
-            console.log('[Control Center] ➡️ Routing to loadActions()');
             loadActions();
             break;
         case 'testing':
-            console.log('[Control Center] ➡️ Routing to loadTestingIframe()');
             loadTestingIframe();
             break;
-        default:
-            console.warn('[Control Center] ⚠️ Unknown section:', section);
     }
 }
 
 // Load Statistics iframe (default: claims stats)
 function loadStatsIframe() {
     const iframe = document.getElementById('statsIframe');
-    console.log('[Control Center] 🔍 loadStatsIframe() called');
-    console.log('[Control Center] 🔍 iframe element:', iframe);
-    console.log('[Control Center] 🔍 iframe.src:', iframe ? iframe.src : 'N/A');
 
-    if (iframe) {
-        // Always set src, even if it was set before (force reload)
-        const newSrc = 'statistiky.php?embed=1';
-        console.log('[Control Center] ✅ Setting iframe src to:', newSrc);
-        iframe.src = newSrc;
-
-        // Add visual indicator while loading
-        iframe.style.border = '3px solid blue';
-        iframe.style.minHeight = '600px';
-
-        // Log when iframe loads
-        iframe.onload = function() {
-            console.log('[Control Center] ✅ Stats iframe loaded successfully');
-            iframe.style.border = '2px solid var(--c-border)';
-        };
-
-        iframe.onerror = function() {
-            console.error('[Control Center] ❌ Stats iframe failed to load');
-            iframe.style.border = '3px solid red';
-        };
-    } else {
-        console.error('[Control Center] ❌ statsIframe element not found in DOM');
+    if (iframe && !iframe.dataset.loaded) {
+        iframe.src = 'statistiky.php?embed=1';
+        iframe.dataset.loaded = 'true';
     }
 }
 
 // Load Notifications iframe
 function loadNotificationsIframe() {
     const iframe = document.getElementById('notificationsIframe');
-    console.log('[Control Center] 🔍 loadNotificationsIframe() called');
-    console.log('[Control Center] 🔍 iframe element:', iframe);
 
-    if (iframe) {
-        const newSrc = 'admin.php?tab=notifications&embed=1';
-        console.log('[Control Center] ✅ Setting notifications iframe src to:', newSrc);
-        iframe.src = newSrc;
-        iframe.style.border = '3px solid purple';
-        iframe.style.minHeight = '600px';
-
-        iframe.onload = () => {
-            console.log('[Control Center] ✅ Notifications iframe loaded');
-            iframe.style.border = '2px solid var(--c-border)';
-        };
-    } else {
-        console.error('[Control Center] ❌ notificationsIframe not found');
+    if (iframe && !iframe.dataset.loaded) {
+        iframe.src = 'admin.php?tab=notifications&embed=1';
+        iframe.dataset.loaded = 'true';
     }
 }
 
 // Load Tools/Diagnostics iframe
 function loadToolsIframe() {
     const iframe = document.getElementById('toolsIframe');
-    console.log('[Control Center] 🔍 loadToolsIframe() called');
-    console.log('[Control Center] 🔍 iframe element:', iframe);
 
-    if (iframe) {
-        const newSrc = 'admin.php?tab=tools&embed=1';
-        console.log('[Control Center] ✅ Setting tools iframe src to:', newSrc);
-        iframe.src = newSrc;
-        iframe.style.border = '3px solid orange';
-        iframe.style.minHeight = '600px';
-
-        iframe.onload = () => {
-            console.log('[Control Center] ✅ Tools iframe loaded');
-            iframe.style.border = '2px solid var(--c-border)';
-        };
-    } else {
-        console.error('[Control Center] ❌ toolsIframe not found');
+    if (iframe && !iframe.dataset.loaded) {
+        iframe.src = 'admin.php?tab=tools&embed=1';
+        iframe.dataset.loaded = 'true';
     }
 }
 
 // Load Testing iframe
 function loadTestingIframe() {
     const iframe = document.getElementById('testingIframe');
-    console.log('[Control Center] 🔍 loadTestingIframe() called');
-    console.log('[Control Center] 🔍 iframe element:', iframe);
 
-    if (iframe) {
-        const newSrc = 'admin.php?tab=control_center_testing_simulator&embed=1';
-        console.log('[Control Center] ✅ Setting testing iframe src to:', newSrc);
-        iframe.src = newSrc;
-        iframe.style.border = '3px solid teal';
-        iframe.style.minHeight = '600px';
-
-        iframe.onload = () => {
-            console.log('[Control Center] ✅ Testing iframe loaded');
-            iframe.style.border = '2px solid var(--c-border)';
-        };
-    } else {
-        console.error('[Control Center] ❌ testingIframe not found');
+    if (iframe && !iframe.dataset.loaded) {
+        iframe.src = 'admin.php?tab=control_center_testing_simulator&embed=1';
+        iframe.dataset.loaded = 'true';
     }
 }
 
 // Switch between Statistics tabs
 function switchStatsTab(tab) {
-    console.log('[Control Center] 📊 Switching stats tab to:', tab);
-
     // Update tab buttons
     document.querySelectorAll('.cc-section-tabs .cc-tab').forEach(btn => {
         btn.classList.remove('active');
@@ -814,32 +714,16 @@ function switchStatsTab(tab) {
     if (tab === 'claims') {
         document.getElementById('statsTabClaims').classList.add('active');
         const iframe = document.getElementById('statsIframe');
-        console.log('[Control Center] 🔍 Stats iframe:', iframe);
-        if (iframe) {
-            console.log('[Control Center] ✅ Setting stats iframe src');
+        if (iframe && !iframe.dataset.loaded) {
             iframe.src = 'statistiky.php?embed=1';
-            iframe.style.border = '3px solid blue';
-            iframe.style.minHeight = '600px';
-
-            iframe.onload = () => {
-                console.log('[Control Center] ✅ Stats iframe loaded in tab');
-                iframe.style.border = '2px solid var(--c-border)';
-            };
+            iframe.dataset.loaded = 'true';
         }
     } else if (tab === 'web') {
         document.getElementById('statsTabWeb').classList.add('active');
         const iframe = document.getElementById('analyticsIframe');
-        console.log('[Control Center] 🔍 Analytics iframe:', iframe);
-        if (iframe) {
-            console.log('[Control Center] ✅ Setting analytics iframe src');
+        if (iframe && !iframe.dataset.loaded) {
             iframe.src = 'analytics.php?embed=1';
-            iframe.style.border = '3px solid green';
-            iframe.style.minHeight = '600px';
-
-            iframe.onload = () => {
-                console.log('[Control Center] ✅ Analytics iframe loaded in tab');
-                iframe.style.border = '2px solid var(--c-border)';
-            };
+            iframe.dataset.loaded = 'true';
         }
     }
 }
@@ -847,17 +731,12 @@ function switchStatsTab(tab) {
 // Load registration keys
 function loadKeys() {
     const container = document.getElementById('ccKeysTable');
-    if (!container) {
-        console.error('[Control Center] ccKeysTable element not found');
-        return;
-    }
+    if (!container) return;
 
-    console.log('[Control Center] Loading keys...');
     container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--c-grey);">Načítání klíčů...</div>';
 
     fetch('api/admin_api.php?action=list_keys')
         .then(async r => {
-            console.log('[Control Center] Keys response status:', r.status);
             if (!r.ok) {
                 // Try to parse error message from response
                 let errorMsg = `HTTP ${r.status}: ${r.statusText}`;
@@ -872,8 +751,6 @@ function loadKeys() {
             return r.json();
         })
         .then(data => {
-            console.log('[Control Center] Keys data:', data);
-
             if (isSuccess(data) && data.keys && data.keys.length > 0) {
                 let html = '<table class="cc-table"><thead><tr>';
                 html += '<th>Klíč</th><th>Typ</th><th>Použití</th><th>Status</th><th>Vytvořen</th><th>Akce</th>';
@@ -892,7 +769,6 @@ function loadKeys() {
 
                 html += '</tbody></table>';
                 container.innerHTML = html;
-                console.log('[Control Center] Keys table rendered');
             } else if (isSuccess(data) && data.keys && data.keys.length === 0) {
                 container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádné registrační klíče<br><small>Vytvořte nový klíč pomocí tlačítka výše</small></p>';
             } else {
@@ -901,34 +777,24 @@ function loadKeys() {
         })
         .catch(err => {
             console.error('[Control Center] Keys load error:', err);
-            container.innerHTML = `<p style="color: var(--c-error); text-align: center; padding: 2rem;">
-                ⚠️ Chyba načítání: ${err.message}<br>
-                <small>Zkontrolujte konzoli pro více informací</small>
-            </p>`;
+            container.innerHTML = `<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba načítání</p>`;
         });
 }
 
 // Load users
 function loadUsers() {
     const container = document.getElementById('ccUsersTable');
-    if (!container) {
-        console.error('[Control Center] ccUsersTable element not found');
-        return;
-    }
+    if (!container) return;
 
-    console.log('[Control Center] Loading users...');
     container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--c-grey);">Načítání uživatelů...</div>';
 
     fetch('api/admin_api.php?action=list_users')
         .then(r => {
-            console.log('[Control Center] Users response status:', r.status);
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
             return r.json();
         })
         .then(data => {
-            console.log('[Control Center] Users data:', data);
-
-            // API returns data.data (not data.users)
+            // API returns data.data (not data.users) - support both formats
             const users = data.data || data.users || [];
 
             if (isSuccess(data) && users.length > 0) {
@@ -939,9 +805,9 @@ function loadUsers() {
                 users.forEach(user => {
                     html += '<tr>';
                     html += `<td>#${user.id}</td>`;
-                    html += `<td>${user.name || user.full_name}</td>`; // API returns 'name' not 'full_name'
-                    html += `<td>${user.email}</td>`;
-                    html += `<td><span class="badge badge-${user.role}">${user.role}</span></td>`;
+                    html += `<td>${user.name || user.full_name || ''}</td>`;
+                    html += `<td>${user.email || ''}</td>`;
+                    html += `<td><span class="badge badge-${user.role}">${user.role || ''}</span></td>`;
                     html += `<td><span class="badge badge-${user.is_active ? 'active' : 'inactive'}">${user.is_active ? 'Aktivní' : 'Neaktivní'}</span></td>`;
                     html += `<td><button class="btn btn-sm">Upravit</button></td>`;
                     html += '</tr>';
@@ -949,100 +815,67 @@ function loadUsers() {
 
                 html += '</tbody></table>';
                 container.innerHTML = html;
-                console.log('[Control Center] ✅ Users table rendered with', users.length, 'users');
             } else if (isSuccess(data)) {
                 container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádní uživatelé</p>';
             } else {
-                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba: ' + (data.error || data.message || 'Neplatná odpověď') + '</p>';
+                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání uživatelů</p>';
             }
         })
         .catch(err => {
             console.error('[Control Center] Users load error:', err);
-            container.innerHTML = `<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba: ${err.message}</p>`;
+            container.innerHTML = `<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba načítání</p>`;
         });
 }
 
 // Load online users
 function loadOnlineUsers() {
     const container = document.getElementById('ccOnlineTable');
-    console.log('[Control Center] 🔍 loadOnlineUsers() called');
-    console.log('[Control Center] 🔍 Container element:', container);
-    console.log('[Control Center] 🔍 Container visible?', container ? window.getComputedStyle(container).display : 'N/A');
+    if (!container) return;
 
-    if (!container) {
-        console.error('[Control Center] ❌ ccOnlineTable element not found');
-        return;
-    }
-
-    console.log('[Control Center] Loading online users...');
-    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #DC3545; font-size: 1.2rem; font-weight: bold; background: yellow;">⏳ NAČÍTÁNÍ ONLINE UŽIVATELŮ...</div>';
+    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--c-grey);">Načítání online uživatelů...</div>';
 
     fetch('api/admin_users_api.php?action=online')
         .then(r => {
-            console.log('[Control Center] Online users response status:', r.status);
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
             return r.json();
         })
         .then(data => {
-            console.log('[Control Center] Online users data:', data);
-            console.log('[Control Center] 🔍 isSuccess(data)?', isSuccess(data));
-            console.log('[Control Center] 🔍 data.users?', data.users);
-            console.log('[Control Center] 🔍 data.users.length?', data.users ? data.users.length : 'N/A');
-
             if (isSuccess(data) && data.users && data.users.length > 0) {
-                console.log('[Control Center] ✅ Rendering', data.users.length, 'users');
                 let html = '<table class="cc-table"><thead><tr>';
                 html += '<th>Jméno</th><th>Role</th><th>Email</th><th>Poslední aktivita</th>';
                 html += '</tr></thead><tbody>';
 
                 data.users.forEach(user => {
                     html += '<tr>';
-                    html += `<td><span class="online-indicator"></span>${user.full_name || user.name}</td>`;
-                    html += `<td><span class="badge badge-${user.role}">${user.role}</span></td>`;
-                    html += `<td>${user.email}</td>`;
+                    html += `<td><span class="online-indicator"></span>${user.full_name || user.name || ''}</td>`;
+                    html += `<td><span class="badge badge-${user.role}">${user.role || ''}</span></td>`;
+                    html += `<td>${user.email || ''}</td>`;
                     html += `<td>${new Date(user.last_activity).toLocaleString('cs-CZ')}</td>`;
                     html += '</tr>';
                 });
 
                 html += '</tbody></table>';
                 container.innerHTML = html;
-                console.log('[Control Center] ✅ Table HTML set, length:', html.length);
             } else if (isSuccess(data)) {
-                console.log('[Control Center] ✅ No users - showing empty state');
-                const emptyHtml = '<p style="color: red; text-align: center; padding: 3rem; font-size: 1.5rem; background: lightyellow; border: 3px solid red;">❌ Žádní online uživatelé (tento text by měl být VELKÝ a ČERVENÝ)</p>';
-                container.innerHTML = emptyHtml;
-                console.log('[Control Center] ✅ Empty state HTML set');
-                console.log('[Control Center] 🔍 Container after update:', container.innerHTML.substring(0, 100));
+                container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádní online uživatelé</p>';
             } else {
-                console.log('[Control Center] ❌ API error - showing error');
-                container.innerHTML = '<p style="color: red; font-size: 2rem; background: yellow; padding: 2rem; text-align: center; border: 5px solid red;">⚠️ CHYBA API</p>';
+                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání</p>';
             }
-
-            // Force repaint
-            container.style.display = 'none';
-            container.offsetHeight; // trigger reflow
-            container.style.display = 'block';
-            console.log('[Control Center] 🔍 Forced repaint');
         })
         .catch(err => {
             console.error('[Control Center] Online users load error:', err);
-            container.innerHTML = `<p style="color: white; background: red; font-size: 2rem; padding: 3rem; text-align: center;">⚠️ CHYBA: ${err.message}</p>`;
+            container.innerHTML = `<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba načítání</p>`;
         });
 }
 
 // Load claims stats
 function loadClaimsStats() {
-    console.log('[Control Center] Loading claims stats...');
-
     fetch('api/admin_api.php?action=list_reklamace')
         .then(r => {
-            console.log('[Control Center] Claims stats response status:', r.status);
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
             return r.json();
         })
         .then(data => {
-            console.log('[Control Center] Claims stats data:', data);
-
             if (isSuccess(data) && data.reklamace) {
                 const claims = data.reklamace;
                 const wait = claims.filter(c => c.stav === 'ČEKÁ').length;
@@ -1052,8 +885,6 @@ function loadClaimsStats() {
                 document.getElementById('ccClaimsWait').textContent = wait;
                 document.getElementById('ccClaimsOpen').textContent = open;
                 document.getElementById('ccClaimsDone').textContent = done;
-            } else {
-                console.error('[Control Center] Failed to load claims stats:', data);
             }
         })
         .catch(err => {
@@ -1064,21 +895,15 @@ function loadClaimsStats() {
 // Load pending actions
 function loadActions() {
     const container = document.getElementById('ccActionsTable');
-    if (!container) {
-        console.error('[Control Center] ccActionsTable element not found');
-        return;
-    }
+    if (!container) return;
 
-    console.log('[Control Center] Loading actions...');
     container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--c-grey);">Načítání úkolů...</div>';
 
     fetch('api/control_center_api.php?action=get_pending_actions')
         .then(r => {
-            console.log('[Control Center] Actions response status:', r.status);
             if (!r.ok) {
                 // If 400/500, probably table doesn't exist - treat as no actions
                 if (r.status === 400 || r.status === 500) {
-                    console.warn('[Control Center] Actions API returned error, showing empty state');
                     return { success: true, actions: [] };
                 }
                 throw new Error(`HTTP ${r.status}`);
@@ -1086,8 +911,6 @@ function loadActions() {
             return r.json();
         })
         .then(data => {
-            console.log('[Control Center] Actions data:', data);
-
             if (isSuccess(data) && data.actions && data.actions.length > 0) {
                 let html = '<table class="cc-table"><thead><tr>';
                 html += '<th>Priorita</th><th>Název</th><th>Popis</th><th>Vytvořeno</th><th>Akce</th>';
@@ -1117,7 +940,7 @@ function loadActions() {
             } else if (isSuccess(data)) {
                 container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">✅ Žádné nevyřízené úkoly</p>';
             } else {
-                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba: ' + (data.error || data.message || 'Neplatná odpověď') + '</p>';
+                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání</p>';
             }
         })
         .catch(err => {
@@ -1231,15 +1054,11 @@ document.getElementById('ccAddUser')?.addEventListener('click', () => {
     window.location.href = 'admin.php?tab=users';
 });
 
-// 🔥 AUTO-LOAD: Load data for sections that are already expanded on page load
-console.log('[Control Center] 🚀 Checking for pre-expanded sections...');
+// AUTO-LOAD: Load data for sections that are already expanded on page load
 document.querySelectorAll('.cc-section.expanded').forEach(section => {
     const sectionName = section.dataset.section;
-    console.log('[Control Center] 🚀 Found pre-expanded section:', sectionName);
     if (sectionName) {
-        console.log('[Control Center] 🚀 Auto-loading data for:', sectionName);
         loadSectionData(sectionName);
     }
 });
-console.log('[Control Center] ✅ Auto-load check complete');
 </script>

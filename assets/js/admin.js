@@ -98,7 +98,7 @@ async function loadKeys() {
 
     const data = await response.json();
 
-    if (data.status === 'success') {
+    if (data.status === 'success' || data.success === true) {
       if (data.keys.length === 0) {
         container.innerHTML = '<p style="text-align:center;color:#999;padding:2rem;">Žádné klíče</p>';
         return;
@@ -269,7 +269,7 @@ async function loadDashboard() {
 
     const data = await response.json();
 
-    if (data.status === 'success') {
+    if (data.status === 'success' || data.success === true) {
       document.getElementById('stat-claims').textContent = data.stats.claims || 0;
       document.getElementById('stat-users').textContent = data.stats.users || 0;
       document.getElementById('stat-online').textContent = data.stats.online || 0;
@@ -393,7 +393,7 @@ async function addUser() {
 
     const data = await response.json();
 
-    if (data.status === 'success') {
+    if (data.status === 'success' || data.success === true) {
       modal.style.display = 'none';
 
       // Reset formuláře
@@ -444,7 +444,7 @@ async function deleteUser(userId) {
 
     const data = await response.json();
 
-    if (data.status === 'success') {
+    if (data.status === 'success' || data.success === true) {
       loadUsers();
     } else {
       alert(data.message || 'Chyba při mazání');
@@ -480,7 +480,7 @@ async function loadOnline() {
 
     const data = await response.json();
 
-    if (data.status === 'success') {
+    if (data.status === 'success' || data.success === true) {
       if (data.users.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">Nikdo online</td></tr>';
         return;

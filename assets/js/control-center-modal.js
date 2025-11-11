@@ -160,10 +160,6 @@ class ControlCenterModal {
             this.showError('Neplatný typ obsahu');
         }
 
-        // Analytics
-        if (section) {
-            console.log(`[Control Center] Opened section: ${section}${testMode ? ' (TEST MODE)' : ''}`);
-        }
     }
 
     close() {
@@ -183,8 +179,6 @@ class ControlCenterModal {
                 badge.remove();
             }
         }, 300);
-
-        console.log('[Control Center] Modal closed');
     }
 
     showLoading() {
@@ -217,15 +211,26 @@ class ControlCenterModal {
         // Přidej parametr pro embed mode
         const embedUrl = url + (url.includes('?') ? '&' : '?') + 'embed=1';
 
-        this.modalBody.innerHTML = `
-            <iframe
-                class="cc-modal-iframe"
-                src="${embedUrl}"
-                frameborder="0"
-                onload="console.log('[Control Center] Iframe loaded')"
-                onerror="ccModal.showError('Nepodařilo se načíst stránku')"
-            ></iframe>
-        `;
+        // Create iframe element safely
+        const iframe = document.createElement('iframe');
+        iframe.className = 'cc-modal-iframe';
+        iframe.src = embedUrl;
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
+        iframe.setAttribute('title', 'Control Center Content');
+
+        // Add event listeners (not inline handlers)
+        iframe.addEventListener('load', () => {
+            // Iframe loaded successfully
+        });
+
+        iframe.addEventListener('error', () => {
+            this.showError('Nepodařilo se načíst stránku');
+        });
+
+        // Clear and append
+        this.modalBody.innerHTML = '';
+        this.modalBody.appendChild(iframe);
     }
 
     loadHTML(htmlContent) {
@@ -249,8 +254,7 @@ class ControlCenterModal {
             this.modalBody.innerHTML = html;
 
         } catch (error) {
-            console.error('[Control Center] AJAX load error:', error);
-            this.showError(`Chyba: ${error.message}`);
+            this.showError('Chyba při načítání obsahu');
         }
     }
 
@@ -354,5 +358,3 @@ window.ccModal = new ControlCenterModal();
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ControlCenterModal;
 }
-
-console.log('[Control Center Modal] System initialized - ccModal exposed globally');

@@ -31,7 +31,7 @@ async function getCsrfTokenFromForm(form) {
       credentials: 'same-origin'
     });
     const data = await response.json();
-    if (data.status === 'success' && data.token) {
+    if ((data.status === 'success' || data.success === true) && data.token) {
       if (tokenInput) {
         tokenInput.value = data.token;
       }
