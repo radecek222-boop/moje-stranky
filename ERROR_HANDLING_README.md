@@ -4,6 +4,12 @@
 
 Tento systém zachytává **všechny chyby** (PHP i JavaScript) a zobrazuje je s **detailními informacemi** pro rychlé debugging. Když se vyskytne chyba, můžete ji jedním kliknutím zkopírovat a poslat vývojáři.
 
+**Integrace s Control Center v3.0:**
+- Error handler je automaticky aktivní v celém **Admin Control Center**
+- Všechny chyby v Control Center sekcích jsou zachyceny
+- Testovací prostředí (Sekce 12) také reportuje chyby s copy buttonem
+- Diagnostika (Sekce 10) zobrazuje error logy
+
 ## ✨ Co systém dělá
 
 ### PHP Chyby (Backend)
@@ -277,6 +283,12 @@ chmod 755 logs
 ```
 
 ## 📝 Changelog
+
+### v1.1 (2025-11-11) - **Control Center Integration**
+- ✅ Integrace s Admin Control Center v3.0
+- ✅ Error logy dostupné v Diagnostika sekci
+- ✅ Testovací prostředí podporuje error reporting
+- ✅ Aktualizovaná dokumentace pro unified interface
 
 ### v1.0 (2025-11-11)
 - ✅ PHP error handler s detailním reportingem
