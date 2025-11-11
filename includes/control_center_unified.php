@@ -814,15 +814,18 @@ function loadUsers() {
         .then(data => {
             console.log('[Control Center] Users data:', data);
 
-            if (isSuccess(data) && data.users && data.users.length > 0) {
+            // API returns data.data (not data.users)
+            const users = data.data || data.users || [];
+
+            if (isSuccess(data) && users.length > 0) {
                 let html = '<table class="cc-table"><thead><tr>';
                 html += '<th>ID</th><th>Jméno</th><th>Email</th><th>Role</th><th>Status</th><th>Akce</th>';
                 html += '</tr></thead><tbody>';
 
-                data.users.forEach(user => {
+                users.forEach(user => {
                     html += '<tr>';
                     html += `<td>#${user.id}</td>`;
-                    html += `<td>${user.full_name}</td>`;
+                    html += `<td>${user.name || user.full_name}</td>`; // API returns 'name' not 'full_name'
                     html += `<td>${user.email}</td>`;
                     html += `<td><span class="badge badge-${user.role}">${user.role}</span></td>`;
                     html += `<td><span class="badge badge-${user.is_active ? 'active' : 'inactive'}">${user.is_active ? 'Aktivní' : 'Neaktivní'}</span></td>`;
@@ -832,6 +835,7 @@ function loadUsers() {
 
                 html += '</tbody></table>';
                 container.innerHTML = html;
+                console.log('[Control Center] ✅ Users table rendered with', users.length, 'users');
             } else if (isSuccess(data)) {
                 container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádní uživatelé</p>';
             } else {
