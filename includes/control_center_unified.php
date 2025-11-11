@@ -500,6 +500,29 @@ try {
         </div>
     </div>
 
+    <!-- SEKCE 12: TESTOVACÍ PROSTŘEDÍ -->
+    <div class="cc-section" data-section="testing">
+        <div class="cc-header">
+            <div class="cc-title-wrapper">
+                <div>
+                    <div class="cc-title">🧪 Testovací prostředí</div>
+                    <div class="cc-subtitle">E2E testování celého workflow aplikace</div>
+                </div>
+            </div>
+            <span class="cc-chevron">▼</span>
+        </div>
+        <div class="cc-body">
+            <div class="cc-content">
+                <p style="color: var(--c-grey); margin-bottom: 1rem;">
+                    <strong>INFO:</strong> Testovací prostředí pro simulaci celého workflow reklamací
+                </p>
+                <div class="cc-actions">
+                    <a href="admin.php?tab=control_center_testing" class="btn btn-sm btn-success">🧪 Otevřít testovací prostředí</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>

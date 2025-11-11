@@ -166,6 +166,11 @@ try {
   <?php require_once __DIR__ . '/includes/control_center_unified.php'; ?>
   <?php endif; ?>
 
+  <?php if ($activeTab === 'control_center_testing'): ?>
+  <!-- TAB: TESTING ENVIRONMENT -->
+  <?php require_once __DIR__ . '/includes/control_center_testing.php'; ?>
+  <?php endif; ?>
+
   <?php if ($activeTab === 'tools'): ?>
   <!-- TAB: TOOLS & MIGRATIONS -->
   <div id="tab-tools" class="tab-content">
