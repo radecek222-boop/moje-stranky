@@ -314,10 +314,10 @@ class ControlCenterModal {
 
     openTesting() {
         this.open({
-            title: 'Testovací prostředí',
-            subtitle: 'E2E testování workflow',
+            title: 'Interaktivní testovací prostředí',
+            subtitle: 'Vizuální průchod workflow s diagnostikou',
             section: 'testing',
-            url: 'admin.php?tab=control_center_testing',
+            url: 'admin.php?tab=control_center_testing_interactive',
             type: 'iframe'
         });
     }

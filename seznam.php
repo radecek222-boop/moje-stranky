@@ -1,5 +1,8 @@
 <?php require_once "init.php"; ?>
 <?php
+// Detect embed mode
+$embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
+
 // Kontrola přihlášení a role
 $isLoggedIn = isset($_SESSION["user_id"]);
 $isAdmin = isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] === true;
@@ -69,14 +72,16 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </head>
 
 <body>
+<?php if (!$embedMode): ?>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
-<?php if ($isAdmin): ?>
 <?php endif; ?>
-  
+<?php if ($isAdmin && !$embedMode): ?>
+<?php endif; ?>
+
   <!-- SEARCH RESULTS INFO -->
   <div id="searchResultsInfo" style="display: none;"></div>
   <!-- SEARCH BAR -->
-<div class="container">
+<div class="container"<?php if ($embedMode) echo ' style="margin-top: 0; padding-top: 1rem;"'; ?>>
   <div class="search-bar">
     <span class="search-icon">🔍</span>
     <input type="text" class="search-input" id="searchInput" placeholder="Hledat v reklamacích...">
