@@ -90,22 +90,32 @@ try {
         // PENDING ACTIONS
         // ==========================================
         case 'get_pending_actions':
-            $stmt = $pdo->query("
-                SELECT *
-                FROM wgs_pending_actions
-                WHERE status = 'pending'
-                ORDER BY
-                    FIELD(priority, 'critical', 'high', 'medium', 'low'),
-                    created_at DESC
-                LIMIT 50
-            ");
+            try {
+                $stmt = $pdo->query("
+                    SELECT *
+                    FROM wgs_pending_actions
+                    WHERE status = 'pending'
+                    ORDER BY
+                        FIELD(priority, 'critical', 'high', 'medium', 'low'),
+                        created_at DESC
+                    LIMIT 50
+                ");
 
-            $actions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $actions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            echo json_encode([
-                'success' => true,
-                'actions' => $actions
-            ]);
+                echo json_encode([
+                    'success' => true,
+                    'actions' => $actions
+                ]);
+            } catch (PDOException $e) {
+                // Table doesn't exist or other DB error - return empty array
+                error_log('[Control Center API] get_pending_actions error: ' . $e->getMessage());
+                echo json_encode([
+                    'success' => true,
+                    'actions' => [],
+                    'note' => 'Actions table not available'
+                ]);
+            }
             break;
 
         case 'complete_action':
