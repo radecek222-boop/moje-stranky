@@ -305,21 +305,24 @@ async function loadUsers() {
 
     const data = await response.json();
 
-    if (data.status === 'success') {
-      if (data.users.length === 0) {
+    if (data.status === 'success' || data.success === true) {
+      // API returns data.data (not data.users) - support both formats
+      const users = data.data || data.users || [];
+
+      if (users.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;">Žádní uživatelé</td></tr>';
         return;
       }
 
       let html = '';
-      data.users.forEach(user => {
+      users.forEach(user => {
         const statusClass = user.status === 'active' ? 'badge-active' : 'badge-inactive';
         const statusText = user.status === 'active' ? 'Aktivní' : 'Neaktivní';
         const createdDate = new Date(user.created_at).toLocaleDateString('cs-CZ');
 
         html += '<tr>';
         html += '<td>' + user.id + '</td>';
-        html += '<td>' + escapeHtml(user.name) + '</td>';
+        html += '<td>' + escapeHtml(user.name || user.full_name) + '</td>'; // API returns 'name' not 'full_name'
         html += '<td>' + escapeHtml(user.email) + '</td>';
         html += '<td>' + escapeHtml(user.role) + '</td>';
         html += '<td><span class="badge ' + statusClass + '">' + statusText + '</span></td>';
