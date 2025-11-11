@@ -21,7 +21,7 @@ async function getCSRFToken() {
         throw new Error('CSRF endpoint neodpověděl');
       }
       const data = await response.json();
-      if (data.status === 'success' && data.token) {
+      if ((data.status === 'success' || data.success === true) && data.token) {
         csrfTokenCache = data.token;
         return data.token;
       }
