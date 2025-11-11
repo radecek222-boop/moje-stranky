@@ -252,3 +252,49 @@
 body.cc-modal-open {
     overflow: hidden;
 }
+
+/* Test Mode - Menší modaly v testovacím prostředí (80%) */
+.cc-modal-test-mode .cc-modal {
+    top: 5%;
+    left: 10%;
+    right: 10%;
+    bottom: 5%;
+    width: 80%;
+    height: 90%;
+    border: 3px solid var(--c-success, #2D5016);
+    box-shadow: 0 0 0 4px rgba(45, 80, 22, 0.1),
+                0 20px 60px rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.cc-modal-test-mode .cc-modal-overlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+/* Test indicator badge */
+.cc-modal-test-badge {
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: var(--c-success, #2D5016);
+    color: white;
+    padding: 4px 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}

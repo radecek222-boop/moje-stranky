@@ -135,16 +135,36 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 }
 
 .iframe-container {
-    border: 2px solid var(--c-border);
+    border: 3px solid var(--c-success);
     height: 500px;
     background: var(--c-white);
     position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.iframe-container::before {
+    content: '📱 NÁHLED APLIKACE';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--c-success);
+    color: white;
+    padding: 8px;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    z-index: 1;
 }
 
 .iframe-container iframe {
     width: 100%;
     height: 100%;
     border: none;
+    margin-top: 32px;
 }
 
 .btn-group {
@@ -194,19 +214,23 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
     <div class="workflow-path">
         <div class="path-step active" id="step1">
             <div style="font-size: 0.8rem; margin-bottom: 0.25rem;">KROK 1</div>
-            <div style="font-weight: 600;">Vytvoření reklamace</div>
+            <div style="font-weight: 600; font-size: 0.9rem;">Vytvoření reklamace</div>
+            <div style="font-size: 0.7rem; color: var(--c-grey); margin-top: 0.25rem;">Formulář + API</div>
         </div>
         <div class="path-step pending" id="step2">
             <div style="font-size: 0.8rem; margin-bottom: 0.25rem;">KROK 2</div>
-            <div style="font-weight: 600;">Seznam reklamací</div>
+            <div style="font-weight: 600; font-size: 0.9rem;">Seznam reklamací</div>
+            <div style="font-size: 0.7rem; color: var(--c-grey); margin-top: 0.25rem;">seznam.php</div>
         </div>
         <div class="path-step pending" id="step3">
             <div style="font-size: 0.8rem; margin-bottom: 0.25rem;">KROK 3</div>
-            <div style="font-weight: 600;">Detail reklamace</div>
+            <div style="font-weight: 600; font-size: 0.9rem;">Detail + Protokol</div>
+            <div style="font-size: 0.7rem; color: var(--c-grey); margin-top: 0.25rem;">protokol.php</div>
         </div>
         <div class="path-step pending" id="step4">
             <div style="font-size: 0.8rem; margin-bottom: 0.25rem;">KROK 4</div>
-            <div style="font-weight: 600;">Výsledek</div>
+            <div style="font-weight: 600; font-size: 0.9rem;">Výsledek + Cleanup</div>
+            <div style="font-size: 0.7rem; color: var(--c-grey); margin-top: 0.25rem;">Diagnostika</div>
         </div>
     </div>
 
@@ -266,11 +290,15 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         <!-- KROK 2: Seznam reklamací (iframe) -->
         <div id="panel-step2" style="display: none;">
-            <h3>Krok 2: Seznam reklamací</h3>
+            <h3>Krok 2: Seznam reklamací (seznam.php)</h3>
             <p style="color: var(--c-grey); margin-bottom: 1rem;">
-                Zkontrolujte, zda se vaše testovací reklamace zobrazuje v seznamu.
-                Klikněte na ni pro otevření detailu.
+                <strong>Co testujeme:</strong> Zobrazení reklamací v seznamu, filtrování, vyhledávání<br>
+                <strong>Úkol:</strong> Zkontrolujte, zda se vaše testovací reklamace zobrazuje v seznamu s správnými daty.
             </p>
+
+            <div style="background: #e3f2fd; border-left: 4px solid #1976d2; padding: 1rem; margin-bottom: 1rem; font-size: 0.9rem;">
+                <strong>💡 Testujte:</strong> Zkuste použít vyhledávání, filtry podle stavu, ověřte že se zobrazují správné informace o reklamaci.
+            </div>
 
             <div class="iframe-container">
                 <iframe id="seznamFrame" src=""></iframe>
@@ -278,7 +306,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
             <div class="btn-group">
                 <button type="button" class="btn btn-success" onclick="goToStep(3)">
-                    Reklamace nalezena → Detail
+                    Reklamace nalezena ✓ → Detail
                 </button>
                 <button type="button" class="btn btn-secondary" onclick="goToStep(1)">
                     ← Zpět
@@ -288,10 +316,15 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         <!-- KROK 3: Detail reklamace (iframe) -->
         <div id="panel-step3" style="display: none;">
-            <h3>Krok 3: Detail reklamace</h3>
+            <h3>Krok 3: Detail + Protokol (protokol.php)</h3>
             <p style="color: var(--c-grey); margin-bottom: 1rem;">
-                Prohlédněte si detail reklamace. Zkontrolujte, zda se zobrazují všechny údaje správně.
+                <strong>Co testujeme:</strong> Detail reklamace, protokol akcí, historie změn<br>
+                <strong>Úkol:</strong> Zkontrolujte kompletní detail reklamace včetně všech údajů a historie.
             </p>
+
+            <div style="background: #e3f2fd; border-left: 4px solid #1976d2; padding: 1rem; margin-bottom: 1rem; font-size: 0.9rem;">
+                <strong>💡 Testujte:</strong> Ověřte údaje zákazníka, popis problému, fotografie (pokud byla přiložena), protokol akcí, možnost změny stavu.
+            </div>
 
             <div class="iframe-container">
                 <iframe id="detailFrame" src=""></iframe>
@@ -299,7 +332,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
             <div class="btn-group">
                 <button type="button" class="btn btn-success" onclick="goToStep(4)">
-                    Zkontrolováno → Výsledek
+                    Zkontrolováno ✓ → Výsledek
                 </button>
                 <button type="button" class="btn btn-secondary" onclick="goToStep(2)">
                     ← Zpět na seznam
@@ -462,10 +495,9 @@ function goToStep(stepNumber) {
         document.getElementById('statusIndicator').className = 'status-indicator waiting';
         document.getElementById('statusIndicator').textContent = 'Prohlížím seznam...';
     } else if (stepNumber === 3) {
-        // Load detail in iframe (you'd need to pass the claim ID)
+        // Load detail in iframe using protokol.php
         if (testData.claimId) {
-            // Assuming there's a detail page
-            document.getElementById('detailFrame').src = `detail.php?id=${testData.claimId}&embed=1`;
+            document.getElementById('detailFrame').src = `protokol.php?id=${testData.claimId}&embed=1`;
         }
         document.getElementById('statusIndicator').className = 'status-indicator waiting';
         document.getElementById('statusIndicator').textContent = 'Prohlížím detail...';
