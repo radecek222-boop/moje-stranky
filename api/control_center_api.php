@@ -89,6 +89,25 @@ try {
         // ==========================================
         // PENDING ACTIONS
         // ==========================================
+        case 'get_pending_actions':
+            $stmt = $pdo->query("
+                SELECT *
+                FROM wgs_pending_actions
+                WHERE status = 'pending'
+                ORDER BY
+                    FIELD(priority, 'critical', 'high', 'medium', 'low'),
+                    created_at DESC
+                LIMIT 50
+            ");
+
+            $actions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            echo json_encode([
+                'success' => true,
+                'actions' => $actions
+            ]);
+            break;
+
         case 'complete_action':
             $actionId = $data['action_id'] ?? null;
 

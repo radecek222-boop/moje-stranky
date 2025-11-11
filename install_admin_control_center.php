@@ -187,11 +187,9 @@ try {
     ];
 
     foreach ($requiredTables as $table) {
-        try {
-            $pdo->query("SELECT 1 FROM $table LIMIT 1");
+        $stmt = $pdo->query("SHOW TABLES LIKE '$table'");
+        if ($stmt->rowCount() > 0) {
             $existingTables[] = $table;
-        } catch (PDOException $e) {
-            // Tabulka neexistuje
         }
     }
 
@@ -256,26 +254,40 @@ try {
     }
 
     $sql = file_get_contents($sqlFile);
-    
+
+    // Odstranit komentáře
+    $sql = preg_replace('/--[^\n]*\n/', "\n", $sql);
+
     // Rozdělení na jednotlivé příkazy
     $statements = array_filter(
         array_map('trim', explode(';', $sql)),
         function($stmt) {
-            return !empty($stmt) && 
-                   !preg_match('/^--/', $stmt) && 
-                   !preg_match('/^SELECT.*status/', $stmt);
+            $stmt = trim($stmt);
+            return !empty($stmt) &&
+                   !preg_match('/^SELECT/i', $stmt) &&
+                   strlen($stmt) > 10; // Skip very short statements
         }
     );
 
     $totalSteps = count($statements);
     $currentStep = 0;
+    $errors = [];
 
     foreach ($statements as $statement) {
-        if (!empty(trim($statement))) {
-            $pdo->exec($statement);
-            $currentStep++;
+        $statement = trim($statement);
+        if (!empty($statement)) {
+            try {
+                $pdo->exec($statement);
+                $currentStep++;
+            } catch (PDOException $e) {
+                $errors[] = "Statement failed: " . substr($statement, 0, 100) . "... Error: " . $e->getMessage();
+            }
             $progress = round(($currentStep / $totalSteps) * 100);
         }
+    }
+
+    if (!empty($errors)) {
+        throw new Exception("Některé SQL příkazy selhaly:\n" . implode("\n", $errors));
     }
 
     $endTime = microtime(true);

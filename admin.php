@@ -159,45 +159,8 @@ try {
   <?php endif; ?>
 
   <?php if ($activeTab === 'control_center'): ?>
-  <!-- TAB: CONTROL CENTER -->
-  <?php
-    // Control Center Routing
-    $section = $_GET['section'] ?? 'main';
-
-    switch ($section) {
-        case 'appearance':
-            require_once __DIR__ . '/includes/control_center_appearance.php';
-            break;
-        case 'diagnostics':
-            require_once __DIR__ . '/includes/control_center_diagnostics.php';
-            break;
-        case 'actions':
-            require_once __DIR__ . '/includes/control_center_actions.php';
-            break;
-        case 'content':
-            require_once __DIR__ . '/includes/control_center_content.php';
-            break;
-        case 'users':
-            // Redirect na existující users tab
-            header('Location: admin.php?tab=users');
-            exit;
-        case 'notifications':
-            // Redirect na existující notifications tab
-            header('Location: admin.php?tab=notifications');
-            exit;
-        case 'configuration':
-            require_once __DIR__ . '/includes/control_center_configuration.php';
-            break;
-        case 'analytics':
-            // Redirect na existující statistiky
-            header('Location: statistiky.php');
-            exit;
-        case 'main':
-        default:
-            require_once __DIR__ . '/includes/control_center_main.php';
-            break;
-    }
-  ?>
+  <!-- TAB: CONTROL CENTER - Unified accordion interface -->
+  <?php require_once __DIR__ . '/includes/control_center_unified.php'; ?>
   <?php endif; ?>
 
   <?php if ($activeTab === 'tools'): ?>
