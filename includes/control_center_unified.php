@@ -693,12 +693,26 @@ function switchStatsTab(tab) {
 // Load registration keys
 function loadKeys() {
     const container = document.getElementById('ccKeysTable');
-    if (!container) return;
+    if (!container) {
+        console.error('[Control Center] ccKeysTable element not found');
+        return;
+    }
+
+    console.log('[Control Center] Loading keys...');
+    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--c-grey);">Načítání klíčů...</div>';
 
     fetch('api/admin_api.php?action=list_keys')
-        .then(r => r.json())
+        .then(r => {
+            console.log('[Control Center] Keys response status:', r.status);
+            if (!r.ok) {
+                throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+            }
+            return r.json();
+        })
         .then(data => {
-            if (data.success && data.keys.length > 0) {
+            console.log('[Control Center] Keys data:', data);
+
+            if (data.success && data.keys && data.keys.length > 0) {
                 let html = '<table class="cc-table"><thead><tr>';
                 html += '<th>Klíč</th><th>Typ</th><th>Použití</th><th>Status</th><th>Vytvořen</th><th>Akce</th>';
                 html += '</tr></thead><tbody>';
@@ -716,24 +730,43 @@ function loadKeys() {
 
                 html += '</tbody></table>';
                 container.innerHTML = html;
+                console.log('[Control Center] Keys table rendered');
+            } else if (data.success && data.keys && data.keys.length === 0) {
+                container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádné registrační klíče<br><small>Vytvořte nový klíč pomocí tlačítka výše</small></p>';
             } else {
-                container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádné klíče</p>';
+                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba: ' + (data.error || 'Neplatná odpověď') + '</p>';
             }
         })
         .catch(err => {
-            container.innerHTML = '<p class="error-message">Chyba načítání: ' + err.message + '</p>';
+            console.error('[Control Center] Keys load error:', err);
+            container.innerHTML = `<p style="color: var(--c-error); text-align: center; padding: 2rem;">
+                ⚠️ Chyba načítání: ${err.message}<br>
+                <small>Zkontrolujte konzoli pro více informací</small>
+            </p>`;
         });
 }
 
 // Load users
 function loadUsers() {
     const container = document.getElementById('ccUsersTable');
-    if (!container) return;
+    if (!container) {
+        console.error('[Control Center] ccUsersTable element not found');
+        return;
+    }
+
+    console.log('[Control Center] Loading users...');
+    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--c-grey);">Načítání uživatelů...</div>';
 
     fetch('api/admin_api.php?action=list_users')
-        .then(r => r.json())
+        .then(r => {
+            console.log('[Control Center] Users response status:', r.status);
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+        })
         .then(data => {
-            if (data.success && data.users.length > 0) {
+            console.log('[Control Center] Users data:', data);
+
+            if (data.success && data.users && data.users.length > 0) {
                 let html = '<table class="cc-table"><thead><tr>';
                 html += '<th>ID</th><th>Jméno</th><th>Email</th><th>Role</th><th>Status</th><th>Akce</th>';
                 html += '</tr></thead><tbody>';
@@ -754,6 +787,10 @@ function loadUsers() {
             } else {
                 container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádní uživatelé</p>';
             }
+        })
+        .catch(err => {
+            console.error('[Control Center] Users load error:', err);
+            container.innerHTML = `<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba: ${err.message}</p>`;
         });
 }
 
