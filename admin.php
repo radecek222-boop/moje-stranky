@@ -158,6 +158,56 @@ try {
   </div>
   <?php endif; ?>
 
+  <?php if ($activeTab === 'control_center'): ?>
+  <!-- TAB: CONTROL CENTER -->
+  <?php
+    // Control Center Routing
+    $section = $_GET['section'] ?? 'main';
+
+    switch ($section) {
+        case 'appearance':
+            require_once __DIR__ . '/includes/control_center_appearance.php';
+            break;
+        case 'diagnostics':
+            require_once __DIR__ . '/includes/control_center_diagnostics.php';
+            break;
+        case 'actions':
+            require_once __DIR__ . '/includes/control_center_actions.php';
+            break;
+        case 'content':
+            // TODO: implementovat
+            echo '<div class="control-detail active">';
+            echo '<div class="control-detail-header"><button class="control-detail-back" onclick="window.location.href=\'admin.php?tab=control_center\'"><span>‹</span><span>Zpět</span></button><h2 class="control-detail-title">📝 Obsah & Texty</h2></div>';
+            echo '<div class="control-detail-content"><div class="cc-alert info"><div class="cc-alert-icon">🚧</div><div class="cc-alert-content"><div class="cc-alert-title">V přípravě</div><div class="cc-alert-message">Tato sekce bude dokončena v příští verzi.</div></div></div></div>';
+            echo '</div>';
+            break;
+        case 'users':
+            // Redirect na existující users tab
+            header('Location: admin.php?tab=users');
+            exit;
+        case 'notifications':
+            // Redirect na existující notifications tab
+            header('Location: admin.php?tab=notifications');
+            exit;
+        case 'configuration':
+            // TODO: implementovat
+            echo '<div class="control-detail active">';
+            echo '<div class="control-detail-header"><button class="control-detail-back" onclick="window.location.href=\'admin.php?tab=control_center\'"><span>‹</span><span>Zpět</span></button><h2 class="control-detail-title">⚙️ Konfigurace</h2></div>';
+            echo '<div class="control-detail-content"><div class="cc-alert warning"><div class="cc-alert-icon">🚧</div><div class="cc-alert-content"><div class="cc-alert-title">V přípravě</div><div class="cc-alert-message">Konfigurace SMTP a API klíčů bude dokončena v příští verzi.</div></div></div></div>';
+            echo '</div>';
+            break;
+        case 'analytics':
+            // Redirect na existující statistiky
+            header('Location: statistiky.php');
+            exit;
+        case 'main':
+        default:
+            require_once __DIR__ . '/includes/control_center_main.php';
+            break;
+    }
+  ?>
+  <?php endif; ?>
+
   <?php if ($activeTab === 'tools'): ?>
   <!-- TAB: TOOLS & MIGRATIONS -->
   <div id="tab-tools" class="tab-content">
@@ -756,7 +806,7 @@ WHERE fakturace_firma IS NULL OR fakturace_firma = '';</code>
             <a href="/seznam.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: #000; color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;">SEZNAM</a>
             <a href="/show_table_structure.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: #000; color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;">DB</a>
             <a href="/diagnostic_web.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: #000; color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;">DIAGNOSTIKA</a>
-            <a href="/install_notifications.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: #dc3545; color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;">🔧 INSTALOVAT NOTIFIKACE</a>
+            <a href="/install_admin_control_center.php" target="_blank" style="display: inline-block; padding: 0.5rem 0.75rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);">🎨 INSTALOVAT CONTROL CENTER</a>
           </div>
         </div>
       </div>

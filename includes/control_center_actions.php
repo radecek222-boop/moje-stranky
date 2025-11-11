@@ -1,0 +1,398 @@
+<?php
+/**
+ * Control Center - Akce & Úkoly
+ * Pending actions, GitHub webhooks, scheduled tasks
+ */
+
+// Bezpečnostní kontrola
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    die('Unauthorized');
+}
+
+$pdo = getDbConnection();
+
+// Načtení pending actions
+$pendingActions = [];
+try {
+    $stmt = $pdo->query("
+        SELECT * FROM wgs_pending_actions
+        WHERE status IN ('pending', 'in_progress')
+        ORDER BY
+            FIELD(priority, 'critical', 'high', 'medium', 'low'),
+            created_at DESC
+    ");
+    $pendingActions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $pendingActions = [];
+}
+
+// Počty podle priority
+$criticalCount = count(array_filter($pendingActions, fn($a) => $a['priority'] === 'critical'));
+$highCount = count(array_filter($pendingActions, fn($a) => $a['priority'] === 'high'));
+$mediumCount = count(array_filter($pendingActions, fn($a) => $a['priority'] === 'medium'));
+$lowCount = count(array_filter($pendingActions, fn($a) => $a['priority'] === 'low'));
+
+// Recent completed actions
+$completedActions = [];
+try {
+    $stmt = $pdo->query("
+        SELECT * FROM wgs_pending_actions
+        WHERE status = 'completed'
+        ORDER BY completed_at DESC
+        LIMIT 10
+    ");
+    $completedActions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $completedActions = [];
+}
+
+// GitHub webhooks (last 10)
+$githubWebhooks = [];
+try {
+    $stmt = $pdo->query("
+        SELECT * FROM wgs_github_webhooks
+        ORDER BY received_at DESC
+        LIMIT 10
+    ");
+    $githubWebhooks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $githubWebhooks = [];
+}
+
+// Priority badge colors
+function getPriorityBadge($priority) {
+    $badges = [
+        'critical' => ['color' => '#DC3545', 'icon' => '🔴', 'text' => 'Kritické'],
+        'high' => ['color' => '#FF6B6B', 'icon' => '🟠', 'text' => 'Vysoká'],
+        'medium' => ['color' => '#FFC107', 'icon' => '🟡', 'text' => 'Střední'],
+        'low' => ['color' => '#28A745', 'icon' => '🟢', 'text' => 'Nízká']
+    ];
+    return $badges[$priority] ?? $badges['medium'];
+}
+?>
+
+<link rel="stylesheet" href="/assets/css/control-center.css">
+
+<div class="control-detail active">
+    <!-- Header -->
+    <div class="control-detail-header">
+        <button class="control-detail-back" onclick="window.location.href='admin.php?tab=control_center'">
+            <span>‹</span>
+            <span>Zpět</span>
+        </button>
+        <h2 class="control-detail-title">🚀 Akce & Úkoly</h2>
+    </div>
+
+    <div class="control-detail-content">
+
+        <!-- Summary -->
+        <?php if (count($pendingActions) > 0): ?>
+            <div class="cc-alert warning">
+                <div class="cc-alert-icon">⚠️</div>
+                <div class="cc-alert-content">
+                    <div class="cc-alert-title">Máte <?= count($pendingActions) ?> nevyřešených úkolů</div>
+                    <div class="cc-alert-message">
+                        <?php if ($criticalCount > 0): ?>
+                            🔴 <?= $criticalCount ?> kritických |
+                        <?php endif; ?>
+                        <?php if ($highCount > 0): ?>
+                            🟠 <?= $highCount ?> vysoká priorita |
+                        <?php endif; ?>
+                        <?= $mediumCount ?> střední | <?= $lowCount ?> nízká
+                    </div>
+                </div>
+            </div>
+        <?php else: ?>
+            <div class="cc-alert success">
+                <div class="cc-alert-icon">✅</div>
+                <div class="cc-alert-content">
+                    <div class="cc-alert-title">Žádné nevyřešené úkoly!</div>
+                    <div class="cc-alert-message">Výborná práce! Všechny úkoly jsou dokončené.</div>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <!-- PENDING ACTIONS -->
+        <?php if (count($pendingActions) > 0): ?>
+            <div class="setting-group">
+                <h3 class="setting-group-title">Nevyřešené úkoly</h3>
+
+                <?php foreach ($pendingActions as $action):
+                    $badge = getPriorityBadge($action['priority']);
+                ?>
+                    <div class="setting-item" style="align-items: flex-start;">
+                        <div class="setting-item-left">
+                            <div class="setting-item-label">
+                                <span style="font-size: 1.2rem; margin-right: 0.5rem;"><?= $badge['icon'] ?></span>
+                                <?= htmlspecialchars($action['action_title']) ?>
+                            </div>
+                            <div class="setting-item-description">
+                                <?= htmlspecialchars($action['action_description']) ?>
+                            </div>
+                            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #666;">
+                                <span style="background: <?= $badge['color'] ?>; color: white; padding: 2px 8px; border-radius: 12px; font-weight: 600;">
+                                    <?= $badge['text'] ?>
+                                </span>
+                                <span style="margin-left: 1rem;">
+                                    📅 <?= date('d.m.Y H:i', strtotime($action['created_at'])) ?>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="setting-item-right" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <?php if ($action['action_url']): ?>
+                                <button class="cc-btn cc-btn-sm cc-btn-primary"
+                                        onclick="executeAction(<?= $action['id'] ?>, '<?= htmlspecialchars($action['action_url']) ?>')">
+                                    ▶️ Spustit
+                                </button>
+                            <?php endif; ?>
+                            <button class="cc-btn cc-btn-sm cc-btn-success"
+                                    onclick="completeAction(<?= $action['id'] ?>)">
+                                ✓ Hotovo
+                            </button>
+                            <button class="cc-btn cc-btn-sm cc-btn-secondary"
+                                    onclick="dismissAction(<?= $action['id'] ?>)">
+                                ✕ Zrušit
+                            </button>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- COMPLETED ACTIONS -->
+        <?php if (count($completedActions) > 0): ?>
+            <div class="setting-group">
+                <h3 class="setting-group-title">Nedávno dokončené</h3>
+
+                <?php foreach ($completedActions as $action): ?>
+                    <div class="setting-item">
+                        <div class="setting-item-left">
+                            <div class="setting-item-label" style="opacity: 0.7;">
+                                ✅ <?= htmlspecialchars($action['action_title']) ?>
+                            </div>
+                            <div class="setting-item-description">
+                                Dokončeno: <?= date('d.m.Y H:i', strtotime($action['completed_at'])) ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- GITHUB WEBHOOKS -->
+        <?php if (count($githubWebhooks) > 0): ?>
+            <div class="setting-group">
+                <h3 class="setting-group-title">GitHub Activity</h3>
+
+                <?php foreach ($githubWebhooks as $webhook):
+                    $payload = json_decode($webhook['payload'], true);
+                ?>
+                    <div class="setting-item">
+                        <div class="setting-item-left">
+                            <div class="setting-item-label">
+                                🔗 <?= htmlspecialchars($webhook['event_type']) ?>
+                            </div>
+                            <div class="setting-item-description">
+                                <strong><?= htmlspecialchars($webhook['repository']) ?></strong>
+                                <?php if ($webhook['branch']): ?>
+                                    › <?= htmlspecialchars($webhook['branch']) ?>
+                                <?php endif; ?>
+                                <?php if ($webhook['commit_message']): ?>
+                                    <br><?= htmlspecialchars(substr($webhook['commit_message'], 0, 100)) ?>
+                                <?php endif; ?>
+                            </div>
+                            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #666;">
+                                👤 <?= htmlspecialchars($webhook['author'] ?? 'Unknown') ?> •
+                                📅 <?= date('d.m.Y H:i', strtotime($webhook['received_at'])) ?>
+                            </div>
+                        </div>
+                        <div class="setting-item-right">
+                            <div class="control-card-status">
+                                <span class="control-card-status-dot <?= $webhook['processed'] ? 'green' : 'yellow' ?>"></span>
+                                <span><?= $webhook['processed'] ? 'Zpracováno' : 'Čeká' ?></span>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="cc-btn cc-btn-sm cc-btn-secondary" onclick="viewAllWebhooks()">
+                        Zobrazit všechny události
+                    </button>
+                </div>
+            </div>
+        <?php else: ?>
+            <div class="setting-group">
+                <h3 class="setting-group-title">GitHub Webhooks</h3>
+                <div class="setting-item">
+                    <div class="setting-item-left">
+                        <div class="setting-item-description">
+                            Žádné nedávné GitHub události. Nastavte webhook v repozitáři.
+                        </div>
+                    </div>
+                    <div class="setting-item-right">
+                        <button class="cc-btn cc-btn-sm cc-btn-primary" onclick="setupGitHubWebhook()">
+                            Nastavit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <!-- SCHEDULED TASKS -->
+        <div class="setting-group">
+            <h3 class="setting-group-title">Naplánované úlohy (Cron)</h3>
+
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">🧹 Session Cleanup</div>
+                    <div class="setting-item-description">Vymazání starých sessions (každých 24 hodin)</div>
+                </div>
+                <div class="setting-item-right">
+                    <div class="control-card-status">
+                        <span class="control-card-status-dot green"></span>
+                        <span>Aktivní</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">📧 Email Reminders</div>
+                    <div class="setting-item-description">Připomenutí termínů (denně v 8:00)</div>
+                </div>
+                <div class="setting-item-right">
+                    <div class="control-card-status">
+                        <span class="control-card-status-dot green"></span>
+                        <span>Aktivní</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">📊 Statistics Generation</div>
+                    <div class="setting-item-description">Generování reportů (týdně)</div>
+                </div>
+                <div class="setting-item-right">
+                    <div class="control-card-status">
+                        <span class="control-card-status-dot green"></span>
+                        <span>Aktivní</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div class="setting-group">
+            <h3 class="setting-group-title">Rychlé akce</h3>
+
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">➕ Vytvořit nový úkol</div>
+                    <div class="setting-item-description">Přidat vlastní pending action</div>
+                </div>
+                <div class="setting-item-right">
+                    <button class="cc-btn cc-btn-sm cc-btn-primary" onclick="createNewAction()">
+                        Vytvořit
+                    </button>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">🔄 Obnovit seznam</div>
+                    <div class="setting-item-description">Načíst aktuální stav</div>
+                </div>
+                <div class="setting-item-right">
+                    <button class="cc-btn cc-btn-sm cc-btn-secondary" onclick="location.reload()">
+                        Obnovit
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="/assets/js/csrf-auto-inject.js"></script>
+<script>
+async function executeAction(actionId, actionUrl) {
+    if (actionUrl) {
+        window.open(actionUrl, '_blank');
+    }
+}
+
+async function completeAction(actionId) {
+    if (!confirm('Označit tento úkol jako dokončený?')) {
+        return;
+    }
+
+    try {
+        const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() : null;
+
+        const response = await fetch('/api/control_center_api.php?action=complete_action', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action_id: actionId, csrf_token: csrfToken })
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            location.reload();
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        alert('❌ Chyba: ' + error.message);
+    }
+}
+
+async function dismissAction(actionId) {
+    if (!confirm('Opravdu chcete zrušit tento úkol?')) {
+        return;
+    }
+
+    try {
+        const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() : null;
+
+        const response = await fetch('/api/control_center_api.php?action=dismiss_action', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action_id: actionId, csrf_token: csrfToken })
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            location.reload();
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        alert('❌ Chyba: ' + error.message);
+    }
+}
+
+function createNewAction() {
+    const title = prompt('Název úkolu:');
+    if (!title) return;
+
+    const description = prompt('Popis:');
+    const priority = prompt('Priorita (low/medium/high/critical):', 'medium');
+
+    // TODO: API call to create action
+    alert('Funkce bude implementována v příští verzi');
+}
+
+function viewAllWebhooks() {
+    window.open('/admin.php?tab=tools&view=github_webhooks', '_blank');
+}
+
+function setupGitHubWebhook() {
+    alert('GitHub Webhook URL:\n\n' + window.location.origin + '/api/github_webhook.php\n\nPřidejte tuto URL do nastavení GitHub repozitáře.');
+}
+
+console.log('✅ Actions section loaded');
+</script>
