@@ -184,6 +184,11 @@ try {
   <?php require_once __DIR__ . '/includes/control_center_testing_interactive.php'; ?>
   <?php endif; ?>
 
+  <?php if ($activeTab === 'control_center_testing_simulator'): ?>
+  <!-- TAB: E2E WORKFLOW SIMULATOR -->
+  <?php require_once __DIR__ . '/includes/control_center_testing_simulator.php'; ?>
+  <?php endif; ?>
+
   <?php if ($activeTab === 'tools'): ?>
   <!-- TAB: TOOLS & DIAGNOSTICS -->
   <div id="tab-tools" class="tab-content">
