@@ -65,11 +65,24 @@ class ControlCenterModal {
         const backBtn = document.getElementById('ccModalBackBtn');
         if (backBtn) {
             backBtn.addEventListener('click', () => this.close());
+
+            // Touch support
+            backBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.close();
+            });
         }
 
         // Zavřít na overlay click (volitelné)
         if (this.overlay) {
             this.overlay.addEventListener('click', () => this.close());
+
+            // Touch support pro overlay
+            this.overlay.addEventListener('touchend', (e) => {
+                if (e.target === this.overlay) {
+                    this.close();
+                }
+            });
         }
 
         // ESC key
@@ -78,6 +91,22 @@ class ControlCenterModal {
                 this.close();
             }
         });
+
+        // Prevent pull-to-refresh when modal is open (mobile)
+        let startY = 0;
+        this.modalBody?.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].pageY;
+        }, { passive: true });
+
+        this.modalBody?.addEventListener('touchmove', (e) => {
+            const y = e.touches[0].pageY;
+            const scrollTop = this.modalBody.scrollTop;
+
+            // Prevent pull-to-refresh at top
+            if (scrollTop === 0 && y > startY) {
+                e.preventDefault();
+            }
+        }, { passive: false });
     }
 
     open(options = {}) {

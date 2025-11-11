@@ -33,9 +33,13 @@ try {
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="description" content="Administrační panel White Glove Service. Správa uživatelů, registračních klíčů, emailů, SMS notifikací a systémových nastavení.">
   <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="WGS Admin">
   <title>Administrace | White Glove Service</title>
 
   <!-- Google Fonts -->
@@ -53,6 +57,7 @@ try {
 <link rel="stylesheet" href="assets/css/admin-header.css">
 <link rel="stylesheet" href="assets/css/admin-notifications.css">
 <link rel="stylesheet" href="assets/css/control-center-modal.css">
+<link rel="stylesheet" href="assets/css/control-center-mobile.css">
 
   <!-- Error Handler - zachytává všechny chyby -->
   <script src="assets/js/error-handler.js"></script>
