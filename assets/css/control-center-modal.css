@@ -1,0 +1,254 @@
+/**
+ * Control Center Modal System
+ * Full-screen overlay pro všechny sekce Control Center
+ */
+
+/* Modal Overlay - zakryje celou stránku */
+.cc-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9998;
+    backdrop-filter: blur(4px);
+}
+
+.cc-modal-overlay.active {
+    display: block;
+}
+
+/* Modal Container */
+.cc-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--c-white, #ffffff);
+    z-index: 9999;
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
+}
+
+.cc-modal.active {
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Modal Header - s tlačítkem Zpět */
+.cc-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    background: var(--c-white, #ffffff);
+    border-bottom: 2px solid var(--c-border, #dddddd);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
+
+.cc-modal-title-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.cc-modal-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--c-black, #000000);
+    color: var(--c-white, #ffffff);
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cc-modal-back-btn:hover {
+    background: var(--c-success, #2D5016);
+    transform: translateX(-3px);
+}
+
+.cc-modal-back-btn:active {
+    transform: scale(0.98);
+}
+
+.cc-modal-back-icon {
+    font-size: 1.2rem;
+}
+
+.cc-modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--c-black, #000000);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.cc-modal-subtitle {
+    font-size: 0.85rem;
+    color: var(--c-grey, #666666);
+    margin-top: 0.25rem;
+}
+
+/* Modal Body - scrollovatelný obsah */
+.cc-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0;
+    background: var(--c-bg, #f8f8f8);
+}
+
+/* Iframe pro embedované stránky */
+.cc-modal-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    background: var(--c-white, #ffffff);
+}
+
+/* Loading spinner */
+.cc-modal-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--c-grey, #666666);
+}
+
+.cc-modal-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--c-border, #dddddd);
+    border-top-color: var(--c-success, #2D5016);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.cc-modal-loading-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Error state */
+.cc-modal-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 2rem;
+    text-align: center;
+    color: var(--c-error, #8B0000);
+}
+
+.cc-modal-error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.cc-modal-error-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.cc-modal-error-message {
+    font-size: 0.9rem;
+    color: var(--c-grey, #666666);
+    margin-bottom: 1.5rem;
+}
+
+.cc-modal-error-btn {
+    padding: 0.75rem 1.5rem;
+    background: var(--c-error, #8B0000);
+    color: var(--c-white, #ffffff);
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.cc-modal-error-btn:hover {
+    background: var(--c-black, #000000);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .cc-modal-header {
+        padding: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .cc-modal-title {
+        font-size: 1.2rem;
+    }
+
+    .cc-modal-back-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .cc-modal-body {
+        padding: 0;
+    }
+}
+
+/* Smooth scrolling */
+.cc-modal-body {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar pro modal */
+.cc-modal-body::-webkit-scrollbar {
+    width: 10px;
+}
+
+.cc-modal-body::-webkit-scrollbar-track {
+    background: var(--c-bg, #f8f8f8);
+}
+
+.cc-modal-body::-webkit-scrollbar-thumb {
+    background: var(--c-border, #dddddd);
+    border-radius: 5px;
+}
+
+.cc-modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--c-grey, #666666);
+}
+
+/* Prevent body scroll when modal is open */
+body.cc-modal-open {
+    overflow: hidden;
+}

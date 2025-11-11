@@ -225,11 +225,34 @@ try {
         </div>
         <div class="cc-body">
             <div class="cc-content">
-                <p style="color: var(--c-grey); margin-bottom: 1rem;">
-                    <strong>COMING SOON:</strong> Zde budou kompletní statistiky z statistiky.php - filtry, grafy, export do Excel/PDF
-                </p>
-                <div class="cc-actions">
-                    <a href="statistiky.php" class="btn btn-sm">Otevřít statistiky (dočasně)</a>
+                <div class="mini-stats" style="grid-template-columns: 1fr 1fr;">
+                    <div class="mini-stat" style="padding: 1.5rem; cursor: pointer; transition: all 0.3s; border-left: 4px solid var(--c-success);"
+                         onclick="ccModal.openStatistics()"
+                         onmouseenter="this.style.transform='translateX(3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
+                         onmouseleave="this.style.transform=''; this.style.boxShadow='';">
+                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📊</div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.1rem;">Statistiky reklamací</div>
+                        <div style="font-size: 0.85rem; color: var(--c-grey); margin-bottom: 1rem;">
+                            Filtry, grafy, export do Excel/PDF
+                        </div>
+                        <div class="btn btn-sm btn-success" style="width: 100%; pointer-events: none;">
+                            Otevřít statistiky →
+                        </div>
+                    </div>
+
+                    <div class="mini-stat" style="padding: 1.5rem; cursor: pointer; transition: all 0.3s; border-left: 4px solid var(--c-success);"
+                         onclick="ccModal.openAnalytics()"
+                         onmouseenter="this.style.transform='translateX(3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
+                         onmouseleave="this.style.transform=''; this.style.boxShadow='';">
+                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📈</div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.1rem;">Web Analytics</div>
+                        <div style="font-size: 0.85rem; color: var(--c-grey); margin-bottom: 1rem;">
+                            Návštěvnost, konverze, real-time metriky
+                        </div>
+                        <div class="btn btn-sm btn-success" style="width: 100%; pointer-events: none;">
+                            Otevřít analytics →
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -327,11 +350,20 @@ try {
         </div>
         <div class="cc-body">
             <div class="cc-content">
-                <p style="color: var(--c-grey); margin-bottom: 1rem;">
-                    <strong>INFO:</strong> Šablony emailů a SMS se spravují v samostatné sekci
-                </p>
-                <div class="cc-actions">
-                    <a href="admin.php?tab=notifications" class="btn btn-sm">Otevřít notifikace</a>
+                <div class="mini-stats" style="grid-template-columns: 1fr;">
+                    <div class="mini-stat" style="padding: 1.5rem; cursor: pointer; transition: all 0.3s; border-left: 4px solid var(--c-success);"
+                         onclick="ccModal.openNotifications()"
+                         onmouseenter="this.style.transform='translateX(3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
+                         onmouseleave="this.style.transform=''; this.style.boxShadow='';">
+                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📧</div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.1rem;">Správa notifikací</div>
+                        <div style="font-size: 0.85rem; color: var(--c-grey); margin-bottom: 1rem;">
+                            Šablony emailů, SMS nastavení, automatické notifikace
+                        </div>
+                        <div class="btn btn-sm btn-success" style="width: 100%; pointer-events: none;">
+                            Otevřít notifikace →
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -370,7 +402,7 @@ try {
                     </div>
                 </div>
                 <div class="cc-actions">
-                    <a href="seznam.php" class="btn btn-sm">Otevřít seznam reklamací</a>
+                    <button class="btn btn-sm" onclick="ccModal.openClaims()">Otevřít seznam reklamací</button>
                     <a href="novareklamace.php" class="btn btn-sm btn-success">+ Nová reklamace</a>
                 </div>
             </div>
@@ -462,13 +494,20 @@ try {
         </div>
         <div class="cc-body">
             <div class="cc-content">
-                <p style="color: var(--c-grey); margin-bottom: 1rem;">
-                    <strong>COMING SOON:</strong> System health monitoring, logy, maintenance akce
-                </p>
-                <div class="cc-actions">
-                    <button class="btn btn-sm" disabled>System Health</button>
-                    <button class="btn btn-sm" disabled>Prohlížeč logů</button>
-                    <button class="btn btn-sm btn-danger" disabled>Vymazat cache</button>
+                <div class="mini-stats" style="grid-template-columns: 1fr;">
+                    <div class="mini-stat" style="padding: 1.5rem; cursor: pointer; transition: all 0.3s; border-left: 4px solid var(--c-success);"
+                         onclick="ccModal.openTools()"
+                         onmouseenter="this.style.transform='translateX(3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
+                         onmouseleave="this.style.transform=''; this.style.boxShadow='';">
+                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🛠️</div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.1rem;">Nástroje & Diagnostika</div>
+                        <div style="font-size: 0.85rem; color: var(--c-grey); margin-bottom: 1rem;">
+                            System health, logy, migrace, údržba
+                        </div>
+                        <div class="btn btn-sm btn-success" style="width: 100%; pointer-events: none;">
+                            Otevřít diagnostiku →
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -513,11 +552,20 @@ try {
         </div>
         <div class="cc-body">
             <div class="cc-content">
-                <p style="color: var(--c-grey); margin-bottom: 1rem;">
-                    <strong>INFO:</strong> Testovací prostředí pro simulaci celého workflow reklamací
-                </p>
-                <div class="cc-actions">
-                    <a href="admin.php?tab=control_center_testing" class="btn btn-sm btn-success">🧪 Otevřít testovací prostředí</a>
+                <div class="mini-stats" style="grid-template-columns: 1fr;">
+                    <div class="mini-stat" style="padding: 1.5rem; cursor: pointer; transition: all 0.3s; border-left: 4px solid var(--c-success);"
+                         onclick="ccModal.openTesting()"
+                         onmouseenter="this.style.transform='translateX(3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
+                         onmouseleave="this.style.transform=''; this.style.boxShadow='';">
+                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🧪</div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.1rem;">E2E Workflow Tester</div>
+                        <div style="font-size: 0.85rem; color: var(--c-grey); margin-bottom: 1rem;">
+                            9-krokový test celého workflow reklamací s cleanup
+                        </div>
+                        <div class="btn btn-sm btn-success" style="width: 100%; pointer-events: none;">
+                            Otevřít testing →
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

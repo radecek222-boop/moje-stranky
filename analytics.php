@@ -7,6 +7,9 @@ if (!$isAdmin) {
     header('Location: login.php?redirect=analytics.php');
     exit;
 }
+
+// Embed mode - skrýt navigaci
+$embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -31,10 +34,12 @@ if (!$isAdmin) {
   <link rel="stylesheet" href="assets/css/analytics.min.css">
 </head>
 <body>
+<?php if (!$embedMode): ?>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
+<?php endif; ?>
 
 <!-- MAIN CONTENT -->
-<main>
+<main<?php if ($embedMode) echo ' style="margin-top: 0; padding-top: 1rem;"'; ?>>
 <div class="container">
 
   <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 1.5rem; padding: 1rem; background: var(--c-white); border: 1px solid var(--c-border); border-radius: 12px;">

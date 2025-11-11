@@ -52,9 +52,11 @@ try {
   <link rel="stylesheet" href="assets/css/admin.min.css">
 <link rel="stylesheet" href="assets/css/admin-header.css">
 <link rel="stylesheet" href="assets/css/admin-notifications.css">
+<link rel="stylesheet" href="assets/css/control-center-modal.css">
 
   <!-- Error Handler - zachytává všechny chyby -->
   <script src="assets/js/error-handler.js"></script>
+  <script src="assets/js/control-center-modal.js" defer></script>
 </head>
 
 <body>
