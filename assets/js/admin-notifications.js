@@ -190,14 +190,23 @@ async function toggleNotification(notificationId) {
 }
 
 // Load on tab switch
-document.addEventListener('DOMContentLoaded', () => {
+function initNotifications() {
   const urlParams = new URLSearchParams(window.location.search);
   const hasContainer = document.getElementById('notifications-container');
+  const tab = urlParams.get('tab');
 
-  if (hasContainer && (urlParams.get('tab') === 'notifications' || window.location.pathname.endsWith('admin.php'))) {
+  // Načíst notifikace jen pokud jsme skutečně na notifications záložce
+  if (hasContainer && tab === 'notifications') {
     loadNotifications();
   }
-});
+}
+
+// Inicializace - podpora pro defer i normální načítání
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initNotifications);
+} else {
+  initNotifications();
+}
 
 console.log('✅ admin-notifications.js loaded');
 
@@ -293,12 +302,19 @@ function updateTemplatePreview() {
 }
 
 // Listen for template changes
-document.addEventListener('DOMContentLoaded', () => {
+function attachTemplateListener() {
   const templateInput = document.getElementById('edit-template');
   if (templateInput) {
     templateInput.addEventListener('input', updateTemplatePreview);
   }
-});
+}
+
+// Inicializace template listeneru
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', attachTemplateListener);
+} else {
+  attachTemplateListener();
+}
 
 async function saveNotificationTemplate() {
   const errorDiv = document.getElementById('edit-notification-error');
@@ -448,7 +464,7 @@ function renderBCCEmails() {
 console.log('✅ Modal functions loaded');
 
 // Override pro zajištění správné velikosti
-document.addEventListener('DOMContentLoaded', () => {
+function addModalStyles() {
   const style = document.createElement('style');
   style.textContent = `
     #editNotificationModal {
@@ -472,4 +488,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   `;
   document.head.appendChild(style);
-});
+}
+
+// Inicializace stylů
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', addModalStyles);
+} else {
+  addModalStyles();
+}

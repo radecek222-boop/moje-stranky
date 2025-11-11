@@ -35,12 +35,19 @@ function redirectToLogin(redirectTarget = '') {
 // ============================================================
 // TAB MANAGEMENT
 // ============================================================
-document.addEventListener('DOMContentLoaded', () => {
+function initAdminPanel() {
   logger.log('✅ Admin panel initialized');
   setupNavigation();
   initKeyManagement();
   initUserManagement();
-});
+}
+
+// Inicializace - podpora pro defer i normální načítání
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAdminPanel);
+} else {
+  initAdminPanel();
+}
 
 logger.log('✅ admin.js loaded');
 
