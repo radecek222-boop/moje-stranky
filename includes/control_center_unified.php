@@ -576,6 +576,12 @@ try {
 </div>
 
 <script>
+// Helper function to check if API response is successful
+// Handles both {success: true} and {status: 'success'} formats
+function isSuccess(data) {
+    return (data && (data.success === true || data.status === 'success'));
+}
+
 // Accordion functionality
 document.querySelectorAll('.cc-header').forEach(header => {
     header.addEventListener('click', function() {
@@ -712,7 +718,7 @@ function loadKeys() {
         .then(data => {
             console.log('[Control Center] Keys data:', data);
 
-            if (data.success && data.keys && data.keys.length > 0) {
+            if (isSuccess(data) && data.keys && data.keys.length > 0) {
                 let html = '<table class="cc-table"><thead><tr>';
                 html += '<th>Klíč</th><th>Typ</th><th>Použití</th><th>Status</th><th>Vytvořen</th><th>Akce</th>';
                 html += '</tr></thead><tbody>';
@@ -731,10 +737,10 @@ function loadKeys() {
                 html += '</tbody></table>';
                 container.innerHTML = html;
                 console.log('[Control Center] Keys table rendered');
-            } else if (data.success && data.keys && data.keys.length === 0) {
+            } else if (isSuccess(data) && data.keys && data.keys.length === 0) {
                 container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádné registrační klíče<br><small>Vytvořte nový klíč pomocí tlačítka výše</small></p>';
             } else {
-                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba: ' + (data.error || 'Neplatná odpověď') + '</p>';
+                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba: ' + (data.error || data.message || 'Neplatná odpověď') + '</p>';
             }
         })
         .catch(err => {
@@ -766,7 +772,7 @@ function loadUsers() {
         .then(data => {
             console.log('[Control Center] Users data:', data);
 
-            if (data.success && data.users && data.users.length > 0) {
+            if (isSuccess(data) && data.users && data.users.length > 0) {
                 let html = '<table class="cc-table"><thead><tr>';
                 html += '<th>ID</th><th>Jméno</th><th>Email</th><th>Role</th><th>Status</th><th>Akce</th>';
                 html += '</tr></thead><tbody>';
@@ -784,8 +790,10 @@ function loadUsers() {
 
                 html += '</tbody></table>';
                 container.innerHTML = html;
-            } else {
+            } else if (isSuccess(data)) {
                 container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádní uživatelé</p>';
+            } else {
+                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba: ' + (data.error || data.message || 'Neplatná odpověď') + '</p>';
             }
         })
         .catch(err => {
@@ -797,19 +805,31 @@ function loadUsers() {
 // Load online users
 function loadOnlineUsers() {
     const container = document.getElementById('ccOnlineTable');
-    if (!container) return;
+    if (!container) {
+        console.error('[Control Center] ccOnlineTable element not found');
+        return;
+    }
+
+    console.log('[Control Center] Loading online users...');
+    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--c-grey);">Načítání online uživatelů...</div>';
 
     fetch('api/admin_users_api.php?action=online')
-        .then(r => r.json())
+        .then(r => {
+            console.log('[Control Center] Online users response status:', r.status);
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+        })
         .then(data => {
-            if (data.success && data.users.length > 0) {
+            console.log('[Control Center] Online users data:', data);
+
+            if (isSuccess(data) && data.users && data.users.length > 0) {
                 let html = '<table class="cc-table"><thead><tr>';
                 html += '<th>Jméno</th><th>Role</th><th>Email</th><th>Poslední aktivita</th>';
                 html += '</tr></thead><tbody>';
 
                 data.users.forEach(user => {
                     html += '<tr>';
-                    html += `<td><span class="online-indicator"></span>${user.full_name}</td>`;
+                    html += `<td><span class="online-indicator"></span>${user.full_name || user.name}</td>`;
                     html += `<td><span class="badge badge-${user.role}">${user.role}</span></td>`;
                     html += `<td>${user.email}</td>`;
                     html += `<td>${new Date(user.last_activity).toLocaleString('cs-CZ')}</td>`;
@@ -818,18 +838,32 @@ function loadOnlineUsers() {
 
                 html += '</tbody></table>';
                 container.innerHTML = html;
-            } else {
+            } else if (isSuccess(data)) {
                 container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádní online uživatelé</p>';
+            } else {
+                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba: ' + (data.error || data.message || 'Neplatná odpověď') + '</p>';
             }
+        })
+        .catch(err => {
+            console.error('[Control Center] Online users load error:', err);
+            container.innerHTML = `<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba: ${err.message}</p>`;
         });
 }
 
 // Load claims stats
 function loadClaimsStats() {
+    console.log('[Control Center] Loading claims stats...');
+
     fetch('api/admin_api.php?action=list_reklamace')
-        .then(r => r.json())
+        .then(r => {
+            console.log('[Control Center] Claims stats response status:', r.status);
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+        })
         .then(data => {
-            if (data.success) {
+            console.log('[Control Center] Claims stats data:', data);
+
+            if (isSuccess(data) && data.reklamace) {
                 const claims = data.reklamace;
                 const wait = claims.filter(c => c.stav === 'ČEKÁ').length;
                 const open = claims.filter(c => c.stav === 'DOMLUVENÁ').length;
@@ -838,7 +872,12 @@ function loadClaimsStats() {
                 document.getElementById('ccClaimsWait').textContent = wait;
                 document.getElementById('ccClaimsOpen').textContent = open;
                 document.getElementById('ccClaimsDone').textContent = done;
+            } else {
+                console.error('[Control Center] Failed to load claims stats:', data);
             }
+        })
+        .catch(err => {
+            console.error('[Control Center] Claims stats load error:', err);
         });
 }
 
@@ -869,7 +908,7 @@ function loadActions() {
         .then(data => {
             console.log('[Control Center] Actions data:', data);
 
-            if (data.success && data.actions && data.actions.length > 0) {
+            if (isSuccess(data) && data.actions && data.actions.length > 0) {
                 let html = '<table class="cc-table"><thead><tr>';
                 html += '<th>Priorita</th><th>Název</th><th>Popis</th><th>Vytvořeno</th><th>Akce</th>';
                 html += '</tr></thead><tbody>';
@@ -895,8 +934,10 @@ function loadActions() {
 
                 html += '</tbody></table>';
                 container.innerHTML = html;
-            } else {
+            } else if (isSuccess(data)) {
                 container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">✅ Žádné nevyřízené úkoly</p>';
+            } else {
+                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba: ' + (data.error || data.message || 'Neplatná odpověď') + '</p>';
             }
         })
         .catch(err => {
@@ -917,11 +958,14 @@ function deleteKey(keyId) {
     })
     .then(r => r.json())
     .then(data => {
-        if (data.success) {
+        if (isSuccess(data)) {
             loadKeys();
         } else {
-            alert('Chyba: ' + data.message);
+            alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
         }
+    })
+    .catch(err => {
+        alert('Chyba: ' + err.message);
     });
 }
 
@@ -933,13 +977,16 @@ function completeAction(actionId) {
     })
     .then(r => r.json())
     .then(data => {
-        if (data.success) {
+        if (isSuccess(data)) {
             loadActions();
             // Refresh badge count
             location.reload();
         } else {
-            alert('Chyba: ' + data.message);
+            alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
         }
+    })
+    .catch(err => {
+        alert('Chyba: ' + err.message);
     });
 }
 
@@ -951,12 +998,15 @@ function dismissAction(actionId) {
     })
     .then(r => r.json())
     .then(data => {
-        if (data.success) {
+        if (isSuccess(data)) {
             loadActions();
             location.reload();
         } else {
-            alert('Chyba: ' + data.message);
+            alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
         }
+    })
+    .catch(err => {
+        alert('Chyba: ' + err.message);
     });
 }
 
