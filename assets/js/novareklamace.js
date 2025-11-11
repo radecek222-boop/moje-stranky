@@ -6,6 +6,14 @@ const WGS = {
   routeLayer: null,
   companyLocation: { lat: 50.080312092724114, lon: 14.598113797415476 }, // Do Dubče 364, Běchovice
   isLoggedIn: false,
+
+  // ⚡ PERFORMANCE: Request cancellation a caching
+  autocompleteController: null,
+  geocodeController: null,
+  routeController: null,
+  geocodeCache: new Map(), // Cache pro geocoding výsledky
+  routeCache: new Map(), // Cache pro route výsledky
+  calculateRouteTimeout: null,
   
   init() {
     logger.log('🚀 WGS init...');
@@ -70,30 +78,53 @@ const WGS = {
       const ulice = uliceInput.value.trim();
       const mesto = mestoInput.value.trim();
       const psc = pscInput.value.trim();
-      
+
       if (ulice.toLowerCase().includes('do dubče') && ulice.includes('364')) {
         updateMapWithGPS(50.08026389885034, 14.59812452579323);
         return;
       }
-      
+
       if (!mesto && !psc) return;
-      
+
       const address = `${ulice}, ${mesto}, ${psc}, Czech Republic`;
-      
+
+      // ⚡ CACHE: Zkontrolovat cache nejdřív
+      if (this.geocodeCache.has(address)) {
+        const cached = this.geocodeCache.get(address);
+        logger.log('📦 Cache hit for geocoding:', address);
+        updateMapWithGPS(cached.lat, cached.lon);
+        return;
+      }
+
+      // ⚡ CANCELLATION: Zrušit předchozí request
+      if (this.geocodeController) {
+        this.geocodeController.abort();
+      }
+      this.geocodeController = new AbortController();
+
       try {
         const response = await fetch(
-          `api/geocode_proxy.php?action=search&address=${encodeURIComponent(address)}`
+          `api/geocode_proxy.php?action=search&address=${encodeURIComponent(address)}`,
+          { signal: this.geocodeController.signal }
         );
-        
+
         if (response.ok) {
           const data = await response.json();
           if (data.features && data.features.length > 0) {
             const [lon, lat] = data.features[0].geometry.coordinates;
+
+            // ⚡ CACHE: Uložit do cache
+            this.geocodeCache.set(address, { lat, lon });
+
             updateMapWithGPS(lat, lon);
           }
         }
       } catch (err) {
-        logger.error('Geocoding error:', err);
+        if (err.name === 'AbortError') {
+          logger.log('🚫 Geocoding request cancelled (new request started)');
+        } else {
+          logger.error('Geocoding error:', err);
+        }
       }
     };
     
@@ -133,8 +164,14 @@ const WGS = {
           return;
         }
 
-        // Zrychleno z 300ms na 150ms
+        // ⚡ PERFORMANCE: Debounce 300ms (kompromis mezi rychlostí a počtem requestů)
         uliceTimeout = setTimeout(async () => {
+          // ⚡ CANCELLATION: Zrušit předchozí autocomplete request
+          if (this.autocompleteController) {
+            this.autocompleteController.abort();
+          }
+          this.autocompleteController = new AbortController();
+
           try {
             const mesto = document.getElementById('mesto').value.trim();
             const psc = document.getElementById('psc').value.trim();
@@ -146,7 +183,8 @@ const WGS = {
             searchText += ', Czech Republic';
 
             const response = await fetch(
-              `api/geocode_proxy.php?action=autocomplete&text=${encodeURIComponent(searchText)}&type=street`
+              `api/geocode_proxy.php?action=autocomplete&text=${encodeURIComponent(searchText)}&type=street`,
+              { signal: this.autocompleteController.signal }
             );
 
             if (response.ok) {
@@ -219,7 +257,11 @@ const WGS = {
               }
             }
           } catch (err) {
-            logger.error('Autocomplete error:', err);
+            if (err.name === 'AbortError') {
+              logger.log('🚫 Autocomplete request cancelled (typing continues)');
+            } else {
+              logger.error('Autocomplete error:', err);
+            }
             dropdownUlice.style.display = 'none';
           }
         }, 300);
@@ -330,66 +372,111 @@ const WGS = {
       return;
     }
 
-    try {
-      logger.log('🚗 Počítám trasu ze sídla firmy...');
+    // ⚡ DEBOUNCING: Počkat 500ms než uživatel přestane klikat
+    clearTimeout(this.calculateRouteTimeout);
 
-      // Odebrat předchozí trasu pokud existuje
-      if (this.routeLayer) {
-        this.map.removeLayer(this.routeLayer);
-        this.routeLayer = null;
+    this.calculateRouteTimeout = setTimeout(async () => {
+      const cacheKey = `${destLat},${destLon}`;
+
+      // ⚡ CACHE: Zkontrolovat cache
+      if (this.routeCache.has(cacheKey)) {
+        const cached = this.routeCache.get(cacheKey);
+        logger.log('📦 Cache hit for route:', cacheKey);
+        this.renderRoute(cached);
+        return;
       }
 
-      const start = this.companyLocation;
-
-      // OSRM API přes proxy pro výpočet trasy
-      const response = await fetch(
-        `api/geocode_proxy.php?action=route&start_lon=${start.lon}&start_lat=${start.lat}&end_lon=${destLon}&end_lat=${destLat}`
-      );
-
-      if (!response.ok) {
-        throw new Error('Nepodařilo se vypočítat trasu');
+      // ⚡ CANCELLATION: Zrušit předchozí route request
+      if (this.routeController) {
+        this.routeController.abort();
       }
+      this.routeController = new AbortController();
 
-      const data = await response.json();
+      try {
+        logger.log('🚗 Počítám trasu ze sídla firmy...');
 
-      if (data.routes && data.routes.length > 0) {
-        const route = data.routes[0];
-        const coordinates = route.geometry.coordinates.map(coord => [coord[1], coord[0]]); // GeoJSON používá [lon, lat], Leaflet [lat, lon]
+        // Odebrat předchozí trasu pokud existuje
+        if (this.routeLayer) {
+          this.map.removeLayer(this.routeLayer);
+          this.routeLayer = null;
+        }
 
-        // Nakreslit trasu na mapu
-        this.routeLayer = L.polyline(coordinates, {
-          color: '#2563eb',
-          weight: 4,
-          opacity: 0.7
-        }).addTo(this.map);
+        const start = this.companyLocation;
 
-        // Přidat markery pro start a cíl
-        const startMarker = L.marker([start.lat, start.lon], {
-          icon: L.divIcon({
-            className: 'custom-marker-start',
-            html: '<div style="background: #10b981; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">🏢</div>',
-            iconSize: [30, 30]
-          })
-        }).addTo(this.map);
+        // OSRM API přes proxy pro výpočet trasy
+        const response = await fetch(
+          `api/geocode_proxy.php?action=route&start_lon=${start.lon}&start_lat=${start.lat}&end_lon=${destLon}&end_lat=${destLat}`,
+          { signal: this.routeController.signal }
+        );
 
-        // Přizpůsobit zoom aby byla vidět celá trasa
-        const bounds = L.latLngBounds(coordinates);
-        this.map.fitBounds(bounds, { padding: [50, 50] });
+        if (!response.ok) {
+          throw new Error('Nepodařilo se vypočítat trasu');
+        }
 
-        // Zobrazit info o trase
-        const distance = (route.distance / 1000).toFixed(1); // metry na kilometry
-        const duration = Math.ceil(route.duration / 60); // sekundy na minuty
+        const data = await response.json();
 
-        this.toast(`🚗 Trasa: ${distance} km, cca ${duration} min`, 'info');
-        logger.log(`✅ Trasa vypočítána: ${distance} km, ${duration} min`);
+        // ⚡ FIX: API vrací data.features, ne data.routes
+        if (data.features && data.features.length > 0) {
+          const feature = data.features[0];
+          const properties = feature.properties;
+          const coordinates = feature.geometry.coordinates.map(coord => [coord[1], coord[0]]); // GeoJSON používá [lon, lat], Leaflet [lat, lon]
 
-        // Uložit info o trase pro pozdější použití
-        this.routeInfo = { distance, duration };
+          const routeData = {
+            coordinates,
+            distance: properties.distance,
+            duration: properties.time,
+            start
+          };
+
+          // ⚡ CACHE: Uložit do cache
+          this.routeCache.set(cacheKey, routeData);
+
+          this.renderRoute(routeData);
+        }
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          logger.log('🚫 Route calculation cancelled (new address selected)');
+        } else {
+          logger.error('❌ Chyba při výpočtu trasy:', err);
+        }
+        // Tiché selhání - trasa není kritická
       }
-    } catch (err) {
-      logger.error('❌ Chyba při výpočtu trasy:', err);
-      // Tiché selhání - trasa není kritická
-    }
+    }, 500); // Debounce 500ms
+  },
+
+  // ⚡ HELPER: Vykreslit trasu na mapu (odděleno pro cache)
+  renderRoute(routeData) {
+    const { coordinates, distance, duration, start } = routeData;
+
+    // Nakreslit trasu na mapu
+    this.routeLayer = L.polyline(coordinates, {
+      color: '#2563eb',
+      weight: 4,
+      opacity: 0.7
+    }).addTo(this.map);
+
+    // Přidat markery pro start a cíl
+    const startMarker = L.marker([start.lat, start.lon], {
+      icon: L.divIcon({
+        className: 'custom-marker-start',
+        html: '<div style="background: #10b981; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">🏢</div>',
+        iconSize: [30, 30]
+      })
+    }).addTo(this.map);
+
+    // Přizpůsobit zoom aby byla vidět celá trasa
+    const bounds = L.latLngBounds(coordinates);
+    this.map.fitBounds(bounds, { padding: [50, 50] });
+
+    // Zobrazit info o trase
+    const distanceKm = (distance / 1000).toFixed(1); // metry na kilometry
+    const durationMin = Math.ceil(duration / 60); // sekundy na minuty
+
+    this.toast(`🚗 Trasa: ${distanceKm} km, cca ${durationMin} min`, 'info');
+    logger.log(`✅ Trasa vypočítána: ${distanceKm} km, ${durationMin} min`);
+
+    // Uložit info o trase pro pozdější použití
+    this.routeInfo = { distance: distanceKm, duration: durationMin };
   },
 
   checkAndUpdateMapFromAddress() {

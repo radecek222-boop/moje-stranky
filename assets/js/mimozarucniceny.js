@@ -6,6 +6,13 @@ const CALC = {
   customerAddress: null,
   distance: 0,
   warehouse: { lat: 50.08026389885034, lon: 14.59812452579323, address: 'Do Dubče 364, Běchovice 190 11' },
+
+  // ⚡ PERFORMANCE: Request cancellation a caching
+  autocompleteController: null,
+  routeController: null,
+  geocodeCache: new Map(),
+  routeCache: new Map(),
+  calculateRouteTimeout: null,
   
   init() {
     logger.log('🧮 Calculator init');
@@ -185,14 +192,22 @@ const CALC = {
   },
   
   async searchAddress(query) {
-    const key = 'a4b2955eeb674dd8b6601f54da2e80a8';
+    // ⚡ CANCELLATION: Zrušit předchozí autocomplete request
+    if (this.autocompleteController) {
+      this.autocompleteController.abort();
+    }
+    this.autocompleteController = new AbortController();
+
     try {
-      const res = await fetch(`api/geocode_proxy.php?action=autocomplete&text=${encodeURIComponent(query)}&type=street`);
+      const res = await fetch(
+        `api/geocode_proxy.php?action=autocomplete&text=${encodeURIComponent(query)}&type=street`,
+        { signal: this.autocompleteController.signal }
+      );
       const data = await res.json();
-      
+
       const dropdown = document.getElementById('autocompleteDropdown');
       dropdown.innerHTML = '';
-      
+
       if (data.features && data.features.length > 0) {
         data.features.forEach(f => {
           const div = document.createElement('div');
@@ -200,21 +215,21 @@ const CALC = {
           div.style.cursor = 'pointer';
           div.style.borderBottom = '1px solid #eee';
           div.style.fontSize = '0.9rem';
-          
+
           const street = f.properties.street || '';
           const houseNumber = f.properties.housenumber || '';
           const city = f.properties.city || '';
           const postcode = f.properties.postcode || '';
-          
+
           div.textContent = `${street} ${houseNumber}, ${city}${postcode ? ' (' + postcode + ')' : ''}`;
-          
+
           div.onmouseenter = () => div.style.background = '#f5f5f5';
           div.onmouseleave = () => div.style.background = 'white';
-          div.onclick = () => { 
-            this.selectAddress(f); 
-            dropdown.style.display = 'none'; 
+          div.onclick = () => {
+            this.selectAddress(f);
+            dropdown.style.display = 'none';
           };
-          
+
           dropdown.appendChild(div);
         });
         dropdown.style.display = 'block';
@@ -222,7 +237,11 @@ const CALC = {
         dropdown.style.display = 'none';
       }
     } catch (err) {
-      logger.error('❌ Geocoding error:', err);
+      if (err.name === 'AbortError') {
+        logger.log('🚫 Autocomplete request cancelled (typing continues)');
+      } else {
+        logger.error('❌ Geocoding error:', err);
+      }
     }
   },
   
@@ -255,45 +274,85 @@ const CALC = {
   },
   
   async calculateRoute() {
-    // BEZPEČNOST: API klíč je skrytý v proxy
-    try {
-      const waypoints = `${this.warehouse.lat},${this.warehouse.lon}|${this.customerAddress.lat},${this.customerAddress.lon}`;
-      const url = `api/geocode_proxy.php?action=routing&waypoints=${waypoints}&mode=drive`;
-      const res = await fetch(url);
-      const data = await res.json();
-      
-      if (data.features && data.features.length > 0) {
-        const route = data.features[0];
-        const distanceKm = (route.properties.distance / 1000).toFixed(1);
-        this.distance = parseFloat(distanceKm) * 2;
-        
-        if (this.routeLayer) this.map.removeLayer(this.routeLayer);
-        
-        const coordinates = route.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
-        this.routeLayer = L.polyline(coordinates, {
-          color: '#0066cc',
-          weight: 4,
-          opacity: 0.7
-        }).addTo(this.map);
-        
-        this.map.fitBounds(this.routeLayer.getBounds(), { padding: [50, 50] });
-        
-        const distanceText = document.getElementById('distanceText');
-        distanceText.innerHTML = `
-          <div style="margin-top:0.5rem;">
-            <strong>Vzdálenost jedním směrem:</strong> ${distanceKm} km<br>
-            <strong>Vzdálenost celkem (tam a zpět):</strong> ${this.distance.toFixed(1)} km<br>
-            <strong>Cena dopravy:</strong> ${(this.distance * 0.28).toFixed(2)} € (${this.distance.toFixed(1)} km × 0.28 €/km)
-          </div>
-        `;
-        
-        document.getElementById('distanceInfo').classList.add('show');
-        logger.log(`✓ Route: ${this.distance.toFixed(1)} km`);
+    // ⚡ DEBOUNCING: Počkat než uživatel přestane klikat
+    clearTimeout(this.calculateRouteTimeout);
+
+    this.calculateRouteTimeout = setTimeout(async () => {
+      const cacheKey = `${this.customerAddress.lat},${this.customerAddress.lon}`;
+
+      // ⚡ CACHE: Zkontrolovat cache
+      if (this.routeCache.has(cacheKey)) {
+        const cached = this.routeCache.get(cacheKey);
+        logger.log('📦 Cache hit for route:', cacheKey);
+        this.renderRoute(cached);
+        return;
       }
-    } catch (err) {
-      logger.error('❌ Route error:', err);
-      this.toast('❌ Nepodařilo se vypočítat trasu', 'error');
-    }
+
+      // ⚡ CANCELLATION: Zrušit předchozí route request
+      if (this.routeController) {
+        this.routeController.abort();
+      }
+      this.routeController = new AbortController();
+
+      try {
+        const waypoints = `${this.warehouse.lat},${this.warehouse.lon}|${this.customerAddress.lat},${this.customerAddress.lon}`;
+        const url = `api/geocode_proxy.php?action=routing&waypoints=${waypoints}&mode=drive`;
+        const res = await fetch(url, { signal: this.routeController.signal });
+        const data = await res.json();
+
+        if (data.features && data.features.length > 0) {
+          const route = data.features[0];
+          const distanceKm = (route.properties.distance / 1000).toFixed(1);
+          const coordinates = route.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
+
+          const routeData = {
+            distanceKm,
+            coordinates
+          };
+
+          // ⚡ CACHE: Uložit do cache
+          this.routeCache.set(cacheKey, routeData);
+
+          this.renderRoute(routeData);
+        }
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          logger.log('🚫 Route calculation cancelled (new address selected)');
+        } else {
+          logger.error('❌ Route error:', err);
+          this.toast('❌ Nepodařilo se vypočítat trasu', 'error');
+        }
+      }
+    }, 500); // Debounce 500ms
+  },
+
+  // ⚡ HELPER: Vykreslit trasu na mapu (odděleno pro cache)
+  renderRoute(routeData) {
+    const { distanceKm, coordinates } = routeData;
+
+    this.distance = parseFloat(distanceKm) * 2;
+
+    if (this.routeLayer) this.map.removeLayer(this.routeLayer);
+
+    this.routeLayer = L.polyline(coordinates, {
+      color: '#0066cc',
+      weight: 4,
+      opacity: 0.7
+    }).addTo(this.map);
+
+    this.map.fitBounds(this.routeLayer.getBounds(), { padding: [50, 50] });
+
+    const distanceText = document.getElementById('distanceText');
+    distanceText.innerHTML = `
+      <div style="margin-top:0.5rem;">
+        <strong>Vzdálenost jedním směrem:</strong> ${distanceKm} km<br>
+        <strong>Vzdálenost celkem (tam a zpět):</strong> ${this.distance.toFixed(1)} km<br>
+        <strong>Cena dopravy:</strong> ${(this.distance * 0.28).toFixed(2)} € (${this.distance.toFixed(1)} km × 0.28 €/km)
+      </div>
+    `;
+
+    document.getElementById('distanceInfo').classList.add('show');
+    logger.log(`✓ Route: ${this.distance.toFixed(1)} km`);
   },
   
   calculatePrice() {
