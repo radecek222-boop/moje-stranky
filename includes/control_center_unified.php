@@ -681,37 +681,105 @@ function loadSectionData(section) {
 // Load Statistics iframe (default: claims stats)
 function loadStatsIframe() {
     const iframe = document.getElementById('statsIframe');
-    if (iframe && !iframe.src) {
-        iframe.src = 'statistiky.php?embed=1';
+    console.log('[Control Center] 🔍 loadStatsIframe() called');
+    console.log('[Control Center] 🔍 iframe element:', iframe);
+    console.log('[Control Center] 🔍 iframe.src:', iframe ? iframe.src : 'N/A');
+
+    if (iframe) {
+        // Always set src, even if it was set before (force reload)
+        const newSrc = 'statistiky.php?embed=1';
+        console.log('[Control Center] ✅ Setting iframe src to:', newSrc);
+        iframe.src = newSrc;
+
+        // Add visual indicator while loading
+        iframe.style.border = '3px solid blue';
+        iframe.style.minHeight = '600px';
+
+        // Log when iframe loads
+        iframe.onload = function() {
+            console.log('[Control Center] ✅ Stats iframe loaded successfully');
+            iframe.style.border = '2px solid var(--c-border)';
+        };
+
+        iframe.onerror = function() {
+            console.error('[Control Center] ❌ Stats iframe failed to load');
+            iframe.style.border = '3px solid red';
+        };
+    } else {
+        console.error('[Control Center] ❌ statsIframe element not found in DOM');
     }
 }
 
 // Load Notifications iframe
 function loadNotificationsIframe() {
     const iframe = document.getElementById('notificationsIframe');
-    if (iframe && !iframe.src) {
-        iframe.src = 'admin.php?tab=notifications&embed=1';
+    console.log('[Control Center] 🔍 loadNotificationsIframe() called');
+    console.log('[Control Center] 🔍 iframe element:', iframe);
+
+    if (iframe) {
+        const newSrc = 'admin.php?tab=notifications&embed=1';
+        console.log('[Control Center] ✅ Setting notifications iframe src to:', newSrc);
+        iframe.src = newSrc;
+        iframe.style.border = '3px solid purple';
+        iframe.style.minHeight = '600px';
+
+        iframe.onload = () => {
+            console.log('[Control Center] ✅ Notifications iframe loaded');
+            iframe.style.border = '2px solid var(--c-border)';
+        };
+    } else {
+        console.error('[Control Center] ❌ notificationsIframe not found');
     }
 }
 
 // Load Tools/Diagnostics iframe
 function loadToolsIframe() {
     const iframe = document.getElementById('toolsIframe');
-    if (iframe && !iframe.src) {
-        iframe.src = 'admin.php?tab=tools&embed=1';
+    console.log('[Control Center] 🔍 loadToolsIframe() called');
+    console.log('[Control Center] 🔍 iframe element:', iframe);
+
+    if (iframe) {
+        const newSrc = 'admin.php?tab=tools&embed=1';
+        console.log('[Control Center] ✅ Setting tools iframe src to:', newSrc);
+        iframe.src = newSrc;
+        iframe.style.border = '3px solid orange';
+        iframe.style.minHeight = '600px';
+
+        iframe.onload = () => {
+            console.log('[Control Center] ✅ Tools iframe loaded');
+            iframe.style.border = '2px solid var(--c-border)';
+        };
+    } else {
+        console.error('[Control Center] ❌ toolsIframe not found');
     }
 }
 
 // Load Testing iframe
 function loadTestingIframe() {
     const iframe = document.getElementById('testingIframe');
-    if (iframe && !iframe.src) {
-        iframe.src = 'admin.php?tab=control_center_testing_simulator&embed=1';
+    console.log('[Control Center] 🔍 loadTestingIframe() called');
+    console.log('[Control Center] 🔍 iframe element:', iframe);
+
+    if (iframe) {
+        const newSrc = 'admin.php?tab=control_center_testing_simulator&embed=1';
+        console.log('[Control Center] ✅ Setting testing iframe src to:', newSrc);
+        iframe.src = newSrc;
+        iframe.style.border = '3px solid teal';
+        iframe.style.minHeight = '600px';
+
+        iframe.onload = () => {
+            console.log('[Control Center] ✅ Testing iframe loaded');
+            iframe.style.border = '2px solid var(--c-border)';
+        };
+    } else {
+        console.error('[Control Center] ❌ testingIframe not found');
     }
 }
 
 // Switch between Statistics tabs
 function switchStatsTab(tab) {
+    console.log('[Control Center] 📊 Switching stats tab to:', tab);
+
     // Update tab buttons
     document.querySelectorAll('.cc-section-tabs .cc-tab').forEach(btn => {
         btn.classList.remove('active');
@@ -726,14 +794,32 @@ function switchStatsTab(tab) {
     if (tab === 'claims') {
         document.getElementById('statsTabClaims').classList.add('active');
         const iframe = document.getElementById('statsIframe');
-        if (iframe && !iframe.src) {
+        console.log('[Control Center] 🔍 Stats iframe:', iframe);
+        if (iframe) {
+            console.log('[Control Center] ✅ Setting stats iframe src');
             iframe.src = 'statistiky.php?embed=1';
+            iframe.style.border = '3px solid blue';
+            iframe.style.minHeight = '600px';
+
+            iframe.onload = () => {
+                console.log('[Control Center] ✅ Stats iframe loaded in tab');
+                iframe.style.border = '2px solid var(--c-border)';
+            };
         }
     } else if (tab === 'web') {
         document.getElementById('statsTabWeb').classList.add('active');
         const iframe = document.getElementById('analyticsIframe');
-        if (iframe && !iframe.src) {
+        console.log('[Control Center] 🔍 Analytics iframe:', iframe);
+        if (iframe) {
+            console.log('[Control Center] ✅ Setting analytics iframe src');
             iframe.src = 'analytics.php?embed=1';
+            iframe.style.border = '3px solid green';
+            iframe.style.minHeight = '600px';
+
+            iframe.onload = () => {
+                console.log('[Control Center] ✅ Analytics iframe loaded in tab');
+                iframe.style.border = '2px solid var(--c-border)';
+            };
         }
     }
 }
