@@ -658,7 +658,7 @@ function loadToolsIframe() {
 function loadTestingIframe() {
     const iframe = document.getElementById('testingIframe');
     if (iframe && !iframe.src) {
-        iframe.src = 'admin.php?tab=control_center_testing_interactive&embed=1';
+        iframe.src = 'admin.php?tab=control_center_testing_simulator&embed=1';
     }
 }
 
