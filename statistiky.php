@@ -7,6 +7,9 @@ if (!$isAdmin) {
     header('Location: login.php?redirect=statistiky.php');
     exit;
 }
+
+// Embed mode - skrýt navigaci
+$embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -33,10 +36,12 @@ if (!$isAdmin) {
 </head>
 
 <body>
+<?php if (!$embedMode): ?>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
+<?php endif; ?>
 
 <!-- MAIN CONTENT -->
-<main>
+<main<?php if ($embedMode) echo ' style="margin-top: 0; padding-top: 1rem;"'; ?>>
 <div class="container">
 
   <!-- USER INFO BAR -->
