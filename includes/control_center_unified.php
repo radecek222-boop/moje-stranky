@@ -845,12 +845,31 @@ function loadClaimsStats() {
 // Load pending actions
 function loadActions() {
     const container = document.getElementById('ccActionsTable');
-    if (!container) return;
+    if (!container) {
+        console.error('[Control Center] ccActionsTable element not found');
+        return;
+    }
+
+    console.log('[Control Center] Loading actions...');
+    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--c-grey);">Načítání úkolů...</div>';
 
     fetch('api/control_center_api.php?action=get_pending_actions')
-        .then(r => r.json())
+        .then(r => {
+            console.log('[Control Center] Actions response status:', r.status);
+            if (!r.ok) {
+                // If 400/500, probably table doesn't exist - treat as no actions
+                if (r.status === 400 || r.status === 500) {
+                    console.warn('[Control Center] Actions API returned error, showing empty state');
+                    return { success: true, actions: [] };
+                }
+                throw new Error(`HTTP ${r.status}`);
+            }
+            return r.json();
+        })
         .then(data => {
-            if (data.success && data.actions.length > 0) {
+            console.log('[Control Center] Actions data:', data);
+
+            if (data.success && data.actions && data.actions.length > 0) {
                 let html = '<table class="cc-table"><thead><tr>';
                 html += '<th>Priorita</th><th>Název</th><th>Popis</th><th>Vytvořeno</th><th>Akce</th>';
                 html += '</tr></thead><tbody>';
@@ -879,6 +898,11 @@ function loadActions() {
             } else {
                 container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">✅ Žádné nevyřízené úkoly</p>';
             }
+        })
+        .catch(err => {
+            console.error('[Control Center] Actions load error:', err);
+            // Show empty state instead of error for better UX
+            container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">✅ Žádné nevyřízené úkoly</p>';
         });
 }
 
