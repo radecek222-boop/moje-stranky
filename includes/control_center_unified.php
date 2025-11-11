@@ -323,7 +323,9 @@ try {
                     <button class="btn btn-sm" id="ccRefreshKeys">Obnovit seznam</button>
                 </div>
                 <div id="ccKeysTable">
-                    <div class="loading">Načítání klíčů...</div>
+                    <div style="text-align: center; padding: 2rem; color: var(--c-grey);">
+                        <em>Klikněte na "Obnovit seznam" nebo rozbalte sekci znovu pro načtení dat</em>
+                    </div>
                 </div>
             </div>
         </div>
@@ -349,7 +351,9 @@ try {
                     <button class="btn btn-sm" id="ccRefreshUsers">Obnovit</button>
                 </div>
                 <div id="ccUsersTable">
-                    <div class="loading">Načítání uživatelů...</div>
+                    <div style="text-align: center; padding: 2rem; color: var(--c-grey);">
+                        <em>Klikněte na "Obnovit" nebo rozbalte sekci znovu pro načtení dat</em>
+                    </div>
                 </div>
             </div>
         </div>
@@ -375,7 +379,9 @@ try {
                     <button class="btn btn-sm" id="ccRefreshOnline">Obnovit</button>
                 </div>
                 <div id="ccOnlineTable">
-                    <div class="loading">Načítání online uživatelů...</div>
+                    <div style="text-align: center; padding: 2rem; color: var(--c-grey);">
+                        <em>Klikněte na "Obnovit" nebo rozbalte sekci znovu pro načtení dat</em>
+                    </div>
                 </div>
             </div>
         </div>
@@ -549,7 +555,9 @@ try {
                     <button class="btn btn-sm" id="ccRefreshActions">Obnovit</button>
                 </div>
                 <div id="ccActionsTable">
-                    <div class="loading">Načítání úkolů...</div>
+                    <div style="text-align: center; padding: 2rem; color: var(--c-grey);">
+                        <em>Klikněte na "Obnovit" nebo rozbalte sekci znovu pro načtení dat</em>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1077,4 +1085,16 @@ document.getElementById('ccRefreshActions')?.addEventListener('click', loadActio
 document.getElementById('ccAddUser')?.addEventListener('click', () => {
     window.location.href = 'admin.php?tab=users';
 });
+
+// 🔥 AUTO-LOAD: Load data for sections that are already expanded on page load
+console.log('[Control Center] 🚀 Checking for pre-expanded sections...');
+document.querySelectorAll('.cc-section.expanded').forEach(section => {
+    const sectionName = section.dataset.section;
+    console.log('[Control Center] 🚀 Found pre-expanded section:', sectionName);
+    if (sectionName) {
+        console.log('[Control Center] 🚀 Auto-loading data for:', sectionName);
+        loadSectionData(sectionName);
+    }
+});
+console.log('[Control Center] ✅ Auto-load check complete');
 </script>
