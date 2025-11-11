@@ -186,6 +186,64 @@ try {
     flex-wrap: wrap;
     margin-bottom: 1.5rem;
 }
+
+/* Inline iframe containers pro accordion sekce */
+.cc-inline-iframe {
+    width: 100%;
+    height: 600px;
+    border: 2px solid var(--c-border);
+    border-radius: 4px;
+    background: var(--c-white);
+    margin-top: 1rem;
+}
+
+.cc-iframe-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 400px;
+    color: var(--c-grey);
+    font-size: 0.9rem;
+}
+
+.cc-section-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--c-border);
+}
+
+.cc-tab {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--c-grey);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+}
+
+.cc-tab:hover {
+    color: var(--c-black);
+    background: rgba(0,0,0,0.02);
+}
+
+.cc-tab.active {
+    color: var(--c-success);
+    border-bottom-color: var(--c-success);
+}
+
+.cc-tab-content {
+    display: none;
+}
+
+.cc-tab-content.active {
+    display: block;
+}
 </style>
 
 <div class="control-center">
@@ -225,32 +283,20 @@ try {
         </div>
         <div class="cc-body">
             <div class="cc-content">
-                <div class="mini-stats" style="grid-template-columns: 1fr 1fr;">
-                    <div class="mini-stat" style="padding: 1.5rem; cursor: pointer; transition: all 0.3s; border-left: 4px solid var(--c-success);"
-                         onclick="ccModal.openStatistics()"
-                         onmouseenter="this.style.transform='translateX(3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
-                         onmouseleave="this.style.transform=''; this.style.boxShadow='';">
-                        <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.1rem;">Statistiky reklamací</div>
-                        <div style="font-size: 0.85rem; color: var(--c-grey); margin-bottom: 1rem;">
-                            Filtry, grafy, export do Excel/PDF
-                        </div>
-                        <div class="btn btn-sm btn-success" style="width: 100%; pointer-events: none;">
-                            Otevřít statistiky →
-                        </div>
-                    </div>
+                <!-- Tabs pro přepínání mezi statistikami a analytics -->
+                <div class="cc-section-tabs">
+                    <button class="cc-tab active" onclick="switchStatsTab('claims')">Statistiky reklamací</button>
+                    <button class="cc-tab" onclick="switchStatsTab('web')">Web Analytics</button>
+                </div>
 
-                    <div class="mini-stat" style="padding: 1.5rem; cursor: pointer; transition: all 0.3s; border-left: 4px solid var(--c-success);"
-                         onclick="ccModal.openAnalytics()"
-                         onmouseenter="this.style.transform='translateX(3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
-                         onmouseleave="this.style.transform=''; this.style.boxShadow='';">
-                        <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.1rem;">Web Analytics</div>
-                        <div style="font-size: 0.85rem; color: var(--c-grey); margin-bottom: 1rem;">
-                            Návštěvnost, konverze, real-time metriky
-                        </div>
-                        <div class="btn btn-sm btn-success" style="width: 100%; pointer-events: none;">
-                            Otevřít analytics →
-                        </div>
-                    </div>
+                <!-- Tab Content: Statistiky reklamací -->
+                <div id="statsTabClaims" class="cc-tab-content active">
+                    <iframe id="statsIframe" class="cc-inline-iframe" src=""></iframe>
+                </div>
+
+                <!-- Tab Content: Web Analytics -->
+                <div id="statsTabWeb" class="cc-tab-content">
+                    <iframe id="analyticsIframe" class="cc-inline-iframe" src=""></iframe>
                 </div>
             </div>
         </div>
@@ -348,20 +394,7 @@ try {
         </div>
         <div class="cc-body">
             <div class="cc-content">
-                <div class="mini-stats" style="grid-template-columns: 1fr;">
-                    <div class="mini-stat" style="padding: 1.5rem; cursor: pointer; transition: all 0.3s; border-left: 4px solid var(--c-success);"
-                         onclick="ccModal.openNotifications()"
-                         onmouseenter="this.style.transform='translateX(3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
-                         onmouseleave="this.style.transform=''; this.style.boxShadow='';">
-                        <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.1rem;">Správa notifikací</div>
-                        <div style="font-size: 0.85rem; color: var(--c-grey); margin-bottom: 1rem;">
-                            Šablony emailů, SMS nastavení, automatické notifikace
-                        </div>
-                        <div class="btn btn-sm btn-success" style="width: 100%; pointer-events: none;">
-                            Otevřít notifikace →
-                        </div>
-                    </div>
-                </div>
+                <iframe id="notificationsIframe" class="cc-inline-iframe" src=""></iframe>
             </div>
         </div>
     </div>
@@ -491,20 +524,7 @@ try {
         </div>
         <div class="cc-body">
             <div class="cc-content">
-                <div class="mini-stats" style="grid-template-columns: 1fr;">
-                    <div class="mini-stat" style="padding: 1.5rem; cursor: pointer; transition: all 0.3s; border-left: 4px solid var(--c-success);"
-                         onclick="ccModal.openTools()"
-                         onmouseenter="this.style.transform='translateX(3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
-                         onmouseleave="this.style.transform=''; this.style.boxShadow='';">
-                        <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.1rem;">Nástroje & Diagnostika</div>
-                        <div style="font-size: 0.85rem; color: var(--c-grey); margin-bottom: 1rem;">
-                            System health, logy, migrace, údržba
-                        </div>
-                        <div class="btn btn-sm btn-success" style="width: 100%; pointer-events: none;">
-                            Otevřít diagnostiku →
-                        </div>
-                    </div>
-                </div>
+                <iframe id="toolsIframe" class="cc-inline-iframe" src=""></iframe>
             </div>
         </div>
     </div>
@@ -548,20 +568,7 @@ try {
         </div>
         <div class="cc-body">
             <div class="cc-content">
-                <div class="mini-stats" style="grid-template-columns: 1fr;">
-                    <div class="mini-stat" style="padding: 1.5rem; cursor: pointer; transition: all 0.3s; border-left: 4px solid var(--c-success);"
-                         onclick="ccModal.openTesting()"
-                         onmouseenter="this.style.transform='translateX(3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
-                         onmouseleave="this.style.transform=''; this.style.boxShadow='';">
-                        <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.1rem;">E2E Workflow Tester</div>
-                        <div style="font-size: 0.85rem; color: var(--c-grey); margin-bottom: 1rem;">
-                            9-krokový test celého workflow reklamací s cleanup
-                        </div>
-                        <div class="btn btn-sm btn-success" style="width: 100%; pointer-events: none;">
-                            Otevřít testing →
-                        </div>
-                    </div>
-                </div>
+                <iframe id="testingIframe" class="cc-inline-iframe" src=""></iframe>
             </div>
         </div>
     </div>
@@ -593,6 +600,9 @@ document.querySelectorAll('.cc-header').forEach(header => {
 
 function loadSectionData(section) {
     switch(section) {
+        case 'statistics':
+            loadStatsIframe();
+            break;
         case 'keys':
             loadKeys();
             break;
@@ -602,12 +612,81 @@ function loadSectionData(section) {
         case 'online':
             loadOnlineUsers();
             break;
+        case 'notifications':
+            loadNotificationsIframe();
+            break;
         case 'claims':
             loadClaimsStats();
+            break;
+        case 'diagnostics':
+            loadToolsIframe();
             break;
         case 'actions':
             loadActions();
             break;
+        case 'testing':
+            loadTestingIframe();
+            break;
+    }
+}
+
+// Load Statistics iframe (default: claims stats)
+function loadStatsIframe() {
+    const iframe = document.getElementById('statsIframe');
+    if (iframe && !iframe.src) {
+        iframe.src = 'statistiky.php?embed=1';
+    }
+}
+
+// Load Notifications iframe
+function loadNotificationsIframe() {
+    const iframe = document.getElementById('notificationsIframe');
+    if (iframe && !iframe.src) {
+        iframe.src = 'admin.php?tab=notifications&embed=1';
+    }
+}
+
+// Load Tools/Diagnostics iframe
+function loadToolsIframe() {
+    const iframe = document.getElementById('toolsIframe');
+    if (iframe && !iframe.src) {
+        iframe.src = 'admin.php?tab=tools&embed=1';
+    }
+}
+
+// Load Testing iframe
+function loadTestingIframe() {
+    const iframe = document.getElementById('testingIframe');
+    if (iframe && !iframe.src) {
+        iframe.src = 'admin.php?tab=control_center_testing_interactive&embed=1';
+    }
+}
+
+// Switch between Statistics tabs
+function switchStatsTab(tab) {
+    // Update tab buttons
+    document.querySelectorAll('.cc-section-tabs .cc-tab').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+
+    // Update tab content
+    document.querySelectorAll('.cc-tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+
+    if (tab === 'claims') {
+        document.getElementById('statsTabClaims').classList.add('active');
+        const iframe = document.getElementById('statsIframe');
+        if (iframe && !iframe.src) {
+            iframe.src = 'statistiky.php?embed=1';
+        }
+    } else if (tab === 'web') {
+        document.getElementById('statsTabWeb').classList.add('active');
+        const iframe = document.getElementById('analyticsIframe');
+        if (iframe && !iframe.src) {
+            iframe.src = 'analytics.php?embed=1';
+        }
     }
 }
 
