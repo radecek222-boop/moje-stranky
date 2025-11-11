@@ -69,6 +69,7 @@ if (!$isLoggedIn) {
         <tr><td class="label">Adresa<span class="en-label">Address</span></td><td><input type="text" id="address" readonly></td></tr>
         <tr><td class="label">Telefon<span class="en-label">Phone</span></td><td><input type="tel" id="phone" readonly></td></tr>
         <tr><td class="label">Email<span class="en-label">Email</span></td><td><input type="email" id="email" readonly></td></tr>
+        <tr><td class="label">Fakturace<span class="en-label">Billing</span></td><td><input type="text" id="fakturace-firma" readonly style="font-weight: 600;"></td></tr>
       </table>
     </div>
     
@@ -163,5 +164,6 @@ if (!$isLoggedIn) {
 
 <!-- External JavaScript -->
 <script src="assets/js/protokol.min.js" defer></script>
+<script src="assets/js/protokol-fakturace-patch.js" defer></script>
 </body>
 </html>
