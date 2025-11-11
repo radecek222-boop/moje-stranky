@@ -91,7 +91,7 @@
       <div class="form-group" style="position:relative;">
         <label class="form-label" data-lang-cs="Ulice a číslo popisné" data-lang-en="Street and House Number" data-lang-it="Numero Civico e Civico">Ulice a číslo popisné</label>
         <input type="text" class="form-control" id="ulice" data-lang-cs-placeholder="Začněte psát adresu..." data-lang-en-placeholder="Start typing address..." data-lang-it-placeholder="Inizia a digitare l'indirizzo..." placeholder="Začněte psát adresu...">
-        <div id="autocompleteDropdown" style="display:none;position:absolute;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:100;width:100%;"></div>
+        <div id="autocompleteDropdown" style="display:none;position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
       </div>
       
       <div class="map-container">
