@@ -291,12 +291,16 @@ try {
 
                 <!-- Tab Content: Statistiky reklamací -->
                 <div id="statsTabClaims" class="cc-tab-content active">
-                    <iframe id="statsIframe" class="cc-inline-iframe" src=""></iframe>
+                    <iframe id="statsIframe" class="cc-inline-iframe" src=""
+                            sandbox="allow-scripts allow-same-origin"
+                            title="Statistiky reklamací"></iframe>
                 </div>
 
                 <!-- Tab Content: Web Analytics -->
                 <div id="statsTabWeb" class="cc-tab-content">
-                    <iframe id="analyticsIframe" class="cc-inline-iframe" src=""></iframe>
+                    <iframe id="analyticsIframe" class="cc-inline-iframe" src=""
+                            sandbox="allow-scripts allow-same-origin"
+                            title="Web Analytics"></iframe>
                 </div>
             </div>
         </div>
@@ -400,7 +404,9 @@ try {
         </div>
         <div class="cc-body">
             <div class="cc-content">
-                <iframe id="notificationsIframe" class="cc-inline-iframe" src=""></iframe>
+                <iframe id="notificationsIframe" class="cc-inline-iframe" src=""
+                        sandbox="allow-scripts allow-same-origin"
+                        title="Email & SMS notifikace"></iframe>
             </div>
         </div>
     </div>
@@ -530,7 +536,9 @@ try {
         </div>
         <div class="cc-body">
             <div class="cc-content">
-                <iframe id="toolsIframe" class="cc-inline-iframe" src=""></iframe>
+                <iframe id="toolsIframe" class="cc-inline-iframe" src=""
+                        sandbox="allow-scripts allow-same-origin"
+                        title="Diagnostika systému"></iframe>
             </div>
         </div>
     </div>
@@ -576,7 +584,9 @@ try {
         </div>
         <div class="cc-body">
             <div class="cc-content">
-                <iframe id="testingIframe" class="cc-inline-iframe" src=""></iframe>
+                <iframe id="testingIframe" class="cc-inline-iframe" src=""
+                        sandbox="allow-scripts allow-same-origin allow-forms"
+                        title="Testovací prostředí"></iframe>
             </div>
         </div>
     </div>
@@ -836,10 +846,18 @@ function loadKeys() {
     container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--c-grey);">Načítání klíčů...</div>';
 
     fetch('api/admin_api.php?action=list_keys')
-        .then(r => {
+        .then(async r => {
             console.log('[Control Center] Keys response status:', r.status);
             if (!r.ok) {
-                throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+                // Try to parse error message from response
+                let errorMsg = `HTTP ${r.status}: ${r.statusText}`;
+                try {
+                    const errorData = await r.json();
+                    errorMsg = errorData.message || errorData.error || errorMsg;
+                } catch (e) {
+                    // JSON parse failed, use default message
+                }
+                throw new Error(errorMsg);
             }
             return r.json();
         })
