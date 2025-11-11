@@ -1,18 +1,121 @@
 <?php
 /**
  * Get Distance Controller
- * Počítá vzdálenost mezi dvěma adresami
- *
- * POZNÁMKA: Toto je MOCK implementace.
- * Pro produkční použití je potřeba:
- * 1. Získat Google Maps API klíč
- * 2. Povolit Distance Matrix API
- * 3. Odkomentovat skutečnou implementaci níže
+ * Počítá vzdálenost mezi dvěma adresami pomocí Geoapify API
  */
 
 require_once __DIR__ . '/../../init.php';
 
 header('Content-Type: application/json');
+
+/**
+ * Převede adresu na GPS souřadnice pomocí Geoapify geocoding
+ * @param string $address Adresa k převodu
+ * @return array|null ['lat' => float, 'lon' => float] nebo null při chybě
+ */
+function geocodeAddress($address) {
+    try {
+        $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') .
+               '://' . $_SERVER['HTTP_HOST'] .
+               '/api/geocode_proxy.php?action=search&address=' . urlencode($address);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Pro lokální requesty
+
+        // Přenos session cookies pro autentizaci
+        if (isset($_COOKIE[session_name()])) {
+            curl_setopt($ch, CURLOPT_COOKIE, session_name() . '=' . $_COOKIE[session_name()]);
+        }
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            return null;
+        }
+
+        $data = json_decode($response, true);
+
+        if (!$data || !isset($data['features']) || empty($data['features'])) {
+            return null;
+        }
+
+        // Vrátí první (nejrelevantnější) výsledek
+        $feature = $data['features'][0];
+        $coords = $feature['geometry']['coordinates'];
+
+        return [
+            'lat' => $coords[1],
+            'lon' => $coords[0]
+        ];
+
+    } catch (Exception $e) {
+        error_log('Geocoding error: ' . $e->getMessage());
+        return null;
+    }
+}
+
+/**
+ * Vypočítá trasu mezi dvěma body pomocí Geoapify routing
+ * @param float $startLat Začátek - zeměpisná šířka
+ * @param float $startLon Začátek - zeměpisná délka
+ * @param float $endLat Konec - zeměpisná šířka
+ * @param float $endLon Konec - zeměpisná délka
+ * @return array|null ['distance' => int (metry), 'time' => int (sekundy)] nebo null
+ */
+function calculateRoute($startLat, $startLon, $endLat, $endLon) {
+    try {
+        $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') .
+               '://' . $_SERVER['HTTP_HOST'] .
+               '/api/geocode_proxy.php?action=route&' .
+               'start_lat=' . urlencode($startLat) .
+               '&start_lon=' . urlencode($startLon) .
+               '&end_lat=' . urlencode($endLat) .
+               '&end_lon=' . urlencode($endLon) .
+               '&mode=drive';
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+        // Přenos session cookies
+        if (isset($_COOKIE[session_name()])) {
+            curl_setopt($ch, CURLOPT_COOKIE, session_name() . '=' . $_COOKIE[session_name()]);
+        }
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            return null;
+        }
+
+        $data = json_decode($response, true);
+
+        if (!$data || !isset($data['features']) || empty($data['features'])) {
+            return null;
+        }
+
+        $feature = $data['features'][0];
+        $properties = $feature['properties'];
+
+        return [
+            'distance' => (int)$properties['distance'], // metry
+            'time' => (int)$properties['time'] // sekundy
+        ];
+
+    } catch (Exception $e) {
+        error_log('Routing error: ' . $e->getMessage());
+        return null;
+    }
+}
 
 try {
     // BEZPEČNOST: Kontrola přihlášení
@@ -51,83 +154,40 @@ try {
         throw new Exception('Adresy jsou příliš dlouhé');
     }
 
-    /*
-    ============================================================================
-    PRODUKČNÍ IMPLEMENTACE S GOOGLE DISTANCE MATRIX API
-    ============================================================================
+    // Krok 1: Geocoding - převod obou adres na GPS souřadnice
+    $originCoords = geocodeAddress($origin);
+    $destCoords = geocodeAddress($destination);
 
-    // Google Maps API klíč (nastavit v config.php nebo .env)
-    $apiKey = getenv('GOOGLE_MAPS_API_KEY') ?: 'YOUR_API_KEY_HERE';
-
-    if ($apiKey === 'YOUR_API_KEY_HERE') {
-        throw new Exception('Google Maps API klíč není nakonfigurován');
+    if (!$originCoords || !$destCoords) {
+        throw new Exception('Nepodařilo se převést adresy na GPS souřadnice');
     }
 
-    // Sestavení URL pro Distance Matrix API
-    $url = 'https://maps.googleapis.com/maps/api/distancematrix/json?' . http_build_query([
-        'origins' => $origin,
-        'destinations' => $destination,
-        'mode' => 'driving',
-        'language' => 'cs',
-        'units' => 'metric',
-        'key' => $apiKey
-    ]);
+    // Krok 2: Routing - výpočet trasy mezi body
+    $routeData = calculateRoute(
+        $originCoords['lat'],
+        $originCoords['lon'],
+        $destCoords['lat'],
+        $destCoords['lon']
+    );
 
-    // Volání API
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($httpCode !== 200) {
-        throw new Exception('Google Maps API vrátilo chybu');
+    if (!$routeData) {
+        throw new Exception('Nepodařilo se vypočítat trasu');
     }
 
-    $result = json_decode($response, true);
-
-    if ($result['status'] !== 'OK') {
-        throw new Exception('Distance Matrix API error: ' . $result['status']);
-    }
-
-    $element = $result['rows'][0]['elements'][0];
-
-    if ($element['status'] !== 'OK') {
-        throw new Exception('Nepodařilo se vypočítat vzdálenost');
-    }
-
-    echo json_encode([
-        'status' => 'success',
-        'distance' => $element['distance'],
-        'duration' => $element['duration']
-    ]);
-
-    ============================================================================
-    */
-
-    // MOCK IMPLEMENTACE (pro testování bez API klíče)
-    // Generuje náhodnou vzdálenost 10-100 km a čas 15-120 minut
-    $distanceKm = rand(10, 100);
-    $distanceMeters = $distanceKm * 1000;
-    $durationMinutes = rand(15, 120);
-    $durationSeconds = $durationMinutes * 60;
+    // Formátování výstupu
+    $distanceKm = round($routeData['distance'] / 1000, 1);
+    $durationMinutes = round($routeData['time'] / 60);
 
     echo json_encode([
         'status' => 'success',
         'distance' => [
-            'value' => $distanceMeters,
+            'value' => $routeData['distance'],
             'text' => $distanceKm . ' km'
         ],
         'duration' => [
-            'value' => $durationSeconds,
+            'value' => $routeData['time'],
             'text' => $durationMinutes . ' min'
-        ],
-        '_mock' => true,
-        '_message' => 'Toto je mock data. Pro produkci nakonfigurujte Google Maps API.'
+        ]
     ]);
 
 } catch (Exception $e) {

@@ -292,12 +292,12 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
     <div class="form-group" style="position:relative;">
       <label class="form-label" for="ulice">Ulice a číslo popisné</label>
       <input type="text" class="form-control" id="ulice" name="ulice" placeholder="Ulice a číslo popisné">
-      <div id="autocompleteDropdownUlice" style="display:none;position:absolute;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:100;width:100%;"></div>
+      <div id="autocompleteDropdownUlice" style="display:none;position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
     </div>
     <div class="form-group" style="position:relative;">
       <label class="form-label" for="mesto">Město</label>
       <input type="text" class="form-control" id="mesto" name="mesto" placeholder="Město">
-      <div id="autocompleteDropdown" style="display:none;position:absolute;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:100;width:100%;"></div>
+      <div id="autocompleteDropdown" style="display:none;position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
     </div>
     <div class="form-group">
       <label class="form-label" for="psc">PSČ</label>
