@@ -788,10 +788,10 @@ try {
 </div>
 
 <!-- External JavaScript -->
-<script src="assets/js/csrf-auto-inject.js" defer></script>
-<script src="assets/js/logger.js" defer></script>
-<script src="assets/js/admin-notifications.js" defer></script>
-<script src="assets/js/admin.js" defer></script>
+<script src="assets/js/csrf-auto-inject.js"></script>
+<script src="assets/js/logger.js"></script>
+<script src="assets/js/admin-notifications.js"></script>
+<script src="assets/js/admin.js"></script>
 
 <!-- MODAL: Edit Notification -->
 <div class="wgs-modal" id="editNotificationModal" style="display: none;">
