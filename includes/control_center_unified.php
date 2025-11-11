@@ -600,6 +600,16 @@ function isSuccess(data) {
     return (data && (data.success === true || data.status === 'success'));
 }
 
+// Helper function to get CSRF token from meta tag
+function getCSRFToken() {
+    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    if (!metaTag) {
+        console.error('[Control Center] CSRF token meta tag not found!');
+        return null;
+    }
+    return metaTag.getAttribute('content');
+}
+
 // Accordion functionality
 document.querySelectorAll('.cc-header').forEach(header => {
     header.addEventListener('click', function() {
@@ -1121,10 +1131,19 @@ function loadActions() {
 function deleteKey(keyId) {
     if (!confirm('Opravdu chcete smazat tento klíč?')) return;
 
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        return;
+    }
+
     fetch('api/admin_api.php?action=delete_key', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key_id: keyId })
+        body: JSON.stringify({
+            key_id: keyId,
+            csrf_token: csrfToken
+        })
     })
     .then(r => r.json())
     .then(data => {
@@ -1140,10 +1159,19 @@ function deleteKey(keyId) {
 }
 
 function completeAction(actionId) {
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        return;
+    }
+
     fetch('api/control_center_api.php?action=complete_action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action_id: actionId })
+        body: JSON.stringify({
+            action_id: actionId,
+            csrf_token: csrfToken
+        })
     })
     .then(r => r.json())
     .then(data => {
@@ -1161,10 +1189,19 @@ function completeAction(actionId) {
 }
 
 function dismissAction(actionId) {
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        return;
+    }
+
     fetch('api/control_center_api.php?action=dismiss_action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action_id: actionId })
+        body: JSON.stringify({
+            action_id: actionId,
+            csrf_token: csrfToken
+        })
     })
     .then(r => r.json())
     .then(data => {
