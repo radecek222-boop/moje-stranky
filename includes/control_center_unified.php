@@ -291,12 +291,16 @@ try {
 
                 <!-- Tab Content: Statistiky reklamací -->
                 <div id="statsTabClaims" class="cc-tab-content active">
-                    <iframe id="statsIframe" class="cc-inline-iframe" src=""></iframe>
+                    <iframe id="statsIframe" class="cc-inline-iframe" src=""
+                            sandbox="allow-scripts allow-same-origin"
+                            title="Statistiky reklamací"></iframe>
                 </div>
 
                 <!-- Tab Content: Web Analytics -->
                 <div id="statsTabWeb" class="cc-tab-content">
-                    <iframe id="analyticsIframe" class="cc-inline-iframe" src=""></iframe>
+                    <iframe id="analyticsIframe" class="cc-inline-iframe" src=""
+                            sandbox="allow-scripts allow-same-origin"
+                            title="Web Analytics"></iframe>
                 </div>
             </div>
         </div>
@@ -400,7 +404,9 @@ try {
         </div>
         <div class="cc-body">
             <div class="cc-content">
-                <iframe id="notificationsIframe" class="cc-inline-iframe" src=""></iframe>
+                <iframe id="notificationsIframe" class="cc-inline-iframe" src=""
+                        sandbox="allow-scripts allow-same-origin"
+                        title="Email & SMS notifikace"></iframe>
             </div>
         </div>
     </div>
@@ -530,7 +536,9 @@ try {
         </div>
         <div class="cc-body">
             <div class="cc-content">
-                <iframe id="toolsIframe" class="cc-inline-iframe" src=""></iframe>
+                <iframe id="toolsIframe" class="cc-inline-iframe" src=""
+                        sandbox="allow-scripts allow-same-origin"
+                        title="Diagnostika systému"></iframe>
             </div>
         </div>
     </div>
@@ -576,7 +584,9 @@ try {
         </div>
         <div class="cc-body">
             <div class="cc-content">
-                <iframe id="testingIframe" class="cc-inline-iframe" src=""></iframe>
+                <iframe id="testingIframe" class="cc-inline-iframe" src=""
+                        sandbox="allow-scripts allow-same-origin allow-forms"
+                        title="Testovací prostředí"></iframe>
             </div>
         </div>
     </div>
@@ -588,6 +598,16 @@ try {
 // Handles both {success: true} and {status: 'success'} formats
 function isSuccess(data) {
     return (data && (data.success === true || data.status === 'success'));
+}
+
+// Helper function to get CSRF token from meta tag
+function getCSRFToken() {
+    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    if (!metaTag) {
+        console.error('[Control Center] CSRF token meta tag not found!');
+        return null;
+    }
+    return metaTag.getAttribute('content');
 }
 
 // Accordion functionality
@@ -836,10 +856,18 @@ function loadKeys() {
     container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--c-grey);">Načítání klíčů...</div>';
 
     fetch('api/admin_api.php?action=list_keys')
-        .then(r => {
+        .then(async r => {
             console.log('[Control Center] Keys response status:', r.status);
             if (!r.ok) {
-                throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+                // Try to parse error message from response
+                let errorMsg = `HTTP ${r.status}: ${r.statusText}`;
+                try {
+                    const errorData = await r.json();
+                    errorMsg = errorData.message || errorData.error || errorMsg;
+                } catch (e) {
+                    // JSON parse failed, use default message
+                }
+                throw new Error(errorMsg);
             }
             return r.json();
         })
@@ -1103,10 +1131,19 @@ function loadActions() {
 function deleteKey(keyId) {
     if (!confirm('Opravdu chcete smazat tento klíč?')) return;
 
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        return;
+    }
+
     fetch('api/admin_api.php?action=delete_key', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key_id: keyId })
+        body: JSON.stringify({
+            key_id: keyId,
+            csrf_token: csrfToken
+        })
     })
     .then(r => r.json())
     .then(data => {
@@ -1122,10 +1159,19 @@ function deleteKey(keyId) {
 }
 
 function completeAction(actionId) {
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        return;
+    }
+
     fetch('api/control_center_api.php?action=complete_action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action_id: actionId })
+        body: JSON.stringify({
+            action_id: actionId,
+            csrf_token: csrfToken
+        })
     })
     .then(r => r.json())
     .then(data => {
@@ -1143,10 +1189,19 @@ function completeAction(actionId) {
 }
 
 function dismissAction(actionId) {
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        return;
+    }
+
     fetch('api/control_center_api.php?action=dismiss_action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action_id: actionId })
+        body: JSON.stringify({
+            action_id: actionId,
+            csrf_token: csrfToken
+        })
     })
     .then(r => r.json())
     .then(data => {
