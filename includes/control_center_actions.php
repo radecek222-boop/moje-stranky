@@ -11,6 +11,9 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
 $pdo = getDbConnection();
 
+// Detect embed mode for iframe contexts
+$embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
+
 // Načtení pending actions
 $pendingActions = [];
 $tableExists = true;
@@ -80,6 +83,7 @@ function getPriorityBadge($priority) {
 
 <div class="control-detail active">
     <!-- Header -->
+    <?php if (!$embedMode): ?>
     <div class="control-detail-header">
         <button class="control-detail-back" onclick="window.location.href='admin.php?tab=control_center'">
             <span>‹</span>
@@ -87,8 +91,9 @@ function getPriorityBadge($priority) {
         </button>
         <h2 class="control-detail-title">🚀 Akce & Úkoly</h2>
     </div>
+    <?php endif; ?>
 
-    <div class="control-detail-content">
+    <div class="control-detail-content" style="<?= $embedMode ? 'padding-top: 1rem;' : '' ?>">
 
         <!-- Summary -->
         <?php if (!$tableExists): ?>
