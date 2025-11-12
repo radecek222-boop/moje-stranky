@@ -770,9 +770,27 @@ async function saveSettings() {
         glow_intensity: document.getElementById('glow-intensity').value,
     };
 
-    // TODO: Implementovat API volání pro uložení
-    console.log('Saving settings:', settings);
-    alert('Nastavení uloženo! (API implementace v1.1)');
+    // Uložení přes API
+    fetch('/api/control_center_api.php?action=save_theme', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(settings)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success' || data.success) {
+            alert('✓ Nastavení vzhledu uloženo!');
+            console.log('Settings saved:', settings);
+        } else {
+            throw new Error(data.message || 'Chyba při ukládání');
+        }
+    })
+    .catch(err => {
+        console.error('Save error:', err);
+        alert('❌ Chyba při ukládání nastavení: ' + err.message);
+    });
 }
 
 function resetToDefaults() {

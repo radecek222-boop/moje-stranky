@@ -313,18 +313,6 @@ function getPriorityBadge($priority) {
 
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">➕ Vytvořit nový úkol</div>
-                    <div class="setting-item-description">Přidat vlastní pending action</div>
-                </div>
-                <div class="setting-item-right">
-                    <button class="cc-btn cc-btn-sm cc-btn-primary" onclick="createNewAction()">
-                        Vytvořit
-                    </button>
-                </div>
-            </div>
-
-            <div class="setting-item">
-                <div class="setting-item-left">
                     <div class="setting-item-label">🔄 Obnovit seznam</div>
                     <div class="setting-item-description">Načíst aktuální stav</div>
                 </div>
@@ -484,17 +472,6 @@ async function dismissAction(actionId) {
     } catch (error) {
         alert('❌ Chyba: ' + error.message);
     }
-}
-
-function createNewAction() {
-    const title = prompt('Název úkolu:');
-    if (!title) return;
-
-    const description = prompt('Popis:');
-    const priority = prompt('Priorita (low/medium/high/critical):', 'medium');
-
-    // TODO: API call to create action
-    alert('Funkce bude implementována v příští verzi');
 }
 
 function viewAllWebhooks() {
