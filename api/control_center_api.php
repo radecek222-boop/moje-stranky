@@ -87,12 +87,11 @@ try {
         }
     }
 
-    // Actions které VYŽADUJÍ existenci tabulek
+    // Actions které VYŽADUJÍ existenci VŠECH ACC tabulek
+    // SMTP config actions jsou VYŇATY - potřebují pouze wgs_system_config
     $actionsRequiringTables = [
         'save_theme', 'get_pending_actions', 'execute_action', 'complete_action', 'dismiss_action',
-        'get_content_texts', 'save_content_text',
-        'get_system_config', 'save_system_config', 'get_smtp_config', 'save_smtp_config',
-        'test_smtp_connection', 'send_test_email'
+        'get_content_texts', 'save_content_text'
     ];
 
     // Pokud tabulky chybí a action je v seznamu vyžadujících tabulky, vrátit info

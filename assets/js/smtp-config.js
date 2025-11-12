@@ -29,11 +29,12 @@ async function loadSmtpConfig() {
             document.getElementById('smtp_from').value = smtpConfigData.smtp_from || 'reklamace@wgs-service.cz';
             document.getElementById('smtp_from_name').value = smtpConfigData.smtp_from_name || 'White Glove Service';
         } else {
-            alert('Chyba při načítání SMTP konfigurace: ' + result.message);
+            console.error('Chyba při načítání SMTP konfigurace:', result.message);
+            showNotification('error', 'Chyba při načítání SMTP konfigurace: ' + result.message);
         }
     } catch (error) {
         console.error('Load SMTP config error:', error);
-        alert('Chyba při načítání SMTP konfigurace');
+        showNotification('error', 'Chyba při načítání SMTP konfigurace');
     }
 }
 
@@ -55,12 +56,12 @@ async function saveSmtpConfig() {
 
     // Validace
     if (!smtpData.smtp_host) {
-        alert('Vyplňte SMTP server');
+        showNotification('warning', 'Vyplňte SMTP server');
         return;
     }
 
     if (!smtpData.smtp_username) {
-        alert('Vyplňte uživatelské jméno');
+        showNotification('warning', 'Vyplňte uživatelské jméno');
         return;
     }
 
@@ -87,13 +88,13 @@ async function saveSmtpConfig() {
         const result = await response.json();
 
         if (result.status === 'success') {
-            alert('✓ SMTP konfigurace byla uložena');
+            showNotification('success', '✓ SMTP konfigurace byla uložena');
         } else {
-            alert('Chyba: ' + result.message);
+            showNotification('error', 'Chyba: ' + result.message);
         }
     } catch (error) {
         console.error('Save SMTP config error:', error);
-        alert('Chyba při ukládání SMTP konfigurace');
+        showNotification('error', 'Chyba při ukládání SMTP konfigurace');
     } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = originalText;
@@ -126,13 +127,13 @@ async function testSmtpConnection() {
         const result = await response.json();
 
         if (result.status === 'success') {
-            alert('✓ ' + result.message);
+            showNotification('success', '✓ ' + result.message);
         } else {
-            alert('✗ Test selhal: ' + result.message);
+            showNotification('error', '✗ Test selhal: ' + result.message);
         }
     } catch (error) {
         console.error('Test SMTP error:', error);
-        alert('✗ Chyba při testování SMTP připojení');
+        showNotification('error', '✗ Chyba při testování SMTP připojení');
     } finally {
         testBtn.disabled = false;
         testBtn.textContent = originalText;
