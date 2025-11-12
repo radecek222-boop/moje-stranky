@@ -786,6 +786,12 @@ try {
 
             foreach ($iterator as $file) {
                 if ($file->getExtension() === 'php') {
+                    // Přeskočit vendor a node_modules
+                    if (strpos($file->getPathname(), '/vendor/') !== false ||
+                        strpos($file->getPathname(), '/node_modules/') !== false) {
+                        continue;
+                    }
+
                     $phpFiles[] = $file->getPathname();
 
                     // Zkontrolovat PHP syntax
@@ -794,9 +800,20 @@ try {
                     exec('php -l ' . escapeshellarg($file->getPathname()) . ' 2>&1', $output, $returnVar);
 
                     if ($returnVar !== 0) {
+                        $relativePath = str_replace($rootDir . '/', '', $file->getPathname());
+                        $errorText = implode(' ', $output);
+
+                        // Parsovat řádek z chyby (např. "Parse error: ... on line 123")
+                        $line = null;
+                        if (preg_match('/on line (\d+)/', $errorText, $matches)) {
+                            $line = $matches[1];
+                        }
+
                         $errors[] = [
-                            'file' => str_replace($rootDir . '/', '', $file->getPathname()),
-                            'error' => implode(' ', $output)
+                            'file' => $relativePath,
+                            'line' => $line,
+                            'error' => $errorText,
+                            'type' => 'syntax'
                         ];
                     }
                 }
@@ -818,13 +835,22 @@ try {
 
             if (file_exists($jsLogFile)) {
                 $lines = file($jsLogFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-                // Poslední 10 errors
-                $recentErrors = array_slice(array_reverse($lines), 0, 10);
+                // Poslední 20 errors
+                $recentErrors = array_slice(array_reverse($lines), 0, 20);
 
                 foreach ($recentErrors as $line) {
                     $decoded = json_decode($line, true);
                     if ($decoded) {
-                        $jsErrors[] = $decoded;
+                        // Struktura: message, file, line, stack, timestamp
+                        $jsErrors[] = [
+                            'message' => $decoded['message'] ?? 'Unknown error',
+                            'file' => $decoded['file'] ?? $decoded['source'] ?? 'unknown',
+                            'line' => $decoded['line'] ?? $decoded['lineno'] ?? null,
+                            'column' => $decoded['column'] ?? $decoded['colno'] ?? null,
+                            'stack' => $decoded['stack'] ?? null,
+                            'timestamp' => $decoded['timestamp'] ?? null,
+                            'user_agent' => $decoded['user_agent'] ?? null
+                        ];
                     }
                 }
             }
@@ -836,7 +862,8 @@ try {
                 'status' => 'success',
                 'data' => [
                     'total' => count($jsFiles),
-                    'recent_errors' => $jsErrors
+                    'recent_errors' => $jsErrors,
+                    'error_count' => count($jsErrors)
                 ]
             ]);
             break;
@@ -912,22 +939,77 @@ try {
             $jsErrors = [];
             $securityLogs = [];
 
-            // PHP errors (poslední 24h)
+            // PHP errors - parsovat strukturovaně
             if (file_exists($phpErrorsFile)) {
                 $lines = file($phpErrorsFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-                $phpErrors = array_slice(array_reverse($lines), 0, 20);
+                $recentLines = array_slice(array_reverse($lines), 0, 20);
+
+                foreach ($recentLines as $line) {
+                    // Parsovat PHP error log formát: [timestamp] Type: message in /path/file.php:123
+                    if (preg_match('/\[(.*?)\]\s*(.*?):\s*(.*?)\s+in\s+(.*?):(\d+)/', $line, $matches)) {
+                        $phpErrors[] = [
+                            'timestamp' => $matches[1],
+                            'type' => $matches[2],
+                            'message' => $matches[3],
+                            'file' => basename($matches[4]),
+                            'full_path' => $matches[4],
+                            'line' => $matches[5],
+                            'raw' => $line
+                        ];
+                    } else {
+                        // Fallback pro neparsovatelné řádky
+                        $phpErrors[] = [
+                            'raw' => $line,
+                            'parsed' => false
+                        ];
+                    }
+                }
             }
 
-            // JS errors
+            // JS errors - parsovat JSON
             if (file_exists($jsErrorsFile)) {
                 $lines = file($jsErrorsFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-                $jsErrors = array_slice(array_reverse($lines), 0, 20);
+                $recentLines = array_slice(array_reverse($lines), 0, 20);
+
+                foreach ($recentLines as $line) {
+                    $decoded = json_decode($line, true);
+                    if ($decoded) {
+                        $jsErrors[] = [
+                            'message' => $decoded['message'] ?? 'Unknown error',
+                            'file' => basename($decoded['file'] ?? $decoded['source'] ?? 'unknown'),
+                            'full_path' => $decoded['file'] ?? $decoded['source'] ?? 'unknown',
+                            'line' => $decoded['line'] ?? $decoded['lineno'] ?? null,
+                            'column' => $decoded['column'] ?? $decoded['colno'] ?? null,
+                            'timestamp' => $decoded['timestamp'] ?? null,
+                            'user_agent' => $decoded['user_agent'] ?? null
+                        ];
+                    }
+                }
             }
 
-            // Security logs
+            // Security logs - parsovat strukturovaně
             if (file_exists($securityLogFile)) {
                 $lines = file($securityLogFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-                $securityLogs = array_slice(array_reverse($lines), 0, 20);
+                $recentLines = array_slice(array_reverse($lines), 0, 20);
+
+                foreach ($recentLines as $line) {
+                    // Parsovat security log formát: [timestamp] [TYPE] message
+                    if (preg_match('/\[(.*?)\]\s*\[(.*?)\]\s*(.*)/', $line, $matches)) {
+                        $securityLogs[] = [
+                            'timestamp' => $matches[1],
+                            'type' => $matches[2],
+                            'message' => $matches[3],
+                            'severity' => strpos($matches[2], 'CRITICAL') !== false ? 'critical' :
+                                         (strpos($matches[2], 'WARNING') !== false ? 'warning' : 'info')
+                        ];
+                    } else {
+                        // Fallback
+                        $securityLogs[] = [
+                            'raw' => $line,
+                            'parsed' => false
+                        ];
+                    }
+                }
             }
 
             echo json_encode([
