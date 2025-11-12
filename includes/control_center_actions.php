@@ -14,6 +14,14 @@ $pdo = getDbConnection();
 // Detect embed mode for iframe contexts
 $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
+// Kontrola, zda je Admin Control Center nainstalovaný
+$adminCenterInstalled = true;
+try {
+    $pdo->query("SELECT 1 FROM wgs_system_config LIMIT 1");
+} catch (PDOException $e) {
+    $adminCenterInstalled = false;
+}
+
 // Načtení pending actions
 $pendingActions = [];
 $tableExists = true;
@@ -94,6 +102,25 @@ function getPriorityBadge($priority) {
     <?php endif; ?>
 
     <div class="control-detail-content" style="<?= $embedMode ? 'padding-top: 1rem;' : '' ?>">
+
+        <!-- Admin Control Center Installation -->
+        <?php if (!$adminCenterInstalled): ?>
+            <div class="cc-alert danger">
+                <div class="cc-alert-icon">🚀</div>
+                <div class="cc-alert-content">
+                    <div class="cc-alert-title">Admin Control Center není nainstalován</div>
+                    <div class="cc-alert-message">
+                        Databázové tabulky pro Admin Control Center neexistují. Klikněte na tlačítko níže pro automatickou instalaci.
+                        <br><small>Bude vytvořeno 6 tabulek: theme_settings, content_texts, system_config, pending_actions, action_history, github_webhooks</small>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="cc-btn cc-btn-success" onclick="window.open('/install_admin_control_center.php', '_blank', 'width=900,height=700')">
+                            🚀 Spustit instalaci Admin Control Center
+                        </button>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <!-- Summary -->
         <?php if (!$tableExists): ?>

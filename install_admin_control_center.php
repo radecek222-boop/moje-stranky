@@ -1,368 +1,421 @@
 <?php
 /**
- * Instalátor Admin Control Center
- * 
- * Tento skript vytvoří databázové tabulky pro iOS-style admin panel
- * PO SPUŠTĚNÍ TENTO SOUBOR SMAŽTE!
+ * Admin Control Center - Installation Script
+ * Automatické spuštění migrace migration_admin_control_center.sql
  */
 
-require_once __DIR__ . '/init.php';
+session_start();
 
-// BEZPEČNOST: Pouze admin
-$isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
-if (!$isAdmin) {
-    http_response_code(403);
-    die('❌ PŘÍSTUP ODEPŘEN: Pouze admin může spustit instalaci.');
+// Bezpečnostní kontrola
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    header('Location: /prihlaseni.php');
+    exit;
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instalace Admin Control Center - WGS</title>
+    <title>Installation - Admin Control Center</title>
+    <link rel="stylesheet" href="/assets/css/control-center.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
-        .container {
+
+        .install-container {
             background: white;
-            max-width: 800px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
             width: 100%;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
         }
-        .header {
+
+        .install-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px;
+            padding: 30px;
             text-align: center;
-        }
-        .header h1 {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1rem;
-        }
-        .content {
-            padding: 40px;
-        }
-        .status {
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 12px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .status-icon {
-            font-size: 2rem;
-            flex-shrink: 0;
-        }
-        .success { background: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
-        .error { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; }
-        .warning { background: #fff3cd; color: #856404; border: 2px solid #ffeeba; }
-        .info { background: #d1ecf1; color: #0c5460; border: 2px solid #bee5eb; }
-        .progress {
-            background: #f0f0f0;
-            border-radius: 10px;
-            height: 40px;
-            overflow: hidden;
-            margin: 20px 0;
-        }
-        .progress-bar {
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             color: white;
+        }
+
+        .install-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
             font-weight: 600;
-            transition: width 0.3s ease;
         }
-        .table-list {
+
+        .install-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .install-body {
+            padding: 30px;
+        }
+
+        .install-info {
             background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
         }
-        .table-list h3 {
-            margin-bottom: 15px;
+
+        .install-info h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
             color: #333;
         }
-        .table-item {
+
+        .install-info ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .install-status {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .install-status.active {
+            display: block;
+        }
+
+        .status-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 12px 15px;
-            background: white;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
             border-radius: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #dee2e6;
+            font-size: 14px;
         }
-        .table-name {
+
+        .status-item.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-item.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-item.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .install-log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
             font-family: 'Courier New', monospace;
-            font-weight: 600;
-            color: #495057;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            display: none;
         }
-        .table-count {
-            background: #667eea;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
+
+        .install-log.active {
+            display: block;
         }
+
+        .log-line {
+            margin-bottom: 4px;
+            line-height: 1.5;
+        }
+
+        .log-time {
+            color: #858585;
+        }
+
+        .log-success {
+            color: #4ec9b0;
+        }
+
+        .log-error {
+            color: #f48771;
+        }
+
+        .log-info {
+            color: #569cd6;
+        }
+
+        .install-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
         .btn {
-            display: inline-block;
-            padding: 15px 30px;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: 600;
-            text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
         }
-        .btn:hover {
+
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
-        .btn-danger {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
         .btn-success {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            background: #28a745;
+            color: white;
         }
-        .actions {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-            flex-wrap: wrap;
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            display: none;
         }
-        .icon-large {
-            font-size: 4rem;
-            text-align: center;
-            margin: 20px 0;
+
+        .progress-bar.active {
+            display: block;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.5s;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🎨 Admin Control Center</h1>
-            <p>iOS-style centrální řídicí panel</p>
+    <div class="install-container">
+        <div class="install-header">
+            <h1>🚀 Admin Control Center</h1>
+            <p>Instalace databázových tabulek</p>
         </div>
-        <div class="content">
-<?php
-try {
-    $pdo = getDbConnection();
-    $startTime = microtime(true);
 
-    // Kontrola zda tabulky již existují
-    $existingTables = [];
-    $requiredTables = [
-        'wgs_theme_settings',
-        'wgs_content_texts',
-        'wgs_system_config',
-        'wgs_pending_actions',
-        'wgs_action_history',
-        'wgs_github_webhooks'
-    ];
+        <div class="install-body">
+            <div class="install-info">
+                <h3>📋 Co bude nainstalováno:</h3>
+                <ul>
+                    <li><strong>wgs_theme_settings</strong> - Barvy, fonty, logo</li>
+                    <li><strong>wgs_content_texts</strong> - Editovatelné texty stránek</li>
+                    <li><strong>wgs_system_config</strong> - SMTP, API klíče, bezpečnost</li>
+                    <li><strong>wgs_pending_actions</strong> - Systém akcí a úkolů</li>
+                    <li><strong>wgs_action_history</strong> - Historie provedených akcí</li>
+                    <li><strong>wgs_github_webhooks</strong> - GitHub integrace</li>
+                </ul>
+            </div>
 
-    foreach ($requiredTables as $table) {
-        $stmt = $pdo->query("SHOW TABLES LIKE '$table'");
-        if ($stmt->rowCount() > 0) {
-            $existingTables[] = $table;
-        }
-    }
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
 
-    if (count($existingTables) === count($requiredTables)) {
-        echo '<div class="icon-large">✅</div>';
-        echo '<div class="status success">';
-        echo '<span class="status-icon">✅</span>';
-        echo '<div><strong>Admin Control Center je již nainstalován!</strong><br>Všechny tabulky existují.</div>';
-        echo '</div>';
+            <div class="install-status" id="installStatus"></div>
 
-        // Zobrazit počty záznamů
-        echo '<div class="table-list">';
-        echo '<h3>📊 Stav databáze:</h3>';
-        
-        foreach ($requiredTables as $table) {
-            $stmt = $pdo->query("SELECT COUNT(*) as count FROM $table");
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            $count = $result['count'];
-            
-            echo '<div class="table-item">';
-            echo '<span class="table-name">' . $table . '</span>';
-            echo '<span class="table-count">' . $count . ' záznamů</span>';
-            echo '</div>';
-        }
-        echo '</div>';
+            <div class="install-log" id="installLog"></div>
 
-        echo '<div class="actions">';
-        echo '<a href="admin.php?tab=control_center" class="btn btn-success">Otevřít Control Center</a>';
-        echo '<a href="?force_reinstall=1" class="btn btn-danger">Přeinstalovat (VAROVÁNÍ: smaže data!)</a>';
-        echo '</div>';
-
-        if (isset($_GET['force_reinstall'])) {
-            echo '<div class="status warning">';
-            echo '<span class="status-icon">⚠️</span>';
-            echo '<div>Probíhá přeinstalace...</div>';
-            echo '</div>';
-            foreach ($requiredTables as $table) {
-                $pdo->exec("DROP TABLE IF EXISTS $table");
-            }
-            header('Refresh: 2');
-            exit;
-        } else {
-            exit;
-        }
-    }
-
-    // Spustit instalaci
-    echo '<div class="status info">';
-    echo '<span class="status-icon">🚀</span>';
-    echo '<div><strong>Spouštím instalaci...</strong></div>';
-    echo '</div>';
-
-    // Progress bar
-    echo '<div class="progress">';
-    echo '<div class="progress-bar" style="width: 20%">20%</div>';
-    echo '</div>';
-
-    // Načtení SQL souboru
-    $sqlFile = __DIR__ . '/migration_admin_control_center.sql';
-    if (!file_exists($sqlFile)) {
-        throw new Exception('SQL migrace nenalezena: migration_admin_control_center.sql');
-    }
-
-    $sql = file_get_contents($sqlFile);
-
-    // Odstranit komentáře
-    $sql = preg_replace('/--[^\n]*\n/', "\n", $sql);
-
-    // Rozdělení na jednotlivé příkazy
-    $statements = array_filter(
-        array_map('trim', explode(';', $sql)),
-        function($stmt) {
-            $stmt = trim($stmt);
-            return !empty($stmt) &&
-                   !preg_match('/^SELECT/i', $stmt) &&
-                   strlen($stmt) > 10; // Skip very short statements
-        }
-    );
-
-    $totalSteps = count($statements);
-    $currentStep = 0;
-    $errors = [];
-
-    foreach ($statements as $statement) {
-        $statement = trim($statement);
-        if (!empty($statement)) {
-            try {
-                $pdo->exec($statement);
-                $currentStep++;
-            } catch (PDOException $e) {
-                $errors[] = "Statement failed: " . substr($statement, 0, 100) . "... Error: " . $e->getMessage();
-            }
-            $progress = round(($currentStep / $totalSteps) * 100);
-        }
-    }
-
-    if (!empty($errors)) {
-        throw new Exception("Některé SQL příkazy selhaly:\n" . implode("\n", $errors));
-    }
-
-    $endTime = microtime(true);
-    $executionTime = round(($endTime - $startTime) * 1000);
-
-    echo '<div class="progress">';
-    echo '<div class="progress-bar" style="width: 100%">100% - Hotovo!</div>';
-    echo '</div>';
-
-    echo '<div class="icon-large">🎉</div>';
-
-    echo '<div class="status success">';
-    echo '<span class="status-icon">✅</span>';
-    echo '<div><strong>Instalace úspěšně dokončena!</strong><br>';
-    echo 'Čas vykonání: ' . $executionTime . ' ms</div>';
-    echo '</div>';
-
-    // Zobrazit vytvořené tabulky
-    echo '<div class="table-list">';
-    echo '<h3>📦 Vytvořené tabulky:</h3>';
-    
-    foreach ($requiredTables as $table) {
-        try {
-            $stmt = $pdo->query("SELECT COUNT(*) as count FROM $table");
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            $count = $result['count'];
-            
-            echo '<div class="table-item">';
-            echo '<span class="table-name">' . $table . '</span>';
-            echo '<span class="table-count">' . $count . ' záznamů</span>';
-            echo '</div>';
-        } catch (Exception $e) {
-            echo '<div class="table-item">';
-            echo '<span class="table-name">' . $table . '</span>';
-            echo '<span class="table-count" style="background: #dc3545;">CHYBA</span>';
-            echo '</div>';
-        }
-    }
-    echo '</div>';
-
-    echo '<div class="status info">';
-    echo '<span class="status-icon">💡</span>';
-    echo '<div>';
-    echo '<strong>Co teď?</strong><br>';
-    echo '1. Otevřete Admin Control Center<br>';
-    echo '2. Projděte si jednotlivé sekce<br>';
-    echo '3. <strong>DŮLEŽITÉ:</strong> Smažte tento soubor (install_admin_control_center.php)';
-    echo '</div>';
-    echo '</div>';
-
-    echo '<div class="actions">';
-    echo '<a href="admin.php?tab=control_center" class="btn btn-success">🚀 Otevřít Control Center</a>';
-    echo '<a href="admin.php" class="btn">← Zpět do adminu</a>';
-    echo '</div>';
-
-    echo '<div class="status warning">';
-    echo '<span class="status-icon">⚠️</span>';
-    echo '<div><strong>BEZPEČNOST:</strong> Smažte soubor <code>install_admin_control_center.php</code> z webu!</div>';
-    echo '</div>';
-
-} catch (PDOException $e) {
-    echo '<div class="icon-large">❌</div>';
-    echo '<div class="status error">';
-    echo '<span class="status-icon">❌</span>';
-    echo '<div><strong>CHYBA DATABÁZE:</strong><br>' . htmlspecialchars($e->getMessage()) . '</div>';
-    echo '</div>';
-} catch (Exception $e) {
-    echo '<div class="icon-large">❌</div>';
-    echo '<div class="status error">';
-    echo '<span class="status-icon">❌</span>';
-    echo '<div><strong>CHYBA:</strong><br>' . htmlspecialchars($e->getMessage()) . '</div>';
-    echo '</div>';
-}
-?>
+            <div class="install-actions">
+                <button class="btn btn-primary" id="installBtn" onclick="startInstallation()">
+                    ▶️ Spustit instalaci
+                </button>
+                <button class="btn btn-secondary" onclick="window.close()" style="display: none;" id="closeBtn">
+                    Zavřít
+                </button>
+                <button class="btn btn-success" onclick="window.location.href='/admin.php?tab=control_center'" style="display: none;" id="goToAdminBtn">
+                    ✅ Přejít do Control Center
+                </button>
+            </div>
         </div>
     </div>
+
+    <script>
+        let logLines = [];
+
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString('cs-CZ');
+            const colorClass = type === 'success' ? 'log-success' : (type === 'error' ? 'log-error' : 'log-info');
+
+            logLines.push(\`<div class="log-line"><span class="log-time">[\${timestamp}]</span> <span class="\${colorClass}">\${message}</span></div>\`);
+
+            const logElement = document.getElementById('installLog');
+            logElement.innerHTML = logLines.join('');
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function addStatus(message, type = 'info') {
+            const statusElement = document.getElementById('installStatus');
+            const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
+
+            const statusItem = document.createElement('div');
+            statusItem.className = \`status-item \${type}\`;
+            statusItem.innerHTML = \`<span class="status-icon">\${icon}</span><span>\${message}</span>\`;
+
+            statusElement.appendChild(statusItem);
+        }
+
+        function setProgress(percent) {
+            document.getElementById('progressFill').style.width = percent + '%';
+        }
+
+        async function startInstallation() {
+            const installBtn = document.getElementById('installBtn');
+            const progressBar = document.getElementById('progressBar');
+            const installLog = document.getElementById('installLog');
+            const installStatus = document.getElementById('installStatus');
+
+            // Disable tlačítko
+            installBtn.disabled = true;
+            installBtn.textContent = '⏳ Probíhá instalace...';
+
+            // Zobrazit prvky
+            progressBar.classList.add('active');
+            installLog.classList.add('active');
+            installStatus.classList.add('active');
+
+            try {
+                // KROK 1: Kontrola stavu
+                addLog('🔍 Kontroluji aktuální stav databáze...', 'info');
+                setProgress(10);
+
+                const statusResponse = await fetch('/api/migration_executor.php?action=check_migration_status');
+                const statusData = await statusResponse.json();
+
+                if (statusData.status === 'success') {
+                    addLog('✓ Stav databáze načten', 'success');
+                    addStatus(\`Nalezeno \${statusData.data.tables_status.filter(t => t.exists).length}/6 tabulek\`, 'info');
+
+                    if (!statusData.data.migration_needed) {
+                        addLog('ℹ️ Všechny tabulky již existují!', 'info');
+                        addStatus('Migrace není potřeba - všechny tabulky jsou vytvořeny', 'success');
+                        setProgress(100);
+
+                        installBtn.style.display = 'none';
+                        document.getElementById('goToAdminBtn').style.display = 'inline-block';
+                        return;
+                    }
+                }
+
+                setProgress(25);
+
+                // KROK 2: Spuštění migrace
+                addLog('🚀 Spouštím migraci migration_admin_control_center.sql...', 'info');
+                setProgress(40);
+
+                const formData = new FormData();
+                formData.append('action', 'run_migration');
+                formData.append('migration_file', 'migration_admin_control_center.sql');
+
+                const migrationResponse = await fetch('/api/migration_executor.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                setProgress(70);
+
+                const migrationData = await migrationResponse.json();
+
+                if (migrationData.status === 'success') {
+                    addLog('✅ Migrace úspěšně dokončena!', 'success');
+                    addLog(\`📊 Vykonáno \${migrationData.data.statements_executed} SQL příkazů za \${migrationData.data.execution_time_ms}ms\`, 'success');
+
+                    setProgress(90);
+
+                    // Zobrazit výsledky
+                    addStatus(\`Vytvořeno \${migrationData.data.tables_created} tabulek\`, 'success');
+
+                    migrationData.data.details.forEach(detail => {
+                        if (detail.table) {
+                            addLog(\`  ✓ \${detail.table}: \${detail.rows} záznamů\`, 'success');
+                        }
+                    });
+
+                    setProgress(100);
+
+                    addLog('🎉 Instalace kompletně dokončena!', 'success');
+                    addStatus('Admin Control Center je připraven k použití', 'success');
+
+                    // Zobrazit tlačítko
+                    installBtn.style.display = 'none';
+                    document.getElementById('goToAdminBtn').style.display = 'inline-block';
+                    document.getElementById('closeBtn').style.display = 'inline-block';
+
+                } else {
+                    throw new Error(migrationData.message);
+                }
+
+            } catch (error) {
+                addLog('❌ CHYBA: ' + error.message, 'error');
+                addStatus('Instalace selhala: ' + error.message, 'error');
+
+                installBtn.disabled = false;
+                installBtn.textContent = '🔄 Zkusit znovu';
+
+                setProgress(0);
+            }
+        }
+
+        // Auto-check při načtení stránky
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('/api/migration_executor.php?action=check_migration_status');
+                const data = await response.json();
+
+                if (data.status === 'success' && !data.data.migration_needed) {
+                    document.querySelector('.install-info').innerHTML = \`
+                        <h3>✅ Instalace již proběhla</h3>
+                        <p style="margin: 10px 0 0 0; color: #666;">Všechny tabulky Admin Control Center jsou již vytvořeny.</p>
+                    \`;
+
+                    document.getElementById('installBtn').textContent = '✅ Již nainstalováno';
+                    document.getElementById('installBtn').disabled = true;
+                    document.getElementById('goToAdminBtn').style.display = 'inline-block';
+                }
+            } catch (error) {
+                console.error('Auto-check failed:', error);
+            }
+        });
+    </script>
 </body>
 </html>

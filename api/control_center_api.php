@@ -1263,18 +1263,17 @@ try {
         case 'check_configuration':
             $rootDir = __DIR__ . '/..';
             $configFiles = [
-                'init.php',
-                'config.php',
-                'db_connect.php',
-                '.htaccess'
+                'init.php' => $rootDir . '/init.php',
+                'config.php' => $rootDir . '/config/config.php',
+                'database.php' => $rootDir . '/config/database.php',
+                '.htaccess' => $rootDir . '/.htaccess'
             ];
 
             $found = 0;
             $errors = [];
             $warnings = [];
 
-            foreach ($configFiles as $file) {
-                $fullPath = $rootDir . '/' . $file;
+            foreach ($configFiles as $file => $fullPath) {
                 if (file_exists($fullPath)) {
                     $found++;
 
@@ -1287,7 +1286,7 @@ try {
                     if ($file !== '.htaccess') { // .htaccess is optional
                         $errors[] = [
                             'file' => $file,
-                            'error' => 'Config file missing'
+                            'error' => 'Config file missing: ' . $fullPath
                         ];
                     }
                 }
