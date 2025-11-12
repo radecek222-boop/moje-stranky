@@ -166,26 +166,4 @@ CREATE TABLE IF NOT EXISTS wgs_github_webhooks (
     INDEX idx_processed (processed)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================
-
--- Kontrola výsledku
-SELECT 'Migration completed successfully!' AS status;
-SELECT
-    'wgs_theme_settings' AS table_name,
-    COUNT(*) AS row_count
-FROM wgs_theme_settings
-UNION ALL
-SELECT
-    'wgs_content_texts' AS table_name,
-    COUNT(*) AS row_count
-FROM wgs_content_texts
-UNION ALL
-SELECT
-    'wgs_system_config' AS table_name,
-    COUNT(*) AS row_count
-FROM wgs_system_config
-UNION ALL
-SELECT
-    'wgs_pending_actions' AS table_name,
-    COUNT(*) AS row_count
-FROM wgs_pending_actions;
+-- Migration completed
