@@ -365,6 +365,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 // Modal systém
 function openStatsModal(type) {
     const overlay = document.getElementById('statsModalOverlay');
+    const modal = overlay.querySelector('.cc-modal');
     const title = document.getElementById('statsModalTitle');
     const body = document.getElementById('statsModalBody');
 
@@ -382,14 +383,19 @@ function openStatsModal(type) {
     // Načíst obsah podle typu
     loadStatsContent(type, body);
 
-    // Zobrazit modal
-    overlay.style.display = 'flex';
+    // Zobrazit modal - přidat třídu active k overlay i modalu
+    overlay.classList.add('active');
+    modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
 function closeStatsModal() {
     const overlay = document.getElementById('statsModalOverlay');
-    overlay.style.display = 'none';
+    const modal = overlay.querySelector('.cc-modal');
+
+    // Odebrat třídu active z overlay i modalu
+    overlay.classList.remove('active');
+    modal.classList.remove('active');
     document.body.style.overflow = 'auto';
 }
 
