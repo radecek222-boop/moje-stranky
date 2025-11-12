@@ -165,7 +165,9 @@ try {
                 ];
             }
 
-            $allTablesExist = count(array_filter($status, fn($s) => $s['exists'])) === count($tables);
+            $allTablesExist = count(array_filter($status, function($s) {
+                return $s['exists'];
+            })) === count($tables);
 
             echo json_encode([
                 'status' => 'success',
