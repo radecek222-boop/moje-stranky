@@ -195,7 +195,24 @@ try {
             </div>
         </div>
 
-        <!-- 8. STATISTIKY & REPORTY -->
+        <!-- 8. KONZOLE -->
+        <div class="control-card" data-section="console" onclick="openSection('console')">
+            <div class="control-card-badge warning">⚡</div>
+            <div class="control-card-header">
+                <div>
+                    <div class="control-card-icon">💻</div>
+                    <h3 class="control-card-title">Konzole</h3>
+                    <p class="control-card-description">Diagnostika HTML/PHP/JS/CSS/SQL</p>
+                </div>
+                <div class="control-card-arrow">›</div>
+            </div>
+            <div class="control-card-status">
+                <span class="control-card-status-dot blue"></span>
+                <span>Developer Tools</span>
+            </div>
+        </div>
+
+        <!-- 9. STATISTIKY & REPORTY -->
         <div class="control-card" data-section="analytics" onclick="openSection('analytics')">
             <div class="control-card-header">
                 <div>

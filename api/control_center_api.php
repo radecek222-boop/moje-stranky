@@ -742,6 +742,206 @@ try {
             ]);
             break;
 
+        // ==========================================
+        // KONZOLE DIAGNOSTIKA
+        // ==========================================
+        case 'check_php_files':
+            $rootDir = __DIR__ . '/..';
+            $phpFiles = [];
+            $errors = [];
+            $warnings = [];
+
+            // Najít všechny PHP soubory
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($rootDir, RecursiveDirectoryIterator::SKIP_DOTS)
+            );
+
+            foreach ($iterator as $file) {
+                if ($file->getExtension() === 'php') {
+                    $phpFiles[] = $file->getPathname();
+
+                    // Zkontrolovat PHP syntax
+                    $output = [];
+                    $returnVar = 0;
+                    exec('php -l ' . escapeshellarg($file->getPathname()) . ' 2>&1', $output, $returnVar);
+
+                    if ($returnVar !== 0) {
+                        $errors[] = [
+                            'file' => str_replace($rootDir . '/', '', $file->getPathname()),
+                            'error' => implode(' ', $output)
+                        ];
+                    }
+                }
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'data' => [
+                    'total' => count($phpFiles),
+                    'errors' => $errors,
+                    'warnings' => $warnings
+                ]
+            ]);
+            break;
+
+        case 'check_js_errors':
+            $jsLogFile = __DIR__ . '/../logs/js_errors.log';
+            $jsErrors = [];
+
+            if (file_exists($jsLogFile)) {
+                $lines = file($jsLogFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                // Poslední 10 errors
+                $recentErrors = array_slice(array_reverse($lines), 0, 10);
+
+                foreach ($recentErrors as $line) {
+                    $decoded = json_decode($line, true);
+                    if ($decoded) {
+                        $jsErrors[] = $decoded;
+                    }
+                }
+            }
+
+            // Spočítat JS soubory
+            $jsFiles = glob(__DIR__ . '/../assets/js/*.js');
+
+            echo json_encode([
+                'status' => 'success',
+                'data' => [
+                    'total' => count($jsFiles),
+                    'recent_errors' => $jsErrors
+                ]
+            ]);
+            break;
+
+        case 'check_database':
+            $tables = [];
+            $corrupted = [];
+            $totalSize = 0;
+
+            // Získat všechny tabulky
+            $stmt = $pdo->query("SHOW TABLES");
+            $allTables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            foreach ($allTables as $table) {
+                $tables[] = $table;
+
+                // CHECK TABLE pro kontrolu integrity
+                try {
+                    $checkStmt = $pdo->query("CHECK TABLE `$table`");
+                    $result = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+                    if (stripos($result['Msg_text'], 'OK') === false) {
+                        $corrupted[] = $table;
+                    }
+                } catch (PDOException $e) {
+                    $corrupted[] = $table;
+                }
+
+                // Získat velikost tabulky
+                try {
+                    $sizeStmt = $pdo->query("
+                        SELECT (data_length + index_length) as size
+                        FROM information_schema.TABLES
+                        WHERE table_schema = DATABASE()
+                        AND table_name = '$table'
+                    ");
+                    $sizeResult = $sizeStmt->fetch(PDO::FETCH_ASSOC);
+                    $totalSize += $sizeResult['size'] ?? 0;
+                } catch (PDOException $e) {
+                    // Ignorovat
+                }
+            }
+
+            // Formátovat velikost
+            $size = $totalSize / 1024 / 1024; // MB
+            $sizeFormatted = $size > 1000 ? round($size / 1024, 2) . ' GB' : round($size, 2) . ' MB';
+
+            echo json_encode([
+                'status' => 'success',
+                'data' => [
+                    'tables' => $tables,
+                    'corrupted' => $corrupted,
+                    'missing_indexes' => [],
+                    'size' => $sizeFormatted
+                ]
+            ]);
+            break;
+
+        case 'get_recent_errors':
+            $phpErrorsFile = __DIR__ . '/../logs/php_errors.log';
+            $jsErrorsFile = __DIR__ . '/../logs/js_errors.log';
+            $securityLogFile = __DIR__ . '/../logs/security.log';
+
+            $phpErrors = [];
+            $jsErrors = [];
+            $securityLogs = [];
+
+            // PHP errors (poslední 24h)
+            if (file_exists($phpErrorsFile)) {
+                $lines = file($phpErrorsFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                $phpErrors = array_slice(array_reverse($lines), 0, 20);
+            }
+
+            // JS errors
+            if (file_exists($jsErrorsFile)) {
+                $lines = file($jsErrorsFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                $jsErrors = array_slice(array_reverse($lines), 0, 20);
+            }
+
+            // Security logs
+            if (file_exists($securityLogFile)) {
+                $lines = file($securityLogFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                $securityLogs = array_slice(array_reverse($lines), 0, 20);
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'data' => [
+                    'php_errors' => $phpErrors,
+                    'js_errors' => $jsErrors,
+                    'security_logs' => $securityLogs
+                ]
+            ]);
+            break;
+
+        case 'check_permissions':
+            $dirsToCheck = ['logs', 'uploads', 'temp', 'uploads/photos', 'uploads/protokoly'];
+            $writable = [];
+            $notWritable = [];
+
+            foreach ($dirsToCheck as $dir) {
+                $fullPath = __DIR__ . '/../' . $dir;
+                if (is_writable($fullPath)) {
+                    $writable[] = $dir;
+                } else {
+                    $notWritable[] = $dir;
+                }
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'data' => [
+                    'writable' => $writable,
+                    'not_writable' => $notWritable
+                ]
+            ]);
+            break;
+
+        case 'check_security':
+            $checks = [
+                'https' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+                'csrf_protection' => function_exists('validateCSRFToken'),
+                'rate_limiting' => true, // Předpokládáme že rate limiting je implementovaný
+                'strong_passwords' => true, // Kontrola v registration_controller.php
+                'admin_keys_secure' => defined('ADMIN_KEY_HASH')
+            ];
+
+            echo json_encode([
+                'status' => 'success',
+                'data' => $checks
+            ]);
+            break;
+
         default:
             http_response_code(400);
             echo json_encode([

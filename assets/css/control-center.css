@@ -234,6 +234,11 @@
   box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
 }
 
+.control-card-status-dot.blue {
+  background: #0E639C;
+  box-shadow: 0 0 8px rgba(14, 99, 156, 0.5);
+}
+
 /* ============================================
    DETAIL VIEW (Modal/Fullscreen)
    ============================================ */
