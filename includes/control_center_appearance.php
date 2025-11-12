@@ -10,6 +10,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 }
 
 $pdo = getDbConnection();
+$embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
 // Načtení aktuálního theme
 $themeSettings = [];
@@ -50,20 +51,21 @@ foreach ($defaults as $key => $value) {
 <link rel="stylesheet" href="/assets/css/control-center.css">
 
 <div class="control-detail active">
+    <?php if (!$embedMode): ?>
     <!-- Header -->
     <div class="control-detail-header">
         <button class="control-detail-back" onclick="window.location.href='admin.php?tab=control_center'">
             <span>‹</span>
             <span>Zpět</span>
         </button>
-        <h2 class="control-detail-title">🎨 Vzhled & Design</h2>
+        <h2 class="control-detail-title">Vzhled & Design</h2>
     </div>
+    <?php endif; ?>
 
     <div class="control-detail-content">
 
         <!-- Alert -->
         <div class="cc-alert info">
-            <div class="cc-alert-icon">💡</div>
             <div class="cc-alert-content">
                 <div class="cc-alert-title">Barevná paleta</div>
                 <div class="cc-alert-message">
@@ -246,22 +248,18 @@ foreach ($defaults as $key => $value) {
         <!-- Akce -->
         <div style="display: flex; gap: 1rem; margin-top: 2rem;">
             <button class="cc-btn cc-btn-primary" onclick="saveAllChanges()">
-                <span>💾</span>
                 <span>Uložit změny</span>
             </button>
             <button class="cc-btn cc-btn-secondary" onclick="resetToDefaults()">
-                <span>🔄</span>
                 <span>Výchozí nastavení</span>
             </button>
             <button class="cc-btn cc-btn-secondary" onclick="previewChanges()">
-                <span>👁️</span>
                 <span>Náhled</span>
             </button>
         </div>
 
         <!-- Success message -->
         <div id="save-success" class="cc-alert success cc-hidden" style="margin-top: 1rem;">
-            <div class="cc-alert-icon">✅</div>
             <div class="cc-alert-content">
                 <div class="cc-alert-title">Uloženo!</div>
                 <div class="cc-alert-message">Změny byly úspěšně uloženy a aplikovány.</div>
@@ -392,5 +390,5 @@ function previewChanges() {
     alert('Náhled změn bude implementován v budoucí verzi.\n\nV současnosti se změny aplikují okamžitě po uložení.');
 }
 
-console.log('✅ Appearance section loaded');
+console.log('[OK] Appearance section loaded');
 </script>

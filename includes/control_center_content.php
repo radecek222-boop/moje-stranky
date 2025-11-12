@@ -10,6 +10,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 }
 
 $pdo = getDbConnection();
+$embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
 // Načtení všech textů
 $contentTexts = [];
@@ -35,33 +36,34 @@ foreach ($contentTexts as $text) {
 
 // Překlad názvů stránek
 $pageNames = [
-    'index' => '🏠 Úvodní stránka',
-    'novareklamace' => '📝 Nová reklamace',
-    'mimozarucniceny' => '💰 Kalkulačka ceny',
-    'onas' => 'ℹ️ O nás',
-    'nasesluzby' => '🛠️ Naše služby',
-    'email' => '📧 Email šablony',
-    'gdpr' => '🔒 GDPR'
+    'index' => 'Úvodní stránka',
+    'novareklamace' => 'Nová reklamace',
+    'mimozarucniceny' => 'Kalkulačka ceny',
+    'onas' => 'O nás',
+    'nasesluzby' => 'Naše služby',
+    'email' => 'Email šablony',
+    'gdpr' => 'GDPR'
 ];
 ?>
 
 <link rel="stylesheet" href="/assets/css/control-center.css">
 
 <div class="control-detail active">
+    <?php if (!$embedMode): ?>
     <!-- Header -->
     <div class="control-detail-header">
         <button class="control-detail-back" onclick="window.location.href='admin.php?tab=control_center'">
             <span>‹</span>
             <span>Zpět</span>
         </button>
-        <h2 class="control-detail-title">📝 Obsah & Texty</h2>
+        <h2 class="control-detail-title">Obsah & Texty</h2>
     </div>
+    <?php endif; ?>
 
     <div class="control-detail-content">
 
         <!-- Alert -->
         <div class="cc-alert info">
-            <div class="cc-alert-icon">💡</div>
             <div class="cc-alert-content">
                 <div class="cc-alert-title">Editace obsahu</div>
                 <div class="cc-alert-message">
@@ -74,7 +76,6 @@ $pageNames = [
         <?php if (empty($pages)): ?>
             <!-- Prázdný stav -->
             <div class="cc-alert warning">
-                <div class="cc-alert-icon">⚠️</div>
                 <div class="cc-alert-content">
                     <div class="cc-alert-title">Žádné texty nenalezeny</div>
                     <div class="cc-alert-message">
@@ -169,7 +170,7 @@ $pageNames = [
                                     <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
                                         <button class="cc-btn cc-btn-sm cc-btn-primary"
                                                 onclick="saveText(<?= $text['id'] ?>)">
-                                            💾 Uložit
+                                            Uložit
                                         </button>
                                         <button class="cc-btn cc-btn-sm cc-btn-secondary"
                                                 onclick="translateText(<?= $text['id'] ?>)">
@@ -199,7 +200,7 @@ $pageNames = [
 
                 <div class="setting-item">
                     <div class="setting-item-left">
-                        <div class="setting-item-label">💾 Uložit všechny změny</div>
+                        <div class="setting-item-label">Uložit všechny změny</div>
                         <div class="setting-item-description">Uložit veškerý editovaný obsah najednou</div>
                     </div>
                     <div class="setting-item-right">
@@ -323,7 +324,7 @@ async function saveText(textId) {
         const result = await response.json();
 
         if (result.status === 'success') {
-            statusEl.innerHTML = '<span style="color: #28A745;">✅ Uloženo!</span>';
+            statusEl.innerHTML = '<span style="color: #28A745;">Uloženo!</span>';
             setTimeout(() => {
                 statusEl.style.display = 'none';
             }, 2000);
@@ -372,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-console.log('✅ Content section loaded');
+console.log('[OK] Content section loaded');
 </script>
 
 <style>
