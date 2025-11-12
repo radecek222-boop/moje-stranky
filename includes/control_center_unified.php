@@ -578,19 +578,6 @@ function loadAnalyticsModal() {
     modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="analytics.php?embed=1" sandbox="allow-scripts allow-same-origin" title="Web Analytics"></iframe></div>';
 }
 
-function switchStatTab(tab) {
-    document.querySelectorAll('.cc-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.cc-tab-content').forEach(c => c.classList.remove('active'));
-
-    if (tab === 'claims') {
-        document.querySelectorAll('.cc-tab')[0].classList.add('active');
-        document.getElementById('statTabClaims').classList.add('active');
-    } else if (tab === 'web') {
-        document.querySelectorAll('.cc-tab')[1].classList.add('active');
-        document.getElementById('statTabWeb').classList.add('active');
-    }
-}
-
 function loadKeysModal() {
     const modalBody = document.getElementById('ccModalBody');
 
