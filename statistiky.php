@@ -217,6 +217,41 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 }
 
 /* Modal styling již existuje v control-center-modal.css */
+
+/* Tabulky v modalech */
+.cc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.cc-table thead {
+    background: #f5f5f5;
+    border-bottom: 2px solid #2D5016;
+}
+
+.cc-table th {
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #2D5016;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+}
+
+.cc-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.cc-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.cc-table tbody tr:last-child td {
+    border-bottom: none;
+}
 </style>
 </head>
 
@@ -399,133 +434,243 @@ function closeStatsModal() {
     document.body.style.overflow = 'auto';
 }
 
-function loadStatsContent(type, body) {
+async function loadStatsContent(type, body) {
     // Zobrazit loading
     body.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Načítání...</div>';
 
-    // Podle typu načíst různý obsah
-    const content = {
-        'salesperson': `
-            <div style="padding: 1rem;">
-                <table class="cc-table" style="width: 100%;">
-                    <thead>
-                        <tr>
-                            <th>Prodejce</th>
-                            <th>Počet zakázek</th>
-                            <th>Celková částka</th>
-                            <th>Průměr/zakázka</th>
-                            <th>CZ / SK</th>
-                            <th>Hotové %</th>
-                        </tr>
-                    </thead>
-                    <tbody id="sales-stats-table">
-                        <tr><td colspan="6" style="text-align: center; color: #999;">Načítání dat...</td></tr>
-                    </tbody>
-                </table>
-                <div style="margin-top: 1rem; text-align: right;">
-                    <button class="stats-btn">Export Excel</button>
-                    <button class="stats-btn stats-btn-primary">Export PDF</button>
-                </div>
-            </div>
-        `,
-        'technician': `
-            <div style="padding: 1rem;">
-                <table class="cc-table" style="width: 100%;">
-                    <thead>
-                        <tr>
-                            <th>Technik</th>
-                            <th>Zakázky</th>
-                            <th>Výdělek (33%)</th>
-                            <th>Průměr/zakázka</th>
-                            <th>CZ / SK</th>
-                            <th>Úspěšnost</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tech-stats-table">
-                        <tr><td colspan="6" style="text-align: center; color: #999;">Načítání dat...</td></tr>
-                    </tbody>
-                </table>
-                <div style="margin-top: 1rem; text-align: right;">
-                    <button class="stats-btn">Export Excel</button>
-                    <button class="stats-btn stats-btn-primary">Export PDF</button>
-                </div>
-            </div>
-        `,
-        'models': `
-            <div style="padding: 1rem;">
-                <table class="cc-table" style="width: 100%;">
-                    <thead>
-                        <tr>
-                            <th>Model / Výrobek</th>
-                            <th>Počet reklamací</th>
-                            <th>Podíl %</th>
-                            <th>Průměrná částka</th>
-                            <th>Celková částka</th>
-                        </tr>
-                    </thead>
-                    <tbody id="models-stats-table">
-                        <tr><td colspan="5" style="text-align: center; color: #999;">Načítání dat...</td></tr>
-                    </tbody>
-                </table>
-                <div style="margin-top: 1rem; text-align: right;">
-                    <button class="stats-btn">Export Excel</button>
-                    <button class="stats-btn stats-btn-primary">Export PDF</button>
-                </div>
-            </div>
-        `,
-        'orders': `
-            <div style="padding: 1rem;">
-                <table class="cc-table" style="width: 100%;">
-                    <thead>
-                        <tr>
-                            <th>Číslo</th>
-                            <th>Zákazník</th>
-                            <th>Prodejce</th>
-                            <th>Technik</th>
-                            <th>Částka</th>
-                            <th>Stav</th>
-                            <th>Země</th>
-                            <th>Datum</th>
-                        </tr>
-                    </thead>
-                    <tbody id="filtered-orders-table">
-                        <tr><td colspan="8" style="text-align: center; color: #999;">Načítání dat...</td></tr>
-                    </tbody>
-                </table>
-                <div style="margin-top: 1rem; text-align: right;">
-                    <button class="stats-btn">Export Excel</button>
-                    <button class="stats-btn stats-btn-primary">Export PDF</button>
-                </div>
-            </div>
-        `,
-        'charts': `
-            <div style="padding: 1rem;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
-                    <div style="background: #f5f5f5; padding: 1rem; border-radius: 8px;">
-                        <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem;">Rozdělení podle měst</h3>
-                        <div id="chart-cities" style="height: 250px; display: flex; align-items: center; justify-content: center; color: #999;">Graf se načítá...</div>
-                    </div>
-                    <div style="background: #f5f5f5; padding: 1rem; border-radius: 8px;">
-                        <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem;">Rozdělení podle zemí</h3>
-                        <div id="chart-countries" style="height: 250px; display: flex; align-items: center; justify-content: center; color: #999;">Graf se načítá...</div>
-                    </div>
-                    <div style="background: #f5f5f5; padding: 1rem; border-radius: 8px;">
-                        <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem;">Nejporuchovější modely</h3>
-                        <div id="chart-models" style="height: 250px; display: flex; align-items: center; justify-content: center; color: #999;">Graf se načítá...</div>
-                    </div>
-                </div>
-                <div style="margin-top: 1rem; text-align: right;">
-                    <button class="stats-btn">Export Excel</button>
-                    <button class="stats-btn stats-btn-primary">Export PDF</button>
-                </div>
-            </div>
-        `
-    };
+    try {
+        const filterParams = getFilterParams();
+        const response = await fetch(`api/statistiky_api.php?action=${type}&${filterParams}`);
+        const result = await response.json();
 
-    // Nastavit obsah
-    setTimeout(() => {
-        body.innerHTML = content[type] || '<p>Obsah nebyl nalezen</p>';
-    }, 300);
+        if (result.status === 'success') {
+            switch(type) {
+                case 'salesperson':
+                    renderSalespersonTable(body, result.data);
+                    break;
+                case 'technician':
+                    renderTechnicianTable(body, result.data);
+                    break;
+                case 'models':
+                    renderModelsTable(body, result.data);
+                    break;
+                case 'orders':
+                    renderOrdersTable(body, result.data);
+                    break;
+                case 'charts':
+                    renderCharts(body, result.data);
+                    break;
+            }
+        } else {
+            body.innerHTML = '<div style="padding: 2rem; color: #d32f2f; text-align: center;">Chyba načítání dat: ' + result.message + '</div>';
+        }
+    } catch (error) {
+        console.error('Chyba načítání statistik:', error);
+        body.innerHTML = '<div style="padding: 2rem; color: #d32f2f; text-align: center;">Chyba načítání dat</div>';
+    }
+}
+
+function renderSalespersonTable(body, data) {
+    let rows = '';
+    if (data.length === 0) {
+        rows = '<tr><td colspan="6" style="text-align: center; color: #999;">Žádná data k zobrazení</td></tr>';
+    } else {
+        data.forEach(row => {
+            rows += `
+                <tr>
+                    <td>${escapeHtml(row.prodejce)}</td>
+                    <td>${row.pocet_zakazek}</td>
+                    <td>${row.celkova_castka} €</td>
+                    <td>${row.prumer_zakazka} €</td>
+                    <td>${row.cz_count} / ${row.sk_count}</td>
+                    <td>${row.hotove_procento}%</td>
+                </tr>
+            `;
+        });
+    }
+
+    body.innerHTML = `
+        <div style="padding: 1rem;">
+            <table class="cc-table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Prodejce</th>
+                        <th>Počet zakázek</th>
+                        <th>Celková částka</th>
+                        <th>Průměr/zakázka</th>
+                        <th>CZ / SK</th>
+                        <th>Hotové %</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderTechnicianTable(body, data) {
+    let rows = '';
+    if (data.length === 0) {
+        rows = '<tr><td colspan="6" style="text-align: center; color: #999;">Žádná data k zobrazení</td></tr>';
+    } else {
+        data.forEach(row => {
+            rows += `
+                <tr>
+                    <td>${escapeHtml(row.technik)}</td>
+                    <td>${row.pocet_zakazek}</td>
+                    <td>${row.vydelek} €</td>
+                    <td>${row.prumer_zakazka} €</td>
+                    <td>${row.cz_count} / ${row.sk_count}</td>
+                    <td>${row.uspesnost}%</td>
+                </tr>
+            `;
+        });
+    }
+
+    body.innerHTML = `
+        <div style="padding: 1rem;">
+            <table class="cc-table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Technik</th>
+                        <th>Zakázky</th>
+                        <th>Výdělek (33%)</th>
+                        <th>Průměr/zakázka</th>
+                        <th>CZ / SK</th>
+                        <th>Úspěšnost</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderModelsTable(body, data) {
+    let rows = '';
+    if (data.length === 0) {
+        rows = '<tr><td colspan="5" style="text-align: center; color: #999;">Žádná data k zobrazení</td></tr>';
+    } else {
+        data.forEach(row => {
+            rows += `
+                <tr>
+                    <td>${escapeHtml(row.model)}</td>
+                    <td>${row.pocet_reklamaci}</td>
+                    <td>${row.podil_procent}%</td>
+                    <td>${row.prumerna_castka} €</td>
+                    <td>${row.celkova_castka} €</td>
+                </tr>
+            `;
+        });
+    }
+
+    body.innerHTML = `
+        <div style="padding: 1rem;">
+            <table class="cc-table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Model / Výrobek</th>
+                        <th>Počet reklamací</th>
+                        <th>Podíl %</th>
+                        <th>Průměrná částka</th>
+                        <th>Celková částka</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderOrdersTable(body, data) {
+    let rows = '';
+    if (data.length === 0) {
+        rows = '<tr><td colspan="8" style="text-align: center; color: #999;">Žádná data k zobrazení</td></tr>';
+    } else {
+        data.forEach(row => {
+            rows += `
+                <tr>
+                    <td>${escapeHtml(row.cislo || '')}</td>
+                    <td>${escapeHtml(row.jmeno || '')}</td>
+                    <td>${escapeHtml(row.prodejce || '-')}</td>
+                    <td>${escapeHtml(row.technik || '-')}</td>
+                    <td>${row.castka} €</td>
+                    <td>${escapeHtml(row.stav || '')}</td>
+                    <td>${escapeHtml(row.zeme || 'CZ')}</td>
+                    <td>${escapeHtml(row.datum || '')}</td>
+                </tr>
+            `;
+        });
+    }
+
+    body.innerHTML = `
+        <div style="padding: 1rem;">
+            <table class="cc-table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Číslo</th>
+                        <th>Zákazník</th>
+                        <th>Prodejce</th>
+                        <th>Technik</th>
+                        <th>Částka</th>
+                        <th>Stav</th>
+                        <th>Země</th>
+                        <th>Datum</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderCharts(body, data) {
+    let citiesHtml = '';
+    let countriesHtml = '';
+    let modelsHtml = '';
+
+    if (data.cities && data.cities.length > 0) {
+        citiesHtml = data.cities.map(c => `<div style="padding: 0.5rem; border-bottom: 1px solid #eee;">${escapeHtml(c.mesto)}: <strong>${c.pocet}</strong></div>`).join('');
+    } else {
+        citiesHtml = '<div style="color: #999;">Žádná data</div>';
+    }
+
+    if (data.countries && data.countries.length > 0) {
+        countriesHtml = data.countries.map(c => `<div style="padding: 0.5rem; border-bottom: 1px solid #eee;">${escapeHtml(c.zeme)}: <strong>${c.pocet}</strong></div>`).join('');
+    } else {
+        countriesHtml = '<div style="color: #999;">Žádná data</div>';
+    }
+
+    if (data.models && data.models.length > 0) {
+        modelsHtml = data.models.map(m => `<div style="padding: 0.5rem; border-bottom: 1px solid #eee;">${escapeHtml(m.model)}: <strong>${m.pocet}</strong></div>`).join('');
+    } else {
+        modelsHtml = '<div style="color: #999;">Žádná data</div>';
+    }
+
+    body.innerHTML = `
+        <div style="padding: 1rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                <div style="background: #f5f5f5; padding: 1rem; border-radius: 8px;">
+                    <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem;">Rozdělení podle měst</h3>
+                    <div style="max-height: 300px; overflow-y: auto;">${citiesHtml}</div>
+                </div>
+                <div style="background: #f5f5f5; padding: 1rem; border-radius: 8px;">
+                    <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem;">Rozdělení podle zemí</h3>
+                    <div style="max-height: 300px; overflow-y: auto;">${countriesHtml}</div>
+                </div>
+                <div style="background: #f5f5f5; padding: 1rem; border-radius: 8px;">
+                    <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem;">Nejporuchovější modely</h3>
+                    <div style="max-height: 300px; overflow-y: auto;">${modelsHtml}</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Filter funkce
@@ -541,14 +686,42 @@ function resetFilters() {
 
 function applyFilters() {
     console.log('Aplikuji filtry...');
-    // Zde bude logika pro aplikaci filtrů a reload dat
     loadSummaryStats();
 }
 
-function loadSummaryStats() {
-    // Načíst summary statistiky (total orders, revenue, avg, techs)
-    console.log('Načítám summary statistiky...');
-    // TODO: Implementovat API volání
+function getFilterParams() {
+    const params = new URLSearchParams();
+
+    const country = document.getElementById('filter-country').value;
+    const status = document.getElementById('filter-status').value;
+    const dateFrom = document.getElementById('filter-date-from').value;
+    const dateTo = document.getElementById('filter-date-to').value;
+
+    if (country) params.append('country', country);
+    if (status) params.append('status', status);
+    if (dateFrom) params.append('date_from', dateFrom);
+    if (dateTo) params.append('date_to', dateTo);
+
+    return params.toString();
+}
+
+async function loadSummaryStats() {
+    try {
+        const filterParams = getFilterParams();
+        const response = await fetch(`api/statistiky_api.php?action=summary&${filterParams}`);
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            document.getElementById('total-orders').textContent = result.data.total_orders;
+            document.getElementById('total-revenue').textContent = result.data.total_revenue.toFixed(2) + ' €';
+            document.getElementById('avg-order').textContent = result.data.avg_order.toFixed(2) + ' €';
+            document.getElementById('active-techs').textContent = result.data.active_techs;
+        } else {
+            console.error('Chyba načítání summary statistik:', result.message);
+        }
+    } catch (error) {
+        console.error('Chyba načítání summary statistik:', error);
+    }
 }
 
 // ESC key zavře modal
