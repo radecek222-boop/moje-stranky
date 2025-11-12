@@ -572,9 +572,27 @@ function isSuccess(data) {
 
 // Helper function to get CSRF token from meta tag
 function getCSRFToken() {
-    const metaTag = document.querySelector('meta[name="csrf-token"]');
-    if (!metaTag) return null;
-    return metaTag.getAttribute('content');
+    // Zkusit nejprve aktuální dokument
+    let metaTag = document.querySelector('meta[name="csrf-token"]');
+
+    // Pokud jsme v iframe, zkusit parent window
+    if (!metaTag && window.parent && window.parent !== window) {
+        try {
+            metaTag = window.parent.document.querySelector('meta[name="csrf-token"]');
+        } catch (e) {
+            // Cross-origin iframe - nemůžeme přistoupit k parent
+            console.error('Cannot access parent CSRF token:', e);
+        }
+    }
+
+    if (!metaTag) {
+        console.error('CSRF token meta tag not found in document or parent');
+        return null;
+    }
+
+    const token = metaTag.getAttribute('content');
+    console.log('CSRF token loaded:', token ? token.substring(0, 10) + '...' : 'empty');
+    return token;
 }
 
 // Open modal with specific section
@@ -963,13 +981,19 @@ function createKey() {
 }
 
 function executeAction(actionId) {
+    console.log('[executeAction] Starting with actionId:', actionId);
+
     const csrfToken = getCSRFToken();
+    console.log('[executeAction] CSRF token retrieved:', csrfToken ? csrfToken.substring(0, 10) + '...' : 'NULL');
+
     if (!csrfToken) {
         alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        console.error('[executeAction] CSRF token is null - aborting');
         return;
     }
 
     if (!confirm('Spustit tuto akci? Bude provedena automaticky.')) {
+        console.log('[executeAction] User cancelled');
         return;
     }
 
@@ -979,32 +1003,56 @@ function executeAction(actionId) {
     btn.disabled = true;
     btn.textContent = 'Provádění...';
 
+    const payload = {
+        action_id: actionId,
+        csrf_token: csrfToken
+    };
+
+    console.log('[executeAction] Sending request with payload:', payload);
+
     fetch('api/control_center_api.php?action=execute_action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            action_id: actionId,
-            csrf_token: csrfToken
-        })
+        body: JSON.stringify(payload)
     })
-    .then(r => {
-        if (!r.ok) {
-            throw new Error(`HTTP ${r.status}`);
+    .then(async r => {
+        console.log('[executeAction] Response status:', r.status);
+
+        // Zkusit načíst JSON i při chybě
+        let responseData;
+        try {
+            responseData = await r.json();
+            console.log('[executeAction] Response data:', responseData);
+        } catch (e) {
+            console.error('[executeAction] Failed to parse JSON:', e);
+            responseData = null;
         }
-        return r.json();
+
+        if (!r.ok) {
+            const errorMsg = responseData
+                ? `HTTP ${r.status}: ${responseData.message || 'Unknown error'}\n\nDebug: ${JSON.stringify(responseData.debug || {}, null, 2)}`
+                : `HTTP ${r.status}`;
+            throw new Error(errorMsg);
+        }
+
+        return responseData;
     })
     .then(data => {
+        console.log('[executeAction] Success data:', data);
+
         if (isSuccess(data)) {
             const execTime = data.execution_time || 'neznámý čas';
             alert(`✓ Akce dokončena!\n\n${data.message}\n\nČas provedení: ${execTime}`);
             loadActionsModal();
         } else {
+            console.error('[executeAction] Action failed:', data);
             alert('✗ Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
             btn.disabled = false;
             btn.textContent = originalText;
         }
     })
     .catch(err => {
+        console.error('[executeAction] Error:', err);
         alert('✗ Chyba při provádění akce: ' + err.message);
         btn.disabled = false;
         btn.textContent = originalText;
