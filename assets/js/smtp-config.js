@@ -137,7 +137,12 @@ async function testSmtpConnection() {
         // Získat CSRF token PŘED vytvořením objektu
         const csrfToken = getCSRFToken();
 
+        console.log('[SMTP Test Debug] CSRF token:', csrfToken ? `${csrfToken.substring(0, 10)}...` : 'NULL');
+        console.log('[SMTP Test Debug] In iframe:', window.parent !== window);
+        console.log('[SMTP Test Debug] Session available:', document.cookie.includes('PHPSESSID'));
+
         if (!csrfToken) {
+            showNotification('error', '⚠️ CSRF token nebyl nalezen - session problém v Safari iframe');
             throw new Error('CSRF token nebyl nalezen');
         }
 
@@ -151,6 +156,14 @@ async function testSmtpConnection() {
             }),
             credentials: 'same-origin'
         });
+
+        // Pokud 403, zkus získat debug info
+        if (response.status === 403) {
+            const errorData = await response.json();
+            console.error('[SMTP Test Debug] 403 Error details:', errorData);
+            showNotification('error', `⚠️ CSRF validace selhala: ${JSON.stringify(errorData.debug || {})}`);
+            throw new Error(`HTTP 403 - ${errorData.message || 'CSRF validation failed'}`);
+        }
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
