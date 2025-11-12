@@ -42,10 +42,10 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 <main<?php if ($embedMode) echo ' style="margin-top: 0; padding-top: 1rem;"'; ?>>
 <div class="container">
 
-  <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 1.5rem; padding: 1rem; background: var(--c-white); border: 1px solid var(--c-border); border-radius: 12px;">
-    <div class="user-info" style="font-weight: 600; letter-spacing: 0.03em; color: var(--c-text-primary, #1d1f2c); text-transform: uppercase; font-size: 0.85rem;">
-      <span style="font-weight: 400; margin-right: 0.5rem; color: var(--c-text-secondary, #6b7280); text-transform: none;">Přihlášený uživatel:</span>
-      <span class="user-name" id="userName" style="font-size: 1rem; color: var(--c-accent, #0f766e);"><?php echo htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['admin_name'] ?? 'Admin', ENT_QUOTES, 'UTF-8'); ?></span>
+  <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 0.5rem; padding: 0.5rem; background: var(--c-white); border: 1px solid var(--c-border); border-radius: 6px;">
+    <div class="user-info" style="font-weight: 600; letter-spacing: 0.03em; color: var(--c-text-primary, #1d1f2c); text-transform: uppercase; font-size: 0.65rem;">
+      <span style="font-weight: 400; margin-right: 0.3rem; color: var(--c-text-secondary, #6b7280); text-transform: none;">Přihlášený uživatel:</span>
+      <span class="user-name" id="userName" style="font-size: 0.75rem; color: var(--c-accent, #0f766e);"><?php echo htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['admin_name'] ?? 'Admin', ENT_QUOTES, 'UTF-8'); ?></span>
     </div>
   </div>
 
@@ -103,7 +103,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
     </div>
   </div>
   
-  <p style="text-align: center; color: #999; margin-top: 2rem;">Analytics data loading...</p>
+  <p style="text-align: center; color: #999; margin-top: 0.5rem; font-size: 0.7rem;">Analytics data loading...</p>
 
 </div>
 </main>
