@@ -803,7 +803,7 @@ function loadActionsModal() {
                     html += `<td>${action.action_description || '-'}</td>`;
                     html += `<td>${new Date(action.created_at).toLocaleDateString('cs-CZ')}</td>`;
                     html += `<td>`;
-                    html += `<button class="btn btn-sm btn-success" onclick="completeAction(${action.id})">Dokončit</button> `;
+                    html += `<button class="btn btn-sm btn-success" onclick="executeAction(${action.id})">Spustit akci</button> `;
                     html += `<button class="btn btn-sm btn-secondary" onclick="dismissAction(${action.id})">Zrušit</button>`;
                     html += `</td>`;
                     html += '</tr>';
@@ -909,6 +909,55 @@ function createKey() {
     })
     .catch(err => {
         alert('Chyba: ' + err.message);
+    });
+}
+
+function executeAction(actionId) {
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        return;
+    }
+
+    if (!confirm('Spustit tuto akci? Bude provedena automaticky.')) {
+        return;
+    }
+
+    // Disable button during execution
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Provádění...';
+
+    fetch('api/control_center_api.php?action=execute_action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action_id: actionId,
+            csrf_token: csrfToken
+        })
+    })
+    .then(r => {
+        if (!r.ok) {
+            throw new Error(`HTTP ${r.status}`);
+        }
+        return r.json();
+    })
+    .then(data => {
+        if (isSuccess(data)) {
+            const execTime = data.execution_time || 'neznámý čas';
+            alert(`✓ Akce dokončena!\n\n${data.message}\n\nČas provedení: ${execTime}`);
+            loadActionsModal();
+        } else {
+            alert('✗ Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    })
+    .catch(err => {
+        alert('✗ Chyba při provádění akce: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = originalText;
     });
 }
 

@@ -118,7 +118,139 @@ try {
             }
             break;
 
+        case 'execute_action':
+            // Spustit akci (např. instalační script)
+            $actionId = $data['action_id'] ?? null;
+
+            if (!$actionId) {
+                throw new Exception('Action ID required');
+            }
+
+            // Načíst akci z DB
+            $stmt = $pdo->prepare("SELECT * FROM wgs_pending_actions WHERE id = :id AND status = 'pending'");
+            $stmt->execute(['id' => $actionId]);
+            $action = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$action) {
+                throw new Exception('Akce nenalezena nebo již byla dokončena');
+            }
+
+            $startTime = microtime(true);
+            $executeResult = ['success' => false, 'message' => ''];
+
+            // Podle action_type spustit příslušnou akci
+            try {
+                switch ($action['action_type']) {
+                    case 'install_smtp':
+                        // Spustit SMTP instalaci
+                        $sqlFile = __DIR__ . '/../add_smtp_password.sql';
+                        if (!file_exists($sqlFile)) {
+                            throw new Exception('SQL soubor nenalezen: ' . $sqlFile);
+                        }
+
+                        $sql = file_get_contents($sqlFile);
+                        $pdo->exec($sql);
+
+                        $executeResult = [
+                            'success' => true,
+                            'message' => 'SMTP konfigurace úspěšně nainstalována. Přidány klíče smtp_password a smtp_encryption.'
+                        ];
+                        break;
+
+                    case 'migration':
+                    case 'install':
+                        // Obecná instalace - spustit URL jako PHP script
+                        if (!empty($action['action_url'])) {
+                            $scriptPath = __DIR__ . '/../' . ltrim($action['action_url'], '/');
+                            if (file_exists($scriptPath)) {
+                                ob_start();
+                                include $scriptPath;
+                                $output = ob_get_clean();
+
+                                $executeResult = [
+                                    'success' => true,
+                                    'message' => 'Script vykonán: ' . basename($scriptPath),
+                                    'output' => $output
+                                ];
+                            } else {
+                                throw new Exception('Script nenalezen: ' . $scriptPath);
+                            }
+                        } else {
+                            throw new Exception('Akce nemá definovaný action_url');
+                        }
+                        break;
+
+                    default:
+                        throw new Exception('Neznámý typ akce: ' . $action['action_type']);
+                }
+            } catch (Exception $e) {
+                $executeResult = [
+                    'success' => false,
+                    'message' => 'Chyba při vykonávání: ' . $e->getMessage()
+                ];
+            }
+
+            $executionTime = round((microtime(true) - $startTime) * 1000); // ms
+
+            if ($executeResult['success']) {
+                // Označit jako completed
+                $stmt = $pdo->prepare("
+                    UPDATE wgs_pending_actions
+                    SET status = 'completed',
+                        completed_at = CURRENT_TIMESTAMP,
+                        completed_by = :user_id
+                    WHERE id = :action_id
+                ");
+                $stmt->execute([
+                    'action_id' => $actionId,
+                    'user_id' => $_SESSION['user_id'] ?? null
+                ]);
+
+                // Přidat do historie
+                $pdo->prepare("
+                    INSERT INTO wgs_action_history (action_id, action_type, action_title, status, executed_by, execution_time)
+                    VALUES (:action_id, :action_type, :action_title, 'completed', :user_id, :exec_time)
+                ")->execute([
+                    'action_id' => $actionId,
+                    'action_type' => $action['action_type'],
+                    'action_title' => $action['action_title'],
+                    'user_id' => $_SESSION['user_id'] ?? null,
+                    'exec_time' => $executionTime
+                ]);
+
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => $executeResult['message'],
+                    'execution_time' => $executionTime . 'ms'
+                ]);
+            } else {
+                // Označit jako failed
+                $stmt = $pdo->prepare("
+                    UPDATE wgs_pending_actions
+                    SET status = 'failed'
+                    WHERE id = :action_id
+                ");
+                $stmt->execute(['action_id' => $actionId]);
+
+                // Přidat do historie jako failed
+                $pdo->prepare("
+                    INSERT INTO wgs_action_history (action_id, action_type, action_title, status, executed_by, execution_time, error_message)
+                    VALUES (:action_id, :action_type, :action_title, 'failed', :user_id, :exec_time, :error)
+                ")->execute([
+                    'action_id' => $actionId,
+                    'action_type' => $action['action_type'],
+                    'action_title' => $action['action_title'],
+                    'user_id' => $_SESSION['user_id'] ?? null,
+                    'exec_time' => $executionTime,
+                    'error' => $executeResult['message']
+                ]);
+
+                throw new Exception($executeResult['message']);
+            }
+            break;
+
         case 'complete_action':
+            // Pouze označit jako dokončené (manuálně)
             $actionId = $data['action_id'] ?? null;
 
             if (!$actionId) {
@@ -399,6 +531,133 @@ try {
             echo json_encode([
                 'status' => 'success',
                 'message' => 'Config saved'
+            ]);
+            break;
+
+        // ==========================================
+        // SMTP CONFIGURATION
+        // ==========================================
+        case 'get_smtp_config':
+            // Načíst SMTP nastavení z databáze
+            $stmt = $pdo->prepare("
+                SELECT config_key, config_value, is_sensitive
+                FROM wgs_system_config
+                WHERE config_group = 'email'
+                ORDER BY config_key
+            ");
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $smtpConfig = [];
+            foreach ($rows as $row) {
+                // Pro citlivé údaje vracíme placeholder pokud jsou vyplněné
+                if ($row['is_sensitive'] && !empty($row['config_value'])) {
+                    $smtpConfig[$row['config_key']] = '••••••••';
+                } else {
+                    $smtpConfig[$row['config_key']] = $row['config_value'];
+                }
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'data' => $smtpConfig
+            ]);
+            break;
+
+        case 'save_smtp_config':
+            // Uložit SMTP nastavení
+            $smtpHost = $data['smtp_host'] ?? '';
+            $smtpPort = $data['smtp_port'] ?? '587';
+            $smtpUsername = $data['smtp_username'] ?? '';
+            $smtpPassword = $data['smtp_password'] ?? '';
+            $smtpEncryption = $data['smtp_encryption'] ?? 'tls';
+            $smtpFrom = $data['smtp_from'] ?? 'reklamace@wgs-service.cz';
+            $smtpFromName = $data['smtp_from_name'] ?? 'White Glove Service';
+
+            // Pokud je password placeholder, necháme původní hodnotu
+            if ($smtpPassword === '••••••••') {
+                $smtpPassword = null; // Nebude se updatovat
+            }
+
+            $userId = $_SESSION['user_id'] ?? null;
+
+            // Update jednotlivých hodnot
+            $configs = [
+                'smtp_host' => $smtpHost,
+                'smtp_port' => $smtpPort,
+                'smtp_username' => $smtpUsername,
+                'smtp_encryption' => $smtpEncryption,
+                'smtp_from' => $smtpFrom,
+                'smtp_from_name' => $smtpFromName
+            ];
+
+            // Přidat password pouze pokud není placeholder
+            if ($smtpPassword !== null) {
+                $configs['smtp_password'] = $smtpPassword;
+            }
+
+            $stmt = $pdo->prepare("
+                UPDATE wgs_system_config
+                SET config_value = :value,
+                    updated_at = CURRENT_TIMESTAMP,
+                    updated_by = :user_id
+                WHERE config_key = :key
+            ");
+
+            foreach ($configs as $key => $value) {
+                $stmt->execute([
+                    'key' => $key,
+                    'value' => $value,
+                    'user_id' => $userId
+                ]);
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'SMTP konfigurace uložena'
+            ]);
+            break;
+
+        case 'test_smtp_connection':
+            // Test SMTP připojení
+            // Načíst aktuální SMTP nastavení
+            $stmt = $pdo->prepare("
+                SELECT config_key, config_value
+                FROM wgs_system_config
+                WHERE config_group = 'email' AND config_key IN ('smtp_host', 'smtp_port', 'smtp_username', 'smtp_password', 'smtp_encryption')
+            ");
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $config = [];
+            foreach ($rows as $row) {
+                $config[$row['config_key']] = $row['config_value'];
+            }
+
+            // Kontrola že jsou vyplněné všechny údaje
+            if (empty($config['smtp_host']) || empty($config['smtp_username']) || empty($config['smtp_password'])) {
+                throw new Exception('SMTP údaje nejsou kompletně vyplněné');
+            }
+
+            // Pro základní test použijeme PHPMailer nebo fsockopen
+            $host = $config['smtp_host'];
+            $port = intval($config['smtp_port'] ?? 587);
+            $timeout = 10;
+
+            // Pokus o připojení
+            $errno = 0;
+            $errstr = '';
+            $socket = @fsockopen($host, $port, $errno, $errstr, $timeout);
+
+            if (!$socket) {
+                throw new Exception("Nelze se připojit k SMTP serveru: $errstr ($errno)");
+            }
+
+            fclose($socket);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => "Připojení k SMTP serveru {$host}:{$port} proběhlo úspěšně"
             ]);
             break;
 
