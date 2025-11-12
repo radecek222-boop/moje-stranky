@@ -59,22 +59,22 @@ try {
 /* Card Grid */
 .cc-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.8rem;
+    margin-top: 1.5rem;
 }
 
 /* Card Styles */
 .cc-card {
     background: var(--c-white);
     border: 1px solid var(--c-border);
-    border-radius: 8px;
-    padding: 1.5rem;
+    border-radius: 6px;
+    padding: 0.75rem;
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
-    min-height: 120px;
+    min-height: 60px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -87,30 +87,30 @@ try {
 }
 
 .cc-card-title {
-    font-size: 1.05rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--c-black);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .cc-card-description {
-    font-size: 0.85rem;
+    font-size: 0.7rem;
     color: var(--c-grey);
-    line-height: 1.4;
+    line-height: 1.3;
     margin: 0;
 }
 
 .cc-card-badge {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 6px;
+    right: 6px;
     background: var(--c-error);
     color: white;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 12px;
-    min-width: 24px;
+    padding: 2px 6px;
+    border-radius: 8px;
+    min-width: 18px;
     text-align: center;
 }
 
@@ -128,15 +128,15 @@ try {
 
 .cc-coming-soon {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 6px;
+    right: 6px;
     background: var(--c-grey);
     color: white;
-    font-size: 0.7rem;
-    padding: 4px 8px;
-    border-radius: 4px;
+    font-size: 0.6rem;
+    padding: 2px 5px;
+    border-radius: 3px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 /* Overlay System */
@@ -227,7 +227,7 @@ try {
 .cc-modal-body {
     flex: 1;
     overflow-y: auto;
-    padding: 1rem 1.5rem;
+    padding: 0.8rem 1rem;
 }
 
 .cc-modal-loading {
@@ -261,9 +261,9 @@ try {
 
 .cc-table th {
     background: var(--c-bg);
-    padding: 0.6rem 0.8rem;
+    padding: 0.4rem 0.6rem;
     text-align: left;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--c-grey);
@@ -272,9 +272,9 @@ try {
 }
 
 .cc-table td {
-    padding: 0.6rem 0.8rem;
+    padding: 0.4rem 0.6rem;
     border-bottom: 1px solid var(--c-border);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 
 .cc-table tr:hover td {
@@ -284,21 +284,21 @@ try {
 /* Tabs */
 .cc-tabs {
     display: flex;
-    gap: 0.3rem;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid var(--c-border);
+    gap: 0.2rem;
+    margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--c-border);
 }
 
 .cc-tab {
-    padding: 0.6rem 1.2rem;
+    padding: 0.4rem 0.8rem;
     background: transparent;
     border: none;
-    border-bottom: 3px solid transparent;
+    border-bottom: 2px solid transparent;
     color: var(--c-grey);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
 }
 
 .cc-tab:hover {
@@ -338,39 +338,63 @@ try {
 /* Mini stats grid */
 .cc-mini-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.8rem;
-    margin-bottom: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
 }
 
 .cc-mini-stat {
     background: var(--c-bg);
     border: 1px solid var(--c-border);
-    padding: 0.75rem;
-    border-radius: 6px;
+    padding: 0.5rem;
+    border-radius: 4px;
     text-align: center;
 }
 
 .cc-mini-stat-value {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--c-primary);
 }
 
 .cc-mini-stat-label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--c-grey);
-    margin-top: 0.3rem;
+    margin-top: 0.2rem;
 }
 
 /* Actions */
 .cc-actions {
     display: flex;
-    gap: 0.6rem;
+    gap: 0.4rem;
     flex-wrap: wrap;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
+}
+
+/* Unified button styles for Control Center */
+.cc-actions .btn,
+.cc-actions button,
+.cc-actions a.btn {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    border-radius: 4px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.cc-actions .btn-sm {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+}
+
+.cc-actions .search-box {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    border-radius: 4px;
 }
 
 /* Responsive */
