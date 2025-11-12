@@ -111,12 +111,427 @@ try {
   <?php if ($activeTab === 'notifications'): ?>
   <!-- TAB: NOTIFICATIONS -->
   <div id="tab-notifications" class="tab-content">
-    <h2 class="page-title" style="font-size: 1.8rem; margin-bottom: 1rem;">Správa Emailů & SMS</h2>
-    <p class="page-subtitle">Editace šablon, nastavení příjemců a správa automatických notifikací</p>
 
-    <div id="notifications-container">
-      <div class="loading">Načítání notifikací...</div>
+    <style>
+    .notif-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    .notif-header {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .notif-title {
+        font-size: 1.2rem;
+        font-weight: 500;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .notif-subtitle {
+        font-size: 0.75rem;
+        color: #666;
+        margin: 0;
+    }
+
+    .notif-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+
+    .notif-card {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .notif-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-color: #2D5016;
+    }
+
+    .notif-card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #000;
+    }
+
+    .notif-card-description {
+        font-size: 0.8rem;
+        color: #666;
+        line-height: 1.4;
+        margin-bottom: 0.75rem;
+    }
+
+    .notif-card-meta {
+        display: flex;
+        gap: 0.75rem;
+        font-size: 0.7rem;
+        color: #999;
+    }
+
+    .notif-card-badge {
+        display: inline-block;
+        padding: 0.2rem 0.5rem;
+        background: #f0f0f0;
+        border-radius: 3px;
+        font-size: 0.65rem;
+        font-weight: 600;
+    }
+
+    .notif-card-badge.active {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .notif-card-badge.inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    </style>
+
+    <div class="notif-container">
+
+      <!-- Header -->
+      <div class="notif-header">
+        <h1 class="notif-title">Správa Emailů & SMS</h1>
+        <p class="notif-subtitle">Editace šablon, nastavení příjemců a správa automatických notifikací</p>
+      </div>
+
+      <!-- Card Grid -->
+      <div class="notif-card-grid">
+
+        <!-- Email šablony -->
+        <div class="notif-card" onclick="openNotifModal('email-templates')">
+          <div class="notif-card-title">Email šablony</div>
+          <div class="notif-card-description">Editace šablon pro automatické emaily (nová reklamace, změna stavu, dokončení)</div>
+          <div class="notif-card-meta">
+            <span class="notif-card-badge active">5 šablon</span>
+          </div>
+        </div>
+
+        <!-- SMS šablony -->
+        <div class="notif-card" onclick="openNotifModal('sms-templates')">
+          <div class="notif-card-title">SMS šablony</div>
+          <div class="notif-card-description">Nastavení SMS notifikací pro zákazníky a techniky</div>
+          <div class="notif-card-meta">
+            <span class="notif-card-badge active">3 šablony</span>
+          </div>
+        </div>
+
+        <!-- Příjemci emailů -->
+        <div class="notif-card" onclick="openNotifModal('email-recipients')">
+          <div class="notif-card-title">Příjemci emailů</div>
+          <div class="notif-card-description">Správa seznamu příjemců pro různé typy notifikací</div>
+          <div class="notif-card-meta">
+            <span class="notif-card-badge">Administrátoři</span>
+          </div>
+        </div>
+
+        <!-- Automatické notifikace -->
+        <div class="notif-card" onclick="openNotifModal('auto-notifications')">
+          <div class="notif-card-title">Automatické notifikace</div>
+          <div class="notif-card-description">Nastavení pravidel pro automatické odesílání emailů a SMS</div>
+          <div class="notif-card-meta">
+            <span class="notif-card-badge active">Aktivní</span>
+          </div>
+        </div>
+
+        <!-- SMTP nastavení -->
+        <div class="notif-card" onclick="openNotifModal('smtp-settings')">
+          <div class="notif-card-title">SMTP nastavení</div>
+          <div class="notif-card-description">Konfigurace SMTP serveru pro odesílání emailů</div>
+          <div class="notif-card-meta">
+            <span class="notif-card-badge active">Nakonfigurováno</span>
+          </div>
+        </div>
+
+        <!-- SMS gateway -->
+        <div class="notif-card" onclick="openNotifModal('sms-gateway')">
+          <div class="notif-card-title">SMS Gateway</div>
+          <div class="notif-card-description">Nastavení SMS brány a API klíčů pro odesílání SMS</div>
+          <div class="notif-card-meta">
+            <span class="notif-card-badge inactive">Neaktivní</span>
+          </div>
+        </div>
+
+        <!-- Historie notifikací -->
+        <div class="notif-card" onclick="openNotifModal('notification-history')">
+          <div class="notif-card-title">Historie notifikací</div>
+          <div class="notif-card-description">Přehled odeslaných emailů a SMS s detaily doručení</div>
+          <div class="notif-card-meta">
+            <span class="notif-card-badge">Poslední 30 dní</span>
+          </div>
+        </div>
+
+        <!-- Test odesílání -->
+        <div class="notif-card" onclick="openNotifModal('test-sending')">
+          <div class="notif-card-title">Test odesílání</div>
+          <div class="notif-card-description">Otestujte funkčnost email a SMS notifikací</div>
+          <div class="notif-card-meta">
+            <span class="notif-card-badge">Nástroje</span>
+          </div>
+        </div>
+
+      </div>
+
     </div>
+
+    <!-- MODAL OVERLAY -->
+    <div class="cc-modal-overlay" id="notifModalOverlay" onclick="closeNotifModal()">
+        <div class="cc-modal" onclick="event.stopPropagation()">
+            <div class="cc-modal-header">
+                <h2 class="cc-modal-title" id="notifModalTitle">Notifikace</h2>
+                <button class="cc-modal-close" onclick="closeNotifModal()">×</button>
+            </div>
+            <div class="cc-modal-body" id="notifModalBody">
+                <!-- Obsah se načte dynamicky -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Modal systém pro notifikace
+    function openNotifModal(type) {
+        const overlay = document.getElementById('notifModalOverlay');
+        const title = document.getElementById('notifModalTitle');
+        const body = document.getElementById('notifModalBody');
+
+        // Nastavit title
+        const titles = {
+            'email-templates': 'Email šablony',
+            'sms-templates': 'SMS šablony',
+            'email-recipients': 'Příjemci emailů',
+            'auto-notifications': 'Automatické notifikace',
+            'smtp-settings': 'SMTP nastavení',
+            'sms-gateway': 'SMS Gateway',
+            'notification-history': 'Historie notifikací',
+            'test-sending': 'Test odesílání'
+        };
+
+        title.textContent = titles[type] || 'Notifikace';
+
+        // Načíst obsah podle typu
+        loadNotifContent(type, body);
+
+        // Zobrazit modal
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeNotifModal() {
+        const overlay = document.getElementById('notifModalOverlay');
+        overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function loadNotifContent(type, body) {
+        // Zobrazit loading
+        body.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Načítání...</div>';
+
+        // Podle typu načíst různý obsah
+        const content = {
+            'email-templates': `
+                <div style="padding: 1rem;">
+                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Editace email šablon pro automatické notifikace</p>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">Nová reklamace</div>
+                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">Odesílá se při vytvoření nové reklamace</div>
+                            <button class="btn btn-sm" style="font-size: 0.7rem;">Editovat šablonu</button>
+                        </div>
+                        <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">Změna stavu</div>
+                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">Odesílá se při změně stavu reklamace</div>
+                            <button class="btn btn-sm" style="font-size: 0.7rem;">Editovat šablonu</button>
+                        </div>
+                        <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">Dokončení reklamace</div>
+                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">Odesílá se po dokončení reklamace</div>
+                            <button class="btn btn-sm" style="font-size: 0.7rem;">Editovat šablonu</button>
+                        </div>
+                    </div>
+                </div>
+            `,
+            'sms-templates': `
+                <div style="padding: 1rem;">
+                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Nastavení SMS šablon pro notifikace</p>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">SMS pro zákazníka</div>
+                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">Text: "Vaše reklamace {cislo} byla přijata"</div>
+                            <button class="btn btn-sm" style="font-size: 0.7rem;">Editovat</button>
+                        </div>
+                        <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">SMS pro technika</div>
+                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">Text: "Nová zakázka {cislo} - {mesto}"</div>
+                            <button class="btn btn-sm" style="font-size: 0.7rem;">Editovat</button>
+                        </div>
+                    </div>
+                </div>
+            `,
+            'email-recipients': `
+                <div style="padding: 1rem;">
+                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Správa příjemců automatických notifikací</p>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Administrátoři</label>
+                        <input type="text" placeholder="admin@example.com, admin2@example.com" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Kopie všech emailů</label>
+                        <input type="text" placeholder="office@example.com" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                    </div>
+                    <button class="btn btn-sm btn-success" style="font-size: 0.7rem;">Uložit změny</button>
+                </div>
+            `,
+            'auto-notifications': `
+                <div style="padding: 1rem;">
+                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Nastavení pravidel pro automatické odesílání</p>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; border: 1px solid #e0e0e0; border-radius: 6px;">
+                            <input type="checkbox" checked>
+                            <span style="font-size: 0.85rem;">Odeslat email při vytvoření nové reklamace</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; border: 1px solid #e0e0e0; border-radius: 6px;">
+                            <input type="checkbox" checked>
+                            <span style="font-size: 0.85rem;">Odeslat SMS zákazníkovi při změně stavu</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; border: 1px solid #e0e0e0; border-radius: 6px;">
+                            <input type="checkbox">
+                            <span style="font-size: 0.85rem;">Denní report pro administrátory (8:00)</span>
+                        </label>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-sm btn-success" style="font-size: 0.7rem;">Uložit nastavení</button>
+                    </div>
+                </div>
+            `,
+            'smtp-settings': `
+                <div style="padding: 1rem;">
+                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Konfigurace SMTP serveru</p>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">SMTP Server</label>
+                            <input type="text" placeholder="smtp.gmail.com" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <div>
+                                <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Port</label>
+                                <input type="text" placeholder="587" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Šifrování</label>
+                                <select style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                                    <option>TLS</option>
+                                    <option>SSL</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Uživatelské jméno</label>
+                            <input type="text" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Heslo</label>
+                            <input type="password" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                        <button class="btn btn-sm" style="font-size: 0.7rem;">Test připojení</button>
+                        <button class="btn btn-sm btn-success" style="font-size: 0.7rem;">Uložit</button>
+                    </div>
+                </div>
+            `,
+            'sms-gateway': `
+                <div style="padding: 1rem;">
+                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Nastavení SMS brány</p>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Poskytovatel</label>
+                            <select style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                                <option>Twilio</option>
+                                <option>Nexmo</option>
+                                <option>SMS.cz</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">API klíč</label>
+                            <input type="text" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">API Secret</label>
+                            <input type="password" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                        <button class="btn btn-sm" style="font-size: 0.7rem;">Test SMS</button>
+                        <button class="btn btn-sm btn-success" style="font-size: 0.7rem;">Uložit</button>
+                    </div>
+                </div>
+            `,
+            'notification-history': `
+                <div style="padding: 1rem;">
+                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Historie odeslaných notifikací (poslední 30 dní)</p>
+                    <table class="cc-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="font-size: 0.75rem;">Datum</th>
+                                <th style="font-size: 0.75rem;">Typ</th>
+                                <th style="font-size: 0.75rem;">Příjemce</th>
+                                <th style="font-size: 0.75rem;">Předmět</th>
+                                <th style="font-size: 0.75rem;">Stav</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 0.75rem;">
+                            <tr><td colspan="5" style="text-align: center; color: #999; padding: 2rem;">Načítání historie...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `,
+            'test-sending': `
+                <div style="padding: 1rem;">
+                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Otestujte funkčnost notifikací</p>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
+                            <h3 style="font-size: 0.9rem; margin-bottom: 0.75rem;">Test Email</h3>
+                            <input type="email" placeholder="Zadejte testovací email" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem; margin-bottom: 0.5rem;">
+                            <button class="btn btn-sm btn-success" style="font-size: 0.7rem;">Odeslat testovací email</button>
+                        </div>
+                        <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
+                            <h3 style="font-size: 0.9rem; margin-bottom: 0.75rem;">Test SMS</h3>
+                            <input type="tel" placeholder="Zadejte telefonní číslo (+420...)" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem; margin-bottom: 0.5rem;">
+                            <button class="btn btn-sm btn-success" style="font-size: 0.7rem;">Odeslat testovací SMS</button>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // Nastavit obsah
+        setTimeout(() => {
+            body.innerHTML = content[type] || '<p>Obsah nebyl nalezen</p>';
+        }, 300);
+    }
+
+    // ESC key zavře modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeNotifModal();
+        }
+    });
+    </script>
+
   </div>
   <?php endif; ?>
   
