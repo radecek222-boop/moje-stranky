@@ -1,10 +1,11 @@
 <?php
 /**
  * Create Test Claim API
- * Vytvoří testovací reklamaci pro interaktivní testing
+ * Vytvoří testovací reklamaci pomocí skutečného save.php - simuluje reálné chování
  */
 
 require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
 
 header('Content-Type: application/json');
 
@@ -15,86 +16,41 @@ if (!$isAdmin) {
     exit;
 }
 
-$pdo = getDbConnection();
-
 try {
-    // Get form data
-    $jmeno = trim($_POST['jmeno'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $telefon = trim($_POST['telefon'] ?? '');
-    $popis = trim($_POST['popis'] ?? '');
+    // Simulace FormData z novareklamace.php
+    $_POST['action'] = 'create';
+    $_POST['typ'] = 'reklamace';
+    $_POST['cislo'] = 'TEST-' . date('Ymd') . '-' . rand(1000, 9999);
+    $_POST['datum_prodeje'] = date('d.m.Y', strtotime('-30 days'));
+    $_POST['datum_reklamace'] = date('d.m.Y');
+    $_POST['jmeno'] = $_POST['jmeno'] ?? 'Test Zákazník';
+    $_POST['email'] = $_POST['email'] ?? 'test@wgs-service.cz';
+    $_POST['telefon'] = $_POST['telefon'] ?? '+420777888999';
+    $_POST['adresa'] = 'Testovací 123, Praha, 11000';
+    $_POST['model'] = 'NATUZZI TEST MODEL';
+    $_POST['provedeni'] = 'Testovací provedení';
+    $_POST['barva'] = 'BF12';
+    $_POST['seriove_cislo'] = '';
+    $_POST['popis_problemu'] = $_POST['popis_problemu'] ?? 'Testovací popis problému - E2E test workflow';
+    $_POST['doplnujici_info'] = 'Automaticky vytvořeno E2E testem';
+    $_POST['fakturace_firma'] = 'CZ';
+    $_POST['gdpr_consent'] = '1';
+    $_POST['csrf_token'] = generateCSRFToken();
 
-    // Validate
-    if (empty($jmeno) || empty($email)) {
-        throw new Exception('Jméno a email jsou povinné');
+    // Zavolat skutečný save.php controller
+    ob_start();
+    require __DIR__ . '/../app/controllers/save.php';
+    $output = ob_get_clean();
+
+    // Pokud save.php již vytvořil response, předat ho
+    if (!empty($output)) {
+        echo $output;
     }
-
-    // Generate unique reklamace_id
-    $reklamaceId = 'TEST-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
-
-    // Get current user info
-    $userId = $_SESSION['admin_id'] ?? $_SESSION['user_id'] ?? null;
-    $userRole = $_SESSION['role'] ?? 'admin';
-
-    // Insert claim
-    $stmt = $pdo->prepare("INSERT INTO wgs_reklamace
-        (reklamace_id, jmeno, email, telefon, popis, stav, created_by, created_by_role, created_at)
-        VALUES
-        (:reklamace_id, :jmeno, :email, :telefon, :popis, 'ČEKÁ', :created_by, :created_by_role, NOW())
-    ");
-
-    $stmt->execute([
-        ':reklamace_id' => $reklamaceId,
-        ':jmeno' => $jmeno,
-        ':email' => $email,
-        ':telefon' => $telefon,
-        ':popis' => $popis,
-        ':created_by' => $userId,
-        ':created_by_role' => $userRole
-    ]);
-
-    $claimId = $pdo->lastInsertId();
-
-    // Handle photo upload if present
-    $photoId = null;
-    if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = __DIR__ . '/../uploads/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-
-        $fileName = 'test_' . time() . '_' . basename($_FILES['photo']['name']);
-        $targetPath = $uploadDir . $fileName;
-
-        if (move_uploaded_file($_FILES['photo']['tmp_name'], $targetPath)) {
-            // Insert into wgs_photos
-            $stmt = $pdo->prepare("INSERT INTO wgs_photos
-                (reklamace_id, file_path, file_name, uploaded_at)
-                VALUES
-                (:reklamace_id, :file_path, :file_name, NOW())
-            ");
-
-            $stmt->execute([
-                ':reklamace_id' => $claimId,
-                ':file_path' => 'uploads/' . $fileName,
-                ':file_name' => $fileName
-            ]);
-
-            $photoId = $pdo->lastInsertId();
-        }
-    }
-
-    echo json_encode([
-        'success' => true,
-        'claim_id' => $claimId,
-        'reklamace_id' => $reklamaceId,
-        'photo_id' => $photoId,
-        'message' => 'Testovací reklamace vytvořena'
-    ]);
 
 } catch (Exception $e) {
     echo json_encode([
         'success' => false,
+        'status' => 'error',
         'error' => $e->getMessage()
     ]);
 }
