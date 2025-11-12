@@ -657,6 +657,11 @@ try {
   <?php require_once __DIR__ . '/includes/control_center_console.php'; ?>
   <?php endif; ?>
 
+  <?php if ($activeTab === 'control_center_actions'): ?>
+  <!-- TAB: AKCE & ÚKOLY -->
+  <?php require_once __DIR__ . '/includes/control_center_actions.php'; ?>
+  <?php endif; ?>
+
   <?php if ($activeTab === 'control_center_configuration'): ?>
   <!-- TAB: KONFIGURACE SYSTÉMU -->
   <?php require_once __DIR__ . '/includes/control_center_configuration.php'; ?>
