@@ -224,7 +224,7 @@ try {
 .cc-modal-body {
     flex: 1;
     overflow-y: auto;
-    padding: 0.8rem 1rem;
+    padding: 0.5rem 0.75rem;
 }
 
 .cc-modal-loading {
@@ -232,14 +232,14 @@ try {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 4rem 2rem;
+    padding: 2rem 1rem;
     color: var(--c-grey);
 }
 
 .cc-modal-spinner {
-    width: 48px;
-    height: 48px;
-    border: 4px solid var(--c-border);
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--c-border);
     border-top-color: var(--c-primary);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -253,14 +253,14 @@ try {
 .cc-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 0.5rem;
+    margin-top: 0.3rem;
 }
 
 .cc-table th {
     background: var(--c-bg);
-    padding: 0.4rem 0.6rem;
+    padding: 0.3rem 0.5rem;
     text-align: left;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--c-grey);
@@ -269,9 +269,9 @@ try {
 }
 
 .cc-table td {
-    padding: 0.4rem 0.6rem;
+    padding: 0.3rem 0.5rem;
     border-bottom: 1px solid var(--c-border);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
 }
 
 .cc-table tr:hover td {
@@ -282,12 +282,12 @@ try {
 .cc-tabs {
     display: flex;
     gap: 0.2rem;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.6rem;
     border-bottom: 1px solid var(--c-border);
 }
 
 .cc-tab {
-    padding: 0.4rem 0.8rem;
+    padding: 0.35rem 0.7rem;
     background: transparent;
     border: none;
     border-bottom: 2px solid transparent;
@@ -295,7 +295,7 @@ try {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
 }
 
 .cc-tab:hover {
@@ -335,63 +335,63 @@ try {
 /* Mini stats grid */
 .cc-mini-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-    gap: 0.6rem;
-    margin-bottom: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
 }
 
 .cc-mini-stat {
     background: var(--c-bg);
     border: 1px solid var(--c-border);
-    padding: 0.5rem;
+    padding: 0.4rem;
     border-radius: 4px;
     text-align: center;
 }
 
 .cc-mini-stat-value {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--c-primary);
 }
 
 .cc-mini-stat-label {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--c-grey);
-    margin-top: 0.2rem;
+    margin-top: 0.15rem;
 }
 
 /* Actions */
 .cc-actions {
     display: flex;
-    gap: 0.4rem;
+    gap: 0.3rem;
     flex-wrap: wrap;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.6rem;
 }
 
 /* Unified button styles for Control Center */
 .cc-actions .btn,
 .cc-actions button,
 .cc-actions a.btn {
-    padding: 0.35rem 0.7rem;
-    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
     line-height: 1.2;
-    border-radius: 4px;
+    border-radius: 3px;
     font-weight: 500;
     white-space: nowrap;
 }
 
 .cc-actions .btn-sm {
-    padding: 0.35rem 0.7rem;
-    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
 }
 
 .cc-actions .search-box {
-    padding: 0.35rem 0.7rem;
-    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
     line-height: 1.2;
-    border-radius: 4px;
+    border-radius: 3px;
 }
 
 /* Responsive */
