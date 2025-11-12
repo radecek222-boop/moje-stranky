@@ -402,10 +402,16 @@ try {
     <!-- Card Grid -->
     <div class="cc-grid">
 
-        <!-- Statistiky & Analytics -->
+        <!-- Statistiky reklamací -->
         <div class="cc-card cc-card-statistics" onclick="openCCModal('statistics')">
-            <div class="cc-card-title">Statistiky & Analytics</div>
-            <div class="cc-card-description">Přehledy, grafy a výkonnostní metriky</div>
+            <div class="cc-card-title">Statistiky</div>
+            <div class="cc-card-description">Přehledy a grafy reklamací</div>
+        </div>
+
+        <!-- Web Analytics -->
+        <div class="cc-card cc-card-analytics" onclick="openCCModal('analytics')">
+            <div class="cc-card-title">Analytics</div>
+            <div class="cc-card-description">Web analytika a metriky</div>
         </div>
 
         <!-- Registrační klíče -->
@@ -421,15 +427,6 @@ try {
         <div class="cc-card cc-card-users" onclick="openCCModal('users')">
             <div class="cc-card-title">Správa uživatelů</div>
             <div class="cc-card-description">Technici, prodejci, administrátoři</div>
-        </div>
-
-        <!-- Online uživatelé -->
-        <div class="cc-card cc-card-online" onclick="openCCModal('online')">
-            <?php if ($onlineUsers > 0): ?>
-                <div class="cc-card-badge" style="background: var(--c-success);"><?= $onlineUsers ?></div>
-            <?php endif; ?>
-            <div class="cc-card-title">Online uživatelé</div>
-            <div class="cc-card-description">Aktivní v posledních 15 minutách</div>
         </div>
 
         <!-- Email & SMS -->
@@ -535,14 +532,14 @@ function openCCModal(section) {
         case 'statistics':
             loadStatisticsModal();
             break;
+        case 'analytics':
+            loadAnalyticsModal();
+            break;
         case 'keys':
             loadKeysModal();
             break;
         case 'users':
             loadUsersModal();
-            break;
-        case 'online':
-            loadOnlineModal();
             break;
         case 'notifications':
             loadNotificationsModal();
@@ -576,23 +573,12 @@ function closeCCModal() {
 
 function loadStatisticsModal() {
     const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="statistiky.php?embed=1" sandbox="allow-scripts allow-same-origin" title="Statistiky reklamací"></iframe></div>';
+}
 
-    modalBody.innerHTML = `
-        <div class="cc-tabs">
-            <button class="cc-tab active" onclick="switchStatTab('claims')">Statistiky reklamací</button>
-            <button class="cc-tab" onclick="switchStatTab('web')">Web Analytics</button>
-        </div>
-        <div id="statTabClaims" class="cc-tab-content active">
-            <div class="cc-iframe-container">
-                <iframe src="statistiky.php?embed=1" sandbox="allow-scripts allow-same-origin" title="Statistiky reklamací"></iframe>
-            </div>
-        </div>
-        <div id="statTabWeb" class="cc-tab-content">
-            <div class="cc-iframe-container">
-                <iframe src="analytics.php?embed=1" sandbox="allow-scripts allow-same-origin" title="Web Analytics"></iframe>
-            </div>
-        </div>
-    `;
+function loadAnalyticsModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="analytics.php?embed=1" sandbox="allow-scripts allow-same-origin" title="Web Analytics"></iframe></div>';
 }
 
 function switchStatTab(tab) {
@@ -706,53 +692,6 @@ function loadUsersModal() {
         .catch(err => {
             console.error('[Control Center] Users load error:', err);
             document.getElementById('usersTableContainer').innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba načítání</p>';
-        });
-}
-
-function loadOnlineModal() {
-    const modalBody = document.getElementById('ccModalBody');
-
-    modalBody.innerHTML = `
-        <div class="cc-actions">
-            <button class="btn btn-sm" onclick="loadOnlineModal()">Obnovit</button>
-        </div>
-        <div id="onlineTableContainer">Načítání online uživatelů...</div>
-    `;
-
-    // Load online users
-    fetch('api/admin_users_api.php?action=online')
-        .then(r => {
-            if (!r.ok) throw new Error(`HTTP ${r.status}`);
-            return r.json();
-        })
-        .then(data => {
-            const container = document.getElementById('onlineTableContainer');
-
-            if (isSuccess(data) && data.users && data.users.length > 0) {
-                let html = '<table class="cc-table"><thead><tr>';
-                html += '<th>Jméno</th><th>Role</th><th>Email</th><th>Poslední aktivita</th>';
-                html += '</tr></thead><tbody>';
-
-                data.users.forEach(user => {
-                    html += '<tr>';
-                    html += `<td><span class="online-indicator" style="display: inline-block; width: 8px; height: 8px; background: var(--c-success); border-radius: 50%; margin-right: 0.5rem;"></span>${user.full_name || user.name || ''}</td>`;
-                    html += `<td><span class="badge badge-${user.role}">${user.role || ''}</span></td>`;
-                    html += `<td>${user.email || ''}</td>`;
-                    html += `<td>${new Date(user.last_activity).toLocaleString('cs-CZ')}</td>`;
-                    html += '</tr>';
-                });
-
-                html += '</tbody></table>';
-                container.innerHTML = html;
-            } else if (isSuccess(data)) {
-                container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádní online uživatelé</p>';
-            } else {
-                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání</p>';
-            }
-        })
-        .catch(err => {
-            console.error('[Control Center] Online users load error:', err);
-            document.getElementById('onlineTableContainer').innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba načítání</p>';
         });
 }
 
