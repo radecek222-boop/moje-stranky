@@ -319,28 +319,27 @@ input:checked + .toggle-slider:before {
 
 /* Live Preview Control Center */
 #livePreview {
-    transform-origin: top center;
-    transition: all 0.3s ease;
-}
-
-.preview-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: none;
+}
+
+.preview-overlay {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .preview-modal {
     width: 90%;
-    max-width: 800px;
-    border-radius: var(--preview-radius);
+    max-width: 600px;
+    border-radius: var(--preview-radius, 8px);
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    padding: var(--preview-padding);
+    padding: var(--preview-padding, 16px);
 }
 
 .preview-content h2 {
