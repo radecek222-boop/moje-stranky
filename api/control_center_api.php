@@ -24,20 +24,43 @@ try {
     $jsonData = file_get_contents('php://input');
     $data = json_decode($jsonData, true);
 
+    // Načíst action před CSRF kontrolou (pro debug)
+    $action = $_GET['action'] ?? '';
+
     // CSRF ochrana pro POST/PUT/DELETE
     if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         $csrfToken = $data['csrf_token'] ?? null;
+
+        // Debug info pro execute_action
+        if ($action === 'execute_action' && !$csrfToken) {
+            http_response_code(400);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'CSRF token missing in request',
+                'debug' => [
+                    'received_data' => array_keys($data),
+                    'has_session_token' => isset($_SESSION['csrf_token'])
+                ]
+            ]);
+            exit;
+        }
+
         if (!$csrfToken || !validateCSRFToken($csrfToken)) {
             http_response_code(403);
             echo json_encode([
                 'status' => 'error',
-                'message' => 'Invalid CSRF token'
+                'message' => 'Invalid CSRF token',
+                'debug' => [
+                    'token_provided' => !empty($csrfToken),
+                    'token_length' => $csrfToken ? strlen($csrfToken) : 0,
+                    'session_has_token' => isset($_SESSION['csrf_token']),
+                    'tokens_match' => $csrfToken && isset($_SESSION['csrf_token']) ? hash_equals($_SESSION['csrf_token'], $csrfToken) : false
+                ]
             ]);
             exit;
         }
     }
 
-    $action = $_GET['action'] ?? '';
     $pdo = getDbConnection();
 
     switch ($action) {
