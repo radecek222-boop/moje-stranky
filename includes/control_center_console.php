@@ -462,11 +462,29 @@ async function checkPhpFiles() {
             credentials: 'same-origin'
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // Vždy zkusit přečíst response body (i při chybě)
+        let data;
+        const contentType = response.headers.get('content-type');
+
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            logError(`Neplatná odpověď od API (HTTP ${response.status}):`);
+            logError(text.substring(0, 300));
+            log('');
+            return;
         }
 
-        const data = await response.json();
+        if (!response.ok) {
+            logError(`API vrátilo chybu (HTTP ${response.status}):`);
+            logError(data.message || response.statusText || 'Neznámá chyba');
+            if (data.debug) {
+                logError('Debug info: ' + JSON.stringify(data.debug).substring(0, 200));
+            }
+            log('');
+            return;
+        }
 
         if (data.status === 'success') {
             const { total, errors, warnings } = data.data;
@@ -498,7 +516,9 @@ async function checkPhpFiles() {
             logError('Nepodařilo se zkontrolovat PHP soubory: ' + (data.message || 'Unknown error'));
         }
     } catch (error) {
-        logError('Chyba při kontrole PHP: ' + error.message);
+        logError('Chyba při kontrole PHP:');
+        logError('  ' + error.message);
+        logError('  Zkontrolujte, zda API soubor existuje a je dostupný');
         if (DEBUG_MODE) console.error(error);
     }
 
@@ -515,11 +535,26 @@ async function checkJavaScriptFiles() {
             credentials: 'same-origin'
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // Vždy zkusit přečíst response body (i při chybě)
+        let data;
+        const contentType = response.headers.get('content-type');
+
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            logError(`Neplatná odpověď od API (HTTP ${response.status}):`);
+            logError(text.substring(0, 300));
+            log('');
+            return;
         }
 
-        const data = await response.json();
+        if (!response.ok) {
+            logError(`API vrátilo chybu (HTTP ${response.status}):`);
+            logError(data.message || response.statusText || 'Neznámá chyba');
+            log('');
+            return;
+        }
 
         if (data.status === 'success') {
             const { total, recent_errors, error_count } = data.data;
@@ -553,7 +588,8 @@ async function checkJavaScriptFiles() {
             logError('Nepodařilo se zkontrolovat JavaScript: ' + (data.message || 'Unknown error'));
         }
     } catch (error) {
-        logError('Chyba při kontrole JS: ' + error.message);
+        logError('Chyba při kontrole JS:');
+        logError('  ' + error.message);
         if (DEBUG_MODE) console.error(error);
     }
 
@@ -651,8 +687,9 @@ async function checkApiEndpoints() {
             };
             failedEndpoints.push(errorInfo);
 
-            logError(`✗ ${endpoint} - Nedostupné`);
+            logError(`✗ ${endpoint} - Network Error`);
             logError(`   Důvod: ${error.message}`);
+            logError(`   (Možná CORS, timeout, nebo server neběží)`);
             failedCount++;
         }
     }
@@ -698,14 +735,21 @@ async function checkErrorLogs() {
 
                 // Zobrazit top 5 PHP errors
                 php_errors.slice(0, 5).forEach((err, idx) => {
-                    if (err.parsed !== false) {
+                    if (err.parsed !== false && err.file && err.line) {
+                        // Plná chyba s file:line
                         logWarning(`#${idx + 1}: ${err.type || 'Error'}`);
                         logWarning(`   📄 ${err.file}:${err.line}`);
                         logWarning(`   💬 ${err.message}`);
                         if (err.timestamp) {
                             logWarning(`   🕐 ${err.timestamp}`);
                         }
-                    } else {
+                    } else if (err.parsed === true && err.message) {
+                        // Jen message bez file:line
+                        logWarning(`#${idx + 1}: ${err.message}`);
+                        if (err.timestamp) {
+                            logWarning(`   🕐 ${err.timestamp}`);
+                        }
+                    } else if (err.raw) {
                         // Neparsované - zobrazit raw
                         logWarning(`#${idx + 1}: ${err.raw.substring(0, 150)}`);
                     }

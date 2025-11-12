@@ -942,28 +942,45 @@ try {
             // PHP errors - parsovat strukturovaně
             if (file_exists($phpErrorsFile)) {
                 $lines = file($phpErrorsFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-                $recentLines = array_slice(array_reverse($lines), 0, 20);
+                $recentLines = array_slice(array_reverse($lines), 0, 50);
 
                 foreach ($recentLines as $line) {
-                    // Parsovat PHP error log formát: [timestamp] Type: message in /path/file.php:123
-                    if (preg_match('/\[(.*?)\]\s*(.*?):\s*(.*?)\s+in\s+(.*?):(\d+)/', $line, $matches)) {
+                    // Přeskočit řádky které jsou metadata (User Agent, IP, Method, URL, atd.)
+                    if (preg_match('/^(User Agent|IP|Method|URL|Referer|=+):/i', $line) ||
+                        preg_match('/^=+$/', $line)) {
+                        continue; // Přeskočit metadata řádky
+                    }
+
+                    // Parsovat PHP error log formát:
+                    // [05-Nov-2025 17:05:38 Europe/Prague] PHP Warning: message in /path/file.php on line 235
+                    if (preg_match('/\[(.*?)\]\s+PHP\s+(Warning|Error|Notice|Fatal error)[:\s]+(.*?)\s+in\s+(.+?)\s+on\s+line\s+(\d+)/', $line, $matches)) {
                         $phpErrors[] = [
                             'timestamp' => $matches[1],
                             'type' => $matches[2],
-                            'message' => $matches[3],
+                            'message' => trim($matches[3]),
                             'file' => basename($matches[4]),
                             'full_path' => $matches[4],
                             'line' => $matches[5],
-                            'raw' => $line
+                            'parsed' => true
                         ];
-                    } else {
-                        // Fallback pro neparsovatelné řádky
+                    }
+                    // Pokud to není PHP error ale vypadá to jako logovací řádek
+                    elseif (preg_match('/\[(.*?)\]\s+(.*)/', $line, $matches)) {
+                        // DEBUG, ✅ atp. - přeskočit
+                        if (stripos($matches[2], 'DEBUG:') === 0 || stripos($matches[2], '✅') === 0) {
+                            continue;
+                        }
+                        // Jiné logování - zobrazit jako raw
                         $phpErrors[] = [
-                            'raw' => $line,
-                            'parsed' => false
+                            'timestamp' => $matches[1],
+                            'message' => $matches[2],
+                            'parsed' => true
                         ];
                     }
                 }
+
+                // Omezit na 20 zobrazených
+                $phpErrors = array_slice($phpErrors, 0, 20);
             }
 
             // JS errors - parsovat JSON
