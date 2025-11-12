@@ -572,8 +572,12 @@ try {
 
 <script>
 // Control Center Unified - Version Check
-console.log('%c🔧 Control Center v2025.11.12-1430 loaded', 'background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;');
-console.log('✅ executeAction is ASYNC + event.target captured BEFORE await');
+// Debug mode - set to false in production
+const DEBUG_MODE = false;
+if (DEBUG_MODE) {
+    console.log('%c🔧 Control Center v2025.11.12-1430 loaded', 'background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;');
+    console.log('✅ executeAction is ASYNC + event.target captured BEFORE await');
+}
 
 // Helper function to check if API response is successful
 function isSuccess(data) {
@@ -606,7 +610,7 @@ function getCSRFToken() {
     const tokenStr = token ? String(token).trim() : null;
 
     if (tokenStr) {
-        console.log('CSRF token loaded:', tokenStr.substring(0, 10) + '... (length: ' + tokenStr.length + ')');
+        if (DEBUG_MODE) console.log('CSRF token loaded:', tokenStr.substring(0, 10) + '... (length: ' + tokenStr.length + ')');
     } else {
         console.error('CSRF token is empty');
     }
@@ -720,13 +724,17 @@ function loadKeysModal() {
                 html += '</tr></thead><tbody>';
 
                 data.keys.forEach(key => {
+                    // Escapování pro XSS ochranu
+                    const safeKeyCode = typeof escapeHTML === 'function' ? escapeHTML(key.key_code) : key.key_code;
+                    const safeKeyType = typeof escapeHTML === 'function' ? escapeHTML(key.key_type) : key.key_type;
+
                     html += '<tr>';
-                    html += `<td><code>${key.key_code}</code></td>`;
-                    html += `<td><span class="badge badge-${key.key_type}">${key.key_type}</span></td>`;
-                    html += `<td>${key.usage_count} / ${key.max_usage || '∞'}</td>`;
+                    html += `<td><code>${safeKeyCode}</code></td>`;
+                    html += `<td><span class="badge badge-${safeKeyType}">${safeKeyType}</span></td>`;
+                    html += `<td>${parseInt(key.usage_count) || 0} / ${parseInt(key.max_usage) || '∞'}</td>`;
                     html += `<td><span class="badge badge-${key.is_active ? 'active' : 'inactive'}">${key.is_active ? 'Aktivní' : 'Neaktivní'}</span></td>`;
                     html += `<td>${new Date(key.created_at).toLocaleDateString('cs-CZ')}</td>`;
-                    html += `<td><button class="btn btn-sm btn-danger" onclick="deleteKey('${key.key_code}')">Smazat</button></td>`;
+                    html += `<td><button class="btn btn-sm btn-danger" onclick="deleteKey('${safeKeyCode}')">Smazat</button></td>`;
                     html += '</tr>';
                 });
 
@@ -771,11 +779,16 @@ function loadUsersModal() {
                 html += '<th>ID</th><th>Jméno</th><th>Email</th><th>Role</th><th>Status</th><th>Vytvořen</th></tr></thead><tbody>';
 
                 users.forEach(user => {
+                    // Escapování pro XSS ochranu
+                    const safeName = typeof escapeHTML === 'function' ? escapeHTML(user.name || user.full_name || '') : (user.name || user.full_name || '');
+                    const safeEmail = typeof escapeHTML === 'function' ? escapeHTML(user.email || '') : (user.email || '');
+                    const safeRole = typeof escapeHTML === 'function' ? escapeHTML(user.role || '') : (user.role || '');
+
                     html += '<tr>';
-                    html += `<td>#${user.id}</td>`;
-                    html += `<td>${user.name || user.full_name || ''}</td>`;
-                    html += `<td>${user.email || ''}</td>`;
-                    html += `<td><span class="badge badge-${user.role}">${user.role || ''}</span></td>`;
+                    html += `<td>#${parseInt(user.id) || 0}</td>`;
+                    html += `<td>${safeName}</td>`;
+                    html += `<td>${safeEmail}</td>`;
+                    html += `<td><span class="badge badge-${safeRole}">${safeRole}</span></td>`;
                     html += `<td><span class="badge badge-${user.is_active ? 'active' : 'inactive'}">${user.is_active ? 'Aktivní' : 'Neaktivní'}</span></td>`;
                     html += `<td>${user.created_at ? new Date(user.created_at).toLocaleDateString('cs-CZ') : '—'}</td>`;
                     html += '</tr>';
@@ -951,7 +964,7 @@ function createKey() {
 }
 
 async function executeAction(actionId) {
-    console.log('[executeAction] Starting with actionId:', actionId);
+    if (DEBUG_MODE) console.log('[executeAction] Starting with actionId:', actionId);
 
     // Capture button reference BEFORE any await (event becomes undefined after await in async functions)
     const btn = event.target;
@@ -959,7 +972,7 @@ async function executeAction(actionId) {
 
     // Await the CSRF token (handles both sync and async getCSRFToken)
     const csrfToken = await getCSRFToken();
-    console.log('[executeAction] CSRF token retrieved:', {
+    if (DEBUG_MODE) console.log('[executeAction] CSRF token retrieved:', {
         type: typeof csrfToken,
         value: csrfToken && typeof csrfToken === 'string' ? csrfToken.substring(0, 10) + '...' : csrfToken,
         length: csrfToken ? csrfToken.length : 0
@@ -972,7 +985,7 @@ async function executeAction(actionId) {
     }
 
     if (!confirm('Spustit tuto akci? Bude provedena automaticky.')) {
-        console.log('[executeAction] User cancelled');
+        if (DEBUG_MODE) console.log('[executeAction] User cancelled');
         return;
     }
 
@@ -985,7 +998,7 @@ async function executeAction(actionId) {
         csrf_token: csrfToken
     };
 
-    console.log('[executeAction] Sending request with payload:', payload);
+    if (DEBUG_MODE) console.log('[executeAction] Sending request with payload:', payload);
 
     fetch('api/control_center_api.php?action=execute_action', {
         method: 'POST',
@@ -993,13 +1006,13 @@ async function executeAction(actionId) {
         body: JSON.stringify(payload)
     })
     .then(async r => {
-        console.log('[executeAction] Response status:', r.status);
+        if (DEBUG_MODE) console.log('[executeAction] Response status:', r.status);
 
         // Zkusit načíst JSON i při chybě
         let responseData;
         try {
             responseData = await r.json();
-            console.log('[executeAction] Response data:', responseData);
+            if (DEBUG_MODE) console.log('[executeAction] Response data:', responseData);
         } catch (e) {
             console.error('[executeAction] Failed to parse JSON:', e);
             responseData = null;
@@ -1021,7 +1034,7 @@ async function executeAction(actionId) {
         return responseData;
     })
     .then(data => {
-        console.log('[executeAction] Success data:', data);
+        if (DEBUG_MODE) console.log('[executeAction] Success data:', data);
 
         if (isSuccess(data)) {
             const execTime = data.execution_time || 'neznámý čas';

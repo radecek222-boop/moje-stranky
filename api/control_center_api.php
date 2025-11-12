@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/rate_limiter.php';
 
 header('Content-Type: application/json');
 
@@ -199,6 +200,14 @@ try {
                         $sqlFile = __DIR__ . '/../add_smtp_password.sql';
                         if (!file_exists($sqlFile)) {
                             throw new Exception('SQL soubor nenalezen: ' . $sqlFile);
+                        }
+
+                        // BEZPEČNOST: Ověření integrity SQL souboru pomocí hash
+                        $expectedHash = '9013f148ee3befedf2ddc87350ca7d754e841320b7e880f0b8a68214ceb11c9c';
+                        $actualHash = hash_file('sha256', $sqlFile);
+
+                        if ($actualHash !== $expectedHash) {
+                            throw new Exception('Bezpečnostní chyba: SQL soubor byl modifikován! Hash nesouhlasí.');
                         }
 
                         $sql = file_get_contents($sqlFile);
@@ -729,6 +738,20 @@ try {
                 throw new Exception('Valid email required');
             }
 
+            // BEZPEČNOST: Rate limiting - max 5 emailů za 10 minut
+            $rateLimiter = new RateLimiter($pdo);
+            $identifier = $_SESSION['user_id'] ?? $_SERVER['REMOTE_ADDR'];
+            $limitCheck = $rateLimiter->checkLimit($identifier, 'test_email', [
+                'max_attempts' => 5,
+                'window_minutes' => 10,
+                'block_minutes' => 30
+            ]);
+
+            if (!$limitCheck['allowed']) {
+                http_response_code(429); // Too Many Requests
+                throw new Exception($limitCheck['message']);
+            }
+
             // Simple test email
             $subject = 'WGS Control Center - Test Email';
             $message = "Hello!\n\nThis is a test email from WGS Control Center.\n\nIf you received this email, your SMTP settings are working correctly.\n\nTimestamp: " . date('Y-m-d H:i:s') . "\n\nBest regards,\nWhite Glove Service";
@@ -743,7 +766,7 @@ try {
 
             echo json_encode([
                 'status' => 'success',
-                'message' => 'Test email sent to ' . $email
+                'message' => 'Test email sent to ' . $email . '. ' . $limitCheck['remaining'] . ' attempts remaining.'
             ]);
             break;
 

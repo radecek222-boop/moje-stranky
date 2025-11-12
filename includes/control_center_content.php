@@ -194,6 +194,9 @@ $pageNames = [
 
 <script src="/assets/js/csrf-auto-inject.js"></script>
 <script>
+// Debug mode - set to false in production
+const DEBUG_MODE = false;
+
 // Show page
 function showPage(page) {
     // Hide all pages
@@ -294,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-console.log('[OK] Content section loaded');
+if (DEBUG_MODE) console.log('[OK] Content section loaded');
 </script>
 
 <style>

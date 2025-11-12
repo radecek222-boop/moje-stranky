@@ -151,6 +151,25 @@ try {
             throw new Exception('Heslo musí mít alespoň 8 znaků');
         }
 
+        // Validace telefonu (pokud je zadán)
+        if (!empty($phone)) {
+            // Regex pro české/slovenské telefony: +420/+421 nebo 00420/00421 nebo 9 číslic
+            if (!preg_match('/^(\+420|\+421|00420|00421)?[0-9]{9}$/', preg_replace('/\s+/', '', $phone))) {
+                throw new Exception('Neplatný formát telefonního čísla. Očekáván formát: +420123456789 nebo 123456789');
+            }
+            // Normalizace - odstranění mezer
+            $phone = preg_replace('/\s+/', '', $phone);
+        }
+
+        // Validace adresy (pokud je zadána)
+        if (!empty($address)) {
+            if (strlen($address) > 255) {
+                throw new Exception('Adresa je příliš dlouhá (max 255 znaků)');
+            }
+            // Sanitizace - odstranění nebezpečných znaků
+            $address = strip_tags($address);
+        }
+
         $allowedRoles = ['prodejce', 'technik', 'admin'];
         if (!in_array($role, $allowedRoles)) {
             throw new Exception('Neplatná role');

@@ -313,18 +313,6 @@ function getPriorityBadge($priority) {
 
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">➕ Vytvořit nový úkol</div>
-                    <div class="setting-item-description">Přidat vlastní pending action</div>
-                </div>
-                <div class="setting-item-right">
-                    <button class="cc-btn cc-btn-sm cc-btn-primary" onclick="createNewAction()">
-                        Vytvořit
-                    </button>
-                </div>
-            </div>
-
-            <div class="setting-item">
-                <div class="setting-item-left">
                     <div class="setting-item-label">🔄 Obnovit seznam</div>
                     <div class="setting-item-description">Načíst aktuální stav</div>
                 </div>
@@ -341,13 +329,16 @@ function getPriorityBadge($priority) {
 
 <script src="/assets/js/csrf-auto-inject.js"></script>
 <script>
+// Debug mode - set to false in production
+const DEBUG_MODE = false;
+
 // Helper function to check API response success
 function isSuccess(data) {
     return (data && (data.success === true || data.status === 'success'));
 }
 
 async function executeAction(actionId) {
-    console.log('[executeAction] Starting with actionId:', actionId);
+    if (DEBUG_MODE) console.log('[executeAction] Starting with actionId:', actionId);
 
     // Capture button reference BEFORE any await
     const btn = event.target;
@@ -355,7 +346,7 @@ async function executeAction(actionId) {
 
     // Await the CSRF token
     const csrfToken = await getCSRFToken();
-    console.log('[executeAction] CSRF token retrieved');
+    if (DEBUG_MODE) console.log('[executeAction] CSRF token retrieved');
 
     if (!csrfToken || typeof csrfToken !== 'string' || csrfToken.length === 0) {
         alert('Chyba: CSRF token nebyl nalezen nebo je neplatný. Obnovte stránku.');
@@ -364,7 +355,7 @@ async function executeAction(actionId) {
     }
 
     if (!confirm('Spustit tuto akci? Bude provedena automaticky.')) {
-        console.log('[executeAction] User cancelled');
+        if (DEBUG_MODE) console.log('[executeAction] User cancelled');
         return;
     }
 
@@ -377,7 +368,7 @@ async function executeAction(actionId) {
         csrf_token: csrfToken
     };
 
-    console.log('[executeAction] Sending request with payload:', payload);
+    if (DEBUG_MODE) console.log('[executeAction] Sending request with payload:', payload);
 
     fetch('api/control_center_api.php?action=execute_action', {
         method: 'POST',
@@ -385,13 +376,13 @@ async function executeAction(actionId) {
         body: JSON.stringify(payload)
     })
     .then(async r => {
-        console.log('[executeAction] Response status:', r.status);
+        if (DEBUG_MODE) console.log('[executeAction] Response status:', r.status);
 
         // Try to parse JSON even on error
         let responseData;
         try {
             responseData = await r.json();
-            console.log('[executeAction] Response data:', responseData);
+            if (DEBUG_MODE) console.log('[executeAction] Response data:', responseData);
         } catch (e) {
             console.error('[executeAction] Failed to parse JSON:', e);
             responseData = null;
@@ -413,7 +404,7 @@ async function executeAction(actionId) {
         return responseData;
     })
     .then(data => {
-        console.log('[executeAction] Success data:', data);
+        if (DEBUG_MODE) console.log('[executeAction] Success data:', data);
 
         if (isSuccess(data)) {
             const execTime = data.execution_time || 'neznámý čas';
@@ -486,17 +477,6 @@ async function dismissAction(actionId) {
     }
 }
 
-function createNewAction() {
-    const title = prompt('Název úkolu:');
-    if (!title) return;
-
-    const description = prompt('Popis:');
-    const priority = prompt('Priorita (low/medium/high/critical):', 'medium');
-
-    // TODO: API call to create action
-    alert('Funkce bude implementována v příští verzi');
-}
-
 function viewAllWebhooks() {
     window.open('/admin.php?tab=tools&view=github_webhooks', '_blank');
 }
@@ -505,5 +485,5 @@ function setupGitHubWebhook() {
     alert('GitHub Webhook URL:\n\n' + window.location.origin + '/api/github_webhook.php\n\nPřidejte tuto URL do nastavení GitHub repozitáře.');
 }
 
-console.log('✅ Actions section loaded');
+if (DEBUG_MODE) console.log('✅ Actions section loaded');
 </script>
