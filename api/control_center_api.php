@@ -825,16 +825,22 @@ try {
 
             try {
                 // Test zda exec funguje
+                $testOutput = [];
+                $testReturn = 0;
                 $execTest = @exec('php --version 2>&1', $testOutput, $testReturn);
                 if ($testReturn !== 0 || empty($execTest)) {
                     throw new Exception('exec() není dostupný nebo PHP není v PATH');
                 }
 
                 // Najít všechny PHP soubory
-                $iterator = new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator($rootDir, RecursiveDirectoryIterator::SKIP_DOTS),
-                    RecursiveIteratorIterator::CATCH_GET_CHILD
-                );
+                try {
+                    $iterator = new RecursiveIteratorIterator(
+                        new RecursiveDirectoryIterator($rootDir, RecursiveDirectoryIterator::SKIP_DOTS),
+                        RecursiveIteratorIterator::CATCH_GET_CHILD
+                    );
+                } catch (Exception $dirException) {
+                    throw new Exception('Nelze číst adresářovou strukturu: ' . $dirException->getMessage());
+                }
 
                 $filesChecked = 0;
                 $maxFiles = 500; // Limit aby to netrvalo věčně
