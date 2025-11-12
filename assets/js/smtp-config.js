@@ -137,7 +137,9 @@ async function testSmtpConnection() {
         // Získat CSRF token PŘED vytvořením objektu
         const csrfToken = getCSRFToken();
 
-        console.log('[SMTP Test Debug] CSRF token:', csrfToken ? `${csrfToken.substring(0, 10)}...` : 'NULL');
+        console.log('[SMTP Test Debug] CSRF token type:', typeof csrfToken);
+        console.log('[SMTP Test Debug] CSRF token value:', csrfToken);
+        console.log('[SMTP Test Debug] CSRF token preview:', csrfToken && typeof csrfToken === 'string' ? `${csrfToken.substring(0, 10)}...` : csrfToken);
         console.log('[SMTP Test Debug] In iframe:', window.parent !== window);
         console.log('[SMTP Test Debug] Session available:', document.cookie.includes('PHPSESSID'));
 
@@ -189,15 +191,26 @@ async function testSmtpConnection() {
 function getCSRFToken() {
     // Zkusit aktuální dokument
     let metaTag = document.querySelector('meta[name="csrf-token"]');
+    console.log('[getCSRFToken] Found in current doc:', !!metaTag);
 
     // Pokud je skript v iframe, zkusit parent dokument
     if (!metaTag && window.parent && window.parent !== window) {
         try {
             metaTag = window.parent.document.querySelector('meta[name="csrf-token"]');
+            console.log('[getCSRFToken] Found in parent doc:', !!metaTag);
         } catch (e) {
             console.warn('Cannot access parent document for CSRF token:', e);
         }
     }
 
-    return metaTag ? metaTag.getAttribute('content') : null;
+    if (!metaTag) {
+        console.warn('[getCSRFToken] No meta tag found');
+        return null;
+    }
+
+    const token = metaTag.getAttribute('content');
+    console.log('[getCSRFToken] Token type:', typeof token, 'Length:', token ? token.length : 0);
+
+    // Ujistit se, že vracíme string nebo null
+    return token && typeof token === 'string' && token.length > 0 ? String(token) : null;
 }
