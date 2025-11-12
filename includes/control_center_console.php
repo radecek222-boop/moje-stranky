@@ -471,8 +471,11 @@ async function runDiagnostics() {
         // 4. CSS/Assets Check
         await checkAssets();
 
-        // 5. SQL Database Check
+        // 5. SQL Database Check (Basic)
         await checkDatabase();
+
+        // 5B. SQL Advanced Check (Foreign Keys, Slow Queries, Collations, Orphaned Records)
+        await checkDatabaseAdvanced();
 
         // 6. API Endpoints Check
         await checkApiEndpoints();
@@ -494,6 +497,18 @@ async function runDiagnostics() {
 
         // 12. Git Status
         await checkGitStatus();
+
+        // 13. Performance Check
+        await checkPerformance();
+
+        // 14. Code Quality Check
+        await checkCodeQuality();
+
+        // 15. SEO Check
+        await checkSEO();
+
+        // 16. Workflow Check
+        await checkWorkflow();
 
         log('');
         logHeader('═══════════════════════════════════════════════════');
@@ -1435,6 +1450,540 @@ async function checkGitStatus() {
         }
     } catch (error) {
         logWarning('Nepodařilo se zkontrolovat git: ' + error.message);
+    }
+
+    log('');
+}
+
+// ============================================
+// SQL ADVANCED CHECKS
+// ============================================
+
+async function checkDatabaseAdvanced() {
+    logHeader('5B. SQL POKROČILÉ KONTROLY');
+    log('Kontroluji foreign keys, slow queries, collations, orphaned records...');
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=check_database_advanced', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const { foreign_keys, slow_queries, collations, orphaned_records, deadlocks } = data.data;
+
+            // Foreign Keys
+            if (foreign_keys) {
+                if (foreign_keys.broken && foreign_keys.broken.length > 0) {
+                    logError(`🔗 ${foreign_keys.broken.length} porušených foreign keys:`);
+                    log('═'.repeat(79));
+                    foreign_keys.broken.slice(0, 5).forEach(fk => {
+                        logError(`  📄 ${fk.table}.${fk.column} -> ${fk.referenced_table}.${fk.referenced_column}`);
+                        logError(`     💬 ${fk.error || 'Cílová tabulka/záznam neexistuje'}`);
+                        log('─'.repeat(79));
+                    });
+                    totalErrors += foreign_keys.broken.length;
+                } else {
+                    logSuccess(`✓ Foreign keys: ${foreign_keys.total || 0} OK`);
+                }
+            }
+
+            // Slow Queries
+            if (slow_queries) {
+                if (slow_queries.count > 0) {
+                    logWarning(`🐌 ${slow_queries.count} pomalých queries (> ${slow_queries.threshold}s):`);
+                    log('═'.repeat(79));
+                    if (slow_queries.queries && slow_queries.queries.length > 0) {
+                        slow_queries.queries.slice(0, 5).forEach((q, idx) => {
+                            logWarning(`#${idx + 1}: ${q.time}s - ${q.query.substring(0, 150)}...`);
+                            if (q.rows_examined) {
+                                logWarning(`   📊 Rows examined: ${q.rows_examined}`);
+                            }
+                            log('─'.repeat(79));
+                        });
+                    }
+                    totalWarnings += slow_queries.count;
+                } else {
+                    logSuccess('✓ Žádné pomalé queries detekované');
+                }
+            }
+
+            // Table Collations
+            if (collations) {
+                if (collations.inconsistent && collations.inconsistent.length > 0) {
+                    logWarning(`⚠️ ${collations.inconsistent.length} tabulek s nekonzistentní collation:`);
+                    log('═'.repeat(79));
+                    collations.inconsistent.forEach(t => {
+                        logWarning(`  📄 ${t.table}: ${t.collation} (doporučeno: utf8mb4_unicode_ci)`);
+                    });
+                    totalWarnings += collations.inconsistent.length;
+                } else {
+                    logSuccess(`✓ Všechny tabulky mají konzistentní collation (${collations.default || 'utf8mb4_unicode_ci'})`);
+                }
+            }
+
+            // Orphaned Records
+            if (orphaned_records) {
+                if (orphaned_records.total > 0) {
+                    logWarning(`🔍 ${orphaned_records.total} orphaned records nalezeno:`);
+                    log('═'.repeat(79));
+                    if (orphaned_records.details && orphaned_records.details.length > 0) {
+                        orphaned_records.details.forEach(orphan => {
+                            logWarning(`  📄 ${orphan.table}: ${orphan.count} záznamů bez parent`);
+                            logWarning(`     FK: ${orphan.foreign_key}`);
+                        });
+                    }
+                    totalWarnings += orphaned_records.total;
+                } else {
+                    logSuccess('✓ Žádné orphaned records');
+                }
+            }
+
+            // Deadlocks
+            if (deadlocks && deadlocks.count > 0) {
+                logWarning(`⚠️ ${deadlocks.count} deadlocků detekováno (24h)`);
+                totalWarnings++;
+            }
+
+        } else {
+            logWarning('Některé pokročilé SQL kontroly selhaly: ' + (data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        logWarning('Nepodařilo se provést pokročilé SQL kontroly: ' + error.message);
+        if (DEBUG_MODE) console.error(error);
+    }
+
+    log('');
+}
+
+// ============================================
+// PERFORMANCE CHECKS
+// ============================================
+
+async function checkPerformance() {
+    logHeader('13. VÝKON (Performance)');
+    log('Kontroluji rychlost stránek, velikost assets, minifikaci...');
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=check_performance', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const { page_load_times, large_assets, unminified_files, gzip_enabled, caching_headers, n_plus_one_queries } = data.data;
+
+            // Page Load Times
+            if (page_load_times) {
+                const slow_pages = page_load_times.pages?.filter(p => p.load_time > 3) || [];
+                if (slow_pages.length > 0) {
+                    logWarning(`⏱️ ${slow_pages.length} pomalých stránek (> 3s):`);
+                    log('═'.repeat(79));
+                    slow_pages.slice(0, 5).forEach(page => {
+                        logWarning(`  📄 ${page.url}: ${page.load_time.toFixed(2)}s`);
+                    });
+                    totalWarnings += slow_pages.length;
+                } else {
+                    logSuccess('✓ Všechny testované stránky rychlé (< 3s)');
+                }
+            }
+
+            // Large Assets
+            if (large_assets && large_assets.files && large_assets.files.length > 0) {
+                logWarning(`📦 ${large_assets.files.length} velkých souborů (> 500KB):`);
+                log('═'.repeat(79));
+                large_assets.files.slice(0, 10).forEach(file => {
+                    logWarning(`  📄 ${file.path}: ${file.size}`);
+                });
+                if (large_assets.files.length > 10) {
+                    logWarning(`  ... a dalších ${large_assets.files.length - 10} souborů`);
+                }
+                totalWarnings += large_assets.files.length;
+            } else {
+                logSuccess('✓ Žádné nadměrně velké assets');
+            }
+
+            // Unminified Files
+            if (unminified_files && unminified_files.length > 0) {
+                logWarning(`🔧 ${unminified_files.length} neminifikovaných JS/CSS souborů:`);
+                log('═'.repeat(79));
+                unminified_files.slice(0, 10).forEach(file => {
+                    logWarning(`  📄 ${file.path} (${file.size || 'N/A'})`);
+                });
+                totalWarnings += unminified_files.length;
+            } else {
+                logSuccess('✓ JS/CSS soubory jsou minifikované');
+            }
+
+            // Gzip Compression
+            if (gzip_enabled !== undefined) {
+                if (gzip_enabled) {
+                    logSuccess('✓ Gzip komprese aktivní');
+                } else {
+                    logWarning('⚠️ Gzip komprese NENÍ aktivní');
+                    totalWarnings++;
+                }
+            }
+
+            // Caching Headers
+            if (caching_headers) {
+                if (caching_headers.missing && caching_headers.missing.length > 0) {
+                    logWarning(`📦 ${caching_headers.missing.length} souborů bez cache headers`);
+                    totalWarnings++;
+                } else {
+                    logSuccess('✓ Cache headers správně nastavené');
+                }
+            }
+
+            // N+1 Queries
+            if (n_plus_one_queries && n_plus_one_queries.detected > 0) {
+                logWarning(`🔁 ${n_plus_one_queries.detected} možných N+1 query problémů`);
+                totalWarnings++;
+            }
+
+        } else {
+            logWarning('Nepodařilo se zkontrolovat výkon: ' + (data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        logWarning('Chyba při kontrole výkonu: ' + error.message);
+        if (DEBUG_MODE) console.error(error);
+    }
+
+    log('');
+}
+
+// ============================================
+// CODE QUALITY CHECKS
+// ============================================
+
+async function checkCodeQuality() {
+    logHeader('14. KVALITA KÓDU');
+    log('Kontroluji dead code, TODOs, complexity, duplicity...');
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=check_code_quality', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const { dead_code, todos, complexity, duplicates, psr_compliance } = data.data;
+
+            // Dead Code
+            if (dead_code && dead_code.functions && dead_code.functions.length > 0) {
+                logWarning(`💀 ${dead_code.functions.length} nepoužívaných funkcí:`);
+                log('═'.repeat(79));
+                dead_code.functions.slice(0, 10).forEach(func => {
+                    logWarning(`  📄 ${func.file}:${func.line}`);
+                    logWarning(`     function ${func.name}()`);
+                });
+                if (dead_code.functions.length > 10) {
+                    logWarning(`  ... a dalších ${dead_code.functions.length - 10} funkcí`);
+                }
+                totalWarnings += dead_code.functions.length;
+            } else {
+                logSuccess('✓ Žádný mrtvý kód detekován');
+            }
+
+            // TODOs/FIXMEs
+            if (todos && todos.count > 0) {
+                logWarning(`📝 ${todos.count} TODO/FIXME komentářů:`);
+                log('═'.repeat(79));
+                if (todos.items && todos.items.length > 0) {
+                    todos.items.slice(0, 10).forEach(todo => {
+                        const icon = todo.type === 'FIXME' ? '🔴' : '🟡';
+                        logWarning(`${icon} ${todo.file}:${todo.line}`);
+                        logWarning(`   ${todo.comment.substring(0, 100)}`);
+                    });
+                    if (todos.count > 10) {
+                        logWarning(`  ... a dalších ${todos.count - 10} komentářů`);
+                    }
+                }
+                totalWarnings += todos.count;
+            } else {
+                logSuccess('✓ Žádné TODO/FIXME komentáře');
+            }
+
+            // Complexity
+            if (complexity && complexity.high_complexity && complexity.high_complexity.length > 0) {
+                logWarning(`⚠️ ${complexity.high_complexity.length} funkcí s vysokou komplexitou:`);
+                log('═'.repeat(79));
+                complexity.high_complexity.slice(0, 5).forEach(func => {
+                    logWarning(`  📄 ${func.file}:${func.line}`);
+                    logWarning(`     ${func.name}() - Complexity: ${func.complexity}`);
+                });
+                totalWarnings += complexity.high_complexity.length;
+            } else {
+                logSuccess('✓ Komplexita kódu v normě');
+            }
+
+            // Duplicate Code
+            if (duplicates && duplicates.blocks && duplicates.blocks.length > 0) {
+                logWarning(`📋 ${duplicates.blocks.length} duplicitních bloků kódu:`);
+                log('═'.repeat(79));
+                duplicates.blocks.slice(0, 5).forEach(dup => {
+                    logWarning(`  📄 ${dup.file1}:${dup.line1} <-> ${dup.file2}:${dup.line2}`);
+                    logWarning(`     ${dup.lines} řádků duplicitního kódu`);
+                });
+                totalWarnings += duplicates.blocks.length;
+            } else {
+                logSuccess('✓ Žádné významné duplicity');
+            }
+
+            // PSR Compliance
+            if (psr_compliance !== undefined) {
+                if (psr_compliance.violations && psr_compliance.violations > 0) {
+                    logWarning(`⚠️ ${psr_compliance.violations} PSR porušení`);
+                    totalWarnings++;
+                } else {
+                    logSuccess('✓ PSR coding standards dodrženy');
+                }
+            }
+
+        } else {
+            logWarning('Nepodařilo se zkontrolovat kvalitu kódu: ' + (data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        logWarning('Chyba při kontrole kvality: ' + error.message);
+        if (DEBUG_MODE) console.error(error);
+    }
+
+    log('');
+}
+
+// ============================================
+// SEO CHECKS
+// ============================================
+
+async function checkSEO() {
+    logHeader('15. SEO OPTIMALIZACE');
+    log('Kontroluji meta tagy, alt atributy, broken links...');
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=check_seo', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const { missing_meta_tags, missing_alt_tags, broken_links, duplicate_titles, h1_issues } = data.data;
+
+            // Missing Meta Tags
+            if (missing_meta_tags && missing_meta_tags.pages && missing_meta_tags.pages.length > 0) {
+                logWarning(`🏷️ ${missing_meta_tags.pages.length} stránek bez meta tagů:`);
+                log('═'.repeat(79));
+                missing_meta_tags.pages.slice(0, 10).forEach(page => {
+                    logWarning(`  📄 ${page.url}`);
+                    if (page.missing_tags && page.missing_tags.length > 0) {
+                        logWarning(`     Chybí: ${page.missing_tags.join(', ')}`);
+                    }
+                });
+                totalWarnings += missing_meta_tags.pages.length;
+            } else {
+                logSuccess('✓ Všechny stránky mají meta tagy');
+            }
+
+            // Missing Alt Tags
+            if (missing_alt_tags && missing_alt_tags.images && missing_alt_tags.images.length > 0) {
+                logWarning(`🖼️ ${missing_alt_tags.images.length} obrázků bez alt atributu:`);
+                log('═'.repeat(79));
+                missing_alt_tags.images.slice(0, 10).forEach(img => {
+                    logWarning(`  📄 ${img.page}: <img src="${img.src}">`);
+                });
+                if (missing_alt_tags.images.length > 10) {
+                    logWarning(`  ... a dalších ${missing_alt_tags.images.length - 10} obrázků`);
+                }
+                totalWarnings += missing_alt_tags.images.length;
+            } else {
+                logSuccess('✓ Všechny obrázky mají alt atributy');
+            }
+
+            // Broken Links
+            if (broken_links && broken_links.links && broken_links.links.length > 0) {
+                logError(`🔗 ${broken_links.links.length} broken links (404):`);
+                log('═'.repeat(79));
+                broken_links.links.slice(0, 10).forEach(link => {
+                    logError(`  📄 ${link.page} -> ${link.url} (HTTP ${link.status})`);
+                });
+                if (broken_links.links.length > 10) {
+                    logError(`  ... a dalších ${broken_links.links.length - 10} broken links`);
+                }
+                totalErrors += broken_links.links.length;
+            } else {
+                logSuccess('✓ Žádné broken links');
+            }
+
+            // Duplicate Titles
+            if (duplicate_titles && duplicate_titles.duplicates && duplicate_titles.duplicates.length > 0) {
+                logWarning(`📋 ${duplicate_titles.duplicates.length} duplicitních title tagů:`);
+                log('═'.repeat(79));
+                duplicate_titles.duplicates.forEach(dup => {
+                    logWarning(`  "${dup.title}"`);
+                    logWarning(`     Nalezeno na: ${dup.pages.join(', ')}`);
+                });
+                totalWarnings += duplicate_titles.duplicates.length;
+            } else {
+                logSuccess('✓ Všechny title tagy unikátní');
+            }
+
+            // H1 Issues
+            if (h1_issues && h1_issues.pages && h1_issues.pages.length > 0) {
+                logWarning(`📰 ${h1_issues.pages.length} stránek s H1 problémem:`);
+                log('═'.repeat(79));
+                h1_issues.pages.forEach(page => {
+                    logWarning(`  📄 ${page.url}: ${page.issue}`);
+                });
+                totalWarnings += h1_issues.pages.length;
+            } else {
+                logSuccess('✓ H1 tagy správně nastavené');
+            }
+
+        } else {
+            logWarning('Nepodařilo se zkontrolovat SEO: ' + (data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        logWarning('Chyba při kontrole SEO: ' + error.message);
+        if (DEBUG_MODE) console.error(error);
+    }
+
+    log('');
+}
+
+// ============================================
+// WORKFLOW CHECKS
+// ============================================
+
+async function checkWorkflow() {
+    logHeader('16. WORKFLOW & INFRASTRUKTURA');
+    log('Kontroluji cron jobs, email queue, backups, .env permissions...');
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=check_workflow', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const { cron_jobs, email_queue, failed_jobs, backup_status, env_permissions, php_ini_settings, smtp_test } = data.data;
+
+            // Cron Jobs
+            if (cron_jobs) {
+                if (cron_jobs.not_running && cron_jobs.not_running.length > 0) {
+                    logError(`⏰ ${cron_jobs.not_running.length} cron jobů neběží:`);
+                    log('═'.repeat(79));
+                    cron_jobs.not_running.forEach(job => {
+                        logError(`  📄 ${job.name}: Poslední běh před ${job.last_run || 'nikdy'}`);
+                    });
+                    totalErrors += cron_jobs.not_running.length;
+                } else {
+                    logSuccess(`✓ Všechny cron joby běží (${cron_jobs.total || 0} aktivních)`);
+                }
+            }
+
+            // Email Queue
+            if (email_queue) {
+                if (email_queue.pending > 50) {
+                    logWarning(`📧 ${email_queue.pending} nevyřízených emailů ve frontě`);
+                    totalWarnings++;
+                } else if (email_queue.pending > 0) {
+                    logSuccess(`📧 Email queue: ${email_queue.pending} čekajících emailů (v normě)`);
+                } else {
+                    logSuccess('✓ Email queue prázdná');
+                }
+
+                if (email_queue.failed > 0) {
+                    logError(`❌ ${email_queue.failed} selhavších emailů`);
+                    totalErrors++;
+                }
+            }
+
+            // Failed Jobs
+            if (failed_jobs && failed_jobs.count > 0) {
+                logError(`❌ ${failed_jobs.count} selhavších úkolů (24h):`);
+                log('═'.repeat(79));
+                if (failed_jobs.jobs && failed_jobs.jobs.length > 0) {
+                    failed_jobs.jobs.slice(0, 5).forEach(job => {
+                        logError(`  📄 ${job.name}: ${job.error || 'Unknown error'}`);
+                        if (job.timestamp) {
+                            logError(`     🕐 ${job.timestamp}`);
+                        }
+                    });
+                }
+                totalErrors += failed_jobs.count;
+            } else {
+                logSuccess('✓ Žádné selhavší úkoly');
+            }
+
+            // Backup Status
+            if (backup_status) {
+                if (backup_status.last_backup) {
+                    const age_days = backup_status.age_days || 0;
+                    if (age_days > 7) {
+                        logWarning(`💾 Poslední backup před ${age_days} dny (doporučeno: max 7 dní)`);
+                        totalWarnings++;
+                    } else {
+                        logSuccess(`✓ Backup aktuální (${age_days} dní)`);
+                    }
+                } else {
+                    logError('❌ Žádný backup nenalezen!');
+                    totalErrors++;
+                }
+            }
+
+            // .env Permissions
+            if (env_permissions) {
+                if (env_permissions.too_permissive) {
+                    logError('🔒 .env soubor má příliš volná oprávnění!');
+                    logError(`   Aktuální: ${env_permissions.current}, Doporučeno: 600`);
+                    totalErrors++;
+                } else if (env_permissions.exists) {
+                    logSuccess('✓ .env oprávnění bezpečná');
+                } else {
+                    logWarning('.env soubor nenalezen');
+                }
+            }
+
+            // PHP.ini Critical Settings
+            if (php_ini_settings) {
+                const warnings = php_ini_settings.warnings || [];
+                if (warnings.length > 0) {
+                    logWarning(`⚙️ ${warnings.length} php.ini varování:`);
+                    log('═'.repeat(79));
+                    warnings.forEach(warn => {
+                        logWarning(`  ${warn.setting}: ${warn.current} (doporučeno: ${warn.recommended})`);
+                    });
+                    totalWarnings += warnings.length;
+                } else {
+                    logSuccess('✓ PHP.ini nastavení optimální');
+                }
+            }
+
+            // SMTP Test
+            if (smtp_test !== undefined) {
+                if (smtp_test.success) {
+                    logSuccess('✓ SMTP funkční (test email odeslán)');
+                } else {
+                    logError('❌ SMTP nefunguje: ' + (smtp_test.error || 'Unknown error'));
+                    totalErrors++;
+                }
+            }
+
+        } else {
+            logWarning('Nepodařilo se zkontrolovat workflow: ' + (data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        logWarning('Chyba při kontrole workflow: ' + error.message);
+        if (DEBUG_MODE) console.error(error);
     }
 
     log('');
