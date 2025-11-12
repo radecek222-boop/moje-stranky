@@ -566,8 +566,8 @@ try {
 
 <script>
 // Control Center Unified - Version Check
-console.log('%c🔧 Control Center v2025.11.12-1425 loaded', 'background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;');
-console.log('✅ executeAction is now ASYNC and awaits CSRF token');
+console.log('%c🔧 Control Center v2025.11.12-1430 loaded', 'background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;');
+console.log('✅ executeAction is ASYNC + event.target captured BEFORE await');
 
 // Helper function to check if API response is successful
 function isSuccess(data) {
@@ -996,6 +996,10 @@ function createKey() {
 async function executeAction(actionId) {
     console.log('[executeAction] Starting with actionId:', actionId);
 
+    // Capture button reference BEFORE any await (event becomes undefined after await in async functions)
+    const btn = event.target;
+    const originalText = btn.textContent;
+
     // Await the CSRF token (handles both sync and async getCSRFToken)
     const csrfToken = await getCSRFToken();
     console.log('[executeAction] CSRF token retrieved:', {
@@ -1016,8 +1020,6 @@ async function executeAction(actionId) {
     }
 
     // Disable button during execution
-    const btn = event.target;
-    const originalText = btn.textContent;
     btn.disabled = true;
     btn.textContent = 'Provádění...';
 
