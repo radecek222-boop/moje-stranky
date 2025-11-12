@@ -55,7 +55,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.5rem 2rem;
+    padding: 0.75rem 1.5rem;
     background: var(--c-white, #ffffff);
     border-bottom: 2px solid var(--c-border, #dddddd);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -65,18 +65,18 @@
 .cc-modal-title-section {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
 }
 
 .cc-modal-back-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
     background: var(--c-black, #000000);
     color: var(--c-white, #ffffff);
     border: none;
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -94,11 +94,11 @@
 }
 
 .cc-modal-back-icon {
-    font-size: 1.2rem;
+    font-size: 1rem;
 }
 
 .cc-modal-title {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: var(--c-black, #000000);
     text-transform: uppercase;
@@ -107,9 +107,9 @@
 }
 
 .cc-modal-subtitle {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: var(--c-grey, #666666);
-    margin-top: 0.25rem;
+    margin-top: 0.2rem;
 }
 
 /* Modal Body - scrollovatelný obsah */

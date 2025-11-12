@@ -162,7 +162,7 @@ try {
     transform: translate(-50%, -50%);
     width: 95%;
     max-width: 1600px;
-    max-height: 92vh;
+    max-height: 96vh;
     background: var(--c-white);
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
@@ -402,7 +402,7 @@ try {
 
     .cc-modal {
         width: 95%;
-        max-height: 90vh;
+        max-height: 94vh;
     }
 
     .cc-modal-body {
