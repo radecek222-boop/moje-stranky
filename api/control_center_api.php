@@ -839,12 +839,13 @@ try {
 
                 // Získat velikost tabulky
                 try {
-                    $sizeStmt = $pdo->query("
+                    $sizeStmt = $pdo->prepare("
                         SELECT (data_length + index_length) as size
                         FROM information_schema.TABLES
                         WHERE table_schema = DATABASE()
-                        AND table_name = '$table'
+                        AND table_name = ?
                     ");
+                    $sizeStmt->execute([$table]);
                     $sizeResult = $sizeStmt->fetch(PDO::FETCH_ASSOC);
                     $totalSize += $sizeResult['size'] ?? 0;
                 } catch (PDOException $e) {
