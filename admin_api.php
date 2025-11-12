@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 // Ověření admin přístupu
-if (!isset($_SESSION['wgs_admin']) || $_SESSION['wgs_admin'] !== true) {
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     http_response_code(403);
     echo json_encode(["status" => "error", "message" => "Přístup odepřen"]);
     exit;
