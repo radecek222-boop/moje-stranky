@@ -278,6 +278,17 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
                 </div>
             </div>
 
+            <!-- Setup Actions System -->
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">🚀 Nastavit Actions System</div>
+                    <div class="setting-item-description">Vytvoří tabulky pro systém akcí a úkolů (pokud neexistují)</div>
+                </div>
+                <div class="setting-item-right">
+                    <button class="cc-btn cc-btn-sm cc-btn-success" onclick="setupActionsSystem()">Spustit setup</button>
+                </div>
+            </div>
+
             <!-- Health Check -->
             <div class="setting-item">
                 <div class="setting-item-left">
@@ -370,6 +381,19 @@ async function optimizeDatabase() {
     } finally {
         btn.textContent = originalText;
         btn.disabled = false;
+    }
+}
+
+function setupActionsSystem() {
+    if (!confirm('🚀 Spustit setup Actions System?\n\nTento script vytvoří databázové tabulky pro systém akcí a úkolů. Je bezpečné spustit i pokud tabulky již existují.')) {
+        return;
+    }
+
+    // Otevřít setup script v novém okně
+    const setupWindow = window.open('/setup_actions_system.php', '_blank', 'width=900,height=700,scrollbars=yes');
+
+    if (!setupWindow) {
+        alert('⚠️ Pop-up byl zablokován prohlížečem.\n\nProsím povolte pop-upy pro tuto stránku nebo navštivte přímo:\n/setup_actions_system.php');
     }
 }
 
