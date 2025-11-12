@@ -128,7 +128,7 @@ async function loadKeys() {
     container.innerHTML = `<div class="error-message">${data.message || 'Nepodařilo se načíst klíče.'}</div>`;
   } catch (error) {
     container.innerHTML = '<div class="error-message">Chyba při načítání klíčů.</div>';
-    console.error('Error:', error);
+    logger.error('Error loading keys:', error);
   }
 }
 
@@ -173,7 +173,7 @@ async function createKey() {
       alert(data?.message || 'Nepodařilo se vytvořit klíč');
     }
   } catch (error) {
-    console.error('Error:', error);
+    logger.error('Error creating key:', error);
     alert('Chyba při vytváření klíče. Zkuste to prosím znovu.');
   }
 }
@@ -217,7 +217,7 @@ async function deleteKey(keyCode) {
       alert(data?.message || 'Klíč se nepodařilo smazat');
     }
   } catch (error) {
-    console.error('Error:', error);
+    logger.error('Error deleting key:', error);
     alert('Chyba při mazání klíče.');
   }
 }

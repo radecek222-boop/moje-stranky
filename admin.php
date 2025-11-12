@@ -24,7 +24,7 @@ $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Control Center';
 $rbacInstalled = false;
 try {
     $pdo = getDbConnection();
-    $stmt = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'created_by'");
+    $stmt = $pdo->query("SHOW COLUMNS FROM `wgs_reklamace` LIKE 'created_by'");
     if ($stmt->rowCount() > 0) {
         $rbacInstalled = true;
     }
