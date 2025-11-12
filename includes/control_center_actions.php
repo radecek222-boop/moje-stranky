@@ -114,9 +114,9 @@ function getPriorityBadge($priority) {
                         <br><small>Bude vytvořeno 6 tabulek: theme_settings, content_texts, system_config, pending_actions, action_history, github_webhooks</small>
                     </div>
                     <div style="margin-top: 1rem;">
-                        <button class="cc-btn cc-btn-success" onclick="window.open('/install_admin_control_center.php', '_blank', 'width=900,height=700')">
+                        <a href="/install_admin_control_center.php" target="_blank" class="cc-btn cc-btn-success" style="display: inline-block; text-decoration: none;">
                             🚀 Spustit instalaci Admin Control Center
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
