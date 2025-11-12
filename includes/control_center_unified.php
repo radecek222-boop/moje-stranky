@@ -199,47 +199,38 @@ try {
 }
 
 .cc-modal-header {
-    padding: 1rem 1.5rem;
+    padding: 0.5rem;
     border-bottom: 1px solid var(--c-border);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     flex-shrink: 0;
 }
 
-.cc-modal-back {
+.cc-modal-close {
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
     color: var(--c-grey);
-    font-size: 0.9rem;
+    font-size: 1.5rem;
     cursor: pointer;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
+    border-radius: 4px;
     transition: all 0.2s;
+    background: transparent;
+    border: none;
 }
 
-.cc-modal-back:hover {
+.cc-modal-close:hover {
     background: rgba(0,0,0,0.05);
     color: var(--c-black);
-}
-
-.cc-modal-title-section {
-    flex: 1;
-    margin-left: 1rem;
-}
-
-.cc-modal-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--c-black);
-    margin: 0;
 }
 
 .cc-modal-body {
     flex: 1;
     overflow-y: auto;
-    padding: 1.25rem 1.5rem;
+    padding: 1rem 1.5rem;
 }
 
 .cc-modal-loading {
@@ -334,7 +325,7 @@ try {
 /* Iframe container */
 .cc-iframe-container {
     width: 100%;
-    height: calc(92vh - 120px);
+    height: calc(92vh - 50px);
     min-height: 500px;
     border: 1px solid var(--c-border);
     border-radius: 8px;
@@ -502,13 +493,7 @@ try {
 <div class="cc-overlay" id="ccOverlay" onclick="closeCCModal()"></div>
 <div class="cc-modal" id="ccModal">
     <div class="cc-modal-header">
-        <div class="cc-modal-back" onclick="closeCCModal()">
-            <span>←</span>
-            <span>Zpět</span>
-        </div>
-        <div class="cc-modal-title-section">
-            <h2 class="cc-modal-title" id="ccModalTitle">Loading...</h2>
-        </div>
+        <button class="cc-modal-close" onclick="closeCCModal()" aria-label="Zavřít">×</button>
     </div>
     <div class="cc-modal-body" id="ccModalBody">
         <div class="cc-modal-loading">
@@ -536,7 +521,6 @@ function openCCModal(section) {
     const overlay = document.getElementById('ccOverlay');
     const modal = document.getElementById('ccModal');
     const modalBody = document.getElementById('ccModalBody');
-    const modalTitle = document.getElementById('ccModalTitle');
 
     // Show overlay and modal
     overlay.classList.add('active');
@@ -549,39 +533,30 @@ function openCCModal(section) {
     // Load section content
     switch(section) {
         case 'statistics':
-            modalTitle.textContent = 'Statistiky & Analytics';
             loadStatisticsModal();
             break;
         case 'keys':
-            modalTitle.textContent = 'Registrační klíče';
             loadKeysModal();
             break;
         case 'users':
-            modalTitle.textContent = 'Správa uživatelů';
             loadUsersModal();
             break;
         case 'online':
-            modalTitle.textContent = 'Online uživatelé';
             loadOnlineModal();
             break;
         case 'notifications':
-            modalTitle.textContent = 'Email & SMS';
             loadNotificationsModal();
             break;
         case 'claims':
-            modalTitle.textContent = 'Správa reklamací';
             loadClaimsModal();
             break;
         case 'actions':
-            modalTitle.textContent = 'Akce & Úkoly';
             loadActionsModal();
             break;
         case 'diagnostics':
-            modalTitle.textContent = 'Diagnostika';
             loadDiagnosticsModal();
             break;
         case 'testing':
-            modalTitle.textContent = 'Testovací prostředí';
             loadTestingModal();
             break;
     }
