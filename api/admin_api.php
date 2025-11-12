@@ -75,6 +75,10 @@ try {
             handleListReklamace($pdo);
             break;
 
+        case 'ping':
+            echo json_encode(['status' => 'success', 'message' => 'pong', 'timestamp' => time()]);
+            break;
+
         default:
             respondError('Neznámá akce.', 400);
     }

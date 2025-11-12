@@ -49,6 +49,10 @@ try {
             getChartsData($pdo);
             break;
 
+        case 'ping':
+            echo json_encode(['status' => 'success', 'message' => 'pong', 'timestamp' => time()]);
+            break;
+
         default:
             http_response_code(400);
             echo json_encode([

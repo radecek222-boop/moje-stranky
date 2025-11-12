@@ -779,28 +779,50 @@ try {
             $errors = [];
             $warnings = [];
 
-            // Najít všechny PHP soubory
-            $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($rootDir, RecursiveDirectoryIterator::SKIP_DOTS)
-            );
+            try {
+                // Test zda exec funguje
+                $execTest = @exec('php --version 2>&1', $testOutput, $testReturn);
+                if ($testReturn !== 0 || empty($execTest)) {
+                    throw new Exception('exec() není dostupný nebo PHP není v PATH');
+                }
 
-            foreach ($iterator as $file) {
-                if ($file->getExtension() === 'php') {
-                    // Přeskočit vendor a node_modules
-                    if (strpos($file->getPathname(), '/vendor/') !== false ||
-                        strpos($file->getPathname(), '/node_modules/') !== false) {
+                // Najít všechny PHP soubory
+                $iterator = new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($rootDir, RecursiveDirectoryIterator::SKIP_DOTS),
+                    RecursiveIteratorIterator::CATCH_GET_CHILD
+                );
+
+                $filesChecked = 0;
+                $maxFiles = 500; // Limit aby to netrvalo věčně
+
+                foreach ($iterator as $file) {
+                    if ($filesChecked >= $maxFiles) {
+                        $warnings[] = "Zkontrolováno pouze prvních $maxFiles souborů (limit)";
+                        break;
+                    }
+
+                    if (!$file->isFile() || $file->getExtension() !== 'php') {
                         continue;
                     }
 
-                    $phpFiles[] = $file->getPathname();
+                    // Přeskočit vendor a node_modules
+                    $pathname = $file->getPathname();
+                    if (strpos($pathname, '/vendor/') !== false ||
+                        strpos($pathname, '/node_modules/') !== false ||
+                        strpos($pathname, '/.git/') !== false) {
+                        continue;
+                    }
+
+                    $phpFiles[] = $pathname;
+                    $filesChecked++;
 
                     // Zkontrolovat PHP syntax
                     $output = [];
                     $returnVar = 0;
-                    exec('php -l ' . escapeshellarg($file->getPathname()) . ' 2>&1', $output, $returnVar);
+                    @exec('php -l ' . escapeshellarg($pathname) . ' 2>&1', $output, $returnVar);
 
                     if ($returnVar !== 0) {
-                        $relativePath = str_replace($rootDir . '/', '', $file->getPathname());
+                        $relativePath = str_replace($rootDir . '/', '', $pathname);
                         $errorText = implode(' ', $output);
 
                         // Parsovat řádek z chyby (např. "Parse error: ... on line 123")
@@ -817,16 +839,26 @@ try {
                         ];
                     }
                 }
-            }
 
-            echo json_encode([
-                'status' => 'success',
-                'data' => [
-                    'total' => count($phpFiles),
-                    'errors' => $errors,
-                    'warnings' => $warnings
-                ]
-            ]);
+                echo json_encode([
+                    'status' => 'success',
+                    'data' => [
+                        'total' => count($phpFiles),
+                        'errors' => $errors,
+                        'warnings' => $warnings
+                    ]
+                ]);
+
+            } catch (Exception $e) {
+                echo json_encode([
+                    'status' => 'success',
+                    'data' => [
+                        'total' => count($phpFiles),
+                        'errors' => $errors,
+                        'warnings' => array_merge($warnings, ['PHP syntax check nedostupný: ' . $e->getMessage()])
+                    ]
+                ]);
+            }
             break;
 
         case 'check_js_errors':
@@ -1074,6 +1106,17 @@ try {
             echo json_encode([
                 'status' => 'success',
                 'data' => $checks
+            ]);
+            break;
+
+        // ==========================================
+        // PING / HEALTH CHECK
+        // ==========================================
+        case 'ping':
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'pong',
+                'timestamp' => time()
             ]);
             break;
 
