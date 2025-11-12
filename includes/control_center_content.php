@@ -167,14 +167,10 @@ $pageNames = [
                                 </div>
 
                                 <?php if ($text['editable']): ?>
-                                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                                    <div style="margin-top: 1rem;">
                                         <button class="cc-btn cc-btn-sm cc-btn-primary"
                                                 onclick="saveText(<?= $text['id'] ?>)">
                                             Uložit
-                                        </button>
-                                        <button class="cc-btn cc-btn-sm cc-btn-secondary"
-                                                onclick="translateText(<?= $text['id'] ?>)">
-                                            🌐 Auto-překlad
                                         </button>
                                     </div>
                                 <?php else: ?>
@@ -191,52 +187,6 @@ $pageNames = [
                 </div>
             <?php endforeach; ?>
 
-        <?php endif; ?>
-
-        <!-- Hromadné akce -->
-        <?php if (!empty($pages)): ?>
-            <div class="setting-group">
-                <h3 class="setting-group-title">Hromadné akce</h3>
-
-                <div class="setting-item">
-                    <div class="setting-item-left">
-                        <div class="setting-item-label">Uložit všechny změny</div>
-                        <div class="setting-item-description">Uložit veškerý editovaný obsah najednou</div>
-                    </div>
-                    <div class="setting-item-right">
-                        <button class="cc-btn cc-btn-sm cc-btn-primary" onclick="saveAllTexts()">
-                            Uložit vše
-                        </button>
-                    </div>
-                </div>
-
-                <div class="setting-item">
-                    <div class="setting-item-left">
-                        <div class="setting-item-label">🌐 Přeložit vše do EN/SK</div>
-                        <div class="setting-item-description">Automaticky přeložit všechny texty (DeepL API)</div>
-                    </div>
-                    <div class="setting-item-right">
-                        <button class="cc-btn cc-btn-sm cc-btn-secondary" onclick="translateAll()">
-                            Přeložit vše
-                        </button>
-                    </div>
-                </div>
-
-                <div class="setting-item">
-                    <div class="setting-item-left">
-                        <div class="setting-item-label">📥 Export / Import</div>
-                        <div class="setting-item-description">Export do JSON nebo import z JSON souboru</div>
-                    </div>
-                    <div class="setting-item-right">
-                        <button class="cc-btn cc-btn-sm cc-btn-secondary" onclick="exportTexts()">
-                            📥 Export
-                        </button>
-                        <button class="cc-btn cc-btn-sm cc-btn-secondary" onclick="importTexts()">
-                            📤 Import
-                        </button>
-                    </div>
-                </div>
-            </div>
         <?php endif; ?>
 
     </div>
@@ -334,35 +284,6 @@ async function saveText(textId) {
     } catch (error) {
         statusEl.innerHTML = '<span style="color: #DC3545;">❌ Chyba: ' + error.message + '</span>';
     }
-}
-
-// Translate text (placeholder)
-async function translateText(textId) {
-    alert('Auto-překlad přes DeepL API bude implementován v příští verzi.\n\nMomentálně prosím překládejte manuálně.');
-}
-
-// Save all texts
-async function saveAllTexts() {
-    if (!confirm('Uložit všechny změny?')) {
-        return;
-    }
-
-    alert('Funkce bude implementována v příští verzi.\n\nMomentálně prosím ukládejte jednotlivé texty samostatně.');
-}
-
-// Translate all
-async function translateAll() {
-    alert('Hromadný překlad přes DeepL API bude implementován v příští verzi.');
-}
-
-// Export texts
-function exportTexts() {
-    alert('Export do JSON bude implementován v příští verzi.');
-}
-
-// Import texts
-function importTexts() {
-    alert('Import z JSON bude implementován v příští verzi.');
 }
 
 // Show first page on load
