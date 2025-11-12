@@ -77,6 +77,10 @@ try {
     transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .cc-card:hover {
@@ -96,21 +100,7 @@ try {
     font-size: 0.85rem;
     color: var(--c-grey);
     line-height: 1.4;
-    margin-bottom: 1rem;
-}
-
-.cc-card-stats {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    color: var(--c-grey);
-}
-
-.cc-card-number {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--c-primary);
+    margin: 0;
 }
 
 .cc-card-badge {
@@ -439,14 +429,12 @@ try {
             <?php endif; ?>
             <div class="cc-card-title">Registrační klíče</div>
             <div class="cc-card-description">Správa přístupových klíčů pro registraci</div>
-            <div class="cc-card-number"><?= $activeKeys ?></div>
         </div>
 
         <!-- Správa uživatelů -->
         <div class="cc-card cc-card-users" onclick="openCCModal('users')">
             <div class="cc-card-title">Správa uživatelů</div>
             <div class="cc-card-description">Technici, prodejci, administrátoři</div>
-            <div class="cc-card-number"><?= $totalUsers ?></div>
         </div>
 
         <!-- Online uživatelé -->
@@ -456,7 +444,6 @@ try {
             <?php endif; ?>
             <div class="cc-card-title">Online uživatelé</div>
             <div class="cc-card-description">Aktivní v posledních 15 minutách</div>
-            <div class="cc-card-number"><?= $onlineUsers ?></div>
         </div>
 
         <!-- Email & SMS -->
@@ -469,7 +456,6 @@ try {
         <div class="cc-card cc-card-claims" onclick="openCCModal('claims')">
             <div class="cc-card-title">Správa reklamací</div>
             <div class="cc-card-description">Přehled všech servisních požadavků</div>
-            <div class="cc-card-number"><?= $totalClaims ?></div>
         </div>
 
         <!-- Akce & Úkoly -->
@@ -479,7 +465,6 @@ try {
             <?php endif; ?>
             <div class="cc-card-title">Akce & Úkoly</div>
             <div class="cc-card-description">Nevyřešené úkoly a plánované akce</div>
-            <div class="cc-card-number"><?= $pendingActions ?></div>
         </div>
 
         <!-- Diagnostika -->
