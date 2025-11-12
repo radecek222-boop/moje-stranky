@@ -338,32 +338,26 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         <div class="progress-step active" data-step="1">
             <div class="progress-step-number">Krok 1</div>
             <div class="progress-step-label">Formulář</div>
-            <div class="progress-step-icon">📝</div>
         </div>
         <div class="progress-step pending" data-step="2">
             <div class="progress-step-number">Krok 2</div>
             <div class="progress-step-label">API Call</div>
-            <div class="progress-step-icon">🚀</div>
         </div>
         <div class="progress-step pending" data-step="3">
             <div class="progress-step-number">Krok 3</div>
             <div class="progress-step-label">Seznam</div>
-            <div class="progress-step-icon">📋</div>
         </div>
         <div class="progress-step pending" data-step="4">
             <div class="progress-step-number">Krok 4</div>
             <div class="progress-step-label">Detail</div>
-            <div class="progress-step-icon">🔍</div>
         </div>
         <div class="progress-step pending" data-step="5">
             <div class="progress-step-number">Krok 5</div>
             <div class="progress-step-label">Protokol</div>
-            <div class="progress-step-icon">📄</div>
         </div>
         <div class="progress-step pending" data-step="6">
             <div class="progress-step-number">Krok 6</div>
             <div class="progress-step-label">Výsledek</div>
-            <div class="progress-step-icon">✅</div>
         </div>
     </div>
 
@@ -405,10 +399,10 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         <div class="test-controls">
             <button class="btn btn-success" onclick="startTest()">
-                ▶ Spustit test workflow
+                Spustit test workflow
             </button>
             <button class="btn btn-secondary" onclick="resetSimulator()">
-                🔄 Reset
+                Reset
             </button>
         </div>
 
@@ -450,7 +444,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         </div>
 
         <div class="mini-preview">
-            <div class="mini-preview-header">📋 NÁHLED: seznam.php</div>
+            <div class="mini-preview-header">NÁHLED: seznam.php</div>
             <div class="mini-preview-body">
                 <iframe id="seznamPreview" src=""></iframe>
             </div>
@@ -458,10 +452,10 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         <div class="test-controls">
             <button class="btn btn-success" onclick="goToStage(4)">
-                ✓ Reklamace nalezena → Pokračovat
+                Reklamace nalezena - Pokračovat
             </button>
             <button class="btn btn-secondary" onclick="flagError(3, 'Reklamace se nezobrazuje v seznamu')">
-                ✗ Reklamace chybí
+                Reklamace chybí
             </button>
         </div>
 
@@ -478,7 +472,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         </div>
 
         <div class="mini-preview">
-            <div class="mini-preview-header">🔍 NÁHLED: protokol.php</div>
+            <div class="mini-preview-header">NÁHLED: protokol.php</div>
             <div class="mini-preview-body">
                 <iframe id="detailPreview" src=""></iframe>
             </div>
@@ -486,10 +480,10 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         <div class="test-controls">
             <button class="btn btn-success" onclick="goToStage(5)">
-                ✓ Detail v pořádku → Pokračovat
+                Detail v pořádku - Pokračovat
             </button>
             <button class="btn btn-secondary" onclick="flagError(4, 'Detail se nenačetl správně')">
-                ✗ Chyba v detailu
+                Chyba v detailu
             </button>
         </div>
 
@@ -523,10 +517,10 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         <div class="test-controls">
             <button class="btn btn-success" onclick="cleanupTest()">
-                🗑️ Smazat testovací data
+                Smazat testovací data
             </button>
             <button class="btn btn-secondary" onclick="resetSimulator()">
-                🔄 Nový test
+                Nový test
             </button>
         </div>
     </div>
@@ -596,7 +590,7 @@ async function startTest() {
         return;
     }
 
-    addDiagnostic('✓ Validace OK', 'success');
+    addDiagnostic('Validace OK', 'success');
     addDiagnostic('Přechod na Stage 2: API Call...', 'info');
 
     updateProgress(1, 'completed');
@@ -633,14 +627,13 @@ async function sendAPIRequest(formData) {
         testState.claimId = result.claim_id;
         testState.reklamaceId = result.reklamace_id;
 
-        addDiagnostic(`✓ Reklamace vytvořena: ID=${result.claim_id}`, 'success', 'diagnosticsPanel2');
+        addDiagnostic(`Reklamace vytvořena: ID=${result.claim_id}`, 'success', 'diagnosticsPanel2');
 
         // Show success
         document.getElementById('apiLoading').style.display = 'none';
         document.getElementById('apiResult').style.display = 'block';
         document.getElementById('apiResult').innerHTML = `
             <div class="success-summary">
-                <div class="success-icon">✅</div>
                 <div class="success-title">API Call úspěšný!</div>
                 <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--c-grey);">
                     <strong>Reklamace ID:</strong> ${result.reklamace_id}<br>
@@ -660,7 +653,7 @@ async function sendAPIRequest(formData) {
         }, 2000);
 
     } catch (error) {
-        addDiagnostic(`✗ ERROR: ${error.message}`, 'error', 'diagnosticsPanel2');
+        addDiagnostic(`ERROR: ${error.message}`, 'error', 'diagnosticsPanel2');
         flagError(2, `API Error: ${error.message}`);
     }
 }
@@ -701,7 +694,7 @@ async function checkProtocol() {
 
     // Simulate protocol check
     setTimeout(() => {
-        addDiagnostic('✓ Protokol OK', 'success', 'diagnosticsPanel5');
+        addDiagnostic('Protokol OK', 'success', 'diagnosticsPanel5');
         updateProgress(5, 'completed');
         updateProgress(6, 'active');
 
@@ -719,7 +712,6 @@ function showFinalResult() {
     if (!hasErrors) {
         html = `
             <div class="success-summary">
-                <div class="success-icon">🎉</div>
                 <div class="success-title">Test úspěšně dokončen!</div>
                 <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--c-grey);">
                     Workflow prošel všemi ${document.querySelectorAll('.progress-step').length} kroky bez chyb<br>
@@ -733,7 +725,7 @@ function showFinalResult() {
     } else {
         html = `
             <div class="error-summary">
-                <div class="error-summary-title">⚠️ Test selhal</div>
+                <div class="error-summary-title">Test selhal</div>
                 <div>Nalezeno ${testState.errors.length} chyb(a)</div>
                 <div class="error-details">
                     ${testState.errors.map(e => `<div>• Krok ${e.step}: ${e.message}</div>`).join('')}
@@ -750,7 +742,7 @@ function showFinalResult() {
 function flagError(step, message) {
     testState.errors.push({ step, message });
     updateProgress(step, 'error');
-    addDiagnostic(`✗ ERROR at Step ${step}: ${message}`, 'error');
+    addDiagnostic(`ERROR at Step ${step}: ${message}`, 'error');
 
     goToStage(6);
     showFinalResult();
@@ -771,15 +763,15 @@ async function cleanupTest() {
         const result = await response.json();
 
         if (result.success) {
-            addDiagnostic('✓ Test data smazána', 'success', 'diagnosticsPanel6');
-            alert('✅ Test data smazána!');
+            addDiagnostic('Test data smazána', 'success', 'diagnosticsPanel6');
+            alert('Test data smazána!');
         } else {
-            addDiagnostic(`✗ Cleanup error: ${result.error}`, 'error', 'diagnosticsPanel6');
-            alert('❌ Chyba: ' + result.error);
+            addDiagnostic(`Cleanup error: ${result.error}`, 'error', 'diagnosticsPanel6');
+            alert('Chyba: ' + result.error);
         }
     } catch (error) {
-        addDiagnostic(`✗ Cleanup failed: ${error.message}`, 'error', 'diagnosticsPanel6');
-        alert('❌ Chyba: ' + error.message);
+        addDiagnostic(`Cleanup failed: ${error.message}`, 'error', 'diagnosticsPanel6');
+        alert('Chyba: ' + error.message);
     }
 }
 

@@ -10,10 +10,45 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab_label' => 'Control Center',
                 'tab' => 'control_center',
             ],
+            'dashboard' => [
+                'href' => 'admin.php?tab=dashboard',
+                'tab_label' => 'Dashboard',
+                'tab' => 'dashboard',
+            ],
+            'notifications' => [
+                'href' => 'admin.php?tab=notifications',
+                'tab_label' => 'Emaily & SMS',
+                'tab' => 'notifications',
+            ],
+            'keys' => [
+                'href' => 'admin.php?tab=keys',
+                'tab_label' => 'Registrační klíče',
+                'tab' => 'keys',
+            ],
+            'users' => [
+                'href' => 'admin.php?tab=users',
+                'tab_label' => 'Uživatelé',
+                'tab' => 'users',
+            ],
             'tools' => [
                 'href' => 'admin.php?tab=tools',
                 'tab_label' => 'Diagnostika',
                 'tab' => 'tools',
+            ],
+            'online' => [
+                'href' => 'admin.php?tab=online',
+                'tab_label' => 'Online',
+                'tab' => 'online',
+            ],
+            'control_center_testing' => [
+                'href' => 'admin.php?tab=control_center_testing',
+                'tab_label' => 'Testing (Old)',
+                'tab' => 'control_center_testing',
+            ],
+            'control_center_testing_interactive' => [
+                'href' => 'admin.php?tab=control_center_testing_interactive',
+                'tab_label' => 'Testing Interactive',
+                'tab' => 'control_center_testing_interactive',
             ],
             'control_center_testing_simulator' => [
                 'href' => 'admin.php?tab=control_center_testing_simulator',
