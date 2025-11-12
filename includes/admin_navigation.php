@@ -10,6 +10,16 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab_label' => 'Control Center',
                 'tab' => 'control_center',
             ],
+            'tools' => [
+                'href' => 'admin.php?tab=tools',
+                'tab_label' => 'Diagnostika',
+                'tab' => 'tools',
+            ],
+            'control_center_testing_simulator' => [
+                'href' => 'admin.php?tab=control_center_testing_simulator',
+                'tab_label' => 'Testing',
+                'tab' => 'control_center_testing_simulator',
+            ],
         ];
     }
 }
