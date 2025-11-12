@@ -202,7 +202,12 @@ try {
                         }
 
                         $sql = file_get_contents($sqlFile);
-                        $pdo->exec($sql);
+
+                        try {
+                            $pdo->exec($sql);
+                        } catch (PDOException $e) {
+                            throw new Exception('Chyba při vykonávání SQL: ' . $e->getMessage());
+                        }
 
                         $executeResult = [
                             'success' => true,
@@ -823,11 +828,18 @@ try {
             $allTables = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
             foreach ($allTables as $table) {
+                // Validace názvu tabulky (bezpečnostní opatření)
+                if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+                    continue; // Přeskočit neplatné názvy
+                }
+
                 $tables[] = $table;
 
                 // CHECK TABLE pro kontrolu integrity
                 try {
-                    $checkStmt = $pdo->query("CHECK TABLE `$table`");
+                    // Escape identifikátor pro bezpečnost (i když pochází z SHOW TABLES)
+                    $escapedTable = '`' . str_replace('`', '``', $table) . '`';
+                    $checkStmt = $pdo->query("CHECK TABLE $escapedTable");
                     $result = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
                     if (stripos($result['Msg_text'], 'OK') === false) {
@@ -839,12 +851,13 @@ try {
 
                 // Získat velikost tabulky
                 try {
-                    $sizeStmt = $pdo->query("
+                    $sizeStmt = $pdo->prepare("
                         SELECT (data_length + index_length) as size
                         FROM information_schema.TABLES
                         WHERE table_schema = DATABASE()
-                        AND table_name = '$table'
+                        AND table_name = ?
                     ");
+                    $sizeStmt->execute([$table]);
                     $sizeResult = $sizeStmt->fetch(PDO::FETCH_ASSOC);
                     $totalSize += $sizeResult['size'] ?? 0;
                 } catch (PDOException $e) {

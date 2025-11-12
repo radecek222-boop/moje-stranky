@@ -29,3 +29,9 @@ vendor/
 # Other Development Artifacts
 *.tmp
 *.cache
+
+# Backup files
+*.backup_*
+*.bak
+*~
+*.swp

@@ -39,6 +39,9 @@ async function loadSmtpConfig() {
 
 // Uložit SMTP konfiguraci
 async function saveSmtpConfig() {
+    // Získat CSRF token PŘED vytvořením objektu
+    const csrfToken = await getCSRFToken();
+
     const smtpData = {
         smtp_host: document.getElementById('smtp_host').value.trim(),
         smtp_port: document.getElementById('smtp_port').value.trim(),
@@ -47,7 +50,7 @@ async function saveSmtpConfig() {
         smtp_encryption: document.getElementById('smtp_encryption').value,
         smtp_from: document.getElementById('smtp_from').value.trim(),
         smtp_from_name: document.getElementById('smtp_from_name').value.trim(),
-        csrf_token: getCSRFToken()
+        csrf_token: csrfToken
     };
 
     // Validace
@@ -62,7 +65,7 @@ async function saveSmtpConfig() {
     }
 
     // Disable tlačítko během ukládání
-    const saveBtn = document.getElementById('saveSmt pBtn');
+    const saveBtn = document.getElementById('saveSmtpBtn');
     const originalText = saveBtn.textContent;
     saveBtn.disabled = true;
     saveBtn.textContent = 'Ukládání...';
