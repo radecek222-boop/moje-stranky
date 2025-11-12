@@ -263,8 +263,13 @@ document.getElementById('cc-search').addEventListener('input', function(e) {
 
 // Section navigation
 function openSection(section) {
-    // Redirect to detail page
-    window.location.href = `admin.php?tab=control_center&section=${section}`;
+    // Open modal with section content
+    if (typeof openCCModal === 'function') {
+        openCCModal(section);
+    } else {
+        // Fallback to redirect if openCCModal not available
+        window.location.href = `admin.php?tab=control_center&section=${section}`;
+    }
 }
 
 console.log('✅ Admin Control Center loaded');

@@ -759,8 +759,8 @@ try {
 </div>
 
 <!-- External JavaScript -->
-<script src="assets/js/csrf-auto-inject.js"></script>
 <script src="assets/js/logger.js"></script>
+<script src="assets/js/csrf-auto-inject.js"></script>
 <script src="assets/js/utils.js"></script>
 <script src="assets/js/admin-notifications.js"></script>
 <script src="assets/js/smtp-config.js"></script>

@@ -523,6 +523,12 @@ try {
             <div class="cc-card-description">Nástroje, logy a system health</div>
         </div>
 
+        <!-- Konzole -->
+        <div class="cc-card cc-card-console" onclick="openCCModal('console')">
+            <div class="cc-card-title">💻 Konzole</div>
+            <div class="cc-card-description">Diagnostika HTML/PHP/JS/CSS/SQL</div>
+        </div>
+
         <!-- Testovací prostředí -->
         <div class="cc-card cc-card-testing" onclick="openCCModal('testing')">
             <div class="cc-card-title">Testovací prostředí</div>
