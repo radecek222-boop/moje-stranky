@@ -160,12 +160,10 @@ function getPriorityBadge($priority) {
                             </div>
                         </div>
                         <div class="setting-item-right" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            <?php if ($action['action_url']): ?>
-                                <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                        onclick="executeAction(<?= $action['id'] ?>, '<?= htmlspecialchars($action['action_url']) ?>')">
-                                    ▶️ Spustit
-                                </button>
-                            <?php endif; ?>
+                            <button class="cc-btn cc-btn-sm cc-btn-primary"
+                                    onclick="executeAction(<?= $action['id'] ?>)">
+                                ▶️ Spustit
+                            </button>
                             <button class="cc-btn cc-btn-sm cc-btn-success"
                                     onclick="completeAction(<?= $action['id'] ?>)">
                                 ✓ Hotovo
@@ -338,10 +336,97 @@ function getPriorityBadge($priority) {
 
 <script src="/assets/js/csrf-auto-inject.js"></script>
 <script>
-async function executeAction(actionId, actionUrl) {
-    if (actionUrl) {
-        window.open(actionUrl, '_blank');
+// Helper function to check API response success
+function isSuccess(data) {
+    return (data && (data.success === true || data.status === 'success'));
+}
+
+async function executeAction(actionId) {
+    console.log('[executeAction] Starting with actionId:', actionId);
+
+    // Capture button reference BEFORE any await
+    const btn = event.target;
+    const originalText = btn.textContent;
+
+    // Await the CSRF token
+    const csrfToken = await getCSRFToken();
+    console.log('[executeAction] CSRF token retrieved');
+
+    if (!csrfToken || typeof csrfToken !== 'string' || csrfToken.length === 0) {
+        alert('Chyba: CSRF token nebyl nalezen nebo je neplatný. Obnovte stránku.');
+        console.error('[executeAction] CSRF token is invalid');
+        return;
     }
+
+    if (!confirm('Spustit tuto akci? Bude provedena automaticky.')) {
+        console.log('[executeAction] User cancelled');
+        return;
+    }
+
+    // Disable button during execution
+    btn.disabled = true;
+    btn.textContent = 'Provádění...';
+
+    const payload = {
+        action_id: actionId,
+        csrf_token: csrfToken
+    };
+
+    console.log('[executeAction] Sending request with payload:', payload);
+
+    fetch('api/control_center_api.php?action=execute_action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(async r => {
+        console.log('[executeAction] Response status:', r.status);
+
+        // Try to parse JSON even on error
+        let responseData;
+        try {
+            responseData = await r.json();
+            console.log('[executeAction] Response data:', responseData);
+        } catch (e) {
+            console.error('[executeAction] Failed to parse JSON:', e);
+            responseData = null;
+        }
+
+        if (!r.ok) {
+            let errorMsg = `HTTP ${r.status}`;
+            if (responseData) {
+                errorMsg = responseData.message || 'Unknown error';
+                if (responseData.debug) {
+                    errorMsg += '\n\n' + Object.entries(responseData.debug)
+                        .map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v, null, 2) : v}`)
+                        .join('\n');
+                }
+            }
+            throw new Error(errorMsg);
+        }
+
+        return responseData;
+    })
+    .then(data => {
+        console.log('[executeAction] Success data:', data);
+
+        if (isSuccess(data)) {
+            const execTime = data.execution_time || 'neznámý čas';
+            alert(`✓ Akce dokončena!\n\n${data.message}\n\nČas provedení: ${execTime}`);
+            location.reload();
+        } else {
+            console.error('[executeAction] Action failed:', data);
+            alert('✗ Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    })
+    .catch(err => {
+        console.error('[executeAction] Error:', err);
+        alert('✗ Chyba při provádění akce: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = originalText;
+    });
 }
 
 async function completeAction(actionId) {
@@ -360,10 +445,10 @@ async function completeAction(actionId) {
 
         const result = await response.json();
 
-        if (result.status === 'success') {
+        if (isSuccess(result)) {
             location.reload();
         } else {
-            throw new Error(result.message);
+            throw new Error(result.message || result.error || 'Neznámá chyba');
         }
     } catch (error) {
         alert('❌ Chyba: ' + error.message);
@@ -386,10 +471,10 @@ async function dismissAction(actionId) {
 
         const result = await response.json();
 
-        if (result.status === 'success') {
+        if (isSuccess(result)) {
             location.reload();
         } else {
-            throw new Error(result.message);
+            throw new Error(result.message || result.error || 'Neznámá chyba');
         }
     } catch (error) {
         alert('❌ Chyba: ' + error.message);
