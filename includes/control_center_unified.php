@@ -41,19 +41,16 @@ try {
 }
 
 .page-header {
-    margin-bottom: 2rem;
-}
-
-.page-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--c-black);
-    margin-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .page-subtitle {
-    font-size: 0.95rem;
-    color: var(--c-grey);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--c-black);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
 }
 
 /* Card Grid */
@@ -416,7 +413,6 @@ try {
 
 <div class="control-center">
     <div class="page-header">
-        <h1 class="page-title">Control Center</h1>
         <p class="page-subtitle">Centrální řídicí panel pro správu celé aplikace</p>
     </div>
 
