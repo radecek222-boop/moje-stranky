@@ -652,6 +652,11 @@ try {
   <?php require_once __DIR__ . '/includes/control_center_content.php'; ?>
   <?php endif; ?>
 
+  <?php if ($activeTab === 'control_center_console'): ?>
+  <!-- TAB: KONZOLE -->
+  <?php require_once __DIR__ . '/includes/control_center_console.php'; ?>
+  <?php endif; ?>
+
   <?php if ($activeTab === 'control_center_configuration'): ?>
   <!-- TAB: KONFIGURACE SYSTÉMU -->
   <?php require_once __DIR__ . '/includes/control_center_configuration.php'; ?>

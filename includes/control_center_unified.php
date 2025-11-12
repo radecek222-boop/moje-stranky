@@ -648,6 +648,9 @@ function openCCModal(section) {
         case 'diagnostics':
             loadDiagnosticsModal();
             break;
+        case 'console':
+            loadConsoleModal();
+            break;
         case 'testing':
             loadTestingModal();
             break;
@@ -907,6 +910,11 @@ function loadActionsModal() {
 function loadDiagnosticsModal() {
     const modalBody = document.getElementById('ccModalBody');
     modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=tools&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Diagnostika systému"></iframe></div>';
+}
+
+function loadConsoleModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_console&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Konzole - Developer Tools"></iframe></div>';
 }
 
 function loadTestingModal() {
