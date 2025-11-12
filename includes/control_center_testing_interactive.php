@@ -353,11 +353,16 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         </div>
         <div class="path-step pending" id="step5">
             <div class="step-number">KROK 5</div>
-            <div class="step-name">Protokol</div>
-            <div class="step-page">protokol.php</div>
+            <div class="step-name">PhotoCustomer</div>
+            <div class="step-page">photocustomer.php</div>
         </div>
         <div class="path-step pending" id="step6">
             <div class="step-number">KROK 6</div>
+            <div class="step-name">Protokol</div>
+            <div class="step-page">protokol.php</div>
+        </div>
+        <div class="path-step pending" id="step7">
+            <div class="step-number">KROK 7</div>
             <div class="step-name">Výsledek</div>
             <div class="step-page">validace dat</div>
         </div>
@@ -444,7 +449,7 @@ function goToStep(stepNumber) {
     testData.currentStep = stepNumber;
 
     // Update path visualization
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= 7; i++) {
         const pathStep = document.getElementById(`step${i}`);
         pathStep.classList.remove('active', 'pending', 'completed');
         if (i < stepNumber) {
@@ -473,10 +478,13 @@ function goToStep(stepNumber) {
             loadStep4_Detail(panel);
             break;
         case 5:
-            loadStep5_Protokol(panel);
+            loadStep5_PhotoCustomer(panel);
             break;
         case 6:
-            loadStep6_Vysledek(panel);
+            loadStep6_Protokol(panel);
+            break;
+        case 7:
+            loadStep7_Vysledek(panel);
             break;
     }
 }
@@ -737,7 +745,7 @@ function loadStep4_Detail(panel) {
 
         <div class="btn-group">
             <button class="btn btn-success" onclick="goToStep(5)">
-                Zahájit návštěvu → Protokol
+                Zahájit návštěvu → PhotoCustomer
             </button>
             <button class="btn btn-secondary" onclick="goToStep(3)">
                 ← Zpět
@@ -752,11 +760,56 @@ function loadStep4_Detail(panel) {
     renderDiagnostic();
 }
 
-function loadStep5_Protokol(panel) {
+function loadStep5_PhotoCustomer(panel) {
+    updateStatus('Fotografování zákazníkem...', 'testing');
+
+    panel.innerHTML = `
+        <h3>Krok 5: PhotoCustomer - Fotodokumentace</h3>
+        <div class="test-info">
+            <strong>Co testujeme:</strong> Nahrání fotografií zákazníkem<br>
+            <strong>Stránka:</strong> photocustomer.php<br>
+            <strong>Akce:</strong> Simulace nahrání fotografie pomocí mobilního zařízení<br>
+            <strong>Úkol:</strong> Zákazník nahrává fotografie problému
+        </div>
+
+        <div class="diagnostic-output">
+            <div style="font-weight: 600; margin-bottom: 0.5rem;">DIAGNOSTIKA:</div>
+            <div id="diagnosticLines"></div>
+        </div>
+
+        <div style="margin: 1rem 0; padding: 1rem; background: #f5f5f5; border-radius: 6px;">
+            <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">
+                <strong>Simulace:</strong> Nahrání 1 testovací fotografie
+            </div>
+            <div style="font-size: 0.85rem; color: #666;">
+                V reálném workflow by zákazník mohl nahrát fotografie pomocí odkazu zaslaného emailem/SMS.
+                Systém umožňuje nahrávání přímo z mobilního zařízení pomocí kamery.
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-success" onclick="goToStep(6)">
+                Fotografie nahrány → Protokol
+            </button>
+            <button class="btn btn-secondary" onclick="goToStep(4)">
+                ← Zpět
+            </button>
+        </div>
+    `;
+
+    renderDiagnostic();
+
+    addDiagnostic('PhotoCustomer stránka načtena', 'success');
+    addDiagnostic('Simulace nahrání fotografie zákazníkem', 'info');
+    addDiagnostic('Fotografie úspěšně nahrána (simulace)', 'success');
+    renderDiagnostic();
+}
+
+function loadStep6_Protokol(panel) {
     updateStatus('Protokol návštěvy...', 'testing');
 
     panel.innerHTML = `
-        <h3>Krok 5: Protokol</h3>
+        <h3>Krok 6: Protokol</h3>
         <div class="test-info">
             <strong>Co testujeme:</strong> Vyplnění protokolu návštěvy<br>
             <strong>Stránka:</strong> protokol.php<br>
@@ -769,10 +822,10 @@ function loadStep5_Protokol(panel) {
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-success" onclick="goToStep(6)">
+            <button class="btn btn-success" onclick="goToStep(7)">
                 Protokol dokončen → Výsledek
             </button>
-            <button class="btn btn-secondary" onclick="goToStep(4)">
+            <button class="btn btn-secondary" onclick="goToStep(5)">
                 ← Zpět
             </button>
         </div>
@@ -785,7 +838,7 @@ function loadStep5_Protokol(panel) {
     renderDiagnostic();
 }
 
-function loadStep6_Vysledek(panel) {
+function loadStep7_Vysledek(panel) {
     updateStatus('Test dokončen', 'success');
     testData.testPassed = true;
 
