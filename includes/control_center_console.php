@@ -463,24 +463,56 @@ async function checkPhpFiles() {
         });
 
         // Vždy zkusit přečíst response body (i při chybě)
-        let data;
         const contentType = response.headers.get('content-type');
+        let data;
+        let isJson = false;
 
-        if (contentType && contentType.includes('application/json')) {
-            data = await response.json();
-        } else {
+        // Pokusit se přečíst jako JSON
+        try {
             const text = await response.text();
-            logError(`Neplatná odpověď od API (HTTP ${response.status}):`);
-            logError(text.substring(0, 300));
+
+            if (text && (contentType?.includes('application/json') || text.trim().startsWith('{'))) {
+                data = JSON.parse(text);
+                isJson = true;
+            } else {
+                // Není JSON - zobrazit raw text
+                if (!response.ok) {
+                    logError(`API vrátilo chybu (HTTP ${response.status}):`);
+
+                    // Extrahovat chybovou zprávu z HTML pokud je to HTML
+                    if (text.includes('<b>Fatal error</b>') || text.includes('<b>Parse error</b>')) {
+                        // PHP Fatal error v HTML formátu
+                        const match = text.match(/<b>(.*?)<\/b>:\s*(.*?)\s+in\s+<b>(.*?)<\/b>\s+on line\s+<b>(\d+)<\/b>/);
+                        if (match) {
+                            logError(`${match[1]}: ${match[2]}`);
+                            logError(`📄 ${match[3]}:${match[4]}`);
+                        } else {
+                            // Fallback - zobrazit začátek raw HTML
+                            const stripped = text.replace(/<[^>]*>/g, '').substring(0, 300);
+                            logError(stripped);
+                        }
+                    } else {
+                        // Plain text error
+                        logError(text.substring(0, 300));
+                    }
+
+                    log('');
+                    return;
+                }
+            }
+        } catch (e) {
+            logError(`Nelze parsovat odpověď od API (HTTP ${response.status})`);
+            logError('Parse error: ' + e.message);
             log('');
             return;
         }
 
-        if (!response.ok) {
+        // Zkontrolovat HTTP status
+        if (!response.ok && isJson) {
             logError(`API vrátilo chybu (HTTP ${response.status}):`);
-            logError(data.message || response.statusText || 'Neznámá chyba');
+            logError(data.message || data.error || response.statusText || 'Neznámá chyba');
             if (data.debug) {
-                logError('Debug info: ' + JSON.stringify(data.debug).substring(0, 200));
+                logError('Debug: ' + JSON.stringify(data.debug).substring(0, 200));
             }
             log('');
             return;
@@ -536,22 +568,42 @@ async function checkJavaScriptFiles() {
         });
 
         // Vždy zkusit přečíst response body (i při chybě)
-        let data;
         const contentType = response.headers.get('content-type');
+        let data;
+        let isJson = false;
 
-        if (contentType && contentType.includes('application/json')) {
-            data = await response.json();
-        } else {
+        try {
             const text = await response.text();
-            logError(`Neplatná odpověď od API (HTTP ${response.status}):`);
-            logError(text.substring(0, 300));
+
+            if (text && (contentType?.includes('application/json') || text.trim().startsWith('{'))) {
+                data = JSON.parse(text);
+                isJson = true;
+            } else if (!response.ok) {
+                logError(`API vrátilo chybu (HTTP ${response.status}):`);
+                // Extrahovat chybu z HTML nebo zobrazit raw
+                if (text.includes('<b>Fatal error</b>') || text.includes('<b>Parse error</b>')) {
+                    const match = text.match(/<b>(.*?)<\/b>:\s*(.*?)\s+in\s+<b>(.*?)<\/b>\s+on line\s+<b>(\d+)<\/b>/);
+                    if (match) {
+                        logError(`${match[1]}: ${match[2]}`);
+                        logError(`📄 ${match[3]}:${match[4]}`);
+                    } else {
+                        logError(text.replace(/<[^>]*>/g, '').substring(0, 300));
+                    }
+                } else {
+                    logError(text.substring(0, 300));
+                }
+                log('');
+                return;
+            }
+        } catch (e) {
+            logError(`Nelze parsovat odpověď (HTTP ${response.status}): ${e.message}`);
             log('');
             return;
         }
 
-        if (!response.ok) {
+        if (!response.ok && isJson) {
             logError(`API vrátilo chybu (HTTP ${response.status}):`);
-            logError(data.message || response.statusText || 'Neznámá chyba');
+            logError(data.message || data.error || 'Neznámá chyba');
             log('');
             return;
         }

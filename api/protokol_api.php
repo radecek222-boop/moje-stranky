@@ -90,6 +90,10 @@ try {
             $result = savePdfDocument($data);
             break;
 
+        case 'ping':
+            $result = ['status' => 'success', 'message' => 'pong', 'timestamp' => time()];
+            break;
+
         default:
             throw new Exception('Neplatná akce: ' . $action);
     }

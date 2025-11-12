@@ -147,6 +147,10 @@ try {
             ]);
             break;
 
+        case 'ping':
+            echo json_encode(['status' => 'success', 'message' => 'pong', 'timestamp' => time()]);
+            break;
+
         default:
             throw new Exception('Neplatná akce: ' . $action);
     }
