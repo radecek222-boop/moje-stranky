@@ -43,10 +43,10 @@ try {
 }
 
 // Počty podle priority
-$criticalCount = count(array_filter($pendingActions, fn($a) => $a['priority'] === 'critical'));
-$highCount = count(array_filter($pendingActions, fn($a) => $a['priority'] === 'high'));
-$mediumCount = count(array_filter($pendingActions, fn($a) => $a['priority'] === 'medium'));
-$lowCount = count(array_filter($pendingActions, fn($a) => $a['priority'] === 'low'));
+$criticalCount = count(array_filter($pendingActions, function($a) { return $a['priority'] === 'critical'; }));
+$highCount = count(array_filter($pendingActions, function($a) { return $a['priority'] === 'high'; }));
+$mediumCount = count(array_filter($pendingActions, function($a) { return $a['priority'] === 'medium'; }));
+$lowCount = count(array_filter($pendingActions, function($a) { return $a['priority'] === 'low'; }));
 
 // Recent completed actions
 $completedActions = [];
