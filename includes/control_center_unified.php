@@ -636,7 +636,7 @@ function loadKeysModal() {
                     html += `<td>${key.usage_count} / ${key.max_usage || '∞'}</td>`;
                     html += `<td><span class="badge badge-${key.is_active ? 'active' : 'inactive'}">${key.is_active ? 'Aktivní' : 'Neaktivní'}</span></td>`;
                     html += `<td>${new Date(key.created_at).toLocaleDateString('cs-CZ')}</td>`;
-                    html += `<td><button class="btn btn-sm btn-danger" onclick="deleteKey(${key.id})">Smazat</button></td>`;
+                    html += `<td><button class="btn btn-sm btn-danger" onclick="deleteKey('${key.key_code}')">Smazat</button></td>`;
                     html += '</tr>';
                 });
 
@@ -850,7 +850,7 @@ function loadConfigModal() {
 
 // === ACTION HANDLERS ===
 
-function deleteKey(keyId) {
+function deleteKey(keyCode) {
     if (!confirm('Opravdu chcete smazat tento klíč?')) return;
 
     const csrfToken = getCSRFToken();
@@ -863,7 +863,7 @@ function deleteKey(keyId) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            key_id: keyId,
+            key_code: keyCode,
             csrf_token: csrfToken
         })
     })
