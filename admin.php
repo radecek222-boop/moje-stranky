@@ -9,6 +9,9 @@ if (!$isAdmin) {
     exit;
 }
 
+// Detect embed mode for iframes
+$embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
+
 $tabConfig = loadAdminTabNavigation();
 $activeTab = $_GET['tab'] ?? 'control_center';
 if (!array_key_exists($activeTab, $tabConfig)) {
@@ -65,13 +68,15 @@ try {
 </head>
 
 <body>
+<?php if (!$embedMode): ?>
 <?php require_once __DIR__ . "/includes/admin_header.php"; ?>
+<?php endif; ?>
 
 <!-- MAIN CONTENT -->
 <main>
 <div class="container">
 
-  <?php if ($activeTab !== 'control_center' && $activeTab !== 'control_center_testing'): ?>
+  <?php if (!$embedMode && $activeTab !== 'control_center' && $activeTab !== 'control_center_testing'): ?>
   <h1 class="page-title"><?php echo htmlspecialchars($currentTabLabel, ENT_QUOTES, 'UTF-8'); ?></h1>
   <p class="page-subtitle">Správa systému White Glove Service</p>
   <?php endif; ?>

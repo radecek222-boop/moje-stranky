@@ -644,7 +644,7 @@ function loadKeysModal() {
         })
         .catch(err => {
             console.error('[Control Center] Keys load error:', err);
-            document.getElementById('keysTableContainer').innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba načítání</p>';
+            document.getElementById('keysTableContainer').innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání</p>';
         });
 }
 
@@ -695,7 +695,7 @@ function loadUsersModal() {
         })
         .catch(err => {
             console.error('[Control Center] Users load error:', err);
-            document.getElementById('usersTableContainer').innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">⚠️ Chyba načítání</p>';
+            document.getElementById('usersTableContainer').innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání</p>';
         });
 }
 

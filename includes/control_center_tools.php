@@ -54,13 +54,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['auto_fix_all_visibili
         }
 
         $fixMessage = "<div style='background: var(--c-success); color: white; padding: 1.5rem; margin-bottom: 1.5rem; font-weight: 600;'>
-            ✓ AUTO-OPRAVA DOKONČENA!<br>
+            AUTO-OPRAVA DOKONČENA!<br>
             Celkem opraveno: <strong>$totalFixed reklamací</strong><br>
             " . (count($details) > 0 ? '<br>' . implode('<br>', $details) : '') . "
         </div>";
     } catch (Exception $e) {
         $fixMessage = "<div style='background: var(--c-error); color: white; padding: 1.5rem; margin-bottom: 1.5rem;'>
-            ✗ CHYBA: " . htmlspecialchars($e->getMessage()) . "
+            CHYBA: " . htmlspecialchars($e->getMessage()) . "
         </div>";
     }
 }
@@ -89,12 +89,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fix_email'])) {
 
         $affected = $stmt->rowCount();
         $fixMessage = "<div style='background: var(--c-success); color: white; padding: 1.5rem; margin-bottom: 1.5rem; font-weight: 600;'>
-            ✓ OPRAVENO! $affected reklamací pro $emailToFix<br>
+            OPRAVENO! $affected reklamací pro $emailToFix<br>
             (created_by = $userIdToSet, role = $userRole)
         </div>";
     } catch (Exception $e) {
         $fixMessage = "<div style='background: var(--c-error); color: white; padding: 1.5rem; margin-bottom: 1.5rem;'>
-            ✗ CHYBA: " . htmlspecialchars($e->getMessage()) . "
+            CHYBA: " . htmlspecialchars($e->getMessage()) . "
         </div>";
     }
 }
@@ -114,26 +114,26 @@ $hasCreatedBy = $stmt->fetchColumn();
 .tools-container {
     max-width: 1200px;
     margin: <?= $embedMode ? '0' : '2rem' ?> auto;
-    padding: <?= $embedMode ? '1rem' : '2rem' ?>;
+    padding: <?= $embedMode ? '0.5rem' : '2rem' ?>;
 }
 
 .tools-section {
     background: var(--c-white);
     border: 1px solid var(--c-border);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: <?= $embedMode ? '0.75rem' : '1.5rem' ?>;
+    margin-bottom: <?= $embedMode ? '0.75rem' : '1.5rem' ?>;
     border-radius: 4px;
 }
 
 .tools-section h3 {
-    margin: 0 0 1rem 0;
-    font-size: 1.1rem;
+    margin: 0 0 <?= $embedMode ? '0.5rem' : '1rem' ?> 0;
+    font-size: <?= $embedMode ? '0.85rem' : '1.1rem' ?>;
     font-weight: 700;
     text-transform: uppercase;
     color: var(--c-black);
     letter-spacing: 0.05em;
-    border-left: 4px solid var(--c-success);
-    padding-left: 1rem;
+    border-left: 3px solid var(--c-success);
+    padding-left: 0.75rem;
 }
 
 .status-box {
@@ -268,7 +268,7 @@ $hasCreatedBy = $stmt->fetchColumn();
 
         <?php if ($nullCreatedBy > 0): ?>
             <div class="status-box warning">
-                <strong>⚠️ PROBLÉM NALEZEN!</strong><br>
+                <strong>PROBLÉM NALEZEN!</strong><br>
                 <span style="font-size: 1.1rem;"><?= $nullCreatedBy ?> reklamací</span> z celkových <strong><?= $totalClaims ?></strong> nemá vyplněné created_by<br>
                 → Prodejci tyto reklamace NEVIDÍ v seznam.php
             </div>
@@ -324,7 +324,7 @@ $hasCreatedBy = $stmt->fetchColumn();
                                     </button>
                                 </form>
                             <?php else: ?>
-                                <span style="color: var(--c-error);">⚠️ User neexistuje</span>
+                                <span style="color: var(--c-error);">User neexistuje</span>
                             <?php endif; ?>
                         </td>
                     </tr>
@@ -333,7 +333,7 @@ $hasCreatedBy = $stmt->fetchColumn();
             <?php endif; ?>
         <?php else: ?>
             <div class="status-box success">
-                ✓ V POŘÁDKU: Všechny reklamace mají vyplněné created_by
+                V POŘÁDKU: Všechny reklamace mají vyplněné created_by
             </div>
         <?php endif; ?>
     </div>
@@ -346,24 +346,24 @@ $hasCreatedBy = $stmt->fetchColumn();
             <div class="stat-item">
                 <div class="stat-label">Role-Based Access</div>
                 <div class="stat-value <?= $rbacInstalled ? 'success' : 'error' ?>">
-                    <?= $rbacInstalled ? '✓ Aktivní' : '✗ Neinstalováno' ?>
+                    <?= $rbacInstalled ? 'Aktivní' : 'Neinstalováno' ?>
                 </div>
             </div>
             <div class="stat-item">
                 <div class="stat-label">CZ/SK Fakturace</div>
                 <div class="stat-value <?= $fakturaceInstalled ? 'success' : 'error' ?>">
-                    <?= $fakturaceInstalled ? '✓ Aktivní' : '✗ Neinstalováno' ?>
+                    <?= $fakturaceInstalled ? 'Aktivní' : 'Neinstalováno' ?>
                 </div>
             </div>
             <div class="stat-item">
                 <div class="stat-label">Databáze</div>
-                <div class="stat-value success">✓ Připojeno</div>
+                <div class="stat-value success">Připojeno</div>
             </div>
         </div>
 
         <?php if (!$rbacInstalled || !$fakturaceInstalled): ?>
             <div class="status-box warning" style="margin-top: 1rem;">
-                ⚠️ Některé migrace nejsou nainstalované. Kontaktujte administrátora nebo spusťte instalaci.
+                Některé migrace nejsou nainstalované. Kontaktujte administrátora nebo spusťte instalaci.
             </div>
         <?php endif; ?>
     </div>
@@ -408,7 +408,7 @@ $hasCreatedBy = $stmt->fetchColumn();
                     <td style="font-size: 0.75rem;"><?= htmlspecialchars($claim['email'] ?? '-') ?></td>
                     <td><?= htmlspecialchars($claim['jmeno'] ?? '-') ?></td>
                     <td style="font-weight: bold; <?= $isNull ? 'color: var(--c-error);' : '' ?>">
-                        <?= $isNull ? 'NULL ⚠️' : $claim['created_by'] ?>
+                        <?= $isNull ? 'NULL' : $claim['created_by'] ?>
                     </td>
                     <td><?= $claim['created_by_role'] ?? '-' ?></td>
                 </tr>
