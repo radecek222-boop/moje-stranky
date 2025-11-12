@@ -120,28 +120,29 @@ $hasCreatedBy = $stmt->fetchColumn();
 .tools-section {
     background: var(--c-white);
     border: 1px solid var(--c-border);
-    padding: <?= $embedMode ? '0.75rem' : '1.5rem' ?>;
-    margin-bottom: <?= $embedMode ? '0.75rem' : '1.5rem' ?>;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
     border-radius: 4px;
 }
 
 .tools-section h3 {
-    margin: 0 0 <?= $embedMode ? '0.5rem' : '1rem' ?> 0;
-    font-size: <?= $embedMode ? '0.85rem' : '1.1rem' ?>;
+    margin: 0 0 0.5rem 0;
+    font-size: 0.8rem;
     font-weight: 700;
     text-transform: uppercase;
     color: var(--c-black);
     letter-spacing: 0.05em;
     border-left: 3px solid var(--c-success);
-    padding-left: 0.75rem;
+    padding-left: 0.5rem;
 }
 
 .status-box {
-    padding: 1rem;
-    margin-bottom: 1rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.75rem;
     border: 2px solid;
     border-radius: 4px;
     font-weight: 600;
+    font-size: 0.8rem;
 }
 
 .status-box.success {
@@ -165,26 +166,27 @@ $hasCreatedBy = $stmt->fetchColumn();
 .tools-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.85rem;
-    margin-top: 1rem;
+    font-size: 0.7rem;
+    margin-top: 0.5rem;
 }
 
 .tools-table th {
     background: var(--c-black);
     color: var(--c-white);
-    padding: 0.75rem;
+    padding: 0.4rem 0.5rem;
     text-align: left;
     border: 1px solid var(--c-black);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    font-size: 0.8rem;
+    font-size: 0.65rem;
 }
 
 .tools-table td {
-    padding: 0.75rem;
+    padding: 0.4rem 0.5rem;
     border: 1px solid var(--c-border);
     background: var(--c-white);
+    font-size: 0.7rem;
 }
 
 .tools-table tr.error-row {
@@ -193,27 +195,28 @@ $hasCreatedBy = $stmt->fetchColumn();
 
 .stats-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .stat-item {
-    padding: 1rem;
+    padding: 0.5rem;
     background: var(--c-bg);
     border: 1px solid var(--c-border);
+    border-radius: 4px;
 }
 
 .stat-label {
-    font-size: 0.8rem;
+    font-size: 0.65rem;
     color: var(--c-grey);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 .stat-value {
-    font-size: 1.8rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--c-black);
 }
@@ -224,6 +227,28 @@ $hasCreatedBy = $stmt->fetchColumn();
 
 .stat-value.success {
     color: var(--c-success);
+}
+
+/* Compact buttons */
+.tools-section .btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+}
+
+.tools-section .btn-sm {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+}
+
+/* Compact page headers */
+.tools-container .page-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+}
+
+.tools-container .page-subtitle {
+    font-size: 0.75rem;
+    margin-bottom: 1rem;
 }
 
 @media (max-width: 768px) {
