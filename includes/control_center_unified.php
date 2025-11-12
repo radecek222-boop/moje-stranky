@@ -184,12 +184,11 @@ try {
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     z-index: 9999;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
 }
 
 .cc-modal.active {
     display: flex;
+    flex-direction: column;
     animation: slideUp 0.3s ease;
 }
 
