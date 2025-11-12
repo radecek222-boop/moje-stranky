@@ -860,22 +860,22 @@ function loadClaimsModal() {
 
 function loadActionsModal() {
     const modalBody = document.getElementById('ccModalBody');
-    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_actions&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Akce & Úkoly"></iframe></div>';
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_actions&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Akce & Úkoly"></iframe></div>';
 }
 
 function loadDiagnosticsModal() {
     const modalBody = document.getElementById('ccModalBody');
-    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=tools&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Diagnostika systému"></iframe></div>';
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=tools&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Diagnostika systému"></iframe></div>';
 }
 
 function loadConsoleModal() {
     const modalBody = document.getElementById('ccModalBody');
-    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_console&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Konzole - Developer Tools"></iframe></div>';
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_console&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Konzole - Developer Tools"></iframe></div>';
 }
 
 function loadTestingModal() {
     const modalBody = document.getElementById('ccModalBody');
-    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_testing_interactive&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Testovací prostředí"></iframe></div>';
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_testing_interactive&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Testovací prostředí"></iframe></div>';
 }
 
 function loadAppearanceModal() {
