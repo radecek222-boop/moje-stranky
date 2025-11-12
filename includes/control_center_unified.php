@@ -166,9 +166,9 @@ try {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 1200px;
-    max-height: 85vh;
+    width: 95%;
+    max-width: 1600px;
+    max-height: 92vh;
     background: var(--c-white);
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
@@ -199,7 +199,7 @@ try {
 }
 
 .cc-modal-header {
-    padding: 1.5rem 2rem;
+    padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--c-border);
     display: flex;
     align-items: center;
@@ -230,22 +230,16 @@ try {
 }
 
 .cc-modal-title {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: var(--c-black);
     margin: 0;
 }
 
-.cc-modal-subtitle {
-    font-size: 0.85rem;
-    color: var(--c-grey);
-    margin-top: 0.25rem;
-}
-
 .cc-modal-body {
     flex: 1;
     overflow-y: auto;
-    padding: 2rem;
+    padding: 1.25rem 1.5rem;
 }
 
 .cc-modal-loading {
@@ -274,14 +268,14 @@ try {
 .cc-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
 }
 
 .cc-table th {
     background: var(--c-bg);
-    padding: 1rem;
+    padding: 0.6rem 0.8rem;
     text-align: left;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--c-grey);
@@ -290,9 +284,9 @@ try {
 }
 
 .cc-table td {
-    padding: 1rem;
+    padding: 0.6rem 0.8rem;
     border-bottom: 1px solid var(--c-border);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .cc-table tr:hover td {
@@ -302,13 +296,13 @@ try {
 /* Tabs */
 .cc-tabs {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
     border-bottom: 2px solid var(--c-border);
 }
 
 .cc-tab {
-    padding: 0.75rem 1.5rem;
+    padding: 0.6rem 1.2rem;
     background: transparent;
     border: none;
     border-bottom: 3px solid transparent;
@@ -316,7 +310,7 @@ try {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .cc-tab:hover {
@@ -340,7 +334,8 @@ try {
 /* Iframe container */
 .cc-iframe-container {
     width: 100%;
-    height: 600px;
+    height: calc(92vh - 120px);
+    min-height: 500px;
     border: 1px solid var(--c-border);
     border-radius: 8px;
     overflow: hidden;
@@ -355,39 +350,39 @@ try {
 /* Mini stats grid */
 .cc-mini-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 1rem;
 }
 
 .cc-mini-stat {
     background: var(--c-bg);
     border: 1px solid var(--c-border);
-    padding: 1rem;
-    border-radius: 8px;
+    padding: 0.75rem;
+    border-radius: 6px;
     text-align: center;
 }
 
 .cc-mini-stat-value {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--c-primary);
 }
 
 .cc-mini-stat-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--c-grey);
-    margin-top: 0.5rem;
+    margin-top: 0.3rem;
 }
 
 /* Actions */
 .cc-actions {
     display: flex;
-    gap: 0.8rem;
+    gap: 0.6rem;
     flex-wrap: wrap;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 /* Responsive */
@@ -513,7 +508,6 @@ try {
         </div>
         <div class="cc-modal-title-section">
             <h2 class="cc-modal-title" id="ccModalTitle">Loading...</h2>
-            <div class="cc-modal-subtitle" id="ccModalSubtitle"></div>
         </div>
     </div>
     <div class="cc-modal-body" id="ccModalBody">
@@ -543,7 +537,6 @@ function openCCModal(section) {
     const modal = document.getElementById('ccModal');
     const modalBody = document.getElementById('ccModalBody');
     const modalTitle = document.getElementById('ccModalTitle');
-    const modalSubtitle = document.getElementById('ccModalSubtitle');
 
     // Show overlay and modal
     overlay.classList.add('active');
@@ -557,47 +550,38 @@ function openCCModal(section) {
     switch(section) {
         case 'statistics':
             modalTitle.textContent = 'Statistiky & Analytics';
-            modalSubtitle.textContent = 'Přehledy, grafy a výkonnostní metriky';
             loadStatisticsModal();
             break;
         case 'keys':
             modalTitle.textContent = 'Registrační klíče';
-            modalSubtitle.textContent = 'Správa přístupových klíčů pro registraci uživatelů';
             loadKeysModal();
             break;
         case 'users':
             modalTitle.textContent = 'Správa uživatelů';
-            modalSubtitle.textContent = 'Technici, prodejci, administrátoři, partneři';
             loadUsersModal();
             break;
         case 'online':
             modalTitle.textContent = 'Online uživatelé';
-            modalSubtitle.textContent = 'Aktivní uživatelé v posledních 15 minutách';
             loadOnlineModal();
             break;
         case 'notifications':
-            modalTitle.textContent = 'Email & SMS notifikace';
-            modalSubtitle.textContent = 'Šablony emailů, SMS, automatické notifikace';
+            modalTitle.textContent = 'Email & SMS';
             loadNotificationsModal();
             break;
         case 'claims':
             modalTitle.textContent = 'Správa reklamací';
-            modalSubtitle.textContent = 'Přehled všech servisních požadavků a reklamací';
             loadClaimsModal();
             break;
         case 'actions':
             modalTitle.textContent = 'Akce & Úkoly';
-            modalSubtitle.textContent = 'Nevyřešené úkoly, GitHub webhooks, plánované akce';
             loadActionsModal();
             break;
         case 'diagnostics':
-            modalTitle.textContent = 'Diagnostika systému';
-            modalSubtitle.textContent = 'Nástroje, migrace a system health';
+            modalTitle.textContent = 'Diagnostika';
             loadDiagnosticsModal();
             break;
         case 'testing':
             modalTitle.textContent = 'Testovací prostředí';
-            modalSubtitle.textContent = 'E2E testování celého workflow aplikace';
             loadTestingModal();
             break;
     }
