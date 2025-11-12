@@ -566,8 +566,8 @@ try {
 
 <script>
 // Control Center Unified - Version Check
-console.log('%c🔧 Control Center v2025.11.12-1320 loaded', 'background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;');
-console.log('If you see old version, press Ctrl+Shift+R (hard refresh)');
+console.log('%c🔧 Control Center v2025.11.12-1425 loaded', 'background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;');
+console.log('✅ executeAction is now ASYNC and awaits CSRF token');
 
 // Helper function to check if API response is successful
 function isSuccess(data) {
@@ -993,10 +993,11 @@ function createKey() {
     });
 }
 
-function executeAction(actionId) {
+async function executeAction(actionId) {
     console.log('[executeAction] Starting with actionId:', actionId);
 
-    const csrfToken = getCSRFToken();
+    // Await the CSRF token (handles both sync and async getCSRFToken)
+    const csrfToken = await getCSRFToken();
     console.log('[executeAction] CSRF token retrieved:', {
         type: typeof csrfToken,
         value: csrfToken && typeof csrfToken === 'string' ? csrfToken.substring(0, 10) + '...' : csrfToken,
