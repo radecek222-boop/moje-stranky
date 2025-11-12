@@ -146,16 +146,46 @@ try {
             $actionId = $data['action_id'] ?? null;
 
             if (!$actionId) {
-                throw new Exception('Action ID required');
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Action ID required',
+                    'debug' => [
+                        'received_data' => $data
+                    ]
+                ]);
+                exit;
             }
 
             // Načíst akci z DB
-            $stmt = $pdo->prepare("SELECT * FROM wgs_pending_actions WHERE id = :id AND status = 'pending'");
-            $stmt->execute(['id' => $actionId]);
-            $action = $stmt->fetch(PDO::FETCH_ASSOC);
+            try {
+                $stmt = $pdo->prepare("SELECT * FROM wgs_pending_actions WHERE id = :id AND status = 'pending'");
+                $stmt->execute(['id' => $actionId]);
+                $action = $stmt->fetch(PDO::FETCH_ASSOC);
+            } catch (PDOException $e) {
+                http_response_code(500);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Databázová chyba při načítání akce',
+                    'debug' => [
+                        'error' => $e->getMessage(),
+                        'hint' => 'Tabulka wgs_pending_actions pravděpodobně neexistuje. Spusťte migraci: migrations/create_actions_system.sql'
+                    ]
+                ]);
+                exit;
+            }
 
             if (!$action) {
-                throw new Exception('Akce nenalezena nebo již byla dokončena');
+                http_response_code(404);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Akce nenalezena nebo již byla dokončena',
+                    'debug' => [
+                        'action_id' => $actionId,
+                        'hint' => 'Zkontrolujte, zda akce existuje v tabulce wgs_pending_actions a má status "pending"'
+                    ]
+                ]);
+                exit;
             }
 
             $startTime = microtime(true);

@@ -1049,9 +1049,15 @@ async function executeAction(actionId) {
         }
 
         if (!r.ok) {
-            const errorMsg = responseData
-                ? `HTTP ${r.status}: ${responseData.message || 'Unknown error'}\n\nDebug: ${JSON.stringify(responseData.debug || {}, null, 2)}`
-                : `HTTP ${r.status}`;
+            let errorMsg = `HTTP ${r.status}`;
+            if (responseData) {
+                errorMsg = responseData.message || 'Unknown error';
+                if (responseData.debug) {
+                    errorMsg += '\n\n' + Object.entries(responseData.debug)
+                        .map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v, null, 2) : v}`)
+                        .join('\n');
+                }
+            }
             throw new Error(errorMsg);
         }
 
@@ -1138,7 +1144,7 @@ function dismissAction(actionId) {
 }
 
 // Clear cache and reload
-function clearCacheAndReload() {
+async function clearCacheAndReload() {
     if (!confirm('Vymazat lokální cache a načíst nejnovější verzi? Stránka se znovu načte.')) {
         return;
     }
@@ -1171,10 +1177,9 @@ function clearCacheAndReload() {
 
         // Vymazat Service Worker cache (pokud existuje)
         if ('caches' in window) {
-            caches.keys().then(names => {
-                names.forEach(name => caches.delete(name));
-                console.log('✓ Service Worker cache vymazán');
-            });
+            const names = await caches.keys();
+            await Promise.all(names.map(name => caches.delete(name)));
+            console.log('✓ Service Worker cache vymazán (' + names.length + ' cache(s))');
         }
 
         console.log('🔄 Reloaduji stránku s force refresh...');

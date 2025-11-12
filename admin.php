@@ -52,9 +52,6 @@ try {
 
     <!-- External CSS -->
     <!-- Unified Design System -->
-  <link rel="preload" href="assets/css/styles.min.css" as="style">
-  <link rel="preload" href="assets/css/admin.min.css" as="style">
-
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/admin.min.css">
 <link rel="stylesheet" href="assets/css/admin-header.css">
