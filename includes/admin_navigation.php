@@ -70,6 +70,16 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab_label' => 'Konfigurace systému',
                 'tab' => 'control_center_configuration',
             ],
+            'control_center_actions' => [
+                'href' => 'admin.php?tab=control_center_actions',
+                'tab_label' => 'Akce & Úkoly',
+                'tab' => 'control_center_actions',
+            ],
+            'control_center_console' => [
+                'href' => 'admin.php?tab=control_center_console',
+                'tab_label' => 'Konzole',
+                'tab' => 'control_center_console',
+            ],
         ];
     }
 }
