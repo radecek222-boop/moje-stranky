@@ -6,9 +6,7 @@
 
 require_once __DIR__ . '/init.php';
 
-session_start();
-
-// Bezpečnostní kontrola
+// Bezpečnostní kontrola (session už běží z init.php)
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die('Unauthorized - admin login required');
 }
