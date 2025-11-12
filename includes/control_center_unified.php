@@ -42,6 +42,11 @@ try {
 
 .page-header {
     margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .page-subtitle {
@@ -51,6 +56,45 @@ try {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin: 0;
+    flex: 1;
+}
+
+.page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.cc-version-info {
+    font-size: 0.7rem;
+    color: var(--c-grey);
+    padding: 0.25rem 0.5rem;
+    background: var(--c-bg);
+    border: 1px solid var(--c-border);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+}
+
+.cc-clear-cache-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.cc-clear-cache-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.cc-clear-cache-btn:active {
+    transform: translateY(0);
 }
 
 /* Card Grid */
@@ -414,6 +458,12 @@ try {
 <div class="control-center">
     <div class="page-header">
         <p class="page-subtitle">Centrální řídicí panel pro správu celé aplikace</p>
+        <div class="page-header-actions">
+            <span class="cc-version-info" id="ccVersionInfo" title="Verze Control Center - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
+            <button class="cc-clear-cache-btn" onclick="clearCacheAndReload()" title="Vymaže lokální cache a načte nejnovější verzi">
+                🔄 Vymazat cache & Reload
+            </button>
+        </div>
     </div>
 
     <!-- Card Grid -->
@@ -1017,6 +1067,67 @@ function dismissAction(actionId) {
     .catch(err => {
         alert('Chyba: ' + err.message);
     });
+}
+
+// Clear cache and reload
+function clearCacheAndReload() {
+    if (!confirm('Vymazat lokální cache a načíst nejnovější verzi? Stránka se znovu načte.')) {
+        return;
+    }
+
+    try {
+        // Vymazat localStorage
+        if (window.localStorage) {
+            const itemsToKeep = ['theme', 'user_preferences']; // Ponechat důležité věci
+            const storage = {};
+            itemsToKeep.forEach(key => {
+                const val = localStorage.getItem(key);
+                if (val !== null) storage[key] = val;
+            });
+
+            localStorage.clear();
+
+            // Vrátit důležité položky
+            Object.keys(storage).forEach(key => {
+                localStorage.setItem(key, storage[key]);
+            });
+
+            console.log('✓ localStorage vymazán');
+        }
+
+        // Vymazat sessionStorage
+        if (window.sessionStorage) {
+            sessionStorage.clear();
+            console.log('✓ sessionStorage vymazán');
+        }
+
+        // Vymazat Service Worker cache (pokud existuje)
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                names.forEach(name => caches.delete(name));
+                console.log('✓ Service Worker cache vymazán');
+            });
+        }
+
+        console.log('🔄 Reloaduji stránku s force refresh...');
+
+        // Force reload s timestamp pro cache busting
+        const timestamp = new Date().getTime();
+        const url = new URL(window.location.href);
+        url.searchParams.set('_cachebust', timestamp);
+
+        // Hard reload
+        window.location.href = url.toString();
+
+        // Fallback: pokud výše nefunguje
+        setTimeout(() => {
+            window.location.reload(true);
+        }, 100);
+
+    } catch (err) {
+        console.error('Chyba při mazání cache:', err);
+        alert('Chyba při mazání cache. Zkuste manuální refresh (Ctrl+Shift+R).');
+    }
 }
 
 // Close modal on ESC key
