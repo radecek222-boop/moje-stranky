@@ -286,6 +286,11 @@ try {
 
       </div>
 
+      <!-- Hidden container for admin-notifications.js to load real data -->
+      <div id="notifications-container" style="display: none;">
+        <div class="loading">Načítání notifikací...</div>
+      </div>
+
     </div>
 
     <!-- MODAL OVERLAY -->
@@ -305,6 +310,7 @@ try {
     // Modal systém pro notifikace
     function openNotifModal(type) {
         const overlay = document.getElementById('notifModalOverlay');
+        const modal = overlay.querySelector('.cc-modal');
         const title = document.getElementById('notifModalTitle');
         const body = document.getElementById('notifModalBody');
 
@@ -325,14 +331,19 @@ try {
         // Načíst obsah podle typu
         loadNotifContent(type, body);
 
-        // Zobrazit modal
-        overlay.style.display = 'flex';
+        // Zobrazit modal - add active classes
+        overlay.classList.add('active');
+        modal.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
 
     function closeNotifModal() {
         const overlay = document.getElementById('notifModalOverlay');
-        overlay.style.display = 'none';
+        const modal = overlay.querySelector('.cc-modal');
+
+        // Skrýt modal - remove active classes
+        overlay.classList.remove('active');
+        modal.classList.remove('active');
         document.body.style.overflow = 'auto';
     }
 
@@ -340,11 +351,22 @@ try {
         // Zobrazit loading
         body.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Načítání...</div>';
 
+        // Pro email-templates zkusit použít reálná data z notifications-container
+        if (type === 'email-templates') {
+            const realContainer = document.getElementById('notifications-container');
+            if (realContainer && realContainer.innerHTML && !realContainer.innerHTML.includes('Načítání')) {
+                // Použít reálná data z admin-notifications.js
+                body.innerHTML = '<div style="padding: 1rem;">' + realContainer.innerHTML + '</div>';
+                return;
+            }
+        }
+
         // Podle typu načíst různý obsah
         const content = {
             'email-templates': `
                 <div style="padding: 1rem;">
                     <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Editace email šablon pro automatické notifikace</p>
+                    <div id="notifications-container-clone"></div>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
                             <div style="font-weight: 600; margin-bottom: 0.5rem;">Nová reklamace</div>
