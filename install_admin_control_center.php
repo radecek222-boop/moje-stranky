@@ -6,6 +6,9 @@
 
 session_start();
 
+// Override COOP policy pro umožnění otevření v novém okně/tabu
+header("Cross-Origin-Opener-Policy: unsafe-none");
+
 // Bezpečnostní kontrola
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     header('Location: /prihlaseni.php');
