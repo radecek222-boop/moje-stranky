@@ -134,13 +134,20 @@ async function testSmtpConnection() {
     testBtn.textContent = 'Testování...';
 
     try {
+        // Získat CSRF token PŘED vytvořením objektu
+        const csrfToken = getCSRFToken();
+
+        if (!csrfToken) {
+            throw new Error('CSRF token nebyl nalezen');
+        }
+
         const response = await fetch('api/control_center_api.php?action=test_smtp_connection', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                csrf_token: getCSRFToken()
+                csrf_token: csrfToken
             }),
             credentials: 'same-origin'
         });
@@ -167,6 +174,17 @@ async function testSmtpConnection() {
 
 // Helper pro získání CSRF tokenu
 function getCSRFToken() {
-    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    // Zkusit aktuální dokument
+    let metaTag = document.querySelector('meta[name="csrf-token"]');
+
+    // Pokud je skript v iframe, zkusit parent dokument
+    if (!metaTag && window.parent && window.parent !== window) {
+        try {
+            metaTag = window.parent.document.querySelector('meta[name="csrf-token"]');
+        } catch (e) {
+            console.warn('Cannot access parent document for CSRF token:', e);
+        }
+    }
+
     return metaTag ? metaTag.getAttribute('content') : null;
 }
