@@ -230,35 +230,81 @@ try {
     }
 
     // KROK 3: Spuštění SQL migrace
-    $migrationFile = __DIR__ . '/migrations/create_actions_system.sql';
-
-    if (!file_exists($migrationFile)) {
-        throw new Exception("SQL migrace nenalezena: {$migrationFile}");
-    }
-
-    $sql = file_get_contents($migrationFile);
-
-    // Rozdělit na jednotlivé příkazy
-    $statements = array_filter(
-        array_map('trim', explode(';', $sql)),
-        function($stmt) {
-            return !empty($stmt) &&
-                   !preg_match('/^--/', $stmt) &&
-                   !preg_match('/^\/\*/', $stmt);
-        }
-    );
-
     $executedCount = 0;
     $errors = [];
 
-    foreach ($statements as $statement) {
+    // SQL příkazy přímo v kódu (spolehlivější než parsování souboru)
+    $sqlStatements = [
+        // Tabulka wgs_pending_actions
+        "CREATE TABLE IF NOT EXISTS wgs_pending_actions (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            action_type VARCHAR(50) NOT NULL COMMENT 'Typ akce: install_smtp, migration, update, etc.',
+            action_title VARCHAR(255) NOT NULL COMMENT 'Název úlohy zobrazený v UI',
+            action_description TEXT DEFAULT NULL COMMENT 'Detailní popis úlohy',
+            action_url VARCHAR(255) DEFAULT NULL COMMENT 'URL scriptu k vykonání (pro migrations)',
+            priority ENUM('critical', 'high', 'medium', 'low') DEFAULT 'medium' COMMENT 'Priorita úlohy',
+            status ENUM('pending', 'in_progress', 'completed', 'failed', 'dismissed') DEFAULT 'pending' COMMENT 'Aktuální stav úlohy',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            completed_at TIMESTAMP NULL DEFAULT NULL,
+            completed_by INT DEFAULT NULL COMMENT 'ID uživatele, který úlohu dokončil',
+            dismissed_at TIMESTAMP NULL DEFAULT NULL,
+            dismissed_by INT DEFAULT NULL COMMENT 'ID uživatele, který úlohu zrušil',
+
+            INDEX idx_status (status),
+            INDEX idx_priority (priority),
+            INDEX idx_created_at (created_at),
+            INDEX idx_action_type (action_type)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        COMMENT='Nevyřešené úlohy a plánované akce pro administrátory'",
+
+        // Tabulka wgs_action_history
+        "CREATE TABLE IF NOT EXISTS wgs_action_history (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            action_id INT DEFAULT NULL COMMENT 'Reference na původní akci (pokud existovala)',
+            action_type VARCHAR(50) NOT NULL,
+            action_title VARCHAR(255) NOT NULL,
+            status ENUM('completed', 'failed') NOT NULL,
+            executed_by INT DEFAULT NULL COMMENT 'ID uživatele, který akci spustil',
+            execution_time INT DEFAULT NULL COMMENT 'Čas vykonávání v milisekundách',
+            error_message TEXT DEFAULT NULL COMMENT 'Chybová zpráva (pokud failed)',
+            executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            INDEX idx_action_id (action_id),
+            INDEX idx_status (status),
+            INDEX idx_executed_at (executed_at),
+            INDEX idx_action_type (action_type)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        COMMENT='Historie všech vykonaných akcí (audit trail)'",
+
+        // Přidat SMTP instalační úlohu
+        "INSERT INTO wgs_pending_actions (
+            action_type,
+            action_title,
+            action_description,
+            priority,
+            status
+        )
+        VALUES (
+            'install_smtp',
+            'Instalovat SMTP konfiguraci',
+            'Přidá smtp_password a smtp_encryption klíče do system_config a vytvoří tabulku wgs_notification_history pro sledování odeslaných emailů a SMS.',
+            'high',
+            'pending'
+        )"
+    ];
+
+    foreach ($sqlStatements as $statement) {
         try {
             $pdo->exec($statement);
             $executedCount++;
         } catch (PDOException $e) {
-            // Ignorovat "already exists" chyby
-            if (strpos($e->getMessage(), 'already exists') === false) {
+            // Ignorovat "already exists" a "Duplicate entry" chyby
+            if (strpos($e->getMessage(), 'already exists') === false &&
+                strpos($e->getMessage(), 'Duplicate entry') === false) {
                 $errors[] = $e->getMessage();
+            } else {
+                // Počítat i přeskočené příkazy jako úspěšné
+                $executedCount++;
             }
         }
     }
