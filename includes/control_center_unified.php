@@ -610,7 +610,7 @@ function getCSRFToken() {
     const tokenStr = token ? String(token).trim() : null;
 
     if (tokenStr) {
-        console.log('CSRF token loaded:', tokenStr.substring(0, 10) + '... (length: ' + tokenStr.length + ')');
+        if (DEBUG_MODE) console.log('CSRF token loaded:', tokenStr.substring(0, 10) + '... (length: ' + tokenStr.length + ')');
     } else {
         console.error('CSRF token is empty');
     }
@@ -964,7 +964,7 @@ function createKey() {
 }
 
 async function executeAction(actionId) {
-    console.log('[executeAction] Starting with actionId:', actionId);
+    if (DEBUG_MODE) console.log('[executeAction] Starting with actionId:', actionId);
 
     // Capture button reference BEFORE any await (event becomes undefined after await in async functions)
     const btn = event.target;
@@ -972,7 +972,7 @@ async function executeAction(actionId) {
 
     // Await the CSRF token (handles both sync and async getCSRFToken)
     const csrfToken = await getCSRFToken();
-    console.log('[executeAction] CSRF token retrieved:', {
+    if (DEBUG_MODE) console.log('[executeAction] CSRF token retrieved:', {
         type: typeof csrfToken,
         value: csrfToken && typeof csrfToken === 'string' ? csrfToken.substring(0, 10) + '...' : csrfToken,
         length: csrfToken ? csrfToken.length : 0
@@ -985,7 +985,7 @@ async function executeAction(actionId) {
     }
 
     if (!confirm('Spustit tuto akci? Bude provedena automaticky.')) {
-        console.log('[executeAction] User cancelled');
+        if (DEBUG_MODE) console.log('[executeAction] User cancelled');
         return;
     }
 
@@ -998,7 +998,7 @@ async function executeAction(actionId) {
         csrf_token: csrfToken
     };
 
-    console.log('[executeAction] Sending request with payload:', payload);
+    if (DEBUG_MODE) console.log('[executeAction] Sending request with payload:', payload);
 
     fetch('api/control_center_api.php?action=execute_action', {
         method: 'POST',
@@ -1006,13 +1006,13 @@ async function executeAction(actionId) {
         body: JSON.stringify(payload)
     })
     .then(async r => {
-        console.log('[executeAction] Response status:', r.status);
+        if (DEBUG_MODE) console.log('[executeAction] Response status:', r.status);
 
         // Zkusit načíst JSON i při chybě
         let responseData;
         try {
             responseData = await r.json();
-            console.log('[executeAction] Response data:', responseData);
+            if (DEBUG_MODE) console.log('[executeAction] Response data:', responseData);
         } catch (e) {
             console.error('[executeAction] Failed to parse JSON:', e);
             responseData = null;
@@ -1034,7 +1034,7 @@ async function executeAction(actionId) {
         return responseData;
     })
     .then(data => {
-        console.log('[executeAction] Success data:', data);
+        if (DEBUG_MODE) console.log('[executeAction] Success data:', data);
 
         if (isSuccess(data)) {
             const execTime = data.execution_time || 'neznámý čas';

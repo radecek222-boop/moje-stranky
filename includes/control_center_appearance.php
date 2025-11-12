@@ -631,6 +631,9 @@ input:checked + .toggle-slider:before {
 </div>
 
 <script>
+// Debug mode - set to false in production
+const DEBUG_MODE = false;
+
 // Initialize všech controlů
 document.addEventListener('DOMContentLoaded', () => {
     initializeControls();
@@ -782,7 +785,7 @@ async function saveSettings() {
     .then(data => {
         if (data.status === 'success' || data.success) {
             alert('✓ Nastavení vzhledu uloženo!');
-            console.log('Settings saved:', settings);
+            if (DEBUG_MODE) console.log('Settings saved:', settings);
         } else {
             throw new Error(data.message || 'Chyba při ukládání');
         }
@@ -817,5 +820,5 @@ function resetToDefaults() {
     updateStyle();
 }
 
-console.log('[OK] iPhone-style editor loaded');
+if (DEBUG_MODE) console.log('[OK] iPhone-style editor loaded');
 </script>

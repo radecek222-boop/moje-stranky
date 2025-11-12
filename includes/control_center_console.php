@@ -288,6 +288,9 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 </div>
 
 <script>
+// Debug mode - set to false in production
+const DEBUG_MODE = false;
+
 let consoleOutput = [];
 let diagnosticsRunning = false;
 
@@ -738,5 +741,5 @@ async function checkSecurity() {
     log('');
 }
 
-console.log('✅ Console loaded');
+if (DEBUG_MODE) console.log('✅ Console loaded');
 </script>
