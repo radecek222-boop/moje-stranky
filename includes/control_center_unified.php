@@ -572,8 +572,12 @@ try {
 
 <script>
 // Control Center Unified - Version Check
-console.log('%c🔧 Control Center v2025.11.12-1430 loaded', 'background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;');
-console.log('✅ executeAction is ASYNC + event.target captured BEFORE await');
+// Debug mode - set to false in production
+const DEBUG_MODE = false;
+if (DEBUG_MODE) {
+    console.log('%c🔧 Control Center v2025.11.12-1430 loaded', 'background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;');
+    console.log('✅ executeAction is ASYNC + event.target captured BEFORE await');
+}
 
 // Helper function to check if API response is successful
 function isSuccess(data) {
@@ -720,13 +724,17 @@ function loadKeysModal() {
                 html += '</tr></thead><tbody>';
 
                 data.keys.forEach(key => {
+                    // Escapování pro XSS ochranu
+                    const safeKeyCode = typeof escapeHTML === 'function' ? escapeHTML(key.key_code) : key.key_code;
+                    const safeKeyType = typeof escapeHTML === 'function' ? escapeHTML(key.key_type) : key.key_type;
+
                     html += '<tr>';
-                    html += `<td><code>${key.key_code}</code></td>`;
-                    html += `<td><span class="badge badge-${key.key_type}">${key.key_type}</span></td>`;
-                    html += `<td>${key.usage_count} / ${key.max_usage || '∞'}</td>`;
+                    html += `<td><code>${safeKeyCode}</code></td>`;
+                    html += `<td><span class="badge badge-${safeKeyType}">${safeKeyType}</span></td>`;
+                    html += `<td>${parseInt(key.usage_count) || 0} / ${parseInt(key.max_usage) || '∞'}</td>`;
                     html += `<td><span class="badge badge-${key.is_active ? 'active' : 'inactive'}">${key.is_active ? 'Aktivní' : 'Neaktivní'}</span></td>`;
                     html += `<td>${new Date(key.created_at).toLocaleDateString('cs-CZ')}</td>`;
-                    html += `<td><button class="btn btn-sm btn-danger" onclick="deleteKey('${key.key_code}')">Smazat</button></td>`;
+                    html += `<td><button class="btn btn-sm btn-danger" onclick="deleteKey('${safeKeyCode}')">Smazat</button></td>`;
                     html += '</tr>';
                 });
 
@@ -771,11 +779,16 @@ function loadUsersModal() {
                 html += '<th>ID</th><th>Jméno</th><th>Email</th><th>Role</th><th>Status</th><th>Vytvořen</th></tr></thead><tbody>';
 
                 users.forEach(user => {
+                    // Escapování pro XSS ochranu
+                    const safeName = typeof escapeHTML === 'function' ? escapeHTML(user.name || user.full_name || '') : (user.name || user.full_name || '');
+                    const safeEmail = typeof escapeHTML === 'function' ? escapeHTML(user.email || '') : (user.email || '');
+                    const safeRole = typeof escapeHTML === 'function' ? escapeHTML(user.role || '') : (user.role || '');
+
                     html += '<tr>';
-                    html += `<td>#${user.id}</td>`;
-                    html += `<td>${user.name || user.full_name || ''}</td>`;
-                    html += `<td>${user.email || ''}</td>`;
-                    html += `<td><span class="badge badge-${user.role}">${user.role || ''}</span></td>`;
+                    html += `<td>#${parseInt(user.id) || 0}</td>`;
+                    html += `<td>${safeName}</td>`;
+                    html += `<td>${safeEmail}</td>`;
+                    html += `<td><span class="badge badge-${safeRole}">${safeRole}</span></td>`;
                     html += `<td><span class="badge badge-${user.is_active ? 'active' : 'inactive'}">${user.is_active ? 'Aktivní' : 'Neaktivní'}</span></td>`;
                     html += `<td>${user.created_at ? new Date(user.created_at).toLocaleDateString('cs-CZ') : '—'}</td>`;
                     html += '</tr>';

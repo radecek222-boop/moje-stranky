@@ -12,6 +12,35 @@ if (!$isAdmin) {
 // Detect embed mode for iframes
 $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
+// BEZPEČNOST: Security headers
+if (!$embedMode) {
+    // Content-Security-Policy - ochrana před XSS útoky
+    header("Content-Security-Policy: " .
+        "default-src 'self'; " .
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; " .
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
+        "font-src 'self' https://fonts.gstatic.com; " .
+        "img-src 'self' data: https:; " .
+        "connect-src 'self'; " .
+        "frame-src 'self'; " .
+        "object-src 'none'; " .
+        "base-uri 'self'; " .
+        "form-action 'self';"
+    );
+
+    // X-Frame-Options - ochrana před clickjacking
+    header("X-Frame-Options: SAMEORIGIN");
+
+    // X-Content-Type-Options - zamezí MIME type sniffing
+    header("X-Content-Type-Options: nosniff");
+
+    // Referrer-Policy - kontrola sdílení referrer informací
+    header("Referrer-Policy: strict-origin-when-cross-origin");
+
+    // Permissions-Policy - omezení přístupu k browser features
+    header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
+}
+
 $tabConfig = loadAdminTabNavigation();
 $activeTab = $_GET['tab'] ?? 'control_center';
 if (!array_key_exists($activeTab, $tabConfig)) {
@@ -61,6 +90,7 @@ try {
 
   <!-- Error Handler - zachytává všechny chyby -->
   <script src="assets/js/error-handler.js"></script>
+  <script src="assets/js/html-sanitizer.js"></script>
   <script src="assets/js/control-center-modal.js" defer></script>
 </head>
 
@@ -352,7 +382,7 @@ try {
         if (type === 'email-templates') {
             const realContainer = document.getElementById('notifications-container');
             if (realContainer && realContainer.innerHTML && !realContainer.innerHTML.includes('Načítání')) {
-                // Bezpečně klonovat obsah místo innerHTML (ochrana před XSS)
+                // Bezpečně klonovat obsah (ochrana před XSS)
                 body.innerHTML = '';
                 const wrapper = document.createElement('div');
                 wrapper.style.padding = '1rem';
@@ -551,9 +581,11 @@ try {
             `
         };
 
-        // Nastavit obsah
+        // Nastavit obsah (sanitizace pro XSS ochranu)
         setTimeout(() => {
-            body.innerHTML = content[type] || '<p>Obsah nebyl nalezen</p>';
+            const htmlContent = content[type] || '<p>Obsah nebyl nalezen</p>';
+            // Použij sanitizeHTML pro ochranu před XSS
+            body.innerHTML = typeof sanitizeHTML === 'function' ? sanitizeHTML(htmlContent) : htmlContent;
 
             // Pro SMTP nastavení načíst data z databáze
             if (type === 'smtp-settings' && typeof loadSmtpConfig === 'function') {
