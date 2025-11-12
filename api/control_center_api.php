@@ -64,6 +64,42 @@ try {
 
     $pdo = getDbConnection();
 
+    // Kontrola existence Admin Control Center tabulek
+    // Pokud tabulky neexistují, vrátit informativní odpověď místo crash
+    $requiredTables = [
+        'wgs_theme_settings',
+        'wgs_content_texts',
+        'wgs_system_config',
+        'wgs_pending_actions',
+        'wgs_action_history',
+        'wgs_github_webhooks'
+    ];
+
+    $missingTables = [];
+    foreach ($requiredTables as $table) {
+        try {
+            $stmt = $pdo->query("SHOW TABLES LIKE '$table'");
+            if ($stmt->rowCount() === 0) {
+                $missingTables[] = $table;
+            }
+        } catch (PDOException $e) {
+            $missingTables[] = $table;
+        }
+    }
+
+    // Pokud některé tabulky chybí a action není diagnostika, vrátit info
+    if (!empty($missingTables) && !in_array($action, ['check_php_files', 'get_diagnostics'])) {
+        http_response_code(503); // Service Unavailable
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Admin Control Center není nainstalován',
+            'error_code' => 'TABLES_MISSING',
+            'missing_tables' => $missingTables,
+            'action_required' => 'Spusťte instalaci na /install_admin_control_center.php'
+        ]);
+        exit;
+    }
+
     switch ($action) {
 
         // ==========================================
