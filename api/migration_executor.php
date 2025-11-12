@@ -4,7 +4,9 @@
  * Bezpečné spuštění SQL migrací
  */
 
-session_start();
+require_once __DIR__ . '/../init.php';
+
+header('Content-Type: application/json');
 
 // Bezpečnostní kontrola
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
@@ -12,14 +14,19 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die(json_encode(['status' => 'error', 'message' => 'Unauthorized']));
 }
 
-header('Content-Type: application/json');
-
-require_once __DIR__ . '/../includes/db_connect.php';
-
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 try {
-    $pdo = getDbConnection();
+    // Vytvořit PDO připojení
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        DB_USER,
+        DB_PASS,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]
+    );
 
     switch ($action) {
         case 'run_migration':
