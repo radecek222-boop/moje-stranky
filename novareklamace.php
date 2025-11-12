@@ -3,6 +3,11 @@ require_once __DIR__ . '/init.php';
 
 $isLoggedIn = isset($_SESSION['user_id']);
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+
+// Bezpečnostní kontrola: CSRF token se generuje pouze pokud je session aktivní
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    die('Session není aktivní. Obnovte stránku.');
+}
 ?>
 <!DOCTYPE html>
 <html lang="cs" data-page="novareklamace">

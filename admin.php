@@ -352,8 +352,13 @@ try {
         if (type === 'email-templates') {
             const realContainer = document.getElementById('notifications-container');
             if (realContainer && realContainer.innerHTML && !realContainer.innerHTML.includes('Načítání')) {
-                // Použít reálná data z admin-notifications.js
-                body.innerHTML = '<div style="padding: 1rem;">' + realContainer.innerHTML + '</div>';
+                // Bezpečně klonovat obsah místo innerHTML (ochrana před XSS)
+                body.innerHTML = '';
+                const wrapper = document.createElement('div');
+                wrapper.style.padding = '1rem';
+                const clonedContent = realContainer.cloneNode(true);
+                wrapper.appendChild(clonedContent);
+                body.appendChild(wrapper);
                 return;
             }
         }

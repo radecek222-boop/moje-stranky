@@ -202,7 +202,12 @@ try {
                         }
 
                         $sql = file_get_contents($sqlFile);
-                        $pdo->exec($sql);
+
+                        try {
+                            $pdo->exec($sql);
+                        } catch (PDOException $e) {
+                            throw new Exception('Chyba při vykonávání SQL: ' . $e->getMessage());
+                        }
 
                         $executeResult = [
                             'success' => true,

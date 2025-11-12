@@ -107,9 +107,9 @@ async function loadKeys() {
       let html = '';
       data.keys.forEach(key => {
         html += '<div class="key-display" style="margin-bottom:1.5rem;">';
-        html += '<div class="key-label">' + key.key_type.toUpperCase() + '</div>';
+        html += '<div class="key-label">' + escapeHtml(key.key_type.toUpperCase()) + '</div>';
         html += '<div style="display:flex;align-items:center;gap:1rem;margin:1rem 0;">';
-        html += '<code style="flex:1;font-size:1.2rem;padding:1rem;background:#f5f5f5;border:2px dashed #ddd;">' + key.key_code + '</code>';
+        html += '<code style="flex:1;font-size:1.2rem;padding:1rem;background:#f5f5f5;border:2px dashed#ddd;">' + escapeHtml(key.key_code) + '</code>';
         html += '</div>';
         html += '<div style="font-size:0.85rem;color:#666;margin-bottom:1rem;">';
         html += 'Použití: ' + key.usage_count + '/' + (key.max_usage || '∞') + ' | ';
