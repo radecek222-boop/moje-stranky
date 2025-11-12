@@ -55,6 +55,21 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab_label' => 'Testing',
                 'tab' => 'control_center_testing_simulator',
             ],
+            'control_center_appearance' => [
+                'href' => 'admin.php?tab=control_center_appearance',
+                'tab_label' => 'Vzhled & Design',
+                'tab' => 'control_center_appearance',
+            ],
+            'control_center_content' => [
+                'href' => 'admin.php?tab=control_center_content',
+                'tab_label' => 'Obsah & Texty',
+                'tab' => 'control_center_content',
+            ],
+            'control_center_configuration' => [
+                'href' => 'admin.php?tab=control_center_configuration',
+                'tab_label' => 'Konfigurace systému',
+                'tab' => 'control_center_configuration',
+            ],
         ];
     }
 }

@@ -479,23 +479,20 @@ try {
             <div class="cc-card-description">E2E testování celého workflow</div>
         </div>
 
-        <!-- Vzhled & Design (disabled) -->
-        <div class="cc-card cc-card-appearance cc-card-disabled">
-            <div class="cc-coming-soon">Soon</div>
+        <!-- Vzhled & Design -->
+        <div class="cc-card cc-card-appearance" onclick="openCCModal('appearance')">
             <div class="cc-card-title">Vzhled & Design</div>
             <div class="cc-card-description">Barvy, fonty, logo, branding</div>
         </div>
 
-        <!-- Obsah & Texty (disabled) -->
-        <div class="cc-card cc-card-content cc-card-disabled">
-            <div class="cc-coming-soon">Soon</div>
+        <!-- Obsah & Texty -->
+        <div class="cc-card cc-card-content" onclick="openCCModal('content')">
             <div class="cc-card-title">Obsah & Texty</div>
             <div class="cc-card-description">Editace textů CZ/EN/SK</div>
         </div>
 
-        <!-- Konfigurace (disabled) -->
-        <div class="cc-card cc-card-config cc-card-disabled">
-            <div class="cc-coming-soon">Soon</div>
+        <!-- Konfigurace -->
+        <div class="cc-card cc-card-config" onclick="openCCModal('config')">
             <div class="cc-card-title">Konfigurace systému</div>
             <div class="cc-card-description">SMTP, API klíče, bezpečnost</div>
         </div>
@@ -572,6 +569,15 @@ function openCCModal(section) {
             break;
         case 'testing':
             loadTestingModal();
+            break;
+        case 'appearance':
+            loadAppearanceModal();
+            break;
+        case 'content':
+            loadContentModal();
+            break;
+        case 'config':
+            loadConfigModal();
             break;
     }
 }
@@ -825,6 +831,21 @@ function loadDiagnosticsModal() {
 function loadTestingModal() {
     const modalBody = document.getElementById('ccModalBody');
     modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_testing_simulator&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Testovací prostředí"></iframe></div>';
+}
+
+function loadAppearanceModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_appearance&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Vzhled & Design"></iframe></div>';
+}
+
+function loadContentModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_content&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Obsah & Texty"></iframe></div>';
+}
+
+function loadConfigModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_configuration&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Konfigurace systému"></iframe></div>';
 }
 
 // === ACTION HANDLERS ===

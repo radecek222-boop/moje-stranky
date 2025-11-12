@@ -10,6 +10,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 }
 
 $pdo = getDbConnection();
+$embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
 // Načtení konfigurace
 $configs = [];
@@ -41,30 +42,32 @@ try {
 
 // Group names
 $groupNames = [
-    'email' => '📧 Email (SMTP)',
-    'api_keys' => '🔑 API Klíče',
-    'security' => '🔒 Bezpečnost',
-    'system' => '⚙️ Systém'
+    'email' => 'Email (SMTP)',
+    'api_keys' => 'API Klíče',
+    'security' => 'Bezpečnost',
+    'system' => 'Systém'
 ];
 ?>
 
 <link rel="stylesheet" href="/assets/css/control-center.css">
 
 <div class="control-detail active">
+    <?php if (!$embedMode): ?>
     <!-- Header -->
     <div class="control-detail-header">
         <button class="control-detail-back" onclick="window.location.href='admin.php?tab=control_center'">
             <span>‹</span>
             <span>Zpět</span>
         </button>
-        <h2 class="control-detail-title">⚙️ Konfigurace</h2>
+        <h2 class="control-detail-title">Konfigurace systému</h2>
     </div>
+    <?php endif; ?>
 
     <div class="control-detail-content">
 
         <!-- Warning Alert -->
         <div class="cc-alert warning">
-            <div class="cc-alert-icon">⚠️</div>
+            
             <div class="cc-alert-content">
                 <div class="cc-alert-title">Důležité upozornění</div>
                 <div class="cc-alert-message">
@@ -118,7 +121,7 @@ $groupNames = [
                                                    style="flex: 1;">
                                             <button class="cc-btn cc-btn-sm cc-btn-secondary"
                                                     onclick="togglePasswordVisibility(<?= $config['id'] ?>)">
-                                                👁️
+                                                Zobrazit
                                             </button>
                                         <?php else: ?>
                                             <input type="text"
@@ -129,7 +132,7 @@ $groupNames = [
                                         <?php endif; ?>
                                         <button class="cc-btn cc-btn-sm cc-btn-primary"
                                                 onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')">
-                                            💾
+                                            
                                         </button>
                                     </div>
                                     <div id="save-status-<?= $config['id'] ?>" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
@@ -145,7 +148,7 @@ $groupNames = [
                     <!-- Test Email -->
                     <div class="setting-item" style="background: #f8f9fa;">
                         <div class="setting-item-left">
-                            <div class="setting-item-label">📧 Test Email</div>
+                            <div class="setting-item-label">Test Email</div>
                             <div class="setting-item-description">Odeslat testovací email pro ověření SMTP nastavení</div>
                         </div>
                         <div class="setting-item-right">
@@ -188,11 +191,11 @@ $groupNames = [
                                                style="flex: 1; font-family: monospace;">
                                         <button class="cc-btn cc-btn-sm cc-btn-secondary"
                                                 onclick="togglePasswordVisibility(<?= $config['id'] ?>)">
-                                            👁️
+                                            Zobrazit
                                         </button>
                                         <button class="cc-btn cc-btn-sm cc-btn-primary"
                                                 onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')">
-                                            💾
+                                            
                                         </button>
                                     </div>
                                     <div id="save-status-<?= $config['id'] ?>" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
@@ -237,7 +240,7 @@ $groupNames = [
                                                style="width: 100px;">
                                         <button class="cc-btn cc-btn-sm cc-btn-primary"
                                                 onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')">
-                                            💾
+                                            
                                         </button>
                                     </div>
                                     <div id="save-status-<?= $config['id'] ?>" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
@@ -286,7 +289,7 @@ $groupNames = [
                                                    value="<?= htmlspecialchars($config['config_value']) ?>">
                                             <button class="cc-btn cc-btn-sm cc-btn-primary"
                                                     onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')">
-                                                💾
+                                                
                                             </button>
                                         </div>
                                     <?php endif; ?>
@@ -306,7 +309,7 @@ $groupNames = [
 
         <!-- Info -->
         <div class="cc-alert info">
-            <div class="cc-alert-icon">💡</div>
+            
             <div class="cc-alert-content">
                 <div class="cc-alert-title">Poznámka k restartu</div>
                 <div class="cc-alert-message">
@@ -362,7 +365,7 @@ async function saveConfig(configId, configKey) {
         const result = await response.json();
 
         if (result.status === 'success') {
-            statusEl.innerHTML = '<span style="color: #28A745;">✅ Uloženo!</span>';
+            statusEl.innerHTML = '<span style="color: #28A745;"> Uloženo!</span>';
             setTimeout(() => {
                 statusEl.style.display = 'none';
             }, 2000);
@@ -370,7 +373,7 @@ async function saveConfig(configId, configKey) {
             throw new Error(result.message);
         }
     } catch (error) {
-        statusEl.innerHTML = '<span style="color: #DC3545;">❌ Chyba: ' + error.message + '</span>';
+        statusEl.innerHTML = '<span style="color: #DC3545;">Chyba: ' + error.message + '</span>';
     }
 }
 
@@ -404,18 +407,18 @@ async function sendTestEmail() {
         const result = await response.json();
 
         if (result.status === 'success') {
-            alert('✅ Testovací email byl úspěšně odeslán na ' + email);
+            alert(' Testovací email byl úspěšně odeslán na ' + email);
             emailInput.value = '';
         } else {
             throw new Error(result.message);
         }
     } catch (error) {
-        alert('❌ Chyba: ' + error.message);
+        alert('Chyba: ' + error.message);
     } finally {
         btn.textContent = originalText;
         btn.disabled = false;
     }
 }
 
-console.log('✅ Configuration section loaded');
+console.log(' Configuration section loaded');
 </script>
