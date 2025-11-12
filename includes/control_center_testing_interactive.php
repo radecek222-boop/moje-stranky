@@ -378,8 +378,15 @@ let testData = {
     currentStep: 0,
     diagnosticLog: [],
     startTime: null,
-    testPassed: false
+    testPassed: false,
+    csrfToken: null
 };
+
+// Získat CSRF token z meta tagu
+function getCSRFToken() {
+    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    return metaTag ? metaTag.getAttribute('content') : null;
+}
 
 function selectRole(role) {
     testData.role = role;
@@ -397,6 +404,13 @@ function selectRole(role) {
 function startTest() {
     if (!testData.role) {
         alert('Vyberte roli pro testování');
+        return;
+    }
+
+    // Získat CSRF token
+    testData.csrfToken = getCSRFToken();
+    if (!testData.csrfToken) {
+        alert('CSRF token nebyl nalezen. Obnovte stránku.');
         return;
     }
 
@@ -789,15 +803,14 @@ async function loadStep5_PhotoCustomer(panel) {
             .then(res => res.blob());
 
         const formData = new FormData();
-        formData.append('action', 'upload_photo');
         formData.append('reklamace_id', testData.reklamaceId);
-        formData.append('photo', testPhotoBlob, 'test-photo.png');
-        formData.append('photo_type', 'before');
+        formData.append('photos[]', testPhotoBlob, 'test-photo.png');
+        formData.append('csrf_token', testData.csrfToken);
 
         addDiagnostic('Nahrávání fotografie do databáze...', 'info');
         renderDiagnostic();
 
-        const response = await fetch('api/photo_upload.php', {
+        const response = await fetch('app/controllers/save_photos.php', {
             method: 'POST',
             body: formData
         });
@@ -871,7 +884,8 @@ async function loadStep6_Protokol(panel) {
             pouzite_materialy: 'Testovací materiály',
             cas_prace: '2.5',
             poznamky: 'Testovací protokol vytvořený E2E testem',
-            generate_pdf: true
+            generate_pdf: true,
+            csrf_token: testData.csrfToken
         };
 
         addDiagnostic('Ukládání protokolu do databáze...', 'info');
@@ -962,7 +976,7 @@ async function loadStep7_Vysledek(panel) {
 
     try {
         // 1. LOAD operace: Načíst reklamaci z DB
-        const loadResponse = await fetch(`api/load.php?action=load_claim&id=${testData.reklamaceId}`);
+        const loadResponse = await fetch(`app/controllers/load.php?action=get_reklamace&id=${testData.reklamaceId}`);
         const claimData = await loadResponse.json();
 
         if (claimData && claimData.success !== false) {
