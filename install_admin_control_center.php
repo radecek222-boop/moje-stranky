@@ -277,7 +277,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
             const timestamp = new Date().toLocaleTimeString('cs-CZ');
             const colorClass = type === 'success' ? 'log-success' : (type === 'error' ? 'log-error' : 'log-info');
 
-            logLines.push(\`<div class="log-line"><span class="log-time">[\${timestamp}]</span> <span class="\${colorClass}">\${message}</span></div>\`);
+            logLines.push(`<div class="log-line"><span class="log-time">[${timestamp}]</span> <span class="${colorClass}">${message}</span></div>`);
 
             const logElement = document.getElementById('installLog');
             logElement.innerHTML = logLines.join('');
@@ -289,8 +289,8 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
             const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
 
             const statusItem = document.createElement('div');
-            statusItem.className = \`status-item \${type}\`;
-            statusItem.innerHTML = \`<span class="status-icon">\${icon}</span><span>\${message}</span>\`;
+            statusItem.className = `status-item ${type}`;
+            statusItem.innerHTML = `<span class="status-icon">${icon}</span><span>${message}</span>`;
 
             statusElement.appendChild(statusItem);
         }
@@ -324,7 +324,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
                 if (statusData.status === 'success') {
                     addLog('✓ Stav databáze načten', 'success');
-                    addStatus(\`Nalezeno \${statusData.data.tables_status.filter(t => t.exists).length}/6 tabulek\`, 'info');
+                    addStatus(`Nalezeno ${statusData.data.tables_status.filter(t => t.exists).length}/6 tabulek`, 'info');
 
                     if (!statusData.data.migration_needed) {
                         addLog('ℹ️ Všechny tabulky již existují!', 'info');
@@ -358,16 +358,16 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
                 if (migrationData.status === 'success') {
                     addLog('✅ Migrace úspěšně dokončena!', 'success');
-                    addLog(\`📊 Vykonáno \${migrationData.data.statements_executed} SQL příkazů za \${migrationData.data.execution_time_ms}ms\`, 'success');
+                    addLog(`📊 Vykonáno ${migrationData.data.statements_executed} SQL příkazů za ${migrationData.data.execution_time_ms}ms`, 'success');
 
                     setProgress(90);
 
                     // Zobrazit výsledky
-                    addStatus(\`Vytvořeno \${migrationData.data.tables_created} tabulek\`, 'success');
+                    addStatus(`Vytvořeno ${migrationData.data.tables_created} tabulek`, 'success');
 
                     migrationData.data.details.forEach(detail => {
                         if (detail.table) {
-                            addLog(\`  ✓ \${detail.table}: \${detail.rows} záznamů\`, 'success');
+                            addLog(`  ✓ ${detail.table}: ${detail.rows} záznamů`, 'success');
                         }
                     });
 
@@ -403,10 +403,10 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
                 const data = await response.json();
 
                 if (data.status === 'success' && !data.data.migration_needed) {
-                    document.querySelector('.install-info').innerHTML = \`
+                    document.querySelector('.install-info').innerHTML = `
                         <h3>✅ Instalace již proběhla</h3>
                         <p style="margin: 10px 0 0 0; color: #666;">Všechny tabulky Admin Control Center jsou již vytvořeny.</p>
-                    \`;
+                    `;
 
                     document.getElementById('installBtn').textContent = '✅ Již nainstalováno';
                     document.getElementById('installBtn').disabled = true;
