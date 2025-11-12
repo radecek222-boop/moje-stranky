@@ -565,6 +565,10 @@ try {
 </div>
 
 <script>
+// Control Center Unified - Version Check
+console.log('%c🔧 Control Center v2025.11.12-1320 loaded', 'background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;');
+console.log('If you see old version, press Ctrl+Shift+R (hard refresh)');
+
 // Helper function to check if API response is successful
 function isSuccess(data) {
     return (data && (data.success === true || data.status === 'success'));
