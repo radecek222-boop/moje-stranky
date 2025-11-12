@@ -847,64 +847,7 @@ function loadClaimsModal() {
 
 function loadActionsModal() {
     const modalBody = document.getElementById('ccModalBody');
-
-    modalBody.innerHTML = `
-        <div class="cc-actions">
-            <button class="btn btn-sm" onclick="loadActionsModal()">Obnovit</button>
-        </div>
-        <div id="actionsTableContainer">Načítání úkolů...</div>
-    `;
-
-    // Load actions
-    fetch('api/control_center_api.php?action=get_pending_actions')
-        .then(r => {
-            if (!r.ok) {
-                if (r.status === 400 || r.status === 500) {
-                    return { success: true, actions: [] };
-                }
-                throw new Error(`HTTP ${r.status}`);
-            }
-            return r.json();
-        })
-        .then(data => {
-            const container = document.getElementById('actionsTableContainer');
-
-            if (isSuccess(data) && data.actions && data.actions.length > 0) {
-                let html = '<table class="cc-table"><thead><tr>';
-                html += '<th>Priorita</th><th>Název</th><th>Popis</th><th>Vytvořeno</th><th>Akce</th>';
-                html += '</tr></thead><tbody>';
-
-                data.actions.forEach(action => {
-                    const priorityColors = {
-                        'critical': '#DC3545',
-                        'high': '#FF6B6B',
-                        'medium': '#FFC107',
-                        'low': '#28A745'
-                    };
-                    html += '<tr>';
-                    html += `<td><span class="badge" style="background: ${priorityColors[action.priority]}; color: white;">${action.priority}</span></td>`;
-                    html += `<td><strong>${action.action_title}</strong></td>`;
-                    html += `<td>${action.action_description || '-'}</td>`;
-                    html += `<td>${new Date(action.created_at).toLocaleDateString('cs-CZ')}</td>`;
-                    html += `<td>`;
-                    html += `<button class="btn btn-sm btn-success" onclick="executeAction(${action.id})">Spustit akci</button> `;
-                    html += `<button class="btn btn-sm btn-secondary" onclick="dismissAction(${action.id})">Zrušit</button>`;
-                    html += `</td>`;
-                    html += '</tr>';
-                });
-
-                html += '</tbody></table>';
-                container.innerHTML = html;
-            } else if (isSuccess(data)) {
-                container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádné nevyřízené úkoly</p>';
-            } else {
-                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání</p>';
-            }
-        })
-        .catch(err => {
-            console.error('[Control Center] Actions load error:', err);
-            document.getElementById('actionsTableContainer').innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádné nevyřízené úkoly</p>';
-        });
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_actions&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Akce & Úkoly"></iframe></div>';
 }
 
 function loadDiagnosticsModal() {

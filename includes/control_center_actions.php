@@ -13,6 +13,7 @@ $pdo = getDbConnection();
 
 // Načtení pending actions
 $pendingActions = [];
+$tableExists = true;
 try {
     $stmt = $pdo->query("
         SELECT * FROM wgs_pending_actions
@@ -24,6 +25,10 @@ try {
     $pendingActions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $pendingActions = [];
+    // Zkontrolovat, jestli tabulka existuje
+    if (strpos($e->getMessage(), "doesn't exist") !== false || strpos($e->getMessage(), 'Table') !== false) {
+        $tableExists = false;
+    }
 }
 
 // Počty podle priority
@@ -86,7 +91,23 @@ function getPriorityBadge($priority) {
     <div class="control-detail-content">
 
         <!-- Summary -->
-        <?php if (count($pendingActions) > 0): ?>
+        <?php if (!$tableExists): ?>
+            <!-- Tabulka neexistuje - zobrazit setup button -->
+            <div class="cc-alert warning">
+                <div class="cc-alert-icon">⚠️</div>
+                <div class="cc-alert-content">
+                    <div class="cc-alert-title">Actions System není nastavený</div>
+                    <div class="cc-alert-message">
+                        Tabulka <code>wgs_pending_actions</code> neexistuje. Klikněte na tlačítko níže pro automatické nastavení systému akcí a úkolů.
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="cc-btn cc-btn-success" onclick="window.open('/setup_actions_system.php', '_blank', 'width=900,height=700')">
+                            🚀 Spustit setup Actions System
+                        </button>
+                    </div>
+                </div>
+            </div>
+        <?php elseif (count($pendingActions) > 0): ?>
             <div class="cc-alert warning">
                 <div class="cc-alert-icon">⚠️</div>
                 <div class="cc-alert-content">
