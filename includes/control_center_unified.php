@@ -591,8 +591,17 @@ function getCSRFToken() {
     }
 
     const token = metaTag.getAttribute('content');
-    console.log('CSRF token loaded:', token ? token.substring(0, 10) + '...' : 'empty');
-    return token;
+
+    // Ujistit se že token je string
+    const tokenStr = token ? String(token).trim() : null;
+
+    if (tokenStr) {
+        console.log('CSRF token loaded:', tokenStr.substring(0, 10) + '... (length: ' + tokenStr.length + ')');
+    } else {
+        console.error('CSRF token is empty');
+    }
+
+    return tokenStr;
 }
 
 // Open modal with specific section
@@ -984,11 +993,15 @@ function executeAction(actionId) {
     console.log('[executeAction] Starting with actionId:', actionId);
 
     const csrfToken = getCSRFToken();
-    console.log('[executeAction] CSRF token retrieved:', csrfToken ? csrfToken.substring(0, 10) + '...' : 'NULL');
+    console.log('[executeAction] CSRF token retrieved:', {
+        type: typeof csrfToken,
+        value: csrfToken && typeof csrfToken === 'string' ? csrfToken.substring(0, 10) + '...' : csrfToken,
+        length: csrfToken ? csrfToken.length : 0
+    });
 
-    if (!csrfToken) {
-        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
-        console.error('[executeAction] CSRF token is null - aborting');
+    if (!csrfToken || typeof csrfToken !== 'string' || csrfToken.length === 0) {
+        alert('Chyba: CSRF token nebyl nalezen nebo je neplatný. Obnovte stránku.');
+        console.error('[executeAction] CSRF token is invalid:', {type: typeof csrfToken, value: csrfToken});
         return;
     }
 
