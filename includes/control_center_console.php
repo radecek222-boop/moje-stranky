@@ -293,6 +293,8 @@ const DEBUG_MODE = false;
 
 let consoleOutput = [];
 let diagnosticsRunning = false;
+let totalErrors = 0;
+let totalWarnings = 0;
 
 // ============================================
 // CONSOLE OUTPUT FUNCTIONS
@@ -406,6 +408,10 @@ async function runDiagnostics() {
         document.getElementById('stat-' + stat).textContent = '—';
     });
 
+    // Reset error counters
+    totalErrors = 0;
+    totalWarnings = 0;
+
     logHeader('═══════════════════════════════════════════════════');
     logHeader('WGS SERVICE - KOMPLETNÍ DIAGNOSTIKA SYSTÉMU');
     logHeader('═══════════════════════════════════════════════════');
@@ -438,9 +444,15 @@ async function runDiagnostics() {
         logSuccess('DIAGNOSTIKA DOKONČENA');
         logHeader('═══════════════════════════════════════════════════');
 
+        // Update final statistics
+        document.getElementById('stat-errors').textContent = totalErrors;
+        document.getElementById('stat-warnings').textContent = totalWarnings;
+
     } catch (error) {
         logError('Kritická chyba diagnostiky: ' + error.message);
         console.error(error);
+        totalErrors++;
+        document.getElementById('stat-errors').textContent = totalErrors;
     } finally {
         diagnosticsRunning = false;
         btn.disabled = false;
@@ -477,23 +489,24 @@ async function checkPhpFiles() {
             } else {
                 // Není JSON - zobrazit raw text
                 if (!response.ok) {
-                    logError(`API vrátilo chybu (HTTP ${response.status}):`);
+                    logError(`API vrátilo chybu (HTTP ${response.status} ${response.statusText}):`);
+                    logError(`   📍 URL: /api/control_center_api.php?action=check_php_files`);
 
                     // Extrahovat chybovou zprávu z HTML pokud je to HTML
                     if (text.includes('<b>Fatal error</b>') || text.includes('<b>Parse error</b>')) {
                         // PHP Fatal error v HTML formátu
                         const match = text.match(/<b>(.*?)<\/b>:\s*(.*?)\s+in\s+<b>(.*?)<\/b>\s+on line\s+<b>(\d+)<\/b>/);
                         if (match) {
-                            logError(`${match[1]}: ${match[2]}`);
-                            logError(`📄 ${match[3]}:${match[4]}`);
+                            logError(`   💬 ${match[1]}: ${match[2]}`);
+                            logError(`   📄 ${match[3]}:${match[4]}`);
                         } else {
                             // Fallback - zobrazit začátek raw HTML
                             const stripped = text.replace(/<[^>]*>/g, '').substring(0, 300);
-                            logError(stripped);
+                            logError(`   💬 ${stripped}`);
                         }
                     } else {
                         // Plain text error
-                        logError(text.substring(0, 300));
+                        logError(`   💬 ${text.substring(0, 300)}`);
                     }
 
                     log('');
@@ -537,20 +550,25 @@ async function checkPhpFiles() {
                     }
                     log('─'.repeat(79));
                 });
+                totalErrors += errors.length;
             } else {
                 logSuccess('✓ Žádné PHP syntax errors');
             }
 
             if (warnings.length > 0) {
                 logWarning(`${warnings.length} upozornění`);
+                totalWarnings += warnings.length;
             }
         } else {
             logError('Nepodařilo se zkontrolovat PHP soubory: ' + (data.message || 'Unknown error'));
+            totalErrors++;
         }
     } catch (error) {
         logError('Chyba při kontrole PHP:');
-        logError('  ' + error.message);
-        logError('  Zkontrolujte, zda API soubor existuje a je dostupný');
+        logError(`   📍 URL: /api/control_center_api.php?action=check_php_files`);
+        logError(`   💬 ${error.message}`);
+        logError(`   ℹ️  Zkontrolujte, zda API soubor existuje a je dostupný`);
+        totalErrors++;
         if (DEBUG_MODE) console.error(error);
     }
 
@@ -579,18 +597,19 @@ async function checkJavaScriptFiles() {
                 data = JSON.parse(text);
                 isJson = true;
             } else if (!response.ok) {
-                logError(`API vrátilo chybu (HTTP ${response.status}):`);
+                logError(`API vrátilo chybu (HTTP ${response.status} ${response.statusText}):`);
+                logError(`   📍 URL: /api/control_center_api.php?action=check_js_errors`);
                 // Extrahovat chybu z HTML nebo zobrazit raw
                 if (text.includes('<b>Fatal error</b>') || text.includes('<b>Parse error</b>')) {
                     const match = text.match(/<b>(.*?)<\/b>:\s*(.*?)\s+in\s+<b>(.*?)<\/b>\s+on line\s+<b>(\d+)<\/b>/);
                     if (match) {
-                        logError(`${match[1]}: ${match[2]}`);
-                        logError(`📄 ${match[3]}:${match[4]}`);
+                        logError(`   💬 ${match[1]}: ${match[2]}`);
+                        logError(`   📄 ${match[3]}:${match[4]}`);
                     } else {
-                        logError(text.replace(/<[^>]*>/g, '').substring(0, 300));
+                        logError(`   💬 ${text.replace(/<[^>]*>/g, '').substring(0, 300)}`);
                     }
                 } else {
-                    logError(text.substring(0, 300));
+                    logError(`   💬 ${text.substring(0, 300)}`);
                 }
                 log('');
                 return;
@@ -633,15 +652,19 @@ async function checkJavaScriptFiles() {
                 if (recent_errors.length > 10) {
                     logWarning(`... a dalších ${recent_errors.length - 10} chyb`);
                 }
+                totalWarnings += error_count;
             } else {
                 logSuccess('✓ Žádné nedávné JavaScript errors');
             }
         } else {
             logError('Nepodařilo se zkontrolovat JavaScript: ' + (data.message || 'Unknown error'));
+            totalErrors++;
         }
     } catch (error) {
         logError('Chyba při kontrole JS:');
-        logError('  ' + error.message);
+        logError(`   📍 URL: /api/control_center_api.php?action=check_js_errors`);
+        logError(`   💬 ${error.message}`);
+        totalErrors++;
         if (DEBUG_MODE) console.error(error);
     }
 
@@ -672,18 +695,22 @@ async function checkDatabase() {
                 corrupted.forEach(table => {
                     logError(`  ${table}`);
                 });
+                totalErrors += corrupted.length;
             } else {
                 logSuccess('Všechny tabulky v pořádku (CHECK TABLE)');
             }
 
             if (missing_indexes && missing_indexes.length > 0) {
                 logWarning(`${missing_indexes.length} doporučených indexů chybí`);
+                totalWarnings += missing_indexes.length;
             }
         } else {
             logError('Nepodařilo se zkontrolovat databázi');
+            totalErrors++;
         }
     } catch (error) {
         logError('Chyba při kontrole DB: ' + error.message);
+        totalErrors++;
     }
 
     log('');
@@ -727,8 +754,20 @@ async function checkApiEndpoints() {
                 failedEndpoints.push(errorInfo);
 
                 logError(`✗ ${endpoint} - HTTP ${response.status} ${response.statusText}`);
+                logError(`   📍 URL: ${endpoint}?action=ping`);
                 if (responseText && responseText.length > 0) {
-                    logError(`   Response: ${responseText.substring(0, 150)}`);
+                    // Try to extract meaningful error from HTML or show raw text
+                    if (responseText.includes('<b>Fatal error</b>') || responseText.includes('<b>Parse error</b>')) {
+                        const match = responseText.match(/<b>(.*?)<\/b>:\s*(.*?)\s+in\s+<b>(.*?)<\/b>/);
+                        if (match) {
+                            logError(`   💬 ${match[1]}: ${match[2]}`);
+                            logError(`   📄 ${match[3]}`);
+                        } else {
+                            logError(`   💬 ${responseText.replace(/<[^>]*>/g, '').substring(0, 200)}`);
+                        }
+                    } else {
+                        logError(`   💬 ${responseText.substring(0, 200)}`);
+                    }
                 }
                 failedCount++;
             }
@@ -740,8 +779,9 @@ async function checkApiEndpoints() {
             failedEndpoints.push(errorInfo);
 
             logError(`✗ ${endpoint} - Network Error`);
-            logError(`   Důvod: ${error.message}`);
-            logError(`   (Možná CORS, timeout, nebo server neběží)`);
+            logError(`   📍 URL: ${endpoint}?action=ping`);
+            logError(`   💬 ${error.message}`);
+            logError(`   ℹ️  Možné příčiny: CORS policy, timeout, nebo server neběží`);
             failedCount++;
         }
     }
@@ -753,6 +793,7 @@ async function checkApiEndpoints() {
         logSuccess('✓ Všechny API endpointy fungují správně');
     } else {
         logWarning(`⚠ ${failedCount} API endpointů nefunguje - viz detaily výše`);
+        totalWarnings += failedCount;
     }
 
     log('');
@@ -777,8 +818,9 @@ async function checkErrorLogs() {
         if (data.status === 'success') {
             const { php_errors, js_errors, security_logs } = data.data;
 
-            let totalErrors = (php_errors?.length || 0) + (js_errors?.length || 0);
-            document.getElementById('stat-errors').textContent = totalErrors;
+            // Add errors from logs to total count
+            const logErrors = (php_errors?.length || 0) + (js_errors?.length || 0);
+            totalErrors += logErrors;
 
             // PHP ERRORS
             if (php_errors && php_errors.length > 0) {
@@ -866,12 +908,14 @@ async function checkErrorLogs() {
                 if (security_logs.length > 5) {
                     logWarning(`... a dalších ${security_logs.length - 5} security events`);
                 }
+                totalWarnings += security_logs.length;
             } else {
                 logSuccess('✓ Žádné security events (24h)');
             }
         }
     } catch (error) {
         logError('Nepodařilo se načíst logy: ' + error.message);
+        totalErrors++;
         if (DEBUG_MODE) console.error(error);
     }
 
@@ -902,12 +946,14 @@ async function checkFilePermissions() {
                 not_writable.forEach(dir => {
                     logError(`  ${dir}`);
                 });
+                totalErrors += not_writable.length;
             } else {
                 logSuccess('Všechna oprávnění v pořádku');
             }
         }
     } catch (error) {
         logWarning('Nepodařilo se zkontrolovat oprávnění: ' + error.message);
+        totalWarnings++;
     }
 
     log('');
@@ -932,30 +978,38 @@ async function checkSecurity() {
                 logSuccess('HTTPS aktivní');
             } else {
                 logError('HTTPS NENÍ aktivní');
+                totalErrors++;
             }
 
             if (checks.csrf_protection) {
                 logSuccess('CSRF ochrana aktivní');
+            } else {
+                totalWarnings++;
             }
 
             if (checks.rate_limiting) {
                 logSuccess('Rate limiting aktivní');
+            } else {
+                totalWarnings++;
             }
 
             if (checks.strong_passwords) {
                 logSuccess('Silná hesla vynucena');
             } else {
                 logWarning('Doporučujeme silnější hesla');
+                totalWarnings++;
             }
 
             if (checks.admin_keys_secure) {
                 logSuccess('Admin klíče zabezpečené');
             } else {
                 logError('Admin klíče NEJSOU zabezpečené!');
+                totalErrors++;
             }
         }
     } catch (error) {
         logWarning('Nepodařilo se zkontrolovat bezpečnost: ' + error.message);
+        totalWarnings++;
     }
 
     log('');
