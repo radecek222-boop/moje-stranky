@@ -444,34 +444,43 @@ try {
                     <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Konfigurace SMTP serveru</p>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <div>
-                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">SMTP Server</label>
-                            <input type="text" placeholder="smtp.gmail.com" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">SMTP Server *</label>
+                            <input type="text" id="smtp_host" placeholder="smtp.gmail.com" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                             <div>
                                 <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Port</label>
-                                <input type="text" placeholder="587" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                                <input type="text" id="smtp_port" placeholder="587" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                             </div>
                             <div>
                                 <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Šifrování</label>
-                                <select style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
-                                    <option>TLS</option>
-                                    <option>SSL</option>
+                                <select id="smtp_encryption" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                                    <option value="tls">TLS</option>
+                                    <option value="ssl">SSL</option>
+                                    <option value="none">Žádné</option>
                                 </select>
                             </div>
                         </div>
                         <div>
-                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Uživatelské jméno</label>
-                            <input type="text" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Uživatelské jméno *</label>
+                            <input type="text" id="smtp_username" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                         <div>
-                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Heslo</label>
-                            <input type="password" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Heslo *</label>
+                            <input type="password" id="smtp_password" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">FROM Email</label>
+                            <input type="email" id="smtp_from" placeholder="reklamace@wgs-service.cz" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">FROM Name</label>
+                            <input type="text" id="smtp_from_name" placeholder="White Glove Service" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                     </div>
                     <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-                        <button class="btn btn-sm" style="font-size: 0.7rem;">Test připojení</button>
-                        <button class="btn btn-sm btn-success" style="font-size: 0.7rem;">Uložit</button>
+                        <button class="btn btn-sm" id="testSmtpBtn" onclick="testSmtpConnection()" style="font-size: 0.7rem;">Test připojení</button>
+                        <button class="btn btn-sm btn-success" id="saveSmtpBtn" onclick="saveSmtpConfig()" style="font-size: 0.7rem;">Uložit</button>
                     </div>
                 </div>
             `,
@@ -543,6 +552,11 @@ try {
         // Nastavit obsah
         setTimeout(() => {
             body.innerHTML = content[type] || '<p>Obsah nebyl nalezen</p>';
+
+            // Pro SMTP nastavení načíst data z databáze
+            if (type === 'smtp-settings' && typeof loadSmtpConfig === 'function') {
+                setTimeout(() => loadSmtpConfig(), 100);
+            }
         }, 300);
     }
 
@@ -742,6 +756,7 @@ try {
 <script src="assets/js/logger.js"></script>
 <script src="assets/js/utils.js"></script>
 <script src="assets/js/admin-notifications.js"></script>
+<script src="assets/js/smtp-config.js"></script>
 <script src="assets/js/admin.js"></script>
 
 <!-- MODAL: Edit Notification -->

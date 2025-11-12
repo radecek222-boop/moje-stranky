@@ -403,6 +403,133 @@ try {
             break;
 
         // ==========================================
+        // SMTP CONFIGURATION
+        // ==========================================
+        case 'get_smtp_config':
+            // Načíst SMTP nastavení z databáze
+            $stmt = $pdo->prepare("
+                SELECT config_key, config_value, is_sensitive
+                FROM wgs_system_config
+                WHERE config_group = 'email'
+                ORDER BY config_key
+            ");
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $smtpConfig = [];
+            foreach ($rows as $row) {
+                // Pro citlivé údaje vracíme placeholder pokud jsou vyplněné
+                if ($row['is_sensitive'] && !empty($row['config_value'])) {
+                    $smtpConfig[$row['config_key']] = '••••••••';
+                } else {
+                    $smtpConfig[$row['config_key']] = $row['config_value'];
+                }
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'data' => $smtpConfig
+            ]);
+            break;
+
+        case 'save_smtp_config':
+            // Uložit SMTP nastavení
+            $smtpHost = $data['smtp_host'] ?? '';
+            $smtpPort = $data['smtp_port'] ?? '587';
+            $smtpUsername = $data['smtp_username'] ?? '';
+            $smtpPassword = $data['smtp_password'] ?? '';
+            $smtpEncryption = $data['smtp_encryption'] ?? 'tls';
+            $smtpFrom = $data['smtp_from'] ?? 'reklamace@wgs-service.cz';
+            $smtpFromName = $data['smtp_from_name'] ?? 'White Glove Service';
+
+            // Pokud je password placeholder, necháme původní hodnotu
+            if ($smtpPassword === '••••••••') {
+                $smtpPassword = null; // Nebude se updatovat
+            }
+
+            $userId = $_SESSION['user_id'] ?? null;
+
+            // Update jednotlivých hodnot
+            $configs = [
+                'smtp_host' => $smtpHost,
+                'smtp_port' => $smtpPort,
+                'smtp_username' => $smtpUsername,
+                'smtp_encryption' => $smtpEncryption,
+                'smtp_from' => $smtpFrom,
+                'smtp_from_name' => $smtpFromName
+            ];
+
+            // Přidat password pouze pokud není placeholder
+            if ($smtpPassword !== null) {
+                $configs['smtp_password'] = $smtpPassword;
+            }
+
+            $stmt = $pdo->prepare("
+                UPDATE wgs_system_config
+                SET config_value = :value,
+                    updated_at = CURRENT_TIMESTAMP,
+                    updated_by = :user_id
+                WHERE config_key = :key
+            ");
+
+            foreach ($configs as $key => $value) {
+                $stmt->execute([
+                    'key' => $key,
+                    'value' => $value,
+                    'user_id' => $userId
+                ]);
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'SMTP konfigurace uložena'
+            ]);
+            break;
+
+        case 'test_smtp_connection':
+            // Test SMTP připojení
+            // Načíst aktuální SMTP nastavení
+            $stmt = $pdo->prepare("
+                SELECT config_key, config_value
+                FROM wgs_system_config
+                WHERE config_group = 'email' AND config_key IN ('smtp_host', 'smtp_port', 'smtp_username', 'smtp_password', 'smtp_encryption')
+            ");
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $config = [];
+            foreach ($rows as $row) {
+                $config[$row['config_key']] = $row['config_value'];
+            }
+
+            // Kontrola že jsou vyplněné všechny údaje
+            if (empty($config['smtp_host']) || empty($config['smtp_username']) || empty($config['smtp_password'])) {
+                throw new Exception('SMTP údaje nejsou kompletně vyplněné');
+            }
+
+            // Pro základní test použijeme PHPMailer nebo fsockopen
+            $host = $config['smtp_host'];
+            $port = intval($config['smtp_port'] ?? 587);
+            $timeout = 10;
+
+            // Pokus o připojení
+            $errno = 0;
+            $errstr = '';
+            $socket = @fsockopen($host, $port, $errno, $errstr, $timeout);
+
+            if (!$socket) {
+                throw new Exception("Nelze se připojit k SMTP serveru: $errstr ($errno)");
+            }
+
+            fclose($socket);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => "Připojení k SMTP serveru {$host}:{$port} proběhlo úspěšně"
+            ]);
+            break;
+
+        // ==========================================
         // TEST EMAIL
         // ==========================================
         case 'send_test_email':
