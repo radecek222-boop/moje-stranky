@@ -11,7 +11,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 .testing-simulator {
     max-width: 1200px;
     margin: <?= $embedMode ? '0' : '2rem' ?> auto;
-    padding: 1.5rem;
+    padding: <?= $embedMode ? '0.5rem' : '1.5rem' ?>;
 }
 
 /* Progress visualization */
@@ -19,8 +19,8 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 0.5rem;
-    margin-bottom: 2rem;
-    padding: 1rem;
+    margin-bottom: <?= $embedMode ? '1rem' : '2rem' ?>;
+    padding: <?= $embedMode ? '0.75rem' : '1rem' ?>;
     background: var(--c-bg);
     border: 2px solid var(--c-border);
     border-radius: 4px;
@@ -101,8 +101,8 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
     background: white;
     border: 2px solid var(--c-border);
     border-radius: 4px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: <?= $embedMode ? '0.75rem' : '1.5rem' ?>;
+    margin-bottom: <?= $embedMode ? '0.75rem' : '1.5rem' ?>;
     display: none;
 }
 
@@ -132,7 +132,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 }
 
 .stage-title {
-    font-size: 1.2rem;
+    font-size: <?= $embedMode ? '0.9rem' : '1.2rem' ?>;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;

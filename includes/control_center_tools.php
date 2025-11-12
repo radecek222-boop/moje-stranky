@@ -114,26 +114,26 @@ $hasCreatedBy = $stmt->fetchColumn();
 .tools-container {
     max-width: 1200px;
     margin: <?= $embedMode ? '0' : '2rem' ?> auto;
-    padding: <?= $embedMode ? '1rem' : '2rem' ?>;
+    padding: <?= $embedMode ? '0.5rem' : '2rem' ?>;
 }
 
 .tools-section {
     background: var(--c-white);
     border: 1px solid var(--c-border);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: <?= $embedMode ? '0.75rem' : '1.5rem' ?>;
+    margin-bottom: <?= $embedMode ? '0.75rem' : '1.5rem' ?>;
     border-radius: 4px;
 }
 
 .tools-section h3 {
-    margin: 0 0 1rem 0;
-    font-size: 1.1rem;
+    margin: 0 0 <?= $embedMode ? '0.5rem' : '1rem' ?> 0;
+    font-size: <?= $embedMode ? '0.85rem' : '1.1rem' ?>;
     font-weight: 700;
     text-transform: uppercase;
     color: var(--c-black);
     letter-spacing: 0.05em;
-    border-left: 4px solid var(--c-success);
-    padding-left: 1rem;
+    border-left: 3px solid var(--c-success);
+    padding-left: 0.75rem;
 }
 
 .status-box {
