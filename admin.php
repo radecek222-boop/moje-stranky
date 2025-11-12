@@ -725,35 +725,35 @@ try {
       
       <div class="form-group">
         <label class="form-label">Jméno *</label>
-        <input type="text" class="form-input" id="add-name">
+        <input type="text" class="form-input" id="add-name" required minlength="2">
       </div>
-      
+
       <div class="form-group">
         <label class="form-label">Email *</label>
-        <input type="email" class="form-input" id="add-email">
+        <input type="email" class="form-input" id="add-email" required>
       </div>
-      
+
       <div class="form-group">
         <label class="form-label">Telefon</label>
         <input type="tel" class="form-input" id="add-phone">
       </div>
-      
+
       <div class="form-group">
         <label class="form-label">Adresa</label>
         <input type="text" class="form-input" id="add-address">
       </div>
-      
+
       <div class="form-group">
         <label class="form-label">Role *</label>
-        <select class="form-select" id="add-role">
+        <select class="form-select" id="add-role" required>
           <option value="prodejce">Prodejce</option>
           <option value="technik">Technik</option>
         </select>
       </div>
-      
+
       <div class="form-group">
         <label class="form-label">Heslo * (min. 8 znaků)</label>
-        <input type="password" class="form-input" id="add-password">
+        <input type="password" class="form-input" id="add-password" required minlength="8">
       </div>
     </div>
     <div class="modal-footer" style="padding: 1.5rem 2rem; border-top: 1px solid #ddd; flex-shrink: 0;">

@@ -828,11 +828,18 @@ try {
             $allTables = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
             foreach ($allTables as $table) {
+                // Validace názvu tabulky (bezpečnostní opatření)
+                if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+                    continue; // Přeskočit neplatné názvy
+                }
+
                 $tables[] = $table;
 
                 // CHECK TABLE pro kontrolu integrity
                 try {
-                    $checkStmt = $pdo->query("CHECK TABLE `$table`");
+                    // Escape identifikátor pro bezpečnost (i když pochází z SHOW TABLES)
+                    $escapedTable = '`' . str_replace('`', '``', $table) . '`';
+                    $checkStmt = $pdo->query("CHECK TABLE $escapedTable");
                     $result = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
                     if (stripos($result['Msg_text'], 'OK') === false) {
