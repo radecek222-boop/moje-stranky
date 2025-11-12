@@ -278,6 +278,28 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
                 </div>
             </div>
 
+            <!-- Create Backup -->
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">💾 Vytvořit zálohu databáze</div>
+                    <div class="setting-item-description">Automaticky zazálohuje celou databázi (komprimováno .gz)</div>
+                </div>
+                <div class="setting-item-right">
+                    <button class="cc-btn cc-btn-sm cc-btn-success" onclick="createBackup()">Vytvořit backup</button>
+                </div>
+            </div>
+
+            <!-- View Backups -->
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">📦 Správa záloh</div>
+                    <div class="setting-item-description">Zobrazit, stáhnout nebo smazat staré zálohy</div>
+                </div>
+                <div class="setting-item-right">
+                    <button class="cc-btn cc-btn-sm cc-btn-secondary" onclick="viewBackups()">Spravovat</button>
+                </div>
+            </div>
+
             <!-- Setup Actions System -->
             <div class="setting-item">
                 <div class="setting-item-left">
@@ -381,6 +403,71 @@ async function optimizeDatabase() {
     } finally {
         btn.textContent = originalText;
         btn.disabled = false;
+    }
+}
+
+async function createBackup() {
+    if (!confirm('💾 Vytvořit zálohu databáze?\n\nTato akce může trvat několik minut v závislosti na velikosti databáze.')) {
+        return;
+    }
+
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.textContent = '⏳ Vytvářím backup...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('/api/backup_api.php?action=create_backup', {
+            method: 'POST'
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            alert(`✅ Záloha vytvořena!\n\nSoubor: ${result.data.filename}\nVelikost: ${result.data.size}\nTabulek: ${result.data.tables}\nZáznamů: ${result.data.rows}\nČas: ${result.data.execution_time_ms}ms`);
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        alert('❌ Chyba: ' + error.message);
+    } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+    }
+}
+
+async function viewBackups() {
+    try {
+        const response = await fetch('/api/backup_api.php?action=list_backups');
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            const backups = result.data.backups;
+
+            if (backups.length === 0) {
+                alert('📦 Žádné zálohy nenalezeny.\n\nKlikněte na "Vytvořit backup" pro vytvoření první zálohy.');
+                return;
+            }
+
+            let message = `📦 Zálohy databáze (celkem: ${result.data.total})\n\n`;
+            backups.slice(0, 10).forEach((backup, index) => {
+                message += `${index + 1}. ${backup.filename}\n`;
+                message += `   Velikost: ${backup.size} | Stáří: ${backup.age_days} dní\n`;
+                message += `   Vytvořeno: ${backup.created}\n\n`;
+            });
+
+            if (backups.length > 10) {
+                message += `... a dalších ${backups.length - 10} záloh\n\n`;
+            }
+
+            message += '\nPro stažení nebo smazání záloh použijte File Manager v /backups/';
+
+            alert(message);
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        alert('❌ Chyba: ' + error.message);
     }
 }
 

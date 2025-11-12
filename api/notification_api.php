@@ -10,6 +10,13 @@ require_once __DIR__ . '/../includes/csrf_helper.php';
 header('Content-Type: application/json');
 
 try {
+    // Health check ping - bez autentizace
+    $action = $_GET['action'] ?? '';
+    if ($action === 'ping') {
+        echo json_encode(['status' => 'ok', 'api' => 'notification', 'timestamp' => time()]);
+        exit;
+    }
+
     // BEZPEČNOST: Pouze admin
     $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
     if (!$isAdmin) {
@@ -44,9 +51,6 @@ try {
         ]);
         exit;
     }
-
-    // Načtení akce
-    $action = $_GET['action'] ?? '';
 
     $pdo = getDbConnection();
 
@@ -145,10 +149,6 @@ try {
                 'status' => 'success',
                 'message' => 'Šablona notifikace aktualizována'
             ]);
-            break;
-
-        case 'ping':
-            echo json_encode(['status' => 'success', 'message' => 'pong', 'timestamp' => time()]);
             break;
 
         default:
