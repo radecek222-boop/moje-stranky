@@ -830,7 +830,7 @@ function loadDiagnosticsModal() {
 
 function loadTestingModal() {
     const modalBody = document.getElementById('ccModalBody');
-    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_testing_simulator&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Testovací prostředí"></iframe></div>';
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_testing_interactive&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Testovací prostředí"></iframe></div>';
 }
 
 function loadAppearanceModal() {
