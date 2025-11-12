@@ -134,8 +134,8 @@ async function testSmtpConnection() {
     testBtn.textContent = 'Testování...';
 
     try {
-        // Získat CSRF token PŘED vytvořením objektu
-        const csrfToken = getCSRFToken();
+        // Získat CSRF token PŘED vytvořením objektu (ASYNC!)
+        const csrfToken = await getCSRFToken();
 
         console.log('[SMTP Test Debug] CSRF token type:', typeof csrfToken);
         console.log('[SMTP Test Debug] CSRF token value:', csrfToken);

@@ -3,6 +3,15 @@
  */
 
 // ============================================================
+// SAFE LOGGER WRAPPER (for Safari compatibility)
+// ============================================================
+const safeLogger = {
+  log: (...args) => typeof logger !== 'undefined' ? logger.log(...args) : console.log(...args),
+  error: (...args) => typeof logger !== 'undefined' ? logger.error(...args) : console.error(...args),
+  warn: (...args) => typeof logger !== 'undefined' ? logger.warn(...args) : console.warn(...args)
+};
+
+// ============================================================
 // CSRF TOKEN HELPER
 // ============================================================
 window.csrfTokenCache = window.csrfTokenCache || null;
@@ -16,7 +25,7 @@ async function getCSRFToken() {
     window.csrfTokenCache = data.token;
     return data.token;
   } catch (err) {
-    logger.error("Chyba získání CSRF tokenu:", err);
+    safeLogger.error("Chyba získání CSRF tokenu:", err);
     return null;
   }
 }
@@ -36,7 +45,7 @@ function redirectToLogin(redirectTarget = '') {
 // TAB MANAGEMENT
 // ============================================================
 function initAdminPanel() {
-  logger.log('✅ Admin panel initialized');
+  safeLogger.log('✅ Admin panel initialized');
   setupNavigation();
   initKeyManagement();
   initUserManagement();
@@ -49,7 +58,7 @@ if (document.readyState === 'loading') {
   initAdminPanel();
 }
 
-logger.log('✅ admin.js loaded');
+safeLogger.log('✅ admin.js loaded');
 
 // ============================================================
 // NAVIGATION - data-navigate buttons

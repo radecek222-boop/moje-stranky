@@ -47,10 +47,10 @@ window.addEventListener('unhandledrejection', function(event) {
 });
 
 // Console error override pro zachycení console.error volání
-const originalConsoleError = console.error;
+const originalConsoleError = console.error.bind(console);
 console.error = function(...args) {
-    // Zavolat původní console.error
-    originalConsoleError.apply(console, args);
+    // Zavolat původní console.error (už má správný kontext díky bind)
+    originalConsoleError(...args);
 
     // Pokud je první argument Error objekt, zobrazit detail
     if (args[0] instanceof Error) {
