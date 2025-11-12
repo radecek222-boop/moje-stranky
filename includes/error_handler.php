@@ -454,9 +454,10 @@ function displayErrorHTML($error) {
 
         <script>
         function copyErrorReport() {
+            const separator = '='.repeat(80);
             const report = `
 🔴 WGS ERROR REPORT
-${'='.repeat(80)}
+${separator}
 Type: <?= addslashes($error['type']) ?>
 
 Message: <?= addslashes($error['message']) ?>
@@ -467,7 +468,7 @@ Line: <?= $error['line'] ?>
 
 <?php if (!empty($error['backtrace'])): ?>
 Stack Trace:
-<?= '-'.repeat(80) ?>
+<?= str_repeat('-', 80) ?>
 
 <?php foreach ($error['backtrace'] as $i => $trace): ?>
 #<?= $i ?> <?= isset($trace['class']) ? addslashes($trace['class'] . $trace['type']) : '' ?><?= addslashes($trace['function'] ?? 'unknown') ?>()
@@ -476,7 +477,7 @@ Stack Trace:
 <?php endforeach; ?>
 <?php endif; ?>
 Request Info:
-<?= '-'.repeat(80) ?>
+<?= str_repeat('-', 80) ?>
 
 URL: <?= addslashes($_SERVER['REQUEST_URI'] ?? 'N/A') ?>
 
@@ -484,7 +485,7 @@ Method: <?= addslashes($_SERVER['REQUEST_METHOD'] ?? 'N/A') ?>
 
 Time: <?= date('Y-m-d H:i:s') ?>
 
-${'='.repeat(80)}
+${separator}
             `.trim();
 
             navigator.clipboard.writeText(report).then(() => {
