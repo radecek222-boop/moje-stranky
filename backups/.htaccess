@@ -1,0 +1,7 @@
+# Deny all access to backup files
+Deny from all
+
+# Alternative for Apache 2.4+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>

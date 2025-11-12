@@ -1341,7 +1341,11 @@ async function checkDependencies() {
                         totalWarnings += composer.outdated.length;
                     }
                 } else {
-                    logWarning('composer.json nenalezen');
+                    if (composer.legacy_mode) {
+                        log('⚠ Composer not in use (legacy mode)');
+                    } else {
+                        logWarning('composer.json nenalezen');
+                    }
                 }
             }
 
@@ -1355,7 +1359,11 @@ async function checkDependencies() {
                         totalErrors += npm.vulnerabilities;
                     }
                 } else {
-                    logWarning('package.json nenalezen');
+                    if (npm.legacy_mode) {
+                        log('⚠ NPM not in use (legacy mode)');
+                    } else {
+                        logWarning('package.json nenalezen');
+                    }
                 }
             }
         }

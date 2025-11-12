@@ -1232,10 +1232,14 @@ try {
                 $composerData = [
                     'exists' => true,
                     'packages' => isset($json['require']) ? count($json['require']) : 0,
-                    'outdated' => []
+                    'outdated' => [],
+                    'legacy_mode' => false
                 ];
             } else {
-                $composerData = ['exists' => false];
+                $composerData = [
+                    'exists' => false,
+                    'legacy_mode' => true  // Project doesn't use Composer
+                ];
             }
 
             // Check package.json
@@ -1245,10 +1249,14 @@ try {
                     'exists' => true,
                     'packages' => (isset($json['dependencies']) ? count($json['dependencies']) : 0) +
                                   (isset($json['devDependencies']) ? count($json['devDependencies']) : 0),
-                    'vulnerabilities' => 0
+                    'vulnerabilities' => 0,
+                    'legacy_mode' => false
                 ];
             } else {
-                $npmData = ['exists' => false];
+                $npmData = [
+                    'exists' => false,
+                    'legacy_mode' => true  // Project doesn't use NPM
+                ];
             }
 
             echo json_encode([
@@ -1645,8 +1653,15 @@ try {
             $pageTitles = [];
 
             foreach ($phpPages as $page) {
+                $basename = basename($page);
+
                 // Skip non-frontend pages
-                if (in_array(basename($page), ['login.php', 'init.php', 'config.php', 'db_connect.php'])) {
+                if (in_array($basename, ['login.php', 'init.php', 'config.php', 'db_connect.php'])) {
+                    continue;
+                }
+
+                // Skip debug/test/install files
+                if (preg_match('/^(debug_|test_|install_|setup_|migration_)/', $basename)) {
                     continue;
                 }
 
