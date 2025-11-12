@@ -835,17 +835,17 @@ function loadTestingModal() {
 
 function loadAppearanceModal() {
     const modalBody = document.getElementById('ccModalBody');
-    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_appearance&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Vzhled & Design"></iframe></div>';
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_appearance&embed=1" title="Vzhled & Design"></iframe></div>';
 }
 
 function loadContentModal() {
     const modalBody = document.getElementById('ccModalBody');
-    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_content&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Obsah & Texty"></iframe></div>';
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_content&embed=1" title="Obsah & Texty"></iframe></div>';
 }
 
 function loadConfigModal() {
     const modalBody = document.getElementById('ccModalBody');
-    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_configuration&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Konfigurace systému"></iframe></div>';
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_configuration&embed=1" title="Konfigurace systému"></iframe></div>';
 }
 
 // === ACTION HANDLERS ===
