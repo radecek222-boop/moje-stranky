@@ -5,6 +5,31 @@
 
 let smtpConfigData = {};
 
+// Helper pro zobrazení notifikací
+function showNotification(type, message) {
+    console.log(`[${type.toUpperCase()}] ${message}`);
+
+    // Vytvořit toast notifikaci
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed; top: 20px; right: 20px; padding: 15px 20px;
+        border-radius: 4px; color: white; font-family: sans-serif;
+        font-size: 14px; z-index: 10000; max-width: 350px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+
+    const colors = { success: '#28a745', error: '#dc3545', warning: '#ffc107', info: '#17a2b8' };
+    toast.style.backgroundColor = colors[type] || colors.info;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
 // Načíst SMTP konfiguraci
 async function loadSmtpConfig() {
     try {
