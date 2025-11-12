@@ -10,6 +10,9 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 }
 
 $pdo = getDbConnection();
+
+// Detect embed mode for iframe contexts
+$embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 ?>
 
 <link rel="stylesheet" href="/assets/css/control-center.css">
@@ -204,6 +207,7 @@ $pdo = getDbConnection();
 
 <div class="control-detail active">
     <!-- Header -->
+    <?php if (!$embedMode): ?>
     <div class="control-detail-header">
         <button class="control-detail-back" onclick="window.location.href='admin.php?tab=control_center'">
             <span>‹</span>
@@ -211,8 +215,9 @@ $pdo = getDbConnection();
         </button>
         <h2 class="control-detail-title">💻 Konzole</h2>
     </div>
+    <?php endif; ?>
 
-    <div class="control-detail-content">
+    <div class="control-detail-content" style="<?= $embedMode ? 'padding-top: 1rem;' : '' ?>">
 
         <!-- Alert -->
         <div class="cc-alert info">
