@@ -20,9 +20,6 @@ $totalClaims = $stmt->fetchColumn();
 $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_users");
 $totalUsers = $stmt->fetchColumn();
 
-$stmt = $pdo->query("SELECT COUNT(DISTINCT user_id) FROM wgs_sessions WHERE last_activity >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
-$onlineUsers = $stmt->fetchColumn();
-
 $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_registration_keys WHERE is_active = 1");
 $activeKeys = $stmt->fetchColumn();
 
