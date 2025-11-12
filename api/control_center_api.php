@@ -87,8 +87,16 @@ try {
         }
     }
 
-    // Pokud některé tabulky chybí a action není diagnostika, vrátit info
-    if (!empty($missingTables) && !in_array($action, ['check_php_files', 'get_diagnostics'])) {
+    // Actions které VYŽADUJÍ existenci tabulek
+    $actionsRequiringTables = [
+        'save_theme', 'get_pending_actions', 'execute_action', 'complete_action', 'dismiss_action',
+        'get_content_texts', 'save_content_text',
+        'get_system_config', 'save_system_config', 'get_smtp_config', 'save_smtp_config',
+        'test_smtp_connection', 'send_test_email'
+    ];
+
+    // Pokud tabulky chybí a action je v seznamu vyžadujících tabulky, vrátit info
+    if (!empty($missingTables) && in_array($action, $actionsRequiringTables)) {
         http_response_code(503); // Service Unavailable
         echo json_encode([
             'status' => 'error',
