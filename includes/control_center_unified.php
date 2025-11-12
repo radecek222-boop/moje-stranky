@@ -517,12 +517,6 @@ try {
             <div class="cc-card-description">Nevyřešené úkoly a plánované akce</div>
         </div>
 
-        <!-- Diagnostika -->
-        <div class="cc-card cc-card-diagnostics" onclick="openCCModal('diagnostics')">
-            <div class="cc-card-title">Diagnostika</div>
-            <div class="cc-card-description">Nástroje, logy a system health</div>
-        </div>
-
         <!-- Konzole -->
         <div class="cc-card cc-card-console" onclick="openCCModal('console')">
             <div class="cc-card-title">💻 Konzole</div>

@@ -231,15 +231,43 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
             </div>
         </div>
 
+        <!-- System Info -->
+        <div class="console-stats" id="console-system-info" style="display: none; margin-bottom: 1rem;">
+            <div class="console-stat-card">
+                <div class="console-stat-label">PHP Verze</div>
+                <div class="console-stat-value success" id="stat-php-version">—</div>
+            </div>
+            <div class="console-stat-card">
+                <div class="console-stat-label">Disk Space</div>
+                <div class="console-stat-value success" id="stat-disk">—</div>
+            </div>
+            <div class="console-stat-card">
+                <div class="console-stat-label">Memory Limit</div>
+                <div class="console-stat-value success" id="stat-memory">—</div>
+            </div>
+            <div class="console-stat-card">
+                <div class="console-stat-label">Max Upload</div>
+                <div class="console-stat-value success" id="stat-upload">—</div>
+            </div>
+        </div>
+
         <!-- Statistics -->
         <div class="console-stats" id="console-stats" style="display: none;">
             <div class="console-stat-card">
-                <div class="console-stat-label">PHP Soubory</div>
+                <div class="console-stat-label">HTML/PHP Stránky</div>
+                <div class="console-stat-value success" id="stat-html">—</div>
+            </div>
+            <div class="console-stat-card">
+                <div class="console-stat-label">PHP Backend</div>
                 <div class="console-stat-value success" id="stat-php">—</div>
             </div>
             <div class="console-stat-card">
-                <div class="console-stat-label">JavaScript Soubory</div>
+                <div class="console-stat-label">JavaScript</div>
                 <div class="console-stat-value success" id="stat-js">—</div>
+            </div>
+            <div class="console-stat-card">
+                <div class="console-stat-label">CSS/Assets</div>
+                <div class="console-stat-value success" id="stat-css">—</div>
             </div>
             <div class="console-stat-card">
                 <div class="console-stat-label">SQL Tabulky</div>
@@ -272,6 +300,15 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
                     </button>
                     <button class="console-btn" id="btn-export" onclick="exportLog()" disabled>
                         💾 Export
+                    </button>
+                    <button class="console-btn" onclick="clearCacheMaintenance()" title="Vymazat cache">
+                        🔄 Cache
+                    </button>
+                    <button class="console-btn" onclick="optimizeDatabaseMaintenance()" title="Optimalizovat databázi">
+                        ⚡ Optimize DB
+                    </button>
+                    <button class="console-btn" onclick="archiveLogsMaintenance()" title="Archivovat staré logy">
+                        📜 Archive
                     </button>
                 </div>
             </div>
@@ -402,9 +439,10 @@ async function runDiagnostics() {
 
     // Show stats
     document.getElementById('console-stats').style.display = 'grid';
+    document.getElementById('console-system-info').style.display = 'grid';
 
     // Reset stats
-    ['php', 'js', 'sql', 'api', 'errors', 'warnings'].forEach(stat => {
+    ['html', 'php', 'js', 'css', 'sql', 'api', 'errors', 'warnings', 'php-version', 'disk', 'memory', 'upload'].forEach(stat => {
         document.getElementById('stat-' + stat).textContent = '—';
     });
 
@@ -418,26 +456,44 @@ async function runDiagnostics() {
     log('');
 
     try {
-        // 1. PHP Files Check
+        // 0. System Info
+        await checkSystemInfo();
+
+        // 1. HTML/PHP Pages Check
+        await checkHtmlPages();
+
+        // 2. PHP Backend Files Check
         await checkPhpFiles();
 
-        // 2. JavaScript Files Check
+        // 3. JavaScript Files Check
         await checkJavaScriptFiles();
 
-        // 3. SQL Database Check
+        // 4. CSS/Assets Check
+        await checkAssets();
+
+        // 5. SQL Database Check
         await checkDatabase();
 
-        // 4. API Endpoints Check
+        // 6. API Endpoints Check
         await checkApiEndpoints();
 
-        // 5. Error Logs Check
+        // 7. Error Logs Check
         await checkErrorLogs();
 
-        // 6. File Permissions
+        // 8. File Permissions
         await checkFilePermissions();
 
-        // 7. Security Check
+        // 9. Security Check
         await checkSecurity();
+
+        // 10. Dependencies Check
+        await checkDependencies();
+
+        // 11. Configuration Check
+        await checkConfiguration();
+
+        // 12. Git Status
+        await checkGitStatus();
 
         log('');
         logHeader('═══════════════════════════════════════════════════');
@@ -1010,6 +1066,375 @@ async function checkSecurity() {
     } catch (error) {
         logWarning('Nepodařilo se zkontrolovat bezpečnost: ' + error.message);
         totalWarnings++;
+    }
+
+    log('');
+}
+
+// ============================================
+// NEW CHECK FUNCTIONS
+// ============================================
+
+async function checkSystemInfo() {
+    logHeader('0. SYSTÉMOVÉ INFORMACE');
+    log('Načítám informace o serveru...');
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=get_system_info', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const info = data.data;
+
+            // Update stat cards
+            document.getElementById('stat-php-version').textContent = info.php_version || '—';
+            document.getElementById('stat-disk').textContent = info.disk_usage || '—';
+            document.getElementById('stat-memory').textContent = info.memory_limit || '—';
+            document.getElementById('stat-upload').textContent = info.max_upload || '—';
+
+            logSuccess(`PHP: ${info.php_version}`);
+            logSuccess(`Disk Space: ${info.disk_usage}`);
+            logSuccess(`Memory Limit: ${info.memory_limit}`);
+            logSuccess(`Max Upload: ${info.max_upload}`);
+
+            if (info.extensions) {
+                logSuccess(`PHP Extensions: ${info.extensions.length} loaded`);
+            }
+        }
+    } catch (error) {
+        logWarning('Nepodařilo se načíst systémové informace: ' + error.message);
+    }
+
+    log('');
+}
+
+async function checkHtmlPages() {
+    logHeader('1. HTML/PHP STRÁNKY (Frontend)');
+    log('Kontroluji HTML/PHP stránky...');
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=check_html_pages', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const { total, errors, warnings } = data.data;
+            document.getElementById('stat-html').textContent = total;
+
+            logSuccess(`Nalezeno ${total} HTML/PHP stránek`);
+
+            if (errors && errors.length > 0) {
+                logError(`Nalezeno ${errors.length} chyb:`);
+                log('═'.repeat(79));
+                errors.slice(0, 10).forEach(err => {
+                    logError(`📄 ${err.file}`);
+                    logError(`   💬 ${err.error.substring(0, 200)}`);
+                    log('─'.repeat(79));
+                });
+                if (errors.length > 10) {
+                    logError(`... a dalších ${errors.length - 10} chyb`);
+                }
+                totalErrors += errors.length;
+            } else {
+                logSuccess('✓ Žádné chyby v HTML/PHP stránkách');
+            }
+
+            if (warnings && warnings.length > 0) {
+                logWarning(`${warnings.length} upozornění`);
+                totalWarnings += warnings.length;
+            }
+        }
+    } catch (error) {
+        logError('Chyba při kontrole HTML/PHP stránek:');
+        logError(`   💬 ${error.message}`);
+        totalErrors++;
+    }
+
+    log('');
+}
+
+async function checkAssets() {
+    logHeader('4. CSS/ASSETS');
+    log('Kontroluji CSS, obrázky a další assets...');
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=check_assets', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const { css_files, images, total_size, errors } = data.data;
+            document.getElementById('stat-css').textContent = css_files || 0;
+
+            logSuccess(`CSS souborů: ${css_files || 0}`);
+            logSuccess(`Obrázků: ${images || 0}`);
+            logSuccess(`Celková velikost: ${total_size || '0 B'}`);
+
+            if (errors && errors.length > 0) {
+                logError(`Nalezeno ${errors.length} chyb v assets:`);
+                errors.forEach(err => {
+                    logError(`  ${err}`);
+                });
+                totalErrors += errors.length;
+            } else {
+                logSuccess('✓ Všechny assets v pořádku');
+            }
+        }
+    } catch (error) {
+        logError('Chyba při kontrole assets:');
+        logError(`   💬 ${error.message}`);
+        totalErrors++;
+    }
+
+    log('');
+}
+
+// ============================================
+// MAINTENANCE FUNCTIONS
+// ============================================
+
+async function clearCacheMaintenance() {
+    if (!confirm('Vymazat cache? Tato akce může dočasně zpomalit systém.')) {
+        return;
+    }
+
+    logHeader('🔄 CLEAR CACHE');
+    log('Mazání cache...');
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=clear_cache', {
+            method: 'POST',
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            logSuccess('✓ Cache byla úspěšně vymazána!');
+        } else {
+            logError('Chyba při mazání cache: ' + (data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        logError('Chyba: ' + error.message);
+    }
+
+    log('');
+}
+
+async function optimizeDatabaseMaintenance() {
+    if (!confirm('Optimalizovat databázi? Tato akce může trvat několik minut.')) {
+        return;
+    }
+
+    logHeader('⚡ OPTIMIZE DATABASE');
+    log('Optimalizuji databázi...');
+
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.textContent = 'Optimalizuji...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=optimize_database', {
+            method: 'POST',
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            logSuccess(`✓ Databáze optimalizována!`);
+            logSuccess(`  Optimalizováno ${data.tables_optimized || '?'} tabulek`);
+            logSuccess(`  Čas: ${data.time_ms || '?'}ms`);
+        } else {
+            logError('Chyba při optimalizaci: ' + (data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        logError('Chyba: ' + error.message);
+    } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+    }
+
+    log('');
+}
+
+async function archiveLogsMaintenance() {
+    if (!confirm('Archivovat logy starší než 90 dní?')) {
+        return;
+    }
+
+    logHeader('📜 ARCHIVE LOGS');
+    log('Archivahuji staré logy...');
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=archive_logs', {
+            method: 'POST',
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            logSuccess(`✓ Archivováno ${data.count || 0} logů!`);
+        } else {
+            logError('Chyba při archivaci: ' + (data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        logError('Chyba: ' + error.message);
+    }
+
+    log('');
+}
+
+// ============================================
+// ADDITIONAL COMPREHENSIVE CHECKS
+// ============================================
+
+async function checkDependencies() {
+    logHeader('10. ZÁVISLOSTI (Dependencies)');
+    log('Kontroluji composer.json, package.json...');
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=check_dependencies', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const { composer, npm } = data.data;
+
+            // Composer
+            if (composer) {
+                if (composer.exists) {
+                    logSuccess(`✓ composer.json nalezen`);
+                    logSuccess(`  Závislostí: ${composer.packages || 0}`);
+                    if (composer.outdated && composer.outdated.length > 0) {
+                        logWarning(`  ${composer.outdated.length} zastaralých balíčků`);
+                        totalWarnings += composer.outdated.length;
+                    }
+                } else {
+                    logWarning('composer.json nenalezen');
+                }
+            }
+
+            // NPM
+            if (npm) {
+                if (npm.exists) {
+                    logSuccess(`✓ package.json nalezen`);
+                    logSuccess(`  Závislostí: ${npm.packages || 0}`);
+                    if (npm.vulnerabilities && npm.vulnerabilities > 0) {
+                        logError(`  ${npm.vulnerabilities} bezpečnostních zranitelností!`);
+                        totalErrors += npm.vulnerabilities;
+                    }
+                } else {
+                    logWarning('package.json nenalezen');
+                }
+            }
+        }
+    } catch (error) {
+        logWarning('Nepodařilo se zkontrolovat závislosti: ' + error.message);
+    }
+
+    log('');
+}
+
+async function checkConfiguration() {
+    logHeader('11. KONFIGURACE');
+    log('Kontroluji konfigurační soubory...');
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=check_configuration', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const { config_files, errors, warnings } = data.data;
+
+            logSuccess(`Nalezeno ${config_files || 0} konfiguračních souborů`);
+
+            if (errors && errors.length > 0) {
+                logError(`${errors.length} chyb v konfiguraci:`);
+                errors.forEach(err => {
+                    logError(`  📄 ${err.file}: ${err.error}`);
+                });
+                totalErrors += errors.length;
+            }
+
+            if (warnings && warnings.length > 0) {
+                logWarning(`${warnings.length} upozornění:`);
+                warnings.forEach(warn => {
+                    logWarning(`  ${warn}`);
+                });
+                totalWarnings += warnings.length;
+            }
+
+            if (!errors || errors.length === 0) {
+                logSuccess('✓ Konfigurace v pořádku');
+            }
+        }
+    } catch (error) {
+        logWarning('Nepodařilo se zkontrolovat konfiguraci: ' + error.message);
+    }
+
+    log('');
+}
+
+async function checkGitStatus() {
+    logHeader('12. GIT STATUS');
+    log('Kontroluji git repository...');
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=check_git_status', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const { branch, uncommitted, untracked, ahead, behind } = data.data;
+
+            logSuccess(`Branch: ${branch || 'unknown'}`);
+
+            if (uncommitted && uncommitted > 0) {
+                logWarning(`${uncommitted} uncommitted změn`);
+                totalWarnings++;
+            }
+
+            if (untracked && untracked > 0) {
+                logWarning(`${untracked} untracked souborů`);
+            }
+
+            if (ahead && ahead > 0) {
+                logSuccess(`${ahead} commits ahead of origin`);
+            }
+
+            if (behind && behind > 0) {
+                logWarning(`${behind} commits behind origin`);
+            }
+
+            if (!uncommitted && !untracked) {
+                logSuccess('✓ Working directory clean');
+            }
+        }
+    } catch (error) {
+        logWarning('Nepodařilo se zkontrolovat git: ' + error.message);
     }
 
     log('');
