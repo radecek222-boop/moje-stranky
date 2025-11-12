@@ -121,7 +121,25 @@
     background: var(--c-bg, #f8f8f8);
 }
 
-/* Iframe pro embedované stránky */
+/* Iframe container pro embedované stránky */
+.cc-iframe-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.cc-iframe-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    background: var(--c-white, #ffffff);
+    flex: 1;
+}
+
+/* Legacy support */
 .cc-modal-iframe {
     width: 100%;
     height: 100%;
