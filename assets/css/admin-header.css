@@ -35,7 +35,7 @@ body.embed-mode .container {
     flex-shrink: 0 !important;
 }
 
-.logo h1 {
+.logo .logo-text {
     color: white !important;
     font-size: 1.5rem !important;
     margin: 0 !important;
