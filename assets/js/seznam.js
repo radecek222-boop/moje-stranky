@@ -1969,21 +1969,26 @@ async function deleteReklamace(reklamaceId) {
         csrf_token: csrfToken
       })
     });
-    
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
     const result = await response.json();
-    
-    if (result.success) {
+
+    if (result.success || result.status === 'success') {
       logger.log('✅ Smazáno!');
       alert('✅ Reklamace byla úspěšně smazána!');
       closeDetail();
       setTimeout(() => location.reload(), 500);
     } else {
-      logger.error('❌ Chyba:', result.error);
-      alert('❌ Chyba: ' + (result.error || 'Nepodařilo se smazat'));
+      const errorMsg = result.message || result.error || 'Nepodařilo se smazat';
+      logger.error('❌ Chyba:', errorMsg);
+      alert('❌ Chyba: ' + errorMsg);
     }
   } catch (error) {
     logger.error('❌ Chyba při mazání:', error);
-    alert('❌ Chyba při mazání. Zkuste to znovu.');
+    alert('❌ Chyba při mazání: ' + error.message);
   }
 }
 
