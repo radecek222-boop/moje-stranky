@@ -1288,12 +1288,10 @@ async function optimizeDatabaseMaintenance() {
 }
 
 async function cleanupLogsMaintenance() {
-    if (!confirm('Vyčistit staré logy, cache a spustit backup?\n\nToto smaže:\n- Všechny .gz logy\n- Archivované logy (.20*.log)\n- php_errors.log zkrátí na 100 řádků\n- Vyčistí cache\n- Spustí první backup')) {
-        return;
-    }
-
     logHeader('🧹 CLEANUP LOGS & BACKUP');
     log('Spouštím kompletní cleanup...');
+    log('Toto smaže staré logy (.gz, .20*.log), zkrátí php_errors.log, vyčistí cache a spustí backup...');
+    log('');
 
     try {
         const response = await fetch('/api/control_center_api.php?action=cleanup_logs', {
