@@ -551,23 +551,26 @@ async function reopenOrder(id) {
   }
   
   try {
+    // Get CSRF token
+    const csrfToken = await getCSRFToken();
+
     const formData = new FormData();
     formData.append('action', 'update');
     formData.append('id', id);
     formData.append('stav', 'ČEKÁ');
     formData.append('termin', '');
     formData.append('cas_navstevy', '');
-    formData.append("action", "update");
-    
+    formData.append('csrf_token', csrfToken);
+
     const response = await fetch('app/controllers/save.php', {
       method: 'POST',
       body: formData
     });
-    
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
-    
+
     const result = await response.json();
     
     if (result.status === 'success') {
@@ -714,19 +717,24 @@ function startVisit(id) {
 // === ULOŽENÍ ===
 async function saveData(data, successMsg) {
   try {
+    // Get CSRF token
+    const csrfToken = await getCSRFToken();
+
     const formData = new FormData();
     Object.keys(data).forEach(key => {
       formData.append(key, data[key]);
     });
 
     formData.append("action", "update");
+    formData.append("csrf_token", csrfToken);
+
     const response = await fetch('app/controllers/save.php', {
       method: 'POST',
       body: formData
     });
 
     if (!response.ok) {
-      throw new Error(`Server error: ${response.status}`);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
     const result = await response.json();
@@ -1200,17 +1208,25 @@ async function saveSelectedDate() {
   }
 
   try {
+    // Get CSRF token
+    const csrfToken = await getCSRFToken();
+
     const formData = new FormData();
     formData.append('action', 'update');
     formData.append('id', CURRENT_RECORD.id);
     formData.append('termin', SELECTED_DATE);
     formData.append('cas_navstevy', SELECTED_TIME);
     formData.append('stav', 'DOMLUVENÁ');
+    formData.append('csrf_token', csrfToken);
 
     const response = await fetch('app/controllers/save.php', {
       method: 'POST',
       body: formData
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
 
     const result = await response.json();
     
