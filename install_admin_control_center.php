@@ -6,8 +6,10 @@
 
 session_start();
 
-// Override COOP policy pro umožnění otevření v novém okně/tabu
+// Safari compatibility headers - must be BEFORE any output
 header("Cross-Origin-Opener-Policy: unsafe-none");
+header("Cross-Origin-Embedder-Policy: unsafe-none");
+header("X-Frame-Options: SAMEORIGIN");
 
 // Bezpečnostní kontrola
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
