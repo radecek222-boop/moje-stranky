@@ -210,10 +210,10 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
     <?php if (!$embedMode): ?>
     <div class="control-detail-header">
         <button class="control-detail-back" onclick="window.location.href='admin.php?tab=control_center'">
-            <span>‹</span>
+            <span>&lt;</span>
             <span>Zpět</span>
         </button>
-        <h2 class="control-detail-title">💻 Konzole</h2>
+        <h2 class="control-detail-title">Konzole</h2>
     </div>
     <?php endif; ?>
 
@@ -221,7 +221,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         <!-- Alert -->
         <div class="cc-alert info">
-            <div class="cc-alert-icon">⚡</div>
+            <div class="cc-alert-icon"></div>
             <div class="cc-alert-content">
                 <div class="cc-alert-title">Developer Console</div>
                 <div class="cc-alert-message">
@@ -293,28 +293,28 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
                 <div class="console-title">$ wgs-service diagnostics</div>
                 <div class="console-actions">
                     <button class="console-btn success" id="btn-run-diagnostics" onclick="runDiagnostics()">
-                        ▶ Spustit diagnostiku
+                        Spustit diagnostiku
                     </button>
                     <button class="console-btn" id="btn-clear" onclick="clearConsole()" disabled>
-                        🗑 Vymazat
+                        Vymazat
                     </button>
                     <button class="console-btn" id="btn-export" onclick="exportLog()" disabled>
-                        💾 Export
+                        Export
                     </button>
                     <button class="console-btn" onclick="clearCacheMaintenance()" title="Vymazat cache">
-                        🔄 Cache
+                        Cache
                     </button>
                     <button class="console-btn" onclick="optimizeDatabaseMaintenance()" title="Optimalizovat databázi">
-                        ⚡ Optimize DB
+                        Optimize DB
                     </button>
                     <button class="console-btn" onclick="archiveLogsMaintenance()" title="Archivovat staré logy">
-                        📜 Archive
+                        Archive
                     </button>
                 </div>
             </div>
             <div class="console-output" id="console-output">
                 <div class="console-empty">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">💻</div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem;"></div>
                     <div style="font-size: 1.25rem; margin-bottom: 0.5rem;">Konzole připravena</div>
                     <div>Klikněte na "Spustit diagnostiku" pro kontrolu aplikace</div>
                 </div>
@@ -353,15 +353,15 @@ function logHeader(message) {
 }
 
 function logSuccess(message) {
-    log('✓ ' + message, 'success');
+    log(message, 'success');
 }
 
 function logWarning(message) {
-    log('⚠ ' + message, 'warning');
+    log(message, 'warning');
 }
 
 function logError(message) {
-    log('✗ ' + message, 'error');
+    log(message, 'error');
 }
 
 function renderConsole() {
@@ -386,7 +386,7 @@ function clearConsole() {
     consoleOutput = [];
     document.getElementById('console-output').innerHTML = `
         <div class="console-empty">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">💻</div>
+            <div style="font-size: 3rem; margin-bottom: 1rem;"></div>
             <div style="font-size: 1.25rem; margin-bottom: 0.5rem;">Konzole vymazána</div>
             <div>Klikněte na "Spustit diagnostiku" pro novou kontrolu</div>
         </div>
@@ -431,7 +431,7 @@ async function runDiagnostics() {
     diagnosticsRunning = true;
     const btn = document.getElementById('btn-run-diagnostics');
     btn.disabled = true;
-    btn.textContent = '⏳ Kontroluji...';
+    btn.textContent = 'Kontroluji...';
 
     // Clear previous output
     consoleOutput = [];
@@ -527,7 +527,7 @@ async function runDiagnostics() {
     } finally {
         diagnosticsRunning = false;
         btn.disabled = false;
-        btn.textContent = '▶ Spustit diagnostiku';
+        btn.textContent = 'Spustit diagnostiku';
     }
 }
 
@@ -561,23 +561,23 @@ async function checkPhpFiles() {
                 // Není JSON - zobrazit raw text
                 if (!response.ok) {
                     logError(`API vrátilo chybu (HTTP ${response.status} ${response.statusText}):`);
-                    logError(`   📍 URL: /api/control_center_api.php?action=check_php_files`);
+                    logError(`   URL: /api/control_center_api.php?action=check_php_files`);
 
                     // Extrahovat chybovou zprávu z HTML pokud je to HTML
                     if (text.includes('<b>Fatal error</b>') || text.includes('<b>Parse error</b>')) {
                         // PHP Fatal error v HTML formátu
                         const match = text.match(/<b>(.*?)<\/b>:\s*(.*?)\s+in\s+<b>(.*?)<\/b>\s+on line\s+<b>(\d+)<\/b>/);
                         if (match) {
-                            logError(`   💬 ${match[1]}: ${match[2]}`);
-                            logError(`   📄 ${match[3]}:${match[4]}`);
+                            logError(`   ${match[1]}: ${match[2]}`);
+                            logError(`   ${match[3]}:${match[4]}`);
                         } else {
                             // Fallback - zobrazit začátek raw HTML
                             const stripped = text.replace(/<[^>]*>/g, '').substring(0, 300);
-                            logError(`   💬 ${stripped}`);
+                            logError(`   ${stripped}`);
                         }
                     } else {
                         // Plain text error
-                        logError(`   💬 ${text.substring(0, 300)}`);
+                        logError(`   ${text.substring(0, 300)}`);
                     }
 
                     log('');
@@ -613,17 +613,17 @@ async function checkPhpFiles() {
                 log('═'.repeat(79));
                 errors.forEach(err => {
                     if (err.line) {
-                        logError(`📄 ${err.file}:${err.line}`);
+                        logError(`${err.file}:${err.line}`);
                         logError(`   ${err.type.toUpperCase()}: ${err.error.substring(0, 150)}`);
                     } else {
-                        logError(`📄 ${err.file}`);
+                        logError(`${err.file}`);
                         logError(`   ${err.error.substring(0, 150)}`);
                     }
                     log('─'.repeat(79));
                 });
                 totalErrors += errors.length;
             } else {
-                logSuccess('✓ Žádné PHP syntax errors');
+                logSuccess('Žádné PHP syntax errors');
             }
 
             if (warnings.length > 0) {
@@ -636,9 +636,9 @@ async function checkPhpFiles() {
         }
     } catch (error) {
         logError('Chyba při kontrole PHP:');
-        logError(`   📍 URL: /api/control_center_api.php?action=check_php_files`);
-        logError(`   💬 ${error.message}`);
-        logError(`   ℹ️  Zkontrolujte, zda API soubor existuje a je dostupný`);
+        logError(`   URL: /api/control_center_api.php?action=check_php_files`);
+        logError(`   ${error.message}`);
+        logError(`   Zkontrolujte, zda API soubor existuje a je dostupný`);
         totalErrors++;
         if (DEBUG_MODE) console.error(error);
     }
@@ -669,18 +669,18 @@ async function checkJavaScriptFiles() {
                 isJson = true;
             } else if (!response.ok) {
                 logError(`API vrátilo chybu (HTTP ${response.status} ${response.statusText}):`);
-                logError(`   📍 URL: /api/control_center_api.php?action=check_js_errors`);
+                logError(`   URL: /api/control_center_api.php?action=check_js_errors`);
                 // Extrahovat chybu z HTML nebo zobrazit raw
                 if (text.includes('<b>Fatal error</b>') || text.includes('<b>Parse error</b>')) {
                     const match = text.match(/<b>(.*?)<\/b>:\s*(.*?)\s+in\s+<b>(.*?)<\/b>\s+on line\s+<b>(\d+)<\/b>/);
                     if (match) {
-                        logError(`   💬 ${match[1]}: ${match[2]}`);
-                        logError(`   📄 ${match[3]}:${match[4]}`);
+                        logError(`   ${match[1]}: ${match[2]}`);
+                        logError(`   ${match[3]}:${match[4]}`);
                     } else {
-                        logError(`   💬 ${text.replace(/<[^>]*>/g, '').substring(0, 300)}`);
+                        logError(`   ${text.replace(/<[^>]*>/g, '').substring(0, 300)}`);
                     }
                 } else {
-                    logError(`   💬 ${text.substring(0, 300)}`);
+                    logError(`   ${text.substring(0, 300)}`);
                 }
                 log('');
                 return;
@@ -712,10 +712,10 @@ async function checkJavaScriptFiles() {
                 recent_errors.slice(0, 10).forEach((err, idx) => {
                     logWarning(`#${idx + 1}: ${err.message}`);
                     if (err.file !== 'unknown') {
-                        logWarning(`   📄 ${err.file}:${err.line || '?'}${err.column ? ':' + err.column : ''}`);
+                        logWarning(`   ${err.file}:${err.line || '?'}${err.column ? ':' + err.column : ''}`);
                     }
                     if (err.timestamp) {
-                        logWarning(`   🕐 ${err.timestamp}`);
+                        logWarning(`   ${err.timestamp}`);
                     }
                     log('─'.repeat(79));
                 });
@@ -725,7 +725,7 @@ async function checkJavaScriptFiles() {
                 }
                 totalWarnings += error_count;
             } else {
-                logSuccess('✓ Žádné nedávné JavaScript errors');
+                logSuccess('Žádné nedávné JavaScript errors');
             }
         } else {
             logError('Nepodařilo se zkontrolovat JavaScript: ' + (data.message || 'Unknown error'));
@@ -733,8 +733,8 @@ async function checkJavaScriptFiles() {
         }
     } catch (error) {
         logError('Chyba při kontrole JS:');
-        logError(`   📍 URL: /api/control_center_api.php?action=check_js_errors`);
-        logError(`   💬 ${error.message}`);
+        logError(`   URL: /api/control_center_api.php?action=check_js_errors`);
+        logError(`   ${error.message}`);
         totalErrors++;
         if (DEBUG_MODE) console.error(error);
     }
@@ -812,7 +812,7 @@ async function checkApiEndpoints() {
 
             if (response.ok || response.status === 400) {
                 // 400 je OK - znamená že API běží, jen ping action neexistuje
-                logSuccess(`✓ ${endpoint} - OK (HTTP ${response.status})`);
+                logSuccess(`${endpoint} - OK (HTTP ${response.status})`);
                 workingCount++;
             } else {
                 const responseText = await response.text().catch(() => 'N/A');
@@ -824,20 +824,20 @@ async function checkApiEndpoints() {
                 };
                 failedEndpoints.push(errorInfo);
 
-                logError(`✗ ${endpoint} - HTTP ${response.status} ${response.statusText}`);
-                logError(`   📍 URL: ${endpoint}?action=ping`);
+                logError(`${endpoint} - HTTP ${response.status} ${response.statusText}`);
+                logError(`   URL: ${endpoint}?action=ping`);
                 if (responseText && responseText.length > 0) {
                     // Try to extract meaningful error from HTML or show raw text
                     if (responseText.includes('<b>Fatal error</b>') || responseText.includes('<b>Parse error</b>')) {
                         const match = responseText.match(/<b>(.*?)<\/b>:\s*(.*?)\s+in\s+<b>(.*?)<\/b>/);
                         if (match) {
-                            logError(`   💬 ${match[1]}: ${match[2]}`);
-                            logError(`   📄 ${match[3]}`);
+                            logError(`   ${match[1]}: ${match[2]}`);
+                            logError(`   ${match[3]}`);
                         } else {
-                            logError(`   💬 ${responseText.replace(/<[^>]*>/g, '').substring(0, 200)}`);
+                            logError(`   ${responseText.replace(/<[^>]*>/g, '').substring(0, 200)}`);
                         }
                     } else {
-                        logError(`   💬 ${responseText.substring(0, 200)}`);
+                        logError(`   ${responseText.substring(0, 200)}`);
                     }
                 }
                 failedCount++;
@@ -849,10 +849,10 @@ async function checkApiEndpoints() {
             };
             failedEndpoints.push(errorInfo);
 
-            logError(`✗ ${endpoint} - Network Error`);
-            logError(`   📍 URL: ${endpoint}?action=ping`);
-            logError(`   💬 ${error.message}`);
-            logError(`   ℹ️  Možné příčiny: CORS policy, timeout, nebo server neběží`);
+            logError(`${endpoint} - Network Error`);
+            logError(`   URL: ${endpoint}?action=ping`);
+            logError(`   ${error.message}`);
+            logError(`   Možné příčiny: CORS policy, timeout, nebo server neběží`);
             failedCount++;
         }
     }
@@ -861,9 +861,9 @@ async function checkApiEndpoints() {
 
     log('');
     if (failedCount === 0) {
-        logSuccess('✓ Všechny API endpointy fungují správně');
+        logSuccess('Všechny API endpointy fungují správně');
     } else {
-        logWarning(`⚠ ${failedCount} API endpointů nefunguje - viz detaily výše`);
+        logWarning(`${failedCount} API endpointů nefunguje - viz detaily výše`);
         totalWarnings += failedCount;
     }
 
@@ -895,7 +895,7 @@ async function checkErrorLogs() {
 
             // PHP ERRORS
             if (php_errors && php_errors.length > 0) {
-                logWarning(`📋 ${php_errors.length} PHP errors (poslední 24h):`);
+                logWarning(`${php_errors.length} PHP errors (poslední 24h):`);
                 log('═'.repeat(79));
 
                 // Zobrazit top 5 PHP errors
@@ -903,16 +903,16 @@ async function checkErrorLogs() {
                     if (err.parsed !== false && err.file && err.line) {
                         // Plná chyba s file:line
                         logWarning(`#${idx + 1}: ${err.type || 'Error'}`);
-                        logWarning(`   📄 ${err.file}:${err.line}`);
-                        logWarning(`   💬 ${err.message}`);
+                        logWarning(`   ${err.file}:${err.line}`);
+                        logWarning(`   ${err.message}`);
                         if (err.timestamp) {
-                            logWarning(`   🕐 ${err.timestamp}`);
+                            logWarning(`   ${err.timestamp}`);
                         }
                     } else if (err.parsed === true && err.message) {
                         // Jen message bez file:line
                         logWarning(`#${idx + 1}: ${err.message}`);
                         if (err.timestamp) {
-                            logWarning(`   🕐 ${err.timestamp}`);
+                            logWarning(`   ${err.timestamp}`);
                         }
                     } else if (err.raw) {
                         // Neparsované - zobrazit raw
@@ -925,24 +925,24 @@ async function checkErrorLogs() {
                     logWarning(`... a dalších ${php_errors.length - 5} PHP chyb`);
                 }
             } else {
-                logSuccess('✓ Žádné PHP errors (24h)');
+                logSuccess('Žádné PHP errors (24h)');
             }
 
             log('');
 
             // JS ERRORS
             if (js_errors && js_errors.length > 0) {
-                logWarning(`📋 ${js_errors.length} JS errors (poslední 24h):`);
+                logWarning(`${js_errors.length} JS errors (poslední 24h):`);
                 log('═'.repeat(79));
 
                 // Zobrazit top 5 JS errors
                 js_errors.slice(0, 5).forEach((err, idx) => {
                     logWarning(`#${idx + 1}: ${err.message}`);
                     if (err.file && err.file !== 'unknown') {
-                        logWarning(`   📄 ${err.file}:${err.line || '?'}`);
+                        logWarning(`   ${err.file}:${err.line || '?'}`);
                     }
                     if (err.timestamp) {
-                        logWarning(`   🕐 ${err.timestamp}`);
+                        logWarning(`   ${err.timestamp}`);
                     }
                     log('─'.repeat(79));
                 });
@@ -951,24 +951,24 @@ async function checkErrorLogs() {
                     logWarning(`... a dalších ${js_errors.length - 5} JS chyb`);
                 }
             } else {
-                logSuccess('✓ Žádné JS errors (24h)');
+                logSuccess('Žádné JS errors (24h)');
             }
 
             log('');
 
             // SECURITY LOGS
             if (security_logs && security_logs.length > 0) {
-                logWarning(`🔒 ${security_logs.length} security events (24h):`);
+                logWarning(`${security_logs.length} security events (24h):`);
                 log('═'.repeat(79));
 
                 // Zobrazit top 5 security events
                 security_logs.slice(0, 5).forEach((event, idx) => {
                     if (event.parsed !== false) {
-                        const icon = event.severity === 'critical' ? '🔴' :
-                                    event.severity === 'warning' ? '🟡' : '🟢';
+                        const icon = event.severity === 'critical' ? '[CRITICAL]' :
+                                    event.severity === 'warning' ? '[WARNING]' : '[INFO]';
                         logWarning(`${icon} #${idx + 1}: [${event.type}] ${event.message}`);
                         if (event.timestamp) {
-                            logWarning(`   🕐 ${event.timestamp}`);
+                            logWarning(`   ${event.timestamp}`);
                         }
                     } else {
                         logWarning(`#${idx + 1}: ${event.raw.substring(0, 150)}`);
@@ -981,7 +981,7 @@ async function checkErrorLogs() {
                 }
                 totalWarnings += security_logs.length;
             } else {
-                logSuccess('✓ Žádné security events (24h)');
+                logSuccess('Žádné security events (24h)');
             }
         }
     } catch (error) {
@@ -1149,8 +1149,8 @@ async function checkHtmlPages() {
                 logError(`Nalezeno ${errors.length} chyb:`);
                 log('═'.repeat(79));
                 errors.slice(0, 10).forEach(err => {
-                    logError(`📄 ${err.file}`);
-                    logError(`   💬 ${err.error.substring(0, 200)}`);
+                    logError(`${err.file}`);
+                    logError(`   ${err.error.substring(0, 200)}`);
                     log('─'.repeat(79));
                 });
                 if (errors.length > 10) {
@@ -1158,7 +1158,7 @@ async function checkHtmlPages() {
                 }
                 totalErrors += errors.length;
             } else {
-                logSuccess('✓ Žádné chyby v HTML/PHP stránkách');
+                logSuccess('Žádné chyby v HTML/PHP stránkách');
             }
 
             if (warnings && warnings.length > 0) {
@@ -1168,7 +1168,7 @@ async function checkHtmlPages() {
         }
     } catch (error) {
         logError('Chyba při kontrole HTML/PHP stránek:');
-        logError(`   💬 ${error.message}`);
+        logError(`   ${error.message}`);
         totalErrors++;
     }
 
@@ -1202,12 +1202,12 @@ async function checkAssets() {
                 });
                 totalErrors += errors.length;
             } else {
-                logSuccess('✓ Všechny assets v pořádku');
+                logSuccess('Všechny assets v pořádku');
             }
         }
     } catch (error) {
         logError('Chyba při kontrole assets:');
-        logError(`   💬 ${error.message}`);
+        logError(`   ${error.message}`);
         totalErrors++;
     }
 
@@ -1223,7 +1223,7 @@ async function clearCacheMaintenance() {
         return;
     }
 
-    logHeader('🔄 CLEAR CACHE');
+    logHeader('CLEAR CACHE');
     log('Mazání cache...');
 
     try {
@@ -1235,7 +1235,7 @@ async function clearCacheMaintenance() {
         const data = await response.json();
 
         if (data.status === 'success') {
-            logSuccess('✓ Cache byla úspěšně vymazána!');
+            logSuccess('Cache byla úspěšně vymazána!');
         } else {
             logError('Chyba při mazání cache: ' + (data.message || 'Unknown error'));
         }
@@ -1251,7 +1251,7 @@ async function optimizeDatabaseMaintenance() {
         return;
     }
 
-    logHeader('⚡ OPTIMIZE DATABASE');
+    logHeader('OPTIMIZE DATABASE');
     log('Optimalizuji databázi...');
 
     const btn = event.target;
@@ -1268,7 +1268,7 @@ async function optimizeDatabaseMaintenance() {
         const data = await response.json();
 
         if (data.status === 'success') {
-            logSuccess(`✓ Databáze optimalizována!`);
+            logSuccess(`Databáze optimalizována!`);
             logSuccess(`  Optimalizováno ${data.tables_optimized || '?'} tabulek`);
             logSuccess(`  Čas: ${data.time_ms || '?'}ms`);
         } else {
@@ -1289,7 +1289,7 @@ async function archiveLogsMaintenance() {
         return;
     }
 
-    logHeader('📜 ARCHIVE LOGS');
+    logHeader('ARCHIVE LOGS');
     log('Archivahuji staré logy...');
 
     try {
@@ -1301,7 +1301,7 @@ async function archiveLogsMaintenance() {
         const data = await response.json();
 
         if (data.status === 'success') {
-            logSuccess(`✓ Archivováno ${data.count || 0} logů!`);
+            logSuccess(`Archivováno ${data.count || 0} logů!`);
         } else {
             logError('Chyba při archivaci: ' + (data.message || 'Unknown error'));
         }
@@ -1334,7 +1334,7 @@ async function checkDependencies() {
             // Composer
             if (composer) {
                 if (composer.exists) {
-                    logSuccess(`✓ composer.json nalezen`);
+                    logSuccess(`composer.json nalezen`);
                     logSuccess(`  Závislostí: ${composer.packages || 0}`);
                     if (composer.outdated && composer.outdated.length > 0) {
                         logWarning(`  ${composer.outdated.length} zastaralých balíčků`);
@@ -1342,7 +1342,7 @@ async function checkDependencies() {
                     }
                 } else {
                     if (composer.legacy_mode) {
-                        log('⚠ Composer not in use (legacy mode)');
+                        log('WARNING: Composer not in use (legacy mode)');
                     } else {
                         logWarning('composer.json nenalezen');
                     }
@@ -1352,7 +1352,7 @@ async function checkDependencies() {
             // NPM
             if (npm) {
                 if (npm.exists) {
-                    logSuccess(`✓ package.json nalezen`);
+                    logSuccess(`package.json nalezen`);
                     logSuccess(`  Závislostí: ${npm.packages || 0}`);
                     if (npm.vulnerabilities && npm.vulnerabilities > 0) {
                         logError(`  ${npm.vulnerabilities} bezpečnostních zranitelností!`);
@@ -1360,7 +1360,7 @@ async function checkDependencies() {
                     }
                 } else {
                     if (npm.legacy_mode) {
-                        log('⚠ NPM not in use (legacy mode)');
+                        log('WARNING: NPM not in use (legacy mode)');
                     } else {
                         logWarning('package.json nenalezen');
                     }
@@ -1394,7 +1394,7 @@ async function checkConfiguration() {
             if (errors && errors.length > 0) {
                 logError(`${errors.length} chyb v konfiguraci:`);
                 errors.forEach(err => {
-                    logError(`  📄 ${err.file}: ${err.error}`);
+                    logError(`  ${err.file}: ${err.error}`);
                 });
                 totalErrors += errors.length;
             }
@@ -1408,7 +1408,7 @@ async function checkConfiguration() {
             }
 
             if (!errors || errors.length === 0) {
-                logSuccess('✓ Konfigurace v pořádku');
+                logSuccess('Konfigurace v pořádku');
             }
         }
     } catch (error) {
@@ -1453,7 +1453,7 @@ async function checkGitStatus() {
             }
 
             if (!uncommitted && !untracked) {
-                logSuccess('✓ Working directory clean');
+                logSuccess('Working directory clean');
             }
         }
     } catch (error) {
@@ -1485,73 +1485,73 @@ async function checkDatabaseAdvanced() {
             // Foreign Keys
             if (foreign_keys) {
                 if (foreign_keys.broken && foreign_keys.broken.length > 0) {
-                    logError(`🔗 ${foreign_keys.broken.length} porušených foreign keys:`);
+                    logError(`${foreign_keys.broken.length} porušených foreign keys:`);
                     log('═'.repeat(79));
                     foreign_keys.broken.slice(0, 5).forEach(fk => {
-                        logError(`  📄 ${fk.table}.${fk.column} -> ${fk.referenced_table}.${fk.referenced_column}`);
-                        logError(`     💬 ${fk.error || 'Cílová tabulka/záznam neexistuje'}`);
+                        logError(`  ${fk.table}.${fk.column} -> ${fk.referenced_table}.${fk.referenced_column}`);
+                        logError(`     ${fk.error || 'Cílová tabulka/záznam neexistuje'}`);
                         log('─'.repeat(79));
                     });
                     totalErrors += foreign_keys.broken.length;
                 } else {
-                    logSuccess(`✓ Foreign keys: ${foreign_keys.total || 0} OK`);
+                    logSuccess(`Foreign keys: ${foreign_keys.total || 0} OK`);
                 }
             }
 
             // Slow Queries
             if (slow_queries) {
                 if (slow_queries.count > 0) {
-                    logWarning(`🐌 ${slow_queries.count} pomalých queries (> ${slow_queries.threshold}s):`);
+                    logWarning(`${slow_queries.count} pomalých queries (> ${slow_queries.threshold}s):`);
                     log('═'.repeat(79));
                     if (slow_queries.queries && slow_queries.queries.length > 0) {
                         slow_queries.queries.slice(0, 5).forEach((q, idx) => {
                             logWarning(`#${idx + 1}: ${q.time}s - ${q.query.substring(0, 150)}...`);
                             if (q.rows_examined) {
-                                logWarning(`   📊 Rows examined: ${q.rows_examined}`);
+                                logWarning(`   Rows examined: ${q.rows_examined}`);
                             }
                             log('─'.repeat(79));
                         });
                     }
                     totalWarnings += slow_queries.count;
                 } else {
-                    logSuccess('✓ Žádné pomalé queries detekované');
+                    logSuccess('Žádné pomalé queries detekované');
                 }
             }
 
             // Table Collations
             if (collations) {
                 if (collations.inconsistent && collations.inconsistent.length > 0) {
-                    logWarning(`⚠️ ${collations.inconsistent.length} tabulek s nekonzistentní collation:`);
+                    logWarning(`${collations.inconsistent.length} tabulek s nekonzistentní collation:`);
                     log('═'.repeat(79));
                     collations.inconsistent.forEach(t => {
-                        logWarning(`  📄 ${t.table}: ${t.collation} (doporučeno: utf8mb4_unicode_ci)`);
+                        logWarning(`  ${t.table}: ${t.collation} (doporučeno: utf8mb4_unicode_ci)`);
                     });
                     totalWarnings += collations.inconsistent.length;
                 } else {
-                    logSuccess(`✓ Všechny tabulky mají konzistentní collation (${collations.default || 'utf8mb4_unicode_ci'})`);
+                    logSuccess(`Všechny tabulky mají konzistentní collation (${collations.default || 'utf8mb4_unicode_ci'})`);
                 }
             }
 
             // Orphaned Records
             if (orphaned_records) {
                 if (orphaned_records.total > 0) {
-                    logWarning(`🔍 ${orphaned_records.total} orphaned records nalezeno:`);
+                    logWarning(`${orphaned_records.total} orphaned records nalezeno:`);
                     log('═'.repeat(79));
                     if (orphaned_records.details && orphaned_records.details.length > 0) {
                         orphaned_records.details.forEach(orphan => {
-                            logWarning(`  📄 ${orphan.table}: ${orphan.count} záznamů bez parent`);
+                            logWarning(`  ${orphan.table}: ${orphan.count} záznamů bez parent`);
                             logWarning(`     FK: ${orphan.foreign_key}`);
                         });
                     }
                     totalWarnings += orphaned_records.total;
                 } else {
-                    logSuccess('✓ Žádné orphaned records');
+                    logSuccess('Žádné orphaned records');
                 }
             }
 
             // Deadlocks
             if (deadlocks && deadlocks.count > 0) {
-                logWarning(`⚠️ ${deadlocks.count} deadlocků detekováno (24h)`);
+                logWarning(`${deadlocks.count} deadlocků detekováno (24h)`);
                 totalWarnings++;
             }
 
@@ -1589,50 +1589,50 @@ async function checkPerformance() {
             if (page_load_times) {
                 const slow_pages = page_load_times.pages?.filter(p => p.load_time > 3) || [];
                 if (slow_pages.length > 0) {
-                    logWarning(`⏱️ ${slow_pages.length} pomalých stránek (> 3s):`);
+                    logWarning(`${slow_pages.length} pomalých stránek (> 3s):`);
                     log('═'.repeat(79));
                     slow_pages.slice(0, 5).forEach(page => {
-                        logWarning(`  📄 ${page.url}: ${page.load_time.toFixed(2)}s`);
+                        logWarning(`  ${page.url}: ${page.load_time.toFixed(2)}s`);
                     });
                     totalWarnings += slow_pages.length;
                 } else {
-                    logSuccess('✓ Všechny testované stránky rychlé (< 3s)');
+                    logSuccess('Všechny testované stránky rychlé (< 3s)');
                 }
             }
 
             // Large Assets
             if (large_assets && large_assets.files && large_assets.files.length > 0) {
-                logWarning(`📦 ${large_assets.files.length} velkých souborů (> 500KB):`);
+                logWarning(`${large_assets.files.length} velkých souborů (> 500KB):`);
                 log('═'.repeat(79));
                 large_assets.files.slice(0, 10).forEach(file => {
-                    logWarning(`  📄 ${file.path}: ${file.size}`);
+                    logWarning(`  ${file.path}: ${file.size}`);
                 });
                 if (large_assets.files.length > 10) {
                     logWarning(`  ... a dalších ${large_assets.files.length - 10} souborů`);
                 }
                 totalWarnings += large_assets.files.length;
             } else {
-                logSuccess('✓ Žádné nadměrně velké assets');
+                logSuccess('Žádné nadměrně velké assets');
             }
 
             // Unminified Files
             if (unminified_files && unminified_files.length > 0) {
-                logWarning(`🔧 ${unminified_files.length} neminifikovaných JS/CSS souborů:`);
+                logWarning(`${unminified_files.length} neminifikovaných JS/CSS souborů:`);
                 log('═'.repeat(79));
                 unminified_files.slice(0, 10).forEach(file => {
-                    logWarning(`  📄 ${file.path} (${file.size || 'N/A'})`);
+                    logWarning(`  ${file.path} (${file.size || 'N/A'})`);
                 });
                 totalWarnings += unminified_files.length;
             } else {
-                logSuccess('✓ JS/CSS soubory jsou minifikované');
+                logSuccess('JS/CSS soubory jsou minifikované');
             }
 
             // Gzip Compression
             if (gzip_enabled !== undefined) {
                 if (gzip_enabled) {
-                    logSuccess('✓ Gzip komprese aktivní');
+                    logSuccess('Gzip komprese aktivní');
                 } else {
-                    logWarning('⚠️ Gzip komprese NENÍ aktivní');
+                    logWarning('Gzip komprese NENÍ aktivní');
                     totalWarnings++;
                 }
             }
@@ -1640,16 +1640,16 @@ async function checkPerformance() {
             // Caching Headers
             if (caching_headers) {
                 if (caching_headers.missing && caching_headers.missing.length > 0) {
-                    logWarning(`📦 ${caching_headers.missing.length} souborů bez cache headers`);
+                    logWarning(`${caching_headers.missing.length} souborů bez cache headers`);
                     totalWarnings++;
                 } else {
-                    logSuccess('✓ Cache headers správně nastavené');
+                    logSuccess('Cache headers správně nastavené');
                 }
             }
 
             // N+1 Queries
             if (n_plus_one_queries && n_plus_one_queries.detected > 0) {
-                logWarning(`🔁 ${n_plus_one_queries.detected} možných N+1 query problémů`);
+                logWarning(`${n_plus_one_queries.detected} možných N+1 query problémů`);
                 totalWarnings++;
             }
 
@@ -1685,10 +1685,10 @@ async function checkCodeQuality() {
 
             // Dead Code
             if (dead_code && dead_code.functions && dead_code.functions.length > 0) {
-                logWarning(`💀 ${dead_code.functions.length} nepoužívaných funkcí:`);
+                logWarning(`${dead_code.functions.length} nepoužívaných funkcí:`);
                 log('═'.repeat(79));
                 dead_code.functions.slice(0, 10).forEach(func => {
-                    logWarning(`  📄 ${func.file}:${func.line}`);
+                    logWarning(`  ${func.file}:${func.line}`);
                     logWarning(`     function ${func.name}()`);
                 });
                 if (dead_code.functions.length > 10) {
@@ -1696,16 +1696,16 @@ async function checkCodeQuality() {
                 }
                 totalWarnings += dead_code.functions.length;
             } else {
-                logSuccess('✓ Žádný mrtvý kód detekován');
+                logSuccess('Žádný mrtvý kód detekován');
             }
 
             // TODOs/FIXMEs
             if (todos && todos.count > 0) {
-                logWarning(`📝 ${todos.count} TODO/FIXME komentářů:`);
+                logWarning(`${todos.count} TODO/FIXME komentářů:`);
                 log('═'.repeat(79));
                 if (todos.items && todos.items.length > 0) {
                     todos.items.slice(0, 10).forEach(todo => {
-                        const icon = todo.type === 'FIXME' ? '🔴' : '🟡';
+                        const icon = todo.type === 'FIXME' ? '[FIXME]' : '[TODO]';
                         logWarning(`${icon} ${todo.file}:${todo.line}`);
                         logWarning(`   ${todo.comment.substring(0, 100)}`);
                     });
@@ -1715,42 +1715,42 @@ async function checkCodeQuality() {
                 }
                 totalWarnings += todos.count;
             } else {
-                logSuccess('✓ Žádné TODO/FIXME komentáře');
+                logSuccess('Žádné TODO/FIXME komentáře');
             }
 
             // Complexity
             if (complexity && complexity.high_complexity && complexity.high_complexity.length > 0) {
-                logWarning(`⚠️ ${complexity.high_complexity.length} funkcí s vysokou komplexitou:`);
+                logWarning(`${complexity.high_complexity.length} funkcí s vysokou komplexitou:`);
                 log('═'.repeat(79));
                 complexity.high_complexity.slice(0, 5).forEach(func => {
-                    logWarning(`  📄 ${func.file}:${func.line}`);
+                    logWarning(`  ${func.file}:${func.line}`);
                     logWarning(`     ${func.name}() - Complexity: ${func.complexity}`);
                 });
                 totalWarnings += complexity.high_complexity.length;
             } else {
-                logSuccess('✓ Komplexita kódu v normě');
+                logSuccess('Komplexita kódu v normě');
             }
 
             // Duplicate Code
             if (duplicates && duplicates.blocks && duplicates.blocks.length > 0) {
-                logWarning(`📋 ${duplicates.blocks.length} duplicitních bloků kódu:`);
+                logWarning(`${duplicates.blocks.length} duplicitních bloků kódu:`);
                 log('═'.repeat(79));
                 duplicates.blocks.slice(0, 5).forEach(dup => {
-                    logWarning(`  📄 ${dup.file1}:${dup.line1} <-> ${dup.file2}:${dup.line2}`);
+                    logWarning(`  ${dup.file1}:${dup.line1} <-> ${dup.file2}:${dup.line2}`);
                     logWarning(`     ${dup.lines} řádků duplicitního kódu`);
                 });
                 totalWarnings += duplicates.blocks.length;
             } else {
-                logSuccess('✓ Žádné významné duplicity');
+                logSuccess('Žádné významné duplicity');
             }
 
             // PSR Compliance
             if (psr_compliance !== undefined) {
                 if (psr_compliance.violations && psr_compliance.violations > 0) {
-                    logWarning(`⚠️ ${psr_compliance.violations} PSR porušení`);
+                    logWarning(`${psr_compliance.violations} PSR porušení`);
                     totalWarnings++;
                 } else {
-                    logSuccess('✓ PSR coding standards dodrženy');
+                    logSuccess('PSR coding standards dodrženy');
                 }
             }
 
@@ -1786,52 +1786,52 @@ async function checkSEO() {
 
             // Missing Meta Tags
             if (missing_meta_tags && missing_meta_tags.pages && missing_meta_tags.pages.length > 0) {
-                logWarning(`🏷️ ${missing_meta_tags.pages.length} stránek bez meta tagů:`);
+                logWarning(`${missing_meta_tags.pages.length} stránek bez meta tagů:`);
                 log('═'.repeat(79));
                 missing_meta_tags.pages.slice(0, 10).forEach(page => {
-                    logWarning(`  📄 ${page.url}`);
+                    logWarning(`  ${page.url}`);
                     if (page.missing_tags && page.missing_tags.length > 0) {
                         logWarning(`     Chybí: ${page.missing_tags.join(', ')}`);
                     }
                 });
                 totalWarnings += missing_meta_tags.pages.length;
             } else {
-                logSuccess('✓ Všechny stránky mají meta tagy');
+                logSuccess('Všechny stránky mají meta tagy');
             }
 
             // Missing Alt Tags
             if (missing_alt_tags && missing_alt_tags.images && missing_alt_tags.images.length > 0) {
-                logWarning(`🖼️ ${missing_alt_tags.images.length} obrázků bez alt atributu:`);
+                logWarning(`${missing_alt_tags.images.length} obrázků bez alt atributu:`);
                 log('═'.repeat(79));
                 missing_alt_tags.images.slice(0, 10).forEach(img => {
-                    logWarning(`  📄 ${img.page}: <img src="${img.src}">`);
+                    logWarning(`  ${img.page}: <img src="${img.src}">`);
                 });
                 if (missing_alt_tags.images.length > 10) {
                     logWarning(`  ... a dalších ${missing_alt_tags.images.length - 10} obrázků`);
                 }
                 totalWarnings += missing_alt_tags.images.length;
             } else {
-                logSuccess('✓ Všechny obrázky mají alt atributy');
+                logSuccess('Všechny obrázky mají alt atributy');
             }
 
             // Broken Links
             if (broken_links && broken_links.links && broken_links.links.length > 0) {
-                logError(`🔗 ${broken_links.links.length} broken links (404):`);
+                logError(`${broken_links.links.length} broken links (404):`);
                 log('═'.repeat(79));
                 broken_links.links.slice(0, 10).forEach(link => {
-                    logError(`  📄 ${link.page} -> ${link.url} (HTTP ${link.status})`);
+                    logError(`  ${link.page} -> ${link.url} (HTTP ${link.status})`);
                 });
                 if (broken_links.links.length > 10) {
                     logError(`  ... a dalších ${broken_links.links.length - 10} broken links`);
                 }
                 totalErrors += broken_links.links.length;
             } else {
-                logSuccess('✓ Žádné broken links');
+                logSuccess('Žádné broken links');
             }
 
             // Duplicate Titles
             if (duplicate_titles && duplicate_titles.duplicates && duplicate_titles.duplicates.length > 0) {
-                logWarning(`📋 ${duplicate_titles.duplicates.length} duplicitních title tagů:`);
+                logWarning(`${duplicate_titles.duplicates.length} duplicitních title tagů:`);
                 log('═'.repeat(79));
                 duplicate_titles.duplicates.forEach(dup => {
                     logWarning(`  "${dup.title}"`);
@@ -1839,19 +1839,19 @@ async function checkSEO() {
                 });
                 totalWarnings += duplicate_titles.duplicates.length;
             } else {
-                logSuccess('✓ Všechny title tagy unikátní');
+                logSuccess('Všechny title tagy unikátní');
             }
 
             // H1 Issues
             if (h1_issues && h1_issues.pages && h1_issues.pages.length > 0) {
-                logWarning(`📰 ${h1_issues.pages.length} stránek s H1 problémem:`);
+                logWarning(`${h1_issues.pages.length} stránek s H1 problémem:`);
                 log('═'.repeat(79));
                 h1_issues.pages.forEach(page => {
-                    logWarning(`  📄 ${page.url}: ${page.issue}`);
+                    logWarning(`  ${page.url}: ${page.issue}`);
                 });
                 totalWarnings += h1_issues.pages.length;
             } else {
-                logSuccess('✓ H1 tagy správně nastavené');
+                logSuccess('H1 tagy správně nastavené');
             }
 
         } else {
@@ -1887,49 +1887,49 @@ async function checkWorkflow() {
             // Cron Jobs
             if (cron_jobs) {
                 if (cron_jobs.not_running && cron_jobs.not_running.length > 0) {
-                    logError(`⏰ ${cron_jobs.not_running.length} cron jobů neběží:`);
+                    logError(`${cron_jobs.not_running.length} cron jobů neběží:`);
                     log('═'.repeat(79));
                     cron_jobs.not_running.forEach(job => {
-                        logError(`  📄 ${job.name}: Poslední běh před ${job.last_run || 'nikdy'}`);
+                        logError(`  ${job.name}: Poslední běh před ${job.last_run || 'nikdy'}`);
                     });
                     totalErrors += cron_jobs.not_running.length;
                 } else {
-                    logSuccess(`✓ Všechny cron joby běží (${cron_jobs.total || 0} aktivních)`);
+                    logSuccess(`Všechny cron joby běží (${cron_jobs.total || 0} aktivních)`);
                 }
             }
 
             // Email Queue
             if (email_queue) {
                 if (email_queue.pending > 50) {
-                    logWarning(`📧 ${email_queue.pending} nevyřízených emailů ve frontě`);
+                    logWarning(`${email_queue.pending} nevyřízených emailů ve frontě`);
                     totalWarnings++;
                 } else if (email_queue.pending > 0) {
-                    logSuccess(`📧 Email queue: ${email_queue.pending} čekajících emailů (v normě)`);
+                    logSuccess(`Email queue: ${email_queue.pending} čekajících emailů (v normě)`);
                 } else {
-                    logSuccess('✓ Email queue prázdná');
+                    logSuccess('Email queue prázdná');
                 }
 
                 if (email_queue.failed > 0) {
-                    logError(`❌ ${email_queue.failed} selhavších emailů`);
+                    logError(`${email_queue.failed} selhavších emailů`);
                     totalErrors++;
                 }
             }
 
             // Failed Jobs
             if (failed_jobs && failed_jobs.count > 0) {
-                logError(`❌ ${failed_jobs.count} selhavších úkolů (24h):`);
+                logError(`${failed_jobs.count} selhavších úkolů (24h):`);
                 log('═'.repeat(79));
                 if (failed_jobs.jobs && failed_jobs.jobs.length > 0) {
                     failed_jobs.jobs.slice(0, 5).forEach(job => {
-                        logError(`  📄 ${job.name}: ${job.error || 'Unknown error'}`);
+                        logError(`  ${job.name}: ${job.error || 'Unknown error'}`);
                         if (job.timestamp) {
-                            logError(`     🕐 ${job.timestamp}`);
+                            logError(`     ${job.timestamp}`);
                         }
                     });
                 }
                 totalErrors += failed_jobs.count;
             } else {
-                logSuccess('✓ Žádné selhavší úkoly');
+                logSuccess('Žádné selhavší úkoly');
             }
 
             // Backup Status
@@ -1937,13 +1937,13 @@ async function checkWorkflow() {
                 if (backup_status.last_backup) {
                     const age_days = backup_status.age_days || 0;
                     if (age_days > 7) {
-                        logWarning(`💾 Poslední backup před ${age_days} dny (doporučeno: max 7 dní)`);
+                        logWarning(`Poslední backup před ${age_days} dny (doporučeno: max 7 dní)`);
                         totalWarnings++;
                     } else {
-                        logSuccess(`✓ Backup aktuální (${age_days} dní)`);
+                        logSuccess(`Backup aktuální (${age_days} dní)`);
                     }
                 } else {
-                    logError('❌ Žádný backup nenalezen!');
+                    logError('Žádný backup nenalezen!');
                     totalErrors++;
                 }
             }
@@ -1951,11 +1951,11 @@ async function checkWorkflow() {
             // .env Permissions
             if (env_permissions) {
                 if (env_permissions.too_permissive) {
-                    logError('🔒 .env soubor má příliš volná oprávnění!');
+                    logError('.env soubor má příliš volná oprávnění!');
                     logError(`   Aktuální: ${env_permissions.current}, Doporučeno: 600`);
                     totalErrors++;
                 } else if (env_permissions.exists) {
-                    logSuccess('✓ .env oprávnění bezpečná');
+                    logSuccess('.env oprávnění bezpečná');
                 } else {
                     logWarning('.env soubor nenalezen');
                 }
@@ -1965,23 +1965,23 @@ async function checkWorkflow() {
             if (php_ini_settings) {
                 const warnings = php_ini_settings.warnings || [];
                 if (warnings.length > 0) {
-                    logWarning(`⚙️ ${warnings.length} php.ini varování:`);
+                    logWarning(`${warnings.length} php.ini varování:`);
                     log('═'.repeat(79));
                     warnings.forEach(warn => {
                         logWarning(`  ${warn.setting}: ${warn.current} (doporučeno: ${warn.recommended})`);
                     });
                     totalWarnings += warnings.length;
                 } else {
-                    logSuccess('✓ PHP.ini nastavení optimální');
+                    logSuccess('PHP.ini nastavení optimální');
                 }
             }
 
             // SMTP Test
             if (smtp_test !== undefined) {
                 if (smtp_test.success) {
-                    logSuccess('✓ SMTP funkční (test email odeslán)');
+                    logSuccess('SMTP funkční (test email odeslán)');
                 } else {
-                    logError('❌ SMTP nefunguje: ' + (smtp_test.error || 'Unknown error'));
+                    logError('SMTP nefunguje: ' + (smtp_test.error || 'Unknown error'));
                     totalErrors++;
                 }
             }
@@ -1997,5 +1997,5 @@ async function checkWorkflow() {
     log('');
 }
 
-if (DEBUG_MODE) console.log('✅ Console loaded');
+if (DEBUG_MODE) console.log('Console loaded');
 </script>
