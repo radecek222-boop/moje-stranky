@@ -171,7 +171,22 @@ async function testSmtpConnection() {
             throw new Error(`HTTP ${response.status}`);
         }
 
-        const result = await response.json();
+        // Debug: získat raw response text
+        const responseText = await response.text();
+        console.log('[SMTP Test Debug] Response status:', response.status);
+        console.log('[SMTP Test Debug] Response headers:', response.headers.get('content-type'));
+        console.log('[SMTP Test Debug] Response text (first 500 chars):', responseText.substring(0, 500));
+
+        // Zkusit parsovat JSON
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('[SMTP Test Debug] JSON parse failed:', parseError);
+            console.error('[SMTP Test Debug] Full response:', responseText);
+            showNotification('error', `⚠️ Server vrátil neplatnou odpověď (ne JSON). Zkontrolujte konzoli pro detaily.`);
+            throw new Error(`Invalid JSON response: ${parseError.message}`);
+        }
 
         if (result.status === 'success') {
             showNotification('success', '✓ ' + result.message);
