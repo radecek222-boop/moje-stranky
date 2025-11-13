@@ -749,25 +749,38 @@ try {
                 throw new Exception('SMTP údaje nejsou kompletně vyplněné');
             }
 
-            // Pro základní test použijeme PHPMailer nebo fsockopen
+            // Pro základní test použijeme fsockopen s error suppressionem
             $host = $config['smtp_host'];
             $port = intval($config['smtp_port'] ?? 587);
             $timeout = 10;
 
-            // Pokus o připojení
+            // Pokus o připojení - suppress všechny errors
             $errno = 0;
             $errstr = '';
-            $socket = @fsockopen($host, $port, $errno, $errstr, $timeout);
+
+            // Dočasně vypnout error handler pro tento test
+            $oldErrorHandler = set_error_handler(function() { return true; });
+            $socket = fsockopen($host, $port, $errno, $errstr, $timeout);
+            restore_error_handler();
 
             if (!$socket) {
-                throw new Exception("Nelze se připojit k SMTP serveru: $errstr ($errno)");
+                // Friendly error message
+                $errorMsg = "Nelze se připojit k SMTP serveru {$host}:{$port}";
+                if ($errstr) {
+                    $errorMsg .= " - " . $errstr;
+                }
+                if ($errno) {
+                    $errorMsg .= " (error code: $errno)";
+                }
+
+                throw new Exception($errorMsg);
             }
 
             fclose($socket);
 
             echo json_encode([
                 'status' => 'success',
-                'message' => "Připojení k SMTP serveru {$host}:{$port} proběhlo úspěšně"
+                'message' => "✓ Připojení k SMTP serveru {$host}:{$port} proběhlo úspěšně"
             ]);
             break;
 

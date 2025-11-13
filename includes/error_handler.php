@@ -44,9 +44,27 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
     // Logování do souboru
     logErrorToFile($errorMessage);
 
-    // Pokud je AJAX request, vrátit JSON
-    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-        strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+    // Detekce API requestů - modernější approach
+    $isApiRequest = (
+        // 1. Klasický AJAX header (jQuery, axios)
+        (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+         strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') ||
+
+        // 2. URL obsahuje /api/
+        (isset($_SERVER['REQUEST_URI']) &&
+         strpos($_SERVER['REQUEST_URI'], '/api/') !== false) ||
+
+        // 3. Request s Content-Type: application/json
+        (isset($_SERVER['CONTENT_TYPE']) &&
+         strpos(strtolower($_SERVER['CONTENT_TYPE']), 'application/json') !== false) ||
+
+        // 4. Accept header preferuje JSON
+        (isset($_SERVER['HTTP_ACCEPT']) &&
+         strpos(strtolower($_SERVER['HTTP_ACCEPT']), 'application/json') !== false)
+    );
+
+    // Pokud je API request, vrátit JSON
+    if ($isApiRequest) {
 
         header('Content-Type: application/json');
         echo json_encode([
@@ -87,9 +105,20 @@ set_exception_handler(function($exception) {
 
     logErrorToFile($errorMessage);
 
-    // Pokud je AJAX request
-    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-        strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+    // Detekce API requestů - stejně jako v error handleru
+    $isApiRequest = (
+        (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+         strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') ||
+        (isset($_SERVER['REQUEST_URI']) &&
+         strpos($_SERVER['REQUEST_URI'], '/api/') !== false) ||
+        (isset($_SERVER['CONTENT_TYPE']) &&
+         strpos(strtolower($_SERVER['CONTENT_TYPE']), 'application/json') !== false) ||
+        (isset($_SERVER['HTTP_ACCEPT']) &&
+         strpos(strtolower($_SERVER['HTTP_ACCEPT']), 'application/json') !== false)
+    );
+
+    // Pokud je API request
+    if ($isApiRequest) {
 
         header('Content-Type: application/json');
         http_response_code(500);
