@@ -1998,6 +1998,30 @@ try {
             break;
 
         // ==========================================
+        // SECURITY SCANNER
+        // ==========================================
+        case 'security_scan':
+            require_once __DIR__ . '/../includes/security_scanner.php';
+
+            $rootDir = __DIR__ . '/..';
+            $scanResults = performSecurityScan($rootDir);
+
+            // Calculate total findings
+            $totalFindings =
+                count($scanResults['csrf_vulnerabilities']['php_endpoints_without_csrf']) +
+                count($scanResults['csrf_vulnerabilities']['js_calls_without_token']) +
+                count($scanResults['sql_injection_risks']) +
+                count($scanResults['authentication_bypasses']);
+
+            $scanResults['total_findings'] = $totalFindings;
+
+            echo json_encode([
+                'status' => 'success',
+                'data' => $scanResults
+            ]);
+            break;
+
+        // ==========================================
         // PING / HEALTH CHECK
         // ==========================================
         case 'ping':
