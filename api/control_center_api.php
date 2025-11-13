@@ -32,6 +32,11 @@ try {
     if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         $csrfToken = $data['csrf_token'] ?? null;
 
+        // SECURITY: Ensure CSRF token is a string, not an array
+        if (is_array($csrfToken)) {
+            $csrfToken = null;
+        }
+
         // Debug info pro execute_action
         if ($action === 'execute_action' && !$csrfToken) {
             http_response_code(400);
