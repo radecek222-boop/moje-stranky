@@ -600,6 +600,9 @@ async function reopenOrder(id) {
       }
       
       try {
+        // Get CSRF token
+        const csrfToken = await getCSRFToken();
+
         const now = new Date();
         const formattedDate = now.toLocaleDateString('cs-CZ', {
           day: '2-digit',
@@ -608,12 +611,13 @@ async function reopenOrder(id) {
           hour: '2-digit',
           minute: '2-digit'
         });
-        
+
         await fetch("app/notification_sender.php", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             notification_id: "order_reopened",
+            csrf_token: csrfToken,
             data: {
               customer_name: customerName,
               order_id: id,
@@ -1681,13 +1685,17 @@ async function sendAppointmentConfirmation(customer, date, time) {
   const phone = customer.telefon || '';
   const email = customer.email || '';
   const orderId = Utils.getOrderId(customer);
-  
+
   try {
+    // Get CSRF token
+    const csrfToken = await getCSRFToken();
+
     const response = await fetch('app/notification_sender.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         notification_id: "appointment_confirmation",
+        csrf_token: csrfToken,
         data: {
           customer_name: customerName,
           customer_email: email,
@@ -1745,11 +1753,15 @@ async function addNote(orderId, text) {
       throw new Error('Reklamace nenalezena');
     }
 
+    // Get CSRF token
+    const csrfToken = await getCSRFToken();
+
     const reklamaceId = record.reklamace_id || record.id;
     const formData = new FormData();
     formData.append('action', 'add');
     formData.append('reklamace_id', reklamaceId);
     formData.append('text', text.trim());
+    formData.append('csrf_token', csrfToken);
 
     const response = await fetch('api/notes_api.php', {
       method: 'POST',
@@ -1774,10 +1786,14 @@ async function markNotesAsRead(orderId) {
     const record = WGS_DATA_CACHE.find(x => x.id == orderId || x.reklamace_id == orderId);
     if (!record) return;
 
+    // Get CSRF token
+    const csrfToken = await getCSRFToken();
+
     const reklamaceId = record.reklamace_id || record.id;
     const formData = new FormData();
     formData.append('action', 'mark_read');
     formData.append('reklamace_id', reklamaceId);
+    formData.append('csrf_token', csrfToken);
 
     await fetch('api/notes_api.php', {
       method: 'POST',

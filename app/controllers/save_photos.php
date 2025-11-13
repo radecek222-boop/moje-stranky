@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../../init.php';
+require_once __DIR__ . '/../../includes/csrf_helper.php';
 
 header('Content-Type: application/json');
 
@@ -12,6 +13,20 @@ try {
     // Kontrola metody
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         throw new Exception('Povolena pouze POST metoda');
+    }
+
+    // BEZPEČNOST: CSRF ochrana
+    $csrfToken = $_POST['csrf_token'] ?? '';
+    if (is_array($csrfToken)) {
+        $csrfToken = '';
+    }
+    if (!validateCSRFToken($csrfToken)) {
+        http_response_code(403);
+        echo json_encode([
+            'status' => 'error',
+            'error' => 'Neplatný CSRF token. Obnovte stránku a zkuste znovu.'
+        ]);
+        exit;
     }
 
     // BEZPEČNOST: Rate limiting - ochrana proti DoS útokům
