@@ -5,6 +5,11 @@
 
 require_once __DIR__ . '/init.php';
 
+// Clear any output buffer
+if (ob_get_level()) {
+    ob_end_clean();
+}
+
 header('Content-Type: application/json');
 
 // Bezpečnost - pouze admin
@@ -20,9 +25,15 @@ try {
     $jsonData = file_get_contents('php://input');
     $data = json_decode($jsonData, true);
 
+    // Log pro debugging
+    error_log('[Cleanup] Received data: ' . $jsonData);
+    error_log('[Cleanup] Parsed data: ' . json_encode($data));
+
     if (isset($data['record_id'])) {
         // Smazat konkrétní záznam
         $recordId = (int)$data['record_id'];
+
+        error_log('[Cleanup] Deleting record ID: ' . $recordId);
 
         $stmt = $pdo->prepare("DELETE FROM wgs_action_history WHERE id = :id");
         $stmt->execute(['id' => $recordId]);
@@ -35,6 +46,8 @@ try {
 
     } elseif (isset($data['delete_all_failed']) && $data['delete_all_failed'] === true) {
         // Smazat všechny selhavší záznamy
+        error_log('[Cleanup] Deleting all failed records');
+
         $stmt = $pdo->query("DELETE FROM wgs_action_history WHERE status = 'failed'");
 
         echo json_encode([
@@ -44,7 +57,8 @@ try {
         ]);
 
     } else {
-        throw new Exception('Invalid request');
+        error_log('[Cleanup] Invalid request - data: ' . json_encode($data));
+        throw new Exception('Invalid request - no valid action specified');
     }
 
 } catch (Exception $e) {
