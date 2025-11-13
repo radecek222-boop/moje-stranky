@@ -46,7 +46,12 @@ if (!function_exists('db_table_exists')) {
         }
 
         try {
-            $stmt = $pdo->prepare('SHOW TABLES LIKE :table');
+            // SHOW TABLES LIKE doesn't support placeholders - use INFORMATION_SCHEMA instead
+            $stmt = $pdo->prepare(
+                'SELECT COUNT(*) FROM information_schema.tables
+                 WHERE table_schema = DATABASE()
+                 AND table_name = :table'
+            );
             $stmt->execute([':table' => $table]);
             $exists = (bool) $stmt->fetchColumn();
         } catch (Throwable $e) {
