@@ -52,9 +52,9 @@ if ($isAdmin) {
       <a href="onas.php" <?php if($current == "onas.php") echo 'class="active"'; ?> data-lang-cs="O NÁS" data-lang-en="ABOUT US" data-lang-it="CHI SIAMO">O NÁS</a>
       <a href="login.php" <?php if($current == "login.php") echo 'class="active"'; ?> data-lang-cs="PŘIHLÁŠENÍ" data-lang-en="LOGIN" data-lang-it="ACCESSO">PŘIHLÁŠENÍ</a>
       <div class="hamburger-lang-switcher">
-        <span class="lang-flag active" data-lang="cs">CZ</span>
-        <span class="lang-flag" data-lang="en">EN</span>
-        <span class="lang-flag" data-lang="it">IT</span>
+        <span class="lang-flag active" data-lang="cs">🇨🇿</span>
+        <span class="lang-flag" data-lang="en">🇬🇧</span>
+        <span class="lang-flag" data-lang="it">🇮🇹</span>
       </div>
     <?php endif; ?>
   </nav>
