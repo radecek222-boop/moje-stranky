@@ -482,11 +482,31 @@ try {
             }
             $results['deleted_files'] = $deletedFiles;
 
-            // 2. Zkrátit php_errors.log (shell tail je bezpečnější než file())
+            // 2. Zkrátit php_errors.log (pure PHP bez exec)
             $errorLog = $logsDir . '/php_errors.log';
-            if (file_exists($errorLog)) {
-                exec("tail -100 {$errorLog} > {$errorLog}.tmp && mv {$errorLog}.tmp {$errorLog}", $output, $code);
-                $results['log_truncated'] = ($code === 0);
+            if (file_exists($errorLog) && filesize($errorLog) > 10000) {
+                try {
+                    // Bezpečně číst poslední 100 řádků bez načtení celého souboru
+                    $lines = [];
+                    $file = new SplFileObject($errorLog, 'r');
+                    $file->seek(PHP_INT_MAX);
+                    $lastLine = $file->key();
+                    $startLine = max(0, $lastLine - 100);
+
+                    $file->seek($startLine);
+                    while (!$file->eof()) {
+                        $line = $file->fgets();
+                        if ($line !== false) $lines[] = $line;
+                    }
+
+                    file_put_contents($errorLog, implode('', $lines));
+                    $results['log_truncated'] = true;
+                } catch (Exception $e) {
+                    $results['log_truncated'] = false;
+                    $results['log_error'] = $e->getMessage();
+                }
+            } else {
+                $results['log_truncated'] = 'skipped';
             }
 
             // 3. Vymazat cache
@@ -506,17 +526,14 @@ try {
                 if (!is_dir($fullPath)) mkdir($fullPath, 0755, true);
             }
 
-            // 5. Spustit první backup (pokud neexistuje)
+            // 5. Backup check (bez exec - jen informace)
             $dailyBackups = glob(__DIR__ . '/../backups/daily/*.sql.gz');
             if (empty($dailyBackups)) {
-                $backupScript = __DIR__ . '/../scripts/backup-database.sh';
-                if (file_exists($backupScript)) {
-                    exec("bash {$backupScript} 2>&1", $backupOutput, $backupCode);
-                    $results['backup_created'] = ($backupCode === 0);
-                    $results['backup_output'] = implode("\n", array_slice($backupOutput, -5));
-                }
+                $results['backup_exists'] = false;
+                $results['backup_note'] = 'Nastavte cron: 0 2 * * * /path/to/backup-database.sh';
             } else {
                 $results['backup_exists'] = true;
+                $results['backup_file'] = basename(end($dailyBackups));
             }
 
             echo json_encode([
