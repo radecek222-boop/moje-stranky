@@ -740,9 +740,29 @@ async function saveData(data, successMsg) {
     const result = await response.json();
     
     if (result.status === 'success') {
+      // Update cache with new data
+      Object.keys(data).forEach(key => {
+        const cacheRecord = WGS_DATA_CACHE.find(x => x.id == data.id);
+        if (cacheRecord && key !== 'action') {
+          cacheRecord[key] = data[key];
+        }
+        if (CURRENT_RECORD && CURRENT_RECORD.id == data.id && key !== 'action') {
+          CURRENT_RECORD[key] = data[key];
+        }
+      });
+
       alert(successMsg);
+
+      // Reload all data from DB to ensure consistency
       await loadAll(ACTIVE_FILTER);
-      closeDetail();
+
+      // Re-open detail to show updated data
+      if (data.id) {
+        closeDetail();
+        setTimeout(() => showDetail(data.id), 100);
+      } else {
+        closeDetail();
+      }
     } else {
       alert('Chyba: ' + (result.message || 'Nepodařilo se uložit.'));
     }
@@ -1270,12 +1290,30 @@ async function saveSelectedDate() {
     const result = await response.json();
     
     if (result.status === 'success') {
+      // Update CURRENT_RECORD with new data
+      CURRENT_RECORD.termin = SELECTED_DATE;
+      CURRENT_RECORD.cas_navstevy = SELECTED_TIME;
+      CURRENT_RECORD.stav = 'DOMLUVENÁ';
+
+      // Update cache
+      const cacheRecord = WGS_DATA_CACHE.find(x => x.id === CURRENT_RECORD.id);
+      if (cacheRecord) {
+        cacheRecord.termin = SELECTED_DATE;
+        cacheRecord.cas_navstevy = SELECTED_TIME;
+        cacheRecord.stav = 'DOMLUVENÁ';
+      }
+
       alert(`✓ Termín uložen: ${SELECTED_DATE} ${SELECTED_TIME}\n\nStav automaticky změněn na: DOMLUVENÁ`);
-      
+
       await sendAppointmentConfirmation(CURRENT_RECORD, SELECTED_DATE, SELECTED_TIME);
-      
+
+      // Reload all data from DB to ensure consistency
       await loadAll(ACTIVE_FILTER);
+
+      // Re-open detail to show updated data
+      const recordId = CURRENT_RECORD.id;
       closeDetail();
+      setTimeout(() => showDetail(recordId), 100);
     } else {
       alert('Chyba: ' + (result.message || 'Nepodařilo se uložit.'));
     }
