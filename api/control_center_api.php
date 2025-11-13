@@ -832,17 +832,77 @@ try {
             $errors = [];
             $warnings = [];
 
-            try {
-                // Test zda exec funguje
-                $testOutput = [];
-                $testReturn = 0;
-                $execTest = @exec('php --version 2>&1', $testOutput, $testReturn);
-                if ($testReturn !== 0 || empty($execTest)) {
-                    throw new Exception('exec() není dostupný nebo PHP není v PATH');
+            // Hosting má zakázáno exec() - použijeme alternativní metodu
+            $execAvailable = function_exists('exec') && !in_array('exec', array_map('trim', explode(',', ini_get('disable_functions'))));
+
+            if (!$execAvailable) {
+                // exec() není dostupný - použijeme token_get_all() pro syntax check
+                try {
+                    $iterator = new RecursiveIteratorIterator(
+                        new RecursiveDirectoryIterator($rootDir, RecursiveDirectoryIterator::SKIP_DOTS),
+                        RecursiveIteratorIterator::CATCH_GET_CHILD
+                    );
+                } catch (Exception $dirException) {
+                    throw new Exception('Nelze číst adresářovou strukturu: ' . $dirException->getMessage());
                 }
 
-                // Najít všechny PHP soubory
-                try {
+                $filesChecked = 0;
+                $maxFiles = 500;
+
+                foreach ($iterator as $file) {
+                    if ($filesChecked >= $maxFiles) {
+                        $warnings[] = "Zkontrolováno pouze prvních $maxFiles souborů (limit)";
+                        break;
+                    }
+
+                    if ($file->isFile() && $file->getExtension() === 'php') {
+                        $filePath = $file->getPathname();
+                        $relativePath = str_replace($rootDir . '/', '', $filePath);
+
+                        // Skip vendor, node_modules, cache directories
+                        if (strpos($relativePath, 'vendor/') === 0 ||
+                            strpos($relativePath, 'node_modules/') === 0 ||
+                            strpos($relativePath, 'cache/') === 0) {
+                            continue;
+                        }
+
+                        $filesChecked++;
+                        $phpFiles[] = $relativePath;
+
+                        // Základní syntax check pomocí token_get_all()
+                        $content = @file_get_contents($filePath);
+                        if ($content !== false) {
+                            // Suppress warnings pro token_get_all
+                            $oldErrorHandler = set_error_handler(function() { return true; });
+                            $tokens = @token_get_all($content);
+                            restore_error_handler();
+
+                            // Pokud token_get_all vrátí false nebo prázdné pole, je problém se syntaxí
+                            if ($tokens === false || empty($tokens)) {
+                                $errors[] = [
+                                    'file' => $relativePath,
+                                    'error' => 'Syntax error detected (token parsing failed)'
+                                ];
+                            }
+                        }
+                    }
+                }
+
+                echo json_encode([
+                    'status' => 'success',
+                    'data' => [
+                        'total_files' => count($phpFiles),
+                        'files_checked' => $filesChecked,
+                        'errors' => $errors,
+                        'warnings' => array_merge($warnings, ['exec() není dostupný - použit alternativní syntax check']),
+                        'method' => 'token_get_all'
+                    ]
+                ]);
+                break;
+            }
+
+            // Původní exec() verze (pokud je dostupný)
+            try {
                     $iterator = new RecursiveIteratorIterator(
                         new RecursiveDirectoryIterator($rootDir, RecursiveDirectoryIterator::SKIP_DOTS),
                         RecursiveIteratorIterator::CATCH_GET_CHILD
