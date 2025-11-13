@@ -903,13 +903,10 @@ try {
 
             // Původní exec() verze (pokud je dostupný)
             try {
-                    $iterator = new RecursiveIteratorIterator(
-                        new RecursiveDirectoryIterator($rootDir, RecursiveDirectoryIterator::SKIP_DOTS),
-                        RecursiveIteratorIterator::CATCH_GET_CHILD
-                    );
-                } catch (Exception $dirException) {
-                    throw new Exception('Nelze číst adresářovou strukturu: ' . $dirException->getMessage());
-                }
+                $iterator = new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($rootDir, RecursiveDirectoryIterator::SKIP_DOTS),
+                    RecursiveIteratorIterator::CATCH_GET_CHILD
+                );
 
                 $filesChecked = 0;
                 $maxFiles = 500; // Limit aby to netrvalo věčně
