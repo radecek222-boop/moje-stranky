@@ -387,17 +387,22 @@ function getCSRFToken() {
     // Try current document first
     let metaTag = document.querySelector('meta[name="csrf-token"]');
 
+    console.log('[CSRF DEBUG] Current document meta tag:', metaTag);
+
     // If in iframe, try parent window
     if (!metaTag && window.parent && window.parent !== window) {
         try {
             metaTag = window.parent.document.querySelector('meta[name="csrf-token"]');
+            console.log('[CSRF DEBUG] Parent document meta tag:', metaTag);
         } catch (e) {
             // Cross-origin iframe - cannot access parent
-            console.error('Cannot access parent CSRF token:', e);
+            console.error('[CSRF DEBUG] Cannot access parent CSRF token:', e);
         }
     }
 
-    return metaTag ? metaTag.getAttribute('content') : null;
+    const token = metaTag ? metaTag.getAttribute('content') : null;
+    console.log('[CSRF DEBUG] Final token:', token ? `${token.substring(0, 10)}...` : 'NULL');
+    return token;
 }
 
 function selectRole(role) {

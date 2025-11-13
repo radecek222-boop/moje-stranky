@@ -16,6 +16,11 @@ function requireCSRF() {
     // Get token from POST, GET, or HTTP header
     $token = $_POST['csrf_token'] ?? $_GET['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
 
+    // SECURITY: Ensure CSRF token is a string, not an array (array injection protection)
+    if (is_array($token)) {
+        $token = '';
+    }
+
     if (!validateCSRFToken($token)) {
         http_response_code(403);
         header('Content-Type: application/json');

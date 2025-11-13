@@ -875,7 +875,7 @@ function loadConsoleModal() {
 
 function loadTestingModal() {
     const modalBody = document.getElementById('ccModalBody');
-    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_testing_interactive&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Testovací prostředí"></iframe></div>';
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_testing_interactive&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Testovací prostředí"></iframe></div>';
 }
 
 function loadAppearanceModal() {
