@@ -307,6 +307,9 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
                     <button class="console-btn" onclick="optimizeDatabaseMaintenance()" title="Optimalizovat databázi">
                         Optimize DB
                     </button>
+                    <button class="console-btn danger" onclick="cleanupLogsMaintenance()" title="Vyčistit logy, cache a spustit backup">
+                        🧹 Cleanup
+                    </button>
                     <button class="console-btn" onclick="archiveLogsMaintenance()" title="Archivovat staré logy">
                         Archive
                     </button>
@@ -1279,6 +1282,49 @@ async function optimizeDatabaseMaintenance() {
     } finally {
         btn.textContent = originalText;
         btn.disabled = false;
+    }
+
+    log('');
+}
+
+async function cleanupLogsMaintenance() {
+    if (!confirm('Vyčistit staré logy, cache a spustit backup?\n\nToto smaže:\n- Všechny .gz logy\n- Archivované logy (.20*.log)\n- php_errors.log zkrátí na 100 řádků\n- Vyčistí cache\n- Spustí první backup')) {
+        return;
+    }
+
+    logHeader('🧹 CLEANUP LOGS & BACKUP');
+    log('Spouštím kompletní cleanup...');
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=cleanup_logs', {
+            method: 'POST',
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const r = data.results || {};
+            logSuccess('✅ Cleanup dokončen!');
+            log('');
+            log(`📊 Výsledky:`);
+            log(`  🗑️  Smazáno souborů: ${r.deleted_files || 0}`);
+            log(`  ✂️  Log zkrácen: ${r.log_truncated ? 'ANO' : 'NE'}`);
+            log(`  💾 Cache vymazána: ${r.cache_deleted || 0} souborů`);
+            if (r.backup_created) {
+                logSuccess('  📦 Backup vytvořen!');
+            } else if (r.backup_exists) {
+                log('  📦 Backup již existuje');
+            } else {
+                logWarning('  ⚠️  Backup selhal - zkontrolujte .env');
+            }
+            log('');
+            logSuccess('Spusťte diagnostiku pro ověření!');
+        } else {
+            logError('Chyba při cleanup: ' + (data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        logError('Chyba: ' + error.message);
     }
 
     log('');

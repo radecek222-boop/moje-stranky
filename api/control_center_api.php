@@ -466,6 +466,66 @@ try {
             ]);
             break;
 
+        case 'cleanup_logs':
+            $results = [];
+            $logsDir = __DIR__ . '/../logs';
+
+            // 1. Smazat .gz a archivované logy
+            $deletedFiles = 0;
+            $gzFiles = glob($logsDir . '/*.gz');
+            foreach ($gzFiles as $file) {
+                if (unlink($file)) $deletedFiles++;
+            }
+            $archivedLogs = glob($logsDir . '/*.20*.log');
+            foreach ($archivedLogs as $file) {
+                if (basename($file) !== 'php_errors.log' && unlink($file)) $deletedFiles++;
+            }
+            $results['deleted_files'] = $deletedFiles;
+
+            // 2. Zkrátit php_errors.log (shell tail je bezpečnější než file())
+            $errorLog = $logsDir . '/php_errors.log';
+            if (file_exists($errorLog)) {
+                exec("tail -100 {$errorLog} > {$errorLog}.tmp && mv {$errorLog}.tmp {$errorLog}", $output, $code);
+                $results['log_truncated'] = ($code === 0);
+            }
+
+            // 3. Vymazat cache
+            $cacheDir = __DIR__ . '/../temp/cache';
+            $cacheDeleted = 0;
+            if (is_dir($cacheDir)) {
+                foreach (glob($cacheDir . '/*') as $file) {
+                    if (is_file($file) && unlink($file)) $cacheDeleted++;
+                }
+            }
+            $results['cache_deleted'] = $cacheDeleted;
+
+            // 4. Vytvořit backup adresáře
+            $backupDirs = ['backups', 'backups/daily', 'backups/weekly', 'backups/monthly'];
+            foreach ($backupDirs as $dir) {
+                $fullPath = __DIR__ . '/../' . $dir;
+                if (!is_dir($fullPath)) mkdir($fullPath, 0755, true);
+            }
+
+            // 5. Spustit první backup (pokud neexistuje)
+            $dailyBackups = glob(__DIR__ . '/../backups/daily/*.sql.gz');
+            if (empty($dailyBackups)) {
+                $backupScript = __DIR__ . '/../scripts/backup-database.sh';
+                if (file_exists($backupScript)) {
+                    exec("bash {$backupScript} 2>&1", $backupOutput, $backupCode);
+                    $results['backup_created'] = ($backupCode === 0);
+                    $results['backup_output'] = implode("\n", array_slice($backupOutput, -5));
+                }
+            } else {
+                $results['backup_exists'] = true;
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Cleanup completed',
+                'results' => $results
+            ]);
+            break;
+
         case 'archive_logs':
             $logsPath = __DIR__ . '/../logs';
             $archivePath = __DIR__ . '/../logs/archive';
