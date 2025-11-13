@@ -232,7 +232,7 @@ try {
 
       <!-- Header -->
       <div class="notif-header">
-        <h1 class="notif-title">Správa Emailů & SMS</h1>
+        <h2 class="notif-title">Správa Emailů & SMS</h2>
         <p class="notif-subtitle">Editace šablon, nastavení příjemců a správa automatických notifikací</p>
       </div>
 

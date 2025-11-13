@@ -161,13 +161,16 @@ function scanSQLInjectionRisks($rootDir) {
 
 function scanAuthenticationBypass($rootDir) {
     $findings = [];
-    $protectedDirs = ['admin', 'api', 'app'];
+    $protectedDirs = ['admin', 'api', 'app', 'app/controllers'];
 
     foreach ($protectedDirs as $dir) {
         $fullPath = $rootDir . '/' . $dir;
         if (!is_dir($fullPath)) continue;
 
+        // Rekurzivně skenovat PHP soubory
         $files = glob($fullPath . '/*.php');
+        $subFiles = glob($fullPath . '/**/*.php');
+        $files = array_merge($files, $subFiles ?: []);
         foreach ($files as $file) {
             $content = file_get_contents($file);
             $relativePath = str_replace($rootDir . '/', '', $file);

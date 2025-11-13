@@ -1,0 +1,88 @@
+# WGS Service - Robots.txt
+# https://www.robotstxt.org/
+
+User-agent: *
+
+# Allow main pages
+Allow: /
+Allow: /index.php
+Allow: /psa-kalkulator.php
+Allow: /psa.php
+Allow: /reklamace.php
+Allow: /seznam.php
+Allow: /protokol.php
+
+# Block all API endpoints
+Disallow: /api/
+
+# Block admin areas
+Disallow: /admin*
+Disallow: /login.php
+Disallow: /logout.php
+
+# Block diagnostic and utility pages
+Disallow: /diagnostic*.php
+Disallow: /quick_debug.php
+Disallow: /phpinfo*.php
+Disallow: /health.php
+
+# Block photo utilities
+Disallow: /check_photos*.php
+Disallow: /copy_photo.php
+Disallow: /count_photos.php
+Disallow: /photos_*.php
+Disallow: /find_all_photos.php
+Disallow: /migrate_photos.php
+Disallow: /insert_photo*.php
+
+# Block database utilities
+Disallow: /db_*.php
+Disallow: /create_missing_tables.php
+Disallow: /show_table_structure.php
+
+# Block SMTP utilities
+Disallow: /add_smtp*.php
+Disallow: /check_and_add_smtp*.php
+Disallow: /run_add_smtp*.php
+
+# Block fix and cleanup utilities
+Disallow: /fix_*.php
+Disallow: /cleanup*.php
+Disallow: /verify_and_cleanup.php
+
+# Block testing utilities
+Disallow: /api_test.php
+Disallow: /path_test.php
+Disallow: /role_testing*.php
+Disallow: /whereami.php
+
+# Block other utilities
+Disallow: /create_upload_dir.php
+Disallow: /last_claim_id.php
+Disallow: /php_copy_http.php
+Disallow: /admin_key_manager.php
+
+# Block directories
+Disallow: /logs/
+Disallow: /backups/
+Disallow: /temp/
+Disallow: /uploads/
+Disallow: /config/
+Disallow: /includes/
+Disallow: /app/
+Disallow: /vendor/
+Disallow: /scripts/
+
+# Block sensitive files
+Disallow: /.env
+Disallow: /.git/
+Disallow: /.htaccess
+Disallow: /composer.json
+Disallow: /composer.lock
+Disallow: /package.json
+
+# Sitemap
+Sitemap: https://wgs-service.cz/sitemap.xml
+
+# Crawl-delay for polite bots (optional)
+Crawl-delay: 10

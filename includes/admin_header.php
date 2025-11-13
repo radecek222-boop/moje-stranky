@@ -8,7 +8,7 @@
 <header class="admin-header">
     <div class="header-container">
         <div class="logo">
-            <h1>WGS</h1>
+            <div class="logo-text">WGS</div>
             <p>CONTROL CENTER</p>
         </div>
 

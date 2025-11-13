@@ -1,0 +1,66 @@
+# WGS Service - Crontab Configuration Example
+#
+# Instalace:
+#   crontab -e
+#   Zkopírovat níže uvedené řádky
+#   Upravit cesty podle vašeho prostředí
+#
+
+# Email pro notifikace (volitelné)
+MAILTO=admin@example.com
+
+# Shell
+SHELL=/bin/bash
+
+# Path
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# ============================================
+# WGS Service - Automatické Zálohy Databáze
+# ============================================
+# Běží každý den ve 2:00 ráno
+# Vytváří denní, týdenní a měsíční zálohy s automatickou rotací
+0 2 * * * /home/user/moje-stranky/scripts/backup-database.sh >> /home/user/moje-stranky/logs/backup.log 2>&1
+
+# ============================================
+# Alternativní časy (vyberte si jeden)
+# ============================================
+
+# Každých 6 hodin (0:00, 6:00, 12:00, 18:00)
+# 0 */6 * * * /home/user/moje-stranky/scripts/backup-database.sh >> /home/user/moje-stranky/logs/backup.log 2>&1
+
+# Každou půlnoc
+# 0 0 * * * /home/user/moje-stranky/scripts/backup-database.sh >> /home/user/moje-stranky/logs/backup.log 2>&1
+
+# Každou hodinu
+# 0 * * * * /home/user/moje-stranky/scripts/backup-database.sh >> /home/user/moje-stranky/logs/backup.log 2>&1
+
+# Pouze o víkendu (sobota a neděle ve 3:00)
+# 0 3 * * 6,0 /home/user/moje-stranky/scripts/backup-database.sh >> /home/user/moje-stranky/logs/backup.log 2>&1
+
+# ============================================
+# Další Maintenance Úkoly (volitelné)
+# ============================================
+
+# Vyčistění starých error logů (každou neděli ve 4:00)
+# 0 4 * * 0 find /home/user/moje-stranky/logs -name "*.log" -mtime +30 -delete
+
+# Optimalizace databázových tabulek (první den měsíce v 5:00)
+# 0 5 1 * * mysqlcheck -o -u USER -pPASSWORD DATABASE_NAME
+
+# ============================================
+# Cron Format Reference
+# ============================================
+# * * * * * command
+# │ │ │ │ │
+# │ │ │ │ └─── Den v týdnu (0-7, 0 a 7 = neděle)
+# │ │ │ └───── Měsíc (1-12)
+# │ │ └─────── Den v měsíci (1-31)
+# │ └───────── Hodina (0-23)
+# └─────────── Minuta (0-59)
+#
+# Speciální znaky:
+#   * = každá hodnota
+#   , = seznam (např. 1,3,5)
+#   - = rozsah (např. 1-5)
+#   / = krok (např. */5 = každých 5)

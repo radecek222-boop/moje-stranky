@@ -36,6 +36,7 @@ require_once INCLUDES_PATH . '/security_headers.php';
 
 // Load helper functions
 require_once INCLUDES_PATH . '/csrf_helper.php';
+require_once INCLUDES_PATH . '/seo_meta.php';
 
 // Load advanced error handler (with detailed error reporting)
 require_once INCLUDES_PATH . '/error_handler.php';
