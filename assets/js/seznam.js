@@ -6,7 +6,7 @@ async function getCSRFToken() {
 
   try {
     // Použít originalFetch aby se předešlo rekurzi
-    const response = await window.fetch("app/controllers/get_csrf_token.php");
+    const response = await window.fetch("/app/controllers/get_csrf_token.php");
     const data = await response.json();
     window.csrfTokenCache = data.token;
     return data.token;
@@ -562,7 +562,7 @@ async function reopenOrder(id) {
     formData.append('cas_navstevy', '');
     formData.append('csrf_token', csrfToken);
 
-    const response = await fetch('app/controllers/save.php', {
+    const response = await fetch('/app/controllers/save.php', {
       method: 'POST',
       body: formData
     });
@@ -612,7 +612,7 @@ async function reopenOrder(id) {
           minute: '2-digit'
         });
 
-        await fetch("app/notification_sender.php", {
+        await fetch("/app/notification_sender.php", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -732,7 +732,7 @@ async function saveData(data, successMsg) {
     formData.append("action", "update");
     formData.append("csrf_token", csrfToken);
 
-    const response = await fetch('app/controllers/save.php', {
+    const response = await fetch('/app/controllers/save.php', {
       method: 'POST',
       body: formData
     });
@@ -950,7 +950,7 @@ async function getDistance(fromAddress, toAddress) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
     
-    const response = await fetch('app/controllers/get_distance.php', {
+    const response = await fetch('/app/controllers/get_distance.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1282,7 +1282,7 @@ async function saveSelectedDate() {
     formData.append('stav', 'DOMLUVENÁ');
     formData.append('csrf_token', csrfToken);
 
-    const response = await fetch('app/controllers/save.php', {
+    const response = await fetch('/app/controllers/save.php', {
       method: 'POST',
       body: formData
     });
@@ -1423,7 +1423,7 @@ async function loadMapAndRoute() {
       </div>
     `;
     
-    const response = await fetch('app/controllers/get_distance.php', {
+    const response = await fetch('/app/controllers/get_distance.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1534,7 +1534,7 @@ async function showCustomerDetail(id) {
         <div class="editable-field">
           <label class="field-label">Fakturace</label>
           <div style="padding: 0.5rem 0; font-weight: 600; color: ${fakturace_firma === 'SK' ? '#059669' : '#0066cc'};">
-            ${fakturace_firma === 'CZ' ? '🇨🇿 Česká republika (CZ)' : '🇸🇰 Slovensko (SK)'}
+            ${fakturace_firma && fakturace_firma.toUpperCase() === 'SK' ? '🇸🇰 Slovensko (SK)' : '🇨🇿 Česká republika (CZ)'}
           </div>
         </div>
         <div class="editable-field">
