@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch: # Umožňuje manuální spuštění
 
 jobs:
   deploy:
@@ -11,10 +12,10 @@ jobs:
     name: Deploy via SFTP to Český hosting
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Deploy to Český hosting via SFTP
+      - name: 🚀 Deploy to Český hosting via SFTP
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
           server: ${{ secrets.FTP_HOST }}
@@ -25,4 +26,26 @@ jobs:
           remote_path: "/wgs-service.cz/www/"
           sftp_only: true
           delete_remote_files: false
+
+      - name: 🧹 Post-deploy cleanup (delete old logs)
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 22
+          script: |
+            cd /wgs-service.cz/www/
+            # Delete old archived logs
+            rm -f logs/*.2025*.gz logs/*.2025*.log 2>/dev/null || true
+            # Clear temp cache
+            rm -rf temp/cache/* 2>/dev/null || true
+            echo "✅ Cleanup completed"
+
+      - name: ✅ Deployment summary
+        run: |
+          echo "🎉 Deployment completed successfully!"
+          echo "📦 Branch: ${{ github.ref_name }}"
+          echo "💾 Commit: ${{ github.sha }}"
+          echo "⏰ Time: $(date)"
 
