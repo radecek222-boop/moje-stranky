@@ -27,7 +27,7 @@ jobs:
           sftp_only: true
           delete_remote_files: false
 
-      - name: 🧹 Post-deploy cleanup (delete old logs)
+      - name: 🧹 Post-deploy cleanup & optimization
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.FTP_HOST }}
@@ -36,11 +36,36 @@ jobs:
           port: 22
           script: |
             cd /wgs-service.cz/www/
-            # Delete old archived logs
-            rm -f logs/*.2025*.gz logs/*.2025*.log 2>/dev/null || true
+
+            echo "🧹 Cleaning old logs..."
+            # Delete ALL old archived logs
+            rm -f logs/*.gz logs/*.20*.log 2>/dev/null || true
+
+            # Truncate current error log (keep last 100 lines)
+            if [ -f logs/php_errors.log ]; then
+              tail -100 logs/php_errors.log > logs/php_errors.log.tmp
+              mv logs/php_errors.log.tmp logs/php_errors.log
+            fi
+
+            echo "💾 Clearing caches..."
             # Clear temp cache
             rm -rf temp/cache/* 2>/dev/null || true
-            echo "✅ Cleanup completed"
+
+            echo "🔧 Optimizing permissions..."
+            # Ensure backup script is executable
+            chmod +x scripts/backup-database.sh 2>/dev/null || true
+            chmod +x scripts/*.sh 2>/dev/null || true
+
+            echo "📦 Running first backup (if not exists)..."
+            # Create backup directory if needed
+            mkdir -p backups/daily backups/weekly backups/monthly 2>/dev/null || true
+
+            # Run backup if no backups exist yet
+            if [ ! -f backups/daily/*.sql.gz 2>/dev/null ]; then
+              bash scripts/backup-database.sh 2>/dev/null || echo "⚠️ Backup failed (check .env config)"
+            fi
+
+            echo "✅ Post-deploy cleanup completed!"
 
       - name: ✅ Deployment summary
         run: |
