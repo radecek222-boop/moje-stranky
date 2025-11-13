@@ -92,13 +92,18 @@ window.exportBothPDFs = async function() {
         // Označit jako hotovou
         logger.log('📋 Označuji reklamaci jako hotovou...');
         try {
+            // Get CSRF token from meta tag
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
             const markResponse = await fetch('app/controllers/save.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 body: new URLSearchParams({
                     action: 'update',
                     id: currentReklamaceId,
-                    mark_as_completed: '1'
+                    mark_as_completed: '1',
+                    csrf_token: csrfToken
                 })
             });
 

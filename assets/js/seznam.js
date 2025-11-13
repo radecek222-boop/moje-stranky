@@ -551,23 +551,26 @@ async function reopenOrder(id) {
   }
   
   try {
+    // Get CSRF token
+    const csrfToken = await getCSRFToken();
+
     const formData = new FormData();
     formData.append('action', 'update');
     formData.append('id', id);
     formData.append('stav', 'ČEKÁ');
     formData.append('termin', '');
     formData.append('cas_navstevy', '');
-    formData.append("action", "update");
-    
+    formData.append('csrf_token', csrfToken);
+
     const response = await fetch('app/controllers/save.php', {
       method: 'POST',
       body: formData
     });
-    
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
-    
+
     const result = await response.json();
     
     if (result.status === 'success') {
@@ -714,27 +717,52 @@ function startVisit(id) {
 // === ULOŽENÍ ===
 async function saveData(data, successMsg) {
   try {
+    // Get CSRF token
+    const csrfToken = await getCSRFToken();
+
     const formData = new FormData();
     Object.keys(data).forEach(key => {
       formData.append(key, data[key]);
     });
 
     formData.append("action", "update");
+    formData.append("csrf_token", csrfToken);
+
     const response = await fetch('app/controllers/save.php', {
       method: 'POST',
       body: formData
     });
 
     if (!response.ok) {
-      throw new Error(`Server error: ${response.status}`);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
     const result = await response.json();
     
     if (result.status === 'success') {
+      // Update cache with new data
+      Object.keys(data).forEach(key => {
+        const cacheRecord = WGS_DATA_CACHE.find(x => x.id == data.id);
+        if (cacheRecord && key !== 'action') {
+          cacheRecord[key] = data[key];
+        }
+        if (CURRENT_RECORD && CURRENT_RECORD.id == data.id && key !== 'action') {
+          CURRENT_RECORD[key] = data[key];
+        }
+      });
+
       alert(successMsg);
+
+      // Reload all data from DB to ensure consistency
       await loadAll(ACTIVE_FILTER);
-      closeDetail();
+
+      // Re-open detail to show updated data
+      if (data.id) {
+        closeDetail();
+        setTimeout(() => showDetail(data.id), 100);
+      } else {
+        closeDetail();
+      }
     } else {
       alert('Chyba: ' + (result.message || 'Nepodařilo se uložit.'));
     }
@@ -778,11 +806,26 @@ function showCalendar(id) {
 }
 
 function previousMonth() {
-  CAL_MONTH--;
-  if (CAL_MONTH < 0) {
-    CAL_MONTH = 11;
-    CAL_YEAR--;
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+
+  // Calculate previous month
+  let prevMonth = CAL_MONTH - 1;
+  let prevYear = CAL_YEAR;
+  if (prevMonth < 0) {
+    prevMonth = 11;
+    prevYear--;
   }
+
+  // Don't allow going to past months
+  if (prevYear < currentYear || (prevYear === currentYear && prevMonth < currentMonth)) {
+    alert('⚠️ Nelze zobrazit minulé měsíce.\n\nTermíny lze plánovat pouze do budoucna.');
+    return;
+  }
+
+  CAL_MONTH = prevMonth;
+  CAL_YEAR = prevYear;
   renderCalendar(CAL_MONTH, CAL_YEAR);
 }
 
@@ -845,15 +888,39 @@ function renderCalendar(m, y) {
     daysGrid.appendChild(empty);
   }
   
+  // Get today's date for comparison (at midnight for accurate comparison)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   for (let d = 1; d <= daysInMonth; d++) {
     const el = document.createElement('div');
     el.className = 'cal-day';
-    if (occupiedDays.has(d)) {
+
+    // Create date for this calendar day
+    const dayDate = new Date(y, m, d);
+    dayDate.setHours(0, 0, 0, 0);
+
+    // Disable past dates
+    const isPast = dayDate < today;
+    if (isPast) {
+      el.classList.add('disabled');
+      el.title = 'Nelze vybrat minulé datum';
+      el.style.opacity = '0.3';
+      el.style.cursor = 'not-allowed';
+      el.style.backgroundColor = '#f0f0f0';
+    } else if (occupiedDays.has(d)) {
       el.classList.add('occupied');
       el.title = 'Tento den má již nějaké termíny';
     }
+
     el.textContent = d;
     el.onclick = async () => {
+      // Prevent selection of past dates
+      if (isPast) {
+        alert('⚠️ Nelze vybrat minulé datum.\n\nVyberte prosím dnešní nebo budoucí datum.');
+        return;
+      }
+
       SELECTED_DATE = `${d}.${m + 1}.${y}`;
       document.querySelectorAll('.cal-day').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
@@ -1200,27 +1267,53 @@ async function saveSelectedDate() {
   }
 
   try {
+    // Get CSRF token
+    const csrfToken = await getCSRFToken();
+
     const formData = new FormData();
     formData.append('action', 'update');
     formData.append('id', CURRENT_RECORD.id);
     formData.append('termin', SELECTED_DATE);
     formData.append('cas_navstevy', SELECTED_TIME);
     formData.append('stav', 'DOMLUVENÁ');
+    formData.append('csrf_token', csrfToken);
 
     const response = await fetch('app/controllers/save.php', {
       method: 'POST',
       body: formData
     });
 
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
     const result = await response.json();
     
     if (result.status === 'success') {
+      // Update CURRENT_RECORD with new data
+      CURRENT_RECORD.termin = SELECTED_DATE;
+      CURRENT_RECORD.cas_navstevy = SELECTED_TIME;
+      CURRENT_RECORD.stav = 'DOMLUVENÁ';
+
+      // Update cache
+      const cacheRecord = WGS_DATA_CACHE.find(x => x.id === CURRENT_RECORD.id);
+      if (cacheRecord) {
+        cacheRecord.termin = SELECTED_DATE;
+        cacheRecord.cas_navstevy = SELECTED_TIME;
+        cacheRecord.stav = 'DOMLUVENÁ';
+      }
+
       alert(`✓ Termín uložen: ${SELECTED_DATE} ${SELECTED_TIME}\n\nStav automaticky změněn na: DOMLUVENÁ`);
-      
+
       await sendAppointmentConfirmation(CURRENT_RECORD, SELECTED_DATE, SELECTED_TIME);
-      
+
+      // Reload all data from DB to ensure consistency
       await loadAll(ACTIVE_FILTER);
+
+      // Re-open detail to show updated data
+      const recordId = CURRENT_RECORD.id;
       closeDetail();
+      setTimeout(() => showDetail(recordId), 100);
     } else {
       alert('Chyba: ' + (result.message || 'Nepodařilo se uložit.'));
     }
@@ -1969,21 +2062,26 @@ async function deleteReklamace(reklamaceId) {
         csrf_token: csrfToken
       })
     });
-    
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
     const result = await response.json();
-    
-    if (result.success) {
+
+    if (result.success || result.status === 'success') {
       logger.log('✅ Smazáno!');
       alert('✅ Reklamace byla úspěšně smazána!');
       closeDetail();
       setTimeout(() => location.reload(), 500);
     } else {
-      logger.error('❌ Chyba:', result.error);
-      alert('❌ Chyba: ' + (result.error || 'Nepodařilo se smazat'));
+      const errorMsg = result.message || result.error || 'Nepodařilo se smazat';
+      logger.error('❌ Chyba:', errorMsg);
+      alert('❌ Chyba: ' + errorMsg);
     }
   } catch (error) {
     logger.error('❌ Chyba při mazání:', error);
-    alert('❌ Chyba při mazání. Zkuste to znovu.');
+    alert('❌ Chyba při mazání: ' + error.message);
   }
 }
 
