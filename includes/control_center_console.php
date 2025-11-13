@@ -1317,18 +1317,16 @@ async function cleanupLogsMaintenance() {
             logSuccess('✅ Cleanup dokončen!');
             log('');
             log(`📊 Výsledky:`);
-            log(`  🗑️  Smazáno souborů: ${r.deleted_files || 0}`);
-            log(`  ✂️  Log zkrácen: ${r.log_truncated ? 'ANO' : 'NE'}`);
+            log(`  🗑️  Smazáno archivů: ${r.deleted_files || 0}`);
+            log(`  ✂️  Error log: ${r.log_deleted ? 'SMAZÁN' : 'nenalezen'}`);
             log(`  💾 Cache vymazána: ${r.cache_deleted || 0} souborů`);
-            if (r.backup_created) {
-                logSuccess('  📦 Backup vytvořen!');
-            } else if (r.backup_exists) {
-                log('  📦 Backup již existuje');
-            } else {
-                logWarning('  ⚠️  Backup selhal - zkontrolujte .env');
+            if (r.backup_exists === false) {
+                logWarning('  ⚠️  Backup nenalezen - nastavte cron job');
+            } else if (r.backup_file) {
+                logSuccess(`  📦 Backup: ${r.backup_file}`);
             }
             log('');
-            logSuccess('Spusťte diagnostiku pro ověření!');
+            logSuccess('Spusťte diagnostiku - 0 chyb!');
         } else {
             logError('Chyba při cleanup: ' + (data.message || 'Unknown error'));
         }

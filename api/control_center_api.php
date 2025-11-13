@@ -482,31 +482,13 @@ try {
             }
             $results['deleted_files'] = $deletedFiles;
 
-            // 2. Zkrátit php_errors.log (pure PHP bez exec)
+            // 2. Smazat php_errors.log (vyčistit staré chyby)
             $errorLog = $logsDir . '/php_errors.log';
-            if (file_exists($errorLog) && filesize($errorLog) > 10000) {
-                try {
-                    // Bezpečně číst poslední 100 řádků bez načtení celého souboru
-                    $lines = [];
-                    $file = new SplFileObject($errorLog, 'r');
-                    $file->seek(PHP_INT_MAX);
-                    $lastLine = $file->key();
-                    $startLine = max(0, $lastLine - 100);
-
-                    $file->seek($startLine);
-                    while (!$file->eof()) {
-                        $line = $file->fgets();
-                        if ($line !== false) $lines[] = $line;
-                    }
-
-                    file_put_contents($errorLog, implode('', $lines));
-                    $results['log_truncated'] = true;
-                } catch (Exception $e) {
-                    $results['log_truncated'] = false;
-                    $results['log_error'] = $e->getMessage();
-                }
+            if (file_exists($errorLog)) {
+                unlink($errorLog);
+                $results['log_deleted'] = true;
             } else {
-                $results['log_truncated'] = 'skipped';
+                $results['log_deleted'] = false;
             }
 
             // 3. Vymazat cache
