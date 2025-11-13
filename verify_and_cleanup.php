@@ -5,6 +5,27 @@
 
 require_once __DIR__ . '/init.php';
 
+// SECURITY: Check admin access
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    http_response_code(403);
+    die('<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Access Denied</title>
+    <style>
+        body { font-family: Arial; text-align: center; padding: 50px; }
+        h1 { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <h1>🔒 Access Denied</h1>
+    <p>This page is only accessible to administrators.</p>
+    <p><a href="/prihlaseni.php">Login as Admin</a></p>
+</body>
+</html>');
+}
+
 header('Content-Type: text/html; charset=utf-8');
 ?>
 <!DOCTYPE html>
