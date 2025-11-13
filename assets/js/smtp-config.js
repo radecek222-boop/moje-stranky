@@ -113,7 +113,7 @@ async function saveSmtpConfig() {
         const result = await response.json();
 
         if (result.status === 'success') {
-            showNotification('success', '✓ SMTP konfigurace byla uložena');
+            showNotification('success', 'SMTP konfigurace byla uložena');
         } else {
             showNotification('error', 'Chyba: ' + result.message);
         }
@@ -137,14 +137,8 @@ async function testSmtpConnection() {
         // Získat CSRF token PŘED vytvořením objektu (ASYNC!)
         const csrfToken = await getCSRFToken();
 
-        console.log('[SMTP Test Debug] CSRF token type:', typeof csrfToken);
-        console.log('[SMTP Test Debug] CSRF token value:', csrfToken);
-        console.log('[SMTP Test Debug] CSRF token preview:', csrfToken && typeof csrfToken === 'string' ? `${csrfToken.substring(0, 10)}...` : csrfToken);
-        console.log('[SMTP Test Debug] In iframe:', window.parent !== window);
-        console.log('[SMTP Test Debug] Session available:', document.cookie.includes('PHPSESSID'));
-
         if (!csrfToken) {
-            showNotification('error', '⚠️ CSRF token nebyl nalezen - session problém v Safari iframe');
+            showNotification('error', 'CSRF token nebyl nalezen - session problém v Safari iframe');
             throw new Error('CSRF token nebyl nalezen');
         }
 
@@ -162,8 +156,8 @@ async function testSmtpConnection() {
         // Pokud 403, zkus získat debug info
         if (response.status === 403) {
             const errorData = await response.json();
-            console.error('[SMTP Test Debug] 403 Error details:', errorData);
-            showNotification('error', `⚠️ CSRF validace selhala: ${JSON.stringify(errorData.debug || {})}`);
+            console.error('403 Error details:', errorData);
+            showNotification('error', `CSRF validace selhala: ${JSON.stringify(errorData.debug || {})}`);
             throw new Error(`HTTP 403 - ${errorData.message || 'CSRF validation failed'}`);
         }
 
@@ -171,31 +165,28 @@ async function testSmtpConnection() {
             throw new Error(`HTTP ${response.status}`);
         }
 
-        // Debug: získat raw response text
+        // Získat raw response text
         const responseText = await response.text();
-        console.log('[SMTP Test Debug] Response status:', response.status);
-        console.log('[SMTP Test Debug] Response headers:', response.headers.get('content-type'));
-        console.log('[SMTP Test Debug] Response text (first 500 chars):', responseText.substring(0, 500));
 
         // Zkusit parsovat JSON
         let result;
         try {
             result = JSON.parse(responseText);
         } catch (parseError) {
-            console.error('[SMTP Test Debug] JSON parse failed:', parseError);
-            console.error('[SMTP Test Debug] Full response:', responseText);
-            showNotification('error', `⚠️ Server vrátil neplatnou odpověď (ne JSON). Zkontrolujte konzoli pro detaily.`);
+            console.error('JSON parse failed:', parseError);
+            console.error('Full response:', responseText);
+            showNotification('error', `Server vrátil neplatnou odpověď (ne JSON). Zkontrolujte konzoli pro detaily.`);
             throw new Error(`Invalid JSON response: ${parseError.message}`);
         }
 
         if (result.status === 'success') {
-            showNotification('success', '✓ ' + result.message);
+            showNotification('success', result.message);
         } else {
-            showNotification('error', '✗ Test selhal: ' + result.message);
+            showNotification('error', 'Test selhal: ' + result.message);
         }
     } catch (error) {
         console.error('Test SMTP error:', error);
-        showNotification('error', '✗ Chyba při testování SMTP připojení');
+        showNotification('error', 'Chyba při testování SMTP připojení');
     } finally {
         testBtn.disabled = false;
         testBtn.textContent = originalText;
@@ -206,25 +197,22 @@ async function testSmtpConnection() {
 function getCSRFToken() {
     // Zkusit aktuální dokument
     let metaTag = document.querySelector('meta[name="csrf-token"]');
-    console.log('[getCSRFToken] Found in current doc:', !!metaTag);
 
     // Pokud je skript v iframe, zkusit parent dokument
     if (!metaTag && window.parent && window.parent !== window) {
         try {
             metaTag = window.parent.document.querySelector('meta[name="csrf-token"]');
-            console.log('[getCSRFToken] Found in parent doc:', !!metaTag);
         } catch (e) {
             console.warn('Cannot access parent document for CSRF token:', e);
         }
     }
 
     if (!metaTag) {
-        console.warn('[getCSRFToken] No meta tag found');
+        console.warn('No CSRF meta tag found');
         return null;
     }
 
     const token = metaTag.getAttribute('content');
-    console.log('[getCSRFToken] Token type:', typeof token, 'Length:', token ? token.length : 0);
 
     // Ujistit se, že vracíme string nebo null
     return token && typeof token === 'string' && token.length > 0 ? String(token) : null;

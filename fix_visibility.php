@@ -46,12 +46,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fix_email'])) {
 
         $affected = $stmt->rowCount();
         $message = "<div style='background: #0a0; color: white; padding: 2rem; margin: 2rem 0; font-size: 1.2rem; font-weight: bold;'>
-            ✓ ÚSPĚCH! Opraveno $affected reklamací pro $emailToFix<br>
+            ÚSPĚCH! Opraveno $affected reklamací pro $emailToFix<br>
             (created_by = $userIdToSet, role = $userRole)
         </div>";
     } catch (Exception $e) {
         $message = "<div style='background: #d00; color: white; padding: 2rem; margin: 2rem 0;'>
-            ✗ CHYBA: " . $e->getMessage() . "
+            CHYBA: " . $e->getMessage() . "
         </div>";
     }
 }
@@ -93,13 +93,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['auto_fix_all'])) {
 
         $detailsList = implode('<br>', $details);
         $message = "<div style='background: #0a0; color: white; padding: 2rem; margin: 2rem 0; font-size: 1.2rem;'>
-            ✓ AUTO-OPRAVA DOKONČENA!<br>
+            AUTO-OPRAVA DOKONČENA!<br>
             Celkem opraveno: <strong>$totalFixed reklamací</strong><br><br>
             Detail:<br>$detailsList
         </div>";
     } catch (Exception $e) {
         $message = "<div style='background: #d00; color: white; padding: 2rem; margin: 2rem 0;'>
-            ✗ CHYBA: " . $e->getMessage() . "
+            CHYBA: " . $e->getMessage() . "
         </div>";
     }
 }
@@ -197,7 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['auto_fix_all'])) {
 </head>
 <body>
 
-<h1>🔧 OPRAVA VIDITELNOSTI REKLAMACÍ</h1>
+<h1>OPRAVA VIDITELNOSTI REKLAMACÍ</h1>
 
 <?php echo $message; ?>
 
@@ -214,13 +214,13 @@ $hasCreatedBy = $stmt->fetchColumn();
 
 if ($nullCreatedBy > 0) {
     echo '<div class="warning">';
-    echo "⚠️ PROBLÉM NALEZEN!<br>";
+    echo "PROBLÉM NALEZEN!<br>";
     echo "<strong>$nullCreatedBy reklamací</strong> z celkových <strong>$totalClaims</strong> nemá vyplněné created_by<br>";
     echo "→ Prodejci tyto reklamace NEVIDÍ v seznam.php";
     echo '</div>';
 } else {
     echo '<div style="background: #0a0; color: white; padding: 1rem; margin: 1rem 0; font-weight: 600;">';
-    echo "✓ V POŘÁDKU: Všechny reklamace mají vyplněné created_by";
+    echo "V POŘÁDKU: Všechny reklamace mají vyplněné created_by";
     echo '</div>';
 }
 ?>
@@ -235,19 +235,19 @@ if ($nullCreatedBy > 0) {
 <?php if ($nullCreatedBy > 0): ?>
 
 <div class="box">
-    <h2>⚡ RYCHLÁ OPRAVA - AUTO FIX</h2>
+    <h2>RYCHLÁ OPRAVA - AUTO FIX</h2>
     <p style="margin: 1rem 0;">
         Toto automaticky opraví <strong>VŠECHNY</strong> reklamace s NULL created_by.<br>
         Pro každý email v databázi najde odpovídající user_id a nastaví ho jako created_by.
     </p>
     <form method="POST">
         <button type="submit" name="auto_fix_all" class="success" onclick="return confirm('OPRAVIT všechny reklamace s NULL created_by?')">
-            ⚡ AUTO-OPRAVA VŠECH
+            AUTO-OPRAVA VŠECH
         </button>
     </form>
 </div>
 
-<h2>📋 REKLAMACE PODLE EMAILU</h2>
+<h2>REKLAMACE PODLE EMAILU</h2>
 
 <?php
 $sql = "SELECT
@@ -267,7 +267,7 @@ $stmt = $pdo->query($sql);
 $emailGroups = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 if (empty($emailGroups)) {
-    echo '<p style="color: green; font-weight: 600;">✓ Žádné reklamace s NULL created_by</p>';
+    echo '<p style="color: green; font-weight: 600;">Žádné reklamace s NULL created_by</p>';
 } else {
     echo '<table>';
     echo '<tr>
@@ -298,7 +298,7 @@ if (empty($emailGroups)) {
         } else {
             echo '<td class="null">NULL</td>';
             echo '<td class="null">-</td>';
-            echo '<td style="color: red;">⚠️ User neexistuje</td>';
+            echo '<td style="color: red;">User neexistuje</td>';
         }
 
         echo '</tr>';
@@ -310,7 +310,7 @@ if (empty($emailGroups)) {
 
 <?php endif; ?>
 
-<h2>📊 VŠECHNY REKLAMACE (poslední 50)</h2>
+<h2>VŠECHNY REKLAMACE (poslední 50)</h2>
 
 <?php
 $sql = "SELECT
@@ -346,7 +346,7 @@ foreach ($claims as $row) {
     echo '<td>' . ($row['reklamace_id'] ?? '-') . '</td>';
     echo '<td>' . ($row['email'] ?? '-') . '</td>';
     echo '<td>' . ($row['jmeno'] ?? '-') . '</td>';
-    echo '<td class="' . ($isNull ? 'null' : '') . '">' . ($isNull ? 'NULL ⚠️' : $row['created_by']) . '</td>';
+    echo '<td class="' . ($isNull ? 'null' : '') . '">' . ($isNull ? 'NULL WARNING' : $row['created_by']) . '</td>';
     echo '<td>' . ($row['created_by_role'] ?? '-') . '</td>';
     echo '<td>' . ($row['created_at'] ?? '-') . '</td>';
     echo '</tr>';
@@ -357,7 +357,7 @@ echo '</table>';
 
 <div style="margin-top: 2rem;">
     <button onclick="window.location.href='admin.php?tab=tools'">← Zpět na Admin</button>
-    <button onclick="window.location.reload()">🔄 Obnovit</button>
+    <button onclick="window.location.reload()">Obnovit</button>
 </div>
 
 </body>

@@ -19,7 +19,7 @@ try {
 
     // Formátování chybové zprávy
     $logMessage = "\n" . str_repeat('=', 80) . "\n";
-    $logMessage .= "🔴 JAVASCRIPT ERROR\n";
+    $logMessage .= "JAVASCRIPT ERROR\n";
     $logMessage .= str_repeat('=', 80) . "\n";
     $logMessage .= "Čas: " . date('Y-m-d H:i:s') . "\n";
     $logMessage .= "Typ: " . ($error['type'] ?? 'Unknown') . "\n";

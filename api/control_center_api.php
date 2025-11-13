@@ -777,7 +777,7 @@ try {
 
             echo json_encode([
                 'status' => 'success',
-                'message' => "✓ Testovací email byl úspěšně odeslán na $adminEmail. Zkontrolujte si schránku."
+                'message' => "Testovací email byl úspěšně odeslán na $adminEmail. Zkontrolujte si schránku."
             ]);
             break;
 

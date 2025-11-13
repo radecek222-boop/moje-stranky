@@ -89,9 +89,9 @@ function testLogin($role, $pdo) {
         // Check 1: DB Connection test
         try {
             $pdo->query("SELECT 1");
-            $checks[] = ['passed' => true, 'message' => '✅ DB připojení funguje'];
+            $checks[] = ['passed' => true, 'message' => 'DB připojení funguje'];
         } catch (Exception $e) {
-            $checks[] = ['passed' => false, 'message' => '❌ DB připojení selhalo: ' . $e->getMessage()];
+            $checks[] = ['passed' => false, 'message' => 'DB připojení selhalo: ' . $e->getMessage()];
             $success = false;
             return ['success' => $success, 'step' => 'login', 'role' => $role, 'checks' => $checks];
         }
@@ -116,13 +116,13 @@ function testLogin($role, $pdo) {
             $testUserId = $pdo->lastInsertId();
 
             if ($testUserId > 0) {
-                $checks[] = ['passed' => true, 'message' => "✅ Test uživatel vytvořen (ID: $testUserId)"];
+                $checks[] = ['passed' => true, 'message' => "Test uživatel vytvořen (ID: $testUserId)"];
             } else {
-                $checks[] = ['passed' => false, 'message' => '❌ Nepodařilo se vytvořit test uživatele'];
+                $checks[] = ['passed' => false, 'message' => 'Nepodařilo se vytvořit test uživatele'];
                 $success = false;
             }
         } catch (Exception $e) {
-            $checks[] = ['passed' => false, 'message' => '❌ Chyba vytvoření uživatele: ' . $e->getMessage()];
+            $checks[] = ['passed' => false, 'message' => 'Chyba vytvoření uživatele: ' . $e->getMessage()];
             $success = false;
         }
 
@@ -134,13 +134,13 @@ function testLogin($role, $pdo) {
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
                 if ($user && $user['email'] === $testEmail) {
-                    $checks[] = ['passed' => true, 'message' => '✅ Načtení uživatele z DB funguje'];
+                    $checks[] = ['passed' => true, 'message' => 'Načtení uživatele z DB funguje'];
                 } else {
-                    $checks[] = ['passed' => false, 'message' => '❌ Načtení uživatele selhalo'];
+                    $checks[] = ['passed' => false, 'message' => 'Načtení uživatele selhalo'];
                     $success = false;
                 }
             } catch (Exception $e) {
-                $checks[] = ['passed' => false, 'message' => '❌ Chyba načtení: ' . $e->getMessage()];
+                $checks[] = ['passed' => false, 'message' => 'Chyba načtení: ' . $e->getMessage()];
                 $success = false;
             }
         }
@@ -153,22 +153,22 @@ function testLogin($role, $pdo) {
                 $hashedPassword = $stmt->fetchColumn();
 
                 if (password_verify('test123', $hashedPassword)) {
-                    $checks[] = ['passed' => true, 'message' => '✅ Password verify funguje'];
+                    $checks[] = ['passed' => true, 'message' => 'Password verify funguje'];
                 } else {
-                    $checks[] = ['passed' => false, 'message' => '❌ Password verify nefunguje'];
+                    $checks[] = ['passed' => false, 'message' => 'Password verify nefunguje'];
                     $success = false;
                 }
             } catch (Exception $e) {
-                $checks[] = ['passed' => false, 'message' => '❌ Chyba password verify: ' . $e->getMessage()];
+                $checks[] = ['passed' => false, 'message' => 'Chyba password verify: ' . $e->getMessage()];
                 $success = false;
             }
         }
 
         // Check 5: Test session
         if (session_status() === PHP_SESSION_ACTIVE) {
-            $checks[] = ['passed' => true, 'message' => '✅ Session je aktivní'];
+            $checks[] = ['passed' => true, 'message' => 'Session je aktivní'];
         } else {
-            $checks[] = ['passed' => false, 'message' => '❌ Session není aktivní'];
+            $checks[] = ['passed' => false, 'message' => 'Session není aktivní'];
             $success = false;
         }
 
@@ -177,9 +177,9 @@ function testLogin($role, $pdo) {
         if ($testUserId) {
             try {
                 $pdo->prepare("DELETE FROM wgs_users WHERE id = ?")->execute([$testUserId]);
-                $checks[] = ['passed' => true, 'message' => '🧹 Test uživatel vymazán (cleanup OK)'];
+                $checks[] = ['passed' => true, 'message' => 'Test uživatel vymazán (cleanup OK)'];
             } catch (Exception $e) {
-                $checks[] = ['passed' => false, 'message' => '⚠️ Cleanup selhal: ' . $e->getMessage()];
+                $checks[] = ['passed' => false, 'message' => 'Cleanup selhal: ' . $e->getMessage()];
             }
         }
     }
@@ -350,13 +350,13 @@ function testSaveClaim($role, $pdo) {
             $testClaimId = $pdo->lastInsertId();
 
             if ($testClaimId > 0) {
-                $checks[] = ['passed' => true, 'message' => "✅ Test reklamace vytvořena (ID: $testClaimId)"];
+                $checks[] = ['passed' => true, 'message' => "Test reklamace vytvořena (ID: $testClaimId)"];
             } else {
-                $checks[] = ['passed' => false, 'message' => '❌ Vytvoření reklamace selhalo'];
+                $checks[] = ['passed' => false, 'message' => 'Vytvoření reklamace selhalo'];
                 $success = false;
             }
         } catch (Exception $e) {
-            $checks[] = ['passed' => false, 'message' => '❌ Chyba vytvoření reklamace: ' . $e->getMessage()];
+            $checks[] = ['passed' => false, 'message' => 'Chyba vytvoření reklamace: ' . $e->getMessage()];
             $success = false;
         }
 
@@ -368,13 +368,13 @@ function testSaveClaim($role, $pdo) {
                 $claim = $stmt->fetch(PDO::FETCH_ASSOC);
 
                 if ($claim && $claim['jmeno'] === 'Test Zákazník') {
-                    $checks[] = ['passed' => true, 'message' => '✅ Načtení reklamace z DB funguje'];
+                    $checks[] = ['passed' => true, 'message' => 'Načtení reklamace z DB funguje'];
                 } else {
-                    $checks[] = ['passed' => false, 'message' => '❌ Načtení reklamace selhalo'];
+                    $checks[] = ['passed' => false, 'message' => 'Načtení reklamace selhalo'];
                     $success = false;
                 }
             } catch (Exception $e) {
-                $checks[] = ['passed' => false, 'message' => '❌ Chyba načtení: ' . $e->getMessage()];
+                $checks[] = ['passed' => false, 'message' => 'Chyba načtení: ' . $e->getMessage()];
                 $success = false;
             }
         }
@@ -390,31 +390,31 @@ function testSaveClaim($role, $pdo) {
                 $newStatus = $stmt->fetchColumn();
 
                 if ($newStatus === 'DOMLUVENÁ') {
-                    $checks[] = ['passed' => true, 'message' => '✅ UPDATE stavu reklamace funguje'];
+                    $checks[] = ['passed' => true, 'message' => 'UPDATE stavu reklamace funguje'];
                 } else {
-                    $checks[] = ['passed' => false, 'message' => '❌ UPDATE selhalo'];
+                    $checks[] = ['passed' => false, 'message' => 'UPDATE selhalo'];
                     $success = false;
                 }
             } catch (Exception $e) {
-                $checks[] = ['passed' => false, 'message' => '❌ Chyba UPDATE: ' . $e->getMessage()];
+                $checks[] = ['passed' => false, 'message' => 'Chyba UPDATE: ' . $e->getMessage()];
                 $success = false;
             }
         }
 
         // Check 4: Test validace emailu
         if (filter_var('test@test.local', FILTER_VALIDATE_EMAIL)) {
-            $checks[] = ['passed' => true, 'message' => '✅ Email validace funguje'];
+            $checks[] = ['passed' => true, 'message' => 'Email validace funguje'];
         } else {
-            $checks[] = ['passed' => false, 'message' => '❌ Email validace nefunguje'];
+            $checks[] = ['passed' => false, 'message' => 'Email validace nefunguje'];
             $success = false;
         }
 
         // Check 5: Test phone validace (basic)
         $testPhone = '+420777888999';
         if (preg_match('/^\+?[0-9]{9,15}$/', $testPhone)) {
-            $checks[] = ['passed' => true, 'message' => '✅ Telefonní číslo validace funguje'];
+            $checks[] = ['passed' => true, 'message' => 'Telefonní číslo validace funguje'];
         } else {
-            $checks[] = ['passed' => false, 'message' => '❌ Telefonní validace nefunguje'];
+            $checks[] = ['passed' => false, 'message' => 'Telefonní validace nefunguje'];
             $success = false;
         }
 
@@ -423,9 +423,9 @@ function testSaveClaim($role, $pdo) {
         if ($testClaimId) {
             try {
                 $pdo->prepare("DELETE FROM wgs_reklamace WHERE id = ?")->execute([$testClaimId]);
-                $checks[] = ['passed' => true, 'message' => '🧹 Test reklamace vymazána (cleanup OK)'];
+                $checks[] = ['passed' => true, 'message' => 'Test reklamace vymazána (cleanup OK)'];
             } catch (Exception $e) {
-                $checks[] = ['passed' => false, 'message' => '⚠️ Cleanup selhal: ' . $e->getMessage()];
+                $checks[] = ['passed' => false, 'message' => 'Cleanup selhal: ' . $e->getMessage()];
             }
         }
     }

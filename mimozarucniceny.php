@@ -99,7 +99,7 @@
       </div>
       
       <div class="distance-info" id="distanceInfo">
-        <strong data-lang-cs="📍 Vypočtená vzdálenost" data-lang-en="📍 Calculated distance" data-lang-it="📍 Distanza calcolata">📍 Vypočtená vzdálenost</strong>
+        <strong data-lang-cs="Vypočtená vzdálenost" data-lang-en="Calculated distance" data-lang-it="Distanza calcolata">Vypočtená vzdálenost</strong>
         <div id="distanceText"></div>
       </div>
     </div>
@@ -214,7 +214,7 @@
       </div>
       
       <div style="margin-top: 1.5rem; padding: 1rem; background: #fff9f0; border-left: 3px solid #ff9900; font-size: 0.85rem; color: #666;">
-        ⚠️ <strong data-lang-cs="Pozor:" data-lang-en="Warning:" data-lang-it="Attenzione:">Pozor:</strong> <span data-lang-cs="Cena nezahrnuje materiál (originální potahy z továrny Natuzzi) a náhradní mechanické díly." data-lang-en="Price does not include materials (original Natuzzi factory covers) and spare mechanical parts." data-lang-it="Il prezzo non include materiali (rivestimenti originali Natuzzi) e ricambi meccanici.">Cena <strong>nezahrnuje</strong> materiál (originální potahy z továrny Natuzzi) a náhradní mechanické díly. Tyto položky budou upřesněny po diagnostice.</span>
+        <strong data-lang-cs="Pozor:" data-lang-en="Warning:" data-lang-it="Attenzione:">Pozor:</strong> <span data-lang-cs="Cena nezahrnuje materiál (originální potahy z továrny Natuzzi) a náhradní mechanické díly." data-lang-en="Price does not include materials (original Natuzzi factory covers) and spare mechanical parts." data-lang-it="Il prezzo non include materiali (rivestimenti originali Natuzzi) e ricambi meccanici.">Cena <strong>nezahrnuje</strong> materiál (originální potahy z továrny Natuzzi) a náhradní mechanické díly. Tyto položky budou upřesněny po diagnostice.</span>
       </div>
       
       <a href="#" class="btn-order" id="orderServiceBtn" data-lang-cs="Objednat servis" data-lang-en="Order service" data-lang-it="Ordinare servizio">Objednat servis</a>
@@ -222,7 +222,7 @@
     
     <!-- INFO BOX -->
     <div class="info-box">
-      <div class="info-box-title" data-lang-cs="💡 Důležité informace" data-lang-en="💡 Important information" data-lang-it="💡 Informazioni importanti">💡 Důležité informace</div>
+      <div class="info-box-title" data-lang-cs="Důležité informace" data-lang-en="Important information" data-lang-it="Informazioni importanti">Důležité informace</div>
       <div class="info-box-text">
         <strong data-lang-cs="Uvedené ceny nezahrnují materiál a náhradní díly:" data-lang-en="The prices listed do not include materials and spare parts:" data-lang-it="I prezzi indicati non includono materiali e pezzi di ricambio:">Uvedené ceny nezahrnují materiál a náhradní díly:</strong><br><br>
         

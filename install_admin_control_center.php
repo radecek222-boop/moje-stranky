@@ -236,13 +236,13 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 <body>
     <div class="install-container">
         <div class="install-header">
-            <h1>🚀 Admin Control Center</h1>
+            <h1>Admin Control Center</h1>
             <p>Instalace databázových tabulek</p>
         </div>
 
         <div class="install-body">
             <div class="install-info">
-                <h3>📋 Co bude nainstalováno:</h3>
+                <h3>Co bude nainstalováno:</h3>
                 <ul>
                     <li><strong>wgs_theme_settings</strong> - Barvy, fonty, logo</li>
                     <li><strong>wgs_content_texts</strong> - Editovatelné texty stránek</li>
@@ -263,13 +263,13 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
             <div class="install-actions">
                 <button class="btn btn-primary" id="installBtn" onclick="startInstallation()">
-                    ▶️ Spustit instalaci
+                    Spustit instalaci
                 </button>
                 <button class="btn btn-secondary" onclick="window.close()" style="display: none;" id="closeBtn">
                     Zavřít
                 </button>
                 <button class="btn btn-success" onclick="window.location.href='/admin.php?tab=control_center'" style="display: none;" id="goToAdminBtn">
-                    ✅ Přejít do Control Center
+                    Přejít do Control Center
                 </button>
             </div>
         </div>
@@ -291,7 +291,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
         function addStatus(message, type = 'info') {
             const statusElement = document.getElementById('installStatus');
-            const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
+            const icon = type === 'success' ? 'OK' : (type === 'error' ? 'ERROR' : 'INFO');
 
             const statusItem = document.createElement('div');
             statusItem.className = `status-item ${type}`;
@@ -312,7 +312,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
             // Disable tlačítko
             installBtn.disabled = true;
-            installBtn.textContent = '⏳ Probíhá instalace...';
+            installBtn.textContent = 'Probíhá instalace...';
 
             // Zobrazit prvky
             progressBar.classList.add('active');
@@ -321,18 +321,18 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
             try {
                 // KROK 1: Kontrola stavu
-                addLog('🔍 Kontroluji aktuální stav databáze...', 'info');
+                addLog('Kontroluji aktuální stav databáze...', 'info');
                 setProgress(10);
 
                 const statusResponse = await fetch('/api/migration_executor.php?action=check_migration_status');
                 const statusData = await statusResponse.json();
 
                 if (statusData.status === 'success') {
-                    addLog('✓ Stav databáze načten', 'success');
+                    addLog('Stav databáze načten', 'success');
                     addStatus(`Nalezeno ${statusData.data.tables_status.filter(t => t.exists).length}/6 tabulek`, 'info');
 
                     if (!statusData.data.migration_needed) {
-                        addLog('ℹ️ Všechny tabulky již existují!', 'info');
+                        addLog('Všechny tabulky již existují!', 'info');
                         addStatus('Migrace není potřeba - všechny tabulky jsou vytvořeny', 'success');
                         setProgress(100);
 
@@ -345,7 +345,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
                 setProgress(25);
 
                 // KROK 2: Spuštění migrace
-                addLog('🚀 Spouštím migraci migration_admin_control_center.sql...', 'info');
+                addLog('Spouštím migraci migration_admin_control_center.sql...', 'info');
                 setProgress(40);
 
                 const formData = new FormData();
@@ -362,8 +362,8 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
                 const migrationData = await migrationResponse.json();
 
                 if (migrationData.status === 'success') {
-                    addLog('✅ Migrace úspěšně dokončena!', 'success');
-                    addLog(`📊 Vykonáno ${migrationData.data.statements_executed} SQL příkazů za ${migrationData.data.execution_time_ms}ms`, 'success');
+                    addLog('Migrace úspěšně dokončena!', 'success');
+                    addLog(`Vykonáno ${migrationData.data.statements_executed} SQL příkazů za ${migrationData.data.execution_time_ms}ms`, 'success');
 
                     setProgress(90);
 
@@ -372,13 +372,13 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
                     migrationData.data.details.forEach(detail => {
                         if (detail.table) {
-                            addLog(`  ✓ ${detail.table}: ${detail.rows} záznamů`, 'success');
+                            addLog(`  ${detail.table}: ${detail.rows} záznamů`, 'success');
                         }
                     });
 
                     setProgress(100);
 
-                    addLog('🎉 Instalace kompletně dokončena!', 'success');
+                    addLog('Instalace kompletně dokončena!', 'success');
                     addStatus('Admin Control Center je připraven k použití', 'success');
 
                     // Zobrazit tlačítko
@@ -391,11 +391,11 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
                 }
 
             } catch (error) {
-                addLog('❌ CHYBA: ' + error.message, 'error');
+                addLog('CHYBA: ' + error.message, 'error');
                 addStatus('Instalace selhala: ' + error.message, 'error');
 
                 installBtn.disabled = false;
-                installBtn.textContent = '🔄 Zkusit znovu';
+                installBtn.textContent = 'Zkusit znovu';
 
                 setProgress(0);
             }
@@ -409,11 +409,11 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
                 if (data.status === 'success' && !data.data.migration_needed) {
                     document.querySelector('.install-info').innerHTML = `
-                        <h3>✅ Instalace již proběhla</h3>
+                        <h3>Instalace již proběhla</h3>
                         <p style="margin: 10px 0 0 0; color: #666;">Všechny tabulky Admin Control Center jsou již vytvořeny.</p>
                     `;
 
-                    document.getElementById('installBtn').textContent = '✅ Již nainstalováno';
+                    document.getElementById('installBtn').textContent = 'Již nainstalováno';
                     document.getElementById('installBtn').disabled = true;
                     document.getElementById('goToAdminBtn').style.display = 'inline-block';
                 }

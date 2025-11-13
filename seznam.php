@@ -84,7 +84,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
   <!-- SEARCH BAR -->
 <div class="container"<?php if ($embedMode) echo ' style="margin-top: 0; padding-top: 1rem;"'; ?>>
   <div class="search-bar">
-    <span class="search-icon">🔍</span>
+    <span class="search-icon"></span>
     <input type="text" class="search-input" id="searchInput" placeholder="Hledat v reklamacích...">
     <button class="search-clear" id="searchClear">×</button>
   </div>
