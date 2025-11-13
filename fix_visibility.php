@@ -12,7 +12,7 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 $userId = $_SESSION['user_id'] ?? null;
 
 if (!$isAdmin && !$userId) {
-    die('<h1 style="color: red;">CHYBA: Musíte být přihlášeni</h1>');
+    die('<h2 style="color: red;">CHYBA: Musíte být přihlášeni</h2>');
 }
 
 $pdo = getDbConnection();

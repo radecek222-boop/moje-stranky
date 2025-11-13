@@ -19,7 +19,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     </style>
 </head>
 <body>
-    <h1>🔒 Access Denied</h1>
+    <h2>🔒 Access Denied</h2>
     <p>This page is only accessible to administrators.</p>
     <p><a href="/prihlaseni.php">Login as Admin</a></p>
 </body>
