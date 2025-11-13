@@ -142,6 +142,12 @@ function handleUpdate(PDO $pdo, array $input): array
                 $time = trim((string) $value);
                 $updateData[$field] = $time === '' ? null : $time;
                 break;
+            case 'stav':
+                // BEZPEČNOST: stav může obsahovat české znaky (ČEKÁ, DOMLUVENÁ, HOTOVO)
+                // Nepoužívat sanitizeInput - rozbije HTML entities
+                $stavValue = trim((string) $value);
+                $updateData[$field] = $stavValue === '' ? null : $stavValue;
+                break;
             default:
                 $sanitized = sanitizeInput((string) $value);
                 $updateData[$field] = $sanitized === '' ? null : $sanitized;
@@ -409,6 +415,10 @@ try {
     ]);
 
 } catch (Exception $e) {
+    // Log error for debugging
+    error_log('SAVE.PHP ERROR: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ':' . $e->getLine());
+    error_log('SAVE.PHP POST DATA: ' . json_encode($_POST));
+
     http_response_code(400);
     echo json_encode([
         'status' => 'error',
