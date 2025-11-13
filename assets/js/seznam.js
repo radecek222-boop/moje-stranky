@@ -786,11 +786,26 @@ function showCalendar(id) {
 }
 
 function previousMonth() {
-  CAL_MONTH--;
-  if (CAL_MONTH < 0) {
-    CAL_MONTH = 11;
-    CAL_YEAR--;
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+
+  // Calculate previous month
+  let prevMonth = CAL_MONTH - 1;
+  let prevYear = CAL_YEAR;
+  if (prevMonth < 0) {
+    prevMonth = 11;
+    prevYear--;
   }
+
+  // Don't allow going to past months
+  if (prevYear < currentYear || (prevYear === currentYear && prevMonth < currentMonth)) {
+    alert('⚠️ Nelze zobrazit minulé měsíce.\n\nTermíny lze plánovat pouze do budoucna.');
+    return;
+  }
+
+  CAL_MONTH = prevMonth;
+  CAL_YEAR = prevYear;
   renderCalendar(CAL_MONTH, CAL_YEAR);
 }
 
@@ -853,15 +868,39 @@ function renderCalendar(m, y) {
     daysGrid.appendChild(empty);
   }
   
+  // Get today's date for comparison (at midnight for accurate comparison)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   for (let d = 1; d <= daysInMonth; d++) {
     const el = document.createElement('div');
     el.className = 'cal-day';
-    if (occupiedDays.has(d)) {
+
+    // Create date for this calendar day
+    const dayDate = new Date(y, m, d);
+    dayDate.setHours(0, 0, 0, 0);
+
+    // Disable past dates
+    const isPast = dayDate < today;
+    if (isPast) {
+      el.classList.add('disabled');
+      el.title = 'Nelze vybrat minulé datum';
+      el.style.opacity = '0.3';
+      el.style.cursor = 'not-allowed';
+      el.style.backgroundColor = '#f0f0f0';
+    } else if (occupiedDays.has(d)) {
       el.classList.add('occupied');
       el.title = 'Tento den má již nějaké termíny';
     }
+
     el.textContent = d;
     el.onclick = async () => {
+      // Prevent selection of past dates
+      if (isPast) {
+        alert('⚠️ Nelze vybrat minulé datum.\n\nVyberte prosím dnešní nebo budoucí datum.');
+        return;
+      }
+
       SELECTED_DATE = `${d}.${m + 1}.${y}`;
       document.querySelectorAll('.cal-day').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
