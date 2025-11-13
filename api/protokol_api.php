@@ -35,7 +35,11 @@ try {
         }
 
         // BEZPEČNOST: CSRF ochrana pro POST operace
+        // Ensure CSRF token is a string, not an array (security)
         $csrfToken = $data['csrf_token'] ?? $_POST['csrf_token'] ?? '';
+        if (is_array($csrfToken)) {
+            $csrfToken = ''; // Reject arrays
+        }
         if (!validateCSRFToken($csrfToken)) {
             http_response_code(403);
             echo json_encode([

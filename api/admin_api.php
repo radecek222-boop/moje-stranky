@@ -42,6 +42,10 @@ if ($method === 'POST') {
     }
 
     $csrfToken = $payload['csrf_token'] ?? $_POST['csrf_token'] ?? $_GET['csrf_token'] ?? '';
+    // SECURITY: Ensure CSRF token is a string, not an array
+    if (is_array($csrfToken)) {
+        $csrfToken = '';
+    }
     if (!validateCSRFToken($csrfToken)) {
         respondError('Neplatný CSRF token. Obnovte stránku a zkuste to znovu.', 403);
     }
