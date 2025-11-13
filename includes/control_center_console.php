@@ -331,6 +331,9 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 // Debug mode - set to false in production
 const DEBUG_MODE = false;
 
+// CSRF Token from session
+const CSRF_TOKEN = <?= json_encode($_SESSION['csrf_token'] ?? '') ?>;
+
 let consoleOutput = [];
 let diagnosticsRunning = false;
 let totalErrors = 0;
@@ -1222,17 +1225,17 @@ async function checkAssets() {
 // ============================================
 
 async function clearCacheMaintenance() {
-    if (!confirm('Vymazat cache? Tato akce může dočasně zpomalit systém.')) {
-        return;
-    }
-
     logHeader('CLEAR CACHE');
-    log('Mazání cache...');
+    log('Mazání cache (může dočasně zpomalit systém)...');
 
     try {
         const response = await fetch('/api/control_center_api.php?action=clear_cache', {
             method: 'POST',
-            credentials: 'same-origin'
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ csrf_token: CSRF_TOKEN })
         });
 
         const data = await response.json();
@@ -1265,7 +1268,11 @@ async function optimizeDatabaseMaintenance() {
     try {
         const response = await fetch('/api/control_center_api.php?action=optimize_database', {
             method: 'POST',
-            credentials: 'same-origin'
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ csrf_token: CSRF_TOKEN })
         });
 
         const data = await response.json();
@@ -1296,7 +1303,11 @@ async function cleanupLogsMaintenance() {
     try {
         const response = await fetch('/api/control_center_api.php?action=cleanup_logs', {
             method: 'POST',
-            credentials: 'same-origin'
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ csrf_token: CSRF_TOKEN })
         });
 
         const data = await response.json();
@@ -1329,17 +1340,17 @@ async function cleanupLogsMaintenance() {
 }
 
 async function archiveLogsMaintenance() {
-    if (!confirm('Archivovat logy starší než 90 dní?')) {
-        return;
-    }
-
     logHeader('ARCHIVE LOGS');
-    log('Archivahuji staré logy...');
+    log('Archivahuji staré logy starší než 90 dní...');
 
     try {
         const response = await fetch('/api/control_center_api.php?action=archive_logs', {
             method: 'POST',
-            credentials: 'same-origin'
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ csrf_token: CSRF_TOKEN })
         });
 
         const data = await response.json();
