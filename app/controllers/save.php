@@ -142,6 +142,12 @@ function handleUpdate(PDO $pdo, array $input): array
                 $time = trim((string) $value);
                 $updateData[$field] = $time === '' ? null : $time;
                 break;
+            case 'stav':
+                // BEZPEČNOST: stav může obsahovat české znaky (ČEKÁ, DOMLUVENÁ, HOTOVO)
+                // Nepoužívat sanitizeInput - rozbije HTML entities
+                $stavValue = trim((string) $value);
+                $updateData[$field] = $stavValue === '' ? null : $stavValue;
+                break;
             default:
                 $sanitized = sanitizeInput((string) $value);
                 $updateData[$field] = $sanitized === '' ? null : $sanitized;
