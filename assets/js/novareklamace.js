@@ -729,15 +729,21 @@ const WGS = {
     if (!this.photos || this.photos.length === 0) return;
     console.log("📸 Počet fotek:", this.photos.length);
     try {
+      // Get CSRF token
+      const csrfResponse = await fetch('app/controllers/get_csrf_token.php');
+      const csrfData = await csrfResponse.json();
+      const csrfToken = csrfData.status === 'success' ? csrfData.token : '';
+
       const formData = new FormData();
       formData.append('reklamace_id', reklamaceId);
       formData.append('photo_type', 'problem');
+      formData.append('csrf_token', csrfToken);
       this.photos.forEach((photo, index) => {
         formData.append(`photo_${index}`, photo.data);
         formData.append(`filename_${index}`, `photo_${index + 1}.jpg`);
       });
       formData.append('photo_count', this.photos.length);
-      
+
       const response = await fetch('app/controllers/save_photos.php', {
         method: 'POST',
         body: formData
