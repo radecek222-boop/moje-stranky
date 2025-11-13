@@ -729,45 +729,55 @@ try {
             break;
 
         case 'test_smtp_connection':
-            // Test SMTP připojení
-            // Načíst aktuální SMTP nastavení
+            // Test email odesílání pomocí PHP mail() funkce
+            // POZNÁMKA: Český hosting blokuje SMTP z webových aplikací,
+            // proto používáme vestavěnou mail() funkci
+
+            // Získat FROM email z konfigurace
             $stmt = $pdo->prepare("
-                SELECT config_key, config_value
+                SELECT config_value
                 FROM wgs_system_config
-                WHERE config_group = 'email' AND config_key IN ('smtp_host', 'smtp_port', 'smtp_username', 'smtp_password', 'smtp_encryption')
+                WHERE config_group = 'email' AND config_key = 'smtp_from'
+                LIMIT 1
             ");
             $stmt->execute();
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $fromEmail = $stmt->fetchColumn();
 
-            $config = [];
-            foreach ($rows as $row) {
-                $config[$row['config_key']] = $row['config_value'];
+            if (!$fromEmail) {
+                $fromEmail = 'reklamace@wgs-service.cz'; // Fallback
             }
 
-            // Kontrola že jsou vyplněné všechny údaje
-            if (empty($config['smtp_host']) || empty($config['smtp_username']) || empty($config['smtp_password'])) {
-                throw new Exception('SMTP údaje nejsou kompletně vyplněné');
+            // Admin email jako příjemce
+            $adminEmail = $_SESSION['user_email'] ?? 'reklamace@wgs-service.cz';
+
+            // Test email
+            $subject = 'WGS Admin Control Center - Test Email';
+            $message = "Tento email byl odeslán jako test emailového systému.\n\n";
+            $message .= "Čas odeslání: " . date('d.m.Y H:i:s') . "\n";
+            $message .= "Odesláno z: Admin Control Center\n";
+            $message .= "Server: " . ($_SERVER['SERVER_NAME'] ?? 'neznámý') . "\n\n";
+            $message .= "Pokud vidíte tento email, emailový systém funguje správně.\n\n";
+            $message .= "---\n";
+            $message .= "White Glove Service\n";
+            $message .= "https://wgs-service.cz";
+
+            $headers = "From: White Glove Service <$fromEmail>\r\n";
+            $headers .= "Reply-To: $fromEmail\r\n";
+            $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+            $headers .= "X-Mailer: WGS Admin Control Center";
+
+            // Pokus o odeslání
+            $oldErrorHandler = set_error_handler(function() { return true; });
+            $emailSent = mail($adminEmail, $subject, $message, $headers);
+            restore_error_handler();
+
+            if (!$emailSent) {
+                throw new Exception('Nepodařilo se odeslat testovací email. Zkontrolujte konfiguraci serveru.');
             }
-
-            // Pro základní test použijeme PHPMailer nebo fsockopen
-            $host = $config['smtp_host'];
-            $port = intval($config['smtp_port'] ?? 587);
-            $timeout = 10;
-
-            // Pokus o připojení
-            $errno = 0;
-            $errstr = '';
-            $socket = @fsockopen($host, $port, $errno, $errstr, $timeout);
-
-            if (!$socket) {
-                throw new Exception("Nelze se připojit k SMTP serveru: $errstr ($errno)");
-            }
-
-            fclose($socket);
 
             echo json_encode([
                 'status' => 'success',
-                'message' => "Připojení k SMTP serveru {$host}:{$port} proběhlo úspěšně"
+                'message' => "Testovací email byl úspěšně odeslán na $adminEmail. Zkontrolujte si schránku."
             ]);
             break;
 

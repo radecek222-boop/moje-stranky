@@ -44,9 +44,27 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
     // Logování do souboru
     logErrorToFile($errorMessage);
 
-    // Pokud je AJAX request, vrátit JSON
-    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-        strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+    // Detekce API requestů - modernější approach
+    $isApiRequest = (
+        // 1. Klasický AJAX header (jQuery, axios)
+        (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+         strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') ||
+
+        // 2. URL obsahuje /api/
+        (isset($_SERVER['REQUEST_URI']) &&
+         strpos($_SERVER['REQUEST_URI'], '/api/') !== false) ||
+
+        // 3. Request s Content-Type: application/json
+        (isset($_SERVER['CONTENT_TYPE']) &&
+         strpos(strtolower($_SERVER['CONTENT_TYPE']), 'application/json') !== false) ||
+
+        // 4. Accept header preferuje JSON
+        (isset($_SERVER['HTTP_ACCEPT']) &&
+         strpos(strtolower($_SERVER['HTTP_ACCEPT']), 'application/json') !== false)
+    );
+
+    // Pokud je API request, vrátit JSON
+    if ($isApiRequest) {
 
         header('Content-Type: application/json');
         echo json_encode([
@@ -87,9 +105,20 @@ set_exception_handler(function($exception) {
 
     logErrorToFile($errorMessage);
 
-    // Pokud je AJAX request
-    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-        strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+    // Detekce API requestů - stejně jako v error handleru
+    $isApiRequest = (
+        (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+         strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') ||
+        (isset($_SERVER['REQUEST_URI']) &&
+         strpos($_SERVER['REQUEST_URI'], '/api/') !== false) ||
+        (isset($_SERVER['CONTENT_TYPE']) &&
+         strpos(strtolower($_SERVER['CONTENT_TYPE']), 'application/json') !== false) ||
+        (isset($_SERVER['HTTP_ACCEPT']) &&
+         strpos(strtolower($_SERVER['HTTP_ACCEPT']), 'application/json') !== false)
+    );
+
+    // Pokud je API request
+    if ($isApiRequest) {
 
         header('Content-Type: application/json');
         http_response_code(500);
@@ -162,7 +191,7 @@ register_shutdown_function(function() {
  */
 function formatErrorMessage($error) {
     $message = "\n" . str_repeat('=', 80) . "\n";
-    $message .= "🔴 {$error['type']}\n";
+    $message .= "{$error['type']}\n";
     $message .= str_repeat('=', 80) . "\n";
     $message .= "Čas: " . date('Y-m-d H:i:s') . "\n";
     $message .= "Zpráva: {$error['message']}\n";
@@ -241,7 +270,7 @@ function displayErrorHTML($error) {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>🔴 Chyba - WGS Debug</title>
+        <title>Chyba - WGS Debug</title>
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body {
@@ -370,7 +399,6 @@ function displayErrorHTML($error) {
     <body>
         <div class="error-container">
             <div class="error-header">
-                <span class="error-icon">🔴</span>
                 <div>
                     <div><?= htmlspecialchars($error['type']) ?></div>
                     <div style="font-size: 14px; font-weight: normal; opacity: 0.9; margin-top: 5px;">
@@ -382,13 +410,13 @@ function displayErrorHTML($error) {
             <div class="error-body">
                 <!-- Chybová zpráva -->
                 <div class="error-section">
-                    <div class="error-label">📋 Chybová zpráva:</div>
+                    <div class="error-label">Chybová zpráva:</div>
                     <div class="error-value error-message"><?= htmlspecialchars($error['message']) ?></div>
                 </div>
 
                 <!-- Umístění -->
                 <div class="error-section">
-                    <div class="error-label">📍 Umístění:</div>
+                    <div class="error-label">Umístění:</div>
                     <div class="error-value">
                         <div style="margin-bottom: 8px;">
                             <span style="color: #ffc107;">Soubor:</span>
@@ -404,7 +432,7 @@ function displayErrorHTML($error) {
                 <!-- Stack Trace -->
                 <?php if (!empty($error['backtrace'])): ?>
                 <div class="error-section">
-                    <div class="error-label">📚 Stack Trace (Posloupnost volání):</div>
+                    <div class="error-label">Stack Trace (Posloupnost volání):</div>
                     <div class="backtrace">
                         <?php foreach ($error['backtrace'] as $i => $trace): ?>
                             <div class="backtrace-item">
@@ -431,7 +459,7 @@ function displayErrorHTML($error) {
 
                 <!-- Request Info -->
                 <div class="error-section">
-                    <div class="error-label">🌐 Request Info:</div>
+                    <div class="error-label">Request Info:</div>
                     <div class="error-value request-info">
                         <div><strong>URL:</strong> <?= htmlspecialchars($_SERVER['REQUEST_URI'] ?? 'N/A') ?></div>
                         <div><strong>Method:</strong> <?= htmlspecialchars($_SERVER['REQUEST_METHOD'] ?? 'N/A') ?></div>
@@ -443,10 +471,10 @@ function displayErrorHTML($error) {
                 <!-- Copy button -->
                 <div style="text-align: center; margin-top: 20px;">
                     <button class="copy-btn" onclick="copyErrorReport()">
-                        📋 Kopírovat pro Claude Code nebo Codex
+                        Kopírovat pro Claude Code nebo Codex
                     </button>
                     <div id="copyStatus" style="color: #28a745; margin-top: 10px; display: none;">
-                        ✅ Zkopírováno! Vložte CTRL+V do zprávy pro Claude/Codex
+                        Zkopírováno! Vložte CTRL+V do zprávy pro Claude/Codex
                     </div>
                 </div>
             </div>
@@ -456,7 +484,7 @@ function displayErrorHTML($error) {
         function copyErrorReport() {
             const separator = '='.repeat(80);
             const report = `
-🔴 WGS ERROR REPORT
+WGS ERROR REPORT
 ${separator}
 Type: <?= addslashes($error['type']) ?>
 

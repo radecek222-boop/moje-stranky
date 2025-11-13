@@ -84,7 +84,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <span>‹</span>
             <span>Zpět</span>
         </button>
-        <h2 class="control-detail-title">🏥 Diagnostika systému</h2>
+        <h2 class="control-detail-title">Diagnostika systému</h2>
     </div>
 
     <div class="control-detail-content">
@@ -92,7 +92,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
         <!-- Overall Status -->
         <div class="cc-alert <?= $overallStatus === 'healthy' ? 'success' : ($overallStatus === 'warning' ? 'warning' : 'danger') ?>">
             <div class="cc-alert-icon">
-                <?= $overallStatus === 'healthy' ? '✅' : ($overallStatus === 'warning' ? '⚠️' : '❌') ?>
+                <?= $overallStatus === 'healthy' ? 'OK' : ($overallStatus === 'warning' ? 'WARNING' : 'ERROR') ?>
             </div>
             <div class="cc-alert-content">
                 <div class="cc-alert-title">
@@ -117,7 +117,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <!-- Database -->
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">🗄️ Databáze</div>
+                    <div class="setting-item-label">Databáze</div>
                     <div class="setting-item-description"><?= $dbMessage ?></div>
                 </div>
                 <div class="setting-item-right">
@@ -131,7 +131,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <!-- PHP Version -->
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">🐘 PHP Verze</div>
+                    <div class="setting-item-label">PHP Verze</div>
                     <div class="setting-item-description">Aktuální: <?= $phpVersion ?></div>
                 </div>
                 <div class="setting-item-right">
@@ -145,7 +145,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <!-- Extensions -->
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">🧩 PHP Extensions</div>
+                    <div class="setting-item-label">PHP Extensions</div>
                     <div class="setting-item-description">
                         <?= array_sum($extensions) ?>/<?= count($extensions) ?> nainstalováno
                     </div>
@@ -161,11 +161,11 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <!-- File Permissions -->
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">📁 Oprávnění souborů</div>
+                    <div class="setting-item-label">Oprávnění souborů</div>
                     <div class="setting-item-description">
-                        Logs: <?= $permissions['logs'] ? '✓' : '✗' ?> |
-                        Uploads: <?= $permissions['uploads'] ? '✓' : '✗' ?> |
-                        Temp: <?= $permissions['temp'] ? '✓' : '✗' ?>
+                        Logs: <?= $permissions['logs'] ? 'OK' : 'FAIL' ?> |
+                        Uploads: <?= $permissions['uploads'] ? 'OK' : 'FAIL' ?> |
+                        Temp: <?= $permissions['temp'] ? 'OK' : 'FAIL' ?>
                     </div>
                 </div>
                 <div class="setting-item-right">
@@ -179,7 +179,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <!-- Disk Space -->
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">💾 Diskový prostor</div>
+                    <div class="setting-item-label">Diskový prostor</div>
                     <div class="setting-item-description">
                         Použito: <?= $diskUsedPercent ?>%
                         (<?= round(($diskTotal - $diskFree) / 1024 / 1024 / 1024, 1) ?> GB / <?= round($diskTotal / 1024 / 1024 / 1024, 1) ?> GB)
@@ -201,7 +201,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <!-- PHP Errors -->
             <div class="setting-item" onclick="viewLog('php_errors')">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">🐛 PHP Error Log</div>
+                    <div class="setting-item-label">PHP Error Log</div>
                     <div class="setting-item-description"><?= $errorCount ?> záznamů</div>
                 </div>
                 <div class="setting-item-right">
@@ -215,7 +215,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <!-- Security Log -->
             <div class="setting-item" onclick="viewLog('security')">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">🔒 Security Log</div>
+                    <div class="setting-item-label">Security Log</div>
                     <div class="setting-item-description"><?= $securityCount ?> událostí</div>
                 </div>
                 <div class="setting-item-right">
@@ -229,7 +229,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <!-- Audit Log -->
             <div class="setting-item" onclick="viewLog('audit')">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">📋 Audit Log</div>
+                    <div class="setting-item-label">Audit Log</div>
                     <div class="setting-item-description">Historie akcí adminů</div>
                 </div>
                 <div class="setting-item-right">
@@ -248,7 +248,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <!-- Clear Cache -->
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">🗑️ Vymazat cache</div>
+                    <div class="setting-item-label">Vymazat cache</div>
                     <div class="setting-item-description">Smazat dočasné soubory a session data</div>
                 </div>
                 <div class="setting-item-right">
@@ -259,7 +259,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <!-- Clear Old Logs -->
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">📜 Archivovat staré logy</div>
+                    <div class="setting-item-label">Archivovat staré logy</div>
                     <div class="setting-item-description">Přesunout logy starší než 90 dní</div>
                 </div>
                 <div class="setting-item-right">
@@ -270,7 +270,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <!-- Database Optimize -->
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">⚡ Optimalizovat databázi</div>
+                    <div class="setting-item-label">Optimalizovat databázi</div>
                     <div class="setting-item-description">OPTIMIZE TABLE pro všechny tabulky</div>
                 </div>
                 <div class="setting-item-right">
@@ -281,7 +281,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <!-- Create Backup -->
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">💾 Vytvořit zálohu databáze</div>
+                    <div class="setting-item-label">Vytvořit zálohu databáze</div>
                     <div class="setting-item-description">Automaticky zazálohuje celou databázi (komprimováno .gz)</div>
                 </div>
                 <div class="setting-item-right">
@@ -292,7 +292,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <!-- View Backups -->
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">📦 Správa záloh</div>
+                    <div class="setting-item-label">Správa záloh</div>
                     <div class="setting-item-description">Zobrazit, stáhnout nebo smazat staré zálohy</div>
                 </div>
                 <div class="setting-item-right">
@@ -303,7 +303,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <!-- Setup Actions System -->
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">🚀 Nastavit Actions System</div>
+                    <div class="setting-item-label">Nastavit Actions System</div>
                     <div class="setting-item-description">Vytvoří tabulky pro systém akcí a úkolů (pokud neexistují)</div>
                 </div>
                 <div class="setting-item-right">
@@ -314,7 +314,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <!-- Health Check -->
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">🔄 Obnovit health check</div>
+                    <div class="setting-item-label">Obnovit health check</div>
                     <div class="setting-item-description">Znovu spustit diagnostiku</div>
                 </div>
                 <div class="setting-item-right">
@@ -344,12 +344,12 @@ async function clearCache() {
         const result = await response.json();
 
         if (result.status === 'success') {
-            alert('✅ Cache byla úspěšně vymazána!');
+            alert('Cache byla úspěšně vymazána!');
         } else {
             throw new Error(result.message);
         }
     } catch (error) {
-        alert('❌ Chyba: ' + error.message);
+        alert('Chyba: ' + error.message);
     }
 }
 
@@ -366,13 +366,13 @@ async function archiveLogs() {
         const result = await response.json();
 
         if (result.status === 'success') {
-            alert(`✅ Archivováno ${result.count} logů!`);
+            alert(`Archivováno ${result.count} logů!`);
             location.reload();
         } else {
             throw new Error(result.message);
         }
     } catch (error) {
-        alert('❌ Chyba: ' + error.message);
+        alert('Chyba: ' + error.message);
     }
 }
 
@@ -394,12 +394,12 @@ async function optimizeDatabase() {
         const result = await response.json();
 
         if (result.status === 'success') {
-            alert(`✅ Databáze optimalizována!\n\nOptimalizováno ${result.tables_optimized} tabulek za ${result.time_ms}ms`);
+            alert(`Databáze optimalizována!\n\nOptimalizováno ${result.tables_optimized} tabulek za ${result.time_ms}ms`);
         } else {
             throw new Error(result.message);
         }
     } catch (error) {
-        alert('❌ Chyba: ' + error.message);
+        alert('Chyba: ' + error.message);
     } finally {
         btn.textContent = originalText;
         btn.disabled = false;
@@ -407,13 +407,13 @@ async function optimizeDatabase() {
 }
 
 async function createBackup() {
-    if (!confirm('💾 Vytvořit zálohu databáze?\n\nTato akce může trvat několik minut v závislosti na velikosti databáze.')) {
+    if (!confirm('Vytvořit zálohu databáze?\n\nTato akce může trvat několik minut v závislosti na velikosti databáze.')) {
         return;
     }
 
     const btn = event.target;
     const originalText = btn.textContent;
-    btn.textContent = '⏳ Vytvářím backup...';
+    btn.textContent = 'Vytvářím backup...';
     btn.disabled = true;
 
     try {
@@ -424,12 +424,12 @@ async function createBackup() {
         const result = await response.json();
 
         if (result.status === 'success') {
-            alert(`✅ Záloha vytvořena!\n\nSoubor: ${result.data.filename}\nVelikost: ${result.data.size}\nTabulek: ${result.data.tables}\nZáznamů: ${result.data.rows}\nČas: ${result.data.execution_time_ms}ms`);
+            alert(`Záloha vytvořena!\n\nSoubor: ${result.data.filename}\nVelikost: ${result.data.size}\nTabulek: ${result.data.tables}\nZáznamů: ${result.data.rows}\nČas: ${result.data.execution_time_ms}ms`);
         } else {
             throw new Error(result.message);
         }
     } catch (error) {
-        alert('❌ Chyba: ' + error.message);
+        alert('Chyba: ' + error.message);
     } finally {
         btn.textContent = originalText;
         btn.disabled = false;
@@ -445,11 +445,11 @@ async function viewBackups() {
             const backups = result.data.backups;
 
             if (backups.length === 0) {
-                alert('📦 Žádné zálohy nenalezeny.\n\nKlikněte na "Vytvořit backup" pro vytvoření první zálohy.');
+                alert('Žádné zálohy nenalezeny.\n\nKlikněte na "Vytvořit backup" pro vytvoření první zálohy.');
                 return;
             }
 
-            let message = `📦 Zálohy databáze (celkem: ${result.data.total})\n\n`;
+            let message = `Zálohy databáze (celkem: ${result.data.total})\n\n`;
             backups.slice(0, 10).forEach((backup, index) => {
                 message += `${index + 1}. ${backup.filename}\n`;
                 message += `   Velikost: ${backup.size} | Stáří: ${backup.age_days} dní\n`;
@@ -467,12 +467,12 @@ async function viewBackups() {
             throw new Error(result.message);
         }
     } catch (error) {
-        alert('❌ Chyba: ' + error.message);
+        alert('Chyba: ' + error.message);
     }
 }
 
 function setupActionsSystem() {
-    if (!confirm('🚀 Spustit setup Actions System?\n\nTento script vytvoří databázové tabulky pro systém akcí a úkolů. Je bezpečné spustit i pokud tabulky již existují.')) {
+    if (!confirm('Spustit setup Actions System?\n\nTento script vytvoří databázové tabulky pro systém akcí a úkolů. Je bezpečné spustit i pokud tabulky již existují.')) {
         return;
     }
 
@@ -480,9 +480,9 @@ function setupActionsSystem() {
     const setupWindow = window.open('/setup_actions_system.php', '_blank', 'width=900,height=700,scrollbars=yes');
 
     if (!setupWindow) {
-        alert('⚠️ Pop-up byl zablokován prohlížečem.\n\nProsím povolte pop-upy pro tuto stránku nebo navštivte přímo:\n/setup_actions_system.php');
+        alert('Pop-up byl zablokován prohlížečem.\n\nProsím povolte pop-upy pro tuto stránku nebo navštivte přímo:\n/setup_actions_system.php');
     }
 }
 
-console.log('✅ Diagnostics section loaded');
+console.log('Diagnostics section loaded');
 </script>
