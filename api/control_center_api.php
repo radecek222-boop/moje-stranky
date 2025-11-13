@@ -891,7 +891,7 @@ try {
                 echo json_encode([
                     'status' => 'success',
                     'data' => [
-                        'total_files' => count($phpFiles),
+                        'total' => count($phpFiles),
                         'files_checked' => $filesChecked,
                         'errors' => $errors,
                         'warnings' => array_merge($warnings, ['exec() není dostupný - použit alternativní syntax check']),
