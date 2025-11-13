@@ -409,6 +409,10 @@ try {
     ]);
 
 } catch (Exception $e) {
+    // Log error for debugging
+    error_log('SAVE.PHP ERROR: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ':' . $e->getLine());
+    error_log('SAVE.PHP POST DATA: ' . json_encode($_POST));
+
     http_response_code(400);
     echo json_encode([
         'status' => 'error',
