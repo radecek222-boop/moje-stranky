@@ -61,6 +61,19 @@ header('Content-Type: text/html; charset=utf-8');
         echo '<div class="box">';
 
         try {
+            // SECURITY: CSRF token validation
+            if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+                http_response_code(403);
+                echo '<p class="error">❌ CSRF token validation failed</p>';
+                echo '<p class="warning">⚠️ Security check failed. Please refresh the page and try again.</p>';
+                echo '</div>';
+                echo '<div class="box">';
+                echo '<a href="/quick_cleanup.php"><button class="safe">← Refresh Page</button></a>';
+                echo '</div>';
+                echo '</body></html>';
+                exit;
+            }
+
             $pdo = getDbConnection();
 
             if ($_POST['action'] === 'delete_failed') {
@@ -125,6 +138,9 @@ header('Content-Type: text/html; charset=utf-8');
         try {
             $pdo = getDbConnection();
 
+            // SECURITY: Generate CSRF token for forms
+            $csrfToken = generateCSRFToken();
+
             // Spočítat selhavší záznamy
             $stmt = $pdo->query("SELECT COUNT(*) as count FROM wgs_action_history WHERE status = 'failed'");
             $failedCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
@@ -165,12 +181,14 @@ header('Content-Type: text/html; charset=utf-8');
                 if ($smtpRecord) {
                     echo '<form method="POST" style="display: inline;">';
                     echo '<input type="hidden" name="action" value="delete_old_smtp">';
+                    echo '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($csrfToken) . '">';
                     echo '<button type="submit">🗑️ Smazat pouze starý SMTP záznam</button>';
                     echo '</form>';
                 }
 
                 echo '<form method="POST" style="display: inline;" onsubmit="return confirm(\'Opravdu chcete smazat VŠECHNY selhavší záznamy?\');">';
                 echo '<input type="hidden" name="action" value="delete_failed">';
+                echo '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($csrfToken) . '">';
                 echo '<button type="submit">🗑️ Smazat všechny selhavší záznamy (' . $failedCount . ')</button>';
                 echo '</form>';
 
