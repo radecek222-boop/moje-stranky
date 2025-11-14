@@ -709,7 +709,13 @@ async function checkPhpFiles() {
 
             if (warnings.length > 0) {
                 logWarning(`⚠️  ${warnings.length} upozornění`);
-                totalWarnings += warnings.length;
+                // Přidat každé warning do seznamu
+                warnings.slice(0, 10).forEach(warn => {
+                    addWarning('PHP', warn.file || 'Unknown file', warn.warning?.substring(0, 100));
+                });
+                if (warnings.length > 10) {
+                    addWarning('PHP', `... a dalších ${warnings.length - 10} PHP warnings`);
+                }
             }
         } else {
             logError('❌ Nepodařilo se zkontrolovat PHP soubory');
@@ -854,7 +860,13 @@ async function checkDatabase() {
 
             if (missing_indexes && missing_indexes.length > 0) {
                 logWarning(`${missing_indexes.length} doporučených indexů chybí`);
-                totalWarnings += missing_indexes.length;
+                // Přidat každý missing index do seznamu
+                missing_indexes.slice(0, 10).forEach(idx => {
+                    addWarning('SQL/Indexy', idx.table || 'Unknown table', idx.column || idx.suggestion);
+                });
+                if (missing_indexes.length > 10) {
+                    addWarning('SQL/Indexy', `... a dalších ${missing_indexes.length - 10} chybějících indexů`);
+                }
             }
         } else {
             logError('Nepodařilo se zkontrolovat databázi');
