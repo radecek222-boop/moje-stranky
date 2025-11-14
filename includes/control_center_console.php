@@ -861,12 +861,19 @@ async function checkDatabase() {
             if (missing_indexes && missing_indexes.length > 0) {
                 logWarning(`${missing_indexes.length} doporučených indexů chybí`);
                 // Přidat každý missing index do seznamu
-                missing_indexes.slice(0, 10).forEach(idx => {
-                    addWarning('SQL/Indexy', idx.table || 'Unknown table', idx.column || idx.suggestion);
+                missing_indexes.forEach((idx, i) => {
+                    if (i < 10) {
+                        const table = idx.table || idx.Table || 'Unknown';
+                        const column = idx.column || idx.Column || idx.suggestion || 'Unknown column';
+                        addWarning('SQL/Indexy', `${table}.${column}`);
+                    }
                 });
                 if (missing_indexes.length > 10) {
                     addWarning('SQL/Indexy', `... a dalších ${missing_indexes.length - 10} chybějících indexů`);
                 }
+            } else {
+                // Debug: pokud API nevrací indexy
+                if (DEBUG_MODE) console.log('[checkDatabase] missing_indexes:', missing_indexes);
             }
         } else {
             logError('Nepodařilo se zkontrolovat databázi');
@@ -2110,9 +2117,14 @@ async function checkWorkflow() {
                     logWarning(`${warnings.length} php.ini varování:`);
                     log('═'.repeat(79));
                     warnings.forEach(warn => {
-                        logWarning(`  ${warn.setting}: ${warn.current} (doporučeno: ${warn.recommended})`);
+                        // display_errors: 0 je správně (0 = Off), nep počítat jako warning
+                        if (warn.setting === 'display_errors' && warn.current === '0') {
+                            logSuccess(`  ${warn.setting}: ${warn.current} = Off (správně)`);
+                        } else {
+                            logWarning(`  ${warn.setting}: ${warn.current} (doporučeno: ${warn.recommended})`);
+                            addWarning('PHP.ini', `${warn.setting}: ${warn.current}`, `Doporučeno: ${warn.recommended}`);
+                        }
                     });
-                    totalWarnings += warnings.length;
                 } else {
                     logSuccess('PHP.ini nastavení optimální');
                 }
@@ -2122,9 +2134,12 @@ async function checkWorkflow() {
             if (smtp_test !== undefined) {
                 if (smtp_test.success) {
                     logSuccess('SMTP funkční (test email odeslán)');
+                } else if (smtp_test.error && smtp_test.error !== 'Not tested') {
+                    logWarning('SMTP nefunguje: ' + smtp_test.error);
+                    addWarning('SMTP', 'SMTP nefunguje', smtp_test.error);
                 } else {
-                    logWarning('SMTP nefunguje: ' + (smtp_test.error || 'Not tested'));
-                    addWarning('SMTP', 'SMTP nefunguje', smtp_test.error || 'Not tested');
+                    // "Not tested" není warning, jen info
+                    log('ℹ️  SMTP nebylo testováno');
                 }
             }
 
