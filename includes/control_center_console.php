@@ -570,11 +570,18 @@ async function runDiagnostics() {
         // Summary of warnings
         if (totalWarnings > 0) {
             logWarning(`⚠️  ${totalWarnings} UPOZORNĚNÍ`);
-            if (totalWarnings <= 10) {
+            log('');
+            // Zobrazit prvních 15 warnings (nebo všechny pokud je jich méně)
+            const displayCount = Math.min(warningsList.length, 15);
+            warningsList.slice(0, displayCount).forEach((warn, idx) => {
+                logWarning(`${idx + 1}. [${warn.section}] ${warn.message}`);
+                if (warn.details) {
+                    log(`   ${warn.details}`);
+                }
+            });
+            if (warningsList.length > displayCount) {
                 log('');
-                warningsList.forEach((warn, idx) => {
-                    logWarning(`${idx + 1}. [${warn.section}] ${warn.message}`);
-                });
+                log(`... a dalších ${warningsList.length - displayCount} upozornění`);
             }
         }
 
