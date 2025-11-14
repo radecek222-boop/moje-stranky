@@ -980,8 +980,9 @@ try {
                         'total' => count($phpFiles),
                         'files_checked' => $filesChecked,
                         'errors' => $errors,
-                        'warnings' => array_merge($warnings, ['exec() není dostupný - použit alternativní syntax check']),
-                        'method' => 'token_get_all'
+                        'warnings' => $warnings, // Odstraněno "exec() není dostupný" - není to warning
+                        'method' => 'token_get_all',
+                        'info' => 'Použit token_get_all() pro syntax check (exec() není dostupný)'
                     ]
                 ]);
                 break;
@@ -1153,12 +1154,89 @@ try {
             $size = $totalSize / 1024 / 1024; // MB
             $sizeFormatted = $size > 1000 ? round($size / 1024, 2) . ' GB' : round($size, 2) . ' MB';
 
+            // KONTROLA CHYBĚJÍCÍCH INDEXŮ
+            $missingIndexes = [];
+
+            try {
+                // 1. Zkontrolovat Foreign Keys - musí mít indexy
+                $fkStmt = $pdo->query("
+                    SELECT
+                        TABLE_NAME as 'table',
+                        COLUMN_NAME as 'column',
+                        CONSTRAINT_NAME as constraint_name,
+                        REFERENCED_TABLE_NAME as referenced_table
+                    FROM information_schema.KEY_COLUMN_USAGE
+                    WHERE TABLE_SCHEMA = DATABASE()
+                    AND REFERENCED_TABLE_NAME IS NOT NULL
+                ");
+                $foreignKeys = $fkStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                foreach ($foreignKeys as $fk) {
+                    // Zkontrolovat jestli FK sloupec má index
+                    $indexStmt = $pdo->prepare("
+                        SHOW INDEX FROM `{$fk['table']}`
+                        WHERE Column_name = ?
+                    ");
+                    $indexStmt->execute([$fk['column']]);
+                    $hasIndex = $indexStmt->fetch();
+
+                    if (!$hasIndex) {
+                        $missingIndexes[] = [
+                            'table' => $fk['table'],
+                            'column' => $fk['column'],
+                            'type' => 'foreign_key',
+                            'reason' => 'FK bez indexu - zpomaluje JOINy',
+                            'suggestion' => "ALTER TABLE `{$fk['table']}` ADD INDEX idx_{$fk['column']} (`{$fk['column']}`)"
+                        ];
+                    }
+                }
+
+                // 2. Zkontrolovat časté sloupce (id, email, user_id, status, created_at)
+                $commonColumns = ['email', 'user_id', 'customer_id', 'status', 'created_at', 'updated_at'];
+
+                foreach ($allTables as $table) {
+                    if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) continue;
+
+                    // Získat sloupce tabulky
+                    $colStmt = $pdo->query("SHOW COLUMNS FROM `$table`");
+                    $columns = $colStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                    foreach ($columns as $col) {
+                        $columnName = $col['Field'];
+
+                        // Pokud je to běžný sloupec pro filtrování
+                        if (in_array($columnName, $commonColumns)) {
+                            // Zkontrolovat jestli má index
+                            $indexStmt = $pdo->query("
+                                SHOW INDEX FROM `$table`
+                                WHERE Column_name = '$columnName'
+                            ");
+                            $hasIndex = $indexStmt->fetch();
+
+                            if (!$hasIndex) {
+                                $missingIndexes[] = [
+                                    'table' => $table,
+                                    'column' => $columnName,
+                                    'type' => 'common_filter',
+                                    'reason' => 'Často používaný v WHERE/JOIN',
+                                    'suggestion' => "ALTER TABLE `$table` ADD INDEX idx_{$columnName} (`$columnName`)"
+                                ];
+                            }
+                        }
+                    }
+                }
+
+            } catch (PDOException $e) {
+                // Pokud kontrola selže, ignorovat
+                $missingIndexes = [];
+            }
+
             echo json_encode([
                 'status' => 'success',
                 'data' => [
                     'tables' => $tables,
                     'corrupted' => $corrupted,
-                    'missing_indexes' => [],
+                    'missing_indexes' => $missingIndexes,
                     'size' => $sizeFormatted
                 ]
             ]);

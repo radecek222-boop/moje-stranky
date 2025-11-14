@@ -860,20 +860,25 @@ async function checkDatabase() {
 
             if (missing_indexes && missing_indexes.length > 0) {
                 logWarning(`${missing_indexes.length} doporučených indexů chybí`);
+                log('═'.repeat(79));
+
                 // Přidat každý missing index do seznamu
                 missing_indexes.forEach((idx, i) => {
                     if (i < 10) {
-                        const table = idx.table || idx.Table || 'Unknown';
-                        const column = idx.column || idx.Column || idx.suggestion || 'Unknown column';
-                        addWarning('SQL/Indexy', `${table}.${column}`);
+                        const table = idx.table || 'Unknown';
+                        const column = idx.column || 'Unknown';
+                        const reason = idx.reason || '';
+                        logWarning(`  ${table}.${column} - ${reason}`);
+                        addWarning('SQL/Indexy', `${table}.${column}`, reason);
                     }
                 });
+
                 if (missing_indexes.length > 10) {
+                    logWarning(`  ... a dalších ${missing_indexes.length - 10} indexů`);
                     addWarning('SQL/Indexy', `... a dalších ${missing_indexes.length - 10} chybějících indexů`);
                 }
             } else {
-                // Debug: pokud API nevrací indexy
-                if (DEBUG_MODE) console.log('[checkDatabase] missing_indexes:', missing_indexes);
+                logSuccess('Všechny důležité indexy jsou přítomny');
             }
         } else {
             logError('Nepodařilo se zkontrolovat databázi');
