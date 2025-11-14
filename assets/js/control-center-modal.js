@@ -216,7 +216,7 @@ class ControlCenterModal {
         iframe.className = 'cc-modal-iframe';
         iframe.src = embedUrl;
         iframe.setAttribute('frameborder', '0');
-        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
+        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-modals allow-popups');
         iframe.setAttribute('title', 'Control Center Content');
 
         // Add event listeners (not inline handlers)
