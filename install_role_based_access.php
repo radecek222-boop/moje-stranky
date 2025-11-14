@@ -17,7 +17,8 @@ $action = $_POST['action'] ?? null;
 
 // DEBUG - zapiš do error logu
 error_log("INSTALL RBAC - Step: $step, Action: " . ($action ?? 'NULL'));
-error_log("INSTALL RBAC - POST data: " . print_r($_POST, true));
+// SECURITY FIX: NIKDY NELOGOVAT $_POST - obsahuje citlivá data (hesla, tokeny)!
+// Original line removed: error_log("INSTALL RBAC - POST data: " . print_r($_POST, true));
 
 // Zkontroluj jestli už je nainstalováno
 $isInstalled = false;

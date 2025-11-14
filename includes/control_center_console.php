@@ -1955,7 +1955,7 @@ async function checkSEO() {
                 logWarning(`${missing_alt_tags.images.length} obrázků bez alt atributu:`);
                 log('═'.repeat(79));
                 missing_alt_tags.images.slice(0, 10).forEach(img => {
-                    logWarning(`  ${img.page}: <img src="${img.src}">`);
+                    logWarning(`  ${img.page}: <img src="${img.src}" loading="lazy">`);
                 });
                 if (missing_alt_tags.images.length > 10) {
                     logWarning(`  ... a dalších ${missing_alt_tags.images.length - 10} obrázků`);

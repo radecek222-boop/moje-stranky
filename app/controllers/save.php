@@ -370,12 +370,17 @@ try {
     $hasCreatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'created_at');
     $hasUpdatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'updated_at');
 
-    $workflowId = null;
-    if ($hasReklamaceId) {
-        $workflowId = generateWorkflowId($pdo);
-    }
+    // CRITICAL FIX: Zahájit transakci PŘED generováním ID
+    // FOR UPDATE lock funguje pouze v transakci!
+    $pdo->beginTransaction();
 
-    $now = date('Y-m-d H:i:s');
+    try {
+        $workflowId = null;
+        if ($hasReklamaceId) {
+            $workflowId = generateWorkflowId($pdo);
+        }
+
+        $now = date('Y-m-d H:i:s');
 
     $columns = [
         'typ' => $typ,
@@ -434,12 +439,24 @@ try {
         $parameters[':' . $column] = $value === '' ? null : $value;
     }
 
-    if (!$stmt->execute($parameters)) {
-        throw new Exception('Chyba při ukládání do databáze');
-    }
+        if (!$stmt->execute($parameters)) {
+            throw new Exception('Chyba při ukládání do databáze');
+        }
 
-    $primaryId = $pdo->lastInsertId();
-    $identifierForClient = $workflowId ?? $primaryId;
+        // CRITICAL FIX: COMMIT transakce
+        $pdo->commit();
+
+        $primaryId = $pdo->lastInsertId();
+        $identifierForClient = $workflowId ?? $primaryId;
+
+    } catch (Exception $e) {
+        // CRITICAL FIX: ROLLBACK při chybě
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log("Save error: " . $e->getMessage());
+        throw $e;
+    }
 
     echo json_encode([
         'status' => 'success',

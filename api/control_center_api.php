@@ -1360,10 +1360,12 @@ try {
                         // Pokud je to běžný sloupec pro filtrování
                         if (in_array($columnName, $commonColumns)) {
                             // Zkontrolovat jestli má index
-                            $indexStmt = $pdo->query("
+                            // SECURITY FIX: Použití prepared statement místo string concatenation
+                            $indexStmt = $pdo->prepare("
                                 SHOW INDEX FROM `$table`
-                                WHERE Column_name = '$columnName'
+                                WHERE Column_name = :columnName
                             ");
+                            $indexStmt->execute(['columnName' => $columnName]);
                             $hasIndex = $indexStmt->fetch();
 
                             if (!$hasIndex) {

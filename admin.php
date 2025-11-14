@@ -10,14 +10,16 @@ if (!$isAdmin) {
 }
 
 // Detect embed mode for iframes
-$embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
+// SECURITY FIX: Strict comparison (=== místo ==)
+$embedMode = isset($_GET['embed']) && $_GET['embed'] === '1';
 
 // BEZPEČNOST: Security headers
 if (!$embedMode) {
     // Content-Security-Policy - ochrana před XSS útoky
+    // SECURITY FIX: Odstraněn 'unsafe-eval' pro lepší bezpečnost
     header("Content-Security-Policy: " .
         "default-src 'self'; " .
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; " .
+        "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
         "font-src 'self' https://fonts.gstatic.com; " .
         "img-src 'self' data: https:; " .
