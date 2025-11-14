@@ -264,38 +264,69 @@ function handleListReklamace(PDO $pdo): void
 
     $reklamace = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-    // Pro každou reklamaci načíst fotky a dokumenty
-    foreach ($reklamace as &$record) {
-        $reklamaceId = $record['reklamace_id'] ?? $record['cislo'] ?? $record['id'];
+    // PERFORMANCE FIX: N+1 Query problem - načíst všechny fotky a dokumenty najednou
+    if (!empty($reklamace)) {
+        // Extrahovat všechny reklamace_id a claim_id
+        $reklamaceIds = array_column($reklamace, 'reklamace_id');
+        $claimIds = array_column($reklamace, 'id');
 
-        // Načtení fotek
-        $stmt = $pdo->prepare("
+        // Načíst VŠECHNY fotky najednou (místo N queries)
+        $photoPlaceholders = implode(',', array_fill(0, count($reklamaceIds), '?'));
+        $photoSql = "
             SELECT
                 id, photo_id, reklamace_id, section_name,
                 photo_path, file_path, file_name,
                 photo_order, photo_type, uploaded_at
             FROM wgs_photos
-            WHERE reklamace_id = :reklamace_id
+            WHERE reklamace_id IN ($photoPlaceholders)
             ORDER BY photo_order ASC, uploaded_at ASC
-        ");
-        $stmt->execute([':reklamace_id' => $reklamaceId]);
-        $photos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        ";
+        $photoStmt = $pdo->prepare($photoSql);
+        $photoStmt->execute($reklamaceIds);
+        $allPhotos = $photoStmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $record['photos'] = $photos;
+        // Seskupit fotky podle reklamace_id
+        $photosMap = [];
+        foreach ($allPhotos as $photo) {
+            $rekId = $photo['reklamace_id'];
+            if (!isset($photosMap[$rekId])) {
+                $photosMap[$rekId] = [];
+            }
+            $photosMap[$rekId][] = $photo;
+        }
 
-        // Načtení dokumentů (PDF protokoly)
-        $stmt = $pdo->prepare("
+        // Načíst VŠECHNY dokumenty najednou (místo N queries)
+        $docPlaceholders = implode(',', array_fill(0, count($claimIds), '?'));
+        $docSql = "
             SELECT
                 id, claim_id, document_name, document_path as file_path,
                 document_type, file_size, uploaded_by, uploaded_at
             FROM wgs_documents
-            WHERE claim_id = :claim_id
+            WHERE claim_id IN ($docPlaceholders)
             ORDER BY uploaded_at DESC
-        ");
-        $stmt->execute([':claim_id' => $record['id']]);
-        $documents = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        ";
+        $docStmt = $pdo->prepare($docSql);
+        $docStmt->execute($claimIds);
+        $allDocuments = $docStmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $record['documents'] = $documents;
+        // Seskupit dokumenty podle claim_id
+        $documentsMap = [];
+        foreach ($allDocuments as $doc) {
+            $claimId = $doc['claim_id'];
+            if (!isset($documentsMap[$claimId])) {
+                $documentsMap[$claimId] = [];
+            }
+            $documentsMap[$claimId][] = $doc;
+        }
+
+        // Přiřadit fotky a dokumenty k reklamacím
+        foreach ($reklamace as &$record) {
+            $reklamaceId = $record['reklamace_id'] ?? $record['cislo'] ?? $record['id'];
+            $claimId = $record['id'];
+
+            $record['photos'] = $photosMap[$reklamaceId] ?? [];
+            $record['documents'] = $documentsMap[$claimId] ?? [];
+        }
     }
 
     respondSuccess([

@@ -105,6 +105,17 @@ try {
         $whereClause = 'WHERE ' . implode(' AND ', $whereParts);
     }
 
+    // PERFORMANCE: Pagination - načíst jen stránku záznamu
+    $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+    $perPage = isset($_GET['per_page']) ? min(200, max(10, (int)$_GET['per_page'])) : 50;
+    $offset = ($page - 1) * $perPage;
+
+    // Spočítat celkový počet záznamů
+    $countSql = "SELECT COUNT(*) as total FROM wgs_reklamace r $whereClause";
+    $countStmt = $pdo->prepare($countSql);
+    $countStmt->execute($params);
+    $totalRecords = (int)$countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+
     $sql = "
         SELECT
             r.*,
@@ -112,54 +123,95 @@ try {
         FROM wgs_reklamace r
         $whereClause
         ORDER BY r.created_at DESC
+        LIMIT :limit OFFSET :offset
     ";
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+    $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
 
     $reklamace = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Pro každou reklamaci načíst fotky a dokumenty
-    foreach ($reklamace as &$record) {
-        $reklamaceId = $record['reklamace_id'] ?? $record['cislo'] ?? $record['id'];
+    // PERFORMANCE FIX: N+1 Query problem - načíst všechny fotky a dokumenty najednou
+    if (!empty($reklamace)) {
+        // Extrahovat všechny reklamace_id a claim_id
+        $reklamaceIds = array_column($reklamace, 'reklamace_id');
+        $claimIds = array_column($reklamace, 'id');
 
-        // Načtení fotek
-        $stmt = $pdo->prepare("
+        // Načíst VŠECHNY fotky najednou (místo N queries)
+        $photoPlaceholders = implode(',', array_fill(0, count($reklamaceIds), '?'));
+        $photoSql = "
             SELECT
                 id, photo_id, reklamace_id, section_name,
                 photo_path, file_path, file_name,
                 photo_order, photo_type, uploaded_at
             FROM wgs_photos
-            WHERE reklamace_id = :reklamace_id
+            WHERE reklamace_id IN ($photoPlaceholders)
             ORDER BY photo_order ASC, uploaded_at ASC
-        ");
-        $stmt->execute([':reklamace_id' => $reklamaceId]);
-        $photos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        ";
+        $photoStmt = $pdo->prepare($photoSql);
+        $photoStmt->execute($reklamaceIds);
+        $allPhotos = $photoStmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Přidat fotky k záznamu
-        $record['photos'] = $photos;
+        // Seskupit fotky podle reklamace_id
+        $photosMap = [];
+        foreach ($allPhotos as $photo) {
+            $rekId = $photo['reklamace_id'];
+            if (!isset($photosMap[$rekId])) {
+                $photosMap[$rekId] = [];
+            }
+            $photosMap[$rekId][] = $photo;
+        }
 
-        // Načtení dokumentů (PDF protokoly)
-        $stmt = $pdo->prepare("
+        // Načíst VŠECHNY dokumenty najednou (místo N queries)
+        $docPlaceholders = implode(',', array_fill(0, count($claimIds), '?'));
+        $docSql = "
             SELECT
                 id, claim_id, document_name, document_path as file_path,
                 document_type, file_size, uploaded_by, uploaded_at
             FROM wgs_documents
-            WHERE claim_id = :claim_id
+            WHERE claim_id IN ($docPlaceholders)
             ORDER BY uploaded_at DESC
-        ");
-        $stmt->execute([':claim_id' => $record['id']]);
-        $documents = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        ";
+        $docStmt = $pdo->prepare($docSql);
+        $docStmt->execute($claimIds);
+        $allDocuments = $docStmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Přidat dokumenty k záznamu
-        $record['documents'] = $documents;
+        // Seskupit dokumenty podle claim_id
+        $documentsMap = [];
+        foreach ($allDocuments as $doc) {
+            $claimId = $doc['claim_id'];
+            if (!isset($documentsMap[$claimId])) {
+                $documentsMap[$claimId] = [];
+            }
+            $documentsMap[$claimId][] = $doc;
+        }
+
+        // Přiřadit fotky a dokumenty k reklamacím
+        foreach ($reklamace as &$record) {
+            $reklamaceId = $record['reklamace_id'] ?? $record['cislo'] ?? $record['id'];
+            $claimId = $record['id'];
+
+            $record['photos'] = $photosMap[$reklamaceId] ?? [];
+            $record['documents'] = $documentsMap[$claimId] ?? [];
+        }
     }
 
-    // Vrácení dat
+    // Vrácení dat s pagination metadata
     echo json_encode([
         'status' => 'success',
         'data' => $reklamace,
-        'count' => count($reklamace)
+        'count' => count($reklamace),
+        'pagination' => [
+            'current_page' => $page,
+            'per_page' => $perPage,
+            'total_records' => $totalRecords,
+            'total_pages' => ceil($totalRecords / $perPage)
+        ]
     ]);
 
 } catch (Exception $e) {
