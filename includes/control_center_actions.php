@@ -398,7 +398,7 @@ async function executeAction(event, actionId) {
 
     if (DEBUG_MODE) console.log('[executeAction] Sending request with payload:', payload);
 
-    fetch('api/control_center_api.php?action=execute_action', {
+    fetch('/api/control_center_api.php?action=execute_action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
