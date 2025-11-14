@@ -166,6 +166,25 @@ function getPriorityBadge($priority) {
             </div>
         <?php endif; ?>
 
+        <!-- QUICK ACTIONS -->
+        <div class="setting-group">
+            <h3 class="setting-group-title">🚀 Rychlé akce</h3>
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">📊 Přidat optimalizační úkoly</div>
+                    <div class="setting-item-description">
+                        Přidá 6 optimalizačních úkolů: minifikace assets, DB indexy, backup, gzip komprese, browser cache.
+                        <br><small style="color: #666;">Úkoly které již existují budou přeskočeny.</small>
+                    </div>
+                </div>
+                <div class="setting-item-right">
+                    <button class="cc-btn cc-btn-primary" onclick="pridatOptimalizacniUkoly()">
+                        ➕ Přidat úkoly
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- PENDING ACTIONS -->
         <?php if (count($pendingActions) > 0): ?>
             <div class="setting-group">
@@ -522,6 +541,36 @@ function viewAllWebhooks() {
 
 function setupGitHubWebhook() {
     alert('GitHub Webhook URL:\n\n' + window.location.origin + '/api/github_webhook.php\n\nPřidejte tuto URL do nastavení GitHub repozitáře.');
+}
+
+// Přidat optimalizační úkoly
+async function pridatOptimalizacniUkoly() {
+    if (!confirm('Přidat 6 optimalizačních úkolů?\n\n• Minifikace JS/CSS\n• Přidat DB indexy\n• Vytvořit backup\n• Vyčistit selhavší emaily\n• Povolit Gzip\n• Nastavit Browser Cache\n\nÚkoly které již existují budou přeskočeny.')) {
+        return;
+    }
+
+    try {
+        const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() : null;
+
+        const response = await fetch('/api/control_center_api.php?action=add_optimization_tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ csrf_token: csrfToken })
+        });
+
+        const result = await response.json();
+
+        if (isSuccess(result)) {
+            const { added, skipped } = result.data || { added: 0, skipped: 0 };
+            alert(`✓ Hotovo!\n\nPřidáno: ${added} úkolů\nPřeskočeno: ${skipped} úkolů (již existují)`);
+            location.reload();
+        } else {
+            throw new Error(result.message || result.error || 'Neznámá chyba');
+        }
+    } catch (error) {
+        console.error('[pridatOptimalizacniUkoly] Error:', error);
+        alert('❌ Chyba: ' + error.message);
+    }
 }
 
 if (DEBUG_MODE) console.log('✅ Actions section loaded');

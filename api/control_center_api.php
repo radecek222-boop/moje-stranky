@@ -450,6 +450,108 @@ try {
             ]);
             break;
 
+        case 'add_optimization_tasks':
+            // Úkoly k přidání
+            $tasks = [
+                [
+                    'action_title' => '🗜️ Minifikovat JS/CSS soubory',
+                    'action_description' => 'Spustit /minify_assets.php pro optimalizaci rychlosti. Úspora: ~68KB (30-40% redukce velikosti souborů)',
+                    'action_type' => 'optimize_assets',
+                    'action_url' => '/minify_assets.php',
+                    'priority' => 'high'
+                ],
+                [
+                    'action_title' => '📊 Přidat chybějící DB indexy',
+                    'action_description' => 'Spustit /add_indexes.php pro přidání 21 indexů. Zrychlí queries s WHERE/JOIN/ORDER BY.',
+                    'action_type' => 'add_db_indexes',
+                    'action_url' => '/add_indexes.php',
+                    'priority' => 'high'
+                ],
+                [
+                    'action_title' => '💾 Vytvořit první backup',
+                    'action_description' => 'Spustit /backup_system.php pro vytvoření zálohy databáze a důležitých souborů.',
+                    'action_type' => 'create_backup',
+                    'action_url' => '/backup_system.php',
+                    'priority' => 'medium'
+                ],
+                [
+                    'action_title' => '🧹 Vyčistit selhavší emaily',
+                    'action_description' => 'Spustit /cleanup_failed_emails.php pro odstranění selhavších emailů z fronty.',
+                    'action_type' => 'cleanup_emails',
+                    'action_url' => '/cleanup_failed_emails.php',
+                    'priority' => 'low'
+                ],
+                [
+                    'action_title' => '⚙️ Povolit Gzip kompresi',
+                    'action_description' => 'Přidat Gzip do .htaccess pro 60-70% redukci transfer size. Zkopírovat konfiguraci z OPTIMIZATION_ANALYSIS.md',
+                    'action_type' => 'enable_gzip',
+                    'action_url' => '/OPTIMIZATION_ANALYSIS.md',
+                    'priority' => 'high'
+                ],
+                [
+                    'action_title' => '📦 Nastavit Browser Cache',
+                    'action_description' => 'Přidat cache headers do .htaccess pro rychlejší repeat visits (0 KB staženo). Návod v OPTIMIZATION_ANALYSIS.md',
+                    'action_type' => 'browser_cache',
+                    'action_url' => '/OPTIMIZATION_ANALYSIS.md',
+                    'priority' => 'high'
+                ]
+            ];
+
+            $added = 0;
+            $skipped = 0;
+
+            foreach ($tasks as $task) {
+                // Zkontrolovat jestli úkol už existuje
+                $stmt = $pdo->prepare("
+                    SELECT id FROM wgs_pending_actions
+                    WHERE action_type = ? AND status IN ('pending', 'in_progress')
+                ");
+                $stmt->execute([$task['action_type']]);
+
+                if ($stmt->rowCount() > 0) {
+                    $skipped++;
+                    continue;
+                }
+
+                // Přidat úkol
+                try {
+                    $stmt = $pdo->prepare("
+                        INSERT INTO wgs_pending_actions (
+                            action_title,
+                            action_description,
+                            action_type,
+                            action_url,
+                            priority,
+                            status,
+                            created_at
+                        ) VALUES (?, ?, ?, ?, ?, 'pending', NOW())
+                    ");
+
+                    $stmt->execute([
+                        $task['action_title'],
+                        $task['action_description'],
+                        $task['action_type'],
+                        $task['action_url'],
+                        $task['priority']
+                    ]);
+
+                    $added++;
+                } catch (PDOException $e) {
+                    // Pokračovat s dalšími úkoly i když jeden selže
+                    continue;
+                }
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => "Přidáno: {$added} úkolů, Přeskočeno: {$skipped} úkolů",
+                'data' => [
+                    'added' => $added,
+                    'skipped' => $skipped
+                ]
+            ]);
+            break;
+
         // ==========================================
         // DIAGNOSTICS
         // ==========================================
