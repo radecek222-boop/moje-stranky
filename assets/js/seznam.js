@@ -918,7 +918,7 @@ function renderCalendar(m, y) {
     }
 
     el.textContent = d;
-    el.onclick = async () => {
+    el.onclick = () => {
       // Prevent selection of past dates
       if (isPast) {
         alert('⚠️ Nelze vybrat minulé datum.\n\nVyberte prosím dnešní nebo budoucí datum.');
@@ -929,8 +929,14 @@ function renderCalendar(m, y) {
       document.querySelectorAll('.cal-day').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
       document.getElementById('selectedDateDisplay').textContent = `Vybraný den: ${SELECTED_DATE}`;
-      await showDayBookingsWithDistances(SELECTED_DATE);
+
+      // Zobrazit časy okamžitě
       renderTimeGrid();
+
+      // Načítat vzdálenosti na pozadí (neblokovat UI)
+      showDayBookingsWithDistances(SELECTED_DATE).catch(err => {
+        logger.error('Chyba při načítání vzdáleností:', err);
+      });
     };
     daysGrid.appendChild(el);
   }
@@ -1219,19 +1225,22 @@ function renderTimeGrid() {
       }
       
       el.textContent = time;
-      el.onclick = async () => {
+      el.onclick = () => {
         SELECTED_TIME = time;
         document.querySelectorAll('.time-slot').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
-        
+
         let displayText = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
         if (occupiedTimes[time]) {
-          displayText += ` KOLIZE: ${occupiedTimes[time].zakaznik}`;
+          displayText += ` ⚠️ KOLIZE: ${occupiedTimes[time].zakaznik}`;
         }
-        
+
         document.getElementById('selectedDateDisplay').textContent = displayText;
-        
-        await showDayBookingsWithDistances(SELECTED_DATE);
+
+        // Aktualizovat vzdálenosti na pozadí s novým časem
+        showDayBookingsWithDistances(SELECTED_DATE).catch(err => {
+          logger.error('Chyba při aktualizaci vzdáleností:', err);
+        });
       };
       t.appendChild(el);
     }
