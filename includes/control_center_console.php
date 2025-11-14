@@ -557,6 +557,9 @@ async function runDiagnostics() {
         // 19. Security Vulnerabilities Scan
         await checkSecurityVulnerabilities();
 
+        // 20. Code Analysis - Komplexní kontrola
+        await checkCodeAnalysis();
+
         log('');
         logHeader('═══════════════════════════════════════════════════');
         logHeader('📊 SHRNUTÍ DIAGNOSTIKY');
@@ -860,13 +863,25 @@ async function checkDatabase() {
 
             if (missing_indexes && missing_indexes.length > 0) {
                 logWarning(`${missing_indexes.length} doporučených indexů chybí`);
+                log('═'.repeat(79));
+
                 // Přidat každý missing index do seznamu
-                missing_indexes.slice(0, 10).forEach(idx => {
-                    addWarning('SQL/Indexy', idx.table || 'Unknown table', idx.column || idx.suggestion);
+                missing_indexes.forEach((idx, i) => {
+                    if (i < 10) {
+                        const table = idx.table || 'Unknown';
+                        const column = idx.column || 'Unknown';
+                        const reason = idx.reason || '';
+                        logWarning(`  ${table}.${column} - ${reason}`);
+                        addWarning('SQL/Indexy', `${table}.${column}`, reason);
+                    }
                 });
+
                 if (missing_indexes.length > 10) {
+                    logWarning(`  ... a dalších ${missing_indexes.length - 10} indexů`);
                     addWarning('SQL/Indexy', `... a dalších ${missing_indexes.length - 10} chybějících indexů`);
                 }
+            } else {
+                logSuccess('Všechny důležité indexy jsou přítomny');
             }
         } else {
             logError('Nepodařilo se zkontrolovat databázi');
@@ -2110,9 +2125,14 @@ async function checkWorkflow() {
                     logWarning(`${warnings.length} php.ini varování:`);
                     log('═'.repeat(79));
                     warnings.forEach(warn => {
-                        logWarning(`  ${warn.setting}: ${warn.current} (doporučeno: ${warn.recommended})`);
+                        // display_errors: 0 je správně (0 = Off), nep počítat jako warning
+                        if (warn.setting === 'display_errors' && warn.current === '0') {
+                            logSuccess(`  ${warn.setting}: ${warn.current} = Off (správně)`);
+                        } else {
+                            logWarning(`  ${warn.setting}: ${warn.current} (doporučeno: ${warn.recommended})`);
+                            addWarning('PHP.ini', `${warn.setting}: ${warn.current}`, `Doporučeno: ${warn.recommended}`);
+                        }
                     });
-                    totalWarnings += warnings.length;
                 } else {
                     logSuccess('PHP.ini nastavení optimální');
                 }
@@ -2122,9 +2142,12 @@ async function checkWorkflow() {
             if (smtp_test !== undefined) {
                 if (smtp_test.success) {
                     logSuccess('SMTP funkční (test email odeslán)');
+                } else if (smtp_test.error && smtp_test.error !== 'Not tested') {
+                    logWarning('SMTP nefunguje: ' + smtp_test.error);
+                    addWarning('SMTP', 'SMTP nefunguje', smtp_test.error);
                 } else {
-                    logWarning('SMTP nefunguje: ' + (smtp_test.error || 'Not tested'));
-                    addWarning('SMTP', 'SMTP nefunguje', smtp_test.error || 'Not tested');
+                    // "Not tested" není warning, jen info
+                    log('ℹ️  SMTP nebylo testováno');
                 }
             }
 
@@ -2318,6 +2341,287 @@ async function checkSecurityVulnerabilities() {
         log('');
     } catch (error) {
         logWarning('⚠️  Security scan selhal: ' + error.message);
+        log('');
+    }
+}
+
+async function checkCodeAnalysis() {
+    logHeader('🔍 CODE ANALYSIS - KOMPLEXNÍ KONTROLA');
+    log('Spouštím hloubkovou analýzu kódu...');
+    log('Detekuji: syntax chyby, vadné stringy, nezavřené závorky, security rizika, HTTP errors');
+    log('═'.repeat(79));
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=check_code_analysis', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+            logError(`❌ API vrátilo chybu: HTTP ${response.status}`);
+            log('');
+            return;
+        }
+
+        const result = await response.json();
+        if (result.status !== 'success') {
+            logError('❌ Code analysis selhala: ' + (result.message || 'Unknown error'));
+            log('');
+            return;
+        }
+
+        const data = result.data;
+        const { php, javascript, css, http_logs, summary } = data;
+
+        log('');
+        logHeader('📊 SHRNUTÍ');
+        log(`Zkontrolováno:`);
+        log(`  • PHP soubory: ${php.files_checked}`);
+        log(`  • JavaScript soubory: ${javascript.files_checked}`);
+        log(`  • CSS soubory: ${css.files_checked}`);
+        log(`  • HTTP logy: ${http_logs.total} záznamů`);
+        log('');
+
+        if (summary.total_errors === 0 && summary.total_warnings === 0) {
+            logSuccess('🎉 VÝBORNĚ! Žádné chyby ani varování nenalezeny!');
+            log('');
+            return;
+        }
+
+        logWarning(`⚠️  NALEZENO: ${summary.total_errors} chyb, ${summary.total_warnings} varování`);
+        log('═'.repeat(79));
+        log('');
+
+        // ============================================
+        // 1. PHP ERRORS
+        // ============================================
+        if (php.errors.length > 0) {
+            logHeader('❌ PHP CHYBY (' + php.errors.length + ')');
+            log('');
+
+            php.errors.forEach((err, index) => {
+                const prefix = `[${index + 1}/${php.errors.length}]`;
+                const location = `${err.file}:${err.line}` + (err.column > 0 ? `:${err.column}` : '');
+
+                logError(`${prefix} ${err.type.toUpperCase()}: ${err.message}`);
+                log(`📄 ${location}`);
+
+                if (err.context && err.context.trim()) {
+                    log(`📝 Kontext:`);
+                    log(`   ${err.context}`);
+                }
+
+                addError('PHP/' + err.type, location, err.message);
+                log('');
+            });
+        }
+
+        // ============================================
+        // 2. PHP WARNINGS
+        // ============================================
+        if (php.warnings.length > 0) {
+            logHeader('⚠️  PHP VAROVÁNÍ (' + php.warnings.length + ')');
+            log('');
+
+            const limit = 10;
+            php.warnings.slice(0, limit).forEach((warn, index) => {
+                const prefix = `[${index + 1}/${Math.min(php.warnings.length, limit)}]`;
+                const location = `${warn.file}:${warn.line}` + (warn.column > 0 ? `:${warn.column}` : '');
+
+                logWarning(`${prefix} ${warn.type.toUpperCase()}: ${warn.message}`);
+                log(`📄 ${location}`);
+
+                if (warn.context && warn.context.trim()) {
+                    log(`📝 Kontext:`);
+                    log(`   ${warn.context}`);
+                }
+
+                addWarning('PHP/' + warn.type, location, warn.message);
+                log('');
+            });
+
+            if (php.warnings.length > limit) {
+                logWarning(`... a dalších ${php.warnings.length - limit} PHP varování`);
+                addWarning('PHP', `+${php.warnings.length - limit} dalších varování`);
+                log('');
+            }
+        }
+
+        // ============================================
+        // 3. JAVASCRIPT ERRORS
+        // ============================================
+        if (javascript.errors.length > 0) {
+            logHeader('❌ JAVASCRIPT CHYBY (' + javascript.errors.length + ')');
+            log('');
+
+            javascript.errors.forEach((err, index) => {
+                const prefix = `[${index + 1}/${javascript.errors.length}]`;
+                const location = `${err.file}:${err.line}` + (err.column > 0 ? `:${err.column}` : '');
+
+                logError(`${prefix} ${err.type.toUpperCase()}: ${err.message}`);
+                log(`📄 ${location}`);
+
+                if (err.context && err.context.trim()) {
+                    log(`📝 Kontext:`);
+                    log(`   ${err.context}`);
+                }
+
+                addError('JS/' + err.type, location, err.message);
+                log('');
+            });
+        }
+
+        // ============================================
+        // 4. JAVASCRIPT WARNINGS
+        // ============================================
+        if (javascript.warnings.length > 0) {
+            logHeader('⚠️  JAVASCRIPT VAROVÁNÍ (' + javascript.warnings.length + ')');
+            log('');
+
+            const limit = 10;
+            javascript.warnings.slice(0, limit).forEach((warn, index) => {
+                const prefix = `[${index + 1}/${Math.min(javascript.warnings.length, limit)}]`;
+                const location = `${warn.file}:${warn.line}` + (warn.column > 0 ? `:${warn.column}` : '');
+
+                logWarning(`${prefix} ${warn.type.toUpperCase()}: ${warn.message}`);
+                log(`📄 ${location}`);
+
+                if (warn.context && warn.context.trim()) {
+                    log(`📝 ${warn.context}`);
+                }
+
+                addWarning('JS/' + warn.type, location, warn.message);
+                log('');
+            });
+
+            if (javascript.warnings.length > limit) {
+                logWarning(`... a dalších ${javascript.warnings.length - limit} JS varování`);
+                log('');
+            }
+        }
+
+        // ============================================
+        // 5. CSS ERRORS
+        // ============================================
+        if (css.errors.length > 0) {
+            logHeader('❌ CSS CHYBY (' + css.errors.length + ')');
+            log('');
+
+            css.errors.forEach((err, index) => {
+                const prefix = `[${index + 1}/${css.errors.length}]`;
+                const location = `${err.file}:${err.line}`;
+
+                logError(`${prefix} ${err.type.toUpperCase()}: ${err.message}`);
+                log(`📄 ${location}`);
+
+                if (err.context && err.context.trim()) {
+                    log(`📝 ${err.context}`);
+                }
+
+                addError('CSS/' + err.type, location, err.message);
+                log('');
+            });
+        }
+
+        // ============================================
+        // 6. CSS WARNINGS
+        // ============================================
+        if (css.warnings.length > 0) {
+            logHeader('⚠️  CSS VAROVÁNÍ (' + css.warnings.length + ')');
+            log('');
+
+            const limit = 5;
+            css.warnings.slice(0, limit).forEach((warn, index) => {
+                const prefix = `[${index + 1}/${Math.min(css.warnings.length, limit)}]`;
+                const location = `${warn.file}:${warn.line}`;
+
+                logWarning(`${prefix} ${warn.message}`);
+                log(`📄 ${location}`);
+
+                addWarning('CSS/' + warn.type, location, warn.message);
+            });
+
+            if (css.warnings.length > limit) {
+                logWarning(`... a dalších ${css.warnings.length - limit} CSS varování`);
+                log('');
+            }
+        }
+
+        // ============================================
+        // 7. HTTP ERROR LOGS
+        // ============================================
+        if (http_logs.errors.length > 0) {
+            logHeader('🌐 HTTP ERROR LOGS (' + http_logs.errors.length + ')');
+            log('Poslední chyby z error logů:');
+            log('');
+
+            const limit = 15;
+            http_logs.errors.slice(0, limit).forEach((err, index) => {
+                const prefix = `[${index + 1}/${Math.min(http_logs.errors.length, limit)}]`;
+
+                if (err.code) {
+                    // HTTP error code
+                    const severity = ['500', '502', '503'].includes(err.code) ? 'error' : 'warning';
+                    if (severity === 'error') {
+                        logError(`${prefix} HTTP ${err.code} - ${err.date}`);
+                    } else {
+                        logWarning(`${prefix} HTTP ${err.code} - ${err.date}`);
+                    }
+                    log(`   ${err.message.substring(0, 150)}`);
+
+                    if (severity === 'error') {
+                        addError('HTTP/' + err.code, err.file, err.message.substring(0, 100));
+                    } else {
+                        addWarning('HTTP/' + err.code, err.file, err.message.substring(0, 100));
+                    }
+                } else if (err.line) {
+                    // PHP error from log
+                    const location = `${err.file}:${err.line}`;
+                    logError(`${prefix} ${err.type.toUpperCase()}: ${err.message}`);
+                    log(`📄 ${location}`);
+
+                    addError('PHP/' + err.type, location, err.message);
+                }
+
+                log('');
+            });
+
+            if (http_logs.errors.length > limit) {
+                log(`... a dalších ${http_logs.errors.length - limit} záznamů v logách`);
+                log('');
+            }
+        }
+
+        // ============================================
+        // FINAL SUMMARY
+        // ============================================
+        log('═'.repeat(79));
+        logHeader('📋 FINÁLNÍ SOUHRN');
+        log('');
+
+        if (summary.total_errors > 0) {
+            logError(`❌ Celkem chyb: ${summary.total_errors}`);
+        }
+
+        if (summary.total_warnings > 0) {
+            logWarning(`⚠️  Celkem varování: ${summary.total_warnings}`);
+        }
+
+        if (summary.total_errors === 0 && summary.total_warnings > 0) {
+            logSuccess('✅ Žádné kritické chyby - pouze varování');
+        } else if (summary.total_errors > 0) {
+            logError('🔧 Opravte prosím nalezené chyby');
+        }
+
+        log('');
+        log('💡 TIP: Každá chyba obsahuje přesnou lokaci (soubor:řádek:sloupec) a kontext kódu');
+        log('═'.repeat(79));
+        log('');
+
+    } catch (error) {
+        logError('❌ Code Analysis selhala:');
+        logError(`   ${error.message}`);
+        if (DEBUG_MODE) console.error(error);
         log('');
     }
 }
