@@ -131,7 +131,7 @@ if (!$isPostRequest) {
     }
 
     echo "<form method='POST'>
-        <input type='hidden' name='csrf_token' value='" . htmlspecialchars(getCSRFToken(), ENT_QUOTES, 'UTF-8') . "'>
+        <input type='hidden' name='csrf_token' value='" . htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8') . "'>
         <br>
         <button type='submit' class='btn'>✅ Potvrdit a přidat všech " . count($tasks) . " úkolů</button>
     </form>";
