@@ -103,24 +103,58 @@ PHP;
 
         $sql = file_get_contents($sqlFile);
 
-        // Remove comments and split by semicolons
-        $statements = array_filter(
-            array_map('trim', preg_split('/;(?=(?:[^\'"]|[\'"][^\'"]*[\'"])*$)/', $sql)),
-            function($stmt) {
-                return !empty($stmt) &&
-                       !preg_match('/^--/', $stmt) &&
-                       !preg_match('/^SELECT/', $stmt);
-            }
-        );
+        // Odstranit komentáře
+        $sql = preg_replace('/--[^\n]*\n/', "\n", $sql);
 
+        // Rozdělit podle středníků, ale respektovat stringy
+        $statements = [];
+        $currentStatement = '';
+        $inString = false;
+        $stringChar = '';
+
+        for ($i = 0; $i < strlen($sql); $i++) {
+            $char = $sql[$i];
+
+            if (!$inString && ($char === '"' || $char === "'")) {
+                $inString = true;
+                $stringChar = $char;
+            } elseif ($inString && $char === $stringChar && $sql[$i-1] !== '\\') {
+                $inString = false;
+            }
+
+            if (!$inString && $char === ';') {
+                $stmt = trim($currentStatement);
+                if (!empty($stmt) && !preg_match('/^SELECT/', $stmt)) {
+                    $statements[] = $stmt;
+                }
+                $currentStatement = '';
+            } else {
+                $currentStatement .= $char;
+            }
+        }
+
+        // Execute each statement
         foreach ($statements as $statement) {
-            if (trim($statement)) {
+            try {
                 $pdo->exec($statement);
+            } catch (PDOException $e) {
+                // Pokračovat i když selhání (např. tabulka už existuje)
+                error_log("SQL Warning: " . $e->getMessage());
             }
         }
 
         // Počkat na dokončení všech SQL operací
         usleep(100000); // 100ms
+
+        // Ověřit, že tabulky byly vytvořeny
+        $tablesCreated = true;
+        try {
+            $pdo->query("SELECT 1 FROM wgs_email_queue LIMIT 0");
+            $pdo->query("SELECT 1 FROM wgs_smtp_settings LIMIT 0");
+        } catch (PDOException $e) {
+            $tablesCreated = false;
+            throw new Exception("Tabulky nebyly vytvořeny: " . $e->getMessage());
+        }
 
         // KROK 3: Automaticky nastavit SMTP z existující konfigurace
         $smtpHost = '';
