@@ -32,7 +32,7 @@ try {
     if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         $csrfToken = $data['csrf_token'] ?? null;
 
-        // SECURITY: Ensure CSRF token is a string, not an array
+        // BEZPEČNOST: Zajistit že CSRF token je string, ne array
         if (is_array($csrfToken)) {
             $csrfToken = null;
         }
@@ -180,7 +180,7 @@ try {
                     'actions' => $actions
                 ]);
             } catch (PDOException $e) {
-                // Table doesn't exist or other DB error - return empty array
+                // Tabulka neexistuje nebo jiná DB chyba - vrátit prázdné pole
                 error_log('[Control Center API] get_pending_actions error: ' . $e->getMessage());
                 echo json_encode([
                     'success' => true,
@@ -407,7 +407,7 @@ try {
                 'user_id' => $_SESSION['user_id'] ?? null
             ]);
 
-            // Add to history
+            // Přidat do historie
             $pdo->prepare("
                 INSERT INTO wgs_action_history (action_id, action_type, action_title, status, executed_by)
                 SELECT id, action_type, action_title, 'completed', :user_id
@@ -689,7 +689,7 @@ try {
                     $pdo->exec("OPTIMIZE TABLE `$table`");
                     $tablesOptimized++;
                 } catch (PDOException $e) {
-                    // Skip if table can't be optimized
+                    // Přeskočit pokud tabulka nelze optimalizovat
                 }
             }
 
