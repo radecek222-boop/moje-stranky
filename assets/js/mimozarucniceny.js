@@ -304,16 +304,28 @@ const CALC = {
           const route = data.features[0];
           const distanceKm = (route.properties.distance / 1000).toFixed(1);
           const coordinates = route.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
+          const provider = route.properties.provider || 'unknown';
+          const warning = route.properties.warning || null;
 
           const routeData = {
             distanceKm,
-            coordinates
+            coordinates,
+            provider,
+            warning
           };
 
           // ⚡ CACHE: Uložit do cache
           this.routeCache.set(cacheKey, routeData);
 
           this.renderRoute(routeData);
+
+          // VAROVÁNÍ: Pokud se používá vzdušná čára
+          if (provider === 'haversine') {
+            this.toast('⚠️ Použita vzdušná čára - routing API nedostupné', 'warning');
+            logger.warn('⚠️ Using haversine distance (straight line)');
+          } else if (provider === 'OSRM') {
+            logger.log('✅ Route calculated by OSRM (road distance)');
+          }
         }
       } catch (err) {
         if (err.name === 'AbortError') {
