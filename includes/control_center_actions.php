@@ -401,6 +401,7 @@ async function executeAction(event, actionId) {
     fetch('/api/control_center_api.php?action=execute_action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify(payload)
     })
     .then(async r => {
