@@ -16,7 +16,7 @@
     // Doplnit fakturaci po načtení dat
     setTimeout(() => {
       const customer = currentReklamace || JSON.parse(localStorage.getItem('currentCustomer') || '{}');
-      const fakturaceFirma = customer.fakturace_firma || 'CZ';
+      const fakturaceFirma = (customer.fakturace_firma || 'cz').toUpperCase(); // DB používá lowercase
       const fakturaceField = document.getElementById('fakturace-firma');
 
       if (fakturaceField) {

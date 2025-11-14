@@ -29,12 +29,11 @@ try {
     $params = [];
 
     if ($status !== 'all') {
-        $statusMap = [
-            'wait' => 'ČEKÁ',
-            'open' => 'DOMLUVENÁ',
-            'done' => 'HOTOVO'
-        ];
-        $statusValue = $statusMap[$status] ?? $status;
+        // DB používá anglické hodnoty: 'wait', 'open', 'done' (lowercase)
+        // URL parametry také používají anglické hodnoty
+        // NESMÍME mapovat na české hodnoty - SQL dotaz by nic nenašel!
+        $statusValue = $status;
+
         if (in_array('stav', $columns, true)) {
             $whereParts[] = 'r.stav = :stav';
         } elseif (in_array('status', $columns, true)) {

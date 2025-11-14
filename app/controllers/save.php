@@ -143,10 +143,30 @@ function handleUpdate(PDO $pdo, array $input): array
                 $updateData[$field] = $time === '' ? null : $time;
                 break;
             case 'stav':
-                // BEZPEČNOST: stav může obsahovat české znaky (ČEKÁ, DOMLUVENÁ, HOTOVO)
-                // Nepoužívat sanitizeInput - rozbije HTML entities
+                // MAPPING: Frontend posílá české názvy, DB používá anglické ENUM
                 $stavValue = trim((string) $value);
-                $updateData[$field] = $stavValue === '' ? null : $stavValue;
+                $stavMapping = [
+                    'ČEKÁ' => 'wait',
+                    'wait' => 'wait',
+                    'DOMLUVENÁ' => 'open',
+                    'open' => 'open',
+                    'HOTOVO' => 'done',
+                    'done' => 'done'
+                ];
+
+                if ($stavValue !== '' && isset($stavMapping[$stavValue])) {
+                    $updateData[$field] = $stavMapping[$stavValue];
+                } elseif ($stavValue === '') {
+                    $updateData[$field] = null;
+                } else {
+                    // Fallback: použít hodnotu jak je (pro zpětnou kompatibilitu)
+                    $updateData[$field] = $stavValue;
+                }
+                break;
+            case 'fakturace_firma':
+                // MAPPING: DB používá lowercase ENUM('cz','sk')
+                $firmValue = trim((string) $value);
+                $updateData[$field] = $firmValue === '' ? null : strtolower($firmValue);
                 break;
             default:
                 $sanitized = sanitizeInput((string) $value);
@@ -246,7 +266,7 @@ try {
     $serioveCislo = sanitizeInput($_POST['seriove_cislo'] ?? '');
     $popisProblemu = sanitizeInput($_POST['popis_problemu'] ?? '');
     $doplnujiciInfo = sanitizeInput($_POST['doplnujici_info'] ?? '');
-    $fakturaceFirma = sanitizeInput($_POST['fakturace_firma'] ?? 'CZ');
+    $fakturaceFirma = strtolower(trim($_POST['fakturace_firma'] ?? 'cz')); // DB používá lowercase ENUM
     $gdprConsentRaw = $_POST['gdpr_consent'] ?? null;
     $gdprConsent = filter_var($gdprConsentRaw, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
 
