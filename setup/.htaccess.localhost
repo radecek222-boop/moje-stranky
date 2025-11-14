@@ -1,0 +1,9 @@
+# SECURITY: Zabezpečení setup adresáře - LOCALHOST ONLY
+# Toto je development verze - povolit pouze z localhost
+
+Order Deny,Allow
+Deny from all
+Allow from 127.0.0.1
+Allow from ::1
+
+# Pro úplné zablokování (produkce) použij setup/.htaccess.production
