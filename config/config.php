@@ -240,22 +240,9 @@ function isStrongPassword($password) {
     return empty($errors) ? true : $errors;
 }
 
-function generateCSRFToken() {
-    if (!isset($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    }
-    
-    return $_SESSION['csrf_token'];
-}
-
-function validateCSRFToken($token) {
-    // SECURITY: Reject arrays (potential attack)
-    if (!is_string($token)) {
-        return false;
-    }
-
-    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
-}
+// ========== CSRF FUNKCE ==========
+// POZNÁMKA: generateCSRFToken() a validateCSRFToken() jsou definovány v includes/csrf_helper.php
+// Nemusíme je zde duplikovat
 
 // ========== ČASOVÁ ZÓNA ==========
 date_default_timezone_set('Europe/Prague');
