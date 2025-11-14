@@ -35,17 +35,18 @@ try {
     // Úkol 1: Database indexy
     $stmt = $pdo->prepare("
         INSERT INTO wgs_pending_actions (
-            title,
-            description,
-            priority,
             action_type,
-            action_data,
+            action_title,
+            action_description,
+            action_url,
+            priority,
             status,
             created_at
         ) VALUES (?, ?, ?, ?, ?, ?, NOW())
     ");
 
     $stmt->execute([
+        'migration',
         '🚀 PRODUKCE: Přidat databázové indexy (47 indexů)',
         'Přidá 47 performance indexů do databáze. Zrychlí WHERE/JOIN/ORDER BY queries o 2-10x.
 
@@ -59,14 +60,14 @@ Co to dělá:
 
 Riziko: NÍZKÉ - pouze přidává indexy, nemění data
 Dopad: Výrazné zrychlení aplikace',
+        'scripts/add_database_indexes.php',
         'high',
-        'run_script',
-        json_encode(['script' => 'scripts/add_database_indexes.php', 'confirm' => true, 'backup_before' => false]),
         'pending'
     ]);
 
     // Úkol 2: Foreign Keys
     $stmt->execute([
+        'migration',
         '🔗 PRODUKCE: Přidat Foreign Key constraints',
         'Přidá FK constraints pro referenční integritu mezi tabulkami.
 
@@ -83,14 +84,14 @@ Pokud najde orphan záznamy, vypíše je a NEZRUŠÍ se constraint.
 
 Riziko: STŘEDNÍ - může failnout pokud jsou orphan data
 Dopad: Zajištění referenční integrity',
+        'scripts/add_foreign_keys.php',
         'high',
-        'run_script',
-        json_encode(['script' => 'scripts/add_foreign_keys.php', 'confirm' => true, 'backup_before' => true]),
         'pending'
     ]);
 
     // Úkol 3: Setup security
     $stmt->execute([
+        'config',
         '🔐 PRODUKCE: Zabezpečit setup/ adresář',
         'Zkopíruje setup/.htaccess.production → setup/.htaccess
 
@@ -107,9 +108,8 @@ Pokud budeš potřebovat setup script, musíš:
 
 Riziko: ŽÁDNÉ - jen kopíruje konfigurační soubor
 Dopad: Zabezpečení proti neoprávněnému přístupu k setup scriptům',
+        'setup/.htaccess.production',
         'critical',
-        'copy_file',
-        json_encode(['source' => 'setup/.htaccess.production', 'target' => 'setup/.htaccess', 'confirm' => true, 'backup_original' => true]),
         'pending'
     ]);
 
