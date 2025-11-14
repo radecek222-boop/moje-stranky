@@ -192,31 +192,58 @@ try {
     $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
     $headers .= "X-Mailer: PHP/" . phpversion();
 
-    // Odeslání emailu
-    $emailSent = mail($to, $subject, $message, $headers);
+    // ============================================
+    // ASYNCHRONNÍ ODESLÁNÍ EMAILU
+    // ============================================
+    // Odešleme odpověď klientovi OKAMŽITĚ a email se odešle na pozadí
+    // Tím se zrychlí response z 15s na ~1s
 
-    if (!$emailSent) {
-        throw new Exception('Nepodařilo se odeslat email');
-    }
-
-    // Logování úspěšného odeslání
-    error_log(sprintf(
-        "Notification sent: %s -> %s (subject: %s)",
-        $notificationId,
-        $to,
-        $subject
-    ));
-
-    // Úspěšná odpověď
+    // Úspěšná odpověď (před odesláním emailu!)
     echo json_encode([
         'success' => true,
-        'message' => 'Notifikace odeslána',
+        'message' => 'Notifikace bude odeslána',
         'sent' => true,
         'notification_id' => $notificationId,
         'to' => $to,
         'cc' => $ccEmails ?? [],
         'bcc_count' => count($bccEmails ?? [])
     ]);
+
+    // Ukončit output buffering a odeslat odpověď klientovi
+    if (ob_get_level() > 0) {
+        ob_end_flush();
+    }
+    flush();
+
+    // Pokud běží na FastCGI/PHP-FPM, uzavřít spojení s klientem
+    if (function_exists('fastcgi_finish_request')) {
+        fastcgi_finish_request();
+    }
+
+    // ============================================
+    // NYNÍ TEPRVE ODEŠLEME EMAIL NA POZADÍ
+    // Klient již dostal odpověď a nebude čekat
+    // ============================================
+
+    // Odeslání emailu
+    $emailSent = @mail($to, $subject, $message, $headers);
+
+    // Logování výsledku (úspěch i selhání)
+    if ($emailSent) {
+        error_log(sprintf(
+            "✓ Notification sent: %s -> %s (subject: %s)",
+            $notificationId,
+            $to,
+            $subject
+        ));
+    } else {
+        error_log(sprintf(
+            "✗ Notification FAILED: %s -> %s (subject: %s)",
+            $notificationId,
+            $to,
+            $subject
+        ));
+    }
 
 } catch (Exception $e) {
     http_response_code(400);
