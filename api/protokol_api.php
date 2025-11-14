@@ -173,7 +173,8 @@ function savePdfDocument($data) {
     $filename = basename($reklamaceId) . '.pdf';
     $filePath = $uploadsDir . '/' . $filename;
 
-    // Uložení souboru
+    // CRITICAL FIX: FILE-FIRST APPROACH
+    // Krok 1: Uložení souboru na disk
     if (file_put_contents($filePath, $pdfData) === false) {
         throw new Exception('Nepodařilo se uložit PDF soubor');
     }
@@ -184,55 +185,62 @@ function savePdfDocument($data) {
     // Velikost souboru
     $fileSize = filesize($filePath);
 
-    // Kontrola zda už PDF existuje
-    $stmt = $pdo->prepare("
-        SELECT id FROM wgs_documents
-        WHERE claim_id = :claim_id AND document_type = 'protokol_pdf'
-        LIMIT 1
-    ");
-    $stmt->execute([':claim_id' => $claimId]);
-    $existingDoc = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($existingDoc) {
-        // Update existujícího záznamu
+    try {
+        // Krok 2: Kontrola zda už PDF existuje a uložení do databáze
         $stmt = $pdo->prepare("
-            UPDATE wgs_documents
-            SET document_path = :document_path,
-                file_size = :file_size,
-                uploaded_at = NOW()
-            WHERE id = :id
+            SELECT id FROM wgs_documents
+            WHERE claim_id = :claim_id AND document_type = 'protokol_pdf'
+            LIMIT 1
         ");
-        $stmt->execute([
-            ':document_path' => $relativePathForDb,
-            ':file_size' => $fileSize,
-            ':id' => $existingDoc['id']
-        ]);
+        $stmt->execute([':claim_id' => $claimId]);
+        $existingDoc = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $documentId = $existingDoc['id'];
-    } else {
-        // Vložení nového záznamu do databáze
-        $stmt = $pdo->prepare("
-            INSERT INTO wgs_documents (
-                claim_id, document_name, document_path, document_type,
-                file_size, uploaded_by, uploaded_at
-            ) VALUES (
-                :claim_id, :document_name, :document_path, :document_type,
-                :file_size, :uploaded_by, NOW()
-            )
-        ");
+        if ($existingDoc) {
+            // Update existujícího záznamu
+            $stmt = $pdo->prepare("
+                UPDATE wgs_documents
+                SET document_path = :document_path,
+                    file_size = :file_size,
+                    uploaded_at = NOW()
+                WHERE id = :id
+            ");
+            $stmt->execute([
+                ':document_path' => $relativePathForDb,
+                ':file_size' => $fileSize,
+                ':id' => $existingDoc['id']
+            ]);
 
-        $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
+            $documentId = $existingDoc['id'];
+        } else {
+            // Vložení nového záznamu do databáze
+            $stmt = $pdo->prepare("
+                INSERT INTO wgs_documents (
+                    claim_id, document_name, document_path, document_type,
+                    file_size, uploaded_by, uploaded_at
+                ) VALUES (
+                    :claim_id, :document_name, :document_path, :document_type,
+                    :file_size, :uploaded_by, NOW()
+                )
+            ");
 
-        $stmt->execute([
-            ':claim_id' => $claimId,
-            ':document_name' => "Protokol_{$reklamaceId}.pdf",
-            ':document_path' => $relativePathForDb,
-            ':document_type' => 'protokol_pdf',
-            ':file_size' => $fileSize,
-            ':uploaded_by' => $uploadedBy
-        ]);
+            $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
 
-        $documentId = $pdo->lastInsertId();
+            $stmt->execute([
+                ':claim_id' => $claimId,
+                ':document_name' => "Protokol_{$reklamaceId}.pdf",
+                ':document_path' => $relativePathForDb,
+                ':document_type' => 'protokol_pdf',
+                ':file_size' => $fileSize,
+                ':uploaded_by' => $uploadedBy
+            ]);
+
+            $documentId = $pdo->lastInsertId();
+        }
+
+    } catch (PDOException $e) {
+        // CRITICAL FIX: ROLLBACK - Smazat soubor pokud DB operace selhala
+        @unlink($filePath);
+        throw new Exception('Chyba při ukládání PDF do databáze: ' . $e->getMessage());
     }
 
     return [
