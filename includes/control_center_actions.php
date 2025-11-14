@@ -358,7 +358,7 @@ function getPriorityBadge($priority) {
 <script src="/assets/js/csrf-auto-inject.js"></script>
 <script>
 // Debug mode - set to false in production
-const DEBUG_MODE = false;
+const DEBUG_MODE = true;
 
 // Helper function to check API response success
 function isSuccess(data) {
@@ -408,11 +408,15 @@ async function executeAction(event, actionId) {
 
         // Try to parse JSON even on error
         let responseData;
+        let rawResponse = '';
         try {
-            responseData = await r.json();
+            rawResponse = await r.text(); // Get raw text first
+            if (DEBUG_MODE) console.log('[executeAction] Raw response:', rawResponse);
+            responseData = JSON.parse(rawResponse);
             if (DEBUG_MODE) console.log('[executeAction] Response data:', responseData);
         } catch (e) {
             console.error('[executeAction] Failed to parse JSON:', e);
+            console.error('[executeAction] Raw response was:', rawResponse.substring(0, 500));
             responseData = null;
         }
 
@@ -425,6 +429,8 @@ async function executeAction(event, actionId) {
                         .map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v, null, 2) : v}`)
                         .join('\n');
                 }
+            } else {
+                errorMsg += '\n\nServer vrátil nevalidní odpověď. Zkontrolujte console pro detaily.';
             }
             throw new Error(errorMsg);
         }
@@ -433,6 +439,10 @@ async function executeAction(event, actionId) {
     })
     .then(data => {
         if (DEBUG_MODE) console.log('[executeAction] Success data:', data);
+
+        if (!data) {
+            throw new Error('API vrátilo prázdnou odpověď');
+        }
 
         if (isSuccess(data)) {
             const execTime = data.execution_time || 'neznámý čas';
