@@ -70,9 +70,13 @@ class RateLimiter {
                 ];
             }
 
+            // CRITICAL FIX: Zahájit transakci pro ochranu proti race condition
+            $this->pdo->beginTransaction();
+
             // Načti aktuální počet pokusů v časovém okně
             $windowStart = date('Y-m-d H:i:s', strtotime("-{$windowMinutes} minutes"));
 
+            // CRITICAL FIX: FOR UPDATE lock pro ochranu proti concurrent updates
             $stmt = $this->pdo->prepare("
                 SELECT * FROM `{$this->tableName}`
                 WHERE identifier = :identifier
@@ -80,6 +84,7 @@ class RateLimiter {
                   AND first_attempt_at >= :window_start
                 ORDER BY id DESC
                 LIMIT 1
+                FOR UPDATE
             ");
 
             $stmt->execute([
@@ -109,6 +114,9 @@ class RateLimiter {
                         ':id' => $record['id']
                     ]);
 
+                    // CRITICAL FIX: COMMIT transakce
+                    $this->pdo->commit();
+
                     return [
                         'allowed' => false,
                         'remaining' => 0,
@@ -129,6 +137,9 @@ class RateLimiter {
 
                 $remaining = $maxAttempts - ($attemptCount + 1);
 
+                // CRITICAL FIX: COMMIT transakce
+                $this->pdo->commit();
+
                 return [
                     'allowed' => true,
                     'remaining' => max(0, $remaining),
@@ -147,6 +158,9 @@ class RateLimiter {
                     ':action_type' => $actionType
                 ]);
 
+                // CRITICAL FIX: COMMIT transakce
+                $this->pdo->commit();
+
                 return [
                     'allowed' => true,
                     'remaining' => $maxAttempts - 1,
@@ -155,6 +169,10 @@ class RateLimiter {
                 ];
             }
         } catch (PDOException $e) {
+            // CRITICAL FIX: ROLLBACK transakce při chybě
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
             error_log("RateLimiter error: " . $e->getMessage());
             // V případě chyby povolíme požadavek (fail-open)
             return [
