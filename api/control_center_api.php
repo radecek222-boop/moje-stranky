@@ -272,6 +272,28 @@ try {
                         ];
                         break;
 
+                    case 'install_phpmailer':
+                        // Instalace PHPMailer
+                        $scriptPath = __DIR__ . '/../scripts/install_phpmailer.php';
+                        if (!file_exists($scriptPath)) {
+                            throw new Exception('Instalační script nenalezen: ' . $scriptPath);
+                        }
+
+                        ob_start();
+                        $installSuccess = include $scriptPath;
+                        $output = ob_get_clean();
+
+                        if ($installSuccess === false) {
+                            throw new Exception('Instalace selhala. Zkontrolujte log: logs/phpmailer_install.log');
+                        }
+
+                        $executeResult = [
+                            'success' => true,
+                            'message' => '✅ PHPMailer byl úspěšně nainstalován! Email queue nyní používá SMTP.',
+                            'output' => $output
+                        ];
+                        break;
+
                     case 'migration':
                     case 'install':
                         // Obecná instalace - spustit URL jako PHP script
