@@ -29,27 +29,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 mkdir($vendorDir, 0755, true);
             }
 
-            $phpmailerUrl = 'https://github.com/PHPMailer/PHPMailer/archive/refs/tags/v6.9.1.tar.gz';
-            $tarFile = $vendorDir . '/phpmailer.tar.gz';
+            // Použít ZIP místo tar.gz kvůli open_basedir restrikci
+            $phpmailerUrl = 'https://github.com/PHPMailer/PHPMailer/archive/refs/tags/v6.9.1.zip';
+            $zipFile = $vendorDir . '/phpmailer.zip';
 
             // Stáhnout
             $ch = curl_init($phpmailerUrl);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
             $data = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
 
-            if (!$data) {
-                throw new Exception("Nepodařilo se stáhnout PHPMailer");
+            if (!$data || $httpCode !== 200) {
+                throw new Exception("Nepodařilo se stáhnout PHPMailer (HTTP $httpCode)");
             }
 
-            file_put_contents($tarFile, $data);
+            file_put_contents($zipFile, $data);
 
-            // Rozbalit
-            $phar = new PharData($tarFile);
-            $phar->extractTo($vendorDir);
-            unlink($tarFile);
+            // Rozbalit pomocí ZipArchive (bez open_basedir problémů)
+            $zip = new ZipArchive;
+            if ($zip->open($zipFile) === TRUE) {
+                $zip->extractTo($vendorDir);
+                $zip->close();
+                unlink($zipFile);
+            } else {
+                unlink($zipFile);
+                throw new Exception("Nepodařilo se rozbalit PHPMailer");
+            }
 
             // Přejmenovat
             if (file_exists($vendorDir . '/PHPMailer-6.9.1')) {
