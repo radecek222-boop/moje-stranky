@@ -47,39 +47,49 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 }
 
 .console-btn {
-    background: #0E639C;
-    color: white;
-    border: none;
+    background: #ffffff;
+    color: #1d1d1f;
+    border: 1px solid #d1d1d6;
     padding: 0.5rem 1rem;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .console-btn:hover {
-    background: #1177BB;
+    background: #f5f5f7;
+    border-color: #667eea;
+    color: #667eea;
 }
 
 .console-btn.danger {
-    background: #DC3545;
+    background: #ffffff;
+    color: #dc3545;
+    border: 1px solid #dc3545;
 }
 
 .console-btn.danger:hover {
-    background: #C82333;
+    background: #dc3545;
+    color: white;
 }
 
 .console-btn.success {
-    background: #28A745;
+    background: #667eea;
+    color: white;
+    border: 1px solid #667eea;
 }
 
 .console-btn.success:hover {
-    background: #218838;
+    background: #5a67d8;
+    border-color: #5a67d8;
 }
 
 .console-btn:disabled {
-    background: #6C757D;
+    background: #f5f5f7;
+    color: #86868b;
+    border-color: #e5e5ea;
     cursor: not-allowed;
     opacity: 0.6;
 }
@@ -237,8 +247,9 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
             </div>
         </div>
 
-        <!-- System Info -->
-        <div class="console-stats" id="console-system-info" style="display: none; margin-bottom: 1rem;">
+        <!-- All Statistics in One Grid (6x2) -->
+        <div class="console-stats" id="console-all-stats" style="display: none;">
+            <!-- System Info -->
             <div class="console-stat-card">
                 <div class="console-stat-label">PHP Verze</div>
                 <div class="console-stat-value success" id="stat-php-version">—</div>
@@ -255,10 +266,6 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
                 <div class="console-stat-label">Max Upload</div>
                 <div class="console-stat-value success" id="stat-upload">—</div>
             </div>
-        </div>
-
-        <!-- Statistics -->
-        <div class="console-stats" id="console-stats" style="display: none;">
             <div class="console-stat-card">
                 <div class="console-stat-label">HTML/PHP Stránky</div>
                 <div class="console-stat-value success" id="stat-html">—</div>
@@ -267,6 +274,8 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
                 <div class="console-stat-label">PHP Backend</div>
                 <div class="console-stat-value success" id="stat-php">—</div>
             </div>
+
+            <!-- Row 2 -->
             <div class="console-stat-card">
                 <div class="console-stat-label">JavaScript</div>
                 <div class="console-stat-value success" id="stat-js">—</div>
@@ -421,7 +430,7 @@ function clearConsole() {
     `;
     document.getElementById('btn-clear').disabled = true;
     document.getElementById('btn-export').disabled = true;
-    document.getElementById('console-stats').style.display = 'none';
+    document.getElementById('console-all-stats').style.display = 'none';
 }
 
 function exportLog() {
@@ -466,8 +475,7 @@ async function runDiagnostics() {
     renderConsole();
 
     // Show stats
-    document.getElementById('console-stats').style.display = 'grid';
-    document.getElementById('console-system-info').style.display = 'grid';
+    document.getElementById('console-all-stats').style.display = 'grid';
 
     // Reset stats
     ['html', 'php', 'js', 'css', 'sql', 'api', 'errors', 'warnings', 'php-version', 'disk', 'memory', 'upload'].forEach(stat => {
@@ -1097,7 +1105,7 @@ async function checkFilePermissions() {
         }
     } catch (error) {
         logWarning('Nepodařilo se zkontrolovat oprávnění: ' + error.message);
-        totalWarnings++;
+        addWarning('Oprávnění', 'Kontrola selhala', error.message);
     }
 
     log('');
@@ -1128,20 +1136,22 @@ async function checkSecurity() {
             if (checks.csrf_protection) {
                 logSuccess('CSRF ochrana aktivní');
             } else {
-                totalWarnings++;
+                logWarning('CSRF ochrana NENÍ aktivní');
+                addWarning('Bezpečnost', 'CSRF ochrana neaktivní');
             }
 
             if (checks.rate_limiting) {
                 logSuccess('Rate limiting aktivní');
             } else {
-                totalWarnings++;
+                logWarning('Rate limiting NENÍ aktivní');
+                addWarning('Bezpečnost', 'Rate limiting neaktivní');
             }
 
             if (checks.strong_passwords) {
                 logSuccess('Silná hesla vynucena');
             } else {
                 logWarning('Doporučujeme silnější hesla');
-                totalWarnings++;
+                addWarning('Bezpečnost', 'Slabá hesla povolena');
             }
 
             if (checks.admin_keys_secure) {
@@ -1153,7 +1163,7 @@ async function checkSecurity() {
         }
     } catch (error) {
         logWarning('Nepodařilo se zkontrolovat bezpečnost: ' + error.message);
-        totalWarnings++;
+        addWarning('Bezpečnost', 'Kontrola selhala', error.message);
     }
 
     log('');
@@ -1557,7 +1567,7 @@ async function checkGitStatus() {
 
             if (uncommitted && uncommitted > 0) {
                 logWarning(`${uncommitted} uncommitted změn`);
-                totalWarnings++;
+                addWarning('Git', `${uncommitted} uncommitted změn`);
             }
 
             if (untracked && untracked > 0) {
@@ -1672,7 +1682,7 @@ async function checkDatabaseAdvanced() {
             // Deadlocks
             if (deadlocks && deadlocks.count > 0) {
                 logWarning(`${deadlocks.count} deadlocků detekováno (24h)`);
-                totalWarnings++;
+                addWarning('SQL', `${deadlocks.count} deadlocků (24h)`);
             }
 
         } else {
@@ -1753,7 +1763,7 @@ async function checkPerformance() {
                     logSuccess('Gzip komprese aktivní');
                 } else {
                     logWarning('Gzip komprese NENÍ aktivní');
-                    totalWarnings++;
+                    addWarning('Výkon', 'Gzip komprese neaktivní');
                 }
             }
 
@@ -1761,7 +1771,7 @@ async function checkPerformance() {
             if (caching_headers) {
                 if (caching_headers.missing && caching_headers.missing.length > 0) {
                     logWarning(`${caching_headers.missing.length} souborů bez cache headers`);
-                    totalWarnings++;
+                    addWarning('Výkon', `${caching_headers.missing.length} souborů bez cache headers`);
                 } else {
                     logSuccess('Cache headers správně nastavené');
                 }
@@ -1770,7 +1780,7 @@ async function checkPerformance() {
             // N+1 Queries
             if (n_plus_one_queries && n_plus_one_queries.detected > 0) {
                 logWarning(`${n_plus_one_queries.detected} možných N+1 query problémů`);
-                totalWarnings++;
+                addWarning('Výkon/SQL', `${n_plus_one_queries.detected} možných N+1 query problémů`);
             }
 
         } else {
@@ -1868,7 +1878,7 @@ async function checkCodeQuality() {
             if (psr_compliance !== undefined) {
                 if (psr_compliance.violations && psr_compliance.violations > 0) {
                     logWarning(`${psr_compliance.violations} PSR porušení`);
-                    totalWarnings++;
+                    addWarning('Kvalita kódu', `${psr_compliance.violations} PSR porušení`);
                 } else {
                     logSuccess('PSR coding standards dodrženy');
                 }
@@ -2022,7 +2032,7 @@ async function checkWorkflow() {
             if (email_queue) {
                 if (email_queue.pending > 50) {
                     logWarning(`${email_queue.pending} nevyřízených emailů ve frontě`);
-                    totalWarnings++;
+                    addWarning('Email Queue', `${email_queue.pending} nevyřízených emailů`);
                 } else if (email_queue.pending > 0) {
                     logSuccess(`Email queue: ${email_queue.pending} čekajících emailů (v normě)`);
                 } else {
@@ -2058,7 +2068,7 @@ async function checkWorkflow() {
                     const age_days = backup_status.age_days || 0;
                     if (age_days > 7) {
                         logWarning(`Poslední backup před ${age_days} dny (doporučeno: max 7 dní)`);
-                        totalWarnings++;
+                        addWarning('Backup', `Starý backup (${age_days} dní)`);
                     } else {
                         logSuccess(`Backup aktuální (${age_days} dní)`);
                     }
