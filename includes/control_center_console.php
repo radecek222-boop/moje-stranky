@@ -146,26 +146,28 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
 .console-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 .console-stat-card {
     background: #2D2D2D;
-    padding: 1.5rem;
-    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
     border: 1px solid #3E3E3E;
 }
 
 .console-stat-label {
     color: #858585;
-    font-size: 0.875rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .console-stat-value {
-    font-size: 2rem;
+    font-size: 1.25rem;
     font-weight: 700;
     font-family: 'Courier New', monospace;
 }
