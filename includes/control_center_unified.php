@@ -860,7 +860,7 @@ function loadClaimsModal() {
 
 function loadActionsModal() {
     const modalBody = document.getElementById('ccModalBody');
-    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_actions&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Akce & Úkoly"></iframe></div>';
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_actions&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Akce & Úkoly"></iframe></div>';
 }
 
 function loadDiagnosticsModal() {
