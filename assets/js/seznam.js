@@ -1338,19 +1338,7 @@ async function saveSelectedDate() {
         cacheRecord.stav = 'DOMLUVENÁ';
       }
 
-      // KROK 2: Odeslání potvrzení (neblokující, s timeoutem)
-      showLoading('Odesílám potvrzení zákazníkovi...');
-      try {
-        await Promise.race([
-          sendAppointmentConfirmation(CURRENT_RECORD, SELECTED_DATE, SELECTED_TIME),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
-        ]);
-      } catch (confirmError) {
-        // Logovat, ale nepřerušovat proces
-        logger.warn('⚠ Potvrzení nebylo odesláno:', confirmError.message);
-      }
-
-      // KROK 3: Načtení aktuálních dat z DB
+      // KROK 2: Načtení aktuálních dat z DB
       showLoading('Aktualizuji seznam...');
       await loadAll(ACTIVE_FILTER);
 
@@ -1359,6 +1347,11 @@ async function saveSelectedDate() {
 
       // ZOBRAZIT ÚSPĚCH (až po všech operacích)
       alert(`✓ Termín uložen: ${SELECTED_DATE} ${SELECTED_TIME}\n\nStav automaticky změněn na: DOMLUVENÁ`);
+
+      // KROK 3: Odeslání potvrzení ASYNCHRONNĚ na pozadí (fire-and-forget)
+      // Email se odešle, ale neuživatel na něj nečeká
+      sendAppointmentConfirmation(CURRENT_RECORD, SELECTED_DATE, SELECTED_TIME)
+        .catch(err => logger.warn('⚠ Email se nepodařilo odeslat:', err.message));
 
       // Re-open detail to show updated data
       const recordId = CURRENT_RECORD.id;
@@ -1754,19 +1747,19 @@ async function sendAppointmentConfirmation(customer, date, time) {
         }
       })
     });
-    
+
     const result = await response.json();
-    
-    if (result.status === 'success') {
+
+    if (result.success === true) {
       logger.log('✓ Potvrzení termínu odesláno zákazníkovi');
-      if (result.email_sent) {
-        logger.log('  ✓ Email odeslán na:', email);
+      if (result.sent) {
+        logger.log('  ✓ Email odeslán na:', result.to || email);
       }
       if (result.sms_sent) {
         logger.log('  ✓ SMS odeslána na:', phone);
       }
     } else {
-      logger.error('⚠ Chyba při odesílání potvrzení:', result.message);
+      logger.error('⚠ Chyba při odesílání potvrzení:', result.error || result.message);
     }
   } catch (error) {
     logger.error('❌ Chyba při odesílání potvrzení:', error);
