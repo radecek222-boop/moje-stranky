@@ -39,7 +39,8 @@ try {
     $pdo = getDbConnection();
     $pdo->beginTransaction();
 
-    $keyStmt = $pdo->prepare('SELECT * FROM wgs_registration_keys WHERE key_code = :code LIMIT 1');
+    // CRITICAL FIX: FOR UPDATE lock pro ochranu proti race condition (max_usage bypass)
+    $keyStmt = $pdo->prepare('SELECT * FROM wgs_registration_keys WHERE key_code = :code LIMIT 1 FOR UPDATE');
     $keyStmt->execute([':code' => $registrationKey]);
     $keyRow = $keyStmt->fetch(PDO::FETCH_ASSOC);
 
@@ -59,7 +60,8 @@ try {
 
     $role = $keyRow['key_type'] ?? 'user';
 
-    $existingStmt = $pdo->prepare('SELECT 1 FROM wgs_users WHERE email = :email LIMIT 1');
+    // CRITICAL FIX: FOR UPDATE lock pro ochranu proti race condition (duplicate email)
+    $existingStmt = $pdo->prepare('SELECT 1 FROM wgs_users WHERE email = :email LIMIT 1 FOR UPDATE');
     $existingStmt->execute([':email' => $email]);
     if ($existingStmt->fetchColumn()) {
         throw new InvalidArgumentException('Uživatel s tímto emailem již existuje.');

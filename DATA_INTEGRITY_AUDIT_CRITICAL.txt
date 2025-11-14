@@ -1,0 +1,346 @@
+╔════════════════════════════════════════════════════════════════════════════════════╗
+║          KOMPLETNÍ DATA INTEGRITY AUDIT - KRITICKÉ NÁLEZY                          ║
+║                    WGS Service CMS - PHP Projekt                                   ║
+║                        Datum: 2025-11-14                                           ║
+╚════════════════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════════════
+1. KRITICKÉ PROBLÉMY - DATABASE TRANSACTIONS
+═══════════════════════════════════════════════════════════════════════════════════════
+
+❌ KRITICKÝ PROBLÉM #1: Vytváření reklamace bez transakce
+───────────────────────────────────────────────────────────────────────────────────────
+FILE: /home/user/moje-stranky/app/controllers/save.php
+LINES: 429-439 (CREATE action)
+SEVERITY: KRITICKÉ
+RISK: Data Corruption
+
+PROBLÉM:
+- INSERT do wgs_reklamace bez beginTransaction()
+- Pokud INSERT selže, workflow ID (řádka 375) je vygenerováno ale neuloženo
+- Atomicita ztracena - žádný rollback
+
+KÓDOVÝ PŘÍKLAD:
+    $sql = 'INSERT INTO wgs_reklamace (...) VALUES (...)';
+    $stmt = $pdo->prepare($sql);
+    if (!$stmt->execute($parameters)) {
+        throw new Exception('Chyba při ukládání do databáze');  // Ale workflow ID je ztraceno!
+    }
+
+ŘEŠENÍ:
+- Přidat $pdo->beginTransaction() před generováním workflow ID
+- Přidat commit() po úspěšném INSERT
+- Přidat rollback() v catch bloku
+
+
+❌ KRITICKÝ PROBLÉM #2: Upload fotky - Orphan files risk
+───────────────────────────────────────────────────────────────────────────────────────
+FILE: /home/user/moje-stranky/app/controllers/save_photos.php
+LINES: 168-193 (fotografické operace)
+SEVERITY: KRITICKÉ
+RISK: Orphan Files + Database Inconsistency
+
+PROBLÉM:
+1. Soubor je uložen na disk PRVNÍ (řádka 168):
+   if (file_put_contents($filePath, $photoData) === false)
+   
+2. Database INSERT je DRUHÝ (řádka 176-193):
+   $stmt = $pdo->prepare("INSERT INTO wgs_photos ...")
+   $stmt->execute([...])
+
+POŘADÍ PROBLÉM:
+   File write ✓ → DB INSERT ✗ → ORPHAN FILE NA DISKU!
+
+ŘEŠENÍ - Možnost A (Doporučeno):
+- Začít s transakce: $pdo->beginTransaction()
+- DB INSERT PRVNÍ (s test reklamace na existenci)
+- Pak file_put_contents()
+- Commit až když je vše OK
+- Rollback smaže DB záznam, file se neuloží
+
+ŘEŠENÍ - Možnost B:
+- File write v tmp adresáři
+- Pak DB INSERT
+- Pak move temp file na finální lokaci
+
+
+❌ KRITICKÝ PROBLÉM #3: PDF upload - Stejný problém
+───────────────────────────────────────────────────────────────────────────────────────
+FILE: /home/user/moje-stranky/api/protokol_api.php
+FUNCTION: savePdfDocument()
+LINES: 177, 198-233
+SEVERITY: KRITICKÉ
+RISK: Orphan Files
+
+PROBLÉM:
+1. PDF se uloží na disk (řádka 177)
+2. Pak se INSERT/UPDATE do wgs_documents (řádky 198-233)
+3. Pokud DB operace selže, PDF zůstane na disku
+
+DODATEČNÝ PROBLÉM:
+- UPDATE a INSERT nejsou v transakci (řádky 196-233)
+- Pokud je existující dokument (řádka 196), UPDATE se provede
+- Pokud UPDATE selže, PDF je stále na disku ale nebyl uložen do DB
+
+ŘEŠENÍ: Jako u save_photos.php
+
+
+❌ KRITICKÝ PROBLÉM #4: Email queue - Status transitions bez transakce
+───────────────────────────────────────────────────────────────────────────────────────
+FILE: /home/user/moje-stranky/includes/EmailQueue.php
+LINES: 233-292 (processQueue)
+LINES: 297-303 (updateStatus)
+SEVERITY: KRITICKÉ
+RISK: Permanent Lock of Emails
+
+PROBLÉM:
+1. updateStatus($id, 'sending') - UPDATE bez transakce (řádka 258)
+2. sendEmail($email) - Externí operace (řádka 261)
+3. updateStatus($id, 'sent') - Druhý UPDATE bez transakce (řádka 265)
+
+SELHÁNÍ SCÉNÁŘ:
+- Email se označí 'sending'
+- sendEmail() timeout/crash
+- updateStatus() se neprovolá → Email ZŮSTANE V STAVU 'sending' NAVŽDY
+- Cron nikdy nezkusí odeslat znovu
+
+PROBLÉM PARALLEL PROCESSING:
+- 2 cron jobsy mohou paralelně zpracovávat stejný email
+- Obě nastaví status='sending'
+- Obě se pokusí odeslat stejný email
+
+ŘEŠENÍ:
+- Transakce kolem updateStatus + sendEmail
+- SELECT ... FOR UPDATE pro zamčení řádku
+- Nebo: INSERT nový pokus s timestamp, UPDATE starý pokus jen pokud je v 'pending'
+
+
+❌ KRITICKÝ PROBLÉM #5: GitHub Webhook - Orphaned records
+───────────────────────────────────────────────────────────────────────────────────────
+FILE: /home/user/moje-stranky/api/github_webhook.php
+LINES: 168-201
+SEVERITY: KRITICKÉ
+RISK: Database Orphan Records
+
+PROBLÉM:
+1. INSERT do wgs_github_webhooks (řádka 168-182)
+2. $webhookId = $pdo->lastInsertId() (řádka 184)
+3. INSERT do wgs_pending_actions s source_id=$webhookId (řádka 188-200)
+
+SELHÁNÍ SCÉNÁŘ:
+- Webhook INSERT ✓
+- lastInsertId() OK
+- Pending Action INSERT ✗ → Webhook zůstane bez action reference
+
+DODATEČNÝ PROBLÉM:
+- Není FK constraint
+- Pokud se webhook smaže, orphan action zůstane
+
+ŘEŠENÍ:
+- $pdo->beginTransaction() na začátku
+- $pdo->commit() na konci
+- $pdo->rollBack() v catch bloku
+
+
+═══════════════════════════════════════════════════════════════════════════════════════
+2. RACE CONDITIONS - UNIQUE CONSTRAINT PROBLEMY
+═══════════════════════════════════════════════════════════════════════════════════════
+
+⚠️ PROBLÉM #6: Email registration - Duplicate key race condition
+───────────────────────────────────────────────────────────────────────────────────────
+FILE: /home/user/moje-stranky/app/controllers/registration_controller.php
+LINES: 40-65, 136-138
+SEVERITY: VYSOKÁ (Race Condition)
+RISK: Duplicate User Registration
+
+PROBLÉM:
+1. beginTransaction() - řádka 40
+2. SELECT COUNT(*) na email - řádka 62-65
+3. Insert do wgs_users - řádka 136
+
+RACE CONDITION SCÉNÁŘ (Time-based):
+T1: Request A - SELECT email 'test@example.com' → NOT FOUND
+T2: Request B - SELECT email 'test@example.com' → NOT FOUND
+T3: Request A - INSERT 'test@example.com' → SUCCESS
+T4: Request B - INSERT 'test@example.com' → DUPLICATE KEY ERROR ✗
+
+PROBLÉM:
+- 2 SELECTs vidí stejný stav (email neexistuje)
+- Oba se pokusí INSERT se stejnou email
+- Jeden selže s DUPLICATE KEY ERROR
+- User se nedokončí registrovat
+
+ŘEŠENÍ:
+- Změnit na SELECT ... FOR UPDATE (pessimistic lock)
+- Nebo: INSERT ... ON DUPLICATE KEY UPDATE
+- Nebo: Spolehnat se na UNIQUE constraint s error handling
+
+
+═══════════════════════════════════════════════════════════════════════════════════════
+3. ORPHAN FILES - SEZNAM
+═══════════════════════════════════════════════════════════════════════════════════════
+
+❌ Fotky bez DB reference:
+   FILE: /home/user/moje-stranky/app/controllers/save_photos.php:168
+   → Pokud file_put_contents() selže a pak INSERT INTO wgs_photos selže
+   → Fotka zůstane na /uploads/reklamace_XXX/photo_*.jpg
+
+❌ PDF bez DB reference:
+   FILE: /home/user/moje-stranky/api/protokol_api.php:177
+   → Pokud file_put_contents() selže a pak INSERT INTO wgs_documents selže
+   → PDF zůstane na /uploads/protokoly/XXX.pdf
+
+✅ DELETE je správně:
+   FILE: /home/user/moje-stranky/api/delete_reklamace.php:163
+   → cleanupUploadedFiles() je volán PO commit()
+   → Pokud file delete selže, DB změny jsou already committed
+   → ⚠️ Ale: Orphan files mohou zůstat pokud delete_reklamace.php selže
+
+
+═══════════════════════════════════════════════════════════════════════════════════════
+4. CHYBĚJÍCÍ FOREIGN KEY CONSTRAINTS
+═══════════════════════════════════════════════════════════════════════════════════════
+
+⚠️ Tabulky bez FK constraints na wgs_reklamace:
+   - wgs_photos.reklamace_id - NEMA FK → orphan photos
+   - wgs_documents.claim_id - NEMA FK → orphan documents
+   - wgs_notes.claim_id - NEMA FK → orphan notes
+   - wgs_notifications.claim_id - NEMA FK → orphan notifications
+
+❌ Manuální cascade delete místo FK:
+   FILE: /home/user/moje-stranky/api/delete_reklamace.php:98-143
+   - DELETE FROM wgs_photos WHERE reklamace_id = :id (řádka 108)
+   - DELETE FROM wgs_documents WHERE claim_id = :id (řádka 123)
+   - DELETE FROM wgs_notes WHERE claim_id = :id (řádka 129)
+   - DELETE FROM wgs_notifications WHERE claim_id = :id (řádka 135)
+
+   RIZIKO: Pokud delete_reklamace.php se neprovede (error, API call selhán), 
+           orphan records zůstanou v DB NAVŽDY
+
+ŘEŠENÍ:
+- Přidat FK constraints:
+  ALTER TABLE wgs_photos ADD FOREIGN KEY (reklamace_id) 
+    REFERENCES wgs_reklamace(reklamace_id) ON DELETE CASCADE;
+  
+- Pak s FK constraints se automatické cascade delete provede
+- Nebudete potřebovat manuální DELETEs
+
+
+═══════════════════════════════════════════════════════════════════════════════════════
+5. LOOP UPDATES BEZ TRANSAKCÍ
+═══════════════════════════════════════════════════════════════════════════════════════
+
+❌ PROBLÉM #7: control_center_tools.php - Auto-fix visibility loop
+───────────────────────────────────────────────────────────────────────────────────────
+FILE: /home/user/moje-stranky/includes/control_center_tools.php
+LINES: 25-66
+SEVERITY: VYSOKÁ
+RISK: Partial state corruption
+
+PROBLÉM:
+foreach ($users as $user) {
+    $stmt = $pdo->prepare("UPDATE wgs_reklamace SET created_by = :user_id ...");
+    $stmt->execute([...]);  // UPDATE #1 OK
+    $affected = $stmt->rowCount();
+    // Pokud UPDATE #N selže (N > 1), UPDATE #1 až #N-1 zůstanou committed
+}
+
+SELHÁNÍ SCÉNÁŘ:
+- UPDATE pro uživatele 1 → OK (3 reklamace zmapovány)
+- UPDATE pro uživatele 2 → OK (5 reklamací zmapovány)
+- UPDATE pro uživatele 3 → ERROR (DB error)
+- Výsledek: 8 z 10 reklamací má created_by, 2 mají NULL
+
+ŘEŠENÍ:
+- Přidat beginTransaction() na začátku loopa
+- Přidat commit() na konci
+- Přidat rollback() v catch
+
+
+═══════════════════════════════════════════════════════════════════════════════════════
+6. CONTROL CENTER API - Theme updates bez transakce
+═══════════════════════════════════════════════════════════════════════════════════════
+
+❌ PROBLÉM #8: control_center_api.php - Save theme settings
+───────────────────────────────────────────────────────────────────────────────────────
+FILE: /home/user/moje-stranky/api/control_center_api.php
+LINES: 122-160 (case 'save_theme')
+SEVERITY: STŘEDNÍ
+RISK: Partial theme update
+
+PROBLÉM:
+foreach ($settings as $key => $value) {
+    $stmt->execute([...]);  // INSERT ON DUPLICATE KEY UPDATE
+    // Pokud INSERT #N selže, INSERT #1 až #N-1 zůstanou
+}
+
+SELHÁNÍ SCÉNÁŘ:
+- Uložit 10 theme nastavení
+- 1-7 jsou OK
+- #8 ERROR
+- Theme bude v nekonzistentním stavu (7 nastavení, 3 stará)
+
+
+═══════════════════════════════════════════════════════════════════════════════════════
+7. SHRNUTÍ A PRIORITIZACE OPRAV
+═══════════════════════════════════════════════════════════════════════════════════════
+
+🔴 KRITICKÉ (Fix immediately):
+   1. save.php CREATE - Add transaction (Line: 429)
+   2. save_photos.php - Reorder file+DB operations (Line: 168)
+   3. protokol_api.php - Reorder file+DB operations (Line: 177)
+   4. github_webhook.php - Add transaction (Line: 168)
+   5. EmailQueue processQueue - Add transaction (Line: 258)
+
+🟠 VYSOKÁ (Fix soon):
+   1. registration_controller.php - Add SELECT FOR UPDATE (Line: 62)
+   2. control_center_tools.php - Add transaction in loop (Line: 38)
+   3. cron/process-email-queue.php - Add transaction (Line: 102)
+   4. notes_api.php - Add transaction (Line: 119, 155)
+   5. admin_api.php - Add transaction (Line: 149)
+
+🟡 STŘEDNÍ (Fix as part of refactoring):
+   1. control_center_api.php - Add transaction in loop (Line: 141)
+   2. Add FK constraints on orphan-prone tables
+   3. Replace manual cascades with FK constraints
+   4. Add file atomicity wrapper function
+
+
+═══════════════════════════════════════════════════════════════════════════════════════
+8. SOUBOR S KONKRÉTNÍMI KÓDOVÝMI LOKACEMI
+═══════════════════════════════════════════════════════════════════════════════════════
+
+FILE: /home/user/moje-stranky/app/controllers/save.php
+- PROBLÉM #1: Lines 429-439 (CREATE bez transaction)
+- ŘEŠENÍ: Přidat transaction wrapper
+
+FILE: /home/user/moje-stranky/app/controllers/save_photos.php
+- PROBLÉM #2: Line 168 (File-first approach)
+- ŘEŠENÍ: Reorder operations + transaction
+
+FILE: /home/user/moje-stranky/api/protokol_api.php
+- PROBLÉM #3: Line 177 (File-first approach)
+- ŘEŠENÍ: Reorder operations + transaction
+
+FILE: /home/user/moje-stranky/includes/EmailQueue.php
+- PROBLÉM #4: Lines 258, 265, 274 (Status transitions)
+- ŘEŠENÍ: Transakce kolem status changes
+
+FILE: /home/user/moje-stranky/api/github_webhook.php
+- PROBLÉM #5: Lines 168-200 (Orphaned INSERTs)
+- ŘEŠENÍ: Transakce kolem dvou INSERTs
+
+FILE: /home/user/moje-stranky/app/controllers/registration_controller.php
+- PROBLÉM #6: Line 62-65 (Race condition)
+- ŘEŠENÍ: SELECT ... FOR UPDATE
+
+FILE: /home/user/moje-stranky/includes/control_center_tools.php
+- PROBLÉM #7: Line 38-42 (Loop UPDATE)
+- ŘEŠENÍ: Transakce kolem loopa
+
+FILE: /home/user/moje-stranky/cron/process-email-queue.php
+- PROBLÉM: Line 102 (Email status without transaction)
+- ŘEŠENÍ: Transakce kolem status updates
+
+KONEC AUDITŮ
+═══════════════════════════════════════════════════════════════════════════════════════

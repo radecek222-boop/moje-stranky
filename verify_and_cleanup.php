@@ -246,7 +246,10 @@ header('Content-Type: text/html; charset=utf-8');
     </div>
 
     <script>
-        function deleteRecord(id) {
+                /**
+         * DeleteRecord
+         */
+function deleteRecord(id) {
             if (!confirm('Opravdu chcete smazat tento záznam z historie?')) {
                 return;
             }
@@ -272,7 +275,10 @@ header('Content-Type: text/html; charset=utf-8');
             });
         }
 
-        function deleteAllFailedRecords() {
+                /**
+         * DeleteAllFailedRecords
+         */
+function deleteAllFailedRecords() {
             if (!confirm('Opravdu chcete smazat VŠECHNY selhavší záznamy z historie?')) {
                 return;
             }

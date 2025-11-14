@@ -11,7 +11,12 @@ if (!function_exists('get_page_seo_meta')) {
      * @param string $page Název stránky (basename nebo URI)
      * @return array ['title' => string, 'description' => string, 'keywords' => string]
      */
-    function get_page_seo_meta(string $page = ''): array
+        /**
+     * Get page seo meta
+     *
+     * @param string $page Page
+     */
+function get_page_seo_meta(string $page = ''): array
     {
         // Pokud není zadána stránka, určit z REQUEST_URI
         if (empty($page)) {
@@ -385,32 +390,3 @@ if (!function_exists('get_page_seo_meta')) {
     }
 }
 
-if (!function_exists('render_seo_meta_tags')) {
-    /**
-     * Vykreslí SEO meta tagy jako HTML
-     *
-     * @param string $page Název stránky
-     * @return void (echoes HTML)
-     */
-    function render_seo_meta_tags(string $page = ''): void
-    {
-        $meta = get_page_seo_meta($page);
-
-        echo '<meta charset="UTF-8">' . "\n";
-        echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">' . "\n";
-        echo '<title>' . htmlspecialchars($meta['title'], ENT_QUOTES, 'UTF-8') . '</title>' . "\n";
-        echo '<meta name="description" content="' . htmlspecialchars($meta['description'], ENT_QUOTES, 'UTF-8') . '">' . "\n";
-        echo '<meta name="keywords" content="' . htmlspecialchars($meta['keywords'], ENT_QUOTES, 'UTF-8') . '">' . "\n";
-        echo '<meta name="robots" content="' . htmlspecialchars($meta['robots'], ENT_QUOTES, 'UTF-8') . '">' . "\n";
-
-        // Open Graph tags (pro social media)
-        echo '<meta property="og:title" content="' . htmlspecialchars($meta['title'], ENT_QUOTES, 'UTF-8') . '">' . "\n";
-        echo '<meta property="og:description" content="' . htmlspecialchars($meta['description'], ENT_QUOTES, 'UTF-8') . '">' . "\n";
-        echo '<meta property="og:type" content="website">' . "\n";
-
-        // Twitter Card tags
-        echo '<meta name="twitter:card" content="summary">' . "\n";
-        echo '<meta name="twitter:title" content="' . htmlspecialchars($meta['title'], ENT_QUOTES, 'UTF-8') . '">' . "\n";
-        echo '<meta name="twitter:description" content="' . htmlspecialchars($meta['description'], ENT_QUOTES, 'UTF-8') . '">' . "\n";
-    }
-}

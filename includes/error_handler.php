@@ -187,7 +187,21 @@ register_shutdown_function(function() {
 });
 
 /**
- * Formátování chybové zprávy pro log
+ * Formátování chybové zprávy pro textový log soubor
+ *
+ * Vytváří detailní log zprávu obsahující:
+ * - Typ chyby, čas, zprávu
+ * - Soubor a řádek
+ * - Stack trace (pokud je k dispozici)
+ * - Request info (URL, metoda, IP, User-Agent)
+ *
+ * @param array $error Error data ['type' => string, 'message' => string, 'file' => string, 'line' => int, 'backtrace' => array|null]
+ * @return string Formátovaná chybová zpráva pro log
+ */
+/**
+ * FormatErrorMessage
+ *
+ * @param mixed $error Error
  */
 function formatErrorMessage($error) {
     $message = "\n" . str_repeat('=', 80) . "\n";
@@ -226,7 +240,22 @@ function formatErrorMessage($error) {
 }
 
 /**
- * Formátování backtrace pro JSON
+ * Formátování backtrace do strukturovaného pole pro JSON output
+ *
+ * Převádí PHP backtrace do čitelné struktury obsahující:
+ * - Číslo záznamu
+ * - Soubor (basename a plná cesta)
+ * - Řádek
+ * - Funkci/metodu
+ * - Třídu a typ volání (-> nebo ::)
+ *
+ * @param array $backtrace PHP backtrace z debug_backtrace()
+ * @return array Formátovaný backtrace vhodný pro JSON encoding
+ */
+/**
+ * FormatBacktrace
+ *
+ * @param mixed $backtrace Backtrace
  */
 function formatBacktrace($backtrace) {
     $formatted = [];
@@ -247,21 +276,57 @@ function formatBacktrace($backtrace) {
 }
 
 /**
- * Logování do souboru
+ * Uloží chybovou zprávu do log souboru
+ *
+ * Zapisuje do /logs/php_errors.log
+ * Vytvoří adresář pokud neexistuje (oprávnění 0755).
+ *
+ * WARNING: Používá @ operator - mělo by být nahrazeno safe_file_operations.php
+ *
+ * @param string $message Chybová zpráva k uložení
+ * @return void
+ */
+/**
+ * LogErrorToFile
+ *
+ * @param mixed $message Message
  */
 function logErrorToFile($message) {
     $logDir = __DIR__ . '/../logs';
 
     if (!is_dir($logDir)) {
-        @mkdir($logDir, 0755, true);
+        if (!is_dir($logDir, 0755, true)) {
+    if (!mkdir($logDir, 0755, true) && !is_dir($logDir, 0755, true)) {
+        error_log('Failed to create directory: ' . $logDir, 0755, true);
+    }
+}
     }
 
     $logFile = $logDir . '/php_errors.log';
-    @file_put_contents($logFile, $message, FILE_APPEND);
+    if (file_put_contents($logFile, $message, FILE_APPEND) === false) {
+    error_log('Failed to write file');
+}
 }
 
 /**
- * Zobrazení chyby v HTML
+ * Zobrazí chybu v přehledném HTML formátu pro development
+ *
+ * Vytváří debug stránku s tmavým Apple-style designem obsahující:
+ * - Typ chyby a zprávu
+ * - Soubor a řádek
+ * - Stack trace s možností rozbalení
+ * - Request informace (URL, metoda, IP, User-Agent)
+ * - Barevné rozlišení podle typu chyby
+ *
+ * WARNING: Mělo by být použito POUZE v development módu!
+ *
+ * @param array $error Error data ['type' => string, 'message' => string, 'file' => string, 'line' => int, 'backtrace' => array|null]
+ * @return void Vypisuje HTML přímo do outputu
+ */
+/**
+ * DisplayErrorHTML
+ *
+ * @param mixed $error Error
  */
 function displayErrorHTML($error) {
     ?>
@@ -481,7 +546,10 @@ function displayErrorHTML($error) {
         </div>
 
         <script>
-        function copyErrorReport() {
+                /**
+         * CopyErrorReport
+         */
+function copyErrorReport() {
             const separator = '='.repeat(80);
             const report = `
 WGS ERROR REPORT

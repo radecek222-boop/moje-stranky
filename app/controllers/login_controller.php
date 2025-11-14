@@ -51,6 +51,11 @@ try {
     respondError('Došlo k neočekávané chybě. Zkuste to prosím znovu.', 500);
 }
 
+/**
+ * HandleAdminLogin
+ *
+ * @param string $adminKey AdminKey
+ */
 function handleAdminLogin(string $adminKey): void
 {
     $identifier = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
@@ -90,6 +95,13 @@ function handleAdminLogin(string $adminKey): void
     ]);
 }
 
+/**
+ * HandleUserLogin
+ *
+ * @param PDO $pdo Pdo
+ * @param string $email Email
+ * @param string $password Password
+ */
 function handleUserLogin(PDO $pdo, string $email, string $password): void
 {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -119,6 +131,9 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     if (array_key_exists('is_active', $user) && (int) $user['is_active'] === 0) {
         respondError('Účet byl deaktivován. Kontaktujte administrátora.', 403);
     }
+
+    // SECURITY FIX: Regenerovat session ID pro ochranu proti session fixation
+    session_regenerate_id(true);
 
     $userId = $user['id'] ?? $user['user_id'] ?? null;
     if ($userId === null) {
@@ -171,6 +186,11 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     ]);
 }
 
+/**
+ * HandleHighKeyVerification
+ *
+ * @param string $highKey HighKey
+ */
 function handleHighKeyVerification(string $highKey): void
 {
     if ($highKey === '') {
@@ -199,6 +219,12 @@ function handleHighKeyVerification(string $highKey): void
     ]);
 }
 
+/**
+ * HandleAdminKeyRotation
+ *
+ * @param string $newKey NewKey
+ * @param string $confirmation Confirmation
+ */
 function handleAdminKeyRotation(string $newKey, string $confirmation): void
 {
     if (!isset($_SESSION['admin_high_key_verified_at']) || (time() - (int) $_SESSION['admin_high_key_verified_at']) > 600) {
@@ -234,11 +260,23 @@ function handleAdminKeyRotation(string $newKey, string $confirmation): void
     ]);
 }
 
+/**
+ * RespondSuccess
+ *
+ * @param array $payload Payload
+ */
 function respondSuccess(array $payload = []): void
 {
     echo json_encode(array_merge(['status' => 'success'], $payload), JSON_UNESCAPED_UNICODE);
 }
 
+/**
+ * RespondError
+ *
+ * @param string $message Message
+ * @param int $code Code
+ * @param array $extra Extra
+ */
 function respondError(string $message, int $code = 400, array $extra = []): void
 {
     http_response_code($code);

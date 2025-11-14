@@ -8,6 +8,21 @@ require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
 require_once __DIR__ . '/../../includes/db_metadata.php';
 
+/**
+ * Generuje unikátní ID pro reklamaci ve formátu WGSyymmdd-XXXXXX
+ *
+ * Používá FOR UPDATE lock k prevenci race condition při generování ID.
+ * Pokud ID už existuje, zkusí vygenerovat nové (max 5 pokusů).
+ *
+ * @param PDO $pdo Database connection
+ * @return string Vygenerované unikátní ID (např. "WGS251114-A3F2B1")
+ * @throws Exception Pokud se nepodaří vygenerovat ID po 5 pokusech
+ */
+/**
+ * GenerateWorkflowId
+ *
+ * @param PDO $pdo Pdo
+ */
 function generateWorkflowId(PDO $pdo): string
 {
     // BUGFIX: Race condition fix - použít FOR UPDATE lock
@@ -30,6 +45,26 @@ function generateWorkflowId(PDO $pdo): string
     throw new Exception('Nepodařilo se vygenerovat interní ID reklamace.');
 }
 
+/**
+ * Normalizuje datum z různých formátů do ISO 8601 (YYYY-MM-DD)
+ *
+ * Podporované formáty:
+ * - NULL nebo prázdný string → NULL
+ * - "nevyplňuje se" → NULL
+ * - YYYY-MM-DD → YYYY-MM-DD (beze změny)
+ * - DD.MM.YYYY → YYYY-MM-DD (převod)
+ *
+ * Validuje že datum je platné pomocí checkdate() (detekuje např. 32.13.9999).
+ *
+ * @param string|null $value Vstupní datum v různých formátech
+ * @return string|null Normalizované datum ve formátu YYYY-MM-DD nebo NULL
+ * @throws Exception Pokud formát data není rozpoznán nebo datum je neplatné
+ */
+/**
+ * NormalizeDateInput
+ *
+ * @param string $value Value
+ */
 function normalizeDateInput(?string $value): ?string
 {
     if ($value === null) {
@@ -61,6 +96,29 @@ function normalizeDateInput(?string $value): ?string
     throw new Exception('Neplatný formát data: ' . $value);
 }
 
+/**
+ * Aktualizuje existující reklamaci v databázi
+ *
+ * Provádí kompletní update záznamu reklamace včetně:
+ * - Kontroly oprávnění (admin nebo vlastník)
+ * - Validace vstupních dat
+ * - Normalizace datumů
+ * - File-first přístupu pro přílohy
+ * - Transakční bezpečnosti
+ *
+ * Podporuje identifikaci záznamu podle: id, reklamace_id nebo cislo.
+ *
+ * @param PDO $pdo Database connection
+ * @param array $input Vstupní data z formuláře (POST data)
+ * @return array Výsledek operace ['success' => bool, 'message' => string, 'data' => array]
+ * @throws Exception Při chybě oprávnění, validace nebo DB operace
+ */
+/**
+ * HandleUpdate
+ *
+ * @param PDO $pdo Pdo
+ * @param array $input Input
+ */
 function handleUpdate(PDO $pdo, array $input): array
 {
     $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
@@ -370,12 +428,17 @@ try {
     $hasCreatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'created_at');
     $hasUpdatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'updated_at');
 
-    $workflowId = null;
-    if ($hasReklamaceId) {
-        $workflowId = generateWorkflowId($pdo);
-    }
+    // CRITICAL FIX: Zahájit transakci PŘED generováním ID
+    // FOR UPDATE lock funguje pouze v transakci!
+    $pdo->beginTransaction();
 
-    $now = date('Y-m-d H:i:s');
+    try {
+        $workflowId = null;
+        if ($hasReklamaceId) {
+            $workflowId = generateWorkflowId($pdo);
+        }
+
+        $now = date('Y-m-d H:i:s');
 
     $columns = [
         'typ' => $typ,
@@ -434,12 +497,24 @@ try {
         $parameters[':' . $column] = $value === '' ? null : $value;
     }
 
-    if (!$stmt->execute($parameters)) {
-        throw new Exception('Chyba při ukládání do databáze');
-    }
+        if (!$stmt->execute($parameters)) {
+            throw new Exception('Chyba při ukládání do databáze');
+        }
 
-    $primaryId = $pdo->lastInsertId();
-    $identifierForClient = $workflowId ?? $primaryId;
+        // CRITICAL FIX: COMMIT transakce
+        $pdo->commit();
+
+        $primaryId = $pdo->lastInsertId();
+        $identifierForClient = $workflowId ?? $primaryId;
+
+    } catch (Exception $e) {
+        // CRITICAL FIX: ROLLBACK při chybě
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log("Save error: " . $e->getMessage());
+        throw $e;
+    }
 
     echo json_encode([
         'status' => 'success',

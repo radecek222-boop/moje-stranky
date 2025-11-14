@@ -401,6 +401,9 @@ function getCSRFTokenSync() {
     return metaTag ? metaTag.getAttribute('content') : null;
 }
 
+/**
+ * SelectRole
+ */
 function selectRole(role) {
     testData.role = role;
 
@@ -414,6 +417,9 @@ function selectRole(role) {
     document.getElementById('startTestBtn').disabled = false;
 }
 
+/**
+ * StartTest
+ */
 function startTest() {
     if (!testData.role) {
         alert('Vyberte roli pro testování');
@@ -446,6 +452,9 @@ function startTest() {
     goToStep(1);
 }
 
+/**
+ * AddDiagnostic
+ */
 function addDiagnostic(message, type = 'info') {
     const timestamp = new Date().toLocaleTimeString('cs-CZ');
     const line = {
@@ -457,12 +466,18 @@ function addDiagnostic(message, type = 'info') {
     console.log(`[${timestamp}]`, message);
 }
 
+/**
+ * UpdateStatus
+ */
 function updateStatus(text, className = 'testing') {
     const indicator = document.getElementById('statusIndicator');
     indicator.className = `status-indicator ${className}`;
     indicator.textContent = text;
 }
 
+/**
+ * GoToStep
+ */
 function goToStep(stepNumber) {
     testData.currentStep = stepNumber;
 
@@ -507,6 +522,9 @@ function goToStep(stepNumber) {
     }
 }
 
+/**
+ * LoadStep1 Formular
+ */
 function loadStep1_Formular(panel) {
     updateStatus('Vyplňování formuláře...', 'testing');
 
@@ -562,7 +580,10 @@ function loadStep1_Formular(panel) {
     renderDiagnostic();
 }
 
-async function executeStep1() {
+async /**
+ * ExecuteStep1
+ */
+function executeStep1() {
     addDiagnostic('Validace formuláře...', 'info');
 
     const jmeno = document.getElementById('jmeno').value;
@@ -587,6 +608,9 @@ async function executeStep1() {
     }, 500);
 }
 
+/**
+ * LoadStep2 APICall
+ */
 function loadStep2_APICall(panel) {
     updateStatus('Volání API...', 'testing');
 
@@ -615,7 +639,10 @@ function loadStep2_APICall(panel) {
     executeStep2();
 }
 
-async function executeStep2() {
+async /**
+ * ExecuteStep2
+ */
+function executeStep2() {
     try {
         addDiagnostic('Volání API create_test_claim.php...', 'info');
         renderDiagnostic();
@@ -668,6 +695,9 @@ async function executeStep2() {
     }
 }
 
+/**
+ * LoadStep3 Seznam
+ */
 function loadStep3_Seznam(panel) {
     updateStatus('Validace v Seznamu...', 'testing');
 
@@ -702,7 +732,10 @@ function loadStep3_Seznam(panel) {
     executeStep3();
 }
 
-async function executeStep3() {
+async /**
+ * ExecuteStep3
+ */
+function executeStep3() {
     try {
         addDiagnostic('Load operace: Načítání seznamu z databáze...', 'info');
         renderDiagnostic();
@@ -747,6 +780,9 @@ async function executeStep3() {
     }
 }
 
+/**
+ * LoadStep4 Detail
+ */
 function loadStep4_Detail(panel) {
     updateStatus('Detail zákazníka...', 'testing');
 
@@ -780,7 +816,10 @@ function loadStep4_Detail(panel) {
     renderDiagnostic();
 }
 
-async function loadStep5_PhotoCustomer(panel) {
+async /**
+ * LoadStep5 PhotoCustomer
+ */
+function loadStep5_PhotoCustomer(panel) {
     updateStatus('Fotografování zákazníkem...', 'testing');
 
     panel.innerHTML = `
@@ -859,7 +898,10 @@ async function loadStep5_PhotoCustomer(panel) {
     }
 }
 
-async function loadStep6_Protokol(panel) {
+async /**
+ * LoadStep6 Protokol
+ */
+function loadStep6_Protokol(panel) {
     updateStatus('Protokol návštěvy...', 'testing');
 
     panel.innerHTML = `
@@ -961,7 +1003,10 @@ async function loadStep6_Protokol(panel) {
     }
 }
 
-async function loadStep7_Vysledek(panel) {
+async /**
+ * LoadStep7 Vysledek
+ */
+function loadStep7_Vysledek(panel) {
     updateStatus('Validace dat...', 'testing');
 
     panel.innerHTML = `
@@ -1064,6 +1109,9 @@ async function loadStep7_Vysledek(panel) {
     }, 2000);
 }
 
+/**
+ * ShowTestResult
+ */
 function showTestResult(passed, errorMessage = null) {
     const panel = document.getElementById('testPanel');
 
@@ -1146,6 +1194,9 @@ function showTestResult(passed, errorMessage = null) {
     renderDiagnostic();
 }
 
+/**
+ * RenderDiagnostic
+ */
 function renderDiagnostic() {
     const container = document.getElementById('diagnosticLines');
     if (!container) return;
@@ -1157,7 +1208,10 @@ function renderDiagnostic() {
     container.scrollTop = container.scrollHeight;
 }
 
-async function cleanupTestData() {
+async /**
+ * CleanupTestData
+ */
+function cleanupTestData() {
     if (!confirm('Opravdu smazat testovací data?')) return;
 
     try {
@@ -1182,6 +1236,9 @@ async function cleanupTestData() {
     }
 }
 
+/**
+ * ResetTest
+ */
 function resetTest() {
     location.reload();
 }

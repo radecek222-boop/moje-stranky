@@ -49,6 +49,13 @@ try {
     echo json_encode(['status' => 'error', 'message' => 'Došlo k neočekávané chybě. Zkuste to prosím znovu.'], JSON_UNESCAPED_UNICODE);
 }
 
+/**
+ * HandleVerification
+ *
+ * @param PDO $pdo Pdo
+ * @param string $email Email
+ * @param string $registrationKey RegistrationKey
+ */
 function handleVerification(PDO $pdo, string $email, string $registrationKey): void
 {
     $user = findUserByEmail($pdo, $email);
@@ -73,6 +80,15 @@ function handleVerification(PDO $pdo, string $email, string $registrationKey): v
     ], JSON_UNESCAPED_UNICODE);
 }
 
+/**
+ * HandlePasswordChange
+ *
+ * @param PDO $pdo Pdo
+ * @param string $email Email
+ * @param string $registrationKey RegistrationKey
+ * @param string $newPassword NewPassword
+ * @param string $confirm Confirm
+ */
 function handlePasswordChange(PDO $pdo, string $email, string $registrationKey, string $newPassword, string $confirm): void
 {
     if ($newPassword === '' || $confirm === '') {
@@ -142,6 +158,12 @@ function handlePasswordChange(PDO $pdo, string $email, string $registrationKey, 
     ], JSON_UNESCAPED_UNICODE);
 }
 
+/**
+ * FindUserByEmail
+ *
+ * @param PDO $pdo Pdo
+ * @param string $email Email
+ */
 function findUserByEmail(PDO $pdo, string $email): ?array
 {
     $stmt = $pdo->prepare('SELECT * FROM wgs_users WHERE email = :email LIMIT 1');
@@ -150,6 +172,13 @@ function findUserByEmail(PDO $pdo, string $email): ?array
     return $user ?: null;
 }
 
+/**
+ * UserMatchesRegistrationKey
+ *
+ * @param PDO $pdo Pdo
+ * @param array $user User
+ * @param string $registrationKey RegistrationKey
+ */
 function userMatchesRegistrationKey(PDO $pdo, array $user, string $registrationKey): bool
 {
     $columns = db_get_table_columns($pdo, 'wgs_users');
@@ -170,6 +199,9 @@ function userMatchesRegistrationKey(PDO $pdo, array $user, string $registrationK
     return false;
 }
 
+/**
+ * RespondUserNotFound
+ */
 function respondUserNotFound(): void
 {
     http_response_code(404);

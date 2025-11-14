@@ -7,11 +7,20 @@
  */
 
 require_once 'init.php';
+require_once __DIR__ . '/includes/csrf_helper.php';
 
-// Admin check
-if (!isset($_SESSION['admin_logged']) || !$_SESSION['admin_logged']) {
+// SECURITY FIX: Konzistentní admin check (používá is_admin jako všechny ostatní soubory)
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     http_response_code(403);
     die('<h1>🔒 Access Denied</h1><p>Admin login required.</p>');
+}
+
+// SECURITY FIX: CSRF ochrana pro POST operace
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        http_response_code(403);
+        die('<h1>🔒 CSRF Protection</h1><p>Invalid or missing CSRF token.</p>');
+    }
 }
 
 header('Content-Type: text/html; charset=utf-8');
@@ -175,9 +184,10 @@ if (empty($dailyBackups)) {
         chmod($backupScript, 0755);
 
         // Spustit backup
+        // SECURITY FIX: Escapovat shell argument proti command injection
         $output = [];
         $returnCode = 0;
-        exec("bash {$backupScript} 2>&1", $output, $returnCode);
+        exec('bash ' . escapeshellarg($backupScript) . ' 2>&1', $output, $returnCode);
 
         if ($returnCode === 0) {
             echo "✅ Backup úspěšně vytvořen!\n";

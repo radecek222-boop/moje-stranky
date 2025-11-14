@@ -398,6 +398,9 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
 <script>
 // Modal systém
+/**
+ * OpenStatsModal
+ */
 function openStatsModal(type) {
     const overlay = document.getElementById('statsModalOverlay');
     const modal = overlay.querySelector('.cc-modal');
@@ -424,6 +427,9 @@ function openStatsModal(type) {
     document.body.style.overflow = 'hidden';
 }
 
+/**
+ * CloseStatsModal
+ */
 function closeStatsModal() {
     const overlay = document.getElementById('statsModalOverlay');
     const modal = overlay.querySelector('.cc-modal');
@@ -434,7 +440,10 @@ function closeStatsModal() {
     document.body.style.overflow = 'auto';
 }
 
-async function loadStatsContent(type, body) {
+async /**
+ * LoadStatsContent
+ */
+function loadStatsContent(type, body) {
     // Zobrazit loading
     body.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Načítání...</div>';
 
@@ -470,6 +479,9 @@ async function loadStatsContent(type, body) {
     }
 }
 
+/**
+ * RenderSalespersonTable
+ */
 function renderSalespersonTable(body, data) {
     let rows = '';
     if (data.length === 0) {
@@ -508,6 +520,9 @@ function renderSalespersonTable(body, data) {
     `;
 }
 
+/**
+ * RenderTechnicianTable
+ */
 function renderTechnicianTable(body, data) {
     let rows = '';
     if (data.length === 0) {
@@ -546,6 +561,9 @@ function renderTechnicianTable(body, data) {
     `;
 }
 
+/**
+ * RenderModelsTable
+ */
 function renderModelsTable(body, data) {
     let rows = '';
     if (data.length === 0) {
@@ -582,6 +600,9 @@ function renderModelsTable(body, data) {
     `;
 }
 
+/**
+ * RenderOrdersTable
+ */
 function renderOrdersTable(body, data) {
     let rows = '';
     if (data.length === 0) {
@@ -624,6 +645,9 @@ function renderOrdersTable(body, data) {
     `;
 }
 
+/**
+ * RenderCharts
+ */
 function renderCharts(body, data) {
     let citiesHtml = '';
     let countriesHtml = '';
@@ -667,6 +691,9 @@ function renderCharts(body, data) {
     `;
 }
 
+/**
+ * EscapeHtml
+ */
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
@@ -674,6 +701,9 @@ function escapeHtml(text) {
 }
 
 // Filter funkce
+/**
+ * ResetFilters
+ */
 function resetFilters() {
     document.getElementById('filter-country').selectedIndex = -1;
     document.getElementById('filter-status').selectedIndex = 0;
@@ -684,11 +714,17 @@ function resetFilters() {
     loadSummaryStats();
 }
 
+/**
+ * ApplyFilters
+ */
 function applyFilters() {
     console.log('Aplikuji filtry...');
     loadSummaryStats();
 }
 
+/**
+ * GetFilterParams
+ */
 function getFilterParams() {
     const params = new URLSearchParams();
 
@@ -705,7 +741,10 @@ function getFilterParams() {
     return params.toString();
 }
 
-async function loadSummaryStats() {
+async /**
+ * LoadSummaryStats
+ */
+function loadSummaryStats() {
     try {
         const filterParams = getFilterParams();
         const response = await fetch(`api/statistiky_api.php?action=summary&${filterParams}`);

@@ -198,6 +198,9 @@ $pageNames = [
 const DEBUG_MODE = false;
 
 // Show page
+/**
+ * ShowPage
+ */
 function showPage(page) {
     // Hide all pages
     document.querySelectorAll('.page-content').forEach(el => {
@@ -225,6 +228,9 @@ function showPage(page) {
 }
 
 // Switch language tab
+/**
+ * SwitchLang
+ */
 function switchLang(textId, lang) {
     // Hide all lang contents for this text
     document.querySelectorAll(`[id^="text-${textId}-"]`).forEach(el => {
@@ -250,7 +256,10 @@ function switchLang(textId, lang) {
 }
 
 // Save text
-async function saveText(textId) {
+async /**
+ * SaveText
+ */
+function saveText(textId) {
     const statusEl = document.getElementById(`save-status-${textId}`);
     statusEl.style.display = 'block';
     statusEl.innerHTML = '<span class="cc-loading"></span> Ukládám...';

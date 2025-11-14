@@ -537,6 +537,9 @@ let testState = {
     startTime: null
 };
 
+/**
+ * AddDiagnostic
+ */
 function addDiagnostic(message, type = 'info', panelId = null) {
     const timestamp = new Date().toLocaleTimeString('cs-CZ');
     const diagnostic = {
@@ -560,6 +563,9 @@ function addDiagnostic(message, type = 'info', panelId = null) {
     });
 }
 
+/**
+ * UpdateProgress
+ */
 function updateProgress(step, status) {
     const progressStep = document.querySelector(`.progress-step[data-step="${step}"]`);
     if (progressStep) {
@@ -567,7 +573,10 @@ function updateProgress(step, status) {
     }
 }
 
-async function startTest() {
+async /**
+ * StartTest
+ */
+function startTest() {
     testState.startTime = Date.now();
     testState.errors = [];
     testState.diagnostics = [];
@@ -602,7 +611,10 @@ async function startTest() {
     }, 500);
 }
 
-async function sendAPIRequest(formData) {
+async /**
+ * SendAPIRequest
+ */
+function sendAPIRequest(formData) {
     addDiagnostic('Volání API: api/create_test_claim.php', 'info', 'diagnosticsPanel2');
 
     try {
@@ -658,6 +670,9 @@ async function sendAPIRequest(formData) {
     }
 }
 
+/**
+ * LoadSeznamPreview
+ */
 function loadSeznamPreview() {
     const iframe = document.getElementById('seznamPreview');
     iframe.src = 'seznam.php?embed=1';
@@ -665,6 +680,9 @@ function loadSeznamPreview() {
     addDiagnostic(`Hledám reklamaci ID: ${testState.reklamaceId}`, 'info', 'diagnosticsPanel3');
 }
 
+/**
+ * GoToStage
+ */
 function goToStage(stageNumber) {
     // Hide all stages
     document.querySelectorAll('.test-stage').forEach(stage => {
@@ -682,6 +700,9 @@ function goToStage(stageNumber) {
     }
 }
 
+/**
+ * LoadDetailPreview
+ */
 function loadDetailPreview() {
     const iframe = document.getElementById('detailPreview');
     iframe.src = `protokol.php?id=${testState.claimId}&embed=1`;
@@ -689,7 +710,10 @@ function loadDetailPreview() {
     addDiagnostic(`ID reklamace: ${testState.claimId}`, 'info', 'diagnosticsPanel4');
 }
 
-async function checkProtocol() {
+async /**
+ * CheckProtocol
+ */
+function checkProtocol() {
     addDiagnostic('Kontroluji protokol akcí...', 'info', 'diagnosticsPanel5');
 
     // Simulate protocol check
@@ -703,6 +727,9 @@ async function checkProtocol() {
     }, 1500);
 }
 
+/**
+ * ShowFinalResult
+ */
 function showFinalResult() {
     const duration = Math.round((Date.now() - testState.startTime) / 1000);
     const hasErrors = testState.errors.length > 0;
@@ -739,6 +766,9 @@ function showFinalResult() {
     document.getElementById('finalResult').innerHTML = html;
 }
 
+/**
+ * FlagError
+ */
 function flagError(step, message) {
     testState.errors.push({ step, message });
     updateProgress(step, 'error');
@@ -748,7 +778,10 @@ function flagError(step, message) {
     showFinalResult();
 }
 
-async function cleanupTest() {
+async /**
+ * CleanupTest
+ */
+function cleanupTest() {
     if (!confirm('Smazat testovací data?')) return;
 
     addDiagnostic('Odstraňuji testovací data...', 'info', 'diagnosticsPanel6');
@@ -775,6 +808,9 @@ async function cleanupTest() {
     }
 }
 
+/**
+ * ResetSimulator
+ */
 function resetSimulator() {
     location.reload();
 }

@@ -112,7 +112,10 @@ PHP;
         $inString = false;
         $stringChar = '';
 
-        for ($i = 0; $i < strlen($sql); $i++) {
+        $len_i = strlen($sql);
+
+
+        for ($i = 0; $i < $len_i; $i++) {
             $char = $sql[$i];
 
             if (!$inString && ($char === '"' || $char === "'")) {

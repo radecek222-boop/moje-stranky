@@ -54,14 +54,20 @@ if (!$isAdmin && $secretKey !== 'wgs-migration-2025') {
     <script>
         const output = document.getElementById('output');
 
-        function log(message, type = 'info') {
+                /**
+         * Log
+         */
+function log(message, type = 'info') {
             const div = document.createElement('div');
             div.className = `log ${type}`;
             div.textContent = message;
             output.appendChild(div);
         }
 
-        async function checkStatus() {
+        async         /**
+         * CheckStatus
+         */
+function checkStatus() {
             log('Checking migration status...', 'info');
 
             try {
@@ -93,7 +99,10 @@ if (!$isAdmin && $secretKey !== 'wgs-migration-2025') {
             }
         }
 
-        async function runMigration() {
+        async         /**
+         * RunMigration
+         */
+function runMigration() {
             const btn = document.getElementById('runBtn');
             btn.disabled = true;
             btn.textContent = 'Running...';

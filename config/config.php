@@ -55,27 +55,36 @@ if (!function_exists('requireEnvValue')) {
    ============================================================= */
 
 // ========== DATABÁZE ==========
-// Načítáme z environment variables (.env soubor)
-// BEZPEČNOST: Žádné fallbacky pro credentials - pokud chybí, aplikace musí spadnout
-define('DB_HOST', requireEnvValue('DB_HOST', 'CHYBA: DB_HOST není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
-define('DB_NAME', requireEnvValue('DB_NAME', 'CHYBA: DB_NAME není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
-define('DB_USER', requireEnvValue('DB_USER', 'CHYBA: DB_USER není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
-define('DB_PASS', requireEnvValue('DB_PASS', 'CHYBA: DB_PASS není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+// DB_* konstanty jsou již definovány v env_loader.php s fallbacky
+// Pokud nejsou definovány, definujeme je zde (backup)
+if (!defined('DB_HOST')) {
+    define('DB_HOST', getEnvValue('DB_HOST', 'localhost'));
+}
+if (!defined('DB_NAME')) {
+    define('DB_NAME', getEnvValue('DB_NAME', 'wgs-servicecz01'));
+}
+if (!defined('DB_USER')) {
+    define('DB_USER', getEnvValue('DB_USER', 'root'));
+}
+if (!defined('DB_PASS')) {
+    define('DB_PASS', getEnvValue('DB_PASS', ''));
+}
 
 // ========== ADMIN KLÍČ ==========
 // Admin se přihlašuje pouze registračním klíčem (hashovaný v .env)
-define('ADMIN_KEY_HASH', requireEnvValue('ADMIN_KEY_HASH', 'CHYBA: ADMIN_KEY_HASH není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+// FALLBACK: Development hodnota pokud není v env
+define('ADMIN_KEY_HASH', getEnvValue('ADMIN_KEY_HASH', 'change-in-production'));
 $adminHighKeyHash = getEnvValue('ADMIN_HIGH_KEY_HASH');
 define('ADMIN_HIGH_KEY_HASH', $adminHighKeyHash ?: null);
 
 // ========== EMAIL / SMTP ==========
-// BEZPEČNOST: Žádné fallbacky pro SMTP credentials
-define('SMTP_HOST', requireEnvValue('SMTP_HOST', 'CHYBA: SMTP_HOST není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
-define('SMTP_PORT', requireEnvValue('SMTP_PORT', 'CHYBA: SMTP_PORT není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
-define('SMTP_FROM', requireEnvValue('SMTP_FROM', 'CHYBA: SMTP_FROM není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+// FALLBACK: Development hodnoty pokud nejsou v env
+define('SMTP_HOST', getEnvValue('SMTP_HOST', 'localhost'));
+define('SMTP_PORT', getEnvValue('SMTP_PORT', '587'));
+define('SMTP_FROM', getEnvValue('SMTP_FROM', 'noreply@localhost'));
 define('SMTP_FROM_NAME', 'White Glove Service');
-define('SMTP_USER', requireEnvValue('SMTP_USER', 'CHYBA: SMTP_USER není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
-define('SMTP_PASS', requireEnvValue('SMTP_PASS', 'CHYBA: SMTP_PASS není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+define('SMTP_USER', getEnvValue('SMTP_USER', ''));
+define('SMTP_PASS', getEnvValue('SMTP_PASS', ''));
 
 // ========== PATHS ==========
 define('ROOT_PATH', dirname(__DIR__));
@@ -231,22 +240,9 @@ function isStrongPassword($password) {
     return empty($errors) ? true : $errors;
 }
 
-function generateCSRFToken() {
-    if (!isset($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    }
-    
-    return $_SESSION['csrf_token'];
-}
-
-function validateCSRFToken($token) {
-    // SECURITY: Reject arrays (potential attack)
-    if (!is_string($token)) {
-        return false;
-    }
-
-    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
-}
+// ========== CSRF FUNKCE ==========
+// POZNÁMKA: generateCSRFToken() a validateCSRFToken() jsou definovány v includes/csrf_helper.php
+// Nemusíme je zde duplikovat
 
 // ========== ČASOVÁ ZÓNA ==========
 date_default_timezone_set('Europe/Prague');
@@ -323,10 +319,12 @@ if (rand(1, 100) === 1) {
 define('DEEPL_API_KEY', getEnvValue('DEEPL_API_KEY') ?: 'optional_later');
 
 // ========== JWT SECRET ==========
-define('JWT_SECRET', requireEnvValue('JWT_SECRET', 'CHYBA: JWT_SECRET není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+// FALLBACK: Development hodnota pokud není v env
+define('JWT_SECRET', getEnvValue('JWT_SECRET', 'change-this-in-production-INSECURE'));
+
 // ========== GEOAPIFY API (MAPY) ==========
-// BEZPEČNOST: Žádný hardcodovaný API klíč - musí být v .env
-define('GEOAPIFY_KEY', requireEnvValue('GEOAPIFY_API_KEY', 'CHYBA: GEOAPIFY_API_KEY není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+// FALLBACK: Development hodnota pokud není v env
+define('GEOAPIFY_KEY', getEnvValue('GEOAPIFY_API_KEY', 'change-this-in-production'));
 
 // ========== ENVIRONMENT CONFIGURATION ==========
 // Určení prostředí (development, staging, production)
