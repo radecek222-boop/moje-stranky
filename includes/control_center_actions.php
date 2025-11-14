@@ -466,8 +466,17 @@ async function executeAction(event, actionId) {
 
         if (isSuccess(data)) {
             const execTime = data.execution_time || 'neznámý čas';
-            alert(`✓ Akce dokončena!\n\n${data.message}\n\nČas provedení: ${execTime}`);
-            location.reload();
+
+            // Pokud je potřeba otevřít dokumentaci
+            if (data.action === 'open_documentation' && data.url) {
+                alert(`✓ Akce dokončena!\n\n${data.message}\n\nDokumentace bude otevřena v novém okně.`);
+                window.open(data.url, '_blank');
+                // Označit úkol jako dokončený
+                location.reload();
+            } else {
+                alert(`✓ Akce dokončena!\n\n${data.message}\n\nČas provedení: ${execTime}`);
+                location.reload();
+            }
         } else {
             console.error('[executeAction] Action failed:', data);
             alert('✗ Chyba: ' + (data.error || data.message || 'Neznámá chyba'));

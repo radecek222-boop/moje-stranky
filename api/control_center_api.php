@@ -296,9 +296,26 @@ try {
 
                     case 'migration':
                     case 'install':
-                        // Obecná instalace - spustit URL jako PHP script
+                    case 'optimize_assets':
+                    case 'add_db_indexes':
+                    case 'create_backup':
+                    case 'cleanup_emails':
+                        // Obecná instalace / optimalizace - spustit URL jako PHP script
                         if (!empty($action['action_url'])) {
                             $scriptPath = __DIR__ . '/../' . ltrim($action['action_url'], '/');
+
+                            // Pokud je to .md soubor, vrátit odkaz místo spuštění
+                            if (pathinfo($scriptPath, PATHINFO_EXTENSION) === 'md') {
+                                $executeResult = [
+                                    'success' => true,
+                                    'message' => 'Dokumentace: ' . basename($scriptPath),
+                                    'action' => 'open_documentation',
+                                    'url' => $action['action_url']
+                                ];
+                                break;
+                            }
+
+                            // Spustit PHP script
                             if (file_exists($scriptPath)) {
                                 ob_start();
                                 include $scriptPath;
@@ -315,6 +332,17 @@ try {
                         } else {
                             throw new Exception('Akce nemá definovaný action_url');
                         }
+                        break;
+
+                    case 'enable_gzip':
+                    case 'browser_cache':
+                        // Manuální úkoly - otevřít dokumentaci
+                        $executeResult = [
+                            'success' => true,
+                            'message' => 'Otevřete dokumentaci a proveďte změny ručně: ' . ($action['action_url'] ?? 'OPTIMIZATION_ANALYSIS.md'),
+                            'action' => 'open_documentation',
+                            'url' => $action['action_url'] ?? '/OPTIMIZATION_ANALYSIS.md'
+                        ];
                         break;
 
                     default:
