@@ -1542,7 +1542,7 @@ async function showCustomerDetail(id) {
         </div>
         <div class="editable-field">
           <label class="field-label">Fakturace</label>
-          <div style="padding: 0.5rem 0; font-weight: 600; color: ${fakturace_firma === 'SK' ? '#059669' : '#0066cc'};">
+          <div style="padding: 0.5rem 0; font-weight: 600; color: ${(fakturace_firma || '').toUpperCase() === 'SK' ? '#059669' : '#0066cc'};">
             ${fakturace_firma && fakturace_firma.toUpperCase() === 'SK' ? '🇸🇰 Slovensko (SK)' : '🇨🇿 Česká republika (CZ)'}
           </div>
         </div>
