@@ -1,8 +1,31 @@
 # Setup & Installation Files
 
-Tento adresář obsahuje instalační skripty a databázové migrace pro WGS Service.
+Tento adresář obsahuje instalační skripty, databázové migrace a produkční úkoly pro WGS Service.
+
+## 🚀 QUICK START - Produkční úkoly
+
+**Chceš přidat 3 produkční úkoly do Control Center? Jednoduše:**
+
+1. Otevři v prohlížeči: `https://your-domain.com/setup/add_production_tasks.php`
+2. Script automaticky přidá 3 úkoly (Databázové indexy, Foreign Keys, Setup security)
+3. Jdi do **Control Center → Akce & Úkoly**
+4. Spusť úkoly jedním kliknutím
+5. ✅ Hotovo!
+
+**Poznámka:** Musíš být přihlášený jako admin!
+
+📖 Detailní návod: viz `PRODUCTION_TASKS_HOWTO.md`
+
+---
 
 ## 📁 Struktura
+
+### Produkční Úkoly (NOVÉ! 🎉)
+- **`add_production_tasks.php`** - Přidá 3 úkoly do Control Center (spusť v prohlížeči)
+- `add_pending_actions_production.sql` - SQL verze (pokud preferuješ phpMyAdmin)
+- `cleanup_now.sql` - Vyčistí dokončené úkoly (jednorázově)
+- `auto_cleanup_completed_actions.sql` - Automatický cleanup (MySQL EVENT)
+- `PRODUCTION_TASKS_HOWTO.md` - Kompletní návod
 
 ### Install Skripty (PHP)
 - `install_*.php` - Instalační skripty pro různé moduly
@@ -12,6 +35,10 @@ Tento adresář obsahuje instalační skripty a databázové migrace pro WGS Ser
 - `migration_*.sql` - Databázové migrace
 - `update_*.sql` - Update skripty
 - `add_*.sql` - Přidání nových struktur
+
+### Security
+- `.htaccess.localhost` - Development config (allow localhost only)
+- `.htaccess.production` - Production config (block all access)
 
 ## 🚀 Jak Používat
 
