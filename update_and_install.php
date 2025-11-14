@@ -67,7 +67,7 @@ if (!file_exists($envPath)) {
 DB_HOST=127.0.0.1
 DB_NAME=wgs-servicecz01
 DB_USER=wgs-servicecz002
-DB_PASS=p7u.s13mR2018
+DB_PASS=O7cw+hkbKSrg/Eew
 
 # ========== SMTP / EMAIL ==========
 # Pokud nevíš SMTP údaje, můžeš prozatím nechat tyto hodnoty
