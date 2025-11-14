@@ -1,13 +1,15 @@
 <?php
 /**
- * Notification Sender - Database-Driven Version
+ * Notification Sender - Queue-Based Version
  * Posílá email a SMS notifikace zákazníkům a adminům
  *
  * ZMĚNA (2025-11-11): Přepsáno z hardcoded switch na databázové šablony
+ * ZMĚNA (2025-11-14): Přepsáno na email queue pro asynchronní odeslání
  */
 
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
+require_once __DIR__ . '/../includes/EmailQueue.php';
 
 header('Content-Type: application/json');
 
@@ -189,61 +191,49 @@ try {
         }
     }
 
-    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-    $headers .= "X-Mailer: PHP/" . phpversion();
-
     // ============================================
-    // ASYNCHRONNÍ ODESLÁNÍ EMAILU
+    // EMAIL QUEUE - ASYNCHRONNÍ ODESLÁNÍ
     // ============================================
-    // Odešleme odpověď klientovi OKAMŽITĚ a email se odešle na pozadí
-    // Tím se zrychlí response z 15s na ~1s
+    // Email se přidá do fronty a odešle se přes cron worker
+    // Response je okamžitý (~100ms místo 15s)
 
-    // Úspěšná odpověď (před odesláním emailu!)
+    $emailQueue = new EmailQueue();
+
+    // Přidat email do fronty
+    $enqueued = $emailQueue->enqueue([
+        'notification_id' => $notificationId,
+        'to' => $to,
+        'to_name' => $notificationData['customer_name'] ?? null,
+        'subject' => $subject,
+        'body' => $message,
+        'cc' => $ccEmails ?? [],
+        'bcc' => $bccEmails ?? [],
+        'priority' => 'normal'
+    ]);
+
+    if (!$enqueued) {
+        throw new Exception('Nepodařilo se přidat email do fronty');
+    }
+
+    // Logování
+    error_log(sprintf(
+        "✓ Email enqueued: %s -> %s (subject: %s)",
+        $notificationId,
+        $to,
+        $subject
+    ));
+
+    // Úspěšná odpověď
     echo json_encode([
         'success' => true,
-        'message' => 'Notifikace bude odeslána',
+        'message' => 'Notifikace byla přidána do fronty',
         'sent' => true,
         'notification_id' => $notificationId,
         'to' => $to,
         'cc' => $ccEmails ?? [],
-        'bcc_count' => count($bccEmails ?? [])
+        'bcc_count' => count($bccEmails ?? []),
+        'queued' => true
     ]);
-
-    // Ukončit output buffering a odeslat odpověď klientovi
-    if (ob_get_level() > 0) {
-        ob_end_flush();
-    }
-    flush();
-
-    // Pokud běží na FastCGI/PHP-FPM, uzavřít spojení s klientem
-    if (function_exists('fastcgi_finish_request')) {
-        fastcgi_finish_request();
-    }
-
-    // ============================================
-    // NYNÍ TEPRVE ODEŠLEME EMAIL NA POZADÍ
-    // Klient již dostal odpověď a nebude čekat
-    // ============================================
-
-    // Odeslání emailu
-    $emailSent = @mail($to, $subject, $message, $headers);
-
-    // Logování výsledku (úspěch i selhání)
-    if ($emailSent) {
-        error_log(sprintf(
-            "✓ Notification sent: %s -> %s (subject: %s)",
-            $notificationId,
-            $to,
-            $subject
-        ));
-    } else {
-        error_log(sprintf(
-            "✗ Notification FAILED: %s -> %s (subject: %s)",
-            $notificationId,
-            $to,
-            $subject
-        ));
-    }
 
 } catch (Exception $e) {
     http_response_code(400);
