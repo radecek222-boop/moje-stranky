@@ -338,6 +338,22 @@ let consoleOutput = [];
 let diagnosticsRunning = false;
 let totalErrors = 0;
 let totalWarnings = 0;
+let errorsList = [];  // Sbírání všech chyb pro finální summary
+let warningsList = [];  // Sbírání všech upozornění
+
+// ============================================
+// ERROR/WARNING TRACKING FUNCTIONS
+// ============================================
+
+function addError(section, message, details = null) {
+    errorsList.push({ section, message, details });
+    totalErrors++;
+}
+
+function addWarning(section, message, details = null) {
+    warningsList.push({ section, message, details });
+    totalWarnings++;
+}
 
 // ============================================
 // CONSOLE OUTPUT FUNCTIONS
@@ -455,6 +471,8 @@ async function runDiagnostics() {
     // Reset error counters
     totalErrors = 0;
     totalWarnings = 0;
+    errorsList = [];
+    warningsList = [];
 
     logHeader('═══════════════════════════════════════════════════');
     logHeader('WGS SERVICE - KOMPLETNÍ DIAGNOSTIKA SYSTÉMU');
@@ -515,6 +533,39 @@ async function runDiagnostics() {
 
         // 16. Workflow Check
         await checkWorkflow();
+
+        log('');
+        logHeader('═══════════════════════════════════════════════════');
+        logHeader('📊 SHRNUTÍ DIAGNOSTIKY');
+        logHeader('═══════════════════════════════════════════════════');
+        log('');
+
+        // Summary of errors
+        if (totalErrors > 0) {
+            logError(`❌ CELKEM ${totalErrors} CHYB${totalErrors === 1 ? 'A' : (totalErrors < 5 ? 'Y' : '')}:`);
+            log('');
+            errorsList.forEach((err, idx) => {
+                logError(`${idx + 1}. [${err.section}] ${err.message}`);
+                if (err.details) {
+                    log(`   ${err.details}`);
+                }
+            });
+        } else {
+            logSuccess('✅ ŽÁDNÉ CHYBY!');
+        }
+
+        log('');
+
+        // Summary of warnings
+        if (totalWarnings > 0) {
+            logWarning(`⚠️  ${totalWarnings} UPOZORNĚNÍ`);
+            if (totalWarnings <= 10) {
+                log('');
+                warningsList.forEach((warn, idx) => {
+                    logWarning(`${idx + 1}. [${warn.section}] ${warn.message}`);
+                });
+            }
+        }
 
         log('');
         logHeader('═══════════════════════════════════════════════════');
@@ -612,33 +663,27 @@ async function checkPhpFiles() {
             const { total, errors, warnings } = data.data;
             document.getElementById('stat-php').textContent = total;
 
-            logSuccess(`Nalezeno ${total} PHP souborů`);
-
             if (errors.length > 0) {
-                logError(`Nalezeno ${errors.length} chyb v PHP souborech:`);
-                log('═'.repeat(79));
+                logError(`❌ ${errors.length} PHP chyb`);
+                // Přidat do seznamu chyb
                 errors.forEach(err => {
-                    if (err.line) {
-                        logError(`${err.file}:${err.line}`);
-                        logError(`   ${err.type.toUpperCase()}: ${err.error.substring(0, 150)}`);
-                    } else {
-                        logError(`${err.file}`);
-                        logError(`   ${err.error.substring(0, 150)}`);
-                    }
-                    log('─'.repeat(79));
+                    addError('PHP',
+                        err.file + (err.line ? `:${err.line}` : ''),
+                        (err.type ? err.type.toUpperCase() + ': ' : '') + err.error?.substring(0, 100)
+                    );
                 });
-                totalErrors += errors.length;
+                // totalErrors již zvýšeno v addError()
             } else {
-                logSuccess('Žádné PHP syntax errors');
+                logSuccess(`✅ ${total} PHP souborů - OK`);
             }
 
             if (warnings.length > 0) {
-                logWarning(`${warnings.length} upozornění`);
+                logWarning(`⚠️  ${warnings.length} upozornění`);
                 totalWarnings += warnings.length;
             }
         } else {
-            logError('Nepodařilo se zkontrolovat PHP soubory: ' + (data.message || 'Unknown error'));
-            totalErrors++;
+            logError('❌ Nepodařilo se zkontrolovat PHP soubory');
+            addError('PHP', 'Kontrola selhala', data.message || 'Unknown error');
         }
     } catch (error) {
         logError('Chyba při kontrole PHP:');
