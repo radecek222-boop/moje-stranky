@@ -31,7 +31,8 @@ function logInstall($message) {
     $timestamp = date('Y-m-d H:i:s');
     $log = "[$timestamp] $message\n";
     @file_put_contents($logFile, $log, FILE_APPEND);
-    echo $log;
+    // DON'T echo - it breaks JSON response!
+    // Output is captured by ob_start() in API
 }
 
 try {
@@ -90,10 +91,10 @@ PHP;
         @mkdir($vendorDir . '/phpmailer', 0755, true);
     }
 
-    // URL PHPMailer
+    // URL PHPMailer - používáme ZIP místo TAR.GZ kvůli open_basedir restrictions
     $version = '6.9.1';
-    $url = "https://github.com/PHPMailer/PHPMailer/archive/refs/tags/v{$version}.tar.gz";
-    $tarFile = $vendorDir . '/phpmailer.tar.gz';
+    $url = "https://github.com/PHPMailer/PHPMailer/archive/refs/tags/v{$version}.zip";
+    $zipFile = $vendorDir . '/phpmailer.zip';
 
     logInstall("Stahuji PHPMailer v{$version}...");
     logInstall("URL: {$url}");
@@ -114,7 +115,7 @@ PHP;
         curl_close($ch);
 
         if ($httpCode === 200 && $data !== false) {
-            @file_put_contents($tarFile, $data);
+            @file_put_contents($zipFile, $data);
             $downloaded = true;
             logInstall("✓ Staženo pomocí cURL");
         }
@@ -131,7 +132,7 @@ PHP;
 
         $data = @file_get_contents($url, false, $context);
         if ($data !== false) {
-            @file_put_contents($tarFile, $data);
+            @file_put_contents($zipFile, $data);
             $downloaded = true;
             logInstall("✓ Staženo pomocí file_get_contents");
         }
@@ -143,19 +144,29 @@ PHP;
 
     logInstall("Rozbaluji archiv...");
 
-    // Rozbalit tar.gz
-    $phar = new PharData($tarFile);
-    $phar->extractTo($vendorDir . '/phpmailer', null, true);
+    // Rozbalit ZIP pomocí ZipArchive (bezpečnější než PharData)
+    if (!class_exists('ZipArchive')) {
+        throw new Exception('ZipArchive extension není dostupná. Kontaktujte hosting support.');
+    }
+
+    $zip = new ZipArchive();
+    if ($zip->open($zipFile) !== true) {
+        throw new Exception('Nepodařilo se otevřít ZIP archiv');
+    }
+
+    $zip->extractTo($vendorDir . '/phpmailer');
+    $zip->close();
+    logInstall("✓ ZIP archiv rozbalen");
 
     // Přejmenovat složku
     $extractedDir = $vendorDir . '/phpmailer/PHPMailer-' . $version;
     if (is_dir($extractedDir)) {
         rename($extractedDir, $phpmailerDir);
-        logInstall("✓ Archiv rozbalen a přejmenován");
+        logInstall("✓ Složka přejmenována");
     }
 
-    // Smazat tar.gz
-    @unlink($tarFile);
+    // Smazat ZIP
+    @unlink($zipFile);
     logInstall("✓ Dočasný archiv smazán");
 
     // Vytvořit autoload.php
