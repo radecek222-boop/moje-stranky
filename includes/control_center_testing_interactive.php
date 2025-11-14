@@ -382,30 +382,23 @@ let testData = {
     csrfToken: null
 };
 
-// Získat CSRF token z meta tagu
-/**
- * GetCSRFToken
- */
-function getCSRFToken() {
+// Local synchronous CSRF token getter for interactive tester
+// Note: control_center_unified.php has async getCSRFToken() which returns Promise
+// This module needs synchronous access, so we use a local helper
+function getCSRFTokenSync() {
     // Try current document first
     let metaTag = document.querySelector('meta[name="csrf-token"]');
-
-    console.log('[CSRF DEBUG] Current document meta tag:', metaTag);
 
     // If in iframe, try parent window
     if (!metaTag && window.parent && window.parent !== window) {
         try {
             metaTag = window.parent.document.querySelector('meta[name="csrf-token"]');
-            console.log('[CSRF DEBUG] Parent document meta tag:', metaTag);
         } catch (e) {
-            // Cross-origin iframe - cannot access parent
-            console.error('[CSRF DEBUG] Cannot access parent CSRF token:', e);
+            console.error('[Interactive Tester] Cannot access parent CSRF token:', e);
         }
     }
 
-    const token = metaTag ? metaTag.getAttribute('content') : null;
-    console.log('[CSRF DEBUG] Final token:', token ? `${token.substring(0, 10)}...` : 'NULL');
-    return token;
+    return metaTag ? metaTag.getAttribute('content') : null;
 }
 
 /**
@@ -433,8 +426,8 @@ function startTest() {
         return;
     }
 
-    // Získat CSRF token
-    testData.csrfToken = getCSRFToken();
+    // Získat CSRF token (synchronní verze pro tento modul)
+    testData.csrfToken = getCSRFTokenSync();
     if (!testData.csrfToken) {
         alert('CSRF token nebyl nalezen. Obnovte stránku.');
         return;
