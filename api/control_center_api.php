@@ -306,6 +306,27 @@ try {
                         if (!empty($action['action_url'])) {
                             $scriptPath = __DIR__ . '/../' . ltrim($action['action_url'], '/');
 
+                            // BEZPEČNOST: RCE ochrana - whitelist povolených directories
+                            $allowedDirs = [
+                                realpath(__DIR__ . '/../scripts'),
+                                realpath(__DIR__ . '/../migrations'),
+                                realpath(__DIR__ . '/../install')
+                            ];
+
+                            $realScriptPath = realpath($scriptPath);
+                            $isAllowed = false;
+
+                            foreach ($allowedDirs as $allowedDir) {
+                                if ($allowedDir && $realScriptPath && strpos($realScriptPath, $allowedDir) === 0) {
+                                    $isAllowed = true;
+                                    break;
+                                }
+                            }
+
+                            if (!$isAllowed) {
+                                throw new Exception('Bezpečnostní chyba: Script není v povoleném adresáři');
+                            }
+
                             // Pokud je to .md soubor, vrátit odkaz místo spuštění
                             if (pathinfo($scriptPath, PATHINFO_EXTENSION) === 'md') {
                                 $executeResult = [

@@ -128,9 +128,15 @@ class EmailQueue {
             // CC
             if (!empty($queueItem['cc_emails'])) {
                 $ccEmails = json_decode($queueItem['cc_emails'], true);
-                foreach ($ccEmails as $cc) {
-                    if (filter_var($cc, FILTER_VALIDATE_EMAIL)) {
-                        $mail->addCC($cc);
+                // BUGFIX: JSON error check
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new \Exception('Invalid JSON in cc_emails: ' . json_last_error_msg());
+                }
+                if (is_array($ccEmails)) {
+                    foreach ($ccEmails as $cc) {
+                        if (filter_var($cc, FILTER_VALIDATE_EMAIL)) {
+                            $mail->addCC($cc);
+                        }
                     }
                 }
             }
@@ -138,9 +144,15 @@ class EmailQueue {
             // BCC
             if (!empty($queueItem['bcc_emails'])) {
                 $bccEmails = json_decode($queueItem['bcc_emails'], true);
-                foreach ($bccEmails as $bcc) {
-                    if (filter_var($bcc, FILTER_VALIDATE_EMAIL)) {
-                        $mail->addBCC($bcc);
+                // BUGFIX: JSON error check
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new \Exception('Invalid JSON in bcc_emails: ' . json_last_error_msg());
+                }
+                if (is_array($bccEmails)) {
+                    foreach ($bccEmails as $bcc) {
+                        if (filter_var($bcc, FILTER_VALIDATE_EMAIL)) {
+                            $mail->addBCC($bcc);
+                        }
                     }
                 }
             }
@@ -240,29 +252,39 @@ class EmailQueue {
         foreach ($emails as $email) {
             $results['processed']++;
 
-            // Označit jako "sending"
-            $this->updateStatus($email['id'], 'sending');
+            // BUGFIX: Email queue atomicity - transaction support
+            try {
+                // Označit jako "sending"
+                $this->updateStatus($email['id'], 'sending');
 
-            // Pokusit se odeslat
-            $result = $this->sendEmail($email);
+                // Pokusit se odeslat
+                $result = $this->sendEmail($email);
 
-            if ($result['success']) {
-                // Úspěch
-                $this->updateStatus($email['id'], 'sent', null, date('Y-m-d H:i:s'));
-                $results['sent']++;
+                if ($result['success']) {
+                    // Úspěch
+                    $this->updateStatus($email['id'], 'sent', null, date('Y-m-d H:i:s'));
+                    $results['sent']++;
 
-                error_log("✓ Email sent: {$email['id']} -> {$email['recipient_email']}");
-            } else {
-                // Selhání
-                $attempts = $email['attempts'] + 1;
-                $status = ($attempts >= $email['max_attempts']) ? 'failed' : 'pending';
+                    error_log("✓ Email sent: {$email['id']} -> {$email['recipient_email']}");
+                } else {
+                    // Selhání
+                    $attempts = $email['attempts'] + 1;
+                    $status = ($attempts >= $email['max_attempts']) ? 'failed' : 'pending';
 
-                $this->updateStatus($email['id'], $status, $result['message']);
+                    $this->updateStatus($email['id'], $status, $result['message']);
+                    $this->incrementAttempts($email['id']);
+
+                    $results['failed']++;
+
+                    error_log("✗ Email failed: {$email['id']} -> {$email['recipient_email']} ({$result['message']})");
+                }
+            } catch (\Exception $e) {
+                // KRITICKÁ CHYBA: Vrátit email zpět na pending pro retry
+                $this->updateStatus($email['id'], 'pending', 'Exception: ' . $e->getMessage());
                 $this->incrementAttempts($email['id']);
-
                 $results['failed']++;
 
-                error_log("✗ Email failed: {$email['id']} -> {$email['recipient_email']} ({$result['message']})");
+                error_log("✗ Email exception: {$email['id']} -> {$email['recipient_email']} ({$e->getMessage()})");
             }
         }
 

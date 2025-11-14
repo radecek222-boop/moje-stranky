@@ -10,14 +10,20 @@ require_once __DIR__ . '/../../includes/db_metadata.php';
 
 function generateWorkflowId(PDO $pdo): string
 {
+    // BUGFIX: Race condition fix - použít FOR UPDATE lock
     $attempts = 0;
     do {
         $candidate = 'WGS' . date('ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
-        $stmt = $pdo->prepare('SELECT COUNT(*) FROM wgs_reklamace WHERE reklamace_id = :id');
+
+        // FOR UPDATE lock zajistí, že jiná transakce nemůže číst tento záznam současně
+        $stmt = $pdo->prepare('SELECT reklamace_id FROM wgs_reklamace WHERE reklamace_id = :id FOR UPDATE');
         $stmt->execute([':id' => $candidate]);
-        if ((int) $stmt->fetchColumn() === 0) {
+
+        if ($stmt->rowCount() === 0) {
+            // ID neexistuje, můžeme ho použít
             return $candidate;
         }
+
         $attempts++;
     } while ($attempts < 5);
 
@@ -203,19 +209,33 @@ function handleUpdate(PDO $pdo, array $input): array
         throw new Exception('Nebyla nalezena žádná platná pole pro aktualizaci.');
     }
 
-    $sql = 'UPDATE wgs_reklamace SET ' . implode(', ', $setParts) . ' WHERE `' . $identifierColumn . '` = :identifier';
-    if ($identifierColumn === 'id') {
-        $sql .= ' LIMIT 1';
+    // BUGFIX: Transaction support - atomicita update operace
+    $pdo->beginTransaction();
+
+    try {
+        $sql = 'UPDATE wgs_reklamace SET ' . implode(', ', $setParts) . ' WHERE `' . $identifierColumn . '` = :identifier';
+        if ($identifierColumn === 'id') {
+            $sql .= ' LIMIT 1';
+        }
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+
+        if ($stmt->rowCount() === 0) {
+            throw new Exception('Reklamace nebyla nalezena nebo nebyla změněna.');
+        }
+
+        $pdo->commit();
+
+        return [
+            'status' => 'success',
+            'message' => 'Reklamace byla aktualizována.',
+            'updated_fields' => array_keys($updateData)
+        ];
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        throw $e;
     }
-
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-
-    return [
-        'status' => 'success',
-        'message' => 'Reklamace byla aktualizována.',
-        'updated_fields' => array_keys($updateData)
-    ];
 }
 
 header('Content-Type: application/json');

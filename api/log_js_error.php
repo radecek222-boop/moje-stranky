@@ -9,6 +9,25 @@ require_once __DIR__ . '/../init.php';
 header('Content-Type: application/json');
 
 try {
+    // BEZPEČNOST: DoS ochrana - rate limiting pro error logging
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $rateLimitKey = "log_js_error_{$ip}";
+    $maxAttempts = 20; // Max 20 errors za hodinu
+    $timeWindow = 3600; // 1 hodina
+
+    $rateLimit = checkRateLimit($rateLimitKey, $maxAttempts, $timeWindow);
+    if (!$rateLimit['allowed']) {
+        http_response_code(429);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Příliš mnoho error reportů. Zkuste to za ' . ceil($rateLimit['retry_after'] / 60) . ' minut.',
+            'retry_after' => $rateLimit['retry_after']
+        ]);
+        exit;
+    }
+
+    recordLoginAttempt($rateLimitKey);
+
     // Načtení JSON dat
     $jsonData = file_get_contents('php://input');
     $error = json_decode($jsonData, true);
@@ -63,6 +82,15 @@ try {
     }
 
     $logFile = $logDir . '/js_errors.log';
+
+    // BEZPEČNOST: DoS ochrana - max velikost log souboru (10MB)
+    $maxLogSize = 10 * 1024 * 1024; // 10MB
+    if (file_exists($logFile) && filesize($logFile) > $maxLogSize) {
+        // Rotace logu - přejmenovat starý, začít nový
+        $archiveFile = $logDir . '/js_errors_' . date('Y-m-d_H-i-s') . '.log';
+        @rename($logFile, $archiveFile);
+    }
+
     @file_put_contents($logFile, $logMessage, FILE_APPEND);
 
     echo json_encode([
