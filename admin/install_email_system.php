@@ -202,31 +202,32 @@ PHP;
             $encryption = 'none';
         }
 
-        // Použít INSERT ... ON DUPLICATE KEY UPDATE místo UPDATE
+        // Použít INSERT ... ON DUPLICATE KEY UPDATE
+        // Novější syntaxe bez VALUES() pro kompatibilitu s MySQL 8.0.20+
         $smtpStmt = $pdo->prepare("
             INSERT INTO wgs_smtp_settings (
                 id, smtp_host, smtp_port, smtp_encryption,
                 smtp_username, smtp_password,
                 smtp_from_email, smtp_from_name, is_active
-            ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, 1)
+            ) VALUES (1, :host, :port, :encryption, :username, :password, :from_email, :from_name, 1)
             ON DUPLICATE KEY UPDATE
-                smtp_host = VALUES(smtp_host),
-                smtp_port = VALUES(smtp_port),
-                smtp_encryption = VALUES(smtp_encryption),
-                smtp_username = VALUES(smtp_username),
-                smtp_password = VALUES(smtp_password),
-                smtp_from_email = VALUES(smtp_from_email),
-                smtp_from_name = VALUES(smtp_from_name),
+                smtp_host = :host,
+                smtp_port = :port,
+                smtp_encryption = :encryption,
+                smtp_username = :username,
+                smtp_password = :password,
+                smtp_from_email = :from_email,
+                smtp_from_name = :from_name,
                 is_active = 1
         ");
         $smtpStmt->execute([
-            $smtpHost,
-            $smtpPort,
-            $encryption,
-            $smtpUsername,
-            $smtpPassword,
-            $smtpFrom,
-            $smtpFromName
+            ':host' => $smtpHost,
+            ':port' => $smtpPort,
+            ':encryption' => $encryption,
+            ':username' => $smtpUsername,
+            ':password' => $smtpPassword,
+            ':from_email' => $smtpFrom,
+            ':from_name' => $smtpFromName
         ]);
 
         $status = 'success';

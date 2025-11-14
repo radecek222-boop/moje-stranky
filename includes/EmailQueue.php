@@ -5,15 +5,8 @@
  */
 
 // Pokusit se načíst PHPMailer (pokud existuje)
-$phpmailerAvailable = false;
 if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
     require_once __DIR__ . '/../vendor/autoload.php';
-    $phpmailerAvailable = class_exists('PHPMailer\\PHPMailer\\PHPMailer');
-}
-
-if ($phpmailerAvailable) {
-    use PHPMailer\PHPMailer\PHPMailer;
-    use PHPMailer\PHPMailer\Exception;
 }
 
 class EmailQueue {
@@ -92,11 +85,10 @@ class EmailQueue {
      * Odešle jeden email z fronty pomocí PHPMailer nebo PHP mail()
      */
     public function sendEmail($queueItem) {
-        global $phpmailerAvailable;
         $settings = $this->getSMTPSettings();
 
         // Použít PHPMailer pokud je dostupný
-        if ($phpmailerAvailable && class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
+        if (class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
             return $this->sendWithPHPMailer($queueItem, $settings);
         }
 
@@ -108,7 +100,7 @@ class EmailQueue {
      * Odeslání pomocí PHPMailer
      */
     private function sendWithPHPMailer($queueItem, $settings) {
-        $mail = new PHPMailer(true);
+        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
 
         try {
             // Server settings
@@ -120,9 +112,9 @@ class EmailQueue {
 
             // Encryption
             if ($settings['smtp_encryption'] === 'ssl') {
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
             } elseif ($settings['smtp_encryption'] === 'tls') {
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
             }
 
             $mail->Port = $settings['smtp_port'];
@@ -165,7 +157,7 @@ class EmailQueue {
                 'message' => 'Email sent via PHPMailer'
             ];
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return [
                 'success' => false,
                 'message' => $mail->ErrorInfo
