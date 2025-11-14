@@ -29,21 +29,12 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
     background: #2D2D2D;
     padding: 1rem 1.5rem;
     border-bottom: 1px solid #3E3E3E;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.console-title {
-    color: #FFFFFF;
-    font-size: 1rem;
-    font-weight: 600;
-    font-family: 'Courier New', monospace;
 }
 
 .console-actions {
     display: flex;
     gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .console-btn {
@@ -56,6 +47,10 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    flex: 1 1 auto;
+    min-width: 110px;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .console-btn:hover {
@@ -305,7 +300,6 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         <!-- Console -->
         <div class="console-container">
             <div class="console-header">
-                <div class="console-title">$ wgs-service diagnostics</div>
                 <div class="console-actions">
                     <button class="console-btn success" id="btn-run-diagnostics" onclick="runDiagnostics()">
                         Spustit diagnostiku

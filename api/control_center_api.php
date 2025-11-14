@@ -2704,15 +2704,14 @@ try {
             try {
                 $logFiles = [
                     $rootDir . '/logs/error.log',
-                    $rootDir . '/logs/php_errors.log',
-                    '/var/log/apache2/error.log',
-                    '/var/log/nginx/error.log'
+                    $rootDir . '/logs/php_errors.log'
                 ];
 
                 $allErrors = [];
 
                 foreach ($logFiles as $logFile) {
-                    if (!file_exists($logFile)) continue;
+                    // Suppress errors kvůli možným open_basedir restrictions
+                    if (!@file_exists($logFile) || !@is_readable($logFile)) continue;
 
                     $lines = @file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
                     if ($lines === false) continue;

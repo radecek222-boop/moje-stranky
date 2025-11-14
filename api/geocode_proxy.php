@@ -1,12 +1,36 @@
 <?php
 /**
- * Geoapify API Proxy
+ * Geoapify API Proxy + OSRM Routing
  * Skrývá API klíč před klienty - bezpečnostní opatření
+ * Používá OSRM pro routing (zdarma, open-source)
  */
 
 require_once __DIR__ . '/../init.php';
 
 header('Content-Type: application/json');
+
+/**
+ * Výpočet vzdálenosti mezi dvěma GPS body (Haversine vzorec)
+ * @param float $lat1 Latitude prvního bodu
+ * @param float $lon1 Longitude prvního bodu
+ * @param float $lat2 Latitude druhého bodu
+ * @param float $lon2 Longitude druhého bodu
+ * @return float Vzdálenost v kilometrech
+ */
+function haversineDistance($lat1, $lon1, $lat2, $lon2) {
+    $earthRadius = 6371; // Poloměr Země v km
+
+    $dLat = deg2rad($lat2 - $lat1);
+    $dLon = deg2rad($lon2 - $lon1);
+
+    $a = sin($dLat/2) * sin($dLat/2) +
+         cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+         sin($dLon/2) * sin($dLon/2);
+
+    $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+
+    return $earthRadius * $c;
+}
 
 try {
     // Získání API klíče - použít konstantu z config.php
@@ -102,7 +126,7 @@ try {
             break;
 
         case 'routing':
-            // Výpočet trasy mezi dvěma body (původní verze)
+            // Výpočet trasy mezi dvěma body - POUŽITÍ OSRM (open-source, ZDARMA)
             $waypoints = $_GET['waypoints'] ?? '';
             $mode = $_GET['mode'] ?? 'drive';
 
@@ -115,13 +139,100 @@ try {
                 throw new Exception('Neplatný formát waypoints');
             }
 
-            $url = 'https://api.geoapify.com/v1/routing?' . http_build_query([
-                'waypoints' => $waypoints,
-                'mode' => $mode,
-                'apiKey' => $apiKey
+            // Rozdělit waypoints
+            list($start, $end) = explode('|', $waypoints);
+            list($startLat, $startLon) = explode(',', $start);
+            list($endLat, $endLon) = explode(',', $end);
+
+            // ============================================
+            // PRIMARY: OSRM (Open Source Routing Machine)
+            // + ZDARMA, bez API klíče
+            // + Rychlé, přesné
+            // + Používá OpenStreetMap data
+            // ============================================
+            $osrmUrl = "https://router.project-osrm.org/route/v1/driving/{$startLon},{$startLat};{$endLon},{$endLat}?overview=full&geometries=geojson";
+
+            $context = stream_context_create([
+                'http' => [
+                    'timeout' => 10, // Zvýšen timeout z 5s na 10s
+                    'user_agent' => 'WGS Service/1.0'
+                ]
             ]);
 
-            break;
+            $osrmResponse = @file_get_contents($osrmUrl, false, $context);
+
+            if ($osrmResponse !== false) {
+                $osrmData = json_decode($osrmResponse, true);
+
+                if (isset($osrmData['code']) && $osrmData['code'] === 'Ok' && isset($osrmData['routes'][0])) {
+                    $route = $osrmData['routes'][0];
+
+                    // Konverze OSRM formátu na GeoJSON (kompatibilní s frontendem)
+                    $geojson = [
+                        'type' => 'FeatureCollection',
+                        'features' => [[
+                            'type' => 'Feature',
+                            'properties' => [
+                                'distance' => $route['distance'], // v metrech
+                                'duration' => $route['duration'], // v sekundách
+                                'provider' => 'OSRM'
+                            ],
+                            'geometry' => [
+                                'type' => 'LineString',
+                                'coordinates' => [$route['geometry']['coordinates']]
+                            ]
+                        ]]
+                    ];
+
+                    echo json_encode($geojson);
+                    exit;
+                }
+            }
+
+            // ============================================
+            // FALLBACK: Geoapify (pokud je API klíč)
+            // ============================================
+            if ($apiKey) {
+                $url = 'https://api.geoapify.com/v1/routing?' . http_build_query([
+                    'waypoints' => $waypoints,
+                    'mode' => $mode,
+                    'apiKey' => $apiKey
+                ]);
+
+                $geoResponse = @file_get_contents($url, false, $context);
+
+                if ($geoResponse !== false) {
+                    echo $geoResponse;
+                    exit;
+                }
+            }
+
+            // ============================================
+            // FALLBACK 2: Vzdušná čára (jako poslední možnost)
+            // ============================================
+            $distance = haversineDistance($startLat, $startLon, $endLat, $endLon);
+
+            $geojson = [
+                'type' => 'FeatureCollection',
+                'features' => [[
+                    'type' => 'Feature',
+                    'properties' => [
+                        'distance' => $distance * 1000, // konverze km → metry
+                        'provider' => 'haversine',
+                        'warning' => 'Vzdušná čára - routing API nedostupné'
+                    ],
+                    'geometry' => [
+                        'type' => 'LineString',
+                        'coordinates' => [[
+                            [floatval($startLon), floatval($startLat)],
+                            [floatval($endLon), floatval($endLat)]
+                        ]]
+                    ]
+                ]]
+            ];
+
+            echo json_encode($geojson);
+            exit;
 
         case 'tile':
             // Map tiles - pro Leaflet
