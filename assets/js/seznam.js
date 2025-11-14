@@ -1754,19 +1754,19 @@ async function sendAppointmentConfirmation(customer, date, time) {
         }
       })
     });
-    
+
     const result = await response.json();
-    
-    if (result.status === 'success') {
+
+    if (result.success === true) {
       logger.log('✓ Potvrzení termínu odesláno zákazníkovi');
-      if (result.email_sent) {
-        logger.log('  ✓ Email odeslán na:', email);
+      if (result.sent) {
+        logger.log('  ✓ Email odeslán na:', result.to || email);
       }
       if (result.sms_sent) {
         logger.log('  ✓ SMS odeslána na:', phone);
       }
     } else {
-      logger.error('⚠ Chyba při odesílání potvrzení:', result.message);
+      logger.error('⚠ Chyba při odesílání potvrzení:', result.error || result.message);
     }
   } catch (error) {
     logger.error('❌ Chyba při odesílání potvrzení:', error);
