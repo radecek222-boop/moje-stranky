@@ -18,19 +18,21 @@ if (!defined('BASE_PATH')) {
     }
 }
 
+require_once __DIR__ . '/../includes/safe_file_operations.php';
+
 $logFile = __DIR__ . '/../logs/phpmailer_install.log';
 $logDir = dirname($logFile);
 
 // Vytvořit logs složku pokud neexistuje
 if (!file_exists($logDir)) {
-    @mkdir($logDir, 0755, true);
+    safeMkdir($logDir, 0755);
 }
 
 function logInstall($message) {
     global $logFile;
     $timestamp = date('Y-m-d H:i:s');
     $log = "[$timestamp] $message\n";
-    @file_put_contents($logFile, $log, FILE_APPEND);
+    safeFilePutContents($logFile, $log, FILE_APPEND);
     // DON'T echo - it breaks JSON response!
     // Output is captured by ob_start() in API
 }
@@ -74,7 +76,7 @@ spl_autoload_register(function ($class) {
     }
 });
 PHP;
-            @file_put_contents($autoloadFile, $autoloadContent);
+            safeFilePutContents($autoloadFile, $autoloadContent);
             logInstall("✓ autoload.php vytvořen");
         }
 
@@ -85,10 +87,10 @@ PHP;
     // Vytvořit vendor strukturu
     logInstall("Vytvářím vendor strukturu...");
     if (!file_exists($vendorDir)) {
-        @mkdir($vendorDir, 0755, true);
+        safeMkdir($vendorDir, 0755);
     }
     if (!file_exists($vendorDir . '/phpmailer')) {
-        @mkdir($vendorDir . '/phpmailer', 0755, true);
+        safeMkdir($vendorDir . '/phpmailer', 0755);
     }
 
     // URL PHPMailer - používáme ZIP místo TAR.GZ kvůli open_basedir restrictions

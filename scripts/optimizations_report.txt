@@ -1,0 +1,325 @@
+# Minor Optimizations Report
+# Vygenerováno: 2025-11-14 20:56:49
+# Celkem issues: 46
+# Souborů: 30
+
+## api/control_center_api.php (8 issues)
+
+Line 2453 [LOW]: strlen() v loop podmínce
+  Problém: strlen() volán každou iteraci
+  Fix: $len = strlen($str); for (...; $i < $len; ...)
+  Code: for ($i = 0; $i < strlen($line); $i++) {
+
+Line 2664 [LOW]: strlen() v loop podmínce
+  Problém: strlen() volán každou iteraci
+  Fix: $len = strlen($str); for (...; $i < $len; ...)
+  Code: for ($i = 0; $i < strlen($line); $i++) {
+
+Line 52 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $jsonData = file_get_contents('php://input');
+
+Line 290 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $sql = file_get_contents($sqlFile);
+
+Line 1795 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $head = file_get_contents($headFile);
+
+Line 2000 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $htaccess = file_get_contents($htaccessFile);
+
+Line 2055 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $content = file_get_contents($pathname);
+
+Line 2130 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $content = file_get_contents($page);
+
+
+## includes/security_scanner.php (5 issues)
+
+Line 173 [MEDIUM]: Double array_merge v loopu
+  Problém: array_merge v loopu je pomalý
+  Fix: Použít $array[] = $item
+  Code: $files = array_merge($files, $subFiles ?: []);
+
+Line 33 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $content = file_get_contents($file);
+
+Line 68 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $content = file_get_contents($file);
+
+Line 135 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $content = file_get_contents($file);
+
+Line 175 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $content = file_get_contents($file);
+
+
+## api/delete_reklamace.php (2 issues)
+
+Line 23 [MEDIUM]: Double array_merge v loopu
+  Problém: array_merge v loopu je pomalý
+  Fix: Použít $array[] = $item
+  Code: $input = array_merge($input, $decoded);
+
+Line 20 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $raw = file_get_contents('php://input');
+
+
+## scripts/detect_dead_code.php (2 issues)
+
+Line 47 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $content = file_get_contents($filePath);
+
+Line 74 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $content = file_get_contents($filePath);
+
+
+## app/controllers/save.php (2 issues)
+
+Line 301 [MEDIUM]: Double array_merge v loopu
+  Problém: array_merge v loopu je pomalý
+  Fix: Použít $array[] = $item
+  Code: $requestData = array_merge($requestData, $decoded);
+
+Line 298 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $rawBody = file_get_contents('php://input');
+
+
+## admin/install_email_system.php (2 issues)
+
+Line 115 [LOW]: strlen() v loop podmínce
+  Problém: strlen() volán každou iteraci
+  Fix: $len = strlen($str); for (...; $i < $len; ...)
+  Code: for ($i = 0; $i < strlen($sql); $i++) {
+
+Line 104 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $sql = file_get_contents($sqlFile);
+
+
+## minify_assets.php (2 issues)
+
+Line 109 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $originalCode = file_get_contents($file);
+
+Line 162 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $originalCode = file_get_contents($file);
+
+
+## includes/safe_file_operations.php (1 issues)
+
+Line 30 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $content = file_get_contents($path);
+
+
+## api/admin_api.php (1 issues)
+
+Line 56 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $raw = file_get_contents('php://input');
+
+
+## api/migration_executor.php (1 issues)
+
+Line 71 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $sql = file_get_contents($migrationPath);
+
+
+## api/protokol_api.php (1 issues)
+
+Line 30 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $jsonData = file_get_contents('php://input');
+
+
+## api/log_js_error.php (1 issues)
+
+Line 32 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $jsonData = file_get_contents('php://input');
+
+
+## api/get_photos_api.php (1 issues)
+
+Line 103 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $imageData = file_get_contents($fullPath);
+
+
+## api/notification_api.php (1 issues)
+
+Line 37 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $jsonData = file_get_contents('php://input');
+
+
+## api/admin_users_api.php (1 issues)
+
+Line 32 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $jsonData = file_get_contents('php://input');
+
+
+## api/github_webhook.php (1 issues)
+
+Line 46 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $payload = file_get_contents('php://input');
+
+
+## setup_actions_system.php (1 issues)
+
+Line 240 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $sql = file_get_contents($migrationFile);
+
+
+## cleanup_history_record.php (1 issues)
+
+Line 25 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $jsonData = file_get_contents('php://input');
+
+
+## scripts/detect_select_star.php (1 issues)
+
+Line 70 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $content = file_get_contents($filePath);
+
+
+## scripts/minor_optimizations.php (1 issues)
+
+Line 110 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $content = file_get_contents($filePath);
+
+
+## scripts/improve_documentation.php (1 issues)
+
+Line 58 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $content = file_get_contents($filePath);
+
+
+## scripts/install_email_queue.php (1 issues)
+
+Line 23 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $sql = file_get_contents($sqlFile);
+
+
+## scripts/add_database_indexes.php (1 issues)
+
+Line 132 [MEDIUM]: Double array_merge v loopu
+  Problém: array_merge v loopu je pomalý
+  Fix: Použít $array[] = $item
+  Code: $allIndexes = array_merge($performanceIndexes, $timestampIndexes);
+
+
+## scripts/create_db_backup.php (1 issues)
+
+Line 191 [MEDIUM]: count() v loop podmínce
+  Problém: count() volán každou iteraci
+  Fix: $count = count($array); for (...; $i < $count; ...)
+  Code: for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
+
+
+## scripts/cleanup_commented_code.php (1 issues)
+
+Line 59 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $content = file_get_contents($filePath);
+
+
+## scripts/detect_legacy_functions.php (1 issues)
+
+Line 72 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $content = file_get_contents($filePath);
+
+
+## scripts/detect_duplicate_code.php (1 issues)
+
+Line 48 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $content = file_get_contents($filePath);
+
+
+## app/controllers/get_distance.php (1 issues)
+
+Line 138 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $jsonData = file_get_contents('php://input');
+
+
+## app/notification_sender.php (1 issues)
+
+Line 34 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $jsonData = file_get_contents('php://input');
+
+
+## app/save_photos.php (1 issues)
+
+Line 26 [MEDIUM]: file_get_contents bez kontroly
+  Problém: Chybí kontrola chyby
+  Fix: if (($content = file_get_contents(...)) !== false)
+  Code: $jsonData = file_get_contents('php://input');
+
+
