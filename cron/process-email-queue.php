@@ -138,7 +138,8 @@ try {
                     WHERE id = ?
                 ")->execute([$attempts, $result['message'], $nextSchedule, $email['id']]);
 
-                logMessage("⟳ Email #{$email['id']} pokus $attempts selhal, zkusím znovu za " . ($attempts * 15) . " minut");
+                logMessage("⟳ Email #{$email['id']} pokus $attempts selhal: {$result['message']}");
+                logMessage("   Zkusím znovu za " . ($attempts * 15) . " minut");
             }
         }
 
