@@ -47,39 +47,49 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 }
 
 .console-btn {
-    background: #0E639C;
-    color: white;
-    border: none;
+    background: #ffffff;
+    color: #1d1d1f;
+    border: 1px solid #d1d1d6;
     padding: 0.5rem 1rem;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .console-btn:hover {
-    background: #1177BB;
+    background: #f5f5f7;
+    border-color: #667eea;
+    color: #667eea;
 }
 
 .console-btn.danger {
-    background: #DC3545;
+    background: #ffffff;
+    color: #dc3545;
+    border: 1px solid #dc3545;
 }
 
 .console-btn.danger:hover {
-    background: #C82333;
+    background: #dc3545;
+    color: white;
 }
 
 .console-btn.success {
-    background: #28A745;
+    background: #667eea;
+    color: white;
+    border: 1px solid #667eea;
 }
 
 .console-btn.success:hover {
-    background: #218838;
+    background: #5a67d8;
+    border-color: #5a67d8;
 }
 
 .console-btn:disabled {
-    background: #6C757D;
+    background: #f5f5f7;
+    color: #86868b;
+    border-color: #e5e5ea;
     cursor: not-allowed;
     opacity: 0.6;
 }
