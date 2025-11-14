@@ -776,6 +776,23 @@ async function saveData(data, successMsg) {
   }
 }
 
+// === LOADING OVERLAY HELPERS ===
+function showLoading(message = 'Načítání...') {
+  const overlay = document.getElementById('loadingOverlay');
+  const text = document.getElementById('loadingText');
+  if (overlay && text) {
+    text.textContent = message;
+    overlay.classList.add('show');
+  }
+}
+
+function hideLoading() {
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) {
+    overlay.classList.remove('show');
+  }
+}
+
 // === KALENDÁŘ ===
 function showCalendar(id) {
   const z = WGS_DATA_CACHE.find(x => x.id == id);
@@ -1252,7 +1269,7 @@ async function saveSelectedDate() {
     alert('Vyberte datum i čas.');
     return;
   }
-  
+
   if (!CURRENT_RECORD) {
     alert('Chyba: žádný záznam k uložení.');
     return;
@@ -1262,9 +1279,9 @@ async function saveSelectedDate() {
     WGS_DATA_CACHE = [];
   }
 
-  const collision = WGS_DATA_CACHE.find(rec => 
-    rec.termin === SELECTED_DATE && 
-    rec.cas_navstevy === SELECTED_TIME && 
+  const collision = WGS_DATA_CACHE.find(rec =>
+    rec.termin === SELECTED_DATE &&
+    rec.cas_navstevy === SELECTED_TIME &&
     rec.id !== CURRENT_RECORD.id
   );
 
@@ -1279,6 +1296,9 @@ async function saveSelectedDate() {
     if (!confirm) return;
   }
 
+  // ZOBRAZIT LOADING OVERLAY
+  showLoading('Ukládám termín...');
+
   try {
     // Get CSRF token
     const csrfToken = await getCSRFToken();
@@ -1291,6 +1311,8 @@ async function saveSelectedDate() {
     formData.append('stav', 'DOMLUVENÁ');
     formData.append('csrf_token', csrfToken);
 
+    // KROK 1: Uložení termínu do DB
+    showLoading('Ukládám termín do databáze...');
     const response = await fetch('/app/controllers/save.php', {
       method: 'POST',
       body: formData
@@ -1316,21 +1338,38 @@ async function saveSelectedDate() {
         cacheRecord.stav = 'DOMLUVENÁ';
       }
 
-      alert(`✓ Termín uložen: ${SELECTED_DATE} ${SELECTED_TIME}\n\nStav automaticky změněn na: DOMLUVENÁ`);
+      // KROK 2: Odeslání potvrzení (neblokující, s timeoutem)
+      showLoading('Odesílám potvrzení zákazníkovi...');
+      try {
+        await Promise.race([
+          sendAppointmentConfirmation(CURRENT_RECORD, SELECTED_DATE, SELECTED_TIME),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
+        ]);
+      } catch (confirmError) {
+        // Logovat, ale nepřerušovat proces
+        logger.warn('⚠ Potvrzení nebylo odesláno:', confirmError.message);
+      }
 
-      await sendAppointmentConfirmation(CURRENT_RECORD, SELECTED_DATE, SELECTED_TIME);
-
-      // Reload all data from DB to ensure consistency
+      // KROK 3: Načtení aktuálních dat z DB
+      showLoading('Aktualizuji seznam...');
       await loadAll(ACTIVE_FILTER);
+
+      // SKRÝT LOADING
+      hideLoading();
+
+      // ZOBRAZIT ÚSPĚCH (až po všech operacích)
+      alert(`✓ Termín uložen: ${SELECTED_DATE} ${SELECTED_TIME}\n\nStav automaticky změněn na: DOMLUVENÁ`);
 
       // Re-open detail to show updated data
       const recordId = CURRENT_RECORD.id;
       closeDetail();
       setTimeout(() => showDetail(recordId), 100);
     } else {
+      hideLoading();
       alert('Chyba: ' + (result.message || 'Nepodařilo se uložit.'));
     }
   } catch (e) {
+    hideLoading();
     logger.error('Chyba při ukládání:', e);
     alert('Chyba při ukládání: ' + e.message);
   }
@@ -1703,7 +1742,7 @@ async function sendAppointmentConfirmation(customer, date, time) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        notification_id: "appointment_confirmation",
+        notification_id: "appointment_confirmed",
         csrf_token: csrfToken,
         data: {
           customer_name: customerName,
