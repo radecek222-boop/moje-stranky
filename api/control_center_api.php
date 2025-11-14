@@ -2450,7 +2450,10 @@ try {
                         foreach ($lines as $lineNum => $line) {
                             $lineNumber = $lineNum + 1;
 
-                            for ($i = 0; $i < strlen($line); $i++) {
+                            $len_i = strlen($line);
+
+
+                            for ($i = 0; $i < $len_i; $i++) {
                                 $char = $line[$i];
 
                                 if ($escaped) {
@@ -2661,7 +2664,10 @@ try {
                     foreach ($lines as $lineNum => $line) {
                         $lineNumber = $lineNum + 1;
 
-                        for ($i = 0; $i < strlen($line); $i++) {
+                        $len_i = strlen($line);
+
+
+                        for ($i = 0; $i < $len_i; $i++) {
                             $char = $line[$i];
 
                             if ($escaped) {

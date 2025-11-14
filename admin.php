@@ -337,7 +337,10 @@ try {
 
     <script>
     // Modal systém pro notifikace
-    function openNotifModal(type) {
+        /**
+     * OpenNotifModal
+     */
+function openNotifModal(type) {
         const overlay = document.getElementById('notifModalOverlay');
         const modal = overlay.querySelector('.cc-modal');
         const title = document.getElementById('notifModalTitle');
@@ -366,7 +369,10 @@ try {
         document.body.style.overflow = 'hidden';
     }
 
-    function closeNotifModal() {
+        /**
+     * CloseNotifModal
+     */
+function closeNotifModal() {
         const overlay = document.getElementById('notifModalOverlay');
         const modal = overlay.querySelector('.cc-modal');
 
@@ -376,7 +382,10 @@ try {
         document.body.style.overflow = 'auto';
     }
 
-    function loadNotifContent(type, body) {
+        /**
+     * LoadNotifContent
+     */
+function loadNotifContent(type, body) {
         // Zobrazit loading
         body.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Načítání...</div>';
 

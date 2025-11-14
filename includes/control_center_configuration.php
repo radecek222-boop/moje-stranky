@@ -325,6 +325,9 @@ $groupNames = [
 <script src="/assets/js/csrf-auto-inject.js"></script>
 <script>
 // Toggle password visibility
+/**
+ * TogglePasswordVisibility
+ */
 function togglePasswordVisibility(configId) {
     const input = document.getElementById(`config-${configId}`);
     if (input.type === 'password') {
@@ -335,7 +338,10 @@ function togglePasswordVisibility(configId) {
 }
 
 // Save config
-async function saveConfig(configId, configKey) {
+async /**
+ * SaveConfig
+ */
+function saveConfig(configId, configKey) {
     const input = document.getElementById(`config-${configId}`);
     const statusEl = document.getElementById(`save-status-${configId}`);
 
@@ -378,7 +384,10 @@ async function saveConfig(configId, configKey) {
 }
 
 // Send test email
-async function sendTestEmail() {
+async /**
+ * SendTestEmail
+ */
+function sendTestEmail() {
     const emailInput = document.getElementById('test-email');
     const email = emailInput.value.trim();
 

@@ -278,7 +278,10 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     <script>
         let logLines = [];
 
-        function addLog(message, type = 'info') {
+                /**
+         * AddLog
+         */
+function addLog(message, type = 'info') {
             const timestamp = new Date().toLocaleTimeString('cs-CZ');
             const colorClass = type === 'success' ? 'log-success' : (type === 'error' ? 'log-error' : 'log-info');
 
@@ -289,7 +292,10 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
             logElement.scrollTop = logElement.scrollHeight;
         }
 
-        function addStatus(message, type = 'info') {
+                /**
+         * AddStatus
+         */
+function addStatus(message, type = 'info') {
             const statusElement = document.getElementById('installStatus');
             const icon = type === 'success' ? 'OK' : (type === 'error' ? 'ERROR' : 'INFO');
 
@@ -300,11 +306,17 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
             statusElement.appendChild(statusItem);
         }
 
-        function setProgress(percent) {
+                /**
+         * SetProgress
+         */
+function setProgress(percent) {
             document.getElementById('progressFill').style.width = percent + '%';
         }
 
-        async function startInstallation() {
+        async         /**
+         * StartInstallation
+         */
+function startInstallation() {
             const installBtn = document.getElementById('installBtn');
             const progressBar = document.getElementById('progressBar');
             const installLog = document.getElementById('installLog');

@@ -17,6 +17,14 @@ header('Content-Type: application/json');
  * @param float $lon2 Longitude druhého bodu
  * @return float Vzdálenost v kilometrech
  */
+/**
+ * HaversineDistance
+ *
+ * @param mixed $lat1 Lat1
+ * @param mixed $lon1 Lon1
+ * @param mixed $lat2 Lat2
+ * @param mixed $lon2 Lon2
+ */
 function haversineDistance($lat1, $lon1, $lat2, $lon2) {
     $earthRadius = 6371; // Poloměr Země v km
 
@@ -159,7 +167,11 @@ try {
                 ]
             ]);
 
-            $osrmResponse = @file_get_contents($osrmUrl, false, $context);
+            $osrmResponse = file_get_contents($osrmUrl, false, $context);
+if ($osrmResponse === false) {
+    error_log('Failed to read file: ' . $osrmUrl, false, $context);
+    $osrmResponse = '';
+}
 
             if ($osrmResponse !== false) {
                 $osrmData = json_decode($osrmResponse, true);
@@ -199,7 +211,11 @@ try {
                     'apiKey' => $apiKey
                 ]);
 
-                $geoResponse = @file_get_contents($url, false, $context);
+                $geoResponse = file_get_contents($url, false, $context);
+if ($geoResponse === false) {
+    error_log('Failed to read file: ' . $url, false, $context);
+    $geoResponse = '';
+}
 
                 if ($geoResponse !== false) {
                     echo $geoResponse;
@@ -254,7 +270,11 @@ try {
 
             // Pro tiles vracíme přímo obrázek
             header('Content-Type: image/png');
-            $imageData = @file_get_contents($url);
+            $imageData = file_get_contents($url);
+if ($imageData === false) {
+    error_log('Failed to read file: ' . $url);
+    $imageData = '';
+}
 
             if ($imageData === false) {
                 throw new Exception('Chyba při načítání tile');
@@ -275,7 +295,11 @@ try {
         ]
     ]);
 
-    $response = @file_get_contents($url, false, $context);
+    $response = file_get_contents($url, false, $context);
+if ($response === false) {
+    error_log('Failed to read file: ' . $url, false, $context);
+    $response = '';
+}
 
     if ($response === false) {
         throw new Exception('Chyba při komunikaci s Geoapify API');

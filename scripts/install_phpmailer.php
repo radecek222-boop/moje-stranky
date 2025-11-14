@@ -28,6 +28,11 @@ if (!file_exists($logDir)) {
     safeMkdir($logDir, 0755);
 }
 
+/**
+ * LogInstall
+ *
+ * @param mixed $message Message
+ */
 function logInstall($message) {
     global $logFile;
     $timestamp = date('Y-m-d H:i:s');
@@ -117,7 +122,9 @@ PHP;
         curl_close($ch);
 
         if ($httpCode === 200 && $data !== false) {
-            @file_put_contents($zipFile, $data);
+            if (file_put_contents($zipFile, $data) === false) {
+    error_log('Failed to write file');
+}
             $downloaded = true;
             logInstall("✓ Staženo pomocí cURL");
         }
@@ -132,9 +139,15 @@ PHP;
             ]
         ]);
 
-        $data = @file_get_contents($url, false, $context);
+        $data = file_get_contents($url, false, $context);
+if ($data === false) {
+    error_log('Failed to read file: ' . $url, false, $context);
+    $data = '';
+}
         if ($data !== false) {
-            @file_put_contents($zipFile, $data);
+            if (file_put_contents($zipFile, $data) === false) {
+    error_log('Failed to write file');
+}
             $downloaded = true;
             logInstall("✓ Staženo pomocí file_get_contents");
         }
@@ -168,7 +181,11 @@ PHP;
     }
 
     // Smazat ZIP
-    @unlink($zipFile);
+    if (file_exists($zipFile)) {
+    if (!unlink($zipFile)) {
+        error_log('Failed to delete file: ' . $zipFile);
+    }
+}
     logInstall("✓ Dočasný archiv smazán");
 
     // Vytvořit autoload.php
@@ -195,7 +212,9 @@ spl_autoload_register(function ($class) {
     }
 });
 PHP;
-    @file_put_contents($autoloadFile, $autoloadContent);
+    if (file_put_contents($autoloadFile, $autoloadContent) === false) {
+    error_log('Failed to write file');
+}
     logInstall("✓ autoload.php vytvořen");
 
     // Test načtení PHPMailer

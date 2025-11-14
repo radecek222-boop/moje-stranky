@@ -9,6 +9,9 @@
  * NOTE: For JSON APIs, read php://input FIRST, then extract and validate token.
  * See admin_api.php for correct pattern.
  */
+/**
+ * RequireCSRF
+ */
 function requireCSRF() {
     // SECURITY FIX: Removed admin bypass - all users require CSRF tokens
     // Even if admin account is compromised, CSRF protection remains active

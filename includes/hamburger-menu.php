@@ -261,7 +261,10 @@ if ($isAdmin) {
 <script>
 (function() {
   'use strict';
-  function initHamburgerMenu() {
+    /**
+   * InitHamburgerMenu
+   */
+function initHamburgerMenu() {
     const hamburger = document.getElementById('hamburger-toggle');
     const nav = document.getElementById('hamburger-nav');
     const overlay = document.getElementById('hamburger-overlay');
@@ -271,7 +274,10 @@ if ($isAdmin) {
       return;
     }
     
-    function toggleMenu() {
+        /**
+     * ToggleMenu
+     */
+function toggleMenu() {
       const isActive = nav.classList.contains('active');
       nav.classList.toggle('active');
       overlay.classList.toggle('active');
@@ -284,7 +290,10 @@ if ($isAdmin) {
       }
     }
     
-    function closeMenu() {
+        /**
+     * CloseMenu
+     */
+function closeMenu() {
       nav.classList.remove('active');
       overlay.classList.remove('active');
       hamburger.classList.remove('active');

@@ -239,7 +239,11 @@ function savePdfDocument($data) {
 
     } catch (PDOException $e) {
         // CRITICAL FIX: ROLLBACK - Smazat soubor pokud DB operace selhala
-        @unlink($filePath);
+        if (file_exists($filePath)) {
+    if (!unlink($filePath)) {
+        error_log('Failed to delete file: ' . $filePath);
+    }
+}
         throw new Exception('Chyba při ukládání PDF do databáze: ' . $e->getMessage());
     }
 

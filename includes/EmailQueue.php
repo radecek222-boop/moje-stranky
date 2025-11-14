@@ -12,7 +12,12 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
 class EmailQueue {
     private $pdo;
 
-    public function __construct($pdo = null) {
+    public     /**
+     *   construct
+     *
+     * @param mixed $pdo Pdo
+     */
+function __construct($pdo = null) {
         $this->pdo = $pdo ?? getDbConnection();
     }
 
@@ -23,7 +28,13 @@ class EmailQueue {
      * @param bool $useTransaction Pokud true, obalí operaci v transakci (default: false pro zpětnou kompatibilitu)
      * @return bool Success
      */
-    public function enqueue($data, $useTransaction = false) {
+    public     /**
+     * Enqueue
+     *
+     * @param mixed $data Data
+     * @param mixed $useTransaction UseTransaction
+     */
+function enqueue($data, $useTransaction = false) {
         try {
             // CRITICAL FIX: Volitelná transakce pro atomicitu při vkládání do fronty
             if ($useTransaction && !$this->pdo->inTransaction()) {
@@ -78,7 +89,10 @@ class EmailQueue {
     /**
      * Získá SMTP nastavení z databáze
      */
-    private function getSMTPSettings() {
+    private     /**
+     * GetSMTPSettings
+     */
+function getSMTPSettings() {
         $stmt = $this->pdo->query("
             SELECT * FROM wgs_smtp_settings
             WHERE is_active = 1
@@ -115,7 +129,12 @@ class EmailQueue {
      * @return array ['success' => bool, 'error' => string|null]
      * @throws Exception Při kritické chybě odeslání
      */
-    public function sendEmail($queueItem) {
+    public     /**
+     * SendEmail
+     *
+     * @param mixed $queueItem QueueItem
+     */
+function sendEmail($queueItem) {
         $settings = $this->getSMTPSettings();
 
         // Použít PHPMailer pokud je dostupný
@@ -141,7 +160,13 @@ class EmailQueue {
      * @param array $settings SMTP konfigurace z wgs_system_config
      * @return array ['success' => bool, 'error' => string|null]
      */
-    private function sendWithPHPMailer($queueItem, $settings) {
+    private     /**
+     * SendWithPHPMailer
+     *
+     * @param mixed $queueItem QueueItem
+     * @param mixed $settings Settings
+     */
+function sendWithPHPMailer($queueItem, $settings) {
         $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
 
         try {
@@ -222,7 +247,13 @@ class EmailQueue {
     /**
      * Fallback - odeslání pomocí PHP mail()
      */
-    private function sendWithPHPMail($queueItem, $settings) {
+    private     /**
+     * SendWithPHPMail
+     *
+     * @param mixed $queueItem QueueItem
+     * @param mixed $settings Settings
+     */
+function sendWithPHPMail($queueItem, $settings) {
         $to = $queueItem['recipient_email'];
         $subject = $queueItem['subject'];
         $message = $queueItem['body'];
@@ -282,7 +313,12 @@ class EmailQueue {
      * @param int $limit Maximální počet emailů ke zpracování (default: 10)
      * @return array ['processed' => int, 'sent' => int, 'failed' => int]
      */
-    public function processQueue($limit = 10) {
+    public     /**
+     * ProcessQueue
+     *
+     * @param mixed $limit Limit
+     */
+function processQueue($limit = 10) {
         // Získat pending emaily
         $stmt = $this->pdo->prepare("
             SELECT * FROM wgs_email_queue
@@ -373,7 +409,15 @@ class EmailQueue {
     /**
      * Aktualizuje stav emailu
      */
-    private function updateStatus($id, $status, $errorMessage = null, $sentAt = null) {
+    private     /**
+     * UpdateStatus
+     *
+     * @param mixed $id Id
+     * @param mixed $status Status
+     * @param mixed $errorMessage ErrorMessage
+     * @param mixed $sentAt SentAt
+     */
+function updateStatus($id, $status, $errorMessage = null, $sentAt = null) {
         $stmt = $this->pdo->prepare("
             UPDATE wgs_email_queue
             SET status = ?, error_message = ?, sent_at = ?
@@ -385,7 +429,12 @@ class EmailQueue {
     /**
      * Zvýší počet pokusů
      */
-    private function incrementAttempts($id) {
+    private     /**
+     * IncrementAttempts
+     *
+     * @param mixed $id Id
+     */
+function incrementAttempts($id) {
         $stmt = $this->pdo->prepare("
             UPDATE wgs_email_queue
             SET attempts = attempts + 1
@@ -397,7 +446,10 @@ class EmailQueue {
     /**
      * Získá statistiky fronty
      */
-    public function getStats() {
+    public     /**
+     * GetStats
+     */
+function getStats() {
         $stmt = $this->pdo->query("
             SELECT
                 status,
@@ -417,7 +469,14 @@ class EmailQueue {
     /**
      * Získá seznam emailů z fronty
      */
-    public function getQueue($status = null, $limit = 50, $offset = 0) {
+    public     /**
+     * GetQueue
+     *
+     * @param mixed $status Status
+     * @param mixed $limit Limit
+     * @param mixed $offset Offset
+     */
+function getQueue($status = null, $limit = 50, $offset = 0) {
         if ($status) {
             $stmt = $this->pdo->prepare("
                 SELECT * FROM wgs_email_queue
@@ -441,7 +500,12 @@ class EmailQueue {
     /**
      * Přeodešle selhavší email
      */
-    public function retry($id) {
+    public     /**
+     * Retry
+     *
+     * @param mixed $id Id
+     */
+function retry($id) {
         $stmt = $this->pdo->prepare("
             UPDATE wgs_email_queue
             SET status = 'pending', attempts = 0, error_message = NULL
@@ -453,7 +517,12 @@ class EmailQueue {
     /**
      * Smaže email z fronty
      */
-    public function delete($id) {
+    public     /**
+     * Delete
+     *
+     * @param mixed $id Id
+     */
+function delete($id) {
         $stmt = $this->pdo->prepare("DELETE FROM wgs_email_queue WHERE id = ?");
         return $stmt->execute([$id]);
     }
