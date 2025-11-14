@@ -4,10 +4,17 @@
  * Spravuje frontu emailů pro asynchronní odeslání
  */
 
-require_once __DIR__ . '/../vendor/autoload.php';
+// Pokusit se načíst PHPMailer (pokud existuje)
+$phpmailerAvailable = false;
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require_once __DIR__ . '/../vendor/autoload.php';
+    $phpmailerAvailable = class_exists('PHPMailer\\PHPMailer\\PHPMailer');
+}
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+if ($phpmailerAvailable) {
+    use PHPMailer\PHPMailer\PHPMailer;
+    use PHPMailer\PHPMailer\Exception;
+}
 
 class EmailQueue {
     private $pdo;
@@ -82,11 +89,25 @@ class EmailQueue {
     }
 
     /**
-     * Odešle jeden email z fronty pomocí PHPMailer
+     * Odešle jeden email z fronty pomocí PHPMailer nebo PHP mail()
      */
     public function sendEmail($queueItem) {
+        global $phpmailerAvailable;
         $settings = $this->getSMTPSettings();
 
+        // Použít PHPMailer pokud je dostupný
+        if ($phpmailerAvailable && class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
+            return $this->sendWithPHPMailer($queueItem, $settings);
+        }
+
+        // Fallback na PHP mail()
+        return $this->sendWithPHPMail($queueItem, $settings);
+    }
+
+    /**
+     * Odeslání pomocí PHPMailer
+     */
+    private function sendWithPHPMailer($queueItem, $settings) {
         $mail = new PHPMailer(true);
 
         try {
@@ -106,7 +127,7 @@ class EmailQueue {
 
             $mail->Port = $settings['smtp_port'];
             $mail->CharSet = 'UTF-8';
-            $mail->Timeout = 10; // 10 second timeout
+            $mail->Timeout = 10;
 
             // Recipients
             $mail->setFrom($settings['smtp_from_email'], $settings['smtp_from_name']);
@@ -141,13 +162,63 @@ class EmailQueue {
 
             return [
                 'success' => true,
-                'message' => 'Email sent successfully'
+                'message' => 'Email sent via PHPMailer'
             ];
 
         } catch (Exception $e) {
             return [
                 'success' => false,
                 'message' => $mail->ErrorInfo
+            ];
+        }
+    }
+
+    /**
+     * Fallback - odeslání pomocí PHP mail()
+     */
+    private function sendWithPHPMail($queueItem, $settings) {
+        $to = $queueItem['recipient_email'];
+        $subject = $queueItem['subject'];
+        $message = $queueItem['body'];
+
+        $headers = "From: {$settings['smtp_from_name']} <{$settings['smtp_from_email']}>\r\n";
+        $headers .= "Reply-To: {$settings['smtp_from_email']}\r\n";
+        $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+        $headers .= "X-Mailer: WGS Email Queue (PHP mail fallback)\r\n";
+
+        // CC
+        if (!empty($queueItem['cc_emails'])) {
+            $ccEmails = json_decode($queueItem['cc_emails'], true);
+            $validCC = array_filter($ccEmails, function($email) {
+                return filter_var($email, FILTER_VALIDATE_EMAIL);
+            });
+            if (!empty($validCC)) {
+                $headers .= "Cc: " . implode(', ', $validCC) . "\r\n";
+            }
+        }
+
+        // BCC
+        if (!empty($queueItem['bcc_emails'])) {
+            $bccEmails = json_decode($queueItem['bcc_emails'], true);
+            $validBCC = array_filter($bccEmails, function($email) {
+                return filter_var($email, FILTER_VALIDATE_EMAIL);
+            });
+            if (!empty($validBCC)) {
+                $headers .= "Bcc: " . implode(', ', $validBCC) . "\r\n";
+            }
+        }
+
+        $success = @mail($to, $subject, $message, $headers);
+
+        if ($success) {
+            return [
+                'success' => true,
+                'message' => 'Email sent via PHP mail() fallback'
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => 'PHP mail() failed'
             ];
         }
     }
