@@ -2181,6 +2181,605 @@ try {
             break;
 
         // ==========================================
+        // KOMPLEXNÍ CODE ANALYSIS
+        // ==========================================
+        case 'check_code_analysis':
+            $rootDir = __DIR__ . '/..';
+            $results = [
+                'php' => ['errors' => [], 'warnings' => [], 'files_checked' => 0],
+                'javascript' => ['errors' => [], 'warnings' => [], 'files_checked' => 0],
+                'css' => ['errors' => [], 'warnings' => [], 'files_checked' => 0],
+                'http_logs' => ['errors' => [], 'total' => 0],
+                'summary' => ['total_errors' => 0, 'total_warnings' => 0]
+            ];
+
+            // Helper funkce pro extrakci kontextu (3 řádky před a po)
+            $getContext = function($lines, $lineNum, $contextLines = 3) {
+                $start = max(0, $lineNum - 1 - $contextLines);
+                $end = min(count($lines), $lineNum + $contextLines);
+                $context = [];
+
+                for ($i = $start; $i < $end; $i++) {
+                    $lineNumber = $i + 1;
+                    $marker = ($i === $lineNum - 1) ? '→→→' : '   ';
+                    $context[] = sprintf("%s %4d: %s", $marker, $lineNumber, rtrim($lines[$i]));
+                }
+
+                return implode("\n", $context);
+            };
+
+            // ============================================
+            // 1. PHP DEEP ANALYSIS
+            // ============================================
+            try {
+                $iterator = new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($rootDir, RecursiveDirectoryIterator::SKIP_DOTS),
+                    RecursiveIteratorIterator::CATCH_GET_CHILD
+                );
+
+                $maxFiles = 300;
+                $filesChecked = 0;
+
+                foreach ($iterator as $file) {
+                    if ($filesChecked >= $maxFiles) break;
+
+                    if ($file->isFile() && $file->getExtension() === 'php') {
+                        $filePath = $file->getPathname();
+                        $relativePath = str_replace($rootDir . '/', '', $filePath);
+
+                        // Skip vendor, node_modules, backups
+                        if (strpos($relativePath, 'vendor/') === 0 ||
+                            strpos($relativePath, 'node_modules/') === 0 ||
+                            strpos($relativePath, 'backups/') === 0 ||
+                            strpos($relativePath, 'cache/') === 0) {
+                            continue;
+                        }
+
+                        $filesChecked++;
+                        $content = @file_get_contents($filePath);
+                        if ($content === false) continue;
+
+                        $lines = explode("\n", $content);
+
+                        // A) SYNTAX CHECK pomocí token_get_all
+                        $oldErrorHandler = set_error_handler(function() { return true; });
+                        $tokens = @token_get_all($content);
+                        restore_error_handler();
+
+                        if ($tokens === false || empty($tokens)) {
+                            $results['php']['errors'][] = [
+                                'file' => $relativePath,
+                                'line' => 1,
+                                'column' => 0,
+                                'type' => 'syntax',
+                                'severity' => 'error',
+                                'message' => 'Syntax error - token parsing failed',
+                                'context' => $getContext($lines, 1, 5)
+                            ];
+                            $results['summary']['total_errors']++;
+                            continue; // Skip další kontroly pokud syntax je špatná
+                        }
+
+                        // B) UNCLOSED STRINGS DETECTION
+                        $inString = false;
+                        $stringChar = null;
+                        $escaped = false;
+
+                        foreach ($lines as $lineNum => $line) {
+                            $lineNumber = $lineNum + 1;
+
+                            for ($i = 0; $i < strlen($line); $i++) {
+                                $char = $line[$i];
+
+                                if ($escaped) {
+                                    $escaped = false;
+                                    continue;
+                                }
+
+                                if ($char === '\\') {
+                                    $escaped = true;
+                                    continue;
+                                }
+
+                                // Check if we're in a string
+                                if (($char === '"' || $char === "'") && !$inString) {
+                                    $inString = true;
+                                    $stringChar = $char;
+                                } elseif ($char === $stringChar && $inString) {
+                                    $inString = false;
+                                    $stringChar = null;
+                                }
+                            }
+
+                            // Pokud string nebyl uzavřen na konci řádku (a nejde o heredoc)
+                            if ($inString && !preg_match('/<<<["\']?\w+["\']?/', $line)) {
+                                $results['php']['errors'][] = [
+                                    'file' => $relativePath,
+                                    'line' => $lineNumber,
+                                    'column' => strpos($line, $stringChar) ?: 0,
+                                    'type' => 'string',
+                                    'severity' => 'error',
+                                    'message' => "Unclosed string (missing closing {$stringChar})",
+                                    'context' => $getContext($lines, $lineNumber)
+                                ];
+                                $results['summary']['total_errors']++;
+                            }
+                        }
+
+                        // C) UNCLOSED BRACKETS DETECTION
+                        $brackets = ['(' => 0, '{' => 0, '[' => 0];
+                        $bracketLines = ['(' => [], '{' => [], '[' => []];
+
+                        foreach ($lines as $lineNum => $line) {
+                            $lineNumber = $lineNum + 1;
+
+                            // Skip komentáře a stringy pro zjednodušení
+                            $cleanLine = preg_replace('/\/\/.*$/', '', $line); // Remove // comments
+                            $cleanLine = preg_replace('/\/\*.*?\*\//', '', $cleanLine); // Remove /* */ comments
+                            $cleanLine = preg_replace('/"[^"]*"/', '""', $cleanLine); // Remove double quoted strings
+                            $cleanLine = preg_replace("/'[^']*'/", "''", $cleanLine); // Remove single quoted strings
+
+                            foreach (str_split($cleanLine) as $char) {
+                                if ($char === '(' || $char === '{' || $char === '[') {
+                                    $brackets[$char]++;
+                                    $bracketLines[$char][] = $lineNumber;
+                                } elseif ($char === ')') {
+                                    $brackets['(']--;
+                                } elseif ($char === '}') {
+                                    $brackets['{']--;
+                                } elseif ($char === ']') {
+                                    $brackets['[']--;
+                                }
+                            }
+                        }
+
+                        foreach ($brackets as $bracket => $count) {
+                            if ($count > 0) {
+                                $closingBracket = $bracket === '(' ? ')' : ($bracket === '{' ? '}' : ']');
+                                $firstLine = $bracketLines[$bracket][0] ?? 1;
+
+                                $results['php']['errors'][] = [
+                                    'file' => $relativePath,
+                                    'line' => $firstLine,
+                                    'column' => 0,
+                                    'type' => 'bracket',
+                                    'severity' => 'error',
+                                    'message' => "Unclosed bracket: {$count} opening '{$bracket}' without closing '{$closingBracket}'",
+                                    'context' => $getContext($lines, $firstLine)
+                                ];
+                                $results['summary']['total_errors']++;
+                            } elseif ($count < 0) {
+                                $results['php']['errors'][] = [
+                                    'file' => $relativePath,
+                                    'line' => 1,
+                                    'column' => 0,
+                                    'type' => 'bracket',
+                                    'severity' => 'error',
+                                    'message' => "Extra closing brackets: " . abs($count) . " too many closing brackets",
+                                    'context' => ''
+                                ];
+                                $results['summary']['total_errors']++;
+                            }
+                        }
+
+                        // D) SQL INJECTION RISKS
+                        foreach ($lines as $lineNum => $line) {
+                            $lineNumber = $lineNum + 1;
+
+                            // Detekce přímého vložení $_GET/$_POST do SQL query
+                            if (preg_match('/\$_(GET|POST|REQUEST)\[/', $line)) {
+                                // Kontrola jestli je to v SQL query a není použit prepare()
+                                if (preg_match('/(SELECT|INSERT|UPDATE|DELETE|WHERE|SET)/i', $line) &&
+                                    !preg_match('/prepare\s*\(|bindParam|bindValue/i', $line) &&
+                                    !preg_match('/htmlspecialchars|intval|floatval|mysqli_real_escape_string/i', $line)) {
+
+                                    $results['php']['warnings'][] = [
+                                        'file' => $relativePath,
+                                        'line' => $lineNumber,
+                                        'column' => strpos($line, '$_') ?: 0,
+                                        'type' => 'security',
+                                        'severity' => 'warning',
+                                        'message' => 'Potential SQL injection: $_GET/$_POST used in SQL query without prepare()',
+                                        'context' => $getContext($lines, $lineNumber)
+                                    ];
+                                    $results['summary']['total_warnings']++;
+                                }
+                            }
+                        }
+
+                        // E) XSS RISKS
+                        foreach ($lines as $lineNum => $line) {
+                            $lineNumber = $lineNum + 1;
+
+                            // Detekce echo/print s $_GET/$_POST bez htmlspecialchars
+                            if (preg_match('/(echo|print)\s+.*\$_(GET|POST|REQUEST|COOKIE)\[/i', $line)) {
+                                if (!preg_match('/htmlspecialchars|htmlentities|strip_tags/i', $line)) {
+                                    $results['php']['warnings'][] = [
+                                        'file' => $relativePath,
+                                        'line' => $lineNumber,
+                                        'column' => strpos($line, 'echo') ?: strpos($line, 'print') ?: 0,
+                                        'type' => 'security',
+                                        'severity' => 'warning',
+                                        'message' => 'Potential XSS: echo/print user input without htmlspecialchars()',
+                                        'context' => $getContext($lines, $lineNumber)
+                                    ];
+                                    $results['summary']['total_warnings']++;
+                                }
+                            }
+                        }
+
+                        // F) DANGEROUS FUNCTIONS
+                        $dangerousFunctions = ['eval', 'exec', 'system', 'shell_exec', 'passthru', 'popen'];
+                        foreach ($lines as $lineNum => $line) {
+                            $lineNumber = $lineNum + 1;
+
+                            foreach ($dangerousFunctions as $func) {
+                                if (preg_match('/\b' . $func . '\s*\(/i', $line)) {
+                                    // Pokud obsahuje user input
+                                    if (preg_match('/\$_(GET|POST|REQUEST|COOKIE)\[/', $line)) {
+                                        $results['php']['errors'][] = [
+                                            'file' => $relativePath,
+                                            'line' => $lineNumber,
+                                            'column' => strpos($line, $func) ?: 0,
+                                            'type' => 'security',
+                                            'severity' => 'error',
+                                            'message' => "Critical: {$func}() with user input - Remote Code Execution risk",
+                                            'context' => $getContext($lines, $lineNumber)
+                                        ];
+                                        $results['summary']['total_errors']++;
+                                    } else {
+                                        $results['php']['warnings'][] = [
+                                            'file' => $relativePath,
+                                            'line' => $lineNumber,
+                                            'column' => strpos($line, $func) ?: 0,
+                                            'type' => 'security',
+                                            'severity' => 'warning',
+                                            'message' => "Dangerous function: {$func}() usage detected",
+                                            'context' => $getContext($lines, $lineNumber)
+                                        ];
+                                        $results['summary']['total_warnings']++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                $results['php']['files_checked'] = $filesChecked;
+
+            } catch (Exception $e) {
+                $results['php']['errors'][] = [
+                    'file' => 'system',
+                    'line' => 0,
+                    'type' => 'system',
+                    'severity' => 'error',
+                    'message' => 'PHP analysis failed: ' . $e->getMessage()
+                ];
+            }
+
+            // ============================================
+            // 2. JAVASCRIPT ANALYSIS
+            // ============================================
+            try {
+                $jsFiles = glob($rootDir . '/assets/js/*.js');
+
+                foreach ($jsFiles as $jsFile) {
+                    $relativePath = str_replace($rootDir . '/', '', $jsFile);
+                    $content = @file_get_contents($jsFile);
+                    if ($content === false) continue;
+
+                    $results['javascript']['files_checked']++;
+                    $lines = explode("\n", $content);
+
+                    // A) UNCLOSED STRINGS
+                    $inString = false;
+                    $stringChar = null;
+                    $escaped = false;
+
+                    foreach ($lines as $lineNum => $line) {
+                        $lineNumber = $lineNum + 1;
+
+                        for ($i = 0; $i < strlen($line); $i++) {
+                            $char = $line[$i];
+
+                            if ($escaped) {
+                                $escaped = false;
+                                continue;
+                            }
+
+                            if ($char === '\\') {
+                                $escaped = true;
+                                continue;
+                            }
+
+                            if (($char === '"' || $char === "'" || $char === '`') && !$inString) {
+                                $inString = true;
+                                $stringChar = $char;
+                            } elseif ($char === $stringChar && $inString) {
+                                $inString = false;
+                                $stringChar = null;
+                            }
+                        }
+
+                        if ($inString && !preg_match('/\/\/|\/\*/', $line)) {
+                            $results['javascript']['errors'][] = [
+                                'file' => $relativePath,
+                                'line' => $lineNumber,
+                                'column' => strpos($line, $stringChar) ?: 0,
+                                'type' => 'string',
+                                'severity' => 'error',
+                                'message' => "Unclosed string (missing closing {$stringChar})",
+                                'context' => $getContext($lines, $lineNumber)
+                            ];
+                            $results['summary']['total_errors']++;
+                        }
+                    }
+
+                    // B) UNCLOSED BRACKETS
+                    $brackets = ['(' => 0, '{' => 0, '[' => 0];
+                    $bracketLines = ['(' => [], '{' => [], '[' => []];
+
+                    foreach ($lines as $lineNum => $line) {
+                        $lineNumber = $lineNum + 1;
+
+                        // Skip komentáře
+                        $cleanLine = preg_replace('/\/\/.*$/', '', $line);
+                        $cleanLine = preg_replace('/\/\*.*?\*\//', '', $cleanLine);
+
+                        foreach (str_split($cleanLine) as $char) {
+                            if ($char === '(' || $char === '{' || $char === '[') {
+                                $brackets[$char]++;
+                                $bracketLines[$char][] = $lineNumber;
+                            } elseif ($char === ')') {
+                                $brackets['(']--;
+                            } elseif ($char === '}') {
+                                $brackets['{']--;
+                            } elseif ($char === ']') {
+                                $brackets['[']--;
+                            }
+                        }
+                    }
+
+                    foreach ($brackets as $bracket => $count) {
+                        if ($count != 0) {
+                            $closingBracket = $bracket === '(' ? ')' : ($bracket === '{' ? '}' : ']');
+                            $firstLine = $bracketLines[$bracket][0] ?? 1;
+
+                            $results['javascript']['errors'][] = [
+                                'file' => $relativePath,
+                                'line' => $firstLine,
+                                'column' => 0,
+                                'type' => 'bracket',
+                                'severity' => 'error',
+                                'message' => "Bracket mismatch: '{$bracket}' vs '{$closingBracket}' (difference: {$count})",
+                                'context' => $getContext($lines, $firstLine)
+                            ];
+                            $results['summary']['total_errors']++;
+                        }
+                    }
+
+                    // C) console.log v production
+                    foreach ($lines as $lineNum => $line) {
+                        $lineNumber = $lineNum + 1;
+                        if (preg_match('/console\.(log|warn|error|debug|info)\s*\(/i', $line)) {
+                            $results['javascript']['warnings'][] = [
+                                'file' => $relativePath,
+                                'line' => $lineNumber,
+                                'column' => strpos($line, 'console') ?: 0,
+                                'type' => 'code_quality',
+                                'severity' => 'warning',
+                                'message' => 'console.log() found in production code',
+                                'context' => $getContext($lines, $lineNumber)
+                            ];
+                            $results['summary']['total_warnings']++;
+                        }
+                    }
+
+                    // D) eval() usage
+                    foreach ($lines as $lineNum => $line) {
+                        $lineNumber = $lineNum + 1;
+                        if (preg_match('/\beval\s*\(/i', $line)) {
+                            $results['javascript']['errors'][] = [
+                                'file' => $relativePath,
+                                'line' => $lineNumber,
+                                'column' => strpos($line, 'eval') ?: 0,
+                                'type' => 'security',
+                                'severity' => 'error',
+                                'message' => 'Dangerous: eval() usage detected',
+                                'context' => $getContext($lines, $lineNumber)
+                            ];
+                            $results['summary']['total_errors']++;
+                        }
+                    }
+                }
+
+            } catch (Exception $e) {
+                $results['javascript']['errors'][] = [
+                    'file' => 'system',
+                    'line' => 0,
+                    'type' => 'system',
+                    'severity' => 'error',
+                    'message' => 'JavaScript analysis failed: ' . $e->getMessage()
+                ];
+            }
+
+            // ============================================
+            // 3. CSS ANALYSIS
+            // ============================================
+            try {
+                $cssFiles = glob($rootDir . '/assets/css/*.css');
+
+                foreach ($cssFiles as $cssFile) {
+                    $relativePath = str_replace($rootDir . '/', '', $cssFile);
+                    $content = @file_get_contents($cssFile);
+                    if ($content === false) continue;
+
+                    $results['css']['files_checked']++;
+                    $lines = explode("\n", $content);
+
+                    // A) UNCLOSED BRACES
+                    $braceCount = 0;
+                    $braceLines = [];
+
+                    foreach ($lines as $lineNum => $line) {
+                        $lineNumber = $lineNum + 1;
+
+                        // Skip komentáře
+                        $cleanLine = preg_replace('/\/\*.*?\*\//', '', $line);
+
+                        $openCount = substr_count($cleanLine, '{');
+                        $closeCount = substr_count($cleanLine, '}');
+
+                        if ($openCount > 0) {
+                            for ($i = 0; $i < $openCount; $i++) {
+                                $braceLines[] = $lineNumber;
+                            }
+                        }
+
+                        $braceCount += $openCount - $closeCount;
+                    }
+
+                    if ($braceCount > 0) {
+                        $firstLine = $braceLines[count($braceLines) - $braceCount] ?? 1;
+                        $results['css']['errors'][] = [
+                            'file' => $relativePath,
+                            'line' => $firstLine,
+                            'column' => 0,
+                            'type' => 'bracket',
+                            'severity' => 'error',
+                            'message' => "Unclosed CSS braces: {$braceCount} opening '{' without closing '}'",
+                            'context' => $getContext($lines, $firstLine)
+                        ];
+                        $results['summary']['total_errors']++;
+                    } elseif ($braceCount < 0) {
+                        $results['css']['errors'][] = [
+                            'file' => $relativePath,
+                            'line' => 1,
+                            'column' => 0,
+                            'type' => 'bracket',
+                            'severity' => 'error',
+                            'message' => 'Extra closing braces: ' . abs($braceCount) . " too many '}'",
+                            'context' => $getContext($lines, 1)
+                        ];
+                        $results['summary']['total_errors']++;
+                    }
+
+                    // B) DUPLICATE SELECTORS (pro info)
+                    $selectors = [];
+                    foreach ($lines as $lineNum => $line) {
+                        $lineNumber = $lineNum + 1;
+                        if (preg_match('/^([^{]+)\{/', trim($line), $matches)) {
+                            $selector = trim($matches[1]);
+                            if (isset($selectors[$selector])) {
+                                $results['css']['warnings'][] = [
+                                    'file' => $relativePath,
+                                    'line' => $lineNumber,
+                                    'column' => 0,
+                                    'type' => 'code_quality',
+                                    'severity' => 'warning',
+                                    'message' => "Duplicate selector: '{$selector}' (first at line {$selectors[$selector]})",
+                                    'context' => $getContext($lines, $lineNumber)
+                                ];
+                                $results['summary']['total_warnings']++;
+                            } else {
+                                $selectors[$selector] = $lineNumber;
+                            }
+                        }
+                    }
+                }
+
+            } catch (Exception $e) {
+                $results['css']['errors'][] = [
+                    'file' => 'system',
+                    'line' => 0,
+                    'type' => 'system',
+                    'severity' => 'error',
+                    'message' => 'CSS analysis failed: ' . $e->getMessage()
+                ];
+            }
+
+            // ============================================
+            // 4. HTTP ERROR LOGS
+            // ============================================
+            try {
+                $logFiles = [
+                    $rootDir . '/logs/error.log',
+                    $rootDir . '/logs/php_errors.log',
+                    '/var/log/apache2/error.log',
+                    '/var/log/nginx/error.log'
+                ];
+
+                $allErrors = [];
+
+                foreach ($logFiles as $logFile) {
+                    if (!file_exists($logFile)) continue;
+
+                    $lines = @file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                    if ($lines === false) continue;
+
+                    // Poslední 100 řádků
+                    $recentLines = array_slice(array_reverse($lines), 0, 100);
+
+                    foreach ($recentLines as $line) {
+                        // Detekce HTTP error codes
+                        if (preg_match('/(400|403|404|500|502|503)\s/', $line)) {
+                            preg_match('/(\d{4}-\d{2}-\d{2}|\w{3}\s+\d{2})/', $line, $dateMatch);
+                            preg_match('/(400|403|404|500|502|503)/', $line, $codeMatch);
+
+                            $allErrors[] = [
+                                'file' => basename($logFile),
+                                'date' => $dateMatch[0] ?? 'Unknown',
+                                'code' => $codeMatch[0] ?? 'Unknown',
+                                'message' => substr($line, 0, 200),
+                                'severity' => in_array($codeMatch[0] ?? '', ['500', '502', '503']) ? 'error' : 'warning'
+                            ];
+                        }
+
+                        // Detekce PHP errors
+                        if (preg_match('/PHP (Warning|Error|Fatal error|Parse error)/i', $line)) {
+                            preg_match('/(Warning|Error|Fatal error|Parse error):\s*(.+?)\s+in\s+(.+?)\s+on line\s+(\d+)/i', $line, $matches);
+
+                            if (count($matches) >= 5) {
+                                $allErrors[] = [
+                                    'file' => str_replace($rootDir . '/', '', $matches[3]),
+                                    'line' => (int)$matches[4],
+                                    'type' => strtolower($matches[1]),
+                                    'message' => $matches[2],
+                                    'severity' => strpos($matches[1], 'Fatal') !== false ? 'error' : 'warning'
+                                ];
+                            }
+                        }
+                    }
+                }
+
+                // Seřadit a limitovat na 50
+                $allErrors = array_slice($allErrors, 0, 50);
+                $results['http_logs']['errors'] = $allErrors;
+                $results['http_logs']['total'] = count($allErrors);
+
+                // Přidat do summary
+                foreach ($allErrors as $error) {
+                    if (($error['severity'] ?? 'warning') === 'error') {
+                        $results['summary']['total_errors']++;
+                    } else {
+                        $results['summary']['total_warnings']++;
+                    }
+                }
+
+            } catch (Exception $e) {
+                $results['http_logs']['errors'][] = [
+                    'message' => 'HTTP log analysis failed: ' . $e->getMessage(),
+                    'severity' => 'warning'
+                ];
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'data' => $results
+            ]);
+            break;
+
+        // ==========================================
         // PING / HEALTH CHECK
         // ==========================================
         case 'ping':
