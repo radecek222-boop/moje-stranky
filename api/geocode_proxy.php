@@ -167,11 +167,7 @@ try {
                 ]
             ]);
 
-            $osrmResponse = file_get_contents($osrmUrl, false, $context);
-if ($osrmResponse === false) {
-    error_log('Failed to read file: ' . $osrmUrl, false, $context);
-    $osrmResponse = '';
-}
+            $osrmResponse = @file_get_contents($osrmUrl, false, $context);
 
             if ($osrmResponse !== false) {
                 $osrmData = json_decode($osrmResponse, true);
@@ -186,7 +182,7 @@ if ($osrmResponse === false) {
                             'type' => 'Feature',
                             'properties' => [
                                 'distance' => $route['distance'], // v metrech
-                                'duration' => $route['duration'], // v sekundách
+                                'time' => $route['duration'], // v sekundách (přejmenováno z duration)
                                 'provider' => 'OSRM'
                             ],
                             'geometry' => [
@@ -211,11 +207,7 @@ if ($osrmResponse === false) {
                     'apiKey' => $apiKey
                 ]);
 
-                $geoResponse = file_get_contents($url, false, $context);
-if ($geoResponse === false) {
-    error_log('Failed to read file: ' . $url, false, $context);
-    $geoResponse = '';
-}
+                $geoResponse = @file_get_contents($url, false, $context);
 
                 if ($geoResponse !== false) {
                     echo $geoResponse;
@@ -270,11 +262,7 @@ if ($geoResponse === false) {
 
             // Pro tiles vracíme přímo obrázek
             header('Content-Type: image/png');
-            $imageData = file_get_contents($url);
-if ($imageData === false) {
-    error_log('Failed to read file: ' . $url);
-    $imageData = '';
-}
+            $imageData = @file_get_contents($url);
 
             if ($imageData === false) {
                 throw new Exception('Chyba při načítání tile');
@@ -295,11 +283,7 @@ if ($imageData === false) {
         ]
     ]);
 
-    $response = file_get_contents($url, false, $context);
-if ($response === false) {
-    error_log('Failed to read file: ' . $url, false, $context);
-    $response = '';
-}
+    $response = @file_get_contents($url, false, $context);
 
     if ($response === false) {
         throw new Exception('Chyba při komunikaci s Geoapify API');
