@@ -46,25 +46,5 @@ CREATE TABLE IF NOT EXISTS wgs_smtp_settings (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert default SMTP settings (from .env or empty)
-INSERT INTO wgs_smtp_settings (
-    smtp_host,
-    smtp_port,
-    smtp_encryption,
-    smtp_username,
-    smtp_password,
-    smtp_from_email,
-    smtp_from_name,
-    is_active
-) VALUES (
-    'smtp.example.com',
-    587,
-    'tls',
-    'user@example.com',
-    '',
-    'noreply@wgs-service.cz',
-    'White Glove Service',
-    0
-) ON DUPLICATE KEY UPDATE id=id;
-
-SELECT 'Email Queue Migration Completed Successfully!' AS status;
+-- Migrace úspěšně dokončena
+-- SMTP settings budou vloženy instalátorem
