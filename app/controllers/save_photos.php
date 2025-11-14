@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
+require_once __DIR__ . '/../../includes/safe_file_operations.php';
 
 header('Content-Type: application/json');
 
@@ -88,14 +89,14 @@ try {
     // Vytvoření uploads adresáře, pokud neexistuje
     $uploadsDir = __DIR__ . '/../../uploads';
     if (!is_dir($uploadsDir)) {
-        @mkdir($uploadsDir, 0755, true);
+        safeMkdir($uploadsDir, 0755, true);
     }
 
     // BUGFIX: mkdir race condition - suppress error pokud složka již existuje
     // Vytvoření podadresáře pro konkrétní reklamaci (basename pro extra bezpečnost)
     $reklamaceDir = $uploadsDir . '/reklamace_' . basename($reklamaceId);
     if (!is_dir($reklamaceDir)) {
-        @mkdir($reklamaceDir, 0755, true);
+        safeMkdir($reklamaceDir, 0755, true);
         // Double-check že složka existuje (pokud concurrent request ji vytvořil)
         if (!is_dir($reklamaceDir)) {
             throw new Exception("Nepodařilo se vytvořit adresář pro reklamaci");
@@ -170,7 +171,7 @@ try {
         if (file_put_contents($filePath, $photoData) === false) {
             // ROLLBACK: Smazat všechny již nahrané soubory
             foreach ($uploadedFiles as $uploadedFile) {
-                @unlink($uploadedFile);
+                safeFileDelete($uploadedFile);
             }
             throw new Exception("Nepodařilo se uložit fotku $i");
         }
@@ -209,11 +210,11 @@ try {
 
         } catch (PDOException $e) {
             // CRITICAL FIX: ROLLBACK - Smazat soubor pokud DB insert selhal
-            @unlink($filePath);
+            safeFileDelete($filePath);
 
             // Smazat i všechny předchozí soubory
             foreach ($uploadedFiles as $uploadedFile) {
-                @unlink($uploadedFile);
+                safeFileDelete($uploadedFile);
             }
 
             throw new Exception("Chyba při ukládání fotky $i do databáze: " . $e->getMessage());

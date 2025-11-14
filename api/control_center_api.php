@@ -1136,7 +1136,7 @@ try {
                         $phpFiles[] = $relativePath;
 
                         // Základní syntax check pomocí token_get_all()
-                        $content = @file_get_contents($filePath);
+                        $content = safeFileGetContents($filePath);
                         if ($content !== false) {
                             // Suppress warnings pro token_get_all
                             $oldErrorHandler = set_error_handler(function() { return true; });
@@ -2418,7 +2418,7 @@ try {
                         }
 
                         $filesChecked++;
-                        $content = @file_get_contents($filePath);
+                        $content = safeFileGetContents($filePath);
                         if ($content === false) continue;
 
                         $lines = explode("\n", $content);
@@ -2647,7 +2647,7 @@ try {
 
                 foreach ($jsFiles as $jsFile) {
                     $relativePath = str_replace($rootDir . '/', '', $jsFile);
-                    $content = @file_get_contents($jsFile);
+                    $content = safeFileGetContents($jsFile);
                     if ($content === false) continue;
 
                     $results['javascript']['files_checked']++;
@@ -2793,7 +2793,7 @@ try {
 
                 foreach ($cssFiles as $cssFile) {
                     $relativePath = str_replace($rootDir . '/', '', $cssFile);
-                    $content = @file_get_contents($cssFile);
+                    $content = safeFileGetContents($cssFile);
                     if ($content === false) continue;
 
                     $results['css']['files_checked']++;
@@ -2893,10 +2893,10 @@ try {
 
                 foreach ($logFiles as $logFile) {
                     // Suppress errors kvůli možným open_basedir restrictions
-                    if (!@file_exists($logFile) || !@is_readable($logFile)) continue;
+                    if (!safeFileExists($logFile) || !@is_readable($logFile)) continue;
 
-                    $lines = @file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-                    if ($lines === false) continue;
+                    $lines = safeFileToArray($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES, []);
+                    if (empty($lines)) continue;
 
                     // Poslední 100 řádků
                     $recentLines = array_slice(array_reverse($lines), 0, 100);
