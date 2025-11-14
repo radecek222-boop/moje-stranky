@@ -120,6 +120,9 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
         respondError('Účet byl deaktivován. Kontaktujte administrátora.', 403);
     }
 
+    // SECURITY FIX: Regenerovat session ID pro ochranu proti session fixation
+    session_regenerate_id(true);
+
     $userId = $user['id'] ?? $user['user_id'] ?? null;
     if ($userId === null) {
         $userId = $user['email'];
