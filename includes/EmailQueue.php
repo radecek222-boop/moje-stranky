@@ -106,6 +106,14 @@ class EmailQueue {
 
     /**
      * Odešle jeden email z fronty pomocí PHPMailer nebo PHP mail()
+     *
+     * Automaticky vybírá metodu odeslání:
+     * - PHPMailer pokud je dostupný (preferováno)
+     * - PHP mail() jako fallback
+     *
+     * @param array $queueItem Email položka z fronty (musí obsahovat: recipient_email, subject, body)
+     * @return array ['success' => bool, 'error' => string|null]
+     * @throws Exception Při kritické chybě odeslání
      */
     public function sendEmail($queueItem) {
         $settings = $this->getSMTPSettings();
@@ -120,7 +128,18 @@ class EmailQueue {
     }
 
     /**
-     * Odeslání pomocí PHPMailer
+     * Odeslání emailu pomocí PHPMailer (SMTP)
+     *
+     * Podporuje:
+     * - SMTP autentizaci
+     * - TLS/SSL šifrování
+     * - CC/BCC příjemce
+     * - UTF-8 encoding
+     * - Timeout 10s
+     *
+     * @param array $queueItem Email položka z fronty
+     * @param array $settings SMTP konfigurace z wgs_system_config
+     * @return array ['success' => bool, 'error' => string|null]
      */
     private function sendWithPHPMailer($queueItem, $settings) {
         $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
@@ -251,7 +270,17 @@ class EmailQueue {
     }
 
     /**
-     * Zpracuje frontu (volá se z cron jobu)
+     * Zpracuje frontu emailů (volá se z cron jobu)
+     *
+     * Zpracovává pending emaily z fronty s následující logikou:
+     * - Priorita: vysoká -> nízká
+     * - Pouze emaily s scheduled_at <= NOW()
+     * - Pouze emaily s attempts < max_attempts
+     * - Používá transakce pro atomicitu
+     * - Retry mechanika při selhání
+     *
+     * @param int $limit Maximální počet emailů ke zpracování (default: 10)
+     * @return array ['processed' => int, 'sent' => int, 'failed' => int]
      */
     public function processQueue($limit = 10) {
         // Získat pending emaily
