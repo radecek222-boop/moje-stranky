@@ -194,7 +194,7 @@ function getPriorityBadge($priority) {
                         </div>
                         <div class="setting-item-right" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                             <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                    onclick="executeAction(<?= $action['id'] ?>)">
+                                    onclick="executeAction(event, <?= $action['id'] ?>)">
                                 ▶️ Spustit
                             </button>
                             <button class="cc-btn cc-btn-sm cc-btn-success"
@@ -365,7 +365,7 @@ function isSuccess(data) {
     return (data && (data.success === true || data.status === 'success'));
 }
 
-async function executeAction(actionId) {
+async function executeAction(event, actionId) {
     if (DEBUG_MODE) console.log('[executeAction] Starting with actionId:', actionId);
 
     // Capture button reference BEFORE any await
