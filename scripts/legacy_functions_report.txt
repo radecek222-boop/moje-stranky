@@ -1,7 +1,7 @@
 # Legacy Functions Report
-# Vygenerováno: 2025-11-14 19:45:13
-# Celkem issues: 195
-# Souborů: 52
+# Vygenerováno: 2025-11-14 20:12:22
+# Celkem issues: 251
+# Souborů: 54
 
 ## api/control_center_api.php (15 issues)
 
@@ -243,6 +243,227 @@ Line 220 [MEDIUM]: @()
   Code: * @return never
 
 
+## includes/safe_file_operations.php (30 issues)
+
+Line 8 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: *   Místo: $content = @file_get_contents($path);
+
+Line 15 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string $path Cesta k souboru
+
+Line 16 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param mixed $default Výchozí hodnota při chybě (default: false)
+
+Line 17 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return string|false Obsah souboru nebo default hodnota
+
+Line 43 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string $path Cesta k souboru
+
+Line 44 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string $data Data k zápisu
+
+Line 45 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param int $flags Flags pro file_put_contents (default: 0)
+
+Line 46 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return bool True při úspěchu, false při chybě
+
+Line 74 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string $path Cesta k souboru
+
+Line 75 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return bool True pokud soubor existuje
+
+Line 89 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string $path Cesta k souboru
+
+Line 90 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param int $flags Flags pro file() (default: FILE_IGNORE_NEW_LINES)
+
+Line 91 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param mixed $default Výchozí hodnota při chybě (default: [])
+
+Line 92 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return array|mixed Pole řádků nebo default hodnota
+
+Line 118 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string $path Cesta k souboru
+
+Line 119 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param mixed $default Výchozí hodnota při chybě (default: 0)
+
+Line 120 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return int|mixed Velikost souboru v bytech nebo default hodnota
+
+Line 141 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string $path Cesta k souboru
+
+Line 142 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return bool True při úspěchu, false při chybě
+
+Line 167 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string $path Cesta k adresáři
+
+Line 168 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param int $permissions Oprávnění (default: 0755)
+
+Line 169 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return bool True při úspěchu, false při chybě
+
+Line 189 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string $path Cesta k JSON souboru
+
+Line 190 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param bool $assoc Vrátit jako asociativní pole (default: true)
+
+Line 191 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param mixed $default Výchozí hodnota při chybě (default: null)
+
+Line 192 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return mixed Parsovaná JSON data nebo default hodnota
+
+Line 214 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string $path Cesta k souboru
+
+Line 215 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param mixed $data Data k zapsání
+
+Line 216 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param int $flags JSON encode flags (default: JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+
+Line 217 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return bool True při úspěchu, false při chybě
+
+
+## includes/EmailQueue.php (13 issues)
+
+Line 22 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param array $data Email data
+
+Line 23 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param bool $useTransaction Pokud true, obalí operaci v transakci (default: false pro zpětnou kompatibilitu)
+
+Line 24 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return bool Success
+
+Line 99 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: 'smtp_from_email' => getenv('SMTP_FROM') ?: 'noreply@wgs-service.cz',
+
+Line 114 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param array $queueItem Email položka z fronty (musí obsahovat: recipient_email, subject, body)
+
+Line 115 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return array ['success' => bool, 'error' => string|null]
+
+Line 116 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @throws Exception Při kritické chybě odeslání
+
+Line 140 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param array $queueItem Email položka z fronty
+
+Line 141 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param array $settings SMTP konfigurace z wgs_system_config
+
+Line 142 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return array ['success' => bool, 'error' => string|null]
+
+Line 257 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: $success = @mail($to, $subject, $message, $headers);
+
+Line 282 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param int $limit Maximální počet emailů ke zpracování (default: 10)
+
+Line 283 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return array ['processed' => int, 'sent' => int, 'failed' => int]
+
+
+## app/controllers/save.php (10 issues)
+
+Line 17 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param PDO $pdo Database connection
+
+Line 18 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return string Vygenerované unikátní ID (např. "WGS251114-A3F2B1")
+
+Line 19 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @throws Exception Pokud se nepodaří vygenerovat ID po 5 pokusech
+
+Line 54 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string|null $value Vstupní datum v různých formátech
+
+Line 55 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return string|null Normalizované datum ve formátu YYYY-MM-DD nebo NULL
+
+Line 56 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @throws Exception Pokud formát data není rozpoznán nebo datum je neplatné
+
+Line 101 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param PDO $pdo Database connection
+
+Line 102 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param array $input Vstupní data z formuláře (POST data)
+
+Line 103 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return array Výsledek operace ['success' => bool, 'message' => string, 'data' => array]
+
+Line 104 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @throws Exception Při chybě oprávnění, validace nebo DB operace
+
+
 ## scripts/install_phpmailer.php (10 issues)
 
 Line 26 [MEDIUM]: @()
@@ -286,43 +507,47 @@ Line 196 [MEDIUM]: @()
   Code: @file_put_contents($autoloadFile, $autoloadContent);
 
 
-## includes/audit_logger.php (9 issues)
+## includes/error_handler.php (10 issues)
 
-Line 15 [MEDIUM]: @()
+Line 198 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
-  Code: * @param string $action Název akce (např. 'admin_login', 'user_deleted', 'key_rotated')
+  Code: * @param array $error Error data ['type' => string, 'message' => string, 'file' => string, 'line' => int, 'backtrace' => array|null]
 
-Line 16 [MEDIUM]: @()
+Line 199 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
-  Code: * @param array $details Detaily akce (pole s libovolnými daty)
+  Code: * @return string Formátovaná chybová zpráva pro log
 
-Line 17 [MEDIUM]: @()
+Line 247 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
-  Code: * @param mixed $userId Volitelné ID uživatele (pokud není uvedeno, vezme se ze session)
+  Code: * @param array $backtrace PHP backtrace z debug_backtrace()
 
-Line 65 [MEDIUM]: @()
+Line 248 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
-  Code: * @param string $from Datum od (YYYY-MM-DD)
+  Code: * @return array Formátovaný backtrace vhodný pro JSON encoding
 
-Line 66 [MEDIUM]: @()
+Line 276 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
-  Code: * @param string $to Datum do (YYYY-MM-DD)
+  Code: * @param string $message Chybová zpráva k uložení
 
-Line 67 [MEDIUM]: @()
+Line 277 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
-  Code: * @param string|null $action Filtr podle akce (volitelné)
+  Code: * @return void
 
-Line 68 [MEDIUM]: @()
+Line 283 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
-  Code: * @param int|null $userId Filtr podle user_id (volitelné)
+  Code: @mkdir($logDir, 0755, true);
 
-Line 69 [MEDIUM]: @()
+Line 287 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
-  Code: * @return array Pole audit záznamů
+  Code: @file_put_contents($logFile, $message, FILE_APPEND);
 
-Line 110 [MEDIUM]: @()
+Line 302 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
-  Code: * @param int $daysToKeep Počet dní, které zachovat (default 365)
+  Code: * @param array $error Error data ['type' => string, 'message' => string, 'file' => string, 'line' => int, 'backtrace' => array|null]
+
+Line 303 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return void Vypisuje HTML přímo do outputu
 
 
 ## api/geocode_proxy.php (9 issues)
@@ -362,6 +587,45 @@ Line 257 [MEDIUM]: @()
 Line 278 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
   Code: $response = @file_get_contents($url, false, $context);
+
+
+## includes/audit_logger.php (9 issues)
+
+Line 15 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string $action Název akce (např. 'admin_login', 'user_deleted', 'key_rotated')
+
+Line 16 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param array $details Detaily akce (pole s libovolnými daty)
+
+Line 17 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param mixed $userId Volitelné ID uživatele (pokud není uvedeno, vezme se ze session)
+
+Line 65 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string $from Datum od (YYYY-MM-DD)
+
+Line 66 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string $to Datum do (YYYY-MM-DD)
+
+Line 67 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string|null $action Filtr podle akce (volitelné)
+
+Line 68 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param int|null $userId Filtr podle user_id (volitelné)
+
+Line 69 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return array Pole audit záznamů
+
+Line 110 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param int $daysToKeep Počet dní, které zachovat (default 365)
 
 
 ## app/controllers/get_distance.php (7 issues)
@@ -422,29 +686,6 @@ Line 354 [MEDIUM]: @()
   Code: <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
 
 
-## includes/EmailQueue.php (5 issues)
-
-Line 22 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: * @param array $data Email data
-
-Line 23 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: * @param bool $useTransaction Pokud true, obalí operaci v transakci (default: false pro zpětnou kompatibilitu)
-
-Line 24 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: * @return bool Success
-
-Line 99 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: 'smtp_from_email' => getenv('SMTP_FROM') ?: 'noreply@wgs-service.cz',
-
-Line 238 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: $success = @mail($to, $subject, $message, $headers);
-
-
 ## app/controllers/save_photos.php (5 issues)
 
 Line 91 [MEDIUM]: @()
@@ -491,6 +732,25 @@ Line 853 [MEDIUM]: @()
   Code: <input type="email" class="form-input" id="new-bcc-email" placeholder="skryta@email.cz" style="flex: 1;">
 
 
+## api/protokol_api.php (4 issues)
+
+Line 242 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @unlink($filePath);
+
+Line 435 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: reklamace@wgs-service.cz
+
+Line 439 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: $headers = "From: White Glove Service <reklamace@wgs-service.cz>\r\n";
+
+Line 440 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: $headers .= "Reply-To: reklamace@wgs-service.cz\r\n";
+
+
 ## includes/qr_payment_helper.php (4 issues)
 
 Line 12 [MEDIUM]: @()
@@ -508,44 +768,6 @@ Line 82 [MEDIUM]: @()
 Line 90 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
   Code: * @return string EPC formátovaný string
-
-
-## includes/control_center_unified.php (4 issues)
-
-Line 223 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @keyframes fadeIn {
-
-Line 228 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @keyframes slideUp {
-
-Line 292 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @keyframes spin {
-
-Line 442 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @media (max-width: 768px) {
-
-
-## includes/rate_limiter.php (4 issues)
-
-Line 43 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: * @param string $identifier - Identifikátor (IP nebo user ID)
-
-Line 44 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: * @param string $actionType - Typ akce (email, sms, api)
-
-Line 45 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: * @param array $limits - Limity [
-
-Line 50 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: * @return array ['allowed' => bool, 'remaining' => int, 'reset_at' => string|null, 'message' => string]
 
 
 ## includes/control_center_testing_simulator.php (4 issues)
@@ -586,23 +808,87 @@ Line 393 [MEDIUM]: @()
   Code: * @return void (echoes HTML)
 
 
-## api/protokol_api.php (4 issues)
+## includes/rate_limiter.php (4 issues)
 
-Line 242 [MEDIUM]: @()
+Line 43 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
-  Code: @unlink($filePath);
+  Code: * @param string $identifier - Identifikátor (IP nebo user ID)
 
-Line 435 [MEDIUM]: @()
+Line 44 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
-  Code: reklamace@wgs-service.cz
+  Code: * @param string $actionType - Typ akce (email, sms, api)
 
-Line 439 [MEDIUM]: @()
+Line 45 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param array $limits - Limity [
+
+Line 50 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return array ['allowed' => bool, 'remaining' => int, 'reset_at' => string|null, 'message' => string]
+
+
+## includes/control_center_unified.php (4 issues)
+
+Line 223 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @keyframes fadeIn {
+
+Line 228 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @keyframes slideUp {
+
+Line 292 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @keyframes spin {
+
+Line 442 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @media (max-width: 768px) {
+
+
+## app/notification_sender.php (3 issues)
+
+Line 109 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: $to = 'reklamace@wgs-service.cz';
+
+Line 171 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
   Code: $headers = "From: White Glove Service <reklamace@wgs-service.cz>\r\n";
 
-Line 440 [MEDIUM]: @()
+Line 172 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
   Code: $headers .= "Reply-To: reklamace@wgs-service.cz\r\n";
+
+
+## api/delete_reklamace.php (3 issues)
+
+Line 209 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: if (@unlink($realPath)) {
+
+Line 242 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: } elseif (@unlink($path)) {
+
+Line 247 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @rmdir($dir);
+
+
+## api/log_js_error.php (3 issues)
+
+Line 81 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @mkdir($logDir, 0755, true);
+
+Line 91 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @rename($logFile, $archiveFile);
+
+Line 94 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @file_put_contents($logFile, $logMessage, FILE_APPEND);
 
 
 ## scripts/test-smtp.php (3 issues)
@@ -635,51 +921,6 @@ Line 255 [MEDIUM]: @()
   Code: echo "    * @throws Exception Kdy může hodit exception\n";
 
 
-## app/notification_sender.php (3 issues)
-
-Line 109 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: $to = 'reklamace@wgs-service.cz';
-
-Line 171 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: $headers = "From: White Glove Service <reklamace@wgs-service.cz>\r\n";
-
-Line 172 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: $headers .= "Reply-To: reklamace@wgs-service.cz\r\n";
-
-
-## api/log_js_error.php (3 issues)
-
-Line 81 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @mkdir($logDir, 0755, true);
-
-Line 91 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @rename($logFile, $archiveFile);
-
-Line 94 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @file_put_contents($logFile, $logMessage, FILE_APPEND);
-
-
-## api/delete_reklamace.php (3 issues)
-
-Line 209 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: if (@unlink($realPath)) {
-
-Line 242 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: } elseif (@unlink($path)) {
-
-Line 247 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @rmdir($dir);
-
-
 ## backup_system.php (3 issues)
 
 Line 122 [MEDIUM]: @()
@@ -695,17 +936,6 @@ Line 129 [MEDIUM]: @()
   Code: @copy($sourcePath, $destPath);
 
 
-## scripts/create_db_backup.php (2 issues)
-
-Line 32 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: * @param string $reason Důvod zálohy (pro logging)
-
-Line 33 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: * @return array ['success' => bool, 'file' => string, 'size' => int, 'message' => string]
-
-
 ## mimozarucniceny.php (2 issues)
 
 Line 229 [MEDIUM]: @()
@@ -715,61 +945,6 @@ Line 229 [MEDIUM]: @()
 Line 249 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
   Code: <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
-
-
-## seznam.php (2 issues)
-
-Line 14 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: "email" => $_SESSION["user_email"] ?? "admin@wgs-service.cz",
-
-Line 99 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @keyframes spin {
-
-
-## includes/hamburger-menu.php (2 issues)
-
-Line 199 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @media (max-width: 768px) {
-
-Line 255 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @media (max-width: 1024px) {
-
-
-## includes/error_handler.php (2 issues)
-
-Line 256 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @mkdir($logDir, 0755, true);
-
-Line 260 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @file_put_contents($logFile, $message, FILE_APPEND);
-
-
-## includes/control_center_testing_interactive.php (2 issues)
-
-Line 532 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: <input type="email" id="email" value="test-e2e@wgs-service.cz" required>
-
-Line 629 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: formData.append('email', document.getElementById('email')?.value || 'test-e2e@wgs-service.cz');
-
-
-## config/config.php (2 issues)
-
-Line 188 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: * @param string $password Heslo ke kontrole
-
-Line 189 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: * @return true|array True pokud je heslo silné, jinak array s chybami
 
 
 ## app/controllers/login_controller.php (2 issues)
@@ -783,6 +958,28 @@ Line 88 [MEDIUM]: @()
   Code: 'email' => 'admin@wgs-service.cz'
 
 
+## config/config.php (2 issues)
+
+Line 188 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string $password Heslo ke kontrole
+
+Line 189 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return true|array True pokud je heslo silné, jinak array s chybami
+
+
+## seznam.php (2 issues)
+
+Line 14 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: "email" => $_SESSION["user_email"] ?? "admin@wgs-service.cz",
+
+Line 99 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @keyframes spin {
+
+
 ## novareklamace.php (2 issues)
 
 Line 374 [MEDIUM]: @()
@@ -792,6 +989,39 @@ Line 374 [MEDIUM]: @()
 Line 403 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
   Code: <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
+
+
+## scripts/create_db_backup.php (2 issues)
+
+Line 32 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @param string $reason Důvod zálohy (pro logging)
+
+Line 33 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: * @return array ['success' => bool, 'file' => string, 'size' => int, 'message' => string]
+
+
+## includes/hamburger-menu.php (2 issues)
+
+Line 199 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @media (max-width: 768px) {
+
+Line 255 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @media (max-width: 1024px) {
+
+
+## includes/control_center_testing_interactive.php (2 issues)
+
+Line 532 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: <input type="email" id="email" value="test-e2e@wgs-service.cz" required>
+
+Line 629 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: formData.append('email', document.getElementById('email')?.value || 'test-e2e@wgs-service.cz');
 
 
 ## cron/process-email-queue.php (2 issues)
@@ -827,60 +1057,11 @@ Line 194 [MEDIUM]: @()
   Code: $smtpFrom = getenv('SMTP_FROM') ?: 'reklamace@wgs-service.cz';
 
 
-## show_table_structure.php (1 issues)
+## validate_tools.php (1 issues)
 
-Line 305 [MEDIUM]: @()
+Line 90 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
-  Code: echo '<p>Pokud přidáš sloupec, musíš nastavit <code>created_by=7</code> pro všechny reklamace vytvořené naty@naty.cz:</p>';
-
-
-## includes/control_center_testing.php (1 issues)
-
-Line 80 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @keyframes pulse {
-
-
-## includes/control_center_configuration.php (1 issues)
-
-Line 158 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: placeholder="vas@email.cz"
-
-
-## includes/control_center_console.php (1 issues)
-
-Line 207 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @keyframes dots {
-
-
-## includes/control_center_appearance.php (1 issues)
-
-Line 412 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @media (max-width: 1024px) {
-
-
-## includes/control_center_tools.php (1 issues)
-
-Line 254 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: @media (max-width: 768px) {
-
-
-## nasesluzby.php (1 issues)
-
-Line 248 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
-
-
-## protokol.php (1 issues)
-
-Line 60 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: <div>Do Dubče 364, Běchovice 190 11 · +420 725 965 826 · reklamace@wgs-service.cz · IČO 09769684</div>
+  Code: $content = @file_get_contents($url, false, $context);
 
 
 ## app/admin_session_check.php (1 issues)
@@ -897,25 +1078,11 @@ Line 54 [MEDIUM]: @()
   Code: $response = @file_get_contents($url, false, $context);
 
 
-## password_reset.php (1 issues)
+## protokol.php (1 issues)
 
-Line 41 [MEDIUM]: @()
+Line 60 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
-  Code: <input type="email" id="resetEmail" name="email" placeholder="vas@email.cz" required>
-
-
-## index.php (1 issues)
-
-Line 91 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
-
-
-## validate_tools.php (1 issues)
-
-Line 90 [MEDIUM]: @()
-  Replacement: try-catch nebo kontrola chyb
-  Code: $content = @file_get_contents($url, false, $context);
+  Code: <div>Do Dubče 364, Běchovice 190 11 · +420 725 965 826 · reklamace@wgs-service.cz · IČO 09769684</div>
 
 
 ## login.php (1 issues)
@@ -925,6 +1092,13 @@ Line 54 [MEDIUM]: @()
   Code: <input type="email" id="userEmail" name="email" placeholder="vas@email.cz">
 
 
+## show_table_structure.php (1 issues)
+
+Line 305 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: echo '<p>Pokud přidáš sloupec, musíš nastavit <code>created_by=7</code> pro všechny reklamace vytvořené naty@naty.cz:</p>';
+
+
 ## registration.php (1 issues)
 
 Line 50 [MEDIUM]: @()
@@ -932,9 +1106,65 @@ Line 50 [MEDIUM]: @()
   Code: <input type="email" id="regEmail" name="email" placeholder="vas@email.cz" required>
 
 
+## index.php (1 issues)
+
+Line 91 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
+
+
 ## onas.php (1 issues)
 
 Line 211 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
+
+
+## includes/control_center_testing.php (1 issues)
+
+Line 80 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @keyframes pulse {
+
+
+## includes/control_center_configuration.php (1 issues)
+
+Line 158 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: placeholder="vas@email.cz"
+
+
+## includes/control_center_appearance.php (1 issues)
+
+Line 412 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @media (max-width: 1024px) {
+
+
+## includes/control_center_tools.php (1 issues)
+
+Line 254 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @media (max-width: 768px) {
+
+
+## includes/control_center_console.php (1 issues)
+
+Line 207 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: @keyframes dots {
+
+
+## password_reset.php (1 issues)
+
+Line 41 [MEDIUM]: @()
+  Replacement: try-catch nebo kontrola chyb
+  Code: <input type="email" id="resetEmail" name="email" placeholder="vas@email.cz" required>
+
+
+## nasesluzby.php (1 issues)
+
+Line 248 [MEDIUM]: @()
   Replacement: try-catch nebo kontrola chyb
   Code: <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
 
