@@ -119,6 +119,75 @@ PHP;
             }
         }
 
+        // KROK 3: Automaticky nastavit SMTP z existující konfigurace
+        $smtpHost = '';
+        $smtpPort = 587;
+        $smtpUsername = '';
+        $smtpPassword = '';
+        $smtpFrom = 'reklamace@wgs-service.cz';
+        $smtpFromName = 'White Glove Service';
+
+        // Zkusit načíst z wgs_system_config
+        try {
+            $configStmt = $pdo->query("SELECT config_key, config_value FROM wgs_system_config WHERE config_group = 'email'");
+            if ($configStmt) {
+                $config = $configStmt->fetchAll(PDO::FETCH_KEY_PAIR);
+                $smtpHost = $config['smtp_host'] ?? $smtpHost;
+                $smtpPort = $config['smtp_port'] ?? $smtpPort;
+                $smtpUsername = $config['smtp_username'] ?? $smtpUsername;
+                $smtpPassword = $config['smtp_password'] ?? $smtpPassword;
+                $smtpFrom = $config['smtp_from'] ?? $smtpFrom;
+                $smtpFromName = $config['smtp_from_name'] ?? $smtpFromName;
+            }
+        } catch (Exception $e) {
+            // Tabulka neexistuje, použít env
+        }
+
+        // Fallback na environment variables
+        if (empty($smtpHost)) {
+            $smtpHost = getenv('SMTP_HOST') ?: 'smtp.example.com';
+        }
+        if (empty($smtpUsername)) {
+            $smtpUsername = getenv('SMTP_USER') ?: '';
+        }
+        if (empty($smtpPassword)) {
+            $smtpPassword = getenv('SMTP_PASS') ?: '';
+        }
+        if (empty($smtpFrom)) {
+            $smtpFrom = getenv('SMTP_FROM') ?: 'reklamace@wgs-service.cz';
+        }
+
+        // Určit šifrování podle portu
+        $encryption = 'tls';
+        if ($smtpPort == 465) {
+            $encryption = 'ssl';
+        } elseif ($smtpPort == 25) {
+            $encryption = 'none';
+        }
+
+        // Uložit do wgs_smtp_settings
+        $smtpStmt = $pdo->prepare("
+            UPDATE wgs_smtp_settings SET
+                smtp_host = ?,
+                smtp_port = ?,
+                smtp_encryption = ?,
+                smtp_username = ?,
+                smtp_password = ?,
+                smtp_from_email = ?,
+                smtp_from_name = ?,
+                is_active = 1
+            WHERE id = 1
+        ");
+        $smtpStmt->execute([
+            $smtpHost,
+            $smtpPort,
+            $encryption,
+            $smtpUsername,
+            $smtpPassword,
+            $smtpFrom,
+            $smtpFromName
+        ]);
+
         $status = 'success';
 
     } catch (Exception $e) {
