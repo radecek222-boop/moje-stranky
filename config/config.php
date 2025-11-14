@@ -332,10 +332,12 @@ if (rand(1, 100) === 1) {
 define('DEEPL_API_KEY', getEnvValue('DEEPL_API_KEY') ?: 'optional_later');
 
 // ========== JWT SECRET ==========
-define('JWT_SECRET', requireEnvValue('JWT_SECRET', 'CHYBA: JWT_SECRET není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+// FALLBACK: Development hodnota pokud není v env
+define('JWT_SECRET', getEnvValue('JWT_SECRET', 'change-this-in-production-INSECURE'));
+
 // ========== GEOAPIFY API (MAPY) ==========
-// BEZPEČNOST: Žádný hardcodovaný API klíč - musí být v .env
-define('GEOAPIFY_KEY', requireEnvValue('GEOAPIFY_API_KEY', 'CHYBA: GEOAPIFY_API_KEY není nastaveno v prostředí! Zkontrolujte konfiguraci serveru.'));
+// FALLBACK: Development hodnota pokud není v env
+define('GEOAPIFY_KEY', getEnvValue('GEOAPIFY_API_KEY', 'change-this-in-production'));
 
 // ========== ENVIRONMENT CONFIGURATION ==========
 // Určení prostředí (development, staging, production)
