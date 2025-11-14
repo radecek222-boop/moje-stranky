@@ -1451,7 +1451,7 @@ async function checkDependencies() {
                     }
                 } else {
                     if (composer.legacy_mode) {
-                        log('WARNING: Composer not in use (legacy mode)');
+                        log('ℹ️  Composer not in use (legacy project)');
                     } else {
                         logWarning('composer.json nenalezen');
                     }
@@ -1469,7 +1469,7 @@ async function checkDependencies() {
                     }
                 } else {
                     if (npm.legacy_mode) {
-                        log('WARNING: NPM not in use (legacy mode)');
+                        log('ℹ️  NPM not in use (legacy project)');
                     } else {
                         logWarning('package.json nenalezen');
                     }
@@ -2019,8 +2019,8 @@ async function checkWorkflow() {
                 }
 
                 if (email_queue.failed > 0) {
-                    logError(`${email_queue.failed} selhavších emailů`);
-                    addError('Email Queue', `${email_queue.failed} selhavších emailů`);
+                    logWarning(`${email_queue.failed} selhavších emailů`);
+                    addWarning('Email Queue', `${email_queue.failed} selhavších emailů`);
                 }
             }
 

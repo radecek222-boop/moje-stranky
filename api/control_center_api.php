@@ -1487,10 +1487,10 @@ try {
                 if (file_exists($fullPath)) {
                     $found++;
 
-                    // Check permissions
+                    // Check permissions - .htaccess should NOT be world-readable for security
                     $perms = fileperms($fullPath);
-                    if ($file === '.htaccess' && !($perms & 0x0004)) { // World readable
-                        $warnings[] = '.htaccess není world-readable';
+                    if ($file === '.htaccess' && ($perms & 0x0004)) { // World readable
+                        $warnings[] = '.htaccess je world-readable (bezpečnostní riziko)';
                     }
                 } else {
                     if ($file !== '.htaccess') { // .htaccess is optional
