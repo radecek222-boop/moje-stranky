@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
 
 header('Content-Type: application/json');
 
@@ -16,6 +17,35 @@ try {
         echo json_encode([
             'success' => false,
             'error' => 'Neautorizovaný přístup. Přihlaste se prosím.'
+        ]);
+        exit;
+    }
+
+    // BEZPEČNOST: CSRF ochrana - kontrola před zpracováním dat
+    // Načteme JSON data dříve, abychom mohli zkontrolovat CSRF token
+    $jsonData = file_get_contents('php://input');
+    $data = json_decode($jsonData, true);
+
+    if (!$data) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Neplatná JSON data'
+        ]);
+        exit;
+    }
+
+    // Kontrola CSRF tokenu
+    $csrfToken = $data['csrf_token'] ?? '';
+    if (is_array($csrfToken)) {
+        $csrfToken = ''; // Bezpečnost: odmítnout array
+    }
+
+    if (!validateCSRFToken($csrfToken)) {
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Neplatný bezpečnostní token. Obnovte stránku a zkuste to znovu.'
         ]);
         exit;
     }
@@ -42,13 +72,8 @@ try {
     // Zaznamenat pokus o upload
     recordLoginAttempt("upload_customer_$ip");
 
-    // Načtení JSON dat
-    $jsonData = file_get_contents('php://input');
-    $data = json_decode($jsonData, true);
-
-    if (!$data) {
-        throw new Exception('Neplatná JSON data');
-    }
+    // JSON data už jsou načtena výše (pro CSRF kontrolu)
+    // $data je už k dispozici
 
     // Získání reklamace ID
     $reklamaceId = $data['reklamace_id'] ?? null;
