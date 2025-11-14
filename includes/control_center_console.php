@@ -146,7 +146,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
 .console-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(6, 1fr);
     gap: 0.5rem;
     margin-bottom: 1rem;
 }
@@ -156,6 +156,10 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
     padding: 0.75rem 1rem;
     border-radius: 6px;
     border: 1px solid #3E3E3E;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 80px;
 }
 
 .console-stat-label {
@@ -570,11 +574,18 @@ async function runDiagnostics() {
         // Summary of warnings
         if (totalWarnings > 0) {
             logWarning(`⚠️  ${totalWarnings} UPOZORNĚNÍ`);
-            if (totalWarnings <= 10) {
+            log('');
+            // Zobrazit prvních 15 warnings (nebo všechny pokud je jich méně)
+            const displayCount = Math.min(warningsList.length, 15);
+            warningsList.slice(0, displayCount).forEach((warn, idx) => {
+                logWarning(`${idx + 1}. [${warn.section}] ${warn.message}`);
+                if (warn.details) {
+                    log(`   ${warn.details}`);
+                }
+            });
+            if (warningsList.length > displayCount) {
                 log('');
-                warningsList.forEach((warn, idx) => {
-                    logWarning(`${idx + 1}. [${warn.section}] ${warn.message}`);
-                });
+                log(`... a dalších ${warningsList.length - displayCount} upozornění`);
             }
         }
 
