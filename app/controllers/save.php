@@ -40,6 +40,15 @@ function normalizeDateInput(?string $value): ?string
     }
 
     if (preg_match('/^(\d{2})\.(\d{2})\.(\d{4})$/', $trimmed, $matches)) {
+        // BUGFIX: Validace že datum je skutečně platné (ne 32.13.9999)
+        $day = (int)$matches[1];
+        $month = (int)$matches[2];
+        $year = (int)$matches[3];
+
+        if (!checkdate($month, $day, $year)) {
+            throw new Exception('Neplatné datum (den/měsíc/rok je mimo rozsah): ' . $value);
+        }
+
         return sprintf('%s-%s-%s', $matches[3], $matches[2], $matches[1]);
     }
 
@@ -316,20 +325,7 @@ try {
         throw new Exception('Popis problému je povinný');
     }
 
-    // GDPR: Kontrola souhlasu se zpracováním osobních údajů
-    $gdprConsent = filter_var($_POST['gdpr_consent'] ?? null, FILTER_VALIDATE_BOOLEAN);
-    if ($gdprConsent !== true) {
-        throw new Exception('Je nutné potvrdit souhlas se zpracováním osobních údajů.');
-    }
-
-    // GDPR: Metadata pro dokumentaci souhlasu
-    $gdprConsentAt = date('Y-m-d H:i:s');
-    $gdprConsentIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $gdprUserAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
-
-    // Připojit GDPR metadata k doplňujícím informacím
-    $gdprNote = "\n\n[GDPR] Souhlas udělen: {$gdprConsentAt} | IP: {$gdprConsentIp} | UA: {$gdprUserAgent}";
-    $doplnujiciInfo = trim($doplnujiciInfo . $gdprNote);
+    // BUGFIX: Odstraněn duplicitní GDPR consent check (už byl proveden výše na řádcích 279-305)
 
     // Formátování dat pro databázi
     $datumProdejeForDb = null;

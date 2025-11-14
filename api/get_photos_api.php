@@ -77,8 +77,16 @@ try {
         $photoPath = $photo['photo_path'];
         $sectionName = $photo['section_name'];
 
-        // Kontrola existence souboru na disku
+        // BEZPEČNOST: Path Traversal ochrana - ověření že cesta vede do uploads/
         $fullPath = __DIR__ . '/../' . $photoPath;
+        $realPath = realpath($fullPath);
+        $uploadsDir = realpath(__DIR__ . '/../uploads');
+
+        // Pokud realpath selže nebo cesta nevede do uploads/, přeskočit
+        if (!$realPath || !$uploadsDir || strpos($realPath, $uploadsDir) !== 0) {
+            continue; // Přeskočit podezřelý soubor
+        }
+
         if (file_exists($fullPath)) {
             // Pro seznam.js - jednoduché pole s cestami
             $photosList[] = [

@@ -83,7 +83,9 @@ try {
     $missingTables = [];
     foreach ($requiredTables as $table) {
         try {
-            $stmt = $pdo->query("SHOW TABLES LIKE '$table'");
+            // BEZPEČNOST: SQL Injection ochrana - použít quote() pro table name
+            $escapedTable = $pdo->quote($table);
+            $stmt = $pdo->query("SHOW TABLES LIKE $escapedTable");
             if ($stmt->rowCount() === 0) {
                 $missingTables[] = $table;
             }

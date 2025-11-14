@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
 
 header('Content-Type: application/json');
 
@@ -15,6 +16,21 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 }
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
+
+// BEZPEČNOST: CSRF ochrana pro POST operace (run_migration je nebezpečná operace)
+if ($action === 'run_migration') {
+    $csrfToken = $_POST['csrf_token'] ?? '';
+    if (is_array($csrfToken)) {
+        $csrfToken = '';
+    }
+    if (!validateCSRFToken($csrfToken)) {
+        http_response_code(403);
+        die(json_encode([
+            'status' => 'error',
+            'message' => 'Neplatný bezpečnostní token. Obnovte stránku a zkuste to znovu.'
+        ]));
+    }
+}
 
 try {
     // Vytvořit PDO připojení
