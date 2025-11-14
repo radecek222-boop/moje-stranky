@@ -1,0 +1,11 @@
+# SECURITY: Zabezpečení setup adresáře v produkci
+# Po instalaci odkomentovat následující řádky:
+
+# Require all denied
+# Deny from all
+
+# Nebo povolit pouze z localhost:
+# Order Deny,Allow
+# Deny from all
+# Allow from 127.0.0.1
+# Allow from ::1
