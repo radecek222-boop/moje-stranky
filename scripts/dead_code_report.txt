@@ -1,0 +1,88 @@
+# Dead Code Report
+# Vygenerováno: 2025-11-14 19:45:01
+# Dead funkcí: 25
+# Dead tříd: 1
+
+## Dead Funkce:
+
+function listBackups()
+  - scripts/create_db_backup.php
+
+function validateAmount()
+  - includes/qr_payment_helper.php
+
+function getTestSPD()
+  - includes/qr_payment_helper.php
+
+function getTestEPC()
+  - includes/qr_payment_helper.php
+
+function getSetting()
+  - includes/control_center_appearance.php
+
+function getAuditLogs()
+  - includes/audit_logger.php
+
+function cleanOldAuditLogs()
+  - includes/audit_logger.php
+
+function render_seo_meta_tags()
+  - includes/seo_meta.php
+
+function paginated()
+  - includes/api_response.php
+
+function validationError()
+  - includes/api_response.php
+
+function unauthorized()
+  - includes/api_response.php
+
+function forbidden()
+  - includes/api_response.php
+
+function rateLimitExceeded()
+  - includes/api_response.php
+
+function serverError()
+  - includes/api_response.php
+
+function created()
+  - includes/api_response.php
+
+function noContent()
+  - includes/api_response.php
+
+function __clone()
+  - config/database.php
+
+function __wakeup()
+  - config/database.php
+
+function logSecurity()
+  - config/config.php
+
+function setSecurityHeaders()
+  - config/config.php
+
+function load_controller()
+  - init.php
+
+function load_model()
+  - init.php
+
+function load_view()
+  - init.php
+
+function testHttpAccess()
+  - validate_tools.php
+
+function googleTranslateElementInit()
+  - offline.php
+
+
+## Dead Třídy:
+
+class QRPaymentHelper
+  - includes/qr_payment_helper.php
+
