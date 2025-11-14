@@ -65,52 +65,46 @@ try {
 // Úkoly k přidání
 $tasks = [
     [
-        'title' => '🗜️ Minifikovat JS/CSS soubory',
-        'description' => 'Spustit /minify_assets.php pro optimalizaci rychlosti. Úspora: ~68KB (30-40% redukce velikosti souborů)',
+        'action_title' => '🗜️ Minifikovat JS/CSS soubory',
+        'action_description' => 'Spustit /minify_assets.php pro optimalizaci rychlosti. Úspora: ~68KB (30-40% redukce velikosti souborů)',
         'action_type' => 'optimize_assets',
-        'priority' => 'high',
-        'button_text' => 'Minifikovat nyní',
-        'button_url' => '/minify_assets.php'
+        'action_url' => '/minify_assets.php',
+        'priority' => 'high'
     ],
     [
-        'title' => '📊 Přidat chybějící DB indexy',
-        'description' => 'Spustit /add_indexes.php pro přidání 21 indexů. Zrychlí queries s WHERE/JOIN/ORDER BY.',
+        'action_title' => '📊 Přidat chybějící DB indexy',
+        'action_description' => 'Spustit /add_indexes.php pro přidání 21 indexů. Zrychlí queries s WHERE/JOIN/ORDER BY.',
         'action_type' => 'add_db_indexes',
-        'priority' => 'high',
-        'button_text' => 'Přidat indexy',
-        'button_url' => '/add_indexes.php'
+        'action_url' => '/add_indexes.php',
+        'priority' => 'high'
     ],
     [
-        'title' => '💾 Vytvořit první backup',
-        'description' => 'Spustit /backup_system.php pro vytvoření zálohy databáze a důležitých souborů.',
+        'action_title' => '💾 Vytvořit první backup',
+        'action_description' => 'Spustit /backup_system.php pro vytvoření zálohy databáze a důležitých souborů.',
         'action_type' => 'create_backup',
-        'priority' => 'medium',
-        'button_text' => 'Vytvořit backup',
-        'button_url' => '/backup_system.php'
+        'action_url' => '/backup_system.php',
+        'priority' => 'medium'
     ],
     [
-        'title' => '🧹 Vyčistit selhavší emaily',
-        'description' => 'Spustit /cleanup_failed_emails.php pro odstranění selhavších emailů z fronty.',
+        'action_title' => '🧹 Vyčistit selhavší emaily',
+        'action_description' => 'Spustit /cleanup_failed_emails.php pro odstranění selhavších emailů z fronty.',
         'action_type' => 'cleanup_emails',
-        'priority' => 'low',
-        'button_text' => 'Vyčistit',
-        'button_url' => '/cleanup_failed_emails.php'
+        'action_url' => '/cleanup_failed_emails.php',
+        'priority' => 'low'
     ],
     [
-        'title' => '⚙️ Povolit Gzip kompresi',
-        'description' => 'Přidat Gzip do .htaccess pro 60-70% redukci transfer size. Zkopírovat konfiguraci z OPTIMIZATION_ANALYSIS.md',
+        'action_title' => '⚙️ Povolit Gzip kompresi',
+        'action_description' => 'Přidat Gzip do .htaccess pro 60-70% redukci transfer size. Zkopírovat konfiguraci z OPTIMIZATION_ANALYSIS.md',
         'action_type' => 'enable_gzip',
-        'priority' => 'high',
-        'button_text' => 'Zobrazit návod',
-        'button_url' => '/OPTIMIZATION_ANALYSIS.md'
+        'action_url' => '/OPTIMIZATION_ANALYSIS.md',
+        'priority' => 'high'
     ],
     [
-        'title' => '📦 Nastavit Browser Cache',
-        'description' => 'Přidat cache headers do .htaccess pro rychlejší repeat visits (0 KB staženo). Návod v OPTIMIZATION_ANALYSIS.md',
+        'action_title' => '📦 Nastavit Browser Cache',
+        'action_description' => 'Přidat cache headers do .htaccess pro rychlejší repeat visits (0 KB staženo). Návod v OPTIMIZATION_ANALYSIS.md',
         'action_type' => 'browser_cache',
-        'priority' => 'high',
-        'button_text' => 'Zobrazit návod',
-        'button_url' => '/OPTIMIZATION_ANALYSIS.md'
+        'action_url' => '/OPTIMIZATION_ANALYSIS.md',
+        'priority' => 'high'
     ]
 ];
 
@@ -124,8 +118,8 @@ if (!$isPostRequest) {
     echo "<h2>📋 Úkoly k přidání:</h2>";
     foreach ($tasks as $task) {
         echo "<div class='task-preview'>
-            <div class='task-title'>{$task['title']}</div>
-            <div class='task-desc'>{$task['description']}</div>
+            <div class='task-title'>{$task['action_title']}</div>
+            <div class='task-desc'>{$task['action_description']}</div>
             <small>Priorita: <strong>{$task['priority']}</strong></small>
         </div>";
     }
@@ -154,7 +148,7 @@ foreach ($tasks as $task) {
 
     if ($stmt->rowCount() > 0) {
         echo "<div class='task'>
-            <div class='task-title'>⏭️ {$task['title']}</div>
+            <div class='task-title'>⏭️ {$task['action_title']}</div>
             <div class='task-desc'>Již existuje v Akce & Úkoly</div>
         </div>";
         $skipped++;
@@ -165,36 +159,34 @@ foreach ($tasks as $task) {
     try {
         $stmt = $pdo->prepare("
             INSERT INTO wgs_pending_actions (
-                title,
-                description,
+                action_title,
+                action_description,
                 action_type,
+                action_url,
                 priority,
-                button_text,
-                button_url,
                 status,
                 created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())
+            ) VALUES (?, ?, ?, ?, ?, 'pending', NOW())
         ");
 
         $stmt->execute([
-            $task['title'],
-            $task['description'],
+            $task['action_title'],
+            $task['action_description'],
             $task['action_type'],
-            $task['priority'],
-            $task['button_text'],
-            $task['button_url']
+            $task['action_url'],
+            $task['priority']
         ]);
 
         echo "<div class='task'>
-            <div class='task-title'>✅ {$task['title']}</div>
-            <div class='task-desc'>{$task['description']}</div>
+            <div class='task-title'>✅ {$task['action_title']}</div>
+            <div class='task-desc'>{$task['action_description']}</div>
         </div>";
 
         $added++;
 
     } catch (PDOException $e) {
         echo "<div class='task'>
-            <div class='task-title'>❌ {$task['title']}</div>
+            <div class='task-title'>❌ {$task['action_title']}</div>
             <div class='task-desc'>Chyba: " . htmlspecialchars($e->getMessage()) . "</div>
         </div>";
     }
