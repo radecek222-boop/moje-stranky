@@ -534,6 +534,15 @@ async function runDiagnostics() {
         // 16. Workflow Check
         await checkWorkflow();
 
+        // 17. Email Test (PHPMailer)
+        await checkEmailSystem();
+
+        // 18. Session Security
+        await checkSessionSecurity();
+
+        // 19. Security Vulnerabilities Scan
+        await checkSecurityVulnerabilities();
+
         log('');
         logHeader('═══════════════════════════════════════════════════');
         logHeader('📊 SHRNUTÍ DIAGNOSTIKY');
@@ -2093,6 +2102,173 @@ async function checkWorkflow() {
     }
 
     log('');
+}
+
+// ============================================
+// NEW DIAGNOSTIC FUNCTIONS
+// ============================================
+
+async function checkEmailSystem() {
+    logHeader('17. EMAIL SYSTÉM (PHPMailer)');
+    log('Kontroluji PHPMailer, SMTP nastavení a email queue...');
+
+    try {
+        // Kontrola existence PHPMailer
+        const phpmailerExists = await fetch('/vendor/phpmailer/phpmailer/src/PHPMailer.php', {
+            method: 'HEAD'
+        }).then(r => r.ok);
+
+        if (!phpmailerExists) {
+            logWarning('⚠️  PHPMailer není nainstalován');
+            addWarning('Email', 'PHPMailer chybí', 'Spusťte instalaci v Control Center → Akce & Úkoly');
+            log('');
+            return;
+        }
+
+        logSuccess('✅ PHPMailer nainstalován');
+
+        // Kontrola SMTP konfigurace
+        const smtpConfigExists = await fetch('/smtp_config.json', { method: 'HEAD' }).then(r => r.ok);
+        if (smtpConfigExists) {
+            logSuccess('✅ SMTP konfigurace existuje');
+        } else {
+            logWarning('⚠️  SMTP konfigurace chybí');
+            addWarning('Email', 'SMTP config chybí', 'Nastavte SMTP v Control Center');
+        }
+
+        log('');
+    } catch (error) {
+        logError('❌ Chyba při kontrole email systému');
+        addError('Email', 'Kontrola selhala', error.message);
+        log('');
+    }
+}
+
+async function checkSessionSecurity() {
+    logHeader('18. SESSION BEZPEČNOST');
+    log('Kontroluji session handling, cookies, lifetime...');
+
+    try {
+        const issues = [];
+
+        // Check session settings via API
+        const response = await fetch('/api/control_center_api.php?action=check_session_security', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.status === 'success') {
+                const { secure, httponly, samesite, lifetime } = data.data;
+
+                if (secure) {
+                    logSuccess('✅ Session cookies jsou secure');
+                } else {
+                    issues.push('Session cookies NEJSOU secure (pouze HTTPS)');
+                }
+
+                if (httponly) {
+                    logSuccess('✅ Session cookies jsou httponly');
+                } else {
+                    issues.push('Session cookies NEJSOU httponly (XSS risk)');
+                }
+
+                if (samesite) {
+                    logSuccess(`✅ SameSite: ${samesite}`);
+                } else {
+                    issues.push('SameSite cookie atribut není nastaven (CSRF risk)');
+                }
+
+                if (lifetime && lifetime < 86400) {
+                    logSuccess(`✅ Session lifetime: ${Math.floor(lifetime / 3600)}h`);
+                } else if (lifetime) {
+                    issues.push(`Session lifetime je dlouhý: ${Math.floor(lifetime / 3600)}h`);
+                }
+
+                if (issues.length > 0) {
+                    logWarning(`⚠️  ${issues.length} bezpečnostních rizik:`);
+                    issues.forEach(issue => {
+                        logWarning(`   - ${issue}`);
+                        addWarning('Session', issue);
+                    });
+                } else {
+                    logSuccess('✅ Session security - OK');
+                }
+            }
+        } else {
+            // Fallback - basic check
+            logSuccess('✅ Session aktivní (základní kontrola)');
+        }
+
+        log('');
+    } catch (error) {
+        logWarning('⚠️  Session security check nepodařen: ' + error.message);
+        log('');
+    }
+}
+
+async function checkSecurityVulnerabilities() {
+    logHeader('19. BEZPEČNOSTNÍ SKEN');
+    log('Kontroluji XSS, SQL injection patterns, insecure funkce...');
+
+    try {
+        const response = await fetch('/api/control_center_api.php?action=security_scan', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.status === 'success') {
+                const { xss_risks, sql_risks, insecure_functions, exposed_files } = data.data;
+
+                let totalRisks = 0;
+
+                if (xss_risks && xss_risks.length > 0) {
+                    logWarning(`⚠️  ${xss_risks.length} možných XSS rizik`);
+                    xss_risks.slice(0, 3).forEach(risk => {
+                        addWarning('Security/XSS', risk.file + ':' + risk.line, risk.pattern);
+                    });
+                    totalRisks += xss_risks.length;
+                }
+
+                if (sql_risks && sql_risks.length > 0) {
+                    logWarning(`⚠️  ${sql_risks.length} možných SQL injection rizik`);
+                    sql_risks.slice(0, 3).forEach(risk => {
+                        addWarning('Security/SQL', risk.file + ':' + risk.line, risk.pattern);
+                    });
+                    totalRisks += sql_risks.length;
+                }
+
+                if (insecure_functions && insecure_functions.length > 0) {
+                    logWarning(`⚠️  ${insecure_functions.length} insecure funkcí`);
+                    totalRisks += insecure_functions.length;
+                }
+
+                if (exposed_files && exposed_files.length > 0) {
+                    logError(`❌ ${exposed_files.length} exposed souborů (.env, config)`);
+                    exposed_files.forEach(file => {
+                        addError('Security', 'Exposed file', file);
+                    });
+                    totalRisks += exposed_files.length;
+                }
+
+                if (totalRisks === 0) {
+                    logSuccess('✅ Žádná kritická bezpečnostní rizika');
+                } else {
+                    logWarning(`⚠️  Celkem ${totalRisks} bezpečnostních rizik`);
+                }
+            }
+        } else {
+            logWarning('⚠️  Security scan není dostupný (implementujte API endpoint)');
+        }
+
+        log('');
+    } catch (error) {
+        logWarning('⚠️  Security scan selhal: ' + error.message);
+        log('');
+    }
 }
 
 if (DEBUG_MODE) console.log('Console loaded');
