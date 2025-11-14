@@ -1,9 +1,9 @@
 # Documentation Quality Report
-# Vygenerováno: 2025-11-14 19:45:30
+# Vygenerováno: 2025-11-14 20:04:38
 
 ## Statistiky:
 
-Funkce: 32/255 (12.5%)
+Funkce: 41/264 (15.5%)
 Třídy: 3/6 (50%)
 Soubory bez headeru: 31
 
@@ -105,11 +105,11 @@ checkDependencies() - 57 řádků
 openCCModal() - 56 řádků
   File: includes/control_center_unified.php
 
-loadUsersModal() - 55 řádků
-  File: includes/control_center_unified.php
-
 sendAPIRequest() - 55 řádků
   File: includes/control_center_testing_simulator.php
+
+loadUsersModal() - 55 řádků
+  File: includes/control_center_unified.php
 
 generateSPD() - 54 řádků
   File: includes/qr_payment_helper.php
@@ -147,29 +147,29 @@ sendWithPHPMail() - 46 řádků
 runMigration() - 44 řádků
   File: run_migration_simple.php
 
-checkGitStatus() - 44 řádků
-  File: includes/control_center_console.php
-
 executeStep3() - 44 řádků
   File: includes/control_center_testing_interactive.php
 
-scanAuthenticationBypass() - 43 řádků
-  File: includes/security_scanner.php
+checkGitStatus() - 44 řádků
+  File: includes/control_center_console.php
 
 copyErrorReport() - 43 řádků
   File: includes/error_handler.php
 
-checkConfiguration() - 43 řádků
-  File: includes/control_center_console.php
-
 goToStep() - 43 řádků
   File: includes/control_center_testing_interactive.php
 
-cleanupLogsMaintenance() - 42 řádků
+checkConfiguration() - 43 řádků
   File: includes/control_center_console.php
+
+scanAuthenticationBypass() - 43 řádků
+  File: includes/security_scanner.php
 
 saveSettings() - 42 řádků
   File: includes/control_center_appearance.php
+
+cleanupLogsMaintenance() - 42 řádků
+  File: includes/control_center_console.php
 
 renderCharts() - 42 řádků
   File: statistiky.php
@@ -189,11 +189,11 @@ renderOrdersTable() - 41 řádků
 copyResults() - 40 řádků
   File: includes/control_center_testing.php
 
-checkAssets() - 38 řádků
-  File: includes/control_center_console.php
-
 saveText() - 38 řádků
   File: includes/control_center_content.php
+
+checkAssets() - 38 řádků
+  File: includes/control_center_console.php
 
 renderSalespersonTable() - 37 řádků
   File: statistiky.php
@@ -201,14 +201,14 @@ renderSalespersonTable() - 37 řádků
 renderTechnicianTable() - 37 řádků
   File: statistiky.php
 
-scanSQLInjectionRisks() - 36 řádků
-  File: includes/security_scanner.php
-
 checkFilePermissions() - 36 řádků
   File: includes/control_center_console.php
 
 checkSystemInfo() - 36 řádků
   File: includes/control_center_console.php
+
+scanSQLInjectionRisks() - 36 řádků
+  File: includes/security_scanner.php
 
 showFinalResult() - 35 řádků
   File: includes/control_center_testing_simulator.php
@@ -219,35 +219,35 @@ loadStatsContent() - 35 řádků
 renderModelsTable() - 35 řádků
   File: statistiky.php
 
-viewBackups() - 34 řádků
-  File: includes/control_center_diagnostics.php
-
 startTest() - 34 řádků
   File: includes/control_center_testing_simulator.php
 
-loadStep3_Seznam() - 33 řádků
-  File: includes/control_center_testing_interactive.php
+viewBackups() - 34 řádků
+  File: includes/control_center_diagnostics.php
 
 checkRateLimit() - 33 řádků
   File: config/config.php
 
-getCSRFToken() - 32 řádků
-  File: includes/control_center_unified.php
-
-loadStep4_Detail() - 32 řádků
+loadStep3_Seznam() - 33 řádků
   File: includes/control_center_testing_interactive.php
 
 testHttpAccess() - 32 řádků
   File: validate_tools.php
 
+loadStep4_Detail() - 32 řádků
+  File: includes/control_center_testing_interactive.php
+
+getCSRFToken() - 32 řádků
+  File: includes/control_center_unified.php
+
 checkStatus() - 31 řádků
   File: run_migration_simple.php
 
-createKey() - 31 řádků
-  File: includes/control_center_unified.php
-
 startTest() - 31 řádků
   File: includes/control_center_testing_interactive.php
+
+createKey() - 31 řádků
+  File: includes/control_center_unified.php
 
 optimizeDatabase() - 29 řádků
   File: includes/control_center_diagnostics.php
@@ -258,6 +258,9 @@ createBackup() - 29 řádků
 deleteKey() - 29 řádků
   File: includes/control_center_unified.php
 
+openNotifModal() - 28 řádků
+  File: admin.php
+
 pridatOptimalizacniUkoly() - 28 řádků
   File: includes/control_center_actions.php
 
@@ -267,11 +270,11 @@ completeAction() - 28 řádků
 dismissAction() - 28 řádků
   File: includes/control_center_unified.php
 
-openNotifModal() - 28 řádků
-  File: admin.php
-
 scanDirectory() - 27 řádků
   File: scripts/detect_select_star.php
+
+loadStep2_APICall() - 27 řádků
+  File: includes/control_center_testing_interactive.php
 
 clearCacheMaintenance() - 27 řádků
   File: includes/control_center_console.php
@@ -279,32 +282,11 @@ clearCacheMaintenance() - 27 řádků
 archiveLogsMaintenance() - 27 řádků
   File: includes/control_center_console.php
 
-loadStep2_APICall() - 27 řádků
-  File: includes/control_center_testing_interactive.php
-
 cleanupTestData() - 26 řádků
   File: includes/control_center_testing.php
 
 cleanupTest() - 26 řádků
   File: includes/control_center_testing_simulator.php
-
-completeAction() - 25 řádků
-  File: includes/control_center_actions.php
-
-dismissAction() - 25 řádků
-  File: includes/control_center_actions.php
-
-reset() - 25 řádků
-  File: includes/rate_limiter.php
-
-showPage() - 25 řádků
-  File: includes/control_center_content.php
-
-getSMTPSettings() - 25 řádků
-  File: includes/EmailQueue.php
-
-openStatsModal() - 25 řádků
-  File: statistiky.php
 
 deleteRecord() - 25 řádků
   File: verify_and_cleanup.php
@@ -312,41 +294,56 @@ deleteRecord() - 25 řádků
 deleteAllFailedRecords() - 25 řádků
   File: verify_and_cleanup.php
 
+showPage() - 25 řádků
+  File: includes/control_center_content.php
+
+reset() - 25 řádků
+  File: includes/rate_limiter.php
+
+completeAction() - 25 řádků
+  File: includes/control_center_actions.php
+
+dismissAction() - 25 řádků
+  File: includes/control_center_actions.php
+
+getSMTPSettings() - 25 řádků
+  File: includes/EmailQueue.php
+
+openStatsModal() - 25 řádků
+  File: statistiky.php
+
 executeStep1() - 24 řádků
   File: includes/control_center_testing_interactive.php
 
 cleanupTestData() - 24 řádků
   File: includes/control_center_testing_interactive.php
 
-resetToDefaults() - 23 řádků
-  File: includes/control_center_appearance.php
-
 switchLang() - 23 řádků
   File: includes/control_center_content.php
 
-listBackups() - 22 řádků
-  File: scripts/create_db_backup.php
-
-archiveLogs() - 22 řádků
-  File: includes/control_center_diagnostics.php
-
-addDiagnostic() - 22 řádků
-  File: includes/control_center_testing_simulator.php
+resetToDefaults() - 23 řádků
+  File: includes/control_center_appearance.php
 
 getDbConnection() - 22 řádků
   File: config/config.php
 
-clearCache() - 21 řádků
+listBackups() - 22 řádků
+  File: scripts/create_db_backup.php
+
+addDiagnostic() - 22 řádků
+  File: includes/control_center_testing_simulator.php
+
+archiveLogs() - 22 řádků
   File: includes/control_center_diagnostics.php
 
 getCSRFToken() - 21 řádků
   File: includes/control_center_testing_interactive.php
 
+clearCache() - 21 řádků
+  File: includes/control_center_diagnostics.php
+
 
 ## Adresáře bez README:
 
-- api/
 - app/
-- includes/
-- scripts/
 - docs/
