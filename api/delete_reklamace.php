@@ -69,6 +69,12 @@ try {
         $identifierValue = (int) $reklamaceId;
     }
 
+    // BEZPEČNOST: SQL Injection ochrana - whitelist povolených sloupců
+    $allowedColumns = ['id', 'reklamace_id', 'cislo'];
+    if (!in_array($identifierColumn, $allowedColumns, true)) {
+        throw new Exception('Neplatný identifikátor sloupce.');
+    }
+
     $stmt = $pdo->prepare('SELECT * FROM wgs_reklamace WHERE `' . $identifierColumn . '` = :identifier LIMIT 1');
     $stmt->execute([':identifier' => $identifierValue]);
     $record = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -188,6 +194,7 @@ function cleanupUploadedFiles(?string $workflowId, array $paths): int
             continue;
         }
 
+        // BEZPEČNOST: Path Traversal ochrana - použít realpath()
         $normalized = str_replace(['\\', '..'], ['/', ''], $path);
         $normalized = ltrim($normalized, '/');
         if (strpos($normalized, 'uploads/') === 0) {
@@ -195,8 +202,13 @@ function cleanupUploadedFiles(?string $workflowId, array $paths): int
         }
 
         $fullPath = $uploadsRoot . '/' . $normalized;
-        if (is_file($fullPath) && @unlink($fullPath)) {
-            $deleted++;
+
+        // Ověřit že realpath je stále v uploads/ (ochrana proti ....// útokům)
+        $realPath = realpath($fullPath);
+        if ($realPath && strpos($realPath, $uploadsRoot) === 0 && is_file($realPath)) {
+            if (@unlink($realPath)) {
+                $deleted++;
+            }
         }
     }
 

@@ -18,9 +18,9 @@ function verifyGitHubSignature($payload, $signature) {
     $secret = $stmt->fetchColumn();
 
     if (empty($secret)) {
-        // If no secret is set, skip verification (dev mode)
-        error_log('GitHub webhook: No secret configured, skipping signature verification');
-        return true;
+        // BEZPEČNOST: Pokud není secret, ODMÍTNOUT webhook (ne akceptovat!)
+        error_log('GitHub webhook: No secret configured, rejecting webhook for security');
+        return false;
     }
 
     $hash = 'sha256=' . hash_hmac('sha256', $payload, $secret);

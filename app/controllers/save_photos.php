@@ -120,12 +120,13 @@ try {
         }
 
         // Dekódování base64
-        // Data jsou ve formátu: data:image/jpeg;base64,/9j/4AAQ...
-        if (preg_match('/^data:image\/(\w+);base64,/', $photoData, $matches)) {
-            $imageType = $matches[1];
+        // Data jsou ve formátu: data:image/jpeg;base64,/9j/4AAQ... nebo data:video/mp4;base64,...
+        // BUGFIX: Podpora video/ prefix (ne jen image/)
+        if (preg_match('/^data:(image|video)\/(\w+);base64,/', $photoData, $matches)) {
+            $imageType = $matches[2]; // jpg, png, mp4, atd.
             $photoData = substr($photoData, strpos($photoData, ',') + 1);
         } else {
-            $imageType = 'jpeg';
+            $imageType = 'jpeg'; // fallback
         }
 
         $photoData = base64_decode($photoData);
