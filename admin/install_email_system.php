@@ -119,6 +119,9 @@ PHP;
             }
         }
 
+        // Počkat na dokončení všech SQL operací
+        usleep(100000); // 100ms
+
         // KROK 3: Automaticky nastavit SMTP z existující konfigurace
         $smtpHost = '';
         $smtpPort = 587;
@@ -165,18 +168,22 @@ PHP;
             $encryption = 'none';
         }
 
-        // Uložit do wgs_smtp_settings
+        // Použít INSERT ... ON DUPLICATE KEY UPDATE místo UPDATE
         $smtpStmt = $pdo->prepare("
-            UPDATE wgs_smtp_settings SET
-                smtp_host = ?,
-                smtp_port = ?,
-                smtp_encryption = ?,
-                smtp_username = ?,
-                smtp_password = ?,
-                smtp_from_email = ?,
-                smtp_from_name = ?,
+            INSERT INTO wgs_smtp_settings (
+                id, smtp_host, smtp_port, smtp_encryption,
+                smtp_username, smtp_password,
+                smtp_from_email, smtp_from_name, is_active
+            ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, 1)
+            ON DUPLICATE KEY UPDATE
+                smtp_host = VALUES(smtp_host),
+                smtp_port = VALUES(smtp_port),
+                smtp_encryption = VALUES(smtp_encryption),
+                smtp_username = VALUES(smtp_username),
+                smtp_password = VALUES(smtp_password),
+                smtp_from_email = VALUES(smtp_from_email),
+                smtp_from_name = VALUES(smtp_from_name),
                 is_active = 1
-            WHERE id = 1
         ");
         $smtpStmt->execute([
             $smtpHost,
