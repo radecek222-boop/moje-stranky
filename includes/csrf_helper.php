@@ -10,6 +10,33 @@
  * See admin_api.php for correct pattern.
  */
 /**
+ * Generate CSRF token
+ *
+ * @return string
+ */
+function generateCSRFToken() {
+    if (!isset($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+/**
+ * Validate CSRF token
+ *
+ * @param string $token Token to validate
+ * @return bool
+ */
+function validateCSRFToken($token) {
+    if (!isset($_SESSION['csrf_token'])) {
+        return false;
+    }
+
+    // SECURITY: Use hash_equals to prevent timing attacks
+    return hash_equals($_SESSION['csrf_token'], $token);
+}
+
+/**
  * RequireCSRF
  */
 function requireCSRF() {
