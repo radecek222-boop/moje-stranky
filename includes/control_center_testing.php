@@ -376,7 +376,10 @@ document.getElementById('startTestBtn').addEventListener('click', async function
 // Reset
 document.getElementById('resetBtn').addEventListener('click', () => location.reload());
 
-async function runWorkflowTest() {
+async /**
+ * RunWorkflowTest
+ */
+function runWorkflowTest() {
     const steps = document.querySelectorAll('.workflow-step');
     const totalSteps = steps.length;
     let passedCount = 0;
@@ -428,7 +431,10 @@ async function runWorkflowTest() {
     }
 }
 
-async function testStep(step, role) {
+async /**
+ * TestStep
+ */
+function testStep(step, role) {
     try {
         const response = await fetch(`api/test_environment_simple.php?step=${step}&role=${role}`);
         const result = await response.json();
@@ -442,6 +448,9 @@ async function testStep(step, role) {
     }
 }
 
+/**
+ * FillErrorDetails
+ */
 function fillErrorDetails() {
     const errorDiv = document.getElementById('errorDetails');
     let html = '<strong>Detaily chyb:</strong><br><br>';
@@ -463,7 +472,10 @@ function fillErrorDetails() {
     errorDiv.innerHTML = html;
 }
 
-async function cleanupTestData() {
+async /**
+ * CleanupTestData
+ */
+function cleanupTestData() {
     if (!confirm('Opravdu smazat všechna test data?')) return;
 
     try {
@@ -490,6 +502,9 @@ async function cleanupTestData() {
     }
 }
 
+/**
+ * ViewTestDataInDB
+ */
 function viewTestDataInDB() {
     const info = `
 Test data v databázi:
@@ -506,6 +521,9 @@ SELECT * FROM wgs_photos WHERE id = ${testResults.testPhotoId};
     console.log(info);
 }
 
+/**
+ * CopyResults
+ */
 function copyResults() {
     const passed = testResults.steps.filter(s => s.success).length;
     const failed = testResults.steps.filter(s => !s.success).length;
@@ -547,6 +565,9 @@ ${'-'.repeat(80)}
     });
 }
 
+/**
+ * Sleep
+ */
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }

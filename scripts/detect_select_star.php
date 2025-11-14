@@ -34,6 +34,12 @@ $findings = [];
 $totalCount = 0;
 
 // Recursive file scanner
+/**
+ * ScanDirectory
+ *
+ * @param mixed $dir Dir
+ * @param mixed $excludeDirs ExcludeDirs
+ */
 function scanDirectory($dir, $excludeDirs) {
     $files = [];
     $iterator = new RecursiveIteratorIterator(

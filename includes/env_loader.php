@@ -4,6 +4,11 @@
  * Loads environment variables from .env file
  */
 
+/**
+ * LoadEnvFile
+ *
+ * @param mixed $path Path
+ */
 function loadEnvFile($path) {
     if (!file_exists($path)) {
         // BEZPEČNOST: Neodhalovat absolutní cestu, ale zaznamenat problém

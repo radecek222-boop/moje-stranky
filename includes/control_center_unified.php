@@ -574,11 +574,17 @@ if (DEBUG_MODE) {
 }
 
 // Helper function to check if API response is successful
+/**
+ * IsSuccess
+ */
 function isSuccess(data) {
     return (data && (data.success === true || data.status === 'success'));
 }
 
 // Helper function to get CSRF token from meta tag
+/**
+ * GetCSRFToken
+ */
 function getCSRFToken() {
     // Zkusit nejprve aktuální dokument
     let metaTag = document.querySelector('meta[name="csrf-token"]');
@@ -613,6 +619,9 @@ function getCSRFToken() {
 }
 
 // Open modal with specific section
+/**
+ * OpenCCModal
+ */
 function openCCModal(section) {
     const overlay = document.getElementById('ccOverlay');
     const modal = document.getElementById('ccModal');
@@ -671,6 +680,9 @@ function openCCModal(section) {
 }
 
 // Close modal
+/**
+ * CloseCCModal
+ */
 function closeCCModal() {
     const overlay = document.getElementById('ccOverlay');
     const modal = document.getElementById('ccModal');
@@ -682,16 +694,25 @@ function closeCCModal() {
 
 // === MODAL LOADERS ===
 
+/**
+ * LoadStatisticsModal
+ */
 function loadStatisticsModal() {
     const modalBody = document.getElementById('ccModalBody');
     modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="statistiky.php?embed=1" sandbox="allow-scripts allow-same-origin" title="Statistiky reklamací"></iframe></div>';
 }
 
+/**
+ * LoadAnalyticsModal
+ */
 function loadAnalyticsModal() {
     const modalBody = document.getElementById('ccModalBody');
     modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="analytics.php?embed=1" sandbox="allow-scripts allow-same-origin" title="Web Analytics"></iframe></div>';
 }
 
+/**
+ * LoadKeysModal
+ */
 function loadKeysModal() {
     const modalBody = document.getElementById('ccModalBody');
 
@@ -746,6 +767,9 @@ function loadKeysModal() {
         });
 }
 
+/**
+ * LoadUsersModal
+ */
 function loadUsersModal() {
     const modalBody = document.getElementById('ccModalBody');
 
@@ -802,11 +826,17 @@ function loadUsersModal() {
         });
 }
 
+/**
+ * LoadNotificationsModal
+ */
 function loadNotificationsModal() {
     const modalBody = document.getElementById('ccModalBody');
     modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=notifications&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Email & SMS notifikace"></iframe></div>';
 }
 
+/**
+ * LoadClaimsModal
+ */
 function loadClaimsModal() {
     const modalBody = document.getElementById('ccModalBody');
 
@@ -858,36 +888,57 @@ function loadClaimsModal() {
         });
 }
 
+/**
+ * LoadActionsModal
+ */
 function loadActionsModal() {
     const modalBody = document.getElementById('ccModalBody');
     modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_actions&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Akce & Úkoly"></iframe></div>';
 }
 
+/**
+ * LoadDiagnosticsModal
+ */
 function loadDiagnosticsModal() {
     const modalBody = document.getElementById('ccModalBody');
     modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=tools&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Diagnostika systému"></iframe></div>';
 }
 
+/**
+ * LoadConsoleModal
+ */
 function loadConsoleModal() {
     const modalBody = document.getElementById('ccModalBody');
     modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_console&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Konzole - Developer Tools"></iframe></div>';
 }
 
+/**
+ * LoadTestingModal
+ */
 function loadTestingModal() {
     const modalBody = document.getElementById('ccModalBody');
     modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_testing_interactive&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Testovací prostředí"></iframe></div>';
 }
 
+/**
+ * LoadAppearanceModal
+ */
 function loadAppearanceModal() {
     const modalBody = document.getElementById('ccModalBody');
     modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_appearance&embed=1" title="Vzhled & Design"></iframe></div>';
 }
 
+/**
+ * LoadContentModal
+ */
 function loadContentModal() {
     const modalBody = document.getElementById('ccModalBody');
     modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_content&embed=1" title="Obsah & Texty"></iframe></div>';
 }
 
+/**
+ * LoadConfigModal
+ */
 function loadConfigModal() {
     const modalBody = document.getElementById('ccModalBody');
     modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_configuration&embed=1" title="Konfigurace systému"></iframe></div>';
@@ -895,6 +946,9 @@ function loadConfigModal() {
 
 // === ACTION HANDLERS ===
 
+/**
+ * DeleteKey
+ */
 function deleteKey(keyCode) {
     if (!confirm('Opravdu chcete smazat tento klíč?')) return;
 
@@ -925,6 +979,9 @@ function deleteKey(keyCode) {
     });
 }
 
+/**
+ * CreateKey
+ */
 function createKey() {
     const keyType = prompt('Typ klíče (admin/technik/prodejce/partner):');
     if (!keyType) return;
@@ -957,7 +1014,10 @@ function createKey() {
     });
 }
 
-async function executeAction(actionId) {
+async /**
+ * ExecuteAction
+ */
+function executeAction(actionId) {
     if (DEBUG_MODE) console.log('[executeAction] Starting with actionId:', actionId);
 
     // Capture button reference BEFORE any await (event becomes undefined after await in async functions)
@@ -1049,6 +1109,9 @@ async function executeAction(actionId) {
     });
 }
 
+/**
+ * CompleteAction
+ */
 function completeAction(actionId) {
     const csrfToken = getCSRFToken();
     if (!csrfToken) {
@@ -1078,6 +1141,9 @@ function completeAction(actionId) {
     });
 }
 
+/**
+ * DismissAction
+ */
 function dismissAction(actionId) {
     const csrfToken = getCSRFToken();
     if (!csrfToken) {
@@ -1108,7 +1174,10 @@ function dismissAction(actionId) {
 }
 
 // Clear cache and reload
-async function clearCacheAndReload() {
+async /**
+ * ClearCacheAndReload
+ */
+function clearCacheAndReload() {
     if (!confirm('Vymazat lokální cache a načíst nejnovější verzi? Stránka se znovu načte.')) {
         return;
     }

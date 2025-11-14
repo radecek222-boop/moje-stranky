@@ -4,7 +4,13 @@
  */
 
 if (!function_exists('db_get_table_columns')) {
-    function db_get_table_columns(PDO $pdo, string $table): array
+        /**
+     * Db get table columns
+     *
+     * @param PDO $pdo Pdo
+     * @param string $table Table
+     */
+function db_get_table_columns(PDO $pdo, string $table): array
     {
         static $cache = [];
         if (isset($cache[$table])) {
@@ -29,7 +35,14 @@ if (!function_exists('db_get_table_columns')) {
 }
 
 if (!function_exists('db_table_has_column')) {
-    function db_table_has_column(PDO $pdo, string $table, string $column): bool
+        /**
+     * Db table has column
+     *
+     * @param PDO $pdo Pdo
+     * @param string $table Table
+     * @param string $column Column
+     */
+function db_table_has_column(PDO $pdo, string $table, string $column): bool
     {
         $columns = db_get_table_columns($pdo, $table);
         return in_array($column, $columns, true);
@@ -37,7 +50,13 @@ if (!function_exists('db_table_has_column')) {
 }
 
 if (!function_exists('db_table_exists')) {
-    function db_table_exists(PDO $pdo, string $table): bool
+        /**
+     * Db table exists
+     *
+     * @param PDO $pdo Pdo
+     * @param string $table Table
+     */
+function db_table_exists(PDO $pdo, string $table): bool
     {
         static $cache = [];
 

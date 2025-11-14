@@ -78,7 +78,11 @@ try {
     // Logování do souboru
     $logDir = __DIR__ . '/../logs';
     if (!is_dir($logDir)) {
-        @mkdir($logDir, 0755, true);
+        if (!is_dir($logDir, 0755, true)) {
+    if (!mkdir($logDir, 0755, true) && !is_dir($logDir, 0755, true)) {
+        error_log('Failed to create directory: ' . $logDir, 0755, true);
+    }
+}
     }
 
     $logFile = $logDir . '/js_errors.log';
@@ -91,7 +95,9 @@ try {
         @rename($logFile, $archiveFile);
     }
 
-    @file_put_contents($logFile, $logMessage, FILE_APPEND);
+    if (file_put_contents($logFile, $logMessage, FILE_APPEND) === false) {
+    error_log('Failed to write file');
+}
 
     echo json_encode([
         'success' => true,

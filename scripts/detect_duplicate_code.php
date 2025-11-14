@@ -48,7 +48,10 @@ foreach ($files as $filePath) {
     $content = file_get_contents($filePath);
     $relativePath = str_replace($projectRoot . '/', '', $filePath);
 
-    // Najít všechny funkce (function name(...))
+    // Najít všechny funkce (    /**
+     * Name
+     */
+function name(...))
     preg_match_all('/function\s+(\w+)\s*\([^)]*\)\s*\{/i', $content, $matches, PREG_OFFSET_CAPTURE);
 
     foreach ($matches[1] as $idx => $match) {

@@ -18,6 +18,11 @@ require_once __DIR__ . '/../../includes/db_metadata.php';
  * @return string Vygenerované unikátní ID (např. "WGS251114-A3F2B1")
  * @throws Exception Pokud se nepodaří vygenerovat ID po 5 pokusech
  */
+/**
+ * GenerateWorkflowId
+ *
+ * @param PDO $pdo Pdo
+ */
 function generateWorkflowId(PDO $pdo): string
 {
     // BUGFIX: Race condition fix - použít FOR UPDATE lock
@@ -54,6 +59,11 @@ function generateWorkflowId(PDO $pdo): string
  * @param string|null $value Vstupní datum v různých formátech
  * @return string|null Normalizované datum ve formátu YYYY-MM-DD nebo NULL
  * @throws Exception Pokud formát data není rozpoznán nebo datum je neplatné
+ */
+/**
+ * NormalizeDateInput
+ *
+ * @param string $value Value
  */
 function normalizeDateInput(?string $value): ?string
 {
@@ -102,6 +112,12 @@ function normalizeDateInput(?string $value): ?string
  * @param array $input Vstupní data z formuláře (POST data)
  * @return array Výsledek operace ['success' => bool, 'message' => string, 'data' => array]
  * @throws Exception Při chybě oprávnění, validace nebo DB operace
+ */
+/**
+ * HandleUpdate
+ *
+ * @param PDO $pdo Pdo
+ * @param array $input Input
  */
 function handleUpdate(PDO $pdo, array $input): array
 {

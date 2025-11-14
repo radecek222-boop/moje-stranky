@@ -198,6 +198,11 @@ register_shutdown_function(function() {
  * @param array $error Error data ['type' => string, 'message' => string, 'file' => string, 'line' => int, 'backtrace' => array|null]
  * @return string Formátovaná chybová zpráva pro log
  */
+/**
+ * FormatErrorMessage
+ *
+ * @param mixed $error Error
+ */
 function formatErrorMessage($error) {
     $message = "\n" . str_repeat('=', 80) . "\n";
     $message .= "{$error['type']}\n";
@@ -247,6 +252,11 @@ function formatErrorMessage($error) {
  * @param array $backtrace PHP backtrace z debug_backtrace()
  * @return array Formátovaný backtrace vhodný pro JSON encoding
  */
+/**
+ * FormatBacktrace
+ *
+ * @param mixed $backtrace Backtrace
+ */
 function formatBacktrace($backtrace) {
     $formatted = [];
 
@@ -276,15 +286,26 @@ function formatBacktrace($backtrace) {
  * @param string $message Chybová zpráva k uložení
  * @return void
  */
+/**
+ * LogErrorToFile
+ *
+ * @param mixed $message Message
+ */
 function logErrorToFile($message) {
     $logDir = __DIR__ . '/../logs';
 
     if (!is_dir($logDir)) {
-        @mkdir($logDir, 0755, true);
+        if (!is_dir($logDir, 0755, true)) {
+    if (!mkdir($logDir, 0755, true) && !is_dir($logDir, 0755, true)) {
+        error_log('Failed to create directory: ' . $logDir, 0755, true);
+    }
+}
     }
 
     $logFile = $logDir . '/php_errors.log';
-    @file_put_contents($logFile, $message, FILE_APPEND);
+    if (file_put_contents($logFile, $message, FILE_APPEND) === false) {
+    error_log('Failed to write file');
+}
 }
 
 /**
@@ -301,6 +322,11 @@ function logErrorToFile($message) {
  *
  * @param array $error Error data ['type' => string, 'message' => string, 'file' => string, 'line' => int, 'backtrace' => array|null]
  * @return void Vypisuje HTML přímo do outputu
+ */
+/**
+ * DisplayErrorHTML
+ *
+ * @param mixed $error Error
  */
 function displayErrorHTML($error) {
     ?>
@@ -520,7 +546,10 @@ function displayErrorHTML($error) {
         </div>
 
         <script>
-        function copyErrorReport() {
+                /**
+         * CopyErrorReport
+         */
+function copyErrorReport() {
             const separator = '='.repeat(80);
             const report = `
 WGS ERROR REPORT

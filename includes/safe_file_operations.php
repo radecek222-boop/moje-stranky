@@ -5,7 +5,11 @@
  * Náhrada za @ operator - proper error handling pro file operace
  *
  * Použití:
- *   Místo: $content = @file_get_contents($path);
+ *   Místo: $content = file_get_contents($path);
+if ($content === false) {
+    error_log('Failed to read file: ' . $path);
+    $content = '';
+}
  *   Použít: $content = safeFileGetContents($path);
  */
 
@@ -15,6 +19,12 @@
  * @param string $path Cesta k souboru
  * @param mixed $default Výchozí hodnota při chybě (default: false)
  * @return string|false Obsah souboru nebo default hodnota
+ */
+/**
+ * SafeFileGetContents
+ *
+ * @param mixed $path Path
+ * @param mixed $default Default
  */
 function safeFileGetContents($path, $default = false) {
     if (!file_exists($path)) {
@@ -44,6 +54,13 @@ function safeFileGetContents($path, $default = false) {
  * @param string $data Data k zápisu
  * @param int $flags Flags pro file_put_contents (default: 0)
  * @return bool True při úspěchu, false při chybě
+ */
+/**
+ * SafeFilePutContents
+ *
+ * @param mixed $path Path
+ * @param mixed $data Data
+ * @param mixed $flags Flags
  */
 function safeFilePutContents($path, $data, $flags = 0) {
     $dir = dirname($path);
@@ -91,6 +108,13 @@ function safeFileExists($path) {
  * @param mixed $default Výchozí hodnota při chybě (default: [])
  * @return array|mixed Pole řádků nebo default hodnota
  */
+/**
+ * SafeFileToArray
+ *
+ * @param mixed $path Path
+ * @param mixed $flags Flags
+ * @param mixed $default Default
+ */
 function safeFileToArray($path, $flags = FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES, $default = []) {
     if (!file_exists($path)) {
         error_log("safeFileToArray: File not found: {$path}");
@@ -118,6 +142,12 @@ function safeFileToArray($path, $flags = FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY
  * @param string $path Cesta k souboru
  * @param mixed $default Výchozí hodnota při chybě (default: 0)
  * @return int|mixed Velikost souboru v bytech nebo default hodnota
+ */
+/**
+ * SafeFileSize
+ *
+ * @param mixed $path Path
+ * @param mixed $default Default
  */
 function safeFileSize($path, $default = 0) {
     if (!file_exists($path)) {
@@ -168,6 +198,12 @@ function safeFileDelete($path) {
  * @param int $permissions Oprávnění (default: 0755)
  * @return bool True při úspěchu, false při chybě
  */
+/**
+ * SafeMkdir
+ *
+ * @param mixed $path Path
+ * @param mixed $permissions Permissions
+ */
 function safeMkdir($path, $permissions = 0755) {
     if (is_dir($path)) {
         return true; // Už existuje = úspěch
@@ -190,6 +226,13 @@ function safeMkdir($path, $permissions = 0755) {
  * @param bool $assoc Vrátit jako asociativní pole (default: true)
  * @param mixed $default Výchozí hodnota při chybě (default: null)
  * @return mixed Parsovaná JSON data nebo default hodnota
+ */
+/**
+ * SafeJsonDecode
+ *
+ * @param mixed $path Path
+ * @param mixed $assoc Assoc
+ * @param mixed $default Default
  */
 function safeJsonDecode($path, $assoc = true, $default = null) {
     $content = safeFileGetContents($path);
@@ -215,6 +258,13 @@ function safeJsonDecode($path, $assoc = true, $default = null) {
  * @param mixed $data Data k zapsání
  * @param int $flags JSON encode flags (default: JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
  * @return bool True při úspěchu, false při chybě
+ */
+/**
+ * SafeJsonEncode
+ *
+ * @param mixed $path Path
+ * @param mixed $data Data
+ * @param mixed $flags Flags
  */
 function safeJsonEncode($path, $data, $flags = JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) {
     $json = json_encode($data, $flags);

@@ -7,6 +7,12 @@
 require_once __DIR__ . '/../init.php';
 
 // Security: Verify GitHub signature
+/**
+ * VerifyGitHubSignature
+ *
+ * @param mixed $payload Payload
+ * @param mixed $signature Signature
+ */
 function verifyGitHubSignature($payload, $signature) {
     if (empty($signature)) {
         return false;
@@ -28,6 +34,11 @@ function verifyGitHubSignature($payload, $signature) {
 }
 
 // Log webhook to file for debugging
+/**
+ * LogWebhook
+ *
+ * @param mixed $data Data
+ */
 function logWebhook($data) {
     $logFile = __DIR__ . '/../logs/github_webhooks.log';
     $logDir = dirname($logFile);

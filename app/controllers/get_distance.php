@@ -67,6 +67,14 @@ function geocodeAddress($address) {
  * @param float $endLon Konec - zeměpisná délka
  * @return array|null ['distance' => int (metry), 'time' => int (sekundy)] nebo null
  */
+/**
+ * CalculateRoute
+ *
+ * @param mixed $startLat StartLat
+ * @param mixed $startLon StartLon
+ * @param mixed $endLat EndLat
+ * @param mixed $endLon EndLon
+ */
 function calculateRoute($startLat, $startLon, $endLat, $endLon) {
     try {
         $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') .

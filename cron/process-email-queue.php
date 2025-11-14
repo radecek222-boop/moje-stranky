@@ -35,14 +35,25 @@ set_time_limit(300);
 $logFile = __DIR__ . '/../logs/email_queue_cron.log';
 $logDir = dirname($logFile);
 if (!file_exists($logDir)) {
-    @mkdir($logDir, 0755, true);
+    if (!is_dir($logDir, 0755, true)) {
+    if (!mkdir($logDir, 0755, true) && !is_dir($logDir, 0755, true)) {
+        error_log('Failed to create directory: ' . $logDir, 0755, true);
+    }
+}
 }
 
+/**
+ * LogMessage
+ *
+ * @param mixed $message Message
+ */
 function logMessage($message) {
     global $logFile;
     $timestamp = date('Y-m-d H:i:s');
     $log = "[$timestamp] $message\n";
-    @file_put_contents($logFile, $log, FILE_APPEND);
+    if (file_put_contents($logFile, $log, FILE_APPEND) === false) {
+    error_log('Failed to write file');
+}
     echo $log; // Zobrazit i v outputu
 }
 

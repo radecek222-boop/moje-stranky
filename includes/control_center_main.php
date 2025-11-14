@@ -262,6 +262,9 @@ document.getElementById('cc-search').addEventListener('input', function(e) {
 });
 
 // Section navigation
+/**
+ * OpenSection
+ */
 function openSection(section) {
     // Open modal with section content
     if (typeof openCCModal === 'function') {

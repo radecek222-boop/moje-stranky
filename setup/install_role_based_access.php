@@ -415,7 +415,13 @@ try {
                 try {
                     $pdo = getDbConnection();
 
-                    function addLog($message, $type = 'info') {
+                                        /**
+                     * AddLog
+                     *
+                     * @param mixed $message Message
+                     * @param mixed $type Type
+                     */
+function addLog($message, $type = 'info') {
                         $msg = htmlspecialchars($message, ENT_QUOTES);
                         echo "<script>document.getElementById('log').innerHTML += '<div class=\"{$type}\">{$msg}</div>'; document.getElementById('log').scrollTop = document.getElementById('log').scrollHeight;</script>";
                         echo str_repeat(' ', 1024); // Flush buffer
@@ -423,7 +429,12 @@ try {
                         usleep(300000); // 300ms delay pro vizuální efekt
                     }
 
-                    function updateProgress($percent) {
+                                        /**
+                     * UpdateProgress
+                     *
+                     * @param mixed $percent Percent
+                     */
+function updateProgress($percent) {
                         echo "<script>document.getElementById('progress').style.width = '{$percent}%'; document.getElementById('progress').textContent = '{$percent}%';</script>";
                         echo str_repeat(' ', 1024); // Flush buffer
                         flush();
