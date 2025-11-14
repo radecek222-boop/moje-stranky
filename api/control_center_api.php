@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
+require_once __DIR__ . '/../includes/safe_file_operations.php';
 
 header('Content-Type: application/json');
 
