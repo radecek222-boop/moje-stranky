@@ -20,7 +20,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
     try {
         $pdo = getDbConnection();
 
-        // Read SQL migration file
+        // KROK 1: Stáhnout PHPMailer pokud neexistuje
+        $vendorDir = __DIR__ . '/../vendor';
+        $phpmailerDir = $vendorDir . '/phpmailer';
+
+        if (!file_exists($phpmailerDir)) {
+            if (!file_exists($vendorDir)) {
+                mkdir($vendorDir, 0755, true);
+            }
+
+            $phpmailerUrl = 'https://github.com/PHPMailer/PHPMailer/archive/refs/tags/v6.9.1.tar.gz';
+            $tarFile = $vendorDir . '/phpmailer.tar.gz';
+
+            // Stáhnout
+            $ch = curl_init($phpmailerUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $data = curl_exec($ch);
+            curl_close($ch);
+
+            if (!$data) {
+                throw new Exception("Nepodařilo se stáhnout PHPMailer");
+            }
+
+            file_put_contents($tarFile, $data);
+
+            // Rozbalit
+            $phar = new PharData($tarFile);
+            $phar->extractTo($vendorDir);
+            unlink($tarFile);
+
+            // Přejmenovat
+            if (file_exists($vendorDir . '/PHPMailer-6.9.1')) {
+                rename($vendorDir . '/PHPMailer-6.9.1', $phpmailerDir);
+            }
+
+            // Vytvořit autoload.php
+            $autoloadContent = <<<'PHP'
+<?php
+/**
+ * Simple autoloader for PHPMailer
+ * (No Composer required)
+ */
+
+spl_autoload_register(function ($class) {
+    // PHPMailer namespace
+    $prefix = 'PHPMailer\\PHPMailer\\';
+    $base_dir = __DIR__ . '/phpmailer/src/';
+
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        return;
+    }
+
+    $relative_class = substr($class, $len);
+    $file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
+
+    if (file_exists($file)) {
+        require $file;
+    }
+});
+PHP;
+            file_put_contents($vendorDir . '/autoload.php', $autoloadContent);
+        }
+
+        // KROK 2: Vytvořit databázové tabulky
         $sqlFile = __DIR__ . '/../migrations/create_email_queue.sql';
 
         if (!file_exists($sqlFile)) {
@@ -55,12 +120,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
 // Check if already installed
 $pdo = getDbConnection();
 $tablesExist = false;
+$phpmailerInstalled = false;
+
 try {
     $stmt = $pdo->query("SHOW TABLES LIKE 'wgs_email_queue'");
     $tablesExist = $stmt->rowCount() > 0;
 } catch (Exception $e) {
     // Ignore
 }
+
+// Check PHPMailer
+$phpmailerInstalled = file_exists(__DIR__ . '/../vendor/phpmailer/src/PHPMailer.php');
 
 ?>
 <!DOCTYPE html>
