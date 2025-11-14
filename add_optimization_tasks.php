@@ -1,6 +1,7 @@
 <?php
 /**
  * Přidání dnešních optimalizačních úkolů do Akce & Úkoly
+ * BEZPEČNOST: Vyžaduje POST + CSRF token pro ochranu před CSRF útoky
  */
 
 require_once __DIR__ . '/init.php';
@@ -11,6 +12,20 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 }
 
 $pdo = getDbConnection();
+
+// BEZPEČNOST: CSRF ochrana - akce mění databázi, musí být POST s tokenem
+$isPostRequest = $_SERVER['REQUEST_METHOD'] === 'POST';
+$csrfValid = false;
+
+if ($isPostRequest) {
+    $csrfToken = $_POST['csrf_token'] ?? null;
+    $csrfValid = $csrfToken && validateCSRFToken($csrfToken);
+
+    if (!$csrfValid) {
+        http_response_code(403);
+        die('CSRF token validation failed. Refresh the page and try again.');
+    }
+}
 
 echo "<!DOCTYPE html>
 <html>
@@ -23,9 +38,13 @@ echo "<!DOCTYPE html>
         h1 { color: #333; }
         .success { color: #28a745; padding: 10px; margin: 10px 0; background: #d4edda; border-left: 4px solid #28a745; }
         .info { color: #0c5460; padding: 10px; margin: 10px 0; background: #d1ecf1; border-left: 4px solid #17a2b8; }
+        .warning { color: #856404; padding: 10px; margin: 10px 0; background: #fff3cd; border-left: 4px solid #ffc107; }
         .task { margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 4px; }
         .task-title { font-weight: bold; font-size: 1.1em; margin-bottom: 5px; }
         .task-desc { color: #666; }
+        .btn { padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; }
+        .btn:hover { background: #5a67d8; }
+        .task-preview { background: #f8f9fa; padding: 10px; margin: 10px 0; border-left: 3px solid #667eea; }
     </style>
 </head>
 <body>
@@ -95,6 +114,33 @@ $tasks = [
     ]
 ];
 
+// Pokud není POST request, zobrazit potvrzovací formulář
+if (!$isPostRequest) {
+    echo "<div class='warning'>
+        <strong>⚠️ BEZPEČNOSTNÍ UPOZORNĚNÍ</strong><br>
+        Tento skript přidá úkoly do databáze. Pro ochranu před CSRF útoky je vyžadováno potvrzení.
+    </div>";
+
+    echo "<h2>📋 Úkoly k přidání:</h2>";
+    foreach ($tasks as $task) {
+        echo "<div class='task-preview'>
+            <div class='task-title'>{$task['title']}</div>
+            <div class='task-desc'>{$task['description']}</div>
+            <small>Priorita: <strong>{$task['priority']}</strong></small>
+        </div>";
+    }
+
+    echo "<form method='POST'>
+        <input type='hidden' name='csrf_token' value='" . htmlspecialchars(getCSRFToken(), ENT_QUOTES, 'UTF-8') . "'>
+        <br>
+        <button type='submit' class='btn'>✅ Potvrdit a přidat všech " . count($tasks) . " úkolů</button>
+    </form>";
+
+    echo "</div></body></html>";
+    exit;
+}
+
+// POST request s platným CSRF tokenem - provést přidání úkolů
 $added = 0;
 $skipped = 0;
 
