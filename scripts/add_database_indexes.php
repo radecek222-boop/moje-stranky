@@ -131,8 +131,14 @@ $timestampIndexes = [
 
 $allIndexes = array_merge($performanceIndexes, $timestampIndexes);
 
-echo "🚀 Starting database index creation...\n";
-echo "Total indexes to add: " . count($allIndexes) . "\n\n";
+// Detect if this is API call (non-CLI)
+$isApiCall = (php_sapi_name() !== 'cli');
+
+// Only output text in CLI mode
+if (!$isApiCall) {
+    echo "🚀 Starting database index creation...\n";
+    echo "Total indexes to add: " . count($allIndexes) . "\n\n";
+}
 
 foreach ($allIndexes as $i => $sql) {
     $num = $i + 1;
@@ -145,7 +151,10 @@ foreach ($allIndexes as $i => $sql) {
     try {
         $pdo->exec($sql);
         $results['success'][] = "{$tableName}.{$indexName}";
-        echo "✅ [{$num}/" . count($allIndexes) . "] {$tableName}.{$indexName}\n";
+
+        if (!$isApiCall) {
+            echo "✅ [{$num}/" . count($allIndexes) . "] {$tableName}.{$indexName}\n";
+        }
 
     } catch (PDOException $e) {
         $errorMsg = $e->getMessage();
@@ -153,22 +162,28 @@ foreach ($allIndexes as $i => $sql) {
         // Check if index already exists
         if (strpos($errorMsg, 'Duplicate key name') !== false || strpos($errorMsg, 'already exists') !== false) {
             $results['skipped'][] = "{$tableName}.{$indexName}";
-            echo "⏭️  [{$num}/" . count($allIndexes) . "] {$tableName}.{$indexName} (již existuje)\n";
+            if (!$isApiCall) {
+                echo "⏭️  [{$num}/" . count($allIndexes) . "] {$tableName}.{$indexName} (již existuje)\n";
+            }
         }
         // Check if table doesn't exist
         elseif (strpos($errorMsg, "doesn't exist") !== false) {
             $results['skipped'][] = "{$tableName}.{$indexName} (tabulka neexistuje)";
-            echo "⚠️  [{$num}/" . count($allIndexes) . "] {$tableName}.{$indexName} (tabulka neexistuje)\n";
+            if (!$isApiCall) {
+                echo "⚠️  [{$num}/" . count($allIndexes) . "] {$tableName}.{$indexName} (tabulka neexistuje)\n";
+            }
         }
         // Other error
         else {
             $results['failed'][] = "{$tableName}.{$indexName}: {$errorMsg}";
-            echo "❌ [{$num}/" . count($allIndexes) . "] {$tableName}.{$indexName} - ERROR: {$errorMsg}\n";
+            if (!$isApiCall) {
+                echo "❌ [{$num}/" . count($allIndexes) . "] {$tableName}.{$indexName} - ERROR: {$errorMsg}\n";
+            }
         }
     }
 
-    // Flush output for real-time feedback
-    if (php_sapi_name() !== 'cli') {
+    // Flush output for real-time feedback (CLI only)
+    if (!$isApiCall && php_sapi_name() !== 'cli') {
         ob_flush();
         flush();
     }
@@ -177,6 +192,23 @@ foreach ($allIndexes as $i => $sql) {
 // Restore error mode
 $pdo->setAttribute(PDO::ATTR_ERRMODE, $errorMode);
 
+// Return JSON for API calls
+if ($isApiCall) {
+    header('Content-Type: application/json');
+    echo json_encode([
+        'status' => 'success',
+        'message' => count($results['success']) . ' indexů přidáno, ' . count($results['skipped']) . ' přeskočeno',
+        'results' => $results,
+        'summary' => [
+            'added' => count($results['success']),
+            'skipped' => count($results['skipped']),
+            'failed' => count($results['failed'])
+        ]
+    ], JSON_PRETTY_PRINT);
+    exit;
+}
+
+// CLI output only
 echo "\n" . str_repeat("=", 70) . "\n";
 echo "✅ HOTOVO!\n";
 echo str_repeat("=", 70) . "\n\n";
@@ -197,17 +229,3 @@ echo "\n💡 Doporučení:\n";
 echo "  - Spusťte OPTIMIZE TABLE na dotčených tabulkách\n";
 echo "  - Zkontrolujte že indexy byly vytvořeny: SHOW INDEX FROM tabulka;\n";
 echo "  - Očekávané zrychlení: 50-90% na WHERE/JOIN/ORDER BY dotazech\n";
-
-// Return JSON for API calls
-if (php_sapi_name() !== 'cli') {
-    header('Content-Type: application/json');
-    echo json_encode([
-        'status' => 'success',
-        'results' => $results,
-        'summary' => [
-            'added' => count($results['success']),
-            'skipped' => count($results['skipped']),
-            'failed' => count($results['failed'])
-        ]
-    ], JSON_PRETTY_PRINT);
-}

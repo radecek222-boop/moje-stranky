@@ -88,7 +88,7 @@ INSERT INTO wgs_pending_actions (
     status,
     created_at
 ) VALUES (
-    'config',
+    'migration',
     '🔐 PRODUKCE: Zabezpečit setup/ adresář',
     'Zkopíruje setup/.htaccess.production → setup/.htaccess
 
@@ -105,7 +105,7 @@ Pokud budeš potřebovat setup script, musíš:
 
 Riziko: ŽÁDNÉ - jen kopíruje konfigurační soubor
 Dopad: Zabezpečení proti neoprávněnému přístupu k setup scriptům',
-    'setup/.htaccess.production',
+    'scripts/secure_setup_directory.php',
     'critical',
     'pending',
     NOW()
