@@ -10,6 +10,7 @@
 
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
+require_once __DIR__ . '/../includes/rate_limiter.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -18,6 +19,28 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     echo json_encode([
         'status' => 'error',
         'message' => 'Přístup odepřen. Pouze pro administrátory.'
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+// HIGH PRIORITY FIX: Rate limiting na admin API
+$ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$userId = $_SESSION['user_id'] ?? $_SESSION['admin_id'] ?? 'admin';
+$identifier = "admin_api_{$ip}_{$userId}";
+
+$rateLimiter = new RateLimiter(getDbConnection());
+$rateCheck = $rateLimiter->checkLimit($identifier, 'admin_api', [
+    'max_attempts' => 100,
+    'window_minutes' => 10,
+    'block_minutes' => 30
+]);
+
+if (!$rateCheck['allowed']) {
+    http_response_code(429);
+    echo json_encode([
+        'status' => 'error',
+        'message' => $rateCheck['message'],
+        'retry_after' => $rateCheck['reset_at']
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }

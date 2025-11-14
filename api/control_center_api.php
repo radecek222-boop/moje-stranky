@@ -21,6 +21,32 @@ try {
         exit;
     }
 
+    // HIGH PRIORITY FIX: Rate limiting na admin API
+    // Ochrana proti brute-force útokům a zneužití admin funkcí
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $userId = $_SESSION['user_id'] ?? $_SESSION['admin_id'] ?? 'admin';
+    $identifier = "admin_api_{$ip}_{$userId}";
+
+    // Použít RateLimiter třídu (již načtena v init.php)
+    $rateLimiter = new RateLimiter(getDbConnection());
+
+    // 100 požadavků za 10 minut, blokace na 30 minut
+    $rateCheck = $rateLimiter->checkLimit($identifier, 'admin_api', [
+        'max_attempts' => 100,
+        'window_minutes' => 10,
+        'block_minutes' => 30
+    ]);
+
+    if (!$rateCheck['allowed']) {
+        http_response_code(429);
+        echo json_encode([
+            'status' => 'error',
+            'message' => $rateCheck['message'],
+            'retry_after' => $rateCheck['reset_at']
+        ]);
+        exit;
+    }
+
     // Načtení JSON dat
     $jsonData = file_get_contents('php://input');
     $data = json_decode($jsonData, true);
