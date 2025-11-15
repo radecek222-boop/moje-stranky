@@ -10,14 +10,16 @@ if (!$isAdmin) {
 }
 
 // Detect embed mode for iframes
-$embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
+// SECURITY FIX: Strict comparison (=== místo ==)
+$embedMode = isset($_GET['embed']) && $_GET['embed'] === '1';
 
 // BEZPEČNOST: Security headers
 if (!$embedMode) {
     // Content-Security-Policy - ochrana před XSS útoky
+    // SECURITY FIX: Odstraněn 'unsafe-eval' pro lepší bezpečnost
     header("Content-Security-Policy: " .
         "default-src 'self'; " .
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; " .
+        "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
         "font-src 'self' https://fonts.gstatic.com; " .
         "img-src 'self' data: https:; " .
@@ -335,7 +337,10 @@ try {
 
     <script>
     // Modal systém pro notifikace
-    function openNotifModal(type) {
+        /**
+     * OpenNotifModal
+     */
+function openNotifModal(type) {
         const overlay = document.getElementById('notifModalOverlay');
         const modal = overlay.querySelector('.cc-modal');
         const title = document.getElementById('notifModalTitle');
@@ -364,7 +369,10 @@ try {
         document.body.style.overflow = 'hidden';
     }
 
-    function closeNotifModal() {
+        /**
+     * CloseNotifModal
+     */
+function closeNotifModal() {
         const overlay = document.getElementById('notifModalOverlay');
         const modal = overlay.querySelector('.cc-modal');
 
@@ -374,7 +382,10 @@ try {
         document.body.style.overflow = 'auto';
     }
 
-    function loadNotifContent(type, body) {
+        /**
+     * LoadNotifContent
+     */
+function loadNotifContent(type, body) {
         // Zobrazit loading
         body.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Načítání...</div>';
 

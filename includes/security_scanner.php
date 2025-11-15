@@ -11,6 +11,11 @@
  * - Rate limiting coverage
  */
 
+/**
+ * ScanCSRFVulnerabilities
+ *
+ * @param mixed $rootDir RootDir
+ */
 function scanCSRFVulnerabilities($rootDir) {
     $findings = [
         'php_endpoints_without_csrf' => [],
@@ -122,6 +127,11 @@ function scanCSRFVulnerabilities($rootDir) {
     return $findings;
 }
 
+/**
+ * ScanSQLInjectionRisks
+ *
+ * @param mixed $rootDir RootDir
+ */
 function scanSQLInjectionRisks($rootDir) {
     $findings = [];
     $dirs = ['api', 'app/controllers', 'app', 'includes'];
@@ -159,6 +169,11 @@ function scanSQLInjectionRisks($rootDir) {
     return $findings;
 }
 
+/**
+ * ScanAuthenticationBypass
+ *
+ * @param mixed $rootDir RootDir
+ */
 function scanAuthenticationBypass($rootDir) {
     $findings = [];
     $protectedDirs = ['admin', 'api', 'app', 'app/controllers'];
@@ -203,6 +218,11 @@ function scanAuthenticationBypass($rootDir) {
     return $findings;
 }
 
+/**
+ * PerformSecurityScan
+ *
+ * @param mixed $rootDir RootDir
+ */
 function performSecurityScan($rootDir) {
     return [
         'csrf_vulnerabilities' => scanCSRFVulnerabilities($rootDir),

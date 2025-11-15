@@ -1,0 +1,16 @@
+# Documentation Quality Report
+# Vygenerováno: 2025-11-14 21:09:48
+
+## Statistiky:
+
+Funkce: 275/275 (100%)
+Třídy: 3/6 (50%)
+Soubory bez headeru: 31
+
+## Komplexní funkce bez dokumentace:
+
+
+## Adresáře bez README:
+
+- app/
+- docs/

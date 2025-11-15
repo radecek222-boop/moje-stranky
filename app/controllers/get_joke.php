@@ -51,7 +51,11 @@ function fetchFromJokeAPI(): ?string {
         ]
     ]);
 
-    $response = @file_get_contents($url, false, $context);
+    $response = file_get_contents($url, false, $context);
+if ($response === false) {
+    error_log('Failed to read file: ' . $url, false, $context);
+    $response = '';
+}
 
     if ($response === false) {
         return null;

@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
+require_once __DIR__ . '/../../includes/safe_file_operations.php';
 
 header('Content-Type: application/json');
 
@@ -88,14 +89,14 @@ try {
     // Vytvoření uploads adresáře, pokud neexistuje
     $uploadsDir = __DIR__ . '/../../uploads';
     if (!is_dir($uploadsDir)) {
-        @mkdir($uploadsDir, 0755, true);
+        safeMkdir($uploadsDir, 0755, true);
     }
 
     // BUGFIX: mkdir race condition - suppress error pokud složka již existuje
     // Vytvoření podadresáře pro konkrétní reklamaci (basename pro extra bezpečnost)
     $reklamaceDir = $uploadsDir . '/reklamace_' . basename($reklamaceId);
     if (!is_dir($reklamaceDir)) {
-        @mkdir($reklamaceDir, 0755, true);
+        safeMkdir($reklamaceDir, 0755, true);
         // Double-check že složka existuje (pokud concurrent request ji vytvořil)
         if (!is_dir($reklamaceDir)) {
             throw new Exception("Nepodařilo se vytvořit adresář pro reklamaci");
@@ -103,6 +104,7 @@ try {
     }
 
     $savedPhotos = [];
+    $uploadedFiles = []; // Track uploaded files for rollback on DB error
 
     // Procházení všech fotek
     for ($i = 0; $i < $photoCount; $i++) {
@@ -164,39 +166,59 @@ try {
         $filename = "photo_{$reklamaceId}_{$timestamp}_{$randomString}.{$imageType}";
         $filePath = $reklamaceDir . '/' . $filename;
 
-        // Uložení souboru
+        // CRITICAL FIX: FILE-FIRST APPROACH
+        // Krok 1: Uložení souboru na disk
         if (file_put_contents($filePath, $photoData) === false) {
+            // ROLLBACK: Smazat všechny již nahrané soubory
+            foreach ($uploadedFiles as $uploadedFile) {
+                safeFileDelete($uploadedFile);
+            }
             throw new Exception("Nepodařilo se uložit fotku $i");
         }
 
         // Relativní cesta pro databázi
         $relativePathForDb = "uploads/reklamace_{$reklamaceId}/{$filename}";
 
-        // Vložení do databáze (s file_path a file_name podle PHOTOS_FIX_REPORT.md)
-        $stmt = $pdo->prepare("
-            INSERT INTO wgs_photos (
-                reklamace_id, section_name, photo_path, file_path, file_name,
-                photo_type, created_at
-            ) VALUES (
-                :reklamace_id, :section_name, :photo_path, :file_path, :file_name,
-                :photo_type, NOW()
-            )
-        ");
+        try {
+            // Krok 2: Vložení do databáze (s file_path a file_name podle PHOTOS_FIX_REPORT.md)
+            $stmt = $pdo->prepare("
+                INSERT INTO wgs_photos (
+                    reklamace_id, section_name, photo_path, file_path, file_name,
+                    photo_type, created_at
+                ) VALUES (
+                    :reklamace_id, :section_name, :photo_path, :file_path, :file_name,
+                    :photo_type, NOW()
+                )
+            ");
 
-        $stmt->execute([
-            ':reklamace_id' => $reklamaceId,
-            ':section_name' => $photoType,
-            ':photo_path' => $relativePathForDb,
-            ':file_path' => $relativePathForDb,
-            ':file_name' => $filename,
-            ':photo_type' => 'image'
-        ]);
+            $stmt->execute([
+                ':reklamace_id' => $reklamaceId,
+                ':section_name' => $photoType,
+                ':photo_path' => $relativePathForDb,
+                ':file_path' => $relativePathForDb,
+                ':file_name' => $filename,
+                ':photo_type' => 'image'
+            ]);
 
-        $savedPhotos[] = [
-            'photo_id' => $pdo->lastInsertId(),
-            'path' => $relativePathForDb,
-            'filename' => $filename
-        ];
+            // Úspěch - přidat do seznamu
+            $uploadedFiles[] = $filePath;
+            $savedPhotos[] = [
+                'photo_id' => $pdo->lastInsertId(),
+                'path' => $relativePathForDb,
+                'filename' => $filename
+            ];
+
+        } catch (PDOException $e) {
+            // CRITICAL FIX: ROLLBACK - Smazat soubor pokud DB insert selhal
+            safeFileDelete($filePath);
+
+            // Smazat i všechny předchozí soubory
+            foreach ($uploadedFiles as $uploadedFile) {
+                safeFileDelete($uploadedFile);
+            }
+
+            throw new Exception("Chyba při ukládání fotky $i do databáze: " . $e->getMessage());
+        }
     }
 
     // Úspěšná odpověď

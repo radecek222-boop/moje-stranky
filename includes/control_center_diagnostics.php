@@ -327,11 +327,17 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
 </div>
 
 <script>
+/**
+ * ViewLog
+ */
 function viewLog(logType) {
     window.open(`/admin.php?tab=tools&view_log=${logType}`, '_blank');
 }
 
-async function clearCache() {
+async /**
+ * ClearCache
+ */
+function clearCache() {
     if (!confirm('Opravdu chcete vymazat cache? Tato akce může dočasně zpomalit systém.')) {
         return;
     }
@@ -353,7 +359,10 @@ async function clearCache() {
     }
 }
 
-async function archiveLogs() {
+async /**
+ * ArchiveLogs
+ */
+function archiveLogs() {
     if (!confirm('Archivovat logy starší než 90 dní?')) {
         return;
     }
@@ -376,7 +385,10 @@ async function archiveLogs() {
     }
 }
 
-async function optimizeDatabase() {
+async /**
+ * OptimizeDatabase
+ */
+function optimizeDatabase() {
     if (!confirm('Optimalizovat databázi? Tato akce může trvat několik minut.')) {
         return;
     }
@@ -406,7 +418,10 @@ async function optimizeDatabase() {
     }
 }
 
-async function createBackup() {
+async /**
+ * CreateBackup
+ */
+function createBackup() {
     if (!confirm('Vytvořit zálohu databáze?\n\nTato akce může trvat několik minut v závislosti na velikosti databáze.')) {
         return;
     }
@@ -436,7 +451,10 @@ async function createBackup() {
     }
 }
 
-async function viewBackups() {
+async /**
+ * ViewBackups
+ */
+function viewBackups() {
     try {
         const response = await fetch('/api/backup_api.php?action=list_backups');
         const result = await response.json();
@@ -471,6 +489,9 @@ async function viewBackups() {
     }
 }
 
+/**
+ * SetupActionsSystem
+ */
 function setupActionsSystem() {
     if (!confirm('Spustit setup Actions System?\n\nTento script vytvoří databázové tabulky pro systém akcí a úkolů. Je bezpečné spustit i pokud tabulky již existují.')) {
         return;

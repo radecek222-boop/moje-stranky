@@ -60,45 +60,66 @@ try {
 
             // Název souboru s časovou značkou
             $timestamp = date('Y-m-d_H-i-s');
-            $filename = "backup_{$dbName}_{$timestamp}.sql";
-            $filepath = $backupDir . '/' . $filename;
+            $filename = "backup_{$dbName}_{$timestamp}.sql.gz";
+            $gzFilepath = $backupDir . '/' . $filename;
+
+            // CRITICAL FIX: Memory leak - streamovat přímo do GZIP místo držení v paměti
+            // Otevřít GZIP soubor pro zápis (w9 = maximální komprese)
+            $gzFile = gzopen($gzFilepath, 'w9');
+
+            if ($gzFile === false) {
+                throw new Exception('Failed to create backup file');
+            }
 
             // Získat všechny tabulky
             $stmt = $pdo->query("SHOW TABLES");
             $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-            $output = "-- Database Backup\n";
-            $output .= "-- Database: $dbName\n";
-            $output .= "-- Generated: " . date('Y-m-d H:i:s') . "\n";
-            $output .= "-- ==========================================\n\n";
-
-            $output .= "SET SQL_MODE = \"NO_AUTO_VALUE_ON_ZERO\";\n";
-            $output .= "SET time_zone = \"+00:00\";\n\n";
+            // CRITICAL FIX: Psát header přímo do GZIP
+            gzwrite($gzFile, "-- Database Backup\n");
+            gzwrite($gzFile, "-- Database: $dbName\n");
+            gzwrite($gzFile, "-- Generated: " . date('Y-m-d H:i:s') . "\n");
+            gzwrite($gzFile, "-- ==========================================\n\n");
+            gzwrite($gzFile, "SET SQL_MODE = \"NO_AUTO_VALUE_ON_ZERO\";\n");
+            gzwrite($gzFile, "SET time_zone = \"+00:00\";\n\n");
 
             $totalRows = 0;
 
             foreach ($tables as $table) {
                 // DROP TABLE IF EXISTS
-                $output .= "\n-- ==========================================\n";
-                $output .= "-- Table: $table\n";
-                $output .= "-- ==========================================\n\n";
-                $output .= "DROP TABLE IF EXISTS `$table`;\n\n";
+                gzwrite($gzFile, "\n-- ==========================================\n");
+                gzwrite($gzFile, "-- Table: $table\n");
+                gzwrite($gzFile, "-- ==========================================\n\n");
+                gzwrite($gzFile, "DROP TABLE IF EXISTS `$table`;\n\n");
 
                 // CREATE TABLE
                 $createStmt = $pdo->query("SHOW CREATE TABLE `$table`");
                 $createRow = $createStmt->fetch(PDO::FETCH_ASSOC);
-                $output .= $createRow['Create Table'] . ";\n\n";
+                gzwrite($gzFile, $createRow['Create Table'] . ";\n\n");
 
-                // INSERT DATA
+                // CRITICAL FIX: INSERT DATA - streamovat řádek po řádku místo fetchAll()
                 $dataStmt = $pdo->query("SELECT * FROM `$table`");
-                $rows = $dataStmt->fetchAll(PDO::FETCH_ASSOC);
-                $rowCount = count($rows);
 
-                if ($rowCount > 0) {
-                    $columns = array_keys($rows[0]);
-                    $output .= "INSERT INTO `$table` (`" . implode('`, `', $columns) . "`) VALUES\n";
+                // Zjistit počet sloupců z prvního řádku
+                $firstRow = $dataStmt->fetch(PDO::FETCH_ASSOC);
 
-                    foreach ($rows as $index => $row) {
+                if ($firstRow) {
+                    $columns = array_keys($firstRow);
+                    gzwrite($gzFile, "INSERT INTO `$table` (`" . implode('`, `', $columns) . "`) VALUES\n");
+
+                    // Zpracovat první řádek
+                    $values = array_map(function($value) use ($pdo) {
+                        if ($value === null) {
+                            return 'NULL';
+                        }
+                        return $pdo->quote($value);
+                    }, array_values($firstRow));
+
+                    gzwrite($gzFile, "(" . implode(', ', $values) . ")");
+                    $totalRows++;
+
+                    // CRITICAL FIX: Fetch po jednom řádku místo fetchAll() - šetří paměť
+                    while ($row = $dataStmt->fetch(PDO::FETCH_ASSOC)) {
                         $values = array_map(function($value) use ($pdo) {
                             if ($value === null) {
                                 return 'NULL';
@@ -106,36 +127,21 @@ try {
                             return $pdo->quote($value);
                         }, array_values($row));
 
-                        $output .= "(" . implode(', ', $values) . ")";
-
-                        if ($index < $rowCount - 1) {
-                            $output .= ",\n";
-                        } else {
-                            $output .= ";\n\n";
-                        }
-
+                        gzwrite($gzFile, ",\n(" . implode(', ', $values) . ")");
                         $totalRows++;
                     }
+
+                    gzwrite($gzFile, ";\n\n");
                 } else {
-                    $output .= "-- No data for table `$table`\n\n";
+                    gzwrite($gzFile, "-- No data for table `$table`\n\n");
                 }
+
+                // CRITICAL FIX: Uvolnit paměť po každé tabulce
+                unset($dataStmt);
             }
 
-            // Zapsat do souboru
-            $written = file_put_contents($filepath, $output);
-
-            if ($written === false) {
-                throw new Exception('Failed to write backup file');
-            }
-
-            // Zkomprimovat
-            $gzFilepath = $filepath . '.gz';
-            $gzFile = gzopen($gzFilepath, 'w9');
-            gzwrite($gzFile, $output);
+            // Zavřít GZIP soubor
             gzclose($gzFile);
-
-            // Smazat nekomprimovaný soubor
-            unlink($filepath);
 
             $endTime = microtime(true);
             $executionTime = round(($endTime - $startTime) * 1000, 2);

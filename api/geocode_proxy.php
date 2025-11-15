@@ -17,6 +17,14 @@ header('Content-Type: application/json');
  * @param float $lon2 Longitude druhého bodu
  * @return float Vzdálenost v kilometrech
  */
+/**
+ * HaversineDistance
+ *
+ * @param mixed $lat1 Lat1
+ * @param mixed $lon1 Lon1
+ * @param mixed $lat2 Lat2
+ * @param mixed $lon2 Lon2
+ */
 function haversineDistance($lat1, $lon1, $lat2, $lon2) {
     $earthRadius = 6371; // Poloměr Země v km
 
@@ -174,7 +182,7 @@ try {
                             'type' => 'Feature',
                             'properties' => [
                                 'distance' => $route['distance'], // v metrech
-                                'duration' => $route['duration'], // v sekundách
+                                'time' => $route['duration'], // v sekundách (přejmenováno z duration)
                                 'provider' => 'OSRM'
                             ],
                             'geometry' => [

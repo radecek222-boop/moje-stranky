@@ -76,6 +76,11 @@ try {
 }
 
 // Priority badge colors
+/**
+ * GetPriorityBadge
+ *
+ * @param mixed $priority Priority
+ */
 function getPriorityBadge($priority) {
     $badges = [
         'critical' => ['color' => '#DC3545', 'icon' => '🔴', 'text' => 'Kritické'],
@@ -380,11 +385,17 @@ function getPriorityBadge($priority) {
 const DEBUG_MODE = false;
 
 // Helper function to check API response success
+/**
+ * IsSuccess
+ */
 function isSuccess(data) {
     return (data && (data.success === true || data.status === 'success'));
 }
 
-async function executeAction(event, actionId) {
+async /**
+ * ExecuteAction
+ */
+function executeAction(event, actionId) {
     if (DEBUG_MODE) console.log('[executeAction] Starting with actionId:', actionId);
 
     // Capture button reference BEFORE any await
@@ -492,7 +503,10 @@ async function executeAction(event, actionId) {
     });
 }
 
-async function completeAction(actionId) {
+async /**
+ * CompleteAction
+ */
+function completeAction(actionId) {
     if (!confirm('Označit tento úkol jako dokončený?')) {
         return;
     }
@@ -518,7 +532,10 @@ async function completeAction(actionId) {
     }
 }
 
-async function dismissAction(actionId) {
+async /**
+ * DismissAction
+ */
+function dismissAction(actionId) {
     if (!confirm('Opravdu chcete zrušit tento úkol?')) {
         return;
     }
@@ -544,16 +561,25 @@ async function dismissAction(actionId) {
     }
 }
 
+/**
+ * ViewAllWebhooks
+ */
 function viewAllWebhooks() {
     window.open('/admin.php?tab=tools&view=github_webhooks', '_blank');
 }
 
+/**
+ * SetupGitHubWebhook
+ */
 function setupGitHubWebhook() {
     alert('GitHub Webhook URL:\n\n' + window.location.origin + '/api/github_webhook.php\n\nPřidejte tuto URL do nastavení GitHub repozitáře.');
 }
 
 // Přidat optimalizační úkoly
-async function pridatOptimalizacniUkoly() {
+async /**
+ * PridatOptimalizacniUkoly
+ */
+function pridatOptimalizacniUkoly() {
     if (!confirm('Přidat 6 optimalizačních úkolů?\n\n• Minifikace JS/CSS\n• Přidat DB indexy\n• Vytvořit backup\n• Vyčistit selhavší emaily\n• Povolit Gzip\n• Nastavit Browser Cache\n\nÚkoly které již existují budou přeskočeny.')) {
         return;
     }

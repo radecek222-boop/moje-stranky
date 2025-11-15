@@ -1,0 +1,180 @@
+═══════════════════════════════════════════════════════════════════════════════════════
+VŠECHNY DATA INTEGRITY PROBLÉMY - KONKRÉTNÍ LOKACE
+═══════════════════════════════════════════════════════════════════════════════════════
+
+KRITICKÉ PROBLÉMY (9):
+───────────────────────────────────────────────────────────────────────────────────────
+
+1. app/controllers/save.php:429
+   ❌ INSERT bez transaction (CREATE action)
+   PROBLÉM: Orphan workflow ID pokud INSERT selže
+   SEVERITY: KRITICKÉ
+
+2. app/controllers/save_photos.php:168
+   ❌ File write PŘED DB INSERT (file-first approach)
+   PROBLÉM: Orphan soubor pokud INSERT selže
+   SEVERITY: KRITICKÉ
+
+3. api/protokol_api.php:177
+   ❌ PDF write PŘED DB INSERT/UPDATE (file-first approach)
+   PROBLÉM: Orphan PDF pokud INSERT/UPDATE selže
+   SEVERITY: KRITICKÉ
+
+4. includes/EmailQueue.php:258
+   ❌ updateStatus MIMO transakci s sendEmail()
+   PROBLÉM: Email se zamrzne v stavu 'sending'
+   SEVERITY: KRITICKÉ
+
+5. api/github_webhook.php:168
+   ❌ INSERT webhook a INSERT action BEZ transakce
+   PROBLÉM: Orphan webhook bez action reference
+   SEVERITY: KRITICKÉ
+
+6. includes/control_center_tools.php:38
+   ❌ Loop UPDATE BEZ transakce
+   PROBLÉM: Partial state persistence - některé UPDATE OK, některé ne
+   SEVERITY: KRITICKÉ
+
+7. api/notes_api.php:119
+   ❌ INSERT poznámky BEZ transakce
+   PROBLÉM: Database inkonsistencej
+   SEVERITY: KRITICKÉ
+
+8. api/notes_api.php:155
+   ❌ DELETE poznámky BEZ transakce
+   PROBLÉM: Neatomiková DELETE operace
+   SEVERITY: KRITICKÉ
+
+9. cron/process-email-queue.php:102
+   ❌ UPDATE email na 'sending' BEZ transakce PŘED sendEmail()
+   PROBLÉM: Email se zamrzne v 'sending' při timeout/error
+   SEVERITY: KRITICKÉ
+
+
+RACE CONDITION (1):
+───────────────────────────────────────────────────────────────────────────────────────
+
+10. app/controllers/registration_controller.php:62
+    ⚠️ SELECT COUNT(*) bez FOR UPDATE
+    PROBLÉM: 2 paralelní requesty mohou vybrat stejný email
+    SCENARIO: T1 SELECT ne; T2 SELECT ne; T1 INSERT OK; T2 INSERT DUPLICATE KEY ERROR
+    SEVERITY: VYSOKÁ
+
+
+ORPHAN FILE RIZIKA (2):
+───────────────────────────────────────────────────────────────────────────────────────
+
+11. app/controllers/save_photos.php:168 (pho-to-save)
+    → Soubor se uloží na /uploads/reklamace_XXX/photo_*.jpg
+    → Pokud DB INSERT selže, soubor zůstane orphaned
+
+12. api/protokol_api.php:177 (pdf-save)
+    → PDF se uloží na /uploads/protokoly/XXX.pdf
+    → Pokud DB INSERT/UPDATE selže, PDF zůstane orphaned
+
+
+LOOP UPDATES BEZ TRANSAKCE (2):
+───────────────────────────────────────────────────────────────────────────────────────
+
+13. includes/control_center_tools.php:38
+    ❌ foreach ($users as $user) { $stmt->execute(...); }
+    PROBLÉM: Pokud UPDATE pro N-tého uživatele selže, UPDATE 1 až N-1 zůstanou committed
+
+14. api/control_center_api.php:141
+    ❌ foreach ($settings as $key => $value) { $stmt->execute(...); }
+    PROBLÉM: Pokud INSERT pro N-tého nastavení selže, INSERT 1 až N-1 zůstanou
+
+
+CHYBĚJÍCÍ FK CONSTRAINTS (4):
+───────────────────────────────────────────────────────────────────────────────────────
+
+15. wgs_photos (table)
+    ❌ NEMÁ FK na wgs_reklamace
+    RIZIKO: Orphan photos bez reklamace reference
+    ŘEŠENÍ: ALTER TABLE wgs_photos ADD FOREIGN KEY (reklamace_id) REFERENCES wgs_reklamace(reklamace_id) ON DELETE CASCADE;
+
+16. wgs_documents (table)
+    ❌ NEMÁ FK na wgs_reklamace
+    RIZIKO: Orphan documents bez reklamace reference
+    ŘEŠENÍ: ALTER TABLE wgs_documents ADD FOREIGN KEY (claim_id) REFERENCES wgs_reklamace(id) ON DELETE CASCADE;
+
+17. wgs_notes (table)
+    ❌ NEMÁ FK na wgs_reklamace
+    RIZIKO: Orphan notes bez reklamace reference
+    ŘEŠENÍ: ALTER TABLE wgs_notes ADD FOREIGN KEY (claim_id) REFERENCES wgs_reklamace(id) ON DELETE CASCADE;
+
+18. wgs_notifications (table)
+    ❌ NEMÁ FK na wgs_reklamace
+    RIZIKO: Orphan notifications bez reklamace reference
+    ŘEŠENÍ: ALTER TABLE wgs_notifications ADD FOREIGN KEY (claim_id) REFERENCES wgs_reklamace(id) ON DELETE CASCADE;
+
+
+DODATEČNÉ PROBLÉMY (2):
+───────────────────────────────────────────────────────────────────────────────────────
+
+19. api/admin_api.php:149
+    ❌ INSERT registrační klíč BEZ transakce
+    PROBLÉM: Klíč se generuje ale INSERT selže → klíč ztracen
+    SEVERITY: VYSOKÁ
+
+20. api/github_webhook.php:202
+    ❌ Manuální cascades místo FK constraints
+    PROBLÉM: Pokud delete_reklamace.php se neprovede, orphan records zůstanou NAVŽDY
+
+
+═══════════════════════════════════════════════════════════════════════════════════════
+PRIORITY MATRIX
+═══════════════════════════════════════════════════════════════════════════════════════
+
+PRIORITY 1 (FIX TODAY - Next 24 hours):
+- save.php:429 (CREATE transaction)
+- save_photos.php:168 (file reorder)
+- protokol_api.php:177 (PDF reorder)
+- github_webhook.php:168 (transaction)
+- EmailQueue.php:258 (transaction)
+
+PRIORITY 2 (FIX THIS WEEK):
+- registration_controller.php:62 (SELECT FOR UPDATE)
+- control_center_tools.php:38 (transaction loop)
+- process-email-queue.php:102 (transaction)
+- notes_api.php:119,155 (transaction)
+- admin_api.php:149 (transaction)
+
+PRIORITY 3 (FIX THIS SPRINT):
+- control_center_api.php:141 (transaction loop)
+- Add FK constraints (4 tables)
+- Replace manual cascades
+
+═══════════════════════════════════════════════════════════════════════════════════════
+SOUHRNNÉ METRIKY
+═══════════════════════════════════════════════════════════════════════════════════════
+
+CELKEM PROBLÉMŮ: 20
+- KRITICKÉ: 9 (45%)
+- VYSOKÁ: 5 (25%)
+- STŘEDNÍ: 6 (30%)
+
+SOUBORY S PROBLÉMY: 12
+- app/controllers/save.php (1)
+- app/controllers/save_photos.php (1)
+- app/controllers/registration_controller.php (1)
+- api/protokol_api.php (1)
+- includes/EmailQueue.php (1)
+- cron/process-email-queue.php (1)
+- api/github_webhook.php (2)
+- includes/control_center_tools.php (1)
+- api/notes_api.php (2)
+- api/admin_api.php (1)
+- api/control_center_api.php (1)
+- Database Tables (4 - chybějící FK)
+
+DATA CORRUPTION RISK: VYSOKÁ
+- Orphan workflows
+- Orphan files (2 lokace)
+- Orphan database records (4 tabulky)
+- Email locks
+- Partial state persistence (2 places)
+
+═══════════════════════════════════════════════════════════════════════════════════════
+KONEC SEZNAMU
+═══════════════════════════════════════════════════════════════════════════════════════

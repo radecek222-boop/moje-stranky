@@ -7,6 +7,12 @@
 require_once __DIR__ . '/../init.php';
 
 // Security: Verify GitHub signature
+/**
+ * VerifyGitHubSignature
+ *
+ * @param mixed $payload Payload
+ * @param mixed $signature Signature
+ */
 function verifyGitHubSignature($payload, $signature) {
     if (empty($signature)) {
         return false;
@@ -28,6 +34,11 @@ function verifyGitHubSignature($payload, $signature) {
 }
 
 // Log webhook to file for debugging
+/**
+ * LogWebhook
+ *
+ * @param mixed $data Data
+ */
 function logWebhook($data) {
     $logFile = __DIR__ . '/../logs/github_webhooks.log';
     $logDir = dirname($logFile);
@@ -164,57 +175,72 @@ try {
             break;
     }
 
-    // Store webhook in database
-    $stmt = $pdo->prepare("
-        INSERT INTO wgs_github_webhooks
-        (event_type, repository, author, branch, commit_message, payload, processed)
-        VALUES (:event_type, :repository, :author, :branch, :commit_message, :payload, :processed)
-    ");
+    // CRITICAL FIX: Zahájit transakci pro atomicitu webhook + pending action
+    $pdo->beginTransaction();
 
-    $stmt->execute([
-        'event_type' => $event,
-        'repository' => $repository,
-        'author' => $sender,
-        'branch' => $branch,
-        'commit_message' => $commitMessage,
-        'payload' => $payload,
-        'processed' => $createPendingAction ? 1 : 0
-    ]);
-
-    $webhookId = $pdo->lastInsertId();
-
-    // Create pending action if needed
-    if ($createPendingAction && $actionTitle) {
+    try {
+        // Store webhook in database
         $stmt = $pdo->prepare("
-            INSERT INTO wgs_pending_actions
-            (action_type, action_title, action_description, priority, source_type, source_id, status)
-            VALUES (:action_type, :action_title, :action_description, :priority, 'github_webhook', :source_id, 'pending')
+            INSERT INTO wgs_github_webhooks
+            (event_type, repository, author, branch, commit_message, payload, processed)
+            VALUES (:event_type, :repository, :author, :branch, :commit_message, :payload, :processed)
         ");
 
         $stmt->execute([
-            'action_type' => $actionType,
-            'action_title' => $actionTitle,
-            'action_description' => $actionDescription,
-            'priority' => $priority,
-            'source_id' => $webhookId
+            'event_type' => $event,
+            'repository' => $repository,
+            'author' => $sender,
+            'branch' => $branch,
+            'commit_message' => $commitMessage,
+            'payload' => $payload,
+            'processed' => $createPendingAction ? 1 : 0
         ]);
 
-        $actionId = $pdo->lastInsertId();
+        $webhookId = $pdo->lastInsertId();
 
-        logWebhook([
-            'status' => 'processed',
-            'event' => $event,
-            'repository' => $repository,
-            'action_created' => $actionId,
-            'priority' => $priority
-        ]);
-    } else {
-        logWebhook([
-            'status' => 'stored',
-            'event' => $event,
-            'repository' => $repository,
-            'no_action_needed' => true
-        ]);
+        // Create pending action if needed
+        if ($createPendingAction && $actionTitle) {
+            $stmt = $pdo->prepare("
+                INSERT INTO wgs_pending_actions
+                (action_type, action_title, action_description, priority, source_type, source_id, status)
+                VALUES (:action_type, :action_title, :action_description, :priority, 'github_webhook', :source_id, 'pending')
+            ");
+
+            $stmt->execute([
+                'action_type' => $actionType,
+                'action_title' => $actionTitle,
+                'action_description' => $actionDescription,
+                'priority' => $priority,
+                'source_id' => $webhookId
+            ]);
+
+            $actionId = $pdo->lastInsertId();
+
+            logWebhook([
+                'status' => 'processed',
+                'event' => $event,
+                'repository' => $repository,
+                'action_created' => $actionId,
+                'priority' => $priority
+            ]);
+        } else {
+            logWebhook([
+                'status' => 'stored',
+                'event' => $event,
+                'repository' => $repository,
+                'no_action_needed' => true
+            ]);
+        }
+
+        // CRITICAL FIX: COMMIT transakce - obě operace úspěšné
+        $pdo->commit();
+
+    } catch (PDOException $dbError) {
+        // CRITICAL FIX: ROLLBACK transakce při chybě
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $dbError; // Re-throw to outer catch block
     }
 
     // Send success response

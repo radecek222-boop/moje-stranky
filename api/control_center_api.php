@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
+require_once __DIR__ . '/../includes/safe_file_operations.php';
 
 header('Content-Type: application/json');
 
@@ -17,6 +18,32 @@ try {
         echo json_encode([
             'status' => 'error',
             'message' => 'Neautorizovaný přístup'
+        ]);
+        exit;
+    }
+
+    // HIGH PRIORITY FIX: Rate limiting na admin API
+    // Ochrana proti brute-force útokům a zneužití admin funkcí
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $userId = $_SESSION['user_id'] ?? $_SESSION['admin_id'] ?? 'admin';
+    $identifier = "admin_api_{$ip}_{$userId}";
+
+    // Použít RateLimiter třídu (již načtena v init.php)
+    $rateLimiter = new RateLimiter(getDbConnection());
+
+    // 100 požadavků za 10 minut, blokace na 30 minut
+    $rateCheck = $rateLimiter->checkLimit($identifier, 'admin_api', [
+        'max_attempts' => 100,
+        'window_minutes' => 10,
+        'block_minutes' => 30
+    ]);
+
+    if (!$rateCheck['allowed']) {
+        http_response_code(429);
+        echo json_encode([
+            'status' => 'error',
+            'message' => $rateCheck['message'],
+            'retry_after' => $rateCheck['reset_at']
         ]);
         exit;
     }
@@ -1109,7 +1136,7 @@ try {
                         $phpFiles[] = $relativePath;
 
                         // Základní syntax check pomocí token_get_all()
-                        $content = @file_get_contents($filePath);
+                        $content = safeFileGetContents($filePath);
                         if ($content !== false) {
                             // Suppress warnings pro token_get_all
                             $oldErrorHandler = set_error_handler(function() { return true; });
@@ -1360,10 +1387,12 @@ try {
                         // Pokud je to běžný sloupec pro filtrování
                         if (in_array($columnName, $commonColumns)) {
                             // Zkontrolovat jestli má index
-                            $indexStmt = $pdo->query("
+                            // SECURITY FIX: Použití prepared statement místo string concatenation
+                            $indexStmt = $pdo->prepare("
                                 SHOW INDEX FROM `$table`
-                                WHERE Column_name = '$columnName'
+                                WHERE Column_name = :columnName
                             ");
+                            $indexStmt->execute(['columnName' => $columnName]);
                             $hasIndex = $indexStmt->fetch();
 
                             if (!$hasIndex) {
@@ -2389,7 +2418,7 @@ try {
                         }
 
                         $filesChecked++;
-                        $content = @file_get_contents($filePath);
+                        $content = safeFileGetContents($filePath);
                         if ($content === false) continue;
 
                         $lines = explode("\n", $content);
@@ -2421,7 +2450,10 @@ try {
                         foreach ($lines as $lineNum => $line) {
                             $lineNumber = $lineNum + 1;
 
-                            for ($i = 0; $i < strlen($line); $i++) {
+                            $len_i = strlen($line);
+
+
+                            for ($i = 0; $i < $len_i; $i++) {
                                 $char = $line[$i];
 
                                 if ($escaped) {
@@ -2618,7 +2650,7 @@ try {
 
                 foreach ($jsFiles as $jsFile) {
                     $relativePath = str_replace($rootDir . '/', '', $jsFile);
-                    $content = @file_get_contents($jsFile);
+                    $content = safeFileGetContents($jsFile);
                     if ($content === false) continue;
 
                     $results['javascript']['files_checked']++;
@@ -2632,7 +2664,10 @@ try {
                     foreach ($lines as $lineNum => $line) {
                         $lineNumber = $lineNum + 1;
 
-                        for ($i = 0; $i < strlen($line); $i++) {
+                        $len_i = strlen($line);
+
+
+                        for ($i = 0; $i < $len_i; $i++) {
                             $char = $line[$i];
 
                             if ($escaped) {
@@ -2764,7 +2799,7 @@ try {
 
                 foreach ($cssFiles as $cssFile) {
                     $relativePath = str_replace($rootDir . '/', '', $cssFile);
-                    $content = @file_get_contents($cssFile);
+                    $content = safeFileGetContents($cssFile);
                     if ($content === false) continue;
 
                     $results['css']['files_checked']++;
@@ -2864,10 +2899,10 @@ try {
 
                 foreach ($logFiles as $logFile) {
                     // Suppress errors kvůli možným open_basedir restrictions
-                    if (!@file_exists($logFile) || !@is_readable($logFile)) continue;
+                    if (!safeFileExists($logFile) || !@is_readable($logFile)) continue;
 
-                    $lines = @file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-                    if ($lines === false) continue;
+                    $lines = safeFileToArray($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES, []);
+                    if (empty($lines)) continue;
 
                     // Poslední 100 řádků
                     $recentLines = array_slice(array_reverse($lines), 0, 100);

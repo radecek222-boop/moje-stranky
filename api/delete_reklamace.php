@@ -180,6 +180,12 @@ try {
     ], JSON_UNESCAPED_UNICODE);
 }
 
+/**
+ * CleanupUploadedFiles
+ *
+ * @param string $workflowId WorkflowId
+ * @param array $paths Paths
+ */
 function cleanupUploadedFiles(?string $workflowId, array $paths): int
 {
     $uploadsRoot = realpath(__DIR__ . '/../uploads');
@@ -206,8 +212,10 @@ function cleanupUploadedFiles(?string $workflowId, array $paths): int
         // Ověřit že realpath je stále v uploads/ (ochrana proti ....// útokům)
         $realPath = realpath($fullPath);
         if ($realPath && strpos($realPath, $uploadsRoot) === 0 && is_file($realPath)) {
-            if (@unlink($realPath)) {
+            if (unlink($realPath)) {
                 $deleted++;
+            } else {
+                error_log('Failed to delete file: ' . $realPath);
             }
         }
     }
@@ -220,6 +228,11 @@ function cleanupUploadedFiles(?string $workflowId, array $paths): int
     return $deleted;
 }
 
+/**
+ * RemoveDirectory
+ *
+ * @param string $dir Dir
+ */
 function removeDirectory(string $dir): int
 {
     if (!is_dir($dir)) {
@@ -239,11 +252,15 @@ function removeDirectory(string $dir): int
         $path = $dir . DIRECTORY_SEPARATOR . $item;
         if (is_dir($path)) {
             $removed += removeDirectory($path);
-        } elseif (@unlink($path)) {
+        } elseif (file_exists($path) && unlink($path)) {
             $removed++;
+        } else {
+            error_log('Failed to delete file: ' . $path);
         }
     }
 
-    @rmdir($dir);
+    if (is_dir($dir) && !rmdir($dir)) {
+        error_log('Failed to remove directory: ' . $dir);
+    }
     return $removed;
 }
