@@ -48,12 +48,26 @@ async function getCsrfTokenFromForm(form) {
 // ============================================================
 if (isAdminCheckbox) {
   isAdminCheckbox.addEventListener('change', (e) => {
+    const userEmail = document.getElementById('userEmail');
+    const userPassword = document.getElementById('userPassword');
+    const adminKey = document.getElementById('adminKey');
+
     if (e.target.checked) {
+      // Admin mode - skrýt user pole a odstranit required
       userLoginFields.style.display = 'none';
       adminLoginFields.style.display = 'block';
+
+      if (userEmail) userEmail.removeAttribute('required');
+      if (userPassword) userPassword.removeAttribute('required');
+      if (adminKey) adminKey.setAttribute('required', 'required');
     } else {
+      // User mode - zobrazit user pole a přidat required
       userLoginFields.style.display = 'block';
       adminLoginFields.style.display = 'none';
+
+      if (userEmail) userEmail.setAttribute('required', 'required');
+      if (userPassword) userPassword.setAttribute('required', 'required');
+      if (adminKey) adminKey.removeAttribute('required');
     }
   });
 }
