@@ -140,15 +140,8 @@ ENV;
     }
 }
 
-if ($fixAction === 'admin_bypass') {
-    session_start();
-    $_SESSION['is_admin'] = true;
-    $_SESSION['admin_id'] = 'BYPASS';
-    $_SESSION['user_name'] = 'Admin (Bypass)';
-    $_SESSION['role'] = 'admin';
-    header('Location: /admin');
-    exit;
-}
+// Admin bypass removed - security risk P0
+// Use proper login with key: ADMIN2025393F940A
 
 ?><!DOCTYPE html>
 <html lang="cs">
@@ -280,7 +273,6 @@ if ($fixAction === 'admin_bypass') {
 
     <?php if ($canFix): ?>
         <a href="?fix=fix_env" class="btn">🔧 OPRAVIT .ENV SOUBOR</a>
-        <a href="?fix=admin_bypass" class="btn warn">⚡ DOČASNÝ ADMIN BYPASS</a>
     <?php endif; ?>
     <?php endif; ?>
 
