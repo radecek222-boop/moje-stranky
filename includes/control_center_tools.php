@@ -3,6 +3,12 @@
  * Control Center - Nástroje & Diagnostika
  * Čistší verze bez starých dokončených úkolů
  */
+
+// Bezpečnostní kontrola
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    die('Unauthorized');
+}
+
 $pdo = getDbConnection();
 
 // Detect embed mode

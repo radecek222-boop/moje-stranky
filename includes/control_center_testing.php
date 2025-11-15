@@ -3,6 +3,12 @@
  * Control Center - Minimalist Testing Environment
  * Jednoduchý vizuální E2E test workflow reklamací
  */
+
+// Bezpečnostní kontrola
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    die('Unauthorized');
+}
+
 $pdo = getDbConnection();
 ?>
 

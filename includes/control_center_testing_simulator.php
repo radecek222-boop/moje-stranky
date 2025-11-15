@@ -3,6 +3,12 @@
  * E2E Workflow Simulator
  * Interaktivní simulace celého workflow s diagnostikou
  */
+
+// Bezpečnostní kontrola
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    die('Unauthorized');
+}
+
 $pdo = getDbConnection();
 $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 ?>

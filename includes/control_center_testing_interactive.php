@@ -4,6 +4,12 @@
  * Testování celého workflow od vytvoření reklamace po výsledek
  * Podporuje testování z pohledu různých rolí
  */
+
+// Bezpečnostní kontrola
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    die('Unauthorized');
+}
+
 $pdo = getDbConnection();
 $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 ?>

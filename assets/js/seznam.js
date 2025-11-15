@@ -1,60 +1,25 @@
 // BEZPEČNOST: Cache CSRF tokenu pro prevenci nekonečné smyčky
 window.csrfTokenCache = window.csrfTokenCache || null;
 
+// Uložit originální fetch PŘED jakýmkoliv přepsáním
+const originalFetch = window.fetch || fetch;
+
 async function getCSRFToken() {
   if (window.csrfTokenCache) return window.csrfTokenCache;
 
   try {
-    // Použít originalFetch aby se předešlo rekurzi
-    const response = await window.fetch("/app/controllers/get_csrf_token.php");
+    // OPRAVENO: Použít originalFetch místo window.fetch aby se předešlo rekurzi
+    const response = await originalFetch("/app/controllers/get_csrf_token.php");
     const data = await response.json();
     window.csrfTokenCache = data.token;
     return data.token;
   } catch (err) {
-    logger.error("Chyba získání CSRF tokenu:", err);
+    if (typeof logger !== 'undefined') {
+      logger.error("Chyba získání CSRF tokenu:", err);
+    }
     return "";
   }
 }
-
-const originalFetch = window.fetch;
-window.fetch = async function(...args) {
-  let [url, config = {}] = args;
-
-  // Skip CSRF pro get_csrf_token endpoint (prevence rekurze)
-  if (url.includes('get_csrf_token.php')) {
-    return originalFetch(url, config);
-  }
-
-  if (config.method === "POST" || config.method === "post") {
-    const token = await getCSRFToken();
-
-    // OPRAVENO: CSRF token musí být v body, ne v hlavičce
-    // requireCSRF() očekává $_POST['csrf_token']
-    if (config.body instanceof FormData) {
-      config.body.append('csrf_token', token);
-    } else if (typeof config.body === 'string') {
-      try {
-        const bodyObj = JSON.parse(config.body);
-        bodyObj.csrf_token = token;
-        config.body = JSON.stringify(bodyObj);
-      } catch (e) {
-        // Body není JSON - vytvoř FormData
-        const formData = new FormData();
-        formData.append('csrf_token', token);
-        formData.append('data', config.body);
-        config.body = formData;
-      }
-    } else if (!config.body) {
-      // Žádné body - vytvoř FormData s tokenem
-      const formData = new FormData();
-      formData.append('csrf_token', token);
-      config.body = formData;
-    }
-  }
-
-  return originalFetch(url, config);
-};
-
 
 // === GLOBÁLNÍ PROMĚNNÉ ===
 let WGS_DATA_CACHE = [];
