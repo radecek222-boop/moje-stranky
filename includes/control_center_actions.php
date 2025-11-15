@@ -392,10 +392,10 @@ function isSuccess(data) {
     return (data && (data.success === true || data.status === 'success'));
 }
 
-async /**
+/**
  * ExecuteAction
  */
-function executeAction(event, actionId) {
+async function executeAction(event, actionId) {
     if (DEBUG_MODE) console.log('[executeAction] Starting with actionId:', actionId);
 
     // Capture button reference BEFORE any await
@@ -503,10 +503,10 @@ function executeAction(event, actionId) {
     });
 }
 
-async /**
+/**
  * CompleteAction
  */
-function completeAction(actionId) {
+async function completeAction(actionId) {
     if (!confirm('Označit tento úkol jako dokončený?')) {
         return;
     }
@@ -532,10 +532,10 @@ function completeAction(actionId) {
     }
 }
 
-async /**
+/**
  * DismissAction
  */
-function dismissAction(actionId) {
+async function dismissAction(actionId) {
     if (!confirm('Opravdu chcete zrušit tento úkol?')) {
         return;
     }
@@ -576,10 +576,10 @@ function setupGitHubWebhook() {
 }
 
 // Přidat optimalizační úkoly
-async /**
+/**
  * PridatOptimalizacniUkoly
  */
-function pridatOptimalizacniUkoly() {
+async function pridatOptimalizacniUkoly() {
     if (!confirm('Přidat 6 optimalizačních úkolů?\n\n• Minifikace JS/CSS\n• Přidat DB indexy\n• Vytvořit backup\n• Vyčistit selhavší emaily\n• Povolit Gzip\n• Nastavit Browser Cache\n\nÚkoly které již existují budou přeskočeny.')) {
         return;
     }

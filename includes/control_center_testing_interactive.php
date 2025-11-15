@@ -586,10 +586,10 @@ function loadStep1_Formular(panel) {
     renderDiagnostic();
 }
 
-async /**
+/**
  * ExecuteStep1
  */
-function executeStep1() {
+async function executeStep1() {
     addDiagnostic('Validace formuláře...', 'info');
 
     const jmeno = document.getElementById('jmeno').value;
@@ -645,10 +645,10 @@ function loadStep2_APICall(panel) {
     executeStep2();
 }
 
-async /**
+/**
  * ExecuteStep2
  */
-function executeStep2() {
+async function executeStep2() {
     try {
         addDiagnostic('Volání API create_test_claim.php...', 'info');
         renderDiagnostic();
@@ -738,10 +738,10 @@ function loadStep3_Seznam(panel) {
     executeStep3();
 }
 
-async /**
+/**
  * ExecuteStep3
  */
-function executeStep3() {
+async function executeStep3() {
     try {
         addDiagnostic('Load operace: Načítání seznamu z databáze...', 'info');
         renderDiagnostic();
@@ -822,10 +822,10 @@ function loadStep4_Detail(panel) {
     renderDiagnostic();
 }
 
-async /**
+/**
  * LoadStep5 PhotoCustomer
  */
-function loadStep5_PhotoCustomer(panel) {
+async function loadStep5_PhotoCustomer(panel) {
     updateStatus('Fotografování zákazníkem...', 'testing');
 
     panel.innerHTML = `
@@ -904,10 +904,10 @@ function loadStep5_PhotoCustomer(panel) {
     }
 }
 
-async /**
+/**
  * LoadStep6 Protokol
  */
-function loadStep6_Protokol(panel) {
+async function loadStep6_Protokol(panel) {
     updateStatus('Protokol návštěvy...', 'testing');
 
     panel.innerHTML = `
@@ -1009,10 +1009,10 @@ function loadStep6_Protokol(panel) {
     }
 }
 
-async /**
+/**
  * LoadStep7 Vysledek
  */
-function loadStep7_Vysledek(panel) {
+async function loadStep7_Vysledek(panel) {
     updateStatus('Validace dat...', 'testing');
 
     panel.innerHTML = `
@@ -1214,10 +1214,10 @@ function renderDiagnostic() {
     container.scrollTop = container.scrollHeight;
 }
 
-async /**
+/**
  * CleanupTestData
  */
-function cleanupTestData() {
+async function cleanupTestData() {
     if (!confirm('Opravdu smazat testovací data?')) return;
 
     try {
