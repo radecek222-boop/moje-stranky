@@ -326,6 +326,7 @@ try {
 
                     case 'migration':
                     case 'install':
+                    case 'config':                  // Konfigurační úkoly (např. zabezpečení setup/ adresáře)
                     case 'optimize_assets':
                     case 'add_db_indexes':
                     case 'create_backup':
@@ -336,9 +337,11 @@ try {
 
                             // BEZPEČNOST: RCE ochrana - whitelist povolených directories
                             $allowedDirs = [
+                                realpath(__DIR__ . '/..'),           // Root adresář (pro minify_assets.php, add_indexes.php atd.)
                                 realpath(__DIR__ . '/../scripts'),
                                 realpath(__DIR__ . '/../migrations'),
-                                realpath(__DIR__ . '/../install')
+                                realpath(__DIR__ . '/../install'),
+                                realpath(__DIR__ . '/../setup')      // Setup adresář (pro config akce)
                             ];
 
                             $realScriptPath = realpath($scriptPath);
@@ -346,7 +349,16 @@ try {
 
                             // Debug info pro failed actions
                             if (!$realScriptPath) {
-                                throw new Exception("Script nenalezen: {$scriptPath} (soubor neexistuje)");
+                                throw new Exception(
+                                    "❌ Script nenalezen\n\n" .
+                                    "📄 Cesta: {$scriptPath}\n" .
+                                    "❓ Důvod: Soubor neexistuje\n\n" .
+                                    "💡 Doporučení:\n" .
+                                    "  1. Zkontrolujte, zda soubor existuje na serveru\n" .
+                                    "  2. Ověřte správnost cesty v action_url (tabulka wgs_pending_actions)\n" .
+                                    "  3. Zkontrolujte oprávnění souborů (chmod 644)\n\n" .
+                                    "🔒 Bezpečnostní riziko: NÍZKÉ - akce nebyla spuštěna"
+                                );
                             }
 
                             foreach ($allowedDirs as $allowedDir) {
@@ -358,10 +370,16 @@ try {
 
                             if (!$isAllowed) {
                                 // Vylepšená error message s debug info
-                                $allowedDirsStr = implode(', ', array_filter($allowedDirs));
-                                throw new Exception("Bezpečnostní chyba: Script není v povoleném adresáři.\n" .
-                                    "Script: {$realScriptPath}\n" .
-                                    "Povolené: {$allowedDirsStr}");
+                                $allowedDirsStr = implode("\n  • ", array_filter($allowedDirs));
+                                throw new Exception(
+                                    "❌ Bezpečnostní chyba: Script není v povoleném adresáři\n\n" .
+                                    "📄 Script: {$realScriptPath}\n\n" .
+                                    "✅ Povolené adresáře:\n  • {$allowedDirsStr}\n\n" .
+                                    "💡 Doporučení:\n" .
+                                    "  1. Přesuňte script do jednoho z povolených adresářů\n" .
+                                    "  2. Nebo aktualizujte action_url v databázi na správnou cestu\n\n" .
+                                    "🔒 Bezpečnostní riziko: STŘEDNÍ - RCE ochrana aktivní"
+                                );
                             }
 
                             // Pokud je to .md soubor, vrátit odkaz místo spuštění
@@ -406,7 +424,19 @@ try {
                         break;
 
                     default:
-                        throw new Exception('Neznámý typ akce: ' . $action['action_type']);
+                        throw new Exception(
+                            "Neznámý typ akce: {$action['action_type']}\n\n" .
+                            "📋 Podporované action_type:\n" .
+                            "  • migration, install, config - Instalační a konfigurační skripty\n" .
+                            "  • optimize_assets - Minifikace JS/CSS\n" .
+                            "  • add_db_indexes - Přidání DB indexů\n" .
+                            "  • create_backup - Vytvoření zálohy\n" .
+                            "  • cleanup_emails - Vyčištění email fronty\n" .
+                            "  • enable_gzip, browser_cache - Manuální úkoly (dokumentace)\n" .
+                            "  • install_smtp, install_phpmailer - Speciální instalace\n\n" .
+                            "💡 Doporučení: Zkontrolujte action_type v databázi (tabulka wgs_pending_actions)\n" .
+                            "🔒 Bezpečnostní riziko: NÍZKÉ - akce nebyla spuštěna"
+                        );
                 }
             } catch (Exception $e) {
                 $executeResult = [
