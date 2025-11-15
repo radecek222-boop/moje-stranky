@@ -244,7 +244,6 @@ function handleListUsers(PDO $pdo): void
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
     respondSuccess([
-        'status' => 'success',
         'data' => array_map(static function (array $user): array {
             return [
                 'id' => (int) ($user['id'] ?? 0),
