@@ -343,6 +343,11 @@ try {
                             $realScriptPath = realpath($scriptPath);
                             $isAllowed = false;
 
+                            // Debug info pro failed actions
+                            if (!$realScriptPath) {
+                                throw new Exception("Script nenalezen: {$scriptPath} (soubor neexistuje)");
+                            }
+
                             foreach ($allowedDirs as $allowedDir) {
                                 if ($allowedDir && $realScriptPath && strpos($realScriptPath, $allowedDir) === 0) {
                                     $isAllowed = true;
@@ -351,7 +356,11 @@ try {
                             }
 
                             if (!$isAllowed) {
-                                throw new Exception('Bezpečnostní chyba: Script není v povoleném adresáři');
+                                // Vylepšená error message s debug info
+                                $allowedDirsStr = implode(', ', array_filter($allowedDirs));
+                                throw new Exception("Bezpečnostní chyba: Script není v povoleném adresáři.\n" .
+                                    "Script: {$realScriptPath}\n" .
+                                    "Povolené: {$allowedDirsStr}");
                             }
 
                             // Pokud je to .md soubor, vrátit odkaz místo spuštění
