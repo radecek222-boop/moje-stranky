@@ -1605,7 +1605,11 @@ async function showCustomerDetail(id) {
         <h3 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-black); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border);">Fotografie (${fotky.length})</h3>
         ${fotky.length
           ? `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem;">
-              ${fotky.map((f, i) => `<img src='${f}' style='width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--c-border); cursor: pointer;' alt='Fotka ${i+1}' onclick='showPhotoFullscreen("${f}")'>`).join('')}
+              ${fotky.map((f, i) => {
+                // BEZPEČNOST: Escape quotes v URL pro onclick handler (XSS protection)
+                const escapedUrl = f.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
+                return `<img src='${f}' style='width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--c-border); cursor: pointer;' alt='Fotka ${i+1}' onclick='showPhotoFullscreen("${escapedUrl}")'>`;
+              }).join('')}
              </div>`
           : '<p style="color: var(--c-grey); text-align: center; padding: 1rem; font-size: 0.85rem;">Žádné fotografie</p>'}
       </div>
@@ -1614,7 +1618,7 @@ async function showCustomerDetail(id) {
       <div style="background: var(--c-bg); border: 1px solid var(--c-border); padding: 1rem; margin-top: 1.5rem;">
         <h3 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-black); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border);">📄 PDF Protokol</h3>
         ${CURRENT_RECORD.documents && CURRENT_RECORD.documents.length > 0 ? `
-          <button onclick="window.open('${CURRENT_RECORD.documents[0].file_path}', '_blank')" 
+          <button onclick="window.open('${CURRENT_RECORD.documents[0].file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')" 
                   class="btn" 
                   style="width: 100%; padding: 1rem; min-height: 60px; background: var(--c-black); color: white; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.2s;">
             📥 Otevřít PDF protokol
@@ -1856,7 +1860,7 @@ async function showNotes(record) {
       <div style="background: var(--c-bg); border: 1px solid var(--c-border); padding: 1rem; margin-top: 1.5rem;">
         <h3 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-black); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border);">📄 PDF Protokol</h3>
         ${CURRENT_RECORD.documents && CURRENT_RECORD.documents.length > 0 ? `
-          <button onclick="window.open('${CURRENT_RECORD.documents[0].file_path}', '_blank')" 
+          <button onclick="window.open('${CURRENT_RECORD.documents[0].file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')" 
                   class="btn" 
                   style="width: 100%; padding: 1rem; min-height: 60px; background: var(--c-black); color: white; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.2s;">
             📥 Otevřít PDF protokol
