@@ -587,8 +587,10 @@ async function runDiagnostics() {
         // 19. Security Vulnerabilities Scan
         await checkSecurityVulnerabilities();
 
-        // 20. Code Analysis - Komplexní kontrola
-        await checkCodeAnalysis();
+        // 20. Code Analysis - Komplexní kontrola (DISABLED - příliš časově náročná)
+        // POZNÁMKA: checkCodeAnalysis() analyzuje 300+ souborů (syntax, závorky, stringy, SQL injection)
+        // Běží několik minut a může způsobit timeout. Pro expert analysis spustit samostatně.
+        // await checkCodeAnalysis();
 
         log('');
         logHeader('═══════════════════════════════════════════════════');
