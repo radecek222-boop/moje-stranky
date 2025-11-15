@@ -334,10 +334,10 @@ function viewLog(logType) {
     window.open(`/admin.php?tab=tools&view_log=${logType}`, '_blank');
 }
 
-async /**
+/**
  * ClearCache
  */
-function clearCache() {
+async function clearCache() {
     if (!confirm('Opravdu chcete vymazat cache? Tato akce může dočasně zpomalit systém.')) {
         return;
     }
@@ -359,10 +359,10 @@ function clearCache() {
     }
 }
 
-async /**
+/**
  * ArchiveLogs
  */
-function archiveLogs() {
+async function archiveLogs() {
     if (!confirm('Archivovat logy starší než 90 dní?')) {
         return;
     }
@@ -385,10 +385,10 @@ function archiveLogs() {
     }
 }
 
-async /**
+/**
  * OptimizeDatabase
  */
-function optimizeDatabase() {
+async function optimizeDatabase() {
     if (!confirm('Optimalizovat databázi? Tato akce může trvat několik minut.')) {
         return;
     }
@@ -418,10 +418,10 @@ function optimizeDatabase() {
     }
 }
 
-async /**
+/**
  * CreateBackup
  */
-function createBackup() {
+async function createBackup() {
     if (!confirm('Vytvořit zálohu databáze?\n\nTato akce může trvat několik minut v závislosti na velikosti databáze.')) {
         return;
     }
@@ -451,10 +451,10 @@ function createBackup() {
     }
 }
 
-async /**
+/**
  * ViewBackups
  */
-function viewBackups() {
+async function viewBackups() {
     try {
         const response = await fetch('/api/backup_api.php?action=list_backups');
         const result = await response.json();

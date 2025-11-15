@@ -256,10 +256,10 @@ function switchLang(textId, lang) {
 }
 
 // Save text
-async /**
+/**
  * SaveText
  */
-function saveText(textId) {
+async function saveText(textId) {
     const statusEl = document.getElementById(`save-status-${textId}`);
     statusEl.style.display = 'block';
     statusEl.innerHTML = '<span class="cc-loading"></span> Ukládám...';

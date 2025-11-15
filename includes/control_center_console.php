@@ -486,10 +486,10 @@ function escapeHtml(text) {
 // MAIN DIAGNOSTICS FUNCTION
 // ============================================
 
-async /**
+/**
  * RunDiagnostics
  */
-function runDiagnostics() {
+async function runDiagnostics() {
     if (diagnosticsRunning) {
         alert('Diagnostika již běží!');
         return;
@@ -655,10 +655,10 @@ function runDiagnostics() {
 // INDIVIDUAL CHECK FUNCTIONS
 // ============================================
 
-async /**
+/**
  * CheckPhpFiles
  */
-function checkPhpFiles() {
+async function checkPhpFiles() {
     logHeader('1. PHP SOUBORY');
     log('Kontroluji PHP syntax a strukturu...');
 
@@ -769,10 +769,10 @@ function checkPhpFiles() {
     log('');
 }
 
-async /**
+/**
  * CheckJavaScriptFiles
  */
-function checkJavaScriptFiles() {
+async function checkJavaScriptFiles() {
     logHeader('2. JAVASCRIPT SOUBORY');
     log('Kontroluji JavaScript errors z logů...');
 
@@ -868,10 +868,10 @@ function checkJavaScriptFiles() {
     log('');
 }
 
-async /**
+/**
  * CheckDatabase
  */
-function checkDatabase() {
+async function checkDatabase() {
     logHeader('3. SQL DATABÁZE');
     log('Kontroluji tabulky, indexy a integritu...');
 
@@ -934,10 +934,10 @@ function checkDatabase() {
     log('');
 }
 
-async /**
+/**
  * CheckApiEndpoints
  */
-function checkApiEndpoints() {
+async function checkApiEndpoints() {
     logHeader('4. API ENDPOINTY');
     log('Testuji dostupnost API...');
 
@@ -1020,10 +1020,10 @@ function checkApiEndpoints() {
     log('');
 }
 
-async /**
+/**
  * CheckErrorLogs
  */
-function checkErrorLogs() {
+async function checkErrorLogs() {
     logHeader('5. ERROR LOGY');
     log('Kontroluji nedávné chyby...');
 
@@ -1146,10 +1146,10 @@ function checkErrorLogs() {
     log('');
 }
 
-async /**
+/**
  * CheckFilePermissions
  */
-function checkFilePermissions() {
+async function checkFilePermissions() {
     logHeader('6. OPRÁVNĚNÍ SOUBORŮ');
     log('Kontroluji write permissions...');
 
@@ -1186,10 +1186,10 @@ function checkFilePermissions() {
     log('');
 }
 
-async /**
+/**
  * CheckSecurity
  */
-function checkSecurity() {
+async function checkSecurity() {
     logHeader('7. BEZPEČNOST');
     log('Kontroluji bezpečnostní nastavení...');
 
@@ -1251,10 +1251,10 @@ function checkSecurity() {
 // NEW CHECK FUNCTIONS
 // ============================================
 
-async /**
+/**
  * CheckSystemInfo
  */
-function checkSystemInfo() {
+async function checkSystemInfo() {
     logHeader('0. SYSTÉMOVÉ INFORMACE');
     log('Načítám informace o serveru...');
 
@@ -1291,10 +1291,10 @@ function checkSystemInfo() {
     log('');
 }
 
-async /**
+/**
  * CheckHtmlPages
  */
-function checkHtmlPages() {
+async function checkHtmlPages() {
     logHeader('1. HTML/PHP STRÁNKY (Frontend)');
     log('Kontroluji HTML/PHP stránky...');
 
@@ -1342,10 +1342,10 @@ function checkHtmlPages() {
     log('');
 }
 
-async /**
+/**
  * CheckAssets
  */
-function checkAssets() {
+async function checkAssets() {
     logHeader('4. CSS/ASSETS');
     log('Kontroluji CSS, obrázky a další assets...');
 
@@ -1388,10 +1388,10 @@ function checkAssets() {
 // MAINTENANCE FUNCTIONS
 // ============================================
 
-async /**
+/**
  * ClearCacheMaintenance
  */
-function clearCacheMaintenance() {
+async function clearCacheMaintenance() {
     logHeader('CLEAR CACHE');
     log('Mazání cache (může dočasně zpomalit systém)...');
 
@@ -1419,10 +1419,10 @@ function clearCacheMaintenance() {
     log('');
 }
 
-async /**
+/**
  * OptimizeDatabaseMaintenance
  */
-function optimizeDatabaseMaintenance() {
+async function optimizeDatabaseMaintenance() {
     if (!confirm('Optimalizovat databázi? Tato akce může trvat několik minut.')) {
         return;
     }
@@ -1464,10 +1464,10 @@ function optimizeDatabaseMaintenance() {
     log('');
 }
 
-async /**
+/**
  * CleanupLogsMaintenance
  */
-function cleanupLogsMaintenance() {
+async function cleanupLogsMaintenance() {
     logHeader('🧹 CLEANUP LOGS & BACKUP');
     log('Spouštím kompletní cleanup...');
     log('Toto smaže staré logy (.gz, .20*.log), zkrátí php_errors.log, vyčistí cache a spustí backup...');
@@ -1510,10 +1510,10 @@ function cleanupLogsMaintenance() {
     log('');
 }
 
-async /**
+/**
  * ArchiveLogsMaintenance
  */
-function archiveLogsMaintenance() {
+async function archiveLogsMaintenance() {
     logHeader('ARCHIVE LOGS');
     log('Archivahuji staré logy starší než 90 dní...');
 
@@ -1545,10 +1545,10 @@ function archiveLogsMaintenance() {
 // ADDITIONAL COMPREHENSIVE CHECKS
 // ============================================
 
-async /**
+/**
  * CheckDependencies
  */
-function checkDependencies() {
+async function checkDependencies() {
     logHeader('10. ZÁVISLOSTI (Dependencies)');
     log('Kontroluji composer.json, package.json...');
 
@@ -1606,10 +1606,10 @@ function checkDependencies() {
     log('');
 }
 
-async /**
+/**
  * CheckConfiguration
  */
-function checkConfiguration() {
+async function checkConfiguration() {
     logHeader('11. KONFIGURACE');
     log('Kontroluji konfigurační soubory...');
 
@@ -1653,10 +1653,10 @@ function checkConfiguration() {
     log('');
 }
 
-async /**
+/**
  * CheckGitStatus
  */
-function checkGitStatus() {
+async function checkGitStatus() {
     logHeader('12. GIT STATUS');
     log('Kontroluji git repository...');
 
@@ -1705,10 +1705,10 @@ function checkGitStatus() {
 // SQL ADVANCED CHECKS
 // ============================================
 
-async /**
+/**
  * CheckDatabaseAdvanced
  */
-function checkDatabaseAdvanced() {
+async function checkDatabaseAdvanced() {
     logHeader('5B. SQL POKROČILÉ KONTROLY');
     log('Kontroluji foreign keys, slow queries, collations, orphaned records...');
 
@@ -1811,10 +1811,10 @@ function checkDatabaseAdvanced() {
 // PERFORMANCE CHECKS
 // ============================================
 
-async /**
+/**
  * CheckPerformance
  */
-function checkPerformance() {
+async function checkPerformance() {
     logHeader('13. VÝKON (Performance)');
     log('Kontroluji rychlost stránek, velikost assets, minifikaci...');
 
@@ -1912,10 +1912,10 @@ function checkPerformance() {
 // CODE QUALITY CHECKS
 // ============================================
 
-async /**
+/**
  * CheckCodeQuality
  */
-function checkCodeQuality() {
+async function checkCodeQuality() {
     logHeader('14. KVALITA KÓDU');
     log('Kontroluji dead code, TODOs, complexity, duplicity...');
 
@@ -2016,10 +2016,10 @@ function checkCodeQuality() {
 // SEO CHECKS
 // ============================================
 
-async /**
+/**
  * CheckSEO
  */
-function checkSEO() {
+async function checkSEO() {
     logHeader('15. SEO OPTIMALIZACE');
     log('Kontroluji meta tagy, alt atributy, broken links...');
 
@@ -2119,10 +2119,10 @@ function checkSEO() {
 // WORKFLOW CHECKS
 // ============================================
 
-async /**
+/**
  * CheckWorkflow
  */
-function checkWorkflow() {
+async function checkWorkflow() {
     logHeader('16. WORKFLOW & INFRASTRUKTURA');
     log('Kontroluji cron jobs, email queue, backups, .env permissions...');
 
@@ -2262,10 +2262,10 @@ function checkWorkflow() {
 // NEW DIAGNOSTIC FUNCTIONS
 // ============================================
 
-async /**
+/**
  * CheckEmailSystem
  */
-function checkEmailSystem() {
+async function checkEmailSystem() {
     logHeader('17. EMAIL SYSTÉM (PHPMailer)');
     log('Kontroluji PHPMailer, SMTP nastavení a email queue...');
 
@@ -2316,10 +2316,10 @@ function checkEmailSystem() {
     }
 }
 
-async /**
+/**
  * CheckSessionSecurity
  */
-function checkSessionSecurity() {
+async function checkSessionSecurity() {
     logHeader('18. SESSION BEZPEČNOST');
     log('Kontroluji session handling, cookies, lifetime...');
 
@@ -2384,10 +2384,10 @@ function checkSessionSecurity() {
     }
 }
 
-async /**
+/**
  * CheckSecurityVulnerabilities
  */
-function checkSecurityVulnerabilities() {
+async function checkSecurityVulnerabilities() {
     logHeader('19. BEZPEČNOSTNÍ SKEN');
     log('Kontroluji XSS, SQL injection patterns, insecure funkce...');
 
@@ -2450,10 +2450,10 @@ function checkSecurityVulnerabilities() {
     }
 }
 
-async /**
+/**
  * CheckCodeAnalysis
  */
-function checkCodeAnalysis() {
+async function checkCodeAnalysis() {
     logHeader('🔍 CODE ANALYSIS - KOMPLEXNÍ KONTROLA');
     log('Spouštím hloubkovou analýzu kódu...');
     log('Detekuji: syntax chyby, vadné stringy, nezavřené závorky, security rizika, HTTP errors');

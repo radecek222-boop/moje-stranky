@@ -338,10 +338,10 @@ function togglePasswordVisibility(configId) {
 }
 
 // Save config
-async /**
+/**
  * SaveConfig
  */
-function saveConfig(configId, configKey) {
+async function saveConfig(configId, configKey) {
     const input = document.getElementById(`config-${configId}`);
     const statusEl = document.getElementById(`save-status-${configId}`);
 
@@ -384,10 +384,10 @@ function saveConfig(configId, configKey) {
 }
 
 // Send test email
-async /**
+/**
  * SendTestEmail
  */
-function sendTestEmail() {
+async function sendTestEmail() {
     const emailInput = document.getElementById('test-email');
     const email = emailInput.value.trim();
 

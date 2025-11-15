@@ -579,10 +579,10 @@ function updateProgress(step, status) {
     }
 }
 
-async /**
+/**
  * StartTest
  */
-function startTest() {
+async function startTest() {
     testState.startTime = Date.now();
     testState.errors = [];
     testState.diagnostics = [];
@@ -617,10 +617,10 @@ function startTest() {
     }, 500);
 }
 
-async /**
+/**
  * SendAPIRequest
  */
-function sendAPIRequest(formData) {
+async function sendAPIRequest(formData) {
     addDiagnostic('Volání API: api/create_test_claim.php', 'info', 'diagnosticsPanel2');
 
     try {
@@ -716,10 +716,10 @@ function loadDetailPreview() {
     addDiagnostic(`ID reklamace: ${testState.claimId}`, 'info', 'diagnosticsPanel4');
 }
 
-async /**
+/**
  * CheckProtocol
  */
-function checkProtocol() {
+async function checkProtocol() {
     addDiagnostic('Kontroluji protokol akcí...', 'info', 'diagnosticsPanel5');
 
     // Simulate protocol check
@@ -784,10 +784,10 @@ function flagError(step, message) {
     showFinalResult();
 }
 
-async /**
+/**
  * CleanupTest
  */
-function cleanupTest() {
+async function cleanupTest() {
     if (!confirm('Smazat testovací data?')) return;
 
     addDiagnostic('Odstraňuji testovací data...', 'info', 'diagnosticsPanel6');

@@ -1017,10 +1017,10 @@ function createKey() {
     });
 }
 
-async /**
+/**
  * ExecuteAction
  */
-function executeAction(actionId) {
+async function executeAction(actionId) {
     if (DEBUG_MODE) console.log('[executeAction] Starting with actionId:', actionId);
 
     // Capture button reference BEFORE any await (event becomes undefined after await in async functions)
@@ -1177,10 +1177,10 @@ function dismissAction(actionId) {
 }
 
 // Clear cache and reload
-async /**
+/**
  * ClearCacheAndReload
  */
-function clearCacheAndReload() {
+async function clearCacheAndReload() {
     if (!confirm('Vymazat lokální cache a načíst nejnovější verzi? Stránka se znovu načte.')) {
         return;
     }

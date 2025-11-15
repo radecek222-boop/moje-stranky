@@ -382,10 +382,10 @@ document.getElementById('startTestBtn').addEventListener('click', async function
 // Reset
 document.getElementById('resetBtn').addEventListener('click', () => location.reload());
 
-async /**
+/**
  * RunWorkflowTest
  */
-function runWorkflowTest() {
+async function runWorkflowTest() {
     const steps = document.querySelectorAll('.workflow-step');
     const totalSteps = steps.length;
     let passedCount = 0;
@@ -437,10 +437,10 @@ function runWorkflowTest() {
     }
 }
 
-async /**
+/**
  * TestStep
  */
-function testStep(step, role) {
+async function testStep(step, role) {
     try {
         const response = await fetch(`api/test_environment_simple.php?step=${step}&role=${role}`);
         const result = await response.json();
@@ -478,10 +478,10 @@ function fillErrorDetails() {
     errorDiv.innerHTML = html;
 }
 
-async /**
+/**
  * CleanupTestData
  */
-function cleanupTestData() {
+async function cleanupTestData() {
     if (!confirm('Opravdu smazat všechna test data?')) return;
 
     try {
