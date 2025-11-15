@@ -1,18 +1,7 @@
 /**
  * UNIFIED LOGIN SYSTEM WITH RECOVERY
+ * getCSRFToken() poskytuje csrf-auto-inject.js
  */
-
-// CSRF Token helper
-async function getCSRFToken() {
-  try {
-    const response = await fetch('app/controllers/get_csrf_token.php');
-    const data = await response.json();
-    return data.token || '';
-  } catch (err) {
-    logger.error('CSRF token error:', err);
-    return '';
-  }
-}
 
 const isAdminCheckbox = document.getElementById('isAdmin');
 const userLoginFields = document.getElementById('userLoginFields');

@@ -1,4 +1,70 @@
-<?php?>
+<?php
+/**
+ * Control Center - Vzhled & Design
+ * Pokročilý iPhone-style editor s live preview
+ */
+
+// Bezpečnostní kontrola
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    die('Unauthorized');
+}
+
+$pdo = getDbConnection();
+$embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
+
+// Načtení aktuálního theme
+$themeSettings = [];
+try {
+    $stmt = $pdo->query("SELECT setting_key, setting_value, setting_type FROM wgs_theme_settings");
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $themeSettings[$row['setting_key']] = [
+            'value' => $row['setting_value'],
+            'type' => $row['setting_type']
+        ];
+    }
+} catch (PDOException $e) {
+    $themeSettings = [];
+}
+
+// Default hodnoty
+$defaults = [
+    // Barvy
+    'overlay_bg' => 'rgba(0, 0, 0, 0.7)',
+    'modal_bg' => '#ffffff',
+    'text_color' => '#000000',
+    'heading_color' => '#000000',
+    'button_bg' => '#2D5016',
+    'button_text' => '#ffffff',
+
+    // Text styling
+    'font_size_body' => '16',
+    'font_size_heading' => '24',
+    'text_align' => 'left',
+    'line_height' => '1.5',
+    'font_weight' => '400',
+
+    // Glow efekty
+    'glow_enabled' => 'false',
+    'glow_color' => '#2D5016',
+    'glow_intensity' => '10',
+
+    // Layout
+    'border_radius' => '8',
+    'padding' => '16',
+    'gap' => '16',
+];
+
+foreach ($defaults as $key => $value) {
+    if (!isset($themeSettings[$key])) {
+        $themeSettings[$key] = ['value' => $value, 'type' => 'text'];
+    }
+}
+
+// Helper funkce pro získání hodnoty
+function getSetting($settings, $key, $default) {
+    return isset($settings[$key]) ? $settings[$key]['value'] : $default;
+}
+?>
 
 <style>
 /* iPhone-style Editor Layout */

@@ -194,7 +194,7 @@ async function testSmtpConnection() {
 }
 
 // Helper pro získání CSRF tokenu
-function getCSRFToken() {
+async function getCSRFToken() {
     // Zkusit aktuální dokument
     let metaTag = document.querySelector('meta[name="csrf-token"]');
 
