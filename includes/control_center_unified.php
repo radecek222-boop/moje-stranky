@@ -1,10 +1,13 @@
 <?php
 /**
  * Control Center - Centrální řídicí panel
- * Mod
-
-ern card-based design s overlay systémem
+ * Modern card-based design s overlay systémem
  */
+
+// Bezpečnostní kontrola
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    die('Unauthorized');
+}
 
 // Načtení dat ze session
 $currentUser = $_SESSION['full_name'] ?? 'Admin';

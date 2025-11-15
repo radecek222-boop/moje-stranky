@@ -119,11 +119,11 @@ try {
                 foreach ($files as $file) {
                     $destFile = $tempDir . '/' . substr($file, strlen(__DIR__) + 1);
                     if ($file->isDir()) {
-                        if (!is_dir($destFile, 0755, true)) {
-    if (!mkdir($destFile, 0755, true) && !is_dir($destFile, 0755, true)) {
-        error_log('Failed to create directory: ' . $destFile, 0755, true);
-    }
-}
+                        if (!is_dir($destFile)) {
+                            if (!mkdir($destFile, 0755, true) && !is_dir($destFile)) {
+                                error_log('Failed to create directory: ' . $destFile);
+                            }
+                        }
                     } else {
                         @copy($file, $destFile);
                     }

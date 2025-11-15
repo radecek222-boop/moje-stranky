@@ -143,16 +143,21 @@ try {
         throw new Exception('Povolena pouze POST metoda');
     }
 
-    // BEZPEČNOST: CSRF ochrana
-    requireCSRF();
-
-    // Načtení JSON dat
+    // Načtení JSON dat (MUSÍ být PŘED requireCSRF pro JSON API)
     $jsonData = file_get_contents('php://input');
     $data = json_decode($jsonData, true);
 
     if (!$data) {
         throw new Exception('Neplatná JSON data');
     }
+
+    // Extrakce CSRF tokenu z JSON pro requireCSRF()
+    if (isset($data['csrf_token'])) {
+        $_POST['csrf_token'] = $data['csrf_token'];
+    }
+
+    // BEZPEČNOST: CSRF ochrana
+    requireCSRF();
 
     $origin = $data['origin'] ?? null;
     $destination = $data['destination'] ?? null;

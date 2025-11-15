@@ -295,11 +295,9 @@ function logErrorToFile($message) {
     $logDir = __DIR__ . '/../logs';
 
     if (!is_dir($logDir)) {
-        if (!is_dir($logDir, 0755, true)) {
-    if (!mkdir($logDir, 0755, true) && !is_dir($logDir, 0755, true)) {
-        error_log('Failed to create directory: ' . $logDir, 0755, true);
-    }
-}
+        if (!mkdir($logDir, 0755, true) && !is_dir($logDir)) {
+            error_log('Failed to create log directory: ' . $logDir);
+        }
     }
 
     $logFile = $logDir . '/php_errors.log';

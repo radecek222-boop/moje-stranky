@@ -768,10 +768,10 @@ function hexToRgba(hex, alpha) {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-async /**
+/**
  * SaveSettings
  */
-function saveSettings() {
+async function saveSettings() {
     const settings = {
         overlay_bg: document.getElementById('overlay-bg').value,
         modal_bg: document.getElementById('modal-bg').value,
