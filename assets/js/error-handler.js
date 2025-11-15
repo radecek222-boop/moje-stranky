@@ -219,27 +219,94 @@ ${'='.repeat(80)}
 
 /**
  * Logování chyby na server
+ * S throttlingem a deduplikací pro prevenci HTTP 429
  */
+const errorLogger = {
+    queue: new Map(), // Error hash → error object
+    lastSent: 0,
+    throttleMs: 2000, // Max 1 request per 2 seconds
+    sending: false,
+    rateLimited: false,
+
+    // Hash error pro deduplikaci
+    hashError(error) {
+        return `${error.type}:${error.message}:${error.file}:${error.line}`;
+    },
+
+    // Přidat error do fronty
+    add(error) {
+        const hash = this.hashError(error);
+        // Pokud již máme stejnou chybu, přeskočit (deduplikace)
+        if (!this.queue.has(hash)) {
+            this.queue.set(hash, error);
+        }
+        this.scheduleFlush();
+    },
+
+    // Naplánovat odeslání fronty
+    scheduleFlush() {
+        if (this.sending || this.rateLimited) return;
+
+        const now = Date.now();
+        const timeSinceLastSent = now - this.lastSent;
+
+        if (timeSinceLastSent >= this.throttleMs) {
+            this.flush();
+        } else {
+            // Počkat do throttle timeout
+            const delay = this.throttleMs - timeSinceLastSent;
+            setTimeout(() => this.flush(), delay);
+        }
+    },
+
+    // Odeslat frontu na server
+    async flush() {
+        if (this.queue.size === 0 || this.sending || this.rateLimited) return;
+
+        this.sending = true;
+        const errors = Array.from(this.queue.values());
+        this.queue.clear();
+
+        try {
+            const response = await fetch('/api/log_js_error.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    errors: errors,
+                    count: errors.length
+                })
+            });
+
+            this.lastSent = Date.now();
+
+            // Pokud dostaneme HTTP 429, přestat logovat na 5 minut
+            if (response.status === 429) {
+                this.rateLimited = true;
+                console.warn('⚠️ Error logging rate limited - paused for 5 minutes');
+                setTimeout(() => {
+                    this.rateLimited = false;
+                    console.log('✅ Error logging resumed');
+                }, 5 * 60 * 1000);
+            }
+        } catch (err) {
+            // Tiše ignorovat chyby logování
+            console.warn('Failed to log errors to server:', err);
+        } finally {
+            this.sending = false;
+        }
+    }
+};
+
 function logErrorToServer(error) {
-    // Nelogovat při vývoji na localhostu (volitelné)
+    // Nelogovat při vývoji na localhostu
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         return;
     }
 
-    try {
-        fetch('/api/log_js_error.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(error)
-        }).catch(err => {
-            // Tiše ignorovat chyby logování
-            console.warn('Failed to log error to server:', err);
-        });
-    } catch (e) {
-        // Ignore
-    }
+    // Přidat do throttled fronty
+    errorLogger.add(error);
 }
 
 /**

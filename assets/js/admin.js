@@ -111,8 +111,10 @@ async function loadKeys() {
         html += 'Vytvořen: ' + new Date(key.created_at).toLocaleDateString('cs-CZ');
         html += '</div>';
         html += '<div style="display:flex;gap:0.5rem;">';
-        html += '<button class="btn btn-sm" onclick="copyToClipboard(\'' + key.key_code + '\')">Kopírovat</button>';
-        html += '<button class="btn btn-sm btn-danger" onclick="deleteKey(\'' + key.key_code + '\')">Smazat</button>';
+        // BEZPEČNOST: Escape single quotes pro onclick handler (XSS protection)
+        const escapedKeyCode = key.key_code.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        html += '<button class="btn btn-sm" onclick="copyToClipboard(\'' + escapedKeyCode + '\')">Kopírovat</button>';
+        html += '<button class="btn btn-sm btn-danger" onclick="deleteKey(\'' + escapedKeyCode + '\')">Smazat</button>';
         html += '</div></div>';
       });
       container.innerHTML = html;

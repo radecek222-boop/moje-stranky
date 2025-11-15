@@ -2,6 +2,14 @@
  * WGS - Welcome Modal s vtipem
  */
 
+// BEZPEČNOST: HTML escaping pro prevenci XSS
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
 async function showWelcomeModal(userName) {
   try {
     // Získej vtip z API
@@ -9,18 +17,22 @@ async function showWelcomeModal(userName) {
     const jokeData = await jokeResponse.json();
     const joke = jokeData.joke || 'Přeji ti krásný den! 😊';
 
+    // BEZPEČNOST: Escape HTML v userName a joke pro XSS protection
+    const safeUserName = escapeHtml(userName);
+    const safeJoke = escapeHtml(joke);
+
     // Vytvoř modal HTML
     const modalHTML = `
       <div class="welcome-modal-overlay" id="welcomeModal">
         <div class="welcome-modal">
           <h1 class="welcome-title">Vítej!</h1>
-          <div class="welcome-name">${userName}</div>
+          <div class="welcome-name">${safeUserName}</div>
           <p class="welcome-message">
-            Přeji ti hezký den a posílám ti něco pro zasmání, 
+            Přeji ti hezký den a posílám ti něco pro zasmání,
             protože úsměv dělá den hezčím! 😊
           </p>
           <div class="welcome-joke">
-            ${joke}
+            ${safeJoke}
           </div>
           <button class="welcome-close-btn" onclick="closeWelcomeModal()">
             Začít pracovat
@@ -45,11 +57,14 @@ async function showWelcomeModal(userName) {
 }
 
 function showFallbackModal(userName) {
+  // BEZPEČNOST: Escape HTML v userName pro XSS protection
+  const safeUserName = escapeHtml(userName);
+
   const modalHTML = `
     <div class="welcome-modal-overlay active" id="welcomeModal">
       <div class="welcome-modal">
         <h1 class="welcome-title">Vítej!</h1>
-        <div class="welcome-name">${userName}</div>
+        <div class="welcome-name">${safeUserName}</div>
         <p class="welcome-message">
           Přeji ti hezký den plný úspěchů! 💪
         </p>
