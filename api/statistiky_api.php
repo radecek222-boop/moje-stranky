@@ -126,7 +126,7 @@ function getSalespersonStats($pdo) {
             AVG(CAST(COALESCE(castka, 0) AS DECIMAL(10,2))) as prumer_zakazka,
             SUM(CASE WHEN zeme = 'CZ' OR zeme = '' OR zeme IS NULL THEN 1 ELSE 0 END) as cz_count,
             SUM(CASE WHEN zeme = 'SK' THEN 1 ELSE 0 END) as sk_count,
-            SUM(CASE WHEN stav = 'HOTOVO' THEN 1 ELSE 0 END) as hotove_count
+            SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotove_count
         FROM wgs_reklamace
         $where
         GROUP BY prodejce
@@ -167,7 +167,7 @@ function getTechnicianStats($pdo) {
             AVG(CAST(COALESCE(castka, 0) AS DECIMAL(10,2))) as prumer_zakazka,
             SUM(CASE WHEN zeme = 'CZ' OR zeme = '' OR zeme IS NULL THEN 1 ELSE 0 END) as cz_count,
             SUM(CASE WHEN zeme = 'SK' THEN 1 ELSE 0 END) as sk_count,
-            SUM(CASE WHEN stav = 'HOTOVO' THEN 1 ELSE 0 END) as hotove_count
+            SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotove_count
         FROM wgs_reklamace
         $where
         GROUP BY technik
