@@ -12,23 +12,8 @@ const safeLogger = {
 };
 
 // ============================================================
-// CSRF TOKEN HELPER
+// CSRF TOKEN - poskytuje csrf-auto-inject.js
 // ============================================================
-window.csrfTokenCache = window.csrfTokenCache || null;
-
-async function getCSRFToken() {
-  if (window.csrfTokenCache) return window.csrfTokenCache;
-
-  try {
-    const response = await fetch("app/controllers/get_csrf_token.php");
-    const data = await response.json();
-    window.csrfTokenCache = data.token;
-    return data.token;
-  } catch (err) {
-    safeLogger.error("Chyba získání CSRF tokenu:", err);
-    return null;
-  }
-}
 
 const SESSION_EXPIRED_MESSAGE = 'Vaše administrátorská relace vypršela. Přihlaste se prosím znovu.';
 
