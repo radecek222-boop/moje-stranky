@@ -31,9 +31,10 @@ try {
     // Použít RateLimiter třídu (již načtena v init.php)
     $rateLimiter = new RateLimiter(getDbConnection());
 
-    // 100 požadavků za 10 minut, blokace na 30 minut
+    // 300 požadavků za 10 minut (zvýšeno kvůli diagnostice která dělá 20+ callů)
+    // Blokace na 30 minut při překročení
     $rateCheck = $rateLimiter->checkLimit($identifier, 'admin_api', [
-        'max_attempts' => 100,
+        'max_attempts' => 300,
         'window_minutes' => 10,
         'block_minutes' => 30
     ]);
