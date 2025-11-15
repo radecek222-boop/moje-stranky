@@ -49,6 +49,10 @@ try {
             getChartsData($pdo);
             break;
 
+        case 'list_salespersons':
+            listSalespersons($pdo);
+            break;
+
         case 'ping':
             echo json_encode(['status' => 'success', 'message' => 'pong', 'timestamp' => time()]);
             break;
@@ -162,9 +166,10 @@ function getTechnicianStats($pdo) {
         SELECT
             COALESCE(technik, 'Neuvedeno') as technik,
             COUNT(*) as pocet_zakazek,
-            SUM(CAST(COALESCE(castka, 0) AS DECIMAL(10,2))) as celkova_castka,
-            SUM(CAST(COALESCE(castka, 0) AS DECIMAL(10,2))) * 0.33 as vydelek,
-            AVG(CAST(COALESCE(castka, 0) AS DECIMAL(10,2))) as prumer_zakazka,
+            COUNT(CASE WHEN stav = 'done' THEN 1 END) as pocet_dokonceno,
+            SUM(CASE WHEN stav = 'done' THEN CAST(COALESCE(cena, 0) AS DECIMAL(10,2)) ELSE 0 END) as celkova_castka_dokonceno,
+            SUM(CASE WHEN stav = 'done' THEN CAST(COALESCE(cena, 0) AS DECIMAL(10,2)) * 0.33 ELSE 0 END) as vydelek,
+            AVG(CASE WHEN stav = 'done' THEN CAST(COALESCE(cena, 0) AS DECIMAL(10,2)) END) as prumer_zakazka,
             SUM(CASE WHEN zeme = 'CZ' OR zeme = '' OR zeme IS NULL THEN 1 ELSE 0 END) as cz_count,
             SUM(CASE WHEN zeme = 'SK' THEN 1 ELSE 0 END) as sk_count,
             SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotove_count
@@ -324,6 +329,25 @@ function getChartsData($pdo) {
             'countries' => $countries,
             'models' => $models
         ]
+    ]);
+}
+
+/**
+ * Vrátit seznam prodejců (pro filtr)
+ */
+function listSalespersons($pdo) {
+    $stmt = $pdo->query("
+        SELECT DISTINCT prodejce
+        FROM wgs_reklamace
+        WHERE prodejce IS NOT NULL AND prodejce != ''
+        ORDER BY prodejce ASC
+    ");
+
+    $salespersons = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    echo json_encode([
+        'status' => 'success',
+        'data' => $salespersons
     ]);
 }
 
