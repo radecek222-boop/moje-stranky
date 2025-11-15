@@ -2175,14 +2175,27 @@ async function checkWorkflow() {
                 logError(`${failed_jobs.count} selhavších úkolů (24h):`);
                 log('═'.repeat(79));
                 if (failed_jobs.jobs && failed_jobs.jobs.length > 0) {
-                    failed_jobs.jobs.slice(0, 5).forEach(job => {
-                        logError(`  ${job.name}: ${job.error || 'Unknown error'}`);
-                        if (job.timestamp) {
-                            logError(`     ${job.timestamp}`);
+                    failed_jobs.jobs.forEach(job => {
+                        const displayName = job.name || 'Unknown task';
+                        const errorMsg = job.error || 'Unknown error';
+                        const timestamp = job.timestamp || '';
+
+                        // Zobrazit v konzoli (max 5)
+                        if (failed_jobs.jobs.indexOf(job) < 5) {
+                            logError(`  ${displayName}: ${errorMsg}`);
+                            if (timestamp) {
+                                logError(`     ${timestamp}`);
+                            }
                         }
+
+                        // Přidat všechny do error listu
+                        addError('Failed Task', displayName, errorMsg);
                     });
+
+                    if (failed_jobs.jobs.length > 5) {
+                        logError(`  ... a dalších ${failed_jobs.jobs.length - 5} selhavších úkolů`);
+                    }
                 }
-                totalErrors += failed_jobs.count;
             } else {
                 logSuccess('Žádné selhavší úkoly');
             }
