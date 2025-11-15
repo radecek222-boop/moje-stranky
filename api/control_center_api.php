@@ -1819,6 +1819,9 @@ try {
         // ADVANCED SQL DIAGNOSTICS
         // ==========================================
         case 'check_database_advanced':
+            // Zvýšit timeout pro pokročilé SQL kontroly
+            set_time_limit(180); // 3 minuty
+
             $foreignKeys = [];
             $slowQueries = [];
             $collations = [];
@@ -1942,6 +1945,9 @@ try {
         // PERFORMANCE CHECKS
         // ==========================================
         case 'check_performance':
+            // Zvýšit timeout pro performance analýzu
+            set_time_limit(180); // 3 minuty
+
             $rootDir = __DIR__ . '/..';
 
             // 1. Page Load Times (simulated - would need real monitoring)
@@ -2029,6 +2035,9 @@ try {
         // CODE QUALITY CHECKS
         // ==========================================
         case 'check_code_quality':
+            // Zvýšit timeout pro code quality analýzu
+            set_time_limit(180); // 3 minuty
+
             $rootDir = __DIR__ . '/..';
 
             // 1. Dead Code Detection (simplified - scan for unused functions)
@@ -2342,6 +2351,9 @@ try {
         // SECURITY SCANNER
         // ==========================================
         case 'security_scan':
+            // Zvýšit timeout pro security scan (může trvat několik minut)
+            set_time_limit(300); // 5 minut
+
             require_once __DIR__ . '/../includes/security_scanner.php';
 
             $rootDir = __DIR__ . '/..';
@@ -2366,6 +2378,9 @@ try {
         // KOMPLEXNÍ CODE ANALYSIS
         // ==========================================
         case 'check_code_analysis':
+            // Zvýšit timeout - analýza 300+ souborů může trvat 5-10 minut
+            set_time_limit(600); // 10 minut
+
             $rootDir = __DIR__ . '/..';
             $results = [
                 'php' => ['errors' => [], 'warnings' => [], 'files_checked' => 0],
