@@ -8,6 +8,7 @@
 
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
 
 header('Content-Type: application/json');
 
@@ -40,6 +41,45 @@ try {
         echo json_encode([
             'status' => 'error',
             'message' => $rateCheck['message']
+        ]);
+        exit;
+    }
+
+    // CSRF PROTECTION: Načtení a validace CSRF tokenu
+    $payload = [];
+    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+    if ($method === 'POST') {
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        if (stripos($contentType, 'application/json') !== false) {
+            $raw = file_get_contents('php://input');
+            if ($raw !== false && $raw !== '') {
+                $payload = json_decode($raw, true);
+                if (!is_array($payload)) {
+                    http_response_code(400);
+                    echo json_encode([
+                        'status' => 'error',
+                        'message' => 'Neplatný JSON payload.'
+                    ]);
+                    exit;
+                }
+            }
+        } else {
+            $payload = $_POST;
+        }
+    }
+
+    // Validace CSRF tokenu
+    $csrfToken = $payload['csrf_token'] ?? $_POST['csrf_token'] ?? $_GET['csrf_token'] ?? '';
+    // SECURITY: Ensure CSRF token is a string, not an array
+    if (is_array($csrfToken)) {
+        $csrfToken = '';
+    }
+    if (!validateCSRFToken($csrfToken)) {
+        http_response_code(403);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Neplatný CSRF token. Obnovte stránku a zkuste to znovu.'
         ]);
         exit;
     }
