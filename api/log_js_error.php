@@ -30,50 +30,64 @@ try {
 
     // Načtení JSON dat
     $jsonData = file_get_contents('php://input');
-    $error = json_decode($jsonData, true);
+    $data = json_decode($jsonData, true);
 
-    if (!$error) {
+    if (!$data) {
         throw new Exception('Invalid JSON data');
     }
 
-    // Formátování chybové zprávy
-    $logMessage = "\n" . str_repeat('=', 80) . "\n";
-    $logMessage .= "JAVASCRIPT ERROR\n";
-    $logMessage .= str_repeat('=', 80) . "\n";
-    $logMessage .= "Čas: " . date('Y-m-d H:i:s') . "\n";
-    $logMessage .= "Typ: " . ($error['type'] ?? 'Unknown') . "\n";
-    $logMessage .= "Zpráva: " . ($error['message'] ?? 'No message') . "\n";
-
-    if (!empty($error['file'])) {
-        $logMessage .= "Soubor: " . $error['file'] . "\n";
+    // Podpora pro batched errors (nový formát) i single error (starý formát)
+    $errors = [];
+    if (isset($data['errors']) && is_array($data['errors'])) {
+        // Nový formát: { errors: [...], count: N }
+        $errors = $data['errors'];
+    } else {
+        // Starý formát: single error object
+        $errors = [$data];
     }
 
-    if (!empty($error['line'])) {
-        $logMessage .= "Řádek: " . $error['line'];
-        if (!empty($error['column'])) {
-            $logMessage .= ":" . $error['column'];
+    $logMessage = '';
+
+    // Zpracovat každý error
+    foreach ($errors as $error) {
+        $logMessage .= "\n" . str_repeat('=', 80) . "\n";
+        $logMessage .= "JAVASCRIPT ERROR\n";
+        $logMessage .= str_repeat('=', 80) . "\n";
+        $logMessage .= "Čas: " . date('Y-m-d H:i:s') . "\n";
+        $logMessage .= "Typ: " . ($error['type'] ?? 'Unknown') . "\n";
+        $logMessage .= "Zpráva: " . ($error['message'] ?? 'No message') . "\n";
+
+        if (!empty($error['file'])) {
+            $logMessage .= "Soubor: " . $error['file'] . "\n";
         }
-        $logMessage .= "\n";
-    }
 
-    if (!empty($error['stack'])) {
-        $logMessage .= "\nStack Trace:\n";
+        if (!empty($error['line'])) {
+            $logMessage .= "Řádek: " . $error['line'];
+            if (!empty($error['column'])) {
+                $logMessage .= ":" . $error['column'];
+            }
+            $logMessage .= "\n";
+        }
+
+        if (!empty($error['stack'])) {
+            $logMessage .= "\nStack Trace:\n";
+            $logMessage .= str_repeat('-', 80) . "\n";
+            $logMessage .= $error['stack'] . "\n";
+        }
+
+        $logMessage .= "\nClient Info:\n";
         $logMessage .= str_repeat('-', 80) . "\n";
-        $logMessage .= $error['stack'] . "\n";
+        $logMessage .= "URL: " . ($error['url'] ?? 'N/A') . "\n";
+        $logMessage .= "User Agent: " . ($error['userAgent'] ?? 'N/A') . "\n";
+        $logMessage .= "IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'N/A') . "\n";
+
+        if (isset($_SESSION['user_id'])) {
+            $logMessage .= "User ID: " . $_SESSION['user_id'] . "\n";
+            $logMessage .= "User: " . ($_SESSION['full_name'] ?? 'Unknown') . "\n";
+        }
+
+        $logMessage .= str_repeat('=', 80) . "\n\n";
     }
-
-    $logMessage .= "\nClient Info:\n";
-    $logMessage .= str_repeat('-', 80) . "\n";
-    $logMessage .= "URL: " . ($error['url'] ?? 'N/A') . "\n";
-    $logMessage .= "User Agent: " . ($error['userAgent'] ?? 'N/A') . "\n";
-    $logMessage .= "IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'N/A') . "\n";
-
-    if (isset($_SESSION['user_id'])) {
-        $logMessage .= "User ID: " . $_SESSION['user_id'] . "\n";
-        $logMessage .= "User: " . ($_SESSION['full_name'] ?? 'Unknown') . "\n";
-    }
-
-    $logMessage .= str_repeat('=', 80) . "\n\n";
 
     // Logování do souboru
     $logDir = __DIR__ . '/../logs';
@@ -97,9 +111,13 @@ try {
     error_log('Failed to write file');
 }
 
+    $errorCount = count($errors);
     echo json_encode([
         'success' => true,
-        'message' => 'Error logged successfully'
+        'message' => $errorCount > 1
+            ? "Logged {$errorCount} errors successfully"
+            : 'Error logged successfully',
+        'count' => $errorCount
     ]);
 
 } catch (Exception $e) {
