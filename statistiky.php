@@ -281,10 +281,51 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
     <div class="stats-filters-grid">
       <div class="stats-filter-group">
+        <label class="stats-filter-label">Měsíc</label>
+        <select class="stats-filter-select" id="filter-month" onchange="handleMonthChange()">
+          <option value="">Vlastní rozsah</option>
+          <option value="current" selected>Aktuální měsíc</option>
+          <option value="last">Minulý měsíc</option>
+          <option value="2024-01">Leden 2024</option>
+          <option value="2024-02">Únor 2024</option>
+          <option value="2024-03">Březen 2024</option>
+          <option value="2024-04">Duben 2024</option>
+          <option value="2024-05">Květen 2024</option>
+          <option value="2024-06">Červen 2024</option>
+          <option value="2024-07">Červenec 2024</option>
+          <option value="2024-08">Srpen 2024</option>
+          <option value="2024-09">Září 2024</option>
+          <option value="2024-10">Říjen 2024</option>
+          <option value="2024-11">Listopad 2024</option>
+          <option value="2024-12">Prosinec 2024</option>
+          <option value="2025-01">Leden 2025</option>
+          <option value="2025-02">Únor 2025</option>
+          <option value="2025-03">Březen 2025</option>
+          <option value="2025-04">Duben 2025</option>
+          <option value="2025-05">Květen 2025</option>
+          <option value="2025-06">Červen 2025</option>
+          <option value="2025-07">Červenec 2025</option>
+          <option value="2025-08">Srpen 2025</option>
+          <option value="2025-09">Září 2025</option>
+          <option value="2025-10">Říjen 2025</option>
+          <option value="2025-11">Listopad 2025</option>
+          <option value="2025-12">Prosinec 2025</option>
+        </select>
+      </div>
+
+      <div class="stats-filter-group">
+        <label class="stats-filter-label">Prodejce</label>
+        <select class="stats-filter-select" id="filter-salesperson">
+          <option value="">Všichni</option>
+        </select>
+      </div>
+
+      <div class="stats-filter-group">
         <label class="stats-filter-label">Země</label>
-        <select class="stats-filter-select" id="filter-country" multiple>
-          <option>CZ</option>
-          <option>SK</option>
+        <select class="stats-filter-select" id="filter-country">
+          <option value="">Všechny</option>
+          <option value="CZ">🇨🇿 Česko</option>
+          <option value="SK">🇸🇰 Slovensko</option>
         </select>
       </div>
 
@@ -292,9 +333,9 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         <label class="stats-filter-label">Stav</label>
         <select class="stats-filter-select" id="filter-status">
           <option value="">Všechny</option>
-          <option>ČEKÁ</option>
-          <option>DOMLUVENÁ</option>
-          <option>HOTOVO</option>
+          <option value="wait">ČEKÁ</option>
+          <option value="open">DOMLUVENÁ</option>
+          <option value="done">HOTOVO</option>
         </select>
       </div>
 
@@ -526,15 +567,17 @@ function renderSalespersonTable(body, data) {
 function renderTechnicianTable(body, data) {
     let rows = '';
     if (data.length === 0) {
-        rows = '<tr><td colspan="6" style="text-align: center; color: #999;">Žádná data k zobrazení</td></tr>';
+        rows = '<tr><td colspan="8" style="text-align: center; color: #999;">Žádná data k zobrazení</td></tr>';
     } else {
         data.forEach(row => {
             rows += `
                 <tr>
                     <td>${escapeHtml(row.technik)}</td>
                     <td>${row.pocet_zakazek}</td>
-                    <td>${row.vydelek} €</td>
-                    <td>${row.prumer_zakazka} €</td>
+                    <td>${row.pocet_dokonceno || row.hotove_count || 0}</td>
+                    <td>${row.celkova_castka_dokonceno ? parseFloat(row.celkova_castka_dokonceno).toFixed(2) : '0.00'} €</td>
+                    <td>${row.vydelek ? parseFloat(row.vydelek).toFixed(2) : '0.00'} €</td>
+                    <td>${row.prumer_zakazka ? parseFloat(row.prumer_zakazka).toFixed(2) : '0.00'} €</td>
                     <td>${row.cz_count} / ${row.sk_count}</td>
                     <td>${row.uspesnost}%</td>
                 </tr>
@@ -548,7 +591,9 @@ function renderTechnicianTable(body, data) {
                 <thead>
                     <tr>
                         <th>Technik</th>
-                        <th>Zakázky</th>
+                        <th>Celkem zakázek</th>
+                        <th>Dokončeno</th>
+                        <th>Částka dokončeno</th>
                         <th>Výdělek (33%)</th>
                         <th>Průměr/zakázka</th>
                         <th>CZ / SK</th>
@@ -702,16 +747,61 @@ function escapeHtml(text) {
 
 // Filter funkce
 /**
+ * HandleMonthChange - nastaví datum podle vybraného měsíce
+ */
+function handleMonthChange() {
+    const monthSelect = document.getElementById('filter-month');
+    const dateFrom = document.getElementById('filter-date-from');
+    const dateTo = document.getElementById('filter-date-to');
+    const value = monthSelect.value;
+
+    if (value === 'current') {
+        // Aktuální měsíc - od 1. dne do dneška
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        dateFrom.value = firstDay.toISOString().split('T')[0];
+        dateTo.value = now.toISOString().split('T')[0];
+        dateFrom.disabled = true;
+        dateTo.disabled = true;
+    } else if (value === 'last') {
+        // Minulý měsíc - od 1. dne do posledního dne
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
+        dateFrom.value = firstDay.toISOString().split('T')[0];
+        dateTo.value = lastDay.toISOString().split('T')[0];
+        dateFrom.disabled = true;
+        dateTo.disabled = true;
+    } else if (value && value.match(/^\d{4}-\d{2}$/)) {
+        // Konkrétní měsíc (např. 2024-11)
+        const [year, month] = value.split('-').map(Number);
+        const firstDay = new Date(year, month - 1, 1);
+        const lastDay = new Date(year, month, 0);
+        dateFrom.value = firstDay.toISOString().split('T')[0];
+        dateTo.value = lastDay.toISOString().split('T')[0];
+        dateFrom.disabled = true;
+        dateTo.disabled = true;
+    } else {
+        // Vlastní rozsah
+        dateFrom.disabled = false;
+        dateTo.disabled = false;
+    }
+
+    // Automaticky aplikovat filtry
+    applyFilters();
+}
+
+/**
  * ResetFilters
  */
 function resetFilters() {
-    document.getElementById('filter-country').selectedIndex = -1;
+    document.getElementById('filter-month').value = 'current';
+    document.getElementById('filter-salesperson').selectedIndex = 0;
+    document.getElementById('filter-country').selectedIndex = 0;
     document.getElementById('filter-status').selectedIndex = 0;
-    document.getElementById('filter-date-from').value = '';
-    document.getElementById('filter-date-to').value = '';
 
-    // Reload stats
-    loadSummaryStats();
+    // Nastavit aktuální měsíc
+    handleMonthChange();
 }
 
 /**
@@ -728,17 +818,41 @@ function applyFilters() {
 function getFilterParams() {
     const params = new URLSearchParams();
 
+    const salesperson = document.getElementById('filter-salesperson').value;
     const country = document.getElementById('filter-country').value;
     const status = document.getElementById('filter-status').value;
     const dateFrom = document.getElementById('filter-date-from').value;
     const dateTo = document.getElementById('filter-date-to').value;
 
+    if (salesperson) params.append('salesperson', salesperson);
     if (country) params.append('country', country);
     if (status) params.append('status', status);
     if (dateFrom) params.append('date_from', dateFrom);
     if (dateTo) params.append('date_to', dateTo);
 
     return params.toString();
+}
+
+/**
+ * LoadSalespersonFilter - načte seznam prodejců do filtru
+ */
+async function loadSalespersonFilter() {
+    try {
+        const response = await fetch('api/statistiky_api.php?action=list_salespersons');
+        const result = await response.json();
+
+        if (result.status === 'success' && result.data) {
+            const select = document.getElementById('filter-salesperson');
+            result.data.forEach(salesperson => {
+                const option = document.createElement('option');
+                option.value = salesperson;
+                option.textContent = salesperson;
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Chyba načítání prodejců:', error);
+    }
 }
 
 async /**
@@ -772,7 +886,11 @@ document.addEventListener('keydown', (e) => {
 
 // Načíst data při načtení stránky
 document.addEventListener('DOMContentLoaded', () => {
-    loadSummaryStats();
+    // Nastavit výchozí datum (aktuální měsíc)
+    handleMonthChange();
+
+    // Načíst seznam prodejců do filtru
+    loadSalespersonFilter();
 });
 </script>
 
