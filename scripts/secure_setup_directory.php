@@ -1,111 +1,59 @@
 <?php
 /**
- * CRITICAL PRIORITY: Zabezpečení setup/ adresáře
- *
- * Zkopíruje .htaccess.production → .htaccess pro zablokování přístupu
- * v produkci. Po spuštění už nebudeš moci přistupovat k setup scriptům!
- *
- * Použití:
- * - CLI: php scripts/secure_setup_directory.php
- * - Web: Spustit z admin panelu (vyžaduje admin oprávnění)
+ * Zabezpečení setup/ adresáře
+ * Přejmenuje setup/ na setup.bak/ a vytvoří .htaccess pro ochranu
  */
 
-require_once __DIR__ . '/../init.php';
-
-// SECURITY: Admin check
-if (php_sapi_name() !== 'cli') {
-    if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
-        http_response_code(403);
-        die(json_encode(['status' => 'error', 'message' => 'Admin access required']));
-    }
-}
-
-// Detect if this is API call (non-CLI)
-$isApiCall = (php_sapi_name() !== 'cli');
+echo "=== ZABEZPEČENÍ SETUP/ ADRESÁŘE ===\n\n";
 
 $setupDir = __DIR__ . '/../setup';
-$sourceFile = $setupDir . '/.htaccess.production';
-$targetFile = $setupDir . '/.htaccess';
-$backupFile = $setupDir . '/.htaccess.backup';
+$backupDir = __DIR__ . '/../setup.bak';
 
 try {
-    // Verify source file exists
-    if (!file_exists($sourceFile)) {
-        throw new Exception("Source file not found: .htaccess.production");
+    // Kontrola jestli setup/ adresář existuje
+    if (!is_dir($setupDir)) {
+        echo "ℹ️  Adresář setup/ neexistuje - není co zabezpečovat\n";
+        echo "✅ OK\n";
+        exit(0);
     }
 
-    // Backup existing .htaccess if it exists
-    if (file_exists($targetFile)) {
-        if (!$isApiCall) {
-            echo "📦 Backing up existing .htaccess...\n";
+    echo "📁 Nalezen adresář: setup/\n";
+
+    // Přejmenovat setup/ na setup.bak/
+    if (is_dir($backupDir)) {
+        echo "⚠️  Adresář setup.bak/ již existuje\n";
+        echo "🗑️  Mažu starý setup.bak/...\n";
+
+        // Rekurzivně smazat setup.bak/
+        $files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($backupDir, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($files as $fileinfo) {
+            $func = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+            $func($fileinfo->getRealPath());
         }
-        if (!copy($targetFile, $backupFile)) {
-            throw new Exception("Failed to backup existing .htaccess");
-        }
+        rmdir($backupDir);
+        echo "✅ Smazán starý setup.bak/\n";
     }
 
-    // Copy production .htaccess
-    if (!$isApiCall) {
-        echo "🔐 Copying .htaccess.production → .htaccess...\n";
-    }
+    echo "🔄 Přejmenovávám setup/ → setup.bak/...\n";
+    rename($setupDir, $backupDir);
+    echo "✅ Přejmenováno\n";
 
-    if (!copy($sourceFile, $targetFile)) {
-        throw new Exception("Failed to copy .htaccess.production to .htaccess");
-    }
+    // Vytvoř .htaccess v setup.bak/ pro extra ochranu
+    $htaccess = $backupDir . '/.htaccess';
+    $htaccessContent = "# Deny all access to setup backup directory\nOrder deny,allow\nDeny from all\n";
+    file_put_contents($htaccess, $htaccessContent);
+    echo "✅ Vytvořen .htaccess ochrana v setup.bak/\n";
 
-    // Verify the copy
-    if (!file_exists($targetFile)) {
-        throw new Exception(".htaccess file was not created");
-    }
-
-    $result = [
-        'status' => 'success',
-        'message' => 'Setup adresář zabezpečen! Přístup k /setup/ je nyní blokován.',
-        'details' => [
-            'source' => '.htaccess.production',
-            'target' => '.htaccess',
-            'backup' => file_exists($backupFile) ? '.htaccess.backup' : null
-        ]
-    ];
-
-    // Return JSON for API calls
-    if ($isApiCall) {
-        header('Content-Type: application/json');
-        echo json_encode($result, JSON_PRETTY_PRINT);
-        exit;
-    }
-
-    // CLI output
-    echo "\n" . str_repeat("=", 70) . "\n";
-    echo "✅ HOTOVO!\n";
-    echo str_repeat("=", 70) . "\n\n";
-    echo "🔐 Setup adresář je nyní zabezpečen!\n";
-    echo "✅ Soubor .htaccess.production zkopírován do .htaccess\n";
-
-    if (file_exists($backupFile)) {
-        echo "📦 Záloha uložena do .htaccess.backup\n";
-    }
-
-    echo "\n⚠️  POZOR:\n";
-    echo "  - Přístup k /setup/ je nyní BLOKOVÁN\n";
-    echo "  - Setup scripty už nepůjde spustit z prohlížeče\n";
-    echo "  - Pro odblokování zkopíruj .htaccess.localhost → .htaccess\n";
+    echo "\n✅ SETUP ADRESÁŘ ZABEZPEČEN!\n";
+    echo "   • setup/ přejmenován na setup.bak/\n";
+    echo "   • Přidán .htaccess deny all\n";
+    echo "\n💡 TIP: Pokud potřebujete setup znovu spustit, přejmenujte setup.bak/ zpět na setup/\n";
 
 } catch (Exception $e) {
-    $errorResult = [
-        'status' => 'error',
-        'message' => $e->getMessage()
-    ];
-
-    // Return JSON for API calls
-    if ($isApiCall) {
-        header('Content-Type: application/json');
-        http_response_code(500);
-        echo json_encode($errorResult, JSON_PRETTY_PRINT);
-        exit;
-    }
-
-    // CLI output
-    echo "\n❌ CHYBA: " . $e->getMessage() . "\n";
+    echo "❌ KRITICKÁ CHYBA: " . $e->getMessage() . "\n";
     exit(1);
 }
