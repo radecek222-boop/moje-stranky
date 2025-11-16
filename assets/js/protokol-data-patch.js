@@ -13,27 +13,41 @@
     }
   }
 
-  if (!dataNode) {
-    log('info', 'ℹ️ Protokol data patch: žádná inicializační data nebyla vložena');
-    return;
+  // ✅ FIX: Pokus o načtení z DOM, pokud selže, zkus localStorage
+  let payload = null;
+  let dataSource = null;
+
+  // Pokus 1: Načíst z DOM (initialReklamaceData)
+  if (dataNode) {
+    const raw = (dataNode.textContent || dataNode.innerText || '').trim();
+    if (raw) {
+      try {
+        payload = JSON.parse(raw);
+        dataSource = 'DOM';
+        log('log', '✅ Data načtena z DOM (initialReklamaceData)');
+      } catch (error) {
+        log('error', '❌ JSON parse z DOM selhal', error);
+      }
+    }
   }
 
-  const raw = (dataNode.textContent || dataNode.innerText || '').trim();
-  if (!raw) {
-    log('warn', '⚠️ Protokol data patch: prázdný JSON payload');
-    return;
+  // Pokus 2: Pokud DOM nemá data, zkus localStorage
+  if (!payload) {
+    try {
+      const storedData = localStorage.getItem('currentCustomer');
+      if (storedData) {
+        payload = JSON.parse(storedData);
+        dataSource = 'localStorage';
+        log('log', '✅ Data načtena z localStorage (currentCustomer)');
+      }
+    } catch (error) {
+      log('warn', '⚠️ Nepodařilo se načíst localStorage', error);
+    }
   }
 
-  let payload;
-  try {
-    payload = JSON.parse(raw);
-  } catch (error) {
-    log('error', '❌ Protokol data patch: JSON parse selhal', error);
-    return;
-  }
-
+  // Pokud stále nemáme žádná data, konec
   if (!payload || typeof payload !== 'object') {
-    log('warn', '⚠️ Protokol data patch: data mají neplatný formát');
+    log('warn', '⚠️ Žádná data k dispozici (ani DOM ani localStorage)');
     return;
   }
 
