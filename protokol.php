@@ -165,5 +165,6 @@ if (!$isLoggedIn) {
 <!-- External JavaScript -->
 <script src="assets/js/protokol.min.js" defer></script>
 <script src="assets/js/protokol-fakturace-patch.js" defer></script>
+<script src="assets/js/protokol-data-patch.js" defer></script>
 </body>
 </html>
