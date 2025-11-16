@@ -1,3 +1,9 @@
+// Konstanty pro autocomplete
+const CALC_CONSTANTS = {
+  AUTOCOMPLETE_MIN_CHARS: 1,   // Min počet znaků pro autocomplete
+  AUTOCOMPLETE_DEBOUNCE: 300   // Debounce pro autocomplete (ms)
+};
+
 const CALC = {
   map: null,
   // ✅ REFACTOR: marker, warehouseMarker, routeLayer jsou nyní spravovány WGSMap modulem
@@ -118,13 +124,13 @@ const CALC = {
       uliceInput.addEventListener('input', (e) => {
         clearTimeout(timeout);
         const query = e.target.value.trim();
-        
-        if (query.length < 3) {
+
+        if (query.length < CALC_CONSTANTS.AUTOCOMPLETE_MIN_CHARS) {
           document.getElementById('autocompleteDropdown').style.display = 'none';
           return;
         }
-        
-        timeout = setTimeout(() => this.searchAddress(query), 300);
+
+        timeout = setTimeout(() => this.searchAddress(query), CALC_CONSTANTS.AUTOCOMPLETE_DEBOUNCE);
       });
     }
     

@@ -6,7 +6,7 @@ const CONSTANTS = {
   MAX_IMAGE_WIDTH: 1200,       // Max šířka obrázku v px
   IMAGE_QUALITY: 0.85,         // JPEG kvalita (0-1)
   AUTOCOMPLETE_DEBOUNCE: 300,  // Debounce pro autocomplete (ms)
-  AUTOCOMPLETE_MIN_CHARS: 3,   // Min počet znaků pro autocomplete
+  AUTOCOMPLETE_MIN_CHARS: 1,   // Min počet znaků pro autocomplete
   ROUTE_DEBOUNCE: 500,         // Debounce pro route calculation (ms)
   WARRANTY_YEARS: 2,           // Délka záruky v letech
   PSC_LENGTH: 5,               // Délka PSČ
