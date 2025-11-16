@@ -304,13 +304,16 @@ function renderOrdersTable(body, data) {
         rows = '<tr><td colspan="8" style="text-align: center; color: #999;">Žádná data k zobrazení</td></tr>';
     } else {
         data.forEach(row => {
-            // Mapování stavů z DB hodnot na české zobrazení
-            const stavMapping = {
-                'wait': 'ČEKÁ',
-                'open': 'DOMLUVENÁ',
-                'done': 'HOTOVO'
-            };
-            const stav = stavMapping[row.stav] || row.stav || '-';
+            // Použít stav_text z API (již přeloženo) nebo fallback na mapping
+            let stav = row.stav_text || row.stav || '-';
+            if (!row.stav_text && row.stav) {
+                const stavMapping = {
+                    'wait': 'ČEKÁ',
+                    'open': 'DOMLUVENÁ',
+                    'done': 'HOTOVO'
+                };
+                stav = stavMapping[row.stav] || row.stav;
+            }
 
             rows += `
                 <tr>
