@@ -451,13 +451,15 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         <div id="photoPreviewMain"></div>
       </div>
 
-      <!-- GDPR CONSENT -->
+      <!-- GDPR CONSENT - pouze pro neregistrované uživatele -->
+      <?php if (!$isLoggedIn): ?>
       <div class="form-consent" style="margin: 1.5rem 0 1rem 0; padding: 0.5rem 1rem; border: 1px solid #ddd; background: #f9f9f9; text-align: center;">
         <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.55rem; line-height: 1.3; color: #666;">
           <input type="checkbox" id="gdpr_consent" name="gdpr_consent" required style="margin-right: 0.5rem; flex-shrink: 0;">
           <span>Souhlasím se zpracováním osobních údajů společností White Glove Service, s.r.o.</span>
         </label>
       </div>
+      <?php endif; ?>
 
       <!-- BUTTONS -->
       <div class="form-actions">

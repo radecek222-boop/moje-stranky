@@ -598,6 +598,8 @@ const WGS = {
   },
   
   async submitForm() {
+    // GDPR souhlas - pouze pro neregistrované uživatele
+    // Checkbox neexistuje pokud je uživatel přihlášený (souhlas ošetřen smluvně)
     const consentCheckbox = document.getElementById('gdpr_consent');
     if (consentCheckbox && !consentCheckbox.checked) {
       consentCheckbox.focus();
@@ -605,20 +607,11 @@ const WGS = {
       return;
     }
 
-    // ✅ FIX H-2: Frontend validace PSČ a telefonu
-    const pscInput = document.getElementById('psc');
+    // ✅ FIX H-2: Frontend validace telefonu
     const telefonInput = document.getElementById('telefon');
 
-    if (pscInput && pscInput.value.trim()) {
-      const psc = pscInput.value.trim();
-      // ✅ FIX L-2: Použít konstantu PSC_LENGTH
-      const pscRegex = new RegExp(`^\\d{${CONSTANTS.PSC_LENGTH}}$`);
-      if (!pscRegex.test(psc)) {
-        this.toast(`❌ PSČ musí být ${CONSTANTS.PSC_LENGTH} číslic`, 'error');
-        pscInput.focus();
-        return;
-      }
-    }
+    // PSČ validace odstraněna - autocomplete vrací různé formáty ("110 00", "11000", atd.)
+    // Uživatelé také píší PSČ různě, není důvod striktně validovat
 
     if (telefonInput && telefonInput.value.trim()) {
       const telefon = telefonInput.value.trim();
