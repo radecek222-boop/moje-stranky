@@ -102,6 +102,25 @@
         fakturaceField.value = payload.fakturace_firma;
       }
     }
+
+    // Předvyplnit technika z databáze (pokud je uložený)
+    const technikField = document.getElementById('technician');
+    if (technikField && payload.technik) {
+      const technikValue = payload.technik.toString().trim();
+      // Najít option s touto hodnotou
+      const options = Array.from(technikField.options);
+      const matchingOption = options.find(opt => opt.value === technikValue || opt.text === technikValue);
+      if (matchingOption) {
+        technikField.value = matchingOption.value;
+      } else {
+        // Pokud technik není v seznamu, přidat ho
+        const newOption = document.createElement('option');
+        newOption.value = technikValue;
+        newOption.text = technikValue;
+        newOption.selected = true;
+        technikField.add(newOption);
+      }
+    }
   };
 
   if (document.readyState === 'loading') {
