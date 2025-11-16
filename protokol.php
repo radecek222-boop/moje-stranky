@@ -7,6 +7,132 @@ if (!$isLoggedIn) {
     header('Location: login.php?redirect=protokol.php');
     exit;
 }
+
+/**
+ * Escapes output for safe HTML rendering.
+ */
+function wgs_escape($value): string
+{
+    return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
+}
+
+/**
+ * Builds a printable address from individual columns.
+ */
+function wgs_format_address(array $record): string
+{
+    if (!empty($record['adresa'])) {
+        return $record['adresa'];
+    }
+
+    $parts = [];
+    foreach (['ulice', 'mesto', 'psc'] as $key) {
+        if (!empty($record[$key])) {
+            $parts[] = trim($record[$key]);
+        }
+    }
+
+    return implode(', ', array_filter($parts, function ($part) {
+        return $part !== '';
+    }));
+}
+
+/**
+ * Formats the billing destination label.
+ */
+function wgs_format_fakturace_label(?string $value): string
+{
+    $code = strtoupper(trim((string)$value));
+
+    switch ($code) {
+        case 'CZ':
+            return '🇨🇿 Česká republika (CZ)';
+        case 'SK':
+            return '🇸🇰 Slovensko (SK)';
+        default:
+            return '';
+    }
+}
+
+$prefillFields = [
+    'order_number' => '',
+    'claim_number' => '',
+    'customer' => '',
+    'address' => '',
+    'phone' => '',
+    'email' => '',
+    'brand' => '',
+    'model' => '',
+    'description' => '',
+    'fakturace' => '',
+];
+
+$initialBootstrapData = null;
+$initialBootstrapJson = '';
+
+$requestedId = $_GET['id'] ?? null;
+$lookupValue = null;
+
+if (is_string($requestedId)) {
+    $requestedId = trim($requestedId);
+
+    if ($requestedId !== '') {
+        // Přípustné jsou i ID se znaky jako "/" nebo "." (např. WGS-2024/001)
+        $lookupValue = mb_substr($requestedId, 0, 120, 'UTF-8');
+    }
+}
+
+if ($lookupValue !== null) {
+    try {
+        $pdo = getDbConnection();
+        $stmt = $pdo->prepare(
+            "SELECT * FROM wgs_reklamace WHERE reklamace_id = :value OR cislo = :value OR id = :value LIMIT 1"
+        );
+        $stmt->execute([':value' => $lookupValue]);
+        $record = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($record) {
+            $address = wgs_format_address($record);
+            $customerName = $record['jmeno'] ?? $record['zakaznik'] ?? '';
+
+            if (empty($record['adresa']) && $address !== '') {
+                $record['adresa'] = $address;
+            }
+
+            if (empty($record['jmeno']) && !empty($record['zakaznik'])) {
+                $record['jmeno'] = $record['zakaznik'];
+            }
+
+            if (empty($record['zakaznik']) && !empty($record['jmeno'])) {
+                $record['zakaznik'] = $record['jmeno'];
+            }
+
+            $prefillFields = [
+                'order_number' => $record['id'] ?? $record['cislo'] ?? '',
+                'claim_number' => $record['id'] ?? $record['reklamace_id'] ?? $record['cislo'] ?? '',
+                'customer' => $customerName,
+                'address' => $record['adresa'] ?? $address,
+                'phone' => $record['telefon'] ?? '',
+                'email' => $record['email'] ?? '',
+                'brand' => $record['znacka'] ?? $record['model'] ?? '',
+                'model' => $record['model'] ?? '',
+                'description' => $record['popis_problemu'] ?? '',
+                'fakturace' => wgs_format_fakturace_label($record['fakturace_firma'] ?? ''),
+            ];
+
+            $initialBootstrapData = $record;
+        }
+    } catch (Exception $e) {
+        error_log('Protokol prefill failed: ' . $e->getMessage());
+    }
+}
+
+if ($initialBootstrapData) {
+    $json = json_encode($initialBootstrapData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($json !== false) {
+        $initialBootstrapJson = str_replace('</', '<\/', $json);
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -33,6 +159,10 @@ if (!$isLoggedIn) {
 <link rel="icon" type="image/png" sizes="512x512" href="./icon512.png">
 
 <title>Protokol – White Glove Service</title>
+
+<?php if ($initialBootstrapJson): ?>
+<script id="initialReklamaceData" type="application/json"><?= $initialBootstrapJson; ?></script>
+<?php endif; ?>
 
 <!-- Google Fonts - Natuzzi style -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -63,16 +193,16 @@ if (!$isLoggedIn) {
   <div class="two-col-table">
     <div class="col">
       <table>
-        <tr><td class="label">Číslo objednávky<span class="en-label">Order number</span></td><td><input type="text" id="order-number" readonly></td></tr>
-        <tr><td class="label">Číslo reklamace<span class="en-label">Claim number</span></td><td><input type="text" id="claim-number" readonly></td></tr>
-        <tr><td class="label">Zákazník<span class="en-label">Customer</span></td><td><input type="text" id="customer" readonly></td></tr>
-        <tr><td class="label">Adresa<span class="en-label">Address</span></td><td><input type="text" id="address" readonly></td></tr>
-        <tr><td class="label">Telefon<span class="en-label">Phone</span></td><td><input type="tel" id="phone" readonly></td></tr>
-        <tr><td class="label">Email<span class="en-label">Email</span></td><td><input type="email" id="email" readonly></td></tr>
-        <tr><td class="label">Fakturace<span class="en-label">Billing</span></td><td><input type="text" id="fakturace-firma" readonly style="font-weight: 600;"></td></tr>
+        <tr><td class="label">Číslo objednávky<span class="en-label">Order number</span></td><td><input type="text" id="order-number" value="<?= wgs_escape($prefillFields['order_number']); ?>" readonly></td></tr>
+        <tr><td class="label">Číslo reklamace<span class="en-label">Claim number</span></td><td><input type="text" id="claim-number" value="<?= wgs_escape($prefillFields['claim_number']); ?>" readonly></td></tr>
+        <tr><td class="label">Zákazník<span class="en-label">Customer</span></td><td><input type="text" id="customer" value="<?= wgs_escape($prefillFields['customer']); ?>" readonly></td></tr>
+        <tr><td class="label">Adresa<span class="en-label">Address</span></td><td><input type="text" id="address" value="<?= wgs_escape($prefillFields['address']); ?>" readonly></td></tr>
+        <tr><td class="label">Telefon<span class="en-label">Phone</span></td><td><input type="tel" id="phone" value="<?= wgs_escape($prefillFields['phone']); ?>" readonly></td></tr>
+        <tr><td class="label">Email<span class="en-label">Email</span></td><td><input type="email" id="email" value="<?= wgs_escape($prefillFields['email']); ?>" readonly></td></tr>
+        <tr><td class="label">Fakturace<span class="en-label">Billing</span></td><td><input type="text" id="fakturace-firma" value="<?= wgs_escape($prefillFields['fakturace']); ?>" readonly style="font-weight: 600;"></td></tr>
       </table>
     </div>
-    
+
     <div class="col">
       <table>
         <tr><td class="label">Technik<span class="en-label">Technician</span></td>
@@ -80,15 +210,15 @@ if (!$isLoggedIn) {
         <tr><td class="label">Datum návštěvy<span class="en-label">Visit date</span></td><td><input type="date" id="visit-date"></td></tr>
         <tr><td class="label">Datum doručení<span class="en-label">Delivery date</span></td><td><input type="date" id="delivery-date"></td></tr>
         <tr><td class="label">Datum reklamace<span class="en-label">Claim date</span></td><td><input type="date" id="claim-date"></td></tr>
-        <tr><td class="label">Značka/Contract<span class="en-label">Brand</span></td><td><input type="text" id="brand"></td></tr>
-        <tr><td class="label">Model<span class="en-label">Model</span></td><td><input type="text" id="model"></td></tr>
+        <tr><td class="label">Značka/Contract<span class="en-label">Brand</span></td><td><input type="text" id="brand" value="<?= wgs_escape($prefillFields['brand']); ?>"></td></tr>
+        <tr><td class="label">Model<span class="en-label">Model</span></td><td><input type="text" id="model" value="<?= wgs_escape($prefillFields['model']); ?>"></td></tr>
       </table>
     </div>
   </div>
 
   <div class="section-title">Zákazník reklamuje<span class="en-label">Customer complaint</span></div>
   <div class="split-section">
-    <textarea id="description-cz" placeholder="Popis reklamace česky..."></textarea>
+    <textarea id="description-cz" placeholder="Popis reklamace česky..."><?= wgs_escape($prefillFields['description']); ?></textarea>
     <textarea id="description-en" placeholder="Automatický překlad..." readonly></textarea>
   </div>
 
@@ -115,7 +245,7 @@ if (!$isLoggedIn) {
         <tr><td class="label"><strong>Celkem</strong><span class="en-label">Total</span></td><td><input type="text" id="price-total" readonly style="font-weight:700;"></td></tr>
       </table>
     </div>
-    
+
     <div class="col">
       <table>
         <tr><td class="label">Vyřešeno?<span class="en-label">Solved?</span></td><td><select id="solved"><option>ANO</option><option>NE</option></select></td></tr>
@@ -138,7 +268,7 @@ if (!$isLoggedIn) {
   <div class="btns">
     <button class="btn btn-primary" data-action="attachPhotos">Přidat fotky</button>
     <button class="btn btn-primary" data-action="exportBothPDFs">Export 2x PDF</button>
-    
+
     <button class="btn" data-action="sendToCustomer">Odeslat zákazníkovi</button>
     <button class="btn" data-navigate="seznam.php">Zpět</button>
   </div>
@@ -158,57 +288,8 @@ if (!$isLoggedIn) {
 
 <script src="assets/js/csrf-auto-inject.js" defer></script>
 
-<!-- Data Loading Fix: Clear localStorage if URL has different ID -->
-<script>
-// PATCH 1: Tento script se spustí PŘED protokol.min.js aby vyčistil zastaralá data
-(function() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlId = urlParams.get('id');
-
-  if (urlId) {
-    const storedData = localStorage.getItem('currentCustomer');
-    if (storedData) {
-      try {
-        const customer = JSON.parse(storedData);
-        const storedId = customer.reklamace_id || customer.cislo || customer.id;
-
-        // Pokud URL ID ≠ localStorage ID, vymazat localStorage
-        if (storedId !== urlId) {
-          console.log('🗑️ FIX: Mazání zastaralých dat z localStorage (', storedId, '≠', urlId, ')');
-          localStorage.removeItem('currentCustomer');
-        } else {
-          console.log('✅ FIX: localStorage obsahuje správná data pro', urlId);
-        }
-      } catch (e) {
-        console.warn('⚠️ FIX: Chyba při parsování localStorage, mažu data');
-        localStorage.removeItem('currentCustomer');
-      }
-    }
-  }
-})();
-
-// PATCH 2: Oprava currentReklamaceId po načtení dat z API
-window.addEventListener('DOMContentLoaded', function() {
-  setTimeout(function() {
-    // Opravit currentReklamaceId pokud používá špatné ID
-    if (window.currentReklamace) {
-      const correctId = window.currentReklamace.reklamace_id || window.currentReklamace.cislo || window.currentReklamace.id;
-      if (window.currentReklamaceId !== correctId) {
-        console.log('🔧 FIX: Opravuji currentReklamaceId z', window.currentReklamaceId, 'na', correctId);
-        window.currentReklamaceId = correctId;
-
-        // Reload fotek se správným ID
-        if (typeof window.loadPhotosFromDatabase === 'function') {
-          console.log('📸 FIX: Reload fotek s opraveným ID:', correctId);
-          window.loadPhotosFromDatabase(correctId);
-        }
-      }
-    }
-  }, 500); // Čekat 500ms až se protokol.min.js načte a spustí
-});
-</script>
-
 <!-- External JavaScript -->
+<script src="assets/js/protokol-data-patch.js" defer></script>
 <script src="assets/js/protokol.min.js" defer></script>
 <script src="assets/js/protokol-fakturace-patch.js" defer></script>
 </body>
