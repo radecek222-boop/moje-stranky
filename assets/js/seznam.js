@@ -27,6 +27,12 @@ let ACTIVE_FILTER = 'all';
 let CURRENT_RECORD = null;
 let SELECTED_DATE = null;
 let SELECTED_TIME = null;
+
+// ✅ PAGINATION FIX: Tracking pagination state
+let CURRENT_PAGE = 1;
+let HAS_MORE_PAGES = false;
+let LOADING_MORE = false;
+const PER_PAGE = 50;
 let CAL_MONTH = new Date().getMonth();
 let CAL_YEAR = new Date().getFullYear();
 let SEARCH_QUERY = '';
@@ -149,14 +155,25 @@ function clearSearch() {
 }
 
 function highlightText(text, query) {
-  if (!query || !text) return text;
-  
-  const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
-  return text.replace(regex, '<span class="highlight">$1</span>');
+  if (!query || !text) return escapeHtml(text);
+
+  // ✅ SECURITY FIX: Escape HTML PŘED highlightováním
+  const escapedText = escapeHtml(text);
+  const escapedQuery = escapeRegex(query);
+
+  const regex = new RegExp(`(${escapedQuery})`, 'gi');
+  return escapedText.replace(regex, '<span class="highlight">$1</span>');
 }
 
 function escapeRegex(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 function matchesSearch(record, query) {
@@ -215,26 +232,42 @@ function updateCounts(items) {
 }
 
 // === NAČTENÍ DAT ===
-async function loadAll(status = 'all') {
+async function loadAll(status = 'all', append = false) {
   try {
-   const response = await fetch(`app/controllers/load.php?status=${status}`);
+    // ✅ PAGINATION FIX: Přidat page a per_page parametry
+    const page = append ? CURRENT_PAGE + 1 : 1;
+    const response = await fetch(`app/controllers/load.php?status=${status}&page=${page}&per_page=${PER_PAGE}`);
     if (!response.ok) throw new Error('Chyba načítání');
 
     const json = await response.json();
-    
+
     let items = [];
     if (json.status === 'success' && Array.isArray(json.data)) {
       items = json.data;
     } else if (Array.isArray(json)) {
       items = json;
     }
-    
-    WGS_DATA_CACHE = items;
-    
-    let userItems = Utils.filterByUserRole(items);
+
+    // ✅ PAGINATION: Append místo replace při loadMore
+    if (append) {
+      WGS_DATA_CACHE = [...WGS_DATA_CACHE, ...items];
+      CURRENT_PAGE = page;
+    } else {
+      WGS_DATA_CACHE = items;
+      CURRENT_PAGE = 1;
+    }
+
+    // ✅ PAGINATION: Detekce zda jsou další stránky
+    HAS_MORE_PAGES = items.length === PER_PAGE;
+    LOADING_MORE = false;
+
+    let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
 
     updateCounts(userItems);
     renderOrders(userItems);
+
+    // ✅ PAGINATION: Zobrazit/skrýt "Načíst další" tlačítko
+    updateLoadMoreButton();
   } catch (err) {
     logger.error('Chyba:', err);
     WGS_DATA_CACHE = [];
@@ -2116,7 +2149,7 @@ async function loadPhotosFromDB(reklamaceId) {
   try {
     const response = await fetch(`api/get_photos_api.php?reklamace_id=${reklamaceId}`);
     if (!response.ok) return [];
-    
+
     const data = await response.json();
     if (data.success && data.photos) {
       return data.photos.map(p => p.photo_path);
@@ -2125,5 +2158,45 @@ async function loadPhotosFromDB(reklamaceId) {
   } catch (err) {
     logger.error('Chyba načítání fotek:', err);
     return [];
+  }
+}
+
+// ✅ PAGINATION: Load more handler
+async function loadMoreOrders() {
+  if (LOADING_MORE || !HAS_MORE_PAGES) return;
+
+  LOADING_MORE = true;
+  const btn = document.getElementById('loadMoreBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Načítání...';
+  }
+
+  await loadAll(ACTIVE_FILTER, true); // append = true
+}
+
+// ✅ PAGINATION: Update "Load More" button visibility
+function updateLoadMoreButton() {
+  let btn = document.getElementById('loadMoreBtn');
+
+  // Create button if doesn't exist
+  if (!btn) {
+    const grid = document.getElementById('orderGrid');
+    if (grid && grid.parentElement) {
+      btn = document.createElement('button');
+      btn.id = 'loadMoreBtn';
+      btn.className = 'load-more-btn';
+      btn.textContent = 'Načíst další zakázky';
+      btn.onclick = loadMoreOrders;
+
+      grid.parentElement.appendChild(btn);
+    }
+  }
+
+  // Show/hide based on HAS_MORE_PAGES
+  if (btn) {
+    btn.style.display = HAS_MORE_PAGES ? 'block' : 'none';
+    btn.disabled = LOADING_MORE;
+    btn.textContent = LOADING_MORE ? 'Načítání...' : `Načíst další (stránka ${CURRENT_PAGE + 1})`;
   }
 }

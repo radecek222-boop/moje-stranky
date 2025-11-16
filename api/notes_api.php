@@ -151,9 +151,35 @@ try {
                 throw new Exception('Neplatné ID poznámky');
             }
 
-            // Smazání z databáze
-            $stmt = $pdo->prepare("DELETE FROM wgs_notes WHERE id = :id");
-            $stmt->execute([':id' => $noteId]);
+            // ✅ SECURITY FIX: Kontrola vlastnictví poznámky
+            $currentUserId = $_SESSION['user_id'] ?? $_SESSION['admin_id'] ?? null;
+            $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+
+            if (!$currentUserId && !$isAdmin) {
+                throw new Exception('Přístup odepřen');
+            }
+
+            // Smazání z databáze - pouze vlastní poznámky nebo admin
+            if ($isAdmin) {
+                // Admin může smazat jakoukoliv poznámku
+                $stmt = $pdo->prepare("DELETE FROM wgs_notes WHERE id = :id");
+                $stmt->execute([':id' => $noteId]);
+            } else {
+                // Ostatní uživatelé pouze své vlastní
+                $stmt = $pdo->prepare("
+                    DELETE FROM wgs_notes
+                    WHERE id = :id AND author_id = :user_id
+                ");
+                $stmt->execute([
+                    ':id' => $noteId,
+                    ':user_id' => $currentUserId
+                ]);
+            }
+
+            // Kontrola zda byla poznámka smazána
+            if ($stmt->rowCount() === 0) {
+                throw new Exception('Poznámku nelze smazat - neexistuje nebo nemáte oprávnění');
+            }
 
             echo json_encode([
                 'status' => 'success',

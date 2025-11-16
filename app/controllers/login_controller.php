@@ -109,11 +109,19 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
         throw new InvalidArgumentException('Zadejte platný email.');
     }
 
+    // ✅ SECURITY FIX: Brute-force protection
+    $identifier = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $rate = checkRateLimit('user_login_' . $identifier, 5, 300);
+    if (!$rate['allowed']) {
+        respondError('Příliš mnoho pokusů. Zkuste to znovu za ' . ceil($rate['retry_after'] / 60) . ' minut.', 429, ['retry_after' => $rate['retry_after']]);
+    }
+
     $stmt = $pdo->prepare('SELECT * FROM wgs_users WHERE email = :email LIMIT 1');
     $stmt->execute([':email' => $email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user) {
+        recordLoginAttempt('user_login_' . $identifier);
         respondError('Uživatel nenalezen.', 401);
     }
 
@@ -126,8 +134,12 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     }
 
     if ($hashField === null || !password_verify($password, $user[$hashField])) {
+        recordLoginAttempt('user_login_' . $identifier);
         respondError('Neplatné přihlašovací údaje.', 401);
     }
+
+    // ✅ Reset rate limit při úspěšném přihlášení
+    resetRateLimit('user_login_' . $identifier);
 
     if (array_key_exists('is_active', $user) && (int) $user['is_active'] === 0) {
         respondError('Účet byl deaktivován. Kontaktujte administrátora.', 403);

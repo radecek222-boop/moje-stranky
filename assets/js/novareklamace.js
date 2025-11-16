@@ -155,11 +155,25 @@ const WGS = {
     };
 
     const highlightMatch = (text, query) => {
-      if (!query || !text) return text;
-      const safeQuery = escapeHighlightRegex(query);
-      if (!safeQuery) return text;
-      const regex = new RegExp(`(${safeQuery})`, 'gi');
-      return text.replace(regex, '<strong>$1</strong>');
+      if (!query) return escapeHtml(text);
+
+      // ✅ SECURITY FIX: Escape HTML PŘED highlightováním
+      const escapedText = escapeHtml(text);
+      const escapedQuery = escapeRegex(query);
+
+      const regex = new RegExp(`(${escapedQuery})`, 'gi');
+      return escapedText.replace(regex, '<strong>$1</strong>');
+    };
+
+    const escapeRegex = (str) => {
+      return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    };
+
+    const escapeHtml = (str) => {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
     };
 
     if (uliceInput && dropdownUlice) {
