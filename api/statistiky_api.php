@@ -165,67 +165,76 @@ function getSalespersonStats($pdo) {
  * Statistiky techniků
  */
 function getTechnicianStats($pdo) {
-    $filters = getFilters();
-    $where = buildWhereClause($filters);
-    $params = buildParams($filters);
+    try {
+        $filters = getFilters();
+        $where = buildWhereClause($filters);
+        $params = buildParams($filters);
 
-    // Technici mají vlastní sloupce: technik_milan_kolin a technik_radek_zikmund (částky)
-    // Použijeme UNION pro vytvoření řádků pro oba techniky
+        // Technici mají vlastní sloupce: technik_milan_kolin a technik_radek_zikmund (částky)
+        // Použijeme UNION pro vytvoření řádků pro oba techniky
 
-    // Přidáme podmínku pro technika do WHERE
-    $whereMilan = $where . " AND technik_milan_kolin > 0";
-    $whereRadek = $where . " AND technik_radek_zikmund > 0";
+        // Přidáme podmínku pro technika do WHERE
+        $whereMilan = $where . " AND technik_milan_kolin > 0";
+        $whereRadek = $where . " AND technik_radek_zikmund > 0";
 
-    $stmt = $pdo->prepare("
-        SELECT
-            'Milan Kolín' as technik,
-            COUNT(*) as pocet_zakazek,
-            COUNT(CASE WHEN stav = 'done' THEN 1 END) as pocet_dokonceno,
-            SUM(CAST(COALESCE(technik_milan_kolin, 0) AS DECIMAL(10,2))) as celkova_castka_dokonceno,
-            SUM(CAST(COALESCE(technik_milan_kolin, 0) AS DECIMAL(10,2))) as vydelek,
-            AVG(CASE WHEN technik_milan_kolin > 0 THEN CAST(technik_milan_kolin AS DECIMAL(10,2)) END) as prumer_zakazka,
-            SUM(CASE WHEN fakturace_firma = 'cz' OR fakturace_firma = '' OR fakturace_firma IS NULL THEN 1 ELSE 0 END) as cz_count,
-            SUM(CASE WHEN fakturace_firma = 'sk' THEN 1 ELSE 0 END) as sk_count,
-            SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotove_count
-        FROM wgs_reklamace
-        $whereMilan
+        $sql = "
+            (SELECT
+                'Milan Kolín' as technik,
+                COUNT(*) as pocet_zakazek,
+                COUNT(CASE WHEN stav = 'done' THEN 1 END) as pocet_dokonceno,
+                SUM(CAST(COALESCE(technik_milan_kolin, 0) AS DECIMAL(10,2))) as celkova_castka_dokonceno,
+                SUM(CAST(COALESCE(technik_milan_kolin, 0) AS DECIMAL(10,2))) as vydelek,
+                AVG(CASE WHEN technik_milan_kolin > 0 THEN CAST(technik_milan_kolin AS DECIMAL(10,2)) END) as prumer_zakazka,
+                SUM(CASE WHEN fakturace_firma = 'cz' OR fakturace_firma = '' OR fakturace_firma IS NULL THEN 1 ELSE 0 END) as cz_count,
+                SUM(CASE WHEN fakturace_firma = 'sk' THEN 1 ELSE 0 END) as sk_count,
+                SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotove_count
+            FROM wgs_reklamace
+            $whereMilan)
 
-        UNION ALL
+            UNION ALL
 
-        SELECT
-            'Radek Zikmund' as technik,
-            COUNT(*) as pocet_zakazek,
-            COUNT(CASE WHEN stav = 'done' THEN 1 END) as pocet_dokonceno,
-            SUM(CAST(COALESCE(technik_radek_zikmund, 0) AS DECIMAL(10,2))) as celkova_castka_dokonceno,
-            SUM(CAST(COALESCE(technik_radek_zikmund, 0) AS DECIMAL(10,2))) as vydelek,
-            AVG(CASE WHEN technik_radek_zikmund > 0 THEN CAST(technik_radek_zikmund AS DECIMAL(10,2)) END) as prumer_zakazka,
-            SUM(CASE WHEN fakturace_firma = 'cz' OR fakturace_firma = '' OR fakturace_firma IS NULL THEN 1 ELSE 0 END) as cz_count,
-            SUM(CASE WHEN fakturace_firma = 'sk' THEN 1 ELSE 0 END) as sk_count,
-            SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotove_count
-        FROM wgs_reklamace
-        $whereRadek
+            (SELECT
+                'Radek Zikmund' as technik,
+                COUNT(*) as pocet_zakazek,
+                COUNT(CASE WHEN stav = 'done' THEN 1 END) as pocet_dokonceno,
+                SUM(CAST(COALESCE(technik_radek_zikmund, 0) AS DECIMAL(10,2))) as celkova_castka_dokonceno,
+                SUM(CAST(COALESCE(technik_radek_zikmund, 0) AS DECIMAL(10,2))) as vydelek,
+                AVG(CASE WHEN technik_radek_zikmund > 0 THEN CAST(technik_radek_zikmund AS DECIMAL(10,2)) END) as prumer_zakazka,
+                SUM(CASE WHEN fakturace_firma = 'cz' OR fakturace_firma = '' OR fakturace_firma IS NULL THEN 1 ELSE 0 END) as cz_count,
+                SUM(CASE WHEN fakturace_firma = 'sk' THEN 1 ELSE 0 END) as sk_count,
+                SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotove_count
+            FROM wgs_reklamace
+            $whereRadek)
 
-        ORDER BY pocet_zakazek DESC
-    ");
+            ORDER BY pocet_zakazek DESC
+        ";
 
-    // Execute s parametry jen jednou (parametry jsou stejné pro oba SELECT v UNION)
-    $stmt->execute($params);
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Vypočítat úspěšnost
-    foreach ($data as &$row) {
-        $total = (int)$row['pocet_zakazek'];
-        $hotove = (int)$row['hotove_count'];
-        $row['uspesnost'] = $total > 0 ? round(($hotove / $total) * 100, 1) : 0;
-        $row['vydelek'] = round((float)$row['vydelek'], 2);
-        $row['celkova_castka_dokonceno'] = round((float)$row['celkova_castka_dokonceno'], 2);
-        $row['prumer_zakazka'] = round((float)$row['prumer_zakazka'], 2);
+        // Vypočítat úspěšnost
+        foreach ($data as &$row) {
+            $total = (int)$row['pocet_zakazek'];
+            $hotove = (int)$row['hotove_count'];
+            $row['uspesnost'] = $total > 0 ? round(($hotove / $total) * 100, 1) : 0;
+            $row['vydelek'] = round((float)$row['vydelek'], 2);
+            $row['celkova_castka_dokonceno'] = round((float)$row['celkova_castka_dokonceno'], 2);
+            $row['prumer_zakazka'] = round((float)$row['prumer_zakazka'], 2);
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => $data
+        ]);
+    } catch (Exception $e) {
+        error_log("getTechnicianStats error: " . $e->getMessage());
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Chyba při načítání statistik techniků: ' . $e->getMessage()
+        ]);
     }
-
-    echo json_encode([
-        'status' => 'success',
-        'data' => $data
-    ]);
 }
 
 /**
