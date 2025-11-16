@@ -30,8 +30,8 @@ $csp = [
     "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
     "font-src 'self' https://fonts.gstatic.com",
-    "img-src 'self' data: https: blob: https://maps.geoapify.com",
-    "connect-src 'self' https://api.geoapify.com https://maps.geoapify.com",
+    "img-src 'self' data: https: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
+    "connect-src 'self' https://api.geoapify.com https://router.project-osrm.org",
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self'"
