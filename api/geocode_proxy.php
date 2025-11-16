@@ -176,6 +176,19 @@ try {
                     $route = $osrmData['routes'][0];
 
                     // Konverze OSRM formátu na GeoJSON (kompatibilní s frontendem)
+                    $coordinates = [];
+                    if (isset($route['geometry']['coordinates']) && is_array($route['geometry']['coordinates'])) {
+                        $coordinates = array_map(static function ($point) {
+                            if (!is_array($point) || count($point) < 2) {
+                                return $point;
+                            }
+                            return [
+                                (float) $point[0],
+                                (float) $point[1]
+                            ];
+                        }, $route['geometry']['coordinates']);
+                    }
+
                     $geojson = [
                         'type' => 'FeatureCollection',
                         'features' => [[
@@ -187,7 +200,7 @@ try {
                             ],
                             'geometry' => [
                                 'type' => 'LineString',
-                                'coordinates' => [$route['geometry']['coordinates']]
+                                'coordinates' => $coordinates
                             ]
                         ]]
                     ];
@@ -231,10 +244,16 @@ try {
                     ],
                     'geometry' => [
                         'type' => 'LineString',
-                        'coordinates' => [[
-                            [floatval($startLon), floatval($startLat)],
-                            [floatval($endLon), floatval($endLat)]
-                        ]]
+                        'coordinates' => [
+                            [
+                                (float) $startLon,
+                                (float) $startLat
+                            ],
+                            [
+                                (float) $endLon,
+                                (float) $endLat
+                            ]
+                        ]
                     ]
                 ]]
             ];
