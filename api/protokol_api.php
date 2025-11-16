@@ -8,6 +8,9 @@ require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 
 header('Content-Type: application/json');
+// ✅ PERFORMANCE: Cache-Control header (10 minut)
+// Protokoly (PDF dokumenty) se nemění často
+header('Cache-Control: private, max-age=600'); // 10 minut
 
 try {
     // BEZPEČNOST: Kontrola přihlášení (admin nebo technik)

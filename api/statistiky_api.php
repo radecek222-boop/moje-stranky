@@ -7,6 +7,9 @@
 require_once __DIR__ . '/../init.php';
 
 header('Content-Type: application/json; charset=utf-8');
+// ✅ PERFORMANCE: Cache-Control header (5 minut)
+// Statistiky se nemění velmi často, můžeme cachovat
+header('Cache-Control: private, max-age=300'); // 5 minut
 
 // BEZPEČNOST: Pouze admin
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;

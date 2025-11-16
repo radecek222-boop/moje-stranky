@@ -9,6 +9,9 @@ require_once __DIR__ . '/../includes/rate_limiter.php';
 require_once __DIR__ . '/../includes/safe_file_operations.php';
 
 header('Content-Type: application/json');
+// ✅ PERFORMANCE: Cache-Control header (2 minuty)
+// Admin rozhraní - kratší cache kvůli častějším změnám
+header('Cache-Control: private, max-age=120'); // 2 minuty
 
 try {
     // BEZPEČNOST: Pouze admin
