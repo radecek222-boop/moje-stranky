@@ -478,6 +478,31 @@ try {
     $response = @file_get_contents($url, false, $context);
 
     if ($response === false) {
+        // ✅ FALLBACK: Pokud Geoapify selže (např. síťový problém), zkusit alternativu
+        error_log('⚠️ Geoapify API failed, trying fallback for action: ' . $action);
+
+        // Pro autocomplete zkusit Photon API jako fallback
+        if ($action === 'autocomplete') {
+            $layers = $type === 'city' ? 'city,locality' : 'street,address';
+            $fallbackUrl = 'https://photon.komoot.io/api/?' . buildQuery([
+                'q' => $text,
+                'limit' => 5,
+                'lang' => 'cs',
+                'layer' => $layers,
+                'bbox' => $fallbackBbox
+            ]);
+
+            $fallbackResponse = @file_get_contents($fallbackUrl, false, $context);
+
+            if ($fallbackResponse !== false) {
+                $fallbackData = json_decode($fallbackResponse, true);
+                if (is_array($fallbackData)) {
+                    echo json_encode(normalizePhotonFeatures($fallbackData, $type));
+                    exit;
+                }
+            }
+        }
+
         throw new Exception('Chyba při komunikaci s Geoapify API');
     }
 

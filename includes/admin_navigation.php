@@ -1,10 +1,10 @@
 <?php
 
 if (!function_exists('loadAdminNavigation')) {
-        /**
+    /**
      * LoadAdminNavigation
      */
-function loadAdminNavigation(): array
+    function loadAdminNavigation(): array
     {
         return [
             'control_center' => [
@@ -88,10 +88,10 @@ function loadAdminNavigation(): array
 }
 
 if (!function_exists('loadAdminTabNavigation')) {
-        /**
+    /**
      * LoadAdminTabNavigation
      */
-function loadAdminTabNavigation(): array
+    function loadAdminTabNavigation(): array
     {
         return array_filter(
             loadAdminNavigation(),
@@ -101,14 +101,14 @@ function loadAdminTabNavigation(): array
 }
 
 if (!function_exists('isAdminNavigationActive')) {
-        /**
+    /**
      * IsAdminNavigationActive
      *
      * @param array $item Item
      * @param string $currentPath CurrentPath
      * @param string $currentTab CurrentTab
      */
-function isAdminNavigationActive(array $item, string $currentPath, string $currentTab): bool
+    function isAdminNavigationActive(array $item, string $currentPath, string $currentTab): bool
     {
         $hrefPath = parse_url($item['href'], PHP_URL_PATH);
         if ($hrefPath === false || $hrefPath === null) {
