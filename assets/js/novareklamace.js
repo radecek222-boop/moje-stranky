@@ -170,12 +170,15 @@ const WGS = {
           const mesto = document.getElementById('mesto').value.trim();
           const psc = document.getElementById('psc').value.trim();
 
-          // Lepší vyhledávání - zahrnout PSČ pokud je vyplněno
+          // Hledání bez nutnosti vyplnit město - pokud je město/PSČ vyplněné, zúží výsledky
           let searchText = query;
           if (mesto) searchText += `, ${mesto}`;
           if (psc) searchText += `, ${psc}`;
 
-          const data = await WGSMap.autocomplete(searchText, { type: 'street', limit: 10, country: 'CZ,SK' });
+          // Více výsledků když není specifikované město (hledá v celé ČR+SK)
+          const limit = mesto || psc ? 10 : 15;
+
+          const data = await WGSMap.autocomplete(searchText, { type: 'street', limit, country: 'CZ,SK' });
 
           if (data && data.features && data.features.length > 0) {
             dropdownUlice.innerHTML = '';
@@ -200,10 +203,29 @@ const WGS = {
               const houseNumber = feature.properties.housenumber || '';
               const city = feature.properties.city || '';
               const postcode = feature.properties.postcode || '';
+              const state = feature.properties.state || ''; // kraj
+              const country = feature.properties.country || '';
 
               // Formátování s zvýrazněním
               const addressText = `${street} ${houseNumber}`.trim();
-              const locationText = postcode ? `${city} (${postcode})` : city;
+
+              // Pokud NENÍ vyplněné město v inputu, zobraz i kraj/stát pro lepší orientaci
+              let locationText = '';
+              if (postcode) {
+                locationText = `${city} (${postcode})`;
+              } else {
+                locationText = city;
+              }
+
+              // Přidat kraj když hledáme globálně (bez vyplněného města)
+              if (!mesto && state && state !== city) {
+                locationText += `, ${state}`;
+              }
+
+              // Přidat zemi pokud je to Slovensko
+              if (country && country !== 'Czechia') {
+                locationText += ` • ${country}`;
+              }
 
               div.innerHTML = `
                 <div style="font-weight: 500; color: #333;">${highlightMatch(addressText, query)}</div>
