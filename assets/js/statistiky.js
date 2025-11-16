@@ -65,11 +65,19 @@ async function loadStatsContent(type, body) {
         const filterParams = getFilterParams();
         const response = await fetch(`api/statistiky_api.php?action=${type}&${filterParams}`);
 
-        if (!response.ok) {
+        // Pokusit se přečíst JSON response i při chybě
+        let result;
+        try {
+            result = await response.json();
+        } catch (e) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const result = await response.json();
+        // Zkontrolovat jestli API vrátilo error
+        if (!response.ok || result.status === 'error') {
+            const errorMsg = result.message || `HTTP error! status: ${response.status}`;
+            throw new Error(errorMsg);
+        }
 
         if (result.status === 'success') {
             switch(type) {
@@ -108,19 +116,26 @@ async function loadSummaryStats() {
         const filterParams = getFilterParams();
         const response = await fetch(`api/statistiky_api.php?action=summary&${filterParams}`);
 
-        if (!response.ok) {
+        // Pokusit se přečíst JSON response i při chybě
+        let result;
+        try {
+            result = await response.json();
+        } catch (e) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const result = await response.json();
+        // Zkontrolovat jestli API vrátilo error
+        if (!response.ok || result.status === 'error') {
+            const errorMsg = result.message || `HTTP error! status: ${response.status}`;
+            console.error('Chyba načítání summary statistik:', errorMsg);
+            throw new Error(errorMsg);
+        }
 
         if (result.status === 'success') {
             document.getElementById('total-orders').textContent = parseInt(result.data.total_orders) || 0;
             document.getElementById('total-revenue').textContent = (parseFloat(result.data.total_revenue) || 0).toFixed(2) + ' €';
             document.getElementById('avg-order').textContent = (parseFloat(result.data.avg_order) || 0).toFixed(2) + ' €';
             document.getElementById('active-techs').textContent = parseInt(result.data.active_techs) || 0;
-        } else {
-            console.error('Chyba načítání summary statistik:', result.message);
         }
     } catch (error) {
         console.error('Chyba načítání summary statistik:', error);
