@@ -7,8 +7,110 @@
 
 require_once __DIR__ . '/../init.php';
 
-// ✅ FIX: Nepoužívat globální header - každý action má vlastní Content-Type
-// header('Content-Type: application/json'); // MOVED to individual cases
+header('Content-Type: application/json');
+
+// ========== HELPERS ==========
+/**
+ * Kontrola, jestli je Geoapify klíč reálně nastavený
+ */
+function resolveGeoapifyKey() {
+    if (!defined('GEOAPIFY_KEY')) {
+        return null;
+    }
+
+    $key = trim((string) GEOAPIFY_KEY);
+    $placeholderValues = [
+        '', 'null', 'undefined', 'not-set',
+        'your_geoapify_api_key',
+        'change-this-in-production',
+        'placeholder_geoapify_key',
+        'skutecny_api_klic',
+        'skutečný_api_klíč_z_geoapify',
+        'add-real-key'
+    ];
+
+    $lowerKey = strtolower($key);
+    $isPlaceholder = in_array($lowerKey, $placeholderValues, true);
+
+    if ($key === '' || $isPlaceholder || strlen($key) < 15) {
+        return null;
+    }
+
+    return $key;
+}
+
+function buildEmptyFeatureCollection($provider) {
+    return [
+        'type' => 'FeatureCollection',
+        'provider' => $provider,
+        'features' => []
+    ];
+}
+
+function normalizeNominatimFeatures(array $data) {
+    $collection = buildEmptyFeatureCollection('nominatim');
+
+    if (!isset($data['features']) || !is_array($data['features'])) {
+        return $collection;
+    }
+
+    foreach ($data['features'] as $feature) {
+        $properties = $feature['properties'] ?? [];
+        $address = $properties['address'] ?? [];
+
+        $collection['features'][] = [
+            'type' => 'Feature',
+            'geometry' => $feature['geometry'] ?? null,
+            'properties' => [
+                'street' => $address['road']
+                    ?? $address['pedestrian']
+                    ?? $properties['name']
+                    ?? '',
+                'housenumber' => $address['house_number'] ?? '',
+                'city' => $address['city']
+                    ?? $address['town']
+                    ?? $address['village']
+                    ?? $address['hamlet']
+                    ?? '',
+                'postcode' => $address['postcode'] ?? '',
+                'name' => $properties['display_name'] ?? ($properties['name'] ?? ''),
+                'provider' => 'nominatim'
+            ]
+        ];
+    }
+
+    return $collection;
+}
+
+function normalizePhotonFeatures(array $data, $type = 'street') {
+    $collection = buildEmptyFeatureCollection('photon');
+
+    if (!isset($data['features']) || !is_array($data['features'])) {
+        return $collection;
+    }
+
+    foreach ($data['features'] as $feature) {
+        $properties = $feature['properties'] ?? [];
+        $collection['features'][] = [
+            'type' => 'Feature',
+            'geometry' => $feature['geometry'] ?? null,
+            'properties' => [
+                'street' => $properties['street'] ?? ($type === 'street' ? ($properties['name'] ?? '') : ''),
+                'housenumber' => $properties['housenumber'] ?? '',
+                'city' => $properties['city'] ?? $properties['name'] ?? '',
+                'postcode' => $properties['postcode'] ?? '',
+                'name' => $properties['name'] ?? '',
+                'provider' => 'photon'
+            ]
+        ];
+    }
+
+    return $collection;
+}
+
+function buildQuery(array $params) {
+    return http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+}
 
 /**
  * Výpočet vzdálenosti mezi dvěma GPS body (Haversine vzorec)
@@ -42,18 +144,22 @@ function haversineDistance($lat1, $lon1, $lat2, $lon2) {
 }
 
 try {
-    // Získání API klíče - použít konstantu z config.php
-    $apiKey = defined('GEOAPIFY_KEY') ? GEOAPIFY_KEY : null;
-
-    if (!$apiKey) {
-        throw new Exception('GEOAPIFY_KEY není nastaveno v konfiguraci');
-    }
+    $apiKey = resolveGeoapifyKey();
+    $contactEmail = defined('NOMINATIM_CONTACT_EMAIL') ? NOMINATIM_CONTACT_EMAIL : 'reklamace@wgs-service.cz';
+    $countryCodes = 'cz,sk';
+    $fallbackBbox = '11.5,47.0,24.5,51.5'; // CZ + SK
 
     // Stream context pro HTTP requesty
+    $userAgent = 'WGS Service/1.0';
+    if (!empty($contactEmail)) {
+        $userAgent .= ' (contact: ' . $contactEmail . ')';
+    }
+
     $context = stream_context_create([
         'http' => [
-            'timeout' => 5,
-            'user_agent' => 'WGS Service/1.0'
+            'timeout' => 8,
+            'user_agent' => $userAgent,
+            'header' => "Accept-Language: cs\n"
         ]
     ]);
 
@@ -63,7 +169,6 @@ try {
     switch ($action) {
         case 'search':
             // Geocoding - převod adresy na GPS souřadnice
-            header('Content-Type: application/json');
             $address = $_GET['address'] ?? '';
 
             if (empty($address)) {
@@ -75,7 +180,34 @@ try {
                 throw new Exception('Adresa je příliš dlouhá');
             }
 
-            $url = 'https://api.geoapify.com/v1/geocode/search?' . http_build_query([
+            if (!$apiKey) {
+                $url = 'https://nominatim.openstreetmap.org/search?' . buildQuery([
+                    'q' => $address,
+                    'format' => 'geojson',
+                    'limit' => 5,
+                    'addressdetails' => 1,
+                    'countrycodes' => $countryCodes,
+                    'email' => $contactEmail,
+                    'accept-language' => 'cs'
+                ]);
+
+                $response = @file_get_contents($url, false, $context);
+
+                if ($response === false) {
+                    throw new Exception('Chyba při komunikaci s Nominatim API');
+                }
+
+                $data = json_decode($response, true);
+
+                if (!is_array($data)) {
+                    throw new Exception('Neplatná odpověď z Nominatim API');
+                }
+
+                echo json_encode(normalizeNominatimFeatures($data));
+                exit;
+            }
+
+            $url = 'https://api.geoapify.com/v1/geocode/search?' . buildQuery([
                 'text' => $address,
                 'apiKey' => $apiKey,
                 'format' => 'geojson'
@@ -85,7 +217,6 @@ try {
 
         case 'autocomplete':
             // Našeptávač adres
-            header('Content-Type: application/json');
             $text = $_GET['text'] ?? '';
             $type = $_GET['type'] ?? 'street'; // street, city, postcode
             $country = $_GET['country'] ?? ''; // CZ, SK, etc.
@@ -97,6 +228,32 @@ try {
             // Validace - max 100 znaků
             if (strlen($text) > 100) {
                 throw new Exception('Text je příliš dlouhý');
+            }
+
+            if (!$apiKey) {
+                $layers = $type === 'city' ? 'city,locality' : 'street,address';
+                $url = 'https://photon.komoot.io/api/?' . buildQuery([
+                    'q' => $text,
+                    'limit' => 5,
+                    'lang' => 'cs',
+                    'layer' => $layers,
+                    'bbox' => $fallbackBbox
+                ]);
+
+                $response = @file_get_contents($url, false, $context);
+
+                if ($response === false) {
+                    throw new Exception('Chyba při komunikaci s Photon API');
+                }
+
+                $data = json_decode($response, true);
+
+                if (!is_array($data)) {
+                    throw new Exception('Neplatná odpověď z Photon API');
+                }
+
+                echo json_encode(normalizePhotonFeatures($data, $type));
+                exit;
             }
 
             $params = [
@@ -124,7 +281,6 @@ try {
 
         case 'route':
             // Výpočet trasy - jednodušší rozhraní
-            header('Content-Type: application/json');
             $startLat = $_GET['start_lat'] ?? '';
             $startLon = $_GET['start_lon'] ?? '';
             $endLat = $_GET['end_lat'] ?? '';
@@ -153,7 +309,6 @@ try {
 
         case 'routing':
             // Výpočet trasy mezi dvěma body - POUŽITÍ OSRM (open-source, ZDARMA)
-            header('Content-Type: application/json');
             $waypoints = $_GET['waypoints'] ?? '';
             $mode = $_GET['mode'] ?? 'drive';
 
@@ -296,7 +451,13 @@ try {
                 session_write_close();
             }
 
-            $url = "https://maps.geoapify.com/v1/tile/osm-carto/{$z}/{$x}/{$y}.png?apiKey={$apiKey}";
+            if (!$apiKey && $z > 19) {
+                $z = 19; // OSM standard tiles podporují max zoom 19
+            }
+
+            $url = $apiKey
+                ? "https://maps.geoapify.com/v1/tile/osm-carto/{$z}/{$x}/{$y}.png?apiKey={$apiKey}"
+                : "https://tile.openstreetmap.org/{$z}/{$x}/{$y}.png";
 
             // Pro tiles vracíme přímo obrázek
             header('Content-Type: image/png');
@@ -310,7 +471,6 @@ try {
             exit;
 
         default:
-            header('Content-Type: application/json');
             throw new Exception('Neplatná akce');
     }
 
@@ -325,10 +485,6 @@ try {
     echo $response;
 
 } catch (Exception $e) {
-    // ✅ FIX: Ensure JSON Content-Type for error responses
-    if (!headers_sent()) {
-        header('Content-Type: application/json');
-    }
     http_response_code(400);
     echo json_encode([
         'error' => $e->getMessage()
