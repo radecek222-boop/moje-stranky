@@ -86,22 +86,26 @@ function getSummaryStats($pdo) {
     $stmt->execute($params);
     $totalOrders = $stmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0;
 
-    // Celkový obrat (pokud máme sloupec castka/cena)
-    $stmt = $pdo->prepare("SELECT SUM(CAST(castka AS DECIMAL(10,2))) as total FROM wgs_reklamace $where");
+    // Celkový obrat (používáme sloupec 'cena' který skutečně existuje)
+    $stmt = $pdo->prepare("SELECT SUM(CAST(COALESCE(cena, 0) AS DECIMAL(10,2))) as total FROM wgs_reklamace $where");
     $stmt->execute($params);
     $totalRevenue = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
     // Průměrná zakázka
     $avgOrder = $totalOrders > 0 ? ($totalRevenue / $totalOrders) : 0;
 
-    // Aktivní technici v období
+    // Aktivní technici v období (počítáme podle technik_milan_kolin a technik_radek_zikmund)
+    $activeTechs = 0;
     $stmt = $pdo->prepare("
-        SELECT COUNT(DISTINCT technik) as count
+        SELECT
+            SUM(CASE WHEN technik_milan_kolin > 0 THEN 1 ELSE 0 END) as milan,
+            SUM(CASE WHEN technik_radek_zikmund > 0 THEN 1 ELSE 0 END) as radek
         FROM wgs_reklamace
-        $where AND technik IS NOT NULL AND technik != ''
+        $where
     ");
     $stmt->execute($params);
-    $activeTechs = $stmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0;
+    $techCount = $stmt->fetch(PDO::FETCH_ASSOC);
+    $activeTechs = (($techCount['milan'] > 0) ? 1 : 0) + (($techCount['radek'] > 0) ? 1 : 0);
 
     echo json_encode([
         'status' => 'success',
@@ -122,18 +126,19 @@ function getSalespersonStats($pdo) {
     $where = buildWhereClause($filters);
     $params = buildParams($filters);
 
+    // Používáme zpracoval místo prodejce (skutečný sloupec)
     $stmt = $pdo->prepare("
         SELECT
-            COALESCE(prodejce, 'Neuvedeno') as prodejce,
+            COALESCE(zpracoval, 'Neuvedeno') as prodejce,
             COUNT(*) as pocet_zakazek,
-            SUM(CAST(COALESCE(castka, 0) AS DECIMAL(10,2))) as celkova_castka,
-            AVG(CAST(COALESCE(castka, 0) AS DECIMAL(10,2))) as prumer_zakazka,
-            SUM(CASE WHEN zeme = 'CZ' OR zeme = '' OR zeme IS NULL THEN 1 ELSE 0 END) as cz_count,
-            SUM(CASE WHEN zeme = 'SK' THEN 1 ELSE 0 END) as sk_count,
+            SUM(CAST(COALESCE(cena, 0) AS DECIMAL(10,2))) as celkova_castka,
+            AVG(CAST(COALESCE(cena, 0) AS DECIMAL(10,2))) as prumer_zakazka,
+            SUM(CASE WHEN fakturace_firma = 'cz' OR fakturace_firma = '' OR fakturace_firma IS NULL THEN 1 ELSE 0 END) as cz_count,
+            SUM(CASE WHEN fakturace_firma = 'sk' THEN 1 ELSE 0 END) as sk_count,
             SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotove_count
         FROM wgs_reklamace
         $where
-        GROUP BY prodejce
+        GROUP BY zpracoval
         ORDER BY pocet_zakazek DESC
     ");
     $stmt->execute($params);
@@ -162,23 +167,40 @@ function getTechnicianStats($pdo) {
     $where = buildWhereClause($filters);
     $params = buildParams($filters);
 
+    // Technici mají vlastní sloupce: technik_milan_kolin a technik_radek_zikmund (částky)
+    // Použijeme UNION pro vytvoření řádků pro oba techniky
     $stmt = $pdo->prepare("
         SELECT
-            COALESCE(technik, 'Neuvedeno') as technik,
+            'Milan Kolín' as technik,
             COUNT(*) as pocet_zakazek,
             COUNT(CASE WHEN stav = 'done' THEN 1 END) as pocet_dokonceno,
-            SUM(CASE WHEN stav = 'done' THEN CAST(COALESCE(cena, 0) AS DECIMAL(10,2)) ELSE 0 END) as celkova_castka_dokonceno,
-            SUM(CASE WHEN stav = 'done' THEN CAST(COALESCE(cena, 0) AS DECIMAL(10,2)) * 0.33 ELSE 0 END) as vydelek,
-            AVG(CASE WHEN stav = 'done' THEN CAST(COALESCE(cena, 0) AS DECIMAL(10,2)) END) as prumer_zakazka,
-            SUM(CASE WHEN zeme = 'CZ' OR zeme = '' OR zeme IS NULL THEN 1 ELSE 0 END) as cz_count,
-            SUM(CASE WHEN zeme = 'SK' THEN 1 ELSE 0 END) as sk_count,
+            SUM(CAST(COALESCE(technik_milan_kolin, 0) AS DECIMAL(10,2))) as celkova_castka_dokonceno,
+            SUM(CAST(COALESCE(technik_milan_kolin, 0) AS DECIMAL(10,2))) as vydelek,
+            AVG(CASE WHEN technik_milan_kolin > 0 THEN CAST(technik_milan_kolin AS DECIMAL(10,2)) END) as prumer_zakazka,
+            SUM(CASE WHEN fakturace_firma = 'cz' OR fakturace_firma = '' OR fakturace_firma IS NULL THEN 1 ELSE 0 END) as cz_count,
+            SUM(CASE WHEN fakturace_firma = 'sk' THEN 1 ELSE 0 END) as sk_count,
             SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotove_count
         FROM wgs_reklamace
-        $where
-        GROUP BY technik
+        $where AND technik_milan_kolin > 0
+
+        UNION ALL
+
+        SELECT
+            'Radek Zikmund' as technik,
+            COUNT(*) as pocet_zakazek,
+            COUNT(CASE WHEN stav = 'done' THEN 1 END) as pocet_dokonceno,
+            SUM(CAST(COALESCE(technik_radek_zikmund, 0) AS DECIMAL(10,2))) as celkova_castka_dokonceno,
+            SUM(CAST(COALESCE(technik_radek_zikmund, 0) AS DECIMAL(10,2))) as vydelek,
+            AVG(CASE WHEN technik_radek_zikmund > 0 THEN CAST(technik_radek_zikmund AS DECIMAL(10,2)) END) as prumer_zakazka,
+            SUM(CASE WHEN fakturace_firma = 'cz' OR fakturace_firma = '' OR fakturace_firma IS NULL THEN 1 ELSE 0 END) as cz_count,
+            SUM(CASE WHEN fakturace_firma = 'sk' THEN 1 ELSE 0 END) as sk_count,
+            SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotove_count
+        FROM wgs_reklamace
+        $where AND technik_radek_zikmund > 0
+
         ORDER BY pocet_zakazek DESC
     ");
-    $stmt->execute($params);
+    $stmt->execute(array_merge($params, $params)); // Parametry 2x pro oba SELECT
     $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Vypočítat úspěšnost
@@ -187,6 +209,7 @@ function getTechnicianStats($pdo) {
         $hotove = (int)$row['hotove_count'];
         $row['uspesnost'] = $total > 0 ? round(($hotove / $total) * 100, 1) : 0;
         $row['vydelek'] = round((float)$row['vydelek'], 2);
+        $row['celkova_castka_dokonceno'] = round((float)$row['celkova_castka_dokonceno'], 2);
         $row['prumer_zakazka'] = round((float)$row['prumer_zakazka'], 2);
     }
 
@@ -208,8 +231,8 @@ function getModelStats($pdo) {
         SELECT
             COALESCE(model, 'Neuvedeno') as model,
             COUNT(*) as pocet_reklamaci,
-            SUM(CAST(COALESCE(castka, 0) AS DECIMAL(10,2))) as celkova_castka,
-            AVG(CAST(COALESCE(castka, 0) AS DECIMAL(10,2))) as prumerna_castka
+            SUM(CAST(COALESCE(cena, 0) AS DECIMAL(10,2))) as celkova_castka,
+            AVG(CAST(COALESCE(cena, 0) AS DECIMAL(10,2))) as prumerna_castka
         FROM wgs_reklamace
         $where
         GROUP BY model
@@ -250,11 +273,15 @@ function getFilteredOrders($pdo) {
             id,
             cislo,
             jmeno,
-            prodejce,
-            technik,
-            CAST(COALESCE(castka, 0) AS DECIMAL(10,2)) as castka,
+            zpracoval as prodejce,
+            CASE
+                WHEN technik_milan_kolin > 0 THEN 'Milan Kolín'
+                WHEN technik_radek_zikmund > 0 THEN 'Radek Zikmund'
+                ELSE '-'
+            END as technik,
+            CAST(COALESCE(cena, 0) AS DECIMAL(10,2)) as castka,
             stav,
-            COALESCE(zeme, 'CZ') as zeme,
+            COALESCE(UPPER(fakturace_firma), 'CZ') as zeme,
             DATE_FORMAT(created_at, '%d.%m.%Y') as datum
         FROM wgs_reklamace
         $where
@@ -282,10 +309,13 @@ function getChartsData($pdo) {
     $where = buildWhereClause($filters);
     $params = buildParams($filters);
 
-    // Rozdělení podle měst
+    // Rozdělení podle měst - extrahujeme z adresy
     $stmt = $pdo->prepare("
         SELECT
-            COALESCE(mesto, 'Neuvedeno') as mesto,
+            COALESCE(
+                TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(adresa, ',', -1), '\n', 1)),
+                'Neuvedeno'
+            ) as mesto,
             COUNT(*) as pocet
         FROM wgs_reklamace
         $where
@@ -296,14 +326,14 @@ function getChartsData($pdo) {
     $stmt->execute($params);
     $cities = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Rozdělení podle zemí
+    // Rozdělení podle zemí - používáme fakturace_firma
     $stmt = $pdo->prepare("
         SELECT
-            COALESCE(zeme, 'CZ') as zeme,
+            COALESCE(UPPER(fakturace_firma), 'CZ') as zeme,
             COUNT(*) as pocet
         FROM wgs_reklamace
         $where
-        GROUP BY zeme
+        GROUP BY fakturace_firma
     ");
     $stmt->execute($params);
     $countries = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -337,10 +367,10 @@ function getChartsData($pdo) {
  */
 function listSalespersons($pdo) {
     $stmt = $pdo->query("
-        SELECT DISTINCT prodejce
+        SELECT DISTINCT zpracoval as prodejce
         FROM wgs_reklamace
-        WHERE prodejce IS NOT NULL AND prodejce != ''
-        ORDER BY prodejce ASC
+        WHERE zpracoval IS NOT NULL AND zpracoval != ''
+        ORDER BY zpracoval ASC
     ");
 
     $salespersons = $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -372,7 +402,8 @@ function buildWhereClause($filters) {
     $conditions = ['1=1'];
 
     if (!empty($filters['country'])) {
-        $conditions[] = "zeme = :country";
+        // Převést na lowercase pro porovnání s fakturace_firma ENUM('cz', 'sk')
+        $conditions[] = "LOWER(fakturace_firma) = LOWER(:country)";
     }
 
     if (!empty($filters['status'])) {
@@ -380,11 +411,16 @@ function buildWhereClause($filters) {
     }
 
     if (!empty($filters['salesperson'])) {
-        $conditions[] = "prodejce = :salesperson";
+        $conditions[] = "zpracoval = :salesperson";
     }
 
     if (!empty($filters['technician'])) {
-        $conditions[] = "technik = :technician";
+        // Filtr podle jména technika (Milan Kolín nebo Radek Zikmund)
+        if ($filters['technician'] === 'Milan Kolín') {
+            $conditions[] = "technik_milan_kolin > 0";
+        } elseif ($filters['technician'] === 'Radek Zikmund') {
+            $conditions[] = "technik_radek_zikmund > 0";
+        }
     }
 
     if (!empty($filters['date_from'])) {
@@ -416,9 +452,7 @@ function buildParams($filters) {
         $params[':salesperson'] = $filters['salesperson'];
     }
 
-    if (!empty($filters['technician'])) {
-        $params[':technician'] = $filters['technician'];
-    }
+    // Technik se filtruje přímo v WHERE (technik_milan_kolin > 0), nepotřebujeme parametr
 
     if (!empty($filters['date_from'])) {
         $params[':date_from'] = $filters['date_from'];
