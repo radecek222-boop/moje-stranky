@@ -218,6 +218,17 @@ function handleDeleteKey(PDO $pdo, array $payload): void
 }
 
 /**
+ * Helper pro úspěšnou odpověď
+ */
+function respondSuccess(array $data = []): void
+{
+    echo json_encode(array_merge(['status' => 'success'], $data), JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+// respondError() je nyní poskytována z includes/api_response.php
+
+/**
  * Vrátí seznam uživatelů
  */
 function handleListUsers(PDO $pdo): void
