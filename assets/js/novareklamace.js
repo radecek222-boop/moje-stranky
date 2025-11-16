@@ -1,10 +1,24 @@
 const logger = window.logger || console;
+
+// ✅ FIX L-2: Konstanty pro magic numbers
+const CONSTANTS = {
+  MAX_PHOTOS: 10,              // Max počet fotek na upload
+  MAX_IMAGE_WIDTH: 1200,       // Max šířka obrázku v px
+  IMAGE_QUALITY: 0.85,         // JPEG kvalita (0-1)
+  AUTOCOMPLETE_DEBOUNCE: 300,  // Debounce pro autocomplete (ms)
+  AUTOCOMPLETE_MIN_CHARS: 2,   // Min počet znaků pro autocomplete
+  ROUTE_DEBOUNCE: 500,         // Debounce pro route calculation (ms)
+  WARRANTY_YEARS: 2,           // Délka záruky v letech
+  PSC_LENGTH: 5,               // Délka PSČ
+  PHONE_MIN_LENGTH: 9          // Min délka telefonu
+};
+
 const WGS = {
   photos: [],
   map: null,
   marker: null,
   routeLayer: null,
-  companyLocation: { lat: 50.080312092724114, lon: 14.598113797415476 }, // Do Dubče 364, Běchovice
+  companyLocation: window.WGS_COMPANY_LOCATION || { lat: 50.080312092724114, lon: 14.598113797415476 }, // ✅ FIX M-3: Konfigurovatelná lokace
   isLoggedIn: false,
 
   // ⚡ PERFORMANCE: Request cancellation a caching
@@ -97,8 +111,10 @@ const WGS = {
       }
 
       // ⚡ CANCELLATION: Zrušit předchozí request
+      // ✅ FIX M-5: Memory leak fix - uvolnit referenci
       if (this.geocodeController) {
         this.geocodeController.abort();
+        this.geocodeController = null;
       }
       this.geocodeController = new AbortController();
 
@@ -181,17 +197,20 @@ const WGS = {
         clearTimeout(uliceTimeout);
         const query = e.target.value.trim();
 
-        // Sníženo z 3 na 2 pro rychlejší návrhy
-        if (query.length < 2) {
+        // ✅ FIX L-2: Použít konstantu AUTOCOMPLETE_MIN_CHARS
+        if (query.length < CONSTANTS.AUTOCOMPLETE_MIN_CHARS) {
           dropdownUlice.style.display = 'none';
           return;
         }
 
-        // ⚡ PERFORMANCE: Debounce 300ms (kompromis mezi rychlostí a počtem requestů)
+        // ⚡ PERFORMANCE: Debounce (kompromis mezi rychlostí a počtem requestů)
+        // ✅ FIX L-2: Použít konstantu AUTOCOMPLETE_DEBOUNCE
         uliceTimeout = setTimeout(async () => {
           // ⚡ CANCELLATION: Zrušit předchozí autocomplete request
+          // ✅ FIX M-5: Memory leak fix - uvolnit referenci
           if (this.autocompleteController) {
             this.autocompleteController.abort();
+            this.autocompleteController = null;
           }
           this.autocompleteController = new AbortController();
 
@@ -287,7 +306,7 @@ const WGS = {
             }
             dropdownUlice.style.display = 'none';
           }
-        }, 300);
+        }, CONSTANTS.AUTOCOMPLETE_DEBOUNCE); // ✅ FIX L-2: Konstantu použít
       });
     }
     
@@ -296,12 +315,13 @@ const WGS = {
         clearTimeout(mestoTimeout);
         const query = e.target.value.trim();
 
-        if (query.length < 2) {
+        // ✅ FIX L-2: Použít konstantu AUTOCOMPLETE_MIN_CHARS
+        if (query.length < CONSTANTS.AUTOCOMPLETE_MIN_CHARS) {
           dropdownMesto.style.display = 'none';
           return;
         }
 
-        // Zrychleno z 300ms na 150ms
+        // ✅ FIX L-2: Použít konstantu AUTOCOMPLETE_DEBOUNCE
         mestoTimeout = setTimeout(async () => {
           try {
             const response = await fetch(
@@ -375,7 +395,7 @@ const WGS = {
             logger.error('Autocomplete error:', err);
             dropdownMesto.style.display = 'none';
           }
-        }, 150);
+        }, CONSTANTS.AUTOCOMPLETE_DEBOUNCE); // ✅ FIX L-2: Použít konstantu
       });
     }
     
@@ -395,9 +415,10 @@ const WGS = {
       return;
     }
 
-    // ⚡ DEBOUNCING: Počkat 500ms než uživatel přestane klikat
+    // ⚡ DEBOUNCING: Počkat než uživatel přestane klikat
     clearTimeout(this.calculateRouteTimeout);
 
+    // ✅ FIX L-2: Použít konstantu ROUTE_DEBOUNCE
     this.calculateRouteTimeout = setTimeout(async () => {
       const cacheKey = `${destLat},${destLon}`;
 
@@ -410,8 +431,10 @@ const WGS = {
       }
 
       // ⚡ CANCELLATION: Zrušit předchozí route request
+      // ✅ FIX M-5: Memory leak fix - uvolnit referenci
       if (this.routeController) {
         this.routeController.abort();
+        this.routeController = null;
       }
       this.routeController = new AbortController();
 
@@ -464,7 +487,7 @@ const WGS = {
         }
         // Tiché selhání - trasa není kritická
       }
-    }, 500); // Debounce 500ms
+    }, CONSTANTS.ROUTE_DEBOUNCE); // ✅ FIX L-2: Použít konstantu
   },
 
   // ⚡ HELPER: Vykreslit trasu na mapu (odděleno pro cache)
@@ -667,8 +690,39 @@ const WGS = {
       return;
     }
 
+    // ✅ FIX H-2: Frontend validace PSČ a telefonu
+    const pscInput = document.getElementById('psc');
+    const telefonInput = document.getElementById('telefon');
+
+    if (pscInput && pscInput.value.trim()) {
+      const psc = pscInput.value.trim();
+      // ✅ FIX L-2: Použít konstantu PSC_LENGTH
+      const pscRegex = new RegExp(`^\\d{${CONSTANTS.PSC_LENGTH}}$`);
+      if (!pscRegex.test(psc)) {
+        this.toast(`❌ PSČ musí být ${CONSTANTS.PSC_LENGTH} číslic`, 'error');
+        pscInput.focus();
+        return;
+      }
+    }
+
+    if (telefonInput && telefonInput.value.trim()) {
+      const telefon = telefonInput.value.trim();
+      const cleanPhone = telefon.replace(/\D/g, '');
+      // ✅ FIX L-2: Použít konstantu PHONE_MIN_LENGTH
+      if (cleanPhone.length < CONSTANTS.PHONE_MIN_LENGTH) {
+        this.toast(`❌ Neplatné telefonní číslo (minimálně ${CONSTANTS.PHONE_MIN_LENGTH} číslic)`, 'error');
+        telefonInput.focus();
+        return;
+      }
+    }
+
     this.toast('Odesílám...', 'info');
     try {
+      // ✅ FIX H-1: Získat CSRF token JEDNOU pro celý submit proces
+      const csrfResponse = await fetch('app/controllers/get_csrf_token.php');
+      const csrfData = await csrfResponse.json();
+      const csrfToken = csrfData.status === 'success' ? csrfData.token : '';
+
       const formData = new FormData();
       formData.append('action', 'create');
       formData.append('typ', this.isLoggedIn ? 'reklamace' : 'servis');
@@ -678,13 +732,13 @@ const WGS = {
       formData.append('jmeno', document.getElementById('jmeno').value || '');
       formData.append('email', document.getElementById('email').value || '');
       formData.append('telefon', document.getElementById('telefon').value || '');
-      
+
       const ulice = document.getElementById('ulice')?.value || '';
       const mesto = document.getElementById('mesto')?.value || '';
       const psc = document.getElementById('psc')?.value || '';
       const adresa = [ulice, mesto, psc].filter(x => x).join(', ');
       formData.append('adresa', adresa);
-      
+
       formData.append('model', document.getElementById('model')?.value || '');
       formData.append('provedeni', document.getElementById('provedeni')?.value || '');
       formData.append('barva', document.getElementById('barva')?.value || '');
@@ -699,23 +753,19 @@ const WGS = {
         formData.append('gdpr_consent', consentCheckbox.checked ? '1' : '0');
       }
 
-      // Získat CSRF token
-      const csrfResponse = await fetch('app/controllers/get_csrf_token.php');
-      const csrfData = await csrfResponse.json();
-      if (csrfData.status === 'success') {
-        formData.append('csrf_token', csrfData.token);
-      }
-      
+      // ✅ FIX H-1: Použít CSRF token získaný výše
+      formData.append('csrf_token', csrfToken);
+
       formData.append("action", "create");
       const response = await fetch('app/controllers/save.php', {
         method: 'POST',
         body: formData
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const result = await response.json();
 
       if (result.status === 'success') {
@@ -723,7 +773,8 @@ const WGS = {
         const referenceNumber = result.reference || (document.getElementById('cislo')?.value || '').trim();
 
         if (this.photos && this.photos.length > 0) {
-          await this.uploadPhotos(workflowId);
+          // ✅ FIX H-1: Předat stejný CSRF token do uploadPhotos
+          await this.uploadPhotos(workflowId, csrfToken);
         }
 
         this.toast('✓ Požadavek byl úspěšně odeslán!', 'success');
@@ -747,20 +798,21 @@ const WGS = {
     }
   },
   
-  async uploadPhotos(reklamaceId) {
-    console.log("🚀 uploadPhotos VOLÁNO!", reklamaceId);
+  /**
+   * ✅ FIX H-1: Uploaduje fotky s předaným CSRF tokenem (bez duplicitního fetch)
+   * ✅ FIX L-1: Změna console.log na logger.log
+   * @param {string} reklamaceId - ID reklamace
+   * @param {string} csrfToken - CSRF token (předaný z submitForm)
+   */
+  async uploadPhotos(reklamaceId, csrfToken) {
+    logger.log("🚀 uploadPhotos VOLÁNO!", reklamaceId);
     if (!this.photos || this.photos.length === 0) return;
-    console.log("📸 Počet fotek:", this.photos.length);
+    logger.log("📸 Počet fotek:", this.photos.length);
     try {
-      // Get CSRF token
-      const csrfResponse = await fetch('app/controllers/get_csrf_token.php');
-      const csrfData = await csrfResponse.json();
-      const csrfToken = csrfData.status === 'success' ? csrfData.token : '';
-
       const formData = new FormData();
       formData.append('reklamace_id', reklamaceId);
       formData.append('photo_type', 'problem');
-      formData.append('csrf_token', csrfToken);
+      formData.append('csrf_token', csrfToken); // ✅ Použít předaný token
       this.photos.forEach((photo, index) => {
         formData.append(`photo_${index}`, photo.data);
         formData.append(`filename_${index}`, `photo_${index + 1}.jpg`);
@@ -771,11 +823,11 @@ const WGS = {
         method: 'POST',
         body: formData
       });
-      
+
       if (!response.ok) {
         throw new Error('Chyba při nahrávání fotek');
       }
-      
+
       const result = await response.json();
       if (result.status !== 'success') {
         throw new Error(result.error || 'Nepodařilo se nahrát fotky');
@@ -797,8 +849,9 @@ const WGS = {
     btn.addEventListener('click', () => photoInput.click());
     photoInput.addEventListener('change', async (e) => {
       const files = Array.from(e.target.files);
-      if (this.photos.length + files.length > 10) {
-        this.toast('❌ Maximálně 10 fotografií', 'error');
+      // ✅ FIX L-2 & L-3: Použít konstantu MAX_PHOTOS (sjednocení s backendem)
+      if (this.photos.length + files.length > CONSTANTS.MAX_PHOTOS) {
+        this.toast(`❌ Maximálně ${CONSTANTS.MAX_PHOTOS} fotografií`, 'error');
         return;
       }
       for (const file of files) {
@@ -818,15 +871,15 @@ const WGS = {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const maxW = 1200;
-          const scale = Math.min(1, maxW / img.width);
+          // ✅ FIX L-2: Použít konstanty MAX_IMAGE_WIDTH a IMAGE_QUALITY
+          const scale = Math.min(1, CONSTANTS.MAX_IMAGE_WIDTH / img.width);
           canvas.width = img.width * scale;
           canvas.height = img.height * scale;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           canvas.toBlob((blob) => {
             resolve(new File([blob], file.name, { type: 'image/jpeg' }));
-          }, 'image/jpeg', 0.85);
+          }, 'image/jpeg', CONSTANTS.IMAGE_QUALITY);
         };
         img.src = e.target.result;
       };
@@ -937,24 +990,54 @@ const WGS = {
     overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
   },
 
+  /**
+   * ✅ FIX M-1: Warranty calculation pouze pro přihlášené uživatele
+   * Nepřihlášení mají datum_prodeje a datum_reklamace = "nevyplňuje se" (readonly)
+   */
   calculateWarranty() {
+    // ✅ FIX M-1: Warranty calculation pouze pro přihlášené
+    if (!this.isLoggedIn) {
+      return; // Nepřihlášení nemají přístup k těmto datům
+    }
+
     const datumProdeje = document.getElementById('datum_prodeje').value;
     const datumReklamace = document.getElementById('datum_reklamace').value;
     const warning = document.getElementById('warrantyWarning');
-    if (!datumProdeje || !datumReklamace) { warning.style.display = 'none'; return; }
-    const parseCzDate = (str) => { const parts = str.split('.'); return new Date(parts[2], parts[1] - 1, parts[0]); };
-    const prodej = parseCzDate(datumProdeje);
-    const reklamace = parseCzDate(datumReklamace);
-    const warrantyEnd = new Date(prodej);
-    warrantyEnd.setFullYear(warrantyEnd.getFullYear() + 2);
-    const daysRemaining = Math.ceil((warrantyEnd - reklamace) / (1000 * 60 * 60 * 24));
-    warning.style.display = 'block';
-    if (daysRemaining > 0) {
-      warning.className = '';
-      warning.innerHTML = '✓ <strong>Záruka platí</strong><br>Do konce záruky zbývá <strong>' + daysRemaining + ' dní</strong> (konec: ' + warrantyEnd.toLocaleDateString('cs-CZ') + ')';
-    } else {
-      warning.className = 'expired';
-      warning.innerHTML = '✗ <strong>Záruka vypršela</strong><br>Záruka skončila ' + Math.abs(daysRemaining) + ' dní před reklamací (konec: ' + warrantyEnd.toLocaleDateString('cs-CZ') + ')';
+
+    // ✅ FIX M-1: Zkontrolovat platnost hodnot
+    if (!datumProdeje || !datumReklamace ||
+        datumProdeje === 'nevyplňuje se' ||
+        datumReklamace === 'nevyplňuje se') {
+      if (warning) warning.style.display = 'none';
+      return;
+    }
+
+    const parseCzDate = (str) => {
+      const parts = str.split('.');
+      return new Date(parts[2], parts[1] - 1, parts[0]);
+    };
+
+    try {
+      const prodej = parseCzDate(datumProdeje);
+      const reklamace = parseCzDate(datumReklamace);
+      const warrantyEnd = new Date(prodej);
+      // ✅ FIX L-2: Použít konstantu WARRANTY_YEARS
+      warrantyEnd.setFullYear(warrantyEnd.getFullYear() + CONSTANTS.WARRANTY_YEARS);
+      const daysRemaining = Math.ceil((warrantyEnd - reklamace) / (1000 * 60 * 60 * 24));
+
+      if (warning) {
+        warning.style.display = 'block';
+        if (daysRemaining > 0) {
+          warning.className = '';
+          warning.innerHTML = '✓ <strong>Záruka platí</strong><br>Do konce záruky zbývá <strong>' + daysRemaining + ' dní</strong> (konec: ' + warrantyEnd.toLocaleDateString('cs-CZ') + ')';
+        } else {
+          warning.className = 'expired';
+          warning.innerHTML = '✗ <strong>Záruka vypršela</strong><br>Záruka skončila ' + Math.abs(daysRemaining) + ' dní před reklamací (konec: ' + warrantyEnd.toLocaleDateString('cs-CZ') + ')';
+        }
+      }
+    } catch (err) {
+      logger.error('Chyba při výpočtu záruky:', err);
+      if (warning) warning.style.display = 'none';
     }
   },
 

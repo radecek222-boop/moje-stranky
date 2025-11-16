@@ -240,7 +240,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     </div>
     <?php endif; ?>
     
-    <form id="reklamaceForm">
+    <!-- ✅ FIX M-4: Přidat action attribute pro fallback (pokud JS selže) -->
+    <form id="reklamaceForm" action="app/controllers/save.php" method="POST">
       
       <!-- ZÁKLADNÍ ÚDAJE -->
       <div class="form-section">
