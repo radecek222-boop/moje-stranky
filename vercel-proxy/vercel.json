@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "env": {
+    "GEOAPIFY_API_KEY": "@geoapify-api-key"
+  },
+  "regions": ["fra1"],
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "edge"
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300"
+        }
+      ]
+    }
+  ]
+}
