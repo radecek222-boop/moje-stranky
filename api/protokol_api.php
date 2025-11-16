@@ -313,8 +313,9 @@ function saveProtokolData($data) {
     // Aktualizovat protokol data (včetně technika)
     $updateFields = [
         'popis_problemu = :problem_description',
-        'navrh_reseni = :repair_proposal',
+        'popis_opravy = :repair_proposal',
         'vyreseno = :solved',
+        'datum_protokolu = NOW()',
         'updated_at = NOW()'
     ];
     $params = [
