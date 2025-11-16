@@ -158,10 +158,58 @@ if (!$isLoggedIn) {
 
 <script src="assets/js/csrf-auto-inject.js" defer></script>
 
+<!-- Data Loading Fix: Clear localStorage if URL has different ID -->
+<script>
+// PATCH 1: Tento script se spustí PŘED protokol.min.js aby vyčistil zastaralá data
+(function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlId = urlParams.get('id');
+
+  if (urlId) {
+    const storedData = localStorage.getItem('currentCustomer');
+    if (storedData) {
+      try {
+        const customer = JSON.parse(storedData);
+        const storedId = customer.reklamace_id || customer.cislo || customer.id;
+
+        // Pokud URL ID ≠ localStorage ID, vymazat localStorage
+        if (storedId !== urlId) {
+          console.log('🗑️ FIX: Mazání zastaralých dat z localStorage (', storedId, '≠', urlId, ')');
+          localStorage.removeItem('currentCustomer');
+        } else {
+          console.log('✅ FIX: localStorage obsahuje správná data pro', urlId);
+        }
+      } catch (e) {
+        console.warn('⚠️ FIX: Chyba při parsování localStorage, mažu data');
+        localStorage.removeItem('currentCustomer');
+      }
+    }
+  }
+})();
+
+// PATCH 2: Oprava currentReklamaceId po načtení dat z API
+window.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    // Opravit currentReklamaceId pokud používá špatné ID
+    if (window.currentReklamace) {
+      const correctId = window.currentReklamace.reklamace_id || window.currentReklamace.cislo || window.currentReklamace.id;
+      if (window.currentReklamaceId !== correctId) {
+        console.log('🔧 FIX: Opravuji currentReklamaceId z', window.currentReklamaceId, 'na', correctId);
+        window.currentReklamaceId = correctId;
+
+        // Reload fotek se správným ID
+        if (typeof window.loadPhotosFromDatabase === 'function') {
+          console.log('📸 FIX: Reload fotek s opraveným ID:', correctId);
+          window.loadPhotosFromDatabase(correctId);
+        }
+      }
+    }
+  }, 500); // Čekat 500ms až se protokol.min.js načte a spustí
+});
+</script>
 
 <!-- External JavaScript -->
 <script src="assets/js/protokol.min.js" defer></script>
 <script src="assets/js/protokol-fakturace-patch.js" defer></script>
-<script src="assets/js/protokol-data-patch.js" defer></script>
 </body>
 </html>
