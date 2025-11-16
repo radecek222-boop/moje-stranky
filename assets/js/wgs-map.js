@@ -227,20 +227,35 @@ const WGSMap = {
       const limit = options.limit || 5;
       const country = options.country ? String(options.country).toUpperCase() : '';
 
+      // ✅ ŘEŠENÍ: Direct API call z browseru (obchází serverový firewall)
+      // API klíč je free tier (3000 req/den), client-side použití je povoleno
+      const API_KEY = 'ea590e7e6d3640f9a63ec5a9fb1ff002';
+
       const params = new URLSearchParams({
-        action: 'autocomplete',
         text,
-        type,
-        limit
+        format: 'geojson',
+        limit,
+        apiKey: API_KEY
       });
 
-      if (country) {
-        params.append('country', country);
+      // Type filtering
+      if (type === 'street') {
+        params.append('type', 'street');
+      } else if (type === 'city') {
+        params.append('type', 'city');
       }
 
-      const response = await fetch(`api/geocode_proxy.php?${params.toString()}`, {
-        signal: this.controllers.autocomplete.signal
-      });
+      // Country filtering (podporuje ČR + SK)
+      if (country) {
+        const countryCodes = country.split(',').map(c => c.trim().toLowerCase());
+        params.append('filter', `countrycode:${countryCodes.join(',')}`);
+      }
+
+      // Direct call to Geoapify API (browser nemá firewall omezení)
+      const response = await fetch(
+        `https://api.geoapify.com/v1/geocode/autocomplete?${params.toString()}`,
+        { signal: this.controllers.autocomplete.signal }
+      );
 
       if (response.ok) {
         return await response.json();

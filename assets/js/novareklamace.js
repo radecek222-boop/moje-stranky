@@ -175,7 +175,7 @@ const WGS = {
           if (mesto) searchText += `, ${mesto}`;
           if (psc) searchText += `, ${psc}`;
 
-          const data = await WGSMap.autocomplete(searchText, { type: 'street', limit: 5, country: 'CZ' });
+          const data = await WGSMap.autocomplete(searchText, { type: 'street', limit: 5, country: 'CZ,SK' });
 
           if (data && data.features && data.features.length > 0) {
             dropdownUlice.innerHTML = '';
@@ -262,7 +262,7 @@ const WGS = {
         }
 
         try {
-          const data = await WGSMap.autocomplete(query, { type: 'city', limit: 5, country: 'CZ' });
+          const data = await WGSMap.autocomplete(query, { type: 'city', limit: 5, country: 'CZ,SK' });
 
           if (data && data.features && data.features.length > 0) {
             dropdownMesto.innerHTML = '';
