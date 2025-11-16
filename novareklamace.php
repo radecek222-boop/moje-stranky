@@ -456,6 +456,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   window.WGS_USER_LOGGED_IN = <?php echo $isLoggedIn ? "true" : "false"; ?>;
 </script>
 <script src="assets/js/logger.js" defer></script>
+<script src="assets/js/wgs-map.js" defer></script>
 <script src="assets/js/csrf-auto-inject.js" defer></script>
 <script src="assets/js/novareklamace.js?v=1762458261" defer></script>
 </body>
