@@ -57,6 +57,12 @@ function wgs_format_fakturace_label(?string $value): string
 // Získat jméno přihlášeného uživatele pro pole "Technik"
 $currentUserName = $_SESSION['user_name'] ?? '';
 
+// DEBUG: Vypsat co je v session
+error_log("=== PROTOKOL.PHP DEBUG ===");
+error_log("SESSION user_name: " . ($currentUserName ?: 'PRÁZDNÉ'));
+error_log("SESSION celá: " . print_r($_SESSION, true));
+error_log("=========================");
+
 $prefillFields = [
     'order_number' => '',
     'claim_number' => '',
@@ -233,18 +239,29 @@ if ($initialBootstrapData) {
     <div class="col">
       <table>
         <tr><td class="label">Technik<span class="en-label">Technician</span></td>
-          <td><select id="technician">
+          <td>
+            <!-- DEBUG INFO -->
+            <div style="font-size: 10px; color: red; margin-bottom: 5px;">
+              DEBUG: SESSION user_name = "<?= wgs_escape($currentUserName); ?>" |
+              selectedTechnik = "<?= wgs_escape($prefillFields['technician']); ?>"
+            </div>
+            <select id="technician">
             <?php
               $technici = ['Milan Kolín', 'Radek Zikmund', 'Kolín/Zikmund'];
               $selectedTechnik = $prefillFields['technician'];
 
+              // DEBUG výpis
+              error_log("SELECT TECHNIK DEBUG: selectedTechnik = '$selectedTechnik'");
+
               // Přidat přihlášeného uživatele pokud není v seznamu
               if ($selectedTechnik && !in_array($selectedTechnik, $technici)) {
                 $technici[] = $selectedTechnik;
+                error_log("Přidávám technika do seznamu: $selectedTechnik");
               }
 
               foreach ($technici as $technik) {
                 $selected = ($technik === $selectedTechnik) ? ' selected' : '';
+                error_log("Option: '$technik' | Selected: " . ($selected ? 'ANO' : 'NE'));
                 echo '<option' . $selected . '>' . wgs_escape($technik) . '</option>';
               }
             ?>
