@@ -490,6 +490,10 @@ async function saveToProtocol() {
 
     if (result.success) {
       showAlert('Fotografie byly uloženy', 'success');
+
+      // ✅ Ujistit se, že currentCustomer je v localStorage pro protokol.php
+      localStorage.setItem('currentCustomer', JSON.stringify(currentCustomerData));
+
       setTimeout(() => {
         window.location.href = `protokol.php?id=${reklamaceId}`;
       }, 1500);
