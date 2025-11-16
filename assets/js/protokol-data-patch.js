@@ -121,6 +121,17 @@
         technikField.add(newOption);
       }
     }
+
+    // Předvyplnit datum fields pokud existují
+    const deliveryDateField = document.getElementById('delivery-date');
+    if (deliveryDateField && payload.datum_prodeje) {
+      deliveryDateField.value = payload.datum_prodeje;
+    }
+
+    const claimDateField = document.getElementById('claim-date');
+    if (claimDateField && payload.datum_reklamace) {
+      claimDateField.value = payload.datum_reklamace;
+    }
   };
 
   if (document.readyState === 'loading') {

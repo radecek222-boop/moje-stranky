@@ -495,7 +495,7 @@ async function saveToProtocol() {
       localStorage.setItem('currentCustomer', JSON.stringify(currentCustomerData));
 
       setTimeout(() => {
-        window.location.href = `protokol.php?id=${reklamaceId}`;
+        window.location.href = `protokol.php?id=${encodeURIComponent(reklamaceId)}`;
       }, 1500);
     } else {
       showAlert('Chyba při ukládání: ' + result.error, 'error');

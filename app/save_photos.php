@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
+require_once __DIR__ . '/../includes/reklamace_id_validator.php';
 
 header('Content-Type: application/json');
 
@@ -75,16 +76,9 @@ try {
     // JSON data už jsou načtena výše (pro CSRF kontrolu)
     // $data je už k dispozici
 
-    // Získání reklamace ID
-    $reklamaceId = $data['reklamace_id'] ?? null;
-    if (!$reklamaceId) {
-        throw new Exception('Chybí reklamace_id');
-    }
-
-    // BEZPEČNOST: Validace reklamace_id - musí být pouze alfanumerické znaky
-    if (!preg_match('/^[a-zA-Z0-9_-]+$/', $reklamaceId)) {
-        throw new Exception('Neplatné ID reklamace');
-    }
+    // Získání a validace reklamace ID
+    $reklamaceId = sanitizeReklamaceId($data['reklamace_id'] ?? null, 'reklamace_id');
+    $reklamaceStorageKey = reklamaceStorageKey($reklamaceId);
 
     // Získání sections
     $sections = $data['sections'] ?? [];
@@ -127,8 +121,8 @@ try {
         mkdir($uploadsDir, 0755, true);
     }
 
-    // Vytvoření podadresáře pro konkrétní reklamaci (basename pro extra bezpečnost)
-    $reklamaceDir = $uploadsDir . '/' . basename($reklamaceId);
+    // Vytvoření podadresáře pro konkrétní reklamaci (bezpečný klíč bez lomítek)
+    $reklamaceDir = $uploadsDir . '/' . $reklamaceStorageKey;
     if (!is_dir($reklamaceDir)) {
         mkdir($reklamaceDir, 0755, true);
     }
@@ -193,7 +187,7 @@ try {
             // Generování unikátního názvu souboru
             $timestamp = time();
             $randomString = bin2hex(random_bytes(4));
-            $filename = "{$sectionName}_{$reklamaceId}_{$index}_{$timestamp}_{$randomString}.{$imageType}";
+            $filename = "{$sectionName}_{$reklamaceStorageKey}_{$index}_{$timestamp}_{$randomString}.{$imageType}";
             $filePath = $reklamaceDir . '/' . $filename;
 
             // Uložení souboru
@@ -202,7 +196,7 @@ try {
             }
 
             // Relativní cesta pro databázi
-            $relativePathForDb = "uploads/photos/{$reklamaceId}/{$filename}";
+            $relativePathForDb = "uploads/photos/{$reklamaceStorageKey}/{$filename}";
 
             // Vložení do databáze (podle PHOTOS_FIX_REPORT.md musí obsahovat file_path a file_name)
             $stmt = $pdo->prepare("

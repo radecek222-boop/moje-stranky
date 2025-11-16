@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/reklamace_id_validator.php';
 
 header('Content-Type: application/json');
 
@@ -25,16 +26,8 @@ try {
         throw new Exception('Povolena pouze GET metoda');
     }
 
-    // Získání reklamace ID
-    $reklamaceId = $_GET['reklamace_id'] ?? null;
-    if (!$reklamaceId) {
-        throw new Exception('Chybí reklamace_id');
-    }
-
-    // BEZPEČNOST: Validace reklamace_id - musí být pouze alfanumerické znaky
-    if (!preg_match('/^[a-zA-Z0-9_-]+$/', $reklamaceId)) {
-        throw new Exception('Neplatné ID reklamace');
-    }
+    // Získání a validace reklamace ID
+    $reklamaceId = sanitizeReklamaceId($_GET['reklamace_id'] ?? null, 'reklamace_id');
 
     // Databázové připojení
     $pdo = getDbConnection();

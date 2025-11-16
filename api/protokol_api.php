@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
+require_once __DIR__ . '/../includes/reklamace_id_validator.php';
 
 header('Content-Type: application/json');
 // ✅ PERFORMANCE: Cache-Control header (10 minut)
@@ -119,12 +120,8 @@ try {
  * Uložení PDF dokumentu
  */
 function savePdfDocument($data) {
-    $reklamaceId = $data['reklamace_id'] ?? null;
+    $reklamaceId = sanitizeReklamaceId($data['reklamace_id'] ?? null, 'reklamace_id');
     $pdfBase64 = $data['pdf_base64'] ?? null;
-
-    if (!$reklamaceId) {
-        throw new Exception('Chybí reklamace_id');
-    }
 
     if (!$pdfBase64) {
         throw new Exception('Chybí PDF data');
@@ -136,11 +133,6 @@ function savePdfDocument($data) {
 
     if ($base64Size > $maxBase64Size) {
         throw new Exception('PDF je příliš velké. Maximální velikost je 11 MB.');
-    }
-
-    // BEZPEČNOST: Validace reklamace_id - musí být pouze alfanumerické znaky
-    if (!preg_match('/^[a-zA-Z0-9_-]+$/', $reklamaceId)) {
-        throw new Exception('Neplatné ID reklamace');
     }
 
     // Databázové připojení
@@ -172,8 +164,8 @@ function savePdfDocument($data) {
         mkdir($uploadsDir, 0755, true);
     }
 
-    // Název souboru (basename pro extra bezpečnost)
-    $filename = basename($reklamaceId) . '.pdf';
+    // Název souboru (bezpečný klíč bez lomítek)
+    $filename = reklamaceStorageKey($reklamaceId) . '.pdf';
     $filePath = $uploadsDir . '/' . $filename;
 
     // CRITICAL FIX: FILE-FIRST APPROACH
@@ -230,7 +222,7 @@ function savePdfDocument($data) {
 
             $stmt->execute([
                 ':claim_id' => $claimId,
-                ':document_name' => "Protokol_{$reklamaceId}.pdf",
+                ':document_name' => $filename, // Používá už reklamaceStorageKey()
                 ':document_path' => $relativePathForDb,
                 ':document_type' => 'protokol_pdf',
                 ':file_size' => $fileSize,
@@ -263,16 +255,7 @@ function savePdfDocument($data) {
  * Načtení dat reklamace
  */
 function loadReklamace($data) {
-    $reklamaceId = $data['id'] ?? null;
-
-    if (!$reklamaceId) {
-        throw new Exception('Chybí ID reklamace');
-    }
-
-    // BEZPEČNOST: Validace ID
-    if (!preg_match('/^[a-zA-Z0-9_-]+$/', $reklamaceId)) {
-        throw new Exception('Neplatné ID reklamace');
-    }
+    $reklamaceId = sanitizeReklamaceId($data['id'] ?? null, 'ID reklamace');
 
     $pdo = getDbConnection();
 
@@ -303,20 +286,11 @@ function loadReklamace($data) {
  * Uložení dat protokolu
  */
 function saveProtokolData($data) {
-    $reklamaceId = $data['reklamace_id'] ?? null;
+    $reklamaceId = sanitizeReklamaceId($data['reklamace_id'] ?? null, 'reklamace_id');
     $problemDescription = $data['problem_description'] ?? '';
     $repairProposal = $data['repair_proposal'] ?? '';
     $solved = $data['solved'] ?? '';
     $technik = $data['technician'] ?? null;
-
-    if (!$reklamaceId) {
-        throw new Exception('Chybí reklamace_id');
-    }
-
-    // BEZPEČNOST: Validace ID
-    if (!preg_match('/^[a-zA-Z0-9_-]+$/', $reklamaceId)) {
-        throw new Exception('Neplatné ID reklamace');
-    }
 
     $pdo = getDbConnection();
 
@@ -374,18 +348,9 @@ function saveProtokolData($data) {
  * Odeslání emailu zákazníkovi
  */
 function sendEmailToCustomer($data) {
-    $reklamaceId = $data['reklamace_id'] ?? null;
+    $reklamaceId = sanitizeReklamaceId($data['reklamace_id'] ?? null, 'reklamace_id');
     $protocolPdf = $data['protokol_pdf'] ?? null;
     $photosPdf = $data['photos_pdf'] ?? null;
-
-    if (!$reklamaceId) {
-        throw new Exception('Chybí reklamace_id');
-    }
-
-    // BEZPEČNOST: Validace ID
-    if (!preg_match('/^[a-zA-Z0-9_-]+$/', $reklamaceId)) {
-        throw new Exception('Neplatné ID reklamace');
-    }
 
     // BEZPEČNOST: Kontrola velikosti base64 příloh (max 15MB každá = ~11MB PDF)
     $maxBase64Size = 15 * 1024 * 1024; // 15MB
@@ -434,6 +399,7 @@ function sendEmailToCustomer($data) {
     }
 
     // Příprava emailu
+    $storageKey = reklamaceStorageKey($reklamaceId);
     $subject = "Servisní protokol WGS - Reklamace č. {$reklamaceId}";
     $customerName = $reklamace['jmeno'] ?? $reklamace['zakaznik'] ?? 'Zákazník';
 
@@ -467,18 +433,18 @@ reklamace@wgs-service.cz
     // Přiložit PDF protokolu
     if ($protocolPdf) {
         $body .= "--WGS_BOUNDARY\r\n";
-        $body .= "Content-Type: application/pdf; name=\"Protokol_{$reklamaceId}.pdf\"\r\n";
+        $body .= "Content-Type: application/pdf; name=\"Protokol_{$storageKey}.pdf\"\r\n";
         $body .= "Content-Transfer-Encoding: base64\r\n";
-        $body .= "Content-Disposition: attachment; filename=\"Protokol_{$reklamaceId}.pdf\"\r\n\r\n";
+        $body .= "Content-Disposition: attachment; filename=\"Protokol_{$storageKey}.pdf\"\r\n\r\n";
         $body .= chunk_split($protocolPdf) . "\r\n";
     }
 
     // Přiložit PDF fotek
     if ($photosPdf) {
         $body .= "--WGS_BOUNDARY\r\n";
-        $body .= "Content-Type: application/pdf; name=\"Fotodokumentace_{$reklamaceId}.pdf\"\r\n";
+        $body .= "Content-Type: application/pdf; name=\"Fotodokumentace_{$storageKey}.pdf\"\r\n";
         $body .= "Content-Transfer-Encoding: base64\r\n";
-        $body .= "Content-Disposition: attachment; filename=\"Fotodokumentace_{$reklamaceId}.pdf\"\r\n\r\n";
+        $body .= "Content-Disposition: attachment; filename=\"Fotodokumentace_{$storageKey}.pdf\"\r\n\r\n";
         $body .= chunk_split($photosPdf) . "\r\n";
     }
 
