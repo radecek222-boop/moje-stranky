@@ -6,17 +6,17 @@
  * 2. Pokud najde data, IGNORUJE ID z URL parametru
  * 3. Načte staré/nesprávné data z minulé session
  *
- * ŘEŠENÍ: Přepsat loadReklamace() s správnou prioritou:
- * 1. Pokud je ID v parametru, VŽDY načti z API
- * 2. localStorage pouze jako fallback
+ * ŘEŠENÍ: Přepsat loadReklamace() a po načtení patche zavolat reload
  */
 
+logger.log('🔧 PATCH: protokol-data-patch.js se načítá...');
+
 // Přepsat funkci loadReklamace() s opravenou logikou
-async function loadReklamace(id) {
+window.loadReklamace = async function(id) {
   showLoading(true);
   try {
     logger.log('🔍 PATCH: Načítám data zákazníka...');
-    logger.log('📋 PATCH: ID z URL:', id);
+    logger.log('📋 PATCH: ID z parametru:', id);
 
     // ✅ OPRAVENO: Pokud je ID v parametru, PRIORITNĚ načti z API
     if (id) {
@@ -27,14 +27,14 @@ async function loadReklamace(id) {
 
       if (result.status === 'success') {
         logger.log('✅ PATCH: Data načtena z API');
-        currentReklamace = result.reklamace;
+        window.currentReklamace = result.reklamace;
 
         // Vyplnit formulář
-        fillFormWithData(currentReklamace);
+        fillFormWithData(result.reklamace);
 
         // ✅ OPRAVENO: Použít reklamace_id (ne database ID!)
-        currentReklamaceId = currentReklamace.reklamace_id || currentReklamace.cislo || currentReklamace.id;
-        logger.log('📋 PATCH: currentReklamaceId nastaveno na:', currentReklamaceId);
+        window.currentReklamaceId = result.reklamace.reklamace_id || result.reklamace.cislo || result.reklamace.id;
+        logger.log('📋 PATCH: currentReklamaceId nastaveno na:', window.currentReklamaceId);
 
         showNotif("success", "✓ Data načtena");
         showLoading(false);
@@ -70,10 +70,10 @@ async function loadReklamace(id) {
       // Vyplnit formulář
       fillFormWithData(customer);
 
-      currentReklamace = customer;
+      window.currentReklamace = customer;
       // ✅ OPRAVENO: Prioritně reklamace_id!
-      currentReklamaceId = customer.reklamace_id || customer.cislo || customer.id;
-      logger.log('📋 PATCH: currentReklamaceId z localStorage:', currentReklamaceId);
+      window.currentReklamaceId = customer.reklamace_id || customer.cislo || customer.id;
+      logger.log('📋 PATCH: currentReklamaceId z localStorage:', window.currentReklamaceId);
 
       showNotif("success", "✓ Data načtena");
       showLoading(false);
@@ -91,7 +91,7 @@ async function loadReklamace(id) {
   } finally {
     showLoading(false);
   }
-}
+};
 
 // Helper funkce pro vyplnění formuláře
 function fillFormWithData(data) {
@@ -115,59 +115,49 @@ function fillFormWithData(data) {
   logger.log('📝 PATCH: Vyplňuji formulář...');
 
   // ✅ OPRAVENO: claim-number používá reklamace_id (ne database ID)
-  document.getElementById("order-number").value = data.objednavka || data.cislo || "";
-  document.getElementById("claim-number").value = data.reklamace_id || data.cislo || "";
-  document.getElementById("customer").value = customerName;
-  document.getElementById("address").value = data.adresa || [ulice, mesto, psc].filter(x => x).join(', ');
-  document.getElementById("phone").value = data.telefon || "";
-  document.getElementById("email").value = data.email || "";
-  document.getElementById("brand").value = data.znacka || data.model || "";
-  document.getElementById("model").value = data.model || "";
-  document.getElementById("description-cz").value = data.popis_problemu || "";
+  const orderField = document.getElementById("order-number");
+  const claimField = document.getElementById("claim-number");
+  const customerField = document.getElementById("customer");
+  const addressField = document.getElementById("address");
+  const phoneField = document.getElementById("phone");
+  const emailField = document.getElementById("email");
+  const brandField = document.getElementById("brand");
+  const modelField = document.getElementById("model");
+  const descField = document.getElementById("description-cz");
+
+  if (orderField) orderField.value = data.objednavka || data.cislo || "";
+  if (claimField) claimField.value = data.reklamace_id || data.cislo || "";
+  if (customerField) customerField.value = customerName;
+  if (addressField) addressField.value = data.adresa || [ulice, mesto, psc].filter(x => x).join(', ');
+  if (phoneField) phoneField.value = data.telefon || "";
+  if (emailField) emailField.value = data.email || "";
+  if (brandField) brandField.value = data.znacka || data.model || "";
+  if (modelField) modelField.value = data.model || "";
+  if (descField) descField.value = data.popis_problemu || "";
 
   logger.log('✅ PATCH: Formulář vyplněn');
 }
 
-// ✅ OPRAVENO: Přepsat DOMContentLoaded handler aby používal SPRÁVNÉ ID pro fotky
-// Původní handler v protokol.min.js volá loadPhotosFromDatabase() s špatným ID
-window.addEventListener("DOMContentLoaded", async () => {
-  logger.log('🚀 PATCH: Inicializace protokolu (přepsaná verze)...');
-
-  initSignaturePad();
+// ✅ OKAMŽITĚ PO NAČTENÍ: Reload data s správným ID
+(async function() {
+  // Počkat chvilku až se načte protokol.min.js (defer znamená paralelní načítání)
+  await new Promise(resolve => setTimeout(resolve, 100));
 
   const urlParams = new URLSearchParams(window.location.search);
-  currentReklamaceId = urlParams.get('id');
+  const reklamaceId = urlParams.get('id');
 
-  logger.log('📋 PATCH: ID z URL:', currentReklamaceId);
+  if (reklamaceId) {
+    logger.log('🔄 PATCH: Automatický reload dat s ID z URL:', reklamaceId);
+    await window.loadReklamace(reklamaceId);
 
-  if (currentReklamaceId) {
-    logger.log('✅ PATCH: ID nalezeno v URL');
-    await loadReklamace(currentReklamaceId);
-
-    // ✅ OPRAVENO: Použít currentReklamaceId z loadReklamace() (reklamace_id, ne database ID)
-    if (currentReklamaceId) {
-      logger.log('📸 PATCH: Načítám fotky s ID:', currentReklamaceId);
-      loadPhotosFromDatabase(currentReklamaceId);
+    // Reload fotek se správným ID
+    if (window.currentReklamaceId && typeof window.loadPhotosFromDatabase === 'function') {
+      logger.log('📸 PATCH: Reload fotek s ID:', window.currentReklamaceId);
+      window.loadPhotosFromDatabase(window.currentReklamaceId);
     }
   } else {
-    logger.warn('⚠️ PATCH: Chybí ID v URL - zkusím načíst z localStorage');
-    await loadReklamace(null);
-
-    if (currentReklamace && (currentReklamace.reklamace_id || currentReklamace.cislo || currentReklamace.id)) {
-      // ✅ OPRAVENO: Prioritně reklamace_id
-      currentReklamaceId = currentReklamace.reklamace_id || currentReklamace.cislo || currentReklamace.id;
-      logger.log('✅ PATCH: ID nalezeno v načtených datech:', currentReklamaceId);
-      loadPhotosFromDatabase(currentReklamaceId);
-    } else {
-      logger.error('❌ PATCH: ID se nepodařilo najít!');
-    }
+    logger.warn('⚠️ PATCH: Žádné ID v URL, používám původní data');
   }
+})();
 
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById("sign-date").value = today;
-  document.getElementById("visit-date").value = today;
-
-  setupAutoTranslate();
-}, { once: false }); // Přidáme handler navíc k originálu
-
-logger.log('🔧 PATCH: protokol-data-patch.js načten - loadReklamace() a DOMContentLoaded přepsány');
+logger.log('🔧 PATCH: protokol-data-patch.js načten - loadReklamace() přepsána a data reloadována');
