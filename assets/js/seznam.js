@@ -201,8 +201,9 @@ function initFilters() {
       btn.classList.add('active');
       ACTIVE_FILTER = btn.dataset.filter;
 
-      let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
-    renderOrders(userItems);
+      // ✅ PAGINATION FIX: Load page 1 for selected filter instead of just filtering cache
+      // This ensures we fetch fresh data from the server for the chosen status
+      loadAll(ACTIVE_FILTER, false);
     });
   });
 }

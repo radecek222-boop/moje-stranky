@@ -7,7 +7,8 @@
 
 require_once __DIR__ . '/../init.php';
 
-header('Content-Type: application/json');
+// ✅ FIX: Nepoužívat globální header - každý action má vlastní Content-Type
+// header('Content-Type: application/json'); // MOVED to individual cases
 
 /**
  * Výpočet vzdálenosti mezi dvěma GPS body (Haversine vzorec)
@@ -54,6 +55,7 @@ try {
     switch ($action) {
         case 'search':
             // Geocoding - převod adresy na GPS souřadnice
+            header('Content-Type: application/json');
             $address = $_GET['address'] ?? '';
 
             if (empty($address)) {
@@ -75,6 +77,7 @@ try {
 
         case 'autocomplete':
             // Našeptávač adres
+            header('Content-Type: application/json');
             $text = $_GET['text'] ?? '';
             $type = $_GET['type'] ?? 'street'; // street, city, postcode
 
@@ -107,6 +110,7 @@ try {
 
         case 'route':
             // Výpočet trasy - jednodušší rozhraní
+            header('Content-Type: application/json');
             $startLat = $_GET['start_lat'] ?? '';
             $startLon = $_GET['start_lon'] ?? '';
             $endLat = $_GET['end_lat'] ?? '';
@@ -135,6 +139,7 @@ try {
 
         case 'routing':
             // Výpočet trasy mezi dvěma body - POUŽITÍ OSRM (open-source, ZDARMA)
+            header('Content-Type: application/json');
             $waypoints = $_GET['waypoints'] ?? '';
             $mode = $_GET['mode'] ?? 'drive';
 
@@ -291,6 +296,7 @@ try {
             exit;
 
         default:
+            header('Content-Type: application/json');
             throw new Exception('Neplatná akce');
     }
 
@@ -312,6 +318,10 @@ try {
     echo $response;
 
 } catch (Exception $e) {
+    // ✅ FIX: Ensure JSON Content-Type for error responses
+    if (!headers_sent()) {
+        header('Content-Type: application/json');
+    }
     http_response_code(400);
     echo json_encode([
         'error' => $e->getMessage()
