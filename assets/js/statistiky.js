@@ -115,10 +115,10 @@ async function loadSummaryStats() {
         const result = await response.json();
 
         if (result.status === 'success') {
-            document.getElementById('total-orders').textContent = result.data.total_orders || 0;
-            document.getElementById('total-revenue').textContent = (result.data.total_revenue || 0).toFixed(2) + ' €';
-            document.getElementById('avg-order').textContent = (result.data.avg_order || 0).toFixed(2) + ' €';
-            document.getElementById('active-techs').textContent = result.data.active_techs || 0;
+            document.getElementById('total-orders').textContent = parseInt(result.data.total_orders) || 0;
+            document.getElementById('total-revenue').textContent = (parseFloat(result.data.total_revenue) || 0).toFixed(2) + ' €';
+            document.getElementById('avg-order').textContent = (parseFloat(result.data.avg_order) || 0).toFixed(2) + ' €';
+            document.getElementById('active-techs').textContent = parseInt(result.data.active_techs) || 0;
         } else {
             console.error('Chyba načítání summary statistik:', result.message);
         }
