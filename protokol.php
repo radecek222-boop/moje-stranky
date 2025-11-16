@@ -347,6 +347,67 @@ if ($initialBootstrapData) {
 
 <script src="assets/js/csrf-auto-inject.js" defer></script>
 
+<!-- EMERGENCY DIAGNOSTIC SCRIPT -->
+<script>
+(function() {
+  console.log('🚨 EMERGENCY DIAGNOSTICS STARTING...');
+
+  // FORCE HIDE LOADING OVERLAY IMMEDIATELY
+  window.addEventListener('DOMContentLoaded', function() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+      overlay.classList.remove('show');
+      overlay.style.display = 'none';
+      console.log('✅ Loading overlay force-hidden');
+    } else {
+      console.error('❌ Loading overlay NOT FOUND');
+    }
+
+    // Check initial data
+    const dataNode = document.getElementById('initialReklamaceData');
+    if (dataNode) {
+      console.log('✅ initialReklamaceData found');
+      const raw = (dataNode.textContent || dataNode.innerText || '').trim();
+      console.log('📦 Raw data length:', raw.length);
+      console.log('📦 Raw data preview:', raw.substring(0, 200));
+
+      try {
+        const parsed = JSON.parse(raw);
+        console.log('✅ JSON parsed successfully');
+        console.log('📋 Parsed data:', parsed);
+      } catch (e) {
+        console.error('❌ JSON parse failed:', e);
+      }
+    } else {
+      console.error('❌ initialReklamaceData NOT FOUND');
+    }
+
+    // Check all form fields
+    const fieldIds = ['order-number', 'claim-number', 'customer', 'address', 'phone', 'email', 'brand', 'model', 'technician'];
+    console.log('🔍 Checking form fields:');
+    fieldIds.forEach(id => {
+      const field = document.getElementById(id);
+      if (field) {
+        console.log(`  ✅ ${id}: "${field.value}"`);
+      } else {
+        console.error(`  ❌ ${id}: NOT FOUND`);
+      }
+    });
+
+    // Check signature pad
+    const canvas = document.getElementById('signature-pad');
+    if (canvas) {
+      console.log('✅ Signature pad canvas found');
+      console.log('  Canvas size:', canvas.offsetWidth, 'x', canvas.offsetHeight);
+    } else {
+      console.error('❌ Signature pad canvas NOT FOUND');
+    }
+
+    console.log('🚨 EMERGENCY DIAGNOSTICS COMPLETE');
+  });
+})();
+</script>
+
 <!-- External JavaScript -->
 <script src="assets/js/protokol-data-patch.js" defer></script>
 <script src="assets/js/protokol.min.js" defer></script>
