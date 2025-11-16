@@ -325,6 +325,8 @@ define('JWT_SECRET', getEnvValue('JWT_SECRET', 'change-this-in-production-INSECU
 // ========== GEOAPIFY API (MAPY) ==========
 // FALLBACK: Development hodnota pokud není v env
 define('GEOAPIFY_KEY', getEnvValue('GEOAPIFY_API_KEY', 'change-this-in-production'));
+// Kontakt pro open-source geocoding fallbacky (Nominatim vyžaduje kontakt)
+define('NOMINATIM_CONTACT_EMAIL', getEnvValue('NOMINATIM_CONTACT_EMAIL', 'reklamace@wgs-service.cz'));
 
 // ========== ENVIRONMENT CONFIGURATION ==========
 // Určení prostředí (development, staging, production)
