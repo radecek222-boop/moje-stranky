@@ -2,12 +2,38 @@
 /**
  * TEST DATABÁZOVÉHO PŘIPOJENÍ
  * Zkusí všechny možné varianty DB hostu a najde fungující
+ * BEZPEČNOST: Pouze pro přihlášené administrátory
  */
 
-// Credentials z phpMyAdmin
-$dbName = 'wgs-servicecz01';
-$dbUser = 'wgs-servicecz01';
-$dbPass = 'p7u.s13mR2018';
+require_once __DIR__ . '/init.php';
+
+// KRITICKÉ: Vyžadovat admin session BEZ BYPASSU
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    http_response_code(403);
+    die('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Přístup odepřen</title></head><body style="font-family: Consolas; background: #000; color: #f00; padding: 40px;"><h1>❌ PŘÍSTUP ODEPŘEN</h1><p>Pouze pro administrátory!</p><p><a href="login.php" style="color: #0f0;">→ Přihlásit se</a></p></body></html>');
+}
+
+// Načíst credentials z .env (bezpečněji než hardcodování!)
+function nactiEnv() {
+    $envFile = __DIR__ . '/.env';
+    if (!file_exists($envFile)) return null;
+    $envVars = [];
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (empty($line) || $line[0] === '#') continue;
+        if (strpos($line, '=') !== false) {
+            list($key, $value) = explode('=', $line, 2);
+            $envVars[trim($key)] = trim($value);
+        }
+    }
+    return $envVars;
+}
+
+$env = nactiEnv();
+$dbName = $env['DB_NAME'] ?? 'wgs-servicecz01';
+$dbUser = $env['DB_USER'] ?? 'wgs-servicecz002';
+$dbPass = $env['DB_PASS'] ?? '';
 
 // Všechny možné varianty hostu které zkusíme
 $hostsToTry = [

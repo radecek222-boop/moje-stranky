@@ -2,36 +2,56 @@
 /**
  * ČISTÝ TEST DATABÁZE - bez WGS kódu
  * Ukáže přesnou chybu připojení
+ * BEZPEČNOST: Pouze pro přihlášené administrátory
  */
+
+require_once __DIR__ . '/init.php';
+
+// KRITICKÉ: Vyžadovat admin session BEZ BYPASSU
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    http_response_code(403);
+    die('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Přístup odepřen</title></head><body style="font-family: Consolas; background: #000; color: #f00; padding: 40px;"><h1>❌ PŘÍSTUP ODEPŘEN</h1><p>Pouze pro administrátory!</p><p><a href="login.php" style="color: #0f0;">→ Přihlásit se</a></p></body></html>');
+}
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Credentials z phpMyAdmin
+// Načíst credentials z .env (bezpečněji než hardcodování!)
+function nactiEnv() {
+    $envFile = __DIR__ . '/.env';
+    if (!file_exists($envFile)) return null;
+    $envVars = [];
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (empty($line) || $line[0] === '#') continue;
+        if (strpos($line, '=') !== false) {
+            list($key, $value) = explode('=', $line, 2);
+            $envVars[trim($key)] = trim($value);
+        }
+    }
+    return $envVars;
+}
+
+$env = nactiEnv();
+$dbHost = $env['DB_HOST'] ?? '127.0.0.1';
+$dbName = $env['DB_NAME'] ?? 'wgs-servicecz01';
+$dbUser = $env['DB_USER'] ?? 'wgs-servicecz002';
+$dbPass = $env['DB_PASS'] ?? '';
+
+// Testy s credentials z .env
 $tests = [
-    'Test 1: wgs-servicecz01 user' => [
-        'host' => '127.0.0.1',
-        'dbname' => 'wgs-servicecz01',
-        'user' => 'wgs-servicecz01',
-        'pass' => 'p7u.s13mR2018'
+    'Test 1: z .env souboru' => [
+        'host' => $dbHost,
+        'dbname' => $dbName,
+        'user' => $dbUser,
+        'pass' => $dbPass
     ],
     'Test 2: localhost' => [
         'host' => 'localhost',
-        'dbname' => 'wgs-servicecz01',
-        'user' => 'wgs-servicecz01',
-        'pass' => 'p7u.s13mR2018'
-    ],
-    'Test 3: root user' => [
-        'host' => '127.0.0.1',
-        'dbname' => 'wgs-servicecz01',
-        'user' => 'root',
-        'pass' => 'p7u.s13mR2018'
-    ],
-    'Test 4: root@localhost' => [
-        'host' => 'localhost',
-        'dbname' => 'wgs-servicecz01',
-        'user' => 'root',
-        'pass' => 'p7u.s13mR2018'
+        'dbname' => $dbName,
+        'user' => $dbUser,
+        'pass' => $dbPass
     ],
 ];
 
