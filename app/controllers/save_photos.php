@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
 require_once __DIR__ . '/../../includes/safe_file_operations.php';
+require_once __DIR__ . '/../../includes/reklamace_id_validator.php';
 
 header('Content-Type: application/json');
 
@@ -47,16 +48,9 @@ try {
     // Zaznamenat pokus o upload
     recordLoginAttempt("upload_photos_$ip");
 
-    // Získání reklamace ID
-    $reklamaceId = $_POST['reklamace_id'] ?? null;
-    if (!$reklamaceId) {
-        throw new Exception('Chybí reklamace_id');
-    }
-
-    // BEZPEČNOST: Validace reklamace_id - musí být pouze alfanumerické znaky
-    if (!preg_match('/^[a-zA-Z0-9_-]+$/', $reklamaceId)) {
-        throw new Exception('Neplatné ID reklamace');
-    }
+    // Získání a validace reklamace ID
+    $reklamaceId = sanitizeReklamaceId($_POST['reklamace_id'] ?? null, 'reklamace_id');
+    $reklamaceStorageKey = reklamaceStorageKey($reklamaceId);
 
     // Získání typu fotek
     $photoType = $_POST['photo_type'] ?? 'problem';
@@ -93,8 +87,8 @@ try {
     }
 
     // BUGFIX: mkdir race condition - suppress error pokud složka již existuje
-    // Vytvoření podadresáře pro konkrétní reklamaci (basename pro extra bezpečnost)
-    $reklamaceDir = $uploadsDir . '/reklamace_' . basename($reklamaceId);
+    // Vytvoření podadresáře pro konkrétní reklamaci (bezpečný klíč bez lomítek)
+    $reklamaceDir = $uploadsDir . '/reklamace_' . $reklamaceStorageKey;
     if (!is_dir($reklamaceDir)) {
         safeMkdir($reklamaceDir, 0755, true);
         // Double-check že složka existuje (pokud concurrent request ji vytvořil)
@@ -163,7 +157,7 @@ try {
         // Generování unikátního názvu souboru
         $timestamp = time();
         $randomString = bin2hex(random_bytes(4));
-        $filename = "photo_{$reklamaceId}_{$timestamp}_{$randomString}.{$imageType}";
+        $filename = "photo_{$reklamaceStorageKey}_{$timestamp}_{$randomString}.{$imageType}";
         $filePath = $reklamaceDir . '/' . $filename;
 
         // CRITICAL FIX: FILE-FIRST APPROACH
@@ -177,7 +171,7 @@ try {
         }
 
         // Relativní cesta pro databázi
-        $relativePathForDb = "uploads/reklamace_{$reklamaceId}/{$filename}";
+        $relativePathForDb = "uploads/reklamace_{$reklamaceStorageKey}/{$filename}";
 
         try {
             // Krok 2: Vložení do databáze (s file_path a file_name podle PHOTOS_FIX_REPORT.md)
