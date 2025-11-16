@@ -457,6 +457,13 @@ async function saveToProtocol() {
   showWaitDialog(true, 'Odesílám do protokolu...');
 
   try {
+    // ✅ OPRAVENO: Získání CSRF tokenu z meta tagu
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+    if (!csrfToken) {
+      throw new Error('CSRF token nebyl nalezen');
+    }
+
     const response = await fetch('/app/save_photos.php', {
       method: 'POST',
       headers: {
@@ -464,7 +471,8 @@ async function saveToProtocol() {
       },
       body: JSON.stringify({
         reklamace_id: currentCustomerData.id || currentCustomerData.cislo,
-        sections: sections
+        sections: sections,
+        csrf_token: csrfToken // ✅ PŘIDÁNO: CSRF token
       })
     });
 
