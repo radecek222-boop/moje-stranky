@@ -184,7 +184,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
                     <div class="form-group">
                         <label for="db_host">DB Host</label>
-                        <input type="text" id="db_host" name="db_host" value="localhost" required>
+                        <input type="text" id="db_host" name="db_host" value="127.0.0.1" required>
+                        <p style="margin-top: 0.3rem; font-size: 0.8rem; color: #666;">Zkus: 127.0.0.1 (doporučeno), localhost, nebo localhost:3306</p>
                     </div>
 
                     <div class="form-group">
@@ -354,27 +355,78 @@ try {
     // ==================================================
     // KROK 5: Otestovat připojení k databázi
     // ==================================================
-    try {
-        $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8mb4";
-        $pdo = new PDO($dsn, $dbUser, $dbPass, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false
-        ]);
+    // SMART CONNECTION: Zkusit různé varianty hostu pokud první selže
+    $hostsToTry = [$dbHost];
 
-        $vysledky[] = "✓ ÚSPĚCH: Připojení k databázi funguje!";
+    // Pokud uživatel zadal localhost, zkusit i 127.0.0.1 a opačně
+    if ($dbHost === 'localhost') {
+        $hostsToTry[] = '127.0.0.1';
+        $hostsToTry[] = 'localhost:3306';
+    } elseif ($dbHost === '127.0.0.1') {
+        $hostsToTry[] = 'localhost';
+    }
 
-        // Otestovat že wgs_reklamace existuje
-        $stmt = $pdo->query("SHOW TABLES LIKE 'wgs_reklamace'");
-        if ($stmt->rowCount() > 0) {
-            $vysledky[] = "✓ Tabulka wgs_reklamace nalezena";
-        } else {
-            $chyby[] = "⚠ Varování: Tabulka wgs_reklamace nebyla nalezena v databázi";
+    $connectionSuccess = false;
+    $lastError = null;
+    $workingHost = null;
+
+    foreach ($hostsToTry as $hostToTry) {
+        try {
+            $dsn = "mysql:host={$hostToTry};dbname={$dbName};charset=utf8mb4";
+            $pdo = new PDO($dsn, $dbUser, $dbPass, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::ATTR_TIMEOUT => 5
+            ]);
+
+            $connectionSuccess = true;
+            $workingHost = $hostToTry;
+
+            // Pokud fungující host je jiný než zadaný, aktualizovat v .env
+            if ($hostToTry !== $dbHost) {
+                $envVars['DB_HOST'] = $hostToTry;
+                $vysledky[] = "⊙ Automaticky změněn DB_HOST na '{$hostToTry}' (funguje lépe)";
+
+                // Přegenerovat .env soubor s novým hostem
+                $envContent = "# WHITE GLOVE SERVICE - Environment Configuration\n";
+                $envContent .= "# Aktualizováno: " . date('Y-m-d H:i:s') . "\n\n";
+                foreach ($envVars as $key => $value) {
+                    if (strpos($value, ' ') !== false) {
+                        $value = '"' . $value . '"';
+                    }
+                    $envContent .= "{$key}={$value}\n";
+                }
+                file_put_contents($envFile, $envContent);
+            }
+
+            $vysledky[] = "✓ ÚSPĚCH: Připojení k databázi funguje! (host: {$workingHost})";
+
+            // Otestovat že wgs_reklamace existuje
+            $stmt = $pdo->query("SHOW TABLES LIKE 'wgs_reklamace'");
+            if ($stmt->rowCount() > 0) {
+                $vysledky[] = "✓ Tabulka wgs_reklamace nalezena";
+            } else {
+                $chyby[] = "⚠ Varování: Tabulka wgs_reklamace nebyla nalezena v databázi";
+            }
+
+            break; // Připojení úspěšné, ukončit smyčku
+
+        } catch (PDOException $e) {
+            $lastError = $e->getMessage();
+            // Pokračovat na další host
         }
+    }
 
-    } catch (PDOException $e) {
-        $chyby[] = "✗ CHYBA: Nepodařilo se připojit k databázi: " . $e->getMessage();
-        $chyby[] = "  Zkontroluj že credentials jsou správné v phpMyAdmin";
+    if (!$connectionSuccess) {
+        $chyby[] = "✗ CHYBA: Nepodařilo se připojit k databázi";
+        $chyby[] = "  Poslední chyba: " . $lastError;
+        $chyby[] = "  Zkoušené hosty: " . implode(', ', $hostsToTry);
+        $chyby[] = "";
+        $chyby[] = "💡 TIPY:";
+        $chyby[] = "  1. Zkontroluj v phpMyAdmin → Oprávnění jaký je skutečný DB uživatel";
+        $chyby[] = "  2. Zkus heslo zkopírovat přímo z phpMyAdmin (bez mezer)";
+        $chyby[] = "  3. Některé hostingy vyžadují specifický host (např. mysql.server.com)";
     }
 
     // ==================================================
