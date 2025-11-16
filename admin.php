@@ -19,11 +19,11 @@ if (!$embedMode) {
     // SECURITY FIX: Odstraněn 'unsafe-eval' pro lepší bezpečnost
     header("Content-Security-Policy: " .
         "default-src 'self'; " .
-        "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
+        "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; " .
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; " .
         "font-src 'self' https://fonts.gstatic.com; " .
         "img-src 'self' data: https:; " .
-        "connect-src 'self' data:; " .
+        "connect-src 'self' data: https://api.geoapify.com https://maps.geoapify.com; " .
         "frame-src 'self'; " .
         "object-src 'none'; " .
         "base-uri 'self'; " .
