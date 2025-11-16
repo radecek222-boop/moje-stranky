@@ -1,0 +1,13 @@
+{
+  "name": "wgs-geocode-proxy",
+  "version": "1.0.0",
+  "description": "Vercel Edge Function proxy pro Geoapify API",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "keywords": ["geocoding", "proxy", "vercel", "edge-function"],
+  "author": "WGS Service",
+  "license": "MIT"
+}
