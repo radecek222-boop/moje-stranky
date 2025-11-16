@@ -137,6 +137,6 @@ if (!$isLoggedIn) {
 <input type="file" id="mediaInput" accept="image/*,video/*" capture="environment" multiple>
 
 <!-- External JavaScript -->
-<script src="assets/js/photocustomer.min.js" defer></script>
+<script src="assets/js/photocustomer.js" defer></script>
 </body>
 </html>
