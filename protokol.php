@@ -89,21 +89,18 @@ if (!$isLoggedIn) {
   <div class="section-title">Zákazník reklamuje<span class="en-label">Customer complaint</span></div>
   <div class="split-section">
     <textarea id="description-cz" placeholder="Popis reklamace česky..."></textarea>
-    <button class="translate-btn" onclick="translateField('description')" title="Přeložit do angličtiny">→</button>
     <textarea id="description-en" placeholder="Automatický překlad..." readonly></textarea>
   </div>
 
   <div class="section-title">Problém zjištěný technikem<span class="en-label">Detected problem</span></div>
   <div class="split-section">
     <textarea id="problem-cz" placeholder="Zjištěný problém česky..."></textarea>
-    <button class="translate-btn" onclick="translateField('problem')" title="Přeložit do angličtiny">→</button>
     <textarea id="problem-en" placeholder="Automatický překlad..." readonly></textarea>
   </div>
 
   <div class="section-title">Návrh opravy<span class="en-label">Repair proposal</span></div>
   <div class="split-section">
     <textarea id="repair-cz" placeholder="Návrh opravy česky..."></textarea>
-    <button class="translate-btn" onclick="translateField('repair')" title="Přeložit do angličtiny">→</button>
     <textarea id="repair-en" placeholder="Automatický překlad..." readonly></textarea>
   </div>
 
