@@ -1449,39 +1449,36 @@ async function loadMapAndRoute() {
       <div style="background: var(--c-bg); padding: 1rem; text-align: center; border: 1px solid var(--c-border);">
         <div style="font-size: 0.8rem; color: var(--c-grey); margin-bottom: 0.8rem; line-height: 1.4;">
           <strong>Z:</strong> WGS<br>
-          <strong>Do:</strong> ${customerAddress}</div>
+          <strong>Do:</strong> ${customerAddress}<br>
+          <strong>Vzdálenost:</strong> <span id="mapDistance">Načítám...</span><br>
+          <strong>Čas:</strong> <span id="mapDuration">—</span>
+        </div>
         <div style="display: flex; gap: 0.5rem; justify-content: center;">
-          <a href="https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving" 
+          <a href="https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving"
              class="btn" target="_blank" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.75rem;">
             Google Maps
           </a>
-          <a href="https://waze.com/ul?q=${destination}&navigate=yes" 
+          <a href="https://waze.com/ul?q=${destination}&navigate=yes"
              class="btn" target="_blank" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.75rem;">
             Waze
           </a>
         </div>
       </div>
     `;
-    
-    const response = await fetch('/app/controllers/get_distance.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        origin: WGS_ADDRESS,
-        destination: customerAddress
-      })
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      if ((data.status === 'success' || data.success === true) && data.distance && data.duration) {
-        document.getElementById('mapDistance').textContent = data.distance.text;
-        document.getElementById('mapDuration').textContent = data.duration.text;
-      } else {
-        document.getElementById('mapDistance').textContent = '—';
-        document.getElementById('mapDuration').textContent = '—';
-        logger.error('Chyba API:', data.message);
+
+    // ✅ PERFORMANCE FIX: Použít getDistance() která má cache místo přímého fetch
+    // Tímto se vyhneme duplicitním API calls
+    const distanceData = await getDistance(WGS_ADDRESS, customerAddress);
+
+    if (distanceData && distanceData.text) {
+      document.getElementById('mapDistance').textContent = distanceData.text;
+      if (distanceData.duration) {
+        document.getElementById('mapDuration').textContent = distanceData.duration;
       }
+    } else {
+      document.getElementById('mapDistance').textContent = '—';
+      document.getElementById('mapDuration').textContent = '—';
+      logger.error('Nepodařilo se načíst vzdálenost');
     }
     
   } catch (error) {
