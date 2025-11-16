@@ -354,27 +354,37 @@ try {
     $popisProblemu = sanitizeInput($_POST['popis_problemu'] ?? '');
     $doplnujiciInfo = sanitizeInput($_POST['doplnujici_info'] ?? '');
     $fakturaceFirma = strtolower(trim($_POST['fakturace_firma'] ?? 'cz')); // DB používá lowercase ENUM
+    // GDPR souhlas - pouze pro neregistrované uživatele
+    // Registrovaní uživatelé (prodejce, technik, admin) mají souhlas ošetřen ve smlouvách
     $gdprConsentRaw = $_POST['gdpr_consent'] ?? null;
     $gdprConsent = filter_var($gdprConsentRaw, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
 
-    if ($gdprConsent !== true) {
-        throw new Exception('Je nutné potvrdit souhlas se zpracováním osobních údajů.');
+    if (!$isLoggedIn) {
+        // Neregistrovaný uživatel - vyžaduje explicitní souhlas
+        if ($gdprConsent !== true) {
+            throw new Exception('Je nutné potvrdit souhlas se zpracováním osobních údajů.');
+        }
+
+        $gdprConsentAt = date('Y-m-d H:i:s');
+        $gdprConsentIp = $_SERVER['REMOTE_ADDR'] ?? '';
+        $gdprNoteParts = ["GDPR souhlas udělen {$gdprConsentAt}"];
+
+        if (!empty($gdprConsentIp)) {
+            $gdprNoteParts[] = 'IP: ' . $gdprConsentIp;
+        }
+
+        if (!empty($_SERVER['HTTP_USER_AGENT'])) {
+            $userAgent = substr($_SERVER['HTTP_USER_AGENT'], 0, 200);
+            $gdprNoteParts[] = 'UA: ' . $userAgent;
+        }
+
+        $gdprNote = sanitizeInput(implode(' | ', $gdprNoteParts));
+    } else {
+        // Registrovaný uživatel - souhlas ošetřen smluvně
+        $userId = $_SESSION['user_id'] ?? 'unknown';
+        $userRole = $_SESSION['role'] ?? 'user';
+        $gdprNote = "GDPR souhlas ošetřen smluvně (User ID: {$userId}, Role: {$userRole})";
     }
-
-    $gdprConsentAt = date('Y-m-d H:i:s');
-    $gdprConsentIp = $_SERVER['REMOTE_ADDR'] ?? '';
-    $gdprNoteParts = ["GDPR souhlas udělen {$gdprConsentAt}"];
-
-    if (!empty($gdprConsentIp)) {
-        $gdprNoteParts[] = 'IP: ' . $gdprConsentIp;
-    }
-
-    if (!empty($_SERVER['HTTP_USER_AGENT'])) {
-        $userAgent = substr($_SERVER['HTTP_USER_AGENT'], 0, 200);
-        $gdprNoteParts[] = 'UA: ' . $userAgent;
-    }
-
-    $gdprNote = sanitizeInput(implode(' | ', $gdprNoteParts));
 
     if (!empty($doplnujiciInfo)) {
         $doplnujiciInfo = trim($doplnujiciInfo) . "\n\n" . $gdprNote;

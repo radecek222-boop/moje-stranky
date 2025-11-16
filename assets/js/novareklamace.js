@@ -598,6 +598,8 @@ const WGS = {
   },
   
   async submitForm() {
+    // GDPR souhlas - pouze pro neregistrované uživatele
+    // Checkbox neexistuje pokud je uživatel přihlášený (souhlas ošetřen smluvně)
     const consentCheckbox = document.getElementById('gdpr_consent');
     if (consentCheckbox && !consentCheckbox.checked) {
       consentCheckbox.focus();
