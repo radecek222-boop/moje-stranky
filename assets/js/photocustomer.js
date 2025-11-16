@@ -464,15 +464,25 @@ async function saveToProtocol() {
       throw new Error('CSRF token nebyl nalezen');
     }
 
+    // ✅ OPRAVENO: Správná identifikace reklamace
+    // Backend hledá podle reklamace_id (např. WGS251116-XXX) nebo cislo
+    const reklamaceId = currentCustomerData.reklamace_id || currentCustomerData.cislo || currentCustomerData.id;
+
+    if (!reklamaceId) {
+      throw new Error('Chybí identifikátor reklamace');
+    }
+
+    logger.log('📤 Odesílám fotky pro reklamaci:', reklamaceId);
+
     const response = await fetch('/app/save_photos.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        reklamace_id: currentCustomerData.id || currentCustomerData.cislo,
+        reklamace_id: reklamaceId,
         sections: sections,
-        csrf_token: csrfToken // ✅ PŘIDÁNO: CSRF token
+        csrf_token: csrfToken
       })
     });
 
@@ -481,12 +491,13 @@ async function saveToProtocol() {
     if (result.success) {
       showAlert('Fotografie byly uloženy', 'success');
       setTimeout(() => {
-        window.location.href = `protokol.php?id=${currentCustomerData.id || currentCustomerData.cislo}`;
+        window.location.href = `protokol.php?id=${reklamaceId}`;
       }, 1500);
     } else {
       showAlert('Chyba při ukládání: ' + result.error, 'error');
     }
   } catch (error) {
+    logger.error('❌ Chyba při odesílání fotek:', error);
     showAlert('Chyba při odesílání: ' + error.message, 'error');
   } finally {
     showWaitDialog(false);
