@@ -32,24 +32,32 @@ try {
     $identifier = "admin_api_{$ip}_{$userId}";
 
     // Použít RateLimiter třídu (již načtena v init.php)
-    $rateLimiter = new RateLimiter(getDbConnection());
+    // OPRAVA: Graceful handling pokud databáze není dostupná
+    try {
+        $pdo = getDbConnection();
+        $rateLimiter = new RateLimiter($pdo);
 
-    // 300 požadavků za 10 minut (zvýšeno kvůli diagnostice která dělá 20+ callů)
-    // Blokace na 30 minut při překročení
-    $rateCheck = $rateLimiter->checkLimit($identifier, 'admin_api', [
-        'max_attempts' => 300,
-        'window_minutes' => 10,
-        'block_minutes' => 30
-    ]);
-
-    if (!$rateCheck['allowed']) {
-        http_response_code(429);
-        echo json_encode([
-            'status' => 'error',
-            'message' => $rateCheck['message'],
-            'retry_after' => $rateCheck['reset_at']
+        // 300 požadavků za 10 minut (zvýšeno kvůli diagnostice která dělá 20+ callů)
+        // Blokace na 30 minut při překročení
+        $rateCheck = $rateLimiter->checkLimit($identifier, 'admin_api', [
+            'max_attempts' => 300,
+            'window_minutes' => 10,
+            'block_minutes' => 30
         ]);
-        exit;
+
+        if (!$rateCheck['allowed']) {
+            http_response_code(429);
+            echo json_encode([
+                'status' => 'error',
+                'message' => $rateCheck['message'],
+                'retry_after' => $rateCheck['reset_at']
+            ]);
+            exit;
+        }
+    } catch (Exception $e) {
+        // Pokud rate limiting selže, logovat a pokračovat (lepší než zablokovat celé API)
+        error_log("Rate limiter failed in control_center_api: " . $e->getMessage());
+        // Nevracet error - pokračovat bez rate limitingu (admin může pokračovat)
     }
 
     // Načtení JSON dat

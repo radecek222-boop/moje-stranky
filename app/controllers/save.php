@@ -163,6 +163,9 @@ function handleUpdate(PDO $pdo, array $input): array
         'telefon',
         'email',
         'adresa',
+        'ulice',
+        'mesto',
+        'psc',
         'model',
         'provedeni',
         'barva',
@@ -171,7 +174,9 @@ function handleUpdate(PDO $pdo, array $input): array
         'stav',
         'termin',
         'cas_navstevy',
-        'fakturace_firma'
+        'fakturace_firma',
+        'technik',
+        'prodejce'
     ];
 
     $updateData = [];
@@ -346,7 +351,19 @@ try {
     // Email - pouze trim, ne sanitizeInput (kvůli zachování formátu)
     $email = trim($_POST['email'] ?? '');
     $telefon = sanitizeInput($_POST['telefon'] ?? '');
+
+    // ADRESA - buď jako celek nebo složená z ulice + mesto + psc
+    $ulice = sanitizeInput($_POST['ulice'] ?? '');
+    $mesto = sanitizeInput($_POST['mesto'] ?? '');
+    $psc = sanitizeInput($_POST['psc'] ?? '');
+
+    // Pokud není adresa přímo, složit ji z ulice + mesto + psc
     $adresa = sanitizeInput($_POST['adresa'] ?? '');
+    if (empty($adresa) && (!empty($ulice) || !empty($mesto) || !empty($psc))) {
+        $adresaParts = array_filter([$ulice, $mesto, $psc], fn($v) => !empty($v));
+        $adresa = implode(', ', $adresaParts);
+    }
+
     $model = sanitizeInput($_POST['model'] ?? '');
     $provedeni = sanitizeInput($_POST['provedeni'] ?? '');
     $barva = sanitizeInput($_POST['barva'] ?? '');
@@ -459,6 +476,9 @@ try {
         'email' => $email,
         'telefon' => $telefon,
         'adresa' => $adresa,
+        'ulice' => $ulice,
+        'mesto' => $mesto,
+        'psc' => $psc,
         'model' => $model,
         'provedeni' => $provedeni,
         'barva' => $barva,
