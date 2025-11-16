@@ -174,9 +174,8 @@ const WGS = {
           let searchText = query;
           if (mesto) searchText += `, ${mesto}`;
           if (psc) searchText += `, ${psc}`;
-          searchText += ', Czech Republic';
 
-          const data = await WGSMap.autocomplete(searchText, { type: 'street', limit: 5 });
+          const data = await WGSMap.autocomplete(searchText, { type: 'street', limit: 5, country: 'CZ' });
 
           if (data && data.features && data.features.length > 0) {
             dropdownUlice.innerHTML = '';
@@ -263,7 +262,7 @@ const WGS = {
         }
 
         try {
-          const data = await WGSMap.autocomplete(query + ', Czech Republic', { type: 'city', limit: 5 });
+          const data = await WGSMap.autocomplete(query, { type: 'city', limit: 5, country: 'CZ' });
 
           if (data && data.features && data.features.length > 0) {
             dropdownMesto.innerHTML = '';
@@ -336,10 +335,14 @@ const WGS = {
     }
     
     document.addEventListener('click', (e) => {
-      if (e.target !== uliceInput && e.target !== dropdownUlice) {
+      const clickedInsideUlice = dropdownUlice && dropdownUlice.contains(e.target);
+      const clickedInsideMesto = dropdownMesto && dropdownMesto.contains(e.target);
+
+      if (dropdownUlice && !clickedInsideUlice && e.target !== uliceInput) {
         dropdownUlice.style.display = 'none';
       }
-      if (e.target !== mestoInput && e.target !== dropdownMesto) {
+
+      if (dropdownMesto && !clickedInsideMesto && e.target !== mestoInput) {
         dropdownMesto.style.display = 'none';
       }
     });

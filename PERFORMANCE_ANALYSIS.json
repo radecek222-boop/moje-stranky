@@ -1,0 +1,154 @@
+{
+  "report_date": "2025-11-16",
+  "analysis_scope": "Complete repository performance audit - similar issues to map tile proxy problem",
+  "summary": {
+    "total_issues_found": 7,
+    "critical_issues": 2,
+    "high_issues": 3,
+    "medium_issues": 2,
+    "low_issues": 0
+  },
+  "issues": [
+    {
+      "id": 1,
+      "title": "Double API Calls in get_distance.php - No Server-Side Caching",
+      "severity": "CRITICAL",
+      "category": "Unnecessary API Proxy Requests",
+      "location": "/home/user/moje-stranky/app/controllers/get_distance.php",
+      "file_lines": "175-188",
+      "description": "For each distance calculation request, the controller makes TWO separate curl requests to geocode_proxy.php - one for origin address (line 175) and one for destination address (line 176). These requests are NOT cached server-side.",
+      "code_snippet": "// Line 175\n$originCoords = geocodeAddress($origin);\n// Line 176\n$destCoords = geocodeAddress($destination);\n\nfunction geocodeAddress($address) {\n    $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') .\n           '://' . $_SERVER['HTTP_HOST'] .\n           '/api/geocode_proxy.php?action=search&address=' . urlencode($address);\n    $ch = curl_init();\n    curl_setopt($ch, CURLOPT_URL, $url);\n    // ... curl execution ...\n}",
+      "problem_analysis": "- Each unique address pair makes 2 internal curl requests to Geoapify API\n- If user calculates distance multiple times with same addresses = multiple API calls\n- Server resources wasted on repeated geocoding of identical addresses\n- SIMILAR ISSUE TO: Original tile proxy problem where stovky PHP requestů were made",
+      "impact": "- High server CPU usage from curl operations\n- Increased latency on distance calculations\n- Potential API rate limiting if many users calculate distances\n- Unnecessary load on geocode_proxy.php",
+      "solution": "1. Add caching layer in get_distance.php:\n   - Cache geocoding results for 24 hours in PHP session or database\n   - Use address as cache key: hash(trim(strtolower($address)))\n2. Or use client-side WGSMap.cache (already has geocode cache)\n3. Implement server-side result caching (Redis/Memcached ideal)",
+      "example_fix": "// Add before geocodeAddress calls:\n$cacheKey = 'geocode_' . md5($origin) . '_' . md5($destination);\n$cached = apcu_fetch($cacheKey);\nif ($cached) return $cached;\n// ... do geocoding ...\napcu_store($cacheKey, $result, 86400); // Cache for 24 hours"
+    },
+    {
+      "id": 2,
+      "title": "Duplicate get_distance.php API Calls in seznam.js",
+      "severity": "CRITICAL",
+      "category": "Redundant Client-Side Requests",
+      "location": "/home/user/moje-stranky/assets/js/seznam.js",
+      "file_lines": "975 and 1466",
+      "description": "The getDistance() function is called from TWO different places in seznam.js for the SAME address pair (WGS headquarters to customer address)",
+      "code_snippet": "// Line 975 in getDistance() function\nconst response = await fetch('/app/controllers/get_distance.php', {\n  method: 'POST',\n  body: JSON.stringify({\n    origin: fromAddress,\n    destination: toAddress\n  })\n});\n\n// Line 1466 in showMapWithDistance() \nconst response = await fetch('/app/controllers/get_distance.php', {\n  method: 'POST',\n  body: JSON.stringify({\n    origin: WGS_ADDRESS,\n    destination: customerAddress\n  })\n});",
+      "problem_analysis": "- Function getDistance() at line 964 has client-side cache (DISTANCE_CACHE)\n- BUT showMapWithDistance() at line 1466 makes a NEW API call WITHOUT checking the cache\n- When user views customer detail, gets distance info displayed AND map info = 2 API calls for same data\n- User clicks on customer in calendar = getDistance called\n- Then map view loads = showMapWithDistance called again = DUPLICATE",
+      "impact": "- Unnecessary network requests to server\n- Duplicate curl calls in get_distance.php\n- Duplicate geocoding API calls to Geoapify\n- Wastes bandwidth and server resources",
+      "solution": "1. Make showMapWithDistance() use the existing getDistance() function and DISTANCE_CACHE\n2. Or create shared cache between both functions\n3. Ensure map view reuses distance data already calculated",
+      "example_fix": "// Instead of separate fetch in showMapWithDistance:\nconst distanceData = await getDistance(WGS_ADDRESS, customerAddress);\nif (distanceData) {\n  document.getElementById('mapDistance').textContent = distanceData.text;\n  document.getElementById('mapDuration').textContent = distanceData.duration;\n}"
+    },
+    {
+      "id": 3,
+      "title": "Missing HTTP Caching Headers on All API Endpoints",
+      "severity": "HIGH",
+      "category": "Missing HTTP Caching",
+      "location": "All API endpoints in /home/user/moje-stranky/api/",
+      "file_lines": "All endpoints (missing Cache-Control, ETag, Last-Modified)",
+      "description": "API endpoints return data with 'no-cache' or NO caching headers, preventing browser caching and forcing server to process same request multiple times",
+      "affected_files": [
+        "/api/statistiky_api.php - no Cache-Control header",
+        "/api/control_center_api.php - no Cache-Control header",
+        "/api/geocode_proxy.php - tile endpoint returns data without cache headers",
+        "/app/controllers/get_distance.php - no Cache-Control header",
+        "/api/protokol_api.php - no Cache-Control header"
+      ],
+      "code_snippet": "// These endpoints LACK proper caching headers:\nheader('Content-Type: application/json; charset=utf-8');\n// Missing:\n// header('Cache-Control: public, max-age=3600'); // For caching 1 hour\n// header('ETag: \"version-hash\"');\n// header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', $timestamp));\n\n// Current pattern (seznam.php line 31):\n<meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\">",
+      "problem_analysis": "- Browser cannot cache any API responses\n- Same data requested multiple times = multiple server hits\n- ETags/Last-Modified missing = browser cannot use 304 Not Modified responses\n- No max-age = browser requests fresh data every time\n- Especially problematic for statistiky_api.php (loads in admin dashboard constantly)",
+      "impact": "- Increased server load from repeated requests\n- Higher bandwidth consumption\n- Slower perceived performance for users\n- More database queries than necessary",
+      "solution": "1. Add Cache-Control headers based on data volatility:\n   - Statistics data: max-age=300 (5 minutes)\n   - Geocoding results: max-age=86400 (24 hours)  \n   - Protokol data: max-age=60 (1 minute)\n2. Implement ETag generation based on data hash\n3. Return 304 Not Modified when appropriate",
+      "example_fix": "function setApiCache($maxAge = 300) {\n  header('Cache-Control: public, max-age=' . $maxAge);\n  header('Pragma: cache');\n  \n  // Generate ETag\n  $data = ob_get_contents();\n  $etag = '\"' . md5($data) . '\"';\n  header('ETag: ' . $etag);\n  \n  // Check If-None-Match\n  if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $etag) {\n    http_response_code(304);\n    exit;\n  }\n}"
+    },
+    {
+      "id": 4,
+      "title": "SELECT * Queries Loading Unnecessary Columns",
+      "severity": "HIGH",
+      "category": "Inefficient Database Queries",
+      "location": "Multiple API endpoints",
+      "file_lines": "Across multiple files",
+      "description": "Several API endpoints use SELECT * instead of selecting specific columns, loading unnecessary data into memory and over network",
+      "affected_locations": [
+        "/api/control_center_api.php:241 - SELECT * FROM wgs_pending_actions",
+        "/api/control_center_api.php:831 - SELECT * FROM wgs_content_texts",
+        "/api/control_center_api.php:892 - SELECT * FROM wgs_system_config",
+        "/api/protokol_api.php:278 - SELECT * FROM wgs_reklamace",
+        "/api/protokol_api.php:403 - SELECT * FROM wgs_reklamace",
+        "/api/delete_reklamace.php:78 - SELECT * FROM wgs_reklamace"
+      ],
+      "code_snippet": "// api/protokol_api.php line 278\n$stmt = $pdo->prepare(\"\n    SELECT * FROM wgs_reklamace\n    WHERE reklamace_id = :reklamace_id OR cislo = :cislo OR id = :id\n    LIMIT 1\n\");\n\n// SHOULD BE:\n$stmt = $pdo->prepare(\"\n    SELECT id, reklamace_id, cislo, problem_description, repair_proposal, solved, created_at\n    FROM wgs_reklamace\n    WHERE reklamace_id = :reklamace_id OR cislo = :cislo OR id = :id\n    LIMIT 1\n\");",
+      "problem_analysis": "- wgs_reklamace table likely has 30+ columns\n- SELECT * loads all columns even if only 5-10 are needed\n- For bulk operations (statistiky_api loading 500+ records) = significant overhead\n- Network transfer size increases unnecessarily\n- Database query optimizer cannot optimize as well\n- Similar to tile proxy issue: unnecessary data transfer",
+      "impact": "- Larger JSON responses\n- More memory usage\n- Slower JSON encoding/decoding\n- Increased bandwidth consumption\n- Slower database performance",
+      "solution": "1. Replace all SELECT * with explicit column lists\n2. Use database views for frequently used column combinations\n3. Consider column groups:\n   - Basic info: id, cislo, jmeno, termin\n   - Details: + ulice, mesto, psc, telefon\n   - Full: + all columns when needed",
+      "example_fix": "// Create helper function\nfunction getClaimsBasicColumns() {\n  return 'id, cislo, jmeno, termin, stav, created_at';\n}\n\n// Use in queries\n$stmt = $pdo->prepare('SELECT ' . getClaimsBasicColumns() . ' FROM wgs_reklamace');"
+    },
+    {
+      "id": 5,
+      "title": "Lack of Request Debouncing/Throttling in Distance Calculations",
+      "severity": "MEDIUM",
+      "category": "Inefficient Client-Side Requests",
+      "location": "/home/user/moje-stranky/assets/js/seznam.js",
+      "file_lines": "Lines around distance calculation logic (1000-1100)",
+      "description": "Distance calculations in getDistancesBatch() use Promise.all() without rate limiting, potentially overwhelming server if user selects many calendar dates rapidly",
+      "code_snippet": "// seznam.js line 1012-1014\nasync function getDistancesBatch(pairs) {\n  const promises = pairs.map(pair => getDistance(pair.from, pair.to));\n  return await Promise.all(promises);\n}",
+      "problem_analysis": "- If user clicks rapidly through calendar dates = many distance requests fire simultaneously\n- showDayBookingsWithDistances() called for each date selection\n- Promise.all() launches all requests without concurrency control\n- Server might receive burst of 50+ requests if user clicks quickly\n- Similar pattern to tile loading issues (many requests at once)",
+      "impact": "- Server CPU spike when handling burst requests\n- Potential rate limiting from Geoapify API\n- Sluggish UI response if too many requests pending\n- Unnecessary load on database",
+      "solution": "1. Add request debouncing on date selection (ROUTE_DEBOUNCE: 500)\n2. Implement concurrency limiting in batch processing\n3. Cancel pending requests when new date selected\n4. Use request queuing system",
+      "example_fix": "// Add concurrency limiter\nasync function getDistancesBatch(pairs, concurrency = 3) {\n  const results = [];\n  for (let i = 0; i < pairs.length; i += concurrency) {\n    const batch = pairs.slice(i, i + concurrency);\n    const batchResults = await Promise.all(\n      batch.map(pair => getDistance(pair.from, pair.to))\n    );\n    results.push(...batchResults);\n  }\n  return results;\n}"
+    },
+    {
+      "id": 6,
+      "title": "Missing ETag and Last-Modified Headers on Dynamic Content",
+      "severity": "MEDIUM",
+      "category": "Missing HTTP Optimization",
+      "location": "API endpoints throughout /api/ directory",
+      "file_lines": "All endpoints lacking ETag/Last-Modified",
+      "description": "Dynamic API endpoints don't implement conditional request support (304 Not Modified responses), forcing full data transmission even when data hasn't changed",
+      "affected_endpoints": [
+        "/api/statistiky_api.php - Could use data hash as ETag",
+        "/api/control_center_api.php - Could track configuration changes",
+        "/api/protokol_api.php - Could use record modification time"
+      ],
+      "code_snippet": "// Missing pattern:\nheader('Last-Modified: ' . gmdate('D, d M Y H:i:s T', $lastModified));\nheader('ETag: \"' . md5($data) . '\"');\n\n// Then check:\nif (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {\n  $ifModifiedSince = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);\n  if ($ifModifiedSince >= $lastModified) {\n    http_response_code(304);\n    exit;\n  }\n}",
+      "problem_analysis": "- Browser caches response but always fetches fresh\n- Server always returns full JSON even if unchanged\n- ETags could identify if data changed since last request\n- statistiky_api called frequently = many full responses for same data\n- Similar optimization missing from tile proxy (now fixed)",
+      "impact": "- Unnecessary bandwidth consumption\n- Slower API responses\n- Higher server CPU from JSON encoding\n- No benefit from browser caching",
+      "solution": "Implement conditional request support across all dynamic endpoints",
+      "example_fix": "// In statistiky_api.php\nfunction setConditionalHeaders($data) {\n  $etag = '\"' . md5(json_encode($data)) . '\"';\n  header('ETag: ' . $etag);\n  \n  // Check If-None-Match\n  if (isset($_SERVER['HTTP_IF_NONE_MATCH'])) {\n    $clientEtag = trim($_SERVER['HTTP_IF_NONE_MATCH'], '\"');\n    if ($clientEtag === trim($etag, '\"')) {\n      http_response_code(304);\n      exit;\n    }\n  }\n}"
+    },
+    {
+      "id": 7,
+      "title": "Potential N+1 Problem in statistiky_api.php for Large Datasets",
+      "severity": "LOW",
+      "category": "Potential Database Optimization",
+      "location": "/home/user/moje-stranky/api/statistiky_api.php",
+      "file_lines": "150-156, 221-228, 273-277",
+      "description": "After fetching aggregated data, code iterates through results to calculate additional metrics. Could be optimized with single SQL query",
+      "code_snippet": "// statistiky_api.php lines 150-156\nforeach ($data as &$row) {\n  $total = (int)$row['pocet_zakazek'];\n  $hotove = (int)$row['hotove_count'];\n  $row['hotove_procento'] = $total > 0 ? round(($hotove / $total) * 100, 1) : 0;\n  // This is OK - just PHP processing, not N+1\n}\n\n// HOWEVER, lines 268-270 has separate query:\n$stmt = $pdo->prepare(\"SELECT COUNT(*) as total FROM wgs_reklamace $where\");\n$stmt->execute($params);\n$total = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 1;",
+      "problem_analysis": "- For getModelStats(): First query gets model aggregates, THEN second query gets total count\n- This is a pattern that could be combined into single query using UNION or CTE\n- Not critical for performance but could be optimized\n- Code is overall well-structured; this is minor optimization",
+      "impact": "- Minor: Two database round-trips instead of one\n- For 500+ records being processed = noticeable overhead\n- Minimal impact compared to other issues found",
+      "solution": "Combine COUNT query with main aggregation query or use window functions",
+      "example_fix": "// Instead of separate queries:\n$stmt = $pdo->prepare(\"\n  SELECT \n    model,\n    COUNT(*) as pocet_reklamaci,\n    (SELECT COUNT(*) FROM wgs_reklamace $where) as total_count,\n    SUM(CAST(COALESCE(cena, 0) AS DECIMAL(10,2))) as celkova_castka\n  FROM wgs_reklamace\n  $where\n  GROUP BY model\n  ORDER BY pocet_reklamaci DESC\n  LIMIT 20\n\");"
+    }
+  ],
+  "recommendations": {
+    "priority_1_critical": [
+      "Implement server-side caching in get_distance.php (use APCu or Redis)",
+      "Fix duplicate distance API calls by reusing DISTANCE_CACHE across functions"
+    ],
+    "priority_2_high": [
+      "Add proper Cache-Control headers to all API endpoints",
+      "Replace SELECT * queries with explicit column lists",
+      "Document caching policy for each endpoint"
+    ],
+    "priority_3_medium": [
+      "Implement request debouncing for batch distance calculations",
+      "Add ETag support to dynamic endpoints",
+      "Optimize query combinations in statistiky_api.php"
+    ]
+  },
+  "testing_recommendations": [
+    "Profile get_distance.php with repeated identical address pairs - verify only 1 API call made",
+    "Monitor API response times before/after implementing caching headers",
+    "Test browser caching with DevTools Network tab",
+    "Measure bandwidth reduction after SELECT * optimization",
+    "Load test with rapid calendar date selection to verify debouncing works"
+  ]
+}

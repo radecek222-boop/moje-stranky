@@ -219,6 +219,7 @@ try {
             // Našeptávač adres
             $text = $_GET['text'] ?? '';
             $type = $_GET['type'] ?? 'street'; // street, city, postcode
+            $country = $_GET['country'] ?? ''; // CZ, SK, etc.
 
             if (empty($text)) {
                 throw new Exception('Chybí parametr text');
@@ -269,7 +270,12 @@ try {
                 $params['type'] = 'city';
             }
 
-            $url = 'https://api.geoapify.com/v1/geocode/autocomplete?' . buildQuery($params);
+            // Filtr podle země (CZ/SK)
+            if (!empty($country)) {
+                $params['filter'] = 'countrycode:' . strtolower($country);
+            }
+
+            $url = 'https://api.geoapify.com/v1/geocode/autocomplete?' . http_build_query($params);
 
             break;
 

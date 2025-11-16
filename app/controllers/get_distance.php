@@ -8,14 +8,33 @@ require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
 
 header('Content-Type: application/json');
+// ✅ PERFORMANCE: Cache-Control header (5 minut cache pro distance calculations)
+// Vzdálenost mezi adresami se nemění často
+header('Cache-Control: private, max-age=300'); // 5 minut
 
 /**
  * Převede adresu na GPS souřadnice pomocí Geoapify geocoding
+ * ✅ PERFORMANCE FIX: Přidán APCu cache (TTL 24h)
  * @param string $address Adresa k převodu
  * @return array|null ['lat' => float, 'lon' => float] nebo null při chybě
  */
 function geocodeAddress($address) {
     try {
+        // ✅ CACHE: Kontrola APCu cache (TTL 24 hodin)
+        // Adresy se nemění, takže můžeme cachovat dlouho
+        $cacheKey = 'geocode_' . md5(strtolower(trim($address)));
+
+        // Pokud je APCu dostupné, zkus načíst z cache
+        if (function_exists('apcu_fetch')) {
+            $cached = apcu_fetch($cacheKey);
+            if ($cached !== false) {
+                error_log("📦 Cache HIT for geocoding: $address");
+                return $cached;
+            }
+        }
+
+        error_log("🌐 Cache MISS - Fetching geocoding for: $address");
+
         $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') .
                '://' . $_SERVER['HTTP_HOST'] .
                '/api/geocode_proxy.php?action=search&address=' . urlencode($address);
@@ -49,10 +68,18 @@ function geocodeAddress($address) {
         $feature = $data['features'][0];
         $coords = $feature['geometry']['coordinates'];
 
-        return [
+        $result = [
             'lat' => $coords[1],
             'lon' => $coords[0]
         ];
+
+        // ✅ CACHE: Uložit do APCu cache (TTL 24 hodin = 86400 sekund)
+        if (function_exists('apcu_store')) {
+            apcu_store($cacheKey, $result, 86400);
+            error_log("💾 Cached geocoding result for: $address");
+        }
+
+        return $result;
 
     } catch (Exception $e) {
         error_log('Geocoding error: ' . $e->getMessage());

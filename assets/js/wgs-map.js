@@ -225,11 +225,22 @@ const WGSMap = {
     try {
       const type = options.type || 'street';
       const limit = options.limit || 5;
+      const country = options.country ? String(options.country).toUpperCase() : '';
 
-      const response = await fetch(
-        `api/geocode_proxy.php?action=autocomplete&text=${encodeURIComponent(text)}&type=${type}&limit=${limit}`,
-        { signal: this.controllers.autocomplete.signal }
-      );
+      const params = new URLSearchParams({
+        action: 'autocomplete',
+        text,
+        type,
+        limit
+      });
+
+      if (country) {
+        params.append('country', country);
+      }
+
+      const response = await fetch(`api/geocode_proxy.php?${params.toString()}`, {
+        signal: this.controllers.autocomplete.signal
+      });
 
       if (response.ok) {
         return await response.json();

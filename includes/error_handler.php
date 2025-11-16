@@ -11,6 +11,11 @@ ini_set('display_startup_errors', 1);
 
 // Global error handler
 set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    // Respektuj @ operátor - pokud je chyba potlačena, předat ji zpět PHP
+    if (!(error_reporting() & $errno)) {
+        return false;
+    }
+
     $errorType = match($errno) {
         E_ERROR => 'FATAL ERROR',
         E_WARNING => 'WARNING',
