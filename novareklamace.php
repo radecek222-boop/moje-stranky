@@ -369,9 +369,9 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
       </div>
 
       <!-- GDPR CONSENT -->
-      <div class="form-consent" style="margin: 2rem 0 1.5rem 0; padding: 1rem; border: 1px solid #ddd; background: #f9f9f9;">
-        <label style="display: flex; align-items: flex-start; cursor: pointer; font-size: 0.65rem; line-height: 1.3; color: #666;">
-          <input type="checkbox" id="gdpr_consent" name="gdpr_consent" required style="margin-right: 0.75rem; margin-top: 0.2rem; flex-shrink: 0;">
+      <div class="form-consent" style="margin: 2rem 0 1.5rem 0; padding: 1rem; border: 1px solid #ddd; background: #f9f9f9; text-align: center;">
+        <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.55rem; line-height: 1.3; color: #666;">
+          <input type="checkbox" id="gdpr_consent" name="gdpr_consent" required style="margin-right: 0.5rem; flex-shrink: 0;">
           <span>Souhlasím se zpracováním osobních údajů společností White Glove Service, s.r.o.</span>
         </label>
       </div>
