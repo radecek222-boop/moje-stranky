@@ -147,9 +147,18 @@ const WGS = {
     let mestoTimeout;
 
     // Funkce pro zvýraznění shody v textu
+    const escapeHighlightRegex = (value) => {
+      if (typeof value !== 'string') {
+        return '';
+      }
+      return value.replace(/[-\/\^$*+?.()|[\]{}]/g, '\\$&');
+    };
+
     const highlightMatch = (text, query) => {
-      if (!query) return text;
-      const regex = new RegExp(`(${query})`, 'gi');
+      if (!query || !text) return text;
+      const safeQuery = escapeHighlightRegex(query);
+      if (!safeQuery) return text;
+      const regex = new RegExp(`(${safeQuery})`, 'gi');
       return text.replace(regex, '<strong>$1</strong>');
     };
 

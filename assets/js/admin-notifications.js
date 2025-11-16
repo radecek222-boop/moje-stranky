@@ -11,6 +11,15 @@ let notificationState = {
 
 const ADMIN_SESSION_EXPIRED_MESSAGE = 'Vaše administrátorská relace vypršela. Přihlaste se prosím znovu.';
 
+function escapeHtml(text) {
+  if (text === null || text === undefined) {
+    return '';
+  }
+  const div = document.createElement('div');
+  div.textContent = String(text);
+  return div.innerHTML;
+}
+
 function redirectToAdminLogin(tab = '') {
   const redirectTarget = tab ? `admin.php?tab=${tab}` : 'admin.php';
   window.location.href = `login.php?redirect=${encodeURIComponent(redirectTarget)}`;
@@ -93,49 +102,55 @@ function renderNotifications() {
       'technician': 'Technik',
       'seller': 'Prodejce'
     }[notif.recipient_type] || notif.recipient_type;
-    
-    const typeName = notif.type === 'both' ? 'Email + SMS' : 
+
+    const typeName = notif.type === 'both' ? 'Email + SMS' :
                      notif.type === 'email' ? 'Email' : 'SMS';
-    
+
+    const safeName = escapeHtml(notif.name);
+    const safeDescription = escapeHtml(notif.description || 'Bez popisu');
+    const safeTrigger = escapeHtml(notif.trigger_event || '');
+    const safeSubject = escapeHtml(notif.subject || '');
+    const safeTemplate = escapeHtml(notif.template || '').replace(/\n/g, '<br>');
+
     return `
       <div class="notification-card">
         <div class="notification-header" onclick="toggleNotificationBody('${notif.id}')">
           <div class="notification-title">
             <span class="badge badge-${notif.active ? 'active' : 'inactive'}">${notif.active ? 'Aktivní' : 'Neaktivní'}</span>
-            <span>${notif.name}</span>
+            <span>${safeName}</span>
           </div>
           <div class="notification-toggle">
-            <div class="toggle-switch ${notif.active ? 'active' : ''}" 
+            <div class="toggle-switch ${notif.active ? 'active' : ''}"
                  onclick="event.stopPropagation(); toggleNotification('${notif.id}')"></div>
           </div>
         </div>
         <div class="notification-body" id="notification-body-${notif.id}">
           <div class="notification-info">
             <div class="notification-info-label">Popis</div>
-            <div class="notification-info-value">${notif.description || 'Bez popisu'}</div>
-            
+            <div class="notification-info-value">${safeDescription}</div>
+
             <div class="notification-info-label">Spouštěč</div>
-            <div class="notification-info-value">${notif.trigger_event}</div>
-            
+            <div class="notification-info-value">${safeTrigger}</div>
+
             <div class="notification-info-label">Příjemce</div>
             <div class="notification-info-value">${recipientName}</div>
-            
+
             <div class="notification-info-label">Typ</div>
             <div class="notification-info-value">${typeName}</div>
           </div>
-          
+
           ${notif.subject ? `
             <div style="margin: 1rem 0;">
               <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem; text-transform: uppercase;">Předmět emailu:</div>
-              <div style="background: #f5f5f5; padding: 0.8rem; border: 1px solid #ddd;">${notif.subject}</div>
+              <div style="background: #f5f5f5; padding: 0.8rem; border: 1px solid #ddd;">${safeSubject}</div>
             </div>
           ` : ''}
-          
+
           <div style="margin: 1rem 0;">
             <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem; text-transform: uppercase;">Šablona zprávy:</div>
-            <div class="template-preview">${notif.template}</div>
+            <div class="template-preview">${safeTemplate}</div>
           </div>
-          
+
           <button class="btn btn-sm" onclick="openEditNotificationModal('${notif.id}')">Editovat šablonu</button>
         </div>
       </div>
