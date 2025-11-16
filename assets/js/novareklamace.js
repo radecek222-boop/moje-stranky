@@ -147,6 +147,13 @@ const WGS = {
     let mestoTimeout;
 
     // Funkce pro zvýraznění shody v textu
+    const escapeHighlightRegex = (value) => {
+      if (typeof value !== 'string') {
+        return '';
+      }
+      return value.replace(/[-\/\^$*+?.()|[\]{}]/g, '\\$&');
+    };
+
     const highlightMatch = (text, query) => {
       if (!query) return escapeHtml(text);
 

@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
 require_once __DIR__ . '/../../includes/db_metadata.php';
 require_once __DIR__ . '/../../includes/audit_logger.php';
+require_once __DIR__ . '/../../includes/api_response.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -270,30 +271,4 @@ function handleAdminKeyRotation(string $newKey, string $confirmation): void
         'message' => 'Nový klíč byl vygenerován. Aktualizujte prosím konfigurační soubor (.env).',
         'hash' => $hash
     ]);
-}
-
-/**
- * RespondSuccess
- *
- * @param array $payload Payload
- */
-function respondSuccess(array $payload = []): void
-{
-    echo json_encode(array_merge(['status' => 'success'], $payload), JSON_UNESCAPED_UNICODE);
-}
-
-/**
- * RespondError
- *
- * @param string $message Message
- * @param int $code Code
- * @param array $extra Extra
- */
-function respondError(string $message, int $code = 400, array $extra = []): void
-{
-    http_response_code($code);
-    echo json_encode(array_merge([
-        'status' => 'error',
-        'message' => $message
-    ], $extra), JSON_UNESCAPED_UNICODE);
 }
