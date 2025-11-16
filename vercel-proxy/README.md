@@ -2,7 +2,20 @@
 
 Cloudová proxy pro Geoapify API, umožňuje autocomplete a geocoding bez přímého přístupu k api.geoapify.com.
 
-## 🚀 Rychlý Deploy
+## ⚠️ DŮLEŽITÉ: Omezení hostingu
+
+Hosting server **blokuje přístup k vercel.com**, takže deployment nelze spustit přímo ze serveru.
+
+**➡️ Použijte alternativní metody v [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)**
+
+Doporučené řešení:
+1. Deploy z lokálního počítače (nejrychlejší)
+2. Deploy přes Vercel web dashboard
+3. Automatický deploy z GitHub (nejlepší dlouhodobě)
+
+---
+
+## 🚀 Rychlý Deploy (pouze z lokálního PC)
 
 ### 1. Instalace Vercel CLI
 
