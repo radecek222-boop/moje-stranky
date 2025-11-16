@@ -27,11 +27,11 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 // Content Security Policy - ochrana proti XSS a injection útokům
 $csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
     "font-src 'self' https://fonts.gstatic.com",
-    "img-src 'self' data: https: blob:",
-    "connect-src 'self'",
+    "img-src 'self' data: https: blob: https://maps.geoapify.com",
+    "connect-src 'self' https://api.geoapify.com https://maps.geoapify.com",
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self'"

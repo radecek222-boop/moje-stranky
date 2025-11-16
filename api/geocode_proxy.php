@@ -49,6 +49,14 @@ try {
         throw new Exception('GEOAPIFY_KEY není nastaveno v konfiguraci');
     }
 
+    // Stream context pro HTTP requesty
+    $context = stream_context_create([
+        'http' => [
+            'timeout' => 5,
+            'user_agent' => 'WGS Service/1.0'
+        ]
+    ]);
+
     // Získání akce
     $action = $_GET['action'] ?? '';
 
@@ -286,7 +294,7 @@ try {
 
             // Pro tiles vracíme přímo obrázek
             header('Content-Type: image/png');
-            $imageData = @file_get_contents($url);
+            $imageData = @file_get_contents($url, false, $context);
 
             if ($imageData === false) {
                 throw new Exception('Chyba při načítání tile');
@@ -301,13 +309,6 @@ try {
     }
 
     // Fetch data z Geoapify API
-    $context = stream_context_create([
-        'http' => [
-            'timeout' => 5,
-            'user_agent' => 'WGS Service/1.0'
-        ]
-    ]);
-
     $response = @file_get_contents($url, false, $context);
 
     if ($response === false) {
