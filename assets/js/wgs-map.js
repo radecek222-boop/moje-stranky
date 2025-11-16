@@ -13,9 +13,12 @@ const WGSMap = {
   config: {
     defaultCenter: [49.8, 15.5],
     defaultZoom: 7,
-    maxZoom: 20,
-    tileUrl: 'api/geocode_proxy.php?action=tile&z={z}&x={x}&y={y}',
-    attribution: '© OpenStreetMap',
+    maxZoom: 19,
+    // ✅ PERFORMANCE FIX: Přímé OSM tiles místo proxy
+    // Důvod: Proxy pro tiles je extrémně pomalá (stovky PHP requestů)
+    // OSM tiles jsou veřejné, zdarma a optimalizované pro rychlé načítání
+    tileUrl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     debounceAutocomplete: 300,
     debounceRoute: 500,
     minCharsAutocomplete: 2

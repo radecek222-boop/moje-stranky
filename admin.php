@@ -22,8 +22,8 @@ if (!$embedMode) {
         "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; " .
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; " .
         "font-src 'self' https://fonts.gstatic.com; " .
-        "img-src 'self' data: https:; " .
-        "connect-src 'self' data: https://api.geoapify.com https://maps.geoapify.com; " .
+        "img-src 'self' data: https: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; " .
+        "connect-src 'self' data: https://api.geoapify.com https://router.project-osrm.org; " .
         "frame-src 'self'; " .
         "object-src 'none'; " .
         "base-uri 'self'; " .
