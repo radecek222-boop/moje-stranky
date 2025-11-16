@@ -324,7 +324,14 @@ define('JWT_SECRET', getEnvValue('JWT_SECRET', 'change-this-in-production-INSECU
 
 // ========== GEOAPIFY API (MAPY) ==========
 // FALLBACK: Development hodnota pokud není v env
-define('GEOAPIFY_KEY', getEnvValue('GEOAPIFY_API_KEY', 'change-this-in-production'));
+$geoapifyKey = getEnvValue('GEOAPIFY_API_KEY');
+if ($geoapifyKey === null || $geoapifyKey === '') {
+    // Backward compatibility: původní název proměnné v .env byl GEOAPIFY_KEY
+    $geoapifyKey = getEnvValue('GEOAPIFY_KEY');
+}
+if (!defined('GEOAPIFY_KEY')) {
+    define('GEOAPIFY_KEY', $geoapifyKey !== null && $geoapifyKey !== '' ? $geoapifyKey : 'change-this-in-production');
+}
 
 // ========== ENVIRONMENT CONFIGURATION ==========
 // Určení prostředí (development, staging, production)
