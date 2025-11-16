@@ -184,6 +184,89 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   border-left-color: #cc0000;
   background: #fff0f0;
 }
+
+/* Provedení Overlay - Minimalistický */
+.overlay-provedeni {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.overlay-provedeni.active { display: flex; }
+
+.provedeni-box {
+  position: relative;
+  background: white;
+  padding: 1.5rem;
+  max-width: 350px;
+  width: 90%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-radius: 4px;
+}
+
+.provedeni-box h3 {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin: 0 0 1rem 0;
+  color: #666;
+  text-align: center;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.provedeni-grid {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0;
+}
+
+.provedeni-card {
+  flex: 1;
+  padding: 0.7rem 0.5rem;
+  text-align: center;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 0.85rem;
+  font-weight: 400;
+  border-radius: 3px;
+}
+
+.provedeni-card:hover {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+.provedeni-card:active {
+  transform: scale(0.98);
+}
+
+#closeProvedeni {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 1.5rem;
+  line-height: 1;
+  border: none;
+  background: transparent;
+  color: #999;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#closeProvedeni:hover {
+  color: #333;
+  background: transparent;
+}
 </style>
 
 </head>
@@ -424,13 +507,13 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 <!-- PROVEDENI OVERLAY -->
 <div class="overlay-provedeni" id="provedeniOverlay">
   <div class="provedeni-box">
-    <h3>Vyberte provedení</h3>
+    <h3>Provedení</h3>
     <div class="provedeni-grid">
       <div class="provedeni-card" data-value="Látka">Látka</div>
       <div class="provedeni-card" data-value="Kůže">Kůže</div>
       <div class="provedeni-card" data-value="Kombinace">Kombinace</div>
     </div>
-    <button class="btn btn-secondary" style="display:block;margin:0 auto;" id="closeProvedeni">Zavřít</button>
+    <button class="btn btn-secondary" id="closeProvedeni">×</button>
   </div>
 </div>
 
