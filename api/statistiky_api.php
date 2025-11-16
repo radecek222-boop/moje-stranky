@@ -169,6 +169,11 @@ function getTechnicianStats($pdo) {
 
     // Technici mají vlastní sloupce: technik_milan_kolin a technik_radek_zikmund (částky)
     // Použijeme UNION pro vytvoření řádků pro oba techniky
+
+    // Přidáme podmínku pro technika do WHERE
+    $whereMilan = $where . " AND technik_milan_kolin > 0";
+    $whereRadek = $where . " AND technik_radek_zikmund > 0";
+
     $stmt = $pdo->prepare("
         SELECT
             'Milan Kolín' as technik,
@@ -181,7 +186,7 @@ function getTechnicianStats($pdo) {
             SUM(CASE WHEN fakturace_firma = 'sk' THEN 1 ELSE 0 END) as sk_count,
             SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotove_count
         FROM wgs_reklamace
-        $where AND technik_milan_kolin > 0
+        $whereMilan
 
         UNION ALL
 
@@ -196,11 +201,13 @@ function getTechnicianStats($pdo) {
             SUM(CASE WHEN fakturace_firma = 'sk' THEN 1 ELSE 0 END) as sk_count,
             SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotove_count
         FROM wgs_reklamace
-        $where AND technik_radek_zikmund > 0
+        $whereRadek
 
         ORDER BY pocet_zakazek DESC
     ");
-    $stmt->execute(array_merge($params, $params)); // Parametry 2x pro oba SELECT
+
+    // Execute s parametry jen jednou (parametry jsou stejné pro oba SELECT v UNION)
+    $stmt->execute($params);
     $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Vypočítat úspěšnost
