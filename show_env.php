@@ -2,13 +2,15 @@
 /**
  * ZOBRAZENÍ STÁVAJÍCÍHO .ENV
  * Ukáže aktuální DB credentials
+ * BEZPEČNOST: Pouze pro přihlášené administrátory
  */
 
-session_start();
-$jeAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+require_once __DIR__ . '/init.php';
 
-if (!$jeAdmin && !isset($_GET['show'])) {
-    die('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Přístup odepřen</title></head><body style="font-family: Consolas; background: #000; color: #0f0; padding: 40px;"><h1>❌ PŘÍSTUP ODEPŘEN</h1><p>Přidej ?show=1 k URL pokud chceš zobrazit .env bez přihlášení (nebezpečné!)</p></body></html>');
+// KRITICKÉ: Vyžadovat admin session BEZ BYPASSU
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    http_response_code(403);
+    die('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Přístup odepřen</title></head><body style="font-family: Consolas; background: #000; color: #f00; padding: 40px;"><h1>❌ PŘÍSTUP ODEPŘEN</h1><p>Pouze pro administrátory!</p><p><a href="login.php" style="color: #0f0;">→ Přihlásit se</a></p></body></html>');
 }
 
 $envFile = __DIR__ . '/.env';
@@ -115,8 +117,12 @@ $envBackup = __DIR__ . '/.env.backup';
                 <strong>DB_HOST:</strong> <?php echo htmlspecialchars($dbHost); ?><br>
                 <strong>DB_NAME:</strong> <?php echo htmlspecialchars($dbName); ?><br>
                 <strong>DB_USER:</strong> <?php echo htmlspecialchars($dbUser); ?><br>
-                <strong>DB_PASS:</strong> <?php echo str_repeat('•', strlen($dbPass)); ?> (<?php echo strlen($dbPass); ?> znaků)<br>
-                <strong>Heslo plain:</strong> <code style="background: #330; padding: 0.2rem 0.5rem;"><?php echo htmlspecialchars($dbPass); ?></code>
+                <strong>DB_PASS:</strong> <?php echo str_repeat('•', strlen($dbPass)); ?> (<?php echo strlen($dbPass); ?> znaků)
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ BEZPEČNOSTNÍ UPOZORNĚNÍ:</strong><br>
+                Heslo je maskováno z bezpečnostních důvodů. Pokud potřebuješ vidět plain text heslo, otevři .env soubor přímo na serveru.
             </div>
 
             <?php
@@ -154,7 +160,7 @@ $envBackup = __DIR__ . '/.env.backup';
                     echo "DB_HOST={$testHost}\n";
                     echo "DB_NAME={$dbName}\n";
                     echo "DB_USER={$dbUser}\n";
-                    echo "DB_PASS={$dbPass}";
+                    echo "DB_PASS=" . str_repeat('•', strlen($dbPass)) . " (" . strlen($dbPass) . " znaků)";
                     echo '</pre>';
                     echo '</div>';
 
