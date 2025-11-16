@@ -149,19 +149,44 @@ try {
     $countryCodes = 'cz,sk';
     $fallbackBbox = '11.5,47.0,24.5,51.5'; // CZ + SK
 
-    // Stream context pro HTTP requesty
+    // ✅ FIX: Helper pro HTTP requesty s cURL (podporuje proxy)
+    function fetchUrl($url, $userAgent = 'WGS Service/1.0', $timeout = 8) {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+        curl_setopt($ch, CURLOPT_USERAGENT, $userAgent);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+
+        // Automatická detekce proxy z environment
+        if (getenv('https_proxy') || getenv('HTTPS_PROXY')) {
+            $proxy = getenv('https_proxy') ?: getenv('HTTPS_PROXY');
+            curl_setopt($ch, CURLOPT_PROXY, $proxy);
+            error_log("Using proxy: {$proxy} for URL: {$url}");
+        }
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($response === false) {
+            error_log("cURL error for {$url}: {$curlError}");
+            return false;
+        }
+
+        if ($httpCode >= 400) {
+            error_log("HTTP {$httpCode} error for {$url}");
+            return false;
+        }
+
+        return $response;
+    }
+
     $userAgent = 'WGS Service/1.0';
     if (!empty($contactEmail)) {
         $userAgent .= ' (contact: ' . $contactEmail . ')';
     }
-
-    $context = stream_context_create([
-        'http' => [
-            'timeout' => 8,
-            'user_agent' => $userAgent,
-            'header' => "Accept-Language: cs\n"
-        ]
-    ]);
 
     // Získání akce
     $action = $_GET['action'] ?? '';
@@ -191,7 +216,7 @@ try {
                     'accept-language' => 'cs'
                 ]);
 
-                $response = @file_get_contents($url, false, $context);
+                $response = fetchUrl($url, $userAgent);
 
                 if ($response === false) {
                     throw new Exception('Chyba při komunikaci s Nominatim API');
@@ -240,7 +265,7 @@ try {
                     'bbox' => $fallbackBbox
                 ]);
 
-                $response = @file_get_contents($url, false, $context);
+                $response = fetchUrl($url, $userAgent);
 
                 if ($response === false) {
                     throw new Exception('Chyba při komunikaci s Photon API');
@@ -341,7 +366,7 @@ try {
                 ]
             ]);
 
-            $osrmResponse = @file_get_contents($osrmUrl, false, $context);
+            $osrmResponse = fetchUrl($osrmUrl, $userAgent, 10);
 
             if ($osrmResponse !== false) {
                 $osrmData = json_decode($osrmResponse, true);
@@ -394,7 +419,7 @@ try {
                     'apiKey' => $apiKey
                 ]);
 
-                $geoResponse = @file_get_contents($url, false, $context);
+                $geoResponse = fetchUrl($url, $userAgent);
 
                 if ($geoResponse !== false) {
                     echo $geoResponse;
@@ -461,7 +486,7 @@ try {
 
             // Pro tiles vracíme přímo obrázek
             header('Content-Type: image/png');
-            $imageData = @file_get_contents($url, false, $context);
+            $imageData = fetchUrl($url, $userAgent);
 
             if ($imageData === false) {
                 throw new Exception('Chyba při načítání tile');
@@ -475,7 +500,7 @@ try {
     }
 
     // Fetch data z Geoapify API
-    $response = @file_get_contents($url, false, $context);
+    $response = fetchUrl($url, $userAgent);
 
     if ($response === false) {
         // ✅ FALLBACK: Pokud Geoapify selže (např. síťový problém), zkusit alternativu
@@ -492,7 +517,7 @@ try {
                 'bbox' => $fallbackBbox
             ]);
 
-            $fallbackResponse = @file_get_contents($fallbackUrl, false, $context);
+            $fallbackResponse = fetchUrl($fallbackUrl, $userAgent);
 
             if ($fallbackResponse !== false) {
                 $fallbackData = json_decode($fallbackResponse, true);
