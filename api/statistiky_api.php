@@ -210,7 +210,11 @@ function getTechnicianStats($pdo) {
         ";
 
         $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
+
+        // ✅ CRITICAL FIX: UNION dotaz potřebuje parametry 2x (pro každý SELECT)
+        $doubleParams = array_merge($params, $params);
+        $stmt->execute($doubleParams);
+
         $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Vypočítat úspěšnost
