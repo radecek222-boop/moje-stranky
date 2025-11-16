@@ -239,11 +239,11 @@ const WGSMap = {
       });
 
       // Type filtering
-      if (type === 'street') {
-        params.append('type', 'street');
-      } else if (type === 'city') {
+      // Pro 'street' NESPECIFIKUJEME type - vrátí přesné adresy včetně house numbers
+      if (type === 'city') {
         params.append('type', 'city');
       }
+      // Pro street/address necháme bez type filtru - API vrátí nejrelevantnější výsledky včetně čísel popisných
 
       // Country filtering (podporuje ČR + SK)
       if (country) {
