@@ -54,6 +54,9 @@ function wgs_format_fakturace_label(?string $value): string
     }
 }
 
+// Získat jméno přihlášeného uživatele pro pole "Technik"
+$currentUserName = $_SESSION['user_name'] ?? '';
+
 $prefillFields = [
     'order_number' => '',
     'claim_number' => '',
@@ -65,6 +68,7 @@ $prefillFields = [
     'model' => '',
     'description' => '',
     'fakturace' => '',
+    'technician' => $currentUserName, // Automaticky předvyplnit podle přihlášeného uživatele
 ];
 
 $initialBootstrapData = null;
@@ -108,15 +112,38 @@ if ($lookupValue !== null) {
             }
 
             $prefillFields = [
+                // Základní identifikátory
                 'order_number' => $record['id'] ?? $record['cislo'] ?? '',
-                'claim_number' => $record['id'] ?? $record['reklamace_id'] ?? $record['cislo'] ?? '',
+                'claim_number' => $record['reklamace_id'] ?? $record['cislo'] ?? '',
+
+                // Kontaktní údaje
                 'customer' => $customerName,
                 'address' => $record['adresa'] ?? $address,
                 'phone' => $record['telefon'] ?? '',
                 'email' => $record['email'] ?? '',
-                'brand' => $record['znacka'] ?? $record['model'] ?? '',
+
+                // Produktové údaje
+                'brand' => $record['model'] ?? '', // OPRAVA: používat 'model', ne 'znacka'
                 'model' => $record['model'] ?? '',
+                'typ' => $record['typ'] ?? '',
+                'provedeni' => $record['provedeni'] ?? '',
+                'barva' => $record['barva'] ?? '',
+                'seriove_cislo' => $record['seriove_cislo'] ?? '',
+
+                // Reklamace info
                 'description' => $record['popis_problemu'] ?? '',
+                'doplnujici_info' => $record['doplnujici_info'] ?? '',
+
+                // Datumy
+                'datum_prodeje' => $record['datum_prodeje'] ?? '',
+                'datum_reklamace' => $record['datum_reklamace'] ?? '',
+                'claim_date' => $record['datum_reklamace'] ?? '', // Pro pole id="claim-date"
+                'delivery_date' => $record['datum_prodeje'] ?? '', // Pro pole id="delivery-date"
+
+                // Technik - pokud je uložený, použít ho, jinak použít aktuálního uživatele
+                'technician' => $record['technik'] ?? $currentUserName,
+
+                // Fakturace
                 'fakturace' => wgs_format_fakturace_label($record['fakturace_firma'] ?? ''),
             ];
 
@@ -206,7 +233,22 @@ if ($initialBootstrapData) {
     <div class="col">
       <table>
         <tr><td class="label">Technik<span class="en-label">Technician</span></td>
-          <td><select id="technician"><option>Milan Kolín</option><option>Radek Zikmund</option><option>Kolín/Zikmund</option></select></td></tr>
+          <td><select id="technician">
+            <?php
+              $technici = ['Milan Kolín', 'Radek Zikmund', 'Kolín/Zikmund'];
+              $selectedTechnik = $prefillFields['technician'];
+
+              // Přidat přihlášeného uživatele pokud není v seznamu
+              if ($selectedTechnik && !in_array($selectedTechnik, $technici)) {
+                $technici[] = $selectedTechnik;
+              }
+
+              foreach ($technici as $technik) {
+                $selected = ($technik === $selectedTechnik) ? ' selected' : '';
+                echo '<option' . $selected . '>' . wgs_escape($technik) . '</option>';
+              }
+            ?>
+          </select></td></tr>
         <tr><td class="label">Datum návštěvy<span class="en-label">Visit date</span></td><td><input type="date" id="visit-date"></td></tr>
         <tr><td class="label">Datum doručení<span class="en-label">Delivery date</span></td><td><input type="date" id="delivery-date"></td></tr>
         <tr><td class="label">Datum reklamace<span class="en-label">Claim date</span></td><td><input type="date" id="claim-date"></td></tr>

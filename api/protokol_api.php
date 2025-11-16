@@ -307,6 +307,7 @@ function saveProtokolData($data) {
     $problemDescription = $data['problem_description'] ?? '';
     $repairProposal = $data['repair_proposal'] ?? '';
     $solved = $data['solved'] ?? '';
+    $technik = $data['technician'] ?? null;
 
     if (!$reklamaceId) {
         throw new Exception('Chybí reklamace_id');
@@ -335,23 +336,33 @@ function saveProtokolData($data) {
         throw new Exception('Reklamace nebyla nalezena');
     }
 
-    // Aktualizovat protokol data
-    $stmt = $pdo->prepare("
-        UPDATE wgs_reklamace
-        SET
-            popis_problemu = :problem_description,
-            navrh_reseni = :repair_proposal,
-            vyreseno = :solved,
-            updated_at = NOW()
-        WHERE id = :id
-    ");
-
-    $stmt->execute([
+    // Aktualizovat protokol data (včetně technika)
+    $updateFields = [
+        'popis_problemu = :problem_description',
+        'navrh_reseni = :repair_proposal',
+        'vyreseno = :solved',
+        'updated_at = NOW()'
+    ];
+    $params = [
         ':problem_description' => $problemDescription,
         ':repair_proposal' => $repairProposal,
         ':solved' => $solved,
         ':id' => $reklamace['id']
-    ]);
+    ];
+
+    // Přidat technika pokud je zadán
+    if ($technik !== null) {
+        $updateFields[] = 'technik = :technik';
+        $params[':technik'] = $technik;
+    }
+
+    $stmt = $pdo->prepare("
+        UPDATE wgs_reklamace
+        SET " . implode(', ', $updateFields) . "
+        WHERE id = :id
+    ");
+
+    $stmt->execute($params);
 
     return [
         'status' => 'success',
