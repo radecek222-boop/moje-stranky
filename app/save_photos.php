@@ -143,8 +143,30 @@ try {
         }
 
         foreach ($photos as $index => $photoData) {
+            // ✅ OPRAVENO: Fotky jsou objekty {type, data, size} ne jen string
+            // Frontend posílá: {type: 'image', data: 'base64...', size: 12345}
+            $base64Data = '';
+            $photoType = 'image';
+
+            if (is_array($photoData)) {
+                // Nový formát z photocustomer.js
+                $base64Data = $photoData['data'] ?? '';
+                $photoType = $photoData['type'] ?? 'image';
+            } elseif (is_string($photoData)) {
+                // Starý formát (fallback)
+                $base64Data = $photoData;
+            } else {
+                // Neplatný formát
+                error_log("SAVE_PHOTOS: Neplatný formát fotky v sekci $sectionName, index $index");
+                continue;
+            }
+
+            if (empty($base64Data)) {
+                continue;
+            }
+
             // BEZPEČNOST: Kontrola velikosti base64 dat (max 13MB = ~10MB obrázek)
-            $base64Size = strlen($photoData);
+            $base64Size = strlen($base64Data);
             $maxBase64Size = 13 * 1024 * 1024; // 13MB
 
             if ($base64Size > $maxBase64Size) {
@@ -153,15 +175,18 @@ try {
 
             // Dekódování base64
             // Data jsou ve formátu: data:image/jpeg;base64,/9j/4AAQ...
-            if (preg_match('/^data:image\/(\w+);base64,/', $photoData, $matches)) {
-                $imageType = $matches[1];
-                $photoData = substr($photoData, strpos($photoData, ',') + 1);
+            if (preg_match('/^data:(image|video)\/(\w+);base64,/', $base64Data, $matches)) {
+                $mediaType = $matches[1]; // 'image' nebo 'video'
+                $imageType = $matches[2]; // 'jpeg', 'png', 'mp4', atd.
+                $base64Data = substr($base64Data, strpos($base64Data, ',') + 1);
             } else {
                 $imageType = 'jpeg';
+                $mediaType = 'image';
             }
 
-            $decodedData = base64_decode($photoData);
+            $decodedData = base64_decode($base64Data);
             if ($decodedData === false) {
+                error_log("SAVE_PHOTOS: Nepodařilo se dekódovat base64 data v sekci $sectionName, index $index");
                 continue; // Skip invalid images
             }
 
@@ -196,7 +221,7 @@ try {
                 ':photo_path' => $relativePathForDb,
                 ':file_path' => $relativePathForDb,
                 ':file_name' => $filename,
-                ':photo_type' => 'image',
+                ':photo_type' => $photoType, // ✅ Použití správného photo_type
                 ':photo_order' => $photoOrder
             ]);
 
@@ -204,7 +229,8 @@ try {
                 'photo_id' => $pdo->lastInsertId(),
                 'section' => $sectionName,
                 'path' => $relativePathForDb,
-                'filename' => $filename
+                'filename' => $filename,
+                'type' => $photoType
             ];
 
             $photoOrder++;
