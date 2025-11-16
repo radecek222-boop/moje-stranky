@@ -120,25 +120,27 @@ function getSummaryStats($pdo) {
 
 /**
  * Statistiky prodejců
+ * JOIN s wgs_users přes created_by (kdo zakázku vytvořil)
  */
 function getSalespersonStats($pdo) {
     $filters = getFilters();
-    $where = buildWhereClause($filters);
+    $where = buildWhereClause($filters, 'r', true); // true = JOIN s users
     $params = buildParams($filters);
 
-    // Používáme zpracoval místo prodejce (skutečný sloupec)
+    // JOIN s wgs_users přes created_by - prodejce je ten, kdo zakázku vytvořil
     $stmt = $pdo->prepare("
         SELECT
-            COALESCE(zpracoval, 'Neuvedeno') as prodejce,
+            COALESCE(u.name, 'Neuvedeno') as prodejce,
             COUNT(*) as pocet_zakazek,
-            SUM(CAST(COALESCE(cena, 0) AS DECIMAL(10,2))) as celkova_castka,
-            AVG(CAST(COALESCE(cena, 0) AS DECIMAL(10,2))) as prumer_zakazka,
-            SUM(CASE WHEN fakturace_firma = 'cz' OR fakturace_firma = '' OR fakturace_firma IS NULL THEN 1 ELSE 0 END) as cz_count,
-            SUM(CASE WHEN fakturace_firma = 'sk' THEN 1 ELSE 0 END) as sk_count,
-            SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotove_count
-        FROM wgs_reklamace
+            SUM(CAST(COALESCE(r.cena, 0) AS DECIMAL(10,2))) as celkova_castka,
+            AVG(CAST(COALESCE(r.cena, 0) AS DECIMAL(10,2))) as prumer_zakazka,
+            SUM(CASE WHEN r.fakturace_firma = 'cz' OR r.fakturace_firma = '' OR r.fakturace_firma IS NULL THEN 1 ELSE 0 END) as cz_count,
+            SUM(CASE WHEN r.fakturace_firma = 'sk' THEN 1 ELSE 0 END) as sk_count,
+            SUM(CASE WHEN r.stav = 'done' THEN 1 ELSE 0 END) as hotove_count
+        FROM wgs_reklamace r
+        LEFT JOIN wgs_users u ON r.created_by = u.id
         $where
-        GROUP BY zpracoval
+        GROUP BY u.name, u.id
         ORDER BY pocet_zakazek DESC
     ");
     $stmt->execute($params);
@@ -269,30 +271,38 @@ function getModelStats($pdo) {
 
 /**
  * Filtrované zakázky
+ * JOIN s wgs_users pro zobrazení jména prodejce
  */
 function getFilteredOrders($pdo) {
     $filters = getFilters();
-    $where = buildWhereClause($filters);
+    $where = buildWhereClause($filters, 'r', true); // JOIN s users
     $params = buildParams($filters);
 
     $stmt = $pdo->prepare("
         SELECT
-            id,
-            cislo,
-            jmeno,
-            zpracoval as prodejce,
+            r.id,
+            r.cislo,
+            r.jmeno,
+            COALESCE(u.name, 'Neuvedeno') as prodejce,
             CASE
-                WHEN technik_milan_kolin > 0 THEN 'Milan Kolín'
-                WHEN technik_radek_zikmund > 0 THEN 'Radek Zikmund'
+                WHEN r.technik_milan_kolin > 0 THEN 'Milan Kolín'
+                WHEN r.technik_radek_zikmund > 0 THEN 'Radek Zikmund'
                 ELSE '-'
             END as technik,
-            CAST(COALESCE(cena, 0) AS DECIMAL(10,2)) as castka,
-            stav,
-            COALESCE(UPPER(fakturace_firma), 'CZ') as zeme,
-            DATE_FORMAT(created_at, '%d.%m.%Y') as datum
-        FROM wgs_reklamace
+            CAST(COALESCE(r.cena, 0) AS DECIMAL(10,2)) as castka,
+            r.stav,
+            CASE
+                WHEN r.stav = 'wait' THEN 'ČEKÁ'
+                WHEN r.stav = 'open' THEN 'DOMLUVENÁ'
+                WHEN r.stav = 'done' THEN 'HOTOVO'
+                ELSE r.stav
+            END as stav_text,
+            COALESCE(UPPER(r.fakturace_firma), 'CZ') as zeme,
+            DATE_FORMAT(r.created_at, '%d.%m.%Y') as datum
+        FROM wgs_reklamace r
+        LEFT JOIN wgs_users u ON r.created_by = u.id
         $where
-        ORDER BY created_at DESC
+        ORDER BY r.created_at DESC
         LIMIT 500
     ");
     $stmt->execute($params);
@@ -371,13 +381,14 @@ function getChartsData($pdo) {
 
 /**
  * Vrátit seznam prodejců (pro filtr)
+ * Načítá VŠECHNY registrované aktivní uživatele z wgs_users
  */
 function listSalespersons($pdo) {
     $stmt = $pdo->query("
-        SELECT DISTINCT zpracoval as prodejce
-        FROM wgs_reklamace
-        WHERE zpracoval IS NOT NULL AND zpracoval != ''
-        ORDER BY zpracoval ASC
+        SELECT name as prodejce
+        FROM wgs_users
+        WHERE is_active = 1
+        ORDER BY name ASC
     ");
 
     $salespersons = $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -404,38 +415,48 @@ function getFilters() {
 
 /**
  * Sestavit WHERE klauzuli
+ * @param array $filters Filtry
+ * @param string $tableAlias Alias tabulky (např. 'r' pro reklamace)
+ * @param bool $useUserJoin True pokud dotaz JOINuje s wgs_users
  */
-function buildWhereClause($filters) {
+function buildWhereClause($filters, $tableAlias = '', $useUserJoin = false) {
     $conditions = ['1=1'];
+    $prefix = $tableAlias ? $tableAlias . '.' : '';
 
     if (!empty($filters['country'])) {
         // Převést na lowercase pro porovnání s fakturace_firma ENUM('cz', 'sk')
-        $conditions[] = "LOWER(fakturace_firma) = LOWER(:country)";
+        $conditions[] = "LOWER({$prefix}fakturace_firma) = LOWER(:country)";
     }
 
     if (!empty($filters['status'])) {
-        $conditions[] = "stav = :status";
+        $conditions[] = "{$prefix}stav = :status";
     }
 
     if (!empty($filters['salesperson'])) {
-        $conditions[] = "zpracoval = :salesperson";
+        // Pokud máme JOIN s users, filtrujeme podle u.name
+        if ($useUserJoin) {
+            $conditions[] = "u.name = :salesperson";
+        } else {
+            // Jinak podle zpracoval (pro zpětnou kompatibilitu)
+            $conditions[] = "{$prefix}zpracoval = :salesperson";
+        }
     }
 
     if (!empty($filters['technician'])) {
         // Filtr podle jména technika (Milan Kolín nebo Radek Zikmund)
         if ($filters['technician'] === 'Milan Kolín') {
-            $conditions[] = "technik_milan_kolin > 0";
+            $conditions[] = "{$prefix}technik_milan_kolin > 0";
         } elseif ($filters['technician'] === 'Radek Zikmund') {
-            $conditions[] = "technik_radek_zikmund > 0";
+            $conditions[] = "{$prefix}technik_radek_zikmund > 0";
         }
     }
 
     if (!empty($filters['date_from'])) {
-        $conditions[] = "DATE(created_at) >= :date_from";
+        $conditions[] = "DATE({$prefix}created_at) >= :date_from";
     }
 
     if (!empty($filters['date_to'])) {
-        $conditions[] = "DATE(created_at) <= :date_to";
+        $conditions[] = "DATE({$prefix}created_at) <= :date_to";
     }
 
     return 'WHERE ' . implode(' AND ', $conditions);

@@ -140,37 +140,39 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
     border-color: #2D5016;
 }
 
-/* Summary stats - kompaktní */
+/* Summary stats - minimalistické */
 .stats-summary {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.4rem;
+    margin-bottom: 0.6rem;
 }
 
 .stats-summary-card {
-    background: white;
+    background: #f9f9f9;
     border: 1px solid #e0e0e0;
-    border-left: 3px solid #2D5016;
-    padding: 0.75rem;
-    border-radius: 4px;
+    border-left: 2px solid #2D5016;
+    padding: 0.5rem 0.6rem;
+    border-radius: 3px;
 }
 
 .stats-summary-label {
-    font-size: 0.65rem;
-    color: #666;
+    font-size: 0.6rem;
+    color: #777;
     text-transform: uppercase;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.02em;
 }
 
 .stats-summary-value {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 600;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.1rem;
+    color: #2D5016;
 }
 
 .stats-summary-sub {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     color: #999;
 }
 
