@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
+require_once __DIR__ . '/../includes/reklamace_id_validator.php';
 
 header('Content-Type: application/json');
 
@@ -39,16 +40,7 @@ try {
     switch ($action) {
         case 'get':
             // Načtení poznámek
-            $reklamaceId = $_GET['reklamace_id'] ?? null;
-
-            if (!$reklamaceId) {
-                throw new Exception('Chybí reklamace_id');
-            }
-
-            // BEZPEČNOST: Validace ID
-            if (!preg_match('/^[a-zA-Z0-9_-]+$/', $reklamaceId)) {
-                throw new Exception('Neplatné ID reklamace');
-            }
+            $reklamaceId = sanitizeReklamaceId($_GET['reklamace_id'] ?? null, 'reklamace_id');
 
             // Převést reklamace_id na claim_id (číselné ID)
             $stmt = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE reklamace_id = :reklamace_id OR cislo = :cislo LIMIT 1");
@@ -80,16 +72,11 @@ try {
 
         case 'add':
             // Přidání poznámky
-            $reklamaceId = $_POST['reklamace_id'] ?? null;
+            $reklamaceId = sanitizeReklamaceId($_POST['reklamace_id'] ?? null, 'reklamace_id');
             $text = $_POST['text'] ?? null;
 
-            if (!$reklamaceId || !$text) {
-                throw new Exception('Chybí reklamace_id nebo text');
-            }
-
-            // BEZPEČNOST: Validace ID
-            if (!preg_match('/^[a-zA-Z0-9_-]+$/', $reklamaceId)) {
-                throw new Exception('Neplatné ID reklamace');
+            if (!$text) {
+                throw new Exception('Chybí text poznámky');
             }
 
             // BEZPEČNOST: Validace textu
