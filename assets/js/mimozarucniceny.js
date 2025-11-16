@@ -1,17 +1,12 @@
 const CALC = {
   map: null,
-  marker: null,
-  warehouseMarker: null,
-  routeLayer: null,
+  // ✅ REFACTOR: marker, warehouseMarker, routeLayer jsou nyní spravovány WGSMap modulem
   customerAddress: null,
   distance: 0,
   warehouse: { lat: 50.08026389885034, lon: 14.59812452579323, address: 'Do Dubče 364, Běchovice 190 11' },
 
-  // ⚡ PERFORMANCE: Request cancellation a caching
-  autocompleteController: null,
-  routeController: null,
-  geocodeCache: new Map(),
-  routeCache: new Map(),
+  // ⚡ NOTE: Cache a controllers jsou nyní v WGSMap modulu
+  // Všechny geocoding, autocomplete a routing funkce nyní používají WGSMap API
   calculateRouteTimeout: null,
   
   init() {
@@ -75,31 +70,34 @@ const CALC = {
     logger.log('✅ Mobile menu fully initialized');
   },
   
+  // ✅ REFACTOR: Použití WGSMap modulu místo přímého Leaflet
   initMap() {
-    if (typeof L === 'undefined') return;
+    if (typeof WGSMap === 'undefined') {
+      logger.error('❌ WGSMap module not loaded');
+      return;
+    }
 
-    try {
-      this.map = L.map('mapContainer').setView([49.8, 15.5], 7);
+    this.map = WGSMap.init('mapContainer', {
+      center: [49.8, 15.5],
+      zoom: 7,
+      onInit: (mapInstance) => {
+        logger.log('✅ Map initialized via WGSMap');
 
-      // BEZPEČNOST: API klíč je skrytý v proxy, ne v JavaScriptu
-      L.tileLayer('api/geocode_proxy.php?action=tile&z={z}&x={x}&y={y}', {
-        maxZoom: 20,
-        attribution: '© OpenStreetMap'
-      }).addTo(this.map);
-      
-      // Use exact GPS coordinates for warehouse marker
-      this.warehouseMarker = L.marker([this.warehouse.lat, this.warehouse.lon], {
-        icon: L.divIcon({
-          html: '<div style="background:#006600;color:white;padding:5px 10px;border-radius:3px;font-weight:bold;white-space:nowrap;">WGS</div>',
-          className: '',
+        // Přidat marker skladu pomocí WGSMap
+        WGSMap.addMarker('warehouse', [this.warehouse.lat, this.warehouse.lon], {
+          icon: '<div style="background:#006600;color:white;padding:5px 10px;border-radius:3px;font-weight:bold;white-space:nowrap;">WGS</div>',
+          iconClass: '',
           iconSize: [50, 30],
           iconAnchor: [50, 15]
-        })
-      }).addTo(this.map);
-      
-      logger.log('✅ Map init with GPS:', this.warehouse.lat, this.warehouse.lon);
-    } catch (err) {
-      logger.error('❌ Map error:', err);
+        });
+
+        logger.log('✅ Warehouse marker added:', this.warehouse.lat, this.warehouse.lon);
+      }
+    });
+
+    if (!this.map) {
+      logger.error('❌ Map initialization failed');
+      return;
     }
   },
   
@@ -191,24 +189,15 @@ const CALC = {
     if (document.getElementById('priceSummary').style.display !== 'none') this.calculatePrice();
   },
   
+  // ✅ REFACTOR: Použití WGSMap.autocomplete()
   async searchAddress(query) {
-    // ⚡ CANCELLATION: Zrušit předchozí autocomplete request
-    if (this.autocompleteController) {
-      this.autocompleteController.abort();
-    }
-    this.autocompleteController = new AbortController();
-
     try {
-      const res = await fetch(
-        `api/geocode_proxy.php?action=autocomplete&text=${encodeURIComponent(query)}&type=street`,
-        { signal: this.autocompleteController.signal }
-      );
-      const data = await res.json();
+      const data = await WGSMap.autocomplete(query, { type: 'street', limit: 5 });
 
       const dropdown = document.getElementById('autocompleteDropdown');
       dropdown.innerHTML = '';
 
-      if (data.features && data.features.length > 0) {
+      if (data && data.features && data.features.length > 0) {
         data.features.forEach(f => {
           const div = document.createElement('div');
           div.style.padding = '0.8rem';
@@ -237,85 +226,57 @@ const CALC = {
         dropdown.style.display = 'none';
       }
     } catch (err) {
-      if (err.name === 'AbortError') {
-        logger.log('🚫 Autocomplete request cancelled (typing continues)');
-      } else {
-        logger.error('❌ Geocoding error:', err);
-      }
+      logger.error('❌ Autocomplete error:', err);
     }
   },
   
+  // ✅ REFACTOR: Použití WGSMap.addMarker()
   async selectAddress(feature) {
     const street = feature.properties.street || '';
     const houseNumber = feature.properties.housenumber || '';
     const city = feature.properties.city || '';
-    
+
     document.getElementById('ulice').value = `${street} ${houseNumber}, ${city}`;
-    
+
     this.customerAddress = {
       lat: feature.properties.lat,
       lon: feature.properties.lon,
       formatted: `${street} ${houseNumber}, ${city}`
     };
-    
-    if (this.marker) this.map.removeLayer(this.marker);
-    
-    this.marker = L.marker([this.customerAddress.lat, this.customerAddress.lon], {
-      icon: L.divIcon({
-        html: '<div style="background:#0066cc;color:white;padding:5px 10px;border-radius:3px;font-weight:bold;white-space:nowrap;">Zákazník</div>',
-        className: '',
-        iconSize: [100, 30],
-        iconAnchor: [50, 15]
-      })
-    }).addTo(this.map);
-    
+
+    // Přidat marker zákazníka pomocí WGSMap
+    WGSMap.removeMarker('customer'); // Odstranit starý marker pokud existuje
+    WGSMap.addMarker('customer', [this.customerAddress.lat, this.customerAddress.lon], {
+      icon: '<div style="background:#0066cc;color:white;padding:5px 10px;border-radius:3px;font-weight:bold;white-space:nowrap;">Zákazník</div>',
+      iconClass: '',
+      iconSize: [100, 30],
+      iconAnchor: [50, 15]
+    });
+
     await this.calculateRoute();
     this.toast('✓ Adresa vybrána', 'success');
   },
   
+  // ✅ REFACTOR: Použití WGSMap.calculateRoute()
   async calculateRoute() {
     // ⚡ DEBOUNCING: Počkat než uživatel přestane klikat
     clearTimeout(this.calculateRouteTimeout);
 
     this.calculateRouteTimeout = setTimeout(async () => {
-      const cacheKey = `${this.customerAddress.lat},${this.customerAddress.lon}`;
-
-      // ⚡ CACHE: Zkontrolovat cache
-      if (this.routeCache.has(cacheKey)) {
-        const cached = this.routeCache.get(cacheKey);
-        logger.log('📦 Cache hit for route:', cacheKey);
-        this.renderRoute(cached);
-        return;
-      }
-
-      // ⚡ CANCELLATION: Zrušit předchozí route request
-      if (this.routeController) {
-        this.routeController.abort();
-      }
-      this.routeController = new AbortController();
-
       try {
-        const waypoints = `${this.warehouse.lat},${this.warehouse.lon}|${this.customerAddress.lat},${this.customerAddress.lon}`;
-        const url = `api/geocode_proxy.php?action=routing&waypoints=${waypoints}&mode=drive`;
-        const res = await fetch(url, { signal: this.routeController.signal });
-        const data = await res.json();
+        const data = await WGSMap.calculateRoute([this.warehouse.lat, this.warehouse.lon], [this.customerAddress.lat, this.customerAddress.lon]);
 
-        if (data.features && data.features.length > 0) {
+        if (data && data.features && data.features.length > 0) {
           const route = data.features[0];
           const distanceKm = (route.properties.distance / 1000).toFixed(1);
-          const coordinates = route.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
+          const coordinates = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
           const provider = route.properties.provider || 'unknown';
-          const warning = route.properties.warning || null;
 
           const routeData = {
             distanceKm,
             coordinates,
-            provider,
-            warning
+            provider
           };
-
-          // ⚡ CACHE: Uložit do cache
-          this.routeCache.set(cacheKey, routeData);
 
           this.renderRoute(routeData);
 
@@ -328,31 +289,26 @@ const CALC = {
           }
         }
       } catch (err) {
-        if (err.name === 'AbortError') {
-          logger.log('🚫 Route calculation cancelled (new address selected)');
-        } else {
-          logger.error('❌ Route error:', err);
-          this.toast('❌ Nepodařilo se vypočítat trasu', 'error');
-        }
+        logger.error('❌ Route error:', err);
+        this.toast('❌ Nepodařilo se vypočítat trasu', 'error');
       }
     }, 500); // Debounce 500ms
   },
 
-  // ⚡ HELPER: Vykreslit trasu na mapu (odděleno pro cache)
+  // ✅ REFACTOR: Použití WGSMap.drawRoute()
   renderRoute(routeData) {
     const { distanceKm, coordinates } = routeData;
 
     this.distance = parseFloat(distanceKm) * 2;
 
-    if (this.routeLayer) this.map.removeLayer(this.routeLayer);
-
-    this.routeLayer = L.polyline(coordinates, {
+    // Nakreslit trasu pomocí WGSMap
+    WGSMap.drawRoute(coordinates, {
       color: '#0066cc',
       weight: 4,
-      opacity: 0.7
-    }).addTo(this.map);
-
-    this.map.fitBounds(this.routeLayer.getBounds(), { padding: [50, 50] });
+      opacity: 0.7,
+      layerId: 'route',
+      fitBounds: true
+    });
 
     const distanceText = document.getElementById('distanceText');
     distanceText.innerHTML = `
