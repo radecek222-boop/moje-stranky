@@ -20,7 +20,7 @@ if (!function_exists('loadAdminNavigation')) {
             ],
             'notifications' => [
                 'href' => 'admin.php?tab=notifications',
-                'tab_label' => 'Emaily & SMS',
+                'tab_label' => 'Email & SMS',
                 'tab' => 'notifications',
             ],
             'keys' => [

@@ -40,9 +40,8 @@ try {
     $configs = [];
 }
 
-// Group names
+// Group names (EMAIL/SMTP přesunuto do karty "Emaily & SMS")
 $groupNames = [
-    'email' => 'Email (SMTP)',
     'api_keys' => 'API Klíče',
     'security' => 'Bezpečnost',
     'system' => 'Systém'
@@ -88,82 +87,6 @@ $groupNames = [
                 </div>
             </div>
         <?php else: ?>
-
-            <!-- EMAIL / SMTP -->
-            <?php if (isset($configs['email'])): ?>
-                <div class="setting-group">
-                    <h3 class="setting-group-title"><?= $groupNames['email'] ?></h3>
-
-                    <?php foreach ($configs['email'] as $config): ?>
-                        <div class="setting-item">
-                            <div class="setting-item-left">
-                                <div class="setting-item-label">
-                                    <?= htmlspecialchars($config['config_key']) ?>
-                                    <?php if ($config['requires_restart']): ?>
-                                        <span style="background: #FFC107; color: #000; padding: 2px 6px; border-radius: 8px; font-size: 0.7rem; margin-left: 0.5rem;">
-                                            Restart
-                                        </span>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="setting-item-description">
-                                    <?= htmlspecialchars($config['description']) ?>
-                                </div>
-                            </div>
-                            <div class="setting-item-right" style="min-width: 250px;">
-                                <?php if ($config['is_editable']): ?>
-                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                        <?php if ($config['is_sensitive']): ?>
-                                            <input type="password"
-                                                   class="cc-input"
-                                                   id="config-<?= $config['id'] ?>"
-                                                   value="<?= htmlspecialchars($config['config_value']) ?>"
-                                                   placeholder="<?= $config['config_value_display'] ?>"
-                                                   style="flex: 1;">
-                                            <button class="cc-btn cc-btn-sm cc-btn-secondary"
-                                                    onclick="togglePasswordVisibility(<?= $config['id'] ?>)">
-                                                Zobrazit
-                                            </button>
-                                        <?php else: ?>
-                                            <input type="text"
-                                                   class="cc-input"
-                                                   id="config-<?= $config['id'] ?>"
-                                                   value="<?= htmlspecialchars($config['config_value']) ?>"
-                                                   style="flex: 1;">
-                                        <?php endif; ?>
-                                        <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                                onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')">
-                                            
-                                        </button>
-                                    </div>
-                                    <div id="save-status-<?= $config['id'] ?>" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
-                                <?php else: ?>
-                                    <span style="color: #999;">
-                                        <?= $config['config_value_display'] ?>
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-
-                    <!-- Test Email -->
-                    <div class="setting-item" style="background: #f8f9fa;">
-                        <div class="setting-item-left">
-                            <div class="setting-item-label">Test Email</div>
-                            <div class="setting-item-description">Odeslat testovací email pro ověření SMTP nastavení</div>
-                        </div>
-                        <div class="setting-item-right">
-                            <input type="email"
-                                   id="test-email"
-                                   class="cc-input"
-                                   placeholder="vas@email.cz"
-                                   style="width: 200px; margin-right: 0.5rem;">
-                            <button class="cc-btn cc-btn-sm cc-btn-success" onclick="sendTestEmail()">
-                                Odeslat test
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
 
             <!-- API KEYS -->
             <?php if (isset($configs['api_keys'])): ?>
@@ -383,51 +306,5 @@ async function saveConfig(configId, configKey) {
     }
 }
 
-// Send test email
-/**
- * SendTestEmail
- */
-async function sendTestEmail() {
-    const emailInput = document.getElementById('test-email');
-    const email = emailInput.value.trim();
-
-    if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-        alert('Zadejte platnou emailovou adresu');
-        return;
-    }
-
-    const btn = event.target;
-    const originalText = btn.textContent;
-    btn.textContent = 'Odesílám...';
-    btn.disabled = true;
-
-    try {
-        const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() : null;
-
-        const response = await fetch('/api/control_center_api.php?action=send_test_email', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: email,
-                csrf_token: csrfToken
-            })
-        });
-
-        const result = await response.json();
-
-        if (result.status === 'success') {
-            alert(' Testovací email byl úspěšně odeslán na ' + email);
-            emailInput.value = '';
-        } else {
-            throw new Error(result.message);
-        }
-    } catch (error) {
-        alert('Chyba: ' + error.message);
-    } finally {
-        btn.textContent = originalText;
-        btn.disabled = false;
-    }
-}
-
-console.log(' Configuration section loaded');
+console.log('⚙️ Configuration section loaded (Email/SMTP moved to Email & SMS tab)');
 </script>
