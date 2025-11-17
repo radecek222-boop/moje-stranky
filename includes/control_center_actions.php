@@ -219,7 +219,14 @@ function getPriorityBadge($priority) {
         <!-- COMPLETED ACTIONS -->
         <?php if (count($completedActions) > 0): ?>
             <div class="setting-group">
-                <h3 class="setting-group-title">Nedávno dokončené</h3>
+                <h3 class="setting-group-title">
+                    Nedávno dokončené
+                    <button class="cc-btn cc-btn-sm cc-btn-secondary"
+                            onclick="window.open('vycisti_akce.php', '_blank')"
+                            style="margin-left: 1rem; font-size: 0.75rem; padding: 0.3rem 0.8rem;">
+                        🗑️ Vyčistit dokončené
+                    </button>
+                </h3>
 
                 <?php foreach ($completedActions as $action): ?>
                     <div class="setting-item">
