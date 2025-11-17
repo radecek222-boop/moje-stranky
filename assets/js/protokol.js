@@ -101,8 +101,12 @@ function initSignaturePad() {
   const canvas = document.getElementById("signature-pad");
   const resize = () => {
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
-    canvas.width = canvas.offsetWidth * ratio;
-    canvas.height = canvas.offsetHeight * ratio;
+    const rect = canvas.getBoundingClientRect();
+    const cssWidth = canvas.clientWidth || rect.width;
+    const cssHeight = canvas.clientHeight || rect.height;
+
+    canvas.width = cssWidth * ratio;
+    canvas.height = cssHeight * ratio;
     canvas.getContext("2d").scale(ratio, ratio);
   };
   window.addEventListener("resize", resize);

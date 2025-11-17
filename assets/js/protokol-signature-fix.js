@@ -37,15 +37,14 @@
 
       // Nastavit velikost canvas
       const resizeCanvas = () => {
-        // DŮLEŽITÉ: Použít offsetWidth/Height (bez border/scroll)
-        // getBoundingClientRect() zahrnuje border, což způsobuje problém
-        const canvasWidth = canvas.offsetWidth;
-        const canvasHeight = canvas.offsetHeight;
+        const rect = canvas.getBoundingClientRect();
+        const canvasWidth = canvas.clientWidth || rect.width;
+        const canvasHeight = canvas.clientHeight || rect.height;
         const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
         console.log('📐 Resize canvas:', {
-          offsetWidth: canvasWidth,
-          offsetHeight: canvasHeight,
+          clientWidth: canvasWidth,
+          clientHeight: canvasHeight,
           ratio: ratio,
           physicalWidth: canvasWidth * ratio,
           physicalHeight: canvasHeight * ratio
