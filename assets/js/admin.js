@@ -90,7 +90,14 @@ async function loadKeys() {
       throw new Error(`HTTP ${response.status}`);
     }
 
-    const data = await response.json();
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error('API returned invalid JSON:', text);
+      throw new Error('Server vrátil neplatnou odpověď (očekáván JSON)');
+    }
 
     if (data.status === 'success' || data.success === true) {
       if (data.keys.length === 0) {
@@ -123,8 +130,8 @@ async function loadKeys() {
 
     container.innerHTML = `<div class="error-message">${data.message || 'Nepodařilo se načíst klíče.'}</div>`;
   } catch (error) {
-    container.innerHTML = '<div class="error-message">Chyba při načítání klíčů.</div>';
-    logger.error('Error loading keys:', error);
+    container.innerHTML = `<div style="background: #f5f5f5; border: 1px solid #000; border-left: 3px solid #000; color: #000; padding: 0.75rem 1rem; margin: 1rem 0; font-size: 0.85rem; font-family: 'Poppins', sans-serif;"><strong>Chyba při načítání klíčů:</strong> ${escapeHtml(error.message || 'Neznámá chyba')}</div>`;
+    logger.error('[Control Center] Keys load error:', error);
   }
 }
 

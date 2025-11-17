@@ -11,7 +11,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 }
 
 $pdo = getDbConnection();
-$currentSection = $_GET['section'] ?? 'prehled';
+$currentSection = $_GET['section'] ?? 'registracni_klice';
 
 // Načtení statistik pro přehled
 $stats = [
@@ -741,5 +741,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-console.log('🔒 Security Center loaded');
+console.log('Security Center loaded');
 </script>
