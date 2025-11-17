@@ -590,3 +590,697 @@ function initUserManagement() {
     loadOnline();
   }
 }
+
+<script>
+// Control Center Unified - Version Check
+// Debug mode - set to false in production
+const DEBUG_MODE = false;
+if (DEBUG_MODE) {
+    console.log('%c🔧 Control Center v2025.11.12-1430 loaded', 'background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;');
+    console.log('✅ executeAction is ASYNC + event.target captured BEFORE await');
+}
+
+// Helper function to check if API response is successful
+/**
+ * IsSuccess
+ */
+function isSuccess(data) {
+    return (data && (data.success === true || data.status === 'success'));
+}
+
+// Helper function to get CSRF token from meta tag
+/**
+ * GetCSRFToken
+ */
+function getCSRFToken() {
+    // Zkusit nejprve aktuální dokument
+    let metaTag = document.querySelector('meta[name="csrf-token"]');
+
+    // Pokud jsme v iframe, zkusit parent window
+    if (!metaTag && window.parent && window.parent !== window) {
+        try {
+            metaTag = window.parent.document.querySelector('meta[name="csrf-token"]');
+        } catch (e) {
+            // Cross-origin iframe - nemůžeme přistoupit k parent
+            console.error('Cannot access parent CSRF token:', e);
+        }
+    }
+
+    if (!metaTag) {
+        console.error('CSRF token meta tag not found in document or parent');
+        return null;
+    }
+
+    const token = metaTag.getAttribute('content');
+
+    // Ujistit se že token je string
+    const tokenStr = token ? String(token).trim() : null;
+
+    if (tokenStr) {
+        if (DEBUG_MODE) console.log('CSRF token loaded:', tokenStr.substring(0, 10) + '... (length: ' + tokenStr.length + ')');
+    } else {
+        console.error('CSRF token is empty');
+    }
+
+    return tokenStr;
+}
+
+// Open modal with specific section
+/**
+ * OpenCCModal
+ */
+function openCCModal(section) {
+    const overlay = document.getElementById('ccOverlay');
+    const modal = document.getElementById('ccModal');
+    const modalBody = document.getElementById('ccModalBody');
+
+    // Show overlay and modal
+    overlay.classList.add('active');
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    // Show loading
+    modalBody.innerHTML = '<div class="cc-modal-loading"><div class="cc-modal-spinner"></div><div style="margin-top: 1rem;">Načítání...</div></div>';
+
+    // Load section content
+    switch(section) {
+        case 'statistics':
+            loadStatisticsModal();
+            break;
+        case 'analytics':
+            loadAnalyticsModal();
+            break;
+        case 'keys':
+            loadKeysModal();
+            break;
+        case 'users':
+            loadUsersModal();
+            break;
+        case 'notifications':
+            loadNotificationsModal();
+            break;
+        case 'claims':
+            loadClaimsModal();
+            break;
+        case 'actions':
+            loadActionsModal();
+            break;
+        case 'diagnostics':
+            loadDiagnosticsModal();
+            break;
+        case 'console':
+            loadConsoleModal();
+            break;
+        case 'testing':
+            loadTestingModal();
+            break;
+        case 'appearance':
+            loadAppearanceModal();
+            break;
+        case 'content':
+            loadContentModal();
+            break;
+        case 'config':
+            loadConfigModal();
+            break;
+    }
+}
+
+// Close modal
+/**
+ * CloseCCModal
+ */
+function closeCCModal() {
+    const overlay = document.getElementById('ccOverlay');
+    const modal = document.getElementById('ccModal');
+
+    overlay.classList.remove('active');
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Open SQL page in new tab (spolehlivé řešení bez blokování)
+/**
+ * OpenSQLPage
+ */
+function openSQLPage() {
+    // Použít window.open() s okamžitým voláním z user action
+    const newWindow = window.open('vsechny_tabulky.php', '_blank');
+
+    // Fallback pokud byl pop-up blokován
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        console.warn('Pop-up blokován, použiji location.href');
+        window.location.href = 'vsechny_tabulky.php';
+    }
+}
+
+// === MODAL LOADERS ===
+
+/**
+ * LoadStatisticsModal
+ */
+function loadStatisticsModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="statistiky.php?embed=1" sandbox="allow-scripts allow-same-origin" title="Statistiky reklamací"></iframe></div>';
+}
+
+/**
+ * LoadAnalyticsModal
+ */
+function loadAnalyticsModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="analytics.php?embed=1" sandbox="allow-scripts allow-same-origin" title="Web Analytics"></iframe></div>';
+}
+
+/**
+ * LoadKeysModal
+ */
+function loadKeysModal() {
+    const modalBody = document.getElementById('ccModalBody');
+
+    modalBody.innerHTML = `
+        <div class="cc-actions">
+            <button class="btn btn-sm btn-success" onclick="createKey()">+ Vytvořit nový klíč</button>
+            <button class="btn btn-sm" onclick="loadKeysModal()">Obnovit</button>
+        </div>
+        <div id="keysTableContainer">Načítání klíčů...</div>
+    `;
+
+    // Load keys
+    fetch('api/admin_api.php?action=list_keys')
+        .then(async r => {
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+        })
+        .then(data => {
+            const container = document.getElementById('keysTableContainer');
+
+            if (isSuccess(data) && data.keys && data.keys.length > 0) {
+                let html = '<table class="cc-table"><thead><tr>';
+                html += '<th>Klíč</th><th>Typ</th><th>Použití</th><th>Status</th><th>Vytvořen</th><th>Akce</th>';
+                html += '</tr></thead><tbody>';
+
+                data.keys.forEach(key => {
+                    // Escapování pro XSS ochranu
+                    const safeKeyCode = typeof escapeHTML === 'function' ? escapeHTML(key.key_code) : key.key_code;
+                    const safeKeyType = typeof escapeHTML === 'function' ? escapeHTML(key.key_type) : key.key_type;
+
+                    html += '<tr>';
+                    html += `<td><code>${safeKeyCode}</code></td>`;
+                    html += `<td><span class="badge badge-${safeKeyType}">${safeKeyType}</span></td>`;
+                    html += `<td>${parseInt(key.usage_count) || 0} / ${parseInt(key.max_usage) || '∞'}</td>`;
+                    html += `<td><span class="badge badge-${key.is_active ? 'active' : 'inactive'}">${key.is_active ? 'Aktivní' : 'Neaktivní'}</span></td>`;
+                    html += `<td>${new Date(key.created_at).toLocaleDateString('cs-CZ')}</td>`;
+                    html += `<td><button class="btn btn-sm btn-danger" onclick="deleteKey('${safeKeyCode}')">Smazat</button></td>`;
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            } else if (isSuccess(data) && data.keys && data.keys.length === 0) {
+                container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádné registrační klíče<br><small>Vytvořte nový klíč pomocí tlačítka výše</small></p>';
+            } else {
+                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání</p>';
+            }
+        })
+        .catch(err => {
+            console.error('[Control Center] Keys load error:', err);
+            document.getElementById('keysTableContainer').innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání</p>';
+        });
+}
+
+/**
+ * LoadUsersModal
+ */
+function loadUsersModal() {
+    const modalBody = document.getElementById('ccModalBody');
+
+    modalBody.innerHTML = `
+        <div class="cc-actions">
+            <input type="text" class="search-box" id="ccSearchUsers" placeholder="Hledat uživatele..." style="flex: 1; max-width: 300px;">
+            <button class="btn btn-sm btn-success" onclick="window.location.href='admin.php?tab=users'">+ Přidat uživatele</button>
+            <button class="btn btn-sm" onclick="loadUsersModal()">Obnovit</button>
+        </div>
+        <div id="usersTableContainer">Načítání uživatelů...</div>
+    `;
+
+    // Load users
+    fetch('api/admin_api.php?action=list_users')
+        .then(r => {
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+        })
+        .then(data => {
+            const container = document.getElementById('usersTableContainer');
+            const users = data.data || data.users || [];
+
+            if (isSuccess(data) && users.length > 0) {
+                let html = '<table class="cc-table"><thead><tr>';
+                html += '<th>ID</th><th>Jméno</th><th>Email</th><th>Role</th><th>Status</th><th>Vytvořen</th></tr></thead><tbody>';
+
+                users.forEach(user => {
+                    // Escapování pro XSS ochranu
+                    const safeName = typeof escapeHTML === 'function' ? escapeHTML(user.name || user.full_name || '') : (user.name || user.full_name || '');
+                    const safeEmail = typeof escapeHTML === 'function' ? escapeHTML(user.email || '') : (user.email || '');
+                    const safeRole = typeof escapeHTML === 'function' ? escapeHTML(user.role || '') : (user.role || '');
+
+                    html += '<tr>';
+                    html += `<td>#${parseInt(user.id) || 0}</td>`;
+                    html += `<td>${safeName}</td>`;
+                    html += `<td>${safeEmail}</td>`;
+                    html += `<td><span class="badge badge-${safeRole}">${safeRole}</span></td>`;
+                    html += `<td><span class="badge badge-${user.is_active ? 'active' : 'inactive'}">${user.is_active ? 'Aktivní' : 'Neaktivní'}</span></td>`;
+                    html += `<td>${user.created_at ? new Date(user.created_at).toLocaleDateString('cs-CZ') : '—'}</td>`;
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            } else if (isSuccess(data)) {
+                container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádní uživatelé</p>';
+            } else {
+                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání</p>';
+            }
+        })
+        .catch(err => {
+            console.error('[Control Center] Users load error:', err);
+            document.getElementById('usersTableContainer').innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání</p>';
+        });
+}
+
+/**
+ * LoadNotificationsModal
+ */
+function loadNotificationsModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=notifications&embed=1" sandbox="allow-scripts allow-same-origin allow-forms" title="Email & SMS notifikace"></iframe></div>';
+}
+
+/**
+ * LoadClaimsModal
+ */
+function loadClaimsModal() {
+    const modalBody = document.getElementById('ccModalBody');
+
+    modalBody.innerHTML = `
+        <div class="cc-mini-stats">
+            <div class="cc-mini-stat">
+                <div class="cc-mini-stat-value" id="ccClaimsWait">-</div>
+                <div class="cc-mini-stat-label">Čekající</div>
+            </div>
+            <div class="cc-mini-stat">
+                <div class="cc-mini-stat-value" id="ccClaimsOpen">-</div>
+                <div class="cc-mini-stat-label">Otevřené</div>
+            </div>
+            <div class="cc-mini-stat">
+                <div class="cc-mini-stat-value" id="ccClaimsDone">-</div>
+                <div class="cc-mini-stat-label">Dokončené</div>
+            </div>
+            <div class="cc-mini-stat">
+                <div class="cc-mini-stat-value" id="ccClaimsTotal"><?= $totalClaims ?></div>
+                <div class="cc-mini-stat-label">Celkem</div>
+            </div>
+        </div>
+        <div class="cc-actions">
+            <a href="seznam.php" class="btn btn-sm">Otevřít seznam reklamací</a>
+            <a href="novareklamace.php" class="btn btn-sm btn-success">+ Nová reklamace</a>
+        </div>
+    `;
+
+    // Load claims stats
+    fetch('api/admin_api.php?action=list_reklamace')
+        .then(r => {
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+        })
+        .then(data => {
+            if (isSuccess(data) && data.reklamace) {
+                const claims = data.reklamace;
+                const wait = claims.filter(c => c.stav === 'ČEKÁ').length;
+                const open = claims.filter(c => c.stav === 'DOMLUVENÁ').length;
+                const done = claims.filter(c => c.stav === 'HOTOVO').length;
+
+                document.getElementById('ccClaimsWait').textContent = wait;
+                document.getElementById('ccClaimsOpen').textContent = open;
+                document.getElementById('ccClaimsDone').textContent = done;
+            }
+        })
+        .catch(err => {
+            console.error('[Control Center] Claims stats load error:', err);
+        });
+}
+
+/**
+ * LoadActionsModal
+ */
+function loadActionsModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_actions&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Akce & Úkoly"></iframe></div>';
+}
+
+/**
+ * LoadDiagnosticsModal
+ */
+function loadDiagnosticsModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=tools&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Diagnostika systému"></iframe></div>';
+}
+
+/**
+ * LoadConsoleModal
+ */
+function loadConsoleModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_console&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Konzole - Developer Tools"></iframe></div>';
+}
+
+/**
+ * LoadTestingModal
+ */
+function loadTestingModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_testing_interactive&embed=1" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Testovací prostředí"></iframe></div>';
+}
+
+/**
+ * LoadAppearanceModal
+ */
+function loadAppearanceModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_appearance&embed=1" title="Vzhled & Design"></iframe></div>';
+}
+
+/**
+ * LoadContentModal
+ */
+function loadContentModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_content&embed=1" title="Obsah & Texty"></iframe></div>';
+}
+
+/**
+ * LoadConfigModal
+ */
+function loadConfigModal() {
+    const modalBody = document.getElementById('ccModalBody');
+    modalBody.innerHTML = '<div class="cc-iframe-container"><iframe src="admin.php?tab=control_center_configuration&embed=1" title="Konfigurace systému"></iframe></div>';
+}
+
+// === ACTION HANDLERS ===
+
+/**
+ * DeleteKey
+ */
+function deleteKey(keyCode) {
+    if (!confirm('Opravdu chcete smazat tento klíč?')) return;
+
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        return;
+    }
+
+    fetch('api/admin_api.php?action=delete_key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            key_code: keyCode,
+            csrf_token: csrfToken
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (isSuccess(data)) {
+            loadKeysModal(); // Reload
+        } else {
+            alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+        }
+    })
+    .catch(err => {
+        alert('Chyba: ' + err.message);
+    });
+}
+
+/**
+ * CreateKey
+ */
+function createKey() {
+    const keyType = prompt('Typ klíče (admin/technik/prodejce/partner):');
+    if (!keyType) return;
+
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        return;
+    }
+
+    fetch('api/admin_api.php?action=create_key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            key_type: keyType,
+            csrf_token: csrfToken
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (isSuccess(data)) {
+            alert('Vytvořeno: ' + data.key_code);
+            loadKeysModal(); // Reload
+        } else {
+            alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+        }
+    })
+    .catch(err => {
+        alert('Chyba: ' + err.message);
+    });
+}
+
+/**
+ * ExecuteAction
+ */
+async function executeAction(actionId) {
+    if (DEBUG_MODE) console.log('[executeAction] Starting with actionId:', actionId);
+
+    // Capture button reference BEFORE any await (event becomes undefined after await in async functions)
+    const btn = event.target;
+    const originalText = btn.textContent;
+
+    // Await the CSRF token (handles both sync and async getCSRFToken)
+    const csrfToken = await getCSRFToken();
+    if (DEBUG_MODE) console.log('[executeAction] CSRF token retrieved:', {
+        type: typeof csrfToken,
+        value: csrfToken && typeof csrfToken === 'string' ? csrfToken.substring(0, 10) + '...' : csrfToken,
+        length: csrfToken ? csrfToken.length : 0
+    });
+
+    if (!csrfToken || typeof csrfToken !== 'string' || csrfToken.length === 0) {
+        alert('Chyba: CSRF token nebyl nalezen nebo je neplatný. Obnovte stránku.');
+        console.error('[executeAction] CSRF token is invalid:', {type: typeof csrfToken, value: csrfToken});
+        return;
+    }
+
+    if (!confirm('Spustit tuto akci? Bude provedena automaticky.')) {
+        if (DEBUG_MODE) console.log('[executeAction] User cancelled');
+        return;
+    }
+
+    // Disable button during execution
+    btn.disabled = true;
+    btn.textContent = 'Provádění...';
+
+    const payload = {
+        action_id: actionId,
+        csrf_token: csrfToken
+    };
+
+    if (DEBUG_MODE) console.log('[executeAction] Sending request with payload:', payload);
+
+    fetch('api/control_center_api.php?action=execute_action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(async r => {
+        if (DEBUG_MODE) console.log('[executeAction] Response status:', r.status);
+
+        // Zkusit načíst JSON i při chybě
+        let responseData;
+        try {
+            responseData = await r.json();
+            if (DEBUG_MODE) console.log('[executeAction] Response data:', responseData);
+        } catch (e) {
+            console.error('[executeAction] Failed to parse JSON:', e);
+            responseData = null;
+        }
+
+        if (!r.ok) {
+            let errorMsg = `HTTP ${r.status}`;
+            if (responseData) {
+                errorMsg = responseData.message || 'Unknown error';
+                if (responseData.debug) {
+                    errorMsg += '\n\n' + Object.entries(responseData.debug)
+                        .map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v, null, 2) : v}`)
+                        .join('\n');
+                }
+            }
+            throw new Error(errorMsg);
+        }
+
+        return responseData;
+    })
+    .then(data => {
+        if (DEBUG_MODE) console.log('[executeAction] Success data:', data);
+
+        if (isSuccess(data)) {
+            const execTime = data.execution_time || 'neznámý čas';
+            alert(`✓ Akce dokončena!\n\n${data.message}\n\nČas provedení: ${execTime}`);
+            loadActionsModal();
+        } else {
+            console.error('[executeAction] Action failed:', data);
+            alert('✗ Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    })
+    .catch(err => {
+        console.error('[executeAction] Error:', err);
+        alert('✗ Chyba při provádění akce: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = originalText;
+    });
+}
+
+/**
+ * CompleteAction
+ */
+function completeAction(actionId) {
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        return;
+    }
+
+    fetch('api/control_center_api.php?action=complete_action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action_id: actionId,
+            csrf_token: csrfToken
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (isSuccess(data)) {
+            loadActionsModal();
+            location.reload();
+        } else {
+            alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+        }
+    })
+    .catch(err => {
+        alert('Chyba: ' + err.message);
+    });
+}
+
+/**
+ * DismissAction
+ */
+function dismissAction(actionId) {
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        return;
+    }
+
+    fetch('api/control_center_api.php?action=dismiss_action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action_id: actionId,
+            csrf_token: csrfToken
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (isSuccess(data)) {
+            loadActionsModal();
+            location.reload();
+        } else {
+            alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+        }
+    })
+    .catch(err => {
+        alert('Chyba: ' + err.message);
+    });
+}
+
+// Clear cache and reload
+/**
+ * ClearCacheAndReload
+ */
+async function clearCacheAndReload() {
+    if (!confirm('Vymazat lokální cache a načíst nejnovější verzi? Stránka se znovu načte.')) {
+        return;
+    }
+
+    try {
+        // Vymazat localStorage
+        if (window.localStorage) {
+            const itemsToKeep = ['theme', 'user_preferences']; // Ponechat důležité věci
+            const storage = {};
+            itemsToKeep.forEach(key => {
+                const val = localStorage.getItem(key);
+                if (val !== null) storage[key] = val;
+            });
+
+            localStorage.clear();
+
+            // Vrátit důležité položky
+            Object.keys(storage).forEach(key => {
+                localStorage.setItem(key, storage[key]);
+            });
+
+            console.log('✓ localStorage vymazán');
+        }
+
+        // Vymazat sessionStorage
+        if (window.sessionStorage) {
+            sessionStorage.clear();
+            console.log('✓ sessionStorage vymazán');
+        }
+
+        // Vymazat Service Worker cache (pokud existuje)
+        if ('caches' in window) {
+            const names = await caches.keys();
+            await Promise.all(names.map(name => caches.delete(name)));
+            console.log('✓ Service Worker cache vymazán (' + names.length + ' cache(s))');
+        }
+
+        console.log('🔄 Reloaduji stránku s force refresh...');
+
+        // Force reload s timestamp pro cache busting
+        const timestamp = new Date().getTime();
+        const url = new URL(window.location.href);
+        url.searchParams.set('_cachebust', timestamp);
+
+        // Hard reload
+        window.location.href = url.toString();
+
+        // Fallback: pokud výše nefunguje
+        setTimeout(() => {
+            window.location.reload(true);
+        }, 100);
+
+    } catch (err) {
+        console.error('Chyba při mazání cache:', err);
+        alert('Chyba při mazání cache. Zkuste manuální refresh (Ctrl+Shift+R).');
+    }
+}
+
+// Close modal on ESC key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeCCModal();
+    }
+});
