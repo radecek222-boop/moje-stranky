@@ -117,7 +117,7 @@ echo "<div class='summary'>
         <li><strong>❌ Chyby:</strong> {$errors} indexů</li>
     </ul>
     <p><strong>Hotovo!</strong> Databázové indexy byly aktualizovány.</p>
-    <p><a href='/admin/control-center'>← Zpět do Control Center</a></p>
+    <p><a href='/admin.php'>← Zpět do Control Center</a></p>
 </div>";
 
 echo "</div></body></html>";

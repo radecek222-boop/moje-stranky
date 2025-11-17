@@ -747,7 +747,7 @@ function loadClaimsModal() {
  */
 function loadActionsModal() {
     const modalBody = document.getElementById('ccModalBody');
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_actions&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Akce & Úkoly"></iframe></div>';
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_actions&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Akce & Úkoly"></iframe></div>';
 }
 
 /**
@@ -763,7 +763,7 @@ function loadDiagnosticsModal() {
  */
 function loadConsoleModal() {
     const modalBody = document.getElementById('ccModalBody');
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_console&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Konzole - Developer Tools"></iframe></div>';
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_console&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Konzole - Developer Tools"></iframe></div>';
 }
 
 /**
@@ -771,7 +771,7 @@ function loadConsoleModal() {
  */
 function loadTestingModal() {
     const modalBody = document.getElementById('ccModalBody');
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_testing_interactive&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Testovací prostředí"></iframe></div>';
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_testing_interactive&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Testovací prostředí"></iframe></div>';
 }
 
 /**
@@ -779,7 +779,7 @@ function loadTestingModal() {
  */
 function loadAppearanceModal() {
     const modalBody = document.getElementById('ccModalBody');
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_appearance&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" title="Vzhled & Design"></iframe></div>';
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_appearance&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Vzhled & Design"></iframe></div>';
 }
 
 /**
@@ -787,7 +787,7 @@ function loadAppearanceModal() {
  */
 function loadContentModal() {
     const modalBody = document.getElementById('ccModalBody');
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_content&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" title="Obsah & Texty"></iframe></div>';
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_content&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Obsah & Texty"></iframe></div>';
 }
 
 /**
@@ -795,7 +795,7 @@ function loadContentModal() {
  */
 function loadConfigModal() {
     const modalBody = document.getElementById('ccModalBody');
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_configuration&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" title="Konfigurace systému"></iframe></div>';
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_configuration&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Konfigurace systému"></iframe></div>';
 }
 
 // === ACTION HANDLERS ===

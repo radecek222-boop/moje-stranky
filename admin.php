@@ -44,17 +44,16 @@ if (!$embedMode) {
 }
 
 $tabConfig = loadAdminTabNavigation();
-$activeTab = $_GET['tab'] ?? 'control_center';
+$activeTab = $_GET['tab'] ?? 'dashboard';
 
-// CLEAN URL: Redirect admin.php?tab=control_center → admin.php
-// Control Center je výchozí stránka, takže není potřeba explicitní tab parametr
-if (isset($_GET['tab']) && $_GET['tab'] === 'control_center' && !$embedMode) {
+// CLEAN URL: Admin dashboard je výchozí stránka
+if (isset($_GET['tab']) && $_GET['tab'] === 'dashboard' && !$embedMode) {
     header('Location: admin.php', true, 301); // 301 Permanent Redirect
     exit;
 }
 
 if (!array_key_exists($activeTab, $tabConfig)) {
-    $activeTab = 'control_center';
+    $activeTab = 'dashboard';
 }
 $currentTabMeta = $tabConfig[$activeTab];
 $currentTabLabel = $currentTabMeta['tab_label'] ?? 'Control Center';
@@ -100,7 +99,6 @@ try {
   <!-- Error Handler - zachytává všechny chyby -->
   <script src="assets/js/error-handler.js"></script>
   <script src="assets/js/html-sanitizer.js"></script>
-  <script src="assets/js/control-center-modal.js" defer></script>
 </head>
 
 <body<?php if ($embedMode): ?> class="embed-mode"<?php endif; ?>>
@@ -112,7 +110,7 @@ try {
 <main>
 <div class="container">
 
-  <?php if (!$embedMode && !str_starts_with($activeTab, 'control_center')): ?>
+  <?php if (!$embedMode && !str_starts_with($activeTab, 'admin_') && $activeTab !== 'dashboard'): ?>
   <h1 class="page-title"><?php echo htmlspecialchars($currentTabLabel, ENT_QUOTES, 'UTF-8'); ?></h1>
   <p class="page-subtitle">Správa systému White Glove Service</p>
   <?php endif; ?>
@@ -146,7 +144,7 @@ try {
   
   <?php if ($activeTab === 'notifications'): ?>
   <!-- TAB: EMAIL & SMS MANAGEMENT -->
-  <?php require_once __DIR__ . '/includes/control_center_email_sms.php'; ?>
+  <?php require_once __DIR__ . '/includes/admin_email_sms.php'; ?>
   <?php endif; ?>
 
   <?php if ($activeTab === 'notifications_old'): ?>
@@ -630,7 +628,7 @@ function loadNotifContent(type, body) {
   
   <?php if ($activeTab === 'keys'): ?>
   <!-- TAB: SECURITY - Bezpečnostní centrum -->
-  <?php require_once __DIR__ . '/includes/control_center_security.php'; ?>
+  <?php require_once __DIR__ . '/includes/admin_security.php'; ?>
   <?php endif; ?>
   
   <?php if ($activeTab === 'users'): ?>
@@ -668,8 +666,8 @@ function loadNotifContent(type, body) {
   </div>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'control_center'): ?>
-  <!-- TAB: CONTROL CENTER - Unified card grid interface -->
+  <?php if ($activeTab === 'dashboard'): ?>
+  <!-- TAB: ADMIN DASHBOARD - Unified card grid interface -->
   <?php
   // Načtení dat ze session
   $currentUser = $_SESSION['full_name'] ?? 'Admin';
@@ -697,7 +695,7 @@ function loadNotifContent(type, body) {
   }
   ?>
 
-  <div class="control-center">
+  <div class="admin-dashboard">
       <div class="page-header">
           <p class="page-subtitle">Centrální řídicí panel pro správu celé aplikace</p>
           <div class="page-header-actions">
@@ -807,50 +805,50 @@ function loadNotifContent(type, body) {
   </div>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'control_center_testing'): ?>
+  <?php if ($activeTab === 'admin_testing'): ?>
   <!-- TAB: TESTING ENVIRONMENT (OLD) -->
-  <?php require_once __DIR__ . '/includes/control_center_testing.php'; ?>
+  <?php require_once __DIR__ . '/includes/admin_testing.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'control_center_testing_interactive'): ?>
+  <?php if ($activeTab === 'admin_testing_interactive'): ?>
   <!-- TAB: INTERACTIVE TESTING ENVIRONMENT -->
-  <?php require_once __DIR__ . '/includes/control_center_testing_interactive.php'; ?>
+  <?php require_once __DIR__ . '/includes/admin_testing_interactive.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'control_center_testing_simulator'): ?>
+  <?php if ($activeTab === 'admin_testing_simulator'): ?>
   <!-- TAB: E2E WORKFLOW SIMULATOR -->
-  <?php require_once __DIR__ . '/includes/control_center_testing_simulator.php'; ?>
+  <?php require_once __DIR__ . '/includes/admin_testing_simulator.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'control_center_appearance'): ?>
+  <?php if ($activeTab === 'admin_appearance'): ?>
   <!-- TAB: VZHLED & DESIGN -->
-  <?php require_once __DIR__ . '/includes/control_center_appearance.php'; ?>
+  <?php require_once __DIR__ . '/includes/admin_appearance.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'control_center_content'): ?>
+  <?php if ($activeTab === 'admin_content'): ?>
   <!-- TAB: OBSAH & TEXTY -->
-  <?php require_once __DIR__ . '/includes/control_center_content.php'; ?>
+  <?php require_once __DIR__ . '/includes/admin_content.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'control_center_console'): ?>
+  <?php if ($activeTab === 'admin_console'): ?>
   <!-- TAB: KONZOLE -->
-  <?php require_once __DIR__ . '/includes/control_center_console.php'; ?>
+  <?php require_once __DIR__ . '/includes/admin_console.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'control_center_actions'): ?>
+  <?php if ($activeTab === 'admin_actions'): ?>
   <!-- TAB: AKCE & ÚKOLY -->
-  <?php require_once __DIR__ . '/includes/control_center_actions.php'; ?>
+  <?php require_once __DIR__ . '/includes/admin_actions.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'control_center_configuration'): ?>
+  <?php if ($activeTab === 'admin_configuration'): ?>
   <!-- TAB: KONFIGURACE SYSTÉMU -->
-  <?php require_once __DIR__ . '/includes/control_center_configuration.php'; ?>
+  <?php require_once __DIR__ . '/includes/admin_configuration.php'; ?>
   <?php endif; ?>
 
   <?php if ($activeTab === 'tools'): ?>
   <!-- TAB: TOOLS & DIAGNOSTICS -->
   <div id="tab-tools" class="tab-content">
-  <?php require_once __DIR__ . '/includes/control_center_tools.php'; ?>
+  <?php require_once __DIR__ . '/includes/admin_tools.php'; ?>
   </div>
   <?php endif; ?>
 

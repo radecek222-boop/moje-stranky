@@ -57,7 +57,7 @@ try {
     $stmt = $pdo->query("SELECT 1 FROM wgs_pending_actions LIMIT 1");
 } catch (PDOException $e) {
     echo "<div class='info'>❌ Tabulka wgs_pending_actions neexistuje. Nejprve spusťte instalaci Admin Control Center.</div>";
-    echo "<p><a href='/install_admin_control_center.php'>→ Instalovat Admin Control Center</a></p>";
+    echo "<p><a href='/install_admin_dashboard.php'>→ Instalovat Admin Control Center</a></p>";
     echo "</div></body></html>";
     exit;
 }
@@ -199,7 +199,7 @@ echo "<div class='success'>
         <li><strong>⏭️ Přeskočeno:</strong> {$skipped} úkolů (již existují)</li>
     </ul>
     <p><strong>Hotovo!</strong> Úkoly jsou nyní viditelné v Admin Control Center.</p>
-    <p><a href='/admin.php?tab=control_center_actions'><strong>→ Otevřít Akce & Úkoly</strong></a></p>
+    <p><a href='/admin.php?tab=admin_actions'><strong>→ Otevřít Akce & Úkoly</strong></a></p>
 </div>";
 
 echo "</div></body></html>";
