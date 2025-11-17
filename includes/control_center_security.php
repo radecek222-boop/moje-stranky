@@ -393,8 +393,8 @@ try {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <h2 style="margin: 0; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Registrační klíče</h2>
             <div style="display: flex; gap: 0.5rem;">
-                <button class="cc-btn cc-btn-success" id="createKeyBtn" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">+ Nový</button>
-                <button class="cc-btn cc-btn-secondary" id="refreshKeysBtn" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">Obnovit</button>
+                <button onclick="vytvorNovyKlic()" class="cc-btn cc-btn-success" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">+ Nový</button>
+                <button onclick="nactiRegistracniKlice()" class="cc-btn cc-btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">Obnovit</button>
             </div>
         </div>
 
@@ -404,8 +404,8 @@ try {
             </div>
         </div>
 
-        <div id="keys-container">
-            <div class="loading">Načítání klíčů...</div>
+        <div id="kontejner-klicu">
+            <div style="padding: 1rem; text-align: center; color: #666; font-family: 'Poppins', sans-serif; font-size: 0.85rem;">Načítání klíčů...</div>
         </div>
     </div>
 
@@ -659,20 +659,155 @@ async function saveConfig(configId, configKey) {
     }
 }
 
-// Load registrační klíče (from admin.js)
-/**
- * LoadRegistracniKlice
- */
-function loadRegistracniKlice() {
-    const container = document.getElementById('keys-container');
-    if (!container) return;
+// Načíst registrační klíče
+async function nactiRegistracniKlice() {
+    const kontejner = document.getElementById('kontejner-klicu');
+    if (!kontejner) return;
 
-    // Volá existující funkci z admin.js pokud existuje
-    if (typeof loadKeys === 'function') {
-        loadKeys();
-    } else {
-        container.innerHTML = '<div class="security-alert"><div>Načítání klíčů vyžaduje reload stránky</div></div>';
+    try {
+        kontejner.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666; font-family: \'Poppins\', sans-serif; font-size: 0.85rem;">Načítání klíčů...</div>';
+
+        const odpoved = await fetch('api/admin_api.php?action=list_keys', {
+            credentials: 'same-origin'
+        });
+
+        if (!odpoved.ok) {
+            throw new Error('HTTP chyba ' + odpoved.status);
+        }
+
+        const text = await odpoved.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error('API vrátilo neplatný JSON:', text);
+            throw new Error('Server vrátil neplatnou odpověď');
+        }
+
+        if (data.status === 'success') {
+            if (data.keys.length === 0) {
+                kontejner.innerHTML = '<div style="padding: 2rem; text-align: center; color: #999; font-family: \'Poppins\', sans-serif;">Žádné klíče</div>';
+                return;
+            }
+
+            let html = '<table style="width: 100%; border-collapse: collapse; font-family: \'Poppins\', sans-serif; font-size: 0.85rem;">';
+            html += '<thead><tr>';
+            html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Typ</th>';
+            html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Kód</th>';
+            html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Použití</th>';
+            html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Aktivní</th>';
+            html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Vytvořen</th>';
+            html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Akce</th>';
+            html += '</tr></thead><tbody>';
+
+            data.keys.forEach(klic => {
+                html += '<tr style="border-bottom: 1px solid #e0e0e0;" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'#fff\'">';
+                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><span style="display: inline-block; padding: 0.2rem 0.5rem; background: #000; color: #fff; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 500;">' + escapujHtml(klic.key_type) + '</span></td>';
+                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><code style="background: #f5f5f5; padding: 0.25rem 0.5rem; font-size: 0.8rem; border: 1px solid #ddd;">' + escapujHtml(klic.key_code) + '</code></td>';
+                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + klic.usage_count + ' / ' + (klic.max_usage || '∞') + '</td>';
+                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + (klic.is_active ? '<span style="color: #000;">✓ Ano</span>' : '<span style="color: #999;">✗ Ne</span>') + '</td>';
+                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + new Date(klic.created_at).toLocaleDateString('cs-CZ') + '</td>';
+                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><button onclick="kopirovatDoSchranky(\'' + klic.key_code.replace(/'/g, "\\'") + '\')" style="padding: 0.25rem 0.5rem; background: #000; color: #fff; border: 1px solid #000; font-family: \'Poppins\', sans-serif; font-size: 0.7rem; cursor: pointer; margin-right: 0.25rem;">Kopírovat</button>';
+                html += '<button onclick="smazatKlic(\'' + klic.key_code.replace(/'/g, "\\'") + '\')" style="padding: 0.25rem 0.5rem; background: #fff; color: #000; border: 1px solid #000; font-family: \'Poppins\', sans-serif; font-size: 0.7rem; cursor: pointer;">Smazat</button></td>';
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            kontejner.innerHTML = html;
+        } else {
+            throw new Error(data.message || 'Nepodařilo se načíst klíče');
+        }
+    } catch (chyba) {
+        kontejner.innerHTML = '<div class="security-alert"><strong>Chyba při načítání klíčů:</strong> ' + escapujHtml(chyba.message || 'Neznámá chyba') + '</div>';
+        console.error('[Security] Chyba načítání klíčů:', chyba);
     }
+}
+
+// Vytvořit nový klíč
+async function vytvorNovyKlic() {
+    const typKlice = prompt('Zadejte typ klíče (admin/technik/prodejce/partner):');
+    if (!typKlice) return;
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (!csrfToken) {
+            throw new Error('CSRF token není k dispozici');
+        }
+
+        const odpoved = await fetch('api/admin_api.php?action=create_key', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                key_type: typKlice,
+                csrf_token: csrfToken
+            })
+        });
+
+        const data = await odpoved.json();
+
+        if (data.status === 'success') {
+            alert('Klíč vytvořen: ' + data.key_code);
+            nactiRegistracniKlice();
+        } else {
+            alert('Chyba: ' + (data.message || 'Nepodařilo se vytvořit klíč'));
+        }
+    } catch (chyba) {
+        alert('Chyba: ' + chyba.message);
+        console.error('[Security] Chyba vytváření klíče:', chyba);
+    }
+}
+
+// Smazat klíč
+async function smazatKlic(kodKlice) {
+    if (!confirm('Opravdu chcete smazat klíč ' + kodKlice + '?')) {
+        return;
+    }
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (!csrfToken) {
+            throw new Error('CSRF token není k dispozici');
+        }
+
+        const odpoved = await fetch('api/admin_api.php?action=delete_key', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                key_code: kodKlice,
+                csrf_token: csrfToken
+            })
+        });
+
+        const data = await odpoved.json();
+
+        if (data.status === 'success') {
+            alert('Klíč byl smazán');
+            nactiRegistracniKlice();
+        } else {
+            alert('Chyba: ' + (data.message || 'Nepodařilo se smazat klíč'));
+        }
+    } catch (chyba) {
+        alert('Chyba: ' + chyba.message);
+        console.error('[Security] Chyba mazání klíče:', chyba);
+    }
+}
+
+// Kopírovat do schránky
+function kopirovatDoSchranky(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Zkopírováno do schránky: ' + text);
+    }).catch(chyba => {
+        alert('Chyba kopírování: ' + chyba.message);
+    });
+}
+
+// Escapovat HTML
+function escapujHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Load uživatelé pro security tab
@@ -729,17 +864,17 @@ function htmlEscape(str) {
     return div.innerHTML;
 }
 
-// Load initial data on page load
+// Načíst data při načtení stránky
 document.addEventListener('DOMContentLoaded', function() {
-    const currentSection = new URLSearchParams(window.location.search).get('section') || 'prehled';
+    const aktualniSekce = new URLSearchParams(window.location.search).get('section') || 'registracni_klice';
 
-    // Load data for initial section
-    if (currentSection === 'registracni_klice') {
-        loadRegistracniKlice();
-    } else if (currentSection === 'uzivatele') {
+    // Načíst data pro aktuální sekci
+    if (aktualniSekce === 'registracni_klice') {
+        nactiRegistracniKlice();
+    } else if (aktualniSekce === 'uzivatele') {
         loadUzivateleProSecurity();
     }
 });
 
-console.log('Security Center loaded');
+console.log('Security centrum načteno');
 </script>
