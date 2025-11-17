@@ -345,7 +345,7 @@ try {
                         <p style="margin: 0.5rem 0; font-size: 0.85rem; color: #666;">
                             Oprava databázových credentials v .env souboru. Použij pokud se změní DB heslo.
                         </p>
-                        <a href="aktualizuj_databazi.php" target="_blank" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                        <a href="aktualizuj_databazi.php" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;">
                             Otevřít nástroj
                         </a>
                     </div>
@@ -358,7 +358,7 @@ try {
                         <p style="margin: 0.5rem 0; font-size: 0.85rem; color: #666;">
                             Smazání selhavších emailů z tabulky wgs_email_queue pro čištění databáze.
                         </p>
-                        <a href="vycisti_emailovou_frontu.php" target="_blank" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                        <a href="vycisti_emailovou_frontu.php" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;">
                             Otevřít nástroj
                         </a>
                     </div>
