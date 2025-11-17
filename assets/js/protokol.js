@@ -308,7 +308,22 @@ async function loadReklamace(id) {
       return;
     }
 
-    const response = await fetch(`api/protokol_api.php?action=load_reklamace&id=${encodeURIComponent(id)}`);
+    const csrfToken = await fetchCsrfToken();
+    const response = await fetch('api/protokol_api.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        action: 'load_reklamace',
+        id,
+        csrf_token: csrfToken
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Chybná odpověď serveru (${response.status})`);
+    }
+
     const result = await response.json();
 
     if (result.status === 'success') {
@@ -340,7 +355,7 @@ async function loadReklamace(id) {
       document.getElementById("description-cz").value = currentReklamace.popis_problemu || "";
       showNotif("success", "Reklamace načtena");
     } else {
-      showNotif("error", "Reklamace nenalezena");
+      showNotif("error", result.message || "Reklamace nenalezena");
     }
   } catch (error) {
     logger.error('❌ Chyba načítání:', error);
