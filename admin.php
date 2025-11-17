@@ -45,6 +45,14 @@ if (!$embedMode) {
 
 $tabConfig = loadAdminTabNavigation();
 $activeTab = $_GET['tab'] ?? 'control_center';
+
+// CLEAN URL: Redirect admin.php?tab=control_center → admin.php
+// Control Center je výchozí stránka, takže není potřeba explicitní tab parametr
+if (isset($_GET['tab']) && $_GET['tab'] === 'control_center' && !$embedMode) {
+    header('Location: admin.php', true, 301); // 301 Permanent Redirect
+    exit;
+}
+
 if (!array_key_exists($activeTab, $tabConfig)) {
     $activeTab = 'control_center';
 }

@@ -242,7 +242,7 @@ header('Content-Type: text/html; charset=utf-8');
         <h2>4. Akce</h2>
         <button onclick="window.location.reload()">🔄 Obnovit</button>
         <button onclick="deleteAllFailedRecords()" class="danger">🗑️ Smazat všechny selhavší záznamy</button>
-        <a href="/admin.php?tab=control_center"><button>← Zpět do Admin Panel</button></a>
+        <a href="/admin.php"><button>← Zpět do Admin Panel</button></a>
     </div>
 
     <script>

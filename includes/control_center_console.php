@@ -220,7 +220,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
     <!-- Header -->
     <?php if (!$embedMode): ?>
     <div class="control-detail-header">
-        <button class="control-detail-back" onclick="window.location.href='admin.php?tab=control_center'">
+        <button class="control-detail-back" onclick="window.location.href='admin.php'">
             <span>&lt;</span>
             <span>Zpět</span>
         </button>

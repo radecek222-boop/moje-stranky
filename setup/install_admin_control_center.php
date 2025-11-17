@@ -273,7 +273,7 @@ $csrfToken = generateCSRFToken();
                 <button class="btn btn-secondary" onclick="window.close()" style="display: none;" id="closeBtn">
                     Zavřít
                 </button>
-                <button class="btn btn-success" onclick="window.location.href='/admin.php?tab=control_center'" style="display: none;" id="goToAdminBtn">
+                <button class="btn btn-success" onclick="window.location.href='/admin.php'" style="display: none;" id="goToAdminBtn">
                     Přejít do Control Center
                 </button>
             </div>

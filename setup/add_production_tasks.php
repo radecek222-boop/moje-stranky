@@ -259,7 +259,7 @@ Dopad: Zabezpečení proti neoprávněnému přístupu k setup scriptům',
                 5. Hotovo! 🎉
             </div>
 
-            <a href="/admin.php?tab=control_center" class="btn">
+            <a href="/admin.php" class="btn">
                 → Otevřít Control Center
             </a>
         </div>
