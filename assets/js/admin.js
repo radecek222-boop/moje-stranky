@@ -94,6 +94,17 @@ function setupNavigation() {
 // ============================================================
 async function loadDashboard() {
   try {
+    // Kontrola existence elementů - pokud statistiky neexistují, nic nedělat
+    const statClaims = document.getElementById('stat-claims');
+    const statUsers = document.getElementById('stat-users');
+    const statOnline = document.getElementById('stat-online');
+    const statKeys = document.getElementById('stat-keys');
+
+    if (!statClaims || !statUsers || !statOnline || !statKeys) {
+      // Dashboard statistiky neexistují, skip
+      return;
+    }
+
     const response = await fetch('api/admin_stats_api.php', {
       credentials: 'same-origin'
     });
@@ -115,10 +126,10 @@ async function loadDashboard() {
     const data = await response.json();
 
     if (data.status === 'success' || data.success === true) {
-      document.getElementById('stat-claims').textContent = data.stats.claims || 0;
-      document.getElementById('stat-users').textContent = data.stats.users || 0;
-      document.getElementById('stat-online').textContent = data.stats.online || 0;
-      document.getElementById('stat-keys').textContent = data.stats.keys || 0;
+      if (statClaims) statClaims.textContent = data.stats.claims || 0;
+      if (statUsers) statUsers.textContent = data.stats.users || 0;
+      if (statOnline) statOnline.textContent = data.stats.online || 0;
+      if (statKeys) statKeys.textContent = data.stats.keys || 0;
     }
   } catch (error) {
     logger.error('Dashboard load error:', error);
