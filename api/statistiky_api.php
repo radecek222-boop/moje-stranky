@@ -97,18 +97,16 @@ function getSummaryStats($pdo) {
     // Průměrná zakázka
     $avgOrder = $totalOrders > 0 ? ($totalRevenue / $totalOrders) : 0;
 
-    // Aktivní technici v období (počítáme podle technik_milan_kolin a technik_radek_zikmund)
-    $activeTechs = 0;
+    // Aktivní technici v období (počítáme registrované techniky z wgs_users)
     $stmt = $pdo->prepare("
-        SELECT
-            SUM(CASE WHEN technik_milan_kolin > 0 THEN 1 ELSE 0 END) as milan,
-            SUM(CASE WHEN technik_radek_zikmund > 0 THEN 1 ELSE 0 END) as radek
-        FROM wgs_reklamace
-        $where
+        SELECT COUNT(DISTINCT u.id) as active_techs
+        FROM wgs_users u
+        LEFT JOIN wgs_reklamace r ON r.zpracoval_id = u.id
+        WHERE u.role = 'technik'
+        AND (r.id IS NULL OR (1=1 $where))
     ");
     $stmt->execute($params);
-    $techCount = $stmt->fetch(PDO::FETCH_ASSOC);
-    $activeTechs = (($techCount['milan'] > 0) ? 1 : 0) + (($techCount['radek'] > 0) ? 1 : 0);
+    $activeTechs = (int)($stmt->fetch(PDO::FETCH_ASSOC)['active_techs'] ?? 0);
 
     echo json_encode([
         'status' => 'success',
@@ -166,61 +164,62 @@ function getSalespersonStats($pdo) {
 
 /**
  * Statistiky techniků
+ *
+ * NOVÁ LOGIKA (2025-11-17):
+ * - Zobrazuje POUZE registrované techniky z wgs_users (role='technik')
+ * - JOIN s wgs_reklamace přes zpracoval_id
+ * - Pokud není registrovaný žádný technik → prázdné statistiky
+ * - Dynamické - přidá se nový technik → automaticky se zobrazí
  */
 function getTechnicianStats($pdo) {
     try {
         $filters = getFilters();
-        $where = buildWhereClause($filters);
-        $params = buildParams($filters);
+        // WHERE podmínky pro reklamace (datum, země atd.)
+        $whereConditions = [];
+        $params = [];
 
-        // Technici mají vlastní sloupce: technik_milan_kolin a technik_radek_zikmund (částky)
-        // Použijeme UNION pro vytvoření řádků pro oba techniky
+        if (!empty($filters['date_from'])) {
+            $whereConditions[] = "r.created_at >= :date_from";
+            $params[':date_from'] = $filters['date_from'];
+        }
+        if (!empty($filters['date_to'])) {
+            $whereConditions[] = "r.created_at <= :date_to";
+            $params[':date_to'] = $filters['date_to'] . ' 23:59:59';
+        }
+        if (!empty($filters['country'])) {
+            $whereConditions[] = "r.fakturace_firma = :country";
+            $params[':country'] = strtolower($filters['country']);
+        }
 
-        // Přidáme podmínku pro technika do WHERE
-        $whereMilan = $where . " AND technik_milan_kolin > 0";
-        $whereRadek = $where . " AND technik_radek_zikmund > 0";
+        $whereClause = !empty($whereConditions) ? 'AND ' . implode(' AND ', $whereConditions) : '';
 
+        // NOVÁ LOGIKA: JOIN s wgs_users WHERE role='technik'
         $sql = "
-            (SELECT
-                'Milan Kolín' as technik,
-                COUNT(*) as pocet_zakazek,
-                COUNT(CASE WHEN stav = 'done' THEN 1 END) as pocet_dokonceno,
-                SUM(CAST(COALESCE(technik_milan_kolin, 0) AS DECIMAL(10,2))) as celkova_castka_dokonceno,
-                SUM(CAST(COALESCE(technik_milan_kolin, 0) AS DECIMAL(10,2))) as vydelek,
-                AVG(CASE WHEN technik_milan_kolin > 0 THEN CAST(technik_milan_kolin AS DECIMAL(10,2)) END) as prumer_zakazka,
-                SUM(CASE WHEN fakturace_firma = 'cz' OR fakturace_firma = '' OR fakturace_firma IS NULL THEN 1 ELSE 0 END) as cz_count,
-                SUM(CASE WHEN fakturace_firma = 'sk' THEN 1 ELSE 0 END) as sk_count,
-                SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotove_count
-            FROM wgs_reklamace
-            $whereMilan)
-
-            UNION ALL
-
-            (SELECT
-                'Radek Zikmund' as technik,
-                COUNT(*) as pocet_zakazek,
-                COUNT(CASE WHEN stav = 'done' THEN 1 END) as pocet_dokonceno,
-                SUM(CAST(COALESCE(technik_radek_zikmund, 0) AS DECIMAL(10,2))) as celkova_castka_dokonceno,
-                SUM(CAST(COALESCE(technik_radek_zikmund, 0) AS DECIMAL(10,2))) as vydelek,
-                AVG(CASE WHEN technik_radek_zikmund > 0 THEN CAST(technik_radek_zikmund AS DECIMAL(10,2)) END) as prumer_zakazka,
-                SUM(CASE WHEN fakturace_firma = 'cz' OR fakturace_firma = '' OR fakturace_firma IS NULL THEN 1 ELSE 0 END) as cz_count,
-                SUM(CASE WHEN fakturace_firma = 'sk' THEN 1 ELSE 0 END) as sk_count,
-                SUM(CASE WHEN stav = 'done' THEN 1 ELSE 0 END) as hotove_count
-            FROM wgs_reklamace
-            $whereRadek)
-
+            SELECT
+                u.id as user_id,
+                u.user_id as user_code,
+                u.name as technik,
+                u.email,
+                COUNT(r.id) as pocet_zakazek,
+                COUNT(CASE WHEN r.stav = 'done' THEN 1 END) as pocet_dokonceno,
+                SUM(CAST(COALESCE(r.cena, 0) AS DECIMAL(10,2))) as celkova_castka_dokonceno,
+                SUM(CAST(COALESCE(r.cena, 0) AS DECIMAL(10,2))) as vydelek,
+                AVG(CASE WHEN r.cena > 0 THEN CAST(r.cena AS DECIMAL(10,2)) END) as prumer_zakazka,
+                SUM(CASE WHEN r.fakturace_firma = 'cz' OR r.fakturace_firma = '' OR r.fakturace_firma IS NULL THEN 1 ELSE 0 END) as cz_count,
+                SUM(CASE WHEN r.fakturace_firma = 'sk' THEN 1 ELSE 0 END) as sk_count,
+                SUM(CASE WHEN r.stav = 'done' THEN 1 ELSE 0 END) as hotove_count
+            FROM wgs_users u
+            LEFT JOIN wgs_reklamace r ON r.zpracoval_id = u.id $whereClause
+            WHERE u.role = 'technik'
+            GROUP BY u.id, u.user_id, u.name, u.email
             ORDER BY pocet_zakazek DESC
         ";
 
         $stmt = $pdo->prepare($sql);
-
-        // ✅ CRITICAL FIX: UNION dotaz potřebuje parametry 2x (pro každý SELECT)
-        $doubleParams = array_merge($params, $params);
-        $stmt->execute($doubleParams);
-
+        $stmt->execute($params);
         $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Vypočítat úspěšnost
+        // Vypočítat úspěšnost a zaokrouhlit hodnoty
         foreach ($data as &$row) {
             $total = (int)$row['pocet_zakazek'];
             $hotove = (int)$row['hotove_count'];
@@ -299,12 +298,8 @@ function getFilteredOrders($pdo) {
             r.id,
             r.cislo,
             r.jmeno,
-            COALESCE(u.name, 'Neuvedeno') as prodejce,
-            CASE
-                WHEN r.technik_milan_kolin > 0 THEN 'Milan Kolín'
-                WHEN r.technik_radek_zikmund > 0 THEN 'Radek Zikmund'
-                ELSE '-'
-            END as technik,
+            COALESCE(prodejce.name, 'Neuvedeno') as prodejce,
+            COALESCE(technik.name, '-') as technik,
             CAST(COALESCE(r.cena, 0) AS DECIMAL(10,2)) as castka,
             r.stav,
             CASE
@@ -316,7 +311,8 @@ function getFilteredOrders($pdo) {
             COALESCE(UPPER(r.fakturace_firma), 'CZ') as zeme,
             DATE_FORMAT(r.created_at, '%d.%m.%Y') as datum
         FROM wgs_reklamace r
-        LEFT JOIN wgs_users u ON r.created_by = u.id
+        LEFT JOIN wgs_users prodejce ON r.created_by = prodejce.id
+        LEFT JOIN wgs_users technik ON r.zpracoval_id = technik.id AND technik.role = 'technik'
         $where
         ORDER BY r.created_at DESC
         LIMIT 500
@@ -459,11 +455,14 @@ function buildWhereClause($filters, $tableAlias = '', $useUserJoin = false) {
     }
 
     if (!empty($filters['technician'])) {
-        // Filtr podle jména technika (Milan Kolín nebo Radek Zikmund)
-        if ($filters['technician'] === 'Milan Kolín') {
-            $conditions[] = "{$prefix}technik_milan_kolin > 0";
-        } elseif ($filters['technician'] === 'Radek Zikmund') {
-            $conditions[] = "{$prefix}technik_radek_zikmund > 0";
+        // Filtr podle ID nebo user_id technika z wgs_users
+        // Frontend může poslat buď číselné ID nebo user_id string
+        if (is_numeric($filters['technician'])) {
+            // Číselné ID - přímé porovnání
+            $conditions[] = "{$prefix}zpracoval_id = :technician_id";
+        } else {
+            // String user_id - subquery
+            $conditions[] = "{$prefix}zpracoval_id IN (SELECT id FROM wgs_users WHERE user_id = :technician_id AND role = 'technik')";
         }
     }
 
@@ -496,7 +495,9 @@ function buildParams($filters) {
         $params[':salesperson'] = $filters['salesperson'];
     }
 
-    // Technik se filtruje přímo v WHERE (technik_milan_kolin > 0), nepotřebujeme parametr
+    if (!empty($filters['technician'])) {
+        $params[':technician_id'] = $filters['technician'];
+    }
 
     if (!empty($filters['date_from'])) {
         $params[':date_from'] = $filters['date_from'];
