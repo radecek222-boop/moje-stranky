@@ -828,14 +828,14 @@ async function sendToCustomer() {
     showNotif("success", "Odesílám email...");
 
     const protocolPdf = await generateProtocolPDF();
-    const protocolBase64 = btoa(protocolPdf.output("arraybuffer"));
+    const protocolBase64 = protocolPdf.output("datauristring").split(",")[1];
 
     let photosBase64 = null;
 
     if (attachedPhotos.length > 0) {
       logger.log(`📸 Vytvářím PDF z ${attachedPhotos.length} fotek...`);
       const photosPdf = await generatePhotosPDF();
-      photosBase64 = btoa(photosPdf.output("arraybuffer"));
+      photosBase64 = photosPdf.output("datauristring").split(",")[1];
       logger.log('✅ PDF s fotkami vytvořeno');
     } else {
       logger.log('ℹ️ Žádné fotky k přiložení');
