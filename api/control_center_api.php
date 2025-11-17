@@ -133,24 +133,35 @@ try {
         }
     }
 
-    // Actions které VYŽADUJÍ existenci VŠECH ACC tabulek
-    // SMTP config actions jsou VYŇATY - potřebují pouze wgs_system_config
-    $actionsRequiringTables = [
-        'save_theme', 'get_pending_actions', 'execute_action', 'complete_action', 'dismiss_action',
-        'get_content_texts', 'save_content_text'
+    // OPRAVA: Každá akce vyžaduje pouze specifické tabulky, ne všechny
+    // Mapování akcí na jejich požadované tabulky
+    $actionTableRequirements = [
+        'save_theme' => ['wgs_theme_settings'],
+        'get_pending_actions' => ['wgs_pending_actions'],
+        'execute_action' => ['wgs_pending_actions'], // Pouze pending_actions, history je optional
+        'complete_action' => ['wgs_pending_actions'],
+        'dismiss_action' => ['wgs_pending_actions'],
+        'get_content_texts' => ['wgs_content_texts'],
+        'save_content_text' => ['wgs_content_texts']
     ];
 
-    // Pokud tabulky chybí a action je v seznamu vyžadujících tabulky, vrátit info
-    if (!empty($missingTables) && in_array($action, $actionsRequiringTables)) {
-        http_response_code(503); // Service Unavailable
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Admin Control Center není nainstalován',
-            'error_code' => 'TABLES_MISSING',
-            'missing_tables' => $missingTables,
-            'action_required' => 'Spusťte instalaci na /install_admin_control_center.php'
-        ]);
-        exit;
+    // Kontrola specifických tabulek pro danou akci
+    if (isset($actionTableRequirements[$action])) {
+        $requiredForAction = $actionTableRequirements[$action];
+        $missingForAction = array_intersect($requiredForAction, $missingTables);
+
+        if (!empty($missingForAction)) {
+            http_response_code(503); // Service Unavailable
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Chybí požadované databázové tabulky pro tuto akci',
+                'error_code' => 'TABLES_MISSING',
+                'missing_tables' => $missingForAction,
+                'action' => $action,
+                'action_required' => 'Spusťte instalaci na /install_admin_control_center.php nebo použijte migrační skripty'
+            ]);
+            exit;
+        }
     }
 
     switch ($action) {
@@ -472,17 +483,22 @@ try {
                     'user_id' => $_SESSION['user_id'] ?? null
                 ]);
 
-                // Přidat do historie
-                $pdo->prepare("
-                    INSERT INTO wgs_action_history (action_id, action_type, action_title, status, executed_by, execution_time)
-                    VALUES (:action_id, :action_type, :action_title, 'completed', :user_id, :exec_time)
-                ")->execute([
-                    'action_id' => $actionId,
-                    'action_type' => $action['action_type'],
-                    'action_title' => $action['action_title'],
-                    'user_id' => $_SESSION['user_id'] ?? null,
-                    'exec_time' => $executionTime
-                ]);
+                // Přidat do historie (optional - pokud tabulka neexistuje, nezastaví to akci)
+                try {
+                    $pdo->prepare("
+                        INSERT INTO wgs_action_history (action_id, action_type, action_title, status, executed_by, execution_time)
+                        VALUES (:action_id, :action_type, :action_title, 'completed', :user_id, :exec_time)
+                    ")->execute([
+                        'action_id' => $actionId,
+                        'action_type' => $action['action_type'],
+                        'action_title' => $action['action_title'],
+                        'user_id' => $_SESSION['user_id'] ?? null,
+                        'exec_time' => $executionTime
+                    ]);
+                } catch (PDOException $e) {
+                    // Historie není kritická - logovat a pokračovat
+                    error_log("Failed to log action history: " . $e->getMessage());
+                }
 
                 echo json_encode([
                     'status' => 'success',
@@ -498,18 +514,22 @@ try {
                 ");
                 $stmt->execute(['action_id' => $actionId]);
 
-                // Přidat do historie jako failed
-                $pdo->prepare("
-                    INSERT INTO wgs_action_history (action_id, action_type, action_title, status, executed_by, execution_time, error_message)
-                    VALUES (:action_id, :action_type, :action_title, 'failed', :user_id, :exec_time, :error)
-                ")->execute([
-                    'action_id' => $actionId,
-                    'action_type' => $action['action_type'],
-                    'action_title' => $action['action_title'],
-                    'user_id' => $_SESSION['user_id'] ?? null,
-                    'exec_time' => $executionTime,
-                    'error' => $executeResult['message']
-                ]);
+                // Přidat do historie jako failed (optional)
+                try {
+                    $pdo->prepare("
+                        INSERT INTO wgs_action_history (action_id, action_type, action_title, status, executed_by, execution_time, error_message)
+                        VALUES (:action_id, :action_type, :action_title, 'failed', :user_id, :exec_time, :error)
+                    ")->execute([
+                        'action_id' => $actionId,
+                        'action_type' => $action['action_type'],
+                        'action_title' => $action['action_title'],
+                        'user_id' => $_SESSION['user_id'] ?? null,
+                        'exec_time' => $executionTime,
+                        'error' => $executeResult['message']
+                    ]);
+                } catch (PDOException $e) {
+                    error_log("Failed to log action history (failed): " . $e->getMessage());
+                }
 
                 throw new Exception($executeResult['message']);
             }
@@ -536,16 +556,20 @@ try {
                 'user_id' => $_SESSION['user_id'] ?? null
             ]);
 
-            // Přidat do historie
-            $pdo->prepare("
-                INSERT INTO wgs_action_history (action_id, action_type, action_title, status, executed_by)
-                SELECT id, action_type, action_title, 'completed', :user_id
-                FROM wgs_pending_actions
-                WHERE id = :action_id
-            ")->execute([
-                'action_id' => $actionId,
-                'user_id' => $_SESSION['user_id'] ?? null
-            ]);
+            // Přidat do historie (optional)
+            try {
+                $pdo->prepare("
+                    INSERT INTO wgs_action_history (action_id, action_type, action_title, status, executed_by)
+                    SELECT id, action_type, action_title, 'completed', :user_id
+                    FROM wgs_pending_actions
+                    WHERE id = :action_id
+                ")->execute([
+                    'action_id' => $actionId,
+                    'user_id' => $_SESSION['user_id'] ?? null
+                ]);
+            } catch (PDOException $e) {
+                error_log("Failed to log action history (completed): " . $e->getMessage());
+            }
 
             echo json_encode([
                 'status' => 'success',
