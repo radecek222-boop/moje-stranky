@@ -30,11 +30,13 @@ try {
     $stmt = $pdo->query("SELECT COUNT(*) as count FROM wgs_users");
     $usersCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0;
 
-    // Počet online uživatelů (aktivity za posledních 15 minut)
+    // Počet online uživatelů (aktivní tokeny za posledních 15 minut)
+    // POZNÁMKA: wgs_sessions tabulka byla odstraněna, používáme wgs_tokens
     $stmt = $pdo->query("
         SELECT COUNT(DISTINCT user_id) as count
-        FROM wgs_sessions
-        WHERE last_activity >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)
+        FROM wgs_tokens
+        WHERE expires_at > NOW()
+        AND created_at >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)
     ");
     $onlineCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0;
 
