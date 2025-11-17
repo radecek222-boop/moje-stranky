@@ -48,7 +48,14 @@ try {
             exit;
         }
     } catch (Exception $e) {
-        error_log("Rate limiter failed in admin API: " . $e->getMessage());
+        error_log("CRITICAL: Rate limiter failed in admin API: " . $e->getMessage());
+        // SECURITY: Rate limiter failure is critical - block request
+        http_response_code(503);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Systémová chyba - zkuste později'
+        ]);
+        exit;
     }
 
     // Načtení JSON dat
@@ -135,6 +142,10 @@ function getActionModule(string $action): ?string
     // Maintenance
     $maintenanceActions = ['clear_cache', 'cleanup_logs', 'archive_logs', 'optimize_database'];
 
+    // Data Listing (keys, users, reklamace)
+    $dataActions = ['list_keys', 'create_key', 'delete_key',
+                    'list_users', 'list_reklamace'];
+
     // Diagnostics (všechny check_* a ostatní)
     $diagnosticsActions = ['check_php_files', 'check_js_errors', 'check_database',
                           'get_recent_errors', 'check_permissions', 'check_security',
@@ -142,7 +153,7 @@ function getActionModule(string $action): ?string
                           'check_dependencies', 'check_configuration', 'check_git_status',
                           'check_database_advanced', 'check_performance', 'check_code_quality',
                           'check_seo', 'check_workflow', 'security_scan', 'check_code_analysis',
-                          'ping'];
+                          'ping', 'log_client_error'];
 
     if (in_array($action, $themeActions)) {
         return 'theme';
@@ -158,6 +169,10 @@ function getActionModule(string $action): ?string
 
     if (in_array($action, $maintenanceActions)) {
         return 'maintenance';
+    }
+
+    if (in_array($action, $dataActions)) {
+        return 'data';
     }
 
     if (in_array($action, $diagnosticsActions)) {
