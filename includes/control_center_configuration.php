@@ -12,10 +12,10 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 $pdo = getDbConnection();
 $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
-// Načtení konfigurace
+// Načtení konfigurace (pouze 'system' - ostatní skupiny jsou v jiných kartách)
 $configs = [];
 try {
-    $stmt = $pdo->query("SELECT * FROM wgs_system_config ORDER BY config_group, config_key");
+    $stmt = $pdo->query("SELECT * FROM wgs_system_config WHERE config_group = 'system' ORDER BY config_key");
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $group = $row['config_group'];
         if (!isset($configs[$group])) {
@@ -40,10 +40,8 @@ try {
     $configs = [];
 }
 
-// Group names (EMAIL/SMTP přesunuto do karty "Emaily & SMS")
+// Group names (EMAIL/SMTP přesunuto do "Email & SMS", API/Security přesunuto do "Security")
 $groupNames = [
-    'api_keys' => 'API Klíče',
-    'security' => 'Bezpečnost',
     'system' => 'Systém'
 ];
 ?>
@@ -87,96 +85,6 @@ $groupNames = [
                 </div>
             </div>
         <?php else: ?>
-
-            <!-- API KEYS -->
-            <?php if (isset($configs['api_keys'])): ?>
-                <div class="setting-group">
-                    <h3 class="setting-group-title"><?= $groupNames['api_keys'] ?></h3>
-
-                    <?php foreach ($configs['api_keys'] as $config): ?>
-                        <div class="setting-item">
-                            <div class="setting-item-left">
-                                <div class="setting-item-label">
-                                    <?= htmlspecialchars($config['config_key']) ?>
-                                </div>
-                                <div class="setting-item-description">
-                                    <?= htmlspecialchars($config['description']) ?>
-                                </div>
-                            </div>
-                            <div class="setting-item-right" style="min-width: 300px;">
-                                <?php if ($config['is_editable']): ?>
-                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                        <input type="password"
-                                               class="cc-input"
-                                               id="config-<?= $config['id'] ?>"
-                                               value="<?= htmlspecialchars($config['config_value']) ?>"
-                                               placeholder="<?= $config['config_value_display'] ?>"
-                                               style="flex: 1; font-family: monospace;">
-                                        <button class="cc-btn cc-btn-sm cc-btn-secondary"
-                                                onclick="togglePasswordVisibility(<?= $config['id'] ?>)">
-                                            Zobrazit
-                                        </button>
-                                        <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                                onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')">
-                                            
-                                        </button>
-                                    </div>
-                                    <div id="save-status-<?= $config['id'] ?>" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
-                                <?php else: ?>
-                                    <span style="color: #999; font-family: monospace;">
-                                        <?= $config['config_value_display'] ?>
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
-
-            <!-- SECURITY -->
-            <?php if (isset($configs['security'])): ?>
-                <div class="setting-group">
-                    <h3 class="setting-group-title"><?= $groupNames['security'] ?></h3>
-
-                    <?php foreach ($configs['security'] as $config): ?>
-                        <div class="setting-item">
-                            <div class="setting-item-left">
-                                <div class="setting-item-label">
-                                    <?= htmlspecialchars($config['config_key']) ?>
-                                    <?php if ($config['requires_restart']): ?>
-                                        <span style="background: #FFC107; color: #000; padding: 2px 6px; border-radius: 8px; font-size: 0.7rem; margin-left: 0.5rem;">
-                                            Restart
-                                        </span>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="setting-item-description">
-                                    <?= htmlspecialchars($config['description']) ?>
-                                </div>
-                            </div>
-                            <div class="setting-item-right" style="min-width: 200px;">
-                                <?php if ($config['is_editable']): ?>
-                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                        <input type="number"
-                                               class="cc-input"
-                                               id="config-<?= $config['id'] ?>"
-                                               value="<?= htmlspecialchars($config['config_value']) ?>"
-                                               style="width: 100px;">
-                                        <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                                onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')">
-                                            
-                                        </button>
-                                    </div>
-                                    <div id="save-status-<?= $config['id'] ?>" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
-                                <?php else: ?>
-                                    <span style="color: #999;">
-                                        <?= $config['config_value_display'] ?>
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
 
             <!-- SYSTEM -->
             <?php if (isset($configs['system'])): ?>

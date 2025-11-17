@@ -25,7 +25,7 @@ if (!function_exists('loadAdminNavigation')) {
             ],
             'keys' => [
                 'href' => 'admin.php?tab=keys',
-                'tab_label' => 'Registrační klíče',
+                'tab_label' => 'Security',
                 'tab' => 'keys',
             ],
             'users' => [
