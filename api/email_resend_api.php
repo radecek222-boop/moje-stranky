@@ -13,7 +13,8 @@ header('Content-Type: application/json; charset=utf-8');
 
 // KRITICKÉ: Pouze pro administrátory
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
-    sendJsonError('Nedostatečná oprávnění', 403);
+    respondError('Nedostatečná oprávnění', 403);
+    exit;
 }
 
 // Přečíst JSON data
@@ -21,28 +22,33 @@ $input = file_get_contents('php://input');
 $data = json_decode($input, true);
 
 if (!$data) {
-    sendJsonError('Neplatná JSON data');
+    respondError('Neplatná JSON data', 400);
+    exit;
 }
 
 // CSRF ochrana
 if (!validateCSRFToken($data['csrf_token'] ?? '')) {
-    sendJsonError('Neplatný CSRF token', 403);
+    respondError('Neplatný CSRF token', 403);
+    exit;
 }
 
 // Validace vstupních dat
 if (!isset($data['email_ids']) || !is_array($data['email_ids'])) {
-    sendJsonError('Chybí email_ids pole');
+    respondError('Chybí email_ids pole', 400);
+    exit;
 }
 
 $emailIds = array_filter($data['email_ids'], 'is_numeric');
 
 if (count($emailIds) === 0) {
-    sendJsonError('Nebyly poskytnuty žádné platné ID emailů');
+    respondError('Nebyly poskytnuty žádné platné ID emailů', 400);
+    exit;
 }
 
 // Limit max 100 emailů najednou
 if (count($emailIds) > 100) {
-    sendJsonError('Maximální počet emailů je 100 najednou');
+    respondError('Maximální počet emailů je 100 najednou', 400);
+    exit;
 }
 
 try {
@@ -70,12 +76,12 @@ try {
     // Log akce
     error_log("Admin resent $affectedRows emails: " . implode(',', $emailIds));
 
-    sendJsonSuccess("Úspěšně přesunuto $affectedRows emailů zpět do fronty", [
+    respondSuccess([
         'count' => $affectedRows,
         'email_ids' => $emailIds
-    ]);
+    ], "Úspěšně přesunuto $affectedRows emailů zpět do fronty", 200);
 
 } catch (PDOException $e) {
     error_log("Email resend API error: " . $e->getMessage());
-    sendJsonError('Chyba při zpracování požadavku');
+    respondError('Chyba při zpracování požadavku', 500);
 }
