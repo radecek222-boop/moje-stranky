@@ -663,6 +663,10 @@ function loadAnalyticsModal() {
  */
 function loadKeysModal() {
     const modalBody = document.getElementById('adminModalBody');
+    if (!modalBody) {
+        console.error('adminModalBody element nenalezen');
+        return;
+    }
 
     modalBody.innerHTML = `
         <div class="cc-actions">
@@ -720,6 +724,10 @@ function loadKeysModal() {
  */
 function loadUsersModal() {
     const modalBody = document.getElementById('adminModalBody');
+    if (!modalBody) {
+        console.error('adminModalBody element nenalezen');
+        return;
+    }
 
     modalBody.innerHTML = `
         <div class="cc-actions">
@@ -778,7 +786,11 @@ function loadUsersModal() {
  * LoadNotificationsModal
  */
 function loadNotificationsModal() {
-    const modalBody = document.getElementById('ccModalBody');
+    const modalBody = document.getElementById('adminModalBody');
+    if (!modalBody) {
+        console.error('adminModalBody element nenalezen');
+        return;
+    }
     const url = getEmbedUrlWithCSRF("admin.php?tab=notifications&embed=1");
     modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Email & SMS notifikace"></iframe></div>`;
 }
@@ -788,6 +800,10 @@ function loadNotificationsModal() {
  */
 function loadClaimsModal() {
     const modalBody = document.getElementById('adminModalBody');
+    if (!modalBody) {
+        console.error('adminModalBody element nenalezen');
+        return;
+    }
 
     modalBody.innerHTML = `
         <div class="cc-mini-stats">
@@ -841,8 +857,12 @@ function loadClaimsModal() {
  * LoadActionsModal
  */
 function loadActionsModal() {
-    const modalBody = document.getElementById('ccModalBody');
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_actions&embed=1");
+    const modalBody = document.getElementById('adminModalBody');
+    if (!modalBody) {
+        console.error('adminModalBody element nenalezen');
+        return;
+    }
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_actions&embed=1");
     modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Akce & Úkoly"></iframe></div>`;
 }
 
@@ -850,7 +870,11 @@ function loadActionsModal() {
  * LoadDiagnosticsModal
  */
 function loadDiagnosticsModal() {
-    const modalBody = document.getElementById('ccModalBody');
+    const modalBody = document.getElementById('adminModalBody');
+    if (!modalBody) {
+        console.error('adminModalBody element nenalezen');
+        return;
+    }
     const url = getEmbedUrlWithCSRF("admin.php?tab=tools&embed=1");
     modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Diagnostika systému"></iframe></div>`;
 }
@@ -859,8 +883,12 @@ function loadDiagnosticsModal() {
  * LoadConsoleModal
  */
 function loadConsoleModal() {
-    const modalBody = document.getElementById('ccModalBody');
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_console&embed=1");
+    const modalBody = document.getElementById('adminModalBody');
+    if (!modalBody) {
+        console.error('adminModalBody element nenalezen');
+        return;
+    }
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_console&embed=1");
     modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Konzole - Developer Tools"></iframe></div>`;
 }
 
@@ -868,8 +896,12 @@ function loadConsoleModal() {
  * LoadTestingModal
  */
 function loadTestingModal() {
-    const modalBody = document.getElementById('ccModalBody');
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_testing_interactive&embed=1");
+    const modalBody = document.getElementById('adminModalBody');
+    if (!modalBody) {
+        console.error('adminModalBody element nenalezen');
+        return;
+    }
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_testing_interactive&embed=1");
     modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Testovací prostředí"></iframe></div>`;
 }
 
@@ -877,27 +909,39 @@ function loadTestingModal() {
  * LoadAppearanceModal
  */
 function loadAppearanceModal() {
-    const modalBody = document.getElementById('ccModalBody');
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_appearance&embed=1");
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" title="Vzhled & Design"></iframe></div>`;
+    const modalBody = document.getElementById('adminModalBody');
+    if (!modalBody) {
+        console.error('adminModalBody element nenalezen');
+        return;
+    }
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_appearance&embed=1");
+    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Vzhled & Design"></iframe></div>`;
 }
 
 /**
  * LoadContentModal
  */
 function loadContentModal() {
-    const modalBody = document.getElementById('ccModalBody');
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_content&embed=1");
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" title="Obsah & Texty"></iframe></div>`;
+    const modalBody = document.getElementById('adminModalBody');
+    if (!modalBody) {
+        console.error('adminModalBody element nenalezen');
+        return;
+    }
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_content&embed=1");
+    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Obsah & Texty"></iframe></div>`;
 }
 
 /**
  * LoadConfigModal
  */
 function loadConfigModal() {
-    const modalBody = document.getElementById('ccModalBody');
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_configuration&embed=1");
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" title="Konfigurace systému"></iframe></div>`;
+    const modalBody = document.getElementById('adminModalBody');
+    if (!modalBody) {
+        console.error('adminModalBody element nenalezen');
+        return;
+    }
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_configuration&embed=1");
+    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Konfigurace systému"></iframe></div>`;
 }
 
 // === ACTION HANDLERS ===
