@@ -542,6 +542,8 @@ async function logClientError(error, context = '') {
  * OpenCCModal
  */
 function openCCModal(section) {
+    console.log('[openCCModal] Opening modal for section:', section);
+
     const overlay = document.getElementById('adminOverlay');
     const modal = document.getElementById('adminModal');
     const modalBody = document.getElementById('adminModalBody');
@@ -552,13 +554,19 @@ function openCCModal(section) {
         return;
     }
 
+    console.log('[openCCModal] Elements found:', { overlay: !!overlay, modal: !!modal, modalBody: !!modalBody });
+
     // Show overlay and modal
     overlay.classList.add('active');
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 
+    console.log('[openCCModal] Modal activated, classes added');
+
     // Show loading
     modalBody.innerHTML = '<div class="cc-modal-loading"><div class="cc-modal-spinner"></div><div style="margin-top: 1rem;">Načítání...</div></div>';
+
+    console.log('[openCCModal] Loading spinner shown');
 
     // Load section content
     switch(section) {
@@ -647,13 +655,16 @@ function getEmbedUrlWithCSRF(baseUrl) {
  * LoadStatisticsModal
  */
 function loadStatisticsModal() {
+    console.log('[loadStatisticsModal] Starting to load statistics');
     const modalBody = document.getElementById('adminModalBody');
     if (!modalBody) {
-        console.error('adminModalBody element nenalezen');
+        console.error('[loadStatisticsModal] adminModalBody element nenalezen');
         return;
     }
     const url = getEmbedUrlWithCSRF('statistiky.php?embed=1');
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin" title="Statistiky reklamací"></iframe></div>`;
+    console.log('[loadStatisticsModal] Loading URL:', url);
+    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Statistiky reklamací"></iframe></div>`;
+    console.log('[loadStatisticsModal] Iframe HTML set');
 }
 
 /**
@@ -666,7 +677,7 @@ function loadAnalyticsModal() {
         return;
     }
     const url = getEmbedUrlWithCSRF("analytics.php?embed=1");
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin" title="Web Analytics"></iframe></div>`;
+    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Web Analytics"></iframe></div>`;
 }
 
 /**
@@ -887,7 +898,7 @@ function loadDiagnosticsModal() {
         return;
     }
     const url = getEmbedUrlWithCSRF("admin.php?tab=tools&embed=1");
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Diagnostika systému"></iframe></div>`;
+    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Diagnostika systému"></iframe></div>`;
 }
 
 /**
@@ -900,7 +911,7 @@ function loadConsoleModal() {
         return;
     }
     const url = getEmbedUrlWithCSRF("admin.php?tab=admin_console&embed=1");
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Konzole - Developer Tools"></iframe></div>`;
+    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Konzole - Developer Tools"></iframe></div>`;
 }
 
 /**
