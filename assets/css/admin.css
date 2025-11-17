@@ -445,6 +445,44 @@
   margin-bottom: 2rem;
 }
 
+/* Stats Grid - Dashboard Statistics Cards */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--cc-bg-secondary);
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius);
+  padding: 1.5rem;
+  text-align: center;
+  transition: var(--cc-transition);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--cc-shadow-sm);
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cc-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--cc-primary);
+  line-height: 1;
+}
+
 /* ============================================
    CONTROL CARD (iOS-style)
    ============================================ */
