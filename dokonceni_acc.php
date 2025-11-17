@@ -137,7 +137,8 @@ try {
     if (isset($_GET['execute']) && $_GET['execute'] === '1') {
         echo "<div class='info'><strong>FÁZE 2: SPOUŠTÍM MIGRACI...</strong></div>";
 
-        $pdo->beginTransaction();
+        // POZNÁMKA: DDL příkazy (ALTER TABLE, CREATE TABLE) v MySQL způsobují automatický COMMIT
+        // Proto nepoužíváme beginTransaction() - není potřeba pro DDL operace
 
         try {
             $provedeneOperace = [];
@@ -204,8 +205,6 @@ try {
                 $provedeneOperace[] = "✅ Vytvořena tabulka <code>wgs_github_webhooks</code>";
             }
 
-            $pdo->commit();
-
             echo "<div class='success'>";
             echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
             echo "<div class='step-title'>Provedené operace:</div>";
@@ -247,12 +246,17 @@ try {
             echo "<a href='zjisti_chybejici_tabulky.php' class='btn' style='background: #6c757d;'>📊 Zkontrolovat stav</a>";
 
         } catch (PDOException $e) {
-            $pdo->rollBack();
+            // DDL příkazy (ALTER TABLE, CREATE TABLE) nejsou transakční v MySQL
+            // Pokud některý příkaz selhal, předchozí změny již byly commitnuty
             echo "<div class='error'>";
             echo "<strong>❌ CHYBA PŘI MIGRACI:</strong><br>";
             echo htmlspecialchars($e->getMessage());
+            echo "<br><br>";
+            echo "<strong>POZNÁMKA:</strong> Pokud některé operace proběhly úspěšně před chybou, ";
+            echo "byly již uloženy do databáze. Zkontrolujte aktuální stav pomocí diagnostického nástroje.";
             echo "</div>";
             echo "<a href='dokonceni_acc.php' class='btn'>🔄 Zkusit znovu</a>";
+            echo "<a href='zjisti_chybejici_tabulky.php' class='btn' style='background: #6c757d;'>📊 Zkontrolovat stav</a>";
         }
     } else {
         // Náhled co bude provedeno
