@@ -80,7 +80,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
 <div class="control-detail active">
     <!-- Header -->
     <div class="control-detail-header">
-        <button class="control-detail-back" onclick="window.location.href='admin.php?tab=control_center'">
+        <button class="control-detail-back" onclick="window.location.href='admin.php'">
             <span>‹</span>
             <span>Zpět</span>
         </button>

@@ -130,7 +130,7 @@ header('Content-Type: text/html; charset=utf-8');
         echo '</div>';
         echo '<div class="box">';
         echo '<a href="/verify_and_cleanup.php"><button class="safe">← Zpět na Verification</button></a>';
-        echo '<a href="/admin.php?tab=control_center"><button class="safe">← Zpět do Admin Panel</button></a>';
+        echo '<a href="/admin.php"><button class="safe">← Zpět do Admin Panel</button></a>';
         echo '</div>';
 
     } else {
@@ -197,7 +197,7 @@ header('Content-Type: text/html; charset=utf-8');
 
             echo '<div class="box">';
             echo '<a href="/verify_and_cleanup.php"><button class="safe">📋 Zobrazit detailní přehled</button></a>';
-            echo '<a href="/admin.php?tab=control_center"><button class="safe">← Zpět do Admin Panel</button></a>';
+            echo '<a href="/admin.php"><button class="safe">← Zpět do Admin Panel</button></a>';
             echo '</div>';
 
         } catch (Exception $e) {

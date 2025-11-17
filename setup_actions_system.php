@@ -388,7 +388,7 @@ echo '<li>🔧 Spravovat pending actions z administrace</li>';
 echo '<li>📊 Sledovat historii vykonaných akcí</li>';
 echo '<li>🔗 Integrovat GitHub webhooks pro automatické úkoly</li>';
 echo '</ul>';
-echo '<a href="admin.php?tab=control_center" class="btn success">→ Otevřít Control Center</a>';
+echo '<a href="admin.php" class="btn success">→ Otevřít Control Center</a>';
 echo '</div>';
 
 ?>

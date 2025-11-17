@@ -271,7 +271,7 @@ function openSection(section) {
         openCCModal(section);
     } else {
         // Fallback to redirect if openCCModal not available
-        window.location.href = `admin.php?tab=control_center&section=${section}`;
+        window.location.href = 'admin.php';
     }
 }
 

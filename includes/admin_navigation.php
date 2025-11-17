@@ -8,7 +8,7 @@ if (!function_exists('loadAdminNavigation')) {
     {
         return [
             'control_center' => [
-                'href' => 'admin.php?tab=control_center',
+                'href' => 'admin.php',
                 'header_label' => 'CONTROL CENTER',
                 'tab_label' => 'Control Center',
                 'tab' => 'control_center',

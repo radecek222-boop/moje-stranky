@@ -3,5 +3,5 @@
  * Admin adresář redirect
  * Přesměruje na hlavní admin panel
  */
-header('Location: ../admin.php?tab=control_center');
+header('Location: ../admin.php');
 exit;

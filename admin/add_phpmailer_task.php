@@ -28,7 +28,7 @@ try {
     if ($existing) {
         if ($existing['status'] === 'pending' || $existing['status'] === 'in_progress') {
             echo "✓ Úkol na instalaci PHPMailer už existuje (ID: {$existing['id']})\n";
-            echo "➜ Jdi do admin.php?tab=control_center a klikni na 'Akce & Úkoly'\n";
+            echo "➜ Jdi do admin.php a klikni na 'Akce & Úkoly'\n";
             exit;
         } else {
             echo "⚠ Úkol existuje, ale má status: {$existing['status']}\n";
@@ -71,7 +71,7 @@ try {
     echo "==========================================\n";
     echo "\n";
     echo "Nebo spusť přímo:\n";
-    echo "https://www.wgs-service.cz/admin.php?tab=control_center&detail=actions\n";
+    echo "https://www.wgs-service.cz/admin.php&detail=actions\n";
 
 } catch (PDOException $e) {
     echo "❌ CHYBA: " . $e->getMessage() . "\n";
