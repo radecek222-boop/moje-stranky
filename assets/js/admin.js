@@ -899,7 +899,7 @@ async function executeAction(actionId) {
 
     if (DEBUG_MODE) console.log('[executeAction] Sending request with payload:', payload);
 
-    fetch('api/control_center_api.php?action=execute_action', {
+    fetch('api/admin.php?action=execute_action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -964,7 +964,7 @@ function completeAction(actionId) {
         return;
     }
 
-    fetch('api/control_center_api.php?action=complete_action', {
+    fetch('api/admin.php?action=complete_action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -996,7 +996,7 @@ function dismissAction(actionId) {
         return;
     }
 
-    fetch('api/control_center_api.php?action=dismiss_action', {
+    fetch('api/admin.php?action=dismiss_action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
