@@ -1,4 +1,4 @@
-<?php}
+<?php
 
 /**
  * Backward compatibility - funkce pro staré API
