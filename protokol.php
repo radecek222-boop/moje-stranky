@@ -342,6 +342,9 @@ if ($initialBootstrapData) {
 
 <!-- Lokální signature-pad (nahrazuje blokovaný CDN) -->
 <script src="assets/js/signature-pad-simple.js"></script>
+<!-- Fix pro globální scope signaturePad -->
+<script src="assets/js/protokol-signature-fix.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" defer></script>
@@ -413,5 +416,7 @@ if ($initialBootstrapData) {
 <script src="assets/js/protokol-data-patch.js" defer></script>
 <script src="assets/js/protokol.min.js" defer></script>
 <script src="assets/js/protokol-fakturace-patch.js" defer></script>
+<!-- Fix pro tlačítka (načíst až po protokol.min.js) -->
+<script src="assets/js/protokol-buttons-fix.js" defer></script>
 </body>
 </html>
