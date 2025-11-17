@@ -170,9 +170,9 @@ function getPriorityBadge($priority) {
                         Výborná práce! Všechny úkoly jsou dokončené.
                         <div style="margin-top: 1rem;">
                             <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                    onclick="window.open('aktualizuj_akce_ukoly.php', '_blank')"
+                                    onclick="window.open('add_optimization_tasks.php', '_blank')"
                                     style="font-size: 0.85rem; padding: 0.5rem 1rem;">
-                                📦 Přidat úkol: Instalace PHPMailer
+                                📦 Přidat úkoly optimalizace
                             </button>
                         </div>
                     </div>
