@@ -46,6 +46,37 @@ let attachedPhotos = [];
 let currentReklamaceId = null;
 let currentReklamace = null;
 
+async function fetchCsrfToken() {
+  if (typeof getCSRFToken === 'function') {
+    try {
+      const token = await getCSRFToken();
+      if (token) {
+        return token;
+      }
+    } catch (err) {
+      logger?.warn?.('CSRF token z getCSRFToken selhal:', err);
+    }
+  }
+
+  if (typeof getCSRFTokenFromMeta === 'function') {
+    const metaToken = getCSRFTokenFromMeta();
+    if (metaToken) {
+      return metaToken;
+    }
+  }
+
+  const fallbackMeta = document.querySelector('meta[name="csrf-token"]');
+  if (fallbackMeta) {
+    const token = fallbackMeta.getAttribute('content');
+    if (token) {
+      window.csrfTokenCache = token;
+      return token;
+    }
+  }
+
+  throw new Error('CSRF token není k dispozici. Obnovte stránku a zkuste to znovu.');
+}
+
 window.addEventListener("DOMContentLoaded", async () => {
   logger.log('🚀 Inicializace protokolu...');
   initSignaturePad();
@@ -101,8 +132,12 @@ function initSignaturePad() {
   const canvas = document.getElementById("signature-pad");
   const resize = () => {
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
-    canvas.width = canvas.offsetWidth * ratio;
-    canvas.height = canvas.offsetHeight * ratio;
+    const rect = canvas.getBoundingClientRect();
+    const cssWidth = rect.width;
+    const cssHeight = rect.height;
+
+    canvas.width = cssWidth * ratio;
+    canvas.height = cssHeight * ratio;
     canvas.getContext("2d").scale(ratio, ratio);
   };
   window.addEventListener("resize", resize);
@@ -743,13 +778,15 @@ async function exportBothPDFs() {
     // Označit jako hotovou
     logger.log('📋 Označuji reklamaci jako hotovou...');
     try {
+      const csrfToken = await fetchCsrfToken();
       const markResponse = await fetch('app/controllers/save.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           action: 'update',
           id: currentReklamaceId,
-          mark_as_completed: '1'
+          mark_as_completed: '1',
+          csrf_token: csrfToken
         })
       });
 
@@ -789,6 +826,8 @@ async function sendToCustomer() {
       logger.log('ℹ️ Žádné fotky k přiložení');
     }
 
+    const csrfToken = await fetchCsrfToken();
+
     const response = await fetch("api/protokol_api.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -796,7 +835,8 @@ async function sendToCustomer() {
         action: "send_email",
         reklamace_id: currentReklamaceId,
         protokol_pdf: protocolBase64,
-        photos_pdf: photosBase64
+        photos_pdf: photosBase64,
+        csrf_token: csrfToken
       })
     });
 
@@ -813,7 +853,8 @@ async function sendToCustomer() {
         body: new URLSearchParams({
           action: 'update',
           id: currentReklamaceId,
-          mark_as_completed: '1'
+          mark_as_completed: '1',
+          csrf_token: csrfToken
         })
       });
 
@@ -853,6 +894,7 @@ async function sendToCustomer() {
 
 async function saveProtokolToDB() {
   try {
+    const csrfToken = await fetchCsrfToken();
     const response = await fetch("api/protokol_api.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -862,7 +904,8 @@ async function saveProtokolToDB() {
         problem_description: document.getElementById("problem-cz").value,
         repair_proposal: document.getElementById("repair-cz").value,
         solved: document.getElementById("solved").value,
-        technician: document.getElementById("technician").value
+        technician: document.getElementById("technician").value,
+        csrf_token: csrfToken
       })
     });
 
