@@ -117,27 +117,7 @@ try {
   <?php if ($activeTab === 'dashboard'): ?>
   <!-- TAB: DASHBOARD -->
   <div id="tab-dashboard" class="tab-content">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Reklamace</div>
-        <div class="stat-value" id="stat-claims">0</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-label">Uživatelé</div>
-        <div class="stat-value" id="stat-users">0</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-label">Online</div>
-        <div class="stat-value" id="stat-online">0</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-label">Aktivní klíče</div>
-        <div class="stat-value" id="stat-keys">0</div>
-      </div>
-    </div>
+    <!-- Dashboard statistics removed per user request -->
   </div>
   <?php endif; ?>
   
