@@ -45,6 +45,34 @@ if (document.readyState === 'loading') {
 safeLogger.log('✅ admin.js loaded');
 
 // ============================================================
+// GLOBAL ERROR HANDLER
+// ============================================================
+window.addEventListener('error', (event) => {
+  // Nelogovat externí skripty (např. Google Analytics)
+  if (event.filename && !event.filename.includes(window.location.origin)) {
+    return;
+  }
+
+  const error = {
+    message: event.message,
+    lineno: event.lineno,
+    colno: event.colno,
+    stack: event.error ? event.error.stack : ''
+  };
+
+  logClientError(error, 'global-error-handler');
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  const error = {
+    message: event.reason instanceof Error ? event.reason.message : String(event.reason),
+    stack: event.reason instanceof Error ? event.reason.stack : ''
+  };
+
+  logClientError(error, 'unhandled-promise-rejection');
+});
+
+// ============================================================
 // NAVIGATION - data-navigate buttons
 // ============================================================
 function setupNavigation() {
@@ -94,6 +122,7 @@ async function loadDashboard() {
     }
   } catch (error) {
     logger.error('Dashboard load error:', error);
+    logClientError(error, 'loadDashboard');
   }
 }
 
@@ -156,6 +185,7 @@ async function loadUsers() {
   } catch (error) {
     tbody.innerHTML = '<tr><td colspan="7" class="error-message">Chyba načítání</td></tr>';
     logger.error('Users load error:', error);
+    logClientError(error, 'loadUsers');
   }
 }
 
@@ -229,6 +259,7 @@ async function addUser() {
     errorDiv.textContent = 'Chyba při vytváření uživatele';
     errorDiv.classList.remove('hidden');
     logger.error('Add user error:', error);
+    logClientError(error, 'addUser');
   }
 }
 
@@ -269,6 +300,7 @@ async function deleteUser(userId) {
   } catch (error) {
     alert('Chyba při mazání uživatele');
     logger.error('Delete user error:', error);
+    logClientError(error, 'deleteUser');
   }
 }
 
@@ -324,6 +356,7 @@ async function loadOnline() {
   } catch (error) {
     tbody.innerHTML = '<tr><td colspan="5" class="error-message">Chyba načítání</td></tr>';
     logger.error('Online load error:', error);
+    logClientError(error, 'loadOnlineUsers');
   }
 }
 
@@ -447,14 +480,60 @@ function getCSRFToken() {
     return tokenStr;
 }
 
+/**
+ * logClientError - Loguje chyby z klientského JavaScriptu na server
+ * @param {Error|string} error - Chyba nebo chybová zpráva
+ * @param {string} context - Kontext chyby (volitelný)
+ */
+async function logClientError(error, context = '') {
+    try {
+        const errorData = {
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : '',
+            url: window.location.href,
+            line: error.lineno || 0,
+            column: error.colno || 0,
+            context: context,
+            timestamp: new Date().toISOString()
+        };
+
+        // Získat CSRF token
+        const csrfToken = getCSRFToken();
+        if (!csrfToken) {
+            console.error('Cannot log error: CSRF token not found');
+            return;
+        }
+
+        // Odeslat na server
+        const response = await fetch('/api/admin.php?action=log_client_error', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                ...errorData,
+                csrf_token: csrfToken
+            }),
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+            console.error('Failed to log client error:', response.status);
+        }
+    } catch (logError) {
+        // Pokud selže logování, nezpůsobovat další chyby
+        console.error('Error logging failed:', logError);
+    }
+}
+
 // Open modal with specific section
 /**
  * OpenCCModal
  */
 function openCCModal(section) {
-    const overlay = document.getElementById('ccOverlay');
-    const modal = document.getElementById('ccModal');
-    const modalBody = document.getElementById('ccModalBody');
+    const overlay = document.getElementById('adminOverlay');
+    const modal = document.getElementById('adminModal');
+    const modalBody = document.getElementById('adminModalBody');
 
     // Show overlay and modal
     overlay.classList.add('active');
@@ -513,8 +592,8 @@ function openCCModal(section) {
  * CloseCCModal
  */
 function closeCCModal() {
-    const overlay = document.getElementById('ccOverlay');
-    const modal = document.getElementById('ccModal');
+    const overlay = document.getElementById('adminOverlay');
+    const modal = document.getElementById('adminModal');
 
     overlay.classList.remove('active');
     modal.classList.remove('active');
@@ -551,7 +630,7 @@ function getEmbedUrlWithCSRF(baseUrl) {
  * LoadStatisticsModal
  */
 function loadStatisticsModal() {
-    const modalBody = document.getElementById('ccModalBody');
+    const modalBody = document.getElementById('adminModalBody');
     const url = getEmbedUrlWithCSRF('statistiky.php?embed=1');
     modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin" title="Statistiky reklamací"></iframe></div>`;
 }
@@ -560,7 +639,7 @@ function loadStatisticsModal() {
  * LoadAnalyticsModal
  */
 function loadAnalyticsModal() {
-    const modalBody = document.getElementById('ccModalBody');
+    const modalBody = document.getElementById('adminModalBody');
     const url = getEmbedUrlWithCSRF("analytics.php?embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin" title="Web Analytics"></iframe></div>';
 }
 
@@ -568,7 +647,7 @@ function loadAnalyticsModal() {
  * LoadKeysModal
  */
 function loadKeysModal() {
-    const modalBody = document.getElementById('ccModalBody');
+    const modalBody = document.getElementById('adminModalBody');
 
     modalBody.innerHTML = `
         <div class="cc-actions">
@@ -625,11 +704,11 @@ function loadKeysModal() {
  * LoadUsersModal
  */
 function loadUsersModal() {
-    const modalBody = document.getElementById('ccModalBody');
+    const modalBody = document.getElementById('adminModalBody');
 
     modalBody.innerHTML = `
         <div class="cc-actions">
-            <input type="text" class="search-box" id="ccSearchUsers" placeholder="Hledat uživatele..." style="flex: 1; max-width: 300px;">
+            <input type="text" class="search-box" id="adminSearchUsers" placeholder="Hledat uživatele..." style="flex: 1; max-width: 300px;">
             <button class="btn btn-sm btn-success" onclick="window.location.href='admin.php?tab=users'">+ Přidat uživatele</button>
             <button class="btn btn-sm" onclick="loadUsersModal()">Obnovit</button>
         </div>
@@ -684,7 +763,7 @@ function loadUsersModal() {
  * LoadNotificationsModal
  */
 function loadNotificationsModal() {
-    const modalBody = document.getElementById('ccModalBody');
+    const modalBody = document.getElementById('adminModalBody');
     const url = getEmbedUrlWithCSRF("admin.php?tab=notifications&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Email & SMS notifikace"></iframe></div>';
 }
 
@@ -692,24 +771,24 @@ function loadNotificationsModal() {
  * LoadClaimsModal
  */
 function loadClaimsModal() {
-    const modalBody = document.getElementById('ccModalBody');
+    const modalBody = document.getElementById('adminModalBody');
 
     modalBody.innerHTML = `
         <div class="cc-mini-stats">
             <div class="cc-mini-stat">
-                <div class="cc-mini-stat-value" id="ccClaimsWait">-</div>
+                <div class="cc-mini-stat-value" id="adminClaimsWait">-</div>
                 <div class="cc-mini-stat-label">Čekající</div>
             </div>
             <div class="cc-mini-stat">
-                <div class="cc-mini-stat-value" id="ccClaimsOpen">-</div>
+                <div class="cc-mini-stat-value" id="adminClaimsOpen">-</div>
                 <div class="cc-mini-stat-label">Otevřené</div>
             </div>
             <div class="cc-mini-stat">
-                <div class="cc-mini-stat-value" id="ccClaimsDone">-</div>
+                <div class="cc-mini-stat-value" id="adminClaimsDone">-</div>
                 <div class="cc-mini-stat-label">Dokončené</div>
             </div>
             <div class="cc-mini-stat">
-                <div class="cc-mini-stat-value" id="ccClaimsTotal"><?= $totalClaims ?></div>
+                <div class="cc-mini-stat-value" id="adminClaimsTotal"><?= $totalClaims ?></div>
                 <div class="cc-mini-stat-label">Celkem</div>
             </div>
         </div>
@@ -732,9 +811,9 @@ function loadClaimsModal() {
                 const open = claims.filter(c => c.stav === 'DOMLUVENÁ').length;
                 const done = claims.filter(c => c.stav === 'HOTOVO').length;
 
-                document.getElementById('ccClaimsWait').textContent = wait;
-                document.getElementById('ccClaimsOpen').textContent = open;
-                document.getElementById('ccClaimsDone').textContent = done;
+                document.getElementById('adminClaimsWait').textContent = wait;
+                document.getElementById('adminClaimsOpen').textContent = open;
+                document.getElementById('adminClaimsDone').textContent = done;
             }
         })
         .catch(err => {
@@ -746,7 +825,7 @@ function loadClaimsModal() {
  * LoadActionsModal
  */
 function loadActionsModal() {
-    const modalBody = document.getElementById('ccModalBody');
+    const modalBody = document.getElementById('adminModalBody');
     const url = getEmbedUrlWithCSRF("admin.php?tab=admin_actions&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Akce & Úkoly"></iframe></div>';
 }
 
@@ -754,7 +833,7 @@ function loadActionsModal() {
  * LoadDiagnosticsModal
  */
 function loadDiagnosticsModal() {
-    const modalBody = document.getElementById('ccModalBody');
+    const modalBody = document.getElementById('adminModalBody');
     const url = getEmbedUrlWithCSRF("admin.php?tab=tools&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Diagnostika systému"></iframe></div>';
 }
 
@@ -762,7 +841,7 @@ function loadDiagnosticsModal() {
  * LoadConsoleModal
  */
 function loadConsoleModal() {
-    const modalBody = document.getElementById('ccModalBody');
+    const modalBody = document.getElementById('adminModalBody');
     const url = getEmbedUrlWithCSRF("admin.php?tab=admin_console&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Konzole - Developer Tools"></iframe></div>';
 }
 
@@ -770,7 +849,7 @@ function loadConsoleModal() {
  * LoadTestingModal
  */
 function loadTestingModal() {
-    const modalBody = document.getElementById('ccModalBody');
+    const modalBody = document.getElementById('adminModalBody');
     const url = getEmbedUrlWithCSRF("admin.php?tab=admin_testing_interactive&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Testovací prostředí"></iframe></div>';
 }
 
@@ -778,7 +857,7 @@ function loadTestingModal() {
  * LoadAppearanceModal
  */
 function loadAppearanceModal() {
-    const modalBody = document.getElementById('ccModalBody');
+    const modalBody = document.getElementById('adminModalBody');
     const url = getEmbedUrlWithCSRF("admin.php?tab=admin_appearance&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Vzhled & Design"></iframe></div>';
 }
 
@@ -786,7 +865,7 @@ function loadAppearanceModal() {
  * LoadContentModal
  */
 function loadContentModal() {
-    const modalBody = document.getElementById('ccModalBody');
+    const modalBody = document.getElementById('adminModalBody');
     const url = getEmbedUrlWithCSRF("admin.php?tab=admin_content&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Obsah & Texty"></iframe></div>';
 }
 
@@ -794,7 +873,7 @@ function loadContentModal() {
  * LoadConfigModal
  */
 function loadConfigModal() {
-    const modalBody = document.getElementById('ccModalBody');
+    const modalBody = document.getElementById('adminModalBody');
     const url = getEmbedUrlWithCSRF("admin.php?tab=admin_configuration&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Konfigurace systému"></iframe></div>';
 }
 
@@ -1106,11 +1185,11 @@ document.addEventListener('keydown', (e) => {
  * Inicializace loading indikátorů na všechny cc-card elementy
  */
 function initCardLoadingStates() {
-    const cards = document.querySelectorAll('.cc-card');
+    const cards = document.querySelectorAll('.admin-card');
 
     cards.forEach(card => {
         // Přidat loading div pokud ještě neexistuje
-        if (!card.querySelector('.cc-card-loader')) {
+        if (!card.querySelector('.admin-card-loader')) {
             const loader = document.createElement('div');
             loader.className = 'cc-card-loader';
             loader.innerHTML = '<div class="cc-card-loader-spinner"></div>';
@@ -1138,7 +1217,7 @@ function initCardLoadingStates() {
  */
 function activateCardLoading(card) {
     card.classList.add('loading');
-    const loader = card.querySelector('.cc-card-loader');
+    const loader = card.querySelector('.admin-card-loader');
     if (loader) {
         loader.classList.add('active');
     }
@@ -1149,7 +1228,7 @@ function activateCardLoading(card) {
  */
 function deactivateCardLoading(card) {
     card.classList.remove('loading');
-    const loader = card.querySelector('.cc-card-loader');
+    const loader = card.querySelector('.admin-card-loader');
     if (loader) {
         loader.classList.remove('active');
     }
@@ -1159,7 +1238,7 @@ function deactivateCardLoading(card) {
  * Deaktivovat loading na všech kartách
  */
 function deactivateAllCardLoading() {
-    document.querySelectorAll('.cc-card.loading').forEach(card => {
+    document.querySelectorAll('.admin-card.loading').forEach(card => {
         deactivateCardLoading(card);
     });
 }

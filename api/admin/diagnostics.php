@@ -146,6 +146,79 @@ switch ($action) {
         ]);
         break;
 
+    case 'log_client_error':
+        // Logování chyb z klientského JavaScriptu
+        try {
+            $errorMessage = $data['message'] ?? 'Neznámá chyba';
+            $errorStack = $data['stack'] ?? '';
+            $errorUrl = $data['url'] ?? $_SERVER['HTTP_REFERER'] ?? 'unknown';
+            $errorLine = $data['line'] ?? 0;
+            $errorColumn = $data['column'] ?? 0;
+            $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+            $timestamp = date('Y-m-d H:i:s');
+
+            // Formát log záznamu
+            $logEntry = sprintf(
+                "[%s] CLIENT ERROR: %s | Stack: %s | URL: %s | Line: %d | Column: %d | UA: %s\n",
+                $timestamp,
+                $errorMessage,
+                substr($errorStack, 0, 500), // Omezení délky stacku
+                $errorUrl,
+                $errorLine,
+                $errorColumn,
+                $userAgent
+            );
+
+            // Zápis do logu
+            $logFile = __DIR__ . '/../../logs/client_errors.log';
+            $logDir = dirname($logFile);
+
+            // Vytvoření složky, pokud neexistuje
+            if (!is_dir($logDir)) {
+                mkdir($logDir, 0755, true);
+            }
+
+            // Zápis do souboru
+            $written = file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
+
+            if ($written === false) {
+                throw new Exception('Nepodařilo se zapsat do logu');
+            }
+
+            // Pro kritické chyby také zapsat do databáze (volitelné)
+            if (stripos($errorMessage, 'critical') !== false ||
+                stripos($errorMessage, 'fatal') !== false) {
+
+                $stmt = $pdo->prepare("
+                    INSERT INTO wgs_client_errors
+                    (error_message, error_stack, error_url, error_line, error_column, user_agent, created_at)
+                    VALUES (:message, :stack, :url, :line, :column, :user_agent, NOW())
+                ");
+
+                $stmt->execute([
+                    'message' => substr($errorMessage, 0, 500),
+                    'stack' => substr($errorStack, 0, 2000),
+                    'url' => substr($errorUrl, 0, 500),
+                    'line' => $errorLine,
+                    'column' => $errorColumn,
+                    'user_agent' => substr($userAgent, 0, 255)
+                ]);
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Chyba zalogována'
+            ]);
+
+        } catch (Exception $e) {
+            error_log("Failed to log client error: " . $e->getMessage());
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Nepodařilo se zalogovat chybu'
+            ]);
+        }
+        break;
+
     default:
         http_response_code(404);
         echo json_encode([

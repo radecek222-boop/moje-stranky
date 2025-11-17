@@ -153,7 +153,7 @@ function getActionModule(string $action): ?string
                           'check_dependencies', 'check_configuration', 'check_git_status',
                           'check_database_advanced', 'check_performance', 'check_code_quality',
                           'check_seo', 'check_workflow', 'security_scan', 'check_code_analysis',
-                          'ping'];
+                          'ping', 'log_client_error'];
 
     if (in_array($action, $themeActions)) {
         return 'theme';
