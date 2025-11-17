@@ -95,6 +95,7 @@ try {
   <link rel="stylesheet" href="assets/css/admin.min.css">
 <link rel="stylesheet" href="assets/css/admin-header.css">
 <link rel="stylesheet" href="assets/css/admin-notifications.css">
+<link rel="stylesheet" href="assets/css/control-center-unified.css">
 <link rel="stylesheet" href="assets/css/control-center-modal.css">
 <link rel="stylesheet" href="assets/css/control-center-mobile.css">
 
