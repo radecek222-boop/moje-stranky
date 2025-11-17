@@ -138,7 +138,12 @@ try {
   <?php endif; ?>
   
   <?php if ($activeTab === 'notifications'): ?>
-  <!-- TAB: NOTIFICATIONS -->
+  <!-- TAB: EMAIL & SMS MANAGEMENT -->
+  <?php require_once __DIR__ . '/includes/control_center_email_sms.php'; ?>
+  <?php endif; ?>
+
+  <?php if ($activeTab === 'notifications_old'): ?>
+  <!-- STARÁ VERZE (backup) -->
   <div id="tab-notifications" class="tab-content">
 
     <style>
