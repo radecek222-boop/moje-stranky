@@ -316,7 +316,7 @@ if ($initialBootstrapData) {
     </div>
   </div>
 
-  <button class="btn-clear" type="button" data-action="signaturePad.clear">Vymazat podpis</button>
+  <button class="btn-clear" type="button" data-action="clearSignaturePad">Vymazat podpis</button>
   <div class="section-title">Podpis zákazníka<span class="en-label">Customer signature</span></div>
   <canvas id="signature-pad"></canvas>
   <div class="signature-label">Podepište se prstem nebo myší</div>
@@ -340,7 +340,8 @@ if ($initialBootstrapData) {
 </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.6/dist/signature_pad.umd.min.js" defer></script>
+<!-- Lokální signature-pad (nahrazuje blokovaný CDN) -->
+<script src="assets/js/signature-pad-simple.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" defer></script>
