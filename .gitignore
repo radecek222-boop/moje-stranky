@@ -19,6 +19,11 @@ node_modules/
 # PHP dependencies
 vendor/
 
+# PHPUnit & Test Coverage
+.phpunit.cache/
+coverage/
+phpunit.xml.dist
+
 # System Files
 .DS_Store
 
