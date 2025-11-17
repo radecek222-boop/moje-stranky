@@ -352,7 +352,7 @@ try {
      */
 function openNotifModal(type) {
         const overlay = document.getElementById('notifModalOverlay');
-        const modal = overlay.querySelector('.cc-modal');
+        const modal = overlay.querySelector('.admin-modal');
         const title = document.getElementById('notifModalTitle');
         const body = document.getElementById('notifModalBody');
 
@@ -384,7 +384,7 @@ function openNotifModal(type) {
      */
 function closeNotifModal() {
         const overlay = document.getElementById('notifModalOverlay');
-        const modal = overlay.querySelector('.cc-modal');
+        const modal = overlay.querySelector('.admin-modal');
 
         // Skrýt modal - remove active classes
         overlay.classList.remove('active');
@@ -699,7 +699,7 @@ function loadNotifContent(type, body) {
       <div class="page-header">
           <p class="page-subtitle">Centrální řídicí panel pro správu celé aplikace</p>
           <div class="page-header-actions">
-              <span class="cc-version-info" id="ccVersionInfo" title="Verze Control Center - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
+              <span class="cc-version-info" id="adminVersionInfo" title="Verze Control Center - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
               <button class="cc-clear-cache-btn" onclick="clearCacheAndReload()" title="Vymaže lokální cache a načte nejnovější verzi">
                   🔄 Vymazat cache & Reload
               </button>
@@ -791,12 +791,12 @@ function loadNotifContent(type, body) {
   </div>
 
   <!-- Overlay & Modal -->
-  <div class="cc-overlay" id="ccOverlay" onclick="closeCCModal()"></div>
-  <div class="cc-modal" id="ccModal">
+  <div class="cc-overlay" id="adminOverlay" onclick="closeCCModal()"></div>
+  <div class="cc-modal" id="adminModal">
       <div class="cc-modal-header">
           <button class="cc-modal-close" onclick="closeCCModal()" aria-label="Zavřít">×</button>
       </div>
-      <div class="cc-modal-body" id="ccModalBody">
+      <div class="cc-modal-body" id="adminModalBody">
           <div class="cc-modal-loading">
               <div class="cc-modal-spinner"></div>
               <div style="margin-top: 1rem;">Načítání...</div>
@@ -984,7 +984,7 @@ function loadNotifContent(type, body) {
           <input type="email" class="form-input" id="new-cc-email" placeholder="novy@email.cz" style="flex: 1;">
           <button class="btn btn-sm" onclick="addCCEmail()">+ Přidat</button>
         </div>
-        <div id="cc-emails-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
+        <div id="admin-emails-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
       </div>
       <div class="form-group">
         <label class="form-label">Skryté kopie (BCC)</label>
