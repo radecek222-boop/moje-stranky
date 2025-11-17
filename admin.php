@@ -295,12 +295,12 @@ try {
           </div>
         </div>
 
-        <!-- Historie notifikací -->
-        <div class="notif-card" onclick="openNotifModal('notification-history')">
-          <div class="notif-card-title">Historie notifikací</div>
-          <div class="notif-card-description">Přehled odeslaných emailů a SMS s detaily doručení</div>
+        <!-- Email Management -->
+        <div class="notif-card" onclick="window.location.href='email_management.php'">
+          <div class="notif-card-title">Email Management</div>
+          <div class="notif-card-description">Kompletní správa emailů - historie, fronta, selhavší + možnost znovu odeslat</div>
           <div class="notif-card-meta">
-            <span class="notif-card-badge">Poslední 30 dní</span>
+            <span class="notif-card-badge">📧 Historie + Fronta</span>
           </div>
         </div>
 
