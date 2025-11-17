@@ -539,9 +539,9 @@ try {
         </div>
 
         <!-- SQL Databáze -->
-        <div class="cc-card cc-card-content" onclick="window.location.href='vsechny_tabulky.php'">
+        <div class="cc-card cc-card-content" onclick="window.open('vsechny_tabulky.php', '_blank')">
             <div class="cc-card-title">SQL</div>
-            <div class="cc-card-description">Zobrazit všechny SQL tabulky</div>
+            <div class="cc-card-description">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
         </div>
 
         <!-- Konfigurace -->

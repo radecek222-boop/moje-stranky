@@ -44,6 +44,10 @@ try {
             $indexyPrehled[$index['Key_name']][] = $index['Column_name'];
         }
 
+        // CREATE TABLE DDL
+        $stmt = $pdo->query("SHOW CREATE TABLE `$tabulka`");
+        $createTableDDL = $stmt->fetch(PDO::FETCH_ASSOC)['Create Table'] ?? null;
+
         // Velikost tabulky
         $stmt = $pdo->query("
             SELECT
@@ -61,7 +65,8 @@ try {
             'struktura' => $struktura,
             'ukazka' => $ukazkaZaznamu,
             'indexy' => $indexyPrehled,
-            'velikost' => $velikost
+            'velikost' => $velikost,
+            'ddl' => $createTableDDL
         ];
     }
 
@@ -277,6 +282,10 @@ try {
         <div class="header">
             <h1>🗄️ KOMPLETNÍ PŘEHLED VŠECH SQL TABULEK</h1>
             <p style="margin-top: 0.5rem; opacity: 0.9; font-size: 0.95rem;">Databáze: <?php echo htmlspecialchars($_ENV['DB_NAME'] ?? 'wgs-servicecz01'); ?> | Live Production Data</p>
+            <div style="margin-top: 1rem;">
+                <button onclick="exportAllDDL()" style="padding: 0.75rem 1.5rem; background: #fff; color: #000; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em; margin-right: 1rem;">📥 Stáhnout všechny DDL</button>
+                <button onclick="window.print()" style="padding: 0.75rem 1.5rem; background: transparent; color: #fff; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">🖨️ Tisk</button>
+            </div>
         </div>
 
         <div class="content">
@@ -323,6 +332,16 @@ try {
                         <span><strong><?php echo count($detail['indexy']); ?></strong> indexů</span>
                     </div>
                 </div>
+
+                <!-- CREATE TABLE DDL -->
+                <?php if (!empty($detail['ddl'])): ?>
+                <h2>📝 CREATE TABLE (SQL DDL)</h2>
+                <details style="margin: 1rem 0; border: 2px solid #ddd; padding: 1rem; border-radius: 5px;">
+                    <summary style="cursor: pointer; font-weight: 600; user-select: none;">Zobrazit CREATE TABLE příkaz</summary>
+                    <pre style="background: #f5f5f5; padding: 1rem; margin-top: 1rem; overflow-x: auto; border: 1px solid #ddd; border-radius: 3px; font-size: 0.85rem; line-height: 1.5;"><code><?php echo htmlspecialchars($detail['ddl']); ?></code></pre>
+                    <button onclick="navigator.clipboard.writeText(<?php echo htmlspecialchars(json_encode($detail['ddl']), ENT_QUOTES); ?>); this.textContent='✅ Zkopírováno!'; setTimeout(() => this.textContent='📋 Kopírovat do schránky', 2000);" style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #000; color: #fff; border: none; cursor: pointer; font-family: Poppins; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">📋 Kopírovat do schránky</button>
+                </details>
+                <?php endif; ?>
 
                 <!-- STRUKTURA SLOUPCŮ -->
                 <h2>📋 Struktura sloupců</h2>
@@ -430,5 +449,42 @@ try {
             <a href="#top">↑ Nahoru</a>
         </div>
     </div>
+
+    <script>
+    // Export všech DDL do jednoho SQL souboru
+    function exportAllDDL() {
+        const allDDL = <?php echo json_encode(array_map(function($t) {
+            return [
+                'nazev' => $t['nazev'],
+                'ddl' => $t['ddl']
+            ];
+        }, $detailyTabulek)); ?>;
+
+        let sqlContent = "-- WGS Database Export\n";
+        sqlContent += "-- Databáze: <?php echo htmlspecialchars($_ENV['DB_NAME'] ?? 'wgs-servicecz01'); ?>\n";
+        sqlContent += "-- Vygenerováno: " + new Date().toLocaleString('cs-CZ') + "\n";
+        sqlContent += "-- Celkem tabulek: " + allDDL.length + "\n";
+        sqlContent += "-- ============================================\n\n";
+
+        allDDL.forEach((table, index) => {
+            sqlContent += "-- ============================================\n";
+            sqlContent += "-- Tabulka #" + (index + 1) + ": " + table.nazev + "\n";
+            sqlContent += "-- ============================================\n\n";
+            sqlContent += "DROP TABLE IF EXISTS `" + table.nazev + "`;\n\n";
+            sqlContent += table.ddl + ";\n\n\n";
+        });
+
+        // Vytvořit blob a stáhnout
+        const blob = new Blob([sqlContent], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'wgs_database_structure_' + new Date().toISOString().split('T')[0] + '.sql';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    </script>
 </body>
 </html>
