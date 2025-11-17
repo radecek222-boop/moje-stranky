@@ -7,9 +7,41 @@ on:
   workflow_dispatch: # Umožňuje manuální spuštění
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: 🧪 Run Tests
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐘 Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo, pdo_sqlite, mbstring, json
+          coverage: xdebug
+
+      - name: 📦 Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: 🧪 Run PHPUnit tests
+        run: |
+          vendor/bin/phpunit --colors=always --testdox
+          echo "✅ All tests passed!"
+
+      - name: 📊 Generate test coverage report
+        run: vendor/bin/phpunit --coverage-text --colors=never > coverage.txt
+
+      - name: 📈 Display coverage summary
+        run: |
+          echo "📊 Test Coverage Summary:"
+          tail -20 coverage.txt
+
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy via SFTP to Český hosting
+    name: 🚀 Deploy via SFTP
+    needs: test  # ✅ Deploy pouze pokud projdou testy!
 
     steps:
       - name: 📥 Checkout repository
