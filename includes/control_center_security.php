@@ -82,187 +82,222 @@ try {
 <link rel="stylesheet" href="/assets/css/control-center.css">
 
 <style>
-/* Security-specific styles */
+/* Security - Minimalistický černobílý design */
 .security-container {
-    padding: 2rem;
+    padding: 1rem;
     background: #fff;
     min-height: calc(100vh - 200px);
+    font-family: 'Poppins', sans-serif;
 }
 
 .cc-tabs {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 2rem;
-    border-bottom: 2px solid #e0e0e0;
+    gap: 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #000;
     flex-wrap: wrap;
 }
 
 .cc-tab {
-    padding: 0.75rem 1.5rem;
-    background: none;
+    padding: 0.5rem 1rem;
+    background: #fff;
     border: none;
-    border-bottom: 3px solid transparent;
+    border-bottom: 2px solid transparent;
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 500;
+    font-family: 'Poppins', sans-serif;
     color: #666;
     transition: all 0.2s;
 }
 
 .cc-tab:hover {
-    color: #2D5016;
-    background: #f8f9fa;
+    color: #000;
+    background: #f5f5f5;
 }
 
 .cc-tab.active {
-    color: #2D5016;
-    border-bottom-color: #2D5016;
-    background: #f8f9fa;
+    color: #000;
+    border-bottom-color: #000;
+    background: #fff;
 }
 
 .cc-section {
     display: none;
-    animation: fadeIn 0.3s;
 }
 
 .cc-section.active {
     display: block;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
+/* Stats - Minimální černobílý grid */
 .security-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
 }
 
 .stat-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 1.5rem;
-    border-radius: 12px;
-    color: white;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-.stat-card.success {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-}
-
-.stat-card.warning {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.stat-card.info {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: #fff;
+    border: 1px solid #000;
+    padding: 1rem;
+    text-align: center;
 }
 
 .stat-card-value {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    color: #000;
+    margin-bottom: 0.25rem;
 }
 
 .stat-card-label {
-    font-size: 0.9rem;
-    opacity: 0.9;
+    font-size: 0.75rem;
+    font-family: 'Poppins', sans-serif;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
+/* Alert - Minimální design */
 .security-alert {
-    background: #fff3cd;
-    border: 1px solid #ffeaa7;
-    color: #856404;
-    padding: 1rem 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    background: #f5f5f5;
+    border: 1px solid #000;
+    border-left: 3px solid #000;
+    color: #000;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    font-family: 'Poppins', sans-serif;
 }
 
-.security-alert.danger {
-    background: #f8d7da;
-    border-color: #f5c6cb;
-    color: #721c24;
+.security-alert strong {
+    font-weight: 600;
 }
 
-.security-alert-icon {
-    font-size: 1.5rem;
-}
-
-/* Keys table styling */
+/* Tabulky */
 #keys-container table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    font-family: 'Poppins', sans-serif;
 }
 
 #keys-container th,
 #keys-container td {
-    padding: 0.75rem;
+    padding: 0.5rem;
     text-align: left;
     border-bottom: 1px solid #e0e0e0;
 }
 
 #keys-container th {
-    background: #f8f9fa;
-    font-weight: 600;
-    color: #333;
+    background: #000;
+    color: #fff;
+    font-weight: 500;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 #keys-container tr:hover {
-    background: #f8f9fa;
+    background: #f5f5f5;
 }
 
+/* Badges - Černobílé */
 .badge {
     display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .badge-success {
-    background: #d4edda;
-    color: #155724;
+    background: #000;
+    color: #fff;
 }
 
 .badge-danger {
-    background: #f8d7da;
-    color: #721c24;
+    background: #fff;
+    color: #000;
+    border: 1px solid #000;
 }
 
 .badge-warning {
-    background: #fff3cd;
-    color: #856404;
+    background: #e0e0e0;
+    color: #000;
 }
 
 /* User access table */
 .user-access-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    font-family: 'Poppins', sans-serif;
 }
 
 .user-access-table th,
 .user-access-table td {
-    padding: 0.75rem;
+    padding: 0.5rem;
     text-align: left;
     border-bottom: 1px solid #e0e0e0;
 }
 
 .user-access-table th {
-    background: #2D5016;
-    color: white;
-    font-weight: 600;
+    background: #000;
+    color: #fff;
+    font-weight: 500;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .user-access-table tr:hover {
-    background: #f8f9fa;
+    background: #f5f5f5;
+}
+
+/* Setting group minimální */
+.setting-group {
+    margin-bottom: 1.5rem;
+}
+
+.setting-group-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    color: #000;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #000;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 0.85rem;
+}
+
+.setting-item-label {
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    color: #000;
+}
+
+.setting-item-description {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 0.25rem;
 }
 </style>
 
@@ -271,63 +306,61 @@ try {
     <!-- Tab Navigation -->
     <div class="cc-tabs">
         <button class="cc-tab <?= $currentSection === 'prehled' ? 'active' : '' ?>" onclick="switchSection('prehled')">
-            📊 Přehled
+            Přehled
         </button>
         <button class="cc-tab <?= $currentSection === 'registracni_klice' ? 'active' : '' ?>" onclick="switchSection('registracni_klice')">
-            🔑 Registrační klíče
+            Registrační klíče
         </button>
         <button class="cc-tab <?= $currentSection === 'api_klice' ? 'active' : '' ?>" onclick="switchSection('api_klice')">
-            🔐 API Klíče
+            API Klíče
         </button>
         <button class="cc-tab <?= $currentSection === 'bezpecnost' ? 'active' : '' ?>" onclick="switchSection('bezpecnost')">
-            🛡️ Bezpečnostní nastavení
+            Bezpečnost
         </button>
         <button class="cc-tab <?= $currentSection === 'uzivatele' ? 'active' : '' ?>" onclick="switchSection('uzivatele')">
-            👥 Uživatelé & Přístupy
+            Uživatelé
         </button>
         <button class="cc-tab <?= $currentSection === 'audit' ? 'active' : '' ?>" onclick="switchSection('audit')">
-            📝 Audit Log
+            Audit Log
         </button>
     </div>
 
     <!-- SEKCE: PŘEHLED -->
     <div id="section-prehled" class="cc-section <?= $currentSection === 'prehled' ? 'active' : '' ?>">
-        <h2 style="margin-bottom: 1.5rem; color: #2D5016;">🔒 Security Dashboard</h2>
+        <h2 style="margin-bottom: 0.75rem; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Security Dashboard</h2>
 
         <!-- Security Alert -->
         <div class="security-alert">
-            <div class="security-alert-icon">⚠️</div>
             <div>
-                <strong>Vysoká úroveň zabezpečení aktivní</strong><br>
-                Všechny citlivé údaje jsou maskovány. Pouze admin má přístup k této kartě.
+                <strong>Vysoká úroveň zabezpečení</strong> - Všechny citlivé údaje jsou maskovány. Pouze admin má přístup.
             </div>
         </div>
 
         <!-- Statistiky -->
         <div class="security-stats">
-            <div class="stat-card success">
+            <div class="stat-card">
                 <div class="stat-card-value"><?= $stats['registracni_klice_aktivni'] ?> / <?= $stats['registracni_klice_celkem'] ?></div>
-                <div class="stat-card-label">Aktivní registrační klíče</div>
+                <div class="stat-card-label">Registrační klíče</div>
             </div>
-            <div class="stat-card info">
+            <div class="stat-card">
                 <div class="stat-card-value"><?= $stats['uzivatele_aktivni'] ?> / <?= $stats['uzivatele_celkem'] ?></div>
                 <div class="stat-card-label">Aktivní uživatelé</div>
             </div>
             <div class="stat-card">
                 <div class="stat-card-value"><?= $stats['api_klice_celkem'] ?></div>
-                <div class="stat-card-label">Nakonfigurované API klíče</div>
+                <div class="stat-card-label">API klíče</div>
             </div>
-            <div class="stat-card warning">
+            <div class="stat-card">
                 <div class="stat-card-value">
                     <?php if ($stats['posledni_prihlaseni']): ?>
                         <?= date('H:i', strtotime($stats['posledni_prihlaseni']['last_login'])) ?>
                     <?php else: ?>
-                        N/A
+                        -
                     <?php endif; ?>
                 </div>
                 <div class="stat-card-label">
                     <?php if ($stats['posledni_prihlaseni']): ?>
-                        Poslední přihlášení: <?= htmlspecialchars($stats['posledni_prihlaseni']['email']) ?>
+                        <?= htmlspecialchars($stats['posledni_prihlaseni']['email']) ?>
                     <?php else: ?>
                         Žádná přihlášení
                     <?php endif; ?>
@@ -337,19 +370,19 @@ try {
 
         <!-- Quick Actions -->
         <div class="setting-group">
-            <h3 class="setting-group-title">🚀 Rychlé akce</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                <button class="cc-btn cc-btn-primary" onclick="switchSection('registracni_klice')">
-                    🔑 Spravovat klíče
+            <h3 class="setting-group-title">Rychlé akce</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem;">
+                <button class="cc-btn cc-btn-primary" onclick="switchSection('registracni_klice')" style="font-size: 0.8rem; padding: 0.5rem;">
+                    Spravovat klíče
                 </button>
-                <button class="cc-btn cc-btn-secondary" onclick="switchSection('uzivatele')">
-                    👥 Zobrazit uživatele
+                <button class="cc-btn cc-btn-secondary" onclick="switchSection('uzivatele')" style="font-size: 0.8rem; padding: 0.5rem;">
+                    Zobrazit uživatele
                 </button>
-                <button class="cc-btn cc-btn-secondary" onclick="switchSection('audit')">
-                    📝 Audit Log
+                <button class="cc-btn cc-btn-secondary" onclick="switchSection('audit')" style="font-size: 0.8rem; padding: 0.5rem;">
+                    Audit Log
                 </button>
-                <button class="cc-btn cc-btn-secondary" onclick="switchSection('api_klice')">
-                    🔐 API Klíče
+                <button class="cc-btn cc-btn-secondary" onclick="switchSection('api_klice')" style="font-size: 0.8rem; padding: 0.5rem;">
+                    API Klíče
                 </button>
             </div>
         </div>
@@ -357,19 +390,17 @@ try {
 
     <!-- SEKCE: REGISTRAČNÍ KLÍČE -->
     <div id="section-registracni_klice" class="cc-section <?= $currentSection === 'registracni_klice' ? 'active' : '' ?>">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <h2 style="margin: 0; color: #2D5016;">🔑 Registrační klíče</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <h2 style="margin: 0; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Registrační klíče</h2>
             <div style="display: flex; gap: 0.5rem;">
-                <button class="cc-btn cc-btn-success" id="createKeyBtn">+ Nový klíč</button>
-                <button class="cc-btn cc-btn-secondary" id="refreshKeysBtn">🔄 Obnovit</button>
+                <button class="cc-btn cc-btn-success" id="createKeyBtn" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">+ Nový</button>
+                <button class="cc-btn cc-btn-secondary" id="refreshKeysBtn" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">Obnovit</button>
             </div>
         </div>
 
-        <div class="cc-alert info">
-            <div class="cc-alert-icon">ℹ️</div>
+        <div class="security-alert">
             <div>
-                <strong>Registrační klíče řídí přístup k registraci</strong><br>
-                Pouze uživatelé s platným klíčem se mohou zaregistrovat. Sledujte využití a deaktivujte podezřelé klíče.
+                <strong>Registrační klíče řídí přístup</strong> - Pouze uživatelé s platným klíčem se mohou zaregistrovat.
             </div>
         </div>
 
@@ -380,13 +411,11 @@ try {
 
     <!-- SEKCE: API KLÍČE -->
     <div id="section-api_klice" class="cc-section <?= $currentSection === 'api_klice' ? 'active' : '' ?>">
-        <h2 style="margin-bottom: 1.5rem; color: #2D5016;">🔐 API Klíče</h2>
+        <h2 style="margin-bottom: 0.75rem; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">API Klíče</h2>
 
-        <div class="security-alert danger">
-            <div class="security-alert-icon">🔴</div>
+        <div class="security-alert">
             <div>
-                <strong>KRITICKÉ: Nikdy nesdílejte API klíče</strong><br>
-                Tyto klíče poskytují přístup k externím službám. Změna klíče vyžaduje restart aplikace.
+                <strong>KRITICKÉ</strong> - Nikdy nesdílejte API klíče. Tyto klíče poskytují přístup k externím službám.
             </div>
         </div>
 
@@ -415,12 +444,14 @@ try {
                                            placeholder="<?= $config['config_value_display'] ?>"
                                            style="flex: 1; font-family: monospace; font-size: 0.85rem;">
                                     <button class="cc-btn cc-btn-sm cc-btn-secondary"
-                                            onclick="togglePasswordVisibility(<?= $config['id'] ?>)">
-                                        👁️ Zobrazit
+                                            onclick="togglePasswordVisibility(<?= $config['id'] ?>)"
+                                            style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                        Zobrazit
                                     </button>
                                     <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                            onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')">
-                                        💾
+                                            onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')"
+                                            style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                        Uložit
                                     </button>
                                 </div>
                                 <div id="save-status-<?= $config['id'] ?>" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
@@ -434,8 +465,7 @@ try {
                 <?php endforeach; ?>
             </div>
         <?php else: ?>
-            <div class="cc-alert info">
-                <div class="cc-alert-icon">ℹ️</div>
+            <div class="security-alert">
                 <div>Žádné API klíče nejsou nakonfigurovány.</div>
             </div>
         <?php endif; ?>
@@ -443,7 +473,7 @@ try {
 
     <!-- SEKCE: BEZPEČNOSTNÍ NASTAVENÍ -->
     <div id="section-bezpecnost" class="cc-section <?= $currentSection === 'bezpecnost' ? 'active' : '' ?>">
-        <h2 style="margin-bottom: 1.5rem; color: #2D5016;">🛡️ Bezpečnostní nastavení</h2>
+        <h2 style="margin-bottom: 0.75rem; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Bezpečnostní nastavení</h2>
 
         <?php if (isset($configs['security']) && !empty($configs['security'])): ?>
             <div class="setting-group">
@@ -469,8 +499,9 @@ try {
                                            value="<?= htmlspecialchars($config['config_value']) ?>"
                                            style="width: 120px;">
                                     <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                            onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')">
-                                        💾
+                                            onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')"
+                                            style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                        Uložit
                                     </button>
                                 </div>
                                 <div id="save-status-<?= $config['id'] ?>" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
@@ -484,8 +515,7 @@ try {
                 <?php endforeach; ?>
             </div>
         <?php else: ?>
-            <div class="cc-alert info">
-                <div class="cc-alert-icon">ℹ️</div>
+            <div class="security-alert">
                 <div>Žádná bezpečnostní nastavení nenalezena.</div>
             </div>
         <?php endif; ?>
@@ -493,13 +523,11 @@ try {
 
     <!-- SEKCE: UŽIVATELÉ & PŘÍSTUPY -->
     <div id="section-uzivatele" class="cc-section <?= $currentSection === 'uzivatele' ? 'active' : '' ?>">
-        <h2 style="margin-bottom: 1.5rem; color: #2D5016;">👥 Uživatelé & Přístupy</h2>
+        <h2 style="margin-bottom: 0.75rem; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Uživatelé & Přístupy</h2>
 
-        <div class="cc-alert info">
-            <div class="cc-alert-icon">ℹ️</div>
+        <div class="security-alert">
             <div>
-                <strong>Správa uživatelských účtů</strong><br>
-                Přehled všech registrovaných uživatelů, jejich rolí a poslední aktivity.
+                <strong>Správa účtů</strong> - Přehled všech registrovaných uživatelů, jejich rolí a poslední aktivity.
             </div>
         </div>
 
@@ -527,19 +555,17 @@ try {
 
     <!-- SEKCE: AUDIT LOG -->
     <div id="section-audit" class="cc-section <?= $currentSection === 'audit' ? 'active' : '' ?>">
-        <h2 style="margin-bottom: 1.5rem; color: #2D5016;">📝 Audit Log</h2>
+        <h2 style="margin-bottom: 0.75rem; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Audit Log</h2>
 
-        <div class="cc-alert warning">
-            <div class="security-alert-icon">⚠️</div>
+        <div class="security-alert">
             <div>
-                <strong>Bezpečnostní audit trail</strong><br>
-                Všechny bezpečnostně relevantní události jsou zaznamenány. Pravidelně kontrolujte podezřelou aktivitu.
+                <strong>Bezpečnostní audit</strong> - Všechny relevantní události jsou zaznamenány. Pravidelně kontrolujte podezřelou aktivitu.
             </div>
         </div>
 
-        <div style="margin-top: 1.5rem; padding: 2rem; background: #f8f9fa; border-radius: 8px; text-align: center;">
-            <h3 style="color: #666; margin-bottom: 1rem;">🚧 Audit Log - V přípravě</h3>
-            <p style="color: #999;">
+        <div style="margin-top: 1rem; padding: 1.5rem; background: #f5f5f5; border: 1px solid #000; text-align: center; font-family: 'Poppins', sans-serif;">
+            <h3 style="color: #000; margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 600;">V PŘÍPRAVĚ</h3>
+            <p style="color: #666; font-size: 0.8rem; line-height: 1.6;">
                 Audit logging bude zaznamenávat:<br>
                 • Přihlášení a odhlášení uživatelů<br>
                 • Změny v registračních klíčích<br>
@@ -621,7 +647,7 @@ async function saveConfig(configId, configKey) {
         const result = await response.json();
 
         if (result.status === 'success') {
-            statusEl.innerHTML = '<span style="color: #28A745;">✅ Uloženo!</span>';
+            statusEl.innerHTML = '<span style="color: #000;">Uloženo</span>';
             setTimeout(() => {
                 statusEl.style.display = 'none';
             }, 2000);
@@ -629,7 +655,7 @@ async function saveConfig(configId, configKey) {
             throw new Error(result.message);
         }
     } catch (error) {
-        statusEl.innerHTML = '<span style="color: #DC3545;">❌ Chyba: ' + error.message + '</span>';
+        statusEl.innerHTML = '<span style="color: #000;">Chyba: ' + error.message + '</span>';
     }
 }
 
@@ -645,7 +671,7 @@ function loadRegistracniKlice() {
     if (typeof loadKeys === 'function') {
         loadKeys();
     } else {
-        container.innerHTML = '<div class="cc-alert warning"><div class="cc-alert-icon">⚠️</div><div>Načítání klíčů vyžaduje reload stránky nebo admin.js</div></div>';
+        container.innerHTML = '<div class="security-alert"><div>Načítání klíčů vyžaduje reload stránky</div></div>';
     }
 }
 
