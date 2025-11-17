@@ -165,31 +165,30 @@ try {
         echo "<h2>🗑️ Odstranění zastaralých sloupců:</h2>";
 
         if (isset($_GET['delete']) && $_GET['delete'] === '1') {
-            echo "<div class='info'><strong>🚀 ODSTRAŇUJI SLOUPCE...</strong></div>";
+            echo "<div class='info'><strong>ODSTRAŇUJI SLOUPCE...</strong></div>";
 
-            $pdo->beginTransaction();
+            // POZNÁMKA: DDL příkazy (ALTER TABLE) v MySQL/MariaDB automaticky commitují transakci
+            // Proto nepoužíváme BEGIN/COMMIT - každý ALTER TABLE je samostatná transakce
 
             try {
                 $pdo->exec("ALTER TABLE wgs_reklamace DROP COLUMN technik_milan_kolin");
-                echo "<div class='success'>✅ Sloupec <code>technik_milan_kolin</code> úspěšně odstraněn</div>";
+                echo "<div class='success'>Sloupec <code>technik_milan_kolin</code> úspěšně odstraněn</div>";
 
                 $pdo->exec("ALTER TABLE wgs_reklamace DROP COLUMN technik_radek_zikmund");
-                echo "<div class='success'>✅ Sloupec <code>technik_radek_zikmund</code> úspěšně odstraněn</div>";
-
-                $pdo->commit();
+                echo "<div class='success'>Sloupec <code>technik_radek_zikmund</code> úspěšně odstraněn</div>";
 
                 echo "<div class='success'>";
-                echo "<strong>🎉 HOTOVO!</strong><br>";
+                echo "<strong>HOTOVO!</strong><br>";
                 echo "Zastaralé sloupce byly odstraněny z databáze.<br>";
                 echo "Systém nyní používá pouze nový přístup: <code>technik</code> + <code>zpracoval_id</code>";
                 echo "</div>";
 
-                echo "<a href='admin.php' class='btn'>← Zpět na admin</a>";
+                echo "<a href='vsechny_tabulky.php' class='btn'>Zpět na SQL přehled</a>";
+                echo "<a href='admin.php' class='btn'>Zpět na admin</a>";
 
             } catch (PDOException $e) {
-                $pdo->rollBack();
                 echo "<div class='error'>";
-                echo "<strong>❌ CHYBA:</strong><br>";
+                echo "<strong>CHYBA:</strong><br>";
                 echo htmlspecialchars($e->getMessage());
                 echo "</div>";
             }
