@@ -538,10 +538,10 @@ try {
             <div class="cc-card-description">Barvy, fonty, logo, branding</div>
         </div>
 
-        <!-- Obsah & Texty -->
-        <div class="cc-card cc-card-content" onclick="openCCModal('content')">
-            <div class="cc-card-title">Obsah & Texty</div>
-            <div class="cc-card-description">Editace textů CZ/EN/SK</div>
+        <!-- SQL Databáze -->
+        <div class="cc-card cc-card-content" onclick="window.location.href='vsechny_tabulky.php'">
+            <div class="cc-card-title">SQL</div>
+            <div class="cc-card-description">Zobrazit všechny SQL tabulky</div>
         </div>
 
         <!-- Konfigurace -->

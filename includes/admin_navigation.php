@@ -64,8 +64,8 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab' => 'control_center_appearance',
             ],
             'control_center_content' => [
-                'href' => 'admin.php?tab=control_center_content',
-                'tab_label' => 'Obsah & Texty',
+                'href' => 'vsechny_tabulky.php',
+                'tab_label' => 'SQL',
                 'tab' => 'control_center_content',
             ],
             'control_center_configuration' => [

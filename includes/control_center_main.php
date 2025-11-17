@@ -86,19 +86,19 @@ try {
             </div>
         </div>
 
-        <!-- 2. OBSAH & TEXTY -->
-        <div class="control-card" data-section="content" onclick="openSection('content')">
+        <!-- 2. SQL DATABÁZE -->
+        <div class="control-card" data-section="sql" onclick="window.location.href='vsechny_tabulky.php'">
             <div class="control-card-header">
                 <div>
-                    <div class="control-card-icon">📝</div>
-                    <h3 class="control-card-title">Obsah & Texty</h3>
-                    <p class="control-card-description">Upravit texty na stránkách</p>
+                    <div class="control-card-icon">🗄️</div>
+                    <h3 class="control-card-title">SQL</h3>
+                    <p class="control-card-description">Zobrazit všechny SQL tabulky</p>
                 </div>
                 <div class="control-card-arrow">›</div>
             </div>
             <div class="control-card-status">
                 <span class="control-card-status-dot green"></span>
-                <span>Editovatelné</span>
+                <span>Aktivní</span>
             </div>
         </div>
 
