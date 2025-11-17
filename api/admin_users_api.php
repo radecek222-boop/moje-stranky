@@ -101,7 +101,7 @@ try {
             $stmt = $pdo->query("
                 SELECT DISTINCT
                     u.user_id as id,
-                    u.jmeno as name,
+                    u.name,
                     u.email,
                     u.role,
                     MAX(t.created_at) as last_activity
@@ -109,7 +109,7 @@ try {
                 JOIN wgs_users u ON t.user_id = u.user_id
                 WHERE t.expires_at > NOW()
                 AND t.created_at >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)
-                GROUP BY u.user_id, u.jmeno, u.email, u.role
+                GROUP BY u.user_id, u.name, u.email, u.role
                 ORDER BY last_activity DESC
             ");
             $onlineUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
