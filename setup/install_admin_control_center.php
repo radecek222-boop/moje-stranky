@@ -16,12 +16,17 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     header('Location: /prihlaseni.php');
     exit;
 }
+
+// Načíst CSRF helper pro generování tokenu
+require_once __DIR__ . '/../includes/csrf_helper.php';
+$csrfToken = generateCSRFToken();
 ?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
     <title>Installation - Admin Control Center</title>
     <link rel="stylesheet" href="/assets/css/control-center.css">
     <style>
@@ -360,9 +365,13 @@ function startInstallation() {
                 addLog('Spouštím migraci migration_admin_control_center.sql...', 'info');
                 setProgress(40);
 
+                // Získat CSRF token z meta tagu
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
                 const formData = new FormData();
                 formData.append('action', 'run_migration');
                 formData.append('migration_file', 'migration_admin_control_center.sql');
+                formData.append('csrf_token', csrfToken);
 
                 const migrationResponse = await fetch('/api/migration_executor.php', {
                     method: 'POST',
