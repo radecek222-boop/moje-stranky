@@ -768,8 +768,10 @@ function loadNotifContent(type, body) {
 
       </div>
   </div>
+  <?php endif; ?>
 
-  <!-- Overlay & Modal -->
+  <!-- Overlay & Modal - MUST be outside dashboard condition so it exists in DOM -->
+  <?php if (!$embedMode): ?>
   <div class="cc-overlay" id="adminOverlay" onclick="closeCCModal()"></div>
   <div class="cc-modal" id="adminModal">
       <div class="cc-modal-header">
