@@ -95,36 +95,26 @@ try {
         ]);
 
     } elseif ($method === 'GET' && $action === 'online') {
-        // Online uživatelé (aktivity za posledních 15 minut)
-        // BEZPEČNOST: Zkontrolovat zda tabulka wgs_sessions existuje
-        $tableCheck = $pdo->query("SHOW TABLES LIKE 'wgs_sessions'");
-        if ($tableCheck->rowCount() === 0) {
-            // Tabulka neexistuje - vrátit prázdný seznam
-            echo json_encode([
-                'status' => 'success',
-                'users' => [],
-                'message' => 'Session tracking not enabled'
-            ]);
-            exit;
-        }
-
+        // Online uživatelé (aktivní tokeny za posledních 15 minut)
+        // POZNÁMKA: wgs_sessions tabulka byla odstraněna, používáme wgs_tokens
         try {
             $stmt = $pdo->query("
                 SELECT DISTINCT
-                    u.id,
-                    u.name,
+                    u.user_id as id,
+                    u.jmeno as name,
                     u.email,
                     u.role,
-                    s.last_activity
-                FROM wgs_sessions s
-                JOIN wgs_users u ON s.user_id = u.id
-                WHERE s.last_activity >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)
-                ORDER BY s.last_activity DESC
+                    MAX(t.created_at) as last_activity
+                FROM wgs_tokens t
+                JOIN wgs_users u ON t.user_id = u.user_id
+                WHERE t.expires_at > NOW()
+                AND t.created_at >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)
+                GROUP BY u.user_id, u.jmeno, u.email, u.role
+                ORDER BY last_activity DESC
             ");
             $onlineUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            // Sloupec last_activity neexistuje - vrátit prázdný seznam
-            error_log("wgs_sessions query failed: " . $e->getMessage());
+            error_log("wgs_tokens query failed: " . $e->getMessage());
             $onlineUsers = [];
         }
 
