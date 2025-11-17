@@ -91,10 +91,9 @@ try {
     <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/admin.min.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
 <link rel="stylesheet" href="assets/css/admin-header.css">
 <link rel="stylesheet" href="assets/css/admin-notifications.css">
-<link rel="stylesheet" href="assets/css/admin.css">
 
   <!-- Error Handler - zachytává všechny chyby -->
   <script src="assets/js/error-handler.js"></script>
