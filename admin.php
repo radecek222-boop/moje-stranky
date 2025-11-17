@@ -622,22 +622,8 @@ function loadNotifContent(type, body) {
   <?php endif; ?>
   
   <?php if ($activeTab === 'keys'): ?>
-  <!-- TAB: KEYS -->
-  <div id="tab-keys" class="tab-content">
-    <div class="table-container">
-      <div class="table-header">
-        <h3 class="table-title">Registrační klíče</h3>
-        <div class="table-actions">
-          <button class="btn btn-sm btn-success" id="createKeyBtn">+ Nový klíč</button>
-          <button class="btn btn-sm" id="refreshKeysBtn">Obnovit</button>
-        </div>
-      </div>
-      
-      <div style="padding: 1.5rem;" id="keys-container">
-        <div class="loading">Načítání klíčů...</div>
-      </div>
-    </div>
-  </div>
+  <!-- TAB: SECURITY - Bezpečnostní centrum -->
+  <?php require_once __DIR__ . '/includes/control_center_security.php'; ?>
   <?php endif; ?>
   
   <?php if ($activeTab === 'users'): ?>
