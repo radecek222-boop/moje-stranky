@@ -166,7 +166,16 @@ function getPriorityBadge($priority) {
                 <div class="cc-alert-icon">✅</div>
                 <div class="cc-alert-content">
                     <div class="cc-alert-title">Žádné nevyřešené úkoly!</div>
-                    <div class="cc-alert-message">Výborná práce! Všechny úkoly jsou dokončené.</div>
+                    <div class="cc-alert-message">
+                        Výborná práce! Všechny úkoly jsou dokončené.
+                        <div style="margin-top: 1rem;">
+                            <button class="cc-btn cc-btn-sm cc-btn-primary"
+                                    onclick="window.open('aktualizuj_akce_ukoly.php', '_blank')"
+                                    style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+                                📦 Přidat úkol: Instalace PHPMailer
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         <?php endif; ?>
@@ -219,7 +228,14 @@ function getPriorityBadge($priority) {
         <!-- COMPLETED ACTIONS -->
         <?php if (count($completedActions) > 0): ?>
             <div class="setting-group">
-                <h3 class="setting-group-title">Nedávno dokončené</h3>
+                <h3 class="setting-group-title">
+                    Nedávno dokončené
+                    <button class="cc-btn cc-btn-sm cc-btn-secondary"
+                            onclick="window.open('vycisti_akce.php', '_blank')"
+                            style="margin-left: 1rem; font-size: 0.75rem; padding: 0.3rem 0.8rem;">
+                        🗑️ Vyčistit dokončené
+                    </button>
+                </h3>
 
                 <?php foreach ($completedActions as $action): ?>
                     <div class="setting-item">

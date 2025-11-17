@@ -68,7 +68,7 @@ try {
         try {
             // KROK 1: Zobrazit aktuální úkoly
             $stmt = $pdo->query("
-                SELECT id, title, priority, status
+                SELECT id, action_title, priority, status
                 FROM wgs_pending_actions
                 WHERE status IN ('pending', 'in_progress')
                 ORDER BY created_at DESC
@@ -79,7 +79,7 @@ try {
                 echo "<div class='step'>";
                 echo "<strong>📋 KROK 1: Nalezené staré úkoly (" . count($oldActions) . ")</strong><br>";
                 foreach ($oldActions as $action) {
-                    echo "• [{$action['priority']}] {$action['title']}<br>";
+                    echo "• [{$action['priority']}] {$action['action_title']}<br>";
                 }
                 echo "</div>";
 
@@ -116,8 +116,8 @@ try {
                 $stmt = $pdo->prepare("
                     INSERT INTO wgs_pending_actions (
                         action_type,
-                        title,
-                        description,
+                        action_title,
+                        action_description,
                         priority,
                         status,
                         created_at,
@@ -181,7 +181,7 @@ try {
 
         // Zobrazit aktuální úkoly
         $stmt = $pdo->query("
-            SELECT id, title, priority, status
+            SELECT id, action_title, priority, status
             FROM wgs_pending_actions
             WHERE status IN ('pending', 'in_progress')
             ORDER BY created_at DESC
@@ -192,7 +192,7 @@ try {
             echo "<div class='info'>";
             echo "<strong>📋 Aktuální úkoly ke smazání (" . count($currentActions) . "):</strong><br>";
             foreach ($currentActions as $action) {
-                echo "• [{$action['priority']}] {$action['title']}<br>";
+                echo "• [{$action['priority']}] {$action['action_title']}<br>";
             }
             echo "</div>";
         } else {
