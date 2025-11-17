@@ -645,7 +645,7 @@ function loadNotifContent(type, body) {
   </div>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'dashboard'): ?>
+  <?php if ($activeTab === 'dashboard' && !$embedMode): ?>
   <!-- TAB: ADMIN DASHBOARD - Unified card grid interface -->
   <?php
   // Načtení dat ze session
