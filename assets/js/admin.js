@@ -394,7 +394,6 @@ function initUserManagement() {
   }
 }
 
-<script>
 // Control Center Unified - Version Check
 // Debug mode - set to false in production
 const DEBUG_MODE = false;
