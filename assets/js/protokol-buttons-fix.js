@@ -1,46 +1,80 @@
 /**
  * FIX: Oprava tlačítek v protokolu
- * Zajišťuje, že všechna tlačítka s data-action fungují
+ * BEZPEČNÝ fallback - kontroluje, jestli už handler existuje
  */
 (function() {
-  console.log('🔧 Protokol Buttons Fix - Inicializace...');
+  console.log('🔧 Protokol Buttons Fix - Kontrola...');
 
-  // Ujistit se, že event delegation je nastaven
+  // Flag pro detekci, jestli už byly handlery nastavené
+  let handlersInitialized = false;
+
+  // Počkat na DOMContentLoaded
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('📋 Protokol Buttons - Nastavuji event listeners...');
+    // Počkat 500ms, aby se protokol.min.js stačil načíst
+    setTimeout(() => {
+      // Test: Zkusit kliknout na testovací element
+      const testDiv = document.createElement('div');
+      testDiv.setAttribute('data-action', 'testAction');
+      testDiv.style.display = 'none';
+      document.body.appendChild(testDiv);
 
-    // Globální handler pro všechna tlačítka s data-action
-    document.addEventListener('click', (event) => {
-      const button = event.target.closest('[data-action]');
-      if (!button) return;
+      // Testovací funkce
+      let testActionCalled = false;
+      window.testAction = function() {
+        testActionCalled = true;
+      };
 
-      const action = button.getAttribute('data-action');
-      console.log(`🔘 Kliknuto na tlačítko s akcí: ${action}`);
+      // Simulovat klik
+      testDiv.click();
 
-      // Zkontrolovat, jestli funkce existuje
-      if (typeof window[action] === 'function') {
-        console.log(`✅ Funkce ${action}() nalezena, volám...`);
-        try {
-          window[action]();
-        } catch (err) {
-          console.error(`❌ Chyba při volání ${action}():`, err);
-        }
-      } else {
-        console.error(`❌ Funkce ${action}() NEEXISTUJE v globálním scope`);
-        console.log('📦 Dostupné funkce:', Object.keys(window).filter(k => typeof window[k] === 'function').slice(0, 20));
+      // Odstranit test element
+      document.body.removeChild(testDiv);
+      delete window.testAction;
+
+      // Pokud testAction byl zavolán, handlers už existují
+      if (testActionCalled) {
+        console.log('✅ Event handlers už fungují (protokol.min.js je aktivní)');
+        handlersInitialized = true;
+        return;
       }
-    });
 
-    // Globální handler pro data-navigate
-    document.addEventListener('click', (event) => {
-      const button = event.target.closest('[data-navigate]');
-      if (!button) return;
+      // Pokud ne, přidat fallback handlers
+      console.warn('⚠️ Event handlers NEFUNGUJÍ - přidávám fallback');
 
-      const url = button.getAttribute('data-navigate');
-      console.log(`🔘 Navigace na: ${url}`);
-      window.location.href = url;
-    });
+      // Fallback handler pro data-action
+      document.addEventListener('click', (event) => {
+        if (handlersInitialized) return; // Zabránit duplicitě
 
-    console.log('✅ Event listeners nastaveny');
+        const button = event.target.closest('[data-action]');
+        if (!button) return;
+
+        const action = button.getAttribute('data-action');
+        console.log(`🔘 [FALLBACK] Kliknuto na: ${action}`);
+
+        if (typeof window[action] === 'function') {
+          try {
+            window[action]();
+          } catch (err) {
+            console.error(`❌ Chyba při volání ${action}():`, err);
+          }
+        } else {
+          console.error(`❌ Funkce ${action}() NEEXISTUJE`);
+        }
+      });
+
+      // Fallback handler pro data-navigate
+      document.addEventListener('click', (event) => {
+        if (handlersInitialized) return; // Zabránit duplicitě
+
+        const button = event.target.closest('[data-navigate]');
+        if (!button) return;
+
+        const url = button.getAttribute('data-navigate');
+        console.log(`🔘 [FALLBACK] Navigace na: ${url}`);
+        window.location.href = url;
+      });
+
+      console.log('✅ Fallback event listeners nastaveny');
+    }, 500); // Počkat 500ms na načtení protokol.min.js
   });
 })();
