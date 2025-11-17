@@ -230,6 +230,17 @@ function copyToClipboard(text) {
 }
 
 function initKeyManagement() {
+  // POZNÁMKA: Stará implementace klíčů byla přesunuta do control_center_security.php
+  // Tam se používají české funkce: nactiRegistracniKlice(), vytvorNovyKlic(), smazatKlic()
+  // Tato funkce je ponechána pro zpětnou kompatibilitu, ale nedělá nic
+
+  // Pokud existuje element 'kontejner-klicu' (nové Security centrum), nic nedělat
+  const novyKontejner = document.getElementById('kontejner-klicu');
+  if (novyKontejner) {
+    return; // Nové Security centrum má vlastní implementaci
+  }
+
+  // Stará implementace (pro zpětnou kompatibilitu s jinými stránkami)
   const createBtn = document.getElementById('createKeyBtn');
   const refreshBtn = document.getElementById('refreshKeysBtn');
 
