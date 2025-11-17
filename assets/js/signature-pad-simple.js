@@ -48,11 +48,12 @@ class SignaturePad {
 
   _ziskejPozici(event) {
     const rect = this.canvas.getBoundingClientRect();
-    const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
+    // DŮLEŽITÉ: Souřadnice NESMÍ být násobeny ratio,
+    // protože context je už scaled (ctx.scale(ratio, ratio))
     return {
-      x: (event.clientX - rect.left) * ratio,
-      y: (event.clientY - rect.top) * ratio
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top
     };
   }
 
