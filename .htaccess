@@ -24,6 +24,8 @@
 
     # Redirect .php requests to extensionless URLs
     RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /([^.]+)\.php\ HTTP
+    # Prevent redirect loops when a directory with the same name exists (e.g. admin.php ↔ /admin)
+    RewriteCond %{DOCUMENT_ROOT}/%1 !-d
     RewriteRule ^(.+)\.php$ /$1 [R=301,L]
 
     # Serve .php files for extensionless URLs
