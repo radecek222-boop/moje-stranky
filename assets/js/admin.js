@@ -394,7 +394,6 @@ function initUserManagement() {
   }
 }
 
-<script>
 // Control Center Unified - Version Check
 // Debug mode - set to false in production
 const DEBUG_MODE = false;
@@ -686,7 +685,8 @@ function loadUsersModal() {
  */
 function loadNotificationsModal() {
     const modalBody = document.getElementById('ccModalBody');
-    const url = getEmbedUrlWithCSRF("admin.php?tab=notifications&embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Email & SMS notifikace"></iframe></div>';
+    const url = getEmbedUrlWithCSRF("admin.php?tab=notifications&embed=1");
+    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Email & SMS notifikace"></iframe></div>`;
 }
 
 /**
