@@ -144,6 +144,15 @@ try {
     margin: 0;
 }
 
+/* Fix pro klikatelné <a> karty - vnitřní elementy neblokují pointer events */
+a.cc-card {
+    display: flex !important;
+}
+
+a.cc-card * {
+    pointer-events: none;
+}
+
 .cc-card-badge {
     position: absolute;
     top: 6px;
@@ -539,7 +548,7 @@ try {
         </div>
 
         <!-- SQL Databáze -->
-        <a href="vsechny_tabulky.php" target="_blank" class="cc-card cc-card-content" style="text-decoration: none; color: inherit; display: block;">
+        <a href="vsechny_tabulky.php" target="_blank" class="cc-card cc-card-content" style="text-decoration: none; color: inherit;">
             <div class="cc-card-title">SQL</div>
             <div class="cc-card-description">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
         </a>
