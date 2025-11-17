@@ -109,10 +109,20 @@ try {
     echo json_encode($result);
 
 } catch (Exception $e) {
+    // DOČASNÝ DEBUGGING - logovat podrobnosti chyby
+    error_log('=== PROTOKOL API ERROR ===');
+    error_log('Message: ' . $e->getMessage());
+    error_log('File: ' . $e->getFile() . ':' . $e->getLine());
+    error_log('Trace: ' . $e->getTraceAsString());
+
     http_response_code(400);
     echo json_encode([
         'success' => false,
-        'error' => $e->getMessage()
+        'error' => $e->getMessage(),
+        'debug' => [
+            'file' => basename($e->getFile()),
+            'line' => $e->getLine()
+        ]
     ]);
 }
 
@@ -346,9 +356,12 @@ function saveProtokolData($data) {
 }
 
 /**
- * Odeslání emailu zákazníkovi
+ * Odeslání emailu zákazníkovi pomocí PHPMailer
  */
 function sendEmailToCustomer($data) {
+    // Načíst PHPMailer
+    require_once __DIR__ . '/../vendor/autoload.php';
+
     $reklamaceId = sanitizeReklamaceId($data['reklamace_id'] ?? null, 'reklamace_id');
     $protocolPdf = $data['protokol_pdf'] ?? null;
     $photosPdf = $data['photos_pdf'] ?? null;
@@ -399,6 +412,19 @@ function sendEmailToCustomer($data) {
         throw new Exception('Neplatná emailová adresa zákazníka');
     }
 
+    // Načtení SMTP nastavení z databáze
+    $stmt = $pdo->query("
+        SELECT * FROM wgs_smtp_settings
+        WHERE is_active = 1
+        ORDER BY id DESC
+        LIMIT 1
+    ");
+    $smtpSettings = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$smtpSettings) {
+        throw new Exception('SMTP nastavení není nakonfigurováno');
+    }
+
     // Příprava emailu
     $storageKey = reklamaceStorageKey($reklamaceId);
     $subject = "Servisní protokol WGS - Reklamace č. {$reklamaceId}";
@@ -421,53 +447,65 @@ reklamace@wgs-service.cz
 +420 725 965 826
 ";
 
-    $headers = "From: White Glove Service <reklamace@wgs-service.cz>\r\n";
-    $headers .= "Reply-To: reklamace@wgs-service.cz\r\n";
-    $headers .= "MIME-Version: 1.0\r\n";
-    $headers .= "Content-Type: multipart/mixed; boundary=\"WGS_BOUNDARY\"\r\n";
+    // Vytvoření PHPMailer instance
+    $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
 
-    $body = "--WGS_BOUNDARY\r\n";
-    $body .= "Content-Type: text/plain; charset=UTF-8\r\n";
-    $body .= "Content-Transfer-Encoding: 8bit\r\n\r\n";
-    $body .= $message . "\r\n\r\n";
+    try {
+        // SMTP konfigurace
+        $mail->isSMTP();
+        $mail->Host = $smtpSettings['smtp_host'];
+        $mail->SMTPAuth = true;
+        $mail->Username = $smtpSettings['smtp_username'];
+        $mail->Password = $smtpSettings['smtp_password'];
+        $mail->Port = $smtpSettings['smtp_port'];
+        $mail->CharSet = 'UTF-8';
 
-    // Přiložit PDF protokolu
-    if ($protocolPdf) {
-        $body .= "--WGS_BOUNDARY\r\n";
-        $body .= "Content-Type: application/pdf; name=\"Protokol_{$storageKey}.pdf\"\r\n";
-        $body .= "Content-Transfer-Encoding: base64\r\n";
-        $body .= "Content-Disposition: attachment; filename=\"Protokol_{$storageKey}.pdf\"\r\n\r\n";
-        $body .= chunk_split($protocolPdf) . "\r\n";
+        // Šifrování
+        if ($smtpSettings['smtp_encryption'] === 'ssl') {
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+        } elseif ($smtpSettings['smtp_encryption'] === 'tls') {
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+        }
+
+        // Odesílatel a příjemce
+        $mail->setFrom($smtpSettings['smtp_from_email'], $smtpSettings['smtp_from_name'] ?? 'White Glove Service');
+        $mail->addAddress($customerEmail, $customerName);
+        $mail->addReplyTo('reklamace@wgs-service.cz', 'White Glove Service');
+
+        // Obsah emailu
+        $mail->isHTML(false);
+        $mail->Subject = $subject;
+        $mail->Body = $message;
+
+        // Přiložit PDF protokolu
+        if ($protocolPdf) {
+            $protocolData = base64_decode($protocolPdf);
+            $mail->addStringAttachment($protocolData, "Protokol_{$storageKey}.pdf", 'base64', 'application/pdf');
+        }
+
+        // Přiložit PDF fotek
+        if ($photosPdf) {
+            $photosData = base64_decode($photosPdf);
+            $mail->addStringAttachment($photosData, "Fotodokumentace_{$storageKey}.pdf", 'base64', 'application/pdf');
+        }
+
+        // Odeslat
+        $mail->send();
+
+        // Aktualizovat stav reklamace
+        $stmt = $pdo->prepare("
+            UPDATE wgs_reklamace
+            SET stav = 'done', updated_at = NOW()
+            WHERE id = :id
+        ");
+        $stmt->execute([':id' => $reklamace['id']]);
+
+        return [
+            'status' => 'success',
+            'message' => 'Email byl úspěšně odeslán'
+        ];
+
+    } catch (\PHPMailer\PHPMailer\Exception $e) {
+        throw new Exception('Chyba při odesílání emailu: ' . $mail->ErrorInfo);
     }
-
-    // Přiložit PDF fotek
-    if ($photosPdf) {
-        $body .= "--WGS_BOUNDARY\r\n";
-        $body .= "Content-Type: application/pdf; name=\"Fotodokumentace_{$storageKey}.pdf\"\r\n";
-        $body .= "Content-Transfer-Encoding: base64\r\n";
-        $body .= "Content-Disposition: attachment; filename=\"Fotodokumentace_{$storageKey}.pdf\"\r\n\r\n";
-        $body .= chunk_split($photosPdf) . "\r\n";
-    }
-
-    $body .= "--WGS_BOUNDARY--";
-
-    // Odeslat email
-    $emailSent = mail($customerEmail, $subject, $body, $headers);
-
-    if (!$emailSent) {
-        throw new Exception('Nepodařilo se odeslat email');
-    }
-
-    // Aktualizovat stav reklamace
-    $stmt = $pdo->prepare("
-        UPDATE wgs_reklamace
-        SET db_stav = 'HOTOVO', updated_at = NOW()
-        WHERE id = :id
-    ");
-    $stmt->execute([':id' => $reklamace['id']]);
-
-    return [
-        'status' => 'success',
-        'message' => 'Email byl úspěšně odeslán'
-    ];
 }
