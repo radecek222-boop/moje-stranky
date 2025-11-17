@@ -144,15 +144,6 @@ try {
     margin: 0;
 }
 
-/* Fix pro klikatelné <a> karty - vnitřní elementy neblokují pointer events */
-a.cc-card {
-    display: flex !important;
-}
-
-a.cc-card * {
-    pointer-events: none;
-}
-
 .cc-card-badge {
     position: absolute;
     top: 6px;
@@ -548,10 +539,10 @@ a.cc-card * {
         </div>
 
         <!-- SQL Databáze -->
-        <a href="vsechny_tabulky.php" target="_blank" class="cc-card cc-card-content" style="text-decoration: none; color: inherit;">
+        <div class="cc-card cc-card-content" onclick="openSQLPage()">
             <div class="cc-card-title">SQL</div>
             <div class="cc-card-description">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
-        </a>
+        </div>
 
         <!-- Konfigurace -->
         <div class="cc-card cc-card-config" onclick="openCCModal('config')">
@@ -702,6 +693,21 @@ function closeCCModal() {
     overlay.classList.remove('active');
     modal.classList.remove('active');
     document.body.style.overflow = '';
+}
+
+// Open SQL page in new tab (spolehlivé řešení bez blokování)
+/**
+ * OpenSQLPage
+ */
+function openSQLPage() {
+    // Použít window.open() s okamžitým voláním z user action
+    const newWindow = window.open('vsechny_tabulky.php', '_blank');
+
+    // Fallback pokud byl pop-up blokován
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        console.warn('Pop-up blokován, použiji location.href');
+        window.location.href = 'vsechny_tabulky.php';
+    }
 }
 
 // === MODAL LOADERS ===
