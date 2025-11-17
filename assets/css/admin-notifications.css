@@ -190,6 +190,7 @@
    ============================================ */
 
 .modal {
+  display: none;  /* Skrytý ve výchozím stavu */
   position: fixed;
   top: 0;
   left: 0;

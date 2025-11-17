@@ -535,6 +535,12 @@ function openCCModal(section) {
     const modal = document.getElementById('adminModal');
     const modalBody = document.getElementById('adminModalBody');
 
+    // Kontrola existence elementů
+    if (!overlay || !modal || !modalBody) {
+        console.error('Modal elementy nenalezeny:', { overlay, modal, modalBody });
+        return;
+    }
+
     // Show overlay and modal
     overlay.classList.add('active');
     modal.classList.add('active');
@@ -631,6 +637,10 @@ function getEmbedUrlWithCSRF(baseUrl) {
  */
 function loadStatisticsModal() {
     const modalBody = document.getElementById('adminModalBody');
+    if (!modalBody) {
+        console.error('adminModalBody element nenalezen');
+        return;
+    }
     const url = getEmbedUrlWithCSRF('statistiky.php?embed=1');
     modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin" title="Statistiky reklamací"></iframe></div>`;
 }
@@ -640,7 +650,12 @@ function loadStatisticsModal() {
  */
 function loadAnalyticsModal() {
     const modalBody = document.getElementById('adminModalBody');
-    const url = getEmbedUrlWithCSRF("analytics.php?embed=1"); modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin" title="Web Analytics"></iframe></div>';
+    if (!modalBody) {
+        console.error('adminModalBody element nenalezen');
+        return;
+    }
+    const url = getEmbedUrlWithCSRF("analytics.php?embed=1");
+    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin" title="Web Analytics"></iframe></div>`;
 }
 
 /**
