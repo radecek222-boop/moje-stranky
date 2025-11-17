@@ -1,0 +1,1743 @@
+/**
+ * ADMIN.CSS - Unified Admin Panel Styles
+ * ===========================================================================
+ * 
+ * Tento soubor obsahuje všechny styly pro admin panel včetně Control Center.
+ * Sloučeno z následujících souborů:
+ * - control-center.css (iOS-style design, variables, core components)
+ * - control-center-unified.css (card grid, layout, modal základy)
+ * - control-center-modal.css (modal systém, overlay)
+ * - control-center-mobile.css (mobile responsivity)
+ *
+ * Datum sloučení: 2025-11-17
+ * Autor: Autonomous Refactoring Engine
+ * ===========================================================================
+ */
+
+/* ===========================================================================
+   ČÁST 1: CSS VARIABLES & CORE DESIGN SYSTEM
+   =========================================================================== */
+
+:root {
+  --cc-primary: #667eea;
+  --cc-primary-dark: #5a67d8;
+  --cc-secondary: #764ba2;
+  --cc-success: #28a745;
+  --cc-warning: #ffc107;
+  --cc-danger: #dc3545;
+  --cc-info: #17a2b8;
+
+  --cc-bg-primary: #f5f5f7;
+  --cc-bg-secondary: #ffffff;
+  --cc-border: #d1d1d6;
+  --cc-text-primary: #1d1d1f;
+  --cc-text-secondary: #6e6e73;
+  --cc-text-tertiary: #86868b;
+
+  --cc-radius: 12px;
+  --cc-shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --cc-shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+  --cc-shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
+
+  --cc-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+/* ===========================================================================
+   ČÁST 2: CONTROL CENTER UNIFIED - Card Grid & Layout
+   Z: control-center-unified.css  
+   =========================================================================== */
+
+/* Control Center - Modern Card Design */
+.control-center {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.page-header {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.page-subtitle {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--c-black);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+    flex: 1;
+}
+
+.page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.cc-version-info {
+    font-size: 0.7rem;
+    color: var(--c-grey);
+    padding: 0.25rem 0.5rem;
+    background: var(--c-bg);
+    border: 1px solid var(--c-border);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+}
+
+.cc-clear-cache-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.cc-clear-cache-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.cc-clear-cache-btn:active {
+    transform: translateY(0);
+}
+
+/* Card Grid */
+.cc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.8rem;
+    margin-top: 1.5rem;
+}
+
+/* Card Styles */
+.cc-card {
+    background: var(--c-white);
+    border: 1px solid var(--c-border);
+    border-radius: 6px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.cc-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border-color: var(--c-primary);
+}
+
+.cc-card-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--c-black);
+    margin-bottom: 0.25rem;
+}
+
+.cc-card-description {
+    font-size: 0.7rem;
+    color: var(--c-grey);
+    line-height: 1.3;
+    margin: 0;
+}
+
+.cc-card-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: var(--c-error);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 8px;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* Card States */
+.cc-card-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cc-card-disabled:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--c-border);
+}
+
+.cc-coming-soon {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: var(--c-grey);
+    color: white;
+    font-size: 0.6rem;
+    padding: 2px 5px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Table Styles */
+.cc-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.3rem;
+}
+
+.cc-table th {
+    background: var(--c-bg);
+    padding: 0.3rem 0.5rem;
+    text-align: left;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--c-grey);
+    border-bottom: 1px solid var(--c-border);
+    font-weight: 600;
+}
+
+.cc-table td {
+    padding: 0.3rem 0.5rem;
+    border-bottom: 1px solid var(--c-border);
+    font-size: 0.75rem;
+}
+
+.cc-table tr:hover td {
+    background: rgba(0,0,0,0.02);
+}
+
+/* Tabs */
+.cc-tabs {
+    display: flex;
+    gap: 0.2rem;
+    margin-bottom: 0.6rem;
+    border-bottom: 1px solid var(--c-border);
+}
+
+.cc-tab {
+    padding: 0.35rem 0.7rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--c-grey);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.7rem;
+}
+
+.cc-tab:hover {
+    color: var(--c-black);
+    background: rgba(0,0,0,0.02);
+}
+
+.cc-tab.active {
+    color: var(--c-primary);
+    border-bottom-color: var(--c-primary);
+}
+
+.cc-tab-content {
+    display: none;
+}
+
+.cc-tab-content.active {
+    display: block;
+}
+
+/* Mini stats grid */
+.cc-mini-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+}
+
+.cc-mini-stat {
+    background: var(--c-bg);
+    border: 1px solid var(--c-border);
+    padding: 0.4rem;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.cc-mini-stat-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--c-primary);
+}
+
+.cc-mini-stat-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--c-grey);
+    margin-top: 0.15rem;
+}
+
+/* Actions */
+.cc-actions {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.6rem;
+}
+
+/* Unified button styles for Control Center */
+.cc-actions .btn,
+.cc-actions button,
+.cc-actions a.btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    border-radius: 3px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.cc-actions .btn-sm {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+}
+
+.cc-actions .search-box {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    border-radius: 3px;
+}
+
+/**
+ * Admin Control Center - iOS-style Design
+ * Inspirováno iOS Settings UI
+ */
+
+/* ============================================
+   PROMĚNNÉ
+   ============================================ */
+:root {
+  --cc-primary: #667eea;
+  --cc-primary-dark: #5a67d8;
+  --cc-secondary: #764ba2;
+  --cc-success: #28a745;
+  --cc-warning: #ffc107;
+  --cc-danger: #dc3545;
+  --cc-info: #17a2b8;
+
+  --cc-bg-primary: #f5f5f7;
+  --cc-bg-secondary: #ffffff;
+  --cc-border: #d1d1d6;
+  --cc-text-primary: #1d1d1f;
+  --cc-text-secondary: #6e6e73;
+  --cc-text-tertiary: #86868b;
+
+  --cc-radius: 12px;
+  --cc-shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --cc-shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+  --cc-shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
+
+  --cc-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+.control-center-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: var(--cc-bg-primary);
+  min-height: calc(100vh - 80px);
+}
+
+.control-center-header {
+  margin-bottom: 2rem;
+}
+
+.control-center-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--cc-text-primary);
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.03em;
+}
+
+.control-center-subtitle {
+  font-size: 1.1rem;
+  color: var(--cc-text-secondary);
+  margin: 0;
+  font-weight: 400;
+}
+
+/* ============================================
+   SEARCH BAR
+   ============================================ */
+.control-center-search {
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.control-center-search input {
+  width: 100%;
+  padding: 1rem 1rem 1rem 3rem;
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius);
+  font-size: 1rem;
+  background: var(--cc-bg-secondary);
+  transition: var(--cc-transition);
+  font-family: inherit;
+}
+
+.control-center-search input:focus {
+  outline: none;
+  border-color: var(--cc-primary);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.control-center-search::before {
+  content: '🔍';
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  opacity: 0.5;
+}
+
+/* ============================================
+   CARD GRID
+   ============================================ */
+.control-center-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* ============================================
+   CONTROL CARD (iOS-style)
+   ============================================ */
+.control-card {
+  background: var(--cc-bg-secondary);
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius);
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: var(--cc-transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.control-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--cc-shadow-md);
+  border-color: var(--cc-primary);
+}
+
+.control-card:active {
+  transform: translateY(-2px);
+}
+
+.control-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.control-card-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  margin-right: 1rem;
+  opacity: 0.9;
+}
+
+.control-card-arrow {
+  color: var(--cc-text-tertiary);
+  font-size: 1.5rem;
+  line-height: 1;
+  opacity: 0.5;
+  transition: var(--cc-transition);
+}
+
+.control-card:hover .control-card-arrow {
+  opacity: 1;
+  transform: translateX(4px);
+}
+
+.control-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--cc-text-primary);
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.02em;
+}
+
+.control-card-description {
+  font-size: 0.9rem;
+  color: var(--cc-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Badge notifikace */
+.control-card-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: var(--cc-danger);
+  color: white;
+  border-radius: 50%;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0 6px;
+}
+
+.control-card-badge.success {
+  background: var(--cc-success);
+}
+
+.control-card-badge.warning {
+  background: var(--cc-warning);
+  color: var(--cc-text-primary);
+}
+
+.control-card-badge.info {
+  background: var(--cc-info);
+}
+
+/* Status indicator */
+.control-card-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--cc-text-tertiary);
+  margin-top: 0.75rem;
+}
+
+.control-card-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cc-text-tertiary);
+}
+
+.control-card-status-dot.green {
+  background: var(--cc-success);
+  box-shadow: 0 0 8px rgba(40, 167, 69, 0.5);
+}
+
+.control-card-status-dot.red {
+  background: var(--cc-danger);
+  box-shadow: 0 0 8px rgba(220, 53, 69, 0.5);
+}
+
+.control-card-status-dot.yellow {
+  background: var(--cc-warning);
+  box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+}
+
+.control-card-status-dot.blue {
+  background: #0E639C;
+  box-shadow: 0 0 8px rgba(14, 99, 156, 0.5);
+}
+
+/* ============================================
+   DETAIL VIEW (Modal/Fullscreen)
+   ============================================ */
+.control-detail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--cc-bg-primary);
+  z-index: 10000;
+  overflow-y: auto;
+  display: none;
+  animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.control-detail.active {
+  display: block;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.control-detail-header {
+  background: var(--cc-bg-secondary);
+  border-bottom: 1px solid var(--cc-border);
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.control-detail-back {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--cc-primary);
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  transition: var(--cc-transition);
+}
+
+.control-detail-back:hover {
+  opacity: 0.7;
+}
+
+.control-detail-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--cc-text-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.control-detail-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* ============================================
+   SETTING GROUPS
+   ============================================ */
+.setting-group {
+  background: var(--cc-bg-secondary);
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.setting-group-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cc-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 1rem 1.5rem 0.5rem;
+  margin: 0;
+}
+
+.setting-item {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--cc-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: var(--cc-transition);
+}
+
+.setting-item:first-of-type {
+  border-top: none;
+}
+
+.setting-item:hover {
+  background: rgba(0,0,0,0.02);
+}
+
+.setting-item-left {
+  flex: 1;
+}
+
+.setting-item-label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--cc-text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.setting-item-description {
+  font-size: 0.85rem;
+  color: var(--cc-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.setting-item-right {
+  flex-shrink: 0;
+}
+
+/* ============================================
+   FORM CONTROLS (iOS-style)
+   ============================================ */
+.cc-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--cc-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: var(--cc-bg-secondary);
+  transition: var(--cc-transition);
+}
+
+.cc-input:focus {
+  outline: none;
+  border-color: var(--cc-primary);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.cc-input:disabled {
+  background: rgba(0,0,0,0.02);
+  color: var(--cc-text-tertiary);
+  cursor: not-allowed;
+}
+
+.cc-select {
+  appearance: none;
+  background: var(--cc-bg-secondary) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%23666" d="M6 9L1 4h10z"/></svg>') no-repeat right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.cc-textarea {
+  min-height: 120px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* Toggle Switch */
+.cc-toggle {
+  position: relative;
+  width: 51px;
+  height: 31px;
+  flex-shrink: 0;
+}
+
+.cc-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.cc-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 31px;
+}
+
+.cc-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 27px;
+  width: 27px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.cc-toggle input:checked + .cc-toggle-slider {
+  background-color: var(--cc-success);
+}
+
+.cc-toggle input:checked + .cc-toggle-slider:before {
+  transform: translateX(20px);
+}
+
+/* Color Picker */
+.cc-color-picker {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cc-color-preview {
+  width: 60px;
+  height: 40px;
+  border-radius: 8px;
+  border: 2px solid var(--cc-border);
+  cursor: pointer;
+  transition: var(--cc-transition);
+}
+
+.cc-color-preview:hover {
+  border-color: var(--cc-primary);
+  transform: scale(1.05);
+}
+
+.cc-color-input {
+  flex: 1;
+}
+
+/* Buttons */
+.cc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--cc-transition);
+  text-decoration: none;
+}
+
+.cc-btn-primary {
+  background: linear-gradient(135deg, var(--cc-primary) 0%, var(--cc-secondary) 100%);
+  color: white;
+}
+
+.cc-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.cc-btn-secondary {
+  background: var(--cc-bg-secondary);
+  color: var(--cc-text-primary);
+  border: 1px solid var(--cc-border);
+}
+
+.cc-btn-secondary:hover {
+  background: rgba(0,0,0,0.02);
+}
+
+.cc-btn-success {
+  background: var(--cc-success);
+  color: white;
+}
+
+.cc-btn-danger {
+  background: var(--cc-danger);
+  color: white;
+}
+
+.cc-btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.cc-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   ALERTS & MESSAGES
+   ============================================ */
+.cc-alert {
+  padding: 1rem 1.5rem;
+  border-radius: var(--cc-radius);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.cc-alert-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.cc-alert-content {
+  flex: 1;
+}
+
+.cc-alert-title {
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+}
+
+.cc-alert-message {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.cc-alert.success {
+  background: rgba(40, 167, 69, 0.1);
+  color: #155724;
+  border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+.cc-alert.warning {
+  background: rgba(255, 193, 7, 0.1);
+  color: #856404;
+  border: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+.cc-alert.danger {
+  background: rgba(220, 53, 69, 0.1);
+  color: #721c24;
+  border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+.cc-alert.info {
+  background: rgba(23, 162, 184, 0.1);
+  color: #0c5460;
+  border: 1px solid rgba(23, 162, 184, 0.2);
+}
+
+/* ============================================
+   LOADING STATES
+   ============================================ */
+.cc-loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0,0,0,0.1);
+  border-radius: 50%;
+  border-top-color: var(--cc-primary);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.cc-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .control-center-container {
+    padding: 1rem;
+  }
+
+  .control-center-title {
+    font-size: 2rem;
+  }
+
+  .control-center-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .control-detail-content {
+    padding: 1rem;
+  }
+
+  .setting-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .setting-item-right {
+    width: 100%;
+  }
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+.cc-text-center { text-align: center; }
+.cc-text-right { text-align: right; }
+.cc-mt-1 { margin-top: 0.5rem; }
+.cc-mt-2 { margin-top: 1rem; }
+.cc-mt-3 { margin-top: 1.5rem; }
+.cc-mb-1 { margin-bottom: 0.5rem; }
+.cc-mb-2 { margin-bottom: 1rem; }
+.cc-mb-3 { margin-bottom: 1.5rem; }
+.cc-flex { display: flex; }
+.cc-flex-center { display: flex; align-items: center; justify-content: center; }
+.cc-gap-1 { gap: 0.5rem; }
+.cc-gap-2 { gap: 1rem; }
+.cc-hidden { display: none; }
+/**
+ * Control Center Modal System
+ * Full-screen overlay pro všechny sekce Control Center
+ */
+
+/* Modal Overlay - zakryje celou stránku */
+.cc-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9998;
+    backdrop-filter: blur(4px);
+}
+
+.cc-modal-overlay.active {
+    display: block;
+}
+
+/* Modal Container */
+.cc-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 75%;
+    background: var(--c-white, #ffffff);
+    z-index: 9999;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease-out;
+}
+
+.cc-modal.active {
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Modal Header - s tlačítkem Zpět */
+.cc-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    background: var(--c-white, #ffffff);
+    border-bottom: 2px solid var(--c-border, #dddddd);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
+
+.cc-modal-title-section {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.cc-modal-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    background: var(--c-black, #000000);
+    color: var(--c-white, #ffffff);
+    border: none;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cc-modal-back-btn:hover {
+    background: var(--c-success, #2D5016);
+    transform: translateX(-3px);
+}
+
+.cc-modal-back-btn:active {
+    transform: scale(0.98);
+}
+
+.cc-modal-back-icon {
+    font-size: 1rem;
+}
+
+.cc-modal-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--c-black, #000000);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.cc-modal-subtitle {
+    font-size: 0.75rem;
+    color: var(--c-grey, #666666);
+    margin-top: 0.2rem;
+}
+
+/* Modal Body - scrollovatelný obsah */
+.cc-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0;
+    background: var(--c-bg, #f8f8f8);
+}
+
+/* Iframe container pro embedované stránky */
+.cc-iframe-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.cc-iframe-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    background: var(--c-white, #ffffff);
+    flex: 1;
+}
+
+/* Legacy support */
+.cc-modal-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    background: var(--c-white, #ffffff);
+}
+
+/* Loading spinner */
+.cc-modal-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--c-grey, #666666);
+}
+
+.cc-modal-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--c-border, #dddddd);
+    border-top-color: var(--c-success, #2D5016);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.cc-modal-loading-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Error state */
+.cc-modal-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 2rem;
+    text-align: center;
+    color: var(--c-error, #8B0000);
+}
+
+.cc-modal-error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.cc-modal-error-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.cc-modal-error-message {
+    font-size: 0.9rem;
+    color: var(--c-grey, #666666);
+    margin-bottom: 1.5rem;
+}
+
+.cc-modal-error-btn {
+    padding: 0.75rem 1.5rem;
+    background: var(--c-error, #8B0000);
+    color: var(--c-white, #ffffff);
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.cc-modal-error-btn:hover {
+    background: var(--c-black, #000000);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .cc-modal {
+        width: 95%;
+        height: 85%;
+    }
+
+    .cc-modal-header {
+        padding: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .cc-modal-title {
+        font-size: 1.2rem;
+    }
+
+    .cc-modal-back-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .cc-modal-body {
+        padding: 0;
+    }
+}
+
+/* Smooth scrolling */
+.cc-modal-body {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar pro modal */
+.cc-modal-body::-webkit-scrollbar {
+    width: 10px;
+}
+
+.cc-modal-body::-webkit-scrollbar-track {
+    background: var(--c-bg, #f8f8f8);
+}
+
+.cc-modal-body::-webkit-scrollbar-thumb {
+    background: var(--c-border, #dddddd);
+    border-radius: 5px;
+}
+
+.cc-modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--c-grey, #666666);
+}
+
+/* Prevent body scroll when modal is open */
+body.cc-modal-open {
+    overflow: hidden;
+}
+
+/* Test Mode - Menší modaly v testovacím prostředí (80%) */
+.cc-modal-test-mode .cc-modal {
+    top: 5%;
+    left: 10%;
+    right: 10%;
+    bottom: 5%;
+    width: 80%;
+    height: 90%;
+    border: 3px solid var(--c-success, #2D5016);
+    box-shadow: 0 0 0 4px rgba(45, 80, 22, 0.1),
+                0 20px 60px rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.cc-modal-test-mode .cc-modal-overlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+/* Test indicator badge */
+.cc-modal-test-badge {
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: var(--c-success, #2D5016);
+    color: white;
+    padding: 4px 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+/**
+ * MOBILE RESPONSIVITA PRO CONTROL CENTER
+ * Optimalizace pro telefony a tablety
+ */
+
+/* === TABLETY (768px - 1024px) === */
+@media (max-width: 1024px) {
+    .control-center {
+        max-width: 100%;
+        padding: 0 1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+    }
+
+    .mini-stats {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1rem;
+    }
+}
+
+/* === TELEFONY (do 768px) === */
+@media (max-width: 768px) {
+    /* Header adjustments */
+    .header-container {
+        padding: 0 1rem !important;
+        gap: 1rem !important;
+    }
+
+    .logo .logo-text {
+        font-size: 1.2rem !important;
+    }
+
+    .logo p {
+        font-size: 0.65rem !important;
+        letter-spacing: 1px !important;
+    }
+
+    .btn-logout {
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* Page title */
+    .page-title {
+        font-size: 1.5rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .page-subtitle {
+        font-size: 0.85rem !important;
+    }
+
+    /* Control Center */
+    .control-center {
+        padding: 0 0.5rem;
+    }
+
+    /* Stats grid - 2 sloupce na mobilu */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        padding: 0.75rem;
+    }
+
+    .stat-label {
+        font-size: 0.7rem !important;
+    }
+
+    .stat-value {
+        font-size: 1.5rem !important;
+    }
+
+    /* Accordion sections */
+    .cc-section {
+        margin-bottom: 1rem;
+        border-radius: 0;
+    }
+
+    .cc-header {
+        padding: 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .cc-title {
+        font-size: 0.95rem;
+        line-height: 1.3;
+    }
+
+    .cc-subtitle {
+        font-size: 0.75rem;
+        display: none; /* Skrýt subtitle na mobilu pro úsporu místa */
+    }
+
+    .cc-badge {
+        min-width: 20px;
+        height: 20px;
+        font-size: 0.7rem;
+        padding: 0 6px;
+    }
+
+    .cc-chevron {
+        font-size: 1rem;
+    }
+
+    .cc-content {
+        padding: 1rem;
+    }
+
+    /* Mini stats - 1 sloupec na velmi malých mobilech */
+    .mini-stats {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem;
+    }
+
+    .mini-stat {
+        padding: 1rem;
+        text-align: left;
+    }
+
+    .mini-stat-value {
+        font-size: 1.5rem;
+    }
+
+    .mini-stat-label {
+        font-size: 0.7rem;
+    }
+
+    /* Buttons v sekcích */
+    .cc-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .cc-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Tables - horizontal scroll */
+    .cc-table {
+        font-size: 0.85rem;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .cc-table th,
+    .cc-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    /* Modal specifické pro mobil */
+    .cc-modal-header {
+        padding: 0.75rem 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .cc-modal-title-section {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .cc-modal-back-btn {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+        justify-content: center;
+    }
+
+    .cc-modal-title {
+        font-size: 1.1rem;
+        width: 100%;
+    }
+
+    .cc-modal-subtitle {
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+    }
+
+    .cc-modal-body {
+        padding: 0;
+    }
+
+    /* Hover states vypnout na touch devices */
+    .mini-stat:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Touch friendly tlačítka */
+    .btn {
+        min-height: 44px; /* Apple's minimum touch target */
+        touch-action: manipulation;
+    }
+
+    button,
+    a,
+    .clickable {
+        -webkit-tap-highlight-color: rgba(45, 80, 22, 0.2);
+    }
+}
+
+/* === VELMI MALÉ TELEFONY (do 480px) === */
+@media (max-width: 480px) {
+    .header-container {
+        padding: 0 0.75rem !important;
+    }
+
+    .logo .logo-text {
+        font-size: 1.1rem !important;
+    }
+
+    .logo p {
+        display: none; /* Skrýt "CONTROL CENTER" na velmi malých obrazovkách */
+    }
+
+    .btn-logout {
+        padding: 0.4rem 0.6rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    .page-title {
+        font-size: 1.3rem !important;
+    }
+
+    /* Stats grid - stacked na velmi malých mobilech */
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .cc-title {
+        font-size: 0.9rem;
+    }
+
+    .cc-header {
+        padding: 0.75rem;
+    }
+
+    .cc-content {
+        padding: 0.75rem;
+    }
+
+    /* Karty v sekcích - plná šířka */
+    .mini-stats[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Modal - plná obrazovka */
+    .cc-modal-header {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .cc-modal-back-btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.8rem;
+    }
+
+    .cc-modal-title {
+        font-size: 1rem;
+    }
+
+    /* Smaller emoji on very small screens */
+    .mini-stat div[style*="font-size: 2.5rem"] {
+        font-size: 2rem !important;
+    }
+
+    .mini-stat div[style*="font-size: 1.1rem"] {
+        font-size: 1rem !important;
+    }
+
+    /* Tables - make more compact */
+    .cc-table {
+        font-size: 0.75rem;
+    }
+
+    .cc-table th,
+    .cc-table td {
+        padding: 0.5rem 0.35rem;
+    }
+}
+
+/* === LANDSCAPE TELEFONY === */
+@media (max-height: 500px) and (orientation: landscape) {
+    .cc-modal-header {
+        padding: 0.5rem 1rem;
+    }
+
+    .cc-modal-title {
+        font-size: 0.95rem;
+    }
+
+    .cc-modal-subtitle {
+        display: none;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0.5rem;
+    }
+
+    .stat-card {
+        padding: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 1.3rem !important;
+    }
+
+    .stat-label {
+        font-size: 0.65rem !important;
+    }
+}
+
+/* === TOUCH OPTIMALIZACE === */
+@media (hover: none) and (pointer: coarse) {
+    /* Touch device - větší touch targety */
+    .cc-header {
+        padding: 1.25rem 1rem;
+    }
+
+    .btn,
+    button,
+    a.btn {
+        min-height: 48px;
+        padding: 0.75rem 1.5rem;
+    }
+
+    /* Disable hover effects on touch */
+    .cc-section:hover {
+        box-shadow: none;
+    }
+
+    .cc-header:hover {
+        background: transparent;
+    }
+
+    .mini-stat:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Active states pro touch */
+    .cc-header:active {
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    .mini-stat:active {
+        transform: scale(0.98);
+        opacity: 0.9;
+    }
+
+    button:active,
+    .btn:active {
+        transform: scale(0.97);
+    }
+}
+
+/* === iOS SAFARI FIXES === */
+@supports (-webkit-touch-callout: none) {
+    /* iOS specific */
+    .cc-modal {
+        /* Fix pro iOS Safari viewport height */
+        height: -webkit-fill-available;
+    }
+
+    .cc-modal-body {
+        /* Smooth scrolling na iOS */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Fix pro iOS input zoom */
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* === DARK MODE SUPPORT (volitelné) === */
+@media (prefers-color-scheme: dark) {
+    /* Pokud by se přidával dark mode v budoucnu */
+}
+
+/* === ACCESSIBILITY - Reduced motion === */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .cc-modal {
+        animation: none;
+    }
+}
