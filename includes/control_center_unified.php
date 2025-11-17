@@ -484,13 +484,13 @@ try {
             <div class="cc-card-description">Web analytika a metriky</div>
         </div>
 
-        <!-- Registrační klíče -->
+        <!-- Security -->
         <div class="cc-card cc-card-keys" onclick="openCCModal('keys')">
             <?php if ($activeKeys > 0): ?>
                 <div class="cc-card-badge"><?= $activeKeys ?></div>
             <?php endif; ?>
-            <div class="cc-card-title">Registrační klíče</div>
-            <div class="cc-card-description">Správa přístupových klíčů pro registraci</div>
+            <div class="cc-card-title">Security</div>
+            <div class="cc-card-description">Registrační klíče, API klíče, bezpečnost</div>
         </div>
 
         <!-- Správa uživatelů -->
