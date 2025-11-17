@@ -38,8 +38,8 @@
       // Nastavit velikost canvas
       const resizeCanvas = () => {
         const rect = canvas.getBoundingClientRect();
-        const canvasWidth = canvas.clientWidth || rect.width;
-        const canvasHeight = canvas.clientHeight || rect.height;
+        const canvasWidth = rect.width;
+        const canvasHeight = rect.height;
         const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
         console.log('📐 Resize canvas:', {

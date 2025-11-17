@@ -27,14 +27,18 @@ window.exportBothPDFs = async function() {
                     reader.onloadend = async () => {
                         try {
                             const base64 = reader.result.split(',')[1];
-                            
+                            const csrfToken = typeof fetchCsrfToken === 'function'
+                                ? await fetchCsrfToken()
+                                : (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
+
                             const response = await fetch('api/protokol_api.php', {
                                 method: 'POST',
                                 headers: {'Content-Type': 'application/json'},
                                 body: JSON.stringify({
                                     action: 'save_pdf_document',
                                     reklamace_id: currentReklamaceId,
-                                    pdf_base64: base64
+                                    pdf_base64: base64,
+                                    csrf_token: csrfToken
                                 })
                             });
                             
@@ -92,9 +96,9 @@ window.exportBothPDFs = async function() {
         // Označit jako hotovou
         logger.log('📋 Označuji reklamaci jako hotovou...');
         try {
-            // Get CSRF token from meta tag
-            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-            const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+            const csrfToken = typeof fetchCsrfToken === 'function'
+                ? await fetchCsrfToken()
+                : (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
 
             const markResponse = await fetch('app/controllers/save.php', {
                 method: 'POST',

@@ -46,6 +46,37 @@ let attachedPhotos = [];
 let currentReklamaceId = null;
 let currentReklamace = null;
 
+async function fetchCsrfToken() {
+  if (typeof getCSRFToken === 'function') {
+    try {
+      const token = await getCSRFToken();
+      if (token) {
+        return token;
+      }
+    } catch (err) {
+      logger?.warn?.('CSRF token z getCSRFToken selhal:', err);
+    }
+  }
+
+  if (typeof getCSRFTokenFromMeta === 'function') {
+    const metaToken = getCSRFTokenFromMeta();
+    if (metaToken) {
+      return metaToken;
+    }
+  }
+
+  const fallbackMeta = document.querySelector('meta[name="csrf-token"]');
+  if (fallbackMeta) {
+    const token = fallbackMeta.getAttribute('content');
+    if (token) {
+      window.csrfTokenCache = token;
+      return token;
+    }
+  }
+
+  throw new Error('CSRF token není k dispozici. Obnovte stránku a zkuste to znovu.');
+}
+
 window.addEventListener("DOMContentLoaded", async () => {
   logger.log('🚀 Inicializace protokolu...');
   initSignaturePad();
@@ -102,8 +133,8 @@ function initSignaturePad() {
   const resize = () => {
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     const rect = canvas.getBoundingClientRect();
-    const cssWidth = canvas.clientWidth || rect.width;
-    const cssHeight = canvas.clientHeight || rect.height;
+    const cssWidth = rect.width;
+    const cssHeight = rect.height;
 
     canvas.width = cssWidth * ratio;
     canvas.height = cssHeight * ratio;
@@ -277,7 +308,22 @@ async function loadReklamace(id) {
       return;
     }
 
-    const response = await fetch(`api/protokol_api.php?action=load_reklamace&id=${encodeURIComponent(id)}`);
+    const csrfToken = await fetchCsrfToken();
+    const response = await fetch('api/protokol_api.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        action: 'load_reklamace',
+        id,
+        csrf_token: csrfToken
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Chybná odpověď serveru (${response.status})`);
+    }
+
     const result = await response.json();
 
     if (result.status === 'success') {
@@ -309,7 +355,7 @@ async function loadReklamace(id) {
       document.getElementById("description-cz").value = currentReklamace.popis_problemu || "";
       showNotif("success", "Reklamace načtena");
     } else {
-      showNotif("error", "Reklamace nenalezena");
+      showNotif("error", result.message || "Reklamace nenalezena");
     }
   } catch (error) {
     logger.error('❌ Chyba načítání:', error);
@@ -747,13 +793,15 @@ async function exportBothPDFs() {
     // Označit jako hotovou
     logger.log('📋 Označuji reklamaci jako hotovou...');
     try {
+      const csrfToken = await fetchCsrfToken();
       const markResponse = await fetch('app/controllers/save.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           action: 'update',
           id: currentReklamaceId,
-          mark_as_completed: '1'
+          mark_as_completed: '1',
+          csrf_token: csrfToken
         })
       });
 
@@ -793,6 +841,8 @@ async function sendToCustomer() {
       logger.log('ℹ️ Žádné fotky k přiložení');
     }
 
+    const csrfToken = await fetchCsrfToken();
+
     const response = await fetch("api/protokol_api.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -800,7 +850,8 @@ async function sendToCustomer() {
         action: "send_email",
         reklamace_id: currentReklamaceId,
         protokol_pdf: protocolBase64,
-        photos_pdf: photosBase64
+        photos_pdf: photosBase64,
+        csrf_token: csrfToken
       })
     });
 
@@ -817,7 +868,8 @@ async function sendToCustomer() {
         body: new URLSearchParams({
           action: 'update',
           id: currentReklamaceId,
-          mark_as_completed: '1'
+          mark_as_completed: '1',
+          csrf_token: csrfToken
         })
       });
 
@@ -857,6 +909,7 @@ async function sendToCustomer() {
 
 async function saveProtokolToDB() {
   try {
+    const csrfToken = await fetchCsrfToken();
     const response = await fetch("api/protokol_api.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -866,7 +919,8 @@ async function saveProtokolToDB() {
         problem_description: document.getElementById("problem-cz").value,
         repair_proposal: document.getElementById("repair-cz").value,
         solved: document.getElementById("solved").value,
-        technician: document.getElementById("technician").value
+        technician: document.getElementById("technician").value,
+        csrf_token: csrfToken
       })
     });
 
