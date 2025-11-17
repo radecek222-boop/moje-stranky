@@ -168,27 +168,34 @@ try {
         }
 
         // Načíst VŠECHNY dokumenty najednou (místo N queries)
-        $docPlaceholders = implode(',', array_fill(0, count($claimIds), '?'));
-        $docSql = "
-            SELECT
-                id, claim_id, document_name, document_path as file_path,
-                document_type, file_size, uploaded_by, uploaded_at
-            FROM wgs_documents
-            WHERE claim_id IN ($docPlaceholders)
-            ORDER BY uploaded_at DESC
-        ";
-        $docStmt = $pdo->prepare($docSql);
-        $docStmt->execute($claimIds);
-        $allDocuments = $docStmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // Seskupit dokumenty podle claim_id
+        // POZNÁMKA: Pokud tabulka wgs_documents neexistuje, přeskočíme načítání dokumentů
         $documentsMap = [];
-        foreach ($allDocuments as $doc) {
-            $claimId = $doc['claim_id'];
-            if (!isset($documentsMap[$claimId])) {
-                $documentsMap[$claimId] = [];
+        try {
+            $docPlaceholders = implode(',', array_fill(0, count($claimIds), '?'));
+            $docSql = "
+                SELECT
+                    id, claim_id, document_name, document_path as file_path,
+                    document_type, file_size, uploaded_by, uploaded_at
+                FROM wgs_documents
+                WHERE claim_id IN ($docPlaceholders)
+                ORDER BY uploaded_at DESC
+            ";
+            $docStmt = $pdo->prepare($docSql);
+            $docStmt->execute($claimIds);
+            $allDocuments = $docStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Seskupit dokumenty podle claim_id
+            foreach ($allDocuments as $doc) {
+                $claimId = $doc['claim_id'];
+                if (!isset($documentsMap[$claimId])) {
+                    $documentsMap[$claimId] = [];
+                }
+                $documentsMap[$claimId][] = $doc;
             }
-            $documentsMap[$claimId][] = $doc;
+        } catch (PDOException $e) {
+            // Tabulka wgs_documents neexistuje nebo je nedostupná
+            // Pokračujeme bez dokumentů
+            error_log("Varování: Nelze načíst dokumenty - " . $e->getMessage());
         }
 
         // Přiřadit fotky a dokumenty k reklamacím
