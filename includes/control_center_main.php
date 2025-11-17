@@ -87,12 +87,12 @@ try {
         </div>
 
         <!-- 2. SQL DATABÁZE -->
-        <div class="control-card" data-section="sql" onclick="window.location.href='vsechny_tabulky.php'">
+        <div class="control-card" data-section="sql" onclick="window.open('vsechny_tabulky.php', '_blank')">
             <div class="control-card-header">
                 <div>
                     <div class="control-card-icon">🗄️</div>
                     <h3 class="control-card-title">SQL</h3>
-                    <p class="control-card-description">Zobrazit všechny SQL tabulky</p>
+                    <p class="control-card-description">Zobrazit všechny SQL tabulky (aktuální živá data)</p>
                 </div>
                 <div class="control-card-arrow">›</div>
             </div>

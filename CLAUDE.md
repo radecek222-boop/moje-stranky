@@ -205,6 +205,51 @@ $stmt->execute(['email' => $email]);
 $result = $pdo->query("SELECT * FROM wgs_reklamace WHERE email = '$email'");
 ```
 
+### 🎯 CRITICAL: Database Management via Control Centre
+
+**⚠️ VŠECHNY ZMĚNY SQL DATABÁZE SE PROVÁDĚJÍ PŘES KARTU "SQL" V CONTROL CENTRE ⚠️**
+
+**Postup pro správu databáze:**
+
+1. **Otevřít Admin Panel:** `https://www.wgs-service.cz/admin.php`
+2. **Kliknout na kartu "SQL"** - otevře se v novém okně
+3. **Zobrazí se aktuální živá struktura všech tabulek** včetně:
+   - CREATE TABLE DDL příkazů
+   - Kompletní struktura sloupců
+   - Indexy a klíče
+   - Ukázka dat (3 záznamy)
+   - Velikost tabulek
+
+**Funkce SQL karty:**
+
+| Funkce | Popis |
+|--------|-------|
+| **📥 Stáhnout všechny DDL** | Export celé struktury databáze do .sql souboru |
+| **📋 Kopírovat do schránky** | Kopírovat CREATE TABLE DDL pro jednotlivé tabulky |
+| **🖨️ Tisk** | Vytisknout dokumentaci databáze |
+| **Živá data** | Vždy zobrazuje aktuální stav z produkční databáze |
+
+**Důležité nástroje pro správu databáze:**
+
+| Nástroj | URL | Účel |
+|---------|-----|------|
+| `vsechny_tabulky.php` | Hlavní SQL viewer | Zobrazení struktury všech tabulek |
+| `pridej_chybejici_sloupce.php` | Migrace sloupců | Bezpečné přidání chybějících sloupců |
+| `kontrola_zastaralych_sloupcu.php` | Kontrola legacy sloupců | Odstranění zastaralých sloupců |
+| `pridej_chybejici_indexy.php` | Optimalizace | Přidání chybějících indexů |
+
+**❌ NIKDY:**
+- Neměňte SQL strukturu ručně přes phpMyAdmin
+- Neodstraňujte sloupce bez kontroly závislostí
+- Nevytvářejte tabulky mimo toto rozhraní
+- Neimportujte SQL skripty bez kontroly
+
+**✅ VŽDY:**
+- Používejte kartu "SQL" pro zobrazení aktuální struktury
+- Exportujte DDL před změnami (tlačítko "Stáhnout všechny DDL")
+- Používejte migrační skripty pro změny struktury
+- Kontrolujte závislosti před odstraněním sloupců
+
 ---
 
 ## 🔒 SECURITY PATTERNS
@@ -354,7 +399,126 @@ try {
 
 ## 🛠️ COMMON DEVELOPMENT TASKS
 
-### Task 1: Adding a New API Endpoint
+### Task 1: Creating Database Migration Scripts
+
+**⚠️ KRITICKÉ: Když vytváříte migrační skripty pro databázi, VŽDY dodržujte tento formát:**
+
+#### Naming Convention:
+```
+pridej_nazev_sloupce.php          # Pro přidání sloupců
+kontrola_nazev.php                 # Pro kontrolu a validaci
+migrace_nazev.php                  # Pro komplexní migrace
+vycisti_nazev.php                  # Pro cleanup operace
+```
+
+#### Template migračního skriptu:
+```php
+<?php
+/**
+ * Migrace: [Popis co skript dělá]
+ *
+ * Tento skript BEZPEČNĚ provede [operaci].
+ * Můžete jej spustit vícekrát - [neprovedese duplicitní operace].
+ */
+
+require_once __DIR__ . '/init.php';
+
+// Bezpečnostní kontrola - pouze admin
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    die("PŘÍSTUP ODEPŘEN: Pouze administrátor může spustit migraci.");
+}
+
+echo "<!DOCTYPE html>
+<html lang='cs'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Migrace: [Název]</title>
+    <style>
+        /* Standardní styly pro migrační skripty */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+               max-width: 1000px; margin: 50px auto; padding: 20px;
+               background: #f5f5f5; }
+        .container { background: white; padding: 30px; border-radius: 10px;
+                     box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2D5016; border-bottom: 3px solid #2D5016;
+             padding-bottom: 10px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb;
+                   color: #155724; padding: 12px; border-radius: 5px;
+                   margin: 10px 0; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb;
+                 color: #721c24; padding: 12px; border-radius: 5px;
+                 margin: 10px 0; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7;
+                   color: #856404; padding: 12px; border-radius: 5px;
+                   margin: 10px 0; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb;
+                color: #0c5460; padding: 12px; border-radius: 5px;
+                margin: 10px 0; }
+        .btn { display: inline-block; padding: 10px 20px;
+               background: #2D5016; color: white; text-decoration: none;
+               border-radius: 5px; margin: 10px 5px 10px 0; }
+        .btn:hover { background: #1a300d; }
+    </style>
+</head>
+<body>
+<div class='container'>";
+
+try {
+    $pdo = getDbConnection();
+
+    // Kontrola před migrací
+    echo "<h1>Migrace: [Název]</h1>";
+
+    // 1. Kontrolní fáze
+    echo "<div class='info'><strong>KONTROLA...</strong></div>";
+
+    // 2. Pokud je nastaveno ?execute=1, provést migraci
+    if (isset($_GET['execute']) && $_GET['execute'] === '1') {
+        echo "<div class='info'><strong>SPOUŠTÍM MIGRACI...</strong></div>";
+
+        $pdo->beginTransaction();
+
+        try {
+            // SQL operace zde
+            // $pdo->exec("ALTER TABLE...");
+
+            $pdo->commit();
+
+            echo "<div class='success'>";
+            echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong>";
+            echo "</div>";
+
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            echo "<div class='error'>";
+            echo "<strong>CHYBA:</strong><br>";
+            echo htmlspecialchars($e->getMessage());
+            echo "</div>";
+        }
+    } else {
+        // Náhled co bude provedeno
+        echo "<a href='?execute=1' class='btn'>SPUSTIT MIGRACI</a>";
+    }
+
+} catch (Exception $e) {
+    echo "<div class='error'>" . htmlspecialchars($e->getMessage()) . "</div>";
+}
+
+echo "</div></body></html>";
+?>
+```
+
+#### Kde uložit:
+- **Všechny migrační skripty uložit do ROOT složky** (`/home/user/moje-stranky/`)
+- **NIKDY** je neumísťovat do `/migrations/` nebo jiných složek
+- Budou automaticky zobrazeny na stránce `vsechny_tabulky.php`
+
+#### Po vytvoření migračního skriptu:
+1. Commitnout soubor do Git
+2. Dodat uživateli URL: `https://www.wgs-service.cz/[nazev_skriptu].php`
+3. Skript se automaticky objeví v seznamu nástrojů na SQL kartě
+
+### Task 2: Adding a New API Endpoint
 
 1. **Create file in `/api/`**
 2. **Include required files:** `init.php`, `csrf_helper.php`, `api_response.php`

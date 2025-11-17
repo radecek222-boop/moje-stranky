@@ -10,7 +10,7 @@ require_once __DIR__ . '/init.php';
 // KRITICKÉ: Vyžadovat admin session BEZ BYPASSU
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     http_response_code(403);
-    die('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Přístup odepřen</title></head><body style="font-family: Poppins; background: #fff; color: #000; padding: 40px; text-align: center;"><h1>❌ PŘÍSTUP ODEPŘEN</h1><p>Pouze pro administrátory!</p><p><a href="login.php" style="color: #000; border-bottom: 2px solid #000; text-decoration: none;">→ Přihlásit se</a></p></body></html>');
+    die('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Přístup odepřen</title></head><body style="font-family: Poppins; background: #fff; color: #000; padding: 40px; text-align: center;"><h1>PŘÍSTUP ODEPŘEN</h1><p>Pouze pro administrátory!</p><p><a href="login.php" style="color: #000; border-bottom: 2px solid #000; text-decoration: none;">Přihlásit se</a></p></body></html>');
 }
 
 try {
@@ -44,6 +44,10 @@ try {
             $indexyPrehled[$index['Key_name']][] = $index['Column_name'];
         }
 
+        // CREATE TABLE DDL
+        $stmt = $pdo->query("SHOW CREATE TABLE `$tabulka`");
+        $createTableDDL = $stmt->fetch(PDO::FETCH_ASSOC)['Create Table'] ?? null;
+
         // Velikost tabulky
         $stmt = $pdo->query("
             SELECT
@@ -61,7 +65,8 @@ try {
             'struktura' => $struktura,
             'ukazka' => $ukazkaZaznamu,
             'indexy' => $indexyPrehled,
-            'velikost' => $velikost
+            'velikost' => $velikost,
+            'ddl' => $createTableDDL
         ];
     }
 
@@ -77,7 +82,7 @@ try {
     $celkovyPocetZaznamu = array_sum(array_column($detailyTabulek, 'pocet'));
 
 } catch (Exception $e) {
-    die('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Chyba</title></head><body style="font-family: Poppins; padding: 40px;"><h1 style="color: #cc0000;">❌ CHYBA DATABÁZE</h1><p>' . htmlspecialchars($e->getMessage()) . '</p></body></html>');
+    die('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Chyba</title></head><body style="font-family: Poppins; padding: 40px;"><h1 style="color: #cc0000;">CHYBA DATABÁZE</h1><p>' . htmlspecialchars($e->getMessage()) . '</p></body></html>');
 }
 ?>
 <!DOCTYPE html>
@@ -275,8 +280,13 @@ try {
 <body>
     <div class="container">
         <div class="header">
-            <h1>🗄️ KOMPLETNÍ PŘEHLED VŠECH SQL TABULEK</h1>
+            <h1>KOMPLETNÍ PŘEHLED VŠECH SQL TABULEK</h1>
             <p style="margin-top: 0.5rem; opacity: 0.9; font-size: 0.95rem;">Databáze: <?php echo htmlspecialchars($_ENV['DB_NAME'] ?? 'wgs-servicecz01'); ?> | Live Production Data</p>
+            <div style="margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button onclick="exportAllDDL()" style="padding: 0.75rem 1.5rem; background: #fff; color: #000; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">Stáhnout všechny DDL</button>
+                <button onclick="window.print()" style="padding: 0.75rem 1.5rem; background: transparent; color: #fff; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">Tisk</button>
+                <button onclick="window.location.reload()" style="padding: 0.75rem 1.5rem; background: transparent; color: #fff; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">Obnovit aktuální SQL</button>
+            </div>
         </div>
 
         <div class="content">
@@ -296,9 +306,76 @@ try {
                 </div>
             </div>
 
+            <!-- NÁSTROJE PRO SPRÁVU DATABÁZE -->
+            <div style="background: #f5f5f5; border: 2px solid #000; padding: 2rem; margin: 2rem 0;">
+                <h2 style="margin-top: 0; padding-bottom: 0.75rem; border-bottom: 2px solid #000; font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;">
+                    Nástroje pro správu databáze
+                </h2>
+                <p style="margin: 1rem 0; color: #555; font-size: 0.9rem;">
+                    <strong>DŮLEŽITÉ:</strong> Všechny změny SQL struktury provádějte pouze přes tyto nástroje. Nikdy neměňte strukturu ručně!
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+
+                    <!-- Migrační nástroj -->
+                    <div style="background: white; border: 2px solid #000; padding: 1.5rem;">
+                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600;">
+                            Přidat chybějící sloupce
+                        </h3>
+                        <p style="margin: 0.5rem 0; font-size: 0.85rem; color: #666;">
+                            Bezpečně přidá chybějící sloupce do tabulek. Kontroluje před spuštěním.
+                        </p>
+                        <a href="pridej_chybejici_sloupce.php" target="_blank" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                            Otevřít nástroj
+                        </a>
+                    </div>
+
+                    <!-- Kontrola zastaralých sloupců -->
+                    <div style="background: white; border: 2px solid #000; padding: 1.5rem;">
+                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600;">
+                            Odstranit zastaralé sloupce
+                        </h3>
+                        <p style="margin: 0.5rem 0; font-size: 0.85rem; color: #666;">
+                            Kontrola a bezpečné odstranění deprecated sloupců (technik_milan_kolin, atd.)
+                        </p>
+                        <a href="kontrola_zastaralych_sloupcu.php" target="_blank" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                            Otevřít nástroj
+                        </a>
+                    </div>
+
+                    <!-- Indexy -->
+                    <div style="background: white; border: 2px solid #000; padding: 1.5rem;">
+                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600;">
+                            Přidat chybějící indexy
+                        </h3>
+                        <p style="margin: 0.5rem 0; font-size: 0.85rem; color: #666;">
+                            Optimalizace databáze - přidání indexů pro rychlejší dotazy
+                        </p>
+                        <a href="pridej_chybejici_indexy.php" target="_blank" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                            Otevřít nástroj
+                        </a>
+                    </div>
+
+                </div>
+
+                <div style="margin-top: 2rem; padding: 1rem; background: #fffbea; border: 2px solid #fbbf24;">
+                    <h3 style="margin: 0 0 0.75rem 0; font-size: 0.95rem; font-weight: 600; color: #92400e;">
+                        Přidat nový SQL požadavek (pro AI)
+                    </h3>
+                    <p style="margin: 0 0 1rem 0; font-size: 0.85rem; color: #78350f;">
+                        Když AI vytvoří nový migrační skript pro změny v databázi, vždy jej uloží do root složky projektu
+                        s názvem který začíná <code>pridej_</code>, <code>kontrola_</code> nebo <code>migrace_</code>.
+                        Tyto skripty se pak automaticky objeví v seznamu nástrojů.
+                    </p>
+                    <p style="margin: 0; font-size: 0.85rem; color: #78350f;">
+                        <strong>Formát názvu:</strong> <code>pridej_nazev_sloupce.php</code>, <code>kontrola_nazev.php</code>, <code>migrace_nazev.php</code>
+                    </p>
+                </div>
+            </div>
+
             <!-- OBSAH -->
             <div class="toc">
-                <h2>📑 Obsah</h2>
+                <h2>Obsah</h2>
                 <ul>
                     <?php foreach ($detailyTabulek as $detail): ?>
                     <li>
@@ -324,8 +401,18 @@ try {
                     </div>
                 </div>
 
+                <!-- CREATE TABLE DDL -->
+                <?php if (!empty($detail['ddl'])): ?>
+                <h2>CREATE TABLE (SQL DDL)</h2>
+                <details style="margin: 1rem 0; border: 2px solid #ddd; padding: 1rem; border-radius: 5px;">
+                    <summary style="cursor: pointer; font-weight: 600; user-select: none;">Zobrazit CREATE TABLE příkaz</summary>
+                    <pre style="background: #f5f5f5; padding: 1rem; margin-top: 1rem; overflow-x: auto; border: 1px solid #ddd; border-radius: 3px; font-size: 0.85rem; line-height: 1.5;"><code><?php echo htmlspecialchars($detail['ddl']); ?></code></pre>
+                    <button onclick="navigator.clipboard.writeText(<?php echo htmlspecialchars(json_encode($detail['ddl']), ENT_QUOTES); ?>); this.textContent='Zkopírováno!'; setTimeout(() => this.textContent='Kopírovat do schránky', 2000);" style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #000; color: #fff; border: none; cursor: pointer; font-family: Poppins; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Kopírovat do schránky</button>
+                </details>
+                <?php endif; ?>
+
                 <!-- STRUKTURA SLOUPCŮ -->
-                <h2>📋 Struktura sloupců</h2>
+                <h2>Struktura sloupců</h2>
                 <div class="overflow-x">
                     <table>
                         <thead>
@@ -375,7 +462,7 @@ try {
 
                 <!-- INDEXY -->
                 <?php if (!empty($detail['indexy'])): ?>
-                <h2>⚡ Indexy</h2>
+                <h2>Indexy</h2>
                 <table>
                     <thead>
                         <tr>
@@ -396,7 +483,7 @@ try {
 
                 <!-- UKÁZKA DAT -->
                 <?php if (!empty($detail['ukazka'])): ?>
-                <h2>📄 Ukázka dat (max 3 záznamy)</h2>
+                <h2>Ukázka dat (max 3 záznamy)</h2>
                 <div class="overflow-x">
                     <table>
                         <thead>
@@ -430,5 +517,42 @@ try {
             <a href="#top">↑ Nahoru</a>
         </div>
     </div>
+
+    <script>
+    // Export všech DDL do jednoho SQL souboru
+    function exportAllDDL() {
+        const allDDL = <?php echo json_encode(array_map(function($t) {
+            return [
+                'nazev' => $t['nazev'],
+                'ddl' => $t['ddl']
+            ];
+        }, $detailyTabulek)); ?>;
+
+        let sqlContent = "-- WGS Database Export\n";
+        sqlContent += "-- Databáze: <?php echo htmlspecialchars($_ENV['DB_NAME'] ?? 'wgs-servicecz01'); ?>\n";
+        sqlContent += "-- Vygenerováno: " + new Date().toLocaleString('cs-CZ') + "\n";
+        sqlContent += "-- Celkem tabulek: " + allDDL.length + "\n";
+        sqlContent += "-- ============================================\n\n";
+
+        allDDL.forEach((table, index) => {
+            sqlContent += "-- ============================================\n";
+            sqlContent += "-- Tabulka #" + (index + 1) + ": " + table.nazev + "\n";
+            sqlContent += "-- ============================================\n\n";
+            sqlContent += "DROP TABLE IF EXISTS `" + table.nazev + "`;\n\n";
+            sqlContent += table.ddl + ";\n\n\n";
+        });
+
+        // Vytvořit blob a stáhnout
+        const blob = new Blob([sqlContent], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'wgs_database_structure_' + new Date().toISOString().split('T')[0] + '.sql';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    </script>
 </body>
 </html>
