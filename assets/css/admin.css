@@ -40,6 +40,20 @@
   --cc-shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
 
   --cc-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Legacy Control Center variables referenced napříč aplikací */
+  --c-bg: #f5f5f5;
+  --c-white: #ffffff;
+  --c-black: #1a1a1a;
+  --c-grey: #666666;
+  --c-light-grey: #999999;
+  --c-border: #e0e0e0;
+  --c-success: #2d5016;
+  --c-error: #8b0000;
+  --c-warning: #b8860b;
+  --c-primary: #667eea;
+  --c-online: #2d5016;
+  --c-info: #1a73e8;
 }
 
 
