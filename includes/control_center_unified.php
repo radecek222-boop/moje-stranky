@@ -539,10 +539,10 @@ try {
         </div>
 
         <!-- SQL Databáze -->
-        <div class="cc-card cc-card-content" onclick="window.open('vsechny_tabulky.php', '_blank')">
+        <a href="vsechny_tabulky.php" target="_blank" class="cc-card cc-card-content" style="text-decoration: none; color: inherit; display: block;">
             <div class="cc-card-title">SQL</div>
             <div class="cc-card-description">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
-        </div>
+        </a>
 
         <!-- Konfigurace -->
         <div class="cc-card cc-card-config" onclick="openCCModal('config')">
