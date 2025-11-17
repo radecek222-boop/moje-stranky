@@ -58,7 +58,7 @@ try {
             <span>‹</span>
             <span>Zpět</span>
         </button>
-        <h2 class="control-detail-title">📧 Email & SMS Management</h2>
+        <h2 class="control-detail-title" style="font-family: 'Poppins', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Email & SMS Management</h2>
     </div>
     <?php endif; ?>
 
@@ -90,43 +90,35 @@ try {
 
         <!-- PŘEHLED -->
         <div id="section-overview" class="cc-section <?= $currentSection === 'overview' ? 'active' : '' ?>">
-            <h3 style="margin-bottom: 1.5rem;">Rychlý přehled</h3>
+            <h3 style="margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">Rychlý přehled</h3>
 
             <!-- Stats Grid -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                <div class="cc-alert info" style="margin: 0;">
-                    <div class="cc-alert-content">
-                        <div class="cc-alert-title" style="font-size: 2rem;"><?= $emailStats['all'] ?></div>
-                        <div class="cc-alert-message">Celkem emailů</div>
-                    </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 1rem;">
+                <div style="background: #fff; border: 1px solid #000; padding: 0.75rem; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: #000;"><?= $emailStats['all'] ?></div>
+                    <div style="font-size: 0.75rem; color: #666; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Celkem</div>
                 </div>
-                <div class="cc-alert success" style="margin: 0;">
-                    <div class="cc-alert-content">
-                        <div class="cc-alert-title" style="font-size: 2rem;"><?= $emailStats['sent'] ?></div>
-                        <div class="cc-alert-message">✅ Odesláno</div>
-                    </div>
+                <div style="background: #fff; border: 1px solid #000; padding: 0.75rem; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: #000;"><?= $emailStats['sent'] ?></div>
+                    <div style="font-size: 0.75rem; color: #666; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Odesláno</div>
                 </div>
-                <div class="cc-alert warning" style="margin: 0;">
-                    <div class="cc-alert-content">
-                        <div class="cc-alert-title" style="font-size: 2rem;"><?= $emailStats['pending'] ?></div>
-                        <div class="cc-alert-message">⏳ Ve frontě</div>
-                    </div>
+                <div style="background: #fff; border: 1px solid #000; padding: 0.75rem; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: #000;"><?= $emailStats['pending'] ?></div>
+                    <div style="font-size: 0.75rem; color: #666; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Ve frontě</div>
                 </div>
-                <div class="cc-alert danger" style="margin: 0;">
-                    <div class="cc-alert-content">
-                        <div class="cc-alert-title" style="font-size: 2rem;"><?= $emailStats['failed'] ?></div>
-                        <div class="cc-alert-message">❌ Selhalo</div>
-                    </div>
+                <div style="background: #fff; border: 1px solid #000; padding: 0.75rem; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: #000;"><?= $emailStats['failed'] ?></div>
+                    <div style="font-size: 0.75rem; color: #666; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Selhalo</div>
                 </div>
             </div>
 
             <!-- Rychlé odkazy -->
-            <div class="setting-group">
-                <h3 class="setting-group-title">Rychlé akce</h3>
+            <div class="setting-group" style="margin-bottom: 1rem;">
+                <h3 style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: #000; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #000;">Rychlé akce</h3>
 
-                <div class="setting-item" onclick="window.location.href='email_management.php'" style="cursor: pointer;">
+                <div class="setting-item" onclick="window.location.href='email_management.php'" style="cursor: pointer; padding: 0.75rem 0; border-bottom: 1px solid #e0e0e0; font-size: 0.85rem;">
                     <div class="setting-item-left">
-                        <div class="setting-item-label">📧 Email Management</div>
+                        <div style="font-weight: 500; font-family: 'Poppins', sans-serif; color: #000;">Email Management</div>
                         <div class="setting-item-description">Kompletní správa emailové fronty - historie, čekající, selhavší</div>
                     </div>
                     <div class="setting-item-right">
@@ -134,9 +126,9 @@ try {
                     </div>
                 </div>
 
-                <div class="setting-item" onclick="window.location.href='cleanup_failed_emails.php'" style="cursor: pointer;">
+                <div class="setting-item" onclick="window.location.href='cleanup_failed_emails.php'" style="cursor: pointer; padding: 0.75rem 0; border-bottom: 1px solid #e0e0e0; font-size: 0.85rem;">
                     <div class="setting-item-left">
-                        <div class="setting-item-label">🧹 Vyčistit selhavší emaily</div>
+                        <div style="font-weight: 500; font-family: 'Poppins', sans-serif; color: #000;">Vyčistit selhavší emaily</div>
                         <div class="setting-item-description">Odstranit všechny emaily se statusem 'failed' z fronty</div>
                     </div>
                     <div class="setting-item-right">
@@ -144,9 +136,9 @@ try {
                     </div>
                 </div>
 
-                <div class="setting-item" onclick="switchSection('smtp')" style="cursor: pointer;">
+                <div class="setting-item" onclick="switchSection('smtp')" style="cursor: pointer; padding: 0.75rem 0; border-bottom: 1px solid #e0e0e0; font-size: 0.85rem;">
                     <div class="setting-item-left">
-                        <div class="setting-item-label">⚙️ SMTP Konfigurace</div>
+                        <div style="font-weight: 500; font-family: 'Poppins', sans-serif; color: #000;">SMTP Konfigurace</div>
                         <div class="setting-item-description">Nastavení SMTP serveru pro odesílání emailů</div>
                     </div>
                     <div class="setting-item-right">
@@ -159,19 +151,12 @@ try {
         <!-- SMTP KONFIGURACE -->
         <div id="section-smtp" class="cc-section <?= $currentSection === 'smtp' ? 'active' : '' ?>">
             <?php if (empty($smtpConfigs)): ?>
-                <div class="cc-alert warning">
-                    <div class="cc-alert-icon">⚠️</div>
-                    <div class="cc-alert-content">
-                        <div class="cc-alert-title">SMTP konfigurace nenalezena</div>
-                        <div class="cc-alert-message">
-                            Tabulka wgs_system_config neobsahuje SMTP nastavení (group='email').
-                            Spusťte instalaci SMTP nebo přidejte konfiguraci ručně.
-                        </div>
-                    </div>
+                <div style="background: #f5f5f5; border: 1px solid #000; border-left: 3px solid #000; color: #000; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; font-family: 'Poppins', sans-serif;">
+                    <strong>SMTP konfigurace nenalezena</strong> - Tabulka wgs_system_config neobsahuje SMTP nastavení (group='email'). Spusťte instalaci SMTP.
                 </div>
             <?php else: ?>
-                <div class="setting-group">
-                    <h3 class="setting-group-title">Email (SMTP) Konfigurace</h3>
+                <div style="margin-bottom: 1.5rem;">
+                    <h3 style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: #000; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #000;">Email (SMTP) Konfigurace</h3>
 
                     <?php foreach ($smtpConfigs as $config): ?>
                         <div class="setting-item">
@@ -199,7 +184,8 @@ try {
                                                    placeholder="<?= $config['config_value_display'] ?>"
                                                    style="flex: 1;">
                                             <button class="cc-btn cc-btn-sm cc-btn-secondary"
-                                                    onclick="togglePasswordVisibility(<?= $config['id'] ?>)">
+                                                    onclick="togglePasswordVisibility(<?= $config['id'] ?>)"
+                                                    style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                                                 Zobrazit
                                             </button>
                                         <?php else: ?>
@@ -207,11 +193,12 @@ try {
                                                    class="cc-input"
                                                    id="config-<?= $config['id'] ?>"
                                                    value="<?= htmlspecialchars($config['config_value']) ?>"
-                                                   style="flex: 1;">
+                                                   style="flex: 1; font-size: 0.85rem;">
                                         <?php endif; ?>
                                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                                onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')">
-                                            💾
+                                                onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')"
+                                                style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                            Uložit
                                         </button>
                                     </div>
                                     <div id="save-status-<?= $config['id'] ?>" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
@@ -236,7 +223,7 @@ try {
                                    class="cc-input"
                                    placeholder="vas@email.cz"
                                    style="width: 200px; margin-right: 0.5rem;">
-                            <button class="cc-btn cc-btn-sm cc-btn-success" onclick="sendTestEmail()">
+                            <button class="cc-btn cc-btn-sm cc-btn-primary" onclick="sendTestEmail()" style="font-size: 0.75rem; padding: 0.4rem 0.75rem;">
                                 Odeslat test
                             </button>
                         </div>
@@ -294,20 +281,21 @@ try {
 <style>
 .cc-tabs {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 2rem;
-    border-bottom: 2px solid #e0e0e0;
+    gap: 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #000;
     overflow-x: auto;
     flex-wrap: wrap;
 }
 
 .cc-tab {
-    padding: 0.75rem 1.5rem;
-    background: transparent;
+    padding: 0.5rem 1rem;
+    background: #fff;
     border: none;
-    border-bottom: 3px solid transparent;
-    font-size: 0.9rem;
+    border-bottom: 2px solid transparent;
+    font-size: 0.85rem;
     font-weight: 500;
+    font-family: 'Poppins', sans-serif;
     color: #666;
     cursor: pointer;
     transition: all 0.2s;
@@ -315,13 +303,13 @@ try {
 }
 
 .cc-tab:hover {
-    color: #2D5016;
+    color: #000;
     background: #f5f5f5;
 }
 
 .cc-tab.active {
-    color: #2D5016;
-    border-bottom-color: #2D5016;
+    color: #000;
+    border-bottom-color: #000;
     font-weight: 600;
 }
 
