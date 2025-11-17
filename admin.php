@@ -669,8 +669,142 @@ function loadNotifContent(type, body) {
   <?php endif; ?>
 
   <?php if ($activeTab === 'control_center'): ?>
-  <!-- TAB: CONTROL CENTER - Unified accordion interface -->
-  <?php require_once __DIR__ . '/includes/control_center_unified.php'; ?>
+  <!-- TAB: CONTROL CENTER - Unified card grid interface -->
+  <?php
+  // Načtení dat ze session
+  $currentUser = $_SESSION['full_name'] ?? 'Admin';
+  $userId = $_SESSION['user_id'] ?? null;
+
+  // Získání statistik
+  $pdo = getDbConnection();
+
+  // Stats
+  $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_reklamace");
+  $totalClaims = $stmt->fetchColumn();
+
+  $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_users");
+  $totalUsers = $stmt->fetchColumn();
+
+  $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_registration_keys WHERE is_active = 1");
+  $activeKeys = $stmt->fetchColumn();
+
+  // Pending actions count
+  try {
+      $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_pending_actions WHERE status = 'pending'");
+      $pendingActions = $stmt->fetchColumn();
+  } catch (Exception $e) {
+      $pendingActions = 0;
+  }
+  ?>
+
+  <div class="control-center">
+      <div class="page-header">
+          <p class="page-subtitle">Centrální řídicí panel pro správu celé aplikace</p>
+          <div class="page-header-actions">
+              <span class="cc-version-info" id="ccVersionInfo" title="Verze Control Center - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
+              <button class="cc-clear-cache-btn" onclick="clearCacheAndReload()" title="Vymaže lokální cache a načte nejnovější verzi">
+                  🔄 Vymazat cache & Reload
+              </button>
+          </div>
+      </div>
+
+      <!-- Card Grid -->
+      <div class="cc-grid">
+
+          <!-- Statistiky reklamací -->
+          <div class="cc-card cc-card-statistics" onclick="openCCModal('statistics')">
+              <div class="cc-card-title">Statistiky</div>
+              <div class="cc-card-description">Přehledy a grafy reklamací</div>
+          </div>
+
+          <!-- Web Analytics -->
+          <div class="cc-card cc-card-analytics" onclick="openCCModal('analytics')">
+              <div class="cc-card-title">Analytics</div>
+              <div class="cc-card-description">Web analytika a metriky</div>
+          </div>
+
+          <!-- Security -->
+          <div class="cc-card cc-card-keys" onclick="openCCModal('keys')">
+              <?php if ($activeKeys > 0): ?>
+                  <div class="cc-card-badge"><?= $activeKeys ?></div>
+              <?php endif; ?>
+              <div class="cc-card-title">Security</div>
+              <div class="cc-card-description">Registrační klíče, API klíče, bezpečnost</div>
+          </div>
+
+          <!-- Správa uživatelů -->
+          <div class="cc-card cc-card-users" onclick="openCCModal('users')">
+              <div class="cc-card-title">Správa uživatelů</div>
+              <div class="cc-card-description">Technici, prodejci, administrátoři</div>
+          </div>
+
+          <!-- Email & SMS -->
+          <div class="cc-card cc-card-notifications" onclick="openCCModal('notifications')">
+              <div class="cc-card-title">Email & SMS</div>
+              <div class="cc-card-description">Šablony emailů a SMS notifikace</div>
+          </div>
+
+          <!-- Reklamace -->
+          <div class="cc-card cc-card-claims" onclick="openCCModal('claims')">
+              <div class="cc-card-title">Správa reklamací</div>
+              <div class="cc-card-description">Přehled všech servisních požadavků</div>
+          </div>
+
+          <!-- Akce & Úkoly -->
+          <div class="cc-card cc-card-actions" onclick="openCCModal('actions')">
+              <?php if ($pendingActions > 0): ?>
+                  <div class="cc-card-badge"><?= $pendingActions ?></div>
+              <?php endif; ?>
+              <div class="cc-card-title">Akce & Úkoly</div>
+              <div class="cc-card-description">Nevyřešené úkoly a plánované akce</div>
+          </div>
+
+          <!-- Konzole -->
+          <div class="cc-card cc-card-console" onclick="openCCModal('console')">
+              <div class="cc-card-title">💻 Konzole</div>
+              <div class="cc-card-description">Diagnostika HTML/PHP/JS/CSS/SQL</div>
+          </div>
+
+          <!-- Testovací prostředí -->
+          <div class="cc-card cc-card-testing" onclick="openCCModal('testing')">
+              <div class="cc-card-title">Testovací prostředí</div>
+              <div class="cc-card-description">E2E testování celého workflow</div>
+          </div>
+
+          <!-- Vzhled & Design -->
+          <div class="cc-card cc-card-appearance" onclick="openCCModal('appearance')">
+              <div class="cc-card-title">Vzhled & Design</div>
+              <div class="cc-card-description">Barvy, fonty, logo, branding</div>
+          </div>
+
+          <!-- SQL Databáze -->
+          <div class="cc-card cc-card-content" onclick="openSQLPage()">
+              <div class="cc-card-title">SQL</div>
+              <div class="cc-card-description">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
+          </div>
+
+          <!-- Konfigurace -->
+          <div class="cc-card cc-card-config" onclick="openCCModal('config')">
+              <div class="cc-card-title">Konfigurace systému</div>
+              <div class="cc-card-description">SMTP, API klíče, bezpečnost</div>
+          </div>
+
+      </div>
+  </div>
+
+  <!-- Overlay & Modal -->
+  <div class="cc-overlay" id="ccOverlay" onclick="closeCCModal()"></div>
+  <div class="cc-modal" id="ccModal">
+      <div class="cc-modal-header">
+          <button class="cc-modal-close" onclick="closeCCModal()" aria-label="Zavřít">×</button>
+      </div>
+      <div class="cc-modal-body" id="ccModalBody">
+          <div class="cc-modal-loading">
+              <div class="cc-modal-spinner"></div>
+              <div style="margin-top: 1rem;">Načítání...</div>
+          </div>
+      </div>
+  </div>
   <?php endif; ?>
 
   <?php if ($activeTab === 'control_center_testing'): ?>
