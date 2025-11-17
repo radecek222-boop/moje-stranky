@@ -1741,3 +1741,47 @@ body.cc-modal-open {
         animation: none;
     }
 }
+
+/* ===========================================================================
+   LOADING INDICATORS - Card loading states
+   Přidáno: 2025-11-17 - FÁZE 5
+   =========================================================================== */
+
+.cc-card-loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 6px;
+}
+
+.cc-card-loader.active {
+    display: flex;
+}
+
+.cc-card-loader-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--c-border, #ddd);
+    border-top-color: var(--c-primary, #667eea);
+    border-radius: 50%;
+    animation: cc-spinner-spin 0.8s linear infinite;
+}
+
+@keyframes cc-spinner-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Card hover effect při načítání vypnout */
+.cc-card.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}

@@ -1097,3 +1097,87 @@ document.addEventListener('keydown', (e) => {
         closeCCModal();
     }
 });
+
+// ===========================================================================
+// LOADING STATES - Card loading indicators
+// Přidáno: FÁZE 5
+// ===========================================================================
+
+/**
+ * Inicializace loading indikátorů na všechny cc-card elementy
+ */
+function initCardLoadingStates() {
+    const cards = document.querySelectorAll('.cc-card');
+
+    cards.forEach(card => {
+        // Přidat loading div pokud ještě neexistuje
+        if (!card.querySelector('.cc-card-loader')) {
+            const loader = document.createElement('div');
+            loader.className = 'cc-card-loader';
+            loader.innerHTML = '<div class="cc-card-loader-spinner"></div>';
+            card.appendChild(loader);
+        }
+
+        // Přidat event listener pro aktivaci loading stavu
+        const originalOnclick = card.onclick;
+        card.onclick = function(event) {
+            activateCardLoading(card);
+
+            // Spustit původní onclick funkci
+            if (originalOnclick) {
+                originalOnclick.call(this, event);
+            }
+
+            // Deaktivovat loading po 500ms (fallback pokud modal loading selže)
+            setTimeout(() => deactivateCardLoading(card), 500);
+        };
+    });
+}
+
+/**
+ * Aktivovat loading stav na kartě
+ */
+function activateCardLoading(card) {
+    card.classList.add('loading');
+    const loader = card.querySelector('.cc-card-loader');
+    if (loader) {
+        loader.classList.add('active');
+    }
+}
+
+/**
+ * Deaktivovat loading stav na kartě
+ */
+function deactivateCardLoading(card) {
+    card.classList.remove('loading');
+    const loader = card.querySelector('.cc-card-loader');
+    if (loader) {
+        loader.classList.remove('active');
+    }
+}
+
+/**
+ * Deaktivovat loading na všech kartách
+ */
+function deactivateAllCardLoading() {
+    document.querySelectorAll('.cc-card.loading').forEach(card => {
+        deactivateCardLoading(card);
+    });
+}
+
+// Inicializovat loading stavy při načtení stránky
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCardLoadingStates);
+} else {
+    initCardLoadingStates();
+}
+
+// Deaktivovat loading když se modal otevře
+const originalOpenCCModal = window.openCCModal;
+window.openCCModal = function(...args) {
+    deactivateAllCardLoading();
+    if (originalOpenCCModal) {
+        return originalOpenCCModal.apply(this, args);
+    }
+};
+
