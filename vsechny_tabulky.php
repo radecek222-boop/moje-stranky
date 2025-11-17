@@ -290,22 +290,6 @@ try {
         </div>
 
         <div class="content">
-            <!-- CELKOVÁ STATISTIKA -->
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-value"><?php echo count($detailyTabulek); ?></div>
-                    <div class="stat-label">Celkem tabulek</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value"><?php echo number_format($celkovyPocetZaznamu); ?></div>
-                    <div class="stat-label">Celkem záznamů</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value"><?php echo $celkovaVelikost; ?> MB</div>
-                    <div class="stat-label">Velikost databáze</div>
-                </div>
-            </div>
-
             <!-- NÁSTROJE PRO SPRÁVU DATABÁZE -->
             <div style="background: #f5f5f5; border: 2px solid #000; padding: 2rem; margin: 2rem 0;">
                 <h2 style="margin-top: 0; padding-bottom: 0.75rem; border-bottom: 2px solid #000; font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;">
@@ -370,6 +354,22 @@ try {
                     <p style="margin: 0; font-size: 0.85rem; color: #78350f;">
                         <strong>Formát názvu:</strong> <code>pridej_nazev_sloupce.php</code>, <code>kontrola_nazev.php</code>, <code>migrace_nazev.php</code>
                     </p>
+                </div>
+            </div>
+
+            <!-- CELKOVÁ STATISTIKA -->
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value"><?php echo count($detailyTabulek); ?></div>
+                    <div class="stat-label">Celkem tabulek</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value"><?php echo number_format($celkovyPocetZaznamu); ?></div>
+                    <div class="stat-label">Celkem záznamů</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value"><?php echo $celkovaVelikost; ?> MB</div>
+                    <div class="stat-label">Velikost databáze</div>
                 </div>
             </div>
 
