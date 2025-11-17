@@ -22,52 +22,63 @@ try {
 
     // Pro každou tabulku získat detaily
     $detailyTabulek = [];
+    $chyboveTabulky = [];
+
     foreach ($vsechnyTabulky as $tabulka) {
-        // Struktura
-        $stmt = $pdo->query("DESCRIBE `$tabulka`");
-        $struktura = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            // Struktura
+            $stmt = $pdo->query("DESCRIBE `$tabulka`");
+            $struktura = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Počet záznamů
-        $stmt = $pdo->query("SELECT COUNT(*) as pocet FROM `$tabulka`");
-        $pocet = $stmt->fetch()['pocet'];
+            // Počet záznamů
+            $stmt = $pdo->query("SELECT COUNT(*) as pocet FROM `$tabulka`");
+            $pocet = $stmt->fetch()['pocet'];
 
-        // Ukázka dat (max 3 záznamy)
-        $stmt = $pdo->query("SELECT * FROM `$tabulka` LIMIT 3");
-        $ukazkaZaznamu = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // Ukázka dat (max 3 záznamy)
+            $stmt = $pdo->query("SELECT * FROM `$tabulka` LIMIT 3");
+            $ukazkaZaznamu = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Indexy
-        $stmt = $pdo->query("SHOW INDEX FROM `$tabulka`");
-        $indexy = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // Indexy
+            $stmt = $pdo->query("SHOW INDEX FROM `$tabulka`");
+            $indexy = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $indexyPrehled = [];
-        foreach ($indexy as $index) {
-            $indexyPrehled[$index['Key_name']][] = $index['Column_name'];
+            $indexyPrehled = [];
+            foreach ($indexy as $index) {
+                $indexyPrehled[$index['Key_name']][] = $index['Column_name'];
+            }
+
+            // CREATE TABLE DDL
+            $stmt = $pdo->query("SHOW CREATE TABLE `$tabulka`");
+            $createTableDDL = $stmt->fetch(PDO::FETCH_ASSOC)['Create Table'] ?? null;
+
+            // Velikost tabulky
+            $stmt = $pdo->query("
+                SELECT
+                    ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024, 2) AS velikost_kb
+                FROM information_schema.TABLES
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = '$tabulka'
+            ");
+            $velikostInfo = $stmt->fetch();
+            $velikost = $velikostInfo['velikost_kb'] ?? 0;
+
+            $detailyTabulek[] = [
+                'nazev' => $tabulka,
+                'pocet' => $pocet,
+                'struktura' => $struktura,
+                'ukazka' => $ukazkaZaznamu,
+                'indexy' => $indexyPrehled,
+                'velikost' => $velikost,
+                'ddl' => $createTableDDL
+            ];
+
+        } catch (PDOException $e) {
+            // Přeskočit tabulky/VIEW které nelze načíst (např. neplatné VIEW)
+            $chyboveTabulky[] = [
+                'nazev' => $tabulka,
+                'chyba' => $e->getMessage()
+            ];
         }
-
-        // CREATE TABLE DDL
-        $stmt = $pdo->query("SHOW CREATE TABLE `$tabulka`");
-        $createTableDDL = $stmt->fetch(PDO::FETCH_ASSOC)['Create Table'] ?? null;
-
-        // Velikost tabulky
-        $stmt = $pdo->query("
-            SELECT
-                ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024, 2) AS velikost_kb
-            FROM information_schema.TABLES
-            WHERE TABLE_SCHEMA = DATABASE()
-            AND TABLE_NAME = '$tabulka'
-        ");
-        $velikostInfo = $stmt->fetch();
-        $velikost = $velikostInfo['velikost_kb'] ?? 0;
-
-        $detailyTabulek[] = [
-            'nazev' => $tabulka,
-            'pocet' => $pocet,
-            'struktura' => $struktura,
-            'ukazka' => $ukazkaZaznamu,
-            'indexy' => $indexyPrehled,
-            'velikost' => $velikost,
-            'ddl' => $createTableDDL
-        ];
     }
 
     // Celková statistika databáze
@@ -290,6 +301,31 @@ try {
         </div>
 
         <div class="content">
+            <!-- UPOZORNĚNÍ NA CHYBOVÉ TABULKY/VIEW -->
+            <?php if (!empty($chyboveTabulky)): ?>
+            <div style="background: #fff3cd; border: 2px solid #fbbf24; padding: 2rem; margin: 2rem 0;">
+                <h2 style="margin-top: 0; padding-bottom: 0.75rem; border-bottom: 2px solid #fbbf24; font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #92400e;">
+                    Neplatné VIEW/Tabulky
+                </h2>
+                <p style="margin: 1rem 0; color: #78350f; font-size: 0.9rem;">
+                    <strong>VAROVÁNÍ:</strong> Následující tabulky/VIEW nelze načíst kvůli chybám. Pravděpodobně jde o neplatné VIEW které odkazují na smazané sloupce.
+                </p>
+                <?php foreach ($chyboveTabulky as $chyba): ?>
+                <div style="background: white; border: 1px solid #fbbf24; padding: 1rem; margin: 0.5rem 0; border-radius: 5px;">
+                    <strong style="color: #92400e;"><?php echo htmlspecialchars($chyba['nazev']); ?></strong>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #78350f;">
+                        Chyba: <?php echo htmlspecialchars($chyba['chyba']); ?>
+                    </p>
+                    <?php if (strpos($chyba['nazev'], 'provize') !== false): ?>
+                    <a href="oprav_view_provize.php" target="_blank" style="display: inline-block; margin-top: 0.5rem; padding: 0.5rem 1rem; background: #92400e; color: #fff; text-decoration: none; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; border-radius: 3px;">
+                        Opravit VIEW
+                    </a>
+                    <?php endif; ?>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+
             <!-- NÁSTROJE PRO SPRÁVU DATABÁZE -->
             <div style="background: #f5f5f5; border: 2px solid #000; padding: 2rem; margin: 2rem 0;">
                 <h2 style="margin-top: 0; padding-bottom: 0.75rem; border-bottom: 2px solid #000; font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;">
@@ -336,6 +372,19 @@ try {
                             Optimalizace databáze - přidání indexů pro rychlejší dotazy
                         </p>
                         <a href="pridej_chybejici_indexy.php" target="_blank" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                            Otevřít nástroj
+                        </a>
+                    </div>
+
+                    <!-- Oprava VIEW -->
+                    <div style="background: white; border: 2px solid #000; padding: 1.5rem;">
+                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600;">
+                            Opravit neplatné VIEW
+                        </h3>
+                        <p style="margin: 0.5rem 0; font-size: 0.85rem; color: #666;">
+                            Odstranění VIEW které odkazují na smazané sloupce (wgs_provize_technici)
+                        </p>
+                        <a href="oprav_view_provize.php" target="_blank" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
                             Otevřít nástroj
                         </a>
                     </div>
