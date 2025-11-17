@@ -47,14 +47,21 @@ class SignaturePad {
   }
 
   _ziskejPozici(event) {
+    // Získat přesnou pozici a velikost canvas (včetně border)
     const rect = this.canvas.getBoundingClientRect();
 
+    // Vypočítat souřadnice relativně k canvas
     // DŮLEŽITÉ: Souřadnice NESMÍ být násobeny ratio,
     // protože context je už scaled (ctx.scale(ratio, ratio))
-    return {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top
-    };
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    // Ověřit, že souřadnice jsou v rámci canvas
+    if (x < 0 || x > rect.width || y < 0 || y > rect.height) {
+      console.warn('⚠️ Souřadnice mimo canvas:', {x, y, rect});
+    }
+
+    return { x, y };
   }
 
   _zacitRysovat(event) {

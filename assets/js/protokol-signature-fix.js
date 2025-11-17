@@ -37,12 +37,32 @@
 
       // Nastavit velikost canvas
       const resizeCanvas = () => {
+        // DŮLEŽITÉ: Použít offsetWidth/Height (bez border/scroll)
+        // getBoundingClientRect() zahrnuje border, což způsobuje problém
+        const canvasWidth = canvas.offsetWidth;
+        const canvasHeight = canvas.offsetHeight;
         const ratio = Math.max(window.devicePixelRatio || 1, 1);
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = canvas.offsetHeight * ratio;
+
+        console.log('📐 Resize canvas:', {
+          offsetWidth: canvasWidth,
+          offsetHeight: canvasHeight,
+          ratio: ratio,
+          physicalWidth: canvasWidth * ratio,
+          physicalHeight: canvasHeight * ratio
+        });
+
+        // Nastavit fyzickou velikost canvas
+        canvas.width = canvasWidth * ratio;
+        canvas.height = canvasHeight * ratio;
+
         const ctx = canvas.getContext('2d');
         if (ctx) {
+          // Scale context pro sharp rendering
           ctx.scale(ratio, ratio);
+
+          // Vyplnit bílou barvou (celý canvas včetně scaled velikosti)
+          ctx.fillStyle = 'white';
+          ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         }
       };
 
