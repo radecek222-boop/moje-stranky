@@ -805,6 +805,11 @@ function loadNotifContent(type, body) {
   </div>
   <?php endif; ?>
 
+  <?php if ($activeTab === 'control_center_phpunit'): ?>
+  <!-- TAB: PHPUNIT TEST RUNNER -->
+  <?php require_once __DIR__ . '/includes/admin_phpunit.php'; ?>
+  <?php endif; ?>
+
   <?php if ($activeTab === 'admin_testing'): ?>
   <!-- TAB: TESTING ENVIRONMENT (OLD) -->
   <?php require_once __DIR__ . '/includes/admin_testing.php'; ?>

@@ -262,7 +262,7 @@ class ApiSecurityTest extends TestCase
     /**
      * Test: Žádné API nepoužívá $_GET pro modifikaci dat
      */
-    public function testApiNepouzivaji GetProModifikaci(): void
+    public function testApiNepouzivajiGetProModifikaci(): void
     {
         $modificationEndpoints = [
             'delete_reklamace.php',

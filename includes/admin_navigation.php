@@ -43,6 +43,11 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab_label' => 'Online',
                 'tab' => 'online',
             ],
+            'control_center_phpunit' => [
+                'href' => 'admin.php?tab=control_center_phpunit',
+                'tab_label' => '🧪 PHPUnit Tests',
+                'tab' => 'control_center_phpunit',
+            ],
             'control_center_testing' => [
                 'href' => 'admin.php?tab=control_center_testing',
                 'tab_label' => 'Testing (Old)',
