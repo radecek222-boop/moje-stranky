@@ -337,54 +337,28 @@ try {
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
 
-                    <!-- Migrační nástroj -->
+                    <!-- Oprava DB credentials -->
                     <div style="background: white; border: 2px solid #000; padding: 1.5rem;">
                         <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600;">
-                            Přidat chybějící sloupce
+                            Aktualizovat DB credentials
                         </h3>
                         <p style="margin: 0.5rem 0; font-size: 0.85rem; color: #666;">
-                            Bezpečně přidá chybějící sloupce do tabulek. Kontroluje před spuštěním.
+                            Oprava databázových credentials v .env souboru. Použij pokud se změní DB heslo.
                         </p>
-                        <a href="pridej_chybejici_sloupce.php" target="_blank" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                        <a href="aktualizuj_databazi.php" target="_blank" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
                             Otevřít nástroj
                         </a>
                     </div>
 
-                    <!-- Kontrola zastaralých sloupců -->
+                    <!-- Čištění emailové fronty -->
                     <div style="background: white; border: 2px solid #000; padding: 1.5rem;">
                         <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600;">
-                            Odstranit zastaralé sloupce
+                            Vyčistit emailovou frontu
                         </h3>
                         <p style="margin: 0.5rem 0; font-size: 0.85rem; color: #666;">
-                            Kontrola a bezpečné odstranění deprecated sloupců (technik_milan_kolin, atd.)
+                            Smazání selhavších emailů z tabulky wgs_email_queue pro čištění databáze.
                         </p>
-                        <a href="kontrola_zastaralych_sloupcu.php" target="_blank" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
-                            Otevřít nástroj
-                        </a>
-                    </div>
-
-                    <!-- Indexy -->
-                    <div style="background: white; border: 2px solid #000; padding: 1.5rem;">
-                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600;">
-                            Přidat chybějící indexy
-                        </h3>
-                        <p style="margin: 0.5rem 0; font-size: 0.85rem; color: #666;">
-                            Optimalizace databáze - přidání indexů pro rychlejší dotazy
-                        </p>
-                        <a href="pridej_chybejici_indexy.php" target="_blank" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
-                            Otevřít nástroj
-                        </a>
-                    </div>
-
-                    <!-- Oprava VIEW -->
-                    <div style="background: white; border: 2px solid #000; padding: 1.5rem;">
-                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600;">
-                            Opravit neplatné VIEW
-                        </h3>
-                        <p style="margin: 0.5rem 0; font-size: 0.85rem; color: #666;">
-                            Odstranění VIEW které odkazují na smazané sloupce (wgs_provize_technici)
-                        </p>
-                        <a href="oprav_view_provize.php" target="_blank" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                        <a href="vycisti_emailovou_frontu.php" target="_blank" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
                             Otevřít nástroj
                         </a>
                     </div>
@@ -393,15 +367,17 @@ try {
 
                 <div style="margin-top: 2rem; padding: 1rem; background: #fffbea; border: 2px solid #fbbf24;">
                     <h3 style="margin: 0 0 0.75rem 0; font-size: 0.95rem; font-weight: 600; color: #92400e;">
-                        Přidat nový SQL požadavek (pro AI)
+                        Přidat nový SQL nástroj (pro AI)
                     </h3>
                     <p style="margin: 0 0 1rem 0; font-size: 0.85rem; color: #78350f;">
-                        Když AI vytvoří nový migrační skript pro změny v databázi, vždy jej uloží do root složky projektu
-                        s názvem který začíná <code>pridej_</code>, <code>kontrola_</code> nebo <code>migrace_</code>.
-                        Tyto skripty se pak automaticky objeví v seznamu nástrojů.
+                        Když AI vytvoří nový migrační skript pro změny v databázi, uloží jej do root složky projektu
+                        s názvem který začíná <code>pridej_</code>, <code>kontrola_</code>, <code>migrace_</code> nebo <code>vycisti_</code>.
+                    </p>
+                    <p style="margin: 0 0 1rem 0; font-size: 0.85rem; color: #78350f;">
+                        <strong>Formát názvu:</strong> <code>pridej_nazev_sloupce.php</code>, <code>kontrola_nazev.php</code>, <code>migrace_nazev.php</code>, <code>vycisti_nazev.php</code>
                     </p>
                     <p style="margin: 0; font-size: 0.85rem; color: #78350f;">
-                        <strong>Formát názvu:</strong> <code>pridej_nazev_sloupce.php</code>, <code>kontrola_nazev.php</code>, <code>migrace_nazev.php</code>
+                        <strong>Po vytvoření skriptu:</strong> Přidej odkaz ručně do sekce "Nástroje pro správu databáze" v tomto souboru (vsechny_tabulky.php).
                     </p>
                 </div>
             </div>
