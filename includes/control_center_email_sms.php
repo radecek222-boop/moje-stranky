@@ -46,6 +46,36 @@ try {
         $emailStats['all'] += (int)$row['count'];
     }
 } catch (PDOException $e) {}
+
+// Load email queue for management tab
+$filterStatus = $_GET['filter'] ?? 'all';
+$emaily = [];
+try {
+    $whereClause = '';
+    if ($filterStatus !== 'all') {
+        $whereClause = "WHERE status = :status";
+    }
+
+    $sql = "
+        SELECT
+            id, to_email, subject, body, status, retry_count,
+            last_error, created_at, updated_at, sent_at
+        FROM wgs_email_queue
+        $whereClause
+        ORDER BY created_at DESC
+        LIMIT 100
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    if ($filterStatus !== 'all') {
+        $stmt->execute(['status' => $filterStatus]);
+    } else {
+        $stmt->execute();
+    }
+    $emaily = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $emaily = [];
+}
 ?>
 
 <link rel="stylesheet" href="/assets/css/control-center.css">
@@ -90,10 +120,10 @@ try {
 
         <!-- PŘEHLED -->
         <div id="section-overview" class="cc-section <?= $currentSection === 'overview' ? 'active' : '' ?>">
-            <h3 style="margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">Rychlý přehled</h3>
+            <h3 style="margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">Emailová fronta</h3>
 
             <!-- Stats Grid -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 1rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem;">
                 <div style="background: #fff; border: 1px solid #000; padding: 0.75rem; text-align: center;">
                     <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: #000;"><?= $emailStats['all'] ?></div>
                     <div style="font-size: 0.75rem; color: #666; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Celkem</div>
@@ -109,41 +139,6 @@ try {
                 <div style="background: #fff; border: 1px solid #000; padding: 0.75rem; text-align: center;">
                     <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: #000;"><?= $emailStats['failed'] ?></div>
                     <div style="font-size: 0.75rem; color: #666; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Selhalo</div>
-                </div>
-            </div>
-
-            <!-- Rychlé odkazy -->
-            <div class="setting-group" style="margin-bottom: 1rem;">
-                <h3 style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: #000; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #000;">Rychlé akce</h3>
-
-                <div class="setting-item" onclick="window.location.href='email_management.php'" style="cursor: pointer; padding: 0.75rem 0; border-bottom: 1px solid #e0e0e0; font-size: 0.85rem;">
-                    <div class="setting-item-left">
-                        <div style="font-weight: 500; font-family: 'Poppins', sans-serif; color: #000;">Email Management</div>
-                        <div class="setting-item-description">Kompletní správa emailové fronty - historie, čekající, selhavší</div>
-                    </div>
-                    <div class="setting-item-right">
-                        <span style="font-size: 1.5rem;">›</span>
-                    </div>
-                </div>
-
-                <div class="setting-item" onclick="window.location.href='cleanup_failed_emails.php'" style="cursor: pointer; padding: 0.75rem 0; border-bottom: 1px solid #e0e0e0; font-size: 0.85rem;">
-                    <div class="setting-item-left">
-                        <div style="font-weight: 500; font-family: 'Poppins', sans-serif; color: #000;">Vyčistit selhavší emaily</div>
-                        <div class="setting-item-description">Odstranit všechny emaily se statusem 'failed' z fronty</div>
-                    </div>
-                    <div class="setting-item-right">
-                        <span style="font-size: 1.5rem;">›</span>
-                    </div>
-                </div>
-
-                <div class="setting-item" onclick="switchSection('smtp')" style="cursor: pointer; padding: 0.75rem 0; border-bottom: 1px solid #e0e0e0; font-size: 0.85rem;">
-                    <div class="setting-item-left">
-                        <div style="font-weight: 500; font-family: 'Poppins', sans-serif; color: #000;">SMTP Konfigurace</div>
-                        <div class="setting-item-description">Nastavení SMTP serveru pro odesílání emailů</div>
-                    </div>
-                    <div class="setting-item-right">
-                        <span style="font-size: 1.5rem;">›</span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -260,19 +255,117 @@ try {
 
         <!-- EMAIL MANAGEMENT -->
         <div id="section-management" class="cc-section <?= $currentSection === 'management' ? 'active' : '' ?>">
-            <div class="cc-alert success">
-                <div class="cc-alert-content">
-                    <div class="cc-alert-title">Email Management</div>
-                    <div class="cc-alert-message">
-                        Pokročilá správa emailů je dostupná na samostatné stránce.
-                        <div style="margin-top: 1rem;">
-                            <a href="email_management.php" class="cc-btn cc-btn-primary">
-                                Otevřít Email Management
-                            </a>
-                        </div>
-                    </div>
+
+            <!-- Alert -->
+            <div id="email-alert" style="display: none; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.85rem;"></div>
+
+            <!-- Filter Stats -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 1rem;">
+                <div onclick="filterEmaily('all')" style="background: <?= $filterStatus === 'all' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
+                    <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStatus === 'all' ? '#fff' : '#000' ?>;"><?= $emailStats['all'] ?></div>
+                    <div style="font-size: 0.75rem; color: <?= $filterStatus === 'all' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Celkem</div>
+                </div>
+                <div onclick="filterEmaily('sent')" style="background: <?= $filterStatus === 'sent' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
+                    <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStatus === 'sent' ? '#fff' : '#000' ?>;"><?= $emailStats['sent'] ?></div>
+                    <div style="font-size: 0.75rem; color: <?= $filterStatus === 'sent' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Odesláno</div>
+                </div>
+                <div onclick="filterEmaily('pending')" style="background: <?= $filterStatus === 'pending' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
+                    <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStatus === 'pending' ? '#fff' : '#000' ?>;"><?= $emailStats['pending'] ?></div>
+                    <div style="font-size: 0.75rem; color: <?= $filterStatus === 'pending' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Ve frontě</div>
+                </div>
+                <div onclick="filterEmaily('failed')" style="background: <?= $filterStatus === 'failed' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
+                    <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStatus === 'failed' ? '#fff' : '#000' ?>;"><?= $emailStats['failed'] ?></div>
+                    <div style="font-size: 0.75rem; color: <?= $filterStatus === 'failed' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Selhalo</div>
                 </div>
             </div>
+
+            <!-- Toolbar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: #f5f5f5; border: 1px solid #000; margin-bottom: 1rem;">
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; font-family: 'Poppins', sans-serif;">
+                        <input type="checkbox" id="select-all-emails" onchange="toggleSelectAllEmails()" style="width: 16px; height: 16px; cursor: pointer;">
+                        <span>Vybrat vše</span>
+                    </label>
+                    <span style="font-size: 0.85rem; color: #666; font-family: 'Poppins', sans-serif;">
+                        Vybráno: <strong id="selected-email-count">0</strong>
+                    </span>
+                </div>
+                <button id="resend-emails-btn" onclick="resendVybraneEmaily()" disabled
+                        style="padding: 0.5rem 1rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; font-size: 0.75rem; transition: all 0.2s;">
+                    Znovu odeslat vybrané
+                </button>
+            </div>
+
+            <!-- Email Table -->
+            <?php if (count($emaily) > 0): ?>
+            <div style="overflow-x: auto; border: 1px solid #000;">
+                <table style="width: 100%; border-collapse: collapse; font-family: 'Poppins', sans-serif;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem; width: 30px;">
+                                <input type="checkbox" id="select-all-emails-header" onchange="toggleSelectAllEmails()" style="width: 16px; height: 16px; cursor: pointer;">
+                            </th>
+                            <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">ID</th>
+                            <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Status</th>
+                            <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Příjemce</th>
+                            <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Předmět</th>
+                            <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Pokusy</th>
+                            <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Vytvořeno</th>
+                            <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Odesláno</th>
+                            <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($emaily as $email): ?>
+                        <tr style="transition: background 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fff'">
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
+                                <input type="checkbox" class="email-checkbox-item" value="<?= $email['id'] ?>" onchange="updateSelectedEmailCount()" style="width: 16px; height: 16px; cursor: pointer;">
+                            </td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['id'] ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
+                                <span style="display: inline-block; padding: 0.25rem 0.5rem; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #000; background: <?= $email['status'] === 'sent' ? '#000' : '#fff' ?>; color: <?= $email['status'] === 'sent' ? '#fff' : '#000' ?>;">
+                                    <?php
+                                        if ($email['status'] === 'sent') echo 'SENT';
+                                        elseif ($email['status'] === 'pending') echo 'PENDING';
+                                        else echo 'FAILED';
+                                    ?>
+                                </span>
+                            </td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= htmlspecialchars($email['to_email']) ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= htmlspecialchars(substr($email['subject'], 0, 40)) ?><?= strlen($email['subject']) > 40 ? '...' : '' ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['retry_count'] ?> / 3</td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= date('d.m.Y H:i', strtotime($email['created_at'])) ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['sent_at'] ? date('d.m.Y H:i', strtotime($email['sent_at'])) : '-' ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
+                                <span onclick="toggleEmailDetail(<?= $email['id'] ?>)" style="cursor: pointer; text-decoration: underline; color: #000; font-size: 0.8rem;">
+                                    Zobrazit
+                                </span>
+                                <div id="email-detail-<?= $email['id'] ?>" style="display: none; margin-top: 0.5rem;">
+                                    <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 0.5rem; font-size: 0.75rem; max-height: 150px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;">
+                                        <strong>Tělo emailu:</strong><br><br>
+                                        <?= htmlspecialchars($email['body']) ?>
+                                    </div>
+                                    <?php if ($email['last_error']): ?>
+                                    <div style="background: #fef2f2; border: 1px solid #ef4444; padding: 0.5rem; margin-top: 0.5rem; font-size: 0.75rem; font-family: monospace; color: #991b1b; white-space: pre-wrap; word-wrap: break-word;">
+                                        <strong>Chyba:</strong><br>
+                                        <?= htmlspecialchars($email['last_error']) ?>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php else: ?>
+            <div style="text-align: center; padding: 3rem 2rem; color: #888; border: 1px solid #ddd; background: #f5f5f5;">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">-</div>
+                <h3 style="font-family: 'Poppins', sans-serif; font-size: 1rem; color: #666; margin-bottom: 0.5rem;">Žádné emaily nenalezeny</h3>
+                <p style="font-size: 0.85rem; color: #999;">Pro vybraný filtr neexistují žádné emaily.</p>
+            </div>
+            <?php endif; ?>
+
         </div>
 
     </div>
@@ -422,5 +515,108 @@ async function sendTestEmail() {
     } catch (error) {
         alert('✗ Chyba: ' + error.message);
     }
+}
+
+// === EMAIL MANAGEMENT FUNCTIONS ===
+
+// Filter emaily podle statusu
+function filterEmaily(status) {
+    const url = new URL(window.location);
+    url.searchParams.set('filter', status);
+    url.searchParams.set('section', 'management');
+    window.location.href = url.toString();
+}
+
+// Toggle select all emails
+function toggleSelectAllEmails() {
+    const selectAll = document.getElementById('select-all-emails');
+    const checkboxes = document.querySelectorAll('.email-checkbox-item');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    updateSelectedEmailCount();
+}
+
+// Update selected email count
+function updateSelectedEmailCount() {
+    const checkboxes = document.querySelectorAll('.email-checkbox-item:checked');
+    const count = checkboxes.length;
+    document.getElementById('selected-email-count').textContent = count;
+    document.getElementById('resend-emails-btn').disabled = count === 0;
+
+    // Sync select-all checkbox
+    const allCheckboxes = document.querySelectorAll('.email-checkbox-item');
+    const selectAll = document.getElementById('select-all-emails');
+    if (selectAll) {
+        selectAll.checked = count === allCheckboxes.length && count > 0;
+    }
+}
+
+// Toggle email detail
+function toggleEmailDetail(id) {
+    const detail = document.getElementById('email-detail-' + id);
+    if (detail) {
+        detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+// Resend selected emails
+async function resendVybraneEmaily() {
+    const checkboxes = document.querySelectorAll('.email-checkbox-item:checked');
+    const ids = Array.from(checkboxes).map(cb => cb.value);
+
+    if (ids.length === 0) {
+        zobrazEmailAlert('Nejsou vybrány žádné emaily', 'error');
+        return;
+    }
+
+    if (!confirm(`Opravdu chcete znovu odeslat ${ids.length} emailů?`)) {
+        return;
+    }
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+    try {
+        const response = await fetch('/api/email_resend_api.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                csrf_token: csrfToken,
+                email_ids: ids
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            zobrazEmailAlert(`Úspěch! ${data.count} emailů bylo přesunuto zpět do fronty.`, 'success');
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            zobrazEmailAlert(`Chyba: ${data.message}`, 'error');
+        }
+    } catch (error) {
+        zobrazEmailAlert(`Síťová chyba: ${error.message}`, 'error');
+    }
+}
+
+// Show email alert
+function zobrazEmailAlert(message, type) {
+    const alert = document.getElementById('email-alert');
+    if (!alert) return;
+
+    alert.textContent = message;
+    alert.style.display = 'block';
+    alert.style.background = type === 'success' ? '#f0fdf4' : '#fef2f2';
+    alert.style.borderColor = type === 'success' ? '#22c55e' : '#ef4444';
+    alert.style.color = type === 'success' ? '#15803d' : '#991b1b';
+
+    setTimeout(() => {
+        alert.style.display = 'none';
+    }, 5000);
+}
+
+// Initialize email management when section is loaded
+if (document.getElementById('section-management')) {
+    updateSelectedEmailCount();
 }
 </script>
