@@ -100,37 +100,56 @@ try {
 
             // KROK 3: Přidat nový úkol - Instalace PHPMailer
             echo "<div class='step'>";
-            echo "<strong>📥 KROK 3: Přidávám nový úkol...</strong><br>";
+            echo "<strong>📥 KROK 3: Přidávám aktuální úkol...</strong><br>";
             echo "</div>";
 
+            // Kontrola, zda PHPMailer úkol už neexistuje
             $stmt = $pdo->prepare("
-                INSERT INTO wgs_pending_actions (
-                    action_type,
-                    title,
-                    description,
-                    priority,
-                    status,
-                    created_at,
-                    scheduled_at
-                ) VALUES (
-                    'install_phpmailer',
-                    'Instalace PHPMailer pro odesílání emailů',
-                    'PHPMailer je potřeba pro funkční odesílání protokolů zákazníkům.\n\n🔧 INSTALACE:\n1. Otevřete: https://www.wgs-service.cz/scripts/install_phpmailer.php\n2. Nebo spusťte v terminálu:\n   cd /home/www/wgs-service.cz/www\n   php scripts/install_phpmailer.php\n\n✅ Po instalaci se emaily budou posílat správně přes SMTP.',
-                    'high',
-                    'pending',
-                    NOW(),
-                    NOW()
-                )
+                SELECT COUNT(*) FROM wgs_pending_actions
+                WHERE action_type = 'install_phpmailer'
+                AND status IN ('pending', 'in_progress')
             ");
             $stmt->execute();
+            $existuje = $stmt->fetchColumn() > 0;
+
+            if (!$existuje) {
+                $stmt = $pdo->prepare("
+                    INSERT INTO wgs_pending_actions (
+                        action_type,
+                        title,
+                        description,
+                        priority,
+                        status,
+                        created_at,
+                        scheduled_at
+                    ) VALUES (
+                        'install_phpmailer',
+                        'Instalace PHPMailer pro odesílání emailů',
+                        'PHPMailer je potřeba pro funkční odesílání protokolů zákazníkům.\n\n🔧 INSTALACE:\n1. Otevřete: https://www.wgs-service.cz/scripts/install_phpmailer.php\n2. Nebo spusťte v terminálu:\n   cd /home/www/wgs-service.cz/www\n   php scripts/install_phpmailer.php\n\n✅ Po instalaci se emaily budou posílat správně přes SMTP.\n\n📚 DOKUMENTACE:\nViz PRAVIDLA_SPRAVA_DB_A_AKCI.md pro další info o správě akcí.',
+                        'high',
+                        'pending',
+                        NOW(),
+                        NOW()
+                    )
+                ");
+                $stmt->execute();
+
+                echo "<div class='success'>";
+                echo "✓ Přidán úkol: Instalace PHPMailer<br>";
+                echo "</div>";
+            } else {
+                echo "<div class='info'>";
+                echo "ℹ️ Úkol 'Instalace PHPMailer' již existuje (ponechán)<br>";
+                echo "</div>";
+            }
 
             $pdo->commit();
 
             echo "<div class='success'>";
             echo "<strong>✅ AKTUALIZACE DOKONČENA!</strong><br><br>";
-            echo "Přidán úkol:<br>";
-            echo "• [high] Instalace PHPMailer pro odesílání emailů<br><br>";
-            echo "Tento úkol se zobrazí v admin panelu v kartě 'Akce & Úkoly'.";
+            echo "Karta 'Akce & Úkoly' byla vyčištěna a aktualizována.<br><br>";
+            echo "<strong>Aktuální úkol:</strong><br>";
+            echo "• [high] Instalace PHPMailer pro odesílání emailů<br>";
             echo "</div>";
 
             echo "<div class='info'>";
@@ -138,7 +157,9 @@ try {
             echo "1. Přejděte do <a href='admin.php'>Admin Panelu</a><br>";
             echo "2. Otevřete kartu 'Akce & Úkoly'<br>";
             echo "3. Klikněte na úkol 'Instalace PHPMailer'<br>";
-            echo "4. Postupujte podle instrukcí<br>";
+            echo "4. Postupujte podle instrukcí v úkolu<br><br>";
+            echo "<strong>📚 Dokumentace:</strong><br>";
+            echo "Viz <a href='PRAVIDLA_SPRAVA_DB_A_AKCI.md'>PRAVIDLA_SPRAVA_DB_A_AKCI.md</a> pro pravidla správy databáze a akcí.";
             echo "</div>";
 
         } catch (PDOException $e) {
