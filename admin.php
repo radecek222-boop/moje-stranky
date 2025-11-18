@@ -49,6 +49,21 @@ if (!$embedMode) {
 $tabConfig = loadAdminTabNavigation();
 $activeTab = $_GET['tab'] ?? 'dashboard';
 
+// Mapování mezi control_center_* a admin_* názvy (pro zpětnou kompatibilitu)
+$tabAliases = [
+    'control_center_testing' => 'admin_testing',
+    'control_center_testing_interactive' => 'admin_testing_interactive',
+    'control_center_testing_simulator' => 'admin_testing_simulator',
+    'control_center_appearance' => 'admin_appearance',
+    'control_center_content' => 'admin_content',
+    'control_center_console' => 'admin_console',
+    'control_center_actions' => 'admin_actions',
+    'control_center_configuration' => 'admin_configuration',
+];
+
+// Pokud tab existuje v aliasech, použij aliasovaný název pro include soubory
+$activeTabForIncludes = $tabAliases[$activeTab] ?? $activeTab;
+
 // CLEAN URL: Admin dashboard je výchozí stránka
 if (isset($_GET['tab']) && $_GET['tab'] === 'dashboard' && !$embedMode) {
     header('Location: admin.php', true, 301); // 301 Permanent Redirect
@@ -794,42 +809,42 @@ function loadNotifContent(type, body) {
   <?php require_once __DIR__ . '/includes/admin_phpunit.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'admin_testing'): ?>
+  <?php if ($activeTabForIncludes === 'admin_testing'): ?>
   <!-- TAB: TESTING ENVIRONMENT (OLD) -->
   <?php require_once __DIR__ . '/includes/admin_testing.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'admin_testing_interactive'): ?>
+  <?php if ($activeTabForIncludes === 'admin_testing_interactive'): ?>
   <!-- TAB: INTERACTIVE TESTING ENVIRONMENT -->
   <?php require_once __DIR__ . '/includes/admin_testing_interactive.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'admin_testing_simulator'): ?>
+  <?php if ($activeTabForIncludes === 'admin_testing_simulator'): ?>
   <!-- TAB: E2E WORKFLOW SIMULATOR -->
   <?php require_once __DIR__ . '/includes/admin_testing_simulator.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'admin_appearance'): ?>
+  <?php if ($activeTabForIncludes === 'admin_appearance'): ?>
   <!-- TAB: VZHLED & DESIGN -->
   <?php require_once __DIR__ . '/includes/admin_appearance.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'admin_content'): ?>
+  <?php if ($activeTabForIncludes === 'admin_content'): ?>
   <!-- TAB: OBSAH & TEXTY -->
   <?php require_once __DIR__ . '/includes/admin_content.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'admin_console'): ?>
+  <?php if ($activeTabForIncludes === 'admin_console'): ?>
   <!-- TAB: KONZOLE -->
   <?php require_once __DIR__ . '/includes/admin_console.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'admin_actions'): ?>
+  <?php if ($activeTabForIncludes === 'admin_actions'): ?>
   <!-- TAB: AKCE & ÚKOLY -->
   <?php require_once __DIR__ . '/includes/admin_actions.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'admin_configuration'): ?>
+  <?php if ($activeTabForIncludes === 'admin_configuration'): ?>
   <!-- TAB: KONFIGURACE SYSTÉMU -->
   <?php require_once __DIR__ . '/includes/admin_configuration.php'; ?>
   <?php endif; ?>
