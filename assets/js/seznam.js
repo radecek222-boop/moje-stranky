@@ -1501,6 +1501,7 @@ async function showCustomerDetail(id) {
   const description = CURRENT_RECORD.popis_problemu || '';
 
   const cislo = CURRENT_RECORD.cislo || '';
+  const reklamaceId = CURRENT_RECORD.reklamace_id || '';
   const datum_prodeje = CURRENT_RECORD.datum_prodeje || '';
   const datum_reklamace = CURRENT_RECORD.datum_reklamace || '';
   const provedeni = CURRENT_RECORD.provedeni || '';
@@ -1508,8 +1509,6 @@ async function showCustomerDetail(id) {
   const doplnujici_info = CURRENT_RECORD.doplnujici_info || '';
   const fakturace_firma = CURRENT_RECORD.fakturace_firma || 'CZ';
 
-  // Použij reklamace_id (alfanumerické), ne číselné id
-  const reklamaceId = CURRENT_RECORD.reklamace_id || CURRENT_RECORD.cislo || id;
   const dbPhotos = await loadPhotosFromDB(reklamaceId);
   let fotky = dbPhotos.length > 0 ? dbPhotos : [];
 
@@ -1530,199 +1529,142 @@ async function showCustomerDetail(id) {
       }
     }
   }
+
   const content = `
     ${ModalManager.createHeader('Detail zákazníka', customerName)}
 
-    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+    <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
 
-      <div class="map-panel">
-        <div class="map-toggle" onclick="toggleMap()">
-          <span>ZOBRAZENÍ MAPY A TRASY</span>
-          <span class="map-toggle-icon" id="mapToggleIcon">▼</span>
+      <!-- KOMPAKTNÍ INFO BLOK -->
+      <div style="background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
+        <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; font-size: 0.85rem;">
+          <span style="color: #666; font-weight: 600;">Číslo objednávky:</span>
+          <input type="text" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; background: white;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
+
+          <span style="color: #666; font-weight: 600;">Číslo reklamace:</span>
+          <input type="text" id="edit_cislo" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${Utils.escapeHtml(cislo)}">
+
+          <span style="color: #666; font-weight: 600;">Fakturace:</span>
+          <span style="color: #1a1a1a; font-weight: 600; padding: 0.25rem 0;">${fakturace_firma.toUpperCase() === 'SK' ? 'Slovensko (SK)' : 'Česká republika (CZ)'}</span>
+
+          <span style="color: #666; font-weight: 600;">Datum prodeje:</span>
+          <input type="text" id="edit_datum_prodeje" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${Utils.escapeHtml(datum_prodeje)}" placeholder="DD.MM.RRRR">
+
+          <span style="color: #666; font-weight: 600;">Datum reklamace:</span>
+          <input type="text" id="edit_datum_reklamace" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${Utils.escapeHtml(datum_reklamace)}" placeholder="DD.MM.RRRR">
+
+          <span style="color: #666; font-weight: 600;">Jméno:</span>
+          <input type="text" id="edit_jmeno" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${customerName}">
+
+          <span style="color: #666; font-weight: 600;">Telefon:</span>
+          <input type="tel" id="edit_telefon" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${phone}">
+
+          <span style="color: #666; font-weight: 600;">Email:</span>
+          <input type="email" id="edit_email" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${email}">
+
+          <span style="color: #666; font-weight: 600;">Adresa:</span>
+          <input type="text" id="edit_adresa" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${address}">
+
+          <span style="color: #666; font-weight: 600;">Model:</span>
+          <input type="text" id="edit_model" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${product}">
+
+          <span style="color: #666; font-weight: 600;">Provedení:</span>
+          <input type="text" id="edit_provedeni" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${Utils.escapeHtml(provedeni)}" placeholder="Látka / Kůže">
+
+          <span style="color: #666; font-weight: 600;">Barva:</span>
+          <input type="text" id="edit_barva" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${Utils.escapeHtml(barva)}">
         </div>
-        <div class="map-content" id="mapContent">
-          <div class="map-stats">
-            <div class="map-stat">
-              <div class="map-stat-label">Vzdálenost</div>
-              <div class="map-stat-value" id="mapDistance">
-                <span class="map-loading">...</span>
-              </div>
+      </div>
+
+      <!-- POPIS PROBLÉMU -->
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému:</label>
+        <textarea id="edit_popis_problemu" style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem; min-height: 60px; resize: vertical; font-family: inherit;" placeholder="Popis problému od zákazníka">${description}</textarea>
+      </div>
+
+      <!-- DOPLŇUJÍCÍ INFO -->
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace:</label>
+        <textarea id="edit_doplnujici_info" style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem; min-height: 50px; resize: vertical; font-family: inherit;" placeholder="Doplňující informace od prodejce">${Utils.escapeHtml(doplnujici_info)}</textarea>
+      </div>
+
+      <!-- FOTOGRAFIE -->
+      ${fotky.length > 0 ? `
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">Fotografie (${fotky.length}):</label>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem;">
+            ${fotky.map((f, i) => {
+              const photoPath = typeof f === 'object' ? f.photo_path : f;
+              const photoId = typeof f === 'object' ? f.id : null;
+              const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
+
+              return `
+                <div class="foto-wrapper" style="position: relative;">
+                  <img src='${photoPath}'
+                       style='width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid #ddd; cursor: pointer; border-radius: 3px;'
+                       alt='Fotka ${i+1}'
+                       onclick='showPhotoFullscreen("${escapedUrl}")'>
+                  ${photoId ? `
+                    <button class="foto-delete-btn"
+                            onclick='event.stopPropagation(); smazatFotku(${photoId}, "${escapedUrl}")'
+                            title="Smazat fotku">
+                      ×
+                    </button>
+                  ` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- PDF DOKUMENTY -->
+      ${(() => {
+        const docs = CURRENT_RECORD.documents || [];
+        const protokolPdf = docs.find(d => d.document_type === 'protokol_pdf');
+        const fotkyPdf = docs.find(d => d.document_type === 'photos_pdf');
+
+        if (docs.length === 0) {
+          return `
+            <div style="padding: 0.75rem; text-align: center; background: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 4px; margin-bottom: 1rem;">
+              <p style="margin: 0; color: #6c757d; font-size: 0.8rem;">PDF dokumenty ještě nebyly vytvořeny</p>
             </div>
-            <div class="map-stat">
-              <div class="map-stat-label">Čas jízdy</div>
-              <div class="map-stat-value" id="mapDuration">
-                <span class="map-loading">...</span>
-              </div>
-            </div>
-          </div>
-          <div id="mapContainer">
-            <div class="map-loading">Načítání mapy...</div>
-          </div>
-        </div>
-      </div>
+          `;
+        }
 
-      <div style="background: var(--c-bg); border: 1px solid var(--c-border); padding: 1rem; margin-bottom: 1.5rem;">
-        <h3 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-black); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border);">Základní údaje</h3>
-        <div class="editable-field">
-          <label class="field-label">Číslo objednávky/reklamace</label>
-          <input type="text" class="field-input" id="edit_cislo" value="${Utils.escapeHtml(cislo)}">
-        </div>
-        <div class="editable-field">
-          <label class="field-label">Fakturace</label>
-          <div style="padding: 0.5rem 0; font-weight: 600; color: ${(fakturace_firma || '').toUpperCase() === 'SK' ? '#059669' : '#0066cc'};">
-            ${fakturace_firma && fakturace_firma.toUpperCase() === 'SK' ? '🇸🇰 Slovensko (SK)' : '🇨🇿 Česká republika (CZ)'}
-          </div>
-        </div>
-        <div class="editable-field">
-          <label class="field-label">Datum prodeje</label>
-          <input type="text" class="field-input" id="edit_datum_prodeje" value="${Utils.escapeHtml(datum_prodeje)}" placeholder="DD.MM.RRRR">
-        </div>
-        <div class="editable-field">
-          <label class="field-label">Datum reklamace</label>
-          <input type="text" class="field-input" id="edit_datum_reklamace" value="${Utils.escapeHtml(datum_reklamace)}" placeholder="DD.MM.RRRR">
-        </div>
-      </div>
+        let html = '<div style="margin-bottom: 1rem;">';
+        html += '<label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF dokumenty:</label>';
+        html += '<div style="display: flex; gap: 0.5rem;">';
 
-      <div style="background: var(--c-bg); border: 1px solid var(--c-border); padding: 1rem; margin-bottom: 1.5rem;">
-        <h3 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-black); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border);">Kontaktní údaje</h3>
-        <div class="editable-field">
-          <label class="field-label">Jméno zákazníka</label>
-          <input type="text" class="field-input" id="edit_jmeno" value="${customerName}">
-        </div>
-        <div class="editable-field">
-          <label class="field-label">Telefon</label>
-          <input type="tel" class="field-input" id="edit_telefon" value="${phone}">
-        </div>
-        <div class="editable-field">
-          <label class="field-label">Email</label>
-          <input type="email" class="field-input" id="edit_email" value="${email}">
-        </div>
-        <div class="editable-field">
-          <label class="field-label">Adresa</label>
-          <input type="text" class="field-input" id="edit_adresa" value="${address}">
-        </div>
-      </div>
+        if (protokolPdf) {
+          html += `
+            <button onclick="window.open('${protokolPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
+                    style="flex: 1; padding: 0.5rem; background: #1a1a1a; color: white; border: none; border-radius: 3px; font-size: 0.8rem; cursor: pointer; font-weight: 600;">
+              PDF protokol
+            </button>
+          `;
+        }
 
-      <div style="background: var(--c-bg); border: 1px solid var(--c-border); padding: 1rem; margin-bottom: 1.5rem;">
-        <h3 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-black); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border);">Informace o produktu</h3>
-        <div class="editable-field">
-          <label class="field-label">Model</label>
-          <input type="text" class="field-input" id="edit_model" value="${product}">
-        </div>
-        <div class="editable-field">
-          <label class="field-label">Provedení</label>
-          <input type="text" class="field-input" id="edit_provedeni" value="${Utils.escapeHtml(provedeni)}" placeholder="Látka / Kůže / Kombinace">
-        </div>
-        <div class="editable-field">
-          <label class="field-label">Označení barvy</label>
-          <input type="text" class="field-input" id="edit_barva" value="${Utils.escapeHtml(barva)}" placeholder="Např. BF12">
-        </div>
-        <div class="editable-field">
-          <label class="field-label">Doplňující informace od prodejce</label>
-          <textarea class="field-textarea" id="edit_doplnujici_info" rows="3">${Utils.escapeHtml(doplnujici_info)}</textarea>
-        </div>
-      </div>
+        if (fotkyPdf) {
+          html += `
+            <button onclick="window.open('${fotkyPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
+                    style="flex: 1; padding: 0.5rem; background: #444; color: white; border: none; border-radius: 3px; font-size: 0.8rem; cursor: pointer; font-weight: 600;">
+              PDF fotky
+            </button>
+          `;
+        }
 
-      <div style="background: var(--c-bg); border: 1px solid var(--c-border); padding: 1rem; margin-bottom: 1.5rem;">
-        <h3 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-black); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border);">Popis problému</h3>
-        <div class="editable-field">
-          <label class="field-label">Popis problému od zákazníka</label>
-          <textarea class="field-textarea" id="edit_popis_problemu" rows="4">${description}</textarea>
-        </div>
-      </div>
-
-      <div style="background: var(--c-bg); border: 1px solid var(--c-border); padding: 1rem;">
-        <h3 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-black); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border);">Fotografie (${fotky.length})</h3>
-        ${fotky.length
-          ? `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem;">
-              ${fotky.map((f, i) => {
-                // ✅ PODPORA OBJEKTŮ I STRINGŮ (zpětná kompatibilita)
-                const photoPath = typeof f === 'object' ? f.photo_path : f;
-                const photoId = typeof f === 'object' ? f.id : null;
-
-                // BEZPEČNOST: Escape quotes v URL pro onclick handler (XSS protection)
-                const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
-
-                return `
-                  <div class="foto-wrapper" style="position: relative;">
-                    <img src='${photoPath}'
-                         style='width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--c-border); cursor: pointer;'
-                         alt='Fotka ${i+1}'
-                         onclick='showPhotoFullscreen("${escapedUrl}")'>
-                    ${photoId ? `
-                      <button class="foto-delete-btn"
-                              onclick='event.stopPropagation(); smazatFotku(${photoId}, "${escapedUrl}")'
-                              title="Smazat fotku"
-                              aria-label="Smazat fotku">
-                        ×
-                      </button>
-                    ` : ''}
-                  </div>
-                `;
-              }).join('')}
-             </div>`
-          : '<p style="color: var(--c-grey); text-align: center; padding: 1rem; font-size: 0.85rem;">Žádné fotografie</p>'}
-      </div>
-
-
-      <div style="background: var(--c-bg); border: 1px solid var(--c-border); padding: 1rem; margin-top: 1.5rem;">
-        <h3 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-black); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border);">📄 PDF Dokumenty</h3>
-        ${(() => {
-          // Rozdělit dokumenty podle typu
-          const docs = CURRENT_RECORD.documents || [];
-          const protokolPdf = docs.find(d => d.document_type === 'protokol_pdf');
-          const fotkyPdf = docs.find(d => d.document_type === 'photos_pdf');
-
-          if (docs.length === 0) {
-            return `
-              <div style="padding: 1rem; text-align: center; background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 4px;">
-                <p style="margin: 0; color: #6c757d; font-size: 0.9rem;">ℹ️ PDF dokumenty ještě nebyly vytvořeny</p>
-                <p style="margin: 0.3rem 0 0 0; font-size: 0.8rem; color: #adb5bd;">Vytvoří se po dokončení servisu</p>
-              </div>
-            `;
-          }
-
-          let html = '';
-
-          // PDF Protokolu
-          if (protokolPdf) {
-            html += `
-              <button onclick="window.open('${protokolPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
-                      class="btn"
-                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #1a1a1a; color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-bottom: 0.25rem;">
-                📥 PDF protokol
-              </button>
-              <p style="margin: 0 0 0.5rem 0; font-size: 0.75rem; color: var(--c-grey); text-align: center;">
-                Vytvořeno: ${new Date(protokolPdf.uploaded_at || protokolPdf.created_at).toLocaleString('cs-CZ')}
-              </p>
-            `;
-          }
-
-          // PDF Fotek
-          if (fotkyPdf) {
-            html += `
-              <button onclick="window.open('${fotkyPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
-                      class="btn"
-                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #444; color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
-                📷 PDF fotodokumentace
-              </button>
-              <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: var(--c-grey); text-align: center;">
-                Vytvořeno: ${new Date(fotkyPdf.uploaded_at || fotkyPdf.created_at).toLocaleString('cs-CZ')}
-              </p>
-            `;
-          }
-
-          return html;
-        })()}
+        html += '</div></div>';
+        return html;
+      })()}
 
       ${CURRENT_USER.is_admin ? `
-        <div style="background: #fff5f5; border: 2px solid #ff4444; padding: 1rem; margin-top: 1.5rem; border-radius: 4px;">
-          <h3 style="color: #ff4444; font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;">⚠️ ADMIN PANEL</h3>
+        <div style="border-top: 1px solid #e0e0e0; padding-top: 1rem; margin-top: 1rem;">
           <button onclick="deleteReklamace('${id}')"
-                  style="width: 100%; padding: 1rem; background: #ff4444; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">
-            🗑️ Smazat celou reklamaci
+                  style="width: 100%; padding: 0.5rem; background: #dc3545; color: white; border: none; border-radius: 3px; font-size: 0.85rem; cursor: pointer; font-weight: 600;">
+            Smazat reklamaci
           </button>
-          <p style="font-size: 0.75rem; color: #999; margin-top: 0.5rem; text-align: center;">Smaže vše včetně fotek a PDF</p>
+          <p style="font-size: 0.7rem; color: #999; margin-top: 0.25rem; text-align: center;">Smaže vše včetně fotek a PDF</p>
         </div>
       ` : ''}
 
@@ -1730,7 +1672,7 @@ async function showCustomerDetail(id) {
 
     ${ModalManager.createActions([
       '<button class="btn btn-secondary" onclick="showDetail(CURRENT_RECORD)">Zpět</button>',
-      '<button class="btn btn-success" onclick="saveAllCustomerData(\'' + id + '\')">Uložit změny</button>'
+      '<button class="btn" style="background: #1a1a1a; color: white;" onclick="saveAllCustomerData(\'' + id + '\')">Uložit změny</button>'
     ])}
   `;
 
