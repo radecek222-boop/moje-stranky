@@ -112,12 +112,12 @@ endif;
 }
 
 .console-output {
-    padding: 1.5rem;
-    height: 600px;
+    padding: 0.875rem;
+    height: 400px;
     overflow-y: auto;
     font-family: 'Courier New', monospace;
-    font-size: 0.875rem;
-    line-height: 1.6;
+    font-size: 0.813rem;
+    line-height: 1.5;
     color: #D4D4D4;
 }
 
