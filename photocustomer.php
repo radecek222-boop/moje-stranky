@@ -14,7 +14,6 @@ if (!$isLoggedIn) {
   <!-- Logger Utility (must be loaded first) -->
 <script src="assets/js/logger.js" defer></script>
 
-<script src="assets/js/admin-auth.js" defer></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#000000">
