@@ -1583,7 +1583,7 @@ async function showCustomerDetail(id) {
       </div>
 
       <!-- DOPLŇUJÍCÍ INFO -->
-      <div style="margin-bottom: 1rem;">
+      <div style="margin-bottom: 2rem;">
         <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace:</label>
         <textarea id="edit_doplnujici_info" style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem; min-height: 50px; resize: vertical; font-family: inherit;" placeholder="Doplňující informace od prodejce">${Utils.escapeHtml(doplnujici_info)}</textarea>
       </div>
