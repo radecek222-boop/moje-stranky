@@ -847,13 +847,13 @@ function loadUsersModal() {
 /**
  * LoadNotificationsModal
  */
-function loadNotificationsModal() {
+async function loadNotificationsModal() {
     const modalBody = document.getElementById('adminModalBody');
     if (!modalBody) {
         console.error('adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF("admin.php?tab=notifications&embed=1");
+    const url = await getEmbedUrlWithCSRF("admin.php?tab=notifications&embed=1");
     modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Email & SMS notifikace"></iframe></div>`;
 }
 
