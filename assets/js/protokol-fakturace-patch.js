@@ -22,10 +22,8 @@
       if (fakturaceField) {
         if (fakturaceFirma === 'CZ') {
           fakturaceField.value = '🇨🇿 Česká republika (CZ)';
-          fakturaceField.style.color = '#0066cc';
         } else if (fakturaceFirma === 'SK') {
           fakturaceField.value = '🇸🇰 Slovensko (SK)';
-          fakturaceField.style.color = '#059669';
         }
         logger.log(`✅ Fakturace nastavena: ${fakturaceFirma}`);
       }
