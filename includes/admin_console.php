@@ -687,7 +687,7 @@ async function checkPhpFiles() {
     log('Kontroluji PHP syntax a strukturu...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_php_files', {
+        const response = await fetch('/api/admin.php?action=check_php_files', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -708,7 +708,7 @@ async function checkPhpFiles() {
                 // Není JSON - zobrazit raw text
                 if (!response.ok) {
                     logError(`API vrátilo chybu (HTTP ${response.status} ${response.statusText}):`);
-                    logError(`   URL: /api/control_center_api.php?action=check_php_files`);
+                    logError(`   URL: /api/admin.php?action=check_php_files`);
 
                     // Extrahovat chybovou zprávu z HTML pokud je to HTML
                     if (text.includes('<b>Fatal error</b>') || text.includes('<b>Parse error</b>')) {
@@ -783,7 +783,7 @@ async function checkPhpFiles() {
         }
     } catch (error) {
         logError('Chyba při kontrole PHP:');
-        logError(`   URL: /api/control_center_api.php?action=check_php_files`);
+        logError(`   URL: /api/admin.php?action=check_php_files`);
         logError(`   ${error.message}`);
         logError(`   Zkontrolujte, zda API soubor existuje a je dostupný`);
         addError('PHP', 'Kontrola selhala', error.message);
@@ -801,7 +801,7 @@ async function checkJavaScriptFiles() {
     log('Kontroluji JavaScript errors z logů...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_js_errors', {
+        const response = await fetch('/api/admin.php?action=check_js_errors', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -819,7 +819,7 @@ async function checkJavaScriptFiles() {
                 isJson = true;
             } else if (!response.ok) {
                 logError(`API vrátilo chybu (HTTP ${response.status} ${response.statusText}):`);
-                logError(`   URL: /api/control_center_api.php?action=check_js_errors`);
+                logError(`   URL: /api/admin.php?action=check_js_errors`);
                 // Extrahovat chybu z HTML nebo zobrazit raw
                 if (text.includes('<b>Fatal error</b>') || text.includes('<b>Parse error</b>')) {
                     const match = text.match(/<b>(.*?)<\/b>:\s*(.*?)\s+in\s+<b>(.*?)<\/b>\s+on line\s+<b>(\d+)<\/b>/);
@@ -883,7 +883,7 @@ async function checkJavaScriptFiles() {
         }
     } catch (error) {
         logError('Chyba při kontrole JS:');
-        logError(`   URL: /api/control_center_api.php?action=check_js_errors`);
+        logError(`   URL: /api/admin.php?action=check_js_errors`);
         logError(`   ${error.message}`);
         addError('JavaScript', 'Kontrola selhala', error.message);
         if (DEBUG_MODE) console.error(error);
@@ -900,7 +900,7 @@ async function checkDatabase() {
     log('Kontroluji tabulky, indexy a integritu...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_database', {
+        const response = await fetch('/api/admin.php?action=check_database', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -967,7 +967,7 @@ async function checkApiEndpoints() {
 
     const endpoints = [
         '/api/admin_api.php',
-        '/api/control_center_api.php',
+        '/api/admin.php',
         '/api/notification_api.php',
         '/api/protokol_api.php',
         '/api/statistiky_api.php'
@@ -1052,7 +1052,7 @@ async function checkErrorLogs() {
     log('Kontroluji nedávné chyby...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=get_recent_errors', {
+        const response = await fetch('/api/admin.php?action=get_recent_errors', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -1178,7 +1178,7 @@ async function checkFilePermissions() {
     log('Kontroluji write permissions...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_permissions', {
+        const response = await fetch('/api/admin.php?action=check_permissions', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -1218,7 +1218,7 @@ async function checkSecurity() {
     log('Kontroluji bezpečnostní nastavení...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_security', {
+        const response = await fetch('/api/admin.php?action=check_security', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -1283,7 +1283,7 @@ async function checkSystemInfo() {
     log('Načítám informace o serveru...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=get_system_info', {
+        const response = await fetch('/api/admin.php?action=get_system_info', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -1323,7 +1323,7 @@ async function checkHtmlPages() {
     log('Kontroluji HTML/PHP stránky...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_html_pages', {
+        const response = await fetch('/api/admin.php?action=check_html_pages', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -1374,7 +1374,7 @@ async function checkAssets() {
     log('Kontroluji CSS, obrázky a další assets...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_assets', {
+        const response = await fetch('/api/admin.php?action=check_assets', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -1420,7 +1420,7 @@ async function clearCacheMaintenance() {
     log('Mazání cache (může dočasně zpomalit systém)...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=clear_cache', {
+        const response = await fetch('/api/admin.php?action=clear_cache', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
@@ -1460,7 +1460,7 @@ async function optimizeDatabaseMaintenance() {
     btn.disabled = true;
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=optimize_database', {
+        const response = await fetch('/api/admin.php?action=optimize_database', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
@@ -1498,7 +1498,7 @@ async function cleanupLogsMaintenance() {
     log('');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=cleanup_logs', {
+        const response = await fetch('/api/admin.php?action=cleanup_logs', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
@@ -1542,7 +1542,7 @@ async function archiveLogsMaintenance() {
     log('Archivahuji staré logy starší než 90 dní...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=archive_logs', {
+        const response = await fetch('/api/admin.php?action=archive_logs', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
@@ -1577,7 +1577,7 @@ async function checkDependencies() {
     log('Kontroluji composer.json, package.json...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_dependencies', {
+        const response = await fetch('/api/admin.php?action=check_dependencies', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -1638,7 +1638,7 @@ async function checkConfiguration() {
     log('Kontroluji konfigurační soubory...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_configuration', {
+        const response = await fetch('/api/admin.php?action=check_configuration', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -1685,7 +1685,7 @@ async function checkGitStatus() {
     log('Kontroluji git repository...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_git_status', {
+        const response = await fetch('/api/admin.php?action=check_git_status', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -1737,7 +1737,7 @@ async function checkDatabaseAdvanced() {
     log('Kontroluji foreign keys, slow queries, collations, orphaned records...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_database_advanced', {
+        const response = await fetch('/api/admin.php?action=check_database_advanced', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -1843,7 +1843,7 @@ async function checkPerformance() {
     log('Kontroluji rychlost stránek, velikost assets, minifikaci...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_performance', {
+        const response = await fetch('/api/admin.php?action=check_performance', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -1944,7 +1944,7 @@ async function checkCodeQuality() {
     log('Kontroluji dead code, TODOs, complexity, duplicity...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_code_quality', {
+        const response = await fetch('/api/admin.php?action=check_code_quality', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -2048,7 +2048,7 @@ async function checkSEO() {
     log('Kontroluji meta tagy, alt atributy, broken links...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_seo', {
+        const response = await fetch('/api/admin.php?action=check_seo', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -2151,7 +2151,7 @@ async function checkWorkflow() {
     log('Kontroluji cron jobs, email queue, backups, .env permissions...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_workflow', {
+        const response = await fetch('/api/admin.php?action=check_workflow', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -2323,7 +2323,7 @@ async function checkEmailSystem() {
 
         // Kontrola SMTP konfigurace přes API
         try {
-            const smtpResponse = await fetch('/api/control_center_api.php?action=check_smtp_config', {
+            const smtpResponse = await fetch('/api/admin.php?action=check_smtp_config', {
                 method: 'GET',
                 credentials: 'same-origin'
             });
@@ -2364,7 +2364,7 @@ async function checkSessionSecurity() {
         const issues = [];
 
         // Check session settings via API
-        const response = await fetch('/api/control_center_api.php?action=check_session_security', {
+        const response = await fetch('/api/admin.php?action=check_session_security', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -2429,7 +2429,7 @@ async function checkSecurityVulnerabilities() {
     log('Kontroluji XSS, SQL injection patterns, insecure funkce...');
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=security_scan', {
+        const response = await fetch('/api/admin.php?action=security_scan', {
             method: 'GET',
             credentials: 'same-origin'
         });
@@ -2497,7 +2497,7 @@ async function checkCodeAnalysis() {
     log('═'.repeat(79));
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=check_code_analysis', {
+        const response = await fetch('/api/admin.php?action=check_code_analysis', {
             method: 'GET',
             credentials: 'same-origin'
         });

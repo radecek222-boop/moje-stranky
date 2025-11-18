@@ -644,7 +644,7 @@ async function saveConfig(configId, configKey) {
     try {
         const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() : null;
 
-        const response = await fetch('/api/control_center_api.php?action=save_system_config', {
+        const response = await fetch('/api/admin.php?action=save_system_config', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

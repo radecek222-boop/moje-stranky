@@ -104,7 +104,7 @@ try {
         echo "<div class='success'>";
         echo "<strong>🔧 ŘEŠENÍ:</strong><br>";
         echo "Spusťte instalaci Admin Control Center, která vytvoří všechny chybějící tabulky:<br><br>";
-        echo "<a href='/install_admin_control_center.php' style='display: inline-block; padding: 10px 20px; background: #2D5016; color: white; text-decoration: none; border-radius: 5px;'>";
+        echo "<a href='/setup/install_admin_control_center.php' style='display: inline-block; padding: 10px 20px; background: #2D5016; color: white; text-decoration: none; border-radius: 5px;'>";
         echo "🚀 Spustit instalaci ACC";
         echo "</a>";
         echo "</div>";

@@ -477,7 +477,7 @@ async function saveConfig(configId, configKey) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=save_system_config', {
+        const response = await fetch('/api/admin.php?action=save_system_config', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -518,7 +518,7 @@ async function sendTestEmail() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=send_test_email', {
+        const response = await fetch('/api/admin.php?action=send_test_email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
