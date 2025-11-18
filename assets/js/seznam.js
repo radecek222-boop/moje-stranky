@@ -1636,9 +1636,29 @@ async function showCustomerDetail(id) {
         ${fotky.length
           ? `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem;">
               ${fotky.map((f, i) => {
+                // ✅ PODPORA OBJEKTŮ I STRINGŮ (zpětná kompatibilita)
+                const photoPath = typeof f === 'object' ? f.photo_path : f;
+                const photoId = typeof f === 'object' ? f.id : null;
+
                 // BEZPEČNOST: Escape quotes v URL pro onclick handler (XSS protection)
-                const escapedUrl = f.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
-                return `<img src='${f}' style='width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--c-border); cursor: pointer;' alt='Fotka ${i+1}' onclick='showPhotoFullscreen("${escapedUrl}")'>`;
+                const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
+
+                return `
+                  <div class="foto-wrapper" style="position: relative;">
+                    <img src='${photoPath}'
+                         style='width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--c-border); cursor: pointer;'
+                         alt='Fotka ${i+1}'
+                         onclick='showPhotoFullscreen("${escapedUrl}")'>
+                    ${photoId ? `
+                      <button class="foto-delete-btn"
+                              onclick='event.stopPropagation(); smazatFotku(${photoId}, "${escapedUrl}")'
+                              title="Smazat fotku"
+                              aria-label="Smazat fotku">
+                        ×
+                      </button>
+                    ` : ''}
+                  </div>
+                `;
               }).join('')}
              </div>`
           : '<p style="color: var(--c-grey); text-align: center; padding: 1rem; font-size: 0.85rem;">Žádné fotografie</p>'}
@@ -2141,6 +2161,76 @@ async function deleteReklamace(reklamaceId) {
   }
 }
 
+// === SMAZÁNÍ JEDNOTLIVÉ FOTKY ===
+async function smazatFotku(photoId, photoUrl) {
+  const confirmed = confirm('Opravdu chcete smazat tuto fotku?\n\nTato akce je nevratná!');
+
+  if (!confirmed) {
+    logger.log('Mazání fotky zrušeno');
+    return;
+  }
+
+  logger.log('🗑️ Mazání fotky ID:', photoId);
+
+  try {
+    // Získat CSRF token
+    const csrfToken = await getCSRFToken();
+
+    const formData = new FormData();
+    formData.append('photo_id', photoId);
+    formData.append('csrf_token', csrfToken);
+
+    const response = await fetch('api/delete_photo.php', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${result.message || result.error || response.statusText}`);
+    }
+
+    if (result.status === 'success') {
+      logger.log('✅ Fotka smazána!');
+
+      // Odstranit fotku z DOM
+      const fotoElements = document.querySelectorAll('.foto-wrapper img');
+      for (const img of fotoElements) {
+        if (img.src.includes(photoUrl.replace(/\\/g, ''))) {
+          img.closest('.foto-wrapper').remove();
+          break;
+        }
+      }
+
+      // Aktualizovat počet fotek v nadpisu
+      const fotkyNadpis = document.querySelector('[style*="Fotografie"]');
+      if (fotkyNadpis) {
+        const zbyvajiciFotky = document.querySelectorAll('.foto-wrapper').length;
+        fotkyNadpis.textContent = `Fotografie (${zbyvajiciFotky})`;
+
+        // Pokud nezbyla žádná fotka, zobrazit "Žádné fotografie"
+        if (zbyvajiciFotky === 0) {
+          const fotoContainer = fotkyNadpis.closest('div');
+          const grid = fotoContainer.querySelector('[style*="grid"]');
+          if (grid) {
+            grid.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 1rem; font-size: 0.85rem;">Žádné fotografie</p>';
+          }
+        }
+      }
+
+      alert('✅ Fotka byla úspěšně smazána!');
+    } else {
+      const errorMsg = result.message || result.error || 'Nepodařilo se smazat fotku';
+      logger.error('❌ Chyba:', errorMsg);
+      alert('❌ Chyba: ' + errorMsg);
+    }
+  } catch (error) {
+    logger.error('❌ Chyba při mazání fotky:', error);
+    alert('❌ Chyba při mazání fotky: ' + error.message);
+  }
+}
+
 // Načti fotky z databáze
 async function loadPhotosFromDB(reklamaceId) {
   try {
@@ -2149,7 +2239,12 @@ async function loadPhotosFromDB(reklamaceId) {
 
     const data = await response.json();
     if (data.success && data.photos) {
-      return data.photos.map(p => p.photo_path);
+      // ✅ Vrátit celé objekty včetně ID pro možnost mazání
+      return data.photos.map(p => ({
+        id: p.id,
+        photo_path: p.photo_path,
+        section_name: p.section_name
+      }));
     }
     return [];
   } catch (err) {
