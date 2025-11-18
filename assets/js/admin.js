@@ -645,8 +645,49 @@ function openSQLPage() {
 /**
  * Helper pro přidání CSRF tokenu k embed URL
  */
-function getEmbedUrlWithCSRF(baseUrl) {
-    const csrf = getCSRFToken();
+async function resolveCSRFToken() {
+    const tryReadMeta = (doc) => {
+        if (!doc) return null;
+        const meta = doc.querySelector('meta[name="csrf-token"]');
+        return meta?.content?.trim() || null;
+    };
+
+    const directMetaToken = tryReadMeta(document);
+    if (directMetaToken) {
+        return directMetaToken;
+    }
+
+    if (window.parent && window.parent !== window) {
+        try {
+            const parentToken = tryReadMeta(window.parent.document);
+            if (parentToken) {
+                return parentToken;
+            }
+        } catch (err) {
+            console.warn('[getEmbedUrlWithCSRF] Cannot access parent document for CSRF token:', err);
+        }
+    }
+
+    if (typeof getCSRFToken === 'function') {
+        try {
+            const asyncToken = await getCSRFToken();
+            if (asyncToken) {
+                return asyncToken;
+            }
+        } catch (err) {
+            console.warn('[getEmbedUrlWithCSRF] Async CSRF fetch failed:', err);
+        }
+    }
+
+    return null;
+}
+
+async function getEmbedUrlWithCSRF(baseUrl) {
+    const csrf = await resolveCSRFToken();
+    if (!csrf) {
+        console.warn('[getEmbedUrlWithCSRF] CSRF token unavailable, falling back to base URL');
+        return baseUrl;
+    }
     const separator = baseUrl.includes('?') ? '&' : '?';
     return `${baseUrl}${separator}csrf=${encodeURIComponent(csrf)}`;
 }
@@ -654,27 +695,37 @@ function getEmbedUrlWithCSRF(baseUrl) {
 /**
  * LoadStatisticsModal
  */
-function loadStatisticsModal() {
+async function loadStatisticsModal() {
     const modalBody = document.getElementById('adminModalBody');
     if (!modalBody) {
         console.error('[loadStatisticsModal] adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF('statistiky.php?embed=1');
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Statistiky reklamací"></iframe></div>`;
+    try {
+        const url = await getEmbedUrlWithCSRF('statistiky.php?embed=1');
+        modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Statistiky reklamací"></iframe></div>`;
+    } catch (error) {
+        console.error('[loadStatisticsModal] Failed to load iframe URL:', error);
+        modalBody.innerHTML = '<div class="cc-modal-loading">Nepodařilo se načíst statistiky.</div>';
+    }
 }
 
 /**
  * LoadAnalyticsModal
  */
-function loadAnalyticsModal() {
+async function loadAnalyticsModal() {
     const modalBody = document.getElementById('adminModalBody');
     if (!modalBody) {
         console.error('adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF("analytics.php?embed=1");
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Web Analytics"></iframe></div>`;
+    try {
+        const url = await getEmbedUrlWithCSRF("analytics.php?embed=1");
+        modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Web Analytics"></iframe></div>`;
+    } catch (error) {
+        console.error('[loadAnalyticsModal] Failed to load iframe URL:', error);
+        modalBody.innerHTML = '<div class="cc-modal-loading">Nepodařilo se načíst analytics.</div>';
+    }
 }
 
 /**
@@ -875,92 +926,127 @@ function loadClaimsModal() {
 /**
  * LoadActionsModal
  */
-function loadActionsModal() {
+async function loadActionsModal() {
     const modalBody = document.getElementById('adminModalBody');
     if (!modalBody) {
         console.error('adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_actions&embed=1");
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Akce & Úkoly"></iframe></div>`;
+    try {
+        const url = await getEmbedUrlWithCSRF("admin.php?tab=admin_actions&embed=1");
+        modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Akce & Úkoly"></iframe></div>`;
+    } catch (error) {
+        console.error('[loadActionsModal] Failed to load iframe URL:', error);
+        modalBody.innerHTML = '<div class="cc-modal-loading">Nepodařilo se načíst akce & úkoly.</div>';
+    }
 }
 
 /**
  * LoadDiagnosticsModal
  */
-function loadDiagnosticsModal() {
+async function loadDiagnosticsModal() {
     const modalBody = document.getElementById('adminModalBody');
     if (!modalBody) {
         console.error('adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF("admin.php?tab=tools&embed=1");
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Diagnostika systému"></iframe></div>`;
+    try {
+        const url = await getEmbedUrlWithCSRF("admin.php?tab=tools&embed=1");
+        modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Diagnostika systému"></iframe></div>`;
+    } catch (error) {
+        console.error('[loadDiagnosticsModal] Failed to load iframe URL:', error);
+        modalBody.innerHTML = '<div class="cc-modal-loading">Nepodařilo se načíst diagnostiku.</div>';
+    }
 }
 
 /**
  * LoadConsoleModal
  */
-function loadConsoleModal() {
+async function loadConsoleModal() {
     const modalBody = document.getElementById('adminModalBody');
     if (!modalBody) {
         console.error('adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_console&embed=1");
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Konzole - Developer Tools"></iframe></div>`;
+    try {
+        const url = await getEmbedUrlWithCSRF("admin.php?tab=admin_console&embed=1");
+        modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Konzole - Developer Tools"></iframe></div>`;
+    } catch (error) {
+        console.error('[loadConsoleModal] Failed to load iframe URL:', error);
+        modalBody.innerHTML = '<div class="cc-modal-loading">Nepodařilo se načíst konzoli.</div>';
+    }
 }
 
 /**
  * LoadTestingModal
  */
-function loadTestingModal() {
+async function loadTestingModal() {
     const modalBody = document.getElementById('adminModalBody');
     if (!modalBody) {
         console.error('adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_testing_interactive&embed=1");
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Testovací prostředí"></iframe></div>`;
+    try {
+        const url = await getEmbedUrlWithCSRF("admin.php?tab=admin_testing_interactive&embed=1");
+        modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Testovací prostředí"></iframe></div>`;
+    } catch (error) {
+        console.error('[loadTestingModal] Failed to load iframe URL:', error);
+        modalBody.innerHTML = '<div class="cc-modal-loading">Nepodařilo se načíst testovací prostředí.</div>';
+    }
 }
 
 /**
  * LoadAppearanceModal
  */
-function loadAppearanceModal() {
+async function loadAppearanceModal() {
     const modalBody = document.getElementById('adminModalBody');
     if (!modalBody) {
         console.error('adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_appearance&embed=1");
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Vzhled & Design"></iframe></div>`;
+    try {
+        const url = await getEmbedUrlWithCSRF("admin.php?tab=admin_appearance&embed=1");
+        modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Vzhled & Design"></iframe></div>`;
+    } catch (error) {
+        console.error('[loadAppearanceModal] Failed to load iframe URL:', error);
+        modalBody.innerHTML = '<div class="cc-modal-loading">Nepodařilo se načíst vzhled & design.</div>';
+    }
 }
 
 /**
  * LoadContentModal
  */
-function loadContentModal() {
+async function loadContentModal() {
     const modalBody = document.getElementById('adminModalBody');
     if (!modalBody) {
         console.error('adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_content&embed=1");
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Obsah & Texty"></iframe></div>`;
+    try {
+        const url = await getEmbedUrlWithCSRF("admin.php?tab=admin_content&embed=1");
+        modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Obsah & Texty"></iframe></div>`;
+    } catch (error) {
+        console.error('[loadContentModal] Failed to load iframe URL:', error);
+        modalBody.innerHTML = '<div class="cc-modal-loading">Nepodařilo se načíst obsah & texty.</div>';
+    }
 }
 
 /**
  * LoadConfigModal
  */
-function loadConfigModal() {
+async function loadConfigModal() {
     const modalBody = document.getElementById('adminModalBody');
     if (!modalBody) {
         console.error('adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_configuration&embed=1");
-    modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Konfigurace systému"></iframe></div>`;
+    try {
+        const url = await getEmbedUrlWithCSRF("admin.php?tab=admin_configuration&embed=1");
+        modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Konfigurace systému"></iframe></div>`;
+    } catch (error) {
+        console.error('[loadConfigModal] Failed to load iframe URL:', error);
+        modalBody.innerHTML = '<div class="cc-modal-loading">Nepodařilo se načíst konfiguraci systému.</div>';
+    }
 }
 
 // === ACTION HANDLERS ===
