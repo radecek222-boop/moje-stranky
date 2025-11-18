@@ -1940,23 +1940,55 @@ async function showNotes(record) {
       </div>
 
       <div style="background: var(--c-bg); border: 1px solid var(--c-border); padding: 1rem; margin-top: 1.5rem;">
-        <h3 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-black); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border);">📄 PDF Protokol</h3>
-        ${CURRENT_RECORD.documents && CURRENT_RECORD.documents.length > 0 ? `
-          <button onclick="window.open('${CURRENT_RECORD.documents[0].file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')" 
-                  class="btn" 
-                  style="width: 100%; padding: 1rem; min-height: 60px; background: var(--c-black); color: white; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.2s;">
-            📥 Otevřít PDF protokol
-          </button>
-          <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: var(--c-grey); text-align: center;">
-            ${new Date(CURRENT_RECORD.documents[0].created_at).toLocaleString('cs-CZ')}
-          </p>
-        ` : `
-          <div style="padding: 1rem; text-align: center; background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 4px;">
-            <p style="margin: 0; color: #6c757d; font-size: 0.9rem;">ℹ️ PDF protokol ještě nebyl vytvořen</p>
-            <p style="margin: 0.3rem 0 0 0; font-size: 0.8rem; color: #adb5bd;">Vytvoří se po dokončení servisu</p>
-          </div>
-        `}
-  
+        <h3 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-black); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border);">📄 PDF Dokumenty</h3>
+        ${(() => {
+          // Rozdělit dokumenty podle typu
+          const docs = CURRENT_RECORD.documents || [];
+          const protokolPdf = docs.find(d => d.document_type === 'protokol_pdf');
+          const fotkyPdf = docs.find(d => d.document_type === 'photos_pdf');
+
+          if (docs.length === 0) {
+            return `
+              <div style="padding: 1rem; text-align: center; background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 4px;">
+                <p style="margin: 0; color: #6c757d; font-size: 0.9rem;">ℹ️ PDF dokumenty ještě nebyly vytvořeny</p>
+                <p style="margin: 0.3rem 0 0 0; font-size: 0.8rem; color: #adb5bd;">Vytvoří se po dokončení servisu</p>
+              </div>
+            `;
+          }
+
+          let html = '';
+
+          // PDF Protokolu
+          if (protokolPdf) {
+            html += `
+              <button onclick="window.open('${protokolPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
+                      class="btn"
+                      style="width: 100%; padding: 1rem; min-height: 60px; background: var(--c-black); color: white; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; margin-bottom: 0.5rem;">
+                📥 Otevřít PDF protokol
+              </button>
+              <p style="margin: 0 0 1rem 0; font-size: 0.8rem; color: var(--c-grey); text-align: center;">
+                Vytvořeno: ${new Date(protokolPdf.uploaded_at || protokolPdf.created_at).toLocaleString('cs-CZ')}
+              </p>
+            `;
+          }
+
+          // PDF Fotek
+          if (fotkyPdf) {
+            html += `
+              <button onclick="window.open('${fotkyPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
+                      class="btn"
+                      style="width: 100%; padding: 1rem; min-height: 60px; background: #059669; color: white; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.2s;">
+                📷 Otevřít PDF fotodokumentace
+              </button>
+              <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: var(--c-grey); text-align: center;">
+                Vytvořeno: ${new Date(fotkyPdf.uploaded_at || fotkyPdf.created_at).toLocaleString('cs-CZ')}
+              </p>
+            `;
+          }
+
+          return html;
+        })()}
+
       ${CURRENT_USER.is_admin ? `
         <div style="background: #fff5f5; border: 2px solid #ff4444; padding: 1rem; margin-top: 1.5rem; border-radius: 4px;">
           <h3 style="color: #ff4444; font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;">⚠️ ADMIN PANEL</h3>
