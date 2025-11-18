@@ -265,7 +265,7 @@ if ($initialBootstrapData) {
         <tr><td class="label">Datum návštěvy<span class="en-label">Visit date</span></td><td><input type="date" id="visit-date"></td></tr>
         <tr><td class="label">Datum doručení<span class="en-label">Delivery date</span></td><td><input type="date" id="delivery-date"></td></tr>
         <tr><td class="label">Datum reklamace<span class="en-label">Claim date</span></td><td><input type="date" id="claim-date"></td></tr>
-        <tr><td class="label">Značka/Contract<span class="en-label">Brand</span></td><td><input type="text" id="brand" value="<?= wgs_escape($prefillFields['brand']); ?>"></td></tr>
+        <tr><td class="label">Zadavatel<span class="en-label">Requester</span></td><td><input type="text" id="brand" value="<?= wgs_escape($prefillFields['brand']); ?>"></td></tr>
         <tr><td class="label">Model<span class="en-label">Model</span></td><td><input type="text" id="model" value="<?= wgs_escape($prefillFields['model']); ?>"></td></tr>
       </table>
     </div>
@@ -313,11 +313,11 @@ if ($initialBootstrapData) {
   </div>
 
   <div class="section-title">Podpis zákazníka<span class="en-label">Customer signature</span></div>
-  <div class="signature-container">
-    <canvas id="signature-pad"></canvas>
+  <canvas id="signature-pad"></canvas>
+  <div class="signature-actions">
+    <div class="signature-label">Podepište se prstem nebo myší</div>
     <button class="btn-clear" type="button" data-action="clearSignaturePad">Vymazat podpis</button>
   </div>
-  <div class="signature-label">Podepište se prstem nebo myší</div>
   <div class="gdpr-clause" style="margin-top: 10px; padding: 8px; font-size: 8px; line-height: 1.4; color: #666; border-top: 1px solid #ddd; text-align: justify;">
     <strong>Ochrana osobních údajů (GDPR):</strong> Podpisem tohoto protokolu souhlasíte se zpracováním Vašich osobních údajů společností White Glove Service za účelem poskytování servisních služeb, komunikace s výrobcem, prodejcem a dalšími techniky. Vaše údaje budou zpracovávány v souladu s GDPR a budou použity pouze pro účely vyřízení této reklamace. Máte právo na přístup k údajům, jejich opravu nebo výmaz. Více na www.wgs-service.cz/gdpr
   </div>
