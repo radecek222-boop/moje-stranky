@@ -1,6 +1,37 @@
 <?php
 require_once "init.php";
 
+// 🔍 DEBUG MODE: Zobrazí session data místo redirectu
+if (isset($_GET['debug']) && $_GET['debug'] === '1') {
+    header('Content-Type: text/html; charset=utf-8');
+    echo "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>DEBUG: photocustomer.php</title>";
+    echo "<style>body{font-family:monospace;background:#1a1a1a;color:#00ff88;padding:20px;}";
+    echo "pre{background:#000;padding:15px;border-radius:5px;}</style></head><body>";
+    echo "<h1>🔍 DEBUG MODE: photocustomer.php</h1>";
+    echo "<p>Datum: " . date('Y-m-d H:i:s') . "</p><hr>";
+
+    echo "<h2>📊 \$_SESSION obsah:</h2><pre>";
+    print_r($_SESSION);
+    echo "</pre>";
+
+    echo "<h2>🔑 Kontrolní hodnoty:</h2>";
+    echo "<p>isset(\$_SESSION['user_id']): " . (isset($_SESSION['user_id']) ? '✅ TRUE' : '❌ FALSE') . "</p>";
+    echo "<p>\$_SESSION['user_id']: " . ($_SESSION['user_id'] ?? 'NENÍ NASTAVENO') . "</p>";
+    echo "<p>\$_SESSION['role']: " . ($_SESSION['role'] ?? 'NENÍ NASTAVENO') . "</p>";
+    echo "<p>isset(\$_SESSION['is_admin']): " . (isset($_SESSION['is_admin']) ? '✅ TRUE' : '❌ FALSE') . "</p>";
+
+    echo "<h2>🚪 Co by se stalo bez debug režimu:</h2>";
+    if (!isset($_SESSION['user_id'])) {
+        echo "<p style='color:#ff4444;'>❌ REDIRECT na login.php (chybí user_id)</p>";
+    } else {
+        echo "<p style='color:#00ff88;'>✅ KROK 1 PROJDE (user_id existuje)</p>";
+    }
+
+    echo "<hr><p><a href='photocustomer.php' style='color:#00ff88;'>→ Zkusit bez debug režimu</a></p>";
+    echo "</body></html>";
+    exit;
+}
+
 // ✅ KROK 1: Kontrola, zda je uživatel vůbec přihlášen
 // DŮLEŽITÉ: Musíme zkontrolovat user_id PŘED kontrolou role!
 if (!isset($_SESSION['user_id'])) {
