@@ -96,30 +96,58 @@ try {
     ];
 
     if ($workflowId !== null && db_table_exists($pdo, 'wgs_photos')) {
-        $stmt = $pdo->prepare('SELECT photo_path, file_path FROM wgs_photos WHERE reklamace_id = :id');
-        $stmt->execute([':id' => $workflowId]);
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $photo) {
-            if (!empty($photo['file_path'])) {
-                $filesToDelete[] = $photo['file_path'];
-            } elseif (!empty($photo['photo_path'])) {
-                $filesToDelete[] = $photo['photo_path'];
+        // Zjistit které sloupce existují
+        $photoCols = db_get_table_columns($pdo, 'wgs_photos');
+        $photoPathCols = [];
+        if (in_array('file_path', $photoCols, true)) {
+            $photoPathCols[] = 'file_path';
+        }
+        if (in_array('photo_path', $photoCols, true)) {
+            $photoPathCols[] = 'photo_path';
+        }
+
+        if (!empty($photoPathCols)) {
+            $selectCols = implode(', ', $photoPathCols);
+            $stmt = $pdo->prepare('SELECT ' . $selectCols . ' FROM wgs_photos WHERE reklamace_id = :id');
+            $stmt->execute([':id' => $workflowId]);
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $photo) {
+                if (!empty($photo['file_path'])) {
+                    $filesToDelete[] = $photo['file_path'];
+                } elseif (!empty($photo['photo_path'])) {
+                    $filesToDelete[] = $photo['photo_path'];
+                }
             }
         }
+
         $stmt = $pdo->prepare('DELETE FROM wgs_photos WHERE reklamace_id = :id');
         $stmt->execute([':id' => $workflowId]);
         $deletedCounters['photos'] = $stmt->rowCount();
     }
 
     if ($primaryId !== null && db_table_exists($pdo, 'wgs_documents')) {
-        $stmt = $pdo->prepare('SELECT document_path, file_path FROM wgs_documents WHERE claim_id = :id');
-        $stmt->execute([':id' => $primaryId]);
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $doc) {
-            if (!empty($doc['file_path'])) {
-                $filesToDelete[] = $doc['file_path'];
-            } elseif (!empty($doc['document_path'])) {
-                $filesToDelete[] = $doc['document_path'];
+        // Zjistit které sloupce existují
+        $docCols = db_get_table_columns($pdo, 'wgs_documents');
+        $docPathCols = [];
+        if (in_array('file_path', $docCols, true)) {
+            $docPathCols[] = 'file_path';
+        }
+        if (in_array('document_path', $docCols, true)) {
+            $docPathCols[] = 'document_path';
+        }
+
+        if (!empty($docPathCols)) {
+            $selectCols = implode(', ', $docPathCols);
+            $stmt = $pdo->prepare('SELECT ' . $selectCols . ' FROM wgs_documents WHERE claim_id = :id');
+            $stmt->execute([':id' => $primaryId]);
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $doc) {
+                if (!empty($doc['file_path'])) {
+                    $filesToDelete[] = $doc['file_path'];
+                } elseif (!empty($doc['document_path'])) {
+                    $filesToDelete[] = $doc['document_path'];
+                }
             }
         }
+
         $stmt = $pdo->prepare('DELETE FROM wgs_documents WHERE claim_id = :id');
         $stmt->execute([':id' => $primaryId]);
         $deletedCounters['documents'] = $stmt->rowCount();
