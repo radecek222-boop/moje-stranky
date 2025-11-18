@@ -4,6 +4,8 @@
  * Sjednocená karta pro správu emailů, SMS a SMTP
  */
 
+require_once __DIR__ . '/../init.php';
+
 // Bezpečnostní kontrola
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die('Unauthorized');
@@ -11,6 +13,21 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
 $pdo = getDbConnection();
 $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
+
+// If embed mode, output full HTML structure
+if ($embedMode):
+?>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email & SMS - WGS Admin</title>
+    <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body class="embed-mode">
+<?php
+endif;
 
 // Načíst aktuální sekci
 $currentSection = $_GET['section'] ?? 'overview';
@@ -78,7 +95,9 @@ try {
 }
 ?>
 
+<?php if (!$embedMode): ?>
 <link rel="stylesheet" href="/assets/css/admin.css">
+<?php endif; ?>
 
 <div class="control-detail active">
     <?php if (!$embedMode): ?>
@@ -620,3 +639,9 @@ if (document.getElementById('section-management')) {
     updateSelectedEmailCount();
 }
 </script>
+
+
+<?php if ($embedMode): ?>
+</body>
+</html>
+<?php endif; ?>

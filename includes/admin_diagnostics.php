@@ -4,6 +4,8 @@
  * System health, logy, výkon
  */
 
+require_once __DIR__ . '/../init.php';
+
 // Bezpečnostní kontrola
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die('Unauthorized');
@@ -75,7 +77,9 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
 }
 ?>
 
+<?php if (!$embedMode): ?>
 <link rel="stylesheet" href="/assets/css/admin.css">
+<?php endif; ?>
 
 <div class="control-detail active">
     <!-- Header -->
@@ -330,6 +334,8 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
 /**
  * ViewLog
  */
+
+require_once __DIR__ . '/../init.php';
 function viewLog(logType) {
     window.open(`/admin.php?tab=tools&view_log=${logType}`, '_blank');
 }
@@ -337,6 +343,8 @@ function viewLog(logType) {
 /**
  * ClearCache
  */
+
+require_once __DIR__ . '/../init.php';
 async function clearCache() {
     if (!confirm('Opravdu chcete vymazat cache? Tato akce může dočasně zpomalit systém.')) {
         return;
@@ -362,6 +370,8 @@ async function clearCache() {
 /**
  * ArchiveLogs
  */
+
+require_once __DIR__ . '/../init.php';
 async function archiveLogs() {
     if (!confirm('Archivovat logy starší než 90 dní?')) {
         return;
@@ -388,6 +398,8 @@ async function archiveLogs() {
 /**
  * OptimizeDatabase
  */
+
+require_once __DIR__ . '/../init.php';
 async function optimizeDatabase() {
     if (!confirm('Optimalizovat databázi? Tato akce může trvat několik minut.')) {
         return;
@@ -421,6 +433,8 @@ async function optimizeDatabase() {
 /**
  * CreateBackup
  */
+
+require_once __DIR__ . '/../init.php';
 async function createBackup() {
     if (!confirm('Vytvořit zálohu databáze?\n\nTato akce může trvat několik minut v závislosti na velikosti databáze.')) {
         return;
@@ -454,6 +468,8 @@ async function createBackup() {
 /**
  * ViewBackups
  */
+
+require_once __DIR__ . '/../init.php';
 async function viewBackups() {
     try {
         const response = await fetch('/api/backup_api.php?action=list_backups');
@@ -492,6 +508,8 @@ async function viewBackups() {
 /**
  * SetupActionsSystem
  */
+
+require_once __DIR__ . '/../init.php';
 function setupActionsSystem() {
     if (!confirm('Spustit setup Actions System?\n\nTento script vytvoří databázové tabulky pro systém akcí a úkolů. Je bezpečné spustit i pokud tabulky již existují.')) {
         return;
@@ -507,3 +525,9 @@ function setupActionsSystem() {
 
 console.log('Diagnostics section loaded');
 </script>
+
+
+<?php if ($embedMode): ?>
+</body>
+</html>
+<?php endif; ?>

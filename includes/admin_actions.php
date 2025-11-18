@@ -4,6 +4,8 @@
  * Pending actions, GitHub webhooks, scheduled tasks
  */
 
+require_once __DIR__ . '/../init.php';
+
 // Bezpečnostní kontrola
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die('Unauthorized');
@@ -13,6 +15,21 @@ $pdo = getDbConnection();
 
 // Detect embed mode for iframe contexts
 $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
+
+// If embed mode, output full HTML structure
+if ($embedMode):
+?>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akce & Úkoly - WGS Admin</title>
+    <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body class="embed-mode">
+<?php
+endif;
 
 // Kontrola, zda je Admin Control Center nainstalovaný
 $adminCenterInstalled = true;
@@ -92,7 +109,9 @@ function getPriorityBadge($priority) {
 }
 ?>
 
+<?php if (!$embedMode): ?>
 <link rel="stylesheet" href="/assets/css/admin.css">
+<?php endif; ?>
 
 <div class="control-detail active">
     <!-- Header -->
@@ -574,3 +593,8 @@ function setupGitHubWebhook() {
 
 if (DEBUG_MODE) console.log('✅ Actions section loaded');
 </script>
+
+<?php if ($embedMode): ?>
+</body>
+</html>
+<?php endif; ?>

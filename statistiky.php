@@ -255,7 +255,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 </style>
 </head>
 
-<body>
+<body<?php if ($embedMode): ?> class="embed-mode"<?php endif; ?>>
 <?php if (!$embedMode): ?>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 <?php endif; ?>
