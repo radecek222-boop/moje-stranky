@@ -428,7 +428,7 @@ async function showDetail(recordOrId) {
   if (typeof recordOrId === 'string') {
     record = WGS_DATA_CACHE.find(x => x.id == recordOrId || x.reklamace_id == recordOrId);
     if (!record) {
-      alert('❌ Záznam nenalezen');
+      alert('Záznam nenalezen');
       return;
     }
   } else {
@@ -523,7 +523,7 @@ function closeDetail() {
 async function reopenOrder(id) {
   const record = WGS_DATA_CACHE.find(x => x.id == id);
   if (!record) {
-    alert('❌ Záznam nenalezen');
+    alert('Záznam nenalezen');
     return;
   }
   
@@ -648,7 +648,7 @@ async function reopenOrder(id) {
     }
   } catch (e) {
     logger.error('Chyba při znovuotevření zakázky:', e);
-    alert('❌ Chyba při znovuotevření zakázky: ' + e.message);
+    alert('Chyba při znovuotevření zakázky: ' + e.message);
   }
 }
 
@@ -685,7 +685,7 @@ function normalizeCustomerData(data) {
 function startVisit(id) {
   const z = WGS_DATA_CACHE.find(x => x.id == id);
   if (!z) {
-    alert('❌ Záznam nenalezen');
+    alert('Záznam nenalezen');
     return;
   }
   
@@ -698,7 +698,7 @@ function startVisit(id) {
   }
   
   if (Utils.isCompleted(z)) {
-    alert('❌ Tato návštěva již byla dokončena.');
+    alert('Tato návštěva již byla dokončena.');
     return;
   }
   
@@ -2124,7 +2124,7 @@ async function deleteReklamace(reklamaceId) {
   );
   
   if (userInput !== reklamaceNumber) {
-    alert('❌ Nesprávné číslo. Mazání zrušeno.');
+    alert('Nesprávné číslo. Mazání zrušeno.');
     logger.log('Mazání zrušeno - špatné číslo (2. krok)');
     return;
   }
@@ -2158,11 +2158,11 @@ async function deleteReklamace(reklamaceId) {
     } else {
       const errorMsg = result.message || result.error || 'Nepodařilo se smazat';
       logger.error('❌ Chyba:', errorMsg);
-      alert('❌ Chyba: ' + errorMsg);
+      alert('Chyba: ' + errorMsg);
     }
   } catch (error) {
     logger.error('❌ Chyba při mazání:', error);
-    alert('❌ Chyba při mazání: ' + error.message);
+    alert('Chyba při mazání: ' + error.message);
   }
 }
 
@@ -2228,11 +2228,11 @@ async function smazatFotku(photoId, photoUrl) {
     } else {
       const errorMsg = result.message || result.error || 'Nepodařilo se smazat fotku';
       logger.error('❌ Chyba:', errorMsg);
-      alert('❌ Chyba: ' + errorMsg);
+      alert('Chyba: ' + errorMsg);
     }
   } catch (error) {
     logger.error('❌ Chyba při mazání fotky:', error);
-    alert('❌ Chyba při mazání fotky: ' + error.message);
+    alert('Chyba při mazání fotky: ' + error.message);
   }
 }
 
