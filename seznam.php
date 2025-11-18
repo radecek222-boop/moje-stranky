@@ -221,6 +221,15 @@ if (!$isLoggedIn && !$isAdmin) {
   gap: 0.75rem !important;
   padding: 0.75rem 1rem !important;
 }
+
+/* ✅ POSUN MODALU OD HEADERU */
+.modal-overlay {
+  padding-top: 3rem !important;
+}
+
+.modal-content {
+  margin-top: 2rem !important;
+}
 </style>
 
 <!-- Current User Data for JavaScript -->
