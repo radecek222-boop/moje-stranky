@@ -54,16 +54,20 @@ if (session_status() === PHP_SESSION_NONE) {
     $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
                 || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
 
-    // ✅ FIX: Použití session_set_cookie_params() místo ini_set()
-    // ini_set() nefunguje správně pro session cookie nastavení
-    session_set_cookie_params([
-        'lifetime' => 3600,              // 1 hodina
-        'path' => '/',                   // Celá doména
-        'domain' => '',                  // Aktuální doména
-        'secure' => $isHttps,            // Pouze HTTPS (pokud je k dispozici)
-        'httponly' => true,              // Ochrana proti XSS
-        'samesite' => 'Lax'              // Ochrana proti CSRF
-    ]);
+    // ✅ FIX: Použití session_set_cookie_params() se STAROU syntaxí pro PHP 7.x kompatibilitu
+    // Nová array syntaxe funguje až od PHP 7.3, používáme starou pro kompatibilitu
+    session_set_cookie_params(
+        3600,           // lifetime - 1 hodina (0 = do zavření prohlížeče je OK)
+        '/',            // path - celá doména
+        '',             // domain - aktuální doména
+        $isHttps,       // secure - pouze HTTPS
+        true            // httponly - ochrana proti XSS
+    );
+
+    // SameSite musí být nastaven přes ini_set (není v session_set_cookie_params v PHP 7.2)
+    if (PHP_VERSION_ID >= 70300) {
+        ini_set('session.cookie_samesite', 'Lax');
+    }
 
     // Nastavení garbage collection
     ini_set('session.gc_maxlifetime', 3600);
