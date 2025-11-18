@@ -457,46 +457,46 @@ async function showDetail(recordOrId) {
         </div>
       </div>
       
-      <div style="display: flex; flex-direction: column; gap: 1rem;">
-        <button class="btn" style="width: 100%; padding: 1rem; min-height: 60px; background: var(--c-neon-yellow); color: var(--c-black); border-color: var(--c-black); font-weight: 700;" onclick="reopenOrder('${record.id}')">
-          🔄 ZNOVU OTEVŘÍT ZAKÁZKU
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: var(--c-neon-yellow); color: var(--c-black); border-color: var(--c-black); font-weight: 600; font-size: 0.85rem;" onclick="reopenOrder('${record.id}')">
+          🔄 Znovu otevřít
         </button>
-        
-        <button class="btn" style="width: 100%; padding: 1rem; min-height: 60px;" onclick="showContactMenu('${record.id}')">KONTAKTOVAT ZÁKAZNÍKA</button>
-        <button class="btn" style="width: 100%; padding: 1rem; min-height: 60px;" onclick="showCustomerDetail('${record.id}')">DETAIL ZÁKAZNÍKA</button>
+
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showContactMenu('${record.id}')">Kontaktovat</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showCustomerDetail('${record.id}')">Detail zákazníka</button>
 
       ${record.documents && record.documents.length > 0 ? `
-        <button class="btn" style="background: #e74c3c; color: white; width: 100%; padding: 1rem; min-height: 60px; margin-top: 0.5rem;" 
+        <button class="btn" style="background: #e74c3c; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; margin-top: 0.25rem;"
                 onclick="window.open('${record.documents[0].file_path}', '_blank')">
           📄 Otevřít PDF
         </button>
       ` : ''}
-      <div style="width: 100%; margin-top: 0.5rem;">
+      <div style="width: 100%; margin-top: 0.25rem;">
         ${record.documents && record.documents.length > 0 ? `
-          <button class="btn" style="background: #e74c3c; color: white; width: 100%; padding: 1rem; min-height: 60px;" 
+          <button class="btn" style="background: #e74c3c; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;"
                   onclick="window.open('${record.documents[0].file_path}', '_blank')">
             📄 Otevřít PDF protokol
           </button>
         ` : `
-          <div style="background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 6px; padding: 1rem; text-align: center; color: #6c757d;">
+          <div style="background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 6px; padding: 0.75rem; text-align: center; color: #6c757d; font-size: 0.8rem;">
             ℹ️ PDF protokol ještě nebyl vytvořen
           </div>
         `}
       </div>
-        
-        <button class="btn btn-secondary" style="width: 100%; padding: 1rem; min-height: 60px;" onclick="closeDetail()">ZAVŘÍT</button>
+
+        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="closeDetail()">Zavřít</button>
       </div>
     `;
   } else {
     buttonsHtml = `
-      <div style="display: flex; flex-direction: column; gap: 1rem;">
-        <button class="btn btn-success" style="width: 100%; padding: 1rem; min-height: 60px;" onclick="startVisit('${record.id}')">ZAHÁJIT NÁVŠTĚVU</button>
-        
-        <button class="btn btn-success" style="width: 100%; padding: 1rem; min-height: 60px;" onclick="showCalendar('${record.id}')">NAPLÁNOVAT TERMÍN</button>
-        
-        <button class="btn" style="width: 100%; padding: 1rem; min-height: 60px;" onclick="showContactMenu('${record.id}')">KONTAKTOVAT ZÁKAZNÍKA</button>
-        <button class="btn" style="width: 100%; padding: 1rem; min-height: 60px;" onclick="showCustomerDetail('${record.id}')">DETAIL ZÁKAZNÍKA</button>
-        <button class="btn btn-secondary" style="width: 100%; padding: 1rem; min-height: 60px;" onclick="closeDetail()">ZAVŘÍT</button>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <button class="btn btn-success" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="startVisit('${record.id}')">Zahájit návštěvu</button>
+
+        <button class="btn btn-success" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showCalendar('${record.id}')">Naplánovat termín</button>
+
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showContactMenu('${record.id}')">Kontaktovat</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showCustomerDetail('${record.id}')">Detail zákazníka</button>
+        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="closeDetail()">Zavřít</button>
       </div>
     `;
   }
@@ -1390,11 +1390,11 @@ function showContactMenu(id) {
       
       <div class="modal-section">
         <h3 class="section-title">Rychlé akce</h3>
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-          ${phone ? `<a href="tel:${phone}" class="btn btn-success">Zavolat</a>` : ''}
-          <button class="btn btn-success" onclick="closeDetail(); setTimeout(() => showCalendar('${id}'), 100)">Termín návštěvy</button>
-          ${phone ? `<a href="sms:${phone}" class="btn">Odeslat SMS</a>` : ''}
-          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn" target="_blank">Navigovat (Waze)</a>` : ''}
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+          ${phone ? `<a href="tel:${phone}" class="btn btn-success" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center;">Zavolat</a>` : ''}
+          <button class="btn btn-success" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;" onclick="closeDetail(); setTimeout(() => showCalendar('${id}'), 100)">Termín návštěvy</button>
+          ${phone ? `<a href="sms:${phone}" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center;">Odeslat SMS</a>` : ''}
+          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center;" target="_blank">Navigovat (Waze)</a>` : ''}
         </div>
       </div>
     </div>
@@ -1689,10 +1689,10 @@ async function showCustomerDetail(id) {
             html += `
               <button onclick="window.open('${protokolPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
                       class="btn"
-                      style="width: 100%; padding: 1rem; min-height: 60px; background: var(--c-black); color: white; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; margin-bottom: 0.5rem;">
-                📥 Otevřít PDF protokol
+                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: var(--c-black); color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-bottom: 0.25rem;">
+                📥 PDF protokol
               </button>
-              <p style="margin: 0 0 1rem 0; font-size: 0.8rem; color: var(--c-grey); text-align: center;">
+              <p style="margin: 0 0 0.5rem 0; font-size: 0.75rem; color: var(--c-grey); text-align: center;">
                 Vytvořeno: ${new Date(protokolPdf.uploaded_at || protokolPdf.created_at).toLocaleString('cs-CZ')}
               </p>
             `;
@@ -1703,10 +1703,10 @@ async function showCustomerDetail(id) {
             html += `
               <button onclick="window.open('${fotkyPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
                       class="btn"
-                      style="width: 100%; padding: 1rem; min-height: 60px; background: #059669; color: white; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.2s;">
-                📷 Otevřít PDF fotodokumentace
+                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #059669; color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+                📷 PDF fotodokumentace
               </button>
-              <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: var(--c-grey); text-align: center;">
+              <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: var(--c-grey); text-align: center;">
                 Vytvořeno: ${new Date(fotkyPdf.uploaded_at || fotkyPdf.created_at).toLocaleString('cs-CZ')}
               </p>
             `;
@@ -1963,10 +1963,10 @@ async function showNotes(record) {
             html += `
               <button onclick="window.open('${protokolPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
                       class="btn"
-                      style="width: 100%; padding: 1rem; min-height: 60px; background: var(--c-black); color: white; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; margin-bottom: 0.5rem;">
-                📥 Otevřít PDF protokol
+                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: var(--c-black); color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-bottom: 0.25rem;">
+                📥 PDF protokol
               </button>
-              <p style="margin: 0 0 1rem 0; font-size: 0.8rem; color: var(--c-grey); text-align: center;">
+              <p style="margin: 0 0 0.5rem 0; font-size: 0.75rem; color: var(--c-grey); text-align: center;">
                 Vytvořeno: ${new Date(protokolPdf.uploaded_at || protokolPdf.created_at).toLocaleString('cs-CZ')}
               </p>
             `;
@@ -1977,10 +1977,10 @@ async function showNotes(record) {
             html += `
               <button onclick="window.open('${fotkyPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
                       class="btn"
-                      style="width: 100%; padding: 1rem; min-height: 60px; background: #059669; color: white; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.2s;">
-                📷 Otevřít PDF fotodokumentace
+                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #059669; color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+                📷 PDF fotodokumentace
               </button>
-              <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: var(--c-grey); text-align: center;">
+              <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: var(--c-grey); text-align: center;">
                 Vytvořeno: ${new Date(fotkyPdf.uploaded_at || fotkyPdf.created_at).toLocaleString('cs-CZ')}
               </p>
             `;
