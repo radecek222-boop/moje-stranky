@@ -169,7 +169,7 @@ $deleted = @unlink(__FILE__);
                 aby se načetl opravený kód!
             </p>
 
-            <a href="/admin?tab=control_center" class="btn">→ Otevřít Control Center</a>
+            <a href="/admin?tab=dashboard" class="btn">→ Otevřít Control Center</a>
 
         <?php else: ?>
             <h1>Oprava selhala</h1>

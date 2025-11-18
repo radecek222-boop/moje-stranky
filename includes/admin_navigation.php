@@ -43,50 +43,50 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab_label' => 'Online',
                 'tab' => 'online',
             ],
-            'control_center_phpunit' => [
-                'href' => 'admin.php?tab=control_center_phpunit',
+            'admin_phpunit' => [
+                'href' => 'admin.php?tab=admin_phpunit',
                 'tab_label' => '🧪 PHPUnit Tests',
-                'tab' => 'control_center_phpunit',
+                'tab' => 'admin_phpunit',
             ],
-            'control_center_testing' => [
-                'href' => 'admin.php?tab=control_center_testing',
+            'admin_testing' => [
+                'href' => 'admin.php?tab=admin_testing',
                 'tab_label' => 'Testing (Old)',
-                'tab' => 'control_center_testing',
+                'tab' => 'admin_testing',
             ],
-            'control_center_testing_interactive' => [
-                'href' => 'admin.php?tab=control_center_testing_interactive',
+            'admin_testing_interactive' => [
+                'href' => 'admin.php?tab=admin_testing_interactive',
                 'tab_label' => 'Testing Interactive',
-                'tab' => 'control_center_testing_interactive',
+                'tab' => 'admin_testing_interactive',
             ],
-            'control_center_testing_simulator' => [
-                'href' => 'admin.php?tab=control_center_testing_simulator',
+            'admin_testing_simulator' => [
+                'href' => 'admin.php?tab=admin_testing_simulator',
                 'tab_label' => 'Testing',
-                'tab' => 'control_center_testing_simulator',
+                'tab' => 'admin_testing_simulator',
             ],
-            'control_center_appearance' => [
-                'href' => 'admin.php?tab=control_center_appearance',
+            'admin_appearance' => [
+                'href' => 'admin.php?tab=admin_appearance',
                 'tab_label' => 'Vzhled & Design',
-                'tab' => 'control_center_appearance',
+                'tab' => 'admin_appearance',
             ],
-            'control_center_content' => [
-                'href' => 'vsechny_tabulky.php',
-                'tab_label' => 'SQL',
-                'tab' => 'control_center_content',
+            'admin_content' => [
+                'href' => 'admin.php?tab=admin_content',
+                'tab_label' => 'Obsah & Texty',
+                'tab' => 'admin_content',
             ],
-            'control_center_configuration' => [
-                'href' => 'admin.php?tab=control_center_configuration',
+            'admin_configuration' => [
+                'href' => 'admin.php?tab=admin_configuration',
                 'tab_label' => 'Konfigurace systému',
-                'tab' => 'control_center_configuration',
+                'tab' => 'admin_configuration',
             ],
-            'control_center_actions' => [
-                'href' => 'admin.php?tab=control_center_actions',
+            'admin_actions' => [
+                'href' => 'admin.php?tab=admin_actions',
                 'tab_label' => 'Akce & Úkoly',
-                'tab' => 'control_center_actions',
+                'tab' => 'admin_actions',
             ],
-            'control_center_console' => [
-                'href' => 'admin.php?tab=control_center_console',
+            'admin_console' => [
+                'href' => 'admin.php?tab=admin_console',
                 'tab_label' => 'Konzole',
-                'tab' => 'control_center_console',
+                'tab' => 'admin_console',
             ],
         ];
     }

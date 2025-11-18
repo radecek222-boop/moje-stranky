@@ -104,7 +104,7 @@ try {
         echo "<div class='success'>";
         echo "<strong>🔧 ŘEŠENÍ:</strong><br>";
         echo "Spusťte instalaci Admin Control Center, která vytvoří všechny chybějící tabulky:<br><br>";
-        echo "<a href='/install_admin_control_center.php' style='display: inline-block; padding: 10px 20px; background: #2D5016; color: white; text-decoration: none; border-radius: 5px;'>";
+        echo "<a href='/setup/install_admin_control_center.php' style='display: inline-block; padding: 10px 20px; background: #2D5016; color: white; text-decoration: none; border-radius: 5px;'>";
         echo "🚀 Spustit instalaci ACC";
         echo "</a>";
         echo "</div>";
@@ -124,7 +124,7 @@ try {
 }
 
 echo "<div style='margin-top: 2rem; text-align: center;'>";
-echo "<a href='admin.php?tab=control_center_actions' style='display: inline-block; padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;'>";
+echo "<a href='admin.php?tab=admin_actions' style='display: inline-block; padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;'>";
 echo "← Zpět do Admin Panelu";
 echo "</a>";
 echo "</div>";

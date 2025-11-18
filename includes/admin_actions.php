@@ -141,7 +141,7 @@ function getPriorityBadge($priority) {
                         <br><small>Bude vytvořeno 6 tabulek: theme_settings, content_texts, system_config, pending_actions, action_history, github_webhooks</small>
                     </div>
                     <div style="margin-top: 1rem;">
-                        <a href="/install_admin_control_center.php" class="cc-btn cc-btn-success" style="display: inline-block; text-decoration: none;">
+                        <a href="/setup/install_admin_control_center.php" class="cc-btn cc-btn-success" style="display: inline-block; text-decoration: none;">
                             🚀 Spustit instalaci Admin Control Center
                         </a>
                         <p style="font-size: 0.7rem; color: #666; margin-top: 0.5rem;">Po dokončení instalace se vrátíte zpět na tento panel</p>
@@ -447,7 +447,7 @@ async function executeAction(event, actionId) {
 
     if (DEBUG_MODE) console.log('[executeAction] Sending request with payload:', payload);
 
-    fetch('/api/control_center_api.php?action=execute_action', {
+    fetch('/api/admin.php?action=execute_action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
@@ -533,7 +533,7 @@ async function completeAction(actionId) {
     try {
         const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() : null;
 
-        const response = await fetch('/api/control_center_api.php?action=complete_action', {
+        const response = await fetch('/api/admin.php?action=complete_action', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action_id: actionId, csrf_token: csrfToken })
@@ -562,7 +562,7 @@ async function dismissAction(actionId) {
     try {
         const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() : null;
 
-        const response = await fetch('/api/control_center_api.php?action=dismiss_action', {
+        const response = await fetch('/api/admin.php?action=dismiss_action', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action_id: actionId, csrf_token: csrfToken })

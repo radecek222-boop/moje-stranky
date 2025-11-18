@@ -351,7 +351,7 @@ async function clearCache() {
     }
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=clear_cache', {
+        const response = await fetch('/api/admin.php?action=clear_cache', {
             method: 'POST'
         });
 
@@ -378,7 +378,7 @@ async function archiveLogs() {
     }
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=archive_logs', {
+        const response = await fetch('/api/admin.php?action=archive_logs', {
             method: 'POST'
         });
 
@@ -411,7 +411,7 @@ async function optimizeDatabase() {
     btn.disabled = true;
 
     try {
-        const response = await fetch('/api/control_center_api.php?action=optimize_database', {
+        const response = await fetch('/api/admin.php?action=optimize_database', {
             method: 'POST'
         });
 

@@ -924,7 +924,7 @@ async function loadActionsModal() {
         console.error('adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_actions&embed=1");
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_actions&embed=1");
     modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Akce & Úkoly"></iframe></div>`;
 }
 
@@ -955,7 +955,7 @@ async function loadConsoleModal() {
         console.error('adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_console&embed=1");
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_console&embed=1");
     modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Konzole - Developer Tools"></iframe></div>`;
 }
 
@@ -968,7 +968,7 @@ async function loadTestingModal() {
         console.error('adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_testing_interactive&embed=1");
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_testing_interactive&embed=1");
     modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Testovací prostředí"></iframe></div>`;
 }
 
@@ -981,7 +981,7 @@ async function loadAppearanceModal() {
         console.error('adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_appearance&embed=1");
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_appearance&embed=1");
     modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Vzhled & Design"></iframe></div>`;
 }
 
@@ -994,7 +994,7 @@ async function loadContentModal() {
         console.error('adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_content&embed=1");
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_content&embed=1");
     modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Obsah & Texty"></iframe></div>`;
 }
 
@@ -1007,7 +1007,7 @@ async function loadConfigModal() {
         console.error('adminModalBody element nenalezen');
         return;
     }
-    const url = getEmbedUrlWithCSRF("admin.php?tab=control_center_configuration&embed=1");
+    const url = getEmbedUrlWithCSRF("admin.php?tab=admin_configuration&embed=1");
     modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms" title="Konfigurace systému"></iframe></div>`;
 }
 

@@ -792,7 +792,7 @@ async function saveSettings() {
     };
 
     // Uložení přes API
-    fetch('/api/control_center_api.php?action=save_theme', {
+    fetch('/api/admin.php?action=save_theme', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

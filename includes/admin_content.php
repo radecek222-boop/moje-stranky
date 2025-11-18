@@ -299,7 +299,7 @@ async function saveText(textId) {
         const valueEn = document.getElementById(`input-${textId}-en`).value;
         const valueSk = document.getElementById(`input-${textId}-sk`).value;
 
-        const response = await fetch('/api/control_center_api.php?action=save_content_text', {
+        const response = await fetch('/api/admin.php?action=save_content_text', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
