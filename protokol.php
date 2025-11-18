@@ -274,21 +274,18 @@ if ($initialBootstrapData) {
   <div class="section-title">Zákazník reklamuje<span class="en-label">CUSTOMER COMPLAINT</span></div>
   <div class="split-section">
     <textarea id="description-cz" placeholder="Popis reklamace česky..."><?= wgs_escape($prefillFields['description']); ?></textarea>
-    <button class="translate-btn" onclick="translateText('description-cz', 'description-en')">→</button>
     <textarea id="description-en" placeholder="Automatický překlad..." readonly></textarea>
   </div>
 
   <div class="section-title">Problém zjištěný technikem<span class="en-label">DETECTED PROBLEM</span></div>
   <div class="split-section">
     <textarea id="problem-cz" placeholder="Zjištěný problém česky..."></textarea>
-    <button class="translate-btn" onclick="translateText('problem-cz', 'problem-en')">→</button>
     <textarea id="problem-en" placeholder="Automatický překlad..." readonly></textarea>
   </div>
 
   <div class="section-title">Návrh opravy<span class="en-label">REPAIR PROPOSAL</span></div>
   <div class="split-section">
     <textarea id="repair-cz" placeholder="Návrh opravy česky..."></textarea>
-    <button class="translate-btn" onclick="translateText('repair-cz', 'repair-en')">→</button>
     <textarea id="repair-en" placeholder="Automatický překlad..." readonly></textarea>
   </div>
 

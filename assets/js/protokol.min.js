@@ -1046,23 +1046,30 @@ async function autoTranslateField(fieldId) {
 
 // Inicializace auto-překladu
 function initAutoTranslation() {
-  const fieldsToTranslate = ['description', 'problem', 'repair'];
+  const fieldsToTranslate = [
+    { source: 'description-cz', target: 'description-en' },
+    { source: 'problem-cz', target: 'problem-en' },
+    { source: 'repair-cz', target: 'repair-en' }
+  ];
 
-  fieldsToTranslate.forEach(fieldId => {
-    const field = document.getElementById(fieldId);
-    if (!field) return;
+  fieldsToTranslate.forEach(({ source, target }) => {
+    const sourceField = document.getElementById(source);
+    if (!sourceField) {
+      logger.warn('Auto-překlad: Pole nenalezeno:', source);
+      return;
+    }
 
     const debouncedTranslate = debounce(() => {
-      autoTranslateField(fieldId);
+      translateText(source, target);
     }, 1500);
 
-    field.addEventListener('input', debouncedTranslate);
+    sourceField.addEventListener('input', debouncedTranslate);
 
-    field.addEventListener('blur', () => {
-      autoTranslateField(fieldId);
+    sourceField.addEventListener('blur', () => {
+      translateText(source, target);
     });
 
-    logger.log('✅ Auto-překlad aktivován pro:', fieldId);
+    logger.log('✅ Auto-překlad aktivován pro:', source, '→', target);
   });
 }
 
