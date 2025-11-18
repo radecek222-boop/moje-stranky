@@ -4,6 +4,8 @@
  * iOS-style centrální řídicí panel
  */
 
+require_once __DIR__ . '/../init.php';
+
 // Bezpečnostní kontrola
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die('Unauthorized');
@@ -50,7 +52,9 @@ try {
 }
 ?>
 
+<?php if (!$embedMode): ?>
 <link rel="stylesheet" href="/assets/css/admin.css">
+<?php endif; ?>
 
 <div class="control-center-container">
     <!-- Header -->
@@ -265,6 +269,8 @@ document.getElementById('cc-search').addEventListener('input', function(e) {
 /**
  * OpenSection
  */
+
+require_once __DIR__ . '/../init.php';
 function openSection(section) {
     // Open modal with section content
     if (typeof openCCModal === 'function') {
@@ -277,3 +283,9 @@ function openSection(section) {
 
 console.log('✅ Admin Control Center loaded');
 </script>
+
+
+<?php if ($embedMode): ?>
+</body>
+</html>
+<?php endif; ?>

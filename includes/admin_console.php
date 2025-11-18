@@ -4,6 +4,8 @@
  * Komplexní diagnostika celé aplikace (HTML, PHP, JS, CSS, SQL, API)
  */
 
+require_once __DIR__ . '/../init.php';
+
 // Bezpečnostní kontrola
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die('Unauthorized');
@@ -13,9 +15,26 @@ $pdo = getDbConnection();
 
 // Detect embed mode for iframe contexts
 $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
+
+// If embed mode, output full HTML structure
+if ($embedMode):
+?>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konzole - WGS Admin</title>
+    <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body class="embed-mode">
+<?php
+endif;
 ?>
 
+<?php if (!$embedMode): ?>
 <link rel="stylesheet" href="/assets/css/admin.css">
+<?php endif; ?>
 <style>
 /* Console-specific styles */
 .console-container {
@@ -2751,3 +2770,9 @@ async function checkCodeAnalysis() {
 
 if (DEBUG_MODE) console.log('Console loaded');
 </script>
+
+
+<?php if ($embedMode): ?>
+</body>
+</html>
+<?php endif; ?>

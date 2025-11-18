@@ -4,6 +4,8 @@
  * Editace textů na stránkách (CZ/EN/SK)
  */
 
+require_once __DIR__ . '/../init.php';
+
 // Bezpečnostní kontrola
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die('Unauthorized');
@@ -11,6 +13,21 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
 $pdo = getDbConnection();
 $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
+
+// If embed mode, output full HTML structure
+if ($embedMode):
+?>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obsah - WGS Admin</title>
+    <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body class="embed-mode">
+<?php
+endif;
 
 // Načtení všech textů
 $contentTexts = [];
@@ -46,7 +63,9 @@ $pageNames = [
 ];
 ?>
 
+<?php if (!$embedMode): ?>
 <link rel="stylesheet" href="/assets/css/admin.css">
+<?php endif; ?>
 
 <div class="control-detail active">
     <?php if (!$embedMode): ?>
@@ -201,6 +220,8 @@ const DEBUG_MODE = false;
 /**
  * ShowPage
  */
+
+require_once __DIR__ . '/../init.php';
 function showPage(page) {
     // Hide all pages
     document.querySelectorAll('.page-content').forEach(el => {
@@ -231,6 +252,8 @@ function showPage(page) {
 /**
  * SwitchLang
  */
+
+require_once __DIR__ . '/../init.php';
 function switchLang(textId, lang) {
     // Hide all lang contents for this text
     document.querySelectorAll(`[id^="text-${textId}-"]`).forEach(el => {
@@ -259,6 +282,8 @@ function switchLang(textId, lang) {
 /**
  * SaveText
  */
+
+require_once __DIR__ . '/../init.php';
 async function saveText(textId) {
     const statusEl = document.getElementById(`save-status-${textId}`);
     statusEl.style.display = 'block';
@@ -331,3 +356,9 @@ if (DEBUG_MODE) console.log('[OK] Content section loaded');
     border-bottom-color: var(--cc-primary);
 }
 </style>
+
+
+<?php if ($embedMode): ?>
+</body>
+</html>
+<?php endif; ?>

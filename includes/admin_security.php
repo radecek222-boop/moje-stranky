@@ -4,6 +4,8 @@
  * Centralizované bezpečnostní centrum - registrační klíče, API klíče, audit log
  */
 
+require_once __DIR__ . '/../init.php';
+
 // Bezpečnostní kontrola - POUZE ADMIN
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     http_response_code(403);
@@ -79,7 +81,9 @@ try {
 }
 ?>
 
+<?php if (!$embedMode): ?>
 <link rel="stylesheet" href="/assets/css/admin.css">
+<?php endif; ?>
 
 <style>
 /* Security - Minimalistický černobílý design */
@@ -584,6 +588,8 @@ try {
 /**
  * SwitchSection - Přepínání mezi sekcemi
  */
+
+require_once __DIR__ . '/../init.php';
 function switchSection(section) {
     // Update URL without reload
     const url = new URL(window.location);
@@ -610,6 +616,8 @@ function switchSection(section) {
 /**
  * TogglePasswordVisibility
  */
+
+require_once __DIR__ . '/../init.php';
 function togglePasswordVisibility(configId) {
     const input = document.getElementById(`config-${configId}`);
     if (input.type === 'password') {
@@ -623,6 +631,8 @@ function togglePasswordVisibility(configId) {
 /**
  * SaveConfig
  */
+
+require_once __DIR__ . '/../init.php';
 async function saveConfig(configId, configKey) {
     const input = document.getElementById(`config-${configId}`);
     const statusEl = document.getElementById(`save-status-${configId}`);
@@ -814,6 +824,8 @@ function escapujHtml(text) {
 /**
  * LoadUzivateleProSecurity
  */
+
+require_once __DIR__ . '/../init.php';
 async function loadUzivateleProSecurity() {
     const tbody = document.querySelector('#security-users-table tbody');
     if (!tbody) return;
@@ -858,6 +870,8 @@ async function loadUzivateleProSecurity() {
 /**
  * HtmlEscape
  */
+
+require_once __DIR__ . '/../init.php';
 function htmlEscape(str) {
     const div = document.createElement('div');
     div.textContent = str;
@@ -878,3 +892,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 console.log('Security centrum načteno');
 </script>
+
+
+<?php if ($embedMode): ?>
+</body>
+</html>
+<?php endif; ?>

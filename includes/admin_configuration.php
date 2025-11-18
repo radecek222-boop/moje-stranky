@@ -4,6 +4,8 @@
  * SMTP, API klíče, security settings
  */
 
+require_once __DIR__ . '/../init.php';
+
 // Bezpečnostní kontrola
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die('Unauthorized');
@@ -11,6 +13,21 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
 $pdo = getDbConnection();
 $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
+
+// If embed mode, output full HTML structure
+if ($embedMode):
+?>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konfigurace - WGS Admin</title>
+    <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body class="embed-mode">
+<?php
+endif;
 
 // Načtení konfigurace (pouze 'system' - ostatní skupiny jsou v jiných kartách)
 $configs = [];
@@ -46,7 +63,9 @@ $groupNames = [
 ];
 ?>
 
+<?php if (!$embedMode): ?>
 <link rel="stylesheet" href="/assets/css/admin.css">
+<?php endif; ?>
 
 <div class="control-detail active">
     <?php if (!$embedMode): ?>
@@ -216,3 +235,9 @@ async function saveConfig(configId, configKey) {
 
 console.log('⚙️ Configuration section loaded (Email/SMTP moved to Email & SMS tab)');
 </script>
+
+
+<?php if ($embedMode): ?>
+</body>
+</html>
+<?php endif; ?>
