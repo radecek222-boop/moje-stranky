@@ -335,6 +335,7 @@ if ($initialBootstrapData) {
 
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-spinner"></div>
+  <div class="loading-text" id="loadingText">Načítání...</div>
 </div>
 </main>
 

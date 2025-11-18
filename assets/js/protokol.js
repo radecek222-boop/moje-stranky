@@ -369,6 +369,17 @@ function showLoading(show) {
   document.getElementById("loadingOverlay").classList.toggle("show", show);
 }
 
+function showLoadingWithMessage(show, message = 'Načítání...') {
+  const overlay = document.getElementById("loadingOverlay");
+  const textElement = document.getElementById("loadingText");
+
+  overlay.classList.toggle("show", show);
+
+  if (textElement && show) {
+    textElement.textContent = message;
+  }
+}
+
 function showNotif(type, message) {
   const notif = document.getElementById("notif");
   notif.className = `notif ${type}`;
@@ -824,22 +835,182 @@ async function exportBothPDFs() {
 
 async function sendToCustomer() {
   try {
-    showLoading(true);
-    showNotif("success", "Odesílám email...");
+    // FÁZE 1: Generování kompletního PDF (protokol + fotky)
+    showLoadingWithMessage(true, '📄 Generuji kompletní PDF report...');
+    logger.log('📋 Generuji kompletní PDF (protokol + fotodokumentace)...');
 
-    const protocolPdf = await generateProtocolPDF();
-    const protocolBase64 = protocolPdf.output("datauristring").split(",")[1];
+    // Vytvořit JEDNO PDF s protokolem
+    const doc = await generateProtocolPDF();
 
-    let photosBase64 = null;
-
+    // Pokud jsou fotky, přidat fotodokumentaci na KONEC protokolu (stejně jako exportBothPDFs)
     if (attachedPhotos.length > 0) {
-      logger.log(`📸 Vytvářím PDF z ${attachedPhotos.length} fotek...`);
-      const photosPdf = await generatePhotosPDF();
-      photosBase64 = photosPdf.output("datauristring").split(",")[1];
-      logger.log('✅ PDF s fotkami vytvořeno');
-    } else {
-      logger.log('ℹ️ Žádné fotky k přiložení');
+      showLoadingWithMessage(true, `📸 Přidávám fotodokumentaci (${attachedPhotos.length} fotek)...`);
+      logger.log('📸 Přidávám fotodokumentaci...');
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 10;
+
+      // NOVÁ STRÁNKA: Fotodokumentace začíná
+      doc.addPage();
+
+      // Hlavička fotodokumentace
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('FOTODOKUMENTACE', pageWidth / 2, 20, { align: 'center' });
+
+      let yPos = 35;
+
+      // Informace o zákazníkovi
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+
+      const customerInfo = [
+        `Cislo reklamace: ${document.getElementById('claim-number')?.value || 'N/A'}`,
+        `Datum: ${document.getElementById('visit-date')?.value || new Date().toLocaleDateString('cs-CZ')}`
+      ];
+
+      customerInfo.forEach(line => {
+        doc.text(line, margin, yPos);
+        yPos += 6;
+      });
+
+      yPos += 5;
+
+      // Čára
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 10;
+
+      // Nadpis indexu
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('INDEX PHOTO', margin, yPos);
+      yPos += 8;
+
+      // Index fotek - miniaturní náhledy
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+
+      const thumbSize = 25;
+      const thumbGap = 5;
+      const thumbsPerRow = Math.floor((pageWidth - 2 * margin) / (thumbSize + thumbGap));
+
+      for (let i = 0; i < attachedPhotos.length; i++) {
+        const photo = attachedPhotos[i];
+        const photoData = typeof photo === 'string' ? photo : photo.data;
+        const photoLabel = typeof photo === 'object' ? photo.label : `Fotka ${i + 1}`;
+
+        const col = i % thumbsPerRow;
+        const row = Math.floor(i / thumbsPerRow);
+
+        const x = margin + (col * (thumbSize + thumbGap));
+        const y = yPos + (row * (thumbSize + thumbGap + 4));
+
+        if (y + thumbSize > pageHeight - margin) {
+          doc.addPage();
+          yPos = 20;
+          continue;
+        }
+
+        try {
+          doc.addImage(photoData, "JPEG", x, y, thumbSize, thumbSize, undefined, 'FAST');
+          doc.setFontSize(7);
+          doc.text(`${i + 1}. ${photoLabel}`, x, y + thumbSize + 3, { maxWidth: thumbSize });
+        } catch (err) {
+          logger.warn(`⚠️ Nelze přidat miniaturu ${i + 1}`);
+        }
+      }
+
+      logger.log(`✅ Index ${attachedPhotos.length} fotek vytvořen`);
+
+      // DALŠÍ STRÁNKY: Velké fotky 4 na stránku
+      doc.addPage();
+
+      const gap = 5;
+      const labelHeight = 5;
+      const photosPerPage = 4;
+      const cols = 2;
+      const rows = 2;
+
+      const availableWidth = pageWidth - (2 * margin) - gap;
+      const availableHeight = pageHeight - (2 * margin) - gap;
+      const cellWidth = availableWidth / cols;
+      const cellHeight = availableHeight / rows;
+
+      for (let i = 0; i < attachedPhotos.length; i++) {
+        const photo = attachedPhotos[i];
+        const photoData = typeof photo === 'string' ? photo : photo.data;
+        const photoLabel = typeof photo === 'object' ? photo.label : '';
+
+        if (i > 0 && i % photosPerPage === 0) {
+          doc.addPage();
+        }
+
+        const indexOnPage = i % photosPerPage;
+        const col = indexOnPage % cols;
+        const row = Math.floor(indexOnPage / cols);
+
+        const x = margin + (col * (cellWidth + gap));
+        const y = margin + (row * (cellHeight + gap));
+
+        if (photoLabel) {
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(0, 0, 0);
+          doc.text(photoLabel, x + 1, y + 3);
+        }
+
+        const photoY = y + labelHeight;
+        const maxPhotoWidth = cellWidth;
+        const maxPhotoHeight = cellHeight - labelHeight;
+
+        try {
+          const img = new Image();
+          img.src = photoData;
+
+          await new Promise((resolve) => {
+            img.onload = resolve;
+            setTimeout(resolve, 100);
+          });
+
+          let imgWidth = img.width || 1000;
+          let imgHeight = img.height || 1000;
+
+          const imgRatio = imgWidth / imgHeight;
+          const cellRatio = maxPhotoWidth / maxPhotoHeight;
+
+          let finalWidth, finalHeight;
+
+          if (imgRatio > cellRatio) {
+            finalWidth = maxPhotoWidth;
+            finalHeight = maxPhotoWidth / imgRatio;
+          } else {
+            finalHeight = maxPhotoHeight;
+            finalWidth = maxPhotoHeight * imgRatio;
+          }
+
+          const offsetX = (maxPhotoWidth - finalWidth) / 2;
+          const offsetY = (maxPhotoHeight - finalHeight) / 2;
+
+          doc.addImage(photoData, "JPEG", x + offsetX, photoY + offsetY, finalWidth, finalHeight, undefined, 'MEDIUM');
+
+          logger.log(`  📸 Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel}`);
+
+        } catch (err) {
+          logger.warn(`⚠️ Chyba fotky ${i + 1}`);
+          doc.addImage(photoData, "JPEG", x, photoY, maxPhotoWidth, maxPhotoHeight, undefined, 'MEDIUM');
+        }
+      }
+
+      logger.log(`✅ Fotodokumentace přidána (${attachedPhotos.length} fotek)`);
     }
+
+    // Konverze na base64
+    const completePdfBase64 = doc.output("datauristring").split(",")[1];
+
+    // FÁZE 2: Odesílání emailu
+    showLoadingWithMessage(true, '📧 Odesílám email zákazníkovi...');
 
     const csrfToken = await fetchCsrfToken();
 
@@ -849,8 +1020,7 @@ async function sendToCustomer() {
       body: JSON.stringify({
         action: "send_email",
         reklamace_id: currentReklamaceId,
-        protokol_pdf: protocolBase64,
-        photos_pdf: photosBase64,
+        complete_pdf: completePdfBase64,
         csrf_token: csrfToken
       })
     });
@@ -903,7 +1073,7 @@ async function sendToCustomer() {
     logger.error(error);
     showNotif("error", "Chyba odesílání: " + error.message);
   } finally {
-    showLoading(false);
+    showLoadingWithMessage(false);
   }
 }
 
