@@ -14,10 +14,20 @@ if (isset($_GET['debug']) && $_GET['debug'] === '1') {
     print_r($_SESSION);
     echo "</pre>";
 
+    echo "<h2>🔑 VŠECHNY SESSION KLÍČE:</h2>";
+    echo "<ul style='background:#000;padding:15px;'>";
+    foreach ($_SESSION as $key => $value) {
+        $displayValue = is_bool($value) ? ($value ? 'TRUE' : 'FALSE') : (is_string($value) || is_numeric($value) ? htmlspecialchars($value) : gettype($value));
+        echo "<li><strong>$key</strong>: $displayValue</li>";
+    }
+    echo "</ul>";
+
     echo "<h2>🔑 Kontrolní hodnoty:</h2>";
     echo "<p>isset(\$_SESSION['user_id']): " . (isset($_SESSION['user_id']) ? '✅ TRUE' : '❌ FALSE') . "</p>";
     echo "<p>\$_SESSION['user_id']: " . ($_SESSION['user_id'] ?? 'NENÍ NASTAVENO') . "</p>";
     echo "<p>\$_SESSION['role']: " . ($_SESSION['role'] ?? 'NENÍ NASTAVENO') . "</p>";
+    echo "<p>\$_SESSION['used_role']: " . ($_SESSION['used_role'] ?? '❌ NENÍ NASTAVENO') . "</p>";
+    echo "<p>\$_SESSION['user_role']: " . ($_SESSION['user_role'] ?? '❌ NENÍ NASTAVENO') . "</p>";
     echo "<p>isset(\$_SESSION['is_admin']): " . (isset($_SESSION['is_admin']) ? '✅ TRUE' : '❌ FALSE') . "</p>";
 
     echo "<h2>🚪 Co by se stalo bez debug režimu:</h2>";
