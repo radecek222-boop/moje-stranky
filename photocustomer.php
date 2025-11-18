@@ -1,21 +1,20 @@
 <?php
 require_once "init.php";
 
-// ✅ DEBUG: Logování session pro diagnostiku
-error_log("=== PHOTOCUSTOMER.PHP DEBUG START ===");
-error_log("Session ID: " . session_id());
-error_log("Session data: " . print_r($_SESSION, true));
-error_log("user_id isset: " . (isset($_SESSION['user_id']) ? 'ANO' : 'NE'));
-error_log("user_id hodnota: " . ($_SESSION['user_id'] ?? 'NENÍ NASTAVENO'));
-error_log("is_admin isset: " . (isset($_SESSION['is_admin']) ? 'ANO' : 'NE'));
-error_log("is_admin hodnota: " . ($_SESSION['is_admin'] ?? 'NENÍ NASTAVENO'));
-error_log("role: " . ($_SESSION['role'] ?? 'NENÍ NASTAVENO'));
-error_log("=== PHOTOCUSTOMER.PHP DEBUG END ===");
+// ✅ DEBUG: Logování session pouze v development režimu
+// BEZPEČNOST: Nelogujeme PII (osobní údaje) v produkci
+if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
+    error_log("=== PHOTOCUSTOMER.PHP DEBUG START ===");
+    error_log("user_id isset: " . (isset($_SESSION['user_id']) ? 'ANO' : 'NE'));
+    error_log("is_admin isset: " . (isset($_SESSION['is_admin']) ? 'ANO' : 'NE'));
+    error_log("role: " . ($_SESSION['role'] ?? 'NENÍ NASTAVENO'));
+    error_log("=== PHOTOCUSTOMER.PHP DEBUG END ===");
+}
 
 // BEZPEČNOST: Kontrola přihlášení (admin nebo technik)
 $isLoggedIn = isset($_SESSION['user_id']) || (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true);
 if (!$isLoggedIn) {
-    error_log("PHOTOCUSTOMER: Přesměrování na login - uživatel není přihlášen");
+    error_log("PHOTOCUSTOMER: Přístup odepřen - přesměrování na login");
     header('Location: login.php?redirect=photocustomer.php');
     exit;
 }
