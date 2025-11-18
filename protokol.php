@@ -131,7 +131,7 @@ if ($lookupValue !== null) {
                 'email' => $record['email'] ?? '',
 
                 // Produktové údaje
-                'brand' => $record['model'] ?? '', // OPRAVA: používat 'model', ne 'znacka'
+                'brand' => $record['prodejce'] ?? '', // Zadavatel = jméno prodejce
                 'model' => $record['model'] ?? '',
                 'typ' => $record['typ'] ?? '',
                 'provedeni' => $record['provedeni'] ?? '',
