@@ -542,8 +542,6 @@ async function logClientError(error, context = '') {
  * OpenCCModal
  */
 function openCCModal(section) {
-    console.log('[openCCModal] Opening modal for section:', section);
-
     const overlay = document.getElementById('adminOverlay');
     const modal = document.getElementById('adminModal');
     const modalBody = document.getElementById('adminModalBody');
@@ -554,19 +552,13 @@ function openCCModal(section) {
         return;
     }
 
-    console.log('[openCCModal] Elements found:', { overlay: !!overlay, modal: !!modal, modalBody: !!modalBody });
-
     // Show overlay and modal
     overlay.classList.add('active');
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 
-    console.log('[openCCModal] Modal activated, classes added');
-
     // Show loading
     modalBody.innerHTML = '<div class="cc-modal-loading"><div class="cc-modal-spinner"></div><div style="margin-top: 1rem;">Načítání...</div></div>';
-
-    console.log('[openCCModal] Loading spinner shown');
 
     // Load section content
     switch(section) {
