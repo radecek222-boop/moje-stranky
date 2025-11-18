@@ -10,7 +10,7 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-async function showWelcomeModal(userName) {
+async function showWelcomeModal(userName, userRole) {
   try {
     // Získej vtip z API
     const jokeResponse = await fetch('app/controllers/get_joke.php?t=' + Date.now());
@@ -34,7 +34,7 @@ async function showWelcomeModal(userName) {
           <div class="welcome-joke">
             ${safeJoke}
           </div>
-          <button class="welcome-close-btn" onclick="closeWelcomeModal()">
+          <button class="welcome-close-btn" onclick="closeWelcomeModal('${escapeHtml(userRole || 'user')}')">
             Začít pracovat
           </button>
         </div>
@@ -52,11 +52,11 @@ async function showWelcomeModal(userName) {
   } catch (error) {
     console.error('Chyba při načítání vtipu:', error);
     // Zobraz modal i bez vtipu
-    showFallbackModal(userName);
+    showFallbackModal(userName, userRole);
   }
 }
 
-function showFallbackModal(userName) {
+function showFallbackModal(userName, userRole) {
   // BEZPEČNOST: Escape HTML v userName pro XSS protection
   const safeUserName = escapeHtml(userName);
 
@@ -68,7 +68,7 @@ function showFallbackModal(userName) {
         <p class="welcome-message">
           Přeji ti hezký den plný úspěchů! 💪
         </p>
-        <button class="welcome-close-btn" onclick="closeWelcomeModal()">
+        <button class="welcome-close-btn" onclick="closeWelcomeModal('${escapeHtml(userRole || 'user')}')">
           Začít pracovat
         </button>
       </div>
@@ -77,13 +77,23 @@ function showFallbackModal(userName) {
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
-function closeWelcomeModal() {
+function closeWelcomeModal(userRole) {
   const modal = document.getElementById("welcomeModal");
   if (modal) {
     modal.classList.remove("active");
     setTimeout(() => {
       modal.remove();
-      window.location.href = "novareklamace.php";
+
+      // Přesměrování podle role
+      // Technici => seznam.php (vidět zakázky)
+      // Prodejci/ostatní => novareklamace.php (objednat servis)
+      const normalizedRole = (userRole || '').toLowerCase().trim();
+
+      if (normalizedRole === 'technik' || normalizedRole === 'technician') {
+        window.location.href = "seznam.php";
+      } else {
+        window.location.href = "novareklamace.php";
+      }
     }, 300);
   }
 }
