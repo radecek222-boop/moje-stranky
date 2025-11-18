@@ -96,7 +96,7 @@ try {
         echo "<strong>✅ VŠECHNY SLOUPCE JIŽ EXISTUJÍ</strong><br>";
         echo "Tabulka má všechny požadované sloupce. Migrace není potřeba.";
         echo "</div>";
-        echo "<a href='admin.php?tab=control_center_sql' class='btn'>← Zpět do Admin Panelu</a>";
+        echo "<a href='admin.php?tab=admin_content' class='btn'>← Zpět do Admin Panelu</a>";
         echo "</div></body></html>";
         exit;
     }
@@ -201,7 +201,7 @@ try {
             echo "<strong>📦 Ovlivněno záznamů:</strong> {$pocet}";
             echo "</div>";
 
-            echo "<a href='admin.php?tab=control_center_sql' class='btn'>← Zpět do Admin Panelu</a>";
+            echo "<a href='admin.php?tab=admin_content' class='btn'>← Zpět do Admin Panelu</a>";
             echo "<a href='vsechny_tabulky.php' class='btn'>📋 Zobrazit všechny tabulky</a>";
 
         } catch (PDOException $e) {
@@ -265,7 +265,7 @@ try {
         echo "</div>";
 
         echo "<a href='?execute=1' class='btn'>✅ SPUSTIT MIGRACI</a>";
-        echo "<a href='admin.php?tab=control_center_sql' class='btn' style='background: #6c757d;'>← Zpět bez změn</a>";
+        echo "<a href='admin.php?tab=admin_content' class='btn' style='background: #6c757d;'>← Zpět bez změn</a>";
     }
 
 } catch (Exception $e) {
@@ -273,7 +273,7 @@ try {
     echo "<strong>❌ KRITICKÁ CHYBA:</strong><br>";
     echo htmlspecialchars($e->getMessage());
     echo "</div>";
-    echo "<a href='admin.php?tab=control_center_sql' class='btn'>← Zpět do Admin Panelu</a>";
+    echo "<a href='admin.php?tab=admin_content' class='btn'>← Zpět do Admin Panelu</a>";
 }
 
 echo "</div></body></html>";

@@ -108,7 +108,7 @@ try {
         }
         echo "</ul>";
 
-        echo "<a href='admin.php?tab=control_center_actions' class='btn'>← Zpět do Admin Panelu</a>";
+        echo "<a href='admin.php?tab=admin_actions' class='btn'>← Zpět do Admin Panelu</a>";
         echo "</div></body></html>";
         exit;
     }
@@ -241,7 +241,7 @@ try {
             echo "• Sledovat GitHub události<br>";
             echo "</div>";
 
-            echo "<a href='admin.php?tab=control_center_actions' class='btn'>← Zpět do Admin Panelu</a>";
+            echo "<a href='admin.php?tab=admin_actions' class='btn'>← Zpět do Admin Panelu</a>";
             echo "<a href='aktualizuj_akce_ukoly.php?execute=1' class='btn' style='background: #007bff;'>🔄 Spustit aktualizaci úkolů</a>";
             echo "<a href='zjisti_chybejici_tabulky.php' class='btn' style='background: #6c757d;'>📊 Zkontrolovat stav</a>";
 
@@ -306,7 +306,7 @@ try {
         echo "</div>";
 
         echo "<a href='?execute=1' class='btn'>✅ SPUSTIT MIGRACI</a>";
-        echo "<a href='admin.php?tab=control_center_actions' class='btn' style='background: #6c757d;'>← Zpět bez změn</a>";
+        echo "<a href='admin.php?tab=admin_actions' class='btn' style='background: #6c757d;'>← Zpět bez změn</a>";
     }
 
 } catch (Exception $e) {
@@ -314,7 +314,7 @@ try {
     echo "<strong>❌ KRITICKÁ CHYBA:</strong><br>";
     echo htmlspecialchars($e->getMessage());
     echo "</div>";
-    echo "<a href='admin.php?tab=control_center_actions' class='btn'>← Zpět do Admin Panelu</a>";
+    echo "<a href='admin.php?tab=admin_actions' class='btn'>← Zpět do Admin Panelu</a>";
 }
 
 echo "</div></body></html>";

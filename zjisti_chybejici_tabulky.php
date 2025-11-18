@@ -124,7 +124,7 @@ try {
 }
 
 echo "<div style='margin-top: 2rem; text-align: center;'>";
-echo "<a href='admin.php?tab=control_center_actions' style='display: inline-block; padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;'>";
+echo "<a href='admin.php?tab=admin_actions' style='display: inline-block; padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;'>";
 echo "← Zpět do Admin Panelu";
 echo "</a>";
 echo "</div>";
