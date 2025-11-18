@@ -64,3 +64,18 @@ if (!function_exists('respondError')) {
         ApiResponse::error($message, $httpCode, $details);
     }
 }
+
+// Aliasy pro zpětnou kompatibilitu
+if (!function_exists('sendJsonSuccess')) {
+    function sendJsonSuccess($message = null, $data = [], $httpCode = 200)
+    {
+        ApiResponse::success($data, $message, null, $httpCode);
+    }
+}
+
+if (!function_exists('sendJsonError')) {
+    function sendJsonError($message, $httpCode = 400, $details = null)
+    {
+        ApiResponse::error($message, $httpCode, $details);
+    }
+}
