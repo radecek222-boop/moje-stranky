@@ -1,4 +1,32 @@
-<?php require_once "init.php"; ?>
+<?php
+require_once "init.php";
+
+// ✅ FIX: Pokud je uživatel JIŽ PŘIHLÁŠEN a má redirect parametr, přesměrovat ho tam
+// SCÉNÁŘ: photocustomer.php redirectuje na login.php?redirect=photocustomer.php
+// ale technik JE stále přihlášen → neměl by vidět login formulář, měl by skočit na photocustomer.php
+if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
+    $redirect = $_GET['redirect'];
+
+    // ✅ BEZPEČNOST: Whitelist povolených redirect URLs (ochrana proti open redirect)
+    $allowedRedirects = [
+        'photocustomer.php',
+        'seznam.php',
+        'protokol.php',
+        'statistiky.php',
+        'novareklamace.php',
+        'admin.php'
+    ];
+
+    // Extrahuj jen název souboru (bez path traversal)
+    $redirectFile = basename($redirect);
+
+    if (in_array($redirectFile, $allowedRedirects, true)) {
+        error_log("LOGIN.PHP: Uživatel již přihlášen (user_id: {$_SESSION['user_id']}), redirectuji na: {$redirectFile}");
+        header("Location: {$redirectFile}");
+        exit;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
