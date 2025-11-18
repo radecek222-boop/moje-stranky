@@ -18,13 +18,54 @@ echo "==========================================\n";
 echo "WGS Service - SMTP Configuration Test\n";
 echo "==========================================\n\n";
 
-// Načíst SMTP konfiguraci z .env
-$smtpHost = getenv('SMTP_HOST') ?: '';
-$smtpPort = getenv('SMTP_PORT') ?: 587;
-$smtpUser = getenv('SMTP_USER') ?: '';
-$smtpPass = getenv('SMTP_PASS') ?: '';
-$smtpFrom = getenv('SMTP_FROM') ?: '';
-$smtpFromName = getenv('SMTP_FROM_NAME') ?: 'WGS Service';
+// Načíst SMTP konfiguraci z databáze (preferováno) nebo fallback na .env
+$smtpHost = '';
+$smtpPort = 587;
+$smtpUser = '';
+$smtpPass = '';
+$smtpFrom = '';
+$smtpFromName = 'WGS Service';
+$smtpEncryption = 'tls';
+
+try {
+    $pdo = getDbConnection();
+
+    // Zkusit načíst z wgs_smtp_settings
+    $stmt = $pdo->query("
+        SELECT * FROM wgs_smtp_settings
+        WHERE is_active = 1
+        ORDER BY id DESC
+        LIMIT 1
+    ");
+    $config = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($config) {
+        echo BLUE . "ℹ Using SMTP config from DATABASE (wgs_smtp_settings)\n" . NC;
+        $smtpHost = $config['smtp_host'];
+        $smtpPort = $config['smtp_port'];
+        $smtpUser = $config['smtp_username'];
+        $smtpPass = $config['smtp_password'];
+        $smtpFrom = $config['smtp_from_email'];
+        $smtpFromName = $config['smtp_from_name'] ?? 'WGS Service';
+        $smtpEncryption = $config['smtp_encryption'] ?? '';
+    } else {
+        echo YELLOW . "⚠ No active config in database, using .env\n" . NC;
+        $smtpHost = getenv('SMTP_HOST') ?: '';
+        $smtpPort = getenv('SMTP_PORT') ?: 587;
+        $smtpUser = getenv('SMTP_USER') ?: '';
+        $smtpPass = getenv('SMTP_PASS') ?: '';
+        $smtpFrom = getenv('SMTP_FROM') ?: '';
+        $smtpFromName = getenv('SMTP_FROM_NAME') ?: 'WGS Service';
+    }
+} catch (Exception $e) {
+    echo YELLOW . "⚠ Database error, using .env: " . $e->getMessage() . "\n" . NC;
+    $smtpHost = getenv('SMTP_HOST') ?: '';
+    $smtpPort = getenv('SMTP_PORT') ?: 587;
+    $smtpUser = getenv('SMTP_USER') ?: '';
+    $smtpPass = getenv('SMTP_PASS') ?: '';
+    $smtpFrom = getenv('SMTP_FROM') ?: '';
+    $smtpFromName = getenv('SMTP_FROM_NAME') ?: 'WGS Service';
+}
 
 echo "Checking SMTP configuration...\n";
 echo "------------------------------\n";
