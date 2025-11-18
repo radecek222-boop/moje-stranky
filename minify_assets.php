@@ -214,7 +214,7 @@ echo "<div class='summary'>
         <strong>💡 Next Step:</strong> Update your HTML files to use .min.js and .min.css versions for production.
         <br><br>Example: Change <code>script.js</code> → <code>script.min.js</code>
     </div>
-    <p><a href='/admin/control-center'>← Back to Control Center</a></p>
+    <p><a href='/admin.php'>← Back to Admin Dashboard</a></p>
 </div>";
 
 echo "</div></body></html>";
