@@ -175,6 +175,52 @@ if (!$isLoggedIn && !$isAdmin) {
 .foto-wrapper:hover .foto-delete-btn {
   opacity: 1;
 }
+
+/* ✅ MINIMALISTICKÝ REDESIGN: Zmenšení info panelů a nadpisů */
+.info-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 1rem;
+  font-size: 0.85rem;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.info-value {
+  color: #1a1a1a;
+  font-size: 0.85rem;
+}
+
+.section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #1a1a1a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.modal-section {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.modal-actions .btn {
+  padding: 0.5rem 0.75rem !important;
+  min-height: 38px !important;
+  font-size: 0.85rem !important;
+}
+
+.modal-actions {
+  gap: 0.5rem !important;
+  padding: 1rem !important;
+}
 </style>
 
 <!-- Current User Data for JavaScript -->
