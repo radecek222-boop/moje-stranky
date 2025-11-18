@@ -281,8 +281,8 @@ async function loadReklamace(id) {
       }
 
       logger.log('📝 Vyplňuji formulář...');
-      document.getElementById("order-number").value = customer.id || customer.cislo || "";
-      document.getElementById("claim-number").value = customer.id || customer.reklamace_id || customer.cislo || "";
+      document.getElementById("order-number").value = customer.reklamace_id || "";
+      document.getElementById("claim-number").value = customer.cislo || "";
       document.getElementById("customer").value = customerName;
       document.getElementById("address").value = customer.adresa || `${ulice}, ${mesto}, ${psc}`;
       document.getElementById("phone").value = customer.telefon || "";
@@ -344,8 +344,8 @@ async function loadReklamace(id) {
         psc = currentReklamace.psc || '';
       }
 
-      document.getElementById("order-number").value = currentReklamace.id || currentReklamace.cislo || "";
-      document.getElementById("claim-number").value = currentReklamace.id || currentReklamace.reklamace_id || "";
+      document.getElementById("order-number").value = currentReklamace.reklamace_id || "";
+      document.getElementById("claim-number").value = currentReklamace.cislo || "";
       document.getElementById("customer").value = customerName;
       document.getElementById("address").value = currentReklamace.adresa || `${ulice}, ${mesto}, ${psc}`;
       document.getElementById("phone").value = currentReklamace.telefon || "";
