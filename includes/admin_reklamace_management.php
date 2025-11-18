@@ -26,6 +26,7 @@ if ($embedMode && $directAccess):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Správa reklamací - WGS Admin</title>
+    <meta name="csrf-token" content="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
     <link rel="stylesheet" href="/assets/css/admin.css">
 </head>
 <body class="embed-mode">
@@ -99,23 +100,23 @@ try {
         <!-- Alert -->
         <div id="reklamace-alert" style="display: none; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.85rem;"></div>
 
-        <!-- Statistiky -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 1rem;">
-            <div onclick="filterReklamace('all')" style="background: <?= $filterStav === 'all' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
-                <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'all' ? '#fff' : '#000' ?>;"><?= $stats['all'] ?></div>
-                <div style="font-size: 0.75rem; color: <?= $filterStav === 'all' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Celkem</div>
+        <!-- Statistiky - kompaktní -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+            <div onclick="filterReklamace('all')" style="background: <?= $filterStav === 'all' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
+                <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'all' ? '#fff' : '#000' ?>;"><?= $stats['all'] ?></span>
+                <span style="font-size: 0.7rem; color: <?= $filterStav === 'all' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">Celkem</span>
             </div>
-            <div onclick="filterReklamace('wait')" style="background: <?= $filterStav === 'wait' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
-                <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'wait' ? '#fff' : '#000' ?>;"><?= $stats['wait'] ?></div>
-                <div style="font-size: 0.75rem; color: <?= $filterStav === 'wait' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Čekající</div>
+            <div onclick="filterReklamace('wait')" style="background: <?= $filterStav === 'wait' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
+                <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'wait' ? '#fff' : '#000' ?>;"><?= $stats['wait'] ?></span>
+                <span style="font-size: 0.7rem; color: <?= $filterStav === 'wait' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">Čekající</span>
             </div>
-            <div onclick="filterReklamace('open')" style="background: <?= $filterStav === 'open' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
-                <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'open' ? '#fff' : '#000' ?>;"><?= $stats['open'] ?></div>
-                <div style="font-size: 0.75rem; color: <?= $filterStav === 'open' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">V řešení</div>
+            <div onclick="filterReklamace('open')" style="background: <?= $filterStav === 'open' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
+                <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'open' ? '#fff' : '#000' ?>;"><?= $stats['open'] ?></span>
+                <span style="font-size: 0.7rem; color: <?= $filterStav === 'open' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">V řešení</span>
             </div>
-            <div onclick="filterReklamace('done')" style="background: <?= $filterStav === 'done' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
-                <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'done' ? '#fff' : '#000' ?>;"><?= $stats['done'] ?></div>
-                <div style="font-size: 0.75rem; color: <?= $filterStav === 'done' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Vyřízené</div>
+            <div onclick="filterReklamace('done')" style="background: <?= $filterStav === 'done' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
+                <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'done' ? '#fff' : '#000' ?>;"><?= $stats['done'] ?></span>
+                <span style="font-size: 0.7rem; color: <?= $filterStav === 'done' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">Vyřízené</span>
             </div>
         </div>
 
