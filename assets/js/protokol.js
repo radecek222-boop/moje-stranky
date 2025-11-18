@@ -369,6 +369,17 @@ function showLoading(show) {
   document.getElementById("loadingOverlay").classList.toggle("show", show);
 }
 
+function showLoadingWithMessage(show, message = 'Načítání...') {
+  const overlay = document.getElementById("loadingOverlay");
+  const textElement = document.getElementById("loadingText");
+
+  overlay.classList.toggle("show", show);
+
+  if (textElement && show) {
+    textElement.textContent = message;
+  }
+}
+
 function showNotif(type, message) {
   const notif = document.getElementById("notif");
   notif.className = `notif ${type}`;
@@ -824,15 +835,17 @@ async function exportBothPDFs() {
 
 async function sendToCustomer() {
   try {
-    showLoading(true);
-    showNotif("success", "Odesílám email...");
+    // FÁZE 1: Generování PDF protokolu
+    showLoadingWithMessage(true, '📄 Generuji PDF protokol...');
 
     const protocolPdf = await generateProtocolPDF();
     const protocolBase64 = protocolPdf.output("datauristring").split(",")[1];
 
     let photosBase64 = null;
 
+    // FÁZE 2: Generování PDF s fotkami (pokud existují)
     if (attachedPhotos.length > 0) {
+      showLoadingWithMessage(true, `📸 Generuji PDF s fotkami (${attachedPhotos.length} fotek)...`);
       logger.log(`📸 Vytvářím PDF z ${attachedPhotos.length} fotek...`);
       const photosPdf = await generatePhotosPDF();
       photosBase64 = photosPdf.output("datauristring").split(",")[1];
@@ -840,6 +853,9 @@ async function sendToCustomer() {
     } else {
       logger.log('ℹ️ Žádné fotky k přiložení');
     }
+
+    // FÁZE 3: Odesílání emailu
+    showLoadingWithMessage(true, '📧 Odesílám email zákazníkovi...');
 
     const csrfToken = await fetchCsrfToken();
 
@@ -903,7 +919,7 @@ async function sendToCustomer() {
     logger.error(error);
     showNotif("error", "Chyba odesílání: " + error.message);
   } finally {
-    showLoading(false);
+    showLoadingWithMessage(false);
   }
 }
 
