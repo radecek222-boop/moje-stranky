@@ -177,14 +177,15 @@ async function loadUsers() {
         const statusText = user.status === 'active' ? 'Aktivní' : 'Neaktivní';
         const createdDate = new Date(user.created_at).toLocaleDateString('cs-CZ');
 
-        html += '<tr>';
-        html += '<td>' + user.id + '</td>';
+        // ✅ Přidán onclick handler pro zobrazení detailu
+        html += '<tr style="cursor: pointer;" onclick="zobrazDetailUzivatele(' + user.id + ')" title="Klikněte pro zobrazení detailu">';
+        html += '<td>#' + user.id + '</td>';
         html += '<td>' + escapeHtml(user.name || user.full_name) + '</td>'; // API returns 'name' not 'full_name'
         html += '<td>' + escapeHtml(user.email) + '</td>';
-        html += '<td>' + escapeHtml(user.role) + '</td>';
-        html += '<td><span class="badge ' + statusClass + '">' + statusText + '</span></td>';
+        html += '<td>' + escapeHtml(user.role.toUpperCase()) + '</td>';
+        html += '<td><span class="badge ' + statusClass + '">' + statusText.toUpperCase() + '</span></td>';
         html += '<td>' + createdDate + '</td>';
-        html += '<td>';
+        html += '<td onclick="event.stopPropagation();">';
         html += '<button class="btn btn-sm btn-danger" onclick="deleteUser(' + user.id + ')">Smazat</button>';
         html += '</td>';
         html += '</tr>';
@@ -1392,4 +1393,309 @@ window.openCCModal = function(...args) {
         return originalOpenCCModal.apply(this, args);
     }
 };
+
+// ============================================================
+// SPRÁVA UŽIVATELŮ - DETAIL
+// ============================================================
+
+/**
+ * Zobrazení detailu uživatele s možností úprav
+ */
+async function zobrazDetailUzivatele(userId) {
+  try {
+    logger.log('Načítání detailu uživatele:', userId);
+
+    const response = await fetch(`/api/admin_users_api.php?action=get&user_id=${userId}`, {
+      credentials: 'same-origin'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.status !== 'success' || !data.user) {
+      throw new Error(data.message || 'Nepodařilo se načíst detail uživatele');
+    }
+
+    const user = data.user;
+
+    // Vytvoření modalu s detailem
+    const modalHTML = `
+      <div class="user-detail-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+          <!-- Header -->
+          <div style="background: #2D5016; color: white; padding: 1.5rem; border-radius: 12px 12px 0 0; position: relative;">
+            <h2 style="margin: 0; font-size: 1.3rem; font-weight: 600;">Detail uživatele #${user.id}</h2>
+            <button onclick="zavritDetailUzivatele()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; line-height: 1; padding: 0; width: 32px; height: 32px;">&times;</button>
+          </div>
+
+          <!-- Body -->
+          <div style="padding: 2rem;">
+            <!-- Základní informace -->
+            <div style="margin-bottom: 2rem;">
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #2D5016; border-bottom: 2px solid #2D5016; padding-bottom: 0.5rem;">Základní údaje</h3>
+
+              <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Jméno a příjmení</label>
+                <input type="text" id="edit-user-name" value="${escapeHtml(user.name)}" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+              </div>
+
+              <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Email</label>
+                <input type="email" id="edit-user-email" value="${escapeHtml(user.email)}" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+              </div>
+
+              <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Telefon</label>
+                <input type="tel" id="edit-user-phone" value="${escapeHtml(user.phone || '')}" placeholder="+420123456789" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+              </div>
+
+              <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Adresa</label>
+                <input type="text" id="edit-user-address" value="${escapeHtml(user.address || '')}" placeholder="Ulice 123, Město" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+              </div>
+
+              <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Role</label>
+                <select id="edit-user-role" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                  <option value="prodejce" ${user.role === 'prodejce' ? 'selected' : ''}>Prodejce</option>
+                  <option value="technik" ${user.role === 'technik' ? 'selected' : ''}>Technik</option>
+                  <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Administrátor</option>
+                </select>
+              </div>
+
+              <button onclick="ulozitZmenyUzivatele(${user.id})" style="width: 100%; padding: 0.8rem; background: #2D5016; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+                💾 Uložit změny
+              </button>
+            </div>
+
+            <!-- Změna hesla -->
+            <div style="margin-bottom: 2rem; padding: 1rem; background: #f9f9f9; border-radius: 8px;">
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #d97706;">🔒 Změna hesla</h3>
+
+              <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Nové heslo (min. 8 znaků)</label>
+                <input type="password" id="edit-user-password" placeholder="••••••••" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+              </div>
+
+              <button onclick="zmenitHesloUzivatele(${user.id})" style="width: 100%; padding: 0.8rem; background: #d97706; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+                🔑 Změnit heslo
+              </button>
+            </div>
+
+            <!-- Status a akce -->
+            <div style="padding: 1rem; background: ${user.status === 'active' ? '#d1fae5' : '#fee2e2'}; border-radius: 8px;">
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">Stav účtu</h3>
+
+              <div style="margin-bottom: 1rem;">
+                <strong>Aktuální stav:</strong>
+                <span style="font-weight: bold; color: ${user.status === 'active' ? '#059669' : '#dc2626'};">
+                  ${user.status === 'active' ? '✅ AKTIVNÍ' : '❌ NEAKTIVNÍ'}
+                </span>
+              </div>
+
+              ${user.created_at ? `
+                <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
+                  <strong>Vytvořen:</strong> ${new Date(user.created_at).toLocaleString('cs-CZ')}
+                </div>
+              ` : ''}
+
+              ${user.last_login ? `
+                <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
+                  <strong>Poslední přihlášení:</strong> ${new Date(user.last_login).toLocaleString('cs-CZ')}
+                </div>
+              ` : ''}
+
+              <button onclick="prepnoutStatusUzivatele(${user.id}, '${user.status === 'active' ? 'inactive' : 'active'}')" style="width: 100%; padding: 0.8rem; background: ${user.status === 'active' ? '#dc2626' : '#059669'}; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer;">
+                ${user.status === 'active' ? '🚫 Deaktivovat uživatele' : '✅ Aktivovat uživatele'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Přidat modal do DOM
+    const modalContainer = document.createElement('div');
+    modalContainer.id = 'userDetailModal';
+    modalContainer.innerHTML = modalHTML;
+    document.body.appendChild(modalContainer);
+
+  } catch (error) {
+    logger.error('Chyba při načítání detailu uživatele:', error);
+    alert('Chyba při načítání detailu: ' + error.message);
+  }
+}
+
+/**
+ * Zavření detailu uživatele
+ */
+function zavritDetailUzivatele() {
+  const modal = document.getElementById('userDetailModal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+/**
+ * Uložení změn uživatele
+ */
+async function ulozitZmenyUzivatele(userId) {
+  try {
+    const name = document.getElementById('edit-user-name').value.trim();
+    const email = document.getElementById('edit-user-email').value.trim();
+    const phone = document.getElementById('edit-user-phone').value.trim();
+    const address = document.getElementById('edit-user-address').value.trim();
+    const role = document.getElementById('edit-user-role').value;
+
+    if (!name || !email) {
+      alert('Jméno a email jsou povinné');
+      return;
+    }
+
+    const csrfToken = await getCSRFToken();
+    if (!csrfToken) {
+      throw new Error('CSRF token není k dispozici');
+    }
+
+    const response = await fetch('/api/admin_users_api.php?action=update', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        user_id: userId,
+        name,
+        email,
+        phone,
+        address,
+        role,
+        csrf_token: csrfToken
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      alert('✅ Změny byly uloženy!');
+      zavritDetailUzivatele();
+      loadUsers(); // Obnovit tabulku
+    } else {
+      alert('❌ Chyba: ' + (data.message || 'Nepodařilo se uložit změny'));
+    }
+  } catch (error) {
+    logger.error('Chyba při ukládání změn:', error);
+    alert('Chyba při ukládání: ' + error.message);
+  }
+}
+
+/**
+ * Změna hesla uživatele
+ */
+async function zmenitHesloUzivatele(userId) {
+  try {
+    const newPassword = document.getElementById('edit-user-password').value;
+
+    if (!newPassword) {
+      alert('Zadejte nové heslo');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      alert('Heslo musí mít alespoň 8 znaků');
+      return;
+    }
+
+    const confirmed = confirm('Opravdu chcete změnit heslo tohoto uživatele?');
+    if (!confirmed) return;
+
+    const csrfToken = await getCSRFToken();
+    if (!csrfToken) {
+      throw new Error('CSRF token není k dispozici');
+    }
+
+    const response = await fetch('/api/admin_users_api.php?action=update_password', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        user_id: userId,
+        new_password: newPassword,
+        csrf_token: csrfToken
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      alert('✅ Heslo bylo změněno!');
+      document.getElementById('edit-user-password').value = ''; // Vymazat pole
+    } else {
+      alert('❌ Chyba: ' + (data.message || 'Nepodařilo se změnit heslo'));
+    }
+  } catch (error) {
+    logger.error('Chyba při změně hesla:', error);
+    alert('Chyba při změně hesla: ' + error.message);
+  }
+}
+
+/**
+ * Přepnutí statusu uživatele (aktivní/neaktivní)
+ */
+async function prepnoutStatusUzivatele(userId, newStatus) {
+  try {
+    const statusText = newStatus === 'active' ? 'aktivovat' : 'deaktivovat';
+    const confirmed = confirm(`Opravdu chcete ${statusText} tohoto uživatele?`);
+    if (!confirmed) return;
+
+    const csrfToken = await getCSRFToken();
+    if (!csrfToken) {
+      throw new Error('CSRF token není k dispozici');
+    }
+
+    const response = await fetch('/api/admin_users_api.php?action=update_status', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        user_id: userId,
+        status: newStatus,
+        csrf_token: csrfToken
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      alert(`✅ Uživatel byl ${newStatus === 'active' ? 'aktivován' : 'deaktivován'}!`);
+      zavritDetailUzivatele();
+      loadUsers(); // Obnovit tabulku
+    } else {
+      alert('❌ Chyba: ' + (data.message || 'Nepodařilo se změnit status'));
+    }
+  } catch (error) {
+    logger.error('Chyba při změně statusu:', error);
+    alert('Chyba při změně statusu: ' + error.message);
+  }
+}
+
+// Zpřístupnit funkce globálně
+window.zobrazDetailUzivatele = zobrazDetailUzivatele;
+window.zavritDetailUzivatele = zavritDetailUzivatele;
+window.ulozitZmenyUzivatele = ulozitZmenyUzivatele;
+window.zmenitHesloUzivatele = zmenitHesloUzivatele;
+window.prepnoutStatusUzivatele = prepnoutStatusUzivatele;
 
