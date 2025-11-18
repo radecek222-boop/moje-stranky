@@ -395,30 +395,18 @@ function sendEmailToCustomer($data) {
     }
 
     $reklamaceId = sanitizeReklamaceId($data['reklamace_id'] ?? null, 'reklamace_id');
-    $protocolPdf = $data['protokol_pdf'] ?? null;
-    $photosPdf = $data['photos_pdf'] ?? null;
+    $completePdf = $data['complete_pdf'] ?? null;
 
-    // BEZPEČNOST: Kontrola velikosti base64 příloh (max 15MB každá = ~11MB PDF)
-    $maxBase64Size = 15 * 1024 * 1024; // 15MB
-
-    if ($protocolPdf) {
-        $protocolSize = strlen($protocolPdf);
-        if ($protocolSize > $maxBase64Size) {
-            throw new Exception('Příloha protokolu je příliš velká. Maximální velikost je 11 MB.');
-        }
+    if (!$completePdf) {
+        throw new Exception('Chybí PDF dokument');
     }
 
-    if ($photosPdf) {
-        $photosSize = strlen($photosPdf);
-        if ($photosSize > $maxBase64Size) {
-            throw new Exception('Příloha fotodokumentace je příliš velká. Maximální velikost je 11 MB.');
-        }
-    }
+    // BEZPEČNOST: Kontrola velikosti base64 přílohy (max 30MB = ~22MB PDF)
+    $maxBase64Size = 30 * 1024 * 1024; // 30MB
+    $pdfSize = strlen($completePdf);
 
-    // BEZPEČNOST: Celková velikost příloh max 30MB (2x 15MB)
-    $totalSize = strlen($protocolPdf ?? '') + strlen($photosPdf ?? '');
-    if ($totalSize > 30 * 1024 * 1024) {
-        throw new Exception('Celková velikost příloh je příliš velká. Maximum je 22 MB celkem.');
+    if ($pdfSize > $maxBase64Size) {
+        throw new Exception('Příloha PDF je příliš velká. Maximální velikost je 22 MB.');
     }
 
     $pdo = getDbConnection();
@@ -465,11 +453,10 @@ function sendEmailToCustomer($data) {
     $message = "
 Dobrý den {$customerName},
 
-zasíláme Vám servisní protokol k reklamaci č. {$reklamaceId}.
+zasíláme Vám kompletní servisní report k reklamaci č. {$reklamaceId}.
 
 V příloze naleznete:
-- Servisní protokol
-" . ($photosPdf ? "- Fotodokumentace" : "") . "
+- Servisní protokol s fotodokumentací (v jednom PDF)
 
 V případě dotazů nás prosím kontaktujte.
 
@@ -509,166 +496,64 @@ reklamace@wgs-service.cz
         $mail->Subject = $subject;
         $mail->Body = $message;
 
-        // Přiložit PDF protokolu
-        if ($protocolPdf) {
-            $protocolData = base64_decode($protocolPdf);
-            $mail->addStringAttachment($protocolData, "Protokol_{$storageKey}.pdf", 'base64', 'application/pdf');
-        }
-
-        // Přiložit PDF fotek
-        if ($photosPdf) {
-            $photosData = base64_decode($photosPdf);
-            $mail->addStringAttachment($photosData, "Fotodokumentace_{$storageKey}.pdf", 'base64', 'application/pdf');
-        }
+        // Přiložit kompletní PDF (protokol + fotodokumentace)
+        $pdfData = base64_decode($completePdf);
+        $mail->addStringAttachment($pdfData, "WGS_Report_{$storageKey}.pdf", 'base64', 'application/pdf');
 
         // Odeslat
         $mail->send();
 
-        // ✅ Uložit protokol_pdf do databáze (pokud existuje)
-        if ($protocolPdf) {
-            $protocolData = base64_decode($protocolPdf);
-
-            // Vytvoření uploads/protokoly adresáře
-            $uploadsDir = __DIR__ . '/../uploads/protokoly';
-            if (!is_dir($uploadsDir)) {
-                mkdir($uploadsDir, 0755, true);
-            }
-
-            // Název souboru pro protokol
-            $filename = reklamaceStorageKey($reklamaceId) . '.pdf';
-            $filePath = $uploadsDir . '/' . $filename;
-
-            // Uložit soubor
-            if (file_put_contents($filePath, $protocolData) !== false) {
-                // Relativní cesta pro databázi
-                $relativePathForDb = "uploads/protokoly/{$filename}";
-                $fileSize = filesize($filePath);
-
-                try {
-                    // Kontrola zda už PDF protokolu existuje
-                    $stmt = $pdo->prepare("
-                        SELECT id FROM wgs_documents
-                        WHERE claim_id = :claim_id AND document_type = 'protokol_pdf'
-                        LIMIT 1
-                    ");
-                    $stmt->execute([':claim_id' => $reklamace['id']]);
-                    $existingDoc = $stmt->fetch(PDO::FETCH_ASSOC);
-
-                    if ($existingDoc) {
-                        // Update existujícího záznamu
-                        $stmt = $pdo->prepare("
-                            UPDATE wgs_documents
-                            SET document_path = :document_path,
-                                file_size = :file_size,
-                                uploaded_at = NOW()
-                            WHERE id = :id
-                        ");
-                        $stmt->execute([
-                            ':document_path' => $relativePathForDb,
-                            ':file_size' => $fileSize,
-                            ':id' => $existingDoc['id']
-                        ]);
-                    } else {
-                        // Vložení nového záznamu
-                        $stmt = $pdo->prepare("
-                            INSERT INTO wgs_documents (
-                                claim_id, document_name, document_path, document_type,
-                                file_size, uploaded_by, uploaded_at
-                            ) VALUES (
-                                :claim_id, :document_name, :document_path, :document_type,
-                                :file_size, :uploaded_by, NOW()
-                            )
-                        ");
-
-                        $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
-
-                        $stmt->execute([
-                            ':claim_id' => $reklamace['id'],
-                            ':document_name' => $filename,
-                            ':document_path' => $relativePathForDb,
-                            ':document_type' => 'protokol_pdf',
-                            ':file_size' => $fileSize,
-                            ':uploaded_by' => $uploadedBy
-                        ]);
-                    }
-                } catch (PDOException $e) {
-                    // Logovat chybu ale nepřerušovat odeslání emailu
-                    error_log('Chyba při ukládání protokol_pdf do databáze: ' . $e->getMessage());
-                }
-            }
+        // ✅ Uložit kompletní PDF do databáze (protokol + fotodokumentace)
+        // Vytvoření uploads/protokoly adresáře
+        $uploadsDir = __DIR__ . '/../uploads/protokoly';
+        if (!is_dir($uploadsDir)) {
+            mkdir($uploadsDir, 0755, true);
         }
 
-        // ✅ Uložit photos_pdf do databáze (pokud existuje)
-        if ($photosPdf) {
-            $photosData = base64_decode($photosPdf);
+        // Název souboru pro kompletní report
+        $filename = reklamaceStorageKey($reklamaceId) . '_report.pdf';
+        $filePath = $uploadsDir . '/' . $filename;
 
-            // Vytvoření uploads/protokoly adresáře (stejný jako pro protokol)
-            $uploadsDir = __DIR__ . '/../uploads/protokoly';
-            if (!is_dir($uploadsDir)) {
-                mkdir($uploadsDir, 0755, true);
-            }
+        // Uložit soubor
+        if (file_put_contents($filePath, $pdfData) !== false) {
+            // Relativní cesta pro databázi
+            $relativePathForDb = "uploads/protokoly/{$filename}";
+            $fileSize = filesize($filePath);
 
-            // Název souboru
-            $filename = reklamaceStorageKey($reklamaceId) . '_fotky.pdf';
-            $filePath = $uploadsDir . '/' . $filename;
+            try {
+                // Smazat staré záznamy (protokol_pdf a photos_pdf) pokud existují
+                $pdo->prepare("
+                    DELETE FROM wgs_documents
+                    WHERE claim_id = :claim_id AND document_type IN ('protokol_pdf', 'photos_pdf')
+                ")->execute([':claim_id' => $reklamace['id']]);
 
-            // Uložit soubor
-            if (file_put_contents($filePath, $photosData) !== false) {
-                // Relativní cesta pro databázi
-                $relativePathForDb = "uploads/protokoly/{$filename}";
-                $fileSize = filesize($filePath);
+                // Vložení nového kompletního reportu
+                $stmt = $pdo->prepare("
+                    INSERT INTO wgs_documents (
+                        claim_id, document_name, document_path, document_type,
+                        file_size, uploaded_by, uploaded_at
+                    ) VALUES (
+                        :claim_id, :document_name, :document_path, :document_type,
+                        :file_size, :uploaded_by, NOW()
+                    )
+                ");
 
-                try {
-                    // Kontrola zda už PDF fotek existuje
-                    $stmt = $pdo->prepare("
-                        SELECT id FROM wgs_documents
-                        WHERE claim_id = :claim_id AND document_type = 'photos_pdf'
-                        LIMIT 1
-                    ");
-                    $stmt->execute([':claim_id' => $reklamace['id']]);
-                    $existingDoc = $stmt->fetch(PDO::FETCH_ASSOC);
+                $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
 
-                    if ($existingDoc) {
-                        // Update existujícího záznamu
-                        $stmt = $pdo->prepare("
-                            UPDATE wgs_documents
-                            SET document_path = :document_path,
-                                file_size = :file_size,
-                                uploaded_at = NOW()
-                            WHERE id = :id
-                        ");
-                        $stmt->execute([
-                            ':document_path' => $relativePathForDb,
-                            ':file_size' => $fileSize,
-                            ':id' => $existingDoc['id']
-                        ]);
-                    } else {
-                        // Vložení nového záznamu
-                        $stmt = $pdo->prepare("
-                            INSERT INTO wgs_documents (
-                                claim_id, document_name, document_path, document_type,
-                                file_size, uploaded_by, uploaded_at
-                            ) VALUES (
-                                :claim_id, :document_name, :document_path, :document_type,
-                                :file_size, :uploaded_by, NOW()
-                            )
-                        ");
+                $stmt->execute([
+                    ':claim_id' => $reklamace['id'],
+                    ':document_name' => $filename,
+                    ':document_path' => $relativePathForDb,
+                    ':document_type' => 'complete_report',
+                    ':file_size' => $fileSize,
+                    ':uploaded_by' => $uploadedBy
+                ]);
 
-                        $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
+                error_log("✅ Kompletní PDF report uložen: {$filename} ({$fileSize} bytes)");
 
-                        $stmt->execute([
-                            ':claim_id' => $reklamace['id'],
-                            ':document_name' => $filename,
-                            ':document_path' => $relativePathForDb,
-                            ':document_type' => 'photos_pdf',
-                            ':file_size' => $fileSize,
-                            ':uploaded_by' => $uploadedBy
-                        ]);
-                    }
-                } catch (PDOException $e) {
-                    // Logovat chybu ale nepřerušovat odeslání emailu
-                    error_log('Chyba při ukládání photos_pdf do databáze: ' . $e->getMessage());
-                }
+            } catch (PDOException $e) {
+                // Logovat chybu ale nepřerušovat odeslání emailu
+                error_log('Chyba při ukládání complete_report do databáze: ' . $e->getMessage());
             }
         }
 
