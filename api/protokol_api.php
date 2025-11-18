@@ -518,6 +518,80 @@ reklamace@wgs-service.cz
         // Odeslat
         $mail->send();
 
+        // ✅ Uložit protokol_pdf do databáze (pokud existuje)
+        if ($protocolPdf) {
+            $protocolData = base64_decode($protocolPdf);
+
+            // Vytvoření uploads/protokoly adresáře
+            $uploadsDir = __DIR__ . '/../uploads/protokoly';
+            if (!is_dir($uploadsDir)) {
+                mkdir($uploadsDir, 0755, true);
+            }
+
+            // Název souboru pro protokol
+            $filename = reklamaceStorageKey($reklamaceId) . '.pdf';
+            $filePath = $uploadsDir . '/' . $filename;
+
+            // Uložit soubor
+            if (file_put_contents($filePath, $protocolData) !== false) {
+                // Relativní cesta pro databázi
+                $relativePathForDb = "uploads/protokoly/{$filename}";
+                $fileSize = filesize($filePath);
+
+                try {
+                    // Kontrola zda už PDF protokolu existuje
+                    $stmt = $pdo->prepare("
+                        SELECT id FROM wgs_documents
+                        WHERE claim_id = :claim_id AND document_type = 'protokol_pdf'
+                        LIMIT 1
+                    ");
+                    $stmt->execute([':claim_id' => $reklamace['id']]);
+                    $existingDoc = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                    if ($existingDoc) {
+                        // Update existujícího záznamu
+                        $stmt = $pdo->prepare("
+                            UPDATE wgs_documents
+                            SET document_path = :document_path,
+                                file_size = :file_size,
+                                uploaded_at = NOW()
+                            WHERE id = :id
+                        ");
+                        $stmt->execute([
+                            ':document_path' => $relativePathForDb,
+                            ':file_size' => $fileSize,
+                            ':id' => $existingDoc['id']
+                        ]);
+                    } else {
+                        // Vložení nového záznamu
+                        $stmt = $pdo->prepare("
+                            INSERT INTO wgs_documents (
+                                claim_id, document_name, document_path, document_type,
+                                file_size, uploaded_by, uploaded_at
+                            ) VALUES (
+                                :claim_id, :document_name, :document_path, :document_type,
+                                :file_size, :uploaded_by, NOW()
+                            )
+                        ");
+
+                        $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
+
+                        $stmt->execute([
+                            ':claim_id' => $reklamace['id'],
+                            ':document_name' => $filename,
+                            ':document_path' => $relativePathForDb,
+                            ':document_type' => 'protokol_pdf',
+                            ':file_size' => $fileSize,
+                            ':uploaded_by' => $uploadedBy
+                        ]);
+                    }
+                } catch (PDOException $e) {
+                    // Logovat chybu ale nepřerušovat odeslání emailu
+                    error_log('Chyba při ukládání protokol_pdf do databáze: ' . $e->getMessage());
+                }
+            }
+        }
+
         // ✅ Uložit photos_pdf do databáze (pokud existuje)
         if ($photosPdf) {
             $photosData = base64_decode($photosPdf);
