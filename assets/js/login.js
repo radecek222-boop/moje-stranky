@@ -165,10 +165,10 @@ async function handleUserLogin() {
     });
     
     const data = await response.json();
-    
+
     if (data.status === 'success') {
-      // Zobraz welcome modal s vtipem
-      showWelcomeModal(data.user.name);
+      // Zobraz welcome modal s vtipem a předej roli pro správné přesměrování
+      showWelcomeModal(data.user.name, data.user.role);
     } else {
       showNotification(data.message || 'Přihlášení selhalo', 'error');
     }
