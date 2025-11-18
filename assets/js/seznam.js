@@ -1578,13 +1578,19 @@ async function showCustomerDetail(id) {
       <!-- POPIS PROBLÉMU -->
       <div style="margin-bottom: 1rem;">
         <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému:</label>
-        <textarea id="edit_popis_problemu" style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem; min-height: 60px; resize: vertical; font-family: inherit;" placeholder="Popis problému od zákazníka">${description}</textarea>
+        <div onclick="showTextOverlay('popis_problemu')"
+             style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem; min-height: 60px; background: white; cursor: pointer; white-space: pre-wrap; color: ${description ? '#1a1a1a' : '#999'};">
+          ${description || 'Klikněte pro zobrazení/zadání popisu problému'}
+        </div>
       </div>
 
       <!-- DOPLŇUJÍCÍ INFO -->
       <div style="margin-bottom: 2rem;">
         <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace:</label>
-        <textarea id="edit_doplnujici_info" style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem; min-height: 50px; resize: vertical; font-family: inherit;" placeholder="Doplňující informace od prodejce">${Utils.escapeHtml(doplnujici_info)}</textarea>
+        <div onclick="showTextOverlay('doplnujici_info')"
+             style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem; min-height: 50px; background: white; cursor: pointer; white-space: pre-wrap; color: ${doplnujici_info ? '#1a1a1a' : '#999'};">
+          ${doplnujici_info || 'Klikněte pro zobrazení/zadání doplňujících informací'}
+        </div>
       </div>
 
       <!-- FOTOGRAFIE -->
@@ -1682,13 +1688,108 @@ function showPhotoFullscreen(photoUrl) {
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; align-items: center; justify-content: center; cursor: pointer;';
   overlay.onclick = () => overlay.remove();
-  
+
   const img = document.createElement('img');
   img.src = photoUrl;
   img.style.cssText = 'max-width: 95%; max-height: 95%; object-fit: contain;';
-  
+
   overlay.appendChild(img);
   document.body.appendChild(overlay);
+}
+
+function showTextOverlay(fieldName) {
+  if (!CURRENT_RECORD) return;
+
+  const nadpis = fieldName === 'popis_problemu' ? 'Popis problému' : 'Doplňující informace';
+  const currentText = CURRENT_RECORD[fieldName] || '';
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 2rem;';
+
+  const contentBox = document.createElement('div');
+  contentBox.style.cssText = 'background: white; padding: 1.5rem; border-radius: 6px; max-width: 700px; width: 100%; max-height: 85vh; display: flex; flex-direction: column;';
+  contentBox.onclick = (e) => e.stopPropagation();
+
+  const header = document.createElement('div');
+  header.style.cssText = 'font-weight: 600; font-size: 1rem; color: #1a1a1a; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #dee2e6;';
+  header.textContent = nadpis;
+
+  const textareaWrapper = document.createElement('div');
+  textareaWrapper.style.cssText = 'flex: 1; overflow-y: auto; margin-bottom: 1rem;';
+
+  const textarea = document.createElement('textarea');
+  textarea.style.cssText = 'width: 100%; min-height: 300px; border: 1px solid #ddd; padding: 0.75rem; border-radius: 4px; font-size: 0.9rem; line-height: 1.6; font-family: inherit; resize: vertical;';
+  textarea.value = currentText;
+  textarea.placeholder = 'Zadejte text...';
+
+  textareaWrapper.appendChild(textarea);
+
+  const buttonRow = document.createElement('div');
+  buttonRow.style.cssText = 'display: flex; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid #dee2e6;';
+
+  const saveBtn = document.createElement('button');
+  saveBtn.style.cssText = 'flex: 1; padding: 0.5rem 1rem; background: #1a1a1a; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer; font-weight: 600;';
+  saveBtn.textContent = 'Uložit změny';
+  saveBtn.onclick = async () => {
+    const newValue = textarea.value;
+
+    try {
+      const csrfToken = await getCSRFToken();
+      const formData = new FormData();
+      formData.append('action', 'update');
+      formData.append('id', CURRENT_RECORD.id);
+      formData.append(fieldName, newValue);
+      formData.append('csrf_token', csrfToken);
+
+      const response = await fetch('/app/controllers/save.php', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        // Aktualizovat v cache
+        CURRENT_RECORD[fieldName] = newValue;
+        const cacheRecord = WGS_DATA_CACHE.find(x => x.id == CURRENT_RECORD.id);
+        if (cacheRecord) {
+          cacheRecord[fieldName] = newValue;
+        }
+        overlay.remove();
+        // Znovu otevřít detail s aktualizovanými daty
+        showCustomerDetail(CURRENT_RECORD.id);
+        alert('Text byl úspěšně uložen');
+      } else {
+        alert('Chyba při ukládání: ' + result.message);
+      }
+    } catch (error) {
+      alert('Chyba při ukládání: ' + error.message);
+    }
+  };
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.style.cssText = 'flex: 1; padding: 0.5rem 1rem; background: #666; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer;';
+  cancelBtn.textContent = 'Zrušit';
+  cancelBtn.onclick = () => overlay.remove();
+
+  buttonRow.appendChild(saveBtn);
+  buttonRow.appendChild(cancelBtn);
+
+  contentBox.appendChild(header);
+  contentBox.appendChild(textareaWrapper);
+  contentBox.appendChild(buttonRow);
+  overlay.appendChild(contentBox);
+  document.body.appendChild(overlay);
+
+  // Zavřít při kliknutí na overlay pozadí
+  overlay.onclick = (e) => {
+    if (e.target === overlay) {
+      overlay.remove();
+    }
+  };
+
+  // Focus na textarea
+  setTimeout(() => textarea.focus(), 100);
 }
 
 async function saveAllCustomerData(id) {
@@ -1704,9 +1805,7 @@ async function saveAllCustomerData(id) {
     adresa: document.getElementById('edit_adresa').value,
     model: document.getElementById('edit_model').value,
     provedeni: document.getElementById('edit_provedeni').value,
-    barva: document.getElementById('edit_barva').value,
-    doplnujici_info: document.getElementById('edit_doplnujici_info').value,
-    popis_problemu: document.getElementById('edit_popis_problemu').value
+    barva: document.getElementById('edit_barva').value
   };
 
   await saveData(data, 'Všechny údaje byly aktualizovány');
