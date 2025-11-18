@@ -868,7 +868,18 @@ function loadClaimsModal() {
         return;
     }
 
+    // Načíst kompletní správu reklamací přes iframe
     modalBody.innerHTML = `
+        <iframe
+            src="/includes/admin_reklamace_management.php?embed=1"
+            style="width: 100%; height: 80vh; border: none; border-radius: 4px;"
+            onload="console.log('Správa reklamací načtena')"
+        ></iframe>
+    `;
+
+    // Původní starý kód pro statistiky (záloha - smazat pokud nový funguje)
+    /*
+    modalBody.innerHTML = \`
         <div class="cc-mini-stats">
             <div class="cc-mini-stat">
                 <div class="cc-mini-stat-value" id="adminClaimsWait">-</div>
@@ -891,12 +902,12 @@ function loadClaimsModal() {
             <a href="seznam.php" class="btn btn-sm">Otevřít seznam reklamací</a>
             <a href="novareklamace.php" class="btn btn-sm btn-success">+ Nová reklamace</a>
         </div>
-    `;
+    \`;
 
     // Load claims stats
     fetch('api/admin_api.php?action=list_reklamace')
         .then(r => {
-            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            if (!r.ok) throw new Error(\`HTTP \${r.status}\`);
             return r.json();
         })
         .then(data => {
@@ -914,6 +925,7 @@ function loadClaimsModal() {
         .catch(err => {
             console.error('[Control Center] Claims stats load error:', err);
         });
+    */
 }
 
 /**
