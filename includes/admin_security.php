@@ -878,7 +878,7 @@ async function nactiRegistracniKlice() {
     try {
         kontejner.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666; font-family: \'Poppins\', sans-serif; font-size: 0.85rem;">Načítání klíčů...</div>';
 
-        const odpoved = await fetch('api/admin_api.php?action=list_keys', {
+        const odpoved = await fetch('/api/admin_api.php?action=list_keys', {
             credentials: 'same-origin'
         });
 
@@ -945,7 +945,7 @@ async function vytvorNovyKlic() {
             throw new Error('CSRF token není k dispozici');
         }
 
-        const odpoved = await fetch('api/admin_api.php?action=create_key', {
+        const odpoved = await fetch('/api/admin_api.php?action=create_key', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {'Content-Type': 'application/json'},
@@ -981,7 +981,7 @@ async function smazatKlic(kodKlice) {
             throw new Error('CSRF token není k dispozici');
         }
 
-        const odpoved = await fetch('api/admin_api.php?action=delete_key', {
+        const odpoved = await fetch('/api/admin_api.php?action=delete_key', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {'Content-Type': 'application/json'},
