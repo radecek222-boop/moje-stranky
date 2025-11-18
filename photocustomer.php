@@ -1,17 +1,25 @@
 <?php
 require_once "init.php";
 
+// ✅ KROK 1: Kontrola, zda je uživatel vůbec přihlášen
+// DŮLEŽITÉ: Musíme zkontrolovat user_id PŘED kontrolou role!
+if (!isset($_SESSION['user_id'])) {
+    error_log("PHOTOCUSTOMER: Přístup odepřen - uživatel není přihlášen (chybí user_id)");
+    header('Location: login.php?redirect=photocustomer.php');
+    exit;
+}
+
 // ✅ DEBUG: Logování session pouze v development režimu
 // BEZPEČNOST: Nelogujeme PII (osobní údaje) v produkci
 if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
     error_log("=== PHOTOCUSTOMER.PHP DEBUG START ===");
-    error_log("user_id isset: " . (isset($_SESSION['user_id']) ? 'ANO' : 'NE'));
+    error_log("user_id: " . $_SESSION['user_id']);
     error_log("is_admin isset: " . (isset($_SESSION['is_admin']) ? 'ANO' : 'NE'));
     error_log("role: " . ($_SESSION['role'] ?? 'NENÍ NASTAVENO'));
     error_log("=== PHOTOCUSTOMER.PHP DEBUG END ===");
 }
 
-// BEZPEČNOST: Kontrola přístupu - POUZE admin a technik
+// ✅ KROK 2: Kontrola přístupu - POUZE admin a technik
 // Prodejci a nepřihlášení uživatelé NEMAJÍ přístup k fotodokumentaci
 $rawRole = (string) ($_SESSION['role'] ?? '');
 $normalizedRole = strtolower(trim($rawRole));
@@ -31,7 +39,13 @@ if (!$isTechnik) {
 }
 
 if (!$isAdmin && !$isTechnik) {
-    error_log("PHOTOCUSTOMER: Přístup odepřen - role: {$rawRole}, is_admin: " . ($isAdmin ? 'true' : 'false'));
+    error_log("PHOTOCUSTOMER: Přístup odepřen");
+    error_log("  - user_id: " . $_SESSION['user_id']);
+    error_log("  - role (raw): '{$rawRole}'");
+    error_log("  - role (normalized): '{$normalizedRole}'");
+    error_log("  - is_admin: " . ($isAdmin ? 'true' : 'false'));
+    error_log("  - isTechnik: " . ($isTechnik ? 'true' : 'false'));
+    error_log("  - ŘEŠENÍ: Zkontrolujte, zda uživatel má v databázi roli obsahující 'technik' nebo 'technician'");
     header('Location: login.php?redirect=photocustomer.php');
     exit;
 }
