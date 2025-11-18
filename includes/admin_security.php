@@ -423,8 +423,144 @@ try {
             </div>
         </div>
 
+        <!-- GEOAPIFY API -->
+        <div class="setting-group">
+            <h3 class="setting-group-title">Geoapify (Mapy)</h3>
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">
+                        GEOAPIFY_API_KEY
+                        <span class="badge badge-warning">Vyžaduje reload</span>
+                    </div>
+                    <div class="setting-item-description">
+                        API klíč pro mapové služby Geoapify (autocomplete adres, geocoding)
+                    </div>
+                </div>
+                <div class="setting-item-right" style="min-width: 300px;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="password"
+                               class="cc-input"
+                               id="api-geoapify"
+                               placeholder="API klíč Geoapify"
+                               style="flex: 1; font-family: monospace; font-size: 0.85rem;">
+                        <button class="cc-btn cc-btn-sm cc-btn-secondary"
+                                onclick="togglePasswordVisibilitySimple('api-geoapify')"
+                                style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                            Zobrazit
+                        </button>
+                        <button class="cc-btn cc-btn-sm cc-btn-primary"
+                                onclick="ulozitApiKlic('GEOAPIFY_API_KEY', 'api-geoapify')"
+                                style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                            Uložit
+                        </button>
+                    </div>
+                    <div id="status-api-geoapify" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SMTP KONFIGURACE -->
+        <div class="setting-group">
+            <h3 class="setting-group-title">SMTP Email</h3>
+
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">SMTP_HOST</div>
+                    <div class="setting-item-description">SMTP server (např. smtp.gmail.com)</div>
+                </div>
+                <div class="setting-item-right" style="min-width: 300px;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="text"
+                               class="cc-input"
+                               id="api-smtp-host"
+                               placeholder="smtp.gmail.com"
+                               style="flex: 1; font-size: 0.85rem;">
+                        <button class="cc-btn cc-btn-sm cc-btn-primary"
+                                onclick="ulozitApiKlic('SMTP_HOST', 'api-smtp-host')"
+                                style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                            Uložit
+                        </button>
+                    </div>
+                    <div id="status-api-smtp-host" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">SMTP_PORT</div>
+                    <div class="setting-item-description">SMTP port (obvykle 587 pro TLS)</div>
+                </div>
+                <div class="setting-item-right" style="min-width: 300px;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="number"
+                               class="cc-input"
+                               id="api-smtp-port"
+                               placeholder="587"
+                               style="width: 120px; font-size: 0.85rem;">
+                        <button class="cc-btn cc-btn-sm cc-btn-primary"
+                                onclick="ulozitApiKlic('SMTP_PORT', 'api-smtp-port')"
+                                style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                            Uložit
+                        </button>
+                    </div>
+                    <div id="status-api-smtp-port" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">SMTP_USER</div>
+                    <div class="setting-item-description">SMTP uživatelské jméno (email)</div>
+                </div>
+                <div class="setting-item-right" style="min-width: 300px;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="text"
+                               class="cc-input"
+                               id="api-smtp-user"
+                               placeholder="user@example.com"
+                               style="flex: 1; font-size: 0.85rem;">
+                        <button class="cc-btn cc-btn-sm cc-btn-primary"
+                                onclick="ulozitApiKlic('SMTP_USER', 'api-smtp-user')"
+                                style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                            Uložit
+                        </button>
+                    </div>
+                    <div id="status-api-smtp-user" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">SMTP_PASS</div>
+                    <div class="setting-item-description">SMTP heslo</div>
+                </div>
+                <div class="setting-item-right" style="min-width: 300px;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="password"
+                               class="cc-input"
+                               id="api-smtp-pass"
+                               placeholder="••••••••"
+                               style="flex: 1; font-family: monospace; font-size: 0.85rem;">
+                        <button class="cc-btn cc-btn-sm cc-btn-secondary"
+                                onclick="togglePasswordVisibilitySimple('api-smtp-pass')"
+                                style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                            Zobrazit
+                        </button>
+                        <button class="cc-btn cc-btn-sm cc-btn-primary"
+                                onclick="ulozitApiKlic('SMTP_PASS', 'api-smtp-pass')"
+                                style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                            Uložit
+                        </button>
+                    </div>
+                    <div id="status-api-smtp-pass" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OSTATNÍ API KLÍČE Z DATABÁZE -->
         <?php if (isset($configs['api_keys']) && !empty($configs['api_keys'])): ?>
             <div class="setting-group">
+                <h3 class="setting-group-title">Další API klíče</h3>
                 <?php foreach ($configs['api_keys'] as $config): ?>
                     <div class="setting-item">
                         <div class="setting-item-left">
@@ -468,10 +604,6 @@ try {
                     </div>
                 <?php endforeach; ?>
             </div>
-        <?php else: ?>
-            <div class="security-alert">
-                <div>Žádné API klíče nejsou nakonfigurovány.</div>
-            </div>
         <?php endif; ?>
     </div>
 
@@ -479,8 +611,81 @@ try {
     <div id="section-bezpecnost" class="cc-section <?= $currentSection === 'bezpecnost' ? 'active' : '' ?>">
         <h2 style="margin-bottom: 0.75rem; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Bezpečnostní nastavení</h2>
 
+        <div class="security-alert">
+            <div>
+                <strong>KRITICKÉ</strong> - Změny hesel a bezpečnostních nastavení mohou ovlivnit přístup do systému.
+            </div>
+        </div>
+
+        <!-- SPRÁVA HESEL -->
+        <div class="setting-group">
+            <h3 class="setting-group-title">Správa hesel</h3>
+
+            <!-- Admin heslo -->
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">Admin heslo</div>
+                    <div class="setting-item-description">
+                        Změna přihlašovacího hesla administrátora
+                    </div>
+                </div>
+                <div class="setting-item-right" style="min-width: 400px;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="password"
+                               class="cc-input"
+                               id="admin-current-password"
+                               placeholder="Aktuální heslo"
+                               style="flex: 1; font-size: 0.85rem;">
+                        <input type="password"
+                               class="cc-input"
+                               id="admin-new-password"
+                               placeholder="Nové heslo"
+                               style="flex: 1; font-size: 0.85rem;">
+                        <button class="cc-btn cc-btn-sm cc-btn-primary"
+                                onclick="zmenitAdminHeslo()"
+                                style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                            Změnit
+                        </button>
+                    </div>
+                    <div id="admin-password-status" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
+                </div>
+            </div>
+
+            <!-- Reset uživatelských hesel -->
+            <div class="setting-item">
+                <div class="setting-item-left">
+                    <div class="setting-item-label">Reset uživatelských hesel</div>
+                    <div class="setting-item-description">
+                        Resetování hesla pro vybraného uživatele (admin může resetovat jakékoli heslo)
+                    </div>
+                </div>
+                <div class="setting-item-right" style="min-width: 400px;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <select class="cc-input"
+                                id="user-select-reset"
+                                style="flex: 1; font-size: 0.85rem;">
+                            <option value="">-- Vyberte uživatele --</option>
+                        </select>
+                        <input type="password"
+                               class="cc-input"
+                               id="user-new-password"
+                               placeholder="Nové heslo"
+                               style="flex: 1; font-size: 0.85rem;">
+                        <button class="cc-btn cc-btn-sm cc-btn-primary"
+                                onclick="resetovatUzivatelskeHeslo()"
+                                style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                Reset
+                        </button>
+                    </div>
+                    <div id="user-password-status" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OSTATNÍ BEZPEČNOSTNÍ NASTAVENÍ -->
         <?php if (isset($configs['security']) && !empty($configs['security'])): ?>
             <div class="setting-group">
+                <h3 class="setting-group-title">Pokročilá nastavení</h3>
                 <?php foreach ($configs['security'] as $config): ?>
                     <div class="setting-item">
                         <div class="setting-item-left">
@@ -517,10 +722,6 @@ try {
                         </div>
                     </div>
                 <?php endforeach; ?>
-            </div>
-        <?php else: ?>
-            <div class="security-alert">
-                <div>Žádná bezpečnostní nastavení nenalezena.</div>
             </div>
         <?php endif; ?>
     </div>
@@ -878,6 +1079,197 @@ function htmlEscape(str) {
     return div.innerHTML;
 }
 
+// Změnit admin heslo
+async function zmenitAdminHeslo() {
+    const aktualniHeslo = document.getElementById('admin-current-password');
+    const noveHeslo = document.getElementById('admin-new-password');
+    const statusEl = document.getElementById('admin-password-status');
+
+    if (!aktualniHeslo.value || !noveHeslo.value) {
+        statusEl.style.display = 'block';
+        statusEl.innerHTML = '<span style="color: #dc3545;">Vyplňte obě pole</span>';
+        return;
+    }
+
+    statusEl.style.display = 'block';
+    statusEl.innerHTML = 'Ukládám...';
+
+    try {
+        const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() :
+                         document.querySelector('meta[name="csrf-token"]')?.content;
+
+        const odpoved = await fetch('/api/admin_api.php?action=change_admin_password', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                current_password: aktualniHeslo.value,
+                new_password: noveHeslo.value,
+                csrf_token: csrfToken
+            })
+        });
+
+        const data = await odpoved.json();
+
+        if (data.status === 'success') {
+            statusEl.innerHTML = '<span style="color: #28a745;">✓ Heslo bylo změněno</span>';
+            aktualniHeslo.value = '';
+            noveHeslo.value = '';
+            setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+        } else {
+            throw new Error(data.message || 'Nepodařilo se změnit heslo');
+        }
+    } catch (error) {
+        statusEl.innerHTML = '<span style="color: #dc3545;">Chyba: ' + escapujHtml(error.message) + '</span>';
+    }
+}
+
+// Resetovat uživatelské heslo
+async function resetovatUzivatelskeHeslo() {
+    const userSelect = document.getElementById('user-select-reset');
+    const noveHeslo = document.getElementById('user-new-password');
+    const statusEl = document.getElementById('user-password-status');
+
+    if (!userSelect.value || !noveHeslo.value) {
+        statusEl.style.display = 'block';
+        statusEl.innerHTML = '<span style="color: #dc3545;">Vyberte uživatele a zadejte nové heslo</span>';
+        return;
+    }
+
+    if (!confirm(`Opravdu chcete resetovat heslo pro uživatele ${userSelect.options[userSelect.selectedIndex].text}?`)) {
+        return;
+    }
+
+    statusEl.style.display = 'block';
+    statusEl.innerHTML = 'Ukládám...';
+
+    try {
+        const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() :
+                         document.querySelector('meta[name="csrf-token"]')?.content;
+
+        const odpoved = await fetch('/api/admin_api.php?action=reset_user_password', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                user_id: parseInt(userSelect.value),
+                new_password: noveHeslo.value,
+                csrf_token: csrfToken
+            })
+        });
+
+        const data = await odpoved.json();
+
+        if (data.status === 'success') {
+            statusEl.innerHTML = '<span style="color: #28a745;">✓ Heslo bylo resetováno</span>';
+            noveHeslo.value = '';
+            setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+        } else {
+            throw new Error(data.message || 'Nepodařilo se resetovat heslo');
+        }
+    } catch (error) {
+        statusEl.innerHTML = '<span style="color: #dc3545;">Chyba: ' + escapujHtml(error.message) + '</span>';
+    }
+}
+
+// Uložit API klíč
+async function ulozitApiKlic(nazevKlice, inputId) {
+    const input = document.getElementById(inputId);
+    const statusEl = document.getElementById('status-' + inputId);
+    const hodnota = input.value.trim();
+
+    if (!hodnota) {
+        statusEl.style.display = 'block';
+        statusEl.innerHTML = '<span style="color: #dc3545;">Zadejte hodnotu</span>';
+        return;
+    }
+
+    statusEl.style.display = 'block';
+    statusEl.innerHTML = 'Ukládám...';
+
+    try {
+        const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() :
+                         document.querySelector('meta[name="csrf-token"]')?.content;
+
+        const odpoved = await fetch('/api/admin_api.php?action=update_api_key', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                key_name: nazevKlice,
+                key_value: hodnota,
+                csrf_token: csrfToken
+            })
+        });
+
+        const data = await odpoved.json();
+
+        if (data.status === 'success') {
+            statusEl.innerHTML = '<span style="color: #28a745;">✓ Uloženo</span>';
+            setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
+        } else {
+            throw new Error(data.message || 'Nepodařilo se uložit');
+        }
+    } catch (error) {
+        statusEl.innerHTML = '<span style="color: #dc3545;">Chyba: ' + escapujHtml(error.message) + '</span>';
+    }
+}
+
+// Toggle password visibility (simple version)
+function togglePasswordVisibilitySimple(inputId) {
+    const input = document.getElementById(inputId);
+    input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+// Načíst uživatele pro dropdown
+async function nactiUzivateleProDropdown() {
+    const select = document.getElementById('user-select-reset');
+    if (!select) return;
+
+    try {
+        const odpoved = await fetch('/api/admin_api.php?action=get_users');
+        const data = await odpoved.json();
+
+        if (data.status === 'success' && data.users) {
+            select.innerHTML = '<option value="">-- Vyberte uživatele --</option>';
+            data.users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = `${user.name || user.email} (${user.email})`;
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Chyba načítání uživatelů:', error);
+    }
+}
+
+// Načíst aktuální hodnoty API klíčů
+async function nactiApiKlice() {
+    try {
+        const odpoved = await fetch('/api/admin_api.php?action=get_api_keys');
+        const data = await odpoved.json();
+
+        if (data.status === 'success' && data.keys) {
+            // Nastavit hodnoty do inputů
+            if (data.keys.GEOAPIFY_API_KEY) {
+                document.getElementById('api-geoapify').value = data.keys.GEOAPIFY_API_KEY;
+            }
+            if (data.keys.SMTP_HOST) {
+                document.getElementById('api-smtp-host').value = data.keys.SMTP_HOST;
+            }
+            if (data.keys.SMTP_PORT) {
+                document.getElementById('api-smtp-port').value = data.keys.SMTP_PORT;
+            }
+            if (data.keys.SMTP_USER) {
+                document.getElementById('api-smtp-user').value = data.keys.SMTP_USER;
+            }
+            if (data.keys.SMTP_PASS) {
+                document.getElementById('api-smtp-pass').value = data.keys.SMTP_PASS;
+            }
+        }
+    } catch (error) {
+        console.error('Chyba načítání API klíčů:', error);
+    }
+}
+
 // Načíst data při načtení stránky
 document.addEventListener('DOMContentLoaded', function() {
     const aktualniSekce = new URLSearchParams(window.location.search).get('section') || 'registracni_klice';
@@ -887,6 +1279,10 @@ document.addEventListener('DOMContentLoaded', function() {
         nactiRegistracniKlice();
     } else if (aktualniSekce === 'uzivatele') {
         loadUzivateleProSecurity();
+    } else if (aktualniSekce === 'bezpecnost') {
+        nactiUzivateleProDropdown();
+    } else if (aktualniSekce === 'api_klice') {
+        nactiApiKlice();
     }
 });
 

@@ -103,6 +103,26 @@ try {
             handleListReklamace($pdo);
             break;
 
+        case 'get_users':
+            handleGetUsers($pdo);
+            break;
+
+        case 'change_admin_password':
+            handleChangeAdminPassword($pdo, $payload);
+            break;
+
+        case 'reset_user_password':
+            handleResetUserPassword($pdo, $payload);
+            break;
+
+        case 'update_api_key':
+            handleUpdateApiKey($pdo, $payload);
+            break;
+
+        case 'get_api_keys':
+            handleGetApiKeys($pdo);
+            break;
+
         case 'ping':
             echo json_encode(['status' => 'success', 'message' => 'pong', 'timestamp' => time()]);
             break;
@@ -336,5 +356,212 @@ function handleListReklamace(PDO $pdo): void
         'reklamace' => $reklamace,
         'count' => count($reklamace)
     ]);
+}
+
+/**
+ * Vrátí VŠECHNY uživatele (včetně neaktivních) - pro security tab
+ */
+function handleGetUsers(PDO $pdo): void
+{
+    $stmt = $pdo->prepare(
+        'SELECT id, name, email, role, is_active, created_at, last_login
+         FROM wgs_users
+         ORDER BY created_at DESC'
+    );
+    $stmt->execute();
+
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+    respondSuccess([
+        'users' => array_map(static function (array $user): array {
+            return [
+                'id' => (int) ($user['id'] ?? 0),
+                'name' => $user['name'] ?? '',
+                'email' => $user['email'] ?? '',
+                'role' => $user['role'] ?? 'prodejce',
+                'is_active' => isset($user['is_active']) ? (bool) $user['is_active'] : true,
+                'created_at' => $user['created_at'] ?? null,
+                'last_login' => $user['last_login'] ?? null,
+            ];
+        }, $users)
+    ]);
+}
+
+/**
+ * Změna admin hesla
+ */
+function handleChangeAdminPassword(PDO $pdo, array $payload): void
+{
+    $aktualniHeslo = trim($payload['current_password'] ?? '');
+    $noveHeslo = trim($payload['new_password'] ?? '');
+
+    if ($aktualniHeslo === '' || $noveHeslo === '') {
+        throw new InvalidArgumentException('Chybí aktuální nebo nové heslo.');
+    }
+
+    // Ověření aktuálního hesla
+    $aktualniHash = hash('sha256', $aktualniHeslo);
+    $ocekavanyHash = defined('ADMIN_KEY_HASH') ? ADMIN_KEY_HASH : getenv('ADMIN_KEY_HASH');
+
+    if ($aktualniHash !== $ocekavanyHash) {
+        throw new InvalidArgumentException('Aktuální heslo je nesprávné.');
+    }
+
+    // Validace síly nového hesla
+    $silneHeslo = isStrongPassword($noveHeslo);
+    if ($silneHeslo !== true) {
+        throw new InvalidArgumentException('Nové heslo není dostatečně silné: ' . implode(', ', $silneHeslo));
+    }
+
+    // Generování nového hashe
+    $novyHash = hash('sha256', $noveHeslo);
+
+    // Uložení do .env souboru
+    $envPath = __DIR__ . '/../.env';
+    if (!file_exists($envPath)) {
+        throw new InvalidArgumentException('.env soubor nebyl nalezen.');
+    }
+
+    $envContent = file_get_contents($envPath);
+    if ($envContent === false) {
+        throw new InvalidArgumentException('Nepodařilo se načíst .env soubor.');
+    }
+
+    // Nahradit admin hash
+    $envContent = preg_replace(
+        '/^ADMIN_KEY_HASH=.*/m',
+        'ADMIN_KEY_HASH=' . $novyHash,
+        $envContent
+    );
+
+    if (file_put_contents($envPath, $envContent, LOCK_EX) === false) {
+        throw new InvalidArgumentException('Nepodařilo se uložit nové heslo do .env souboru.');
+    }
+
+    respondSuccess(['message' => 'Admin heslo bylo úspěšně změněno.']);
+}
+
+/**
+ * Reset uživatelského hesla
+ */
+function handleResetUserPassword(PDO $pdo, array $payload): void
+{
+    $userId = (int) ($payload['user_id'] ?? 0);
+    $noveHeslo = trim($payload['new_password'] ?? '');
+
+    if ($userId <= 0) {
+        throw new InvalidArgumentException('Neplatné ID uživatele.');
+    }
+
+    if ($noveHeslo === '') {
+        throw new InvalidArgumentException('Nové heslo nesmí být prázdné.');
+    }
+
+    // Validace síly hesla
+    $silneHeslo = isStrongPassword($noveHeslo);
+    if ($silneHeslo !== true) {
+        throw new InvalidArgumentException('Heslo není dostatečně silné: ' . implode(', ', $silneHeslo));
+    }
+
+    // Hashování hesla
+    $passwordHash = password_hash($noveHeslo, PASSWORD_DEFAULT);
+
+    // Aktualizace hesla v databázi
+    $stmt = $pdo->prepare(
+        'UPDATE wgs_users SET password_hash = :password_hash WHERE id = :id'
+    );
+    $stmt->execute([
+        ':password_hash' => $passwordHash,
+        ':id' => $userId
+    ]);
+
+    if ($stmt->rowCount() === 0) {
+        throw new InvalidArgumentException('Uživatel nebyl nalezen.');
+    }
+
+    respondSuccess(['message' => 'Heslo bylo úspěšně resetováno.']);
+}
+
+/**
+ * Aktualizace API klíče
+ */
+function handleUpdateApiKey(PDO $pdo, array $payload): void
+{
+    $nazevKlice = trim($payload['key_name'] ?? '');
+    $hodnotaKlice = trim($payload['key_value'] ?? '');
+
+    if ($nazevKlice === '') {
+        throw new InvalidArgumentException('Chybí název klíče.');
+    }
+
+    if ($hodnotaKlice === '') {
+        throw new InvalidArgumentException('Hodnota klíče nesmí být prázdná.');
+    }
+
+    // Povolené klíče (whitelist)
+    $povoleneKlice = [
+        'GEOAPIFY_API_KEY',
+        'SMTP_HOST',
+        'SMTP_PORT',
+        'SMTP_USER',
+        'SMTP_PASS'
+    ];
+
+    if (!in_array($nazevKlice, $povoleneKlice, true)) {
+        throw new InvalidArgumentException('Nepovolený název klíče.');
+    }
+
+    // Uložení do .env souboru
+    $envPath = __DIR__ . '/../.env';
+    if (!file_exists($envPath)) {
+        throw new InvalidArgumentException('.env soubor nebyl nalezen.');
+    }
+
+    $envContent = file_get_contents($envPath);
+    if ($envContent === false) {
+        throw new InvalidArgumentException('Nepodařilo se načíst .env soubor.');
+    }
+
+    // Escapovat hodnotu pro .env (pokud obsahuje mezery, obalit uvozovkami)
+    $escapedValue = $hodnotaKlice;
+    if (strpos($hodnotaKlice, ' ') !== false || strpos($hodnotaKlice, '#') !== false) {
+        $escapedValue = '"' . str_replace('"', '\\"', $hodnotaKlice) . '"';
+    }
+
+    // Kontrola zda klíč už v .env existuje
+    if (preg_match('/^' . preg_quote($nazevKlice, '/') . '=/m', $envContent)) {
+        // Nahradit existující hodnotu
+        $envContent = preg_replace(
+            '/^' . preg_quote($nazevKlice, '/') . '=.*/m',
+            $nazevKlice . '=' . $escapedValue,
+            $envContent
+        );
+    } else {
+        // Přidat nový klíč na konec souboru
+        $envContent .= "\n" . $nazevKlice . '=' . $escapedValue . "\n";
+    }
+
+    if (file_put_contents($envPath, $envContent, LOCK_EX) === false) {
+        throw new InvalidArgumentException('Nepodařilo se uložit API klíč do .env souboru.');
+    }
+
+    respondSuccess(['message' => 'API klíč byl úspěšně uložen.']);
+}
+
+/**
+ * Načtení aktuálních hodnot API klíčů
+ */
+function handleGetApiKeys(PDO $pdo): void
+{
+    // Načíst hodnoty z prostředí (.env)
+    $keys = [
+        'GEOAPIFY_API_KEY' => getEnvValue('GEOAPIFY_API_KEY') ?: getEnvValue('GEOAPIFY_KEY') ?: '',
+        'SMTP_HOST' => getEnvValue('SMTP_HOST') ?: '',
+        'SMTP_PORT' => getEnvValue('SMTP_PORT') ?: '',
+        'SMTP_USER' => getEnvValue('SMTP_USER') ?: '',
+        'SMTP_PASS' => getEnvValue('SMTP_PASS') ?: '',
+    ];
+
+    respondSuccess(['keys' => $keys]);
 }
 

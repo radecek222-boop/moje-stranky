@@ -27,7 +27,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
   
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/novareklamace.min.css">
+  <link rel="stylesheet" href="assets/css/novareklamace.css">
 
 
 <style>
@@ -45,7 +45,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 .calendar-box {
   background: white;
-  padding: 2rem;
+  padding: 1.5rem;
   max-width: 550px;
   width: 90%;
   box-shadow: 0 10px 40px rgba(0,0,0,0.3);
@@ -107,7 +107,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 .calendar-day {
   text-align: center;
-  padding: 1rem 0.5rem;
+  padding: 0.7rem 0.4rem;
   min-width: 50px;
   cursor: pointer;
   border: 1px solid #e0e0e0;
@@ -140,8 +140,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 
 .form-consent {
-  margin-top: 1.5rem;
-  padding: 1.5rem;
+  margin-top: 1rem;
+  padding: 1rem;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   background: #f9fafb;
@@ -168,11 +168,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 
 #warrantyWarning {
-  margin-top: 1rem;
-  padding: 1rem;
+  margin-top: 0.8rem;
+  padding: 0.8rem;
   border-left: 4px solid #006600;
   background: #f0fff0;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 #warrantyWarning.warning {
@@ -297,26 +297,26 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <div class="form-card">
     
     <?php if (!$isLoggedIn): ?>
-    <div id="calculatorBox" style="padding: 2.5rem; margin-bottom: 3rem; border: 2px solid #000000; background: #ffffff; display: none;">
-      <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.8rem; font-weight: 300; letter-spacing: 0.1em; margin-bottom: 1rem; color: #000000; text-transform: uppercase;">Orientační cena servisu</h3>
-      <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;">Spočítejte si předběžnou cenu mimozáručního servisu včetně dopravy ještě před odesláním objednávky.</p>
-      <a href="mimozarucniceny.php" style="display: inline-block; padding: 1rem 3rem; background: #000000; color: white; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; border: 2px solid #000000;">Kalkulačka ceny</a>
+    <div id="calculatorBox" style="padding: 1.5rem; margin-bottom: 2rem; border: 2px solid #000000; background: #ffffff; display: none;">
+      <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 300; letter-spacing: 0.1em; margin-bottom: 0.8rem; color: #000000; text-transform: uppercase;">Orientační cena servisu</h3>
+      <p style="color: #666; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;">Spočítejte si předběžnou cenu mimozáručního servisu včetně dopravy ještě před odesláním objednávky.</p>
+      <a href="mimozarucniceny.php" style="display: inline-block; padding: 0.7rem 2rem; background: #000000; color: white; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; border: 2px solid #000000;">Kalkulačka ceny</a>
     </div>
     <?php endif; ?>
-    
+
     <?php if (!$isLoggedIn): ?>
-    <div id="modeInfo" style="display:none; padding: 1rem; margin-bottom: 2rem; border-left: 4px solid #555555; background: #f5f5f5; font-size: 0.9rem;">
+    <div id="modeInfo" style="display:none; padding: 0.8rem; margin-bottom: 1.5rem; border-left: 4px solid #555555; background: #f5f5f5; font-size: 0.85rem;">
       <strong id="modeTitle"></strong>
-      <p id="modeDescription" style="margin-top: 0.5rem; color: #666;"></p>
+      <p id="modeDescription" style="margin-top: 0.4rem; color: #666;"></p>
     </div>
     <?php endif; ?>
-    
+
     <?php if (!$isLoggedIn): ?>
-    <div id="calculationBox" style="display:none; padding: 2rem; margin-bottom: 3rem; border: 2px solid #555555; background: #f5f5f5;">
-      <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: #555555;">
+    <div id="calculationBox" style="display:none; padding: 1.5rem; margin-bottom: 2rem; border: 2px solid #555555; background: #f5f5f5;">
+      <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 600; margin-bottom: 0.8rem; color: #555555;">
         ✓ <span>Vaše kalkulace z cenové kalkulačky</span>
       </h3>
-      <div id="calculationDetails" style="font-size: 0.9rem; line-height: 1.8; color: #333;"></div>
+      <div id="calculationDetails" style="font-size: 0.85rem; line-height: 1.6; color: #333;"></div>
       <div style="margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #555555;">
         <strong style="font-size: 1.1rem; color: #555555;"><span>Celková orientační cena:</span> <span id="calculationTotal"></span></strong>
       </div>
@@ -453,7 +453,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
       <!-- GDPR CONSENT - pouze pro neregistrované uživatele -->
       <?php if (!$isLoggedIn): ?>
-      <div class="form-consent" style="margin: 1.5rem 0 1rem 0; padding: 0.5rem 1rem; border: 1px solid #ddd; background: #f9f9f9; text-align: center;">
+      <div class="form-consent" style="margin: 1rem 0 0.8rem 0; padding: 0.5rem 0.8rem; border: 1px solid #ddd; background: #f9f9f9; text-align: center;">
         <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.55rem; line-height: 1.3; color: #666;">
           <input type="checkbox" id="gdpr_consent" name="gdpr_consent" required style="margin-right: 0.5rem; flex-shrink: 0;">
           <span>Souhlasím se zpracováním osobních údajů společností White Glove Service, s.r.o.</span>
