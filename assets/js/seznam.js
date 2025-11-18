@@ -458,7 +458,7 @@ async function showDetail(recordOrId) {
       </div>
       
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: var(--c-neon-yellow); color: var(--c-black); border-color: var(--c-black); font-weight: 600; font-size: 0.85rem;" onclick="reopenOrder('${record.id}')">
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #333; color: white; font-weight: 600; font-size: 0.85rem;" onclick="reopenOrder('${record.id}')">
           🔄 Znovu otevřít
         </button>
 
@@ -466,14 +466,14 @@ async function showDetail(recordOrId) {
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showCustomerDetail('${record.id}')">Detail zákazníka</button>
 
       ${record.documents && record.documents.length > 0 ? `
-        <button class="btn" style="background: #e74c3c; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; margin-top: 0.25rem;"
+        <button class="btn" style="background: #444; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; margin-top: 0.25rem;"
                 onclick="window.open('${record.documents[0].file_path}', '_blank')">
           📄 Otevřít PDF
         </button>
       ` : ''}
       <div style="width: 100%; margin-top: 0.25rem;">
         ${record.documents && record.documents.length > 0 ? `
-          <button class="btn" style="background: #e74c3c; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;"
+          <button class="btn" style="background: #444; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;"
                   onclick="window.open('${record.documents[0].file_path}', '_blank')">
             📄 Otevřít PDF protokol
           </button>
@@ -490,9 +490,9 @@ async function showDetail(recordOrId) {
   } else {
     buttonsHtml = `
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <button class="btn btn-success" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="startVisit('${record.id}')">Zahájit návštěvu</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" onclick="startVisit('${record.id}')">Zahájit návštěvu</button>
 
-        <button class="btn btn-success" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showCalendar('${record.id}')">Naplánovat termín</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" onclick="showCalendar('${record.id}')">Naplánovat termín</button>
 
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showContactMenu('${record.id}')">Kontaktovat</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showCustomerDetail('${record.id}')">Detail zákazníka</button>
@@ -1391,10 +1391,10 @@ function showContactMenu(id) {
       <div class="modal-section">
         <h3 class="section-title">Rychlé akce</h3>
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-          ${phone ? `<a href="tel:${phone}" class="btn btn-success" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center;">Zavolat</a>` : ''}
-          <button class="btn btn-success" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;" onclick="closeDetail(); setTimeout(() => showCalendar('${id}'), 100)">Termín návštěvy</button>
-          ${phone ? `<a href="sms:${phone}" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center;">Odeslat SMS</a>` : ''}
-          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center;" target="_blank">Navigovat (Waze)</a>` : ''}
+          ${phone ? `<a href="tel:${phone}" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center; background: #1a1a1a; color: white;">Zavolat</a>` : ''}
+          <button class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; background: #1a1a1a; color: white;" onclick="closeDetail(); setTimeout(() => showCalendar('${id}'), 100)">Termín návštěvy</button>
+          ${phone ? `<a href="sms:${phone}" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center; background: #444; color: white;">Odeslat SMS</a>` : ''}
+          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center; background: #444; color: white;" target="_blank">Navigovat (Waze)</a>` : ''}
         </div>
       </div>
     </div>
@@ -1689,7 +1689,7 @@ async function showCustomerDetail(id) {
             html += `
               <button onclick="window.open('${protokolPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
                       class="btn"
-                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: var(--c-black); color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-bottom: 0.25rem;">
+                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #1a1a1a; color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-bottom: 0.25rem;">
                 📥 PDF protokol
               </button>
               <p style="margin: 0 0 0.5rem 0; font-size: 0.75rem; color: var(--c-grey); text-align: center;">
@@ -1703,7 +1703,7 @@ async function showCustomerDetail(id) {
             html += `
               <button onclick="window.open('${fotkyPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
                       class="btn"
-                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #059669; color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #444; color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
                 📷 PDF fotodokumentace
               </button>
               <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: var(--c-grey); text-align: center;">
@@ -1963,7 +1963,7 @@ async function showNotes(record) {
             html += `
               <button onclick="window.open('${protokolPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
                       class="btn"
-                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: var(--c-black); color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-bottom: 0.25rem;">
+                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #1a1a1a; color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-bottom: 0.25rem;">
                 📥 PDF protokol
               </button>
               <p style="margin: 0 0 0.5rem 0; font-size: 0.75rem; color: var(--c-grey); text-align: center;">
@@ -1977,7 +1977,7 @@ async function showNotes(record) {
             html += `
               <button onclick="window.open('${fotkyPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
                       class="btn"
-                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #059669; color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #444; color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
                 📷 PDF fotodokumentace
               </button>
               <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: var(--c-grey); text-align: center;">
