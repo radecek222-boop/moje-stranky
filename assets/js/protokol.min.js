@@ -948,7 +948,7 @@ function debounce(func, wait) {
 }
 
 // Funkce pro překlad textu přes Google Translate API
-async function translateText(text, sourceLang = 'cs', targetLang = 'en') {
+async function translateTextApi(text, sourceLang = 'cs', targetLang = 'en') {
   if (!text || text.trim() === '') return '';
 
   try {
@@ -964,6 +964,51 @@ async function translateText(text, sourceLang = 'cs', targetLang = 'en') {
   } catch (err) {
     logger.error('Chyba překladu:', err);
     return '';
+  }
+}
+
+// Wrapper funkce pro překlad mezi textovými poli
+async function translateText(sourceId, targetId) {
+  const sourceField = document.getElementById(sourceId);
+  const targetField = document.getElementById(targetId);
+
+  if (!sourceField || !targetField) {
+    logger.error('Pole pro překlad nenalezeno:', sourceId, targetId);
+    return;
+  }
+
+  const text = sourceField.value.trim();
+  if (!text) {
+    showNotification('Nejdříve napište text pro překlad', 'error');
+    return;
+  }
+
+  // Najít tlačítko pro animaci
+  const button = sourceField.parentElement.querySelector('.translate-btn');
+  if (button) {
+    button.classList.add('loading');
+    button.disabled = true;
+  }
+
+  try {
+    logger.log('🔄 Překládám:', text.substring(0, 50) + '...');
+    const translated = await translateTextApi(text, 'cs', 'en');
+
+    if (translated) {
+      targetField.value = translated;
+      logger.log('✅ Přeloženo:', translated.substring(0, 50) + '...');
+      showNotification('✅ Text přeložen', 'success');
+    } else {
+      showNotification('Překlad selhal', 'error');
+    }
+  } catch (err) {
+    logger.error('Chyba při překladu:', err);
+    showNotification('Chyba při překladu', 'error');
+  } finally {
+    if (button) {
+      button.classList.remove('loading');
+      button.disabled = false;
+    }
   }
 }
 
@@ -991,7 +1036,7 @@ async function autoTranslateField(fieldId) {
     return;
   }
 
-  const translated = await translateText(text, 'cs', 'en');
+  const translated = await translateTextApi(text, 'cs', 'en');
 
   if (translated) {
     enLabel.textContent = translated;
