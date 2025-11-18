@@ -16,8 +16,11 @@ $pdo = getDbConnection();
 // Detect embed mode for iframe contexts
 $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
-// If embed mode, output full HTML structure
-if ($embedMode):
+// Check if accessed directly (not through admin.php)
+$directAccess = !defined('ADMIN_PHP_LOADED');
+
+// If embed mode AND direct access, output full HTML structure
+if ($embedMode && $directAccess):
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -109,7 +112,7 @@ function getPriorityBadge($priority) {
 }
 ?>
 
-<?php if (!$embedMode): ?>
+<?php if (!$directAccess): ?>
 <link rel="stylesheet" href="/assets/css/admin.css">
 <?php endif; ?>
 
@@ -594,7 +597,7 @@ function setupGitHubWebhook() {
 if (DEBUG_MODE) console.log('✅ Actions section loaded');
 </script>
 
-<?php if ($embedMode): ?>
+<?php if ($embedMode && $directAccess): ?>
 </body>
 </html>
 <?php endif; ?>

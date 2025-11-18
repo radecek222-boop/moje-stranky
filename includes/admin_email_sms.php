@@ -14,8 +14,11 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 $pdo = getDbConnection();
 $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
+// Check if accessed directly (not through admin.php)
+$directAccess = !defined('ADMIN_PHP_LOADED');
+
 // If embed mode, output full HTML structure
-if ($embedMode):
+if ($embedMode && $directAccess):
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -95,12 +98,12 @@ try {
 }
 ?>
 
-<?php if (!$embedMode): ?>
+<?php if (!$directAccess): ?>
 <link rel="stylesheet" href="/assets/css/admin.css">
 <?php endif; ?>
 
 <div class="control-detail active">
-    <?php if (!$embedMode): ?>
+    <?php if (!$directAccess): ?>
     <!-- Header -->
     <div class="control-detail-header">
         <button class="control-detail-back" onclick="window.location.href='admin.php'">
@@ -641,7 +644,7 @@ if (document.getElementById('section-management')) {
 </script>
 
 
-<?php if ($embedMode): ?>
+<?php if ($embedMode && $directAccess): ?>
 </body>
 </html>
 <?php endif; ?>
