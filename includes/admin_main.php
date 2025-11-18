@@ -52,7 +52,7 @@ try {
 }
 ?>
 
-<?php if (!$embedMode): ?>
+<?php if (!$directAccess): ?>
 <link rel="stylesheet" href="/assets/css/admin.css">
 <?php endif; ?>
 
@@ -285,7 +285,7 @@ console.log('✅ Admin Control Center loaded');
 </script>
 
 
-<?php if ($embedMode): ?>
+<?php if ($embedMode && $directAccess): ?>
 </body>
 </html>
 <?php endif; ?>

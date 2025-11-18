@@ -2,6 +2,9 @@
 require_once "init.php";
 require_once __DIR__ . '/includes/admin_navigation.php';
 
+// Definovat konstantu pro include soubory
+define('ADMIN_PHP_LOADED', true);
+
 // BEZPEČNOST: Kontrola admin přihlášení
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 if (!$isAdmin) {

@@ -81,7 +81,7 @@ try {
 }
 ?>
 
-<?php if (!$embedMode): ?>
+<?php if (!$directAccess): ?>
 <link rel="stylesheet" href="/assets/css/admin.css">
 <?php endif; ?>
 
@@ -894,7 +894,7 @@ console.log('Security centrum načteno');
 </script>
 
 
-<?php if ($embedMode): ?>
+<?php if ($embedMode && $directAccess): ?>
 </body>
 </html>
 <?php endif; ?>

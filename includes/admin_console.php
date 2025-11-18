@@ -16,8 +16,11 @@ $pdo = getDbConnection();
 // Detect embed mode for iframe contexts
 $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
+// Check if accessed directly (not through admin.php)
+$directAccess = !defined('ADMIN_PHP_LOADED');
+
 // If embed mode, output full HTML structure
-if ($embedMode):
+if ($embedMode && $directAccess):
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -32,7 +35,7 @@ if ($embedMode):
 endif;
 ?>
 
-<?php if (!$embedMode): ?>
+<?php if (!$directAccess): ?>
 <link rel="stylesheet" href="/assets/css/admin.css">
 <?php endif; ?>
 <style>
@@ -237,7 +240,7 @@ endif;
 
 <div class="control-detail active">
     <!-- Header -->
-    <?php if (!$embedMode): ?>
+    <?php if (!$directAccess): ?>
     <div class="control-detail-header">
         <button class="control-detail-back" onclick="window.location.href='admin.php'">
             <span>&lt;</span>
@@ -2772,7 +2775,7 @@ if (DEBUG_MODE) console.log('Console loaded');
 </script>
 
 
-<?php if ($embedMode): ?>
+<?php if ($embedMode && $directAccess): ?>
 </body>
 </html>
 <?php endif; ?>

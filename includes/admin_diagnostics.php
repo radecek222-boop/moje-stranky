@@ -77,7 +77,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
 }
 ?>
 
-<?php if (!$embedMode): ?>
+<?php if (!$directAccess): ?>
 <link rel="stylesheet" href="/assets/css/admin.css">
 <?php endif; ?>
 
@@ -527,7 +527,7 @@ console.log('Diagnostics section loaded');
 </script>
 
 
-<?php if ($embedMode): ?>
+<?php if ($embedMode && $directAccess): ?>
 </body>
 </html>
 <?php endif; ?>
