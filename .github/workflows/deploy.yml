@@ -55,7 +55,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local_path: "./"
-          remote_path: "/home/www/wgs-service.cz/www/wgs-service.cz/www/"
+          remote_path: "./www/wgs-service.cz/www/"
           sftp_only: true
           delete_remote_files: false
 
@@ -67,7 +67,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: 22
           script: |
-            cd /home/www/wgs-service.cz/www/wgs-service.cz/www/
+            cd www/wgs-service.cz/www/
 
             echo "🧹 Cleaning old logs..."
             # Delete ALL old archived logs

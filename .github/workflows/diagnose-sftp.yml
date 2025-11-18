@@ -1,0 +1,51 @@
+name: 🔍 Diagnostika SFTP Cesty
+
+on:
+  workflow_dispatch:  # Spustí se manuálně
+
+jobs:
+  diagnose-sftp:
+    runs-on: ubuntu-latest
+    name: 🔍 Zjistit SFTP Cestu
+
+    steps:
+      - name: 🔍 Diagnostika SFTP přístupu
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 22
+          script: |
+            echo "=== 🔍 SFTP/SSH DIAGNOSTIKA ==="
+            echo ""
+
+            echo "1️⃣ Aktuální adresář (pwd):"
+            pwd
+            echo ""
+
+            echo "2️⃣ Domovský adresář (\$HOME):"
+            echo $HOME
+            echo ""
+
+            echo "3️⃣ Obsah aktuálního adresáře (ls -la):"
+            ls -la
+            echo ""
+
+            echo "4️⃣ Hledání www složek:"
+            find . -maxdepth 3 -type d -name "www" 2>/dev/null || echo "Žádné www složky nenalezeny"
+            echo ""
+
+            echo "5️⃣ Hledání photocustomer.php:"
+            find . -maxdepth 5 -name "photocustomer.php" 2>/dev/null || echo "photocustomer.php nenalezen"
+            echo ""
+
+            echo "6️⃣ Hledání wgs-service.cz složek:"
+            find . -maxdepth 3 -type d -name "*wgs-service*" 2>/dev/null || echo "wgs-service složky nenalezeny"
+            echo ""
+
+            echo "7️⃣ Absolutní cesta k photocustomer.php (pokud existuje):"
+            find . -name "photocustomer.php" -exec readlink -f {} \; 2>/dev/null || echo "Nelze zjistit absolutní cestu"
+            echo ""
+
+            echo "=== ✅ DIAGNOSTIKA DOKONČENA ==="
