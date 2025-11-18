@@ -376,6 +376,12 @@ function saveProtokolData($data) {
  * Odeslání emailu zákazníkovi pomocí PHPMailer
  */
 function sendEmailToCustomer($data) {
+    // DOČASNÉ LOGOVÁNÍ - debug
+    error_log('=== SEND EMAIL DEBUG ===');
+    error_log('Přijatá data: ' . print_r($data, true));
+    error_log('reklamace_id value: ' . var_export($data['reklamace_id'] ?? 'UNDEFINED', true));
+    error_log('=======================');
+
     // Načíst PHPMailer
     $autoloadPath = __DIR__ . '/../vendor/autoload.php';
     if (!file_exists($autoloadPath)) {
