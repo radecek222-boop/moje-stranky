@@ -655,16 +655,13 @@ function getEmbedUrlWithCSRF(baseUrl) {
  * LoadStatisticsModal
  */
 function loadStatisticsModal() {
-    console.log('[loadStatisticsModal] Starting to load statistics');
     const modalBody = document.getElementById('adminModalBody');
     if (!modalBody) {
         console.error('[loadStatisticsModal] adminModalBody element nenalezen');
         return;
     }
     const url = getEmbedUrlWithCSRF('statistiky.php?embed=1');
-    console.log('[loadStatisticsModal] Loading URL:', url);
     modalBody.innerHTML = `<div class="cc-iframe-container"><iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" title="Statistiky reklamací"></iframe></div>`;
-    console.log('[loadStatisticsModal] Iframe HTML set');
 }
 
 /**
