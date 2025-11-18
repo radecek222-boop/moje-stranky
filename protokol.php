@@ -269,7 +269,7 @@ if ($initialBootstrapData) {
         <tr><td class="label">Datum návštěvy<span class="en-label">Visit date</span></td><td><input type="date" id="visit-date"></td></tr>
         <tr><td class="label">Datum doručení<span class="en-label">Delivery date</span></td><td><input type="date" id="delivery-date"></td></tr>
         <tr><td class="label">Datum reklamace<span class="en-label">Claim date</span></td><td><input type="date" id="claim-date"></td></tr>
-        <tr><td class="label">Značka/Contract<span class="en-label">Brand</span></td><td><input type="text" id="brand" value="<?= wgs_escape($prefillFields['brand']); ?>"></td></tr>
+        <tr><td class="label">Zadavatel<span class="en-label">Requester</span></td><td><input type="text" id="brand" value="<?= wgs_escape($prefillFields['brand']); ?>"></td></tr>
         <tr><td class="label">Model<span class="en-label">Model</span></td><td><input type="text" id="model" value="<?= wgs_escape($prefillFields['model']); ?>"></td></tr>
       </table>
     </div>
