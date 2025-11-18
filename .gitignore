@@ -2,6 +2,7 @@
 
 # Sensitive files
 .env
+.user.ini
 setup_smtp_jednou.php
 
 # Log files
