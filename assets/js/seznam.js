@@ -1670,8 +1670,11 @@ async function showCustomerDetail(id) {
         ${(() => {
           // Rozdělit dokumenty podle typu
           const docs = CURRENT_RECORD.documents || [];
+          console.log('📄 DEBUG - Všechny dokumenty:', docs);
           const protokolPdf = docs.find(d => d.document_type === 'protokol_pdf');
           const fotkyPdf = docs.find(d => d.document_type === 'photos_pdf');
+          console.log('📄 DEBUG - protokolPdf:', protokolPdf);
+          console.log('📄 DEBUG - fotkyPdf:', fotkyPdf);
 
           if (docs.length === 0) {
             return `
@@ -1944,8 +1947,11 @@ async function showNotes(record) {
         ${(() => {
           // Rozdělit dokumenty podle typu
           const docs = CURRENT_RECORD.documents || [];
+          console.log('📄 DEBUG - Všechny dokumenty:', docs);
           const protokolPdf = docs.find(d => d.document_type === 'protokol_pdf');
           const fotkyPdf = docs.find(d => d.document_type === 'photos_pdf');
+          console.log('📄 DEBUG - protokolPdf:', protokolPdf);
+          console.log('📄 DEBUG - fotkyPdf:', fotkyPdf);
 
           if (docs.length === 0) {
             return `
