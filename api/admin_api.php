@@ -127,6 +127,14 @@ try {
             echo json_encode(['status' => 'success', 'message' => 'pong', 'timestamp' => time()]);
             break;
 
+        case 'change_reklamace_status':
+            handleChangeReklamaceStatus($pdo, $payload);
+            break;
+
+        case 'get_reklamace_detail':
+            handleGetReklamaceDetail($pdo);
+            break;
+
         default:
             respondError('Neznámá akce.', 400);
     }
@@ -563,5 +571,159 @@ function handleGetApiKeys(PDO $pdo): void
     ];
 
     respondSuccess(['keys' => $keys]);
+}
+
+/**
+ * Změna stavu reklamace
+ */
+function handleChangeReklamaceStatus(PDO $pdo, array $payload): void
+{
+    $reklamaceId = $payload['reklamace_id'] ?? null;
+    $newStatus = $payload['new_status'] ?? null;
+
+    if (!$reklamaceId || !$newStatus) {
+        throw new InvalidArgumentException('Chybí reklamace_id nebo new_status.');
+    }
+
+    // Whitelist povolených stavů
+    $allowedStatuses = ['wait', 'open', 'done'];
+    if (!in_array($newStatus, $allowedStatuses, true)) {
+        throw new InvalidArgumentException('Neplatný stav. Povolené hodnoty: wait, open, done');
+    }
+
+    // Aktualizovat stav
+    $stmt = $pdo->prepare("
+        UPDATE wgs_reklamace
+        SET stav = :stav,
+            datum_dokonceni = CASE WHEN :stav = 'done' THEN NOW() ELSE datum_dokonceni END
+        WHERE reklamace_id = :reklamace_id
+    ");
+
+    $stmt->execute([
+        'stav' => $newStatus,
+        'reklamace_id' => $reklamaceId
+    ]);
+
+    if ($stmt->rowCount() === 0) {
+        throw new InvalidArgumentException('Reklamace nebyla nalezena nebo stav nebyl změněn.');
+    }
+
+    respondSuccess(['message' => 'Stav reklamace byl změněn.']);
+}
+
+/**
+ * Načtení detailu reklamace + timeline historie
+ */
+function handleGetReklamaceDetail(PDO $pdo): void
+{
+    $reklamaceId = $_GET['reklamace_id'] ?? null;
+
+    if (!$reklamaceId) {
+        throw new InvalidArgumentException('Chybí reklamace_id.');
+    }
+
+    // Načíst detail reklamace
+    $stmt = $pdo->prepare("
+        SELECT
+            reklamace_id, cislo, jmeno, telefon, email,
+            ulice, mesto, psc, model, provedeni, barva,
+            popis_problemu, doplnujici_info, termin, cas_navstevy,
+            stav, datum_vytvoreni, datum_dokonceni, jmeno_prodejce,
+            typ, objednavka_reklamace
+        FROM wgs_reklamace
+        WHERE reklamace_id = :reklamace_id
+        LIMIT 1
+    ");
+
+    $stmt->execute(['reklamace_id' => $reklamaceId]);
+    $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$reklamace) {
+        throw new InvalidArgumentException('Reklamace nebyla nalezena.');
+    }
+
+    // Vytvořit timeline historii
+    $timeline = [];
+
+    // 1. Vytvoření reklamace
+    if ($reklamace['datum_vytvoreni']) {
+        $timeline[] = [
+            'typ' => 'system',
+            'nazev' => '✅ Reklamace vytvořena',
+            'popis' => 'Zákazník vytvořil novou reklamaci',
+            'datum' => $reklamace['datum_vytvoreni'],
+            'user' => $reklamace['jmeno_prodejce'] ?: 'Systém'
+        ];
+    }
+
+    // 2. Domluvení termínu (pokud existuje)
+    if ($reklamace['termin']) {
+        $timeline[] = [
+            'typ' => 'termin',
+            'nazev' => '📅 Termín domluven',
+            'popis' => 'Termín návštěvy: ' . date('d.m.Y', strtotime($reklamace['termin'])) . ' v ' . $reklamace['cas_navstevy'],
+            'datum' => $reklamace['termin'] . ' ' . $reklamace['cas_navstevy'],
+            'user' => 'Technik'
+        ];
+    }
+
+    // 3. Fotodokumentace (pokud existují fotky)
+    $fotoStmt = $pdo->prepare("SELECT COUNT(*) as count, MIN(created_at) as first_date FROM wgs_photos WHERE reklamace_id = :id");
+    $fotoStmt->execute(['id' => $reklamaceId]);
+    $fotoData = $fotoStmt->fetch(PDO::FETCH_ASSOC);
+    if ($fotoData && $fotoData['count'] > 0) {
+        $timeline[] = [
+            'typ' => 'photo',
+            'nazev' => '📸 Fotodokumentace',
+            'popis' => 'Nahrán počet fotografií: ' . $fotoData['count'],
+            'datum' => $fotoData['first_date'] ?: $reklamace['datum_vytvoreni'],
+            'user' => 'Technik'
+        ];
+    }
+
+    // 4. Protokol (pokud existuje)
+    // Hledáme v tabulce wgs_protocols nebo podobně (musíte ověřit strukturu DB)
+    // Pro tento příklad přeskočíme, protože není jasná struktura
+
+    // 5. Odeslané emaily
+    $emailStmt = $pdo->prepare("
+        SELECT subject, created_at, sent_at
+        FROM wgs_email_queue
+        WHERE to_email = :email
+        ORDER BY created_at ASC
+    ");
+    $emailStmt->execute(['email' => $reklamace['email']]);
+    $emaily = $emailStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($emaily as $email) {
+        $timeline[] = [
+            'typ' => 'email',
+            'nazev' => '📧 Email odeslán',
+            'popis' => 'Předmět: ' . $email['subject'],
+            'datum' => $email['sent_at'] ?: $email['created_at'],
+            'user' => 'Systém'
+        ];
+    }
+
+    // 6. Dokončení (pokud je hotovo)
+    if ($reklamace['stav'] === 'done' && $reklamace['datum_dokonceni']) {
+        $timeline[] = [
+            'typ' => 'done',
+            'nazev' => '✅ Reklamace vyřízena',
+            'popis' => 'Zakázka byla úspěšně dokončena',
+            'datum' => $reklamace['datum_dokonceni'],
+            'user' => 'Technik'
+        ];
+    }
+
+    // Seřadit timeline chronologicky
+    usort($timeline, function($a, $b) {
+        return strtotime($a['datum']) - strtotime($b['datum']);
+    });
+
+    respondSuccess([
+        'reklamace' => $reklamace,
+        'timeline' => $timeline
+    ]);
 }
 
