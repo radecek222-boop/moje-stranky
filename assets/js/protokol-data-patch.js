@@ -108,12 +108,8 @@
       const code = payload.fakturace_firma.toString().trim().toUpperCase();
       if (code === 'CZ') {
         fakturaceField.value = '🇨🇿 Česká republika (CZ)';
-        fakturaceField.style.color = '#1a1a1a';
-        fakturaceField.style.fontWeight = '600';
       } else if (code === 'SK') {
         fakturaceField.value = '🇸🇰 Slovensko (SK)';
-        fakturaceField.style.color = '#1a1a1a';
-        fakturaceField.style.fontWeight = '600';
       } else {
         fakturaceField.value = payload.fakturace_firma;
       }
