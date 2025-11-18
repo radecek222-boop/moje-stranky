@@ -143,7 +143,7 @@ table {
 }
 
 td {
-  padding: 8px 6px;
+  padding: 5px 6px;
   vertical-align: top;
   border-bottom: 1px solid var(--c-border);
 }
@@ -163,6 +163,40 @@ input, select, textarea {
   color: var(--c-black);
   font-family: 'Poppins';
   font-size: 13px;
+}
+
+/* Sjednocení placeholderů */
+input::placeholder,
+select::placeholder,
+textarea::placeholder {
+  font-family: 'Poppins';
+  font-size: 13px;
+  color: #999;
+  opacity: 1;
+}
+
+input::-webkit-input-placeholder,
+select::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+  font-family: 'Poppins';
+  font-size: 13px;
+  color: #999;
+}
+
+input::-moz-placeholder,
+select::-moz-placeholder,
+textarea::-moz-placeholder {
+  font-family: 'Poppins';
+  font-size: 13px;
+  color: #999;
+}
+
+input:-ms-input-placeholder,
+select:-ms-input-placeholder,
+textarea:-ms-input-placeholder {
+  font-family: 'Poppins';
+  font-size: 13px;
+  color: #999;
 }
 input:focus, select:focus, textarea:focus {
   outline: none;

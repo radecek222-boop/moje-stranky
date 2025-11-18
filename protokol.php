@@ -119,8 +119,10 @@ if ($lookupValue !== null) {
 
             $prefillFields = [
                 // Základní identifikátory
-                'order_number' => $record['id'] ?? $record['cislo'] ?? '',
-                'claim_number' => $record['reklamace_id'] ?? $record['cislo'] ?? '',
+                // Order number = Interní WGS číslo (reklamace_id)
+                'order_number' => $record['reklamace_id'] ?? '',
+                // Claim number = Číslo zakázky zadané uživatelem (cislo)
+                'claim_number' => $record['cislo'] ?? '',
 
                 // Kontaktní údaje
                 'customer' => $customerName,
@@ -232,7 +234,7 @@ if ($initialBootstrapData) {
         <tr><td class="label">Adresa<span class="en-label">Address</span></td><td><input type="text" id="address" value="<?= wgs_escape($prefillFields['address']); ?>" readonly></td></tr>
         <tr><td class="label">Telefon<span class="en-label">Phone</span></td><td><input type="tel" id="phone" value="<?= wgs_escape($prefillFields['phone']); ?>" readonly></td></tr>
         <tr><td class="label">Email<span class="en-label">Email</span></td><td><input type="email" id="email" value="<?= wgs_escape($prefillFields['email']); ?>" readonly></td></tr>
-        <tr><td class="label">Fakturace<span class="en-label">Billing</span></td><td><input type="text" id="fakturace-firma" value="<?= wgs_escape($prefillFields['fakturace']); ?>" readonly style="font-weight: 600;"></td></tr>
+        <tr><td class="label">Fakturace<span class="en-label">Billing</span></td><td><input type="text" id="fakturace-firma" value="<?= wgs_escape($prefillFields['fakturace']); ?>" readonly style="font-weight: 600; color: #1a1a1a;"></td></tr>
       </table>
     </div>
 
@@ -240,11 +242,6 @@ if ($initialBootstrapData) {
       <table>
         <tr><td class="label">Technik<span class="en-label">Technician</span></td>
           <td>
-            <!-- DEBUG INFO -->
-            <div style="font-size: 10px; color: red; margin-bottom: 5px;">
-              DEBUG: SESSION user_name = "<?= wgs_escape($currentUserName); ?>" |
-              selectedTechnik = "<?= wgs_escape($prefillFields['technician']); ?>"
-            </div>
             <select id="technician">
             <?php
               $technici = ['Milan Kolín', 'Radek Zikmund', 'Kolín/Zikmund'];
