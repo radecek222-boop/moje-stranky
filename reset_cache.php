@@ -5,10 +5,11 @@
  * Tento skript vymaže PHP OPcache a vynutí reload všech souborů.
  * Použijte po změnách v init.php nebo jiných core souborech.
  *
- * BEZPEČNOST: Pouze pro admina
+ * BEZPEČNOST: Pouze pro admina + CSRF ochrana
  */
 
 require_once "init.php";
+require_once __DIR__ . "/includes/csrf_helper.php";
 
 // BEZPEČNOST: Pouze admin
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
@@ -22,6 +23,7 @@ if (!$isAdmin) {
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
     <title>Reset Cache | WGS Service</title>
     <style>
         body {
@@ -111,6 +113,11 @@ if (!$isAdmin) {
 
     <?php
     if (isset($_POST['reset_cache'])) {
+        // ✅ CSRF OCHRANA: Validace CSRF tokenu před destruktivní akcí
+        if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+            die('<div class="section error"><strong>❌ BEZPEČNOSTNÍ CHYBA:</strong><br>Neplatný CSRF token. Obnovte stránku a zkuste to znovu.</div>');
+        }
+
         $vysledky = [];
 
         // 1. OPcache reset
@@ -201,6 +208,7 @@ if (!$isAdmin) {
     <h2>🚀 Akce</h2>
     <?php if (!isset($_POST['reset_cache'])): ?>
     <form method="POST">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
         <div class="section warning">
             <strong>⚠️ VAROVÁNÍ:</strong><br>
             Tato akce vymaže celou PHP cache a vynutí reload všech souborů.<br>
