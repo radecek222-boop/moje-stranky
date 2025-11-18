@@ -101,17 +101,85 @@ try {
             $pdo->beginTransaction();
 
             try {
-                // Zjistit aktuální maximální user_id pro nastavení AUTO_INCREMENT startovní hodnoty
-                $maxIdStmt = $pdo->query("SELECT MAX(user_id) as max_id FROM wgs_users");
-                $maxIdRow = $maxIdStmt->fetch(PDO::FETCH_ASSOC);
-                $nextId = ($maxIdRow['max_id'] ?? 0) + 1;
+                // Zjistit typ sloupce user_id
+                $isVarchar = stripos($column['Type'], 'varchar') !== false;
+                $isInt = stripos($column['Type'], 'int') !== false;
 
                 echo "<div class='info'>";
-                echo "Maximální existující user_id: " . ($maxIdRow['max_id'] ?? 0) . "<br>";
+                echo "<strong>Zjištěný typ sloupce:</strong> " . htmlspecialchars($column['Type']) . "<br>";
+                echo "</div>";
+
+                // Pokud je VARCHAR, nejdřív zkontrolovat hodnoty a konvertovat na INT
+                if ($isVarchar) {
+                    echo "<div class='warning'>";
+                    echo "<strong>⚠️ KROK 1: Konverze VARCHAR na INT</strong><br>";
+                    echo "Sloupec user_id je VARCHAR, musím ho nejdřív konvertovat na INT...";
+                    echo "</div>";
+
+                    // Zkontrolovat všechny existující hodnoty
+                    $checkStmt = $pdo->query("SELECT user_id FROM wgs_users");
+                    $allIds = $checkStmt->fetchAll(PDO::FETCH_COLUMN);
+
+                    $maxNumericId = 0;
+                    $hasNonNumeric = false;
+
+                    foreach ($allIds as $id) {
+                        if (!is_numeric($id)) {
+                            $hasNonNumeric = true;
+                            echo "<div class='error'>";
+                            echo "Nalezena non-numeric hodnota: " . htmlspecialchars($id);
+                            echo "</div>";
+                            break;
+                        }
+                        $numId = (int)$id;
+                        if ($numId > $maxNumericId) {
+                            $maxNumericId = $numId;
+                        }
+                    }
+
+                    if ($hasNonNumeric) {
+                        throw new Exception("Nelze konvertovat VARCHAR na INT - existují non-numeric hodnoty!");
+                    }
+
+                    echo "<div class='info'>";
+                    echo "✅ Všechny hodnoty jsou číselné<br>";
+                    echo "Počet záznamů: " . count($allIds) . "<br>";
+                    echo "Maximální ID: " . $maxNumericId . "<br>";
+                    echo "</div>";
+
+                    // Nejdřív odstranit UNIQUE constraint pokud existuje
+                    if ($column['Key'] === 'UNI') {
+                        echo "<div class='info'>Odstraňuji UNIQUE constraint...</div>";
+                        // Najít název indexu
+                        $indexStmt = $pdo->query("SHOW INDEX FROM wgs_users WHERE Column_name = 'user_id' AND Key_name != 'PRIMARY'");
+                        $indexes = $indexStmt->fetchAll(PDO::FETCH_ASSOC);
+                        foreach ($indexes as $idx) {
+                            $indexName = $idx['Key_name'];
+                            $pdo->exec("ALTER TABLE wgs_users DROP INDEX `$indexName`");
+                            echo "<div class='info'>Odstraněn index: $indexName</div>";
+                        }
+                    }
+
+                    // Konvertovat VARCHAR na INT
+                    echo "<div class='info'>Konvertuji VARCHAR na INT...</div>";
+                    $pdo->exec("ALTER TABLE wgs_users MODIFY COLUMN user_id INT(11) NOT NULL");
+
+                    echo "<div class='success'>✅ Úspěšně konvertováno z VARCHAR na INT</div>";
+
+                    $nextId = $maxNumericId + 1;
+                } else {
+                    // Pokud už je INT, jen zjistit maximum
+                    $maxIdStmt = $pdo->query("SELECT MAX(CAST(user_id AS UNSIGNED)) as max_id FROM wgs_users");
+                    $maxIdRow = $maxIdStmt->fetch(PDO::FETCH_ASSOC);
+                    $nextId = (int)($maxIdRow['max_id'] ?? 0) + 1;
+                }
+
+                echo "<div class='info'>";
+                echo "<strong>⚠️ KROK 2: Přidání AUTO_INCREMENT</strong><br>";
                 echo "Další AUTO_INCREMENT bude: " . $nextId;
                 echo "</div>";
 
-                // Opravit sloupec user_id - přidat AUTO_INCREMENT a PRIMARY KEY
+                // Přidat AUTO_INCREMENT a PRIMARY KEY
                 $alterSql = "ALTER TABLE wgs_users
                             MODIFY COLUMN user_id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY";
 
