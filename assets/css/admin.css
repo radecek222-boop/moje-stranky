@@ -2087,3 +2087,35 @@ body.admin-modal-open {
         height: 85vh;
     }
 }
+
+/* ===========================================================================
+   EMBED MODE OVERRIDES - Fix for iframe display
+   =========================================================================== */
+
+/* When in embed mode (iframe), control-detail should NOT be fixed fullscreen */
+.embed-mode .control-detail {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    z-index: auto !important;
+    display: block !important;
+    animation: none !important;
+    min-height: 100vh;
+    overflow-y: visible;
+}
+
+.embed-mode .control-detail.active {
+    display: block !important;
+}
+
+/* Make sure content is visible in embed mode */
+.embed-mode .control-detail-content {
+    padding: 1rem;
+}
+
+/* Hide elements that don't make sense in iframe */
+.embed-mode .control-detail-back {
+    display: none !important;
+}
