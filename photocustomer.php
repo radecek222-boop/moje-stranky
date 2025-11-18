@@ -21,10 +21,51 @@ if (isset($_GET['debug']) && $_GET['debug'] === '1') {
     echo "<p>isset(\$_SESSION['is_admin']): " . (isset($_SESSION['is_admin']) ? '✅ TRUE' : '❌ FALSE') . "</p>";
 
     echo "<h2>🚪 Co by se stalo bez debug režimu:</h2>";
+
+    // SIMULACE KROK 1
     if (!isset($_SESSION['user_id'])) {
-        echo "<p style='color:#ff4444;'>❌ REDIRECT na login.php (chybí user_id)</p>";
+        echo "<p style='color:#ff4444;'>❌ KROK 1: REDIRECT na login.php (chybí user_id)</p>";
     } else {
-        echo "<p style='color:#00ff88;'>✅ KROK 1 PROJDE (user_id existuje)</p>";
+        echo "<p style='color:#00ff88;'>✅ KROK 1: PASS (user_id existuje)</p>";
+
+        // SIMULACE KROK 2
+        echo "<h3 style='margin-top:20px;'>🔍 KROK 2: Kontrola role</h3>";
+        $rawRole = (string) ($_SESSION['role'] ?? '');
+        $normalizedRole = strtolower(trim($rawRole));
+        $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+
+        echo "<p>\$rawRole = '" . htmlspecialchars($rawRole) . "'</p>";
+        echo "<p>\$normalizedRole = '" . htmlspecialchars($normalizedRole) . "'</p>";
+        echo "<p>\$isAdmin = " . ($isAdmin ? 'TRUE' : 'FALSE') . "</p>";
+
+        $technikKeywords = ['technik', 'technician'];
+        $isTechnik = in_array($normalizedRole, $technikKeywords, true);
+        echo "<p>in_array('{$normalizedRole}', ['technik', 'technician']): " . ($isTechnik ? 'TRUE' : 'FALSE') . "</p>";
+
+        if (!$isTechnik) {
+            echo "<p>Zkouším partial match...</p>";
+            foreach ($technikKeywords as $keyword) {
+                $found = strpos($normalizedRole, $keyword) !== false;
+                echo "<p>  strpos('{$normalizedRole}', '{$keyword}'): " . ($found ? 'FOUND' : 'NOT FOUND') . "</p>";
+                if ($found) {
+                    $isTechnik = true;
+                    break;
+                }
+            }
+        }
+
+        echo "<p><strong>\$isTechnik (final) = " . ($isTechnik ? 'TRUE' : 'FALSE') . "</strong></p>";
+
+        echo "<h3 style='margin-top:20px;'>🚪 Finální rozhodnutí:</h3>";
+        echo "<p>(!isAdmin && !isTechnik) = (!" . ($isAdmin ? 'TRUE' : 'FALSE') . " && !" . ($isTechnik ? 'TRUE' : 'FALSE') . ")</p>";
+        echo "<p>= (" . ($isAdmin ? 'FALSE' : 'TRUE') . " && " . ($isTechnik ? 'FALSE' : 'TRUE') . ")</p>";
+        echo "<p>= <strong>" . ((!$isAdmin && !$isTechnik) ? 'TRUE' : 'FALSE') . "</strong></p>";
+
+        if (!$isAdmin && !$isTechnik) {
+            echo "<p style='color:#ff4444;font-size:18px;'><strong>❌ KROK 2: REDIRECT na login.php (není admin ANI technik)</strong></p>";
+        } else {
+            echo "<p style='color:#00ff88;font-size:18px;'><strong>✅ KROK 2: PASS (je admin NEBO technik) → PŘÍSTUP POVOLEN!</strong></p>";
+        }
     }
 
     echo "<hr><p><a href='photocustomer.php' style='color:#00ff88;'>→ Zkusit bez debug režimu</a></p>";
