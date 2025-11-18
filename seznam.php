@@ -212,14 +212,14 @@ if (!$isLoggedIn && !$isAdmin) {
 }
 
 .modal-actions .btn {
-  padding: 0.5rem 0.75rem !important;
-  min-height: 38px !important;
+  padding: 0.4rem 0.75rem !important;
+  min-height: 32px !important;
   font-size: 0.85rem !important;
 }
 
 .modal-actions {
-  gap: 0.5rem !important;
-  padding: 1rem !important;
+  gap: 0.75rem !important;
+  padding: 0.75rem 1rem !important;
 }
 </style>
 

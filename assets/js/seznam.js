@@ -428,7 +428,7 @@ async function showDetail(recordOrId) {
   if (typeof recordOrId === 'string') {
     record = WGS_DATA_CACHE.find(x => x.id == recordOrId || x.reklamace_id == recordOrId);
     if (!record) {
-      alert('❌ Záznam nenalezen');
+      alert('Záznam nenalezen');
       return;
     }
   } else {
@@ -449,17 +449,16 @@ async function showDetail(recordOrId) {
   
   if (isCompleted) {
     buttonsHtml = `
-      <div style="background: rgba(0, 255, 136, 0.1); border: 2px solid var(--c-neon-green); padding: 1.5rem; margin-bottom: 1.5rem;">
-        <div style="text-align: center; margin-bottom: 1rem;">
-          <div style="font-size: 3rem; margin-bottom: 0.5rem;">✓</div>
-          <div style="font-size: 1.2rem; font-weight: 600; color: var(--c-black); margin-bottom: 0.3rem;">ZAKÁZKA DOKONČENA</div>
-          <div style="font-size: 0.85rem; color: var(--c-grey);">Tato zakázka byla již vyřízena</div>
+      <div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 0.75rem; margin-bottom: 1rem; border-radius: 4px;">
+        <div style="text-align: center;">
+          <div style="font-size: 0.85rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem;">Zakázka dokončena</div>
+          <div style="font-size: 0.75rem; color: #666;">Tato zakázka byla již vyřízena</div>
         </div>
       </div>
-      
+
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #333; color: white; font-weight: 600; font-size: 0.85rem;" onclick="reopenOrder('${record.id}')">
-          🔄 Znovu otevřít
+          Znovu otevřít
         </button>
 
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showContactMenu('${record.id}')">Kontaktovat</button>
@@ -468,18 +467,18 @@ async function showDetail(recordOrId) {
       ${record.documents && record.documents.length > 0 ? `
         <button class="btn" style="background: #444; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; margin-top: 0.25rem;"
                 onclick="window.open('${record.documents[0].file_path}', '_blank')">
-          📄 Otevřít PDF
+          Otevřít PDF
         </button>
       ` : ''}
       <div style="width: 100%; margin-top: 0.25rem;">
         ${record.documents && record.documents.length > 0 ? `
           <button class="btn" style="background: #444; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;"
                   onclick="window.open('${record.documents[0].file_path}', '_blank')">
-            📄 Otevřít PDF protokol
+            Otevřít PDF protokol
           </button>
         ` : `
-          <div style="background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 6px; padding: 0.75rem; text-align: center; color: #6c757d; font-size: 0.8rem;">
-            ℹ️ PDF protokol ještě nebyl vytvořen
+          <div style="background: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 4px; padding: 0.5rem; text-align: center; color: #666; font-size: 0.75rem;">
+            PDF protokol ještě nebyl vytvořen
           </div>
         `}
       </div>
@@ -524,7 +523,7 @@ function closeDetail() {
 async function reopenOrder(id) {
   const record = WGS_DATA_CACHE.find(x => x.id == id);
   if (!record) {
-    alert('❌ Záznam nenalezen');
+    alert('Záznam nenalezen');
     return;
   }
   
@@ -532,14 +531,14 @@ async function reopenOrder(id) {
   const product = Utils.getProduct(record);
   
   const confirmed = window.confirm(
-    `⚠️ ZNOVU OTEVŘÍT ZAKÁZKU?\n\n` +
+    `ZNOVU OTEVŘÍT ZAKÁZKU?\n\n` +
     `Zákazník: ${customerName}\n` +
     `Produkt: ${product}\n\n` +
     `Tato akce:\n` +
-    `✓ Změní stav na NOVÁ (žlutá)\n` +
-    `✓ Zruší původní termín návštěvy\n` +
-    `✓ Umožní naplánovat novou návštěvu\n\n` +
-    `⚠️ Použijte pouze v případě, že se objevil nový problém u této zakázky.\n\n` +
+    `- Změní stav na NOVÁ (žlutá)\n` +
+    `- Zruší původní termín návštěvy\n` +
+    `- Umožní naplánovat novou návštěvu\n\n` +
+    `Použijte pouze v případě, že se objevil nový problém u této zakázky.\n\n` +
     `Opravdu chcete pokračovat?`
   );
   
@@ -649,7 +648,7 @@ async function reopenOrder(id) {
     }
   } catch (e) {
     logger.error('Chyba při znovuotevření zakázky:', e);
-    alert('❌ Chyba při znovuotevření zakázky: ' + e.message);
+    alert('Chyba při znovuotevření zakázky: ' + e.message);
   }
 }
 
@@ -686,7 +685,7 @@ function normalizeCustomerData(data) {
 function startVisit(id) {
   const z = WGS_DATA_CACHE.find(x => x.id == id);
   if (!z) {
-    alert('❌ Záznam nenalezen');
+    alert('Záznam nenalezen');
     return;
   }
   
@@ -699,7 +698,7 @@ function startVisit(id) {
   }
   
   if (Utils.isCompleted(z)) {
-    alert('❌ Tato návštěva již byla dokončena.');
+    alert('Tato návštěva již byla dokončena.');
     return;
   }
   
@@ -1583,7 +1582,7 @@ async function showCustomerDetail(id) {
       </div>
 
       <!-- DOPLŇUJÍCÍ INFO -->
-      <div style="margin-bottom: 1rem;">
+      <div style="margin-bottom: 2rem;">
         <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace:</label>
         <textarea id="edit_doplnujici_info" style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem; min-height: 50px; resize: vertical; font-family: inherit;" placeholder="Doplňující informace od prodejce">${Utils.escapeHtml(doplnujici_info)}</textarea>
       </div>
@@ -2125,7 +2124,7 @@ async function deleteReklamace(reklamaceId) {
   );
   
   if (userInput !== reklamaceNumber) {
-    alert('❌ Nesprávné číslo. Mazání zrušeno.');
+    alert('Nesprávné číslo. Mazání zrušeno.');
     logger.log('Mazání zrušeno - špatné číslo (2. krok)');
     return;
   }
@@ -2159,11 +2158,11 @@ async function deleteReklamace(reklamaceId) {
     } else {
       const errorMsg = result.message || result.error || 'Nepodařilo se smazat';
       logger.error('❌ Chyba:', errorMsg);
-      alert('❌ Chyba: ' + errorMsg);
+      alert('Chyba: ' + errorMsg);
     }
   } catch (error) {
     logger.error('❌ Chyba při mazání:', error);
-    alert('❌ Chyba při mazání: ' + error.message);
+    alert('Chyba při mazání: ' + error.message);
   }
 }
 
@@ -2229,11 +2228,11 @@ async function smazatFotku(photoId, photoUrl) {
     } else {
       const errorMsg = result.message || result.error || 'Nepodařilo se smazat fotku';
       logger.error('❌ Chyba:', errorMsg);
-      alert('❌ Chyba: ' + errorMsg);
+      alert('Chyba: ' + errorMsg);
     }
   } catch (error) {
     logger.error('❌ Chyba při mazání fotky:', error);
-    alert('❌ Chyba při mazání fotky: ' + error.message);
+    alert('Chyba při mazání fotky: ' + error.message);
   }
 }
 
