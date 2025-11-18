@@ -377,7 +377,16 @@ function saveProtokolData($data) {
  */
 function sendEmailToCustomer($data) {
     // Načíst PHPMailer
-    require_once __DIR__ . '/../vendor/autoload.php';
+    $autoloadPath = __DIR__ . '/../vendor/autoload.php';
+    if (!file_exists($autoloadPath)) {
+        throw new Exception('PHPMailer není nainstalován. Spusťte Email System Installer na /admin/install_email_system.php');
+    }
+    require_once $autoloadPath;
+
+    // Ověřit, že PHPMailer class existuje
+    if (!class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
+        throw new Exception('PHPMailer class nebyla nalezena. Přeinstalujte PHPMailer přes /admin/install_email_system.php');
+    }
 
     $reklamaceId = sanitizeReklamaceId($data['reklamace_id'] ?? null, 'reklamace_id');
     $protocolPdf = $data['protokol_pdf'] ?? null;
@@ -439,7 +448,7 @@ function sendEmailToCustomer($data) {
     $smtpSettings = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$smtpSettings) {
-        throw new Exception('SMTP nastavení není nakonfigurováno');
+        throw new Exception('SMTP nastavení není nakonfigurováno. Spusťte Email System Installer na /admin/install_email_system.php nebo zkontrolujte konfiguraci na /diagnoza_smtp.php');
     }
 
     // Příprava emailu
