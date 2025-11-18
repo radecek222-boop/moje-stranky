@@ -14,6 +14,10 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
 $pdo = getDbConnection();
 $currentSection = $_GET['section'] ?? 'registracni_klice';
+$embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
+
+// Check if accessed directly (not through admin.php)
+$directAccess = !defined('ADMIN_PHP_LOADED');
 
 // Načtení statistik pro přehled
 $stats = [
@@ -79,6 +83,22 @@ try {
 } catch (PDOException $e) {
     $configs = [];
 }
+
+// If embed mode, output full HTML structure
+if ($embedMode && $directAccess):
+?>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security - WGS Admin</title>
+    <meta name="csrf-token" content="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
+    <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body class="embed-mode">
+<?php
+endif;
 ?>
 
 <?php if (!$directAccess): ?>
