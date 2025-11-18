@@ -25,24 +25,39 @@ require_once __DIR__ . '/../../includes/db_metadata.php';
  */
 function generateWorkflowId(PDO $pdo): string
 {
-    // BUGFIX: Race condition fix - použít FOR UPDATE lock
-    $attempts = 0;
-    do {
-        $candidate = 'WGS' . date('ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
+    // Formát: WGS/YYYY/DD-MM/XXXXX
+    // Příklad: WGS/2025/18-11/00001
+    // Sekvenční číslo se resetuje každý den
 
-        // FOR UPDATE lock zajistí, že jiná transakce nemůže číst tento záznam současně
-        $stmt = $pdo->prepare('SELECT reklamace_id FROM wgs_reklamace WHERE reklamace_id = :id FOR UPDATE');
-        $stmt->execute([':id' => $candidate]);
+    $rok = date('Y');        // 2025
+    $denMesic = date('d-m'); // 18-11
+    $prefix = "WGS/{$rok}/{$denMesic}/";
 
-        if ($stmt->rowCount() === 0) {
-            // ID neexistuje, můžeme ho použít
-            return $candidate;
-        }
+    // Najít nejvyšší číslo pro dnešní den
+    $stmt = $pdo->prepare("
+        SELECT reklamace_id FROM wgs_reklamace
+        WHERE reklamace_id LIKE :prefix
+        ORDER BY reklamace_id DESC
+        LIMIT 1
+        FOR UPDATE
+    ");
+    $stmt->execute([':prefix' => $prefix . '%']);
+    $lastId = $stmt->fetchColumn();
 
-        $attempts++;
-    } while ($attempts < 5);
+    if ($lastId) {
+        // Extrahovat číslo z konce (WGS/2025/18-11/00001 -> 00001)
+        $parts = explode('/', $lastId);
+        $cislo = (int)end($parts);
+        $noveCislo = $cislo + 1;
+    } else {
+        // První reklamace pro dnešní den
+        $noveCislo = 1;
+    }
 
-    throw new Exception('Nepodařilo se vygenerovat interní ID reklamace.');
+    // Formátovat číslo na 5 číslic (00001, 00002, ...)
+    $candidate = sprintf('%s%05d', $prefix, $noveCislo);
+
+    return $candidate;
 }
 
 /**
