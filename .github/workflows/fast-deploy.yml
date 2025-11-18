@@ -1,0 +1,66 @@
+name: ⚡ Fast Deploy (No Tests)
+
+on:
+  workflow_dispatch: # Pouze manuální spuštění
+    inputs:
+      reason:
+        description: 'Důvod rychlého nasazení'
+        required: false
+        default: 'Hotfix'
+
+jobs:
+  fast-deploy:
+    runs-on: ubuntu-latest
+    name: ⚡ Fast Deploy via SFTP
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚡ Fast Deploy to Český hosting via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          port: 22
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local_path: "./"
+          remote_path: "wgs-service.cz/www/"
+          sftp_only: true
+          delete_remote_files: false
+
+      - name: 🧹 Post-deploy cleanup & optimization
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 22
+          script: |
+            cd wgs-service.cz/www/
+
+            echo "🧹 Cleaning old logs..."
+            rm -f logs/*.gz logs/*.20*.log 2>/dev/null || true
+
+            if [ -f logs/php_errors.log ]; then
+              tail -100 logs/php_errors.log > logs/php_errors.log.tmp
+              mv logs/php_errors.log.tmp logs/php_errors.log
+            fi
+
+            echo "💾 Clearing caches..."
+            rm -rf temp/cache/* 2>/dev/null || true
+
+            echo "🔧 Optimizing permissions..."
+            chmod +x scripts/*.sh 2>/dev/null || true
+
+            echo "✅ Fast deploy cleanup completed!"
+
+      - name: ✅ Deployment summary
+        run: |
+          echo "⚡ FAST DEPLOY completed successfully!"
+          echo "📦 Branch: ${{ github.ref_name }}"
+          echo "💾 Commit: ${{ github.sha }}"
+          echo "📝 Reason: ${{ github.event.inputs.reason }}"
+          echo "⏰ Time: $(date)"
+          echo ""
+          echo "⚠️ WARNING: Tests were SKIPPED in this deployment!"
