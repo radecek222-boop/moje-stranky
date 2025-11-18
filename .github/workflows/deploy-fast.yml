@@ -15,6 +15,29 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
+      - name: 🗜️ Create deployment package (exclude large files)
+        run: |
+          echo "📦 Creating deployment package..."
+          # Create temporary directory
+          mkdir -p /tmp/deploy
+
+          # Copy only necessary files (exclude .git, tests, backups)
+          rsync -av --progress \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='node_modules/' \
+            --exclude='vendor/' \
+            --exclude='tests/' \
+            --exclude='backups/' \
+            --exclude='.gitignore' \
+            --exclude='.env.example' \
+            --exclude='README.md' \
+            --exclude='CLAUDE.md' \
+            --exclude='*.md' \
+            ./ /tmp/deploy/
+
+          echo "✅ Deployment package created ($(du -sh /tmp/deploy | cut -f1))"
+
       - name: 🚀 Deploy to Český hosting via SFTP
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
@@ -22,22 +45,10 @@ jobs:
           port: 22
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local_path: "./"
+          local_path: "/tmp/deploy/"
           remote_path: "wgs-service.cz/www/"
           sftp_only: true
           delete_remote_files: false
-          # ✅ Exclude large directories
-          exclude: |
-            .git/
-            .github/
-            node_modules/
-            vendor/
-            tests/
-            backups/
-            .gitignore
-            .env.example
-            README.md
-            CLAUDE.md
 
       - name: ✅ Deployment summary
         run: |
