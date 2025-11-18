@@ -1377,7 +1377,7 @@ function showContactMenu(id) {
     ${ModalManager.createHeader('Kontaktovat zákazníka', customerName)}
     
     <div class="modal-body">
-      <div class="info-grid" style="margin-bottom: 2rem;">
+      <div class="info-grid" style="margin-bottom: 1rem;">
         <div class="info-label">Telefon:</div>
         <div class="info-value"><strong>${phone || 'Neuvedeno'}</strong></div>
         
