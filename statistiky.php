@@ -29,7 +29,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/statistiky.min.css">
   <link rel="stylesheet" href="assets/css/statistiky-fixes.css">
-  <link rel="stylesheet" href="assets/css/control-center-modal.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
 
   <style>
 /* Kompaktní statistiky */
@@ -217,8 +217,6 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
     color: #666;
     line-height: 1.4;
 }
-
-/* Modal styling již existuje v control-center-modal.css */
 
 /* Tabulky v modalech */
 .cc-table {
