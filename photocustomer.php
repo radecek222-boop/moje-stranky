@@ -13,12 +13,25 @@ if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
 
 // BEZPEČNOST: Kontrola přístupu - POUZE admin a technik
 // Prodejci a nepřihlášení uživatelé NEMAJÍ přístup k fotodokumentaci
-$role = $_SESSION['role'] ?? '';
+$rawRole = (string) ($_SESSION['role'] ?? '');
+$normalizedRole = strtolower(trim($rawRole));
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
-$isTechnik = in_array(strtolower($role), ['technik', 'technician']);
+
+// Technik může být uložen různými variantami (např. "Technik WGS", "externi technik")
+// Proto testujeme jednak přesné hodnoty, ale i to, zda role obsahuje klíčová slova
+$technikKeywords = ['technik', 'technician'];
+$isTechnik = in_array($normalizedRole, $technikKeywords, true);
+if (!$isTechnik) {
+    foreach ($technikKeywords as $keyword) {
+        if (strpos($normalizedRole, $keyword) !== false) {
+            $isTechnik = true;
+            break;
+        }
+    }
+}
 
 if (!$isAdmin && !$isTechnik) {
-    error_log("PHOTOCUSTOMER: Přístup odepřen - role: {$role}, is_admin: " . ($isAdmin ? 'true' : 'false'));
+    error_log("PHOTOCUSTOMER: Přístup odepřen - role: {$rawRole}, is_admin: " . ($isAdmin ? 'true' : 'false'));
     header('Location: login.php?redirect=photocustomer.php');
     exit;
 }
