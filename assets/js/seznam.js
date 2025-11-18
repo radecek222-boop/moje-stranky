@@ -449,17 +449,16 @@ async function showDetail(recordOrId) {
   
   if (isCompleted) {
     buttonsHtml = `
-      <div style="background: rgba(0, 255, 136, 0.1); border: 2px solid var(--c-neon-green); padding: 1.5rem; margin-bottom: 1.5rem;">
-        <div style="text-align: center; margin-bottom: 1rem;">
-          <div style="font-size: 3rem; margin-bottom: 0.5rem;">✓</div>
-          <div style="font-size: 1.2rem; font-weight: 600; color: var(--c-black); margin-bottom: 0.3rem;">ZAKÁZKA DOKONČENA</div>
-          <div style="font-size: 0.85rem; color: var(--c-grey);">Tato zakázka byla již vyřízena</div>
+      <div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 0.75rem; margin-bottom: 1rem; border-radius: 4px;">
+        <div style="text-align: center;">
+          <div style="font-size: 0.85rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem;">Zakázka dokončena</div>
+          <div style="font-size: 0.75rem; color: #666;">Tato zakázka byla již vyřízena</div>
         </div>
       </div>
-      
+
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #333; color: white; font-weight: 600; font-size: 0.85rem;" onclick="reopenOrder('${record.id}')">
-          🔄 Znovu otevřít
+          Znovu otevřít
         </button>
 
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showContactMenu('${record.id}')">Kontaktovat</button>
@@ -468,18 +467,18 @@ async function showDetail(recordOrId) {
       ${record.documents && record.documents.length > 0 ? `
         <button class="btn" style="background: #444; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; margin-top: 0.25rem;"
                 onclick="window.open('${record.documents[0].file_path}', '_blank')">
-          📄 Otevřít PDF
+          Otevřít PDF
         </button>
       ` : ''}
       <div style="width: 100%; margin-top: 0.25rem;">
         ${record.documents && record.documents.length > 0 ? `
           <button class="btn" style="background: #444; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;"
                   onclick="window.open('${record.documents[0].file_path}', '_blank')">
-            📄 Otevřít PDF protokol
+            Otevřít PDF protokol
           </button>
         ` : `
-          <div style="background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 6px; padding: 0.75rem; text-align: center; color: #6c757d; font-size: 0.8rem;">
-            ℹ️ PDF protokol ještě nebyl vytvořen
+          <div style="background: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 4px; padding: 0.5rem; text-align: center; color: #666; font-size: 0.75rem;">
+            PDF protokol ještě nebyl vytvořen
           </div>
         `}
       </div>
@@ -532,14 +531,14 @@ async function reopenOrder(id) {
   const product = Utils.getProduct(record);
   
   const confirmed = window.confirm(
-    `⚠️ ZNOVU OTEVŘÍT ZAKÁZKU?\n\n` +
+    `ZNOVU OTEVŘÍT ZAKÁZKU?\n\n` +
     `Zákazník: ${customerName}\n` +
     `Produkt: ${product}\n\n` +
     `Tato akce:\n` +
-    `✓ Změní stav na NOVÁ (žlutá)\n` +
-    `✓ Zruší původní termín návštěvy\n` +
-    `✓ Umožní naplánovat novou návštěvu\n\n` +
-    `⚠️ Použijte pouze v případě, že se objevil nový problém u této zakázky.\n\n` +
+    `- Změní stav na NOVÁ (žlutá)\n` +
+    `- Zruší původní termín návštěvy\n` +
+    `- Umožní naplánovat novou návštěvu\n\n` +
+    `Použijte pouze v případě, že se objevil nový problém u této zakázky.\n\n` +
     `Opravdu chcete pokračovat?`
   );
   
