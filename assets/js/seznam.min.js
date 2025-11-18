@@ -1569,21 +1569,21 @@ async function showCustomerDetail(id) {
         </div>
       </div>
 
-      <!-- POPIS PROBLÉMU -->
+      <!-- DOPLŇUJÍCÍ INFORMACE OD PRODEJCE -->
       <div style="margin-bottom: 1rem;">
-        <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému:</label>
-        <div onclick="showTextOverlay('popis_problemu')"
-             style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem; min-height: 60px; background: white; cursor: pointer; white-space: pre-wrap; color: ${description ? '#1a1a1a' : '#999'};">
-          ${description || 'Klikněte pro zobrazení/zadání popisu problému'}
+        <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace od prodejce:</label>
+        <div onclick="showTextOverlay('doplnujici_info')"
+             style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem; min-height: 50px; background: white; cursor: pointer; white-space: pre-wrap; color: ${doplnujici_info ? '#1a1a1a' : '#999'};">
+          ${doplnujici_info || 'Klikněte pro zobrazení/zadání doplňujících informací od prodejce'}
         </div>
       </div>
 
-      <!-- DOPLŇUJÍCÍ INFO -->
+      <!-- POPIS PROBLÉMU OD ZÁKAZNÍKA -->
       <div style="margin-bottom: 2rem;">
-        <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace:</label>
-        <div onclick="showTextOverlay('doplnujici_info')"
-             style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem; min-height: 50px; background: white; cursor: pointer; white-space: pre-wrap; color: ${doplnujici_info ? '#1a1a1a' : '#999'};">
-          ${doplnujici_info || 'Klikněte pro zobrazení/zadání doplňujících informací'}
+        <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému od zákazníka:</label>
+        <div onclick="showTextOverlay('popis_problemu')"
+             style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem; min-height: 60px; background: white; cursor: pointer; white-space: pre-wrap; color: ${description ? '#1a1a1a' : '#999'};">
+          ${description || 'Klikněte pro zobrazení/zadání popisu problému od zákazníka'}
         </div>
       </div>
 
