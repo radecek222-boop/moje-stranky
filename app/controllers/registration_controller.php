@@ -70,7 +70,36 @@ try {
     $columns = db_get_table_columns($pdo, 'wgs_users');
     $now = date('Y-m-d H:i:s');
 
+    // CRITICAL: Vygenerovat user_id podle role
+    $rolePrefix = ($role === 'technik') ? 'TCH' : 'PRT';
+    $currentYear = date('Y');
+
+    // Najít maximální číslo pro danou roli v tomto roce
+    $maxIdStmt = $pdo->prepare("
+        SELECT user_id
+        FROM wgs_users
+        WHERE user_id LIKE :prefix
+        ORDER BY user_id DESC
+        LIMIT 1
+    ");
+    $maxIdStmt->execute([':prefix' => $rolePrefix . $currentYear . '%']);
+    $maxIdRow = $maxIdStmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($maxIdRow && preg_match('/' . $rolePrefix . $currentYear . '(\d+)/', $maxIdRow['user_id'], $matches)) {
+        $nextNumber = (int)$matches[1] + 1;
+    } else {
+        $nextNumber = 1;
+    }
+
+    $generatedUserId = $rolePrefix . $currentYear . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
     $userData = [];
+
+    // CRITICAL: Přidat vygenerované user_id
+    if (in_array('user_id', $columns, true)) {
+        $userData['user_id'] = $generatedUserId;
+    }
+
     if (in_array('name', $columns, true)) {
         $userData['name'] = $name;
     }
