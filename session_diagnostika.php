@@ -4,9 +4,18 @@
  *
  * Tento skript zobrazí aktuální stav session a pomůže identifikovat
  * problémy s přihlášením technika na photocustomer.php
+ *
+ * BEZPEČNOST: Pouze pro přihlášené uživatele (admin nebo technik)
  */
 
 require_once "init.php";
+
+// BEZPEČNOST: Kontrola přihlášení (stejná logika jako photocustomer.php)
+$isLoggedIn = isset($_SESSION['user_id']) || (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true);
+if (!$isLoggedIn) {
+    http_response_code(403);
+    die('<html><head><meta charset="UTF-8"><title>Přístup odepřen</title></head><body style="font-family: sans-serif; text-align: center; padding: 50px;"><h1>🔒 Přístup odepřen</h1><p>Tento diagnostický nástroj je dostupný pouze pro přihlášené uživatele.</p><a href="login.php" style="display: inline-block; padding: 10px 20px; background: #2D5016; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px;">Přihlásit se</a></body></html>');
+}
 
 ?>
 <!DOCTYPE html>
@@ -103,17 +112,67 @@ require_once "init.php";
     <?php
     // Kontrola session ID
     $sessionId = session_id();
+
+    // Kontrola správnosti session nastavení
+    $cookieLifetime = ini_get('session.cookie_lifetime');
+    $gcMaxlifetime = ini_get('session.gc_maxlifetime');
+    $cookieSecure = ini_get('session.cookie_secure');
+    $cookieHttponly = ini_get('session.cookie_httponly');
+    $cookieSamesite = ini_get('session.cookie_samesite');
+
+    $sessionNastaveniOk = true;
+    $sessionProblemy = [];
+
+    if ($cookieLifetime != 3600 && $cookieLifetime != 0) {
+        $sessionNastaveniOk = false;
+        $sessionProblemy[] = "Cookie Lifetime je {$cookieLifetime} místo 3600 nebo 0";
+    }
+    if ($gcMaxlifetime != 3600) {
+        $sessionNastaveniOk = false;
+        $sessionProblemy[] = "GC Maxlifetime je {$gcMaxlifetime} místo 3600";
+    }
+    if (!$cookieHttponly) {
+        $sessionNastaveniOk = false;
+        $sessionProblemy[] = "Cookie HTTPOnly není nastaveno (bezpečnostní riziko)";
+    }
+    if (empty($cookieSamesite) || $cookieSamesite !== 'Lax') {
+        $sessionNastaveniOk = false;
+        $sessionProblemy[] = "Cookie SameSite není 'Lax' (session se může ztrácet)";
+    }
     ?>
 
     <h2>📋 Session informace</h2>
+
+    <?php if (!$sessionNastaveniOk): ?>
+    <div class="section error">
+        <strong>⚠️ Session nastavení má PROBLÉMY:</strong>
+        <ul>
+            <?php foreach ($sessionProblemy as $problem): ?>
+                <li><?php echo htmlspecialchars($problem); ?></li>
+            <?php endforeach; ?>
+        </ul>
+        <p style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px;">
+            <strong>🔧 ŘEŠENÍ:</strong><br>
+            1. Opraveno v <code>init.php</code> (použití <code>session_set_cookie_params()</code>)<br>
+            2. <strong style="color: #dc3545;">→ ODHLASTE SE A ZNOVU SE PŘIHLASTE!</strong> (session se musí restartovat)<br>
+            3. Obnovte tuto stránku a zkontrolujte, zda se vše opravilo
+        </p>
+    </div>
+    <?php else: ?>
+    <div class="section success">
+        <strong>✅ Session nastavení je SPRÁVNÉ!</strong><br>
+        Všechny parametry jsou nastaveny korektně.
+    </div>
+    <?php endif; ?>
+
     <div class="section">
         <div><span class="key">Session ID:</span> <span class="value"><code><?php echo htmlspecialchars($sessionId); ?></code></span></div>
         <div><span class="key">Session Status:</span> <span class="value"><?php echo session_status() === PHP_SESSION_ACTIVE ? '✅ AKTIVNÍ' : '❌ NEAKTIVNÍ'; ?></span></div>
-        <div><span class="key">Cookie Lifetime:</span> <span class="value"><?php echo ini_get('session.cookie_lifetime'); ?> sekund</span></div>
-        <div><span class="key">GC Maxlifetime:</span> <span class="value"><?php echo ini_get('session.gc_maxlifetime'); ?> sekund</span></div>
-        <div><span class="key">Cookie Secure:</span> <span class="value"><?php echo ini_get('session.cookie_secure') ? '✅ ANO (HTTPS)' : '⚠️ NE'; ?></span></div>
-        <div><span class="key">Cookie HTTPOnly:</span> <span class="value"><?php echo ini_get('session.cookie_httponly') ? '✅ ANO' : '❌ NE'; ?></span></div>
-        <div><span class="key">Cookie SameSite:</span> <span class="value"><?php echo ini_get('session.cookie_samesite'); ?></span></div>
+        <div><span class="key">Cookie Lifetime:</span> <span class="value"><?php echo $cookieLifetime; ?> sekund <?php echo ($cookieLifetime == 3600 || $cookieLifetime == 0) ? '✅' : '❌'; ?></span></div>
+        <div><span class="key">GC Maxlifetime:</span> <span class="value"><?php echo $gcMaxlifetime; ?> sekund <?php echo $gcMaxlifetime == 3600 ? '✅' : '❌'; ?></span></div>
+        <div><span class="key">Cookie Secure:</span> <span class="value"><?php echo $cookieSecure ? '✅ ANO (HTTPS)' : '⚠️ NE'; ?></span></div>
+        <div><span class="key">Cookie HTTPOnly:</span> <span class="value"><?php echo $cookieHttponly ? '✅ ANO' : '❌ NE'; ?></span></div>
+        <div><span class="key">Cookie SameSite:</span> <span class="value"><?php echo $cookieSamesite ?: '❌ NENÍ NASTAVENO'; ?> <?php echo ($cookieSamesite === 'Lax') ? '✅' : '❌'; ?></span></div>
     </div>
 
     <h2>👤 Přihlášení</h2>

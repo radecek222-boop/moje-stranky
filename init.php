@@ -50,18 +50,24 @@ if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
 
 // Session configuration - nastavujeme správně a spouštíme session
 if (session_status() === PHP_SESSION_NONE) {
-    ini_set('session.cookie_httponly', 1);
-    ini_set('session.use_only_cookies', 1);
-
-    // cookie_secure pouze pro HTTPS
+    // Detekce HTTPS
     $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
                 || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
 
-    ini_set('session.cookie_secure', $isHttps ? 1 : 0);
-    ini_set('session.cookie_path', '/');
-    ini_set('session.cookie_samesite', 'Lax');
+    // ✅ FIX: Použití session_set_cookie_params() místo ini_set()
+    // ini_set() nefunguje správně pro session cookie nastavení
+    session_set_cookie_params([
+        'lifetime' => 3600,              // 1 hodina
+        'path' => '/',                   // Celá doména
+        'domain' => '',                  // Aktuální doména
+        'secure' => $isHttps,            // Pouze HTTPS (pokud je k dispozici)
+        'httponly' => true,              // Ochrana proti XSS
+        'samesite' => 'Lax'              // Ochrana proti CSRF
+    ]);
+
+    // Nastavení garbage collection
     ini_set('session.gc_maxlifetime', 3600);
-    ini_set('session.cookie_lifetime', 3600);
+    ini_set('session.use_only_cookies', 1);
 
     session_start();
 }
