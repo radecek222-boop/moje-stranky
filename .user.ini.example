@@ -1,0 +1,27 @@
+; ======================================
+; WGS Service - PHP-FPM Session Configuration
+; ======================================
+; Tento soubor VYNUCUJE session nastavení na úrovni PHP-FPM
+; Má PŘEDNOST před session_set_cookie_params() v init.php
+; Aplikuje se OKAMŽITĚ po uložení (5min cache default)
+
+; Session cookie parametry - KRITICKÁ OPRAVA pro problém s přístupem technika
+session.cookie_lifetime = 3600
+session.gc_maxlifetime = 3600
+session.cookie_httponly = On
+session.cookie_secure = On
+session.cookie_samesite = Lax
+session.use_only_cookies = On
+session.cookie_path = /
+
+; Garbage collection
+session.gc_probability = 1
+session.gc_divisor = 100
+
+; Session handler
+session.save_handler = files
+
+; Error reporting (produkce)
+display_errors = Off
+log_errors = On
+error_log = logs/php_errors.log
