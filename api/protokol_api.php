@@ -376,11 +376,14 @@ function saveProtokolData($data) {
  * Odeslání emailu zákazníkovi pomocí PHPMailer
  */
 function sendEmailToCustomer($data) {
-    // DOČASNÉ LOGOVÁNÍ - debug
-    error_log('=== SEND EMAIL DEBUG ===');
-    error_log('Přijatá data: ' . print_r($data, true));
-    error_log('reklamace_id value: ' . var_export($data['reklamace_id'] ?? 'UNDEFINED', true));
-    error_log('=======================');
+    // BEZPEČNÉ LOGOVÁNÍ - pouze metadata (bez PDF payloadu)
+    $pdfSize = isset($data['complete_pdf']) ? strlen($data['complete_pdf']) : 0;
+    error_log(sprintf(
+        'Email send: reklamace_id=%s, pdf_size=%d bytes (%.2f MB)',
+        $data['reklamace_id'] ?? 'UNDEFINED',
+        $pdfSize,
+        $pdfSize / (1024 * 1024)
+    ));
 
     // Načíst PHPMailer
     $autoloadPath = __DIR__ . '/../vendor/autoload.php';

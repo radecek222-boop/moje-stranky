@@ -1620,41 +1620,28 @@ async function showCustomerDetail(id) {
       <!-- PDF DOKUMENTY -->
       ${(() => {
         const docs = CURRENT_RECORD.documents || [];
-        const protokolPdf = docs.find(d => d.document_type === 'protokol_pdf');
-        const fotkyPdf = docs.find(d => d.document_type === 'photos_pdf');
+        // Hledat complete_report (nový formát) nebo fallback na jakýkoliv PDF dokument
+        const completeReport = docs.find(d => d.document_type === 'complete_report');
+        const anyPdf = docs.length > 0 ? docs[0] : null;
+        const pdfDoc = completeReport || anyPdf;
 
-        if (docs.length === 0) {
+        if (!pdfDoc) {
           return `
             <div style="padding: 0.75rem; text-align: center; background: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 4px; margin-bottom: 1rem;">
-              <p style="margin: 0; color: #6c757d; font-size: 0.8rem;">PDF dokumenty ještě nebyly vytvořeny</p>
+              <p style="margin: 0; color: #6c757d; font-size: 0.8rem;">PDF report ještě nebyl vytvořen</p>
             </div>
           `;
         }
 
-        let html = '<div style="margin-bottom: 1rem;">';
-        html += '<label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF dokumenty:</label>';
-        html += '<div style="display: flex; gap: 0.5rem;">';
-
-        if (protokolPdf) {
-          html += `
-            <button onclick="window.open('${protokolPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
-                    style="flex: 1; padding: 0.5rem; background: #1a1a1a; color: white; border: none; border-radius: 3px; font-size: 0.8rem; cursor: pointer; font-weight: 600;">
-              PDF protokol
+        return `
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF Report:</label>
+            <button onclick="window.open('${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
+                    style="width: 100%; padding: 0.75rem; background: #2D5016; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer; font-weight: 600;">
+              📄 Otevřít PDF Report
             </button>
-          `;
-        }
-
-        if (fotkyPdf) {
-          html += `
-            <button onclick="window.open('${fotkyPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
-                    style="flex: 1; padding: 0.5rem; background: #444; color: white; border: none; border-radius: 3px; font-size: 0.8rem; cursor: pointer; font-weight: 600;">
-              PDF fotky
-            </button>
-          `;
-        }
-
-        html += '</div></div>';
-        return html;
+          </div>
+        `;
       })()}
 
       ${CURRENT_USER.is_admin ? `
@@ -1974,53 +1961,33 @@ async function showNotes(record) {
       </div>
 
       <div style="background: var(--c-bg); border: 1px solid var(--c-border); padding: 1rem; margin-top: 1.5rem;">
-        <h3 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-black); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border);">📄 PDF Dokumenty</h3>
+        <h3 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-black); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border);">📄 PDF Report</h3>
         ${(() => {
-          // Rozdělit dokumenty podle typu
           const docs = CURRENT_RECORD.documents || [];
-          const protokolPdf = docs.find(d => d.document_type === 'protokol_pdf');
-          const fotkyPdf = docs.find(d => d.document_type === 'photos_pdf');
+          // Hledat complete_report (nový formát) nebo fallback na jakýkoliv PDF dokument
+          const completeReport = docs.find(d => d.document_type === 'complete_report');
+          const anyPdf = docs.length > 0 ? docs[0] : null;
+          const pdfDoc = completeReport || anyPdf;
 
-          if (docs.length === 0) {
+          if (!pdfDoc) {
             return `
               <div style="padding: 1rem; text-align: center; background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 4px;">
-                <p style="margin: 0; color: #6c757d; font-size: 0.9rem;">ℹ️ PDF dokumenty ještě nebyly vytvořeny</p>
+                <p style="margin: 0; color: #6c757d; font-size: 0.9rem;">ℹ️ PDF report ještě nebyl vytvořen</p>
                 <p style="margin: 0.3rem 0 0 0; font-size: 0.8rem; color: #adb5bd;">Vytvoří se po dokončení servisu</p>
               </div>
             `;
           }
 
-          let html = '';
-
-          // PDF Protokolu
-          if (protokolPdf) {
-            html += `
-              <button onclick="window.open('${protokolPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
-                      class="btn"
-                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #1a1a1a; color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-bottom: 0.25rem;">
-                📥 PDF protokol
-              </button>
-              <p style="margin: 0 0 0.5rem 0; font-size: 0.75rem; color: var(--c-grey); text-align: center;">
-                Vytvořeno: ${new Date(protokolPdf.uploaded_at || protokolPdf.created_at).toLocaleString('cs-CZ')}
-              </p>
-            `;
-          }
-
-          // PDF Fotek
-          if (fotkyPdf) {
-            html += `
-              <button onclick="window.open('${fotkyPdf.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
-                      class="btn"
-                      style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #444; color: white; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
-                📷 PDF fotodokumentace
-              </button>
-              <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: var(--c-grey); text-align: center;">
-                Vytvořeno: ${new Date(fotkyPdf.uploaded_at || fotkyPdf.created_at).toLocaleString('cs-CZ')}
-              </p>
-            `;
-          }
-
-          return html;
+          return `
+            <button onclick="window.open('${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
+                    class="btn"
+                    style="width: 100%; padding: 0.75rem; background: #2D5016; color: white; border: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; border-radius: 4px;">
+              📄 Otevřít PDF Report
+            </button>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.75rem; color: var(--c-grey); text-align: center;">
+              Vytvořeno: ${new Date(pdfDoc.uploaded_at || pdfDoc.created_at).toLocaleString('cs-CZ')}
+            </p>
+          `;
         })()}
 
       ${CURRENT_USER.is_admin ? `
