@@ -217,6 +217,176 @@ try {
             'message' => 'Uživatel smazán'
         ]);
 
+    } elseif ($method === 'GET' && $action === 'get') {
+        // Získání detailu konkrétního uživatele
+        $userId = $_GET['user_id'] ?? null;
+
+        if (!$userId || !is_numeric($userId)) {
+            throw new Exception('Neplatné ID uživatele');
+        }
+
+        // BEZPEČNOST: Zjistit existující sloupce
+        $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
+        $existingColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        // Sestavit SELECT pouze z existujících sloupců
+        $selectColumns = array_intersect([
+            'id', 'user_id', 'name', 'email', 'phone', 'address', 'role',
+            'status', 'created_at', 'updated_at', 'last_login'
+        ], $existingColumns);
+
+        if (empty($selectColumns)) {
+            throw new Exception('Tabulka wgs_users nemá požadované sloupce');
+        }
+
+        $sql = "SELECT " . implode(', ', $selectColumns) . "
+                FROM wgs_users
+                WHERE id = :id LIMIT 1";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':id' => $userId]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$user) {
+            throw new Exception('Uživatel nenalezen');
+        }
+
+        // Doplnit chybějící sloupce s defaultními hodnotami
+        if (!isset($user['name'])) $user['name'] = $user['email'];
+        if (!isset($user['phone'])) $user['phone'] = '';
+        if (!isset($user['address'])) $user['address'] = '';
+        if (!isset($user['role'])) $user['role'] = 'user';
+        if (!isset($user['status'])) $user['status'] = 'active';
+
+        // Nikdy nevrátit heslo!
+        unset($user['password_hash']);
+        unset($user['password']);
+
+        echo json_encode([
+            'status' => 'success',
+            'user' => $user
+        ]);
+
+    } elseif ($method === 'POST' && $action === 'update') {
+        // Úprava uživatele (data už načtena výše)
+        $userId = $data['user_id'] ?? null;
+        $name = $data['name'] ?? '';
+        $email = $data['email'] ?? '';
+        $phone = $data['phone'] ?? '';
+        $address = $data['address'] ?? '';
+        $role = $data['role'] ?? '';
+
+        if (!$userId || !is_numeric($userId)) {
+            throw new Exception('Neplatné ID uživatele');
+        }
+
+        // Validace
+        if (!$name || !$email) {
+            throw new Exception('Jméno a email jsou povinné');
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new Exception('Neplatný formát emailu');
+        }
+
+        // Validace telefonu (pokud je zadán)
+        if (!empty($phone)) {
+            if (!preg_match('/^(\+420|\+421|00420|00421)?[0-9]{9}$/', preg_replace('/\s+/', '', $phone))) {
+                throw new Exception('Neplatný formát telefonního čísla');
+            }
+            $phone = preg_replace('/\s+/', '', $phone);
+        }
+
+        // Validace adresy
+        if (!empty($address) && strlen($address) > 255) {
+            throw new Exception('Adresa je příliš dlouhá (max 255 znaků)');
+        }
+        $address = strip_tags($address);
+
+        $allowedRoles = ['prodejce', 'technik', 'admin'];
+        if ($role && !in_array($role, $allowedRoles)) {
+            throw new Exception('Neplatná role');
+        }
+
+        // Kontrola zda email už neexistuje (u jiného uživatele)
+        $stmt = $pdo->prepare("SELECT id FROM wgs_users WHERE email = :email AND id != :id");
+        $stmt->execute([':email' => $email, ':id' => $userId]);
+        if ($stmt->fetch()) {
+            throw new Exception('Email již používá jiný uživatel');
+        }
+
+        // Sestavit UPDATE pouze pro existující sloupce
+        $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
+        $existingColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        $updateParts = [];
+        $params = [':id' => $userId];
+
+        if (in_array('name', $existingColumns)) {
+            $updateParts[] = "name = :name";
+            $params[':name'] = $name;
+        }
+        if (in_array('email', $existingColumns)) {
+            $updateParts[] = "email = :email";
+            $params[':email'] = $email;
+        }
+        if (in_array('phone', $existingColumns)) {
+            $updateParts[] = "phone = :phone";
+            $params[':phone'] = $phone;
+        }
+        if (in_array('address', $existingColumns)) {
+            $updateParts[] = "address = :address";
+            $params[':address'] = $address;
+        }
+        if ($role && in_array('role', $existingColumns)) {
+            $updateParts[] = "role = :role";
+            $params[':role'] = $role;
+        }
+        if (in_array('updated_at', $existingColumns)) {
+            $updateParts[] = "updated_at = NOW()";
+        }
+
+        if (empty($updateParts)) {
+            throw new Exception('Žádné sloupce k aktualizaci');
+        }
+
+        $sql = "UPDATE wgs_users SET " . implode(', ', $updateParts) . " WHERE id = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Uživatel aktualizován'
+        ]);
+
+    } elseif ($method === 'POST' && $action === 'update_password') {
+        // Změna hesla (data už načtena výše)
+        $userId = $data['user_id'] ?? null;
+        $newPassword = $data['new_password'] ?? '';
+
+        if (!$userId || !is_numeric($userId)) {
+            throw new Exception('Neplatné ID uživatele');
+        }
+
+        if (strlen($newPassword) < 8) {
+            throw new Exception('Heslo musí mít alespoň 8 znaků');
+        }
+
+        $stmt = $pdo->prepare("
+            UPDATE wgs_users
+            SET password_hash = :password_hash
+            WHERE id = :id
+        ");
+        $stmt->execute([
+            ':password_hash' => password_hash($newPassword, PASSWORD_BCRYPT),
+            ':id' => $userId
+        ]);
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Heslo změněno'
+        ]);
+
     } elseif ($method === 'POST' && $action === 'update_status') {
         // Změna statusu uživatele (active/inactive - data už načtena výše)
         $userId = $data['user_id'] ?? null;
