@@ -93,14 +93,14 @@ try {
 
     <!-- External CSS -->
     <!-- Unified Design System -->
-  <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/admin.css">
-<link rel="stylesheet" href="assets/css/admin-header.css">
-<link rel="stylesheet" href="assets/css/admin-notifications.css">
+  <link rel="stylesheet" href="/assets/css/styles.min.css">
+  <link rel="stylesheet" href="/assets/css/admin.css">
+<link rel="stylesheet" href="/assets/css/admin-header.css">
+<link rel="stylesheet" href="/assets/css/admin-notifications.css">
 
   <!-- Error Handler - zachytává všechny chyby -->
-  <script src="assets/js/error-handler.js"></script>
-  <script src="assets/js/html-sanitizer.js"></script>
+  <script src="/assets/js/error-handler.js"></script>
+  <script src="/assets/js/html-sanitizer.js"></script>
 </head>
 
 <body<?php if ($embedMode): ?> class="embed-mode"<?php endif; ?>>
@@ -926,12 +926,12 @@ function loadNotifContent(type, body) {
 </div>
 
 <!-- External JavaScript -->
-<script src="assets/js/logger.js"></script>
-<script src="assets/js/csrf-auto-inject.js"></script>
-<script src="assets/js/utils.js"></script>
-<script src="assets/js/admin-notifications.js"></script>
-<script src="assets/js/smtp-config.js"></script>
-<script src="assets/js/admin.js"></script>
+<script src="/assets/js/logger.js"></script>
+<script src="/assets/js/csrf-auto-inject.js"></script>
+<script src="/assets/js/utils.js"></script>
+<script src="/assets/js/admin-notifications.js"></script>
+<script src="/assets/js/smtp-config.js"></script>
+<script src="/assets/js/admin.js"></script>
 
 <!-- MODAL: Edit Notification -->
 <div class="wgs-modal" id="editNotificationModal" style="display: none;">
