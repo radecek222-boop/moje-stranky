@@ -11,10 +11,14 @@ if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
     error_log("=== PHOTOCUSTOMER.PHP DEBUG END ===");
 }
 
-// BEZPEČNOST: Kontrola přihlášení (admin nebo technik)
-$isLoggedIn = isset($_SESSION['user_id']) || (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true);
-if (!$isLoggedIn) {
-    error_log("PHOTOCUSTOMER: Přístup odepřen - přesměrování na login");
+// BEZPEČNOST: Kontrola přístupu - POUZE admin a technik
+// Prodejci a nepřihlášení uživatelé NEMAJÍ přístup k fotodokumentaci
+$role = $_SESSION['role'] ?? '';
+$isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+$isTechnik = in_array(strtolower($role), ['technik', 'technician']);
+
+if (!$isAdmin && !$isTechnik) {
+    error_log("PHOTOCUSTOMER: Přístup odepřen - role: {$role}, is_admin: " . ($isAdmin ? 'true' : 'false'));
     header('Location: login.php?redirect=photocustomer.php');
     exit;
 }
