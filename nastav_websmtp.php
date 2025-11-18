@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['setup'])) {
                 SET smtp_port = 25,
                     smtp_username = 'wgs-service.cz',
                     smtp_password = :password,
-                    smtp_encryption = '',
+                    smtp_encryption = NULL,
                     smtp_from_email = 'reklamace@wgs-service.cz',
                     smtp_from_name = 'White Glove Service',
                     is_active = 1,
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['setup'])) {
                     created_at, updated_at
                 ) VALUES (
                     'websmtp.cesky-hosting.cz', 25, 'wgs-service.cz', :password,
-                    '', 'reklamace@wgs-service.cz', 'White Glove Service', 1,
+                    NULL, 'reklamace@wgs-service.cz', 'White Glove Service', 1,
                     NOW(), NOW()
                 )
             ");
