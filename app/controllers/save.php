@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
 require_once __DIR__ . '/../../includes/db_metadata.php';
+require_once __DIR__ . '/../../includes/email_domain_validator.php';
 
 /**
  * Generuje unikátní ID pro reklamaci ve formátu WGSyymmdd-XXXXXX
@@ -222,8 +223,13 @@ function handleUpdate(PDO $pdo, array $input): array
                 break;
             case 'email':
                 $email = trim((string) $value);
-                if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                    throw new Exception('Neplatný formát emailu.');
+                if ($email !== '') {
+                    // Validace formátu a kontrola existence domény
+                    $emailValidation = validateAndSanitizeEmail($email, true);
+                    if (!$emailValidation['valid']) {
+                        throw new Exception($emailValidation['error']);
+                    }
+                    $email = $emailValidation['email'];
                 }
                 $updateData[$field] = $email === '' ? null : $email;
                 break;
@@ -426,12 +432,15 @@ try {
 
     // Dodatečná validace emailu - pouze pokud je vyplněn
     if (!empty($email)) {
-        // Validace formátu
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new Exception('Neplatný formát emailu');
+        // Validace formátu a kontrola existence domény (MX záznamy)
+        $emailValidation = validateAndSanitizeEmail($email, true);
+
+        if (!$emailValidation['valid']) {
+            throw new Exception($emailValidation['error']);
         }
-        // Sanitizace pro bezpečné uložení do DB
-        $email = filter_var($email, FILTER_SANITIZE_EMAIL);
+
+        // Použít sanitizovaný email
+        $email = $emailValidation['email'];
     }
 
     // Validace povinných polí
