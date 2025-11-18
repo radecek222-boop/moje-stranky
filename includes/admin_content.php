@@ -217,14 +217,9 @@ $pageNames = [
 <script src="/assets/js/csrf-auto-inject.js"></script>
 <script>
 // Debug mode - set to false in production
-const DEBUG_MODE = false;
+if (typeof DEBUG_MODE === 'undefined') { var DEBUG_MODE = false; }
 
-// Show page
-/**
- * ShowPage
- */
-
-require_once __DIR__ . '/../init.php';
+// Zobrazení stránky
 function showPage(page) {
     // Hide all pages
     document.querySelectorAll('.page-content').forEach(el => {
@@ -251,12 +246,7 @@ function showPage(page) {
     }
 }
 
-// Switch language tab
-/**
- * SwitchLang
- */
-
-require_once __DIR__ . '/../init.php';
+// Přepínání jazykových záložek
 function switchLang(textId, lang) {
     // Hide all lang contents for this text
     document.querySelectorAll(`[id^="text-${textId}-"]`).forEach(el => {
@@ -281,12 +271,7 @@ function switchLang(textId, lang) {
     }
 }
 
-// Save text
-/**
- * SaveText
- */
-
-require_once __DIR__ . '/../init.php';
+// Uložení textu
 async function saveText(textId) {
     const statusEl = document.getElementById(`save-status-${textId}`);
     statusEl.style.display = 'block';
