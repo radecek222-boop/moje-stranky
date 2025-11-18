@@ -401,7 +401,7 @@ function getPriorityBadge($priority) {
 <script src="/assets/js/csrf-auto-inject.js"></script>
 <script>
 // Debug mode - set to false in production
-const DEBUG_MODE = false;
+if (typeof DEBUG_MODE === 'undefined') { var DEBUG_MODE = false; }
 
 // Helper function to check API response success
 /**

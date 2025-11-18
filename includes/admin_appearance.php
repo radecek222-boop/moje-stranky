@@ -632,7 +632,7 @@ input:checked + .toggle-slider:before {
 
 <script>
 // Debug mode - set to false in production
-const DEBUG_MODE = false;
+if (typeof DEBUG_MODE === 'undefined') { var DEBUG_MODE = false; }
 
 // Initialize všech controlů
 document.addEventListener('DOMContentLoaded', () => {

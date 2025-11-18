@@ -360,7 +360,7 @@ endif;
 
 <script>
 // Debug mode - set to false in production
-const DEBUG_MODE = false;
+if (typeof DEBUG_MODE === 'undefined') { var DEBUG_MODE = false; }
 
 // CSRF Token from session
 const CSRF_TOKEN = <?= json_encode($_SESSION['csrf_token'] ?? '') ?>;
