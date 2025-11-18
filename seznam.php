@@ -133,6 +133,48 @@ if (!$isLoggedIn && !$isAdmin) {
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+/* ✅ MAZÁNÍ FOTEK: Křížek na miniatuře */
+.foto-wrapper {
+  position: relative;
+}
+
+.foto-delete-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 28px;
+  height: 28px;
+  background: rgba(220, 38, 38, 0.95);
+  color: white;
+  border: 2px solid white;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  padding: 0;
+  font-weight: bold;
+}
+
+.foto-delete-btn:hover {
+  background: rgba(185, 28, 28, 1);
+  transform: scale(1.1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+}
+
+.foto-delete-btn:active {
+  transform: scale(0.95);
+}
+
+.foto-wrapper:hover .foto-delete-btn {
+  opacity: 1;
+}
 </style>
 
 <!-- Current User Data for JavaScript -->
