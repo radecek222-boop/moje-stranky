@@ -440,7 +440,7 @@ function initUserManagement() {
 
 // Control Center Unified - Version Check
 // Debug mode - set to false in production
-const DEBUG_MODE = false;
+if (typeof DEBUG_MODE === 'undefined') { var DEBUG_MODE = false; }
 if (DEBUG_MODE) {
     console.log('%c🔧 Control Center v2025.11.12-1430 loaded', 'background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;');
     console.log('✅ executeAction is ASYNC + event.target captured BEFORE await');
