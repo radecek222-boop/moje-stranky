@@ -351,10 +351,10 @@ try {
 
                             <!-- Akce -->
                             <div style="border-top: 1px solid #e0e0e0; padding-top: 0.75rem; margin-top: 0.75rem; text-align: center;">
-                                <a href="admin.php?page=notifications#<?= $sablona['id'] ?>"
-                                   style="display: inline-block; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-radius: 3px; transition: all 0.2s;">
+                                <button onclick="otevritNotifikace('<?= $sablona['id'] ?>')"
+                                   style="display: inline-block; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-radius: 3px; transition: all 0.2s; border: none; cursor: pointer;">
                                     Upravit šablonu
-                                </a>
+                                </button>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -760,6 +760,21 @@ function zobrazEmailAlert(message, type) {
 // Initialize email management when section is loaded
 if (document.getElementById('section-management')) {
     updateSelectedEmailCount();
+}
+
+// Otevřít Notifications tab v parent admin panelu
+function otevritNotifikace(sablona_id) {
+    if (window.parent && window.parent !== window) {
+        // Pokud jsme v iframe, komunikujeme s parent oknem
+        window.parent.postMessage({
+            action: 'switchTab',
+            tab: 'notifications',
+            highlightId: sablona_id
+        }, '*');
+    } else {
+        // Pokud jsme v hlavním okně, přejdeme přímo
+        window.location.href = '/admin.php?tab=notifications#' + sablona_id;
+    }
 }
 </script>
 

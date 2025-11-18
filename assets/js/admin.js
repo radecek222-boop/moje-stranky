@@ -731,55 +731,14 @@ function loadKeysModal() {
         return;
     }
 
+    // Načíst kompletní Security centrum přes iframe
     modalBody.innerHTML = `
-        <div class="cc-actions">
-            <button class="btn btn-sm btn-success" onclick="createKey()">+ Vytvořit nový klíč</button>
-            <button class="btn btn-sm" onclick="loadKeysModal()">Obnovit</button>
-        </div>
-        <div id="keysTableContainer">Načítání klíčů...</div>
+        <iframe
+            src="/includes/admin_security.php?embed=1"
+            style="width: 100%; height: 80vh; border: none; border-radius: 4px;"
+            onload="console.log('Security centrum načteno')"
+        ></iframe>
     `;
-
-    // Load keys
-    fetch('api/admin_api.php?action=list_keys')
-        .then(async r => {
-            if (!r.ok) throw new Error(`HTTP ${r.status}`);
-            return r.json();
-        })
-        .then(data => {
-            const container = document.getElementById('keysTableContainer');
-
-            if (isSuccess(data) && data.keys && data.keys.length > 0) {
-                let html = '<table class="cc-table"><thead><tr>';
-                html += '<th>Klíč</th><th>Typ</th><th>Použití</th><th>Status</th><th>Vytvořen</th><th>Akce</th>';
-                html += '</tr></thead><tbody>';
-
-                data.keys.forEach(key => {
-                    // Escapování pro XSS ochranu
-                    const safeKeyCode = typeof escapeHTML === 'function' ? escapeHTML(key.key_code) : key.key_code;
-                    const safeKeyType = typeof escapeHTML === 'function' ? escapeHTML(key.key_type) : key.key_type;
-
-                    html += '<tr>';
-                    html += `<td><code>${safeKeyCode}</code></td>`;
-                    html += `<td><span class="badge badge-${safeKeyType}">${safeKeyType}</span></td>`;
-                    html += `<td>${parseInt(key.usage_count) || 0} / ${parseInt(key.max_usage) || '∞'}</td>`;
-                    html += `<td><span class="badge badge-${key.is_active ? 'active' : 'inactive'}">${key.is_active ? 'Aktivní' : 'Neaktivní'}</span></td>`;
-                    html += `<td>${new Date(key.created_at).toLocaleDateString('cs-CZ')}</td>`;
-                    html += `<td><button class="btn btn-sm btn-danger" onclick="deleteKey('${safeKeyCode}')">Smazat</button></td>`;
-                    html += '</tr>';
-                });
-
-                html += '</tbody></table>';
-                container.innerHTML = html;
-            } else if (isSuccess(data) && data.keys && data.keys.length === 0) {
-                container.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 2rem;">Žádné registrační klíče<br><small>Vytvořte nový klíč pomocí tlačítka výše</small></p>';
-            } else {
-                container.innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání</p>';
-            }
-        })
-        .catch(err => {
-            console.error('[Control Center] Keys load error:', err);
-            document.getElementById('keysTableContainer').innerHTML = '<p style="color: var(--c-error); text-align: center; padding: 2rem;">Chyba načítání</p>';
-        });
 }
 
 /**
@@ -1710,4 +1669,23 @@ window.zavritDetailUzivatele = zavritDetailUzivatele;
 window.ulozitZmenyUzivatele = ulozitZmenyUzivatele;
 window.zmenitHesloUzivatele = zmenitHesloUzivatele;
 window.prepnoutStatusUzivatele = prepnoutStatusUzivatele;
+
+// Posluchač postMessage pro přepínání tabů z iframe
+window.addEventListener('message', function(event) {
+  // Bezpečnostní kontrola - pouze zprávy z naší domény
+  if (event.origin !== window.location.origin) {
+    return;
+  }
+
+  const message = event.data;
+
+  if (message.action === 'switchTab' && message.tab) {
+    // Přepnout na požadovaný tab
+    let url = '/admin.php?tab=' + message.tab;
+    if (message.highlightId) {
+      url += '#' + message.highlightId;
+    }
+    window.location.href = url;
+  }
+});
 
