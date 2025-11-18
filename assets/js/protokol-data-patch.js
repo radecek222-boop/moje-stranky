@@ -85,8 +85,8 @@
 
   const hydrateStaticFields = () => {
     const defaults = {
-      'order-number': payload.id || payload.cislo || '',
-      'claim-number': payload.id || payload.reklamace_id || payload.cislo || '',
+      'order-number': payload.reklamace_id || '',
+      'claim-number': payload.cislo || '',
       customer: payload.jmeno || payload.zakaznik || '',
       address: buildAddress(payload),
       phone: payload.telefon || '',
@@ -108,10 +108,12 @@
       const code = payload.fakturace_firma.toString().trim().toUpperCase();
       if (code === 'CZ') {
         fakturaceField.value = '🇨🇿 Česká republika (CZ)';
-        fakturaceField.style.color = '#0066cc';
+        fakturaceField.style.color = '#1a1a1a';
+        fakturaceField.style.fontWeight = '600';
       } else if (code === 'SK') {
         fakturaceField.value = '🇸🇰 Slovensko (SK)';
-        fakturaceField.style.color = '#059669';
+        fakturaceField.style.color = '#1a1a1a';
+        fakturaceField.style.fontWeight = '600';
       } else {
         fakturaceField.value = payload.fakturace_firma;
       }
