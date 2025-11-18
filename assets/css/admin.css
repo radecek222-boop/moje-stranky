@@ -2089,6 +2089,494 @@ body.admin-modal-open {
 }
 
 /* ===========================================================================
+   MINIMALISTICKÝ DESIGN - Kompaktní a jednotný styling
+   =========================================================================== */
+
+/* Globální reset pro kompaktní design */
+:root {
+    --min-font-size-base: 0.813rem;      /* 13px */
+    --min-font-size-small: 0.75rem;      /* 12px */
+    --min-font-size-xs: 0.688rem;        /* 11px */
+    --min-padding-btn: 0.4rem 0.8rem;    /* Menší tlačítka */
+    --min-padding-input: 0.5rem 0.75rem; /* Menší inputy */
+    --min-spacing: 0.75rem;              /* Jednotný spacing */
+}
+
+/* === TYPOGRAFIE === */
+body {
+    font-size: var(--min-font-size-base);
+    line-height: 1.5;
+}
+
+.page-title,
+h1 {
+    font-size: 1.25rem !important;  /* 20px */
+    margin-bottom: 0.75rem !important;
+    font-weight: 600;
+}
+
+h2 {
+    font-size: 1.125rem !important; /* 18px */
+    margin-bottom: 0.625rem !important;
+    font-weight: 600;
+}
+
+h3 {
+    font-size: 1rem !important;     /* 16px */
+    margin-bottom: 0.5rem !important;
+    font-weight: 600;
+}
+
+h4 {
+    font-size: 0.875rem !important; /* 14px */
+    margin-bottom: 0.5rem !important;
+    font-weight: 600;
+}
+
+p,
+.control-detail-description,
+.cc-card-description {
+    font-size: var(--min-font-size-base) !important;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+}
+
+small,
+.text-small {
+    font-size: var(--min-font-size-small) !important;
+}
+
+/* === TLAČÍTKA === */
+.cc-btn,
+.btn,
+button:not(.cc-toggle):not([class*="icon"]) {
+    padding: var(--min-padding-btn) !important;
+    font-size: var(--min-font-size-base) !important;
+    border-radius: 6px !important;
+    font-weight: 500;
+    line-height: 1.4;
+    transition: var(--cc-transition);
+}
+
+.cc-btn-sm,
+.btn-sm {
+    padding: 0.3rem 0.6rem !important;
+    font-size: var(--min-font-size-small) !important;
+}
+
+.cc-btn-xs {
+    padding: 0.25rem 0.5rem !important;
+    font-size: var(--min-font-size-xs) !important;
+}
+
+/* === FORMULÁŘOVÉ PRVKY === */
+.cc-input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="url"],
+input[type="search"],
+input[type="tel"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+textarea,
+select {
+    padding: var(--min-padding-input) !important;
+    font-size: var(--min-font-size-base) !important;
+    border-radius: 6px !important;
+    border: 1px solid var(--cc-border);
+    line-height: 1.4;
+    transition: var(--cc-transition);
+}
+
+textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+/* Prevence přetékání textu v inputech */
+input,
+textarea,
+select {
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Labels */
+label {
+    font-size: var(--min-font-size-base) !important;
+    font-weight: 500;
+    margin-bottom: 0.375rem;
+    display: block;
+    color: var(--cc-text-primary);
+}
+
+/* === KARTY === */
+.cc-card,
+.control-card,
+.dashboard-card {
+    padding: 0.875rem !important;
+    border-radius: 8px !important;
+    box-shadow: var(--cc-shadow-sm);
+    margin-bottom: 0.75rem;
+}
+
+.cc-card-title {
+    font-size: 1rem !important;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.cc-card-icon {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.5rem;
+}
+
+.cc-card-description {
+    font-size: var(--min-font-size-small) !important;
+    color: var(--cc-text-secondary);
+    margin-bottom: 0;
+}
+
+/* === TABULKY === */
+table {
+    font-size: var(--min-font-size-base) !important;
+}
+
+table th {
+    font-size: var(--min-font-size-small) !important;
+    font-weight: 600;
+    padding: 0.5rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+table td {
+    padding: 0.5rem !important;
+    font-size: var(--min-font-size-base) !important;
+}
+
+/* === BADGES & LABELS === */
+.badge,
+.label,
+.status-badge,
+[class*="-badge"] {
+    padding: 0.2rem 0.5rem !important;
+    font-size: var(--min-font-size-xs) !important;
+    border-radius: 4px !important;
+    font-weight: 500;
+    line-height: 1.2;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+/* === GRID & LAYOUT === */
+.cc-grid,
+.admin-grid {
+    gap: 0.75rem !important;
+}
+
+.control-center {
+    padding: 0 0.875rem !important;
+}
+
+.page-header {
+    margin-bottom: 1rem !important;
+    padding: 0.75rem 0 !important;
+}
+
+.page-subtitle {
+    font-size: var(--min-font-size-base) !important;
+    font-weight: 600;
+}
+
+/* === MODAL OKNA === */
+.cc-modal {
+    width: 90vw !important;
+    max-width: 1200px !important;
+    height: 85vh !important;
+    max-height: 800px !important;
+}
+
+.cc-modal-header {
+    padding: 0.875rem 1rem !important;
+}
+
+.cc-modal-title {
+    font-size: 1.125rem !important;
+    font-weight: 600;
+}
+
+.cc-modal-body {
+    padding: 1rem !important;
+    font-size: var(--min-font-size-base) !important;
+}
+
+.cc-modal-footer {
+    padding: 0.75rem 1rem !important;
+}
+
+/* === PREVENCE PŘETÉKÁNÍ === */
+/* Text overflow handling */
+.text-truncate,
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Word wrapping pro dlouhé texty */
+.text-wrap {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* Všechny textové elementy v kartách */
+.cc-card *,
+.control-card *,
+.dashboard-card * {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* === SPACING UTILITIES === */
+.mb-1 { margin-bottom: 0.5rem !important; }
+.mb-2 { margin-bottom: 0.75rem !important; }
+.mb-3 { margin-bottom: 1rem !important; }
+.mt-1 { margin-top: 0.5rem !important; }
+.mt-2 { margin-top: 0.75rem !important; }
+.mt-3 { margin-top: 1rem !important; }
+.p-1 { padding: 0.5rem !important; }
+.p-2 { padding: 0.75rem !important; }
+.p-3 { padding: 1rem !important; }
+
+/* === FORM GROUPS === */
+.form-group,
+.cc-form-group {
+    margin-bottom: 0.875rem;
+}
+
+.form-group:last-child,
+.cc-form-group:last-child {
+    margin-bottom: 0;
+}
+
+/* === RESPONSIVITA === */
+@media (max-width: 768px) {
+    :root {
+        --min-font-size-base: 0.75rem;   /* 12px na mobilu */
+        --min-font-size-small: 0.688rem; /* 11px na mobilu */
+    }
+
+    .cc-btn,
+    .btn {
+        padding: 0.35rem 0.7rem !important;
+        font-size: var(--min-font-size-small) !important;
+    }
+
+    .cc-modal {
+        width: 95vw !important;
+        height: 90vh !important;
+    }
+}
+
+/* === BARVY - Minimalistická paleta === */
+.cc-btn-primary {
+    background: var(--cc-primary);
+    color: white;
+}
+
+.cc-btn-primary:hover {
+    background: var(--cc-primary-dark);
+}
+
+.cc-btn-secondary {
+    background: transparent;
+    border: 1px solid var(--cc-border);
+    color: var(--cc-text-primary);
+}
+
+.cc-btn-secondary:hover {
+    background: var(--cc-bg-primary);
+}
+
+.cc-btn-success {
+    background: var(--cc-success);
+    color: white;
+}
+
+.cc-btn-danger {
+    background: var(--cc-danger);
+    color: white;
+}
+
+.cc-btn-warning {
+    background: var(--cc-warning);
+    color: var(--cc-text-primary);
+}
+
+/* === ALIGNMENT === */
+.text-left { text-align: left !important; }
+.text-center { text-align: center !important; }
+.text-right { text-align: right !important; }
+
+.d-flex { display: flex !important; }
+.align-items-center { align-items: center !important; }
+.justify-content-between { justify-content: space-between !important; }
+.justify-content-center { justify-content: center !important; }
+.gap-1 { gap: 0.5rem !important; }
+.gap-2 { gap: 0.75rem !important; }
+.gap-3 { gap: 1rem !important; }
+
+/* === CONSOLE SPECIFICKÉ STYLY === */
+.console-output {
+    padding: 0.875rem !important;
+    height: 400px !important;
+    font-size: var(--min-font-size-base) !important;
+}
+
+.console-btn {
+    padding: var(--min-padding-btn) !important;
+    border-radius: 6px !important;
+    font-size: var(--min-font-size-base) !important;
+}
+
+/* === TESTING & PHPUNIT KARTY === */
+.test-results,
+.phpunit-output {
+    padding: 0.875rem !important;
+    font-size: var(--min-font-size-base) !important;
+}
+
+/* === CONFIG & SETTINGS KARTY === */
+.config-section,
+.settings-section {
+    margin-bottom: 1rem !important;
+    padding: 0.875rem !important;
+}
+
+.config-item,
+.settings-item {
+    margin-bottom: 0.75rem !important;
+}
+
+/* === EMAIL & SMS KARTA === */
+.email-template-editor,
+.sms-template-editor {
+    padding: 0.875rem !important;
+}
+
+/* === APPEARANCE KARTA === */
+.appearance-controls {
+    padding: 0.875rem !important;
+}
+
+.color-picker-container {
+    margin-bottom: 0.75rem !important;
+}
+
+/* === SECURITY KARTA === */
+.security-item {
+    padding: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+/* === CONTENT KARTA === */
+.content-editor {
+    padding: 0.875rem !important;
+}
+
+.language-tabs {
+    margin-bottom: 0.75rem !important;
+}
+
+.language-tab {
+    padding: 0.4rem 0.8rem !important;
+    font-size: var(--min-font-size-base) !important;
+}
+
+/* === ACTIONS KARTA === */
+.action-item,
+.pending-action {
+    padding: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.action-buttons {
+    gap: 0.5rem !important;
+}
+
+/* === DIAGNOSTICS KARTA === */
+.diagnostic-check {
+    padding: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.diagnostic-result {
+    font-size: var(--min-font-size-base) !important;
+    padding: 0.5rem !important;
+}
+
+/* === CODE BLOCKS === */
+pre,
+code {
+    font-size: var(--min-font-size-small) !important;
+    padding: 0.5rem !important;
+    border-radius: 4px;
+}
+
+pre {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+/* === LIST ITEMS === */
+ul li,
+ol li {
+    font-size: var(--min-font-size-base) !important;
+    margin-bottom: 0.375rem;
+}
+
+/* === SPECIFIC OVERRIDES FOR INLINE STYLES === */
+/* Přepsání nadměrně velkých inline stylů */
+[style*="padding: 1.5rem"],
+[style*="padding: 2rem"] {
+    padding: 0.875rem !important;
+}
+
+[style*="font-size: 1.5rem"],
+[style*="font-size: 2rem"],
+[style*="font-size: 2.5rem"] {
+    font-size: 1.125rem !important;
+}
+
+[style*="height: 600px"],
+[style*="height: 700px"],
+[style*="height: 800px"] {
+    height: 400px !important;
+}
+
+/* === GRID RESPONSIVE === */
+@media (min-width: 769px) {
+    .cc-grid,
+    .admin-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .cc-grid,
+    .admin-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    }
+}
+
+/* ===========================================================================
    EMBED MODE OVERRIDES - Fix for iframe display
    =========================================================================== */
 
