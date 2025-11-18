@@ -292,11 +292,11 @@ if ($initialBootstrapData) {
   <div class="two-col-table">
     <div class="col">
       <table>
-        <tr><td class="label">Počet dílů<span class="en-label">Parts</span></td><td><input type="number" id="parts" min="0"></td></tr>
-        <tr><td class="label">Práce<span class="en-label">Work</span></td><td><input type="number" id="price-work" step="0.01" min="0" oninput="updateTotal()"></td></tr>
-        <tr><td class="label">Materiál<span class="en-label">Materiál</span></td><td><input type="number" id="price-material" step="0.01" min="0" oninput="updateTotal()"></td></tr>
-        <tr><td class="label">2. technik<span class="en-label">Second tech.</span></td><td><input type="number" id="price-second" step="0.01" min="0" oninput="updateTotal()"></td></tr>
-        <tr><td class="label">Doprava<span class="en-label">Transport</span></td><td><input type="number" id="price-transport" step="0.01" min="0" oninput="updateTotal()"></td></tr>
+        <tr><td class="label">Počet dílů<span class="en-label">Parts</span></td><td><input type="text" id="parts" placeholder="0"></td></tr>
+        <tr><td class="label">Práce<span class="en-label">Work</span></td><td><input type="text" id="price-work" placeholder="0.00" oninput="updateTotal()"></td></tr>
+        <tr><td class="label">Materiál<span class="en-label">Materiál</span></td><td><input type="text" id="price-material" placeholder="0.00" oninput="updateTotal()"></td></tr>
+        <tr><td class="label">2. technik<span class="en-label">Second tech.</span></td><td><input type="text" id="price-second" placeholder="0.00" oninput="updateTotal()"></td></tr>
+        <tr><td class="label">Doprava<span class="en-label">Transport</span></td><td><input type="text" id="price-transport" placeholder="0.00" oninput="updateTotal()"></td></tr>
         <tr><td class="label"><strong>Celkem</strong><span class="en-label">Total</span></td><td><input type="text" id="price-total" readonly style="font-weight:700;"></td></tr>
       </table>
     </div>
