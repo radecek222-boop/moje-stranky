@@ -15,7 +15,7 @@ $pdo = getDbConnection();
 $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 ?>
 
-<link rel="stylesheet" href="/assets/css/control-center.css">
+<link rel="stylesheet" href="/assets/css/admin.css">
 <style>
 /* Console-specific styles */
 .console-container {

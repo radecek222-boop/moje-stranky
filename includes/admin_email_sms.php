@@ -78,7 +78,7 @@ try {
 }
 ?>
 
-<link rel="stylesheet" href="/assets/css/control-center.css">
+<link rel="stylesheet" href="/assets/css/admin.css">
 
 <div class="control-detail active">
     <?php if (!$embedMode): ?>
