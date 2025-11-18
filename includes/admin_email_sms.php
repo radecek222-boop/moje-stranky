@@ -67,6 +67,21 @@ try {
     }
 } catch (PDOException $e) {}
 
+// Load email templates for templates tab
+$emailSablony = [];
+try {
+    $stmt = $pdo->query("
+        SELECT
+            id, name, description, trigger_event, recipient_type,
+            type, subject, template, active, created_at, updated_at
+        FROM wgs_notifications
+        ORDER BY name ASC
+    ");
+    $emailSablony = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $emailSablony = [];
+}
+
 // Load email queue for management tab
 $filterStatus = $_GET['filter'] ?? 'all';
 $emaily = [];
@@ -251,15 +266,120 @@ try {
 
         <!-- EMAIL ŠABLONY -->
         <div id="section-templates" class="cc-section <?= $currentSection === 'templates' ? 'active' : '' ?>">
-            <div class="cc-alert info">
-                <div class="cc-alert-icon">ℹ️</div>
-                <div class="cc-alert-content">
-                    <div class="cc-alert-title">Email šablony</div>
-                    <div class="cc-alert-message">
-                        Tato sekce je ve vývoji. Pro správu emailů použijte Email Management.
+            <h3 style="margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">Email notifikační šablony</h3>
+
+            <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-left: 3px solid #0ea5e9; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; font-family: 'Poppins', sans-serif;">
+                <strong>ℹ️ Info:</strong> Tyto šablony se automaticky odesílají při různých událostech v systému. Můžete je zapínat/vypínat nebo upravovat v hlavním admin panelu (tab "Notifications").
+            </div>
+
+            <?php if (empty($emailSablony)): ?>
+                <div style="background: #fff3cd; border: 1px solid #ffc107; border-left: 3px solid #ffc107; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; font-family: 'Poppins', sans-serif;">
+                    <strong>⚠️ Varování:</strong> Žádné email šablony nenalezeny. Pravděpodobně není nainstalován notifikační systém. Pro instalaci přejděte do sekce "Nástroje" v hlavním admin panelu.
+                </div>
+            <?php else: ?>
+                <!-- Šablony Grid -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1rem;">
+                    <?php foreach ($emailSablony as $sablona): ?>
+                        <div style="background: #fff; border: 1px solid <?= $sablona['active'] ? '#000' : '#ddd' ?>; padding: 1rem; border-radius: 4px; transition: all 0.2s;">
+                            <!-- Header šablony -->
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                <div style="flex: 1;">
+                                    <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; margin-bottom: 0.25rem;">
+                                        <?= htmlspecialchars($sablona['name']) ?>
+                                    </h4>
+                                    <p style="font-size: 0.75rem; color: #666; margin: 0;">
+                                        <?= htmlspecialchars($sablona['description']) ?>
+                                    </p>
+                                </div>
+                                <span style="display: inline-block; padding: 0.25rem 0.5rem; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #000; background: <?= $sablona['active'] ? '#000' : '#fff' ?>; color: <?= $sablona['active'] ? '#fff' : '#000' ?>; border-radius: 3px;">
+                                    <?= $sablona['active'] ? 'AKTIVNÍ' : 'VYPNUTO' ?>
+                                </span>
+                            </div>
+
+                            <!-- Informace -->
+                            <div style="border-top: 1px solid #e0e0e0; padding-top: 0.75rem; margin-top: 0.75rem;">
+                                <div style="display: grid; grid-template-columns: 100px 1fr; gap: 0.5rem; font-size: 0.75rem; font-family: 'Poppins', sans-serif;">
+                                    <div style="color: #666;">Spouštěč:</div>
+                                    <div style="font-weight: 500; color: #000;">
+                                        <?php
+                                            $triggerLabels = [
+                                                'appointment_confirmed' => 'Potvrzení termínu',
+                                                'appointment_assigned' => 'Přiřazení termínu',
+                                                'appointment_reminder' => 'Připomínka termínu',
+                                                'complaint_created' => 'Nová reklamace',
+                                                'complaint_completed' => 'Dokončení zakázky',
+                                                'complaint_reopened' => 'Znovu otevřeno'
+                                            ];
+                                            echo htmlspecialchars($triggerLabels[$sablona['trigger_event']] ?? $sablona['trigger_event']);
+                                        ?>
+                                    </div>
+
+                                    <div style="color: #666;">Příjemce:</div>
+                                    <div style="font-weight: 500; color: #000;">
+                                        <?php
+                                            $recipientLabels = [
+                                                'customer' => 'Zákazník',
+                                                'admin' => 'Administrátor',
+                                                'technician' => 'Technik',
+                                                'seller' => 'Prodejce'
+                                            ];
+                                            echo htmlspecialchars($recipientLabels[$sablona['recipient_type']] ?? $sablona['recipient_type']);
+                                        ?>
+                                    </div>
+
+                                    <div style="color: #666;">Předmět:</div>
+                                    <div style="font-weight: 500; color: #000;">
+                                        <?= htmlspecialchars(substr($sablona['subject'], 0, 40)) ?><?= strlen($sablona['subject']) > 40 ? '...' : '' ?>
+                                    </div>
+
+                                    <div style="color: #666;">Aktualizováno:</div>
+                                    <div style="color: #666;">
+                                        <?= $sablona['updated_at'] ? date('d.m.Y H:i', strtotime($sablona['updated_at'])) : '-' ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Náhled šablony -->
+                            <div style="border-top: 1px solid #e0e0e0; padding-top: 0.75rem; margin-top: 0.75rem;">
+                                <div style="font-size: 0.7rem; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                                    Náhled šablony:
+                                </div>
+                                <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 0.5rem; font-size: 0.7rem; font-family: monospace; color: #333; max-height: 80px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4;">
+                                    <?= htmlspecialchars(substr($sablona['template'], 0, 200)) ?><?= strlen($sablona['template']) > 200 ? '...' : '' ?>
+                                </div>
+                            </div>
+
+                            <!-- Akce -->
+                            <div style="border-top: 1px solid #e0e0e0; padding-top: 0.75rem; margin-top: 0.75rem; text-align: center;">
+                                <a href="admin.php?page=notifications#<?= $sablona['id'] ?>"
+                                   style="display: inline-block; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-radius: 3px; transition: all 0.2s;">
+                                    Upravit šablonu
+                                </a>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- Informace o proměnných -->
+                <div style="margin-top: 1.5rem; background: #fafafa; border: 1px solid #ddd; padding: 1rem;">
+                    <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600; color: #000; margin-bottom: 0.75rem;">
+                        📝 Dostupné proměnné v šablonách:
+                    </h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; font-size: 0.75rem; font-family: monospace;">
+                        <div><code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd;">{{customer_name}}</code></div>
+                        <div><code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd;">{{customer_email}}</code></div>
+                        <div><code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd;">{{customer_phone}}</code></div>
+                        <div><code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd;">{{date}}</code></div>
+                        <div><code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd;">{{time}}</code></div>
+                        <div><code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd;">{{order_id}}</code></div>
+                        <div><code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd;">{{address}}</code></div>
+                        <div><code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd;">{{product}}</code></div>
+                        <div><code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd;">{{description}}</code></div>
+                        <div><code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd;">{{technician_name}}</code></div>
+                        <div><code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd;">{{seller_name}}</code></div>
                     </div>
                 </div>
-            </div>
+            <?php endif; ?>
         </div>
 
         <!-- SMS -->
