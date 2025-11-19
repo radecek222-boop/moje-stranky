@@ -645,6 +645,11 @@ const WGS = {
       const mesto = document.getElementById('mesto')?.value || '';
       const psc = document.getElementById('psc')?.value || '';
       const adresa = [ulice, mesto, psc].filter(x => x).join(', ');
+
+      // Poslat jak samostatné hodnoty, tak i složenou adresu
+      formData.append('ulice', ulice);
+      formData.append('mesto', mesto);
+      formData.append('psc', psc);
       formData.append('adresa', adresa);
 
       formData.append('model', document.getElementById('model')?.value || '');
