@@ -510,9 +510,17 @@ reklamace@wgs-service.cz
         // SMTP konfigurace
         $mail->isSMTP();
         $mail->Host = $smtpSettings['smtp_host'];
-        $mail->SMTPAuth = true;
-        $mail->Username = $smtpSettings['smtp_username'];
-        $mail->Password = $smtpSettings['smtp_password'];
+
+        // SMTP Authentication - pouze pokud jsou zadány credentials
+        // Pro WebSMTP port 25 může být autentizace doménová (bez hesla)
+        if (!empty($smtpSettings['smtp_username']) && !empty($smtpSettings['smtp_password'])) {
+            $mail->SMTPAuth = true;
+            $mail->Username = $smtpSettings['smtp_username'];
+            $mail->Password = $smtpSettings['smtp_password'];
+        } else {
+            $mail->SMTPAuth = false;
+        }
+
         $mail->Port = $smtpSettings['smtp_port'];
         $mail->CharSet = 'UTF-8';
 
