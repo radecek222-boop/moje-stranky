@@ -599,12 +599,13 @@ function handleChangeReklamaceStatus(PDO $pdo, array $payload): void
     $stmt = $pdo->prepare("
         UPDATE wgs_reklamace
         SET stav = :stav,
-            datum_dokonceni = CASE WHEN :stav = 'done' THEN NOW() ELSE datum_dokonceni END
+            datum_dokonceni = CASE WHEN :stav_check = 'done' THEN NOW() ELSE datum_dokonceni END
         WHERE reklamace_id = :reklamace_id
     ");
 
     $stmt->execute([
         'stav' => $newStatus,
+        'stav_check' => $newStatus,
         'reklamace_id' => $reklamaceId
     ]);
 
