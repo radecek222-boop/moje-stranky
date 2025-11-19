@@ -104,7 +104,7 @@ try {
     $sql = "
         SELECT
             reklamace_id, cislo, jmeno, telefon, email,
-            ulice, mesto, psc, model, provedeni, barva,
+            ulice, mesto, psc, adresa, model, provedeni, barva,
             popis_problemu, doplnujici_info, termin, cas_navstevy, stav,
             created_at as datum_vytvoreni, datum_dokonceni, prodejce as jmeno_prodejce, typ
         FROM wgs_reklamace
@@ -199,7 +199,16 @@ try {
 
                 <!-- Adresa -->
                 <div style="flex: 1; min-width: 120px; color: #666;">
-                    <?= htmlspecialchars(($rek['ulice'] ?: '') . ($rek['mesto'] ? ', ' . $rek['mesto'] : '')) ?>
+                    <?php
+                    // Použít složenou adresu pokud chybí ulice/mesto (staré záznamy)
+                    $zobrazenaAdresa = '';
+                    if (!empty($rek['ulice']) || !empty($rek['mesto'])) {
+                        $zobrazenaAdresa = ($rek['ulice'] ?: '') . ($rek['mesto'] ? ', ' . $rek['mesto'] : '');
+                    } elseif (!empty($rek['adresa'])) {
+                        $zobrazenaAdresa = $rek['adresa'];
+                    }
+                    echo htmlspecialchars($zobrazenaAdresa);
+                    ?>
                 </div>
 
                 <!-- Termín -->
@@ -380,7 +389,7 @@ function zobrazitDetailReklamace(rek, timeline) {
                 <div><strong>Zákazník:</strong> ${rek.jmeno}</div>
                 <div><strong>Telefon:</strong> ${rek.telefon || '-'}</div>
                 <div><strong>Email:</strong> ${rek.email || '-'}</div>
-                <div><strong>Adresa:</strong> ${[rek.ulice, rek.mesto, rek.psc].filter(x => x).join(', ') || '-'}</div>
+                <div><strong>Adresa:</strong> ${[rek.ulice, rek.mesto, rek.psc].filter(x => x).join(', ') || rek.adresa || '-'}</div>
                 <div><strong>Model:</strong> ${rek.model || '-'}</div>
                 <div><strong>Provedení:</strong> ${rek.provedeni || '-'}</div>
                 <div><strong>Barva:</strong> ${rek.barva || '-'}</div>
