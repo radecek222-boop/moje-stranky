@@ -955,21 +955,25 @@ function renderCalendar(m, y) {
 // === VÝPOČET VZDÁLENOSTI ===
 async function getDistance(fromAddress, toAddress) {
   const cacheKey = `${fromAddress}|${toAddress}`;
-  
+
   if (DISTANCE_CACHE[cacheKey]) {
     return DISTANCE_CACHE[cacheKey];
   }
-  
+
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
+
+    // Načíst CSRF token
+    const csrfToken = await fetchCsrfToken();
+
     const response = await fetch('/app/controllers/get_distance.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         origin: fromAddress,
-        destination: toAddress
+        destination: toAddress,
+        csrf_token: csrfToken
       }),
       signal: controller.signal
     });
