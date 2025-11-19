@@ -37,11 +37,11 @@ try {
 
     echo "<div class='info'>";
     echo "<strong>AKTUÁLNÍ KONFIGURACE:</strong><br>";
-    echo "Host: <code>{$current['smtp_host']}</code><br>";
-    echo "Port: <code>{$current['smtp_port']}</code><br>";
-    echo "Username: <code>{$current['smtp_username']}</code><br>";
+    echo "Host: <code>" . htmlspecialchars($current['smtp_host']) . "</code><br>";
+    echo "Port: <code>" . htmlspecialchars($current['smtp_port']) . "</code><br>";
+    echo "Username: <code>" . htmlspecialchars($current['smtp_username']) . "</code><br>";
     echo "Password: <code>" . (strlen($current['smtp_password']) > 0 ? str_repeat('*', strlen($current['smtp_password'])) : 'PRÁZDNÉ') . "</code><br>";
-    echo "Encryption: <code>{$current['smtp_encryption']}</code>";
+    echo "Encryption: <code>" . htmlspecialchars($current['smtp_encryption']) . "</code>";
     echo "</div>";
 
     $heslo = 'p7u.s13mR2018';
