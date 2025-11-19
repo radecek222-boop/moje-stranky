@@ -46,8 +46,8 @@ try {
 
     $pdo = getDbConnection();
 
-    // Vypočítat datum zítřka
-    $zitra = date('Y-m-d', strtotime('+1 day'));
+    // Vypočítat datum zítřka v ČESKÉM FORMÁTU (DD.MM.YYYY) - tak jak je v databázi
+    $zitra = date('d.m.Y', strtotime('+1 day'));
     logMessage("Hledám návštěvy na datum: {$zitra}");
 
     // Najít všechny reklamace se stavem 'open' (DOMLUVENÁ) a termínem na zítřek
