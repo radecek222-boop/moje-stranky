@@ -64,16 +64,19 @@ Jméno: {{technician_name}}
 
 Náš technik Vás bude kontaktovat den předem pro potvrzení termínu.
 
+⏰ PŘÍJEZD TECHNIKA:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Náš technik se pokusí dorazit přesně v domluvený čas. Situaci však
+může ovlivnit dopravní situace, proto Vás žádáme o ohleduplnost.
+
+ℹ️ Při delším zpoždění než 30 minut budete informováni telefonicky
+   nebo formou SMS přímo od technika.
+
 ✅ CO VÁS ČEKÁ:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Náš technik dorazí ve smluvený čas
-• Prohlédne si Váš nábytek a posoudí stav
-• Navrhne řešení a postup opravy
+• Náš technik dorazí a provede odbornou opravu
+• Navrhne řešení a postup práce
 • Odpovídá na všechny Vaše dotazy
-
-💡 DŮLEŽITÉ - PROSÍME O PŘÍPRAVU:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Zajistěte prosím volný přístup k nábytkuZabezpečení šetří čas a umožňuje rychlejší opravu.
 
 🅿️ PARKOVÁNÍ PRO VOZIDLO TECHNIKA:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -126,9 +129,7 @@ jen Vám chceme připomenout, že **ZÍTRA** k Vám přijede náš technik! 😊
 {{technician_name}}
 📞 {{technician_phone}}
 
-✅ PŘIPRAVTE SI PROSÍM:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Volný přístup k nábytkuNáš technik se na Vás těší a dnes odpoledne Vás případně kontaktuje
+Náš technik se na Vás těší a dnes odpoledne Vás případně kontaktuje
 pro finální potvrzení.
 
 🅿️ NEZAPOMEŇTE: PARKOVÁNÍ
