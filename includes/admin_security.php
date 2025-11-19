@@ -1327,6 +1327,12 @@ async function nactiAuditLogy() {
         formData.append('date_to', dateTo + ' 23:59:59');
         if (action) formData.append('filter_action', action);
 
+        // Přidat CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (csrfToken) {
+            formData.append('csrf_token', csrfToken);
+        }
+
         const response = await fetch('/api/admin/security_api.php', {
             method: 'POST',
             body: formData

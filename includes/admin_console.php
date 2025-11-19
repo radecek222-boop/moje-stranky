@@ -1196,8 +1196,8 @@ async function checkFilePermissions() {
                 logError(`${not_writable.length} složek není writable:`);
                 not_writable.forEach(dir => {
                     logError(`  ${dir}`);
+                    addError('Oprávnění', `Složka ${dir} není writable`, 'Opravte permissions přes FTP nebo automatickou opravu');
                 });
-                totalErrors += not_writable.length;
             } else {
                 logSuccess('Všechna oprávnění v pořádku');
             }
