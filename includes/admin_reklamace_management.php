@@ -429,7 +429,7 @@ function zobrazitDetailReklamace(rek, timeline) {
         <div style="margin-bottom: 1.5rem;">
             <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; margin-bottom: 0.5rem;">Doplňující popis prodejce:</h4>
             <div style="background: #fff3cd; padding: 1rem; border: 1px solid #ffc107; border-radius: 4px; font-size: 0.85rem; white-space: pre-wrap;">
-                ${rek.doplnujici_info}
+                ${rek.doplnujici_info.split('\\n').filter(line => !line.includes('GDPR') && !line.includes('User ID:')).join('\\n').trim()}
             </div>
         </div>
         ` : ''}
