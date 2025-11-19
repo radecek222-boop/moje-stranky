@@ -185,7 +185,7 @@ try {
 
                 <!-- Status badge -->
                 <div style="min-width: 80px;">
-                    <span style="display: inline-block; padding: 0.2rem 0.5rem; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; border: 1px solid #000; background: <?= $rek['stav'] === 'done' ? '#000' : '#fff' ?>; color: <?= $rek['stav'] === 'done' ? '#fff' : '#000' ?>; border-radius: 2px;">
+                    <span style="display: inline-block; padding: 0.05rem 0.5rem; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; border: 1px solid #000; background: <?= $rek['stav'] === 'done' ? '#000' : '#fff' ?>; color: <?= $rek['stav'] === 'done' ? '#fff' : '#000' ?>; border-radius: 2px; line-height: 1.2;">
                         <?php
                             if ($rek['stav'] === 'wait') echo 'ČEKÁ';
                             elseif ($rek['stav'] === 'open') echo 'ŘEŠÍ';
