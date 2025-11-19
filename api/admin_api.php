@@ -631,10 +631,11 @@ function handleGetReklamaceDetail(PDO $pdo): void
     $stmt = $pdo->prepare("
         SELECT
             reklamace_id, cislo, jmeno, telefon, email,
-            ulice, mesto, psc, model, provedeni, barva,
+            ulice, mesto, psc, adresa, model, provedeni, barva,
             popis_problemu, doplnujici_info, termin, cas_navstevy,
             stav, created_at as datum_vytvoreni, datum_dokonceni, prodejce as jmeno_prodejce,
-            typ, technik, castka, fakturace_firma
+            typ, technik, castka, fakturace_firma,
+            pocet_dilu, cena_prace, cena_material, cena_druhy_technik, cena_doprava, cena_celkem
         FROM wgs_reklamace
         WHERE reklamace_id = :reklamace_id
         LIMIT 1

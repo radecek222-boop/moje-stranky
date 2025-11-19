@@ -399,6 +399,23 @@ function zobrazitDetailReklamace(rek, timeline) {
             </div>
         </div>
 
+        <!-- Cenové údaje z protokolu -->
+        ${(rek.pocet_dilu > 0 || rek.cena_prace > 0 || rek.cena_material > 0 || rek.cena_druhy_technik > 0 || rek.cena_doprava > 0 || rek.cena_celkem > 0) ? `
+        <div style="margin-bottom: 1.5rem; background: #e8f5e9; padding: 1rem; border: 2px solid #2D5016; border-radius: 4px;">
+            <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #2D5016; margin-bottom: 0.75rem;">💰 Cenové údaje z protokolu:</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-family: 'Poppins', sans-serif; font-size: 0.85rem;">
+                ${rek.pocet_dilu > 0 ? `<div><strong>Počet dílů:</strong> ${rek.pocet_dilu}</div>` : ''}
+                ${rek.cena_prace > 0 ? `<div><strong>Práce:</strong> ${parseFloat(rek.cena_prace).toFixed(2)} Kč</div>` : ''}
+                ${rek.cena_material > 0 ? `<div><strong>Materiál:</strong> ${parseFloat(rek.cena_material).toFixed(2)} Kč</div>` : ''}
+                ${rek.cena_druhy_technik > 0 ? `<div><strong>2. technik:</strong> ${parseFloat(rek.cena_druhy_technik).toFixed(2)} Kč</div>` : ''}
+                ${rek.cena_doprava > 0 ? `<div><strong>Doprava:</strong> ${parseFloat(rek.cena_doprava).toFixed(2)} Kč</div>` : ''}
+            </div>
+            <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 2px solid #2D5016; font-family: 'Poppins', sans-serif; font-size: 0.95rem; font-weight: bold; color: #2D5016;">
+                <strong>Celkem:</strong> ${parseFloat(rek.cena_celkem || 0).toFixed(2)} Kč
+            </div>
+        </div>
+        ` : ''}
+
         <!-- Popis problému zákazníkem -->
         <div style="margin-bottom: 1.5rem;">
             <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; margin-bottom: 0.5rem;">Popis problému zákazníkem:</h4>
