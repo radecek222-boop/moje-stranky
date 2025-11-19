@@ -58,7 +58,7 @@ try {
 
         // Základní sloupce které MUSÍ existovat
         $requiredColumns = ['id', 'email'];
-        $optionalColumns = ['name', 'phone', 'address', 'role', 'status', 'created_at'];
+        $optionalColumns = ['name', 'phone', 'address', 'role', 'status', 'is_active', 'created_at'];
 
         // Sestavit SELECT pouze z existujících sloupců
         $selectColumns = [];
@@ -85,7 +85,15 @@ try {
             if (!isset($user['phone'])) $user['phone'] = null;
             if (!isset($user['address'])) $user['address'] = null;
             if (!isset($user['role'])) $user['role'] = 'user';
-            if (!isset($user['status'])) $user['status'] = 'active';
+
+            // Mapování is_active → status
+            if (!isset($user['status']) && isset($user['is_active'])) {
+                $user['status'] = $user['is_active'] ? 'active' : 'inactive';
+                unset($user['is_active']); // Odstranit is_active z výstupu
+            } elseif (!isset($user['status'])) {
+                $user['status'] = 'active';
+            }
+
             if (!isset($user['created_at'])) $user['created_at'] = null;
         }
 
@@ -298,7 +306,7 @@ try {
         // Sestavit SELECT pouze z existujících sloupců
         $selectColumns = array_intersect([
             'id', 'user_id', 'name', 'email', 'phone', 'address', 'role',
-            'status', 'created_at', 'updated_at', 'last_login'
+            'status', 'is_active', 'created_at', 'updated_at', 'last_login'
         ], $existingColumns);
 
         if (empty($selectColumns)) {
@@ -325,7 +333,14 @@ try {
         if (!isset($user['phone'])) $user['phone'] = '';
         if (!isset($user['address'])) $user['address'] = '';
         if (!isset($user['role'])) $user['role'] = 'user';
-        if (!isset($user['status'])) $user['status'] = 'active';
+
+        // Mapování is_active → status
+        if (!isset($user['status']) && isset($user['is_active'])) {
+            $user['status'] = $user['is_active'] ? 'active' : 'inactive';
+            unset($user['is_active']); // Odstranit is_active z výstupu
+        } elseif (!isset($user['status'])) {
+            $user['status'] = 'active';
+        }
 
         // Nikdy nevrátit heslo!
         unset($user['password_hash']);
@@ -477,20 +492,38 @@ try {
             throw new Exception('Neplatný status');
         }
 
-        // Zjistit správný název ID sloupce
+        // Zjistit správný název ID sloupce a status sloupce
         $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
         $existingColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
         $idColumn = in_array('id', $existingColumns) ? 'id' : 'user_id';
 
-        $stmt = $pdo->prepare("
-            UPDATE wgs_users
-            SET status = :status
-            WHERE {$idColumn} = :id
-        ");
-        $stmt->execute([
-            ':status' => $status,
-            ':id' => $userId
-        ]);
+        // Zjistit zda tabulka má 'status' nebo 'is_active'
+        if (in_array('status', $existingColumns)) {
+            // Tabulka používá status (varchar)
+            $stmt = $pdo->prepare("
+                UPDATE wgs_users
+                SET status = :status
+                WHERE {$idColumn} = :id
+            ");
+            $stmt->execute([
+                ':status' => $status,
+                ':id' => $userId
+            ]);
+        } elseif (in_array('is_active', $existingColumns)) {
+            // Tabulka používá is_active (tinyint)
+            $isActive = ($status === 'active') ? 1 : 0;
+            $stmt = $pdo->prepare("
+                UPDATE wgs_users
+                SET is_active = :is_active
+                WHERE {$idColumn} = :id
+            ");
+            $stmt->execute([
+                ':is_active' => $isActive,
+                ':id' => $userId
+            ]);
+        } else {
+            throw new Exception('Tabulka nemá sloupec status ani is_active');
+        }
 
         echo json_encode([
             'status' => 'success',
