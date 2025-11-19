@@ -836,10 +836,40 @@ async function exportBothPDFs() {
       showNotif("success", "✓ Protokol vytvořen (bez fotek)");
     }
 
+    // Uložit PDF do databáze (stejně jako při odeslání emailem)
+    logger.log('💾 Ukládám PDF do databáze...');
+    try {
+      const csrfToken = await fetchCsrfToken();
+      const completePdfBase64 = doc.output("datauristring").split(",")[1];
+
+      const saveResponse = await fetch("api/protokol_api.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "save_pdf_only",
+          reklamace_id: currentReklamaceId,
+          complete_pdf: completePdfBase64,
+          csrf_token: csrfToken
+        })
+      });
+
+      if (saveResponse.ok) {
+        const saveResult = await saveResponse.json();
+        if (saveResult.status === 'success') {
+          logger.log('✅ PDF úspěšně uložen do databáze');
+        } else {
+          logger.warn('⚠️ PDF se nepodařilo uložit:', saveResult.message);
+        }
+      }
+    } catch (err) {
+      logger.error('❌ Chyba při ukládání PDF:', err);
+      // Pokračujeme i přes chybu - alespoň zobrazíme PDF
+    }
+
     // Otevřít JEDNO PDF
     window.open(URL.createObjectURL(doc.output("blob")), "_blank");
 
-    // Uložit do DB
+    // Uložit textová data do DB
     await saveProtokolToDB();
 
     // Označit jako hotovou

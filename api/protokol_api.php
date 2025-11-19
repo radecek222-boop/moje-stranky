@@ -94,6 +94,10 @@ try {
             $result = sendEmailToCustomer($data);
             break;
 
+        case 'save_pdf_only':
+            $result = savePdfOnly($data);
+            break;
+
         case 'save_pdf_document':
             $result = savePdfDocument($data);
             break;
@@ -141,6 +145,111 @@ try {
             'timestamp' => $errorDetails['timestamp']
         ]
     ]);
+}
+
+/**
+ * Uložení kompletního PDF reportu (protokol + fotky) do databáze
+ * Používá se při EXPORT PDF, aby se uložil stejný PDF jako při odeslání emailem
+ */
+function savePdfOnly($data) {
+    $reklamaceId = sanitizeReklamaceId($data['reklamace_id'] ?? null, 'reklamace_id');
+    $completePdf = $data['complete_pdf'] ?? null;
+
+    if (!$completePdf) {
+        throw new Exception('Chybí PDF dokument');
+    }
+
+    // BEZPEČNOST: Kontrola velikosti base64 přílohy (max 30MB = ~22MB PDF)
+    $maxBase64Size = 30 * 1024 * 1024; // 30MB
+    $pdfSize = strlen($completePdf);
+
+    if ($pdfSize > $maxBase64Size) {
+        throw new Exception('Příloha PDF je příliš velká. Maximální velikost je 22 MB.');
+    }
+
+    $pdo = getDbConnection();
+
+    // Načtení reklamace
+    $stmt = $pdo->prepare("
+        SELECT * FROM wgs_reklamace
+        WHERE reklamace_id = :reklamace_id OR cislo = :cislo
+        LIMIT 1
+    ");
+    $stmt->execute([
+        ':reklamace_id' => $reklamaceId,
+        ':cislo' => $reklamaceId
+    ]);
+    $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$reklamace) {
+        throw new Exception('Reklamace nebyla nalezena');
+    }
+
+    // Dekódování PDF
+    $pdfData = base64_decode($completePdf);
+
+    // Vytvoření uploads/protokoly adresáře
+    $uploadsDir = __DIR__ . '/../uploads/protokoly';
+    if (!is_dir($uploadsDir)) {
+        mkdir($uploadsDir, 0755, true);
+    }
+
+    // Název souboru pro kompletní report
+    $storageKey = reklamaceStorageKey($reklamaceId);
+    $filename = $storageKey . '_report.pdf';
+    $filePath = $uploadsDir . '/' . $filename;
+
+    // Uložit soubor
+    if (file_put_contents($filePath, $pdfData) !== false) {
+        // Relativní cesta pro databázi
+        $relativePathForDb = "uploads/protokoly/{$filename}";
+        $fileSize = filesize($filePath);
+
+        try {
+            // Smazat staré záznamy (protokol_pdf a photos_pdf) pokud existují
+            $pdo->prepare("
+                DELETE FROM wgs_documents
+                WHERE claim_id = :claim_id AND document_type IN ('protokol_pdf', 'photos_pdf')
+            ")->execute([':claim_id' => $reklamace['id']]);
+
+            // Vložení nového kompletního reportu
+            $stmt = $pdo->prepare("
+                INSERT INTO wgs_documents (
+                    claim_id, document_name, document_path, document_type,
+                    file_size, uploaded_by, uploaded_at
+                ) VALUES (
+                    :claim_id, :document_name, :document_path, :document_type,
+                    :file_size, :uploaded_by, NOW()
+                )
+            ");
+
+            $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
+
+            $stmt->execute([
+                ':claim_id' => $reklamace['id'],
+                ':document_name' => $filename,
+                ':document_path' => $relativePathForDb,
+                ':document_type' => 'complete_report',
+                ':file_size' => $fileSize,
+                ':uploaded_by' => $uploadedBy
+            ]);
+
+            error_log("✅ PDF report uložen přes EXPORT: {$filename} ({$fileSize} bytes)");
+
+            return [
+                'status' => 'success',
+                'message' => 'PDF úspěšně uložen do databáze',
+                'file_path' => $relativePathForDb,
+                'file_size' => $fileSize
+            ];
+
+        } catch (PDOException $e) {
+            error_log('Chyba při ukládání PDF do databáze: ' . $e->getMessage());
+            throw new Exception('Chyba při ukládání PDF do databáze');
+        }
+    } else {
+        throw new Exception('Nepodařilo se uložit PDF soubor');
+    }
 }
 
 /**
