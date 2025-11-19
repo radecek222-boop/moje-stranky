@@ -356,7 +356,7 @@ function zobrazitDetailReklamace(rek, timeline) {
                 <div><strong>Zákazník:</strong> ${rek.jmeno}</div>
                 <div><strong>Telefon:</strong> ${rek.telefon || '-'}</div>
                 <div><strong>Email:</strong> ${rek.email || '-'}</div>
-                <div><strong>Adresa:</strong> ${rek.ulice}, ${rek.mesto}, ${rek.psc}</div>
+                <div><strong>Adresa:</strong> ${[rek.ulice, rek.mesto, rek.psc].filter(x => x).join(', ') || '-'}</div>
                 <div><strong>Model:</strong> ${rek.model || '-'}</div>
                 <div><strong>Provedení:</strong> ${rek.provedeni || '-'}</div>
                 <div><strong>Barva:</strong> ${rek.barva || '-'}</div>
@@ -366,18 +366,28 @@ function zobrazitDetailReklamace(rek, timeline) {
             </div>
         </div>
 
-        <!-- Popis problému -->
+        <!-- Popis problému zákazníkem -->
         <div style="margin-bottom: 1.5rem;">
-            <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; margin-bottom: 0.5rem;">Popis problému:</h4>
+            <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; margin-bottom: 0.5rem;">Popis problému zákazníkem:</h4>
             <div style="background: #f5f5f5; padding: 1rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.85rem; white-space: pre-wrap;">
                 ${rek.popis_problemu || 'Žádný popis'}
             </div>
         </div>
 
+        <!-- Doplňující popis prodejce -->
+        ${rek.doplnujici_info ? `
+        <div style="margin-bottom: 1.5rem;">
+            <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; margin-bottom: 0.5rem;">Doplňující popis prodejce:</h4>
+            <div style="background: #fff3cd; padding: 1rem; border: 1px solid #ffc107; border-radius: 4px; font-size: 0.85rem; white-space: pre-wrap;">
+                ${rek.doplnujici_info}
+            </div>
+        </div>
+        ` : ''}
+
         <!-- Timeline historie -->
         <div style="margin-bottom: 1.5rem;">
             <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; margin-bottom: 1rem; border-bottom: 2px solid #000; padding-bottom: 0.5rem;">
-                📅 Historie života zákazníka (Timeline)
+                Historie života zákazníka (Timeline)
             </h4>
 
             <div style="position: relative; padding-left: 2rem;">

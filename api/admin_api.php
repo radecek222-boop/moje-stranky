@@ -654,7 +654,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
     if ($reklamace['datum_vytvoreni']) {
         $timeline[] = [
             'typ' => 'system',
-            'nazev' => '✅ Reklamace vytvořena',
+            'nazev' => 'Reklamace vytvořena',
             'popis' => 'Zákazník vytvořil novou reklamaci',
             'datum' => $reklamace['datum_vytvoreni'],
             'user' => $reklamace['jmeno_prodejce'] ?: 'Systém'
@@ -665,7 +665,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
     if ($reklamace['termin']) {
         $timeline[] = [
             'typ' => 'termin',
-            'nazev' => '📅 Termín domluven',
+            'nazev' => 'Termín domluven',
             'popis' => 'Termín návštěvy: ' . date('d.m.Y', strtotime($reklamace['termin'])) . ' v ' . $reklamace['cas_navstevy'],
             'datum' => $reklamace['termin'] . ' ' . $reklamace['cas_navstevy'],
             'user' => 'Technik'
@@ -673,22 +673,76 @@ function handleGetReklamaceDetail(PDO $pdo): void
     }
 
     // 3. Fotodokumentace (pokud existují fotky)
-    $fotoStmt = $pdo->prepare("SELECT COUNT(*) as count, MIN(created_at) as first_date FROM wgs_photos WHERE reklamace_id = :id");
+    $fotoStmt = $pdo->prepare("
+        SELECT id, photo_path, file_path, file_name, section_name, created_at
+        FROM wgs_photos
+        WHERE reklamace_id = :id
+        ORDER BY created_at ASC
+    ");
     $fotoStmt->execute(['id' => $reklamaceId]);
-    $fotoData = $fotoStmt->fetch(PDO::FETCH_ASSOC);
-    if ($fotoData && $fotoData['count'] > 0) {
+    $fotky = $fotoStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!empty($fotky)) {
+        // Seskupit fotky podle sekce
+        $fotkyPodleSekci = [];
+        foreach ($fotky as $fotka) {
+            $sekce = $fotka['section_name'] ?: 'Ostatní';
+            if (!isset($fotkyPodleSekci[$sekce])) {
+                $fotkyPodleSekci[$sekce] = [];
+            }
+            $fotkyPodleSekci[$sekce][] = $fotka;
+        }
+
+        // Přidat do timeline pro každou sekci
+        foreach ($fotkyPodleSekci as $sekce => $fotkySekce) {
+            $fotkyHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px;">';
+            foreach ($fotkySekce as $fotka) {
+                $cesta = $fotka['file_path'] ?: $fotka['photo_path'];
+                $fotkyHtml .= '<a href="/' . htmlspecialchars($cesta) . '" target="_blank" style="display: block; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; transition: transform 0.2s;" onmouseover="this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'">';
+                $fotkyHtml .= '<img src="/' . htmlspecialchars($cesta) . '" style="width: 100%; height: 120px; object-fit: cover;" alt="' . htmlspecialchars($fotka['file_name']) . '">';
+                $fotkyHtml .= '</a>';
+            }
+            $fotkyHtml .= '</div>';
+
+            $timeline[] = [
+                'typ' => 'photo',
+                'nazev' => 'Fotodokumentace - ' . $sekce,
+                'popis' => 'Nahrán počet fotografií: ' . count($fotkySekce) . $fotkyHtml,
+                'datum' => $fotkySekce[0]['created_at'] ?: $reklamace['datum_vytvoreni'],
+                'user' => 'Technik'
+            ];
+        }
+    }
+
+    // 4. Protokoly (PDFy)
+    $protokolStmt = $pdo->prepare("
+        SELECT id, file_path, original_filename, document_type, created_at
+        FROM wgs_documents
+        WHERE claim_id = :id AND document_type = 'protokol_pdf'
+        ORDER BY created_at ASC
+    ");
+    $protokolStmt->execute(['id' => $reklamaceId]);
+    $protokoly = $protokolStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($protokoly as $protokol) {
+        $protokolyHtml = '<div style="margin-top: 10px;">';
+        $protokolyHtml .= '<a href="/' . htmlspecialchars($protokol['file_path']) . '" target="_blank" style="display: inline-flex; align-items: center; gap: 10px; padding: 10px 15px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #000; transition: background 0.2s;" onmouseover="this.style.background=\'#e5e5e5\'" onmouseout="this.style.background=\'#f5f5f5\'">';
+        $protokolyHtml .= '<span style="font-size: 1.5rem; font-weight: 600; color: #dc3545;">PDF</span>';
+        $protokolyHtml .= '<div>';
+        $protokolyHtml .= '<div style="font-weight: 600;">' . htmlspecialchars($protokol['original_filename']) . '</div>';
+        $protokolyHtml .= '<div style="font-size: 0.75rem; color: #666;">Klikněte pro zobrazení PDF</div>';
+        $protokolyHtml .= '</div>';
+        $protokolyHtml .= '</a>';
+        $protokolyHtml .= '</div>';
+
         $timeline[] = [
-            'typ' => 'photo',
-            'nazev' => '📸 Fotodokumentace',
-            'popis' => 'Nahrán počet fotografií: ' . $fotoData['count'],
-            'datum' => $fotoData['first_date'] ?: $reklamace['datum_vytvoreni'],
+            'typ' => 'document',
+            'nazev' => 'Protokol PDF',
+            'popis' => 'Vytvořen servisní protokol' . $protokolyHtml,
+            'datum' => $protokol['created_at'],
             'user' => 'Technik'
         ];
     }
-
-    // 4. Protokol (pokud existuje)
-    // Hledáme v tabulce wgs_protocols nebo podobně (musíte ověřit strukturu DB)
-    // Pro tento příklad přeskočíme, protože není jasná struktura
 
     // 5. Odeslané emaily
     $emailStmt = $pdo->prepare("
@@ -703,7 +757,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
     foreach ($emaily as $email) {
         $timeline[] = [
             'typ' => 'email',
-            'nazev' => '📧 Email odeslán',
+            'nazev' => 'Email odeslán',
             'popis' => 'Předmět: ' . $email['subject'],
             'datum' => $email['sent_at'] ?: $email['created_at'],
             'user' => 'Systém'
@@ -714,7 +768,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
     if ($reklamace['stav'] === 'done' && $reklamace['datum_dokonceni']) {
         $timeline[] = [
             'typ' => 'done',
-            'nazev' => '✅ Reklamace vyřízena',
+            'nazev' => 'Reklamace vyřízena',
             'popis' => 'Zakázka byla úspěšně dokončena',
             'datum' => $reklamace['datum_dokonceni'],
             'user' => 'Technik'
