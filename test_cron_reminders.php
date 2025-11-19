@@ -235,7 +235,8 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
             <div id="output" class="output" style="display: none;"></div>
 
-            <a href="CRON_NAVOD.md" class="back-link" target="_blank">📖 Zobrazit kompletní návod na nastavení CRON</a>
+            <a href="NAVOD_WEBCRON.md" class="back-link" target="_blank">📖 Návod na nastavení WEBCRON (doporučeno)</a>
+            <a href="CRON_NAVOD.md" class="back-link" target="_blank">📖 Návod na nastavení CLI CRON</a>
         </div>
     </div>
 
@@ -251,8 +252,8 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
             stats.style.display = 'none';
 
             try {
-                // Spustit CRON skript
-                const response = await fetch('cron_send_reminders.php', {
+                // Spustit CRON skript přes nový webcron endpoint
+                const response = await fetch('/cron/send-reminders.php?key=wgs2025reminder', {
                     method: 'GET',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
@@ -260,20 +261,17 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
                 });
 
                 const text = await response.text();
+                const data = JSON.parse(text);
 
                 // Skrýt loading, zobrazit output
                 loading.classList.remove('active');
                 output.style.display = 'block';
-                output.textContent = text;
+                output.textContent = JSON.stringify(data, null, 2);
 
-                // Parsovat statistiky z logu
-                const statFound = (text.match(/Nalezeno návštěv: (\d+)/) || [null, '0'])[1];
-                const statSent = (text.match(/Úspěšně přidáno do fronty: (\d+)/) || [null, '0'])[1];
-                const statErrors = (text.match(/Chyby: (\d+)/) || [null, '0'])[1];
-
-                document.getElementById('stat-found').textContent = statFound;
-                document.getElementById('stat-sent').textContent = statSent;
-                document.getElementById('stat-errors').textContent = statErrors;
+                // Zobrazit statistiky z JSON odpovědi
+                document.getElementById('stat-found').textContent = data.found || 0;
+                document.getElementById('stat-sent').textContent = data.sent || 0;
+                document.getElementById('stat-errors').textContent = data.errors || 0;
 
                 stats.style.display = 'grid';
 
