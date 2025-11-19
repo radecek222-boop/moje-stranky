@@ -135,6 +135,10 @@ try {
             handleGetReklamaceDetail($pdo);
             break;
 
+        case 'update_email_template':
+            handleUpdateEmailTemplate($pdo, $payload);
+            break;
+
         default:
             respondError('Neznámá akce.', 400);
     }
@@ -724,6 +728,55 @@ function handleGetReklamaceDetail(PDO $pdo): void
     respondSuccess([
         'reklamace' => $reklamace,
         'timeline' => $timeline
+    ]);
+}
+
+/**
+ * Aktualizovat email šablonu
+ */
+function handleUpdateEmailTemplate(PDO $pdo, array $payload): void
+{
+    $templateId = $payload['template_id'] ?? null;
+    $subject = trim($payload['subject'] ?? '');
+    $template = trim($payload['template'] ?? '');
+    $active = isset($payload['active']) ? (bool)$payload['active'] : false;
+
+    if (!$templateId) {
+        throw new InvalidArgumentException('Chybí ID šablony');
+    }
+
+    if (empty($subject)) {
+        throw new InvalidArgumentException('Předmět emailu nesmí být prázdný');
+    }
+
+    if (empty($template)) {
+        throw new InvalidArgumentException('Obsah šablony nesmí být prázdný');
+    }
+
+    // Aktualizovat šablonu v databázi
+    $stmt = $pdo->prepare("
+        UPDATE wgs_notifications
+        SET subject = :subject,
+            template = :template,
+            active = :active,
+            updated_at = NOW()
+        WHERE id = :id
+    ");
+
+    $stmt->execute([
+        'subject' => $subject,
+        'template' => $template,
+        'active' => $active ? 1 : 0,
+        'id' => $templateId
+    ]);
+
+    if ($stmt->rowCount() === 0) {
+        throw new InvalidArgumentException('Šablona nebyla nalezena nebo nebyla změněna');
+    }
+
+    respondSuccess([
+        'message' => 'Šablona byla úspěšně aktualizována',
+        'template_id' => $templateId
     ]);
 }
 

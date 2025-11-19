@@ -33,8 +33,8 @@ if ($embedMode && $directAccess):
 <?php
 endif;
 
-// Načíst aktuální filtr
-$filterStav = $_GET['filter'] ?? 'all';
+// Načíst aktuální filtr - při prvním načtení vždy 'all'
+$filterStav = isset($_GET['filter']) ? $_GET['filter'] : 'all';
 
 // Načíst reklamace z databáze
 $reklamace = [];
@@ -50,8 +50,10 @@ try {
 
     // Seznam reklamací
     $whereClause = '';
+    $params = [];
     if ($filterStav !== 'all') {
         $whereClause = "WHERE stav = :stav";
+        $params = ['stav' => $filterStav];
     }
 
     $sql = "
@@ -67,12 +69,13 @@ try {
     ";
 
     $stmt = $pdo->prepare($sql);
-    if ($filterStav !== 'all') {
-        $stmt->execute(['stav' => $filterStav]);
-    } else {
-        $stmt->execute();
-    }
+    $stmt->execute($params);
     $reklamace = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Debug: pokud jsou statistiky ale žádné reklamace, zaloguj to
+    if ($stats['all'] > 0 && count($reklamace) === 0 && $filterStav !== 'all') {
+        error_log("Správa reklamací: Statistiky ukazují {$stats['all']} reklamací, ale filtr '$filterStav' vrátil 0 výsledků (očekáváno {$stats[$filterStav]} reklamací)");
+    }
 } catch (PDOException $e) {
     error_log("Chyba načítání reklamací: " . $e->getMessage());
     $reklamace = [];
