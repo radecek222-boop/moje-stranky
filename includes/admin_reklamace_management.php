@@ -6,8 +6,16 @@
 
 require_once __DIR__ . '/../init.php';
 
+// DEBUG: Logovat session info
+error_log("admin_reklamace_management.php - Session check:");
+error_log("  session_id: " . session_id());
+error_log("  is_admin isset: " . (isset($_SESSION['is_admin']) ? 'yes' : 'no'));
+error_log("  is_admin value: " . (isset($_SESSION['is_admin']) ? var_export($_SESSION['is_admin'], true) : 'not set'));
+error_log("  all session keys: " . implode(', ', array_keys($_SESSION ?? [])));
+
 // Bezpečnostní kontrola
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    error_log("UNAUTHORIZED ACCESS - session is_admin not valid");
     die('Unauthorized');
 }
 
