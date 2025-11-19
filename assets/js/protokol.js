@@ -1058,6 +1058,19 @@ async function sendToCustomer() {
       })
     });
 
+    // Detailní výpis chyby pokud response není OK
+    if (!response.ok) {
+      const errorText = await response.text();
+      logger.error('❌ Server error:', response.status, errorText);
+      try {
+        const errorJson = JSON.parse(errorText);
+        logger.error('❌ Error detail:', errorJson);
+        throw new Error(errorJson.error || errorJson.message || `Server error ${response.status}`);
+      } catch (parseErr) {
+        throw new Error(`Server error ${response.status}: ${errorText.substring(0, 200)}`);
+      }
+    }
+
     const result = await response.json();
 
     if (result.status === 'success') {
