@@ -61,10 +61,10 @@ try {
             reklamace_id, cislo, jmeno, telefon, email,
             ulice, mesto, psc, model, provedeni, barva,
             popis_problemu, termin, cas_navstevy, stav,
-            datum_vytvoreni, datum_dokonceni, jmeno_prodejce, typ
+            created_at as datum_vytvoreni, datum_dokonceni, prodejce as jmeno_prodejce, typ
         FROM wgs_reklamace
         $whereClause
-        ORDER BY datum_vytvoreni DESC
+        ORDER BY created_at DESC
         LIMIT 200
     ";
 
