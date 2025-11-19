@@ -65,7 +65,7 @@ try {
                 ':host' => 'websmtp.cesky-hosting.cz',
                 ':port' => 25,
                 ':username' => 'wgs-service.cz',
-                ':encryption' => '',
+                ':encryption' => 'none',
                 ':id' => $current['id']
             ]);
 
