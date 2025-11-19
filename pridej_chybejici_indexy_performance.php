@@ -99,7 +99,7 @@ try {
         $column = $index['column'];
 
         // Kontrola, zda tabulka existuje
-        $stmt = $pdo->query("SHOW TABLES LIKE '" . $pdo->quote($table) . "'");
+        $stmt = $pdo->query("SHOW TABLES LIKE " . $pdo->quote($table));
         if (!$stmt->fetch()) {
             echo "<tr>";
             echo "<td>{$table}</td>";
