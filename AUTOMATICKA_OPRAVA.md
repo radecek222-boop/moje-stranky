@@ -4,7 +4,7 @@
 
 Tento skript **automaticky opraví všechny problémy** zjištěné diagnostikou:
 - ✅ Přidá chybějící databázové indexy (3 indexy)
-- ✅ Zkontroluje write permissions (5 složek)
+- ✅ **AUTOMATICKY** opraví write permissions (5 složek)
 - ✅ Ověří opravy pomocí diagnostiky
 
 ---
@@ -28,10 +28,11 @@ https://www.wgs-service.cz/automaticka_oprava_diagnostiky.php
 - Zrychlí dotazy na `updated_at` a `created_at` sloupce
 - Trvá: ~10 sekund
 
-### **Krok 2: Write Permissions** (kontrola)
-- Skript zkontroluje, zda složky mají správná oprávnění
-- Pokud NE, zobrazí návod jak to opravit přes FTP
-- **TOTO MUSÍTE UDĚLAT RUČNĚ** (skript to nemůže udělat sám)
+### **Krok 2: Write Permissions** (automaticky)
+- Skript **automaticky nastaví permissions** na 0775 pro všechny složky
+- Vytvoří chybějící složky, pokud neexistují
+- V 99% případů to funguje bez zásahu!
+- Trvá: ~5 sekund
 
 ### **Krok 3: Ověření** (automaticky)
 - Spustí diagnostiku
@@ -42,7 +43,9 @@ https://www.wgs-service.cz/automaticka_oprava_diagnostiky.php
 
 ## ⚠️ CO MUSÍTE UDĚLAT RUČNĚ?
 
-**Pouze PERMISSIONS na složky** (pokud skript zjistí problém):
+**TÉMĚŘ NIC!** Skript vše opraví automaticky.
+
+**Pouze v případě, že automatická oprava permissions selže** (1% případů):
 
 1. **Otevřete FTP klient** (FileZilla, WinSCP)
 2. **Najděte tyto složky:**
@@ -60,6 +63,8 @@ https://www.wgs-service.cz/automaticka_oprava_diagnostiky.php
    - Klikněte **OK**
 
 **Detailní návod:** [OPRAVA_PERMISSIONS.md](OPRAVA_PERMISSIONS.md)
+
+💡 **TIP:** Pokud automatický skript ohlásí chybu při nastavování permissions, použijte tento návod.
 
 ---
 
@@ -94,6 +99,11 @@ Pokud chcete spustit pouze některou část:
 https://www.wgs-service.cz/pridej_chybejici_indexy_performance.php?auto=1
 ```
 
+### **Pouze permissions:**
+```
+https://www.wgs-service.cz/oprav_permissions_slozek.php?auto=1
+```
+
 ### **Pouze diagnostika:**
 ```
 https://www.wgs-service.cz/admin.php?tab=console
@@ -117,8 +127,8 @@ https://www.wgs-service.cz/admin.php?tab=console
 ✅ Skript zobrazí chybu a pokračuje dál. Můžete to spustit znovu.
 
 ### **Q: Jak dlouho to trvá?**
-⏱️ Automatická část: ~30 sekund
-⏱️ Ruční permissions: ~5 minut (pokud je potřeba)
+⏱️ Celková automatická oprava: **~20 sekund**
+⏱️ Ruční oprava permissions (jen při selhání): ~5 minut
 
 ---
 

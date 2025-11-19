@@ -197,9 +197,9 @@ $krok = $_GET['krok'] ?? '1';
         </script>
 
     <?php elseif ($krok === '3'): ?>
-        <!-- KROK 3: KONTROLA PERMISSIONS -->
+        <!-- KROK 3: OPRAVA PERMISSIONS -->
         <div class='progress'>
-            <div class='progress-bar' style='width: 66%;'>66% - Kontrola permissions...</div>
+            <div class='progress-bar' style='width: 66%;'>66% - Oprava permissions...</div>
         </div>
 
         <div class='krok done'>
@@ -208,57 +208,17 @@ $krok = $_GET['krok'] ?? '1';
         </div>
 
         <div class='krok active'>
-            <h3>⚙️ Krok 2/3: Kontrola Write Permissions</h3>
-            <?php
-            try {
-                $pdo = getDbConnection();
-
-                $checkDirs = [
-                    'logs',
-                    'uploads',
-                    'temp',
-                    'uploads/photos',
-                    'uploads/protokoly'
-                ];
-
-                $notWritable = [];
-                foreach ($checkDirs as $dir) {
-                    $path = __DIR__ . '/' . $dir;
-                    if (!is_writable($path)) {
-                        $notWritable[] = $dir;
-                    }
-                }
-
-                if (empty($notWritable)) {
-                    echo "<div class='success'>";
-                    echo "<strong>✅ Všechny složky mají správná oprávnění!</strong><br>";
-                    echo "Write permissions jsou v pořádku.";
-                    echo "</div>";
-                } else {
-                    echo "<div class='warning'>";
-                    echo "<strong>⚠️ " . count($notWritable) . " složek nemá write permissions:</strong><br>";
-                    echo "<ul>";
-                    foreach ($notWritable as $dir) {
-                        echo "<li>❌ {$dir}</li>";
-                    }
-                    echo "</ul>";
-                    echo "<br><strong>🛠️ JAK TO OPRAVIT:</strong><br>";
-                    echo "1. Otevřete FTP klient (FileZilla, WinSCP)<br>";
-                    echo "2. Pro každou složku: Pravé tlačítko → Permissions → Nastavte 755 nebo 775<br>";
-                    echo "3. Zaškrtněte 'Rekurzivně do podsložek'<br>";
-                    echo "<br>";
-                    echo "<a href='OPRAVA_PERMISSIONS.md' target='_blank' class='btn'>📖 Detailní Návod</a>";
-                    echo "</div>";
-                }
-            } catch (Exception $e) {
-                echo "<div class='warning'>";
-                echo "Nelze zkontrolovat permissions: " . htmlspecialchars($e->getMessage());
-                echo "</div>";
-            }
-            ?>
+            <h3>⚙️ Krok 2/3: Oprava Write Permissions</h3>
+            <div class='spinner'></div>
+            <p>Spouštím automatickou opravu permissions...</p>
         </div>
 
-        <a href='?krok=4' class='btn'>▶️ POKRAČOVAT NA OVĚŘENÍ</a>
+        <script>
+            // Automaticky přesměrovat na opravu permissions s auto=1
+            setTimeout(function() {
+                window.location.href = 'oprav_permissions_slozek.php?auto=1&redirect=automaticka_oprava_diagnostiky.php?krok=4';
+            }, 2000);
+        </script>
 
     <?php elseif ($krok === '4'): ?>
         <!-- KROK 4: OVĚŘENÍ -->
