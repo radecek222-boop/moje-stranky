@@ -830,7 +830,7 @@ function loadClaimsModal() {
     // Načíst kompletní správu reklamací přes iframe
     modalBody.innerHTML = `
         <iframe
-            src="/includes/admin_reklamace_management.php?embed=1"
+            src="/includes/admin_reklamace_management.php?embed=1&filter=all"
             style="width: 100%; height: 80vh; border: none; border-radius: 4px;"
             onload="console.log('Správa reklamací načtena')"
         ></iframe>
