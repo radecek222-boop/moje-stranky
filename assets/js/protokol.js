@@ -28,6 +28,39 @@ function toggleMenu() {
   hamburger.classList.toggle('active');
 }
 
+// === NOTIFIKACE ===
+function showNotification(message, type = 'info') {
+  const notification = document.getElementById('notif');
+  if (!notification) {
+    console.warn('Notification element not found, falling back to console');
+    console.log(`[${type.toUpperCase()}] ${message}`);
+    return;
+  }
+
+  notification.textContent = message;
+  notification.className = `notif ${type}`;
+  notification.style.display = 'block';
+  notification.style.opacity = '1';
+
+  // Auto-hide po 3 sekundách (kromě error)
+  if (type !== 'error') {
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 300);
+    }, 3000);
+  } else {
+    // Error zprávy se skryjí po 5 sekundách
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 300);
+    }, 5000);
+  }
+}
+
 // Zavřít menu při kliknutí na odkaz
 document.addEventListener('DOMContentLoaded', () => {
   const navLinks = document.querySelectorAll('.nav a');

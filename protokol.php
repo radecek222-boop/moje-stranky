@@ -413,9 +413,9 @@ if ($initialBootstrapData) {
 
 <!-- External JavaScript -->
 <script src="assets/js/protokol-data-patch.js" defer></script>
-<script src="assets/js/protokol.min.js" defer></script>
+<script src="assets/js/protokol.js" defer></script>
 <script src="assets/js/protokol-fakturace-patch.js" defer></script>
-<!-- Fix pro tlačítka (načíst až po protokol.min.js) -->
+<!-- Fix pro tlačítka (načíst až po protokol.js) -->
 <script src="assets/js/protokol-buttons-fix.js" defer></script>
 </body>
 </html>
