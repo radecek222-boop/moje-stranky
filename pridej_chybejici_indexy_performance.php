@@ -99,8 +99,7 @@ try {
         $column = $index['column'];
 
         // Kontrola, zda tabulka existuje
-        $stmt = $pdo->prepare("SHOW TABLES LIKE :table");
-        $stmt->execute(['table' => $table]);
+        $stmt = $pdo->query("SHOW TABLES LIKE '" . $pdo->quote($table) . "'");
         if (!$stmt->fetch()) {
             echo "<tr>";
             echo "<td>{$table}</td>";
@@ -112,8 +111,7 @@ try {
         }
 
         // Kontrola, zda sloupec existuje
-        $stmt = $pdo->prepare("SHOW COLUMNS FROM `{$table}` LIKE :column");
-        $stmt->execute(['column' => $column]);
+        $stmt = $pdo->query("SHOW COLUMNS FROM `{$table}` LIKE " . $pdo->quote($column));
         if (!$stmt->fetch()) {
             echo "<tr>";
             echo "<td>{$table}</td>";
@@ -158,8 +156,23 @@ try {
         echo "Kliknutím na tlačítko níže přidáte tyto indexy do databáze.";
         echo "</div>";
 
+        // Automatický režim - pokud je ?auto=1, automaticky provést
+        $autoMode = isset($_GET['auto']) && $_GET['auto'] === '1';
+        $executeMode = isset($_GET['execute']) && $_GET['execute'] === '1';
+
+        // Pokud je auto režim a není execute, přesměrovat na execute
+        if ($autoMode && !$executeMode) {
+            echo "<div class='info'>";
+            echo "<strong>🤖 AUTOMATICKÝ REŽIM AKTIVNÍ</strong><br>";
+            echo "Spouštím migraci automaticky...";
+            echo "</div>";
+            echo "<script>window.location.href = '?execute=1';</script>";
+            echo "<meta http-equiv='refresh' content='1;url=?execute=1'>";
+            exit;
+        }
+
         // Pokud je nastaveno ?execute=1, provést migraci
-        if (isset($_GET['execute']) && $_GET['execute'] === '1') {
+        if ($executeMode) {
             echo "<div class='info'><strong>SPOUŠTÍM MIGRACI...</strong></div>";
 
             $uspesne = 0;
@@ -206,8 +219,18 @@ try {
             echo "<strong>Výsledek:</strong> Databázové dotazy na těchto sloupcích budou nyní rychlejší.";
             echo "</div>";
 
-            echo "<a href='admin.php' class='btn'>← Zpět do Admin Panelu</a>";
-            echo "<a href='vsechny_tabulky.php' class='btn'>Zobrazit strukturu DB</a>";
+            // Pokud je nastaveno redirect, automaticky přesměrovat
+            $redirectUrl = $_GET['redirect'] ?? null;
+            if ($redirectUrl && $autoMode) {
+                echo "<div class='info'>";
+                echo "<strong>✅ Hotovo! Přesměrovávám...</strong>";
+                echo "</div>";
+                echo "<script>setTimeout(function() { window.location.href = '" . htmlspecialchars($redirectUrl) . "'; }, 2000);</script>";
+                echo "<meta http-equiv='refresh' content='2;url=" . htmlspecialchars($redirectUrl) . "'>";
+            } else {
+                echo "<a href='admin.php' class='btn'>← Zpět do Admin Panelu</a>";
+                echo "<a href='vsechny_tabulky.php' class='btn'>Zobrazit strukturu DB</a>";
+            }
 
         } else {
             // Náhled co bude provedeno
