@@ -788,17 +788,46 @@ endif;
             </div>
         </div>
 
-        <div style="margin-top: 1rem; padding: 1.5rem; background: #f5f5f5; border: 1px solid #000; text-align: center; font-family: 'Poppins', sans-serif;">
-            <h3 style="color: #000; margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 600;">V PŘÍPRAVĚ</h3>
-            <p style="color: #666; font-size: 0.8rem; line-height: 1.6;">
-                Audit logging bude zaznamenávat:<br>
-                • Přihlášení a odhlášení uživatelů<br>
-                • Změny v registračních klíčích<br>
-                • Modifikace API klíčů<br>
-                • Změny bezpečnostních nastavení<br>
-                • Failed login attempts<br>
-                • Podezřelé aktivity
-            </p>
+        <!-- Filtry -->
+        <div style="margin: 1rem 0; padding: 1rem; background: #fff; border: 1px solid #000;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <label style="display: block; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; color: #000;">Datum od:</label>
+                    <input type="date" id="auditDateFrom" value="<?= date('Y-m-d', strtotime('-7 days')) ?>" style="width: 100%; padding: 0.4rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem;">
+                </div>
+                <div>
+                    <label style="display: block; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; color: #000;">Datum do:</label>
+                    <input type="date" id="auditDateTo" value="<?= date('Y-m-d') ?>" style="width: 100%; padding: 0.4rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem;">
+                </div>
+                <div>
+                    <label style="display: block; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; color: #000;">Typ události:</label>
+                    <select id="auditActionFilter" style="width: 100%; padding: 0.4rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem;">
+                        <option value="">Všechny události</option>
+                        <option value="admin_login">Přihlášení admina</option>
+                        <option value="user_login">Přihlášení uživatele</option>
+                        <option value="user_logout">Odhlášení</option>
+                        <option value="key_created">Vytvoření klíče</option>
+                        <option value="key_deleted">Smazání klíče</option>
+                        <option value="key_rotated">Rotace klíče</option>
+                        <option value="failed_login">Neúspěšné přihlášení</option>
+                        <option value="reklamace_created">Vytvoření reklamace</option>
+                        <option value="reklamace_updated">Úprava reklamace</option>
+                        <option value="reklamace_deleted">Smazání reklamace</option>
+                    </select>
+                </div>
+                <div style="display: flex; align-items: flex-end;">
+                    <button onclick="nactiAuditLogy()" style="width: 100%; padding: 0.5rem 1rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; text-transform: uppercase;">
+                        Načíst záznamy
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabulka s audit logy -->
+        <div id="auditLogContainer" style="margin-top: 1rem;">
+            <div style="text-align: center; padding: 2rem; color: #666; font-family: 'Poppins', sans-serif; font-size: 0.8rem;">
+                Klikněte na "Načíst záznamy" pro zobrazení audit logů
+            </div>
         </div>
     </div>
 </div>
@@ -1280,6 +1309,97 @@ async function nactiApiKlice() {
     }
 }
 
+/**
+ * Načíst Audit Logy
+ */
+async function nactiAuditLogy() {
+    try {
+        const dateFrom = document.getElementById('auditDateFrom').value;
+        const dateTo = document.getElementById('auditDateTo').value;
+        const action = document.getElementById('auditActionFilter').value;
+
+        const container = document.getElementById('auditLogContainer');
+        container.innerHTML = '<div style="text-align: center; padding: 2rem;"><div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #000; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div><p style="margin-top: 1rem; color: #666;">Načítání audit logů...</p></div>';
+
+        const formData = new FormData();
+        formData.append('action', 'get_audit_logs');
+        formData.append('date_from', dateFrom + ' 00:00:00');
+        formData.append('date_to', dateTo + ' 23:59:59');
+        if (action) formData.append('filter_action', action);
+
+        const response = await fetch('/api/admin/security_api.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            zobrazAuditLogy(data.logs);
+        } else {
+            container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #dc3545;">Chyba: ${data.message}</div>`;
+        }
+    } catch (error) {
+        console.error('Chyba načítání audit logů:', error);
+        document.getElementById('auditLogContainer').innerHTML = '<div style="text-align: center; padding: 2rem; color: #dc3545;">Chyba při načítání audit logů</div>';
+    }
+}
+
+/**
+ * Zobrazit Audit Logy v tabulce
+ */
+function zobrazAuditLogy(logs) {
+    const container = document.getElementById('auditLogContainer');
+
+    if (logs.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666; font-family: Poppins, sans-serif;">Žádné záznamy nenalezeny</div>';
+        return;
+    }
+
+    // Mapování akcí na česky
+    const akceMapovani = {
+        'admin_login': 'Přihlášení admina',
+        'user_login': 'Přihlášení uživatele',
+        'user_logout': 'Odhlášení',
+        'key_created': 'Vytvoření klíče',
+        'key_deleted': 'Smazání klíče',
+        'key_rotated': 'Rotace klíče',
+        'failed_login': 'Neúspěšné přihlášení',
+        'reklamace_created': 'Vytvoření reklamace',
+        'reklamace_updated': 'Úprava reklamace',
+        'reklamace_deleted': 'Smazání reklamace'
+    };
+
+    let html = '<div style="background: #fff; border: 1px solid #000; overflow-x: auto;">';
+    html += '<table style="width: 100%; border-collapse: collapse; font-family: Poppins, sans-serif; font-size: 0.75rem;">';
+    html += '<thead><tr style="background: #f5f5f5; border-bottom: 2px solid #000;">';
+    html += '<th style="padding: 0.5rem; text-align: left; font-weight: 600; border-right: 1px solid #ddd;">Datum a čas</th>';
+    html += '<th style="padding: 0.5rem; text-align: left; font-weight: 600; border-right: 1px solid #ddd;">Akce</th>';
+    html += '<th style="padding: 0.5rem; text-align: left; font-weight: 600; border-right: 1px solid #ddd;">Uživatel</th>';
+    html += '<th style="padding: 0.5rem; text-align: left; font-weight: 600; border-right: 1px solid #ddd;">IP adresa</th>';
+    html += '<th style="padding: 0.5rem; text-align: left; font-weight: 600;">Detaily</th>';
+    html += '</tr></thead><tbody>';
+
+    logs.forEach((log, index) => {
+        const backgroundColor = index % 2 === 0 ? '#fff' : '#f9f9f9';
+        const akceNazev = akceMapovani[log.action] || log.action;
+        const isAdmin = log.is_admin ? '<span style="background: #000; color: #fff; padding: 2px 6px; border-radius: 2px; font-size: 0.65rem; margin-left: 4px;">ADMIN</span>' : '';
+
+        html += `<tr style="background: ${backgroundColor}; border-bottom: 1px solid #e5e5e5;">`;
+        html += `<td style="padding: 0.5rem; border-right: 1px solid #ddd; white-space: nowrap;">${log.timestamp}</td>`;
+        html += `<td style="padding: 0.5rem; border-right: 1px solid #ddd;"><strong>${akceNazev}</strong></td>`;
+        html += `<td style="padding: 0.5rem; border-right: 1px solid #ddd;">${log.user_name || 'Unknown'}${isAdmin}</td>`;
+        html += `<td style="padding: 0.5rem; border-right: 1px solid #ddd;"><code>${log.ip}</code></td>`;
+        html += `<td style="padding: 0.5rem;"><details><summary style="cursor: pointer; color: #667eea;">Zobrazit detaily</summary><pre style="margin-top: 0.5rem; padding: 0.5rem; background: #f5f5f5; border: 1px solid #ddd; border-radius: 3px; font-size: 0.7rem; overflow-x: auto;">${JSON.stringify(log.details, null, 2)}</pre></details></td>`;
+        html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+    html += `<div style="margin-top: 0.75rem; padding: 0.5rem; background: #f5f5f5; border: 1px solid #000; font-family: Poppins, sans-serif; font-size: 0.7rem; text-align: right;">Celkem záznamů: <strong>${logs.length}</strong></div>`;
+
+    container.innerHTML = html;
+}
+
 // Načíst data při načtení stránky
 document.addEventListener('DOMContentLoaded', function() {
     const aktualniSekce = new URLSearchParams(window.location.search).get('section') || 'registracni_klice';
@@ -1293,6 +1413,9 @@ document.addEventListener('DOMContentLoaded', function() {
         nactiUzivateleProDropdown();
     } else if (aktualniSekce === 'api_klice') {
         nactiApiKlice();
+    } else if (aktualniSekce === 'audit') {
+        // Automaticky načíst audit logy při otevření sekce
+        setTimeout(() => nactiAuditLogy(), 500);
     }
 });
 
