@@ -173,9 +173,16 @@ function sendWithPHPMailer($queueItem, $settings) {
             // Server settings
             $mail->isSMTP();
             $mail->Host = $settings['smtp_host'];
-            $mail->SMTPAuth = true;
-            $mail->Username = $settings['smtp_username'];
-            $mail->Password = $settings['smtp_password'];
+
+            // SMTP Authentication - pouze pokud jsou zadány credentials
+            // Pro WebSMTP port 25 může být autentizace doménová (bez hesla)
+            if (!empty($settings['smtp_username']) && !empty($settings['smtp_password'])) {
+                $mail->SMTPAuth = true;
+                $mail->Username = $settings['smtp_username'];
+                $mail->Password = $settings['smtp_password'];
+            } else {
+                $mail->SMTPAuth = false;
+            }
 
             // Encryption
             if ($settings['smtp_encryption'] === 'ssl') {
