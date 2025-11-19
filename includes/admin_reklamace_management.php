@@ -72,9 +72,19 @@ try {
     $stmt->execute($params);
     $reklamace = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Debug: detailní logging
+    error_log("DEBUG Správa reklamací:");
+    error_log("  - Filter: $filterStav");
+    error_log("  - Statistiky: " . json_encode($stats));
+    error_log("  - Počet načtených reklamací: " . count($reklamace));
+    error_log("  - SQL: $sql");
+    error_log("  - Params: " . json_encode($params));
+
     // Debug: pokud jsou statistiky ale žádné reklamace, zaloguj to
-    if ($stats['all'] > 0 && count($reklamace) === 0 && $filterStav !== 'all') {
-        error_log("Správa reklamací: Statistiky ukazují {$stats['all']} reklamací, ale filtr '$filterStav' vrátil 0 výsledků (očekáváno {$stats[$filterStav]} reklamací)");
+    if ($stats['all'] > 0 && count($reklamace) === 0) {
+        error_log("CHYBA: Statistiky ukazují {$stats['all']} reklamací, ale dotaz vrátil 0 výsledků!");
+        error_log("SQL dotaz: $sql");
+        error_log("Parametry: " . json_encode($params));
     }
 } catch (PDOException $e) {
     error_log("Chyba načítání reklamací: " . $e->getMessage());
