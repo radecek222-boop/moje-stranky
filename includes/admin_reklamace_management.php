@@ -4,44 +4,11 @@
  * Kompletní správa všech reklamací s timeline historií
  */
 
-// KRITICKÉ: No-cache headers - zabránění cache problémům
-header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
-header('Pragma: no-cache');
-header('Expires: 0');
-
 require_once __DIR__ . '/../init.php';
 
-// DEBUG: Logovat session info
-error_log("admin_reklamace_management.php - Session check:");
-error_log("  session_id: " . session_id());
-error_log("  is_admin isset: " . (isset($_SESSION['is_admin']) ? 'yes' : 'no'));
-error_log("  is_admin value: " . (isset($_SESSION['is_admin']) ? var_export($_SESSION['is_admin'], true) : 'not set'));
-error_log("  all session keys: " . implode(', ', array_keys($_SESSION ?? [])));
-error_log("  REQUEST_URI: " . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
-error_log("  HTTP_REFERER: " . ($_SERVER['HTTP_REFERER'] ?? 'unknown'));
-
-// DOČASNĚ VYPNUTO PRO DEBUG - NEBEZPEČNÉ V PRODUKCI!
-// TODO: Vrátit session check až bude problém vyřešen
-/*
 // Bezpečnostní kontrola
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
-    error_log("UNAUTHORIZED ACCESS - session is_admin not valid");
     die('Unauthorized');
-}
-*/
-
-// DOČASNÉ VAROVÁNÍ pokud session nefunguje
-$sessionVarovani = '';
-if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
-    error_log("VAROVÁNÍ: Session není validní, ale zobrazuji obsah pro debug");
-    $sessionVarovani = "
-    <div style='background: #dc3545; color: #fff; padding: 1rem; margin: 1rem; font-family: Poppins, sans-serif; border-radius: 4px;'>
-        <strong>⚠️ VAROVÁNÍ:</strong> Session není validní!
-        <br>Session ID: " . session_id() . "
-        <br>is_admin: " . (isset($_SESSION['is_admin']) ? var_export($_SESSION['is_admin'], true) : 'not set') . "
-        <br>Všechny session klíče: " . implode(', ', array_keys($_SESSION ?? [])) . "
-        <br><small>Tento obsah je zobrazen pouze pro diagnostiku.</small>
-    </div>";
 }
 
 $pdo = getDbConnection();
@@ -155,11 +122,6 @@ try {
     <?php endif; ?>
 
     <div class="control-detail-content">
-
-        <!-- Session varování (pokud existuje) -->
-        <?php if ($sessionVarovani): ?>
-            <?= $sessionVarovani ?>
-        <?php endif; ?>
 
         <!-- Alert -->
         <div id="reklamace-alert" style="display: none; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.85rem;"></div>
