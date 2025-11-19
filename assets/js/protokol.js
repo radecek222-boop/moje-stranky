@@ -354,7 +354,15 @@ async function loadReklamace(id) {
     });
 
     if (!response.ok) {
-      throw new Error(`Chybná odpověď serveru (${response.status})`);
+      const errorText = await response.text();
+      logger.error('❌ Load reklamace error:', response.status, errorText);
+      try {
+        const errorJson = JSON.parse(errorText);
+        logger.error('❌ Load error detail:', errorJson);
+        throw new Error(errorJson.error || errorJson.message || `Server error ${response.status}`);
+      } catch (parseErr) {
+        throw new Error(`Server error ${response.status}: ${errorText.substring(0, 200)}`);
+      }
     }
 
     const result = await response.json();
