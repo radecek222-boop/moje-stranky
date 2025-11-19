@@ -42,10 +42,23 @@ try {
     $stats['uzivatele_celkem'] = $userStats['total'] ?? 0;
     $stats['uzivatele_aktivni'] = $userStats['active'] ?? 0;
 
-    // API klíče (z wgs_system_config)
-    $stmt = $pdo->query("SELECT COUNT(*) as total FROM wgs_system_config WHERE config_group = 'api_keys'");
-    $apiStats = $stmt->fetch(PDO::FETCH_ASSOC);
-    $stats['api_klice_celkem'] = $apiStats['total'] ?? 0;
+    // API klíče - spočítat skutečně nakonfigurované služby z .env
+    $nakonfigurovaneSluzby = 0;
+
+    // Geoapify API (mapy)
+    $geoapifyKey = getenv('GEOAPIFY_API_KEY') ?: getenv('GEOAPIFY_KEY');
+    if (!empty($geoapifyKey) && $geoapifyKey !== false) {
+        $nakonfigurovaneSluzby++;
+    }
+
+    // SMTP služba (email) - počítá se jako 1 služba, pokud je nastaveno
+    $smtpHost = getenv('SMTP_HOST');
+    $smtpUser = getenv('SMTP_USER');
+    if (!empty($smtpHost) && !empty($smtpUser) && $smtpHost !== false && $smtpUser !== false) {
+        $nakonfigurovaneSluzby++;
+    }
+
+    $stats['api_klice_celkem'] = $nakonfigurovaneSluzby;
 
     // Poslední přihlášení
     $stmt = $pdo->query("SELECT email, last_login FROM wgs_users WHERE last_login IS NOT NULL ORDER BY last_login DESC LIMIT 1");
@@ -370,9 +383,9 @@ endif;
                 <div class="stat-card-value"><?= $stats['uzivatele_aktivni'] ?> / <?= $stats['uzivatele_celkem'] ?></div>
                 <div class="stat-card-label">Aktivní uživatelé</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" title="Geoapify (mapy), SMTP (email)">
                 <div class="stat-card-value"><?= $stats['api_klice_celkem'] ?></div>
-                <div class="stat-card-label">API klíče</div>
+                <div class="stat-card-label">API služby</div>
             </div>
             <div class="stat-card">
                 <div class="stat-card-value">
