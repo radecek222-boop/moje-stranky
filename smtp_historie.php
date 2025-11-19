@@ -69,11 +69,11 @@ try {
 
         echo "<tr>";
         echo "<td><code>#{$cfg['id']}</code></td>";
-        echo "<td><code>{$cfg['smtp_host']}</code></td>";
-        echo "<td><code>{$cfg['smtp_port']}</code></td>";
-        echo "<td><code>{$cfg['smtp_encryption']}</code></td>";
-        echo "<td><code>{$cfg['smtp_username']}</code></td>";
-        echo "<td><code>" . ($cfg['password_length'] > 0 ? "{$cfg['password_length']} znaků" : 'PRÁZDNÉ') . "</code></td>";
+        echo "<td><code>" . htmlspecialchars($cfg['smtp_host']) . "</code></td>";
+        echo "<td><code>" . htmlspecialchars($cfg['smtp_port']) . "</code></td>";
+        echo "<td><code>" . htmlspecialchars($cfg['smtp_encryption']) . "</code></td>";
+        echo "<td><code>" . htmlspecialchars($cfg['smtp_username']) . "</code></td>";
+        echo "<td><code>" . ($cfg['password_length'] > 0 ? htmlspecialchars($cfg['password_length']) . " znaků" : 'PRÁZDNÉ') . "</code></td>";
         echo "<td>{$isActive}</td>";
         echo "<td>" . date('d.m.Y H:i', strtotime($cfg['created_at'])) . "</td>";
         echo "<td><strong>{$updatedDate}</strong></td>";
@@ -97,7 +97,7 @@ try {
     foreach ($sentEmails as $email) {
         echo "<tr>";
         echo "<td><code>#{$email['id']}</code></td>";
-        echo "<td><code>{$email['recipient_email']}</code></td>";
+        echo "<td><code>" . htmlspecialchars($email['recipient_email']) . "</code></td>";
         echo "<td>" . htmlspecialchars(substr($email['subject'], 0, 50)) . "</td>";
         echo "<td>" . date('d.m.Y H:i:s', strtotime($email['sent_at'])) . "</td>";
         echo "</tr>";
