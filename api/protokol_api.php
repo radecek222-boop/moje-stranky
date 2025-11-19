@@ -319,6 +319,14 @@ function saveProtokolData($data) {
     $solved = $data['solved'] ?? '';
     $technik = $data['technician'] ?? null;
 
+    // Cenové údaje
+    $pocetDilu = isset($data['pocet_dilu']) ? (int)$data['pocet_dilu'] : null;
+    $cenaPrace = isset($data['cena_prace']) ? (float)$data['cena_prace'] : null;
+    $cenaMaterial = isset($data['cena_material']) ? (float)$data['cena_material'] : null;
+    $cenaDruhyTechnik = isset($data['cena_druhy_technik']) ? (float)$data['cena_druhy_technik'] : null;
+    $cenaDoprava = isset($data['cena_doprava']) ? (float)$data['cena_doprava'] : null;
+    $cenaCelkem = isset($data['cena_celkem']) ? (float)$data['cena_celkem'] : null;
+
     $pdo = getDbConnection();
 
     // Najít reklamaci
@@ -337,7 +345,7 @@ function saveProtokolData($data) {
         throw new Exception('Reklamace nebyla nalezena');
     }
 
-    // Aktualizovat protokol data (včetně technika)
+    // Aktualizovat protokol data (včetně technika a cenových údajů)
     $updateFields = [
         'popis_problemu = :problem_description',
         'popis_opravy = :repair_proposal',
@@ -356,6 +364,32 @@ function saveProtokolData($data) {
     if ($technik !== null) {
         $updateFields[] = 'technik = :technik';
         $params[':technik'] = $technik;
+    }
+
+    // Přidat cenové údaje pokud jsou zadány
+    if ($pocetDilu !== null) {
+        $updateFields[] = 'pocet_dilu = :pocet_dilu';
+        $params[':pocet_dilu'] = $pocetDilu;
+    }
+    if ($cenaPrace !== null) {
+        $updateFields[] = 'cena_prace = :cena_prace';
+        $params[':cena_prace'] = $cenaPrace;
+    }
+    if ($cenaMaterial !== null) {
+        $updateFields[] = 'cena_material = :cena_material';
+        $params[':cena_material'] = $cenaMaterial;
+    }
+    if ($cenaDruhyTechnik !== null) {
+        $updateFields[] = 'cena_druhy_technik = :cena_druhy_technik';
+        $params[':cena_druhy_technik'] = $cenaDruhyTechnik;
+    }
+    if ($cenaDoprava !== null) {
+        $updateFields[] = 'cena_doprava = :cena_doprava';
+        $params[':cena_doprava'] = $cenaDoprava;
+    }
+    if ($cenaCelkem !== null) {
+        $updateFields[] = 'cena_celkem = :cena_celkem';
+        $params[':cena_celkem'] = $cenaCelkem;
     }
 
     $stmt = $pdo->prepare("

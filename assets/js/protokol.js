@@ -1080,6 +1080,15 @@ async function sendToCustomer() {
 async function saveProtokolToDB() {
   try {
     const csrfToken = await fetchCsrfToken();
+
+    // Získat cenové údaje z formuláře
+    const pocetDilu = parseInt(document.getElementById("parts").value) || 0;
+    const cenaPrace = parseFloat(document.getElementById("price-work").value) || 0;
+    const cenaMaterial = parseFloat(document.getElementById("price-material").value) || 0;
+    const cenaDruhyTechnik = parseFloat(document.getElementById("price-second").value) || 0;
+    const cenaDoprava = parseFloat(document.getElementById("price-transport").value) || 0;
+    const cenaCelkem = cenaPrace + cenaMaterial + cenaDruhyTechnik + cenaDoprava;
+
     const response = await fetch("api/protokol_api.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1090,6 +1099,12 @@ async function saveProtokolToDB() {
         repair_proposal: document.getElementById("repair-cz").value,
         solved: document.getElementById("solved").value,
         technician: document.getElementById("technician").value,
+        pocet_dilu: pocetDilu,
+        cena_prace: cenaPrace,
+        cena_material: cenaMaterial,
+        cena_druhy_technik: cenaDruhyTechnik,
+        cena_doprava: cenaDoprava,
+        cena_celkem: cenaCelkem,
         csrf_token: csrfToken
       })
     });
@@ -1097,7 +1112,7 @@ async function saveProtokolToDB() {
     const result = await response.json();
 
     if (result.status === 'success') {
-      logger.log("Protokol uložen do DB");
+      logger.log("Protokol uložen do DB (včetně cenových údajů)");
     }
   } catch (error) {
     logger.error("Chyba ukládání:", error);
