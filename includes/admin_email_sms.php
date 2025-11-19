@@ -514,6 +514,22 @@ try {
     </div>
 </div>
 
+<!-- Modal pro editaci email šablony -->
+<div id="sablona-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; overflow-y: auto;">
+    <div style="max-width: 800px; margin: 2rem auto; background: #fff; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <!-- Header -->
+        <div style="padding: 1.5rem; background: #000; color: #fff; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
+            <h2 id="sablona-modal-title" style="font-family: 'Poppins', sans-serif; font-size: 1.2rem; font-weight: 600; margin: 0;">Editace email šablony</h2>
+            <button onclick="zavritSablonaModal()" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
+        </div>
+
+        <!-- Obsah -->
+        <div id="sablona-modal-content" style="padding: 1.5rem;">
+            <div style="text-align: center; padding: 2rem; color: #999;">Načítám...</div>
+        </div>
+    </div>
+</div>
+
 <style>
 .cc-tabs {
     display: flex;
@@ -763,18 +779,157 @@ if (document.getElementById('section-management')) {
     updateSelectedEmailCount();
 }
 
-// Otevřít Notifications tab v parent admin panelu
-function otevritNotifikace(sablona_id) {
-    if (window.parent && window.parent !== window) {
-        // Pokud jsme v iframe, komunikujeme s parent oknem
-        window.parent.postMessage({
-            action: 'switchTab',
-            tab: 'notifications',
-            highlightId: sablona_id
-        }, '*');
-    } else {
-        // Pokud jsme v hlavním okně, přejdeme přímo
-        window.location.href = '/admin.php?tab=notifications#' + sablona_id;
+// Otevřít modal pro editaci šablony
+async function otevritNotifikace(sablonaId) {
+    const modal = document.getElementById('sablona-modal');
+    const content = document.getElementById('sablona-modal-content');
+
+    // Zobrazit modal
+    modal.style.display = 'block';
+    content.innerHTML = '<div style="text-align: center; padding: 2rem; color: #999;">Načítám šablonu...</div>';
+
+    try {
+        // Načíst data šablony z databáze
+        const sablona = <?= json_encode($emailSablony) ?>.find(s => s.id == sablonaId);
+
+        if (!sablona) {
+            content.innerHTML = '<div style="color: #dc3545; text-align: center; padding: 2rem;">Šablona nebyla nalezena</div>';
+            return;
+        }
+
+        // Aktualizovat title
+        document.getElementById('sablona-modal-title').textContent = 'Editace: ' + sablona.name;
+
+        // Vytvořit formulář
+        content.innerHTML = `
+            <form id="sablona-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Název -->
+                <div>
+                    <label style="display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #000;">
+                        Název šablony:
+                    </label>
+                    <input type="text" id="sablona-name" value="${sablona.name.replace(/"/g, '&quot;')}"
+                           style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; font-family: 'Poppins', sans-serif; font-size: 0.85rem;" readonly disabled />
+                </div>
+
+                <!-- Popis -->
+                <div>
+                    <label style="display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #000;">
+                        Popis:
+                    </label>
+                    <input type="text" id="sablona-description" value="${sablona.description.replace(/"/g, '&quot;')}"
+                           style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; font-family: 'Poppins', sans-serif; font-size: 0.85rem;" readonly disabled />
+                </div>
+
+                <!-- Předmět -->
+                <div>
+                    <label style="display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #000;">
+                        Předmět emailu:
+                    </label>
+                    <input type="text" id="sablona-subject" value="${sablona.subject.replace(/"/g, '&quot;')}"
+                           style="width: 100%; padding: 0.75rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.85rem;" />
+                </div>
+
+                <!-- Šablona -->
+                <div>
+                    <label style="display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #000;">
+                        Obsah emailu (HTML):
+                    </label>
+                    <textarea id="sablona-template" rows="12"
+                              style="width: 100%; padding: 0.75rem; border: 1px solid #000; font-family: monospace; font-size: 0.8rem; line-height: 1.5;">${sablona.template.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+                    <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #666;">
+                        💡 Použijte proměnné: {{customer_name}}, {{customer_email}}, {{date}}, {{time}}, atd.
+                    </div>
+                </div>
+
+                <!-- Aktivní -->
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <input type="checkbox" id="sablona-active" ${sablona.active ? 'checked' : ''}
+                           style="width: 18px; height: 18px; cursor: pointer;" />
+                    <label for="sablona-active" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; color: #000; cursor: pointer;">
+                        Šablona je aktivní
+                    </label>
+                </div>
+
+                <!-- Alert -->
+                <div id="sablona-alert" style="display: none; padding: 0.75rem; border: 1px solid #000; font-size: 0.85rem; font-family: 'Poppins', sans-serif;"></div>
+
+                <!-- Tlačítka -->
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 0.5rem;">
+                    <button type="button" onclick="zavritSablonaModal()"
+                            style="padding: 0.75rem 1.5rem; background: #fff; color: #000; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: 3px;">
+                        Zrušit
+                    </button>
+                    <button type="button" onclick="ulozitSablonu('${sablonaId}')"
+                            style="padding: 0.75rem 1.5rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: 3px;">
+                        Uložit změny
+                    </button>
+                </div>
+            </form>
+        `;
+    } catch (error) {
+        console.error('Chyba načítání šablony:', error);
+        content.innerHTML = '<div style="color: #dc3545; text-align: center; padding: 2rem;">Chyba načítání šablony</div>';
+    }
+}
+
+// Zavřít modal
+function zavritSablonaModal() {
+    document.getElementById('sablona-modal').style.display = 'none';
+}
+
+// Uložit šablonu
+async function ulozitSablonu(sablonaId) {
+    const subject = document.getElementById('sablona-subject').value;
+    const template = document.getElementById('sablona-template').value;
+    const active = document.getElementById('sablona-active').checked;
+    const alertEl = document.getElementById('sablona-alert');
+
+    if (!subject || !template) {
+        alertEl.style.display = 'block';
+        alertEl.style.background = '#fef2f2';
+        alertEl.style.color = '#991b1b';
+        alertEl.textContent = 'Vyplňte předmět i obsah emailu';
+        return;
+    }
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+    try {
+        const response = await fetch('/api/admin_api.php?action=update_email_template', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                csrf_token: csrfToken,
+                template_id: sablonaId,
+                subject: subject,
+                template: template,
+                active: active
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            alertEl.style.display = 'block';
+            alertEl.style.background = '#f0fdf4';
+            alertEl.style.color = '#15803d';
+            alertEl.textContent = '✓ Šablona byla úspěšně uložena';
+
+            // Zavřít modal po 1.5s a obnovit stránku
+            setTimeout(() => {
+                zavritSablonaModal();
+                window.location.reload();
+            }, 1500);
+        } else {
+            throw new Error(result.message || 'Nepodařilo se uložit šablonu');
+        }
+    } catch (error) {
+        console.error('Chyba ukládání šablony:', error);
+        alertEl.style.display = 'block';
+        alertEl.style.background = '#fef2f2';
+        alertEl.style.color = '#991b1b';
+        alertEl.textContent = '✗ Chyba: ' + error.message;
     }
 }
 </script>
