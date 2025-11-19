@@ -827,36 +827,14 @@ function loadClaimsModal() {
         return;
     }
 
-    // Načíst správu reklamací přes fetch (ne iframe kvůli session)
-    fetch('/includes/admin_reklamace_management.php?embed=1&filter=all', {
-        method: 'GET',
-        credentials: 'same-origin', // Důležité pro session
-        headers: {
-            'Accept': 'text/html'
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        return response.text();
-    })
-    .then(html => {
-        modalBody.innerHTML = html;
-        console.log('Správa reklamací načtena');
-    })
-    .catch(error => {
-        console.error('Chyba načítání správy reklamací:', error);
-        modalBody.innerHTML = `
-            <div style="text-align: center; padding: 3rem; color: #dc3545; font-family: 'Poppins', sans-serif;">
-                <h3>Chyba načítání správy reklamací</h3>
-                <p style="color: #666; margin-top: 1rem;">${error.message}</p>
-                <button onclick="loadClaimsModal()" style="margin-top: 1.5rem; padding: 0.5rem 1.5rem; background: #000; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Poppins', sans-serif;">
-                    Zkusit znovu
-                </button>
-            </div>
-        `;
-    });
+    // Načíst kompletní správu reklamací přes iframe
+    modalBody.innerHTML = `
+        <iframe
+            src="/includes/admin_reklamace_management.php?embed=1&filter=all"
+            style="width: 100%; height: 80vh; border: none; border-radius: 4px;"
+            onload="console.log('Správa reklamací načtena')"
+        ></iframe>
+    `;
 
     // Původní starý kód pro statistiky (záloha - smazat pokud nový funguje)
     /*
