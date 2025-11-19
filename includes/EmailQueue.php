@@ -22,6 +22,27 @@ function __construct($pdo = null) {
     }
 
     /**
+     * Přidá email do fronty (zkrácená verze pro jednoduché použití)
+     *
+     * @param string $toEmail Email příjemce
+     * @param string $subject Předmět
+     * @param string $body Tělo emailu
+     * @param string $notificationId ID notifikace (volitelné)
+     * @param int $relatedId ID souvisejícího záznamu (volitelné)
+     * @return bool Success
+     */
+    public function add($toEmail, $subject, $body, $notificationId = 'custom', $relatedId = null) {
+        return $this->enqueue([
+            'to' => $toEmail,
+            'to_name' => null,
+            'subject' => $subject,
+            'body' => $body,
+            'notification_id' => $notificationId,
+            'priority' => 'normal'
+        ]);
+    }
+
+    /**
      * Přidá email do fronty
      *
      * @param array $data Email data
