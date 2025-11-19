@@ -153,17 +153,20 @@ try {
         $deletedCounters['documents'] = $stmt->rowCount();
     }
 
-    if ($primaryId !== null && db_table_exists($pdo, 'wgs_notes')) {
-        $stmt = $pdo->prepare('DELETE FROM wgs_notes WHERE claim_id = :id');
-        $stmt->execute([':id' => $primaryId]);
-        $deletedCounters['notes'] = $stmt->rowCount();
-    }
+    // POZNÁMKA: Tabulka wgs_notes neexistuje v produkční DB
+    // if ($primaryId !== null && db_table_exists($pdo, 'wgs_notes')) {
+    //     $stmt = $pdo->prepare('DELETE FROM wgs_notes WHERE claim_id = :id');
+    //     $stmt->execute([':id' => $primaryId]);
+    //     $deletedCounters['notes'] = $stmt->rowCount();
+    // }
 
-    if ($primaryId !== null && db_table_exists($pdo, 'wgs_notifications')) {
-        $stmt = $pdo->prepare('DELETE FROM wgs_notifications WHERE claim_id = :id');
-        $stmt->execute([':id' => $primaryId]);
-        $deletedCounters['notifications'] = $stmt->rowCount();
-    }
+    // POZNÁMKA: Tabulka wgs_notifications je šablonová tabulka (templates),
+    // nemá sloupec claim_id a neměla by se mazat při smazání reklamace
+    // if ($primaryId !== null && db_table_exists($pdo, 'wgs_notifications')) {
+    //     $stmt = $pdo->prepare('DELETE FROM wgs_notifications WHERE claim_id = :id');
+    //     $stmt->execute([':id' => $primaryId]);
+    //     $deletedCounters['notifications'] = $stmt->rowCount();
+    // }
 
     $deleteStmt = $pdo->prepare('DELETE FROM wgs_reklamace WHERE `' . $identifierColumn . '` = :identifier LIMIT 1');
     $deleteStmt->execute([':identifier' => $identifierValue]);
