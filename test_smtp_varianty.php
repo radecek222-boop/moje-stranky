@@ -156,8 +156,11 @@ try {
         echo "FROM: {$successVariant['from']}\n";
         echo "Encryption: {$successVariant['encryption']}\n\n";
 
+        // Uložit úspěšnou variantu do session (BEZPEČNĚ bez hesla v URL)
+        $_SESSION['successful_smtp_variant'] = $successVariant;
+
         echo "Pro aplikaci změn otevřete:\n";
-        echo "https://www.wgs-service.cz/aplikuj_smtp_fix.php?variant=" . urlencode(json_encode($successVariant)) . "\n";
+        echo "https://www.wgs-service.cz/aplikuj_smtp_fix.php\n";
 
     } else {
         echo "❌ ŽÁDNÁ KONFIGURACE NEFUNGOVALA\n\n";

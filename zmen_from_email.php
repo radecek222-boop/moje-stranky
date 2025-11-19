@@ -3,6 +3,7 @@
  * Změna FROM emailu pro řešení SPF problému
  */
 require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/includes/csrf_helper.php';
 
 // Bezpečnostní kontrola
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
@@ -45,6 +46,11 @@ echo "SMTP server odmítá tento email jako odesílatele kvůli SPF politice.";
 echo "</div>";
 
 if (isset($_POST['change_email'])) {
+    // CSRF ochrana
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        die("<div class='section error'>❌ Neplatný CSRF token. Obnovte stránku a zkuste znovu.</div>");
+    }
+
     try {
         $pdo = getDbConnection();
 
@@ -95,6 +101,11 @@ try {
     echo "<div class='section'>";
     echo "<h3>Změnit FROM email:</h3>";
     echo "<form method='POST'>";
+
+    // CSRF token
+    $csrfToken = generateCSRFToken();
+    echo "<input type='hidden' name='csrf_token' value='{$csrfToken}'>";
+
     echo "<label>Nový FROM Email:</label>";
     echo "<input type='text' name='from_email' value='info@wgs-service.cz' required>";
     echo "<small>Doporučené: info@wgs-service.cz nebo admin@wgs-service.cz</small><br><br>";
