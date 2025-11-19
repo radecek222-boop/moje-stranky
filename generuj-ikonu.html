@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WGS Ikona Generator - Glowing Effect</title>
+
+  <!-- Google Fonts - Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .kontejner {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 0.5rem;
+      font-size: 2.5rem;
+      font-weight: 700;
+    }
+
+    .popis {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 3rem;
+      font-size: 1.1rem;
+    }
+
+    .nahled-sekce {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .nahled-karta {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nahled-karta h2 {
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    canvas {
+      border-radius: 20%;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      margin: 1rem auto;
+      display: block;
+    }
+
+    .ovladaci-panel {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .ovladaci-panel h3 {
+      margin-bottom: 1.5rem;
+      font-size: 1.3rem;
+    }
+
+    .kontrola {
+      margin-bottom: 1.5rem;
+    }
+
+    .kontrola label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #00FF88;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: #00FF88;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 50px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      margin-right: 10px;
+      accent-color: #00FF88;
+    }
+
+    .hodnota {
+      display: inline-block;
+      margin-left: 1rem;
+      color: #00FF88;
+      font-weight: 600;
+    }
+
+    .tlacitko {
+      background: linear-gradient(135deg, #00FF88 0%, #00CC6A 100%);
+      color: #000;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 1rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .tlacitko:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+    }
+
+    .tlacitko:active {
+      transform: translateY(0);
+    }
+
+    .instrukce {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 20px;
+      padding: 2rem;
+      border-left: 4px solid #00FF88;
+      margin-top: 2rem;
+    }
+
+    .instrukce h3 {
+      margin-bottom: 1rem;
+      color: #00FF88;
+    }
+
+    .instrukce ol {
+      margin-left: 1.5rem;
+    }
+
+    .instrukce li {
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+
+    .upozorneni {
+      background: rgba(255, 200, 0, 0.1);
+      border-left: 4px solid #FFC800;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 5px;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .nahled-sekce {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="kontejner">
+    <h1>🎨 WGS Ikona Generator</h1>
+    <p class="popis">Vytvořte profesionální PWA ikonu s glow efektem pro vaši aplikaci</p>
+
+    <!-- Ovládací panel -->
+    <div class="ovladaci-panel">
+      <h3>⚙️ Nastavení</h3>
+
+      <div class="kontrola">
+        <label>Barva pozadí:
+          <input type="color" id="barvaPozadi" value="#000000">
+        </label>
+      </div>
+
+      <div class="kontrola">
+        <label>Barva textu:
+          <input type="color" id="barvaTextu" value="#ffffff">
+        </label>
+      </div>
+
+      <div class="kontrola">
+        <label>Síla glow efektu: <span class="hodnota" id="glowHodnota">50</span></label>
+        <input type="range" id="silaGlow" min="0" max="100" value="50">
+      </div>
+
+      <div class="kontrola">
+        <label>Velikost písma: <span class="hodnota" id="fontHodnota">60%</span></label>
+        <input type="range" id="velikostFontu" min="30" max="80" value="60">
+      </div>
+
+      <div class="kontrola">
+        <label>Gradient pozadí: <span class="hodnota" id="gradientHodnota">30%</span></label>
+        <input type="range" id="gradientPozadi" min="0" max="100" value="30">
+      </div>
+
+      <div class="kontrola">
+        <label>
+          <input type="checkbox" id="safezone" checked> Zobrazit iOS/Android safe zones
+        </label>
+      </div>
+
+      <div class="kontrola">
+        <label>
+          <input type="checkbox" id="maskable" checked> Maskable režim (padding pro Android)
+        </label>
+      </div>
+    </div>
+
+    <!-- Náhled ikon -->
+    <div class="nahled-sekce">
+      <div class="nahled-karta">
+        <h2>📱 Ikona 192x192</h2>
+        <canvas id="canvas192" width="192" height="192"></canvas>
+        <button class="tlacitko" onclick="stahniIkonu(192)">💾 Stáhnout icon192.png</button>
+      </div>
+
+      <div class="nahled-karta">
+        <h2>📱 Ikona 512x512</h2>
+        <canvas id="canvas512" width="512" height="512"></canvas>
+        <button class="tlacitko" onclick="stahniIkonu(512)">💾 Stáhnout icon512.png</button>
+      </div>
+    </div>
+
+    <!-- Instrukce -->
+    <div class="instrukce">
+      <h3>📋 Jak na to:</h3>
+      <ol>
+        <li><strong>Upravte nastavení</strong> podle svých preferencí pomocí ovládacích prvků výše</li>
+        <li><strong>Stáhněte obě ikony</strong> (192x192 a 512x512) kliknutím na tlačítka</li>
+        <li><strong>Nahraďte staré ikony</strong> v root složce projektu (<code>icon192.png</code> a <code>icon512.png</code>)</li>
+        <li><strong>Commitněte a pushněte</strong> změny do Git repositáře</li>
+        <li><strong>Po nasazení</strong> odinstalujte a znovu nainstalujte PWA na mobilu</li>
+      </ol>
+
+      <div class="upozorneni">
+        <strong>⚠️ Safe Zones vysvětlení:</strong>
+        <ul>
+          <li><strong>Červený obdélník:</strong> iOS zaobluje rohy ikon (~22.5%) - obsah mimo roh se ořeže</li>
+          <li><strong>Zelený kruh:</strong> Android maskable safe area (40%) - obsah mimo kruh může být ořízlý různými tvary</li>
+          <li><strong>Maskable režim:</strong> Automaticky zmenší text, aby se vešel do safe area</li>
+        </ul>
+      </div>
+
+      <div class="upozorneni">
+        <strong>💡 Tip:</strong> Ikona se fyzicky neanimuje na ploše telefonu, ale díky glow efektu vypadá živě a profesionálně. Zapněte "Maskable režim" pro korektní zobrazení na všech zařízeních.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Konfigurace
+    const config = {
+      barvaPozadi: '#000000',
+      barvaTextu: '#ffffff',
+      silaGlow: 50,
+      velikostFontu: 60,
+      gradientPozadi: 30,
+      safezone: true,
+      maskable: true
+    };
+
+    // Elementy
+    const canvas192 = document.getElementById('canvas192');
+    const canvas512 = document.getElementById('canvas512');
+    const ctx192 = canvas192.getContext('2d');
+    const ctx512 = canvas512.getContext('2d');
+
+    // Event listeners pro ovládací prvky
+    document.getElementById('barvaPozadi').addEventListener('input', (e) => {
+      config.barvaPozadi = e.target.value;
+      vykresliIkony();
+    });
+
+    document.getElementById('barvaTextu').addEventListener('input', (e) => {
+      config.barvaTextu = e.target.value;
+      vykresliIkony();
+    });
+
+    document.getElementById('silaGlow').addEventListener('input', (e) => {
+      config.silaGlow = parseInt(e.target.value);
+      document.getElementById('glowHodnota').textContent = config.silaGlow;
+      vykresliIkony();
+    });
+
+    document.getElementById('velikostFontu').addEventListener('input', (e) => {
+      config.velikostFontu = parseInt(e.target.value);
+      document.getElementById('fontHodnota').textContent = config.velikostFontu + '%';
+      vykresliIkony();
+    });
+
+    document.getElementById('gradientPozadi').addEventListener('input', (e) => {
+      config.gradientPozadi = parseInt(e.target.value);
+      document.getElementById('gradientHodnota').textContent = config.gradientPozadi + '%';
+      vykresliIkony();
+    });
+
+    document.getElementById('safezone').addEventListener('change', (e) => {
+      config.safezone = e.target.checked;
+      vykresliIkony();
+    });
+
+    document.getElementById('maskable').addEventListener('change', (e) => {
+      config.maskable = e.target.checked;
+      vykresliIkony();
+    });
+
+    // Funkce pro vykreslení ikony
+    function vykresliIkonu(ctx, velikost) {
+      // Vyčistit canvas
+      ctx.clearRect(0, 0, velikost, velikost);
+
+      // Gradient pozadí
+      const gradient = ctx.createRadialGradient(
+        velikost / 2, velikost / 2, 0,
+        velikost / 2, velikost / 2, velikost / 2
+      );
+
+      const svetlost = config.gradientPozadi / 100;
+      const r = parseInt(config.barvaPozadi.substr(1, 2), 16);
+      const g = parseInt(config.barvaPozadi.substr(3, 2), 16);
+      const b = parseInt(config.barvaPozadi.substr(5, 2), 16);
+
+      gradient.addColorStop(0, `rgba(${r + 30 * svetlost}, ${g + 30 * svetlost}, ${b + 30 * svetlost}, 1)`);
+      gradient.addColorStop(1, config.barvaPozadi);
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, velikost, velikost);
+
+      // Výpočet velikosti písma s respektem k maskable režimu
+      // Maskable ikony potřebují 20% padding na každé straně (celkem 40% safe area)
+      let fontVelikost = Math.floor(velikost * (config.velikostFontu / 100));
+      if (config.maskable) {
+        // Zmenšit text o 20%, aby se vešel do safe area
+        fontVelikost *= 0.65;
+      }
+
+      ctx.font = `900 ${fontVelikost}px Poppins, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // Glow efekt - vícevrstevný
+      const glowSila = config.silaGlow / 100;
+      const r2 = parseInt(config.barvaTextu.substr(1, 2), 16);
+      const g2 = parseInt(config.barvaTextu.substr(3, 2), 16);
+      const b2 = parseInt(config.barvaTextu.substr(5, 2), 16);
+
+      // Vnější glow (nejsilnější)
+      ctx.shadowColor = `rgba(${r2}, ${g2}, ${b2}, ${0.1 * glowSila})`;
+      ctx.shadowBlur = velikost * 0.15 * glowSila;
+      ctx.fillStyle = config.barvaTextu;
+      ctx.fillText('WGS', velikost / 2, velikost / 2);
+
+      // Střední glow
+      ctx.shadowBlur = velikost * 0.08 * glowSila;
+      ctx.shadowColor = `rgba(${r2}, ${g2}, ${b2}, ${0.3 * glowSila})`;
+      ctx.fillText('WGS', velikost / 2, velikost / 2);
+
+      // Vnitřní glow (nejostřejší)
+      ctx.shadowBlur = velikost * 0.03 * glowSila;
+      ctx.shadowColor = `rgba(${r2}, ${g2}, ${b2}, ${0.6 * glowSila})`;
+      ctx.fillText('WGS', velikost / 2, velikost / 2);
+
+      // Text bez glow (crisp)
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = config.barvaTextu;
+      ctx.fillText('WGS', velikost / 2, velikost / 2);
+
+      // Safe zone overlay (pokud je zapnutý)
+      if (config.safezone) {
+        ctx.save();
+
+        // iOS safe area (zaoblené rohy) - červená čára
+        ctx.strokeStyle = 'rgba(255, 100, 100, 0.5)';
+        ctx.lineWidth = 2;
+        const iosRadius = velikost * 0.225; // 22.5% iOS radius
+        ctx.beginPath();
+        ctx.roundRect(0, 0, velikost, velikost, iosRadius);
+        ctx.stroke();
+
+        // Android maskable safe area (kruh) - zelená čára
+        if (config.maskable) {
+          ctx.strokeStyle = 'rgba(100, 255, 100, 0.5)';
+          ctx.lineWidth = 2;
+          const safeRadius = velikost * 0.4; // 40% safe area
+          ctx.beginPath();
+          ctx.arc(velikost / 2, velikost / 2, safeRadius, 0, 2 * Math.PI);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+    }
+
+    // Vykreslení obou ikon
+    function vykresliIkony() {
+      vykresliIkonu(ctx192, 192);
+      vykresliIkonu(ctx512, 512);
+    }
+
+    // Stažení ikony jako PNG
+    function stahniIkonu(velikost) {
+      const canvas = velikost === 192 ? canvas192 : canvas512;
+
+      // Konverze canvas na blob
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `icon${velikost}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    }
+
+    // Inicializace - vykreslit ikony při načtení stránky
+    window.addEventListener('load', () => {
+      vykresliIkony();
+    });
+  </script>
+</body>
+</html>
