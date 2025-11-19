@@ -89,9 +89,9 @@ try {
 
     // Načíst šablonu pro připomenutí
     $stmtTemplate = $pdo->prepare("
-        SELECT subject, body
+        SELECT subject, template
         FROM wgs_notifications
-        WHERE notification_type = 'appointment_reminder_customer'
+        WHERE id = 'appointment_reminder_customer'
         LIMIT 1
     ");
     $stmtTemplate->execute();
@@ -140,7 +140,7 @@ try {
 
         // Nahradit proměnné v předmětu a těle emailu
         $predmet = str_replace(array_keys($nahradit), array_values($nahradit), $template['subject']);
-        $telo = str_replace(array_keys($nahradit), array_values($nahradit), $template['body']);
+        $telo = str_replace(array_keys($nahradit), array_values($nahradit), $template['template']);
 
         // Přidat email do fronty
         try {
