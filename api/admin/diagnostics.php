@@ -31,7 +31,7 @@ function safeFileGetContents($path, $maxSize = 1048576) {
 switch ($action) {
     // ==================== CHECK PHP FILES ====================
         case 'check_php_files':
-            $rootDir = __DIR__ . '/..';
+            $rootDir = __DIR__ . '/../..';
             $phpFiles = [];
             $errors = [];
             $warnings = [];
@@ -545,7 +545,7 @@ switch ($action) {
 
     // ==================== CHECK HTML PAGES ====================
         case 'check_html_pages':
-            $rootDir = __DIR__ . '/..';
+            $rootDir = __DIR__ . '/../..';
             $htmlFiles = [];
             $errors = [];
             $warnings = [];
@@ -628,7 +628,7 @@ switch ($action) {
 
     // ==================== CHECK DEPENDENCIES ====================
         case 'check_dependencies':
-            $rootDir = __DIR__ . '/..';
+            $rootDir = __DIR__ . '/../..';
             $composerJson = $rootDir . '/composer.json';
             $packageJson = $rootDir . '/package.json';
 
@@ -679,7 +679,7 @@ switch ($action) {
 
     // ==================== CHECK CONFIGURATION ====================
         case 'check_configuration':
-            $rootDir = __DIR__ . '/..';
+            $rootDir = __DIR__ . '/../..';
             $configFiles = [
                 'init.php' => $rootDir . '/init.php',
                 'config.php' => $rootDir . '/config/config.php',
@@ -722,7 +722,7 @@ switch ($action) {
 
     // ==================== CHECK GIT STATUS ====================
         case 'check_git_status':
-            $rootDir = __DIR__ . '/..';
+            $rootDir = __DIR__ . '/../..';
             $gitDir = $rootDir . '/.git';
 
             if (!is_dir($gitDir)) {
