@@ -1,29 +1,24 @@
 <?php
 /**
- * Webcron endpoint: Automatické odesílání připomínek
+ * Webcron: Automatické odesílání připomínek (standalone verze)
  *
- * Tento soubor je určen pro spuštění přes webcron na hostingu.
- * URL: https://www.wgs-service.cz/cron/send-reminders.php?key=TAJNY_KLIC
+ * URL pro nastavení v hostingu českého hostingu:
+ * https://www.wgs-service.cz/webcron-send-reminders.php
  *
- * Bezpečnost: Vyžaduje tajný klíč v URL parametru
+ * Perioda spouštění:
+ * minuta: 0
+ * hodina: 10
+ * den: *
+ * měsíc: *
+ * den v týdnu: *
  */
 
 // Načíst konfiguraci
-require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../includes/EmailQueue.php';
-
-// === BEZPEČNOSTNÍ KONTROLA ===
-$tajnyKlic = getenv('CRON_SECRET_KEY') ?: 'wgs2025reminder';  // Výchozí klíč - změňte v .env!
-
-// Kontrola tajného klíče
-if (!isset($_GET['key']) || $_GET['key'] !== $tajnyKlic) {
-    http_response_code(403);
-    error_log("CRON send-reminders: Neplatný klíč - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
-    die('Forbidden');
-}
+require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/includes/EmailQueue.php';
 
 // === LOGOVÁNÍ ===
-$logFile = __DIR__ . '/../logs/cron_reminders.log';
+$logFile = __DIR__ . '/logs/cron_reminders.log';
 
 function logMessage($message) {
     global $logFile;
@@ -34,7 +29,7 @@ function logMessage($message) {
 
 // === HLAVNÍ LOGIKA ===
 try {
-    logMessage("=== START: Kontrola návštěv pro připomenutí (webcron) ===");
+    logMessage("=== START: Kontrola návštěv pro připomenutí (webcron standalone) ===");
 
     $pdo = getDbConnection();
 
@@ -75,12 +70,7 @@ try {
     if ($pocetNalezenych === 0) {
         logMessage("Žádné návštěvy na zítřek - konec.");
         logMessage("=== KONEC ===\n");
-        echo json_encode([
-            'status' => 'success',
-            'message' => 'Žádné návštěvy na zítřek',
-            'found' => 0,
-            'sent' => 0
-        ]);
+        echo "OK: Žádné návštěvy na zítřek\n";
         exit(0);
     }
 
@@ -165,15 +155,8 @@ try {
     logMessage("  Chyby: {$chyby}");
     logMessage("=== KONEC ===\n");
 
-    // Vrátit JSON odpověď
-    echo json_encode([
-        'status' => 'success',
-        'message' => 'Připomínky odeslány',
-        'found' => $pocetNalezenych,
-        'sent' => $uspesneOdeslano,
-        'errors' => $chyby
-    ]);
-
+    // Výstup pro webcron
+    echo "OK: Odesláno {$uspesneOdeslano} připomínek\n";
     exit($chyby > 0 ? 1 : 0);
 
 } catch (Exception $e) {
@@ -181,9 +164,8 @@ try {
     logMessage("Stack trace: " . $e->getTraceAsString());
     logMessage("=== KONEC S CHYBOU ===\n");
 
-    echo json_encode([
-        'status' => 'error',
-        'message' => $e->getMessage()
-    ]);
+    echo "ERROR: " . $e->getMessage() . "\n";
     exit(1);
 }
+
+
