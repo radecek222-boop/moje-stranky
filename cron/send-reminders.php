@@ -56,9 +56,10 @@ try {
             r.cas_navstevy,
             r.model,
             r.popis_problemu,
-            r.technik_jmeno,
-            r.technik_telefon
+            r.technik,
+            u.phone as technik_telefon
         FROM wgs_reklamace r
+        LEFT JOIN wgs_users u ON u.name = r.technik AND u.role = 'technik'
         WHERE r.stav = 'open'
           AND r.termin = :zitra
           AND r.email IS NOT NULL
@@ -131,7 +132,7 @@ try {
             '{{order_id}}' => $reference,
             '{{product}}' => $navsteva['model'] ?? 'nábytek',
             '{{description}}' => $navsteva['popis_problemu'] ?? '',
-            '{{technician_name}}' => $navsteva['technik_jmeno'] ?? 'WGS technik',
+            '{{technician_name}}' => $navsteva['technik'] ?? 'WGS technik',
             '{{technician_phone}}' => $navsteva['technik_telefon'] ?? '+420 725 965 826'
         ];
 
