@@ -230,6 +230,32 @@ if (!$isLoggedIn && !$isAdmin) {
 .modal-content {
   margin-top: 2rem !important;
 }
+
+/* Barevné nádechy karet podle stavu (velmi světlé) */
+.order-box.status-bg-wait {
+  background: rgba(255, 235, 59, 0.08) !important; /* Žlutá nádech - ČEKÁ */
+}
+
+.order-box.status-bg-open {
+  background: rgba(33, 150, 243, 0.08) !important; /* Modrá nádech - DOMLUVENÁ */
+}
+
+.order-box.status-bg-done {
+  background: rgba(76, 175, 80, 0.08) !important; /* Zelená nádech - HOTOVO */
+}
+
+/* Zachovat original při hover */
+.order-box.status-bg-wait:hover {
+  background: rgba(255, 235, 59, 0.12) !important; /* Trochu více na hover */
+}
+
+.order-box.status-bg-open:hover {
+  background: rgba(33, 150, 243, 0.12) !important;
+}
+
+.order-box.status-bg-done:hover {
+  background: rgba(76, 175, 80, 0.12) !important;
+}
 </style>
 
 <!-- Current User Data for JavaScript -->
