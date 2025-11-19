@@ -101,7 +101,17 @@ try {
         logMessage("Zpracovávám: {$reference} - {$navsteva['jmeno']} ({$navsteva['email']})");
 
         // Připravit data pro nahrazení v šabloně
-        $datumZobrazeni = date('d.m.Y', strtotime($navsteva['termin']));
+        // Převést český formát DD.MM.YYYY na YYYY-MM-DD pro strtotime
+        $terminParts = explode('.', $navsteva['termin']);
+        if (count($terminParts) === 3) {
+            $terminISO = $terminParts[2] . '-' . $terminParts[1] . '-' . $terminParts[0]; // YYYY-MM-DD
+            $datumZobrazeni = $navsteva['termin']; // Už je v českém formátu DD.MM.YYYY
+        } else {
+            $terminISO = $navsteva['termin'];
+            $datumZobrazeni = $navsteva['termin'];
+        }
+
+        // Zjistit den v týdnu
         $denVTydnu = [
             'Monday' => 'pondělí',
             'Tuesday' => 'úterý',
@@ -111,7 +121,7 @@ try {
             'Saturday' => 'sobota',
             'Sunday' => 'neděle'
         ];
-        $denCesky = $denVTydnu[date('l', strtotime($navsteva['termin']))] ?? date('l', strtotime($navsteva['termin']));
+        $denCesky = $denVTydnu[date('l', strtotime($terminISO))] ?? 'den';
 
         $nahradit = [
             '{{customer_name}}' => $navsteva['jmeno'],
