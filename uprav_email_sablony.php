@@ -92,6 +92,17 @@ pro osobní vozidlo našeho technika v blízkosti místa opravy.
 Toto opatření je nezbytné pro bezproblémový průběh servisní
 návštěvy a ochranu našeho vozidla a nářadí.
 
+🛋️ PŘÍPRAVA NÁBYTKU PŘED NÁVŠTĚVOU:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Prosíme Vás, abyste PŘED PŘÍJEZDEM TECHNIKA odstranili z nábytku:
+
+• Lůžkoviny (prostěradla, deky, přikrývky)
+• Polštáře a dekorační textil
+• Osobní předměty a doplňky
+
+⚙️ Toto umožní technikovi volný přístup k nábytku a rychlejší
+   provedení opravy.
+
 📞 DOTAZY NEBO ZMĚNA TERMÍNU?
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Kontaktujte prosím přímo Vašeho technika:
@@ -136,6 +147,17 @@ pro finální potvrzení.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Prosíme o zajištění bezplatného a bezpečného parkování pro vozidlo
 technika. Pokud to není možné, informujte technika na tel. {{technician_phone}}.
+
+🛋️ PŘÍPRAVA NÁBYTKU PŘED NÁVŠTĚVOU:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Prosíme Vás, abyste PŘED PŘÍJEZDEM TECHNIKA odstranili z nábytku:
+
+• Lůžkoviny (prostěradla, deky, přikrývky)
+• Polštáře a dekorační textil
+• Osobní předměty a doplňky
+
+⚙️ Toto umožní technikovi volný přístup k nábytku a rychlejší
+   provedení opravy.
 
 ⚠️ POTŘEBUJETE PŘELOŽIT TERMÍN?
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
