@@ -30,16 +30,23 @@ if ($embedMode && $directAccess):
     <link rel="stylesheet" href="/assets/css/admin.css">
     <style>
         /* Specifické styly pro tlačítka v reklamačních řádcích - přebíjí admin.css */
-        .reklamace-row button,
-        .reklamace-row select.reklamace-stav-select {
+        /* Vyšší specificita díky atributovým selectorům a :not() */
+        .reklamace-row button[onclick]:not(.fake-specificity-boost),
+        .reklamace-row button[onclick] {
             padding: 0.05rem 0.5rem !important;
             font-size: 0.65rem !important;
             line-height: 1.2 !important;
             height: auto !important;
+            min-height: auto !important;
         }
 
-        .reklamace-row select.reklamace-stav-select {
+        .reklamace-row select.reklamace-stav-select[onchange]:not(.fake-specificity-boost),
+        .reklamace-row select.reklamace-stav-select[onchange] {
             padding: 0.05rem 0.4rem !important;
+            font-size: 0.65rem !important;
+            line-height: 1.2 !important;
+            height: auto !important;
+            min-height: auto !important;
         }
     </style>
 </head>
