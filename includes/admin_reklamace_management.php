@@ -61,24 +61,26 @@ try {
             reklamace_id, cislo, jmeno, telefon, email,
             ulice, mesto, psc, model, provedeni, barva,
             popis_problemu, termin, cas_navstevy, stav,
-            datum_vytvoreni, datum_dokonceni, jmeno_prodejce, typ
+            created_at as datum_vytvoreni, datum_dokonceni, prodejce as jmeno_prodejce, typ
         FROM wgs_reklamace
         $whereClause
-        ORDER BY datum_vytvoreni DESC
+        ORDER BY created_at DESC
         LIMIT 200
     ";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $reklamace = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Debug: pokud jsou statistiky ale žádné reklamace, zaloguj to
-    if ($stats['all'] > 0 && count($reklamace) === 0 && $filterStav !== 'all') {
-        error_log("Správa reklamací: Statistiky ukazují {$stats['all']} reklamací, ale filtr '$filterStav' vrátil 0 výsledků (očekáváno {$stats[$filterStav]} reklamací)");
-    }
 } catch (PDOException $e) {
-    error_log("Chyba načítání reklamací: " . $e->getMessage());
+    error_log("CHYBA PDO při načítání reklamací: " . $e->getMessage());
+    error_log("Trace: " . $e->getTraceAsString());
     $reklamace = [];
+    $stats = ['all' => 0, 'wait' => 0, 'open' => 0, 'done' => 0];
+} catch (Exception $e) {
+    error_log("CHYBA Exception při načítání reklamací: " . $e->getMessage());
+    error_log("Trace: " . $e->getTraceAsString());
+    $reklamace = [];
+    $stats = ['all' => 0, 'wait' => 0, 'open' => 0, 'done' => 0];
 }
 ?>
 
