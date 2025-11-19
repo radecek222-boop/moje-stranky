@@ -828,11 +828,15 @@ function loadClaimsModal() {
     }
 
     // Načíst kompletní správu reklamací přes iframe
+    // Cache-busting timestamp aby se vyhli cache problémům
+    const timestamp = new Date().getTime();
+
     modalBody.innerHTML = `
         <iframe
-            src="/includes/admin_reklamace_management.php?embed=1&filter=all"
+            src="/includes/admin_reklamace_management.php?embed=1&filter=all&_t=${timestamp}"
             style="width: 100%; height: 80vh; border: none; border-radius: 4px;"
-            onload="console.log('Správa reklamací načtena')"
+            onload="console.log('Správa reklamací načtena');"
+            id="claimsIframe"
         ></iframe>
     `;
 
