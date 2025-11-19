@@ -133,7 +133,7 @@ try {
             </div>
 
             <?php foreach ($reklamace as $rek): ?>
-            <div class="reklamace-row" style="border-bottom: 1px solid #e5e5e5; padding: 0.4rem 0.75rem; transition: background 0.2s; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; font-size: 0.75rem;"
+            <div class="reklamace-row" style="border-bottom: 1px solid #e5e5e5; padding: 0.4rem 0.75rem; transition: background 0.2s; display: flex; align-items: center; gap: 0.75rem; font-size: 0.75rem;"
                  onmouseover="this.style.background='#f9f9f9'"
                  onmouseout="this.style.background='#fff'">
 
@@ -143,18 +143,23 @@ try {
                 </div>
 
                 <!-- Zákazník -->
-                <div style="flex: 1; min-width: 140px;">
+                <div style="min-width: 140px;">
                     <strong style="color: #333;"><?= htmlspecialchars($rek['jmeno']) ?></strong>
                 </div>
 
-                <!-- Model + Provedení -->
-                <div style="min-width: 100px; color: #666;">
-                    <?= htmlspecialchars($rek['model'] ?: '-') ?> / <?= htmlspecialchars($rek['provedeni'] ?: '-') ?>
+                <!-- Model -->
+                <div style="min-width: 90px; color: #666;">
+                    Model: <?= htmlspecialchars($rek['model'] ?: '-') ?>
+                </div>
+
+                <!-- Adresa -->
+                <div style="flex: 1; min-width: 120px; color: #666;">
+                    <?= htmlspecialchars(($rek['ulice'] ?: '') . ($rek['mesto'] ? ', ' . $rek['mesto'] : '')) ?>
                 </div>
 
                 <!-- Termín -->
-                <div style="min-width: 95px; color: #666;">
-                    <?= $rek['termin'] ? date('d.m.Y', strtotime($rek['termin'])) : '-' ?>
+                <div style="min-width: 135px; color: #666;">
+                    Termín: <?= $rek['termin'] ? date('d.m.Y', strtotime($rek['termin'])) . ' - ' . $rek['cas_navstevy'] : '-' ?>
                 </div>
 
                 <!-- Status badge -->
@@ -169,7 +174,7 @@ try {
                 </div>
 
                 <!-- Akce -->
-                <div style="display: flex; gap: 0.3rem; flex-shrink: 0;" onclick="event.stopPropagation();">
+                <div style="display: flex; gap: 0.3rem; flex-shrink: 0;">
                     <!-- Změna stavu -->
                     <select class="reklamace-stav-select"
                             data-reklamace-id="<?= htmlspecialchars($rek['reklamace_id']) ?>"
@@ -180,16 +185,16 @@ try {
                         <option value="done" <?= $rek['stav'] === 'done' ? 'selected' : '' ?>>HOTOVO</option>
                     </select>
 
-                    <!-- Detail -->
-                    <button onclick="otevritDetailReklamace('<?= htmlspecialchars($rek['reklamace_id']) ?>')"
-                            style="padding: 0.2rem 0.4rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px;">
-                        Detail
-                    </button>
-
                     <!-- Smazat -->
                     <button onclick="smazatReklamaci('<?= htmlspecialchars($rek['reklamace_id']) ?>', '<?= htmlspecialchars($rek['cislo'] ?? $rek['reklamace_id']) ?>')"
-                            style="padding: 0.2rem 0.4rem; background: #dc3545; color: #fff; border: 1px solid #dc3545; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px;">
-                        ×
+                            style="padding: 0.2rem 0.5rem; background: #dc3545; color: #fff; border: 1px solid #dc3545; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px; text-transform: uppercase;">
+                        Smazat
+                    </button>
+
+                    <!-- Detail -->
+                    <button onclick="otevritDetailReklamace('<?= htmlspecialchars($rek['reklamace_id']) ?>')"
+                            style="padding: 0.2rem 0.5rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px; text-transform: uppercase;">
+                        Detail + Historie
                     </button>
                 </div>
             </div>
