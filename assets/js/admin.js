@@ -828,11 +828,15 @@ function loadClaimsModal() {
     }
 
     // Načíst správu reklamací přes fetch (ne iframe kvůli session)
-    fetch('/includes/admin_reklamace_management.php?embed=1&filter=all', {
+    // Cache-busting: přidáme timestamp aby se zabránilo cache
+    const cacheBuster = new Date().getTime();
+    fetch(`/includes/admin_reklamace_management.php?embed=1&filter=all&_t=${cacheBuster}`, {
         method: 'GET',
         credentials: 'same-origin', // Důležité pro session
         headers: {
-            'Accept': 'text/html'
+            'Accept': 'text/html',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
         }
     })
     .then(response => {

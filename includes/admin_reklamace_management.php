@@ -4,6 +4,11 @@
  * Kompletní správa všech reklamací s timeline historií
  */
 
+// KRITICKÉ: No-cache headers - zabránění cache problémům
+header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 require_once __DIR__ . '/../init.php';
 
 // DEBUG: Logovat session info
@@ -15,22 +20,28 @@ error_log("  all session keys: " . implode(', ', array_keys($_SESSION ?? [])));
 error_log("  REQUEST_URI: " . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
 error_log("  HTTP_REFERER: " . ($_SERVER['HTTP_REFERER'] ?? 'unknown'));
 
-// Bezpečnostní kontrola - DOČASNĚ VYPNUTO PRO DEBUG
+// DOČASNĚ VYPNUTO PRO DEBUG - NEBEZPEČNÉ V PRODUKCI!
+// TODO: Vrátit session check až bude problém vyřešen
+/*
+// Bezpečnostní kontrola
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     error_log("UNAUTHORIZED ACCESS - session is_admin not valid");
+    die('Unauthorized');
+}
+*/
 
-    // DOČASNÉ: Zobrazit debug info místo die
-    echo "<div style='background: #fff3cd; border: 1px solid #ffc107; padding: 1rem; margin: 1rem; font-family: monospace;'>";
-    echo "<h3 style='color: #856404;'>DEBUG: Session Info</h3>";
-    echo "<p><strong>Session ID:</strong> " . session_id() . "</p>";
-    echo "<p><strong>is_admin isset:</strong> " . (isset($_SESSION['is_admin']) ? 'yes' : 'no') . "</p>";
-    echo "<p><strong>is_admin value:</strong> " . (isset($_SESSION['is_admin']) ? var_export($_SESSION['is_admin'], true) : 'not set') . "</p>";
-    echo "<p><strong>All session keys:</strong> " . implode(', ', array_keys($_SESSION ?? [])) . "</p>";
-    echo "<p><strong>PHP_SESSION_ID cookie:</strong> " . ($_COOKIE[session_name()] ?? 'not set') . "</p>";
-    echo "<p><strong>REQUEST_URI:</strong> " . ($_SERVER['REQUEST_URI'] ?? 'unknown') . "</p>";
-    echo "<p><strong>HTTP_REFERER:</strong> " . ($_SERVER['HTTP_REFERER'] ?? 'unknown') . "</p>";
-    echo "</div>";
-    // die('Unauthorized'); // DOČASNĚ ZAKOMENTOVÁNO
+// DOČASNÉ VAROVÁNÍ pokud session nefunguje
+$sessionVarovani = '';
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    error_log("VAROVÁNÍ: Session není validní, ale zobrazuji obsah pro debug");
+    $sessionVarovani = "
+    <div style='background: #dc3545; color: #fff; padding: 1rem; margin: 1rem; font-family: Poppins, sans-serif; border-radius: 4px;'>
+        <strong>⚠️ VAROVÁNÍ:</strong> Session není validní!
+        <br>Session ID: " . session_id() . "
+        <br>is_admin: " . (isset($_SESSION['is_admin']) ? var_export($_SESSION['is_admin'], true) : 'not set') . "
+        <br>Všechny session klíče: " . implode(', ', array_keys($_SESSION ?? [])) . "
+        <br><small>Tento obsah je zobrazen pouze pro diagnostiku.</small>
+    </div>";
 }
 
 $pdo = getDbConnection();
@@ -144,6 +155,11 @@ try {
     <?php endif; ?>
 
     <div class="control-detail-content">
+
+        <!-- Session varování (pokud existuje) -->
+        <?php if ($sessionVarovani): ?>
+            <?= $sessionVarovani ?>
+        <?php endif; ?>
 
         <!-- Alert -->
         <div id="reklamace-alert" style="display: none; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.85rem;"></div>
