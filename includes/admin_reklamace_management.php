@@ -81,7 +81,7 @@ try {
         SELECT
             reklamace_id, cislo, jmeno, telefon, email,
             ulice, mesto, psc, model, provedeni, barva,
-            popis_problemu, termin, cas_navstevy, stav,
+            popis_problemu, doplnujici_info, termin, cas_navstevy, stav,
             created_at as datum_vytvoreni, datum_dokonceni, prodejce as jmeno_prodejce, typ
         FROM wgs_reklamace
         $whereClause
