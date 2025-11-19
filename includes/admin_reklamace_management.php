@@ -179,7 +179,7 @@ try {
                     <select class="reklamace-stav-select"
                             data-reklamace-id="<?= htmlspecialchars($rek['reklamace_id']) ?>"
                             onchange="zmenitStavReklamace('<?= htmlspecialchars($rek['reklamace_id']) ?>', this.value)"
-                            style="padding: 0.1rem 0.4rem; background: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px;">
+                            style="padding: 0.05rem 0.4rem; background: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px;">
                         <option value="wait" <?= $rek['stav'] === 'wait' ? 'selected' : '' ?>>ČEKÁ</option>
                         <option value="open" <?= $rek['stav'] === 'open' ? 'selected' : '' ?>>ŘEŠÍ</option>
                         <option value="done" <?= $rek['stav'] === 'done' ? 'selected' : '' ?>>HOTOVO</option>
@@ -187,13 +187,13 @@ try {
 
                     <!-- Smazat -->
                     <button onclick="smazatReklamaci('<?= htmlspecialchars($rek['reklamace_id']) ?>', '<?= htmlspecialchars($rek['cislo'] ?? $rek['reklamace_id']) ?>')"
-                            style="padding: 0.1rem 0.5rem; background: #dc3545; color: #fff; border: 1px solid #dc3545; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px; text-transform: uppercase;">
+                            style="padding: 0.05rem 0.5rem; background: #dc3545; color: #fff; border: 1px solid #dc3545; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px; text-transform: uppercase;">
                         Smazat
                     </button>
 
                     <!-- Detail -->
                     <button onclick="otevritDetailReklamace('<?= htmlspecialchars($rek['reklamace_id']) ?>')"
-                            style="padding: 0.1rem 0.5rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px; text-transform: uppercase;">
+                            style="padding: 0.05rem 0.5rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px; text-transform: uppercase;">
                         Detail + Historie
                     </button>
                 </div>
