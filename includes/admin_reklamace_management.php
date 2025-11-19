@@ -387,7 +387,7 @@ function zobrazitDetailReklamace(rek, timeline) {
         <!-- Timeline historie -->
         <div style="margin-bottom: 1.5rem;">
             <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; margin-bottom: 1rem; border-bottom: 2px solid #000; padding-bottom: 0.5rem;">
-                📅 Historie života zákazníka (Timeline)
+                Historie života zákazníka (Timeline)
             </h4>
 
             <div style="position: relative; padding-left: 2rem;">

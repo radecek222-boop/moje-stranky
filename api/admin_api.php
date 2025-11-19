@@ -654,7 +654,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
     if ($reklamace['datum_vytvoreni']) {
         $timeline[] = [
             'typ' => 'system',
-            'nazev' => '✅ Reklamace vytvořena',
+            'nazev' => 'Reklamace vytvořena',
             'popis' => 'Zákazník vytvořil novou reklamaci',
             'datum' => $reklamace['datum_vytvoreni'],
             'user' => $reklamace['jmeno_prodejce'] ?: 'Systém'
@@ -665,7 +665,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
     if ($reklamace['termin']) {
         $timeline[] = [
             'typ' => 'termin',
-            'nazev' => '📅 Termín domluven',
+            'nazev' => 'Termín domluven',
             'popis' => 'Termín návštěvy: ' . date('d.m.Y', strtotime($reklamace['termin'])) . ' v ' . $reklamace['cas_navstevy'],
             'datum' => $reklamace['termin'] . ' ' . $reklamace['cas_navstevy'],
             'user' => 'Technik'
@@ -706,7 +706,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
 
             $timeline[] = [
                 'typ' => 'photo',
-                'nazev' => '📸 Fotodokumentace - ' . $sekce,
+                'nazev' => 'Fotodokumentace - ' . $sekce,
                 'popis' => 'Nahrán počet fotografií: ' . count($fotkySekce) . $fotkyHtml,
                 'datum' => $fotkySekce[0]['created_at'] ?: $reklamace['datum_vytvoreni'],
                 'user' => 'Technik'
@@ -727,7 +727,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
     foreach ($protokoly as $protokol) {
         $protokolyHtml = '<div style="margin-top: 10px;">';
         $protokolyHtml .= '<a href="/' . htmlspecialchars($protokol['file_path']) . '" target="_blank" style="display: inline-flex; align-items: center; gap: 10px; padding: 10px 15px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #000; transition: background 0.2s;" onmouseover="this.style.background=\'#e5e5e5\'" onmouseout="this.style.background=\'#f5f5f5\'">';
-        $protokolyHtml .= '<span style="font-size: 2rem;">📄</span>';
+        $protokolyHtml .= '<span style="font-size: 1.5rem; font-weight: 600; color: #dc3545;">PDF</span>';
         $protokolyHtml .= '<div>';
         $protokolyHtml .= '<div style="font-weight: 600;">' . htmlspecialchars($protokol['original_filename']) . '</div>';
         $protokolyHtml .= '<div style="font-size: 0.75rem; color: #666;">Klikněte pro zobrazení PDF</div>';
@@ -737,7 +737,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
 
         $timeline[] = [
             'typ' => 'document',
-            'nazev' => '📋 Protokol PDF',
+            'nazev' => 'Protokol PDF',
             'popis' => 'Vytvořen servisní protokol' . $protokolyHtml,
             'datum' => $protokol['created_at'],
             'user' => 'Technik'
@@ -757,7 +757,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
     foreach ($emaily as $email) {
         $timeline[] = [
             'typ' => 'email',
-            'nazev' => '📧 Email odeslán',
+            'nazev' => 'Email odeslán',
             'popis' => 'Předmět: ' . $email['subject'],
             'datum' => $email['sent_at'] ?: $email['created_at'],
             'user' => 'Systém'
@@ -768,7 +768,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
     if ($reklamace['stav'] === 'done' && $reklamace['datum_dokonceni']) {
         $timeline[] = [
             'typ' => 'done',
-            'nazev' => '✅ Reklamace vyřízena',
+            'nazev' => 'Reklamace vyřízena',
             'popis' => 'Zakázka byla úspěšně dokončena',
             'datum' => $reklamace['datum_dokonceni'],
             'user' => 'Technik'
