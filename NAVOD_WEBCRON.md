@@ -6,15 +6,15 @@ Každý den v **10:00 ráno** automaticky odešle **připomínky zákazníkům**
 
 ---
 
-## 🚀 Nastavení na hostingu (Forpsi)
+## 🚀 Nastavení na hostingu (Český hosting)
 
-### Krok 1: Přihlásit se do admin panelu hostingu
-- URL: https://www.forpsi.com
-- Přejít na: **Webhosting → Správa domény → Pokročilé nastavení → Cron**
+### Krok 1: Přihlásit se do klientské sekce
+- URL: https://www.cesky-hosting.cz (nebo váš přihlašovací panel)
+- Přejít na: **Správa domény → wgs-service.cz → záložka CRON**
 
 ### Krok 2: Přidat nový WEBCRON
 
-V sekci **"Webcron"** klikněte na **"Přidat webcron"**.
+V sekci **"Webcron"** najděte tlačítko **"Přidat webcron"**.
 
 #### Vyplňte následující údaje:
 
@@ -23,23 +23,39 @@ V sekci **"Webcron"** klikněte na **"Přidat webcron"**.
 https://www.wgs-service.cz/cron/send-reminders.php?key=wgs2025reminder
 ```
 
-⚠️ **DŮLEŽITÉ:** Parametr `?key=wgs2025reminder` je **TAJNÝ KLÍČ** - bez něj skript nefunguje!
+⚠️ **DŮLEŽITÉ:**
+- Parametr `?key=wgs2025reminder` je **TAJNÝ KLÍČ** - bez něj skript nefunguje!
+- URL zadávejte přesně stejně, jako byste ji zadávali do prohlížeče
 
 **Čas spouštění:**
+
+Český hosting nabízí **formulář pro nastavení času**. Vyberte:
+
+**Možnost A - Přednastavený čas:**
+- V rozbalovacím menu vyberte: **"Každý den v 10:00"** (pokud je k dispozici)
+
+**Možnost B - Vlastní nastavení:**
 ```
 Minuta: 0
 Hodina: 10
-Den: *
-Měsíc: *
-Den v týdnu: *
+Den v měsíci: *  (každý den)
+Měsíc: *  (každý měsíc)
+Den v týdnu: *  (každý den)
 ```
 
-**Nebo v cron formátu:**
+**Možnost C - Pokročilé (cron formát):**
 ```
 0 10 * * *
 ```
 
-**Výsledek:** Spustí se každý den v **10:00:00**
+**Výsledek:** Skript se spustí každý den přesně v **10:00:00**
+
+---
+
+### 📋 Omezení na sdíleném hostingu:
+- **Maximální počet webcronů:** 5
+- **Minimální perioda spouštění:** 15 minut
+- **Logování chyb:** Automaticky do `data/webcron.log`
 
 ---
 
@@ -136,8 +152,17 @@ Měl by obsahovat:
    LIMIT 10;
    ```
 
-3. **Sledovat dashboard hostingu:**
-   - V admin panelu hostingu → Cron → Historie spuštění
+3. **Kontrola logů českého hostingu:**
+   - **Logy webcron chyb:** Český hosting automaticky loguje chybná volání do:
+     ```
+     /data/webcron.log
+     ```
+   - Přístup přes SFTP/FTP klienta
+   - Pokud je soubor prázdný = vše funguje správně!
+
+4. **Sledovat dashboard hostingu:**
+   - V klientské sekci → Správa domény → CRON → Webcron
+   - Zobrazí se seznam všech nastavených webcronů
 
 ---
 
@@ -145,7 +170,16 @@ Měl by obsahovat:
 
 ### Problém: 403 Forbidden
 **Příčina:** Špatný tajný klíč v URL
-**Řešení:** Zkontrolujte, že URL obsahuje správný parametr `?key=wgs2025reminder`
+**Řešení:**
+1. Zkontrolujte, že URL obsahuje správný parametr `?key=wgs2025reminder`
+2. Zkontrolujte log `/data/webcron.log` na českém hostingu
+3. Ověřte, že soubor `/cron/send-reminders.php` existuje na serveru
+
+### Problém: Webcron se nespustil
+**Kontrola na českém hostingu:**
+1. Zkontrolujte `/data/webcron.log` - obsahuje chybová hlášení
+2. Ověřte v klientské sekci, že webcron je aktivní
+3. Zkontrolujte, že URL je správně zadaná (včetně `https://`)
 
 ### Problém: Emaily se neodesílají
 **Možné příčiny:**
