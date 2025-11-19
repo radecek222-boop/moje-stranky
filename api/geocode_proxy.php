@@ -285,7 +285,8 @@ try {
                 'text' => $text,
                 'apiKey' => $apiKey,
                 'format' => 'geojson',
-                'limit' => 5
+                'limit' => 5,
+                'lang' => 'cs' // ✅ FIX: České názvy míst (Praha místo Capital city)
             ];
 
             // Filtr podle typu

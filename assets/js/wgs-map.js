@@ -235,7 +235,8 @@ const WGSMap = {
         text,
         format: 'geojson',
         limit,
-        apiKey: API_KEY
+        apiKey: API_KEY,
+        lang: 'cs' // ✅ FIX: České názvy míst (Praha místo Capital city)
       });
 
       // Type filtering
