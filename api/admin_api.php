@@ -714,34 +714,39 @@ function handleGetReklamaceDetail(PDO $pdo): void
         }
     }
 
-    // 4. Protokoly (PDFy)
-    $protokolStmt = $pdo->prepare("
-        SELECT id, file_path, original_filename, document_type, created_at
-        FROM wgs_documents
-        WHERE claim_id = :id AND document_type = 'protokol_pdf'
-        ORDER BY created_at ASC
-    ");
-    $protokolStmt->execute(['id' => $reklamaceId]);
-    $protokoly = $protokolStmt->fetchAll(PDO::FETCH_ASSOC);
+    // 4. Protokoly (PDFy) - pouze pokud tabulka existuje
+    try {
+        $protokolStmt = $pdo->prepare("
+            SELECT id, file_path, original_filename, document_type, created_at
+            FROM wgs_documents
+            WHERE claim_id = :id AND document_type = 'protokol_pdf'
+            ORDER BY created_at ASC
+        ");
+        $protokolStmt->execute(['id' => $reklamaceId]);
+        $protokoly = $protokolStmt->fetchAll(PDO::FETCH_ASSOC);
 
-    foreach ($protokoly as $protokol) {
-        $protokolyHtml = '<div style="margin-top: 10px;">';
-        $protokolyHtml .= '<a href="/' . htmlspecialchars($protokol['file_path']) . '" target="_blank" style="display: inline-flex; align-items: center; gap: 10px; padding: 10px 15px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #000; transition: background 0.2s;" onmouseover="this.style.background=\'#e5e5e5\'" onmouseout="this.style.background=\'#f5f5f5\'">';
-        $protokolyHtml .= '<span style="font-size: 1.5rem; font-weight: 600; color: #dc3545;">PDF</span>';
-        $protokolyHtml .= '<div>';
-        $protokolyHtml .= '<div style="font-weight: 600;">' . htmlspecialchars($protokol['original_filename']) . '</div>';
-        $protokolyHtml .= '<div style="font-size: 0.75rem; color: #666;">Klikněte pro zobrazení PDF</div>';
-        $protokolyHtml .= '</div>';
-        $protokolyHtml .= '</a>';
-        $protokolyHtml .= '</div>';
+        foreach ($protokoly as $protokol) {
+            $protokolyHtml = '<div style="margin-top: 10px;">';
+            $protokolyHtml .= '<a href="/' . htmlspecialchars($protokol['file_path']) . '" target="_blank" style="display: inline-flex; align-items: center; gap: 10px; padding: 10px 15px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #000; transition: background 0.2s;" onmouseover="this.style.background=\'#e5e5e5\'" onmouseout="this.style.background=\'#f5f5f5\'">';
+            $protokolyHtml .= '<span style="font-size: 1.5rem; font-weight: 600; color: #dc3545;">PDF</span>';
+            $protokolyHtml .= '<div>';
+            $protokolyHtml .= '<div style="font-weight: 600;">' . htmlspecialchars($protokol['original_filename']) . '</div>';
+            $protokolyHtml .= '<div style="font-size: 0.75rem; color: #666;">Klikněte pro zobrazení PDF</div>';
+            $protokolyHtml .= '</div>';
+            $protokolyHtml .= '</a>';
+            $protokolyHtml .= '</div>';
 
-        $timeline[] = [
-            'typ' => 'document',
-            'nazev' => 'Protokol PDF',
-            'popis' => 'Vytvořen servisní protokol' . $protokolyHtml,
-            'datum' => $protokol['created_at'],
-            'user' => 'Technik'
-        ];
+            $timeline[] = [
+                'typ' => 'document',
+                'nazev' => 'Protokol PDF',
+                'popis' => 'Vytvořen servisní protokol' . $protokolyHtml,
+                'datum' => $protokol['created_at'],
+                'user' => 'Technik'
+            ];
+        }
+    } catch (PDOException $e) {
+        // Tabulka wgs_documents neexistuje - přeskočit
+        error_log("wgs_documents table doesn't exist or query failed: " . $e->getMessage());
     }
 
     // 5. Odeslané emaily
