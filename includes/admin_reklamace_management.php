@@ -393,7 +393,7 @@ function zobrazitDetailReklamace(rek, timeline) {
                 <div><strong>Model:</strong> ${rek.model || '-'}</div>
                 <div><strong>Provedení:</strong> ${rek.provedeni || '-'}</div>
                 <div><strong>Barva:</strong> ${rek.barva || '-'}</div>
-                <div><strong>Termín:</strong> ${rek.termin ? new Date(rek.termin).toLocaleDateString('cs-CZ') + ' ' + rek.cas_navstevy : '-'}</div>
+                <div><strong>Termín:</strong> ${rek.termin && rek.cas_navstevy ? rek.termin + ' ' + rek.cas_navstevy : (rek.termin || '—')}</div>
                 <div><strong>Stav:</strong> ${rek.stav === 'wait' ? 'ČEKAJÍCÍ' : rek.stav === 'open' ? 'V ŘEŠENÍ' : 'VYŘÍZENÉ'}</div>
                 <div><strong>Vytvořeno:</strong> ${new Date(rek.datum_vytvoreni).toLocaleString('cs-CZ')}</div>
             </div>

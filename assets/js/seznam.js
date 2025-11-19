@@ -364,9 +364,11 @@ function renderOrders(items = null) {
     const highlightedOrderId = SEARCH_QUERY ? highlightText(orderId, SEARCH_QUERY) : orderId;
     
     const searchMatchClass = SEARCH_QUERY && matchesSearch(rec, SEARCH_QUERY) ? 'search-match' : '';
-    
+    // Přidat barevný nádech podle stavu
+    const statusBgClass = `status-bg-${status.class}`;
+
     return `
-      <div class="order-box ${searchMatchClass}" onclick='showDetail(${JSON.stringify(rec).replace(/'/g, "&#39;")})'>
+      <div class="order-box ${searchMatchClass} ${statusBgClass}" onclick='showDetail(${JSON.stringify(rec).replace(/'/g, "&#39;")})'>
         <div class="order-header">
           <div class="order-number">${highlightedOrderId}</div>
           <div style="display: flex; gap: 0.4rem; align-items: center;">
@@ -950,6 +952,38 @@ function renderCalendar(m, y) {
   }
   
   grid.appendChild(daysGrid);
+}
+
+// === CSRF TOKEN HELPER ===
+async function fetchCsrfToken() {
+  if (typeof getCSRFToken === 'function') {
+    try {
+      const token = await getCSRFToken();
+      if (token) {
+        return token;
+      }
+    } catch (err) {
+      logger?.warn?.('CSRF token z getCSRFToken selhal:', err);
+    }
+  }
+
+  if (typeof getCSRFTokenFromMeta === 'function') {
+    const metaToken = getCSRFTokenFromMeta();
+    if (metaToken) {
+      return metaToken;
+    }
+  }
+
+  const fallbackMeta = document.querySelector('meta[name="csrf-token"]');
+  if (fallbackMeta) {
+    const token = fallbackMeta.getAttribute('content');
+    if (token) {
+      window.csrfTokenCache = token;
+      return token;
+    }
+  }
+
+  throw new Error('CSRF token není k dispozici. Obnovte stránku a zkuste to znovu.');
 }
 
 // === VÝPOČET VZDÁLENOSTI ===
