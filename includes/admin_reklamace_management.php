@@ -28,6 +28,20 @@ if ($embedMode && $directAccess):
     <title>Správa reklamací - WGS Admin</title>
     <meta name="csrf-token" content="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
     <link rel="stylesheet" href="/assets/css/admin.css">
+    <style>
+        /* Specifické styly pro tlačítka v reklamačních řádcích - přebíjí admin.css */
+        .reklamace-row button,
+        .reklamace-row select.reklamace-stav-select {
+            padding: 0.05rem 0.5rem !important;
+            font-size: 0.65rem !important;
+            line-height: 1.2 !important;
+            height: auto !important;
+        }
+
+        .reklamace-row select.reklamace-stav-select {
+            padding: 0.05rem 0.4rem !important;
+        }
+    </style>
 </head>
 <body class="embed-mode">
 <?php
