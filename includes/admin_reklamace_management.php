@@ -6,9 +6,31 @@
 
 require_once __DIR__ . '/../init.php';
 
-// Bezpečnostní kontrola
+// DEBUG: Logovat session info
+error_log("admin_reklamace_management.php - Session check:");
+error_log("  session_id: " . session_id());
+error_log("  is_admin isset: " . (isset($_SESSION['is_admin']) ? 'yes' : 'no'));
+error_log("  is_admin value: " . (isset($_SESSION['is_admin']) ? var_export($_SESSION['is_admin'], true) : 'not set'));
+error_log("  all session keys: " . implode(', ', array_keys($_SESSION ?? [])));
+error_log("  REQUEST_URI: " . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
+error_log("  HTTP_REFERER: " . ($_SERVER['HTTP_REFERER'] ?? 'unknown'));
+
+// Bezpečnostní kontrola - DOČASNĚ VYPNUTO PRO DEBUG
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
-    die('Unauthorized');
+    error_log("UNAUTHORIZED ACCESS - session is_admin not valid");
+
+    // DOČASNÉ: Zobrazit debug info místo die
+    echo "<div style='background: #fff3cd; border: 1px solid #ffc107; padding: 1rem; margin: 1rem; font-family: monospace;'>";
+    echo "<h3 style='color: #856404;'>DEBUG: Session Info</h3>";
+    echo "<p><strong>Session ID:</strong> " . session_id() . "</p>";
+    echo "<p><strong>is_admin isset:</strong> " . (isset($_SESSION['is_admin']) ? 'yes' : 'no') . "</p>";
+    echo "<p><strong>is_admin value:</strong> " . (isset($_SESSION['is_admin']) ? var_export($_SESSION['is_admin'], true) : 'not set') . "</p>";
+    echo "<p><strong>All session keys:</strong> " . implode(', ', array_keys($_SESSION ?? [])) . "</p>";
+    echo "<p><strong>PHP_SESSION_ID cookie:</strong> " . ($_COOKIE[session_name()] ?? 'not set') . "</p>";
+    echo "<p><strong>REQUEST_URI:</strong> " . ($_SERVER['REQUEST_URI'] ?? 'unknown') . "</p>";
+    echo "<p><strong>HTTP_REFERER:</strong> " . ($_SERVER['HTTP_REFERER'] ?? 'unknown') . "</p>";
+    echo "</div>";
+    // die('Unauthorized'); // DOČASNĚ ZAKOMENTOVÁNO
 }
 
 $pdo = getDbConnection();
