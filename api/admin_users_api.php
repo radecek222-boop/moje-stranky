@@ -58,7 +58,7 @@ try {
 
         // Základní sloupce které MUSÍ existovat
         $requiredColumns = ['id', 'email'];
-        $optionalColumns = ['name', 'phone', 'address', 'role', 'status', 'created_at'];
+        $optionalColumns = ['name', 'phone', 'address', 'role', 'status', 'is_active', 'created_at'];
 
         // Sestavit SELECT pouze z existujících sloupců
         $selectColumns = [];
@@ -85,7 +85,15 @@ try {
             if (!isset($user['phone'])) $user['phone'] = null;
             if (!isset($user['address'])) $user['address'] = null;
             if (!isset($user['role'])) $user['role'] = 'user';
-            if (!isset($user['status'])) $user['status'] = 'active';
+
+            // Mapování is_active → status
+            if (!isset($user['status']) && isset($user['is_active'])) {
+                $user['status'] = $user['is_active'] ? 'active' : 'inactive';
+                unset($user['is_active']); // Odstranit is_active z výstupu
+            } elseif (!isset($user['status'])) {
+                $user['status'] = 'active';
+            }
+
             if (!isset($user['created_at'])) $user['created_at'] = null;
         }
 
@@ -169,29 +177,90 @@ try {
             throw new Exception('Neplatná role');
         }
 
-        // Kontrola zda email už neexistuje
-        $stmt = $pdo->prepare("SELECT id FROM wgs_users WHERE email = :email");
+        // Kontrola zda email už neexistuje - použít existující sloupec
+        $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
+        $existingColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        // Zjistit správný název ID sloupce
+        $idColumn = 'user_id'; // defaultně
+        if (in_array('id', $existingColumns)) {
+            $idColumn = 'id';
+        } elseif (in_array('user_id', $existingColumns)) {
+            $idColumn = 'user_id';
+        }
+
+        $stmt = $pdo->prepare("SELECT {$idColumn} FROM wgs_users WHERE email = :email");
         $stmt->execute([':email' => $email]);
         if ($stmt->fetch()) {
             throw new Exception('Email již existuje');
         }
 
-        // Vložení uživatele
-        $stmt = $pdo->prepare("
-            INSERT INTO wgs_users (
-                name, email, phone, address, role, password_hash, status, created_at
-            ) VALUES (
-                :name, :email, :phone, :address, :role, :password_hash, 'active', NOW()
-            )
-        ");
-        $stmt->execute([
-            ':name' => $name,
-            ':email' => $email,
-            ':phone' => $phone,
-            ':address' => $address,
-            ':role' => $role,
-            ':password_hash' => password_hash($password, PASSWORD_BCRYPT)
-        ]);
+        // Sestavit INSERT pouze pro existující sloupce
+        $insertColumns = [];
+        $insertValues = [];
+        $params = [];
+
+        if (in_array('name', $existingColumns)) {
+            $insertColumns[] = 'name';
+            $insertValues[] = ':name';
+            $params[':name'] = $name;
+        }
+
+        if (in_array('email', $existingColumns)) {
+            $insertColumns[] = 'email';
+            $insertValues[] = ':email';
+            $params[':email'] = $email;
+        }
+
+        if (in_array('phone', $existingColumns)) {
+            $insertColumns[] = 'phone';
+            $insertValues[] = ':phone';
+            $params[':phone'] = $phone;
+        }
+
+        if (in_array('address', $existingColumns)) {
+            $insertColumns[] = 'address';
+            $insertValues[] = ':address';
+            $params[':address'] = $address;
+        }
+
+        if (in_array('role', $existingColumns)) {
+            $insertColumns[] = 'role';
+            $insertValues[] = ':role';
+            $params[':role'] = $role;
+        }
+
+        if (in_array('password_hash', $existingColumns)) {
+            $insertColumns[] = 'password_hash';
+            $insertValues[] = ':password_hash';
+            $params[':password_hash'] = password_hash($password, PASSWORD_BCRYPT);
+        }
+
+        if (in_array('status', $existingColumns) || in_array('is_active', $existingColumns)) {
+            if (in_array('status', $existingColumns)) {
+                $insertColumns[] = 'status';
+                $insertValues[] = ':status';
+                $params[':status'] = 'active';
+            } elseif (in_array('is_active', $existingColumns)) {
+                $insertColumns[] = 'is_active';
+                $insertValues[] = ':is_active';
+                $params[':is_active'] = 1;
+            }
+        }
+
+        if (in_array('created_at', $existingColumns)) {
+            $insertColumns[] = 'created_at';
+            $insertValues[] = 'NOW()';
+        }
+
+        if (empty($insertColumns)) {
+            throw new Exception('Nelze vytvořit uživatele - tabulka nemá požadované sloupce');
+        }
+
+        // Vytvořit SQL dotaz
+        $sql = "INSERT INTO wgs_users (" . implode(', ', $insertColumns) . ") VALUES (" . implode(', ', $insertValues) . ")";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
 
         $userId = $pdo->lastInsertId();
 
@@ -209,7 +278,12 @@ try {
             throw new Exception('Neplatné ID uživatele');
         }
 
-        $stmt = $pdo->prepare("DELETE FROM wgs_users WHERE id = :id");
+        // Zjistit správný název ID sloupce
+        $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
+        $existingColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $idColumn = in_array('id', $existingColumns) ? 'id' : 'user_id';
+
+        $stmt = $pdo->prepare("DELETE FROM wgs_users WHERE {$idColumn} = :id");
         $stmt->execute([':id' => $userId]);
 
         echo json_encode([
@@ -232,16 +306,19 @@ try {
         // Sestavit SELECT pouze z existujících sloupců
         $selectColumns = array_intersect([
             'id', 'user_id', 'name', 'email', 'phone', 'address', 'role',
-            'status', 'created_at', 'updated_at', 'last_login'
+            'status', 'is_active', 'created_at', 'updated_at', 'last_login'
         ], $existingColumns);
 
         if (empty($selectColumns)) {
             throw new Exception('Tabulka wgs_users nemá požadované sloupce');
         }
 
+        // Zjistit správný název ID sloupce
+        $idColumn = in_array('id', $existingColumns) ? 'id' : 'user_id';
+
         $sql = "SELECT " . implode(', ', $selectColumns) . "
                 FROM wgs_users
-                WHERE id = :id LIMIT 1";
+                WHERE {$idColumn} = :id LIMIT 1";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([':id' => $userId]);
@@ -256,7 +333,14 @@ try {
         if (!isset($user['phone'])) $user['phone'] = '';
         if (!isset($user['address'])) $user['address'] = '';
         if (!isset($user['role'])) $user['role'] = 'user';
-        if (!isset($user['status'])) $user['status'] = 'active';
+
+        // Mapování is_active → status
+        if (!isset($user['status']) && isset($user['is_active'])) {
+            $user['status'] = $user['is_active'] ? 'active' : 'inactive';
+            unset($user['is_active']); // Odstranit is_active z výstupu
+        } elseif (!isset($user['status'])) {
+            $user['status'] = 'active';
+        }
 
         // Nikdy nevrátit heslo!
         unset($user['password_hash']);
@@ -308,16 +392,19 @@ try {
             throw new Exception('Neplatná role');
         }
 
+        // Sestavit UPDATE pouze pro existující sloupce
+        $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
+        $existingColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        // Zjistit správný název ID sloupce
+        $idColumn = in_array('id', $existingColumns) ? 'id' : 'user_id';
+
         // Kontrola zda email už neexistuje (u jiného uživatele)
-        $stmt = $pdo->prepare("SELECT id FROM wgs_users WHERE email = :email AND id != :id");
+        $stmt = $pdo->prepare("SELECT {$idColumn} FROM wgs_users WHERE email = :email AND {$idColumn} != :id");
         $stmt->execute([':email' => $email, ':id' => $userId]);
         if ($stmt->fetch()) {
             throw new Exception('Email již používá jiný uživatel');
         }
-
-        // Sestavit UPDATE pouze pro existující sloupce
-        $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
-        $existingColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
         $updateParts = [];
         $params = [':id' => $userId];
@@ -350,7 +437,7 @@ try {
             throw new Exception('Žádné sloupce k aktualizaci');
         }
 
-        $sql = "UPDATE wgs_users SET " . implode(', ', $updateParts) . " WHERE id = :id";
+        $sql = "UPDATE wgs_users SET " . implode(', ', $updateParts) . " WHERE {$idColumn} = :id";
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
 
@@ -372,10 +459,15 @@ try {
             throw new Exception('Heslo musí mít alespoň 8 znaků');
         }
 
+        // Zjistit správný název ID sloupce
+        $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
+        $existingColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $idColumn = in_array('id', $existingColumns) ? 'id' : 'user_id';
+
         $stmt = $pdo->prepare("
             UPDATE wgs_users
             SET password_hash = :password_hash
-            WHERE id = :id
+            WHERE {$idColumn} = :id
         ");
         $stmt->execute([
             ':password_hash' => password_hash($newPassword, PASSWORD_BCRYPT),
@@ -400,15 +492,38 @@ try {
             throw new Exception('Neplatný status');
         }
 
-        $stmt = $pdo->prepare("
-            UPDATE wgs_users
-            SET status = :status
-            WHERE id = :id
-        ");
-        $stmt->execute([
-            ':status' => $status,
-            ':id' => $userId
-        ]);
+        // Zjistit správný název ID sloupce a status sloupce
+        $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
+        $existingColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $idColumn = in_array('id', $existingColumns) ? 'id' : 'user_id';
+
+        // Zjistit zda tabulka má 'status' nebo 'is_active'
+        if (in_array('status', $existingColumns)) {
+            // Tabulka používá status (varchar)
+            $stmt = $pdo->prepare("
+                UPDATE wgs_users
+                SET status = :status
+                WHERE {$idColumn} = :id
+            ");
+            $stmt->execute([
+                ':status' => $status,
+                ':id' => $userId
+            ]);
+        } elseif (in_array('is_active', $existingColumns)) {
+            // Tabulka používá is_active (tinyint)
+            $isActive = ($status === 'active') ? 1 : 0;
+            $stmt = $pdo->prepare("
+                UPDATE wgs_users
+                SET is_active = :is_active
+                WHERE {$idColumn} = :id
+            ");
+            $stmt->execute([
+                ':is_active' => $isActive,
+                ':id' => $userId
+            ]);
+        } else {
+            throw new Exception('Tabulka nemá sloupec status ani is_active');
+        }
 
         echo json_encode([
             'status' => 'success',
@@ -419,7 +534,21 @@ try {
         throw new Exception('Neplatná akce nebo metoda');
     }
 
+} catch (PDOException $e) {
+    // Logovat databázovou chybu pro debugging
+    error_log("Admin Users API DB Error: " . $e->getMessage());
+    error_log("Stack trace: " . $e->getTraceAsString());
+
+    http_response_code(400);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Databázová chyba: ' . $e->getMessage()
+    ]);
 } catch (Exception $e) {
+    // Logovat obecnou chybu
+    error_log("Admin Users API Error: " . $e->getMessage());
+    error_log("Stack trace: " . $e->getTraceAsString());
+
     http_response_code(400);
     echo json_encode([
         'status' => 'error',
