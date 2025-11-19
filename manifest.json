@@ -1,7 +1,7 @@
 {
   "name": "White Glove Service",
   "short_name": "WGS",
-  "start_url": "/",
+  "start_url": "/pwa-splash.php",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
