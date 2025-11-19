@@ -62,7 +62,7 @@ try {
             r.adresa,
             r.termin,
             r.cas_navstevy,
-            r.typ_produktu,
+            r.model,
             r.popis_problemu,
             r.technik_jmeno,
             r.technik_telefon
@@ -131,7 +131,7 @@ try {
             '{{time}}' => $navsteva['cas_navstevy'] ?? '(čas upřesní technik)',
             '{{address}}' => $navsteva['adresa'],
             '{{order_id}}' => $reference,
-            '{{product}}' => $navsteva['typ_produktu'] ?? 'nábytek',
+            '{{product}}' => $navsteva['model'] ?? 'nábytek',
             '{{description}}' => $navsteva['popis_problemu'] ?? '',
             '{{technician_name}}' => $navsteva['technik_jmeno'] ?? 'WGS technik',
             '{{technician_phone}}' => $navsteva['technik_telefon'] ?? '+420 XXX XXX XXX'
