@@ -133,67 +133,63 @@ try {
             </div>
 
             <?php foreach ($reklamace as $rek): ?>
-            <div class="reklamace-row" style="border-bottom: 1px solid #ddd; padding: 1rem; transition: background 0.2s; cursor: pointer; position: relative;"
-                 onmouseover="this.style.background='#f5f5f5'"
-                 onmouseout="this.style.background='#fff'"
-                 onclick="otevritDetailReklamace('<?= htmlspecialchars($rek['reklamace_id']) ?>')">
+            <div class="reklamace-row" style="border-bottom: 1px solid #e5e5e5; padding: 0.4rem 0.75rem; transition: background 0.2s; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; font-size: 0.75rem;"
+                 onmouseover="this.style.background='#f9f9f9'"
+                 onmouseout="this.style.background='#fff'">
 
-                <!-- Hlavní info -->
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
-                    <div style="flex: 1;">
-                        <div style="font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; color: #000; margin-bottom: 0.25rem;">
-                            <?= htmlspecialchars($rek['cislo'] ?? $rek['reklamace_id']) ?>
-                        </div>
-                        <div style="font-size: 0.9rem; color: #333; margin-bottom: 0.25rem;">
-                            <strong><?= htmlspecialchars($rek['jmeno']) ?></strong>
-                        </div>
-                        <div style="font-size: 0.8rem; color: #666;">
-                            <?= htmlspecialchars($rek['ulice'] . ', ' . $rek['mesto']) ?>
-                        </div>
-                    </div>
-
-                    <!-- Status badge -->
-                    <div style="margin-left: 1rem;">
-                        <span style="display: inline-block; padding: 0.5rem 1rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #000; background: <?= $rek['stav'] === 'done' ? '#000' : '#fff' ?>; color: <?= $rek['stav'] === 'done' ? '#fff' : '#000' ?>; border-radius: 3px;">
-                            <?php
-                                if ($rek['stav'] === 'wait') echo 'ČEKAJÍCÍ';
-                                elseif ($rek['stav'] === 'open') echo 'V ŘEŠENÍ';
-                                else echo 'VYŘÍZENÉ';
-                            ?>
-                        </span>
-                    </div>
+                <!-- Číslo -->
+                <div style="font-family: 'Poppins', sans-serif; font-weight: 600; color: #000; min-width: 110px;">
+                    <?= htmlspecialchars($rek['cislo'] ?? $rek['reklamace_id']) ?>
                 </div>
 
-                <!-- Detail info -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem; font-size: 0.75rem; font-family: 'Poppins', sans-serif; color: #666; margin-bottom: 0.75rem;">
-                    <div><strong>Model:</strong> <?= htmlspecialchars($rek['model'] ?: '-') ?></div>
-                    <div><strong>Provedení:</strong> <?= htmlspecialchars($rek['provedeni'] ?: '-') ?></div>
-                    <div><strong>Termín:</strong> <?= $rek['termin'] ? date('d.m.Y', strtotime($rek['termin'])) . ' - ' . $rek['cas_navstevy'] : '-' ?></div>
-                    <div><strong>Vytvořeno:</strong> <?= date('d.m.Y H:i', strtotime($rek['datum_vytvoreni'])) ?></div>
+                <!-- Zákazník -->
+                <div style="flex: 1; min-width: 140px;">
+                    <strong style="color: #333;"><?= htmlspecialchars($rek['jmeno']) ?></strong>
+                </div>
+
+                <!-- Model + Provedení -->
+                <div style="min-width: 100px; color: #666;">
+                    <?= htmlspecialchars($rek['model'] ?: '-') ?> / <?= htmlspecialchars($rek['provedeni'] ?: '-') ?>
+                </div>
+
+                <!-- Termín -->
+                <div style="min-width: 95px; color: #666;">
+                    <?= $rek['termin'] ? date('d.m.Y', strtotime($rek['termin'])) : '-' ?>
+                </div>
+
+                <!-- Status badge -->
+                <div style="min-width: 80px;">
+                    <span style="display: inline-block; padding: 0.2rem 0.5rem; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; border: 1px solid #000; background: <?= $rek['stav'] === 'done' ? '#000' : '#fff' ?>; color: <?= $rek['stav'] === 'done' ? '#fff' : '#000' ?>; border-radius: 2px;">
+                        <?php
+                            if ($rek['stav'] === 'wait') echo 'ČEKÁ';
+                            elseif ($rek['stav'] === 'open') echo 'ŘEŠÍ';
+                            else echo 'HOTOVO';
+                        ?>
+                    </span>
                 </div>
 
                 <!-- Akce -->
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" onclick="event.stopPropagation();">
+                <div style="display: flex; gap: 0.3rem; flex-shrink: 0;" onclick="event.stopPropagation();">
                     <!-- Změna stavu -->
                     <select class="reklamace-stav-select"
                             data-reklamace-id="<?= htmlspecialchars($rek['reklamace_id']) ?>"
                             onchange="zmenitStavReklamace('<?= htmlspecialchars($rek['reklamace_id']) ?>', this.value)"
-                            style="padding: 0.35rem 0.75rem; background: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; cursor: pointer;">
-                        <option value="wait" <?= $rek['stav'] === 'wait' ? 'selected' : '' ?>>ČEKAJÍCÍ</option>
-                        <option value="open" <?= $rek['stav'] === 'open' ? 'selected' : '' ?>>V ŘEŠENÍ</option>
-                        <option value="done" <?= $rek['stav'] === 'done' ? 'selected' : '' ?>>VYŘÍZENÉ</option>
+                            style="padding: 0.2rem 0.4rem; background: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px;">
+                        <option value="wait" <?= $rek['stav'] === 'wait' ? 'selected' : '' ?>>ČEKÁ</option>
+                        <option value="open" <?= $rek['stav'] === 'open' ? 'selected' : '' ?>>ŘEŠÍ</option>
+                        <option value="done" <?= $rek['stav'] === 'done' ? 'selected' : '' ?>>HOTOVO</option>
                     </select>
-
-                    <!-- Smazat -->
-                    <button onclick="smazatReklamaci('<?= htmlspecialchars($rek['reklamace_id']) ?>', '<?= htmlspecialchars($rek['cislo'] ?? $rek['reklamace_id']) ?>')"
-                            style="padding: 0.35rem 0.75rem; background: #dc3545; color: #fff; border: 1px solid #dc3545; font-family: 'Poppins', sans-serif; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; cursor: pointer; border-radius: 3px;">
-                        Smazat
-                    </button>
 
                     <!-- Detail -->
                     <button onclick="otevritDetailReklamace('<?= htmlspecialchars($rek['reklamace_id']) ?>')"
-                            style="padding: 0.35rem 0.75rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; cursor: pointer; border-radius: 3px;">
-                        Detail + Historie
+                            style="padding: 0.2rem 0.4rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px;">
+                        Detail
+                    </button>
+
+                    <!-- Smazat -->
+                    <button onclick="smazatReklamaci('<?= htmlspecialchars($rek['reklamace_id']) ?>', '<?= htmlspecialchars($rek['cislo'] ?? $rek['reklamace_id']) ?>')"
+                            style="padding: 0.2rem 0.4rem; background: #dc3545; color: #fff; border: 1px solid #dc3545; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px;">
+                        ×
                     </button>
                 </div>
             </div>
