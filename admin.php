@@ -115,8 +115,8 @@ try {
 if (!$embedMode && $activeTab === 'dashboard'):
 ?>
 <div class="admin-landing-planets">
-    <!-- Slunce - WGS + ADMIN uprostřed -->
-    <div class="admin-sun">
+    <!-- Slunce - WGS + ADMIN uprostřed - kliknutím na index.php -->
+    <div class="admin-sun" onclick="window.location='index.php'" style="cursor: pointer;">
         <h1 class="admin-landing-title">WGS</h1>
         <p class="admin-landing-subtitle">ADMIN</p>
     </div>
@@ -224,7 +224,7 @@ if (!$embedMode && $activeTab === 'dashboard'):
 </div>
 <?php endif; ?>
 
-<?php if (!$embedMode): ?>
+<?php if (!$embedMode && $activeTab !== 'dashboard'): ?>
 <?php require_once __DIR__ . "/includes/admin_header.php"; ?>
 <?php endif; ?>
 
