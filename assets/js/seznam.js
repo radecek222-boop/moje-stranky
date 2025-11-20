@@ -1533,6 +1533,7 @@ async function showCustomerDetail(id) {
 
   const cislo = CURRENT_RECORD.cislo || '';
   const reklamaceId = CURRENT_RECORD.reklamace_id || '';
+  const zadavatel = CURRENT_RECORD.created_by_name || CURRENT_RECORD.prodejce || '';
   const datum_prodeje = CURRENT_RECORD.datum_prodeje || '';
   const datum_reklamace = CURRENT_RECORD.datum_reklamace || '';
   const provedeni = CURRENT_RECORD.provedeni || '';
@@ -1571,6 +1572,9 @@ async function showCustomerDetail(id) {
         <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; font-size: 0.85rem;">
           <span style="color: #666; font-weight: 600;">Číslo objednávky:</span>
           <input type="text" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; background: white;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
+
+          <span style="color: #666; font-weight: 600;">Zadavatel:</span>
+          <input type="text" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; background: #f8f9fa;" value="${Utils.escapeHtml(zadavatel)}" readonly placeholder="Prodejce/Uživatel">
 
           <span style="color: #666; font-weight: 600;">Číslo reklamace:</span>
           <input type="text" id="edit_cislo" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${Utils.escapeHtml(cislo)}">

@@ -119,8 +119,10 @@ try {
     $sql = "
         SELECT
             r.*,
-            r.id as claim_id
+            r.id as claim_id,
+            u.name as created_by_name
         FROM wgs_reklamace r
+        LEFT JOIN wgs_users u ON r.created_by = u.id
         $whereClause
         ORDER BY r.created_at DESC
         LIMIT :limit OFFSET :offset
