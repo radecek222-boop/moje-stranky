@@ -97,6 +97,7 @@ try {
   <link rel="stylesheet" href="/assets/css/admin.css">
 <link rel="stylesheet" href="/assets/css/admin-header.css">
 <link rel="stylesheet" href="/assets/css/admin-notifications.css">
+  <link rel="stylesheet" href="/assets/css/mobile-responsive.css">
 
   <!-- Error Handler - zachytává všechny chyby -->
   <script src="/assets/js/error-handler.js"></script>

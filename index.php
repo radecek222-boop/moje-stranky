@@ -33,6 +33,7 @@
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/index.min.css">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.css">
 </head>
 
 <body>

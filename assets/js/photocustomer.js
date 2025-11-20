@@ -124,6 +124,12 @@ function loadCustomerData() {
   document.getElementById('customerModel').textContent = model;
   document.getElementById('customerContact').textContent = contact;
 
+  // ✅ VYPLNĚNÍ JMÉNA V ROZBALOVACÍM MENU
+  const customerInfoName = document.getElementById('customerInfoName');
+  if (customerInfoName) {
+    customerInfoName.textContent = customerName;
+  }
+
   logger.log(`✅ Hlavička vyplněna:`, {
     jméno: customerName,
     adresa: address,

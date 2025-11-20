@@ -48,6 +48,7 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
   <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/login.min.css">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.css">
   <style>
     .admin-checkbox-group { margin-bottom: 1.5rem; padding: 1rem; background: #f5f5f5; border-radius: 4px; }
     .admin-checkbox-group input[type="checkbox"] { margin-right: 0.5rem; }
