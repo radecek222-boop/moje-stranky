@@ -104,6 +104,19 @@ try {
 </head>
 
 <body<?php if ($embedMode): ?> class="embed-mode"<?php endif; ?>>
+
+<?php
+// Landing page - full screen, před headerem
+if (!$embedMode && $activeTab === 'dashboard'):
+?>
+<div class="admin-landing">
+    <div class="admin-landing-content">
+        <h1 class="admin-landing-title">WGS</h1>
+        <p class="admin-landing-subtitle">ADMIN</p>
+    </div>
+</div>
+<?php else: ?>
+
 <?php if (!$embedMode): ?>
 <?php require_once __DIR__ . "/includes/admin_header.php"; ?>
 <?php endif; ?>
@@ -677,14 +690,7 @@ function loadNotifContent(type, body) {
   }
   ?>
 
-  <div class="admin-dashboard admin-landing">
-      <div class="admin-landing-content">
-          <h1 class="admin-landing-title">WGS</h1>
-          <p class="admin-landing-subtitle">ADMIN</p>
-      </div>
-  </div>
-
-  <div class="admin-dashboard admin-dashboard-cards" style="display: none;">
+  <div class="admin-dashboard">
       <div class="page-header">
           <p class="page-subtitle">Centrální řídicí panel pro správu celé aplikace</p>
           <div class="page-header-actions">
@@ -869,6 +875,8 @@ function loadNotifContent(type, body) {
 
 </div>
 </main>
+
+<?php endif; // Konec else bloku (pokud není landing page) ?>
 
 <!-- MODAL: Add User -->
 <div class="modal" id="addUserModal">

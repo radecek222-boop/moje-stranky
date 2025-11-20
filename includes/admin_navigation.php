@@ -7,6 +7,22 @@ if (!function_exists('loadAdminNavigation')) {
     function loadAdminNavigation(): array
     {
         return [
+            'homepage' => [
+                'href' => 'index.php',
+                'header_label' => 'DOMŮ',
+            ],
+            'seznam' => [
+                'href' => 'seznam.php',
+                'header_label' => 'SEZNAM REKLAMACÍ',
+            ],
+            'protokol' => [
+                'href' => 'protokol.php',
+                'header_label' => 'PROTOKOL',
+            ],
+            'statistiky' => [
+                'href' => 'statistiky.php',
+                'header_label' => 'STATISTIKY',
+            ],
             'control_center' => [
                 'href' => 'admin.php',
                 'header_label' => 'CONTROL CENTER',
