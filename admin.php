@@ -157,6 +157,7 @@ if (!$embedMode && $activeTab === 'dashboard'):
 <?php require_once __DIR__ . "/includes/admin_header.php"; ?>
 <?php endif; ?>
 
+<?php if ($activeTab !== 'dashboard'): ?>
 <!-- MAIN CONTENT -->
 <main>
 <div class="container">
@@ -911,8 +912,7 @@ function loadNotifContent(type, body) {
 
 </div>
 </main>
-
-<?php endif; // Konec else bloku (pokud není landing page) ?>
+<?php endif; // Konec MAIN (pokud není dashboard) ?>
 
 <!-- MODAL: Add User -->
 <div class="modal" id="addUserModal">
