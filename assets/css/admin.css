@@ -103,10 +103,10 @@
     border-radius: 4px;
     font-family: 'Courier New', monospace;
     height: 36px;
+    min-width: 150px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 150px;
 }
 
 .cc-clear-cache-btn {
@@ -121,10 +121,10 @@
     transition: all 0.2s ease;
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
     height: 36px;
+    min-width: 150px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 150px;
 }
 
 .cc-clear-cache-btn:hover {
