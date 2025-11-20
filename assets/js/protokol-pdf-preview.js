@@ -15,6 +15,9 @@ let aktualniPdfNazev = 'protokol.pdf';
 function otevritPdfPreview(pdfBlob, nazevSouboru = 'protokol.pdf') {
   try {
     logger.log('📄 Otevírám PDF preview modal...');
+    logger.log('📄 PDF Blob:', pdfBlob);
+    logger.log('📄 PDF Blob size:', pdfBlob.size, 'bytes');
+    logger.log('📄 PDF Blob type:', pdfBlob.type);
 
     // Uložit referenci
     aktualniPdfBlob = pdfBlob;
@@ -22,10 +25,26 @@ function otevritPdfPreview(pdfBlob, nazevSouboru = 'protokol.pdf') {
 
     // Vytvořit URL pro iframe
     const pdfUrl = URL.createObjectURL(pdfBlob);
+    logger.log('📄 PDF URL vytvořena:', pdfUrl);
 
     // Nastavit iframe src
     const iframe = document.getElementById('pdfPreviewFrame');
-    iframe.src = pdfUrl;
+    if (!iframe) {
+      logger.error('❌ iframe #pdfPreviewFrame nenalezen!');
+      showNotif('error', 'Chyba: iframe nenalezen');
+      return;
+    }
+
+    logger.log('📄 Nastavuji iframe.src...');
+
+    // Přidat loading text do iframe před načtením PDF
+    iframe.srcdoc = '<html><body style="margin:0;padding:0;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;background:#f0f0f0;"><div style="text-align:center;"><h2 style="color:#333;">Načítám PDF...</h2><p style="color:#666;">Chvíli strpení</p></div></body></html>';
+
+    // Nastavit iframe src (přepíše srcdoc po načtení)
+    setTimeout(() => {
+      iframe.src = pdfUrl;
+      logger.log('📄 iframe.src nastavena:', iframe.src);
+    }, 100);
 
     // Podmíněně zobrazit tlačítka podle kontextu
     const shareBtn = document.getElementById('pdfShareBtn');
@@ -48,13 +67,36 @@ function otevritPdfPreview(pdfBlob, nazevSouboru = 'protokol.pdf') {
 
     // Zobrazit modal
     const overlay = document.getElementById('pdfPreviewOverlay');
-    overlay.classList.add('active');
+    if (!overlay) {
+      logger.error('❌ overlay #pdfPreviewOverlay nenalezen!');
+      showNotif('error', 'Chyba: modal nenalezen');
+      return;
+    }
 
-    logger.log('✅ PDF preview zobrazen');
+    overlay.classList.add('active');
+    logger.log('✅ Modal zobrazen (active class přidána)');
+
+    // FALLBACK: Pokud iframe nedokáže zobrazit PDF (některé browsery mají problémy),
+    // zobraz tlačítko "Otevřít v novém okně"
+    setTimeout(() => {
+      if (!iframe.contentDocument && !iframe.contentWindow) {
+        logger.warn('⚠️ iframe pravděpodobně neobsahuje PDF - možná problém s CORS nebo prohlížeč');
+        logger.log('💡 Zkuste tlačítko Sdílet/Stáhnout pro zobrazení v novém okně');
+      } else {
+        logger.log('✅ PDF preview úspěšně zobrazen v iframe');
+      }
+    }, 1000);
 
   } catch (error) {
     logger.error('❌ Chyba při otevírání PDF preview:', error);
-    showNotif('error', 'Chyba při zobrazení PDF');
+    showNotif('error', 'Chyba při zobrazení PDF: ' + error.message);
+
+    // Fallback: otevřít v novém okně
+    if (pdfBlob) {
+      logger.log('💡 Fallback: Otevírám PDF v novém okně...');
+      const url = URL.createObjectURL(pdfBlob);
+      window.open(url, '_blank');
+    }
   }
 }
 
