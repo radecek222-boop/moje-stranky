@@ -597,9 +597,92 @@ const WGS = {
         }
       });
     }
+
+    // ✅ Event listenery pro odstranění červeného označení při psaní
+    const povinnaPoleIds = ['jmeno', 'email', 'telefon', 'ulice', 'mesto', 'psc', 'popis_problemu'];
+    povinnaPoleIds.forEach(poleId => {
+      const element = document.getElementById(poleId);
+      if (element) {
+        element.addEventListener('input', () => {
+          if (element.value.trim()) {
+            element.style.borderColor = '';
+            element.style.backgroundColor = '';
+          }
+        });
+      }
+    });
   },
-  
+
+  /**
+   * Validace všech povinných polí formuláře
+   * @returns {Object} { valid: boolean, chybejici: string[] }
+   */
+  validatePovinnaPole() {
+    const povinnaPole = [
+      { id: 'jmeno', label: 'Jméno a příjmení' },
+      { id: 'email', label: 'E-mail' },
+      { id: 'telefon', label: 'Telefon' },
+      { id: 'ulice', label: 'Ulice a ČP' },
+      { id: 'mesto', label: 'Město' },
+      { id: 'psc', label: 'PSČ' },
+      { id: 'popis_problemu', label: 'Popis problému' }
+    ];
+
+    const chybejici = [];
+    let prvniPrazdne = null;
+
+    // Odebrat červené označení ze všech polí
+    povinnaPole.forEach(pole => {
+      const element = document.getElementById(pole.id);
+      if (element) {
+        element.style.borderColor = '';
+        element.style.backgroundColor = '';
+      }
+    });
+
+    // Zkontrolovat každé povinné pole
+    povinnaPole.forEach(pole => {
+      const element = document.getElementById(pole.id);
+      if (!element) {
+        logger.warn(`⚠️ Pole ${pole.id} nebylo nalezeno v DOM`);
+        return;
+      }
+
+      const hodnota = element.value.trim();
+      if (!hodnota) {
+        chybejici.push(pole.label);
+
+        // Označit červeně
+        element.style.borderColor = '#dc3545';
+        element.style.backgroundColor = '#fff5f5';
+
+        // Zapamatovat první prázdné pole
+        if (!prvniPrazdne) {
+          prvniPrazdne = element;
+        }
+      }
+    });
+
+    // Scrollnout na první prázdné pole
+    if (prvniPrazdne) {
+      prvniPrazdne.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => prvniPrazdne.focus(), 500);
+    }
+
+    return {
+      valid: chybejici.length === 0,
+      chybejici
+    };
+  },
+
   async submitForm() {
+    // ✅ VALIDACE VŠECH POVINNÝCH POLÍ
+    const validace = this.validatePovinnaPole();
+    if (!validace.valid) {
+      this.toast(`❌ Vyplňte prosím všechna povinná pole: ${validace.chybejici.join(', ')}`, 'error');
+      return;
+    }
+
     // GDPR souhlas - pouze pro neregistrované uživatele
     // Checkbox neexistuje pokud je uživatel přihlášený (souhlas ošetřen smluvně)
     const consentCheckbox = document.getElementById('gdpr_consent');
