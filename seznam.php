@@ -371,6 +371,33 @@ if (!$isLoggedIn && !$isAdmin) {
     font-size: 0.75rem !important;
   }
 }
+
+/* 📱 DETAIL ZÁKAZNÍKA - MOBILNÍ OPTIMALIZACE */
+@media (max-width: 768px) {
+  /* Grid v detailu zákazníka - jednoduchý layout na mobilu */
+  .modal-body > div[style*="grid-template-columns"] {
+    display: block !important;
+  }
+
+  .modal-body > div[style*="grid-template-columns"] > div > div[style*="display: grid"] {
+    display: block !important;
+  }
+
+  /* Labels a inputy v detailu zákazníka */
+  .modal-body input[type="text"],
+  .modal-body input[type="tel"],
+  .modal-body input[type="email"] {
+    width: 100% !important;
+    margin-bottom: 0.75rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .modal-body span[style*="font-weight: 600"] {
+    display: block !important;
+    margin-bottom: 0.25rem !important;
+    font-size: 0.75rem !important;
+  }
+}
 </style>
 
 <!-- Current User Data for JavaScript -->

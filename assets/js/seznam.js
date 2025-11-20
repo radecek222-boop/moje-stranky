@@ -1524,12 +1524,6 @@ async function loadMapAndRoute() {
 
 // === DETAIL ZÁKAZNÍKA ===
 async function showCustomerDetail(id) {
-  // DEBUG: Logovat CURRENT_RECORD pro diagnostiku
-  logger.log('🔍 DEBUG showCustomerDetail - CURRENT_RECORD:', CURRENT_RECORD);
-  logger.log('🔍 created_by:', CURRENT_RECORD.created_by);
-  logger.log('🔍 created_by_name:', CURRENT_RECORD.created_by_name);
-  logger.log('🔍 prodejce:', CURRENT_RECORD.prodejce);
-
   const customerName = Utils.getCustomerName(CURRENT_RECORD);
   const phone = CURRENT_RECORD.telefon || '';
   const email = CURRENT_RECORD.email || '';
@@ -1540,8 +1534,6 @@ async function showCustomerDetail(id) {
   const cislo = CURRENT_RECORD.cislo || '';
   const reklamaceId = CURRENT_RECORD.reklamace_id || '';
   const zadavatel = CURRENT_RECORD.created_by_name || CURRENT_RECORD.prodejce || '';
-
-  logger.log('🔍 Vypočítaný zadavatel:', zadavatel);
   const datum_prodeje = CURRENT_RECORD.datum_prodeje || '';
   const datum_reklamace = CURRENT_RECORD.datum_reklamace || '';
   const provedeni = CURRENT_RECORD.provedeni || '';

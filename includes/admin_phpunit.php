@@ -677,6 +677,27 @@ async function zkontrolovatSystem() {
         // Kontrola HTTP statusu
         if (!odpoved.ok) {
             const errorData = await odpoved.json().catch(() => ({ message: 'Neznámá chyba' }));
+
+            // Speciální zpracování pro HTTP 503 (exec() zakázán)
+            if (odpoved.status === 503) {
+                const infoDiv = document.getElementById('system-info');
+                infoDiv.innerHTML = `
+                    <div style="padding: 1.5rem; background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; margin: 1rem 0;">
+                        <h3 style="color: #856404; margin-top: 0; font-size: 1.1rem;">⚠️ PHPUnit Test Runner není dostupný</h3>
+                        <p style="margin: 0.5rem 0; color: #856404;"><strong>Důvod:</strong> ${errorData.message}</p>
+                        ${errorData.detail ? `<p style="margin: 0.5rem 0; color: #856404; font-size: 0.9rem;">${errorData.detail}</p>` : ''}
+                        ${errorData.disabled_functions ? `
+                            <details style="margin-top: 1rem; color: #856404; font-size: 0.85rem;">
+                                <summary style="cursor: pointer; font-weight: 600;">Zakázané funkce na serveru</summary>
+                                <pre style="background: #fff; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem; overflow-x: auto;">${errorData.disabled_functions}</pre>
+                            </details>
+                        ` : ''}
+                    </div>
+                `;
+                zobrazLoading(false);
+                return;
+            }
+
             throw new Error(`HTTP ${odpoved.status}: ${errorData.message || 'Přístup odepřen'}`);
         }
 
