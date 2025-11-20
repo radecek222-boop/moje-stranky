@@ -4,11 +4,17 @@
 --
 -- PROBLÉM: Ulice se nenachází kde původní pattern očekával
 --
--- V PDF je text: "adresa: Na Blatech 396"
+-- V PDF vizuálně:
+--   Město: Osnice
+--   Adresa: Na Blatech 396
+--
+-- V RAW textu (PDF.js extrakce):
+--   "Osnice Město: Na Blatech 396 Adresa:"
+--
 -- Ve formuláři novareklamace.php: "ULICE A ČÍSLO POPISNÉ"
 -- V SQL: pole `ulice` VARCHAR(255)
 --
--- ŘEŠENÍ: Hledat ulici PO "adresa:" (malým a)
+-- ŘEŠENÍ: Hledat ulici PŘED "Adresa:" (s velkým A!)
 -- Pattern zachytí text od prvního velkého písmene až po číslo
 -- =====================================================
 
@@ -16,7 +22,7 @@ UPDATE wgs_pdf_parser_configs
 SET regex_patterns = JSON_SET(
     regex_patterns,
     '$.ulice',
-    '/adresa:\\\\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\\\\w\\\\s]+\\\\d+)/ui'
+    '/([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\\\\w\\\\s]+\\\\d+)\\\\s+Adresa:/ui'
 )
 WHERE zdroj = 'natuzzi';
 

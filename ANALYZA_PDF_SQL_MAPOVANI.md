@@ -92,22 +92,28 @@ kmochova@petrisk.cz  725 387 868 Telefon:
 **Pattern:** `/([\d\s]+)\s+Telefon:/ui`
 
 ### G) Ulice
-**Z PDF:**
+**V PDF vizuálně:**
 ```
-adresa: Na Blatech 396
+Město: Osnice
+Adresa: Na Blatech 396
 ```
-**DŮLEŽITÉ:** V PDF je text "adresa:" (malým a)!
+
+**V RAW textu (PDF.js extrakce):**
+```
+Osnice Město: Na Blatech 396 Adresa:
+```
+
+**DŮLEŽITÉ:** "Adresa:" je s velkým A!
 **Ve formuláři:** "ULICE A ČÍSLO POPISNÉ"
 **V SQL:** pole `ulice` VARCHAR(255)
 
-**Použít:** Text PO "adresa:"
+**Použít:** Text PŘED "Adresa:"
 **→ SQL:** `ulice`
-**Pattern:** `/adresa:\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\w\s]+\d+)/ui`
+**Pattern:** `/([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\w\s]+\d+)\s+Adresa:/ui`
 
 **Vysvětlení:**
-- `adresa:` - hledá text "adresa:" (case-insensitive díky `i`)
-- `\s+` - mezery za tím
 - `([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\w\s]+\d+)` - zachytí text začínající velkým písmenem, obsahující slova/mezery, končící číslem
+- `\s+Adresa:` - následovaný mezerou a slovem "Adresa:" (s velkým A)
 
 ### H) Město
 **Z PDF:**
@@ -163,7 +169,7 @@ Závada:   Tak odstáté polštáře, že se na posteli nedá spát. Prosím o r
   "jmeno": "/Jméno společnosti:\\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][a-záčďéěíňóřšťúůýž]+\\s+[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][a-záčďéěíňóřšťúůýž]+)\\s+Poschodí:/ui",
   "email": "/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})\\s+[\\d\\s]+Telefon:/ui",
   "telefon": "/([\\d\\s]+)\\s+Telefon:/ui",
-  "ulice": "/adresa:\\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\\w\\s]+\\d+)/ui",
+  "ulice": "/([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\\w\\s]+\\d+)\\s+Adresa:/ui",
   "mesto": "/([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][a-záčďéěíňóřšťúůýž]+)\\s+Město:/ui",
   "psc": "/(\\d{5})\\s+PSČ:/ui",
   "model": "/Model:\\s+([^\\n]+?)\\s+Složení:/ui",
