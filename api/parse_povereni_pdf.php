@@ -142,26 +142,54 @@ function najdiNejlepsiKonfiguraci($text, $configs) {
 
 /**
  * Parsuje PDF podle zadané konfigurace
+ *
+ * Extrahuje VŠECHNA pole:
+ * - Základní pole → mapují se přímo (jmeno, telefon, email, adresa, popis...)
+ * - Technické detaily → spojí se do doplnujici_info (model, provedeni, barva, nohy, doplnky)
  */
 function parsujPodleKonfigurace($text, $config) {
-    $data = [];
+    $zakladniData = [];
+    $technickeData = [];
+
     $regexPatterns = $config['regex_patterns'];
     $poleMapping = $config['pole_mapping'];
+
+    // Technická pole která se NEUKLÁDAJÍ přímo, ale do doplnujici_info
+    $technickeKlice = ['model', 'provedeni', 'barva', 'nohy', 'doplnky'];
 
     // Pro každý regex pattern zkusit extrahovat data
     foreach ($regexPatterns as $klic => $pattern) {
         if (preg_match($pattern, $text, $matches)) {
             $hodnota = isset($matches[1]) ? trim($matches[1]) : '';
 
-            // Mapovat na správný klíč pole ve formuláři
-            if (isset($poleMapping[$klic])) {
-                $cilovePoloe = $poleMapping[$klic];
-                $data[$cilovePoloe] = htmlspecialchars($hodnota, ENT_QUOTES, 'UTF-8');
+            if (empty($hodnota)) {
+                continue; // Skip prázdné hodnoty
+            }
+
+            // Je to technický detail?
+            if (in_array($klic, $technickeKlice)) {
+                // Uložit do technických dat
+                $technickeData[strtoupper($klic)] = $hodnota;
+            } else {
+                // Základní pole - mapovat přímo
+                if (isset($poleMapping[$klic])) {
+                    $cilovePoloe = $poleMapping[$klic];
+                    $zakladniData[$cilovePoloe] = htmlspecialchars($hodnota, ENT_QUOTES, 'UTF-8');
+                }
             }
         }
     }
 
-    return $data;
+    // Spojit technické detaily do doplnujici_info
+    if (!empty($technickeData)) {
+        $doplnujiciInfo = "=== TECHNICKÉ DETAILY Z PDF ===\n\n";
+        foreach ($technickeData as $nazev => $hodnota) {
+            $doplnujiciInfo .= "{$nazev}:\n{$hodnota}\n\n";
+        }
+        $zakladniData['doplnujici_info'] = trim($doplnujiciInfo);
+    }
+
+    return $zakladniData;
 }
 
 /**
