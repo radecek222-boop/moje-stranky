@@ -256,6 +256,121 @@ if (!$isLoggedIn && !$isAdmin) {
 .order-box.status-bg-done:hover {
   background: rgba(76, 175, 80, 0.12) !important;
 }
+
+/* 📱 MOBILNÍ OPTIMALIZACE KALENDÁŘE A PANELŮ */
+@media (max-width: 768px) {
+  /* Modal title - "Vyberte termín návštěvy" menší pro mobil */
+  .modal-title {
+    font-size: 0.9rem !important;
+    line-height: 1.3;
+    padding-right: 2.5rem;
+  }
+
+  /* Červený obdélník s termíny - KOMPAKTNÍ */
+  .day-bookings {
+    margin-top: 0.8rem !important;
+    padding: 0.5rem !important;
+  }
+
+  .day-bookings h4 {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+    letter-spacing: 0.03em;
+  }
+
+  .booking-item {
+    padding: 0.4rem !important;
+    margin-bottom: 0.3rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .booking-item:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  /* Panel trasy - KOMPAKTNÍ */
+  .distance-info-panel {
+    padding: 0.5rem !important;
+    margin: 0.5rem 0 !important;
+  }
+
+  .distance-info-title {
+    font-size: 0.65rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .distance-stats {
+    gap: 0.4rem !important;
+  }
+
+  .distance-stat {
+    padding: 0.4rem !important;
+  }
+
+  .distance-stat-label {
+    font-size: 0.55rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .distance-stat-value {
+    font-size: 0.85rem !important;
+  }
+
+  .distance-stat-unit {
+    font-size: 0.65rem !important;
+  }
+
+  /* Položky trasy - KOMPAKTNÍ */
+  .route-info {
+    margin-top: 0.5rem !important;
+    padding-top: 0.5rem !important;
+  }
+
+  .route-item {
+    padding: 0.3rem !important;
+    margin-bottom: 0.3rem !important;
+    font-size: 0.65rem !important;
+  }
+
+  .route-item.new-customer {
+    padding: 0.4rem !important;
+    margin: 0.3rem 0 !important;
+  }
+
+  .route-distance {
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.65rem !important;
+    min-width: 60px !important;
+  }
+
+  .route-arrow {
+    font-size: 0.65rem !important;
+  }
+}
+
+/* 📱 Ještě menší displeje - ultra kompaktní */
+@media (max-width: 480px) {
+  .modal-title {
+    font-size: 0.8rem !important;
+  }
+
+  .day-bookings h4 {
+    font-size: 0.7rem !important;
+  }
+
+  .booking-item {
+    padding: 0.3rem !important;
+    font-size: 0.65rem !important;
+  }
+
+  .distance-info-title {
+    font-size: 0.6rem !important;
+  }
+
+  .distance-stat-value {
+    font-size: 0.75rem !important;
+  }
+}
 </style>
 
 <!-- Current User Data for JavaScript -->
