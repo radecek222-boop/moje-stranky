@@ -2619,10 +2619,12 @@ ol li {
 }
 
 /* ===========================================================================
-   ADMIN LANDING PAGE - Černý background s centrovaným WGS logem
+   ADMIN LANDING PAGE - Planetární systém
+   WGS + ADMIN jako slunce, karty se točí dokola jako planety
    =========================================================================== */
 
-.admin-landing {
+/* Hlavní kontejner - černý vesmír */
+.admin-landing-planets {
     background: #000;
     position: fixed;
     top: 0;
@@ -2631,15 +2633,18 @@ ol li {
     bottom: 0;
     width: 100vw;
     height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     z-index: 9999;
     overflow: hidden;
 }
 
-.admin-landing-content {
+/* Slunce - WGS + ADMIN uprostřed */
+.admin-sun {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     text-align: center;
+    z-index: 10;
 }
 
 .admin-landing-title {
@@ -2650,6 +2655,7 @@ ol li {
     letter-spacing: 0.1em;
     margin: 0;
     text-transform: uppercase;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
 }
 
 .admin-landing-subtitle {
@@ -2660,6 +2666,125 @@ ol li {
     text-transform: uppercase;
     letter-spacing: 0.3em;
     margin: 2rem 0 0 0;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+/* Orbita - prostor pro planety */
+.admin-orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 600px;
+    height: 600px;
+    margin: -300px 0 0 -300px;
+    animation: orbit-rotate 60s linear infinite;
+}
+
+/* Animace rotace orbity */
+@keyframes orbit-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Planety (karty) */
+.admin-planet {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: 3px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+    animation: counter-rotate 60s linear infinite reverse;
+}
+
+/* Proti-rotace planet aby zůstaly správně orientované */
+@keyframes counter-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+}
+
+/* Silný hover efekt */
+.admin-planet:hover {
+    transform: scale(1.35) rotate(0deg) !important;
+    box-shadow:
+        0 0 60px rgba(102, 126, 234, 1),
+        0 0 100px rgba(118, 75, 162, 0.8),
+        0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 20;
+    background: linear-gradient(135deg, #7b8ff7 0%, #8f5fc4 100%);
+    border-color: #fff;
+    border-width: 4px;
+}
+
+.admin-planet:hover .planet-content {
+    transform: scale(1.1);
+}
+
+.admin-planet:active {
+    transform: scale(1.25) rotate(0deg) !important;
+}
+
+/* Rozmístění planet na orbitě */
+.admin-planet-1 {
+    top: 0;
+    left: 50%;
+    margin-left: -75px;
+}
+
+.admin-planet-2 {
+    top: 50%;
+    right: 0;
+    margin-top: -75px;
+}
+
+.admin-planet-3 {
+    bottom: 0;
+    left: 50%;
+    margin-left: -75px;
+}
+
+.admin-planet-4 {
+    top: 50%;
+    left: 0;
+    margin-top: -75px;
+}
+
+/* Obsah planety - perfektně vycentrovaný */
+.planet-content {
+    text-align: center;
+    color: #fff;
+    padding: 1rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.planet-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.3rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+}
+
+.planet-desc {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 300;
+    opacity: 0.9;
+    line-height: 1.3;
+    margin: 0;
 }
 
 /* Responsivita pro mobil */
@@ -2672,6 +2797,35 @@ ol li {
         font-size: 1.5rem;
         letter-spacing: 0.2em;
     }
+
+    .admin-orbit {
+        width: 400px;
+        height: 400px;
+        margin: -200px 0 0 -200px;
+    }
+
+    .admin-planet {
+        width: 100px;
+        height: 100px;
+    }
+
+    .admin-planet-1,
+    .admin-planet-3 {
+        margin-left: -50px;
+    }
+
+    .admin-planet-2,
+    .admin-planet-4 {
+        margin-top: -50px;
+    }
+
+    .planet-title {
+        font-size: 0.85rem;
+    }
+
+    .planet-desc {
+        font-size: 0.6rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -2682,5 +2836,34 @@ ol li {
     .admin-landing-subtitle {
         font-size: 1.2rem;
         letter-spacing: 0.15em;
+    }
+
+    .admin-orbit {
+        width: 300px;
+        height: 300px;
+        margin: -150px 0 0 -150px;
+    }
+
+    .admin-planet {
+        width: 80px;
+        height: 80px;
+    }
+
+    .admin-planet-1,
+    .admin-planet-3 {
+        margin-left: -40px;
+    }
+
+    .admin-planet-2,
+    .admin-planet-4 {
+        margin-top: -40px;
+    }
+
+    .planet-title {
+        font-size: 0.7rem;
+    }
+
+    .planet-desc {
+        display: none;
     }
 }

@@ -59,7 +59,7 @@ if (!array_key_exists($activeTab, $tabConfig)) {
     $activeTab = 'dashboard';
 }
 $currentTabMeta = $tabConfig[$activeTab];
-$currentTabLabel = $currentTabMeta['tab_label'] ?? 'Control Center';
+$currentTabLabel = $currentTabMeta['tab_label'] ?? 'Admin';
 
 // Zkontroluj jestli je RBAC nainstalován
 $rbacInstalled = false;
@@ -106,16 +106,52 @@ try {
 <body<?php if ($embedMode): ?> class="embed-mode"<?php endif; ?>>
 
 <?php
-// Landing page - full screen, před headerem
+// Landing page - full screen s planetárními kartami
 if (!$embedMode && $activeTab === 'dashboard'):
 ?>
-<div class="admin-landing">
-    <div class="admin-landing-content">
+<div class="admin-landing-planets">
+    <!-- Slunce - WGS + ADMIN uprostřed -->
+    <div class="admin-sun">
         <h1 class="admin-landing-title">WGS</h1>
         <p class="admin-landing-subtitle">ADMIN</p>
     </div>
+
+    <!-- Planety (karty) točící se dokola -->
+    <div class="admin-orbit">
+        <!-- Statistiky -->
+        <div class="admin-planet admin-planet-1" onclick="window.location='statistiky.php'">
+            <div class="planet-content">
+                <div class="planet-title">Statistiky</div>
+                <div class="planet-desc">Přehledy a reporty</div>
+            </div>
+        </div>
+
+        <!-- Reklamace -->
+        <div class="admin-planet admin-planet-2" onclick="window.location='statistiky.php'">
+            <div class="planet-content">
+                <div class="planet-title">Reklamace</div>
+                <div class="planet-desc">Správa požadavků</div>
+            </div>
+        </div>
+
+        <!-- Security -->
+        <div class="admin-planet admin-planet-3" onclick="window.location='admin.php?tab=keys'">
+            <div class="planet-content">
+                <div class="planet-title">Security</div>
+                <div class="planet-desc">Klíče & bezpečnost</div>
+            </div>
+        </div>
+
+        <!-- Email & SMS -->
+        <div class="admin-planet admin-planet-4" onclick="window.location='admin.php?tab=notifications'">
+            <div class="planet-content">
+                <div class="planet-title">Notifikace</div>
+                <div class="planet-desc">Email & SMS</div>
+            </div>
+        </div>
+    </div>
 </div>
-<?php else: ?>
+<?php endif; ?>
 
 <?php if (!$embedMode): ?>
 <?php require_once __DIR__ . "/includes/admin_header.php"; ?>
@@ -694,7 +730,7 @@ function loadNotifContent(type, body) {
       <div class="page-header">
           <p class="page-subtitle">Centrální řídicí panel pro správu celé aplikace</p>
           <div class="page-header-actions">
-              <span class="cc-version-info" id="adminVersionInfo" title="Verze Control Center - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
+              <span class="cc-version-info" id="adminVersionInfo" title="Verze Admin - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
               <button class="cc-clear-cache-btn" onclick="clearCacheAndReload()" title="Vymaže lokální cache a načte nejnovější verzi">
                   🔄 Vymazat cache & Reload
               </button>

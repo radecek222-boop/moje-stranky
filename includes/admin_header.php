@@ -11,7 +11,7 @@ $currentAdminTab = $_GET['tab'] ?? 'dashboard';
     <div class="header-container">
         <div class="logo">
             <div class="logo-text">WGS</div>
-            <p>CONTROL CENTER</p>
+            <p>ADMIN</p>
         </div>
 
         <button class="hamburger-toggle" id="hamburger-toggle" aria-label="Otevřít menu" aria-expanded="false">

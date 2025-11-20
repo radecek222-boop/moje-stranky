@@ -23,12 +23,6 @@ if (!function_exists('loadAdminNavigation')) {
                 'href' => 'statistiky.php',
                 'header_label' => 'STATISTIKY',
             ],
-            'control_center' => [
-                'href' => 'admin.php',
-                'header_label' => 'CONTROL CENTER',
-                'tab_label' => 'Control Center',
-                'tab' => 'control_center',
-            ],
             'dashboard' => [
                 'href' => 'admin.php?tab=dashboard',
                 'tab_label' => 'Dashboard',
