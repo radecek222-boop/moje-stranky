@@ -685,7 +685,8 @@ button.btn:hover {
     justify-content: space-between;
     align-items: center;
     padding: 12px 15px;
-    background: linear-gradient(135deg, #2D5016 0%, #3a6b1e 100%);
+    background: #f5f5f5;
+    border: 2px solid #000;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s;
@@ -697,14 +698,14 @@ button.btn:hover {
   }
 
   .customer-info-name {
-    color: white;
+    color: #000;
     font-weight: 600;
     font-size: 15px;
     letter-spacing: 0.02em;
   }
 
   .customer-info-arrow {
-    stroke: white;
+    stroke: #000;
     transition: transform 0.3s;
     flex-shrink: 0;
   }
