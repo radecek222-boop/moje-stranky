@@ -15,6 +15,7 @@ const CONSTANTS = {
 
 const WGS = {
   photos: [],
+  povereniPDF: null, // PDF soubor s pověřením k reklamaci
   map: null,
   // ✅ REFACTOR: marker a routeLayer jsou nyní spravovány WGSMap modulem
   companyLocation: window.WGS_COMPANY_LOCATION || { lat: 50.080312092724114, lon: 14.598113797415476 }, // ✅ FIX M-3: Konfigurovatelná lokace
@@ -33,6 +34,7 @@ const WGS = {
     this.initMap();
     this.initForm();
     this.initPhotos();
+    this.initPovereniPDF(); // Inicializace nahrávání PDF pověření
     this.initProvedeni();
     this.initLanguage();
     this.initCustomCalendar();
@@ -666,6 +668,12 @@ const WGS = {
         formData.append('gdpr_consent', consentCheckbox.checked ? '1' : '0');
       }
 
+      // Přiložení PDF pověření k reklamaci (pokud bylo nahráno)
+      if (this.povereniPDF) {
+        formData.append('povereni_pdf', this.povereniPDF);
+        logger.log(`📄 Přikládám PDF pověření: ${this.povereniPDF.name}`);
+      }
+
       // ✅ FIX H-1: Použít CSRF token získaný výše
       formData.append('csrf_token', csrfToken);
 
@@ -824,7 +832,58 @@ const WGS = {
       container.appendChild(div);
     });
   },
-  
+
+  // Inicializace nahrávání PDF pověření k reklamaci
+  initPovereniPDF() {
+    const btn = document.getElementById('nahrajPovereniBtn');
+    const pdfInput = document.getElementById('povereniInput');
+    const statusSpan = document.getElementById('povereniStatus');
+
+    if (!btn || !pdfInput || !statusSpan) {
+      logger.warn('📄 PDF pověření prvky nebyly nalezeny, initPovereniPDF se přeskočí');
+      return;
+    }
+
+    // Kliknutí na tlačítko otevře file input
+    btn.addEventListener('click', () => pdfInput.click());
+
+    // Při výběru souboru
+    pdfInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      // Validace typu souboru
+      if (file.type !== 'application/pdf') {
+        this.toast('❌ Pouze PDF soubory jsou povoleny', 'error');
+        pdfInput.value = '';
+        return;
+      }
+
+      // Validace velikosti (max 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB v bytech
+      if (file.size > maxSize) {
+        this.toast('❌ Soubor je příliš velký (max 10MB)', 'error');
+        pdfInput.value = '';
+        return;
+      }
+
+      // Uložení PDF souboru
+      this.povereniPDF = file;
+
+      // Zobrazení názvu souboru
+      const velikostMB = (file.size / (1024 * 1024)).toFixed(2);
+      statusSpan.textContent = `✓ ${file.name} (${velikostMB} MB)`;
+      statusSpan.style.color = '#2D5016';
+      statusSpan.style.fontWeight = '600';
+
+      this.toast(`✓ PDF pověření nahráno: ${file.name}`, 'success');
+      logger.log(`📄 PDF pověření připojeno: ${file.name}, velikost: ${velikostMB} MB`);
+    });
+  },
+
   initProvedeni() {
     const btn = document.getElementById('selectProvedeniBtn');
     const overlay = document.getElementById('provedeniOverlay');

@@ -258,8 +258,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Form Sections - KOMPAKTNĚJŠÍ */
 .form-section {
-  margin-bottom: 1.5rem; /* ZMĚNA: z 3rem na 1.5rem */
-  padding-bottom: 1.5rem; /* ZMĚNA: z 3rem na 1.5rem */
+  margin-bottom: 1rem; /* ZMĚNA: z 3rem → 1.5rem → 1rem pro menší mezery */
+  padding-bottom: 1rem; /* ZMĚNA: z 3rem → 1.5rem → 1rem pro menší mezery */
   border-bottom: 1px solid var(--c-border);
 }
 
@@ -877,16 +877,43 @@ textarea.form-control {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   }
 
-  #calculatorBox {
+  #calculatorBox,
+  #povereniBox {
     padding: 1.2rem 0.8rem !important;
     margin-bottom: 1.2rem !important;
   }
 
-  #calculatorBox h3 {
+  #calculatorBox h3,
+  #povereniBox h3 {
     font-size: 1.1rem !important;
     margin-bottom: 0.6rem !important;
     line-height: 1.3;
     letter-spacing: 0.08em;
+    flex-direction: column;
+    gap: 0.3rem !important;
+  }
+
+  #povereniBox h3 svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  #povereniBox p {
+    font-size: 0.8rem !important;
+    line-height: 1.4;
+    margin-bottom: 1rem !important;
+  }
+
+  #povereniBox button {
+    padding: 0.6rem 1rem !important;
+    font-size: 0.7rem !important;
+    width: 100%;
+  }
+
+  #povereniStatus {
+    font-size: 0.75rem !important;
+    width: 100%;
+    text-align: center;
   }
 
   #calculatorBox p {
