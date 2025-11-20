@@ -628,19 +628,24 @@ button.btn:hover {
     border-width: 1px;
   }
 
-  /* Header text menší na mobilu */
+  /* Header text menší na mobilu - kompaktní na jeden řádek */
   .header {
-    margin-bottom: 15px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
   }
 
   .header > div:first-child {
-    font-size: 14px;
+    font-size: 11px;
     font-weight: 700;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .header > div:last-child {
-    font-size: 9px;
-    line-height: 1.3;
+    font-size: 7px;
+    line-height: 1.2;
   }
 
   /* Větší labels pro lepší čitelnost */
@@ -798,11 +803,12 @@ button.btn:hover {
   }
 
   .header > div:first-child {
-    font-size: 12px;
+    font-size: 10px;
+    letter-spacing: 0.5px;
   }
 
   .header > div:last-child {
-    font-size: 8px;
+    font-size: 6.5px;
   }
 
   .label {
