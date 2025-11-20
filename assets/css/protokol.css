@@ -596,6 +596,31 @@ button.btn:hover {
     font-size: inherit !important;
   }
 
+  /* PDF export: Zobrazit OBA pole (CZ + EN) vedle sebe */
+  body.pdf-export-mode .split-section {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 15px !important;
+  }
+
+  body.pdf-export-mode .split-section textarea:nth-child(2) {
+    display: block !important;
+  }
+
+  body.pdf-export-mode .split-section textarea:nth-child(1) {
+    width: auto !important;
+  }
+
+  /* PDF export: Customer info vždy rozbaleno, header skrytý */
+  body.pdf-export-mode .customer-info-header {
+    display: none !important;
+  }
+
+  body.pdf-export-mode .customer-info-content {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
   /* Větší font pro lepší čitelnost na mobilu */
   body {
     font-size: 15px;
@@ -802,6 +827,17 @@ button.btn:hover {
   }
 
   .col {
+    min-width: 100%;
+  }
+
+  /* Skrýt anglické překladové pole na mobilu (druhé textarea) */
+  .split-section textarea:nth-child(2) {
+    display: none;
+  }
+
+  /* České pole na plnou šířku */
+  .split-section textarea:nth-child(1) {
+    width: 100%;
     min-width: 100%;
   }
 
