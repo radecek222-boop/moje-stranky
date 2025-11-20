@@ -280,7 +280,7 @@ if ($initialBootstrapData) {
             <tr><td class="label">Datum návštěvy<span class="en-label">Visit date</span></td><td><input type="date" id="visit-date"></td></tr>
             <tr><td class="label">Datum doručení<span class="en-label">Delivery date</span></td><td><input type="date" id="delivery-date"></td></tr>
             <tr><td class="label">Datum reklamace<span class="en-label">Claim date</span></td><td><input type="date" id="claim-date"></td></tr>
-            <tr><td class="label">Zadavatel<span class="en-label">Requester</span></td><td><input type="text" id="brand" placeholder="Jméno prodejce" value="<?= wgs_escape($prefillFields['brand']); ?>"></td></tr>
+            <tr><td class="label">Zadavatel<span class="en-label">Requester</span></td><td><input type="text" id="brand" placeholder="Prodejce" value="<?= wgs_escape($prefillFields['brand']); ?>"></td></tr>
             <tr><td class="label">Model<span class="en-label">Model</span></td><td><input type="text" id="model" value="<?= wgs_escape($prefillFields['model']); ?>"></td></tr>
           </table>
         </div>
@@ -290,20 +290,20 @@ if ($initialBootstrapData) {
 
   <div class="section-title">Zákazník reklamuje<span class="en-label">CUSTOMER COMPLAINT</span></div>
   <div class="split-section">
-    <textarea id="description-cz" placeholder="Popis reklamace česky..."><?= wgs_escape($prefillFields['description']); ?></textarea>
-    <textarea id="description-en" placeholder="Automatický překlad..." readonly></textarea>
+    <textarea id="description-cz" placeholder="Popis problému..."><?= wgs_escape($prefillFields['description']); ?></textarea>
+    <textarea id="description-en" placeholder="Překlad..." readonly></textarea>
   </div>
 
   <div class="section-title">Problém zjištěný technikem<span class="en-label">DETECTED PROBLEM</span></div>
   <div class="split-section">
-    <textarea id="problem-cz" placeholder="Zjištěný problém česky..."></textarea>
-    <textarea id="problem-en" placeholder="Automatický překlad..." readonly></textarea>
+    <textarea id="problem-cz" placeholder="Zjištěný problém..."></textarea>
+    <textarea id="problem-en" placeholder="Překlad..." readonly></textarea>
   </div>
 
   <div class="section-title">Návrh opravy<span class="en-label">REPAIR PROPOSAL</span></div>
   <div class="split-section">
-    <textarea id="repair-cz" placeholder="Návrh opravy česky..."></textarea>
-    <textarea id="repair-en" placeholder="Automatický překlad..." readonly></textarea>
+    <textarea id="repair-cz" placeholder="Návrh..."></textarea>
+    <textarea id="repair-en" placeholder="Překlad..." readonly></textarea>
   </div>
 
   <div class="two-col-table">
