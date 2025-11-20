@@ -673,6 +673,13 @@ async function zkontrolovatSystem() {
 
     try {
         const odpoved = await fetch('/api/phpunit_runner_api.php?akce=zkontrolovat_phpunit');
+
+        // Kontrola HTTP statusu
+        if (!odpoved.ok) {
+            const errorData = await odpoved.json().catch(() => ({ message: 'Neznámá chyba' }));
+            throw new Error(`HTTP ${odpoved.status}: ${errorData.message || 'Přístup odepřen'}`);
+        }
+
         const data = await odpoved.json();
 
         if (data.status === 'success') {
