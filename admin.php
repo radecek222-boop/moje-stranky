@@ -103,17 +103,12 @@ try {
   <script src="/assets/js/html-sanitizer.js"></script>
 </head>
 
-<body<?php if ($embedMode): ?> class="embed-mode"<?php endif; ?>>
-
-<style>
-<?php if (!$embedMode && $activeTab === 'dashboard'): ?>
-/* OVERRIDE: Černé pozadí pro dashboard landing page */
-body {
-    background: #000 !important;
-    overflow: hidden !important;
-}
-<?php endif; ?>
-</style>
+<body<?php
+    $bodyClasses = [];
+    if ($embedMode) $bodyClasses[] = 'embed-mode';
+    elseif ($activeTab === 'dashboard') $bodyClasses[] = 'admin-dashboard-page';
+    if (!empty($bodyClasses)) echo ' class="' . implode(' ', $bodyClasses) . '"';
+?>>
 
 <?php
 // Landing page - full screen s planetárními kartami
