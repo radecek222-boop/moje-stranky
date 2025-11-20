@@ -8,27 +8,64 @@ const userLoginFields = document.getElementById('userLoginFields');
 const adminLoginFields = document.getElementById('adminLoginFields');
 const loginForm = document.getElementById('loginForm');
 
-async function getCsrfTokenFromForm(form) {
+async function getCsrfTokenFromForm(form, maxRetries = 3) {
   if (!form) return null;
+
+  // Zkusit získat token z již existujícího inputu
   const tokenInput = form.querySelector('input[name="csrf_token"]');
   if (tokenInput && tokenInput.value) {
+    logger.log('📋 CSRF token nalezen v formuláři');
     return tokenInput.value;
   }
 
-  try {
-    const response = await fetch('app/controllers/get_csrf_token.php', {
-      credentials: 'same-origin'
-    });
-    const data = await response.json();
-    if ((data.status === 'success' || data.success === true) && data.token) {
-      if (tokenInput) {
-        tokenInput.value = data.token;
+  // Pokusit se získat token z API s retry mechanikou
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      logger.log(`🔄 Získávám CSRF token (pokus ${attempt}/${maxRetries})...`);
+
+      const response = await fetch('app/controllers/get_csrf_token.php', {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
+
+      if (!response.ok) {
+        logger.warn(`⚠️ CSRF API vrátilo ${response.status}`);
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+          continue;
+        }
+        throw new Error(`HTTP ${response.status}`);
       }
-      return data.token;
+
+      const data = await response.json();
+
+      if ((data.status === 'success' || data.success === true) && data.token) {
+        logger.log('✅ CSRF token úspěšně získán');
+
+        // Uložit token do formuláře pro další použití
+        if (tokenInput) {
+          tokenInput.value = data.token;
+        }
+
+        return data.token;
+      } else {
+        logger.warn('⚠️ CSRF API nevrátilo platný token:', data);
+      }
+
+    } catch (error) {
+      logger.error(`❌ CSRF fetch pokus ${attempt} selhal:`, error);
+
+      if (attempt < maxRetries) {
+        // Exponenciální backoff: 1s, 2s, 3s
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
     }
-  } catch (error) {
-    logger.error('CSRF fetch failed:', error);
   }
+
+  logger.error('❌ Nepodařilo se získat CSRF token po ' + maxRetries + ' pokusech');
   return null;
 }
 
@@ -91,7 +128,7 @@ async function handleAdminLogin() {
 
   const csrfToken = await getCsrfTokenFromForm(loginForm);
   if (!csrfToken) {
-    showNotification('Nepodařilo se získat bezpečnostní token. Obnovte stránku.', 'error');
+    showNotification('⚠️ Problém se zabezpečením. Zkontrolujte:\n• Cookies jsou povoleny\n• Používáte HTTPS\n• Nejste v režimu inkognito', 'error');
     return;
   }
   
@@ -152,7 +189,7 @@ async function handleUserLogin() {
   
   const csrfToken = await getCsrfTokenFromForm(loginForm);
   if (!csrfToken) {
-    showNotification('Nepodařilo se získat bezpečnostní token. Obnovte stránku.', 'error');
+    showNotification('⚠️ Problém se zabezpečením. Zkontrolujte:\n• Cookies jsou povoleny\n• Používáte HTTPS\n• Nejste v režimu inkognito', 'error');
     return;
   }
 
