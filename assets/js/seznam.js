@@ -368,11 +368,11 @@ function renderOrders(items = null) {
     const statusBgClass = `status-bg-${status.class}`;
 
     return `
-      <div class="order-box ${searchMatchClass} ${statusBgClass}" onclick='showDetail(${JSON.stringify(rec).replace(/'/g, "&#39;")})'>
+      <div class="order-box ${searchMatchClass} ${statusBgClass}" onclick='showDetail("${rec.id}")'>
         <div class="order-header">
           <div class="order-number">${highlightedOrderId}</div>
           <div style="display: flex; gap: 0.4rem; align-items: center;">
-            <div class="order-notes-badge ${hasUnread ? 'has-unread' : ''}" onclick='event.stopPropagation(); showNotes(${JSON.stringify(rec).replace(/'/g, "&#39;")})' title="${notes.length} poznámek">
+            <div class="order-notes-badge ${hasUnread ? 'has-unread' : ''}" onclick='event.stopPropagation(); showNotes("${rec.id}")' title="${notes.length} poznámek">
               ${notes.length > 0 ? notes.length : ''}
             </div>
             <div class="order-status status-${status.class}"></div>
@@ -1215,8 +1215,8 @@ async function showDayBookingsWithDistances(date) {
     bookings.forEach(b => {
       const customerName = Utils.getCustomerName(b);
       html += `
-        <div class="booking-item" onclick='showBookingDetail(${JSON.stringify(b).replace(/'/g, "&apos;")})'>
-          <strong>${b.cas_navstevy || '—'}</strong> — ${customerName} 
+        <div class="booking-item" onclick='showBookingDetail("${b.id}")'>
+          <strong>${b.cas_navstevy || '—'}</strong> — ${customerName}
           <span style="opacity:.7">(${Utils.getProduct(b)})</span>
         </div>`;
     });
@@ -1227,7 +1227,18 @@ async function showDayBookingsWithDistances(date) {
   }
 }
 
-function showBookingDetail(booking) {
+function showBookingDetail(bookingOrId) {
+  let booking;
+  if (typeof bookingOrId === 'string' || typeof bookingOrId === 'number') {
+    booking = WGS_DATA_CACHE.find(x => x.id == bookingOrId || x.reklamace_id == bookingOrId);
+    if (!booking) {
+      alert('Záznam nenalezen');
+      return;
+    }
+  } else {
+    booking = bookingOrId;
+  }
+
   const customerName = Utils.getCustomerName(booking);
   const address = Utils.getAddress(booking);
   const product = Utils.getProduct(booking);
@@ -2000,7 +2011,18 @@ async function markNotesAsRead(orderId) {
   }
 }
 
-async function showNotes(record) {
+async function showNotes(recordOrId) {
+  let record;
+  if (typeof recordOrId === 'string' || typeof recordOrId === 'number') {
+    record = WGS_DATA_CACHE.find(x => x.id == recordOrId || x.reklamace_id == recordOrId);
+    if (!record) {
+      alert('Záznam nenalezen');
+      return;
+    }
+  } else {
+    record = recordOrId;
+  }
+
   CURRENT_RECORD = record;
   const customerName = Utils.getCustomerName(record);
 
@@ -2076,7 +2098,7 @@ async function showNotes(record) {
       ${CURRENT_USER.is_admin ? `
         <div style="background: #fff5f5; border: 2px solid #ff4444; padding: 1rem; margin-top: 1.5rem; border-radius: 4px;">
           <h3 style="color: #ff4444; font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;">⚠️ ADMIN PANEL</h3>
-          <button onclick="deleteReklamace('${id}')"
+          <button onclick="deleteReklamace('${record.id}')"
                   style="width: 100%; padding: 1rem; background: #ff4444; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">
             🗑️ Smazat celou reklamaci
           </button>
