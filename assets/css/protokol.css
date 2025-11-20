@@ -729,17 +729,17 @@ button.btn:hover {
   }
 
   .header > div:first-child {
-    font-size: 11px;
+    font-size: 16px;
     font-weight: 700;
     letter-spacing: 1px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
   }
 
   .header > div:last-child {
-    font-size: 7px;
-    line-height: 1.2;
+    font-size: 10px;
+    line-height: 1.3;
+    white-space: normal;
   }
 
   /* Větší labels pro lepší čitelnost */
@@ -751,9 +751,12 @@ button.btn:hover {
   /* Větší inputy pro touch-friendly UX */
   /* KRITICKÉ: iOS zoom fix - font-size musí být min 16px */
   input, select, textarea {
-    font-size: 16px !important;
-    padding: 10px 12px !important;
-    min-height: 44px; /* Apple HIG minimum touch target */
+    font-size: 14px !important;
+    padding: 8px 10px !important;
+    min-height: 44px;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   input[type="text"],
@@ -763,31 +766,36 @@ button.btn:hover {
   input[type="date"],
   select,
   textarea {
-    font-size: 16px !important;
-    padding: 10px 12px !important;
+    font-size: 14px !important;
+    padding: 8px 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
-  /* Placeholder text také větší */
+  /* Placeholder text menší pro kompaktnost */
   input::placeholder,
   select::placeholder,
   textarea::placeholder,
   input::-webkit-input-placeholder,
   select::-webkit-input-placeholder,
   textarea::-webkit-input-placeholder {
-    font-size: 16px !important;
+    font-size: 11px !important;
+    color: #999 !important;
   }
 
-  /* Textarea přizpůsobené mobilu - menší font, plná šířka */
+  /* Textarea přizpůsobené mobilu */
   textarea {
-    min-height: 100px;
-    font-size: 13px;
-    padding: 10px;
-    width: 100%;
-    box-sizing: border-box;
+    min-height: 90px;
+    font-size: 13px !important;
+    padding: 8px 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   textarea::placeholder {
-    font-size: 12px;
+    font-size: 11px !important;
   }
 
   /* Table cells větší padding pro lepší čitelnost */
@@ -795,20 +803,22 @@ button.btn:hover {
     padding: 6px 8px;
   }
 
-  /* Buttony větší a touch-friendly */
+  /* Buttony kompaktní pro mobil */
   button.btn {
-    font-size: 12px;
-    padding: 12px 8px;
-    min-height: 48px;
+    font-size: 10px;
+    padding: 10px 6px;
+    min-height: 44px;
     width: 100%;
     box-sizing: border-box;
-    white-space: normal; /* Povolit zalamování textu */
-    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
   }
 
   .btns {
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
   }
 
@@ -837,13 +847,32 @@ button.btn:hover {
   }
 
   /* Tabulky responzivní */
-  .two-col-table,
-  .split-section {
+  .two-col-table {
     flex-direction: column;
   }
 
   .col {
     min-width: 100%;
+  }
+
+  /* SECTION TITLE - Větší na mobilu */
+  .section-title {
+    font-size: 11px !important;
+    padding: 8px 10px;
+    margin-top: 15px;
+    margin-bottom: 8px;
+  }
+
+  .section-title .en-label {
+    font-size: 10px !important;
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* SPLIT SECTION - Plná šířka textareas */
+  .split-section {
+    display: block;
+    margin-bottom: 15px;
   }
 
   /* Skrýt anglické překladové pole na mobilu (druhé textarea) */
@@ -853,8 +882,10 @@ button.btn:hover {
 
   /* České pole na plnou šířku */
   .split-section textarea:nth-child(1) {
-    width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
     min-width: 100%;
+    box-sizing: border-box !important;
   }
 
   /* Skrýt translate tlačítko na mobilu */
