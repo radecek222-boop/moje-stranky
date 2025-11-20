@@ -228,50 +228,62 @@ if ($initialBootstrapData) {
     <div>Do Dubče 364, Běchovice 190 11 · +420 725 965 826 · reklamace@wgs-service.cz · IČO 09769684</div>
   </div>
 
-  <div class="two-col-table">
-    <div class="col">
-      <table>
-        <tr><td class="label">Číslo objednávky<span class="en-label">Order number</span></td><td><input type="text" id="order-number" value="<?= wgs_escape($prefillFields['order_number']); ?>" readonly></td></tr>
-        <tr><td class="label">Číslo reklamace<span class="en-label">Claim number</span></td><td><input type="text" id="claim-number" value="<?= wgs_escape($prefillFields['claim_number']); ?>" readonly></td></tr>
-        <tr><td class="label">Zákazník<span class="en-label">Customer</span></td><td><input type="text" id="customer" value="<?= wgs_escape($prefillFields['customer']); ?>" readonly></td></tr>
-        <tr><td class="label">Adresa<span class="en-label">Address</span></td><td><input type="text" id="address" value="<?= wgs_escape($prefillFields['address']); ?>" readonly></td></tr>
-        <tr><td class="label">Telefon<span class="en-label">Phone</span></td><td><input type="tel" id="phone" value="<?= wgs_escape($prefillFields['phone']); ?>" readonly></td></tr>
-        <tr><td class="label">Email<span class="en-label">Email</span></td><td><input type="email" id="email" value="<?= wgs_escape($prefillFields['email']); ?>" readonly></td></tr>
-        <tr><td class="label">Fakturace<span class="en-label">Billing</span></td><td><input type="text" id="fakturace-firma" value="<?= wgs_escape($prefillFields['fakturace']); ?>" readonly></td></tr>
-      </table>
+  <!-- Rozbalovací sekce zákaznických dat -->
+  <div class="customer-info-collapsible">
+    <div class="customer-info-header" id="customerInfoToggle">
+      <span class="customer-info-name" id="customerInfoName"><?= wgs_escape($prefillFields['customer']) ?: 'Zákazník' ?></span>
+      <svg class="customer-info-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
     </div>
 
-    <div class="col">
-      <table>
-        <tr><td class="label">Technik<span class="en-label">Technician</span></td>
-          <td>
-            <select id="technician">
-            <?php
-              $technici = ['Milan Kolín', 'Radek Zikmund', 'Kolín/Zikmund'];
-              $selectedTechnik = $prefillFields['technician'];
+    <div class="customer-info-content" id="customerInfoContent">
+      <div class="two-col-table">
+        <div class="col">
+          <table>
+            <tr><td class="label">Číslo objednávky<span class="en-label">Order number</span></td><td><input type="text" id="order-number" value="<?= wgs_escape($prefillFields['order_number']); ?>" readonly></td></tr>
+            <tr><td class="label">Číslo reklamace<span class="en-label">Claim number</span></td><td><input type="text" id="claim-number" value="<?= wgs_escape($prefillFields['claim_number']); ?>" readonly></td></tr>
+            <tr><td class="label">Zákazník<span class="en-label">Customer</span></td><td><input type="text" id="customer" value="<?= wgs_escape($prefillFields['customer']); ?>" readonly></td></tr>
+            <tr><td class="label">Adresa<span class="en-label">Address</span></td><td><input type="text" id="address" value="<?= wgs_escape($prefillFields['address']); ?>" readonly></td></tr>
+            <tr><td class="label">Telefon<span class="en-label">Phone</span></td><td><input type="tel" id="phone" value="<?= wgs_escape($prefillFields['phone']); ?>" readonly></td></tr>
+            <tr><td class="label">Email<span class="en-label">Email</span></td><td><input type="email" id="email" value="<?= wgs_escape($prefillFields['email']); ?>" readonly></td></tr>
+            <tr><td class="label">Fakturace<span class="en-label">Billing</span></td><td><input type="text" id="fakturace-firma" value="<?= wgs_escape($prefillFields['fakturace']); ?>" readonly></td></tr>
+          </table>
+        </div>
 
-              // DEBUG výpis
-              error_log("SELECT TECHNIK DEBUG: selectedTechnik = '$selectedTechnik'");
+        <div class="col">
+          <table>
+            <tr><td class="label">Technik<span class="en-label">Technician</span></td>
+              <td>
+                <select id="technician">
+                <?php
+                  $technici = ['Milan Kolín', 'Radek Zikmund', 'Kolín/Zikmund'];
+                  $selectedTechnik = $prefillFields['technician'];
 
-              // Přidat přihlášeného uživatele pokud není v seznamu
-              if ($selectedTechnik && !in_array($selectedTechnik, $technici)) {
-                $technici[] = $selectedTechnik;
-                error_log("Přidávám technika do seznamu: $selectedTechnik");
-              }
+                  // DEBUG výpis
+                  error_log("SELECT TECHNIK DEBUG: selectedTechnik = '$selectedTechnik'");
 
-              foreach ($technici as $technik) {
-                $selected = ($technik === $selectedTechnik) ? ' selected' : '';
-                error_log("Option: '$technik' | Selected: " . ($selected ? 'ANO' : 'NE'));
-                echo '<option' . $selected . '>' . wgs_escape($technik) . '</option>';
-              }
-            ?>
-          </select></td></tr>
-        <tr><td class="label">Datum návštěvy<span class="en-label">Visit date</span></td><td><input type="date" id="visit-date"></td></tr>
-        <tr><td class="label">Datum doručení<span class="en-label">Delivery date</span></td><td><input type="date" id="delivery-date"></td></tr>
-        <tr><td class="label">Datum reklamace<span class="en-label">Claim date</span></td><td><input type="date" id="claim-date"></td></tr>
-        <tr><td class="label">Zadavatel<span class="en-label">Requester</span></td><td><input type="text" id="brand" value="<?= wgs_escape($prefillFields['brand']); ?>"></td></tr>
-        <tr><td class="label">Model<span class="en-label">Model</span></td><td><input type="text" id="model" value="<?= wgs_escape($prefillFields['model']); ?>"></td></tr>
-      </table>
+                  // Přidat přihlášeného uživatele pokud není v seznamu
+                  if ($selectedTechnik && !in_array($selectedTechnik, $technici)) {
+                    $technici[] = $selectedTechnik;
+                    error_log("Přidávám technika do seznamu: $selectedTechnik");
+                  }
+
+                  foreach ($technici as $technik) {
+                    $selected = ($technik === $selectedTechnik) ? ' selected' : '';
+                    error_log("Option: '$technik' | Selected: " . ($selected ? 'ANO' : 'NE'));
+                    echo '<option' . $selected . '>' . wgs_escape($technik) . '</option>';
+                  }
+                ?>
+              </select></td></tr>
+            <tr><td class="label">Datum návštěvy<span class="en-label">Visit date</span></td><td><input type="date" id="visit-date"></td></tr>
+            <tr><td class="label">Datum doručení<span class="en-label">Delivery date</span></td><td><input type="date" id="delivery-date"></td></tr>
+            <tr><td class="label">Datum reklamace<span class="en-label">Claim date</span></td><td><input type="date" id="claim-date"></td></tr>
+            <tr><td class="label">Zadavatel<span class="en-label">Requester</span></td><td><input type="text" id="brand" value="<?= wgs_escape($prefillFields['brand']); ?>"></td></tr>
+            <tr><td class="label">Model<span class="en-label">Model</span></td><td><input type="text" id="model" value="<?= wgs_escape($prefillFields['model']); ?>"></td></tr>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -444,6 +456,7 @@ if ($initialBootstrapData) {
 <!-- External JavaScript -->
 <script src="assets/js/protokol-diagnostic.js"></script>
 <script src="assets/js/protokol-pdf-preview.js" defer></script>
+<script src="assets/js/protokol-customer-collapse.js" defer></script>
 <script src="assets/js/protokol-data-patch.js" defer></script>
 <script src="assets/js/protokol.js" defer></script>
 <script src="assets/js/protokol-fakturace-patch.js" defer></script>

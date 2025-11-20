@@ -115,6 +115,22 @@ body {
   font-size: 10px;
   color: #333;
 }
+/* === Rozbalovací sekce zákaznických dat (DESKTOP - skrytá) === */
+.customer-info-collapsible {
+  /* Na desktopu je to normální sekce bez collapsingu */
+}
+
+.customer-info-header {
+  /* Na desktopu skrytý - zobrazí se jen na mobilu */
+  display: none;
+}
+
+.customer-info-content {
+  /* Na desktopu vždy viditelný */
+  max-height: none;
+  overflow: visible;
+}
+
 .section-title {
   font-family: 'Poppins';
   font-weight: 700;
@@ -632,6 +648,55 @@ button.btn:hover {
   .header {
     margin-bottom: 12px;
     padding-bottom: 10px;
+  }
+
+  /* === ROZBALOVACÍ SEKCE ZÁKAZNICKÝCH DAT (POUZE MOBIL) === */
+  .customer-info-collapsible {
+    margin-bottom: 15px;
+  }
+
+  .customer-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: linear-gradient(135deg, #2D5016 0%, #3a6b1e 100%);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .customer-info-header:active {
+    transform: scale(0.98);
+  }
+
+  .customer-info-name {
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+  }
+
+  .customer-info-arrow {
+    stroke: white;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+
+  .customer-info-collapsible.expanded .customer-info-arrow {
+    transform: rotate(180deg);
+  }
+
+  .customer-info-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+  }
+
+  .customer-info-collapsible.expanded .customer-info-content {
+    max-height: 2000px;
+    transition: max-height 0.6s ease-in;
   }
 
   .header > div:first-child {
