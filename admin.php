@@ -106,6 +106,9 @@ try {
 <body<?php if ($embedMode): ?> class="embed-mode"<?php endif; ?>>
 
 <?php
+// DEBUG: Zkontroluj hodnoty
+echo "<!-- DEBUG: activeTab = '{$activeTab}', embedMode = " . ($embedMode ? 'true' : 'false') . ", condition = " . ((!$embedMode && $activeTab === 'dashboard') ? 'TRUE' : 'FALSE') . " -->";
+
 // Landing page - full screen s planetárními kartami
 if (!$embedMode && $activeTab === 'dashboard'):
 ?>
