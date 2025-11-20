@@ -96,7 +96,11 @@ if ($lookupValue !== null) {
     try {
         $pdo = getDbConnection();
         $stmt = $pdo->prepare(
-            "SELECT * FROM wgs_reklamace WHERE reklamace_id = :value OR cislo = :value OR id = :value LIMIT 1"
+            "SELECT r.*, u.name as created_by_name
+             FROM wgs_reklamace r
+             LEFT JOIN wgs_users u ON r.created_by = u.id
+             WHERE r.reklamace_id = :value OR r.cislo = :value OR r.id = :value
+             LIMIT 1"
         );
         $stmt->execute([':value' => $lookupValue]);
         $record = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -131,7 +135,7 @@ if ($lookupValue !== null) {
                 'email' => $record['email'] ?? '',
 
                 // Produktové údaje
-                'brand' => $record['prodejce'] ?? '', // Zadavatel = jméno prodejce
+                'brand' => $record['created_by_name'] ?? $record['prodejce'] ?? '', // Zadavatel = kdo vytvořil zakázku
                 'model' => $record['model'] ?? '',
                 'typ' => $record['typ'] ?? '',
                 'provedeni' => $record['provedeni'] ?? '',
@@ -324,10 +328,9 @@ if ($initialBootstrapData) {
 
   <div class="btns">
     <button class="btn btn-primary" data-action="attachPhotos">Přidat fotky</button>
-    <button class="btn btn-primary" data-action="exportBothPDFs">Export 2x PDF</button>
-
-    <button class="btn" data-action="sendToCustomer">Odeslat zákazníkovi</button>
-    <button class="btn" data-navigate="seznam.php">Zpět</button>
+    <button class="btn btn-primary" data-action="exportBothPDFs">Export do PDF</button>
+    <button class="btn btn-primary" data-action="sendToCustomer">Odeslat zákazníkovi</button>
+    <button class="btn btn-primary" data-navigate="seznam.php">Zpět</button>
   </div>
 
   <div id="notif" class="notif"></div>
