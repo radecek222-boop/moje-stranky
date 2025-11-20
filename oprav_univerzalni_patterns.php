@@ -61,7 +61,7 @@ try {
 
     echo "<div class='error'>";
     echo "<strong>🐛 NALEZENY PROBLÉMY v NCM-NATUZZI.pdf:</strong><br><br>";
-    echo "1. Pattern pro číslo reklamace hledá jen <code>NCE25</code> ale v PDF je <code>NCM23</code><br>";
+    echo "1. Pattern pro číslo reklamace je příliš specifický - potřebujeme podporovat <strong>JAKÝKOLIV prefix</strong> (NCE, NCM, NBR, NKE, UKK, MOR, ...)<br>";
     echo "2. Pattern pro ulici najde PRVNÍ adresu (zákazníka) místo DRUHÉ (místa reklamace)<br>";
     echo "</div>";
 
@@ -73,8 +73,10 @@ try {
         try {
             // NOVÉ UNIVERZÁLNÍ PATTERNS
             $novePatterns = [
-                // Číslo reklamace - UNIVERZÁLNÍ (akceptuje NCE25, NCM23, atd.)
-                'cislo_reklamace' => '/Čislo reklamace:\s+[A-Z]{3}\d{2}-\d+-\d+\s+([A-Z0-9\-\/]+)/ui',
+                // Číslo reklamace - ZCELA UNIVERZÁLNÍ (vezme druhý výskyt, akceptuje JAKÝKOLIV prefix)
+                // Struktura: "Čislo reklamace: NCE25-00002444-39 NCE25-00002444-39/CZ785-2025"
+                //                                   ^ignorovat^    ^^^^^zachytit tento^^^^^
+                'cislo_reklamace' => '/Čislo reklamace:\s+[A-Z0-9\-]+\s+([A-Z0-9\-\/]+)/ui',
 
                 // Ulice - hledat v sekci "Místo reklamace" (ne "Zákazník")
                 'ulice' => '/Místo reklamace.*?Adresa:\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][^\n]+?)\s+(?:Jméno společnosti|Email)/uis'
@@ -116,7 +118,7 @@ try {
             echo "<tr>";
             echo "<td><strong>Číslo reklamace</strong></td>";
             echo "<td><code>" . htmlspecialchars($novePatterns['cislo_reklamace']) . "</code></td>";
-            echo "<td>NCE25-..., NCM23-..., NCL24-..., atd.</td>";
+            echo "<td>NCE25, NCM23, NBR, NKE, UKK, MOR, ... (jakýkoliv prefix)</td>";
             echo "</tr>";
 
             echo "<tr>";
@@ -159,11 +161,11 @@ try {
         echo "<tr><th>Pattern</th><th>Co najde</th></tr>";
         echo "<tr>";
         echo "<td><strong>STARÝ:</strong><br><code>/Čislo reklamace:\\s+NCE25-...</code></td>";
-        echo "<td>Jen NCE25-00002444-39/...</td>";
+        echo "<td>❌ Jen NCE25-00002444-39/...</td>";
         echo "</tr>";
         echo "<tr>";
-        echo "<td><strong>NOVÝ:</strong><br><code>/Čislo reklamace:\\s+[A-Z]{3}\\d{2}-...</code></td>";
-        echo "<td>NCE25-..., NCM23-..., NCL24-..., atd.</td>";
+        echo "<td><strong>NOVÝ:</strong><br><code>/Čislo reklamace:\\s+[A-Z0-9\\-]+\\s+([A-Z0-9\\-\\/]+)/</code></td>";
+        echo "<td>✅ NCE25, NCM23, NBR, NKE, UKK, MOR, ... (jakýkoliv prefix)</td>";
         echo "</tr>";
         echo "</table>";
 
