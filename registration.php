@@ -20,6 +20,7 @@
   <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/login.min.css">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.css">
 </head>
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>

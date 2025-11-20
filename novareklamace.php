@@ -37,6 +37,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/novareklamace.css">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.css">
 
 
 <style>

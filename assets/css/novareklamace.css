@@ -996,3 +996,219 @@ textarea.form-control {
   color: #666 !important;
   cursor: pointer !important;
 }
+
+/* === MOBILNÍ VYLEPŠENÍ PRO MALÉ DISPLEJE === */
+
+/* Extra malé mobily (iPhone SE, Galaxy Fold) */
+@media (max-width: 375px) {
+  .form-container {
+    padding: 0 1rem;
+  }
+
+  .form-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .section-title {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-grid-3,
+  .form-grid-2,
+  .form-grid-address {
+    grid-template-columns: 1fr !important;
+    gap: 0.8rem;
+  }
+
+  .form-control {
+    padding: 0.8rem 0.7rem;
+    font-size: 0.95rem;
+    min-height: 44px; /* Touch target minimum */
+  }
+
+  .btn,
+  button[type="submit"] {
+    padding: 0.9rem 1.5rem;
+    font-size: 0.8rem;
+    min-height: 44px;
+    width: 100%;
+  }
+
+  /* Kalendář - větší touch targets */
+  .calendar-overlay {
+    padding: 0.5rem;
+  }
+
+  .calendar-box {
+    padding: 1rem;
+    width: 95%;
+  }
+
+  .calendar-header h3 {
+    font-size: 1rem;
+  }
+
+  .calendar-nav button {
+    padding: 0.6rem 0.8rem;
+    font-size: 1rem;
+  }
+}
+
+/* Touch-friendly vylepšení pro všechny mobilní zařízení */
+@media (max-width: 768px) {
+  /* Větší touch targets pro všechny interaktivní prvky */
+  button,
+  .btn,
+  a.btn,
+  input[type="button"],
+  input[type="submit"],
+  .hamburger {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Lepší spacing pro čitelnost */
+  .form-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  /* Horizontální scroll pro dlouhé tabulky */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Vylepšené checkboxy a radio buttons pro touch */
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-width: 24px;
+    min-height: 24px;
+    transform: scale(1.2);
+  }
+
+  /* Select dropdown větší pro snadnější klikání */
+  select.form-control {
+    min-height: 44px;
+    font-size: 16px; /* Zabrání iOS zoom při focus */
+  }
+
+  /* Input fields - prevent iOS zoom */
+  input.form-control,
+  textarea.form-control {
+    font-size: 16px;
+  }
+
+  /* Hero sekce - lepší padding na mobilu */
+  .hero {
+    min-height: 40vh;
+    padding: 2rem 1rem;
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+
+  /* Modály - plná šířka na mobilu */
+  .modal-overlay,
+  .calendar-overlay {
+    padding: 1rem;
+  }
+
+  .modal-content,
+  .calendar-box {
+    max-width: 100%;
+  }
+
+  /* Sticky footer spacing */
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Lepší práce s notch a safe areas */
+  .top-bar {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* Landscape mode na mobilech */
+@media (max-width: 896px) and (orientation: landscape) {
+  .hero {
+    min-height: 60vh;
+  }
+
+  .form-container {
+    margin: 1rem auto;
+  }
+
+  /* Kompaktnější navigace v landscape */
+  .nav {
+    gap: 1.5rem;
+  }
+
+  .nav a {
+    font-size: 0.8rem;
+  }
+}
+
+/* Tablets v portrait módu */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .form-container {
+    max-width: 90%;
+  }
+
+  .form-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Grid layout optimalizace pro tablety */
+  .form-grid-address {
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+}
+
+/* Touch-specific hover states - disable hover effects on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .btn:hover,
+  .nav a:hover,
+  button:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Active states místo hover */
+  .btn:active,
+  button:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+
+  .nav a:active {
+    opacity: 0.7;
+  }
+}
+
+/* Print styles pro mobilní */
+@media print {
+  .top-bar,
+  .nav,
+  .hamburger,
+  .btn,
+  .form-actions,
+  .footer {
+    display: none;
+  }
+
+  .form-container {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .form-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}
