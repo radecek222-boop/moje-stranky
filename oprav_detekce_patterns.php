@@ -86,7 +86,7 @@ try {
             $stmt = $pdo->prepare("
                 UPDATE wgs_pdf_parser_configs
                 SET
-                    detekce_pattern = 'NATUZZI|EDITIONS|THE NAME OF COMFORT',
+                    detekce_pattern = '/(NATUZZI|EDITIONS|THE NAME OF COMFORT|Reklamační list.*Místo reklamace)/i',
                     priorita = 100
                 WHERE zdroj = 'natuzzi'
             ");
@@ -94,7 +94,7 @@ try {
 
             echo "<div class='success'>";
             echo "✅ NATUZZI detekční pattern aktualizován<br>";
-            echo "Pattern: <code>NATUZZI|EDITIONS|THE NAME OF COMFORT</code><br>";
+            echo "Pattern: <code>/(NATUZZI|EDITIONS|THE NAME OF COMFORT|Reklamační list.*Místo reklamace)/i</code><br>";
             echo "Priorita: <strong>100</strong> (nejvyšší)";
             echo "</div>";
 
@@ -102,7 +102,7 @@ try {
             $stmt = $pdo->prepare("
                 UPDATE wgs_pdf_parser_configs
                 SET
-                    detekce_pattern = 'pohodlie.*phase|sedenie.*spanie|Reklamačný list|reklamácie',
+                    detekce_pattern = '/(Reklamačný list|Dátum podania|sedenie.*spanie|Miesto reklamácie)/i',
                     priorita = 90
                 WHERE zdroj = 'phase'
             ");
@@ -110,7 +110,7 @@ try {
 
             echo "<div class='success'>";
             echo "✅ PHASE detekční pattern aktualizován<br>";
-            echo "Pattern: <code>pohodlie.*phase|sedenie.*spanie|Reklamačný list|reklamácie</code><br>";
+            echo "Pattern: <code>/(Reklamačný list|Dátum podania|sedenie.*spanie|Miesto reklamácie)/i</code><br>";
             echo "Priorita: <strong>90</strong> (vysoká)";
             echo "</div>";
 
