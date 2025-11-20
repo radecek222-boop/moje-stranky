@@ -961,8 +961,15 @@ const WGS = {
       throw new Error(result.message || 'Chyba při parsování PDF');
     }
 
+    // Extrakce dat z odpovědi
+    // API může vracet přímo data (fallback parser) nebo strukturu { data, config_name, config_id }
+    const extrahovanaData = result.data.data || result.data;
+    const configName = result.data.config_name || 'Výchozí parser';
+
+    logger.log(`✓ Použita konfigurace: ${configName}`);
+
     // Předvyplnění formuláře s extrahovanými daty
-    this.predvyplnFormularZPDF(result.data);
+    this.predvyplnFormularZPDF(extrahovanaData);
   },
 
   /**
@@ -983,7 +990,8 @@ const WGS = {
     };
 
     // Předvyplnění polí
-    nastavPole('cislo', data.cislo);
+    // Podporuje obě varianty názvů (nová API vrací cislo_objednavky_reklamace, fallback vrací cislo)
+    nastavPole('cislo', data.cislo_objednavky_reklamace || data.cislo);
     nastavPole('datum_prodeje', data.datum_prodeje);
     nastavPole('datum_reklamace', data.datum_reklamace);
     nastavPole('jmeno', data.jmeno);
