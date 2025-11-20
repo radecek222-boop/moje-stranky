@@ -2476,13 +2476,9 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
       logger.log('✓ Email o pokusu o kontakt odeslán zákazníkovi');
       showToast('Email odeslán zákazníkovi', 'success');
 
-      // Připravit SMS text se stejnými informacemi jako v emailu
-      const jmeno = zaznam.jmeno || zaznam.zakaznik || 'zákazníku';
-      const cisloZakazky = zaznam.reklamace_id || zaznam.id || '—';
-      const produkt = zaznam.produkt || 'neuvedeno';
-      const datum = new Date().toLocaleDateString('cs-CZ');
-
-      const smsText = `Dobrý den ${jmeno}, pokusili jsme se Vás kontaktovat ohledně servisní prohlídky č. ${cisloZakazky} (${produkt}, ${datum}). Prosím zavolejte zpět na +420 725 965 826. Děkujeme, WGS Service`;
+      // ✅ DŮLEŽITÉ: SMS text je nyní generován na serveru ze stejných dat jako email
+      // To znamená, že změna v emailové šabloně automaticky ovlivní i SMS
+      const smsText = data.sms_text || `Dobrý den, pokusili jsme se Vás kontaktovat. Zavolejte prosím zpět na +420 725 965 826. Děkujeme, WGS Service`;
 
       // Otevřít SMS aplikaci na telefonu s předvyplněným textem
       const encodedText = encodeURIComponent(smsText);

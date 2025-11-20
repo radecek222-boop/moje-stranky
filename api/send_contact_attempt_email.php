@@ -168,6 +168,10 @@ try {
         throw new Exception('Nepodařilo se přidat email do fronty');
     }
 
+    // Příprava SMS textu (zkrácená verze emailu pro SMS)
+    // Použijeme stejné proměnné jako v emailu pro konzistenci
+    $smsText = "Dobrý den {$customerName}, pokusili jsme se Vás kontaktovat ohledně servisní prohlídky č. {$orderId} ({$product}, " . date('d.m.Y') . "). Prosím zavolejte zpět na +420 725 965 826. Děkujeme, WGS Service";
+
     // Logování akce
     error_log("✉️ EMAIL - Pokus o kontakt: Zákazník: {$customerName}, Email: {$customerEmail}, Zakázka: {$orderId}");
 
@@ -178,7 +182,9 @@ try {
         'queue_id' => $queueId,
         'recipient' => $customerEmail,
         'customer_name' => $customerName,
-        'order_id' => $orderId
+        'order_id' => $orderId,
+        'sms_text' => $smsText,  // ✅ SMS text se generuje ze stejných dat jako email
+        'product' => $product
     ]);
 
 } catch (Exception $e) {
