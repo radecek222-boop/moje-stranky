@@ -106,16 +106,17 @@ try {
 <body<?php if ($embedMode): ?> class="embed-mode"<?php endif; ?>>
 
 <?php
-// Landing page - full screen, před headerem
+// Landing page - full screen
 if (!$embedMode && $activeTab === 'dashboard'):
 ?>
-<div class="admin-landing">
+<div class="admin-landing" onclick="window.location.href='admin.php?tab=notifications'" style="cursor: pointer;" title="Klikněte pro vstup do Control Center">
     <div class="admin-landing-content">
         <h1 class="admin-landing-title">WGS</h1>
         <p class="admin-landing-subtitle">ADMIN</p>
+        <p style="color: #666; font-size: 0.9rem; margin-top: 3rem; font-family: 'Poppins', sans-serif; letter-spacing: 0.2em;">KLIKNĚTE PRO VSTUP</p>
     </div>
 </div>
-<?php else: ?>
+<?php endif; ?>
 
 <?php if (!$embedMode): ?>
 <?php require_once __DIR__ . "/includes/admin_header.php"; ?>
