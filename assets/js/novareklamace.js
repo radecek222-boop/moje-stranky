@@ -698,6 +698,19 @@ const WGS = {
           await this.uploadPhotos(workflowId, csrfToken);
         }
 
+        // Cleanup: Vyčistit PDF pověření po úspěšném uložení
+        if (this.povereniPDF) {
+          this.povereniPDF = null;
+          const pdfInput = document.getElementById('povereniInput');
+          const statusSpan = document.getElementById('povereniStatus');
+          if (pdfInput) pdfInput.value = '';
+          if (statusSpan) {
+            statusSpan.textContent = '';
+            statusSpan.style.color = '#666';
+          }
+          logger.log('🧹 PDF pověření vyčištěno po úspěšném uložení');
+        }
+
         this.toast('✓ Požadavek byl úspěšně odeslán!', 'success');
         setTimeout(() => {
           if (this.isLoggedIn) {
@@ -848,7 +861,7 @@ const WGS = {
     btn.addEventListener('click', () => pdfInput.click());
 
     // Při výběru souboru
-    pdfInput.addEventListener('change', (e) => {
+    pdfInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
 
       if (!file) {
@@ -875,13 +888,131 @@ const WGS = {
 
       // Zobrazení názvu souboru
       const velikostMB = (file.size / (1024 * 1024)).toFixed(2);
-      statusSpan.textContent = `✓ ${file.name} (${velikostMB} MB)`;
-      statusSpan.style.color = '#2D5016';
+      statusSpan.textContent = `⏳ Zpracovávám ${file.name}...`;
+      statusSpan.style.color = '#666';
       statusSpan.style.fontWeight = '600';
 
-      this.toast(`✓ PDF pověření nahráno: ${file.name}`, 'success');
+      this.toast(`⏳ Zpracovávám PDF pověření...`, 'info');
       logger.log(`📄 PDF pověření připojeno: ${file.name}, velikost: ${velikostMB} MB`);
+
+      // Extrakce textu z PDF a parsování dat
+      try {
+        await this.zpracujPovereniPDF(file);
+        statusSpan.textContent = `✓ ${file.name} (${velikostMB} MB) - Data předvyplněna`;
+        statusSpan.style.color = '#2D5016';
+        this.toast(`✓ Formulář byl předvyplněn z PDF pověření`, 'success');
+      } catch (error) {
+        logger.error('Chyba při zpracování PDF:', error);
+        statusSpan.textContent = `⚠ ${file.name} (${velikostMB} MB) - Chyba při zpracování`;
+        statusSpan.style.color = '#cc0000';
+        this.toast(`⚠ PDF nahráno, ale nepodařilo se extrahovat data`, 'error');
+      }
     });
+  },
+
+  /**
+   * Zpracuje PDF pověření - extrahuje text a předvyplní formulář
+   * @param {File} pdfFile - PDF soubor
+   */
+  async zpracujPovereniPDF(pdfFile) {
+    // Kontrola dostupnosti PDF.js
+    if (typeof pdfjsLib === 'undefined') {
+      throw new Error('PDF.js library není načtena');
+    }
+
+    // Načtení PDF souboru
+    const arrayBuffer = await pdfFile.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+    logger.log(`📄 PDF má ${pdf.numPages} stránek`);
+
+    // Extrakce textu ze všech stránek
+    let celkovyText = '';
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      const textItems = textContent.items.map(item => item.str).join(' ');
+      celkovyText += textItems + '\n';
+    }
+
+    logger.log(`📄 Extrahovaný text (${celkovyText.length} znaků):`, celkovyText.substring(0, 200) + '...');
+
+    // Odeslání textu na backend pro parsování
+    const csrfResponse = await fetch('app/controllers/get_csrf_token.php');
+    const csrfData = await csrfResponse.json();
+    const csrfToken = csrfData.status === 'success' ? csrfData.token : '';
+
+    const formData = new FormData();
+    formData.append('pdf_text', celkovyText);
+    formData.append('csrf_token', csrfToken);
+
+    const response = await fetch('api/parse_povereni_pdf.php', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (result.status !== 'success') {
+      throw new Error(result.message || 'Chyba při parsování PDF');
+    }
+
+    // Předvyplnění formuláře s extrahovanými daty
+    this.predvyplnFormularZPDF(result.data);
+  },
+
+  /**
+   * Předvyplní formulář daty extrahovanými z PDF
+   * @param {Object} data - Extrahovaná data z PDF
+   */
+  predvyplnFormularZPDF(data) {
+    logger.log('📝 Předvyplňuji formulář daty z PDF:', data);
+
+    // Helper funkce pro bezpečné nastavení hodnoty pole
+    const nastavPole = (id, hodnota) => {
+      if (!hodnota) return;
+      const element = document.getElementById(id);
+      if (element && !element.value) { // Nepřepsat pokud už je vyplněno
+        element.value = hodnota;
+        logger.log(`✓ Vyplněno pole ${id}: ${hodnota}`);
+      }
+    };
+
+    // Předvyplnění polí
+    nastavPole('cislo', data.cislo);
+    nastavPole('datum_prodeje', data.datum_prodeje);
+    nastavPole('datum_reklamace', data.datum_reklamace);
+    nastavPole('jmeno', data.jmeno);
+    nastavPole('email', data.email);
+    nastavPole('telefon', data.telefon);
+    nastavPole('ulice', data.ulice);
+    nastavPole('mesto', data.mesto);
+    nastavPole('psc', data.psc);
+    nastavPole('model', data.model);
+    nastavPole('provedeni', data.provedeni);
+    nastavPole('barva', data.barva);
+    nastavPole('popis_problemu', data.popis_problemu);
+    nastavPole('doplnujici_info', data.doplnujici_info);
+
+    // Pokud máme adresu, aktualizovat mapu
+    if (data.mesto || data.psc || data.ulice) {
+      if (this.geocodeAddress) {
+        setTimeout(() => this.geocodeAddress(), 500);
+      }
+    }
+
+    // Pokud bylo vyplněno datum prodeje nebo reklamace, zkontrolovat záruku
+    if (data.datum_prodeje || data.datum_reklamace) {
+      const datumProdeje = document.getElementById('datum_prodeje');
+      const datumReklamace = document.getElementById('datum_reklamace');
+      if (datumProdeje && datumReklamace && this.checkWarranty) {
+        setTimeout(() => this.checkWarranty(), 500);
+      }
+    }
   },
 
   initProvedeni() {
