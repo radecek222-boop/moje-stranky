@@ -565,96 +565,6 @@ button.btn:hover {
 }
 /* === MOBILNÍ RESPONSIVITA (PWA) === */
 @media (max-width: 768px) {
-  /* KRITICKÉ: Vypnout mobilní styly během PDF exportu */
-  body.pdf-export-mode {
-    font-size: 13px !important;
-  }
-
-  body.pdf-export-mode .wrapper {
-    padding: 30px 35px !important;
-    margin: 20px auto !important;
-    max-width: 900px !important;
-  }
-
-  body.pdf-export-mode input,
-  body.pdf-export-mode select,
-  body.pdf-export-mode textarea {
-    font-size: 12px !important;
-    padding: 4px 8px !important;
-    min-height: auto !important;
-  }
-
-  body.pdf-export-mode .label {
-    font-size: 11px !important;
-  }
-
-  body.pdf-export-mode .header > div:first-child {
-    font-size: inherit !important;
-  }
-
-  body.pdf-export-mode .header > div:last-child {
-    font-size: inherit !important;
-  }
-
-  /* PDF export: Zobrazit OBA pole (CZ + EN) vedle sebe */
-  body.pdf-export-mode .split-section {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 15px !important;
-  }
-
-  body.pdf-export-mode .split-section textarea:nth-child(2) {
-    display: block !important;
-  }
-
-  body.pdf-export-mode .split-section textarea:nth-child(1) {
-    width: auto !important;
-  }
-
-  /* PDF export: Customer info vždy rozbaleno, header skrytý */
-  body.pdf-export-mode .customer-info-header {
-    display: none !important;
-  }
-
-  body.pdf-export-mode .customer-info-content {
-    max-height: none !important;
-    overflow: visible !important;
-  }
-
-  /* PDF export: Tabulky vedle sebe (desktop layout) */
-  body.pdf-export-mode .two-col-table {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 20px !important;
-  }
-
-  body.pdf-export-mode .col {
-    min-width: auto !important;
-    flex: 1 !important;
-  }
-
-  /* PDF export: Section titles desktop velikost */
-  body.pdf-export-mode .section-title {
-    font-size: 10px !important;
-    padding: 5px 7px !important;
-    margin-top: 13px !important;
-    margin-bottom: 5px !important;
-  }
-
-  body.pdf-export-mode .section-title .en-label {
-    font-size: 0.7em !important;
-  }
-
-  /* PDF export: Skrýt tlačítka */
-  body.pdf-export-mode .btns {
-    display: none !important;
-  }
-
-  /* PDF export: Table styling */
-  body.pdf-export-mode td {
-    padding: 2px 6px !important;
-  }
-
   /* Jednotný font na mobilu */
   body {
     font-size: 14px;
@@ -983,6 +893,130 @@ button.btn:hover {
   .pdf-action-btn svg {
     width: 28px;
     height: 28px;
+  }
+
+  /* ============================================ */
+  /* === PDF EXPORT MODE: DESKTOP LAYOUT === */
+  /* Přebíjí VŠECHNY mobilní styly výše */
+  /* ============================================ */
+
+  body.pdf-export-mode {
+    font-size: 13px !important;
+  }
+
+  body.pdf-export-mode .wrapper {
+    padding: 30px 35px !important;
+    margin: 20px auto !important;
+    max-width: 900px !important;
+    border-width: 2px !important;
+  }
+
+  body.pdf-export-mode input,
+  body.pdf-export-mode select,
+  body.pdf-export-mode textarea {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+    min-height: auto !important;
+  }
+
+  body.pdf-export-mode .label {
+    font-size: 11px !important;
+  }
+
+  body.pdf-export-mode .header {
+    margin-bottom: 25px !important;
+    padding-bottom: 15px !important;
+  }
+
+  body.pdf-export-mode .header > div:first-child {
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    letter-spacing: 2px !important;
+  }
+
+  body.pdf-export-mode .header > div:last-child {
+    font-size: 10px !important;
+  }
+
+  /* PDF export: Zobrazit OBA pole (CZ + EN) vedle sebe */
+  body.pdf-export-mode .split-section {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 15px !important;
+  }
+
+  body.pdf-export-mode .split-section textarea:nth-child(2) {
+    display: block !important;
+  }
+
+  body.pdf-export-mode .split-section textarea:nth-child(1) {
+    width: auto !important;
+  }
+
+  body.pdf-export-mode .translate-btn {
+    display: block !important;
+  }
+
+  /* PDF export: Customer info vždy rozbaleno, header skrytý */
+  body.pdf-export-mode .customer-info-header {
+    display: none !important;
+  }
+
+  body.pdf-export-mode .customer-info-content {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* PDF export: Tabulky vedle sebe (desktop layout) */
+  body.pdf-export-mode .two-col-table {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 20px !important;
+  }
+
+  body.pdf-export-mode .col {
+    min-width: auto !important;
+    flex: 1 !important;
+  }
+
+  /* PDF export: Section titles desktop velikost */
+  body.pdf-export-mode .section-title {
+    font-size: 10px !important;
+    padding: 5px 7px !important;
+    margin-top: 13px !important;
+    margin-bottom: 5px !important;
+  }
+
+  body.pdf-export-mode .section-title .en-label {
+    font-size: 0.7em !important;
+    display: block !important;
+  }
+
+  /* PDF export: Skrýt tlačítka */
+  body.pdf-export-mode .btns {
+    display: none !important;
+  }
+
+  /* PDF export: Table styling */
+  body.pdf-export-mode td {
+    padding: 2px 6px !important;
+  }
+
+  body.pdf-export-mode button.btn {
+    font-size: 12px !important;
+    padding: 12px 24px !important;
+  }
+
+  body.pdf-export-mode .top-bar {
+    padding: 1rem 2rem !important;
+  }
+
+  body.pdf-export-mode .logo {
+    font-size: 1.8rem !important;
+  }
+
+  body.pdf-export-mode #signature-pad {
+    height: 180px !important;
   }
 }
 
