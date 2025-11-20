@@ -320,7 +320,7 @@ async function loadReklamace(id) {
       document.getElementById("address").value = customer.adresa || `${ulice}, ${mesto}, ${psc}`;
       document.getElementById("phone").value = customer.telefon || "";
       document.getElementById("email").value = customer.email || "";
-      document.getElementById("brand").value = customer.znacka || customer.model || "";
+      document.getElementById("brand").value = customer.created_by_name || customer.prodejce || "";
       document.getElementById("model").value = customer.model || "";
       document.getElementById("description-cz").value = customer.popis_problemu || "";
 
@@ -391,7 +391,7 @@ async function loadReklamace(id) {
       document.getElementById("address").value = currentReklamace.adresa || `${ulice}, ${mesto}, ${psc}`;
       document.getElementById("phone").value = currentReklamace.telefon || "";
       document.getElementById("email").value = currentReklamace.email || "";
-      document.getElementById("brand").value = currentReklamace.znacka || currentReklamace.model || "";
+      document.getElementById("brand").value = currentReklamace.created_by_name || currentReklamace.prodejce || "";
       document.getElementById("model").value = currentReklamace.model || "";
       document.getElementById("description-cz").value = currentReklamace.popis_problemu || "";
       showNotif("success", "Reklamace načtena");
