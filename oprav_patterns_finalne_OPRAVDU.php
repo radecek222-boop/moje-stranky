@@ -76,7 +76,7 @@ try {
         'model' => '/Model:\s*([^\n]+?)(?:\s+(?:Složení|Provedení|Látka|Barva|Závada|Popis)|$)/is',
         'provedeni' => '/(?:Složení|Provedení):\s*([^\n]+?)(?:\s+(?:Látka|Barva|Závada|Popis)|$)/is',
         'barva' => '/(?:Látka|Barva):\s*([^\n]+?)(?:\s+(?:Závada|Popis)|$)/is',
-        'popis_problemu' => '/(?:Závada|Popis\s+problému):\s*([^\n]+?)(?:\s+(?:Poznámky|Datum\s+opravy|Cena)|$)/is'
+        'popis_problemu' => '/(?:Závada|Popis\s+problému):\s*(.+?)(?=Model:|Složení:|Látka:|Reklamované\s+zboží|$)/is'
     ];
 
     $natuzziMapping = [
@@ -128,7 +128,7 @@ try {
         'model' => '/Model:\s*([^\n]+?)(?:\s+(?:Zloženie|Provedenie|Látka|Farba|Závada)|$)/is',
         'provedeni' => '/(?:Zloženie|Provedenie):\s*([^\n]+?)(?:\s+(?:Látka|Farba|Závada)|$)/is',
         'barva' => '/(?:Látka|Farba):\s*([^\n]+?)(?:\s+Závada|$)/is',
-        'popis_problemu' => '/Závada:\s*([^\n]+?)(?:\s+(?:Poznámky|Dátum\s+opravy|Cena)|$)/is'
+        'popis_problemu' => '/Závada:\s*(.+?)(?=Model:|Zloženie:|Látka:|Reklamované\s+zboží|$)/is'
     ];
 
     $phaseSkMapping = [
@@ -180,7 +180,7 @@ try {
         'model' => '/Model:\s*([^\n]+?)(?:\s+(?:Složení|Provedení|Látka|Barva|Závada)|$)/is',
         'provedeni' => '/(?:Složení|Provedení):\s*([^\n]+?)(?:\s+(?:Látka|Barva|Závada)|$)/is',
         'barva' => '/(?:Látka|Barva):\s*([^\n]+?)(?:\s+Závada|$)/is',
-        'popis_problemu' => '/Závada:\s*([^\n]+?)(?:\s+(?:Poznámky|Datum\s+opravy|Cena)|$)/is'
+        'popis_problemu' => '/Závada:\s*(.+?)(?=Model:|Složení:|Látka:|Reklamované\s+zboží|$)/is'
     ];
 
     $phaseCzMapping = [
