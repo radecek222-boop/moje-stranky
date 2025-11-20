@@ -95,13 +95,18 @@
 }
 
 .cc-version-info {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     color: var(--c-grey);
-    padding: 0.25rem 0.5rem;
+    padding: 0.5rem 0.75rem;
     background: var(--c-bg);
     border: 1px solid var(--c-border);
     border-radius: 4px;
     font-family: 'Courier New', monospace;
+    height: 36px;
+    min-width: 150px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .cc-clear-cache-btn {
@@ -115,6 +120,11 @@
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    height: 36px;
+    min-width: 150px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .cc-clear-cache-btn:hover {

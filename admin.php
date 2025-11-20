@@ -692,9 +692,9 @@ function loadNotifContent(type, body) {
       <div class="cc-grid">
 
           <!-- Statistiky reklamací -->
-          <div class="cc-card cc-card-statistics" onclick="openCCModal('statistics')">
+          <div class="cc-card cc-card-statistics" onclick="window.location='statistiky.php'">
               <div class="cc-card-title">Statistiky</div>
-              <div class="cc-card-description">Přehledy a grafy reklamací</div>
+              <div class="cc-card-description">Přehledy, správa reklamací a uživatelů</div>
           </div>
 
           <!-- Web Analytics -->
@@ -712,22 +712,10 @@ function loadNotifContent(type, body) {
               <div class="cc-card-description">Registrační klíče, API klíče, bezpečnost</div>
           </div>
 
-          <!-- Správa uživatelů -->
-          <div class="cc-card cc-card-users" onclick="openCCModal('users')">
-              <div class="cc-card-title">Správa uživatelů</div>
-              <div class="cc-card-description">Technici, prodejci, administrátoři</div>
-          </div>
-
           <!-- Email & SMS -->
           <div class="cc-card cc-card-notifications" onclick="openCCModal('notifications')">
               <div class="cc-card-title">Email & SMS</div>
               <div class="cc-card-description">Šablony emailů a SMS notifikace</div>
-          </div>
-
-          <!-- Reklamace -->
-          <div class="cc-card cc-card-claims" onclick="openCCModal('claims')">
-              <div class="cc-card-title">Správa reklamací</div>
-              <div class="cc-card-description">Přehled všech servisních požadavků</div>
           </div>
 
           <!-- Akce & Úkoly -->
