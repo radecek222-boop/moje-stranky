@@ -7,48 +7,6 @@ if (!function_exists('loadAdminNavigation')) {
     function loadAdminNavigation(): array
     {
         return [
-            'index' => [
-                'href' => 'index.php',
-                'header_label' => 'DOMŮ',
-                'tab_label' => null,
-                'tab' => null,
-            ],
-            'seznam' => [
-                'href' => 'seznam.php',
-                'header_label' => 'SEZNAM REKLAMACÍ',
-                'tab_label' => null,
-                'tab' => null,
-            ],
-            'novareklamace' => [
-                'href' => 'novareklamace.php',
-                'header_label' => 'NOVÁ REKLAMACE',
-                'tab_label' => null,
-                'tab' => null,
-            ],
-            'protokol' => [
-                'href' => 'protokol.php',
-                'header_label' => 'PROTOKOL',
-                'tab_label' => null,
-                'tab' => null,
-            ],
-            'statistiky' => [
-                'href' => 'statistiky.php',
-                'header_label' => 'STATISTIKY',
-                'tab_label' => null,
-                'tab' => null,
-            ],
-            'nasesluzby' => [
-                'href' => 'nasesluzby.php',
-                'header_label' => 'NAŠE SLUŽBY',
-                'tab_label' => null,
-                'tab' => null,
-            ],
-            'onas' => [
-                'href' => 'onas.php',
-                'header_label' => 'O NÁS',
-                'tab_label' => null,
-                'tab' => null,
-            ],
             'control_center' => [
                 'href' => 'admin.php',
                 'header_label' => 'CONTROL CENTER',
@@ -100,10 +58,30 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab_label' => 'Testing Interactive',
                 'tab' => 'admin_testing_interactive',
             ],
+            'admin_testing_simulator' => [
+                'href' => 'admin.php?tab=admin_testing_simulator',
+                'tab_label' => 'Testing',
+                'tab' => 'admin_testing_simulator',
+            ],
+            'admin_appearance' => [
+                'href' => 'admin.php?tab=admin_appearance',
+                'tab_label' => 'Vzhled & Design',
+                'tab' => 'admin_appearance',
+            ],
             'admin_content' => [
                 'href' => 'admin.php?tab=admin_content',
                 'tab_label' => 'Obsah & Texty',
                 'tab' => 'admin_content',
+            ],
+            'admin_configuration' => [
+                'href' => 'admin.php?tab=admin_configuration',
+                'tab_label' => 'Konfigurace systému',
+                'tab' => 'admin_configuration',
+            ],
+            'admin_actions' => [
+                'href' => 'admin.php?tab=admin_actions',
+                'tab_label' => 'Akce & Úkoly',
+                'tab' => 'admin_actions',
             ],
             'admin_console' => [
                 'href' => 'admin.php?tab=admin_console',
@@ -143,20 +121,15 @@ if (!function_exists('isAdminNavigationActive')) {
         }
         $hrefPath = basename($hrefPath);
 
-        // Porovnání bez query stringu
-        $currentPathClean = basename(parse_url($currentPath, PHP_URL_PATH) ?: $currentPath);
-
-        if ($hrefPath !== $currentPathClean) {
+        if ($hrefPath !== $currentPath) {
             return false;
         }
 
-        // Pro admin.php kontrola tabu
-        if ($hrefPath === 'admin.php') {
-            $targetTab = $item['tab'] ?? 'dashboard';
-            return $currentTab === $targetTab;
+        if ($hrefPath !== 'admin.php') {
+            return true;
         }
 
-        // Pro ostatní stránky je aktivní pokud se shoduje název
-        return true;
+        $targetTab = $item['tab'] ?? 'dashboard';
+        return $currentTab === $targetTab;
     }
 }
