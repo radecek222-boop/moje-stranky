@@ -115,6 +115,22 @@ body {
   font-size: 10px;
   color: #333;
 }
+/* === Rozbalovací sekce zákaznických dat (DESKTOP - skrytá) === */
+.customer-info-collapsible {
+  /* Na desktopu je to normální sekce bez collapsingu */
+}
+
+.customer-info-header {
+  /* Na desktopu skrytý - zobrazí se jen na mobilu */
+  display: none;
+}
+
+.customer-info-content {
+  /* Na desktopu vždy viditelný */
+  max-height: none;
+  overflow: visible;
+}
+
 .section-title {
   font-family: 'Poppins';
   font-weight: 700;
@@ -298,9 +314,8 @@ input[readonly], textarea[readonly] {
 }
 .btns {
   margin-top: 25px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
   padding-top: 20px;
   border-top: 2px solid #e0e0e0;
@@ -328,9 +343,9 @@ button.btn:hover {
   color: #fff;
 }
 .btn-clear {
-  background: #fff;
-  color: #666;
-  border: 1px solid #999;
+  background: #ffe6e6;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
   padding: 4px 10px;
   font-size: 0.75em;
   cursor: pointer;
@@ -339,7 +354,8 @@ button.btn:hover {
   white-space: nowrap;
 }
 .btn-clear:hover {
-  background: #f5f5f5;
+  background: #ffcdd2;
+  color: #b71c1c;
 }
 .notif {
   position: fixed;
@@ -580,6 +596,31 @@ button.btn:hover {
     font-size: inherit !important;
   }
 
+  /* PDF export: Zobrazit OBA pole (CZ + EN) vedle sebe */
+  body.pdf-export-mode .split-section {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 15px !important;
+  }
+
+  body.pdf-export-mode .split-section textarea:nth-child(2) {
+    display: block !important;
+  }
+
+  body.pdf-export-mode .split-section textarea:nth-child(1) {
+    width: auto !important;
+  }
+
+  /* PDF export: Customer info vždy rozbaleno, header skrytý */
+  body.pdf-export-mode .customer-info-header {
+    display: none !important;
+  }
+
+  body.pdf-export-mode .customer-info-content {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
   /* Větší font pro lepší čitelnost na mobilu */
   body {
     font-size: 15px;
@@ -628,19 +669,73 @@ button.btn:hover {
     border-width: 1px;
   }
 
-  /* Header text menší na mobilu */
+  /* Header text menší na mobilu - kompaktní na jeden řádek */
   .header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  /* === ROZBALOVACÍ SEKCE ZÁKAZNICKÝCH DAT (POUZE MOBIL) === */
+  .customer-info-collapsible {
     margin-bottom: 15px;
   }
 
+  .customer-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: linear-gradient(135deg, #2D5016 0%, #3a6b1e 100%);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .customer-info-header:active {
+    transform: scale(0.98);
+  }
+
+  .customer-info-name {
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+  }
+
+  .customer-info-arrow {
+    stroke: white;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+
+  .customer-info-collapsible.expanded .customer-info-arrow {
+    transform: rotate(180deg);
+  }
+
+  .customer-info-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+  }
+
+  .customer-info-collapsible.expanded .customer-info-content {
+    max-height: 2000px;
+    transition: max-height 0.6s ease-in;
+  }
+
   .header > div:first-child {
-    font-size: 14px;
+    font-size: 11px;
     font-weight: 700;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .header > div:last-child {
-    font-size: 9px;
-    line-height: 1.3;
+    font-size: 7px;
+    line-height: 1.2;
   }
 
   /* Větší labels pro lepší čitelnost */
@@ -697,7 +792,7 @@ button.btn:hover {
   }
 
   .btns {
-    flex-direction: column;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
 
@@ -732,6 +827,17 @@ button.btn:hover {
   }
 
   .col {
+    min-width: 100%;
+  }
+
+  /* Skrýt anglické překladové pole na mobilu (druhé textarea) */
+  .split-section textarea:nth-child(2) {
+    display: none;
+  }
+
+  /* České pole na plnou šířku */
+  .split-section textarea:nth-child(1) {
+    width: 100%;
     min-width: 100%;
   }
 
@@ -798,11 +904,12 @@ button.btn:hover {
   }
 
   .header > div:first-child {
-    font-size: 12px;
+    font-size: 10px;
+    letter-spacing: 0.5px;
   }
 
   .header > div:last-child {
-    font-size: 8px;
+    font-size: 6.5px;
   }
 
   .label {
