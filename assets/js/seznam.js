@@ -1259,7 +1259,9 @@ function renderTimeGrid() {
     }
   });
   
-  for (let h = 7; h <= 20; h++) {
+  // Časový rozsah: 8:00 - 19:00 (místo původního 7:00 - 20:30)
+  // Snížení z 28 slotů na 22 slotů pro lepší mobilní zobrazení
+  for (let h = 8; h <= 19; h++) {
     for (const mm of [0, 30]) {
       const time = `${String(h).padStart(2, '0')}:${mm === 0 ? '00' : '30'}`;
       const el = document.createElement('div');
