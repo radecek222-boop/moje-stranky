@@ -941,7 +941,24 @@ function renderCalendar(m, y) {
       SELECTED_DATE = `${d}.${m + 1}.${y}`;
       document.querySelectorAll('.cal-day').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
-      document.getElementById('selectedDateDisplay').textContent = `Vybraný den: ${SELECTED_DATE}`;
+
+      // Získat vzdálenost k zákazníkovi pro zobrazení v hlavičce
+      const currentAddress = Utils.addCountryToAddress(Utils.getAddress(CURRENT_RECORD));
+      let displayText = `Vybraný den: ${SELECTED_DATE}`;
+
+      // Zkusit získat vzdálenost asynchronně
+      if (currentAddress && currentAddress !== '—') {
+        getDistance(WGS_ADDRESS, currentAddress).then(distToCustomer => {
+          if (distToCustomer && distToCustomer.km) {
+            const updatedText = `Vybraný den: ${SELECTED_DATE} — ${distToCustomer.km} km`;
+            document.getElementById('selectedDateDisplay').textContent = updatedText;
+          }
+        }).catch(err => {
+          logger.error('Chyba při získání vzdálenosti:', err);
+        });
+      }
+
+      document.getElementById('selectedDateDisplay').textContent = displayText;
 
       // Zobrazit časy okamžitě
       renderTimeGrid();
@@ -1276,12 +1293,31 @@ function renderTimeGrid() {
       }
       
       el.textContent = time;
-      el.onclick = () => {
+      el.onclick = async () => {
         SELECTED_TIME = time;
         document.querySelectorAll('.time-slot').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
 
-        let displayText = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
+        // Získat adresu zákazníka
+        const currentAddress = Utils.addCountryToAddress(Utils.getAddress(CURRENT_RECORD));
+
+        // Základní text bez vzdálenosti
+        let displayText = `Vybraný termín: ${SELECTED_DATE}`;
+
+        // Zkusit získat vzdálenost (z cache nebo vypočítat)
+        if (currentAddress && currentAddress !== '—') {
+          try {
+            const distToCustomer = await getDistance(WGS_ADDRESS, currentAddress);
+            if (distToCustomer && distToCustomer.km) {
+              displayText += ` — ${distToCustomer.km} km`;
+            }
+          } catch (err) {
+            logger.error('Chyba při získání vzdálenosti:', err);
+          }
+        }
+
+        displayText += ` — ${SELECTED_TIME}`;
+
         if (occupiedTimes[time]) {
           displayText += ` ⚠️ KOLIZE: ${occupiedTimes[time].zakaznik}`;
         }
