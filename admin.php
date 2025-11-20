@@ -121,37 +121,103 @@ if (!$embedMode && $activeTab === 'dashboard'):
         <p class="admin-landing-subtitle">ADMIN</p>
     </div>
 
-    <!-- Planety (karty) točící se dokola -->
+    <!-- Planety (karty) točící se dokola - 18 planet -->
     <div class="admin-orbit">
-        <!-- Statistiky -->
-        <div class="admin-planet admin-planet-1" onclick="window.location='statistiky.php'">
+        <!-- Hlavní stránky -->
+        <div class="admin-planet admin-planet-1" onclick="window.location='index.php'">
+            <div class="planet-content">
+                <div class="planet-title">Domů</div>
+            </div>
+        </div>
+
+        <div class="admin-planet admin-planet-2" onclick="window.location='seznam.php'">
+            <div class="planet-content">
+                <div class="planet-title">Seznam</div>
+            </div>
+        </div>
+
+        <div class="admin-planet admin-planet-3" onclick="window.location='protokol.php'">
+            <div class="planet-content">
+                <div class="planet-title">Protokol</div>
+            </div>
+        </div>
+
+        <div class="admin-planet admin-planet-4" onclick="window.location='statistiky.php'">
             <div class="planet-content">
                 <div class="planet-title">Statistiky</div>
-                <div class="planet-desc">Přehledy a reporty</div>
             </div>
         </div>
 
-        <!-- Reklamace -->
-        <div class="admin-planet admin-planet-2" onclick="window.location='statistiky.php'">
+        <!-- Admin taby -->
+        <div class="admin-planet admin-planet-5" onclick="window.location='admin.php?tab=notifications'">
             <div class="planet-content">
-                <div class="planet-title">Reklamace</div>
-                <div class="planet-desc">Správa požadavků</div>
+                <div class="planet-title">Email</div>
             </div>
         </div>
 
-        <!-- Security -->
-        <div class="admin-planet admin-planet-3" onclick="window.location='admin.php?tab=keys'">
+        <div class="admin-planet admin-planet-6" onclick="window.location='admin.php?tab=keys'">
             <div class="planet-content">
                 <div class="planet-title">Security</div>
-                <div class="planet-desc">Klíče & bezpečnost</div>
             </div>
         </div>
 
-        <!-- Email & SMS -->
-        <div class="admin-planet admin-planet-4" onclick="window.location='admin.php?tab=notifications'">
+        <div class="admin-planet admin-planet-7" onclick="window.location='admin.php?tab=users'">
             <div class="planet-content">
-                <div class="planet-title">Notifikace</div>
-                <div class="planet-desc">Email & SMS</div>
+                <div class="planet-title">Users</div>
+            </div>
+        </div>
+
+        <div class="admin-planet admin-planet-8" onclick="window.location='admin.php?tab=tools'">
+            <div class="planet-content">
+                <div class="planet-title">Tools</div>
+            </div>
+        </div>
+
+        <div class="admin-planet admin-planet-9" onclick="window.location='admin.php?tab=online'">
+            <div class="planet-content">
+                <div class="planet-title">Online</div>
+            </div>
+        </div>
+
+        <div class="admin-planet admin-planet-10" onclick="window.location='admin.php?tab=admin_phpunit'">
+            <div class="planet-content">
+                <div class="planet-title">Tests</div>
+            </div>
+        </div>
+
+        <div class="admin-planet admin-planet-11" onclick="window.location='admin.php?tab=admin_testing_simulator'">
+            <div class="planet-content">
+                <div class="planet-title">Testing</div>
+            </div>
+        </div>
+
+        <div class="admin-planet admin-planet-12" onclick="window.location='admin.php?tab=admin_appearance'">
+            <div class="planet-content">
+                <div class="planet-title">Vzhled</div>
+            </div>
+        </div>
+
+        <div class="admin-planet admin-planet-13" onclick="window.location='admin.php?tab=admin_content'">
+            <div class="planet-content">
+                <div class="planet-title">Obsah</div>
+            </div>
+        </div>
+
+        <div class="admin-planet admin-planet-14" onclick="window.location='admin.php?tab=admin_configuration'">
+            <div class="planet-content">
+                <div class="planet-title">Config</div>
+            </div>
+        </div>
+
+        <div class="admin-planet admin-planet-15" onclick="window.location='admin.php?tab=admin_actions'">
+            <div class="planet-content">
+                <div class="planet-title">Akce</div>
+            </div>
+        </div>
+
+        <div class="admin-planet admin-planet-16" onclick="window.location='admin.php?tab=admin_console'">
+            <div class="planet-content">
+                <div class="planet-title">Konzole</div>
             </div>
         </div>
     </div>
