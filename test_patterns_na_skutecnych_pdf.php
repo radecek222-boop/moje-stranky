@@ -2,7 +2,7 @@
 /**
  * Test Patterns na SKUTEČNÝCH PDF souborech
  *
- * Tento nástroj načte Base64 PDF soubory, extrahuje z nich text
+ * Tento nástroj načte PDF soubory, extrahuje z nich text
  * a otestuje všechny patterns na skutečných datech.
  */
 require_once __DIR__ . '/init.php';
@@ -12,29 +12,42 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die("PŘÍSTUP ODEPŘEN");
 }
 
-// Načíst Base64 PDF soubory v PHP (vyřeší CORS problém)
+// Načíst PDF soubory přímo jako binární data
 $pdfFiles = [
     [
         'name' => 'NATUZZI PROTOKOL (Osnice)',
-        'base64' => file_get_contents(__DIR__ . '/uploads/base64.txt'),
+        'pdfPath' => __DIR__ . '/uploads/NATUZZI PROTOKOL.pdf',
         'expectedConfig' => 'NATUZZI'
     ],
     [
         'name' => 'NCM-NATUZZI (Praha)',
-        'base64' => file_get_contents(__DIR__ . '/uploads/base64-2.txt'),
+        'pdfPath' => __DIR__ . '/uploads/NCM-NATUZZI.pdf',
         'expectedConfig' => 'NATUZZI'
     ],
     [
         'name' => 'PHASE CZ (Praha)',
-        'base64' => file_get_contents(__DIR__ . '/uploads/base64-3.txt'),
+        'pdfPath' => __DIR__ . '/uploads/PHASE CZ.pdf',
         'expectedConfig' => 'PHASE CZ'
     ],
     [
         'name' => 'PHASE SK (Zlín)',
-        'base64' => file_get_contents(__DIR__ . '/uploads/base64-4.txt'),
+        'pdfPath' => __DIR__ . '/uploads/PHASE PROTOKOL.pdf',
         'expectedConfig' => 'PHASE SK'
     ]
 ];
+
+// Převést PDF na Base64 data URI
+foreach ($pdfFiles as &$file) {
+    if (file_exists($file['pdfPath'])) {
+        $pdfBinary = file_get_contents($file['pdfPath']);
+        $file['dataUri'] = 'data:application/pdf;base64,' . base64_encode($pdfBinary);
+        unset($file['pdfPath']); // Neposílat cestu do frontendu
+    } else {
+        $file['dataUri'] = null;
+        $file['error'] = 'Soubor nenalezen: ' . basename($file['pdfPath']);
+    }
+}
+unset($file);
 
 // Převést do JSON pro JavaScript
 $pdfFilesJson = json_encode($pdfFiles);
@@ -78,19 +91,12 @@ $pdfFilesJson = json_encode($pdfFiles);
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// Base64 PDF data (načtená z PHP)
+// PDF data jako data URI (načtená z PHP)
 const pdfFiles = <?php echo $pdfFilesJson; ?>;
 
-async function extractTextFromBase64(base64String) {
-    // Dekódovat Base64 → ArrayBuffer
-    const binaryString = atob(base64String.trim());
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-    }
-
-    // Načíst PDF
-    const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+async function extractTextFromDataUri(dataUri) {
+    // Načíst PDF z data URI
+    const pdf = await pdfjsLib.getDocument(dataUri).promise;
 
     // Extrahovat text ze všech stránek
     let fullText = '';
@@ -106,7 +112,6 @@ async function extractTextFromBase64(base64String) {
 
 async function testPDF(pdfInfo) {
     const resultsDiv = document.getElementById('results');
-    const loadingDiv = document.getElementById('loading');
 
     const section = document.createElement('div');
     section.className = 'pdf-section';
@@ -115,9 +120,16 @@ async function testPDF(pdfInfo) {
                          <p class="progress">⏳ Extrahuji text z PDF...</p>`;
     resultsDiv.appendChild(section);
 
+    // Kontrola chyb
+    if (pdfInfo.error) {
+        section.innerHTML = `<h2>📄 ${pdfInfo.name}</h2>
+                             <p class="error">❌ ${pdfInfo.error}</p>`;
+        return;
+    }
+
     try {
         // Extrahovat text z PDF
-        const pdfText = await extractTextFromBase64(pdfInfo.base64);
+        const pdfText = await extractTextFromDataUri(pdfInfo.dataUri);
 
         // Zobrazit ukázku textu
         section.innerHTML = `<h2>📄 ${pdfInfo.name}</h2>
