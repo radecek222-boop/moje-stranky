@@ -435,7 +435,7 @@ function updateTotal() {
   const second = parseFloat(document.getElementById("price-second").value) || 0;
   const transport = parseFloat(document.getElementById("price-transport").value) || 0;
   const total = work + material + second + transport;
-  document.getElementById("price-total").value = total.toFixed(2) + " Kč";
+  document.getElementById("price-total").value = total.toFixed(2);
 }
 
 async function attachPhotos() {
