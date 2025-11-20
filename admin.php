@@ -677,7 +677,14 @@ function loadNotifContent(type, body) {
   }
   ?>
 
-  <div class="admin-dashboard">
+  <div class="admin-dashboard admin-landing">
+      <div class="admin-landing-content">
+          <h1 class="admin-landing-title">WGS</h1>
+          <p class="admin-landing-subtitle">ADMIN</p>
+      </div>
+  </div>
+
+  <div class="admin-dashboard admin-dashboard-cards" style="display: none;">
       <div class="page-header">
           <p class="page-subtitle">Centrální řídicí panel pro správu celé aplikace</p>
           <div class="page-header-actions">
