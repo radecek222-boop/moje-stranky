@@ -1465,7 +1465,7 @@ function showContactMenu(id) {
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
           ${phone ? `<a href="tel:${phone}" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center; background: #1a1a1a; color: white;">Zavolat</a>` : ''}
           <button class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; background: #1a1a1a; color: white;" onclick="closeDetail(); setTimeout(() => showCalendar('${id}'), 100)">Termín návštěvy</button>
-          ${phone ? `<a href="sms:${phone}" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center; background: #444; color: white;">Odeslat SMS</a>` : ''}
+          ${phone ? `<button class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; background: #444; color: white;" onclick="sendContactAttemptEmail('${id}', '${phone}')">Odeslat SMS</button>` : ''}
           ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center; background: #444; color: white;" target="_blank">Navigovat (Waze)</a>` : ''}
         </div>
       </div>
@@ -2438,5 +2438,63 @@ function updateLoadMoreButton() {
     btn.style.display = HAS_MORE_PAGES ? 'block' : 'none';
     btn.disabled = LOADING_MORE;
     btn.textContent = LOADING_MORE ? 'Načítání...' : `Načíst další (stránka ${CURRENT_PAGE + 1})`;
+  }
+}
+
+// === ODESLÁNÍ POKUSU O KONTAKT (EMAIL + SMS) ===
+
+/**
+ * Odešle zákazníkovi email o pokusu o kontakt a otevře SMS aplikaci s předvyplněným textem
+ * @param {string} reklamaceId - ID reklamace
+ * @param {string} telefon - Telefonní číslo zákazníka
+ */
+async function sendContactAttemptEmail(reklamaceId, telefon) {
+  try {
+    // Najít záznam v cache
+    const zaznam = WGS_DATA_CACHE.find(x => x.id == reklamaceId || x.reklamace_id == reklamaceId);
+    if (!zaznam) {
+      showToast('Záznam nenalezen', 'error');
+      return;
+    }
+
+    // Získat CSRF token
+    const csrfToken = await getCSRFToken();
+
+    // Zavolat API pro odeslání emailu
+    const odpoved = await fetch('/api/send_contact_attempt_email.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reklamace_id: reklamaceId,
+        csrf_token: csrfToken
+      })
+    });
+
+    const data = await odpoved.json();
+
+    if (data.success) {
+      logger.log('✓ Email o pokusu o kontakt odeslán zákazníkovi');
+      showToast('Email odeslán zákazníkovi', 'success');
+
+      // Připravit SMS text se stejnými informacemi jako v emailu
+      const jmeno = zaznam.jmeno || zaznam.zakaznik || 'zákazníku';
+      const cisloZakazky = zaznam.reklamace_id || zaznam.id || '—';
+      const produkt = zaznam.produkt || 'neuvedeno';
+      const datum = new Date().toLocaleDateString('cs-CZ');
+
+      const smsText = `Dobrý den ${jmeno}, pokusili jsme se Vás kontaktovat ohledně servisní prohlídky č. ${cisloZakazky} (${produkt}, ${datum}). Prosím zavolejte zpět na +420 725 965 826. Děkujeme, WGS Service`;
+
+      // Otevřít SMS aplikaci na telefonu s předvyplněným textem
+      const encodedText = encodeURIComponent(smsText);
+      window.location.href = `sms:${telefon}?body=${encodedText}`;
+
+    } else {
+      logger.error('⚠ Chyba při odesílání emailu:', data.error || data.message);
+      showToast(data.error || 'Chyba při odesílání emailu', 'error');
+    }
+
+  } catch (chyba) {
+    logger.error('❌ Chyba při odesílání kontaktního emailu:', chyba);
+    showToast('Nepodařilo se odeslat email', 'error');
   }
 }
