@@ -24,8 +24,8 @@ $vzechnyPatterns = [
     'telefon' => '/(\d{3}\s+\d{3}\s+\d{3})\s+Telefon/i',
     'psc' => '/\b(\d{3}\s?\d{2})\b.*?PSČ/i',
     'mesto' => '/\b([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][a-záčďéěíňóřšťúůýž]+)\s+Město/iu',
-    'ulice' => '/Adresa:\s+([^A-Z]{5,50}?)\s+(?:[A-Z]|Jméno)/s',
-    'jmeno' => '/Jméno\s+společnosti:\s+([^Pp]{3,50}?)\s+(?:Poschodí|PSČ|Stát)/iu',
+    'ulice' => '/\b([A-Z][a-záčďéěíňóřšťúůýž\s]+\d+)\s+Adresa:/iu',
+    'jmeno' => '/Jméno\s+společnosti:\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][a-záčďéěíňóřšťúůýž\s]+?)\s+Poschodí:/iu',
     'popis_problemu' => '/Závada:\s+(.+?)\s+Model:/s',
 
     // ========== TECHNICKÉ DETAILY (uloží se do doplnujici_info) ==========
