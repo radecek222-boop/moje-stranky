@@ -536,6 +536,17 @@ button.btn:hover {
   color: white;
 }
 
+.pdf-send-btn {
+  border-color: #007bff;
+  background: #007bff;
+}
+
+.pdf-send-btn:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+  color: white;
+}
+
 .pdf-close-btn {
   border-color: #dc3545;
 }
