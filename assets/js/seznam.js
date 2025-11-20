@@ -795,8 +795,11 @@ function showCalendar(id) {
   SELECTED_TIME = null;
   
   const content = `
-    ${ModalManager.createHeader('Vyberte termín návštěvy', '<div id="selectedDateDisplay" style="margin-top: 0.5rem; color: var(--c-grey); font-size: 0.75rem;">Zatím nevybráno</div>')}
-    
+    <div class="modal-header">
+      <div id="selectedDateDisplay" style="color: var(--c-grey); font-size: 0.9rem; font-weight: 600; text-align: center;">Zatím nevybráno</div>
+      <button class="modal-close" onclick="ModalManager.close()">✕</button>
+    </div>
+
     <div class="modal-body" style="max-height: 80vh; overflow-y: auto; padding: 1rem;">
       <div class="calendar-container">
         <div id="calGrid"></div>
