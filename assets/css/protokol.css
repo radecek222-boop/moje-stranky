@@ -774,9 +774,17 @@ button.btn:hover {
     font-size: 16px !important;
   }
 
-  /* Textarea vyšší na mobilu */
+  /* Textarea přizpůsobené mobilu - menší font, plná šířka */
   textarea {
     min-height: 100px;
+    font-size: 13px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  textarea::placeholder {
+    font-size: 12px;
   }
 
   /* Table cells větší padding pro lepší čitelnost */
