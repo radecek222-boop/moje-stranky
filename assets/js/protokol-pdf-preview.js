@@ -27,6 +27,25 @@ function otevritPdfPreview(pdfBlob, nazevSouboru = 'protokol.pdf') {
     const iframe = document.getElementById('pdfPreviewFrame');
     iframe.src = pdfUrl;
 
+    // Podmíněně zobrazit tlačítka podle kontextu
+    const shareBtn = document.getElementById('pdfShareBtn');
+    const sendBtn = document.getElementById('pdfSendBtn');
+
+    // Získat kontext z protokol.js (globální proměnná pdfPreviewContext)
+    const kontext = typeof pdfPreviewContext !== 'undefined' ? pdfPreviewContext : 'export';
+
+    if (kontext === 'send') {
+      // Režim "Odeslat zákazníkovi"
+      shareBtn.style.display = 'none';
+      sendBtn.style.display = 'flex';
+      logger.log('📧 Režim: Odeslání zákazníkovi');
+    } else {
+      // Režim "Export/Sdílení"
+      shareBtn.style.display = 'flex';
+      sendBtn.style.display = 'none';
+      logger.log('📤 Režim: Export/Sdílení');
+    }
+
     // Zobrazit modal
     const overlay = document.getElementById('pdfPreviewOverlay');
     overlay.classList.add('active');
@@ -142,10 +161,25 @@ function initPdfPreview() {
     zavritBtn.addEventListener('click', zavritPdfPreview);
   }
 
-  // Tlačítko Sdílet/Stáhnout
+  // Tlačítko Sdílet/Stáhnout (pro export)
   const sdiletBtn = document.getElementById('pdfShareBtn');
   if (sdiletBtn) {
     sdiletBtn.addEventListener('click', sdiletNeboStahnutPdf);
+  }
+
+  // Tlačítko Odeslat zákazníkovi (pro email)
+  const odeslatBtn = document.getElementById('pdfSendBtn');
+  if (odeslatBtn) {
+    odeslatBtn.addEventListener('click', () => {
+      logger.log('📧 Potvrzuji odeslání zákazníkovi...');
+      // Zavolat funkci z protokol.js
+      if (typeof potvrditAOdeslat === 'function') {
+        potvrditAOdeslat();
+      } else {
+        logger.error('❌ Funkce potvrditAOdeslat není dostupná');
+        showNotif('error', 'Chyba při odesílání');
+      }
+    });
   }
 
   // Zavřít při kliknutí mimo modal

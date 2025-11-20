@@ -79,6 +79,11 @@ let attachedPhotos = [];
 let currentReklamaceId = null;
 let currentReklamace = null;
 
+// PDF preview kontext
+let pdfPreviewContext = null; // 'export' nebo 'send'
+let cachedPdfDoc = null; // uložený jsPDF document
+let cachedPdfBase64 = null; // uložený base64 pro odeslání
+
 async function fetchCsrfToken() {
   if (typeof getCSRFToken === 'function') {
     try {
@@ -900,6 +905,11 @@ async function exportBothPDFs() {
     const cisloReklamace = document.getElementById('claim-number')?.value || 'protokol';
     const nazevSouboru = `WGS_Protokol_${cisloReklamace.replace(/\s+/g, '_')}.pdf`;
 
+    // Nastavit kontext na 'export' a uložit doc
+    pdfPreviewContext = 'export';
+    cachedPdfDoc = doc;
+    cachedPdfBase64 = null; // není potřeba pro export
+
     // Použít novou funkci pro zobrazení PDF preview
     if (typeof otevritPdfPreview === 'function') {
       otevritPdfPreview(pdfBlob, nazevSouboru);
@@ -945,9 +955,9 @@ async function exportBothPDFs() {
 
 async function sendToCustomer() {
   try {
-    // FÁZE 1: Generování kompletního PDF (protokol + fotky)
-    showLoadingWithMessage(true, '📄 Generuji kompletní PDF report...');
-    logger.log('📋 Generuji kompletní PDF (protokol + fotodokumentace)...');
+    // FÁZE 1: Generování kompletního PDF (protokol + fotky) pro NÁHLED
+    showLoadingWithMessage(true, '📄 Generuji náhled PDF...');
+    logger.log('📋 Generuji kompletní PDF pro náhled před odesláním...');
 
     // Vytvořit JEDNO PDF s protokolem
     const doc = await generateProtocolPDF();
@@ -1116,11 +1126,57 @@ async function sendToCustomer() {
       logger.log(`✅ Fotodokumentace přidána (${attachedPhotos.length} fotek)`);
     }
 
-    // Konverze na base64
+    // Konverze na base64 a uložení pro pozdější odeslání
     const completePdfBase64 = doc.output("datauristring").split(",")[1];
+
+    // Uložit pro pozdější odeslání
+    cachedPdfDoc = doc;
+    cachedPdfBase64 = completePdfBase64;
+    pdfPreviewContext = 'send';
+
+    // Zobrazit náhled PDF PŘED odesláním
+    showLoadingWithMessage(false); // Skrýt loading
+
+    const pdfBlob = doc.output("blob");
+    const cisloReklamace = document.getElementById('claim-number')?.value || 'protokol';
+    const nazevSouboru = `WGS_Protokol_${cisloReklamace.replace(/\s+/g, '_')}.pdf`;
+
+    logger.log('📄 Zobrazuji náhled PDF před odesláním...');
+
+    // Použít funkci pro zobrazení PDF preview
+    if (typeof otevritPdfPreview === 'function') {
+      otevritPdfPreview(pdfBlob, nazevSouboru);
+    } else {
+      // Fallback - rovnou odeslat pokud preview není dostupný
+      await potvrditAOdeslat();
+    }
+
+  } catch (error) {
+    logger.error('❌ Chyba při generování PDF:', error);
+    showNotif("error", "Chyba při vytváření PDF");
+    showLoadingWithMessage(false);
+  }
+}
+
+/**
+ * Potvrzení a odeslání emailu se zákazníkovi
+ * Volá se z preview modalu po kliknutí na "Odeslat zákazníkovi"
+ */
+async function potvrditAOdeslat() {
+  if (!cachedPdfBase64) {
+    showNotif("error", "PDF není dostupné");
+    return;
+  }
+
+  try {
+    // Zavřít preview modal
+    if (typeof zavritPdfPreview === 'function') {
+      zavritPdfPreview();
+    }
 
     // FÁZE 2: Odesílání emailu
     showLoadingWithMessage(true, '📧 Odesílám email zákazníkovi...');
+    logger.log('📧 Odesílám PDF zákazníkovi...');
 
     const csrfToken = await fetchCsrfToken();
 
@@ -1130,7 +1186,7 @@ async function sendToCustomer() {
       body: JSON.stringify({
         action: "send_email",
         reklamace_id: currentReklamaceId,
-        complete_pdf: completePdfBase64,
+        complete_pdf: cachedPdfBase64,
         csrf_token: csrfToken
       })
     });
