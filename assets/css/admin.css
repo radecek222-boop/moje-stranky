@@ -2617,3 +2617,63 @@ ol li {
 .embed-mode .control-detail-back {
     display: none !important;
 }
+
+/* ===========================================================================
+   ADMIN LANDING PAGE - Černý background s centrovaným WGS logem
+   =========================================================================== */
+
+.admin-landing {
+    background: #000;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.admin-landing-content {
+    text-align: center;
+}
+
+.admin-landing-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 6rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.1em;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.admin-landing-subtitle {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2rem;
+    font-weight: 300;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    margin: 2rem 0 0 0;
+}
+
+/* Responsivita pro mobil */
+@media (max-width: 768px) {
+    .admin-landing-title {
+        font-size: 4rem;
+    }
+
+    .admin-landing-subtitle {
+        font-size: 1.5rem;
+        letter-spacing: 0.2em;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-landing-title {
+        font-size: 3rem;
+    }
+
+    .admin-landing-subtitle {
+        font-size: 1.2rem;
+        letter-spacing: 0.15em;
+    }
+}

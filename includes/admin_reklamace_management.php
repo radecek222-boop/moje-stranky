@@ -178,27 +178,27 @@ try {
             </div>
 
             <?php foreach ($reklamace as $rek): ?>
-            <div class="reklamace-row" style="border-bottom: 1px solid #e5e5e5; padding: 0.4rem 0.75rem; transition: background 0.2s; display: flex; align-items: center; gap: 0.75rem; font-size: 0.75rem;"
+            <div class="reklamace-row" style="border-bottom: 1px solid #e5e5e5; padding: 0.4rem 0.75rem; transition: background 0.2s; display: grid; grid-template-columns: 130px 150px 100px 1fr 150px 90px 310px; gap: 0.75rem; align-items: center; font-size: 0.75rem;"
                  onmouseover="this.style.background='#f9f9f9'"
                  onmouseout="this.style.background='#fff'">
 
                 <!-- Číslo -->
-                <div style="font-family: 'Poppins', sans-serif; font-weight: 600; color: #000; min-width: 110px;">
+                <div style="font-family: 'Poppins', sans-serif; font-weight: 600; color: #000;">
                     <?= htmlspecialchars($rek['cislo'] ?? $rek['reklamace_id']) ?>
                 </div>
 
                 <!-- Zákazník -->
-                <div style="min-width: 140px;">
+                <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                     <strong style="color: #333;"><?= htmlspecialchars($rek['jmeno']) ?></strong>
                 </div>
 
                 <!-- Model -->
-                <div style="min-width: 90px; color: #666;">
+                <div style="color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                     Model: <?= htmlspecialchars($rek['model'] ?: '-') ?>
                 </div>
 
                 <!-- Adresa -->
-                <div style="flex: 1; min-width: 120px; color: #666;">
+                <div style="color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                     <?php
                     // Použít složenou adresu pokud chybí ulice/mesto (staré záznamy)
                     $zobrazenaAdresa = '';
@@ -212,12 +212,12 @@ try {
                 </div>
 
                 <!-- Termín -->
-                <div style="min-width: 135px; color: #666;">
+                <div style="color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                     Termín: <?= $rek['termin'] ? date('d.m.Y', strtotime($rek['termin'])) . ' - ' . $rek['cas_navstevy'] : '-' ?>
                 </div>
 
                 <!-- Status badge -->
-                <div style="min-width: 80px;">
+                <div>
                     <span style="display: inline-block; padding: 0.05rem 0.5rem; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; border: 1px solid #000; background: <?= $rek['stav'] === 'done' ? '#000' : '#fff' ?>; color: <?= $rek['stav'] === 'done' ? '#fff' : '#000' ?>; border-radius: 2px; line-height: 1.2;">
                         <?php
                             if ($rek['stav'] === 'wait') echo 'ČEKÁ';
@@ -228,7 +228,7 @@ try {
                 </div>
 
                 <!-- Akce -->
-                <div style="display: flex; gap: 0.3rem; flex-shrink: 0;">
+                <div style="display: flex; gap: 0.3rem;">
                     <!-- Změna stavu -->
                     <select class="reklamace-stav-select"
                             data-reklamace-id="<?= htmlspecialchars($rek['reklamace_id']) ?>"
