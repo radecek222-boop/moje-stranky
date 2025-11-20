@@ -434,6 +434,9 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
     </div>
 </div>
 
+<!-- jsPDF pro PDF export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script src="assets/js/logger.js" defer></script>
 <script src="assets/js/statistiky.js" defer></script>
 
