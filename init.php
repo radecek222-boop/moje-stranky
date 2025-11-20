@@ -54,12 +54,15 @@ if (session_status() === PHP_SESSION_NONE) {
     $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
                 || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
 
+    // ✅ FIX Safari ITP: Explicitní session name
+    session_name('WGS_SESSION');
+
     // ✅ FIX: Použití session_set_cookie_params() se STAROU syntaxí pro PHP 7.x kompatibilitu
-    // Nová array syntaxe funguje až od PHP 7.3, používáme starou pro kompatibilitu
+    // Safari ITP fix: domain = NULL místo prázdného stringu, lifetime = 0 (browser session)
     session_set_cookie_params(
-        3600,           // lifetime - 1 hodina (0 = do zavření prohlížeče je OK)
+        0,              // lifetime - 0 = do zavření prohlížeče (lepší pro Safari ITP)
         '/',            // path - celá doména
-        '',             // domain - aktuální doména
+        NULL,           // domain - NULL místo '' (Safari compatibility)
         $isHttps,       // secure - pouze HTTPS
         true            // httponly - ochrana proti XSS
     );
