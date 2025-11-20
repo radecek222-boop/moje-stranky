@@ -328,10 +328,9 @@ if ($initialBootstrapData) {
 
   <div class="btns">
     <button class="btn btn-primary" data-action="attachPhotos">Přidat fotky</button>
-    <button class="btn btn-primary" data-action="exportBothPDFs">Export 2x PDF</button>
-
-    <button class="btn" data-action="sendToCustomer">Odeslat zákazníkovi</button>
-    <button class="btn" data-navigate="seznam.php">Zpět</button>
+    <button class="btn btn-primary" data-action="exportBothPDFs">Export do PDF</button>
+    <button class="btn btn-primary" data-action="sendToCustomer">Odeslat zákazníkovi</button>
+    <button class="btn btn-primary" data-navigate="seznam.php">Zpět</button>
   </div>
 
   <div id="notif" class="notif"></div>
