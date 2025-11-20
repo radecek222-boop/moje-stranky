@@ -5,13 +5,13 @@ function switchLanguage(lang) {
   currentLang = lang;
   localStorage.setItem('wgs-lang', lang);
   document.documentElement.lang = lang;
-  
+
   // Update all elements with data-lang attributes
   document.querySelectorAll('[data-lang-cs]').forEach(el => {
     const text = el.getAttribute('data-lang-' + lang);
     if (text) {
       if (el.tagName === 'BR') return;
-      
+
       // Handle elements with <br> tags
       if (text.includes('<br>')) {
         el.innerHTML = text;
@@ -20,7 +20,7 @@ function switchLanguage(lang) {
       }
     }
   });
-  
+
   // Update active flag
   document.querySelectorAll('.lang-flag').forEach(flag => {
     flag.classList.remove('active');
@@ -28,7 +28,7 @@ function switchLanguage(lang) {
       flag.classList.add('active');
     }
   });
-  
+
   // Update page title
   const titles = {
     cs: 'O nás - White Glove Service | Autorizovaný servis Natuzzi',
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (currentLang !== 'cs') {
     switchLanguage(currentLang);
   }
-  
+
   // Add click handlers to flags
   document.querySelectorAll('.lang-flag').forEach(flag => {
     flag.addEventListener('click', () => {
@@ -52,47 +52,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// === MOBILE MENU ===
-const mobileMenuBtn = document.getElementById('hamburger-toggle');
-const nav = document.getElementById('hamburger-nav');
-const menuOverlay = document.getElementById('hamburger-overlay');
-
-// Kontrola zda elementy existují
-if (mobileMenuBtn && nav && menuOverlay) {
-  // Funkce pro otevření/zavření menu
-  function toggleMenu() {
-    const isActive = nav.classList.contains('active');
-    nav.classList.toggle('active');
-    menuOverlay.classList.toggle('active');
-    mobileMenuBtn.setAttribute('aria-expanded', !isActive ? 'true' : 'false');
-
-    // Zabránit scrollování těla když je menu otevřené
-    if (!isActive) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-  }
-
-  // Kliknutí na hamburger tlačítko
-  mobileMenuBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleMenu();
-  });
-
-  // Zavřít menu kliknutím na overlay
-  menuOverlay.addEventListener('click', () => {
-    toggleMenu();
-  });
-
-  // Zavřít menu kliknutím na odkaz v menu
-  nav.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      if (nav.classList.contains('active')) {
-        toggleMenu();
-      }
-    });
-  });
-} else {
-  console.warn('Mobile menu elements not found - hamburger menu disabled');
-}
+// Hamburger menu je spravováno v hamburger-menu.php (inline JavaScript)
+// Neduplikovat kód zde - zabráníme konfliktům event listenerů
