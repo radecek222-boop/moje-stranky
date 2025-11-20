@@ -56,6 +56,14 @@ try {
             listSalespersons($pdo);
             break;
 
+        case 'export_technician_detail':
+            exportTechnicianDetail($pdo);
+            break;
+
+        case 'export_salesperson_detail':
+            exportSalespersonDetail($pdo);
+            break;
+
         case 'ping':
             echo json_encode(['status' => 'success', 'message' => 'pong', 'timestamp' => time()]);
             break;
@@ -194,6 +202,7 @@ function getTechnicianStats($pdo) {
         $whereClause = !empty($whereConditions) ? 'AND ' . implode(' AND ', $whereConditions) : '';
 
         // NOVÁ LOGIKA: JOIN s wgs_users WHERE role='technik'
+        // Používáme cena_celkem z protokolu (pokud existuje), jinak cena
         $sql = "
             SELECT
                 u.id as user_id,
@@ -202,9 +211,9 @@ function getTechnicianStats($pdo) {
                 u.email,
                 COUNT(r.id) as pocet_zakazek,
                 COUNT(CASE WHEN r.stav = 'done' THEN 1 END) as pocet_dokonceno,
-                SUM(CAST(COALESCE(r.cena, 0) AS DECIMAL(10,2))) as celkova_castka_dokonceno,
-                SUM(CAST(COALESCE(r.cena, 0) AS DECIMAL(10,2))) as vydelek,
-                AVG(CASE WHEN r.cena > 0 THEN CAST(r.cena AS DECIMAL(10,2)) END) as prumer_zakazka,
+                SUM(CASE WHEN r.stav = 'done' THEN CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2)) ELSE 0 END) as celkova_castka_dokonceno,
+                SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkova_castka_vsechny,
+                AVG(CASE WHEN r.cena > 0 THEN CAST(COALESCE(r.cena_celkem, r.cena) AS DECIMAL(10,2)) END) as prumer_zakazka,
                 SUM(CASE WHEN r.fakturace_firma = 'cz' OR r.fakturace_firma = '' OR r.fakturace_firma IS NULL THEN 1 ELSE 0 END) as cz_count,
                 SUM(CASE WHEN r.fakturace_firma = 'sk' THEN 1 ELSE 0 END) as sk_count,
                 SUM(CASE WHEN r.stav = 'done' THEN 1 ELSE 0 END) as hotove_count
@@ -219,13 +228,18 @@ function getTechnicianStats($pdo) {
         $stmt->execute($params);
         $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Vypočítat úspěšnost a zaokrouhlit hodnoty
+        // Vypočítat úspěšnost, výdělek (33%) a zaokrouhlit hodnoty
         foreach ($data as &$row) {
             $total = (int)$row['pocet_zakazek'];
             $hotove = (int)$row['hotove_count'];
             $row['uspesnost'] = $total > 0 ? round(($hotove / $total) * 100, 1) : 0;
-            $row['vydelek'] = round((float)$row['vydelek'], 2);
-            $row['celkova_castka_dokonceno'] = round((float)$row['celkova_castka_dokonceno'], 2);
+
+            // Výdělek technika = 33% z celkové částky dokončených zakázek
+            $celkovaCastka = (float)$row['celkova_castka_dokonceno'];
+            $row['vydelek_technika'] = round($celkovaCastka * 0.33, 2);
+
+            $row['celkova_castka_dokonceno'] = round($celkovaCastka, 2);
+            $row['celkova_castka_vsechny'] = round((float)$row['celkova_castka_vsechny'], 2);
             $row['prumer_zakazka'] = round((float)$row['prumer_zakazka'], 2);
         }
 
@@ -508,4 +522,275 @@ function buildParams($filters) {
     }
 
     return $params;
+}
+
+/**
+ * Export detailních dat technika pro PDF fakturaci
+ * Vrátí všechny zakázky technika s cenami z protokolů
+ */
+function exportTechnicianDetail($pdo) {
+    try {
+        $filters = getFilters();
+        $technikJmeno = $_GET['technik'] ?? null;
+
+        if (!$technikJmeno) {
+            throw new Exception('Chybí parametr technik');
+        }
+
+        // Najít technika podle jména
+        $stmtFindTech = $pdo->prepare("
+            SELECT id, name, email, user_id
+            FROM wgs_users
+            WHERE name = :name AND role = 'technik'
+        ");
+        $stmtFindTech->execute([':name' => $technikJmeno]);
+        $technikData = $stmtFindTech->fetch(PDO::FETCH_ASSOC);
+
+        if (!$technikData) {
+            throw new Exception('Technik nebyl nalezen: ' . $technikJmeno);
+        }
+
+        $technicianId = $technikData['id'];
+
+        // WHERE podmínky
+        $whereConditions = ["r.zpracoval_id = :technician_id"];
+        $params = [':technician_id' => $technicianId];
+
+        if (!empty($filters['date_from'])) {
+            $whereConditions[] = "DATE(r.created_at) >= :date_from";
+            $params[':date_from'] = $filters['date_from'];
+        }
+        if (!empty($filters['date_to'])) {
+            $whereConditions[] = "DATE(r.created_at) <= :date_to";
+            $params[':date_to'] = $filters['date_to'];
+        }
+        if (!empty($filters['country'])) {
+            $whereConditions[] = "LOWER(r.fakturace_firma) = LOWER(:country)";
+            $params[':country'] = $filters['country'];
+        }
+
+        $whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
+
+        // Načíst všechny zakázky technika
+        $sql = "
+            SELECT
+                r.id,
+                r.reklamace_id,
+                r.cislo,
+                r.jmeno as zakaznik,
+                r.email as zakaznik_email,
+                r.telefon,
+                r.model,
+                r.popis_problemu,
+                r.popis_opravy,
+                r.stav,
+                r.termin,
+                r.fakturace_firma as zeme,
+                COALESCE(r.cena_celkem, r.cena, 0) as cena_celkem,
+                COALESCE(r.cena_prace, 0) as cena_prace,
+                COALESCE(r.cena_material, 0) as cena_material,
+                COALESCE(r.cena_druhy_technik, 0) as cena_druhy_technik,
+                COALESCE(r.cena_doprava, 0) as cena_doprava,
+                r.created_at,
+                r.datum_protokolu,
+                r.datum_dokonceni
+            FROM wgs_reklamace r
+            $whereClause
+            ORDER BY r.created_at DESC
+        ";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $zakazky = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Vypočítat souhrny
+        $celkovaCastka = 0;
+        $celkovyVydelek = 0;
+        $dokonceneCount = 0;
+
+        foreach ($zakazky as &$zakazka) {
+            $cenaCelkem = (float)$zakazka['cena_celkem'];
+            $vydelekZakazky = round($cenaCelkem * 0.33, 2);
+
+            $zakazka['vydelek_technika'] = $vydelekZakazky;
+            $zakazka['cena_celkem'] = round($cenaCelkem, 2);
+
+            if ($zakazka['stav'] === 'done') {
+                $celkovaCastka += $cenaCelkem;
+                $celkovyVydelek += $vydelekZakazky;
+                $dokonceneCount++;
+            }
+        }
+
+        // Přidat stav_text pro každou zakázku
+        foreach ($zakazky as &$zakazka) {
+            $stavMapping = [
+                'wait' => 'ČEKÁ',
+                'open' => 'DOMLUVENÁ',
+                'done' => 'HOTOVO'
+            ];
+            $zakazka['stav_text'] = $stavMapping[$zakazka['stav']] ?? $zakazka['stav'];
+            $zakazka['cislo_reklamace'] = $zakazka['cislo'] ?? '';
+            $zakazka['jmeno'] = $zakazka['zakaznik'] ?? '';
+            $zakazka['vydelek_technika_33'] = $zakazka['vydelek_technika'];
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => [
+                'summary' => [
+                    'total_orders' => count($zakazky),
+                    'completed_count' => $dokonceneCount,
+                    'total_revenue' => round($celkovaCastka, 2),
+                    'vydelek_technika_33' => round($celkovyVydelek, 2)
+                ],
+                'orders' => $zakazky
+            ]
+        ]);
+
+    } catch (Exception $e) {
+        error_log("exportTechnicianDetail error: " . $e->getMessage());
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ]);
+    }
+}
+
+/**
+ * Export detailních dat prodejce pro PDF fakturaci
+ * Vrátí všechny zakázky prodejce s cenami z protokolů
+ */
+function exportSalespersonDetail($pdo) {
+    try {
+        $filters = getFilters();
+        $prodejceJmeno = $_GET['prodejce'] ?? null;
+
+        if (!$prodejceJmeno) {
+            throw new Exception('Chybí parametr prodejce');
+        }
+
+        // Najít prodejce podle jména
+        $stmtFindSales = $pdo->prepare("
+            SELECT id, name, email, user_id
+            FROM wgs_users
+            WHERE name = :name
+        ");
+        $stmtFindSales->execute([':name' => $prodejceJmeno]);
+        $prodejceData = $stmtFindSales->fetch(PDO::FETCH_ASSOC);
+
+        if (!$prodejceData) {
+            throw new Exception('Prodejce nebyl nalezen: ' . $prodejceJmeno);
+        }
+
+        $salespersonId = $prodejceData['id'];
+
+        // WHERE podmínky
+        $whereConditions = ["r.created_by = :salesperson_id"];
+        $params = [':salesperson_id' => $salespersonId];
+
+        if (!empty($filters['date_from'])) {
+            $whereConditions[] = "DATE(r.created_at) >= :date_from";
+            $params[':date_from'] = $filters['date_from'];
+        }
+        if (!empty($filters['date_to'])) {
+            $whereConditions[] = "DATE(r.created_at) <= :date_to";
+            $params[':date_to'] = $filters['date_to'];
+        }
+        if (!empty($filters['country'])) {
+            $whereConditions[] = "LOWER(r.fakturace_firma) = LOWER(:country)";
+            $params[':country'] = $filters['country'];
+        }
+
+        $whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
+
+        // Načíst všechny zakázky prodejce
+        $sql = "
+            SELECT
+                r.id,
+                r.reklamace_id,
+                r.cislo,
+                r.jmeno as zakaznik,
+                r.email as zakaznik_email,
+                r.telefon,
+                r.model,
+                r.popis_problemu,
+                r.popis_opravy,
+                r.stav,
+                r.termin,
+                r.fakturace_firma as zeme,
+                COALESCE(r.cena_celkem, r.cena, 0) as cena_celkem,
+                COALESCE(r.cena_prace, 0) as cena_prace,
+                COALESCE(r.cena_material, 0) as cena_material,
+                COALESCE(r.cena_druhy_technik, 0) as cena_druhy_technik,
+                COALESCE(r.cena_doprava, 0) as cena_doprava,
+                r.created_at,
+                r.datum_protokolu,
+                r.datum_dokonceni,
+                u.name as technik
+            FROM wgs_reklamace r
+            LEFT JOIN wgs_users u ON r.zpracoval_id = u.id
+            $whereClause
+            ORDER BY r.created_at DESC
+        ";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $zakazky = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Vypočítat souhrny
+        $celkovaCastka = 0;
+        $dokonceneCount = 0;
+        $czCount = 0;
+        $skCount = 0;
+
+        foreach ($zakazky as &$zakazka) {
+            $cenaCelkem = (float)$zakazka['cena_celkem'];
+            $zakazka['cena_celkem'] = round($cenaCelkem, 2);
+
+            if ($zakazka['stav'] === 'done') {
+                $celkovaCastka += $cenaCelkem;
+                $dokonceneCount++;
+            }
+
+            if (strtolower($zakazka['zeme']) === 'cz' || empty($zakazka['zeme'])) {
+                $czCount++;
+            } else if (strtolower($zakazka['zeme']) === 'sk') {
+                $skCount++;
+            }
+
+            // Přidat stav_text a normalizovat klíče
+            $stavMapping = [
+                'wait' => 'ČEKÁ',
+                'open' => 'DOMLUVENÁ',
+                'done' => 'HOTOVO'
+            ];
+            $zakazka['stav_text'] = $stavMapping[$zakazka['stav']] ?? $zakazka['stav'];
+            $zakazka['cislo_reklamace'] = $zakazka['cislo'] ?? '';
+            $zakazka['jmeno'] = $zakazka['zakaznik'] ?? '';
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => [
+                'summary' => [
+                    'total_orders' => count($zakazky),
+                    'completed_count' => $dokonceneCount,
+                    'total_revenue' => round($celkovaCastka, 2),
+                    'cz_count' => $czCount,
+                    'sk_count' => $skCount
+                ],
+                'orders' => $zakazky
+            ]
+        ]);
+
+    } catch (Exception $e) {
+        error_log("exportSalespersonDetail error: " . $e->getMessage());
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ]);
+    }
 }
