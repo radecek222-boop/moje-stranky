@@ -2618,6 +2618,12 @@ ol li {
     display: none !important;
 }
 
+/* OVERRIDE: Černé pozadí pro admin dashboard landing page */
+body.admin-dashboard-page {
+    background: #000 !important;
+    overflow: hidden !important;
+}
+
 /* ===========================================================================
    ADMIN LANDING PAGE - Planetární systém
    WGS + ADMIN jako slunce, karty se točí dokola jako planety
