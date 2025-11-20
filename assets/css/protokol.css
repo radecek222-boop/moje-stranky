@@ -621,6 +621,40 @@ button.btn:hover {
     overflow: visible !important;
   }
 
+  /* PDF export: Tabulky vedle sebe (desktop layout) */
+  body.pdf-export-mode .two-col-table {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 20px !important;
+  }
+
+  body.pdf-export-mode .col {
+    min-width: auto !important;
+    flex: 1 !important;
+  }
+
+  /* PDF export: Section titles desktop velikost */
+  body.pdf-export-mode .section-title {
+    font-size: 10px !important;
+    padding: 5px 7px !important;
+    margin-top: 13px !important;
+    margin-bottom: 5px !important;
+  }
+
+  body.pdf-export-mode .section-title .en-label {
+    font-size: 0.7em !important;
+  }
+
+  /* PDF export: Skrýt tlačítka */
+  body.pdf-export-mode .btns {
+    display: none !important;
+  }
+
+  /* PDF export: Table styling */
+  body.pdf-export-mode td {
+    padding: 2px 6px !important;
+  }
+
   /* Jednotný font na mobilu */
   body {
     font-size: 14px;
