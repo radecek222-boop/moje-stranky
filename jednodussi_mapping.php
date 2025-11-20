@@ -269,67 +269,93 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
                 <form id="mappingForm">
                     <div class="form-group">
                         <label>1️⃣ Číslo reklamace:</label>
-                        <input type="text" name="cislo" placeholder="např. NCE25-00002444-39">
+                        <input type="text" name="cislo" placeholder="Hodnota z PDF (např. NCE25-00002444-39)">
+                        <small style="color: #666;">Jaký TEXT je PŘED touto hodnotou v PDF? (např. "Číslo reklamace:", "Čislo reklamace:")</small>
+                        <input type="text" name="cislo_label" placeholder="Label v PDF (např. Číslo reklamace:)" style="margin-top: 5px; border-color: #ffc107;">
                     </div>
 
                     <div class="form-group">
                         <label>2️⃣ Jméno a příjmení:</label>
-                        <input type="text" name="jmeno" placeholder="např. Jan Novák">
+                        <input type="text" name="jmeno" placeholder="Hodnota z PDF (např. Jan Novák)">
+                        <small style="color: #666;">Jaký TEXT je PŘED touto hodnotou?</small>
+                        <input type="text" name="jmeno_label" placeholder="Label v PDF (např. Jméno a příjmení:)" style="margin-top: 5px; border-color: #ffc107;">
                     </div>
 
                     <div class="form-group">
                         <label>3️⃣ Email:</label>
-                        <input type="email" name="email" placeholder="např. jan@email.cz">
+                        <input type="email" name="email" placeholder="Hodnota z PDF (např. jan@email.cz)">
+                        <small style="color: #666;">Jaký TEXT je PŘED touto hodnotou?</small>
+                        <input type="text" name="email_label" placeholder="Label v PDF (volitelné)" style="margin-top: 5px; border-color: #ffc107;">
                     </div>
 
                     <div class="form-group">
                         <label>4️⃣ Telefon:</label>
-                        <input type="text" name="telefon" placeholder="např. 777 123 456">
+                        <input type="text" name="telefon" placeholder="Hodnota z PDF (např. 777 123 456)">
+                        <small style="color: #666;">Jaký TEXT je PŘED touto hodnotou?</small>
+                        <input type="text" name="telefon_label" placeholder="Label v PDF (volitelné)" style="margin-top: 5px; border-color: #ffc107;">
                     </div>
 
                     <div class="form-group">
                         <label>5️⃣ Ulice a číslo popisné:</label>
-                        <input type="text" name="ulice" placeholder="např. Hlavní 123">
+                        <input type="text" name="ulice" placeholder="Hodnota z PDF (např. Hlavní 123)">
+                        <small style="color: #666;">Jaký TEXT je PŘED touto hodnotou?</small>
+                        <input type="text" name="ulice_label" placeholder="Label v PDF (volitelné)" style="margin-top: 5px; border-color: #ffc107;">
                     </div>
 
                     <div class="form-group">
                         <label>6️⃣ Město:</label>
-                        <input type="text" name="mesto" placeholder="např. Praha">
+                        <input type="text" name="mesto" placeholder="Hodnota z PDF (např. Praha)">
+                        <small style="color: #666;">Jaký TEXT je PŘED touto hodnotou?</small>
+                        <input type="text" name="mesto_label" placeholder="Label v PDF (volitelné)" style="margin-top: 5px; border-color: #ffc107;">
                     </div>
 
                     <div class="form-group">
                         <label>7️⃣ PSČ:</label>
-                        <input type="text" name="psc" placeholder="např. 110 00">
+                        <input type="text" name="psc" placeholder="Hodnota z PDF (např. 110 00)">
+                        <small style="color: #666;">Jaký TEXT je PŘED touto hodnotou?</small>
+                        <input type="text" name="psc_label" placeholder="Label v PDF (volitelné)" style="margin-top: 5px; border-color: #ffc107;">
                     </div>
 
                     <div class="form-group">
                         <label>8️⃣ Datum prodeje:</label>
-                        <input type="text" name="datum_prodeje" placeholder="např. 01.01.2025">
+                        <input type="text" name="datum_prodeje" placeholder="Hodnota z PDF (např. 01.01.2025)">
+                        <small style="color: #666;">Jaký TEXT je PŘED touto hodnotou?</small>
+                        <input type="text" name="datum_prodeje_label" placeholder="Label v PDF (např. Datum vyhotovení:)" style="margin-top: 5px; border-color: #ffc107;">
                     </div>
 
                     <div class="form-group">
                         <label>9️⃣ Datum reklamace:</label>
-                        <input type="text" name="datum_reklamace" placeholder="např. 15.01.2025">
+                        <input type="text" name="datum_reklamace" placeholder="Hodnota z PDF (např. 15.01.2025)">
+                        <small style="color: #666;">Jaký TEXT je PŘED touto hodnotou?</small>
+                        <input type="text" name="datum_reklamace_label" placeholder="Label v PDF (např. Datum podání:)" style="margin-top: 5px; border-color: #ffc107;">
                     </div>
 
                     <div class="form-group">
                         <label>🔟 Model:</label>
-                        <input type="text" name="model" placeholder="např. C157 Intenso">
+                        <input type="text" name="model" placeholder="Hodnota z PDF (např. C157 Intenso)">
+                        <small style="color: #666;">Jaký TEXT je PŘED touto hodnotou?</small>
+                        <input type="text" name="model_label" placeholder="Label v PDF (např. Model:)" style="margin-top: 5px; border-color: #ffc107;">
                     </div>
 
                     <div class="form-group">
                         <label>1️⃣1️⃣ Provedení:</label>
-                        <input type="text" name="provedeni" placeholder="např. TG 20JJ">
+                        <input type="text" name="provedeni" placeholder="Hodnota z PDF (např. TG 20JJ)">
+                        <small style="color: #666;">Jaký TEXT je PŘED touto hodnotou?</small>
+                        <input type="text" name="provedeni_label" placeholder="Label v PDF (např. Složení:)" style="margin-top: 5px; border-color: #ffc107;">
                     </div>
 
                     <div class="form-group">
                         <label>1️⃣2️⃣ Barva/Látka:</label>
-                        <input type="text" name="barva" placeholder="např. Light Beige">
+                        <input type="text" name="barva" placeholder="Hodnota z PDF (např. Light Beige)">
+                        <small style="color: #666;">Jaký TEXT je PŘED touto hodnotou?</small>
+                        <input type="text" name="barva_label" placeholder="Label v PDF (např. Látka:)" style="margin-top: 5px; border-color: #ffc107;">
                     </div>
 
                     <div class="form-group">
                         <label>1️⃣3️⃣ Popis problému:</label>
-                        <textarea name="popis_problemu" placeholder="např. Vadný mechanismus..."></textarea>
+                        <textarea name="popis_problemu" placeholder="Hodnota z PDF (např. Vadný mechanismus...)"></textarea>
+                        <small style="color: #666;">Jaký TEXT je PŘED touto hodnotou?</small>
+                        <input type="text" name="popis_problemu_label" placeholder="Label v PDF (např. Závada:)" style="margin-top: 5px; border-color: #ffc107;">
                     </div>
 
                     <button type="button" class="generate-btn" onclick="vygenerujPatterns()">
