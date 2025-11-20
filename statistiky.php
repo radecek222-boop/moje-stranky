@@ -30,6 +30,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
   <link rel="stylesheet" href="assets/css/statistiky.min.css">
   <link rel="stylesheet" href="assets/css/statistiky-fixes.css">
   <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.css">
 
   <style>
 /* Kompaktní statistiky */

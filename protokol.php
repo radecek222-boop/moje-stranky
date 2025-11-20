@@ -215,6 +215,7 @@ if ($initialBootstrapData) {
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/protokol.css">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.css">
 </head>
 
 <body>
