@@ -167,6 +167,7 @@ if (!$isAdmin && !$isTechnik) {
 
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/photocustomer.min.css">
+  <link rel="stylesheet" href="assets/css/photocustomer-collapsible.css">
 </head>
 
 <body>
@@ -175,30 +176,33 @@ if (!$isAdmin && !$isTechnik) {
 
 <!-- HLAVNÍ OBSAH -->
 <div class="main-content">
-  
-  <!-- HLAVIČKA STRÁNKY -->
-  <div class="page-header">
-    <h1 class="page-title">Fotodokumentace</h1>
-    <p class="page-subtitle">Pořízení fotografií a videa ze servisu</p>
-  </div>
-  
-  <!-- INFORMACE O ZAKÁZCE -->
-  <div class="info-box">
-    <div class="info-row">
-      <span class="info-label">Zákazník</span>
-      <span class="info-value" id="customerName">-</span>
+
+  <!-- ROZBALOVACÍ INFORMACE O ZÁKAZNÍKOVI -->
+  <div class="customer-info-collapsible">
+    <div class="customer-info-header" id="customerInfoToggle">
+      <span class="customer-info-name" id="customerInfoName">Zákazník</span>
+      <svg class="customer-info-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
     </div>
-    <div class="info-row">
-      <span class="info-label">Adresa</span>
-      <span class="info-value" id="customerAddress">-</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">Model</span>
-      <span class="info-value" id="customerModel">-</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">Kontakt</span>
-      <span class="info-value" id="customerContact">-</span>
+
+    <div class="customer-info-content" id="customerInfoContent">
+      <div class="info-row">
+        <span class="info-label">Zákazník</span>
+        <span class="info-value" id="customerName">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Adresa</span>
+        <span class="info-value" id="customerAddress">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Model</span>
+        <span class="info-value" id="customerModel">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Kontakt</span>
+        <span class="info-value" id="customerContact">-</span>
+      </div>
     </div>
   </div>
   
@@ -260,6 +264,7 @@ if (!$isAdmin && !$isTechnik) {
 <input type="file" id="mediaInput" accept="image/*,video/*" capture="environment" multiple>
 
 <!-- External JavaScript -->
+<script src="assets/js/photocustomer-collapsible.js" defer></script>
 <script src="assets/js/photocustomer.js" defer></script>
 </body>
 </html>
