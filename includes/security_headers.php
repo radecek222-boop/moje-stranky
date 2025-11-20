@@ -33,6 +33,7 @@ $csp = [
     "img-src 'self' data: blob: https: https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
     "font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
     "connect-src 'self' https:",
+    "frame-src 'self' blob:", // Povolit blob URLs v iframe (PDF preview)
     "worker-src 'self' blob:", // Povolit PDF.js workers
     "frame-ancestors 'self'",
     "base-uri 'self'",
