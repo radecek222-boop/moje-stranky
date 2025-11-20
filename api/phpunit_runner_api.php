@@ -40,6 +40,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCSRF();
 }
 
+// KRITICKÁ KONTROLA: Funkce exec() musí být povolená
+$disabledFunctions = explode(',', ini_get('disable_functions'));
+$disabledFunctions = array_map('trim', $disabledFunctions);
+$execDisabled = in_array('exec', $disabledFunctions) || !function_exists('exec');
+
+if ($execDisabled) {
+    http_response_code(503);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'PHPUnit Test Runner není dostupný na tomto serveru.',
+        'detail' => 'Funkce exec() je zakázána v php.ini (disable_functions). PHPUnit vyžaduje exec() pro spouštění testů. Kontaktujte administrátora serveru pro povolení této funkce.',
+        'disabled_functions' => implode(', ', array_filter($disabledFunctions))
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 $akce = $_POST['akce'] ?? $_GET['akce'] ?? '';
 
 try {
