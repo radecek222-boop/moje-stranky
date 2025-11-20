@@ -99,6 +99,7 @@ try {
                 // Přidat novou šablonu
                 $stmt = $pdo->prepare("
                     INSERT INTO wgs_notifications (
+                        id,
                         name,
                         description,
                         type,
@@ -110,6 +111,7 @@ try {
                         created_at,
                         updated_at
                     ) VALUES (
+                        :id,
                         :name,
                         :description,
                         :type,
@@ -170,6 +172,7 @@ try {
 HTML;
 
                 $stmt->execute([
+                    'id' => 'contact_attempt',
                     'name' => 'Pokus o kontakt',
                     'description' => 'Email odeslaný zákazníkovi po neúspěšném pokusu o telefonický kontakt',
                     'type' => 'email',
@@ -183,7 +186,7 @@ HTML;
                 echo "<div class='success'>";
                 echo "<strong>✅ Email šablona úspěšně přidána!</strong><br><br>";
                 echo "Název: <strong>Pokus o kontakt</strong><br>";
-                echo "ID: <strong>" . $pdo->lastInsertId() . "</strong><br>";
+                echo "ID: <strong>contact_attempt</strong><br>";
                 echo "Typ: email<br>";
                 echo "Příjemce: zákazník<br>";
                 echo "Trigger: contact_attempt<br>";
