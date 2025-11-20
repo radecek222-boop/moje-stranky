@@ -461,7 +461,13 @@ function handleMonthChange() {
     const dateTo = document.getElementById('filter-date-to');
     const value = monthSelect.value;
 
-    if (value === 'current') {
+    if (value === 'all') {
+        // Všechny - žádný datumový filtr
+        dateFrom.value = '';
+        dateTo.value = '';
+        dateFrom.disabled = true;
+        dateTo.disabled = true;
+    } else if (value === 'current') {
         // Aktuální měsíc - od 1. dne do dneška
         const now = new Date();
         const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -501,7 +507,7 @@ function handleMonthChange() {
  * Reset všech filtrů
  */
 function resetFilters() {
-    document.getElementById('filter-month').value = 'current';
+    document.getElementById('filter-month').value = 'all';
 
     const salespersonSelect = document.getElementById('filter-salesperson');
     if (salespersonSelect) salespersonSelect.selectedIndex = 0;
