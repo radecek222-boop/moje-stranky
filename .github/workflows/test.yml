@@ -1,0 +1,34 @@
+name: 🧪 Tests
+
+on:
+  push:
+    branches:
+      - main
+      - 'claude/**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: 🧪 Run PHPUnit Tests
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐘 Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo, pdo_sqlite, mbstring, json
+          coverage: none  # Bez coverage = rychlejší
+
+      - name: 📦 Install Composer
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: 🧪 Run Tests
+        run: |
+          vendor/bin/phpunit --colors=always --testdox
+          echo "✅ Všechny testy prošly!"
