@@ -86,25 +86,27 @@ WHERE zdroj = 'natuzzi';
 
 ## 🚀 CO MUSÍTE UDĚLAT:
 
-### **KROK 1: Aktualizovat patterns v databázi**
+### **KROK 1: Spustit migrační skripty**
 
-1. Otevřete **phpMyAdmin**
-2. Vyberte databázi `wgs_service`
-3. Spusťte tyto SQL příkazy:
+Otevřete tyto odkazy v prohlížeči (automaticky se otevře migrační rozhraní):
 
-```sql
--- 1. Oprava patternu pro ulici v NATUZZI
-UPDATE wgs_pdf_parser_configs
-SET regex_patterns = JSON_SET(
-    regex_patterns,
-    '$.ulice',
-    '/adresa:\\\\s+([^\\\\n]+?)(?:\\\\s+(?:Meno|Jméno)|$)/ui'
-)
-WHERE zdroj = 'natuzzi';
-
--- 2. Kompletní update PHASE patterns
--- (zkopírujte celý obsah souboru aplikuj_phase_patterns.sql)
+#### **A) Oprava patternu pro ulici:**
 ```
+https://www.wgs-service.cz/oprav_ulici_pattern.php
+```
+- Zobrazí se stávající patterns pro NATUZZI a PHASE
+- Klikněte **"▶️ SPUSTIT MIGRACI"**
+- Opraví pattern pro pole "ulice" v obou protokolech
+
+#### **B) Aktualizace PHASE patterns:**
+```
+https://www.wgs-service.cz/aplikuj_phase_patterns.php
+```
+- Zobrazí se náhled co bude provedeno
+- Klikněte **"▶️ SPUSTIT MIGRACI"**
+- Aktualizuje všechny patterns pro slovenský PHASE protokol
+
+---
 
 ### **KROK 2: Otestovat NATUZZI PDF**
 
