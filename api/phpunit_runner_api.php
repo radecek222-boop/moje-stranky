@@ -11,12 +11,26 @@ require_once __DIR__ . '/../includes/csrf_helper.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
+// DEBUG: Logovat session stav
+error_log("=== PHPUnit API DEBUG ===");
+error_log("Session ID: " . session_id());
+error_log("Session is_admin: " . (isset($_SESSION['is_admin']) ? var_export($_SESSION['is_admin'], true) : 'NOT SET'));
+error_log("Session user_id: " . ($_SESSION['user_id'] ?? 'NOT SET'));
+error_log("Session role: " . ($_SESSION['role'] ?? 'NOT SET'));
+error_log("========================");
+
 // BEZPEČNOST: Kontrola admin přihlášení
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     http_response_code(403);
     echo json_encode([
         'status' => 'error',
-        'message' => 'Neautorizovaný přístup. Pouze admin může spouštět testy.'
+        'message' => 'Neautorizovaný přístup. Pouze admin může spouštět testy.',
+        'debug' => [
+            'session_id' => session_id(),
+            'is_admin_set' => isset($_SESSION['is_admin']),
+            'is_admin_value' => $_SESSION['is_admin'] ?? null,
+            'role' => $_SESSION['role'] ?? null
+        ]
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }

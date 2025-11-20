@@ -110,6 +110,9 @@ try {
     if (!empty($bodyClasses)) echo ' class="' . implode(' ', $bodyClasses) . '"';
 ?>>
 
+<!-- CSRF Token pro API volání -->
+<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+
 <?php
 // Landing page - full screen s planetárními kartami
 if (!$embedMode && $activeTab === 'dashboard'):
