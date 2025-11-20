@@ -314,9 +314,8 @@ input[readonly], textarea[readonly] {
 }
 .btns {
   margin-top: 25px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
   padding-top: 20px;
   border-top: 2px solid #e0e0e0;
@@ -344,9 +343,9 @@ button.btn:hover {
   color: #fff;
 }
 .btn-clear {
-  background: #fff;
-  color: #666;
-  border: 1px solid #999;
+  background: #ffe6e6;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
   padding: 4px 10px;
   font-size: 0.75em;
   cursor: pointer;
@@ -355,7 +354,8 @@ button.btn:hover {
   white-space: nowrap;
 }
 .btn-clear:hover {
-  background: #f5f5f5;
+  background: #ffcdd2;
+  color: #b71c1c;
 }
 .notif {
   position: fixed;
@@ -792,7 +792,7 @@ button.btn:hover {
   }
 
   .btns {
-    flex-direction: column;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
 
