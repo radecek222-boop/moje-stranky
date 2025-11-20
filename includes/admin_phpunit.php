@@ -191,6 +191,40 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     100% { transform: rotate(360deg); }
 }
 
+.progress-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+.progress-bar-wrapper {
+    width: 100%;
+    height: 30px;
+    background: #e0e0e0;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2D5016 0%, #4a7f29 100%);
+    width: 0%;
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+.progress-text {
+    margin-top: 10px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
 .phpunit-status {
     padding: 15px 20px;
     border-radius: 8px;
@@ -366,7 +400,13 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     <!-- Loading Indicator -->
     <div id="phpunit-loading" class="phpunit-loading">
         <div class="phpunit-spinner"></div>
-        <p>Spouštím testy, prosím čekejte...</p>
+        <p id="loading-message">Spouštím testy, prosím čekejte...</p>
+        <div class="progress-container">
+            <div class="progress-bar-wrapper">
+                <div class="progress-bar-fill" id="progress-bar">0%</div>
+            </div>
+            <div class="progress-text" id="progress-text">Inicializace...</div>
+        </div>
     </div>
 
     <!-- Test Results -->
@@ -417,6 +457,33 @@ function zobrazLoading(zobrazit) {
     document.querySelectorAll('.phpunit-btn').forEach(btn => {
         btn.disabled = zobrazit;
     });
+
+    // Reset progress bar při zobrazení
+    if (zobrazit) {
+        aktualizovatProgress(0, 'Inicializace...');
+    }
+}
+
+/**
+ * Aktualizuje progress bar
+ */
+function aktualizovatProgress(procenta, text, zprava = null) {
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const loadingMessage = document.getElementById('loading-message');
+
+    if (progressBar) {
+        progressBar.style.width = procenta + '%';
+        progressBar.textContent = procenta + '%';
+    }
+
+    if (progressText && text) {
+        progressText.textContent = text;
+    }
+
+    if (loadingMessage && zprava) {
+        loadingMessage.textContent = zprava;
+    }
 }
 
 /**
@@ -471,18 +538,28 @@ function zobrazStatistiky(vysledek) {
  */
 async function spustitVsechnyTesty() {
     zobrazLoading(true);
+    aktualizovatProgress(10, 'Příprava testů...', 'Spouštím všechny testy...');
 
     try {
         const formData = new FormData();
         formData.append('csrf_token', csrfToken);
         formData.append('akce', 'spustit_testy');
 
+        // Simulace progressu během běhu testů
+        setTimeout(() => aktualizovatProgress(30, 'Spouštím testy...'), 500);
+        setTimeout(() => aktualizovatProgress(50, 'Probíhá testování...'), 1500);
+        setTimeout(() => aktualizovatProgress(70, 'Zpracovávám výsledky...'), 3000);
+
         const odpoved = await fetch('/api/phpunit_runner_api.php', {
             method: 'POST',
             body: formData
         });
 
+        aktualizovatProgress(90, 'Dokončuji...', 'Zpracovávám výsledky...');
+
         const data = await odpoved.json();
+
+        aktualizovatProgress(100, 'Hotovo!', 'Testy dokončeny');
 
         if (data.status === 'success' || data.status === 'warning') {
             zobrazStatus(data.status, data.message);
@@ -503,6 +580,7 @@ async function spustitVsechnyTesty() {
  */
 async function spustitTestSuite(testsuite) {
     zobrazLoading(true);
+    aktualizovatProgress(10, 'Příprava test suite...', `Spouštím test suite: ${testsuite}`);
 
     try {
         const formData = new FormData();
@@ -510,12 +588,19 @@ async function spustitTestSuite(testsuite) {
         formData.append('akce', 'spustit_testsuite');
         formData.append('testsuite', testsuite);
 
+        setTimeout(() => aktualizovatProgress(30, 'Spouštím testy...'), 300);
+        setTimeout(() => aktualizovatProgress(60, 'Probíhá testování...'), 1000);
+
         const odpoved = await fetch('/api/phpunit_runner_api.php', {
             method: 'POST',
             body: formData
         });
 
+        aktualizovatProgress(90, 'Dokončuji...', 'Zpracovávám výsledky...');
+
         const data = await odpoved.json();
+
+        aktualizovatProgress(100, 'Hotovo!', 'Test suite dokončen');
 
         if (data.status === 'success' || data.status === 'warning') {
             zobrazStatus(data.status, data.message);
@@ -536,18 +621,27 @@ async function spustitTestSuite(testsuite) {
  */
 async function spustitCoverage() {
     zobrazLoading(true);
+    aktualizovatProgress(10, 'Příprava coverage analýzy...', 'Generuji coverage report...');
 
     try {
         const formData = new FormData();
         formData.append('csrf_token', csrfToken);
         formData.append('akce', 'spustit_coverage');
 
+        setTimeout(() => aktualizovatProgress(25, 'Analyzuji kód...'), 500);
+        setTimeout(() => aktualizovatProgress(50, 'Generuji report...'), 2000);
+        setTimeout(() => aktualizovatProgress(75, 'Finalizuji coverage...'), 4000);
+
         const odpoved = await fetch('/api/phpunit_runner_api.php', {
             method: 'POST',
             body: formData
         });
 
+        aktualizovatProgress(90, 'Zpracovávám výsledky...', 'Dokončuji...');
+
         const data = await odpoved.json();
+
+        aktualizovatProgress(100, 'Hotovo!', 'Coverage report dokončen');
 
         if (data.status === 'success' || data.status === 'warning') {
             zobrazStatus(data.status, data.message);
@@ -634,18 +728,30 @@ async function nainstavovatZavislosti() {
     }
 
     zobrazLoading(true);
+    aktualizovatProgress(5, 'Příprava instalace...', 'Spouštím composer install...');
 
     try {
         const formData = new FormData();
         formData.append('csrf_token', csrfToken);
         formData.append('akce', 'nainstalovat_zavislosti');
 
+        // Pomalejší progress pro dlouhodobou operaci
+        setTimeout(() => aktualizovatProgress(15, 'Stahuji balíčky...'), 1000);
+        setTimeout(() => aktualizovatProgress(30, 'Instaluji závislosti...'), 3000);
+        setTimeout(() => aktualizovatProgress(50, 'Kompiluji autoloader...'), 6000);
+        setTimeout(() => aktualizovatProgress(70, 'Optimalizuji balíčky...'), 9000);
+        setTimeout(() => aktualizovatProgress(85, 'Finalizuji instalaci...'), 12000);
+
         const odpoved = await fetch('/api/phpunit_runner_api.php', {
             method: 'POST',
             body: formData
         });
 
+        aktualizovatProgress(95, 'Dokončuji...', 'Kontroluji instalaci...');
+
         const data = await odpoved.json();
+
+        aktualizovatProgress(100, 'Hotovo!', 'Instalace dokončena');
 
         if (data.status === 'success') {
             zobrazStatus('success', data.message);
