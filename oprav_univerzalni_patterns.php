@@ -62,7 +62,8 @@ try {
     echo "<div class='error'>";
     echo "<strong>🐛 NALEZENY PROBLÉMY v NCM-NATUZZI.pdf:</strong><br><br>";
     echo "1. Pattern pro číslo reklamace je příliš specifický - potřebujeme podporovat <strong>JAKÝKOLIV prefix</strong> (NCE, NCM, NBR, NKE, UKK, MOR, ...)<br>";
-    echo "2. Pattern pro ulici najde PRVNÍ adresu (zákazníka) místo DRUHÉ (místa reklamace)<br>";
+    echo "2. Pattern pro ulici zachycuje špatný text (\"Dr.HERMANN ASSET MA\" místo \"Jungmannovo náměstí 76\")<br>";
+    echo "3. PSČ není zachyceno z \"Místo reklamace\" (zachycuje se z \"Zákazník\")<br>";
     echo "</div>";
 
     if (isset($_GET['execute']) && $_GET['execute'] === '1') {
@@ -78,8 +79,13 @@ try {
                 //                                   ^ignorovat^    ^^^^^zachytit tento^^^^^
                 'cislo_reklamace' => '/Čislo reklamace:\s+[A-Z0-9\-]+\s+([A-Z0-9\-\/]+)/ui',
 
-                // Ulice - hledat v sekci "Místo reklamace" (ne "Zákazník")
-                'ulice' => '/Místo reklamace.*?Adresa:\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][^\n]+?)\s+(?:Jméno společnosti|Email)/uis'
+                // Ulice - hledat mezi "Město:" a "Adresa:" v sekci "Místo reklamace"
+                // RAW text: "Praha 1 Město: Jungmannovo náměstí 76 Adresa: Dr.HERMANN..."
+                //                         ^^^^^^^^^^^^^^^^^^^^^
+                'ulice' => '/Místo reklamace.*?Město:\s+[^\n]+?\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][^\n]+?)\s+Adresa:/uis',
+
+                // PSČ - z sekce "Místo reklamace" (ne "Zákazník")
+                'psc' => '/Místo reklamace.*?PSČ:\s+(\d{3}\s?\d{2}|\d{5})/uis'
             ];
 
             // Aktualizovat NATUZZI patterns
@@ -91,6 +97,7 @@ try {
             // Nahradit problematické patterns
             $patterns['cislo_reklamace'] = $novePatterns['cislo_reklamace'];
             $patterns['ulice'] = $novePatterns['ulice'];
+            $patterns['psc'] = $novePatterns['psc'];
 
             $stmt = $pdo->prepare("
                 UPDATE wgs_pdf_parser_configs
@@ -104,8 +111,9 @@ try {
             echo "<div class='success'>";
             echo "✅ NATUZZI patterns aktualizovány!<br><br>";
             echo "<strong>Změněné patterns:</strong><br>";
-            echo "• <code>cislo_reklamace</code>: Nyní akceptuje jakýkoliv prefix (NCE, NCM, ...)<br>";
-            echo "• <code>ulice</code>: Nyní hledá adresu v sekci \"Místo reklamace\"";
+            echo "• <code>cislo_reklamace</code>: Nyní akceptuje jakýkoliv prefix (NCE, NCM, NBR, ...)<br>";
+            echo "• <code>ulice</code>: Nyní hledá mezi \"Město:\" a \"Adresa:\" v sekci \"Místo reklamace\"<br>";
+            echo "• <code>psc</code>: Nyní hledá PSČ v sekci \"Místo reklamace\" (ne \"Zákazník\")";
             echo "</div>";
 
             $pdo->commit();
@@ -124,7 +132,13 @@ try {
             echo "<tr>";
             echo "<td><strong>Ulice</strong></td>";
             echo "<td><code>" . htmlspecialchars($novePatterns['ulice']) . "</code></td>";
-            echo "<td>Adresa z &quot;Místo reklamace&quot; (ne &quot;Zákazník&quot;)</td>";
+            echo "<td>Text mezi &quot;Město:&quot; a &quot;Adresa:&quot; v sekci &quot;Místo reklamace&quot;</td>";
+            echo "</tr>";
+
+            echo "<tr>";
+            echo "<td><strong>PSČ</strong></td>";
+            echo "<td><code>" . htmlspecialchars($novePatterns['psc']) . "</code></td>";
+            echo "<td>PSČ z &quot;Místo reklamace&quot; (ne &quot;Zákazník&quot;)</td>";
             echo "</tr>";
 
             echo "</table>";
@@ -132,9 +146,13 @@ try {
             echo "<div class='info'>";
             echo "<strong>🧪 TEST:</strong><br><br>";
             echo "Pro <strong>NCM-NATUZZI.pdf</strong> by mělo zachytit:<br>";
-            echo "• Číslo: <code>NCM23-00000208-41/CZ709-2025</code><br>";
-            echo "• Ulice: <code>Jungmannovo náměstí 76</code> (Místo reklamace)<br><br>";
-            echo "NE: <code>Beranových 827</code> (to je adresa zákazníka)";
+            echo "• Číslo: <code>NCM23-00000208-41/CZ709-2025</code> ✅<br>";
+            echo "• Ulice: <code>Jungmannovo náměstí 76</code> ✅<br>";
+            echo "• PSČ: <code>110 00</code> ✅<br>";
+            echo "• Město: <code>Praha 1</code> (už funguje)<br><br>";
+            echo "<strong>❌ NE:</strong><br>";
+            echo "• Ulice: <code>Beranových 827</code> (to je adresa Zákazníka, ne Místo reklamace)<br>";
+            echo "• PSČ: <code>19900</code> (to je PSČ Zákazníka, ne Místo reklamace)";
             echo "</div>";
 
             echo "<div class='success'>";
@@ -150,8 +168,9 @@ try {
     } else {
         echo "<div class='warning'>";
         echo "<strong>📋 Co bude provedeno:</strong><br><br>";
-        echo "1. <strong>Číslo reklamace</strong>: Změna patternu aby fungoval pro všechny prefixy<br>";
-        echo "2. <strong>Ulice</strong>: Změna patternu aby hledal v sekci \"Místo reklamace\"<br>";
+        echo "1. <strong>Číslo reklamace</strong>: Univerzální pattern pro JAKÝKOLIV prefix<br>";
+        echo "2. <strong>Ulice</strong>: Pattern hledá mezi \"Město:\" a \"Adresa:\" v sekci \"Místo reklamace\"<br>";
+        echo "3. <strong>PSČ</strong>: Pattern hledá PSČ v sekci \"Místo reklamace\"<br>";
         echo "</div>";
 
         echo "<h3>Příklad rozdílu:</h3>";
