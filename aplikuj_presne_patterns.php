@@ -146,8 +146,8 @@ try {
                 // Telefon - čísla před "Telefon:"
                 'telefon' => '/([\d\s]+)\s+Telefon:/ui',
 
-                // Ulice - před "Adresa: Jméno společnosti:"
-                'ulice' => '/([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\w\s]+\d+)\s+Adresa:\s+Jméno společnosti:/ui',
+                // Ulice - PO "adresa:" (malé a)
+                'ulice' => '/adresa:\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\w\s]+\d+)/ui',
 
                 // Město - před "Město:"
                 'mesto' => '/([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][a-záčďéěíňóřšťúůýž]+)\s+Město:/ui',

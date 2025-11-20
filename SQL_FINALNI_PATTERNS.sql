@@ -19,7 +19,7 @@ SET regex_patterns = '{
   "jmeno": "/Jméno společnosti:\\\\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][a-záčďéěíňóřšťúůýž]+\\\\s+[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][a-záčďéěíňóřšťúůýž]+)\\\\s+Poschodí:/ui",
   "email": "/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,})\\\\s+[\\\\d\\\\s]+Telefon:/ui",
   "telefon": "/([\\\\d\\\\s]+)\\\\s+Telefon:/ui",
-  "ulice": "/([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\\\\w\\\\s]+\\\\d+)\\\\s+Adresa:\\\\s+Jméno společnosti:/ui",
+  "ulice": "/adresa:\\\\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\\\\w\\\\s]+\\\\d+)/ui",
   "mesto": "/([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][a-záčďéěíňóřšťúůýž]+)\\\\s+Město:/ui",
   "psc": "/(\\\\d{5})\\\\s+PSČ:/ui",
   "model": "/Model:\\\\s+([^\\\\n]+?)\\\\s+Složení:/ui",

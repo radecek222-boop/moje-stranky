@@ -92,20 +92,22 @@ kmochova@petrisk.cz  725 387 868 Telefon:
 **Pattern:** `/([\d\s]+)\s+Telefon:/ui`
 
 ### G) Ulice
-**Z PDF (2x v textu!):**
+**Z PDF:**
 ```
-1. Na Blatech 396 Adresa:  Jméno společnosti:  (PRVNÍ výskyt)
-2. Na Blatech 396 Adresa:  Jméno společnosti:  Petr Kmoch  (DRUHÝ výskyt - správný)
+adresa: Na Blatech 396
 ```
-**Použít:** Druhý výskyt (po "Místo reklamace")
+**DŮLEŽITÉ:** V PDF je text "adresa:" (malým a)!
+**Ve formuláři:** "ULICE A ČÍSLO POPISNÉ"
+**V SQL:** pole `ulice` VARCHAR(255)
+
+**Použít:** Text PO "adresa:"
 **→ SQL:** `ulice`
-**Pattern:** `/Místo reklamace.*?Adresa:\s+Jméno společnosti:\s+Petr Kmoch.*?Adresa:\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][^\s]+\s+[^\s]+\s+\d+)/uis`
+**Pattern:** `/adresa:\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\w\s]+\d+)/ui`
 
-Nebo jednodušeji: **Hledat "Adresa:" následované "Jméno společnosti:" následované jménem**
-**Pattern:** `/Adresa:\s+Jméno společnosti:\s+Petr Kmoch.*?Město:\s+Osnice.*?Adresa:\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\w\s]+\d+)/uis`
-
-**NEBO NEJJEDNODUŠEJI:** Najít `Na Blatech 396` před `Adresa: Jméno společnosti: Petr Kmoch`
-**Pattern:** `/([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\w\s]+\d+)\s+Adresa:\s+Jméno společnosti:\s+Petr Kmoch/ui`
+**Vysvětlení:**
+- `adresa:` - hledá text "adresa:" (case-insensitive díky `i`)
+- `\s+` - mezery za tím
+- `([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\w\s]+\d+)` - zachytí text začínající velkým písmenem, obsahující slova/mezery, končící číslem
 
 ### H) Město
 **Z PDF:**
@@ -161,7 +163,7 @@ Závada:   Tak odstáté polštáře, že se na posteli nedá spát. Prosím o r
   "jmeno": "/Jméno společnosti:\\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][a-záčďéěíňóřšťúůýž]+\\s+[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][a-záčďéěíňóřšťúůýž]+)\\s+Poschodí:/ui",
   "email": "/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})\\s+[\\d\\s]+Telefon:/ui",
   "telefon": "/([\\d\\s]+)\\s+Telefon:/ui",
-  "ulice": "/([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\\w\\s]+\\d+)\\s+Adresa:\\s+Jméno společnosti:\\s+Petr Kmoch/ui",
+  "ulice": "/adresa:\\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][\\w\\s]+\\d+)/ui",
   "mesto": "/([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][a-záčďéěíňóřšťúůýž]+)\\s+Město:/ui",
   "psc": "/(\\d{5})\\s+PSČ:/ui",
   "model": "/Model:\\s+([^\\n]+?)\\s+Složení:/ui",
