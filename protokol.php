@@ -336,6 +336,33 @@ if ($initialBootstrapData) {
   <div id="notif" class="notif"></div>
 </div>
 
+<!-- PDF Preview Modal -->
+<div class="pdf-preview-overlay" id="pdfPreviewOverlay">
+  <div class="pdf-preview-container">
+    <div class="pdf-preview-header">
+      <h3 class="pdf-preview-title">Náhled PDF</h3>
+      <div class="pdf-preview-actions">
+        <button class="pdf-action-btn pdf-share-btn" id="pdfShareBtn" title="Sdílet / Stáhnout">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+            <polyline points="16 6 12 2 8 6"></polyline>
+            <line x1="12" y1="2" x2="12" y2="15"></line>
+          </svg>
+        </button>
+        <button class="pdf-action-btn pdf-close-btn" id="pdfCloseBtn" title="Zavřít">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="pdf-preview-body">
+      <iframe id="pdfPreviewFrame" class="pdf-preview-frame"></iframe>
+    </div>
+  </div>
+</div>
+
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-spinner"></div>
   <div class="loading-text" id="loadingText">Načítání...</div>
@@ -416,6 +443,7 @@ if ($initialBootstrapData) {
 
 <!-- External JavaScript -->
 <script src="assets/js/protokol-diagnostic.js"></script>
+<script src="assets/js/protokol-pdf-preview.js" defer></script>
 <script src="assets/js/protokol-data-patch.js" defer></script>
 <script src="assets/js/protokol.js" defer></script>
 <script src="assets/js/protokol-fakturace-patch.js" defer></script>

@@ -522,8 +522,30 @@ async function generateProtocolPDF() {
 
   const wrapper = document.querySelector(".wrapper");
   const btns = document.querySelector(".btns");
+  const body = document.body;
 
+  // Skrýt tlačítka
   btns.style.display = "none";
+
+  // KRITICKÉ: Dočasně vypnout mobilní styly pro konzistentní PDF na všech zařízeních
+  body.classList.add("pdf-export-mode");
+
+  // Uložit původní styly wrapper
+  const puvodni = {
+    padding: wrapper.style.padding,
+    fontSize: wrapper.style.fontSize,
+    maxWidth: wrapper.style.maxWidth,
+    margin: wrapper.style.margin
+  };
+
+  // Vynutit desktop layout pro PDF
+  wrapper.style.padding = "30px 35px";
+  wrapper.style.fontSize = "13px";
+  wrapper.style.maxWidth = "900px";
+  wrapper.style.margin = "20px auto";
+
+  // Počkat na reflow
+  await new Promise(resolve => setTimeout(resolve, 100));
 
   const canvas = await html2canvas(wrapper, {
     scale: 3,
@@ -559,7 +581,14 @@ async function generateProtocolPDF() {
 
   doc.addImage(imgData, "JPEG", xOffset, yOffset, imgWidth, imgHeight);
 
+  // Obnovit původní styly
+  wrapper.style.padding = puvodni.padding;
+  wrapper.style.fontSize = puvodni.fontSize;
+  wrapper.style.maxWidth = puvodni.maxWidth;
+  wrapper.style.margin = puvodni.margin;
+
   btns.style.display = "flex";
+  body.classList.remove("pdf-export-mode");
 
   return doc;
 }
@@ -866,8 +895,18 @@ async function exportBothPDFs() {
       // Pokračujeme i přes chybu - alespoň zobrazíme PDF
     }
 
-    // Otevřít JEDNO PDF
-    window.open(URL.createObjectURL(doc.output("blob")), "_blank");
+    // Zobrazit PDF v preview modalu místo window.open
+    const pdfBlob = doc.output("blob");
+    const cisloReklamace = document.getElementById('claim-number')?.value || 'protokol';
+    const nazevSouboru = `WGS_Protokol_${cisloReklamace.replace(/\s+/g, '_')}.pdf`;
+
+    // Použít novou funkci pro zobrazení PDF preview
+    if (typeof otevritPdfPreview === 'function') {
+      otevritPdfPreview(pdfBlob, nazevSouboru);
+    } else {
+      // Fallback na původní window.open pokud funkce není dostupná
+      window.open(URL.createObjectURL(pdfBlob), "_blank");
+    }
 
     // Uložit textová data do DB
     await saveProtokolToDB();

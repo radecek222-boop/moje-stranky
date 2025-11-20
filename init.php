@@ -65,10 +65,11 @@ if (session_status() === PHP_SESSION_NONE) {
     );
 
     // SameSite musí být nastaven přes ini_set (není v session_set_cookie_params v PHP 7.2)
-    // DŮLEŽITÉ: Použijeme 'None' místo 'Lax' aby fungovaly iframe na stejné doméně (např. admin_reklamace_management.php)
-    // 'None' je bezpečné protože máme 'Secure=true' a 'HttpOnly=true'
+    // DŮLEŽITÉ: Použijeme 'Lax' pro lepší kompatibilitu na mobilech
+    // 'Lax' umožňuje first-party cookies (login, navigace) ale blokuje cross-site POST
+    // Toto je bezpečnější než 'None' a funguje lépe na mobilních zařízeních
     if (PHP_VERSION_ID >= 70300) {
-        ini_set('session.cookie_samesite', 'None');
+        ini_set('session.cookie_samesite', 'Lax');
     }
 
     // Nastavení garbage collection
