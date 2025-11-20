@@ -2708,10 +2708,10 @@ body.admin-dashboard-page {
     box-shadow:
         0 0 15px rgba(0, 255, 255, 0.5),
         inset 0 0 20px rgba(255, 255, 255, 0.1);
-    animation: counter-rotate 60s linear infinite reverse;
+    /* Removed animation - positioning transforms must not be overridden */
 }
 
-/* Proti-rotace planet aby zůstaly správně orientované */
+/* Proti-rotace obsahu planet aby text zůstal horizontální */
 @keyframes counter-rotate {
     from { transform: rotate(0deg); }
     to { transform: rotate(-360deg); }
@@ -2731,9 +2731,7 @@ body.admin-dashboard-page {
     background: radial-gradient(circle at 30% 30%, #555, #222, #111);
 }
 
-.admin-planet:hover .planet-content {
-    transform: scale(1.05);
-}
+/* Removed: transform would override counter-rotate animation */
 
 .admin-planet:active {
     transform: scale(1.2) rotate(0deg) !important;
@@ -2836,7 +2834,7 @@ body.admin-dashboard-page {
     transform: translate(-50%, -50%) rotate(337.5deg) translateY(-300px);
 }
 
-/* Obsah planety - perfektně vycentrovaný */
+/* Obsah planety - perfektně vycentrovaný + proti-rotace */
 .planet-content {
     text-align: center;
     color: #fff;
@@ -2846,7 +2844,8 @@ body.admin-dashboard-page {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: transform 1.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+    /* Counter-rotate to keep text horizontal while orbit rotates */
+    animation: counter-rotate 60s linear infinite reverse;
 }
 
 .planet-title {
