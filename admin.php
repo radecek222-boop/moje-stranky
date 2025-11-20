@@ -105,10 +105,17 @@ try {
 
 <body<?php if ($embedMode): ?> class="embed-mode"<?php endif; ?>>
 
-<?php
-// DEBUG: Zkontroluj hodnoty
-echo "<!-- DEBUG: activeTab = '{$activeTab}', embedMode = " . ($embedMode ? 'true' : 'false') . ", condition = " . ((!$embedMode && $activeTab === 'dashboard') ? 'TRUE' : 'FALSE') . " -->";
+<style>
+<?php if (!$embedMode && $activeTab === 'dashboard'): ?>
+/* OVERRIDE: Černé pozadí pro dashboard landing page */
+body {
+    background: #000 !important;
+    overflow: hidden !important;
+}
+<?php endif; ?>
+</style>
 
+<?php
 // Landing page - full screen s planetárními kartami
 if (!$embedMode && $activeTab === 'dashboard'):
 ?>
