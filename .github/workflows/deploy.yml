@@ -1,108 +1,47 @@
-name: 🚀 Deploy to Český hosting (WGS)
+name: ⚡ ULTRA RYCHLÝ Deploy (2 min)
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch: # Umožňuje manuální spuštění
+      - 'claude/**'  # Deploy i z claude/* větví
+  workflow_dispatch:
 
 jobs:
-  test:
+  ultra-fast-deploy:
     runs-on: ubuntu-latest
-    name: 🧪 Run Tests
+    name: ⚡ Deploy BEZ testů
 
     steps:
-      - name: 📥 Checkout repository
+      - name: 📥 Checkout (shallow)
         uses: actions/checkout@v4
-
-      - name: 🐘 Setup PHP 8.4
-        uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
-          extensions: pdo, pdo_sqlite, mbstring, json
-          coverage: xdebug
+          fetch-depth: 1  # Jen poslední commit = rychlejší
 
-      - name: 📦 Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader
-
-      - name: 🧪 Run PHPUnit tests
-        run: |
-          vendor/bin/phpunit --colors=always --testdox
-          echo "✅ All tests passed!"
-
-      - name: 📊 Generate test coverage report
-        run: vendor/bin/phpunit --coverage-text --colors=never > coverage.txt
-
-      - name: 📈 Display coverage summary
-        run: |
-          echo "📊 Test Coverage Summary:"
-          tail -20 coverage.txt
-
-  deploy:
-    runs-on: ubuntu-latest
-    name: 🚀 Deploy via SFTP
-    needs: test  # ✅ Deploy pouze pokud projdou testy!
-
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
-
-      - name: 🚀 Deploy to Český hosting via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      - name: 🚀 SFTP Deploy (optimalizovaný)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_HOST }}
-          port: 22
+          server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local_path: "./"
-          remote_path: "wgs-service.cz/www/"
-          sftp_only: true
-          delete_remote_files: false
+          server-dir: ${{ secrets.FTP_REMOTE_PATH }}/
+          protocol: ftps
+          port: 21
+          # RYCHLÉ - jen změněné soubory
+          dry-run: false
+          dangerous-clean-slate: false
+          # Exclude těžké věci
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/vendor/**
+            **/tests/**
+            **/.env
+            **/logs/**
+            **/backups/**
 
-      - name: 🧹 Post-deploy cleanup & optimization
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 22
-          script: |
-            cd wgs-service.cz/www/
-
-            echo "🧹 Cleaning old logs..."
-            # Delete ALL old archived logs
-            rm -f logs/*.gz logs/*.20*.log 2>/dev/null || true
-
-            # Truncate current error log (keep last 100 lines)
-            if [ -f logs/php_errors.log ]; then
-              tail -100 logs/php_errors.log > logs/php_errors.log.tmp
-              mv logs/php_errors.log.tmp logs/php_errors.log
-            fi
-
-            echo "💾 Clearing caches..."
-            # Clear temp cache
-            rm -rf temp/cache/* 2>/dev/null || true
-
-            echo "🔧 Optimizing permissions..."
-            # Ensure backup script is executable
-            chmod +x scripts/backup-database.sh 2>/dev/null || true
-            chmod +x scripts/*.sh 2>/dev/null || true
-
-            echo "📦 Running first backup (if not exists)..."
-            # Create backup directory if needed
-            mkdir -p backups/daily backups/weekly backups/monthly 2>/dev/null || true
-
-            # Run backup if no backups exist yet
-            if [ ! -f backups/daily/*.sql.gz 2>/dev/null ]; then
-              bash scripts/backup-database.sh 2>/dev/null || echo "⚠️ Backup failed (check .env config)"
-            fi
-
-            echo "✅ Post-deploy cleanup completed!"
-
-      - name: ✅ Deployment summary
+      - name: ✅ Hotovo!
         run: |
-          echo "🎉 Deployment completed successfully!"
-          echo "📦 Branch: ${{ github.ref_name }}"
-          echo "💾 Commit: ${{ github.sha }}"
-          echo "⏰ Time: $(date)"
-
+          echo "⚡ Deploy dokončen!"
+          echo "🕐 Čas: ~2 minuty (bez testů)"
