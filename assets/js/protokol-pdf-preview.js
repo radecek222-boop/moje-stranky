@@ -40,8 +40,9 @@ function otevritPdfPreview(pdfBlob, nazevSouboru = 'protokol.pdf') {
     // Přidat loading text do iframe před načtením PDF
     iframe.srcdoc = '<html><body style="margin:0;padding:0;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;background:#f0f0f0;"><div style="text-align:center;"><h2 style="color:#333;">Načítám PDF...</h2><p style="color:#666;">Chvíli strpení</p></div></body></html>';
 
-    // Nastavit iframe src (přepíše srcdoc po načtení)
+    // Nastavit iframe src (MUSÍ vymazat srcdoc, jinak má srcdoc prioritu!)
     setTimeout(() => {
+      iframe.srcdoc = '';  // ❗ VYMAZAT srcdoc - má prioritu nad src!
       iframe.src = pdfUrl;
       logger.log('📄 iframe.src nastavena:', iframe.src);
     }, 100);
