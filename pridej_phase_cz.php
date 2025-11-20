@@ -174,19 +174,21 @@ try {
             echo "<strong>Priorita:</strong> 95 (mezi NATUZZI a PHASE SK)";
             echo "</div>";
 
-            // 3. Aktualizovat PHASE SK detekční pattern (aby nebyl příliš obecný)
+            // 3. Aktualizovat PHASE SK detekční pattern a prioritu
             $stmt = $pdo->prepare("
                 UPDATE wgs_pdf_parser_configs
                 SET
                     nazev = 'PHASE SK Parser (slovenská terminologie)',
-                    detekce_pattern = 'Reklamačný list|Dátum podania|sedenie a spanie|Miesto reklamácie'
+                    detekce_pattern = 'Reklamačný list|Dátum podania|sedenie a spanie|Miesto reklamácie',
+                    priorita = 90
                 WHERE zdroj = 'phase'
             ");
             $stmt->execute();
 
             echo "<div class='success'>";
-            echo "✅ PHASE SK detekční pattern aktualizován<br>";
-            echo "<strong>Nový pattern:</strong> <code>Reklamačný list|Dátum podania|sedenie a spanie|Miesto reklamácie</code>";
+            echo "✅ PHASE SK detekční pattern a priorita aktualizovány<br>";
+            echo "<strong>Nový pattern:</strong> <code>Reklamačný list|Dátum podania|sedenie a spanie|Miesto reklamácie</code><br>";
+            echo "<strong>Priorita:</strong> 90";
             echo "</div>";
 
             // 4. Aktualizovat NATUZZI detekční pattern (přidat Reklamační list pro odlišení)
