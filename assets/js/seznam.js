@@ -795,8 +795,11 @@ function showCalendar(id) {
   SELECTED_TIME = null;
   
   const content = `
-    ${ModalManager.createHeader('Vyberte termín návštěvy', '<div id="selectedDateDisplay" style="margin-top: 0.5rem; color: var(--c-grey); font-size: 0.75rem;">Zatím nevybráno</div>')}
-    
+    <div class="modal-header">
+      <div id="selectedDateDisplay" style="color: var(--c-grey); font-size: 0.9rem; font-weight: 600; text-align: center;">Zatím nevybráno</div>
+      <button class="modal-close" onclick="ModalManager.close()">✕</button>
+    </div>
+
     <div class="modal-body" style="max-height: 80vh; overflow-y: auto; padding: 1rem;">
       <div class="calendar-container">
         <div id="calGrid"></div>
@@ -938,7 +941,24 @@ function renderCalendar(m, y) {
       SELECTED_DATE = `${d}.${m + 1}.${y}`;
       document.querySelectorAll('.cal-day').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
-      document.getElementById('selectedDateDisplay').textContent = `Vybraný den: ${SELECTED_DATE}`;
+
+      // Získat vzdálenost k zákazníkovi pro zobrazení v hlavičce
+      const currentAddress = Utils.addCountryToAddress(Utils.getAddress(CURRENT_RECORD));
+      let displayText = `Vybraný den: ${SELECTED_DATE}`;
+
+      // Zkusit získat vzdálenost asynchronně
+      if (currentAddress && currentAddress !== '—') {
+        getDistance(WGS_ADDRESS, currentAddress).then(distToCustomer => {
+          if (distToCustomer && distToCustomer.km) {
+            const updatedText = `Vybraný den: ${SELECTED_DATE} — ${distToCustomer.km} km`;
+            document.getElementById('selectedDateDisplay').textContent = updatedText;
+          }
+        }).catch(err => {
+          logger.error('Chyba při získání vzdálenosti:', err);
+        });
+      }
+
+      document.getElementById('selectedDateDisplay').textContent = displayText;
 
       // Zobrazit časy okamžitě
       renderTimeGrid();
@@ -1259,7 +1279,9 @@ function renderTimeGrid() {
     }
   });
   
-  for (let h = 7; h <= 20; h++) {
+  // Časový rozsah: 8:00 - 19:00 (místo původního 7:00 - 20:30)
+  // Snížení z 28 slotů na 22 slotů pro lepší mobilní zobrazení
+  for (let h = 8; h <= 19; h++) {
     for (const mm of [0, 30]) {
       const time = `${String(h).padStart(2, '0')}:${mm === 0 ? '00' : '30'}`;
       const el = document.createElement('div');
@@ -1271,12 +1293,31 @@ function renderTimeGrid() {
       }
       
       el.textContent = time;
-      el.onclick = () => {
+      el.onclick = async () => {
         SELECTED_TIME = time;
         document.querySelectorAll('.time-slot').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
 
-        let displayText = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
+        // Získat adresu zákazníka
+        const currentAddress = Utils.addCountryToAddress(Utils.getAddress(CURRENT_RECORD));
+
+        // Základní text bez vzdálenosti
+        let displayText = `Vybraný termín: ${SELECTED_DATE}`;
+
+        // Zkusit získat vzdálenost (z cache nebo vypočítat)
+        if (currentAddress && currentAddress !== '—') {
+          try {
+            const distToCustomer = await getDistance(WGS_ADDRESS, currentAddress);
+            if (distToCustomer && distToCustomer.km) {
+              displayText += ` — ${distToCustomer.km} km`;
+            }
+          } catch (err) {
+            logger.error('Chyba při získání vzdálenosti:', err);
+          }
+        }
+
+        displayText += ` — ${SELECTED_TIME}`;
+
         if (occupiedTimes[time]) {
           displayText += ` ⚠️ KOLIZE: ${occupiedTimes[time].zakaznik}`;
         }
@@ -1424,7 +1465,7 @@ function showContactMenu(id) {
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
           ${phone ? `<a href="tel:${phone}" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center; background: #1a1a1a; color: white;">Zavolat</a>` : ''}
           <button class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; background: #1a1a1a; color: white;" onclick="closeDetail(); setTimeout(() => showCalendar('${id}'), 100)">Termín návštěvy</button>
-          ${phone ? `<a href="sms:${phone}" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center; background: #444; color: white;">Odeslat SMS</a>` : ''}
+          ${phone ? `<button class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; background: #444; color: white;" onclick="sendContactAttemptEmail('${id}', '${phone}')">Odeslat SMS</button>` : ''}
           ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center; background: #444; color: white;" target="_blank">Navigovat (Waze)</a>` : ''}
         </div>
       </div>
@@ -2397,5 +2438,59 @@ function updateLoadMoreButton() {
     btn.style.display = HAS_MORE_PAGES ? 'block' : 'none';
     btn.disabled = LOADING_MORE;
     btn.textContent = LOADING_MORE ? 'Načítání...' : `Načíst další (stránka ${CURRENT_PAGE + 1})`;
+  }
+}
+
+// === ODESLÁNÍ POKUSU O KONTAKT (EMAIL + SMS) ===
+
+/**
+ * Odešle zákazníkovi email o pokusu o kontakt a otevře SMS aplikaci s předvyplněným textem
+ * @param {string} reklamaceId - ID reklamace
+ * @param {string} telefon - Telefonní číslo zákazníka
+ */
+async function sendContactAttemptEmail(reklamaceId, telefon) {
+  try {
+    // Najít záznam v cache
+    const zaznam = WGS_DATA_CACHE.find(x => x.id == reklamaceId || x.reklamace_id == reklamaceId);
+    if (!zaznam) {
+      showToast('Záznam nenalezen', 'error');
+      return;
+    }
+
+    // Získat CSRF token
+    const csrfToken = await getCSRFToken();
+
+    // Zavolat API pro odeslání emailu
+    const odpoved = await fetch('/api/send_contact_attempt_email.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reklamace_id: reklamaceId,
+        csrf_token: csrfToken
+      })
+    });
+
+    const data = await odpoved.json();
+
+    if (data.success) {
+      logger.log('✓ Email o pokusu o kontakt odeslán zákazníkovi');
+      showToast('Email odeslán zákazníkovi', 'success');
+
+      // ✅ DŮLEŽITÉ: SMS text je nyní generován na serveru ze stejných dat jako email
+      // To znamená, že změna v emailové šabloně automaticky ovlivní i SMS
+      const smsText = data.sms_text || `Dobrý den, pokusili jsme se Vás kontaktovat. Zavolejte prosím zpět na +420 725 965 826. Děkujeme, WGS Service`;
+
+      // Otevřít SMS aplikaci na telefonu s předvyplněným textem
+      const encodedText = encodeURIComponent(smsText);
+      window.location.href = `sms:${telefon}?body=${encodedText}`;
+
+    } else {
+      logger.error('⚠ Chyba při odesílání emailu:', data.error || data.message);
+      showToast(data.error || 'Chyba při odesílání emailu', 'error');
+    }
+
+  } catch (chyba) {
+    logger.error('❌ Chyba při odesílání kontaktního emailu:', chyba);
+    showToast('Nepodařilo se odeslat email', 'error');
   }
 }
