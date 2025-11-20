@@ -105,3 +105,178 @@ body.embed-mode .container {
     color: #ccc !important;
     opacity: 0.8 !important;
 }
+
+/* === HAMBURGER MENU PRO MOBIL === */
+.hamburger-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.5rem;
+    width: 40px;
+    height: 40px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    z-index: 10001;
+    transition: all 0.3s ease;
+}
+
+.hamburger-toggle span {
+    width: 25px;
+    height: 2px;
+    background: white;
+    transition: all 0.3s ease;
+    display: block;
+}
+
+.hamburger-toggle.active span:nth-child(1) {
+    transform: rotate(45deg) translate(8px, 8px);
+}
+
+.hamburger-toggle.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-toggle.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+.hamburger-nav {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.hamburger-nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 400;
+    transition: opacity 0.2s ease;
+    position: relative;
+    padding-bottom: 0.2rem;
+    white-space: nowrap;
+}
+
+.hamburger-nav a:hover,
+.hamburger-nav a.active {
+    opacity: 0.7;
+}
+
+.hamburger-nav a.active::after {
+    content: '';
+    position: absolute;
+    bottom: -0.2rem;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: white;
+}
+
+.hamburger-logout {
+    color: #ff6b6b !important;
+    font-weight: 600 !important;
+}
+
+.hamburger-logout:hover {
+    color: #ff4444 !important;
+}
+
+.hamburger-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.hamburger-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+body.hamburger-menu-open {
+    overflow: hidden;
+}
+
+/* Desktop - skrýt hamburger, zobrazit desktop logout */
+.desktop-only {
+    display: flex;
+}
+
+/* === MOBILNÍ RESPONSIVE === */
+@media (max-width: 768px) {
+    .header-container {
+        padding: 0 1.5rem !important;
+    }
+
+    .hamburger-toggle {
+        display: flex;
+    }
+
+    .desktop-only {
+        display: none;
+    }
+
+    .hamburger-nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 90%;
+        max-width: 85vw;
+        min-width: 200px;
+        height: 100vh;
+        background: #222;
+        flex-direction: column;
+        padding: 80px 0 0 0;
+        gap: 0;
+        margin: 0;
+        z-index: 10000;
+        overflow-y: auto;
+        transition: right 0.3s ease;
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .hamburger-nav.active {
+        right: 0;
+    }
+
+    .hamburger-nav a {
+        display: block;
+        padding: 1rem 1.5rem;
+        width: 100%;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.95rem;
+    }
+
+    .hamburger-nav a:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .hamburger-nav a.active {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .hamburger-nav a.active::after {
+        display: none;
+    }
+
+    .logo .logo-text {
+        font-size: 1.3rem !important;
+    }
+
+    .logo p {
+        font-size: 0.6rem !important;
+    }
+}
