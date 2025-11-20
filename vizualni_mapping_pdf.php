@@ -1,3 +1,16 @@
+<?php
+/**
+ * Vizuální Mapping Tool pro PDF Parser
+ * Interaktivní nástroj pro spojení PDF dat s formulářovými poli
+ */
+require_once __DIR__ . '/init.php';
+
+// Kontrola přihlášení - pouze pro adminy
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    header('Location: login.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -397,7 +410,7 @@
         async function poslNaAPI(text) {
             try {
                 // Získat CSRF token
-                const csrfResponse = await fetch('/api/get_csrf_token.php');
+                const csrfResponse = await fetch('/app/controllers/get_csrf_token.php');
                 const csrfData = await csrfResponse.json();
                 const csrfToken = csrfData.token;
 
@@ -531,7 +544,7 @@ Pokračovat?
 
             try {
                 // Získat CSRF token
-                const csrfResponse = await fetch('/api/get_csrf_token.php');
+                const csrfResponse = await fetch('/app/controllers/get_csrf_token.php');
                 const csrfData = await csrfResponse.json();
                 const csrfToken = csrfData.token;
 

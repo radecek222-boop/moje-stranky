@@ -17,7 +17,7 @@ Je to jako **spojovačka** - vidíš co parser našel vlevo, vidíš pole ve for
 ### KROK 1: Otevři nástroj
 
 ```
-https://www.wgs-service.cz/vizualni_mapping_pdf.html
+https://www.wgs-service.cz/vizualni_mapping_pdf.php
 ```
 
 ### KROK 2: Nahraj PDF
@@ -170,7 +170,7 @@ WHERE nazev = 'NATUZZI Protokol';
 
 | Soubor | Účel |
 |--------|------|
-| `vizualni_mapping_pdf.html` | Vizuální nástroj (frontend) |
+| `vizualni_mapping_pdf.php` | Vizuální nástroj (frontend + backend) |
 | `api/uloz_pdf_mapping.php` | API endpoint pro uložení mappingu |
 | `api/parse_povereni_pdf.php` | API endpoint pro parsování PDF |
 | `NAVOD_VIZUALNI_MAPPING.md` | Tento návod |
