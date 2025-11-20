@@ -454,7 +454,8 @@ async function saveToProtocol() {
     return;
   }
 
-  showWaitDialog(true, 'Odesílám do protokolu...');
+  // ⏳ ZOBRAZIT PŘESÝPACÍ HODINY
+  showWaitDialog(true, 'Ukládám fotografie...');
 
   try {
     // ✅ OPRAVENO: Získání CSRF tokenu z meta tagu
@@ -489,7 +490,8 @@ async function saveToProtocol() {
     const result = await response.json();
 
     if (result.success) {
-      showAlert('Fotografie byly uloženy', 'success');
+      // ⏳ ZOBRAZIT PŘESÝPACÍ HODINY S TEXTEM "PŘESMĚROVÁNÍ NA PROTOKOL"
+      showWaitDialog(true, 'Přesměrování na protokol...');
 
       // ✅ Ujistit se, že currentCustomer je v localStorage pro protokol.php
       localStorage.setItem('currentCustomer', JSON.stringify(currentCustomerData));
