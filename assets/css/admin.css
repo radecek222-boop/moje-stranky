@@ -2675,7 +2675,7 @@ body.admin-dashboard-page {
     text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 }
 
-/* Orbita - prostor pro planety */
+/* Orbita - prostor pro planety - STATICKÁ, ovládaná JavaScriptem */
 .admin-orbit {
     position: absolute;
     top: 50%;
@@ -2683,7 +2683,13 @@ body.admin-dashboard-page {
     width: 600px;
     height: 600px;
     margin: -300px 0 0 -300px;
-    animation: orbit-rotate 60s linear infinite;
+    /* animation removed - controlled by JS drag */
+    transition: transform 0.1s linear;
+    cursor: grab;
+}
+
+.admin-orbit:active {
+    cursor: grabbing;
 }
 
 /* Animace rotace orbity */
@@ -2866,7 +2872,7 @@ body.admin-dashboard-page {
     transform: translate(-50%, -50%) rotate(337.5deg) translateY(-300px);
 }
 
-/* Obsah planety - perfektně vycentrovaný + proti-rotace */
+/* Obsah planety - perfektně vycentrovaný + proti-rotace ŘÍZENÁ JS */
 .planet-content {
     text-align: center;
     color: #fff;
@@ -2876,8 +2882,8 @@ body.admin-dashboard-page {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* Counter-rotate to keep text horizontal while orbit rotates */
-    animation: counter-rotate 60s linear infinite reverse;
+    /* Counter-rotate controlled by JavaScript drag handler */
+    transition: transform 0.1s linear;
 }
 
 .planet-title {
@@ -2928,54 +2934,54 @@ body.admin-dashboard-page {
     .admin-planet-15 { width: 75px !important; height: 75px !important; }
     .admin-planet-16 { width: 80px !important; height: 80px !important; }
 
-    /* OVÁL: horizontální vzdálenost zůstává, vertikální se zkracuje */
+    /* OVÁL: max 240px pro strany (bezpečné pro displeje 480-768px) */
     .admin-planet-1 {  /* 0° - nahoře */
-        transform: translate(-50%, -50%) rotate(0deg) translateY(-180px) !important;
+        transform: translate(-50%, -50%) rotate(0deg) translateY(-150px) !important;
     }
     .admin-planet-2 {  /* 22.5° */
-        transform: translate(-50%, -50%) rotate(22.5deg) translateY(-220px) !important;
+        transform: translate(-50%, -50%) rotate(22.5deg) translateY(-180px) !important;
     }
     .admin-planet-3 {  /* 45° */
-        transform: translate(-50%, -50%) rotate(45deg) translateY(-250px) !important;
+        transform: translate(-50%, -50%) rotate(45deg) translateY(-210px) !important;
     }
     .admin-planet-4 {  /* 67.5° */
-        transform: translate(-50%, -50%) rotate(67.5deg) translateY(-270px) !important;
+        transform: translate(-50%, -50%) rotate(67.5deg) translateY(-230px) !important;
     }
     .admin-planet-5 {  /* 90° - vpravo */
-        transform: translate(-50%, -50%) rotate(90deg) translateY(-280px) !important;
+        transform: translate(-50%, -50%) rotate(90deg) translateY(-240px) !important;
     }
     .admin-planet-6 {  /* 112.5° */
-        transform: translate(-50%, -50%) rotate(112.5deg) translateY(-270px) !important;
+        transform: translate(-50%, -50%) rotate(112.5deg) translateY(-230px) !important;
     }
     .admin-planet-7 {  /* 135° */
-        transform: translate(-50%, -50%) rotate(135deg) translateY(-250px) !important;
+        transform: translate(-50%, -50%) rotate(135deg) translateY(-210px) !important;
     }
     .admin-planet-8 {  /* 157.5° */
-        transform: translate(-50%, -50%) rotate(157.5deg) translateY(-220px) !important;
+        transform: translate(-50%, -50%) rotate(157.5deg) translateY(-180px) !important;
     }
     .admin-planet-9 {  /* 180° - dole */
-        transform: translate(-50%, -50%) rotate(180deg) translateY(-180px) !important;
+        transform: translate(-50%, -50%) rotate(180deg) translateY(-150px) !important;
     }
     .admin-planet-10 {  /* 202.5° */
-        transform: translate(-50%, -50%) rotate(202.5deg) translateY(-220px) !important;
+        transform: translate(-50%, -50%) rotate(202.5deg) translateY(-180px) !important;
     }
     .admin-planet-11 {  /* 225° */
-        transform: translate(-50%, -50%) rotate(225deg) translateY(-250px) !important;
+        transform: translate(-50%, -50%) rotate(225deg) translateY(-210px) !important;
     }
     .admin-planet-12 {  /* 247.5° */
-        transform: translate(-50%, -50%) rotate(247.5deg) translateY(-270px) !important;
+        transform: translate(-50%, -50%) rotate(247.5deg) translateY(-230px) !important;
     }
     .admin-planet-13 {  /* 270° - vlevo */
-        transform: translate(-50%, -50%) rotate(270deg) translateY(-280px) !important;
+        transform: translate(-50%, -50%) rotate(270deg) translateY(-240px) !important;
     }
     .admin-planet-14 {  /* 292.5° */
-        transform: translate(-50%, -50%) rotate(292.5deg) translateY(-270px) !important;
+        transform: translate(-50%, -50%) rotate(292.5deg) translateY(-230px) !important;
     }
     .admin-planet-15 {  /* 315° */
-        transform: translate(-50%, -50%) rotate(315deg) translateY(-250px) !important;
+        transform: translate(-50%, -50%) rotate(315deg) translateY(-210px) !important;
     }
     .admin-planet-16 {  /* 337.5° */
-        transform: translate(-50%, -50%) rotate(337.5deg) translateY(-220px) !important;
+        transform: translate(-50%, -50%) rotate(337.5deg) translateY(-180px) !important;
     }
 
     /* Hover menší na mobilu */
@@ -3013,23 +3019,23 @@ body.admin-dashboard-page {
     .admin-planet-7, .admin-planet-15 { width: 60px !important; height: 60px !important; }
     .admin-planet-8, .admin-planet-16 { width: 65px !important; height: 65px !important; }
 
-    /* Ještě menší ovál pro malé displeje */
-    .admin-planet-1 { transform: translate(-50%, -50%) rotate(0deg) translateY(-140px) !important; }
-    .admin-planet-2 { transform: translate(-50%, -50%) rotate(22.5deg) translateY(-170px) !important; }
-    .admin-planet-3 { transform: translate(-50%, -50%) rotate(45deg) translateY(-190px) !important; }
-    .admin-planet-4 { transform: translate(-50%, -50%) rotate(67.5deg) translateY(-205px) !important; }
-    .admin-planet-5 { transform: translate(-50%, -50%) rotate(90deg) translateY(-210px) !important; }
-    .admin-planet-6 { transform: translate(-50%, -50%) rotate(112.5deg) translateY(-205px) !important; }
-    .admin-planet-7 { transform: translate(-50%, -50%) rotate(135deg) translateY(-190px) !important; }
-    .admin-planet-8 { transform: translate(-50%, -50%) rotate(157.5deg) translateY(-170px) !important; }
-    .admin-planet-9 { transform: translate(-50%, -50%) rotate(180deg) translateY(-140px) !important; }
-    .admin-planet-10 { transform: translate(-50%, -50%) rotate(202.5deg) translateY(-170px) !important; }
-    .admin-planet-11 { transform: translate(-50%, -50%) rotate(225deg) translateY(-190px) !important; }
-    .admin-planet-12 { transform: translate(-50%, -50%) rotate(247.5deg) translateY(-205px) !important; }
-    .admin-planet-13 { transform: translate(-50%, -50%) rotate(270deg) translateY(-210px) !important; }
-    .admin-planet-14 { transform: translate(-50%, -50%) rotate(292.5deg) translateY(-205px) !important; }
-    .admin-planet-15 { transform: translate(-50%, -50%) rotate(315deg) translateY(-190px) !important; }
-    .admin-planet-16 { transform: translate(-50%, -50%) rotate(337.5deg) translateY(-170px) !important; }
+    /* Menší ovál - MAX 155px pro strany aby se vešly na displej 360-375px */
+    .admin-planet-1 { transform: translate(-50%, -50%) rotate(0deg) translateY(-100px) !important; }
+    .admin-planet-2 { transform: translate(-50%, -50%) rotate(22.5deg) translateY(-120px) !important; }
+    .admin-planet-3 { transform: translate(-50%, -50%) rotate(45deg) translateY(-135px) !important; }
+    .admin-planet-4 { transform: translate(-50%, -50%) rotate(67.5deg) translateY(-145px) !important; }
+    .admin-planet-5 { transform: translate(-50%, -50%) rotate(90deg) translateY(-150px) !important; }
+    .admin-planet-6 { transform: translate(-50%, -50%) rotate(112.5deg) translateY(-145px) !important; }
+    .admin-planet-7 { transform: translate(-50%, -50%) rotate(135deg) translateY(-135px) !important; }
+    .admin-planet-8 { transform: translate(-50%, -50%) rotate(157.5deg) translateY(-120px) !important; }
+    .admin-planet-9 { transform: translate(-50%, -50%) rotate(180deg) translateY(-100px) !important; }
+    .admin-planet-10 { transform: translate(-50%, -50%) rotate(202.5deg) translateY(-120px) !important; }
+    .admin-planet-11 { transform: translate(-50%, -50%) rotate(225deg) translateY(-135px) !important; }
+    .admin-planet-12 { transform: translate(-50%, -50%) rotate(247.5deg) translateY(-145px) !important; }
+    .admin-planet-13 { transform: translate(-50%, -50%) rotate(270deg) translateY(-150px) !important; }
+    .admin-planet-14 { transform: translate(-50%, -50%) rotate(292.5deg) translateY(-145px) !important; }
+    .admin-planet-15 { transform: translate(-50%, -50%) rotate(315deg) translateY(-135px) !important; }
+    .admin-planet-16 { transform: translate(-50%, -50%) rotate(337.5deg) translateY(-120px) !important; }
 
     /* Hover ještě menší */
     .admin-planet:hover {
@@ -3043,5 +3049,54 @@ body.admin-dashboard-page {
 
     .planet-desc {
         display: none;
+    }
+}
+
+/* Ultra malé displeje - ještě kompaktnější (iPhone SE, malé Androidy) */
+@media (max-width: 360px) {
+    .admin-landing-title {
+        font-size: 2rem;
+    }
+
+    .admin-landing-subtitle {
+        font-size: 0.85rem;
+    }
+
+    /* Ještě menší planety */
+    .admin-planet-1, .admin-planet-9 { width: 50px !important; height: 50px !important; }
+    .admin-planet-2, .admin-planet-10 { width: 55px !important; height: 55px !important; }
+    .admin-planet-3, .admin-planet-11 { width: 52px !important; height: 52px !important; }
+    .admin-planet-4, .admin-planet-12 { width: 58px !important; height: 58px !important; }
+    .admin-planet-5, .admin-planet-13 { width: 50px !important; height: 50px !important; }
+    .admin-planet-6, .admin-planet-14 { width: 58px !important; height: 58px !important; }
+    .admin-planet-7, .admin-planet-15 { width: 52px !important; height: 52px !important; }
+    .admin-planet-8, .admin-planet-16 { width: 55px !important; height: 55px !important; }
+
+    /* Ultra kompaktní ovál - MAX 130px pro strany (bezpečné pro 320-360px) */
+    .admin-planet-1 { transform: translate(-50%, -50%) rotate(0deg) translateY(-80px) !important; }
+    .admin-planet-2 { transform: translate(-50%, -50%) rotate(22.5deg) translateY(-95px) !important; }
+    .admin-planet-3 { transform: translate(-50%, -50%) rotate(45deg) translateY(-110px) !important; }
+    .admin-planet-4 { transform: translate(-50%, -50%) rotate(67.5deg) translateY(-120px) !important; }
+    .admin-planet-5 { transform: translate(-50%, -50%) rotate(90deg) translateY(-125px) !important; }
+    .admin-planet-6 { transform: translate(-50%, -50%) rotate(112.5deg) translateY(-120px) !important; }
+    .admin-planet-7 { transform: translate(-50%, -50%) rotate(135deg) translateY(-110px) !important; }
+    .admin-planet-8 { transform: translate(-50%, -50%) rotate(157.5deg) translateY(-95px) !important; }
+    .admin-planet-9 { transform: translate(-50%, -50%) rotate(180deg) translateY(-80px) !important; }
+    .admin-planet-10 { transform: translate(-50%, -50%) rotate(202.5deg) translateY(-95px) !important; }
+    .admin-planet-11 { transform: translate(-50%, -50%) rotate(225deg) translateY(-110px) !important; }
+    .admin-planet-12 { transform: translate(-50%, -50%) rotate(247.5deg) translateY(-120px) !important; }
+    .admin-planet-13 { transform: translate(-50%, -50%) rotate(270deg) translateY(-125px) !important; }
+    .admin-planet-14 { transform: translate(-50%, -50%) rotate(292.5deg) translateY(-120px) !important; }
+    .admin-planet-15 { transform: translate(-50%, -50%) rotate(315deg) translateY(-110px) !important; }
+    .admin-planet-16 { transform: translate(-50%, -50%) rotate(337.5deg) translateY(-95px) !important; }
+
+    /* Hover minimální */
+    .admin-planet:hover {
+        width: 65px !important;
+        height: 65px !important;
+    }
+
+    .planet-title {
+        font-size: 0.55rem;
     }
 }

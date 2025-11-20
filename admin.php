@@ -1100,5 +1100,11 @@ function loadNotifContent(type, body) {
     </div>
   </div>
 </div>
+
+<?php if (!$embedMode && $activeTab === 'dashboard'): ?>
+<!-- Admin Orbit Drag - Interaktivní rotace planet -->
+<script src="/assets/js/admin-orbit-drag.js"></script>
+<?php endif; ?>
+
 </body>
 </html>
