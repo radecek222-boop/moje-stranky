@@ -1,10 +1,7 @@
-name: 🚀 Deploy to Český hosting (WGS)
+name: 🐢 Deploy SLOW (s testy, 6-7 min)
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch: # Umožňuje manuální spuštění
+  workflow_dispatch: # JEN manuální spuštění - ne automaticky!
 
 jobs:
   test:
