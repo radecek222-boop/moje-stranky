@@ -283,8 +283,9 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
       <div class="stats-filter-group">
         <label class="stats-filter-label">Měsíc</label>
         <select class="stats-filter-select" id="filter-month" onchange="handleMonthChange()">
+          <option value="all" selected>Všechny</option>
           <option value="">Vlastní rozsah</option>
-          <option value="current" selected>Aktuální měsíc</option>
+          <option value="current">Aktuální měsíc</option>
           <option value="last">Minulý měsíc</option>
           <option value="2024-01">Leden 2024</option>
           <option value="2024-02">Únor 2024</option>
