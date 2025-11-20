@@ -1032,3 +1032,127 @@ body.pdf-export-mode #signature-pad {
   height: 180px !important;
 }
 
+/* ========================================================================== */
+/* === PDF CLONE DESKTOP: Skrytý wrapper pro PDF generování na mobilu ====== */
+/* === Vytvoří se jako clone, renderuje se mimo viewport, pak se smaže ===== */
+/* ========================================================================== */
+
+.pdf-clone-desktop {
+  position: absolute !important;
+  left: -9999px !important;
+  top: 0 !important;
+  width: 900px !important;
+  max-width: 900px !important;
+  padding: 30px 35px !important;
+  margin: 20px auto !important;
+  background: #fff !important;
+  border: 2px solid #000 !important;
+  box-sizing: border-box !important;
+  font-size: 13px !important;
+  visibility: visible !important;
+  overflow: visible !important;
+}
+
+.pdf-clone-desktop input,
+.pdf-clone-desktop select,
+.pdf-clone-desktop textarea {
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+  min-height: auto !important;
+}
+
+.pdf-clone-desktop .label {
+  font-size: 11px !important;
+}
+
+.pdf-clone-desktop .header {
+  margin-bottom: 25px !important;
+  padding-bottom: 15px !important;
+}
+
+.pdf-clone-desktop .header > div:first-child {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px !important;
+}
+
+.pdf-clone-desktop .header > div:last-child {
+  font-size: 10px !important;
+}
+
+.pdf-clone-desktop .split-section {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 15px !important;
+}
+
+.pdf-clone-desktop .split-section textarea:nth-child(2) {
+  display: block !important;
+}
+
+.pdf-clone-desktop .split-section textarea:nth-child(1) {
+  width: auto !important;
+}
+
+.pdf-clone-desktop .translate-btn {
+  display: block !important;
+}
+
+.pdf-clone-desktop .customer-info-header {
+  display: none !important;
+}
+
+.pdf-clone-desktop .customer-info-content {
+  max-height: none !important;
+  overflow: visible !important;
+  display: block !important;
+}
+
+.pdf-clone-desktop .two-col-table {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 20px !important;
+}
+
+.pdf-clone-desktop .col {
+  min-width: auto !important;
+  flex: 1 !important;
+}
+
+.pdf-clone-desktop .section-title {
+  font-size: 10px !important;
+  padding: 5px 7px !important;
+  margin-top: 13px !important;
+  margin-bottom: 5px !important;
+}
+
+.pdf-clone-desktop .section-title .en-label {
+  font-size: 0.7em !important;
+  display: block !important;
+}
+
+.pdf-clone-desktop .btns {
+  display: none !important;
+}
+
+.pdf-clone-desktop td {
+  padding: 2px 6px !important;
+}
+
+.pdf-clone-desktop button.btn {
+  font-size: 12px !important;
+  padding: 12px 24px !important;
+}
+
+.pdf-clone-desktop .top-bar {
+  padding: 1rem 2rem !important;
+}
+
+.pdf-clone-desktop .logo {
+  font-size: 1.8rem !important;
+}
+
+.pdf-clone-desktop #signature-pad {
+  height: 180px !important;
+}
+

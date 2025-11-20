@@ -526,33 +526,37 @@ async function generateProtocolPDF() {
   const doc = new jsPDF("p", "mm", "a4");
 
   const wrapper = document.querySelector(".wrapper");
-  const btns = document.querySelector(".btns");
-  const body = document.body;
 
-  // Skrýt tlačítka
-  btns.style.display = "none";
+  logger.log('📄 Vytvářím desktop clone pro PDF generování...');
 
-  // KRITICKÉ: Dočasně vypnout mobilní styly pro konzistentní PDF na všech zařízeních
-  body.classList.add("pdf-export-mode");
+  // ❗ CLONE APPROACH: Vytvoření skrytého desktop wrapper mimo viewport
+  // Tento přístup zajistí identický PDF na mobilu i desktopu
+  const clone = wrapper.cloneNode(true);
+  clone.classList.add('pdf-clone-desktop');
+  clone.id = 'pdf-clone-wrapper-temp';
 
-  // Uložit původní styly wrapper
-  const puvodni = {
-    padding: wrapper.style.padding,
-    fontSize: wrapper.style.fontSize,
-    maxWidth: wrapper.style.maxWidth,
-    margin: wrapper.style.margin
-  };
+  // Přidat clone do DOM (mimo viewport, neviditelný)
+  document.body.appendChild(clone);
 
-  // Vynutit desktop layout pro PDF
-  wrapper.style.padding = "30px 35px";
-  wrapper.style.fontSize = "13px";
-  wrapper.style.maxWidth = "900px";
-  wrapper.style.margin = "20px auto";
+  // Zkopírovat signature pad canvas obsah do clone
+  const originalCanvas = wrapper.querySelector('#signature-pad');
+  const cloneCanvas = clone.querySelector('#signature-pad');
+  if (originalCanvas && cloneCanvas) {
+    try {
+      const ctx = cloneCanvas.getContext('2d');
+      ctx.drawImage(originalCanvas, 0, 0);
+      logger.log('✅ Signature pad zkopírován do clone');
+    } catch (e) {
+      logger.warn('⚠️ Nepodařilo se zkopírovat signature pad:', e);
+    }
+  }
 
-  // Počkat na reflow
-  await new Promise(resolve => setTimeout(resolve, 100));
+  // Počkat na reflow clone (desktop layout se aplikuje)
+  await new Promise(resolve => setTimeout(resolve, 150));
 
-  const canvas = await html2canvas(wrapper, {
+  logger.log('📸 Renderuji clone pomocí html2canvas...');
+
+  const canvas = await html2canvas(clone, {
     scale: 3,
     backgroundColor: "#fff",
     useCORS: true,
@@ -586,14 +590,9 @@ async function generateProtocolPDF() {
 
   doc.addImage(imgData, "JPEG", xOffset, yOffset, imgWidth, imgHeight);
 
-  // Obnovit původní styly
-  wrapper.style.padding = puvodni.padding;
-  wrapper.style.fontSize = puvodni.fontSize;
-  wrapper.style.maxWidth = puvodni.maxWidth;
-  wrapper.style.margin = puvodni.margin;
-
-  btns.style.display = "flex";
-  body.classList.remove("pdf-export-mode");
+  // ❗ Odstranit clone z DOM
+  document.body.removeChild(clone);
+  logger.log('✅ Clone odstraněn, PDF vygenerováno');
 
   return doc;
 }
