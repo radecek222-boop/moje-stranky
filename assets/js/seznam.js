@@ -799,7 +799,7 @@ function showCalendar(id) {
       <div id="selectedDateDisplay" style="color: var(--c-grey); font-size: 0.9rem; font-weight: 600; text-align: center;">Zatím nevybráno</div>
       <button class="modal-close" onclick="ModalManager.close()">✕</button>
     </div>
-
+    
     <div class="modal-body" style="max-height: 80vh; overflow-y: auto; padding: 1rem;">
       <div class="calendar-container">
         <div id="calGrid"></div>
@@ -946,6 +946,9 @@ function renderCalendar(m, y) {
       const currentAddress = Utils.addCountryToAddress(Utils.getAddress(CURRENT_RECORD));
       let displayText = `Vybraný den: ${SELECTED_DATE}`;
 
+      // Nastavit základní text okamžitě
+      document.getElementById('selectedDateDisplay').textContent = displayText;
+
       // Zkusit získat vzdálenost asynchronně
       if (currentAddress && currentAddress !== '—') {
         getDistance(WGS_ADDRESS, currentAddress).then(distToCustomer => {
@@ -957,8 +960,6 @@ function renderCalendar(m, y) {
           logger.error('Chyba při získání vzdálenosti:', err);
         });
       }
-
-      document.getElementById('selectedDateDisplay').textContent = displayText;
 
       // Zobrazit časy okamžitě
       renderTimeGrid();
@@ -1280,7 +1281,6 @@ function renderTimeGrid() {
   });
   
   // Časový rozsah: 8:00 - 19:00 (místo původního 7:00 - 20:30)
-  // Snížení z 28 slotů na 22 slotů pro lepší mobilní zobrazení
   for (let h = 8; h <= 19; h++) {
     for (const mm of [0, 30]) {
       const time = `${String(h).padStart(2, '0')}:${mm === 0 ? '00' : '30'}`;

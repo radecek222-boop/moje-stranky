@@ -1,12 +1,10 @@
 <?php
 /**
- * Migrace: Přidání email šablony pro pokus o kontakt zákazníka
+ * Migrace: Přidání email šablony "Pokus o kontakt"
  *
- * Tento skript BEZPEČNĚ přidá novou email šablonu do tabulky wgs_notifications.
- * Šablona se používá když technik klikne na "Odeslat SMS" - automaticky pošle
- * email zákazníkovi s informací o pokusu o kontakt.
- *
- * Můžete jej spustit vícekrát - nepřidá duplicity.
+ * Tento skript BEZPEČNĚ přidá email šablonu pro notifikaci zákazníka
+ * o pokusu o telefonický kontakt.
+ * Můžete jej spustit vícekrát - neprovede duplicitní vložení.
  */
 
 require_once __DIR__ . '/init.php';
@@ -20,7 +18,7 @@ echo "<!DOCTYPE html>
 <html lang='cs'>
 <head>
     <meta charset='UTF-8'>
-    <title>Migrace: Email šablona pokus o kontakt</title>
+    <title>Migrace: Přidání email šablony - Pokus o kontakt</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                max-width: 1000px; margin: 50px auto; padding: 20px;
@@ -45,8 +43,6 @@ echo "<!DOCTYPE html>
                background: #2D5016; color: white; text-decoration: none;
                border-radius: 5px; margin: 10px 5px 10px 0; }
         .btn:hover { background: #1a300d; }
-        pre { background: #f8f9fa; padding: 15px; border-radius: 5px;
-              overflow-x: auto; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -55,37 +51,24 @@ echo "<!DOCTYPE html>
 try {
     $pdo = getDbConnection();
 
-    echo "<h1>Migrace: Email šablona pro pokus o kontakt</h1>";
-
     // Kontrola před migrací
+    echo "<h1>Migrace: Přidání email šablony 'Pokus o kontakt'</h1>";
+
     echo "<div class='info'><strong>KONTROLA...</strong></div>";
 
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM wgs_notifications WHERE name = 'Pokus o kontakt'");
+    // Zkontrolovat, zda šablona již existuje
+    $stmt = $pdo->prepare("SELECT COUNT(*) as cnt FROM wgs_notifications WHERE name = 'Pokus o kontakt'");
     $stmt->execute();
-    $existuje = $stmt->fetchColumn() > 0;
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $existuje = $result['cnt'] > 0;
 
     if ($existuje) {
         echo "<div class='warning'>";
-        echo "<strong>Šablona již existuje!</strong><br>";
-        echo "Email šablona 'Pokus o kontakt' je již v databázi.";
+        echo "<strong>Šablona již existuje, nebude přidána znovu.</strong>";
         echo "</div>";
-
-        // Zobrazit aktuální šablonu
-        $stmt = $pdo->prepare("SELECT * FROM wgs_notifications WHERE name = 'Pokus o kontakt'");
-        $stmt->execute();
-        $sablona = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        echo "<h3>Aktuální šablona:</h3>";
-        echo "<pre>";
-        echo "ID: " . $sablona['id'] . "\n";
-        echo "Název: " . $sablona['name'] . "\n";
-        echo "Typ: " . $sablona['type'] . "\n";
-        echo "Příjemce: " . $sablona['recipient_type'] . "\n";
-        echo "Aktivní: " . ($sablona['active'] ? 'Ano' : 'Ne') . "\n";
-        echo "</pre>";
-
-    } else {
-        echo "<div class='info'><strong>Šablona neexistuje, bude přidána.</strong></div>";
+        echo "<a href='admin.php' class='btn'>Zpět na admin</a>";
+        echo "</div></body></html>";
+        exit;
     }
 
     // Pokud je nastaveno ?execute=1, provést migraci
@@ -201,53 +184,30 @@ HTML;
             $pdo->commit();
 
             echo "<div class='success'>";
-            echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
-            echo "Můžete nyní používat tuto šablonu pro automatické odesílání emailů při pokusu o kontakt.";
+            echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong>";
             echo "</div>";
 
-            echo "<h3>Náhled šablony:</h3>";
-            echo "<pre style='background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto;'>";
-            echo htmlspecialchars($template);
-            echo "</pre>";
-
-            echo "<div class='info'>";
-            echo "<strong>Použití v kódu:</strong><br><br>";
-            echo "<pre style='background: #282c34; color: #abb2bf; padding: 15px; border-radius: 5px;'>";
-            echo htmlspecialchars("// V JavaScript (seznam.js)
-fetch('/api/send_contact_attempt_email.php', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    reklamace_id: record.id,
-    csrf_token: csrfToken
-  })
-});");
-            echo "</pre>";
-            echo "</div>";
+            echo "<a href='admin.php' class='btn'>Zpět na admin</a>";
 
         } catch (PDOException $e) {
             $pdo->rollBack();
             echo "<div class='error'>";
-            echo "<strong>CHYBA PŘI MIGRACI:</strong><br>";
+            echo "<strong>CHYBA:</strong><br>";
             echo htmlspecialchars($e->getMessage());
             echo "</div>";
         }
-
     } else {
         // Náhled co bude provedeno
         echo "<div class='info'>";
-        echo "<h3>Co bude provedeno:</h3>";
-        echo "<ul>";
-        echo "<li>Přidána nová email šablona 'Pokus o kontakt'</li>";
-        echo "<li>Typ: email</li>";
-        echo "<li>Příjemce: zákazník</li>";
-        echo "<li>Trigger event: contact_attempt</li>";
-        echo "<li>Obsahuje proměnné: {{customer_name}}, {{order_id}}, {{product}}, {{date}}</li>";
-        echo "</ul>";
+        echo "<strong>Připraveno k migraci:</strong><br>";
+        echo "• Šablona: <strong>Pokus o kontakt</strong><br>";
+        echo "• Typ: Email<br>";
+        echo "• Příjemce: Zákazník<br>";
+        echo "• Trigger: contact_attempt<br>";
         echo "</div>";
 
         echo "<a href='?execute=1' class='btn'>SPUSTIT MIGRACI</a>";
-        echo "<a href='admin.php?tab=email-sms' class='btn' style='background: #666;'>Zpět na Admin</a>";
+        echo "<a href='admin.php' class='btn' style='background: #666;'>Zrušit</a>";
     }
 
 } catch (Exception $e) {
