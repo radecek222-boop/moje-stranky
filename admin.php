@@ -59,7 +59,7 @@ if (!array_key_exists($activeTab, $tabConfig)) {
     $activeTab = 'dashboard';
 }
 $currentTabMeta = $tabConfig[$activeTab];
-$currentTabLabel = $currentTabMeta['tab_label'] ?? 'Control Center';
+$currentTabLabel = $currentTabMeta['tab_label'] ?? 'Admin';
 
 // Zkontroluj jestli je RBAC nainstalován
 $rbacInstalled = false;
@@ -109,7 +109,7 @@ try {
 // Landing page - full screen
 if (!$embedMode && $activeTab === 'dashboard'):
 ?>
-<div class="admin-landing" onclick="window.location.href='admin.php?tab=notifications'" style="cursor: pointer;" title="Klikněte pro vstup do Control Center">
+<div class="admin-landing" onclick="window.location.href='statistiky.php'" style="cursor: pointer;" title="Klikněte pro vstup do Admin">
     <div class="admin-landing-content">
         <h1 class="admin-landing-title">WGS</h1>
         <p class="admin-landing-subtitle">ADMIN</p>
@@ -695,7 +695,7 @@ function loadNotifContent(type, body) {
       <div class="page-header">
           <p class="page-subtitle">Centrální řídicí panel pro správu celé aplikace</p>
           <div class="page-header-actions">
-              <span class="cc-version-info" id="adminVersionInfo" title="Verze Control Center - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
+              <span class="cc-version-info" id="adminVersionInfo" title="Verze Admin - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
               <button class="cc-clear-cache-btn" onclick="clearCacheAndReload()" title="Vymaže lokální cache a načte nejnovější verzi">
                   🔄 Vymazat cache & Reload
               </button>
