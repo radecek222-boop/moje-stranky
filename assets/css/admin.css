@@ -2692,7 +2692,7 @@ body.admin-dashboard-page {
     to { transform: rotate(360deg); }
 }
 
-/* Planety (karty) - černé s neonem */
+/* Planety (karty) - černé s neonem - RŮZNÉ VELIKOSTI */
 .admin-planet {
     position: absolute;
     width: 120px;
@@ -2704,12 +2704,28 @@ body.admin-dashboard-page {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 1.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+    transition: width 0.3s ease, height 0.3s ease, box-shadow 0.3s ease, border-width 0.3s ease;
     box-shadow:
         0 0 15px rgba(0, 255, 255, 0.5),
         inset 0 0 20px rgba(255, 255, 255, 0.1);
-    /* Removed animation - positioning transforms must not be overridden */
+    /* Positioning via transform, NO animation on planet itself */
 }
+
+/* Pulzování planet - různé rychlosti */
+@keyframes planet-pulse {
+    0%, 100% {
+        box-shadow:
+            0 0 15px rgba(0, 255, 255, 0.5),
+            inset 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+    50% {
+        box-shadow:
+            0 0 25px rgba(0, 255, 255, 0.8),
+            inset 0 0 30px rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* Různé velikosti planet + positioning - SLOUČENO */
 
 /* Proti-rotace obsahu planet aby text zůstal horizontální */
 @keyframes counter-rotate {
@@ -2717,120 +2733,136 @@ body.admin-dashboard-page {
     to { transform: rotate(-360deg); }
 }
 
-/* Neonový hover efekt */
+/* Neonový hover efekt - BEZ scale transform (aby neutíkalo kurzoru) */
 .admin-planet:hover {
-    transform: scale(1.3) rotate(0deg) !important;
+    width: 160px !important;
+    height: 160px !important;
     box-shadow:
         0 0 30px rgba(0, 255, 255, 1),
         0 0 50px rgba(0, 255, 255, 0.8),
         0 0 70px rgba(0, 255, 255, 0.5),
-        inset 0 0 30px rgba(0, 255, 255, 0.3);
+        inset 0 0 30px rgba(0, 255, 255, 0.3) !important;
     z-index: 20;
     border-color: #00ffff;
     border-width: 3px;
     background: radial-gradient(circle at 30% 30%, #555, #222, #111);
 }
 
-/* Removed: transform would override counter-rotate animation */
-
 .admin-planet:active {
-    transform: scale(1.2) rotate(0deg) !important;
+    width: 150px !important;
+    height: 150px !important;
 }
 
-/* Rozmístění 16 planet v kruhu - každá na úhlu 22.5° */
+/* Rozmístění 16 planet v kruhu + velikosti + pulse animace */
 .admin-planet-1 {
-    top: 50%;
-    left: 50%;
+    width: 100px; height: 100px;
+    animation: planet-pulse 3s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(0deg) translateY(-300px);
 }
 
 .admin-planet-2 {
-    top: 50%;
-    left: 50%;
+    width: 130px; height: 130px;
+    animation: planet-pulse 4s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(22.5deg) translateY(-300px);
 }
 
 .admin-planet-3 {
-    top: 50%;
-    left: 50%;
+    width: 110px; height: 110px;
+    animation: planet-pulse 3.5s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(45deg) translateY(-300px);
 }
 
 .admin-planet-4 {
-    top: 50%;
-    left: 50%;
+    width: 140px; height: 140px;
+    animation: planet-pulse 5s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(67.5deg) translateY(-300px);
 }
 
 .admin-planet-5 {
-    top: 50%;
-    left: 50%;
+    width: 105px; height: 105px;
+    animation: planet-pulse 3.2s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(90deg) translateY(-300px);
 }
 
 .admin-planet-6 {
-    top: 50%;
-    left: 50%;
+    width: 125px; height: 125px;
+    animation: planet-pulse 4.5s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(112.5deg) translateY(-300px);
 }
 
 .admin-planet-7 {
-    top: 50%;
-    left: 50%;
+    width: 115px; height: 115px;
+    animation: planet-pulse 3.8s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(135deg) translateY(-300px);
 }
 
 .admin-planet-8 {
-    top: 50%;
-    left: 50%;
+    width: 135px; height: 135px;
+    animation: planet-pulse 4.8s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(157.5deg) translateY(-300px);
 }
 
 .admin-planet-9 {
-    top: 50%;
-    left: 50%;
+    width: 100px; height: 100px;
+    animation: planet-pulse 3.3s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(180deg) translateY(-300px);
 }
 
 .admin-planet-10 {
-    top: 50%;
-    left: 50%;
+    width: 120px; height: 120px;
+    animation: planet-pulse 4.2s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(202.5deg) translateY(-300px);
 }
 
 .admin-planet-11 {
-    top: 50%;
-    left: 50%;
+    width: 110px; height: 110px;
+    animation: planet-pulse 3.6s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(225deg) translateY(-300px);
 }
 
 .admin-planet-12 {
-    top: 50%;
-    left: 50%;
+    width: 130px; height: 130px;
+    animation: planet-pulse 4.7s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(247.5deg) translateY(-300px);
 }
 
 .admin-planet-13 {
-    top: 50%;
-    left: 50%;
+    width: 105px; height: 105px;
+    animation: planet-pulse 3.4s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(270deg) translateY(-300px);
 }
 
 .admin-planet-14 {
-    top: 50%;
-    left: 50%;
+    width: 140px; height: 140px;
+    animation: planet-pulse 5.2s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(292.5deg) translateY(-300px);
 }
 
 .admin-planet-15 {
-    top: 50%;
-    left: 50%;
+    width: 115px; height: 115px;
+    animation: planet-pulse 3.9s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(315deg) translateY(-300px);
 }
 
 .admin-planet-16 {
-    top: 50%;
-    left: 50%;
+    width: 125px; height: 125px;
+    animation: planet-pulse 4.3s ease-in-out infinite;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(337.5deg) translateY(-300px);
 }
 
@@ -2867,50 +2899,10 @@ body.admin-dashboard-page {
     margin: 0;
 }
 
-/* Responsivita pro mobil */
+/* Responsivita pro mobil - OVÁL místo kruhu */
 @media (max-width: 768px) {
     .admin-landing-title {
-        font-size: 4rem;
-    }
-
-    .admin-landing-subtitle {
-        font-size: 1.5rem;
-        letter-spacing: 0.2em;
-    }
-
-    .admin-orbit {
-        width: 400px;
-        height: 400px;
-        margin: -200px 0 0 -200px;
-    }
-
-    .admin-planet {
-        width: 100px;
-        height: 100px;
-    }
-
-    .admin-planet-1,
-    .admin-planet-3 {
-        margin-left: -50px;
-    }
-
-    .admin-planet-2,
-    .admin-planet-4 {
-        margin-top: -50px;
-    }
-
-    .planet-title {
-        font-size: 0.85rem;
-    }
-
-    .planet-desc {
-        font-size: 0.6rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .admin-landing-title {
-        font-size: 3rem;
+        font-size: 3.5rem;
     }
 
     .admin-landing-subtitle {
@@ -2918,29 +2910,135 @@ body.admin-dashboard-page {
         letter-spacing: 0.15em;
     }
 
-    .admin-orbit {
-        width: 300px;
-        height: 300px;
-        margin: -150px 0 0 -150px;
+    /* Planety menší na mobilu */
+    .admin-planet-1 { width: 70px !important; height: 70px !important; }
+    .admin-planet-2 { width: 85px !important; height: 85px !important; }
+    .admin-planet-3 { width: 75px !important; height: 75px !important; }
+    .admin-planet-4 { width: 90px !important; height: 90px !important; }
+    .admin-planet-5 { width: 70px !important; height: 70px !important; }
+    .admin-planet-6 { width: 80px !important; height: 80px !important; }
+    .admin-planet-7 { width: 75px !important; height: 75px !important; }
+    .admin-planet-8 { width: 85px !important; height: 85px !important; }
+    .admin-planet-9 { width: 70px !important; height: 70px !important; }
+    .admin-planet-10 { width: 80px !important; height: 80px !important; }
+    .admin-planet-11 { width: 75px !important; height: 75px !important; }
+    .admin-planet-12 { width: 85px !important; height: 85px !important; }
+    .admin-planet-13 { width: 70px !important; height: 70px !important; }
+    .admin-planet-14 { width: 90px !important; height: 90px !important; }
+    .admin-planet-15 { width: 75px !important; height: 75px !important; }
+    .admin-planet-16 { width: 80px !important; height: 80px !important; }
+
+    /* OVÁL: horizontální vzdálenost zůstává, vertikální se zkracuje */
+    .admin-planet-1 {  /* 0° - nahoře */
+        transform: translate(-50%, -50%) rotate(0deg) translateY(-180px) !important;
+    }
+    .admin-planet-2 {  /* 22.5° */
+        transform: translate(-50%, -50%) rotate(22.5deg) translateY(-220px) !important;
+    }
+    .admin-planet-3 {  /* 45° */
+        transform: translate(-50%, -50%) rotate(45deg) translateY(-250px) !important;
+    }
+    .admin-planet-4 {  /* 67.5° */
+        transform: translate(-50%, -50%) rotate(67.5deg) translateY(-270px) !important;
+    }
+    .admin-planet-5 {  /* 90° - vpravo */
+        transform: translate(-50%, -50%) rotate(90deg) translateY(-280px) !important;
+    }
+    .admin-planet-6 {  /* 112.5° */
+        transform: translate(-50%, -50%) rotate(112.5deg) translateY(-270px) !important;
+    }
+    .admin-planet-7 {  /* 135° */
+        transform: translate(-50%, -50%) rotate(135deg) translateY(-250px) !important;
+    }
+    .admin-planet-8 {  /* 157.5° */
+        transform: translate(-50%, -50%) rotate(157.5deg) translateY(-220px) !important;
+    }
+    .admin-planet-9 {  /* 180° - dole */
+        transform: translate(-50%, -50%) rotate(180deg) translateY(-180px) !important;
+    }
+    .admin-planet-10 {  /* 202.5° */
+        transform: translate(-50%, -50%) rotate(202.5deg) translateY(-220px) !important;
+    }
+    .admin-planet-11 {  /* 225° */
+        transform: translate(-50%, -50%) rotate(225deg) translateY(-250px) !important;
+    }
+    .admin-planet-12 {  /* 247.5° */
+        transform: translate(-50%, -50%) rotate(247.5deg) translateY(-270px) !important;
+    }
+    .admin-planet-13 {  /* 270° - vlevo */
+        transform: translate(-50%, -50%) rotate(270deg) translateY(-280px) !important;
+    }
+    .admin-planet-14 {  /* 292.5° */
+        transform: translate(-50%, -50%) rotate(292.5deg) translateY(-270px) !important;
+    }
+    .admin-planet-15 {  /* 315° */
+        transform: translate(-50%, -50%) rotate(315deg) translateY(-250px) !important;
+    }
+    .admin-planet-16 {  /* 337.5° */
+        transform: translate(-50%, -50%) rotate(337.5deg) translateY(-220px) !important;
     }
 
-    .admin-planet {
-        width: 80px;
-        height: 80px;
-    }
-
-    .admin-planet-1,
-    .admin-planet-3 {
-        margin-left: -40px;
-    }
-
-    .admin-planet-2,
-    .admin-planet-4 {
-        margin-top: -40px;
+    /* Hover menší na mobilu */
+    .admin-planet:hover {
+        width: 100px !important;
+        height: 100px !important;
     }
 
     .planet-title {
         font-size: 0.7rem;
+    }
+
+    .planet-desc {
+        display: none; /* Skrýt popisky na mobilu */
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-landing-title {
+        font-size: 2.5rem;
+    }
+
+    .admin-landing-subtitle {
+        font-size: 1rem;
+        letter-spacing: 0.1em;
+    }
+
+    /* Ultra malé planety pro malé displeje */
+    .admin-planet-1, .admin-planet-9 { width: 55px !important; height: 55px !important; }
+    .admin-planet-2, .admin-planet-10 { width: 65px !important; height: 65px !important; }
+    .admin-planet-3, .admin-planet-11 { width: 60px !important; height: 60px !important; }
+    .admin-planet-4, .admin-planet-12 { width: 70px !important; height: 70px !important; }
+    .admin-planet-5, .admin-planet-13 { width: 55px !important; height: 55px !important; }
+    .admin-planet-6, .admin-planet-14 { width: 70px !important; height: 70px !important; }
+    .admin-planet-7, .admin-planet-15 { width: 60px !important; height: 60px !important; }
+    .admin-planet-8, .admin-planet-16 { width: 65px !important; height: 65px !important; }
+
+    /* Ještě menší ovál pro malé displeje */
+    .admin-planet-1 { transform: translate(-50%, -50%) rotate(0deg) translateY(-140px) !important; }
+    .admin-planet-2 { transform: translate(-50%, -50%) rotate(22.5deg) translateY(-170px) !important; }
+    .admin-planet-3 { transform: translate(-50%, -50%) rotate(45deg) translateY(-190px) !important; }
+    .admin-planet-4 { transform: translate(-50%, -50%) rotate(67.5deg) translateY(-205px) !important; }
+    .admin-planet-5 { transform: translate(-50%, -50%) rotate(90deg) translateY(-210px) !important; }
+    .admin-planet-6 { transform: translate(-50%, -50%) rotate(112.5deg) translateY(-205px) !important; }
+    .admin-planet-7 { transform: translate(-50%, -50%) rotate(135deg) translateY(-190px) !important; }
+    .admin-planet-8 { transform: translate(-50%, -50%) rotate(157.5deg) translateY(-170px) !important; }
+    .admin-planet-9 { transform: translate(-50%, -50%) rotate(180deg) translateY(-140px) !important; }
+    .admin-planet-10 { transform: translate(-50%, -50%) rotate(202.5deg) translateY(-170px) !important; }
+    .admin-planet-11 { transform: translate(-50%, -50%) rotate(225deg) translateY(-190px) !important; }
+    .admin-planet-12 { transform: translate(-50%, -50%) rotate(247.5deg) translateY(-205px) !important; }
+    .admin-planet-13 { transform: translate(-50%, -50%) rotate(270deg) translateY(-210px) !important; }
+    .admin-planet-14 { transform: translate(-50%, -50%) rotate(292.5deg) translateY(-205px) !important; }
+    .admin-planet-15 { transform: translate(-50%, -50%) rotate(315deg) translateY(-190px) !important; }
+    .admin-planet-16 { transform: translate(-50%, -50%) rotate(337.5deg) translateY(-170px) !important; }
+
+    /* Hover ještě menší */
+    .admin-planet:hover {
+        width: 80px !important;
+        height: 80px !important;
+    }
+
+    .planet-title {
+        font-size: 0.6rem;
     }
 
     .planet-desc {
