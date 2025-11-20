@@ -758,7 +758,7 @@ button.btn:hover {
   /* KRITICKÉ: iOS zoom fix - font-size musí být min 16px */
   input, select, textarea {
     font-size: 14px !important;
-    padding: 8px 10px !important;
+    padding: 8px 4px !important;
     min-height: 44px;
     width: 100% !important;
     max-width: 100% !important;
@@ -773,13 +773,13 @@ button.btn:hover {
   select,
   textarea {
     font-size: 14px !important;
-    padding: 8px 10px !important;
+    padding: 8px 4px !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
 
-  /* Placeholder text menší pro kompaktnost */
+  /* Placeholder text menší pro kompaktnost a více vlevo */
   input::placeholder,
   select::placeholder,
   textarea::placeholder,
@@ -788,13 +788,15 @@ button.btn:hover {
   textarea::-webkit-input-placeholder {
     font-size: 9px !important;
     color: #999 !important;
+    padding-left: 0 !important;
+    text-indent: 0 !important;
   }
 
   /* Textarea přizpůsobené mobilu */
   textarea {
     min-height: 90px;
     font-size: 13px !important;
-    padding: 8px 10px !important;
+    padding: 8px 4px !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
@@ -802,6 +804,8 @@ button.btn:hover {
 
   textarea::placeholder {
     font-size: 9px !important;
+    padding-left: 0 !important;
+    text-indent: 0 !important;
   }
 
   /* Table cells větší padding pro lepší čitelnost */
