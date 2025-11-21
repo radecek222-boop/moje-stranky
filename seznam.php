@@ -587,7 +587,7 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 
   .modal-title {
-    font-size: 0.6rem !important;
+    font-size: 0.85rem !important;
     margin-bottom: 0.08rem !important;
     line-height: 1.05 !important;
   }
