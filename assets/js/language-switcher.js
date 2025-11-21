@@ -29,6 +29,9 @@
     // Aktualizovat placeholdery
     aktualizujPlaceholdery(jazyk);
 
+    // Aktualizovat title atributy (tooltips)
+    aktualizujTitleAtributy(jazyk);
+
     // Aktualizovat aktivní vlajku
     aktualizujVlajky(jazyk);
 
@@ -82,6 +85,18 @@
       const placeholder = element.getAttribute(`data-lang-${jazyk}-placeholder`);
       if (placeholder && (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA')) {
         element.placeholder = placeholder;
+      }
+    });
+  }
+
+  /**
+   * Aktualizuje title atributy elementů podle data-lang-X-title atributů
+   */
+  function aktualizujTitleAtributy(jazyk) {
+    document.querySelectorAll('[data-lang-cs-title]').forEach(element => {
+      const title = element.getAttribute(`data-lang-${jazyk}-title`);
+      if (title) {
+        element.title = title;
       }
     });
   }

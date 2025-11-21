@@ -356,7 +356,7 @@ if ($initialBootstrapData) {
       <h3 class="pdf-preview-title" data-lang-cs="Náhled PDF" data-lang-en="PDF Preview" data-lang-it="Anteprima PDF">Náhled PDF</h3>
       <div class="pdf-preview-actions">
         <!-- Tlačítko pro export (sdílení/stažení) -->
-        <button class="pdf-action-btn pdf-share-btn" id="pdfShareBtn" title="Sdílet / Stáhnout" style="display: none;">
+        <button class="pdf-action-btn pdf-share-btn" id="pdfShareBtn" data-lang-cs-title="Sdílet / Stáhnout" data-lang-en-title="Share / Download" data-lang-it-title="Condividi / Scarica" title="Sdílet / Stáhnout" style="display: none;">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
             <polyline points="16 6 12 2 8 6"></polyline>
@@ -365,7 +365,7 @@ if ($initialBootstrapData) {
         </button>
 
         <!-- Tlačítko pro odeslání zákazníkovi -->
-        <button class="pdf-action-btn pdf-send-btn" id="pdfSendBtn" title="Odeslat zákazníkovi" style="display: none;">
+        <button class="pdf-action-btn pdf-send-btn" id="pdfSendBtn" data-lang-cs-title="Odeslat zákazníkovi" data-lang-en-title="Send to Customer" data-lang-it-title="Invia al Cliente" title="Odeslat zákazníkovi" style="display: none;">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="22" y1="2" x2="11" y2="13"></line>
             <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -373,7 +373,7 @@ if ($initialBootstrapData) {
         </button>
 
         <!-- Tlačítko zavřít (vždy viditelné) -->
-        <button class="pdf-action-btn pdf-close-btn" id="pdfCloseBtn" title="Zavřít">
+        <button class="pdf-action-btn pdf-close-btn" id="pdfCloseBtn" data-lang-cs-title="Zavřít" data-lang-en-title="Close" data-lang-it-title="Chiudi" title="Zavřít">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
