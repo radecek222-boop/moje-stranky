@@ -66,7 +66,7 @@ if (!$isLoggedIn && !$isAdmin) {
     padding: 0.15rem 0.4rem !important;
     margin-top: 0.05rem !important;
     margin-bottom: 0.2rem !important;
-    border-width: 1px !important;
+    border-width: 2px !important;
     line-height: 1.0 !important;
     min-height: 16px !important;
   }
