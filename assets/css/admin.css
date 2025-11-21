@@ -1935,7 +1935,7 @@ body.admin-modal-open {
     bottom: 0;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
-    z-index: 9998;
+    z-index: 10002; /* ✅ OPRAVA: Zvýšeno z 9998 na 10002 (nad hamburger menu z-index: 10001) */
     display: none;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -1959,7 +1959,7 @@ body.admin-modal-open {
     background: var(--cc-bg-secondary, #ffffff);
     border-radius: var(--cc-radius, 12px);
     box-shadow: var(--cc-shadow-lg, 0 8px 32px rgba(0,0,0,0.16));
-    z-index: 10000;
+    z-index: 10003; /* ✅ OPRAVA: Zvýšeno z 10000 na 10003 (nad overlay 10002 a hamburger 10001) */
     display: none;
     flex-direction: column;
     opacity: 0;
