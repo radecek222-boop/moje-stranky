@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
 require_once __DIR__ . '/../../includes/db_metadata.php';
+require_once __DIR__ . '/../../includes/audit_logger.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -185,6 +186,17 @@ try {
     }
 
     $pdo->commit();
+
+    // ✅ FIX 10: Audit log pro compliance a forensics
+    auditLog('user_registration', [
+        'email' => $email,
+        'user_id' => $generatedUserId,
+        'role' => $role,
+        'registration_key' => $registrationKey,
+        'registration_key_type' => $keyRow['key_type'] ?? 'unknown',
+        'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+        'success' => true
+    ]);
 
     echo json_encode([
         'status' => 'success',
