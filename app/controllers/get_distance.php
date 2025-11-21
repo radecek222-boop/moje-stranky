@@ -105,13 +105,15 @@ function geocodeAddress($address) {
  */
 function calculateRoute($startLat, $startLon, $endLat, $endLon) {
     try {
+        // ✅ FIX: Použití action=routing místo action=route
+        // routing akce používá OSRM (open-source) ZDARMA, nepotřebuje API klíč
+        // route akce vyžaduje Geoapify API klíč
+        $waypoints = "{$startLat},{$startLon}|{$endLat},{$endLon}";
+
         $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') .
                '://' . $_SERVER['HTTP_HOST'] .
-               '/api/geocode_proxy.php?action=route&' .
-               'start_lat=' . urlencode($startLat) .
-               '&start_lon=' . urlencode($startLon) .
-               '&end_lat=' . urlencode($endLat) .
-               '&end_lon=' . urlencode($endLon) .
+               '/api/geocode_proxy.php?action=routing&' .
+               'waypoints=' . urlencode($waypoints) .
                '&mode=drive';
 
         $ch = curl_init();
