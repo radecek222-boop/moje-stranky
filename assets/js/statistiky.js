@@ -868,5 +868,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Načíst seznam prodejců do filtru
     loadSalespersonFilter();
 
+    // Načíst summary statistiky ihned po načtení stránky
+    loadSummaryStats();
+
     console.log('WGS Statistiky - Inicializace dokončena');
 });
