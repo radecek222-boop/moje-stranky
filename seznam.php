@@ -64,8 +64,8 @@ if (!$isLoggedIn && !$isAdmin) {
 @media (max-width: 768px) {
   .search-bar {
     padding: 0 0.2rem !important;
-    margin-top: 0.125rem !important;
-    margin-bottom: 0.38rem !important;
+    margin-top: 0.05rem !important;
+    margin-bottom: 0.2rem !important;
     border: 1px solid var(--c-black) !important;
     line-height: 1.0 !important;
     min-height: 12px !important;
@@ -341,7 +341,7 @@ if (!$isLoggedIn && !$isAdmin) {
   .order-grid,
   #orderGrid {
     gap: 0.25rem !important;
-    padding: 0.25rem !important;
+    padding: 0.1rem !important;
   }
 }
 
@@ -367,25 +367,25 @@ if (!$isLoggedIn && !$isAdmin) {
   .order-grid,
   #orderGrid {
     gap: 0.2rem !important;
-    padding: 0.2rem !important;
+    padding: 0.05rem !important;
   }
 }
 
-/* 📱 MOBILNÍ OPTIMALIZACE FILTER TLAČÍTEK (minimální výška) */
+/* 📱 MOBILNÍ OPTIMALIZACE FILTER TLAČÍTEK (kompromis - varianta A) */
 @media (max-width: 768px) {
   /* Filter bar - stack filters */
   .filter-bar {
     flex-direction: column !important;
-    gap: 0.08rem !important;
-    margin-bottom: 0.5rem !important;
+    gap: 0.05rem !important;
+    margin-bottom: 0.25rem !important;
   }
 
   .filter-btn {
     width: 100% !important;
-    padding: 0 0.2rem !important;
+    padding: 0.15rem 0.2rem !important;
     font-size: 0.65rem !important;
     line-height: 1.0 !important;
-    min-height: 12px !important;
+    min-height: 16px !important;
     border: 1px solid var(--c-border) !important;
   }
 
@@ -396,14 +396,14 @@ if (!$isLoggedIn && !$isAdmin) {
 
 @media (max-width: 375px) {
   .filter-btn {
-    padding: 0 0.18rem !important;
+    padding: 0.12rem 0.18rem !important;
     font-size: 0.6rem !important;
     line-height: 1.0 !important;
-    min-height: 11px !important;
+    min-height: 15px !important;
   }
 
   .filter-bar {
-    gap: 0.05rem !important;
+    gap: 0.03rem !important;
   }
 }
 
