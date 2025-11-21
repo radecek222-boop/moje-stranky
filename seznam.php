@@ -416,85 +416,85 @@ if (!$isLoggedIn && !$isAdmin) {
     padding-right: 2.5rem;
   }
 
-  /* Červený obdélník s termíny - KOMPAKTNÍ */
+  /* Červený obdélník s termíny - VELMI KOMPAKTNÍ */
   .day-bookings {
-    margin-top: 0.8rem !important;
-    padding: 0.5rem !important;
+    margin-top: 0.5rem !important;
+    padding: 0.3rem !important;
   }
 
   .day-bookings h4 {
-    font-size: 0.75rem !important;
-    margin-bottom: 0.5rem !important;
+    font-size: 0.65rem !important;
+    margin-bottom: 0.3rem !important;
     letter-spacing: 0.03em;
   }
 
   .booking-item {
-    padding: 0.4rem !important;
-    margin-bottom: 0.3rem !important;
-    font-size: 0.7rem !important;
+    padding: 0.25rem !important;
+    margin-bottom: 0.2rem !important;
+    font-size: 0.6rem !important;
   }
 
   .booking-item:last-child {
     margin-bottom: 0 !important;
   }
 
-  /* Panel trasy - KOMPAKTNÍ */
+  /* Panel trasy - VELMI KOMPAKTNÍ */
   .distance-info-panel {
-    padding: 0.5rem !important;
-    margin: 0.5rem 0 !important;
-  }
-
-  .distance-info-title {
-    font-size: 0.65rem !important;
-    margin-bottom: 0.5rem !important;
-  }
-
-  .distance-stats {
-    gap: 0.4rem !important;
-  }
-
-  .distance-stat {
-    padding: 0.4rem !important;
-  }
-
-  .distance-stat-label {
-    font-size: 0.55rem !important;
-    margin-bottom: 0.2rem !important;
-  }
-
-  .distance-stat-value {
-    font-size: 0.85rem !important;
-  }
-
-  .distance-stat-unit {
-    font-size: 0.65rem !important;
-  }
-
-  /* Položky trasy - KOMPAKTNÍ */
-  .route-info {
-    margin-top: 0.5rem !important;
-    padding-top: 0.5rem !important;
-  }
-
-  .route-item {
     padding: 0.3rem !important;
-    margin-bottom: 0.3rem !important;
-    font-size: 0.65rem !important;
-  }
-
-  .route-item.new-customer {
-    padding: 0.4rem !important;
     margin: 0.3rem 0 !important;
   }
 
+  .distance-info-title {
+    font-size: 0.6rem !important;
+    margin-bottom: 0.3rem !important;
+  }
+
+  .distance-stats {
+    gap: 0.25rem !important;
+  }
+
+  .distance-stat {
+    padding: 0.25rem !important;
+  }
+
+  .distance-stat-label {
+    font-size: 0.5rem !important;
+    margin-bottom: 0.15rem !important;
+  }
+
+  .distance-stat-value {
+    font-size: 0.75rem !important;
+  }
+
+  .distance-stat-unit {
+    font-size: 0.6rem !important;
+  }
+
+  /* Položky trasy - VELMI KOMPAKTNÍ */
+  .route-info {
+    margin-top: 0.3rem !important;
+    padding-top: 0.3rem !important;
+  }
+
+  .route-item {
+    padding: 0.2rem !important;
+    margin-bottom: 0.2rem !important;
+    font-size: 0.6rem !important;
+  }
+
+  .route-item.new-customer {
+    padding: 0.25rem !important;
+    margin: 0.2rem 0 !important;
+  }
+
   .route-distance {
-    padding: 0.2rem 0.4rem !important;
-    font-size: 0.65rem !important;
-    min-width: 60px !important;
+    padding: 0.15rem 0.3rem !important;
+    font-size: 0.6rem !important;
+    min-width: 55px !important;
   }
 
   .route-arrow {
-    font-size: 0.65rem !important;
+    font-size: 0.6rem !important;
   }
 }
 
@@ -549,94 +549,108 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 }
 
-/* 📱 KOMPLETNÍ OPTIMALIZACE DETAIL MODALU - KOMPAKTNÍ STYL */
+/* 📱 KOMPLETNÍ OPTIMALIZACE DETAIL MODALU - ULTRA KOMPAKTNÍ STYL */
 @media (max-width: 768px) {
-  /* Modal header - kompaktní */
-  .modal-header {
+  /* Modal overlay - lepší scrollování na mobilu */
+  .modal-overlay {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+    align-items: flex-start !important;
     padding: 0.5rem !important;
+  }
+
+  .modal-content {
+    margin: 0 auto !important;
+    max-height: none !important;
+  }
+
+  /* Modal header - velmi kompaktní */
+  .modal-header {
+    padding: 0.3rem !important;
   }
 
   .modal-title {
-    font-size: 0.75rem !important;
-    margin-bottom: 0.25rem !important;
-    line-height: 1.2 !important;
+    font-size: 0.65rem !important;
+    margin-bottom: 0.15rem !important;
+    line-height: 1.1 !important;
   }
 
   .modal-subtitle {
-    font-size: 0.6rem !important;
-    line-height: 1.2 !important;
+    font-size: 0.55rem !important;
+    line-height: 1.1 !important;
   }
 
   .modal-close {
-    width: 20px !important;
-    height: 20px !important;
-    font-size: 1rem !important;
-    top: 0.5rem !important;
-    right: 0.5rem !important;
-    padding: 0.2rem !important;
+    width: 35px !important;
+    height: 35px !important;
+    font-size: 1.75rem !important;
+    top: 0.3rem !important;
+    right: 0.3rem !important;
+    padding: 0.35rem !important;
   }
 
-  /* Modal body - kompaktní padding */
+  /* Modal body - velmi kompaktní padding */
   .modal-body {
-    padding: 0.5rem !important;
+    padding: 0.3rem !important;
   }
 
   /* Section titles - menší */
   .section-title {
-    font-size: 0.65rem !important;
-    margin-bottom: 0.5rem !important;
-    padding-bottom: 0.25rem !important;
+    font-size: 0.6rem !important;
+    margin-bottom: 0.3rem !important;
+    padding-bottom: 0.15rem !important;
   }
 
   /* Info grid - kompaktní */
   .info-grid {
-    grid-template-columns: 80px 1fr !important;
-    gap: 0.4rem !important;
-    font-size: 0.7rem !important;
-  }
-
-  .info-label {
+    grid-template-columns: 70px 1fr !important;
+    gap: 0.25rem !important;
     font-size: 0.65rem !important;
   }
 
+  .info-label {
+    font-size: 0.6rem !important;
+  }
+
   .info-value {
-    font-size: 0.7rem !important;
+    font-size: 0.65rem !important;
   }
 
   /* Modal sections - menší mezery */
   .modal-section {
-    margin-bottom: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
   }
 
   /* Editable fields - kompaktní */
   .editable-field {
-    padding: 0.4rem !important;
-    margin-bottom: 0.5rem !important;
+    padding: 0.25rem !important;
+    margin-bottom: 0.3rem !important;
   }
 
   .field-label {
-    font-size: 0.65rem !important;
-    margin-bottom: 0.25rem !important;
+    font-size: 0.6rem !important;
+    margin-bottom: 0.15rem !important;
   }
 
   .field-input {
-    padding: 0.3rem !important;
-    font-size: 0.7rem !important;
+    padding: 0.25rem !important;
+    font-size: 0.65rem !important;
   }
 
   .field-textarea {
-    padding: 0.3rem !important;
-    font-size: 0.7rem !important;
-    min-height: 50px !important;
-    line-height: 1.3 !important;
+    padding: 0.25rem !important;
+    font-size: 0.65rem !important;
+    min-height: 40px !important;
+    line-height: 1.2 !important;
   }
 
-  /* Všechna tlačítka v modalu - kompaktní */
+  /* Všechna tlačítka v modalu - větší pro lepší použitelnost (75% větší) */
   .modal-body .btn,
   .modal-actions .btn {
-    padding: 0.35rem 0.7rem !important;
-    font-size: 0.6rem !important;
-    min-height: 22px !important;
+    padding: 0.61rem 1.23rem !important;
+    font-size: 1.05rem !important;
+    min-height: 38px !important;
     line-height: 1.2 !important;
     letter-spacing: 0.05em !important;
   }
@@ -647,128 +661,129 @@ if (!$isLoggedIn && !$isAdmin) {
     gap: 0.3rem !important;
   }
 
-  /* Calendar container - kompaktní */
+  /* Calendar container - velmi kompaktní */
   .calendar-container {
-    gap: 0.3rem !important;
+    gap: 0.2rem !important;
   }
 
   .calendar-controls {
-    margin-bottom: 0.3rem !important;
+    margin-bottom: 0.2rem !important;
   }
 
   .calendar-month-title {
-    font-size: 0.7rem !important;
+    font-size: 0.65rem !important;
   }
 
   .calendar-nav-btn {
-    padding: 0.2rem 0.4rem !important;
-    font-size: 0.6rem !important;
+    padding: 0.35rem 0.7rem !important;
+    font-size: 1.05rem !important;
   }
 
   .calendar-weekdays {
-    font-size: 0.55rem !important;
-    gap: 0.1rem !important;
-    margin-bottom: 0.1rem !important;
+    font-size: 0.5rem !important;
+    gap: 0.05rem !important;
+    margin-bottom: 0.05rem !important;
   }
 
   .calendar-weekdays > div {
-    padding: 0.15rem !important;
+    padding: 0.1rem !important;
   }
 
   .calendar-days {
-    gap: 0.1rem !important;
+    gap: 0.05rem !important;
   }
 
   .cal-day {
-    padding: 0.25rem !important;
-    font-size: 0.65rem !important;
-    min-height: 24px !important;
-  }
-
-  /* Time grid - kompaktní */
-  #timeGrid {
-    grid-template-columns: repeat(4, 1fr) !important;
-    gap: 0.1rem !important;
-    margin-top: 0.3rem !important;
-  }
-
-  .time-slot {
-    padding: 0.25rem 0.15rem !important;
+    padding: 0.2rem !important;
     font-size: 0.6rem !important;
     min-height: 22px !important;
   }
 
-  #selectedDateDisplay {
+  /* Time grid - velmi kompaktní */
+  #timeGrid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.05rem !important;
     margin-top: 0.2rem !important;
-    font-size: 0.65rem !important;
+  }
+
+  .time-slot {
+    padding: 0.2rem 0.1rem !important;
+    font-size: 0.55rem !important;
+    min-height: 20px !important;
+  }
+
+  #selectedDateDisplay {
+    margin-top: 0.15rem !important;
+    font-size: 0.6rem !important;
   }
 
   /* Photo grid - kompaktní mezery */
   .modal-body div[style*="display: grid"][style*="grid-template-columns"] {
-    gap: 0.3rem !important;
+    gap: 0.2rem !important;
   }
 
-  /* PDF tlačítka - kompaktní */
+  /* PDF tlačítka - větší (75% větší) */
   .modal-body button[onclick*="PDF"],
   .modal-body button[onclick*="pdf"] {
-    padding: 0.3rem 0.5rem !important;
-    font-size: 0.6rem !important;
-    min-height: 20px !important;
+    padding: 0.53rem 0.88rem !important;
+    font-size: 1.05rem !important;
+    min-height: 35px !important;
   }
 
-  /* Input fields v inline stylu - kompaktní */
+  /* Input fields v inline stylu - velmi kompaktní */
   .modal-body input[style*="padding"] {
-    padding: 0.3rem 0.4rem !important;
-    font-size: 0.7rem !important;
+    padding: 0.2rem 0.3rem !important;
+    font-size: 0.65rem !important;
   }
 
   .modal-body textarea[style*="padding"] {
-    padding: 0.3rem 0.4rem !important;
-    font-size: 0.7rem !important;
-    min-height: 50px !important;
+    padding: 0.2rem 0.3rem !important;
+    font-size: 0.65rem !important;
+    min-height: 40px !important;
+    line-height: 1.2 !important;
   }
 
-  /* Select dropdowns - kompaktní */
+  /* Select dropdowns - velmi kompaktní */
   .modal-body select {
-    padding: 0.3rem 0.4rem !important;
-    font-size: 0.7rem !important;
+    padding: 0.2rem 0.3rem !important;
+    font-size: 0.65rem !important;
   }
 
   /* Map panel toggle - kompaktní */
   .map-toggle {
-    padding: 0.5rem 0.75rem !important;
-    font-size: 0.7rem !important;
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.65rem !important;
   }
 
   .map-toggle-icon {
-    font-size: 1rem !important;
+    font-size: 0.9rem !important;
   }
 
   .map-content {
-    padding: 0.75rem !important;
+    padding: 0.5rem !important;
   }
 
   /* Map stats - kompaktní */
   .map-stats {
-    gap: 0.5rem !important;
-    margin-bottom: 0.75rem !important;
+    gap: 0.3rem !important;
+    margin-bottom: 0.5rem !important;
   }
 
   .map-stat {
-    padding: 0.5rem !important;
+    padding: 0.3rem !important;
   }
 
   .map-stat-label {
-    font-size: 0.65rem !important;
-    margin-bottom: 0.3rem !important;
+    font-size: 0.6rem !important;
+    margin-bottom: 0.2rem !important;
   }
 
   .map-stat-value {
-    font-size: 1.1rem !important;
+    font-size: 0.95rem !important;
   }
 
   .map-stat-unit {
-    font-size: 0.75rem !important;
+    font-size: 0.65rem !important;
   }
 }
 
@@ -807,8 +822,8 @@ if (!$isLoggedIn && !$isAdmin) {
 
   .modal-body .btn,
   .modal-actions .btn {
-    padding: 0.3rem 0.6rem !important;
-    font-size: 0.55rem !important;
+    padding: 0.53rem 1.05rem !important;
+    font-size: 0.96rem !important;
   }
 
   .cal-day {
