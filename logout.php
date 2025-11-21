@@ -77,16 +77,22 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         <div class="logout-container">
             <h1>🔒 Odhlášení</h1>
             <p>Opravdu se chcete odhlásit z WGS Service?</p>
-            <form method="POST" action="logout.php">
+            <form method="POST" action="/logout.php">
                 <?php
                 // Vygenerovat CSRF token
                 $token = generateCSRFToken();
                 ?>
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($token, ENT_QUOTES, 'UTF-8'); ?>">
                 <button type="submit" class="btn">Ano, odhlásit</button>
-                <button type="button" class="btn btn-cancel" onclick="history.back()">Zrušit</button>
+                <button type="button" class="btn btn-cancel" id="cancelLogout">Zrušit</button>
             </form>
         </div>
+        <script>
+            // Event listener pro tlačítko Zrušit (bez inline onclick - best practice)
+            document.getElementById('cancelLogout').addEventListener('click', function() {
+                history.back();
+            });
+        </script>
     </body>
     </html>
     <?php

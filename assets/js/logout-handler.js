@@ -27,7 +27,7 @@
       // 2. Pokud není, zkusit fetch z API
       if (!csrfToken) {
         try {
-          const response = await fetch('app/controllers/get_csrf_token.php', {
+          const response = await fetch('/app/controllers/get_csrf_token.php', {
             credentials: 'same-origin'
           });
           const data = await response.json();
@@ -47,7 +47,7 @@
       // Odeslat POST request na logout.php
       const form = document.createElement('form');
       form.method = 'POST';
-      form.action = 'logout.php';
+      form.action = '/logout.php';
 
       const tokenField = document.createElement('input');
       tokenField.type = 'hidden';
@@ -68,8 +68,8 @@
    * Inicializace logout handlerů
    */
   function initLogoutHandlers() {
-    // Najít všechny logout odkazy
-    const logoutLinks = document.querySelectorAll('a[href="logout.php"], a.logout-link, a.hamburger-logout, #logoutBtn, #logoutBtnDesktop');
+    // Najít všechny logout odkazy (relativní i absolutní cesty)
+    const logoutLinks = document.querySelectorAll('a[href="logout.php"], a[href="/logout.php"], a.logout-link, a.hamburger-logout, #logoutBtn, #logoutBtnDesktop');
 
     logoutLinks.forEach(link => {
       link.addEventListener('click', handleLogout);
