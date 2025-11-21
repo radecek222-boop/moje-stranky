@@ -258,6 +258,90 @@ if (!$isLoggedIn && !$isAdmin) {
   background: rgba(76, 175, 80, 0.12) !important;
 }
 
+/* 📱 MOBILNÍ OPTIMALIZACE KARET ZÁKAZNÍKŮ */
+@media (max-width: 768px) {
+  /* Karty zákazníků - kompaktní pro zobrazení více karet */
+  .order-box {
+    padding: 0.6rem !important;
+    margin-bottom: 0.5rem !important;
+    min-height: auto !important;
+  }
+
+  .order-header {
+    margin-bottom: 0.4rem !important;
+    padding-bottom: 0.3rem !important;
+  }
+
+  .order-number {
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+  }
+
+  .order-status {
+    width: 8px !important;
+    height: 8px !important;
+  }
+
+  .order-notes-badge {
+    font-size: 0.6rem !important;
+    min-width: 16px !important;
+    height: 16px !important;
+    padding: 0 0.25rem !important;
+  }
+
+  .order-body {
+    gap: 0.3rem !important;
+  }
+
+  .order-customer {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.3rem !important;
+  }
+
+  .order-detail {
+    gap: 0.2rem !important;
+  }
+
+  .order-detail-line {
+    font-size: 0.7rem !important;
+    line-height: 1.3 !important;
+  }
+
+  /* Grid - menší mezery mezi kartami */
+  .order-grid,
+  #orderGrid {
+    gap: 0.5rem !important;
+    padding: 0.5rem !important;
+  }
+}
+
+/* 📱 Extra malé displeje - ještě kompaktnější */
+@media (max-width: 480px) {
+  .order-box {
+    padding: 0.5rem !important;
+    margin-bottom: 0.4rem !important;
+  }
+
+  .order-number {
+    font-size: 0.7rem !important;
+  }
+
+  .order-customer {
+    font-size: 0.8rem !important;
+  }
+
+  .order-detail-line {
+    font-size: 0.65rem !important;
+  }
+
+  .order-grid,
+  #orderGrid {
+    gap: 0.4rem !important;
+    padding: 0.4rem !important;
+  }
+}
+
 /* 📱 MOBILNÍ OPTIMALIZACE KALENDÁŘE A PANELŮ */
 @media (max-width: 768px) {
   /* Modal title - "Vyberte termín návštěvy" menší pro mobil */
