@@ -72,6 +72,26 @@ try {
 } catch (Exception $e) {
     // Ignoruj chyby
 }
+
+// Získání statistik pro dashboard
+if ($activeTab === 'dashboard') {
+    try {
+        $pdo = getDbConnection();
+
+        $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_registration_keys WHERE is_active = 1");
+        $activeKeys = $stmt->fetchColumn();
+
+        try {
+            $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_pending_actions WHERE status = 'pending'");
+            $pendingActions = $stmt->fetchColumn();
+        } catch (Exception $e) {
+            $pendingActions = 0;
+        }
+    } catch (Exception $e) {
+        $activeKeys = 0;
+        $pendingActions = 0;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -115,117 +135,212 @@ try {
 <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
 
 <?php
-// Landing page - full screen s planetárními kartami
+// Dashboard - kartový systém
 if (!$embedMode && $activeTab === 'dashboard'):
 ?>
-<div class="admin-landing-planets">
-    <!-- Slunce - WGS + ADMIN uprostřed - kliknutím na index.php -->
-    <div class="admin-sun" onclick="window.location='index.php'" style="cursor: pointer;">
-        <h1 class="admin-landing-title">WGS</h1>
-        <p class="admin-landing-subtitle">ADMIN</p>
+<div class="admin-dashboard-wrapper">
+    <div class="admin-dashboard-header">
+        <h1 class="admin-dashboard-title">WGS Admin Panel</h1>
+        <p class="admin-dashboard-subtitle">Centrální řídicí panel pro správu celé aplikace</p>
+        <div class="admin-dashboard-actions">
+            <span class="cc-version-info" id="adminVersionInfo" title="Verze Admin - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
+            <button class="cc-clear-cache-btn" onclick="clearCacheAndReload()" title="Vymaže lokální cache a načte nejnovější verzi">
+                🔄 Vymazat cache & Reload
+            </button>
+        </div>
     </div>
 
-    <!-- Planety (karty) točící se dokola - 18 planet -->
-    <div class="admin-orbit">
-        <!-- Hlavní stránky -->
-        <div class="admin-planet admin-planet-1" onclick="window.location='index.php'">
-            <div class="planet-content">
-                <div class="planet-title">Domů</div>
+    <!-- HLAVNÍ NAVIGACE -->
+    <div class="admin-kategorie">
+        <h2 class="admin-kategorie-nadpis">📋 Hlavní navigace</h2>
+        <div class="cc-grid">
+            <div class="cc-card" onclick="window.location='index.php'">
+                <div class="cc-card-title">🏠 Domů</div>
+                <div class="cc-card-description">Hlavní stránka aplikace</div>
+            </div>
+
+            <div class="cc-card" onclick="window.location='seznam.php'">
+                <div class="cc-card-title">📑 Seznam reklamací</div>
+                <div class="cc-card-description">Přehled všech reklamací a servisních požadavků</div>
+            </div>
+
+            <div class="cc-card" onclick="window.location='protokol.php'">
+                <div class="cc-card-title">📝 Nový protokol</div>
+                <div class="cc-card-description">Vytvořit nový servisní protokol</div>
+            </div>
+
+            <div class="cc-card" onclick="window.location='statistiky.php'">
+                <div class="cc-card-title">📊 Statistiky</div>
+                <div class="cc-card-description">Přehledy, grafy a analytické reporty</div>
             </div>
         </div>
+    </div>
 
-        <div class="admin-planet admin-planet-2" onclick="window.location='seznam.php'">
-            <div class="planet-content">
-                <div class="planet-title">Seznam</div>
+    <!-- SPRÁVA & BEZPEČNOST -->
+    <div class="admin-kategorie">
+        <h2 class="admin-kategorie-nadpis">👥 Správa & Bezpečnost</h2>
+        <div class="cc-grid">
+            <div class="cc-card" onclick="window.location='admin.php?tab=users'">
+                <div class="cc-card-title">👤 Uživatelé</div>
+                <div class="cc-card-description">Správa uživatelských účtů a oprávnění</div>
+            </div>
+
+            <div class="cc-card" onclick="window.location='admin.php?tab=keys'">
+                <?php if ($activeKeys > 0): ?>
+                    <div class="cc-card-badge"><?= $activeKeys ?></div>
+                <?php endif; ?>
+                <div class="cc-card-title">🔐 Bezpečnost & Klíče</div>
+                <div class="cc-card-description">Registrační klíče, API klíče, bezpečnostní nastavení</div>
+            </div>
+
+            <div class="cc-card" onclick="window.location='admin.php?tab=notifications'">
+                <div class="cc-card-title">📧 Email & SMS</div>
+                <div class="cc-card-description">Správa emailových a SMS notifikací</div>
+            </div>
+
+            <div class="cc-card" onclick="window.location='admin.php?tab=online'">
+                <div class="cc-card-title">🟢 Online uživatelé</div>
+                <div class="cc-card-description">Aktuálně přihlášení uživatelé v systému</div>
             </div>
         </div>
+    </div>
 
-        <div class="admin-planet admin-planet-3" onclick="window.location='protokol.php'">
-            <div class="planet-content">
-                <div class="planet-title">Protokol</div>
+    <!-- SYSTÉM -->
+    <div class="admin-kategorie">
+        <h2 class="admin-kategorie-nadpis">⚙️ Systém</h2>
+        <div class="cc-grid">
+            <div class="cc-card" onclick="window.location='admin.php?tab=admin_configuration'">
+                <div class="cc-card-title">🔧 Konfigurace</div>
+                <div class="cc-card-description">SMTP, API klíče, systémová nastavení</div>
+            </div>
+
+            <div class="cc-card" onclick="window.location='admin.php?tab=admin_actions'">
+                <?php if ($pendingActions > 0): ?>
+                    <div class="cc-card-badge"><?= $pendingActions ?></div>
+                <?php endif; ?>
+                <div class="cc-card-title">✅ Akce & Úkoly</div>
+                <div class="cc-card-description">Nevyřešené úkoly a plánované akce</div>
+            </div>
+
+            <div class="cc-card" onclick="window.location='admin.php?tab=tools'">
+                <div class="cc-card-title">🛠️ Nástroje</div>
+                <div class="cc-card-description">Diagnostické nástroje a utilities</div>
             </div>
         </div>
+    </div>
 
-        <div class="admin-planet admin-planet-4" onclick="window.location='statistiky.php'">
-            <div class="planet-content">
-                <div class="planet-title">Statistiky</div>
+    <!-- VÝVOJ & TESTOVÁNÍ -->
+    <div class="admin-kategorie">
+        <h2 class="admin-kategorie-nadpis">🧪 Vývoj & Testování</h2>
+        <div class="cc-grid">
+            <div class="cc-card" onclick="window.location='admin.php?tab=admin_phpunit'">
+                <div class="cc-card-title">🧪 PHPUnit Testy</div>
+                <div class="cc-card-description">Spuštění automatických testů</div>
+            </div>
+
+            <div class="cc-card" onclick="window.location='admin.php?tab=admin_testing_simulator'">
+                <div class="cc-card-title">🎯 E2E Testing</div>
+                <div class="cc-card-description">End-to-end testování celého workflow</div>
+            </div>
+
+            <div class="cc-card" onclick="window.location='admin.php?tab=admin_console'">
+                <div class="cc-card-title">💻 Konzole</div>
+                <div class="cc-card-description">Diagnostika HTML/PHP/JS/CSS/SQL</div>
             </div>
         </div>
+    </div>
 
-        <!-- Admin taby -->
-        <div class="admin-planet admin-planet-5" onclick="window.location='admin.php?tab=notifications'">
-            <div class="planet-content">
-                <div class="planet-title">Email</div>
+    <!-- DESIGN & DATABÁZE -->
+    <div class="admin-kategorie">
+        <h2 class="admin-kategorie-nadpis">🎨 Design & Databáze</h2>
+        <div class="cc-grid">
+            <div class="cc-card" onclick="window.location='admin.php?tab=admin_appearance'">
+                <div class="cc-card-title">🎨 Vzhled & Design</div>
+                <div class="cc-card-description">Barvy, fonty, logo, branding</div>
             </div>
-        </div>
 
-        <div class="admin-planet admin-planet-6" onclick="window.location='admin.php?tab=keys'">
-            <div class="planet-content">
-                <div class="planet-title">Security</div>
+            <div class="cc-card" onclick="window.location='admin.php?tab=admin_content'">
+                <div class="cc-card-title">📄 Správa Obsahu</div>
+                <div class="cc-card-description">Editace textů a obsahových bloků</div>
             </div>
-        </div>
 
-        <div class="admin-planet admin-planet-7" onclick="window.location='admin.php?tab=users'">
-            <div class="planet-content">
-                <div class="planet-title">Users</div>
-            </div>
-        </div>
-
-        <div class="admin-planet admin-planet-8" onclick="window.location='admin.php?tab=tools'">
-            <div class="planet-content">
-                <div class="planet-title">Tools</div>
-            </div>
-        </div>
-
-        <div class="admin-planet admin-planet-9" onclick="window.location='admin.php?tab=online'">
-            <div class="planet-content">
-                <div class="planet-title">Online</div>
-            </div>
-        </div>
-
-        <div class="admin-planet admin-planet-10" onclick="window.location='admin.php?tab=admin_phpunit'">
-            <div class="planet-content">
-                <div class="planet-title">Tests</div>
-            </div>
-        </div>
-
-        <div class="admin-planet admin-planet-11" onclick="window.location='admin.php?tab=admin_testing_simulator'">
-            <div class="planet-content">
-                <div class="planet-title">Testing</div>
-            </div>
-        </div>
-
-        <div class="admin-planet admin-planet-12" onclick="window.location='admin.php?tab=admin_appearance'">
-            <div class="planet-content">
-                <div class="planet-title">Vzhled</div>
-            </div>
-        </div>
-
-        <div class="admin-planet admin-planet-13" onclick="window.location='admin.php?tab=admin_content'">
-            <div class="planet-content">
-                <div class="planet-title">Obsah</div>
-            </div>
-        </div>
-
-        <div class="admin-planet admin-planet-14" onclick="window.location='admin.php?tab=admin_configuration'">
-            <div class="planet-content">
-                <div class="planet-title">Config</div>
-            </div>
-        </div>
-
-        <div class="admin-planet admin-planet-15" onclick="window.location='admin.php?tab=admin_actions'">
-            <div class="planet-content">
-                <div class="planet-title">Akce</div>
-            </div>
-        </div>
-
-        <div class="admin-planet admin-planet-16" onclick="window.location='admin.php?tab=admin_console'">
-            <div class="planet-content">
-                <div class="planet-title">Konzole</div>
+            <div class="cc-card" onclick="openSQLPage()">
+                <div class="cc-card-title">🗄️ SQL Databáze</div>
+                <div class="cc-card-description">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+/* Dashboard kartový systém */
+.admin-dashboard-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.admin-dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.admin-dashboard-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+}
+
+.admin-dashboard-subtitle {
+    font-size: 1rem;
+    color: #666;
+    margin: 0 0 1.5rem 0;
+}
+
+.admin-dashboard-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.admin-kategorie {
+    margin-bottom: 3rem;
+}
+
+.admin-kategorie-nadpis {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .admin-dashboard-title {
+        font-size: 1.8rem;
+    }
+
+    .admin-dashboard-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .admin-kategorie-nadpis {
+        font-size: 1rem;
+    }
+
+    .cc-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}
+</style>
 <?php endif; ?>
 
 <?php if (!$embedMode && $activeTab !== 'dashboard'): ?>
@@ -773,118 +888,6 @@ function loadNotifContent(type, body) {
   </div>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'dashboard' && !$embedMode): ?>
-  <!-- TAB: ADMIN DASHBOARD - Unified card grid interface -->
-  <?php
-  // Načtení dat ze session
-  $currentUser = $_SESSION['full_name'] ?? 'Admin';
-  $userId = $_SESSION['user_id'] ?? null;
-
-  // Získání statistik
-  $pdo = getDbConnection();
-
-  // Stats
-  $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_reklamace");
-  $totalClaims = $stmt->fetchColumn();
-
-  $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_users");
-  $totalUsers = $stmt->fetchColumn();
-
-  $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_registration_keys WHERE is_active = 1");
-  $activeKeys = $stmt->fetchColumn();
-
-  // Pending actions count
-  try {
-      $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_pending_actions WHERE status = 'pending'");
-      $pendingActions = $stmt->fetchColumn();
-  } catch (Exception $e) {
-      $pendingActions = 0;
-  }
-  ?>
-
-  <div class="admin-dashboard">
-      <div class="page-header">
-          <p class="page-subtitle">Centrální řídicí panel pro správu celé aplikace</p>
-          <div class="page-header-actions">
-              <span class="cc-version-info" id="adminVersionInfo" title="Verze Admin - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
-              <button class="cc-clear-cache-btn" onclick="clearCacheAndReload()" title="Vymaže lokální cache a načte nejnovější verzi">
-                  🔄 Vymazat cache & Reload
-              </button>
-          </div>
-      </div>
-
-      <!-- Card Grid -->
-      <div class="cc-grid">
-
-          <!-- Statistiky reklamací -->
-          <div class="cc-card cc-card-statistics" onclick="window.location='statistiky.php'">
-              <div class="cc-card-title">Statistiky</div>
-              <div class="cc-card-description">Přehledy, správa reklamací a uživatelů</div>
-          </div>
-
-          <!-- Web Analytics -->
-          <div class="cc-card cc-card-analytics" onclick="openCCModal('analytics')">
-              <div class="cc-card-title">Analytics</div>
-              <div class="cc-card-description">Web analytika a metriky</div>
-          </div>
-
-          <!-- Security -->
-          <div class="cc-card cc-card-keys" onclick="openCCModal('keys')">
-              <?php if ($activeKeys > 0): ?>
-                  <div class="cc-card-badge"><?= $activeKeys ?></div>
-              <?php endif; ?>
-              <div class="cc-card-title">Security</div>
-              <div class="cc-card-description">Registrační klíče, API klíče, bezpečnost</div>
-          </div>
-
-          <!-- Email & SMS -->
-          <div class="cc-card cc-card-notifications" onclick="openCCModal('notifications')">
-              <div class="cc-card-title">Email & SMS</div>
-              <div class="cc-card-description">Šablony emailů a SMS notifikace</div>
-          </div>
-
-          <!-- Akce & Úkoly -->
-          <div class="cc-card cc-card-actions" onclick="openCCModal('actions')">
-              <?php if ($pendingActions > 0): ?>
-                  <div class="cc-card-badge"><?= $pendingActions ?></div>
-              <?php endif; ?>
-              <div class="cc-card-title">Akce & Úkoly</div>
-              <div class="cc-card-description">Nevyřešené úkoly a plánované akce</div>
-          </div>
-
-          <!-- Konzole -->
-          <div class="cc-card cc-card-console" onclick="openCCModal('console')">
-              <div class="cc-card-title">💻 Konzole</div>
-              <div class="cc-card-description">Diagnostika HTML/PHP/JS/CSS/SQL</div>
-          </div>
-
-          <!-- Testovací prostředí -->
-          <div class="cc-card cc-card-testing" onclick="openCCModal('testing')">
-              <div class="cc-card-title">Testovací prostředí</div>
-              <div class="cc-card-description">E2E testování celého workflow</div>
-          </div>
-
-          <!-- Vzhled & Design -->
-          <div class="cc-card cc-card-appearance" onclick="openCCModal('appearance')">
-              <div class="cc-card-title">Vzhled & Design</div>
-              <div class="cc-card-description">Barvy, fonty, logo, branding</div>
-          </div>
-
-          <!-- SQL Databáze -->
-          <div class="cc-card cc-card-content" onclick="openSQLPage()">
-              <div class="cc-card-title">SQL</div>
-              <div class="cc-card-description">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
-          </div>
-
-          <!-- Konfigurace -->
-          <div class="cc-card cc-card-config" onclick="openCCModal('config')">
-              <div class="cc-card-title">Konfigurace systému</div>
-              <div class="cc-card-description">SMTP, API klíče, bezpečnost</div>
-          </div>
-
-      </div>
-  </div>
-  <?php endif; ?>
 
   <!-- Overlay & Modal - MUST be outside dashboard condition so it exists in DOM -->
   <?php if (!$embedMode): ?>
@@ -1105,10 +1108,6 @@ function loadNotifContent(type, body) {
   </div>
 </div>
 
-<?php if (!$embedMode && $activeTab === 'dashboard'): ?>
-<!-- Admin Orbit Drag - Interaktivní rotace planet -->
-<script src="/assets/js/admin-orbit-drag.js"></script>
-<?php endif; ?>
 
 </body>
 </html>
