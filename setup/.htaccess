@@ -1,11 +1,23 @@
-# SECURITY: Zabezpečení setup adresáře v produkci
-# Po instalaci odkomentovat následující řádky:
+# SECURITY: Zabezpečení setup adresáře v PRODUKCI
+# AKTIVOVÁNO: 2025-11-21 (produkční audit)
 
-# Require all denied
-# Deny from all
+# BLOKOVAT přístup ze všech IP kromě localhost
+<IfModule mod_authz_core.c>
+    # Apache 2.4+
+    <RequireAll>
+        Require local
+    </RequireAll>
+</IfModule>
 
-# Nebo povolit pouze z localhost:
-# Order Deny,Allow
-# Deny from all
-# Allow from 127.0.0.1
-# Allow from ::1
+<IfModule !mod_authz_core.c>
+    # Apache 2.2
+    Order Deny,Allow
+    Deny from all
+    Allow from 127.0.0.1
+    Allow from ::1
+</IfModule>
+
+# Poznámka: Pokud potřebuješ spustit setup skripty v produkci:
+# 1. Dočasně vykomentuj Deny from all
+# 2. Spusť skript
+# 3. Vrať Deny from all zpět
