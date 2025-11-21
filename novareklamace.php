@@ -297,8 +297,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 <!-- HERO -->
 <section class="hero">
   <div>
-    <h1 class="hero-title">Objednat Servis</h1>
-    <p class="hero-subtitle">Rychlý a profesionální servis vašeho nábytku</p>
+    <h1 class="hero-title" data-lang-cs="Objednat Servis" data-lang-en="Order Service" data-lang-it="Ordinare Servizio">Objednat Servis</h1>
+    <p class="hero-subtitle" data-lang-cs="Rychlý a profesionální servis vašeho nábytku" data-lang-en="Fast and professional furniture service" data-lang-it="Servizio mobili veloce e professionale">Rychlý a profesionální servis vašeho nábytku</p>
   </div>
 </section>
 
@@ -308,9 +308,9 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     
     <?php if (!$isLoggedIn): ?>
     <div id="calculatorBox" style="padding: 1.5rem; margin-bottom: 2rem; border: 2px solid #000000; background: #ffffff; display: none;">
-      <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 300; letter-spacing: 0.1em; margin-bottom: 0.8rem; color: #000000; text-transform: uppercase;">Orientační cena servisu</h3>
-      <p style="color: #666; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;">Spočítejte si předběžnou cenu mimozáručního servisu včetně dopravy ještě před odesláním objednávky.</p>
-      <a href="mimozarucniceny.php" style="display: inline-block; padding: 0.7rem 2rem; background: #000000; color: white; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; border: 2px solid #000000;">Kalkulačka ceny</a>
+      <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 300; letter-spacing: 0.1em; margin-bottom: 0.8rem; color: #000000; text-transform: uppercase;" data-lang-cs="Orientační cena servisu" data-lang-en="Estimated Service Price" data-lang-it="Prezzo Stimato del Servizio">Orientační cena servisu</h3>
+      <p style="color: #666; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;" data-lang-cs="Spočítejte si předběžnou cenu mimozáručního servisu včetně dopravy ještě před odesláním objednávky." data-lang-en="Calculate the preliminary price of out-of-warranty service including shipping before submitting your order." data-lang-it="Calcola il prezzo preliminare del servizio fuori garanzia inclusa la spedizione prima di inviare l'ordine.">Spočítejte si předběžnou cenu mimozáručního servisu včetně dopravy ještě před odesláním objednávky.</p>
+      <a href="mimozarucniceny.php" style="display: inline-block; padding: 0.7rem 2rem; background: #000000; color: white; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; border: 2px solid #000000;" data-lang-cs="Kalkulačka ceny" data-lang-en="Price Calculator" data-lang-it="Calcolatore di Prezzo">Kalkulačka ceny</a>
     </div>
     <?php endif; ?>
 
@@ -347,13 +347,13 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
             <line x1="16" y1="17" x2="8" y2="17"></line>
             <polyline points="10 9 9 9 8 9"></polyline>
           </svg>
-          Pověření k reklamaci
+          <span data-lang-cs="Pověření k reklamaci" data-lang-en="Power of Attorney for Claim" data-lang-it="Procura per Reclamo">Pověření k reklamaci</span>
         </h3>
-        <p style="color: #555; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.2rem;">
+        <p style="color: #555; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.2rem;" data-lang-cs="Nahrajte pověření od prodejce k této reklamaci ve formátu PDF. Dokument bude připojen k objednávce." data-lang-en="Upload the power of attorney from the seller for this claim in PDF format. The document will be attached to the order." data-lang-it="Carica la procura del venditore per questo reclamo in formato PDF. Il documento verrà allegato all'ordine.">
           Nahrajte pověření od prodejce k této reklamaci ve formátu PDF. Dokument bude připojen k objednávce.
         </p>
         <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-          <button type="button" id="nahrajPovereniBtn" style="display: inline-block; padding: 0.7rem 2rem; background: #2D5016; color: white; border: 2px solid #2D5016; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; cursor: pointer;">
+          <button type="button" id="nahrajPovereniBtn" style="display: inline-block; padding: 0.7rem 2rem; background: #2D5016; color: white; border: 2px solid #2D5016; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; cursor: pointer;" data-lang-cs="📄 VYBRAT PDF SOUBOR" data-lang-en="📄 SELECT PDF FILE" data-lang-it="📄 SELEZIONA FILE PDF">
             📄 VYBRAT PDF SOUBOR
           </button>
           <span id="povereniStatus" style="font-size: 0.85rem; color: #666;"></span>
@@ -364,10 +364,10 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
       <!-- ZÁKLADNÍ ÚDAJE -->
       <div class="form-section">
-        <h2 class="section-title">Základní údaje</h2>
+        <h2 class="section-title" data-lang-cs="Základní údaje" data-lang-en="Basic Information" data-lang-it="Informazioni di Base">Základní údaje</h2>
         <div class="form-grid form-grid-3">
           <div class="form-group">
-            <label class="form-label" for="cislo">Číslo objednávky/reklamace<?php if ($isLoggedIn) echo " *"; ?></label>
+            <label class="form-label" for="cislo" data-lang-cs="Číslo objednávky/reklamace" data-lang-en="Order/Claim Number" data-lang-it="Numero Ordine/Reclamo">Číslo objednávky/reklamace<?php if ($isLoggedIn) echo " *"; ?></label>
             <input type="text" class="form-control" id="cislo" name="cislo"<?php if ($isLoggedIn) echo " required"; ?>>
             <select id="fakturace_firma" name="fakturace_firma" style="margin-top:0.5rem; width:33%; height:2rem; font-size:0.85rem; padding:0.3rem; border:1px solid #ddd; border-radius:4px;">
               <option value="CZ" selected>🇨🇿 CZ</option>
@@ -376,15 +376,15 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
             <p id="faktura_hint" style="margin-top:0.3rem; font-size:0.8rem; color:#059669; font-style:italic;">Tato objednávka se bude fakturovat na CZ firmu</p>
           </div>
           <div class="form-group">
-            <label class="form-label" for="datum_prodeje">Datum prodeje<?php if ($isLoggedIn) echo " *"; ?></label>
+            <label class="form-label" for="datum_prodeje" data-lang-cs="Datum prodeje" data-lang-en="Sale Date" data-lang-it="Data di Vendita">Datum prodeje<?php if ($isLoggedIn) echo " *"; ?></label>
             <div class="date-input-wrapper">
-              <input type="text" class="form-control date-input" id="datum_prodeje" name="datum_prodeje" placeholder="DD.MM.RRRR"<?php if ($isLoggedIn) echo " required"; ?>>
+              <input type="text" class="form-control date-input" id="datum_prodeje" name="datum_prodeje" data-lang-cs-placeholder="DD.MM.RRRR" data-lang-en-placeholder="DD.MM.YYYY" data-lang-it-placeholder="GG.MM.AAAA" placeholder="DD.MM.RRRR"<?php if ($isLoggedIn) echo " required"; ?>>
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="datum_reklamace">Datum reklamace<?php if ($isLoggedIn) echo " *"; ?></label>
+            <label class="form-label" for="datum_reklamace" data-lang-cs="Datum reklamace" data-lang-en="Claim Date" data-lang-it="Data del Reclamo">Datum reklamace<?php if ($isLoggedIn) echo " *"; ?></label>
             <div class="date-input-wrapper">
-              <input type="text" class="form-control date-input" id="datum_reklamace" name="datum_reklamace" placeholder="DD.MM.RRRR"<?php if ($isLoggedIn) echo " required"; ?>>
+              <input type="text" class="form-control date-input" id="datum_reklamace" name="datum_reklamace" data-lang-cs-placeholder="DD.MM.RRRR" data-lang-en-placeholder="DD.MM.YYYY" data-lang-it-placeholder="GG.MM.AAAA" placeholder="DD.MM.RRRR"<?php if ($isLoggedIn) echo " required"; ?>>
             </div>
           </div>
         </div>
@@ -393,10 +393,10 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
       
       <!-- KONTAKTNÍ ÚDAJE -->
       <div class="form-section">
-        <h2 class="section-title">Kontaktní údaje</h2>
+        <h2 class="section-title" data-lang-cs="Kontaktní údaje" data-lang-en="Contact Information" data-lang-it="Informazioni di Contatto">Kontaktní údaje</h2>
         <div class="form-grid form-grid-3">
           <div class="form-group">
-            <label class="form-label" for="jmeno">Jméno zákazníka *</label>
+            <label class="form-label" for="jmeno" data-lang-cs="Jméno zákazníka *" data-lang-en="Customer Name *" data-lang-it="Nome Cliente *">Jméno zákazníka *</label>
             <input type="text" class="form-control" id="jmeno" name="jmeno" required>
           </div>
           <div class="form-group">
@@ -404,7 +404,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
             <input type="email" class="form-control" id="email" name="email" required>
           </div>
           <div class="form-group">
-            <label class="form-label" for="telefon">Telefon *</label>
+            <label class="form-label" for="telefon" data-lang-cs="Telefon *" data-lang-en="Phone *" data-lang-it="Telefono *">Telefon *</label>
             <input type="tel" class="form-control" id="telefon" name="telefon" required>
           </div>
         </div>
@@ -412,21 +412,21 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
       
      <!-- ADRESA ZÁKAZNÍKA -->
 <div class="form-section">
-  <h2 class="section-title">Adresa zákazníka</h2>
+  <h2 class="section-title" data-lang-cs="Adresa zákazníka" data-lang-en="Customer Address" data-lang-it="Indirizzo Cliente">Adresa zákazníka</h2>
   <div class="form-grid form-grid-address">
     <div class="form-group" style="position:relative;">
-      <label class="form-label" for="ulice">Ulice a číslo popisné</label>
-      <input type="text" class="form-control" id="ulice" name="ulice" placeholder="Ulice a číslo popisné">
+      <label class="form-label" for="ulice" data-lang-cs="Ulice a číslo popisné" data-lang-en="Street and Number" data-lang-it="Via e Numero">Ulice a číslo popisné</label>
+      <input type="text" class="form-control" id="ulice" name="ulice" data-lang-cs-placeholder="Ulice a číslo popisné" data-lang-en-placeholder="Street and Number" data-lang-it-placeholder="Via e Numero" placeholder="Ulice a číslo popisné">
       <div id="autocompleteDropdownUlice" style="display:none;position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
     </div>
     <div class="form-group" style="position:relative;">
-      <label class="form-label" for="mesto">Město</label>
-      <input type="text" class="form-control" id="mesto" name="mesto" placeholder="Město">
+      <label class="form-label" for="mesto" data-lang-cs="Město" data-lang-en="City" data-lang-it="Città">Město</label>
+      <input type="text" class="form-control" id="mesto" name="mesto" data-lang-cs-placeholder="Město" data-lang-en-placeholder="City" data-lang-it-placeholder="Città" placeholder="Město">
       <div id="autocompleteDropdown" style="display:none;position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
     </div>
     <div class="form-group">
-      <label class="form-label" for="psc">PSČ</label>
-      <input type="text" class="form-control" id="psc" name="psc" placeholder="PSČ">
+      <label class="form-label" for="psc" data-lang-cs="PSČ" data-lang-en="ZIP Code" data-lang-it="CAP">PSČ</label>
+      <input type="text" class="form-control" id="psc" name="psc" data-lang-cs-placeholder="PSČ" data-lang-en-placeholder="ZIP Code" data-lang-it-placeholder="CAP" placeholder="PSČ">
     </div>
     <div class="map-container">
       <div id="mapContainer"></div>
@@ -436,30 +436,30 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
       
       <!-- INFORMACE O PRODUKTU -->
       <div class="form-section">
-        <h2 class="section-title">Informace o produktu</h2>
+        <h2 class="section-title" data-lang-cs="Informace o produktu" data-lang-en="Product Information" data-lang-it="Informazioni sul Prodotto">Informace o produktu</h2>
         <div class="form-grid form-grid-3">
           <div class="form-group">
-            <label class="form-label" for="model">Model</label>
+            <label class="form-label" for="model" data-lang-cs="Model" data-lang-en="Model" data-lang-it="Modello">Model</label>
             <input type="text" class="form-control" id="model" name="model">
           </div>
           <div class="form-group">
-            <label class="form-label" for="provedeni">Provedení</label>
+            <label class="form-label" for="provedeni" data-lang-cs="Provedení" data-lang-en="Version" data-lang-it="Versione">Provedení</label>
             <div class="provedeni-group">
-              <input type="text" class="form-control provedeni-input" id="provedeni" name="provedeni" placeholder="Vyberte..." readonly>
-              <button type="button" class="btn-select" id="selectProvedeniBtn">VYBRAT</button>
+              <input type="text" class="form-control provedeni-input" id="provedeni" name="provedeni" data-lang-cs-placeholder="Vyberte..." data-lang-en-placeholder="Select..." data-lang-it-placeholder="Seleziona..." placeholder="Vyberte..." readonly>
+              <button type="button" class="btn-select" id="selectProvedeniBtn" data-lang-cs="VYBRAT" data-lang-en="SELECT" data-lang-it="SELEZIONA">VYBRAT</button>
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="barva">Označení barvy</label>
-            <input type="text" class="form-control" id="barva" name="barva" placeholder="Např. BF12">
+            <label class="form-label" for="barva" data-lang-cs="Označení barvy" data-lang-en="Color Code" data-lang-it="Codice Colore">Označení barvy</label>
+            <input type="text" class="form-control" id="barva" name="barva" data-lang-cs-placeholder="Např. BF12" data-lang-en-placeholder="E.g. BF12" data-lang-it-placeholder="Es. BF12" placeholder="Např. BF12">
           </div>
         </div>
-        
+
         <?php if ($isLoggedIn): ?>
         <div class="form-grid" style="margin-top:1.5rem;">
           <div class="form-group">
-            <label class="form-label" for="info_prodejce">Doplňující informace od prodejce</label>
-            <textarea class="form-control" id="doplnujici_info" name="doplnujici_info" placeholder="Doplňující informace od prodejce..."></textarea>
+            <label class="form-label" for="info_prodejce" data-lang-cs="Doplňující informace od prodejce" data-lang-en="Additional Information from Seller" data-lang-it="Informazioni Aggiuntive dal Venditore">Doplňující informace od prodejce</label>
+            <textarea class="form-control" id="doplnujici_info" name="doplnujici_info" data-lang-cs-placeholder="Doplňující informace od prodejce..." data-lang-en-placeholder="Additional information from seller..." data-lang-it-placeholder="Informazioni aggiuntive dal venditore..." placeholder="Doplňující informace od prodejce..."></textarea>
           </div>
         </div>
         <?php endif; ?>
@@ -467,21 +467,21 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
       
       <!-- POPIS PROBLÉMU -->
       <div class="form-section">
-        <h2 class="section-title">Popis problému</h2>
+        <h2 class="section-title" data-lang-cs="Popis problému" data-lang-en="Problem Description" data-lang-it="Descrizione del Problema">Popis problému</h2>
         <div class="form-grid">
           <div class="form-group">
-            <label class="form-label" for="popis_problemu">Popis problému od zákazníka</label>
-            <textarea class="form-control" id="popis_problemu" name="popis_problemu" placeholder="Popis problému od zákazníka..." required></textarea>
+            <label class="form-label" for="popis_problemu" data-lang-cs="Popis problému od zákazníka" data-lang-en="Problem Description from Customer" data-lang-it="Descrizione del Problema dal Cliente">Popis problému od zákazníka</label>
+            <textarea class="form-control" id="popis_problemu" name="popis_problemu" data-lang-cs-placeholder="Popis problému od zákazníka..." data-lang-en-placeholder="Problem description from customer..." data-lang-it-placeholder="Descrizione del problema dal cliente..." placeholder="Popis problému od zákazníka..." required></textarea>
           </div>
         </div>
       </div>
       
       <!-- FOTODOKUMENTACE -->
       <div class="form-section">
-        <h2 class="section-title">Fotodokumentace</h2>
+        <h2 class="section-title" data-lang-cs="Fotodokumentace" data-lang-en="Photo Documentation" data-lang-it="Documentazione Fotografica">Fotodokumentace</h2>
         <div class="photo-upload-area">
-          <button type="button" class="btn-photo" id="uploadPhotosBtn">VYBRAT FOTOGRAFIE</button>
-          <p class="photo-info">Max. 10 fotografií • automatická komprese</p>
+          <button type="button" class="btn-photo" id="uploadPhotosBtn" data-lang-cs="VYBRAT FOTOGRAFIE" data-lang-en="SELECT PHOTOS" data-lang-it="SELEZIONA FOTO">VYBRAT FOTOGRAFIE</button>
+          <p class="photo-info" data-lang-cs="Max. 10 fotografií • automatická komprese" data-lang-en="Max. 10 photos • automatic compression" data-lang-it="Max. 10 foto • compressione automatica">Max. 10 fotografií • automatická komprese</p>
           <input type="file" id="photoInput" accept="image/*" multiple style="display:none;">
         </div>
         <div id="photoPreviewMain"></div>
@@ -492,15 +492,15 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
       <div class="form-consent" style="margin: 1rem 0 0.8rem 0; padding: 0.5rem 0.8rem; border: 1px solid #ddd; background: #f9f9f9; text-align: center;">
         <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.55rem; line-height: 1.3; color: #666;">
           <input type="checkbox" id="gdpr_consent" name="gdpr_consent" required style="margin-right: 0.5rem; flex-shrink: 0;">
-          <span>Souhlasím se zpracováním osobních údajů společností White Glove Service, s.r.o.</span>
+          <span data-lang-cs="Souhlasím se zpracováním osobních údajů společností White Glove Service, s.r.o." data-lang-en="I agree with the processing of personal data by White Glove Service, s.r.o." data-lang-it="Acconsento al trattamento dei dati personali da parte di White Glove Service, s.r.o.">Souhlasím se zpracováním osobních údajů společností White Glove Service, s.r.o.</span>
         </label>
       </div>
       <?php endif; ?>
 
       <!-- BUTTONS -->
       <div class="form-actions">
-        <button type="submit" class="btn">ODESLAT POŽADAVEK</button>
-        <button type="button" class="btn btn-secondary" onclick="window.history.back()">ZPĚT</button>
+        <button type="submit" class="btn" data-lang-cs="ODESLAT POŽADAVEK" data-lang-en="SUBMIT REQUEST" data-lang-it="INVIA RICHIESTA">ODESLAT POŽADAVEK</button>
+        <button type="button" class="btn btn-secondary" onclick="window.history.back()" data-lang-cs="ZPĚT" data-lang-en="BACK" data-lang-it="INDIETRO">ZPĚT</button>
       </div>
       
     </form>
@@ -514,19 +514,19 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     <div class="footer-grid">
       <div class="footer-column">
         <h2 class="footer-title">White Glove Service</h2>
-        <p class="footer-text">
+        <p class="footer-text" data-lang-cs="Specializovaný servis Natuzzi." data-lang-en="Specialized Natuzzi Service." data-lang-it="Servizio Specializzato Natuzzi.">
           Specializovaný servis Natuzzi.
         </p>
       </div>
       <div class="footer-column">
-        <h2 class="footer-title">Kontakt</h2>
+        <h2 class="footer-title" data-lang-cs="Kontakt" data-lang-en="Contact" data-lang-it="Contatto">Kontakt</h2>
         <p class="footer-text">
           <strong>Tel:</strong> <a href="tel:+420725965826" class="footer-link">+420 725 965 826</a><br>
           <strong>Email:</strong> <a href="mailto:reklamace@wgs-service.cz" class="footer-link">reklamace@wgs-service.cz</a>
         </p>
       </div>
       <div class="footer-column">
-        <h2 class="footer-title">Adresa</h2>
+        <h2 class="footer-title" data-lang-cs="Adresa" data-lang-en="Address" data-lang-it="Indirizzo">Adresa</h2>
         <p class="footer-text">
           Do Dubče 364, Běchovice 190 11 CZ
         </p>
@@ -534,9 +534,9 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     </div>
     <div class="footer-bottom">
       <p>
-        &copy; 2025 White Glove Service. Všechna práva vyhrazena.
+        <span data-lang-cs="&copy; 2025 White Glove Service. Všechna práva vyhrazena." data-lang-en="&copy; 2025 White Glove Service. All rights reserved." data-lang-it="&copy; 2025 White Glove Service. Tutti i diritti riservati.">&copy; 2025 White Glove Service. Všechna práva vyhrazena.</span>
         <span aria-hidden="true"> • </span>
-        <a href="gdpr.php" class="footer-link">Zpracování osobních údajů (GDPR)</a>
+        <a href="gdpr.php" class="footer-link" data-lang-cs="Zpracování osobních údajů (GDPR)" data-lang-en="Personal Data Processing (GDPR)" data-lang-it="Trattamento dei Dati Personali (GDPR)">Zpracování osobních údajů (GDPR)</a>
       </p>
     </div>
   </div>
@@ -545,11 +545,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 <!-- PROVEDENI OVERLAY -->
 <div class="overlay-provedeni" id="provedeniOverlay">
   <div class="provedeni-box">
-    <h3>Provedení</h3>
+    <h3 data-lang-cs="Provedení" data-lang-en="Version" data-lang-it="Versione">Provedení</h3>
     <div class="provedeni-grid">
-      <div class="provedeni-card" data-value="Látka">Látka</div>
-      <div class="provedeni-card" data-value="Kůže">Kůže</div>
-      <div class="provedeni-card" data-value="Kombinace">Kombinace</div>
+      <div class="provedeni-card" data-value="Látka" data-lang-cs="Látka" data-lang-en="Fabric" data-lang-it="Tessuto">Látka</div>
+      <div class="provedeni-card" data-value="Kůže" data-lang-cs="Kůže" data-lang-en="Leather" data-lang-it="Pelle">Kůže</div>
+      <div class="provedeni-card" data-value="Kombinace" data-lang-cs="Kombinace" data-lang-en="Combination" data-lang-it="Combinazione">Kombinace</div>
     </div>
     <button class="btn btn-secondary" id="closeProvedeni">×</button>
   </div>
@@ -559,7 +559,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 <div class="calendar-overlay" id="calendarOverlay">
   <div class="calendar-box">
     <div class="calendar-header">
-      <h3 id="calendarTitle">Vyberte datum</h3>
+      <h3 id="calendarTitle" data-lang-cs="Vyberte datum" data-lang-en="Select Date" data-lang-it="Seleziona Data">Vyberte datum</h3>
       <div class="calendar-nav">
         <button id="prevMonth">&larr;</button>
         <button id="nextMonth">&rarr;</button>
@@ -567,7 +567,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     </div>
     <div id="calendarMonthYear" style="text-align:center;margin-bottom:1rem;font-weight:600;font-size:1.1rem;"></div>
     <div class="calendar-grid" id="calendarGrid"></div>
-    <button class="btn btn-secondary" style="display:block;margin:1.5rem auto 0;width:100%;" id="closeCalendar">Zavřít</button>
+    <button class="btn btn-secondary" style="display:block;margin:1.5rem auto 0;width:100%;" id="closeCalendar" data-lang-cs="Zavřít" data-lang-en="Close" data-lang-it="Chiudi">Zavřít</button>
   </div>
 </div>
 

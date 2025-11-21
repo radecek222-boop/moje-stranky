@@ -34,8 +34,8 @@ $csrfToken = generateCSRFToken();
 <main class="main-content">
 <div class="container">
   <div class="logo">
-    <h1>Registrace</h1>
-    <div class="subtitle">Vyplňte registrační formulář</div>
+    <h1 data-lang-cs="Registrace" data-lang-en="Registration" data-lang-it="Registrazione">Registrace</h1>
+    <div class="subtitle" data-lang-cs="Vyplňte registrační formulář" data-lang-en="Fill in the registration form" data-lang-it="Compila il modulo di registrazione">Vyplňte registrační formulář</div>
   </div>
 
   <div id="notification" class="notification"></div>
@@ -45,42 +45,42 @@ $csrfToken = generateCSRFToken();
     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
 
     <div class="form-group">
-      <label for="regKey">Registrační klíč *</label>
-      <input type="password" id="regKey" name="registration_key" placeholder="Zadejte klíč" required>
-      <div class="helper-text">Klíč dostáváte od administátora</div>
+      <label for="regKey" data-lang-cs="Registrační klíč *" data-lang-en="Registration Key *" data-lang-it="Chiave di Registrazione *">Registrační klíč *</label>
+      <input type="password" id="regKey" name="registration_key" data-lang-cs-placeholder="Zadejte klíč" data-lang-en-placeholder="Enter key" data-lang-it-placeholder="Inserisci chiave" placeholder="Zadejte klíč" required>
+      <div class="helper-text" data-lang-cs="Klíč dostáváte od administátora" data-lang-en="You receive the key from the administrator" data-lang-it="Ricevi la chiave dall'amministratore">Klíč dostáváte od administátora</div>
     </div>
 
     <div class="form-group">
-      <label for="regName">Jméno a příjmení</label>
-      <input type="text" id="regName" name="name" placeholder="Jan Novák" required>
+      <label for="regName" data-lang-cs="Jméno a příjmení" data-lang-en="Full Name" data-lang-it="Nome Completo">Jméno a příjmení</label>
+      <input type="text" id="regName" name="name" data-lang-cs-placeholder="Jan Novák" data-lang-en-placeholder="John Doe" data-lang-it-placeholder="Mario Rossi" placeholder="Jan Novák" required>
     </div>
 
     <div class="form-group">
       <label for="regEmail">Email</label>
-      <input type="email" id="regEmail" name="email" placeholder="vas@email.cz" required>
+      <input type="email" id="regEmail" name="email" data-lang-cs-placeholder="vas@email.cz" data-lang-en-placeholder="your@email.com" data-lang-it-placeholder="tua@email.it" placeholder="vas@email.cz" required>
     </div>
 
     <div class="form-group">
-      <label for="regPhone">Telefon (volitelně)</label>
+      <label for="regPhone" data-lang-cs="Telefon (volitelně)" data-lang-en="Phone (optional)" data-lang-it="Telefono (opzionale)">Telefon (volitelně)</label>
       <input type="tel" id="regPhone" name="phone" placeholder="+420 777 777 777">
     </div>
 
     <div class="form-group">
-      <label for="regPassword">Heslo</label>
+      <label for="regPassword" data-lang-cs="Heslo" data-lang-en="Password" data-lang-it="Password">Heslo</label>
       <input type="password" id="regPassword" name="password" placeholder="••••••••" required>
-      <div class="helper-text">Minimálně 12 znaků (velké/malé písmena, čísla a znaky)</div>
+      <div class="helper-text" data-lang-cs="Minimálně 12 znaků (velké/malé písmena, čísla a znaky)" data-lang-en="At least 12 characters (uppercase/lowercase letters, numbers and symbols)" data-lang-it="Almeno 12 caratteri (lettere maiuscole/minuscole, numeri e simboli)">Minimálně 12 znaků (velké/malé písmena, čísla a znaky)</div>
     </div>
 
     <div class="form-group">
-      <label for="regPasswordConfirm">Potvrzení hesla</label>
+      <label for="regPasswordConfirm" data-lang-cs="Potvrzení hesla" data-lang-en="Password Confirmation" data-lang-it="Conferma Password">Potvrzení hesla</label>
       <input type="password" id="regPasswordConfirm" name="passwordConfirm" placeholder="••••••••" required>
     </div>
 
-    <button type="submit" class="btn btn-primary" style="width: 100%;">Zaregistrovat se</button>
+    <button type="submit" class="btn btn-primary" style="width: 100%;" data-lang-cs="Zaregistrovat se" data-lang-en="Register" data-lang-it="Registrati">Zaregistrovat se</button>
   </form>
 
   <div class="links" style="text-align: center; margin-top: 2rem;">
-    <p>Již máte účet? <a href="login.php">Přihlaste se</a></p>
+    <p><span data-lang-cs="Již máte účet?" data-lang-en="Already have an account?" data-lang-it="Hai già un account?">Již máte účet?</span> <a href="login.php" data-lang-cs="Přihlaste se" data-lang-en="Log in" data-lang-it="Accedi">Přihlaste se</a></p>
   </div>
 
 </div>

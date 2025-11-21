@@ -30,7 +30,7 @@
 </head>
 
 <body>
-
+<?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
 <div class="menu-overlay" id="menuOverlay"></div>
 
