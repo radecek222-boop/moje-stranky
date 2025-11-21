@@ -15,7 +15,7 @@ const safeLogger = {
 // CSRF TOKEN - poskytuje csrf-auto-inject.js
 // ============================================================
 
-const SESSION_EXPIRED_MESSAGE = 'Vaše administrátorská relace vypršela. Přihlaste se prosím znovu.';
+const SESSION_EXPIRED_MESSAGE = () => t('session_expired');
 
 function isUnauthorizedStatus(status) {
   return status === 401 || status === 403;
@@ -293,7 +293,7 @@ async function deleteUser(userId) {
 
     if (!response.ok) {
       if (isUnauthorizedStatus(response.status)) {
-        alert(SESSION_EXPIRED_MESSAGE);
+        alert(SESSION_EXPIRED_MESSAGE());
         redirectToLogin('admin.php?tab=users');
         return;
       }
@@ -307,10 +307,10 @@ async function deleteUser(userId) {
     if (data.status === 'success' || data.success === true) {
       loadUsers();
     } else {
-      alert(data.message || 'Chyba při mazání');
+      alert(data.message || t('delete_error'));
     }
   } catch (error) {
-    alert('Chyba při mazání uživatele');
+    alert(t('delete_user_error'));
     logger.error('Delete user error:', error);
     logClientError(error, 'deleteUser');
   }
@@ -997,7 +997,7 @@ function deleteKey(keyCode) {
 
     const csrfToken = getCSRFToken();
     if (!csrfToken) {
-        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        alert(t('csrf_token_not_found'));
         return;
     }
 
@@ -1014,7 +1014,7 @@ function deleteKey(keyCode) {
         if (isSuccess(data)) {
             loadKeysModal(); // Reload
         } else {
-            alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+            alert(t('error') + ': ' + (data.error || data.message || t('unknown_error')));
         }
     })
     .catch(err => {
@@ -1031,7 +1031,7 @@ function createKey() {
 
     const csrfToken = getCSRFToken();
     if (!csrfToken) {
-        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        alert(t('csrf_token_not_found'));
         return;
     }
 
@@ -1046,10 +1046,10 @@ function createKey() {
     .then(r => r.json())
     .then(data => {
         if (isSuccess(data)) {
-            alert('Vytvořeno: ' + data.key_code);
+            alert(t('key_created').replace('{key}', data.key_code));
             loadKeysModal(); // Reload
         } else {
-            alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+            alert(t('error') + ': ' + (data.error || data.message || t('unknown_error')));
         }
     })
     .catch(err => {
@@ -1158,7 +1158,7 @@ async function executeAction(actionId) {
 function completeAction(actionId) {
     const csrfToken = getCSRFToken();
     if (!csrfToken) {
-        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        alert(t('csrf_token_not_found'));
         return;
     }
 
@@ -1176,7 +1176,7 @@ function completeAction(actionId) {
             loadActionsModal();
             location.reload();
         } else {
-            alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+            alert(t('error') + ': ' + (data.error || data.message || t('unknown_error')));
         }
     })
     .catch(err => {
@@ -1190,7 +1190,7 @@ function completeAction(actionId) {
 function dismissAction(actionId) {
     const csrfToken = getCSRFToken();
     if (!csrfToken) {
-        alert('Chyba: CSRF token nebyl nalezen. Obnovte stránku.');
+        alert(t('csrf_token_not_found'));
         return;
     }
 
@@ -1208,7 +1208,7 @@ function dismissAction(actionId) {
             loadActionsModal();
             location.reload();
         } else {
-            alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+            alert(t('error') + ': ' + (data.error || data.message || t('unknown_error')));
         }
     })
     .catch(err => {

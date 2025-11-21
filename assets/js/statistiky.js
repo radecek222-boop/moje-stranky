@@ -19,14 +19,14 @@ function openStatsModal(type) {
 
     // Nastavit title
     const titles = {
-        'salesperson': 'Statistiky prodejců',
-        'technician': 'Statistiky techniků',
-        'models': 'Nejporuchovější modely',
-        'orders': 'Filtrované zakázky',
-        'charts': 'Grafy a vizualizace'
+        'salesperson': t('stats_salesperson'),
+        'technician': t('stats_technician'),
+        'models': t('stats_models'),
+        'orders': t('stats_orders'),
+        'charts': t('stats_charts')
     };
 
-    title.textContent = titles[type] || 'Statistiky';
+    title.textContent = titles[type] || t('statistics');
 
     // Načíst obsah podle typu
     loadStatsContent(type, body);
@@ -59,7 +59,7 @@ function closeStatsModal() {
  */
 async function loadStatsContent(type, body) {
     // Zobrazit loading
-    body.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Načítání...</div>';
+    body.innerHTML = `<div style="text-align: center; padding: 2rem; color: #666;">${t('loading')}</div>`;
 
     try {
         const filterParams = getFilterParams();
@@ -97,14 +97,14 @@ async function loadStatsContent(type, body) {
                     renderCharts(body, result.data);
                     break;
                 default:
-                    body.innerHTML = '<div style="padding: 2rem; color: #d32f2f; text-align: center;">Neznámý typ statistiky</div>';
+                    body.innerHTML = `<div style="padding: 2rem; color: #d32f2f; text-align: center;">${t('unknown_stats_type')}</div>`;
             }
         } else {
-            body.innerHTML = '<div style="padding: 2rem; color: #d32f2f; text-align: center;">Chyba načítání dat: ' + escapeHtml(result.message) + '</div>';
+            body.innerHTML = `<div style="padding: 2rem; color: #d32f2f; text-align: center;">${t('data_load_error_msg')}: ${escapeHtml(result.message)}</div>`;
         }
     } catch (error) {
         console.error('Chyba načítání statistik:', error);
-        body.innerHTML = '<div style="padding: 2rem; color: #d32f2f; text-align: center;">Chyba načítání dat: ' + escapeHtml(error.message) + '</div>';
+        body.innerHTML = `<div style="padding: 2rem; color: #d32f2f; text-align: center;">${t('data_load_error_msg')}: ${escapeHtml(error.message)}</div>`;
     }
 }
 
@@ -572,7 +572,7 @@ async function exportProdejcePDF(prodejce) {
         const result = await response.json();
 
         if (result.status !== 'success') {
-            alert('Chyba načítání dat: ' + result.message);
+            alert(t('data_load_error_msg') + ': ' + result.message);
             return;
         }
 
@@ -680,7 +680,7 @@ async function exportProdejcePDF(prodejce) {
 
     } catch (error) {
         console.error('Chyba exportu PDF:', error);
-        alert('Chyba exportu PDF: ' + error.message);
+        alert(t('pdf_export_error') + ': ' + error.message);
     }
 }
 
@@ -701,7 +701,7 @@ async function exportTechnikPDF(technik) {
         const result = await response.json();
 
         if (result.status !== 'success') {
-            alert('Chyba načítání dat: ' + result.message);
+            alert(t('data_load_error_msg') + ': ' + result.message);
             return;
         }
 
@@ -826,7 +826,7 @@ async function exportTechnikPDF(technik) {
 
     } catch (error) {
         console.error('Chyba exportu PDF:', error);
-        alert('Chyba exportu PDF: ' + error.message);
+        alert(t('pdf_export_error') + ': ' + error.message);
     }
 }
 

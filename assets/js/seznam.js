@@ -273,7 +273,7 @@ async function loadAll(status = 'all', append = false) {
     WGS_DATA_CACHE = [];
     document.getElementById('orderGrid').innerHTML = `
       <div class="empty-state">
-        <div class="empty-state-text">Chyba při načítání dat</div>
+        <div class="empty-state-text">${t('data_load_error')}</div>
       </div>
     `;
   }
@@ -311,10 +311,13 @@ function renderOrders(items = null) {
     
     if (filtered.length > 0) {
       searchResultsInfo.className = 'search-results-info';
-      searchResultsInfo.textContent = `Nalezeno ${filtered.length} z ${totalBeforeSearch} výsledků pro "${SEARCH_QUERY}"`;
+      searchResultsInfo.textContent = t('search_results_found')
+        .replace('{count}', filtered.length)
+        .replace('{total}', totalBeforeSearch)
+        .replace('{query}', SEARCH_QUERY);
     } else {
       searchResultsInfo.className = 'search-results-info no-results';
-      searchResultsInfo.textContent = `Žádné výsledky pro "${SEARCH_QUERY}"`;
+      searchResultsInfo.textContent = t('no_search_results').replace('{query}', SEARCH_QUERY);
     }
     searchResultsInfo.style.display = 'block';
   } else {
@@ -324,7 +327,7 @@ function renderOrders(items = null) {
   if (filtered.length === 0) {
     grid.innerHTML = `
       <div class="empty-state">
-        <div class="empty-state-text">${SEARCH_QUERY ? 'Žádné výsledky nenalezeny' : 'Žádné reklamace k zobrazení'}</div>
+        <div class="empty-state-text">${SEARCH_QUERY ? t('no_results_found') : t('no_claims_to_display')}</div>
       </div>
     `;
     return;
@@ -430,7 +433,7 @@ async function showDetail(recordOrId) {
   if (typeof recordOrId === 'string') {
     record = WGS_DATA_CACHE.find(x => x.id == recordOrId || x.reklamace_id == recordOrId);
     if (!record) {
-      alert('Záznam nenalezen');
+      alert(t('record_not_found'));
       return;
     }
   } else {
@@ -519,7 +522,7 @@ function closeDetail() {
 async function reopenOrder(id) {
   const record = WGS_DATA_CACHE.find(x => x.id == id);
   if (!record) {
-    alert('Záznam nenalezen');
+    alert(t('record_not_found'));
     return;
   }
   
@@ -527,15 +530,9 @@ async function reopenOrder(id) {
   const product = Utils.getProduct(record);
   
   const confirmed = window.confirm(
-    `ZNOVU OTEVŘÍT ZAKÁZKU?\n\n` +
-    `Zákazník: ${customerName}\n` +
-    `Produkt: ${product}\n\n` +
-    `Tato akce:\n` +
-    `- Změní stav na NOVÁ (žlutá)\n` +
-    `- Zruší původní termín návštěvy\n` +
-    `- Umožní naplánovat novou návštěvu\n\n` +
-    `Použijte pouze v případě, že se objevil nový problém u této zakázky.\n\n` +
-    `Opravdu chcete pokračovat?`
+    t('confirm_reopen_order')
+      .replace('{customer}', customerName)
+      .replace('{product}', product)
   );
   
   if (!confirmed) {
@@ -644,7 +641,7 @@ async function reopenOrder(id) {
     }
   } catch (e) {
     logger.error('Chyba při znovuotevření zakázky:', e);
-    alert('Chyba při znovuotevření zakázky: ' + e.message);
+    alert(t('error_reopening_order') + ': ' + e.message);
   }
 }
 
@@ -681,20 +678,17 @@ function normalizeCustomerData(data) {
 function startVisit(id) {
   const z = WGS_DATA_CACHE.find(x => x.id == id);
   if (!z) {
-    alert('Záznam nenalezen');
+    alert(t('record_not_found'));
     return;
   }
   
   if (z.stav === 'ČEKÁ' || z.stav === 'wait') {
-    const confirm = window.confirm(
-      'VAROVÁNÍ: Termín návštěvy ještě není naplánován.\n\n' +
-      'Chcete pokračovat i bez naplánovaného termínu?'
-    );
+    const confirm = window.confirm(t('confirm_continue_without_appointment'));
     if (!confirm) return;
   }
   
   if (Utils.isCompleted(z)) {
-    alert('Tato návštěva již byla dokončena.');
+    alert(t('visit_already_completed'));
     return;
   }
   
@@ -761,16 +755,17 @@ async function saveData(data, successMsg) {
         closeDetail();
       }
     } else {
-      alert('Chyba: ' + (result.message || 'Nepodařilo se uložit.'));
+      alert(t('error') + ': ' + (result.message || t('failed_to_save')));
     }
   } catch (e) {
     logger.error('Chyba při ukládání:', e);
-    alert('Chyba při ukládání: ' + e.message);
+    alert(t('save_error') + ': ' + e.message);
   }
 }
 
 // === LOADING OVERLAY HELPERS ===
-function showLoading(message = 'Načítání...') {
+function showLoading(message = null) {
+  if (!message) message = t('loading');
   const overlay = document.getElementById('loadingOverlay');
   const text = document.getElementById('loadingText');
   if (overlay && text) {
@@ -837,7 +832,7 @@ function previousMonth() {
 
   // Don't allow going to past months
   if (prevYear < currentYear || (prevYear === currentYear && prevMonth < currentMonth)) {
-    alert('⚠️ Nelze zobrazit minulé měsíce.\n\nTermíny lze plánovat pouze do budoucna.');
+    alert(t('cannot_show_past_months'));
     return;
   }
 
@@ -873,7 +868,7 @@ function renderCalendar(m, y) {
   
   const weekdays = document.createElement('div');
   weekdays.className = 'calendar-weekdays';
-  weekdays.innerHTML = '<div>Po</div><div>Út</div><div>St</div><div>Čt</div><div>Pá</div><div>So</div><div>Ne</div>';
+  weekdays.innerHTML = `<div>${t('monday')}</div><div>${t('tuesday')}</div><div>${t('wednesday')}</div><div>${t('thursday')}</div><div>${t('friday')}</div><div>${t('saturday')}</div><div>${t('sunday')}</div>`;
   grid.appendChild(weekdays);
   
   const daysGrid = document.createElement('div');
@@ -934,7 +929,7 @@ function renderCalendar(m, y) {
     el.onclick = () => {
       // Prevent selection of past dates
       if (isPast) {
-        alert('⚠️ Nelze vybrat minulé datum.\n\nVyberte prosím dnešní nebo budoucí datum.');
+        alert(t('cannot_select_past_date'));
         return;
       }
 
@@ -1098,7 +1093,7 @@ async function showDayBookingsWithDistances(date) {
   const isCached = DISTANCE_CACHE[cacheKey] !== undefined;
   
   if (!isCached) {
-    distanceContainer.innerHTML = '<div style="text-align: center; color: var(--c-grey); font-size: 0.7rem; padding: 0.5rem;">Načítání...</div>';
+    distanceContainer.innerHTML = `<div style="text-align: center; color: var(--c-grey); font-size: 0.7rem; padding: 0.5rem;">${t('loading')}</div>`;
   }
   
   if (bookings.length === 0) {
@@ -1232,7 +1227,7 @@ function showBookingDetail(bookingOrId) {
   if (typeof bookingOrId === 'string' || typeof bookingOrId === 'number') {
     booking = WGS_DATA_CACHE.find(x => x.id == bookingOrId || x.reklamace_id == bookingOrId);
     if (!booking) {
-      alert('Záznam nenalezen');
+      alert(t('record_not_found'));
       return;
     }
   } else {
@@ -1347,12 +1342,12 @@ function renderTimeGrid() {
 
 async function saveSelectedDate() {
   if (!SELECTED_DATE || !SELECTED_TIME) {
-    alert('Vyberte datum i čas.');
+    alert(t('select_date_and_time'));
     return;
   }
 
   if (!CURRENT_RECORD) {
-    alert('Chyba: žádný záznam k uložení.');
+    alert(t('no_record_to_save'));
     return;
   }
 
@@ -1369,16 +1364,16 @@ async function saveSelectedDate() {
   if (collision) {
     const collisionName = Utils.getCustomerName(collision);
     const confirm = window.confirm(
-      `VAROVÁNÍ: Kolize termínu!\n\n` +
-      `${SELECTED_DATE} v ${SELECTED_TIME} již má:\n` +
-      `${collisionName}\n\n` +
-      `Chcete i přesto uložit tento termín?`
+      t('confirm_appointment_collision')
+        .replace('{date}', SELECTED_DATE)
+        .replace('{time}', SELECTED_TIME)
+        .replace('{customer}', collisionName)
     );
     if (!confirm) return;
   }
 
   // ZOBRAZIT LOADING OVERLAY
-  showLoading('Ukládám termín...');
+  showLoading(t('saving_appointment'));
 
   try {
     // Get CSRF token
@@ -1393,7 +1388,7 @@ async function saveSelectedDate() {
     formData.append('csrf_token', csrfToken);
 
     // KROK 1: Uložení termínu do DB
-    showLoading('Ukládám termín do databáze...');
+    showLoading(t('saving_appointment_to_db'));
     const response = await fetch('/app/controllers/save.php', {
       method: 'POST',
       body: formData
@@ -1427,7 +1422,7 @@ async function saveSelectedDate() {
       hideLoading();
 
       // ZOBRAZIT ÚSPĚCH
-      alert(`✓ Termín uložen: ${SELECTED_DATE} ${SELECTED_TIME}\n\nStav automaticky změněn na: DOMLUVENÁ`);
+      alert(t('appointment_saved_success').replace('{date}', SELECTED_DATE).replace('{time}', SELECTED_TIME));
 
       // KROK 3: Odeslání potvrzení ASYNCHRONNĚ na pozadí (fire-and-forget)
       // Email se odešle, ale neuživatel na něj nečeká
@@ -1440,12 +1435,12 @@ async function saveSelectedDate() {
       setTimeout(() => showDetail(recordId), 100);
     } else {
       hideLoading();
-      alert('Chyba: ' + (result.message || 'Nepodařilo se uložit.'));
+      alert(t('error') + ': ' + (result.message || t('failed_to_save')));
     }
   } catch (e) {
     hideLoading();
     logger.error('Chyba při ukládání:', e);
-    alert('Chyba při ukládání: ' + e.message);
+    alert(t('save_error') + ': ' + e.message);
   }
 }
 
@@ -1517,7 +1512,7 @@ async function loadMapAndRoute() {
   let customerAddress = Utils.getAddress(CURRENT_RECORD);
   
   if (!customerAddress || customerAddress === '—') {
-    mapContainer.innerHTML = '<div class="map-error">Adresa zákazníka není k dispozici</div>';
+    mapContainer.innerHTML = `<div class="map-error">${t('customer_address_not_available')}</div>`;
     return;
   }
   
@@ -1804,7 +1799,7 @@ function showTextOverlay(fieldName) {
 
   const saveBtn = document.createElement('button');
   saveBtn.style.cssText = 'flex: 1; padding: 0.5rem 1rem; background: #1a1a1a; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer; font-weight: 600;';
-  saveBtn.textContent = 'Uložit změny';
+  saveBtn.textContent = t('save_changes');
   saveBtn.onclick = async () => {
     const newValue = textarea.value;
 
@@ -1833,18 +1828,18 @@ function showTextOverlay(fieldName) {
         overlay.remove();
         // Znovu otevřít detail s aktualizovanými daty
         showCustomerDetail(CURRENT_RECORD.id);
-        alert('Text byl úspěšně uložen');
+        alert(t('text_saved_successfully'));
       } else {
-        alert('Chyba při ukládání: ' + result.message);
+        alert(t('save_error') + ': ' + result.message);
       }
     } catch (error) {
-      alert('Chyba při ukládání: ' + error.message);
+      alert(t('save_error') + ': ' + error.message);
     }
   };
 
   const cancelBtn = document.createElement('button');
   cancelBtn.style.cssText = 'flex: 1; padding: 0.5rem 1rem; background: #666; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer;';
-  cancelBtn.textContent = 'Zrušit';
+  cancelBtn.textContent = t('cancel');
   cancelBtn.onclick = () => overlay.remove();
 
   buttonRow.appendChild(saveBtn);
@@ -2016,7 +2011,7 @@ async function showNotes(recordOrId) {
   if (typeof recordOrId === 'string' || typeof recordOrId === 'number') {
     record = WGS_DATA_CACHE.find(x => x.id == recordOrId || x.reklamace_id == recordOrId);
     if (!record) {
-      alert('Záznam nenalezen');
+      alert(t('record_not_found'));
       return;
     }
   } else {
@@ -2127,7 +2122,7 @@ async function saveNewNote(orderId) {
   const text = textarea.value.trim();
 
   if (!text) {
-    alert('Napište text poznámky');
+    alert(t('write_note_text'));
     return;
   }
 
@@ -2139,7 +2134,7 @@ async function saveNewNote(orderId) {
 
     await loadAll(ACTIVE_FILTER);
   } catch (e) {
-    alert('Chyba při ukládání poznámky: ' + e.message);
+    alert(t('note_save_error') + ': ' + e.message);
   }
 }
 
@@ -2267,16 +2262,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // === SMAZÁNÍ REKLAMACE (ADMIN ONLY) ===
 async function deleteReklamace(reklamaceId) {
-  const confirmed = confirm(
-    '⚠️ VAROVÁNÍ!\n\n' +
-    'Opravdu chcete TRVALE SMAZAT tuto reklamaci?\n\n' +
-    'Bude smazáno:\n' +
-    '• Záznam z databáze\n' +
-    '• Všechny fotografie\n' +
-    '• PDF protokoly\n' +
-    '• Poznámky a historie\n\n' +
-    'Tato akce je NEVRATNÁ!'
-  );
+  const confirmed = confirm(t('confirm_delete_claim_full'));
   
   if (!confirmed) {
     logger.log('Mazání zrušeno (1. krok)');
@@ -2285,11 +2271,11 @@ async function deleteReklamace(reklamaceId) {
   
   const reklamaceNumber = CURRENT_RECORD.reklamace_id || CURRENT_RECORD.id || reklamaceId;
   const userInput = prompt(
-    'Pro potvrzení smazání napište číslo reklamace:\n\n' + reklamaceNumber
+    t('prompt_confirm_claim_number').replace('{number}', reklamaceNumber)
   );
   
   if (userInput !== reklamaceNumber) {
-    alert('Nesprávné číslo. Mazání zrušeno.');
+    alert(t('incorrect_number_delete_cancelled'));
     logger.log('Mazání zrušeno - špatné číslo (2. krok)');
     return;
   }
@@ -2317,23 +2303,23 @@ async function deleteReklamace(reklamaceId) {
 
     if (result.success || result.status === 'success') {
       logger.log('✅ Smazáno!');
-      alert('✅ Reklamace byla úspěšně smazána!');
+      alert(t('claim_deleted_successfully'));
       closeDetail();
       setTimeout(() => location.reload(), 500);
     } else {
-      const errorMsg = result.message || result.error || 'Nepodařilo se smazat';
+      const errorMsg = result.message || result.error || t('delete_failed');
       logger.error('❌ Chyba:', errorMsg);
-      alert('Chyba: ' + errorMsg);
+      alert(t('error') + ': ' + errorMsg);
     }
   } catch (error) {
     logger.error('❌ Chyba při mazání:', error);
-    alert('Chyba při mazání: ' + error.message);
+    alert(t('delete_error') + ': ' + error.message);
   }
 }
 
 // === SMAZÁNÍ JEDNOTLIVÉ FOTKY ===
 async function smazatFotku(photoId, photoUrl) {
-  const confirmed = confirm('Opravdu chcete smazat tuto fotku?\n\nTato akce je nevratná!');
+  const confirmed = confirm(t('confirm_delete_photo'));
 
   if (!confirmed) {
     logger.log('Mazání fotky zrušeno');
@@ -2384,20 +2370,20 @@ async function smazatFotku(photoId, photoUrl) {
           const fotoContainer = fotkyNadpis.closest('div');
           const grid = fotoContainer.querySelector('[style*="grid"]');
           if (grid) {
-            grid.innerHTML = '<p style="color: var(--c-grey); text-align: center; padding: 1rem; font-size: 0.85rem;">Žádné fotografie</p>';
+            grid.innerHTML = `<p style="color: var(--c-grey); text-align: center; padding: 1rem; font-size: 0.85rem;">${t('no_photos')}</p>`;
           }
         }
       }
 
-      alert('✅ Fotka byla úspěšně smazána!');
+      alert(t('photo_deleted_successfully'));
     } else {
-      const errorMsg = result.message || result.error || 'Nepodařilo se smazat fotku';
+      const errorMsg = result.message || result.error || t('delete_failed');
       logger.error('❌ Chyba:', errorMsg);
-      alert('Chyba: ' + errorMsg);
+      alert(t('error') + ': ' + errorMsg);
     }
   } catch (error) {
     logger.error('❌ Chyba při mazání fotky:', error);
-    alert('Chyba při mazání fotky: ' + error.message);
+    alert(t('photo_delete_error') + ': ' + error.message);
   }
 }
 
@@ -2431,7 +2417,7 @@ async function loadMoreOrders() {
   const btn = document.getElementById('loadMoreBtn');
   if (btn) {
     btn.disabled = true;
-    btn.textContent = 'Načítání...';
+    btn.textContent = t('loading');
   }
 
   await loadAll(ACTIVE_FILTER, true); // append = true
@@ -2448,7 +2434,7 @@ function updateLoadMoreButton() {
       btn = document.createElement('button');
       btn.id = 'loadMoreBtn';
       btn.className = 'load-more-btn';
-      btn.textContent = 'Načíst další zakázky';
+      btn.textContent = t('load_more_orders');
       btn.onclick = loadMoreOrders;
 
       grid.parentElement.appendChild(btn);
@@ -2459,7 +2445,7 @@ function updateLoadMoreButton() {
   if (btn) {
     btn.style.display = HAS_MORE_PAGES ? 'block' : 'none';
     btn.disabled = LOADING_MORE;
-    btn.textContent = LOADING_MORE ? 'Načítání...' : `Načíst další (stránka ${CURRENT_PAGE + 1})`;
+    btn.textContent = LOADING_MORE ? t('loading') : t('load_more_page').replace('{page}', CURRENT_PAGE + 1);
   }
 }
 

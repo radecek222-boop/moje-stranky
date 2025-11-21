@@ -198,6 +198,27 @@
   };
 
   /**
+   * Získá překlad pro daný klíč a aktuální jazyk
+   * @param {string} klic - Klíč překladu
+   * @returns {string} - Přeložený text nebo původní klíč pokud překlad neexistuje
+   */
+  window.t = function(klic) {
+    const preklady = window.WGS_TRANSLATIONS || {};
+    return preklady[klic]?.[aktualniJazyk] || klic;
+  };
+
+  /**
+   * Získá překlad pro daný klíč a konkrétní jazyk
+   * @param {string} klic - Klíč překladu
+   * @param {string} jazyk - Kód jazyka
+   * @returns {string} - Přeložený text
+   */
+  window.tLang = function(klic, jazyk) {
+    const preklady = window.WGS_TRANSLATIONS || {};
+    return preklady[klic]?.[jazyk] || klic;
+  };
+
+  /**
    * Inicializace při načtení stránky
    */
   function inicializujJazyk() {
