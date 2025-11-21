@@ -566,13 +566,13 @@ if (!$isLoggedIn && !$isAdmin) {
 
 /* 📱 KOMPLETNÍ OPTIMALIZACE DETAIL MODALU - ULTRA KOMPAKTNÍ STYL */
 @media (max-width: 768px) {
-  /* Modal overlay - lepší scrollování na mobilu */
+  /* Modal overlay - lepší scrollování, uprostřed displeje */
   .modal-overlay {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
     touch-action: pan-y !important;
-    align-items: flex-start !important;
-    padding: 0.5rem !important;
+    align-items: center !important;
+    padding: 2rem 0.5rem !important;
   }
 
   .modal-content {
@@ -580,20 +580,20 @@ if (!$isLoggedIn && !$isAdmin) {
     max-height: none !important;
   }
 
-  /* Modal header - velmi kompaktní */
+  /* Modal header - ultra kompaktní */
   .modal-header {
-    padding: 0.3rem !important;
+    padding: 0.2rem !important;
   }
 
   .modal-title {
-    font-size: 0.65rem !important;
-    margin-bottom: 0.15rem !important;
-    line-height: 1.1 !important;
+    font-size: 0.6rem !important;
+    margin-bottom: 0.08rem !important;
+    line-height: 1.05 !important;
   }
 
   .modal-subtitle {
-    font-size: 0.55rem !important;
-    line-height: 1.1 !important;
+    font-size: 0.5rem !important;
+    line-height: 1.05 !important;
   }
 
   .modal-close {
@@ -605,59 +605,59 @@ if (!$isLoggedIn && !$isAdmin) {
     padding: 0.35rem !important;
   }
 
-  /* Modal body - velmi kompaktní padding */
+  /* Modal body - ultra kompaktní padding */
   .modal-body {
-    padding: 0.3rem !important;
+    padding: 0.2rem !important;
   }
 
-  /* Section titles - menší */
+  /* Section titles - ultra menší */
   .section-title {
-    font-size: 0.6rem !important;
-    margin-bottom: 0.3rem !important;
-    padding-bottom: 0.15rem !important;
+    font-size: 0.55rem !important;
+    margin-bottom: 0.15rem !important;
+    padding-bottom: 0.08rem !important;
   }
 
-  /* Info grid - kompaktní */
+  /* Info grid - ultra kompaktní */
   .info-grid {
-    grid-template-columns: 70px 1fr !important;
-    gap: 0.25rem !important;
-    font-size: 0.65rem !important;
+    grid-template-columns: 60px 1fr !important;
+    gap: 0.15rem !important;
+    font-size: 0.6rem !important;
   }
 
   .info-label {
-    font-size: 0.6rem !important;
+    font-size: 0.55rem !important;
   }
 
   .info-value {
-    font-size: 0.65rem !important;
+    font-size: 0.6rem !important;
   }
 
-  /* Modal sections - menší mezery */
+  /* Modal sections - minimální mezery */
   .modal-section {
-    margin-bottom: 0.5rem !important;
-  }
-
-  /* Editable fields - kompaktní */
-  .editable-field {
-    padding: 0.25rem !important;
     margin-bottom: 0.3rem !important;
   }
 
+  /* Editable fields - ultra kompaktní */
+  .editable-field {
+    padding: 0.15rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+
   .field-label {
-    font-size: 0.6rem !important;
-    margin-bottom: 0.15rem !important;
+    font-size: 0.55rem !important;
+    margin-bottom: 0.08rem !important;
   }
 
   .field-input {
-    padding: 0.25rem !important;
-    font-size: 0.65rem !important;
+    padding: 0.15rem !important;
+    font-size: 0.6rem !important;
   }
 
   .field-textarea {
-    padding: 0.25rem !important;
-    font-size: 0.65rem !important;
-    min-height: 40px !important;
-    line-height: 1.2 !important;
+    padding: 0.15rem !important;
+    font-size: 0.6rem !important;
+    min-height: 30px !important;
+    line-height: 1.15 !important;
   }
 
   /* Všechna tlačítka v modalu - decentní font */
@@ -670,10 +670,10 @@ if (!$isLoggedIn && !$isAdmin) {
     letter-spacing: 0.05em !important;
   }
 
-  /* Modal actions - kompaktní footer */
+  /* Modal actions - ultra kompaktní footer */
   .modal-actions {
-    padding: 0.5rem !important;
-    gap: 0.3rem !important;
+    padding: 0.3rem !important;
+    gap: 0.2rem !important;
   }
 
   /* Calendar container - velmi kompaktní */
@@ -733,9 +733,9 @@ if (!$isLoggedIn && !$isAdmin) {
     font-size: 0.6rem !important;
   }
 
-  /* Photo grid - kompaktní mezery */
+  /* Photo grid - minimální mezery */
   .modal-body div[style*="display: grid"][style*="grid-template-columns"] {
-    gap: 0.2rem !important;
+    gap: 0.15rem !important;
   }
 
   /* PDF tlačítka - decentní font */
@@ -746,23 +746,23 @@ if (!$isLoggedIn && !$isAdmin) {
     min-height: 27px !important;
   }
 
-  /* Input fields v inline stylu - velmi kompaktní */
+  /* Input fields v inline stylu - ultra kompaktní */
   .modal-body input[style*="padding"] {
-    padding: 0.2rem 0.3rem !important;
-    font-size: 0.65rem !important;
+    padding: 0.15rem 0.2rem !important;
+    font-size: 0.6rem !important;
   }
 
   .modal-body textarea[style*="padding"] {
-    padding: 0.2rem 0.3rem !important;
-    font-size: 0.65rem !important;
-    min-height: 40px !important;
-    line-height: 1.2 !important;
+    padding: 0.15rem 0.2rem !important;
+    font-size: 0.6rem !important;
+    min-height: 30px !important;
+    line-height: 1.15 !important;
   }
 
-  /* Select dropdowns - velmi kompaktní */
+  /* Select dropdowns - ultra kompaktní */
   .modal-body select {
-    padding: 0.2rem 0.3rem !important;
-    font-size: 0.65rem !important;
+    padding: 0.15rem 0.2rem !important;
+    font-size: 0.6rem !important;
   }
 
   /* Map panel toggle - kompaktní */
@@ -803,37 +803,67 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 }
 
-/* 📱 Extra malé displeje - ještě kompaktnější modal */
+/* 📱 Extra malé displeje - ultra kompaktnější modal */
 @media (max-width: 480px) {
   .modal-header {
-    padding: 0.4rem !important;
+    padding: 0.15rem !important;
   }
 
   .modal-title {
-    font-size: 0.7rem !important;
-  }
-
-  .modal-subtitle {
     font-size: 0.55rem !important;
   }
 
+  .modal-subtitle {
+    font-size: 0.48rem !important;
+  }
+
   .modal-body {
-    padding: 0.4rem !important;
+    padding: 0.15rem !important;
   }
 
   .section-title {
-    font-size: 0.6rem !important;
+    font-size: 0.5rem !important;
+    margin-bottom: 0.1rem !important;
+    padding-bottom: 0.05rem !important;
   }
 
   .info-grid {
-    grid-template-columns: 70px 1fr !important;
-    gap: 0.3rem !important;
-    font-size: 0.65rem !important;
+    grid-template-columns: 55px 1fr !important;
+    gap: 0.1rem !important;
+    font-size: 0.55rem !important;
+  }
+
+  .info-label {
+    font-size: 0.5rem !important;
+  }
+
+  .info-value {
+    font-size: 0.55rem !important;
   }
 
   .field-input,
   .field-textarea {
-    font-size: 0.65rem !important;
+    font-size: 0.55rem !important;
+    padding: 0.1rem !important;
+  }
+
+  .field-label {
+    font-size: 0.5rem !important;
+    margin-bottom: 0.05rem !important;
+  }
+
+  .editable-field {
+    padding: 0.1rem !important;
+    margin-bottom: 0.15rem !important;
+  }
+
+  .modal-section {
+    margin-bottom: 0.2rem !important;
+  }
+
+  .modal-actions {
+    padding: 0.2rem !important;
+    gap: 0.15rem !important;
   }
 
   .modal-body .btn,
