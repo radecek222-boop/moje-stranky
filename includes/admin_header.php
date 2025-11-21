@@ -36,7 +36,7 @@ $currentAdminTab = $_GET['tab'] ?? 'dashboard';
         </nav>
 
         <div class="header-actions desktop-only">
-            <button id="logoutBtnDesktop" class="btn-logout" title="Odhlásit se">Odhlásit</button>
+            <a href="/logout.php" id="logoutBtnDesktop" class="btn-logout" title="Odhlásit se">Odhlásit</a>
         </div>
     </div>
 </header>
