@@ -1038,22 +1038,39 @@ async function smazatKlic(kodKlice) {
         }
 
         console.log('[Security] Mazání klíče:', kodKlice);
+        console.log('[Security] CSRF token:', csrfToken);
+
+        const requestBody = JSON.stringify({
+            key_code: kodKlice,
+            csrf_token: csrfToken
+        });
+        console.log('[Security] Request body:', requestBody);
 
         const odpoved = await fetch('/api/admin_api.php?action=delete_key', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                key_code: kodKlice,
-                csrf_token: csrfToken
-            })
+            body: requestBody
         });
+
+        console.log('[Security] Response status:', odpoved.status);
+        console.log('[Security] Response Content-Type:', odpoved.headers.get('content-type'));
 
         // ✅ OPRAVA: Kontrola HTTP statusu PŘED parsováním JSON
         if (!odpoved.ok) {
             const errorText = await odpoved.text();
-            console.error('[Security] HTTP error:', odpoved.status, errorText);
-            throw new Error(`HTTP ${odpoved.status}: ${errorText}`);
+            console.error('[Security] HTTP error response body:', errorText);
+            console.error('[Security] Response length:', errorText.length);
+
+            // Zkusit parsovat jako JSON
+            try {
+                const errorJson = JSON.parse(errorText);
+                console.error('[Security] Parsed error JSON:', errorJson);
+                throw new Error(`HTTP ${odpoved.status}: ${errorJson.message || errorJson.error || errorText}`);
+            } catch (parseError) {
+                console.error('[Security] Response není validní JSON');
+                throw new Error(`HTTP ${odpoved.status}: ${errorText || 'Prázdná odpověď'}`);
+            }
         }
 
         const data = await odpoved.json();
