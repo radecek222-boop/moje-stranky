@@ -342,6 +342,32 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 }
 
+/* 📱 MOBILNÍ OPTIMALIZACE FILTER TLAČÍTEK */
+@media (max-width: 768px) {
+  /* Filter bar - stack filters */
+  .filter-bar {
+    flex-direction: column !important;
+    gap: 0.25rem !important;
+  }
+
+  .filter-btn {
+    width: 100% !important;
+    padding: 0.4rem 0.75rem !important; /* 50% menší výška */
+    font-size: 0.85rem !important;
+  }
+}
+
+@media (max-width: 375px) {
+  .filter-btn {
+    padding: 0.35rem 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .filter-bar {
+    gap: 0.2rem !important;
+  }
+}
+
 /* 📱 MOBILNÍ OPTIMALIZACE KALENDÁŘE A PANELŮ */
 @media (max-width: 768px) {
   /* Modal title - "Vyberte termín návštěvy" menší pro mobil */
