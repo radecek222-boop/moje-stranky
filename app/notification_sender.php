@@ -10,6 +10,7 @@
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/EmailQueue.php';
+require_once __DIR__ . '/../includes/rate_limiter.php';
 
 header('Content-Type: application/json');
 
@@ -59,25 +60,35 @@ try {
         throw new Exception('Chybí notification_id');
     }
 
-    // Rate limiting
-    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $rateLimit = checkRateLimit("notification_$ip", 30, 3600); // 30 notifikací za hodinu
+    // ============================================
+    // DATABÁZOVÉ PŘIPOJENÍ
+    // ============================================
+    $pdo = getDbConnection();
 
-    if (!$rateLimit['allowed']) {
+    // ✅ FIX 9: Databázový rate limiting - ochrana proti spamování
+    $rateLimiter = new RateLimiter($pdo);
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+
+    $rateCheck = $rateLimiter->checkLimit(
+        $ip,
+        'notification',
+        ['max_attempts' => 30, 'window_minutes' => 60, 'block_minutes' => 120]
+    );
+
+    if (!$rateCheck['allowed']) {
         http_response_code(429);
         echo json_encode([
             'success' => false,
-            'error' => 'Příliš mnoho notifikací. Zkuste to později.'
+            'error' => $rateCheck['message']
         ]);
         exit;
     }
 
-    recordLoginAttempt("notification_$ip");
+    // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
 
     // ============================================
     // NAČTENÍ ŠABLONY Z DATABÁZE
     // ============================================
-    $pdo = getDbConnection();
 
     $stmt = $pdo->prepare("
         SELECT * FROM wgs_notifications
