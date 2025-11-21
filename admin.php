@@ -74,6 +74,9 @@ try {
 }
 
 // Získání statistik pro dashboard
+$activeKeys = 0;
+$pendingActions = 0;
+
 if ($activeTab === 'dashboard') {
     try {
         $pdo = getDbConnection();
@@ -127,7 +130,6 @@ if ($activeTab === 'dashboard') {
 <body<?php
     $bodyClasses = [];
     if ($embedMode) $bodyClasses[] = 'embed-mode';
-    elseif ($activeTab === 'dashboard') $bodyClasses[] = 'admin-dashboard-page';
     if (!empty($bodyClasses)) echo ' class="' . implode(' ', $bodyClasses) . '"';
 ?>>
 
@@ -143,34 +145,32 @@ if (!$embedMode && $activeTab === 'dashboard'):
         <h1 class="admin-dashboard-title">WGS Admin Panel</h1>
         <p class="admin-dashboard-subtitle">Centrální řídicí panel pro správu celé aplikace</p>
         <div class="admin-dashboard-actions">
-            <span class="cc-version-info" id="adminVersionInfo" title="Verze Admin - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
-            <button class="cc-clear-cache-btn" onclick="clearCacheAndReload()" title="Vymaže lokální cache a načte nejnovější verzi">
-                🔄 Vymazat cache & Reload
-            </button>
+            <span class="admin-version-info" id="adminVersionInfo" title="Verze Admin - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
+            <button class="admin-cache-btn" onclick="clearCacheAndReload()" title="Vymaže lokální cache a načte nejnovější verzi">Vymazat cache & Reload</button>
         </div>
     </div>
 
     <!-- HLAVNÍ NAVIGACE -->
     <div class="admin-kategorie">
-        <h2 class="admin-kategorie-nadpis">📋 Hlavní navigace</h2>
+        <h2 class="admin-kategorie-nadpis">Hlavní navigace</h2>
         <div class="cc-grid">
             <div class="cc-card" onclick="window.location='index.php'">
-                <div class="cc-card-title">🏠 Domů</div>
+                <div class="cc-card-title">Domů</div>
                 <div class="cc-card-description">Hlavní stránka aplikace</div>
             </div>
 
             <div class="cc-card" onclick="window.location='seznam.php'">
-                <div class="cc-card-title">📑 Seznam reklamací</div>
+                <div class="cc-card-title">Seznam reklamací</div>
                 <div class="cc-card-description">Přehled všech reklamací a servisních požadavků</div>
             </div>
 
             <div class="cc-card" onclick="window.location='protokol.php'">
-                <div class="cc-card-title">📝 Nový protokol</div>
+                <div class="cc-card-title">Nový protokol</div>
                 <div class="cc-card-description">Vytvořit nový servisní protokol</div>
             </div>
 
             <div class="cc-card" onclick="window.location='statistiky.php'">
-                <div class="cc-card-title">📊 Statistiky</div>
+                <div class="cc-card-title">Statistiky</div>
                 <div class="cc-card-description">Přehledy, grafy a analytické reporty</div>
             </div>
         </div>
@@ -178,10 +178,10 @@ if (!$embedMode && $activeTab === 'dashboard'):
 
     <!-- SPRÁVA & BEZPEČNOST -->
     <div class="admin-kategorie">
-        <h2 class="admin-kategorie-nadpis">👥 Správa & Bezpečnost</h2>
+        <h2 class="admin-kategorie-nadpis">Správa & Bezpečnost</h2>
         <div class="cc-grid">
             <div class="cc-card" onclick="window.location='admin.php?tab=users'">
-                <div class="cc-card-title">👤 Uživatelé</div>
+                <div class="cc-card-title">Uživatelé</div>
                 <div class="cc-card-description">Správa uživatelských účtů a oprávnění</div>
             </div>
 
@@ -189,17 +189,17 @@ if (!$embedMode && $activeTab === 'dashboard'):
                 <?php if ($activeKeys > 0): ?>
                     <div class="cc-card-badge"><?= $activeKeys ?></div>
                 <?php endif; ?>
-                <div class="cc-card-title">🔐 Bezpečnost & Klíče</div>
+                <div class="cc-card-title">Bezpečnost & Klíče</div>
                 <div class="cc-card-description">Registrační klíče, API klíče, bezpečnostní nastavení</div>
             </div>
 
             <div class="cc-card" onclick="window.location='admin.php?tab=notifications'">
-                <div class="cc-card-title">📧 Email & SMS</div>
+                <div class="cc-card-title">Email & SMS</div>
                 <div class="cc-card-description">Správa emailových a SMS notifikací</div>
             </div>
 
             <div class="cc-card" onclick="window.location='admin.php?tab=online'">
-                <div class="cc-card-title">🟢 Online uživatelé</div>
+                <div class="cc-card-title">Online uživatelé</div>
                 <div class="cc-card-description">Aktuálně přihlášení uživatelé v systému</div>
             </div>
         </div>
@@ -207,10 +207,10 @@ if (!$embedMode && $activeTab === 'dashboard'):
 
     <!-- SYSTÉM -->
     <div class="admin-kategorie">
-        <h2 class="admin-kategorie-nadpis">⚙️ Systém</h2>
+        <h2 class="admin-kategorie-nadpis">Systém</h2>
         <div class="cc-grid">
             <div class="cc-card" onclick="window.location='admin.php?tab=admin_configuration'">
-                <div class="cc-card-title">🔧 Konfigurace</div>
+                <div class="cc-card-title">Konfigurace</div>
                 <div class="cc-card-description">SMTP, API klíče, systémová nastavení</div>
             </div>
 
@@ -218,12 +218,12 @@ if (!$embedMode && $activeTab === 'dashboard'):
                 <?php if ($pendingActions > 0): ?>
                     <div class="cc-card-badge"><?= $pendingActions ?></div>
                 <?php endif; ?>
-                <div class="cc-card-title">✅ Akce & Úkoly</div>
+                <div class="cc-card-title">Akce & Úkoly</div>
                 <div class="cc-card-description">Nevyřešené úkoly a plánované akce</div>
             </div>
 
             <div class="cc-card" onclick="window.location='admin.php?tab=tools'">
-                <div class="cc-card-title">🛠️ Nástroje</div>
+                <div class="cc-card-title">Nástroje</div>
                 <div class="cc-card-description">Diagnostické nástroje a utilities</div>
             </div>
         </div>
@@ -231,20 +231,20 @@ if (!$embedMode && $activeTab === 'dashboard'):
 
     <!-- VÝVOJ & TESTOVÁNÍ -->
     <div class="admin-kategorie">
-        <h2 class="admin-kategorie-nadpis">🧪 Vývoj & Testování</h2>
+        <h2 class="admin-kategorie-nadpis">Vývoj & Testování</h2>
         <div class="cc-grid">
             <div class="cc-card" onclick="window.location='admin.php?tab=admin_phpunit'">
-                <div class="cc-card-title">🧪 PHPUnit Testy</div>
+                <div class="cc-card-title">PHPUnit Testy</div>
                 <div class="cc-card-description">Spuštění automatických testů</div>
             </div>
 
             <div class="cc-card" onclick="window.location='admin.php?tab=admin_testing_simulator'">
-                <div class="cc-card-title">🎯 E2E Testing</div>
+                <div class="cc-card-title">E2E Testing</div>
                 <div class="cc-card-description">End-to-end testování celého workflow</div>
             </div>
 
             <div class="cc-card" onclick="window.location='admin.php?tab=admin_console'">
-                <div class="cc-card-title">💻 Konzole</div>
+                <div class="cc-card-title">Konzole</div>
                 <div class="cc-card-description">Diagnostika HTML/PHP/JS/CSS/SQL</div>
             </div>
         </div>
@@ -252,20 +252,20 @@ if (!$embedMode && $activeTab === 'dashboard'):
 
     <!-- DESIGN & DATABÁZE -->
     <div class="admin-kategorie">
-        <h2 class="admin-kategorie-nadpis">🎨 Design & Databáze</h2>
+        <h2 class="admin-kategorie-nadpis">Design & Databáze</h2>
         <div class="cc-grid">
             <div class="cc-card" onclick="window.location='admin.php?tab=admin_appearance'">
-                <div class="cc-card-title">🎨 Vzhled & Design</div>
+                <div class="cc-card-title">Vzhled & Design</div>
                 <div class="cc-card-description">Barvy, fonty, logo, branding</div>
             </div>
 
             <div class="cc-card" onclick="window.location='admin.php?tab=admin_content'">
-                <div class="cc-card-title">📄 Správa Obsahu</div>
+                <div class="cc-card-title">Správa Obsahu</div>
                 <div class="cc-card-description">Editace textů a obsahových bloků</div>
             </div>
 
             <div class="cc-card" onclick="openSQLPage()">
-                <div class="cc-card-title">🗄️ SQL Databáze</div>
+                <div class="cc-card-title">SQL Databáze</div>
                 <div class="cc-card-description">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
             </div>
         </div>
@@ -273,7 +273,13 @@ if (!$embedMode && $activeTab === 'dashboard'):
 </div>
 
 <style>
-/* Dashboard kartový systém */
+/* Dashboard kartový systém - stejný styl jako seznam.php */
+body {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #f5f5f7;
+    color: #1a1a1a;
+}
+
 .admin-dashboard-wrapper {
     max-width: 1400px;
     margin: 0 auto;
@@ -282,23 +288,26 @@ if (!$embedMode && $activeTab === 'dashboard'):
 
 .admin-dashboard-header {
     text-align: center;
-    margin-bottom: 3rem;
-    padding-bottom: 2rem;
-    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #d1d1d6;
 }
 
 .admin-dashboard-title {
-    font-size: 2.5rem;
-    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
     color: #1a1a1a;
     margin: 0 0 0.5rem 0;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
 }
 
 .admin-dashboard-subtitle {
-    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 400;
     color: #666;
-    margin: 0 0 1.5rem 0;
+    margin: 0 0 1rem 0;
 }
 
 .admin-dashboard-actions {
@@ -309,35 +318,87 @@ if (!$embedMode && $activeTab === 'dashboard'):
     margin-top: 1rem;
 }
 
+.admin-version-info {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.75rem;
+    color: #666;
+    padding: 0.5rem 0.75rem;
+    background: #fff;
+    border: 1px solid #d1d1d6;
+    border-radius: 6px;
+    height: 36px;
+    min-width: 150px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-cache-btn {
+    font-family: 'Poppins', sans-serif;
+    background: #2D5016;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 36px;
+    min-width: 150px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-cache-btn:hover {
+    background: #1a300d;
+    transform: translateY(-1px);
+}
+
 .admin-kategorie {
-    margin-bottom: 3rem;
+    margin-bottom: 2.5rem;
 }
 
 .admin-kategorie-nadpis {
-    font-size: 1.1rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
     font-weight: 600;
     color: #1a1a1a;
     margin: 0 0 1rem 0;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #d1d1d6;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
     .admin-dashboard-title {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
     }
 
     .admin-dashboard-subtitle {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
     }
 
     .admin-kategorie-nadpis {
-        font-size: 1rem;
+        font-size: 0.9rem;
     }
 
     .cc-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    .admin-dashboard-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .admin-version-info,
+    .admin-cache-btn {
+        width: 100%;
+        max-width: 300px;
     }
 }
 </style>
