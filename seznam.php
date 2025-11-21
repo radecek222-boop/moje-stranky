@@ -560,7 +560,7 @@ if (!$isLoggedIn && !$isAdmin) {
   .modal-body span[style*="font-weight: 600"] {
     display: block !important;
     margin-bottom: 0.25rem !important;
-    font-size: 0.75rem !important;
+    font-size: 0.55rem !important;
   }
 }
 
