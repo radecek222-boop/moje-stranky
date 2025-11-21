@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
 require_once __DIR__ . '/../../includes/safe_file_operations.php';
 require_once __DIR__ . '/../../includes/reklamace_id_validator.php';
+require_once __DIR__ . '/../../includes/rate_limiter.php';
 
 header('Content-Type: application/json');
 
@@ -31,22 +32,30 @@ try {
         exit;
     }
 
-    // BEZPEČNOST: Rate limiting - ochrana proti DoS útokům
-    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $rateLimit = checkRateLimit("upload_photos_$ip", 20, 3600); // 20 uploadů za hodinu
+    // Databázové připojení
+    $pdo = getDbConnection();
 
-    if (!$rateLimit['allowed']) {
+    // ✅ FIX 9: Databázový rate limiting - ochrana proti DoS útokům
+    $rateLimiter = new RateLimiter($pdo);
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+
+    $rateCheck = $rateLimiter->checkLimit(
+        $ip,
+        'photo_upload',
+        ['max_attempts' => 20, 'window_minutes' => 60, 'block_minutes' => 60]
+    );
+
+    if (!$rateCheck['allowed']) {
         http_response_code(429);
         echo json_encode([
             'status' => 'error',
-            'error' => 'Příliš mnoho požadavků. Zkuste to za ' . ceil($rateLimit['retry_after'] / 60) . ' minut.',
-            'retry_after' => $rateLimit['retry_after']
+            'error' => $rateCheck['message'],
+            'retry_after' => strtotime($rateCheck['reset_at']) - time()
         ]);
         exit;
     }
 
-    // Zaznamenat pokus o upload
-    recordLoginAttempt("upload_photos_$ip");
+    // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
 
     // Získání a validace reklamace ID
     $reklamaceId = sanitizeReklamaceId($_POST['reklamace_id'] ?? null, 'reklamace_id');
@@ -64,9 +73,6 @@ try {
     if ($photoCount > 20) {
         throw new Exception('Příliš mnoho fotek. Maximum je 20 fotek na upload.');
     }
-
-    // Databázové připojení
-    $pdo = getDbConnection();
 
     // BEZPEČNOST: Ověření existence reklamace PŘED zápisem souborů
     $stmt = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE reklamace_id = :reklamace_id OR cislo = :cislo LIMIT 1");
