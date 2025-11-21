@@ -42,9 +42,9 @@ registrationForm.addEventListener('submit', async (e) => {
     showNotification('Vyplňte všechna povinná pole', 'error');
     return;
   }
-  
-  if (password.length < 8) {
-    showNotification('Heslo musí mít alespoň 8 znaků', 'error');
+
+  if (password.length < 12) {
+    showNotification('Heslo musí mít alespoň 12 znaků', 'error');
     return;
   }
   

@@ -68,7 +68,7 @@ $csrfToken = generateCSRFToken();
     <div class="form-group">
       <label for="regPassword">Heslo</label>
       <input type="password" id="regPassword" name="password" placeholder="••••••••" required>
-      <div class="helper-text">Minimálně 8 znaků</div>
+      <div class="helper-text">Minimálně 12 znaků (velké/malé písmena, čísla a znaky)</div>
     </div>
 
     <div class="form-group">

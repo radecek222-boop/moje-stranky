@@ -27,8 +27,8 @@ try {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         throw new InvalidArgumentException('Zadejte platný email.');
     }
-    if (strlen($password) < 8) {
-        throw new InvalidArgumentException('Heslo musí mít alespoň 8 znaků.');
+    if (strlen($password) < 12) {
+        throw new InvalidArgumentException('Heslo musí mít alespoň 12 znaků.');
     }
 
     $strength = isStrongPassword($password);
