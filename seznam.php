@@ -568,12 +568,12 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 
   .modal-close {
-    width: 20px !important;
-    height: 20px !important;
-    font-size: 1rem !important;
+    width: 35px !important;
+    height: 35px !important;
+    font-size: 1.75rem !important;
     top: 0.5rem !important;
     right: 0.5rem !important;
-    padding: 0.2rem !important;
+    padding: 0.35rem !important;
   }
 
   /* Modal body - kompaktní padding */
@@ -631,12 +631,12 @@ if (!$isLoggedIn && !$isAdmin) {
     line-height: 1.3 !important;
   }
 
-  /* Všechna tlačítka v modalu - kompaktní */
+  /* Všechna tlačítka v modalu - větší pro lepší použitelnost (75% větší) */
   .modal-body .btn,
   .modal-actions .btn {
-    padding: 0.35rem 0.7rem !important;
-    font-size: 0.6rem !important;
-    min-height: 22px !important;
+    padding: 0.61rem 1.23rem !important;
+    font-size: 1.05rem !important;
+    min-height: 38px !important;
     line-height: 1.2 !important;
     letter-spacing: 0.05em !important;
   }
@@ -661,8 +661,8 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 
   .calendar-nav-btn {
-    padding: 0.2rem 0.4rem !important;
-    font-size: 0.6rem !important;
+    padding: 0.35rem 0.7rem !important;
+    font-size: 1.05rem !important;
   }
 
   .calendar-weekdays {
@@ -708,12 +708,12 @@ if (!$isLoggedIn && !$isAdmin) {
     gap: 0.3rem !important;
   }
 
-  /* PDF tlačítka - kompaktní */
+  /* PDF tlačítka - větší (75% větší) */
   .modal-body button[onclick*="PDF"],
   .modal-body button[onclick*="pdf"] {
-    padding: 0.3rem 0.5rem !important;
-    font-size: 0.6rem !important;
-    min-height: 20px !important;
+    padding: 0.53rem 0.88rem !important;
+    font-size: 1.05rem !important;
+    min-height: 35px !important;
   }
 
   /* Input fields v inline stylu - kompaktní */
@@ -807,8 +807,8 @@ if (!$isLoggedIn && !$isAdmin) {
 
   .modal-body .btn,
   .modal-actions .btn {
-    padding: 0.3rem 0.6rem !important;
-    font-size: 0.55rem !important;
+    padding: 0.53rem 1.05rem !important;
+    font-size: 0.96rem !important;
   }
 
   .cal-day {
