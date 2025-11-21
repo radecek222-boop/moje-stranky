@@ -428,12 +428,13 @@ body {
   /* Filter bar - stack filters */
   .filter-bar {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.25rem; /* Minimální mezera mezi tlačítky */
   }
 
   .filter-btn {
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.4rem 0.75rem; /* 50% menší výška (bylo 0.75rem) */
+    font-size: 0.85rem; /* Menší font pro kompaktnost */
   }
 }
 
@@ -617,6 +618,16 @@ body {
 
   .order-grid {
     gap: 0.4rem;
+  }
+
+  /* Filter buttony - ještě kompaktnější */
+  .filter-btn {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .filter-bar {
+    gap: 0.2rem;
   }
 }
 
