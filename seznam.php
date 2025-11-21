@@ -746,6 +746,14 @@ if (!$isLoggedIn && !$isAdmin) {
     min-height: 27px !important;
   }
 
+  /* Textové bloky POPIS PROBLÉMU a DOPLŇUJÍCÍ INFO - decentní font */
+  .modal-body div[onclick*="showTextOverlay"] {
+    font-size: 0.55rem !important;
+    padding: 0.15rem !important;
+    min-height: 30px !important;
+    line-height: 1.15 !important;
+  }
+
   /* Input fields v inline stylu - ultra kompaktní */
   .modal-body input[style*="padding"] {
     padding: 0.15rem 0.2rem !important;
