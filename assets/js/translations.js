@@ -759,5 +759,32 @@ window.WGS_TRANSLATIONS = {
     cs: 'Prosinec',
     en: 'December',
     it: 'Dicembre'
+  },
+
+  // === ADMIN.JS - Admin panel ===
+  'session_expired': {
+    cs: 'Vaše relace vypršela. Přihlaste se znovu.',
+    en: 'Your session has expired. Please log in again.',
+    it: 'La tua sessione è scaduta. Per favore accedi di nuovo.'
+  },
+  'delete_user_error': {
+    cs: 'Chyba při mazání uživatele',
+    en: 'Error deleting user',
+    it: 'Errore nell\'eliminazione dell\'utente'
+  },
+  'csrf_token_not_found': {
+    cs: 'Chyba: CSRF token nebyl nalezen. Obnovte stránku.',
+    en: 'Error: CSRF token not found. Please refresh the page.',
+    it: 'Errore: Token CSRF non trovato. Aggiorna la pagina.'
+  },
+  'unknown_error': {
+    cs: 'Neznámá chyba',
+    en: 'Unknown error',
+    it: 'Errore sconosciuto'
+  },
+  'key_created': {
+    cs: 'Vytvořeno: {key}',
+    en: 'Created: {key}',
+    it: 'Creato: {key}'
   }
 };
