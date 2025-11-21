@@ -1037,6 +1037,8 @@ async function smazatKlic(kodKlice) {
             throw new Error('CSRF token není k dispozici');
         }
 
+        console.log('[Security] Mazání klíče:', kodKlice);
+
         const odpoved = await fetch('/api/admin_api.php?action=delete_key', {
             method: 'POST',
             credentials: 'same-origin',
@@ -1047,16 +1049,24 @@ async function smazatKlic(kodKlice) {
             })
         });
 
+        // ✅ OPRAVA: Kontrola HTTP statusu PŘED parsováním JSON
+        if (!odpoved.ok) {
+            const errorText = await odpoved.text();
+            console.error('[Security] HTTP error:', odpoved.status, errorText);
+            throw new Error(`HTTP ${odpoved.status}: ${errorText}`);
+        }
+
         const data = await odpoved.json();
+        console.log('[Security] Response:', data);
 
         if (data.status === 'success') {
-            alert('Klíč byl smazán');
+            alert('Klíč byl úspěšně smazán');
             nactiRegistracniKlice();
         } else {
             alert('Chyba: ' + (data.message || 'Nepodařilo se smazat klíč'));
         }
     } catch (chyba) {
-        alert('Chyba: ' + chyba.message);
+        alert('Chyba mazání klíče: ' + chyba.message);
         console.error('[Security] Chyba mazání klíče:', chyba);
     }
 }
