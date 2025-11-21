@@ -383,7 +383,7 @@ function renderOrders(items = null) {
           <div class="order-detail">
             <div class="order-detail-line">${highlightedAddress}</div>
             <div class="order-detail-line">${highlightedProduct}</div>
-            ${appointmentText ? `<div class="order-detail-line" style="color: #00d4ff; font-weight: 700; font-size: 0.7rem;">${appointmentText}</div>` : ''}
+            ${appointmentText ? `<div class="order-detail-line" style="color: #00d4ff; font-weight: 700; font-size: 0.55rem;">${appointmentText}</div>` : ''}
             <div class="order-detail-line" style="opacity: 0.6;">${date}</div>
           </div>
         </div>
