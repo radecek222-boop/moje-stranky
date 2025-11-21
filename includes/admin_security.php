@@ -867,7 +867,7 @@ function switchSection(section) {
 
     // Load data for specific sections
     if (section === 'registracni_klice') {
-        loadRegistracniKlice();
+        nactiRegistracniKlice();
     } else if (section === 'uzivatele') {
         loadUzivateleProSecurity();
     }
