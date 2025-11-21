@@ -120,5 +120,4 @@ $currentAdminTab = $_GET['tab'] ?? 'dashboard';
 <!-- Language Switcher - centralizovaný jazykový přepínač -->
 <script src="assets/js/language-switcher.js"></script>
 
-<!-- ✅ SECURITY FIX: CSRF protected logout handler -->
-<script src="assets/js/logout-handler.js"></script>
+<!-- ✅ OPRAVA: logout-handler.js přesunut do globálních scriptů v admin.php (řádek 1113) -->
