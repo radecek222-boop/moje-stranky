@@ -563,5 +563,52 @@ window.WGS_TRANSLATIONS = {
     cs: 'Pro potvrzení smazání napište číslo reklamace:\n\n{number}',
     en: 'To confirm deletion, enter claim number:\n\n{number}',
     it: 'Per confermare l\'eliminazione, inserisci il numero del reclamo:\n\n{number}'
+  },
+
+  // === STATISTIKY.JS - Statistiky a reporty ===
+  'stats_salesperson': {
+    cs: 'Statistiky prodejců',
+    en: 'Salesperson Statistics',
+    it: 'Statistiche Venditori'
+  },
+  'stats_technician': {
+    cs: 'Statistiky techniků',
+    en: 'Technician Statistics',
+    it: 'Statistiche Tecnici'
+  },
+  'stats_models': {
+    cs: 'Nejporuchovější modely',
+    en: 'Most Problematic Models',
+    it: 'Modelli Più Problematici'
+  },
+  'stats_orders': {
+    cs: 'Filtrované zakázky',
+    en: 'Filtered Orders',
+    it: 'Ordini Filtrati'
+  },
+  'stats_charts': {
+    cs: 'Grafy a vizualizace',
+    en: 'Charts and Visualization',
+    it: 'Grafici e Visualizzazione'
+  },
+  'statistics': {
+    cs: 'Statistiky',
+    en: 'Statistics',
+    it: 'Statistiche'
+  },
+  'unknown_stats_type': {
+    cs: 'Neznámý typ statistiky',
+    en: 'Unknown statistics type',
+    it: 'Tipo di statistica sconosciuto'
+  },
+  'data_load_error_msg': {
+    cs: 'Chyba načítání dat',
+    en: 'Error loading data',
+    it: 'Errore nel caricamento dei dati'
+  },
+  'pdf_export_error': {
+    cs: 'Chyba exportu PDF',
+    en: 'PDF export error',
+    it: 'Errore esportazione PDF'
   }
 };
