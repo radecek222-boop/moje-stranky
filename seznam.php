@@ -371,7 +371,7 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 }
 
-/* 📱 MOBILNÍ OPTIMALIZACE FILTER TLAČÍTEK (větší pro lepší klikání) */
+/* 📱 MOBILNÍ OPTIMALIZACE FILTER TLAČÍTEK (větší o 50% pro lepší klikání) */
 @media (max-width: 768px) {
   /* Filter bar - stack filters */
   .filter-bar {
@@ -382,10 +382,10 @@ if (!$isLoggedIn && !$isAdmin) {
 
   .filter-btn {
     width: 100% !important;
-    padding: 0.25rem 0.4rem !important;
-    font-size: 0.65rem !important;
-    line-height: 1.0 !important;
-    min-height: 18px !important;
+    padding: 0.375rem 0.6rem !important;
+    font-size: 0.975rem !important;
+    line-height: 1.2 !important;
+    min-height: 27px !important;
     border-width: 1px !important;
   }
 
@@ -396,14 +396,14 @@ if (!$isLoggedIn && !$isAdmin) {
 
 @media (max-width: 375px) {
   .filter-btn {
-    padding: 0.2rem 0.3rem !important;
-    font-size: 0.6rem !important;
-    line-height: 1.0 !important;
-    min-height: 17px !important;
+    padding: 0.375rem 0.6rem !important;
+    font-size: 0.975rem !important;
+    line-height: 1.2 !important;
+    min-height: 27px !important;
   }
 
   .filter-bar {
-    gap: 0.03rem !important;
+    gap: 0.05rem !important;
   }
 }
 
@@ -645,12 +645,12 @@ if (!$isLoggedIn && !$isAdmin) {
     line-height: 1.2 !important;
   }
 
-  /* Všechna tlačítka v modalu - větší pro lepší použitelnost (75% větší) */
+  /* Všechna tlačítka v modalu - sjednocená velikost s filtry */
   .modal-body .btn,
   .modal-actions .btn {
-    padding: 0.61rem 1.23rem !important;
-    font-size: 1.05rem !important;
-    min-height: 38px !important;
+    padding: 0.375rem 0.6rem !important;
+    font-size: 0.975rem !important;
+    min-height: 27px !important;
     line-height: 1.2 !important;
     letter-spacing: 0.05em !important;
   }
@@ -675,8 +675,9 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 
   .calendar-nav-btn {
-    padding: 0.35rem 0.7rem !important;
-    font-size: 1.05rem !important;
+    padding: 0.375rem 0.6rem !important;
+    font-size: 0.975rem !important;
+    min-height: 27px !important;
   }
 
   .calendar-weekdays {
@@ -722,12 +723,12 @@ if (!$isLoggedIn && !$isAdmin) {
     gap: 0.2rem !important;
   }
 
-  /* PDF tlačítka - větší (75% větší) */
+  /* PDF tlačítka - sjednocená velikost s filtry */
   .modal-body button[onclick*="PDF"],
   .modal-body button[onclick*="pdf"] {
-    padding: 0.53rem 0.88rem !important;
-    font-size: 1.05rem !important;
-    min-height: 35px !important;
+    padding: 0.375rem 0.6rem !important;
+    font-size: 0.975rem !important;
+    min-height: 27px !important;
   }
 
   /* Input fields v inline stylu - velmi kompaktní */
@@ -822,8 +823,9 @@ if (!$isLoggedIn && !$isAdmin) {
 
   .modal-body .btn,
   .modal-actions .btn {
-    padding: 0.53rem 1.05rem !important;
-    font-size: 0.96rem !important;
+    padding: 0.375rem 0.6rem !important;
+    font-size: 0.975rem !important;
+    min-height: 27px !important;
   }
 
   .cal-day {
