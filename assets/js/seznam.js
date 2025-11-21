@@ -1419,14 +1419,14 @@ async function saveSelectedDate() {
         cacheRecord.stav = 'DOMLUVENÁ';
       }
 
-      // KROK 2: Načtení aktuálních dat z DB
-      showLoading('Aktualizuji seznam...');
-      await loadAll(ACTIVE_FILTER);
+      // ✅ PERFORMANCE FIX: Odstranění zbytečného loadAll()
+      // Cache je už aktualizovaná (řádky výše), seznam se obnoví automaticky
+      // když uživatel zavře detail. Nemusíme čekat na reload celého seznamu.
 
       // SKRÝT LOADING
       hideLoading();
 
-      // ZOBRAZIT ÚSPĚCH (až po všech operacích)
+      // ZOBRAZIT ÚSPĚCH
       alert(`✓ Termín uložen: ${SELECTED_DATE} ${SELECTED_TIME}\n\nStav automaticky změněn na: DOMLUVENÁ`);
 
       // KROK 3: Odeslání potvrzení ASYNCHRONNĚ na pozadí (fire-and-forget)
