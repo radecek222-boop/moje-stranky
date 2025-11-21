@@ -53,6 +53,8 @@
 
       if (!csrfToken) {
         alert('Nepodařilo se získat bezpečnostní token. Obnovte stránku a zkuste to znovu.');
+        // Fallback: přesměrovat na potvrzovací logout stránku (bezpečnější než neudělat nic)
+        window.location.href = '/logout.php';
         return;
       }
 
@@ -70,18 +72,36 @@
       document.body.appendChild(form);
       form.submit();
 
-    } catch (error) {
-      console.error('Logout error:', error);
-      alert('Chyba při odhlašování. Zkuste to prosím znovu.');
-    }
+  } catch (error) {
+    console.error('Logout error:', error);
+    alert('Chyba při odhlašování. Zkuste to prosím znovu.');
+    // Fallback pro nečekané chyby - zobrazit potvrzovací stránku
+    window.location.href = '/logout.php';
   }
+}
 
   /**
    * Inicializace logout handlerů
    */
   function initLogoutHandlers() {
     // Najít všechny logout odkazy (relativní i absolutní cesty)
-    const logoutLinks = document.querySelectorAll('a[href="logout.php"], a[href="/logout.php"], a.logout-link, a.hamburger-logout, #logoutBtn, #logoutBtnDesktop');
+    const logoutSelectors = [
+      'a[href="logout.php"]',
+      'a[href="/logout.php"]',
+      'a.logout-link',
+      'a.hamburger-logout',
+      '#logoutBtn',
+      '#logoutBtnDesktop'
+    ];
+
+    let logoutLinks = [];
+    try {
+      logoutLinks = document.querySelectorAll(logoutSelectors.join(', '));
+    } catch (selectorError) {
+      console.error('Logout handler selector error:', selectorError);
+      // Bezpečný fallback: zajistit alespoň ID selektory, aby logout fungoval
+      logoutLinks = document.querySelectorAll('#logoutBtn, #logoutBtnDesktop');
+    }
 
     logoutLinks.forEach(link => {
       link.addEventListener('click', handleLogout);
