@@ -90,6 +90,11 @@ function handleAdminLogin(string $adminKey): void
     $_SESSION['user_email'] = 'admin@wgs-service.cz';
     $_SESSION['role'] = 'admin';
 
+    // ✅ FIX 6: Inactivity timeout - nastavit initial timestamps při admin login
+    $_SESSION['last_activity'] = time();
+    $_SESSION['login_time'] = time();
+    $_SESSION['login_method'] = 'admin_key';
+
     // Audit log
     auditLog('admin_login', [
         'method' => 'admin_key',
@@ -179,6 +184,11 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     $_SESSION['user_id'] = $userId;
     $_SESSION['user_name'] = $user['name'] ?? ($user['email'] ?? 'Uživatel');
     $_SESSION['user_email'] = $user['email'] ?? '';
+
+    // ✅ FIX 6: Inactivity timeout - nastavit initial timestamps při login
+    $_SESSION['last_activity'] = time();
+    $_SESSION['login_time'] = time(); // Pro audit trail a session duration tracking
+    $_SESSION['login_method'] = 'user_login'; // Pro rozlišení login metod
 
     $rawRole = $user['role'] ?? 'user';
     $_SESSION['role'] = $rawRole;

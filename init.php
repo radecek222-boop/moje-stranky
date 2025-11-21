@@ -97,6 +97,25 @@ if (session_status() === PHP_SESSION_NONE) {
 
     session_start();
 
+    // ✅ FIX 6: Inactivity timeout - automatické vypršení session po 30 min neaktivity
+    // Ochrana proti session hijacking na opuštěných zařízeních (Security Issue 6)
+    // OWASP A07: Identification and Authentication Failures - CWE-613 mitigation
+    $inactivityTimeout = 1800; // 30 minut (30 * 60 sekund)
+
+    if (isset($_SESSION['user_id'])) {
+        $lastActivity = $_SESSION['last_activity'] ?? null;
+
+        if ($lastActivity !== null && (time() - $lastActivity) > $inactivityTimeout) {
+            // Session vypršela z důvodu neaktivity
+            session_unset();
+            session_destroy();
+            session_start(); // Restart pro novou čistou session
+        }
+
+        // Aktualizovat last_activity timestamp při každém požadavku
+        $_SESSION['last_activity'] = time();
+    }
+
     // ✅ FIX 11: Auto-login z Remember Me tokenu
     if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_me'])) {
         require_once __DIR__ . '/includes/remember_me_handler.php';

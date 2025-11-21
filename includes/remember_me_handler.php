@@ -73,6 +73,11 @@ function handleRememberMeLogin(): void
         $_SESSION['role'] = $user['role'] ?? 'user';
         $_SESSION['is_admin'] = ($user['is_admin'] ?? 0) == 1;
 
+        // ✅ FIX 6: Inactivity timeout - nastavit initial timestamps při auto-login
+        $_SESSION['last_activity'] = time();
+        $_SESSION['login_time'] = time();
+        $_SESSION['login_method'] = 'remember_me';
+
         // Audit log
         require_once __DIR__ . '/audit_logger.php';
         auditLog('auto_login_remember_me', [
