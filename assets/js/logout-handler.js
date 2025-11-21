@@ -53,6 +53,8 @@
 
       if (!csrfToken) {
         alert('Nepodařilo se získat bezpečnostní token. Obnovte stránku a zkuste to znovu.');
+        // Fallback: přesměrovat na potvrzovací logout stránku (bezpečnější než neudělat nic)
+        window.location.href = '/logout.php';
         return;
       }
 
@@ -70,11 +72,13 @@
       document.body.appendChild(form);
       form.submit();
 
-    } catch (error) {
-      console.error('Logout error:', error);
-      alert('Chyba při odhlašování. Zkuste to prosím znovu.');
-    }
+  } catch (error) {
+    console.error('Logout error:', error);
+    alert('Chyba při odhlašování. Zkuste to prosím znovu.');
+    // Fallback pro nečekané chyby - zobrazit potvrzovací stránku
+    window.location.href = '/logout.php';
   }
+}
 
   /**
    * Inicializace logout handlerů
