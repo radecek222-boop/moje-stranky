@@ -1,45 +1,61 @@
-.gitignore
+# Ignore diagnostics, tests, debug tools
+test.php
+debug.php
+diagnostika.php
+diagnostic.php
+oprava.php
+audit.php
+cleanup.php
+fix.php
+FINALNI_*.php
+*.sh
+*.md
+!CLAUDE.md
+*.txt
+live_test_pdf.html
+div.
+echo
+screen
 
-# Sensitive files
+# Sensitive
 .env
 .user.ini
 setup_smtp_jednou.php
 
-# Log files
-*.log
+# IDE
+.vscode/
+.idea/
 
-# PHP debug files
-debug_*.php
-diagnostic_*.php
+# OS
+.DS_Store
+Thumbs.db
 
-# Test files
-**/*_test.php
-
-# Node.js dependencies
+# Dependencies
+vendor/
 node_modules/
 
-# PHP dependencies
-vendor/
+# Logs
+*.log
+logs/
+error_log
+
+# Backups
+backups/
+*.backup
+*.bak
+backups-archive-*.tar.gz
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.cache
 
 # PHPUnit & Test Coverage
 .phpunit.cache/
 coverage/
 phpunit.xml.dist
 
-# System Files
-.DS_Store
-
-# IDE files
-.idea/
-.vscode/
-
-# Other Development Artifacts
-*.tmp
-*.cache
-
-# Backup files
-*.backup_*
-*.bak
-*~
-*.swp
-backups-archive-*.tar.gz
+# User uploads (keep directory structure but ignore content)
+uploads/*
+!uploads/.gitkeep
