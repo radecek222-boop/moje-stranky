@@ -24,7 +24,8 @@ if (!function_exists('loadAdminNavigation')) {
                 'header_label' => 'STATISTIKY',
             ],
             'dashboard' => [
-                'href' => 'admin.php?tab=dashboard',
+                'href' => 'admin.php',
+                'header_label' => 'ADMIN',
                 'tab_label' => 'Dashboard',
                 'tab' => 'dashboard',
             ],
