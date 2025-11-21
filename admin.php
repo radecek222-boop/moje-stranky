@@ -74,6 +74,9 @@ try {
 }
 
 // Získání statistik pro dashboard
+$activeKeys = 0;
+$pendingActions = 0;
+
 if ($activeTab === 'dashboard') {
     try {
         $pdo = getDbConnection();
