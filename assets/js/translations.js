@@ -627,5 +627,137 @@ window.WGS_TRANSLATIONS = {
     cs: 'Připojené fotky ({count})',
     en: 'Attached Photos ({count})',
     it: 'Foto Allegate ({count})'
+  },
+
+  // === NOVAREKLAMACE.JS - Formulář nové reklamace ===
+  'mode_customer_title': {
+    cs: '📋 Režim: Zákazník (bez přihlášení)',
+    en: '📋 Mode: Customer (not logged in)',
+    it: '📋 Modalità: Cliente (non autenticato)'
+  },
+  'mode_customer_desc': {
+    cs: 'Objednáváte mimozáruční servis. Některá pole jsou předvyplněna a nelze je měnit.',
+    en: 'You are ordering out-of-warranty service. Some fields are pre-filled and cannot be changed.',
+    it: 'Stai ordinando un servizio fuori garanzia. Alcuni campi sono precompilati e non possono essere modificati.'
+  },
+  'mode_seller_title': {
+    cs: '✓ Režim: Prodejce (přihlášen)',
+    en: '✓ Mode: Salesperson (logged in)',
+    it: '✓ Modalità: Venditore (autenticato)'
+  },
+  'mode_seller_desc': {
+    cs: 'Máte plný přístup ke všem polím formuláře.',
+    en: 'You have full access to all form fields.',
+    it: 'Hai pieno accesso a tutti i campi del modulo.'
+  },
+  'invoice_cz_hint': {
+    cs: 'Tato objednávka se bude fakturovat na CZ firmu',
+    en: 'This order will be invoiced to CZ company',
+    it: 'Questo ordine verrà fatturato alla società CZ'
+  },
+  'invoice_sk_hint': {
+    cs: 'Tato objednávka se bude fakturovat na SK firmu',
+    en: 'This order will be invoiced to SK company',
+    it: 'Questo ordine verrà fatturato alla società SK'
+  },
+  'order_accepted_with_ref': {
+    cs: 'Děkujeme! Vaše objednávka byla přijata.\n\nČíslo reklamace: {reference}\n\nBrzy vás budeme kontaktovat.',
+    en: 'Thank you! Your order has been received.\n\nClaim number: {reference}\n\nWe will contact you soon.',
+    it: 'Grazie! Il tuo ordine è stato ricevuto.\n\nNumero reclamo: {reference}\n\nTi contatteremo presto.'
+  },
+  'order_accepted_no_ref': {
+    cs: 'Děkujeme! Vaše objednávka byla přijata.\n\nČíslo reklamace vám zašleme e-mailem.\n\nBrzy vás budeme kontaktovat.',
+    en: 'Thank you! Your order has been received.\n\nWe will send you the claim number by email.\n\nWe will contact you soon.',
+    it: 'Grazie! Il tuo ordine è stato ricevuto.\n\nTi invieremo il numero del reclamo via email.\n\nTi contatteremo presto.'
+  },
+  'submit_error': {
+    cs: '❌ Chyba při odesílání',
+    en: '❌ Error submitting',
+    it: '❌ Errore di invio'
+  },
+  'processing_file': {
+    cs: '⏳ Zpracovávám {filename}...',
+    en: '⏳ Processing {filename}...',
+    it: '⏳ Elaborazione {filename}...'
+  },
+  'file_processed_success': {
+    cs: '✓ {filename} ({size} MB) - Data předvyplněna',
+    en: '✓ {filename} ({size} MB) - Data pre-filled',
+    it: '✓ {filename} ({size} MB) - Dati precompilati'
+  },
+  'file_processing_error': {
+    cs: '⚠ {filename} ({size} MB) - Chyba při zpracování',
+    en: '⚠ {filename} ({size} MB) - Processing error',
+    it: '⚠ {filename} ({size} MB) - Errore di elaborazione'
+  },
+  'warranty_valid': {
+    cs: '✓ <strong>Záruka platí</strong><br>Do konce záruky zbývá <strong>{days} dní</strong> (konec: {date})',
+    en: '✓ <strong>Warranty Valid</strong><br><strong>{days} days</strong> remaining until warranty expires (ends: {date})',
+    it: '✓ <strong>Garanzia Valida</strong><br>Rimangono <strong>{days} giorni</strong> fino alla scadenza della garanzia (scade: {date})'
+  },
+  'warranty_expired': {
+    cs: '✗ <strong>Záruka vypršela</strong><br>Záruka skončila {days} dní před reklamací (konec: {date})',
+    en: '✗ <strong>Warranty Expired</strong><br>Warranty ended {days} days before claim (ended: {date})',
+    it: '✗ <strong>Garanzia Scaduta</strong><br>La garanzia è terminata {days} giorni prima del reclamo (scadenza: {date})'
+  },
+  'january': {
+    cs: 'Leden',
+    en: 'January',
+    it: 'Gennaio'
+  },
+  'february': {
+    cs: 'Únor',
+    en: 'February',
+    it: 'Febbraio'
+  },
+  'march': {
+    cs: 'Březen',
+    en: 'March',
+    it: 'Marzo'
+  },
+  'april': {
+    cs: 'Duben',
+    en: 'April',
+    it: 'Aprile'
+  },
+  'may': {
+    cs: 'Květen',
+    en: 'May',
+    it: 'Maggio'
+  },
+  'june': {
+    cs: 'Červen',
+    en: 'June',
+    it: 'Giugno'
+  },
+  'july': {
+    cs: 'Červenec',
+    en: 'July',
+    it: 'Luglio'
+  },
+  'august': {
+    cs: 'Srpen',
+    en: 'August',
+    it: 'Agosto'
+  },
+  'september': {
+    cs: 'Září',
+    en: 'September',
+    it: 'Settembre'
+  },
+  'october': {
+    cs: 'Říjen',
+    en: 'October',
+    it: 'Ottobre'
+  },
+  'november': {
+    cs: 'Listopad',
+    en: 'November',
+    it: 'Novembre'
+  },
+  'december': {
+    cs: 'Prosinec',
+    en: 'December',
+    it: 'Dicembre'
   }
 };

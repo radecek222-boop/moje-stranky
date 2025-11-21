@@ -501,8 +501,8 @@ const WGS = {
       
       if (modeInfo) {
         modeInfo.style.display = 'block';
-        document.getElementById('modeTitle').textContent = '📋 Režim: Zákazník (bez přihlášení)';
-        document.getElementById('modeDescription').textContent = 'Objednáváte mimozáruční servis. Některá pole jsou předvyplněna a nelze je měnit.';
+        document.getElementById('modeTitle').textContent = t('mode_customer_title');
+        document.getElementById('modeDescription').textContent = t('mode_customer_desc');
       }
       
       logger.log('📋 Mode: Customer');
@@ -515,8 +515,8 @@ const WGS = {
         modeInfo.style.display = 'block';
         modeInfo.style.borderLeftColor = '#006600';
         modeInfo.style.background = '#f0fff0';
-        document.getElementById('modeTitle').textContent = '✓ Režim: Prodejce (přihlášen)';
-        document.getElementById('modeDescription').textContent = 'Máte plný přístup ke všem polím formuláře.';
+        document.getElementById('modeTitle').textContent = t('mode_seller_title');
+        document.getElementById('modeDescription').textContent = t('mode_seller_desc');
       }
       logger.log('📋 Mode: Seller');
     }
@@ -591,9 +591,9 @@ const WGS = {
       fakturaceSelect.addEventListener('change', (e) => {
         const value = e.target.value;
         if (value === 'CZ') {
-          fakturaHint.textContent = 'Tato objednávka se bude fakturovat na CZ firmu';
+          fakturaHint.textContent = t('invoice_cz_hint');
         } else if (value === 'SK') {
-          fakturaHint.textContent = 'Tato objednávka se bude fakturovat na SK firmu';
+          fakturaHint.textContent = t('invoice_sk_hint');
         }
       });
     }
@@ -799,10 +799,10 @@ const WGS = {
           if (this.isLoggedIn) {
             window.location.href = 'seznam.php';
           } else {
-            const referenceText = referenceNumber
-              ? `Číslo reklamace: ${referenceNumber}`
-              : 'Číslo reklamace vám zašleme e-mailem.';
-            alert(`Děkujeme! Vaše objednávka byla přijata.\n\n${referenceText}\n\nBrzy vás budeme kontaktovat.`);
+            const alertMessage = referenceNumber
+              ? t('order_accepted_with_ref').replace('{reference}', referenceNumber)
+              : t('order_accepted_no_ref');
+            alert(alertMessage);
             window.location.href = 'index.php';
           }
         }, 1500);
@@ -811,7 +811,7 @@ const WGS = {
       }
     } catch (error) {
       logger.error('Chyba při odesílání formuláře:', error);
-      this.toast('❌ Chyba při odesílání: ' + error.message, 'error');
+      this.toast(t('submit_error') + ': ' + error.message, 'error');
     }
   },
   
@@ -971,22 +971,26 @@ const WGS = {
 
       // Zobrazení názvu souboru
       const velikostMB = (file.size / (1024 * 1024)).toFixed(2);
-      statusSpan.textContent = `⏳ Zpracovávám ${file.name}...`;
+      statusSpan.textContent = t('processing_file').replace('{filename}', file.name);
       statusSpan.style.color = '#666';
       statusSpan.style.fontWeight = '600';
 
-      this.toast(`⏳ Zpracovávám PDF pověření...`, 'info');
+      this.toast(t('processing_file').replace('{filename}', 'PDF pověření'), 'info');
       logger.log(`📄 PDF pověření připojeno: ${file.name}, velikost: ${velikostMB} MB`);
 
       // Extrakce textu z PDF a parsování dat
       try {
         await this.zpracujPovereniPDF(file);
-        statusSpan.textContent = `✓ ${file.name} (${velikostMB} MB) - Data předvyplněna`;
+        statusSpan.textContent = t('file_processed_success')
+          .replace('{filename}', file.name)
+          .replace('{size}', velikostMB);
         statusSpan.style.color = '#2D5016';
         this.toast(`✓ Formulář byl předvyplněn z PDF pověření`, 'success');
       } catch (error) {
         logger.error('Chyba při zpracování PDF:', error);
-        statusSpan.textContent = `⚠ ${file.name} (${velikostMB} MB) - Chyba při zpracování`;
+        statusSpan.textContent = t('file_processing_error')
+          .replace('{filename}', file.name)
+          .replace('{size}', velikostMB);
         statusSpan.style.color = '#cc0000';
         this.toast(`⚠ PDF nahráno, ale nepodařilo se extrahovat data`, 'error');
       }
@@ -1143,8 +1147,8 @@ const WGS = {
     const monthYearDisplay = document.getElementById('calendarMonthYear');
     let currentDate = new Date();
     let selectedInput = null;
-    const monthNames = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
-    const weekDays = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'];
+    const monthNames = [t('january'), t('february'), t('march'), t('april'), t('may'), t('june'), t('july'), t('august'), t('september'), t('october'), t('november'), t('december')];
+    const weekDays = [t('monday'), t('tuesday'), t('wednesday'), t('thursday'), t('friday'), t('saturday'), t('sunday')];
     const self = this;
     const renderCalendar = () => {
       const year = currentDate.getFullYear();
@@ -1223,10 +1227,14 @@ const WGS = {
         warning.style.display = 'block';
         if (daysRemaining > 0) {
           warning.className = '';
-          warning.innerHTML = '✓ <strong>Záruka platí</strong><br>Do konce záruky zbývá <strong>' + daysRemaining + ' dní</strong> (konec: ' + warrantyEnd.toLocaleDateString('cs-CZ') + ')';
+          warning.innerHTML = t('warranty_valid')
+            .replace('{days}', daysRemaining)
+            .replace('{date}', warrantyEnd.toLocaleDateString('cs-CZ'));
         } else {
           warning.className = 'expired';
-          warning.innerHTML = '✗ <strong>Záruka vypršela</strong><br>Záruka skončila ' + Math.abs(daysRemaining) + ' dní před reklamací (konec: ' + warrantyEnd.toLocaleDateString('cs-CZ') + ')';
+          warning.innerHTML = t('warranty_expired')
+            .replace('{days}', Math.abs(daysRemaining))
+            .replace('{date}', warrantyEnd.toLocaleDateString('cs-CZ'));
         }
       }
     } catch (err) {
