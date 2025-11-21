@@ -181,12 +181,15 @@ async function handleAdminLogin() {
 async function handleUserLogin() {
   const email = document.getElementById('userEmail').value.trim();
   const password = document.getElementById('userPassword').value.trim();
-  
+
+  // ✅ FIX 11: Remember Me checkbox
+  const rememberMe = document.getElementById('rememberMe')?.checked || false;
+
   if (!email || !password) {
     showNotification('Vyplňte email a heslo', 'error');
     return;
   }
-  
+
   const csrfToken = await getCsrfTokenFromForm(loginForm);
   if (!csrfToken) {
     showNotification('⚠️ Problém se zabezpečením. Zkontrolujte:\n• Cookies jsou povoleny\n• Používáte HTTPS\n• Nejste v režimu inkognito', 'error');
@@ -198,7 +201,7 @@ async function handleUserLogin() {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       credentials: 'include',
-      body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&csrf_token=${encodeURIComponent(csrfToken)}`
+      body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&remember_me=${rememberMe ? '1' : '0'}&csrf_token=${encodeURIComponent(csrfToken)}`
     });
     
     const data = await response.json();

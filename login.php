@@ -93,6 +93,14 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
         <label for="userPassword">Heslo</label>
         <input type="password" id="userPassword" name="password" placeholder="••••••••">
       </div>
+
+      <!-- ✅ FIX 11: Remember Me checkbox -->
+      <div class="form-group" style="margin-top: 0.5rem;">
+        <input type="checkbox" id="rememberMe" name="remember_me" style="width: auto; margin-right: 8px;">
+        <label for="rememberMe" style="display: inline; font-weight: normal; cursor: pointer;">
+          Zapamatovat si mě (30 dní)
+        </label>
+      </div>
     </div>
 
     <!-- ADMIN LOGIN (ADMIN KEY ONLY) -->

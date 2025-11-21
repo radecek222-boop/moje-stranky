@@ -96,6 +96,12 @@ if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.use_only_cookies', 1);
 
     session_start();
+
+    // ✅ FIX 11: Auto-login z Remember Me tokenu
+    if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_me'])) {
+        require_once __DIR__ . '/includes/remember_me_handler.php';
+        handleRememberMeLogin();
+    }
 }
 
 // Helper function to include files from different directories

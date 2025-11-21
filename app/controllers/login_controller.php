@@ -170,6 +170,12 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
         $userId = $user['email'];
     }
 
+    // ✅ FIX 11: Remember Me token
+    $rememberMe = $_POST['remember_me'] ?? '0';
+    if ($rememberMe === '1' || $rememberMe === 'true') {
+        createRememberToken($pdo, $userId);
+    }
+
     $_SESSION['user_id'] = $userId;
     $_SESSION['user_name'] = $user['name'] ?? ($user['email'] ?? 'Uživatel');
     $_SESSION['user_email'] = $user['email'] ?? '';
@@ -288,6 +294,64 @@ function handleAdminKeyRotation(string $newKey, string $confirmation): void
         'message' => 'Nový klíč byl vygenerován. Aktualizujte prosím konfigurační soubor (.env).',
         'hash' => $hash
     ]);
+}
+
+/**
+ * Vytvoří Remember Me token pro uživatele
+ *
+ * @param PDO $pdo Databázové připojení
+ * @param string $userId ID uživatele
+ */
+function createRememberToken(PDO $pdo, string $userId): void
+{
+    // Generovat náhodný selector (veřejný identifikátor)
+    $selector = bin2hex(random_bytes(16)); // 32 chars
+
+    // Generovat náhodný validator (tajný klíč)
+    $validator = bin2hex(random_bytes(32)); // 64 chars
+
+    // Hashovat validator před uložením do DB
+    $hashedValidator = hash('sha256', $validator);
+
+    // Expirace za 30 dní
+    $expiresAt = date('Y-m-d H:i:s', strtotime('+30 days'));
+
+    // Uložit do databáze
+    $stmt = $pdo->prepare("
+        INSERT INTO wgs_remember_tokens
+        (user_id, selector, hashed_validator, expires_at, ip_address, user_agent)
+        VALUES (:user_id, :selector, :hashed_validator, :expires_at, :ip, :user_agent)
+    ");
+
+    $stmt->execute([
+        ':user_id' => $userId,
+        ':selector' => $selector,
+        ':hashed_validator' => $hashedValidator,
+        ':expires_at' => $expiresAt,
+        ':ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+        ':user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown'
+    ]);
+
+    // Nastavit cookie (selector:validator)
+    $cookieValue = $selector . ':' . $validator;
+
+    setcookie(
+        'remember_me',
+        $cookieValue,
+        [
+            'expires' => strtotime('+30 days'),
+            'path' => '/',
+            'domain' => '',
+            'secure' => true,
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]
+    );
+
+    auditLog('remember_token_created', [
+        'user_id' => $userId,
+        'expires_at' => $expiresAt
+    ], $userId);
 }
 
 /**
