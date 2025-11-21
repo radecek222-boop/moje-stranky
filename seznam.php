@@ -297,8 +297,8 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 
   .order-header {
-    margin-bottom: 0.2rem !important;
-    padding-bottom: 0.15rem !important;
+    margin-bottom: 0.1rem !important;
+    padding-bottom: 0.05rem !important;
   }
 
   .order-number {
@@ -319,22 +319,22 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 
   .order-body {
-    gap: 0.15rem !important;
+    gap: 0.05rem !important;
   }
 
   .order-customer {
     font-size: 0.65rem !important;
     font-weight: 600 !important;
-    margin-bottom: 0.15rem !important;
+    margin-bottom: 0.05rem !important;
   }
 
   .order-detail {
-    gap: 0.1rem !important;
+    gap: 0.02rem !important;
   }
 
   .order-detail-line {
     font-size: 0.55rem !important;
-    line-height: 1.2 !important;
+    line-height: 1.1 !important;
   }
 
   /* Grid - menší mezery mezi kartami */
@@ -352,16 +352,31 @@ if (!$isLoggedIn && !$isAdmin) {
     margin-bottom: 0.2rem !important;
   }
 
+  .order-header {
+    margin-bottom: 0.08rem !important;
+    padding-bottom: 0.03rem !important;
+  }
+
   .order-number {
     font-size: 0.55rem !important;
   }
 
+  .order-body {
+    gap: 0.03rem !important;
+  }
+
   .order-customer {
     font-size: 0.6rem !important;
+    margin-bottom: 0.03rem !important;
+  }
+
+  .order-detail {
+    gap: 0.01rem !important;
   }
 
   .order-detail-line {
     font-size: 0.52rem !important;
+    line-height: 1.05 !important;
   }
 
   .order-grid,
