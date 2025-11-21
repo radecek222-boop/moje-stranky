@@ -610,5 +610,22 @@ window.WGS_TRANSLATIONS = {
     cs: 'Chyba exportu PDF',
     en: 'PDF export error',
     it: 'Errore esportazione PDF'
+  },
+
+  // === PROTOKOL.JS - Servisní protokol ===
+  'please_log_in': {
+    cs: 'Přihlaste se prosím',
+    en: 'Please log in',
+    it: 'Si prega di effettuare il login'
+  },
+  'page_for_techs_admins_only': {
+    cs: 'Tato stránka je pouze pro techniky a administrátory',
+    en: 'This page is for technicians and administrators only',
+    it: 'Questa pagina è solo per tecnici e amministratori'
+  },
+  'attached_photos_count': {
+    cs: 'Připojené fotky ({count})',
+    en: 'Attached Photos ({count})',
+    it: 'Foto Allegate ({count})'
   }
 };

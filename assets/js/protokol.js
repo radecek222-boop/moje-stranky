@@ -5,13 +5,13 @@
         const data = await response.json();
 
         if (!data.logged_in) {
-            alert("Přihlaste se prosím");
+            alert(t('please_log_in'));
             window.location.href = "login.php";
             return;
         }
 
         if (data.role === "prodejce") {
-            alert("Tato stránka je pouze pro techniky a administrátory");
+            alert(t('page_for_techs_admins_only'));
             window.location.href = "seznam.php";
         }
     } catch (err) {
@@ -510,7 +510,7 @@ function renderPhotoPreview(arr) {
     cont.id = "photoPreviewContainer";
     document.querySelector(".wrapper").appendChild(cont);
   }
-  cont.innerHTML = `<h3>Připojené fotky (${arr.length})</h3><div id="photoGrid"></div>`;
+  cont.innerHTML = `<h3>${t('attached_photos_count').replace('{count}', arr.length)}</h3><div id="photoGrid"></div>`;
   const grid = cont.querySelector("#photoGrid");
   arr.forEach(src => {
     const photoData = typeof src === 'string' ? src : src.data;
