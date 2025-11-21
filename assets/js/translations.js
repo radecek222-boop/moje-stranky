@@ -349,5 +349,219 @@ window.WGS_TRANSLATIONS = {
     cs: 'Chyba sítě',
     en: 'Network error',
     it: 'Errore di rete'
+  },
+
+  // === SEZNAM.JS - Seznam reklamací ===
+  'record_not_found': {
+    cs: 'Záznam nenalezen',
+    en: 'Record not found',
+    it: 'Record non trovato'
+  },
+  'error_reopening_order': {
+    cs: 'Chyba při znovuotevření zakázky',
+    en: 'Error reopening order',
+    it: 'Errore nella riapertura dell\'ordine'
+  },
+  'visit_already_completed': {
+    cs: 'Tato návštěva již byla dokončena.',
+    en: 'This visit has already been completed.',
+    it: 'Questa visita è già stata completata.'
+  },
+  'failed_to_save': {
+    cs: 'Nepodařilo se uložit.',
+    en: 'Failed to save.',
+    it: 'Salvataggio fallito.'
+  },
+  'save_error': {
+    cs: 'Chyba při ukládání',
+    en: 'Error saving',
+    it: 'Errore di salvataggio'
+  },
+  'cannot_show_past_months': {
+    cs: '⚠️ Nelze zobrazit minulé měsíce.\n\nTermíny lze plánovat pouze do budoucna.',
+    en: '⚠️ Cannot show past months.\n\nAppointments can only be scheduled in the future.',
+    it: '⚠️ Impossibile mostrare mesi passati.\n\nGli appuntamenti possono essere programmati solo in futuro.'
+  },
+  'cannot_select_past_date': {
+    cs: '⚠️ Nelze vybrat minulé datum.\n\nVyberte prosím dnešní nebo budoucí datum.',
+    en: '⚠️ Cannot select past date.\n\nPlease select today or a future date.',
+    it: '⚠️ Impossibile selezionare data passata.\n\nSi prega di selezionare oggi o una data futura.'
+  },
+  'select_date_and_time': {
+    cs: 'Vyberte datum i čas.',
+    en: 'Select date and time.',
+    it: 'Seleziona data e ora.'
+  },
+  'no_record_to_save': {
+    cs: 'Chyba: žádný záznam k uložení.',
+    en: 'Error: no record to save.',
+    it: 'Errore: nessun record da salvare.'
+  },
+  'appointment_saved_success': {
+    cs: '✓ Termín uložen: {date} {time}\n\nStav automaticky změněn na: DOMLUVENÁ',
+    en: '✓ Appointment saved: {date} {time}\n\nStatus automatically changed to: SCHEDULED',
+    it: '✓ Appuntamento salvato: {date} {time}\n\nStato automaticamente cambiato in: PROGRAMMATO'
+  },
+  'text_saved_successfully': {
+    cs: 'Text byl úspěšně uložen',
+    en: 'Text saved successfully',
+    it: 'Testo salvato con successo'
+  },
+  'write_note_text': {
+    cs: 'Napište text poznámky',
+    en: 'Write note text',
+    it: 'Scrivi il testo della nota'
+  },
+  'note_save_error': {
+    cs: 'Chyba při ukládání poznámky',
+    en: 'Error saving note',
+    it: 'Errore nel salvataggio della nota'
+  },
+  'incorrect_number_delete_cancelled': {
+    cs: 'Nesprávné číslo. Mazání zrušeno.',
+    en: 'Incorrect number. Deletion cancelled.',
+    it: 'Numero errato. Eliminazione annullata.'
+  },
+  'claim_deleted_successfully': {
+    cs: '✅ Reklamace byla úspěšně smazána!',
+    en: '✅ Claim successfully deleted!',
+    it: '✅ Reclamo eliminato con successo!'
+  },
+  'delete_error': {
+    cs: 'Chyba při mazání',
+    en: 'Error deleting',
+    it: 'Errore di eliminazione'
+  },
+  'photo_deleted_successfully': {
+    cs: '✅ Fotka byla úspěšně smazána!',
+    en: '✅ Photo successfully deleted!',
+    it: '✅ Foto eliminata con successo!'
+  },
+  'photo_delete_error': {
+    cs: 'Chyba při mazání fotky',
+    en: 'Error deleting photo',
+    it: 'Errore nell\'eliminazione della foto'
+  },
+  'data_load_error': {
+    cs: 'Chyba při načítání dat',
+    en: 'Error loading data',
+    it: 'Errore nel caricamento dei dati'
+  },
+  'search_results_found': {
+    cs: 'Nalezeno {count} z {total} výsledků pro "{query}"',
+    en: 'Found {count} of {total} results for "{query}"',
+    it: 'Trovati {count} di {total} risultati per "{query}"'
+  },
+  'no_search_results': {
+    cs: 'Žádné výsledky pro "{query}"',
+    en: 'No results for "{query}"',
+    it: 'Nessun risultato per "{query}"'
+  },
+  'no_results_found': {
+    cs: 'Žádné výsledky nenalezeny',
+    en: 'No results found',
+    it: 'Nessun risultato trovato'
+  },
+  'no_claims_to_display': {
+    cs: 'Žádné reklamace k zobrazení',
+    en: 'No claims to display',
+    it: 'Nessun reclamo da visualizzare'
+  },
+  'customer_address_not_available': {
+    cs: 'Adresa zákazníka není k dispozici',
+    en: 'Customer address not available',
+    it: 'Indirizzo cliente non disponibile'
+  },
+  'no_photos': {
+    cs: 'Žádné fotografie',
+    en: 'No photos',
+    it: 'Nessuna foto'
+  },
+  'load_more_orders': {
+    cs: 'Načíst další zakázky',
+    en: 'Load more orders',
+    it: 'Carica altri ordini'
+  },
+  'load_more_page': {
+    cs: 'Načíst další (stránka {page})',
+    en: 'Load more (page {page})',
+    it: 'Carica altro (pagina {page})'
+  },
+  'saving_appointment': {
+    cs: 'Ukládám termín...',
+    en: 'Saving appointment...',
+    it: 'Salvataggio appuntamento...'
+  },
+  'saving_appointment_to_db': {
+    cs: 'Ukládám termín do databáze...',
+    en: 'Saving appointment to database...',
+    it: 'Salvataggio appuntamento nel database...'
+  },
+  'monday': {
+    cs: 'Po',
+    en: 'Mon',
+    it: 'Lun'
+  },
+  'tuesday': {
+    cs: 'Út',
+    en: 'Tue',
+    it: 'Mar'
+  },
+  'wednesday': {
+    cs: 'St',
+    en: 'Wed',
+    it: 'Mer'
+  },
+  'thursday': {
+    cs: 'Čt',
+    en: 'Thu',
+    it: 'Gio'
+  },
+  'friday': {
+    cs: 'Pá',
+    en: 'Fri',
+    it: 'Ven'
+  },
+  'saturday': {
+    cs: 'So',
+    en: 'Sat',
+    it: 'Sab'
+  },
+  'sunday': {
+    cs: 'Ne',
+    en: 'Sun',
+    it: 'Dom'
+  },
+
+  // === SEZNAM.JS - Confirm dialogy ===
+  'confirm_reopen_order': {
+    cs: 'ZNOVU OTEVŘÍT ZAKÁZKU?\n\nZákazník: {customer}\nProdukt: {product}\n\nTato akce:\n- Změní stav na NOVÁ (žlutá)\n- Zruší původní termín návštěvy\n- Umožní naplánovat novou návštěvu\n\nPoužijte pouze v případě, že se objevil nový problém u této zakázky.\n\nOpravdu chcete pokračovat?',
+    en: 'REOPEN ORDER?\n\nCustomer: {customer}\nProduct: {product}\n\nThis action will:\n- Change status to NEW (yellow)\n- Cancel original appointment\n- Allow scheduling a new visit\n\nUse only if a new problem appeared with this order.\n\nDo you really want to continue?',
+    it: 'RIAPRIRE ORDINE?\n\nCliente: {customer}\nProdotto: {product}\n\nQuesta azione:\n- Cambierà lo stato in NUOVO (giallo)\n- Annullerà l\'appuntamento originale\n- Permetterà di programmare una nuova visita\n\nUtilizzare solo se si è verificato un nuovo problema con questo ordine.\n\nVuoi davvero continuare?'
+  },
+  'confirm_continue_without_appointment': {
+    cs: 'VAROVÁNÍ: Termín návštěvy ještě není naplánován.\n\nChcete pokračovat i bez naplánovaného termínu?',
+    en: 'WARNING: Visit appointment is not yet scheduled.\n\nDo you want to continue without a scheduled appointment?',
+    it: 'AVVISO: L\'appuntamento della visita non è ancora programmato.\n\nVuoi continuare senza un appuntamento programmato?'
+  },
+  'confirm_appointment_collision': {
+    cs: 'VAROVÁNÍ: Kolize termínu!\n\n{date} v {time} již má:\n{customer}\n\nChcete i přesto uložit tento termín?',
+    en: 'WARNING: Appointment collision!\n\n{date} at {time} already has:\n{customer}\n\nDo you still want to save this appointment?',
+    it: 'AVVISO: Collisione appuntamento!\n\n{date} alle {time} ha già:\n{customer}\n\nVuoi comunque salvare questo appuntamento?'
+  },
+  'confirm_delete_claim_full': {
+    cs: '⚠️ VAROVÁNÍ!\n\nOpravdu chcete TRVALE SMAZAT tuto reklamaci?\n\nBude smazáno:\n• Záznam z databáze\n• Všechny fotografie\n• PDF protokoly\n• Poznámky a historie\n\nTato akce je NEVRATNÁ!',
+    en: '⚠️ WARNING!\n\nDo you really want to PERMANENTLY DELETE this claim?\n\nWill be deleted:\n• Database record\n• All photos\n• PDF protocols\n• Notes and history\n\nThis action is IRREVERSIBLE!',
+    it: '⚠️ AVVISO!\n\nVuoi davvero ELIMINARE PERMANENTEMENTE questo reclamo?\n\nVerrà eliminato:\n• Record dal database\n• Tutte le foto\n• Protocolli PDF\n• Note e cronologia\n\nQuesta azione è IRREVERSIBILE!'
+  },
+  'confirm_delete_photo': {
+    cs: 'Opravdu chcete smazat tuto fotku?\n\nTato akce je nevratná!',
+    en: 'Do you really want to delete this photo?\n\nThis action is irreversible!',
+    it: 'Vuoi davvero eliminare questa foto?\n\nQuesta azione è irreversibile!'
+  },
+  'prompt_confirm_claim_number': {
+    cs: 'Pro potvrzení smazání napište číslo reklamace:\n\n{number}',
+    en: 'To confirm deletion, enter claim number:\n\n{number}',
+    it: 'Per confermare l\'eliminazione, inserisci il numero del reclamo:\n\n{number}'
   }
 };
