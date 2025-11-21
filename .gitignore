@@ -42,3 +42,4 @@ phpunit.xml.dist
 *.bak
 *~
 *.swp
+backups-archive-*.tar.gz
