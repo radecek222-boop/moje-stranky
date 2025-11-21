@@ -268,8 +268,8 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
   <!-- USER INFO BAR - kompaktní -->
   <div class="stats-user-bar">
     <div>
-      <h1 class="stats-title">Statistiky</h1>
-      <p class="stats-subtitle">Analýza a reporty reklamací</p>
+      <h1 class="stats-title" data-lang-cs="Statistiky" data-lang-en="Statistics" data-lang-it="Statistiche">Statistiky</h1>
+      <p class="stats-subtitle" data-lang-cs="Analýza a reporty reklamací" data-lang-en="Analysis and claim reports" data-lang-it="Analisi e report reclami">Analýza a reporty reklamací</p>
     </div>
     <div class="stats-user">
       <?php echo htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['admin_name'] ?? 'Administrátor'); ?>
@@ -278,11 +278,11 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
   <!-- KOMPAKTNÍ FILTRY -->
   <div class="stats-filters">
-    <div class="stats-filters-title">Filtry</div>
+    <div class="stats-filters-title" data-lang-cs="Filtry" data-lang-en="Filters" data-lang-it="Filtri">Filtry</div>
 
     <div class="stats-filters-grid">
       <div class="stats-filter-group">
-        <label class="stats-filter-label">Měsíc</label>
+        <label class="stats-filter-label" data-lang-cs="Měsíc" data-lang-en="Month" data-lang-it="Mese">Měsíc</label>
         <select class="stats-filter-select" id="filter-month" onchange="handleMonthChange()">
           <option value="all" selected>Všechny</option>
           <option value="">Vlastní rozsah</option>
@@ -353,35 +353,35 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
     </div>
 
     <div class="stats-filter-actions">
-      <button class="stats-btn" onclick="resetFilters()">Reset</button>
-      <button class="stats-btn stats-btn-primary" onclick="applyFilters()">Aplikovat</button>
+      <button class="stats-btn" onclick="resetFilters()" data-lang-cs="Reset" data-lang-en="Reset" data-lang-it="Ripristina">Reset</button>
+      <button class="stats-btn stats-btn-primary" onclick="applyFilters()" data-lang-cs="Aplikovat" data-lang-en="Apply" data-lang-it="Applica">Aplikovat</button>
     </div>
   </div>
 
   <!-- SUMMARY STATISTIKY - kompaktní -->
   <div class="stats-summary">
     <div class="stats-summary-card">
-      <div class="stats-summary-label">Celkem zakázek</div>
+      <div class="stats-summary-label" data-lang-cs="Celkem zakázek" data-lang-en="Total Orders" data-lang-it="Totale Ordini">Celkem zakázek</div>
       <div class="stats-summary-value" id="total-orders">0</div>
-      <div class="stats-summary-sub">Filtrovaných</div>
+      <div class="stats-summary-sub" data-lang-cs="Filtrovaných" data-lang-en="Filtered" data-lang-it="Filtrati">Filtrovaných</div>
     </div>
 
     <div class="stats-summary-card">
-      <div class="stats-summary-label">Celkový obrat</div>
+      <div class="stats-summary-label" data-lang-cs="Celkový obrat" data-lang-en="Total Revenue" data-lang-it="Fatturato Totale">Celkový obrat</div>
       <div class="stats-summary-value" id="total-revenue">0 €</div>
-      <div class="stats-summary-sub">Všechny zakázky</div>
+      <div class="stats-summary-sub" data-lang-cs="Všechny zakázky" data-lang-en="All orders" data-lang-it="Tutti gli ordini">Všechny zakázky</div>
     </div>
 
     <div class="stats-summary-card">
-      <div class="stats-summary-label">Průměrná zakázka</div>
+      <div class="stats-summary-label" data-lang-cs="Průměrná zakázka" data-lang-en="Average Order" data-lang-it="Ordine Medio">Průměrná zakázka</div>
       <div class="stats-summary-value" id="avg-order">0 €</div>
-      <div class="stats-summary-sub">Na zakázku</div>
+      <div class="stats-summary-sub" data-lang-cs="Na zakázku" data-lang-en="Per order" data-lang-it="Per ordine">Na zakázku</div>
     </div>
 
     <div class="stats-summary-card">
-      <div class="stats-summary-label">Aktivní technici</div>
+      <div class="stats-summary-label" data-lang-cs="Aktivní technici" data-lang-en="Active Technicians" data-lang-it="Tecnici Attivi">Aktivní technici</div>
       <div class="stats-summary-value" id="active-techs">0</div>
-      <div class="stats-summary-sub">V období</div>
+      <div class="stats-summary-sub" data-lang-cs="V období" data-lang-en="In period" data-lang-it="Nel periodo">V období</div>
     </div>
   </div>
 
@@ -390,32 +390,32 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
     <!-- Statistiky prodejců -->
     <div class="stats-card" onclick="openStatsModal('salesperson')">
-      <div class="stats-card-title">Statistiky prodejců</div>
-      <div class="stats-card-description">Detailní přehled výkonnosti prodejců, počet zakázek a obraty</div>
+      <div class="stats-card-title" data-lang-cs="Statistiky prodejců" data-lang-en="Sales Statistics" data-lang-it="Statistiche Venditori">Statistiky prodejců</div>
+      <div class="stats-card-description" data-lang-cs="Detailní přehled výkonnosti prodejců, počet zakázek a obraty" data-lang-en="Detailed overview of salesperson performance, number of orders and turnover" data-lang-it="Panoramica dettagliata delle prestazioni dei venditori, numero di ordini e fatturato">Detailní přehled výkonnosti prodejců, počet zakázek a obraty</div>
     </div>
 
     <!-- Statistiky techniků -->
     <div class="stats-card" onclick="openStatsModal('technician')">
-      <div class="stats-card-title">Statistiky techniků</div>
-      <div class="stats-card-description">Výkonnost techniků, úspěšnost oprav a výdělky</div>
+      <div class="stats-card-title" data-lang-cs="Statistiky techniků" data-lang-en="Technician Statistics" data-lang-it="Statistiche Tecnici">Statistiky techniků</div>
+      <div class="stats-card-description" data-lang-cs="Výkonnost techniků, úspěšnost oprav a výdělky" data-lang-en="Technician performance, repair success rate and earnings" data-lang-it="Prestazioni dei tecnici, tasso di successo delle riparazioni e guadagni">Výkonnost techniků, úspěšnost oprav a výdělky</div>
     </div>
 
     <!-- Nejporuchovější modely -->
     <div class="stats-card" onclick="openStatsModal('models')">
-      <div class="stats-card-title">Nejporuchovější modely</div>
-      <div class="stats-card-description">Analýza nejčastěji porouchaných modelů a výrobků</div>
+      <div class="stats-card-title" data-lang-cs="Nejporuchovější modely" data-lang-en="Most Faulty Models" data-lang-it="Modelli Più Difettosi">Nejporuchovější modely</div>
+      <div class="stats-card-description" data-lang-cs="Analýza nejčastěji porouchaných modelů a výrobků" data-lang-en="Analysis of most frequently faulty models and products" data-lang-it="Analisi dei modelli e prodotti più frequentemente difettosi">Analýza nejčastěji porouchaných modelů a výrobků</div>
     </div>
 
     <!-- Filtrované zakázky -->
     <div class="stats-card" onclick="openStatsModal('orders')">
-      <div class="stats-card-title">Filtrované zakázky</div>
-      <div class="stats-card-description">Přehled všech zakázek podle aktuálních filtrů</div>
+      <div class="stats-card-title" data-lang-cs="Filtrované zakázky" data-lang-en="Filtered Orders" data-lang-it="Ordini Filtrati">Filtrované zakázky</div>
+      <div class="stats-card-description" data-lang-cs="Přehled všech zakázek podle aktuálních filtrů" data-lang-en="Overview of all orders based on current filters" data-lang-it="Panoramica di tutti gli ordini in base ai filtri attuali">Přehled všech zakázek podle aktuálních filtrů</div>
     </div>
 
     <!-- Grafy a vizualizace -->
     <div class="stats-card" onclick="openStatsModal('charts')">
-      <div class="stats-card-title">Grafy a vizualizace</div>
-      <div class="stats-card-description">Grafická analýza rozdělení podle měst, zemí a modelů</div>
+      <div class="stats-card-title" data-lang-cs="Grafy a vizualizace" data-lang-en="Charts & Visualization" data-lang-it="Grafici e Visualizzazioni">Grafy a vizualizace</div>
+      <div class="stats-card-description" data-lang-cs="Grafická analýza rozdělení podle měst, zemí a modelů" data-lang-en="Graphical analysis of distribution by cities, countries and models" data-lang-it="Analisi grafica della distribuzione per città, paesi e modelli">Grafická analýza rozdělení podle měst, zemí a modelů</div>
     </div>
 
   </div>

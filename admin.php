@@ -142,131 +142,131 @@ if (!$embedMode && $activeTab === 'dashboard'):
 ?>
 <div class="admin-dashboard-wrapper">
     <div class="admin-dashboard-header">
-        <h1 class="admin-dashboard-title">WGS Admin Panel</h1>
-        <p class="admin-dashboard-subtitle">Centrální řídicí panel pro správu celé aplikace</p>
+        <h1 class="admin-dashboard-title" data-lang-cs="WGS Admin Panel" data-lang-en="WGS Admin Panel" data-lang-it="Pannello Admin WGS">WGS Admin Panel</h1>
+        <p class="admin-dashboard-subtitle" data-lang-cs="Centrální řídicí panel pro správu celé aplikace" data-lang-en="Central control panel for managing the entire application" data-lang-it="Pannello di controllo centrale per la gestione dell'intera applicazione">Centrální řídicí panel pro správu celé aplikace</p>
         <div class="admin-dashboard-actions">
             <span class="admin-version-info" id="adminVersionInfo" title="Verze Admin - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
-            <button class="admin-cache-btn" onclick="clearCacheAndReload()" title="Vymaže lokální cache a načte nejnovější verzi">Vymazat cache & Reload</button>
+            <button class="admin-cache-btn" onclick="clearCacheAndReload()" data-lang-cs="Vymazat cache & Reload" data-lang-en="Clear cache & Reload" data-lang-it="Cancella cache & Ricarica">Vymazat cache & Reload</button>
         </div>
     </div>
 
     <!-- HLAVNÍ NAVIGACE -->
     <div class="admin-kategorie">
-        <h2 class="admin-kategorie-nadpis">Hlavní navigace</h2>
+        <h2 class="admin-kategorie-nadpis" data-lang-cs="Hlavní navigace" data-lang-en="Main Navigation" data-lang-it="Navigazione Principale">Hlavní navigace</h2>
         <div class="cc-grid">
             <div class="cc-card" onclick="window.location='index.php'">
-                <div class="cc-card-title">Domů</div>
-                <div class="cc-card-description">Hlavní stránka aplikace</div>
+                <div class="cc-card-title" data-lang-cs="Domů" data-lang-en="Home" data-lang-it="Home">Domů</div>
+                <div class="cc-card-description" data-lang-cs="Hlavní stránka aplikace" data-lang-en="Main application page" data-lang-it="Pagina principale dell'applicazione">Hlavní stránka aplikace</div>
             </div>
 
             <div class="cc-card" onclick="window.location='seznam.php'">
-                <div class="cc-card-title">Seznam reklamací</div>
-                <div class="cc-card-description">Přehled všech reklamací a servisních požadavků</div>
+                <div class="cc-card-title" data-lang-cs="Seznam reklamací" data-lang-en="Claims List" data-lang-it="Elenco Reclami">Seznam reklamací</div>
+                <div class="cc-card-description" data-lang-cs="Přehled všech reklamací a servisních požadavků" data-lang-en="Overview of all claims and service requests" data-lang-it="Panoramica di tutti i reclami e le richieste di servizio">Přehled všech reklamací a servisních požadavků</div>
             </div>
 
             <div class="cc-card" onclick="window.location='protokol.php'">
-                <div class="cc-card-title">Nový protokol</div>
-                <div class="cc-card-description">Vytvořit nový servisní protokol</div>
+                <div class="cc-card-title" data-lang-cs="Nový protokol" data-lang-en="New Protocol" data-lang-it="Nuovo Protocollo">Nový protokol</div>
+                <div class="cc-card-description" data-lang-cs="Vytvořit nový servisní protokol" data-lang-en="Create new service protocol" data-lang-it="Crea nuovo protocollo di servizio">Vytvořit nový servisní protokol</div>
             </div>
 
             <div class="cc-card" onclick="window.location='statistiky.php'">
-                <div class="cc-card-title">Statistiky</div>
-                <div class="cc-card-description">Přehledy, grafy a analytické reporty</div>
+                <div class="cc-card-title" data-lang-cs="Statistiky" data-lang-en="Statistics" data-lang-it="Statistiche">Statistiky</div>
+                <div class="cc-card-description" data-lang-cs="Přehledy, grafy a analytické reporty" data-lang-en="Overviews, charts and analytical reports" data-lang-it="Panoramiche, grafici e report analitici">Přehledy, grafy a analytické reporty</div>
             </div>
         </div>
     </div>
 
     <!-- SPRÁVA & BEZPEČNOST -->
     <div class="admin-kategorie">
-        <h2 class="admin-kategorie-nadpis">Správa & Bezpečnost</h2>
+        <h2 class="admin-kategorie-nadpis" data-lang-cs="Správa & Bezpečnost" data-lang-en="Management & Security" data-lang-it="Gestione & Sicurezza">Správa & Bezpečnost</h2>
         <div class="cc-grid">
             <div class="cc-card" onclick="window.location='admin.php?tab=users'">
-                <div class="cc-card-title">Uživatelé</div>
-                <div class="cc-card-description">Správa uživatelských účtů a oprávnění</div>
+                <div class="cc-card-title" data-lang-cs="Uživatelé" data-lang-en="Users" data-lang-it="Utenti">Uživatelé</div>
+                <div class="cc-card-description" data-lang-cs="Správa uživatelských účtů a oprávnění" data-lang-en="User account and permission management" data-lang-it="Gestione account utente e permessi">Správa uživatelských účtů a oprávnění</div>
             </div>
 
             <div class="cc-card" onclick="window.location='admin.php?tab=keys'">
                 <?php if ($activeKeys > 0): ?>
                     <div class="cc-card-badge"><?= $activeKeys ?></div>
                 <?php endif; ?>
-                <div class="cc-card-title">Bezpečnost & Klíče</div>
-                <div class="cc-card-description">Registrační klíče, API klíče, bezpečnostní nastavení</div>
+                <div class="cc-card-title" data-lang-cs="Bezpečnost & Klíče" data-lang-en="Security & Keys" data-lang-it="Sicurezza & Chiavi">Bezpečnost & Klíče</div>
+                <div class="cc-card-description" data-lang-cs="Registrační klíče, API klíče, bezpečnostní nastavení" data-lang-en="Registration keys, API keys, security settings" data-lang-it="Chiavi di registrazione, chiavi API, impostazioni di sicurezza">Registrační klíče, API klíče, bezpečnostní nastavení</div>
             </div>
 
             <div class="cc-card" onclick="window.location='admin.php?tab=notifications'">
-                <div class="cc-card-title">Email & SMS</div>
-                <div class="cc-card-description">Správa emailových a SMS notifikací</div>
+                <div class="cc-card-title" data-lang-cs="Email & SMS" data-lang-en="Email & SMS" data-lang-it="Email & SMS">Email & SMS</div>
+                <div class="cc-card-description" data-lang-cs="Správa emailových a SMS notifikací" data-lang-en="Email and SMS notification management" data-lang-it="Gestione notifiche email e SMS">Správa emailových a SMS notifikací</div>
             </div>
 
             <div class="cc-card" onclick="window.location='admin.php?tab=online'">
-                <div class="cc-card-title">Online uživatelé</div>
-                <div class="cc-card-description">Aktuálně přihlášení uživatelé v systému</div>
+                <div class="cc-card-title" data-lang-cs="Online uživatelé" data-lang-en="Online Users" data-lang-it="Utenti Online">Online uživatelé</div>
+                <div class="cc-card-description" data-lang-cs="Aktuálně přihlášení uživatelé v systému" data-lang-en="Currently logged in users in the system" data-lang-it="Utenti attualmente connessi al sistema">Aktuálně přihlášení uživatelé v systému</div>
             </div>
         </div>
     </div>
 
     <!-- SYSTÉM -->
     <div class="admin-kategorie">
-        <h2 class="admin-kategorie-nadpis">Systém</h2>
+        <h2 class="admin-kategorie-nadpis" data-lang-cs="Systém" data-lang-en="System" data-lang-it="Sistema">Systém</h2>
         <div class="cc-grid">
             <div class="cc-card" onclick="window.location='admin.php?tab=admin_configuration'">
-                <div class="cc-card-title">Konfigurace</div>
-                <div class="cc-card-description">SMTP, API klíče, systémová nastavení</div>
+                <div class="cc-card-title" data-lang-cs="Konfigurace" data-lang-en="Configuration" data-lang-it="Configurazione">Konfigurace</div>
+                <div class="cc-card-description" data-lang-cs="SMTP, API klíče, systémová nastavení" data-lang-en="SMTP, API keys, system settings" data-lang-it="SMTP, chiavi API, impostazioni di sistema">SMTP, API klíče, systémová nastavení</div>
             </div>
 
             <div class="cc-card" onclick="window.location='admin.php?tab=admin_actions'">
                 <?php if ($pendingActions > 0): ?>
                     <div class="cc-card-badge"><?= $pendingActions ?></div>
                 <?php endif; ?>
-                <div class="cc-card-title">Akce & Úkoly</div>
-                <div class="cc-card-description">Nevyřešené úkoly a plánované akce</div>
+                <div class="cc-card-title" data-lang-cs="Akce & Úkoly" data-lang-en="Actions & Tasks" data-lang-it="Azioni & Compiti">Akce & Úkoly</div>
+                <div class="cc-card-description" data-lang-cs="Nevyřešené úkoly a plánované akce" data-lang-en="Unresolved tasks and scheduled actions" data-lang-it="Compiti non risolti e azioni pianificate">Nevyřešené úkoly a plánované akce</div>
             </div>
 
             <div class="cc-card" onclick="window.location='admin.php?tab=tools'">
-                <div class="cc-card-title">Nástroje</div>
-                <div class="cc-card-description">Diagnostické nástroje a utilities</div>
+                <div class="cc-card-title" data-lang-cs="Nástroje" data-lang-en="Tools" data-lang-it="Strumenti">Nástroje</div>
+                <div class="cc-card-description" data-lang-cs="Diagnostické nástroje a utilities" data-lang-en="Diagnostic tools and utilities" data-lang-it="Strumenti diagnostici e utility">Diagnostické nástroje a utilities</div>
             </div>
         </div>
     </div>
 
     <!-- VÝVOJ & TESTOVÁNÍ -->
     <div class="admin-kategorie">
-        <h2 class="admin-kategorie-nadpis">Vývoj & Testování</h2>
+        <h2 class="admin-kategorie-nadpis" data-lang-cs="Vývoj & Testování" data-lang-en="Development & Testing" data-lang-it="Sviluppo & Test">Vývoj & Testování</h2>
         <div class="cc-grid">
             <div class="cc-card" onclick="window.location='admin.php?tab=admin_phpunit'">
-                <div class="cc-card-title">PHPUnit Testy</div>
-                <div class="cc-card-description">Spuštění automatických testů</div>
+                <div class="cc-card-title" data-lang-cs="PHPUnit Testy" data-lang-en="PHPUnit Tests" data-lang-it="Test PHPUnit">PHPUnit Testy</div>
+                <div class="cc-card-description" data-lang-cs="Spuštění automatických testů" data-lang-en="Run automated tests" data-lang-it="Esegui test automatici">Spuštění automatických testů</div>
             </div>
 
             <div class="cc-card" onclick="window.location='admin.php?tab=admin_testing_simulator'">
-                <div class="cc-card-title">E2E Testing</div>
-                <div class="cc-card-description">End-to-end testování celého workflow</div>
+                <div class="cc-card-title" data-lang-cs="E2E Testing" data-lang-en="E2E Testing" data-lang-it="Test E2E">E2E Testing</div>
+                <div class="cc-card-description" data-lang-cs="End-to-end testování celého workflow" data-lang-en="End-to-end testing of entire workflow" data-lang-it="Test end-to-end dell'intero flusso di lavoro">End-to-end testování celého workflow</div>
             </div>
 
             <div class="cc-card" onclick="window.location='admin.php?tab=admin_console'">
-                <div class="cc-card-title">Konzole</div>
-                <div class="cc-card-description">Diagnostika HTML/PHP/JS/CSS/SQL</div>
+                <div class="cc-card-title" data-lang-cs="Konzole" data-lang-en="Console" data-lang-it="Console">Konzole</div>
+                <div class="cc-card-description" data-lang-cs="Diagnostika HTML/PHP/JS/CSS/SQL" data-lang-en="Diagnostics HTML/PHP/JS/CSS/SQL" data-lang-it="Diagnostica HTML/PHP/JS/CSS/SQL">Diagnostika HTML/PHP/JS/CSS/SQL</div>
             </div>
         </div>
     </div>
 
     <!-- DESIGN & DATABÁZE -->
     <div class="admin-kategorie">
-        <h2 class="admin-kategorie-nadpis">Design & Databáze</h2>
+        <h2 class="admin-kategorie-nadpis" data-lang-cs="Design & Databáze" data-lang-en="Design & Database" data-lang-it="Design & Database">Design & Databáze</h2>
         <div class="cc-grid">
             <div class="cc-card" onclick="window.location='admin.php?tab=admin_appearance'">
-                <div class="cc-card-title">Vzhled & Design</div>
-                <div class="cc-card-description">Barvy, fonty, logo, branding</div>
+                <div class="cc-card-title" data-lang-cs="Vzhled & Design" data-lang-en="Appearance & Design" data-lang-it="Aspetto & Design">Vzhled & Design</div>
+                <div class="cc-card-description" data-lang-cs="Barvy, fonty, logo, branding" data-lang-en="Colors, fonts, logo, branding" data-lang-it="Colori, caratteri, logo, branding">Barvy, fonty, logo, branding</div>
             </div>
 
             <div class="cc-card" onclick="window.location='admin.php?tab=admin_content'">
-                <div class="cc-card-title">Správa Obsahu</div>
-                <div class="cc-card-description">Editace textů a obsahových bloků</div>
+                <div class="cc-card-title" data-lang-cs="Správa Obsahu" data-lang-en="Content Management" data-lang-it="Gestione Contenuti">Správa Obsahu</div>
+                <div class="cc-card-description" data-lang-cs="Editace textů a obsahových bloků" data-lang-en="Edit texts and content blocks" data-lang-it="Modifica testi e blocchi di contenuto">Editace textů a obsahových bloků</div>
             </div>
 
             <div class="cc-card" onclick="openSQLPage()">
-                <div class="cc-card-title">SQL Databáze</div>
-                <div class="cc-card-description">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
+                <div class="cc-card-title" data-lang-cs="SQL Databáze" data-lang-en="SQL Database" data-lang-it="Database SQL">SQL Databáze</div>
+                <div class="cc-card-description" data-lang-cs="Zobrazit všechny SQL tabulky (aktuální živá data)" data-lang-en="View all SQL tables (current live data)" data-lang-it="Visualizza tutte le tabelle SQL (dati live attuali)">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
             </div>
         </div>
     </div>

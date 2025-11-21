@@ -921,31 +921,35 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 <div class="container"<?php if ($embedMode) echo ' style="margin-top: 0; padding-top: 1rem;"'; ?>>
   <div class="search-bar">
     <span class="search-icon"></span>
-    <input type="text" class="search-input" id="searchInput" placeholder="Hledat v reklamacích...">
+    <input type="text" class="search-input" id="searchInput"
+           data-lang-cs-placeholder="Hledat v reklamacích..."
+           data-lang-en-placeholder="Search in claims..."
+           data-lang-it-placeholder="Cerca nei reclami..."
+           placeholder="Hledat v reklamacích...">
     <button class="search-clear" id="searchClear">×</button>
   </div>
-  
+
   <!-- FILTERS -->
   <div class="filter-bar">
-    <button class="filter-btn active" data-filter="all">
+    <button class="filter-btn active" data-filter="all" data-lang-cs="Všechny" data-lang-en="All" data-lang-it="Tutti">
       Všechny <span id="count-all" style="opacity: 0.7;"></span>
     </button>
-    <button class="filter-btn" data-filter="wait">
+    <button class="filter-btn" data-filter="wait" data-lang-cs="Čekající" data-lang-en="Waiting" data-lang-it="In Attesa">
       Čekající <span id="count-wait" style="opacity: 0.7;"></span>
     </button>
-    <button class="filter-btn" data-filter="open">
+    <button class="filter-btn" data-filter="open" data-lang-cs="V řešení" data-lang-en="In Progress" data-lang-it="In Corso">
       V řešení <span id="count-open" style="opacity: 0.7;"></span>
     </button>
-    <button class="filter-btn" data-filter="done">
+    <button class="filter-btn" data-filter="done" data-lang-cs="Vyřízené" data-lang-en="Completed" data-lang-it="Completato">
       Vyřízené <span id="count-done" style="opacity: 0.7;"></span>
     </button>
   </div>
-  
+
   <!-- GRID -->
   <div class="order-grid" id="orderGrid">
-    <div class="loading">Načítání reklamací...</div>
+    <div class="loading" data-lang-cs="Načítání reklamací..." data-lang-en="Loading claims..." data-lang-it="Caricamento reclami...">Načítání reklamací...</div>
   </div>
-  
+
 </div>
 
 <!-- MODAL DETAIL -->
@@ -959,7 +963,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 <!-- LOADING OVERLAY -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-spinner"></div>
-  <div class="loading-text" id="loadingText">Ukládám termín...</div>
+  <div class="loading-text" id="loadingText" data-lang-cs="Ukládám termín..." data-lang-en="Saving appointment..." data-lang-it="Salvataggio appuntamento...">Ukládám termín...</div>
 </div>
 
 <!-- External JavaScript -->

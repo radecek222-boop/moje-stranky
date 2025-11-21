@@ -329,21 +329,21 @@ if ($initialBootstrapData) {
     </div>
   </div>
 
-  <div class="section-title">Podpis zákazníka<span class="en-label">Customer signature</span></div>
+  <div class="section-title" data-lang-cs="Podpis zákazníka" data-lang-en="Customer signature" data-lang-it="Firma del cliente">Podpis zákazníka<span class="en-label">Customer signature</span></div>
   <canvas id="signature-pad"></canvas>
   <div class="signature-actions">
-    <div class="signature-label">Podepište se prstem nebo myší</div>
-    <button class="btn-clear" type="button" data-action="clearSignaturePad">Vymazat podpis</button>
+    <div class="signature-label" data-lang-cs="Podepište se prstem nebo myší" data-lang-en="Sign with finger or mouse" data-lang-it="Firma con dito o mouse">Podepište se prstem nebo myší</div>
+    <button class="btn-clear" type="button" data-action="clearSignaturePad" data-lang-cs="Vymazat podpis" data-lang-en="Clear signature" data-lang-it="Cancella firma">Vymazat podpis</button>
   </div>
   <div class="gdpr-clause" style="margin-top: 10px; padding: 8px; font-size: 8px; line-height: 1.4; color: #666; border-top: 1px solid #ddd; text-align: justify;">
     <strong>Ochrana osobních údajů (GDPR):</strong> Podpisem tohoto protokolu souhlasíte se zpracováním Vašich osobních údajů společností White Glove Service za účelem poskytování servisních služeb, komunikace s výrobcem, prodejcem a dalšími techniky. Vaše údaje budou zpracovávány v souladu s GDPR a budou použity pouze pro účely vyřízení této reklamace. Máte právo na přístup k údajům, jejich opravu nebo výmaz. Více na www.wgs-service.cz/gdpr
   </div>
 
   <div class="btns">
-    <button class="btn btn-primary" data-action="attachPhotos">Přidat fotky</button>
-    <button class="btn btn-primary" data-action="exportBothPDFs">Export do PDF</button>
-    <button class="btn btn-primary" data-action="sendToCustomer">Odeslat zákazníkovi</button>
-    <button class="btn btn-primary" data-navigate="seznam.php">Zpět</button>
+    <button class="btn btn-primary" data-action="attachPhotos" data-lang-cs="Přidat fotky" data-lang-en="Add photos" data-lang-it="Aggiungi foto">Přidat fotky</button>
+    <button class="btn btn-primary" data-action="exportBothPDFs" data-lang-cs="Export do PDF" data-lang-en="Export to PDF" data-lang-it="Esporta in PDF">Export do PDF</button>
+    <button class="btn btn-primary" data-action="sendToCustomer" data-lang-cs="Odeslat zákazníkovi" data-lang-en="Send to customer" data-lang-it="Invia al cliente">Odeslat zákazníkovi</button>
+    <button class="btn btn-primary" data-navigate="seznam.php" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
   </div>
 
   <div id="notif" class="notif"></div>
@@ -353,7 +353,7 @@ if ($initialBootstrapData) {
 <div class="pdf-preview-overlay" id="pdfPreviewOverlay">
   <div class="pdf-preview-container">
     <div class="pdf-preview-header">
-      <h3 class="pdf-preview-title">Náhled PDF</h3>
+      <h3 class="pdf-preview-title" data-lang-cs="Náhled PDF" data-lang-en="PDF Preview" data-lang-it="Anteprima PDF">Náhled PDF</h3>
       <div class="pdf-preview-actions">
         <!-- Tlačítko pro export (sdílení/stažení) -->
         <button class="pdf-action-btn pdf-share-btn" id="pdfShareBtn" title="Sdílet / Stáhnout" style="display: none;">
