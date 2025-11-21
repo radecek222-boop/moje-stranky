@@ -63,9 +63,9 @@ if (!$isLoggedIn && !$isAdmin) {
 /* 📱 MOBILNÍ OPTIMALIZACE SEARCH BAR */
 @media (max-width: 768px) {
   .search-bar {
-    padding: 0.3rem 0.4rem !important;
-    margin-top: 0.25rem !important;
-    margin-bottom: 0.75rem !important;
+    padding: 0.15rem 0.2rem !important;
+    margin-top: 0.125rem !important;
+    margin-bottom: 0.38rem !important;
   }
 
   .search-input {
@@ -78,7 +78,7 @@ if (!$isLoggedIn && !$isAdmin) {
 
   .search-clear {
     font-size: 0.55rem !important;
-    padding: 0.3rem 0.6rem !important;
+    padding: 0.15rem 0.3rem !important;
   }
 }
 
@@ -364,30 +364,30 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 }
 
-/* 📱 MOBILNÍ OPTIMALIZACE FILTER TLAČÍTEK (50% menší) */
+/* 📱 MOBILNÍ OPTIMALIZACE FILTER TLAČÍTEK (75% menší padding) */
 @media (max-width: 768px) {
   /* Filter bar - stack filters */
   .filter-bar {
     flex-direction: column !important;
-    gap: 0.15rem !important;
-    margin-bottom: 1rem !important;
+    gap: 0.08rem !important;
+    margin-bottom: 0.5rem !important;
   }
 
   .filter-btn {
     width: 100% !important;
-    padding: 0.2rem 0.4rem !important;
+    padding: 0.1rem 0.2rem !important;
     font-size: 0.65rem !important;
   }
 }
 
 @media (max-width: 375px) {
   .filter-btn {
-    padding: 0.18rem 0.35rem !important;
+    padding: 0.09rem 0.18rem !important;
     font-size: 0.6rem !important;
   }
 
   .filter-bar {
-    gap: 0.1rem !important;
+    gap: 0.05rem !important;
   }
 }
 
