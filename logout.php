@@ -102,6 +102,20 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // ✅ SECURITY: CSRF validace
 requireCSRF();
 
+// ✅ OPRAVA: Audit log PRVNÍ (před smazáním session dat)
+if (function_exists('auditLog')) {
+    auditLog('user_logout', [
+        'user_id' => $_SESSION['user_id'] ?? 'unknown',
+        'login_method' => $_SESSION['login_method'] ?? 'unknown'
+    ]);
+}
+
+// ✅ OPRAVA: Získat cookie params PŘED smazáním session
+$sessionCookieParams = null;
+if (ini_get("session.use_cookies")) {
+    $sessionCookieParams = session_get_cookie_params();
+}
+
 // Smazat Remember Me token z databáze pokud existuje
 if (isset($_COOKIE['remember_me'])) {
     try {
@@ -113,41 +127,35 @@ if (isset($_COOKIE['remember_me'])) {
             $stmt = $pdo->prepare("DELETE FROM wgs_remember_tokens WHERE selector = :selector");
             $stmt->execute([':selector' => $selector]);
         }
+
+        // ✅ OPRAVA: Smazat Remember Me cookie UVNITŘ try-catch
+        setcookie('remember_me', '', time() - 3600, '/', '', true, true);
+
     } catch (Exception $e) {
-        error_log("Logout: Remember Me token deletion failed: " . $e->getMessage());
+        error_log("Logout: Remember Me cleanup failed: " . $e->getMessage());
+        // I v případě chyby DB smazat cookie (bezpečnější než nechat dead token)
+        setcookie('remember_me', '', time() - 3600, '/', '', true, true);
     }
-
-    // Smazat Remember Me cookie
-    setcookie('remember_me', '', time() - 3600, '/', '', true, true);
-}
-
-// Audit log před smazáním session
-if (function_exists('auditLog')) {
-    auditLog('user_logout', [
-        'user_id' => $_SESSION['user_id'] ?? 'unknown',
-        'login_method' => $_SESSION['login_method'] ?? 'unknown'
-    ]);
 }
 
 // Smazat session data
 $_SESSION = [];
 
-// Smazat session cookie
-if (ini_get("session.use_cookies")) {
-    $params = session_get_cookie_params();
+// Destroy session
+session_destroy();
+
+// Smazat session cookie (použít params získané PŘED destroy)
+if ($sessionCookieParams !== null) {
     setcookie(
         session_name(),
         '',
         time() - 42000,
-        $params["path"],
-        $params["domain"],
-        $params["secure"],
-        $params["httponly"]
+        $sessionCookieParams["path"],
+        $sessionCookieParams["domain"],
+        $sessionCookieParams["secure"],
+        $sessionCookieParams["httponly"]
     );
 }
-
-// Destroy session
-session_destroy();
 
 // Redirect na login
 header('Location: login.php?logged_out=1');

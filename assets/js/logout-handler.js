@@ -24,18 +24,30 @@
         csrfToken = tokenInput.value;
       }
 
-      // 2. Pokud není, zkusit fetch z API
+      // 2. Pokud není, zkusit fetch z API (s timeoutem)
       if (!csrfToken) {
         try {
+          // ✅ OPRAVA: Přidat timeout 5 sekund pro fetch
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+
           const response = await fetch('/app/controllers/get_csrf_token.php', {
-            credentials: 'same-origin'
+            credentials: 'same-origin',
+            signal: controller.signal
           });
+
+          clearTimeout(timeoutId);
+
           const data = await response.json();
           if ((data.status === 'success' || data.success === true) && data.token) {
             csrfToken = data.token;
           }
         } catch (error) {
           console.error('CSRF token fetch failed:', error);
+          // Pokud fetch selhal, zobrazit varování
+          if (error.name === 'AbortError') {
+            console.error('CSRF token fetch timeout (5s)');
+          }
         }
       }
 

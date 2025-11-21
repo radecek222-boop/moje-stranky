@@ -107,15 +107,25 @@ if (session_status() === PHP_SESSION_NONE) {
 
         if ($lastActivity !== null && (time() - $lastActivity) > $inactivityTimeout) {
             // Session vypršela z důvodu neaktivity
-            // ✅ FIX 6.1: Destroy session a STOP - NEPOKRAČOVAT v if bloku
+            // ✅ KRITICKÁ OPRAVA: NERESETOVAT session, jen vymazat auth data
+            // Důvod: Zachování CSRF tokenu pro fungující logout
             // Remember Me handler se postará o případný auto-login
-            session_unset();
-            session_destroy();
-            session_start(); // Restart pro novou čistou session
-            // KONEC - nedělat nic dalšího, vyhnout se ghost session
+
+            // Vymazat pouze autentizační data
+            unset($_SESSION['user_id']);
+            unset($_SESSION['admin_id']);
+            unset($_SESSION['is_admin']);
+            unset($_SESSION['role']);
+            unset($_SESSION['user_name']);
+            unset($_SESSION['user_email']);
+            unset($_SESSION['login_time']);
+            unset($_SESSION['login_method']);
+            unset($_SESSION['last_activity']);
+
+            // CSRF token a ostatní session data ZŮSTÁVAJÍ zachována
+            // Logout pak bude fungovat, protože CSRF token je stále platný
         } else {
             // Session je aktivní - aktualizovat last_activity
-            // ✅ FIX 6.1: Nastavit last_activity POUZE pokud session NENÍ expirovaná
             $_SESSION['last_activity'] = time();
         }
     }
