@@ -50,20 +50,34 @@ if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
 
 // Session configuration - nastavujeme správně a spouštíme session
 if (session_status() === PHP_SESSION_NONE) {
-    // Detekce HTTPS
-    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-                || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+    // ✅ FIX 5: Secure cookie flag podle environmentu (ne runtime detekce)
+    // Eliminuje HTTP/HTTPS cookie mismatch - environment-based secure flag
+    $isProduction = (getEnvValue('ENVIRONMENT') ?? 'production') === 'production';
+    $secureFlag = $isProduction ? true : false;
+
+    // ✅ FIX 5: HTTPS redirect na produkci
+    // Zajišťuje, že produkce vždy používá HTTPS → eliminuje mismatch
+    if ($isProduction) {
+        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                   || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+
+        if (!$isHttps) {
+            header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], true, 301);
+            exit;
+        }
+    }
 
     // ✅ FIX Safari ITP: Explicitní session name
     session_name('WGS_SESSION');
 
     // ✅ FIX: Použití session_set_cookie_params() se STAROU syntaxí pro PHP 7.x kompatibilitu
     // Safari ITP fix: domain = NULL místo prázdného stringu, lifetime = 0 (browser session)
+    // ✅ FIX 5: secure flag je nyní environment-based (ne runtime)
     session_set_cookie_params(
         0,              // lifetime - 0 = do zavření prohlížeče (lepší pro Safari ITP)
         '/',            // path - celá doména
         NULL,           // domain - NULL místo '' (Safari compatibility)
-        $isHttps,       // secure - pouze HTTPS
+        $secureFlag,    // ✅ FIX 5: secure - environment-based (production=true, dev=false)
         true            // httponly - ochrana proti XSS
     );
 
