@@ -35,8 +35,17 @@ async function initAuth() {
   return true;
 }
 
-async function handleLogout() {
+async function handleLogout(event) {
   if (!confirm('Opravdu se chcete odhlásit?')) return;
-  // OPRAVENO: Přesměrování na logout.php místo neexistujícího API
-  window.location.href = 'logout.php';
+
+  // ✅ KRITICKÁ OPRAVA: Použít CSRF-protected logout z logout-handler.js
+  // Důvod: Přímý GET redirect neposílá CSRF token → zobrazuje se potvrzovací formulář
+  if (typeof window.secureLogout === 'function') {
+    // Použít globální secure logout handler (POST s CSRF tokenem)
+    window.secureLogout(event);
+  } else {
+    // Fallback: přímý redirect (zobrazí potvrzovací formulář)
+    console.warn('secureLogout() není dostupná, používám fallback');
+    window.location.href = '/logout.php';
+  }
 }
