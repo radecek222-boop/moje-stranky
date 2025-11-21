@@ -355,4 +355,4 @@ function closeMenu() {
     initHamburgerMenu();
   }
 })();
-</script>
+</script><script src="assets/js/logout-handler.js" defer></script>

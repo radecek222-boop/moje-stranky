@@ -83,6 +83,13 @@ function handleAdminLogin(string $adminKey): void
     // ✅ FIX 9: Reset rate limit při úspěšném přihlášení
     $rateLimiter->reset($identifier, 'admin_login');
 
+    // ✅ SECURITY FIX: Session regeneration pro admin login (session fixation protection)
+    session_regenerate_id(true);
+
+    // ✅ SECURITY FIX: CSRF token rotation po přihlášení
+    unset($_SESSION['csrf_token']);
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
     $_SESSION['is_admin'] = true;
     $_SESSION['admin_id'] = $_SESSION['admin_id'] ?? 'WGS_ADMIN';
     $_SESSION['user_id'] = $_SESSION['user_id'] ?? 0;
@@ -169,6 +176,11 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
 
     // SECURITY FIX: Regenerovat session ID pro ochranu proti session fixation
     session_regenerate_id(true);
+
+    // ✅ SECURITY FIX: CSRF token rotation po přihlášení
+    // Vygenerovat nový CSRF token pro zabránění token reuse
+    unset($_SESSION['csrf_token']);
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
     $userId = $user['id'] ?? $user['user_id'] ?? null;
     if ($userId === null) {
@@ -354,7 +366,7 @@ function createRememberToken(PDO $pdo, string $userId): void
             'domain' => '',
             'secure' => true,
             'httponly' => true,
-            'samesite' => 'Lax'
+            'samesite' => 'Strict'  // ✅ SECURITY FIX: Změněno z 'Lax' na 'Strict' pro CSRF ochranu
         ]
     );
 

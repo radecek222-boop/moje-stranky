@@ -168,4 +168,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
-</script>
+</script><script src="assets/js/logout-handler.js"></script>

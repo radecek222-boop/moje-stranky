@@ -115,23 +115,7 @@ $currentAdminTab = $_GET['tab'] ?? 'dashboard';
     initHamburgerMenu();
   }
 })();
-
-// Logout button handler
-document.addEventListener('DOMContentLoaded', () => {
-    const logoutBtn = document.getElementById('logoutBtn');
-    const logoutBtnDesktop = document.getElementById('logoutBtnDesktop');
-
-    function handleLogout() {
-        if (!confirm('Opravdu se chcete odhlásit?')) return;
-        fetch('logout.php')
-            .then(() => window.location.href = 'index.php')
-            .catch(err => {
-                console.error('Logout failed:', err);
-                window.location.href = 'index.php';
-            });
-    }
-
-    if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
-    if (logoutBtnDesktop) logoutBtnDesktop.addEventListener('click', handleLogout);
-});
 </script>
+
+<!-- ✅ SECURITY FIX: CSRF protected logout handler -->
+<script src="assets/js/logout-handler.js"></script>

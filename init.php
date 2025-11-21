@@ -82,11 +82,11 @@ if (session_status() === PHP_SESSION_NONE) {
     );
 
     // SameSite musí být nastaven přes ini_set (není v session_set_cookie_params v PHP 7.2)
-    // DŮLEŽITÉ: Použijeme 'Lax' pro lepší kompatibilitu na mobilech
-    // 'Lax' umožňuje first-party cookies (login, navigace) ale blokuje cross-site POST
-    // Toto je bezpečnější než 'None' a funguje lépe na mobilních zařízeních
+    // ✅ SECURITY FIX: Změněno z 'Lax' na 'Strict' pro lepší CSRF ochranu
+    // 'Strict' zajistí, že session cookie se NIKDY nepošle při cross-site requestech
+    // (včetně GET requestů z jiných domén)
     if (PHP_VERSION_ID >= 70300) {
-        ini_set('session.cookie_samesite', 'Lax');
+        ini_set('session.cookie_samesite', 'Strict');
     }
 
     // Nastavení garbage collection
