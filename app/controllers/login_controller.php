@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
 require_once __DIR__ . '/../../includes/db_metadata.php';
 require_once __DIR__ . '/../../includes/audit_logger.php';
+require_once __DIR__ . '/../../includes/rate_limiter.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -58,19 +59,29 @@ try {
  */
 function handleAdminLogin(string $adminKey): void
 {
+    // ✅ FIX 9: Databázový rate limiting místo file-based
+    $pdo = getDbConnection();
+    $rateLimiter = new RateLimiter($pdo);
     $identifier = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $rate = checkRateLimit('admin_login_' . $identifier, 5, 900);
-    if (!$rate['allowed']) {
-        respondError('Příliš mnoho pokusů. Zkuste to znovu za ' . ceil($rate['retry_after'] / 60) . ' minut.', 429, ['retry_after' => $rate['retry_after']]);
+
+    $rateCheck = $rateLimiter->checkLimit(
+        $identifier,
+        'admin_login',
+        ['max_attempts' => 5, 'window_minutes' => 15, 'block_minutes' => 60]
+    );
+
+    if (!$rateCheck['allowed']) {
+        respondError($rateCheck['message'], 429, ['retry_after' => strtotime($rateCheck['reset_at']) - time()]);
     }
 
     $providedHash = hash('sha256', $adminKey);
     if (!defined('ADMIN_KEY_HASH') || !hash_equals(ADMIN_KEY_HASH, $providedHash)) {
-        recordLoginAttempt('admin_login_' . $identifier);
+        // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
         respondError('Neplatný administrátorský klíč.', 401);
     }
 
-    resetRateLimit('admin_login_' . $identifier);
+    // ✅ FIX 9: Reset rate limit při úspěšném přihlášení
+    $rateLimiter->reset($identifier, 'admin_login');
 
     $_SESSION['is_admin'] = true;
     $_SESSION['admin_id'] = $_SESSION['admin_id'] ?? 'WGS_ADMIN';
@@ -108,11 +119,18 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
         throw new InvalidArgumentException('Zadejte platný email.');
     }
 
-    // ✅ SECURITY FIX: Brute-force protection
+    // ✅ FIX 9: Databázový rate limiting místo file-based
+    $rateLimiter = new RateLimiter($pdo);
     $identifier = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $rate = checkRateLimit('user_login_' . $identifier, 5, 300);
-    if (!$rate['allowed']) {
-        respondError('Příliš mnoho pokusů. Zkuste to znovu za ' . ceil($rate['retry_after'] / 60) . ' minut.', 429, ['retry_after' => $rate['retry_after']]);
+
+    $rateCheck = $rateLimiter->checkLimit(
+        $identifier,
+        'user_login',
+        ['max_attempts' => 5, 'window_minutes' => 5, 'block_minutes' => 30]
+    );
+
+    if (!$rateCheck['allowed']) {
+        respondError($rateCheck['message'], 429, ['retry_after' => strtotime($rateCheck['reset_at']) - time()]);
     }
 
     $stmt = $pdo->prepare('SELECT * FROM wgs_users WHERE email = :email LIMIT 1');
@@ -120,7 +138,7 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user) {
-        recordLoginAttempt('user_login_' . $identifier);
+        // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
         respondError('Uživatel nenalezen.', 401);
     }
 
@@ -133,12 +151,12 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     }
 
     if ($hashField === null || !password_verify($password, $user[$hashField])) {
-        recordLoginAttempt('user_login_' . $identifier);
+        // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
         respondError('Neplatné přihlašovací údaje.', 401);
     }
 
-    // ✅ Reset rate limit při úspěšném přihlášení
-    resetRateLimit('user_login_' . $identifier);
+    // ✅ FIX 9: Reset rate limit při úspěšném přihlášení
+    $rateLimiter->reset($identifier, 'user_login');
 
     if (array_key_exists('is_active', $user) && (int) $user['is_active'] === 0) {
         respondError('Účet byl deaktivován. Kontaktujte administrátora.', 403);
