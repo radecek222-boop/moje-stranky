@@ -371,4 +371,5 @@ function closeMenu() {
 <script src="/assets/js/translations.js"></script>
 <!-- Language Switcher - centralizovaný jazykový přepínač -->
 <script src="/assets/js/language-switcher.js" defer></script>
-<!-- ✅ OPRAVA: logout-handler.js přesunut do globálních scriptů v admin.php (řádek 1113) -->
+<!-- ✅ KRITICKÁ OPRAVA: logout-handler.js MUSÍ být zde, protože hamburger-menu se načítá VŠUDE! -->
+<script src="/assets/js/logout-handler.js"></script>

@@ -1110,7 +1110,7 @@ function loadNotifContent(type, body) {
 <!-- External JavaScript -->
 <script src="/assets/js/logger.js"></script>
 <script src="/assets/js/csrf-auto-inject.js"></script>
-<script src="/assets/js/logout-handler.js"></script>
+<!-- ✅ logout-handler.js je v hamburger-menu.php (načítá se VŠUDE včetně dashboardu) -->
 <script src="/assets/js/utils.js"></script>
 <script src="/assets/js/admin-notifications.js"></script>
 <script src="/assets/js/smtp-config.js"></script>
