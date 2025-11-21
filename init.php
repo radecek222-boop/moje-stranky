@@ -107,16 +107,21 @@ if (session_status() === PHP_SESSION_NONE) {
 
         if ($lastActivity !== null && (time() - $lastActivity) > $inactivityTimeout) {
             // Session vypršela z důvodu neaktivity
+            // ✅ FIX 6.1: Destroy session a STOP - NEPOKRAČOVAT v if bloku
+            // Remember Me handler se postará o případný auto-login
             session_unset();
             session_destroy();
             session_start(); // Restart pro novou čistou session
+            // KONEC - nedělat nic dalšího, vyhnout se ghost session
+        } else {
+            // Session je aktivní - aktualizovat last_activity
+            // ✅ FIX 6.1: Nastavit last_activity POUZE pokud session NENÍ expirovaná
+            $_SESSION['last_activity'] = time();
         }
-
-        // Aktualizovat last_activity timestamp při každém požadavku
-        $_SESSION['last_activity'] = time();
     }
 
     // ✅ FIX 11: Auto-login z Remember Me tokenu
+    // Funguje i po inactivity timeout - pokud session byla prázdná, Remember Me přihlásí
     if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_me'])) {
         require_once __DIR__ . '/includes/remember_me_handler.php';
         handleRememberMeLogin();
