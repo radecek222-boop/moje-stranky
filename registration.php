@@ -1,4 +1,10 @@
-<?php require_once "init.php"; ?>
+<?php
+require_once "init.php";
+
+// ✅ FIX 1: Generovat CSRF token v PHP pro okamžitou dostupnost v HTML
+// Eliminuje race condition s async fetch v csrf-auto-inject.js
+$csrfToken = generateCSRFToken();
+?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -35,6 +41,9 @@
   <div id="notification" class="notification"></div>
 
   <form id="registrationForm">
+    <!-- ✅ FIX 1: CSRF token vložen přímo v PHP - okamžitě dostupný, žádná race condition -->
+    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
+
     <div class="form-group">
       <label for="regKey">Registrační klíč *</label>
       <input type="password" id="regKey" name="registration_key" placeholder="Zadejte klíč" required>
@@ -59,7 +68,7 @@
     <div class="form-group">
       <label for="regPassword">Heslo</label>
       <input type="password" id="regPassword" name="password" placeholder="••••••••" required>
-      <div class="helper-text">Minimálně 8 znaků</div>
+      <div class="helper-text">Minimálně 12 znaků (velké/malé písmena, čísla a znaky)</div>
     </div>
 
     <div class="form-group">

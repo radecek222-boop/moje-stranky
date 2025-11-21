@@ -50,20 +50,34 @@ if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
 
 // Session configuration - nastavujeme správně a spouštíme session
 if (session_status() === PHP_SESSION_NONE) {
-    // Detekce HTTPS
-    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-                || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+    // ✅ FIX 5: Secure cookie flag podle environmentu (ne runtime detekce)
+    // Eliminuje HTTP/HTTPS cookie mismatch - environment-based secure flag
+    $isProduction = (getEnvValue('ENVIRONMENT') ?? 'production') === 'production';
+    $secureFlag = $isProduction ? true : false;
+
+    // ✅ FIX 5: HTTPS redirect na produkci
+    // Zajišťuje, že produkce vždy používá HTTPS → eliminuje mismatch
+    if ($isProduction) {
+        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                   || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+
+        if (!$isHttps) {
+            header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], true, 301);
+            exit;
+        }
+    }
 
     // ✅ FIX Safari ITP: Explicitní session name
     session_name('WGS_SESSION');
 
     // ✅ FIX: Použití session_set_cookie_params() se STAROU syntaxí pro PHP 7.x kompatibilitu
     // Safari ITP fix: domain = NULL místo prázdného stringu, lifetime = 0 (browser session)
+    // ✅ FIX 5: secure flag je nyní environment-based (ne runtime)
     session_set_cookie_params(
         0,              // lifetime - 0 = do zavření prohlížeče (lepší pro Safari ITP)
         '/',            // path - celá doména
         NULL,           // domain - NULL místo '' (Safari compatibility)
-        $isHttps,       // secure - pouze HTTPS
+        $secureFlag,    // ✅ FIX 5: secure - environment-based (production=true, dev=false)
         true            // httponly - ochrana proti XSS
     );
 
@@ -76,10 +90,37 @@ if (session_status() === PHP_SESSION_NONE) {
     }
 
     // Nastavení garbage collection
-    ini_set('session.gc_maxlifetime', 3600);
+    // ✅ FIX 3: Zvýšení gc_maxlifetime z 1 hodiny na 24 hodin
+    // Eliminuje předčasné vypršení session a ztrátu CSRF tokenu
+    ini_set('session.gc_maxlifetime', 86400);  // 24 hodin (24 * 60 * 60)
     ini_set('session.use_only_cookies', 1);
 
     session_start();
+
+    // ✅ FIX 6: Inactivity timeout - automatické vypršení session po 30 min neaktivity
+    // Ochrana proti session hijacking na opuštěných zařízeních (Security Issue 6)
+    // OWASP A07: Identification and Authentication Failures - CWE-613 mitigation
+    $inactivityTimeout = 1800; // 30 minut (30 * 60 sekund)
+
+    if (isset($_SESSION['user_id'])) {
+        $lastActivity = $_SESSION['last_activity'] ?? null;
+
+        if ($lastActivity !== null && (time() - $lastActivity) > $inactivityTimeout) {
+            // Session vypršela z důvodu neaktivity
+            session_unset();
+            session_destroy();
+            session_start(); // Restart pro novou čistou session
+        }
+
+        // Aktualizovat last_activity timestamp při každém požadavku
+        $_SESSION['last_activity'] = time();
+    }
+
+    // ✅ FIX 11: Auto-login z Remember Me tokenu
+    if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_me'])) {
+        require_once __DIR__ . '/includes/remember_me_handler.php';
+        handleRememberMeLogin();
+    }
 }
 
 // Helper function to include files from different directories

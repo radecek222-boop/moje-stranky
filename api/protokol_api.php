@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/reklamace_id_validator.php';
+require_once __DIR__ . '/../includes/rate_limiter.php';
 
 header('Content-Type: application/json');
 // ✅ PERFORMANCE: Cache-Control header (10 minut)
@@ -62,23 +63,29 @@ try {
         throw new Exception('Povolena pouze POST nebo GET metoda');
     }
 
-    // Rate limiting pouze pro POST operace (upload, save, send)
+    // ✅ FIX 9: Databázový rate limiting pouze pro POST operace (upload, save, send)
     if ($isPost && in_array($action, ['save_pdf_document', 'save_protokol', 'send_email'])) {
+        $pdo = getDbConnection();
+        $rateLimiter = new RateLimiter($pdo);
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-        $rateLimit = checkRateLimit("upload_pdf_$ip", 10, 3600); // 10 operací za hodinu
 
-        if (!$rateLimit['allowed']) {
+        $rateCheck = $rateLimiter->checkLimit(
+            $ip,
+            'pdf_upload',
+            ['max_attempts' => 10, 'window_minutes' => 60, 'block_minutes' => 120]
+        );
+
+        if (!$rateCheck['allowed']) {
             http_response_code(429);
             echo json_encode([
                 'success' => false,
-                'error' => 'Příliš mnoho požadavků. Zkuste to za ' . ceil($rateLimit['retry_after'] / 60) . ' minut.',
-                'retry_after' => $rateLimit['retry_after']
+                'error' => $rateCheck['message'],
+                'retry_after' => strtotime($rateCheck['reset_at']) - time()
             ]);
             exit;
         }
 
-        // Zaznamenat pokus o upload
-        recordLoginAttempt("upload_pdf_$ip");
+        // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
     }
 
     switch ($action) {

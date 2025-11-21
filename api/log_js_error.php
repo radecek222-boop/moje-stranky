@@ -5,28 +5,33 @@
  */
 
 require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/rate_limiter.php';
 
 header('Content-Type: application/json');
 
 try {
-    // BEZPEČNOST: DoS ochrana - rate limiting pro error logging
+    // ✅ FIX 9: Databázový rate limiting - DoS ochrana pro error logging
+    $pdo = getDbConnection();
+    $rateLimiter = new RateLimiter($pdo);
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $rateLimitKey = "log_js_error_{$ip}";
-    $maxAttempts = 20; // Max 20 errors za hodinu
-    $timeWindow = 3600; // 1 hodina
 
-    $rateLimit = checkRateLimit($rateLimitKey, $maxAttempts, $timeWindow);
-    if (!$rateLimit['allowed']) {
+    $rateCheck = $rateLimiter->checkLimit(
+        $ip,
+        'js_error_log',
+        ['max_attempts' => 20, 'window_minutes' => 60, 'block_minutes' => 30]
+    );
+
+    if (!$rateCheck['allowed']) {
         http_response_code(429);
         echo json_encode([
             'success' => false,
-            'error' => 'Příliš mnoho error reportů. Zkuste to za ' . ceil($rateLimit['retry_after'] / 60) . ' minut.',
-            'retry_after' => $rateLimit['retry_after']
+            'error' => $rateCheck['message'],
+            'retry_after' => strtotime($rateCheck['reset_at']) - time()
         ]);
         exit;
     }
 
-    recordLoginAttempt($rateLimitKey);
+    // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
 
     // Načtení JSON dat
     $jsonData = file_get_contents('php://input');

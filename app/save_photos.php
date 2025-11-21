@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/reklamace_id_validator.php';
+require_once __DIR__ . '/../includes/rate_limiter.php';
 
 header('Content-Type: application/json');
 
@@ -56,22 +57,28 @@ try {
         throw new Exception('Povolena pouze POST metoda');
     }
 
-    // BEZPEČNOST: Rate limiting - ochrana proti DoS útokům
+    // ✅ FIX 9: Databázový rate limiting - ochrana proti DoS útokům
+    $pdo = getDbConnection();
+    $rateLimiter = new RateLimiter($pdo);
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $rateLimit = checkRateLimit("upload_customer_$ip", 30, 3600); // 30 uploadů za hodinu
 
-    if (!$rateLimit['allowed']) {
+    $rateCheck = $rateLimiter->checkLimit(
+        $ip,
+        'photo_upload',
+        ['max_attempts' => 30, 'window_minutes' => 60, 'block_minutes' => 60]
+    );
+
+    if (!$rateCheck['allowed']) {
         http_response_code(429);
         echo json_encode([
             'success' => false,
-            'error' => 'Příliš mnoho požadavků. Zkuste to za ' . ceil($rateLimit['retry_after'] / 60) . ' minut.',
-            'retry_after' => $rateLimit['retry_after']
+            'error' => $rateCheck['message'],
+            'retry_after' => strtotime($rateCheck['reset_at']) - time()
         ]);
         exit;
     }
 
-    // Zaznamenat pokus o upload
-    recordLoginAttempt("upload_customer_$ip");
+    // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
 
     // JSON data už jsou načtena výše (pro CSRF kontrolu)
     // $data je už k dispozici

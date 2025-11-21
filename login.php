@@ -1,6 +1,10 @@
 <?php
 require_once "init.php";
 
+// ✅ FIX 1: Generovat CSRF token v PHP pro okamžitou dostupnost v HTML
+// Eliminuje race condition s async fetch v csrf-auto-inject.js
+$csrfToken = generateCSRFToken();
+
 // ✅ FIX: Pokud je uživatel JIŽ PŘIHLÁŠEN a má redirect parametr, přesměrovat ho tam
 // SCÉNÁŘ: photocustomer.php redirectuje na login.php?redirect=photocustomer.php
 // ale technik JE stále přihlášen → neměl by vidět login formulář, měl by skočit na photocustomer.php
@@ -70,6 +74,9 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
   <div id="notification" class="notification"></div>
 
   <form id="loginForm">
+    <!-- ✅ FIX 1: CSRF token vložen přímo v PHP - okamžitě dostupný, žádná race condition -->
+    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
+
     <!-- CHECKBOX: Jsem administrátor -->
     <div class="admin-checkbox-group">
       <input type="checkbox" id="isAdmin" name="is_admin">
@@ -85,6 +92,14 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
       <div class="form-group">
         <label for="userPassword">Heslo</label>
         <input type="password" id="userPassword" name="password" placeholder="••••••••">
+      </div>
+
+      <!-- ✅ FIX 11: Remember Me checkbox -->
+      <div class="form-group" style="margin-top: 0.5rem;">
+        <input type="checkbox" id="rememberMe" name="remember_me" style="width: auto; margin-right: 8px;">
+        <label for="rememberMe" style="display: inline; font-weight: normal; cursor: pointer;">
+          Zapamatovat si mě (30 dní)
+        </label>
       </div>
     </div>
 
