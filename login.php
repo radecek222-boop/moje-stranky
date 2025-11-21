@@ -68,7 +68,7 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
 <div class="container">
   <div class="logo">
     <h1>WGS</h1>
-    <div class="subtitle">White Glove Service</div>
+    <div class="subtitle" data-lang-cs="White Glove Service" data-lang-en="White Glove Service" data-lang-it="White Glove Service">White Glove Service</div>
   </div>
 
   <div id="notification" class="notification"></div>
@@ -80,24 +80,32 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
     <!-- CHECKBOX: Jsem administrátor -->
     <div class="admin-checkbox-group">
       <input type="checkbox" id="isAdmin" name="is_admin">
-      <label for="isAdmin">Jsem administrátor</label>
+      <label for="isAdmin" data-lang-cs="Jsem administrátor" data-lang-en="I am administrator" data-lang-it="Sono amministratore">Jsem administrátor</label>
     </div>
 
     <!-- USER LOGIN (EMAIL + HESLO) -->
     <div id="userLoginFields">
       <div class="form-group">
-        <label for="userEmail">Email</label>
-        <input type="email" id="userEmail" name="email" placeholder="vas@email.cz">
+        <label for="userEmail" data-lang-cs="Email" data-lang-en="Email" data-lang-it="Email">Email</label>
+        <input type="email" id="userEmail" name="email"
+               data-lang-cs-placeholder="vas@email.cz"
+               data-lang-en-placeholder="your@email.com"
+               data-lang-it-placeholder="tua@email.it"
+               placeholder="vas@email.cz">
       </div>
       <div class="form-group">
-        <label for="userPassword">Heslo</label>
-        <input type="password" id="userPassword" name="password" placeholder="••••••••">
+        <label for="userPassword" data-lang-cs="Heslo" data-lang-en="Password" data-lang-it="Password">Heslo</label>
+        <input type="password" id="userPassword" name="password"
+               data-lang-cs-placeholder="••••••••"
+               data-lang-en-placeholder="••••••••"
+               data-lang-it-placeholder="••••••••"
+               placeholder="••••••••">
       </div>
 
       <!-- ✅ FIX 11: Remember Me checkbox -->
       <div class="form-group" style="margin-top: 0.5rem;">
         <input type="checkbox" id="rememberMe" name="remember_me" style="width: auto; margin-right: 8px;">
-        <label for="rememberMe" style="display: inline; font-weight: normal; cursor: pointer;">
+        <label for="rememberMe" style="display: inline; font-weight: normal; cursor: pointer;" data-lang-cs="Zapamatovat si mě (30 dní)" data-lang-en="Remember me (30 days)" data-lang-it="Ricordami (30 giorni)">
           Zapamatovat si mě (30 dní)
         </label>
       </div>
@@ -106,17 +114,21 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
     <!-- ADMIN LOGIN (ADMIN KEY ONLY) -->
     <div id="adminLoginFields">
       <div class="form-group">
-        <label for="adminKey">Administrátorský klíč</label>
-        <input type="password" id="adminKey" name="admin_key" placeholder="Zadejte klíč">
+        <label for="adminKey" data-lang-cs="Administrátorský klíč" data-lang-en="Administrator key" data-lang-it="Chiave amministratore">Administrátorský klíč</label>
+        <input type="password" id="adminKey" name="admin_key"
+               data-lang-cs-placeholder="Zadejte klíč"
+               data-lang-en-placeholder="Enter key"
+               data-lang-it-placeholder="Inserisci chiave"
+               placeholder="Zadejte klíč">
       </div>
     </div>
 
-    <button type="submit" id="loginButton" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Přihlásit se</button>
+    <button type="submit" id="loginButton" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" data-lang-cs="Přihlásit se" data-lang-en="Log in" data-lang-it="Accedi">Přihlásit se</button>
   </form>
 
   <div class="links" style="text-align: center; margin-top: 2rem;">
-    <p>Zapomněl/a jsi heslo? <a href="password_reset.php">Resetovat heslo</a></p>
-  <p>Nemáte účet? <a href="registration.php">Zaregistrujte se</a></p>
+    <p><span data-lang-cs="Zapomněl/a jsi heslo?" data-lang-en="Forgot password?" data-lang-it="Hai dimenticato la password?">Zapomněl/a jsi heslo?</span> <a href="password_reset.php" data-lang-cs="Resetovat heslo" data-lang-en="Reset password" data-lang-it="Resetta password">Resetovat heslo</a></p>
+    <p><span data-lang-cs="Nemáte účet?" data-lang-en="Don't have an account?" data-lang-it="Non hai un account?">Nemáte účet?</span> <a href="registration.php" data-lang-cs="Zaregistrujte se" data-lang-en="Sign up" data-lang-it="Registrati">Zaregistrujte se</a></p>
   </div>
 
 </div>
