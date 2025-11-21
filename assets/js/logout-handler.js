@@ -85,7 +85,23 @@
    */
   function initLogoutHandlers() {
     // Najít všechny logout odkazy (relativní i absolutní cesty)
-    const logoutLinks = document.querySelectorAll('a[href="logout.php"], a[href="/logout.php"], a.logout-link, a.hamburger-logout, #logoutBtn, #logoutBtnDesktop');
+    const logoutSelectors = [
+      'a[href="logout.php"]',
+      'a[href="/logout.php"]',
+      'a.logout-link',
+      'a.hamburger-logout',
+      '#logoutBtn',
+      '#logoutBtnDesktop'
+    ];
+
+    let logoutLinks = [];
+    try {
+      logoutLinks = document.querySelectorAll(logoutSelectors.join(', '));
+    } catch (selectorError) {
+      console.error('Logout handler selector error:', selectorError);
+      // Bezpečný fallback: zajistit alespoň ID selektory, aby logout fungoval
+      logoutLinks = document.querySelectorAll('#logoutBtn, #logoutBtnDesktop');
+    }
 
     logoutLinks.forEach(link => {
       link.addEventListener('click', handleLogout);
