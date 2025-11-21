@@ -324,10 +324,16 @@ function escapeHtml(text) {
 const originalFetch = window.fetch;
 window.fetch = function(...args) {
     return originalFetch.apply(this, args)
-        .then(response => {
+        .then(async response => {
             // Pokud je to error response, zkusit extrahovat detaily
             if (!response.ok) {
-                return response.json().then(data => {
+                // ✅ OPRAVA: Clone response aby šel přečíst 2x (jako text i JSON)
+                const clonedResponse = response.clone();
+
+                try {
+                    // Zkusit parsovat jako JSON
+                    const data = await response.json();
+
                     if (data.error || data.message) {
                         const error = new Error(data.message || data.error || 'HTTP Error');
                         error.httpStatus = response.status;
@@ -349,11 +355,25 @@ window.fetch = function(...args) {
 
                         throw error;
                     }
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }).catch(jsonError => {
-                    // Pokud response není JSON
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                });
+
+                    // JSON je OK, ale nemá error/message → vrátit response
+                    throw new Error(`HTTP ${response.status}: ${JSON.stringify(data)}`);
+                } catch (jsonError) {
+                    // ✅ OPRAVA: Pokud JSON parsing selhal, přečíst jako text
+                    try {
+                        const errorText = await clonedResponse.text();
+                        console.error('🔴 HTTP Error (non-JSON response):', {
+                            status: response.status,
+                            statusText: response.statusText,
+                            body: errorText,
+                            bodyLength: errorText.length
+                        });
+                        throw new Error(`HTTP ${response.status}: ${errorText || response.statusText || 'Empty response'}`);
+                    } catch (textError) {
+                        // Fallback pokud i text parsing selhal
+                        throw new Error(`HTTP ${response.status}: ${response.statusText || 'Unknown error'}`);
+                    }
+                }
             }
             return response;
         })
