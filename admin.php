@@ -684,7 +684,7 @@ function closeNotifModal() {
      */
 function loadNotifContent(type, body) {
         // Zobrazit loading
-        body.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Načítání...</div>';
+        body.innerHTML = `<div style="text-align: center; padding: 2rem; color: #666;">${t('loading')}</div>`;
 
         // Pro email-templates zkusit použít reálná data z notifications-container
         if (type === 'email-templates') {
@@ -705,56 +705,56 @@ function loadNotifContent(type, body) {
         const content = {
             'email-templates': `
                 <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Editace email šablon pro automatické notifikace</p>
+                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">${t('notif_edit_email_templates')}</p>
                     <div id="notifications-container-clone"></div>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
-                            <div style="font-weight: 600; margin-bottom: 0.5rem;">Nová reklamace</div>
-                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">Odesílá se při vytvoření nové reklamace</div>
-                            <button class="btn btn-sm" style="font-size: 0.7rem;">Editovat šablonu</button>
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">${t('notif_new_claim')}</div>
+                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">${t('notif_new_claim_desc')}</div>
+                            <button class="btn btn-sm" style="font-size: 0.7rem;">${t('edit_template')}</button>
                         </div>
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
-                            <div style="font-weight: 600; margin-bottom: 0.5rem;">Změna stavu</div>
-                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">Odesílá se při změně stavu reklamace</div>
-                            <button class="btn btn-sm" style="font-size: 0.7rem;">Editovat šablonu</button>
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">${t('notif_status_change')}</div>
+                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">${t('notif_status_change_desc')}</div>
+                            <button class="btn btn-sm" style="font-size: 0.7rem;">${t('edit_template')}</button>
                         </div>
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
-                            <div style="font-weight: 600; margin-bottom: 0.5rem;">Dokončení reklamace</div>
-                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">Odesílá se po dokončení reklamace</div>
-                            <button class="btn btn-sm" style="font-size: 0.7rem;">Editovat šablonu</button>
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">${t('notif_claim_completion')}</div>
+                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">${t('notif_claim_completion_desc')}</div>
+                            <button class="btn btn-sm" style="font-size: 0.7rem;">${t('edit_template')}</button>
                         </div>
                     </div>
                 </div>
             `,
             'sms-templates': `
                 <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Nastavení SMS šablon pro notifikace</p>
+                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">${t('sms_templates_desc')}</p>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
-                            <div style="font-weight: 600; margin-bottom: 0.5rem;">SMS pro zákazníka</div>
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">${t('sms_for_customer')}</div>
                             <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">Text: "Vaše reklamace {cislo} byla přijata"</div>
-                            <button class="btn btn-sm" style="font-size: 0.7rem;">Editovat</button>
+                            <button class="btn btn-sm" style="font-size: 0.7rem;">${t('edit')}</button>
                         </div>
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
-                            <div style="font-weight: 600; margin-bottom: 0.5rem;">SMS pro technika</div>
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">${t('sms_for_technician')}</div>
                             <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">Text: "Nová zakázka {cislo} - {mesto}"</div>
-                            <button class="btn btn-sm" style="font-size: 0.7rem;">Editovat</button>
+                            <button class="btn btn-sm" style="font-size: 0.7rem;">${t('edit')}</button>
                         </div>
                     </div>
                 </div>
             `,
             'email-recipients': `
                 <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Správa příjemců automatických notifikací</p>
+                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">${t('email_recipients_desc')}</p>
                     <div style="margin-bottom: 1rem;">
-                        <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Administrátoři</label>
+                        <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">${t('administrators')}</label>
                         <input type="text" placeholder="admin@example.com, admin2@example.com" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                     </div>
                     <div style="margin-bottom: 1rem;">
-                        <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">Kopie všech emailů</label>
+                        <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">${t('all_emails_copy')}</label>
                         <input type="text" placeholder="office@example.com" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                     </div>
-                    <button class="btn btn-sm btn-success" style="font-size: 0.7rem;">Uložit změny</button>
+                    <button class="btn btn-sm btn-success" style="font-size: 0.7rem;">${t('save_changes')}</button>
                 </div>
             `,
             'auto-notifications': `

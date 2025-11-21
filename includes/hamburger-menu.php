@@ -367,6 +367,8 @@ function closeMenu() {
 })();
 </script>
 
+<!-- Translations - překladový slovník pro dynamický obsah -->
+<script src="assets/js/translations.js"></script>
 <!-- Language Switcher - centralizovaný jazykový přepínač -->
 <script src="assets/js/language-switcher.js" defer></script>
 <script src="assets/js/logout-handler.js" defer></script>
