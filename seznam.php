@@ -383,7 +383,7 @@ if (!$isLoggedIn && !$isAdmin) {
   .filter-btn {
     width: 100% !important;
     padding: 0.375rem 0.6rem !important;
-    font-size: 0.975rem !important;
+    font-size: 0.65rem !important;
     line-height: 1.2 !important;
     min-height: 27px !important;
     border-width: 1px !important;
@@ -397,7 +397,7 @@ if (!$isLoggedIn && !$isAdmin) {
 @media (max-width: 375px) {
   .filter-btn {
     padding: 0.375rem 0.6rem !important;
-    font-size: 0.975rem !important;
+    font-size: 0.65rem !important;
     line-height: 1.2 !important;
     min-height: 27px !important;
   }
@@ -645,11 +645,11 @@ if (!$isLoggedIn && !$isAdmin) {
     line-height: 1.2 !important;
   }
 
-  /* Všechna tlačítka v modalu - sjednocená velikost s filtry */
+  /* Všechna tlačítka v modalu - decentní font */
   .modal-body .btn,
   .modal-actions .btn {
     padding: 0.375rem 0.6rem !important;
-    font-size: 0.975rem !important;
+    font-size: 0.65rem !important;
     min-height: 27px !important;
     line-height: 1.2 !important;
     letter-spacing: 0.05em !important;
@@ -676,7 +676,7 @@ if (!$isLoggedIn && !$isAdmin) {
 
   .calendar-nav-btn {
     padding: 0.375rem 0.6rem !important;
-    font-size: 0.975rem !important;
+    font-size: 0.65rem !important;
     min-height: 27px !important;
   }
 
@@ -723,11 +723,11 @@ if (!$isLoggedIn && !$isAdmin) {
     gap: 0.2rem !important;
   }
 
-  /* PDF tlačítka - sjednocená velikost s filtry */
+  /* PDF tlačítka - decentní font */
   .modal-body button[onclick*="PDF"],
   .modal-body button[onclick*="pdf"] {
     padding: 0.375rem 0.6rem !important;
-    font-size: 0.975rem !important;
+    font-size: 0.65rem !important;
     min-height: 27px !important;
   }
 
@@ -824,7 +824,7 @@ if (!$isLoggedIn && !$isAdmin) {
   .modal-body .btn,
   .modal-actions .btn {
     padding: 0.375rem 0.6rem !important;
-    font-size: 0.975rem !important;
+    font-size: 0.65rem !important;
     min-height: 27px !important;
   }
 
