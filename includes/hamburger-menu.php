@@ -37,12 +37,22 @@ if ($isAdmin) {
         </a>
       <?php endforeach; ?>
       <a href="logout.php" class="hamburger-logout">ODHLÁŠENÍ</a>
+      <div class="hamburger-lang-switcher">
+        <span class="lang-flag active" data-lang="cs">🇨🇿</span>
+        <span class="lang-flag" data-lang="en">🇬🇧</span>
+        <span class="lang-flag" data-lang="it">🇮🇹</span>
+      </div>
     <?php
     elseif ($isLoggedIn):
     ?>
       <a href="novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
       <a href="seznam.php" <?php if($current == "seznam.php") echo 'class="active"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
       <a href="logout.php" class="hamburger-logout" data-lang-cs="ODHLÁŠENÍ" data-lang-en="LOGOUT" data-lang-it="DISCONNETTERSI">ODHLÁŠENÍ</a>
+      <div class="hamburger-lang-switcher">
+        <span class="lang-flag active" data-lang="cs">🇨🇿</span>
+        <span class="lang-flag" data-lang="en">🇬🇧</span>
+        <span class="lang-flag" data-lang="it">🇮🇹</span>
+      </div>
     <?php
     else:
     ?>
@@ -355,4 +365,8 @@ function closeMenu() {
     initHamburgerMenu();
   }
 })();
-</script><script src="assets/js/logout-handler.js" defer></script>
+</script>
+
+<!-- Language Switcher - centralizovaný jazykový přepínač -->
+<script src="assets/js/language-switcher.js" defer></script>
+<script src="assets/js/logout-handler.js" defer></script>
