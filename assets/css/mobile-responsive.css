@@ -378,9 +378,9 @@ body {
 
   /* Order box - kompaktnější pro zobrazení více karet */
   .order-box {
-    margin-bottom: 0.5rem;
-    padding: 0.6rem;
-    min-height: auto;
+    margin-bottom: 0.5rem !important;
+    padding: 0.6rem !important;
+    min-height: auto !important;
   }
 
   /* Grid layouts - single column */
@@ -432,9 +432,9 @@ body {
   }
 
   .filter-btn {
-    width: 100%;
-    padding: 0.4rem 0.75rem; /* 50% menší výška (bylo 0.75rem) */
-    font-size: 0.85rem; /* Menší font pro kompaktnost */
+    width: 100% !important;
+    padding: 0.4rem 0.75rem !important; /* 50% menší výška (bylo 0.75rem) */
+    font-size: 0.85rem !important; /* Menší font pro kompaktnost */
   }
 }
 
@@ -622,12 +622,12 @@ body {
 
   /* Filter buttony - ještě kompaktnější */
   .filter-btn {
-    padding: 0.35rem 0.5rem;
-    font-size: 0.75rem;
+    padding: 0.35rem 0.5rem !important;
+    font-size: 0.75rem !important;
   }
 
   .filter-bar {
-    gap: 0.2rem;
+    gap: 0.2rem !important;
   }
 }
 
