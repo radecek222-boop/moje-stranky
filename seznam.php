@@ -60,6 +60,28 @@ if (!$isLoggedIn && !$isAdmin) {
   margin-top: 2rem !important;
 }
 
+/* 📱 MOBILNÍ OPTIMALIZACE SEARCH BAR */
+@media (max-width: 768px) {
+  .search-bar {
+    padding: 0.3rem 0.4rem !important;
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .search-input {
+    font-size: 0.65rem !important;
+  }
+
+  .search-icon {
+    font-size: 0.75rem !important;
+  }
+
+  .search-clear {
+    font-size: 0.55rem !important;
+    padding: 0.3rem 0.6rem !important;
+  }
+}
+
 /* Loading Overlay */
 .loading-overlay {
   position: fixed;
@@ -260,111 +282,112 @@ if (!$isLoggedIn && !$isAdmin) {
 
 /* 📱 MOBILNÍ OPTIMALIZACE KARET ZÁKAZNÍKŮ */
 @media (max-width: 768px) {
-  /* Karty zákazníků - kompaktní pro zobrazení více karet */
+  /* Karty zákazníků - kompaktní pro zobrazení více karet (50% menší) */
   .order-box {
-    padding: 0.6rem !important;
-    margin-bottom: 0.5rem !important;
+    padding: 0.3rem !important;
+    margin-bottom: 0.25rem !important;
     min-height: auto !important;
   }
 
   .order-header {
-    margin-bottom: 0.4rem !important;
-    padding-bottom: 0.3rem !important;
+    margin-bottom: 0.2rem !important;
+    padding-bottom: 0.15rem !important;
   }
 
   .order-number {
-    font-size: 0.75rem !important;
+    font-size: 0.6rem !important;
     font-weight: 600 !important;
   }
 
   .order-status {
-    width: 8px !important;
-    height: 8px !important;
+    width: 6px !important;
+    height: 6px !important;
   }
 
   .order-notes-badge {
-    font-size: 0.6rem !important;
-    min-width: 16px !important;
-    height: 16px !important;
-    padding: 0 0.25rem !important;
+    font-size: 0.5rem !important;
+    min-width: 14px !important;
+    height: 14px !important;
+    padding: 0 0.2rem !important;
   }
 
   .order-body {
-    gap: 0.3rem !important;
+    gap: 0.15rem !important;
   }
 
   .order-customer {
-    font-size: 0.85rem !important;
+    font-size: 0.65rem !important;
     font-weight: 600 !important;
-    margin-bottom: 0.3rem !important;
+    margin-bottom: 0.15rem !important;
   }
 
   .order-detail {
-    gap: 0.2rem !important;
+    gap: 0.1rem !important;
   }
 
   .order-detail-line {
-    font-size: 0.7rem !important;
-    line-height: 1.3 !important;
+    font-size: 0.55rem !important;
+    line-height: 1.2 !important;
   }
 
   /* Grid - menší mezery mezi kartami */
   .order-grid,
   #orderGrid {
-    gap: 0.5rem !important;
-    padding: 0.5rem !important;
+    gap: 0.25rem !important;
+    padding: 0.25rem !important;
   }
 }
 
-/* 📱 Extra malé displeje - ještě kompaktnější */
+/* 📱 Extra malé displeje - ještě kompaktnější (50% menší) */
 @media (max-width: 480px) {
   .order-box {
-    padding: 0.5rem !important;
-    margin-bottom: 0.4rem !important;
+    padding: 0.25rem !important;
+    margin-bottom: 0.2rem !important;
   }
 
   .order-number {
-    font-size: 0.7rem !important;
+    font-size: 0.55rem !important;
   }
 
   .order-customer {
-    font-size: 0.8rem !important;
+    font-size: 0.6rem !important;
   }
 
   .order-detail-line {
-    font-size: 0.65rem !important;
+    font-size: 0.52rem !important;
   }
 
   .order-grid,
   #orderGrid {
-    gap: 0.4rem !important;
-    padding: 0.4rem !important;
+    gap: 0.2rem !important;
+    padding: 0.2rem !important;
   }
 }
 
-/* 📱 MOBILNÍ OPTIMALIZACE FILTER TLAČÍTEK */
+/* 📱 MOBILNÍ OPTIMALIZACE FILTER TLAČÍTEK (50% menší) */
 @media (max-width: 768px) {
   /* Filter bar - stack filters */
   .filter-bar {
     flex-direction: column !important;
-    gap: 0.25rem !important;
+    gap: 0.15rem !important;
+    margin-bottom: 1rem !important;
   }
 
   .filter-btn {
     width: 100% !important;
-    padding: 0.4rem 0.75rem !important; /* 50% menší výška */
-    font-size: 0.85rem !important;
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.65rem !important;
   }
 }
 
 @media (max-width: 375px) {
   .filter-btn {
-    padding: 0.35rem 0.5rem !important;
-    font-size: 0.75rem !important;
+    padding: 0.18rem 0.35rem !important;
+    font-size: 0.6rem !important;
   }
 
   .filter-bar {
-    gap: 0.2rem !important;
+    gap: 0.1rem !important;
   }
 }
 
