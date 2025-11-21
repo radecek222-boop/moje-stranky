@@ -46,12 +46,12 @@ if (!$isLoggedIn && !$isAdmin) {
 
 <!-- External CSS -->
     <!-- Unified Design System -->
-  <link rel="preload" href="assets/css/styles.min.css" as="style">
-  <link rel="preload" href="assets/css/seznam.min.css" as="style">
+  <link rel="preload" href="assets/css/styles.min.css?v=20251121-02" as="style">
+  <link rel="preload" href="assets/css/seznam.min.css?v=20251121-02" as="style">
 
-  <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/seznam.min.css">
-  <link rel="stylesheet" href="assets/css/mobile-responsive.css">
+  <link rel="stylesheet" href="assets/css/styles.min.css?v=20251121-02">
+  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20251121-02">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.css?v=20251121-02">
 <?php if ($isAdmin): ?>
 <link rel="stylesheet" href="assets/css/admin-header.css">
 <?php endif; ?>
