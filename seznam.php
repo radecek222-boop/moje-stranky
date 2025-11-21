@@ -557,7 +557,8 @@ if (!$isLoggedIn && !$isAdmin) {
     box-sizing: border-box !important;
   }
 
-  .modal-body span[style*="font-weight: 600"] {
+  .modal-body span[style*="font-weight: 600"],
+  .modal-body label[style*="font-weight: 600"] {
     display: block !important;
     margin-bottom: 0.25rem !important;
     font-size: 0.55rem !important;
