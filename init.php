@@ -76,7 +76,9 @@ if (session_status() === PHP_SESSION_NONE) {
     }
 
     // Nastavení garbage collection
-    ini_set('session.gc_maxlifetime', 3600);
+    // ✅ FIX 3: Zvýšení gc_maxlifetime z 1 hodiny na 24 hodin
+    // Eliminuje předčasné vypršení session a ztrátu CSRF tokenu
+    ini_set('session.gc_maxlifetime', 86400);  // 24 hodin (24 * 60 * 60)
     ini_set('session.use_only_cookies', 1);
 
     session_start();
