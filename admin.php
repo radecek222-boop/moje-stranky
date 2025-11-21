@@ -133,6 +133,10 @@ if ($activeTab === 'dashboard') {
     if (!empty($bodyClasses)) echo ' class="' . implode(' ', $bodyClasses) . '"';
 ?>>
 
+<?php if (!$embedMode): ?>
+<?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
+<?php endif; ?>
+
 <!-- CSRF Token pro API volání -->
 <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
 
@@ -919,11 +923,11 @@ function loadNotifContent(type, body) {
   <div id="tab-users" class="tab-content">
     <div class="table-container">
       <div class="table-header">
-        <h3 class="table-title">Všichni uživatelé</h3>
+        <h3 class="table-title" data-lang-cs="Všichni uživatelé" data-lang-en="All Users" data-lang-it="Tutti gli Utenti">Všichni uživatelé</h3>
         <div class="table-actions">
-          <input type="text" class="search-box" id="search-users" placeholder="Hledat...">
-          <button class="btn btn-sm btn-success" id="addUserBtn">Přidat</button>
-          <button class="btn btn-sm" id="refreshUsersBtn">Obnovit</button>
+          <input type="text" class="search-box" id="search-users" data-lang-cs-placeholder="Hledat..." data-lang-en-placeholder="Search..." data-lang-it-placeholder="Cerca..." placeholder="Hledat...">
+          <button class="btn btn-sm btn-success" id="addUserBtn" data-lang-cs="Přidat" data-lang-en="Add" data-lang-it="Aggiungi">Přidat</button>
+          <button class="btn btn-sm" id="refreshUsersBtn" data-lang-cs="Obnovit" data-lang-en="Refresh" data-lang-it="Aggiorna">Obnovit</button>
         </div>
       </div>
       
@@ -931,17 +935,17 @@ function loadNotifContent(type, body) {
         <thead>
           <tr>
             <th>ID</th>
-            <th>Jméno</th>
+            <th data-lang-cs="Jméno" data-lang-en="Name" data-lang-it="Nome">Jméno</th>
             <th>Email</th>
-            <th>Role</th>
+            <th data-lang-cs="Role" data-lang-en="Role" data-lang-it="Ruolo">Role</th>
             <th>Status</th>
-            <th>Registrace</th>
-            <th>Akce</th>
+            <th data-lang-cs="Registrace" data-lang-en="Registration" data-lang-it="Registrazione">Registrace</th>
+            <th data-lang-cs="Akce" data-lang-en="Actions" data-lang-it="Azioni">Akce</th>
           </tr>
         </thead>
         <tbody id="users-table">
           <tr>
-            <td colspan="7" class="loading">Načítání...</td>
+            <td colspan="7" class="loading" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
           </tr>
         </tbody>
       </table>
@@ -1023,25 +1027,25 @@ function loadNotifContent(type, body) {
   <div id="tab-online" class="tab-content">
     <div class="table-container">
       <div class="table-header">
-        <h3 class="table-title">Online uživatelé</h3>
+        <h3 class="table-title" data-lang-cs="Online uživatelé" data-lang-en="Online Users" data-lang-it="Utenti Online">Online uživatelé</h3>
         <div class="table-actions">
-          <button class="btn btn-sm" id="refreshOnlineBtn">Obnovit</button>
+          <button class="btn btn-sm" id="refreshOnlineBtn" data-lang-cs="Obnovit" data-lang-en="Refresh" data-lang-it="Aggiorna">Obnovit</button>
         </div>
       </div>
-      
+
       <table>
         <thead>
           <tr>
             <th>Status</th>
-            <th>Uživatel</th>
-            <th>Role</th>
+            <th data-lang-cs="Uživatel" data-lang-en="User" data-lang-it="Utente">Uživatel</th>
+            <th data-lang-cs="Role" data-lang-en="Role" data-lang-it="Ruolo">Role</th>
             <th>Email</th>
-            <th>Poslední aktivita</th>
+            <th data-lang-cs="Poslední aktivita" data-lang-en="Last Activity" data-lang-it="Ultima Attività">Poslední aktivita</th>
           </tr>
         </thead>
         <tbody id="online-table">
           <tr>
-            <td colspan="5" class="loading">Načítání...</td>
+            <td colspan="5" class="loading" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
           </tr>
         </tbody>
       </table>
@@ -1057,14 +1061,14 @@ function loadNotifContent(type, body) {
 <div class="modal" id="addUserModal">
   <div class="modal-content" style="width: 90vw !important; height: 80vh !important; max-width: 90vw !important; max-height: 80vh !important; display: flex; flex-direction: column;">
     <div class="modal-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #ddd; flex-shrink: 0;">
-      <h3 class="modal-title">Přidat uživatele</h3>
+      <h3 class="modal-title" data-lang-cs="Přidat uživatele" data-lang-en="Add User" data-lang-it="Aggiungi Utente">Přidat uživatele</h3>
       <button class="modal-close" id="closeModalBtn">×</button>
     </div>
     <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 2rem;">
       <div id="modal-error" class="error-message hidden"></div>
-      
+
       <div class="form-group">
-        <label class="form-label">Jméno *</label>
+        <label class="form-label" data-lang-cs="Jméno *" data-lang-en="Name *" data-lang-it="Nome *">Jméno *</label>
         <input type="text" class="form-input" id="add-name" required minlength="2">
       </div>
 
@@ -1074,31 +1078,31 @@ function loadNotifContent(type, body) {
       </div>
 
       <div class="form-group">
-        <label class="form-label">Telefon</label>
+        <label class="form-label" data-lang-cs="Telefon" data-lang-en="Phone" data-lang-it="Telefono">Telefon</label>
         <input type="tel" class="form-input" id="add-phone">
       </div>
 
       <div class="form-group">
-        <label class="form-label">Adresa</label>
+        <label class="form-label" data-lang-cs="Adresa" data-lang-en="Address" data-lang-it="Indirizzo">Adresa</label>
         <input type="text" class="form-input" id="add-address">
       </div>
 
       <div class="form-group">
-        <label class="form-label">Role *</label>
+        <label class="form-label" data-lang-cs="Role *" data-lang-en="Role *" data-lang-it="Ruolo *">Role *</label>
         <select class="form-select" id="add-role" required>
-          <option value="prodejce">Prodejce</option>
-          <option value="technik">Technik</option>
+          <option value="prodejce" data-lang-cs="Prodejce" data-lang-en="Seller" data-lang-it="Venditore">Prodejce</option>
+          <option value="technik" data-lang-cs="Technik" data-lang-en="Technician" data-lang-it="Tecnico">Technik</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Heslo * (min. 8 znaků)</label>
+        <label class="form-label" data-lang-cs="Heslo * (min. 8 znaků)" data-lang-en="Password * (min. 8 characters)" data-lang-it="Password * (min. 8 caratteri)">Heslo * (min. 8 znaků)</label>
         <input type="password" class="form-input" id="add-password" required minlength="8">
       </div>
     </div>
     <div class="modal-footer" style="padding: 1.5rem 2rem; border-top: 1px solid #ddd; flex-shrink: 0;">
-      <button class="btn" id="cancelModalBtn">Zrušit</button>
-      <button class="btn btn-success" id="submitUserBtn">Přidat</button>
+      <button class="btn" id="cancelModalBtn" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
+      <button class="btn btn-success" id="submitUserBtn" data-lang-cs="Přidat" data-lang-en="Add" data-lang-it="Aggiungi">Přidat</button>
     </div>
   </div>
 </div>
@@ -1115,56 +1119,56 @@ function loadNotifContent(type, body) {
 <div class="wgs-modal" id="editNotificationModal" style="display: none;">
   <div class="modal-content" style="width: 1200px; max-width: 90vw; height: 80vh; display: flex; flex-direction: column; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
     <div class="modal-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #ddd; flex-shrink: 0;">
-      <h3 class="modal-title" id="editNotificationTitle">Editovat notifikaci</h3>
+      <h3 class="modal-title" id="editNotificationTitle" data-lang-cs="Editovat notifikaci" data-lang-en="Edit Notification" data-lang-it="Modifica Notifica">Editovat notifikaci</h3>
       <button class="modal-close" onclick="closeEditNotificationModal()">×</button>
     </div>
     <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 2rem;">
       <div id="edit-notification-error" class="error-message" style="display: none;"></div>
       <div id="edit-notification-success" class="success-message" style="display: none;"></div>
       <div class="form-group">
-        <label class="form-label">Příjemce</label>
+        <label class="form-label" data-lang-cs="Příjemce" data-lang-en="Recipient" data-lang-it="Destinatario">Příjemce</label>
         <select class="form-select" id="edit-recipient">
-          <option value="customer">Zákazník</option>
+          <option value="customer" data-lang-cs="Zákazník" data-lang-en="Customer" data-lang-it="Cliente">Zákazník</option>
           <option value="admin">Admin</option>
-          <option value="technician">Technik</option>
-          <option value="seller">Prodejce</option>
+          <option value="technician" data-lang-cs="Technik" data-lang-en="Technician" data-lang-it="Tecnico">Technik</option>
+          <option value="seller" data-lang-cs="Prodejce" data-lang-en="Seller" data-lang-it="Venditore">Prodejce</option>
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Předmět (pouze email)</label>
+        <label class="form-label" data-lang-cs="Předmět (pouze email)" data-lang-en="Subject (email only)" data-lang-it="Oggetto (solo email)">Předmět (pouze email)</label>
         <input type="text" class="form-input" id="edit-subject">
       </div>
       <div class="form-group">
-        <label class="form-label">Šablona zprávy</label>
-        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;"><strong>Dostupné proměnné:</strong>
+        <label class="form-label" data-lang-cs="Šablona zprávy" data-lang-en="Message Template" data-lang-it="Modello di Messaggio">Šablona zprávy</label>
+        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;"><strong data-lang-cs="Dostupné proměnné:" data-lang-en="Available variables:" data-lang-it="Variabili disponibili:">Dostupné proměnné:</strong>
           <div id="available-variables" style="display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem;"></div>
         </div>
         <textarea class="form-input" id="edit-template" rows="8"></textarea>
       </div>
       <div class="form-group">
-        <label class="form-label">Náhled</label>
+        <label class="form-label" data-lang-cs="Náhled" data-lang-en="Preview" data-lang-it="Anteprima">Náhled</label>
         <div id="template-preview" style="background: #f5f5f5; padding: 1rem; border: 1px solid #ddd; white-space: pre-wrap; font-family: monospace; font-size: 0.9rem;">Začněte psát...</div>
       </div>
       <div class="form-group">
-        <label class="form-label">Dodatečné kopie emailů (CC)</label>
+        <label class="form-label" data-lang-cs="Dodatečné kopie emailů (CC)" data-lang-en="Additional Email Copies (CC)" data-lang-it="Copie Email Aggiuntive (CC)">Dodatečné kopie emailů (CC)</label>
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-          <input type="email" class="form-input" id="new-cc-email" placeholder="novy@email.cz" style="flex: 1;">
-          <button class="btn btn-sm" onclick="addCCEmail()">+ Přidat</button>
+          <input type="email" class="form-input" id="new-cc-email" data-lang-cs-placeholder="novy@email.cz" data-lang-en-placeholder="new@email.com" data-lang-it-placeholder="nuovo@email.it" placeholder="novy@email.cz" style="flex: 1;">
+          <button class="btn btn-sm" onclick="addCCEmail()" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
         </div>
         <div id="admin-emails-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
       </div>
       <div class="form-group">
-        <label class="form-label">Skryté kopie (BCC)</label>
+        <label class="form-label" data-lang-cs="Skryté kopie (BCC)" data-lang-en="Blind Copies (BCC)" data-lang-it="Copie Nascoste (BCC)">Skryté kopie (BCC)</label>
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-          <input type="email" class="form-input" id="new-bcc-email" placeholder="skryta@email.cz" style="flex: 1;">
-          <button class="btn btn-sm" onclick="addBCCEmail()">+ Přidat</button>
+          <input type="email" class="form-input" id="new-bcc-email" data-lang-cs-placeholder="skryta@email.cz" data-lang-en-placeholder="hidden@email.com" data-lang-it-placeholder="nascosta@email.it" placeholder="skryta@email.cz" style="flex: 1;">
+          <button class="btn btn-sm" onclick="addBCCEmail()" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
         </div>
         <div id="bcc-emails-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
       </div>
     </div>
     <div class="modal-footer" style="padding: 1.5rem 2rem; border-top: 1px solid #ddd; flex-shrink: 0;">
-      <button class="btn" onclick="closeEditNotificationModal()">Zrušit</button>
-      <button class="btn btn-success" onclick="saveNotificationTemplate()">Uložit</button>
+      <button class="btn" onclick="closeEditNotificationModal()" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
+      <button class="btn btn-success" onclick="saveNotificationTemplate()" data-lang-cs="Uložit" data-lang-en="Save" data-lang-it="Salva">Uložit</button>
     </div>
   </div>
 </div>
