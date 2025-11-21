@@ -19,16 +19,31 @@ jobs:
           fetch-depth: 1  # Jen poslední commit = rychlejší
 
       - name: 🚀 SFTP Deploy (optimalizovaný)
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_HOST }}
-          port: 22
+          protocol: ftps
+          port: 21
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local_path: "./"
-          remote_path: "wgs-service.cz/www/"
-          sftp_only: true
-          delete_remote_files: false
+          server-dir: /wgs-service.cz/www/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/tests/**
+            **/test/**
+            **/.github/**
+            **/.vscode/**
+            **/README.md
+            **/CONTRIBUTING.md
+            **/LICENSE
+            **/*.log
+            **/phpunit.xml
+            **/composer.lock
+            **/.env.example
+            **/temp/**
+            **/uploads/screens
 
       - name: ✅ Hotovo!
         run: |
