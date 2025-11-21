@@ -67,6 +67,10 @@ function handleRememberMeLogin(): void
         // Přihlásit uživatele
         session_regenerate_id(true);
 
+        // ✅ SECURITY FIX: CSRF token rotation po auto-login
+        unset($_SESSION['csrf_token']);
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
         $_SESSION['user_id'] = $user['user_id'];
         $_SESSION['user_name'] = $user['name'] ?? $user['email'];
         $_SESSION['user_email'] = $user['email'];
