@@ -239,14 +239,18 @@ function handleDeleteKey(PDO $pdo, array $payload): void
         throw new InvalidArgumentException('Chybí kód klíče.');
     }
 
-    $stmt = $pdo->prepare('UPDATE wgs_registration_keys SET is_active = 0 WHERE key_code = :key_code');
+    // ✅ OPRAVA: Fyzické smazání místo soft delete (is_active = 0)
+    // Důvod: UI zobrazuje i neaktivní klíče, ale UPDATE ... SET is_active = 0
+    // nefunguje pro klíče které už jsou neaktivní (rowCount = 0)
+    // Řešení: DELETE fyzicky odstraní klíč z databáze
+    $stmt = $pdo->prepare('DELETE FROM wgs_registration_keys WHERE key_code = :key_code');
     $stmt->execute([':key_code' => $keyCode]);
 
     if ($stmt->rowCount() === 0) {
-        throw new InvalidArgumentException('Klíč nebyl nalezen nebo již byl deaktivován.');
+        throw new InvalidArgumentException('Klíč nebyl nalezen v databázi.');
     }
 
-    respondSuccess(['key_code' => $keyCode]);
+    respondSuccess(['key_code' => $keyCode, 'message' => 'Klíč byl úspěšně smazán']);
 }
 
 /**
