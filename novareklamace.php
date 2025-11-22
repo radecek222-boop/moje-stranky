@@ -25,9 +25,28 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
+  <!-- Preload hero image pro rychlejší LCP -->
+  <link rel="preload" href="assets/img/herman-image03.webp" as="image" fetchpriority="high">
+
   <!-- Google Fonts s font-display: swap pro prevenci CLS -->
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
+
+  <!-- Inline fallback font pro prevenci CLS -->
+  <style>
+    body {
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+    @font-face {
+      font-family: 'Poppins-fallback';
+      font-display: swap;
+      src: local('Arial');
+      ascent-override: 92%;
+      descent-override: 24%;
+      line-gap-override: 0%;
+      size-adjust: 107%;
+    }
+  </style>
 
   <!-- Critical CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
