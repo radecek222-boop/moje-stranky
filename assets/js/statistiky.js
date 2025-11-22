@@ -596,28 +596,20 @@ async function exportovatPDF() {
                         </tr>
                     `).join('')}
                 </tbody>
-                <tfoot>
-                    <tr style="background: #f0f0f0; font-weight: bold;">
-                        <td colspan="5" style="padding: 6px; border: 1px solid #999; text-align: right;">Počet zakázek celkem:</td>
-                        <td style="padding: 6px; border: 1px solid #999; text-align: right;">${zakazky.length} ks</td>
-                        ${zobrazitOdmenu ? '<td style="padding: 6px; border: 1px solid #999;"></td>' : ''}
-                        <td colspan="2" style="padding: 6px; border: 1px solid #999;"></td>
-                    </tr>
-                    <tr style="background: #f0f0f0; font-weight: bold;">
-                        <td colspan="5" style="padding: 6px; border: 1px solid #999; text-align: right;">Celkem za zakázky k fakturaci:</td>
-                        <td style="padding: 6px; border: 1px solid #999; text-align: right;">${celkemCastka.toFixed(2)} €</td>
-                        ${zobrazitOdmenu ? '<td style="padding: 6px; border: 1px solid #999;"></td>' : ''}
-                        <td colspan="2" style="padding: 6px; border: 1px solid #999;"></td>
-                    </tr>
-                    ${zobrazitOdmenu ? `
-                        <tr style="background: #f0f0f0; font-weight: bold;">
-                            <td colspan="6" style="padding: 6px; border: 1px solid #999; text-align: right;">Výdělek celkem technik:</td>
-                            <td style="padding: 6px; border: 1px solid #999; text-align: right;">${celkemVydelek.toFixed(2)} €</td>
-                            <td colspan="2" style="padding: 6px; border: 1px solid #999;"></td>
-                        </tr>
-                    ` : ''}
-                </tfoot>
             </table>
+            <div style="margin-top: 20px;">
+                <div style="display: inline-block; background: #f0f0f0; border: 1px solid #999; padding: 6px 12px; margin-right: 15px; margin-bottom: 8px; font-size: 9px; font-weight: bold;">
+                    Počet zakázek celkem: <span style="color: #333;">${zakazky.length} ks</span>
+                </div>
+                <div style="display: inline-block; background: #f0f0f0; border: 1px solid #999; padding: 6px 12px; margin-right: 15px; margin-bottom: 8px; font-size: 9px; font-weight: bold;">
+                    Celkem za zakázky k fakturaci: <span style="color: #333;">${celkemCastka.toFixed(2)} €</span>
+                </div>
+                ${zobrazitOdmenu ? `
+                    <div style="display: inline-block; background: #f0f0f0; border: 1px solid #999; padding: 6px 12px; margin-bottom: 8px; font-size: 9px; font-weight: bold;">
+                        Výdělek celkem technik: <span style="color: #333;">${celkemVydelek.toFixed(2)} €</span>
+                    </div>
+                ` : ''}
+            </div>
             <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd;">
                 <div style="font-size: 10px; color: #999; margin-bottom: 5px;">
                     Vygenerováno: ${datum}
