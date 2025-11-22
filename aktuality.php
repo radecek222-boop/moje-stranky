@@ -858,20 +858,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
           font-size: 14px;
           box-sizing: border-box;
           background: white;
-          margin-bottom: 10px;
         ">
-
-        <div style="margin-bottom: 10px;">
-          <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Pozice fotky:</label>
-          <label style="display: inline-flex; align-items: center; margin-right: 20px; cursor: pointer;">
-            <input type="radio" name="fotkaPozice" value="nahore" id="fotkaNahore" style="margin-right: 5px;">
-            Nahoře (pod nadpisem)
-          </label>
-          <label style="display: inline-flex; align-items: center; cursor: pointer;">
-            <input type="radio" name="fotkaPozice" value="dole" id="fotkaDole" checked style="margin-right: 5px;">
-            Dole (na konci článku)
-          </label>
-        </div>
 
         <div id="fotkaPreview" style="margin-top: 10px; display: none;">
           <img id="fotkaPreviewImg" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 5px;">
@@ -1171,11 +1158,6 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
     // Nadpis (všechny články normální, bez ŠIROKÝ:)
     markdown = '## ' + data.nadpis + '\n\n';
-
-    // Přidat fotku NAHOŘE (pod nadpisem) pokud je vybraná pozice nahore
-    if (data.fotka && data.fotkaPozice === 'nahore') {
-      markdown += `![Fotka článku](${data.fotka})\n\n`;
-    }
 
     // Pokud má být fotka NAHOŘE (pod nadpisem)
     if (data.fotka && data.fotkaPozice === 'nahore') {
