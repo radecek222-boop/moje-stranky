@@ -159,6 +159,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1920&h=500&fit=crop');
       background-size: cover;
       background-position: center;
+      background-attachment: fixed;
       color: white;
       padding: 100px 20px;
       text-align: center;
@@ -171,6 +172,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       margin: 0 0 15px 0;
       letter-spacing: -1px;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      text-transform: uppercase;
     }
 
     .hero-subtitle {
@@ -522,19 +524,6 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     <?php if (!empty($articles)): ?>
 
       <div class="datum-bar">
-        <div class="datum-badge">
-          <?php
-          // Překlad "Datum:"
-          echo $jazyk === 'en' ? 'Date: ' : ($jazyk === 'it' ? 'Data: ' : 'Datum: ');
-          echo date('d.m.Y', strtotime($datumAktuality));
-          ?>
-          <?php if ($hlavniAktualita && $hlavniAktualita['svatek_cz']): ?>
-            | <?php
-            echo $jazyk === 'en' ? 'Name Day' : ($jazyk === 'it' ? 'Onomastico' : 'Svátek');
-            ?>: <?php echo htmlspecialchars($hlavniAktualita['svatek_cz']); ?>
-          <?php endif; ?>
-        </div>
-
         <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
           <button class="pridat-clanek-btn" onclick="pridatNovyClanek()">
             Přidat nový článek

@@ -8,7 +8,7 @@
   background-image: url('../img/herman-image04.webp');
   background-size: cover;
   background-position: center 35%; /* Posunuto nahoru aby byla sedačka víc vidět */
-  background-attachment: fixed; /* PARALLAX EFEKT */
+  background-attachment: fixed;
   overflow: hidden;
 }
 
