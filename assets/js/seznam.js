@@ -1,3 +1,6 @@
+// VERSION CHECK: 20251122-03 - Performance diagnostika
+console.log('🔍 SEZNAM.JS NAČTEN - VERZE: 20251122-03 (s detailními timings)');
+
 // BEZPEČNOST: Cache CSRF tokenu pro prevenci nekonečné smyčky
 window.csrfTokenCache = window.csrfTokenCache || null;
 
