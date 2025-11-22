@@ -57,6 +57,52 @@ async function saveAppointment(date, time) {
 
 ---
 
+## 🚫 CRITICAL: NO EMOJI POLICY
+
+**ABSOLUTELY NO EMOJI IN CODE, UI, OR MESSAGES**
+
+With the **SOLE EXCEPTION** of language flags (🇨🇿 🇬🇧 🇮🇹), **NO emoji** are allowed anywhere in the codebase:
+
+- ❌ **NO emoji in button text:** Use "Uložit" NOT "💾 Uložit"
+- ❌ **NO emoji in headings:** Use "Upravit článek" NOT "📝 Upravit článek"
+- ❌ **NO emoji in labels:** Use "Fotografie" NOT "📷 Fotografie"
+- ❌ **NO emoji in alerts:** Use "Chyba" NOT "❌ Chyba"
+- ❌ **NO emoji in placeholders:** Use "Klikněte" NOT "📸 Klikněte"
+- ❌ **NO emoji anywhere else**
+- ✅ **ONLY EXCEPTION:** Language flags: 🇨🇿 🇬🇧 🇮🇹
+
+### Why No Emoji?
+
+1. Professional appearance for business software
+2. Accessibility - screen readers struggle with emoji
+3. Inconsistent rendering across devices and browsers
+4. Cluttered, unprofessional user interface
+5. Harder to maintain and translate
+6. User preference - requested explicitly by project owner
+
+### Example - CORRECT vs INCORRECT:
+
+```javascript
+// ✅ SPRÁVNĚ (CORRECT)
+<button>Uložit změny</button>
+<h1>Upravit článek</h1>
+alert('Článek byl uložen');
+
+// ❌ ŠPATNĚ (WRONG)
+<button>💾 Uložit změny</button>
+<h1>📝 Upravit článek</h1>
+alert('✅ Článek byl uložen');
+
+// ✅ VÝJIMKA - Pouze vlajky
+<button>🇨🇿 Čeština</button>
+<button>🇬🇧 English</button>
+<button>🇮🇹 Italiano</button>
+```
+
+**IMPORTANT:** When generating ANY code, interface, or message, Claude AI must NEVER add emoji. This is a permanent project requirement.
+
+---
+
 ## 📋 PROJECT OVERVIEW
 
 **Type:** Luxury furniture service management system

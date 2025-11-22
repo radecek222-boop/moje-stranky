@@ -27,10 +27,6 @@ if (!function_exists('loadAdminNavigation')) {
                 'href' => 'aktuality.php',
                 'header_label' => 'AKTUALITY',
             ],
-            'nova_aktualita' => [
-                'href' => 'nova_aktualita.php',
-                'header_label' => '➕ NOVÁ AKTUALITA',
-            ],
             'dashboard' => [
                 'href' => 'admin.php',
                 'header_label' => 'ADMIN',

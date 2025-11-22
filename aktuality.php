@@ -1,41 +1,76 @@
 <?php
 /**
  * Aktuality o značce Natuzzi
- * Automaticky generované denní novinky ve třech jazycích
+ * Zobrazení všech 24 článků v náhodném pořadí
  */
 
 require_once __DIR__ . '/init.php';
 require_once __DIR__ . '/includes/csrf_helper.php';
 
-// Získat dnešní aktualitu nebo poslední dostupnou
+// Získat všechny automaticky generované články (ne admin vytvořené)
 try {
     $pdo = getDbConnection();
 
-    // Zkusit získat aktualitu podle parametru ?datum=
-    $zobrazitDatum = $_GET['datum'] ?? date('Y-m-d');
+    // Získat datum které má uživatel zobrazit (default = nejnovější)
+    $vybraneDatum = $_GET['datum'] ?? null;
 
-    $stmt = $pdo->prepare("
-        SELECT * FROM wgs_natuzzi_aktuality
-        WHERE datum = :datum
-        LIMIT 1
-    ");
-    $stmt->execute(['datum' => $zobrazitDatum]);
-    $aktualita = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($vybraneDatum) {
+        // Pokud je vybrané konkrétní datum, zobrazit články z toho dne
+        $stmt = $pdo->prepare("
+            SELECT * FROM wgs_natuzzi_aktuality
+            WHERE datum = :datum
+            LIMIT 1
+        ");
+        $stmt->execute(['datum' => $vybraneDatum]);
+        $hlavniAktualita = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Pokud neexistuje, vzít poslední dostupnou
-    if (!$aktualita) {
+        if (!$hlavniAktualita) {
+            // Pokud datum neexistuje, zobrazit nejnovější
+            $stmt = $pdo->query("
+                SELECT * FROM wgs_natuzzi_aktuality
+                WHERE created_by_admin = FALSE
+                ORDER BY datum DESC
+                LIMIT 1
+            ");
+            $hlavniAktualita = $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+    } else {
+        // Zobrazit nejnovější aktualitu
         $stmt = $pdo->query("
             SELECT * FROM wgs_natuzzi_aktuality
+            WHERE created_by_admin = FALSE
             ORDER BY datum DESC
             LIMIT 1
         ");
-        $aktualita = $stmt->fetch(PDO::FETCH_ASSOC);
+        $hlavniAktualita = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Pokud existuje hlavní aktualita, načíst její obsah
+    if ($hlavniAktualita) {
+        $datumAktuality = $hlavniAktualita['datum'];
+
+        // Rozdělit obsah na jednotlivé články podle ## nadpisů
+        $jazyk = $_GET['lang'] ?? 'cz';
+        $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
+
+        $obsahSloupec = 'obsah_' . $jazyk;
+        $celyObsah = $hlavniAktualita[$obsahSloupec] ?? '';
+
+        // Parse článků z markdown obsahu
+        $clanky = parseClankyzObsahu($celyObsah, $hlavniAktualita['id'], $jazyk);
+
+        // Náhodně zamíchat pořadí článků (SEO optimalizace)
+        shuffle($clanky);
+    } else {
+        $clanky = [];
+        $datumAktuality = null;
     }
 
     // Získat seznam posledních 30 aktualit pro archiv
     $stmtArchiv = $pdo->query("
         SELECT datum, svatek_cz
         FROM wgs_natuzzi_aktuality
+        WHERE created_by_admin = FALSE
         ORDER BY datum DESC
         LIMIT 30
     ");
@@ -43,16 +78,40 @@ try {
 
 } catch (Exception $e) {
     error_log("Chyba při načítání aktualit: " . $e->getMessage());
-    $aktualita = null;
+    $clanky = [];
     $archiv = [];
+    $datumAktuality = null;
 }
 
-// Určit jazyk z URL parametru (default CZ)
+// Funkce pro rozdělení obsahu na jednotlivé články
+function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
+    $clanky = [];
+
+    // Rozdělit podle ## nadpisů (každý článek začíná ##)
+    $parts = preg_split('/(?=^## )/m', $obsah);
+
+    foreach ($parts as $index => $part) {
+        $part = trim($part);
+        if (empty($part)) continue;
+
+        // První část je hlavní nadpis + úvodní text
+        if ($index === 0 && !preg_match('/^## /', $part)) {
+            continue; // Přeskočit hlavní nadpis
+        }
+
+        $clanky[] = [
+            'obsah' => $part,
+            'aktualita_id' => $aktualitaId,
+            'jazyk' => $jazyk,
+            'index' => $index
+        ];
+    }
+
+    return $clanky;
+}
+
 $jazyk = $_GET['lang'] ?? 'cz';
 $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
-
-$obsahSloupec = 'obsah_' . $jazyk;
-$obsah = $aktualita[$obsahSloupec] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $jazyk; ?>">
@@ -95,7 +154,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
       color: white;
       padding: 80px 20px;
       text-align: center;
-      margin-bottom: 0;
+      margin-bottom: 40px;
     }
 
     .hero-title {
@@ -111,15 +170,10 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
       font-weight: 300;
     }
 
-    .content-section {
-      padding: 0;
-      background: #ffffff;
-    }
-
     .container {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 0;
+      padding: 0 20px 40px 20px;
     }
 
     .datum-badge {
@@ -131,117 +185,115 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
       margin-bottom: 30px;
       font-weight: 600;
       font-size: 1em;
+      text-align: center;
     }
 
-    .aktualita-card {
-      background: white;
-      padding: 15px 30px;
-      border-bottom: 1px solid #e0e0e0;
-      margin-bottom: 0;
-      column-count: 2;
-      column-gap: 35px;
-      text-align: justify;
+    /* DVA SLOUPCE ČLÁNKŮ */
+    .clanky-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 40px;
     }
 
-    @media (max-width: 768px) {
-      .aktualita-card {
-        column-count: 1;
-        padding: 12px 18px;
+    @media (max-width: 968px) {
+      .clanky-grid {
+        grid-template-columns: 1fr;
       }
     }
 
-    .aktualita-obsah {
+    /* Každý článek je samostatný blok */
+    .clanek-card {
+      background: white;
+      padding: 25px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      position: relative;
+      transition: all 0.3s;
+    }
+
+    .clanek-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+
+    .clanek-obsah {
       font-size: 0.95em;
       line-height: 1.6;
       color: #333;
       font-family: Georgia, 'Times New Roman', serif;
     }
 
-    .aktualita-obsah h1 {
-      color: #1a1a1a;
-      font-size: 2.8em;
-      margin: 0 0 10px 0;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: -1px;
-      column-span: all;
-      font-family: 'Poppins', sans-serif;
-      line-height: 1.1;
-    }
-
-    .aktualita-obsah h2 {
+    .clanek-obsah h2 {
       color: #1a1a1a;
       font-size: 1.4em;
-      margin: 25px 0 10px 0;
+      margin: 0 0 15px 0;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
-      border-top: 3px solid #000;
-      padding-top: 10px;
-      column-span: all;
+      border-bottom: 3px solid #000;
+      padding-bottom: 10px;
       font-family: 'Poppins', sans-serif;
     }
 
-    .aktualita-obsah h3 {
+    .clanek-obsah h3 {
       color: #333333;
-      font-size: 1.3em;
-      margin: 30px 0 15px 0;
+      font-size: 1.2em;
+      margin: 20px 0 12px 0;
       font-weight: 600;
     }
 
-    .aktualita-obsah p {
-      margin: 0 0 15px 0;
+    .clanek-obsah p {
+      margin: 0 0 12px 0;
       text-align: justify;
-      text-indent: 20px;
     }
 
-    .aktualita-obsah p:first-of-type {
-      font-weight: 500;
-      font-size: 1.1em;
-      text-indent: 0;
-    }
-
-    .aktualita-obsah strong {
+    .clanek-obsah strong {
       color: #1a1a1a;
       font-weight: 700;
     }
 
-    .aktualita-obsah a {
+    .clanek-obsah a {
       color: #1a1a1a;
       text-decoration: underline;
       font-weight: 600;
       transition: all 0.2s;
     }
 
-    .aktualita-obsah a:hover {
+    .clanek-obsah a:hover {
       color: #666666;
     }
 
-    .aktualita-obsah img {
+    .clanek-obsah img {
       max-width: 100%;
       height: auto;
       display: block;
       margin: 15px 0;
-      column-span: all;
       border: 1px solid #ddd;
+      border-radius: 5px;
     }
 
-    .news-image {
-      width: 100%;
-      height: 300px;
-      object-fit: cover;
-      margin: 20px 0;
-      border: 1px solid #e0e0e0;
-      column-span: all;
+    /* Admin tlačítko pro každý článek */
+    .admin-edit-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 8px 16px;
+      background: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85em;
+      transition: all 0.3s;
+      z-index: 10;
     }
 
-    .info-box {
-      background: linear-gradient(135deg, #f0f0f0 0%, #e8e8e8 100%);
-      border-left: 5px solid #333333;
-      padding: 20px;
-      margin: 30px 0;
-      border-radius: 8px;
-      font-size: 0.95em;
+    .admin-edit-btn:hover {
+      background: #333;
+      transform: scale(1.05);
     }
 
     .archiv-section {
@@ -249,6 +301,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
       padding: 30px;
       border-radius: 15px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-top: 40px;
     }
 
     .archiv-section h3 {
@@ -289,12 +342,8 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
         font-size: 2em;
       }
 
-      .aktualita-card {
-        padding: 25px;
-      }
-
-      .aktualita-obsah h1 {
-        font-size: 1.8em;
+      .clanek-card {
+        padding: 20px;
       }
     }
   </style>
@@ -331,76 +380,52 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
   </div>
 </section>
 
-<!-- OBSAH AKTUALITY -->
+<!-- OBSAH AKTUALIT -->
 <section class="content-section">
   <div class="container">
 
-    <?php if ($aktualita && !empty($obsah)): ?>
+    <?php if (!empty($clanky)): ?>
 
       <div class="datum-badge">
         <?php
         // Překlad "Datum:"
         echo $jazyk === 'en' ? 'Date: ' : ($jazyk === 'it' ? 'Data: ' : 'Datum: ');
-        echo date('d.m.Y', strtotime($aktualita['datum']));
+        echo date('d.m.Y', strtotime($datumAktuality));
         ?>
-        <?php if ($aktualita['svatek_cz']): ?>
+        <?php if ($hlavniAktualita && $hlavniAktualita['svatek_cz']): ?>
           | <?php
           echo $jazyk === 'en' ? 'Name Day' : ($jazyk === 'it' ? 'Onomastico' : 'Svátek');
-          ?>: <?php echo htmlspecialchars($aktualita['svatek_cz']); ?>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-          <button id="upravitClanekBtn" style="
-            margin-left: 20px;
-            padding: 8px 16px;
-            background: #1a1a1a;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9em;
-            transition: all 0.3s;
-          " onmouseover="this.style.background='#333'" onmouseout="this.style.background='#1a1a1a'">
-            ✏️ Upravit článek
-          </button>
+          ?>: <?php echo htmlspecialchars($hlavniAktualita['svatek_cz']); ?>
         <?php endif; ?>
       </div>
 
-      <div class="aktualita-card">
-        <div class="aktualita-obsah">
-          <?php
-          // Převést Markdown na HTML
-          echo parseMarkdownToHTML($obsah);
-          ?>
-        </div>
+      <!-- GRID SE 2 SLOUPCI ČLÁNKŮ -->
+      <div class="clanky-grid">
+        <?php foreach ($clanky as $clanek): ?>
+          <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>">
 
-        <?php if ($aktualita['vygenerovano_ai']): ?>
-          <div class="info-box">
-            <strong>ℹ️ <?php
-            echo $jazyk === 'en' ? 'Information' : ($jazyk === 'it' ? 'Informazione' : 'Informace');
-            ?>:</strong>
-            <?php
-            echo $jazyk === 'en' ?
-              'This content was automatically generated from current sources on the internet.' :
-              ($jazyk === 'it' ?
-                'Questo contenuto è stato generato automaticamente da fonti attuali su Internet.' :
-                'Tento obsah byl automaticky vygenerován z aktuálních zdrojů na internetu.');
-            ?>
+            <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
+              <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>')">
+                Upravit článek
+              </button>
+            <?php endif; ?>
+
+            <div class="clanek-obsah">
+              <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
+            </div>
           </div>
-        <?php endif; ?>
+        <?php endforeach; ?>
       </div>
 
       <?php if (!empty($archiv) && count($archiv) > 1): ?>
         <div class="archiv-section">
-          <h3>
-            📚 <?php
+          <h3><?php
             echo $jazyk === 'en' ? 'News Archive' : ($jazyk === 'it' ? 'Archivio Notizie' : 'Archiv aktualit');
             ?>
           </h3>
           <?php foreach (array_slice($archiv, 0, 10) as $polozka): ?>
             <a href="?datum=<?php echo $polozka['datum']; ?>&lang=<?php echo $jazyk; ?>"
-               class="archiv-link <?php echo $polozka['datum'] === $aktualita['datum'] ? 'active' : ''; ?>">
+               class="archiv-link <?php echo $polozka['datum'] === $datumAktuality ? 'active' : ''; ?>">
               <?php echo date('d.m.Y', strtotime($polozka['datum'])); ?>
               <?php if ($polozka['svatek_cz']): ?>
                 - <?php echo htmlspecialchars($polozka['svatek_cz']); ?>
@@ -412,8 +437,8 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
 
     <?php else: ?>
 
-      <div class="aktualita-card">
-        <h2>⚠️ <?php
+      <div style="background: white; padding: 40px; border-radius: 10px; text-align: center;">
+        <h2><?php
         echo $jazyk === 'en' ? 'No news available' : ($jazyk === 'it' ? 'Nessuna notizia disponibile' : 'Žádné aktuality');
         ?></h2>
         <p>
@@ -433,208 +458,42 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
 </section>
 </main>
 
-<?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true && $aktualita): ?>
-<!-- ADMIN EDITOR ODKAZŮ -->
+<?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
+<!-- ADMIN EDITOR CELÝCH ČLÁNKŮ -->
 <script>
 (function() {
   'use strict';
 
-  // Přidat CSRF token
+  // CSRF token
   const csrfToken = '<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>';
-  const aktualitaId = <?php echo intval($aktualita['id'] ?? 0); ?>;
-  const jazyk = '<?php echo htmlspecialchars($jazyk, ENT_QUOTES, 'UTF-8'); ?>';
 
-  // Když je stránka načtena
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔧 ADMIN MODE: Editor odkazů aktivován');
+  // Globální funkce pro editaci článku
+  window.upravitClanek = function(aktualitaId, jazyk) {
+    otevritEditorClanku(aktualitaId, jazyk);
+  };
 
-    // Najít všechny odkazy v obsahu aktuality
-    const odkazy = document.querySelectorAll('.aktualita-obsah a');
-
-    odkazy.forEach(function(link) {
-      // Přidat vizuální indikaci že je odkaz editovatelný
-      link.style.cursor = 'pointer';
-      link.style.position = 'relative';
-      link.title = 'Admin: Klikněte pro úpravu URL';
-
-      // Přidat malou ikonku
-      const editIcon = document.createElement('span');
-      editIcon.innerHTML = ' ✏️';
-      editIcon.style.fontSize = '0.8em';
-      editIcon.style.opacity = '0.6';
-      link.appendChild(editIcon);
-
-      // Při kliknutí zobrazit editor
-      link.addEventListener('click', function(e) {
-        e.preventDefault();
-        upravitOdkaz(link);
-      });
-    });
-  });
-
-  function upravitOdkaz(linkElement) {
-    const puvodniUrl = linkElement.href;
-    const text = linkElement.textContent.replace(' ✏️', '').trim();
-
-    // Vytvořit dialog
-    const dialog = document.createElement('div');
-    dialog.style.cssText = `
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-      z-index: 10000;
-      min-width: 500px;
-      max-width: 90%;
-    `;
-
-    dialog.innerHTML = `
-      <h3 style="margin: 0 0 20px 0; color: #1a1a1a;">✏️ Upravit odkaz</h3>
-      <p style="margin: 0 0 10px 0; color: #666;">
-        <strong>Text odkazu:</strong> ${escapeHtml(text)}
-      </p>
-      <div style="margin-bottom: 15px;">
-        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Aktuální URL:</label>
-        <input type="text" id="currentUrl" value="${escapeHtml(puvodniUrl)}"
-               style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-family: monospace; background: #f5f5f5;"
-               readonly>
-      </div>
-      <div style="margin-bottom: 20px;">
-        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Nová URL:</label>
-        <input type="text" id="newUrl" value="${escapeHtml(puvodniUrl)}"
-               style="width: 100%; padding: 10px; border: 2px solid #333; border-radius: 5px; font-family: monospace;"
-               placeholder="https://example.com">
-      </div>
-      <div style="display: flex; gap: 10px; justify-content: flex-end;">
-        <button id="cancelBtn" style="padding: 10px 20px; background: #999; color: white; border: none; border-radius: 5px; cursor: pointer;">
-          Zrušit
-        </button>
-        <button id="saveBtn" style="padding: 10px 20px; background: #1a1a1a; color: white; border: none; border-radius: 5px; cursor: pointer;">
-          💾 Uložit změnu
-        </button>
-      </div>
-    `;
-
-    // Overlay
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 9999;
-    `;
-
-    document.body.appendChild(overlay);
-    document.body.appendChild(dialog);
-
-    // Focus na input
-    const newUrlInput = document.getElementById('newUrl');
-    newUrlInput.focus();
-    newUrlInput.select();
-
-    // Zavřít dialog
-    function zavritDialog() {
-      overlay.remove();
-      dialog.remove();
+  function otevritEditorClanku(aktualitaId, jazyk) {
+    // Najít článek v DOM
+    const clanek = document.querySelector(`.clanek-card[data-aktualita-id="${aktualitaId}"]`);
+    if (!clanek) {
+      alert('Chyba: článek nebyl nalezen');
+      return;
     }
 
-    // Tlačítka
-    document.getElementById('cancelBtn').addEventListener('click', zavritDialog);
-    overlay.addEventListener('click', zavritDialog);
-
-    document.getElementById('saveBtn').addEventListener('click', async function() {
-      const novaUrl = newUrlInput.value.trim();
-
-      if (!novaUrl) {
-        alert('❌ URL nesmí být prázdná!');
-        return;
-      }
-
-      // Validace URL
-      try {
-        new URL(novaUrl);
-      } catch (e) {
-        alert('❌ Neplatný formát URL! Použijte formát: https://example.com');
-        return;
-      }
-
-      // Uložit změnu
-      this.disabled = true;
-      this.textContent = '⏳ Ukládám...';
-
-      try {
-        const response = await ulozitZmenuOdkazu(puvodniUrl, novaUrl);
-
-        if (response.status === 'success') {
-          alert('✅ Odkaz byl úspěšně změněn!\n\n' +
-                'Stará URL: ' + puvodniUrl + '\n' +
-                'Nová URL: ' + novaUrl);
-
-          // Obnovit stránku
-          window.location.reload();
+    // Získat aktuální markdown obsah z databáze
+    fetch(`/api/nacti_aktualitu.php?id=${aktualitaId}&jazyk=${jazyk}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'success') {
+          zobrazitEditor(aktualitaId, jazyk, data.obsah);
         } else {
-          alert('❌ Chyba: ' + response.message);
-          this.disabled = false;
-          this.textContent = '💾 Uložit změnu';
+          alert('Chyba při načítání: ' + data.message);
         }
-      } catch (error) {
-        alert('❌ Síťová chyba: ' + error.message);
-        this.disabled = false;
-        this.textContent = '💾 Uložit změnu';
-      }
-    });
-
-    // Enter pro uložení
-    newUrlInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        document.getElementById('saveBtn').click();
-      }
-    });
+      })
+      .catch(e => alert('Síťová chyba: ' + e.message));
   }
 
-  async function ulozitZmenuOdkazu(staraUrl, novaUrl) {
-    const formData = new FormData();
-    formData.append('csrf_token', csrfToken);
-    formData.append('aktualita_id', aktualitaId);
-    formData.append('jazyk', jazyk);
-    formData.append('stara_url', staraUrl);
-    formData.append('nova_url', novaUrl);
-
-    const response = await fetch('/api/uprav_odkaz_aktuality.php', {
-      method: 'POST',
-      body: formData
-    });
-
-    return await response.json();
-  }
-
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  // ========================================
-  // EDITOR CELÉHO ČLÁNKU
-  // ========================================
-  const upravitBtn = document.getElementById('upravitClanekBtn');
-  if (upravitBtn) {
-    upravitBtn.addEventListener('click', function() {
-      otevritEditorClanku();
-    });
-  }
-
-  function otevritEditorClanku() {
-    // Získat aktuální markdown obsah
-    const aktualniObsah = `<?php echo addslashes(str_replace(["\r\n", "\n", "\r"], "\\n", $obsah)); ?>`;
-
+  function zobrazitEditor(aktualitaId, jazyk, aktualniObsah) {
     // Vytvořit velký editor dialog
     const editorDialog = document.createElement('div');
     editorDialog.style.cssText = `
@@ -655,13 +514,13 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
 
     editorDialog.innerHTML = `
       <h2 style="margin: 0 0 20px 0; color: #1a1a1a;">
-        📝 Upravit článek - <?php echo strtoupper($jazyk); ?>
+        Upravit článek - ${jazyk.toUpperCase()}
       </h2>
       <p style="margin: 0 0 15px 0; color: #666;">
         Editujte obsah článku v Markdown formátu. Změny se uloží do databáze a budou okamžitě viditelné.
       </p>
       <div style="margin-bottom: 15px; padding: 15px; background: #f0f8ff; border-left: 4px solid #1a1a1a; border-radius: 5px;">
-        <strong>💡 Markdown formát:</strong><br>
+        <strong>Markdown formát:</strong><br>
         <code># Nadpis</code> = H1 | <code>## Nadpis</code> = H2 | <code>**tučně**</code> = <strong>tučně</strong><br>
         <code>[text](url)</code> = odkaz | <code>![popis](url)</code> = obrázek
       </div>
@@ -677,7 +536,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
         resize: vertical;
       "></textarea>
       <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
-        <strong>⚠️ Pozor:</strong> Tato změna přepíše celý obsah článku v jazyce <strong><?php echo strtoupper($jazyk); ?></strong>.
+        <strong>Pozor:</strong> Tato změna přepíše celý obsah článku v jazyce <strong>${jazyk.toUpperCase()}</strong>.
         Ostatní jazyky zůstanou nezměněny.
       </div>
       <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
@@ -690,7 +549,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
           cursor: pointer;
           font-weight: 600;
         ">
-          ❌ Zrušit
+          Zrušit
         </button>
         <button id="saveEditorBtn" style="
           padding: 12px 24px;
@@ -701,7 +560,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
           cursor: pointer;
           font-weight: 600;
         ">
-          💾 Uložit změny
+          Uložit změny
         </button>
       </div>
     `;
@@ -740,37 +599,37 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
       const novyObsah = textarea.value.trim();
 
       if (!novyObsah) {
-        alert('❌ Obsah článku nesmí být prázdný!');
+        alert('Obsah článku nesmí být prázdný!');
         return;
       }
 
-      if (!confirm(`Opravdu chcete uložit změny?\n\nPřepíše se celý obsah článku v jazyce <?php echo strtoupper($jazyk); ?>.`)) {
+      if (!confirm(`Opravdu chcete uložit změny?\n\nPřepíše se celý obsah článku v jazyce ${jazyk.toUpperCase()}.`)) {
         return;
       }
 
       this.disabled = true;
-      this.textContent = '⏳ Ukládám...';
+      this.textContent = 'Ukládám...';
 
       try {
-        const response = await ulozitCelyClanek(novyObsah);
+        const response = await ulozitCelyClanek(aktualitaId, jazyk, novyObsah);
 
         if (response.status === 'success') {
-          alert('✅ Článek byl úspěšně uložen!\n\nStránka se nyní obnoví.');
+          alert('Článek byl úspěšně uložen!\n\nStránka se nyní obnoví.');
           window.location.reload();
         } else {
-          alert('❌ Chyba při ukládání: ' + response.message);
+          alert('Chyba při ukládání: ' + response.message);
           this.disabled = false;
-          this.textContent = '💾 Uložit změny';
+          this.textContent = 'Uložit změny';
         }
       } catch (error) {
-        alert('❌ Síťová chyba: ' + error.message);
+        alert('Síťová chyba: ' + error.message);
         this.disabled = false;
-        this.textContent = '💾 Uložit změny';
+        this.textContent = 'Uložit změny';
       }
     });
   }
 
-  async function ulozitCelyClanek(novyObsah) {
+  async function ulozitCelyClanek(aktualitaId, jazyk, novyObsah) {
     const formData = new FormData();
     formData.append('csrf_token', csrfToken);
     formData.append('aktualita_id', aktualitaId);
@@ -800,7 +659,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
 function parseMarkdownToHTML(string $text): string
 {
     // Obrázky (před odkazy!)
-    $text = preg_replace('/!\[([^\]]*)\]\(([^)]+)\)/', '<img src="$2" alt="$1" class="news-image" loading="lazy">', $text);
+    $text = preg_replace('/!\[([^\]]*)\]\(([^)]+)\)/', '<img src="$2" alt="$1" loading="lazy">', $text);
 
     // Nadpisy
     $text = preg_replace('/^### (.+)$/m', '<h3>$1</h3>', $text);
