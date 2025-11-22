@@ -560,7 +560,7 @@ async function exportovatPDF() {
 
         // Vytvořit HTML pro PDF (skrytý div)
         const pdfContainer = document.createElement('div');
-        pdfContainer.style.cssText = 'position: absolute; left: -9999px; width: 1200px; background: white; padding: 30px; font-family: Poppins, Arial, sans-serif;';
+        pdfContainer.style.cssText = 'position: absolute; left: -9999px; width: 1200px; height: 800px; background: white; padding: 30px; font-family: Poppins, Arial, sans-serif;';
 
         pdfContainer.innerHTML = `
             <div style="margin-bottom: 15px;">
@@ -597,20 +597,20 @@ async function exportovatPDF() {
                     `).join('')}
                 </tbody>
             </table>
-            <div style="margin-top: 20px;">
-                <div style="display: inline-block; background: #f0f0f0; border: 1px solid #999; padding: 6px 12px; margin-right: 15px; margin-bottom: 8px; font-size: 9px; font-weight: bold;">
+            <div style="position: absolute; bottom: 100px; right: 30px; text-align: right;">
+                <div style="background: #f0f0f0; border: 1px solid #999; padding: 4px 8px; margin-bottom: 4px; font-size: 9px; font-weight: bold; display: inline-block;">
                     Počet zakázek celkem: <span style="color: #333;">${zakazky.length} ks</span>
-                </div>
-                <div style="display: inline-block; background: #f0f0f0; border: 1px solid #999; padding: 6px 12px; margin-right: 15px; margin-bottom: 8px; font-size: 9px; font-weight: bold;">
+                </div><br>
+                <div style="background: #f0f0f0; border: 1px solid #999; padding: 4px 8px; margin-bottom: 4px; font-size: 9px; font-weight: bold; display: inline-block;">
                     Celkem za zakázky k fakturaci: <span style="color: #333;">${celkemCastka.toFixed(2)} €</span>
-                </div>
+                </div><br>
                 ${zobrazitOdmenu ? `
-                    <div style="display: inline-block; background: #f0f0f0; border: 1px solid #999; padding: 6px 12px; margin-bottom: 8px; font-size: 9px; font-weight: bold;">
+                    <div style="background: #f0f0f0; border: 1px solid #999; padding: 4px 8px; font-size: 9px; font-weight: bold; display: inline-block;">
                         Výdělek celkem technik: <span style="color: #333;">${celkemVydelek.toFixed(2)} €</span>
-                    </div>
+                    </div><br>
                 ` : ''}
             </div>
-            <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd;">
+            <div style="position: absolute; bottom: 30px; left: 30px; right: 30px; padding-top: 15px; border-top: 1px solid #ddd;">
                 <div style="font-size: 10px; color: #999; margin-bottom: 5px;">
                     Vygenerováno: ${datum}
                 </div>
