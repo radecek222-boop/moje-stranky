@@ -1,175 +1,130 @@
 /**
- * WGS Statistiky - Kompletní systém statistik a reportů
- * Verze: 2.0
- * Datum: 2025-11-15
+ * WGS Statistiky - NOVÁ VERZE 2.0
+ * Reporty a vyúčtování
+ * Datum: 2025-11-22
  */
 
-// ==================================================
-// MODAL SYSTÉM
-// ==================================================
+// Globální proměnné
+let aktualniStranka = 1;
+let vybraneProdejci = [];
+let vybraneTechnici = [];
+let vybraneZeme = ['cz', 'sk']; // Defaultně obě země
+
+console.log('📊 Statistiky 2.0 - načítání...');
 
 /**
- * Otevření modalu se statistikami
+ * Inicializace při načtení stránky
  */
-function openStatsModal(type) {
-    const overlay = document.getElementById('statsModalOverlay');
-    const modal = overlay.querySelector('.cc-modal');
-    const title = document.getElementById('statsModalTitle');
-    const body = document.getElementById('statsModalBody');
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('📊 Statistiky 2.0 - inicializace');
 
-    // Nastavit title
-    const titles = {
-        'salesperson': t('stats_salesperson'),
-        'technician': t('stats_technician'),
-        'models': t('stats_models'),
-        'orders': t('stats_orders'),
-        'charts': t('stats_charts')
-    };
+    // Inicializovat multi-select dropdowny
+    inicializujMultiselect();
 
-    title.textContent = titles[type] || t('statistics');
+    // Načíst data
+    nactiProdejce();
+    nactiTechniky();
+    nactiSummary();
+    nactiZakazky();
+    nactiCharty();
 
-    // Načíst obsah podle typu
-    loadStatsContent(type, body);
+    // Aplikovat filtry při změně roku nebo měsíce
+    document.getElementById('filter-year').addEventListener('change', () => {
+        aktualniStranka = 1;
+        aplikovatFiltry();
+    });
 
-    // Zobrazit modal - přidat třídu active k overlay i modalu
-    overlay.classList.add('active');
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    document.getElementById('filter-month').addEventListener('change', () => {
+        aktualniStranka = 1;
+        aplikovatFiltry();
+    });
+
+    console.log('📊 Statistiky 2.0 - inicializace dokončena');
+});
+
+/**
+ * Inicializace multi-select dropdownů
+ */
+function inicializujMultiselect() {
+    // Prodejci
+    document.getElementById('prodejci-trigger').addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleDropdown('prodejci');
+    });
+
+    // Technici
+    document.getElementById('technici-trigger').addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleDropdown('technici');
+    });
+
+    // Země
+    document.getElementById('zeme-trigger').addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleDropdown('zeme');
+    });
+
+    // Zavřít dropdowny při kliknutí mimo
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.filter-multiselect')) {
+            document.querySelectorAll('.multiselect-dropdown').forEach(dropdown => {
+                dropdown.classList.remove('active');
+            });
+        }
+    });
+
+    // Země checkboxy - listener
+    document.querySelectorAll('#zeme-dropdown input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            updateVyberZeme();
+        });
+    });
 }
 
 /**
- * Zavření modalu
+ * Toggle dropdown
  */
-function closeStatsModal() {
-    const overlay = document.getElementById('statsModalOverlay');
-    const modal = overlay.querySelector('.cc-modal');
+function toggleDropdown(typ) {
+    const dropdown = document.getElementById(`${typ}-dropdown`);
+    const jineDropdowny = document.querySelectorAll('.multiselect-dropdown');
 
-    // Odebrat třídu active z overlay i modalu
-    overlay.classList.remove('active');
-    modal.classList.remove('active');
-    document.body.style.overflow = 'auto';
+    // Zavřít ostatní
+    jineDropdowny.forEach(d => {
+        if (d !== dropdown) {
+            d.classList.remove('active');
+        }
+    });
+
+    // Toggle aktuální
+    dropdown.classList.toggle('active');
 }
 
-// ==================================================
-// NAČÍTÁNÍ DAT Z API
-// ==================================================
-
 /**
- * Načtení obsahu pro modal
+ * Načíst prodejce do multi-selectu
  */
-async function loadStatsContent(type, body) {
-    // Zobrazit loading
-    body.innerHTML = `<div style="text-align: center; padding: 2rem; color: #666;">${t('loading')}</div>`;
-
+async function nactiProdejce() {
     try {
-        const filterParams = getFilterParams();
-        const response = await fetch(`api/statistiky_api.php?action=${type}&${filterParams}`);
-
-        // Pokusit se přečíst JSON response i při chybě
-        let result;
-        try {
-            result = await response.json();
-        } catch (e) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        // Zkontrolovat jestli API vrátilo error
-        if (!response.ok || result.status === 'error') {
-            const errorMsg = result.message || `HTTP error! status: ${response.status}`;
-            throw new Error(errorMsg);
-        }
-
-        if (result.status === 'success') {
-            switch(type) {
-                case 'salesperson':
-                    renderSalespersonTable(body, result.data);
-                    break;
-                case 'technician':
-                    renderTechnicianTable(body, result.data);
-                    break;
-                case 'models':
-                    renderModelsTable(body, result.data);
-                    break;
-                case 'orders':
-                    renderOrdersTable(body, result.data);
-                    break;
-                case 'charts':
-                    renderCharts(body, result.data);
-                    break;
-                default:
-                    body.innerHTML = `<div style="padding: 2rem; color: #d32f2f; text-align: center;">${t('unknown_stats_type')}</div>`;
-            }
-        } else {
-            body.innerHTML = `<div style="padding: 2rem; color: #d32f2f; text-align: center;">${t('data_load_error_msg')}: ${escapeHtml(result.message)}</div>`;
-        }
-    } catch (error) {
-        console.error('Chyba načítání statistik:', error);
-        body.innerHTML = `<div style="padding: 2rem; color: #d32f2f; text-align: center;">${t('data_load_error_msg')}: ${escapeHtml(error.message)}</div>`;
-    }
-}
-
-/**
- * Načtení summary statistik
- */
-async function loadSummaryStats() {
-    try {
-        const filterParams = getFilterParams();
-        const response = await fetch(`api/statistiky_api.php?action=summary&${filterParams}`);
-
-        // Pokusit se přečíst JSON response i při chybě
-        let result;
-        try {
-            result = await response.json();
-        } catch (e) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        // Zkontrolovat jestli API vrátilo error
-        if (!response.ok || result.status === 'error') {
-            const errorMsg = result.message || `HTTP error! status: ${response.status}`;
-            console.error('Chyba načítání summary statistik:', errorMsg);
-            throw new Error(errorMsg);
-        }
-
-        if (result.status === 'success') {
-            document.getElementById('total-orders').textContent = parseInt(result.data.total_orders) || 0;
-            document.getElementById('total-revenue').textContent = (parseFloat(result.data.total_revenue) || 0).toFixed(2) + ' €';
-            document.getElementById('avg-order').textContent = (parseFloat(result.data.avg_order) || 0).toFixed(2) + ' €';
-            document.getElementById('active-techs').textContent = parseInt(result.data.active_techs) || 0;
-        }
-    } catch (error) {
-        console.error('Chyba načítání summary statistik:', error);
-    }
-}
-
-/**
- * Načtení seznamu prodejců pro filtr
- */
-async function loadSalespersonFilter() {
-    try {
-        const response = await fetch('api/statistiky_api.php?action=list_salespersons');
-
-        if (!response.ok) {
-            console.warn('Nelze načíst seznam prodejců');
-            return;
-        }
-
+        const response = await fetch('/api/statistiky_api.php?action=load_prodejci');
         const result = await response.json();
 
-        if (result.status === 'success' && result.data) {
-            const select = document.getElementById('filter-salesperson');
+        if (result.status === 'success') {
+            const dropdown = document.getElementById('prodejci-dropdown');
+            dropdown.innerHTML = '';
 
-            // Vymazat existující možnosti (kromě první "Všichni")
-            while (select.options.length > 1) {
-                select.remove(1);
-            }
+            result.data.forEach(prodejce => {
+                const option = document.createElement('div');
+                option.className = 'multiselect-option';
+                option.innerHTML = `
+                    <input type="checkbox" id="prodejce-${prodejce.id}" value="${prodejce.id}">
+                    <label for="prodejce-${prodejce.id}">${prodejce.name}</label>
+                `;
 
-            // Přidat prodejce
-            result.data.forEach(salesperson => {
-                const option = document.createElement('option');
-                option.value = salesperson;
-                option.textContent = salesperson;
-                select.appendChild(option);
+                // Listener na checkbox
+                option.querySelector('input').addEventListener('change', () => {
+                    updateVyberProdejci();
+                });
+
+                dropdown.appendChild(option);
             });
         }
     } catch (error) {
@@ -177,635 +132,514 @@ async function loadSalespersonFilter() {
     }
 }
 
-// ==================================================
-// RENDER FUNKCE PRO TABULKY
-// ==================================================
-
 /**
- * Renderování tabulky prodejců
+ * Načíst techniky do multi-selectu
  */
-function renderSalespersonTable(body, data) {
-    let rows = '';
+async function nactiTechniky() {
+    try {
+        const response = await fetch('/api/statistiky_api.php?action=load_technici');
+        const result = await response.json();
 
-    if (!Array.isArray(data) || data.length === 0) {
-        rows = '<tr><td colspan="7" style="text-align: center; color: #999;">Žádná data k zobrazení</td></tr>';
-    } else {
-        data.forEach(row => {
-            const prodejce = escapeHtml(row.prodejce || '-');
-            rows += `
-                <tr>
-                    <td>${prodejce}</td>
-                    <td>${parseInt(row.pocet_zakazek) || 0}</td>
-                    <td>${parseFloat(row.celkova_castka || 0).toFixed(2)} €</td>
-                    <td>${parseFloat(row.prumer_zakazka || 0).toFixed(2)} €</td>
-                    <td>${parseInt(row.cz_count) || 0} / ${parseInt(row.sk_count) || 0}</td>
-                    <td>${parseFloat(row.hotove_procento || 0).toFixed(1)}%</td>
-                    <td>
-                        <button
-                            onclick="exportProdejcePDF('${prodejce}')"
-                            style="padding: 0.4rem 0.8rem; background: #2D5016; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem;"
-                            title="Exportovat fakturaci do PDF">
-                            📄 PDF
-                        </button>
-                    </td>
-                </tr>
-            `;
-        });
+        if (result.status === 'success') {
+            const dropdown = document.getElementById('technici-dropdown');
+            dropdown.innerHTML = '';
+
+            result.data.forEach(technik => {
+                const option = document.createElement('div');
+                option.className = 'multiselect-option';
+                option.innerHTML = `
+                    <input type="checkbox" id="technik-${technik.id}" value="${technik.id}">
+                    <label for="technik-${technik.id}">${technik.name}</label>
+                `;
+
+                // Listener na checkbox
+                option.querySelector('input').addEventListener('change', () => {
+                    updateVyberTechnici();
+                });
+
+                dropdown.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Chyba načítání techniků:', error);
     }
-
-    body.innerHTML = `
-        <div style="padding: 1rem;">
-            <table class="cc-table" style="width: 100%;">
-                <thead>
-                    <tr>
-                        <th>Prodejce</th>
-                        <th>Počet zakázek</th>
-                        <th>Celková částka</th>
-                        <th>Průměr/zakázka</th>
-                        <th>CZ / SK</th>
-                        <th>Hotové %</th>
-                        <th>Export</th>
-                    </tr>
-                </thead>
-                <tbody>${rows}</tbody>
-            </table>
-        </div>
-    `;
 }
 
 /**
- * Renderování tabulky techniků
+ * Update vybraných prodejců
  */
-function renderTechnicianTable(body, data) {
-    let rows = '';
+function updateVyberProdejci() {
+    const checkboxy = document.querySelectorAll('#prodejci-dropdown input[type="checkbox"]:checked');
+    vybraneProdejci = Array.from(checkboxy).map(cb => cb.value);
 
-    if (!Array.isArray(data) || data.length === 0) {
-        rows = '<tr><td colspan="9" style="text-align: center; color: #999;">Žádná data k zobrazení</td></tr>';
+    const label = document.getElementById('prodejci-label');
+    if (vybraneProdejci.length === 0) {
+        label.textContent = 'Všichni';
+    } else if (vybraneProdejci.length === 1) {
+        const checkbox = document.querySelector(`#prodejci-dropdown input[value="${vybraneProdejci[0]}"]`);
+        const labelElement = checkbox.nextElementSibling;
+        label.textContent = labelElement.textContent;
     } else {
-        data.forEach(row => {
-            const technik = escapeHtml(row.technik || '-');
-            rows += `
-                <tr>
-                    <td>${technik}</td>
-                    <td>${parseInt(row.pocet_zakazek) || 0}</td>
-                    <td>${parseInt(row.pocet_dokonceno) || 0}</td>
-                    <td>${parseFloat(row.celkova_castka_dokonceno || 0).toFixed(2)} €</td>
-                    <td>${parseFloat(row.vydelek || 0).toFixed(2)} €</td>
-                    <td>${parseFloat(row.prumer_zakazka || 0).toFixed(2)} €</td>
-                    <td>${parseInt(row.cz_count) || 0} / ${parseInt(row.sk_count) || 0}</td>
-                    <td>${parseFloat(row.uspesnost || 0).toFixed(1)}%</td>
-                    <td>
-                        <button
-                            onclick="exportTechnikPDF('${technik}')"
-                            style="padding: 0.4rem 0.8rem; background: #2D5016; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem;"
-                            title="Exportovat report do PDF">
-                            📄 PDF
-                        </button>
-                    </td>
-                </tr>
-            `;
-        });
+        label.textContent = `Vybráno (${vybraneProdejci.length})`;
     }
-
-    body.innerHTML = `
-        <div style="padding: 1rem;">
-            <table class="cc-table" style="width: 100%;">
-                <thead>
-                    <tr>
-                        <th>Technik</th>
-                        <th>Celkem zakázek</th>
-                        <th>Dokončeno</th>
-                        <th>Částka dokončeno</th>
-                        <th>Výdělek (33%)</th>
-                        <th>Průměr/zakázka</th>
-                        <th>CZ / SK</th>
-                        <th>Úspěšnost</th>
-                        <th>Export</th>
-                    </tr>
-                </thead>
-                <tbody>${rows}</tbody>
-            </table>
-        </div>
-    `;
 }
 
 /**
- * Renderování tabulky modelů
+ * Update vybraných techniků
  */
-function renderModelsTable(body, data) {
-    let rows = '';
+function updateVyberTechnici() {
+    const checkboxy = document.querySelectorAll('#technici-dropdown input[type="checkbox"]:checked');
+    vybraneTechnici = Array.from(checkboxy).map(cb => cb.value);
 
-    if (!Array.isArray(data) || data.length === 0) {
-        rows = '<tr><td colspan="5" style="text-align: center; color: #999;">Žádná data k zobrazení</td></tr>';
+    const label = document.getElementById('technici-label');
+    if (vybraneTechnici.length === 0) {
+        label.textContent = 'Všichni';
+    } else if (vybraneTechnici.length === 1) {
+        const checkbox = document.querySelector(`#technici-dropdown input[value="${vybraneTechnici[0]}"]`);
+        const labelElement = checkbox.nextElementSibling;
+        label.textContent = labelElement.textContent;
     } else {
-        data.forEach(row => {
-            rows += `
-                <tr>
-                    <td>${escapeHtml(row.model || '-')}</td>
-                    <td>${parseInt(row.pocet_reklamaci) || 0}</td>
-                    <td>${parseFloat(row.podil_procent || 0).toFixed(2)}%</td>
-                    <td>${parseFloat(row.prumerna_castka || 0).toFixed(2)} €</td>
-                    <td>${parseFloat(row.celkova_castka || 0).toFixed(2)} €</td>
-                </tr>
-            `;
-        });
+        label.textContent = `Vybráno (${vybraneTechnici.length})`;
     }
-
-    body.innerHTML = `
-        <div style="padding: 1rem;">
-            <table class="cc-table" style="width: 100%;">
-                <thead>
-                    <tr>
-                        <th>Model / Výrobek</th>
-                        <th>Počet reklamací</th>
-                        <th>Podíl %</th>
-                        <th>Průměrná částka</th>
-                        <th>Celková částka</th>
-                    </tr>
-                </thead>
-                <tbody>${rows}</tbody>
-            </table>
-        </div>
-    `;
 }
 
 /**
- * Renderování tabulky zakázek
+ * Update vybraných zemí
  */
-function renderOrdersTable(body, data) {
-    let rows = '';
+function updateVyberZeme() {
+    const checkboxy = document.querySelectorAll('#zeme-dropdown input[type="checkbox"]:checked');
+    vybraneZeme = Array.from(checkboxy).map(cb => cb.value);
 
-    if (!Array.isArray(data) || data.length === 0) {
-        rows = '<tr><td colspan="8" style="text-align: center; color: #999;">Žádná data k zobrazení</td></tr>';
+    const label = document.getElementById('zeme-label');
+    if (vybraneZeme.length === 0) {
+        label.textContent = 'Žádná';
+    } else if (vybraneZeme.length === 2) {
+        label.textContent = 'Všechny';
     } else {
-        data.forEach(row => {
-            // Použít stav_text z API (již přeloženo) nebo fallback na mapping
-            let stav = row.stav_text || row.stav || '-';
-            if (!row.stav_text && row.stav) {
-                const stavMapping = {
-                    'wait': 'ČEKÁ',
-                    'open': 'DOMLUVENÁ',
-                    'done': 'HOTOVO'
-                };
-                stav = stavMapping[row.stav] || row.stav;
-            }
-
-            rows += `
-                <tr>
-                    <td>${escapeHtml(row.cislo || '')}</td>
-                    <td>${escapeHtml(row.jmeno || '')}</td>
-                    <td>${escapeHtml(row.prodejce || '-')}</td>
-                    <td>${escapeHtml(row.technik || '-')}</td>
-                    <td>${parseFloat(row.castka || 0).toFixed(2)} €</td>
-                    <td>${escapeHtml(stav)}</td>
-                    <td>${escapeHtml(row.zeme || 'CZ')}</td>
-                    <td>${escapeHtml(row.datum || '')}</td>
-                </tr>
-            `;
-        });
+        const checkbox = document.querySelector(`#zeme-dropdown input[value="${vybraneZeme[0]}"]`);
+        const labelElement = checkbox.nextElementSibling;
+        label.textContent = labelElement.textContent;
     }
-
-    body.innerHTML = `
-        <div style="padding: 1rem;">
-            <table class="cc-table" style="width: 100%;">
-                <thead>
-                    <tr>
-                        <th>Číslo</th>
-                        <th>Zákazník</th>
-                        <th>Prodejce</th>
-                        <th>Technik</th>
-                        <th>Částka</th>
-                        <th>Stav</th>
-                        <th>Země</th>
-                        <th>Datum</th>
-                    </tr>
-                </thead>
-                <tbody>${rows}</tbody>
-            </table>
-        </div>
-    `;
 }
 
 /**
- * Renderování grafů
- */
-function renderCharts(body, data) {
-    let citiesHtml = '';
-    let countriesHtml = '';
-    let modelsHtml = '';
-
-    // Města
-    if (data.cities && Array.isArray(data.cities) && data.cities.length > 0) {
-        citiesHtml = data.cities.map(c =>
-            `<div style="padding: 0.5rem; border-bottom: 1px solid #eee;">
-                ${escapeHtml(c.mesto)}: <strong>${parseInt(c.pocet) || 0}</strong>
-            </div>`
-        ).join('');
-    } else {
-        citiesHtml = '<div style="color: #999; padding: 1rem; text-align: center;">Žádná data</div>';
-    }
-
-    // Země
-    if (data.countries && Array.isArray(data.countries) && data.countries.length > 0) {
-        countriesHtml = data.countries.map(c => {
-            const countryName = c.zeme === 'CZ' ? '🇨🇿 Česko' : c.zeme === 'SK' ? '🇸🇰 Slovensko' : c.zeme;
-            return `<div style="padding: 0.5rem; border-bottom: 1px solid #eee;">
-                ${escapeHtml(countryName)}: <strong>${parseInt(c.pocet) || 0}</strong>
-            </div>`;
-        }).join('');
-    } else {
-        countriesHtml = '<div style="color: #999; padding: 1rem; text-align: center;">Žádná data</div>';
-    }
-
-    // Modely
-    if (data.models && Array.isArray(data.models) && data.models.length > 0) {
-        modelsHtml = data.models.map(m =>
-            `<div style="padding: 0.5rem; border-bottom: 1px solid #eee;">
-                ${escapeHtml(m.model)}: <strong>${parseInt(m.pocet) || 0}</strong>
-            </div>`
-        ).join('');
-    } else {
-        modelsHtml = '<div style="color: #999; padding: 1rem; text-align: center;">Žádná data</div>';
-    }
-
-    body.innerHTML = `
-        <div style="padding: 1rem;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
-                <div style="background: #f5f5f5; padding: 1rem; border-radius: 8px;">
-                    <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem;">Rozdělení podle měst</h3>
-                    <div style="max-height: 300px; overflow-y: auto;">${citiesHtml}</div>
-                </div>
-                <div style="background: #f5f5f5; padding: 1rem; border-radius: 8px;">
-                    <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem;">Rozdělení podle zemí</h3>
-                    <div style="max-height: 300px; overflow-y: auto;">${countriesHtml}</div>
-                </div>
-                <div style="background: #f5f5f5; padding: 1rem; border-radius: 8px;">
-                    <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem;">Nejporuchovější modely</h3>
-                    <div style="max-height: 300px; overflow-y: auto;">${modelsHtml}</div>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// ==================================================
-// FILTRY
-// ==================================================
-
-/**
- * Změna měsíce - nastaví datum podle vybraného měsíce
- */
-function handleMonthChange() {
-    const monthSelect = document.getElementById('filter-month');
-    const dateFrom = document.getElementById('filter-date-from');
-    const dateTo = document.getElementById('filter-date-to');
-    const value = monthSelect.value;
-
-    if (value === 'all') {
-        // Všechny - žádný datumový filtr
-        dateFrom.value = '';
-        dateTo.value = '';
-        dateFrom.disabled = true;
-        dateTo.disabled = true;
-    } else if (value === 'current') {
-        // Aktuální měsíc - od 1. dne do dneška
-        const now = new Date();
-        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-        dateFrom.value = firstDay.toISOString().split('T')[0];
-        dateTo.value = now.toISOString().split('T')[0];
-        dateFrom.disabled = true;
-        dateTo.disabled = true;
-    } else if (value === 'last') {
-        // Minulý měsíc - od 1. dne do posledního dne
-        const now = new Date();
-        const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
-        dateFrom.value = firstDay.toISOString().split('T')[0];
-        dateTo.value = lastDay.toISOString().split('T')[0];
-        dateFrom.disabled = true;
-        dateTo.disabled = true;
-    } else if (value && value.match(/^\d{4}-\d{2}$/)) {
-        // Konkrétní měsíc (např. 2024-11)
-        const [year, month] = value.split('-').map(Number);
-        const firstDay = new Date(year, month - 1, 1);
-        const lastDay = new Date(year, month, 0);
-        dateFrom.value = firstDay.toISOString().split('T')[0];
-        dateTo.value = lastDay.toISOString().split('T')[0];
-        dateFrom.disabled = true;
-        dateTo.disabled = true;
-    } else {
-        // Vlastní rozsah
-        dateFrom.disabled = false;
-        dateTo.disabled = false;
-    }
-
-    // Automaticky aplikovat filtry
-    applyFilters();
-}
-
-/**
- * Reset všech filtrů
- */
-function resetFilters() {
-    document.getElementById('filter-month').value = 'all';
-
-    const salespersonSelect = document.getElementById('filter-salesperson');
-    if (salespersonSelect) salespersonSelect.selectedIndex = 0;
-
-    const countrySelect = document.getElementById('filter-country');
-    if (countrySelect) countrySelect.selectedIndex = 0;
-
-    const statusSelect = document.getElementById('filter-status');
-    if (statusSelect) statusSelect.selectedIndex = 0;
-
-    // Nastavit aktuální měsíc
-    handleMonthChange();
-}
-
-/**
- * Aplikování filtrů
- */
-function applyFilters() {
-    console.log('Aplikuji filtry...');
-    loadSummaryStats();
-}
-
-/**
- * Získání parametrů filtrů pro API
+ * Získat URL parametry filtrů
  */
 function getFilterParams() {
     const params = new URLSearchParams();
 
-    const salesperson = document.getElementById('filter-salesperson')?.value;
-    const country = document.getElementById('filter-country')?.value;
-    const status = document.getElementById('filter-status')?.value;
-    const dateFrom = document.getElementById('filter-date-from')?.value;
-    const dateTo = document.getElementById('filter-date-to')?.value;
+    const rok = document.getElementById('filter-year').value;
+    const mesic = document.getElementById('filter-month').value;
 
-    if (salesperson) params.append('salesperson', salesperson);
-    if (country) params.append('country', country);
-    if (status) params.append('status', status);
-    if (dateFrom) params.append('date_from', dateFrom);
-    if (dateTo) params.append('date_to', dateTo);
+    if (rok) params.append('rok', rok);
+    if (mesic) params.append('mesic', mesic);
+
+    // Multi-select prodejci
+    vybraneProdejci.forEach(p => params.append('prodejci[]', p));
+
+    // Multi-select technici
+    vybraneTechnici.forEach(t => params.append('technici[]', t));
+
+    // Multi-select země
+    vybraneZeme.forEach(z => params.append('zeme[]', z));
 
     return params.toString();
 }
 
-// ==================================================
-// PDF EXPORT FUNKCE
-// ==================================================
-
 /**
- * Export fakturace prodejce do PDF
+ * Načíst summary statistiky (4 karty)
  */
-async function exportProdejcePDF(prodejce) {
+async function nactiSummary() {
     try {
-        console.log('Načítám data pro prodejce:', prodejce);
-
-        // Získat filtry
         const filterParams = getFilterParams();
-        const params = new URLSearchParams(filterParams);
-        params.append('prodejce', prodejce);
-
-        // Načíst detailní data z API
-        const response = await fetch(`api/statistiky_api.php?action=export_salesperson_detail&${params.toString()}`);
+        const response = await fetch(`/api/statistiky_api.php?action=summary&${filterParams}`);
         const result = await response.json();
 
-        if (result.status !== 'success') {
-            alert(t('data_load_error_msg') + ': ' + result.message);
-            return;
+        if (result.status === 'success') {
+            document.getElementById('total-all').textContent = result.data.total_all;
+            document.getElementById('total-month').textContent = result.data.total_month;
+            document.getElementById('revenue-all').textContent = result.data.revenue_all.toFixed(2) + ' €';
+            document.getElementById('revenue-month').textContent = result.data.revenue_month.toFixed(2) + ' €';
         }
-
-        const data = result.data;
-
-        // Inicializovat jsPDF
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        // Nastavení fontu
-        doc.setFont('helvetica');
-
-        // Titulek
-        doc.setFontSize(18);
-        doc.setTextColor(45, 80, 22); // #2D5016
-        doc.text('Fakturace prodejce', 105, 20, { align: 'center' });
-
-        // Informace o prodejci
-        doc.setFontSize(14);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`Prodejce: ${prodejce}`, 20, 35);
-
-        // Období
-        const datumOd = document.getElementById('filter-date-from')?.value || '-';
-        const datumDo = document.getElementById('filter-date-to')?.value || '-';
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`Období: ${datumOd} až ${datumDo}`, 20, 42);
-
-        // Summary
-        doc.setFontSize(11);
-        doc.setTextColor(0, 0, 0);
-        let yPos = 52;
-        doc.text(`Celkem zakázek: ${data.summary.total_orders}`, 20, yPos);
-        doc.text(`CZ: ${data.summary.cz_count} | SK: ${data.summary.sk_count}`, 120, yPos);
-        yPos += 7;
-        doc.text(`Celkový obrat: ${parseFloat(data.summary.total_revenue).toFixed(2)} €`, 20, yPos);
-
-        // Čára oddělovače
-        yPos += 5;
-        doc.setDrawColor(200, 200, 200);
-        doc.line(20, yPos, 190, yPos);
-
-        // Tabulka zakázek
-        yPos += 10;
-        doc.setFontSize(9);
-        doc.setTextColor(45, 80, 22);
-        doc.setFont('helvetica', 'bold');
-
-        // Hlavička tabulky
-        doc.text('Číslo', 20, yPos);
-        doc.text('Zákazník', 45, yPos);
-        doc.text('Technik', 90, yPos);
-        doc.text('Práce', 120, yPos);
-        doc.text('Materiál', 140, yPos);
-        doc.text('Celkem', 165, yPos);
-
-        yPos += 2;
-        doc.setDrawColor(45, 80, 22);
-        doc.line(20, yPos, 190, yPos);
-
-        // Data zakázek
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(0, 0, 0);
-
-        data.orders.forEach((order, index) => {
-            yPos += 6;
-
-            // Kontrola přetečení stránky
-            if (yPos > 270) {
-                doc.addPage();
-                yPos = 20;
-            }
-
-            const cislo = order.cislo_reklamace || '-';
-            const jmeno = (order.jmeno || '').substring(0, 15);
-            const technik = (order.technik || '-').substring(0, 15);
-            const cenaPrace = parseFloat(order.cena_prace || 0).toFixed(2);
-            const cenaMaterial = parseFloat(order.cena_material || 0).toFixed(2);
-            const cenaCelkem = parseFloat(order.cena_celkem || 0).toFixed(2);
-
-            doc.text(cislo, 20, yPos);
-            doc.text(jmeno, 45, yPos);
-            doc.text(technik, 90, yPos);
-            doc.text(`${cenaPrace} €`, 120, yPos);
-            doc.text(`${cenaMaterial} €`, 140, yPos);
-            doc.text(`${cenaCelkem} €`, 165, yPos);
-        });
-
-        // Patička
-        const pageCount = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i);
-            doc.setFontSize(8);
-            doc.setTextColor(150, 150, 150);
-            doc.text(`Strana ${i} z ${pageCount}`, 105, 290, { align: 'center' });
-            doc.text(`Vygenerováno: ${new Date().toLocaleDateString('cs-CZ')}`, 20, 290);
-        }
-
-        // Stáhnout PDF
-        const nazevSouboru = `fakturace_${prodejce.replace(/\s+/g, '_')}_${datumOd}_${datumDo}.pdf`;
-        doc.save(nazevSouboru);
-
-        console.log('PDF exportováno:', nazevSouboru);
-
     } catch (error) {
-        console.error('Chyba exportu PDF:', error);
-        alert(t('pdf_export_error') + ': ' + error.message);
+        console.error('Chyba načítání summary:', error);
     }
 }
 
 /**
- * Export reportu technika do PDF
+ * Načíst zakázky podle filtrů
  */
-async function exportTechnikPDF(technik) {
+async function nactiZakazky() {
     try {
-        console.log('Načítám data pro technika:', technik);
+        const container = document.getElementById('table-container');
+        container.innerHTML = '<div class="loading">Načítání zakázek...</div>';
 
-        // Získat filtry
         const filterParams = getFilterParams();
-        const params = new URLSearchParams(filterParams);
-        params.append('technik', technik);
-
-        // Načíst detailní data z API
-        const response = await fetch(`api/statistiky_api.php?action=export_technician_detail&${params.toString()}`);
+        const response = await fetch(`/api/statistiky_api.php?action=get_zakazky&${filterParams}&stranka=${aktualniStranka}`);
         const result = await response.json();
 
-        if (result.status !== 'success') {
-            alert(t('data_load_error_msg') + ': ' + result.message);
+        if (result.status === 'success') {
+            renderTabulka(result.data);
+            updateStrankovani(result.data);
+        } else {
+            container.innerHTML = '<div class="empty-state">Chyba načítání dat</div>';
+        }
+    } catch (error) {
+        console.error('Chyba načítání zakázek:', error);
+        document.getElementById('table-container').innerHTML = '<div class="empty-state">Chyba načítání dat</div>';
+    }
+}
+
+/**
+ * Renderovat tabulku zakázek
+ */
+function renderTabulka(data) {
+    const container = document.getElementById('table-container');
+    const tableCount = document.getElementById('table-count');
+
+    if (!data.zakazky || data.zakazky.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div>Žádné zakázky podle filtrů</div>';
+        tableCount.textContent = '0 zakázek';
+        return;
+    }
+
+    tableCount.textContent = `${data.total_count} zakázek`;
+
+    let rows = '';
+    data.zakazky.forEach(z => {
+        rows += `
+            <tr>
+                <td>${z.reklamace_id || '-'}</td>
+                <td>${z.adresa || '-'}</td>
+                <td>${z.model || '-'}</td>
+                <td>${z.technik}</td>
+                <td>${z.prodejce}</td>
+                <td>${parseFloat(z.castka_celkem).toFixed(2)} €</td>
+                <td>${parseFloat(z.vydelek_technika).toFixed(2)} €</td>
+                <td>${z.zeme}</td>
+                <td>${z.datum}</td>
+            </tr>
+        `;
+    });
+
+    container.innerHTML = `
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th>Reklamace ID</th>
+                    <th>Adresa</th>
+                    <th>Model</th>
+                    <th>Technik</th>
+                    <th>Prodejce</th>
+                    <th>Částka celkem</th>
+                    <th>Výdělek technika (33%)</th>
+                    <th>Země</th>
+                    <th>Datum</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows}
+            </tbody>
+        </table>
+    `;
+}
+
+/**
+ * Update stránkování
+ */
+function updateStrankovani(data) {
+    const pagination = document.getElementById('pagination');
+    const pageInfo = document.getElementById('page-info');
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+
+    if (data.celkem_stranek <= 1) {
+        pagination.style.display = 'none';
+        return;
+    }
+
+    pagination.style.display = 'flex';
+    pageInfo.textContent = `Strana ${data.stranka} z ${data.celkem_stranek}`;
+
+    prevBtn.disabled = data.stranka === 1;
+    nextBtn.disabled = data.stranka >= data.celkem_stranek;
+}
+
+/**
+ * Předchozí stránka
+ */
+function predchoziStranka() {
+    if (aktualniStranka > 1) {
+        aktualniStranka--;
+        nactiZakazky();
+    }
+}
+
+/**
+ * Další stránka
+ */
+function dalsiStranka() {
+    aktualniStranka++;
+    nactiZakazky();
+}
+
+/**
+ * Načíst grafy
+ */
+async function nactiCharty() {
+    try {
+        const filterParams = getFilterParams();
+        const response = await fetch(`/api/statistiky_api.php?action=get_charts&${filterParams}`);
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            renderCharty(result.data);
+        }
+    } catch (error) {
+        console.error('Chyba načítání grafů:', error);
+    }
+}
+
+/**
+ * Renderovat grafy
+ */
+function renderCharty(data) {
+    // 1. Nejporuchovější modely
+    const modelsContainer = document.getElementById('chart-models');
+    if (data.modely && data.modely.length > 0) {
+        let html = '';
+        data.modely.forEach(m => {
+            html += `
+                <div class="chart-item">
+                    <div class="chart-item-label">${m.model}</div>
+                    <div class="chart-item-value">${m.pocet} ks</div>
+                </div>
+            `;
+        });
+        modelsContainer.innerHTML = html;
+    } else {
+        modelsContainer.innerHTML = '<div class="empty-state">Žádná data</div>';
+    }
+
+    // 2. Lokality (města)
+    const citiesContainer = document.getElementById('chart-cities');
+    if (data.mesta && data.mesta.length > 0) {
+        let html = '';
+        data.mesta.forEach(m => {
+            html += `
+                <div class="chart-item">
+                    <div class="chart-item-label">${m.mesto}</div>
+                    <div class="chart-item-value">${m.pocet} ks</div>
+                </div>
+            `;
+        });
+        citiesContainer.innerHTML = html;
+    } else {
+        citiesContainer.innerHTML = '<div class="empty-state">Žádná data</div>';
+    }
+
+    // 3. Statistiky prodejců
+    const salespersonsContainer = document.getElementById('chart-salespersons');
+    if (data.prodejci && data.prodejci.length > 0) {
+        let html = '';
+        data.prodejci.forEach(p => {
+            html += `
+                <div class="chart-item">
+                    <div class="chart-item-label">${p.prodejce} (${p.pocet} ks)</div>
+                    <div class="chart-item-value">${parseFloat(p.celkem).toFixed(2)} €</div>
+                </div>
+            `;
+        });
+        salespersonsContainer.innerHTML = html;
+    } else {
+        salespersonsContainer.innerHTML = '<div class="empty-state">Žádná data</div>';
+    }
+
+    // 4. Statistiky techniků
+    const techniciansContainer = document.getElementById('chart-technicians');
+    if (data.technici && data.technici.length > 0) {
+        let html = '';
+        data.technici.forEach(t => {
+            html += `
+                <div class="chart-item">
+                    <div class="chart-item-label">${t.technik} (${t.pocet} ks)</div>
+                    <div class="chart-item-value">${parseFloat(t.vydelek).toFixed(2)} €</div>
+                </div>
+            `;
+        });
+        techniciansContainer.innerHTML = html;
+    } else {
+        techniciansContainer.innerHTML = '<div class="empty-state">Žádná data</div>';
+    }
+}
+
+/**
+ * Aplikovat filtry
+ */
+function aplikovatFiltry() {
+    console.log('Aplikuji filtry...');
+    aktualniStranka = 1;
+    nactiSummary();
+    nactiZakazky();
+    nactiCharty();
+}
+
+/**
+ * Resetovat filtry
+ */
+function resetovitFiltry() {
+    console.log('Resetuji filtry...');
+
+    // Reset year, month
+    document.getElementById('filter-year').value = '2025';
+    document.getElementById('filter-month').value = '11';
+
+    // Reset prodejci
+    document.querySelectorAll('#prodejci-dropdown input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+    });
+    vybraneProdejci = [];
+    document.getElementById('prodejci-label').textContent = 'Všichni';
+
+    // Reset technici
+    document.querySelectorAll('#technici-dropdown input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+    });
+    vybraneTechnici = [];
+    document.getElementById('technici-label').textContent = 'Všichni';
+
+    // Reset země
+    document.querySelectorAll('#zeme-dropdown input[type="checkbox"]').forEach(cb => {
+        cb.checked = true;
+    });
+    vybraneZeme = ['cz', 'sk'];
+    document.getElementById('zeme-label').textContent = 'Všechny';
+
+    aktualniStranka = 1;
+    aplikovatFiltry();
+}
+
+/**
+ * Exportovat do PDF
+ */
+async function exportovatPDF() {
+    try {
+        console.log('📄 Exportuji PDF...');
+
+        // Načíst VŠECHNA data (bez limitu)
+        const filterParams = getFilterParams();
+        const response = await fetch(`/api/statistiky_api.php?action=get_zakazky&${filterParams}&pro_export=1`);
+        const result = await response.json();
+
+        if (result.status !== 'success' || !result.data.zakazky) {
+            alert('Chyba při načítání dat pro export');
             return;
         }
 
-        const data = result.data;
+        const zakazky = result.data.zakazky;
+
+        if (zakazky.length === 0) {
+            alert('Žádná data k exportu podle filtrů');
+            return;
+        }
 
         // Inicializovat jsPDF
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
 
-        // Nastavení fontu
-        doc.setFont('helvetica');
-
-        // Titulek
-        doc.setFontSize(18);
-        doc.setTextColor(45, 80, 22); // #2D5016
-        doc.text('Report technika', 105, 20, { align: 'center' });
-
-        // Informace o technikovi
-        doc.setFontSize(14);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`Technik: ${technik}`, 20, 35);
+        // Nadpis
+        doc.setFontSize(16);
+        doc.setTextColor(45, 80, 22);
+        doc.text('Statistiky a reporty - WGS', 15, 15);
 
         // Období
-        const datumOd = document.getElementById('filter-date-from')?.value || '-';
-        const datumDo = document.getElementById('filter-date-to')?.value || '-';
+        const rok = document.getElementById('filter-year').value || 'Všechny';
+        const mesic = document.getElementById('filter-month').value || 'Všechny';
         doc.setFontSize(10);
         doc.setTextColor(100, 100, 100);
-        doc.text(`Období: ${datumOd} až ${datumDo}`, 20, 42);
+        doc.text(`Rok: ${rok} | Měsíc: ${mesic} | Celkem: ${zakazky.length} zakázek`, 15, 22);
 
-        // Summary
-        doc.setFontSize(11);
-        doc.setTextColor(0, 0, 0);
-        let yPos = 52;
-        doc.text(`Celkem zakázek: ${data.summary.total_orders}`, 20, yPos);
-        doc.text(`Dokončeno: ${data.summary.completed_count}`, 100, yPos);
-        yPos += 7;
-        doc.text(`Celkový obrat: ${parseFloat(data.summary.total_revenue).toFixed(2)} €`, 20, yPos);
-
-        // Výdělek technika (33%)
-        doc.setFontSize(13);
-        doc.setTextColor(45, 80, 22);
-        doc.setFont('helvetica', 'bold');
-        yPos += 10;
-        doc.text(`Výdělek technika (33%): ${parseFloat(data.summary.vydelek_technika_33).toFixed(2)} €`, 20, yPos);
-
-        // Čára oddělovače
-        yPos += 5;
-        doc.setDrawColor(200, 200, 200);
-        doc.line(20, yPos, 190, yPos);
-
-        // Tabulka zakázek
-        yPos += 10;
-        doc.setFontSize(9);
+        // Tabulka - hlavička
+        let yPos = 30;
+        doc.setFontSize(8);
         doc.setTextColor(45, 80, 22);
         doc.setFont('helvetica', 'bold');
 
-        // Hlavička tabulky
-        doc.text('Číslo', 20, yPos);
-        doc.text('Zákazník', 45, yPos);
-        doc.text('Stav', 85, yPos);
-        doc.text('Práce', 110, yPos);
-        doc.text('Celkem', 135, yPos);
-        doc.text('Výdělek', 160, yPos);
+        const colWidths = {
+            id: 20,
+            adresa: 50,
+            model: 35,
+            technik: 30,
+            prodejce: 30,
+            castka: 20,
+            vydelek: 20,
+            zeme: 15,
+            datum: 20
+        };
+
+        let xPos = 15;
+        doc.text('Rekl. ID', xPos, yPos); xPos += colWidths.id;
+        doc.text('Adresa', xPos, yPos); xPos += colWidths.adresa;
+        doc.text('Model', xPos, yPos); xPos += colWidths.model;
+        doc.text('Technik', xPos, yPos); xPos += colWidths.technik;
+        doc.text('Prodejce', xPos, yPos); xPos += colWidths.prodejce;
+        doc.text('Částka', xPos, yPos); xPos += colWidths.castka;
+        doc.text('Výdělek', xPos, yPos); xPos += colWidths.vydelek;
+        doc.text('Země', xPos, yPos); xPos += colWidths.zeme;
+        doc.text('Datum', xPos, yPos);
 
         yPos += 2;
         doc.setDrawColor(45, 80, 22);
-        doc.line(20, yPos, 190, yPos);
+        doc.line(15, yPos, 280, yPos);
 
-        // Data zakázek
+        // Tabulka - data
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
+        doc.setFontSize(7);
 
-        data.orders.forEach((order, index) => {
-            yPos += 6;
+        zakazky.forEach((z, index) => {
+            yPos += 5;
 
             // Kontrola přetečení stránky
-            if (yPos > 270) {
+            if (yPos > 190) {
                 doc.addPage();
-                yPos = 20;
-            }
+                yPos = 15;
 
-            const cislo = order.cislo_reklamace || '-';
-            const jmeno = (order.jmeno || '').substring(0, 12);
-            const stav = order.stav_text || '-';
-            const cenaPrace = parseFloat(order.cena_prace || 0).toFixed(2);
-            const cenaCelkem = parseFloat(order.cena_celkem || 0).toFixed(2);
-            const vydelekTechnika = parseFloat(order.vydelek_technika_33 || 0).toFixed(2);
-
-            // Zvýraznit dokončené zakázky
-            if (order.stav === 'done') {
-                doc.setFont('helvetica', 'bold');
+                // Opakovat hlavičku
+                doc.setFontSize(8);
                 doc.setTextColor(45, 80, 22);
+                doc.setFont('helvetica', 'bold');
+
+                xPos = 15;
+                doc.text('Rekl. ID', xPos, yPos); xPos += colWidths.id;
+                doc.text('Adresa', xPos, yPos); xPos += colWidths.adresa;
+                doc.text('Model', xPos, yPos); xPos += colWidths.model;
+                doc.text('Technik', xPos, yPos); xPos += colWidths.technik;
+                doc.text('Prodejce', xPos, yPos); xPos += colWidths.prodejce;
+                doc.text('Částka', xPos, yPos); xPos += colWidths.castka;
+                doc.text('Výdělek', xPos, yPos); xPos += colWidths.vydelek;
+                doc.text('Země', xPos, yPos); xPos += colWidths.zeme;
+                doc.text('Datum', xPos, yPos);
+
+                yPos += 2;
+                doc.line(15, yPos, 280, yPos);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(7);
+                yPos += 5;
             }
 
-            doc.text(cislo, 20, yPos);
-            doc.text(jmeno, 45, yPos);
-            doc.text(stav, 85, yPos);
-            doc.text(`${cenaPrace} €`, 110, yPos);
-            doc.text(`${cenaCelkem} €`, 135, yPos);
-            doc.text(`${vydelekTechnika} €`, 160, yPos);
-
-            // Reset font pro další řádek
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(0, 0, 0);
+            xPos = 15;
+            doc.text((z.reklamace_id || '-').substring(0, 12), xPos, yPos); xPos += colWidths.id;
+            doc.text((z.adresa || '-').substring(0, 30), xPos, yPos); xPos += colWidths.adresa;
+            doc.text((z.model || '-').substring(0, 20), xPos, yPos); xPos += colWidths.model;
+            doc.text((z.technik || '-').substring(0, 18), xPos, yPos); xPos += colWidths.technik;
+            doc.text((z.prodejce || '-').substring(0, 18), xPos, yPos); xPos += colWidths.prodejce;
+            doc.text(parseFloat(z.castka_celkem).toFixed(2) + ' €', xPos, yPos); xPos += colWidths.castka;
+            doc.text(parseFloat(z.vydelek_technika).toFixed(2) + ' €', xPos, yPos); xPos += colWidths.vydelek;
+            doc.text(z.zeme, xPos, yPos); xPos += colWidths.zeme;
+            doc.text(z.datum, xPos, yPos);
         });
 
         // Patička
@@ -814,62 +648,18 @@ async function exportTechnikPDF(technik) {
             doc.setPage(i);
             doc.setFontSize(8);
             doc.setTextColor(150, 150, 150);
-            doc.text(`Strana ${i} z ${pageCount}`, 105, 290, { align: 'center' });
-            doc.text(`Vygenerováno: ${new Date().toLocaleDateString('cs-CZ')}`, 20, 290);
+            doc.text(`Strana ${i} z ${pageCount}`, 148, 200, { align: 'center' });
+            doc.text(`Vygenerováno: ${new Date().toLocaleDateString('cs-CZ')}`, 15, 200);
         }
 
         // Stáhnout PDF
-        const nazevSouboru = `report_technik_${technik.replace(/\s+/g, '_')}_${datumOd}_${datumDo}.pdf`;
+        const nazevSouboru = `statistiky_${rok}_${mesic}_${new Date().toISOString().split('T')[0]}.pdf`;
         doc.save(nazevSouboru);
 
-        console.log('PDF exportováno:', nazevSouboru);
+        console.log('✅ PDF exportováno:', nazevSouboru);
 
     } catch (error) {
         console.error('Chyba exportu PDF:', error);
-        alert(t('pdf_export_error') + ': ' + error.message);
+        alert('Chyba při exportu PDF: ' + error.message);
     }
 }
-
-// ==================================================
-// UTILITY FUNKCE
-// ==================================================
-
-/**
- * Escape HTML pro bezpečné zobrazení
- */
-function escapeHtml(text) {
-    if (text === null || text === undefined) {
-        return '';
-    }
-
-    const div = document.createElement('div');
-    div.textContent = String(text);
-    return div.innerHTML;
-}
-
-// ==================================================
-// EVENT LISTENERS
-// ==================================================
-
-// ESC key zavře modal
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        closeStatsModal();
-    }
-});
-
-// Inicializace při načtení stránky
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('WGS Statistiky - Inicializace...');
-
-    // Nastavit výchozí datum (aktuální měsíc)
-    handleMonthChange();
-
-    // Načíst seznam prodejců do filtru
-    loadSalespersonFilter();
-
-    // Načíst summary statistiky ihned po načtení stránky
-    loadSummaryStats();
-
-    console.log('WGS Statistiky - Inicializace dokončena');
-});
