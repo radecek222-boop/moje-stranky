@@ -569,7 +569,7 @@ async function exportovatPDF() {
             </div>
             <table style="width: 100%; border-collapse: collapse; font-size: 9px;">
                 <thead>
-                    <tr style="background: #444; color: white;">
+                    <tr style="background: #f0f0f0; color: #333;">
                         <th style="padding: 5px; text-align: left; border: 1px solid #999;">Reklamace ID</th>
                         <th style="padding: 5px; text-align: left; border: 1px solid #999;">Adresa</th>
                         <th style="padding: 5px; text-align: left; border: 1px solid #999;">Model</th>
