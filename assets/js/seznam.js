@@ -1,3 +1,6 @@
+// VERSION CHECK: 20251122-03 - Performance diagnostika
+console.log('🔍 SEZNAM.JS NAČTEN - VERZE: 20251122-03 (s detailními timings)');
+
 // BEZPEČNOST: Cache CSRF tokenu pro prevenci nekonečné smyčky
 window.csrfTokenCache = window.csrfTokenCache || null;
 
@@ -1092,43 +1095,50 @@ async function showDayBookingsWithDistances(date) {
   const cacheKey = `${WGS_ADDRESS}|${currentAddress}`;
   const isCached = DISTANCE_CACHE[cacheKey] !== undefined;
   
+  // ✅ PERFORMANCE FIX: Zobrazit loading a vypočítat vzdálenost asynchronně
   if (!isCached) {
     distanceContainer.innerHTML = `<div style="text-align: center; color: var(--c-grey); font-size: 0.7rem; padding: 0.5rem;">${t('loading')}</div>`;
   }
-  
+
   if (bookings.length === 0) {
-    const distToCustomer = await getDistance(WGS_ADDRESS, currentAddress);
-    
-    if (distToCustomer) {
-      distanceContainer.innerHTML = `
-        <div class="distance-info-panel">
-          <div class="distance-info-title">Informace o trase</div>
-          <div class="distance-stats">
-            <div class="distance-stat">
-              <div class="distance-stat-label">Vzdálenost</div>
-              <div class="distance-stat-value">${distToCustomer.km} <span class="distance-stat-unit">km</span></div>
-            </div>
-            <div class="distance-stat">
-              <div class="distance-stat-label">Čas jízdy</div>
-              <div class="distance-stat-value">${distToCustomer.duration || '—'}</div>
-            </div>
-          </div>
-          <div class="route-info">
-            <div class="route-item">
-              <div class="route-item-left">
-                <span>WGS Sídlo</span>
-                <span class="route-arrow">→</span>
-                <span>${Utils.getCustomerName(CURRENT_RECORD)}</span>
+    // ✅ PERFORMANCE FIX: Neblokovat UI - vzdálenost načíst asynchronně
+    getDistance(WGS_ADDRESS, currentAddress)
+      .then(distToCustomer => {
+        if (distToCustomer) {
+          distanceContainer.innerHTML = `
+            <div class="distance-info-panel">
+              <div class="distance-info-title">Informace o trase</div>
+              <div class="distance-stats">
+                <div class="distance-stat">
+                  <div class="distance-stat-label">Vzdálenost</div>
+                  <div class="distance-stat-value">${distToCustomer.km} <span class="distance-stat-unit">km</span></div>
+                </div>
+                <div class="distance-stat">
+                  <div class="distance-stat-label">Čas jízdy</div>
+                  <div class="distance-stat-value">${distToCustomer.duration || '—'}</div>
+                </div>
               </div>
-              <span class="route-distance">${distToCustomer.km} km</span>
+              <div class="route-info">
+                <div class="route-item">
+                  <div class="route-item-left">
+                    <span>WGS Sídlo</span>
+                    <span class="route-arrow">→</span>
+                    <span>${Utils.getCustomerName(CURRENT_RECORD)}</span>
+                  </div>
+                  <span class="route-distance">${distToCustomer.km} km</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      `;
-    } else {
-      distanceContainer.innerHTML = '';
-    }
-    
+          `;
+        } else {
+          distanceContainer.innerHTML = '';
+        }
+      })
+      .catch(err => {
+        logger.error('Chyba při výpočtu vzdálenosti:', err);
+        distanceContainer.innerHTML = ''; // Skrýt loading při chybě
+      });
+
     bookingsContainer.innerHTML = '';
     return;
   }
@@ -1299,7 +1309,7 @@ function renderTimeGrid() {
       }
       
       el.textContent = time;
-      el.onclick = async () => {
+      el.onclick = () => {
         SELECTED_TIME = time;
         document.querySelectorAll('.time-slot').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
@@ -1307,22 +1317,8 @@ function renderTimeGrid() {
         // Získat adresu zákazníka
         const currentAddress = Utils.addCountryToAddress(Utils.getAddress(CURRENT_RECORD));
 
-        // Základní text bez vzdálenosti
-        let displayText = `Vybraný termín: ${SELECTED_DATE}`;
-
-        // Zkusit získat vzdálenost (z cache nebo vypočítat)
-        if (currentAddress && currentAddress !== '—') {
-          try {
-            const distToCustomer = await getDistance(WGS_ADDRESS, currentAddress);
-            if (distToCustomer && distToCustomer.km) {
-              displayText += ` — ${distToCustomer.km} km`;
-            }
-          } catch (err) {
-            logger.error('Chyba při získání vzdálenosti:', err);
-          }
-        }
-
-        displayText += ` — ${SELECTED_TIME}`;
+        // Základní text bez vzdálenosti - zobrazit OKAMŽITĚ
+        let displayText = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
 
         if (occupiedTimes[time]) {
           displayText += ` ⚠️ KOLIZE: ${occupiedTimes[time].zakaznik}`;
@@ -1330,7 +1326,23 @@ function renderTimeGrid() {
 
         document.getElementById('selectedDateDisplay').textContent = displayText;
 
-        // Aktualizovat vzdálenosti na pozadí s novým časem
+        // ✅ PERFORMANCE FIX: Získat vzdálenost ASYNCHRONNĚ (neblokovat UI)
+        // Pokud přijde odpověď, aktualizovat text
+        if (currentAddress && currentAddress !== '—') {
+          getDistance(WGS_ADDRESS, currentAddress)
+            .then(distToCustomer => {
+              if (distToCustomer && distToCustomer.km) {
+                const updatedText = `Vybraný termín: ${SELECTED_DATE} — ${distToCustomer.km} km — ${SELECTED_TIME}`;
+                document.getElementById('selectedDateDisplay').textContent = updatedText;
+              }
+            })
+            .catch(err => {
+              logger.error('Chyba při získání vzdálenosti:', err);
+              // Chyba se nezobrazuje - vzdálenost je optional
+            });
+        }
+
+        // Aktualizovat vzdálenosti na pozadí s novým časem (fire-and-forget)
         showDayBookingsWithDistances(SELECTED_DATE).catch(err => {
           logger.error('Chyba při aktualizaci vzdáleností:', err);
         });
@@ -1595,20 +1607,25 @@ async function loadMapAndRoute() {
       </div>
     `;
 
-    // ✅ PERFORMANCE FIX: Použít getDistance() která má cache místo přímého fetch
-    // Tímto se vyhneme duplicitním API calls
-    const distanceData = await getDistance(WGS_ADDRESS, customerAddress);
-
-    if (distanceData && distanceData.text) {
-      document.getElementById('mapDistance').textContent = distanceData.text;
-      if (distanceData.duration) {
-        document.getElementById('mapDuration').textContent = distanceData.duration;
-      }
-    } else {
-      document.getElementById('mapDistance').textContent = '—';
-      document.getElementById('mapDuration').textContent = '—';
-      logger.error('Nepodařilo se načíst vzdálenost');
-    }
+    // ✅ PERFORMANCE FIX: Použít getDistance() asynchronně (neblokovat UI)
+    // Tímto se vyhneme duplicitním API calls a zároveň nezablokujeme UI při selhání
+    getDistance(WGS_ADDRESS, customerAddress)
+      .then(distanceData => {
+        if (distanceData && distanceData.text) {
+          document.getElementById('mapDistance').textContent = distanceData.text;
+          if (distanceData.duration) {
+            document.getElementById('mapDuration').textContent = distanceData.duration;
+          }
+        } else {
+          document.getElementById('mapDistance').textContent = '—';
+          document.getElementById('mapDuration').textContent = '—';
+        }
+      })
+      .catch(err => {
+        logger.error('Nepodařilo se načíst vzdálenost:', err);
+        document.getElementById('mapDistance').textContent = '—';
+        document.getElementById('mapDuration').textContent = '—';
+      });
     
   } catch (error) {
     logger.error('Chyba při načítání mapy:', error);
