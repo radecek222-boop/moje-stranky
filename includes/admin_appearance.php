@@ -431,7 +431,7 @@ input:checked + .toggle-slider:before {
             <div class="control-group">
                 <label class="control-label">Pozadí Overlay</label>
                 <div class="color-picker-group">
-                    <div class="color-preview" id="overlay-bg-preview" onclick="document.getElementById('overlay-bg').click()"></div>
+                    <button type="button" class="color-preview" id="overlay-bg-preview" onclick="document.getElementById('overlay-bg').click()"></button>
                     <input type="color" id="overlay-bg" class="color-input" onchange="updateStyle()">
                     <div class="color-value" id="overlay-bg-value"></div>
                 </div>
@@ -441,7 +441,7 @@ input:checked + .toggle-slider:before {
             <div class="control-group">
                 <label class="control-label">Pozadí Modalu</label>
                 <div class="color-picker-group">
-                    <div class="color-preview" id="modal-bg-preview" onclick="document.getElementById('modal-bg').click()"></div>
+                    <button type="button" class="color-preview" id="modal-bg-preview" onclick="document.getElementById('modal-bg').click()"></button>
                     <input type="color" id="modal-bg" class="color-input" onchange="updateStyle()">
                     <div class="color-value" id="modal-bg-value"></div>
                 </div>
@@ -478,7 +478,7 @@ input:checked + .toggle-slider:before {
             <div class="control-group">
                 <label class="control-label">Barva textu</label>
                 <div class="color-picker-group">
-                    <div class="color-preview" id="text-color-preview" onclick="document.getElementById('text-color').click()"></div>
+                    <button type="button" class="color-preview" id="text-color-preview" onclick="document.getElementById('text-color').click()"></button>
                     <input type="color" id="text-color" class="color-input" onchange="updateStyle()">
                     <div class="color-value" id="text-color-value"></div>
                 </div>
@@ -487,7 +487,7 @@ input:checked + .toggle-slider:before {
             <div class="control-group">
                 <label class="control-label">Barva nadpisů</label>
                 <div class="color-picker-group">
-                    <div class="color-preview" id="heading-color-preview" onclick="document.getElementById('heading-color').click()"></div>
+                    <button type="button" class="color-preview" id="heading-color-preview" onclick="document.getElementById('heading-color').click()"></button>
                     <input type="color" id="heading-color" class="color-input" onchange="updateStyle()">
                     <div class="color-value" id="heading-color-value"></div>
                 </div>
@@ -554,7 +554,7 @@ input:checked + .toggle-slider:before {
             <div class="control-group">
                 <label class="control-label">Pozadí tlačítek</label>
                 <div class="color-picker-group">
-                    <div class="color-preview" id="button-bg-preview" onclick="document.getElementById('button-bg').click()"></div>
+                    <button type="button" class="color-preview" id="button-bg-preview" onclick="document.getElementById('button-bg').click()"></button>
                     <input type="color" id="button-bg" class="color-input" value="#2D5016" onchange="updateStyle()">
                     <div class="color-value" id="button-bg-value">#2D5016</div>
                 </div>
@@ -563,7 +563,7 @@ input:checked + .toggle-slider:before {
             <div class="control-group">
                 <label class="control-label">Text tlačítek</label>
                 <div class="color-picker-group">
-                    <div class="color-preview" id="button-text-preview" onclick="document.getElementById('button-text').click()"></div>
+                    <button type="button" class="color-preview" id="button-text-preview" onclick="document.getElementById('button-text').click()"></button>
                     <input type="color" id="button-text" class="color-input" value="#ffffff" onchange="updateStyle()">
                     <div class="color-value" id="button-text-value">#ffffff</div>
                 </div>
@@ -587,7 +587,7 @@ input:checked + .toggle-slider:before {
             <div class="control-group">
                 <label class="control-label">Barva Glow</label>
                 <div class="color-picker-group">
-                    <div class="color-preview" id="glow-color-preview" onclick="document.getElementById('glow-color').click()"></div>
+                    <button type="button" class="color-preview" id="glow-color-preview" onclick="document.getElementById('glow-color').click()"></button>
                     <input type="color" id="glow-color" class="color-input" value="#2D5016" onchange="updateStyle()">
                     <div class="color-value" id="glow-color-value">#2D5016</div>
                 </div>
@@ -802,7 +802,7 @@ async function saveSettings() {
     .then(r => r.json())
     .then(data => {
         if (data.status === 'success' || data.success) {
-            alert('✓ Nastavení vzhledu uloženo!');
+            alert('Nastavení vzhledu uloženo!');
             if (DEBUG_MODE) console.log('Settings saved:', settings);
         } else {
             throw new Error(data.message || 'Chyba při ukládání');
@@ -810,7 +810,7 @@ async function saveSettings() {
     })
     .catch(err => {
         console.error('Save error:', err);
-        alert('❌ Chyba při ukládání nastavení: ' + err.message);
+        alert('Chyba při ukládání nastavení: ' + err.message);
     });
 }
 

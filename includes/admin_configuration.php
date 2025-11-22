@@ -98,7 +98,6 @@ $groupNames = [
 
         <?php if (empty($configs)): ?>
             <div class="cc-alert info">
-                <div class="cc-alert-icon">ℹ️</div>
                 <div class="cc-alert-content">
                     <div class="cc-alert-title">Žádná konfigurace</div>
                     <div class="cc-alert-message">
@@ -142,11 +141,11 @@ $groupNames = [
                                                    value="<?= htmlspecialchars($config['config_value']) ?>">
                                             <button class="cc-btn cc-btn-sm cc-btn-primary"
                                                     onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')">
-                                                
+                                                Uložit
                                             </button>
                                         </div>
                                     <?php endif; ?>
-                                    <div id="save-status-<?= $config['id'] ?>" style="margin-top: 0.5rem; display: none; font-size: 0.85rem;"></div>
+                                    <div id="save-status-<?= $config['id'] ?>" style="margin-top: 0.5rem; display: none;"></div>
                                 <?php else: ?>
                                     <span style="color: #999;">
                                         <?= $config['config_value_display'] ?>
@@ -236,7 +235,7 @@ async function saveConfig(configId, configKey) {
     }
 }
 
-console.log('⚙️ Configuration section loaded (Email/SMTP moved to Email & SMS tab)');
+console.log('Configuration section loaded (Email/SMTP moved to Email & SMS tab)');
 </script>
 
 

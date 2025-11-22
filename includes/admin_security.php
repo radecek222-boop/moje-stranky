@@ -806,15 +806,15 @@ endif;
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
                 <div>
                     <label style="display: block; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; color: #000;">Datum od:</label>
-                    <input type="date" id="auditDateFrom" value="<?= date('Y-m-d', strtotime('-7 days')) ?>" style="width: 100%; padding: 0.4rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem;">
+                    <input type="date" id="auditDateFrom" value="<?= date('Y-m-d', strtotime('-7 days')) ?>" style="width: 100%; padding: 0.4rem; border: 1px solid #000; font-family: 'Poppins', sans-serif;">
                 </div>
                 <div>
                     <label style="display: block; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; color: #000;">Datum do:</label>
-                    <input type="date" id="auditDateTo" value="<?= date('Y-m-d') ?>" style="width: 100%; padding: 0.4rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem;">
+                    <input type="date" id="auditDateTo" value="<?= date('Y-m-d') ?>" style="width: 100%; padding: 0.4rem; border: 1px solid #000; font-family: 'Poppins', sans-serif;">
                 </div>
                 <div>
                     <label style="display: block; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; color: #000;">Typ události:</label>
-                    <select id="auditActionFilter" style="width: 100%; padding: 0.4rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem;">
+                    <select id="auditActionFilter" style="width: 100%; padding: 0.4rem; border: 1px solid #000; font-family: 'Poppins', sans-serif;">
                         <option value="">Všechny události</option>
                         <option value="admin_login">Přihlášení admina</option>
                         <option value="user_login">Přihlášení uživatele</option>
@@ -972,10 +972,10 @@ async function nactiRegistracniKlice() {
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><span style="display: inline-block; padding: 0.2rem 0.5rem; background: #000; color: #fff; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 500;">' + escapujHtml(klic.key_type) + '</span></td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><code style="background: #f5f5f5; padding: 0.25rem 0.5rem; font-size: 0.8rem; border: 1px solid #ddd;">' + escapujHtml(klic.key_code) + '</code></td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + klic.usage_count + ' / ' + (klic.max_usage || '∞') + '</td>';
-                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + (klic.is_active ? '<span style="color: #000;">✓ Ano</span>' : '<span style="color: #999;">✗ Ne</span>') + '</td>';
+                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + (klic.is_active ? '<span style="color: #000;">Ano</span>' : '<span style="color: #999;">Ne</span>') + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + new Date(klic.created_at).toLocaleDateString('cs-CZ') + '</td>';
-                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><button onclick="kopirovatDoSchranky(\'' + klic.key_code.replace(/'/g, "\\'") + '\')" style="padding: 0.25rem 0.5rem; background: #000; color: #fff; border: 1px solid #000; font-family: \'Poppins\', sans-serif; font-size: 0.7rem; cursor: pointer; margin-right: 0.25rem;">Kopírovat</button>';
-                html += '<button onclick="smazatKlic(\'' + klic.key_code.replace(/'/g, "\\'") + '\')" style="padding: 0.25rem 0.5rem; background: #fff; color: #000; border: 1px solid #000; font-family: \'Poppins\', sans-serif; font-size: 0.7rem; cursor: pointer;">Smazat</button></td>';
+                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><button onclick="kopirovatDoSchranky(\'' + klic.key_code.replace(/'/g, "\\'") + '\')" class="cc-btn cc-btn-sm cc-btn-primary" style="margin-right: 0.25rem;">Kopírovat</button>';
+                html += '<button onclick="smazatKlic(\'' + klic.key_code.replace(/'/g, "\\'") + '\')" class="cc-btn cc-btn-sm cc-btn-secondary">Smazat</button></td>';
                 html += '</tr>';
             });
 
@@ -1056,7 +1056,7 @@ async function smazatKlic(kodKlice) {
         console.log('[Security] Response status:', odpoved.status);
         console.log('[Security] Response Content-Type:', odpoved.headers.get('content-type'));
 
-        // ✅ OPRAVA: Kontrola HTTP statusu PŘED parsováním JSON
+        // OPRAVA: Kontrola HTTP statusu PŘED parsováním JSON
         if (!odpoved.ok) {
             const errorText = await odpoved.text();
             console.error('[Security] HTTP error response body:', errorText);
@@ -1190,7 +1190,7 @@ async function zmenitAdminHeslo() {
         const data = await odpoved.json();
 
         if (data.status === 'success') {
-            statusEl.innerHTML = '<span style="color: #28a745;">✓ Heslo bylo změněno</span>';
+            statusEl.innerHTML = '<span style="color: #28a745;">Heslo bylo změněno</span>';
             aktualniHeslo.value = '';
             noveHeslo.value = '';
             setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
@@ -1238,7 +1238,7 @@ async function resetovatUzivatelskeHeslo() {
         const data = await odpoved.json();
 
         if (data.status === 'success') {
-            statusEl.innerHTML = '<span style="color: #28a745;">✓ Heslo bylo resetováno</span>';
+            statusEl.innerHTML = '<span style="color: #28a745;">Heslo bylo resetováno</span>';
             noveHeslo.value = '';
             setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
         } else {
@@ -1281,7 +1281,7 @@ async function ulozitApiKlic(nazevKlice, inputId) {
         const data = await odpoved.json();
 
         if (data.status === 'success') {
-            statusEl.innerHTML = '<span style="color: #28a745;">✓ Uloženo</span>';
+            statusEl.innerHTML = '<span style="color: #28a745;">Uloženo</span>';
             setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
         } else {
             throw new Error(data.message || 'Nepodařilo se uložit');
