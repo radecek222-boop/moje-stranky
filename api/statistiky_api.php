@@ -85,14 +85,14 @@ function getSummaryStatistiky($pdo) {
     list($where, $params) = buildFilterWhere();
 
     // Reklamací v měsíci (filtrované)
-    $stmtMonth = $pdo->prepare("SELECT COUNT(*) as count FROM wgs_reklamace $where");
+    $stmtMonth = $pdo->prepare("SELECT COUNT(*) as count FROM wgs_reklamace r $where");
     $stmtMonth->execute($params);
     $totalMonth = (int)($stmtMonth->fetch(PDO::FETCH_ASSOC)['count'] ?? 0);
 
     // Částka v měsíci (filtrované)
     $stmtRevenueMonth = $pdo->prepare("
-        SELECT SUM(CAST(COALESCE(cena_celkem, cena, 0) AS DECIMAL(10,2))) as total
-        FROM wgs_reklamace
+        SELECT SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as total
+        FROM wgs_reklamace r
         $where
     ");
     $stmtRevenueMonth->execute($params);
@@ -169,7 +169,7 @@ function getZakazky($pdo) {
     list($where, $params) = buildFilterWhere();
 
     // Celkový počet záznamů (pro stránkování)
-    $stmtCount = $pdo->prepare("SELECT COUNT(*) as count FROM wgs_reklamace $where");
+    $stmtCount = $pdo->prepare("SELECT COUNT(*) as count FROM wgs_reklamace r $where");
     $stmtCount->execute($params);
     $totalCount = (int)($stmtCount->fetch(PDO::FETCH_ASSOC)['count'] ?? 0);
 
@@ -236,11 +236,11 @@ function getCharty($pdo) {
     // 1. Nejporuchovější modely
     $stmtModely = $pdo->prepare("
         SELECT
-            COALESCE(model, 'Neuvedeno') as model,
+            COALESCE(r.model, 'Neuvedeno') as model,
             COUNT(*) as pocet
-        FROM wgs_reklamace
+        FROM wgs_reklamace r
         $where
-        GROUP BY model
+        GROUP BY r.model
         ORDER BY pocet DESC
         LIMIT 10
     ");
@@ -250,9 +250,9 @@ function getCharty($pdo) {
     // 2. Lokality - extrahujeme město z adresy
     $stmtMesta = $pdo->prepare("
         SELECT
-            TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(adresa, ',', -1), '\n', 1)) as mesto,
+            TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(r.adresa, ',', -1), '\n', 1)) as mesto,
             COUNT(*) as pocet
-        FROM wgs_reklamace
+        FROM wgs_reklamace r
         $where
         GROUP BY mesto
         ORDER BY pocet DESC
@@ -324,13 +324,13 @@ function buildFilterWhere() {
 
     // Rok
     if (!empty($_GET['rok'])) {
-        $conditions[] = "YEAR(created_at) = :rok";
+        $conditions[] = "YEAR(r.created_at) = :rok";
         $params[':rok'] = (int)$_GET['rok'];
     }
 
     // Měsíc
     if (!empty($_GET['mesic'])) {
-        $conditions[] = "MONTH(created_at) = :mesic";
+        $conditions[] = "MONTH(r.created_at) = :mesic";
         $params[':mesic'] = (int)$_GET['mesic'];
     }
 
