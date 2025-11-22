@@ -329,15 +329,15 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
 
 <!-- PŘEPÍNAČ JAZYKŮ -->
 <div class="lang-switcher">
-  <a href="?lang=cz<?php echo isset($_GET['datum']) ? '&datum=' . $_GET['datum'] : ''; ?>"
+  <a href="?lang=cz<?php echo isset($_GET['datum']) ? '&datum=' . htmlspecialchars($_GET['datum'], ENT_QUOTES, 'UTF-8') : ''; ?>"
      class="lang-btn <?php echo $jazyk === 'cz' ? 'active' : ''; ?>">
     Čeština
   </a>
-  <a href="?lang=en<?php echo isset($_GET['datum']) ? '&datum=' . $_GET['datum'] : ''; ?>"
+  <a href="?lang=en<?php echo isset($_GET['datum']) ? '&datum=' . htmlspecialchars($_GET['datum'], ENT_QUOTES, 'UTF-8') : ''; ?>"
      class="lang-btn <?php echo $jazyk === 'en' ? 'active' : ''; ?>">
     English
   </a>
-  <a href="?lang=it<?php echo isset($_GET['datum']) ? '&datum=' . $_GET['datum'] : ''; ?>"
+  <a href="?lang=it<?php echo isset($_GET['datum']) ? '&datum=' . htmlspecialchars($_GET['datum'], ENT_QUOTES, 'UTF-8') : ''; ?>"
      class="lang-btn <?php echo $jazyk === 'it' ? 'active' : ''; ?>">
     Italiano
   </a>

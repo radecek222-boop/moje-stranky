@@ -196,7 +196,7 @@ function vygenerujObsahCZ(string $datum, array $svatek, array $novinky, array $p
     $html .= "**Datum:** " . sanitizeInput($datum) . " | **Svátek má:** {$jmeno}\n\n";
     $html .= "{$komentar}\n\n";
 
-    $html .= "## 📰 Novinky o značce Natuzzi\n\n";
+    $html .= "## Novinky o značce Natuzzi\n\n";
 
     if (!empty($novinky['novinky'])) {
         foreach ($novinky['novinky'] as $index => $novinka) {
@@ -213,7 +213,7 @@ function vygenerujObsahCZ(string $datum, array $svatek, array $novinky, array $p
         }
     }
 
-    $html .= "## 🛠️ Péče o luxusní nábytek\n\n";
+    $html .= "## Péče o luxusní nábytek\n\n";
 
     if (!empty($pece['tipy'])) {
         foreach ($pece['tipy'] as $tip) {
@@ -225,7 +225,7 @@ function vygenerujObsahCZ(string $datum, array $svatek, array $novinky, array $p
         }
     }
 
-    $html .= "## 🇨🇿 Natuzzi v České republice\n\n";
+    $html .= "## Natuzzi v České republice\n\n";
     $html .= "Navštivte naše showroomy v Praze a Brně. Více informací na [natuzzi.cz](https://www.natuzzi.cz/).\n\n";
 
     return $html;

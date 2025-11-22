@@ -242,7 +242,7 @@ function vygenerujKompletniObsahCZ(string $datum, array $svatek, array $novinky,
     $html .= "**{$datumFormat} | Svátek má: {$jmeno}**\n\n";
     $html .= "{$komentar}\n\n";
 
-    $html .= "## 📰 Novinky o značce Natuzzi\n\n";
+    $html .= "## Novinky o značce Natuzzi\n\n";
 
     if (!empty($novinky['novinky'])) {
         foreach ($novinky['novinky'] as $index => $novinka) {
@@ -259,7 +259,7 @@ function vygenerujKompletniObsahCZ(string $datum, array $svatek, array $novinky,
         }
     }
 
-    $html .= "## 🛠️ Péče o luxusní nábytek\n\n";
+    $html .= "## Péče o luxusní nábytek\n\n";
 
     if (!empty($pece['tipy'])) {
         foreach ($pece['tipy'] as $tip) {
@@ -271,7 +271,7 @@ function vygenerujKompletniObsahCZ(string $datum, array $svatek, array $novinky,
         }
     }
 
-    $html .= "## 🇨🇿 Natuzzi v České republice\n\n";
+    $html .= "## Natuzzi v České republice\n\n";
     $html .= "Navštivte naše showroomy v Praze (Pasáž Lucerna, River Garden Karlín) a Brně. ";
     $html .= "Kompletní sortiment luxusního italského nábytku s odborným poradenstvím. ";
     $html .= "Více informací na [natuzzi.cz](https://www.natuzzi.cz/).\n\n";
@@ -292,7 +292,7 @@ function prelozitDoAnglictiny(string $obsahCZ, array $svatek, array $novinky, ar
     $html .= "**{$datumFormat} | Name Day: {$jmeno}**\n\n";
     $html .= "Today we celebrate the feast of {$jmeno}. It's a day full of opportunities and new ideas, just as Natuzzi brings new design possibilities to homes.\n\n";
 
-    $html .= "## 📰 Natuzzi Brand News\n\n";
+    $html .= "## Natuzzi Brand News\n\n";
 
     if (!empty($novinky['novinky'])) {
         foreach ($novinky['novinky'] as $index => $novinka) {
@@ -309,7 +309,7 @@ function prelozitDoAnglictiny(string $obsahCZ, array $svatek, array $novinky, ar
         }
     }
 
-    $html .= "## 🛠️ Luxury Furniture Care\n\n";
+    $html .= "## Luxury Furniture Care\n\n";
 
     if (!empty($pece['tipy'])) {
         foreach ($pece['tipy'] as $tip) {
@@ -321,7 +321,7 @@ function prelozitDoAnglictiny(string $obsahCZ, array $svatek, array $novinky, ar
         }
     }
 
-    $html .= "## 🇨🇿 Natuzzi in Czech Republic\n\n";
+    $html .= "## Natuzzi in Czech Republic\n\n";
     $html .= "Visit our showrooms in Prague (Lucerna Passage, River Garden Karlín) and Brno. ";
     $html .= "Complete range of luxury Italian furniture with expert advice. ";
     $html .= "More information at [natuzzi.cz](https://www.natuzzi.cz/).\n\n";
@@ -342,7 +342,7 @@ function prelozitDoItalstiny(string $obsahCZ, array $svatek, array $novinky, arr
     $html .= "**{$datumFormat} | Onomastico: {$jmeno}**\n\n";
     $html .= "Oggi celebriamo la festa di {$jmeno}. È un giorno pieno di opportunità e nuove idee, proprio come Natuzzi porta nuove possibilità di design nelle case.\n\n";
 
-    $html .= "## 📰 Novità del Brand Natuzzi\n\n";
+    $html .= "## Novità del Brand Natuzzi\n\n";
 
     if (!empty($novinky['novinky'])) {
         foreach ($novinky['novinky'] as $index => $novinka) {
@@ -359,7 +359,7 @@ function prelozitDoItalstiny(string $obsahCZ, array $svatek, array $novinky, arr
         }
     }
 
-    $html .= "## 🛠️ Cura dei Mobili di Lusso\n\n";
+    $html .= "## Cura dei Mobili di Lusso\n\n";
 
     if (!empty($pece['tipy'])) {
         foreach ($pece['tipy'] as $tip) {
@@ -371,7 +371,7 @@ function prelozitDoItalstiny(string $obsahCZ, array $svatek, array $novinky, arr
         }
     }
 
-    $html .= "## 🇨🇿 Natuzzi nella Repubblica Ceca\n\n";
+    $html .= "## Natuzzi nella Repubblica Ceca\n\n";
     $html .= "Visitate i nostri showroom a Praga (Passaggio Lucerna, River Garden Karlín) e Brno. ";
     $html .= "Gamma completa di mobili italiani di lusso con consulenza esperta. ";
     $html .= "Maggiori informazioni su [natuzzi.cz](https://www.natuzzi.cz/).\n\n";

@@ -1,7 +1,16 @@
 <?php
 /**
  * DEBUG VERZE - Generátor aktualit s viditelným výstupem chyb
+ * POUZE PRO ADMINISTRÁTORY
  */
+
+require_once __DIR__ . '/../init.php';
+
+// BEZPEČNOST: Pouze pro administrátory
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    http_response_code(403);
+    die("PŘÍSTUP ODEPŘEN: Pouze administrátor může používat debug generátor.");
+}
 
 // Zobrazit všechny chyby
 error_reporting(E_ALL);
@@ -10,8 +19,7 @@ ini_set('display_errors', 1);
 echo "<h1>DEBUG: Generování aktualit</h1>";
 echo "<pre>";
 
-echo "1. Načítání init.php...\n";
-require_once __DIR__ . '/../init.php';
+echo "1. init.php načten (admin autentizován)...\n";
 echo "   ✅ init.php načten\n\n";
 
 echo "2. Připojení k databázi...\n";
@@ -84,14 +92,14 @@ echo "   Svátek: {$jmenoSvatku}\n";
 $obsahCZ = "# Denní aktuality Natuzzi\n\n";
 $obsahCZ .= "**Datum:** " . date('d.m.Y') . " | **Svátek má:** {$jmenoSvatku}\n\n";
 $obsahCZ .= "Vítejte u dnešních aktualit o luxusním italském nábytku Natuzzi.\n\n";
-$obsahCZ .= "## 📰 Novinky o značce Natuzzi\n\n";
+$obsahCZ .= "## Novinky o značce Natuzzi\n\n";
 $obsahCZ .= "**1. Nová kolekce Natuzzi 2025**\n\n";
 $obsahCZ .= "Natuzzi představuje novou kolekci inspirovanou italskou přírodou a moderním designem.\n\n";
 $obsahCZ .= "[Více informací](https://www.natuzzi.com)\n\n";
-$obsahCZ .= "## 🛠️ Péče o luxusní nábytek\n\n";
+$obsahCZ .= "## Péče o luxusní nábytek\n\n";
 $obsahCZ .= "**Pravidelná údržba kožených sedaček**\n\n";
 $obsahCZ .= "Týdenní péče o kůži prodlužuje životnost vašeho nábytku. Používejte měkký hadřík a specializované přípravky.\n\n";
-$obsahCZ .= "## 🇨🇿 Natuzzi v České republice\n\n";
+$obsahCZ .= "## Natuzzi v České republice\n\n";
 $obsahCZ .= "Navštivte naše showroomy v Praze a Brně. Více informací na [natuzzi.cz](https://www.natuzzi.cz/).\n\n";
 
 echo "   ✅ CZ obsah vygenerován (" . strlen($obsahCZ) . " znaků)\n";
