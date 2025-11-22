@@ -202,10 +202,35 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       padding: 12px 30px;
       border-radius: 30px;
       display: inline-block;
-      margin-bottom: 30px;
       font-weight: 600;
       font-size: 1em;
-      text-align: center;
+    }
+
+    .datum-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .pridat-clanek-btn {
+      padding: 12px 30px;
+      background: #2D5016;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1em;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .pridat-clanek-btn:hover {
+      background: #1a300d;
+      transform: scale(1.05);
     }
 
     /* ŠIROKÝ ČLÁNEK */
@@ -217,6 +242,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       border-radius: 10px;
       box-shadow: 0 4px 16px rgba(0,0,0,0.1);
       position: relative;
+      height: auto;  /* Výška podle obsahu */
     }
 
     .siroky-clanek h2 {
@@ -256,6 +282,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       grid-template-columns: 1fr 1fr;
       gap: 30px;
       margin-bottom: 40px;
+      align-items: start;  /* Každý článek má vlastní výšku podle obsahu */
     }
 
     @media (max-width: 968px) {
@@ -273,6 +300,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
       position: relative;
       transition: all 0.3s;
+      height: auto;  /* Výška podle obsahu */
     }
 
     .clanek-card:hover {
@@ -456,16 +484,24 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
     <?php if ($sirokyArticle || !empty($normalniArticles)): ?>
 
-      <div class="datum-badge">
-        <?php
-        // Překlad "Datum:"
-        echo $jazyk === 'en' ? 'Date: ' : ($jazyk === 'it' ? 'Data: ' : 'Datum: ');
-        echo date('d.m.Y', strtotime($datumAktuality));
-        ?>
-        <?php if ($hlavniAktualita && $hlavniAktualita['svatek_cz']): ?>
-          | <?php
-          echo $jazyk === 'en' ? 'Name Day' : ($jazyk === 'it' ? 'Onomastico' : 'Svátek');
-          ?>: <?php echo htmlspecialchars($hlavniAktualita['svatek_cz']); ?>
+      <div class="datum-bar">
+        <div class="datum-badge">
+          <?php
+          // Překlad "Datum:"
+          echo $jazyk === 'en' ? 'Date: ' : ($jazyk === 'it' ? 'Data: ' : 'Datum: ');
+          echo date('d.m.Y', strtotime($datumAktuality));
+          ?>
+          <?php if ($hlavniAktualita && $hlavniAktualita['svatek_cz']): ?>
+            | <?php
+            echo $jazyk === 'en' ? 'Name Day' : ($jazyk === 'it' ? 'Onomastico' : 'Svátek');
+            ?>: <?php echo htmlspecialchars($hlavniAktualita['svatek_cz']); ?>
+          <?php endif; ?>
+        </div>
+
+        <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
+          <button class="pridat-clanek-btn" onclick="pridatNovyClanek()">
+            Přidat nový článek
+          </button>
         <?php endif; ?>
       </div>
 
@@ -560,6 +596,21 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     otevritEditorClanku(aktualitaId, jazyk, index);
   };
 
+  // Globální funkce pro přidání nového článku
+  window.pridatNovyClanek = function() {
+    // Získat ID aktuální aktuality (nejnovější)
+    const sirokyArticle = document.querySelector('[data-aktualita-id]');
+    if (!sirokyArticle) {
+      alert('Nepodařilo se najít ID aktuality');
+      return;
+    }
+    const aktualitaId = sirokyArticle.dataset.aktualitaId;
+    const jazyk = 'cz';
+
+    // Otevřít editor s prázdnými poli, index -1 znamená nový článek
+    zobrazitEditor(aktualitaId, jazyk, -1, '');
+  };
+
   function otevritEditorClanku(aktualitaId, jazyk, index) {
     // Získat aktuální markdown obsah z databáze (celý obsah všech článků)
     fetch(`/api/nacti_aktualitu.php?id=${aktualitaId}&jazyk=${jazyk}&index=${index}`)
@@ -596,9 +647,12 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       overflow-y: auto;
     `;
 
+    const jeNovyClanek = (index === -1);
+    const nadpisEditoru = jeNovyClanek ? 'Přidat nový článek' : 'Upravit článek';
+
     editorDialog.innerHTML = `
       <h2 style="margin: 0 0 20px 0; color: #1a1a1a;">
-        Upravit článek - ${jazyk.toUpperCase()}
+        ${nadpisEditoru} - ${jazyk.toUpperCase()}
       </h2>
       <p style="margin: 0 0 20px 0; color: #666; background: #e8f4fd; padding: 12px; border-radius: 5px; border-left: 4px solid #0066cc;">
         Jednoduše vyplňte pole níže. Nemusíte nic formátovat - prostě napište text.
@@ -732,9 +786,37 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         </div>
       </div>
 
-      <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
-        <strong>Pozor:</strong> Tato změna přepíše celý obsah článku v jazyce <strong>${jazyk.toUpperCase()}</strong>.
-        Ostatní jazyky zůstanou nezměněny.
+      <!-- SEKCE NADPIS -->
+      <div style="background: #1a1a1a; color: white; padding: 12px 20px; margin: 25px 0 15px 0; border-radius: 5px; font-weight: bold;">
+        FOTOGRAFIE (volitelná)
+      </div>
+
+      <!-- FOTOGRAFIE -->
+      <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+        <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">
+          Fotografie na konci článku:
+        </label>
+        <input type="file" id="fotkaArticle" accept="image/*" style="
+          width: 100%;
+          padding: 10px;
+          border: 2px solid #ddd;
+          border-radius: 5px;
+          font-size: 14px;
+          box-sizing: border-box;
+          background: white;
+        ">
+        <div id="fotkaPreview" style="margin-top: 10px; display: none;">
+          <img id="fotkaPreviewImg" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 5px;">
+        </div>
+        <div id="fotkaExisting" style="margin-top: 10px; display: none;">
+          <p style="font-size: 13px; color: #666; margin-bottom: 5px;">Stávající fotka:</p>
+          <img id="fotkaExistingImg" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 5px;">
+          <p style="font-size: 12px; color: #999; margin-top: 5px;">Pokud vyberete novou fotku, nahradí tuto stávající.</p>
+        </div>
+      </div>
+
+      <div style="margin-top: 15px; padding: 10px; background: ${jeNovyClanek ? '#d4edda' : '#fff3cd'}; border-left: 4px solid ${jeNovyClanek ? '#28a745' : '#ffc107'}; border-radius: 5px;">
+        <strong>${jeNovyClanek ? 'Info:' : 'Pozor:'}</strong> ${jeNovyClanek ? 'Nový článek bude přidán na konec seznamu článků.' : 'Tato změna přepíše celý obsah článku v jazyce <strong>' + jazyk.toUpperCase() + '</strong>.'}
       </div>
 
       <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
@@ -760,7 +842,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
           font-weight: 600;
           font-size: 15px;
         ">
-          Uložit článek
+          ${jeNovyClanek ? 'Přidat článek' : 'Uložit článek'}
         </button>
       </div>
     `;
@@ -791,6 +873,27 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     document.getElementById('odkaz3Text').value = parsovanaData.odkazy[2]?.text || '';
     document.getElementById('odkaz3Url').value = parsovanaData.odkazy[2]?.url || '';
 
+    // Pokud má stávající fotku, zobrazit ji
+    if (parsovanaData.fotka) {
+      document.getElementById('fotkaExisting').style.display = 'block';
+      document.getElementById('fotkaExistingImg').src = parsovanaData.fotka;
+    }
+
+    // Náhled nové fotky při výběru
+    document.getElementById('fotkaArticle').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          document.getElementById('fotkaPreview').style.display = 'block';
+          document.getElementById('fotkaPreviewImg').src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        document.getElementById('fotkaPreview').style.display = 'none';
+      }
+    });
+
     // Focus na nadpis
     document.getElementById('nadpisArticle').focus();
 
@@ -818,6 +921,18 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         return;
       }
 
+      // Zjistit zda má novou fotku nebo ponechat stávající
+      const fotkaInput = document.getElementById('fotkaArticle');
+      const maNovoufotku = fotkaInput.files.length > 0;
+
+      // Pokud nemá novou fotku, ponechat URL stávající (pokud existuje)
+      let fotkaUrl = parsovanaData.fotka || null;
+
+      // Pokud má novou fotku, použít placeholder - nahradí se po uploadu
+      if (maNovoufotku) {
+        fotkaUrl = 'PLACEHOLDER_NEW_PHOTO';
+      }
+
       // Sestavit markdown z polí formuláře
       const novyObsah = parseFormularDoMarkdown({
         jeSiroky: document.getElementById('jeSiroky').checked,
@@ -836,31 +951,39 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
             text: document.getElementById('odkaz3Text').value.trim(),
             url: document.getElementById('odkaz3Url').value.trim()
           }
-        ]
+        ],
+        fotka: fotkaUrl
       });
 
-      if (!confirm(`Opravdu chcete uložit změny?\n\nPřepíše se celý obsah článku v jazyce ${jazyk.toUpperCase()}.`)) {
+      const confirmMessage = jeNovyClanek
+        ? 'Opravdu chcete přidat tento nový článek?'
+        : `Opravdu chcete uložit změny?\n\nPřepíše se celý obsah článku v jazyce ${jazyk.toUpperCase()}.`;
+
+      if (!confirm(confirmMessage)) {
         return;
       }
 
       this.disabled = true;
-      this.textContent = 'Ukládám...';
+      this.textContent = jeNovyClanek ? 'Přidávám...' : 'Ukládám...';
 
       try {
-        const response = await ulozitCelyClanek(aktualitaId, jazyk, index, novyObsah);
+        const response = await ulozitCelyClanek(aktualitaId, jazyk, index, novyObsah, maNovoufotku ? fotkaInput.files[0] : null);
 
         if (response.status === 'success') {
-          alert('Článek byl úspěšně uložen!\n\nStránka se nyní obnoví.');
+          const successMsg = jeNovyClanek
+            ? 'Nový článek byl úspěšně přidán!\n\nStránka se nyní obnoví.'
+            : 'Článek byl úspěšně uložen!\n\nStránka se nyní obnoví.';
+          alert(successMsg);
           window.location.reload();
         } else {
           alert('Chyba při ukládání: ' + response.message);
           this.disabled = false;
-          this.textContent = 'Uložit článek';
+          this.textContent = jeNovyClanek ? 'Přidat článek' : 'Uložit článek';
         }
       } catch (error) {
         alert('Síťová chyba: ' + error.message);
         this.disabled = false;
-        this.textContent = 'Uložit článek';
+        this.textContent = jeNovyClanek ? 'Přidat článek' : 'Uložit článek';
       }
     });
   }
@@ -871,12 +994,21 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       jeSiroky: false,
       nadpis: '',
       text: '',
-      odkazy: []
+      odkazy: [],
+      fotka: null
     };
 
     // Kontrola zda je široký článek
     const jeSiroky = /^## ŠIROKÝ:/im.test(markdown);
     result.jeSiroky = jeSiroky;
+
+    // Parsovat fotku (pokud existuje) - ![alt](url)
+    const fotkaMatch = markdown.match(/!\[([^\]]*)\]\(([^)]+)\)/);
+    if (fotkaMatch) {
+      result.fotka = fotkaMatch[2]; // URL fotky
+      // Odstranit fotku z markdownu pro další zpracování
+      markdown = markdown.replace(fotkaMatch[0], '').trim();
+    }
 
     // Získat nadpis (po ##, odstranit ŠIROKÝ: pokud existuje)
     const nadpisMatch = markdown.match(/^## (?:ŠIROKÝ:\s*)?(.+)$/m);
@@ -932,19 +1064,29 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       const odkazyText = platneOdkazy
         .map(o => `[${o.text}](${o.url})`)
         .join(' | ');
-      markdown += odkazyText;
+      markdown += odkazyText + '\n\n';
+    }
+
+    // Přidat fotku na konec, pokud existuje (buď stávající URL nebo placeholder pro novou)
+    if (data.fotka) {
+      markdown += `![Fotka článku](${data.fotka})`;
     }
 
     return markdown.trim();
   }
 
-  async function ulozitCelyClanek(aktualitaId, jazyk, index, novyObsah) {
+  async function ulozitCelyClanek(aktualitaId, jazyk, index, novyObsah, fotkaFile) {
     const formData = new FormData();
     formData.append('csrf_token', csrfToken);
     formData.append('aktualita_id', aktualitaId);
     formData.append('jazyk', jazyk);
     formData.append('index', index);
     formData.append('novy_obsah', novyObsah);
+
+    // Přidat fotku pokud byla vybrána
+    if (fotkaFile) {
+      formData.append('fotka', fotkaFile);
+    }
 
     const response = await fetch('/api/uprav_celou_aktualitu.php', {
       method: 'POST',

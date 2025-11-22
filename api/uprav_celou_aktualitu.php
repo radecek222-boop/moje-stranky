@@ -35,6 +35,7 @@ try {
     $jazyk = $_POST['jazyk'] ?? 'cz';  // Vždy CZ
     $index = (int)($_POST['index'] ?? 0);
     $novyObsah = $_POST['novy_obsah'] ?? '';
+    $jeNovyClanek = ($index === -1);  // Index -1 znamená přidat nový článek
 
     if (!$aktualitaId) {
         sendJsonError('Chybí ID aktuality');
@@ -59,43 +60,91 @@ try {
 
     $staryObsahCely = $aktualita['obsah_cz'];
 
-    // Rozdělit na jednotlivé články
-    $parts = preg_split('/(?=^## )/m', $staryObsahCely);
+    // Pokud je to nový článek, přidat na konec
+    if ($jeNovyClanek) {
+        $novyObsahCely = $staryObsahCely . "\n\n" . $novyObsah;
+    } else {
+        // Rozdělit na jednotlivé články
+        $parts = preg_split('/(?=^## )/m', $staryObsahCely);
 
-    $noveCasti = [];
-    $currentIndex = 0;
-    $articleUpdated = false;
+        $noveCasti = [];
+        $currentIndex = 0;
+        $articleUpdated = false;
 
-    foreach ($parts as $part) {
-        $part = trim($part);
-        if (empty($part)) continue;
+        foreach ($parts as $part) {
+            $part = trim($part);
+            if (empty($part)) continue;
 
-        // První část je hlavní nadpis - zachovat
-        if ($currentIndex === 0 && !preg_match('/^## /', $part)) {
-            $noveCasti[] = $part;
-            continue;
-        }
-
-        // Pokud je to článek s ## nadpisem
-        if (preg_match('/^## /', $part)) {
-            if ($currentIndex === $index) {
-                // Nahradit tímto článkem novým obsahem
-                $noveCasti[] = $novyObsah;
-                $articleUpdated = true;
-            } else {
-                // Zachovat původní článek
+            // První část je hlavní nadpis - zachovat
+            if ($currentIndex === 0 && !preg_match('/^## /', $part)) {
                 $noveCasti[] = $part;
+                continue;
             }
-            $currentIndex++;
+
+            // Pokud je to článek s ## nadpisem
+            if (preg_match('/^## /', $part)) {
+                if ($currentIndex === $index) {
+                    // Nahradit tímto článkem novým obsahem
+                    $noveCasti[] = $novyObsah;
+                    $articleUpdated = true;
+                } else {
+                    // Zachovat původní článek
+                    $noveCasti[] = $part;
+                }
+                $currentIndex++;
+            }
         }
+
+        if (!$articleUpdated) {
+            sendJsonError('Článek s indexem ' . $index . ' nebyl nalezen');
+        }
+
+        // Složit zpět dohromady
+        $novyObsahCely = implode("\n\n", $noveCasti);
     }
 
-    if (!$articleUpdated) {
-        sendJsonError('Článek s indexem ' . $index . ' nebyl nalezen');
-    }
+    // Zpracovat upload fotky pokud byla nahrána
+    if (isset($_FILES['fotka']) && $_FILES['fotka']['error'] === UPLOAD_ERR_OK) {
+        $fotka = $_FILES['fotka'];
 
-    // Složit zpět dohromady
-    $novyObsahCely = implode("\n\n", $noveCasti);
+        // Validace typu souboru
+        $povoleneMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $fotka['tmp_name']);
+        finfo_close($finfo);
+
+        if (!in_array($mimeType, $povoleneMimeTypes)) {
+            sendJsonError('Neplatný formát souboru. Povolené formáty: JPG, PNG, GIF, WebP');
+        }
+
+        // Validace velikosti (max 5MB)
+        if ($fotka['size'] > 5 * 1024 * 1024) {
+            sendJsonError('Soubor je příliš velký. Maximální velikost je 5 MB.');
+        }
+
+        // Vytvořit složku pokud neexistuje
+        $uploadDir = __DIR__ . '/../uploads/aktuality/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        // Generovat unikátní název souboru
+        $extension = pathinfo($fotka['name'], PATHINFO_EXTENSION);
+        $indexSuffix = $jeNovyClanek ? 'novy' : $index;
+        $fileName = 'aktualita_' . $aktualitaId . '_clanek_' . $indexSuffix . '_' . time() . '.' . $extension;
+        $filePath = $uploadDir . $fileName;
+
+        // Přesunout soubor
+        if (!move_uploaded_file($fotka['tmp_name'], $filePath)) {
+            sendJsonError('Chyba při nahrávání souboru');
+        }
+
+        // URL fotky pro použití v markdownu
+        $fotkaUrl = '/uploads/aktuality/' . $fileName;
+
+        // Nahradit placeholder skutečnou URL v obsahu
+        $novyObsahCely = str_replace('PLACEHOLDER_NEW_PHOTO', $fotkaUrl, $novyObsahCely);
+    }
 
     // Aktualizovat obsah v databázi
     $stmtUpdate = $pdo->prepare("
@@ -110,20 +159,34 @@ try {
     ]);
 
     // Audit log
-    error_log(sprintf(
-        "ADMIN EDIT AKTUALITA: User %d edited aktualita #%d (článek index %d) on %s | Length: %d -> %d chars",
-        $_SESSION['user_id'] ?? 0,
-        $aktualitaId,
-        $index,
-        $aktualita['datum'],
-        strlen($staryObsahCely),
-        strlen($novyObsahCely)
-    ));
+    if ($jeNovyClanek) {
+        error_log(sprintf(
+            "ADMIN ADD AKTUALITA: User %d added new article to aktualita #%d on %s | Length: %d -> %d chars",
+            $_SESSION['user_id'] ?? 0,
+            $aktualitaId,
+            $aktualita['datum'],
+            strlen($staryObsahCely),
+            strlen($novyObsahCely)
+        ));
+    } else {
+        error_log(sprintf(
+            "ADMIN EDIT AKTUALITA: User %d edited aktualita #%d (článek index %d) on %s | Length: %d -> %d chars",
+            $_SESSION['user_id'] ?? 0,
+            $aktualitaId,
+            $index,
+            $aktualita['datum'],
+            strlen($staryObsahCely),
+            strlen($novyObsahCely)
+        ));
+    }
 
-    sendJsonSuccess('Článek byl úspěšně upraven', [
+    $successMessage = $jeNovyClanek ? 'Nový článek byl úspěšně přidán' : 'Článek byl úspěšně upraven';
+
+    sendJsonSuccess($successMessage, [
         'aktualita_id' => $aktualitaId,
         'index' => $index,
-        'delka_noveho_obsahu' => strlen($novyObsahCely)
+        'delka_noveho_obsahu' => strlen($novyObsahCely),
+        'je_novy' => $jeNovyClanek
     ]);
 
 } catch (PDOException $e) {
