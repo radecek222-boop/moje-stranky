@@ -1,5 +1,5 @@
-// VERSION CHECK: 20251122-03 - Performance diagnostika
-console.log('🔍 SEZNAM.JS NAČTEN - VERZE: 20251122-03 (s detailními timings)');
+// VERSION CHECK: 20251122-04 - Distance API vypnuto
+console.log('🔍 SEZNAM.JS NAČTEN - VERZE: 20251122-04 (distance API vypnuto)');
 
 // BEZPEČNOST: Cache CSRF tokenu pro prevenci nekonečné smyčky
 window.csrfTokenCache = window.csrfTokenCache || null;
@@ -940,32 +940,15 @@ function renderCalendar(m, y) {
       document.querySelectorAll('.cal-day').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
 
-      // Získat vzdálenost k zákazníkovi pro zobrazení v hlavičce
-      const currentAddress = Utils.addCountryToAddress(Utils.getAddress(CURRENT_RECORD));
+      // ✅ PERFORMANCE: Vzdálenosti vypnuty kvůli API problémům
       let displayText = `Vybraný den: ${SELECTED_DATE}`;
-
-      // Nastavit základní text okamžitě
       document.getElementById('selectedDateDisplay').textContent = displayText;
-
-      // Zkusit získat vzdálenost asynchronně
-      if (currentAddress && currentAddress !== '—') {
-        getDistance(WGS_ADDRESS, currentAddress).then(distToCustomer => {
-          if (distToCustomer && distToCustomer.km) {
-            const updatedText = `Vybraný den: ${SELECTED_DATE} — ${distToCustomer.km} km`;
-            document.getElementById('selectedDateDisplay').textContent = updatedText;
-          }
-        }).catch(err => {
-          logger.error('Chyba při získání vzdálenosti:', err);
-        });
-      }
 
       // Zobrazit časy okamžitě
       renderTimeGrid();
 
-      // Načítat vzdálenosti na pozadí (neblokovat UI)
-      showDayBookingsWithDistances(SELECTED_DATE).catch(err => {
-        logger.error('Chyba při načítání vzdáleností:', err);
-      });
+      // ✅ PERFORMANCE: Vypnuto kvůli problémům s get_distance.php
+      // showDayBookingsWithDistances(SELECTED_DATE);
     };
     daysGrid.appendChild(el);
   }
@@ -1065,30 +1048,38 @@ async function getDistancesBatch(pairs) {
 
 // === ZOBRAZENÍ TERMÍNŮ S VZDÁLENOSTMI ===
 async function showDayBookingsWithDistances(date) {
+  // ✅ PERFORMANCE: Funkce vypnuta kvůli problémům s get_distance.php API
+  // Vzdálenosti se nezobrazují
   const distanceContainer = document.getElementById('distanceInfo');
   const bookingsContainer = document.getElementById('dayBookings');
-  
+
+  if (distanceContainer) distanceContainer.innerHTML = '';
+  if (bookingsContainer) bookingsContainer.innerHTML = '';
+  return;
+
+  /* VYPNUTO - DISTANCE API NEFUNGUJE
   if (!Array.isArray(WGS_DATA_CACHE)) {
     WGS_DATA_CACHE = [];
   }
-  
-  const bookings = WGS_DATA_CACHE.filter(rec => 
+
+  const bookings = WGS_DATA_CACHE.filter(rec =>
     rec.termin === date && rec.id !== CURRENT_RECORD?.id
   );
-  
+
   bookings.sort((a, b) => {
     const timeA = a.cas_navstevy || '00:00';
     const timeB = b.cas_navstevy || '00:00';
     return timeA.localeCompare(timeB);
   });
-  
+
   let currentAddress = Utils.getAddress(CURRENT_RECORD);
-  
+
   if (!currentAddress || currentAddress === '—') {
     distanceContainer.innerHTML = '';
     bookingsContainer.innerHTML = '';
     return;
   }
+  */
   
   currentAddress = Utils.addCountryToAddress(currentAddress);
   
@@ -1314,10 +1305,7 @@ function renderTimeGrid() {
         document.querySelectorAll('.time-slot').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
 
-        // Získat adresu zákazníka
-        const currentAddress = Utils.addCountryToAddress(Utils.getAddress(CURRENT_RECORD));
-
-        // Základní text bez vzdálenosti - zobrazit OKAMŽITĚ
+        // ✅ PERFORMANCE: Zobrazit termín bez vzdálenosti
         let displayText = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
 
         if (occupiedTimes[time]) {
@@ -1326,26 +1314,7 @@ function renderTimeGrid() {
 
         document.getElementById('selectedDateDisplay').textContent = displayText;
 
-        // ✅ PERFORMANCE FIX: Získat vzdálenost ASYNCHRONNĚ (neblokovat UI)
-        // Pokud přijde odpověď, aktualizovat text
-        if (currentAddress && currentAddress !== '—') {
-          getDistance(WGS_ADDRESS, currentAddress)
-            .then(distToCustomer => {
-              if (distToCustomer && distToCustomer.km) {
-                const updatedText = `Vybraný termín: ${SELECTED_DATE} — ${distToCustomer.km} km — ${SELECTED_TIME}`;
-                document.getElementById('selectedDateDisplay').textContent = updatedText;
-              }
-            })
-            .catch(err => {
-              logger.error('Chyba při získání vzdálenosti:', err);
-              // Chyba se nezobrazuje - vzdálenost je optional
-            });
-        }
-
-        // Aktualizovat vzdálenosti na pozadí s novým časem (fire-and-forget)
-        showDayBookingsWithDistances(SELECTED_DATE).catch(err => {
-          logger.error('Chyba při aktualizaci vzdáleností:', err);
-        });
+        // ✅ PERFORMANCE: getDistance() a showDayBookingsWithDistances() vypnuty
       };
       t.appendChild(el);
     }
@@ -1607,25 +1576,10 @@ async function loadMapAndRoute() {
       </div>
     `;
 
-    // ✅ PERFORMANCE FIX: Použít getDistance() asynchronně (neblokovat UI)
-    // Tímto se vyhneme duplicitním API calls a zároveň nezablokujeme UI při selhání
-    getDistance(WGS_ADDRESS, customerAddress)
-      .then(distanceData => {
-        if (distanceData && distanceData.text) {
-          document.getElementById('mapDistance').textContent = distanceData.text;
-          if (distanceData.duration) {
-            document.getElementById('mapDuration').textContent = distanceData.duration;
-          }
-        } else {
-          document.getElementById('mapDistance').textContent = '—';
-          document.getElementById('mapDuration').textContent = '—';
-        }
-      })
-      .catch(err => {
-        logger.error('Nepodařilo se načíst vzdálenost:', err);
-        document.getElementById('mapDistance').textContent = '—';
-        document.getElementById('mapDuration').textContent = '—';
-      });
+    // ✅ PERFORMANCE: getDistance() vypnuto kvůli API problémům
+    // Vzdálenost se nezobrazuje, zobrazí se jen '—'
+    document.getElementById('mapDistance').textContent = '—';
+    document.getElementById('mapDuration').textContent = '—';
     
   } catch (error) {
     logger.error('Chyba při načítání mapy:', error);
