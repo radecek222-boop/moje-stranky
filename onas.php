@@ -36,6 +36,9 @@
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/onas.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.css">
+
+  <!-- Analytics Tracker -->
+  <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
 </head>
 <body>
   <link rel="preload" as="image" href="assets/img/herman-image04.webp" fetchpriority="high">

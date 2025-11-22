@@ -112,6 +112,12 @@ try {
 
             $pdo->beginTransaction();
 
+            $migrationSuccess = false;
+            $adminIPs = [
+                '46.135.14.161' => 'Admin IP - IPv4',
+                '2a00:11b1:100d:445b:550:e51:9352:3106' => 'Admin IP - IPv6'
+            ];
+
             try {
                 // SQL pro vytvoření tabulky
                 $sql = "
@@ -164,11 +170,6 @@ try {
                 $pdo->exec($sqlIgnored);
 
                 // Přidat admin IP do ignorovaných
-                $adminIPs = [
-                    '46.135.14.161' => 'Admin IP - IPv4',
-                    '2a00:11b1:100d:445b:550:e51:9352:3106' => 'Admin IP - IPv6'
-                ];
-
                 $stmtInsert = $pdo->prepare("
                     INSERT IGNORE INTO wgs_analytics_ignored_ips (ip_address, description)
                     VALUES (:ip, :desc)
@@ -179,7 +180,18 @@ try {
                 }
 
                 $pdo->commit();
+                $migrationSuccess = true;
 
+            } catch (PDOException $e) {
+                $pdo->rollBack();
+                echo "<div class='error'>";
+                echo "<strong>CHYBA:</strong><br>";
+                echo htmlspecialchars($e->getMessage());
+                echo "</div>";
+            }
+
+            // Výpis výsledku migrace (mimo try-catch)
+            if ($migrationSuccess) {
                 echo "<div class='success'>";
                 echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
                 echo "Vytvořené tabulky:<br>";
@@ -196,13 +208,6 @@ try {
                 echo "1. Tracking skript bude automaticky zaznamenávat návštěvy<br>";
                 echo "2. Vaše IP bude ignorována<br>";
                 echo "3. Analytics budou zobrazovat skutečná data<br>";
-                echo "</div>";
-
-            } catch (PDOException $e) {
-                $pdo->rollBack();
-                echo "<div class='error'>";
-                echo "<strong>CHYBA:</strong><br>";
-                echo htmlspecialchars($e->getMessage());
                 echo "</div>";
             }
         }

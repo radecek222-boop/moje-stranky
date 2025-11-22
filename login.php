@@ -60,6 +60,9 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
     #userLoginFields { display: block; }
     #adminLoginFields { display: none; }
   </style>
+
+  <!-- Analytics Tracker -->
+  <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
 </head>
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
