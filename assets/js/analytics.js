@@ -113,8 +113,10 @@ async function nactiData() {
 
         if (data.status === 'success') {
             ANALYTICS.data.stats = data.data.stats || {};
-            ANALYTICS.data.visits = data.data.visits || [];
-            ANALYTICS.data.events = data.data.events || [];
+            ANALYTICS.data.topPages = data.data.topPages || [];
+            ANALYTICS.data.referrers = data.data.referrers || [];
+            ANALYTICS.data.browsersDevices = data.data.browsersDevices || {browsers: [], devices: []};
+            ANALYTICS.data.timeline = data.data.timeline || [];
 
             logger.log('✅ Data úspěšně načtena');
             aktualizovatUI();
@@ -167,6 +169,13 @@ function aktualizovatUI() {
     document.getElementById('conversion-change').innerHTML = `Za ${periodText}`;
     document.getElementById('conversion-change').className = 'stat-change';
 
+    // Detailní analytics
+    zobrazitTopStranky();
+    zobrazitReferrery();
+    zobrazitProhlizece();
+    zobrazitZarizeni();
+    vykreslit Graf();
+
     logger.log('✅ UI úspěšně aktualizováno');
 }
 
@@ -194,6 +203,184 @@ function formatDuration(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+// === DETAILNÍ ANALYTICS ===
+
+function zobrazitTopStranky() {
+    const tbody = document.querySelector('#top-pages-table tbody');
+    const pages = ANALYTICS.data.topPages || [];
+
+    if (pages.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem; color: #999;">Žádná data k zobrazení</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = pages.map(page => `
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 0.75rem;">
+                <div style="font-weight: 500; color: #1d1f2c;">${page.page_title || page.page_url}</div>
+                <div style="font-size: 0.75rem; color: #6b7280;">${page.page_url}</div>
+            </td>
+            <td style="padding: 0.75rem;">${formatNumber(page.visits)}</td>
+            <td style="padding: 0.75rem;">${formatNumber(page.unique_visitors)}</td>
+            <td style="padding: 0.75rem;">${formatDuration(Math.round(page.avg_duration))}</td>
+        </tr>
+    `).join('');
+}
+
+function zobrazitReferrery() {
+    const tbody = document.querySelector('#referrers-table tbody');
+    const referrers = ANALYTICS.data.referrers || [];
+
+    if (referrers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 2rem; color: #999;">Žádná data k zobrazení</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = referrers.map(ref => `
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 0.75rem; font-weight: 500;">${ref.referrer_source}</td>
+            <td style="padding: 0.75rem;">${formatNumber(ref.visits)}</td>
+            <td style="padding: 0.75rem;">${formatNumber(ref.unique_visitors)}</td>
+        </tr>
+    `).join('');
+}
+
+function zobrazitProhlizece() {
+    const tbody = document.querySelector('#browsers-table tbody');
+    const browsers = ANALYTICS.data.browsersDevices?.browsers || [];
+
+    if (browsers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 2rem; color: #999;">Žádná data k zobrazení</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = browsers.map(browser => {
+        const browserName = parsujUserAgent(browser.user_agent);
+        return `
+            <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 0.75rem; font-weight: 500;">${browserName}</td>
+                <td style="padding: 0.75rem;">${formatNumber(browser.visits)}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function zobrazitZarizeni() {
+    const tbody = document.querySelector('#devices-table tbody');
+    const devices = ANALYTICS.data.browsersDevices?.devices || [];
+
+    if (devices.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 2rem; color: #999;">Žádná data k zobrazení</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = devices.map(device => `
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 0.75rem; font-weight: 500;">${device.screen_resolution}</td>
+            <td style="padding: 0.75rem;">${formatNumber(device.visits)}</td>
+        </tr>
+    `).join('');
+}
+
+let visitsChart = null;
+
+function vykreslit Graf() {
+    const canvas = document.getElementById('visits-chart');
+    if (!canvas) return;
+
+    const timeline = ANALYTICS.data.timeline || [];
+
+    if (timeline.length === 0) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = '14px Poppins';
+        ctx.fillStyle = '#999';
+        ctx.textAlign = 'center';
+        ctx.fillText('Žádná data k zobrazení', canvas.width / 2, canvas.height / 2);
+        return;
+    }
+
+    // Zničit předchozí graf
+    if (visitsChart) {
+        visitsChart.destroy();
+    }
+
+    const labels = timeline.map(t => t.time_period);
+    const visits = timeline.map(t => parseInt(t.visits));
+    const unique = timeline.map(t => parseInt(t.unique_visitors));
+
+    const ctx = canvas.getContext('2d');
+    visitsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Celkem návštěv',
+                    data: visits,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Unikátní návštěvníci',
+                    data: unique,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            family: 'Poppins',
+                            size: 12
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        font: {
+                            family: 'Poppins'
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            family: 'Poppins',
+                            size: 11
+                        },
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            }
+        }
+    });
+}
+
+function parsujUserAgent(ua) {
+    if (!ua) return 'Neznámý';
+    if (ua.includes('Chrome')) return 'Chrome';
+    if (ua.includes('Firefox')) return 'Firefox';
+    if (ua.includes('Safari')) return 'Safari';
+    if (ua.includes('Edge')) return 'Edge';
+    if (ua.includes('Opera')) return 'Opera';
+    return 'Ostatní';
 }
 
 // === EXPORT ===

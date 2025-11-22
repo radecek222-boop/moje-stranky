@@ -26,16 +26,21 @@ $period = $_GET['period'] ?? 'week';
 try {
     $pdo = getDbConnection();
 
-    // Načíst základní statistiky z reklamací (jako prozatímní analytics)
+    // Načíst všechna analytics data
     $stats = getBasicStats($pdo, $period);
+    $topPages = getTopPages($pdo, $period);
+    $referrers = getReferrers($pdo, $period);
+    $browsersDevices = getBrowsersDevices($pdo, $period);
+    $timeline = getVisitsTimeline($pdo, $period);
 
     echo json_encode([
         'status' => 'success',
         'data' => [
-            'visits' => [],
-            'events' => [],
-            'sessions' => [],
-            'stats' => $stats
+            'stats' => $stats,
+            'topPages' => $topPages,
+            'referrers' => $referrers,
+            'browsersDevices' => $browsersDevices,
+            'timeline' => $timeline
         ]
     ], JSON_UNESCAPED_UNICODE);
 
@@ -142,4 +147,168 @@ function getBasicStats(PDO $pdo, string $period): array
         'conversionRate' => $conversionRate,
         'totalEvents' => 0 // Pro budoucí implementaci
     ];
+}
+
+/**
+ * Získá nejnavštěvovanější stránky
+ */
+function getTopPages(PDO $pdo, string $period): array
+{
+    $dateFrom = getDateFrom($period);
+
+    $stmtTableCheck = $pdo->query("SHOW TABLES LIKE 'wgs_pageviews'");
+    if ($stmtTableCheck->rowCount() === 0) {
+        return [];
+    }
+
+    $stmt = $pdo->prepare("
+        SELECT
+            page_url,
+            page_title,
+            COUNT(*) as visits,
+            COUNT(DISTINCT session_id) as unique_visitors,
+            AVG(visit_duration) as avg_duration
+        FROM wgs_pageviews
+        WHERE created_at >= :date_from
+        GROUP BY page_url, page_title
+        ORDER BY visits DESC
+        LIMIT 10
+    ");
+    $stmt->execute(['date_from' => $dateFrom]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Získá zdroje návštěvnosti (referrers)
+ */
+function getReferrers(PDO $pdo, string $period): array
+{
+    $dateFrom = getDateFrom($period);
+
+    $stmtTableCheck = $pdo->query("SHOW TABLES LIKE 'wgs_pageviews'");
+    if ($stmtTableCheck->rowCount() === 0) {
+        return [];
+    }
+
+    $stmt = $pdo->prepare("
+        SELECT
+            CASE
+                WHEN referrer = '' OR referrer IS NULL THEN 'Přímý přístup'
+                WHEN referrer LIKE '%google%' THEN 'Google'
+                WHEN referrer LIKE '%facebook%' THEN 'Facebook'
+                WHEN referrer LIKE '%seznam%' THEN 'Seznam'
+                WHEN referrer LIKE '%instagram%' THEN 'Instagram'
+                ELSE referrer
+            END as referrer_source,
+            COUNT(*) as visits,
+            COUNT(DISTINCT session_id) as unique_visitors
+        FROM wgs_pageviews
+        WHERE created_at >= :date_from
+        GROUP BY referrer_source
+        ORDER BY visits DESC
+        LIMIT 10
+    ");
+    $stmt->execute(['date_from' => $dateFrom]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Získá prohlížeče a zařízení
+ */
+function getBrowsersDevices(PDO $pdo, string $period): array
+{
+    $dateFrom = getDateFrom($period);
+
+    $stmtTableCheck = $pdo->query("SHOW TABLES LIKE 'wgs_pageviews'");
+    if ($stmtTableCheck->rowCount() === 0) {
+        return ['browsers' => [], 'devices' => []];
+    }
+
+    // Prohlížeče
+    $stmtBrowsers = $pdo->prepare("
+        SELECT
+            user_agent,
+            COUNT(*) as visits
+        FROM wgs_pageviews
+        WHERE created_at >= :date_from AND user_agent IS NOT NULL
+        GROUP BY user_agent
+        ORDER BY visits DESC
+        LIMIT 5
+    ");
+    $stmtBrowsers->execute(['date_from' => $dateFrom]);
+    $browsers = $stmtBrowsers->fetchAll(PDO::FETCH_ASSOC);
+
+    // Zařízení (podle screen_resolution)
+    $stmtDevices = $pdo->prepare("
+        SELECT
+            screen_resolution,
+            COUNT(*) as visits
+        FROM wgs_pageviews
+        WHERE created_at >= :date_from AND screen_resolution IS NOT NULL
+        GROUP BY screen_resolution
+        ORDER BY visits DESC
+        LIMIT 5
+    ");
+    $stmtDevices->execute(['date_from' => $dateFrom]);
+    $devices = $stmtDevices->fetchAll(PDO::FETCH_ASSOC);
+
+    return [
+        'browsers' => $browsers,
+        'devices' => $devices
+    ];
+}
+
+/**
+ * Získá časovou osu návštěv (pro graf)
+ */
+function getVisitsTimeline(PDO $pdo, string $period): array
+{
+    $dateFrom = getDateFrom($period);
+
+    $stmtTableCheck = $pdo->query("SHOW TABLES LIKE 'wgs_pageviews'");
+    if ($stmtTableCheck->rowCount() === 0) {
+        return [];
+    }
+
+    // Formát podle období
+    $dateFormat = match($period) {
+        'today' => '%Y-%m-%d %H:00:00',
+        'week' => '%Y-%m-%d',
+        'month' => '%Y-%m-%d',
+        'year' => '%Y-%m',
+        default => '%Y-%m-%d'
+    };
+
+    $stmt = $pdo->prepare("
+        SELECT
+            DATE_FORMAT(created_at, :date_format) as time_period,
+            COUNT(*) as visits,
+            COUNT(DISTINCT session_id) as unique_visitors
+        FROM wgs_pageviews
+        WHERE created_at >= :date_from
+        GROUP BY time_period
+        ORDER BY time_period ASC
+    ");
+    $stmt->execute([
+        'date_format' => $dateFormat,
+        'date_from' => $dateFrom
+    ]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Pomocná funkce pro získání počátečního data podle období
+ */
+function getDateFrom(string $period): string
+{
+    return match($period) {
+        'today' => date('Y-m-d 00:00:00'),
+        'week' => date('Y-m-d 00:00:00', strtotime('-7 days')),
+        'month' => date('Y-m-d 00:00:00', strtotime('-30 days')),
+        'year' => date('Y-m-d 00:00:00', strtotime('-365 days')),
+        default => date('Y-m-d 00:00:00', strtotime('-7 days'))
+    };
 }

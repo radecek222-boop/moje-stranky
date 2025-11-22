@@ -105,13 +105,111 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
       <div class="stat-change">Real-time</div>
     </div>
   </div>
-  
-  <p style="text-align: center; color: #999; margin-top: 0.5rem; font-size: 0.7rem;">Analytics data loading...</p>
+
+  <!-- DETAILNÍ ANALYTICS -->
+  <div class="analytics-details" style="margin-top: 3rem;">
+
+    <!-- Nejnavštěvovanější stránky -->
+    <div class="analytics-section" style="margin-bottom: 2rem;">
+      <h2 style="font-size: 1.5rem; margin-bottom: 1rem; color: #1d1f2c;">Nejnavštěvovanější stránky</h2>
+      <div class="table-container" style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <table class="analytics-table" id="top-pages-table" style="width: 100%; border-collapse: collapse;">
+          <thead style="background: #f9fafb;">
+            <tr>
+              <th style="padding: 0.75rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: #6b7280;">Stránka</th>
+              <th style="padding: 0.75rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: #6b7280;">Návštěvy</th>
+              <th style="padding: 0.75rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: #6b7280;">Unikátní</th>
+              <th style="padding: 0.75rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: #6b7280;">Průměrná doba</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="4" style="text-align: center; padding: 2rem; color: #999;">Načítání dat...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Zdroje návštěvnosti -->
+    <div class="analytics-section" style="margin-bottom: 2rem;">
+      <h2 style="font-size: 1.5rem; margin-bottom: 1rem; color: #1d1f2c;">Zdroje návštěvnosti</h2>
+      <div class="table-container" style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <table class="analytics-table" id="referrers-table" style="width: 100%; border-collapse: collapse;">
+          <thead style="background: #f9fafb;">
+            <tr>
+              <th style="padding: 0.75rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: #6b7280;">Zdroj</th>
+              <th style="padding: 0.75rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: #6b7280;">Návštěvy</th>
+              <th style="padding: 0.75rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: #6b7280;">Unikátní návštěvníci</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="3" style="text-align: center; padding: 2rem; color: #999;">Načítání dat...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Prohlížeče a zařízení -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
+      <div class="analytics-section">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1rem; color: #1d1f2c;">Top prohlížeče</h2>
+        <div class="table-container" style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <table class="analytics-table" id="browsers-table" style="width: 100%; border-collapse: collapse;">
+            <thead style="background: #f9fafb;">
+              <tr>
+                <th style="padding: 0.75rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: #6b7280;">Prohlížeč</th>
+                <th style="padding: 0.75rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: #6b7280;">Návštěvy</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="2" style="text-align: center; padding: 2rem; color: #999;">Načítání dat...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="analytics-section">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1rem; color: #1d1f2c;">Top rozlišení</h2>
+        <div class="table-container" style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <table class="analytics-table" id="devices-table" style="width: 100%; border-collapse: collapse;">
+            <thead style="background: #f9fafb;">
+              <tr>
+                <th style="padding: 0.75rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: #6b7280;">Rozlišení</th>
+                <th style="padding: 0.75rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: #6b7280;">Návštěvy</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="2" style="text-align: center; padding: 2rem; color: #999;">Načítání dat...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graf návštěvnosti -->
+    <div class="analytics-section">
+      <h2 style="font-size: 1.5rem; margin-bottom: 1rem; color: #1d1f2c;">Návštěvnost v čase</h2>
+      <div style="background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <canvas id="visits-chart" style="max-height: 400px;"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <p style="text-align: center; color: #999; margin-top: 1.5rem; font-size: 0.7rem;">Analytics data loading...</p>
 
 </div>
 </main>
 
 <script src="assets/js/logger.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 <script src="assets/js/analytics.js" defer></script>
 </body>
 </html>
