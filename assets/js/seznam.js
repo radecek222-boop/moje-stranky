@@ -1375,9 +1375,16 @@ async function saveSelectedDate() {
   // ZOBRAZIT LOADING OVERLAY
   showLoading(t('saving_appointment'));
 
+  // ⏱️ PERFORMANCE: Debug timing
+  const t0 = performance.now();
+  logger.log('⏱️ START ukládání termínu...');
+
   try {
     // Get CSRF token
+    const t1 = performance.now();
     const csrfToken = await getCSRFToken();
+    const t2 = performance.now();
+    logger.log(`⏱️ CSRF token získán za ${(t2 - t1).toFixed(0)}ms`);
 
     const formData = new FormData();
     formData.append('action', 'update');
@@ -1389,10 +1396,14 @@ async function saveSelectedDate() {
 
     // KROK 1: Uložení termínu do DB
     showLoading(t('saving_appointment_to_db'));
+    const t3 = performance.now();
+    logger.log('⏱️ Odesílám POST request na save.php...');
     const response = await fetch('/app/controllers/save.php', {
       method: 'POST',
       body: formData
     });
+    const t4 = performance.now();
+    logger.log(`⏱️ POST request dokončen za ${(t4 - t3).toFixed(0)}ms`);
 
     const result = await response.json();
 
@@ -1429,10 +1440,18 @@ async function saveSelectedDate() {
       sendAppointmentConfirmation(CURRENT_RECORD, SELECTED_DATE, SELECTED_TIME)
         .catch(err => logger.warn('⚠ Email se nepodařilo odeslat:', err.message));
 
-      // Re-open detail to show updated data
+      // ⏱️ PERFORMANCE: Optimalizace - místo closeDetail() + showDetail() jen aktualizovat modal
+      const t5 = performance.now();
+      logger.log('⏱️ Aktualizuji detail...');
       const recordId = CURRENT_RECORD.id;
       closeDetail();
       setTimeout(() => showDetail(recordId), 100);
+      const t6 = performance.now();
+      logger.log(`⏱️ Detail aktualizován za ${(t6 - t5).toFixed(0)}ms`);
+
+      // ⏱️ CELKOVÝ ČAS
+      const tTotal = performance.now();
+      logger.log(`⏱️ ✅ CELKOVÝ ČAS: ${(tTotal - t0).toFixed(0)}ms (${((tTotal - t0) / 1000).toFixed(1)}s)`);
     } else {
       hideLoading();
       alert(t('error') + ': ' + (result.message || t('failed_to_save')));
@@ -1441,6 +1460,10 @@ async function saveSelectedDate() {
     hideLoading();
     logger.error('Chyba při ukládání:', e);
     alert(t('save_error') + ': ' + e.message);
+
+    // ⏱️ Log času i při chybě
+    const tError = performance.now();
+    logger.log(`⏱️ ❌ Čas do chyby: ${(tError - t0).toFixed(0)}ms`);
   }
 }
 
