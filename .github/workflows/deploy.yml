@@ -21,25 +21,29 @@ jobs:
       - name: 🚀 SFTP Deploy (optimalizovaný)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_REMOTE_PATH }}/
+          server: ${{ secrets.FTP_HOST }}
           protocol: ftps
           port: 21
-          # RYCHLÉ - jen změněné soubory
-          dry-run: false
-          dangerous-clean-slate: false
-          # Exclude těžké věci
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /wgs-service.cz/www/
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
-            **/vendor/**
             **/tests/**
-            **/.env
-            **/logs/**
-            **/backups/**
+            **/test/**
+            **/.github/**
+            **/.vscode/**
+            **/README.md
+            **/CONTRIBUTING.md
+            **/LICENSE
+            **/*.log
+            **/phpunit.xml
+            **/composer.lock
+            **/.env.example
+            **/temp/**
+            **/uploads/screens
 
       - name: ✅ Hotovo!
         run: |
