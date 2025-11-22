@@ -8,7 +8,7 @@
   background-image: url('../img/herman-image04.webp');
   background-size: cover;
   background-position: center 35%; /* Posunuto nahoru aby byla sedačka víc vidět */
-  background-attachment: scroll;
+  background-attachment: fixed;
   overflow: hidden;
 }
 
@@ -16,7 +16,7 @@
   background-image: url('../img/herman-image04.jpg');
   background-size: cover;
   background-position: center 35%;
-  background-attachment: scroll;
+  background-attachment: fixed;
   overflow: hidden;
 }
 
