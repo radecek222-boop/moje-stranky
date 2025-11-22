@@ -7,17 +7,14 @@ if (!$isAdmin) {
     header('Location: login.php?redirect=statistiky.php');
     exit;
 }
-
-// Embed mode - skrýt navigaci
-$embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 ?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Statistiky | White Glove Service</title>
-  <meta name="description" content="Statistiky a přehledy White Glove Service. Sledujte metriky servisu, úspěšnost oprav, spokojenost zákazníků a výkonnost techniků.">
+  <title>Statistiky a reporty | White Glove Service</title>
+  <meta name="description" content="Statistiky a reporty pro vyúčtování - prodejci, technici, zakázky.">
   <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
 
   <!-- Google Fonts -->
@@ -27,420 +24,628 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
   <!-- External CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/statistiky.min.css">
-  <link rel="stylesheet" href="assets/css/statistiky-fixes.css">
-  <link rel="stylesheet" href="assets/css/admin.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.css">
 
   <style>
-/* Kompaktní statistiky */
+/* ==================================================
+   STATISTIKY - NOVÝ DESIGN
+   ================================================== */
+
+body {
+    background: #f5f5f5;
+    font-family: 'Poppins', sans-serif;
+}
+
 .stats-container {
-    max-width: 1400px;
+    max-width: 1600px;
     margin: 0 auto;
     padding: 1rem;
 }
 
-/* User bar - kompaktní */
-.stats-user-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
-    padding: 0.5rem 1rem;
+/* Header */
+.stats-header {
     background: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.stats-title {
-    font-size: 1.2rem;
-    font-weight: 500;
+.stats-header h1 {
     margin: 0;
-}
-
-.stats-subtitle {
-    font-size: 0.75rem;
-    color: #666;
-    margin: 0;
-}
-
-.stats-user {
-    font-size: 0.75rem;
+    font-size: 1.8rem;
     color: #2D5016;
     font-weight: 600;
 }
 
-/* Kompaktní filtry */
+.stats-header p {
+    margin: 0.25rem 0 0 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Summary karty */
+.stats-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-left: 4px solid #2D5016;
+}
+
+.summary-card-label {
+    font-size: 0.75rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.summary-card-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2D5016;
+    margin-bottom: 0.25rem;
+}
+
+.summary-card-sub {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+/* Filtry */
 .stats-filters {
     background: white;
-    border: 1px solid #e0e0e0;
     border-radius: 8px;
-    padding: 0.75rem;
-    margin-bottom: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.stats-filters-title {
-    font-size: 0.75rem;
+.filters-title {
+    font-size: 1rem;
     font-weight: 600;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-    color: #666;
+    color: #2D5016;
+    margin-bottom: 1rem;
 }
 
-.stats-filters-grid {
+.filters-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
 }
 
-.stats-filter-group {
+.filter-group {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
 }
 
-.stats-filter-label {
-    font-size: 0.65rem;
+.filter-label {
+    font-size: 0.75rem;
+    font-weight: 600;
     color: #666;
-    font-weight: 500;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.stats-filter-input,
-.stats-filter-select {
-    padding: 0.4rem 0.5rem;
-    border: 1px solid #e0e0e0;
+.filter-select {
+    padding: 0.6rem;
+    border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 0.7rem;
-    width: 100%;
-}
-
-.stats-filter-actions {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: flex-end;
-}
-
-.stats-btn {
-    padding: 0.4rem 0.8rem;
-    border: 1px solid #e0e0e0;
+    font-size: 0.9rem;
     background: white;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 0.7rem;
-    transition: all 0.2s;
 }
 
-.stats-btn:hover {
+.filter-select:focus {
+    outline: none;
     border-color: #2D5016;
 }
 
-.stats-btn-primary {
+/* Multi-select checkboxy */
+.filter-multiselect {
+    position: relative;
+}
+
+.multiselect-trigger {
+    padding: 0.6rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.multiselect-trigger:hover {
+    border-color: #2D5016;
+}
+
+.multiselect-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 0.25rem;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.multiselect-dropdown.active {
+    display: block;
+}
+
+.multiselect-option {
+    padding: 0.6rem;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.multiselect-option:hover {
+    background: #f9f9f9;
+}
+
+.multiselect-option:last-child {
+    border-bottom: none;
+}
+
+.multiselect-option input[type="checkbox"] {
+    margin-right: 0.5rem;
+    cursor: pointer;
+}
+
+.multiselect-option label {
+    cursor: pointer;
+    flex: 1;
+    font-size: 0.85rem;
+}
+
+/* Akční tlačítka */
+.filter-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.btn {
+    padding: 0.6rem 1.5rem;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    border-color: #2D5016;
+}
+
+.btn-primary {
     background: #2D5016;
     color: white;
     border-color: #2D5016;
 }
 
-/* Summary stats - minimalistické */
-.stats-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.4rem;
-    margin-bottom: 0.6rem;
+.btn-primary:hover {
+    background: #1a300d;
 }
 
-.stats-summary-card {
-    background: #f9f9f9;
-    border: 1px solid #e0e0e0;
-    border-left: 2px solid #2D5016;
-    padding: 0.5rem 0.6rem;
-    border-radius: 3px;
+.btn-export {
+    background: #0066cc;
+    color: white;
+    border-color: #0066cc;
 }
 
-.stats-summary-label {
-    font-size: 0.6rem;
-    color: #777;
-    text-transform: uppercase;
-    margin-bottom: 0.25rem;
-    letter-spacing: 0.02em;
+.btn-export:hover {
+    background: #004499;
 }
 
-.stats-summary-value {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-bottom: 0.1rem;
-    color: #2D5016;
-}
-
-.stats-summary-sub {
-    font-size: 0.6rem;
-    color: #999;
-}
-
-/* Card Grid - jako Control Center */
-.stats-card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
-}
-
-.stats-card {
+/* Hlavní tabulka zakázek */
+.stats-table-wrapper {
     background: white;
-    border: 1px solid #e0e0e0;
     border-radius: 8px;
     padding: 1.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.stats-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    border-color: #2D5016;
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
 }
 
-.stats-card-icon {
-    font-size: 2rem;
-    margin-bottom: 0.75rem;
+.table-title {
+    font-size: 1rem;
+    font-weight: 600;
     color: #2D5016;
 }
 
-.stats-card-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #000;
-}
-
-.stats-card-description {
-    font-size: 0.8rem;
+.table-count {
+    font-size: 0.85rem;
     color: #666;
-    line-height: 1.4;
 }
 
-/* Tabulky v modalech */
-.cc-table {
+.stats-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.85rem;
 }
 
-.cc-table thead {
-    background: #f5f5f5;
+.stats-table thead {
+    background: #f9f9f9;
     border-bottom: 2px solid #2D5016;
 }
 
-.cc-table th {
+.stats-table th {
     padding: 0.75rem;
     text-align: left;
     font-weight: 600;
     color: #2D5016;
     text-transform: uppercase;
     font-size: 0.7rem;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.5px;
 }
 
-.cc-table td {
+.stats-table td {
     padding: 0.75rem;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #f0f0f0;
 }
 
-.cc-table tbody tr:hover {
+.stats-table tbody tr:hover {
     background: #f9f9f9;
 }
 
-.cc-table tbody tr:last-child td {
+.stats-table tbody tr:last-child td {
     border-bottom: none;
 }
-</style>
+
+/* Stránkování */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.pagination button {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.pagination button:hover:not(:disabled) {
+    border-color: #2D5016;
+    background: #f9f9f9;
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination .page-info {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+/* Grafy sekce */
+.stats-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.chart-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.chart-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2D5016;
+    margin-bottom: 1rem;
+}
+
+.chart-content {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.chart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.chart-item:last-child {
+    border-bottom: none;
+}
+
+.chart-item-label {
+    font-size: 0.85rem;
+    color: #333;
+}
+
+.chart-item-value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #2D5016;
+}
+
+/* Loading */
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #999;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-summary {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-charts {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-table {
+        font-size: 0.75rem;
+    }
+
+    .stats-table th,
+    .stats-table td {
+        padding: 0.5rem;
+    }
+}
+  </style>
 </head>
 
-<body<?php if ($embedMode): ?> class="embed-mode"<?php endif; ?>>
-<?php if (!$embedMode): ?>
+<body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
-<?php endif; ?>
 
-<!-- MAIN CONTENT -->
-<main<?php if ($embedMode) echo ' style="margin-top: 0; padding-top: 0;"'; ?>>
+<main>
 <div class="stats-container">
 
-  <!-- USER INFO BAR - kompaktní -->
-  <div class="stats-user-bar">
-    <div>
-      <h1 class="stats-title" data-lang-cs="Statistiky" data-lang-en="Statistics" data-lang-it="Statistiche">Statistiky</h1>
-      <p class="stats-subtitle" data-lang-cs="Analýza a reporty reklamací" data-lang-en="Analysis and claim reports" data-lang-it="Analisi e report reclami">Analýza a reporty reklamací</p>
-    </div>
-    <div class="stats-user">
-      <?php echo htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['admin_name'] ?? 'Administrátor'); ?>
-    </div>
+  <!-- Header -->
+  <div class="stats-header">
+    <h1>Statistiky a reporty</h1>
+    <p>Vyúčtování zakázek, prodejci, technici - <?php echo htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['admin_name'] ?? 'Administrátor'); ?></p>
   </div>
 
-  <!-- KOMPAKTNÍ FILTRY -->
-  <div class="stats-filters">
-    <div class="stats-filters-title" data-lang-cs="Filtry" data-lang-en="Filters" data-lang-it="Filtri">Filtry</div>
-
-    <div class="stats-filters-grid">
-      <div class="stats-filter-group">
-        <label class="stats-filter-label" data-lang-cs="Měsíc" data-lang-en="Month" data-lang-it="Mese">Měsíc</label>
-        <select class="stats-filter-select" id="filter-month" onchange="handleMonthChange()">
-          <option value="all" selected>Všechny</option>
-          <option value="">Vlastní rozsah</option>
-          <option value="current">Aktuální měsíc</option>
-          <option value="last">Minulý měsíc</option>
-          <option value="2024-01">Leden 2024</option>
-          <option value="2024-02">Únor 2024</option>
-          <option value="2024-03">Březen 2024</option>
-          <option value="2024-04">Duben 2024</option>
-          <option value="2024-05">Květen 2024</option>
-          <option value="2024-06">Červen 2024</option>
-          <option value="2024-07">Červenec 2024</option>
-          <option value="2024-08">Srpen 2024</option>
-          <option value="2024-09">Září 2024</option>
-          <option value="2024-10">Říjen 2024</option>
-          <option value="2024-11">Listopad 2024</option>
-          <option value="2024-12">Prosinec 2024</option>
-          <option value="2025-01">Leden 2025</option>
-          <option value="2025-02">Únor 2025</option>
-          <option value="2025-03">Březen 2025</option>
-          <option value="2025-04">Duben 2025</option>
-          <option value="2025-05">Květen 2025</option>
-          <option value="2025-06">Červen 2025</option>
-          <option value="2025-07">Červenec 2025</option>
-          <option value="2025-08">Srpen 2025</option>
-          <option value="2025-09">Září 2025</option>
-          <option value="2025-10">Říjen 2025</option>
-          <option value="2025-11">Listopad 2025</option>
-          <option value="2025-12">Prosinec 2025</option>
-        </select>
-      </div>
-
-      <div class="stats-filter-group">
-        <label class="stats-filter-label">Prodejce</label>
-        <select class="stats-filter-select" id="filter-salesperson">
-          <option value="">Všichni</option>
-        </select>
-      </div>
-
-      <div class="stats-filter-group">
-        <label class="stats-filter-label">Země</label>
-        <select class="stats-filter-select" id="filter-country">
-          <option value="">Všechny</option>
-          <option value="CZ">🇨🇿 Česko</option>
-          <option value="SK">🇸🇰 Slovensko</option>
-        </select>
-      </div>
-
-      <div class="stats-filter-group">
-        <label class="stats-filter-label">Stav</label>
-        <select class="stats-filter-select" id="filter-status">
-          <option value="">Všechny</option>
-          <option value="wait">ČEKÁ</option>
-          <option value="open">DOMLUVENÁ</option>
-          <option value="done">HOTOVO</option>
-        </select>
-      </div>
-
-      <div class="stats-filter-group">
-        <label class="stats-filter-label">Od data</label>
-        <input type="date" class="stats-filter-input" id="filter-date-from">
-      </div>
-
-      <div class="stats-filter-group">
-        <label class="stats-filter-label">Do data</label>
-        <input type="date" class="stats-filter-input" id="filter-date-to">
-      </div>
-    </div>
-
-    <div class="stats-filter-actions">
-      <button class="stats-btn" onclick="resetFilters()" data-lang-cs="Reset" data-lang-en="Reset" data-lang-it="Ripristina">Reset</button>
-      <button class="stats-btn stats-btn-primary" onclick="applyFilters()" data-lang-cs="Aplikovat" data-lang-en="Apply" data-lang-it="Applica">Aplikovat</button>
-    </div>
-  </div>
-
-  <!-- SUMMARY STATISTIKY - kompaktní -->
+  <!-- Summary karty -->
   <div class="stats-summary">
-    <div class="stats-summary-card">
-      <div class="stats-summary-label" data-lang-cs="Celkem zakázek" data-lang-en="Total Orders" data-lang-it="Totale Ordini">Celkem zakázek</div>
-      <div class="stats-summary-value" id="total-orders">0</div>
-      <div class="stats-summary-sub" data-lang-cs="Filtrovaných" data-lang-en="Filtered" data-lang-it="Filtrati">Filtrovaných</div>
+    <div class="summary-card">
+      <div class="summary-card-label">Celkem reklamací</div>
+      <div class="summary-card-value" id="total-all">0</div>
+      <div class="summary-card-sub">Všechny v systému</div>
     </div>
 
-    <div class="stats-summary-card">
-      <div class="stats-summary-label" data-lang-cs="Celkový obrat" data-lang-en="Total Revenue" data-lang-it="Fatturato Totale">Celkový obrat</div>
-      <div class="stats-summary-value" id="total-revenue">0 €</div>
-      <div class="stats-summary-sub" data-lang-cs="Všechny zakázky" data-lang-en="All orders" data-lang-it="Tutti gli ordini">Všechny zakázky</div>
+    <div class="summary-card">
+      <div class="summary-card-label">Reklamací v měsíci</div>
+      <div class="summary-card-value" id="total-month">0</div>
+      <div class="summary-card-sub">Podle filtrů</div>
     </div>
 
-    <div class="stats-summary-card">
-      <div class="stats-summary-label" data-lang-cs="Průměrná zakázka" data-lang-en="Average Order" data-lang-it="Ordine Medio">Průměrná zakázka</div>
-      <div class="stats-summary-value" id="avg-order">0 €</div>
-      <div class="stats-summary-sub" data-lang-cs="Na zakázku" data-lang-en="Per order" data-lang-it="Per ordine">Na zakázku</div>
+    <div class="summary-card">
+      <div class="summary-card-label">Částka celkem</div>
+      <div class="summary-card-value" id="revenue-all">0 €</div>
+      <div class="summary-card-sub">Všechny zakázky</div>
     </div>
 
-    <div class="stats-summary-card">
-      <div class="stats-summary-label" data-lang-cs="Aktivní technici" data-lang-en="Active Technicians" data-lang-it="Tecnici Attivi">Aktivní technici</div>
-      <div class="stats-summary-value" id="active-techs">0</div>
-      <div class="stats-summary-sub" data-lang-cs="V období" data-lang-en="In period" data-lang-it="Nel periodo">V období</div>
+    <div class="summary-card">
+      <div class="summary-card-label">Částka v měsíci</div>
+      <div class="summary-card-value" id="revenue-month">0 €</div>
+      <div class="summary-card-sub">Podle filtrů</div>
     </div>
   </div>
 
-  <!-- CARD GRID S MODALY -->
-  <div class="stats-card-grid">
+  <!-- Filtry -->
+  <div class="stats-filters">
+    <div class="filters-title">Filtry</div>
+
+    <div class="filters-grid">
+      <!-- Rok -->
+      <div class="filter-group">
+        <label class="filter-label">Rok</label>
+        <select class="filter-select" id="filter-year">
+          <option value="">Všechny</option>
+          <option value="2024">2024</option>
+          <option value="2025" selected>2025</option>
+          <option value="2026">2026</option>
+        </select>
+      </div>
+
+      <!-- Měsíc -->
+      <div class="filter-group">
+        <label class="filter-label">Měsíc</label>
+        <select class="filter-select" id="filter-month">
+          <option value="">Všechny</option>
+          <option value="1">Leden</option>
+          <option value="2">Únor</option>
+          <option value="3">Březen</option>
+          <option value="4">Duben</option>
+          <option value="5">Květen</option>
+          <option value="6">Červen</option>
+          <option value="7">Červenec</option>
+          <option value="8">Srpen</option>
+          <option value="9">Září</option>
+          <option value="10">Říjen</option>
+          <option value="11" selected>Listopad</option>
+          <option value="12">Prosinec</option>
+        </select>
+      </div>
+
+      <!-- Prodejci (multi-select) -->
+      <div class="filter-group">
+        <label class="filter-label">Prodejci</label>
+        <div class="filter-multiselect">
+          <div class="multiselect-trigger" id="prodejci-trigger">
+            <span id="prodejci-label">Všichni</span>
+            <span>▼</span>
+          </div>
+          <div class="multiselect-dropdown" id="prodejci-dropdown">
+            <!-- Načte se dynamicky -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Technici (multi-select) -->
+      <div class="filter-group">
+        <label class="filter-label">Technici</label>
+        <div class="filter-multiselect">
+          <div class="multiselect-trigger" id="technici-trigger">
+            <span id="technici-label">Všichni</span>
+            <span>▼</span>
+          </div>
+          <div class="multiselect-dropdown" id="technici-dropdown">
+            <!-- Načte se dynamicky -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Země -->
+      <div class="filter-group">
+        <label class="filter-label">Země</label>
+        <div class="filter-multiselect">
+          <div class="multiselect-trigger" id="zeme-trigger">
+            <span id="zeme-label">Všechny</span>
+            <span>▼</span>
+          </div>
+          <div class="multiselect-dropdown" id="zeme-dropdown">
+            <div class="multiselect-option">
+              <input type="checkbox" id="zeme-cz" value="cz" checked>
+              <label for="zeme-cz">🇨🇿 Česko</label>
+            </div>
+            <div class="multiselect-option">
+              <input type="checkbox" id="zeme-sk" value="sk" checked>
+              <label for="zeme-sk">🇸🇰 Slovensko</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button class="btn" onclick="resetovitFiltry()">Reset</button>
+      <button class="btn btn-primary" onclick="aplikovatFiltry()">Aplikovat filtry</button>
+      <button class="btn btn-export" onclick="exportovatPDF()">📄 Exportovat PDF</button>
+    </div>
+  </div>
+
+  <!-- Hlavní tabulka zakázek -->
+  <div class="stats-table-wrapper">
+    <div class="table-header">
+      <div class="table-title">Zakázky podle filtrů</div>
+      <div class="table-count" id="table-count">0 zakázek</div>
+    </div>
+
+    <div id="table-container">
+      <div class="loading">Načítání dat...</div>
+    </div>
+
+    <!-- Stránkování -->
+    <div class="pagination" id="pagination" style="display: none;">
+      <button id="prev-page" onclick="predchoziStranka()">← Předchozí</button>
+      <span class="page-info" id="page-info">Strana 1 z 1</span>
+      <button id="next-page" onclick="dalsiStranka()">Další →</button>
+    </div>
+  </div>
+
+  <!-- Grafy a statistiky -->
+  <div class="stats-charts">
+    <!-- Nejporuchovější modely -->
+    <div class="chart-card">
+      <div class="chart-title">Nejporuchovější modely</div>
+      <div class="chart-content" id="chart-models">
+        <div class="loading">Načítání...</div>
+      </div>
+    </div>
+
+    <!-- Lokality -->
+    <div class="chart-card">
+      <div class="chart-title">Lokality (města)</div>
+      <div class="chart-content" id="chart-cities">
+        <div class="loading">Načítání...</div>
+      </div>
+    </div>
 
     <!-- Statistiky prodejců -->
-    <div class="stats-card" onclick="openStatsModal('salesperson')">
-      <div class="stats-card-title" data-lang-cs="Statistiky prodejců" data-lang-en="Sales Statistics" data-lang-it="Statistiche Venditori">Statistiky prodejců</div>
-      <div class="stats-card-description" data-lang-cs="Detailní přehled výkonnosti prodejců, počet zakázek a obraty" data-lang-en="Detailed overview of salesperson performance, number of orders and turnover" data-lang-it="Panoramica dettagliata delle prestazioni dei venditori, numero di ordini e fatturato">Detailní přehled výkonnosti prodejců, počet zakázek a obraty</div>
+    <div class="chart-card">
+      <div class="chart-title">Statistiky prodejců</div>
+      <div class="chart-content" id="chart-salespersons">
+        <div class="loading">Načítání...</div>
+      </div>
     </div>
 
     <!-- Statistiky techniků -->
-    <div class="stats-card" onclick="openStatsModal('technician')">
-      <div class="stats-card-title" data-lang-cs="Statistiky techniků" data-lang-en="Technician Statistics" data-lang-it="Statistiche Tecnici">Statistiky techniků</div>
-      <div class="stats-card-description" data-lang-cs="Výkonnost techniků, úspěšnost oprav a výdělky" data-lang-en="Technician performance, repair success rate and earnings" data-lang-it="Prestazioni dei tecnici, tasso di successo delle riparazioni e guadagni">Výkonnost techniků, úspěšnost oprav a výdělky</div>
+    <div class="chart-card">
+      <div class="chart-title">Statistiky techniků</div>
+      <div class="chart-content" id="chart-technicians">
+        <div class="loading">Načítání...</div>
+      </div>
     </div>
-
-    <!-- Nejporuchovější modely -->
-    <div class="stats-card" onclick="openStatsModal('models')">
-      <div class="stats-card-title" data-lang-cs="Nejporuchovější modely" data-lang-en="Most Faulty Models" data-lang-it="Modelli Più Difettosi">Nejporuchovější modely</div>
-      <div class="stats-card-description" data-lang-cs="Analýza nejčastěji porouchaných modelů a výrobků" data-lang-en="Analysis of most frequently faulty models and products" data-lang-it="Analisi dei modelli e prodotti più frequentemente difettosi">Analýza nejčastěji porouchaných modelů a výrobků</div>
-    </div>
-
-    <!-- Filtrované zakázky -->
-    <div class="stats-card" onclick="openStatsModal('orders')">
-      <div class="stats-card-title" data-lang-cs="Filtrované zakázky" data-lang-en="Filtered Orders" data-lang-it="Ordini Filtrati">Filtrované zakázky</div>
-      <div class="stats-card-description" data-lang-cs="Přehled všech zakázek podle aktuálních filtrů" data-lang-en="Overview of all orders based on current filters" data-lang-it="Panoramica di tutti gli ordini in base ai filtri attuali">Přehled všech zakázek podle aktuálních filtrů</div>
-    </div>
-
-    <!-- Grafy a vizualizace -->
-    <div class="stats-card" onclick="openStatsModal('charts')">
-      <div class="stats-card-title" data-lang-cs="Grafy a vizualizace" data-lang-en="Charts & Visualization" data-lang-it="Grafici e Visualizzazioni">Grafy a vizualizace</div>
-      <div class="stats-card-description" data-lang-cs="Grafická analýza rozdělení podle měst, zemí a modelů" data-lang-en="Graphical analysis of distribution by cities, countries and models" data-lang-it="Analisi grafica della distribuzione per città, paesi e modelli">Grafická analýza rozdělení podle měst, zemí a modelů</div>
-    </div>
-
   </div>
 
 </div>
 </main>
 
-<!-- MODAL OVERLAY -->
-<div class="cc-modal-overlay" id="statsModalOverlay" onclick="closeStatsModal()">
-    <div class="cc-modal" onclick="event.stopPropagation()">
-        <div class="cc-modal-header">
-            <h2 class="cc-modal-title" id="statsModalTitle">Statistiky</h2>
-            <button class="cc-modal-close" onclick="closeStatsModal()">×</button>
-        </div>
-        <div class="cc-modal-body" id="statsModalBody">
-            <!-- Obsah se načte dynamicky -->
-        </div>
-    </div>
-</div>
-
 <!-- jsPDF pro PDF export -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script src="assets/js/logger.js" defer></script>
-<script src="assets/js/statistiky.js" defer></script>
+<script src="assets/js/statistiky.js?v=2.0" defer></script>
 
 </body>
 </html>
