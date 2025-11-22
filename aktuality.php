@@ -202,10 +202,35 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       padding: 12px 30px;
       border-radius: 30px;
       display: inline-block;
-      margin-bottom: 30px;
       font-weight: 600;
       font-size: 1em;
-      text-align: center;
+    }
+
+    .datum-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .pridat-clanek-btn {
+      padding: 12px 30px;
+      background: #2D5016;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1em;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .pridat-clanek-btn:hover {
+      background: #1a300d;
+      transform: scale(1.05);
     }
 
     /* ŠIROKÝ ČLÁNEK */
@@ -459,16 +484,24 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
     <?php if ($sirokyArticle || !empty($normalniArticles)): ?>
 
-      <div class="datum-badge">
-        <?php
-        // Překlad "Datum:"
-        echo $jazyk === 'en' ? 'Date: ' : ($jazyk === 'it' ? 'Data: ' : 'Datum: ');
-        echo date('d.m.Y', strtotime($datumAktuality));
-        ?>
-        <?php if ($hlavniAktualita && $hlavniAktualita['svatek_cz']): ?>
-          | <?php
-          echo $jazyk === 'en' ? 'Name Day' : ($jazyk === 'it' ? 'Onomastico' : 'Svátek');
-          ?>: <?php echo htmlspecialchars($hlavniAktualita['svatek_cz']); ?>
+      <div class="datum-bar">
+        <div class="datum-badge">
+          <?php
+          // Překlad "Datum:"
+          echo $jazyk === 'en' ? 'Date: ' : ($jazyk === 'it' ? 'Data: ' : 'Datum: ');
+          echo date('d.m.Y', strtotime($datumAktuality));
+          ?>
+          <?php if ($hlavniAktualita && $hlavniAktualita['svatek_cz']): ?>
+            | <?php
+            echo $jazyk === 'en' ? 'Name Day' : ($jazyk === 'it' ? 'Onomastico' : 'Svátek');
+            ?>: <?php echo htmlspecialchars($hlavniAktualita['svatek_cz']); ?>
+          <?php endif; ?>
+        </div>
+
+        <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
+          <button class="pridat-clanek-btn" onclick="pridatNovyClanek()">
+            Přidat nový článek
+          </button>
         <?php endif; ?>
       </div>
 
@@ -563,6 +596,21 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     otevritEditorClanku(aktualitaId, jazyk, index);
   };
 
+  // Globální funkce pro přidání nového článku
+  window.pridatNovyClanek = function() {
+    // Získat ID aktuální aktuality (nejnovější)
+    const sirokyArticle = document.querySelector('[data-aktualita-id]');
+    if (!sirokyArticle) {
+      alert('Nepodařilo se najít ID aktuality');
+      return;
+    }
+    const aktualitaId = sirokyArticle.dataset.aktualitaId;
+    const jazyk = 'cz';
+
+    // Otevřít editor s prázdnými poli, index -1 znamená nový článek
+    zobrazitEditor(aktualitaId, jazyk, -1, '');
+  };
+
   function otevritEditorClanku(aktualitaId, jazyk, index) {
     // Získat aktuální markdown obsah z databáze (celý obsah všech článků)
     fetch(`/api/nacti_aktualitu.php?id=${aktualitaId}&jazyk=${jazyk}&index=${index}`)
@@ -599,9 +647,12 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       overflow-y: auto;
     `;
 
+    const jeNovyClanek = (index === -1);
+    const nadpisEditoru = jeNovyClanek ? 'Přidat nový článek' : 'Upravit článek';
+
     editorDialog.innerHTML = `
       <h2 style="margin: 0 0 20px 0; color: #1a1a1a;">
-        Upravit článek - ${jazyk.toUpperCase()}
+        ${nadpisEditoru} - ${jazyk.toUpperCase()}
       </h2>
       <p style="margin: 0 0 20px 0; color: #666; background: #e8f4fd; padding: 12px; border-radius: 5px; border-left: 4px solid #0066cc;">
         Jednoduše vyplňte pole níže. Nemusíte nic formátovat - prostě napište text.
@@ -764,9 +815,8 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         </div>
       </div>
 
-      <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
-        <strong>Pozor:</strong> Tato změna přepíše celý obsah článku v jazyce <strong>${jazyk.toUpperCase()}</strong>.
-        Ostatní jazyky zůstanou nezměněny.
+      <div style="margin-top: 15px; padding: 10px; background: ${jeNovyClanek ? '#d4edda' : '#fff3cd'}; border-left: 4px solid ${jeNovyClanek ? '#28a745' : '#ffc107'}; border-radius: 5px;">
+        <strong>${jeNovyClanek ? 'Info:' : 'Pozor:'}</strong> ${jeNovyClanek ? 'Nový článek bude přidán na konec seznamu článků.' : 'Tato změna přepíše celý obsah článku v jazyce <strong>' + jazyk.toUpperCase() + '</strong>.'}
       </div>
 
       <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
@@ -792,7 +842,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
           font-weight: 600;
           font-size: 15px;
         ">
-          Uložit článek
+          ${jeNovyClanek ? 'Přidat článek' : 'Uložit článek'}
         </button>
       </div>
     `;
@@ -905,28 +955,35 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         fotka: fotkaUrl
       });
 
-      if (!confirm(`Opravdu chcete uložit změny?\n\nPřepíše se celý obsah článku v jazyce ${jazyk.toUpperCase()}.`)) {
+      const confirmMessage = jeNovyClanek
+        ? 'Opravdu chcete přidat tento nový článek?'
+        : `Opravdu chcete uložit změny?\n\nPřepíše se celý obsah článku v jazyce ${jazyk.toUpperCase()}.`;
+
+      if (!confirm(confirmMessage)) {
         return;
       }
 
       this.disabled = true;
-      this.textContent = 'Ukládám...';
+      this.textContent = jeNovyClanek ? 'Přidávám...' : 'Ukládám...';
 
       try {
         const response = await ulozitCelyClanek(aktualitaId, jazyk, index, novyObsah, maNovoufotku ? fotkaInput.files[0] : null);
 
         if (response.status === 'success') {
-          alert('Článek byl úspěšně uložen!\n\nStránka se nyní obnoví.');
+          const successMsg = jeNovyClanek
+            ? 'Nový článek byl úspěšně přidán!\n\nStránka se nyní obnoví.'
+            : 'Článek byl úspěšně uložen!\n\nStránka se nyní obnoví.';
+          alert(successMsg);
           window.location.reload();
         } else {
           alert('Chyba při ukládání: ' + response.message);
           this.disabled = false;
-          this.textContent = 'Uložit článek';
+          this.textContent = jeNovyClanek ? 'Přidat článek' : 'Uložit článek';
         }
       } catch (error) {
         alert('Síťová chyba: ' + error.message);
         this.disabled = false;
-        this.textContent = 'Uložit článek';
+        this.textContent = jeNovyClanek ? 'Přidat článek' : 'Uložit článek';
       }
     });
   }
