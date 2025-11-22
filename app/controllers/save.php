@@ -137,6 +137,10 @@ function normalizeDateInput(?string $value): ?string
  */
 function handleUpdate(PDO $pdo, array $input): array
 {
+    // ⏱️ PERFORMANCE: Backend timing
+    $t0 = microtime(true);
+    error_log("⏱️ handleUpdate START");
+
     $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
     $userId = $_SESSION['user_id'] ?? null;
 
@@ -144,7 +148,10 @@ function handleUpdate(PDO $pdo, array $input): array
         throw new Exception('Neautorizovaný přístup.');
     }
 
+    $t1 = microtime(true);
     $columns = db_get_table_columns($pdo, 'wgs_reklamace');
+    $t2 = microtime(true);
+    error_log(sprintf("⏱️ db_get_table_columns: %.0fms", ($t2 - $t1) * 1000));
     if (empty($columns)) {
         throw new Exception('Nelze načíst strukturu tabulky reklamací.');
     }
@@ -294,7 +301,10 @@ function handleUpdate(PDO $pdo, array $input): array
     }
 
     // BUGFIX: Transaction support - atomicita update operace
+    $t3 = microtime(true);
     $pdo->beginTransaction();
+    $t4 = microtime(true);
+    error_log(sprintf("⏱️ beginTransaction: %.0fms", ($t4 - $t3) * 1000));
 
     try {
         $sql = 'UPDATE wgs_reklamace SET ' . implode(', ', $setParts) . ' WHERE `' . $identifierColumn . '` = :identifier';
@@ -302,14 +312,24 @@ function handleUpdate(PDO $pdo, array $input): array
             $sql .= ' LIMIT 1';
         }
 
+        $t5 = microtime(true);
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
+        $t6 = microtime(true);
+        error_log(sprintf("⏱️ SQL UPDATE execute: %.0fms", ($t6 - $t5) * 1000));
 
         if ($stmt->rowCount() === 0) {
             throw new Exception('Reklamace nebyla nalezena nebo nebyla změněna.');
         }
 
+        $t7 = microtime(true);
         $pdo->commit();
+        $t8 = microtime(true);
+        error_log(sprintf("⏱️ commit: %.0fms", ($t8 - $t7) * 1000));
+
+        // ⏱️ CELKOVÝ ČAS
+        $tTotal = microtime(true);
+        error_log(sprintf("⏱️ ✅ handleUpdate TOTAL: %.0fms (%.1fs)", ($tTotal - $t0) * 1000, $tTotal - $t0));
 
         return [
             'status' => 'success',
@@ -318,6 +338,11 @@ function handleUpdate(PDO $pdo, array $input): array
         ];
     } catch (Exception $e) {
         $pdo->rollBack();
+
+        // ⏱️ Log času i při chybě
+        $tError = microtime(true);
+        error_log(sprintf("⏱️ ❌ Čas do chyby: %.0fms", ($tError - $t0) * 1000));
+
         throw $e;
     }
 }
