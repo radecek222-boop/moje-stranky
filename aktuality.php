@@ -111,41 +111,6 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
       font-weight: 300;
     }
 
-    .lang-switcher {
-      background: white;
-      padding: 20px;
-      text-align: center;
-      border-bottom: 1px solid #e0e0e0;
-    }
-
-    .lang-btn {
-      display: inline-block;
-      padding: 10px 25px;
-      margin: 0 5px;
-      background: white;
-      color: #1a1a1a;
-      border: 2px solid #333333;
-      border-radius: 25px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.9em;
-      transition: all 0.3s;
-      cursor: pointer;
-    }
-
-    .lang-btn:hover {
-      background: #333333;
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    .lang-btn.active {
-      background: #1a1a1a;
-      color: white;
-      border-color: #1a1a1a;
-    }
-
     .content-section {
       padding: 0;
       background: #ffffff;
@@ -170,18 +135,18 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
 
     .aktualita-card {
       background: white;
-      padding: 20px 40px;
+      padding: 15px 30px;
       border-bottom: 1px solid #e0e0e0;
       margin-bottom: 0;
       column-count: 2;
-      column-gap: 40px;
+      column-gap: 35px;
       text-align: justify;
     }
 
     @media (max-width: 768px) {
       .aktualita-card {
         column-count: 1;
-        padding: 15px 20px;
+        padding: 12px 18px;
       }
     }
 
@@ -331,11 +296,6 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
       .aktualita-obsah h1 {
         font-size: 1.8em;
       }
-
-      .lang-btn {
-        display: block;
-        margin: 5px 0;
-      }
     }
   </style>
 
@@ -370,22 +330,6 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     </div>
   </div>
 </section>
-
-<!-- PŘEPÍNAČ JAZYKŮ -->
-<div class="lang-switcher">
-  <a href="?lang=cz<?php echo isset($_GET['datum']) ? '&datum=' . htmlspecialchars($_GET['datum'], ENT_QUOTES, 'UTF-8') : ''; ?>"
-     class="lang-btn <?php echo $jazyk === 'cz' ? 'active' : ''; ?>">
-    🇨🇿 Čeština
-  </a>
-  <a href="?lang=en<?php echo isset($_GET['datum']) ? '&datum=' . htmlspecialchars($_GET['datum'], ENT_QUOTES, 'UTF-8') : ''; ?>"
-     class="lang-btn <?php echo $jazyk === 'en' ? 'active' : ''; ?>">
-    🇬🇧 English
-  </a>
-  <a href="?lang=it<?php echo isset($_GET['datum']) ? '&datum=' . htmlspecialchars($_GET['datum'], ENT_QUOTES, 'UTF-8') : ''; ?>"
-     class="lang-btn <?php echo $jazyk === 'it' ? 'active' : ''; ?>">
-    🇮🇹 Italiano
-  </a>
-</div>
 
 <!-- OBSAH AKTUALITY -->
 <section class="content-section">
