@@ -16,17 +16,26 @@ const ANALYTICS = {
 
 // === INIT ===
 window.addEventListener('DOMContentLoaded', () => {
+    logger.log('🚀 Analytics dashboard inicialization...');
     checkAuth();
     nactiData();
+    inicializovatEventListeners();
+});
 
-    // Event listeners pro time period
+// === EVENT LISTENERS ===
+function inicializovatEventListeners() {
+    // Time period buttons
     document.querySelectorAll('.time-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
             const period = btn.getAttribute('data-timeperiod');
+            logger.log('⏰ Změna období na:', period);
             nastavCasoveObdobi(period);
         });
     });
-});
+
+    logger.log('✅ Event listeners registrovány');
+}
 
 // === AUTH ===
 async function checkAuth() {
@@ -52,6 +61,8 @@ async function checkAuth() {
 
 // === TIME PERIOD ===
 function nastavCasoveObdobi(period) {
+    logger.log('📅 Nastavuji časové období:', period);
+
     ANALYTICS.timePeriod = period;
 
     // Aktualizovat aktivní tlačítko
@@ -62,8 +73,25 @@ function nastavCasoveObdobi(period) {
         }
     });
 
+    // Zobrazit loading state
+    zobrazitNacitani();
+
     // Znovu načíst data
     nactiData();
+}
+
+function zobrazitNacitani() {
+    document.getElementById('total-visits').textContent = '-';
+    document.getElementById('unique-visitors').textContent = '-';
+    document.getElementById('avg-duration').textContent = '-';
+    document.getElementById('bounce-rate').textContent = '-';
+    document.getElementById('conversion-rate').textContent = '-';
+
+    document.getElementById('visits-change').textContent = 'Načítání...';
+    document.getElementById('unique-change').textContent = 'Načítání...';
+    document.getElementById('duration-change').textContent = 'Načítání...';
+    document.getElementById('bounce-change').textContent = 'Načítání...';
+    document.getElementById('conversion-change').textContent = 'Načítání...';
 }
 
 // === LOAD DATA ===
@@ -120,23 +148,41 @@ function aktualizovatUI() {
     // Online návštěvníci (simulace)
     document.getElementById('online-now').textContent = Math.floor(Math.random() * 15) + 5;
 
-    // Změny (placeholder)
-    document.getElementById('visits-change').innerHTML = '↑ +15% od minulého období';
-    document.getElementById('visits-change').className = 'stat-change positive';
+    // Získat text období pro change labels
+    const periodText = getPeriodText();
 
-    document.getElementById('unique-change').innerHTML = '↑ +8% od minulého období';
-    document.getElementById('unique-change').className = 'stat-change positive';
+    // Změny (placeholder - v budoucnu možné porovnání s předchozím obdobím)
+    document.getElementById('visits-change').innerHTML = `Za ${periodText}`;
+    document.getElementById('visits-change').className = 'stat-change';
 
-    document.getElementById('duration-change').innerHTML = '↓ -5% od minulého období';
-    document.getElementById('duration-change').className = 'stat-change negative';
+    document.getElementById('unique-change').innerHTML = `Za ${periodText}`;
+    document.getElementById('unique-change').className = 'stat-change';
 
-    document.getElementById('bounce-change').innerHTML = '↓ -3% od minulého období';
-    document.getElementById('bounce-change').className = 'stat-change positive';
+    document.getElementById('duration-change').innerHTML = `Za ${periodText}`;
+    document.getElementById('duration-change').className = 'stat-change';
 
-    document.getElementById('conversion-change').innerHTML = '↑ +1.2% od minulého období';
-    document.getElementById('conversion-change').className = 'stat-change positive';
+    document.getElementById('bounce-change').innerHTML = `Za ${periodText}`;
+    document.getElementById('bounce-change').className = 'stat-change';
+
+    document.getElementById('conversion-change').innerHTML = `Za ${periodText}`;
+    document.getElementById('conversion-change').className = 'stat-change';
 
     logger.log('✅ UI úspěšně aktualizováno');
+}
+
+function getPeriodText() {
+    switch(ANALYTICS.timePeriod) {
+        case 'today':
+            return 'dnes';
+        case 'week':
+            return 'posledních 7 dní';
+        case 'month':
+            return 'posledních 30 dní';
+        case 'year':
+            return 'posledních 365 dní';
+        default:
+            return 'zvolené období';
+    }
 }
 
 // === HELPERS ===
