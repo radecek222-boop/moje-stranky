@@ -103,10 +103,10 @@ try {
  */
 function getPriorityBadge($priority) {
     $badges = [
-        'critical' => ['color' => '#DC3545', 'icon' => '🔴', 'text' => 'Kritické'],
-        'high' => ['color' => '#FF6B6B', 'icon' => '🟠', 'text' => 'Vysoká'],
-        'medium' => ['color' => '#FFC107', 'icon' => '🟡', 'text' => 'Střední'],
-        'low' => ['color' => '#28A745', 'icon' => '🟢', 'text' => 'Nízká']
+        'critical' => ['color' => '#DC3545', 'text' => 'Kritické'],
+        'high' => ['color' => '#FF6B6B', 'text' => 'Vysoká'],
+        'medium' => ['color' => '#FFC107', 'text' => 'Střední'],
+        'low' => ['color' => '#28A745', 'text' => 'Nízká']
     ];
     return $badges[$priority] ?? $badges['medium'];
 }
@@ -124,7 +124,7 @@ function getPriorityBadge($priority) {
             <span>‹</span>
             <span>Zpět</span>
         </button>
-        <h2 class="control-detail-title">🚀 Akce & Úkoly</h2>
+        <h2 class="control-detail-title">Akce & Úkoly</h2>
     </div>
     <?php endif; ?>
 
@@ -133,7 +133,6 @@ function getPriorityBadge($priority) {
         <!-- Admin Control Center Installation -->
         <?php if (!$adminCenterInstalled): ?>
             <div class="cc-alert danger">
-                <div class="cc-alert-icon">🚀</div>
                 <div class="cc-alert-content">
                     <div class="cc-alert-title">Admin Control Center není nainstalován</div>
                     <div class="cc-alert-message">
@@ -142,7 +141,7 @@ function getPriorityBadge($priority) {
                     </div>
                     <div style="margin-top: 1rem;">
                         <a href="/setup/install_admin_control_center.php" class="cc-btn cc-btn-success" style="display: inline-block; text-decoration: none;">
-                            🚀 Spustit instalaci Admin Control Center
+                            Spustit instalaci Admin Control Center
                         </a>
                         <p style="font-size: 0.7rem; color: #666; margin-top: 0.5rem;">Po dokončení instalace se vrátíte zpět na tento panel</p>
                     </div>
@@ -154,7 +153,6 @@ function getPriorityBadge($priority) {
         <?php if (!$tableExists): ?>
             <!-- Tabulka neexistuje - zobrazit setup button -->
             <div class="cc-alert warning">
-                <div class="cc-alert-icon">⚠️</div>
                 <div class="cc-alert-content">
                     <div class="cc-alert-title">Actions System není nastavený</div>
                     <div class="cc-alert-message">
@@ -162,22 +160,21 @@ function getPriorityBadge($priority) {
                     </div>
                     <div style="margin-top: 1rem;">
                         <button class="cc-btn cc-btn-success" onclick="window.open('/setup_actions_system.php', '_blank', 'width=900,height=700')">
-                            🚀 Spustit setup Actions System
+                            Spustit setup Actions System
                         </button>
                     </div>
                 </div>
             </div>
         <?php elseif (count($pendingActions) > 0): ?>
             <div class="cc-alert warning">
-                <div class="cc-alert-icon">⚠️</div>
                 <div class="cc-alert-content">
                     <div class="cc-alert-title">Máte <?= count($pendingActions) ?> nevyřešených úkolů</div>
                     <div class="cc-alert-message">
                         <?php if ($criticalCount > 0): ?>
-                            🔴 <?= $criticalCount ?> kritických |
+                            <?= $criticalCount ?> kritických |
                         <?php endif; ?>
                         <?php if ($highCount > 0): ?>
-                            🟠 <?= $highCount ?> vysoká priorita |
+                            <?= $highCount ?> vysoká priorita |
                         <?php endif; ?>
                         <?= $mediumCount ?> střední | <?= $lowCount ?> nízká
                     </div>
@@ -185,7 +182,6 @@ function getPriorityBadge($priority) {
             </div>
         <?php else: ?>
             <div class="cc-alert success">
-                <div class="cc-alert-icon">✅</div>
                 <div class="cc-alert-content">
                     <div class="cc-alert-title">Žádné nevyřešené úkoly!</div>
                     <div class="cc-alert-message">
@@ -224,22 +220,22 @@ function getPriorityBadge($priority) {
                                     <?= $badge['text'] ?>
                                 </span>
                                 <span style="margin-left: 1rem;">
-                                    📅 <?= date('d.m.Y H:i', strtotime($action['created_at'])) ?>
+                                    <?= date('d.m.Y H:i', strtotime($action['created_at'])) ?>
                                 </span>
                             </div>
                         </div>
                         <div class="setting-item-right" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                             <button class="cc-btn cc-btn-sm cc-btn-primary"
                                     onclick="executeAction(event, <?= $action['id'] ?>)">
-                                ▶️ Spustit
+                                Spustit
                             </button>
                             <button class="cc-btn cc-btn-sm cc-btn-success"
                                     onclick="completeAction(<?= $action['id'] ?>)">
-                                ✓ Hotovo
+                                Hotovo
                             </button>
                             <button class="cc-btn cc-btn-sm cc-btn-secondary"
                                     onclick="dismissAction(<?= $action['id'] ?>)">
-                                ✕ Zrušit
+                                Zrušit
                             </button>
                         </div>
                     </div>
@@ -254,8 +250,8 @@ function getPriorityBadge($priority) {
                     Nedávno dokončené
                     <button class="cc-btn cc-btn-sm cc-btn-secondary"
                             onclick="window.open('vycisti_akce.php', '_blank')"
-                            style="margin-left: 1rem; font-size: 0.75rem; padding: 0.3rem 0.8rem;">
-                        🗑️ Vyčistit dokončené
+                            style="margin-left: 1rem;">
+                        Vyčistit dokončené
                     </button>
                 </h3>
 
@@ -263,7 +259,7 @@ function getPriorityBadge($priority) {
                     <div class="setting-item">
                         <div class="setting-item-left">
                             <div class="setting-item-label" style="opacity: 0.7;">
-                                ✅ <?= htmlspecialchars($action['action_title']) ?>
+                                <?= htmlspecialchars($action['action_title']) ?>
                             </div>
                             <div class="setting-item-description">
                                 Dokončeno: <?= date('d.m.Y H:i', strtotime($action['completed_at'])) ?>
@@ -297,8 +293,8 @@ function getPriorityBadge($priority) {
                                 <?php endif; ?>
                             </div>
                             <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #666;">
-                                👤 <?= htmlspecialchars($webhook['author'] ?? 'Unknown') ?> •
-                                📅 <?= date('d.m.Y H:i', strtotime($webhook['received_at'])) ?>
+                                <?= htmlspecialchars($webhook['author'] ?? 'Unknown') ?> •
+                                <?= date('d.m.Y H:i', strtotime($webhook['received_at'])) ?>
                             </div>
                         </div>
                         <div class="setting-item-right">
@@ -366,7 +362,7 @@ function getPriorityBadge($priority) {
 
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">📊 Statistics Generation</div>
+                    <div class="setting-item-label">Statistics Generation</div>
                     <div class="setting-item-description">Generování reportů (týdně)</div>
                 </div>
                 <div class="setting-item-right">
@@ -384,7 +380,7 @@ function getPriorityBadge($priority) {
 
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">🔄 Obnovit seznam</div>
+                    <div class="setting-item-label">Obnovit seznam</div>
                     <div class="setting-item-description">Načíst aktuální stav</div>
                 </div>
                 <div class="setting-item-right">
@@ -499,24 +495,24 @@ async function executeAction(event, actionId) {
 
             // Pokud je potřeba otevřít dokumentaci
             if (data.action === 'open_documentation' && data.url) {
-                alert(`✓ Akce dokončena!\n\n${data.message}\n\nDokumentace bude otevřena v novém okně.`);
+                alert(`Akce dokončena!\n\n${data.message}\n\nDokumentace bude otevřena v novém okně.`);
                 window.open(data.url, '_blank');
                 // Označit úkol jako dokončený
                 location.reload();
             } else {
-                alert(`✓ Akce dokončena!\n\n${data.message}\n\nČas provedení: ${execTime}`);
+                alert(`Akce dokončena!\n\n${data.message}\n\nČas provedení: ${execTime}`);
                 location.reload();
             }
         } else {
             console.error('[executeAction] Action failed:', data);
-            alert('✗ Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+            alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
             btn.disabled = false;
             btn.textContent = originalText;
         }
     })
     .catch(err => {
         console.error('[executeAction] Error:', err);
-        alert('✗ Chyba při provádění akce: ' + err.message);
+        alert('Chyba při provádění akce: ' + err.message);
         btn.disabled = false;
         btn.textContent = originalText;
     });
@@ -547,7 +543,7 @@ async function completeAction(actionId) {
             throw new Error(result.message || result.error || 'Neznámá chyba');
         }
     } catch (error) {
-        alert('❌ Chyba: ' + error.message);
+        alert('Chyba: ' + error.message);
     }
 }
 
@@ -576,7 +572,7 @@ async function dismissAction(actionId) {
             throw new Error(result.message || result.error || 'Neznámá chyba');
         }
     } catch (error) {
-        alert('❌ Chyba: ' + error.message);
+        alert('Chyba: ' + error.message);
     }
 }
 
@@ -594,7 +590,7 @@ function setupGitHubWebhook() {
     alert('GitHub Webhook URL:\n\n' + window.location.origin + '/api/github_webhook.php\n\nPřidejte tuto URL do nastavení GitHub repozitáře.');
 }
 
-if (DEBUG_MODE) console.log('✅ Actions section loaded');
+if (DEBUG_MODE) console.log('Actions section loaded');
 </script>
 
 <?php if ($embedMode && $directAccess): ?>
