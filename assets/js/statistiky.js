@@ -579,6 +579,8 @@ async function exportovatPDF() {
         ]);
 
         // Vytvořit tabulku s AutoTable (startY upraveno kvůli nadpisu nahoře)
+        const datum = new Date().toLocaleDateString('cs-CZ');
+
         doc.autoTable({
             startY: doc.lastAutoTable ? doc.lastAutoTable.finalY + 5 : 30,
             head: [['Reklamace ID', 'Adresa', 'Model', 'Technik', 'Prodejce', 'Částka', 'Výdělek (33%)', 'Země', 'Datum']],
@@ -608,29 +610,24 @@ async function exportovatPDF() {
                 7: { cellWidth: 12, halign: 'center' }, // Země
                 8: { cellWidth: 22, halign: 'center' }  // Datum
             },
-            margin: { left: 14, right: 14, bottom: 15 }
+            margin: { left: 14, right: 14, bottom: 15 },
+            didDrawPage: function(data) {
+                // Patička na každé stránce
+                const pageCount = doc.internal.getNumberOfPages();
+                const pageNum = doc.internal.getCurrentPageInfo().pageNumber;
+
+                doc.setFontSize(8);
+                doc.setTextColor(150, 150, 150);
+
+                // Levá strana - datum
+                doc.text(`Vygenerováno: ${datum}`, 14, doc.internal.pageSize.height - 10);
+
+                // Pravá strana - číslo stránky
+                doc.text(`Strana ${pageNum} z ${pageCount}`,
+                         doc.internal.pageSize.width - 14, doc.internal.pageSize.height - 10,
+                         { align: 'right' });
+            }
         });
-
-        // Přidat patičku na všechny stránky
-        const pageCount = doc.internal.getNumberOfPages();
-        const datum = new Date().toLocaleDateString('cs-CZ');
-
-        for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i);
-
-            // Patička jako tabulka (pro správné UTF-8)
-            doc.autoTable({
-                startY: doc.internal.pageSize.height - 12,
-                body: [
-                    [
-                        { content: `Vygenerováno: ${datum}`, styles: { fontSize: 8, textColor: [150, 150, 150], halign: 'left' } },
-                        { content: `Strana ${i} z ${pageCount}`, styles: { fontSize: 8, textColor: [150, 150, 150], halign: 'right' } }
-                    ]
-                ],
-                theme: 'plain',
-                margin: { left: 14, right: 14 }
-            });
-        }
 
         // Stáhnout PDF
         const nazevSouboru = `statistiky_${rok}_${mesicValue || 'vsechny'}_${new Date().toISOString().split('T')[0]}.pdf`;
