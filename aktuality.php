@@ -270,7 +270,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     .clanky-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 15px;
+      gap: 0;
       margin-bottom: 40px;
     }
 
