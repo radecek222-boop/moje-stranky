@@ -598,15 +598,15 @@ async function exportovatPDF() {
                 </tbody>
             </table>
             <div style="position: absolute; bottom: 100px; right: 30px; text-align: right;">
-                <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; margin-bottom: 8px; font-size: 18px; font-weight: bold; display: inline-block;">
-                    Počet zakázek celkem: <span style="color: #333;">${zakazky.length} ks</span>
+                <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; margin-bottom: 8px; font-size: 18px; display: inline-block;">
+                    Počet zakázek celkem: <span style="color: #333; font-weight: bold;">${zakazky.length} ks</span>
                 </div><br>
-                <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; margin-bottom: 8px; font-size: 18px; font-weight: bold; display: inline-block;">
-                    Celkem za zakázky k fakturaci: <span style="color: #333;">${celkemCastka.toFixed(2)} €</span>
+                <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; margin-bottom: 8px; font-size: 18px; display: inline-block;">
+                    Celkem za zakázky k fakturaci: <span style="color: #333; font-weight: bold;">${celkemCastka.toFixed(2)} €</span>
                 </div><br>
                 ${zobrazitOdmenu ? `
-                    <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; font-size: 18px; font-weight: bold; display: inline-block;">
-                        Výdělek celkem technik: <span style="color: #333;">${celkemVydelek.toFixed(2)} €</span>
+                    <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; font-size: 18px; display: inline-block;">
+                        Výdělek celkem technik: <span style="color: #333; font-weight: bold;">${celkemVydelek.toFixed(2)} €</span>
                     </div><br>
                 ` : ''}
             </div>
@@ -664,10 +664,10 @@ async function exportovatPDF() {
             doc.setTextColor(100, 100, 100);
             doc.text('1/1', margin, margin - 3);
 
-            // Přidat text o počtu stránek dole (nad linkou)
-            doc.setFontSize(9);
-            doc.setTextColor(150, 150, 150);
-            doc.text('Výpis se skládá z 1 stránky', margin, pageHeight - 18);
+            // Přidat text o počtu stránek vlevo dole (na úrovni součtů)
+            doc.setFontSize(14);
+            doc.setTextColor(51, 51, 51);
+            doc.text('Výpis se skládá z 1 stránky', margin, pageHeight - 35);
         } else {
             // Rozdělení na více stránek
             let yPosition = 0;
@@ -701,13 +701,13 @@ async function exportovatPDF() {
                 doc.setTextColor(100, 100, 100);
                 doc.text(`${cisloStranky}/${celkovyPocetStranek}`, margin, margin - 3);
 
-                // Na poslední stránce přidat text o počtu stránek dole (nad linkou)
+                // Na poslední stránce přidat text o počtu stránek vlevo dole (na úrovni součtů)
                 if (cisloStranky === celkovyPocetStranek) {
-                    doc.setFontSize(9);
-                    doc.setTextColor(150, 150, 150);
+                    doc.setFontSize(14);
+                    doc.setTextColor(51, 51, 51);
                     const pocetText = celkovyPocetStranek === 1 ? 'stránky' :
                                      (celkovyPocetStranek >= 2 && celkovyPocetStranek <= 4) ? 'stránek' : 'stránek';
-                    doc.text(`Výpis se skládá z ${celkovyPocetStranek} ${pocetText}`, margin, pageHeight - 18);
+                    doc.text(`Výpis se skládá z ${celkovyPocetStranek} ${pocetText}`, margin, pageHeight - 35);
                 }
 
                 cisloStranky++;
