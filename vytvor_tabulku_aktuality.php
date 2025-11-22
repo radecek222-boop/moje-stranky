@@ -91,6 +91,9 @@ try {
         if (isset($_GET['execute']) && $_GET['execute'] === '1') {
             echo "<div class='info'><strong>SPOUŠTÍM MIGRACI...</strong></div>";
 
+            $migrationSuccess = false;
+            $errorMessage = '';
+
             $pdo->beginTransaction();
 
             try {
@@ -128,7 +131,15 @@ try {
                 $pdo->exec($sqlCreateTable);
 
                 $pdo->commit();
+                $migrationSuccess = true;
 
+            } catch (PDOException $e) {
+                $pdo->rollBack();
+                $errorMessage = $e->getMessage();
+            }
+
+            // Výstup MIMO transakci
+            if ($migrationSuccess) {
                 echo "<div class='success'>";
                 echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
                 echo "Tabulka <code>wgs_natuzzi_aktuality</code> byla vytvořena.<br><br>";
@@ -150,16 +161,14 @@ try {
 
                 echo "<div class='info'>";
                 echo "<strong>📋 DALŠÍ KROKY:</strong><br>";
-                echo "1. Spustit generátor obsahu: <code>generuj_aktuality.php</code><br>";
-                echo "2. Nastavit cron job pro denní spouštění<br>";
-                echo "3. Vytvořit frontend stránku <code>aktuality.php</code>";
+                echo "1. Spustit generátor obsahu: <code>api/generuj_aktuality.php</code><br>";
+                echo "2. Cron job je již nastavený: každý den v 06:00<br>";
+                echo "3. Zobrazit aktuality: <a href='aktuality.php'>aktuality.php</a>";
                 echo "</div>";
-
-            } catch (PDOException $e) {
-                $pdo->rollBack();
+            } else {
                 echo "<div class='error'>";
                 echo "<strong>CHYBA PŘI VYTVÁŘENÍ TABULKY:</strong><br>";
-                echo htmlspecialchars($e->getMessage());
+                echo htmlspecialchars($errorMessage);
                 echo "</div>";
             }
         } else {
