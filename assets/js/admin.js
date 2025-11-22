@@ -556,7 +556,14 @@ function openCCModal(section) {
     // Show overlay and modal
     overlay.classList.add('active');
     modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+
+    // ✅ iOS scroll lock (position: fixed místo overflow: hidden)
+    window.ccModalScrollPosition = window.pageYOffset;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${window.ccModalScrollPosition}px`;
+    document.body.style.width = '100%';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
 
     // Show loading
     modalBody.innerHTML = '<div class="cc-modal-loading"><div class="cc-modal-spinner"></div><div style="margin-top: 1rem;">Načítání...</div></div>';
@@ -615,7 +622,16 @@ function closeCCModal() {
 
     overlay.classList.remove('active');
     modal.classList.remove('active');
-    document.body.style.overflow = '';
+
+    // ✅ Obnovit scroll (iOS scroll lock unlock)
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    if (typeof window.ccModalScrollPosition !== 'undefined') {
+        window.scrollTo(0, window.ccModalScrollPosition);
+    }
 }
 
 // Open SQL page in new tab (spolehlivé řešení bez blokování)

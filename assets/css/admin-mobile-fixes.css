@@ -1,0 +1,204 @@
+/**
+ * ADMIN-MOBILE-FIXES.CSS
+ * PWA Responsive Opravy pro admin.php
+ * Datum: 2025-11-22
+ *
+ * Tyto styly se načítají NAVÍC k admin.css
+ * a opravují kritické touch target a iOS problémy.
+ */
+
+@media (max-width: 768px) {
+  /* ========================================================================
+     ✅ FIX #1: Admin Dashboard Buttons (36px → 44px)
+     Admin cache button a version info mají height: 36px
+     ======================================================================== */
+  .admin-cache-btn,
+  .admin-version-info {
+    height: 44px !important; /* z 36px */
+    min-height: 44px;
+    padding: 12px 16px !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ========================================================================
+     ✅ FIX #2: Control Centre Cards - Touch Optimization
+     CC karty jsou již dostatečně velké, ale přidáme touch optimalizaci
+     ======================================================================== */
+  .cc-card {
+    min-height: 100px; /* Dostatečně velké pro pohodlné kliknutí */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+  }
+
+  .cc-card:active {
+    transform: scale(0.98); /* Touch feedback */
+  }
+
+  /* ========================================================================
+     ✅ FIX #3: Toggle Switch (28px → 48px)
+     Toggle pro změnu stavu reklamace
+     ======================================================================== */
+  .toggle-switch,
+  .status-toggle,
+  .stav-toggle,
+  input[type="checkbox"].toggle {
+    min-width: 48px !important;
+    min-height: 48px !important;
+    touch-action: manipulation;
+  }
+
+  /* Pro custom toggle switche */
+  .toggle-switch-container {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* ========================================================================
+     ✅ FIX #4: Modal Back Button (32px → 44px)
+     Zpět tlačítko v modálním okně
+     ======================================================================== */
+  .modal-back-btn,
+  .back-btn,
+  .modal .btn-back,
+  button[data-action="back"] {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 50%; /* Kulaté = lepší trefitelnost */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ========================================================================
+     ✅ FIX #5: Modal Full Screen (100vw×100vh)
+     Modální okna mají být full-screen na mobilu
+     ======================================================================== */
+  .modal,
+  .modal-overlay,
+  #addUserModal,
+  #editUserModal {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+  }
+
+  .modal-content,
+  .modal-body {
+    max-height: calc(100vh - 120px); /* Prostor pro header/footer */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ========================================================================
+     ✅ FIX #6: Search Input iOS Auto-Zoom Prevention
+     Font-size < 16px na inputech způsobuje auto-zoom v iOS Safari
+     ======================================================================== */
+  input[type="search"],
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px !important;
+    min-height: 44px;
+    padding: 12px 16px;
+    line-height: 1.4;
+  }
+
+  /* Výjimka pro readonly pole (nebudou focusnutá) */
+  input[readonly],
+  select[disabled] {
+    font-size: 13px !important;
+  }
+
+  /* ========================================================================
+     ✅ FIX #7: Tab Navigation (minimum 48px)
+     Taby v admin panelu by měly být dostatečně velké
+     ======================================================================== */
+  .tab-btn,
+  .tab-navigation button,
+  .admin-tabs button,
+  [role="tab"] {
+    min-height: 48px !important;
+    padding: 12px 20px !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ========================================================================
+     ✅ Touch Optimization pro všechny buttons
+     ======================================================================== */
+  .btn,
+  button,
+  input[type="submit"],
+  input[type="button"],
+  .action-btn {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+  }
+
+  /* Malá tlačítka v tabulkách */
+  .btn-sm,
+  .btn-small,
+  table .btn {
+    min-height: 44px !important; /* z menších rozměrů */
+    min-width: 44px !important;
+    padding: 8px 12px !important;
+  }
+
+  /* ========================================================================
+     ✅ Table Row Actions
+     Akční tlačítka v řádcích tabulky
+     ======================================================================== */
+  .table-actions button,
+  .row-actions button,
+  td button {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  /* ========================================================================
+     ✅ Dropdowns a Select Menus
+     ======================================================================== */
+  select {
+    background-size: 16px; /* Větší šipka pro lepší viditelnost */
+    padding-right: 40px; /* Prostor pro šipku */
+  }
+
+  /* ========================================================================
+     ✅ Checkboxes a Radio Buttons
+     ======================================================================== */
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-width: 24px;
+    min-height: 24px;
+    margin: 10px; /* Větší touch target včetně marginu */
+  }
+
+  /* Pro custom checkboxy/radia s label */
+  label:has(input[type="checkbox"]),
+  label:has(input[type="radio"]) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px;
+    cursor: pointer;
+  }
+}

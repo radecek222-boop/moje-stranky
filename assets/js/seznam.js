@@ -401,12 +401,29 @@ function renderOrders(items = null) {
 // === MODAL MANAGER ===
 const ModalManager = {
   show: (content) => {
+    // ✅ iOS scroll lock
+    window.modalScrollPosition = window.pageYOffset;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${window.modalScrollPosition}px`;
+    document.body.style.width = '100%';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+
     document.getElementById('modalContent').innerHTML = content;
     document.getElementById('detailOverlay').classList.add('active');
   },
-  
+
   close: () => {
     document.getElementById('detailOverlay').classList.remove('active');
+
+    // ✅ Obnovit scroll
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    window.scrollTo(0, window.modalScrollPosition);
+
     CURRENT_RECORD = null;
     SELECTED_DATE = null;
     SELECTED_TIME = null;

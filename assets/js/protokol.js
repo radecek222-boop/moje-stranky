@@ -24,8 +24,29 @@ function toggleMenu() {
   const navMenu = document.getElementById('navMenu');
   const hamburger = document.querySelector('.hamburger');
 
-  navMenu.classList.toggle('active');
-  hamburger.classList.toggle('active');
+  const isActive = navMenu.classList.contains('active');
+
+  if (!isActive) {
+    // ✅ Otevírání - zamknout scroll (iOS fix)
+    window.menuScrollPosition = window.pageYOffset;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${window.menuScrollPosition}px`;
+    document.body.style.width = '100%';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    navMenu.classList.add('active');
+    hamburger.classList.add('active');
+  } else {
+    // ✅ Zavírání - obnovit scroll
+    navMenu.classList.remove('active');
+    hamburger.classList.remove('active');
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    window.scrollTo(0, window.menuScrollPosition);
+  }
 }
 
 // === NOTIFIKACE ===
@@ -42,22 +63,23 @@ function showNotification(message, type = 'info') {
   notification.style.display = 'block';
   notification.style.opacity = '1';
 
+  // ✅ Tap-to-dismiss (iOS touch feedback)
+  const skryjNotifikaci = () => {
+    notification.style.opacity = '0';
+    setTimeout(() => {
+      notification.style.display = 'none';
+    }, 300);
+  };
+
+  // ✅ Click pro okamžité zavření
+  notification.onclick = skryjNotifikaci;
+
   // Auto-hide po 3 sekundách (kromě error)
   if (type !== 'error') {
-    setTimeout(() => {
-      notification.style.opacity = '0';
-      setTimeout(() => {
-        notification.style.display = 'none';
-      }, 300);
-    }, 3000);
+    setTimeout(skryjNotifikaci, 3000);
   } else {
     // Error zprávy se skryjí po 5 sekundách
-    setTimeout(() => {
-      notification.style.opacity = '0';
-      setTimeout(() => {
-        notification.style.display = 'none';
-      }, 300);
-    }, 5000);
+    setTimeout(skryjNotifikaci, 5000);
   }
 }
 
@@ -70,6 +92,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const hamburger = document.querySelector('.hamburger');
       nav.classList.remove('active');
       hamburger.classList.remove('active');
+
+      // ✅ Obnovit scroll při zavření menu (iOS fix)
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      if (typeof window.menuScrollPosition !== 'undefined') {
+        window.scrollTo(0, window.menuScrollPosition);
+      }
     });
   });
 });
@@ -161,7 +193,7 @@ function setupAutoTranslate() {
         if (czField.value.trim().length > 5) {
           translateField(field, true);
         }
-      }, 1500);
+      }, 2500); // ✅ Zvýšeno z 1500ms - prevence lagování na pomalejších mobilech
     });
   });
 }
@@ -178,13 +210,16 @@ function initSignaturePad() {
     canvas.height = cssHeight * ratio;
     canvas.getContext("2d").scale(ratio, ratio);
   };
-  window.addEventListener("resize", resize);
+  window.addEventListener("resize", resize, { passive: true }); // ✅ PŘIDÁNO passive
   resize();
   signaturePad = new SignaturePad(canvas, {
     minWidth: 1,
     maxWidth: 2.5,
     penColor: "black",
-    backgroundColor: "white"
+    backgroundColor: "white",
+    throttle: 8,               // ✅ PŘIDÁNO - throttle pro lepší performance
+    velocityFilterWeight: 0.5, // ✅ PŘIDÁNO - hladší linie
+    minDistance: 2             // ✅ PŘIDÁNO - méně bodů = méně laguje
   });
 }
 
@@ -514,10 +549,21 @@ function renderPhotoPreview(arr) {
   const grid = cont.querySelector("#photoGrid");
   arr.forEach(src => {
     const photoData = typeof src === 'string' ? src : src.data;
+
+    // ✅ Wrapper pro touch feedback (scale 0.95 on :active)
+    const wrapper = document.createElement("div");
+    wrapper.className = "photo-thumb-wrapper";
+
     const img = document.createElement("img");
     img.src = photoData;
-    img.onclick = () => window.open(photoData, "_blank");
-    grid.appendChild(img);
+
+    // ✅ Event delegation místo inline onclick
+    wrapper.addEventListener('click', () => {
+      window.open(photoData, "_blank");
+    });
+
+    wrapper.appendChild(img);
+    grid.appendChild(wrapper);
   });
 }
 
