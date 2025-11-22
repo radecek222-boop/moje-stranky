@@ -23,7 +23,7 @@ if (!$isAdmin) {
 $action = $_GET['action'] ?? '';
 
 try {
-    $pdo = getDbConnection();
+    $pdo = Database::getInstance()->getConnection();
 
     switch ($action) {
         case 'summary':
