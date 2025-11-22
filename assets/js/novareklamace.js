@@ -252,10 +252,10 @@ const WGS = {
                 const [lon, lat] = feature.geometry.coordinates;
                 this.updateMapWithGPS(lat, lon);
 
-                // Spustit výpočet trasy ze sídla
-                if (this.calculateRoute) {
-                  this.calculateRoute(lat, lon);
-                }
+                // ✅ PERFORMANCE: Výpočet trasy vypnut kvůli problémům s API
+                // if (this.calculateRoute) {
+                //   this.calculateRoute(lat, lon);
+                // }
 
                 dropdownUlice.style.display = 'none';
                 this.toast('✓ Adresa vyplněna', 'success');
@@ -372,8 +372,13 @@ const WGS = {
     });
   },
 
-  // ✅ REFACTOR: Použití WGSMap.calculateRoute() místo manuálního fetch
+  // ✅ PERFORMANCE: Funkce vypnuta kvůli problémům s get_distance API
   async calculateRoute(destLat, destLon) {
+    // Funkce deaktivována - žádný výpočet trasy
+    logger.log('⚠️ Výpočet trasy vypnut (API nefunguje)');
+    return;
+
+    /* VYPNUTO - ROUTING API NEFUNGUJE
     if (!this.map) {
       logger.warn('⚠️ Mapa není inicializována');
       return;
@@ -409,6 +414,7 @@ const WGS = {
         // Tiché selhání - trasa není kritická
       }
     }, CONSTANTS.ROUTE_DEBOUNCE);
+    */
   },
 
   // ✅ REFACTOR: Použití WGSMap.drawRoute() a WGSMap.addMarker()
