@@ -554,6 +554,10 @@ async function exportovatPDF() {
         // Kontrola checkboxu pro zobrazení odměny technika
         const zobrazitOdmenu = document.getElementById('zobrazitOdmenu').checked;
 
+        // Spočítat součty
+        const celkemCastka = zakazky.reduce((sum, z) => sum + parseFloat(z.castka_celkem), 0);
+        const celkemVydelek = zakazky.reduce((sum, z) => sum + parseFloat(z.vydelek_technika), 0);
+
         // Vytvořit HTML pro PDF (skrytý div)
         const pdfContainer = document.createElement('div');
         pdfContainer.style.cssText = 'position: absolute; left: -9999px; width: 1200px; background: white; padding: 30px; font-family: Poppins, Arial, sans-serif;';
@@ -592,6 +596,27 @@ async function exportovatPDF() {
                         </tr>
                     `).join('')}
                 </tbody>
+                <tfoot>
+                    <tr style="background: #f0f0f0; font-weight: bold;">
+                        <td colspan="5" style="padding: 10px; border: 1px solid #999; text-align: right;">Počet zakázek celkem:</td>
+                        <td style="padding: 10px; border: 1px solid #999; text-align: right;">${zakazky.length} ks</td>
+                        ${zobrazitOdmenu ? '<td style="padding: 10px; border: 1px solid #999;"></td>' : ''}
+                        <td colspan="2" style="padding: 10px; border: 1px solid #999;"></td>
+                    </tr>
+                    <tr style="background: #f0f0f0; font-weight: bold;">
+                        <td colspan="5" style="padding: 10px; border: 1px solid #999; text-align: right;">Celkem za zakázky k fakturaci:</td>
+                        <td style="padding: 10px; border: 1px solid #999; text-align: right;">${celkemCastka.toFixed(2)} €</td>
+                        ${zobrazitOdmenu ? '<td style="padding: 10px; border: 1px solid #999;"></td>' : ''}
+                        <td colspan="2" style="padding: 10px; border: 1px solid #999;"></td>
+                    </tr>
+                    ${zobrazitOdmenu ? `
+                        <tr style="background: #f0f0f0; font-weight: bold;">
+                            <td colspan="6" style="padding: 10px; border: 1px solid #999; text-align: right;">Výdělek celkem technik:</td>
+                            <td style="padding: 10px; border: 1px solid #999; text-align: right;">${celkemVydelek.toFixed(2)} €</td>
+                            <td colspan="2" style="padding: 10px; border: 1px solid #999;"></td>
+                        </tr>
+                    ` : ''}
+                </tfoot>
             </table>
             <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd;">
                 <div style="font-size: 10px; color: #999; margin-bottom: 5px;">
