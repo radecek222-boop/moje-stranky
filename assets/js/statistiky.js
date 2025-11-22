@@ -551,6 +551,9 @@ async function exportovatPDF() {
         const mesic = mesicValue ? mesicNazvy[parseInt(mesicValue)] : 'Všechny';
         const datum = new Date().toLocaleDateString('cs-CZ');
 
+        // Kontrola checkboxu pro zobrazení odměny technika
+        const zobrazitOdmenu = document.getElementById('zobrazitOdmenu').checked;
+
         // Vytvořit HTML pro PDF (skrytý div)
         const pdfContainer = document.createElement('div');
         pdfContainer.style.cssText = 'position: absolute; left: -9999px; width: 1200px; background: white; padding: 30px; font-family: Poppins, Arial, sans-serif;';
@@ -569,7 +572,7 @@ async function exportovatPDF() {
                         <th style="padding: 10px; text-align: left; border: 1px solid #999;">Technik</th>
                         <th style="padding: 10px; text-align: left; border: 1px solid #999;">Prodejce</th>
                         <th style="padding: 10px; text-align: right; border: 1px solid #999;">Částka</th>
-                        <th style="padding: 10px; text-align: right; border: 1px solid #999;">Výdělek (33%)</th>
+                        ${zobrazitOdmenu ? '<th style="padding: 10px; text-align: right; border: 1px solid #999;">Výdělek (33%)</th>' : ''}
                         <th style="padding: 10px; text-align: center; border: 1px solid #999;">Země</th>
                         <th style="padding: 10px; text-align: center; border: 1px solid #999;">Datum</th>
                     </tr>
@@ -583,7 +586,7 @@ async function exportovatPDF() {
                             <td style="padding: 8px; border: 1px solid #ddd;">${z.technik || '-'}</td>
                             <td style="padding: 8px; border: 1px solid #ddd;">${z.prodejce || '-'}</td>
                             <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${parseFloat(z.castka_celkem).toFixed(2)} €</td>
-                            <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${parseFloat(z.vydelek_technika).toFixed(2)} €</td>
+                            ${zobrazitOdmenu ? `<td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${parseFloat(z.vydelek_technika).toFixed(2)} €</td>` : ''}
                             <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${z.zeme || '-'}</td>
                             <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${z.datum || '-'}</td>
                         </tr>
