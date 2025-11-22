@@ -278,25 +278,11 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     .clanek-card {
       background: white;
       padding: 25px;
-      border: 1px solid #e0e0e0;
-      border-radius: 0;
-      box-shadow: none;
+      border: none;
       position: relative;
       transition: all 0.3s;
       height: auto;
       margin: 0;
-      border-bottom: none;
-    }
-
-    .clanek-card:first-child {
-      border-top-left-radius: 8px;
-      border-top-right-radius: 8px;
-    }
-
-    .clanek-card:last-child {
-      border-bottom-left-radius: 8px;
-      border-bottom-right-radius: 8px;
-      border-bottom: 1px solid #e0e0e0;
     }
 
     .clanek-card:hover {
