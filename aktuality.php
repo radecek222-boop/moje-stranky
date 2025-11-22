@@ -1,26 +1,27 @@
 <?php
 /**
- * Stránka Aktuality - Denní novinky o značce Natuzzi
- * Automaticky načítá aktuální obsah z databáze
+ * Aktuality o značce Natuzzi
+ * Automaticky generované denní novinky ve třech jazycích
  */
 
 require_once __DIR__ . '/init.php';
 
-// Získat dnešní aktualitu
+// Získat dnešní aktualitu nebo poslední dostupnou
 try {
     $pdo = getDbConnection();
 
-    // Nejprve zkusit dnešní datum
-    $dnes = date('Y-m-d');
+    // Zkusit získat aktualitu podle parametru ?datum=
+    $zobrazitDatum = $_GET['datum'] ?? date('Y-m-d');
+
     $stmt = $pdo->prepare("
         SELECT * FROM wgs_natuzzi_aktuality
         WHERE datum = :datum
         LIMIT 1
     ");
-    $stmt->execute(['datum' => $dnes]);
+    $stmt->execute(['datum' => $zobrazitDatum]);
     $aktualita = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Pokud neexistuje dnešní, vzít poslední dostupnou
+    // Pokud neexistuje, vzít poslední dostupnou
     if (!$aktualita) {
         $stmt = $pdo->query("
             SELECT * FROM wgs_natuzzi_aktuality
@@ -30,7 +31,7 @@ try {
         $aktualita = $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Získat všechny dostupné datumy pro archiv
+    // Získat seznam posledních 30 aktualit pro archiv
     $stmtArchiv = $pdo->query("
         SELECT datum, svatek_cz
         FROM wgs_natuzzi_aktuality
@@ -50,339 +51,388 @@ $jazyk = $_GET['lang'] ?? 'cz';
 $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
 $obsahSloupec = 'obsah_' . $jazyk;
-$obsah = $aktualita[$obsahSloupec] ?? 'Obsah se načítá...';
-
+$obsah = $aktualita[$obsahSloupec] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $jazyk; ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Natuzzi Aktuality | WGS Service</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="WGS">
 
-    <meta name="description" content="Denní aktuality o značce Natuzzi - novinky, tipy na péči o luxusní nábytek, showroomy v ČR">
-    <meta name="keywords" content="Natuzzi, aktuality, novinky, luxusní nábytek, kožené sedačky, péče o nábytek">
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Denní aktuality o značce Natuzzi - novinky, tipy na péči o luxusní nábytek, showroomy v ČR. White Glove Service - autorizovaný servisní partner.">
+  <meta name="keywords" content="Natuzzi, aktuality, novinky, luxusní nábytek, kožené sedačky, péče o nábytek, White Glove Service">
 
-    <!-- Ikona -->
-    <link rel="icon" href="https://www.wgs-service.cz/favicon.ico">
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icon192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="./icon512.png">
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <title>Aktuality Natuzzi | White Glove Service</title>
 
-        :root {
-            --c-primary: #2D5016;
-            --c-primary-dark: #1a300d;
-            --c-bg: #f5f5f5;
-            --c-white: #ffffff;
-            --c-grey: #666;
-            --c-light-grey: #e0e0e0;
-        }
+  <!-- Preload critical resources -->
+  <link rel="preload" href="assets/css/styles.min.css" as="style">
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--c-bg);
-            line-height: 1.6;
-            color: #333;
-        }
+  <!-- Google Fonts - Natuzzi style -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+  <!-- External CSS -->
+  <link rel="stylesheet" href="assets/css/styles.min.css">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.css">
 
-        header {
-            background: var(--c-primary);
-            color: white;
-            padding: 30px 20px;
-            text-align: center;
-            margin-bottom: 30px;
-            border-radius: 10px;
-        }
+  <style>
+    /* Aktuality specifické styly */
+    .hero {
+      background: linear-gradient(135deg, #1a1a1a 0%, #2D5016 100%);
+      color: white;
+      padding: 80px 20px;
+      text-align: center;
+      margin-bottom: 0;
+    }
 
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
+    .hero-title {
+      font-size: 3em;
+      font-weight: 700;
+      margin: 0 0 10px 0;
+      letter-spacing: -1px;
+    }
 
-        header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
+    .hero-subtitle {
+      font-size: 1.2em;
+      opacity: 0.9;
+      font-weight: 300;
+    }
 
-        .lang-switcher {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px 0;
-        }
+    .lang-switcher {
+      background: white;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid #e0e0e0;
+    }
 
-        .lang-btn {
-            padding: 8px 20px;
-            background: var(--c-white);
-            color: var(--c-primary);
-            border: 2px solid var(--c-primary);
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
+    .lang-btn {
+      display: inline-block;
+      padding: 10px 25px;
+      margin: 0 5px;
+      background: white;
+      color: #2D5016;
+      border: 2px solid #2D5016;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9em;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
 
-        .lang-btn.active,
-        .lang-btn:hover {
-            background: var(--c-primary);
-            color: white;
-        }
+    .lang-btn:hover {
+      background: #2D5016;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(45, 80, 22, 0.2);
+    }
 
-        .content-card {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
+    .lang-btn.active {
+      background: #2D5016;
+      color: white;
+    }
 
-        .datum-badge {
-            background: var(--c-primary);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
+    .content-section {
+      padding: 60px 20px;
+      background: #f5f5f7;
+    }
 
-        .obsah {
-            font-size: 1.05em;
-            line-height: 1.8;
-        }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
 
-        .obsah h1 {
-            color: var(--c-primary);
-            margin: 30px 0 20px 0;
-            font-size: 2em;
-            border-bottom: 3px solid var(--c-primary);
-            padding-bottom: 10px;
-        }
+    .datum-badge {
+      background: #2D5016;
+      color: white;
+      padding: 12px 30px;
+      border-radius: 30px;
+      display: inline-block;
+      margin-bottom: 30px;
+      font-weight: 600;
+      font-size: 1em;
+    }
 
-        .obsah h2 {
-            color: var(--c-primary);
-            margin: 25px 0 15px 0;
-            font-size: 1.5em;
-        }
+    .aktualita-card {
+      background: white;
+      padding: 50px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 40px;
+    }
 
-        .obsah h3 {
-            color: var(--c-primary-dark);
-            margin: 20px 0 10px 0;
-        }
+    .aktualita-obsah {
+      font-size: 1.05em;
+      line-height: 1.8;
+      color: #333;
+    }
 
-        .obsah p {
-            margin: 15px 0;
-        }
+    .aktualita-obsah h1 {
+      color: #2D5016;
+      font-size: 2.5em;
+      margin: 0 0 30px 0;
+      font-weight: 700;
+      border-bottom: 3px solid #2D5016;
+      padding-bottom: 15px;
+    }
 
-        .obsah a {
-            color: var(--c-primary);
-            text-decoration: none;
-            font-weight: 500;
-            border-bottom: 1px dotted var(--c-primary);
-        }
+    .aktualita-obsah h2 {
+      color: #2D5016;
+      font-size: 1.8em;
+      margin: 40px 0 20px 0;
+      font-weight: 600;
+    }
 
-        .obsah a:hover {
-            border-bottom-style: solid;
-        }
+    .aktualita-obsah h3 {
+      color: #1a1a1a;
+      font-size: 1.3em;
+      margin: 30px 0 15px 0;
+      font-weight: 600;
+    }
 
-        .obsah ul {
-            margin: 15px 0 15px 30px;
-        }
+    .aktualita-obsah p {
+      margin: 20px 0;
+      text-align: justify;
+    }
 
-        .obsah li {
-            margin: 8px 0;
-        }
+    .aktualita-obsah strong {
+      color: #2D5016;
+      font-weight: 600;
+    }
 
-        .archiv-sidebar {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
+    .aktualita-obsah a {
+      color: #2D5016;
+      text-decoration: none;
+      font-weight: 500;
+      border-bottom: 1px dotted #2D5016;
+      transition: all 0.3s;
+    }
 
-        .archiv-sidebar h3 {
-            color: var(--c-primary);
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
+    .aktualita-obsah a:hover {
+      border-bottom-style: solid;
+      color: #1a300d;
+    }
 
-        .archiv-link {
-            display: block;
-            padding: 10px;
-            margin: 5px 0;
-            background: var(--c-bg);
-            border-radius: 5px;
-            text-decoration: none;
-            color: #333;
-            transition: all 0.3s;
-        }
+    .info-box {
+      background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+      border-left: 5px solid #2D5016;
+      padding: 20px;
+      margin: 30px 0;
+      border-radius: 8px;
+      font-size: 0.95em;
+    }
 
-        .archiv-link:hover {
-            background: var(--c-primary);
-            color: white;
-        }
+    .archiv-section {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
 
-        .archiv-link.active {
-            background: var(--c-primary);
-            color: white;
-            font-weight: bold;
-        }
+    .archiv-section h3 {
+      color: #2D5016;
+      font-size: 1.5em;
+      margin: 0 0 20px 0;
+      font-weight: 600;
+    }
 
-        .refresh-btn {
-            display: inline-block;
-            padding: 12px 30px;
-            background: var(--c-primary);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
+    .archiv-link {
+      display: block;
+      padding: 12px 15px;
+      margin: 8px 0;
+      background: #f5f5f7;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #333;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
 
-        .refresh-btn:hover {
-            background: var(--c-primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
+    .archiv-link:hover {
+      background: #2D5016;
+      color: white;
+      border-left-color: #1a300d;
+      transform: translateX(5px);
+    }
 
-        .info-box {
-            background: #e8f5e9;
-            border-left: 4px solid var(--c-primary);
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
-        }
+    .archiv-link.active {
+      background: #2D5016;
+      color: white;
+      border-left-color: #1a300d;
+      font-weight: 600;
+    }
 
-        .info-box strong {
-            color: var(--c-primary);
-        }
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2em;
+      }
 
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: var(--c-grey);
-            margin-top: 40px;
-        }
+      .aktualita-card {
+        padding: 25px;
+      }
 
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 1.8em;
-            }
+      .aktualita-obsah h1 {
+        font-size: 1.8em;
+      }
 
-            .content-card {
-                padding: 20px;
-            }
+      .lang-btn {
+        display: block;
+        margin: 5px 0;
+      }
+    }
+  </style>
 
-            .lang-switcher {
-                flex-direction: column;
-            }
-        }
-    </style>
-
-    <!-- Analytics Tracker -->
-    <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
+  <!-- Analytics Tracker -->
+  <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>🛋️ Natuzzi Aktuality</h1>
-        <p>Denní novinky, tipy a zajímavosti o luxusním italském nábytku</p>
-    </header>
+<?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
-    <!-- Přepínač jazyků -->
-    <div class="lang-switcher">
-        <a href="?lang=cz" class="lang-btn <?php echo $jazyk === 'cz' ? 'active' : ''; ?>">
-            🇨🇿 Čeština
-        </a>
-        <a href="?lang=en" class="lang-btn <?php echo $jazyk === 'en' ? 'active' : ''; ?>">
-            🇬🇧 English
-        </a>
-        <a href="?lang=it" class="lang-btn <?php echo $jazyk === 'it' ? 'active' : ''; ?>">
-            🇮🇹 Italiano
-        </a>
+<!-- HERO SEKCE -->
+<main>
+<section class="hero">
+  <div class="hero-content">
+    <h1 class="hero-title"
+        data-lang-cs="Aktuality Natuzzi"
+        data-lang-en="Natuzzi News"
+        data-lang-it="Notizie Natuzzi">
+        <?php
+        echo $jazyk === 'en' ? 'Natuzzi News' : ($jazyk === 'it' ? 'Notizie Natuzzi' : 'Aktuality Natuzzi');
+        ?>
+    </h1>
+    <div class="hero-subtitle"
+         data-lang-cs="Denní novinky o luxusním italském nábytku"
+         data-lang-en="Daily news about luxury Italian furniture"
+         data-lang-it="Notizie quotidiane sui mobili italiani di lusso">
+        <?php
+        echo $jazyk === 'en' ? 'Daily news about luxury Italian furniture' :
+             ($jazyk === 'it' ? 'Notizie quotidiane sui mobili italiani di lusso' :
+              'Denní novinky o luxusním italském nábytku');
+        ?>
     </div>
+  </div>
+</section>
 
-    <?php if ($aktualita): ?>
-        <div class="content-card">
-            <div class="datum-badge">
-                📅 <?php echo date('d.m.Y', strtotime($aktualita['datum'])); ?>
-                <?php if ($aktualita['svatek_cz']): ?>
-                    | Svátek: <?php echo htmlspecialchars($aktualita['svatek_cz']); ?>
-                <?php endif; ?>
-            </div>
+<!-- PŘEPÍNAČ JAZYKŮ -->
+<div class="lang-switcher">
+  <a href="?lang=cz<?php echo isset($_GET['datum']) ? '&datum=' . $_GET['datum'] : ''; ?>"
+     class="lang-btn <?php echo $jazyk === 'cz' ? 'active' : ''; ?>">
+    🇨🇿 Čeština
+  </a>
+  <a href="?lang=en<?php echo isset($_GET['datum']) ? '&datum=' . $_GET['datum'] : ''; ?>"
+     class="lang-btn <?php echo $jazyk === 'en' ? 'active' : ''; ?>">
+    🇬🇧 English
+  </a>
+  <a href="?lang=it<?php echo isset($_GET['datum']) ? '&datum=' . $_GET['datum'] : ''; ?>"
+     class="lang-btn <?php echo $jazyk === 'it' ? 'active' : ''; ?>">
+    🇮🇹 Italiano
+  </a>
+</div>
 
-            <div class="obsah">
-                <?php
-                // Převést Markdown na HTML (jednoduchý parser)
-                $htmlObsah = parseMarkdown($obsah);
-                echo $htmlObsah;
-                ?>
-            </div>
+<!-- OBSAH AKTUALITY -->
+<section class="content-section">
+  <div class="container">
 
-            <?php if ($aktualita['vygenerovano_ai']): ?>
-                <div class="info-box">
-                    <strong>ℹ️ Informace:</strong> Tento obsah byl automaticky vygenerován z aktuálních zdrojů na internetu a přeložen do <?php echo $jazyk === 'cz' ? 'češtiny' : ($jazyk === 'en' ? 'angličtiny' : 'italštiny'); ?>.
-                </div>
-            <?php endif; ?>
+    <?php if ($aktualita && !empty($obsah)): ?>
+
+      <div class="datum-badge">
+        📅 <?php echo date('d.m.Y', strtotime($aktualita['datum'])); ?>
+        <?php if ($aktualita['svatek_cz']): ?>
+          | <?php
+          echo $jazyk === 'en' ? 'Name Day' : ($jazyk === 'it' ? 'Onomastico' : 'Svátek');
+          ?>: <?php echo htmlspecialchars($aktualita['svatek_cz']); ?>
+        <?php endif; ?>
+      </div>
+
+      <div class="aktualita-card">
+        <div class="aktualita-obsah">
+          <?php
+          // Převést Markdown na HTML
+          echo parseMarkdownToHTML($obsah);
+          ?>
         </div>
 
-        <?php if (!empty($archiv) && count($archiv) > 1): ?>
-            <div class="archiv-sidebar">
-                <h3>📚 Archiv aktualit</h3>
-                <?php foreach ($archiv as $polozka): ?>
-                    <a href="?datum=<?php echo $polozka['datum']; ?>&lang=<?php echo $jazyk; ?>"
-                       class="archiv-link <?php echo $polozka['datum'] === $aktualita['datum'] ? 'active' : ''; ?>">
-                        <?php echo date('d.m.Y', strtotime($polozka['datum'])); ?>
-                        <?php if ($polozka['svatek_cz']): ?>
-                            - <?php echo htmlspecialchars($polozka['svatek_cz']); ?>
-                        <?php endif; ?>
-                    </a>
-                <?php endforeach; ?>
-            </div>
+        <?php if ($aktualita['vygenerovano_ai']): ?>
+          <div class="info-box">
+            <strong>ℹ️ <?php
+            echo $jazyk === 'en' ? 'Information' : ($jazyk === 'it' ? 'Informazione' : 'Informace');
+            ?>:</strong>
+            <?php
+            echo $jazyk === 'en' ?
+              'This content was automatically generated from current sources on the internet.' :
+              ($jazyk === 'it' ?
+                'Questo contenuto è stato generato automaticamente da fonti attuali su Internet.' :
+                'Tento obsah byl automaticky vygenerován z aktuálních zdrojů na internetu.');
+            ?>
+          </div>
         <?php endif; ?>
+      </div>
+
+      <?php if (!empty($archiv) && count($archiv) > 1): ?>
+        <div class="archiv-section">
+          <h3>
+            <?php
+            echo $jazyk === 'en' ? '📚 News Archive' : ($jazyk === 'it' ? '📚 Archivio Notizie' : '📚 Archiv aktualit');
+            ?>
+          </h3>
+          <?php foreach (array_slice($archiv, 0, 10) as $polozka): ?>
+            <a href="?datum=<?php echo $polozka['datum']; ?>&lang=<?php echo $jazyk; ?>"
+               class="archiv-link <?php echo $polozka['datum'] === $aktualita['datum'] ? 'active' : ''; ?>">
+              <?php echo date('d.m.Y', strtotime($polozka['datum'])); ?>
+              <?php if ($polozka['svatek_cz']): ?>
+                - <?php echo htmlspecialchars($polozka['svatek_cz']); ?>
+              <?php endif; ?>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
 
     <?php else: ?>
-        <div class="content-card">
-            <h2>⚠️ Žádné aktuality</h2>
-            <p>Momentálně nejsou k dispozici žádné aktuality. Systém je možná třeba inicializovat.</p>
 
-            <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-                <p style="margin-top: 20px;">
-                    <a href="/api/generuj_aktuality.php" class="refresh-btn">
-                        🔄 Vygenerovat první aktualitu
-                    </a>
-                </p>
-            <?php endif; ?>
-        </div>
+      <div class="aktualita-card">
+        <h2>⚠️ <?php
+        echo $jazyk === 'en' ? 'No news available' : ($jazyk === 'it' ? 'Nessuna notizia disponibile' : 'Žádné aktuality');
+        ?></h2>
+        <p>
+          <?php
+          echo $jazyk === 'en' ?
+            'Currently, no news is available. The system will automatically generate the first news tomorrow at 6:00 AM.' :
+            ($jazyk === 'it' ?
+              'Attualmente non ci sono notizie disponibili. Il sistema genererà automaticamente le prime notizie domani alle 6:00.' :
+              'Momentálně nejsou k dispozici žádné aktuality. Systém automaticky vygeneruje první aktualitu zítra v 6:00 ráno.');
+          ?>
+        </p>
+      </div>
+
     <?php endif; ?>
 
-    <footer>
-        <p>&copy; <?php echo date('Y'); ?> WGS Service | Natuzzi Authorized Service Partner</p>
-        <p><a href="index.php" style="color: var(--c-primary);">← Zpět na hlavní stránku</a></p>
-    </footer>
-</div>
+  </div>
+</section>
+</main>
+
+<script src="assets/js/hamburger-menu.js" defer></script>
 
 </body>
 </html>
 
 <?php
 /**
- * Jednoduchý Markdown → HTML parser
+ * Převede Markdown na HTML
  */
-function parseMarkdown(string $text): string
+function parseMarkdownToHTML(string $text): string
 {
     // Nadpisy
     $text = preg_replace('/^### (.+)$/m', '<h3>$1</h3>', $text);
@@ -393,15 +443,47 @@ function parseMarkdown(string $text): string
     $text = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $text);
 
     // Odkazy
-    $text = preg_replace('/\[([^\]]+)\]\(([^)]+)\)/', '<a href="$2" target="_blank">$1</a>', $text);
+    $text = preg_replace('/\[([^\]]+)\]\(([^)]+)\)/', '<a href="$2" target="_blank" rel="noopener">$1</a>', $text);
 
-    // Odstavce
-    $text = preg_replace('/\n\n/', '</p><p>', $text);
-    $text = '<p>' . $text . '</p>';
+    // Odstavce (dvojitý enter = nový odstavec)
+    $lines = explode("\n", $text);
+    $html = '';
+    $inParagraph = false;
 
-    // Prázdné odstavce
-    $text = str_replace('<p></p>', '', $text);
+    foreach ($lines as $line) {
+        $line = trim($line);
 
-    return $text;
+        // Přeskočit prázdné řádky
+        if (empty($line)) {
+            if ($inParagraph) {
+                $html .= '</p>';
+                $inParagraph = false;
+            }
+            continue;
+        }
+
+        // Pokud je to nadpis, nepřidávat <p>
+        if (preg_match('/^<h[1-6]>/', $line)) {
+            if ($inParagraph) {
+                $html .= '</p>';
+                $inParagraph = false;
+            }
+            $html .= $line . "\n";
+        } else {
+            if (!$inParagraph) {
+                $html .= '<p>';
+                $inParagraph = true;
+            } else {
+                $html .= ' ';
+            }
+            $html .= $line;
+        }
+    }
+
+    if ($inParagraph) {
+        $html .= '</p>';
+    }
+
+    return $html;
 }
 ?>
