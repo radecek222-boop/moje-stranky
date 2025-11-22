@@ -189,11 +189,11 @@ function ziskatTipyNaPeciONabytek(): array
  */
 function vygenerujObsahCZ(string $datum, array $svatek, array $novinky, array $pece): string
 {
-    $jmeno = $svatek['jmeno'] ?? 'Den';
-    $komentar = $svatek['komentar'] ?? '';
+    $jmeno = sanitizeInput($svatek['jmeno'] ?? 'Den');
+    $komentar = sanitizeInput($svatek['komentar'] ?? '');
 
     $html = "# Denní aktuality Natuzzi\n\n";
-    $html .= "**Datum:** {$datum} | **Svátek má:** {$jmeno}\n\n";
+    $html .= "**Datum:** " . sanitizeInput($datum) . " | **Svátek má:** {$jmeno}\n\n";
     $html .= "{$komentar}\n\n";
 
     $html .= "## 📰 Novinky o značce Natuzzi\n\n";
@@ -201,9 +201,15 @@ function vygenerujObsahCZ(string $datum, array $svatek, array $novinky, array $p
     if (!empty($novinky['novinky'])) {
         foreach ($novinky['novinky'] as $index => $novinka) {
             $cislo = $index + 1;
-            $html .= "**{$cislo}. {$novinka['titulek']}**\n\n";
-            $html .= "{$novinka['popis']}\n\n";
-            $html .= "[Číst více]({$novinka['url']})\n\n";
+            $titulek = sanitizeInput($novinka['titulek'] ?? '');
+            $popis = sanitizeInput($novinka['popis'] ?? '');
+            $url = validateUrl($novinka['url'] ?? '');
+
+            $html .= "**{$cislo}. {$titulek}**\n\n";
+            $html .= "{$popis}\n\n";
+            if ($url) {
+                $html .= "[Číst více]({$url})\n\n";
+            }
         }
     }
 
@@ -211,8 +217,11 @@ function vygenerujObsahCZ(string $datum, array $svatek, array $novinky, array $p
 
     if (!empty($pece['tipy'])) {
         foreach ($pece['tipy'] as $tip) {
-            $html .= "**{$tip['nadpis']}**\n\n";
-            $html .= "{$tip['text']}\n\n";
+            $nadpis = sanitizeInput($tip['nadpis'] ?? '');
+            $text = sanitizeInput($tip['text'] ?? '');
+
+            $html .= "**{$nadpis}**\n\n";
+            $html .= "{$text}\n\n";
         }
     }
 
@@ -220,6 +229,41 @@ function vygenerujObsahCZ(string $datum, array $svatek, array $novinky, array $p
     $html .= "Navštivte naše showroomy v Praze a Brně. Více informací na [natuzzi.cz](https://www.natuzzi.cz/).\n\n";
 
     return $html;
+}
+
+/**
+ * Sanitizuje vstup proti XSS
+ */
+function sanitizeInput(?string $input): string
+{
+    if ($input === null) {
+        return '';
+    }
+    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+}
+
+/**
+ * Validuje a sanitizuje URL
+ */
+function validateUrl(?string $url): ?string
+{
+    if (empty($url)) {
+        return null;
+    }
+
+    // Validace URL
+    $url = filter_var($url, FILTER_VALIDATE_URL);
+    if ($url === false) {
+        return null;
+    }
+
+    // Povolit pouze HTTP/HTTPS
+    $scheme = parse_url($url, PHP_URL_SCHEME);
+    if (!in_array($scheme, ['http', 'https'], true)) {
+        return null;
+    }
+
+    return htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
 }
 
 /**
