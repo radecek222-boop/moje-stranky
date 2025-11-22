@@ -129,21 +129,56 @@ try {
         }
 
         // Generovat unikátní název souboru
-        $extension = pathinfo($fotka['name'], PATHINFO_EXTENSION);
         $indexSuffix = $jeNovyClanek ? 'novy' : $index;
-        $fileName = 'aktualita_' . $aktualitaId . '_clanek_' . $indexSuffix . '_' . time() . '.' . $extension;
-        $filePath = $uploadDir . $fileName;
+        $baseFileName = 'aktualita_' . $aktualitaId . '_clanek_' . $indexSuffix . '_' . time();
 
-        // Přesunout soubor
-        if (!move_uploaded_file($fotka['tmp_name'], $filePath)) {
-            sendJsonError('Chyba při nahrávání souboru');
+        // Konvertovat do WebP pro optimalizaci (úspora ~80% velikosti)
+        $webpFileName = $baseFileName . '.webp';
+        $webpFilePath = $uploadDir . $webpFileName;
+
+        // Načíst originální obrázek podle typu
+        $sourceImage = null;
+        switch ($mimeType) {
+            case 'image/jpeg':
+                $sourceImage = imagecreatefromjpeg($fotka['tmp_name']);
+                break;
+            case 'image/png':
+                $sourceImage = imagecreatefrompng($fotka['tmp_name']);
+                break;
+            case 'image/gif':
+                $sourceImage = imagecreatefromgif($fotka['tmp_name']);
+                break;
+            case 'image/webp':
+                $sourceImage = imagecreatefromwebp($fotka['tmp_name']);
+                break;
         }
 
-        // URL fotky pro použití v markdownu
-        $fotkaUrl = '/uploads/aktuality/' . $fileName;
+        if (!$sourceImage) {
+            sendJsonError('Nepodařilo se zpracovat obrázek');
+        }
+
+        // Konvertovat do WebP s kvalitou 85 (dobrý poměr kvalita/velikost)
+        if (!imagewebp($sourceImage, $webpFilePath, 85)) {
+            imagedestroy($sourceImage);
+            sendJsonError('Chyba při konverzi obrázku do WebP formátu');
+        }
+
+        // Uvolnit paměť
+        imagedestroy($sourceImage);
+
+        // URL fotky pro použití v markdownu (WebP verze)
+        $fotkaUrl = '/uploads/aktuality/' . $webpFileName;
 
         // Nahradit placeholder skutečnou URL v obsahu
         $novyObsahCely = str_replace('PLACEHOLDER_NEW_PHOTO', $fotkaUrl, $novyObsahCely);
+
+        // Audit log - zaznamenat konverzi
+        error_log(sprintf(
+            "WEBP CONVERSION: Original size: %d bytes (%s) → WebP: %s",
+            $fotka['size'],
+            $mimeType,
+            $webpFileName
+        ));
     }
 
     // Aktualizovat obsah v databázi
