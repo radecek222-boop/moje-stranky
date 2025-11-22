@@ -558,6 +558,11 @@ async function exportovatPDF() {
         const celkemCastka = zakazky.reduce((sum, z) => sum + parseFloat(z.castka_celkem), 0);
         const celkemVydelek = zakazky.reduce((sum, z) => sum + parseFloat(z.vydelek_technika), 0);
 
+        // Odhadnout počet stránek (přibližně 25 řádků na stránku)
+        const odhadPoctuStranek = Math.max(1, Math.ceil(zakazky.length / 25));
+        const pocetText = odhadPoctuStranek === 1 ? 'stránky' :
+                         (odhadPoctuStranek >= 2 && odhadPoctuStranek <= 4) ? 'stránek' : 'stránek';
+
         // Vytvořit HTML pro PDF (skrytý div)
         const pdfContainer = document.createElement('div');
         pdfContainer.style.cssText = 'position: absolute; left: -9999px; width: 1200px; height: 800px; background: white; padding: 30px; font-family: Poppins, Arial, sans-serif;';
@@ -597,6 +602,11 @@ async function exportovatPDF() {
                     `).join('')}
                 </tbody>
             </table>
+            <div style="position: absolute; bottom: 100px; left: 30px;">
+                <div style="font-size: 10px; color: #333;">
+                    Výpis se skládá z ${odhadPoctuStranek} ${pocetText}
+                </div>
+            </div>
             <div style="position: absolute; bottom: 100px; right: 30px; text-align: right;">
                 <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; margin-bottom: 8px; font-size: 18px; display: inline-block;">
                     Počet zakázek celkem: <span style="color: #333; font-weight: bold;">${zakazky.length} ks</span>
@@ -663,11 +673,6 @@ async function exportovatPDF() {
             doc.setFontSize(9);
             doc.setTextColor(100, 100, 100);
             doc.text('1/1', margin, 8);
-
-            // Přidat text o počtu stránek vlevo dole (na stejné úrovni jako součty)
-            doc.setFontSize(5);
-            doc.setTextColor(51, 51, 51);
-            doc.text('Výpis se skládá z 1 stránky', margin, pageHeight - 33);
         } else {
             // Rozdělení na více stránek
             let yPosition = 0;
@@ -700,15 +705,6 @@ async function exportovatPDF() {
                 doc.setFontSize(9);
                 doc.setTextColor(100, 100, 100);
                 doc.text(`${cisloStranky}/${celkovyPocetStranek}`, margin, 8);
-
-                // Na poslední stránce přidat text o počtu stránek vlevo dole (na stejné úrovni jako součty)
-                if (cisloStranky === celkovyPocetStranek) {
-                    doc.setFontSize(5);
-                    doc.setTextColor(51, 51, 51);
-                    const pocetText = celkovyPocetStranek === 1 ? 'stránky' :
-                                     (celkovyPocetStranek >= 2 && celkovyPocetStranek <= 4) ? 'stránek' : 'stránek';
-                    doc.text(`Výpis se skládá z ${celkovyPocetStranek} ${pocetText}`, margin, pageHeight - 33);
-                }
 
                 cisloStranky++;
                 yPosition += pageHeightInPx;
