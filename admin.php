@@ -180,6 +180,11 @@ if (!$embedMode && $activeTab === 'dashboard'):
                 <div class="cc-card-title" data-lang-cs="Statistiky" data-lang-en="Statistics" data-lang-it="Statistiche">Statistiky</div>
                 <div class="cc-card-description" data-lang-cs="Přehledy, grafy a analytické reporty" data-lang-en="Overviews, charts and analytical reports" data-lang-it="Panoramiche, grafici e report analitici">Přehledy, grafy a analytické reporty</div>
             </div>
+
+            <div class="cc-card" onclick="window.location='analytics.php'">
+                <div class="cc-card-title" data-lang-cs="Web Analytics" data-lang-en="Web Analytics" data-lang-it="Web Analytics">Web Analytics</div>
+                <div class="cc-card-description" data-lang-cs="Návštěvnost webu, zařízení, konverze" data-lang-en="Website traffic, devices, conversions" data-lang-it="Traffico sito web, dispositivi, conversioni">Návštěvnost webu, zařízení, konverze</div>
+            </div>
         </div>
     </div>
 
@@ -274,6 +279,11 @@ if (!$embedMode && $activeTab === 'dashboard'):
             <div class="cc-card" onclick="openSQLPage()">
                 <div class="cc-card-title" data-lang-cs="SQL Databáze" data-lang-en="SQL Database" data-lang-it="Database SQL">SQL Databáze</div>
                 <div class="cc-card-description" data-lang-cs="Zobrazit všechny SQL tabulky (aktuální živá data)" data-lang-en="View all SQL tables (current live data)" data-lang-it="Visualizza tutte le tabelle SQL (dati live attuali)">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
+            </div>
+
+            <div class="cc-card" onclick="window.location='kontrola_analytics_dat.php'">
+                <div class="cc-card-title" data-lang-cs="Analytics Data" data-lang-en="Analytics Data" data-lang-it="Dati Analytics">Analytics Data</div>
+                <div class="cc-card-description" data-lang-cs="Kontrola trackingu návštěvnosti a ignorovaných IP" data-lang-en="Check visitor tracking and ignored IPs" data-lang-it="Controlla il tracciamento dei visitatori e gli IP ignorati">Kontrola trackingu návštěvnosti a ignorovaných IP</div>
             </div>
         </div>
     </div>
