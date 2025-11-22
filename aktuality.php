@@ -523,19 +523,6 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     <?php if (!empty($articles)): ?>
 
       <div class="datum-bar">
-        <div class="datum-badge">
-          <?php
-          // Překlad "Datum:"
-          echo $jazyk === 'en' ? 'Date: ' : ($jazyk === 'it' ? 'Data: ' : 'Datum: ');
-          echo date('d.m.Y', strtotime($datumAktuality));
-          ?>
-          <?php if ($hlavniAktualita && $hlavniAktualita['svatek_cz']): ?>
-            | <?php
-            echo $jazyk === 'en' ? 'Name Day' : ($jazyk === 'it' ? 'Onomastico' : 'Svátek');
-            ?>: <?php echo htmlspecialchars($hlavniAktualita['svatek_cz']); ?>
-          <?php endif; ?>
-        </div>
-
         <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
           <button class="pridat-clanek-btn" onclick="pridatNovyClanek()">
             Přidat nový článek
