@@ -872,7 +872,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       <!-- FOTOGRAFIE -->
       <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
         <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">
-          Fotografie na konci článku:
+          Vyberte fotografii:
         </label>
         <input type="file" id="fotkaArticle" accept="image/*" style="
           width: 100%;
@@ -890,6 +890,29 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
           <p style="font-size: 13px; color: #666; margin-bottom: 5px;">Stávající fotka:</p>
           <img id="fotkaExistingImg" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 5px;">
           <p style="font-size: 12px; color: #999; margin-top: 5px;">Pokud vyberete novou fotku, nahradí tuto stávající.</p>
+        </div>
+
+        <!-- POZICE FOTKY -->
+        <div id="fotkaPoziceSection" style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #e0e0e0; display: none;">
+          <label style="display: block; font-size: 13px; color: #333; margin-bottom: 10px; font-weight: 600;">
+            Kde má být fotka umístěna?
+          </label>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="display: flex; align-items: center; cursor: pointer; padding: 8px; background: white; border-radius: 5px; border: 2px solid #ddd; transition: all 0.2s;">
+              <input type="radio" name="fotkaPozice" value="nahore" style="width: 18px; height: 18px; margin-right: 10px; cursor: pointer;">
+              <div>
+                <div style="font-weight: 600; color: #333;">Nahoře (pod nadpisem)</div>
+                <div style="font-size: 12px; color: #666;">Fotka se zobrazí hned pod nadpisem článku</div>
+              </div>
+            </label>
+            <label style="display: flex; align-items: center; cursor: pointer; padding: 8px; background: white; border-radius: 5px; border: 2px solid #ddd; transition: all 0.2s;">
+              <input type="radio" name="fotkaPozice" value="dole" checked style="width: 18px; height: 18px; margin-right: 10px; cursor: pointer;">
+              <div>
+                <div style="font-weight: 600; color: #333;">Dole (na konci)</div>
+                <div style="font-size: 12px; color: #666;">Fotka se zobrazí na konci článku (výchozí)</div>
+              </div>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -951,10 +974,17 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     document.getElementById('odkaz3Text').value = parsovanaData.odkazy[2]?.text || '';
     document.getElementById('odkaz3Url').value = parsovanaData.odkazy[2]?.url || '';
 
-    // Pokud má stávající fotku, zobrazit ji
+    // Pokud má stávající fotku, zobrazit ji a sekci s pozicí
     if (parsovanaData.fotka) {
       document.getElementById('fotkaExisting').style.display = 'block';
       document.getElementById('fotkaExistingImg').src = parsovanaData.fotka;
+      document.getElementById('fotkaPoziceSection').style.display = 'block';
+
+      // Nastavit správnou pozici fotky z parsovaných dat
+      const poziceRadio = document.querySelector(`input[name="fotkaPozice"][value="${parsovanaData.fotkaPozice}"]`);
+      if (poziceRadio) {
+        poziceRadio.checked = true;
+      }
     }
 
     // Náhled nové fotky při výběru
@@ -965,10 +995,16 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         reader.onload = function(event) {
           document.getElementById('fotkaPreview').style.display = 'block';
           document.getElementById('fotkaPreviewImg').src = event.target.result;
+          // Zobrazit sekci s pozicí fotky
+          document.getElementById('fotkaPoziceSection').style.display = 'block';
         };
         reader.readAsDataURL(file);
       } else {
         document.getElementById('fotkaPreview').style.display = 'none';
+        // Skrýt sekci s pozicí pokud není žádná fotka
+        if (!parsovanaData.fotka) {
+          document.getElementById('fotkaPoziceSection').style.display = 'none';
+        }
       }
     });
 
@@ -1011,6 +1047,10 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         fotkaUrl = 'PLACEHOLDER_NEW_PHOTO';
       }
 
+      // Získat vybranou pozici fotky (výchozí = dole)
+      const fotkaPoziceRadio = document.querySelector('input[name="fotkaPozice"]:checked');
+      const fotkaPozice = fotkaPoziceRadio ? fotkaPoziceRadio.value : 'dole';
+
       // Sestavit markdown z polí formuláře
       const novyObsah = parseFormularDoMarkdown({
         jeSiroky: document.getElementById('jeSiroky').checked,
@@ -1030,7 +1070,8 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
             url: document.getElementById('odkaz3Url').value.trim()
           }
         ],
-        fotka: fotkaUrl
+        fotka: fotkaUrl,
+        fotkaPozice: fotkaPozice
       });
 
       const confirmMessage = jeNovyClanek
@@ -1073,20 +1114,13 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       nadpis: '',
       text: '',
       odkazy: [],
-      fotka: null
+      fotka: null,
+      fotkaPozice: 'dole'  // Výchozí pozice
     };
 
     // Kontrola zda je široký článek
     const jeSiroky = /^## ŠIROKÝ:/im.test(markdown);
     result.jeSiroky = jeSiroky;
-
-    // Parsovat fotku (pokud existuje) - ![alt](url)
-    const fotkaMatch = markdown.match(/!\[([^\]]*)\]\(([^)]+)\)/);
-    if (fotkaMatch) {
-      result.fotka = fotkaMatch[2]; // URL fotky
-      // Odstranit fotku z markdownu pro další zpracování
-      markdown = markdown.replace(fotkaMatch[0], '').trim();
-    }
 
     // Získat nadpis (po ##, odstranit ŠIROKÝ: pokud existuje)
     const nadpisMatch = markdown.match(/^## (?:ŠIROKÝ:\s*)?(.+)$/m);
@@ -1094,8 +1128,30 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       result.nadpis = nadpisMatch[1].trim();
     }
 
-    // Odstranit nadpis z textu
+    // Odstranit nadpis z textu pro další zpracování
     let zbyvajiciText = markdown.replace(/^## (?:ŠIROKÝ:\s*)?(.+)$/m, '').trim();
+
+    // Parsovat fotku (pokud existuje) a detekovat její pozici - ![alt](url)
+    const fotkaMatch = zbyvajiciText.match(/!\[([^\]]*)\]\(([^)]+)\)/);
+    if (fotkaMatch) {
+      result.fotka = fotkaMatch[2]; // URL fotky
+
+      // Zjistit pozici fotky v textu
+      const fotkaIndex = zbyvajiciText.indexOf(fotkaMatch[0]);
+      const textPredFotkou = zbyvajiciText.substring(0, fotkaIndex).trim();
+      const textPoFotce = zbyvajiciText.substring(fotkaIndex + fotkaMatch[0].length).trim();
+
+      // Pokud je fotka na začátku (před hlavním textem), nastavit pozici "nahore"
+      // Pokud je fotka na konci (za textem), nastavit pozici "dole"
+      if (textPredFotkou.length < 50 && textPoFotce.length > textPredFotkou.length) {
+        result.fotkaPozice = 'nahore';
+      } else {
+        result.fotkaPozice = 'dole';
+      }
+
+      // Odstranit fotku z markdownu pro další zpracování
+      zbyvajiciText = zbyvajiciText.replace(fotkaMatch[0], '').trim();
+    }
 
     // Extrahovat odkazy (na konci textu)
     const odkazyPattern = /\[([^\]]+)\]\(([^)]+)\)/g;
@@ -1133,6 +1189,11 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       markdown = '## ' + data.nadpis + '\n\n';
     }
 
+    // Pokud má být fotka NAHOŘE (pod nadpisem)
+    if (data.fotka && data.fotkaPozice === 'nahore') {
+      markdown += `![Fotka článku](${data.fotka})\n\n`;
+    }
+
     // Text
     markdown += data.text + '\n\n';
 
@@ -1145,8 +1206,8 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       markdown += odkazyText + '\n\n';
     }
 
-    // Přidat fotku na konec, pokud existuje (buď stávající URL nebo placeholder pro novou)
-    if (data.fotka) {
+    // Pokud má být fotka DOLE (na konci článku)
+    if (data.fotka && data.fotkaPozice === 'dole') {
       markdown += `![Fotka článku](${data.fotka})`;
     }
 
