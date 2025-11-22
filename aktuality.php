@@ -276,19 +276,10 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       color: #666666;
     }
 
-    /* DVA SLOUPCE NORMÁLNÍCH ČLÁNKŮ */
+    /* ČLÁNKY POD SEBOU BEZ MEZER */
     .clanky-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
+      display: block;
       margin-bottom: 40px;
-      align-items: start;  /* Každý článek má vlastní výšku podle obsahu */
-    }
-
-    @media (max-width: 968px) {
-      .clanky-grid {
-        grid-template-columns: 1fr;
-      }
     }
 
     /* Každý normální článek je samostatný blok */
@@ -296,16 +287,28 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       background: white;
       padding: 25px;
       border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-radius: 0;
+      box-shadow: none;
       position: relative;
       transition: all 0.3s;
-      height: auto;  /* Výška podle obsahu */
+      height: auto;
+      margin: 0;
+      border-bottom: none;
+    }
+
+    .clanek-card:first-child {
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    .clanek-card:last-child {
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+      border-bottom: 1px solid #e0e0e0;
     }
 
     .clanek-card:hover {
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-      transform: translateY(-2px);
+      background: #fafafa;
     }
 
     .clanek-obsah {
