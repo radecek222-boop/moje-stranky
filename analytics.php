@@ -32,6 +32,9 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/analytics.min.css">
+
+  <!-- Analytics Tracker -->
+  <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
 </head>
 <body>
 <?php if (!$embedMode): ?>

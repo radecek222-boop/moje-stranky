@@ -216,6 +216,9 @@ if ($initialBootstrapData) {
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/protokol.css">
   <!-- mobile-responsive.css odstraněn - protokol.css má vlastní mobilní styly -->
+
+  <!-- Analytics Tracker -->
+  <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
 </head>
 
 <body>

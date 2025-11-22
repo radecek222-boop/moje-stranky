@@ -34,6 +34,9 @@
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/index.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.css">
+
+  <!-- Analytics Tracker -->
+  <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
 </head>
 
 <body>
