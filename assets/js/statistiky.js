@@ -547,21 +547,23 @@ async function exportovatPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
 
-        // Nadpis
-        doc.setFontSize(16);
-        doc.setTextColor(45, 80, 22);
-        doc.text('Statistiky a reporty - WGS', 14, 15);
-
-        // Období
+        // Připravit informace o filtru
         const rok = document.getElementById('filter-year').value || 'Všechny';
         const mesicValue = document.getElementById('filter-month').value;
         const mesicNazvy = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
                            'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
         const mesic = mesicValue ? mesicNazvy[parseInt(mesicValue)] : 'Všechny';
 
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`Rok: ${rok} | Měsíc: ${mesic} | Celkem: ${zakazky.length} zakázek`, 14, 22);
+        // Nadpis a info jako tabulka (pro správné UTF-8)
+        doc.autoTable({
+            startY: 10,
+            body: [
+                [{ content: 'Statistiky a reporty - WGS', styles: { fontSize: 16, fontStyle: 'bold', textColor: [45, 80, 22], halign: 'left' } }],
+                [{ content: `Rok: ${rok} | Měsíc: ${mesic} | Celkem: ${zakazky.length} zakázek`, styles: { fontSize: 10, textColor: [100, 100, 100], halign: 'left' } }]
+            ],
+            theme: 'plain',
+            margin: { left: 14 }
+        });
 
         // Připravit data pro tabulku
         const tabulkaData = zakazky.map(z => [
@@ -576,9 +578,9 @@ async function exportovatPDF() {
             z.datum || '-'
         ]);
 
-        // Vytvořit tabulku s AutoTable
+        // Vytvořit tabulku s AutoTable (startY upraveno kvůli nadpisu nahoře)
         doc.autoTable({
-            startY: 28,
+            startY: doc.lastAutoTable ? doc.lastAutoTable.finalY + 5 : 30,
             head: [['Reklamace ID', 'Adresa', 'Model', 'Technik', 'Prodejce', 'Částka', 'Výdělek (33%)', 'Země', 'Datum']],
             body: tabulkaData,
             theme: 'grid',
@@ -606,20 +608,29 @@ async function exportovatPDF() {
                 7: { cellWidth: 12, halign: 'center' }, // Země
                 8: { cellWidth: 22, halign: 'center' }  // Datum
             },
-            margin: { left: 14, right: 14 },
-            didDrawPage: function(data) {
-                // Patička na každé stránce
-                const pageCount = doc.internal.getNumberOfPages();
-                const pageNum = doc.internal.getCurrentPageInfo().pageNumber;
-
-                doc.setFontSize(8);
-                doc.setTextColor(150, 150, 150);
-                doc.text(`Strana ${pageNum} z ${pageCount}`, doc.internal.pageSize.width / 2,
-                         doc.internal.pageSize.height - 10, { align: 'center' });
-                doc.text(`Vygenerováno: ${new Date().toLocaleDateString('cs-CZ')}`, 14,
-                         doc.internal.pageSize.height - 10);
-            }
+            margin: { left: 14, right: 14, bottom: 15 }
         });
+
+        // Přidat patičku na všechny stránky
+        const pageCount = doc.internal.getNumberOfPages();
+        const datum = new Date().toLocaleDateString('cs-CZ');
+
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+
+            // Patička jako tabulka (pro správné UTF-8)
+            doc.autoTable({
+                startY: doc.internal.pageSize.height - 12,
+                body: [
+                    [
+                        { content: `Vygenerováno: ${datum}`, styles: { fontSize: 8, textColor: [150, 150, 150], halign: 'left' } },
+                        { content: `Strana ${i} z ${pageCount}`, styles: { fontSize: 8, textColor: [150, 150, 150], halign: 'right' } }
+                    ]
+                ],
+                theme: 'plain',
+                margin: { left: 14, right: 14 }
+            });
+        }
 
         // Stáhnout PDF
         const nazevSouboru = `statistiky_${rok}_${mesicValue || 'vsechny'}_${new Date().toISOString().split('T')[0]}.pdf`;
