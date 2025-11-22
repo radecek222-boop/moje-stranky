@@ -202,3 +202,38 @@
     cursor: pointer;
   }
 }
+
+/* ========================================================================
+   ✅ PRIORITY BADGE FIX - Conflict resolution with admin.css [class*="-badge"]
+   Must use !important to override generic badge selector
+   ======================================================================== */
+.priority-badge {
+  color: white;
+  padding: 4px 10px !important;
+  border-radius: 12px !important;
+  font-weight: 600;
+  font-size: 14px !important;
+}
+
+.priority-badge[data-priority="kritické"] {
+  background: #DC3545;
+}
+
+.priority-badge[data-priority="vysoká"] {
+  background: #FF6B6B;
+}
+
+.priority-badge[data-priority="střední"] {
+  background: #FFC107;
+}
+
+.priority-badge[data-priority="nízká"] {
+  background: #28A745;
+}
+
+@media (max-width: 768px) {
+  .priority-badge {
+    font-size: 16px !important;
+    padding: 6px 12px !important;
+  }
+}
