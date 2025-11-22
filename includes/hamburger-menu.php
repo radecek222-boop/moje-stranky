@@ -295,12 +295,26 @@ function toggleMenu() {
       hamburger.classList.toggle('active');
       hamburger.setAttribute('aria-expanded', !isActive);
       if (!isActive) {
+        // ✅ Otevírání - zamknout scroll (iOS fix)
+        window.mainMenuScrollPosition = window.pageYOffset;
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${window.mainMenuScrollPosition}px`;
+        document.body.style.width = '100%';
+        document.body.style.left = '0';
+        document.body.style.right = '0';
         document.body.classList.add('hamburger-menu-open');
       } else {
+        // ✅ Zavírání - obnovit scroll
         document.body.classList.remove('hamburger-menu-open');
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        window.scrollTo(0, window.mainMenuScrollPosition);
       }
     }
-    
+
         /**
      * CloseMenu
      */
@@ -310,6 +324,16 @@ function closeMenu() {
       hamburger.classList.remove('active');
       hamburger.setAttribute('aria-expanded', 'false');
       document.body.classList.remove('hamburger-menu-open');
+
+      // ✅ Obnovit scroll (iOS fix)
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      if (typeof window.mainMenuScrollPosition !== 'undefined') {
+        window.scrollTo(0, window.mainMenuScrollPosition);
+      }
     }
     
     hamburger.addEventListener('click', (e) => {
