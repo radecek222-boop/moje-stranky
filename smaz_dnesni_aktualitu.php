@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/includes/csrf_helper.php';
 
 // Bezpečnostní kontrola - pouze admin
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
@@ -35,6 +36,7 @@ echo "<!DOCTYPE html>
         .btn:hover { background: #c82333; }
         .btn-secondary { background: #6c757d; }
         .btn-secondary:hover { background: #5a6268; }
+        form { display: inline; }
     </style>
 </head>
 <body>
@@ -68,20 +70,32 @@ try {
     echo "Vytvořeno: {$zaznam['created_at']}<br>";
     echo "</div>";
 
-    // Pokud je potvrzeno, smazat
-    if (isset($_GET['confirm']) && $_GET['confirm'] === '1') {
-        $stmtDelete = $pdo->prepare("DELETE FROM wgs_natuzzi_aktuality WHERE datum = :datum");
-        $stmtDelete->execute(['datum' => $dnes]);
+    // Pokud je potvrzeno přes POST, smazat
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm'])) {
+        // CSRF validace
+        if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+            echo "<div class='error'>";
+            echo "<strong>CHYBA:</strong> Neplatný CSRF token. Obnovte stránku a zkuste to znovu.";
+            echo "</div>";
+        } else {
+            $stmtDelete = $pdo->prepare("DELETE FROM wgs_natuzzi_aktuality WHERE datum = :datum");
+            $stmtDelete->execute(['datum' => $dnes]);
 
-        echo "<div class='success'>";
-        echo "<strong>✅ ZÁZNAM SMAZÁN</strong><br>";
-        echo "Dnešní aktualita byla úspěšně smazána z databáze.<br><br>";
-        echo "Nyní můžete vygenerovat novou aktualitu BEZ EMOJI:<br>";
-        echo "<a href='api/generuj_aktuality_debug.php' class='btn btn-secondary'>Vygenerovat novou aktualitu</a>";
-        echo "</div>";
+            echo "<div class='success'>";
+            echo "<strong>✅ ZÁZNAM SMAZÁN</strong><br>";
+            echo "Dnešní aktualita byla úspěšně smazána z databáze.<br><br>";
+            echo "Nyní můžete vygenerovat novou aktualitu BEZ EMOJI:<br>";
+            echo "<a href='api/generuj_aktuality_debug.php' class='btn btn-secondary'>Vygenerovat novou aktualitu</a>";
+            echo "</div>";
+        }
     } else {
+        // Formulář s CSRF tokenem
         echo "<p><strong>Opravdu chcete smazat tento záznam?</strong></p>";
-        echo "<a href='?confirm=1' class='btn'>ANO, SMAZAT</a>";
+        echo "<form method='POST'>";
+        echo "<input type='hidden' name='csrf_token' value='" . htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8') . "'>";
+        echo "<input type='hidden' name='confirm' value='1'>";
+        echo "<button type='submit' class='btn'>ANO, SMAZAT</button>";
+        echo "</form>";
         echo "<a href='admin.php' class='btn btn-secondary'>Zrušit</a>";
     }
 
