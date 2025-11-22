@@ -538,6 +538,44 @@ async function generateProtocolPDF() {
   // Přidat clone do DOM (mimo viewport, neviditelný)
   document.body.appendChild(clone);
 
+  // ✅ FIX: Odstranit interaktivní prvky z PDF (tlačítka, akce)
+  // Odstranit celý kontejner signature-actions (tlačítko + label)
+  const signatureActions = clone.querySelector('.signature-actions');
+  if (signatureActions) {
+    signatureActions.remove();
+    logger.log('✅ Signature actions (tlačítko "Vymazat podpis" + label) odstraněny z PDF');
+  }
+
+  // Odstranit dolní tlačítka (Export, Odeslat, Zpět)
+  const btnsContainer = clone.querySelector('.btns');
+  if (btnsContainer) {
+    btnsContainer.remove();
+    logger.log('✅ Dolní tlačítka odstraněna z PDF');
+  }
+
+  // Odstranit photoPreviewContainer pokud existuje
+  const photoPreview = clone.querySelector('#photoPreviewContainer');
+  if (photoPreview) {
+    photoPreview.remove();
+    logger.log('✅ Photo preview odstraněn z PDF (fotky jsou v samostatné sekci)');
+  }
+
+  // Odstranit šipku u rozbalovací hlavičky (není interaktivní v PDF)
+  const customerInfoArrow = clone.querySelector('.customer-info-arrow');
+  if (customerInfoArrow) {
+    customerInfoArrow.remove();
+    logger.log('✅ Šipka u zákaznické hlavičky odstraněna z PDF');
+  }
+
+  // Ujistit se, že customer-info-content je viditelný (není skrytý)
+  const customerInfoContent = clone.querySelector('.customer-info-content');
+  if (customerInfoContent) {
+    customerInfoContent.style.display = 'block';
+    customerInfoContent.style.maxHeight = 'none';
+    customerInfoContent.style.overflow = 'visible';
+    logger.log('✅ Zákaznický obsah nastaven jako viditelný v PDF');
+  }
+
   // Zkopírovat signature pad canvas obsah do clone
   const originalCanvas = wrapper.querySelector('#signature-pad');
   const cloneCanvas = clone.querySelector('#signature-pad');

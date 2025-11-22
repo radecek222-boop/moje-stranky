@@ -37,15 +37,62 @@ function otevritPdfPreview(pdfBlob, nazevSouboru = 'protokol.pdf') {
 
     logger.log('📄 Nastavuji iframe.src...');
 
-    // Přidat loading text do iframe před načtením PDF
-    iframe.srcdoc = '<html><body style="margin:0;padding:0;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;background:#f0f0f0;"><div style="text-align:center;"><h2 style="color:#333;">Načítám PDF...</h2><p style="color:#666;">Chvíli strpení</p></div></body></html>';
+    // ✅ FIX: Vyčistit iframe PŘED nastavením nového src
+    // srcdoc má prioritu nad src, proto musíme nejprve kompletně vyčistit iframe
+    iframe.removeAttribute('srcdoc');
+    iframe.src = '';  // Vyčistit starý src
 
-    // Nastavit iframe src (MUSÍ odstranit srcdoc atribut, jinak má srcdoc prioritu!)
+    // ✅ FIX: Zobrazit loading během načítání PDF
+    const pdfBody = iframe.closest('.pdf-preview-body');
+    if (pdfBody) {
+      pdfBody.style.position = 'relative';
+      pdfBody.innerHTML = `
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+                    display: flex; align-items: center; justify-content: center;
+                    background: #f5f5f5; z-index: 1;">
+          <div style="text-align: center;">
+            <div style="width: 50px; height: 50px; border: 4px solid #ddd;
+                        border-top: 4px solid #2D5016; border-radius: 50%;
+                        animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
+            <p style="color: #666; font-size: 14px; margin: 0;">Načítám PDF...</p>
+          </div>
+        </div>
+        <iframe id="pdfPreviewFrame" class="pdf-preview-frame"></iframe>
+      `;
+
+      // Přidat CSS animaci pro spinner
+      if (!document.getElementById('pdf-spinner-style')) {
+        const style = document.createElement('style');
+        style.id = 'pdf-spinner-style';
+        style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+        document.head.appendChild(style);
+      }
+    }
+
+    // Znovu získat iframe (protože jsme změnili innerHTML)
+    const newIframe = document.getElementById('pdfPreviewFrame');
+
+    // Nastavit nový src
+    newIframe.src = pdfUrl;
+    logger.log('📄 iframe.src nastavena:', newIframe.src);
+
+    // ✅ FIX: Skrýt loading po načtení PDF
+    newIframe.onload = () => {
+      logger.log('✅ PDF úspěšně načten v iframe');
+      const loadingDiv = pdfBody?.querySelector('div[style*="position: absolute"]');
+      if (loadingDiv) {
+        loadingDiv.remove();
+      }
+    };
+
+    // Fallback: skrýt loading po 3 sekundách i když onload nevypálí
     setTimeout(() => {
-      iframe.removeAttribute('srcdoc');  // ❗ ODSTRANIT srcdoc atribut - má prioritu nad src!
-      iframe.src = pdfUrl;
-      logger.log('📄 iframe.src nastavena:', iframe.src);
-    }, 100);
+      const loadingDiv = pdfBody?.querySelector('div[style*="position: absolute"]');
+      if (loadingDiv) {
+        logger.warn('⚠️ Loading skrytý po timeoutu (3s)');
+        loadingDiv.remove();
+      }
+    }, 3000);
 
     // Podmíněně zobrazit tlačítka podle kontextu
     const shareBtn = document.getElementById('pdfShareBtn');
@@ -110,11 +157,25 @@ function zavritPdfPreview() {
   const overlay = document.getElementById('pdfPreviewOverlay');
   overlay.classList.remove('active');
 
-  // Vyčistit iframe
+  // ✅ FIX: Vyčistit iframe a PDF URL
   const iframe = document.getElementById('pdfPreviewFrame');
-  if (iframe.src) {
-    URL.revokeObjectURL(iframe.src);
-    iframe.src = '';
+  if (iframe) {
+    if (iframe.src) {
+      URL.revokeObjectURL(iframe.src);
+      iframe.src = '';
+    }
+
+    // Odstranit onload handler
+    iframe.onload = null;
+  }
+
+  // Vyčistit loading div pokud existuje
+  const pdfBody = document.querySelector('.pdf-preview-body');
+  if (pdfBody) {
+    const loadingDiv = pdfBody.querySelector('div[style*="position: absolute"]');
+    if (loadingDiv) {
+      loadingDiv.remove();
+    }
   }
 
   // Vyčistit reference
