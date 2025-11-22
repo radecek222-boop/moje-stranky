@@ -247,10 +247,10 @@ function getCharty($pdo) {
     $stmtModely->execute($params);
     $modely = $stmtModely->fetchAll(PDO::FETCH_ASSOC);
 
-    // 2. Lokality - extrahujeme město z adresy
+    // 2. Lokality - extrahujeme město z adresy (druhá část po čárce)
     $stmtMesta = $pdo->prepare("
         SELECT
-            TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(r.adresa, ',', -1), '\n', 1)) as mesto,
+            TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(r.adresa, ',', 2), ',', -1)) as mesto,
             COUNT(*) as pocet
         FROM wgs_reklamace r
         $where
