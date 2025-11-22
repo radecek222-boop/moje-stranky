@@ -90,22 +90,25 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
     // Rozdělit podle ## nadpisů (každý článek začíná ##)
     $parts = preg_split('/(?=^## )/m', $obsah);
 
-    foreach ($parts as $index => $part) {
+    // Počítadlo indexu pouze pro články s ##
+    $articleIndex = 0;
+
+    foreach ($parts as $part) {
         $part = trim($part);
         if (empty($part)) continue;
 
-        // První část je hlavní nadpis + úvodní text - přeskočit
-        if ($index === 0 && !preg_match('/^## /', $part)) {
+        // První část je hlavní nadpis + úvodní text - přeskočit (nemá ##)
+        if (!preg_match('/^## /', $part)) {
             continue;
         }
 
-        // Pokud obsahuje "ŠIROKÝ:", je to široký článek
+        // Toto je článek s ## nadpisem - přidělit mu index a inkrementovat
         if (preg_match('/^## ŠIROKÝ:/i', $part)) {
             $sirokyArticle = [
                 'obsah' => $part,
                 'aktualita_id' => $aktualitaId,
                 'jazyk' => $jazyk,
-                'index' => $index
+                'index' => $articleIndex
             ];
         } else {
             // Normální článek
@@ -113,9 +116,11 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
                 'obsah' => $part,
                 'aktualita_id' => $aktualitaId,
                 'jazyk' => $jazyk,
-                'index' => $index
+                'index' => $articleIndex
             ];
         }
+
+        $articleIndex++;  // Inkrementovat pouze pro články s ##
     }
 
     return [$sirokyArticle, $normalniArticles];
