@@ -598,4 +598,20 @@ document.addEventListener('DOMContentLoaded', () => {
       window[action](value);
     }
   });
+
+  // ✅ FIX: Event delegation pro photo sections (odstranit inline onclick)
+  document.querySelectorAll('.photo-section').forEach(section => {
+    const captureType = section.getAttribute('data-capture-type');
+
+    if (captureType) {
+      section.addEventListener('click', (e) => {
+        // Neotevírat pokud klikáme na delete button
+        if (e.target.closest('.delete-thumb')) return;
+
+        if (typeof openMediaCapture === 'function') {
+          openMediaCapture(captureType);
+        }
+      });
+    }
+  });
 });

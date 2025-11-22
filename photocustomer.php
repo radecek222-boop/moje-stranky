@@ -163,10 +163,10 @@ if (!$isAdmin && !$isTechnik) {
   <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
-  <link rel="preload" href="assets/css/photocustomer.min.css" as="style">
+  <link rel="preload" href="assets/css/photocustomer.css" as="style">
 
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/photocustomer.min.css">
+  <link rel="stylesheet" href="assets/css/photocustomer.css">
   <link rel="stylesheet" href="assets/css/photocustomer-collapsible.css">
 </head>
 
@@ -207,27 +207,27 @@ if (!$isAdmin && !$isTechnik) {
   </div>
   
   <!-- SEKCE FOTOGRAFIÍ -->
-  <div class="photo-section" onclick="openMediaCapture('before')">
+  <div class="photo-section" data-capture-type="before">
     <div class="section-header">Before</div>
     <div id="preview-before" class="photo-preview"></div>
   </div>
-  
-  <div class="photo-section" onclick="openMediaCapture('id')">
+
+  <div class="photo-section" data-capture-type="id">
     <div class="section-header">ID</div>
     <div id="preview-id" class="photo-preview"></div>
   </div>
-  
-  <div class="photo-section" onclick="openMediaCapture('problem')">
+
+  <div class="photo-section" data-capture-type="problem">
     <div class="section-header">Detail Bug</div>
     <div id="preview-problem" class="photo-preview"></div>
   </div>
-  
-  <div class="photo-section" onclick="openMediaCapture('repair')">
+
+  <div class="photo-section" data-capture-type="repair">
     <div class="section-header">Repair</div>
     <div id="preview-repair" class="photo-preview"></div>
   </div>
-  
-  <div class="photo-section" onclick="openMediaCapture('after')">
+
+  <div class="photo-section" data-capture-type="after">
     <div class="section-header">After</div>
     <div id="preview-after" class="photo-preview"></div>
   </div>
