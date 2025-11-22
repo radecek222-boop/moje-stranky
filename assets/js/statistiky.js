@@ -520,7 +520,7 @@ function resetovitFiltry() {
 }
 
 /**
- * Exportovat do PDF - použití AutoTable pro správné UTF-8
+ * Exportovat do PDF - použití html2canvas pro správné UTF-8
  */
 async function exportovatPDF() {
     try {
@@ -543,91 +543,114 @@ async function exportovatPDF() {
             return;
         }
 
-        // Inicializovat jsPDF
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
-
         // Připravit informace o filtru
         const rok = document.getElementById('filter-year').value || 'Všechny';
         const mesicValue = document.getElementById('filter-month').value;
         const mesicNazvy = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
                            'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
         const mesic = mesicValue ? mesicNazvy[parseInt(mesicValue)] : 'Všechny';
-
-        // Nadpis a info jako tabulka (pro správné UTF-8)
-        doc.autoTable({
-            startY: 10,
-            body: [
-                [{ content: 'Statistiky a reporty - WGS', styles: { fontSize: 16, fontStyle: 'bold', textColor: [45, 80, 22], halign: 'left' } }],
-                [{ content: `Rok: ${rok} | Měsíc: ${mesic} | Celkem: ${zakazky.length} zakázek`, styles: { fontSize: 10, textColor: [100, 100, 100], halign: 'left' } }]
-            ],
-            theme: 'plain',
-            margin: { left: 14 }
-        });
-
-        // Připravit data pro tabulku
-        const tabulkaData = zakazky.map(z => [
-            z.reklamace_id || '-',
-            z.adresa || '-',
-            z.model || '-',
-            z.technik || '-',
-            z.prodejce || '-',
-            parseFloat(z.castka_celkem).toFixed(2) + ' €',
-            parseFloat(z.vydelek_technika).toFixed(2) + ' €',
-            z.zeme || '-',
-            z.datum || '-'
-        ]);
-
-        // Vytvořit tabulku s AutoTable (startY upraveno kvůli nadpisu nahoře)
         const datum = new Date().toLocaleDateString('cs-CZ');
 
-        doc.autoTable({
-            startY: doc.lastAutoTable ? doc.lastAutoTable.finalY + 5 : 30,
-            head: [['Reklamace ID', 'Adresa', 'Model', 'Technik', 'Prodejce', 'Částka', 'Výdělek (33%)', 'Země', 'Datum']],
-            body: tabulkaData,
-            theme: 'grid',
-            styles: {
-                font: 'helvetica',
-                fontSize: 8,
-                cellPadding: 2,
-                overflow: 'linebreak',
-                halign: 'left'
-            },
-            headStyles: {
-                fillColor: [45, 80, 22],
-                textColor: [255, 255, 255],
-                fontStyle: 'bold',
-                fontSize: 9
-            },
-            columnStyles: {
-                0: { cellWidth: 25 },  // Reklamace ID
-                1: { cellWidth: 60 },  // Adresa
-                2: { cellWidth: 25 },  // Model
-                3: { cellWidth: 30 },  // Technik
-                4: { cellWidth: 35 },  // Prodejce
-                5: { cellWidth: 22, halign: 'right' },  // Částka
-                6: { cellWidth: 22, halign: 'right' },  // Výdělek
-                7: { cellWidth: 12, halign: 'center' }, // Země
-                8: { cellWidth: 22, halign: 'center' }  // Datum
-            },
-            margin: { left: 14, right: 14, bottom: 15 },
-            didDrawPage: function(data) {
-                // Patička na každé stránce
-                const pageCount = doc.internal.getNumberOfPages();
-                const pageNum = doc.internal.getCurrentPageInfo().pageNumber;
+        // Vytvořit HTML pro PDF (skrytý div)
+        const pdfContainer = document.createElement('div');
+        pdfContainer.style.cssText = 'position: absolute; left: -9999px; width: 1200px; background: white; padding: 30px; font-family: Poppins, Arial, sans-serif;';
 
-                doc.setFontSize(8);
-                doc.setTextColor(150, 150, 150);
+        pdfContainer.innerHTML = `
+            <div style="margin-bottom: 20px;">
+                <h1 style="color: #2D5016; font-size: 24px; margin: 0 0 10px 0;">Statistiky a reporty - WGS</h1>
+                <p style="color: #666; font-size: 14px; margin: 0;">Rok: ${rok} | Měsíc: ${mesic} | Celkem: ${zakazky.length} zakázek</p>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                <thead>
+                    <tr style="background: #2D5016; color: white;">
+                        <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Reklamace ID</th>
+                        <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Adresa</th>
+                        <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Model</th>
+                        <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Technik</th>
+                        <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Prodejce</th>
+                        <th style="padding: 10px; text-align: right; border: 1px solid #ddd;">Částka</th>
+                        <th style="padding: 10px; text-align: right; border: 1px solid #ddd;">Výdělek (33%)</th>
+                        <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">Země</th>
+                        <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">Datum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${zakazky.map(z => `
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${z.reklamace_id || '-'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${z.adresa || '-'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${z.model || '-'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${z.technik || '-'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${z.prodejce || '-'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${parseFloat(z.castka_celkem).toFixed(2)} €</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${parseFloat(z.vydelek_technika).toFixed(2)} €</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${z.zeme || '-'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${z.datum || '-'}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <div style="margin-top: 20px; font-size: 10px; color: #999;">
+                Vygenerováno: ${datum}
+            </div>
+        `;
 
-                // Levá strana - datum
-                doc.text(`Vygenerováno: ${datum}`, 14, doc.internal.pageSize.height - 10);
+        document.body.appendChild(pdfContainer);
 
-                // Pravá strana - číslo stránky
-                doc.text(`Strana ${pageNum} z ${pageCount}`,
-                         doc.internal.pageSize.width - 14, doc.internal.pageSize.height - 10,
-                         { align: 'right' });
-            }
+        // Renderovat pomocí html2canvas
+        console.log('📸 Renderuji HTML pomocí html2canvas...');
+        const canvas = await html2canvas(pdfContainer, {
+            scale: 2,
+            backgroundColor: '#fff',
+            useCORS: true,
+            logging: false
         });
+
+        // Odstranit z DOMu
+        document.body.removeChild(pdfContainer);
+
+        // Vytvořit PDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4');
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const pageWidth = doc.internal.pageSize.width;
+        const pageHeight = doc.internal.pageSize.height;
+        const margin = 10;
+
+        const availableWidth = pageWidth - (margin * 2);
+        const canvasRatio = canvas.height / canvas.width;
+
+        let imgWidth = availableWidth;
+        let imgHeight = imgWidth * canvasRatio;
+
+        // Pokud je obrázek větší než stránka, rozdělit na více stránek
+        let yOffset = margin;
+        let remainingHeight = imgHeight;
+
+        while (remainingHeight > 0) {
+            const availablePageHeight = pageHeight - (margin * 2);
+            const sliceHeight = Math.min(remainingHeight, availablePageHeight);
+
+            if (yOffset > margin) {
+                doc.addPage();
+                yOffset = margin;
+            }
+
+            const sourceY = (imgHeight - remainingHeight) / canvasRatio * canvas.width / imgWidth;
+            const sourceHeight = sliceHeight / canvasRatio * canvas.width / imgWidth;
+
+            // Vytvořit slice canvas
+            const sliceCanvas = document.createElement('canvas');
+            sliceCanvas.width = canvas.width;
+            sliceCanvas.height = sourceHeight;
+            const ctx = sliceCanvas.getContext('2d');
+            ctx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
+
+            doc.addImage(sliceCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', margin, yOffset, imgWidth, sliceHeight);
+
+            remainingHeight -= sliceHeight;
+        }
 
         // Stáhnout PDF
         const nazevSouboru = `statistiky_${rok}_${mesicValue || 'vsechny'}_${new Date().toISOString().split('T')[0]}.pdf`;

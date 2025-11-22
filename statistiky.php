@@ -644,9 +644,10 @@ body {
 <!-- jsPDF pro PDF export -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script src="assets/js/logger.js" defer></script>
-<script src="assets/js/statistiky.js?v=2.1" defer></script>
+<script src="assets/js/statistiky.js?v=2.2" defer></script>
 
 </body>
 </html>
