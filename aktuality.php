@@ -153,15 +153,18 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
   <!-- Preload critical resources -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
+  <link rel="preload" href="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1920&h=500&fit=crop" as="image" fetchpriority="high">
 
   <!-- Google Fonts - Natuzzi style -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet"></noscript>
 
   <!-- External CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/mobile-responsive.css">
+  <link rel="preload" href="assets/css/mobile-responsive.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="assets/css/mobile-responsive.min.css"></noscript>
 
   <style>
     /* Aktuality specifické styly */
@@ -276,19 +279,10 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       color: #666666;
     }
 
-    /* DVA SLOUPCE NORMÁLNÍCH ČLÁNKŮ */
+    /* ČLÁNKY POD SEBOU BEZ MEZER */
     .clanky-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
+      display: block;
       margin-bottom: 40px;
-      align-items: start;  /* Každý článek má vlastní výšku podle obsahu */
-    }
-
-    @media (max-width: 968px) {
-      .clanky-grid {
-        grid-template-columns: 1fr;
-      }
     }
 
     /* Každý normální článek je samostatný blok */
@@ -296,16 +290,28 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       background: white;
       padding: 25px;
       border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-radius: 0;
+      box-shadow: none;
       position: relative;
       transition: all 0.3s;
-      height: auto;  /* Výška podle obsahu */
+      height: auto;
+      margin: 0;
+      border-bottom: none;
+    }
+
+    .clanek-card:first-child {
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    .clanek-card:last-child {
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+      border-bottom: 1px solid #e0e0e0;
     }
 
     .clanek-card:hover {
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-      transform: translateY(-2px);
+      background: #fafafa;
     }
 
     .clanek-obsah {
@@ -356,12 +362,14 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     }
 
     .clanek-obsah img {
-      max-width: 100%;
+      width: 100%;
       height: auto;
       display: block;
       margin: 15px 0;
       border: 1px solid #ddd;
       border-radius: 5px;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
     }
 
     /* Admin tlačítko pro každý článek */
@@ -1113,8 +1121,8 @@ function parseMarkdownToHTML(string $text): string
     // Odstranit "ŠIROKÝ:" z nadpisu
     $text = preg_replace('/^## ŠIROKÝ:\s*/m', '## ', $text);
 
-    // Obrázky (před odkazy!)
-    $text = preg_replace('/!\[([^\]]*)\]\(([^)]+)\)/', '<img src="$2" alt="$1" loading="lazy">', $text);
+    // Obrázky (před odkazy!) - přidat width/height pro CLS
+    $text = preg_replace('/!\[([^\]]*)\]\(([^)]+)\)/', '<img src="$2" alt="$1" width="800" height="600" loading="lazy">', $text);
 
     // Nadpisy
     $text = preg_replace('/^### (.+)$/m', '<h3>$1</h3>', $text);
