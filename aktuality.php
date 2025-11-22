@@ -159,6 +159,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1920&h=500&fit=crop');
       background-size: cover;
       background-position: center;
+      background-attachment: fixed;
       color: white;
       padding: 100px 20px;
       text-align: center;
