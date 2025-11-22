@@ -129,7 +129,10 @@ function getBasicStats(PDO $pdo, string $period): array
     ");
     $stmtConversion->execute(['date_from' => $dateFrom]);
     $totalClaims = (int)$stmtConversion->fetch(PDO::FETCH_ASSOC)['total_claims'];
-    $conversionRate = $uniqueVisitors > 0 ? round(($totalClaims / $uniqueVisitors) * 100, 1) : 0;
+
+    // Konverzní poměr (claims/visitors), max 100%
+    $rawConversionRate = $uniqueVisitors > 0 ? ($totalClaims / $uniqueVisitors) * 100 : 0;
+    $conversionRate = min(100, round($rawConversionRate, 1));
 
     return [
         'totalVisits' => $totalVisits,

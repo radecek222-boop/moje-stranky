@@ -112,6 +112,6 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 </main>
 
 <script src="assets/js/logger.js" defer></script>
-<script src="assets/js/analytics.min.js" defer></script>
+<script src="assets/js/analytics.js" defer></script>
 </body>
 </html>
