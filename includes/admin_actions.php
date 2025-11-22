@@ -209,7 +209,6 @@ function getPriorityBadge($priority) {
                     <div class="setting-item" style="align-items: flex-start;">
                         <div class="setting-item-left">
                             <div class="setting-item-label">
-                                <span style="font-size: 1.2rem; margin-right: 0.5rem;"><?= $badge['icon'] ?></span>
                                 <?= htmlspecialchars($action['action_title']) ?>
                             </div>
                             <div class="setting-item-description">
