@@ -1163,30 +1163,17 @@ async function sendToCustomer() {
       logger.log(`✅ Fotodokumentace přidána (${attachedPhotos.length} fotek)`);
     }
 
-    // Konverze na base64 a uložení pro pozdější odeslání
+    // Konverze na base64 a uložení pro odeslání
     const completePdfBase64 = doc.output("datauristring").split(",")[1];
 
-    // Uložit pro pozdější odeslání
+    // Uložit pro odeslání
     cachedPdfDoc = doc;
     cachedPdfBase64 = completePdfBase64;
     pdfPreviewContext = 'send';
 
-    // Zobrazit náhled PDF PŘED odesláním
-    showLoadingWithMessage(false); // Skrýt loading
-
-    const pdfBlob = doc.output("blob");
-    const cisloReklamace = document.getElementById('claim-number')?.value || 'protokol';
-    const nazevSouboru = `WGS_Protokol_${cisloReklamace.replace(/\s+/g, '_')}.pdf`;
-
-    logger.log('📄 Zobrazuji náhled PDF před odesláním...');
-
-    // Použít funkci pro zobrazení PDF preview
-    if (typeof otevritPdfPreview === 'function') {
-      otevritPdfPreview(pdfBlob, nazevSouboru);
-    } else {
-      // Fallback - rovnou odeslat pokud preview není dostupný
-      await potvrditAOdeslat();
-    }
+    // ✅ PERFORMANCE: Rovnou odeslat bez preview modalu
+    logger.log('📧 Odesílám email přímo bez náhledu...');
+    await potvrditAOdeslat();
 
   } catch (error) {
     logger.error('❌ Chyba při generování PDF:', error);
@@ -1197,7 +1184,7 @@ async function sendToCustomer() {
 
 /**
  * Potvrzení a odeslání emailu se zákazníkovi
- * Volá se z preview modalu po kliknutí na "Odeslat zákazníkovi"
+ * ✅ Volá se ROVNOU z sendToCustomer() bez preview modalu
  */
 async function potvrditAOdeslat() {
   if (!cachedPdfBase64) {
@@ -1206,12 +1193,7 @@ async function potvrditAOdeslat() {
   }
 
   try {
-    // Zavřít preview modal
-    if (typeof zavritPdfPreview === 'function') {
-      zavritPdfPreview();
-    }
-
-    // FÁZE 2: Odesílání emailu
+    // ✅ PERFORMANCE: Preview modal vypnut, rovnou odesílání emailu
     showLoadingWithMessage(true, '📧 Odesílám email zákazníkovi...');
     logger.log('📧 Odesílám PDF zákazníkovi...');
 
