@@ -130,41 +130,89 @@ $obsahCZ .= "[Více informací](https://www.natuzzi.cz) | [Online katalog](https
 
 echo "   ✅ CZ obsah vygenerován (" . strlen($obsahCZ) . " znaků)\n";
 
-// Anglický obsah
-$obsahEN = str_replace('Denní aktuality Natuzzi', 'Natuzzi Daily News', $obsahCZ);
-$obsahEN = str_replace('Svátek má:', 'Name Day:', $obsahEN);
-$obsahEN = str_replace('Vítejte u dnešních aktualit', 'Welcome to today\'s news', $obsahEN);
-$obsahEN = str_replace('Novinky o značce Natuzzi', 'Natuzzi Brand News', $obsahEN);
-$obsahEN = str_replace('Nová kolekce Natuzzi 2025', 'New Natuzzi Collection 2025', $obsahEN);
-$obsahEN = str_replace('Natuzzi představuje novou kolekci', 'Natuzzi presents a new collection', $obsahEN);
-$obsahEN = str_replace('inspirovanou italskou přírodou a moderním designem', 'inspired by Italian nature and modern design', $obsahEN);
-$obsahEN = str_replace('Více informací', 'More information', $obsahEN);
-$obsahEN = str_replace('Péče o luxusní nábytek', 'Luxury Furniture Care', $obsahEN);
-$obsahEN = str_replace('Pravidelná údržba kožených sedaček', 'Regular Leather Sofa Maintenance', $obsahEN);
-$obsahEN = str_replace('Týdenní péče o kůži prodlužuje životnost vašeho nábytku', 'Weekly leather care extends the life of your furniture', $obsahEN);
-$obsahEN = str_replace('Používejte měkký hadřík a specializované přípravky', 'Use a soft cloth and specialized products', $obsahEN);
-$obsahEN = str_replace('Natuzzi v České republice', 'Natuzzi in Czech Republic', $obsahEN);
-$obsahEN = str_replace('Navštivte naše showroomy v Praze a Brně', 'Visit our showrooms in Prague and Brno', $obsahEN);
+// Anglický obsah - KOMPLETNÍ překlad
+$obsahEN = "# Natuzzi Daily News\n\n";
+$obsahEN .= "**Date:** " . date('m/d/Y') . " | **Name Day:** {$jmenoSvatku}\n\n";
+$obsahEN .= "Welcome to today's news about luxury Italian furniture Natuzzi. We bring you the latest trends, care tips and exclusive offers from our showrooms.\n\n";
 
-echo "   ✅ EN obsah přeložen (" . strlen($obsahEN) . " znaků)\n";
+$obsahEN .= "![Natuzzi Sofa](https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&h=400&fit=crop)\n\n";
 
-// Italský obsah
-$obsahIT = str_replace('Denní aktuality Natuzzi', 'Notizie Quotidiane Natuzzi', $obsahCZ);
-$obsahIT = str_replace('Svátek má:', 'Onomastico:', $obsahIT);
-$obsahIT = str_replace('Vítejte u dnešních aktualit', 'Benvenuti alle notizie di oggi', $obsahIT);
-$obsahIT = str_replace('Novinky o značce Natuzzi', 'Novità del Brand Natuzzi', $obsahIT);
-$obsahIT = str_replace('Nová kolekce Natuzzi 2025', 'Nuova Collezione Natuzzi 2025', $obsahIT);
-$obsahIT = str_replace('Natuzzi představuje novou kolekci', 'Natuzzi presenta una nuova collezione', $obsahIT);
-$obsahIT = str_replace('inspirovanou italskou přírodou a moderním designem', 'ispirata dalla natura italiana e dal design moderno', $obsahIT);
-$obsahIT = str_replace('Více informací', 'Maggiori informazioni', $obsahIT);
-$obsahIT = str_replace('Péče o luxusní nábytek', 'Cura dei Mobili di Lusso', $obsahIT);
-$obsahIT = str_replace('Pravidelná údržba kožených sedaček', 'Manutenzione Regolare dei Divani in Pelle', $obsahIT);
-$obsahIT = str_replace('Týdenní péče o kůži prodlužuje životnost vašeho nábytku', 'La cura settimanale della pelle prolunga la vita dei vostri mobili', $obsahIT);
-$obsahIT = str_replace('Používejte měkký hadřík a specializované přípravky', 'Utilizzate un panno morbido e prodotti specializzati', $obsahIT);
-$obsahIT = str_replace('Natuzzi v České republice', 'Natuzzi nella Repubblica Ceca', $obsahIT);
-$obsahIT = str_replace('Navštivte naše showroomy v Praze a Brně', 'Visitate i nostri showroom a Praga e Brno', $obsahIT);
+$obsahEN .= "## Natuzzi Brand News\n\n";
 
-echo "   ✅ IT obsah přeložen (" . strlen($obsahIT) . " znaků)\n\n";
+$obsahEN .= "**1. New Natuzzi Editions 2025 Collection - Italian Design in Czech Homes**\n\n";
+$obsahEN .= "Natuzzi presents the revolutionary Editions 2025 collection, which combines traditional Italian craftsmanship with modern materials. The collection includes Re-vive seating systems that offer perfect comfort thanks to an innovative reclining system. Each piece is handmade in Italy from premium materials.\n\n";
+$obsahEN .= "[View the full collection](https://www.natuzzi.com/cz/editions-2025) | [Order catalog](https://www.natuzzi.cz/katalog)\n\n";
+
+$obsahEN .= "**2. Sustainability in Focus**\n\n";
+$obsahEN .= "Natuzzi continues its commitment to sustainability. All leathers come from controlled sources and are processed using ecological methods. The new collection uses FSC-certified wood and recyclable materials. Natuzzi has received ISO 14001 certification for environmental management.\n\n";
+$obsahEN .= "[More about sustainability](https://www.natuzzi.com/sustainability)\n\n";
+
+$obsahEN .= "**3. Exclusive Promotion at Prague Showroom**\n\n";
+$obsahEN .= "From tomorrow we are launching a special promotion on selected models in our Prague showroom Pasáž Lucerna. Get up to 25% discount on models from previous collections and free consultation with our designers. The promotion lasts only this week.\n\n";
+$obsahEN .= "[Book an appointment](https://www.natuzzi.cz/rezervace) | [Showroom address](https://goo.gl/maps/natuzzi-praha)\n\n";
+
+$obsahEN .= "**4. New Trends in Home Design 2025**\n\n";
+$obsahEN .= "According to the latest Natuzzi Design Institute survey, the main trends for 2025 are: earthy tones, modular furniture and multifunctional spaces. Natuzzi brings solutions that perfectly match these trends.\n\n";
+$obsahEN .= "[2025 Trends Guide](https://www.natuzzi.com/trends-2025)\n\n";
+
+$obsahEN .= "## Luxury Furniture Care\n\n";
+
+$obsahEN .= "**Winter Care for Leather Sofas - Complete Guide**\n\n";
+$obsahEN .= "Winter places increased demands on leather furniture. Low air humidity caused by heating can lead to leather drying. We recommend regular treatment with special Natuzzi Leather Care balms every 2-3 months. Use a humidifier to maintain optimal humidity of 40-60%. Avoid direct contact with radiators.\n\n";
+$obsahEN .= "[Buy Natuzzi Leather Care](https://www.natuzzi.cz/pece) | [Care video tutorial](https://youtu.be/natuzzi-care)\n\n";
+
+$obsahEN .= "**Cleaning Textile Upholstery - Professional Tips**\n\n";
+$obsahEN .= "For textile upholstery, we recommend regular vacuuming with a soft attachment once a week. For stains, use only certified cleaning products suitable for the type of fabric. Natuzzi offers professional cleaning as part of White Glove Service care.\n\n";
+$obsahEN .= "[Order WGS cleaning](https://www.wgs-service.cz/novareklamace.php)\n\n";
+
+$obsahEN .= "## Natuzzi in Czech Republic\n\n";
+
+$obsahEN .= "Visit our authorized showrooms: **Prague** (Pasáž Lucerna - Štěpánská 61, River Garden Karlín - Prvního pluku 621), **Brno** (Veveří 38). Complete range of luxury Italian furniture with expert advice from certified designers. Open Mon-Fri 9am-6pm, Sat 10am-4pm.\n\n";
+$obsahEN .= "[More information](https://www.natuzzi.cz) | [Online catalog](https://www.natuzzi.cz/katalog) | [Contact](https://www.natuzzi.cz/kontakt)\n\n";
+
+echo "   ✅ EN obsah vygenerován (" . strlen($obsahEN) . " znaků)\n";
+
+// Italský obsah - KOMPLETNÍ překlad
+$obsahIT = "# Notizie Quotidiane Natuzzi\n\n";
+$obsahIT .= "**Data:** " . date('d.m.Y') . " | **Onomastico:** {$jmenoSvatku}\n\n";
+$obsahIT .= "Benvenuti alle notizie di oggi sui mobili italiani di lusso Natuzzi. Vi portiamo le ultime tendenze, consigli per la cura e offerte esclusive dai nostri showroom.\n\n";
+
+$obsahIT .= "![Natuzzi Sofa](https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&h=400&fit=crop)\n\n";
+
+$obsahIT .= "## Novità del Brand Natuzzi\n\n";
+
+$obsahIT .= "**1. Nuova Collezione Natuzzi Editions 2025 - Design Italiano nelle Case Ceche**\n\n";
+$obsahIT .= "Natuzzi presenta la rivoluzionaria collezione Editions 2025, che combina l'artigianato italiano tradizionale con materiali moderni. La collezione include sistemi di seduta Re-vive che offrono un comfort perfetto grazie a un innovativo sistema di reclinazione. Ogni pezzo è realizzato a mano in Italia con materiali premium.\n\n";
+$obsahIT .= "[Visualizza la collezione completa](https://www.natuzzi.com/cz/editions-2025) | [Ordina il catalogo](https://www.natuzzi.cz/katalog)\n\n";
+
+$obsahIT .= "**2. Sostenibilità al Centro dell'Attenzione**\n\n";
+$obsahIT .= "Natuzzi continua il suo impegno per la sostenibilità. Tutte le pelli provengono da fonti controllate e sono lavorate con metodi ecologici. La nuova collezione utilizza legno certificato FSC e materiali riciclabili. Natuzzi ha ottenuto la certificazione ISO 14001 per la gestione ambientale.\n\n";
+$obsahIT .= "[Maggiori informazioni sulla sostenibilità](https://www.natuzzi.com/sustainability)\n\n";
+
+$obsahIT .= "**3. Promozione Esclusiva nello Showroom di Praga**\n\n";
+$obsahIT .= "Da domani lanciamo una promozione speciale su modelli selezionati nel nostro showroom di Praga Pasáž Lucerna. Ottenete fino al 25% di sconto sui modelli delle collezioni precedenti e consulenza gratuita con i nostri designer. La promozione dura solo questa settimana.\n\n";
+$obsahIT .= "[Prenota un appuntamento](https://www.natuzzi.cz/rezervace) | [Indirizzo dello showroom](https://goo.gl/maps/natuzzi-praha)\n\n";
+
+$obsahIT .= "**4. Nuove Tendenze nel Design Domestico 2025**\n\n";
+$obsahIT .= "Secondo l'ultimo sondaggio del Natuzzi Design Institute, le principali tendenze per il 2025 sono: toni terrosi, mobili modulari e spazi multifunzionali. Natuzzi porta soluzioni che si adattano perfettamente a queste tendenze.\n\n";
+$obsahIT .= "[Guida alle Tendenze 2025](https://www.natuzzi.com/trends-2025)\n\n";
+
+$obsahIT .= "## Cura dei Mobili di Lusso\n\n";
+
+$obsahIT .= "**Cura Invernale dei Divani in Pelle - Guida Completa**\n\n";
+$obsahIT .= "L'inverno pone maggiori esigenze sui mobili in pelle. La bassa umidità dell'aria causata dal riscaldamento può portare all'essiccazione della pelle. Consigliamo un trattamento regolare con balsami speciali Natuzzi Leather Care ogni 2-3 mesi. Utilizzate un umidificatore per mantenere un'umidità ottimale del 40-60%. Evitate il contatto diretto con i radiatori.\n\n";
+$obsahIT .= "[Acquista Natuzzi Leather Care](https://www.natuzzi.cz/pece) | [Video tutorial sulla cura](https://youtu.be/natuzzi-care)\n\n";
+
+$obsahIT .= "**Pulizia dei Rivestimenti Tessili - Consigli Professionali**\n\n";
+$obsahIT .= "Per i rivestimenti tessili, consigliamo l'aspirazione regolare con un accessorio morbido una volta alla settimana. Per le macchie, utilizzate solo prodotti detergenti certificati adatti al tipo di tessuto. Natuzzi offre la pulizia professionale nell'ambito del servizio White Glove Service.\n\n";
+$obsahIT .= "[Ordina la pulizia WGS](https://www.wgs-service.cz/novareklamace.php)\n\n";
+
+$obsahIT .= "## Natuzzi nella Repubblica Ceca\n\n";
+
+$obsahIT .= "Visitate i nostri showroom autorizzati: **Praga** (Pasáž Lucerna - Štěpánská 61, River Garden Karlín - Prvního pluku 621), **Brno** (Veveří 38). Gamma completa di mobili italiani di lusso con consulenza esperta di designer certificati. Aperto Lun-Ven 9-18, Sab 10-16.\n\n";
+$obsahIT .= "[Maggiori informazioni](https://www.natuzzi.cz) | [Catalogo online](https://www.natuzzi.cz/katalog) | [Contatto](https://www.natuzzi.cz/kontakt)\n\n";
+
+echo "   ✅ IT obsah vygenerován (" . strlen($obsahIT) . " znaků)\n\n";
 
 echo "6. Ukládání do databáze...\n";
 try {
