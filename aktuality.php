@@ -57,8 +57,8 @@ try {
         // Parse článků z markdown obsahu
         $articles = parseClankyzObsahu($celyObsah, $hlavniAktualita['id'], $jazyk);
 
-        // Náhodně zamíchat pořadí VŠECH článků (pro Google)
-        shuffle($articles);
+        // Články se nemíchají při každém načtení - pořadí je dané obsahem z databáze
+        // Inteligentní rozdělení do sloupců podle délky se provede níže při zobrazování
     } else {
         $articles = [];
         $datumAktuality = null;
@@ -542,85 +542,69 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         <?php endif; ?>
       </div>
 
-      <!-- GRID SE 2 SLOUPCI VŠECH ČLÁNKŮ -->
+      <!-- GRID SE 2 SLOUPCI VŠECH ČLÁNKŮ S INTELIGENTNÍM VYVÁŽENÍM -->
       <div class="clanky-grid">
-        <?php foreach ($articles as $clanek): ?>
-          <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
+        <?php
+        // INTELIGENTNÍ ROZDĚLENÍ ČLÁNKŮ podle délky textu
+        // Spočítat délku každého článku
+        foreach ($articles as $key => $article) {
+            $articles[$key]['delka'] = strlen($article['obsah']);
+        }
 
-            <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-              <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>', <?php echo $clanek['index']; ?>)">
-                Upravit článek
-              </button>
-            <?php endif; ?>
+        // Seřadit podle délky (sestupně) pro lepší rozdělení
+        usort($articles, function($a, $b) {
+            return $b['delka'] - $a['delka'];
+        });
 
-      <!-- GRID SE 2 SLOUPCI NORMÁLNÍCH ČLÁNKŮ S ODSKOČENÝM PRAVÝM SLOUPCEM -->
-      <?php if (!empty($normalniArticles)): ?>
-        <div class="clanky-grid">
-          <!-- LEVÝ SLOUPEC -->
-          <div class="column-left">
-            <?php
-            // INTELIGENTNÍ ROZDĚLENÍ ČLÁNKŮ podle délky textu
-            // Spočítat délku každého článku
-            foreach ($normalniArticles as $key => $clanek) {
-                $normalniArticles[$key]['delka'] = strlen($clanek['obsah']);
+        // Rozdělit na 2 sloupce tak, aby celková délka byla vyrovnaná
+        $levySloupec = [];
+        $pravySloupec = [];
+        $levaSuma = 0;
+        $pravaSuma = 0;
+
+        foreach ($articles as $article) {
+            // Přidat do sloupce s menší celkovou délkou
+            if ($levaSuma <= $pravaSuma) {
+                $levySloupec[] = $article;
+                $levaSuma += $article['delka'];
+            } else {
+                $pravySloupec[] = $article;
+                $pravaSuma += $article['delka'];
             }
+        }
 
-            // Seřadit podle délky (sestupně) pro lepší rozdělení
-            usort($normalniArticles, function($a, $b) {
-                return $b['delka'] - $a['delka'];
-            });
-
-            // Rozdělit na 2 sloupce tak, aby celková délka byla vyrovnaná
-            $levySloupec = [];
-            $pravySloupec = [];
-            $levaSuma = 0;
-            $pravaSuma = 0;
-
-            foreach ($normalniArticles as $clanek) {
-                // Přidat do sloupce s menší celkovou délkou
-                if ($levaSuma <= $pravaSuma) {
-                    $levySloupec[] = $clanek;
-                    $levaSuma += $clanek['delka'];
-                } else {
-                    $pravySloupec[] = $clanek;
-                    $pravaSuma += $clanek['delka'];
-                }
-            }
-
-            // Zobrazit levý sloupec
-            foreach ($levySloupec as $clanek): ?>
-              <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
-                <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-                  <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>', <?php echo $clanek['index']; ?>)">
-                    Upravit článek
-                  </button>
-                <?php endif; ?>
-                <div class="clanek-obsah">
-                  <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
-                </div>
+        // Zobrazit oba sloupce
+        ?>
+        <div class="column-left">
+          <?php foreach ($levySloupec as $clanek): ?>
+            <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
+              <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
+                <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>', <?php echo $clanek['index']; ?>)">
+                  Upravit článek
+                </button>
+              <?php endif; ?>
+              <div class="clanek-obsah">
+                <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
               </div>
-            <?php endforeach; ?>
-          </div>
-
-          <!-- PRAVÝ SLOUPEC (odskočený začátek) -->
-          <div class="column-right">
-            <?php
-            // Zobrazit pravý sloupec
-            foreach ($pravySloupec as $clanek): ?>
-              <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
-                <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-                  <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>', <?php echo $clanek['index']; ?>)">
-                    Upravit článek
-                  </button>
-                <?php endif; ?>
-                <div class="clanek-obsah">
-                  <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
-                </div>
-              </div>
-            <?php endforeach; ?>
-          </div>
+            </div>
+          <?php endforeach; ?>
         </div>
-      <?php endif; ?>
+
+        <div class="column-right">
+          <?php foreach ($pravySloupec as $clanek): ?>
+            <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
+              <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
+                <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>', <?php echo $clanek['index']; ?>)">
+                  Upravit článek
+                </button>
+              <?php endif; ?>
+              <div class="clanek-obsah">
+                <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
 
       <?php if (!empty($archiv) && count($archiv) > 1): ?>
         <div class="archiv-section">
