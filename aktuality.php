@@ -171,6 +171,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       margin: 0 0 15px 0;
       letter-spacing: -1px;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      text-transform: uppercase;
     }
 
     .hero-subtitle {
