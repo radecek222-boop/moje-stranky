@@ -1412,40 +1412,69 @@ async function saveSelectedDate() {
     }
 
     if (result.status === 'success') {
+      // ⏱️ DEBUG: Měření každé operace v success bloku
+      const tSuccess = performance.now();
+      logger.log(`⏱️ SUCCESS block started: ${(tSuccess - t0).toFixed(0)}ms od začátku`);
+
       // Update CURRENT_RECORD with new data
+      const tBeforeUpdate = performance.now();
       CURRENT_RECORD.termin = SELECTED_DATE;
       CURRENT_RECORD.cas_navstevy = SELECTED_TIME;
       CURRENT_RECORD.stav = 'DOMLUVENÁ';
+      const tAfterUpdate = performance.now();
+      logger.log(`⏱️ CURRENT_RECORD update: ${(tAfterUpdate - tBeforeUpdate).toFixed(0)}ms`);
 
       // Update cache
+      const tBeforeCache = performance.now();
       const cacheRecord = WGS_DATA_CACHE.find(x => x.id === CURRENT_RECORD.id);
       if (cacheRecord) {
         cacheRecord.termin = SELECTED_DATE;
         cacheRecord.cas_navstevy = SELECTED_TIME;
         cacheRecord.stav = 'DOMLUVENÁ';
       }
+      const tAfterCache = performance.now();
+      logger.log(`⏱️ Cache update: ${(tAfterCache - tBeforeCache).toFixed(0)}ms`);
 
       // ✅ PERFORMANCE FIX: Odstranění zbytečného loadAll()
       // Cache je už aktualizovaná (řádky výše), seznam se obnoví automaticky
       // když uživatel zavře detail. Nemusíme čekat na reload celého seznamu.
 
       // SKRÝT LOADING
+      const tBeforeHideLoading = performance.now();
       hideLoading();
+      const tAfterHideLoading = performance.now();
+      logger.log(`⏱️ hideLoading(): ${(tAfterHideLoading - tBeforeHideLoading).toFixed(0)}ms`);
 
       // ZOBRAZIT ÚSPĚCH
+      const tBeforeAlert = performance.now();
+      logger.log(`⏱️ TĚSNĚ PŘED ALERT: ${(tBeforeAlert - t0).toFixed(0)}ms od začátku`);
       alert(t('appointment_saved_success').replace('{date}', SELECTED_DATE).replace('{time}', SELECTED_TIME));
+      const tAfterAlert = performance.now();
+      logger.log(`⏱️ alert() dokončen: ${(tAfterAlert - tBeforeAlert).toFixed(0)}ms`);
 
       // KROK 3: Odeslání potvrzení ASYNCHRONNĚ na pozadí (fire-and-forget)
       // Email se odešle, ale neuživatel na něj nečeká
+      const tBeforeEmail = performance.now();
       sendAppointmentConfirmation(CURRENT_RECORD, SELECTED_DATE, SELECTED_TIME)
         .catch(err => logger.warn('⚠ Email se nepodařilo odeslat:', err.message));
+      const tAfterEmail = performance.now();
+      logger.log(`⏱️ sendAppointmentConfirmation() launch: ${(tAfterEmail - tBeforeEmail).toFixed(0)}ms`);
 
       // ⏱️ PERFORMANCE: Optimalizace - místo closeDetail() + showDetail() jen aktualizovat modal
       const t5 = performance.now();
       logger.log('⏱️ Aktualizuji detail...');
       const recordId = CURRENT_RECORD.id;
+
+      const tBeforeClose = performance.now();
       closeDetail();
+      const tAfterClose = performance.now();
+      logger.log(`⏱️ closeDetail(): ${(tAfterClose - tBeforeClose).toFixed(0)}ms`);
+
+      const tBeforeSetTimeout = performance.now();
       setTimeout(() => showDetail(recordId), 100);
+      const tAfterSetTimeout = performance.now();
+      logger.log(`⏱️ setTimeout() scheduled: ${(tAfterSetTimeout - tBeforeSetTimeout).toFixed(0)}ms`);
+
       const t6 = performance.now();
       logger.log(`⏱️ Detail aktualizován za ${(t6 - t5).toFixed(0)}ms`);
 
