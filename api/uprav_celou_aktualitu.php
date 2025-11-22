@@ -97,6 +97,48 @@ try {
     // Složit zpět dohromady
     $novyObsahCely = implode("\n\n", $noveCasti);
 
+    // Zpracovat upload fotky pokud byla nahrána
+    if (isset($_FILES['fotka']) && $_FILES['fotka']['error'] === UPLOAD_ERR_OK) {
+        $fotka = $_FILES['fotka'];
+
+        // Validace typu souboru
+        $povoleneMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $fotka['tmp_name']);
+        finfo_close($finfo);
+
+        if (!in_array($mimeType, $povoleneMimeTypes)) {
+            sendJsonError('Neplatný formát souboru. Povolené formáty: JPG, PNG, GIF, WebP');
+        }
+
+        // Validace velikosti (max 5MB)
+        if ($fotka['size'] > 5 * 1024 * 1024) {
+            sendJsonError('Soubor je příliš velký. Maximální velikost je 5 MB.');
+        }
+
+        // Vytvořit složku pokud neexistuje
+        $uploadDir = __DIR__ . '/../uploads/aktuality/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        // Generovat unikátní název souboru
+        $extension = pathinfo($fotka['name'], PATHINFO_EXTENSION);
+        $fileName = 'aktualita_' . $aktualitaId . '_clanek_' . $index . '_' . time() . '.' . $extension;
+        $filePath = $uploadDir . $fileName;
+
+        // Přesunout soubor
+        if (!move_uploaded_file($fotka['tmp_name'], $filePath)) {
+            sendJsonError('Chyba při nahrávání souboru');
+        }
+
+        // URL fotky pro použití v markdownu
+        $fotkaUrl = '/uploads/aktuality/' . $fileName;
+
+        // Nahradit placeholder skutečnou URL v obsahu
+        $novyObsahCely = str_replace('PLACEHOLDER_NEW_PHOTO', $fotkaUrl, $novyObsahCely);
+    }
+
     // Aktualizovat obsah v databázi
     $stmtUpdate = $pdo->prepare("
         UPDATE wgs_natuzzi_aktuality

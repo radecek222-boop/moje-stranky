@@ -735,6 +735,35 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         </div>
       </div>
 
+      <!-- SEKCE NADPIS -->
+      <div style="background: #1a1a1a; color: white; padding: 12px 20px; margin: 25px 0 15px 0; border-radius: 5px; font-weight: bold;">
+        FOTOGRAFIE (volitelná)
+      </div>
+
+      <!-- FOTOGRAFIE -->
+      <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+        <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">
+          Fotografie na konci článku:
+        </label>
+        <input type="file" id="fotkaArticle" accept="image/*" style="
+          width: 100%;
+          padding: 10px;
+          border: 2px solid #ddd;
+          border-radius: 5px;
+          font-size: 14px;
+          box-sizing: border-box;
+          background: white;
+        ">
+        <div id="fotkaPreview" style="margin-top: 10px; display: none;">
+          <img id="fotkaPreviewImg" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 5px;">
+        </div>
+        <div id="fotkaExisting" style="margin-top: 10px; display: none;">
+          <p style="font-size: 13px; color: #666; margin-bottom: 5px;">Stávající fotka:</p>
+          <img id="fotkaExistingImg" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 5px;">
+          <p style="font-size: 12px; color: #999; margin-top: 5px;">Pokud vyberete novou fotku, nahradí tuto stávající.</p>
+        </div>
+      </div>
+
       <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
         <strong>Pozor:</strong> Tato změna přepíše celý obsah článku v jazyce <strong>${jazyk.toUpperCase()}</strong>.
         Ostatní jazyky zůstanou nezměněny.
@@ -794,6 +823,27 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     document.getElementById('odkaz3Text').value = parsovanaData.odkazy[2]?.text || '';
     document.getElementById('odkaz3Url').value = parsovanaData.odkazy[2]?.url || '';
 
+    // Pokud má stávající fotku, zobrazit ji
+    if (parsovanaData.fotka) {
+      document.getElementById('fotkaExisting').style.display = 'block';
+      document.getElementById('fotkaExistingImg').src = parsovanaData.fotka;
+    }
+
+    // Náhled nové fotky při výběru
+    document.getElementById('fotkaArticle').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          document.getElementById('fotkaPreview').style.display = 'block';
+          document.getElementById('fotkaPreviewImg').src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        document.getElementById('fotkaPreview').style.display = 'none';
+      }
+    });
+
     // Focus na nadpis
     document.getElementById('nadpisArticle').focus();
 
@@ -821,6 +871,18 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         return;
       }
 
+      // Zjistit zda má novou fotku nebo ponechat stávající
+      const fotkaInput = document.getElementById('fotkaArticle');
+      const maNovoufotku = fotkaInput.files.length > 0;
+
+      // Pokud nemá novou fotku, ponechat URL stávající (pokud existuje)
+      let fotkaUrl = parsovanaData.fotka || null;
+
+      // Pokud má novou fotku, použít placeholder - nahradí se po uploadu
+      if (maNovoufotku) {
+        fotkaUrl = 'PLACEHOLDER_NEW_PHOTO';
+      }
+
       // Sestavit markdown z polí formuláře
       const novyObsah = parseFormularDoMarkdown({
         jeSiroky: document.getElementById('jeSiroky').checked,
@@ -839,7 +901,8 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
             text: document.getElementById('odkaz3Text').value.trim(),
             url: document.getElementById('odkaz3Url').value.trim()
           }
-        ]
+        ],
+        fotka: fotkaUrl
       });
 
       if (!confirm(`Opravdu chcete uložit změny?\n\nPřepíše se celý obsah článku v jazyce ${jazyk.toUpperCase()}.`)) {
@@ -850,7 +913,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       this.textContent = 'Ukládám...';
 
       try {
-        const response = await ulozitCelyClanek(aktualitaId, jazyk, index, novyObsah);
+        const response = await ulozitCelyClanek(aktualitaId, jazyk, index, novyObsah, maNovoufotku ? fotkaInput.files[0] : null);
 
         if (response.status === 'success') {
           alert('Článek byl úspěšně uložen!\n\nStránka se nyní obnoví.');
@@ -874,12 +937,21 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       jeSiroky: false,
       nadpis: '',
       text: '',
-      odkazy: []
+      odkazy: [],
+      fotka: null
     };
 
     // Kontrola zda je široký článek
     const jeSiroky = /^## ŠIROKÝ:/im.test(markdown);
     result.jeSiroky = jeSiroky;
+
+    // Parsovat fotku (pokud existuje) - ![alt](url)
+    const fotkaMatch = markdown.match(/!\[([^\]]*)\]\(([^)]+)\)/);
+    if (fotkaMatch) {
+      result.fotka = fotkaMatch[2]; // URL fotky
+      // Odstranit fotku z markdownu pro další zpracování
+      markdown = markdown.replace(fotkaMatch[0], '').trim();
+    }
 
     // Získat nadpis (po ##, odstranit ŠIROKÝ: pokud existuje)
     const nadpisMatch = markdown.match(/^## (?:ŠIROKÝ:\s*)?(.+)$/m);
@@ -935,19 +1007,29 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       const odkazyText = platneOdkazy
         .map(o => `[${o.text}](${o.url})`)
         .join(' | ');
-      markdown += odkazyText;
+      markdown += odkazyText + '\n\n';
+    }
+
+    // Přidat fotku na konec, pokud existuje (buď stávající URL nebo placeholder pro novou)
+    if (data.fotka) {
+      markdown += `![Fotka článku](${data.fotka})`;
     }
 
     return markdown.trim();
   }
 
-  async function ulozitCelyClanek(aktualitaId, jazyk, index, novyObsah) {
+  async function ulozitCelyClanek(aktualitaId, jazyk, index, novyObsah, fotkaFile) {
     const formData = new FormData();
     formData.append('csrf_token', csrfToken);
     formData.append('aktualita_id', aktualitaId);
     formData.append('jazyk', jazyk);
     formData.append('index', index);
     formData.append('novy_obsah', novyObsah);
+
+    // Přidat fotku pokud byla vybrána
+    if (fotkaFile) {
+      formData.append('fotka', fotkaFile);
+    }
 
     const response = await fetch('/api/uprav_celou_aktualitu.php', {
       method: 'POST',
