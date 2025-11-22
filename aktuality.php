@@ -90,7 +90,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
   <style>
     /* Aktuality specifické styly */
     .hero {
-      background: linear-gradient(135deg, #1a1a1a 0%, #2D5016 100%);
+      background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
       color: white;
       padding: 80px 20px;
       text-align: center;
@@ -122,8 +122,8 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
       padding: 10px 25px;
       margin: 0 5px;
       background: white;
-      color: #2D5016;
-      border: 2px solid #2D5016;
+      color: #1a1a1a;
+      border: 2px solid #333333;
       border-radius: 25px;
       text-decoration: none;
       font-weight: 600;
@@ -133,15 +133,16 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     }
 
     .lang-btn:hover {
-      background: #2D5016;
+      background: #333333;
       color: white;
       transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(45, 80, 22, 0.2);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
 
     .lang-btn.active {
-      background: #2D5016;
+      background: #1a1a1a;
       color: white;
+      border-color: #1a1a1a;
     }
 
     .content-section {
@@ -155,7 +156,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     }
 
     .datum-badge {
-      background: #2D5016;
+      background: #1a1a1a;
       color: white;
       padding: 12px 30px;
       border-radius: 30px;
@@ -180,23 +181,23 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     }
 
     .aktualita-obsah h1 {
-      color: #2D5016;
+      color: #1a1a1a;
       font-size: 2.5em;
       margin: 0 0 30px 0;
       font-weight: 700;
-      border-bottom: 3px solid #2D5016;
+      border-bottom: 3px solid #333333;
       padding-bottom: 15px;
     }
 
     .aktualita-obsah h2 {
-      color: #2D5016;
+      color: #1a1a1a;
       font-size: 1.8em;
       margin: 40px 0 20px 0;
       font-weight: 600;
     }
 
     .aktualita-obsah h3 {
-      color: #1a1a1a;
+      color: #333333;
       font-size: 1.3em;
       margin: 30px 0 15px 0;
       font-weight: 600;
@@ -208,26 +209,26 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     }
 
     .aktualita-obsah strong {
-      color: #2D5016;
+      color: #1a1a1a;
       font-weight: 600;
     }
 
     .aktualita-obsah a {
-      color: #2D5016;
+      color: #000000;
       text-decoration: none;
       font-weight: 500;
-      border-bottom: 1px dotted #2D5016;
+      border-bottom: 1px dotted #333333;
       transition: all 0.3s;
     }
 
     .aktualita-obsah a:hover {
       border-bottom-style: solid;
-      color: #1a300d;
+      color: #666666;
     }
 
     .info-box {
-      background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
-      border-left: 5px solid #2D5016;
+      background: linear-gradient(135deg, #f0f0f0 0%, #e8e8e8 100%);
+      border-left: 5px solid #333333;
       padding: 20px;
       margin: 30px 0;
       border-radius: 8px;
@@ -242,7 +243,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     }
 
     .archiv-section h3 {
-      color: #2D5016;
+      color: #1a1a1a;
       font-size: 1.5em;
       margin: 0 0 20px 0;
       font-weight: 600;
@@ -261,16 +262,16 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     }
 
     .archiv-link:hover {
-      background: #2D5016;
+      background: #333333;
       color: white;
-      border-left-color: #1a300d;
+      border-left-color: #1a1a1a;
       transform: translateX(5px);
     }
 
     .archiv-link.active {
-      background: #2D5016;
+      background: #1a1a1a;
       color: white;
-      border-left-color: #1a300d;
+      border-left-color: #000000;
       font-weight: 600;
     }
 
@@ -330,15 +331,15 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
 <div class="lang-switcher">
   <a href="?lang=cz<?php echo isset($_GET['datum']) ? '&datum=' . $_GET['datum'] : ''; ?>"
      class="lang-btn <?php echo $jazyk === 'cz' ? 'active' : ''; ?>">
-    🇨🇿 Čeština
+    Čeština
   </a>
   <a href="?lang=en<?php echo isset($_GET['datum']) ? '&datum=' . $_GET['datum'] : ''; ?>"
      class="lang-btn <?php echo $jazyk === 'en' ? 'active' : ''; ?>">
-    🇬🇧 English
+    English
   </a>
   <a href="?lang=it<?php echo isset($_GET['datum']) ? '&datum=' . $_GET['datum'] : ''; ?>"
      class="lang-btn <?php echo $jazyk === 'it' ? 'active' : ''; ?>">
-    🇮🇹 Italiano
+    Italiano
   </a>
 </div>
 
@@ -349,7 +350,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     <?php if ($aktualita && !empty($obsah)): ?>
 
       <div class="datum-badge">
-        📅 <?php echo date('d.m.Y', strtotime($aktualita['datum'])); ?>
+        <?php echo date('d.m.Y', strtotime($aktualita['datum'])); ?>
         <?php if ($aktualita['svatek_cz']): ?>
           | <?php
           echo $jazyk === 'en' ? 'Name Day' : ($jazyk === 'it' ? 'Onomastico' : 'Svátek');
@@ -367,7 +368,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
 
         <?php if ($aktualita['vygenerovano_ai']): ?>
           <div class="info-box">
-            <strong>ℹ️ <?php
+            <strong><?php
             echo $jazyk === 'en' ? 'Information' : ($jazyk === 'it' ? 'Informazione' : 'Informace');
             ?>:</strong>
             <?php
@@ -385,7 +386,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
         <div class="archiv-section">
           <h3>
             <?php
-            echo $jazyk === 'en' ? '📚 News Archive' : ($jazyk === 'it' ? '📚 Archivio Notizie' : '📚 Archiv aktualit');
+            echo $jazyk === 'en' ? 'News Archive' : ($jazyk === 'it' ? 'Archivio Notizie' : 'Archiv aktualit');
             ?>
           </h3>
           <?php foreach (array_slice($archiv, 0, 10) as $polozka): ?>
@@ -403,7 +404,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     <?php else: ?>
 
       <div class="aktualita-card">
-        <h2>⚠️ <?php
+        <h2><?php
         echo $jazyk === 'en' ? 'No news available' : ($jazyk === 'it' ? 'Nessuna notizia disponibile' : 'Žádné aktuality');
         ?></h2>
         <p>
