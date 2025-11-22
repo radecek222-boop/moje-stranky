@@ -662,12 +662,12 @@ async function exportovatPDF() {
             // Přidat číslo stránky nahoře vlevo
             doc.setFontSize(9);
             doc.setTextColor(100, 100, 100);
-            doc.text('1/1', margin, margin - 3);
+            doc.text('1/1', margin, 8);
 
-            // Přidat text o počtu stránek vlevo dole (na úrovni součtů)
-            doc.setFontSize(10);
+            // Přidat text o počtu stránek vlevo dole (zarovnáno s "Vygenerováno")
+            doc.setFontSize(5);
             doc.setTextColor(51, 51, 51);
-            doc.text('Výpis se skládá z 1 stránky', margin, pageHeight - 35);
+            doc.text('Výpis se skládá z 1 stránky', margin, pageHeight - 22);
         } else {
             // Rozdělení na více stránek
             let yPosition = 0;
@@ -699,15 +699,15 @@ async function exportovatPDF() {
                 // Přidat číslo stránky nahoře vlevo
                 doc.setFontSize(9);
                 doc.setTextColor(100, 100, 100);
-                doc.text(`${cisloStranky}/${celkovyPocetStranek}`, margin, margin - 3);
+                doc.text(`${cisloStranky}/${celkovyPocetStranek}`, margin, 8);
 
-                // Na poslední stránce přidat text o počtu stránek vlevo dole (na úrovni součtů)
+                // Na poslední stránce přidat text o počtu stránek vlevo dole (zarovnáno s "Vygenerováno")
                 if (cisloStranky === celkovyPocetStranek) {
-                    doc.setFontSize(10);
+                    doc.setFontSize(5);
                     doc.setTextColor(51, 51, 51);
                     const pocetText = celkovyPocetStranek === 1 ? 'stránky' :
                                      (celkovyPocetStranek >= 2 && celkovyPocetStranek <= 4) ? 'stránek' : 'stránek';
-                    doc.text(`Výpis se skládá z ${celkovyPocetStranek} ${pocetText}`, margin, pageHeight - 35);
+                    doc.text(`Výpis se skládá z ${celkovyPocetStranek} ${pocetText}`, margin, pageHeight - 22);
                 }
 
                 cisloStranky++;
