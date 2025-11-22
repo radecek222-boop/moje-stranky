@@ -1,7 +1,7 @@
 <?php
 /**
  * Aktuality o značce Natuzzi
- * Zobrazení 1 širokého článku + 6 menších článků v náhodném pořadí
+ * Zobrazení všech článků ve 2 sloupcích v náhodném pořadí
  */
 
 require_once __DIR__ . '/init.php';
@@ -55,13 +55,12 @@ try {
         $celyObsah = $hlavniAktualita[$obsahSloupec] ?? '';
 
         // Parse článků z markdown obsahu
-        list($sirokyArticle, $normalniArticles) = parseClankyzObsahu($celyObsah, $hlavniAktualita['id'], $jazyk);
+        $articles = parseClankyzObsahu($celyObsah, $hlavniAktualita['id'], $jazyk);
 
-        // Náhodně zamíchat pořadí POUZE normálních článků (ne široký)
-        shuffle($normalniArticles);
+        // Náhodně zamíchat pořadí VŠECH článků (pro Google)
+        shuffle($articles);
     } else {
-        $sirokyArticle = null;
-        $normalniArticles = [];
+        $articles = [];
         $datumAktuality = null;
     }
 
@@ -76,16 +75,14 @@ try {
 
 } catch (Exception $e) {
     error_log("Chyba při načítání aktualit: " . $e->getMessage());
-    $sirokyArticle = null;
-    $normalniArticles = [];
+    $articles = [];
     $archiv = [];
     $datumAktuality = null;
 }
 
-// Funkce pro rozdělení obsahu na široký článek + normální články
+// Funkce pro rozdělení obsahu na články (všechny ve 2 sloupcích)
 function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
-    $sirokyArticle = null;
-    $normalniArticles = [];
+    $articles = [];
 
     // Rozdělit podle ## nadpisů (každý článek začíná ##)
     $parts = preg_split('/(?=^## )/m', $obsah);
@@ -102,31 +99,18 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
             continue;
         }
 
-        // Toto je článek s ## nadpisem - přidělit mu index a inkrementovat
-        if (preg_match('/^## ŠIROKÝ:/i', $part)) {
-            // Vzít POUZE PRVNÍ široký článek, ostatní ignorovat
-            if ($sirokyArticle === null) {
-                $sirokyArticle = [
-                    'obsah' => $part,
-                    'aktualita_id' => $aktualitaId,
-                    'jazyk' => $jazyk,
-                    'index' => $articleIndex
-                ];
-            }
-        } else {
-            // Normální článek (nemá "ŠIROKÝ:")
-            $normalniArticles[] = [
-                'obsah' => $part,
-                'aktualita_id' => $aktualitaId,
-                'jazyk' => $jazyk,
-                'index' => $articleIndex
-            ];
-        }
+        // Přidat článek (všechny budou ve 2 sloupcích)
+        $articles[] = [
+            'obsah' => $part,
+            'aktualita_id' => $aktualitaId,
+            'jazyk' => $jazyk,
+            'index' => $articleIndex
+        ];
 
-        $articleIndex++;  // Inkrementovat pouze pro články s ##
+        $articleIndex++;
     }
 
-    return [$sirokyArticle, $normalniArticles];
+    return $articles;
 }
 
 $jazyk = $_GET['lang'] ?? 'cz';
@@ -282,9 +266,11 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       color: #666666;
     }
 
-    /* ČLÁNKY POD SEBOU BEZ MEZER */
+    /* DVA SLOUPCE ČLÁNKŮ */
     .clanky-grid {
-      display: block;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
       margin-bottom: 40px;
     }
 
@@ -493,7 +479,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 <section class="content-section">
   <div class="container">
 
-    <?php if ($sirokyArticle || !empty($normalniArticles)): ?>
+    <?php if (!empty($articles)): ?>
 
       <div class="datum-bar">
         <div class="datum-badge">
@@ -516,41 +502,23 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         <?php endif; ?>
       </div>
 
-      <!-- ŠIROKÝ ČLÁNEK NAHOŘE -->
-      <?php if ($sirokyArticle): ?>
-        <div class="siroky-clanek" data-aktualita-id="<?php echo $sirokyArticle['aktualita_id']; ?>" data-jazyk="<?php echo $sirokyArticle['jazyk']; ?>" data-index="<?php echo $sirokyArticle['index']; ?>">
+      <!-- GRID SE 2 SLOUPCI VŠECH ČLÁNKŮ -->
+      <div class="clanky-grid">
+        <?php foreach ($articles as $clanek): ?>
+          <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
 
-          <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-            <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $sirokyArticle['aktualita_id']; ?>, '<?php echo $sirokyArticle['jazyk']; ?>', <?php echo $sirokyArticle['index']; ?>)">
-              Upravit článek
-            </button>
-          <?php endif; ?>
+            <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
+              <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>', <?php echo $clanek['index']; ?>)">
+                Upravit článek
+              </button>
+            <?php endif; ?>
 
-          <div class="clanek-obsah">
-            <?php echo parseMarkdownToHTML($sirokyArticle['obsah']); ?>
-          </div>
-        </div>
-      <?php endif; ?>
-
-      <!-- GRID SE 2 SLOUPCI NORMÁLNÍCH ČLÁNKŮ -->
-      <?php if (!empty($normalniArticles)): ?>
-        <div class="clanky-grid">
-          <?php foreach ($normalniArticles as $clanek): ?>
-            <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
-
-              <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-                <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>', <?php echo $clanek['index']; ?>)">
-                  Upravit článek
-                </button>
-              <?php endif; ?>
-
-              <div class="clanek-obsah">
-                <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
-              </div>
+            <div class="clanek-obsah">
+              <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
             </div>
-          <?php endforeach; ?>
-        </div>
-      <?php endif; ?>
+          </div>
+        <?php endforeach; ?>
+      </div>
 
       <?php if (!empty($archiv) && count($archiv) > 1): ?>
         <div class="archiv-section">
@@ -666,19 +634,8 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         ${nadpisEditoru} - ${jazyk.toUpperCase()}
       </h2>
       <p style="margin: 0 0 20px 0; color: #666; background: #e8f4fd; padding: 12px; border-radius: 5px; border-left: 4px solid #0066cc;">
-        Jednoduše vyplňte pole níže. Nemusíte nic formátovat - prostě napište text.
+        Jednoduše vyplňte pole níže. Nemusíte nic formátovat - prostě napište text. Všechny články jsou zobrazeny ve 2 sloupcích.
       </p>
-
-      <!-- TYP ČLÁNKU -->
-      <div style="margin-bottom: 25px; padding: 15px; background: #f9f9f9; border-radius: 5px;">
-        <label style="display: flex; align-items: center; cursor: pointer; font-weight: 600; font-size: 15px;">
-          <input type="checkbox" id="jeSiroky" style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer;">
-          Široký článek přes celou šířku stránky
-        </label>
-        <p style="margin: 8px 0 0 30px; color: #666; font-size: 13px;">
-          Zaškrtněte, pokud má být článek zobrazený přes celou šířku (ne ve 2 sloupcích).
-        </p>
-      </div>
 
       <!-- NADPIS -->
       <div style="margin-bottom: 20px;">
@@ -874,7 +831,6 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     document.body.appendChild(editorDialog);
 
     // Vyplnit pole z parsovaných dat
-    document.getElementById('jeSiroky').checked = parsovanaData.jeSiroky;
     document.getElementById('nadpisArticle').value = parsovanaData.nadpis;
     document.getElementById('textArticle').value = parsovanaData.text;
     document.getElementById('odkaz1Text').value = parsovanaData.odkazy[0]?.text || '';
@@ -946,7 +902,6 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
       // Sestavit markdown z polí formuláře
       const novyObsah = parseFormularDoMarkdown({
-        jeSiroky: document.getElementById('jeSiroky').checked,
         nadpis: nadpis,
         text: text,
         odkazy: [
@@ -1002,16 +957,11 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
   // Parsovat markdown do objektu s poli formuláře
   function parseMarkdownDoFormulare(markdown) {
     const result = {
-      jeSiroky: false,
       nadpis: '',
       text: '',
       odkazy: [],
       fotka: null
     };
-
-    // Kontrola zda je široký článek
-    const jeSiroky = /^## ŠIROKÝ:/im.test(markdown);
-    result.jeSiroky = jeSiroky;
 
     // Parsovat fotku (pokud existuje) - ![alt](url)
     const fotkaMatch = markdown.match(/!\[([^\]]*)\]\(([^)]+)\)/);
@@ -1059,12 +1009,8 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
   function parseFormularDoMarkdown(data) {
     let markdown = '';
 
-    // Nadpis s prefixem ŠIROKÝ: pokud je zaškrtnuto
-    if (data.jeSiroky) {
-      markdown = '## ŠIROKÝ: ' + data.nadpis + '\n\n';
-    } else {
-      markdown = '## ' + data.nadpis + '\n\n';
-    }
+    // Nadpis (všechny články normální, bez ŠIROKÝ:)
+    markdown = '## ' + data.nadpis + '\n\n';
 
     // Text
     markdown += data.text + '\n\n';
