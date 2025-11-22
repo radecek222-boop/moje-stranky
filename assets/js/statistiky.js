@@ -551,47 +551,80 @@ async function exportovatPDF() {
         const mesic = mesicValue ? mesicNazvy[parseInt(mesicValue)] : 'Všechny';
         const datum = new Date().toLocaleDateString('cs-CZ');
 
+        // Kontrola checkboxu pro zobrazení odměny technika
+        const zobrazitOdmenu = document.getElementById('zobrazitOdmenu').checked;
+
+        // Spočítat součty
+        const celkemCastka = zakazky.reduce((sum, z) => sum + parseFloat(z.castka_celkem), 0);
+        const celkemVydelek = zakazky.reduce((sum, z) => sum + parseFloat(z.vydelek_technika), 0);
+
         // Vytvořit HTML pro PDF (skrytý div)
         const pdfContainer = document.createElement('div');
         pdfContainer.style.cssText = 'position: absolute; left: -9999px; width: 1200px; background: white; padding: 30px; font-family: Poppins, Arial, sans-serif;';
 
         pdfContainer.innerHTML = `
             <div style="margin-bottom: 20px;">
-                <h1 style="color: #2D5016; font-size: 24px; margin: 0 0 10px 0;">Statistiky a reporty - WGS</h1>
+                <h1 style="color: #333; font-size: 24px; margin: 0 0 10px 0; font-weight: 700;">Statistiky a reporty - WGS</h1>
                 <p style="color: #666; font-size: 14px; margin: 0;">Rok: ${rok} | Měsíc: ${mesic} | Celkem: ${zakazky.length} zakázek</p>
             </div>
             <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
                 <thead>
-                    <tr style="background: #2D5016; color: white;">
-                        <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Reklamace ID</th>
-                        <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Adresa</th>
-                        <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Model</th>
-                        <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Technik</th>
-                        <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Prodejce</th>
-                        <th style="padding: 10px; text-align: right; border: 1px solid #ddd;">Částka</th>
-                        <th style="padding: 10px; text-align: right; border: 1px solid #ddd;">Výdělek (33%)</th>
-                        <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">Země</th>
-                        <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">Datum</th>
+                    <tr style="background: #444; color: white;">
+                        <th style="padding: 10px; text-align: left; border: 1px solid #999;">Reklamace ID</th>
+                        <th style="padding: 10px; text-align: left; border: 1px solid #999;">Adresa</th>
+                        <th style="padding: 10px; text-align: left; border: 1px solid #999;">Model</th>
+                        <th style="padding: 10px; text-align: left; border: 1px solid #999;">Technik</th>
+                        <th style="padding: 10px; text-align: left; border: 1px solid #999;">Prodejce</th>
+                        <th style="padding: 10px; text-align: right; border: 1px solid #999;">Částka</th>
+                        ${zobrazitOdmenu ? '<th style="padding: 10px; text-align: right; border: 1px solid #999;">Výdělek (33%)</th>' : ''}
+                        <th style="padding: 10px; text-align: center; border: 1px solid #999;">Země</th>
+                        <th style="padding: 10px; text-align: center; border: 1px solid #999;">Datum</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${zakazky.map(z => `
-                        <tr>
+                    ${zakazky.map((z, idx) => `
+                        <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f5f5f5'};">
                             <td style="padding: 8px; border: 1px solid #ddd;">${z.reklamace_id || '-'}</td>
                             <td style="padding: 8px; border: 1px solid #ddd;">${z.adresa || '-'}</td>
                             <td style="padding: 8px; border: 1px solid #ddd;">${z.model || '-'}</td>
                             <td style="padding: 8px; border: 1px solid #ddd;">${z.technik || '-'}</td>
                             <td style="padding: 8px; border: 1px solid #ddd;">${z.prodejce || '-'}</td>
                             <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${parseFloat(z.castka_celkem).toFixed(2)} €</td>
-                            <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${parseFloat(z.vydelek_technika).toFixed(2)} €</td>
+                            ${zobrazitOdmenu ? `<td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${parseFloat(z.vydelek_technika).toFixed(2)} €</td>` : ''}
                             <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${z.zeme || '-'}</td>
                             <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${z.datum || '-'}</td>
                         </tr>
                     `).join('')}
                 </tbody>
+                <tfoot>
+                    <tr style="background: #f0f0f0; font-weight: bold;">
+                        <td colspan="5" style="padding: 10px; border: 1px solid #999; text-align: right;">Počet zakázek celkem:</td>
+                        <td style="padding: 10px; border: 1px solid #999; text-align: right;">${zakazky.length} ks</td>
+                        ${zobrazitOdmenu ? '<td style="padding: 10px; border: 1px solid #999;"></td>' : ''}
+                        <td colspan="2" style="padding: 10px; border: 1px solid #999;"></td>
+                    </tr>
+                    <tr style="background: #f0f0f0; font-weight: bold;">
+                        <td colspan="5" style="padding: 10px; border: 1px solid #999; text-align: right;">Celkem za zakázky k fakturaci:</td>
+                        <td style="padding: 10px; border: 1px solid #999; text-align: right;">${celkemCastka.toFixed(2)} €</td>
+                        ${zobrazitOdmenu ? '<td style="padding: 10px; border: 1px solid #999;"></td>' : ''}
+                        <td colspan="2" style="padding: 10px; border: 1px solid #999;"></td>
+                    </tr>
+                    ${zobrazitOdmenu ? `
+                        <tr style="background: #f0f0f0; font-weight: bold;">
+                            <td colspan="6" style="padding: 10px; border: 1px solid #999; text-align: right;">Výdělek celkem technik:</td>
+                            <td style="padding: 10px; border: 1px solid #999; text-align: right;">${celkemVydelek.toFixed(2)} €</td>
+                            <td colspan="2" style="padding: 10px; border: 1px solid #999;"></td>
+                        </tr>
+                    ` : ''}
+                </tfoot>
             </table>
-            <div style="margin-top: 20px; font-size: 10px; color: #999;">
-                Vygenerováno: ${datum}
+            <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd;">
+                <div style="font-size: 10px; color: #999; margin-bottom: 5px;">
+                    Vygenerováno: ${datum}
+                </div>
+                <div style="font-size: 9px; color: #aaa; font-style: italic;">
+                    Report byl vytvořen pomocí systému WGS (White Glove Service) – Nástroj pro správu servisních zakázek Natuzzi
+                </div>
             </div>
         `;
 

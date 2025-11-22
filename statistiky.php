@@ -578,6 +578,10 @@ body {
     </div>
 
     <div class="filter-actions">
+      <div style="display: flex; align-items: center; gap: 10px; margin-right: auto;">
+        <input type="checkbox" id="zobrazitOdmenu" checked style="cursor: pointer;">
+        <label for="zobrazitOdmenu" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit odměnu technika v PDF</label>
+      </div>
       <button class="btn" onclick="resetovitFiltry()">Reset</button>
       <button class="btn btn-primary" onclick="aplikovatFiltry()">Aplikovat filtry</button>
       <button class="btn btn-export" onclick="exportovatPDF()">📄 Exportovat PDF</button>
