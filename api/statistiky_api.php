@@ -176,7 +176,7 @@ function getZakazky($pdo) {
     // Hlavní dotaz
     $sql = "
         SELECT
-            r.reklamace_id,
+            r.cislo as cislo_reklamace,
             r.adresa,
             r.model,
             COALESCE(technik.name, '-') as technik,

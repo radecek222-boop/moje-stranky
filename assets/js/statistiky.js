@@ -309,7 +309,7 @@ function renderTabulka(data) {
     data.zakazky.forEach(z => {
         rows += `
             <tr>
-                <td>${z.reklamace_id || '-'}</td>
+                <td>${z.cislo_reklamace || '-'}</td>
                 <td>${z.adresa || '-'}</td>
                 <td>${z.model || '-'}</td>
                 <td>${z.technik}</td>
@@ -563,57 +563,57 @@ async function exportovatPDF() {
         pdfContainer.style.cssText = 'position: absolute; left: -9999px; width: 1200px; background: white; padding: 30px; font-family: Poppins, Arial, sans-serif;';
 
         pdfContainer.innerHTML = `
-            <div style="margin-bottom: 20px;">
-                <h1 style="color: #333; font-size: 24px; margin: 0 0 10px 0; font-weight: 700;">Statistiky a reporty - WGS</h1>
-                <p style="color: #666; font-size: 14px; margin: 0;">Rok: ${rok} | Měsíc: ${mesic} | Celkem: ${zakazky.length} zakázek</p>
+            <div style="margin-bottom: 15px;">
+                <h1 style="color: #333; font-size: 18px; margin: 0 0 8px 0; font-weight: 700;">Statistiky a reporty - WGS</h1>
+                <p style="color: #666; font-size: 11px; margin: 0;">Rok: ${rok} | Měsíc: ${mesic} | Celkem: ${zakazky.length} zakázek</p>
             </div>
-            <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 9px;">
                 <thead>
                     <tr style="background: #444; color: white;">
-                        <th style="padding: 10px; text-align: left; border: 1px solid #999;">Reklamace ID</th>
-                        <th style="padding: 10px; text-align: left; border: 1px solid #999;">Adresa</th>
-                        <th style="padding: 10px; text-align: left; border: 1px solid #999;">Model</th>
-                        <th style="padding: 10px; text-align: left; border: 1px solid #999;">Technik</th>
-                        <th style="padding: 10px; text-align: left; border: 1px solid #999;">Prodejce</th>
-                        <th style="padding: 10px; text-align: right; border: 1px solid #999;">Částka</th>
-                        ${zobrazitOdmenu ? '<th style="padding: 10px; text-align: right; border: 1px solid #999;">Výdělek (33%)</th>' : ''}
-                        <th style="padding: 10px; text-align: center; border: 1px solid #999;">Země</th>
-                        <th style="padding: 10px; text-align: center; border: 1px solid #999;">Datum</th>
+                        <th style="padding: 5px; text-align: left; border: 1px solid #999;">Reklamace ID</th>
+                        <th style="padding: 5px; text-align: left; border: 1px solid #999;">Adresa</th>
+                        <th style="padding: 5px; text-align: left; border: 1px solid #999;">Model</th>
+                        <th style="padding: 5px; text-align: left; border: 1px solid #999;">Technik</th>
+                        <th style="padding: 5px; text-align: left; border: 1px solid #999;">Prodejce</th>
+                        <th style="padding: 5px; text-align: right; border: 1px solid #999;">Částka</th>
+                        ${zobrazitOdmenu ? '<th style="padding: 5px; text-align: right; border: 1px solid #999;">Výdělek (33%)</th>' : ''}
+                        <th style="padding: 5px; text-align: center; border: 1px solid #999;">Země</th>
+                        <th style="padding: 5px; text-align: center; border: 1px solid #999;">Datum</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${zakazky.map((z, idx) => `
                         <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f5f5f5'};">
-                            <td style="padding: 8px; border: 1px solid #ddd;">${z.reklamace_id || '-'}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">${z.adresa || '-'}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">${z.model || '-'}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">${z.technik || '-'}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">${z.prodejce || '-'}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${parseFloat(z.castka_celkem).toFixed(2)} €</td>
-                            ${zobrazitOdmenu ? `<td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${parseFloat(z.vydelek_technika).toFixed(2)} €</td>` : ''}
-                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${z.zeme || '-'}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${z.datum || '-'}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd;">${z.cislo_reklamace || '-'}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd;">${z.adresa || '-'}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd;">${z.model || '-'}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd;">${z.technik || '-'}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd;">${z.prodejce || '-'}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">${parseFloat(z.castka_celkem).toFixed(2)} €</td>
+                            ${zobrazitOdmenu ? `<td style="padding: 4px; border: 1px solid #ddd; text-align: right;">${parseFloat(z.vydelek_technika).toFixed(2)} €</td>` : ''}
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${z.zeme || '-'}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${z.datum || '-'}</td>
                         </tr>
                     `).join('')}
                 </tbody>
                 <tfoot>
                     <tr style="background: #f0f0f0; font-weight: bold;">
-                        <td colspan="5" style="padding: 10px; border: 1px solid #999; text-align: right;">Počet zakázek celkem:</td>
-                        <td style="padding: 10px; border: 1px solid #999; text-align: right;">${zakazky.length} ks</td>
-                        ${zobrazitOdmenu ? '<td style="padding: 10px; border: 1px solid #999;"></td>' : ''}
-                        <td colspan="2" style="padding: 10px; border: 1px solid #999;"></td>
+                        <td colspan="5" style="padding: 6px; border: 1px solid #999; text-align: right;">Počet zakázek celkem:</td>
+                        <td style="padding: 6px; border: 1px solid #999; text-align: right;">${zakazky.length} ks</td>
+                        ${zobrazitOdmenu ? '<td style="padding: 6px; border: 1px solid #999;"></td>' : ''}
+                        <td colspan="2" style="padding: 6px; border: 1px solid #999;"></td>
                     </tr>
                     <tr style="background: #f0f0f0; font-weight: bold;">
-                        <td colspan="5" style="padding: 10px; border: 1px solid #999; text-align: right;">Celkem za zakázky k fakturaci:</td>
-                        <td style="padding: 10px; border: 1px solid #999; text-align: right;">${celkemCastka.toFixed(2)} €</td>
-                        ${zobrazitOdmenu ? '<td style="padding: 10px; border: 1px solid #999;"></td>' : ''}
-                        <td colspan="2" style="padding: 10px; border: 1px solid #999;"></td>
+                        <td colspan="5" style="padding: 6px; border: 1px solid #999; text-align: right;">Celkem za zakázky k fakturaci:</td>
+                        <td style="padding: 6px; border: 1px solid #999; text-align: right;">${celkemCastka.toFixed(2)} €</td>
+                        ${zobrazitOdmenu ? '<td style="padding: 6px; border: 1px solid #999;"></td>' : ''}
+                        <td colspan="2" style="padding: 6px; border: 1px solid #999;"></td>
                     </tr>
                     ${zobrazitOdmenu ? `
                         <tr style="background: #f0f0f0; font-weight: bold;">
-                            <td colspan="6" style="padding: 10px; border: 1px solid #999; text-align: right;">Výdělek celkem technik:</td>
-                            <td style="padding: 10px; border: 1px solid #999; text-align: right;">${celkemVydelek.toFixed(2)} €</td>
-                            <td colspan="2" style="padding: 10px; border: 1px solid #999;"></td>
+                            <td colspan="6" style="padding: 6px; border: 1px solid #999; text-align: right;">Výdělek celkem technik:</td>
+                            <td style="padding: 6px; border: 1px solid #999; text-align: right;">${celkemVydelek.toFixed(2)} €</td>
+                            <td colspan="2" style="padding: 6px; border: 1px solid #999;"></td>
                         </tr>
                     ` : ''}
                 </tfoot>
@@ -659,13 +659,27 @@ async function exportovatPDF() {
         let imgWidth = availableWidth;
         let imgHeight = imgWidth * canvasRatio;
 
+        // Spočítat celkový počet stránek
+        const pageHeightInPx = canvas.width * (availableHeight / imgWidth);
+        const celkovyPocetStranek = Math.ceil(canvas.height / pageHeightInPx);
+
         // Pokud se vejde na jednu stránku
         if (imgHeight <= availableHeight) {
             doc.addImage(imgData, 'JPEG', margin, margin, imgWidth, imgHeight);
+
+            // Přidat číslo stránky nahoře vlevo
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
+            doc.text('1/1', margin, margin - 3);
+
+            // Přidat text o počtu stránek dole
+            doc.setFontSize(8);
+            doc.setTextColor(170, 170, 170);
+            doc.text('Výpis se skládá z 1 stránky', margin, pageHeight - 5);
         } else {
-            // Rozdělení na více stránek - jednoduchý přístup
+            // Rozdělení na více stránek
             let yPosition = 0;
-            const pageHeightInPx = canvas.width * (availableHeight / imgWidth);
+            let cisloStranky = 1;
 
             while (yPosition < canvas.height) {
                 if (yPosition > 0) {
@@ -690,6 +704,21 @@ async function exportovatPDF() {
 
                 doc.addImage(sliceData, 'JPEG', margin, margin, imgWidth, sliceHeight);
 
+                // Přidat číslo stránky nahoře vlevo
+                doc.setFontSize(9);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`${cisloStranky}/${celkovyPocetStranek}`, margin, margin - 3);
+
+                // Na poslední stránce přidat text o počtu stránek dole
+                if (cisloStranky === celkovyPocetStranek) {
+                    doc.setFontSize(8);
+                    doc.setTextColor(170, 170, 170);
+                    const pocetText = celkovyPocetStranek === 1 ? 'stránky' :
+                                     (celkovyPocetStranek >= 2 && celkovyPocetStranek <= 4) ? 'stránek' : 'stránek';
+                    doc.text(`Výpis se skládá z ${celkovyPocetStranek} ${pocetText}`, margin, pageHeight - 5);
+                }
+
+                cisloStranky++;
                 yPosition += pageHeightInPx;
             }
         }
