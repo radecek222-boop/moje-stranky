@@ -217,6 +217,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       border-radius: 10px;
       box-shadow: 0 4px 16px rgba(0,0,0,0.1);
       position: relative;
+      height: auto;  /* Výška podle obsahu */
     }
 
     .siroky-clanek h2 {
@@ -256,6 +257,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       grid-template-columns: 1fr 1fr;
       gap: 30px;
       margin-bottom: 40px;
+      align-items: start;  /* Každý článek má vlastní výšku podle obsahu */
     }
 
     @media (max-width: 968px) {
@@ -273,6 +275,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
       position: relative;
       transition: all 0.3s;
+      height: auto;  /* Výška podle obsahu */
     }
 
     .clanek-card:hover {
