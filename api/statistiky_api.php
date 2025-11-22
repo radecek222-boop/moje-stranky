@@ -341,7 +341,8 @@ function buildFilterWhere() {
         $prodejciConditions = [];
         foreach ($prodejci as $idx => $prodejce) {
             if ($prodejce === 'mimozarucni') {
-                $prodejciConditions[] = "r.created_by IS NULL";
+                // Mimozáruční může být NULL nebo 0
+                $prodejciConditions[] = "(r.created_by IS NULL OR r.created_by = 0)";
             } else {
                 $key = ":prodejce_$idx";
                 $prodejciConditions[] = "r.created_by = $key";

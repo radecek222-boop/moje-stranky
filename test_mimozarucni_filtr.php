@@ -25,31 +25,31 @@ try {
     $result1 = $stmt1->fetchAll(PDO::FETCH_ASSOC);
     echo "<pre>" . print_r($result1, true) . "</pre>";
     
-    // Test 2: S filtrem mimozáruční (created_by IS NULL)
-    echo "<h2>Test 2: Pouze Mimozáruční servis (created_by IS NULL)</h2>";
+    // Test 2: S filtrem mimozáruční (created_by IS NULL OR = 0)
+    echo "<h2>Test 2: Pouze Mimozáruční servis (created_by IS NULL OR = 0)</h2>";
     $stmt2 = $pdo->query("
         SELECT reklamace_id, created_by,
                COALESCE(u.name, 'Mimozáruční servis') as prodejce
         FROM wgs_reklamace r
         LEFT JOIN wgs_users u ON r.created_by = u.id
-        WHERE r.created_by IS NULL
+        WHERE (r.created_by IS NULL OR r.created_by = 0)
         ORDER BY r.created_at DESC
         LIMIT 5
     ");
     $result2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     echo "<pre>" . print_r($result2, true) . "</pre>";
-    
+
     // Test 3: S filtrem rok + měsíc + mimozáruční
     echo "<h2>Test 3: Rok 2025 + Měsíc 11 + Mimozáruční</h2>";
     $stmt3 = $pdo->query("
         SELECT reklamace_id, created_by,
                COALESCE(u.name, 'Mimozáruční servis') as prodejce,
-               created_at
+               r.created_at
         FROM wgs_reklamace r
         LEFT JOIN wgs_users u ON r.created_by = u.id
-        WHERE YEAR(r.created_at) = 2025 
+        WHERE YEAR(r.created_at) = 2025
           AND MONTH(r.created_at) = 11
-          AND r.created_by IS NULL
+          AND (r.created_by IS NULL OR r.created_by = 0)
         ORDER BY r.created_at DESC
         LIMIT 5
     ");
