@@ -51,6 +51,7 @@ if (!$isLoggedIn && !$isAdmin) {
 
   <link rel="stylesheet" href="assets/css/styles.min.css?v=20251121-02">
   <link rel="stylesheet" href="assets/css/seznam.min.css?v=20251121-02">
+  <link rel="stylesheet" href="assets/css/seznam-mobile-fixes.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.css?v=20251121-02">
 <?php if ($isAdmin): ?>
 <link rel="stylesheet" href="assets/css/admin-header.css">
