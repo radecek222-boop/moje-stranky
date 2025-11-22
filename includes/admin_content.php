@@ -197,7 +197,7 @@ $pageNames = [
                                     </div>
                                 <?php else: ?>
                                     <div style="margin-top: 1rem; color: #999; font-size: 0.85rem;">
-                                        🔒 Tento text není editovatelný
+                                        Tento text není editovatelný
                                     </div>
                                 <?php endif; ?>
 
@@ -307,7 +307,7 @@ async function saveText(textId) {
             throw new Error(result.message);
         }
     } catch (error) {
-        statusEl.innerHTML = '<span style="color: #DC3545;">❌ Chyba: ' + error.message + '</span>';
+        statusEl.innerHTML = '<span style="color: #DC3545;">Chyba: ' + error.message + '</span>';
     }
 }
 
@@ -333,6 +333,9 @@ if (DEBUG_MODE) console.log('[OK] Content section loaded');
     color: var(--cc-text-secondary);
     transition: var(--cc-transition);
     border-bottom: 2px solid transparent;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
 }
 
 .lang-tab:hover {
