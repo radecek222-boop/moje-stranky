@@ -19,19 +19,16 @@ try {
 
     // Validace vstupních dat
     $id = $_GET['id'] ?? '';
-    $jazyk = $_GET['jazyk'] ?? '';
+    $jazyk = $_GET['jazyk'] ?? 'cz';  // Vždy CZ
+    $index = (int)($_GET['index'] ?? 0);
 
     if (empty($id) || !is_numeric($id)) {
         sendJsonError('Chybí nebo neplatné ID aktuality');
     }
 
-    if (!in_array($jazyk, ['cz', 'en', 'it'])) {
-        sendJsonError('Neplatný jazyk (povoleno: cz, en, it)');
-    }
-
-    // Načíst aktualitu z databáze
+    // Načíst aktualitu z databáze - pouze CZ verze
     $stmt = $pdo->prepare("
-        SELECT obsah_cz, obsah_en, obsah_it
+        SELECT obsah_cz
         FROM wgs_natuzzi_aktuality
         WHERE id = :id
     ");
@@ -42,12 +39,40 @@ try {
         sendJsonError('Aktualita nebyla nalezena');
     }
 
-    // Vrátit obsah pro vybraný jazyk
-    $sloupec = 'obsah_' . $jazyk;
-    $obsah = $aktualita[$sloupec] ?? '';
+    $celyObsah = $aktualita['obsah_cz'] ?? '';
+
+    // Rozdělit na jednotlivé články podle ## nadpisů
+    $parts = preg_split('/(?=^## )/m', $celyObsah);
+
+    // Najít článek podle indexu
+    $obsahJednohoArticle = '';
+    $currentIndex = 0;
+
+    foreach ($parts as $part) {
+        $part = trim($part);
+        if (empty($part)) continue;
+
+        // První část je hlavní nadpis - přeskočit
+        if ($currentIndex === 0 && !preg_match('/^## /', $part)) {
+            continue;
+        }
+
+        // Pokud je to článek s ## nadpisem
+        if (preg_match('/^## /', $part)) {
+            if ($currentIndex === $index) {
+                $obsahJednohoArticle = $part;
+                break;
+            }
+            $currentIndex++;
+        }
+    }
+
+    if (empty($obsahJednohoArticle)) {
+        sendJsonError('Článek s indexem ' . $index . ' nebyl nalezen');
+    }
 
     sendJsonSuccess('Obsah načten', [
-        'obsah' => $obsah
+        'obsah' => $obsahJednohoArticle
     ]);
 
 } catch (PDOException $e) {
