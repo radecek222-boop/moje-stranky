@@ -146,13 +146,14 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     }
 
     .content-section {
-      padding: 60px 20px;
-      background: #f5f5f7;
+      padding: 0;
+      background: #ffffff;
     }
 
     .container {
-      max-width: 900px;
+      max-width: 1200px;
       margin: 0 auto;
+      padding: 0;
     }
 
     .datum-badge {
@@ -168,32 +169,51 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
 
     .aktualita-card {
       background: white;
-      padding: 50px;
-      border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      margin-bottom: 40px;
+      padding: 20px 40px;
+      border-bottom: 1px solid #e0e0e0;
+      margin-bottom: 0;
+      column-count: 2;
+      column-gap: 40px;
+      text-align: justify;
+    }
+
+    @media (max-width: 768px) {
+      .aktualita-card {
+        column-count: 1;
+        padding: 15px 20px;
+      }
     }
 
     .aktualita-obsah {
-      font-size: 1.05em;
-      line-height: 1.8;
+      font-size: 0.95em;
+      line-height: 1.6;
       color: #333;
+      font-family: Georgia, 'Times New Roman', serif;
     }
 
     .aktualita-obsah h1 {
       color: #1a1a1a;
-      font-size: 2.5em;
-      margin: 0 0 30px 0;
-      font-weight: 700;
-      border-bottom: 3px solid #333333;
-      padding-bottom: 15px;
+      font-size: 2.8em;
+      margin: 0 0 10px 0;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      column-span: all;
+      font-family: 'Poppins', sans-serif;
+      line-height: 1.1;
     }
 
     .aktualita-obsah h2 {
       color: #1a1a1a;
-      font-size: 1.8em;
-      margin: 40px 0 20px 0;
-      font-weight: 600;
+      font-size: 1.4em;
+      margin: 25px 0 10px 0;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-top: 3px solid #000;
+      padding-top: 10px;
+      column-span: all;
+      font-family: 'Poppins', sans-serif;
     }
 
     .aktualita-obsah h3 {
@@ -204,26 +224,49 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     }
 
     .aktualita-obsah p {
-      margin: 20px 0;
+      margin: 0 0 15px 0;
       text-align: justify;
+      text-indent: 20px;
+    }
+
+    .aktualita-obsah p:first-of-type {
+      font-weight: 500;
+      font-size: 1.1em;
+      text-indent: 0;
     }
 
     .aktualita-obsah strong {
       color: #1a1a1a;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .aktualita-obsah a {
-      color: #000000;
-      text-decoration: none;
-      font-weight: 500;
-      border-bottom: 1px dotted #333333;
-      transition: all 0.3s;
+      color: #1a1a1a;
+      text-decoration: underline;
+      font-weight: 600;
+      transition: all 0.2s;
     }
 
     .aktualita-obsah a:hover {
-      border-bottom-style: solid;
       color: #666666;
+    }
+
+    .aktualita-obsah img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 15px 0;
+      column-span: all;
+      border: 1px solid #ddd;
+    }
+
+    .news-image {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      margin: 20px 0;
+      border: 1px solid #e0e0e0;
+      column-span: all;
     }
 
     .info-box {
@@ -435,6 +478,9 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
  */
 function parseMarkdownToHTML(string $text): string
 {
+    // Obrázky (před odkazy!)
+    $text = preg_replace('/!\[([^\]]*)\]\(([^)]+)\)/', '<img src="$2" alt="$1" class="news-image" loading="lazy">', $text);
+
     // Nadpisy
     $text = preg_replace('/^### (.+)$/m', '<h3>$1</h3>', $text);
     $text = preg_replace('/^## (.+)$/m', '<h2>$1</h2>', $text);

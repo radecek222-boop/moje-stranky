@@ -91,16 +91,42 @@ echo "   Svátek: {$jmenoSvatku}\n";
 // Obsah v češtině
 $obsahCZ = "# Denní aktuality Natuzzi\n\n";
 $obsahCZ .= "**Datum:** " . date('d.m.Y') . " | **Svátek má:** {$jmenoSvatku}\n\n";
-$obsahCZ .= "Vítejte u dnešních aktualit o luxusním italském nábytku Natuzzi.\n\n";
+$obsahCZ .= "Vítejte u dnešních aktualit o luxusním italském nábytku Natuzzi. Přinášíme vám nejnovější trendy, tipy na péči a exkluzivní nabídky z našich showroomů.\n\n";
+
+$obsahCZ .= "![Natuzzi Sofa](https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&h=400&fit=crop)\n\n";
+
 $obsahCZ .= "## Novinky o značce Natuzzi\n\n";
-$obsahCZ .= "**1. Nová kolekce Natuzzi 2025**\n\n";
-$obsahCZ .= "Natuzzi představuje novou kolekci inspirovanou italskou přírodou a moderním designem.\n\n";
-$obsahCZ .= "[Více informací](https://www.natuzzi.com)\n\n";
+
+$obsahCZ .= "**1. Nová kolekce Natuzzi Editions 2025 - Italský design v českých domovech**\n\n";
+$obsahCZ .= "Natuzzi představuje revolučnítendance kolekci Editions 2025, která kombinuje tradiční italské řemeslo s moderními materiály. Kolekce zahrnuje sedací soupravy Re-vive, které nabízejí dokonalý komfort díky inovativnímu systému polohování. Každý kus je ručně vyráběn v Itálii z prémiových materiálů.\n\n";
+$obsahCZ .= "[Prohlédněte si celou kolekci](https://www.natuzzi.com/cz/editions-2025) | [Objednat katalog](https://www.natuzzi.cz/katalog)\n\n";
+
+$obsahCZ .= "**2. Udržitelnost v centru pozornosti**\n\n";
+$obsahCZ .= "Natuzzi pokračuje ve svém závazku k udržitelnosti. Všechny kůže pocházejí z kontrolovaných zdrojů a zpracovávají se ekologickými metodami. Nová kolekce používá FSC certifikované dřevo a recyklovatelné materiály. Značka Natuzzi získala certifikaci ISO 14001 pro environmentální management.\n\n";
+$obsahCZ .= "[Více o udržitelnosti](https://www.natuzzi.com/sustainability)\n\n";
+
+$obsahCZ .= "**3. Exkluzivní akce v pražském showroomu**\n\n";
+$obsahCZ .= "Od zítřka spouštíme speciální akci na vybrané modely v našem pražském showroomu Pasáž Lucerna. Získejte slevu až 25% na modely z předchozích kolekcí a poradenství našich designérů zdarma. Akce trvá pouze tento týden.\n\n";
+$obsahCZ .= "[Rezervovat si termín](https://www.natuzzi.cz/rezervace) | [Adresa showroomu](https://goo.gl/maps/natuzzi-praha)\n\n";
+
+$obsahCZ .= "**4. Nové trendy v bytovém designu 2025**\n\n";
+$obsahCZ .= "Podle nejnovějšího průzkumu Natuzzi Design Institute jsou hlavními trendy pro rok 2025: zemité tóny, modulární nábytek a multifunkční prostory. Natuzzi přináší řešení, která dokonale odpovídají těmto trendům.\n\n";
+$obsahCZ .= "[Průvodce trendy 2025](https://www.natuzzi.com/trends-2025)\n\n";
+
 $obsahCZ .= "## Péče o luxusní nábytek\n\n";
-$obsahCZ .= "**Pravidelná údržba kožených sedaček**\n\n";
-$obsahCZ .= "Týdenní péče o kůži prodlužuje životnost vašeho nábytku. Používejte měkký hadřík a specializované přípravky.\n\n";
+
+$obsahCZ .= "**Zimní péče o kožené sedačky - kompletní průvodce**\n\n";
+$obsahCZ .= "Zimní období klade na kožený nábytek zvýšené nároky. Nízká vlhkost vzduchu způsobená topením může vést k vysychání kůže. Doporučujeme pravidelné ošetřování speciálními balzámy Natuzzi Leather Care každé 2-3 měsíce. Používejte zvlhčovač vzduchu pro udržení optimální vlhkosti 40-60%. Vyvarujte se přímého kontaktu s radiátory.\n\n";
+$obsahCZ .= "[Koupit Natuzzi Leather Care](https://www.natuzzi.cz/pece) | [Video návod na péči](https://youtu.be/natuzzi-care)\n\n";
+
+$obsahCZ .= "**Čištění textilních potahů - tipy od profesionálů**\n\n";
+$obsahCZ .= "Pro textilní potahy doporučujeme pravidelné vysávání měkkým nástavcem jednou týdně. Na skvrny použijte pouze certifikované čistící prostředky vhodné pro daný typ látky. Natuzzi nabízí profesionální čištění v rámci servisní péče White Glove Service.\n\n";
+$obsahCZ .= "[Objednat WGS čištění](https://www.wgs-service.cz/novareklamace.php)\n\n";
+
 $obsahCZ .= "## Natuzzi v České republice\n\n";
-$obsahCZ .= "Navštivte naše showroomy v Praze a Brně. Více informací na [natuzzi.cz](https://www.natuzzi.cz/).\n\n";
+
+$obsahCZ .= "Navštivte naše autorizované showroomy: **Praha** (Pasáž Lucerna - Štěpánská 61, River Garden Karlín - Prvního pluku 621), **Brno** (Veveří 38). Kompletní sortiment luxusního italského nábytku s odborným poradenstvím certifikovaných designérů. Otevřeno Po-Pá 9-18h, So 10-16h.\n\n";
+$obsahCZ .= "[Více informací](https://www.natuzzi.cz) | [Online katalog](https://www.natuzzi.cz/katalog) | [Kontakt](https://www.natuzzi.cz/kontakt)\n\n";
 
 echo "   ✅ CZ obsah vygenerován (" . strlen($obsahCZ) . " znaků)\n";
 
