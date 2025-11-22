@@ -270,12 +270,12 @@ try {
             <h3 style="margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">Email notifikační šablony</h3>
 
             <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-left: 3px solid #0ea5e9; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; font-family: 'Poppins', sans-serif;">
-                <strong>ℹ️ Info:</strong> Tyto šablony se automaticky odesílají při různých událostech v systému. Můžete je zapínat/vypínat nebo upravovat v hlavním admin panelu (tab "Notifications").
+                <strong>Info:</strong> Tyto šablony se automaticky odesílají při různých událostech v systému. Můžete je zapínat/vypínat nebo upravovat v hlavním admin panelu (tab "Notifications").
             </div>
 
             <?php if (empty($emailSablony)): ?>
                 <div style="background: #fff3cd; border: 1px solid #ffc107; border-left: 3px solid #ffc107; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; font-family: 'Poppins', sans-serif;">
-                    <strong>⚠️ Varování:</strong> Žádné email šablony nenalezeny. Pravděpodobně není nainstalován notifikační systém. Pro instalaci přejděte do sekce "Nástroje" v hlavním admin panelu.
+                    <strong>Varování:</strong> Žádné email šablony nenalezeny. Pravděpodobně není nainstalován notifikační systém. Pro instalaci přejděte do sekce "Nástroje" v hlavním admin panelu.
                 </div>
             <?php else: ?>
                 <!-- Šablony Grid -->
@@ -364,7 +364,7 @@ try {
                 <!-- Informace o proměnných -->
                 <div style="margin-top: 1.5rem; background: #fafafa; border: 1px solid #ddd; padding: 1rem;">
                     <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600; color: #000; margin-bottom: 0.75rem;">
-                        📝 Dostupné proměnné v šablonách:
+                        Dostupné proměnné v šablonách:
                     </h4>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; font-size: 0.75rem; font-family: monospace;">
                         <div><code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd;">{{customer_name}}</code></div>
@@ -386,7 +386,6 @@ try {
         <!-- SMS -->
         <div id="section-sms" class="cc-section <?= $currentSection === 'sms' ? 'active' : '' ?>">
             <div class="cc-alert info">
-                <div class="cc-alert-icon">ℹ️</div>
                 <div class="cc-alert-content">
                     <div class="cc-alert-title">SMS Notifikace</div>
                     <div class="cc-alert-message">
@@ -426,7 +425,7 @@ try {
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: #f5f5f5; border: 1px solid #000; margin-bottom: 1rem;">
                 <div style="display: flex; gap: 1rem; align-items: center;">
                     <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; font-family: 'Poppins', sans-serif;">
-                        <input type="checkbox" id="select-all-emails" onchange="toggleSelectAllEmails()" style="width: 16px; height: 16px; cursor: pointer;">
+                        <input type="checkbox" id="select-all-emails" onchange="toggleSelectAllEmails()">
                         <span>Vybrat vše</span>
                     </label>
                     <span style="font-size: 0.85rem; color: #666; font-family: 'Poppins', sans-serif;">
@@ -446,7 +445,7 @@ try {
                     <thead>
                         <tr>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem; width: 30px;">
-                                <input type="checkbox" id="select-all-emails-header" onchange="toggleSelectAllEmails()" style="width: 16px; height: 16px; cursor: pointer;">
+                                <input type="checkbox" id="select-all-emails-header" onchange="toggleSelectAllEmails()">
                             </th>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">ID</th>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Status</th>
@@ -462,7 +461,7 @@ try {
                         <?php foreach ($emaily as $email): ?>
                         <tr style="transition: background 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fff'">
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
-                                <input type="checkbox" class="email-checkbox-item" value="<?= $email['id'] ?>" onchange="updateSelectedEmailCount()" style="width: 16px; height: 16px; cursor: pointer;">
+                                <input type="checkbox" class="email-checkbox-item" value="<?= $email['id'] ?>" onchange="updateSelectedEmailCount()">
                             </td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['id'] ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
@@ -480,9 +479,9 @@ try {
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= date('d.m.Y H:i', strtotime($email['created_at'])) ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['sent_at'] ? date('d.m.Y H:i', strtotime($email['sent_at'])) : '-' ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
-                                <span onclick="toggleEmailDetail(<?= $email['id'] ?>)" style="cursor: pointer; text-decoration: underline; color: #000; font-size: 0.8rem;">
+                                <button class="cc-btn cc-btn-sm cc-btn-link" onclick="toggleEmailDetail(<?= $email['id'] ?>)">
                                     Zobrazit
-                                </span>
+                                </button>
                                 <div id="email-detail-<?= $email['id'] ?>" style="display: none; margin-top: 0.5rem;">
                                     <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 0.5rem; font-size: 0.75rem; max-height: 150px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;">
                                         <strong>Tělo emailu:</strong><br><br>
@@ -630,7 +629,7 @@ async function saveConfig(configId, configKey) {
         if (result.status === 'success') {
             status.style.display = 'block';
             status.style.color = '#28a745';
-            status.textContent = '✓ Uloženo';
+            status.textContent = 'Uloženo';
             setTimeout(() => { status.style.display = 'none'; }, 3000);
         } else {
             throw new Error(result.message || 'Chyba při ukládání');
@@ -638,7 +637,7 @@ async function saveConfig(configId, configKey) {
     } catch (error) {
         status.style.display = 'block';
         status.style.color = '#dc3545';
-        status.textContent = '✗ ' + error.message;
+        status.textContent = 'Chyba: ' + error.message;
     }
 }
 
@@ -667,12 +666,12 @@ async function sendTestEmail() {
         const result = await response.json();
 
         if (result.status === 'success') {
-            alert('✓ Testovací email byl odeslán na ' + email);
+            alert('Testovací email byl odeslán na ' + email);
         } else {
             throw new Error(result.message || 'Chyba při odesílání');
         }
     } catch (error) {
-        alert('✗ Chyba: ' + error.message);
+        alert('Chyba: ' + error.message);
     }
 }
 
@@ -836,16 +835,15 @@ async function otevritNotifikace(sablonaId) {
                         Obsah emailu (HTML):
                     </label>
                     <textarea id="sablona-template" rows="12"
-                              style="width: 100%; padding: 0.75rem; border: 1px solid #000; font-family: monospace; font-size: 0.8rem; line-height: 1.5;">${sablona.template.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+                              style="width: 100%; padding: 0.75rem; border: 1px solid #000; font-family: monospace; line-height: 1.5;">${sablona.template.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
                     <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #666;">
-                        💡 Použijte proměnné: {{customer_name}}, {{customer_email}}, {{date}}, {{time}}, atd.
+                        Použijte proměnné: {{customer_name}}, {{customer_email}}, {{date}}, {{time}}, atd.
                     </div>
                 </div>
 
                 <!-- Aktivní -->
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <input type="checkbox" id="sablona-active" ${sablona.active ? 'checked' : ''}
-                           style="width: 18px; height: 18px; cursor: pointer;" />
+                    <input type="checkbox" id="sablona-active" ${sablona.active ? 'checked' : ''} />
                     <label for="sablona-active" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; color: #000; cursor: pointer;">
                         Šablona je aktivní
                     </label>
@@ -914,7 +912,7 @@ async function ulozitSablonu(sablonaId) {
             alertEl.style.display = 'block';
             alertEl.style.background = '#f0fdf4';
             alertEl.style.color = '#15803d';
-            alertEl.textContent = '✓ Šablona byla úspěšně uložena';
+            alertEl.textContent = 'Šablona byla úspěšně uložena';
 
             // Zavřít modal po 1.5s a obnovit stránku
             setTimeout(() => {
@@ -929,7 +927,7 @@ async function ulozitSablonu(sablonaId) {
         alertEl.style.display = 'block';
         alertEl.style.background = '#fef2f2';
         alertEl.style.color = '#991b1b';
-        alertEl.textContent = '✗ Chyba: ' + error.message;
+        alertEl.textContent = 'Chyba: ' + error.message;
     }
 }
 </script>
