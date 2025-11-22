@@ -279,10 +279,39 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       color: #666666;
     }
 
-    /* ČLÁNKY POD SEBOU BEZ MEZER */
+    /* DVA SLOUPCE S ODSKOČENÝM PRAVÝM SLOUPCEM */
     .clanky-grid {
-      display: block;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
       margin-bottom: 40px;
+      align-items: start;
+    }
+
+    /* Levý sloupec - články těsně pod sebou */
+    .column-left {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* Pravý sloupec - články těsně pod sebou s odskočeným začátkem */
+    .column-right {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 250px; /* Odskok - první článek začíná u 2/3 prvního článku vlevo */
+    }
+
+    @media (max-width: 968px) {
+      .clanky-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .column-right {
+        margin-top: 0; /* Na mobilu bez odskoku */
+      }
     }
 
     /* Každý normální článek je samostatný blok */
@@ -299,12 +328,27 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       border-bottom: none;
     }
 
-    .clanek-card:first-child {
+    /* První článek v levém sloupci */
+    .column-left .clanek-card:first-child {
       border-top-left-radius: 8px;
       border-top-right-radius: 8px;
     }
 
-    .clanek-card:last-child {
+    /* Poslední článek v levém sloupci */
+    .column-left .clanek-card:last-child {
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    /* První článek v pravém sloupci */
+    .column-right .clanek-card:first-child {
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    /* Poslední článek v pravém sloupci */
+    .column-right .clanek-card:last-child {
       border-bottom-left-radius: 8px;
       border-bottom-right-radius: 8px;
       border-bottom: 1px solid #e0e0e0;
@@ -529,23 +573,49 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         </div>
       <?php endif; ?>
 
-      <!-- GRID SE 2 SLOUPCI NORMÁLNÍCH ČLÁNKŮ -->
+      <!-- GRID SE 2 SLOUPCI NORMÁLNÍCH ČLÁNKŮ S ODSKOČENÝM PRAVÝM SLOUPCEM -->
       <?php if (!empty($normalniArticles)): ?>
         <div class="clanky-grid">
-          <?php foreach ($normalniArticles as $clanek): ?>
-            <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
+          <!-- LEVÝ SLOUPEC -->
+          <div class="column-left">
+            <?php
+            // Rozdělit články na polovinu
+            $polovinaPoctu = ceil(count($normalniArticles) / 2);
+            $levySloupec = array_slice($normalniArticles, 0, $polovinaPoctu);
 
-              <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-                <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>', <?php echo $clanek['index']; ?>)">
-                  Upravit článek
-                </button>
-              <?php endif; ?>
-
-              <div class="clanek-obsah">
-                <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
+            foreach ($levySloupec as $clanek): ?>
+              <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
+                <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
+                  <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>', <?php echo $clanek['index']; ?>)">
+                    Upravit článek
+                  </button>
+                <?php endif; ?>
+                <div class="clanek-obsah">
+                  <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
+                </div>
               </div>
-            </div>
-          <?php endforeach; ?>
+            <?php endforeach; ?>
+          </div>
+
+          <!-- PRAVÝ SLOUPEC (odskočený začátek) -->
+          <div class="column-right">
+            <?php
+            // Druhá polovina článků
+            $pravySloupec = array_slice($normalniArticles, $polovinaPoctu);
+
+            foreach ($pravySloupec as $clanek): ?>
+              <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
+                <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
+                  <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>', <?php echo $clanek['index']; ?>)">
+                    Upravit článek
+                  </button>
+                <?php endif; ?>
+                <div class="clanek-obsah">
+                  <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          </div>
         </div>
       <?php endif; ?>
 
