@@ -19,25 +19,51 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
   <title>Objednat servis | WGS</title>
 
+  <!-- Preconnect k CDN pro rychlejší načítání -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Leaflet Map -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
-  <!-- PDF.js Library pro parsování PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script>
-    // Nastavení workerSrc pro PDF.js
-    if (typeof pdfjsLib !== 'undefined') {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    }
-  </script>
+  <!-- Preload hero image pro rychlejší LCP -->
+  <link rel="preload" href="assets/img/herman-image03.webp" as="image" fetchpriority="high">
 
+  <!-- Google Fonts - použít 'optional' pro prevenci CLS (žádný layout shift) -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+
+  <!-- Critical CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/novareklamace.css">
-  <link rel="stylesheet" href="assets/css/mobile-responsive.css">
+
+  <!-- Non-critical CSS - defer -->
+  <link rel="preload" href="assets/css/mobile-responsive.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="assets/css/mobile-responsive.min.css"></noscript>
+
+  <!-- Leaflet Map - lazy load (pouze když je potřeba) -->
+  <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /></noscript>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+
+  <!-- PDF.js Library - lazy load (pouze když user uploaduje PDF) -->
+  <script>
+    // Lazy load PDF.js pouze když je potřeba
+    window.loadPDFJS = function() {
+      if (window.pdfjsLib) return Promise.resolve(); // Už načteno
+
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+        script.onload = () => {
+          if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          }
+          resolve();
+        };
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    };
+  </script>
 
 
 <style>
@@ -310,7 +336,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     
     <?php if (!$isLoggedIn): ?>
     <div id="calculatorBox" style="padding: 1.5rem; margin-bottom: 2rem; border: 2px solid #000000; background: #ffffff; display: none;">
-      <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 300; letter-spacing: 0.1em; margin-bottom: 0.8rem; color: #000000; text-transform: uppercase;" data-lang-cs="Orientační cena servisu" data-lang-en="Estimated Service Price" data-lang-it="Prezzo Stimato del Servizio">Orientační cena servisu</h3>
+      <h2 style="font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 300; letter-spacing: 0.1em; margin-bottom: 0.8rem; color: #000000; text-transform: uppercase;" data-lang-cs="Orientační cena servisu" data-lang-en="Estimated Service Price" data-lang-it="Prezzo Stimato del Servizio">Orientační cena servisu</h2>
       <p style="color: #666; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;" data-lang-cs="Spočítejte si předběžnou cenu mimozáručního servisu včetně dopravy ještě před odesláním objednávky." data-lang-en="Calculate the preliminary price of out-of-warranty service including shipping before submitting your order." data-lang-it="Calcola il prezzo preliminare del servizio fuori garanzia inclusa la spedizione prima di inviare l'ordine.">Spočítejte si předběžnou cenu mimozáručního servisu včetně dopravy ještě před odesláním objednávky.</p>
       <a href="mimozarucniceny.php" style="display: inline-block; padding: 0.7rem 2rem; background: #000000; color: white; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; border: 2px solid #000000;" data-lang-cs="Kalkulačka ceny" data-lang-en="Price Calculator" data-lang-it="Calcolatore di Prezzo">Kalkulačka ceny</a>
     </div>
@@ -371,11 +397,12 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
           <div class="form-group">
             <label class="form-label" for="cislo" data-lang-cs="Číslo objednávky/reklamace" data-lang-en="Order/Claim Number" data-lang-it="Numero Ordine/Reclamo">Číslo objednávky/reklamace<?php if ($isLoggedIn) echo " *"; ?></label>
             <input type="text" class="form-control" id="cislo" name="cislo"<?php if ($isLoggedIn) { echo " required"; } else { echo " readonly placeholder='nevyplňuje se' style='background-color: #f5f5f5; cursor: not-allowed;'"; } ?>>
-            <select id="fakturace_firma" name="fakturace_firma" style="margin-top:0.5rem; width:33%; height:2rem; font-size:0.85rem; padding:0.3rem; border:1px solid #ddd; border-radius:4px;">
+            <label for="fakturace_firma" style="display:block; margin-top:0.5rem; font-size:0.85rem; font-weight:600;">Fakturace:</label>
+            <select id="fakturace_firma" name="fakturace_firma" style="width:33%; height:2rem; font-size:0.85rem; padding:0.3rem; border:1px solid #ddd; border-radius:4px;" aria-label="Výběr státu pro fakturaci">
               <option value="CZ" selected>🇨🇿 CZ</option>
               <option value="SK">🇸🇰 SK</option>
             </select>
-            <p id="faktura_hint" style="margin-top:0.3rem; font-size:0.8rem; color:#059669; font-style:italic;">Tato objednávka se bude fakturovat na CZ firmu</p>
+            <p id="faktura_hint" style="margin-top:0.3rem; font-size:0.8rem; color:#047857; font-style:italic;">Tato objednávka se bude fakturovat na CZ firmu</p>
           </div>
           <div class="form-group">
             <label class="form-label" for="datum_prodeje" data-lang-cs="Datum prodeje" data-lang-en="Sale Date" data-lang-it="Data di Vendita">Datum prodeje<?php if ($isLoggedIn) echo " *"; ?></label>
@@ -581,7 +608,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 <script src="assets/js/logger.js" defer></script>
 <script src="assets/js/wgs-map.js" defer></script>
 <script src="assets/js/csrf-auto-inject.js" defer></script>
-<script src="assets/js/novareklamace.js?v=1762458261" defer></script>
+<script src="assets/js/novareklamace.min.js?v=1762458261" defer></script>
 </body>
 </html>
 <script>

@@ -1008,9 +1008,11 @@ const WGS = {
    * @param {File} pdfFile - PDF soubor
    */
   async zpracujPovereniPDF(pdfFile) {
-    // Kontrola dostupnosti PDF.js
-    if (typeof pdfjsLib === 'undefined') {
-      throw new Error('PDF.js library není načtena');
+    // Lazy load PDF.js library pouze když je potřeba
+    try {
+      await window.loadPDFJS();
+    } catch (error) {
+      throw new Error('Nepodařilo se načíst PDF.js library');
     }
 
     // Načtení PDF souboru
