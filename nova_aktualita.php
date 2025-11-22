@@ -276,7 +276,7 @@ $csrfToken = generateCSRFToken();
 
 <div class="container">
   <div class="header">
-    <h1>📝 Vytvořit novou aktualitu</h1>
+    <h1>Vytvořit novou aktualitu</h1>
     <p style="margin: 0; color: #666;">Vyplňte formulář ve všech třech jazycích a přidejte fotografie.</p>
   </div>
 
@@ -285,7 +285,7 @@ $csrfToken = generateCSRFToken();
 
     <!-- Základní informace -->
     <div class="form-card">
-      <h2 style="margin: 0 0 20px 0;">📅 Základní informace</h2>
+      <h2 style="margin: 0 0 20px 0;">Základní informace</h2>
 
       <div class="form-group">
         <label for="datum">Datum <span class="required">*</span></label>
@@ -305,10 +305,10 @@ $csrfToken = generateCSRFToken();
 
     <!-- Jazykové verze -->
     <div class="form-card">
-      <h2 style="margin: 0 0 20px 0;">🌍 Obsah ve třech jazycích</h2>
+      <h2 style="margin: 0 0 20px 0;">Obsah ve třech jazycích</h2>
 
       <div class="info-box">
-        <strong>ℹ️ Důležité:</strong> Vyplňte obsah ve všech třech jazycích. Použijte Markdown formát pro formátování textu.
+        <strong>Důležité:</strong> Vyplňte obsah ve všech třech jazycích. Použijte Markdown formát pro formátování textu.
       </div>
 
       <div class="language-tabs">
@@ -320,7 +320,7 @@ $csrfToken = generateCSRFToken();
       <!-- Česká verze -->
       <div id="tab-cz" class="tab-content active">
         <div class="markdown-help">
-          <strong>💡 Markdown formát:</strong>
+          <strong>Markdown formát:</strong>
           <code># Nadpis</code> = H1 |
           <code>## Nadpis</code> = H2 |
           <code>**tučně**</code> = <strong>tučně</strong> |
@@ -340,7 +340,7 @@ Vítejte u dnešních aktualit o luxusním italském nábytku Natuzzi..."></text
       <!-- Anglická verze -->
       <div id="tab-en" class="tab-content">
         <div class="markdown-help">
-          <strong>💡 Markdown format:</strong>
+          <strong>Markdown format:</strong>
           <code># Heading</code> = H1 |
           <code>## Heading</code> = H2 |
           <code>**bold**</code> = <strong>bold</strong> |
@@ -360,7 +360,7 @@ Welcome to today's news about luxury Italian furniture Natuzzi..."></textarea>
       <!-- Italská verze -->
       <div id="tab-it" class="tab-content">
         <div class="markdown-help">
-          <strong>💡 Formato Markdown:</strong>
+          <strong>Formato Markdown:</strong>
           <code># Titolo</code> = H1 |
           <code>## Titolo</code> = H2 |
           <code>**grassetto**</code> = <strong>grassetto</strong> |
@@ -380,13 +380,12 @@ Benvenuti alle notizie di oggi sui mobili italiani di lusso Natuzzi..."></textar
 
     <!-- Fotografie -->
     <div class="form-card">
-      <h2 style="margin: 0 0 20px 0;">📷 Fotografie</h2>
+      <h2 style="margin: 0 0 20px 0;">Fotografie</h2>
       <p style="margin: 0 0 15px 0; color: #666;">
         Přidejte fotografie k článku. Fotky budou automaticky přizpůsobeny velikosti.
       </p>
 
       <div class="photo-upload" id="photoUploadArea">
-        <p style="margin: 0 0 10px 0; font-size: 3em;">📸</p>
         <p style="margin: 0; font-weight: 600;">Klikněte nebo přetáhněte fotografie</p>
         <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #666;">Podporované formáty: JPG, PNG, WebP (max 5 MB)</p>
         <input type="file" id="fotoInput" name="fotografie[]" multiple accept="image/*" style="display: none;">
@@ -399,10 +398,10 @@ Benvenuti alle notizie di oggi sui mobili italiani di lusso Natuzzi..."></textar
     <div class="form-card">
       <div class="submit-section">
         <button type="button" class="btn btn-cancel" onclick="window.location.href='admin.php'">
-          ❌ Zrušit
+          Zrušit
         </button>
         <button type="submit" class="btn btn-submit">
-          💾 Vytvořit aktualitu
+          Vytvořit aktualitu
         </button>
       </div>
     </div>
@@ -501,7 +500,7 @@ Benvenuti alle notizie di oggi sui mobili italiani di lusso Natuzzi..."></textar
 
     const submitBtn = form.querySelector('.btn-submit');
     submitBtn.disabled = true;
-    submitBtn.textContent = '⏳ Vytvářím...';
+    submitBtn.textContent = 'Vytvářím...';
 
     try {
       const formData = new FormData(form);
@@ -519,17 +518,17 @@ Benvenuti alle notizie di oggi sui mobili italiani di lusso Natuzzi..."></textar
       const result = await response.json();
 
       if (result.status === 'success') {
-        alert('✅ Aktualita byla úspěšně vytvořena!\n\nBudete přesměrováni na stránku s aktualitami.');
+        alert('Aktualita byla úspěšně vytvořena!\n\nBudete přesměrováni na stránku s aktualitami.');
         window.location.href = 'aktuality.php?datum=' + formData.get('datum');
       } else {
-        alert('❌ Chyba: ' + result.message);
+        alert('Chyba: ' + result.message);
         submitBtn.disabled = false;
-        submitBtn.textContent = '💾 Vytvořit aktualitu';
+        submitBtn.textContent = 'Vytvořit aktualitu';
       }
     } catch (error) {
-      alert('❌ Síťová chyba: ' + error.message);
+      alert('Síťová chyba: ' + error.message);
       submitBtn.disabled = false;
-      submitBtn.textContent = '💾 Vytvořit aktualitu';
+      submitBtn.textContent = 'Vytvořit aktualitu';
     }
   });
 })();
