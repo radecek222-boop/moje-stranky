@@ -579,10 +579,35 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
           <!-- LEVÝ SLOUPEC -->
           <div class="column-left">
             <?php
-            // Rozdělit články na polovinu
-            $polovinaPoctu = ceil(count($normalniArticles) / 2);
-            $levySloupec = array_slice($normalniArticles, 0, $polovinaPoctu);
+            // INTELIGENTNÍ ROZDĚLENÍ ČLÁNKŮ podle délky textu
+            // Spočítat délku každého článku
+            foreach ($normalniArticles as $key => $clanek) {
+                $normalniArticles[$key]['delka'] = strlen($clanek['obsah']);
+            }
 
+            // Seřadit podle délky (sestupně) pro lepší rozdělení
+            usort($normalniArticles, function($a, $b) {
+                return $b['delka'] - $a['delka'];
+            });
+
+            // Rozdělit na 2 sloupce tak, aby celková délka byla vyrovnaná
+            $levySloupec = [];
+            $pravySloupec = [];
+            $levaSuma = 0;
+            $pravaSuma = 0;
+
+            foreach ($normalniArticles as $clanek) {
+                // Přidat do sloupce s menší celkovou délkou
+                if ($levaSuma <= $pravaSuma) {
+                    $levySloupec[] = $clanek;
+                    $levaSuma += $clanek['delka'];
+                } else {
+                    $pravySloupec[] = $clanek;
+                    $pravaSuma += $clanek['delka'];
+                }
+            }
+
+            // Zobrazit levý sloupec
             foreach ($levySloupec as $clanek): ?>
               <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
                 <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
@@ -600,9 +625,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
           <!-- PRAVÝ SLOUPEC (odskočený začátek) -->
           <div class="column-right">
             <?php
-            // Druhá polovina článků
-            $pravySloupec = array_slice($normalniArticles, $polovinaPoctu);
-
+            // Zobrazit pravý sloupec
             foreach ($pravySloupec as $clanek): ?>
               <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
                 <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
