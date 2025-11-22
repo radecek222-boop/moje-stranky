@@ -520,7 +520,7 @@ function resetovitFiltry() {
 }
 
 /**
- * Exportovat do PDF
+ * Exportovat do PDF - použití AutoTable pro správné UTF-8
  */
 async function exportovatPDF() {
     try {
@@ -550,110 +550,79 @@ async function exportovatPDF() {
         // Nadpis
         doc.setFontSize(16);
         doc.setTextColor(45, 80, 22);
-        doc.text('Statistiky a reporty - WGS', 15, 15);
+        doc.text('Statistiky a reporty - WGS', 14, 15);
 
         // Období
         const rok = document.getElementById('filter-year').value || 'Všechny';
-        const mesic = document.getElementById('filter-month').value || 'Všechny';
+        const mesicValue = document.getElementById('filter-month').value;
+        const mesicNazvy = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
+                           'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
+        const mesic = mesicValue ? mesicNazvy[parseInt(mesicValue)] : 'Všechny';
+
         doc.setFontSize(10);
         doc.setTextColor(100, 100, 100);
-        doc.text(`Rok: ${rok} | Měsíc: ${mesic} | Celkem: ${zakazky.length} zakázek`, 15, 22);
+        doc.text(`Rok: ${rok} | Měsíc: ${mesic} | Celkem: ${zakazky.length} zakázek`, 14, 22);
 
-        // Tabulka - hlavička
-        let yPos = 30;
-        doc.setFontSize(8);
-        doc.setTextColor(45, 80, 22);
-        doc.setFont('helvetica', 'bold');
+        // Připravit data pro tabulku
+        const tabulkaData = zakazky.map(z => [
+            z.reklamace_id || '-',
+            z.adresa || '-',
+            z.model || '-',
+            z.technik || '-',
+            z.prodejce || '-',
+            parseFloat(z.castka_celkem).toFixed(2) + ' €',
+            parseFloat(z.vydelek_technika).toFixed(2) + ' €',
+            z.zeme || '-',
+            z.datum || '-'
+        ]);
 
-        const colWidths = {
-            id: 20,
-            adresa: 50,
-            model: 35,
-            technik: 30,
-            prodejce: 30,
-            castka: 20,
-            vydelek: 20,
-            zeme: 15,
-            datum: 20
-        };
+        // Vytvořit tabulku s AutoTable
+        doc.autoTable({
+            startY: 28,
+            head: [['Reklamace ID', 'Adresa', 'Model', 'Technik', 'Prodejce', 'Částka', 'Výdělek (33%)', 'Země', 'Datum']],
+            body: tabulkaData,
+            theme: 'grid',
+            styles: {
+                font: 'helvetica',
+                fontSize: 8,
+                cellPadding: 2,
+                overflow: 'linebreak',
+                halign: 'left'
+            },
+            headStyles: {
+                fillColor: [45, 80, 22],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: 9
+            },
+            columnStyles: {
+                0: { cellWidth: 25 },  // Reklamace ID
+                1: { cellWidth: 60 },  // Adresa
+                2: { cellWidth: 25 },  // Model
+                3: { cellWidth: 30 },  // Technik
+                4: { cellWidth: 35 },  // Prodejce
+                5: { cellWidth: 22, halign: 'right' },  // Částka
+                6: { cellWidth: 22, halign: 'right' },  // Výdělek
+                7: { cellWidth: 12, halign: 'center' }, // Země
+                8: { cellWidth: 22, halign: 'center' }  // Datum
+            },
+            margin: { left: 14, right: 14 },
+            didDrawPage: function(data) {
+                // Patička na každé stránce
+                const pageCount = doc.internal.getNumberOfPages();
+                const pageNum = doc.internal.getCurrentPageInfo().pageNumber;
 
-        let xPos = 15;
-        doc.text('Rekl. ID', xPos, yPos); xPos += colWidths.id;
-        doc.text('Adresa', xPos, yPos); xPos += colWidths.adresa;
-        doc.text('Model', xPos, yPos); xPos += colWidths.model;
-        doc.text('Technik', xPos, yPos); xPos += colWidths.technik;
-        doc.text('Prodejce', xPos, yPos); xPos += colWidths.prodejce;
-        doc.text('Částka', xPos, yPos); xPos += colWidths.castka;
-        doc.text('Výdělek', xPos, yPos); xPos += colWidths.vydelek;
-        doc.text('Země', xPos, yPos); xPos += colWidths.zeme;
-        doc.text('Datum', xPos, yPos);
-
-        yPos += 2;
-        doc.setDrawColor(45, 80, 22);
-        doc.line(15, yPos, 280, yPos);
-
-        // Tabulka - data
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(7);
-
-        zakazky.forEach((z, index) => {
-            yPos += 5;
-
-            // Kontrola přetečení stránky
-            if (yPos > 190) {
-                doc.addPage();
-                yPos = 15;
-
-                // Opakovat hlavičku
                 doc.setFontSize(8);
-                doc.setTextColor(45, 80, 22);
-                doc.setFont('helvetica', 'bold');
-
-                xPos = 15;
-                doc.text('Rekl. ID', xPos, yPos); xPos += colWidths.id;
-                doc.text('Adresa', xPos, yPos); xPos += colWidths.adresa;
-                doc.text('Model', xPos, yPos); xPos += colWidths.model;
-                doc.text('Technik', xPos, yPos); xPos += colWidths.technik;
-                doc.text('Prodejce', xPos, yPos); xPos += colWidths.prodejce;
-                doc.text('Částka', xPos, yPos); xPos += colWidths.castka;
-                doc.text('Výdělek', xPos, yPos); xPos += colWidths.vydelek;
-                doc.text('Země', xPos, yPos); xPos += colWidths.zeme;
-                doc.text('Datum', xPos, yPos);
-
-                yPos += 2;
-                doc.line(15, yPos, 280, yPos);
-
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(0, 0, 0);
-                doc.setFontSize(7);
-                yPos += 5;
+                doc.setTextColor(150, 150, 150);
+                doc.text(`Strana ${pageNum} z ${pageCount}`, doc.internal.pageSize.width / 2,
+                         doc.internal.pageSize.height - 10, { align: 'center' });
+                doc.text(`Vygenerováno: ${new Date().toLocaleDateString('cs-CZ')}`, 14,
+                         doc.internal.pageSize.height - 10);
             }
-
-            xPos = 15;
-            doc.text((z.reklamace_id || '-').substring(0, 12), xPos, yPos); xPos += colWidths.id;
-            doc.text((z.adresa || '-').substring(0, 30), xPos, yPos); xPos += colWidths.adresa;
-            doc.text((z.model || '-').substring(0, 20), xPos, yPos); xPos += colWidths.model;
-            doc.text((z.technik || '-').substring(0, 18), xPos, yPos); xPos += colWidths.technik;
-            doc.text((z.prodejce || '-').substring(0, 18), xPos, yPos); xPos += colWidths.prodejce;
-            doc.text(parseFloat(z.castka_celkem).toFixed(2) + ' €', xPos, yPos); xPos += colWidths.castka;
-            doc.text(parseFloat(z.vydelek_technika).toFixed(2) + ' €', xPos, yPos); xPos += colWidths.vydelek;
-            doc.text(z.zeme, xPos, yPos); xPos += colWidths.zeme;
-            doc.text(z.datum, xPos, yPos);
         });
 
-        // Patička
-        const pageCount = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i);
-            doc.setFontSize(8);
-            doc.setTextColor(150, 150, 150);
-            doc.text(`Strana ${i} z ${pageCount}`, 148, 200, { align: 'center' });
-            doc.text(`Vygenerováno: ${new Date().toLocaleDateString('cs-CZ')}`, 15, 200);
-        }
-
         // Stáhnout PDF
-        const nazevSouboru = `statistiky_${rok}_${mesic}_${new Date().toISOString().split('T')[0]}.pdf`;
+        const nazevSouboru = `statistiky_${rok}_${mesicValue || 'vsechny'}_${new Date().toISOString().split('T')[0]}.pdf`;
         doc.save(nazevSouboru);
 
         console.log('✅ PDF exportováno:', nazevSouboru);

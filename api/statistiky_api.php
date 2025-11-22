@@ -247,10 +247,10 @@ function getCharty($pdo) {
     $stmtModely->execute($params);
     $modely = $stmtModely->fetchAll(PDO::FETCH_ASSOC);
 
-    // 2. Lokality - extrahujeme město z adresy
+    // 2. Lokality - extrahujeme město z adresy (druhá část po čárce)
     $stmtMesta = $pdo->prepare("
         SELECT
-            TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(r.adresa, ',', -1), '\n', 1)) as mesto,
+            TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(r.adresa, ',', 2), ',', -1)) as mesto,
             COUNT(*) as pocet
         FROM wgs_reklamace r
         $where
@@ -341,10 +341,10 @@ function buildFilterWhere() {
         $prodejciConditions = [];
         foreach ($prodejci as $idx => $prodejce) {
             if ($prodejce === 'mimozarucni') {
-                $prodejciConditions[] = "created_by IS NULL";
+                $prodejciConditions[] = "r.created_by IS NULL";
             } else {
                 $key = ":prodejce_$idx";
-                $prodejciConditions[] = "created_by = $key";
+                $prodejciConditions[] = "r.created_by = $key";
                 $params[$key] = (int)$prodejce;
             }
         }
@@ -361,7 +361,7 @@ function buildFilterWhere() {
         $techniciConditions = [];
         foreach ($technici as $idx => $technik) {
             $key = ":technik_$idx";
-            $techniciConditions[] = "zpracoval_id = $key";
+            $techniciConditions[] = "r.zpracoval_id = $key";
             $params[$key] = (int)$technik;
         }
 
@@ -377,8 +377,8 @@ function buildFilterWhere() {
         $zemeConditions = [];
         foreach ($zeme as $idx => $z) {
             $key = ":zeme_$idx";
-            $zemeConditions[] = "LOWER(fakturace_firma) = $key";
-            $params[$key] = strtolower($z);
+            $zemeConditions[] = "UPPER(COALESCE(r.fakturace_firma, 'cz')) = $key";
+            $params[$key] = strtoupper($z);
         }
 
         if (!empty($zemeConditions)) {
