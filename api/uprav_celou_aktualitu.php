@@ -67,8 +67,7 @@ try {
     // Aktualizovat obsah
     $stmtUpdate = $pdo->prepare("
         UPDATE wgs_natuzzi_aktuality
-        SET {$sloupecObsahu} = :obsah,
-            upraveno_at = NOW()
+        SET {$sloupecObsahu} = :obsah
         WHERE id = :id
     ");
 
