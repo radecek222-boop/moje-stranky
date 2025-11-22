@@ -619,37 +619,46 @@ async function exportovatPDF() {
         const margin = 10;
 
         const availableWidth = pageWidth - (margin * 2);
-        const canvasRatio = canvas.height / canvas.width;
+        const availableHeight = pageHeight - (margin * 2);
 
+        // Vypočítat rozměry obrázku
+        const canvasRatio = canvas.height / canvas.width;
         let imgWidth = availableWidth;
         let imgHeight = imgWidth * canvasRatio;
 
-        // Pokud je obrázek větší než stránka, rozdělit na více stránek
-        let yOffset = margin;
-        let remainingHeight = imgHeight;
+        // Pokud se vejde na jednu stránku
+        if (imgHeight <= availableHeight) {
+            doc.addImage(imgData, 'JPEG', margin, margin, imgWidth, imgHeight);
+        } else {
+            // Rozdělení na více stránek - jednoduchý přístup
+            let yPosition = 0;
+            const pageHeightInPx = canvas.width * (availableHeight / imgWidth);
 
-        while (remainingHeight > 0) {
-            const availablePageHeight = pageHeight - (margin * 2);
-            const sliceHeight = Math.min(remainingHeight, availablePageHeight);
+            while (yPosition < canvas.height) {
+                if (yPosition > 0) {
+                    doc.addPage();
+                }
 
-            if (yOffset > margin) {
-                doc.addPage();
-                yOffset = margin;
+                const sliceCanvas = document.createElement('canvas');
+                sliceCanvas.width = canvas.width;
+                sliceCanvas.height = Math.min(pageHeightInPx, canvas.height - yPosition);
+
+                const ctx = sliceCanvas.getContext('2d');
+                ctx.drawImage(
+                    canvas,
+                    0, yPosition,  // source x, y
+                    canvas.width, sliceCanvas.height,  // source width, height
+                    0, 0,  // dest x, y
+                    canvas.width, sliceCanvas.height  // dest width, height
+                );
+
+                const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.95);
+                const sliceHeight = (sliceCanvas.height / canvas.width) * imgWidth;
+
+                doc.addImage(sliceData, 'JPEG', margin, margin, imgWidth, sliceHeight);
+
+                yPosition += pageHeightInPx;
             }
-
-            const sourceY = (imgHeight - remainingHeight) / canvasRatio * canvas.width / imgWidth;
-            const sourceHeight = sliceHeight / canvasRatio * canvas.width / imgWidth;
-
-            // Vytvořit slice canvas
-            const sliceCanvas = document.createElement('canvas');
-            sliceCanvas.width = canvas.width;
-            sliceCanvas.height = sourceHeight;
-            const ctx = sliceCanvas.getContext('2d');
-            ctx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
-
-            doc.addImage(sliceCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', margin, yOffset, imgWidth, sliceHeight);
-
-            remainingHeight -= sliceHeight;
         }
 
         // Stáhnout PDF
