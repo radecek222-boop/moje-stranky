@@ -570,6 +570,9 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
   }
 
   function zobrazitEditor(aktualitaId, jazyk, aktualniObsah) {
+    // Parsovat markdown do polí formuláře
+    const parsovanaData = parseMarkdownDoFormulare(aktualniObsah);
+
     // Vytvořit velký editor dialog
     const editorDialog = document.createElement('div');
     editorDialog.style.cssText = `
@@ -583,7 +586,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       box-shadow: 0 10px 40px rgba(0,0,0,0.3);
       z-index: 10000;
       width: 90%;
-      max-width: 1200px;
+      max-width: 900px;
       max-height: 90vh;
       overflow-y: auto;
     `;
@@ -592,52 +595,167 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       <h2 style="margin: 0 0 20px 0; color: #1a1a1a;">
         Upravit článek - ${jazyk.toUpperCase()}
       </h2>
-      <p style="margin: 0 0 15px 0; color: #666;">
-        Editujte obsah článku v Markdown formátu. Změny se uloží do databáze a budou okamžitě viditelné.
+      <p style="margin: 0 0 20px 0; color: #666; background: #e8f4fd; padding: 12px; border-radius: 5px; border-left: 4px solid #0066cc;">
+        Jednoduše vyplňte pole níže. Nemusíte nic formátovat - prostě napište text.
       </p>
-      <div style="margin-bottom: 15px; padding: 15px; background: #f0f8ff; border-left: 4px solid #1a1a1a; border-radius: 5px;">
-        <strong>Markdown formát:</strong><br>
-        <code>## ŠIROKÝ: Název</code> = široký článek přes celou šířku<br>
-        <code>## Název</code> = normální článek (2 sloupce)<br>
-        <code>**tučně**</code> = <strong>tučně</strong> | <code>[text](url)</code> = odkaz
+
+      <!-- TYP ČLÁNKU -->
+      <div style="margin-bottom: 25px; padding: 15px; background: #f9f9f9; border-radius: 5px;">
+        <label style="display: flex; align-items: center; cursor: pointer; font-weight: 600; font-size: 15px;">
+          <input type="checkbox" id="jeSiroky" style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer;">
+          Široký článek přes celou šířku stránky
+        </label>
+        <p style="margin: 8px 0 0 30px; color: #666; font-size: 13px;">
+          Zaškrtněte, pokud má být článek zobrazený přes celou šířku (ne ve 2 sloupcích).
+        </p>
       </div>
-      <textarea id="editorTextarea" style="
-        width: 100%;
-        min-height: 500px;
-        padding: 15px;
-        border: 2px solid #333;
-        border-radius: 5px;
-        font-family: 'Courier New', monospace;
-        font-size: 14px;
-        line-height: 1.6;
-        resize: vertical;
-      "></textarea>
+
+      <!-- NADPIS -->
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; font-weight: bold; color: #333; margin-bottom: 8px; font-size: 14px;">
+          Hlavní nadpis článku:
+        </label>
+        <input type="text" id="nadpisArticle" placeholder="např. NOVINKY O ZNAČCE NATUZZI" style="
+          width: 100%;
+          padding: 12px;
+          border: 2px solid #ddd;
+          border-radius: 5px;
+          font-size: 14px;
+          box-sizing: border-box;
+        ">
+      </div>
+
+      <!-- TEXT ČLÁNKU -->
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; font-weight: bold; color: #333; margin-bottom: 8px; font-size: 14px;">
+          Hlavní text článku (napište normálně, jako do Wordu):
+        </label>
+        <textarea id="textArticle" placeholder="Napište text vašeho článku... Prostě pište normálně, nemusíte nic formátovat." style="
+          width: 100%;
+          padding: 12px;
+          border: 2px solid #ddd;
+          border-radius: 5px;
+          font-size: 14px;
+          box-sizing: border-box;
+          min-height: 200px;
+          resize: vertical;
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+        "></textarea>
+      </div>
+
+      <!-- SEKCE NADPIS -->
+      <div style="background: #1a1a1a; color: white; padding: 12px 20px; margin: 25px 0 15px 0; border-radius: 5px; font-weight: bold;">
+        ODKAZY (volitelné)
+      </div>
+
+      <!-- ODKAZ 1 -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+        <div>
+          <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">ODKAZ 1 - Text odkazu:</label>
+          <input type="text" id="odkaz1Text" placeholder="např. Více informací" style="
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+          ">
+        </div>
+        <div>
+          <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">ODKAZ 1 - URL adresa:</label>
+          <input type="text" id="odkaz1Url" placeholder="např. https://www.natuzzi.cz/info" style="
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+          ">
+        </div>
+      </div>
+
+      <!-- ODKAZ 2 -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+        <div>
+          <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">ODKAZ 2 - Text odkazu:</label>
+          <input type="text" id="odkaz2Text" placeholder="např. Objednat katalog" style="
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+          ">
+        </div>
+        <div>
+          <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">ODKAZ 2 - URL adresa:</label>
+          <input type="text" id="odkaz2Url" placeholder="např. https://www.natuzzi.cz/katalog" style="
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+          ">
+        </div>
+      </div>
+
+      <!-- ODKAZ 3 -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <div>
+          <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">ODKAZ 3 - Text odkazu:</label>
+          <input type="text" id="odkaz3Text" placeholder="např. Kontakt" style="
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+          ">
+        </div>
+        <div>
+          <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">ODKAZ 3 - URL adresa:</label>
+          <input type="text" id="odkaz3Url" placeholder="např. https://www.natuzzi.cz/kontakt" style="
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+          ">
+        </div>
+      </div>
+
       <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
         <strong>Pozor:</strong> Tato změna přepíše celý obsah článku v jazyce <strong>${jazyk.toUpperCase()}</strong>.
         Ostatní jazyky zůstanou nezměněny.
       </div>
-      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
         <button id="cancelEditorBtn" style="
-          padding: 12px 24px;
+          padding: 14px 28px;
           background: #6c757d;
           color: white;
           border: none;
           border-radius: 5px;
           cursor: pointer;
           font-weight: 600;
+          font-size: 15px;
         ">
           Zrušit
         </button>
         <button id="saveEditorBtn" style="
-          padding: 12px 24px;
+          padding: 14px 28px;
           background: #28a745;
           color: white;
           border: none;
           border-radius: 5px;
           cursor: pointer;
           font-weight: 600;
+          font-size: 15px;
         ">
-          Uložit změny
+          Uložit článek
         </button>
       </div>
     `;
@@ -657,10 +775,19 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     document.body.appendChild(overlay);
     document.body.appendChild(editorDialog);
 
-    // Nastavit obsah textarea
-    const textarea = document.getElementById('editorTextarea');
-    textarea.value = aktualniObsah;
-    textarea.focus();
+    // Vyplnit pole z parsovaných dat
+    document.getElementById('jeSiroky').checked = parsovanaData.jeSiroky;
+    document.getElementById('nadpisArticle').value = parsovanaData.nadpis;
+    document.getElementById('textArticle').value = parsovanaData.text;
+    document.getElementById('odkaz1Text').value = parsovanaData.odkazy[0]?.text || '';
+    document.getElementById('odkaz1Url').value = parsovanaData.odkazy[0]?.url || '';
+    document.getElementById('odkaz2Text').value = parsovanaData.odkazy[1]?.text || '';
+    document.getElementById('odkaz2Url').value = parsovanaData.odkazy[1]?.url || '';
+    document.getElementById('odkaz3Text').value = parsovanaData.odkazy[2]?.text || '';
+    document.getElementById('odkaz3Url').value = parsovanaData.odkazy[2]?.url || '';
+
+    // Focus na nadpis
+    document.getElementById('nadpisArticle').focus();
 
     // Zavřít editor
     function zavritEditor() {
@@ -673,12 +800,39 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
     // Uložit změny
     document.getElementById('saveEditorBtn').addEventListener('click', async function() {
-      const novyObsah = textarea.value.trim();
+      const nadpis = document.getElementById('nadpisArticle').value.trim();
+      const text = document.getElementById('textArticle').value.trim();
 
-      if (!novyObsah) {
-        alert('Obsah článku nesmí být prázdný!');
+      if (!nadpis) {
+        alert('Musíte vyplnit nadpis článku!');
         return;
       }
+
+      if (!text) {
+        alert('Musíte vyplnit text článku!');
+        return;
+      }
+
+      // Sestavit markdown z polí formuláře
+      const novyObsah = parseFormularDoMarkdown({
+        jeSiroky: document.getElementById('jeSiroky').checked,
+        nadpis: nadpis,
+        text: text,
+        odkazy: [
+          {
+            text: document.getElementById('odkaz1Text').value.trim(),
+            url: document.getElementById('odkaz1Url').value.trim()
+          },
+          {
+            text: document.getElementById('odkaz2Text').value.trim(),
+            url: document.getElementById('odkaz2Url').value.trim()
+          },
+          {
+            text: document.getElementById('odkaz3Text').value.trim(),
+            url: document.getElementById('odkaz3Url').value.trim()
+          }
+        ]
+      });
 
       if (!confirm(`Opravdu chcete uložit změny?\n\nPřepíše se celý obsah článku v jazyce ${jazyk.toUpperCase()}.`)) {
         return;
@@ -696,14 +850,87 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         } else {
           alert('Chyba při ukládání: ' + response.message);
           this.disabled = false;
-          this.textContent = 'Uložit změny';
+          this.textContent = 'Uložit článek';
         }
       } catch (error) {
         alert('Síťová chyba: ' + error.message);
         this.disabled = false;
-        this.textContent = 'Uložit změny';
+        this.textContent = 'Uložit článek';
       }
     });
+  }
+
+  // Parsovat markdown do objektu s poli formuláře
+  function parseMarkdownDoFormulare(markdown) {
+    const result = {
+      jeSiroky: false,
+      nadpis: '',
+      text: '',
+      odkazy: []
+    };
+
+    // Kontrola zda je široký článek
+    const jeSiroky = /^## ŠIROKÝ:/im.test(markdown);
+    result.jeSiroky = jeSiroky;
+
+    // Získat nadpis (po ##, odstranit ŠIROKÝ: pokud existuje)
+    const nadpisMatch = markdown.match(/^## (?:ŠIROKÝ:\s*)?(.+)$/m);
+    if (nadpisMatch) {
+      result.nadpis = nadpisMatch[1].trim();
+    }
+
+    // Odstranit nadpis z textu
+    let zbyvajiciText = markdown.replace(/^## (?:ŠIROKÝ:\s*)?(.+)$/m, '').trim();
+
+    // Extrahovat odkazy (na konci textu)
+    const odkazyPattern = /\[([^\]]+)\]\(([^)]+)\)/g;
+    const nalezeneOdkazy = [];
+    let odkazMatch;
+
+    while ((odkazMatch = odkazyPattern.exec(zbyvajiciText)) !== null) {
+      nalezeneOdkazy.push({
+        text: odkazMatch[1],
+        url: odkazMatch[2],
+        fullMatch: odkazMatch[0]
+      });
+    }
+
+    // Odstranit odkazy a oddělovače z textu
+    nalezeneOdkazy.forEach(odkaz => {
+      zbyvajiciText = zbyvajiciText.replace(odkaz.fullMatch, '');
+    });
+    zbyvajiciText = zbyvajiciText.replace(/\s*\|\s*/g, '').trim();
+
+    result.text = zbyvajiciText;
+    result.odkazy = nalezeneOdkazy.map(o => ({ text: o.text, url: o.url }));
+
+    return result;
+  }
+
+  // Převést data z formuláře na markdown
+  function parseFormularDoMarkdown(data) {
+    let markdown = '';
+
+    // Nadpis s prefixem ŠIROKÝ: pokud je zaškrtnuto
+    if (data.jeSiroky) {
+      markdown = '## ŠIROKÝ: ' + data.nadpis + '\n\n';
+    } else {
+      markdown = '## ' + data.nadpis + '\n\n';
+    }
+
+    // Text
+    markdown += data.text + '\n\n';
+
+    // Přidat odkazy pokud existují
+    const platneOdkazy = data.odkazy.filter(o => o.text && o.url);
+    if (platneOdkazy.length > 0) {
+      const odkazyText = platneOdkazy
+        .map(o => `[${o.text}](${o.url})`)
+        .join(' | ');
+      markdown += odkazyText;
+    }
+
+    return markdown.trim();
   }
 
   async function ulozitCelyClanek(aktualitaId, jazyk, novyObsah) {

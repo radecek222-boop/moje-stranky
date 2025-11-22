@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - Jednoduchý editor článku</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    .editor-container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #1a1a1a;
+      margin-top: 0;
+    }
+
+    .pole {
+      margin-bottom: 25px;
+    }
+
+    .pole-popisek {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 14px;
+      display: block;
+    }
+
+    .pole input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .pole textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+      box-sizing: border-box;
+      min-height: 150px;
+      resize: vertical;
+      font-family: Arial, sans-serif;
+    }
+
+    .pole input:focus,
+    .pole textarea:focus {
+      outline: none;
+      border-color: #1a1a1a;
+    }
+
+    .odkaz-skupina {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+    }
+
+    .odkaz-pole {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .odkaz-pole label {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .odkaz-pole input {
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .tlacitka {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+
+    .tlacitko {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tlacitko-ulozit {
+      background: #28a745;
+      color: white;
+    }
+
+    .tlacitko-ulozit:hover {
+      background: #218838;
+    }
+
+    .tlacitko-zrusit {
+      background: #6c757d;
+      color: white;
+    }
+
+    .tlacitko-zrusit:hover {
+      background: #5a6268;
+    }
+
+    .sekce-nadpis {
+      background: #1a1a1a;
+      color: white;
+      padding: 12px 20px;
+      margin: 30px 0 20px 0;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .napoveda {
+      background: #e8f4fd;
+      border-left: 4px solid #0066cc;
+      padding: 12px 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      font-size: 13px;
+      color: #333;
+    }
+
+    @media (max-width: 768px) {
+      .odkaz-skupina {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="editor-container">
+  <h1>Jednoduchý editor článku</h1>
+
+  <div class="napoveda">
+    Jen vyplňte pole níže. Nemusíte nic formátovat - prostě napište text.
+  </div>
+
+  <div class="sekce-nadpis">NADPIS ČLÁNKU</div>
+
+  <div class="pole">
+    <label class="pole-popisek">Hlavní nadpis článku:</label>
+    <input type="text" id="nadpis" placeholder="např. NOVINKY O ZNAČCE NATUZZI">
+  </div>
+
+  <div class="sekce-nadpis">TEXT ČLÁNKU</div>
+
+  <div class="pole">
+    <label class="pole-popisek">Hlavní text článku (napište normálně, jako do Wordu):</label>
+    <textarea id="text" placeholder="Napište text vašeho článku... Prostě pište normálně, nemusíte nic formátovat."></textarea>
+  </div>
+
+  <div class="sekce-nadpis">ODKAZY (volitelné)</div>
+
+  <div class="odkaz-skupina">
+    <div class="odkaz-pole">
+      <label>ODKAZ 1 - Text odkazu:</label>
+      <input type="text" id="odkaz1_text" placeholder="např. Více informací">
+    </div>
+    <div class="odkaz-pole">
+      <label>ODKAZ 1 - URL adresa:</label>
+      <input type="text" id="odkaz1_url" placeholder="např. https://www.natuzzi.cz/info">
+    </div>
+  </div>
+
+  <div class="odkaz-skupina">
+    <div class="odkaz-pole">
+      <label>ODKAZ 2 - Text odkazu:</label>
+      <input type="text" id="odkaz2_text" placeholder="např. Objednat katalog">
+    </div>
+    <div class="odkaz-pole">
+      <label>ODKAZ 2 - URL adresa:</label>
+      <input type="text" id="odkaz2_url" placeholder="např. https://www.natuzzi.cz/katalog">
+    </div>
+  </div>
+
+  <div class="odkaz-skupina">
+    <div class="odkaz-pole">
+      <label>ODKAZ 3 - Text odkazu:</label>
+      <input type="text" id="odkaz3_text" placeholder="např. Kontakt">
+    </div>
+    <div class="odkaz-pole">
+      <label>ODKAZ 3 - URL adresa:</label>
+      <input type="text" id="odkaz3_url" placeholder="např. https://www.natuzzi.cz/kontakt">
+    </div>
+  </div>
+
+  <div class="tlacitka">
+    <button class="tlacitko tlacitko-zrusit" onclick="zrusit()">Zrušit</button>
+    <button class="tlacitko tlacitko-ulozit" onclick="ulozit()">Uložit článek</button>
+  </div>
+
+  <div id="vysledek" style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 5px; display: none;">
+    <h3>Výsledný markdown:</h3>
+    <pre id="vysledek-text" style="background: white; padding: 15px; border-radius: 5px; overflow-x: auto;"></pre>
+  </div>
+</div>
+
+<script>
+function zrusit() {
+  if (confirm('Opravdu chcete zrušit změny?')) {
+    document.getElementById('nadpis').value = '';
+    document.getElementById('text').value = '';
+    document.getElementById('odkaz1_text').value = '';
+    document.getElementById('odkaz1_url').value = '';
+    document.getElementById('odkaz2_text').value = '';
+    document.getElementById('odkaz2_url').value = '';
+    document.getElementById('odkaz3_text').value = '';
+    document.getElementById('odkaz3_url').value = '';
+    document.getElementById('vysledek').style.display = 'none';
+  }
+}
+
+function ulozit() {
+  // Získat data z polí
+  const nadpis = document.getElementById('nadpis').value.trim();
+  const text = document.getElementById('text').value.trim();
+  const odkaz1Text = document.getElementById('odkaz1_text').value.trim();
+  const odkaz1Url = document.getElementById('odkaz1_url').value.trim();
+  const odkaz2Text = document.getElementById('odkaz2_text').value.trim();
+  const odkaz2Url = document.getElementById('odkaz2_url').value.trim();
+  const odkaz3Text = document.getElementById('odkaz3_text').value.trim();
+  const odkaz3Url = document.getElementById('odkaz3_url').value.trim();
+
+  // Kontrola
+  if (!nadpis) {
+    alert('Musíte vyplnit nadpis článku!');
+    return;
+  }
+  if (!text) {
+    alert('Musíte vyplnit text článku!');
+    return;
+  }
+
+  // Sestavit markdown
+  let markdown = '## ' + nadpis + '\n\n';
+  markdown += text + '\n\n';
+
+  // Přidat odkazy pokud existují
+  if (odkaz1Text && odkaz1Url) {
+    markdown += '[' + odkaz1Text + '](' + odkaz1Url + ')';
+    if (odkaz2Text && odkaz2Url) {
+      markdown += ' | ';
+    }
+  }
+  if (odkaz2Text && odkaz2Url) {
+    markdown += '[' + odkaz2Text + '](' + odkaz2Url + ')';
+    if (odkaz3Text && odkaz3Url) {
+      markdown += ' | ';
+    }
+  }
+  if (odkaz3Text && odkaz3Url) {
+    markdown += '[' + odkaz3Text + '](' + odkaz3Url + ')';
+  }
+
+  // Zobrazit výsledek
+  document.getElementById('vysledek-text').textContent = markdown;
+  document.getElementById('vysledek').style.display = 'block';
+
+  // V reálné aplikaci by se tady zavolalo API pro uložení
+  console.log('Markdown:', markdown);
+  alert('Článek uložen! (v reálné aplikaci by se teď uložil do databáze)');
+}
+</script>
+
+</body>
+</html>
