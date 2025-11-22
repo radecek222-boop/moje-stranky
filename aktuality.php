@@ -348,6 +348,23 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
           echo $jazyk === 'en' ? 'Name Day' : ($jazyk === 'it' ? 'Onomastico' : 'Svátek');
           ?>: <?php echo htmlspecialchars($aktualita['svatek_cz']); ?>
         <?php endif; ?>
+
+        <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
+          <button id="upravitClanekBtn" style="
+            margin-left: 20px;
+            padding: 8px 16px;
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.3s;
+          " onmouseover="this.style.background='#333'" onmouseout="this.style.background='#1a1a1a'">
+            ✏️ Upravit článek
+          </button>
+        <?php endif; ?>
       </div>
 
       <div class="aktualita-card">
@@ -602,6 +619,170 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  // ========================================
+  // EDITOR CELÉHO ČLÁNKU
+  // ========================================
+  const upravitBtn = document.getElementById('upravitClanekBtn');
+  if (upravitBtn) {
+    upravitBtn.addEventListener('click', function() {
+      otevritEditorClanku();
+    });
+  }
+
+  function otevritEditorClanku() {
+    // Získat aktuální markdown obsah
+    const aktualniObsah = `<?php echo addslashes(str_replace(["\r\n", "\n", "\r"], "\\n", $obsah)); ?>`;
+
+    // Vytvořit velký editor dialog
+    const editorDialog = document.createElement('div');
+    editorDialog.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      z-index: 10000;
+      width: 90%;
+      max-width: 1200px;
+      max-height: 90vh;
+      overflow-y: auto;
+    `;
+
+    editorDialog.innerHTML = `
+      <h2 style="margin: 0 0 20px 0; color: #1a1a1a;">
+        📝 Upravit článek - <?php echo strtoupper($jazyk); ?>
+      </h2>
+      <p style="margin: 0 0 15px 0; color: #666;">
+        Editujte obsah článku v Markdown formátu. Změny se uloží do databáze a budou okamžitě viditelné.
+      </p>
+      <div style="margin-bottom: 15px; padding: 15px; background: #f0f8ff; border-left: 4px solid #1a1a1a; border-radius: 5px;">
+        <strong>💡 Markdown formát:</strong><br>
+        <code># Nadpis</code> = H1 | <code>## Nadpis</code> = H2 | <code>**tučně**</code> = <strong>tučně</strong><br>
+        <code>[text](url)</code> = odkaz | <code>![popis](url)</code> = obrázek
+      </div>
+      <textarea id="editorTextarea" style="
+        width: 100%;
+        min-height: 500px;
+        padding: 15px;
+        border: 2px solid #333;
+        border-radius: 5px;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        line-height: 1.6;
+        resize: vertical;
+      "></textarea>
+      <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
+        <strong>⚠️ Pozor:</strong> Tato změna přepíše celý obsah článku v jazyce <strong><?php echo strtoupper($jazyk); ?></strong>.
+        Ostatní jazyky zůstanou nezměněny.
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+        <button id="cancelEditorBtn" style="
+          padding: 12px 24px;
+          background: #6c757d;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          font-weight: 600;
+        ">
+          ❌ Zrušit
+        </button>
+        <button id="saveEditorBtn" style="
+          padding: 12px 24px;
+          background: #28a745;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          font-weight: 600;
+        ">
+          💾 Uložit změny
+        </button>
+      </div>
+    `;
+
+    // Overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 9999;
+    `;
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(editorDialog);
+
+    // Nastavit obsah textarea
+    const textarea = document.getElementById('editorTextarea');
+    textarea.value = aktualniObsah;
+    textarea.focus();
+
+    // Zavřít editor
+    function zavritEditor() {
+      overlay.remove();
+      editorDialog.remove();
+    }
+
+    document.getElementById('cancelEditorBtn').addEventListener('click', zavritEditor);
+    overlay.addEventListener('click', zavritEditor);
+
+    // Uložit změny
+    document.getElementById('saveEditorBtn').addEventListener('click', async function() {
+      const novyObsah = textarea.value.trim();
+
+      if (!novyObsah) {
+        alert('❌ Obsah článku nesmí být prázdný!');
+        return;
+      }
+
+      if (!confirm(`Opravdu chcete uložit změny?\n\nPřepíše se celý obsah článku v jazyce <?php echo strtoupper($jazyk); ?>.`)) {
+        return;
+      }
+
+      this.disabled = true;
+      this.textContent = '⏳ Ukládám...';
+
+      try {
+        const response = await ulozitCelyClanek(novyObsah);
+
+        if (response.status === 'success') {
+          alert('✅ Článek byl úspěšně uložen!\n\nStránka se nyní obnoví.');
+          window.location.reload();
+        } else {
+          alert('❌ Chyba při ukládání: ' + response.message);
+          this.disabled = false;
+          this.textContent = '💾 Uložit změny';
+        }
+      } catch (error) {
+        alert('❌ Síťová chyba: ' + error.message);
+        this.disabled = false;
+        this.textContent = '💾 Uložit změny';
+      }
+    });
+  }
+
+  async function ulozitCelyClanek(novyObsah) {
+    const formData = new FormData();
+    formData.append('csrf_token', csrfToken);
+    formData.append('aktualita_id', aktualitaId);
+    formData.append('jazyk', jazyk);
+    formData.append('novy_obsah', novyObsah);
+
+    const response = await fetch('/api/uprav_celou_aktualitu.php', {
+      method: 'POST',
+      body: formData
+    });
+
+    return await response.json();
   }
 })();
 </script>
