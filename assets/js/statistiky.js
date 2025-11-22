@@ -309,7 +309,7 @@ function renderTabulka(data) {
     data.zakazky.forEach(z => {
         rows += `
             <tr>
-                <td>${z.reklamace_id || '-'}</td>
+                <td>${z.cislo_reklamace || '-'}</td>
                 <td>${z.adresa || '-'}</td>
                 <td>${z.model || '-'}</td>
                 <td>${z.technik}</td>
@@ -584,7 +584,7 @@ async function exportovatPDF() {
                 <tbody>
                     ${zakazky.map((z, idx) => `
                         <tr style="background: ${idx % 2 === 0 ? '#fff' : '#f5f5f5'};">
-                            <td style="padding: 4px; border: 1px solid #ddd;">${z.reklamace_id || '-'}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd;">${z.cislo_reklamace || '-'}</td>
                             <td style="padding: 4px; border: 1px solid #ddd;">${z.adresa || '-'}</td>
                             <td style="padding: 4px; border: 1px solid #ddd;">${z.model || '-'}</td>
                             <td style="padding: 4px; border: 1px solid #ddd;">${z.technik || '-'}</td>
