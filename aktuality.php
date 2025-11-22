@@ -277,7 +277,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     /* Každý normální článek je samostatný blok */
     .clanek-card {
       background: white;
-      padding: 25px;
+      padding: 10px;
       border: none;
       position: relative;
       transition: all 0.3s;
