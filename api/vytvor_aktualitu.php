@@ -20,15 +20,15 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     sendJsonError('Přístup odepřen - pouze pro administrátory', 403);
 }
 
-// Rate limiting
-require_once __DIR__ . '/../includes/rate_limiter.php';
-$rateLimiter = new RateLimiter($pdo);
-if (!$rateLimiter->checkLimit('create_aktualita', $_SERVER['REMOTE_ADDR'], 10, 3600)) {
-    sendJsonError('Příliš mnoho požadavků na vytvoření', 429);
-}
-
 try {
     $pdo = getDbConnection();
+
+    // Rate limiting
+    require_once __DIR__ . '/../includes/rate_limiter.php';
+    $rateLimiter = new RateLimiter($pdo);
+    if (!$rateLimiter->checkLimit('create_aktualita', $_SERVER['REMOTE_ADDR'], 10, 3600)) {
+        sendJsonError('Příliš mnoho požadavků na vytvoření', 429);
+    }
 
     // Validace vstupních dat
     $datum = $_POST['datum'] ?? '';
