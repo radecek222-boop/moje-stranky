@@ -598,14 +598,14 @@ async function exportovatPDF() {
                 </tbody>
             </table>
             <div style="position: absolute; bottom: 100px; right: 30px; text-align: right;">
-                <div style="background: #f0f0f0; border: 1px solid #999; padding: 4px 8px; margin-bottom: 4px; font-size: 9px; font-weight: bold; display: inline-block;">
+                <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; margin-bottom: 8px; font-size: 18px; font-weight: bold; display: inline-block;">
                     Počet zakázek celkem: <span style="color: #333;">${zakazky.length} ks</span>
                 </div><br>
-                <div style="background: #f0f0f0; border: 1px solid #999; padding: 4px 8px; margin-bottom: 4px; font-size: 9px; font-weight: bold; display: inline-block;">
+                <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; margin-bottom: 8px; font-size: 18px; font-weight: bold; display: inline-block;">
                     Celkem za zakázky k fakturaci: <span style="color: #333;">${celkemCastka.toFixed(2)} €</span>
                 </div><br>
                 ${zobrazitOdmenu ? `
-                    <div style="background: #f0f0f0; border: 1px solid #999; padding: 4px 8px; font-size: 9px; font-weight: bold; display: inline-block;">
+                    <div style="background: #f0f0f0; border: 1px solid #999; padding: 8px 16px; font-size: 18px; font-weight: bold; display: inline-block;">
                         Výdělek celkem technik: <span style="color: #333;">${celkemVydelek.toFixed(2)} €</span>
                     </div><br>
                 ` : ''}
