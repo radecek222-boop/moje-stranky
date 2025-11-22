@@ -104,14 +104,17 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
         // Toto je článek s ## nadpisem - přidělit mu index a inkrementovat
         if (preg_match('/^## ŠIROKÝ:/i', $part)) {
-            $sirokyArticle = [
-                'obsah' => $part,
-                'aktualita_id' => $aktualitaId,
-                'jazyk' => $jazyk,
-                'index' => $articleIndex
-            ];
+            // Vzít POUZE PRVNÍ široký článek, ostatní ignorovat
+            if ($sirokyArticle === null) {
+                $sirokyArticle = [
+                    'obsah' => $part,
+                    'aktualita_id' => $aktualitaId,
+                    'jazyk' => $jazyk,
+                    'index' => $articleIndex
+                ];
+            }
         } else {
-            // Normální článek
+            // Normální článek (nemá "ŠIROKÝ:")
             $normalniArticles[] = [
                 'obsah' => $part,
                 'aktualita_id' => $aktualitaId,
