@@ -1,13 +1,13 @@
 <?php
 /**
  * Aktuality o značce Natuzzi
- * Zobrazení všech 24 článků v náhodném pořadí
+ * Zobrazení 1 širokého článku + 6 menších článků v náhodném pořadí
  */
 
 require_once __DIR__ . '/init.php';
 require_once __DIR__ . '/includes/csrf_helper.php';
 
-// Získat všechny automaticky generované články (ne admin vytvořené)
+// Získat aktuality z databáze
 try {
     $pdo = getDbConnection();
 
@@ -28,7 +28,6 @@ try {
             // Pokud datum neexistuje, zobrazit nejnovější
             $stmt = $pdo->query("
                 SELECT * FROM wgs_natuzzi_aktuality
-                WHERE created_by_admin = FALSE
                 ORDER BY datum DESC
                 LIMIT 1
             ");
@@ -38,7 +37,6 @@ try {
         // Zobrazit nejnovější aktualitu
         $stmt = $pdo->query("
             SELECT * FROM wgs_natuzzi_aktuality
-            WHERE created_by_admin = FALSE
             ORDER BY datum DESC
             LIMIT 1
         ");
@@ -57,12 +55,13 @@ try {
         $celyObsah = $hlavniAktualita[$obsahSloupec] ?? '';
 
         // Parse článků z markdown obsahu
-        $clanky = parseClankyzObsahu($celyObsah, $hlavniAktualita['id'], $jazyk);
+        list($sirokyArticle, $normalniArticles) = parseClankyzObsahu($celyObsah, $hlavniAktualita['id'], $jazyk);
 
-        // Náhodně zamíchat pořadí článků (SEO optimalizace)
-        shuffle($clanky);
+        // Náhodně zamíchat pořadí POUZE normálních článků (ne široký)
+        shuffle($normalniArticles);
     } else {
-        $clanky = [];
+        $sirokyArticle = null;
+        $normalniArticles = [];
         $datumAktuality = null;
     }
 
@@ -70,7 +69,6 @@ try {
     $stmtArchiv = $pdo->query("
         SELECT datum, svatek_cz
         FROM wgs_natuzzi_aktuality
-        WHERE created_by_admin = FALSE
         ORDER BY datum DESC
         LIMIT 30
     ");
@@ -78,14 +76,16 @@ try {
 
 } catch (Exception $e) {
     error_log("Chyba při načítání aktualit: " . $e->getMessage());
-    $clanky = [];
+    $sirokyArticle = null;
+    $normalniArticles = [];
     $archiv = [];
     $datumAktuality = null;
 }
 
-// Funkce pro rozdělení obsahu na jednotlivé články
+// Funkce pro rozdělení obsahu na široký článek + normální články
 function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
-    $clanky = [];
+    $sirokyArticle = null;
+    $normalniArticles = [];
 
     // Rozdělit podle ## nadpisů (každý článek začíná ##)
     $parts = preg_split('/(?=^## )/m', $obsah);
@@ -94,20 +94,31 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
         $part = trim($part);
         if (empty($part)) continue;
 
-        // První část je hlavní nadpis + úvodní text
+        // První část je hlavní nadpis + úvodní text - přeskočit
         if ($index === 0 && !preg_match('/^## /', $part)) {
-            continue; // Přeskočit hlavní nadpis
+            continue;
         }
 
-        $clanky[] = [
-            'obsah' => $part,
-            'aktualita_id' => $aktualitaId,
-            'jazyk' => $jazyk,
-            'index' => $index
-        ];
+        // Pokud obsahuje "ŠIROKÝ:", je to široký článek
+        if (preg_match('/^## ŠIROKÝ:/i', $part)) {
+            $sirokyArticle = [
+                'obsah' => $part,
+                'aktualita_id' => $aktualitaId,
+                'jazyk' => $jazyk,
+                'index' => $index
+            ];
+        } else {
+            // Normální článek
+            $normalniArticles[] = [
+                'obsah' => $part,
+                'aktualita_id' => $aktualitaId,
+                'jazyk' => $jazyk,
+                'index' => $index
+            ];
+        }
     }
 
-    return $clanky;
+    return [$sirokyArticle, $normalniArticles];
 }
 
 $jazyk = $_GET['lang'] ?? 'cz';
@@ -150,24 +161,28 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
   <style>
     /* Aktuality specifické styly */
     .hero {
-      background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+      background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1920&h=500&fit=crop');
+      background-size: cover;
+      background-position: center;
       color: white;
-      padding: 80px 20px;
+      padding: 100px 20px;
       text-align: center;
       margin-bottom: 40px;
     }
 
     .hero-title {
-      font-size: 3em;
+      font-size: 3.5em;
       font-weight: 700;
-      margin: 0 0 10px 0;
+      margin: 0 0 15px 0;
       letter-spacing: -1px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
 
     .hero-subtitle {
-      font-size: 1.2em;
-      opacity: 0.9;
+      font-size: 1.4em;
+      opacity: 0.95;
       font-weight: 300;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
     }
 
     .container {
@@ -188,7 +203,49 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       text-align: center;
     }
 
-    /* DVA SLOUPCE ČLÁNKŮ */
+    /* ŠIROKÝ ČLÁNEK */
+    .siroky-clanek {
+      background: white;
+      padding: 35px 40px;
+      margin-bottom: 40px;
+      border: 2px solid #1a1a1a;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .siroky-clanek h2 {
+      color: #1a1a1a;
+      font-size: 2em;
+      margin: 0 0 20px 0;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-bottom: 4px solid #1a1a1a;
+      padding-bottom: 15px;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .siroky-clanek p {
+      font-size: 1.1em;
+      line-height: 1.8;
+      color: #333;
+      margin: 0 0 15px 0;
+    }
+
+    .siroky-clanek a {
+      color: #1a1a1a;
+      text-decoration: underline;
+      font-weight: 600;
+      transition: all 0.2s;
+      margin-right: 15px;
+    }
+
+    .siroky-clanek a:hover {
+      color: #666666;
+    }
+
+    /* DVA SLOUPCE NORMÁLNÍCH ČLÁNKŮ */
     .clanky-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -202,7 +259,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       }
     }
 
-    /* Každý článek je samostatný blok */
+    /* Každý normální článek je samostatný blok */
     .clanek-card {
       background: white;
       padding: 25px;
@@ -338,8 +395,16 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     }
 
     @media (max-width: 768px) {
+      .hero {
+        padding: 60px 20px;
+      }
+
       .hero-title {
         font-size: 2em;
+      }
+
+      .siroky-clanek {
+        padding: 25px 20px;
       }
 
       .clanek-card {
@@ -355,7 +420,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
-<!-- HERO SEKCE -->
+<!-- HERO SEKCE S FOTKOU -->
 <main>
 <section class="hero">
   <div class="hero-content">
@@ -384,7 +449,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 <section class="content-section">
   <div class="container">
 
-    <?php if (!empty($clanky)): ?>
+    <?php if ($sirokyArticle || !empty($normalniArticles)): ?>
 
       <div class="datum-badge">
         <?php
@@ -399,23 +464,41 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         <?php endif; ?>
       </div>
 
-      <!-- GRID SE 2 SLOUPCI ČLÁNKŮ -->
-      <div class="clanky-grid">
-        <?php foreach ($clanky as $clanek): ?>
-          <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>">
+      <!-- ŠIROKÝ ČLÁNEK NAHOŘE -->
+      <?php if ($sirokyArticle): ?>
+        <div class="siroky-clanek" data-aktualita-id="<?php echo $sirokyArticle['aktualita_id']; ?>" data-jazyk="<?php echo $sirokyArticle['jazyk']; ?>">
 
-            <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-              <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>')">
-                Upravit článek
-              </button>
-            <?php endif; ?>
+          <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
+            <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $sirokyArticle['aktualita_id']; ?>, '<?php echo $sirokyArticle['jazyk']; ?>')">
+              Upravit článek
+            </button>
+          <?php endif; ?>
 
-            <div class="clanek-obsah">
-              <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
-            </div>
+          <div class="clanek-obsah">
+            <?php echo parseMarkdownToHTML($sirokyArticle['obsah']); ?>
           </div>
-        <?php endforeach; ?>
-      </div>
+        </div>
+      <?php endif; ?>
+
+      <!-- GRID SE 2 SLOUPCI NORMÁLNÍCH ČLÁNKŮ -->
+      <?php if (!empty($normalniArticles)): ?>
+        <div class="clanky-grid">
+          <?php foreach ($normalniArticles as $clanek): ?>
+            <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>">
+
+              <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
+                <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>')">
+                  Upravit článek
+                </button>
+              <?php endif; ?>
+
+              <div class="clanek-obsah">
+                <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
 
       <?php if (!empty($archiv) && count($archiv) > 1): ?>
         <div class="archiv-section">
@@ -473,13 +556,6 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
   };
 
   function otevritEditorClanku(aktualitaId, jazyk) {
-    // Najít článek v DOM
-    const clanek = document.querySelector(`.clanek-card[data-aktualita-id="${aktualitaId}"]`);
-    if (!clanek) {
-      alert('Chyba: článek nebyl nalezen');
-      return;
-    }
-
     // Získat aktuální markdown obsah z databáze
     fetch(`/api/nacti_aktualitu.php?id=${aktualitaId}&jazyk=${jazyk}`)
       .then(r => r.json())
@@ -494,6 +570,9 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
   }
 
   function zobrazitEditor(aktualitaId, jazyk, aktualniObsah) {
+    // Parsovat markdown do polí formuláře
+    const parsovanaData = parseMarkdownDoFormulare(aktualniObsah);
+
     // Vytvořit velký editor dialog
     const editorDialog = document.createElement('div');
     editorDialog.style.cssText = `
@@ -507,7 +586,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       box-shadow: 0 10px 40px rgba(0,0,0,0.3);
       z-index: 10000;
       width: 90%;
-      max-width: 1200px;
+      max-width: 900px;
       max-height: 90vh;
       overflow-y: auto;
     `;
@@ -516,51 +595,167 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       <h2 style="margin: 0 0 20px 0; color: #1a1a1a;">
         Upravit článek - ${jazyk.toUpperCase()}
       </h2>
-      <p style="margin: 0 0 15px 0; color: #666;">
-        Editujte obsah článku v Markdown formátu. Změny se uloží do databáze a budou okamžitě viditelné.
+      <p style="margin: 0 0 20px 0; color: #666; background: #e8f4fd; padding: 12px; border-radius: 5px; border-left: 4px solid #0066cc;">
+        Jednoduše vyplňte pole níže. Nemusíte nic formátovat - prostě napište text.
       </p>
-      <div style="margin-bottom: 15px; padding: 15px; background: #f0f8ff; border-left: 4px solid #1a1a1a; border-radius: 5px;">
-        <strong>Markdown formát:</strong><br>
-        <code># Nadpis</code> = H1 | <code>## Nadpis</code> = H2 | <code>**tučně**</code> = <strong>tučně</strong><br>
-        <code>[text](url)</code> = odkaz | <code>![popis](url)</code> = obrázek
+
+      <!-- TYP ČLÁNKU -->
+      <div style="margin-bottom: 25px; padding: 15px; background: #f9f9f9; border-radius: 5px;">
+        <label style="display: flex; align-items: center; cursor: pointer; font-weight: 600; font-size: 15px;">
+          <input type="checkbox" id="jeSiroky" style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer;">
+          Široký článek přes celou šířku stránky
+        </label>
+        <p style="margin: 8px 0 0 30px; color: #666; font-size: 13px;">
+          Zaškrtněte, pokud má být článek zobrazený přes celou šířku (ne ve 2 sloupcích).
+        </p>
       </div>
-      <textarea id="editorTextarea" style="
-        width: 100%;
-        min-height: 500px;
-        padding: 15px;
-        border: 2px solid #333;
-        border-radius: 5px;
-        font-family: 'Courier New', monospace;
-        font-size: 14px;
-        line-height: 1.6;
-        resize: vertical;
-      "></textarea>
+
+      <!-- NADPIS -->
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; font-weight: bold; color: #333; margin-bottom: 8px; font-size: 14px;">
+          Hlavní nadpis článku:
+        </label>
+        <input type="text" id="nadpisArticle" placeholder="např. NOVINKY O ZNAČCE NATUZZI" style="
+          width: 100%;
+          padding: 12px;
+          border: 2px solid #ddd;
+          border-radius: 5px;
+          font-size: 14px;
+          box-sizing: border-box;
+        ">
+      </div>
+
+      <!-- TEXT ČLÁNKU -->
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; font-weight: bold; color: #333; margin-bottom: 8px; font-size: 14px;">
+          Hlavní text článku (napište normálně, jako do Wordu):
+        </label>
+        <textarea id="textArticle" placeholder="Napište text vašeho článku... Prostě pište normálně, nemusíte nic formátovat." style="
+          width: 100%;
+          padding: 12px;
+          border: 2px solid #ddd;
+          border-radius: 5px;
+          font-size: 14px;
+          box-sizing: border-box;
+          min-height: 200px;
+          resize: vertical;
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+        "></textarea>
+      </div>
+
+      <!-- SEKCE NADPIS -->
+      <div style="background: #1a1a1a; color: white; padding: 12px 20px; margin: 25px 0 15px 0; border-radius: 5px; font-weight: bold;">
+        ODKAZY (volitelné)
+      </div>
+
+      <!-- ODKAZ 1 -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+        <div>
+          <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">ODKAZ 1 - Text odkazu:</label>
+          <input type="text" id="odkaz1Text" placeholder="např. Více informací" style="
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+          ">
+        </div>
+        <div>
+          <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">ODKAZ 1 - URL adresa:</label>
+          <input type="text" id="odkaz1Url" placeholder="např. https://www.natuzzi.cz/info" style="
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+          ">
+        </div>
+      </div>
+
+      <!-- ODKAZ 2 -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+        <div>
+          <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">ODKAZ 2 - Text odkazu:</label>
+          <input type="text" id="odkaz2Text" placeholder="např. Objednat katalog" style="
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+          ">
+        </div>
+        <div>
+          <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">ODKAZ 2 - URL adresa:</label>
+          <input type="text" id="odkaz2Url" placeholder="např. https://www.natuzzi.cz/katalog" style="
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+          ">
+        </div>
+      </div>
+
+      <!-- ODKAZ 3 -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <div>
+          <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">ODKAZ 3 - Text odkazu:</label>
+          <input type="text" id="odkaz3Text" placeholder="např. Kontakt" style="
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+          ">
+        </div>
+        <div>
+          <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">ODKAZ 3 - URL adresa:</label>
+          <input type="text" id="odkaz3Url" placeholder="např. https://www.natuzzi.cz/kontakt" style="
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+          ">
+        </div>
+      </div>
+
       <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
         <strong>Pozor:</strong> Tato změna přepíše celý obsah článku v jazyce <strong>${jazyk.toUpperCase()}</strong>.
         Ostatní jazyky zůstanou nezměněny.
       </div>
-      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
         <button id="cancelEditorBtn" style="
-          padding: 12px 24px;
+          padding: 14px 28px;
           background: #6c757d;
           color: white;
           border: none;
           border-radius: 5px;
           cursor: pointer;
           font-weight: 600;
+          font-size: 15px;
         ">
           Zrušit
         </button>
         <button id="saveEditorBtn" style="
-          padding: 12px 24px;
+          padding: 14px 28px;
           background: #28a745;
           color: white;
           border: none;
           border-radius: 5px;
           cursor: pointer;
           font-weight: 600;
+          font-size: 15px;
         ">
-          Uložit změny
+          Uložit článek
         </button>
       </div>
     `;
@@ -580,10 +775,19 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     document.body.appendChild(overlay);
     document.body.appendChild(editorDialog);
 
-    // Nastavit obsah textarea
-    const textarea = document.getElementById('editorTextarea');
-    textarea.value = aktualniObsah;
-    textarea.focus();
+    // Vyplnit pole z parsovaných dat
+    document.getElementById('jeSiroky').checked = parsovanaData.jeSiroky;
+    document.getElementById('nadpisArticle').value = parsovanaData.nadpis;
+    document.getElementById('textArticle').value = parsovanaData.text;
+    document.getElementById('odkaz1Text').value = parsovanaData.odkazy[0]?.text || '';
+    document.getElementById('odkaz1Url').value = parsovanaData.odkazy[0]?.url || '';
+    document.getElementById('odkaz2Text').value = parsovanaData.odkazy[1]?.text || '';
+    document.getElementById('odkaz2Url').value = parsovanaData.odkazy[1]?.url || '';
+    document.getElementById('odkaz3Text').value = parsovanaData.odkazy[2]?.text || '';
+    document.getElementById('odkaz3Url').value = parsovanaData.odkazy[2]?.url || '';
+
+    // Focus na nadpis
+    document.getElementById('nadpisArticle').focus();
 
     // Zavřít editor
     function zavritEditor() {
@@ -596,12 +800,39 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
     // Uložit změny
     document.getElementById('saveEditorBtn').addEventListener('click', async function() {
-      const novyObsah = textarea.value.trim();
+      const nadpis = document.getElementById('nadpisArticle').value.trim();
+      const text = document.getElementById('textArticle').value.trim();
 
-      if (!novyObsah) {
-        alert('Obsah článku nesmí být prázdný!');
+      if (!nadpis) {
+        alert('Musíte vyplnit nadpis článku!');
         return;
       }
+
+      if (!text) {
+        alert('Musíte vyplnit text článku!');
+        return;
+      }
+
+      // Sestavit markdown z polí formuláře
+      const novyObsah = parseFormularDoMarkdown({
+        jeSiroky: document.getElementById('jeSiroky').checked,
+        nadpis: nadpis,
+        text: text,
+        odkazy: [
+          {
+            text: document.getElementById('odkaz1Text').value.trim(),
+            url: document.getElementById('odkaz1Url').value.trim()
+          },
+          {
+            text: document.getElementById('odkaz2Text').value.trim(),
+            url: document.getElementById('odkaz2Url').value.trim()
+          },
+          {
+            text: document.getElementById('odkaz3Text').value.trim(),
+            url: document.getElementById('odkaz3Url').value.trim()
+          }
+        ]
+      });
 
       if (!confirm(`Opravdu chcete uložit změny?\n\nPřepíše se celý obsah článku v jazyce ${jazyk.toUpperCase()}.`)) {
         return;
@@ -619,14 +850,87 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         } else {
           alert('Chyba při ukládání: ' + response.message);
           this.disabled = false;
-          this.textContent = 'Uložit změny';
+          this.textContent = 'Uložit článek';
         }
       } catch (error) {
         alert('Síťová chyba: ' + error.message);
         this.disabled = false;
-        this.textContent = 'Uložit změny';
+        this.textContent = 'Uložit článek';
       }
     });
+  }
+
+  // Parsovat markdown do objektu s poli formuláře
+  function parseMarkdownDoFormulare(markdown) {
+    const result = {
+      jeSiroky: false,
+      nadpis: '',
+      text: '',
+      odkazy: []
+    };
+
+    // Kontrola zda je široký článek
+    const jeSiroky = /^## ŠIROKÝ:/im.test(markdown);
+    result.jeSiroky = jeSiroky;
+
+    // Získat nadpis (po ##, odstranit ŠIROKÝ: pokud existuje)
+    const nadpisMatch = markdown.match(/^## (?:ŠIROKÝ:\s*)?(.+)$/m);
+    if (nadpisMatch) {
+      result.nadpis = nadpisMatch[1].trim();
+    }
+
+    // Odstranit nadpis z textu
+    let zbyvajiciText = markdown.replace(/^## (?:ŠIROKÝ:\s*)?(.+)$/m, '').trim();
+
+    // Extrahovat odkazy (na konci textu)
+    const odkazyPattern = /\[([^\]]+)\]\(([^)]+)\)/g;
+    const nalezeneOdkazy = [];
+    let odkazMatch;
+
+    while ((odkazMatch = odkazyPattern.exec(zbyvajiciText)) !== null) {
+      nalezeneOdkazy.push({
+        text: odkazMatch[1],
+        url: odkazMatch[2],
+        fullMatch: odkazMatch[0]
+      });
+    }
+
+    // Odstranit odkazy a oddělovače z textu
+    nalezeneOdkazy.forEach(odkaz => {
+      zbyvajiciText = zbyvajiciText.replace(odkaz.fullMatch, '');
+    });
+    zbyvajiciText = zbyvajiciText.replace(/\s*\|\s*/g, '').trim();
+
+    result.text = zbyvajiciText;
+    result.odkazy = nalezeneOdkazy.map(o => ({ text: o.text, url: o.url }));
+
+    return result;
+  }
+
+  // Převést data z formuláře na markdown
+  function parseFormularDoMarkdown(data) {
+    let markdown = '';
+
+    // Nadpis s prefixem ŠIROKÝ: pokud je zaškrtnuto
+    if (data.jeSiroky) {
+      markdown = '## ŠIROKÝ: ' + data.nadpis + '\n\n';
+    } else {
+      markdown = '## ' + data.nadpis + '\n\n';
+    }
+
+    // Text
+    markdown += data.text + '\n\n';
+
+    // Přidat odkazy pokud existují
+    const platneOdkazy = data.odkazy.filter(o => o.text && o.url);
+    if (platneOdkazy.length > 0) {
+      const odkazyText = platneOdkazy
+        .map(o => `[${o.text}](${o.url})`)
+        .join(' | ');
+      markdown += odkazyText;
+    }
+
+    return markdown.trim();
   }
 
   async function ulozitCelyClanek(aktualitaId, jazyk, novyObsah) {
@@ -658,6 +962,9 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
  */
 function parseMarkdownToHTML(string $text): string
 {
+    // Odstranit "ŠIROKÝ:" z nadpisu
+    $text = preg_replace('/^## ŠIROKÝ:\s*/m', '## ', $text);
+
     // Obrázky (před odkazy!)
     $text = preg_replace('/!\[([^\]]*)\]\(([^)]+)\)/', '<img src="$2" alt="$1" loading="lazy">', $text);
 
@@ -689,8 +996,8 @@ function parseMarkdownToHTML(string $text): string
             continue;
         }
 
-        // Pokud je to nadpis, nepřidávat <p>
-        if (preg_match('/^<h[1-6]>/', $line)) {
+        // Pokud je to nadpis nebo obrázek, nepřidávat <p>
+        if (preg_match('/^<(h[1-6]|img)/', $line)) {
             if ($inParagraph) {
                 $html .= '</p>';
                 $inParagraph = false;
