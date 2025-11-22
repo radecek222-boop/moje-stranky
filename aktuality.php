@@ -1,13 +1,13 @@
 <?php
 /**
  * Aktuality o značce Natuzzi
- * Zobrazení všech 24 článků v náhodném pořadí
+ * Zobrazení 1 širokého článku + 6 menších článků v náhodném pořadí
  */
 
 require_once __DIR__ . '/init.php';
 require_once __DIR__ . '/includes/csrf_helper.php';
 
-// Získat všechny automaticky generované články (ne admin vytvořené)
+// Získat aktuality z databáze
 try {
     $pdo = getDbConnection();
 
@@ -28,7 +28,6 @@ try {
             // Pokud datum neexistuje, zobrazit nejnovější
             $stmt = $pdo->query("
                 SELECT * FROM wgs_natuzzi_aktuality
-                WHERE created_by_admin = FALSE
                 ORDER BY datum DESC
                 LIMIT 1
             ");
@@ -38,7 +37,6 @@ try {
         // Zobrazit nejnovější aktualitu
         $stmt = $pdo->query("
             SELECT * FROM wgs_natuzzi_aktuality
-            WHERE created_by_admin = FALSE
             ORDER BY datum DESC
             LIMIT 1
         ");
@@ -57,12 +55,13 @@ try {
         $celyObsah = $hlavniAktualita[$obsahSloupec] ?? '';
 
         // Parse článků z markdown obsahu
-        $clanky = parseClankyzObsahu($celyObsah, $hlavniAktualita['id'], $jazyk);
+        list($sirokyArticle, $normalniArticles) = parseClankyzObsahu($celyObsah, $hlavniAktualita['id'], $jazyk);
 
-        // Náhodně zamíchat pořadí článků (SEO optimalizace)
-        shuffle($clanky);
+        // Náhodně zamíchat pořadí POUZE normálních článků (ne široký)
+        shuffle($normalniArticles);
     } else {
-        $clanky = [];
+        $sirokyArticle = null;
+        $normalniArticles = [];
         $datumAktuality = null;
     }
 
@@ -70,7 +69,6 @@ try {
     $stmtArchiv = $pdo->query("
         SELECT datum, svatek_cz
         FROM wgs_natuzzi_aktuality
-        WHERE created_by_admin = FALSE
         ORDER BY datum DESC
         LIMIT 30
     ");
@@ -78,14 +76,16 @@ try {
 
 } catch (Exception $e) {
     error_log("Chyba při načítání aktualit: " . $e->getMessage());
-    $clanky = [];
+    $sirokyArticle = null;
+    $normalniArticles = [];
     $archiv = [];
     $datumAktuality = null;
 }
 
-// Funkce pro rozdělení obsahu na jednotlivé články
+// Funkce pro rozdělení obsahu na široký článek + normální články
 function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
-    $clanky = [];
+    $sirokyArticle = null;
+    $normalniArticles = [];
 
     // Rozdělit podle ## nadpisů (každý článek začíná ##)
     $parts = preg_split('/(?=^## )/m', $obsah);
@@ -94,20 +94,31 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
         $part = trim($part);
         if (empty($part)) continue;
 
-        // První část je hlavní nadpis + úvodní text
+        // První část je hlavní nadpis + úvodní text - přeskočit
         if ($index === 0 && !preg_match('/^## /', $part)) {
-            continue; // Přeskočit hlavní nadpis
+            continue;
         }
 
-        $clanky[] = [
-            'obsah' => $part,
-            'aktualita_id' => $aktualitaId,
-            'jazyk' => $jazyk,
-            'index' => $index
-        ];
+        // Pokud obsahuje "ŠIROKÝ:", je to široký článek
+        if (preg_match('/^## ŠIROKÝ:/i', $part)) {
+            $sirokyArticle = [
+                'obsah' => $part,
+                'aktualita_id' => $aktualitaId,
+                'jazyk' => $jazyk,
+                'index' => $index
+            ];
+        } else {
+            // Normální článek
+            $normalniArticles[] = [
+                'obsah' => $part,
+                'aktualita_id' => $aktualitaId,
+                'jazyk' => $jazyk,
+                'index' => $index
+            ];
+        }
     }
 
-    return $clanky;
+    return [$sirokyArticle, $normalniArticles];
 }
 
 $jazyk = $_GET['lang'] ?? 'cz';
@@ -150,24 +161,28 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
   <style>
     /* Aktuality specifické styly */
     .hero {
-      background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+      background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1920&h=500&fit=crop');
+      background-size: cover;
+      background-position: center;
       color: white;
-      padding: 80px 20px;
+      padding: 100px 20px;
       text-align: center;
       margin-bottom: 40px;
     }
 
     .hero-title {
-      font-size: 3em;
+      font-size: 3.5em;
       font-weight: 700;
-      margin: 0 0 10px 0;
+      margin: 0 0 15px 0;
       letter-spacing: -1px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
 
     .hero-subtitle {
-      font-size: 1.2em;
-      opacity: 0.9;
+      font-size: 1.4em;
+      opacity: 0.95;
       font-weight: 300;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
     }
 
     .container {
@@ -188,7 +203,49 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       text-align: center;
     }
 
-    /* DVA SLOUPCE ČLÁNKŮ */
+    /* ŠIROKÝ ČLÁNEK */
+    .siroky-clanek {
+      background: white;
+      padding: 35px 40px;
+      margin-bottom: 40px;
+      border: 2px solid #1a1a1a;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .siroky-clanek h2 {
+      color: #1a1a1a;
+      font-size: 2em;
+      margin: 0 0 20px 0;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-bottom: 4px solid #1a1a1a;
+      padding-bottom: 15px;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .siroky-clanek p {
+      font-size: 1.1em;
+      line-height: 1.8;
+      color: #333;
+      margin: 0 0 15px 0;
+    }
+
+    .siroky-clanek a {
+      color: #1a1a1a;
+      text-decoration: underline;
+      font-weight: 600;
+      transition: all 0.2s;
+      margin-right: 15px;
+    }
+
+    .siroky-clanek a:hover {
+      color: #666666;
+    }
+
+    /* DVA SLOUPCE NORMÁLNÍCH ČLÁNKŮ */
     .clanky-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -202,7 +259,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       }
     }
 
-    /* Každý článek je samostatný blok */
+    /* Každý normální článek je samostatný blok */
     .clanek-card {
       background: white;
       padding: 25px;
@@ -338,8 +395,16 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     }
 
     @media (max-width: 768px) {
+      .hero {
+        padding: 60px 20px;
+      }
+
       .hero-title {
         font-size: 2em;
+      }
+
+      .siroky-clanek {
+        padding: 25px 20px;
       }
 
       .clanek-card {
@@ -355,7 +420,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
-<!-- HERO SEKCE -->
+<!-- HERO SEKCE S FOTKOU -->
 <main>
 <section class="hero">
   <div class="hero-content">
@@ -384,7 +449,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 <section class="content-section">
   <div class="container">
 
-    <?php if (!empty($clanky)): ?>
+    <?php if ($sirokyArticle || !empty($normalniArticles)): ?>
 
       <div class="datum-badge">
         <?php
@@ -399,23 +464,41 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         <?php endif; ?>
       </div>
 
-      <!-- GRID SE 2 SLOUPCI ČLÁNKŮ -->
-      <div class="clanky-grid">
-        <?php foreach ($clanky as $clanek): ?>
-          <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>">
+      <!-- ŠIROKÝ ČLÁNEK NAHOŘE -->
+      <?php if ($sirokyArticle): ?>
+        <div class="siroky-clanek" data-aktualita-id="<?php echo $sirokyArticle['aktualita_id']; ?>" data-jazyk="<?php echo $sirokyArticle['jazyk']; ?>">
 
-            <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-              <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>')">
-                Upravit článek
-              </button>
-            <?php endif; ?>
+          <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
+            <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $sirokyArticle['aktualita_id']; ?>, '<?php echo $sirokyArticle['jazyk']; ?>')">
+              Upravit článek
+            </button>
+          <?php endif; ?>
 
-            <div class="clanek-obsah">
-              <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
-            </div>
+          <div class="clanek-obsah">
+            <?php echo parseMarkdownToHTML($sirokyArticle['obsah']); ?>
           </div>
-        <?php endforeach; ?>
-      </div>
+        </div>
+      <?php endif; ?>
+
+      <!-- GRID SE 2 SLOUPCI NORMÁLNÍCH ČLÁNKŮ -->
+      <?php if (!empty($normalniArticles)): ?>
+        <div class="clanky-grid">
+          <?php foreach ($normalniArticles as $clanek): ?>
+            <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>">
+
+              <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
+                <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>')">
+                  Upravit článek
+                </button>
+              <?php endif; ?>
+
+              <div class="clanek-obsah">
+                <?php echo parseMarkdownToHTML($clanek['obsah']); ?>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
 
       <?php if (!empty($archiv) && count($archiv) > 1): ?>
         <div class="archiv-section">
@@ -473,13 +556,6 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
   };
 
   function otevritEditorClanku(aktualitaId, jazyk) {
-    // Najít článek v DOM
-    const clanek = document.querySelector(`.clanek-card[data-aktualita-id="${aktualitaId}"]`);
-    if (!clanek) {
-      alert('Chyba: článek nebyl nalezen');
-      return;
-    }
-
     // Získat aktuální markdown obsah z databáze
     fetch(`/api/nacti_aktualitu.php?id=${aktualitaId}&jazyk=${jazyk}`)
       .then(r => r.json())
@@ -521,8 +597,9 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       </p>
       <div style="margin-bottom: 15px; padding: 15px; background: #f0f8ff; border-left: 4px solid #1a1a1a; border-radius: 5px;">
         <strong>Markdown formát:</strong><br>
-        <code># Nadpis</code> = H1 | <code>## Nadpis</code> = H2 | <code>**tučně**</code> = <strong>tučně</strong><br>
-        <code>[text](url)</code> = odkaz | <code>![popis](url)</code> = obrázek
+        <code>## ŠIROKÝ: Název</code> = široký článek přes celou šířku<br>
+        <code>## Název</code> = normální článek (2 sloupce)<br>
+        <code>**tučně**</code> = <strong>tučně</strong> | <code>[text](url)</code> = odkaz
       </div>
       <textarea id="editorTextarea" style="
         width: 100%;
@@ -658,6 +735,9 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
  */
 function parseMarkdownToHTML(string $text): string
 {
+    // Odstranit "ŠIROKÝ:" z nadpisu
+    $text = preg_replace('/^## ŠIROKÝ:\s*/m', '## ', $text);
+
     // Obrázky (před odkazy!)
     $text = preg_replace('/!\[([^\]]*)\]\(([^)]+)\)/', '<img src="$2" alt="$1" loading="lazy">', $text);
 
@@ -689,8 +769,8 @@ function parseMarkdownToHTML(string $text): string
             continue;
         }
 
-        // Pokud je to nadpis, nepřidávat <p>
-        if (preg_match('/^<h[1-6]>/', $line)) {
+        // Pokud je to nadpis nebo obrázek, nepřidávat <p>
+        if (preg_match('/^<(h[1-6]|img)/', $line)) {
             if ($inParagraph) {
                 $html .= '</p>';
                 $inParagraph = false;
