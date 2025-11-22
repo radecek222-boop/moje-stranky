@@ -374,15 +374,15 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
 <div class="lang-switcher">
   <a href="?lang=cz<?php echo isset($_GET['datum']) ? '&datum=' . htmlspecialchars($_GET['datum'], ENT_QUOTES, 'UTF-8') : ''; ?>"
      class="lang-btn <?php echo $jazyk === 'cz' ? 'active' : ''; ?>">
-    Čeština
+    🇨🇿 Čeština
   </a>
   <a href="?lang=en<?php echo isset($_GET['datum']) ? '&datum=' . htmlspecialchars($_GET['datum'], ENT_QUOTES, 'UTF-8') : ''; ?>"
      class="lang-btn <?php echo $jazyk === 'en' ? 'active' : ''; ?>">
-    English
+    🇬🇧 English
   </a>
   <a href="?lang=it<?php echo isset($_GET['datum']) ? '&datum=' . htmlspecialchars($_GET['datum'], ENT_QUOTES, 'UTF-8') : ''; ?>"
      class="lang-btn <?php echo $jazyk === 'it' ? 'active' : ''; ?>">
-    Italiano
+    🇮🇹 Italiano
   </a>
 </div>
 
@@ -393,7 +393,11 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     <?php if ($aktualita && !empty($obsah)): ?>
 
       <div class="datum-badge">
-        <?php echo date('d.m.Y', strtotime($aktualita['datum'])); ?>
+        <?php
+        // Překlad "Datum:"
+        echo $jazyk === 'en' ? 'Date: ' : ($jazyk === 'it' ? 'Data: ' : 'Datum: ');
+        echo date('d.m.Y', strtotime($aktualita['datum']));
+        ?>
         <?php if ($aktualita['svatek_cz']): ?>
           | <?php
           echo $jazyk === 'en' ? 'Name Day' : ($jazyk === 'it' ? 'Onomastico' : 'Svátek');
@@ -411,7 +415,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
 
         <?php if ($aktualita['vygenerovano_ai']): ?>
           <div class="info-box">
-            <strong><?php
+            <strong>ℹ️ <?php
             echo $jazyk === 'en' ? 'Information' : ($jazyk === 'it' ? 'Informazione' : 'Informace');
             ?>:</strong>
             <?php
@@ -428,7 +432,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
       <?php if (!empty($archiv) && count($archiv) > 1): ?>
         <div class="archiv-section">
           <h3>
-            <?php
+            📚 <?php
             echo $jazyk === 'en' ? 'News Archive' : ($jazyk === 'it' ? 'Archivio Notizie' : 'Archiv aktualit');
             ?>
           </h3>
@@ -447,7 +451,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     <?php else: ?>
 
       <div class="aktualita-card">
-        <h2><?php
+        <h2>⚠️ <?php
         echo $jazyk === 'en' ? 'No news available' : ($jazyk === 'it' ? 'Nessuna notizia disponibile' : 'Žádné aktuality');
         ?></h2>
         <p>
