@@ -304,7 +304,7 @@ $hasCreatedBy = $stmt->fetchColumn();
                         onclick="return confirm('OPRAVIT všechny reklamace s NULL created_by?')"
                         class="btn btn-success"
                         style="width: 100%; padding: 1rem;">
-                    ⚡ AUTO-OPRAVA VŠECH (<?= $nullCreatedBy ?> reklamací)
+                    AUTO-OPRAVA VŠECH (<?= $nullCreatedBy ?> reklamací)
                 </button>
             </form>
 
