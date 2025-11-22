@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/includes/csrf_helper.php';
 
 // Získat dnešní aktualitu nebo poslední dostupnou
 try {
@@ -374,15 +375,15 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
 <div class="lang-switcher">
   <a href="?lang=cz<?php echo isset($_GET['datum']) ? '&datum=' . htmlspecialchars($_GET['datum'], ENT_QUOTES, 'UTF-8') : ''; ?>"
      class="lang-btn <?php echo $jazyk === 'cz' ? 'active' : ''; ?>">
-    Čeština
+    🇨🇿 Čeština
   </a>
   <a href="?lang=en<?php echo isset($_GET['datum']) ? '&datum=' . htmlspecialchars($_GET['datum'], ENT_QUOTES, 'UTF-8') : ''; ?>"
      class="lang-btn <?php echo $jazyk === 'en' ? 'active' : ''; ?>">
-    English
+    🇬🇧 English
   </a>
   <a href="?lang=it<?php echo isset($_GET['datum']) ? '&datum=' . htmlspecialchars($_GET['datum'], ENT_QUOTES, 'UTF-8') : ''; ?>"
      class="lang-btn <?php echo $jazyk === 'it' ? 'active' : ''; ?>">
-    Italiano
+    🇮🇹 Italiano
   </a>
 </div>
 
@@ -393,7 +394,11 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     <?php if ($aktualita && !empty($obsah)): ?>
 
       <div class="datum-badge">
-        <?php echo date('d.m.Y', strtotime($aktualita['datum'])); ?>
+        <?php
+        // Překlad "Datum:"
+        echo $jazyk === 'en' ? 'Date: ' : ($jazyk === 'it' ? 'Data: ' : 'Datum: ');
+        echo date('d.m.Y', strtotime($aktualita['datum']));
+        ?>
         <?php if ($aktualita['svatek_cz']): ?>
           | <?php
           echo $jazyk === 'en' ? 'Name Day' : ($jazyk === 'it' ? 'Onomastico' : 'Svátek');
@@ -411,7 +416,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
 
         <?php if ($aktualita['vygenerovano_ai']): ?>
           <div class="info-box">
-            <strong><?php
+            <strong>ℹ️ <?php
             echo $jazyk === 'en' ? 'Information' : ($jazyk === 'it' ? 'Informazione' : 'Informace');
             ?>:</strong>
             <?php
@@ -428,7 +433,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
       <?php if (!empty($archiv) && count($archiv) > 1): ?>
         <div class="archiv-section">
           <h3>
-            <?php
+            📚 <?php
             echo $jazyk === 'en' ? 'News Archive' : ($jazyk === 'it' ? 'Archivio Notizie' : 'Archiv aktualit');
             ?>
           </h3>
@@ -447,7 +452,7 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
     <?php else: ?>
 
       <div class="aktualita-card">
-        <h2><?php
+        <h2>⚠️ <?php
         echo $jazyk === 'en' ? 'No news available' : ($jazyk === 'it' ? 'Nessuna notizia disponibile' : 'Žádné aktuality');
         ?></h2>
         <p>
@@ -466,6 +471,197 @@ $obsah = $aktualita[$obsahSloupec] ?? '';
   </div>
 </section>
 </main>
+
+<?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true && $aktualita): ?>
+<!-- ADMIN EDITOR ODKAZŮ -->
+<script>
+(function() {
+  'use strict';
+
+  // Přidat CSRF token
+  const csrfToken = '<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>';
+  const aktualitaId = <?php echo intval($aktualita['id'] ?? 0); ?>;
+  const jazyk = '<?php echo htmlspecialchars($jazyk, ENT_QUOTES, 'UTF-8'); ?>';
+
+  // Když je stránka načtena
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔧 ADMIN MODE: Editor odkazů aktivován');
+
+    // Najít všechny odkazy v obsahu aktuality
+    const odkazy = document.querySelectorAll('.aktualita-obsah a');
+
+    odkazy.forEach(function(link) {
+      // Přidat vizuální indikaci že je odkaz editovatelný
+      link.style.cursor = 'pointer';
+      link.style.position = 'relative';
+      link.title = 'Admin: Klikněte pro úpravu URL';
+
+      // Přidat malou ikonku
+      const editIcon = document.createElement('span');
+      editIcon.innerHTML = ' ✏️';
+      editIcon.style.fontSize = '0.8em';
+      editIcon.style.opacity = '0.6';
+      link.appendChild(editIcon);
+
+      // Při kliknutí zobrazit editor
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        upravitOdkaz(link);
+      });
+    });
+  });
+
+  function upravitOdkaz(linkElement) {
+    const puvodniUrl = linkElement.href;
+    const text = linkElement.textContent.replace(' ✏️', '').trim();
+
+    // Vytvořit dialog
+    const dialog = document.createElement('div');
+    dialog.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      z-index: 10000;
+      min-width: 500px;
+      max-width: 90%;
+    `;
+
+    dialog.innerHTML = `
+      <h3 style="margin: 0 0 20px 0; color: #1a1a1a;">✏️ Upravit odkaz</h3>
+      <p style="margin: 0 0 10px 0; color: #666;">
+        <strong>Text odkazu:</strong> ${escapeHtml(text)}
+      </p>
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Aktuální URL:</label>
+        <input type="text" id="currentUrl" value="${escapeHtml(puvodniUrl)}"
+               style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-family: monospace; background: #f5f5f5;"
+               readonly>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Nová URL:</label>
+        <input type="text" id="newUrl" value="${escapeHtml(puvodniUrl)}"
+               style="width: 100%; padding: 10px; border: 2px solid #333; border-radius: 5px; font-family: monospace;"
+               placeholder="https://example.com">
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button id="cancelBtn" style="padding: 10px 20px; background: #999; color: white; border: none; border-radius: 5px; cursor: pointer;">
+          Zrušit
+        </button>
+        <button id="saveBtn" style="padding: 10px 20px; background: #1a1a1a; color: white; border: none; border-radius: 5px; cursor: pointer;">
+          💾 Uložit změnu
+        </button>
+      </div>
+    `;
+
+    // Overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 9999;
+    `;
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(dialog);
+
+    // Focus na input
+    const newUrlInput = document.getElementById('newUrl');
+    newUrlInput.focus();
+    newUrlInput.select();
+
+    // Zavřít dialog
+    function zavritDialog() {
+      overlay.remove();
+      dialog.remove();
+    }
+
+    // Tlačítka
+    document.getElementById('cancelBtn').addEventListener('click', zavritDialog);
+    overlay.addEventListener('click', zavritDialog);
+
+    document.getElementById('saveBtn').addEventListener('click', async function() {
+      const novaUrl = newUrlInput.value.trim();
+
+      if (!novaUrl) {
+        alert('❌ URL nesmí být prázdná!');
+        return;
+      }
+
+      // Validace URL
+      try {
+        new URL(novaUrl);
+      } catch (e) {
+        alert('❌ Neplatný formát URL! Použijte formát: https://example.com');
+        return;
+      }
+
+      // Uložit změnu
+      this.disabled = true;
+      this.textContent = '⏳ Ukládám...';
+
+      try {
+        const response = await ulozitZmenuOdkazu(puvodniUrl, novaUrl);
+
+        if (response.status === 'success') {
+          alert('✅ Odkaz byl úspěšně změněn!\n\n' +
+                'Stará URL: ' + puvodniUrl + '\n' +
+                'Nová URL: ' + novaUrl);
+
+          // Obnovit stránku
+          window.location.reload();
+        } else {
+          alert('❌ Chyba: ' + response.message);
+          this.disabled = false;
+          this.textContent = '💾 Uložit změnu';
+        }
+      } catch (error) {
+        alert('❌ Síťová chyba: ' + error.message);
+        this.disabled = false;
+        this.textContent = '💾 Uložit změnu';
+      }
+    });
+
+    // Enter pro uložení
+    newUrlInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('saveBtn').click();
+      }
+    });
+  }
+
+  async function ulozitZmenuOdkazu(staraUrl, novaUrl) {
+    const formData = new FormData();
+    formData.append('csrf_token', csrfToken);
+    formData.append('aktualita_id', aktualitaId);
+    formData.append('jazyk', jazyk);
+    formData.append('stara_url', staraUrl);
+    formData.append('nova_url', novaUrl);
+
+    const response = await fetch('/api/uprav_odkaz_aktuality.php', {
+      method: 'POST',
+      body: formData
+    });
+
+    return await response.json();
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+})();
+</script>
+<?php endif; ?>
 
 <script src="assets/js/hamburger-menu.js" defer></script>
 
