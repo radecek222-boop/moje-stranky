@@ -466,10 +466,10 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
       <!-- ŠIROKÝ ČLÁNEK NAHOŘE -->
       <?php if ($sirokyArticle): ?>
-        <div class="siroky-clanek" data-aktualita-id="<?php echo $sirokyArticle['aktualita_id']; ?>" data-jazyk="<?php echo $sirokyArticle['jazyk']; ?>">
+        <div class="siroky-clanek" data-aktualita-id="<?php echo $sirokyArticle['aktualita_id']; ?>" data-jazyk="<?php echo $sirokyArticle['jazyk']; ?>" data-index="<?php echo $sirokyArticle['index']; ?>">
 
           <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-            <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $sirokyArticle['aktualita_id']; ?>, '<?php echo $sirokyArticle['jazyk']; ?>')">
+            <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $sirokyArticle['aktualita_id']; ?>, '<?php echo $sirokyArticle['jazyk']; ?>', <?php echo $sirokyArticle['index']; ?>)">
               Upravit článek
             </button>
           <?php endif; ?>
@@ -484,10 +484,10 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       <?php if (!empty($normalniArticles)): ?>
         <div class="clanky-grid">
           <?php foreach ($normalniArticles as $clanek): ?>
-            <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>">
+            <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
 
               <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-                <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>')">
+                <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>', <?php echo $clanek['index']; ?>)">
                   Upravit článek
                 </button>
               <?php endif; ?>
@@ -551,17 +551,17 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
   const csrfToken = '<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>';
 
   // Globální funkce pro editaci článku
-  window.upravitClanek = function(aktualitaId, jazyk) {
-    otevritEditorClanku(aktualitaId, jazyk);
+  window.upravitClanek = function(aktualitaId, jazyk, index) {
+    otevritEditorClanku(aktualitaId, jazyk, index);
   };
 
-  function otevritEditorClanku(aktualitaId, jazyk) {
-    // Získat aktuální markdown obsah z databáze
-    fetch(`/api/nacti_aktualitu.php?id=${aktualitaId}&jazyk=${jazyk}`)
+  function otevritEditorClanku(aktualitaId, jazyk, index) {
+    // Získat aktuální markdown obsah z databáze (celý obsah všech článků)
+    fetch(`/api/nacti_aktualitu.php?id=${aktualitaId}&jazyk=${jazyk}&index=${index}`)
       .then(r => r.json())
       .then(data => {
         if (data.status === 'success') {
-          zobrazitEditor(aktualitaId, jazyk, data.obsah);
+          zobrazitEditor(aktualitaId, jazyk, index, data.obsah);
         } else {
           alert('Chyba při načítání: ' + data.message);
         }
@@ -569,7 +569,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       .catch(e => alert('Síťová chyba: ' + e.message));
   }
 
-  function zobrazitEditor(aktualitaId, jazyk, aktualniObsah) {
+  function zobrazitEditor(aktualitaId, jazyk, index, aktualniObsah) {
     // Parsovat markdown do polí formuláře
     const parsovanaData = parseMarkdownDoFormulare(aktualniObsah);
 
@@ -842,7 +842,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       this.textContent = 'Ukládám...';
 
       try {
-        const response = await ulozitCelyClanek(aktualitaId, jazyk, novyObsah);
+        const response = await ulozitCelyClanek(aktualitaId, jazyk, index, novyObsah);
 
         if (response.status === 'success') {
           alert('Článek byl úspěšně uložen!\n\nStránka se nyní obnoví.');
@@ -933,11 +933,12 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
     return markdown.trim();
   }
 
-  async function ulozitCelyClanek(aktualitaId, jazyk, novyObsah) {
+  async function ulozitCelyClanek(aktualitaId, jazyk, index, novyObsah) {
     const formData = new FormData();
     formData.append('csrf_token', csrfToken);
     formData.append('aktualita_id', aktualitaId);
     formData.append('jazyk', jazyk);
+    formData.append('index', index);
     formData.append('novy_obsah', novyObsah);
 
     const response = await fetch('/api/uprav_celou_aktualitu.php', {

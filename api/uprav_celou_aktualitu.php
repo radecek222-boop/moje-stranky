@@ -32,24 +32,21 @@ try {
 
     // Validace vstupních dat
     $aktualitaId = filter_var($_POST['aktualita_id'] ?? '', FILTER_VALIDATE_INT);
-    $jazyk = $_POST['jazyk'] ?? '';
+    $jazyk = $_POST['jazyk'] ?? 'cz';  // Vždy CZ
+    $index = (int)($_POST['index'] ?? 0);
     $novyObsah = $_POST['novy_obsah'] ?? '';
 
     if (!$aktualitaId) {
         sendJsonError('Chybí ID aktuality');
     }
 
-    if (!in_array($jazyk, ['cz', 'en', 'it'])) {
-        sendJsonError('Neplatný jazyk (povoleno: cz, en, it)');
-    }
-
     if (empty(trim($novyObsah))) {
         sendJsonError('Obsah nesmí být prázdný');
     }
 
-    // Získat aktuální záznam
+    // Získat aktuální záznam - pouze CZ
     $stmtGet = $pdo->prepare("
-        SELECT id, datum, obsah_cz, obsah_en, obsah_it
+        SELECT id, datum, obsah_cz
         FROM wgs_natuzzi_aktuality
         WHERE id = :id
     ");
@@ -60,37 +57,73 @@ try {
         sendJsonError('Aktualita nebyla nalezena', 404);
     }
 
-    // Uložit starý obsah pro audit log
-    $sloupecObsahu = 'obsah_' . $jazyk;
-    $staryObsah = $aktualita[$sloupecObsahu];
+    $staryObsahCely = $aktualita['obsah_cz'];
 
-    // Aktualizovat obsah
+    // Rozdělit na jednotlivé články
+    $parts = preg_split('/(?=^## )/m', $staryObsahCely);
+
+    $noveCasti = [];
+    $currentIndex = 0;
+    $articleUpdated = false;
+
+    foreach ($parts as $part) {
+        $part = trim($part);
+        if (empty($part)) continue;
+
+        // První část je hlavní nadpis - zachovat
+        if ($currentIndex === 0 && !preg_match('/^## /', $part)) {
+            $noveCasti[] = $part;
+            continue;
+        }
+
+        // Pokud je to článek s ## nadpisem
+        if (preg_match('/^## /', $part)) {
+            if ($currentIndex === $index) {
+                // Nahradit tímto článkem novým obsahem
+                $noveCasti[] = $novyObsah;
+                $articleUpdated = true;
+            } else {
+                // Zachovat původní článek
+                $noveCasti[] = $part;
+            }
+            $currentIndex++;
+        }
+    }
+
+    if (!$articleUpdated) {
+        sendJsonError('Článek s indexem ' . $index . ' nebyl nalezen');
+    }
+
+    // Složit zpět dohromady
+    $novyObsahCely = implode("\n\n", $noveCasti);
+
+    // Aktualizovat obsah v databázi
     $stmtUpdate = $pdo->prepare("
         UPDATE wgs_natuzzi_aktuality
-        SET {$sloupecObsahu} = :obsah
+        SET obsah_cz = :obsah
         WHERE id = :id
     ");
 
     $stmtUpdate->execute([
-        'obsah' => $novyObsah,
+        'obsah' => $novyObsahCely,
         'id' => $aktualitaId
     ]);
 
     // Audit log
     error_log(sprintf(
-        "ADMIN EDIT AKTUALITA: User %d edited aktualita #%d (%s) on %s | Length: %d -> %d chars",
+        "ADMIN EDIT AKTUALITA: User %d edited aktualita #%d (článek index %d) on %s | Length: %d -> %d chars",
         $_SESSION['user_id'] ?? 0,
         $aktualitaId,
-        $jazyk,
+        $index,
         $aktualita['datum'],
-        strlen($staryObsah),
-        strlen($novyObsah)
+        strlen($staryObsahCely),
+        strlen($novyObsahCely)
     ));
 
-    sendJsonSuccess('Aktualita byla úspěšně upravena', [
+    sendJsonSuccess('Článek byl úspěšně upraven', [
         'aktualita_id' => $aktualitaId,
-        'jazyk' => $jazyk,
-        'delka_noveho_obsahu' => strlen($novyObsah)
+        'index' => $index,
+        'delka_noveho_obsahu' => strlen($novyObsahCely)
     ]);
 
 } catch (PDOException $e) {
