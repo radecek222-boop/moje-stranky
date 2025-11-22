@@ -271,11 +271,6 @@ $hasCreatedBy = $stmt->fetchColumn();
 </style>
 
 <div class="tools-container">
-    <?php if (!$embedMode): ?>
-    <h1 class="page-title">Diagnostika systému</h1>
-    <p class="page-subtitle">Nástroje pro opravu problémů a údržbu databáze</p>
-    <?php endif; ?>
-
     <?= $fixMessage ?>
 
     <!-- DIAGNOSTIKA VISIBILITY -->
