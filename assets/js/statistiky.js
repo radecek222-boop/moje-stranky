@@ -659,13 +659,27 @@ async function exportovatPDF() {
         let imgWidth = availableWidth;
         let imgHeight = imgWidth * canvasRatio;
 
+        // Spočítat celkový počet stránek
+        const pageHeightInPx = canvas.width * (availableHeight / imgWidth);
+        const celkovyPocetStranek = Math.ceil(canvas.height / pageHeightInPx);
+
         // Pokud se vejde na jednu stránku
         if (imgHeight <= availableHeight) {
             doc.addImage(imgData, 'JPEG', margin, margin, imgWidth, imgHeight);
+
+            // Přidat číslo stránky nahoře vlevo
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
+            doc.text('1/1', margin, margin - 3);
+
+            // Přidat text o počtu stránek dole
+            doc.setFontSize(8);
+            doc.setTextColor(170, 170, 170);
+            doc.text('Výpis se skládá z 1 stránky', margin, pageHeight - 5);
         } else {
-            // Rozdělení na více stránek - jednoduchý přístup
+            // Rozdělení na více stránek
             let yPosition = 0;
-            const pageHeightInPx = canvas.width * (availableHeight / imgWidth);
+            let cisloStranky = 1;
 
             while (yPosition < canvas.height) {
                 if (yPosition > 0) {
@@ -690,6 +704,21 @@ async function exportovatPDF() {
 
                 doc.addImage(sliceData, 'JPEG', margin, margin, imgWidth, sliceHeight);
 
+                // Přidat číslo stránky nahoře vlevo
+                doc.setFontSize(9);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`${cisloStranky}/${celkovyPocetStranek}`, margin, margin - 3);
+
+                // Na poslední stránce přidat text o počtu stránek dole
+                if (cisloStranky === celkovyPocetStranek) {
+                    doc.setFontSize(8);
+                    doc.setTextColor(170, 170, 170);
+                    const pocetText = celkovyPocetStranek === 1 ? 'stránky' :
+                                     (celkovyPocetStranek >= 2 && celkovyPocetStranek <= 4) ? 'stránek' : 'stránek';
+                    doc.text(`Výpis se skládá z ${celkovyPocetStranek} ${pocetText}`, margin, pageHeight - 5);
+                }
+
+                cisloStranky++;
                 yPosition += pageHeightInPx;
             }
         }
