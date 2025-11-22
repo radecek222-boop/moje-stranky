@@ -510,11 +510,11 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 <section class="hero">
   <div class="hero-content">
     <h1 class="hero-title"
-        data-lang-cs="Aktuality Natuzzi"
-        data-lang-en="Natuzzi News"
-        data-lang-it="Notizie Natuzzi">
+        data-lang-cs="Aktuality"
+        data-lang-en="News"
+        data-lang-it="Notizie">
         <?php
-        echo $jazyk === 'en' ? 'Natuzzi News' : ($jazyk === 'it' ? 'Notizie Natuzzi' : 'Aktuality Natuzzi');
+        echo $jazyk === 'en' ? 'News' : ($jazyk === 'it' ? 'Notizie' : 'Aktuality');
         ?>
     </h1>
     <div class="hero-subtitle"
