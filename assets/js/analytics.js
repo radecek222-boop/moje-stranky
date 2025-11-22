@@ -174,7 +174,7 @@ function aktualizovatUI() {
     zobrazitReferrery();
     zobrazitProhlizece();
     zobrazitZarizeni();
-    vykreslit Graf();
+    vykreslitGraf();
 
     logger.log('✅ UI úspěšně aktualizováno');
 }
@@ -286,7 +286,7 @@ function zobrazitZarizeni() {
 
 let visitsChart = null;
 
-function vykreslit Graf() {
+function vykreslitGraf() {
     const canvas = document.getElementById('visits-chart');
     if (!canvas) return;
 
