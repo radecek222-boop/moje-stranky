@@ -272,6 +272,8 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       grid-template-columns: 1fr 1fr;
       gap: 0;
       margin-bottom: 40px;
+      align-items: start;
+      grid-auto-rows: auto;
     }
 
     /* Každý normální článek je samostatný blok */
