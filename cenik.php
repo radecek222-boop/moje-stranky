@@ -329,6 +329,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 
         <div class="wizard-buttons">
           <button class="btn-secondary" onclick="previousStep()">Zpět</button>
+          <button class="btn-primary" onclick="exportovatCenikPDF()">Export do PDF</button>
           <button class="btn-primary" onclick="resetovatKalkulacku()">Nová kalkulace</button>
         </div>
       </div>
@@ -483,6 +484,11 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <script src="assets/js/logger.js" defer></script>
 <script src="assets/js/wgs-map.js" defer></script>
 <script src="assets/js/cenik.js" defer></script>
+
+<!-- PDF Export Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+
 <script src="assets/js/cenik-calculator.js" defer></script>
 
 <?php renderHeatmapTracker(); ?>
