@@ -976,8 +976,9 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 
 <!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
 <script>
+// CACHE BUSTER: 2025-11-23-19:15 - FORCE RELOAD
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('🔧 EMERGENCY event delegation se načítá...');
+  console.log('🔧 EMERGENCY event delegation V3 se načítá... [2025-11-23-19:15]');
 
   document.addEventListener('click', (e) => {
     const button = e.target.closest('[data-action]');
@@ -996,25 +997,7 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         }
 
-        // DEBUG: Test jestli window.confirm vůbec funguje
-        console.log('[EMERGENCY] 🔔 Zobrazuji confirmation dialog...');
-        console.log('[EMERGENCY] typeof window.confirm:', typeof window.confirm);
-
-        // PŘÍMÝ confirmation dialog (obejde problém s překladovou funkcí t())
-        const confirmReopen = window.confirm(
-          'Opravdu chcete znovu otevřít tuto dokončenou zakázku?\n\n' +
-          'Zakázka bude vrácena do stavu "ČEKÁ" a bude možné ji znovu upravit.'
-        );
-
-        console.log('[EMERGENCY] 📋 Výsledek confirm():', confirmReopen);
-
-        if (!confirmReopen) {
-          console.log('[EMERGENCY] ❌ Uživatel zrušil (confirmReopen = false)');
-          alert('🛑 POZOR: Klikli jste na ZRUŠIT!\n\nPokud chcete zakázku znovu otevřít, klikněte znovu na tlačítko a tentokrát zvolte OK.');
-          break;
-        }
-
-        console.log('[EMERGENCY] ✅ Otevírám zakázku ID:', id);
+        console.log('[EMERGENCY] V3 ✅ PŘÍMO otevírám zakázku ID:', id, '(BEZ confirmation dialogu)');
 
         // Použít asynchronní funkci pro await
         (async () => {
@@ -1039,9 +1022,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (result.status === 'success') {
-              console.log('[EMERGENCY] ✅ Úspěch!');
-              alert('Zakázka byla znovu otevřena');
-              location.reload();
+              console.log('[EMERGENCY] V3 ✅ ÚSPĚCH! Zakázka byla znovu otevřena');
+              alert('✅ ÚSPĚCH!\n\nZakázka byla znovu otevřena a vrácena do stavu ČEKÁ.');
+              setTimeout(() => location.reload(), 500);
             } else {
               throw new Error(result.message || 'Chyba');
             }
@@ -1089,7 +1072,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('✅ EMERGENCY event delegation načten');
+  console.log('✅ EMERGENCY event delegation V3 načten [2025-11-23-19:15] - BEZ confirmation dialogu');
 });
 </script>
 </body>
