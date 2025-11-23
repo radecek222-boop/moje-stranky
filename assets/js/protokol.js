@@ -469,15 +469,6 @@ function showNotif(type, message) {
   setTimeout(() => notif.classList.remove("show"), 3000);
 }
 
-function updateTotal() {
-  const work = parseFloat(document.getElementById("price-work").value) || 0;
-  const material = parseFloat(document.getElementById("price-material").value) || 0;
-  const second = parseFloat(document.getElementById("price-second").value) || 0;
-  const transport = parseFloat(document.getElementById("price-transport").value) || 0;
-  const total = work + material + second + transport;
-  document.getElementById("price-total").value = total.toFixed(2);
-}
-
 async function attachPhotos() {
   const input = document.createElement("input");
   input.type = "file";
@@ -1325,13 +1316,8 @@ async function saveProtokolToDB() {
   try {
     const csrfToken = await fetchCsrfToken();
 
-    // Získat cenové údaje z formuláře
-    const pocetDilu = parseInt(document.getElementById("parts").value) || 0;
-    const cenaPrace = parseFloat(document.getElementById("price-work").value) || 0;
-    const cenaMaterial = parseFloat(document.getElementById("price-material").value) || 0;
-    const cenaDruhyTechnik = parseFloat(document.getElementById("price-second").value) || 0;
-    const cenaDoprava = parseFloat(document.getElementById("price-transport").value) || 0;
-    const cenaCelkem = cenaPrace + cenaMaterial + cenaDruhyTechnik + cenaDoprava;
+    // Získat celkovou cenu z formuláře
+    const cenaCelkem = parseFloat(document.getElementById("price-total").value) || 0;
 
     const response = await fetch("api/protokol_api.php", {
       method: "POST",
@@ -1343,11 +1329,6 @@ async function saveProtokolToDB() {
         repair_proposal: document.getElementById("repair-cz").value,
         solved: document.getElementById("solved").value,
         technician: document.getElementById("technician").value,
-        pocet_dilu: pocetDilu,
-        cena_prace: cenaPrace,
-        cena_material: cenaMaterial,
-        cena_druhy_technik: cenaDruhyTechnik,
-        cena_doprava: cenaDoprava,
         cena_celkem: cenaCelkem,
         csrf_token: csrfToken
       })

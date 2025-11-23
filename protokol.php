@@ -313,12 +313,9 @@ if ($initialBootstrapData) {
   <div class="two-col-table">
     <div class="col">
       <table>
-        <tr><td class="label">Počet dílů<span class="en-label">Parts</span></td><td><input type="text" id="parts" placeholder="0"></td></tr>
-        <tr><td class="label">Práce<span class="en-label">Work</span></td><td><input type="text" id="price-work" placeholder="0.00" oninput="updateTotal()"></td></tr>
-        <tr><td class="label">Materiál<span class="en-label">Materiál</span></td><td><input type="text" id="price-material" placeholder="0.00" oninput="updateTotal()"></td></tr>
-        <tr><td class="label">2. technik<span class="en-label">Second tech.</span></td><td><input type="text" id="price-second" placeholder="0.00" oninput="updateTotal()"></td></tr>
-        <tr><td class="label">Doprava<span class="en-label">Transport</span></td><td><input type="text" id="price-transport" placeholder="0.00" oninput="updateTotal()"></td></tr>
-        <tr><td class="label"><strong>Celkem</strong><span class="en-label">Total</span></td><td><input type="text" id="price-total" readonly style="font-weight:700;"></td></tr>
+        <tr><td class="label"><strong>Celkem</strong><span class="en-label">Total</span></td><td><input type="text" id="price-total" placeholder="0.00" style="font-weight:700;"></td></tr>
+        <tr><td class="label">Platí zákazník?<span class="en-label">Customer pays?</span></td><td><select id="payment"><option>NE</option><option>ANO</option></select></td></tr>
+        <tr><td class="label">Datum podpisu<span class="en-label">Signature date</span></td><td><input type="date" id="sign-date"></td></tr>
       </table>
     </div>
 
@@ -327,8 +324,6 @@ if ($initialBootstrapData) {
         <tr><td class="label">Vyřešeno?<span class="en-label">Solved?</span></td><td><select id="solved"><option>ANO</option><option>NE</option></select></td></tr>
         <tr><td class="label">Nutné vyjádření prodejce<span class="en-label">Waiting dealer?</span></td><td><select id="dealer"><option>NE</option><option>ANO</option></select></td></tr>
         <tr><td class="label">Poškození technikem?<span class="en-label">Damage by tech?</span></td><td><select id="damage"><option>NE</option><option>ANO</option></select></td></tr>
-        <tr><td class="label">Platí zákazník?<span class="en-label">Customer pays?</span></td><td><select id="payment"><option>NE</option><option>ANO</option></select></td></tr>
-        <tr><td class="label">Datum podpisu<span class="en-label">Signature date</span></td><td><input type="date" id="sign-date"></td></tr>
       </table>
     </div>
   </div>
