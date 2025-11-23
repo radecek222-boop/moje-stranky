@@ -43,16 +43,25 @@ if (!validateCSRFToken($_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? 
     sendJsonError('Neplatný CSRF token', 403);
 }
 
-// Rate limiting - 1000 požadavků za hodinu per IP
-$rateLimiter = new RateLimiter($pdo);
-$clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-
-if (!$rateLimiter->checkLimit('track_v2', $clientIp, 1000, 3600)) {
-    sendJsonError('Příliš mnoho požadavků. Zkuste to později.', 429);
-}
-
 try {
+    // FIX P1: PDO musí být inicializováno PŘED vytvořením RateLimiter instance
     $pdo = getDbConnection();
+
+    // Rate limiting - 1000 požadavků za hodinu per IP
+    $clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $rateLimiter = new RateLimiter($pdo);
+
+    // FIX P1: checkLimit() vrací pole s klíčem 'allowed', ne boolean
+    // Správné parametry: (identifier, actionType, limits array)
+    $rateLimitResult = $rateLimiter->checkLimit($clientIp, 'track_v2', [
+        'max_attempts' => 1000,
+        'window_minutes' => 60,
+        'block_minutes' => 60
+    ]);
+
+    if (!$rateLimitResult['allowed']) {
+        sendJsonError($rateLimitResult['message'], 429);
+    }
 
     // Získání JSON dat z request body
     $inputData = json_decode(file_get_contents('php://input'), true);
