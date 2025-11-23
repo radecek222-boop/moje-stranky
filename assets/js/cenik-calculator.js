@@ -30,6 +30,7 @@
         adresa: null,
         vzdalenost: 0,
         dopravne: 0,
+        reklamaceBezDopravy: false,
         typServisu: 'calouneni', // diagnostika, calouneni, mechanika, kombinace
 
         // Čalounické práce
@@ -182,10 +183,21 @@
                 const distanceKm = Math.round(distanceMeters / 1000);
 
                 stav.vzdalenost = distanceKm;
-                stav.dopravne = Math.round(distanceKm * 2 * TRANSPORT_RATE * 100) / 100;
+
+                // Zkontrolovat checkbox "reklamace bez dopravy"
+                const reklamaceBezDopravyCheckbox = document.getElementById('reklamace-bez-dopravy');
+                const jeReklamace = reklamaceBezDopravyCheckbox && reklamaceBezDopravyCheckbox.checked;
+
+                if (jeReklamace) {
+                    stav.dopravne = 0;
+                    stav.reklamaceBezDopravy = true;
+                } else {
+                    stav.dopravne = Math.round(distanceKm * 2 * TRANSPORT_RATE * 100) / 100;
+                    stav.reklamaceBezDopravy = false;
+                }
 
                 document.getElementById('distance-value').textContent = distanceKm;
-                document.getElementById('transport-cost').textContent = stav.dopravne.toFixed(2);
+                document.getElementById('transport-cost').textContent = stav.dopravne.toFixed(2) + (jeReklamace ? ' (reklamace)' : '');
                 document.getElementById('distance-result').style.display = 'block';
 
                 // Automaticky pokračovat na další krok po 1 sekundě

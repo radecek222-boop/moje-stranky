@@ -114,6 +114,19 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
           <div id="address-suggestions" class="suggestions-dropdown" style="display: none;"></div>
         </div>
 
+        <?php
+        // Checkbox pro reklamace - viditelný jen pro přihlášené uživatele
+        $isLoggedIn = isset($_SESSION['user_id']) || (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true);
+        if ($isLoggedIn):
+        ?>
+        <div class="form-group" style="margin-top: 15px;">
+          <label class="checkbox-container">
+            <input type="checkbox" id="reklamace-bez-dopravy">
+            <span class="checkbox-label">Jedná se o reklamaci – neúčtuje se dopravné</span>
+          </label>
+        </div>
+        <?php endif; ?>
+
         <div id="distance-result" class="calc-result" style="display: none;">
           <div class="result-box">
             <p><strong>Vzdálenost z dílny:</strong> <span id="distance-value">-</span> km</p>
