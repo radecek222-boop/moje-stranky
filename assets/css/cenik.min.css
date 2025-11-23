@@ -2,7 +2,7 @@
 
 /* Hero sekce */
 .hero {
-    background: linear-gradient(135deg, #2D5016 0%, #1a300d 100%);
+    background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%);
     color: white;
     padding: 80px 20px;
     text-align: center;
@@ -60,7 +60,7 @@
 
 .section-title {
     font-size: 2.5rem;
-    color: #2D5016;
+    color: #4a4a4a;
     margin-bottom: 20px;
     font-weight: 600;
 }
@@ -95,7 +95,7 @@
 }
 
 .category-header {
-    background: #2D5016;
+    background: #4a4a4a;
     color: white;
     padding: 20px;
     font-size: 1.5rem;
@@ -131,14 +131,14 @@
 .item-name {
     font-size: 1.3rem;
     font-weight: 600;
-    color: #2D5016;
+    color: #4a4a4a;
     flex: 1;
 }
 
 .item-price {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #2D5016;
+    color: #4a4a4a;
     white-space: nowrap;
     margin-left: 20px;
 }
@@ -160,7 +160,7 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    background: #2D5016;
+    background: #4a4a4a;
     color: white;
     border: none;
     padding: 8px 15px;
@@ -176,7 +176,7 @@
 }
 
 .item-edit-btn:hover {
-    background: #1a300d;
+    background: #2a2a2a;
 }
 
 /* Admin Actions */
@@ -186,7 +186,7 @@
 }
 
 .btn-admin {
-    background: #2D5016;
+    background: #4a4a4a;
     color: white;
     border: none;
     padding: 15px 30px;
@@ -197,7 +197,7 @@
 }
 
 .btn-admin:hover {
-    background: #1a300d;
+    background: #2a2a2a;
 }
 
 /* Loading Indicator */
@@ -206,7 +206,7 @@
     height: 50px;
     margin: 0 auto 20px;
     border: 5px solid #f3f3f3;
-    border-top: 5px solid #2D5016;
+    border-top: 5px solid #4a4a4a;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -227,7 +227,7 @@
 }
 
 .pricing-footer h3 {
-    color: #2D5016;
+    color: #4a4a4a;
     font-size: 1.8rem;
     margin-bottom: 15px;
 }
@@ -238,7 +238,7 @@
 }
 
 .contact-info a {
-    color: #2D5016;
+    color: #4a4a4a;
     text-decoration: none;
     font-weight: 600;
 }
@@ -287,7 +287,7 @@
 }
 
 #modal-title {
-    color: #2D5016;
+    color: #4a4a4a;
     margin-bottom: 25px;
 }
 
@@ -342,12 +342,12 @@
 }
 
 .btn-primary {
-    background: #2D5016;
+    background: #4a4a4a;
     color: white;
 }
 
 .btn-primary:hover {
-    background: #1a300d;
+    background: #2a2a2a;
 }
 
 .btn-secondary {
@@ -378,7 +378,7 @@
 
 .btn-admin {
     padding: 15px 40px;
-    background: linear-gradient(135deg, #2D5016 0%, #1a300d 100%);
+    background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%);
     color: white;
     border: none;
     border-radius: 8px;
@@ -418,7 +418,7 @@
 }
 
 .footer-title {
-    color: #2D5016;
+    color: #4a4a4a;
     margin-bottom: 15px;
     font-size: 1.3rem;
 }
@@ -434,7 +434,7 @@
 }
 
 .footer-link:hover {
-    color: #2D5016;
+    color: #4a4a4a;
 }
 
 .footer-bottom {
@@ -478,7 +478,7 @@
 
 /* Kalkulačka */
 .calculator-section {
-    background: linear-gradient(135deg, rgba(44, 62, 80, 0.05) 0%, rgba(26, 37, 47, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(74, 74, 74, 0.05) 0%, rgba(26, 37, 47, 0.05) 100%);
     border-radius: 15px;
     padding: 40px;
     margin-bottom: 40px;
@@ -494,11 +494,11 @@
 }
 
 .calculator-step h3 {
-    color: #2c3e50;
+    color: #4a4a4a;
     font-size: 1.3rem;
     margin-bottom: 20px;
     padding-bottom: 10px;
-    border-bottom: 2px solid rgba(44, 62, 80, 0.1);
+    border-bottom: 2px solid rgba(74, 74, 74, 0.1);
 }
 
 .calc-input {
@@ -512,13 +512,13 @@
 
 .calc-input:focus {
     outline: none;
-    border-color: #2c3e50;
+    border-color: #4a4a4a;
 }
 
 .suggestions-dropdown {
     position: absolute;
     background: white;
-    border: 2px solid #2c3e50;
+    border: 2px solid #4a4a4a;
     border-top: none;
     border-radius: 0 0 8px 8px;
     max-height: 300px;
@@ -536,15 +536,15 @@
 }
 
 .suggestion-item:hover {
-    background: rgba(44, 62, 80, 0.1);
+    background: rgba(74, 74, 74, 0.1);
 }
 
 .calc-result {
     margin-top: 20px;
     padding: 20px;
-    background: rgba(44, 62, 80, 0.05);
+    background: rgba(74, 74, 74, 0.05);
     border-radius: 8px;
-    border-left: 4px solid #2c3e50;
+    border-left: 4px solid #4a4a4a;
 }
 
 .calc-result p {
@@ -561,7 +561,7 @@
 
 .service-checkbox-item {
     padding: 15px;
-    background: rgba(44, 62, 80, 0.02);
+    background: rgba(74, 74, 74, 0.02);
     border: 2px solid #ddd;
     border-radius: 8px;
     cursor: pointer;
@@ -569,13 +569,13 @@
 }
 
 .service-checkbox-item:hover {
-    border-color: #2c3e50;
-    background: rgba(44, 62, 80, 0.05);
+    border-color: #4a4a4a;
+    background: rgba(74, 74, 74, 0.05);
 }
 
 .service-checkbox-item.selected {
-    border-color: #2c3e50;
-    background: rgba(44, 62, 80, 0.1);
+    border-color: #4a4a4a;
+    background: rgba(74, 74, 74, 0.1);
 }
 
 .service-checkbox-item input[type="checkbox"] {
@@ -590,13 +590,13 @@
     display: flex;
     align-items: center;
     font-weight: 600;
-    color: #2c3e50;
+    color: #4a4a4a;
 }
 
 .service-price {
     display: block;
     margin-top: 8px;
-    color: #2c3e50;
+    color: #4a4a4a;
     font-size: 1.1rem;
     font-weight: 700;
 }
@@ -605,7 +605,7 @@
     padding: 25px;
     background: white;
     border-radius: 10px;
-    border: 2px solid #2c3e50;
+    border: 2px solid #4a4a4a;
 }
 
 .summary-line {
@@ -618,11 +618,11 @@
 
 .summary-line.total {
     border-bottom: none;
-    border-top: 3px solid #2c3e50;
+    border-top: 3px solid #4a4a4a;
     margin-top: 15px;
     padding-top: 20px;
     font-size: 1.4rem;
-    color: #2c3e50;
+    color: #4a4a4a;
 }
 
 .summary-note {
