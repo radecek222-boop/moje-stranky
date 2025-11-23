@@ -1119,10 +1119,38 @@
     display: block;
     border: 2px solid #ddd;
     border-radius: 8px;
-    padding: 1rem 1.25rem;
+    padding: 1rem 1.25rem 1rem 3.5rem;
     cursor: pointer;
     transition: all 0.3s;
     position: relative;
+}
+
+.radio-card::before {
+    content: '';
+    position: absolute;
+    left: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+    background: white;
+    transition: all 0.3s;
+}
+
+.radio-card::after {
+    content: '';
+    position: absolute;
+    left: calc(1.25rem + 5px);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #4a4a4a;
+    opacity: 0;
+    transition: opacity 0.2s;
 }
 
 .radio-card:hover {
@@ -1130,19 +1158,26 @@
     background: #f9f9f9;
 }
 
+.radio-card:hover::before {
+    border-color: #4a4a4a;
+}
+
 .radio-card input[type="radio"] {
     position: absolute;
     opacity: 0;
 }
 
-.radio-card input[type="radio"]:checked + .radio-content {
-    border-left: 4px solid #4a4a4a;
-    padding-left: 1rem;
-}
-
 .radio-card:has(input:checked) {
     border-color: #4a4a4a;
     background: #f4f4f4;
+}
+
+.radio-card:has(input:checked)::before {
+    border-color: #4a4a4a;
+}
+
+.radio-card:has(input:checked)::after {
+    opacity: 1;
 }
 
 .radio-content {
@@ -1181,14 +1216,52 @@
     display: block;
     border: 2px solid #ddd;
     border-radius: 6px;
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 1rem 0.75rem 3.5rem;
     cursor: pointer;
     transition: all 0.3s;
+    position: relative;
+}
+
+.checkbox-card::before {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    transition: all 0.3s;
+}
+
+.checkbox-card::after {
+    content: '✓';
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
 }
 
 .checkbox-card:hover {
     border-color: #4a4a4a;
     background: #f9f9f9;
+}
+
+.checkbox-card:hover::before {
+    border-color: #4a4a4a;
 }
 
 .checkbox-card input[type="checkbox"] {
@@ -1198,6 +1271,15 @@
 .checkbox-card:has(input:checked) {
     border-color: #4a4a4a;
     background: #f4f4f4;
+}
+
+.checkbox-card:has(input:checked)::before {
+    background: #4a4a4a;
+    border-color: #4a4a4a;
+}
+
+.checkbox-card:has(input:checked)::after {
+    opacity: 1;
 }
 
 .checkbox-content {
