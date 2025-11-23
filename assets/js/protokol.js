@@ -178,6 +178,20 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("visit-date").value = today;
 
   setupAutoTranslate();
+
+  // Propojení polí Vyřešeno? a Nutné vyjádření prodejce
+  const solvedSelect = document.getElementById("solved");
+  const dealerSelect = document.getElementById("dealer");
+
+  if (solvedSelect && dealerSelect) {
+    solvedSelect.addEventListener("change", () => {
+      if (solvedSelect.value === "ANO") {
+        dealerSelect.value = "NE";
+      } else if (solvedSelect.value === "NE") {
+        dealerSelect.value = "ANO";
+      }
+    });
+  }
 });
 
 function setupAutoTranslate() {
