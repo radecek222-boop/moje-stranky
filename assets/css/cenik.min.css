@@ -1130,7 +1130,7 @@
     cursor: pointer;
     transition: all 0.3s;
     position: relative;
-    min-height: 85px;
+    height: 95px;
 }
 
 .radio-card::before {
