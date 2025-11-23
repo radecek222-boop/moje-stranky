@@ -1773,8 +1773,43 @@
         padding: 1.5rem 1rem;
     }
 
+    /* Počítadla pod sebou na mobilu */
     .counter-group {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .counter-item {
+        padding: 0.75rem;
+    }
+
+    .counter-item label {
+        font-size: 0.7rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .counter-controls {
+        gap: 0.75rem;
+    }
+
+    .counter-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+
+    .counter-value {
+        font-size: 1.2rem;
+        min-width: 50px;
+    }
+
+    /* Radio a checkbox buttony na plnou šířku */
+    .radio-group, .checkbox-group {
+        gap: 0.5rem;
+    }
+
+    .radio-card, .checkbox-card {
+        width: 100%;
     }
 
     .wizard-buttons {
@@ -1788,6 +1823,190 @@
     .pdf-preview-container {
         width: 95%;
         height: 95vh;
+    }
+
+    /* Summary na mobilu */
+    .summary-section {
+        padding: 1rem;
+    }
+
+    .summary-line {
+        font-size: 0.9rem;
+    }
+
+    .summary-line.total {
+        font-size: 1.1rem;
+    }
+}
+
+/* Extra small devices (PWA, phones < 480px) */
+@media (max-width: 480px) {
+    .calculator-section {
+        padding: 0.75rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .section-title {
+        font-size: 1.1rem !important;
+    }
+
+    .section-text {
+        font-size: 0.7rem !important;
+    }
+
+    .wizard-progress {
+        padding: 0.25rem;
+        gap: 0.25rem;
+    }
+
+    .progress-step {
+        padding: 0.25rem;
+    }
+
+    .step-number {
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        font-size: 0.8rem;
+    }
+
+    .step-label {
+        font-size: 0.6rem;
+        margin-top: 0.15rem;
+    }
+
+    .wizard-step {
+        padding: 1rem 0.5rem;
+    }
+
+    .wizard-step h3 {
+        font-size: 1rem !important;
+    }
+
+    /* Counter na velmi malých displejích */
+    .counter-group {
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+
+    .counter-item {
+        padding: 0.6rem;
+    }
+
+    .counter-item label {
+        font-size: 0.65rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .counter-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+
+    .counter-value {
+        font-size: 1.1rem;
+        min-width: 45px;
+    }
+
+    /* Radio a checkbox buttony */
+    .radio-card, .checkbox-card {
+        padding: 0.4rem 4rem 0.4rem 2rem !important;
+        min-height: 45px !important;
+        max-height: 45px !important;
+        height: 45px !important;
+    }
+
+    .radio-title, .checkbox-title {
+        font-size: 0.75rem !important;
+    }
+
+    .radio-desc, .checkbox-desc {
+        font-size: 0.65rem !important;
+    }
+
+    .radio-price, .checkbox-price {
+        font-size: 0.75rem !important;
+    }
+
+    /* Tlačítka */
+    .btn-primary, .btn-secondary {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    /* Summary */
+    .summary-section {
+        padding: 0.75rem;
+    }
+
+    .summary-line {
+        font-size: 0.85rem;
+        padding: 0.5rem 0;
+    }
+
+    .summary-line.total {
+        font-size: 1rem;
+        padding: 0.75rem 0;
+    }
+
+    /* Address input */
+    .calc-input {
+        font-size: 0.85rem !important;
+        padding: 0.6rem !important;
+    }
+
+    #address-suggestions {
+        font-size: 0.85rem;
+    }
+
+    .address-suggestion {
+        padding: 0.6rem;
+    }
+
+    /* Hero na PWA */
+    .hero {
+        padding: 25px 10px !important;
+    }
+
+    .hero-title {
+        font-size: 1.1rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    .hero-subtitle {
+        font-size: 0.7rem !important;
+    }
+
+    /* Content section */
+    .content-section {
+        padding: 0.75rem 10px !important;
+    }
+
+    /* Pricing grid na úvodní stránce */
+    .pricing-grid {
+        gap: 0.75rem !important;
+    }
+
+    .pricing-category {
+        margin-bottom: 0.75rem !important;
+    }
+
+    .category-header {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    .pricing-item {
+        padding: 0.6rem 0.75rem !important;
+    }
+
+    .item-name {
+        font-size: 0.8rem !important;
+    }
+
+    .item-price {
+        font-size: 0.8rem !important;
     }
 }
 
