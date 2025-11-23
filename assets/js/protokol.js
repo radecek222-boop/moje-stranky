@@ -516,10 +516,15 @@ function showLoadingWithMessage(show, message = 'Načítání...') {
   const overlay = document.getElementById("loadingOverlay");
   const textElement = document.getElementById("loadingText");
 
-  overlay.classList.toggle("show", show);
-
-  if (textElement && show) {
-    textElement.textContent = message;
+  if (show) {
+    // Odebrat inline style (z EMERGENCY DIAGNOSTIC) aby CSS fungoval
+    overlay.style.display = '';
+    overlay.classList.add("show");
+    if (textElement) {
+      textElement.textContent = message;
+    }
+  } else {
+    overlay.classList.remove("show");
   }
 }
 
@@ -991,13 +996,15 @@ async function exportBothPDFs() {
     showLoading(true);
 
     logger.log('📋 Generuji kompletní PDF (protokol + PRICELIST + fotodokumentace)...');
+    logger.log('💰 Kontrola kalkulace - kalkulaceData:', kalkulaceData);
 
     // Vytvořit JEDNO PDF s protokolem
     const doc = await generateProtocolPDF();
 
     // Pokud existuje kalkulace, přidat PRICELIST
     if (kalkulaceData) {
-      logger.log('💶 Přidávám PRICELIST...');
+      logger.log('✅ Kalkulace nalezena - přidávám PRICELIST...');
+      logger.log('📊 Kalkulace data:', kalkulaceData);
 
       // NOVÁ STRÁNKA: PRICELIST
       doc.addPage();
@@ -1125,6 +1132,12 @@ async function exportBothPDFs() {
       doc.text(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
 
       logger.log(`✅ PRICELIST přidán (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
+    } else {
+      logger.warn('⚠️ Kalkulace nenalezena - PRICELIST nebude v PDF');
+      logger.warn('   Možné příčiny:');
+      logger.warn('   1. Kalkulace nebyla vytvořena');
+      logger.warn('   2. Kalkulace nebyla uložena do databáze');
+      logger.warn('   3. Chyba při načítání z databáze');
     }
 
     // Pokud jsou fotky, přidat fotodokumentaci na KONEC protokolu
@@ -1382,6 +1395,7 @@ async function sendToCustomer() {
     // FÁZE 1: Generování kompletního PDF (protokol + fotky) pro NÁHLED
     showLoadingWithMessage(true, 'Generuji protokol... Prosím čekejte');
     logger.log('📋 Generuji kompletní PDF pro náhled před odesláním...');
+    logger.log('💰 Kontrola kalkulace - kalkulaceData:', kalkulaceData);
 
     // Vytvořit JEDNO PDF s protokolem
     const doc = await generateProtocolPDF();
@@ -1389,7 +1403,8 @@ async function sendToCustomer() {
     // Pokud existuje kalkulace, přidat PRICELIST
     if (kalkulaceData) {
       showLoadingWithMessage(true, `Přidávám PRICELIST (${kalkulaceData.celkovaCena.toFixed(2)} €)... Prosím čekejte`);
-      logger.log('💶 Přidávám PRICELIST...');
+      logger.log('✅ Kalkulace nalezena - přidávám PRICELIST...');
+      logger.log('📊 Kalkulace data:', kalkulaceData);
 
       // NOVÁ STRÁNKA: PRICELIST
       doc.addPage();
@@ -1517,6 +1532,9 @@ async function sendToCustomer() {
       doc.text(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
 
       logger.log(`✅ PRICELIST přidán (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
+    } else {
+      logger.warn('⚠️ Kalkulace nenalezena - PRICELIST nebude v emailu');
+      logger.warn('   Zkontrolujte, zda byla kalkulace vytvořena a uložena');
     }
 
     // Pokud jsou fotky, přidat fotodokumentaci na KONEC protokolu (stejně jako exportBothPDFs)

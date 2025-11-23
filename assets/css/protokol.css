@@ -291,6 +291,10 @@ input[readonly], textarea[readonly] {
   from { transform: translate(-50%, -50%) rotate(0deg); }
   to { transform: translate(-50%, -50%) rotate(360deg); }
 }
+@keyframes spinLoader {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 #signature-pad {
   border: 2px solid #000;
   width: 100%;
@@ -412,7 +416,7 @@ button.btn:hover {
   border-radius: 50%;
   width: 70px;
   height: 70px;
-  animation: spin 0.8s linear infinite;
+  animation: spinLoader 0.8s linear infinite;
 }
 .loading-text {
   color: #fff;
