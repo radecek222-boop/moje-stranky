@@ -2123,53 +2123,11 @@ async function showNotes(recordOrId) {
           placeholder="Napište poznámku..."
         ></textarea>
       </div>
-
-      <div style="background: var(--c-bg); border: 1px solid var(--c-border); padding: 1rem; margin-top: 1.5rem;">
-        <h3 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-black); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border);">📄 PDF Report</h3>
-        ${(() => {
-          const docs = CURRENT_RECORD.documents || [];
-          // Hledat complete_report (nový formát) nebo fallback na jakýkoliv PDF dokument
-          const completeReport = docs.find(d => d.document_type === 'complete_report');
-          const anyPdf = docs.length > 0 ? docs[0] : null;
-          const pdfDoc = completeReport || anyPdf;
-
-          if (!pdfDoc) {
-            return `
-              <div style="padding: 1rem; text-align: center; background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 4px;">
-                <p style="margin: 0; color: #6c757d; font-size: 0.9rem;">ℹ️ PDF report ještě nebyl vytvořen</p>
-                <p style="margin: 0.3rem 0 0 0; font-size: 0.8rem; color: #adb5bd;">Vytvoří se po dokončení servisu</p>
-              </div>
-            `;
-          }
-
-          return `
-            <button onclick="window.open('${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
-                    class="btn"
-                    style="width: 100%; padding: 0.75rem; background: #2D5016; color: white; border: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; border-radius: 4px;">
-              📄 Otevřít PDF Report
-            </button>
-            <p style="margin: 0.5rem 0 0 0; font-size: 0.75rem; color: var(--c-grey); text-align: center;">
-              Vytvořeno: ${new Date(pdfDoc.uploaded_at || pdfDoc.created_at).toLocaleString('cs-CZ')}
-            </p>
-          `;
-        })()}
-
-      ${CURRENT_USER.is_admin ? `
-        <div style="background: #fff5f5; border: 2px solid #ff4444; padding: 1rem; margin-top: 1.5rem; border-radius: 4px;">
-          <h3 style="color: #ff4444; font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;">⚠️ ADMIN PANEL</h3>
-          <button onclick="deleteReklamace('${record.id}')"
-                  style="width: 100%; padding: 1rem; background: #ff4444; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">
-            🗑️ Smazat celou reklamaci
-          </button>
-          <p style="font-size: 0.75rem; color: #999; margin-top: 0.5rem; text-align: center;">Smaže vše včetně fotek a PDF</p>
-        </div>
-      ` : ''}
-
     </div>
 
     ${ModalManager.createActions([
-      '<button class="btn btn-secondary" onclick="closeNotesModal()">Zavřít</button>',
-      '<button class="btn btn-success" onclick="saveNewNote(\'' + record.id + '\')">Přidat poznámku</button>'
+      '<button class="btn btn-secondary" data-action="closeNotesModal">Zavřít</button>',
+      '<button class="btn btn-success" data-action="saveNewNote" data-id="' + record.id + '">Přidat poznámku</button>'
     ])}
   `;
 
@@ -2767,6 +2725,18 @@ document.addEventListener('click', (e) => {
 
     case 'closeDetail':
       closeDetail();
+      break;
+
+    case 'closeNotesModal':
+      if (typeof closeNotesModal === 'function') {
+        closeNotesModal();
+      }
+      break;
+
+    case 'saveNewNote':
+      if (id && typeof saveNewNote === 'function') {
+        saveNewNote(id);
+      }
       break;
 
     default:
