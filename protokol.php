@@ -313,7 +313,7 @@ if ($initialBootstrapData) {
   <div class="two-col-table">
     <div class="col">
       <table>
-        <tr><td class="label">Celkem k úhradě za servis<span class="en-label">Total service payment</span></td><td><input type="text" id="price-total" placeholder="0.00"></td></tr>
+        <tr><td class="label">Účtováno za servis<span class="en-label">Service charged</span></td><td><input type="text" id="price-total" placeholder="0.00"></td></tr>
         <tr><td class="label">Platí zákazník?<span class="en-label">Customer pays?</span></td><td><select id="payment"><option>NE</option><option>ANO</option></select></td></tr>
         <tr><td class="label">Datum podpisu<span class="en-label">Signature date</span></td><td><input type="date" id="sign-date"></td></tr>
       </table>
