@@ -610,6 +610,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 <script src="assets/js/wgs-map.js" defer></script>
 <script src="assets/js/csrf-auto-inject.js" defer></script>
 <script src="assets/js/novareklamace.min.js?v=1762458261" defer></script>
+
+<?php renderHeatmapTracker(); ?>
 </body>
 </html>
 <script>
