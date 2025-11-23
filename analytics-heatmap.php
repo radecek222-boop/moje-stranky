@@ -10,6 +10,7 @@
  */
 
 require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/includes/csrf_helper.php';
 
 // Bezpečnostní kontrola - pouze admin
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
@@ -17,8 +18,8 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     exit;
 }
 
-// Získat CSRF token pro API calls
-$csrfToken = $_SESSION['csrf_token'] ?? '';
+// Vygenerovat nebo získat CSRF token pro API calls
+$csrfToken = generateCSRFToken();
 ?>
 <!DOCTYPE html>
 <html lang="cs">
