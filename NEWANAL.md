@@ -1,9 +1,9 @@
 # NEWANAL – Enterprise Analytics System Documentation
 
-**Version:** 1.9.0
+**Version:** 2.0.0
 **Last Updated:** 2025-11-23
 **Project:** WGS Enterprise Analytics System
-**Status:** Modules #1-10 Complete, Modules #11-13 Pending
+**Status:** Modules #1-11 Complete, Modules #12-13 Pending
 
 ---
 
@@ -59,7 +59,7 @@ The **Enterprise Analytics System** is a full-scale web analytics platform compa
 | UTM Campaign Tracking | ✅ Complete | Module #8 |
 | Conversion Funnels | ✅ Complete | Module #9 |
 | User Interest AI Scoring | ✅ Complete | Module #10 |
-| Real-time Dashboard | ⏳ Pending | Module #11 |
+| Real-time Dashboard | ✅ Complete | Module #11 |
 | AI Reports Engine | ⏳ Pending | Module #12 |
 | GDPR Compliance Tools | ⏳ Pending | Module #13 |
 
@@ -1738,39 +1738,45 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 | **Module #8** | ✅ Complete | 100% | Committed: `591549b` |
 | **Module #9** | ✅ Complete | 100% | Committed: `7ad924e` |
 | **Module #10** | ✅ Complete | 100% | Committed: `5d1b488` |
-| **Module #11** | ⏳ Pending | 0% | Awaiting approval |
+| **Module #11** | ✅ Complete | 100% | Committed: `eced189` |
 | **Module #12** | ⏳ Pending | 0% | Awaiting approval |
 | **Module #13** | ⏳ Pending | 0% | Awaiting approval |
 
 ### Overall Progress
 
 ```
-[████████████████████████████████████] 76.9% (10/13 modules complete)
+[██████████████████████████████████████████] 84.6% (11/13 modules complete)
 ```
 
 ### Next Steps
 
 1. **User Action Required:**
-   - Test Module #10 (User Interest AI Scoring)
-   - Run migration: `migrace_module10_user_scores.php?execute=1`
-   - Run score recalculation: `php scripts/recalculate_user_scores.php`
+   - Test Module #11 (Real-time Dashboard)
+   - Run migration: `migrace_module11_realtime.php?execute=1`
+   - Test cleanup script: `php scripts/cleanup_realtime_sessions.php`
    - Test admin UI:
-     * Otevřít `analytics-user-scores.php`
-     * Kliknout "Načíst data"
-     * Zkontrolovat stats cards (avg engagement, frustration, interest, total sessions)
-     * Zkontrolovat distribution charts (3 histogramy)
-     * Zkontrolovat sessions table se všemi scores
-     * Ověřit color-coded badges (high/medium/low)
+     * Otevřít `analytics-realtime.php`
+     * Zkontrolovat live indicator (ŽIVĚ + last update time)
+     * Zkontrolovat stats cards (Aktivní Lidé, Aktivní Boti, Země, Průměrná doba)
+     * Zkontrolovat world map s markers aktivních návštěvníků
+     * Zkontrolovat seznam aktivních sessions (vlajky, města, device type)
+     * Zkontrolovat live event feed (posledních 50 eventů)
+     * Ověřit auto-refresh každých 5 sekund
    - Verify database table:
-     * `wgs_analytics_user_scores` - scores pro sessions
-     * Zkontrolovat engagement_score, frustration_score, interest_score (0-100)
-     * Zkontrolovat JSON faktory (engagement_factors, frustration_factors, interest_factors)
-   - Approve Module #10 OR request fixes
+     * `wgs_analytics_realtime` - real-time sessions
+     * Zkontrolovat expires_at (5 minut od last_activity_at)
+     * Zkontrolovat is_active flag
+     * Zkontrolovat geolocation data (latitude, longitude)
+   - Setup cron job:
+     * Cron: `*/5 * * * * php /path/to/scripts/cleanup_realtime_sessions.php`
+     * Interval: Každých 5 minut
+     * **NOTE:** Toto je 5. cron job - limit 5/5 naplněn!
+   - Approve Module #11 OR request fixes
 
-2. **After Module #10 Approval:**
-   - Create implementation plan for Module #11 (Real-time Dashboard)
+2. **After Module #11 Approval:**
+   - Create implementation plan for Module #12 (AI Reports Engine)
    - Wait for plan approval
-   - Generate code for Module #11
+   - Generate code for Module #12
    - Repeat workflow
 
 ### File Inventory
@@ -1849,9 +1855,16 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 - `analytics-user-scores.php` (500 lines)
 - `scripts/recalculate_user_scores.php` (150 lines)
 
-**Total New Code:** ~17,168 lines (Modules #1-10)
+**Created Files (Module #11):**
+- `migrace_module11_realtime.php` (250 lines)
+- `api/analytics_realtime.php` (280 lines)
+- `analytics-realtime.php` (500 lines)
+- `scripts/cleanup_realtime_sessions.php` (150 lines)
+- Updated: `api/track_v2.php` (+110 lines real-time tracking)
 
-**Pending Files (Modules #11-13):** ~6+ files, estimated ~3,000+ lines
+**Total New Code:** ~18,439 lines (Modules #1-11)
+
+**Pending Files (Modules #12-13):** ~8+ files, estimated ~3,500+ lines
 
 ---
 
