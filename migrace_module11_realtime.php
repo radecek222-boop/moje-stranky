@@ -204,10 +204,9 @@ CREATE TABLE IF NOT EXISTS wgs_analytics_realtime (
         echo "<div class='step'>";
         echo "<h2>3️⃣ Spouštím migraci...</h2>";
 
-        $pdo->beginTransaction();
-
         try {
             // Drop table if exists (pro čistou migraci)
+            // Poznámka: DDL příkazy (DROP, CREATE) mají implicitní COMMIT, proto nepoužíváme explicitní transakci
             if ($tabulkaExistuje) {
                 echo "<div class='info'>⏳ Odstraňuji starou tabulku wgs_analytics_realtime...</div>";
                 $pdo->exec("DROP TABLE IF EXISTS wgs_analytics_realtime");
@@ -218,9 +217,6 @@ CREATE TABLE IF NOT EXISTS wgs_analytics_realtime (
             echo "<div class='info'>⏳ Vytvářím tabulku wgs_analytics_realtime...</div>";
             $pdo->exec($ddl);
             echo "<div class='success'>✅ Tabulka wgs_analytics_realtime vytvořena</div>";
-
-            // Commit transakce
-            $pdo->commit();
 
             echo "<div class='success'>";
             echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
@@ -249,8 +245,6 @@ CREATE TABLE IF NOT EXISTS wgs_analytics_realtime (
             echo "<p><a href='analytics-realtime.php' class='btn'>Otevřít Real-time Dashboard</a></p>";
 
         } catch (PDOException $e) {
-            $pdo->rollBack();
-
             echo "<div class='error'>";
             echo "<strong>❌ CHYBA PŘI MIGRACI</strong><br>";
             echo htmlspecialchars($e->getMessage());
