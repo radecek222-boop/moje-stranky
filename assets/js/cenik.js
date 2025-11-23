@@ -142,9 +142,9 @@
         if (jazyk === 'cs') {
             nameEl.textContent = item.service_name || '';
         } else if (jazyk === 'en') {
-            nameEl.textContent = item.service_name_en || item.service_name || '';
+            nameEl.textContent = item.service_name_en || prelozitText(item.service_name, 'service') || item.service_name || '';
         } else if (jazyk === 'it') {
-            nameEl.textContent = item.service_name_it || item.service_name || '';
+            nameEl.textContent = item.service_name_it || prelozitText(item.service_name, 'service') || item.service_name || '';
         }
 
         const priceEl = document.createElement('div');
@@ -168,9 +168,9 @@
         if (jazyk === 'cs') {
             popis = item.description || '';
         } else if (jazyk === 'en') {
-            popis = item.description_en || item.description || '';
+            popis = item.description_en || prelozitText(item.description, 'desc') || item.description || '';
         } else if (jazyk === 'it') {
-            popis = item.description_it || item.description || '';
+            popis = item.description_it || prelozitText(item.description, 'desc') || item.description || '';
         }
 
         if (popis) {
