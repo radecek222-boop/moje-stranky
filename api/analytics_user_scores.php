@@ -69,7 +69,7 @@ try {
                 s.session_start,
                 s.session_end,
                 s.device_type,
-                s.country_code,
+                s.country,
                 s.city
             FROM wgs_analytics_user_scores us
             LEFT JOIN wgs_analytics_sessions s ON us.session_id = s.session_id
