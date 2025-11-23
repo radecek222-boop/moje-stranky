@@ -1375,9 +1375,10 @@
 }
 
 .summary-line {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    align-items: baseline;
     padding: 0.75rem 0;
     border-bottom: 1px solid #eee;
     font-size: 0.95rem;
@@ -1397,12 +1398,18 @@
 .summary-price {
     font-weight: 700;
     color: #4a4a4a;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
 }
 
 .total-price {
     font-size: 1.5rem;
     font-weight: 700;
     color: #4a4a4a;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
 }
 
 .summary-subline {
@@ -1410,6 +1417,7 @@
     color: #666;
     padding-left: 1rem;
     margin-top: -0.5rem;
+    grid-column: 1 / -1;
 }
 
 .summary-note {
