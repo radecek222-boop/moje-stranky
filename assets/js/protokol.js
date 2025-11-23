@@ -1043,7 +1043,7 @@ async function exportBothPDFs() {
 async function sendToCustomer() {
   try {
     // FÁZE 1: Generování kompletního PDF (protokol + fotky) pro NÁHLED
-    showLoadingWithMessage(true, '📄 Generuji náhled PDF...');
+    showLoadingWithMessage(true, 'Generuji protokol... Prosím čekejte');
     logger.log('📋 Generuji kompletní PDF pro náhled před odesláním...');
 
     // Vytvořit JEDNO PDF s protokolem
@@ -1051,7 +1051,7 @@ async function sendToCustomer() {
 
     // Pokud jsou fotky, přidat fotodokumentaci na KONEC protokolu (stejně jako exportBothPDFs)
     if (attachedPhotos.length > 0) {
-      showLoadingWithMessage(true, `📸 Přidávám fotodokumentaci (${attachedPhotos.length} fotek)...`);
+      showLoadingWithMessage(true, `Přidávám ${attachedPhotos.length} fotografií... Prosím čekejte`);
       logger.log('📸 Přidávám fotodokumentaci...');
 
       const pageWidth = doc.internal.pageSize.getWidth();
@@ -1244,7 +1244,7 @@ async function potvrditAOdeslat() {
 
   try {
     // ✅ PERFORMANCE: Preview modal vypnut, rovnou odesílání emailu
-    showLoadingWithMessage(true, '📧 Odesílám email zákazníkovi...');
+    showLoadingWithMessage(true, 'Odesílám email zákazníkovi... Prosím čekejte');
     logger.log('📧 Odesílám PDF zákazníkovi...');
 
     const csrfToken = await fetchCsrfToken();
