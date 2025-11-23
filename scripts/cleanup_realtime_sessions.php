@@ -5,10 +5,10 @@
  * Odstraní expirované sessions z wgs_analytics_realtime tabulky.
  * Sessions expirují po 5 minutách neaktivity.
  *
- * Spouštět: Každých 5 minut
- * Cron: */5 * * * * php /path/to/scripts/cleanup_realtime_sessions.php
+ * Spouštět: Každých 15 minut (hosting limit, ideálně každých 5 minut)
+ * Cron: */15 * * * * php /path/to/scripts/cleanup_realtime_sessions.php
  *
- * @version 1.0.0
+ * @version 1.0.1
  * @date 2025-11-23
  * @module Module #11 - Real-time Dashboard
  */

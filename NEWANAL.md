@@ -900,12 +900,14 @@ INDEX idx_device (device_type)
 | # | Job | File | Schedule | Systém | Co obsahuje |
 |---|-----|------|----------|--------|-------------|
 | 1 | **Ultra Master Cron** | `scripts/ultra_master_cron.php` | Daily 02:00 | Analytics | ALL Analytics ops (6 jobs v 1) |
-| 2 | Realtime Cleanup | `scripts/cleanup_realtime_sessions.php` | Every 5 min | Analytics | Real-time sessions cleanup |
+| 2 | Realtime Cleanup | `scripts/cleanup_realtime_sessions.php` | Every 15 min | Analytics | Real-time sessions cleanup |
 | 3 | Email Queue | `cron/process-email-queue.php` | Every 15 min | WGS | Zpracování fronty emailů (KRITICKÝ) |
 | 4 | Appointment Reminders | `webcron-send-reminders.php` | Daily 10:00 | WGS | Připomínky návštěv (KRITICKÝ) |
 | 5 | SEO Actuality | `generuj_aktuality.php` | Daily 06:00 | SEO | Generování SEO obsahu |
 
 **✅ LIMIT SPLNĚN: 5/5 jobů (MAXIMUM DOSAŽENO)**
+
+**⚠️ POZNÁMKA:** Hosting má minimální periodu webcron 15 minut (ne 5 min). Sessions stále expirují po 5 minutách, jen se fyzicky odstraní později.
 
 #### **Ultra Master Cron Details:**
 
@@ -972,9 +974,9 @@ Celkové trvání: 12.34s
 #              scheduled reports, GDPR retention (v NE)
 0 2 * * * /usr/bin/php /path/to/scripts/ultra_master_cron.php >> /path/to/logs/cron_ultra_master.log 2>&1
 
-# 2. Realtime cleanup (každých 5 minut)
-#    Real-time sessions cleanup (5 min TTL)
-*/5 * * * * /usr/bin/php /path/to/scripts/cleanup_realtime_sessions.php >> /path/to/logs/cron.log 2>&1
+# 2. Realtime cleanup (každých 15 minut - hosting limit)
+#    Real-time sessions cleanup (sessions expirují po 5 min)
+*/15 * * * * /usr/bin/php /path/to/scripts/cleanup_realtime_sessions.php >> /path/to/logs/cron.log 2>&1
 
 # ┌─────────────────────────────────────────────────────────────────────┐
 # │ WGS SYSTEM (2 joby - KRITICKÉ)                                      │
