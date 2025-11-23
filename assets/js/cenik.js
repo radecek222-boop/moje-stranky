@@ -11,6 +11,15 @@
     let currentEditItem = null;
 
     // ========================================
+    // HELPER: Markdown parsing
+    // ========================================
+    function parseMarkdown(text) {
+        if (!text) return '';
+        // **text** → <strong>text</strong>
+        return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    // ========================================
     // INIT
     // ========================================
     window.addEventListener('DOMContentLoaded', () => {
@@ -112,7 +121,7 @@
         if (item.description) {
             const descEl = document.createElement('div');
             descEl.className = 'item-description';
-            descEl.textContent = item.description;
+            descEl.innerHTML = parseMarkdown(item.description);
             itemEl.appendChild(descEl);
         }
 

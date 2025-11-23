@@ -671,3 +671,162 @@
         font-size: 1.2rem;
     }
 }
+/* ULTRA KOMPAKTNÍ CENÍK - podle analytics.php */
+
+/* Hero - velmi malý */
+.hero {
+    padding: 30px 15px !important;
+}
+
+.hero-title {
+    font-size: 1.2rem !important;
+    margin-bottom: 0.3rem !important;
+}
+
+.hero-subtitle {
+    font-size: 0.75rem !important;
+}
+
+/* Content sekce */
+.content-section {
+    padding: 1rem 15px !important;
+}
+
+/* Section intro */
+.section-intro {
+    margin-bottom: 1rem !important;
+}
+
+.section-title {
+    font-size: 1.2rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.section-text {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Pricing grid */
+.pricing-category {
+    margin-bottom: 0.5rem !important;
+}
+
+.category-header {
+    padding: 0.6rem 1rem !important;
+    font-size: 0.9rem !important;
+}
+
+.pricing-item {
+    padding: 0.75rem 1rem !important;
+}
+
+.pricing-item-name {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.3rem !important;
+}
+
+.pricing-item-desc {
+    font-size: 0.7rem !important;
+    margin-bottom: 0.3rem !important;
+}
+
+.pricing-item-price {
+    font-size: 1rem !important;
+}
+
+/* Calculator */
+.calculator-section {
+    padding: 1rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.calculator-step {
+    padding: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.calculator-step h3 {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.5rem !important;
+    padding-bottom: 0.3rem !important;
+}
+
+.calc-input {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8rem !important;
+}
+
+.service-checkbox-item {
+    padding: 0.6rem !important;
+}
+
+.service-checkbox-item label {
+    font-size: 0.75rem !important;
+}
+
+.service-price {
+    font-size: 0.85rem !important;
+}
+
+.price-summary-box {
+    padding: 1rem !important;
+}
+
+.summary-line {
+    padding: 0.4rem 0 !important;
+    font-size: 0.8rem !important;
+}
+
+.summary-line.total {
+    font-size: 1rem !important;
+    padding-top: 0.6rem !important;
+}
+
+/* Buttons */
+.btn-admin {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.7rem !important;
+}
+
+.item-edit-btn {
+    padding: 0.3rem 0.6rem !important;
+    font-size: 0.65rem !important;
+}
+
+/* Modal */
+.modal-content {
+    padding: 1rem !important;
+}
+
+.modal-content h2 {
+    font-size: 1rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.form-group label {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.3rem !important;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    padding: 0.4rem 0.6rem !important;
+    font-size: 0.75rem !important;
+}
+
+/* Footer */
+.pricing-footer {
+    padding: 1rem !important;
+    margin-top: 1rem !important;
+}
+
+.pricing-footer h3 {
+    font-size: 1rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.pricing-footer p {
+    font-size: 0.75rem !important;
+}
