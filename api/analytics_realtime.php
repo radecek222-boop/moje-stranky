@@ -152,6 +152,19 @@ try {
         // LIVE_EVENTS - Stream nejnovějších eventů
         // ========================================
         case 'live_events':
+            // Zkontrolovat existenci tabulky wgs_analytics_events
+            $tableCheck = $pdo->query("SHOW TABLES LIKE 'wgs_analytics_events'");
+
+            if ($tableCheck->rowCount() === 0) {
+                // Tabulka neexistuje - vrátit prázdné pole
+                sendJsonSuccess('Live eventy načteny (tabulka ještě neexistuje)', [
+                    'events' => [],
+                    'count' => 0,
+                    'timestamp' => date('Y-m-d H:i:s')
+                ]);
+                break;
+            }
+
             // Získat nejnovější eventy z wgs_analytics_events
             $stmt = $pdo->prepare("
                 SELECT
@@ -167,9 +180,8 @@ try {
                     r.current_page_title,
                     r.is_bot
                 FROM wgs_analytics_events e
-                LEFT JOIN wgs_analytics_realtime r ON e.session_id = r.session_id
+                LEFT JOIN wgs_analytics_realtime r ON e.session_id = r.session_id AND r.is_active = 1
                 WHERE e.event_timestamp >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
-                AND r.is_active = 1
                 ORDER BY e.event_timestamp DESC
                 LIMIT :limit
             ");
@@ -178,7 +190,9 @@ try {
 
             // Dekódovat JSON data
             foreach ($events as &$event) {
-                $event['event_data'] = json_decode($event['event_data'], true);
+                if (isset($event['event_data'])) {
+                    $event['event_data'] = json_decode($event['event_data'], true);
+                }
             }
 
             sendJsonSuccess('Live eventy načteny', [
