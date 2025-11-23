@@ -143,10 +143,10 @@ try {
     $existujiciTabulky = [];
 
     foreach ($tabulkyKKontrole as $tabulka) {
-        $stmt = $pdo->prepare("SHOW TABLES LIKE :tabulka");
-        $stmt->execute(['tabulka' => $tabulka]);
+        // SHOW TABLES LIKE nepodporuje bind parametry - použít přímý dotaz
+        $stmt = $pdo->query("SHOW TABLES LIKE '{$tabulka}'");
 
-        if ($stmt->rowCount() > 0) {
+        if ($stmt && $stmt->rowCount() > 0) {
             $existujiciTabulky[] = $tabulka;
             echo "<div class='warning'>⚠️ Tabulka <code>{$tabulka}</code> již existuje</div>";
 
