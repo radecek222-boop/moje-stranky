@@ -889,62 +889,130 @@ INDEX idx_device (device_type)
 
 ---
 
-### ✅ VYŘEŠENO: Cron Jobs (Consolidováno z 7 → 4)
+### ✅ VYŘEŠENO: Cron Jobs - FINÁLNÍ KONFIGURACE (Consolidováno z 7 → 5)
 
-**Hosting limit: 5 webcronů | Aktuální počet: 4 joby** ✅
+**Hosting limit: 5 webcronů CELKEM | Aktuální počet: 5/5 jobů** ✅
 
-#### **Nové nastavení (po consolidaci):**
+**DŮLEŽITÉ:** Limit 5 je pro **CELÝ HOSTING** (včetně WGS systému), ne pouze pro Analytics!
 
-| # | Job | File | Schedule | Co obsahuje | Priority |
-|---|-----|------|----------|-------------|----------|
-| 1 | **Master Cron** | `scripts/master_cron.php` | Daily 02:00 | Cleanup + Scores + Retention (v NE) | ✅ HIGH |
-| 2 | Realtime Cleanup | `scripts/cleanup_realtime_sessions.php` | Every 5 min | Real-time sessions cleanup | 🟡 MEDIUM |
-| 3 | Campaign Stats | `scripts/aggregate_campaign_stats.php` | Every hour | UTM campaign aggregation | 🟡 MEDIUM |
-| 4 | Scheduled Reports | `scripts/generate_scheduled_reports.php` | Daily 06:00 | AI reports generation | ✅ HIGH |
+#### **FINÁLNÍ nastavení (Analytics + WGS + SEO):**
 
-**✅ LIMIT SPLNĚN: 4/5 jobů**
+| # | Job | File | Schedule | Systém | Co obsahuje |
+|---|-----|------|----------|--------|-------------|
+| 1 | **Ultra Master Cron** | `scripts/ultra_master_cron.php` | Daily 02:00 | Analytics | ALL Analytics ops (6 jobs v 1) |
+| 2 | Realtime Cleanup | `scripts/cleanup_realtime_sessions.php` | Every 15 min | Analytics | Real-time sessions cleanup |
+| 3 | Email Queue | `cron/process-email-queue.php` | Every 15 min | WGS | Zpracování fronty emailů (KRITICKÝ) |
+| 4 | Appointment Reminders | `webcron-send-reminders.php` | Daily 10:00 | WGS | Připomínky návštěv (KRITICKÝ) |
+| 5 | SEO Actuality | `generuj_aktuality.php` | Daily 06:00 | SEO | Generování SEO obsahu |
 
-#### **Master Cron Details:**
+**✅ LIMIT SPLNĚN: 5/5 jobů (MAXIMUM DOSAŽENO)**
 
-`scripts/master_cron.php` kombinuje následující joby:
-- ✅ Cleanup geo cache (3 dny TTL) - denně
-- ✅ Cleanup replay frames (30 dní TTL) - denně
-- ✅ Recalculate user scores - denně (KROMĚ neděle)
-- ✅ GDPR retention policy (730 dní) - týdně v neděli
+**⚠️ POZNÁMKA:** Hosting má minimální periodu webcron 15 minut (ne 5 min). Sessions stále expirují po 5 minutách, jen se fyzicky odstraní později.
+
+#### **Ultra Master Cron Details:**
+
+`scripts/ultra_master_cron.php` kombinuje **VŠECH 6 Analytics operací** do jednoho jobu:
+
+1. ✅ **Cleanup replay frames** (30 dní TTL) - denně
+2. ✅ **Cleanup geo cache** (3 dny TTL) - denně
+3. ✅ **Recalculate user scores** - denně (KROMĚ neděle)
+4. ✅ **Campaign stats aggregation** - denně (trade-off: hourly → daily)
+5. ✅ **Generate scheduled reports** - denně (AI reporty)
+6. ✅ **GDPR retention policy** (730 dní) - týdně pouze v NEDĚLI
 
 **Features:**
 - Sekvenciální provádění (bez race conditions)
-- Centralizované logování (`/logs/cron_master.log`)
+- Centralizované logování (`/logs/cron_ultra_master.log`)
 - Email notifikace při chybách (optional)
 - Měření trvání každého jobu
+- Sunday detection (GDPR retention pouze v neděli)
 - Summary po dokončení
+
+**Trade-off:**
+- Campaign stats: **hourly → daily** (stále dostačující pro většinu analytics potřeb)
 
 **Testing:**
 ```bash
-php scripts/master_cron.php
+php scripts/ultra_master_cron.php
 ```
 
-### Crontab Example (Nové - 4 joby)
+**Expected output:**
+```
+==========================================
+ULTRA MASTER CRON JOB - START
+==========================================
+Datum: 2025-11-23 02:00:00
+Den v týdnu: Saturday
+========================================
+Spouštím: Cleanup Replay Frames
+========================================
+✅ Skript dokončen: Cleanup Replay Frames (trvání: 1.23s)
+...
+==========================================
+ULTRA MASTER CRON JOB - SUMMARY
+==========================================
+Úspěšné joby: 5
+Neúspěšné joby: 0
+Celkové trvání: 12.34s
+==========================================
+✅ ULTRA MASTER CRON DOKONČEN ÚSPĚŠNĚ
+```
+
+### Crontab Example (FINÁLNÍ - 5 jobů)
 
 ```cron
-# Enterprise Analytics System - Production Cron Jobs (4 total - v rámci limitu 5)
+# ================================================================================
+# WGS HOSTING - VŠECHNY WEBCRON JOBY (LIMIT 5/5)
+# ================================================================================
 
-# 1. Master Cron - Daily cleanup + maintenance (combines 4 jobs)
-#    - Cleanup geo cache + replay frames
-#    - Recalculate user scores (PO-SO) / GDPR retention (NE)
-0 2 * * * /usr/bin/php /path/to/scripts/master_cron.php >> /path/to/logs/cron_master.log 2>&1
+# ┌─────────────────────────────────────────────────────────────────────┐
+# │ ANALYTICS SYSTEM (2 joby)                                           │
+# └─────────────────────────────────────────────────────────────────────┘
 
-# 2. Realtime cleanup (every 5 minutes)
-*/5 * * * * /usr/bin/php /path/to/scripts/cleanup_realtime_sessions.php >> /path/to/logs/cron.log 2>&1
+# 1. Ultra Master Cron - ALL Analytics operations (denně v 02:00)
+#    Obsahuje: cleanup frames, geo cache, user scores, campaign stats,
+#              scheduled reports, GDPR retention (v NE)
+0 2 * * * /usr/bin/php /path/to/scripts/ultra_master_cron.php >> /path/to/logs/cron_ultra_master.log 2>&1
 
-# 3. Campaign stats aggregation (every hour)
-0 * * * * /usr/bin/php /path/to/scripts/aggregate_campaign_stats.php >> /path/to/logs/cron.log 2>&1
+# 2. Realtime cleanup (každých 15 minut - hosting limit)
+#    Real-time sessions cleanup (sessions expirují po 5 min)
+*/15 * * * * /usr/bin/php /path/to/scripts/cleanup_realtime_sessions.php >> /path/to/logs/cron.log 2>&1
 
-# 4. Scheduled reports generation (daily at 06:00)
-0 6 * * * /usr/bin/php /path/to/scripts/generate_scheduled_reports.php >> /path/to/logs/cron.log 2>&1
+# ┌─────────────────────────────────────────────────────────────────────┐
+# │ WGS SYSTEM (2 joby - KRITICKÉ)                                      │
+# └─────────────────────────────────────────────────────────────────────┘
+
+# 3. Email Queue Processor (každých 15 minut) - KRITICKÝ
+#    Zpracování fronty emailů (reklamace, notifikace, reporty)
+*/15 * * * * /usr/bin/php /path/to/cron/process-email-queue.php >> /path/to/logs/email_queue_cron.log 2>&1
+
+# 4. Appointment Reminders (denně v 10:00) - KRITICKÝ
+#    Automatické připomínky návštěv den před termínem
+0 10 * * * /usr/bin/php /path/to/webcron-send-reminders.php >> /path/to/logs/cron_reminders.log 2>&1
+
+# ┌─────────────────────────────────────────────────────────────────────┐
+# │ SEO SYSTEM (1 job)                                                  │
+# └─────────────────────────────────────────────────────────────────────┘
+
+# 5. SEO Actuality Generator (denně v 06:00)
+#    Generování SEO obsahu pro lepší indexaci
+0 6 * * * /usr/bin/php /path/to/generuj_aktuality.php >> /path/to/logs/cron.log 2>&1
+
+# ================================================================================
+# LIMIT: 5/5 WEBCRONŮ (MAXIMUM)
+# ================================================================================
 ```
 
-**Poznámka:** Hosting limit 5 webcronů splněn (4/5) ✅
+**Poznámka:** Hosting limit 5 webcronů **PŘESNĚ SPLNĚN** (5/5) - nelze přidat další ✅
+
+**Staré joby ke SMAZÁNÍ:**
+- ❌ `wp-cron.php` (WordPress nepoužíván)
+- ❌ `cleanup_geo_cache.php` (nahrazeno ultra_master_cron)
+- ❌ `cleanup_old_replay_frames.php` (nahrazeno ultra_master_cron)
+- ❌ `recalculate_user_scores.php` (nahrazeno ultra_master_cron)
+- ❌ `apply_retention_policy.php` (nahrazeno ultra_master_cron)
+- ❌ `aggregate_campaign_stats.php` (nahrazeno ultra_master_cron)
+- ❌ `generate_scheduled_reports.php` (nahrazeno ultra_master_cron)
 
 ### Deployment Checklist
 
