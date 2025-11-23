@@ -976,9 +976,9 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 
 <!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
 <script>
-// CACHE BUSTER: 2025-11-23-19:15 - FORCE RELOAD
+// CACHE BUSTER: 2025-11-23-19:25 - S CONFIRMATION DIALOGEM
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('🔧 EMERGENCY event delegation V3 se načítá... [2025-11-23-19:15]');
+  console.log('🔧 EMERGENCY event delegation V4 se načítá... [2025-11-23-19:25]');
 
   document.addEventListener('click', (e) => {
     const button = e.target.closest('[data-action]');
@@ -997,7 +997,18 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         }
 
-        console.log('[EMERGENCY] V3 ✅ PŘÍMO otevírám zakázku ID:', id, '(BEZ confirmation dialogu)');
+        // Confirmation dialog PRO BEZPEČNOST
+        const confirmReopen = confirm(
+          'Opravdu chcete znovu otevřít tuto dokončenou zakázku?\n\n' +
+          'Zakázka bude vrácena do stavu "ČEKÁ" a bude možné ji znovu upravit.'
+        );
+
+        if (!confirmReopen) {
+          console.log('[EMERGENCY] ❌ Uživatel zrušil znovuotevření');
+          break;
+        }
+
+        console.log('[EMERGENCY] V3 ✅ Otevírám zakázku ID:', id);
 
         // Použít asynchronní funkci pro await
         (async () => {
@@ -1072,7 +1083,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('✅ EMERGENCY event delegation V3 načten [2025-11-23-19:15] - BEZ confirmation dialogu');
+  console.log('✅ EMERGENCY event delegation V4 načten [2025-11-23-19:25] - S CONFIRMATION DIALOGEM');
 });
 </script>
 </body>
