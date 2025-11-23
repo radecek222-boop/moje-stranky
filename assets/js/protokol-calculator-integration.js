@@ -236,8 +236,15 @@
                 return;
             }
 
-            // Získat CSRF token
-            const csrfToken = document.querySelector('input[name="csrf_token"]')?.value;
+            // Získat CSRF token z meta tagu nebo přes API
+            const csrfToken = await window.fetchCsrfToken();
+
+            if (!csrfToken) {
+                console.error('[Protokol-Kalkulačka] ❌ Nepodařilo se získat CSRF token');
+                return;
+            }
+
+            console.log('[Protokol-Kalkulačka] ✅ CSRF token získán');
 
             const response = await fetch('/api/protokol_api.php', {
                 method: 'POST',
