@@ -1199,6 +1199,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
 <script src="assets/js/hamburger-menu.js" defer></script>
 
+<?php renderHeatmapTracker(); ?>
 </body>
 </html>
 

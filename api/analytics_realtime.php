@@ -133,10 +133,12 @@ try {
                 ORDER BY last_activity_at DESC
                 LIMIT :limit OFFSET :offset
             ");
-            $stmt->execute([
-                'limit' => $limit,
-                'offset' => $offset
-            ]);
+
+            // LIMIT a OFFSET musí být bindnuty jako INT
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+
             $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // Total count
@@ -194,7 +196,11 @@ try {
                 ORDER BY e.event_timestamp DESC
                 LIMIT :limit
             ");
-            $stmt->execute(['limit' => $limit]);
+
+            // LIMIT musí být bindnutý jako INT
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->execute();
+
             $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // Dekódovat JSON data

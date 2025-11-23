@@ -253,5 +253,7 @@
 <script src="assets/js/logger.js" defer></script>
 
 <script src="assets/js/onas.js" defer></script>
+
+<?php renderHeatmapTracker(); ?>
 </body>
 </html>

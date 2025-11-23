@@ -133,5 +133,6 @@
 
 <script src="assets/js/index.js" defer></script>
 
+<?php renderHeatmapTracker(); ?>
 </body>
 </html>

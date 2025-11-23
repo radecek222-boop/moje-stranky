@@ -122,6 +122,9 @@ $csrfToken = generateCSRFToken();
             pointer-events: none;
             z-index: 10;
             opacity: 0.7;
+            min-width: 100%;
+            min-height: 600px;
+            border: 2px dashed rgba(45, 80, 22, 0.3); /* Debug border */
         }
 
         #page-mockup {
@@ -329,7 +332,8 @@ $csrfToken = generateCSRFToken();
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    currentData = result.data;
+                    // API vrací data v top-level (array_merge pattern)
+                    currentData = result;
 
                     // Zobrazit statistiky
                     document.getElementById('stats-container').style.display = 'block';
