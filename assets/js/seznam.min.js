@@ -1,5 +1,5 @@
-// VERSION CHECK: 20251123-02 - Všechna tlačítka převedena na data-action (CSP fix)
-console.log('🔍 SEZNAM.JS NAČTEN - VERZE: 20251123-02 (CSP fix - data-action)');
+// VERSION CHECK: 20251123-03 - Odstraněny duplicitní event listenery
+console.log('🔍 SEZNAM.JS NAČTEN - VERZE: 20251123-03 (event listener cleanup)');
 
 // BEZPEČNOST: Cache CSRF tokenu pro prevenci nekonečné smyčky
 window.csrfTokenCache = window.csrfTokenCache || null;
@@ -2263,14 +2263,21 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', (e) => {
     const target = e.target.closest('[data-action]');
     if (!target) return;
-    
+
     const action = target.getAttribute('data-action');
-    
+
+    // Ignorovat akce zpracované EMERGENCY event listenerem v seznam.php
+    const emergencyActions = ['reopenOrder', 'openPDF', 'startVisit', 'showCalendar',
+                               'showContactMenu', 'showCustomerDetail', 'closeDetail', 'deleteReklamace'];
+    if (emergencyActions.includes(action)) {
+      return;  // Nechat zpracovat EMERGENCY event listener
+    }
+
     if (action === 'reload') {
       location.reload();
       return;
     }
-    
+
     if (typeof window[action] === 'function') {
       window[action]();
     }
@@ -2546,40 +2553,6 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
 // ========================================
 // EVENT DELEGATION PRO TLAČÍTKA V DETAILU
 // ========================================
-// Zachytává kliknutí na tlačítka s data-action atributem
-// Řeší problém s inline onclick, které CSP blokuje
-document.addEventListener('click', (e) => {
-  const button = e.target.closest('[data-action]');
-  if (!button) return;
-
-  const action = button.getAttribute('data-action');
-  const id = button.getAttribute('data-id');
-  const url = button.getAttribute('data-url');
-
-  logger.log(`[Seznam] Tlačítko kliknuto: ${action}`, { id, url });
-
-  switch (action) {
-    case 'reopenOrder':
-      if (id) reopenOrder(id);
-      break;
-
-    case 'showContactMenu':
-      if (id) showContactMenu(id);
-      break;
-
-    case 'showCustomerDetail':
-      if (id) showCustomerDetail(id);
-      break;
-
-    case 'openPDF':
-      if (url) window.open(url, '_blank');
-      break;
-
-    case 'closeDetail':
-      closeDetail();
-      break;
-
-    default:
-      logger.warn(`[Seznam] Neznámá akce: ${action}`);
-  }
-});
+// POZOR: Tento listener je DEAKTIVOVÁN - event handling se provádí v seznam.php (EMERGENCY event delegation V6)
+// Důvod: Duplicitní event listenery způsobovaly vícenásobné volání funkcí
+// Pokud EMERGENCY listener selže, můžete tento listener znovu aktivovat
