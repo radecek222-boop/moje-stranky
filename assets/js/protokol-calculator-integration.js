@@ -106,8 +106,32 @@
                 console.log('[Protokol-Kalkulačka] Režim nastaven na "protokol"');
             }
 
-            // Reinicializovat kalkulačku (pokud je potřeba)
-            // Některé event listenery by mohly potřebovat reinicializaci
+            // Načíst data zákazníka z protokolu
+            const customerAddress = document.getElementById('address')?.value;
+            const customerName = document.getElementById('customer')?.value;
+            const claimNumber = document.getElementById('claim-number')?.value;
+
+            console.log('[Protokol-Kalkulačka] Data zákazníka:', {
+                address: customerAddress,
+                name: customerName,
+                claim: claimNumber
+            });
+
+            // Předvyplnit adresu do kalkulačky
+            if (customerAddress && customerAddress.trim() !== '') {
+                const calcAddressInput = document.getElementById('calc-address');
+                if (calcAddressInput) {
+                    calcAddressInput.value = customerAddress;
+                    console.log('[Protokol-Kalkulačka] Adresa předvyplněna:', customerAddress);
+
+                    // Automaticky spustit vyhledávání adresy po krátké prodlevě
+                    setTimeout(() => {
+                        // Simulovat input event pro spuštění autocomplete
+                        const event = new Event('input', { bubbles: true });
+                        calcAddressInput.dispatchEvent(event);
+                    }, 300);
+                }
+            }
 
             console.log('[Protokol-Kalkulačka] Kalkulačka načtena');
 
