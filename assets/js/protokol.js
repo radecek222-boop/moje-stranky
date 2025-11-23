@@ -110,7 +110,7 @@ let signaturePad;
 let attachedPhotos = [];
 let currentReklamaceId = null;
 let currentReklamace = null;
-let kalkulaceData = null; // Data kalkulace z databáze pro PDF
+window.kalkulaceData = null; // Data kalkulace z databáze pro PDF (globální scope)
 
 // PDF preview kontext
 let pdfPreviewContext = null; // 'export' nebo 'send'
