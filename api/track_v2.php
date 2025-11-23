@@ -5,13 +5,15 @@
  * Endpoint pro tracking pageviews s integrací:
  * - Device fingerprinting (Modul #1)
  * - Session tracking (Modul #2)
+ * - Bot detection (Modul #3)
+ * - Geolocation service (Modul #4)
  * - UTM parametry
  * - Device info
  * - Engagement metrics
  *
- * @version 1.0.0
+ * @version 1.1.0
  * @date 2025-11-23
- * @module Module #2 - Advanced Session Tracking
+ * @module Module #4 - Geolocation Service Integration
  */
 
 require_once __DIR__ . '/../init.php';
@@ -19,6 +21,7 @@ require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
 require_once __DIR__ . '/../includes/SessionMerger.php';
 require_once __DIR__ . '/../includes/BotDetector.php';
+require_once __DIR__ . '/../includes/GeolocationService.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -155,6 +158,31 @@ try {
     $pocetPageviews = $vysledekRelace['pageview_count'];
 
     // ========================================
+    // IP ANONYMIZACE (pro GDPR compliance)
+    // ========================================
+    $ipAdresa = $clientIp;
+
+    // IP anonymizace (poslední oktet)
+    if (strpos($ipAdresa, '.') !== false) {
+        // IPv4
+        $parts = explode('.', $ipAdresa);
+        $parts[3] = '0';
+        $ipAdresaAnonymni = implode('.', $parts);
+    } else {
+        // IPv6 - maskovat posledních 80 bitů
+        $ipAdresaAnonymni = substr($ipAdresa, 0, 19) . '::';
+    }
+
+    // ========================================
+    // GEOLOCATION (Modul #4)
+    // ========================================
+    $geoService = new GeolocationService($pdo);
+    $geoData = $geoService->getLocationFromIP($ipAdresa);
+
+    // Aktualizovat relaci s geolokačními daty
+    $sessionMerger->aktualizujGeoData($sessionId, $geoData);
+
+    // ========================================
     // BOT DETECTION (Modul #3)
     // ========================================
     $botDetector = new BotDetector($pdo);
@@ -189,21 +217,7 @@ try {
     // ========================================
     // ULOŽENÍ PAGEVIEW DO TABULKY wgs_pageviews
     // ========================================
-
-    // Extrakce dodatečných informací
     $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-    $ipAdresa = $clientIp;
-
-    // IP anonymizace (poslední oktet)
-    if (strpos($ipAdresa, '.') !== false) {
-        // IPv4
-        $parts = explode('.', $ipAdresa);
-        $parts[3] = '0';
-        $ipAdresaAnonymni = implode('.', $parts);
-    } else {
-        // IPv6 - maskovat posledních 80 bitů
-        $ipAdresaAnonymni = substr($ipAdresa, 0, 19) . '::';
-    }
 
     $stmt = $pdo->prepare("
         INSERT INTO wgs_pageviews (
@@ -276,10 +290,17 @@ try {
             'threat_level' => $threatLevel,
             'is_whitelisted' => $jeWhitelisted
         ],
+        'geolocation' => [
+            'country_code' => $geoData['country_code'],
+            'country_name' => $geoData['country_name'],
+            'city' => $geoData['city'],
+            'from_cache' => $geoData['from_cache'] ?? false
+        ],
         'tracking' => [
             'fingerprint_linked' => true,
             'utm_tracked' => !empty($sessionData['utm_source']),
-            'bot_detection_enabled' => true
+            'bot_detection_enabled' => true,
+            'geolocation_enabled' => true
         ]
     ]);
 
