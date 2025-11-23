@@ -157,7 +157,7 @@
         features.slice(0, 5).forEach(feature => {
             const item = document.createElement('div');
             item.className = 'suggestion-item';
-            item.textContent = feature.properties.formatted || feature.properties.address_line1 || 'Neznámá adresa';
+            item.textContent = feature.properties.formatted || feature.properties.address_line1 || window.t('summary.unknownAddress');
 
             item.addEventListener('click', () => {
                 const coords = feature.geometry.coordinates;
@@ -203,16 +203,16 @@
                 }
 
                 document.getElementById('distance-value').textContent = distanceKm;
-                document.getElementById('transport-cost').textContent = stav.dopravne.toFixed(2) + (jeReklamace ? ' (reklamace)' : '');
+                document.getElementById('transport-cost').textContent = stav.dopravne.toFixed(2) + (jeReklamace ? ' (' + window.t('summary.claim') + ')' : '');
                 document.getElementById('distance-result').style.display = 'block';
 
                 // Uživatel pokračuje ručně tlačítkem "Pokračovat"
             } else {
-                alert('Nepodařilo se vypočítat vzdálenost. Zkuste jinou adresu.');
+                alert(window.t('alert.distanceError'));
             }
         } catch (error) {
             console.error('[Kalkulačka] Chyba výpočtu vzdálenosti:', error);
-            alert('Chyba při výpočtu vzdálenosti');
+            alert(window.t('alert.distanceCalculationError'));
         }
     }
 
@@ -228,14 +228,14 @@
 
             if (!jeReklamace) {
                 // Pokud není reklamace, adresa je povinná
-                alert('Nejprve vyberte adresu ze seznamu návrhů.');
+                alert(window.t('alert.selectAddress'));
                 return;
             } else {
                 // Pokud je reklamace, nastavit dopravné a vzdálenost na 0
                 stav.dopravne = 0;
                 stav.vzdalenost = 0;
                 stav.reklamaceBezDopravy = true;
-                stav.adresa = 'Reklamace bez dopravného';
+                stav.adresa = window.t('summary.claimNoTransport');
                 console.log('[Kalkulačka] Reklamace bez dopravy - pokračuji bez adresy');
             }
         }
@@ -393,9 +393,10 @@
 
         if (priceBreakdownEl && celkemDilu > 0) {
             let cena = 0;
+            const firstPartText = window.t('summary.firstPart').toLowerCase();
             if (celkemDilu === 1) {
                 cena = CENY.prvniDil;
-                priceBreakdownEl.textContent = `(1× první díl = ${CENY.prvniDil}€)`;
+                priceBreakdownEl.textContent = `(1× ${firstPartText} = ${CENY.prvniDil}€)`;
             } else {
                 cena = CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
                 priceBreakdownEl.textContent = `(1× ${CENY.prvniDil}€ + ${celkemDilu - 1}× ${CENY.dalsiDil}€ = ${cena}€)`;
@@ -404,11 +405,11 @@
             // Přidat rohový díl a ottoman
             if (stav.rohovyDil) {
                 cena += CENY.rohovyDil;
-                priceBreakdownEl.textContent += ` + rohový díl (${CENY.rohovyDil}€)`;
+                priceBreakdownEl.textContent += ` + ${window.t('summary.cornerPiece').toLowerCase()} (${CENY.rohovyDil}€)`;
             }
             if (stav.ottoman) {
                 cena += CENY.ottoman;
-                priceBreakdownEl.textContent += ` + ottoman (${CENY.ottoman}€)`;
+                priceBreakdownEl.textContent += ` + ${window.t('summary.ottoman').toLowerCase()} (${CENY.ottoman}€)`;
             }
         } else if (priceBreakdownEl) {
             priceBreakdownEl.textContent = '';
@@ -427,7 +428,7 @@
 
         // Dopravné
         html += `<div class="summary-line">
-            <span>Dopravné (${stav.vzdalenost} km × 2 × ${TRANSPORT_RATE}€):</span>
+            <span>${window.t('summary.transportation')} (${stav.vzdalenost} km × 2 × ${TRANSPORT_RATE}€):</span>
             <span class="summary-price">${stav.dopravne.toFixed(2)} €</span>
         </div>`;
         celkem += stav.dopravne;
@@ -435,7 +436,7 @@
         // Diagnostika
         if (stav.typServisu === 'diagnostika') {
             html += `<div class="summary-line">
-                <span>Inspekce / Diagnostika:</span>
+                <span>${window.t('summary.inspection')}:</span>
                 <span class="summary-price">${CENY.diagnostika.toFixed(2)} €</span>
             </div>`;
             celkem += CENY.diagnostika;
@@ -450,14 +451,15 @@
                     CENY.prvniDil :
                     CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
 
+                const partsWord = celkemDilu === 1 ? window.t('summary.part') : window.t('summary.parts');
                 html += `<div class="summary-line">
-                    <span>Čalounické práce (${celkemDilu} dílů):</span>
+                    <span>${window.t('summary.upholsteryWork')} (${celkemDilu} ${partsWord}):</span>
                     <span class="summary-price">${cenaDilu.toFixed(2)} €</span>
                 </div>`;
 
                 if (celkemDilu > 1) {
                     html += `<div class="summary-subline">
-                        ↳ První díl: ${CENY.prvniDil}€, další díly: ${celkemDilu - 1}× ${CENY.dalsiDil}€
+                        ↳ ${window.t('summary.firstPart')}: ${CENY.prvniDil}€, ${window.t('summary.additionalParts')}: ${celkemDilu - 1}× ${CENY.dalsiDil}€
                     </div>`;
                 }
 
@@ -467,7 +469,7 @@
             // Rohový díl
             if (stav.rohovyDil) {
                 html += `<div class="summary-line">
-                    <span>Rohový díl:</span>
+                    <span>${window.t('summary.cornerPiece')}:</span>
                     <span class="summary-price">${CENY.rohovyDil.toFixed(2)} €</span>
                 </div>`;
                 celkem += CENY.rohovyDil;
@@ -476,7 +478,7 @@
             // Ottoman
             if (stav.ottoman) {
                 html += `<div class="summary-line">
-                    <span>Ottoman / Lehátko:</span>
+                    <span>${window.t('summary.ottoman')}:</span>
                     <span class="summary-price">${CENY.ottoman.toFixed(2)} €</span>
                 </div>`;
                 celkem += CENY.ottoman;
@@ -491,18 +493,18 @@
                 const cenaMechanismu = celkemMechanismu * CENY.mechanismus;
 
                 html += `<div class="summary-line">
-                    <span>Mechanické části (${celkemMechanismu}× mechanismus):</span>
+                    <span>${window.t('summary.mechanicalParts')} (${celkemMechanismu}× ${window.t('summary.mechanism')}):</span>
                     <span class="summary-price">${cenaMechanismu.toFixed(2)} €</span>
                 </div>`;
 
                 if (stav.relax > 0) {
                     html += `<div class="summary-subline">
-                        ↳ Relax mechanismy: ${stav.relax}× ${CENY.mechanismus}€
+                        ↳ ${window.t('summary.relaxMechanisms')}: ${stav.relax}× ${CENY.mechanismus}€
                     </div>`;
                 }
                 if (stav.vysuv > 0) {
                     html += `<div class="summary-subline">
-                        ↳ Výsuvné mechanismy: ${stav.vysuv}× ${CENY.mechanismus}€
+                        ↳ ${window.t('summary.slidingMechanisms')}: ${stav.vysuv}× ${CENY.mechanismus}€
                     </div>`;
                 }
 
@@ -513,7 +515,7 @@
         // Druhá osoba
         if (stav.tezkyNabytek) {
             html += `<div class="summary-line">
-                <span>Druhá osoba (těžký nábytek >50kg):</span>
+                <span>${window.t('summary.secondPerson')}:</span>
                 <span class="summary-price">${CENY.druhaOsoba.toFixed(2)} €</span>
             </div>`;
             celkem += CENY.druhaOsoba;
@@ -522,7 +524,7 @@
         // Materiál
         if (stav.material) {
             html += `<div class="summary-line">
-                <span>Materiál dodán od WGS:</span>
+                <span>${window.t('summary.materialSupplied')}:</span>
                 <span class="summary-price">${CENY.material.toFixed(2)} €</span>
             </div>`;
             celkem += CENY.material;
@@ -542,15 +544,15 @@
         if (kalkulackaRezim === 'protokol') {
             // Protokol režim - zobrazit Zpět a Započítat
             wizardButtons.innerHTML = `
-                <button class="btn-secondary" onclick="previousStep()">Zpět</button>
-                <button class="btn-primary" onclick="zapocitatDoProtokolu()">Započítat</button>
+                <button class="btn-secondary" onclick="previousStep()">${window.t('btn.back')}</button>
+                <button class="btn-primary" onclick="zapocitatDoProtokolu()">${window.t('btn.addToProtocol')}</button>
             `;
         } else {
             // Standalone režim - zobrazit Zpět, Export PDF a Nová kalkulace
             wizardButtons.innerHTML = `
-                <button class="btn-secondary" onclick="previousStep()">Zpět</button>
-                <button class="btn-primary" onclick="exportovatCenikPDF()">Export do PDF</button>
-                <button class="btn-primary" onclick="resetovatKalkulacku()">Nová kalkulace</button>
+                <button class="btn-secondary" onclick="previousStep()">${window.t('btn.back')}</button>
+                <button class="btn-primary" onclick="exportovatCenikPDF()">${window.t('btn.exportPDF')}</button>
+                <button class="btn-primary" onclick="resetovatKalkulacku()">${window.t('btn.newCalculation')}</button>
             `;
         }
     }
@@ -617,7 +619,7 @@
         try {
             // Kontrola jestli jsou knihovny načteny
             if (typeof window.jspdf === 'undefined' || typeof html2canvas === 'undefined') {
-                alert('PDF knihovna se načítá, zkuste to prosím za chvíli...');
+                alert(window.t('alert.pdfLoading'));
                 return;
             }
 
@@ -959,7 +961,7 @@
 
         } catch (error) {
             console.error('[Kalkulačka] Chyba při exportu PDF:', error);
-            alert('Nepodařilo se vytvořit PDF. Zkuste to prosím znovu.');
+            alert(window.t('alert.pdfError'));
         }
     };
 

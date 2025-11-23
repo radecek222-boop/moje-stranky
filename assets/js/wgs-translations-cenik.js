@@ -628,6 +628,177 @@ window.WGS_TRANSLATIONS_CENIK = {
   },
 
   // ========================================
+  // ALERT MESSAGES (JavaScript)
+  // ========================================
+  'alert.selectAddress': {
+    cs: 'Nejprve vyberte adresu ze seznamu návrhů.',
+    en: 'Please select an address from the suggestions list first.',
+    it: 'Seleziona prima un indirizzo dall\'elenco dei suggerimenti.'
+  },
+
+  'alert.distanceError': {
+    cs: 'Nepodařilo se vypočítat vzdálenost. Zkuste jinou adresu.',
+    en: 'Failed to calculate distance. Try a different address.',
+    it: 'Impossibile calcolare la distanza. Prova un altro indirizzo.'
+  },
+
+  'alert.distanceCalculationError': {
+    cs: 'Chyba při výpočtu vzdálenosti',
+    en: 'Error calculating distance',
+    it: 'Errore nel calcolo della distanza'
+  },
+
+  'alert.pdfLoading': {
+    cs: 'PDF knihovna se načítá, zkuste to prosím za chvíli...',
+    en: 'PDF library is loading, please try again in a moment...',
+    it: 'La libreria PDF si sta caricando, riprova tra un momento...'
+  },
+
+  'alert.pdfError': {
+    cs: 'Nepodařilo se vytvořit PDF. Zkuste to prosím znovu.',
+    en: 'Failed to create PDF. Please try again.',
+    it: 'Impossibile creare il PDF. Riprova.'
+  },
+
+  // ========================================
+  // SUMMARY TEXTS (Dynamic HTML generation)
+  // ========================================
+  'summary.transportation': {
+    cs: 'Dopravné',
+    en: 'Transportation',
+    it: 'Trasporto'
+  },
+
+  'summary.inspection': {
+    cs: 'Inspekce / Diagnostika',
+    en: 'Inspection / Diagnostic',
+    it: 'Ispezione / Diagnostica'
+  },
+
+  'summary.upholsteryWork': {
+    cs: 'Čalounické práce',
+    en: 'Upholstery Work',
+    it: 'Lavori di Tappezzeria'
+  },
+
+  'summary.parts': {
+    cs: 'dílů',
+    en: 'parts',
+    it: 'parti'
+  },
+
+  'summary.part': {
+    cs: 'díl',
+    en: 'part',
+    it: 'parte'
+  },
+
+  'summary.firstPart': {
+    cs: 'První díl',
+    en: 'First part',
+    it: 'Prima parte'
+  },
+
+  'summary.additionalParts': {
+    cs: 'další díly',
+    en: 'additional parts',
+    it: 'parti aggiuntive'
+  },
+
+  'summary.cornerPiece': {
+    cs: 'Rohový díl',
+    en: 'Corner Piece',
+    it: 'Pezzo Angolare'
+  },
+
+  'summary.ottoman': {
+    cs: 'Ottoman / Lehátko',
+    en: 'Ottoman / Daybed',
+    it: 'Pouf / Divano letto'
+  },
+
+  'summary.mechanicalParts': {
+    cs: 'Mechanické části',
+    en: 'Mechanical Parts',
+    it: 'Parti Meccaniche'
+  },
+
+  'summary.mechanism': {
+    cs: 'mechanismus',
+    en: 'mechanism',
+    it: 'meccanismo'
+  },
+
+  'summary.relaxMechanisms': {
+    cs: 'Relax mechanismy',
+    en: 'Relax mechanisms',
+    it: 'Meccanismi relax'
+  },
+
+  'summary.slidingMechanisms': {
+    cs: 'Výsuvné mechanismy',
+    en: 'Sliding mechanisms',
+    it: 'Meccanismi scorrevoli'
+  },
+
+  'summary.secondPerson': {
+    cs: 'Druhá osoba (těžký nábytek >50kg)',
+    en: 'Second Person (heavy furniture >50kg)',
+    it: 'Seconda Persona (mobile pesante >50kg)'
+  },
+
+  'summary.materialSupplied': {
+    cs: 'Materiál dodán od WGS',
+    en: 'Material Supplied by WGS',
+    it: 'Materiale Fornito da WGS'
+  },
+
+  'summary.unknownAddress': {
+    cs: 'Neznámá adresa',
+    en: 'Unknown address',
+    it: 'Indirizzo sconosciuto'
+  },
+
+  'summary.claimNoTransport': {
+    cs: 'Reklamace bez dopravného',
+    en: 'Claim without transportation fee',
+    it: 'Reclamo senza costo di trasporto'
+  },
+
+  'summary.claim': {
+    cs: 'reklamace',
+    en: 'claim',
+    it: 'reclamo'
+  },
+
+  // ========================================
+  // BUTTONS
+  // ========================================
+  'btn.back': {
+    cs: 'Zpět',
+    en: 'Back',
+    it: 'Indietro'
+  },
+
+  'btn.addToProtocol': {
+    cs: 'Započítat',
+    en: 'Add to Protocol',
+    it: 'Aggiungi al Protocollo'
+  },
+
+  'btn.exportPDF': {
+    cs: 'Export do PDF',
+    en: 'Export to PDF',
+    it: 'Esporta in PDF'
+  },
+
+  'btn.newCalculation': {
+    cs: 'Nová kalkulace',
+    en: 'New Calculation',
+    it: 'Nuovo Calcolo'
+  },
+
+  // ========================================
   // PAGE TITLE
   // ========================================
   'page.title': {
