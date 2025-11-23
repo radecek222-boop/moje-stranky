@@ -972,6 +972,65 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 
 <!-- External JavaScript -->
 <script src="assets/js/seznam.js?v=20251123-01" defer></script>
-    <script src="assets/js/seznam-delete-patch.js" defer></script>
+<script src="assets/js/seznam-delete-patch.js" defer></script>
+
+<!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('🔧 EMERGENCY event delegation se načítá...');
+
+  document.addEventListener('click', (e) => {
+    const button = e.target.closest('[data-action]');
+    if (!button) return;
+
+    const action = button.getAttribute('data-action');
+    const id = button.getAttribute('data-id');
+    const url = button.getAttribute('data-url');
+
+    console.log(`[EMERGENCY] Tlačítko kliknuto: ${action}`, { id, url });
+
+    switch (action) {
+      case 'reopenOrder':
+        if (id && typeof reopenOrder === 'function') {
+          reopenOrder(id);
+        } else {
+          console.error('[EMERGENCY] reopenOrder není k dispozici nebo chybí ID');
+        }
+        break;
+
+      case 'showContactMenu':
+        if (id && typeof showContactMenu === 'function') {
+          showContactMenu(id);
+        }
+        break;
+
+      case 'showCustomerDetail':
+        if (id && typeof showCustomerDetail === 'function') {
+          showCustomerDetail(id);
+        }
+        break;
+
+      case 'openPDF':
+        if (url) {
+          window.open(url, '_blank');
+        } else {
+          console.error('[EMERGENCY] PDF URL chybí');
+        }
+        break;
+
+      case 'closeDetail':
+        if (typeof closeDetail === 'function') {
+          closeDetail();
+        }
+        break;
+
+      default:
+        console.warn(`[EMERGENCY] Neznámá akce: ${action}`);
+    }
+  });
+
+  console.log('✅ EMERGENCY event delegation načten');
+});
+</script>
 </body>
 </html>
