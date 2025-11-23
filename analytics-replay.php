@@ -193,6 +193,9 @@ $pageIndex = isset($_GET['page']) ? (int)$_GET['page'] : 0;
 </head>
 <body>
     <div class="container">
+        <!-- ANALYTICS TABS NAVIGACE -->
+        <?php require_once __DIR__ . '/includes/analytics_tabs.php'; ?>
+
         <h1>Session Replay Viewer</h1>
 
         <div class="controls">

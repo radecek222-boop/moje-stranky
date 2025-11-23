@@ -206,6 +206,9 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 </head>
 <body>
     <div class="container">
+        <!-- ANALYTICS TABS NAVIGACE -->
+        <?php require_once __DIR__ . '/includes/analytics_tabs.php'; ?>
+
         <h1>Heatmap Viewer</h1>
 
         <div class="controls">
