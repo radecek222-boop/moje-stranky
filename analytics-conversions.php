@@ -370,12 +370,16 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 const response = await fetch(`/api/analytics_conversions.php?${params.toString()}`);
                 const result = await response.json();
 
-                if (result.status === 'success') {
+                if (result.status === 'success' && result.data && result.data.conversions) {
                     conversionsData = result.data.conversions;
                     displayConversions(result.data);
                 } else {
-                    console.error('[Conversions] Chyba:', result.message);
-                    document.getElementById('loading-message').textContent = 'Chyba: ' + result.message;
+                    const errorMsg = result.message || 'Neznámá chyba';
+                    console.error('[Conversions] Chyba:', errorMsg);
+                    document.getElementById('loading-message').style.display = 'block';
+                    document.getElementById('loading-message').textContent = 'Chyba: ' + errorMsg;
+                    document.getElementById('stats-cards').style.display = 'none';
+                    document.getElementById('conversions-table').style.display = 'none';
                 }
             } catch (error) {
                 console.error('[Conversions] Síťová chyba:', error);
@@ -426,7 +430,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 const response = await fetch(`/api/analytics_conversions.php?action=list_funnels&csrf_token=${csrfToken}`);
                 const result = await response.json();
 
-                if (result.status === 'success') {
+                if (result.status === 'success' && result.data && result.data.funnels) {
                     const select = document.getElementById('funnel-select');
                     select.innerHTML = '<option value="">-- Vyberte funnel --</option>';
 
@@ -436,6 +440,8 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                         option.textContent = funnel.funnel_name;
                         select.appendChild(option);
                     });
+                } else {
+                    console.error('[Funnels] Chyba při načítání funnelů:', result.message || 'Neznámá chyba');
                 }
             } catch (error) {
                 console.error('[Funnels] Chyba:', error);
@@ -468,11 +474,16 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 const response = await fetch(`/api/analytics_conversions.php?${params.toString()}`);
                 const result = await response.json();
 
-                if (result.status === 'success') {
+                if (result.status === 'success' && result.data && result.data.funnel_analysis) {
                     displayFunnelAnalysis(result.data.funnel_analysis);
+                } else {
+                    document.getElementById('funnel-loading').style.display = 'block';
+                    document.getElementById('funnel-loading').textContent = 'Chyba: ' + (result.message || 'Neznámá chyba');
                 }
             } catch (error) {
                 console.error('[Funnel Analysis] Chyba:', error);
+                document.getElementById('funnel-loading').style.display = 'block';
+                document.getElementById('funnel-loading').textContent = 'Síťová chyba: ' + error.message;
             } finally {
                 document.getElementById('funnel-loading').style.display = 'none';
             }
