@@ -51,10 +51,10 @@ echo "<!DOCTYPE html>
 try {
     $pdo = getDbConnection();
 
-    echo "<h1>Doplnění popisů ceníku</h1>";
+    echo "<h1>Doplnění popisů a názvů ceníku</h1>";
 
-    // Pole s překlady podle ID
-    $updates = [
+    // Pole s překlady popisů podle ID
+    $descriptionUpdates = [
         58 => [
             'en' => 'Applies to all repairs feasible within approx. 1.5 hours on-site. Covers all tasks not falling under standard upholstery work. PRICE FOR LABOR ONLY, EXCLUDING MATERIAL.',
             'it' => 'Applicabile a tutte le riparazioni eseguibili in circa 1,5 ore sul posto. Riguarda tutte le operazioni che non rientrano nei lavori di tappezzeria standard. PREZZO SOLO PER LA MANODOPERA, ESCLUSO IL MATERIALE.'
@@ -97,26 +97,40 @@ try {
         ]
     ];
 
+    // Pole s překlady názvů služeb podle ID
+    $nameUpdates = [
+        70 => [
+            'en' => 'Transport to workshop and back incl. handling (up to 100 km)',
+            'it' => 'Trasporto in officina e ritorno incl. movimentazione (fino a 100 km)'
+        ],
+        71 => [
+            'en' => 'Transport to workshop and back incl. handling (up to 200 km)',
+            'it' => 'Trasporto in officina e ritorno incl. movimentazione (fino a 200 km)'
+        ]
+    ];
+
     if (isset($_GET['execute']) && $_GET['execute'] === '1') {
-        echo "<div class='info'><strong>SPOUŠTÍM DOPLNĚNÍ POPISŮ...</strong></div>";
+        echo "<div class='info'><strong>SPOUŠTÍM DOPLNĚNÍ...</strong></div>";
 
         $pdo->beginTransaction();
 
         try {
             echo "<h2>Průběh aktualizace:</h2>";
             echo "<table>";
-            echo "<tr><th>ID</th><th>Název</th><th>Popis EN</th><th>Popis IT</th></tr>";
+            echo "<tr><th>ID</th><th>Název</th><th>Co se doplnilo</th></tr>";
 
-            $stmt = $pdo->prepare("
+            $totalUpdated = 0;
+
+            // 1. Aktualizace popisů
+            $descStmt = $pdo->prepare("
                 UPDATE wgs_pricing
                 SET description_en = :desc_en,
                     description_it = :desc_it
                 WHERE id = :id
             ");
 
-            $updated = 0;
-            foreach ($updates as $id => $translations) {
-                $stmt->execute([
+            foreach ($descriptionUpdates as $id => $translations) {
+                $descStmt->execute([
                     'id' => $id,
                     'desc_en' => $translations['en'],
                     'desc_it' => $translations['it']
@@ -130,11 +144,39 @@ try {
                 echo "<tr class='updated'>";
                 echo "<td>$id</td>";
                 echo "<td>" . htmlspecialchars($item['service_name']) . "</td>";
-                echo "<td>✓ Doplněno</td>";
-                echo "<td>✓ Doplněno</td>";
+                echo "<td>✓ Popis EN + IT</td>";
                 echo "</tr>";
 
-                $updated++;
+                $totalUpdated++;
+            }
+
+            // 2. Aktualizace názvů služeb
+            $nameStmt = $pdo->prepare("
+                UPDATE wgs_pricing
+                SET service_name_en = :name_en,
+                    service_name_it = :name_it
+                WHERE id = :id
+            ");
+
+            foreach ($nameUpdates as $id => $translations) {
+                $nameStmt->execute([
+                    'id' => $id,
+                    'name_en' => $translations['en'],
+                    'name_it' => $translations['it']
+                ]);
+
+                // Načíst název pro zobrazení
+                $itemStmt = $pdo->prepare("SELECT service_name FROM wgs_pricing WHERE id = :id");
+                $itemStmt->execute(['id' => $id]);
+                $item = $itemStmt->fetch(PDO::FETCH_ASSOC);
+
+                echo "<tr class='updated'>";
+                echo "<td>$id</td>";
+                echo "<td>" . htmlspecialchars($item['service_name']) . "</td>";
+                echo "<td>✓ Název EN + IT</td>";
+                echo "</tr>";
+
+                $totalUpdated++;
             }
 
             echo "</table>";
@@ -144,10 +186,10 @@ try {
             echo "<div class='success'>";
             echo "<strong>✓ DOPLNĚNÍ ÚSPĚŠNĚ DOKONČENO</strong><br><br>";
             echo "📊 <strong>Statistiky:</strong><br>";
-            echo "• Aktualizováno položek: <strong>$updated</strong><br>";
-            echo "• Doplněno EN popisů: <strong>$updated</strong><br>";
-            echo "• Doplněno IT popisů: <strong>$updated</strong><br>";
-            echo "<br><strong>Nyní obnov stránku ceníku a VŠECHNY popisy budou perfektně přeložené!</strong>";
+            echo "• Celkem aktualizováno položek: <strong>$totalUpdated</strong><br>";
+            echo "• Doplněno popisů: <strong>" . count($descriptionUpdates) . "</strong><br>";
+            echo "• Doplněno názvů služeb: <strong>" . count($nameUpdates) . "</strong><br>";
+            echo "<br><strong>Nyní obnov stránku ceníku a VŠECHNY překlady budou perfektní!</strong>";
             echo "</div>";
 
             echo "<a href='cenik.php' class='btn'>Zobrazit ceník</a>";
@@ -164,18 +206,24 @@ try {
     } else {
         echo "<div class='info'>";
         echo "<strong>📋 CO BUDE PROVEDENO:</strong><br>";
-        echo "• Doplnění EN popisů pro položky ID 58-67<br>";
-        echo "• Doplnění IT popisů pro položky ID 58-67<br>";
-        echo "• Celkem <strong>" . count($updates) . " položek</strong> bude aktualizováno<br>";
-        echo "• Po doplnění budou VŠECHNY popisy perfektně přeložené";
+        echo "• Doplnění EN + IT popisů pro položky ID 58-67<br>";
+        echo "• Doplnění EN + IT názvů služeb pro položky ID 70-71<br>";
+        echo "• Celkem <strong>" . (count($descriptionUpdates) + count($nameUpdates)) . " položek</strong> bude aktualizováno<br>";
+        echo "• Po doplnění budou VŠECHNY překlady perfektní!";
         echo "</div>";
 
         echo "<table>";
         echo "<tr><th>ID</th><th>Co bude doplněno</th></tr>";
-        foreach ($updates as $id => $translations) {
+        foreach ($descriptionUpdates as $id => $translations) {
             echo "<tr>";
             echo "<td>$id</td>";
             echo "<td>EN + IT překlad popisu</td>";
+            echo "</tr>";
+        }
+        foreach ($nameUpdates as $id => $translations) {
+            echo "<tr>";
+            echo "<td>$id</td>";
+            echo "<td>EN + IT překlad názvu služby</td>";
             echo "</tr>";
         }
         echo "</table>";
