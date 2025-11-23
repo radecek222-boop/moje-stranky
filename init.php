@@ -159,6 +159,32 @@ function load_model($filename) {
     return false;
 }
 
+/**
+ * Heatmap Tracker - vložit na všechny veřejné stránky
+ * Volat před </body> tag
+ */
+function renderHeatmapTracker() {
+    // Skip admin a API stránky
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    if (strpos($uri, '/admin') !== false || strpos($uri, '/api/') !== false) {
+        return;
+    }
+
+    // Vygenerovat CSRF token
+    if (!isset($_SESSION['csrf_token'])) {
+        if (function_exists('generateCSRFToken')) {
+            generateCSRFToken();
+        }
+    }
+
+    $csrfToken = $_SESSION['csrf_token'] ?? '';
+    ?>
+<!-- Heatmap Tracker -->
+<meta name="csrf-token" content="<?php echo htmlspecialchars($csrfToken); ?>">
+<script src="/assets/js/heatmap-tracker.js" defer></script>
+<?php
+}
+
 function load_view($filename) {
     $path = VIEWS_PATH . '/' . $filename;
     if (file_exists($path)) {
