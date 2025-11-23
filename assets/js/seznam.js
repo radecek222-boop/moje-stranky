@@ -695,8 +695,18 @@ function normalizeCustomerData(data) {
 }
 
 // === ZAHÁJIT NÁVŠTĚVU ===
+// Ochrana proti duplicitnímu volání
+let startVisitInProgress = false;
+
 function startVisit(id) {
   console.log('[startVisit] 🔍 Zahajuji návštěvu, ID:', id);
+
+  // Ochrana proti duplicitnímu volání
+  if (startVisitInProgress) {
+    console.log('[startVisit] ⚠️ Funkce již běží, ignoruji duplicitní volání');
+    return;
+  }
+  startVisitInProgress = true;
 
   const z = WGS_DATA_CACHE.find(x => x.id == id);
   console.log('[startVisit] 📋 Nalezený záznam:', z);
@@ -704,26 +714,16 @@ function startVisit(id) {
   if (!z) {
     console.error('[startVisit] ❌ Záznam nenalezen v cache!');
     alert(t('record_not_found'));
+    startVisitInProgress = false;
     return;
   }
 
-  console.log('[startVisit] ✅ Záznam nalezen, kontroluji stav:', z.stav);
-
-  if (z.stav === 'ČEKÁ' || z.stav === 'wait') {
-    console.log('[startVisit] ⚠️ Stav ČEKÁ - ptám se uživatele');
-    const confirm = window.confirm(t('confirm_continue_without_appointment'));
-    if (!confirm) {
-      console.log('[startVisit] ❌ Uživatel zrušil');
-      return;
-    }
-    console.log('[startVisit] ✅ Uživatel potvrdil');
-  }
-
-  console.log('[startVisit] 🔍 Kontroluji, zda není dokončeno:', Utils.isCompleted(z));
+  console.log('[startVisit] ✅ Záznam nalezen, stav:', z.stav);
 
   if (Utils.isCompleted(z)) {
     console.error('[startVisit] ❌ Návštěva již dokončena!');
     alert(t('visit_already_completed'));
+    startVisitInProgress = false;
     return;
   }
 
