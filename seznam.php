@@ -991,10 +991,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     switch (action) {
       case 'reopenOrder':
-        if (id && typeof reopenOrder === 'function') {
+        console.log('[EMERGENCY] reopenOrder case - typeof:', typeof reopenOrder);
+        console.log('[EMERGENCY] reopenOrder case - id:', id);
+
+        if (!id) {
+          console.error('[EMERGENCY] ❌ ID chybí!');
+          break;
+        }
+
+        if (typeof reopenOrder !== 'function') {
+          console.error('[EMERGENCY] ❌ reopenOrder není funkce! Type:', typeof reopenOrder);
+          console.log('[EMERGENCY] window.reopenOrder:', typeof window.reopenOrder);
+          console.log('[EMERGENCY] Všechny globální funkce:', Object.keys(window).filter(k => typeof window[k] === 'function' && k.includes('open')));
+          break;
+        }
+
+        console.log('[EMERGENCY] ✅ Volám reopenOrder(' + id + ')...');
+        try {
           reopenOrder(id);
-        } else {
-          console.error('[EMERGENCY] reopenOrder není k dispozici nebo chybí ID');
+          console.log('[EMERGENCY] ✅ reopenOrder byla zavolána');
+        } catch (err) {
+          console.error('[EMERGENCY] ❌ Chyba při volání reopenOrder:', err);
         }
         break;
 
@@ -1011,10 +1028,23 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
 
       case 'openPDF':
-        if (url) {
-          window.open(url, '_blank');
-        } else {
-          console.error('[EMERGENCY] PDF URL chybí');
+        console.log('[EMERGENCY] openPDF case - url:', url);
+
+        if (!url) {
+          console.error('[EMERGENCY] ❌ PDF URL chybí!');
+          break;
+        }
+
+        console.log('[EMERGENCY] ✅ Otevírám PDF:', url);
+        try {
+          const newWindow = window.open(url, '_blank');
+          if (newWindow) {
+            console.log('[EMERGENCY] ✅ PDF okno otevřeno');
+          } else {
+            console.error('[EMERGENCY] ❌ PDF okno bylo blokováno (pop-up blocker)');
+          }
+        } catch (err) {
+          console.error('[EMERGENCY] ❌ Chyba při otevírání PDF:', err);
         }
         break;
 
