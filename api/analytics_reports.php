@@ -73,7 +73,12 @@ try {
                 ORDER BY generated_at DESC
                 LIMIT :limit OFFSET :offset
             ");
-            $stmt->execute(['limit' => $limit, 'offset' => $offset]);
+
+            // LIMIT a OFFSET musí být bindnuty jako INT
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+
             $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // Total count
