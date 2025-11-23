@@ -1101,6 +1101,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
+      case 'startVisit':
+        if (id && typeof startVisit === 'function') {
+          console.log('[EMERGENCY] ✅ Zahajuji návštěvu ID:', id);
+          startVisit(id);
+        } else {
+          console.error('[EMERGENCY] ❌ startVisit funkce není dostupná nebo ID chybí');
+        }
+        break;
+
+      case 'showCalendar':
+        if (id && typeof showCalendar === 'function') {
+          console.log('[EMERGENCY] ✅ Otevírám kalendář pro ID:', id);
+          showCalendar(id);
+        } else {
+          console.error('[EMERGENCY] ❌ showCalendar funkce není dostupná nebo ID chybí');
+        }
+        break;
+
       default:
         console.warn(`[EMERGENCY] Neznámá akce: ${action}`);
     }
