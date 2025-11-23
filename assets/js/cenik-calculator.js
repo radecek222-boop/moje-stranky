@@ -23,7 +23,7 @@
         rohovyDil: 330,
         ottoman: 260,
         mechanismus: 70, // relax nebo výsuv
-        druhaOsoba: 40,
+        druhaOsoba: 80, // Jednorázově 80€ pro těžký nábytek nad 50kg
         material: 40
     };
 

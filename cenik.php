@@ -300,7 +300,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
             <div class="checkbox-content">
               <div class="checkbox-title">Nábytek je těžší než 50 kg</div>
               <div class="checkbox-desc">Bude potřeba druhá osoba pro manipulaci</div>
-              <div class="checkbox-price">+ 40 €</div>
+              <div class="checkbox-price">+ 80 €</div>
             </div>
           </label>
 
