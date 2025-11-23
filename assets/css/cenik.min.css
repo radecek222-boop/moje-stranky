@@ -1130,7 +1130,9 @@
     cursor: pointer;
     transition: all 0.3s;
     position: relative;
-    height: 95px;
+    min-height: 95px;
+    max-height: 95px;
+    overflow: hidden;
 }
 
 .radio-card::before {
@@ -1193,7 +1195,8 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 100%;
+    flex: 1;
+    min-height: 0;
 }
 
 .radio-title {
@@ -1209,8 +1212,9 @@
     font-size: 0.7rem;
     color: #666;
     line-height: 1.25;
-    margin-bottom: 0.25rem;
-    flex: 1;
+    margin-bottom: 0;
+    flex-grow: 1;
+    flex-shrink: 1;
     margin-top: 0.3rem;
 }
 
