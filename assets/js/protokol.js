@@ -2033,6 +2033,63 @@ window.addEventListener('load', () => {
   logger.log('Translate ready');
 });
 
+// ========================================
+// FUNKCE PRO ZNOVUOTEVŘENÍ ZAKÁZKY
+// ========================================
+async function reopenOrder(id) {
+  logger.log('[reopenOrder] Znovuotevírání zakázky ID:', id);
+
+  const confirmed = window.confirm(
+    'Opravdu chcete znovu otevřít tuto dokončenou zakázku?\n\n' +
+    'Zakázka bude vrácena do stavu "ČEKÁ" a bude možné ji znovu upravit.'
+  );
+
+  if (!confirmed) {
+    logger.log('[reopenOrder] ❌ Znovuotevření zrušeno uživatelem');
+    return;
+  }
+
+  try {
+    showLoadingWithMessage(true, 'Otevírám zakázku...');
+
+    // Získat CSRF token
+    const csrfToken = await fetchCsrfToken();
+
+    const formData = new FormData();
+    formData.append('action', 'update');
+    formData.append('id', id);
+    formData.append('stav', 'ČEKÁ');
+    formData.append('termin', '');
+    formData.append('cas_navstevy', '');
+    formData.append('csrf_token', csrfToken);
+
+    const response = await fetch('app/controllers/save.php', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.status === 'success') {
+      logger.log('[reopenOrder] ✅ Zakázka úspěšně znovu otevřena');
+      showNotif('success', 'Zakázka byla znovu otevřena');
+
+      // Obnovit stránku po 1 sekundě
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+    } else {
+      throw new Error(result.message || 'Chyba při znovuotevření zakázky');
+    }
+
+  } catch (error) {
+    logger.error('[reopenOrder] ❌ Chyba:', error);
+    showNotif('error', 'Chyba při znovuotevření: ' + error.message);
+  } finally {
+    showLoadingWithMessage(false);
+  }
+}
+
 // === UNIVERSAL EVENT DELEGATION FOR REMOVED INLINE HANDLERS ===
 document.addEventListener('DOMContentLoaded', () => {
   // Handle data-action buttons
