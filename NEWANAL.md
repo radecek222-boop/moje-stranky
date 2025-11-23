@@ -889,53 +889,62 @@ INDEX idx_device (device_type)
 
 ---
 
-### ⚠️ KRITICKÉ: Aktuální Cron Jobs (PŘEKROČEN LIMIT!)
+### ✅ VYŘEŠENO: Cron Jobs (Consolidováno z 7 → 4)
 
-**Hosting limit: 5 webcronů | Aktuálně máme: 7 jobů**
+**Hosting limit: 5 webcronů | Aktuální počet: 4 joby** ✅
 
-| # | Job | File | Schedule | Purpose | Priority |
-|---|-----|------|----------|---------|----------|
-| 1 | Cleanup Geo Cache | `scripts/cleanup_geo_cache.php` | Daily 04:00 | Delete expired geolocation cache | ✅ HIGH |
-| 2 | Cleanup Replay Frames | `scripts/cleanup_old_replay_frames.php` | Daily 02:00 | Delete frames older than 30 days | ✅ HIGH |
-| 3 | Cleanup Realtime Sessions | `scripts/cleanup_realtime_sessions.php` | Every 5 min | Delete expired real-time sessions | 🟡 MEDIUM |
-| 4 | Campaign Stats Aggregation | `scripts/aggregate_campaign_stats.php` | Every hour | Aggregate UTM campaign data | 🟡 MEDIUM |
-| 5 | User Scores Recalculation | `scripts/recalculate_user_scores.php` | Daily 05:00 | Recalculate engagement/frustration/interest scores | 🟡 MEDIUM |
-| 6 | Generate Scheduled Reports | `scripts/generate_scheduled_reports.php` | Daily 06:00 | Generate AI reports (daily/weekly/monthly) | ✅ HIGH |
-| 7 | GDPR Retention Policy | `scripts/apply_retention_policy.php` | Weekly Sunday 03:00 | Anonymize/delete old data (GDPR compliance) | ✅ HIGH |
+#### **Nové nastavení (po consolidaci):**
 
-**⚠️ NUTNÁ CONSOLIDACE - Překročen limit o 2 joby!**
+| # | Job | File | Schedule | Co obsahuje | Priority |
+|---|-----|------|----------|-------------|----------|
+| 1 | **Master Cron** | `scripts/master_cron.php` | Daily 02:00 | Cleanup + Scores + Retention (v NE) | ✅ HIGH |
+| 2 | Realtime Cleanup | `scripts/cleanup_realtime_sessions.php` | Every 5 min | Real-time sessions cleanup | 🟡 MEDIUM |
+| 3 | Campaign Stats | `scripts/aggregate_campaign_stats.php` | Every hour | UTM campaign aggregation | 🟡 MEDIUM |
+| 4 | Scheduled Reports | `scripts/generate_scheduled_reports.php` | Daily 06:00 | AI reports generation | ✅ HIGH |
 
-**PLÁN KONSOLIDACE:**
-1. **Vytvořit `scripts/master_cron.php`** který sjednotí:
-   - Daily cleanup jobs (#1, #2, #5) → spustit v 02:00 sequentially
-   - Report generation (#6) → keep separate (daily 06:00)
-   - GDPR retention (#7) → integrate do weekly cleanup cycle
-2. **Výsledný počet: 4 cron jobs (v rámci limitu 5!)**
-   - `master_cron.php` - Daily 02:00 (cleanup + scores)
-   - `cleanup_realtime_sessions.php` - Every 5 min
-   - `aggregate_campaign_stats.php` - Every hour
-   - `generate_scheduled_reports.php` - Daily 06:00
+**✅ LIMIT SPLNĚN: 4/5 jobů**
 
-### Crontab Example
+#### **Master Cron Details:**
+
+`scripts/master_cron.php` kombinuje následující joby:
+- ✅ Cleanup geo cache (3 dny TTL) - denně
+- ✅ Cleanup replay frames (30 dní TTL) - denně
+- ✅ Recalculate user scores - denně (KROMĚ neděle)
+- ✅ GDPR retention policy (730 dní) - týdně v neděli
+
+**Features:**
+- Sekvenciální provádění (bez race conditions)
+- Centralizované logování (`/logs/cron_master.log`)
+- Email notifikace při chybách (optional)
+- Měření trvání každého jobu
+- Summary po dokončení
+
+**Testing:**
+```bash
+php scripts/master_cron.php
+```
+
+### Crontab Example (Nové - 4 joby)
 
 ```cron
-# Daily reports
-0 6 * * * /usr/bin/php /path/to/scripts/generate_daily_report.php >> /path/to/logs/cron.log 2>&1
+# Enterprise Analytics System - Production Cron Jobs (4 total - v rámci limitu 5)
 
-# Weekly reports (Monday 7 AM)
-0 7 * * 1 /usr/bin/php /path/to/scripts/generate_weekly_report.php >> /path/to/logs/cron.log 2>&1
+# 1. Master Cron - Daily cleanup + maintenance (combines 4 jobs)
+#    - Cleanup geo cache + replay frames
+#    - Recalculate user scores (PO-SO) / GDPR retention (NE)
+0 2 * * * /usr/bin/php /path/to/scripts/master_cron.php >> /path/to/logs/cron_master.log 2>&1
 
-# Cleanup jobs (2-4 AM)
-0 2 * * * /usr/bin/php /path/to/scripts/cleanup_old_replay_frames.php >> /path/to/logs/cron.log 2>&1
-0 3 * * * /usr/bin/php /path/to/scripts/cleanup_old_events.php >> /path/to/logs/cron.log 2>&1
-0 4 * * * /usr/bin/php /path/to/scripts/cleanup_geo_cache.php >> /path/to/logs/cron.log 2>&1
-
-# Real-time cleanup (every 5 minutes)
+# 2. Realtime cleanup (every 5 minutes)
 */5 * * * * /usr/bin/php /path/to/scripts/cleanup_realtime_sessions.php >> /path/to/logs/cron.log 2>&1
 
-# Campaign stats (every hour)
-0 * * * * /usr/bin/php /path/to/scripts/update_campaign_stats.php >> /path/to/logs/cron.log 2>&1
+# 3. Campaign stats aggregation (every hour)
+0 * * * * /usr/bin/php /path/to/scripts/aggregate_campaign_stats.php >> /path/to/logs/cron.log 2>&1
+
+# 4. Scheduled reports generation (daily at 06:00)
+0 6 * * * /usr/bin/php /path/to/scripts/generate_scheduled_reports.php >> /path/to/logs/cron.log 2>&1
 ```
+
+**Poznámka:** Hosting limit 5 webcronů splněn (4/5) ✅
 
 ### Deployment Checklist
 
@@ -1780,15 +1789,14 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
      * **CRITICAL:** Toto je 7. cron job - PŘEKRAČUJE LIMIT 6/5!
    - Approve Module #13 OR request fixes
 
-2. **KRITICKÉ: Consolidace Cron Jobs (NUTNÉ!):**
-   - Hosting limit: **5 webcronů** (aktuálně máme 7!)
-   - Vytvořit `scripts/master_cron.php` který sjednotí:
-     * Daily cleanup jobs (geo cache, replay frames, events) → 1 job
-     * Report generation (daily/scheduled) → 1 job
-     * Realtime cleanup (5min) → keep separate
-     * Campaign aggregation (hourly) → keep separate
-     * Retention policy (weekly) → integrate into cleanup
-   - Cílový počet: **3-4 cron jobs** (v rámci limitu 5)
+2. **✅ HOTOVO: Cron Jobs Consolidace:**
+   - Hosting limit: **5 webcronů** (nyní máme 4!) ✅
+   - Vytvořen `scripts/master_cron.php` který sjednocuje:
+     * Daily cleanup jobs (geo cache, replay frames) → 1 job
+     * User scores recalculation (PO-SO) → 1 job
+     * GDPR retention policy (pouze neděle) → 1 job
+   - **Setup nutný:** Nastavit 4 cron joby v hostingu (viz sekce "Crontab Example")
+   - **Testing:** `php scripts/master_cron.php` (lokální test)
 
 3. **Post-Implementation Testing:**
    - End-to-end testing všech modulů
