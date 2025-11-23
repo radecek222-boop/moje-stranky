@@ -94,16 +94,21 @@
 
     async function hledatAdresy(query, dropdown) {
         try {
-            const response = await fetch('/api/geocode_proxy.php?action=autocomplete&text=' + encodeURIComponent(query));
-            const data = await response.json();
+            // Použít WGSMap modul pro autocomplete (podporuje čísla popisná)
+            const data = await WGSMap.autocomplete(query, {
+                type: 'street',
+                limit: 5,
+                country: 'CZ,SK'
+            });
 
-            if (data.features && data.features.length > 0) {
+            if (data && data.features && data.features.length > 0) {
                 zobrazitNavrhy(data.features, dropdown);
             } else {
                 dropdown.style.display = 'none';
             }
         } catch (error) {
             console.error('[Kalkulačka] Chyba autocomplete:', error);
+            dropdown.style.display = 'none';
         }
     }
 

@@ -282,6 +282,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 
 <!-- External JavaScript -->
 <script src="assets/js/logger.js" defer></script>
+<script src="assets/js/wgs-map.js" defer></script>
 <script src="assets/js/cenik.js" defer></script>
 <script src="assets/js/cenik-calculator.js" defer></script>
 
