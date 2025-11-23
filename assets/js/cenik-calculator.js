@@ -770,16 +770,75 @@
             doc.text('Do Dubče 364, Běchovice 190 11', pageWidth / 2, footerY + 4, { align: 'center' });
             doc.text('Tel: +420 725 965 826 | Email: reklamace@wgs-service.cz', pageWidth / 2, footerY + 8, { align: 'center' });
 
-            // STÁHNOUT PDF
+            // ZOBRAZIT PDF PREVIEW
             const nazevSouboru = `kalkulace_${new Date().getTime()}.pdf`;
-            doc.save(nazevSouboru);
+            const pdfBlob = doc.output('blob');
 
-            console.log('[Kalkulačka] PDF vyexportováno:', nazevSouboru);
+            console.log('[Kalkulačka] PDF vygenerováno:', nazevSouboru);
+
+            // Zobrazit v preview modalu
+            otevritPdfPreview(pdfBlob, nazevSouboru);
 
         } catch (error) {
             console.error('[Kalkulačka] Chyba při exportu PDF:', error);
             alert('Nepodařilo se vytvořit PDF. Zkuste to prosím znovu.');
         }
     };
+
+    // ========================================
+    // PDF PREVIEW MODAL
+    // ========================================
+    function otevritPdfPreview(pdfBlob, nazevSouboru) {
+        console.log('[PDF Preview] Otevírám modal...');
+
+        // Vytvořit URL pro iframe
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+
+        // Zobrazit modal
+        const overlay = document.getElementById('pdfPreviewOverlay');
+        const iframe = document.getElementById('pdfPreviewFrame');
+
+        if (!overlay || !iframe) {
+            console.error('[PDF Preview] Modal elementy nenalezeny!');
+            // Fallback - stáhnout přímo
+            const link = document.createElement('a');
+            link.href = pdfUrl;
+            link.download = nazevSouboru;
+            link.click();
+            return;
+        }
+
+        iframe.src = pdfUrl;
+        overlay.style.display = 'flex';
+
+        console.log('[PDF Preview] Modal otevřen');
+    }
+
+    // Zavřít PDF preview
+    const pdfCloseBtn = document.getElementById('pdfCloseBtn');
+    if (pdfCloseBtn) {
+        pdfCloseBtn.addEventListener('click', () => {
+            const overlay = document.getElementById('pdfPreviewOverlay');
+            const iframe = document.getElementById('pdfPreviewFrame');
+
+            if (overlay) overlay.style.display = 'none';
+            if (iframe) iframe.src = '';
+
+            console.log('[PDF Preview] Modal zavřen');
+        });
+    }
+
+    // Zavřít kliknutím mimo modal
+    const overlay = document.getElementById('pdfPreviewOverlay');
+    if (overlay) {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.style.display = 'none';
+                const iframe = document.getElementById('pdfPreviewFrame');
+                if (iframe) iframe.src = '';
+                console.log('[PDF Preview] Modal zavřen (klik mimo)');
+            }
+        });
+    }
 
 })();

@@ -1127,7 +1127,7 @@
     flex-direction: column;
     border: 2px solid #ddd;
     border-radius: 6px;
-    padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+    padding: 0.5rem 5rem 0.5rem 2.5rem;
     cursor: pointer;
     transition: all 0.3s;
     position: relative;
@@ -1228,11 +1228,14 @@
 }
 
 .radio-price {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
     font-size: 0.85rem;
     font-weight: 700;
     color: #4a4a4a;
-    margin-top: auto;
-    padding-top: 0.3rem;
+    white-space: nowrap;
 }
 
 /* Checkbox Cards */
@@ -1249,7 +1252,7 @@
     flex-direction: column;
     border: 2px solid #ddd;
     border-radius: 6px;
-    padding: 0.4rem 0.6rem 0.4rem 2.5rem;
+    padding: 0.4rem 4.5rem 0.4rem 2.5rem;
     cursor: pointer;
     transition: all 0.3s;
     position: relative;
@@ -1329,9 +1332,8 @@
 
 .checkbox-content {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
     height: 100%;
 }
 
@@ -1351,11 +1353,14 @@
 }
 
 .checkbox-price {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
     font-size: 0.8rem;
     font-weight: 700;
     color: #4a4a4a;
     white-space: nowrap;
-    margin-left: 0.75rem;
 }
 
 /* Counter Controls */
@@ -1655,37 +1660,125 @@
     background: #f4f4f4;
 }
 
+/* PDF Preview Modal */
+.pdf-preview-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.pdf-preview-container {
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 1200px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.pdf-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #ddd;
+    background: #f8f8f8;
+    border-radius: 8px 8px 0 0;
+}
+
+.pdf-preview-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin: 0;
+}
+
+.pdf-preview-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pdf-action-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+}
+
+.pdf-action-btn:hover {
+    background: rgba(0,0,0,0.05);
+    color: #2a2a2a;
+}
+
+.pdf-close-btn:hover {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.pdf-preview-body {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+.pdf-preview-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .wizard-progress {
         padding: 0 0.5rem;
     }
-    
+
     .step-label {
         font-size: 0.65rem;
     }
-    
+
     .step-number {
         width: 30px;
         height: 30px;
         line-height: 30px;
         font-size: 0.9rem;
     }
-    
+
     .wizard-step {
         padding: 1.5rem 1rem;
     }
-    
+
     .counter-group {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .wizard-buttons {
         flex-direction: column-reverse;
     }
-    
+
     .btn-primary, .btn-secondary {
         width: 100%;
+    }
+
+    .pdf-preview-container {
+        width: 95%;
+        height: 95vh;
     }
 }
 
