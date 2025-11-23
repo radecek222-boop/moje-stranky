@@ -888,6 +888,12 @@ window.WGS_TRANSLATIONS_CENIK = {
     it: 'Errore di rete durante l\'eliminazione'
   },
 
+  'pricingGrid.info.editingLanguage': {
+    cs: 'Upravuješ 🇨🇿 českou verzi. Přepni jazyk stránky pro editaci jiných verzí.',
+    en: 'Editing 🇬🇧 English version. Switch page language to edit other versions.',
+    it: 'Modifichi 🇮🇹 versione italiana. Cambia lingua della pagina per modificare altre versioni.'
+  },
+
   // ========================================
   // DATABÁZOVÉ KATEGORIE - PŘEKLAD
   // ========================================

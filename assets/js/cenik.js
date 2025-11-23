@@ -206,6 +206,12 @@
         document.getElementById('item-id').value = item.id;
         document.getElementById('edit-lang').value = jazyk;
 
+        // Aktualizovat info text podle jazyka
+        const infoElement = document.querySelector('.language-info span');
+        if (infoElement) {
+            infoElement.textContent = window.t('pricingGrid.info.editingLanguage');
+        }
+
         // Načíst správnou jazykovou verzi
         if (jazyk === 'cs') {
             document.getElementById('service-name').value = item.service_name || '';
@@ -249,6 +255,12 @@
         document.getElementById('item-id').value = '';
         document.getElementById('edit-lang').value = jazyk;
         document.getElementById('is-active').checked = true;
+
+        // Aktualizovat info text podle jazyka
+        const infoElement = document.querySelector('.language-info span');
+        if (infoElement) {
+            infoElement.textContent = window.t('pricingGrid.info.editingLanguage');
+        }
 
         // Skrýt delete tlačítko
         document.getElementById('delete-btn').style.display = 'none';
