@@ -2,7 +2,7 @@
 
 /* Hero sekce */
 .hero {
-    background: linear-gradient(135deg, #2D5016 0%, #1a300d 100%);
+    background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
     color: white;
     padding: 80px 20px;
     text-align: center;
@@ -60,7 +60,7 @@
 
 .section-title {
     font-size: 2.5rem;
-    color: #2D5016;
+    color: #2c3e50;
     margin-bottom: 20px;
     font-weight: 600;
 }
@@ -95,7 +95,7 @@
 }
 
 .category-header {
-    background: #2D5016;
+    background: #2c3e50;
     color: white;
     padding: 20px;
     font-size: 1.5rem;
@@ -131,14 +131,14 @@
 .item-name {
     font-size: 1.3rem;
     font-weight: 600;
-    color: #2D5016;
+    color: #2c3e50;
     flex: 1;
 }
 
 .item-price {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #2D5016;
+    color: #2c3e50;
     white-space: nowrap;
     margin-left: 20px;
 }
@@ -160,7 +160,7 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    background: #2D5016;
+    background: #2c3e50;
     color: white;
     border: none;
     padding: 8px 15px;
@@ -176,7 +176,7 @@
 }
 
 .item-edit-btn:hover {
-    background: #1a300d;
+    background: #1a252f;
 }
 
 /* Admin Actions */
@@ -186,7 +186,7 @@
 }
 
 .btn-admin {
-    background: #2D5016;
+    background: #2c3e50;
     color: white;
     border: none;
     padding: 15px 30px;
@@ -197,7 +197,7 @@
 }
 
 .btn-admin:hover {
-    background: #1a300d;
+    background: #1a252f;
 }
 
 /* Loading Indicator */
@@ -206,7 +206,7 @@
     height: 50px;
     margin: 0 auto 20px;
     border: 5px solid #f3f3f3;
-    border-top: 5px solid #2D5016;
+    border-top: 5px solid #2c3e50;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -227,7 +227,7 @@
 }
 
 .pricing-footer h3 {
-    color: #2D5016;
+    color: #2c3e50;
     font-size: 1.8rem;
     margin-bottom: 15px;
 }
@@ -238,7 +238,7 @@
 }
 
 .contact-info a {
-    color: #2D5016;
+    color: #2c3e50;
     text-decoration: none;
     font-weight: 600;
 }
@@ -287,7 +287,7 @@
 }
 
 #modal-title {
-    color: #2D5016;
+    color: #2c3e50;
     margin-bottom: 25px;
 }
 
@@ -342,12 +342,12 @@
 }
 
 .btn-primary {
-    background: #2D5016;
+    background: #2c3e50;
     color: white;
 }
 
 .btn-primary:hover {
-    background: #1a300d;
+    background: #1a252f;
 }
 
 .btn-secondary {
@@ -373,12 +373,12 @@
     margin-top: 40px;
     text-align: center;
     padding: 30px 0;
-    border-top: 2px dashed rgba(45, 80, 22, 0.2);
+    border-top: 2px dashed rgba(44, 62, 80, 0.2);
 }
 
 .btn-admin {
     padding: 15px 40px;
-    background: linear-gradient(135deg, #2D5016 0%, #1a300d 100%);
+    background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
     color: white;
     border: none;
     border-radius: 8px;
@@ -386,12 +386,12 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(45, 80, 22, 0.3);
+    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
 }
 
 .btn-admin:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(45, 80, 22, 0.4);
+    box-shadow: 0 6px 20px rgba(44, 62, 80, 0.4);
 }
 
 .btn-admin:active {
@@ -418,7 +418,7 @@
 }
 
 .footer-title {
-    color: #2D5016;
+    color: #2c3e50;
     margin-bottom: 15px;
     font-size: 1.3rem;
 }
@@ -434,7 +434,7 @@
 }
 
 .footer-link:hover {
-    color: #2D5016;
+    color: #2c3e50;
 }
 
 .footer-bottom {

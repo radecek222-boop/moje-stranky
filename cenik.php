@@ -74,7 +74,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
       <h2 class="section-title">Přehled služeb a cen</h2>
 
       <p class="section-text">
-        Níže naleznete kompletní ceník našich služeb. Všechny ceny jsou uvedeny v EUR a platí od 1.1.2023 do 31.12.2023.
+        Níže naleznete kompletní ceník našich služeb. Všechny ceny jsou uvedeny v EUR a platí od 1.1.2026.
         Účtovaná cena bude přepočtena na Kč podle aktuálního kurzu. Primárně přijímáme zakázky v lokalitě 150km od dílny.
       </p>
 
