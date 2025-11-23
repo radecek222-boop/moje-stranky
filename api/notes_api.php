@@ -26,6 +26,13 @@ try {
     $action = '';
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $action = $_GET['action'] ?? '';
+
+        // ✅ SECURITY FIX: GET metoda může provádět pouze read-only operace
+        // Prevence CSRF útoku přes GET requesty (např. <img src="...?action=delete&...">)
+        $readOnlyActions = ['get', 'list', 'count'];
+        if (!in_array($action, $readOnlyActions, true)) {
+            throw new Exception('Tato akce vyžaduje POST metodu s CSRF tokenem. Povolené GET akce: ' . implode(', ', $readOnlyActions));
+        }
     } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
 
@@ -139,10 +146,11 @@ try {
             }
 
             // ✅ SECURITY FIX: Kontrola vlastnictví poznámky
-            $currentUserId = $_SESSION['user_id'] ?? $_SESSION['admin_id'] ?? null;
+            // Poznámka: created_by je EMAIL, ne user_id!
+            $currentEmail = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? null;
             $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 
-            if (!$currentUserId && !$isAdmin) {
+            if (!$currentEmail && !$isAdmin) {
                 throw new Exception('Přístup odepřen');
             }
 
@@ -152,14 +160,14 @@ try {
                 $stmt = $pdo->prepare("DELETE FROM wgs_notes WHERE id = :id");
                 $stmt->execute([':id' => $noteId]);
             } else {
-                // Ostatní uživatelé pouze své vlastní
+                // Ostatní uživatelé pouze své vlastní (kontrola podle created_by email)
                 $stmt = $pdo->prepare("
                     DELETE FROM wgs_notes
-                    WHERE id = :id AND author_id = :user_id
+                    WHERE id = :id AND created_by = :user_email
                 ");
                 $stmt->execute([
                     ':id' => $noteId,
-                    ':user_id' => $currentUserId
+                    ':user_email' => $currentEmail
                 ]);
             }
 

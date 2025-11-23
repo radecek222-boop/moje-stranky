@@ -149,7 +149,7 @@ try {
             http_response_code(400);
             echo json_encode([
                 'status' => 'error',
-                'message' => 'Neznámá akce: ' . $action
+                'message' => 'Neznámá akce: ' . htmlspecialchars($action, ENT_QUOTES, 'UTF-8')
             ]);
             exit;
     }
@@ -160,12 +160,20 @@ try {
     ]);
 
 } catch (Exception $e) {
+    // Log úplné detaily server-side pro debugging
+    error_log(sprintf(
+        "Advanced Diagnostics Error: %s in %s:%d\nTrace: %s",
+        $e->getMessage(),
+        $e->getFile(),
+        $e->getLine(),
+        $e->getTraceAsString()
+    ));
+
     http_response_code(500);
     echo json_encode([
         'status' => 'error',
-        'message' => $e->getMessage(),
-        'file' => $e->getFile(),
-        'line' => $e->getLine()
+        'message' => 'Došlo k neočekávané chybě při zpracování požadavku. Zkontrolujte logy.',
+        'error_id' => uniqid('err_', true)  // Pro tracking v logu
     ]);
 }
 
