@@ -113,6 +113,10 @@ try {
             $result = ['status' => 'success', 'message' => 'pong', 'timestamp' => time()];
             break;
 
+        case 'save_kalkulace':
+            $result = saveKalkulaceData($data);
+            break;
+
         default:
             throw new Exception('Neplatná akce: ' . $action);
     }
@@ -734,4 +738,64 @@ reklamace@wgs-service.cz
     } catch (\PHPMailer\PHPMailer\Exception $e) {
         throw new Exception('Chyba při odesílání emailu: ' . $mail->ErrorInfo);
     }
+}
+
+/**
+ * Uložení dat z kalkulačky k reklamaci
+ *
+ * @param array $data Data z POST requestu
+ * @return array Výsledek operace
+ * @throws Exception Pokud reklamace neexistuje nebo nastane chyba
+ */
+function saveKalkulaceData($data) {
+    $reklamaceId = sanitizeReklamaceId($data['reklamace_id'] ?? null, 'reklamace_id');
+    $kalkulaceData = $data['kalkulace_data'] ?? null;
+
+    if (!$kalkulaceData) {
+        throw new Exception('Chybí data kalkulace');
+    }
+
+    $pdo = getDbConnection();
+
+    // Najít reklamaci
+    $stmt = $pdo->prepare("
+        SELECT id FROM wgs_reklamace
+        WHERE reklamace_id = :reklamace_id OR cislo = :cislo
+        LIMIT 1
+    ");
+    $stmt->execute([
+        ':reklamace_id' => $reklamaceId,
+        ':cislo' => $reklamaceId
+    ]);
+    $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$reklamace) {
+        throw new Exception('Reklamace nebyla nalezena');
+    }
+
+    // Převést kalkulace data na JSON
+    $kalkulaceJson = json_encode($kalkulaceData, JSON_UNESCAPED_UNICODE);
+
+    if ($kalkulaceJson === false) {
+        throw new Exception('Chyba při převodu dat kalkulace do JSON');
+    }
+
+    // Uložit kalkulaci do databáze
+    $stmt = $pdo->prepare("
+        UPDATE wgs_reklamace
+        SET kalkulace_data = :kalkulace_data,
+            updated_at = NOW()
+        WHERE id = :id
+    ");
+
+    $stmt->execute([
+        ':kalkulace_data' => $kalkulaceJson,
+        ':id' => $reklamace['id']
+    ]);
+
+    return [
+        'status' => 'success',
+        'message' => 'Kalkulace byla úspěšně uložena',
+        'reklamace_id' => $reklamaceId
+    ];
 }

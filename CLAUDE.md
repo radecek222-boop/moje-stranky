@@ -57,17 +57,19 @@ async function saveAppointment(date, time) {
 
 ---
 
-## 🚫 CRITICAL: NO EMOJI POLICY
+## 🚫 CRITICAL: NO EMOJI OR ICONS POLICY
 
-**ABSOLUTELY NO EMOJI IN CODE, UI, OR MESSAGES**
+**ABSOLUTELY NO EMOJI OR ICONS IN CODE, UI, OR MESSAGES**
 
-With the **SOLE EXCEPTION** of language flags (🇨🇿 🇬🇧 🇮🇹), **NO emoji** are allowed anywhere in the codebase:
+With the **SOLE EXCEPTION** of language flags (🇨🇿 🇬🇧 🇮🇹), **NO emoji or decorative icons** are allowed anywhere in the codebase:
 
 - ❌ **NO emoji in button text:** Use "Uložit" NOT "💾 Uložit"
 - ❌ **NO emoji in headings:** Use "Upravit článek" NOT "📝 Upravit článek"
 - ❌ **NO emoji in labels:** Use "Fotografie" NOT "📷 Fotografie"
 - ❌ **NO emoji in alerts:** Use "Chyba" NOT "❌ Chyba"
 - ❌ **NO emoji in placeholders:** Use "Klikněte" NOT "📸 Klikněte"
+- ❌ **NO decorative icons** (Font Awesome, Material Icons, etc.)
+- ❌ **NO icon libraries** unless explicitly approved by project owner
 - ❌ **NO emoji anywhere else**
 - ✅ **ONLY EXCEPTION:** Language flags: 🇨🇿 🇬🇧 🇮🇹
 
@@ -99,7 +101,74 @@ alert('✅ Článek byl uložen');
 <button>🇮🇹 Italiano</button>
 ```
 
-**IMPORTANT:** When generating ANY code, interface, or message, Claude AI must NEVER add emoji. This is a permanent project requirement.
+**IMPORTANT:** When generating ANY code, interface, or message, Claude AI must NEVER add emoji or decorative icons. This is a permanent project requirement.
+
+---
+
+## 🎨 CRITICAL: COLOR SCHEME POLICY
+
+**ONLY BLACK, WHITE, AND SHADES OF GRAY**
+
+All UI elements, buttons, text, backgrounds, and design components **MUST** use only:
+
+- ✅ **Black** (`#000`, `#111`, `#222`, `#333`, etc.)
+- ✅ **White** (`#fff`, `#fefefe`, `#f9f9f9`, etc.)
+- ✅ **Shades of gray** (`#666`, `#999`, `#ccc`, `#ddd`, `#eee`, etc.)
+- ❌ **NO other colors** without explicit approval from project owner
+
+### Examples:
+
+```css
+/* ✅ SPRÁVNĚ (CORRECT) */
+.button-primary {
+  background: #333;  /* Dark gray */
+  color: #fff;       /* White */
+}
+
+.button-secondary {
+  background: #999;  /* Light gray */
+  color: #fff;       /* White */
+}
+
+.alert-error {
+  background: #222;  /* Very dark gray */
+  border: 1px solid #666;  /* Medium gray */
+}
+
+/* ❌ ŠPATNĚ (WRONG) - NO COLORS! */
+.button-primary {
+  background: #2D5016;  /* Green - FORBIDDEN */
+  color: #fff;
+}
+
+.button-danger {
+  background: #ff4444;  /* Red - FORBIDDEN */
+  color: #fff;
+}
+
+.alert-success {
+  background: #4CAF50;  /* Green - FORBIDDEN */
+}
+```
+
+### Why Only Black/White/Gray?
+
+1. **Professional minimalist design** - Clean, modern, timeless
+2. **Accessibility** - High contrast ratios
+3. **Consistency** - No color clashes or confusing visual hierarchy
+4. **User preference** - Explicitly requested by project owner
+5. **Focus on content** - No distracting colors
+
+### When Can Other Colors Be Used?
+
+**ONLY** with explicit written approval from the project owner (Radek Zikmund).
+
+If you believe a feature absolutely requires color:
+1. Ask the user/owner first
+2. Explain why color is necessary
+3. Wait for approval before implementing
+
+**DO NOT** use colors and ask for forgiveness later. Always ask first.
 
 ---
 
@@ -941,30 +1010,35 @@ async function ulozData(data) {
 ## ⚠️ NEVER DO THIS
 
 1. ❌ **Never use English** in code, comments, or commits
-2. ❌ **Never skip CSRF validation** on POST requests
-3. ❌ **Never concatenate SQL** strings (always use prepared statements)
-4. ❌ **Never expose sensitive data** in error messages
-5. ❌ **Never commit .env file** (it's gitignored)
-6. ❌ **Never push to main/master** directly (always use feature branches)
-7. ❌ **Never modify session config** without understanding security implications
-8. ❌ **Never trust user input** (always sanitize and validate)
-9. ❌ **Never use `SELECT *`** in production queries (specify columns)
-10. ❌ **Never mix Czech and English** in the same file
+2. ❌ **Never use emoji or decorative icons** (except language flags 🇨🇿🇬🇧🇮🇹)
+3. ❌ **Never use colors** other than black/white/gray without approval
+4. ❌ **Never skip CSRF validation** on POST requests
+5. ❌ **Never concatenate SQL** strings (always use prepared statements)
+6. ❌ **Never expose sensitive data** in error messages
+7. ❌ **Never commit .env file** (it's gitignored)
+8. ❌ **Never push to main/master** directly (always use feature branches)
+9. ❌ **Never modify session config** without understanding security implications
+10. ❌ **Never trust user input** (always sanitize and validate)
+11. ❌ **Never use `SELECT *`** in production queries (specify columns)
+12. ❌ **Never mix Czech and English** in the same file
 
 ---
 
 ## ✅ ALWAYS DO THIS
 
 1. ✅ **Always write in Czech** (code, comments, commits)
-2. ✅ **Always validate CSRF tokens** on POST requests
-3. ✅ **Always use PDO prepared statements** for database queries
-4. ✅ **Always sanitize user input** with `htmlspecialchars()` and filters
-5. ✅ **Always check authentication** before sensitive operations
-6. ✅ **Always log errors** securely without exposing details to users
-7. ✅ **Always test locally** before pushing
-8. ✅ **Always use meaningful Czech names** for variables and functions
-9. ✅ **Always commit with descriptive messages** (FIX:, FEATURE:, etc.)
-10. ✅ **Always follow the enum mapping** (Czech frontend ↔ English database)
+2. ✅ **Always use only black/white/gray colors** in UI
+3. ✅ **Always avoid emoji and icons** (except language flags)
+4. ✅ **Always validate CSRF tokens** on POST requests
+5. ✅ **Always use PDO prepared statements** for database queries
+6. ✅ **Always sanitize user input** with `htmlspecialchars()` and filters
+7. ✅ **Always check authentication** before sensitive operations
+8. ✅ **Always log errors** securely without exposing details to users
+9. ✅ **Always test locally** before pushing
+10. ✅ **Always use meaningful Czech names** for variables and functions
+11. ✅ **Always commit with descriptive messages** (FIX:, FEATURE:, etc.)
+12. ✅ **Always follow the enum mapping** (Czech frontend ↔ English database)
+13. ✅ **Always ask for approval** before using any color other than black/white/gray
 
 ---
 

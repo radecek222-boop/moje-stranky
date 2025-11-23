@@ -2,9 +2,9 @@
 
 /* Hero sekce */
 .hero {
-    background: linear-gradient(135deg, #2D5016 0%, #1a300d 100%);
+    background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%);
     color: white;
-    padding: 80px 20px;
+    padding: 50px 15px;
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -17,7 +17,6 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('../img/pattern-overlay.png') repeat;
     opacity: 0.05;
     pointer-events: none;
 }
@@ -30,7 +29,7 @@
 }
 
 .hero-title {
-    font-size: 3rem;
+    font-size: 2rem;
     font-weight: 700;
     margin: 0 0 15px 0;
     letter-spacing: -0.5px;
@@ -44,7 +43,7 @@
 
 /* Content sekce */
 .content-section {
-    padding: 60px 20px;
+    padding: 40px 15px;
     background: #f9f9f9;
 }
 
@@ -59,8 +58,8 @@
 }
 
 .section-title {
-    font-size: 2.5rem;
-    color: #2D5016;
+    font-size: 1.8rem;
+    color: #4a4a4a;
     margin-bottom: 20px;
     font-weight: 600;
 }
@@ -95,10 +94,10 @@
 }
 
 .category-header {
-    background: #2D5016;
+    background: #4a4a4a;
     color: white;
-    padding: 20px;
-    font-size: 1.5rem;
+    padding: 12px 15px;
+    font-size: 1.2rem;
     font-weight: 600;
 }
 
@@ -107,7 +106,7 @@
 }
 
 .pricing-item {
-    padding: 25px;
+    padding: 15px;
     border-bottom: 1px solid #eee;
     position: relative;
     transition: background 0.2s;
@@ -131,14 +130,14 @@
 .item-name {
     font-size: 1.3rem;
     font-weight: 600;
-    color: #2D5016;
+    color: #4a4a4a;
     flex: 1;
 }
 
 .item-price {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #2D5016;
+    color: #4a4a4a;
     white-space: nowrap;
     margin-left: 20px;
 }
@@ -160,7 +159,7 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    background: #2D5016;
+    background: #4a4a4a;
     color: white;
     border: none;
     padding: 8px 15px;
@@ -176,7 +175,7 @@
 }
 
 .item-edit-btn:hover {
-    background: #1a300d;
+    background: #2a2a2a;
 }
 
 /* Admin Actions */
@@ -186,7 +185,7 @@
 }
 
 .btn-admin {
-    background: #2D5016;
+    background: #4a4a4a;
     color: white;
     border: none;
     padding: 15px 30px;
@@ -197,7 +196,7 @@
 }
 
 .btn-admin:hover {
-    background: #1a300d;
+    background: #2a2a2a;
 }
 
 /* Loading Indicator */
@@ -206,7 +205,7 @@
     height: 50px;
     margin: 0 auto 20px;
     border: 5px solid #f3f3f3;
-    border-top: 5px solid #2D5016;
+    border-top: 5px solid #4a4a4a;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -227,7 +226,7 @@
 }
 
 .pricing-footer h3 {
-    color: #2D5016;
+    color: #4a4a4a;
     font-size: 1.8rem;
     margin-bottom: 15px;
 }
@@ -238,7 +237,7 @@
 }
 
 .contact-info a {
-    color: #2D5016;
+    color: #4a4a4a;
     text-decoration: none;
     font-weight: 600;
 }
@@ -287,7 +286,7 @@
 }
 
 #modal-title {
-    color: #2D5016;
+    color: #4a4a4a;
     margin-bottom: 25px;
 }
 
@@ -342,12 +341,12 @@
 }
 
 .btn-primary {
-    background: #2D5016;
+    background: #4a4a4a;
     color: white;
 }
 
 .btn-primary:hover {
-    background: #1a300d;
+    background: #2a2a2a;
 }
 
 .btn-secondary {
@@ -378,7 +377,7 @@
 
 .btn-admin {
     padding: 15px 40px;
-    background: linear-gradient(135deg, #2D5016 0%, #1a300d 100%);
+    background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%);
     color: white;
     border: none;
     border-radius: 8px;
@@ -418,7 +417,7 @@
 }
 
 .footer-title {
-    color: #2D5016;
+    color: #4a4a4a;
     margin-bottom: 15px;
     font-size: 1.3rem;
 }
@@ -434,7 +433,7 @@
 }
 
 .footer-link:hover {
-    color: #2D5016;
+    color: #4a4a4a;
 }
 
 .footer-bottom {
@@ -475,3 +474,1539 @@
         width: 100%;
     }
 }
+
+/* Kalkulačka */
+.calculator-section {
+    background: linear-gradient(135deg, rgba(74, 74, 74, 0.05) 0%, rgba(26, 37, 47, 0.05) 100%);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.calculator-step {
+    margin-bottom: 30px;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.calculator-step h3 {
+    color: #4a4a4a;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(74, 74, 74, 0.1);
+}
+
+.calc-input {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    transition: border-color 0.3s;
+}
+
+.calc-input:focus {
+    outline: none;
+    border-color: #4a4a4a;
+}
+
+.suggestions-dropdown {
+    position: absolute;
+    background: white;
+    border: 2px solid #4a4a4a;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    width: calc(100% - 30px);
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.suggestion-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid #eee;
+}
+
+.suggestion-item:hover {
+    background: rgba(74, 74, 74, 0.1);
+}
+
+.calc-result {
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(74, 74, 74, 0.05);
+    border-radius: 8px;
+    border-left: 4px solid #4a4a4a;
+}
+
+.calc-result p {
+    margin: 8px 0;
+    font-size: 1.05rem;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.service-checkbox-item {
+    padding: 15px;
+    background: rgba(74, 74, 74, 0.02);
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.service-checkbox-item:hover {
+    border-color: #4a4a4a;
+    background: rgba(74, 74, 74, 0.05);
+}
+
+.service-checkbox-item.selected {
+    border-color: #4a4a4a;
+    background: rgba(74, 74, 74, 0.1);
+}
+
+.service-checkbox-item input[type="checkbox"] {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.service-checkbox-item label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: #4a4a4a;
+}
+
+.service-price {
+    display: block;
+    margin-top: 8px;
+    color: #4a4a4a;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.price-summary-box {
+    padding: 25px;
+    background: white;
+    border-radius: 10px;
+    border: 2px solid #4a4a4a;
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 1.1rem;
+}
+
+.summary-line.total {
+    border-bottom: none;
+    border-top: 3px solid #4a4a4a;
+    margin-top: 15px;
+    padding-top: 20px;
+    font-size: 1.4rem;
+    color: #4a4a4a;
+}
+
+.summary-note {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+}
+
+.calculator-actions {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.btn-reset {
+    padding: 12px 30px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-reset:hover {
+    background: #5a6268;
+}
+
+/* Responzivita kalkulačky */
+@media (max-width: 768px) {
+    .calculator-section {
+        padding: 20px;
+    }
+    
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .summary-line {
+        font-size: 1rem;
+    }
+    
+    .summary-line.total {
+        font-size: 1.2rem;
+    }
+}
+/* ULTRA KOMPAKTNÍ CENÍK - podle analytics.php */
+
+/* Hero - velmi malý */
+.hero {
+    padding: 30px 15px !important;
+}
+
+.hero-title {
+    font-size: 1.2rem !important;
+    margin-bottom: 0.3rem !important;
+}
+
+.hero-subtitle {
+    font-size: 0.75rem !important;
+}
+
+/* Content sekce */
+.content-section {
+    padding: 1rem 15px !important;
+}
+
+/* Section intro */
+.section-intro {
+    margin-bottom: 1rem !important;
+}
+
+.section-title {
+    font-size: 1.2rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.section-text {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Pricing grid */
+.pricing-category {
+    margin-bottom: 0.5rem !important;
+}
+
+.category-header {
+    padding: 0.6rem 1rem !important;
+    font-size: 0.9rem !important;
+}
+
+.pricing-item {
+    padding: 0.75rem 1rem !important;
+}
+
+.pricing-item-name {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.3rem !important;
+}
+
+.pricing-item-desc {
+    font-size: 0.7rem !important;
+    margin-bottom: 0.3rem !important;
+}
+
+.pricing-item-price {
+    font-size: 1rem !important;
+}
+
+/* Calculator */
+.calculator-section {
+    padding: 1rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.calculator-step {
+    padding: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.calculator-step h3 {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.5rem !important;
+    padding-bottom: 0.3rem !important;
+}
+
+.calc-input {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8rem !important;
+}
+
+.service-checkbox-item {
+    padding: 0.6rem !important;
+}
+
+.service-checkbox-item label {
+    font-size: 0.75rem !important;
+}
+
+.service-price {
+    font-size: 0.85rem !important;
+}
+
+.price-summary-box {
+    padding: 1rem !important;
+}
+
+.summary-line {
+    padding: 0.4rem 0 !important;
+    font-size: 0.8rem !important;
+}
+
+.summary-line.total {
+    font-size: 1rem !important;
+    padding-top: 0.6rem !important;
+}
+
+/* Buttons */
+.btn-admin {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.7rem !important;
+}
+
+.item-edit-btn {
+    padding: 0.3rem 0.6rem !important;
+    font-size: 0.65rem !important;
+}
+
+/* Modal */
+.modal-content {
+    padding: 1rem !important;
+}
+
+.modal-content h2 {
+    font-size: 1rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.form-group label {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.3rem !important;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    padding: 0.4rem 0.6rem !important;
+    font-size: 0.75rem !important;
+}
+
+/* Footer */
+.pricing-footer {
+    padding: 1rem !important;
+    margin-top: 1rem !important;
+}
+
+.pricing-footer h3 {
+    font-size: 1rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.pricing-footer p {
+    font-size: 0.75rem !important;
+}
+
+/* VYLEPŠENÍ KALKULAČKY - více viditelná */
+.calculator-section {
+    background: #f8f9fa !important;
+    border: 2px solid #4a4a4a !important;
+    border-radius: 8px !important;
+    padding: 1.5rem !important;
+    margin-bottom: 2rem !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.calculator-section .section-title {
+    color: #2a2a2a !important;
+    font-size: 1.3rem !important;
+    margin-bottom: 0.5rem !important;
+    border-bottom: 2px solid #4a4a4a !important;
+    padding-bottom: 0.5rem !important;
+    display: block !important;
+    width: 100% !important;
+}
+
+.calculator-section .section-text {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 0 1rem 0 !important;
+    text-align: left !important;
+}
+
+.calc-input {
+    border: 2px solid #ddd !important;
+    border-radius: 6px !important;
+    padding: 0.75rem !important;
+    font-size: 0.9rem !important;
+    width: 100% !important;
+    transition: border-color 0.3s !important;
+}
+
+.calc-input:focus {
+    border-color: #4a4a4a !important;
+    outline: none !important;
+}
+
+.suggestions-dropdown {
+    border: 2px solid #4a4a4a !important;
+    border-radius: 0 0 6px 6px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.suggestion-item {
+    padding: 0.75rem !important;
+    font-size: 0.85rem !important;
+}
+
+.calc-result {
+    background: #fff !important;
+    border-left: 4px solid #4a4a4a !important;
+    padding: 1rem !important;
+    margin-top: 1rem !important;
+}
+
+.calc-result p {
+    font-size: 0.9rem !important;
+    margin: 0.5rem 0 !important;
+}
+
+.services-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+}
+
+.service-checkbox-item {
+    background: #fff !important;
+    border: 2px solid #ddd !important;
+    padding: 0.75rem !important;
+    cursor: pointer !important;
+}
+
+.service-checkbox-item:hover {
+    border-color: #4a4a4a !important;
+}
+
+.service-checkbox-item.selected {
+    border-color: #4a4a4a !important;
+    background: #f8f9fa !important;
+}
+
+.price-summary-box {
+    background: #fff !important;
+    border: 3px solid #4a4a4a !important;
+    padding: 1.5rem !important;
+}
+
+.summary-line {
+    font-size: 0.95rem !important;
+    padding: 0.6rem 0 !important;
+}
+
+.summary-line.total {
+    font-size: 1.3rem !important;
+    padding-top: 1rem !important;
+    border-top: 3px solid #4a4a4a !important;
+}
+
+.btn-reset {
+    background: #4a4a4a !important;
+    color: white !important;
+    padding: 0.75rem 1.5rem !important;
+    font-size: 0.85rem !important;
+    border-radius: 6px !important;
+}
+
+.btn-reset:hover {
+    background: #2a2a2a !important;
+}
+
+/* Responzivita */
+@media (max-width: 768px) {
+    .calculator-section {
+        padding: 1rem !important;
+    }
+    
+    .services-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* OPRAVA NÁZVŮ TŘÍD - podle JavaScriptu */
+
+/* Item name (ne pricing-item-name) */
+.item-name {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.3rem !important;
+    font-weight: 600 !important;
+    color: #2a2a2a !important;
+}
+
+/* Item price (ne pricing-item-price) */
+.item-price {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: #4a4a4a !important;
+}
+
+/* Item description (ne pricing-item-desc) */
+.item-description {
+    font-size: 0.7rem !important;
+    margin-bottom: 0.3rem !important;
+    color: #666 !important;
+    line-height: 1.4 !important;
+}
+
+/* Item header */
+.item-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Category items */
+.category-items {
+    background: white !important;
+}
+
+/* Pricing item */
+.pricing-item {
+    padding: 0.75rem 1rem !important;
+    border-bottom: 1px solid #eee !important;
+    position: relative !important;
+    transition: background 0.2s !important;
+}
+
+.pricing-item:hover {
+    background: rgba(74, 74, 74, 0.02) !important;
+}
+
+.pricing-item:last-child {
+    border-bottom: none !important;
+}
+
+/* Category header */
+.category-header {
+    padding: 0.6rem 1rem !important;
+    font-size: 0.9rem !important;
+    background: #4a4a4a !important;
+    color: white !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* Pricing category */
+.pricing-category {
+    margin-bottom: 0.5rem !important;
+    background: white !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+/* ========================================
+   WIZARD STYLES
+   ======================================== */
+
+/* Progress Indicator */
+.wizard-progress {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem 0;
+    padding: 0 0.5rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.progress-step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    opacity: 0.4;
+    transition: opacity 0.3s;
+}
+
+.progress-step.active {
+    opacity: 1;
+}
+
+.progress-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: #ddd;
+    z-index: -1;
+}
+
+.progress-step.active:not(:last-child)::after {
+    background: #4a4a4a;
+}
+
+.step-number {
+    display: inline-block;
+    width: 35px;
+    height: 35px;
+    line-height: 35px;
+    border-radius: 50%;
+    background: #ddd;
+    color: #666;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    transition: background 0.3s, color 0.3s;
+}
+
+.progress-step.active .step-number {
+    background: #4a4a4a;
+    color: white;
+}
+
+.step-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #666;
+}
+
+/* Wizard Steps */
+.wizard-step {
+    background: white;
+    padding: 1rem;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin: 1rem 0;
+    min-height: 440px;
+    display: flex;
+    flex-direction: column;
+}
+
+.step-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin: 0 0 0.4rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.step-desc {
+    color: #666;
+    margin: 0 0 1rem 0;
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+/* Radio Cards */
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    width: 100%;
+}
+
+.radio-card {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    padding: 0.5rem 5rem 0.5rem 2.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    min-height: 70px;
+    max-height: 70px;
+    height: 70px;
+    overflow: hidden;
+    width: 100%;
+    /* Override globální label styly */
+    font-size: inherit !important;
+    font-weight: normal !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    color: inherit !important;
+}
+
+.radio-card::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+    background: white;
+    transition: all 0.3s;
+}
+
+.radio-card::after {
+    content: '';
+    position: absolute;
+    left: calc(0.75rem + 4px);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #4a4a4a;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.radio-card:hover {
+    border-color: #4a4a4a;
+    background: #f9f9f9;
+}
+
+.radio-card:hover::before {
+    border-color: #4a4a4a;
+}
+
+.radio-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+}
+
+.radio-card:has(input:checked) {
+    border-color: #4a4a4a;
+    background: #f4f4f4;
+}
+
+.radio-card:has(input:checked)::before {
+    border-color: #4a4a4a;
+}
+
+.radio-card:has(input:checked)::after {
+    opacity: 1;
+}
+
+.radio-content {
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+    min-height: 0;
+}
+
+.radio-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.radio-desc {
+    font-size: 0.7rem;
+    color: #666;
+    line-height: 1.25;
+    margin-bottom: 0;
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin-top: 0.3rem;
+}
+
+.radio-price {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #4a4a4a;
+    white-space: nowrap;
+}
+
+/* Checkbox Cards */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+    width: 100%;
+}
+
+.checkbox-card {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    padding: 0.4rem 4.5rem 0.4rem 2.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    min-height: 50px;
+    max-height: 50px;
+    height: 50px;
+    overflow: hidden;
+    width: 100%;
+    /* Override globální label styly */
+    font-size: inherit !important;
+    font-weight: normal !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    color: inherit !important;
+    margin-bottom: 0 !important;
+}
+
+.checkbox-card::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ddd;
+    border-radius: 3px;
+    background: white;
+    transition: all 0.3s;
+}
+
+.checkbox-card::after {
+    content: '✓';
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.checkbox-card:hover {
+    border-color: #4a4a4a;
+    background: #f9f9f9;
+}
+
+.checkbox-card:hover::before {
+    border-color: #4a4a4a;
+}
+
+.checkbox-card input[type="checkbox"] {
+    display: none;
+}
+
+.checkbox-card:has(input:checked) {
+    border-color: #4a4a4a;
+    background: #f4f4f4;
+}
+
+.checkbox-card:has(input:checked)::before {
+    background: #4a4a4a;
+    border-color: #4a4a4a;
+}
+
+.checkbox-card:has(input:checked)::after {
+    opacity: 1;
+}
+
+.checkbox-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+.checkbox-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.checkbox-desc {
+    font-size: 0.65rem;
+    color: #666;
+    margin-top: 0.2rem;
+    line-height: 1.3;
+}
+
+.checkbox-price {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #4a4a4a;
+    white-space: nowrap;
+}
+
+/* Counter Controls */
+.counter-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.counter-item {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.counter-item label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.counter-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-counter {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 2px solid #4a4a4a;
+    background: white;
+    color: #4a4a4a;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-counter:hover {
+    background: #4a4a4a;
+    color: white;
+}
+
+.btn-counter:active {
+    transform: scale(0.95);
+}
+
+.counter-controls input[type="number"] {
+    width: 60px;
+    height: 35px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+}
+
+.counter-price {
+    font-size: 0.7rem;
+    color: #666;
+    margin-top: 0.5rem;
+}
+
+/* Parts Summary */
+.parts-summary {
+    background: #e8f4f8;
+    border: 2px solid #4a4a4a;
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.parts-summary strong {
+    color: #2a2a2a;
+}
+
+#total-parts {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #4a4a4a;
+}
+
+.price-breakdown {
+    display: block;
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 0.5rem;
+}
+
+/* Wizard Buttons */
+.wizard-buttons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: auto;
+    padding-top: 1.5rem;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 0.6rem 1.5rem;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+}
+
+.btn-primary {
+    background: #4a4a4a;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2a2a2a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn-secondary {
+    background: white;
+    color: #4a4a4a;
+    border: 2px solid #4a4a4a;
+}
+
+.btn-secondary:hover {
+    background: #f4f4f4;
+}
+
+/* Summary */
+.price-summary-box {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.summary-line {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    align-items: baseline;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.85rem;
+}
+
+.summary-line:last-of-type {
+    border-bottom: none;
+}
+
+.summary-line.total {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid #4a4a4a;
+    font-size: 1.05rem;
+}
+
+.summary-price {
+    font-weight: 700;
+    color: #4a4a4a;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.total-price {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #4a4a4a;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.summary-subline {
+    font-size: 0.75rem;
+    color: #666;
+    padding-left: 1rem;
+    margin-top: -0.5rem;
+    grid-column: 1 / -1;
+}
+
+.summary-note {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #fff9f0;
+    border-left: 4px solid #ff9900;
+    font-size: 0.8rem;
+    color: #666;
+    line-height: 1.5;
+}
+
+.summary-note strong {
+    color: #2a2a2a;
+}
+
+/* Form Groups */
+.form-group {
+    margin: 1rem 0;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.calc-input {
+    width: 100%;
+    padding: 0.65rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s;
+}
+
+.calc-input:focus {
+    outline: none;
+    border-color: #4a4a4a;
+}
+
+.calc-result {
+    margin-top: 1rem;
+}
+
+.result-box {
+    background: #e8f4f8;
+    border: 2px solid #4a4a4a;
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.result-box p {
+    margin: 0.5rem 0;
+    font-size: 0.8rem;
+}
+
+.highlight-price {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #4a4a4a;
+}
+
+/* Suggestions Dropdown */
+.suggestions-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #4a4a4a;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    margin-top: -2px;
+}
+
+.suggestion-item {
+    padding: 0.6rem 0.75rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #eee;
+    line-height: 1.3;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover {
+    background: #f4f4f4;
+}
+
+/* PDF Preview Modal */
+.pdf-preview-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.pdf-preview-container {
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 1200px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.pdf-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #ddd;
+    background: #f8f8f8;
+    border-radius: 8px 8px 0 0;
+}
+
+.pdf-preview-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin: 0;
+}
+
+.pdf-preview-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pdf-action-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+}
+
+.pdf-action-btn:hover {
+    background: rgba(0,0,0,0.05);
+    color: #2a2a2a;
+}
+
+.pdf-close-btn:hover {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.pdf-preview-body {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+.pdf-preview-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .wizard-progress {
+        padding: 0 0.5rem;
+    }
+
+    .step-label {
+        font-size: 0.65rem;
+    }
+
+    .step-number {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        font-size: 0.9rem;
+    }
+
+    .wizard-step {
+        padding: 1.5rem 1rem;
+    }
+
+    /* Počítadla pod sebou na mobilu */
+    .counter-group {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .counter-item {
+        padding: 0.75rem;
+    }
+
+    .counter-item label {
+        font-size: 0.7rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .counter-controls {
+        gap: 0.75rem;
+    }
+
+    .counter-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+
+    .counter-value {
+        font-size: 1.2rem;
+        min-width: 50px;
+    }
+
+    /* Radio a checkbox buttony na plnou šířku */
+    .radio-group, .checkbox-group {
+        gap: 0.5rem;
+    }
+
+    .radio-card, .checkbox-card {
+        width: 100%;
+    }
+
+    .wizard-buttons {
+        flex-direction: column-reverse;
+    }
+
+    .btn-primary, .btn-secondary {
+        width: 100%;
+    }
+
+    .pdf-preview-container {
+        width: 95%;
+        height: 95vh;
+    }
+
+    /* Summary na mobilu */
+    .summary-section {
+        padding: 1rem;
+    }
+
+    .summary-line {
+        font-size: 0.9rem;
+    }
+
+    .summary-line.total {
+        font-size: 1.1rem;
+    }
+}
+
+/* Extra small devices (PWA, phones < 480px) */
+@media (max-width: 480px) {
+    .calculator-section {
+        padding: 0.75rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .section-title {
+        font-size: 1.1rem !important;
+    }
+
+    .section-text {
+        font-size: 0.7rem !important;
+    }
+
+    .wizard-progress {
+        padding: 0.25rem;
+        gap: 0.25rem;
+    }
+
+    .progress-step {
+        padding: 0.25rem;
+    }
+
+    .step-number {
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        font-size: 0.8rem;
+    }
+
+    .step-label {
+        font-size: 0.6rem;
+        margin-top: 0.15rem;
+    }
+
+    .wizard-step {
+        padding: 1rem 0.5rem;
+    }
+
+    .wizard-step h3 {
+        font-size: 1rem !important;
+    }
+
+    /* Counter na velmi malých displejích */
+    .counter-group {
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+
+    .counter-item {
+        padding: 0.6rem;
+    }
+
+    .counter-item label {
+        font-size: 0.65rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .counter-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+
+    .counter-value {
+        font-size: 1.1rem;
+        min-width: 45px;
+    }
+
+    /* Radio a checkbox buttony */
+    .radio-card, .checkbox-card {
+        padding: 0.4rem 4rem 0.4rem 2rem !important;
+        min-height: 45px !important;
+        max-height: 45px !important;
+        height: 45px !important;
+    }
+
+    .radio-title, .checkbox-title {
+        font-size: 0.75rem !important;
+    }
+
+    .radio-desc, .checkbox-desc {
+        font-size: 0.65rem !important;
+    }
+
+    .radio-price, .checkbox-price {
+        font-size: 0.75rem !important;
+    }
+
+    /* Tlačítka */
+    .btn-primary, .btn-secondary {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    /* Summary */
+    .summary-section {
+        padding: 0.75rem;
+    }
+
+    .summary-line {
+        font-size: 0.85rem;
+        padding: 0.5rem 0;
+    }
+
+    .summary-line.total {
+        font-size: 1rem;
+        padding: 0.75rem 0;
+    }
+
+    /* Address input */
+    .calc-input {
+        font-size: 0.85rem !important;
+        padding: 0.6rem !important;
+    }
+
+    #address-suggestions {
+        font-size: 0.85rem;
+    }
+
+    .address-suggestion {
+        padding: 0.6rem;
+    }
+
+    /* Hero na PWA */
+    .hero {
+        padding: 25px 10px !important;
+    }
+
+    .hero-title {
+        font-size: 1.1rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    .hero-subtitle {
+        font-size: 0.7rem !important;
+    }
+
+    /* Content section */
+    .content-section {
+        padding: 0.75rem 10px !important;
+    }
+
+    /* Pricing grid na úvodní stránce */
+    .pricing-grid {
+        gap: 0.75rem !important;
+    }
+
+    .pricing-category {
+        margin-bottom: 0.75rem !important;
+    }
+
+    .category-header {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    .pricing-item {
+        padding: 0.6rem 0.75rem !important;
+    }
+
+    .item-name {
+        font-size: 0.8rem !important;
+    }
+
+    .item-price {
+        font-size: 0.8rem !important;
+    }
+}
+

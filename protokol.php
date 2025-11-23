@@ -216,6 +216,8 @@ if ($initialBootstrapData) {
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/protokol.css">
   <link rel="stylesheet" href="assets/css/protokol-mobile-fixes.css">
+  <link rel="stylesheet" href="assets/css/cenik.min.css">
+  <link rel="stylesheet" href="assets/css/protokol-calculator-modal.css">
   <!-- mobile-responsive.css odstraněn - protokol.css má vlastní mobilní styly -->
 
   <!-- Analytics Tracker -->
@@ -252,7 +254,6 @@ if ($initialBootstrapData) {
             <tr><td class="label">Adresa<span class="en-label">Address</span></td><td><input type="text" id="address" value="<?= wgs_escape($prefillFields['address']); ?>" readonly></td></tr>
             <tr><td class="label">Telefon<span class="en-label">Phone</span></td><td><input type="tel" id="phone" value="<?= wgs_escape($prefillFields['phone']); ?>" readonly></td></tr>
             <tr><td class="label">Email<span class="en-label">Email</span></td><td><input type="email" id="email" value="<?= wgs_escape($prefillFields['email']); ?>" readonly></td></tr>
-            <tr><td class="label">Fakturace<span class="en-label">Billing</span></td><td><input type="text" id="fakturace-firma" value="<?= wgs_escape($prefillFields['fakturace']); ?>" readonly></td></tr>
           </table>
         </div>
 
@@ -281,11 +282,11 @@ if ($initialBootstrapData) {
                   }
                 ?>
               </select></td></tr>
-            <tr><td class="label">Datum návštěvy<span class="en-label">Visit date</span></td><td><input type="date" id="visit-date"></td></tr>
             <tr><td class="label">Datum doručení<span class="en-label">Delivery date</span></td><td><input type="date" id="delivery-date"></td></tr>
             <tr><td class="label">Datum reklamace<span class="en-label">Claim date</span></td><td><input type="date" id="claim-date"></td></tr>
             <tr><td class="label">Zadavatel<span class="en-label">Requester</span></td><td><input type="text" id="brand" placeholder="Prodejce" value="<?= wgs_escape($prefillFields['brand']); ?>"></td></tr>
             <tr><td class="label">Model<span class="en-label">Model</span></td><td><input type="text" id="model" value="<?= wgs_escape($prefillFields['model']); ?>"></td></tr>
+            <tr><td class="label">Fakturace<span class="en-label">Billing</span></td><td><input type="text" id="fakturace-firma" value="<?= wgs_escape($prefillFields['fakturace']); ?>" readonly></td></tr>
           </table>
         </div>
       </div>
@@ -313,12 +314,9 @@ if ($initialBootstrapData) {
   <div class="two-col-table">
     <div class="col">
       <table>
-        <tr><td class="label">Počet dílů<span class="en-label">Parts</span></td><td><input type="text" id="parts" placeholder="0"></td></tr>
-        <tr><td class="label">Práce<span class="en-label">Work</span></td><td><input type="text" id="price-work" placeholder="0.00" oninput="updateTotal()"></td></tr>
-        <tr><td class="label">Materiál<span class="en-label">Materiál</span></td><td><input type="text" id="price-material" placeholder="0.00" oninput="updateTotal()"></td></tr>
-        <tr><td class="label">2. technik<span class="en-label">Second tech.</span></td><td><input type="text" id="price-second" placeholder="0.00" oninput="updateTotal()"></td></tr>
-        <tr><td class="label">Doprava<span class="en-label">Transport</span></td><td><input type="text" id="price-transport" placeholder="0.00" oninput="updateTotal()"></td></tr>
-        <tr><td class="label"><strong>Celkem</strong><span class="en-label">Total</span></td><td><input type="text" id="price-total" readonly style="font-weight:700;"></td></tr>
+        <tr><td class="label">Účtováno za servis<span class="en-label">Service charged</span></td><td><input type="text" id="price-total" placeholder="Kalkulačka" readonly class="calculator-input"></td></tr>
+        <tr><td class="label">Platí zákazník?<span class="en-label">Customer pays?</span></td><td><select id="payment"><option>NE</option><option>ANO</option></select></td></tr>
+        <tr><td class="label">Datum podpisu<span class="en-label">Signature date</span></td><td><input type="date" id="sign-date"></td></tr>
       </table>
     </div>
 
@@ -327,8 +325,6 @@ if ($initialBootstrapData) {
         <tr><td class="label">Vyřešeno?<span class="en-label">Solved?</span></td><td><select id="solved"><option>ANO</option><option>NE</option></select></td></tr>
         <tr><td class="label">Nutné vyjádření prodejce<span class="en-label">Waiting dealer?</span></td><td><select id="dealer"><option>NE</option><option>ANO</option></select></td></tr>
         <tr><td class="label">Poškození technikem?<span class="en-label">Damage by tech?</span></td><td><select id="damage"><option>NE</option><option>ANO</option></select></td></tr>
-        <tr><td class="label">Platí zákazník?<span class="en-label">Customer pays?</span></td><td><select id="payment"><option>NE</option><option>ANO</option></select></td></tr>
-        <tr><td class="label">Datum podpisu<span class="en-label">Signature date</span></td><td><input type="date" id="sign-date"></td></tr>
       </table>
     </div>
   </div>
@@ -353,8 +349,21 @@ if ($initialBootstrapData) {
   <div id="notif" class="notif"></div>
 </div>
 
+<!-- Calculator Modal -->
+<div class="calculator-modal-overlay" id="calculatorModalOverlay" style="display: none;">
+  <div class="calculator-modal-container">
+    <div class="calculator-modal-header">
+      <h3>Kalkulace ceny servisu</h3>
+      <button type="button" class="calculator-modal-close" id="calculatorModalClose">×</button>
+    </div>
+    <div class="calculator-modal-body" id="calculatorModalBody">
+      <!-- Kalkulačka se vloží dynamicky -->
+    </div>
+  </div>
+</div>
+
 <!-- PDF Preview Modal -->
-<div class="pdf-preview-overlay" id="pdfPreviewOverlay">
+<div class="pdf-preview-overlay" id="pdfPreviewOverlay" style="display: none;">
   <div class="pdf-preview-container">
     <div class="pdf-preview-header">
       <h3 class="pdf-preview-title" data-lang-cs="Náhled PDF" data-lang-en="PDF Preview" data-lang-it="Anteprima PDF">Náhled PDF</h3>
@@ -478,5 +487,8 @@ if ($initialBootstrapData) {
 <script src="assets/js/protokol-fakturace-patch.js" defer></script>
 <!-- Fix pro tlačítka (načíst až po protokol.js) -->
 <script src="assets/js/protokol-buttons-fix.js" defer></script>
+<!-- Kalkulačka integrace -->
+<script src="assets/js/cenik-calculator.js" defer></script>
+<script src="assets/js/protokol-calculator-integration.js" defer></script>
 </body>
 </html>

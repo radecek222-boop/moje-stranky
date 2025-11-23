@@ -971,7 +971,143 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </div>
 
 <!-- External JavaScript -->
-<script src="assets/js/seznam.js?v=20251122-04" defer></script>
-    <script src="assets/js/seznam-delete-patch.js" defer></script>
+<script src="assets/js/seznam.js?v=20251123-01" defer></script>
+<script src="assets/js/seznam-delete-patch.js" defer></script>
+
+<!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
+<script>
+// CACHE BUSTER: 2025-11-23-19:35:00 - VLASTNÍ MODAL DIALOG
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('🔧 EMERGENCY event delegation V5 se načítá... [2025-11-23-19:35:00 - VLASTNÍ MODAL]');
+
+  document.addEventListener('click', (e) => {
+    const button = e.target.closest('[data-action]');
+    if (!button) return;
+
+    const action = button.getAttribute('data-action');
+    const id = button.getAttribute('data-id');
+    const url = button.getAttribute('data-url');
+
+    console.log(`[EMERGENCY] Tlačítko kliknuto: ${action}`, { id, url });
+
+    switch (action) {
+      case 'reopenOrder':
+        if (!id) {
+          console.error('[EMERGENCY] ❌ ID chybí!');
+          break;
+        }
+
+        // VLASTNÍ CONFIRMATION MODAL (obchází problém s window.confirm)
+        console.log('[EMERGENCY V5] 🎨 VYTVÁŘENÍ VLASTNÍHO MODALU pro ID:', id);
+
+        // Vytvořit vlastní modal overlay
+        const modalDiv = document.createElement('div');
+        modalDiv.id = 'customConfirmModal';
+        modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:999999;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.2s ease-in;';
+
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = 'background:white;padding:25px;border-radius:8px;max-width:350px;width:85%;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.4);';
+
+        modalContent.innerHTML = `
+          <h2 style="margin:0 0 15px 0;color:#333;font-size:1.1rem;font-weight:700;">Znovu otevřít zakázku?</h2>
+          <p style="margin:0 0 25px 0;color:#555;line-height:1.6;font-size:0.95rem;">Opravdu chcete znovu otevřít tuto dokončenou zakázku?<br><br>Zakázka bude vrácena do stavu <strong>ČEKÁ</strong> a bude možné ji znovu upravit.</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <button id="confirmYes" style="padding:12px 25px;background:#333;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.95rem;font-weight:700;transition:all 0.2s;">Ano, otevřít</button>
+            <button id="confirmNo" style="padding:12px 25px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.95rem;font-weight:600;transition:all 0.2s;">Zrušit</button>
+          </div>
+        `;
+
+        modalDiv.appendChild(modalContent);
+        document.body.appendChild(modalDiv);
+
+        console.log('[EMERGENCY V5] ✅ Modal přidán do DOM!');
+
+        // Event listenery pro tlačítka
+        document.getElementById('confirmNo').onclick = () => {
+          console.log('[EMERGENCY V5] ❌ Uživatel zrušil');
+          document.body.removeChild(modalDiv);
+        };
+
+        document.getElementById('confirmYes').onclick = () => {
+          console.log('[EMERGENCY V5] ✅ Uživatel potvrdil, otevírám zakázku ID:', id);
+          document.body.removeChild(modalDiv);
+
+        // Použít asynchronní funkci pro await
+        (async () => {
+          try {
+            const csrfToken = typeof window.fetchCsrfToken === 'function'
+              ? await window.fetchCsrfToken()
+              : document.querySelector('meta[name="csrf-token"]')?.content;
+
+            const formData = new FormData();
+            formData.append('action', 'update');
+            formData.append('id', id);
+            formData.append('stav', 'ČEKÁ');
+            formData.append('termin', '');
+            formData.append('cas_navstevy', '');
+            formData.append('csrf_token', csrfToken);
+
+            const response = await fetch('/app/controllers/save.php', {
+              method: 'POST',
+              body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+              console.log('[EMERGENCY V5] ✅ ÚSPĚCH! Zakázka byla znovu otevřena');
+              alert('Zakázka byla úspěšně znovu otevřena a vrácena do stavu ČEKÁ.');
+              setTimeout(() => location.reload(), 500);
+            } else {
+              throw new Error(result.message || 'Chyba při otevření zakázky');
+            }
+          } catch (err) {
+            console.error('[EMERGENCY V5] ❌ Chyba:', err);
+            alert('Chyba při otevření zakázky: ' + err.message);
+          }
+        })();
+        };
+        break;
+
+      case 'showContactMenu':
+        if (id && typeof showContactMenu === 'function') {
+          showContactMenu(id);
+        }
+        break;
+
+      case 'showCustomerDetail':
+        if (id && typeof showCustomerDetail === 'function') {
+          showCustomerDetail(id);
+        }
+        break;
+
+      case 'openPDF':
+        if (!url) {
+          console.error('[EMERGENCY] ❌ PDF URL chybí!');
+          break;
+        }
+
+        console.log('[EMERGENCY] ✅ Otevírám PDF:', url);
+
+        // Obejít pop-up blocker: Otevřít v SOUČASNÉM okně místo nového tabu
+        // Uživatel může použít "Zpět" pro návrat
+        window.location.href = url;
+        console.log('[EMERGENCY] ✅ Přesměrování na PDF');
+        break;
+
+      case 'closeDetail':
+        if (typeof closeDetail === 'function') {
+          closeDetail();
+        }
+        break;
+
+      default:
+        console.warn(`[EMERGENCY] Neznámá akce: ${action}`);
+    }
+  });
+
+  console.log('✅ EMERGENCY event delegation V5 načten [2025-11-23-19:35:00] - VLASTNÍ MODAL DIALOG');
+});
+</script>
 </body>
 </html>

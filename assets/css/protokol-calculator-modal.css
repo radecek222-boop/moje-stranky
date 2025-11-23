@@ -1,0 +1,154 @@
+/**
+ * CSS styly pro calculator modal v protokolu
+ */
+
+/* FIX: Vrátit původní velikost section-title v protokolu */
+body:not(.calculator-page) .section-title {
+    font-family: 'Poppins' !important;
+    font-weight: 700 !important;
+    font-size: 10px !important;
+    margin-top: 13px !important;
+    margin-bottom: 5px !important;
+}
+
+/* Calculator Modal Overlay */
+.calculator-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Calculator Modal Container */
+.calculator-modal-container {
+    background: white;
+    border-radius: 12px;
+    width: 95%;
+    max-width: 1200px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    overflow: hidden;
+}
+
+/* Modal Header */
+.calculator-modal-header {
+    background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.calculator-modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.calculator-modal-close {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.3s;
+}
+
+.calculator-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Modal Body */
+.calculator-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: #f5f5f5;
+}
+
+/* Kalkulačka uvnitř modalu - úpravy */
+.calculator-modal-body .calculator-section {
+    margin: 0;
+    box-shadow: none;
+    background: white;
+}
+
+.calculator-modal-body .section-title {
+    display: none; /* Nadpis je už v modal header */
+}
+
+.calculator-modal-body .section-text {
+    display: none; /* Popisek je už jasný z kontextu */
+}
+
+/* Klikatelné pole pro kalkulačku */
+.calculator-input {
+    cursor: pointer !important;
+    transition: all 0.3s ease;
+}
+
+.calculator-input:hover {
+    background-color: #f0f9ff !important;
+    border-color: #2D5016 !important;
+}
+
+.calculator-input:not(:placeholder-shown) {
+    font-weight: 600 !important;
+}
+
+/* Responsivní úpravy */
+@media (max-width: 768px) {
+    .calculator-modal-container {
+        width: 100%;
+        max-height: 95vh;
+        border-radius: 0;
+    }
+
+    .calculator-modal-header {
+        padding: 15px;
+    }
+
+    .calculator-modal-header h3 {
+        font-size: 1.2rem;
+    }
+
+    .calculator-modal-body {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .calculator-modal-header {
+        padding: 12px;
+    }
+
+    .calculator-modal-header h3 {
+        font-size: 1rem;
+    }
+
+    .calculator-modal-body {
+        padding: 10px;
+    }
+
+    .btn-calculator {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.75rem;
+    }
+}

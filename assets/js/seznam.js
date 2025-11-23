@@ -482,17 +482,17 @@ async function showDetail(recordOrId) {
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #333; color: white; font-weight: 600; font-size: 0.85rem;" onclick="reopenOrder('${record.id}')">
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #333; color: white; font-weight: 600; font-size: 0.85rem;" data-action="reopenOrder" data-id="${record.id}">
           Znovu otevřít
         </button>
 
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showContactMenu('${record.id}')">Kontaktovat</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showCustomerDetail('${record.id}')">Detail zákazníka</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
 
       <div style="width: 100%; margin-top: 0.25rem;">
         ${record.documents && record.documents.length > 0 ? `
           <button class="btn" style="background: #2D5016; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; font-weight: 600;"
-                  onclick="window.open('${record.documents[0].file_path}', '_blank')">
+                  data-action="openPDF" data-url="${record.documents[0].file_path}">
             📄 PDF REPORT
           </button>
         ` : `
@@ -502,7 +502,7 @@ async function showDetail(recordOrId) {
         `}
       </div>
 
-        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="closeDetail()">Zavřít</button>
+        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   } else {
@@ -2542,3 +2542,44 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
     showToast('Nepodařilo se odeslat email', 'error');
   }
 }
+
+// ========================================
+// EVENT DELEGATION PRO TLAČÍTKA V DETAILU
+// ========================================
+// Zachytává kliknutí na tlačítka s data-action atributem
+// Řeší problém s inline onclick, které CSP blokuje
+document.addEventListener('click', (e) => {
+  const button = e.target.closest('[data-action]');
+  if (!button) return;
+
+  const action = button.getAttribute('data-action');
+  const id = button.getAttribute('data-id');
+  const url = button.getAttribute('data-url');
+
+  logger.log(`[Seznam] Tlačítko kliknuto: ${action}`, { id, url });
+
+  switch (action) {
+    case 'reopenOrder':
+      if (id) reopenOrder(id);
+      break;
+
+    case 'showContactMenu':
+      if (id) showContactMenu(id);
+      break;
+
+    case 'showCustomerDetail':
+      if (id) showCustomerDetail(id);
+      break;
+
+    case 'openPDF':
+      if (url) window.open(url, '_blank');
+      break;
+
+    case 'closeDetail':
+      closeDetail();
+      break;
+
+    default:
+      logger.warn(`[Seznam] Neznámá akce: ${action}`);
+  }
+});
