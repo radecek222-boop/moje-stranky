@@ -475,3 +475,199 @@
         width: 100%;
     }
 }
+
+/* Kalkulačka */
+.calculator-section {
+    background: linear-gradient(135deg, rgba(44, 62, 80, 0.05) 0%, rgba(26, 37, 47, 0.05) 100%);
+    border-radius: 15px;
+    padding: 40px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.calculator-step {
+    margin-bottom: 30px;
+    padding: 25px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.calculator-step h3 {
+    color: #2c3e50;
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(44, 62, 80, 0.1);
+}
+
+.calc-input {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    transition: border-color 0.3s;
+}
+
+.calc-input:focus {
+    outline: none;
+    border-color: #2c3e50;
+}
+
+.suggestions-dropdown {
+    position: absolute;
+    background: white;
+    border: 2px solid #2c3e50;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    width: calc(100% - 30px);
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.suggestion-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid #eee;
+}
+
+.suggestion-item:hover {
+    background: rgba(44, 62, 80, 0.1);
+}
+
+.calc-result {
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(44, 62, 80, 0.05);
+    border-radius: 8px;
+    border-left: 4px solid #2c3e50;
+}
+
+.calc-result p {
+    margin: 8px 0;
+    font-size: 1.05rem;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.service-checkbox-item {
+    padding: 15px;
+    background: rgba(44, 62, 80, 0.02);
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.service-checkbox-item:hover {
+    border-color: #2c3e50;
+    background: rgba(44, 62, 80, 0.05);
+}
+
+.service-checkbox-item.selected {
+    border-color: #2c3e50;
+    background: rgba(44, 62, 80, 0.1);
+}
+
+.service-checkbox-item input[type="checkbox"] {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.service-checkbox-item label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.service-price {
+    display: block;
+    margin-top: 8px;
+    color: #2c3e50;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.price-summary-box {
+    padding: 25px;
+    background: white;
+    border-radius: 10px;
+    border: 2px solid #2c3e50;
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 1.1rem;
+}
+
+.summary-line.total {
+    border-bottom: none;
+    border-top: 3px solid #2c3e50;
+    margin-top: 15px;
+    padding-top: 20px;
+    font-size: 1.4rem;
+    color: #2c3e50;
+}
+
+.summary-note {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+}
+
+.calculator-actions {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.btn-reset {
+    padding: 12px 30px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-reset:hover {
+    background: #5a6268;
+}
+
+/* Responzivita kalkulačky */
+@media (max-width: 768px) {
+    .calculator-section {
+        padding: 20px;
+    }
+    
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .summary-line {
+        font-size: 1rem;
+    }
+    
+    .summary-line.total {
+        font-size: 1.2rem;
+    }
+}

@@ -70,16 +70,85 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <section class="content-section">
   <div class="container">
 
+    <!-- KALKULAČKA CENY -->
+    <div class="calculator-section" id="kalkulacka">
+      <h2 class="section-title">Kalkulace ceny služby</h2>
+      <p class="section-text">
+        Zadejte vaši adresu a vyberte požadované služby pro orientační výpočet ceny.
+      </p>
+
+      <!-- Krok 1: Zadání adresy -->
+      <div class="calculator-step">
+        <h3>1. Zadejte adresu zákazníka</h3>
+        <div class="form-group">
+          <label for="calc-address">Adresa:</label>
+          <input
+            type="text"
+            id="calc-address"
+            class="calc-input"
+            placeholder="Začněte psát adresu..."
+            autocomplete="off"
+          >
+          <div id="address-suggestions" class="suggestions-dropdown" style="display: none;"></div>
+        </div>
+
+        <div id="distance-result" class="calc-result" style="display: none;">
+          <p><strong>Vzdálenost z dílny:</strong> <span id="distance-value">-</span> km</p>
+          <p><strong>Dopravné (tam a zpět):</strong> <span id="transport-cost">-</span> €</p>
+        </div>
+      </div>
+
+      <!-- Krok 2: Výběr služeb -->
+      <div class="calculator-step" id="services-selection" style="display: none;">
+        <h3>2. Vyberte požadované služby</h3>
+        <div id="services-checkboxes" class="services-grid">
+          <!-- Načteno dynamicky z API -->
+        </div>
+      </div>
+
+      <!-- Krok 3: Cenový souhrn -->
+      <div class="calculator-step" id="price-summary" style="display: none;">
+        <h3>3. Cenový souhrn</h3>
+        <div class="price-summary-box">
+          <div class="summary-line">
+            <span>Služby celkem:</span>
+            <span id="services-total">0 €</span>
+          </div>
+          <div class="summary-line">
+            <span>Dopravné:</span>
+            <span id="transport-total">0 €</span>
+          </div>
+          <div class="summary-line total">
+            <span><strong>Celková cena:</strong></span>
+            <span id="grand-total"><strong>0 €</strong></span>
+          </div>
+          <p class="summary-note">
+            * Ceny jsou orientační a vztahují se pouze na práci. Materiál se účtuje zvlášť.
+          </p>
+        </div>
+      </div>
+
+      <!-- Reset Button -->
+      <div class="calculator-actions">
+        <button class="btn-reset" onclick="resetovatKalkulacku()" style="display: none;" id="reset-btn">
+          Nová kalkulace
+        </button>
+      </div>
+    </div>
+
+    <hr style="margin: 60px 0; border: none; border-top: 2px dashed rgba(44, 62, 80, 0.2);">
+
     <div class="section-intro">
       <h2 class="section-title">Přehled služeb a cen</h2>
 
       <p class="section-text">
-        Níže naleznete kompletní ceník našich služeb. Všechny ceny jsou uvedeny v EUR a platí od 1.1.2023 do 31.12.2023.
+        Níže naleznete kompletní ceník našich služeb. Všechny ceny jsou uvedeny v EUR a platí od 1.1.2026.
         Účtovaná cena bude přepočtena na Kč podle aktuálního kurzu. Primárně přijímáme zakázky v lokalitě 150km od dílny.
       </p>
 
       <p class="section-text note">
-        <strong>Poznámka:</strong> Konečná cena může být ovlivněna složitostí opravy, dostupností materiálu a vzdáleností od naší dílny.
+        <strong>Poznámka:</strong> Všechny ceny jsou uvedeny za práci BEZ materiálu. Materiál se účtuje zvlášť.
+        Konečná cena může být ovlivněna složitostí opravy, dostupností materiálu a vzdáleností od naší dílny.
         Pro přesnou cenovou nabídku nás prosím kontaktujte.
       </p>
     </div>
@@ -214,6 +283,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <!-- External JavaScript -->
 <script src="assets/js/logger.js" defer></script>
 <script src="assets/js/cenik.js" defer></script>
+<script src="assets/js/cenik-calculator.js" defer></script>
 
 <?php renderHeatmapTracker(); ?>
 </body>
