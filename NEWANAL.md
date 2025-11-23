@@ -1,9 +1,9 @@
 # NEWANAL – Enterprise Analytics System Documentation
 
-**Version:** 1.6.0
+**Version:** 1.7.0
 **Last Updated:** 2025-11-23
 **Project:** WGS Enterprise Analytics System
-**Status:** Modules #1-7 Complete, Modules #8-13 Pending
+**Status:** Modules #1-8 Complete, Modules #9-13 Pending
 
 ---
 
@@ -56,7 +56,7 @@ The **Enterprise Analytics System** is a full-scale web analytics platform compa
 | Event Tracking | ✅ Complete | Module #5 |
 | Heatmaps (Click & Scroll) | ✅ Complete | Module #6 |
 | Session Replay | ✅ Complete | Module #7 |
-| UTM Campaign Tracking | ⏳ Pending | Module #8 |
+| UTM Campaign Tracking | ✅ Complete | Module #8 |
 | Conversion Funnels | ⏳ Pending | Module #9 |
 | User Interest AI Scoring | ⏳ Pending | Module #10 |
 | Real-time Dashboard | ⏳ Pending | Module #11 |
@@ -1699,7 +1699,7 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 | **Module #5** | ✅ Complete | 100% | Committed: `c92c683` |
 | **Module #6** | ✅ Complete | 100% | Committed: `e727f2b` |
 | **Module #7** | ✅ Complete | 100% | Committed: `8b0f1c0` |
-| **Module #8** | ⏳ Pending | 0% | Awaiting approval |
+| **Module #8** | ✅ Complete | 100% | Committed: `591549b` |
 | **Module #9** | ⏳ Pending | 0% | Awaiting approval |
 | **Module #10** | ⏳ Pending | 0% | Awaiting approval |
 | **Module #11** | ⏳ Pending | 0% | Awaiting approval |
@@ -1709,32 +1709,33 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 ### Overall Progress
 
 ```
-[██████████████████████████] 53.8% (7/13 modules complete)
+[████████████████████████████] 61.5% (8/13 modules complete)
 ```
 
 ### Next Steps
 
 1. **User Action Required:**
-   - Test Module #7 (Session Replay Engine)
-   - Run migration: `migrace_module7_session_replay.php?execute=1`
-   - Test session replay recording v prohlížeči:
-     * Otevřít jakoukoliv stránku na webu
-     * Pohybovat myší, klikat, scrollovat
-     * Zkontrolovat konzoli - měly by se odesílat batche framů každých 30s
-     * Zkontrolovat tabulku `wgs_analytics_replay_frames` v databázi
-   - Test session replay playback v admin UI:
-     * Otevřít `analytics-replay.php`
-     * Zadat session_id a page_index (0)
-     * Kliknout "Načíst Replay"
-     * Přehrát replay - kontrola kurzoru, klikacích animací, scroll indicatoru
-     * Testovat timeline scrubber, rychlost playbacku (0.5x-4x)
-   - Verify cleanup cron job: `scripts/cleanup_old_replay_frames.php`
-   - Approve Module #7 OR request fixes
+   - Test Module #8 (UTM Campaign Tracking)
+   - Run migration: `migrace_module8_utm_campaigns.php?execute=1`
+   - Test UTM tracking v prohlížeči:
+     * Otevřít stránku s UTM parametry (např. `?utm_source=facebook&utm_medium=cpc&utm_campaign=test`)
+     * Zkontrolovat konzoli - měly by se logovat UTM parameters
+     * Zkontrolovat localStorage a sessionStorage (first-click, last-click, conversion_path)
+     * Zkontrolovat tabulku `wgs_analytics_sessions` - UTM parametry by měly být uloženy
+   - Test campaign dashboard v admin UI:
+     * Otevřít `analytics-campaigns.php`
+     * Kliknout "Načíst data"
+     * Zkontrolovat campaign tabulku, stats cards, filtry
+     * Testovat export CSV
+   - Run aggregation cron job: `scripts/aggregate_campaign_stats.php`
+     * Zkontrolovat tabulku `wgs_analytics_utm_campaigns`
+     * Ověřit agregaci session metrik, conversion metrik
+   - Approve Module #8 OR request fixes
 
-2. **After Module #7 Approval:**
-   - Create implementation plan for Module #8 (UTM Campaign Tracking)
+2. **After Module #8 Approval:**
+   - Create implementation plan for Module #9 (Conversion Funnels)
    - Wait for plan approval
-   - Generate code for Module #8
+   - Generate code for Module #9
    - Repeat workflow
 
 ### File Inventory
@@ -1790,9 +1791,17 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 - Updated: `assets/js/tracker-v2.js` (+51 lines replay integration)
 - Updated: `NEWANAL.md` (webcron limit poznámka)
 
-**Total New Code:** ~11,583 lines (Modules #1-7)
+**Created Files (Module #8):**
+- `migrace_module8_utm_campaigns.php` (300 lines)
+- `includes/CampaignAttribution.php` (400 lines)
+- `api/analytics_campaigns.php` (350 lines)
+- `analytics-campaigns.php` (400 lines)
+- `scripts/aggregate_campaign_stats.php` (200 lines)
+- Updated: `assets/js/tracker-v2.js` (+118 lines multi-touch attribution)
 
-**Pending Files (Modules #8-13):** ~15+ files, estimated ~8,000+ lines
+**Total New Code:** ~13,351 lines (Modules #1-8)
+
+**Pending Files (Modules #9-13):** ~12+ files, estimated ~6,000+ lines
 
 ---
 
@@ -1857,6 +1866,7 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 | 2025-11-23 | 1.4.0 | Module #5 (Event Tracking Engine) completed - 4 soubory (3 nové + 1 upravený), 1326 řádků kódu | Claude |
 | 2025-11-23 | 1.5.0 | Module #6 (Heatmap Engine) completed - 5 souborů, 1543 řádků kódu | Claude |
 | 2025-11-23 | 1.6.0 | Module #7 (Session Replay Engine) completed - 9 souborů (7 nových + 2 upravené), 2251 řádků kódu | Claude |
+| 2025-11-23 | 1.7.0 | Module #8 (UTM Campaign Tracking) completed - 6 souborů (5 nových + 1 upravený), 1768 řádků kódu | Claude |
 
 ---
 
@@ -1869,4 +1879,4 @@ All future work must reference this document.
 Any AI agent working on this project must read this document first.
 
 **Last Updated:** 2025-11-23
-**Status:** Modules #1-7 Complete, Modules #8-13 Pending Approval
+**Status:** Modules #1-8 Complete, Modules #9-13 Pending Approval

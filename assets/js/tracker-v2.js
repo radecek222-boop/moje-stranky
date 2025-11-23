@@ -392,14 +392,109 @@
             utm_content: params.get('utm_content')
         };
 
-        // Persistovat UTM params v localStorage (first-touch attribution)
-        if (utmParams.utm_source) {
-            localStorage.setItem('wgs_utm_params', JSON.stringify(utmParams));
+        // Pokud jsou nové UTM parametry v URL
+        const maUtmParametry = utmParams.utm_source || utmParams.utm_medium || utmParams.utm_campaign;
+
+        if (maUtmParametry) {
+            // ========================================
+            // FIRST-CLICK ATTRIBUTION (localStorage)
+            // ========================================
+            // Uložit první kampaň (pokud ještě není uložena)
+            const firstClick = localStorage.getItem('wgs_utm_first_click');
+            if (!firstClick) {
+                localStorage.setItem('wgs_utm_first_click', JSON.stringify({
+                    ...utmParams,
+                    timestamp: Date.now()
+                }));
+            }
+
+            // ========================================
+            // LAST-CLICK ATTRIBUTION (sessionStorage)
+            // ========================================
+            // Uložit aktuální kampaň pro current session
+            sessionStorage.setItem('wgs_utm_last_click', JSON.stringify({
+                ...utmParams,
+                timestamp: Date.now()
+            }));
+
+            // ========================================
+            // LINEAR ATTRIBUTION - Conversion Path Tracking
+            // ========================================
+            // Sledovat conversion path (všechny kampaně v historii uživatele)
+            let conversionPath = [];
+            const existingPath = localStorage.getItem('wgs_utm_conversion_path');
+
+            if (existingPath) {
+                try {
+                    conversionPath = JSON.parse(existingPath);
+                } catch (e) {
+                    conversionPath = [];
+                }
+            }
+
+            // Přidat current kampaň do path (pokud už tam není duplicit)
+            const kampanKey = `${utmParams.utm_source}|${utmParams.utm_medium}|${utmParams.utm_campaign}`;
+            const existujeVPath = conversionPath.some(item =>
+                `${item.utm_source}|${item.utm_medium}|${item.utm_campaign}` === kampanKey
+            );
+
+            if (!existujeVPath) {
+                conversionPath.push({
+                    ...utmParams,
+                    timestamp: Date.now()
+                });
+
+                // Limit na 10 kampaní v path
+                if (conversionPath.length > 10) {
+                    conversionPath = conversionPath.slice(-10);
+                }
+
+                localStorage.setItem('wgs_utm_conversion_path', JSON.stringify(conversionPath));
+            }
+
+            if (CONFIG.debug) {
+                console.log('[WGS Analytics V2] UTM Parameters detected:', utmParams);
+                console.log('[WGS Analytics V2] Conversion Path length:', conversionPath.length);
+            }
+
+            return utmParams;
+
         } else {
-            // Použít uložené UTM params pokud nejsou nové v URL
-            const ulozene = localStorage.getItem('wgs_utm_params');
-            if (ulozene) {
-                return JSON.parse(ulozene);
+            // ========================================
+            // FALLBACK: Použít uložené UTM params
+            // ========================================
+
+            // Priorita: sessionStorage (last-click) > localStorage (first-click)
+            const lastClick = sessionStorage.getItem('wgs_utm_last_click');
+            if (lastClick) {
+                try {
+                    const parsed = JSON.parse(lastClick);
+                    return {
+                        utm_source: parsed.utm_source,
+                        utm_medium: parsed.utm_medium,
+                        utm_campaign: parsed.utm_campaign,
+                        utm_term: parsed.utm_term,
+                        utm_content: parsed.utm_content
+                    };
+                } catch (e) {
+                    // Ignore parse error
+                }
+            }
+
+            const firstClick = localStorage.getItem('wgs_utm_first_click');
+            if (firstClick) {
+                try {
+                    const parsed = JSON.parse(firstClick);
+                    return {
+                        utm_source: parsed.utm_source,
+                        utm_medium: parsed.utm_medium,
+                        utm_campaign: parsed.utm_campaign,
+                        utm_term: parsed.utm_term,
+                        utm_content: parsed.utm_content
+                    };
+                } catch (e) {
+                    // Ignore parse error
+                }
             }
         }
 
