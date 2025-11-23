@@ -673,4 +673,49 @@
         inicializovatTracking();
     }
 
+    // ========================================
+    // EVENT TRACKING (Modul #5)
+    // ========================================
+
+    /**
+     * Inicializace Event Trackeru po inicializaci hlavního trackingu
+     */
+    function inicializovatEventTracker() {
+        if (typeof EventTracker === 'undefined') {
+            console.warn('[WGS Analytics V2] EventTracker není načten, přeskakuji event tracking.');
+            return;
+        }
+
+        // Počkat na inicializaci session a fingerprint ID
+        if (!sessionId || !fingerprintId) {
+            console.warn('[WGS Analytics V2] Session ID nebo Fingerprint ID není k dispozici, opakuji za 1s...');
+            setTimeout(inicializovatEventTracker, 1000);
+            return;
+        }
+
+        console.log('[WGS Analytics V2] Inicializuji Event Tracker...');
+
+        EventTracker.init({
+            sessionId: sessionId,
+            fingerprintId: fingerprintId,
+            csrfToken: csrfToken,
+            apiEndpoint: '/api/track_event.php',
+            batchSize: 50,
+            sendInterval: 5000,
+            trackClicks: true,
+            trackScroll: true,
+            trackRageClicks: true,
+            trackCopyPaste: true,
+            trackFormInteractions: true,
+            trackIdleState: true,
+            scrollDebounce: 500,
+            idleTimeout: 30000
+        });
+
+        console.log('[WGS Analytics V2] Event Tracker inicializován');
+    }
+
+    // Spustit Event Tracker po inicializaci trackingu (s malým delay)
+    setTimeout(inicializovatEventTracker, 2000);
+
 })();
