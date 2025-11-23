@@ -109,23 +109,23 @@ try {
     ]);
 
 } catch (PDOException $e) {
+    // SECURITY: Log detaily server-side, klientovi vrátit pouze generickou zprávu
     error_log("GET_KALKULACE API - Database error: " . $e->getMessage());
     error_log("GET_KALKULACE API - Stack trace: " . $e->getTraceAsString());
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'Chyba databáze',
-        'detail' => $e->getMessage() // Přidat detaily pro debugging
+        'error' => 'Chyba při načítání dat z databáze'
     ]);
 
 } catch (Exception $e) {
+    // SECURITY: Log detaily server-side, klientovi vrátit pouze generickou zprávu
     error_log("GET_KALKULACE API - Error: " . $e->getMessage());
     error_log("GET_KALKULACE API - Stack trace: " . $e->getTraceAsString());
     http_response_code(400);
     echo json_encode([
         'success' => false,
-        'error' => $e->getMessage(),
-        'detail' => $e->getTraceAsString()
+        'error' => 'Chyba při zpracování požadavku'
     ]);
 }
 ?>
