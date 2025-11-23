@@ -696,32 +696,51 @@ function normalizeCustomerData(data) {
 
 // === ZAHÁJIT NÁVŠTĚVU ===
 function startVisit(id) {
+  console.log('[startVisit] 🔍 Zahajuji návštěvu, ID:', id);
+
   const z = WGS_DATA_CACHE.find(x => x.id == id);
+  console.log('[startVisit] 📋 Nalezený záznam:', z);
+
   if (!z) {
+    console.error('[startVisit] ❌ Záznam nenalezen v cache!');
     alert(t('record_not_found'));
     return;
   }
-  
+
+  console.log('[startVisit] ✅ Záznam nalezen, kontroluji stav:', z.stav);
+
   if (z.stav === 'ČEKÁ' || z.stav === 'wait') {
+    console.log('[startVisit] ⚠️ Stav ČEKÁ - ptám se uživatele');
     const confirm = window.confirm(t('confirm_continue_without_appointment'));
-    if (!confirm) return;
+    if (!confirm) {
+      console.log('[startVisit] ❌ Uživatel zrušil');
+      return;
+    }
+    console.log('[startVisit] ✅ Uživatel potvrdil');
   }
-  
+
+  console.log('[startVisit] 🔍 Kontroluji, zda není dokončeno:', Utils.isCompleted(z));
+
   if (Utils.isCompleted(z)) {
+    console.error('[startVisit] ❌ Návštěva již dokončena!');
     alert(t('visit_already_completed'));
     return;
   }
-  
+
+  console.log('[startVisit] 📝 Normalizuji data...');
   const normalizedData = normalizeCustomerData(z);
-  
+  console.log('[startVisit] ✅ Data normalizována:', normalizedData);
+
+  console.log('[startVisit] 💾 Ukládám do localStorage...');
   localStorage.setItem('currentCustomer', JSON.stringify(normalizedData));
   localStorage.setItem('visitStartTime', new Date().toISOString());
-  
+
   const photoKey = 'photoSections_' + normalizedData.id;
   localStorage.removeItem(photoKey);
-  
+
   logger.log('✅ Normalizovaná data uložena:', normalizedData);
-  
+
+  console.log('[startVisit] 🚀 Přesměrovávám na photocustomer.php...');
   window.location.href = 'photocustomer.php?new=true';
 }
 
