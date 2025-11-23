@@ -184,6 +184,11 @@
         cs: 'Naše služby | White Glove Service',
         en: 'Our Services | White Glove Service',
         it: 'I Nostri Servizi | White Glove Service'
+      },
+      'cenik': {
+        cs: 'Ceník služeb - White Glove Service | Servis Natuzzi | Praha, Brno',
+        en: 'Price List - White Glove Service | Natuzzi Service | Prague, Brno',
+        it: 'Listino Prezzi - White Glove Service | Servizio Natuzzi | Praga, Brno'
       }
     };
 

@@ -328,7 +328,7 @@
 
             // Filled part (scroll position)
             const filledHeight = (scrollPercent / 100) * barHeight;
-            ctx.fillStyle = 'rgba(45, 80, 22, 0.7)';
+            ctx.fillStyle = 'rgba(51, 51, 51, 0.7)';
             ctx.fillRect(barX, 0, barWidth, filledHeight);
         },
 

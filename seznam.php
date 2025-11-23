@@ -137,7 +137,7 @@ if (!$isLoggedIn && !$isAdmin) {
   display: block;
   margin: 2rem auto;
   padding: 1rem 2rem;
-  background: #2D5016;
+  background: #333333;
   color: white;
   border: none;
   border-radius: 8px;
@@ -949,6 +949,13 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
     </button>
   </div>
 
+  <!-- INDIKÁTOR NOVÝCH POZNÁMEK -->
+  <div id="unreadNotesIndicator" style="display: none; text-align: center; padding: 0.5rem; margin: 0.5rem 0; background: rgba(255, 0, 0, 0.05); border-radius: 5px; cursor: pointer;" data-action="filterUnreadNotes">
+    <span style="color: #d32f2f; font-size: 0.85rem; font-weight: 600;">
+      Máte <span id="unreadNotesCount">0</span> nových poznámek
+    </span>
+  </div>
+
   <!-- GRID -->
   <div class="order-grid" id="orderGrid">
     <div class="loading" data-lang-cs="Načítání reklamací..." data-lang-en="Loading claims..." data-lang-it="Caricamento reclami...">Načítání reklamací...</div>
@@ -1098,6 +1105,24 @@ document.addEventListener('DOMContentLoaded', () => {
       case 'closeDetail':
         if (typeof closeDetail === 'function') {
           closeDetail();
+        }
+        break;
+
+      case 'startVisit':
+        if (id && typeof startVisit === 'function') {
+          console.log('[EMERGENCY] ✅ Zahajuji návštěvu ID:', id);
+          startVisit(id);
+        } else {
+          console.error('[EMERGENCY] ❌ startVisit funkce není dostupná nebo ID chybí');
+        }
+        break;
+
+      case 'showCalendar':
+        if (id && typeof showCalendar === 'function') {
+          console.log('[EMERGENCY] ✅ Otevírám kalendář pro ID:', id);
+          showCalendar(id);
+        } else {
+          console.error('[EMERGENCY] ❌ showCalendar funkce není dostupná nebo ID chybí');
         }
         break;
 

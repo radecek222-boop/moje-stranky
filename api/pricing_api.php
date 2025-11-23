@@ -99,6 +99,9 @@ try {
                 sendJsonError('Chybí ID položky');
             }
 
+            // Zjistit v jakém jazyce se edituje
+            $editLang = $_POST['edit_lang'] ?? 'cs';
+
             // Validace vstupů
             $serviceName = $_POST['service_name'] ?? null;
             $description = $_POST['description'] ?? null;
@@ -112,14 +115,19 @@ try {
                 sendJsonError('Chybí název služby');
             }
 
+            // Určit správné sloupce podle jazyka
+            $nameCol = $editLang === 'cs' ? 'service_name' : "service_name_{$editLang}";
+            $descCol = $editLang === 'cs' ? 'description' : "description_{$editLang}";
+            $catCol = $editLang === 'cs' ? 'category' : "category_{$editLang}";
+
             $sql = "
             UPDATE wgs_pricing
-            SET service_name = :name,
-                description = :desc,
+            SET {$nameCol} = :name,
+                {$descCol} = :desc,
                 price_from = :from,
                 price_to = :to,
                 price_unit = :unit,
-                category = :cat,
+                {$catCol} = :cat,
                 is_active = :active
             WHERE id = :id
             ";
@@ -137,7 +145,7 @@ try {
             ]);
 
             if ($success) {
-                sendJsonSuccess('Položka aktualizována', ['id' => $itemId]);
+                sendJsonSuccess('Položka aktualizována', ['id' => $itemId, 'lang' => $editLang]);
             } else {
                 sendJsonError('Chyba při aktualizaci');
             }
@@ -157,6 +165,9 @@ try {
                 sendJsonError('Přístup odepřen', 403);
             }
 
+            // Zjistit v jakém jazyce se vytváří
+            $editLang = $_POST['edit_lang'] ?? 'cs';
+
             // Validace vstupů
             $serviceName = $_POST['service_name'] ?? null;
             $description = $_POST['description'] ?? null;
@@ -170,8 +181,13 @@ try {
                 sendJsonError('Chybí název služby');
             }
 
+            // Určit správné sloupce podle jazyka
+            $nameCol = $editLang === 'cs' ? 'service_name' : "service_name_{$editLang}";
+            $descCol = $editLang === 'cs' ? 'description' : "description_{$editLang}";
+            $catCol = $editLang === 'cs' ? 'category' : "category_{$editLang}";
+
             $sql = "
-            INSERT INTO wgs_pricing (service_name, description, price_from, price_to, price_unit, category, display_order)
+            INSERT INTO wgs_pricing ({$nameCol}, {$descCol}, price_from, price_to, price_unit, {$catCol}, display_order)
             VALUES (:name, :desc, :from, :to, :unit, :cat, :order)
             ";
 
@@ -188,7 +204,7 @@ try {
 
             if ($success) {
                 $newId = $pdo->lastInsertId();
-                sendJsonSuccess('Položka vytvořena', ['id' => $newId]);
+                sendJsonSuccess('Položka vytvořena', ['id' => $newId, 'lang' => $editLang]);
             } else {
                 sendJsonError('Chyba při vytváření');
             }

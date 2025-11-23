@@ -367,8 +367,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
       <!-- PANEL PRO NAHRÁNÍ POVĚŘENÍ - pouze pro přihlášené uživatele -->
       <?php if ($isLoggedIn): ?>
-      <div id="povereniBox" style="padding: 1.5rem; margin-bottom: 1.5rem; border: 2px solid #2D5016; background: #f9fdf7; box-shadow: 0 2px 8px rgba(45,80,22,0.1);">
-        <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 0.8rem; color: #2D5016; text-transform: uppercase; display: flex; align-items: center; gap: 0.5rem;">
+      <div id="povereniBox" style="padding: 1.5rem; margin-bottom: 1.5rem; border: 2px solid #333333; background: #f9fdf7; box-shadow: 0 2px 8px rgba(51,51,51,0.1);">
+        <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 0.8rem; color: #333333; text-transform: uppercase; display: flex; align-items: center; gap: 0.5rem;">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
@@ -382,7 +382,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
           Nahrajte pověření od prodejce k této reklamaci ve formátu PDF. Dokument bude připojen k objednávce.
         </p>
         <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-          <button type="button" id="nahrajPovereniBtn" style="display: inline-block; padding: 0.7rem 2rem; background: #2D5016; color: white; border: 2px solid #2D5016; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; cursor: pointer;" data-lang-cs="📄 VYBRAT PDF SOUBOR" data-lang-en="📄 SELECT PDF FILE" data-lang-it="📄 SELEZIONA FILE PDF">
+          <button type="button" id="nahrajPovereniBtn" style="display: inline-block; padding: 0.7rem 2rem; background: #333333; color: white; border: 2px solid #333333; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; cursor: pointer;" data-lang-cs="📄 VYBRAT PDF SOUBOR" data-lang-en="📄 SELECT PDF FILE" data-lang-it="📄 SELEZIONA FILE PDF">
             📄 VYBRAT PDF SOUBOR
           </button>
           <span id="povereniStatus" style="font-size: 0.85rem; color: #666;"></span>

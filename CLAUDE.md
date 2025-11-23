@@ -1,6 +1,6 @@
 # CLAUDE.md - AI Assistant Guide for WGS Service
 
-**Last Updated:** 2025-11-16
+**Last Updated:** 2025-11-23
 **Project:** White Glove Service (WGS) - Natuzzi Furniture Service Management System
 
 ---
@@ -508,6 +508,160 @@ try {
     sendJsonError('Chyba při zpracování požadavku');
 }
 ?>
+```
+
+---
+
+## 🌍 MULTI-LANGUAGE SUPPORT (CENÍK)
+
+**Stránka ceník (`cenik.php`) plně podporuje 3 jazyky: Čeština (CS), Angličtina (EN), Italština (IT)**
+
+### Architektura překladů
+
+Systém používá **databázově-řízenou architekturu** pro všechny překlady:
+
+| Datový typ | CS (výchozí) | EN | IT |
+|------------|--------------|----|----|
+| **Kategorie** | `category` | `category_en` | `category_it` |
+| **Název služby** | `service_name` | `service_name_en` | `service_name_it` |
+| **Popis** | `description` | `description_en` | `description_it` |
+| **Předpona ceny** | JavaScript: `'Od'` | `'From'` | `'Da'` |
+
+### Klíčové soubory
+
+| Soubor | Účel |
+|--------|------|
+| `/assets/js/cenik.js` | Frontend rendering + překlad prefixu cen |
+| `/api/pricing_api.php` | Backend API - vrací data včetně všech jazykových variant |
+| `/assets/js/language-switcher.js` | Centrální systém přepínání jazyků |
+| `/assets/css/cenik.min.css` | Styling (CSS `content` NESMÍ přidávat text, pouze JS) |
+| `/doplnit_popisy_cenik_sql.php` | Migrační skript - SQL UPDATE pro překlady podle ID |
+
+### Jak funguje překlad cen
+
+**JavaScript (`cenik.js`) kontroluje jazyk a přidává správnou předponu:**
+
+```javascript
+const odPrefix = {
+    cs: 'Od',
+    en: 'From',
+    it: 'Da'
+};
+
+// Pro rozpětí cen (price_from existuje, price_to neexistuje)
+if (item.price_from && !item.price_to) {
+    priceEl.className += ' range';
+    priceEl.innerHTML = `${odPrefix[jazyk] || 'Od'} ${item.price_from} ${item.price_unit}`;
+}
+```
+
+**CSS (`cenik.min.css`) NESMÍ obsahovat `content: 'od '`:**
+
+```css
+/* ✅ SPRÁVNĚ - prázdný content */
+.item-price.range::before {
+    content: '';
+}
+
+/* ❌ ŠPATNĚ - způsobí duplicitní zobrazení "od From 190€" */
+.item-price.range::before {
+    content: 'od ';
+}
+```
+
+### Doplnění překladů do databáze
+
+**Použijte migrační skript `/doplnit_popisy_cenik_sql.php`:**
+
+1. Otevřete v prohlížeči: `https://www.wgs-service.cz/doplnit_popisy_cenik_sql.php`
+2. Zkontrolujte náhled změn
+3. Klikněte "SPUSTIT DOPLNĚNÍ"
+4. Skript provede UPDATE podle ID (ne podle textového matchingu!)
+
+**Struktura skriptu:**
+
+```php
+// Pole s překlady POPISŮ podle ID
+$descriptionUpdates = [
+    58 => [
+        'en' => 'English description...',
+        'it' => 'Italian description...'
+    ],
+    // ... další ID
+];
+
+// Pole s překlady NÁZVŮ SLUŽEB podle ID
+$nameUpdates = [
+    70 => [
+        'en' => 'Transport to workshop...',
+        'it' => 'Trasporto in officina...'
+    ],
+    // ... další ID
+];
+```
+
+### Detekce jazyka
+
+**Frontend používá funkci z `language-switcher.js`:**
+
+```javascript
+// ✅ SPRÁVNĚ
+const jazyk = window.ziskejAktualniJazyk ? window.ziskejAktualniJazyk() : 'cs';
+
+// ❌ ŠPATNĚ - tato proměnná neexistuje
+const jazyk = window.aktualniJazyk || 'cs';
+```
+
+### Fallback mechanismus
+
+**Inteligentní fallback pokud DB překlad chybí:**
+
+```javascript
+// Pokud DB překlad neexistuje NEBO je stejný jako český text
+let dbPreklad = item.service_name_it;
+if (!dbPreklad || dbPreklad === item.service_name) {
+    // Zkusit slovník jako fallback
+    dbPreklad = prelozitText(item.service_name, 'service');
+}
+nameEl.textContent = dbPreklad || item.service_name || '';
+```
+
+### Testování překladů
+
+1. Otevřít stránku: `https://www.wgs-service.cz/cenik.php`
+2. Přepnout jazyk pomocí vlajek: 🇨🇿 🇬🇧 🇮🇹
+3. Zkontrolovat:
+   - ✅ Kategorie přeloženy
+   - ✅ Názvy služeb přeloženy
+   - ✅ Popisy přeloženy
+   - ✅ Předpona ceny ("Od"/"From"/"Da") přeložena
+   - ✅ Žádný text v češtině v EN/IT verzích
+
+### Časté problémy a řešení
+
+| Problém | Příčina | Řešení |
+|---------|---------|--------|
+| Zobrazuje se "od From 190€" | CSS má `content: 'od '` | Změnit na `content: ''` v CSS |
+| Některé popisy v češtině | DB má prázdný nebo český text | Spustit `/doplnit_popisy_cenik_sql.php` |
+| Chyba "undefined function" | Špatná detekce jazyka | Použít `window.ziskejAktualniJazyk()` |
+| Kategorie v češtině | Chybí `category_en`/`_it` | Importovat překlady pomocí migračního skriptu |
+
+### Přidání nové položky ceníku
+
+**Při přidání nové položky VŽDY vyplňte všechny jazykové varianty:**
+
+```sql
+INSERT INTO wgs_pricing (
+    service_name,       service_name_en,          service_name_it,
+    description,        description_en,           description_it,
+    category,           category_en,              category_it,
+    price_from, price_to, price_unit
+) VALUES (
+    'Oprava čalounění', 'Upholstery repair',      'Riparazione tappezzeria',
+    'Popis česky...',   'Description English...', 'Descrizione italiana...',
+    'Čalounění',        'Upholstery',             'Tappezzeria',
+    190, NULL, '€'
+);
 ```
 
 ---

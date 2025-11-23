@@ -10,7 +10,7 @@
   --c-grey: #666666;
   --c-light-grey: #999999;
   --c-border: #e0e0e0;
-  --c-success: #2d5016;
+  --c-success: #333333;
   --c-error: #8b0000;
   --c-warning: #b8860b;
   --c-info: #555555;
@@ -156,7 +156,7 @@ body {
 
 .stat-card.highlight {
   border-color: var(--c-success);
-  background: linear-gradient(to bottom, var(--c-white) 0%, rgba(45, 80, 22, 0.03) 100%);
+  background: linear-gradient(to bottom, var(--c-white) 0%, rgba(51, 51, 51, 0.03) 100%);
 }
 
 .stat-icon {

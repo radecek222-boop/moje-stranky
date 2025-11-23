@@ -1036,7 +1036,7 @@ async function exportBothPDFs() {
       // === HLAVIČKA ===
       doc.setFontSize(20);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(45, 80, 22);
+      doc.setTextColor(0, 0, 0);
       doc.text('PRICELIST', pageWidth / 2, yPos, { align: 'center' });
       yPos += 15;
 
@@ -1078,7 +1078,7 @@ async function exportBothPDFs() {
 
       // Čára oddělení
       doc.setLineWidth(0.5);
-      doc.setDrawColor(45, 80, 22);
+      doc.setDrawColor(0, 0, 0);
       doc.line(margin, yPos, pageWidth - margin, yPos);
       yPos += 10;
 
@@ -1146,7 +1146,7 @@ async function exportBothPDFs() {
       // === CELKOVÁ CENA ===
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(45, 80, 22);
+      doc.setTextColor(0, 0, 0);
       doc.text('CELKEM:', margin, yPos);
       doc.text(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
 
@@ -1436,7 +1436,7 @@ async function sendToCustomer() {
       // === HLAVIČKA ===
       doc.setFontSize(20);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(45, 80, 22);
+      doc.setTextColor(0, 0, 0);
       doc.text('PRICELIST', pageWidth / 2, yPos, { align: 'center' });
       yPos += 15;
 
@@ -1478,7 +1478,7 @@ async function sendToCustomer() {
 
       // Čára oddělení
       doc.setLineWidth(0.5);
-      doc.setDrawColor(45, 80, 22);
+      doc.setDrawColor(0, 0, 0);
       doc.line(margin, yPos, pageWidth - margin, yPos);
       yPos += 10;
 
@@ -1546,7 +1546,7 @@ async function sendToCustomer() {
       // === CELKOVÁ CENA ===
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(45, 80, 22);
+      doc.setTextColor(0, 0, 0);
       doc.text('CELKEM:', margin, yPos);
       doc.text(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
 

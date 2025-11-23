@@ -29,7 +29,7 @@ try {
 
         // ✅ SECURITY FIX: GET metoda může provádět pouze read-only operace
         // Prevence CSRF útoku přes GET requesty (např. <img src="...?action=delete&...">)
-        $readOnlyActions = ['get', 'list', 'count'];
+        $readOnlyActions = ['get', 'list', 'count', 'get_unread_counts'];
         if (!in_array($action, $readOnlyActions, true)) {
             throw new Exception('Tato akce vyžaduje POST metodu s CSRF tokenem. Povolené GET akce: ' . implode(', ', $readOnlyActions));
         }
@@ -60,16 +60,47 @@ try {
 
             $claimId = $reklamace['id'];
 
-            // Načtení poznámek z databáze
+            // Načtení poznámek z databáze s read status pro aktuálního uživatele
+            $currentUserEmail = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? null;
+
             $stmt = $pdo->prepare("
                 SELECT
-                    id, claim_id, note_text, created_by, created_at
-                FROM wgs_notes
-                WHERE claim_id = :claim_id
-                ORDER BY created_at DESC
+                    n.id,
+                    n.claim_id,
+                    n.note_text,
+                    n.created_by,
+                    n.created_at,
+                    CASE WHEN nr.id IS NOT NULL THEN 1 ELSE 0 END as is_read,
+                    u.name as user_name
+                FROM wgs_notes n
+                LEFT JOIN wgs_notes_read nr ON n.id = nr.note_id AND nr.user_email = :user_email
+                LEFT JOIN wgs_users u ON n.created_by = u.email
+                WHERE n.claim_id = :claim_id
+                ORDER BY n.created_at DESC
             ");
-            $stmt->execute([':claim_id' => $claimId]);
+            $stmt->execute([
+                ':claim_id' => $claimId,
+                ':user_email' => $currentUserEmail
+            ]);
             $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Převést is_read na boolean pro frontend
+            foreach ($notes as &$note) {
+                $note['read'] = (bool)$note['is_read'];
+                $note['author'] = $note['created_by'];
+
+                // Zobrazit jméno místo emailu
+                if ($note['created_by'] === 'admin@wgs-service.cz') {
+                    $note['author_name'] = 'Radek';
+                } else {
+                    $note['author_name'] = $note['user_name'] ?: $note['created_by'];
+                }
+
+                $note['timestamp'] = $note['created_at'];
+                $note['text'] = $note['note_text'];  // ✅ KRITICKÉ: Mapování textu poznámky
+                unset($note['is_read']);
+                unset($note['user_name']); // Vyčistit pomocný sloupec
+            }
 
             echo json_encode([
                 'status' => 'success',
@@ -179,6 +210,84 @@ try {
             echo json_encode([
                 'status' => 'success',
                 'message' => 'Poznámka smazána'
+            ]);
+            break;
+
+        case 'get_unread_counts':
+            // Načtení počtu nepřečtených poznámek pro všechny reklamace
+            $currentUserEmail = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? null;
+
+            if (!$currentUserEmail) {
+                throw new Exception('Uživatel není přihlášen');
+            }
+
+            // Načíst všechny poznámky, které aktuální uživatel ještě nepřečetl
+            // a nejsou od něj (autor automaticky "přečetl" své vlastní poznámky)
+            $stmt = $pdo->prepare("
+                SELECT
+                    n.claim_id,
+                    COUNT(*) as unread_count
+                FROM wgs_notes n
+                LEFT JOIN wgs_notes_read nr ON n.id = nr.note_id AND nr.user_email = :user_email
+                WHERE nr.id IS NULL
+                  AND n.created_by != :user_email_author
+                GROUP BY n.claim_id
+            ");
+            $stmt->execute([
+                ':user_email' => $currentUserEmail,
+                ':user_email_author' => $currentUserEmail
+            ]);
+            $unreadCounts = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            echo json_encode([
+                'status' => 'success',
+                'unread_counts' => $unreadCounts
+            ]);
+            break;
+
+        case 'mark_read':
+            // Označení všech poznámek reklamace jako přečtené
+            $reklamaceId = sanitizeReklamaceId($_POST['reklamace_id'] ?? null, 'reklamace_id');
+
+            // Převést reklamace_id na claim_id (číselné ID)
+            $stmt = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE reklamace_id = :reklamace_id OR cislo = :cislo LIMIT 1");
+            $stmt->execute([':reklamace_id' => $reklamaceId, ':cislo' => $reklamaceId]);
+            $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$reklamace) {
+                throw new Exception('Reklamace nebyla nalezena');
+            }
+
+            $claimId = $reklamace['id'];
+            $currentUserEmail = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? null;
+
+            if (!$currentUserEmail) {
+                throw new Exception('Uživatel není přihlášen');
+            }
+
+            // Načíst všechny poznámky pro tuto reklamaci
+            $stmt = $pdo->prepare("SELECT id FROM wgs_notes WHERE claim_id = :claim_id");
+            $stmt->execute([':claim_id' => $claimId]);
+            $noteIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            // Označit všechny jako přečtené (INSERT IGNORE pro zabránění duplicit)
+            $markedCount = 0;
+            foreach ($noteIds as $noteId) {
+                $stmt = $pdo->prepare("
+                    INSERT IGNORE INTO wgs_notes_read (note_id, user_email, read_at)
+                    VALUES (:note_id, :user_email, NOW())
+                ");
+                $stmt->execute([
+                    ':note_id' => $noteId,
+                    ':user_email' => $currentUserEmail
+                ]);
+                $markedCount += $stmt->rowCount();
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Poznámky označeny jako přečtené',
+                'marked_count' => $markedCount
             ]);
             break;
 

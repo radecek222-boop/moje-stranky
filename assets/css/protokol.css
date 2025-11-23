@@ -412,7 +412,7 @@ button.btn:hover {
 }
 .loading-spinner {
   border: 6px solid #f3f3f3;
-  border-top: 6px solid #2D5016;
+  border-top: 6px solid #333333;
   border-radius: 50%;
   width: 70px;
   height: 70px;
@@ -424,7 +424,7 @@ button.btn:hover {
   font-weight: 700;
   margin-top: 25px;
   text-align: center;
-  background: rgba(45, 80, 22, 0.9);
+  background: rgba(51, 51, 51, 0.9);
   padding: 15px 30px;
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.3);
@@ -498,7 +498,7 @@ button.btn:hover {
   padding: 16px 20px;
   background: #000;
   color: white;
-  border-bottom: 2px solid #2D5016;
+  border-bottom: 2px solid #333333;
 }
 
 .pdf-preview-title {
@@ -539,8 +539,8 @@ button.btn:hover {
 }
 
 .pdf-share-btn {
-  border-color: #2D5016;
-  background: #2D5016;
+  border-color: #333333;
+  background: #333333;
 }
 
 .pdf-share-btn:hover {

@@ -51,7 +51,7 @@ $pageIndex = isset($_GET['page']) ? (int)$_GET['page'] : 0;
         }
 
         h1 {
-            color: #2D5016;
+            color: #333333;
             margin-bottom: 20px;
         }
 
@@ -86,7 +86,7 @@ $pageIndex = isset($_GET['page']) ? (int)$_GET['page'] : 0;
 
         .btn {
             padding: 10px 20px;
-            background: #2D5016;
+            background: #333333;
             color: white;
             border: none;
             border-radius: 4px;

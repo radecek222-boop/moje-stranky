@@ -363,7 +363,7 @@ body {
 
 .admin-cache-btn {
     font-family: 'Poppins', sans-serif;
-    background: #2D5016;
+    background: #333333;
     color: white;
     border: none;
     padding: 0.5rem 0.75rem;
@@ -507,7 +507,7 @@ body {
     .notif-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        border-color: #2D5016;
+        border-color: #333333;
     }
 
     .notif-card-title {

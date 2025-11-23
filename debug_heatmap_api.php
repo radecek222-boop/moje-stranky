@@ -140,4 +140,4 @@ try {
 
 echo "</pre>";
 echo "<hr>";
-echo "<a href='/analytics' style='padding: 10px 20px; background: #2D5016; color: white; text-decoration: none; border-radius: 5px;'>Zpět na Analytics</a>";
+echo "<a href='/analytics' style='padding: 10px 20px; background: #333333; color: white; text-decoration: none; border-radius: 5px;'>Zpět na Analytics</a>";

@@ -283,35 +283,35 @@ async function loadAll(status = 'all', append = false) {
 }
 
 // === VYKRESLENÍ OBJEDNÁVEK ===
-function renderOrders(items = null) {
+async function renderOrders(items = null) {
   const grid = document.getElementById('orderGrid');
   const searchResultsInfo = document.getElementById('searchResultsInfo');
-  
+
   if (!items) {
     items = Utils.filterByUserRole(WGS_DATA_CACHE);
   }
-  
+
   if (!Array.isArray(items)) items = [];
-  
+
   let filtered = items;
-  
+
   if (ACTIVE_FILTER !== 'all') {
     const statusMap = {
       'wait': ['ČEKÁ', 'wait'],
       'open': ['DOMLUVENÁ', 'open'],
       'done': ['HOTOVO', 'done']
     };
-    
+
     filtered = items.filter(r => {
       const stav = r.stav || 'wait';
       return statusMap[ACTIVE_FILTER]?.includes(stav);
     });
   }
-  
+
   const totalBeforeSearch = filtered.length;
   if (SEARCH_QUERY) {
     filtered = filtered.filter(r => matchesSearch(r, SEARCH_QUERY));
-    
+
     if (filtered.length > 0) {
       searchResultsInfo.className = 'search-results-info';
       searchResultsInfo.textContent = t('search_results_found')
@@ -326,7 +326,7 @@ function renderOrders(items = null) {
   } else {
     searchResultsInfo.style.display = 'none';
   }
-  
+
   if (filtered.length === 0) {
     grid.innerHTML = `
       <div class="empty-state">
@@ -335,34 +335,50 @@ function renderOrders(items = null) {
     `;
     return;
   }
-  
+
+  // Načíst unread counts pro všechny reklamace najednou
+  let unreadCountsMap = {};
+  try {
+    const response = await fetch('api/notes_api.php?action=get_unread_counts');
+    const data = await response.json();
+    if (data.status === 'success') {
+      unreadCountsMap = data.unread_counts || {};
+    }
+  } catch (e) {
+    logger.warn('Nepodařilo se načíst unread counts:', e);
+  }
+
   filtered.sort((a, b) => {
     const dateA = new Date(a.datum || a.timestamp || 0);
     const dateB = new Date(b.datum || b.timestamp || 0);
     return dateB - dateA;
   });
-  
+
   grid.innerHTML = filtered.map((rec, index) => {
     const customerName = Utils.getCustomerName(rec);
     const product = Utils.getProduct(rec);
     const date = formatDate(rec.datum);
     const status = getStatus(rec.stav);
     const orderId = Utils.getOrderId(rec, index);
-    
+
     let address = Utils.getAddress(rec);
     if (address !== '—') {
       const parts = address.split(',').map(p => p.trim());
       address = parts.slice(0, 2).join(', ');
     }
-    
+
     let appointmentText = '';
     if (rec.termin && rec.cas_navstevy) {
       appointmentText = formatAppointment(rec.termin, rec.cas_navstevy);
     }
-    
-    const notes = [];
-    const unreadCount = 0;
-    const hasUnread = false;
+
+    // Načíst unread count z mapy
+    const claimId = rec.id;
+    const unreadCount = unreadCountsMap[claimId] || 0;
+    const hasUnread = unreadCount > 0;
+
+    if (unreadCount > 0) {
+    }
     
     const highlightedCustomer = SEARCH_QUERY ? highlightText(customerName, SEARCH_QUERY) : customerName;
     const highlightedAddress = SEARCH_QUERY ? highlightText(address, SEARCH_QUERY) : address;
@@ -378,8 +394,8 @@ function renderOrders(items = null) {
         <div class="order-header">
           <div class="order-number">${highlightedOrderId}</div>
           <div style="display: flex; gap: 0.4rem; align-items: center;">
-            <div class="order-notes-badge ${hasUnread ? 'has-unread' : ''}" onclick='event.stopPropagation(); showNotes("${rec.id}")' title="${notes.length} poznámek">
-              ${notes.length > 0 ? notes.length : ''}
+            <div class="order-notes-badge ${hasUnread ? 'has-unread pulse' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Poznámky'}">
+              <span class="notes-icon">✎</span>${unreadCount > 0 ? unreadCount : ''}
             </div>
             <div class="order-status status-${status.class}"></div>
           </div>
@@ -396,6 +412,54 @@ function renderOrders(items = null) {
       </div>
     `;
   }).join('');
+
+  // Aktualizovat indikátor nových poznámek
+  const totalUnreadCount = Object.values(unreadCountsMap).reduce((sum, count) => sum + count, 0);
+
+  const unreadIndicator = document.getElementById('unreadNotesIndicator');
+  const unreadCountSpan = document.getElementById('unreadNotesCount');
+
+
+  if (totalUnreadCount > 0) {
+    unreadCountSpan.textContent = totalUnreadCount;
+    unreadIndicator.style.display = 'block';
+  } else {
+    unreadIndicator.style.display = 'none';
+  }
+
+  // Uložit unreadCountsMap pro filtrování
+  window.UNREAD_COUNTS_MAP = unreadCountsMap;
+}
+
+// === FILTROVÁNÍ PODLE NEPŘEČTENÝCH POZNÁMEK ===
+function filterUnreadNotes() {
+  const unreadCountsMap = window.UNREAD_COUNTS_MAP || {};
+
+  // Najít všechny karty s nepřečtenými poznámkami
+  const cardsWithUnread = WGS_DATA_CACHE.filter(rec => {
+    const claimId = rec.id;
+    return unreadCountsMap[claimId] > 0;
+  });
+
+  logger.log(`[Seznam] Filtrování nepřečtených poznámek: ${cardsWithUnread.length} karet`);
+
+  // Vyrenderovat pouze karty s nepřečtenými poznámkami
+  const grid = document.getElementById('orderGrid');
+
+  if (cardsWithUnread.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-text">Žádné nepřečtené poznámky</div>
+      </div>
+    `;
+    return;
+  }
+
+  // Použít stejnou logiku jako renderOrders, ale s filtrovanými daty
+  renderOrders(cardsWithUnread);
+
+  // Scroll na začátek seznamu
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // === MODAL MANAGER ===
@@ -491,7 +555,7 @@ async function showDetail(recordOrId) {
 
       <div style="width: 100%; margin-top: 0.25rem;">
         ${record.documents && record.documents.length > 0 ? `
-          <button class="btn" style="background: #2D5016; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; font-weight: 600;"
+          <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; font-weight: 600;"
                   data-action="openPDF" data-url="${record.documents[0].file_path}">
             📄 PDF REPORT
           </button>
@@ -508,13 +572,13 @@ async function showDetail(recordOrId) {
   } else {
     buttonsHtml = `
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" onclick="startVisit('${record.id}')">Zahájit návštěvu</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
 
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" onclick="showCalendar('${record.id}')">Naplánovat termín</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
 
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showContactMenu('${record.id}')">Kontaktovat</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showCustomerDetail('${record.id}')">Detail zákazníka</button>
-        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="closeDetail()">Zavřít</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   }
@@ -695,33 +759,52 @@ function normalizeCustomerData(data) {
 }
 
 // === ZAHÁJIT NÁVŠTĚVU ===
+// Ochrana proti duplicitnímu volání
+let startVisitInProgress = false;
+
 function startVisit(id) {
+  console.log('[startVisit] 🔍 Zahajuji návštěvu, ID:', id);
+
+  // Ochrana proti duplicitnímu volání
+  if (startVisitInProgress) {
+    console.log('[startVisit] ⚠️ Funkce již běží, ignoruji duplicitní volání');
+    return;
+  }
+  startVisitInProgress = true;
+
   const z = WGS_DATA_CACHE.find(x => x.id == id);
+  console.log('[startVisit] 📋 Nalezený záznam:', z);
+
   if (!z) {
+    console.error('[startVisit] ❌ Záznam nenalezen v cache!');
     alert(t('record_not_found'));
+    startVisitInProgress = false;
     return;
   }
-  
-  if (z.stav === 'ČEKÁ' || z.stav === 'wait') {
-    const confirm = window.confirm(t('confirm_continue_without_appointment'));
-    if (!confirm) return;
-  }
-  
+
+  console.log('[startVisit] ✅ Záznam nalezen, stav:', z.stav);
+
   if (Utils.isCompleted(z)) {
+    console.error('[startVisit] ❌ Návštěva již dokončena!');
     alert(t('visit_already_completed'));
+    startVisitInProgress = false;
     return;
   }
-  
+
+  console.log('[startVisit] 📝 Normalizuji data...');
   const normalizedData = normalizeCustomerData(z);
-  
+  console.log('[startVisit] ✅ Data normalizována:', normalizedData);
+
+  console.log('[startVisit] 💾 Ukládám do localStorage...');
   localStorage.setItem('currentCustomer', JSON.stringify(normalizedData));
   localStorage.setItem('visitStartTime', new Date().toISOString());
-  
+
   const photoKey = 'photoSections_' + normalizedData.id;
   localStorage.removeItem(photoKey);
-  
+
   logger.log('✅ Normalizovaná data uložena:', normalizedData);
-  
+
+  console.log('[startVisit] 🚀 Přesměrovávám na photocustomer.php...');
   window.location.href = 'photocustomer.php?new=true';
 }
 
@@ -1731,10 +1814,13 @@ async function showCustomerDetail(id) {
                   <img src='${photoPath}'
                        style='width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid #ddd; cursor: pointer; border-radius: 3px;'
                        alt='Fotka ${i+1}'
-                       onclick='showPhotoFullscreen("${escapedUrl}")'>
+                       data-action="showPhotoFullscreen"
+                       data-url="${escapedUrl}">
                   ${photoId ? `
                     <button class="foto-delete-btn"
-                            onclick='event.stopPropagation(); smazatFotku(${photoId}, "${escapedUrl}")'
+                            data-action="smazatFotku"
+                            data-photo-id="${photoId}"
+                            data-url="${escapedUrl}"
                             title="Smazat fotku">
                       ×
                     </button>
@@ -1765,9 +1851,10 @@ async function showCustomerDetail(id) {
         return `
           <div style="margin-bottom: 1rem;">
             <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF Report:</label>
-            <button onclick="window.open('${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
-                    style="width: 100%; padding: 0.75rem; background: #2D5016; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer; font-weight: 600;">
-              📄 Otevřít PDF Report
+            <button data-action="openPDF"
+                    data-url="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}"
+                    style="width: 100%; padding: 0.75rem; background: #333333; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer; font-weight: 600;">
+              Otevřít PDF Report
             </button>
           </div>
         `;
@@ -1775,7 +1862,8 @@ async function showCustomerDetail(id) {
 
       ${CURRENT_USER.is_admin ? `
         <div style="border-top: 1px solid #e0e0e0; padding-top: 1rem; margin-top: 1rem;">
-          <button onclick="deleteReklamace('${id}')"
+          <button data-action="deleteReklamace"
+                  data-id="${id}"
                   style="width: 100%; padding: 0.5rem; background: #dc3545; color: white; border: none; border-radius: 3px; font-size: 0.85rem; cursor: pointer; font-weight: 600;">
             Smazat reklamaci
           </button>
@@ -1786,8 +1874,8 @@ async function showCustomerDetail(id) {
     </div>
 
     ${ModalManager.createActions([
-      '<button class="btn btn-secondary" onclick="showDetail(CURRENT_RECORD)">Zpět</button>',
-      '<button class="btn" style="background: #1a1a1a; color: white;" onclick="saveAllCustomerData(\'' + id + '\')">Uložit změny</button>'
+      '<button class="btn btn-secondary" data-action="showDetail" data-id="' + id + '">Zpět</button>',
+      '<button class="btn" style="background: #1a1a1a; color: white;" data-action="saveAllCustomerData" data-id="' + id + '">Uložit změny</button>'
     ])}
   `;
 
@@ -2099,53 +2187,11 @@ async function showNotes(recordOrId) {
           placeholder="Napište poznámku..."
         ></textarea>
       </div>
-
-      <div style="background: var(--c-bg); border: 1px solid var(--c-border); padding: 1rem; margin-top: 1.5rem;">
-        <h3 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-black); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border);">📄 PDF Report</h3>
-        ${(() => {
-          const docs = CURRENT_RECORD.documents || [];
-          // Hledat complete_report (nový formát) nebo fallback na jakýkoliv PDF dokument
-          const completeReport = docs.find(d => d.document_type === 'complete_report');
-          const anyPdf = docs.length > 0 ? docs[0] : null;
-          const pdfDoc = completeReport || anyPdf;
-
-          if (!pdfDoc) {
-            return `
-              <div style="padding: 1rem; text-align: center; background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 4px;">
-                <p style="margin: 0; color: #6c757d; font-size: 0.9rem;">ℹ️ PDF report ještě nebyl vytvořen</p>
-                <p style="margin: 0.3rem 0 0 0; font-size: 0.8rem; color: #adb5bd;">Vytvoří se po dokončení servisu</p>
-              </div>
-            `;
-          }
-
-          return `
-            <button onclick="window.open('${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
-                    class="btn"
-                    style="width: 100%; padding: 0.75rem; background: #2D5016; color: white; border: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; border-radius: 4px;">
-              📄 Otevřít PDF Report
-            </button>
-            <p style="margin: 0.5rem 0 0 0; font-size: 0.75rem; color: var(--c-grey); text-align: center;">
-              Vytvořeno: ${new Date(pdfDoc.uploaded_at || pdfDoc.created_at).toLocaleString('cs-CZ')}
-            </p>
-          `;
-        })()}
-
-      ${CURRENT_USER.is_admin ? `
-        <div style="background: #fff5f5; border: 2px solid #ff4444; padding: 1rem; margin-top: 1.5rem; border-radius: 4px;">
-          <h3 style="color: #ff4444; font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;">⚠️ ADMIN PANEL</h3>
-          <button onclick="deleteReklamace('${record.id}')"
-                  style="width: 100%; padding: 1rem; background: #ff4444; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">
-            🗑️ Smazat celou reklamaci
-          </button>
-          <p style="font-size: 0.75rem; color: #999; margin-top: 0.5rem; text-align: center;">Smaže vše včetně fotek a PDF</p>
-        </div>
-      ` : ''}
-
     </div>
 
     ${ModalManager.createActions([
-      '<button class="btn btn-secondary" onclick="closeNotesModal()">Zavřít</button>',
-      '<button class="btn btn-success" onclick="saveNewNote(\'' + record.id + '\')">Přidat poznámku</button>'
+      '<button class="btn btn-secondary" data-action="closeNotesModal">Zavřít</button>',
+      '<button class="btn btn-success" data-action="saveNewNote" data-id="' + record.id + '">Přidat poznámku</button>'
     ])}
   `;
 
@@ -2259,23 +2305,11 @@ function toggleMenu() {
   hamburger.classList.toggle('active');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.addEventListener('click', (e) => {
-    const target = e.target.closest('[data-action]');
-    if (!target) return;
-    
-    const action = target.getAttribute('data-action');
-    
-    if (action === 'reload') {
-      location.reload();
-      return;
-    }
-    
-    if (typeof window[action] === 'function') {
-      window[action]();
-    }
-  });
+// DUPLICITNÍ EVENT DELEGATION ODSTRANĚN
+// Používá se hlavní event delegation na řádku 2587
+// Ponecháme pouze data-navigate a data-onchange handlers
 
+document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', (e) => {
     const navigate = e.target.closest('[data-navigate]')?.getAttribute('data-navigate');
     if (navigate) {
@@ -2290,36 +2324,151 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('change', (e) => {
     const target = e.target.closest('[data-onchange]');
     if (!target) return;
-    
+
     const action = target.getAttribute('data-onchange');
     const value = target.getAttribute('data-onchange-value') || target.value;
-    
+
     if (typeof window[action] === 'function') {
       window[action](value);
     }
   });
 });
 
+// === POMOCNÉ FUNKCE PRO DELETE MODALY ===
+function showDeleteConfirmModal(reklamaceNumber) {
+  return new Promise((resolve) => {
+    const modalDiv = document.createElement('div');
+    modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999999;display:flex;align-items:center;justify-content:center;';
+
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = 'background:white;padding:30px;border-radius:8px;max-width:450px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+
+    modalContent.innerHTML = `
+      <h2 style="margin:0 0 20px 0;color:#dc3545;font-size:1.3rem;font-weight:700;">Smazat reklamaci?</h2>
+      <p style="margin:0 0 15px 0;color:#555;line-height:1.6;font-size:1rem;">
+        Opravdu chcete <strong>TRVALE SMAZAT</strong> reklamaci<br>
+        <strong style="color:#dc3545;font-size:1.1rem;">${reklamaceNumber}</strong>?
+      </p>
+      <p style="margin:0 0 25px 0;color:#dc3545;font-size:0.9rem;font-weight:600;">
+        Tato akce smaže VŠE včetně fotek a PDF!<br>
+        Tuto akci NELZE vrátit zpět!
+      </p>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button id="deleteConfirmYes" style="padding:14px 28px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700;">
+          Ano, pokračovat →
+        </button>
+        <button id="deleteConfirmNo" style="padding:14px 28px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:600;">
+          Zrušit
+        </button>
+      </div>
+    `;
+
+    modalDiv.appendChild(modalContent);
+    document.body.appendChild(modalDiv);
+
+    document.getElementById('deleteConfirmNo').onclick = () => {
+      document.body.removeChild(modalDiv);
+      resolve(false);
+    };
+
+    document.getElementById('deleteConfirmYes').onclick = () => {
+      document.body.removeChild(modalDiv);
+      resolve(true);
+    };
+  });
+}
+
+function showDeleteInputModal(reklamaceNumber) {
+  return new Promise((resolve) => {
+    const modalDiv = document.createElement('div');
+    modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999999;display:flex;align-items:center;justify-content:center;';
+
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = 'background:white;padding:30px;border-radius:8px;max-width:450px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+
+    modalContent.innerHTML = `
+      <h2 style="margin:0 0 20px 0;color:#dc3545;font-size:1.3rem;font-weight:700;">Poslední ověření</h2>
+      <p style="margin:0 0 15px 0;color:#555;line-height:1.6;font-size:1rem;">
+        Pro potvrzení smazání zadejte přesně číslo reklamace:
+      </p>
+      <p style="margin:0 0 15px 0;color:#dc3545;font-size:1.2rem;font-weight:700;">
+        ${reklamaceNumber}
+      </p>
+      <input type="text" id="deleteInputField"
+             placeholder="Zadejte číslo reklamace"
+             style="width:100%;padding:12px;border:2px solid #dc3545;border-radius:6px;font-size:1rem;text-align:center;margin-bottom:20px;">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button id="deleteInputConfirm" style="padding:14px 28px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700;">
+          SMAZAT NAVŽDY
+        </button>
+        <button id="deleteInputCancel" style="padding:14px 28px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:600;">
+          Zrušit
+        </button>
+      </div>
+    `;
+
+    modalDiv.appendChild(modalContent);
+    document.body.appendChild(modalDiv);
+
+    const inputField = document.getElementById('deleteInputField');
+    inputField.focus();
+
+    document.getElementById('deleteInputCancel').onclick = () => {
+      document.body.removeChild(modalDiv);
+      resolve('');
+    };
+
+    document.getElementById('deleteInputConfirm').onclick = () => {
+      const value = inputField.value.trim();
+      document.body.removeChild(modalDiv);
+      resolve(value);
+    };
+
+    // Enter key pro potvrzení
+    inputField.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const value = inputField.value.trim();
+        document.body.removeChild(modalDiv);
+        resolve(value);
+      }
+    });
+  });
+}
+
 // === SMAZÁNÍ REKLAMACE (ADMIN ONLY) ===
 async function deleteReklamace(reklamaceId) {
-  const confirmed = confirm(t('confirm_delete_claim_full'));
-  
-  if (!confirmed) {
+  logger.log('[deleteReklamace] Zobrazuji 1. confirmation modal');
+
+  const reklamaceNumber = CURRENT_RECORD.reklamace_id || CURRENT_RECORD.id || reklamaceId;
+
+  // 1. KROK: První potvrzení
+  const firstConfirm = await showDeleteConfirmModal(reklamaceNumber);
+  if (!firstConfirm) {
     logger.log('Mazání zrušeno (1. krok)');
     return;
   }
-  
-  const reklamaceNumber = CURRENT_RECORD.reklamace_id || CURRENT_RECORD.id || reklamaceId;
-  const userInput = prompt(
-    t('prompt_confirm_claim_number').replace('{number}', reklamaceNumber)
-  );
-  
+
+  // 2. KROK: Zadání čísla reklamace
+  const userInput = await showDeleteInputModal(reklamaceNumber);
   if (userInput !== reklamaceNumber) {
-    alert(t('incorrect_number_delete_cancelled'));
     logger.log('Mazání zrušeno - špatné číslo (2. krok)');
+
+    // Zobrazit chybovou hlášku
+    const errorModal = document.createElement('div');
+    errorModal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999999;display:flex;align-items:center;justify-content:center;';
+    errorModal.innerHTML = `
+      <div style="background:white;padding:30px;border-radius:8px;max-width:400px;width:90%;text-align:center;">
+        <h2 style="margin:0 0 20px 0;color:#dc3545;">Nesprávné číslo!</h2>
+        <p style="margin:0 0 25px 0;color:#555;">Zadali jste nesprávné číslo reklamace.<br>Mazání bylo zrušeno.</p>
+        <button onclick="this.closest('div').parentElement.remove()" style="padding:12px 24px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;">
+          OK
+        </button>
+      </div>
+    `;
+    document.body.appendChild(errorModal);
     return;
   }
-  
+
   logger.log('🗑️ Mazání reklamace:', reklamaceId);
 
   try {
@@ -2359,13 +2508,52 @@ async function deleteReklamace(reklamaceId) {
 
 // === SMAZÁNÍ JEDNOTLIVÉ FOTKY ===
 async function smazatFotku(photoId, photoUrl) {
-  const confirmed = confirm(t('confirm_delete_photo'));
+  logger.log('[smazatFotku] Vytvářím confirmation modal pro ID:', photoId);
 
-  if (!confirmed) {
-    logger.log('Mazání fotky zrušeno');
-    return;
-  }
+  // Vlastní confirmation modal (viditelný nad vším)
+  return new Promise((resolve) => {
+    const modalDiv = document.createElement('div');
+    modalDiv.id = 'deleteFotoModal';
+    modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999999;display:flex;align-items:center;justify-content:center;';
 
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = 'background:white;padding:30px;border-radius:8px;max-width:400px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+
+    modalContent.innerHTML = `
+      <h2 style="margin:0 0 20px 0;color:#333;font-size:1.2rem;font-weight:700;">Smazat fotku?</h2>
+      <p style="margin:0 0 25px 0;color:#555;line-height:1.6;font-size:1rem;">
+        Opravdu chcete smazat tuto fotografii?<br><br>
+        <strong>Tato akce je nevratná!</strong>
+      </p>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button id="deleteFotoYes" style="padding:14px 28px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700;">
+          Ano, smazat
+        </button>
+        <button id="deleteFotoNo" style="padding:14px 28px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:600;">
+          Zrušit
+        </button>
+      </div>
+    `;
+
+    modalDiv.appendChild(modalContent);
+    document.body.appendChild(modalDiv);
+
+    document.getElementById('deleteFotoNo').onclick = () => {
+      logger.log('[smazatFotku] Uživatel zrušil');
+      document.body.removeChild(modalDiv);
+      resolve(false);
+    };
+
+    document.getElementById('deleteFotoYes').onclick = async () => {
+      logger.log('[smazatFotku] Uživatel potvrdil, mazám...');
+      document.body.removeChild(modalDiv);
+      await pokracovatSmazaniFotky(photoId, photoUrl);
+      resolve(true);
+    };
+  });
+}
+
+async function pokracovatSmazaniFotky(photoId, photoUrl) {
   logger.log('🗑️ Mazání fotky ID:', photoId);
 
   try {
@@ -2571,12 +2759,61 @@ document.addEventListener('click', (e) => {
       if (id) showCustomerDetail(id);
       break;
 
+    case 'showDetail':
+      if (CURRENT_RECORD) showDetail(CURRENT_RECORD);
+      break;
+
     case 'openPDF':
       if (url) window.open(url, '_blank');
       break;
 
+    case 'showPhotoFullscreen':
+      if (url) showPhotoFullscreen(url);
+      break;
+
+    case 'smazatFotku':
+      const photoId = button.getAttribute('data-photo-id');
+      if (photoId && url) {
+        e.stopPropagation();
+        smazatFotku(photoId, url);
+      }
+      break;
+
+    case 'deleteReklamace':
+      if (id) deleteReklamace(id);
+      break;
+
+    case 'saveAllCustomerData':
+      if (id) saveAllCustomerData(id);
+      break;
+
     case 'closeDetail':
       closeDetail();
+      break;
+
+    case 'showNotes':
+      if (id && typeof showNotes === 'function') {
+        e.stopPropagation();
+        showNotes(id);
+      }
+      break;
+
+    case 'filterUnreadNotes':
+      if (typeof filterUnreadNotes === 'function') {
+        filterUnreadNotes();
+      }
+      break;
+
+    case 'closeNotesModal':
+      if (typeof closeNotesModal === 'function') {
+        closeNotesModal();
+      }
+      break;
+
+    case 'saveNewNote':
+      if (id && typeof saveNewNote === 'function') {
+        saveNewNote(id);
+      }
       break;
 
     default:

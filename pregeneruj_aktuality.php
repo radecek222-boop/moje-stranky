@@ -23,11 +23,11 @@ echo "<!DOCTYPE html>
     <style>
         body { font-family: Arial, sans-serif; max-width: 900px; margin: 50px auto; padding: 20px; background: #f5f5f5; }
         .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1 { color: #2D5016; border-bottom: 3px solid #2D5016; padding-bottom: 10px; }
+        h1 { color: #333333; border-bottom: 3px solid #333333; padding-bottom: 10px; }
         .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 12px; border-radius: 5px; margin: 10px 0; }
         .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 12px; border-radius: 5px; margin: 10px 0; }
         .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; padding: 12px; border-radius: 5px; margin: 10px 0; }
-        .btn { display: inline-block; padding: 10px 20px; background: #2D5016; color: white; text-decoration: none; border-radius: 5px; margin: 10px 5px 10px 0; }
+        .btn { display: inline-block; padding: 10px 20px; background: #333333; color: white; text-decoration: none; border-radius: 5px; margin: 10px 5px 10px 0; }
         .btn:hover { background: #1a300d; }
         pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; }
     </style>

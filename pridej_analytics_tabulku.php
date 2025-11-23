@@ -24,7 +24,7 @@ echo "<!DOCTYPE html>
                background: #f5f5f5; }
         .container { background: white; padding: 30px; border-radius: 10px;
                      box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1 { color: #2D5016; border-bottom: 3px solid #2D5016;
+        h1 { color: #333333; border-bottom: 3px solid #333333;
              padding-bottom: 10px; }
         .success { background: #d4edda; border: 1px solid #c3e6cb;
                    color: #155724; padding: 12px; border-radius: 5px;
@@ -39,7 +39,7 @@ echo "<!DOCTYPE html>
                 color: #0c5460; padding: 12px; border-radius: 5px;
                 margin: 10px 0; }
         .btn { display: inline-block; padding: 10px 20px;
-               background: #2D5016; color: white; text-decoration: none;
+               background: #333333; color: white; text-decoration: none;
                border-radius: 5px; margin: 10px 5px 10px 0; }
         .btn:hover { background: #1a300d; }
         pre { background: #f4f4f4; padding: 15px; border-radius: 5px;

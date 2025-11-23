@@ -108,4 +108,4 @@ if (json_last_error() === JSON_ERROR_NONE) {
 echo "</div>";
 
 echo "<hr>";
-echo "<a href='/analytics-heatmap' style='display:inline-block;padding:10px 20px;background:#2D5016;color:white;text-decoration:none;border-radius:5px;'>Zpět na Heatmap</a>";
+echo "<a href='/analytics-heatmap' style='display:inline-block;padding:10px 20px;background:#333333;color:white;text-decoration:none;border-radius:5px;'>Zpět na Heatmap</a>";

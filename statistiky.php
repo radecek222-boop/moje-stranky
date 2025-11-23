@@ -54,7 +54,7 @@ body {
 .stats-header h1 {
     margin: 0;
     font-size: 1.8rem;
-    color: #2D5016;
+    color: #333333;
     font-weight: 600;
 }
 
@@ -77,7 +77,7 @@ body {
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    border-left: 4px solid #2D5016;
+    border-left: 4px solid #333333;
 }
 
 .summary-card-label {
@@ -92,7 +92,7 @@ body {
 .summary-card-value {
     font-size: 2rem;
     font-weight: 700;
-    color: #2D5016;
+    color: #333333;
     margin-bottom: 0.25rem;
 }
 
@@ -113,7 +113,7 @@ body {
 .filters-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #2D5016;
+    color: #333333;
     margin-bottom: 1rem;
 }
 
@@ -149,7 +149,7 @@ body {
 
 .filter-select:focus {
     outline: none;
-    border-color: #2D5016;
+    border-color: #333333;
 }
 
 /* Multi-select checkboxy */
@@ -170,7 +170,7 @@ body {
 }
 
 .multiselect-trigger:hover {
-    border-color: #2D5016;
+    border-color: #333333;
 }
 
 .multiselect-dropdown {
@@ -239,13 +239,13 @@ body {
 }
 
 .btn:hover {
-    border-color: #2D5016;
+    border-color: #333333;
 }
 
 .btn-primary {
-    background: #2D5016;
+    background: #333333;
     color: white;
-    border-color: #2D5016;
+    border-color: #333333;
 }
 
 .btn-primary:hover {
@@ -281,7 +281,7 @@ body {
 .table-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #2D5016;
+    color: #333333;
 }
 
 .table-count {
@@ -297,14 +297,14 @@ body {
 
 .stats-table thead {
     background: #f9f9f9;
-    border-bottom: 2px solid #2D5016;
+    border-bottom: 2px solid #333333;
 }
 
 .stats-table th {
     padding: 0.75rem;
     text-align: left;
     font-weight: 600;
-    color: #2D5016;
+    color: #333333;
     text-transform: uppercase;
     font-size: 0.7rem;
     letter-spacing: 0.5px;
@@ -342,7 +342,7 @@ body {
 }
 
 .pagination button:hover:not(:disabled) {
-    border-color: #2D5016;
+    border-color: #333333;
     background: #f9f9f9;
 }
 
@@ -374,7 +374,7 @@ body {
 .chart-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #2D5016;
+    color: #333333;
     margin-bottom: 1rem;
 }
 
@@ -403,7 +403,7 @@ body {
 .chart-item-value {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #2D5016;
+    color: #333333;
 }
 
 /* Loading */

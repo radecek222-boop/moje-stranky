@@ -43,7 +43,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             margin: 0 auto;
         }
         h1 {
-            color: #2D5016;
+            color: #333333;
             margin-bottom: 10px;
         }
         .subtitle {
@@ -73,7 +73,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         .stat-card .value {
             font-size: 32px;
             font-weight: bold;
-            color: #2D5016;
+            color: #333333;
         }
         .stat-card .label {
             font-size: 12px;
@@ -112,7 +112,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             font-size: 14px;
         }
         .btn {
-            background: #2D5016;
+            background: #333333;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -165,7 +165,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         }
         .bar-fill {
             height: 100%;
-            background: linear-gradient(to right, #4caf50, #2D5016);
+            background: linear-gradient(to right, #4caf50, #333333);
             transition: width 0.3s ease;
         }
         .bar-value {
