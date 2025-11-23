@@ -109,25 +109,25 @@ try {
 
                 // 2. Profesionální čalounické práce
                 [
-                    'service_name' => 'Modul (hlavní díl)',
-                    'description' => 'Zahrnuje: sedák + opěradlo (bez příslušenství). **CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.**',
+                    'service_name' => 'První díl',
+                    'description' => 'Čalounění prvního dílu včetně rozebrání konstrukce. Jeden díl = např. sedák NEBO opěrka NEBO područka. **CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.**',
                     'price_from' => 190,
                     'price_to' => null,
                     'price_unit' => '€',
                     'category' => '2. Profesionální čalounické práce',
-                    'item_type' => 'module',
+                    'item_type' => 'first_part',
                     'display_order' => 2,
                     'is_active' => 1,
                     'is_calculable' => 1
                 ],
                 [
                     'service_name' => 'Každý další díl',
-                    'description' => 'Zadní panel, područka, opěrka zad, boční panel, samostatný sedák/polštář, krycí panel, tvarové části, čalouněné bočnice, lemování. **CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.**',
+                    'description' => 'Při téže opravě. Např. opěrka, područka, zadní panel, boční panel, polštář, krycí díl. **CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.**',
                     'price_from' => 70,
                     'price_to' => null,
                     'price_unit' => '€',
                     'category' => '2. Profesionální čalounické práce',
-                    'item_type' => 'part',
+                    'item_type' => 'additional_part',
                     'display_order' => 3,
                     'is_active' => 1,
                     'is_calculable' => 1
@@ -171,9 +171,9 @@ try {
 
                 // 3. Modelové příklady (nezapočítávat do kalkulace - jsou to jen příklady)
                 [
-                    'service_name' => 'Příklad: Křeslo (sedák + opěradlo + 2 područky)',
-                    'description' => 'Modul 190€ + 2× područka (2×70€) = **330€**. **CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.**',
-                    'price_from' => 330,
+                    'service_name' => 'Příklad: Pouze sedák',
+                    'description' => 'První díl 190€ = **190€**. **CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.**',
+                    'price_from' => 190,
                     'price_to' => null,
                     'price_unit' => '€',
                     'category' => '3. Modelové příklady výpočtu',
@@ -183,8 +183,8 @@ try {
                     'is_calculable' => 0
                 ],
                 [
-                    'service_name' => 'Příklad: Židle (sedák + opěrka zad)',
-                    'description' => 'Modul 190€ + opěrka zad 70€ = **260€**. **CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.**',
+                    'service_name' => 'Příklad: Sedák + opěrka',
+                    'description' => 'První díl 190€ + další díl 70€ = **260€**. **CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.**',
                     'price_from' => 260,
                     'price_to' => null,
                     'price_unit' => '€',
@@ -195,9 +195,9 @@ try {
                     'is_calculable' => 0
                 ],
                 [
-                    'service_name' => 'Příklad: Sedačka – díl bez područky',
-                    'description' => 'Modul 190€ + zadní panel 70€ = **260€**. **CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.**',
-                    'price_from' => 260,
+                    'service_name' => 'Příklad: Sedák + opěrka + područka',
+                    'description' => 'První díl 190€ + 2× další díl (2×70€) = **330€**. **CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.**',
+                    'price_from' => 330,
                     'price_to' => null,
                     'price_unit' => '€',
                     'category' => '3. Modelové příklady výpočtu',
@@ -207,9 +207,9 @@ try {
                     'is_calculable' => 0
                 ],
                 [
-                    'service_name' => 'Příklad: Sedačka – díl s područkou',
-                    'description' => 'Modul 190€ + zadní panel 70€ + područka 70€ = **330€**. **CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.**',
-                    'price_from' => 330,
+                    'service_name' => 'Příklad: Křeslo komplet (4 díly)',
+                    'description' => 'První díl 190€ + 3× další díl (3×70€) = **400€**. Sedák + opěrka + 2× područka. **CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.**',
+                    'price_from' => 400,
                     'price_to' => null,
                     'price_unit' => '€',
                     'category' => '3. Modelové příklady výpočtu',
