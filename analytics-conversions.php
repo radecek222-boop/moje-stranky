@@ -370,9 +370,9 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 const response = await fetch(`/api/analytics_conversions.php?${params.toString()}`);
                 const result = await response.json();
 
-                if (result.status === 'success' && result.data && result.data.conversions) {
-                    conversionsData = result.data.conversions;
-                    displayConversions(result.data);
+                if (result.status === 'success' && result.conversions) {
+                    conversionsData = result.conversions;
+                    displayConversions(result);
                 } else {
                     const errorMsg = result.message || 'Neznámá chyba';
                     console.error('[Conversions] Chyba:', errorMsg);
@@ -430,11 +430,11 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 const response = await fetch(`/api/analytics_conversions.php?action=list_funnels&csrf_token=${csrfToken}`);
                 const result = await response.json();
 
-                if (result.status === 'success' && result.data && result.data.funnels) {
+                if (result.status === 'success' && result.funnels) {
                     const select = document.getElementById('funnel-select');
                     select.innerHTML = '<option value="">-- Vyberte funnel --</option>';
 
-                    result.data.funnels.forEach(funnel => {
+                    result.funnels.forEach(funnel => {
                         const option = document.createElement('option');
                         option.value = funnel.id;
                         option.textContent = funnel.funnel_name;
@@ -474,8 +474,8 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 const response = await fetch(`/api/analytics_conversions.php?${params.toString()}`);
                 const result = await response.json();
 
-                if (result.status === 'success' && result.data && result.data.funnel_analysis) {
-                    displayFunnelAnalysis(result.data.funnel_analysis);
+                if (result.status === 'success' && result.funnel_analysis) {
+                    displayFunnelAnalysis(result.funnel_analysis);
                 } else {
                     document.getElementById('funnel-loading').style.display = 'block';
                     document.getElementById('funnel-loading').textContent = 'Chyba: ' + (result.message || 'Neznámá chyba');
