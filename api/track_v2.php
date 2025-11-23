@@ -183,6 +183,38 @@ try {
     $sessionMerger->aktualizujGeoData($sessionId, $geoData);
 
     // ========================================
+    // BOT DETECTION (Modul #3)
+    // ========================================
+    $botDetector = new BotDetector($pdo);
+
+    // Příprava bot detection dat
+    $botSignals = [];
+
+    // Pokud frontend poslal bot_signals (JSON nebo pole)
+    if (isset($inputData['bot_signals'])) {
+        if (is_string($inputData['bot_signals'])) {
+            $botSignals = json_decode($inputData['bot_signals'], true) ?? [];
+        } elseif (is_array($inputData['bot_signals'])) {
+            $botSignals = $inputData['bot_signals'];
+        }
+    }
+
+    // Request data pro bot detection
+    $botRequestData = [
+        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+        'ip_address' => $ipAdresaAnonymni ?? $clientIp,
+        'signals' => $botSignals
+    ];
+
+    // Detekce bota
+    $botDetectionResult = $botDetector->detekujBota($sessionId, $fingerprintId, $botRequestData);
+
+    $jeBot = $botDetectionResult['is_bot'];
+    $botScore = $botDetectionResult['bot_score'];
+    $threatLevel = $botDetectionResult['threat_level'];
+    $jeWhitelisted = $botDetectionResult['is_whitelisted'];
+
+    // ========================================
     // REAL-TIME TRACKING (Modul #11)
     // ========================================
     // UPSERT do wgs_analytics_realtime pro real-time dashboard
@@ -290,38 +322,6 @@ try {
         'session_start' => $sessionStart,
         'pageviews_update' => $pocetPageviews
     ]);
-
-    // ========================================
-    // BOT DETECTION (Modul #3)
-    // ========================================
-    $botDetector = new BotDetector($pdo);
-
-    // Příprava bot detection dat
-    $botSignals = [];
-
-    // Pokud frontend poslal bot_signals (JSON nebo pole)
-    if (isset($inputData['bot_signals'])) {
-        if (is_string($inputData['bot_signals'])) {
-            $botSignals = json_decode($inputData['bot_signals'], true) ?? [];
-        } elseif (is_array($inputData['bot_signals'])) {
-            $botSignals = $inputData['bot_signals'];
-        }
-    }
-
-    // Request data pro bot detection
-    $botRequestData = [
-        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
-        'ip_address' => $ipAdresaAnonymni ?? $clientIp,
-        'signals' => $botSignals
-    ];
-
-    // Detekce bota
-    $botDetectionResult = $botDetector->detekujBota($sessionId, $fingerprintId, $botRequestData);
-
-    $jeBot = $botDetectionResult['is_bot'];
-    $botScore = $botDetectionResult['bot_score'];
-    $threatLevel = $botDetectionResult['threat_level'];
-    $jeWhitelisted = $botDetectionResult['is_whitelisted'];
 
     // ========================================
     // ULOŽENÍ PAGEVIEW DO TABULKY wgs_pageviews
