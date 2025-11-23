@@ -34,6 +34,11 @@
     let fingerprintId = null;
     let heartbeatIntervalId = null;
 
+    // Bot detection metrics
+    let pageLoadStart = Date.now();
+    let mouseMovements = [];
+    let keyboardTimings = [];
+
     // ========================================
     // INICIALIZACE
     // ========================================
@@ -170,6 +175,7 @@
             const utmParams = extrahovatUtmParametry();
             const deviceInfo = ziskatDeviceInfo();
             const csrfToken = ziskatCsrfToken();
+            const botSignaly = sbiratBotDetectionSignaly();
 
             const payload = {
                 csrf_token: csrfToken,
@@ -179,7 +185,8 @@
                 page_title: document.title,
                 referrer: document.referrer || null,
                 ...utmParams,
-                ...deviceInfo
+                ...deviceInfo,
+                bot_signals: botSignaly
             };
 
             if (CONFIG.debug) {
@@ -212,6 +219,161 @@
         } catch (error) {
             console.error('[WGS Analytics V2] Síťová chyba při sledování pageview:', error);
         }
+    }
+
+    /**
+     * Sbírá bot detection signály
+     *
+     * Detekuje:
+     * - Webdriver (Selenium, Playwright, Puppeteer)
+     * - Headless browser
+     * - Automation tools (PhantomJS, Zombie)
+     * - Mouse movement entropy
+     * - Keyboard timing variance
+     * - Pageview speed
+     *
+     * @returns {Object} Bot detection signály
+     */
+    function sbiratBotDetectionSignaly() {
+        const signaly = {};
+
+        // 1. Detekce WebDriver
+        signaly.webdriver = !!(
+            navigator.webdriver ||
+            window.navigator.webdriver ||
+            window.callPhantom ||
+            window._phantom
+        );
+
+        // 2. Detekce Headless Chrome/Firefox
+        signaly.headless = false;
+
+        // Chrome headless detection
+        if (navigator.userAgent.includes('HeadlessChrome')) {
+            signaly.headless = true;
+        }
+
+        // Chrome headless API detection
+        if (navigator.plugins && navigator.plugins.length === 0 && !navigator.userAgent.includes('Mobile')) {
+            signaly.headless = true;
+        }
+
+        // Firefox headless detection
+        if (navigator.userAgent.includes('Firefox') && !window.sidebar) {
+            signaly.headless = true;
+        }
+
+        // 3. Detekce PhantomJS/Automation
+        signaly.automation = !!(
+            window.phantom ||
+            window._phantom ||
+            window.callPhantom ||
+            window.Buffer ||
+            (window.emit && window.spawn)
+        );
+
+        // 4. Pageview speed (čas od načtení stránky)
+        const pageviewSpeed = Date.now() - pageLoadStart;
+        signaly.pageview_speed_ms = pageviewSpeed;
+
+        // 5. Mouse movement entropy (pokud je k dispozici)
+        if (mouseMovements.length > 0) {
+            signaly.mouse_movement_entropy = vypocitejMouseEntropii(mouseMovements);
+        } else {
+            signaly.mouse_movement_entropy = 0; // Žádný pohyb = suspektní
+        }
+
+        // 6. Keyboard timing variance (pokud je k dispozici)
+        if (keyboardTimings.length > 1) {
+            signaly.keyboard_timing_variance = vypocitejKeyboardVarianci(keyboardTimings);
+        } else {
+            signaly.keyboard_timing_variance = null;
+        }
+
+        // 7. Permissions API anomalie
+        if (navigator.permissions) {
+            signaly.permissions_available = true;
+        }
+
+        // 8. Battery API detection (často chybí v headless)
+        if (!navigator.getBattery && !navigator.userAgent.includes('Mobile')) {
+            signaly.no_battery_api = true;
+        }
+
+        return signaly;
+    }
+
+    /**
+     * Výpočet entropie pohybu myši (0-1)
+     *
+     * Vysoká entropie = lidský pohyb (nepravidelný)
+     * Nízká entropie = bot (lineární pohyb nebo žádný)
+     *
+     * @param {Array} movements Pole [{x, y, timestamp}]
+     * @returns {number} 0-1
+     */
+    function vypocitejMouseEntropii(movements) {
+        if (movements.length < 5) {
+            return 0; // Nedostatek dat
+        }
+
+        // Výpočet směrových změn
+        let smerovaZmena = 0;
+        let predchoziUhel = null;
+
+        for (let i = 1; i < movements.length; i++) {
+            const dx = movements[i].x - movements[i - 1].x;
+            const dy = movements[i].y - movements[i - 1].y;
+
+            const uhel = Math.atan2(dy, dx);
+
+            if (predchoziUhel !== null) {
+                const zmena = Math.abs(uhel - predchoziUhel);
+                smerovaZmena += zmena;
+            }
+
+            predchoziUhel = uhel;
+        }
+
+        // Normalizace na 0-1
+        const maxZmena = (movements.length - 2) * Math.PI;
+        const entropie = Math.min(smerovaZmena / maxZmena, 1);
+
+        return parseFloat(entropie.toFixed(2));
+    }
+
+    /**
+     * Výpočet variance klávesnicových timingů (0-1)
+     *
+     * Nízká variance = bot (pravidelné intervaly)
+     * Vysoká variance = člověk (nepravidelné)
+     *
+     * @param {Array} timings Pole timestampů
+     * @returns {number} 0-1
+     */
+    function vypocitejKeyboardVarianci(timings) {
+        if (timings.length < 2) {
+            return 0;
+        }
+
+        // Výpočet intervalů
+        const intervaly = [];
+        for (let i = 1; i < timings.length; i++) {
+            intervaly.push(timings[i] - timings[i - 1]);
+        }
+
+        // Průměrný interval
+        const prumer = intervaly.reduce((a, b) => a + b, 0) / intervaly.length;
+
+        // Variance
+        const variance = intervaly.reduce((sum, interval) => {
+            return sum + Math.pow(interval - prumer, 2);
+        }, 0) / intervaly.length;
+
+        // Normalizace (předpokládejme max variance 10000ms²)
+        const normalizedVariance = Math.min(variance / 10000, 1);
+
+        return parseFloat(normalizedVariance.toFixed(2));
     }
 
     /**
@@ -388,6 +550,41 @@
             }
         }
     }
+
+    // ========================================
+    // BOT DETECTION - EVENT LISTENERS
+    // ========================================
+
+    /**
+     * Trackování pohybu myši pro bot detection
+     */
+    document.addEventListener('mousemove', function(e) {
+        // Throttle - pouze každý 100ms
+        if (mouseMovements.length === 0 || Date.now() - mouseMovements[mouseMovements.length - 1].timestamp > 100) {
+            mouseMovements.push({
+                x: e.clientX,
+                y: e.clientY,
+                timestamp: Date.now()
+            });
+
+            // Omezit velikost pole (max 50 záznamů)
+            if (mouseMovements.length > 50) {
+                mouseMovements.shift();
+            }
+        }
+    });
+
+    /**
+     * Trackování klávesnice pro bot detection
+     */
+    document.addEventListener('keydown', function() {
+        keyboardTimings.push(Date.now());
+
+        // Omezit velikost pole (max 30 záznamů)
+        if (keyboardTimings.length > 30) {
+            keyboardTimings.shift();
+        }
+    });
 
     // ========================================
     // EVENT LISTENERS

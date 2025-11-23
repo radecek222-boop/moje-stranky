@@ -487,26 +487,39 @@ const fingerprint = await FingerprintModule.generateFingerprint();
 ### Class: `BotDetector`
 
 **File:** `includes/BotDetector.php`
-**Status:** ⏳ Pending (Module #3)
+**Status:** ✅ Complete (Module #3)
 
 **Methods:**
-- `detectBot(array $signals): array` - Detect bot from signals
-- `calculateBotScore(array $signals): float` - Calculate 0-100 score
-- `getThreatLevel(float $score): string` - Map score to threat level
-- `isKnownBot(string $userAgent): bool` - Check against bot database
-- `isHeadlessBrowser(array $signals): bool` - Detect headless browsers
-- `isDatacenter(string $ipAddress): bool` - Check if IP from datacenter
-- `whitelistBot(string $botSignature): void` - Add to whitelist
+- `detekujBota(string $sessionId, string $fingerprintId, array $requestData): array` - Main bot detection
+- `vypocitejBotScore(array $signals): int` - Calculate 0-100 score
+- `vypocitejUaScore(string $userAgent): int` - User-Agent score (0-30)
+- `vypocitejBehavioralScore(array $signals): int` - Behavioral score (0-40)
+- `vypocitejFingerprintScore(string $fingerprintId): int` - Fingerprint score (0-20)
+- `vypocitejNetworkScore(string $ipAddress): int` - Network score (0-10)
+- `urcThreatLevel(int $botScore): string` - Map score to threat level
+- `jeNaWhitelistu(string $userAgent, string $ipAddress): bool` - Whitelist check
+- `ulozDetekci(string $sessionId, string $fingerprintId, array $detectionData): bool` - Store detection
+- `nactiDetekceRelace(string $sessionId): array` - Get session detections
+- `nactiStatistiky(string $from, string $to, array $filters): array` - Get bot activity stats
+- `ipInCidr(string $ip, string $cidr): bool` - IP range check (private method)
 
 **Detection Signals:**
-- User agent patterns (bot keywords)
-- Webdriver detection
-- Missing plugins
-- Zero mouse movement
-- Zero scroll depth
-- Too-fast navigation
-- Impossible mouse paths
-- VPN/Proxy/TOR detection
+- User agent patterns (bot keywords: bot, crawler, spider, curl, wget, selenium, puppeteer)
+- Webdriver detection (navigator.webdriver, window.callPhantom)
+- Headless browser detection (HeadlessChrome, missing plugins, no sidebar)
+- Automation detection (PhantomJS, window.phantom, window.Buffer)
+- Mouse movement entropy (0-1, low = bot)
+- Keyboard timing variance (0-1, low = bot)
+- Pageview speed (< 500ms = suspicious)
+- Fingerprint stability (high session count = bot)
+- Network analysis (data center IP ranges)
+
+**Threat Level Classification:**
+- none: 0-20 (pravděpodobně člověk)
+- low: 21-40 (možný bot)
+- medium: 41-60 (pravděpodobný bot)
+- high: 61-80 (skoro jistě bot)
+- critical: 81-100 (100% bot)
 
 ### Class: `GeolocationService`
 
@@ -1646,7 +1659,7 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 |-----------|--------|------------|-------|
 | **Module #1** | ✅ Complete | 100% | Committed: `75c52d4` |
 | **Module #2** | ✅ Complete | 100% | Committed: `481bd22` |
-| **Module #3** | ⏳ Pending | 0% | Awaiting approval |
+| **Module #3** | ✅ Complete | 100% | Committed: `8ebd2bb` |
 | **Module #4** | ⏳ Pending | 0% | Awaiting approval |
 | **Module #5** | ⏳ Pending | 0% | Awaiting approval |
 | **Module #6** | ⏳ Pending | 0% | Awaiting approval |
@@ -1661,22 +1674,23 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 ### Overall Progress
 
 ```
-[████████░░░░░░░░░░░░] 15.4% (2/13 modules complete)
+[█████████████░░░░░░░] 23.1% (3/13 modules complete)
 ```
 
 ### Next Steps
 
 1. **User Action Required:**
-   - Test Module #2 (Advanced Session Tracking)
-   - Run migration: `migrace_module2_sessions.php?execute=1`
-   - Test session tracking in browser console
-   - Verify database records
-   - Approve Module #2 OR request fixes
+   - Test Module #3 (Bot Detection Engine)
+   - Run migration: `migrace_module3_bot_detection.php?execute=1`
+   - Test bot detection in browser console
+   - View bot activity in admin dashboard: `api/analytics_bot_activity.php`
+   - Verify database records in `wgs_analytics_bot_detections` and `wgs_analytics_bot_whitelist`
+   - Approve Module #3 OR request fixes
 
-2. **After Module #2 Approval:**
-   - Create implementation plan for Module #3
+2. **After Module #3 Approval:**
+   - Create implementation plan for Module #4 (Geolocation Service)
    - Wait for plan approval
-   - Generate code for Module #3
+   - Generate code for Module #4
    - Repeat workflow
 
 ### File Inventory
@@ -1693,9 +1707,17 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 - `api/track_v2.php` (280 lines)
 - `assets/js/tracker-v2.js` (450 lines)
 
-**Total New Code:** ~3,430 lines (Modules #1-2)
+**Created Files (Module #3):**
+- `migrace_module3_bot_detection.php` (450 lines)
+- `includes/BotDetector.php` (720 lines)
+- `api/analytics_bot_activity.php` (280 lines)
+- `api/admin_bot_whitelist.php` (370 lines)
+- Updated: `assets/js/tracker-v2.js` (+210 lines bot detection)
+- Updated: `api/track_v2.php` (+40 lines integration)
 
-**Pending Files (Modules #3-13):** ~35+ files, estimated ~17,000+ lines
+**Total New Code:** ~5,480 lines (Modules #1-3)
+
+**Pending Files (Modules #4-13):** ~30+ files, estimated ~14,000+ lines
 
 ---
 
@@ -1755,6 +1777,7 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 | 2025-11-23 | 1.0.0 | Initial documentation created | Claude |
 | 2025-11-23 | 1.0.0 | Module #1 completed and documented | Claude |
 | 2025-11-23 | 1.1.0 | Module #2 (Advanced Session Tracking) completed - 4 soubory, 1780 řádků kódu | Claude |
+| 2025-11-23 | 1.2.0 | Module #3 (Bot Detection Engine) completed - 6 souborů (4 nové + 2 upravené), 2070 řádků kódu | Claude |
 
 ---
 
@@ -1767,4 +1790,4 @@ All future work must reference this document.
 Any AI agent working on this project must read this document first.
 
 **Last Updated:** 2025-11-23
-**Status:** Module #1 & #2 Complete, Modules #3-13 Pending Approval
+**Status:** Modules #1-3 Complete, Modules #4-13 Pending Approval

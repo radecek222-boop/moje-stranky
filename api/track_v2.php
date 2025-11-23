@@ -18,6 +18,7 @@ require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
 require_once __DIR__ . '/../includes/SessionMerger.php';
+require_once __DIR__ . '/../includes/BotDetector.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -154,6 +155,38 @@ try {
     $pocetPageviews = $vysledekRelace['pageview_count'];
 
     // ========================================
+    // BOT DETECTION (Modul #3)
+    // ========================================
+    $botDetector = new BotDetector($pdo);
+
+    // Příprava bot detection dat
+    $botSignals = [];
+
+    // Pokud frontend poslal bot_signals (JSON nebo pole)
+    if (isset($inputData['bot_signals'])) {
+        if (is_string($inputData['bot_signals'])) {
+            $botSignals = json_decode($inputData['bot_signals'], true) ?? [];
+        } elseif (is_array($inputData['bot_signals'])) {
+            $botSignals = $inputData['bot_signals'];
+        }
+    }
+
+    // Request data pro bot detection
+    $botRequestData = [
+        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+        'ip_address' => $ipAdresaAnonymni ?? $clientIp,
+        'signals' => $botSignals
+    ];
+
+    // Detekce bota
+    $botDetectionResult = $botDetector->detekujBota($sessionId, $fingerprintId, $botRequestData);
+
+    $jeBot = $botDetectionResult['is_bot'];
+    $botScore = $botDetectionResult['bot_score'];
+    $threatLevel = $botDetectionResult['threat_level'];
+    $jeWhitelisted = $botDetectionResult['is_whitelisted'];
+
+    // ========================================
     // ULOŽENÍ PAGEVIEW DO TABULKY wgs_pageviews
     // ========================================
 
@@ -237,9 +270,16 @@ try {
             'pageview_id' => $pageviewId,
             'page_url' => $pageUrl
         ],
+        'bot_detection' => [
+            'is_bot' => $jeBot,
+            'bot_score' => $botScore,
+            'threat_level' => $threatLevel,
+            'is_whitelisted' => $jeWhitelisted
+        ],
         'tracking' => [
             'fingerprint_linked' => true,
-            'utm_tracked' => !empty($sessionData['utm_source'])
+            'utm_tracked' => !empty($sessionData['utm_source']),
+            'bot_detection_enabled' => true
         ]
     ]);
 
