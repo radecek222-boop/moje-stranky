@@ -29,7 +29,7 @@ try {
 
         // ✅ SECURITY FIX: GET metoda může provádět pouze read-only operace
         // Prevence CSRF útoku přes GET requesty (např. <img src="...?action=delete&...">)
-        $readOnlyActions = ['get', 'list', 'count'];
+        $readOnlyActions = ['get', 'list', 'count', 'get_unread_counts'];
         if (!in_array($action, $readOnlyActions, true)) {
             throw new Exception('Tato akce vyžaduje POST metodu s CSRF tokenem. Povolené GET akce: ' . implode(', ', $readOnlyActions));
         }
