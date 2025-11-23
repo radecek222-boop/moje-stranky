@@ -1,6 +1,6 @@
 /**
- * Kalkulačka ceny - Ceník služeb
- * @version 1.0.0
+ * Kalkulačka ceny - Ceník služeb (WIZARD)
+ * @version 2.0.0
  */
 
 (function() {
@@ -12,10 +12,42 @@
     const WORKSHOP_COORDS = { lat: 50.056725, lon: 14.577261 }; // Běchovice
     const TRANSPORT_RATE = 0.28; // €/km
 
-    let calculableServices = [];
-    let selectedServices = [];
-    let currentDistance = 0;
-    let currentTransportCost = 0;
+    // Ceník služeb
+    const CENY = {
+        diagnostika: 155,
+        prvniDil: 190,
+        dalsiDil: 70,
+        rohovyDil: 330,
+        ottoman: 260,
+        mechanismus: 70, // relax nebo výsuv
+        druhaOsoba: 40,
+        material: 40
+    };
+
+    // Stav kalkulačky
+    let stav = {
+        krok: 1,
+        adresa: null,
+        vzdalenost: 0,
+        dopravne: 0,
+        typServisu: 'calouneni', // diagnostika, calouneni, mechanika, kombinace
+
+        // Čalounické práce
+        sedaky: 0,
+        operky: 0,
+        podrucky: 0,
+        panely: 0,
+        rohovyDil: false,
+        ottoman: false,
+
+        // Mechanické práce
+        relax: 0,
+        vysuv: 0,
+
+        // Další
+        tezkyNabytek: false,
+        material: false
+    };
 
     // ========================================
     // INIT KALKULAČKY
@@ -24,48 +56,49 @@
         initKalkulacka();
     });
 
-    async function initKalkulacka() {
-        try {
-            // Načíst kalkulovatelné služby z API
-            const response = await fetch('/api/pricing_api.php?action=list');
-
-            if (!response.ok) {
-                throw new Error('API vrátilo chybu: HTTP ' + response.status);
-            }
-
-            const result = await response.json();
-
-            if (result.status === 'success') {
-                // Filtrovat pouze kalkulovatelné položky (is_calculable = 1)
-                calculableServices = result.items.filter(item => item.is_calculable == 1);
-
-                if (calculableServices.length === 0) {
-                    console.warn('[Kalkulačka] Žádné kalkulovatelné služby nenalezeny');
-                    zobrazitChybovouZpravu('Ceník služeb není k dispozici. Spusťte prosím migraci databáze.');
-                } else {
-                    // Čekat až se zobrazí sekce služeb
-                    initAddressAutocomplete();
-                }
-            } else {
-                console.error('[Kalkulačka] Chyba:', result.message);
-                zobrazitChybovouZpravu('Nepodařilo se načíst ceník: ' + result.message);
-            }
-        } catch (error) {
-            console.error('[Kalkulačka] Síťová chyba:', error);
-            zobrazitChybovouZpravu('Nepodařilo se připojit k API ceníku. Zkontrolujte prosím, že tabulka wgs_pricing existuje v databázi.');
-        }
+    function initKalkulacka() {
+        console.log('[Kalkulačka] Inicializace wizardu');
+        initAddressAutocomplete();
+        initEventListeners();
+        aktualizovatProgress();
     }
 
-    function zobrazitChybovouZpravu(zprava) {
-        const kalkulacka = document.getElementById('kalkulacka');
-        if (kalkulacka) {
-            const errorDiv = document.createElement('div');
-            errorDiv.style.cssText = 'background: #f8d7da; border: 2px solid #721c24; color: #721c24; padding: 1rem; border-radius: 6px; margin: 1rem 0;';
-            errorDiv.innerHTML = '<strong>⚠️ Chyba:</strong> ' + zprava + '<br><br>' +
-                                 '<a href="/update_cenik_2025.php" style="color: #721c24; text-decoration: underline;">Spustit migraci databáze</a> | ' +
-                                 '<a href="/test_pricing_api.php" style="color: #721c24; text-decoration: underline;">Diagnostika API</a>';
-            kalkulacka.appendChild(errorDiv);
-        }
+    function initEventListeners() {
+        // Radio buttony pro typ servisu
+        document.querySelectorAll('input[name="service-type"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                stav.typServisu = e.target.value;
+            });
+        });
+
+        // Checkboxy
+        const checkboxy = ['rohovy-dil', 'ottoman', 'tezky-nabytek', 'material'];
+        checkboxy.forEach(id => {
+            const checkbox = document.getElementById(id);
+            if (checkbox) {
+                checkbox.addEventListener('change', (e) => {
+                    const key = id.replace(/-/g, '');
+                    stav[key === 'rohovydil' ? 'rohovyDil' :
+                          key === 'tezkynabytek' ? 'tezkyNabytek' : key] = e.target.checked;
+
+                    // Aktualizovat souhrn dílů
+                    if (id === 'rohovy-dil' || id === 'ottoman') {
+                        aktualizovatSouhrnDilu();
+                    }
+                });
+            }
+        });
+
+        // Countery - live update souhrnu
+        ['sedaky', 'operky', 'podrucky', 'panely', 'relax', 'vysuv'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('change', () => {
+                    stav[id] = parseInt(input.value) || 0;
+                    aktualizovatSouhrnDilu();
+                });
+            }
+        });
     }
 
     // ========================================
@@ -94,7 +127,6 @@
 
     async function hledatAdresy(query, dropdown) {
         try {
-            // Použít WGSMap modul pro autocomplete (podporuje čísla popisná)
             const data = await WGSMap.autocomplete(query, {
                 type: 'street',
                 limit: 5,
@@ -137,9 +169,9 @@
     // ========================================
     async function vybratAdresu(formatted, lat, lon) {
         document.getElementById('calc-address').value = formatted;
+        stav.adresa = formatted;
 
         try {
-            // Zavolat OSRM routing API přes proxy
             const url = '/api/geocode_proxy.php?action=route&start_lat=' + WORKSHOP_COORDS.lat +
                         '&start_lon=' + WORKSHOP_COORDS.lon + '&end_lat=' + lat + '&end_lon=' + lon;
             const response = await fetch(url);
@@ -149,16 +181,17 @@
                 const distanceMeters = data.routes[0].distance;
                 const distanceKm = Math.round(distanceMeters / 1000);
 
-                currentDistance = distanceKm;
-                currentTransportCost = Math.round(distanceKm * 2 * TRANSPORT_RATE * 100) / 100; // Tam a zpět
+                stav.vzdalenost = distanceKm;
+                stav.dopravne = Math.round(distanceKm * 2 * TRANSPORT_RATE * 100) / 100;
 
-                // Zobrazit výsledek
                 document.getElementById('distance-value').textContent = distanceKm;
-                document.getElementById('transport-cost').textContent = currentTransportCost.toFixed(2);
+                document.getElementById('transport-cost').textContent = stav.dopravne.toFixed(2);
                 document.getElementById('distance-result').style.display = 'block';
 
-                // Zobrazit výběr služeb
-                zobrazitVyberSluzeb();
+                // Automaticky pokračovat na další krok po 1 sekundě
+                setTimeout(() => {
+                    nextStep();
+                }, 1000);
             } else {
                 alert('Nepodařilo se vypočítat vzdálenost. Zkuste jinou adresu.');
             }
@@ -169,98 +202,360 @@
     }
 
     // ========================================
-    // ZOBRAZIT VÝBĚR SLUŽEB
+    // WIZARD NAVIGACE
     // ========================================
-    function zobrazitVyberSluzeb() {
-        const servicesSection = document.getElementById('services-selection');
-        const checkboxesContainer = document.getElementById('services-checkboxes');
+    window.nextStep = function() {
+        // Validace před pokračováním
+        if (stav.krok === 1 && !stav.adresa) {
+            alert('Nejprve vyberte adresu ze seznamu návrhů.');
+            return;
+        }
 
-        checkboxesContainer.innerHTML = '';
+        // Skrýt aktuální krok
+        const currentStep = document.querySelector('.wizard-step[style*="display: block"]');
+        if (currentStep) {
+            currentStep.style.display = 'none';
+        }
 
-        calculableServices.forEach(service => {
-            const div = document.createElement('div');
-            div.className = 'service-checkbox-item';
-            div.dataset.serviceId = service.id;
+        stav.krok++;
 
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.id = 'service-' + service.id;
-            checkbox.value = service.id;
-            checkbox.addEventListener('change', () => aktualizovatVyber());
+        // Určit, který krok zobrazit
+        let nextStepId;
 
-            const label = document.createElement('label');
-            label.htmlFor = 'service-' + service.id;
-            label.innerHTML = '<span>' + service.service_name + '</span><span class="service-price">' +
-                              service.price_from + ' ' + service.price_unit + '</span>';
+        if (stav.krok === 2) {
+            nextStepId = 'step-service-type';
+        } else if (stav.krok === 3) {
+            // Podle typu servisu
+            if (stav.typServisu === 'diagnostika') {
+                // Přeskočit na krok 4 (extras)
+                stav.krok = 4;
+                nextStepId = 'step-extras';
+            } else if (stav.typServisu === 'calouneni') {
+                nextStepId = 'step-upholstery';
+            } else if (stav.typServisu === 'mechanika') {
+                nextStepId = 'step-mechanics';
+            } else if (stav.typServisu === 'kombinace') {
+                nextStepId = 'step-upholstery'; // Nejdřív čalounění
+            }
+        } else if (stav.krok === 4) {
+            // Pokud je kombinace a právě jsme byli na čalounění, jdi na mechaniku
+            if (stav.typServisu === 'kombinace' && currentStep && currentStep.id === 'step-upholstery') {
+                nextStepId = 'step-mechanics';
+                stav.krok = 3; // Zůstat na kroku 3
+            } else {
+                nextStepId = 'step-extras';
+            }
+        } else if (stav.krok === 5) {
+            // Souhrn
+            zobrazitSouhrn();
+            nextStepId = 'step-summary';
+        }
 
-            div.appendChild(checkbox);
-            div.appendChild(label);
+        // Zobrazit další krok
+        const nextStep = document.getElementById(nextStepId);
+        if (nextStep) {
+            nextStep.style.display = 'block';
+        }
 
-            // Klik na celý div = toggle checkbox
-            div.addEventListener('click', (e) => {
-                if (e.target !== checkbox) {
-                    checkbox.checked = !checkbox.checked;
-                    aktualizovatVyber();
-                }
-            });
+        aktualizovatProgress();
+        scrollToTop();
+    };
 
-            checkboxesContainer.appendChild(div);
+    window.previousStep = function() {
+        // Skrýt aktuální krok
+        const currentStep = document.querySelector('.wizard-step[style*="display: block"]');
+        if (currentStep) {
+            currentStep.style.display = 'none';
+        }
+
+        stav.krok--;
+
+        // Určit, který krok zobrazit
+        let prevStepId;
+
+        if (stav.krok === 1) {
+            prevStepId = 'step-address';
+        } else if (stav.krok === 2) {
+            prevStepId = 'step-service-type';
+        } else if (stav.krok === 3) {
+            // Podle typu servisu
+            if (stav.typServisu === 'calouneni' || stav.typServisu === 'kombinace') {
+                prevStepId = 'step-upholstery';
+            } else if (stav.typServisu === 'mechanika') {
+                prevStepId = 'step-mechanics';
+            }
+        } else if (stav.krok === 4) {
+            // Pokud je kombinace a jsme na mechanice, jdi zpět na čalounění
+            if (stav.typServisu === 'kombinace' && currentStep && currentStep.id === 'step-mechanics') {
+                prevStepId = 'step-upholstery';
+                stav.krok = 3;
+            } else {
+                prevStepId = 'step-extras';
+            }
+        }
+
+        // Zobrazit předchozí krok
+        const prevStep = document.getElementById(prevStepId);
+        if (prevStep) {
+            prevStep.style.display = 'block';
+        }
+
+        aktualizovatProgress();
+        scrollToTop();
+    };
+
+    function aktualizovatProgress() {
+        const progressSteps = document.querySelectorAll('.progress-step');
+        progressSteps.forEach((step, index) => {
+            if (index < stav.krok) {
+                step.classList.add('active');
+            } else {
+                step.classList.remove('active');
+            }
         });
+    }
 
-        servicesSection.style.display = 'block';
-        aktualizovatVyber();
+    function scrollToTop() {
+        const kalkulacka = document.getElementById('kalkulacka');
+        if (kalkulacka) {
+            kalkulacka.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     // ========================================
-    // AKTUALIZOVAT VÝBĚR SLUŽEB
+    // COUNTER CONTROLS
     // ========================================
-    function aktualizovatVyber() {
-        selectedServices = [];
-        let totalServices = 0;
-
-        document.querySelectorAll('.service-checkbox-item input[type="checkbox"]').forEach(checkbox => {
-            const parent = checkbox.closest('.service-checkbox-item');
-
-            if (checkbox.checked) {
-                parent.classList.add('selected');
-
-                const service = calculableServices.find(s => s.id == checkbox.value);
-                if (service) {
-                    selectedServices.push(service);
-                    totalServices += parseFloat(service.price_from);
-                }
-            } else {
-                parent.classList.remove('selected');
+    window.incrementCounter = function(id) {
+        const input = document.getElementById(id);
+        if (input) {
+            const max = parseInt(input.max) || 20;
+            let value = parseInt(input.value) || 0;
+            if (value < max) {
+                input.value = value + 1;
+                stav[id] = value + 1;
+                aktualizovatSouhrnDilu();
             }
-        });
-
-        // Zobrazit cenový souhrn
-        if (selectedServices.length > 0) {
-            document.getElementById('services-total').textContent = totalServices.toFixed(2) + ' €';
-            document.getElementById('transport-total').textContent = currentTransportCost.toFixed(2) + ' €';
-            document.getElementById('grand-total').innerHTML = '<strong>' + (totalServices + currentTransportCost).toFixed(2) + ' €</strong>';
-
-            document.getElementById('price-summary').style.display = 'block';
-            document.getElementById('reset-btn').style.display = 'inline-block';
-        } else {
-            document.getElementById('price-summary').style.display = 'none';
         }
+    };
+
+    window.decrementCounter = function(id) {
+        const input = document.getElementById(id);
+        if (input) {
+            let value = parseInt(input.value) || 0;
+            if (value > 0) {
+                input.value = value - 1;
+                stav[id] = value - 1;
+                aktualizovatSouhrnDilu();
+            }
+        }
+    };
+
+    // ========================================
+    // SOUHRN DÍLŮ (živý update)
+    // ========================================
+    function aktualizovatSouhrnDilu() {
+        const celkemDilu = stav.sedaky + stav.operky + stav.podrucky + stav.panely;
+        const totalPartsEl = document.getElementById('total-parts');
+        const priceBreakdownEl = document.getElementById('parts-price-breakdown');
+
+        if (totalPartsEl) {
+            totalPartsEl.textContent = celkemDilu;
+        }
+
+        if (priceBreakdownEl && celkemDilu > 0) {
+            let cena = 0;
+            if (celkemDilu === 1) {
+                cena = CENY.prvniDil;
+                priceBreakdownEl.textContent = `(1× první díl = ${CENY.prvniDil}€)`;
+            } else {
+                cena = CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
+                priceBreakdownEl.textContent = `(1× ${CENY.prvniDil}€ + ${celkemDilu - 1}× ${CENY.dalsiDil}€ = ${cena}€)`;
+            }
+
+            // Přidat rohový díl a ottoman
+            if (stav.rohovyDil) {
+                cena += CENY.rohovyDil;
+                priceBreakdownEl.textContent += ` + rohový díl (${CENY.rohovyDil}€)`;
+            }
+            if (stav.ottoman) {
+                cena += CENY.ottoman;
+                priceBreakdownEl.textContent += ` + ottoman (${CENY.ottoman}€)`;
+            }
+        } else if (priceBreakdownEl) {
+            priceBreakdownEl.textContent = '';
+        }
+    }
+
+    // ========================================
+    // ZOBRAZIT CENOVÝ SOUHRN
+    // ========================================
+    function zobrazitSouhrn() {
+        const summaryDetails = document.getElementById('summary-details');
+        const grandTotal = document.getElementById('grand-total');
+
+        let html = '';
+        let celkem = 0;
+
+        // Dopravné
+        html += `<div class="summary-line">
+            <span>Dopravné (${stav.vzdalenost} km × 2 × ${TRANSPORT_RATE}€):</span>
+            <span class="summary-price">${stav.dopravne.toFixed(2)} €</span>
+        </div>`;
+        celkem += stav.dopravne;
+
+        // Diagnostika
+        if (stav.typServisu === 'diagnostika') {
+            html += `<div class="summary-line">
+                <span>Inspekce / Diagnostika:</span>
+                <span class="summary-price">${CENY.diagnostika.toFixed(2)} €</span>
+            </div>`;
+            celkem += CENY.diagnostika;
+        }
+
+        // Čalounické práce
+        if (stav.typServisu === 'calouneni' || stav.typServisu === 'kombinace') {
+            const celkemDilu = stav.sedaky + stav.operky + stav.podrucky + stav.panely;
+
+            if (celkemDilu > 0) {
+                const cenaDilu = celkemDilu === 1 ?
+                    CENY.prvniDil :
+                    CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
+
+                html += `<div class="summary-line">
+                    <span>Čalounické práce (${celkemDilu} dílů):</span>
+                    <span class="summary-price">${cenaDilu.toFixed(2)} €</span>
+                </div>`;
+
+                if (celkemDilu > 1) {
+                    html += `<div class="summary-subline">
+                        ↳ První díl: ${CENY.prvniDil}€, další díly: ${celkemDilu - 1}× ${CENY.dalsiDil}€
+                    </div>`;
+                }
+
+                celkem += cenaDilu;
+            }
+
+            // Rohový díl
+            if (stav.rohovyDil) {
+                html += `<div class="summary-line">
+                    <span>Rohový díl:</span>
+                    <span class="summary-price">${CENY.rohovyDil.toFixed(2)} €</span>
+                </div>`;
+                celkem += CENY.rohovyDil;
+            }
+
+            // Ottoman
+            if (stav.ottoman) {
+                html += `<div class="summary-line">
+                    <span>Ottoman / Lehátko:</span>
+                    <span class="summary-price">${CENY.ottoman.toFixed(2)} €</span>
+                </div>`;
+                celkem += CENY.ottoman;
+            }
+        }
+
+        // Mechanické práce
+        if (stav.typServisu === 'mechanika' || stav.typServisu === 'kombinace') {
+            const celkemMechanismu = stav.relax + stav.vysuv;
+
+            if (celkemMechanismu > 0) {
+                const cenaMechanismu = celkemMechanismu * CENY.mechanismus;
+
+                html += `<div class="summary-line">
+                    <span>Mechanické části (${celkemMechanismu}× mechanismus):</span>
+                    <span class="summary-price">${cenaMechanismu.toFixed(2)} €</span>
+                </div>`;
+
+                if (stav.relax > 0) {
+                    html += `<div class="summary-subline">
+                        ↳ Relax mechanismy: ${stav.relax}× ${CENY.mechanismus}€
+                    </div>`;
+                }
+                if (stav.vysuv > 0) {
+                    html += `<div class="summary-subline">
+                        ↳ Výsuvné mechanismy: ${stav.vysuv}× ${CENY.mechanismus}€
+                    </div>`;
+                }
+
+                celkem += cenaMechanismu;
+            }
+        }
+
+        // Druhá osoba
+        if (stav.tezkyNabytek) {
+            html += `<div class="summary-line">
+                <span>Druhá osoba (těžký nábytek >50kg):</span>
+                <span class="summary-price">${CENY.druhaOsoba.toFixed(2)} €</span>
+            </div>`;
+            celkem += CENY.druhaOsoba;
+        }
+
+        // Materiál
+        if (stav.material) {
+            html += `<div class="summary-line">
+                <span>Materiál z vlastních zdrojů:</span>
+                <span class="summary-price">${CENY.material.toFixed(2)} €</span>
+            </div>`;
+            celkem += CENY.material;
+        }
+
+        summaryDetails.innerHTML = html;
+        grandTotal.innerHTML = `<strong>${celkem.toFixed(2)} €</strong>`;
     }
 
     // ========================================
     // RESETOVAT KALKULAČKU
     // ========================================
     window.resetovatKalkulacku = function() {
+        // Reset stavu
+        stav = {
+            krok: 1,
+            adresa: null,
+            vzdalenost: 0,
+            dopravne: 0,
+            typServisu: 'calouneni',
+            sedaky: 0,
+            operky: 0,
+            podrucky: 0,
+            panely: 0,
+            rohovyDil: false,
+            ottoman: false,
+            relax: 0,
+            vysuv: 0,
+            tezkyNabytek: false,
+            material: false
+        };
+
+        // Reset formuláře
         document.getElementById('calc-address').value = '';
         document.getElementById('distance-result').style.display = 'none';
-        document.getElementById('services-selection').style.display = 'none';
-        document.getElementById('price-summary').style.display = 'none';
-        document.getElementById('reset-btn').style.display = 'none';
         document.getElementById('address-suggestions').style.display = 'none';
 
-        selectedServices = [];
-        currentDistance = 0;
-        currentTransportCost = 0;
+        // Reset radio buttons
+        document.querySelector('input[name="service-type"][value="calouneni"]').checked = true;
+
+        // Reset counterů
+        ['sedaky', 'operky', 'podrucky', 'panely', 'relax', 'vysuv'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) input.value = 0;
+        });
+
+        // Reset checkboxů
+        ['rohovy-dil', 'ottoman', 'tezky-nabytek', 'material'].forEach(id => {
+            const checkbox = document.getElementById(id);
+            if (checkbox) checkbox.checked = false;
+        });
+
+        // Skrýt všechny kroky
+        document.querySelectorAll('.wizard-step').forEach(step => {
+            step.style.display = 'none';
+        });
+
+        // Zobrazit první krok
+        document.getElementById('step-address').style.display = 'block';
+
+        aktualizovatProgress();
+        scrollToTop();
     };
 
 })();

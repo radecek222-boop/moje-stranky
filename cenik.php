@@ -74,66 +74,265 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
     <div class="calculator-section" id="kalkulacka">
       <h2 class="section-title">Kalkulace ceny služby</h2>
       <p class="section-text">
-        Zadejte vaši adresu a vyberte požadované služby pro orientační výpočet ceny.
+        Odpovězte na několik jednoduchých otázek a zjistěte orientační cenu servisu.
       </p>
 
-      <!-- Krok 1: Zadání adresy -->
-      <div class="calculator-step">
-        <h3>1. Zadejte adresu zákazníka</h3>
+      <!-- Progress Indicator -->
+      <div class="wizard-progress" id="wizard-progress">
+        <div class="progress-step active" data-step="1">
+          <span class="step-number">1</span>
+          <span class="step-label">Adresa</span>
+        </div>
+        <div class="progress-step" data-step="2">
+          <span class="step-number">2</span>
+          <span class="step-label">Typ servisu</span>
+        </div>
+        <div class="progress-step" data-step="3">
+          <span class="step-number">3</span>
+          <span class="step-label">Detaily</span>
+        </div>
+        <div class="progress-step" data-step="4">
+          <span class="step-number">4</span>
+          <span class="step-label">Souhrn</span>
+        </div>
+      </div>
+
+      <!-- KROK 1: Zadání adresy -->
+      <div class="wizard-step" id="step-address" style="display: block;">
+        <h3 class="step-title">1. Zadejte adresu zákazníka</h3>
+        <p class="step-desc">Pro výpočet dopravného potřebujeme znát vaši adresu.</p>
+
         <div class="form-group">
           <label for="calc-address">Adresa:</label>
           <input
             type="text"
             id="calc-address"
             class="calc-input"
-            placeholder="Začněte psát adresu..."
+            placeholder="Začněte psát adresu (ulice, město)..."
             autocomplete="off"
           >
           <div id="address-suggestions" class="suggestions-dropdown" style="display: none;"></div>
         </div>
 
         <div id="distance-result" class="calc-result" style="display: none;">
-          <p><strong>Vzdálenost z dílny:</strong> <span id="distance-value">-</span> km</p>
-          <p><strong>Dopravné (tam a zpět):</strong> <span id="transport-cost">-</span> €</p>
+          <div class="result-box">
+            <p><strong>Vzdálenost z dílny:</strong> <span id="distance-value">-</span> km</p>
+            <p><strong>Dopravné (tam a zpět):</strong> <span id="transport-cost" class="highlight-price">-</span> €</p>
+          </div>
         </div>
       </div>
 
-      <!-- Krok 2: Výběr služeb -->
-      <div class="calculator-step" id="services-selection" style="display: none;">
-        <h3>2. Vyberte požadované služby</h3>
-        <div id="services-checkboxes" class="services-grid">
-          <!-- Načteno dynamicky z API -->
+      <!-- KROK 2: Typ servisu -->
+      <div class="wizard-step" id="step-service-type" style="display: none;">
+        <h3 class="step-title">2. Jaký typ servisu potřebujete?</h3>
+        <p class="step-desc">Vyberte, co u vás potřebujeme udělat.</p>
+
+        <div class="radio-group">
+          <label class="radio-card">
+            <input type="radio" name="service-type" value="diagnostika">
+            <div class="radio-content">
+              <div class="radio-title">Pouze diagnostika / inspekce</div>
+              <div class="radio-desc">Technik provede pouze zjištění rozsahu poškození a posouzení stavu.</div>
+              <div class="radio-price">155 €</div>
+            </div>
+          </label>
+
+          <label class="radio-card">
+            <input type="radio" name="service-type" value="calouneni" checked>
+            <div class="radio-content">
+              <div class="radio-title">Čalounické práce</div>
+              <div class="radio-desc">Oprava včetně rozčalounění konstrukce (sedáky, opěrky, područky).</div>
+              <div class="radio-price">Od 190 €</div>
+            </div>
+          </label>
+
+          <label class="radio-card">
+            <input type="radio" name="service-type" value="mechanika">
+            <div class="radio-content">
+              <div class="radio-title">Mechanické opravy</div>
+              <div class="radio-desc">Oprava mechanismů (relax, výsuv) bez rozčalounění.</div>
+              <div class="radio-price">155 € / díl</div>
+            </div>
+          </label>
+
+          <label class="radio-card">
+            <input type="radio" name="service-type" value="kombinace">
+            <div class="radio-content">
+              <div class="radio-title">Kombinace čalounění + mechaniky</div>
+              <div class="radio-desc">Komplexní oprava zahrnující čalounění i mechanické části.</div>
+              <div class="radio-price">Dle rozsahu</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="wizard-buttons">
+          <button class="btn-secondary" onclick="previousStep()">Zpět</button>
+          <button class="btn-primary" onclick="nextStep()">Pokračovat</button>
         </div>
       </div>
 
-      <!-- Krok 3: Cenový souhrn -->
-      <div class="calculator-step" id="price-summary" style="display: none;">
-        <h3>3. Cenový souhrn</h3>
+      <!-- KROK 3A: Čalounické práce - počet dílů -->
+      <div class="wizard-step" id="step-upholstery" style="display: none;">
+        <h3 class="step-title">3. Kolik dílů potřebuje přečalounit?</h3>
+        <p class="step-desc">Jeden díl = sedák NEBO opěrka NEBO područka NEBO panel. První díl stojí 190€, každý další 70€.</p>
+
+        <div class="counter-group">
+          <div class="counter-item">
+            <label>Sedáky</label>
+            <div class="counter-controls">
+              <button class="btn-counter" onclick="decrementCounter('sedaky')">−</button>
+              <input type="number" id="sedaky" value="0" min="0" max="20" readonly>
+              <button class="btn-counter" onclick="incrementCounter('sedaky')">+</button>
+            </div>
+          </div>
+
+          <div class="counter-item">
+            <label>Opěrky</label>
+            <div class="counter-controls">
+              <button class="btn-counter" onclick="decrementCounter('operky')">−</button>
+              <input type="number" id="operky" value="0" min="0" max="20" readonly>
+              <button class="btn-counter" onclick="incrementCounter('operky')">+</button>
+            </div>
+          </div>
+
+          <div class="counter-item">
+            <label>Područky</label>
+            <div class="counter-controls">
+              <button class="btn-counter" onclick="decrementCounter('podrucky')">−</button>
+              <input type="number" id="podrucky" value="0" min="0" max="20" readonly>
+              <button class="btn-counter" onclick="incrementCounter('podrucky')">+</button>
+            </div>
+          </div>
+
+          <div class="counter-item">
+            <label>Panely (zadní/boční)</label>
+            <div class="counter-controls">
+              <button class="btn-counter" onclick="decrementCounter('panely')">−</button>
+              <input type="number" id="panely" value="0" min="0" max="20" readonly>
+              <button class="btn-counter" onclick="incrementCounter('panely')">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="checkbox-group">
+          <label class="checkbox-card">
+            <input type="checkbox" id="rohovy-dil">
+            <div class="checkbox-content">
+              <div class="checkbox-title">Rohový díl (1 modul + 2 díly navíc)</div>
+              <div class="checkbox-price">+ 330 €</div>
+            </div>
+          </label>
+
+          <label class="checkbox-card">
+            <input type="checkbox" id="ottoman">
+            <div class="checkbox-content">
+              <div class="checkbox-title">Ottoman / Lehátko</div>
+              <div class="checkbox-price">+ 260 €</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="parts-summary" id="parts-summary">
+          <strong>Celkem dílů:</strong> <span id="total-parts">0</span>
+          <span class="price-breakdown" id="parts-price-breakdown"></span>
+        </div>
+
+        <div class="wizard-buttons">
+          <button class="btn-secondary" onclick="previousStep()">Zpět</button>
+          <button class="btn-primary" onclick="nextStep()">Pokračovat</button>
+        </div>
+      </div>
+
+      <!-- KROK 3B: Mechanické práce -->
+      <div class="wizard-step" id="step-mechanics" style="display: none;">
+        <h3 class="step-title">3. Mechanické části</h3>
+        <p class="step-desc">Vyberte, které mechanické části potřebují opravu.</p>
+
+        <div class="counter-group">
+          <div class="counter-item">
+            <label>Relax mechanismy</label>
+            <div class="counter-controls">
+              <button class="btn-counter" onclick="decrementCounter('relax')">−</button>
+              <input type="number" id="relax" value="0" min="0" max="10" readonly>
+              <button class="btn-counter" onclick="incrementCounter('relax')">+</button>
+            </div>
+            <div class="counter-price">70 € / kus</div>
+          </div>
+
+          <div class="counter-item">
+            <label>Výsuvné mechanismy</label>
+            <div class="counter-controls">
+              <button class="btn-counter" onclick="decrementCounter('vysuv')">−</button>
+              <input type="number" id="vysuv" value="0" min="0" max="10" readonly>
+              <button class="btn-counter" onclick="incrementCounter('vysuv')">+</button>
+            </div>
+            <div class="counter-price">70 € / kus</div>
+          </div>
+        </div>
+
+        <div class="wizard-buttons">
+          <button class="btn-secondary" onclick="previousStep()">Zpět</button>
+          <button class="btn-primary" onclick="nextStep()">Pokračovat</button>
+        </div>
+      </div>
+
+      <!-- KROK 4: Další parametry -->
+      <div class="wizard-step" id="step-extras" style="display: none;">
+        <h3 class="step-title">4. Další parametry</h3>
+        <p class="step-desc">Poslední detaily pro přesný výpočet ceny.</p>
+
+        <div class="checkbox-group">
+          <label class="checkbox-card">
+            <input type="checkbox" id="tezky-nabytek">
+            <div class="checkbox-content">
+              <div class="checkbox-title">Nábytek je těžší než 50 kg</div>
+              <div class="checkbox-desc">Bude potřeba druhá osoba pro manipulaci</div>
+              <div class="checkbox-price">+ 40 €</div>
+            </div>
+          </label>
+
+          <label class="checkbox-card">
+            <input type="checkbox" id="material">
+            <div class="checkbox-content">
+              <div class="checkbox-title">Materiál z vlastních zdrojů</div>
+              <div class="checkbox-desc">Výplně (vata, pěna) z naší zásoby</div>
+              <div class="checkbox-price">+ 40 €</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="wizard-buttons">
+          <button class="btn-secondary" onclick="previousStep()">Zpět</button>
+          <button class="btn-primary" onclick="nextStep()">Zobrazit souhrn</button>
+        </div>
+      </div>
+
+      <!-- KROK 5: Cenový souhrn -->
+      <div class="wizard-step" id="step-summary" style="display: none;">
+        <h3 class="step-title">Orientační cena servisu</h3>
+
         <div class="price-summary-box">
-          <div class="summary-line">
-            <span>Služby celkem:</span>
-            <span id="services-total">0 €</span>
+          <div id="summary-details">
+            <!-- Načteno dynamicky JavaScriptem -->
           </div>
-          <div class="summary-line">
-            <span>Dopravné:</span>
-            <span id="transport-total">0 €</span>
-          </div>
+
           <div class="summary-line total">
-            <span><strong>Celková cena:</strong></span>
-            <span id="grand-total"><strong>0 €</strong></span>
+            <span><strong>CELKOVÁ CENA:</strong></span>
+            <span id="grand-total" class="total-price"><strong>0 €</strong></span>
           </div>
-          <p class="summary-note">
-            * Ceny jsou orientační a vztahují se pouze na práci. Materiál se účtuje zvlášť.
-          </p>
+
+          <div class="summary-note">
+            <strong>Upozornění:</strong> Ceny jsou orientační a vztahují se <strong>pouze na práci</strong>.
+            Originální materiál z továrny Natuzzi a náhradní mechanické díly se účtují zvlášť podle skutečné spotřeby.
+          </div>
+        </div>
+
+        <div class="wizard-buttons">
+          <button class="btn-secondary" onclick="previousStep()">Zpět</button>
+          <button class="btn-primary" onclick="resetovatKalkulacku()">Nová kalkulace</button>
         </div>
       </div>
 
-      <!-- Reset Button -->
-      <div class="calculator-actions">
-        <button class="btn-reset" onclick="resetovatKalkulacku()" style="display: none;" id="reset-btn">
-          Nová kalkulace
-        </button>
-      </div>
     </div>
 
     <hr style="margin: 60px 0; border: none; border-top: 2px dashed rgba(44, 62, 80, 0.2);">
