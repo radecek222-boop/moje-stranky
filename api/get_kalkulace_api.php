@@ -23,6 +23,9 @@ if (!isset($_SESSION['user_id'])) {
 try {
     $pdo = getDbConnection();
 
+    // Zapnout error mode pro debugging
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
     // Získat reklamace_id z GET parametru
     $reklamaceId = $_GET['reklamace_id'] ?? null;
 
@@ -32,6 +35,9 @@ try {
 
     // Sanitizace
     $reklamaceId = trim($reklamaceId);
+
+    // Log pro debugging
+    error_log("GET_KALKULACE: Hledám reklamaci s ID: " . $reklamaceId);
 
     // Najít reklamaci v databázi
     $stmt = $pdo->prepare("
@@ -56,6 +62,9 @@ try {
     ]);
 
     $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Log výsledku
+    error_log("GET_KALKULACE: Nalezeno: " . ($reklamace ? 'ANO' : 'NE'));
 
     if (!$reklamace) {
         echo json_encode([
@@ -101,18 +110,22 @@ try {
 
 } catch (PDOException $e) {
     error_log("GET_KALKULACE API - Database error: " . $e->getMessage());
+    error_log("GET_KALKULACE API - Stack trace: " . $e->getTraceAsString());
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'Chyba databáze'
+        'error' => 'Chyba databáze',
+        'detail' => $e->getMessage() // Přidat detaily pro debugging
     ]);
 
 } catch (Exception $e) {
     error_log("GET_KALKULACE API - Error: " . $e->getMessage());
+    error_log("GET_KALKULACE API - Stack trace: " . $e->getTraceAsString());
     http_response_code(400);
     echo json_encode([
         'success' => false,
-        'error' => $e->getMessage()
+        'error' => $e->getMessage(),
+        'detail' => $e->getTraceAsString()
     ]);
 }
 ?>
