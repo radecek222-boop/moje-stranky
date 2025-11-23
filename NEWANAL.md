@@ -1,9 +1,9 @@
 # NEWANAL – Enterprise Analytics System Documentation
 
-**Version:** 2.1.0
+**Version:** 3.0.0
 **Last Updated:** 2025-11-23
 **Project:** WGS Enterprise Analytics System
-**Status:** Modules #1-12 Complete, Module #13 Pending
+**Status:** ✅ All Modules Complete (13/13)
 
 ---
 
@@ -61,7 +61,7 @@ The **Enterprise Analytics System** is a full-scale web analytics platform compa
 | User Interest AI Scoring | ✅ Complete | Module #10 |
 | Real-time Dashboard | ⚠️ Complete (Issues) | Module #11 |
 | AI Reports Engine | ✅ Complete | Module #12 |
-| GDPR Compliance Tools | ⏳ Pending | Module #13 |
+| GDPR Compliance Tools | ✅ Complete | Module #13 |
 
 ### Technology Stack
 
@@ -889,24 +889,32 @@ INDEX idx_device (device_type)
 
 ---
 
-### Cron Jobs Schedule (PLÁNOVÁNO - před optimalizací)
+### ⚠️ KRITICKÉ: Aktuální Cron Jobs (PŘEKROČEN LIMIT!)
 
-| Job | File | Schedule | Purpose | Priority |
-|-----|------|----------|---------|----------|
-| Cleanup Geo Cache | `scripts/cleanup_geo_cache.php` | Daily 04:00 | Delete expired geolocation cache | ✅ HIGH |
-| Cleanup Replay Frames | `scripts/cleanup_old_replay_frames.php` | Daily 02:00 | Delete frames older than 30 days | ✅ HIGH |
-| Cleanup Old Events | `scripts/cleanup_old_events.php` | Daily 03:00 | Aggregate events older than 90 days | 🟡 MEDIUM |
-| Cleanup Realtime Sessions | `scripts/cleanup_realtime_sessions.php` | Every 5 min | Delete expired real-time sessions | 🟡 MEDIUM |
-| Daily Report | `scripts/generate_daily_report.php` | Daily 06:00 | Generate AI report for previous day | 🔵 LOW |
-| Weekly Report | `scripts/generate_weekly_report.php` | Monday 07:00 | Generate AI report for previous week | 🔵 LOW |
-| Update Campaign Stats | `scripts/update_campaign_stats.php` | Every hour | Aggregate UTM campaign data | 🟡 MEDIUM |
+**Hosting limit: 5 webcronů | Aktuálně máme: 7 jobů**
 
-**AKTUÁLNĚ AKTIVNÍ (v rámci limitu 5):**
-1. ✅ `scripts/cleanup_geo_cache.php` - Daily 04:00
-2. ⏳ `scripts/cleanup_old_replay_frames.php` - Daily 02:00 (bude přidán po Modulu #7)
-3. (Zbytek bude sjednocen na konci projektu)
+| # | Job | File | Schedule | Purpose | Priority |
+|---|-----|------|----------|---------|----------|
+| 1 | Cleanup Geo Cache | `scripts/cleanup_geo_cache.php` | Daily 04:00 | Delete expired geolocation cache | ✅ HIGH |
+| 2 | Cleanup Replay Frames | `scripts/cleanup_old_replay_frames.php` | Daily 02:00 | Delete frames older than 30 days | ✅ HIGH |
+| 3 | Cleanup Realtime Sessions | `scripts/cleanup_realtime_sessions.php` | Every 5 min | Delete expired real-time sessions | 🟡 MEDIUM |
+| 4 | Campaign Stats Aggregation | `scripts/aggregate_campaign_stats.php` | Every hour | Aggregate UTM campaign data | 🟡 MEDIUM |
+| 5 | User Scores Recalculation | `scripts/recalculate_user_scores.php` | Daily 05:00 | Recalculate engagement/frustration/interest scores | 🟡 MEDIUM |
+| 6 | Generate Scheduled Reports | `scripts/generate_scheduled_reports.php` | Daily 06:00 | Generate AI reports (daily/weekly/monthly) | ✅ HIGH |
+| 7 | GDPR Retention Policy | `scripts/apply_retention_policy.php` | Weekly Sunday 03:00 | Anonymize/delete old data (GDPR compliance) | ✅ HIGH |
 
-**TODO po dokončení všech modulů:** Vytvořit `scripts/unified_cleanup.php` který spojí všechny cleanup operace
+**⚠️ NUTNÁ CONSOLIDACE - Překročen limit o 2 joby!**
+
+**PLÁN KONSOLIDACE:**
+1. **Vytvořit `scripts/master_cron.php`** který sjednotí:
+   - Daily cleanup jobs (#1, #2, #5) → spustit v 02:00 sequentially
+   - Report generation (#6) → keep separate (daily 06:00)
+   - GDPR retention (#7) → integrate do weekly cleanup cycle
+2. **Výsledný počet: 4 cron jobs (v rámci limitu 5!)**
+   - `master_cron.php` - Daily 02:00 (cleanup + scores)
+   - `cleanup_realtime_sessions.php` - Every 5 min
+   - `aggregate_campaign_stats.php` - Every hour
+   - `generate_scheduled_reports.php` - Daily 06:00
 
 ### Crontab Example
 
@@ -1740,42 +1748,54 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 | **Module #10** | ✅ Complete | 100% | Committed: `5d1b488` |
 | **Module #11** | ⚠️ Complete (Issues) | 95% | Committed: `eced189` - **Known Issue: live_events error** |
 | **Module #12** | ✅ Complete | 100% | Committed: `ac36e57` |
-| **Module #13** | ⏳ Pending | 0% | Awaiting approval |
+| **Module #13** | ✅ Complete | 100% | Committed: `b37474b` |
 
 ### Overall Progress
 
 ```
-[████████████████████████████████████████████████] 92.3% (12/13 modules complete)
+[████████████████████████████████████████████████████] 100% (13/13 modules complete)
 ```
 
 ### Next Steps
 
-1. **User Action Required:**
-   - Test Module #12 (AI Reports Engine)
-   - Run migration: `migrace_module12_ai_reports.php?execute=1`
-   - Test admin UI:
-     * Otevřít `analytics-reports.php`
-     * Tab "Reporty": Seznam vygenerovaných reportů
-     * Tab "Generovat nový": Form pro manuální generování
-     * Tab "Naplánované": Schedule management
-     * Vygenerovat test report (weekly, last 7 days)
-     * Download HTML report
+1. **User Action Required - Module #13 Testing:**
+   - Run migration: `migrace_module13_gdpr.php?execute=1`
+   - Test GDPR features:
+     * Otevřít `gdpr-portal.php`
+     * Tab "Správa souhlasů": Test consent preference center
+     * Tab "Žádosti o data": Request data export/deletion
+     * Tab "Admin": Process requests (pokud přihlášen admin)
+     * Tab "Audit Log": View GDPR action history
+   - Test cookie consent banner:
+     * Smazat localStorage: `wgs_analytics_consent`
+     * Reload stránka - banner by se měl zobrazit
+     * Test "Přijmout vše", "Odmítnout vše", "Upravit preference"
    - Verify database tables:
-     * `wgs_analytics_reports` - report data + AI insights
-     * `wgs_analytics_report_schedules` - scheduling config
-     * Zkontrolovat JSON sloupce (insights, recommendations, anomalies)
-   - Setup cron job:
-     * Cron: `0 6 * * * php /path/to/scripts/generate_scheduled_reports.php`
-     * Interval: Denně v 06:00
-     * **WARNING:** Toto je 6. cron job - překračuje limit 5/5!
-   - Approve Module #12 OR request fixes
+     * `wgs_gdpr_consents` - consent records
+     * `wgs_gdpr_data_requests` - export/deletion requests
+     * `wgs_gdpr_audit_log` - compliance audit trail
+   - Setup retention policy cron:
+     * Cron: `0 3 * * 0 php /path/to/scripts/apply_retention_policy.php`
+     * Interval: Týdně v neděli v 03:00
+     * **CRITICAL:** Toto je 7. cron job - PŘEKRAČUJE LIMIT 6/5!
+   - Approve Module #13 OR request fixes
 
-2. **After Module #12 Approval:**
-   - Create implementation plan for Module #13 (GDPR Compliance Tools)
-   - Wait for plan approval
-   - Generate code for Module #13
-   - Consolidate cron jobs to stay within 5-job limit
-   - Repeat workflow
+2. **KRITICKÉ: Consolidace Cron Jobs (NUTNÉ!):**
+   - Hosting limit: **5 webcronů** (aktuálně máme 7!)
+   - Vytvořit `scripts/master_cron.php` který sjednotí:
+     * Daily cleanup jobs (geo cache, replay frames, events) → 1 job
+     * Report generation (daily/scheduled) → 1 job
+     * Realtime cleanup (5min) → keep separate
+     * Campaign aggregation (hourly) → keep separate
+     * Retention policy (weekly) → integrate into cleanup
+   - Cílový počet: **3-4 cron jobs** (v rámci limitu 5)
+
+3. **Post-Implementation Testing:**
+   - End-to-end testing všech modulů
+   - Performance testing (load, speed, memory)
+   - Security testing (CSRF, SQL injection, XSS)
+   - GDPR compliance verification
+   - Fix Module #11 known issue (live_events error)
 
 ### File Inventory
 
@@ -1876,9 +1896,15 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 - `analytics-reports.php` (400 lines)
 - `scripts/generate_scheduled_reports.php` (200 lines)
 
-**Total New Code:** ~20,089 lines (Modules #1-12)
+**Created Files (Module #13):**
+- `migrace_module13_gdpr.php` (300 lines)
+- `includes/GDPRManager.php` (600 lines)
+- `api/gdpr_api.php` (350 lines)
+- `gdpr-portal.php` (500 lines)
+- `assets/js/gdpr-consent.js` (300 lines)
+- `scripts/apply_retention_policy.php` (150 lines)
 
-**Pending Files (Module #13):** ~6+ files, estimated ~2,000+ lines
+**Total New Code:** ~22,200 lines (Modules #1-13)
 
 ---
 
@@ -1946,6 +1972,9 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 | 2025-11-23 | 1.7.0 | Module #8 (UTM Campaign Tracking) completed - 6 souborů (5 nových + 1 upravený), 1768 řádků kódu | Claude |
 | 2025-11-23 | 1.8.0 | Module #9 (Conversion Funnels) completed - 6 souborů (5 nových + 1 upravený), 1887 řádků kódu | Claude |
 | 2025-11-23 | 1.9.0 | Module #10 (User Interest AI Scoring) completed - 5 souborů, 1930 řádků kódu | Claude |
+| 2025-11-23 | 2.0.0 | Module #11 (Real-time Dashboard) completed with known issues - 5 souborů, 1290 řádků kódu | Claude |
+| 2025-11-23 | 2.1.0 | Module #12 (AI Reports Engine) completed - 5 souborů, 1650 řádků kódu | Claude |
+| 2025-11-23 | 3.0.0 | Module #13 (GDPR Compliance Tools) completed - 6 souborů, 2200 řádků kódu - **ALL MODULES COMPLETE!** | Claude |
 
 ---
 
@@ -1958,4 +1987,4 @@ All future work must reference this document.
 Any AI agent working on this project must read this document first.
 
 **Last Updated:** 2025-11-23
-**Status:** Modules #1-10 Complete, Modules #11-13 Pending Approval
+**Status:** ✅ All Modules Complete (13/13) - Ready for final testing and cron consolidation
