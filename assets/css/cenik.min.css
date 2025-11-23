@@ -1241,6 +1241,7 @@
     flex-direction: column;
     gap: 0.5rem;
     margin: 0.75rem 0;
+    width: 100%;
 }
 
 .checkbox-card {
@@ -1248,11 +1249,22 @@
     flex-direction: column;
     border: 2px solid #ddd;
     border-radius: 6px;
-    padding: 0.65rem 0.75rem 0.65rem 3rem;
+    padding: 0.4rem 0.6rem 0.4rem 2.5rem;
     cursor: pointer;
     transition: all 0.3s;
     position: relative;
-    min-height: 65px;
+    min-height: 50px;
+    max-height: 50px;
+    height: 50px;
+    overflow: hidden;
+    width: 100%;
+    /* Override globální label styly */
+    font-size: inherit !important;
+    font-weight: normal !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    color: inherit !important;
+    margin-bottom: 0 !important;
 }
 
 .checkbox-card::before {
