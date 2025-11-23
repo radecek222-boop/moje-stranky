@@ -88,6 +88,7 @@ try {
                 $note['author'] = $note['created_by'];
                 $note['author_name'] = $note['created_by'];
                 $note['timestamp'] = $note['created_at'];
+                $note['text'] = $note['note_text'];  // ✅ KRITICKÉ: Mapování textu poznámky
                 unset($note['is_read']);
             }
 
