@@ -607,7 +607,16 @@ try {
 } catch (Exception $e) {
     // Log error for debugging
     error_log('SAVE.PHP ERROR: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ':' . $e->getLine());
-    error_log('SAVE.PHP POST DATA: ' . json_encode($_POST));
+
+    // ✅ SECURITY FIX: Sanitizovat POST data před logováním (odstranit citlivá pole)
+    $safePost = $_POST;
+    $sensitiveKeys = ['password', 'csrf_token', 'credit_card', 'pin', 'ssn', 'card_number'];
+    foreach ($sensitiveKeys as $key) {
+        if (isset($safePost[$key])) {
+            $safePost[$key] = '[REDACTED]';
+        }
+    }
+    error_log('SAVE.PHP POST DATA: ' . json_encode($safePost));
 
     http_response_code(400);
     echo json_encode([
