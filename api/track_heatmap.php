@@ -1,0 +1,281 @@
+<?php
+/**
+ * Track Heatmap API - Agregace dat pro heatmap
+ *
+ * Tento endpoint přijímá click a scroll data z Modulu #5 a agreguje je
+ * do heatmap tabulek pro rychlou vizualizaci.
+ *
+ * Používá UPSERT pattern (INSERT ON DUPLICATE KEY UPDATE) pro efektivní agregaci.
+ *
+ * @version 1.0.0
+ * @date 2025-11-23
+ * @module Module #6 - Heatmap Engine
+ */
+
+require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
+require_once __DIR__ . '/../includes/api_response.php';
+require_once __DIR__ . '/../includes/rate_limiter.php';
+
+header('Content-Type: application/json; charset=utf-8');
+
+// CORS headers
+header('Access-Control-Allow-Origin: https://www.wgs-service.cz');
+header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Headers: Content-Type, X-CSRF-TOKEN');
+
+// OPTIONS request pro CORS preflight
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+// Pouze POST metoda
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    sendJsonError('Pouze POST metoda je povolena', 405);
+}
+
+try {
+    $pdo = getDbConnection();
+
+    // Rate limiting - 1000 požadavků za hodinu per IP
+    $clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $rateLimiter = new RateLimiter($pdo);
+
+    $rateLimitResult = $rateLimiter->checkLimit($clientIp, 'track_heatmap', [
+        'max_attempts' => 1000,
+        'window_minutes' => 60,
+        'block_minutes' => 60
+    ]);
+
+    if (!$rateLimitResult['allowed']) {
+        sendJsonError($rateLimitResult['message'], 429);
+    }
+
+    // Získání JSON dat
+    $inputData = json_decode(file_get_contents('php://input'), true);
+
+    if (!$inputData) {
+        $inputData = $_POST;
+    }
+
+    // CSRF validace
+    $csrfToken = $inputData['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+    if (!validateCSRFToken($csrfToken)) {
+        sendJsonError('Neplatný CSRF token', 403);
+    }
+
+    // ========================================
+    // VALIDACE POVINNÝCH POLÍ
+    // ========================================
+    if (empty($inputData['page_url'])) {
+        sendJsonError('Chybí povinné pole: page_url', 400);
+    }
+
+    if (empty($inputData['device_type'])) {
+        sendJsonError('Chybí povinné pole: device_type', 400);
+    }
+
+    // ========================================
+    // SANITIZACE A VALIDACE DAT
+    // ========================================
+    $pageUrl = filter_var($inputData['page_url'], FILTER_VALIDATE_URL);
+    if (!$pageUrl) {
+        sendJsonError('Neplatná URL adresa', 400);
+    }
+
+    // Normalizace URL (odstranit query params a hash)
+    $parsedUrl = parse_url($pageUrl);
+    $normalizedUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . ($parsedUrl['path'] ?? '/');
+
+    // Validace device_type
+    $deviceType = sanitizeInput($inputData['device_type']);
+    $povoleneDeviceTypes = ['desktop', 'mobile', 'tablet'];
+    if (!in_array($deviceType, $povoleneDeviceTypes)) {
+        sendJsonError('Neplatný device_type (povolené: desktop, mobile, tablet)', 400);
+    }
+
+    $clicksAggregated = 0;
+    $scrollBucketsUpdated = 0;
+
+    // ========================================
+    // AGREGACE CLICK DATA
+    // ========================================
+    if (!empty($inputData['clicks']) && is_array($inputData['clicks'])) {
+        foreach ($inputData['clicks'] as $click) {
+            if (!isset($click['x_percent']) || !isset($click['y_percent'])) {
+                continue; // Přeskočit neplatné kliky
+            }
+
+            $xPercent = round((float)$click['x_percent'], 2);
+            $yPercent = round((float)$click['y_percent'], 2);
+
+            // Validace rozsahu (0-100%)
+            if ($xPercent < 0 || $xPercent > 100 || $yPercent < 0 || $yPercent > 100) {
+                continue;
+            }
+
+            // Viewport data (optional)
+            $viewportWidth = isset($click['viewport_width']) ? (int)$click['viewport_width'] : null;
+            $viewportHeight = isset($click['viewport_height']) ? (int)$click['viewport_height'] : null;
+
+            // UPSERT: INSERT nebo UPDATE click_count
+            $stmt = $pdo->prepare("
+                INSERT INTO wgs_analytics_heatmap_clicks (
+                    page_url,
+                    device_type,
+                    click_x_percent,
+                    click_y_percent,
+                    click_count,
+                    viewport_width_avg,
+                    viewport_height_avg,
+                    first_click,
+                    last_click
+                ) VALUES (
+                    :page_url,
+                    :device_type,
+                    :click_x_percent,
+                    :click_y_percent,
+                    1,
+                    :viewport_width,
+                    :viewport_height,
+                    NOW(),
+                    NOW()
+                )
+                ON DUPLICATE KEY UPDATE
+                    click_count = click_count + 1,
+                    viewport_width_avg = IF(:viewport_width IS NOT NULL,
+                        (viewport_width_avg * click_count + :viewport_width) / (click_count + 1),
+                        viewport_width_avg
+                    ),
+                    viewport_height_avg = IF(:viewport_height IS NOT NULL,
+                        (viewport_height_avg * click_count + :viewport_height) / (click_count + 1),
+                        viewport_height_avg
+                    ),
+                    last_click = NOW()
+            ");
+
+            $stmt->execute([
+                'page_url' => $normalizedUrl,
+                'device_type' => $deviceType,
+                'click_x_percent' => $xPercent,
+                'click_y_percent' => $yPercent,
+                'viewport_width' => $viewportWidth,
+                'viewport_height' => $viewportHeight
+            ]);
+
+            $clicksAggregated++;
+        }
+    }
+
+    // ========================================
+    // AGREGACE SCROLL DATA
+    // ========================================
+    if (!empty($inputData['scroll_depths']) && is_array($inputData['scroll_depths'])) {
+        foreach ($inputData['scroll_depths'] as $scrollDepth) {
+            $depth = (int)$scrollDepth;
+
+            // Validace rozsahu (0-100)
+            if ($depth < 0 || $depth > 100) {
+                continue;
+            }
+
+            // Bucket do 10% intervalů (0, 10, 20, ..., 100)
+            $bucket = floor($depth / 10) * 10;
+
+            // Viewport data (optional)
+            $viewportWidth = isset($inputData['viewport_width']) ? (int)$inputData['viewport_width'] : null;
+            $viewportHeight = isset($inputData['viewport_height']) ? (int)$inputData['viewport_height'] : null;
+
+            // UPSERT: INSERT nebo UPDATE reach_count
+            $stmt = $pdo->prepare("
+                INSERT INTO wgs_analytics_heatmap_scroll (
+                    page_url,
+                    device_type,
+                    scroll_depth_bucket,
+                    reach_count,
+                    viewport_width_avg,
+                    viewport_height_avg,
+                    first_reach,
+                    last_reach
+                ) VALUES (
+                    :page_url,
+                    :device_type,
+                    :scroll_depth_bucket,
+                    1,
+                    :viewport_width,
+                    :viewport_height,
+                    NOW(),
+                    NOW()
+                )
+                ON DUPLICATE KEY UPDATE
+                    reach_count = reach_count + 1,
+                    viewport_width_avg = IF(:viewport_width IS NOT NULL,
+                        (viewport_width_avg * reach_count + :viewport_width) / (reach_count + 1),
+                        viewport_width_avg
+                    ),
+                    viewport_height_avg = IF(:viewport_height IS NOT NULL,
+                        (viewport_height_avg * reach_count + :viewport_height) / (reach_count + 1),
+                        viewport_height_avg
+                    ),
+                    last_reach = NOW()
+            ");
+
+            $stmt->execute([
+                'page_url' => $normalizedUrl,
+                'device_type' => $deviceType,
+                'scroll_depth_bucket' => $bucket,
+                'viewport_width' => $viewportWidth,
+                'viewport_height' => $viewportHeight
+            ]);
+
+            $scrollBucketsUpdated++;
+        }
+    }
+
+    // ========================================
+    // LOGOVÁNÍ (debug)
+    // ========================================
+    if (defined('DEBUG_MODE') && DEBUG_MODE === true) {
+        error_log(sprintf(
+            '[Track Heatmap] Page: %s | Device: %s | Clicks: %d | Scroll Buckets: %d',
+            $normalizedUrl,
+            $deviceType,
+            $clicksAggregated,
+            $scrollBucketsUpdated
+        ));
+    }
+
+    // ========================================
+    // ODPOVĚĎ
+    // ========================================
+    sendJsonSuccess('Heatmap data agregována', [
+        'clicks_aggregated' => $clicksAggregated,
+        'scroll_buckets_updated' => $scrollBucketsUpdated,
+        'page_url' => $normalizedUrl,
+        'device_type' => $deviceType
+    ]);
+
+} catch (PDOException $e) {
+    error_log('Track Heatmap API Error: ' . $e->getMessage());
+    error_log('Stack trace: ' . $e->getTraceAsString());
+
+    sendJsonError('Chyba při zpracování požadavku', 500);
+
+} catch (Exception $e) {
+    error_log('Track Heatmap API Unexpected Error: ' . $e->getMessage());
+    sendJsonError('Neočekávaná chyba serveru', 500);
+}
+
+/**
+ * Pomocná funkce pro sanitizaci vstupu
+ */
+function sanitizeInput($input): ?string
+{
+    if ($input === null || $input === '') {
+        return null;
+    }
+
+    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+}
+?>
