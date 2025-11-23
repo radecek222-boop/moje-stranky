@@ -58,7 +58,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
       <h1 class="page-title">Web Analytics</h1>
       <p class="page-subtitle">Komplexní analýza návštěvnosti a chování na webu</p>
     </div>
-    
+
     <div class="time-selector">
       <button class="time-btn" data-timeperiod="today">Dnes</button>
       <button class="time-btn active" data-timeperiod="week">Týden</button>
@@ -66,7 +66,10 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
       <button class="time-btn" data-timeperiod="year">Rok</button>
     </div>
   </div>
-  
+
+  <!-- ANALYTICS TABS NAVIGACE -->
+  <?php require_once __DIR__ . '/includes/analytics_tabs.php'; ?>
+
   <!-- HLAVNÍ METRIKY -->
   <div class="stats-grid">
     <div class="stat-card blue">

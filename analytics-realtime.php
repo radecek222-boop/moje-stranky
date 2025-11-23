@@ -256,6 +256,9 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 </head>
 <body>
     <div class="container">
+        <!-- ANALYTICS TABS NAVIGACE -->
+        <?php require_once __DIR__ . '/includes/analytics_tabs.php'; ?>
+
         <h1>Real-time Dashboard</h1>
         <p class="subtitle">Živý přehled aktivních návštěvníků a jejich aktivit</p>
 

@@ -231,6 +231,9 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 </head>
 <body>
     <div class="container">
+        <!-- ANALYTICS TABS NAVIGACE -->
+        <?php require_once __DIR__ . '/includes/analytics_tabs.php'; ?>
+
         <h1>User Interest AI Scoring</h1>
         <p class="subtitle">Engagement, Frustration a Interest skóre pro každou session</p>
 

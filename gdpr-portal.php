@@ -236,6 +236,9 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 </head>
 <body>
     <div class="container">
+        <!-- ANALYTICS TABS NAVIGACE -->
+        <?php require_once __DIR__ . '/includes/analytics_tabs.php'; ?>
+
         <h1>GDPR Portal</h1>
         <p class="subtitle">Správa souhlasů a práva subjektů údajů</p>
 

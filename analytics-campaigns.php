@@ -251,7 +251,10 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 </head>
 <body>
     <div class="container">
-        <h1>📊 UTM Campaign Performance</h1>
+        <!-- ANALYTICS TABS NAVIGACE -->
+        <?php require_once __DIR__ . '/includes/analytics_tabs.php'; ?>
+
+        <h1>UTM Campaign Performance</h1>
 
         <div class="filters">
             <div class="filter-row">
