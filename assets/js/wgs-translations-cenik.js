@@ -915,6 +915,24 @@ window.WGS_TRANSLATIONS_CENIK = {
     it: 'SERVIZI AGGIUNTIVI'
   },
 
+  'pricing.category.PROFESIONÁLNÍ ČALOUNICKÉ PRÁCE': {
+    cs: 'PROFESIONÁLNÍ ČALOUNICKÉ PRÁCE',
+    en: 'PROFESSIONAL UPHOLSTERY WORK',
+    it: 'LAVORI DI TAPPEZZERIA PROFESSIONALE'
+  },
+
+  'pricing.category.MODELOVÉ PŘÍKLADY VÝPOČTU': {
+    cs: 'MODELOVÉ PŘÍKLADY VÝPOČTU',
+    en: 'CALCULATION EXAMPLES',
+    it: 'ESEMPI DI CALCOLO'
+  },
+
+  'pricing.category.DALŠÍ SERVISNÍ POLOŽKY': {
+    cs: 'DALŠÍ SERVISNÍ POLOŽKY',
+    en: 'OTHER SERVICE ITEMS',
+    it: 'ALTRE VOCI DI SERVIZIO'
+  },
+
   // ========================================
   // DATABÁZOVÉ POLOŽKY - NÁZVY SLUŽEB
   // ========================================
@@ -984,6 +1002,78 @@ window.WGS_TRANSLATIONS_CENIK = {
     it: 'Parti Meccaniche di Ricambio'
   },
 
+  'pricing.service.Rohový díl': {
+    cs: 'Rohový díl',
+    en: 'Corner Piece',
+    it: 'Pezzo Angolare'
+  },
+
+  'pricing.service.Ottoman / lehátko': {
+    cs: 'Ottoman / lehátko',
+    en: 'Ottoman / Daybed',
+    it: 'Pouf / Divano Letto'
+  },
+
+  'pricing.service.Mechanická část (relax, výsuv)': {
+    cs: 'Mechanická část (relax, výsuv)',
+    en: 'Mechanical Part (relax, extension)',
+    it: 'Parte Meccanica (relax, estensione)'
+  },
+
+  'pricing.service.Příklad: Pouze sedák': {
+    cs: 'Příklad: Pouze sedák',
+    en: 'Example: Seat Only',
+    it: 'Esempio: Solo Sedile'
+  },
+
+  'pricing.service.Příklad: Sedák + opěrka': {
+    cs: 'Příklad: Sedák + opěrka',
+    en: 'Example: Seat + Backrest',
+    it: 'Esempio: Sedile + Schienale'
+  },
+
+  'pricing.service.Příklad: Sedák + opěrka + područka': {
+    cs: 'Příklad: Sedák + opěrka + područka',
+    en: 'Example: Seat + Backrest + Armrest',
+    it: 'Esempio: Sedile + Schienale + Bracciolo'
+  },
+
+  'pricing.service.Příklad: Křeslo komplet (4 díly)': {
+    cs: 'Příklad: Křeslo komplet (4 díly)',
+    en: 'Example: Complete Armchair (4 parts)',
+    it: 'Esempio: Poltrona Completa (4 parti)'
+  },
+
+  'pricing.service.Zmařený výjezd': {
+    cs: 'Zmařený výjezd',
+    en: 'Unsuccessful Visit',
+    it: 'Visita Non Riuscita'
+  },
+
+  'pricing.service.Doprava na dílnu a zpět doručení včetně manipulace (do 100 km)': {
+    cs: 'Doprava na dílnu a zpět doručení včetně manipulace (do 100 km)',
+    en: 'Transport to workshop and back incl. handling (up to 100 km)',
+    it: 'Trasporto in officina e ritorno incl. movimentazione (fino a 100 km)'
+  },
+
+  'pricing.service.Doprava na dílnu a zpět doručení včetně manipulace (do 200 km)': {
+    cs: 'Doprava na dílnu a zpět doručení včetně manipulace (do 200 km)',
+    en: 'Transport to workshop and back incl. handling (up to 200 km)',
+    it: 'Trasporto in officina e ritorno incl. movimentazione (fino a 200 km)'
+  },
+
+  'pricing.service.Materiál (výplně od nás)': {
+    cs: 'Materiál (výplně od nás)',
+    en: 'Material (fillings from us)',
+    it: 'Materiale (imbottiture da noi)'
+  },
+
+  'pricing.service.Druhá osoba (nutnost manipulace)': {
+    cs: 'Druhá osoba (nutnost manipulace)',
+    en: 'Second Person (handling required)',
+    it: 'Seconda Persona (movimentazione richiesta)'
+  },
+
   // ========================================
   // DATABÁZOVÉ POLOŽKY - POPISY
   // ========================================
@@ -1039,6 +1129,96 @@ window.WGS_TRANSLATIONS_CENIK = {
     cs: 'Dle skutečné spotřeby a typu',
     en: 'According to actual consumption and type',
     it: 'Secondo consumo effettivo e tipo'
+  },
+
+  'pricing.desc.Platí pro veškeré opravy proveditelné do cca 1,5 hodiny na místě. Týká se všech úkonů, které nespadají pod standardní čalounické práce. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.': {
+    cs: 'Platí pro veškeré opravy proveditelné do cca 1,5 hodiny na místě. Týká se všech úkonů, které nespadají pod standardní čalounické práce. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.',
+    en: 'Applies to all repairs feasible within approx. 1.5 hours on-site. Covers all tasks not falling under standard upholstery work. PRICE FOR LABOR ONLY, EXCLUDING MATERIAL.',
+    it: 'Applicabile a tutte le riparazioni eseguibili in circa 1,5 ore sul posto. Riguarda tutte le operazioni che non rientrano nei lavori di tappezzeria standard. PREZZO SOLO PER LA MANODOPERA, ESCLUSO IL MATERIALE.'
+  },
+
+  'pricing.desc.Čalounění prvního dílu včetně rozebrání konstrukce. Jeden díl = např. sedák NEBO opěrka NEBO područka. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.': {
+    cs: 'Čalounění prvního dílu včetně rozebrání konstrukce. Jeden díl = např. sedák NEBO opěrka NEBO područka. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.',
+    en: 'Upholstery of the first part including disassembly of structure. One part = e.g. seat OR backrest OR armrest. PRICE FOR LABOR ONLY, EXCLUDING MATERIAL.',
+    it: 'Tappezzeria della prima parte incluso smontaggio della struttura. Una parte = ad es. sedile O schienale O bracciolo. PREZZO SOLO PER LA MANODOPERA, ESCLUSO IL MATERIALE.'
+  },
+
+  'pricing.desc.Při téže opravě. Např. opěrka, područka, zadní panel, boční panel, polštář, krycí díl. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.': {
+    cs: 'Při téže opravě. Např. opěrka, područka, zadní panel, boční panel, polštář, krycí díl. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.',
+    en: 'During the same repair. E.g. backrest, armrest, back panel, side panel, cushion, cover piece. PRICE FOR LABOR ONLY, EXCLUDING MATERIAL.',
+    it: 'Durante la stessa riparazione. Ad es. schienale, bracciolo, pannello posteriore, pannello laterale, cuscino, pezzo di copertura. PREZZO SOLO PER LA MANODOPERA, ESCLUSO IL MATERIALE.'
+  },
+
+  'pricing.desc.1 modul + 2 díly navíc. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.': {
+    cs: '1 modul + 2 díly navíc. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.',
+    en: '1 module + 2 extra parts. PRICE FOR LABOR ONLY, EXCLUDING MATERIAL.',
+    it: '1 modulo + 2 parti extra. PREZZO SOLO PER LA MANODOPERA, ESCLUSO IL MATERIALE.'
+  },
+
+  'pricing.desc.Cena dle konstrukce. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.': {
+    cs: 'Cena dle konstrukce. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.',
+    en: 'Price according to construction. PRICE FOR LABOR ONLY, EXCLUDING MATERIAL.',
+    it: 'Prezzo secondo la costruzione. PREZZO SOLO PER LA MANODOPERA, ESCLUSO IL MATERIALE.'
+  },
+
+  'pricing.desc.Příplatek za mechanismus (relax, výsuv, pohyb). CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.': {
+    cs: 'Příplatek za mechanismus (relax, výsuv, pohyb). CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.',
+    en: 'Surcharge for mechanism (relax, extension, movement). PRICE FOR LABOR ONLY, EXCLUDING MATERIAL.',
+    it: 'Supplemento per meccanismo (relax, estensione, movimento). PREZZO SOLO PER LA MANODOPERA, ESCLUSO IL MATERIALE.'
+  },
+
+  'pricing.desc.První díl 190€ = 190€. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.': {
+    cs: 'První díl 190€ = 190€. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.',
+    en: 'First part 190€ = 190€. PRICE FOR LABOR ONLY, EXCLUDING MATERIAL.',
+    it: 'Prima parte 190€ = 190€. PREZZO SOLO PER LA MANODOPERA, ESCLUSO IL MATERIALE.'
+  },
+
+  'pricing.desc.První díl 190€ + další díl 70€ = 260€. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.': {
+    cs: 'První díl 190€ + další díl 70€ = 260€. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.',
+    en: 'First part 190€ + additional part 70€ = 260€. PRICE FOR LABOR ONLY, EXCLUDING MATERIAL.',
+    it: 'Prima parte 190€ + parte aggiuntiva 70€ = 260€. PREZZO SOLO PER LA MANODOPERA, ESCLUSO IL MATERIALE.'
+  },
+
+  'pricing.desc.První díl 190€ + 2× další díl (2×70€) = 330€. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.': {
+    cs: 'První díl 190€ + 2× další díl (2×70€) = 330€. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.',
+    en: 'First part 190€ + 2× additional part (2×70€) = 330€. PRICE FOR LABOR ONLY, EXCLUDING MATERIAL.',
+    it: 'Prima parte 190€ + 2× parte aggiuntiva (2×70€) = 330€. PREZZO SOLO PER LA MANODOPERA, ESCLUSO IL MATERIALE.'
+  },
+
+  'pricing.desc.První díl 190€ + 3× další díl (3×70€) = 400€. Sedák + opěrka + 2× područka. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.': {
+    cs: 'První díl 190€ + 3× další díl (3×70€) = 400€. Sedák + opěrka + 2× područka. CENA POUZE ZA PRÁCI, BEZ MATERIÁLU.',
+    en: 'First part 190€ + 3× additional part (3×70€) = 400€. Seat + backrest + 2× armrest. PRICE FOR LABOR ONLY, EXCLUDING MATERIAL.',
+    it: 'Prima parte 190€ + 3× parte aggiuntiva (3×70€) = 400€. Sedile + schienale + 2× bracciolo. PREZZO SOLO PER LA MANODOPERA, ESCLUSO IL MATERIALE.'
+  },
+
+  'pricing.desc.Návštěva zákazníka, posudek pro reklamaci, konzultace opravy. Účtováno i v případě neoprávněné reklamace nebo nezjištěné závady.': {
+    cs: 'Návštěva zákazníka, posudek pro reklamaci, konzultace opravy. Účtováno i v případě neoprávněné reklamace nebo nezjištěné závady.',
+    en: 'Customer visit, claim assessment, repair consultation. Charged even in case of unjustified claim or undetected defect.',
+    it: 'Visita del cliente, valutazione del reclamo, consulenza per la riparazione. Addebitato anche in caso di reclamo ingiustificato o difetto non rilevato.'
+  },
+
+  'pricing.desc.Zákazník není přítomen, neumožní přístup nebo odmítne opravu.': {
+    cs: 'Zákazník není přítomen, neumožní přístup nebo odmítne opravu.',
+    en: 'Customer not present, does not allow access or refuses repair.',
+    it: 'Cliente non presente, non consente l\'accesso o rifiuta la riparazione.'
+  },
+
+  'pricing.desc.Dopravné pro rozsáhlejší opravy prováděné mimo místo zákazníka.': {
+    cs: 'Dopravné pro rozsáhlejší opravy prováděné mimo místo zákazníka.',
+    en: 'Transportation for more extensive repairs carried out outside customer location.',
+    it: 'Trasporto per riparazioni più estese eseguite fuori dalla sede del cliente.'
+  },
+
+  'pricing.desc.Cena obsahuje jednu sedací jednotku (modul).': {
+    cs: 'Cena obsahuje jednu sedací jednotku (modul).',
+    en: 'Price includes one seating unit (module).',
+    it: 'Il prezzo include un\'unità di seduta (modulo).'
+  },
+
+  'pricing.desc.V případě dílů větších než 1 sedací plocha a těžších dílů než je zákonem stanovený limit 50kg, je nutná při opravě přítomna druhá osoba.': {
+    cs: 'V případě dílů větších než 1 sedací plocha a těžších dílů než je zákonem stanovený limit 50kg, je nutná při opravě přítomna druhá osoba.',
+    en: 'For parts larger than 1 seating area and heavier parts than the legally mandated limit of 50kg, a second person must be present during repair.',
+    it: 'Per parti più grandi di 1 area di seduta e parti più pesanti del limite legale di 50kg, è necessaria la presenza di una seconda persona durante la riparazione.'
   }
 
 };
