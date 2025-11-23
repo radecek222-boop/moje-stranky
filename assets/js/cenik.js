@@ -20,6 +20,27 @@
     }
 
     // ========================================
+    // HELPER: Překlad databázového obsahu
+    // ========================================
+    function prelozitText(text, typ) {
+        if (!text) return text;
+
+        // Typ může být: 'category', 'service', 'desc'
+        const klic = `pricing.${typ}.${text}`;
+
+        // Zkusit najít překlad
+        const preklad = window.t ? window.t(klic) : null;
+
+        // Pokud existuje překlad a není to stejný klíč (nebyl nalezen), použít ho
+        if (preklad && preklad !== klic) {
+            return preklad;
+        }
+
+        // Jinak vrátit původní text
+        return text;
+    }
+
+    // ========================================
     // INIT
     // ========================================
     window.addEventListener('DOMContentLoaded', () => {
@@ -39,11 +60,11 @@
                 zobrazitCenik(result.by_category);
             } else {
                 console.error('[Ceník] Chyba:', result.message);
-                document.getElementById('loading-indicator').innerHTML = '<p style="color: red;">Chyba při načítání ceníku</p>';
+                document.getElementById('loading-indicator').innerHTML = `<p style="color: red;">${window.t('pricingGrid.loading.error')}</p>`;
             }
         } catch (error) {
             console.error('[Ceník] Síťová chyba:', error);
-            document.getElementById('loading-indicator').innerHTML = '<p style="color: red;">Síťová chyba při načítání</p>';
+            document.getElementById('loading-indicator').innerHTML = `<p style="color: red;">${window.t('pricingGrid.loading.networkError')}</p>`;
         }
     }
 
@@ -69,7 +90,7 @@
 
             const headerEl = document.createElement('div');
             headerEl.className = 'category-header';
-            headerEl.textContent = category;
+            headerEl.textContent = prelozitText(category, 'category');
 
             const itemsEl = document.createElement('div');
             itemsEl.className = 'category-items';
@@ -99,7 +120,7 @@
 
         const nameEl = document.createElement('div');
         nameEl.className = 'item-name';
-        nameEl.textContent = item.service_name;
+        nameEl.textContent = prelozitText(item.service_name, 'service');
 
         const priceEl = document.createElement('div');
         priceEl.className = 'item-price';
@@ -121,7 +142,8 @@
         if (item.description) {
             const descEl = document.createElement('div');
             descEl.className = 'item-description';
-            descEl.innerHTML = parseMarkdown(item.description);
+            const prelozenyPopis = prelozitText(item.description, 'desc');
+            descEl.innerHTML = parseMarkdown(prelozenyPopis);
             itemEl.appendChild(descEl);
         }
 
@@ -129,7 +151,7 @@
         if (window.isAdmin) {
             const editBtn = document.createElement('button');
             editBtn.className = 'item-edit-btn';
-            editBtn.textContent = 'Upravit';
+            editBtn.textContent = window.t('pricingGrid.btn.edit');
             editBtn.onclick = () => upravitPolozku(item);
             itemEl.appendChild(editBtn);
         }
@@ -144,7 +166,7 @@
         currentEditItem = item;
 
         // Naplnit formulář
-        document.getElementById('modal-title').textContent = 'Upravit položku';
+        document.getElementById('modal-title').textContent = window.t('pricingGrid.modal.titleEdit');
         document.getElementById('item-id').value = item.id;
         document.getElementById('service-name').value = item.service_name;
         document.getElementById('description').value = item.description || '';
@@ -168,7 +190,7 @@
         currentEditItem = null;
 
         // Vyčistit formulář
-        document.getElementById('modal-title').textContent = 'Přidat novou položku';
+        document.getElementById('modal-title').textContent = window.t('pricingGrid.modal.titleAdd');
         document.getElementById('edit-form').reset();
         document.getElementById('item-id').value = '';
         document.getElementById('is-active').checked = true;
@@ -211,15 +233,15 @@
             const result = await response.json();
 
             if (result.status === 'success') {
-                alert(itemId ? 'Položka aktualizována' : 'Položka vytvořena');
+                alert(itemId ? window.t('pricingGrid.alert.updated') : window.t('pricingGrid.alert.created'));
                 zavritModal();
                 nactiCenik(); // Reload ceníku
             } else {
-                alert('Chyba: ' + result.message);
+                alert(window.t('pricingGrid.alert.error') + ': ' + result.message);
             }
         } catch (error) {
             console.error('[Ceník] Chyba při ukládání:', error);
-            alert('Síťová chyba při ukládání');
+            alert(window.t('pricingGrid.alert.saveError'));
         }
     };
 
@@ -229,7 +251,7 @@
     window.smazatPolozku = async function() {
         if (!currentEditItem) return;
 
-        if (!confirm('Opravdu chcete smazat tuto položku?')) {
+        if (!confirm(window.t('pricingGrid.alert.deleteConfirm'))) {
             return;
         }
 
@@ -247,15 +269,15 @@
             const result = await response.json();
 
             if (result.status === 'success') {
-                alert('Položka smazána');
+                alert(window.t('pricingGrid.alert.deleted'));
                 zavritModal();
                 nactiCenik(); // Reload ceníku
             } else {
-                alert('Chyba: ' + result.message);
+                alert(window.t('pricingGrid.alert.error') + ': ' + result.message);
             }
         } catch (error) {
             console.error('[Ceník] Chyba při mazání:', error);
-            alert('Síťová chyba při mazání');
+            alert(window.t('pricingGrid.alert.deleteError'));
         }
     };
 
@@ -274,5 +296,22 @@
             zavritModal();
         }
     });
+
+    // ========================================
+    // PODPORA PŘEPÍNÁNÍ JAZYKA
+    // ========================================
+    // Sledovat změny jazyka a aktualizovat cenící
+    const originalPrepniJazyk = window.prepniJazyk;
+    if (originalPrepniJazyk) {
+        window.prepniJazyk = function(jazyk) {
+            // Zavolat původní funkci
+            originalPrepniJazyk(jazyk);
+
+            // Aktualizovat ceník s novými překlady (pokud jsou data načtena)
+            if (pricingData && Object.keys(pricingData).length > 0) {
+                zobrazitCenik(pricingData);
+            }
+        };
+    }
 
 })();

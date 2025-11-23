@@ -805,6 +805,240 @@ window.WGS_TRANSLATIONS_CENIK = {
     cs: 'Ceník služeb - White Glove Service | Servis Natuzzi | Praha, Brno',
     en: 'Price List - White Glove Service | Natuzzi Service | Prague, Brno',
     it: 'Listino Prezzi - White Glove Service | Servizio Natuzzi | Praga, Brno'
+  },
+
+  // ========================================
+  // CENIK.JS - ADMIN UI TEXTY
+  // ========================================
+  'pricingGrid.loading.error': {
+    cs: 'Chyba při načítání ceníku',
+    en: 'Error loading price list',
+    it: 'Errore nel caricamento del listino prezzi'
+  },
+
+  'pricingGrid.loading.networkError': {
+    cs: 'Síťová chyba při načítání',
+    en: 'Network error during loading',
+    it: 'Errore di rete durante il caricamento'
+  },
+
+  'pricingGrid.btn.edit': {
+    cs: 'Upravit',
+    en: 'Edit',
+    it: 'Modifica'
+  },
+
+  'pricingGrid.btn.addNew': {
+    cs: 'Přidat novou položku',
+    en: 'Add New Item',
+    it: 'Aggiungi Nuovo Articolo'
+  },
+
+  'pricingGrid.modal.titleEdit': {
+    cs: 'Upravit položku',
+    en: 'Edit Item',
+    it: 'Modifica Articolo'
+  },
+
+  'pricingGrid.modal.titleAdd': {
+    cs: 'Přidat novou položku',
+    en: 'Add New Item',
+    it: 'Aggiungi Nuovo Articolo'
+  },
+
+  'pricingGrid.alert.updated': {
+    cs: 'Položka aktualizována',
+    en: 'Item updated',
+    it: 'Articolo aggiornato'
+  },
+
+  'pricingGrid.alert.created': {
+    cs: 'Položka vytvořena',
+    en: 'Item created',
+    it: 'Articolo creato'
+  },
+
+  'pricingGrid.alert.error': {
+    cs: 'Chyba',
+    en: 'Error',
+    it: 'Errore'
+  },
+
+  'pricingGrid.alert.saveError': {
+    cs: 'Síťová chyba při ukládání',
+    en: 'Network error while saving',
+    it: 'Errore di rete durante il salvataggio'
+  },
+
+  'pricingGrid.alert.deleteConfirm': {
+    cs: 'Opravdu chcete smazat tuto položku?',
+    en: 'Are you sure you want to delete this item?',
+    it: 'Sei sicuro di voler eliminare questo articolo?'
+  },
+
+  'pricingGrid.alert.deleted': {
+    cs: 'Položka smazána',
+    en: 'Item deleted',
+    it: 'Articolo eliminato'
+  },
+
+  'pricingGrid.alert.deleteError': {
+    cs: 'Síťová chyba při mazání',
+    en: 'Network error while deleting',
+    it: 'Errore di rete durante l\'eliminazione'
+  },
+
+  // ========================================
+  // DATABÁZOVÉ KATEGORIE - PŘEKLAD
+  // ========================================
+  'pricing.category.ZÁKLADNÍ SERVISNÍ SAZBY': {
+    cs: 'ZÁKLADNÍ SERVISNÍ SAZBY',
+    en: 'BASIC SERVICE RATES',
+    it: 'TARIFFE DI SERVIZIO BASE'
+  },
+
+  'pricing.category.SERVIS NA MÍSTĚ': {
+    cs: 'SERVIS NA MÍSTĚ',
+    en: 'ON-SITE SERVICE',
+    it: 'SERVIZIO IN LOCO'
+  },
+
+  'pricing.category.DOPRAVNÉ': {
+    cs: 'DOPRAVNÉ',
+    en: 'TRANSPORTATION',
+    it: 'TRASPORTO'
+  },
+
+  'pricing.category.DOPLŇKOVÉ SLUŽBY': {
+    cs: 'DOPLŇKOVÉ SLUŽBY',
+    en: 'ADDITIONAL SERVICES',
+    it: 'SERVIZI AGGIUNTIVI'
+  },
+
+  // ========================================
+  // DATABÁZOVÉ POLOŽKY - NÁZVY SLUŽEB
+  // ========================================
+  'pricing.service.Opravy všeho druhu': {
+    cs: 'Opravy všeho druhu',
+    en: 'All Types of Repairs',
+    it: 'Tutti i Tipi di Riparazioni'
+  },
+
+  'pricing.service.První díl': {
+    cs: 'První díl',
+    en: 'First Part',
+    it: 'Prima Parte'
+  },
+
+  'pricing.service.Každý další díl': {
+    cs: 'Každý další díl',
+    en: 'Each Additional Part',
+    it: 'Ogni Parte Aggiuntiva'
+  },
+
+  'pricing.service.Kompletní služba u klienta': {
+    cs: 'Kompletní služba u klienta',
+    en: 'Complete Service at Customer Site',
+    it: 'Servizio Completo presso il Cliente'
+  },
+
+  'pricing.service.Inspekce / diagnostika': {
+    cs: 'Inspekce / diagnostika',
+    en: 'Inspection / Diagnosis',
+    it: 'Ispezione / Diagnosi'
+  },
+
+  'pricing.service.Oprava mechaniky (relax, výsuv)': {
+    cs: 'Oprava mechaniky (relax, výsuv)',
+    en: 'Mechanical Repair (relax, extension)',
+    it: 'Riparazione Meccanica (relax, estensione)'
+  },
+
+  'pricing.service.Druhá osoba u zákazníka': {
+    cs: 'Druhá osoba u zákazníka',
+    en: 'Second Person at Customer Site',
+    it: 'Seconda Persona presso il Cliente'
+  },
+
+  'pricing.service.Materiál WGS (vata, pěna apod.)': {
+    cs: 'Materiál WGS (vata, pěna apod.)',
+    en: 'WGS Material (cotton, foam, etc.)',
+    it: 'Materiale WGS (cotone, schiuma, ecc.)'
+  },
+
+  'pricing.service.Doprava po ČR': {
+    cs: 'Doprava po ČR',
+    en: 'Transportation in Czech Republic',
+    it: 'Trasporto in Repubblica Ceca'
+  },
+
+  'pricing.service.Materiál z továrny Natuzzi': {
+    cs: 'Materiál z továrny Natuzzi',
+    en: 'Material from Natuzzi Factory',
+    it: 'Materiale dalla Fabbrica Natuzzi'
+  },
+
+  'pricing.service.Náhradní mechanické díly': {
+    cs: 'Náhradní mechanické díly',
+    en: 'Replacement Mechanical Parts',
+    it: 'Parti Meccaniche di Ricambio'
+  },
+
+  // ========================================
+  // DATABÁZOVÉ POLOŽKY - POPISY
+  // ========================================
+  'pricing.desc.CENA POUZE ZA PRÁCI, BEZ MATERIÁLU': {
+    cs: 'CENA POUZE ZA PRÁCI, BEZ MATERIÁLU',
+    en: 'PRICE FOR LABOR ONLY, EXCLUDING MATERIAL',
+    it: 'PREZZO SOLO PER LA MANODOPERA, ESCLUSO IL MATERIALE'
+  },
+
+  'pricing.desc.Cena za práci, materiál navíc': {
+    cs: 'Cena za práci, materiál navíc',
+    en: 'Price for labor, material extra',
+    it: 'Prezzo per la manodopera, materiale extra'
+  },
+
+  'pricing.desc.Pouze prohlídka, zjištění rozsahu poškození': {
+    cs: 'Pouze prohlídka, zjištění rozsahu poškození',
+    en: 'Inspection only, assessment of damage extent',
+    it: 'Solo ispezione, valutazione dell\'entità del danno'
+  },
+
+  'pricing.desc.Oprava bez rozčalounění': {
+    cs: 'Oprava bez rozčalounění',
+    en: 'Repair without upholstery',
+    it: 'Riparazione senza tappezzeria'
+  },
+
+  'pricing.desc.Pro těžký nábytek (nad 50kg)': {
+    cs: 'Pro těžký nábytek (nad 50kg)',
+    en: 'For heavy furniture (over 50kg)',
+    it: 'Per mobili pesanti (oltre 50kg)'
+  },
+
+  'pricing.desc.Výplně z našich zásob': {
+    cs: 'Výplně z našich zásob',
+    en: 'Fillings from our stock',
+    it: 'Imbottiture dal nostro magazzino'
+  },
+
+  'pricing.desc.2x vzdálenost × 0,70€/km': {
+    cs: '2x vzdálenost × 0,70€/km',
+    en: '2x distance × €0.70/km',
+    it: '2x distanza × 0,70€/km'
+  },
+
+  'pricing.desc.Dle spotřeby': {
+    cs: 'Dle spotřeby',
+    en: 'According to consumption',
+    it: 'Secondo il consumo'
+  },
+
+  'pricing.desc.Dle skutečné spotřeby a typu': {
+    cs: 'Dle skutečné spotřeby a typu',
+    en: 'According to actual consumption and type',
+    it: 'Secondo consumo effettivo e tipo'
   }
 
 };
