@@ -1738,7 +1738,7 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 | **Module #8** | ✅ Complete | 100% | Committed: `591549b` |
 | **Module #9** | ✅ Complete | 100% | Committed: `7ad924e` |
 | **Module #10** | ✅ Complete | 100% | Committed: `5d1b488` |
-| **Module #11** | ✅ Complete | 100% | Committed: `eced189` |
+| **Module #11** | ⚠️ Complete (Issues) | 95% | Committed: `eced189` - **Known Issue: live_events error** |
 | **Module #12** | ⏳ Pending | 0% | Awaiting approval |
 | **Module #13** | ⏳ Pending | 0% | Awaiting approval |
 
@@ -1861,6 +1861,15 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 - `analytics-realtime.php` (500 lines)
 - `scripts/cleanup_realtime_sessions.php` (150 lines)
 - Updated: `api/track_v2.php` (+110 lines real-time tracking)
+
+**⚠️ Known Issues (Module #11):**
+- **Issue:** API returns 400 error for `live_events` action
+- **Error:** `SQLSTATE[42S22]: Column not found: 1054 Unknown column 'e.event_id' in 'SELECT'`
+- **Root Cause:** Table `wgs_analytics_events` does not exist yet (created in Module #5)
+- **Impact:** Live events feed shows error instead of empty state
+- **Status:** Postponed - will fix after all modules complete
+- **Fix Required:** Improve table existence check or handle SQL exception gracefully
+- **Commits with debug attempts:** `536a131`, `f1baa73`, `00c5c1c`, `c82daf6`, `5d24c93`
 
 **Total New Code:** ~18,439 lines (Modules #1-11)
 
