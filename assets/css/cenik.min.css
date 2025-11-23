@@ -1122,13 +1122,15 @@
 }
 
 .radio-card {
-    display: block;
+    display: flex;
+    flex-direction: column;
     border: 2px solid #ddd;
     border-radius: 6px;
     padding: 0.75rem 1rem 0.75rem 3rem;
     cursor: pointer;
     transition: all 0.3s;
     position: relative;
+    min-height: 85px;
 }
 
 .radio-card::before {
@@ -1188,6 +1190,10 @@
 
 .radio-content {
     transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
 }
 
 .radio-title {
@@ -1204,12 +1210,16 @@
     color: #666;
     line-height: 1.25;
     margin-bottom: 0.25rem;
+    flex: 1;
+    margin-top: 0.3rem;
 }
 
 .radio-price {
     font-size: 0.85rem;
     font-weight: 700;
     color: #4a4a4a;
+    margin-top: auto;
+    padding-top: 0.3rem;
 }
 
 /* Checkbox Cards */
@@ -1221,13 +1231,15 @@
 }
 
 .checkbox-card {
-    display: block;
+    display: flex;
+    flex-direction: column;
     border: 2px solid #ddd;
     border-radius: 6px;
     padding: 0.65rem 0.75rem 0.65rem 3rem;
     cursor: pointer;
     transition: all 0.3s;
     position: relative;
+    min-height: 65px;
 }
 
 .checkbox-card::before {
@@ -1292,8 +1304,10 @@
 
 .checkbox-content {
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    height: 100%;
 }
 
 .checkbox-title {
