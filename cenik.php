@@ -41,7 +41,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
   <!-- External CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/cenik.min.css">
-  <link rel="stylesheet" href="assets/css/mobile-responsive.css">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
 
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
@@ -507,7 +507,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 
-<script src="assets/js/cenik-calculator.js" defer></script>
+<script src="assets/js/cenik-calculator.min.js" defer></script>
 
 <?php renderHeatmapTracker(); ?>
 </body>
