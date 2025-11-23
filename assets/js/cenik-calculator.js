@@ -28,18 +28,43 @@
         try {
             // Načíst kalkulovatelné služby z API
             const response = await fetch('/api/pricing_api.php?action=list');
+
+            if (!response.ok) {
+                throw new Error('API vrátilo chybu: HTTP ' + response.status);
+            }
+
             const result = await response.json();
 
             if (result.status === 'success') {
                 // Filtrovat pouze kalkulovatelné položky (is_calculable = 1)
                 calculableServices = result.items.filter(item => item.is_calculable == 1);
-                // Čekat až se zobrazí sekce služeb
-                initAddressAutocomplete();
+
+                if (calculableServices.length === 0) {
+                    console.warn('[Kalkulačka] Žádné kalkulovatelné služby nenalezeny');
+                    zobrazitChybovouZpravu('Ceník služeb není k dispozici. Spusťte prosím migraci databáze.');
+                } else {
+                    // Čekat až se zobrazí sekce služeb
+                    initAddressAutocomplete();
+                }
             } else {
                 console.error('[Kalkulačka] Chyba:', result.message);
+                zobrazitChybovouZpravu('Nepodařilo se načíst ceník: ' + result.message);
             }
         } catch (error) {
             console.error('[Kalkulačka] Síťová chyba:', error);
+            zobrazitChybovouZpravu('Nepodařilo se připojit k API ceníku. Zkontrolujte prosím, že tabulka wgs_pricing existuje v databázi.');
+        }
+    }
+
+    function zobrazitChybovouZpravu(zprava) {
+        const kalkulacka = document.getElementById('kalkulacka');
+        if (kalkulacka) {
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = 'background: #f8d7da; border: 2px solid #721c24; color: #721c24; padding: 1rem; border-radius: 6px; margin: 1rem 0;';
+            errorDiv.innerHTML = '<strong>⚠️ Chyba:</strong> ' + zprava + '<br><br>' +
+                                 '<a href="/update_cenik_2025.php" style="color: #721c24; text-decoration: underline;">Spustit migraci databáze</a> | ' +
+                                 '<a href="/test_pricing_api.php" style="color: #721c24; text-decoration: underline;">Diagnostika API</a>';
+            kalkulacka.appendChild(errorDiv);
         }
     }
 
