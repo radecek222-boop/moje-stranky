@@ -110,6 +110,7 @@ let signaturePad;
 let attachedPhotos = [];
 let currentReklamaceId = null;
 let currentReklamace = null;
+let kalkulaceData = null; // Data kalkulace z databáze pro PDF
 
 // PDF preview kontext
 let pdfPreviewContext = null; // 'export' nebo 'send'
@@ -160,6 +161,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     logger.log('✅ ID nalezeno v URL');
     await loadReklamace(currentReklamaceId);
     loadPhotosFromDatabase(currentReklamaceId);
+    loadKalkulaceFromDatabase(currentReklamaceId);
   } else {
     logger.warn('⚠️ Chybí ID v URL - zkusím načíst z localStorage');
     await loadReklamace(null);
@@ -168,6 +170,7 @@ window.addEventListener("DOMContentLoaded", async () => {
       logger.log('✅ ID nalezeno v načtených datech:', currentReklamace.id);
       currentReklamaceId = currentReklamace.id;
       loadPhotosFromDatabase(currentReklamaceId);
+      loadKalkulaceFromDatabase(currentReklamaceId);
     } else {
       logger.error('❌ ID se nepodařilo najít!');
     }
@@ -317,6 +320,52 @@ async function loadPhotosFromDatabase(customerId) {
   } catch (error) {
     logger.error('❌ Chyba při načítání fotek:', error);
     showNotif("error", "Chyba načítání fotek");
+  }
+}
+
+async function loadKalkulaceFromDatabase(customerId) {
+  try {
+    if (!customerId) {
+      logger.warn('ID zákazníka nenalezeno - kalkulace nebude načtena');
+      return;
+    }
+
+    logger.log('═══════════════════════════════════════');
+    logger.log('💶 NAČÍTÁM KALKULACI Z DATABÁZE');
+    logger.log('═══════════════════════════════════════');
+    logger.log('🔑 customerId:', customerId);
+
+    // Načíst z API
+    const response = await fetch(`api/get_kalkulace_api.php?reklamace_id=${customerId}`);
+    const data = await response.json();
+
+    if (!data.success) {
+      logger.log('❌ Kalkulace nenalezena v databázi:', data.error);
+      logger.log('═══════════════════════════════════════');
+      return;
+    }
+
+    if (!data.has_kalkulace) {
+      logger.log('ℹ️ Kalkulace nebyla vytvořena pro tuto reklamaci');
+      logger.log('═══════════════════════════════════════');
+      return;
+    }
+
+    logger.log('✅ Kalkulace načtena z databáze!');
+    kalkulaceData = data.kalkulace;
+
+    logger.log('📦 Kalkulace data:', kalkulaceData);
+    logger.log('💰 Celková cena:', kalkulaceData.celkovaCena, '€');
+    logger.log('📍 Adresa:', kalkulaceData.adresa);
+    logger.log('📏 Vzdálenost:', kalkulaceData.vzdalenost, 'km');
+    logger.log('═══════════════════════════════════════');
+
+    // Zobrazit notifikaci
+    showNotif("success", `✓ Kalkulace načtena (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
+
+  } catch (error) {
+    logger.error('❌ Chyba při načítání kalkulace:', error);
+    showNotif("error", "Chyba načítání kalkulace");
   }
 }
 
@@ -781,14 +830,302 @@ async function generatePhotosPDF() {
   return pdf;
 }
 
+async function generatePricelistPDF() {
+  if (!kalkulaceData) {
+    logger.log('ℹ️ Kalkulace neexistuje - PRICELIST PDF nebude vygenerováno');
+    return null;
+  }
+
+  logger.log('💶 Generuji PDF PRICELIST...');
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p", "mm", "a4");
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const margin = 15;
+  let yPos = margin;
+
+  // === HLAVIČKA ===
+  pdf.setFontSize(20);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(45, 80, 22); // Brand zelená
+  pdf.text('PRICELIST', pageWidth / 2, yPos, { align: 'center' });
+  yPos += 15;
+
+  // === ÚDAJE ZÁKAZNÍKA ===
+  const zakaznikJmeno = document.getElementById('customer')?.value || 'N/A';
+  const zakaznikAdresa = kalkulaceData.adresa || document.getElementById('address')?.value || 'N/A';
+  const zakaznikTelefon = document.getElementById('phone')?.value || '';
+  const zakaznikEmail = document.getElementById('email')?.value || '';
+  const reklamaceCislo = document.getElementById('claim-number')?.value || '';
+
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(0, 0, 0);
+
+  if (reklamaceCislo) {
+    pdf.text(`Cislo reklamace: ${reklamaceCislo}`, margin, yPos);
+    yPos += 6;
+  }
+
+  pdf.setFont('helvetica', 'bold');
+  pdf.text(`Zakaznik: ${zakaznikJmeno}`, margin, yPos);
+  yPos += 6;
+
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(`Adresa: ${zakaznikAdresa}`, margin, yPos);
+  yPos += 6;
+
+  if (zakaznikTelefon) {
+    pdf.text(`Telefon: ${zakaznikTelefon}`, margin, yPos);
+    yPos += 6;
+  }
+
+  if (zakaznikEmail) {
+    pdf.text(`Email: ${zakaznikEmail}`, margin, yPos);
+    yPos += 6;
+  }
+
+  yPos += 5;
+
+  // Čára oddělení
+  pdf.setLineWidth(0.5);
+  pdf.setDrawColor(45, 80, 22);
+  pdf.line(margin, yPos, pageWidth - margin, yPos);
+  yPos += 10;
+
+  // === CENOTVORBA ===
+  pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Rozpis cen', margin, yPos);
+  yPos += 10;
+
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
+
+  // Dopravné
+  if (!kalkulaceData.reklamaceBezDopravy) {
+    const dopravneText = `Dopravne (${kalkulaceData.vzdalenost} km)`;
+    const dopravneCena = kalkulaceData.dopravne.toFixed(2);
+    pdf.text(dopravneText, margin, yPos);
+    pdf.text(`${dopravneCena} EUR`, pageWidth - margin - 30, yPos);
+    yPos += 7;
+  } else {
+    pdf.text('Dopravne (reklamace)', margin, yPos);
+    pdf.text('0.00 EUR', pageWidth - margin - 30, yPos);
+    yPos += 7;
+  }
+
+  // Díly a práce
+  if (kalkulaceData.dilyPrace && kalkulaceData.dilyPrace.length > 0) {
+    yPos += 3;
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Dily a prace:', margin, yPos);
+    yPos += 7;
+
+    pdf.setFont('helvetica', 'normal');
+    kalkulaceData.dilyPrace.forEach(polozka => {
+      const text = `  ${polozka.nazev} (${polozka.pocet}x)`;
+      const cena = polozka.cena.toFixed(2);
+      pdf.text(text, margin, yPos);
+      pdf.text(`${cena} EUR`, pageWidth - margin - 30, yPos);
+      yPos += 6;
+    });
+
+    yPos += 3;
+  }
+
+  // Příplatky
+  if (kalkulaceData.tezkyNabytek) {
+    pdf.text('Priplatek: Tezky nabytek (nad 50 kg)', margin, yPos);
+    pdf.text('80.00 EUR', pageWidth - margin - 30, yPos);
+    yPos += 7;
+  }
+
+  if (kalkulaceData.druhaOsoba) {
+    pdf.text('Priplatek: Druha osoba', margin, yPos);
+    pdf.text('80.00 EUR', pageWidth - margin - 30, yPos);
+    yPos += 7;
+  }
+
+  yPos += 5;
+
+  // Čára před celkovou cenou
+  pdf.setLineWidth(0.3);
+  pdf.line(margin, yPos, pageWidth - margin, yPos);
+  yPos += 8;
+
+  // === CELKOVÁ CENA ===
+  pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(45, 80, 22);
+  pdf.text('CELKEM:', margin, yPos);
+  pdf.text(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
+  yPos += 10;
+
+  // === POZNÁMKY ===
+  if (kalkulaceData.poznamka) {
+    yPos += 5;
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'italic');
+    pdf.setTextColor(100, 100, 100);
+    pdf.text('Poznamka:', margin, yPos);
+    yPos += 6;
+    pdf.setFont('helvetica', 'normal');
+
+    const lines = pdf.splitTextToSize(kalkulaceData.poznamka, pageWidth - 2 * margin);
+    lines.forEach(line => {
+      pdf.text(line, margin, yPos);
+      yPos += 5;
+    });
+  }
+
+  logger.log(`✅ PDF PRICELIST vytvořen (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
+
+  return pdf;
+}
+
 async function exportBothPDFs() {
   try {
     showLoading(true);
 
-    logger.log('📋 Generuji kompletní PDF (protokol + fotodokumentace)...');
+    logger.log('📋 Generuji kompletní PDF (protokol + PRICELIST + fotodokumentace)...');
 
     // Vytvořit JEDNO PDF s protokolem
     const doc = await generateProtocolPDF();
+
+    // Pokud existuje kalkulace, přidat PRICELIST
+    if (kalkulaceData) {
+      logger.log('💶 Přidávám PRICELIST...');
+
+      // NOVÁ STRÁNKA: PRICELIST
+      doc.addPage();
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 15;
+      let yPos = margin;
+
+      // === HLAVIČKA ===
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(45, 80, 22);
+      doc.text('PRICELIST', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 15;
+
+      // === ÚDAJE ZÁKAZNÍKA ===
+      const zakaznikJmeno = document.getElementById('customer')?.value || 'N/A';
+      const zakaznikAdresa = kalkulaceData.adresa || document.getElementById('address')?.value || 'N/A';
+      const zakaznikTelefon = document.getElementById('phone')?.value || '';
+      const zakaznikEmail = document.getElementById('email')?.value || '';
+      const reklamaceCislo = document.getElementById('claim-number')?.value || '';
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0, 0, 0);
+
+      if (reklamaceCislo) {
+        doc.text(`Cislo reklamace: ${reklamaceCislo}`, margin, yPos);
+        yPos += 6;
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Zakaznik: ${zakaznikJmeno}`, margin, yPos);
+      yPos += 6;
+
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Adresa: ${zakaznikAdresa}`, margin, yPos);
+      yPos += 6;
+
+      if (zakaznikTelefon) {
+        doc.text(`Telefon: ${zakaznikTelefon}`, margin, yPos);
+        yPos += 6;
+      }
+
+      if (zakaznikEmail) {
+        doc.text(`Email: ${zakaznikEmail}`, margin, yPos);
+        yPos += 6;
+      }
+
+      yPos += 5;
+
+      // Čára oddělení
+      doc.setLineWidth(0.5);
+      doc.setDrawColor(45, 80, 22);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 10;
+
+      // === CENOTVORBA ===
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Rozpis cen', margin, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+
+      // Dopravné
+      if (!kalkulaceData.reklamaceBezDopravy) {
+        const dopravneText = `Dopravne (${kalkulaceData.vzdalenost} km)`;
+        const dopravneCena = kalkulaceData.dopravne.toFixed(2);
+        doc.text(dopravneText, margin, yPos);
+        doc.text(`${dopravneCena} EUR`, pageWidth - margin - 30, yPos);
+        yPos += 7;
+      } else {
+        doc.text('Dopravne (reklamace)', margin, yPos);
+        doc.text('0.00 EUR', pageWidth - margin - 30, yPos);
+        yPos += 7;
+      }
+
+      // Díly a práce
+      if (kalkulaceData.dilyPrace && kalkulaceData.dilyPrace.length > 0) {
+        yPos += 3;
+        doc.setFont('helvetica', 'bold');
+        doc.text('Dily a prace:', margin, yPos);
+        yPos += 7;
+
+        doc.setFont('helvetica', 'normal');
+        kalkulaceData.dilyPrace.forEach(polozka => {
+          const text = `  ${polozka.nazev} (${polozka.pocet}x)`;
+          const cena = polozka.cena.toFixed(2);
+          doc.text(text, margin, yPos);
+          doc.text(`${cena} EUR`, pageWidth - margin - 30, yPos);
+          yPos += 6;
+        });
+
+        yPos += 3;
+      }
+
+      // Příplatky
+      if (kalkulaceData.tezkyNabytek) {
+        doc.text('Priplatek: Tezky nabytek (nad 50 kg)', margin, yPos);
+        doc.text('80.00 EUR', pageWidth - margin - 30, yPos);
+        yPos += 7;
+      }
+
+      if (kalkulaceData.druhaOsoba) {
+        doc.text('Priplatek: Druha osoba', margin, yPos);
+        doc.text('80.00 EUR', pageWidth - margin - 30, yPos);
+        yPos += 7;
+      }
+
+      yPos += 5;
+
+      // Čára před celkovou cenou
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 8;
+
+      // === CELKOVÁ CENA ===
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(45, 80, 22);
+      doc.text('CELKEM:', margin, yPos);
+      doc.text(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
+
+      logger.log(`✅ PRICELIST přidán (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
+    }
 
     // Pokud jsou fotky, přidat fotodokumentaci na KONEC protokolu
     if (attachedPhotos.length > 0) {
@@ -1048,6 +1385,139 @@ async function sendToCustomer() {
 
     // Vytvořit JEDNO PDF s protokolem
     const doc = await generateProtocolPDF();
+
+    // Pokud existuje kalkulace, přidat PRICELIST
+    if (kalkulaceData) {
+      showLoadingWithMessage(true, `Přidávám PRICELIST (${kalkulaceData.celkovaCena.toFixed(2)} €)... Prosím čekejte`);
+      logger.log('💶 Přidávám PRICELIST...');
+
+      // NOVÁ STRÁNKA: PRICELIST
+      doc.addPage();
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 15;
+      let yPos = margin;
+
+      // === HLAVIČKA ===
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(45, 80, 22);
+      doc.text('PRICELIST', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 15;
+
+      // === ÚDAJE ZÁKAZNÍKA ===
+      const zakaznikJmeno = document.getElementById('customer')?.value || 'N/A';
+      const zakaznikAdresa = kalkulaceData.adresa || document.getElementById('address')?.value || 'N/A';
+      const zakaznikTelefon = document.getElementById('phone')?.value || '';
+      const zakaznikEmail = document.getElementById('email')?.value || '';
+      const reklamaceCislo = document.getElementById('claim-number')?.value || '';
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0, 0, 0);
+
+      if (reklamaceCislo) {
+        doc.text(`Cislo reklamace: ${reklamaceCislo}`, margin, yPos);
+        yPos += 6;
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Zakaznik: ${zakaznikJmeno}`, margin, yPos);
+      yPos += 6;
+
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Adresa: ${zakaznikAdresa}`, margin, yPos);
+      yPos += 6;
+
+      if (zakaznikTelefon) {
+        doc.text(`Telefon: ${zakaznikTelefon}`, margin, yPos);
+        yPos += 6;
+      }
+
+      if (zakaznikEmail) {
+        doc.text(`Email: ${zakaznikEmail}`, margin, yPos);
+        yPos += 6;
+      }
+
+      yPos += 5;
+
+      // Čára oddělení
+      doc.setLineWidth(0.5);
+      doc.setDrawColor(45, 80, 22);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 10;
+
+      // === CENOTVORBA ===
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Rozpis cen', margin, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+
+      // Dopravné
+      if (!kalkulaceData.reklamaceBezDopravy) {
+        const dopravneText = `Dopravne (${kalkulaceData.vzdalenost} km)`;
+        const dopravneCena = kalkulaceData.dopravne.toFixed(2);
+        doc.text(dopravneText, margin, yPos);
+        doc.text(`${dopravneCena} EUR`, pageWidth - margin - 30, yPos);
+        yPos += 7;
+      } else {
+        doc.text('Dopravne (reklamace)', margin, yPos);
+        doc.text('0.00 EUR', pageWidth - margin - 30, yPos);
+        yPos += 7;
+      }
+
+      // Díly a práce
+      if (kalkulaceData.dilyPrace && kalkulaceData.dilyPrace.length > 0) {
+        yPos += 3;
+        doc.setFont('helvetica', 'bold');
+        doc.text('Dily a prace:', margin, yPos);
+        yPos += 7;
+
+        doc.setFont('helvetica', 'normal');
+        kalkulaceData.dilyPrace.forEach(polozka => {
+          const text = `  ${polozka.nazev} (${polozka.pocet}x)`;
+          const cena = polozka.cena.toFixed(2);
+          doc.text(text, margin, yPos);
+          doc.text(`${cena} EUR`, pageWidth - margin - 30, yPos);
+          yPos += 6;
+        });
+
+        yPos += 3;
+      }
+
+      // Příplatky
+      if (kalkulaceData.tezkyNabytek) {
+        doc.text('Priplatek: Tezky nabytek (nad 50 kg)', margin, yPos);
+        doc.text('80.00 EUR', pageWidth - margin - 30, yPos);
+        yPos += 7;
+      }
+
+      if (kalkulaceData.druhaOsoba) {
+        doc.text('Priplatek: Druha osoba', margin, yPos);
+        doc.text('80.00 EUR', pageWidth - margin - 30, yPos);
+        yPos += 7;
+      }
+
+      yPos += 5;
+
+      // Čára před celkovou cenou
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 8;
+
+      // === CELKOVÁ CENA ===
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(45, 80, 22);
+      doc.text('CELKEM:', margin, yPos);
+      doc.text(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
+
+      logger.log(`✅ PRICELIST přidán (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
+    }
 
     // Pokud jsou fotky, přidat fotodokumentaci na KONEC protokolu (stejně jako exportBothPDFs)
     if (attachedPhotos.length > 0) {
