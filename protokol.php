@@ -216,6 +216,8 @@ if ($initialBootstrapData) {
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/protokol.css">
   <link rel="stylesheet" href="assets/css/protokol-mobile-fixes.css">
+  <link rel="stylesheet" href="assets/css/cenik.min.css">
+  <link rel="stylesheet" href="assets/css/protokol-calculator-modal.css">
   <!-- mobile-responsive.css odstraněn - protokol.css má vlastní mobilní styly -->
 
   <!-- Analytics Tracker -->
@@ -312,7 +314,7 @@ if ($initialBootstrapData) {
   <div class="two-col-table">
     <div class="col">
       <table>
-        <tr><td class="label">Účtováno za servis<span class="en-label">Service charged</span></td><td><input type="text" id="price-total" placeholder="0.00"></td></tr>
+        <tr><td class="label">Účtováno za servis<span class="en-label">Service charged</span></td><td><input type="text" id="price-total" placeholder="0.00" readonly> <button type="button" id="open-calculator-btn" class="btn-calculator">Kalkulačka</button></td></tr>
         <tr><td class="label">Platí zákazník?<span class="en-label">Customer pays?</span></td><td><select id="payment"><option>NE</option><option>ANO</option></select></td></tr>
         <tr><td class="label">Datum podpisu<span class="en-label">Signature date</span></td><td><input type="date" id="sign-date"></td></tr>
       </table>
@@ -345,6 +347,19 @@ if ($initialBootstrapData) {
   </div>
 
   <div id="notif" class="notif"></div>
+</div>
+
+<!-- Calculator Modal -->
+<div class="calculator-modal-overlay" id="calculatorModalOverlay" style="display: none;">
+  <div class="calculator-modal-container">
+    <div class="calculator-modal-header">
+      <h3>Kalkulace ceny servisu</h3>
+      <button type="button" class="calculator-modal-close" id="calculatorModalClose">×</button>
+    </div>
+    <div class="calculator-modal-body" id="calculatorModalBody">
+      <!-- Kalkulačka se vloží dynamicky -->
+    </div>
+  </div>
 </div>
 
 <!-- PDF Preview Modal -->
@@ -472,5 +487,8 @@ if ($initialBootstrapData) {
 <script src="assets/js/protokol-fakturace-patch.js" defer></script>
 <!-- Fix pro tlačítka (načíst až po protokol.js) -->
 <script src="assets/js/protokol-buttons-fix.js" defer></script>
+<!-- Kalkulačka integrace -->
+<script src="assets/js/cenik-calculator.js" defer></script>
+<script src="assets/js/protokol-calculator-integration.js" defer></script>
 </body>
 </html>
