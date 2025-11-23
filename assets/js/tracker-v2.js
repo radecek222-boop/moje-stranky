@@ -751,6 +751,75 @@
          */
         getEngagementScore: function() {
             return sessionStorage.getItem('wgs_engagement_score');
+        },
+
+        /**
+         * Zaznamenat konverzi (Modul #9)
+         *
+         * @param {string} conversionType - Typ konverze (form_submit, login, contact, purchase, etc.)
+         * @param {string|null} conversionLabel - Volitelný popis konverze
+         * @param {number} conversionValue - Hodnota konverze v Kč (0 pokud není)
+         * @param {Object|null} metadata - Volitelná custom data (JSON objekt)
+         * @returns {Promise<Object>} API response
+         *
+         * @example
+         * WgsTrackerV2.trackConversion('purchase', 'Product Purchase', 1250, {
+         *     product_id: 123,
+         *     quantity: 2
+         * });
+         */
+        trackConversion: async function(conversionType, conversionLabel = null, conversionValue = 0, metadata = null) {
+            try {
+                if (!sessionId) {
+                    throw new Error('Session ID není k dispozici. Tracker ještě není inicializován.');
+                }
+
+                if (!conversionType) {
+                    throw new Error('Conversion type je povinný parametr.');
+                }
+
+                const csrfToken = ziskatCsrfToken();
+                if (!csrfToken) {
+                    throw new Error('CSRF token není k dispozici.');
+                }
+
+                const payload = {
+                    session_id: sessionId,
+                    conversion_type: conversionType,
+                    conversion_label: conversionLabel,
+                    conversion_value: parseFloat(conversionValue) || 0,
+                    metadata: metadata ? JSON.stringify(metadata) : null,
+                    csrf_token: csrfToken
+                };
+
+                if (CONFIG.debug) {
+                    console.log('[WGS Analytics V2] Tracking conversion:', payload);
+                }
+
+                const odpoved = await fetch('/api/track_conversion.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams(payload)
+                });
+
+                const vysledek = await odpoved.json();
+
+                if (vysledek.status === 'success') {
+                    if (CONFIG.debug) {
+                        console.log('[WGS Analytics V2] Conversion tracked successfully:', vysledek.data);
+                    }
+                    return vysledek;
+                } else {
+                    console.error('[WGS Analytics V2] Chyba při trackování konverze:', vysledek.message);
+                    throw new Error(vysledek.message);
+                }
+
+            } catch (error) {
+                console.error('[WGS Analytics V2] Chyba při trackování konverze:', error);
+                throw error;
+            }
         }
     };
 
