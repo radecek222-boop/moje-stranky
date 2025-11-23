@@ -1,5 +1,5 @@
-// VERSION CHECK: 20251122-04 - Distance API vypnuto
-console.log('🔍 SEZNAM.JS NAČTEN - VERZE: 20251122-04 (distance API vypnuto)');
+// VERSION CHECK: 20251123-02 - Všechna tlačítka převedena na data-action (CSP fix)
+console.log('🔍 SEZNAM.JS NAČTEN - VERZE: 20251123-02 (CSP fix - data-action)');
 
 // BEZPEČNOST: Cache CSRF tokenu pro prevenci nekonečné smyčky
 window.csrfTokenCache = window.csrfTokenCache || null;
@@ -508,13 +508,13 @@ async function showDetail(recordOrId) {
   } else {
     buttonsHtml = `
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" onclick="startVisit('${record.id}')">Zahájit návštěvu</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
 
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" onclick="showCalendar('${record.id}')">Naplánovat termín</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
 
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showContactMenu('${record.id}')">Kontaktovat</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="showCustomerDetail('${record.id}')">Detail zákazníka</button>
-        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" onclick="closeDetail()">Zavřít</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   }
