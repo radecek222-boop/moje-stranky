@@ -101,11 +101,19 @@ try {
             }
 
             $sql .= " ORDER BY us.created_at DESC LIMIT :limit OFFSET :offset";
-            $params['limit'] = $limit;
-            $params['offset'] = $offset;
 
             $stmt = $pdo->prepare($sql);
-            $stmt->execute($params);
+
+            // Bind všechny parametry kromě LIMIT/OFFSET
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value);
+            }
+
+            // LIMIT a OFFSET musí být bindnuty jako INT
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+            $stmt->execute();
             $scores = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // Dekódovat JSON sloupce
@@ -115,15 +123,21 @@ try {
                 $score['interest_factors'] = json_decode($score['interest_factors'], true);
             }
 
-            // Total count
+            // Total count - OPRAVA: použít prepared statement místo SQL injection
             $countSql = "SELECT COUNT(*) as total FROM wgs_analytics_user_scores WHERE 1=1";
+            $countParams = [];
+
             if ($dateFrom) {
-                $countSql .= " AND DATE(created_at) >= '{$dateFrom}'";
+                $countSql .= " AND DATE(created_at) >= :date_from";
+                $countParams['date_from'] = $dateFrom;
             }
             if ($dateTo) {
-                $countSql .= " AND DATE(created_at) <= '{$dateTo}'";
+                $countSql .= " AND DATE(created_at) <= :date_to";
+                $countParams['date_to'] = $dateTo;
             }
-            $countStmt = $pdo->query($countSql);
+
+            $countStmt = $pdo->prepare($countSql);
+            $countStmt->execute($countParams);
             $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
             sendJsonSuccess('Scores načteny', [
