@@ -294,7 +294,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
           <label class="checkbox-card">
             <input type="checkbox" id="material">
             <div class="checkbox-content">
-              <div class="checkbox-title">Materiál z vlastních zdrojů</div>
+              <div class="checkbox-title">Materiál dodán od WGS</div>
               <div class="checkbox-desc">Výplně (vata, pěna) z naší zásoby</div>
               <div class="checkbox-price">+ 40 €</div>
             </div>

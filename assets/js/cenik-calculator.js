@@ -493,7 +493,7 @@
         // Materiál
         if (stav.material) {
             html += `<div class="summary-line">
-                <span>Materiál z vlastních zdrojů:</span>
+                <span>Materiál dodán od WGS:</span>
                 <span class="summary-price">${CENY.material.toFixed(2)} €</span>
             </div>`;
             celkem += CENY.material;
@@ -720,7 +720,7 @@
 
             // Materiál
             if (stav.material) {
-                doc.text('Materiál z vlastních zdrojů:', margin, yPos);
+                doc.text('Materiál dodán od WGS:', margin, yPos);
                 doc.text(`${CENY.material.toFixed(2)} €`, pageWidth - margin, yPos, { align: 'right' });
                 celkem += CENY.material;
                 yPos += 6;
