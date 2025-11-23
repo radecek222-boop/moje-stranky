@@ -35,17 +35,6 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
-
-  <style>
-    /* Analytics Module Cards Hover Effect */
-    .analytics-module-card {
-      transition: all 0.3s ease;
-    }
-    .analytics-module-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
-    }
-  </style>
 </head>
 <body>
 <?php if (!$embedMode): ?>
