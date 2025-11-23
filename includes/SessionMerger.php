@@ -606,4 +606,30 @@ class SessionMerger
             'session_id' => $sessionId
         ]);
     }
+
+    /**
+     * Aktualizuje geolokační data relace z GeolocationService (Modul #4)
+     *
+     * Ukládá country a city do tabulky wgs_analytics_sessions.
+     * Kompletní geolokační data (latitude, longitude, timezone, ISP atd.)
+     * jsou uložena v cache tabulce wgs_analytics_geolocation_cache.
+     *
+     * @param string $sessionId
+     * @param array $geoData - Data z GeolocationService::getLocationFromIP()
+     * @return bool
+     */
+    public function aktualizujGeoData(string $sessionId, array $geoData): bool
+    {
+        // Extrahovat country a city z geoData
+        $country = $geoData['country_name'] ?? null;
+        $city = $geoData['city'] ?? null;
+
+        // Pokud nejsou data k dispozici, neaktualizovat
+        if ($country === null && $city === null) {
+            return true; // Není co aktualizovat, ale není to chyba
+        }
+
+        // Použít existující metodu pro aktualizaci geolokace
+        return $this->aktualizujGeolokaci($sessionId, $country ?? '', $city);
+    }
 }
