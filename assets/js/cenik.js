@@ -142,9 +142,19 @@
         if (jazyk === 'cs') {
             nameEl.textContent = item.service_name || '';
         } else if (jazyk === 'en') {
-            nameEl.textContent = item.service_name_en || prelozitText(item.service_name, 'service') || item.service_name || '';
+            let dbPreklad = item.service_name_en;
+            // Pokud DB překlad neexistuje nebo je stejný jako český text, zkusit slovník
+            if (!dbPreklad || dbPreklad === item.service_name) {
+                dbPreklad = prelozitText(item.service_name, 'service');
+            }
+            nameEl.textContent = dbPreklad || item.service_name || '';
         } else if (jazyk === 'it') {
-            nameEl.textContent = item.service_name_it || prelozitText(item.service_name, 'service') || item.service_name || '';
+            let dbPreklad = item.service_name_it;
+            // Pokud DB překlad neexistuje nebo je stejný jako český text, zkusit slovník
+            if (!dbPreklad || dbPreklad === item.service_name) {
+                dbPreklad = prelozitText(item.service_name, 'service');
+            }
+            nameEl.textContent = dbPreklad || item.service_name || '';
         }
 
         const priceEl = document.createElement('div');
@@ -168,9 +178,19 @@
         if (jazyk === 'cs') {
             popis = item.description || '';
         } else if (jazyk === 'en') {
-            popis = item.description_en || prelozitText(item.description, 'desc') || item.description || '';
+            let dbPreklad = item.description_en;
+            // Pokud DB překlad neexistuje nebo je stejný jako český text, zkusit slovník
+            if (!dbPreklad || dbPreklad === item.description) {
+                dbPreklad = prelozitText(item.description, 'desc');
+            }
+            popis = dbPreklad || item.description || '';
         } else if (jazyk === 'it') {
-            popis = item.description_it || prelozitText(item.description, 'desc') || item.description || '';
+            let dbPreklad = item.description_it;
+            // Pokud DB překlad neexistuje nebo je stejný jako český text, zkusit slovník
+            if (!dbPreklad || dbPreklad === item.description) {
+                dbPreklad = prelozitText(item.description, 'desc');
+            }
+            popis = dbPreklad || item.description || '';
         }
 
         if (popis) {
