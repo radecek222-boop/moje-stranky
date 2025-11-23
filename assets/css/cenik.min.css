@@ -142,10 +142,9 @@
     margin-left: 20px;
 }
 
+/* Překlad "od"/"From"/"Da" zajištěn v cenik.js */
 .item-price.range::before {
-    content: 'od ';
-    font-weight: 400;
-    font-size: 1rem;
+    content: '';
 }
 
 .item-description {
