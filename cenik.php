@@ -446,8 +446,18 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
     <span class="modal-close" onclick="zavritModal()">&times;</span>
     <h2 id="modal-title" data-lang-cs="Upravit položku" data-lang-en="Edit Item" data-lang-it="Modifica Elemento">Upravit položku</h2>
 
+    <!-- Info: Upravuješ v aktuálním jazyce stránky -->
+    <div class="language-info">
+      <span data-lang-cs="Upravuješ 🇨🇿 českou verzi. Přepni jazyk stránky pro editaci jiných verzí."
+            data-lang-en="Editing 🇬🇧 English version. Switch page language to edit other versions."
+            data-lang-it="Modifichi 🇮🇹 versione italiana. Cambia lingua della pagina per modificare altre versioni.">
+        Upravuješ 🇨🇿 českou verzi. Přepni jazyk stránky pro editaci jiných verzí.
+      </span>
+    </div>
+
     <form id="edit-form" onsubmit="ulozitPolozku(event)">
       <input type="hidden" id="item-id" name="id">
+      <input type="hidden" id="edit-lang" name="edit_lang" value="cs">
 
       <div class="form-group">
         <label for="service-name" data-lang-cs="Název služby *" data-lang-en="Service Name *" data-lang-it="Nome Servizio *">Název služby *</label>
@@ -499,6 +509,20 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
     </form>
   </div>
 </div>
+
+<!-- Styly pro info -->
+<style>
+.language-info {
+  background: #e7f3ff;
+  border-left: 4px solid #2196F3;
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #0c5460;
+}
+</style>
+
 <?php endif; ?>
 
 <!-- External JavaScript -->

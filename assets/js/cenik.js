@@ -90,7 +90,21 @@
 
             const headerEl = document.createElement('div');
             headerEl.className = 'category-header';
-            headerEl.textContent = prelozitText(category, 'category');
+
+            // Zjistit překlad kategorie z první položky
+            const jazyk = window.aktualniJazyk || 'cs';
+            const firstItem = items[0];
+            let categoryName = category;
+
+            if (firstItem) {
+                if (jazyk === 'en' && firstItem.category_en) {
+                    categoryName = firstItem.category_en;
+                } else if (jazyk === 'it' && firstItem.category_it) {
+                    categoryName = firstItem.category_it;
+                }
+            }
+
+            headerEl.textContent = categoryName;
 
             const itemsEl = document.createElement('div');
             itemsEl.className = 'category-items';
@@ -114,13 +128,24 @@
         itemEl.className = 'pricing-item';
         itemEl.dataset.id = item.id;
 
+        // Zjistit aktuální jazyk
+        const jazyk = window.aktualniJazyk || 'cs';
+
         // Header (název + cena)
         const headerEl = document.createElement('div');
         headerEl.className = 'item-header';
 
         const nameEl = document.createElement('div');
         nameEl.className = 'item-name';
-        nameEl.textContent = prelozitText(item.service_name, 'service');
+
+        // Načíst název podle jazyka
+        if (jazyk === 'cs') {
+            nameEl.textContent = item.service_name || '';
+        } else if (jazyk === 'en') {
+            nameEl.textContent = item.service_name_en || item.service_name || '';
+        } else if (jazyk === 'it') {
+            nameEl.textContent = item.service_name_it || item.service_name || '';
+        }
 
         const priceEl = document.createElement('div');
         priceEl.className = 'item-price';
@@ -138,12 +163,20 @@
         headerEl.appendChild(priceEl);
         itemEl.appendChild(headerEl);
 
-        // Popis
-        if (item.description) {
+        // Popis podle jazyka
+        let popis = '';
+        if (jazyk === 'cs') {
+            popis = item.description || '';
+        } else if (jazyk === 'en') {
+            popis = item.description_en || item.description || '';
+        } else if (jazyk === 'it') {
+            popis = item.description_it || item.description || '';
+        }
+
+        if (popis) {
             const descEl = document.createElement('div');
             descEl.className = 'item-description';
-            const prelozenyPopis = prelozitText(item.description, 'desc');
-            descEl.innerHTML = parseMarkdown(prelozenyPopis);
+            descEl.innerHTML = parseMarkdown(popis);
             itemEl.appendChild(descEl);
         }
 
@@ -165,15 +198,33 @@
     window.upravitPolozku = function(item) {
         currentEditItem = item;
 
-        // Naplnit formulář
+        // Zjistit aktuální jazyk stránky
+        const jazyk = window.aktualniJazyk || 'cs';
+
+        // Naplnit formulář podle aktivního jazyka
         document.getElementById('modal-title').textContent = window.t('pricingGrid.modal.titleEdit');
         document.getElementById('item-id').value = item.id;
-        document.getElementById('service-name').value = item.service_name;
-        document.getElementById('description').value = item.description || '';
+        document.getElementById('edit-lang').value = jazyk;
+
+        // Načíst správnou jazykovou verzi
+        if (jazyk === 'cs') {
+            document.getElementById('service-name').value = item.service_name || '';
+            document.getElementById('description').value = item.description || '';
+            document.getElementById('category').value = item.category || '';
+        } else if (jazyk === 'en') {
+            document.getElementById('service-name').value = item.service_name_en || item.service_name || '';
+            document.getElementById('description').value = item.description_en || item.description || '';
+            document.getElementById('category').value = item.category_en || item.category || '';
+        } else if (jazyk === 'it') {
+            document.getElementById('service-name').value = item.service_name_it || item.service_name || '';
+            document.getElementById('description').value = item.description_it || item.description || '';
+            document.getElementById('category').value = item.category_it || item.category || '';
+        }
+
+        // Společné hodnoty (ceny, aktivní)
         document.getElementById('price-from').value = item.price_from || '';
         document.getElementById('price-to').value = item.price_to || '';
         document.getElementById('price-unit').value = item.price_unit;
-        document.getElementById('category').value = item.category || '';
         document.getElementById('is-active').checked = item.is_active == 1;
 
         // Zobrazit delete tlačítko
@@ -189,10 +240,14 @@
     window.pridatPolozku = function() {
         currentEditItem = null;
 
+        // Zjistit aktuální jazyk stránky
+        const jazyk = window.aktualniJazyk || 'cs';
+
         // Vyčistit formulář
         document.getElementById('modal-title').textContent = window.t('pricingGrid.modal.titleAdd');
         document.getElementById('edit-form').reset();
         document.getElementById('item-id').value = '';
+        document.getElementById('edit-lang').value = jazyk;
         document.getElementById('is-active').checked = true;
 
         // Skrýt delete tlačítko
