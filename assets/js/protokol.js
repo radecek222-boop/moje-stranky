@@ -175,7 +175,6 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   const today = new Date().toISOString().split('T')[0];
   document.getElementById("sign-date").value = today;
-  document.getElementById("visit-date").value = today;
 
   setupAutoTranslate();
 
@@ -815,7 +814,7 @@ async function exportBothPDFs() {
 
       const customerInfo = [
         `Cislo reklamace: ${document.getElementById('claim-number')?.value || 'N/A'}`,
-        `Datum: ${document.getElementById('visit-date')?.value || new Date().toLocaleDateString('cs-CZ')}`
+        `Datum: ${document.getElementById('sign-date')?.value || new Date().toLocaleDateString('cs-CZ')}`
       ];
 
       customerInfo.forEach(line => {
@@ -1075,7 +1074,7 @@ async function sendToCustomer() {
 
       const customerInfo = [
         `Cislo reklamace: ${document.getElementById('claim-number')?.value || 'N/A'}`,
-        `Datum: ${document.getElementById('visit-date')?.value || new Date().toLocaleDateString('cs-CZ')}`
+        `Datum: ${document.getElementById('sign-date')?.value || new Date().toLocaleDateString('cs-CZ')}`
       ];
 
       customerInfo.forEach(line => {
