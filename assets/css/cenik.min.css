@@ -846,6 +846,15 @@
     margin-bottom: 0.5rem !important;
     border-bottom: 2px solid #4a4a4a !important;
     padding-bottom: 0.5rem !important;
+    display: block !important;
+    width: 100% !important;
+}
+
+.calculator-section .section-text {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 0 1rem 0 !important;
+    text-align: left !important;
 }
 
 .calc-input {
