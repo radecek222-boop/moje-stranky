@@ -35,6 +35,17 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
+
+  <style>
+    /* Analytics Module Cards Hover Effect */
+    .analytics-module-card {
+      transition: all 0.3s ease;
+    }
+    .analytics-module-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+    }
+  </style>
 </head>
 <body>
 <?php if (!$embedMode): ?>
@@ -58,7 +69,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
       <h1 class="page-title">Web Analytics</h1>
       <p class="page-subtitle">Komplexní analýza návštěvnosti a chování na webu</p>
     </div>
-    
+
     <div class="time-selector">
       <button class="time-btn" data-timeperiod="today">Dnes</button>
       <button class="time-btn active" data-timeperiod="week">Týden</button>
@@ -66,7 +77,63 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
       <button class="time-btn" data-timeperiod="year">Rok</button>
     </div>
   </div>
-  
+
+  <!-- ANALYTICS MODULY - NAVIGACE -->
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);">
+    <h2 style="color: white; font-size: 1.3rem; margin-bottom: 1.5rem; font-weight: 600;">Analytics Moduly</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+
+      <a href="analytics-heatmap.php" class="analytics-module-card" style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 8px; text-decoration: none; display: flex; flex-direction: column; gap: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div style="font-size: 2rem; color: #f59e0b;">🔥</div>
+        <div style="font-weight: 600; color: #1f2937; font-size: 1rem;">Heatmapy</div>
+        <div style="font-size: 0.75rem; color: #6b7280;">Click & Scroll mapy</div>
+      </a>
+
+      <a href="analytics-replay.php" class="analytics-module-card" style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 8px; text-decoration: none; display: flex; flex-direction: column; gap: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div style="font-size: 2rem; color: #ef4444;">🎥</div>
+        <div style="font-weight: 600; color: #1f2937; font-size: 1rem;">Session Replay</div>
+        <div style="font-size: 0.75rem; color: #6b7280;">Záznamy návštěv</div>
+      </a>
+
+      <a href="analytics-campaigns.php" class="analytics-module-card" style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 8px; text-decoration: none; display: flex; flex-direction: column; gap: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div style="font-size: 2rem; color: #8b5cf6;">📢</div>
+        <div style="font-weight: 600; color: #1f2937; font-size: 1rem;">Kampaně</div>
+        <div style="font-size: 0.75rem; color: #6b7280;">UTM tracking</div>
+      </a>
+
+      <a href="analytics-conversions.php" class="analytics-module-card" style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 8px; text-decoration: none; display: flex; flex-direction: column; gap: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div style="font-size: 2rem; color: #10b981;">🎯</div>
+        <div style="font-weight: 600; color: #1f2937; font-size: 1rem;">Konverze</div>
+        <div style="font-size: 0.75rem; color: #6b7280;">Conversion funnels</div>
+      </a>
+
+      <a href="analytics-user-scores.php" class="analytics-module-card" style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 8px; text-decoration: none; display: flex; flex-direction: column; gap: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div style="font-size: 2rem; color: #3b82f6;">🧠</div>
+        <div style="font-weight: 600; color: #1f2937; font-size: 1rem;">User Scoring</div>
+        <div style="font-size: 0.75rem; color: #6b7280;">AI analýza chování</div>
+      </a>
+
+      <a href="analytics-realtime.php" class="analytics-module-card" style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 8px; text-decoration: none; display: flex; flex-direction: column; gap: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div style="font-size: 2rem; color: #ec4899;">⚡</div>
+        <div style="font-weight: 600; color: #1f2937; font-size: 1rem;">Real-time</div>
+        <div style="font-size: 0.75rem; color: #6b7280;">Live dashboard</div>
+      </a>
+
+      <a href="analytics-reports.php" class="analytics-module-card" style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 8px; text-decoration: none; display: flex; flex-direction: column; gap: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div style="font-size: 2rem; color: #14b8a6;">📊</div>
+        <div style="font-weight: 600; color: #1f2937; font-size: 1rem;">AI Reporty</div>
+        <div style="font-size: 0.75rem; color: #6b7280;">Automatické reporty</div>
+      </a>
+
+      <a href="gdpr-portal.php" class="analytics-module-card" style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 8px; text-decoration: none; display: flex; flex-direction: column; gap: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div style="font-size: 2rem; color: #64748b;">🔒</div>
+        <div style="font-weight: 600; color: #1f2937; font-size: 1rem;">GDPR Portal</div>
+        <div style="font-size: 0.75rem; color: #6b7280;">Compliance & Privacy</div>
+      </a>
+
+    </div>
+  </div>
+
   <!-- HLAVNÍ METRIKY -->
   <div class="stats-grid">
     <div class="stat-card blue">

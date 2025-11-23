@@ -23,6 +23,10 @@ if (!function_exists('loadAdminNavigation')) {
                 'href' => 'statistiky.php',
                 'header_label' => 'STATISTIKY',
             ],
+            'analytics' => [
+                'href' => 'analytics.php',
+                'header_label' => 'ANALYTICS',
+            ],
             'aktuality' => [
                 'href' => 'aktuality.php',
                 'header_label' => 'AKTUALITY',
