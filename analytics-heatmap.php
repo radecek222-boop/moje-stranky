@@ -329,7 +329,8 @@ $csrfToken = generateCSRFToken();
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    currentData = result.data;
+                    // API vrací data v top-level (array_merge pattern)
+                    currentData = result;
 
                     // Zobrazit statistiky
                     document.getElementById('stats-container').style.display = 'block';
