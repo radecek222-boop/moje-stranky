@@ -976,9 +976,9 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 
 <!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
 <script>
-// CACHE BUSTER: 2025-11-23-19:25 - S CONFIRMATION DIALOGEM
+// CACHE BUSTER: 2025-11-23-19:35:00 - VLASTNÍ MODAL DIALOG
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('🔧 EMERGENCY event delegation V4 se načítá... [2025-11-23-19:25]');
+  console.log('🔧 EMERGENCY event delegation V5 se načítá... [2025-11-23-19:35:00 - VLASTNÍ MODAL]');
 
   document.addEventListener('click', (e) => {
     const button = e.target.closest('[data-action]');
@@ -997,18 +997,40 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         }
 
-        // Confirmation dialog PRO BEZPEČNOST
-        const confirmReopen = confirm(
-          'Opravdu chcete znovu otevřít tuto dokončenou zakázku?\n\n' +
-          'Zakázka bude vrácena do stavu "ČEKÁ" a bude možné ji znovu upravit.'
-        );
+        // VLASTNÍ CONFIRMATION MODAL (obchází problém s window.confirm)
+        console.log('[EMERGENCY V5] 🎨 VYTVÁŘENÍ VLASTNÍHO MODALU pro ID:', id);
 
-        if (!confirmReopen) {
-          console.log('[EMERGENCY] ❌ Uživatel zrušil znovuotevření');
-          break;
-        }
+        // Vytvořit vlastní modal overlay
+        const modalDiv = document.createElement('div');
+        modalDiv.id = 'customConfirmModal';
+        modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:999999;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.2s ease-in;';
 
-        console.log('[EMERGENCY] V3 ✅ Otevírám zakázku ID:', id);
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = 'background:white;padding:40px;border-radius:12px;max-width:500px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);animation:slideIn 0.3s ease-out;';
+
+        modalContent.innerHTML = `
+          <h2 style="margin:0 0 20px 0;color:#2D5016;font-size:1.4rem;font-weight:700;">Znovu otevřít zakázku?</h2>
+          <p style="margin:0 0 35px 0;color:#555;line-height:1.8;font-size:1.05rem;">Opravdu chcete znovu otevřít tuto dokončenou zakázku?<br><br>Zakázka bude vrácena do stavu <strong>ČEKÁ</strong> a bude možné ji znovu upravit.</p>
+          <div style="display:flex;gap:15px;justify-content:center;">
+            <button id="confirmNo" style="padding:14px 35px;background:#999;color:white;border:none;border-radius:8px;cursor:pointer;font-size:1.05rem;font-weight:600;transition:all 0.2s;">Zrušit</button>
+            <button id="confirmYes" style="padding:14px 35px;background:#2D5016;color:white;border:none;border-radius:8px;cursor:pointer;font-size:1.05rem;font-weight:700;transition:all 0.2s;box-shadow:0 3px 10px rgba(45,80,22,0.3);">Ano, otevřít</button>
+          </div>
+        `;
+
+        modalDiv.appendChild(modalContent);
+        document.body.appendChild(modalDiv);
+
+        console.log('[EMERGENCY V5] ✅ Modal přidán do DOM!');
+
+        // Event listenery pro tlačítka
+        document.getElementById('confirmNo').onclick = () => {
+          console.log('[EMERGENCY V5] ❌ Uživatel zrušil');
+          document.body.removeChild(modalDiv);
+        };
+
+        document.getElementById('confirmYes').onclick = () => {
+          console.log('[EMERGENCY V5] ✅ Uživatel potvrdil, otevírám zakázku ID:', id);
+          document.body.removeChild(modalDiv);
 
         // Použít asynchronní funkci pro await
         (async () => {
@@ -1033,17 +1055,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (result.status === 'success') {
-              console.log('[EMERGENCY] V3 ✅ ÚSPĚCH! Zakázka byla znovu otevřena');
-              alert('✅ ÚSPĚCH!\n\nZakázka byla znovu otevřena a vrácena do stavu ČEKÁ.');
+              console.log('[EMERGENCY V5] ✅ ÚSPĚCH! Zakázka byla znovu otevřena');
+              alert('Zakázka byla úspěšně znovu otevřena a vrácena do stavu ČEKÁ.');
               setTimeout(() => location.reload(), 500);
             } else {
-              throw new Error(result.message || 'Chyba');
+              throw new Error(result.message || 'Chyba při otevření zakázky');
             }
           } catch (err) {
-            console.error('[EMERGENCY] ❌ Chyba:', err);
-            alert('Chyba: ' + err.message);
+            console.error('[EMERGENCY V5] ❌ Chyba:', err);
+            alert('Chyba při otevření zakázky: ' + err.message);
           }
         })();
+        };
         break;
 
       case 'showContactMenu':
@@ -1083,7 +1106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('✅ EMERGENCY event delegation V4 načten [2025-11-23-19:25] - S CONFIRMATION DIALOGEM');
+  console.log('✅ EMERGENCY event delegation V5 načten [2025-11-23-19:35:00] - VLASTNÍ MODAL DIALOG');
 });
 </script>
 </body>
