@@ -339,17 +339,12 @@ async function renderOrders(items = null) {
   // Načíst unread counts pro všechny reklamace najednou
   let unreadCountsMap = {};
   try {
-    console.log('[DEBUG] Načítám unread counts...');
     const response = await fetch('api/notes_api.php?action=get_unread_counts');
     const data = await response.json();
-    console.log('[DEBUG] Odpověď z API:', data);
     if (data.status === 'success') {
       unreadCountsMap = data.unread_counts || {};
-      console.log('[DEBUG] Unread counts map:', unreadCountsMap);
-      console.log('[DEBUG] Celkem nepřečtených:', Object.keys(unreadCountsMap).length);
     }
   } catch (e) {
-    console.error('[DEBUG] CHYBA při načítání unread counts:', e);
     logger.warn('Nepodařilo se načíst unread counts:', e);
   }
 
@@ -383,7 +378,6 @@ async function renderOrders(items = null) {
     const hasUnread = unreadCount > 0;
 
     if (unreadCount > 0) {
-      console.log(`[DEBUG] Reklamace ${claimId} má ${unreadCount} nepřečtených poznámek - BUDE PULSOVAT!`);
     }
     
     const highlightedCustomer = SEARCH_QUERY ? highlightText(customerName, SEARCH_QUERY) : customerName;
@@ -421,20 +415,15 @@ async function renderOrders(items = null) {
 
   // Aktualizovat indikátor nových poznámek
   const totalUnreadCount = Object.values(unreadCountsMap).reduce((sum, count) => sum + count, 0);
-  console.log('[DEBUG] Celkový počet nepřečtených:', totalUnreadCount);
 
   const unreadIndicator = document.getElementById('unreadNotesIndicator');
   const unreadCountSpan = document.getElementById('unreadNotesCount');
 
-  console.log('[DEBUG] Indikátor element:', unreadIndicator);
-  console.log('[DEBUG] Count span element:', unreadCountSpan);
 
   if (totalUnreadCount > 0) {
-    console.log('[DEBUG] ✅ ZOBRAZUJI INDIKÁTOR - máte', totalUnreadCount, 'nepřečtených!');
     unreadCountSpan.textContent = totalUnreadCount;
     unreadIndicator.style.display = 'block';
   } else {
-    console.log('[DEBUG] ⚠️ SKRÝVÁM INDIKÁTOR - žádné nepřečtené');
     unreadIndicator.style.display = 'none';
   }
 

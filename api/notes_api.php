@@ -70,9 +70,11 @@ try {
                     n.note_text,
                     n.created_by,
                     n.created_at,
-                    CASE WHEN nr.id IS NOT NULL THEN 1 ELSE 0 END as is_read
+                    CASE WHEN nr.id IS NOT NULL THEN 1 ELSE 0 END as is_read,
+                    u.name as user_name
                 FROM wgs_notes n
                 LEFT JOIN wgs_notes_read nr ON n.id = nr.note_id AND nr.user_email = :user_email
+                LEFT JOIN wgs_users u ON n.created_by = u.email
                 WHERE n.claim_id = :claim_id
                 ORDER BY n.created_at DESC
             ");
@@ -86,10 +88,18 @@ try {
             foreach ($notes as &$note) {
                 $note['read'] = (bool)$note['is_read'];
                 $note['author'] = $note['created_by'];
-                $note['author_name'] = $note['created_by'];
+
+                // Zobrazit jméno místo emailu
+                if ($note['created_by'] === 'admin@wgs-service.cz') {
+                    $note['author_name'] = 'Radek';
+                } else {
+                    $note['author_name'] = $note['user_name'] ?: $note['created_by'];
+                }
+
                 $note['timestamp'] = $note['created_at'];
                 $note['text'] = $note['note_text'];  // ✅ KRITICKÉ: Mapování textu poznámky
                 unset($note['is_read']);
+                unset($note['user_name']); // Vyčistit pomocný sloupec
             }
 
             echo json_encode([
