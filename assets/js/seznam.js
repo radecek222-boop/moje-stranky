@@ -2282,16 +2282,28 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', (e) => {
     const target = e.target.closest('[data-action]');
     if (!target) return;
-    
+
     const action = target.getAttribute('data-action');
-    
+
     if (action === 'reload') {
       location.reload();
       return;
     }
-    
+
     if (typeof window[action] === 'function') {
-      window[action]();
+      const id = target.getAttribute('data-id');
+      const url = target.getAttribute('data-url');
+
+      console.log(`[seznam.js delegation] Volám ${action} s parametry:`, {id, url});
+
+      // Předat parametry podle dostupnosti
+      if (id) {
+        window[action](id);
+      } else if (url) {
+        window[action](url);
+      } else {
+        window[action]();
+      }
     }
   });
 
