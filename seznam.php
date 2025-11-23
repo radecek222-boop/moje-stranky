@@ -1006,14 +1006,14 @@ document.addEventListener('DOMContentLoaded', () => {
         modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:999999;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.2s ease-in;';
 
         const modalContent = document.createElement('div');
-        modalContent.style.cssText = 'background:white;padding:40px;border-radius:12px;max-width:500px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);animation:slideIn 0.3s ease-out;';
+        modalContent.style.cssText = 'background:white;padding:25px;border-radius:8px;max-width:350px;width:85%;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.4);';
 
         modalContent.innerHTML = `
-          <h2 style="margin:0 0 20px 0;color:#2D5016;font-size:1.4rem;font-weight:700;">Znovu otevřít zakázku?</h2>
-          <p style="margin:0 0 35px 0;color:#555;line-height:1.8;font-size:1.05rem;">Opravdu chcete znovu otevřít tuto dokončenou zakázku?<br><br>Zakázka bude vrácena do stavu <strong>ČEKÁ</strong> a bude možné ji znovu upravit.</p>
-          <div style="display:flex;gap:15px;justify-content:center;">
-            <button id="confirmNo" style="padding:14px 35px;background:#999;color:white;border:none;border-radius:8px;cursor:pointer;font-size:1.05rem;font-weight:600;transition:all 0.2s;">Zrušit</button>
-            <button id="confirmYes" style="padding:14px 35px;background:#2D5016;color:white;border:none;border-radius:8px;cursor:pointer;font-size:1.05rem;font-weight:700;transition:all 0.2s;box-shadow:0 3px 10px rgba(45,80,22,0.3);">Ano, otevřít</button>
+          <h2 style="margin:0 0 15px 0;color:#333;font-size:1.1rem;font-weight:700;">Znovu otevřít zakázku?</h2>
+          <p style="margin:0 0 25px 0;color:#555;line-height:1.6;font-size:0.95rem;">Opravdu chcete znovu otevřít tuto dokončenou zakázku?<br><br>Zakázka bude vrácena do stavu <strong>ČEKÁ</strong> a bude možné ji znovu upravit.</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <button id="confirmYes" style="padding:12px 25px;background:#333;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.95rem;font-weight:700;transition:all 0.2s;">Ano, otevřít</button>
+            <button id="confirmNo" style="padding:12px 25px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.95rem;font-weight:600;transition:all 0.2s;">Zrušit</button>
           </div>
         `;
 
