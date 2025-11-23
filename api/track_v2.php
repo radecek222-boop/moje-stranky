@@ -183,6 +183,115 @@ try {
     $sessionMerger->aktualizujGeoData($sessionId, $geoData);
 
     // ========================================
+    // REAL-TIME TRACKING (Modul #11)
+    // ========================================
+    // UPSERT do wgs_analytics_realtime pro real-time dashboard
+    // Session expirvuje po 5 minutách neaktivity
+
+    // Získat session_start z wgs_analytics_sessions
+    $stmtSessionStart = $pdo->prepare("SELECT session_start FROM wgs_analytics_sessions WHERE session_id = :session_id");
+    $stmtSessionStart->execute(['session_id' => $sessionId]);
+    $sessionStartRow = $stmtSessionStart->fetch(PDO::FETCH_ASSOC);
+    $sessionStart = $sessionStartRow['session_start'] ?? date('Y-m-d H:i:s');
+
+    // Vypočítat session duration
+    $sessionStartTimestamp = strtotime($sessionStart);
+    $sessionDuration = time() - $sessionStartTimestamp;
+
+    // Extract referrer domain
+    $referrerDomain = null;
+    if (!empty($sessionData['referrer'])) {
+        $parsedReferrer = parse_url($sessionData['referrer']);
+        $referrerDomain = $parsedReferrer['host'] ?? null;
+    }
+
+    $stmtRealtime = $pdo->prepare("
+        INSERT INTO wgs_analytics_realtime (
+            session_id,
+            fingerprint_id,
+            is_bot,
+            visitor_type,
+            current_page,
+            current_page_title,
+            country_code,
+            city,
+            latitude,
+            longitude,
+            device_type,
+            browser,
+            os,
+            referrer_domain,
+            utm_source,
+            utm_medium,
+            utm_campaign,
+            pageviews,
+            events_count,
+            session_duration,
+            is_active,
+            last_activity_at,
+            session_start,
+            expires_at
+        ) VALUES (
+            :session_id,
+            :fingerprint_id,
+            :is_bot,
+            :visitor_type,
+            :current_page,
+            :current_page_title,
+            :country_code,
+            :city,
+            :latitude,
+            :longitude,
+            :device_type,
+            :browser,
+            :os,
+            :referrer_domain,
+            :utm_source,
+            :utm_medium,
+            :utm_campaign,
+            :pageviews,
+            0,
+            :session_duration,
+            1,
+            NOW(),
+            :session_start,
+            DATE_ADD(NOW(), INTERVAL 5 MINUTE)
+        )
+        ON DUPLICATE KEY UPDATE
+            current_page = VALUES(current_page),
+            current_page_title = VALUES(current_page_title),
+            pageviews = :pageviews_update,
+            session_duration = VALUES(session_duration),
+            last_activity_at = NOW(),
+            expires_at = DATE_ADD(NOW(), INTERVAL 5 MINUTE),
+            is_active = 1
+    ");
+
+    $stmtRealtime->execute([
+        'session_id' => $sessionId,
+        'fingerprint_id' => $fingerprintId,
+        'is_bot' => $jeBot ? 1 : 0,
+        'visitor_type' => $jeBot ? 'bot' : 'human',
+        'current_page' => substr($pageUrl, 0, 500),
+        'current_page_title' => substr($sessionData['page_title'], 0, 200),
+        'country_code' => $geoData['country_code'],
+        'city' => $geoData['city'],
+        'latitude' => $geoData['latitude'],
+        'longitude' => $geoData['longitude'],
+        'device_type' => $sessionData['device_type'],
+        'browser' => $sessionData['browser'],
+        'os' => $sessionData['os'],
+        'referrer_domain' => $referrerDomain,
+        'utm_source' => $sessionData['utm_source'],
+        'utm_medium' => $sessionData['utm_medium'],
+        'utm_campaign' => $sessionData['utm_campaign'],
+        'pageviews' => $pocetPageviews,
+        'session_duration' => $sessionDuration,
+        'session_start' => $sessionStart,
+        'pageviews_update' => $pocetPageviews
+    ]);
+
+    // ========================================
     // BOT DETECTION (Modul #3)
     // ========================================
     $botDetector = new BotDetector($pdo);
