@@ -430,8 +430,9 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    campaignsData = result.data.campaigns;
-                    zobrazitCampaignData(result.data);
+                    // API vrací data v top-level (array_merge pattern)
+                    campaignsData = result.campaigns;
+                    zobrazitCampaignData(result);
                 } else {
                     console.error('[Campaign Dashboard] Chyba:', result.message);
                     document.getElementById('loading-message').textContent = 'Chyba: ' + result.message;
