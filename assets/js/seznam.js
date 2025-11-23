@@ -409,6 +409,52 @@ async function renderOrders(items = null) {
       </div>
     `;
   }).join('');
+
+  // Aktualizovat indikátor nových poznámek
+  const totalUnreadCount = Object.values(unreadCountsMap).reduce((sum, count) => sum + count, 0);
+  const unreadIndicator = document.getElementById('unreadNotesIndicator');
+  const unreadCountSpan = document.getElementById('unreadNotesCount');
+
+  if (totalUnreadCount > 0) {
+    unreadCountSpan.textContent = totalUnreadCount;
+    unreadIndicator.style.display = 'block';
+  } else {
+    unreadIndicator.style.display = 'none';
+  }
+
+  // Uložit unreadCountsMap pro filtrování
+  window.UNREAD_COUNTS_MAP = unreadCountsMap;
+}
+
+// === FILTROVÁNÍ PODLE NEPŘEČTENÝCH POZNÁMEK ===
+function filterUnreadNotes() {
+  const unreadCountsMap = window.UNREAD_COUNTS_MAP || {};
+
+  // Najít všechny karty s nepřečtenými poznámkami
+  const cardsWithUnread = WGS_DATA_CACHE.filter(rec => {
+    const claimId = rec.id;
+    return unreadCountsMap[claimId] > 0;
+  });
+
+  logger.log(`[Seznam] Filtrování nepřečtených poznámek: ${cardsWithUnread.length} karet`);
+
+  // Vyrenderovat pouze karty s nepřečtenými poznámkami
+  const grid = document.getElementById('orderGrid');
+
+  if (cardsWithUnread.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-text">Žádné nepřečtené poznámky</div>
+      </div>
+    `;
+    return;
+  }
+
+  // Použít stejnou logiku jako renderOrders, ale s filtrovanými daty
+  renderOrders(cardsWithUnread);
+
+  // Scroll na začátek seznamu
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // === MODAL MANAGER ===
@@ -2744,6 +2790,12 @@ document.addEventListener('click', (e) => {
       if (id && typeof showNotes === 'function') {
         e.stopPropagation();
         showNotes(id);
+      }
+      break;
+
+    case 'filterUnreadNotes':
+      if (typeof filterUnreadNotes === 'function') {
+        filterUnreadNotes();
       }
       break;
 
