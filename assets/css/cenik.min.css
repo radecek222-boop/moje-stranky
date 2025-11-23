@@ -1119,6 +1119,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
+    width: 100%;
 }
 
 .radio-card {
@@ -1132,7 +1133,15 @@
     position: relative;
     min-height: 95px;
     max-height: 95px;
+    height: 95px;
     overflow: hidden;
+    width: 100%;
+    /* Override globální label styly */
+    font-size: inherit !important;
+    font-weight: normal !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    color: inherit !important;
 }
 
 .radio-card::before {
