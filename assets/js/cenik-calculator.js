@@ -69,7 +69,7 @@
 
     async function hledatAdresy(query, dropdown) {
         try {
-            const response = await fetch('/api/geocode_proxy.php?text=' + encodeURIComponent(query));
+            const response = await fetch('/api/geocode_proxy.php?action=autocomplete&text=' + encodeURIComponent(query));
             const data = await response.json();
 
             if (data.features && data.features.length > 0) {

@@ -17,7 +17,6 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('../img/pattern-overlay.png') repeat;
     opacity: 0.05;
     pointer-events: none;
 }
