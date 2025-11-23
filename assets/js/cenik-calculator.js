@@ -67,6 +67,9 @@
         aktualizovatProgress();
     }
 
+    // Export pro použití z protokolu
+    window.initKalkulacka = initKalkulacka;
+
     function initEventListeners() {
         // Radio buttony pro typ servisu
         document.querySelectorAll('input[name="service-type"]').forEach(radio => {

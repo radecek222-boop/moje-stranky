@@ -100,6 +100,14 @@
             // Vložit kalkulačku do modalu
             modalBody.innerHTML = kalkulackaElement.outerHTML;
 
+            // Reinicializovat kalkulačku - připojit event listenery k novému DOMu
+            if (typeof window.initKalkulacka === 'function') {
+                window.initKalkulacka();
+                console.log('[Protokol-Kalkulačka] Kalkulačka reinicializována');
+            } else {
+                console.warn('[Protokol-Kalkulačka] Funkce initKalkulacka není dostupná');
+            }
+
             // Nastavit kalkulačku do protokol režimu
             if (typeof window.nastavitKalkulackuRezim === 'function') {
                 window.nastavitKalkulackuRezim('protokol');
