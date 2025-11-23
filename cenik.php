@@ -133,6 +133,10 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
             <p><strong>Dopravné (tam a zpět):</strong> <span id="transport-cost" class="highlight-price">-</span> €</p>
           </div>
         </div>
+
+        <div class="wizard-buttons">
+          <button class="btn-primary" onclick="nextStep()">Pokračovat</button>
+        </div>
       </div>
 
       <!-- KROK 2: Typ servisu -->

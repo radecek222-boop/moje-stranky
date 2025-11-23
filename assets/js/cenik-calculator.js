@@ -203,10 +203,7 @@
                 document.getElementById('transport-cost').textContent = stav.dopravne.toFixed(2) + (jeReklamace ? ' (reklamace)' : '');
                 document.getElementById('distance-result').style.display = 'block';
 
-                // Automaticky pokračovat na další krok po 1 sekundě
-                setTimeout(() => {
-                    nextStep();
-                }, 1000);
+                // Uživatel pokračuje ručně tlačítkem "Pokračovat"
             } else {
                 alert('Nepodařilo se vypočítat vzdálenost. Zkuste jinou adresu.');
             }
