@@ -996,14 +996,21 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         }
 
+        // DEBUG: Test jestli window.confirm vůbec funguje
+        console.log('[EMERGENCY] 🔔 Zobrazuji confirmation dialog...');
+        console.log('[EMERGENCY] typeof window.confirm:', typeof window.confirm);
+
         // PŘÍMÝ confirmation dialog (obejde problém s překladovou funkcí t())
         const confirmReopen = window.confirm(
           'Opravdu chcete znovu otevřít tuto dokončenou zakázku?\n\n' +
           'Zakázka bude vrácena do stavu "ČEKÁ" a bude možné ji znovu upravit.'
         );
 
+        console.log('[EMERGENCY] 📋 Výsledek confirm():', confirmReopen);
+
         if (!confirmReopen) {
-          console.log('[EMERGENCY] ❌ Uživatel zrušil');
+          console.log('[EMERGENCY] ❌ Uživatel zrušil (confirmReopen = false)');
+          alert('🛑 POZOR: Klikli jste na ZRUŠIT!\n\nPokud chcete zakázku znovu otevřít, klikněte znovu na tlačítko a tentokrát zvolte OK.');
           break;
         }
 
