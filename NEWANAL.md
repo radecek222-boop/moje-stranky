@@ -1,9 +1,9 @@
 # NEWANAL – Enterprise Analytics System Documentation
 
-**Version:** 1.5.0
+**Version:** 1.6.0
 **Last Updated:** 2025-11-23
 **Project:** WGS Enterprise Analytics System
-**Status:** Modules #1-6 Complete, Modules #7-13 Pending
+**Status:** Modules #1-7 Complete, Modules #8-13 Pending
 
 ---
 
@@ -55,7 +55,7 @@ The **Enterprise Analytics System** is a full-scale web analytics platform compa
 | Geolocation Engine | ✅ Complete | Module #4 |
 | Event Tracking | ✅ Complete | Module #5 |
 | Heatmaps (Click & Scroll) | ✅ Complete | Module #6 |
-| Session Replay | ⏳ Pending | Module #7 |
+| Session Replay | ✅ Complete | Module #7 |
 | UTM Campaign Tracking | ⏳ Pending | Module #8 |
 | Conversion Funnels | ⏳ Pending | Module #9 |
 | User Interest AI Scoring | ⏳ Pending | Module #10 |
@@ -1698,7 +1698,7 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 | **Module #4** | ✅ Complete | 100% | Committed: `bb4ce85` |
 | **Module #5** | ✅ Complete | 100% | Committed: `c92c683` |
 | **Module #6** | ✅ Complete | 100% | Committed: `e727f2b` |
-| **Module #7** | ⏳ Pending | 0% | Awaiting approval |
+| **Module #7** | ✅ Complete | 100% | Committed: `8b0f1c0` |
 | **Module #8** | ⏳ Pending | 0% | Awaiting approval |
 | **Module #9** | ⏳ Pending | 0% | Awaiting approval |
 | **Module #10** | ⏳ Pending | 0% | Awaiting approval |
@@ -1709,30 +1709,32 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 ### Overall Progress
 
 ```
-[████████████████████████] 46.2% (6/13 modules complete)
+[██████████████████████████] 53.8% (7/13 modules complete)
 ```
 
 ### Next Steps
 
 1. **User Action Required:**
-   - Test Module #6 (Heatmap Engine)
-   - Run migration: `migrace_module6_heatmaps.php?execute=1`
-   - Test heatmap visualization v prohlížeči:
-     * Otevřít `analytics-heatmap.php`
-     * Vybrat stránku (např. hlavní stránka)
-     * Vybrat typ zařízení (desktop/mobile/tablet)
-     * Vybrat typ heatmap (Click/Scroll)
-     * Kliknout "Načíst Heatmap"
-     * Zkontrolovat vizualizaci gradientu (modrá → červená)
-     * Testovat export PNG
-   - Verify data in `wgs_analytics_heatmap_clicks` and `wgs_analytics_heatmap_scroll` tables
-   - Check aggregation (UPSERT pattern, click_count increment)
-   - Approve Module #6 OR request fixes
+   - Test Module #7 (Session Replay Engine)
+   - Run migration: `migrace_module7_session_replay.php?execute=1`
+   - Test session replay recording v prohlížeči:
+     * Otevřít jakoukoliv stránku na webu
+     * Pohybovat myší, klikat, scrollovat
+     * Zkontrolovat konzoli - měly by se odesílat batche framů každých 30s
+     * Zkontrolovat tabulku `wgs_analytics_replay_frames` v databázi
+   - Test session replay playback v admin UI:
+     * Otevřít `analytics-replay.php`
+     * Zadat session_id a page_index (0)
+     * Kliknout "Načíst Replay"
+     * Přehrát replay - kontrola kurzoru, klikacích animací, scroll indicatoru
+     * Testovat timeline scrubber, rychlost playbacku (0.5x-4x)
+   - Verify cleanup cron job: `scripts/cleanup_old_replay_frames.php`
+   - Approve Module #7 OR request fixes
 
-2. **After Module #6 Approval:**
-   - Create implementation plan for Module #7 (Session Replay Engine)
+2. **After Module #7 Approval:**
+   - Create implementation plan for Module #8 (UTM Campaign Tracking)
    - Wait for plan approval
-   - Generate code for Module #7
+   - Generate code for Module #8
    - Repeat workflow
 
 ### File Inventory
@@ -1777,9 +1779,20 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 - `assets/js/heatmap-renderer.js` (277 lines)
 - `analytics-heatmap.php` (370 lines)
 
-**Total New Code:** ~9,332 lines (Modules #1-6)
+**Created Files (Module #7):**
+- `migrace_module7_session_replay.php` (380 lines)
+- `api/track_replay.php` (320 lines)
+- `api/analytics_replay.php` (210 lines)
+- `assets/js/replay-recorder.js` (470 lines)
+- `assets/js/replay-player.js` (420 lines)
+- `analytics-replay.php` (280 lines)
+- `scripts/cleanup_old_replay_frames.php` (120 lines)
+- Updated: `assets/js/tracker-v2.js` (+51 lines replay integration)
+- Updated: `NEWANAL.md` (webcron limit poznámka)
 
-**Pending Files (Modules #7-13):** ~19+ files, estimated ~10,200+ lines
+**Total New Code:** ~11,583 lines (Modules #1-7)
+
+**Pending Files (Modules #8-13):** ~15+ files, estimated ~8,000+ lines
 
 ---
 
@@ -1843,6 +1856,7 @@ Test scenarios for each module (see Module Implementation Plan for specific scen
 | 2025-11-23 | 1.3.0 | Module #4 (Geolocation Service) completed - 5 souborů (3 nové + 2 upravené), 983 řádků kódu | Claude |
 | 2025-11-23 | 1.4.0 | Module #5 (Event Tracking Engine) completed - 4 soubory (3 nové + 1 upravený), 1326 řádků kódu | Claude |
 | 2025-11-23 | 1.5.0 | Module #6 (Heatmap Engine) completed - 5 souborů, 1543 řádků kódu | Claude |
+| 2025-11-23 | 1.6.0 | Module #7 (Session Replay Engine) completed - 9 souborů (7 nových + 2 upravené), 2251 řádků kódu | Claude |
 
 ---
 
@@ -1855,4 +1869,4 @@ All future work must reference this document.
 Any AI agent working on this project must read this document first.
 
 **Last Updated:** 2025-11-23
-**Status:** Modules #1-6 Complete, Modules #7-13 Pending Approval
+**Status:** Modules #1-7 Complete, Modules #8-13 Pending Approval
