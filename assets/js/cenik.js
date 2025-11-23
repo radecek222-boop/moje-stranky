@@ -92,7 +92,7 @@
             headerEl.className = 'category-header';
 
             // Zjistit překlad kategorie z první položky
-            const jazyk = window.aktualniJazyk || 'cs';
+            const jazyk = window.ziskejAktualniJazyk ? window.ziskejAktualniJazyk() : 'cs';
             const firstItem = items[0];
             let categoryName = category;
 
@@ -129,7 +129,7 @@
         itemEl.dataset.id = item.id;
 
         // Zjistit aktuální jazyk
-        const jazyk = window.aktualniJazyk || 'cs';
+        const jazyk = window.ziskejAktualniJazyk ? window.ziskejAktualniJazyk() : 'cs';
 
         // Header (název + cena)
         const headerEl = document.createElement('div');
@@ -199,7 +199,7 @@
         currentEditItem = item;
 
         // Zjistit aktuální jazyk stránky
-        const jazyk = window.aktualniJazyk || 'cs';
+        const jazyk = window.ziskejAktualniJazyk ? window.ziskejAktualniJazyk() : 'cs';
 
         // Naplnit formulář podle aktivního jazyka
         document.getElementById('modal-title').textContent = window.t('pricingGrid.modal.titleEdit');
@@ -247,7 +247,7 @@
         currentEditItem = null;
 
         // Zjistit aktuální jazyk stránky
-        const jazyk = window.aktualniJazyk || 'cs';
+        const jazyk = window.ziskejAktualniJazyk ? window.ziskejAktualniJazyk() : 'cs';
 
         // Vyčistit formulář
         document.getElementById('modal-title').textContent = window.t('pricingGrid.modal.titleAdd');
