@@ -363,7 +363,7 @@ if ($initialBootstrapData) {
 </div>
 
 <!-- PDF Preview Modal -->
-<div class="pdf-preview-overlay" id="pdfPreviewOverlay">
+<div class="pdf-preview-overlay" id="pdfPreviewOverlay" style="display: none;">
   <div class="pdf-preview-container">
     <div class="pdf-preview-header">
       <h3 class="pdf-preview-title" data-lang-cs="Náhled PDF" data-lang-en="PDF Preview" data-lang-it="Anteprima PDF">Náhled PDF</h3>

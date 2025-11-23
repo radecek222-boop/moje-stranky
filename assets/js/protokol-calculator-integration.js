@@ -53,43 +53,73 @@
     // ========================================
     // OTEVŘENÍ MODALU S KALKULAČKOU
     // ========================================
-    function otevritKalkulacku() {
+    async function otevritKalkulacku() {
         console.log('[Protokol-Kalkulačka] Otevírám modal...');
 
-        // Načíst HTML strukturu kalkulačky
-        fetch('/cenik.php')
-            .then(response => response.text())
-            .then(html => {
-                // Extrahovat pouze sekci kalkulačky z HTML
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
+        try {
+            // Zobrazit loading
+            modalBody.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div style="width: 50px; height: 50px; border: 4px solid #ddd;
+                                border-top: 4px solid #2D5016; border-radius: 50%;
+                                animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
+                    <p style="color: #666;">Načítám kalkulačku...</p>
+                </div>
+            `;
 
-                // Najít calculator-section
-                const calculatorSection = doc.querySelector('#kalkulacka');
+            // Přidat CSS animaci pro spinner pokud ještě neexistuje
+            if (!document.getElementById('calc-spinner-style')) {
+                const style = document.createElement('style');
+                style.id = 'calc-spinner-style';
+                style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+                document.head.appendChild(style);
+            }
 
-                if (!calculatorSection) {
-                    console.error('[Protokol-Kalkulačka] Sekce kalkulačky nenalezena v HTML!');
-                    alert('Chyba při načítání kalkulačky');
-                    return;
-                }
+            // Zobrazit modal
+            modalOverlay.style.display = 'flex';
 
-                // Vložit HTML do modalu
-                modalBody.innerHTML = calculatorSection.outerHTML;
+            // Načíst HTML kalkulačky z cenik.php
+            const response = await fetch('cenik.php');
+            if (!response.ok) {
+                throw new Error('Nepodařilo se načíst kalkulačku');
+            }
 
-                // Zobrazit modal
-                modalOverlay.style.display = 'flex';
+            const html = await response.text();
 
-                // Inicializovat kalkulačku (pokud má vlastní init funkci)
-                setTimeout(() => {
-                    inicializovatKalkulackuVModalu();
-                }, 100);
+            // Extrahovat pouze div s kalkulačkou
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const kalkulackaElement = doc.getElementById('kalkulacka');
 
-                console.log('[Protokol-Kalkulačka] Modal otevřen');
-            })
-            .catch(error => {
-                console.error('[Protokol-Kalkulačka] Chyba při načítání kalkulačky:', error);
-                alert('Chyba při načítání kalkulačky');
-            });
+            if (!kalkulackaElement) {
+                throw new Error('Kalkulačka nebyla nalezena v HTML');
+            }
+
+            // Vložit kalkulačku do modalu
+            modalBody.innerHTML = kalkulackaElement.outerHTML;
+
+            // Nastavit kalkulačku do protokol režimu
+            if (typeof window.nastavitKalkulackuRezim === 'function') {
+                window.nastavitKalkulackuRezim('protokol');
+                console.log('[Protokol-Kalkulačka] Režim nastaven na "protokol"');
+            }
+
+            // Reinicializovat kalkulačku (pokud je potřeba)
+            // Některé event listenery by mohly potřebovat reinicializaci
+
+            console.log('[Protokol-Kalkulačka] Kalkulačka načtena');
+
+        } catch (error) {
+            console.error('[Protokol-Kalkulačka] Chyba při načítání kalkulačky:', error);
+            modalBody.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <h2>Chyba</h2>
+                    <p style="color: #d32f2f;">Nepodařilo se načíst kalkulačku.</p>
+                    <p>${error.message}</p>
+                    <button class="btn-primary" onclick="window.protokolKalkulacka.zavritModal()">Zavřít</button>
+                </div>
+            `;
+        }
     }
 
     // ========================================
@@ -116,6 +146,11 @@
         modalOverlay.style.display = 'none';
         modalBody.innerHTML = '';
         kalkulaceData = null;
+
+        // Resetovat režim kalkulačky zpět na standalone
+        if (typeof window.nastavitKalkulackuRezim === 'function') {
+            window.nastavitKalkulackuRezim('standalone');
+        }
     }
 
     // ========================================
@@ -131,6 +166,16 @@
         const priceTotalInput = document.getElementById('price-total');
         if (priceTotalInput && data.celkovaCena) {
             priceTotalInput.value = data.celkovaCena.toFixed(2);
+
+            // Zobrazit notifikaci
+            if (typeof showNotif === 'function') {
+                showNotif('success', `Cena ${data.celkovaCena.toFixed(2)} € byla započítána`);
+            }
+        } else {
+            console.error('[Protokol-Kalkulačka] Pole price-total nebo celková cena nenalezeny');
+            if (typeof showNotif === 'function') {
+                showNotif('error', 'Chyba při přenosu ceny');
+            }
         }
 
         // Zavřít modal

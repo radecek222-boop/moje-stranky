@@ -12,6 +12,9 @@
     const WORKSHOP_COORDS = { lat: 50.056725, lon: 14.577261 }; // Běchovice
     const TRANSPORT_RATE = 0.28; // €/km
 
+    // Režim kalkulačky: 'standalone' nebo 'protokol'
+    let kalkulackaRezim = 'standalone';
+
     // Ceník služeb
     const CENY = {
         diagnostika: 155,
@@ -513,6 +516,29 @@
 
         summaryDetails.innerHTML = html;
         grandTotal.innerHTML = `<strong>${celkem.toFixed(2)} €</strong>`;
+
+        // Upravit tlačítka podle režimu kalkulačky
+        upravitTlacitkaProRezim();
+    }
+
+    function upravitTlacitkaProRezim() {
+        const wizardButtons = document.querySelector('#step-summary .wizard-buttons');
+        if (!wizardButtons) return;
+
+        if (kalkulackaRezim === 'protokol') {
+            // Protokol režim - zobrazit Zpět a Započítat
+            wizardButtons.innerHTML = `
+                <button class="btn-secondary" onclick="previousStep()">Zpět</button>
+                <button class="btn-primary" onclick="zapocitatDoProtokolu()">Započítat</button>
+            `;
+        } else {
+            // Standalone režim - zobrazit Zpět, Export PDF a Nová kalkulace
+            wizardButtons.innerHTML = `
+                <button class="btn-secondary" onclick="previousStep()">Zpět</button>
+                <button class="btn-primary" onclick="exportovatCenikPDF()">Export do PDF</button>
+                <button class="btn-primary" onclick="resetovatKalkulacku()">Nová kalkulace</button>
+            `;
+        }
     }
 
     // ========================================
@@ -920,6 +946,98 @@
         } catch (error) {
             console.error('[Kalkulačka] Chyba při exportu PDF:', error);
             alert('Nepodařilo se vytvořit PDF. Zkuste to prosím znovu.');
+        }
+    };
+
+    // ========================================
+    // NASTAVENÍ REŽIMU KALKULAČKY
+    // ========================================
+    window.nastavitKalkulackuRezim = function(rezim) {
+        kalkulackaRezim = rezim;
+        console.log('[Kalkulačka] Režim nastaven na:', rezim);
+    };
+
+    // ========================================
+    // ZAPOČÍTAT DO PROTOKOLU
+    // ========================================
+    window.zapocitatDoProtokolu = function() {
+        console.log('[Kalkulačka] Započítávám do protokolu...');
+
+        // Vypočítat celkovou cenu
+        let celkovaCena = stav.dopravne;
+
+        // Diagnostika
+        if (stav.typServisu === 'diagnostika') {
+            celkovaCena += CENY.diagnostika;
+        }
+
+        // Čalounické práce
+        if (stav.typServisu === 'calouneni' || stav.typServisu === 'kombinace') {
+            const celkemDilu = stav.sedaky + stav.operky + stav.podrucky + stav.panely;
+            if (celkemDilu > 0) {
+                const cenaDilu = celkemDilu === 1 ?
+                    CENY.prvniDil :
+                    CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
+                celkovaCena += cenaDilu;
+            }
+            if (stav.rohovyDil) celkovaCena += CENY.rohovyDil;
+            if (stav.ottoman) celkovaCena += CENY.ottoman;
+        }
+
+        // Mechanické práce
+        if (stav.typServisu === 'mechanika' || stav.typServisu === 'kombinace') {
+            const celkemMechanismu = stav.relax + stav.vysuv;
+            if (celkemMechanismu > 0) {
+                celkovaCena += celkemMechanismu * CENY.mechanismus;
+            }
+        }
+
+        // Druhá osoba
+        if (stav.tezkyNabytek) {
+            celkovaCena += CENY.druhaOsoba;
+        }
+
+        // Materiál
+        if (stav.material) {
+            celkovaCena += CENY.material;
+        }
+
+        // Sestavit data pro protokol
+        const kalkulaceData = {
+            celkovaCena: celkovaCena,
+            adresa: stav.adresa,
+            vzdalenost: stav.vzdalenost,
+            dopravne: stav.dopravne,
+            reklamaceBezDopravy: stav.reklamaceBezDopravy,
+            typServisu: stav.typServisu,
+            rozpis: {
+                diagnostika: stav.typServisu === 'diagnostika' ? CENY.diagnostika : 0,
+                calouneni: {
+                    sedaky: stav.sedaky,
+                    operky: stav.operky,
+                    podrucky: stav.podrucky,
+                    panely: stav.panely,
+                    rohovyDil: stav.rohovyDil,
+                    ottoman: stav.ottoman
+                },
+                mechanika: {
+                    relax: stav.relax,
+                    vysuv: stav.vysuv
+                },
+                doplnky: {
+                    tezkyNabytek: stav.tezkyNabytek,
+                    material: stav.material
+                }
+            }
+        };
+
+        // Zavolat callback do protokolu
+        if (typeof window.protokolKalkulacka !== 'undefined' &&
+            typeof window.protokolKalkulacka.zpracovatVysledek === 'function') {
+            window.protokolKalkulacka.zpracovatVysledek(kalkulaceData);
+        } else {
+            console.error('[Kalkulačka] Funkce protokolKalkulacka.zpracovatVysledek není dostupná!');
+            alert('Chyba: Nelze přenést data do protokolu.');
         }
     };
 
