@@ -2312,26 +2312,141 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// === POMOCNÉ FUNKCE PRO DELETE MODALY ===
+function showDeleteConfirmModal(reklamaceNumber) {
+  return new Promise((resolve) => {
+    const modalDiv = document.createElement('div');
+    modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999999;display:flex;align-items:center;justify-content:center;';
+
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = 'background:white;padding:30px;border-radius:8px;max-width:450px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+
+    modalContent.innerHTML = `
+      <h2 style="margin:0 0 20px 0;color:#dc3545;font-size:1.3rem;font-weight:700;">Smazat reklamaci?</h2>
+      <p style="margin:0 0 15px 0;color:#555;line-height:1.6;font-size:1rem;">
+        Opravdu chcete <strong>TRVALE SMAZAT</strong> reklamaci<br>
+        <strong style="color:#dc3545;font-size:1.1rem;">${reklamaceNumber}</strong>?
+      </p>
+      <p style="margin:0 0 25px 0;color:#dc3545;font-size:0.9rem;font-weight:600;">
+        Tato akce smaže VŠE včetně fotek a PDF!<br>
+        Tuto akci NELZE vrátit zpět!
+      </p>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button id="deleteConfirmYes" style="padding:14px 28px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700;">
+          Ano, pokračovat →
+        </button>
+        <button id="deleteConfirmNo" style="padding:14px 28px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:600;">
+          Zrušit
+        </button>
+      </div>
+    `;
+
+    modalDiv.appendChild(modalContent);
+    document.body.appendChild(modalDiv);
+
+    document.getElementById('deleteConfirmNo').onclick = () => {
+      document.body.removeChild(modalDiv);
+      resolve(false);
+    };
+
+    document.getElementById('deleteConfirmYes').onclick = () => {
+      document.body.removeChild(modalDiv);
+      resolve(true);
+    };
+  });
+}
+
+function showDeleteInputModal(reklamaceNumber) {
+  return new Promise((resolve) => {
+    const modalDiv = document.createElement('div');
+    modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999999;display:flex;align-items:center;justify-content:center;';
+
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = 'background:white;padding:30px;border-radius:8px;max-width:450px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+
+    modalContent.innerHTML = `
+      <h2 style="margin:0 0 20px 0;color:#dc3545;font-size:1.3rem;font-weight:700;">Poslední ověření</h2>
+      <p style="margin:0 0 15px 0;color:#555;line-height:1.6;font-size:1rem;">
+        Pro potvrzení smazání zadejte přesně číslo reklamace:
+      </p>
+      <p style="margin:0 0 15px 0;color:#dc3545;font-size:1.2rem;font-weight:700;">
+        ${reklamaceNumber}
+      </p>
+      <input type="text" id="deleteInputField"
+             placeholder="Zadejte číslo reklamace"
+             style="width:100%;padding:12px;border:2px solid #dc3545;border-radius:6px;font-size:1rem;text-align:center;margin-bottom:20px;">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button id="deleteInputConfirm" style="padding:14px 28px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700;">
+          SMAZAT NAVŽDY
+        </button>
+        <button id="deleteInputCancel" style="padding:14px 28px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:600;">
+          Zrušit
+        </button>
+      </div>
+    `;
+
+    modalDiv.appendChild(modalContent);
+    document.body.appendChild(modalDiv);
+
+    const inputField = document.getElementById('deleteInputField');
+    inputField.focus();
+
+    document.getElementById('deleteInputCancel').onclick = () => {
+      document.body.removeChild(modalDiv);
+      resolve('');
+    };
+
+    document.getElementById('deleteInputConfirm').onclick = () => {
+      const value = inputField.value.trim();
+      document.body.removeChild(modalDiv);
+      resolve(value);
+    };
+
+    // Enter key pro potvrzení
+    inputField.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const value = inputField.value.trim();
+        document.body.removeChild(modalDiv);
+        resolve(value);
+      }
+    });
+  });
+}
+
 // === SMAZÁNÍ REKLAMACE (ADMIN ONLY) ===
 async function deleteReklamace(reklamaceId) {
-  const confirmed = confirm(t('confirm_delete_claim_full'));
-  
-  if (!confirmed) {
+  logger.log('[deleteReklamace] Zobrazuji 1. confirmation modal');
+
+  const reklamaceNumber = CURRENT_RECORD.reklamace_id || CURRENT_RECORD.id || reklamaceId;
+
+  // 1. KROK: První potvrzení
+  const firstConfirm = await showDeleteConfirmModal(reklamaceNumber);
+  if (!firstConfirm) {
     logger.log('Mazání zrušeno (1. krok)');
     return;
   }
-  
-  const reklamaceNumber = CURRENT_RECORD.reklamace_id || CURRENT_RECORD.id || reklamaceId;
-  const userInput = prompt(
-    t('prompt_confirm_claim_number').replace('{number}', reklamaceNumber)
-  );
-  
+
+  // 2. KROK: Zadání čísla reklamace
+  const userInput = await showDeleteInputModal(reklamaceNumber);
   if (userInput !== reklamaceNumber) {
-    alert(t('incorrect_number_delete_cancelled'));
     logger.log('Mazání zrušeno - špatné číslo (2. krok)');
+
+    // Zobrazit chybovou hlášku
+    const errorModal = document.createElement('div');
+    errorModal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999999;display:flex;align-items:center;justify-content:center;';
+    errorModal.innerHTML = `
+      <div style="background:white;padding:30px;border-radius:8px;max-width:400px;width:90%;text-align:center;">
+        <h2 style="margin:0 0 20px 0;color:#dc3545;">Nesprávné číslo!</h2>
+        <p style="margin:0 0 25px 0;color:#555;">Zadali jste nesprávné číslo reklamace.<br>Mazání bylo zrušeno.</p>
+        <button onclick="this.closest('div').parentElement.remove()" style="padding:12px 24px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;">
+          OK
+        </button>
+      </div>
+    `;
+    document.body.appendChild(errorModal);
     return;
   }
-  
+
   logger.log('🗑️ Mazání reklamace:', reklamaceId);
 
   try {
@@ -2371,13 +2486,52 @@ async function deleteReklamace(reklamaceId) {
 
 // === SMAZÁNÍ JEDNOTLIVÉ FOTKY ===
 async function smazatFotku(photoId, photoUrl) {
-  const confirmed = confirm(t('confirm_delete_photo'));
+  logger.log('[smazatFotku] Vytvářím confirmation modal pro ID:', photoId);
 
-  if (!confirmed) {
-    logger.log('Mazání fotky zrušeno');
-    return;
-  }
+  // Vlastní confirmation modal (viditelný nad vším)
+  return new Promise((resolve) => {
+    const modalDiv = document.createElement('div');
+    modalDiv.id = 'deleteFotoModal';
+    modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999999;display:flex;align-items:center;justify-content:center;';
 
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = 'background:white;padding:30px;border-radius:8px;max-width:400px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+
+    modalContent.innerHTML = `
+      <h2 style="margin:0 0 20px 0;color:#333;font-size:1.2rem;font-weight:700;">Smazat fotku?</h2>
+      <p style="margin:0 0 25px 0;color:#555;line-height:1.6;font-size:1rem;">
+        Opravdu chcete smazat tuto fotografii?<br><br>
+        <strong>Tato akce je nevratná!</strong>
+      </p>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button id="deleteFotoYes" style="padding:14px 28px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700;">
+          Ano, smazat
+        </button>
+        <button id="deleteFotoNo" style="padding:14px 28px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:600;">
+          Zrušit
+        </button>
+      </div>
+    `;
+
+    modalDiv.appendChild(modalContent);
+    document.body.appendChild(modalDiv);
+
+    document.getElementById('deleteFotoNo').onclick = () => {
+      logger.log('[smazatFotku] Uživatel zrušil');
+      document.body.removeChild(modalDiv);
+      resolve(false);
+    };
+
+    document.getElementById('deleteFotoYes').onclick = async () => {
+      logger.log('[smazatFotku] Uživatel potvrdil, mazám...');
+      document.body.removeChild(modalDiv);
+      await pokracovatSmazaniFotky(photoId, photoUrl);
+      resolve(true);
+    };
+  });
+}
+
+async function pokracovatSmazaniFotky(photoId, photoUrl) {
   logger.log('🗑️ Mazání fotky ID:', photoId);
 
   try {
