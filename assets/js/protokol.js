@@ -854,7 +854,7 @@ async function generatePricelistPDF() {
   // === HLAVIČKA ===
   pdf.setFontSize(20);
   pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(45, 80, 22); // Brand zelená
+  pdf.setTextColor(0, 0, 0); // Černá
   pdf.text('PRICELIST', pageWidth / 2, yPos, { align: 'center' });
   yPos += 15;
 
@@ -896,7 +896,7 @@ async function generatePricelistPDF() {
 
   // Čára oddělení
   pdf.setLineWidth(0.5);
-  pdf.setDrawColor(45, 80, 22);
+  pdf.setDrawColor(0, 0, 0); // Černá
   pdf.line(margin, yPos, pageWidth - margin, yPos);
   yPos += 10;
 
@@ -920,6 +920,25 @@ async function generatePricelistPDF() {
     pdf.text('Dopravne (reklamace)', margin, yPos);
     pdf.text('0.00 EUR', pageWidth - margin - 30, yPos);
     yPos += 7;
+  }
+
+  // Služby
+  if (kalkulaceData.sluzby && kalkulaceData.sluzby.length > 0) {
+    yPos += 3;
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Sluzby:', margin, yPos);
+    yPos += 7;
+
+    pdf.setFont('helvetica', 'normal');
+    kalkulaceData.sluzby.forEach(sluzba => {
+      const text = `  ${sluzba.nazev}`;
+      const cena = sluzba.cena.toFixed(2);
+      pdf.text(text, margin, yPos);
+      pdf.text(`${cena} EUR`, pageWidth - margin - 30, yPos);
+      yPos += 6;
+    });
+
+    yPos += 3;
   }
 
   // Díly a práce
@@ -964,7 +983,7 @@ async function generatePricelistPDF() {
   // === CELKOVÁ CENA ===
   pdf.setFontSize(14);
   pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(45, 80, 22);
+  pdf.setTextColor(0, 0, 0); // Černá
   pdf.text('CELKEM:', margin, yPos);
   pdf.text(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
   yPos += 10;
