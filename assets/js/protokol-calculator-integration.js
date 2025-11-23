@@ -22,7 +22,7 @@
 
         modalOverlay = document.getElementById('calculatorModalOverlay');
         modalBody = document.getElementById('calculatorModalBody');
-        const openBtn = document.getElementById('open-calculator-btn');
+        const priceTotalInput = document.getElementById('price-total');
         const closeBtn = document.getElementById('calculatorModalClose');
 
         if (!modalOverlay || !modalBody) {
@@ -30,9 +30,11 @@
             return;
         }
 
-        // Event listener pro otevření kalkulačky
-        if (openBtn) {
-            openBtn.addEventListener('click', otevritKalkulacku);
+        // Event listener pro otevření kalkulačky (kliknutí na pole)
+        if (priceTotalInput) {
+            priceTotalInput.addEventListener('click', otevritKalkulacku);
+            // Přidat vizuální indikátor že pole je klikatelné
+            priceTotalInput.style.cursor = 'pointer';
         }
 
         // Event listener pro zavření modalu

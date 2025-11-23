@@ -2,6 +2,15 @@
  * CSS styly pro calculator modal v protokolu
  */
 
+/* FIX: Vrátit původní velikost section-title v protokolu */
+body:not(.calculator-page) .section-title {
+    font-family: 'Poppins' !important;
+    font-weight: 700 !important;
+    font-size: 10px !important;
+    margin-top: 13px !important;
+    margin-bottom: 5px !important;
+}
+
 /* Calculator Modal Overlay */
 .calculator-modal-overlay {
     position: fixed;
@@ -89,21 +98,19 @@
     display: none; /* Popisek je už jasný z kontextu */
 }
 
-/* Tlačítko kalkulačky ve formuláři */
-.btn-calculator {
-    background: #2D5016;
-    color: white;
-    border: none;
-    padding: 0.4rem 0.8rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    margin-left: 0.5rem;
-    transition: background 0.3s;
+/* Klikatelné pole pro kalkulačku */
+.calculator-input {
+    cursor: pointer !important;
+    transition: all 0.3s ease;
 }
 
-.btn-calculator:hover {
-    background: #1a300d;
+.calculator-input:hover {
+    background-color: #f0f9ff !important;
+    border-color: #2D5016 !important;
+}
+
+.calculator-input:not(:placeholder-shown) {
+    font-weight: 600 !important;
 }
 
 /* Responsivní úpravy */
