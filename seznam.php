@@ -991,28 +991,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     switch (action) {
       case 'reopenOrder':
-        console.log('[EMERGENCY] reopenOrder case - typeof:', typeof reopenOrder);
-        console.log('[EMERGENCY] reopenOrder case - id:', id);
-
         if (!id) {
           console.error('[EMERGENCY] ❌ ID chybí!');
           break;
         }
 
-        if (typeof reopenOrder !== 'function') {
-          console.error('[EMERGENCY] ❌ reopenOrder není funkce! Type:', typeof reopenOrder);
-          console.log('[EMERGENCY] window.reopenOrder:', typeof window.reopenOrder);
-          console.log('[EMERGENCY] Všechny globální funkce:', Object.keys(window).filter(k => typeof window[k] === 'function' && k.includes('open')));
+        // PŘÍMÝ confirmation dialog (obejde problém s překladovou funkcí t())
+        const confirmReopen = window.confirm(
+          'Opravdu chcete znovu otevřít tuto dokončenou zakázku?\n\n' +
+          'Zakázka bude vrácena do stavu "ČEKÁ" a bude možné ji znovu upravit.'
+        );
+
+        if (!confirmReopen) {
+          console.log('[EMERGENCY] ❌ Uživatel zrušil');
           break;
         }
 
-        console.log('[EMERGENCY] ✅ Volám reopenOrder(' + id + ')...');
-        try {
-          reopenOrder(id);
-          console.log('[EMERGENCY] ✅ reopenOrder byla zavolána');
-        } catch (err) {
-          console.error('[EMERGENCY] ❌ Chyba při volání reopenOrder:', err);
-        }
+        console.log('[EMERGENCY] ✅ Otevírám zakázku ID:', id);
+
+        // Použít asynchronní funkci pro await
+        (async () => {
+          try {
+            const csrfToken = typeof window.fetchCsrfToken === 'function'
+              ? await window.fetchCsrfToken()
+              : document.querySelector('meta[name="csrf-token"]')?.content;
+
+            const formData = new FormData();
+            formData.append('action', 'update');
+            formData.append('id', id);
+            formData.append('stav', 'ČEKÁ');
+            formData.append('termin', '');
+            formData.append('cas_navstevy', '');
+            formData.append('csrf_token', csrfToken);
+
+            const response = await fetch('/app/controllers/save.php', {
+              method: 'POST',
+              body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+              console.log('[EMERGENCY] ✅ Úspěch!');
+              alert('Zakázka byla znovu otevřena');
+              location.reload();
+            } else {
+              throw new Error(result.message || 'Chyba');
+            }
+          } catch (err) {
+            console.error('[EMERGENCY] ❌ Chyba:', err);
+            alert('Chyba: ' + err.message);
+          }
+        })();
         break;
 
       case 'showContactMenu':
@@ -1028,24 +1058,17 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
 
       case 'openPDF':
-        console.log('[EMERGENCY] openPDF case - url:', url);
-
         if (!url) {
           console.error('[EMERGENCY] ❌ PDF URL chybí!');
           break;
         }
 
         console.log('[EMERGENCY] ✅ Otevírám PDF:', url);
-        try {
-          const newWindow = window.open(url, '_blank');
-          if (newWindow) {
-            console.log('[EMERGENCY] ✅ PDF okno otevřeno');
-          } else {
-            console.error('[EMERGENCY] ❌ PDF okno bylo blokováno (pop-up blocker)');
-          }
-        } catch (err) {
-          console.error('[EMERGENCY] ❌ Chyba při otevírání PDF:', err);
-        }
+
+        // Obejít pop-up blocker: Otevřít v SOUČASNÉM okně místo nového tabu
+        // Uživatel může použít "Zpět" pro návrat
+        window.location.href = url;
+        console.log('[EMERGENCY] ✅ Přesměrování na PDF');
         break;
 
       case 'closeDetail':
