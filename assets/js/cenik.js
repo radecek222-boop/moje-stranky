@@ -160,11 +160,18 @@
         const priceEl = document.createElement('div');
         priceEl.className = 'item-price';
 
+        // Přeložené předpony pro ceny
+        const odPrefix = {
+            cs: 'Od',
+            en: 'From',
+            it: 'Da'
+        };
+
         if (item.price_from && item.price_to) {
             priceEl.innerHTML = `${item.price_from} - ${item.price_to} ${item.price_unit}`;
         } else if (item.price_from) {
             priceEl.className += ' range';
-            priceEl.innerHTML = `${item.price_from} ${item.price_unit}`;
+            priceEl.innerHTML = `${odPrefix[jazyk] || 'Od'} ${item.price_from} ${item.price_unit}`;
         } else if (item.price_to) {
             priceEl.innerHTML = `${item.price_to} ${item.price_unit}`;
         }
