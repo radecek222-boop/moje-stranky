@@ -642,6 +642,80 @@
                     <p style="font-size: 14px; margin: 0;">Vzdálenost z dílny: ${stav.vzdalenost} km</p>
                 </div>
 
+                <div style="margin: 30px 0; background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <h3 style="font-size: 18px; color: #2a2a2a; margin: 0 0 15px 0; font-weight: bold;">
+                        Specifikace zakázky:
+                    </h3>
+            `;
+
+            // Typ servisu
+            const typyServisu = {
+                'diagnostika': 'Inspekce / Diagnostika',
+                'calouneni': 'Čalounické práce',
+                'mechanika': 'Mechanické práce',
+                'kombinace': 'Kombinace čalounění a mechaniky'
+            };
+            htmlContent += `
+                    <p style="font-size: 14px; margin: 8px 0;">
+                        <strong>Typ servisu:</strong> ${typyServisu[stav.typServisu] || 'Neuveden'}
+                    </p>
+            `;
+
+            // Čalounické práce - detaily
+            if (stav.typServisu === 'calouneni' || stav.typServisu === 'kombinace') {
+                htmlContent += `<p style="font-size: 14px; margin: 8px 0;"><strong>Čalounické práce:</strong></p>`;
+                htmlContent += `<ul style="margin: 5px 0 5px 20px; font-size: 14px; line-height: 1.8;">`;
+
+                if (stav.sedaky > 0) htmlContent += `<li>Sedáky: ${stav.sedaky}×</li>`;
+                if (stav.operky > 0) htmlContent += `<li>Opěrky: ${stav.operky}×</li>`;
+                if (stav.podrucky > 0) htmlContent += `<li>Područky: ${stav.podrucky}×</li>`;
+                if (stav.panely > 0) htmlContent += `<li>Panely: ${stav.panely}×</li>`;
+                if (stav.rohovyDil) htmlContent += `<li>Rohový díl: Ano</li>`;
+                if (stav.ottoman) htmlContent += `<li>Ottoman / Lehátko: Ano</li>`;
+
+                const celkemDilu = stav.sedaky + stav.operky + stav.podrucky + stav.panely;
+                if (celkemDilu === 0 && !stav.rohovyDil && !stav.ottoman) {
+                    htmlContent += `<li style="color: #999;">Nebyly vybrány žádné díly</li>`;
+                }
+
+                htmlContent += `</ul>`;
+            }
+
+            // Mechanické práce - detaily
+            if (stav.typServisu === 'mechanika' || stav.typServisu === 'kombinace') {
+                htmlContent += `<p style="font-size: 14px; margin: 8px 0;"><strong>Mechanické práce:</strong></p>`;
+                htmlContent += `<ul style="margin: 5px 0 5px 20px; font-size: 14px; line-height: 1.8;">`;
+
+                if (stav.relax > 0) htmlContent += `<li>Relax mechanismy: ${stav.relax}×</li>`;
+                if (stav.vysuv > 0) htmlContent += `<li>Výsuvné mechanismy: ${stav.vysuv}×</li>`;
+
+                const celkemMechanismu = stav.relax + stav.vysuv;
+                if (celkemMechanismu === 0) {
+                    htmlContent += `<li style="color: #999;">Nebyly vybrány žádné mechanismy</li>`;
+                }
+
+                htmlContent += `</ul>`;
+            }
+
+            // Doplňkové služby
+            htmlContent += `<p style="font-size: 14px; margin: 8px 0;"><strong>Doplňkové služby:</strong></p>`;
+            htmlContent += `<ul style="margin: 5px 0 5px 20px; font-size: 14px; line-height: 1.8;">`;
+
+            if (stav.tezkyNabytek) {
+                htmlContent += `<li>Druhá osoba (těžký nábytek >50kg): Ano</li>`;
+            }
+            if (stav.material) {
+                htmlContent += `<li>Materiál dodán od WGS: Ano</li>`;
+            }
+            if (!stav.tezkyNabytek && !stav.material) {
+                htmlContent += `<li style="color: #999;">Žádné doplňkové služby</li>`;
+            }
+
+            htmlContent += `</ul>`;
+            htmlContent += `</div>`;
+
+            // CENOVÝ SOUHRN
+            htmlContent += `
                 <div style="margin: 30px 0;">
                     <h3 style="font-size: 18px; color: #2a2a2a; margin: 0 0 15px 0; font-weight: bold;">
                         Cenový souhrn:
