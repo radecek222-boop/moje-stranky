@@ -718,4 +718,54 @@
     // Spustit Event Tracker po inicializaci trackingu (s malým delay)
     setTimeout(inicializovatEventTracker, 2000);
 
+    // ========================================
+    // SESSION REPLAY (Modul #7)
+    // ========================================
+
+    /**
+     * Inicializace Session Replay Recorder
+     */
+    function inicializovatReplayRecorder() {
+        if (typeof ReplayRecorder === 'undefined') {
+            console.warn('[WGS Analytics V2] ReplayRecorder není načten, přeskakuji session replay.');
+            return;
+        }
+
+        // Počkat na inicializaci session ID
+        if (!sessionId) {
+            console.warn('[WGS Analytics V2] Session ID není k dispozici, opakuji za 1s...');
+            setTimeout(inicializovatReplayRecorder, 1000);
+            return;
+        }
+
+        // Určit page index (počet pageviews v current session)
+        const pageIndex = parseInt(sessionStorage.getItem('wgs_page_index') || '0');
+
+        console.log('[WGS Analytics V2] Inicializuji Replay Recorder (page_index: ' + pageIndex + ')...');
+
+        ReplayRecorder.init({
+            sessionId: sessionId,
+            pageUrl: window.location.href,
+            pageIndex: pageIndex,
+            csrfToken: csrfToken,
+            recordMouseMove: true,
+            recordClicks: true,
+            recordScroll: true,
+            recordResize: true,
+            mouseMoveThrottle: 100,
+            scrollThrottle: 150,
+            maxBatchSize: 50,
+            batchInterval: 30000,
+            apiEndpoint: '/api/track_replay.php'
+        });
+
+        // Increment page index pro další stránku
+        sessionStorage.setItem('wgs_page_index', pageIndex + 1);
+
+        console.log('[WGS Analytics V2] Replay Recorder inicializován');
+    }
+
+    // Spustit Replay Recorder po inicializaci trackingu (s delay po Event Trackeru)
+    setTimeout(inicializovatReplayRecorder, 2500);
+
 })();

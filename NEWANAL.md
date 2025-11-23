@@ -876,17 +876,37 @@ INDEX idx_device (device_type)
 
 ## 10. DEPLOYMENT & CRON JOBS
 
-### Cron Jobs Schedule
+### ⚠️ KRITICKÉ: Webcron Limit na Hostingu
 
-| Job | File | Schedule | Purpose |
-|-----|------|----------|---------|
-| Daily Report | `scripts/generate_daily_report.php` | Daily 06:00 | Generate AI report for previous day |
-| Weekly Report | `scripts/generate_weekly_report.php` | Monday 07:00 | Generate AI report for previous week |
-| Cleanup Replay Frames | `scripts/cleanup_old_replay_frames.php` | Daily 02:00 | Delete frames older than 30 days |
-| Cleanup Old Events | `scripts/cleanup_old_events.php` | Daily 03:00 | Aggregate events older than 90 days |
-| Cleanup Realtime Sessions | `scripts/cleanup_realtime_sessions.php` | Every 5 min | Delete expired real-time sessions |
-| Cleanup Geo Cache | `scripts/cleanup_geo_cache.php` | Daily 04:00 | Delete expired geolocation cache |
-| Update Campaign Stats | `scripts/update_campaign_stats.php` | Every hour | Aggregate UTM campaign data |
+**DŮLEŽITÉ:** Hosting má **LIMIT 5 WEBCRONŮ** (sdílený hosting). Je potřeba sjednotit/optimalizovat cron jobs na konci projektu.
+
+**Řešení:**
+1. Vytvořit **unified cleanup script** (`scripts/unified_cleanup.php`), který spustí všechny cleanup operace najednou
+2. Sjednotit denní reporty do jednoho skriptu
+3. Prioritizovat nejdůležitější crony
+
+**POZNÁMKA:** Na konci implementace všech modulů je nutné zkontrolovat a upravit cron jobs, aby nepřekročily limit 5!
+
+---
+
+### Cron Jobs Schedule (PLÁNOVÁNO - před optimalizací)
+
+| Job | File | Schedule | Purpose | Priority |
+|-----|------|----------|---------|----------|
+| Cleanup Geo Cache | `scripts/cleanup_geo_cache.php` | Daily 04:00 | Delete expired geolocation cache | ✅ HIGH |
+| Cleanup Replay Frames | `scripts/cleanup_old_replay_frames.php` | Daily 02:00 | Delete frames older than 30 days | ✅ HIGH |
+| Cleanup Old Events | `scripts/cleanup_old_events.php` | Daily 03:00 | Aggregate events older than 90 days | 🟡 MEDIUM |
+| Cleanup Realtime Sessions | `scripts/cleanup_realtime_sessions.php` | Every 5 min | Delete expired real-time sessions | 🟡 MEDIUM |
+| Daily Report | `scripts/generate_daily_report.php` | Daily 06:00 | Generate AI report for previous day | 🔵 LOW |
+| Weekly Report | `scripts/generate_weekly_report.php` | Monday 07:00 | Generate AI report for previous week | 🔵 LOW |
+| Update Campaign Stats | `scripts/update_campaign_stats.php` | Every hour | Aggregate UTM campaign data | 🟡 MEDIUM |
+
+**AKTUÁLNĚ AKTIVNÍ (v rámci limitu 5):**
+1. ✅ `scripts/cleanup_geo_cache.php` - Daily 04:00
+2. ⏳ `scripts/cleanup_old_replay_frames.php` - Daily 02:00 (bude přidán po Modulu #7)
+3. (Zbytek bude sjednocen na konci projektu)
+
+**TODO po dokončení všech modulů:** Vytvořit `scripts/unified_cleanup.php` který spojí všechny cleanup operace
 
 ### Crontab Example
 
