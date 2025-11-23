@@ -122,3 +122,51 @@
     padding: 12px 16px;
   }
 }
+
+/* ========================================================================
+   ✅ NOTES BADGE - Ikonka poznámkového bloku s pulsováním
+   ======================================================================== */
+
+/* Ikonka poznámky */
+.notes-icon {
+  font-size: 1.1rem;
+  margin-right: 0.2rem;
+  opacity: 0.7;
+}
+
+/* Pulsování pro nepřečtené poznámky */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+.order-notes-badge.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Zvýraznění badge s nepřečtenými poznámkami */
+.order-notes-badge.has-unread {
+  font-weight: bold;
+  color: #000;
+}
+
+/* Interaktivní styl - badge je klikatelný */
+.order-notes-badge {
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.2s ease;
+}
+
+.order-notes-badge:hover {
+  opacity: 0.7;
+}
+
+.order-notes-badge:active {
+  opacity: 0.5;
+}

@@ -283,35 +283,35 @@ async function loadAll(status = 'all', append = false) {
 }
 
 // === VYKRESLENÍ OBJEDNÁVEK ===
-function renderOrders(items = null) {
+async function renderOrders(items = null) {
   const grid = document.getElementById('orderGrid');
   const searchResultsInfo = document.getElementById('searchResultsInfo');
-  
+
   if (!items) {
     items = Utils.filterByUserRole(WGS_DATA_CACHE);
   }
-  
+
   if (!Array.isArray(items)) items = [];
-  
+
   let filtered = items;
-  
+
   if (ACTIVE_FILTER !== 'all') {
     const statusMap = {
       'wait': ['ČEKÁ', 'wait'],
       'open': ['DOMLUVENÁ', 'open'],
       'done': ['HOTOVO', 'done']
     };
-    
+
     filtered = items.filter(r => {
       const stav = r.stav || 'wait';
       return statusMap[ACTIVE_FILTER]?.includes(stav);
     });
   }
-  
+
   const totalBeforeSearch = filtered.length;
   if (SEARCH_QUERY) {
     filtered = filtered.filter(r => matchesSearch(r, SEARCH_QUERY));
-    
+
     if (filtered.length > 0) {
       searchResultsInfo.className = 'search-results-info';
       searchResultsInfo.textContent = t('search_results_found')
@@ -326,7 +326,7 @@ function renderOrders(items = null) {
   } else {
     searchResultsInfo.style.display = 'none';
   }
-  
+
   if (filtered.length === 0) {
     grid.innerHTML = `
       <div class="empty-state">
@@ -335,34 +335,47 @@ function renderOrders(items = null) {
     `;
     return;
   }
-  
+
+  // Načíst unread counts pro všechny reklamace najednou
+  let unreadCountsMap = {};
+  try {
+    const response = await fetch('api/notes_api.php?action=get_unread_counts');
+    const data = await response.json();
+    if (data.status === 'success') {
+      unreadCountsMap = data.unread_counts || {};
+    }
+  } catch (e) {
+    logger.warn('Nepodařilo se načíst unread counts:', e);
+  }
+
   filtered.sort((a, b) => {
     const dateA = new Date(a.datum || a.timestamp || 0);
     const dateB = new Date(b.datum || b.timestamp || 0);
     return dateB - dateA;
   });
-  
+
   grid.innerHTML = filtered.map((rec, index) => {
     const customerName = Utils.getCustomerName(rec);
     const product = Utils.getProduct(rec);
     const date = formatDate(rec.datum);
     const status = getStatus(rec.stav);
     const orderId = Utils.getOrderId(rec, index);
-    
+
     let address = Utils.getAddress(rec);
     if (address !== '—') {
       const parts = address.split(',').map(p => p.trim());
       address = parts.slice(0, 2).join(', ');
     }
-    
+
     let appointmentText = '';
     if (rec.termin && rec.cas_navstevy) {
       appointmentText = formatAppointment(rec.termin, rec.cas_navstevy);
     }
-    
-    const notes = [];
-    const unreadCount = 0;
-    const hasUnread = false;
+
+    // Načíst unread count z mapy
+    const claimId = rec.id;
+    const unreadCount = unreadCountsMap[claimId] || 0;
+    const hasUnread = unreadCount > 0;
     
     const highlightedCustomer = SEARCH_QUERY ? highlightText(customerName, SEARCH_QUERY) : customerName;
     const highlightedAddress = SEARCH_QUERY ? highlightText(address, SEARCH_QUERY) : address;
@@ -378,8 +391,8 @@ function renderOrders(items = null) {
         <div class="order-header">
           <div class="order-number">${highlightedOrderId}</div>
           <div style="display: flex; gap: 0.4rem; align-items: center;">
-            <div class="order-notes-badge ${hasUnread ? 'has-unread' : ''}" onclick='event.stopPropagation(); showNotes("${rec.id}")' title="${notes.length} poznámek">
-              ${notes.length > 0 ? notes.length : ''}
+            <div class="order-notes-badge ${hasUnread ? 'has-unread pulse' : ''}" data-action="showNotes" data-id="${rec.id}" title="${unreadCount > 0 ? unreadCount + ' nepřečtené' : 'Poznámky'}">
+              <span class="notes-icon">✎</span>${unreadCount > 0 ? unreadCount : ''}
             </div>
             <div class="order-status status-${status.class}"></div>
           </div>
@@ -2725,6 +2738,13 @@ document.addEventListener('click', (e) => {
 
     case 'closeDetail':
       closeDetail();
+      break;
+
+    case 'showNotes':
+      if (id && typeof showNotes === 'function') {
+        e.stopPropagation();
+        showNotes(id);
+      }
       break;
 
     case 'closeNotesModal':
