@@ -42,20 +42,20 @@ class CampaignAttribution
                 s.utm_content,
                 s.utm_term,
                 s.device_type,
-                DATE(s.first_seen) as session_date,
+                DATE(s.session_start) as session_date,
 
                 -- Traffic metriky
                 COUNT(DISTINCT s.session_id) as sessions_count,
-                SUM(s.pageviews_count) as pageviews_count,
+                SUM(s.pageview_count) as pageviews_count,
                 COUNT(DISTINCT s.fingerprint_id) as unique_visitors,
 
                 -- Engagement metriky
-                AVG(TIMESTAMPDIFF(SECOND, s.first_seen, s.last_seen)) as avg_session_duration,
-                AVG(s.pageviews_count) as avg_pages_per_session,
-                SUM(CASE WHEN s.pageviews_count = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) as bounce_rate
+                AVG(TIMESTAMPDIFF(SECOND, s.session_start, s.session_end)) as avg_session_duration,
+                AVG(s.pageview_count) as avg_pages_per_session,
+                SUM(CASE WHEN s.pageview_count = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) as bounce_rate
 
             FROM wgs_analytics_sessions s
-            WHERE DATE(s.first_seen) = :date
+            WHERE DATE(s.session_start) = :date
               AND (s.utm_source IS NOT NULL OR s.utm_medium IS NOT NULL OR s.utm_campaign IS NOT NULL)
               AND s.is_bot = 0
             GROUP BY
@@ -65,7 +65,7 @@ class CampaignAttribution
                 s.utm_content,
                 s.utm_term,
                 s.device_type,
-                DATE(s.first_seen)
+                DATE(s.session_start)
         ");
 
         $stmt->execute(['date' => $date]);
@@ -218,11 +218,11 @@ class CampaignAttribution
                 utm_campaign,
                 utm_content,
                 utm_term,
-                first_seen as campaign_first_seen
+                session_start as campaign_first_seen
             FROM wgs_analytics_sessions
             WHERE fingerprint_id = :fingerprint_id
               AND (utm_source IS NOT NULL OR utm_medium IS NOT NULL OR utm_campaign IS NOT NULL)
-            ORDER BY first_seen ASC
+            ORDER BY session_start ASC
             LIMIT 1
         ");
 
@@ -247,11 +247,11 @@ class CampaignAttribution
                 utm_campaign,
                 utm_content,
                 utm_term,
-                first_seen as campaign_last_seen
+                session_start as campaign_last_seen
             FROM wgs_analytics_sessions
             WHERE session_id = :session_id
               AND (utm_source IS NOT NULL OR utm_medium IS NOT NULL OR utm_campaign IS NOT NULL)
-            ORDER BY first_seen DESC
+            ORDER BY session_start DESC
             LIMIT 1
         ");
 
@@ -277,11 +277,11 @@ class CampaignAttribution
                 utm_campaign,
                 utm_content,
                 utm_term,
-                first_seen
+                session_start
             FROM wgs_analytics_sessions
             WHERE fingerprint_id = :fingerprint_id
               AND (utm_source IS NOT NULL OR utm_medium IS NOT NULL OR utm_campaign IS NOT NULL)
-            ORDER BY first_seen ASC
+            ORDER BY session_start ASC
         ");
 
         $stmt->execute(['fingerprint_id' => $fingerprintId]);
