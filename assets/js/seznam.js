@@ -1750,10 +1750,13 @@ async function showCustomerDetail(id) {
                   <img src='${photoPath}'
                        style='width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid #ddd; cursor: pointer; border-radius: 3px;'
                        alt='Fotka ${i+1}'
-                       onclick='showPhotoFullscreen("${escapedUrl}")'>
+                       data-action="showPhotoFullscreen"
+                       data-url="${escapedUrl}">
                   ${photoId ? `
                     <button class="foto-delete-btn"
-                            onclick='event.stopPropagation(); smazatFotku(${photoId}, "${escapedUrl}")'
+                            data-action="smazatFotku"
+                            data-photo-id="${photoId}"
+                            data-url="${escapedUrl}"
                             title="Smazat fotku">
                       ×
                     </button>
@@ -1784,9 +1787,10 @@ async function showCustomerDetail(id) {
         return `
           <div style="margin-bottom: 1rem;">
             <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF Report:</label>
-            <button onclick="window.open('${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '_blank')"
+            <button data-action="openPDF"
+                    data-url="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}"
                     style="width: 100%; padding: 0.75rem; background: #2D5016; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer; font-weight: 600;">
-              📄 Otevřít PDF Report
+              Otevřít PDF Report
             </button>
           </div>
         `;
@@ -1794,7 +1798,8 @@ async function showCustomerDetail(id) {
 
       ${CURRENT_USER.is_admin ? `
         <div style="border-top: 1px solid #e0e0e0; padding-top: 1rem; margin-top: 1rem;">
-          <button onclick="deleteReklamace('${id}')"
+          <button data-action="deleteReklamace"
+                  data-id="${id}"
                   style="width: 100%; padding: 0.5rem; background: #dc3545; color: white; border: none; border-radius: 3px; font-size: 0.85rem; cursor: pointer; font-weight: 600;">
             Smazat reklamaci
           </button>
@@ -1805,8 +1810,8 @@ async function showCustomerDetail(id) {
     </div>
 
     ${ModalManager.createActions([
-      '<button class="btn btn-secondary" onclick="showDetail(CURRENT_RECORD)">Zpět</button>',
-      '<button class="btn" style="background: #1a1a1a; color: white;" onclick="saveAllCustomerData(\'' + id + '\')">Uložit změny</button>'
+      '<button class="btn btn-secondary" data-action="showDetail" data-id="' + id + '">Zpět</button>',
+      '<button class="btn" style="background: #1a1a1a; color: white;" data-action="saveAllCustomerData" data-id="' + id + '">Uložit změny</button>'
     ])}
   `;
 
@@ -2278,35 +2283,11 @@ function toggleMenu() {
   hamburger.classList.toggle('active');
 }
 
+// DUPLICITNÍ EVENT DELEGATION ODSTRANĚN
+// Používá se hlavní event delegation na řádku 2587
+// Ponecháme pouze data-navigate a data-onchange handlers
+
 document.addEventListener('DOMContentLoaded', () => {
-  document.addEventListener('click', (e) => {
-    const target = e.target.closest('[data-action]');
-    if (!target) return;
-
-    const action = target.getAttribute('data-action');
-
-    if (action === 'reload') {
-      location.reload();
-      return;
-    }
-
-    if (typeof window[action] === 'function') {
-      const id = target.getAttribute('data-id');
-      const url = target.getAttribute('data-url');
-
-      console.log(`[seznam.js delegation] Volám ${action} s parametry:`, {id, url});
-
-      // Předat parametry podle dostupnosti
-      if (id) {
-        window[action](id);
-      } else if (url) {
-        window[action](url);
-      } else {
-        window[action]();
-      }
-    }
-  });
-
   document.addEventListener('click', (e) => {
     const navigate = e.target.closest('[data-navigate]')?.getAttribute('data-navigate');
     if (navigate) {
@@ -2321,10 +2302,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('change', (e) => {
     const target = e.target.closest('[data-onchange]');
     if (!target) return;
-    
+
     const action = target.getAttribute('data-onchange');
     const value = target.getAttribute('data-onchange-value') || target.value;
-    
+
     if (typeof window[action] === 'function') {
       window[action](value);
     }
@@ -2602,8 +2583,32 @@ document.addEventListener('click', (e) => {
       if (id) showCustomerDetail(id);
       break;
 
+    case 'showDetail':
+      if (CURRENT_RECORD) showDetail(CURRENT_RECORD);
+      break;
+
     case 'openPDF':
       if (url) window.open(url, '_blank');
+      break;
+
+    case 'showPhotoFullscreen':
+      if (url) showPhotoFullscreen(url);
+      break;
+
+    case 'smazatFotku':
+      const photoId = button.getAttribute('data-photo-id');
+      if (photoId && url) {
+        e.stopPropagation();
+        smazatFotku(photoId, url);
+      }
+      break;
+
+    case 'deleteReklamace':
+      if (id) deleteReklamace(id);
+      break;
+
+    case 'saveAllCustomerData':
+      if (id) saveAllCustomerData(id);
       break;
 
     case 'closeDetail':
