@@ -559,218 +559,273 @@
     };
 
     // ========================================
-    // EXPORT DO PDF
+    // EXPORT DO PDF (pomocí html2canvas - stejně jako protokol.php)
     // ========================================
     window.exportovatCenikPDF = async function() {
         try {
             // Kontrola jestli jsou knihovny načteny
-            if (typeof window.jspdf === 'undefined') {
+            if (typeof window.jspdf === 'undefined' || typeof html2canvas === 'undefined') {
                 alert('PDF knihovna se načítá, zkuste to prosím za chvíli...');
                 return;
             }
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'mm', 'a4');
+            console.log('[Kalkulačka] Generuji PDF pomocí html2canvas...');
 
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const margin = 15;
-            let yPos = 20;
-
-            // HLAVIČKA
-            doc.setFontSize(20);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(74, 74, 74); // #4a4a4a
-            doc.text('KALKULACE CENY SERVISU', pageWidth / 2, yPos, { align: 'center' });
-
-            yPos += 10;
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(102, 102, 102); // #666
-            const datum = new Date().toLocaleDateString('cs-CZ');
-            doc.text(`Datum: ${datum}`, pageWidth / 2, yPos, { align: 'center' });
-
-            yPos += 15;
-
-            // LINKA
-            doc.setDrawColor(74, 74, 74);
-            doc.setLineWidth(0.5);
-            doc.line(margin, yPos, pageWidth - margin, yPos);
-
-            yPos += 10;
-
-            // ADRESA
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(42, 42, 42);
-            doc.text('Adresa zákazníka:', margin, yPos);
-            yPos += 6;
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(0, 0, 0);
-            doc.text(stav.adresa || 'Neuvedeno', margin, yPos);
-            yPos += 6;
-            doc.text(`Vzdálenost z dílny: ${stav.vzdalenost} km`, margin, yPos);
-
-            yPos += 12;
-
-            // CENOVÝ SOUHRN
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(42, 42, 42);
-            doc.text('Cenový souhrn:', margin, yPos);
-
-            yPos += 8;
-
-            // Položky
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-
-            let celkem = 0;
-
-            // Dopravné
-            doc.text(`Dopravné (${stav.vzdalenost} km × 2 × ${TRANSPORT_RATE}€):`, margin, yPos);
-            doc.text(`${stav.dopravne.toFixed(2)} €`, pageWidth - margin, yPos, { align: 'right' });
-            celkem += stav.dopravne;
-            yPos += 6;
+            // Vypočítat celkovou cenu
+            let celkem = stav.dopravne;
 
             // Diagnostika
             if (stav.typServisu === 'diagnostika') {
-                doc.text('Inspekce / Diagnostika:', margin, yPos);
-                doc.text(`${CENY.diagnostika.toFixed(2)} €`, pageWidth - margin, yPos, { align: 'right' });
                 celkem += CENY.diagnostika;
-                yPos += 6;
             }
 
             // Čalounické práce
             if (stav.typServisu === 'calouneni' || stav.typServisu === 'kombinace') {
                 const celkemDilu = stav.sedaky + stav.operky + stav.podrucky + stav.panely;
-
                 if (celkemDilu > 0) {
-                    const cenaDilu = celkemDilu === 1 ?
-                        CENY.prvniDil :
-                        CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
-
-                    doc.text(`Čalounické práce (${celkemDilu} dílů):`, margin, yPos);
-                    doc.text(`${cenaDilu.toFixed(2)} €`, pageWidth - margin, yPos, { align: 'right' });
+                    const cenaDilu = celkemDilu === 1 ? CENY.prvniDil : CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
                     celkem += cenaDilu;
-                    yPos += 6;
+                }
+                if (stav.rohovyDil) celkem += CENY.rohovyDil;
+                if (stav.ottoman) celkem += CENY.ottoman;
+            }
 
+            // Mechanické práce
+            if (stav.typServisu === 'mechanika' || stav.typServisu === 'kombinace') {
+                const celkemMechanismu = stav.relax + stav.vysuv;
+                if (celkemMechanismu > 0) {
+                    celkem += celkemMechanismu * CENY.mechanismus;
+                }
+            }
+
+            // Druhá osoba
+            if (stav.tezkyNabytek) celkem += CENY.druhaOsoba;
+
+            // Materiál
+            if (stav.material) celkem += CENY.material;
+
+            // Vytvořit HTML strukturu pro PDF (vždy desktop šířka, i na mobilu)
+            const pdfContent = document.createElement('div');
+            pdfContent.id = 'pdf-kalkulace-temp';
+            pdfContent.style.cssText = `
+                width: 794px !important;
+                min-width: 794px !important;
+                max-width: 794px !important;
+                padding: 40px;
+                background: white;
+                font-family: Arial, sans-serif;
+                position: fixed;
+                left: -9999px;
+                top: 0;
+                box-sizing: border-box;
+            `;
+
+            const datum = new Date().toLocaleDateString('cs-CZ');
+
+            let htmlContent = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h1 style="font-size: 28px; color: #4a4a4a; margin: 0 0 10px 0; font-weight: bold;">
+                        KALKULACE CENY SERVISU
+                    </h1>
+                    <p style="font-size: 14px; color: #666; margin: 0;">
+                        Datum: ${datum}
+                    </p>
+                </div>
+
+                <hr style="border: none; border-top: 2px solid #4a4a4a; margin: 20px 0;">
+
+                <div style="margin: 20px 0;">
+                    <h3 style="font-size: 16px; color: #2a2a2a; margin: 0 0 8px 0; font-weight: bold;">
+                        Adresa zákazníka:
+                    </h3>
+                    <p style="font-size: 14px; margin: 0 0 5px 0;">${stav.adresa || 'Neuvedeno'}</p>
+                    <p style="font-size: 14px; margin: 0;">Vzdálenost z dílny: ${stav.vzdalenost} km</p>
+                </div>
+
+                <div style="margin: 30px 0;">
+                    <h3 style="font-size: 18px; color: #2a2a2a; margin: 0 0 15px 0; font-weight: bold;">
+                        Cenový souhrn:
+                    </h3>
+
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 8px 0;">Dopravné (${stav.vzdalenost} km × 2 × ${TRANSPORT_RATE}€):</td>
+                            <td style="padding: 8px 0; text-align: right; font-weight: bold;">${stav.dopravne.toFixed(2)} €</td>
+                        </tr>
+            `;
+
+            // Diagnostika
+            if (stav.typServisu === 'diagnostika') {
+                htmlContent += `
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 8px 0;">Inspekce / Diagnostika:</td>
+                        <td style="padding: 8px 0; text-align: right; font-weight: bold;">${CENY.diagnostika.toFixed(2)} €</td>
+                    </tr>
+                `;
+            }
+
+            // Čalounické práce
+            if (stav.typServisu === 'calouneni' || stav.typServisu === 'kombinace') {
+                const celkemDilu = stav.sedaky + stav.operky + stav.podrucky + stav.panely;
+                if (celkemDilu > 0) {
+                    const cenaDilu = celkemDilu === 1 ? CENY.prvniDil : CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
+                    htmlContent += `
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 8px 0;">Čalounické práce (${celkemDilu} ${celkemDilu === 1 ? 'díl' : 'dílů'}):</td>
+                            <td style="padding: 8px 0; text-align: right; font-weight: bold;">${cenaDilu.toFixed(2)} €</td>
+                        </tr>
+                    `;
                     if (celkemDilu > 1) {
-                        doc.setFontSize(9);
-                        doc.setTextColor(102, 102, 102);
-                        doc.text(`  ↳ První díl: ${CENY.prvniDil}€, další díly: ${celkemDilu - 1}× ${CENY.dalsiDil}€`, margin, yPos);
-                        yPos += 5;
-                        doc.setFontSize(10);
-                        doc.setTextColor(0, 0, 0);
+                        htmlContent += `
+                            <tr>
+                                <td colspan="2" style="padding: 4px 0 8px 20px; font-size: 12px; color: #666;">
+                                    ↳ První díl: ${CENY.prvniDil}€, další díly: ${celkemDilu - 1}× ${CENY.dalsiDil}€
+                                </td>
+                            </tr>
+                        `;
                     }
                 }
 
-                // Rohový díl
                 if (stav.rohovyDil) {
-                    doc.text('Rohový díl:', margin, yPos);
-                    doc.text(`${CENY.rohovyDil.toFixed(2)} €`, pageWidth - margin, yPos, { align: 'right' });
-                    celkem += CENY.rohovyDil;
-                    yPos += 6;
+                    htmlContent += `
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 8px 0;">Rohový díl:</td>
+                            <td style="padding: 8px 0; text-align: right; font-weight: bold;">${CENY.rohovyDil.toFixed(2)} €</td>
+                        </tr>
+                    `;
                 }
 
-                // Ottoman
                 if (stav.ottoman) {
-                    doc.text('Ottoman / Lehátko:', margin, yPos);
-                    doc.text(`${CENY.ottoman.toFixed(2)} €`, pageWidth - margin, yPos, { align: 'right' });
-                    celkem += CENY.ottoman;
-                    yPos += 6;
+                    htmlContent += `
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 8px 0;">Ottoman / Lehátko:</td>
+                            <td style="padding: 8px 0; text-align: right; font-weight: bold;">${CENY.ottoman.toFixed(2)} €</td>
+                        </tr>
+                    `;
                 }
             }
 
             // Mechanické práce
             if (stav.typServisu === 'mechanika' || stav.typServisu === 'kombinace') {
                 const celkemMechanismu = stav.relax + stav.vysuv;
-
                 if (celkemMechanismu > 0) {
                     const cenaMechanismu = celkemMechanismu * CENY.mechanismus;
-
-                    doc.text(`Mechanické části (${celkemMechanismu}× mechanismus):`, margin, yPos);
-                    doc.text(`${cenaMechanismu.toFixed(2)} €`, pageWidth - margin, yPos, { align: 'right' });
-                    celkem += cenaMechanismu;
-                    yPos += 6;
-
+                    htmlContent += `
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 8px 0;">Mechanické části (${celkemMechanismu}× mechanismus):</td>
+                            <td style="padding: 8px 0; text-align: right; font-weight: bold;">${cenaMechanismu.toFixed(2)} €</td>
+                        </tr>
+                    `;
                     if (stav.relax > 0 || stav.vysuv > 0) {
-                        doc.setFontSize(9);
-                        doc.setTextColor(102, 102, 102);
-                        if (stav.relax > 0) {
-                            doc.text(`  ↳ Relax mechanismy: ${stav.relax}× ${CENY.mechanismus}€`, margin, yPos);
-                            yPos += 5;
-                        }
+                        let detaily = '';
+                        if (stav.relax > 0) detaily += `Relax mechanismy: ${stav.relax}× ${CENY.mechanismus}€`;
                         if (stav.vysuv > 0) {
-                            doc.text(`  ↳ Výsuvné mechanismy: ${stav.vysuv}× ${CENY.mechanismus}€`, margin, yPos);
-                            yPos += 5;
+                            if (detaily) detaily += ', ';
+                            detaily += `Výsuvné mechanismy: ${stav.vysuv}× ${CENY.mechanismus}€`;
                         }
-                        doc.setFontSize(10);
-                        doc.setTextColor(0, 0, 0);
+                        htmlContent += `
+                            <tr>
+                                <td colspan="2" style="padding: 4px 0 8px 20px; font-size: 12px; color: #666;">
+                                    ↳ ${detaily}
+                                </td>
+                            </tr>
+                        `;
                     }
                 }
             }
 
             // Druhá osoba
             if (stav.tezkyNabytek) {
-                doc.text('Druhá osoba (těžký nábytek >50kg):', margin, yPos);
-                doc.text(`${CENY.druhaOsoba.toFixed(2)} €`, pageWidth - margin, yPos, { align: 'right' });
-                celkem += CENY.druhaOsoba;
-                yPos += 6;
+                htmlContent += `
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 8px 0;">Druhá osoba (těžký nábytek >50kg):</td>
+                        <td style="padding: 8px 0; text-align: right; font-weight: bold;">${CENY.druhaOsoba.toFixed(2)} €</td>
+                    </tr>
+                `;
             }
 
             // Materiál
             if (stav.material) {
-                doc.text('Materiál dodán od WGS:', margin, yPos);
-                doc.text(`${CENY.material.toFixed(2)} €`, pageWidth - margin, yPos, { align: 'right' });
-                celkem += CENY.material;
-                yPos += 6;
+                htmlContent += `
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 8px 0;">Materiál dodán od WGS:</td>
+                        <td style="padding: 8px 0; text-align: right; font-weight: bold;">${CENY.material.toFixed(2)} €</td>
+                    </tr>
+                `;
             }
 
-            yPos += 5;
+            htmlContent += `
+                        <tr style="border-top: 3px solid #4a4a4a;">
+                            <td style="padding: 15px 0; font-size: 18px; font-weight: bold;">CELKOVÁ CENA:</td>
+                            <td style="padding: 15px 0; text-align: right; font-size: 18px; font-weight: bold; color: #2a2a2a;">
+                                ${celkem.toFixed(2)} €
+                            </td>
+                        </tr>
+                    </table>
+                </div>
 
-            // CELKOVÁ ČÁRA
-            doc.setDrawColor(74, 74, 74);
-            doc.setLineWidth(1);
-            doc.line(margin, yPos, pageWidth - margin, yPos);
+                <div style="background: #fff9f0; border-left: 4px solid #ff9900; padding: 15px; margin: 30px 0; font-size: 12px; color: #666;">
+                    <strong>Upozornění:</strong> Ceny jsou orientační a vztahují se pouze na práci.
+                    Originální materiál z továrny Natuzzi a náhradní mechanické díly se účtují zvlášť podle skutečné spotřeby.
+                </div>
 
-            yPos += 8;
+                <div style="text-align: center; margin-top: 50px; font-size: 11px; color: #999;">
+                    <p style="margin: 5px 0;"><strong>White Glove Service s.r.o.</strong></p>
+                    <p style="margin: 5px 0;">Do Dubče 364, Běchovice 190 11</p>
+                    <p style="margin: 5px 0;">Tel: +420 725 965 826 | Email: reklamace@wgs-service.cz</p>
+                </div>
+            `;
 
-            // CELKOVÁ CENA
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(42, 42, 42);
-            doc.text('CELKOVÁ CENA:', margin, yPos);
-            doc.text(`${celkem.toFixed(2)} €`, pageWidth - margin, yPos, { align: 'right' });
+            pdfContent.innerHTML = htmlContent;
+            document.body.appendChild(pdfContent);
 
-            yPos += 15;
+            // Počkat na reflow
+            await new Promise(resolve => setTimeout(resolve, 100));
 
-            // UPOZORNĚNÍ
-            doc.setFontSize(9);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(102, 102, 102);
-            doc.setDrawColor(255, 153, 0);
-            doc.setFillColor(255, 249, 240);
-            doc.rect(margin, yPos, pageWidth - 2 * margin, 15, 'FD');
+            // Převést HTML na canvas (stejné nastavení jako protokol.php)
+            console.log('[Kalkulačka] Renderuji HTML pomocí html2canvas...');
+            const canvas = await html2canvas(pdfContent, {
+                scale: 3,
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                logging: false,
+                imageTimeout: 0,
+                allowTaint: true,
+                letterRendering: true
+            });
 
-            yPos += 5;
-            const upozorneni = doc.splitTextToSize(
-                'Upozornění: Ceny jsou orientační a vztahují se pouze na práci. ' +
-                'Originální materiál z továrny Natuzzi a náhradní mechanické díly se účtují zvlášť podle skutečné spotřeby.',
-                pageWidth - 2 * margin - 4
-            );
-            doc.text(upozorneni, margin + 2, yPos);
+            // Vytvořit PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
 
-            yPos += 20;
+            const imgData = canvas.toDataURL('image/jpeg', 0.98);
 
-            // FOOTER
-            doc.setFontSize(8);
-            doc.setTextColor(150, 150, 150);
-            const footerY = doc.internal.pageSize.getHeight() - 15;
-            doc.text('White Glove Service s.r.o.', pageWidth / 2, footerY, { align: 'center' });
-            doc.text('Do Dubče 364, Běchovice 190 11', pageWidth / 2, footerY + 4, { align: 'center' });
-            doc.text('Tel: +420 725 965 826 | Email: reklamace@wgs-service.cz', pageWidth / 2, footerY + 8, { align: 'center' });
+            const pageWidth = 210;
+            const pageHeight = 297;
+            const margin = 10;
 
-            // STÁHNOUT PDF
+            const availableWidth = pageWidth - (margin * 2);
+            const availableHeight = pageHeight - (margin * 2);
+
+            const canvasRatio = canvas.height / canvas.width;
+
+            let imgWidth = availableWidth;
+            let imgHeight = imgWidth * canvasRatio;
+
+            if (imgHeight > availableHeight) {
+                imgHeight = availableHeight;
+                imgWidth = imgHeight / canvasRatio;
+            }
+
+            const xOffset = (pageWidth - imgWidth) / 2;
+            const yOffset = margin;
+
+            doc.addImage(imgData, 'JPEG', xOffset, yOffset, imgWidth, imgHeight);
+
+            // Odstranit dočasný element
+            document.body.removeChild(pdfContent);
+
+            // Stáhnout PDF
             const nazevSouboru = `kalkulace_${new Date().getTime()}.pdf`;
             doc.save(nazevSouboru);
 
