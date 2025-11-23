@@ -276,9 +276,15 @@ if (!defined('GEOAPIFY_KEY')) {
 // Určení prostředí (development, staging, production)
 $environment = getEnvValue('ENVIRONMENT') ?? 'production';
 define('APP_ENV', $environment);
-define('IS_PRODUCTION', $environment === 'production');
-define('IS_DEVELOPMENT', $environment === 'development');
-define('IS_STAGING', $environment === 'staging');
+if (!defined('IS_PRODUCTION')) {
+    define('IS_PRODUCTION', $environment === 'production');
+}
+if (!defined('IS_DEVELOPMENT')) {
+    define('IS_DEVELOPMENT', $environment === 'development');
+}
+if (!defined('IS_STAGING')) {
+    define('IS_STAGING', $environment === 'staging');
+}
 
 // Error reporting podle prostředí
 if (IS_DEVELOPMENT) {

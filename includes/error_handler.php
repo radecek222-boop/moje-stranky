@@ -5,7 +5,9 @@
  */
 
 // Detekce produkčního prostředí
-define('IS_PRODUCTION', isset($_SERVER['SERVER_NAME']) && $_SERVER['SERVER_NAME'] === 'www.wgs-service.cz');
+if (!defined('IS_PRODUCTION')) {
+    define('IS_PRODUCTION', isset($_SERVER['SERVER_NAME']) && $_SERVER['SERVER_NAME'] === 'www.wgs-service.cz');
+}
 
 // Nastavení error reportingu
 error_reporting(E_ALL);
