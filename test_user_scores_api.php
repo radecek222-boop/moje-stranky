@@ -16,7 +16,7 @@ $_SESSION['csrf_token'] = generateCSRFToken();
 echo "<h1>Test User Scores API</h1>";
 echo "<pre>";
 
-$url = "http://" . $_SERVER['HTTP_HOST'] . "/api/analytics_user_scores.php?action=get_scores&csrf_token=" . urlencode($_SESSION['csrf_token']);
+$url = "https://" . $_SERVER['HTTP_HOST'] . "/api/analytics_user_scores.php?action=get_scores&csrf_token=" . urlencode($_SESSION['csrf_token']);
 
 echo "URL: $url\n\n";
 
