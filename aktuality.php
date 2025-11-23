@@ -209,7 +209,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
     .pridat-clanek-btn {
       padding: 12px 30px;
-      background: #2D5016;
+      background: #333333;
       color: white;
       border: none;
       border-radius: 30px;

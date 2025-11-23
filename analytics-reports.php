@@ -44,7 +44,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             margin: 0 auto;
         }
         h1 {
-            color: #2D5016;
+            color: #333333;
             margin-bottom: 10px;
         }
         .subtitle {
@@ -71,11 +71,11 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             transition: all 0.2s;
         }
         .tab:hover {
-            color: #2D5016;
+            color: #333333;
         }
         .tab.active {
-            color: #2D5016;
-            border-bottom-color: #2D5016;
+            color: #333333;
+            border-bottom-color: #333333;
         }
 
         /* Tab Content */
@@ -120,7 +120,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         }
         .btn {
             padding: 10px 20px;
-            background: #2D5016;
+            background: #333333;
             color: white;
             border: none;
             border-radius: 4px;

@@ -1417,7 +1417,7 @@ async function zobrazDetailUzivatele(userId) {
       <div class="user-detail-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; display: flex; align-items: center; justify-content: center;">
         <div style="background: white; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
           <!-- Header -->
-          <div style="background: #2D5016; color: white; padding: 1.5rem; border-radius: 12px 12px 0 0; position: relative;">
+          <div style="background: #333333; color: white; padding: 1.5rem; border-radius: 12px 12px 0 0; position: relative;">
             <h2 style="margin: 0; font-size: 1.3rem; font-weight: 600;">Detail uživatele #${user.id}</h2>
             <button onclick="zavritDetailUzivatele()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; line-height: 1; padding: 0; width: 32px; height: 32px;">&times;</button>
           </div>
@@ -1426,7 +1426,7 @@ async function zobrazDetailUzivatele(userId) {
           <div style="padding: 2rem;">
             <!-- Základní informace -->
             <div style="margin-bottom: 2rem;">
-              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #2D5016; border-bottom: 2px solid #2D5016; padding-bottom: 0.5rem;">Základní údaje</h3>
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #333333; border-bottom: 2px solid #333333; padding-bottom: 0.5rem;">Základní údaje</h3>
 
               <div style="margin-bottom: 1rem;">
                 <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Jméno a příjmení</label>
@@ -1457,7 +1457,7 @@ async function zobrazDetailUzivatele(userId) {
                 </select>
               </div>
 
-              <button onclick="ulozitZmenyUzivatele(${user.id})" style="width: 100%; padding: 0.8rem; background: #2D5016; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+              <button onclick="ulozitZmenyUzivatele(${user.id})" style="width: 100%; padding: 0.8rem; background: #333333; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
                 💾 Uložit změny
               </button>
             </div>

@@ -47,7 +47,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         h1 {
-            color: #2D5016; border-bottom: 3px solid #2D5016;
+            color: #333333; border-bottom: 3px solid #333333;
             padding-bottom: 10px;
         }
         h2 {
@@ -78,7 +78,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
         }
         .btn {
             display: inline-block; padding: 12px 24px;
-            background: #2D5016; color: white; text-decoration: none;
+            background: #333333; color: white; text-decoration: none;
             border-radius: 5px; margin: 10px 5px 10px 0;
             font-weight: 600;
             border: none;
@@ -120,7 +120,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
             text-align: center;
         }
         .stat-card.green {
-            background: linear-gradient(135deg, #2D5016 0%, #1a300d 100%);
+            background: linear-gradient(135deg, #333333 0%, #1a300d 100%);
         }
         .stat-card.blue {
             background: linear-gradient(135deg, #0066cc 0%, #004499 100%);

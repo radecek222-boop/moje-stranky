@@ -48,7 +48,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             margin: 0 auto;
         }
         h1 {
-            color: #2D5016;
+            color: #333333;
             margin-bottom: 10px;
         }
         .subtitle {
@@ -103,7 +103,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         .stat-card .value {
             font-size: 36px;
             font-weight: bold;
-            color: #2D5016;
+            color: #333333;
         }
         .stat-card .label {
             font-size: 12px;
@@ -111,7 +111,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             margin-top: 5px;
         }
         .stat-card.humans .value {
-            color: #2D5016;
+            color: #333333;
         }
         .stat-card.bots .value {
             color: #999;
@@ -218,7 +218,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         }
         .event-item {
             padding: 10px;
-            border-left: 3px solid #2D5016;
+            border-left: 3px solid #333333;
             background: #f9f9f9;
             margin-bottom: 10px;
             border-radius: 4px;
@@ -226,7 +226,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         .event-item .event-type {
             font-size: 13px;
             font-weight: bold;
-            color: #2D5016;
+            color: #333333;
             margin-bottom: 4px;
         }
         .event-item .event-meta {

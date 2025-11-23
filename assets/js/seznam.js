@@ -555,7 +555,7 @@ async function showDetail(recordOrId) {
 
       <div style="width: 100%; margin-top: 0.25rem;">
         ${record.documents && record.documents.length > 0 ? `
-          <button class="btn" style="background: #2D5016; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; font-weight: 600;"
+          <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; font-weight: 600;"
                   data-action="openPDF" data-url="${record.documents[0].file_path}">
             📄 PDF REPORT
           </button>
@@ -1853,7 +1853,7 @@ async function showCustomerDetail(id) {
             <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF Report:</label>
             <button data-action="openPDF"
                     data-url="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}"
-                    style="width: 100%; padding: 0.75rem; background: #2D5016; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer; font-weight: 600;">
+                    style="width: 100%; padding: 0.75rem; background: #333333; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer; font-weight: 600;">
               Otevřít PDF Report
             </button>
           </div>

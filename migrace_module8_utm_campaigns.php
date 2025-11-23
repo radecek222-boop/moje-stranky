@@ -54,8 +54,8 @@ echo "<!DOCTYPE html>
         }
 
         h1 {
-            color: #2D5016;
-            border-bottom: 4px solid #2D5016;
+            color: #333333;
+            border-bottom: 4px solid #333333;
             padding-bottom: 15px;
             margin-bottom: 30px;
             font-size: 28px;

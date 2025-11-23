@@ -990,7 +990,7 @@ const WGS = {
         statusSpan.textContent = t('file_processed_success')
           .replace('{filename}', file.name)
           .replace('{size}', velikostMB);
-        statusSpan.style.color = '#2D5016';
+        statusSpan.style.color = '#333333';
         this.toast(`✓ Formulář byl předvyplněn z PDF pověření`, 'success');
       } catch (error) {
         logger.error('Chyba při zpracování PDF:', error);

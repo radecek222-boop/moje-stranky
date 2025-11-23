@@ -176,7 +176,7 @@
             .gdpr-banner-inner h3 {
                 margin: 0 0 15px 0;
                 font-size: 24px;
-                color: #2D5016;
+                color: #333333;
             }
 
             .gdpr-banner-inner p {
@@ -187,7 +187,7 @@
             }
 
             .gdpr-banner-inner a {
-                color: #2D5016;
+                color: #333333;
                 text-decoration: underline;
             }
 
@@ -209,7 +209,7 @@
             }
 
             .gdpr-btn-primary {
-                background: #2D5016;
+                background: #333333;
                 color: white;
             }
 
@@ -228,8 +228,8 @@
 
             .gdpr-btn-tertiary {
                 background: white;
-                color: #2D5016;
-                border: 2px solid #2D5016;
+                color: #333333;
+                border: 2px solid #333333;
             }
 
             .gdpr-btn-tertiary:hover {
@@ -407,7 +407,7 @@
             .gdpr-modal-inner h3 {
                 margin: 0 0 20px 0;
                 font-size: 22px;
-                color: #2D5016;
+                color: #333333;
             }
 
             .gdpr-option {

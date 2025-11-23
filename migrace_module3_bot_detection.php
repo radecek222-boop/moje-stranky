@@ -41,8 +41,8 @@ echo "<!DOCTYPE html>
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         h1 {
-            color: #2D5016;
-            border-bottom: 3px solid #2D5016;
+            color: #333333;
+            border-bottom: 3px solid #333333;
             padding-bottom: 10px;
         }
         h2 {
@@ -84,7 +84,7 @@ echo "<!DOCTYPE html>
         .btn {
             display: inline-block;
             padding: 12px 24px;
-            background: #2D5016;
+            background: #333333;
             color: white;
             text-decoration: none;
             border-radius: 5px;

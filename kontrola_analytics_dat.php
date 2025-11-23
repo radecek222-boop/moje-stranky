@@ -22,7 +22,7 @@ echo "<!DOCTYPE html>
                background: #f5f5f5; }
         .container { background: white; padding: 30px; border-radius: 10px;
                      box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1 { color: #2D5016; border-bottom: 3px solid #2D5016;
+        h1 { color: #333333; border-bottom: 3px solid #333333;
              padding-bottom: 10px; }
         h2 { color: #333; margin-top: 30px; }
         .success { background: #d4edda; border: 1px solid #c3e6cb;
@@ -33,7 +33,7 @@ echo "<!DOCTYPE html>
                 margin: 10px 0; }
         table { width: 100%; border-collapse: collapse; margin: 20px 0; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #f8f9fa; font-weight: 600; color: #2D5016; }
+        th { background: #f8f9fa; font-weight: 600; color: #333333; }
         tr:hover { background: #f8f9fa; }
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.85em;
                  font-weight: 600; }
@@ -42,11 +42,11 @@ echo "<!DOCTYPE html>
         .badge-tablet { background: #e8f5e9; color: #388e3c; }
         .stat-box { display: inline-block; background: #f8f9fa; padding: 20px;
                     border-radius: 8px; margin: 10px; min-width: 200px;
-                    text-align: center; border: 2px solid #2D5016; }
-        .stat-value { font-size: 2.5rem; font-weight: 700; color: #2D5016; }
+                    text-align: center; border: 2px solid #333333; }
+        .stat-value { font-size: 2.5rem; font-weight: 700; color: #333333; }
         .stat-label { font-size: 0.9rem; color: #666; margin-top: 5px; }
         .btn { display: inline-block; padding: 10px 20px;
-               background: #2D5016; color: white; text-decoration: none;
+               background: #333333; color: white; text-decoration: none;
                border-radius: 5px; margin: 10px 5px 10px 0; }
         .btn:hover { background: #1a300d; }
         code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px;

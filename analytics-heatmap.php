@@ -46,7 +46,7 @@ $csrfToken = generateCSRFToken();
         }
 
         h1 {
-            color: #2D5016;
+            color: #333333;
             margin-bottom: 20px;
         }
 
@@ -82,7 +82,7 @@ $csrfToken = generateCSRFToken();
 
         .btn {
             padding: 10px 20px;
-            background: #2D5016;
+            background: #333333;
             color: white;
             border: none;
             border-radius: 4px;
@@ -124,7 +124,7 @@ $csrfToken = generateCSRFToken();
             opacity: 0.7;
             min-width: 100%;
             min-height: 600px;
-            border: 2px dashed rgba(45, 80, 22, 0.3); /* Debug border */
+            border: 2px dashed rgba(51, 51, 51, 0.3); /* Debug border */
         }
 
         #page-mockup {
@@ -162,7 +162,7 @@ $csrfToken = generateCSRFToken();
 
         .stats h2 {
             font-size: 18px;
-            color: #2D5016;
+            color: #333333;
             margin-bottom: 15px;
         }
 
@@ -188,7 +188,7 @@ $csrfToken = generateCSRFToken();
         .stat-value {
             font-size: 24px;
             font-weight: bold;
-            color: #2D5016;
+            color: #333333;
             margin-top: 5px;
         }
 

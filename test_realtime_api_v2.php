@@ -14,7 +14,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 $csrfToken = $_SESSION['csrf_token'] ?? '';
 
 echo "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Test Real-time API v2</title>";
-echo "<style>body{font-family:monospace;padding:20px;} h2{color:#2D5016;} pre{background:#f4f4f4;padding:10px;border-left:4px solid #2D5016;} .success{color:green;} .error{color:red;}</style>";
+echo "<style>body{font-family:monospace;padding:20px;} h2{color:#333333;} pre{background:#f4f4f4;padding:10px;border-left:4px solid #333333;} .success{color:green;} .error{color:red;}</style>";
 echo "</head><body>";
 echo "<h1>Test Real-time API v2</h1>";
 

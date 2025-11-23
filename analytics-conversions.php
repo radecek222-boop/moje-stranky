@@ -35,7 +35,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             padding: 20px;
         }
         .container { max-width: 1600px; margin: 0 auto; }
-        h1 { color: #2D5016; margin-bottom: 20px; }
+        h1 { color: #333333; margin-bottom: 20px; }
         .tabs {
             display: flex;
             gap: 10px;
@@ -53,8 +53,8 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             border-bottom: 3px solid transparent;
         }
         .tab.active {
-            color: #2D5016;
-            border-bottom-color: #2D5016;
+            color: #333333;
+            border-bottom-color: #333333;
         }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -93,7 +93,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         }
         .btn {
             padding: 10px 20px;
-            background: #2D5016;
+            background: #333333;
             color: white;
             border: none;
             border-radius: 4px;
@@ -127,7 +127,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         .stat-card .value {
             font-size: 28px;
             font-weight: 700;
-            color: #2D5016;
+            color: #333333;
         }
         .conversions-table {
             background: white;
@@ -141,7 +141,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             border-collapse: collapse;
         }
         th {
-            background: #2D5016;
+            background: #333333;
             color: white;
             padding: 12px;
             text-align: left;
@@ -180,7 +180,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             margin: 20px 0;
             padding: 20px;
             background: #f8f9fa;
-            border-left: 4px solid #2D5016;
+            border-left: 4px solid #333333;
             border-radius: 4px;
         }
         .funnel-step-header {
@@ -197,11 +197,11 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         .funnel-step-count {
             font-size: 24px;
             font-weight: 700;
-            color: #2D5016;
+            color: #333333;
         }
         .funnel-step-bar {
             height: 30px;
-            background: linear-gradient(90deg, #2D5016 0%, #5a9a2e 100%);
+            background: linear-gradient(90deg, #333333 0%, #5a9a2e 100%);
             border-radius: 4px;
             position: relative;
             overflow: hidden;

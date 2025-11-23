@@ -37,8 +37,8 @@ echo "<!DOCTYPE html>
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         h1 {
-            color: #2D5016;
-            border-bottom: 3px solid #2D5016;
+            color: #333333;
+            border-bottom: 3px solid #333333;
             padding-bottom: 10px;
         }
         .success {
@@ -76,7 +76,7 @@ echo "<!DOCTYPE html>
         .btn {
             display: inline-block;
             padding: 10px 20px;
-            background: #2D5016;
+            background: #333333;
             color: white;
             text-decoration: none;
             border-radius: 5px;
@@ -90,7 +90,7 @@ echo "<!DOCTYPE html>
             padding: 15px;
             border-radius: 5px;
             overflow-x: auto;
-            border-left: 4px solid #2D5016;
+            border-left: 4px solid #333333;
         }
         .step {
             margin: 20px 0;

@@ -18,7 +18,7 @@ echo "<!DOCTYPE html>
     <title>Test Analytics API</title>
     <style>
         body { font-family: monospace; max-width: 1200px; margin: 50px auto; padding: 20px; }
-        h1 { color: #2D5016; }
+        h1 { color: #333333; }
         pre { background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; }
         .success { color: green; }
         .error { color: red; }

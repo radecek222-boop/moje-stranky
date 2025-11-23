@@ -137,7 +137,7 @@ if (!$isLoggedIn && !$isAdmin) {
   display: block;
   margin: 2rem auto;
   padding: 1rem 2rem;
-  background: #2D5016;
+  background: #333333;
   color: white;
   border: none;
   border-radius: 8px;
