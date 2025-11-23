@@ -222,8 +222,22 @@
     window.nextStep = function() {
         // Validace před pokračováním
         if (stav.krok === 1 && !stav.adresa) {
-            alert('Nejprve vyberte adresu ze seznamu návrhů.');
-            return;
+            // Zkontrolovat jestli je zaškrtnutý checkbox "reklamace bez dopravy"
+            const reklamaceBezDopravyCheckbox = document.getElementById('reklamace-bez-dopravy');
+            const jeReklamace = reklamaceBezDopravyCheckbox && reklamaceBezDopravyCheckbox.checked;
+
+            if (!jeReklamace) {
+                // Pokud není reklamace, adresa je povinná
+                alert('Nejprve vyberte adresu ze seznamu návrhů.');
+                return;
+            } else {
+                // Pokud je reklamace, nastavit dopravné a vzdálenost na 0
+                stav.dopravne = 0;
+                stav.vzdalenost = 0;
+                stav.reklamaceBezDopravy = true;
+                stav.adresa = 'Reklamace bez dopravného';
+                console.log('[Kalkulačka] Reklamace bez dopravy - pokračuji bez adresy');
+            }
         }
 
         // Skrýt aktuální krok
