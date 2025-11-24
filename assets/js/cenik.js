@@ -419,7 +419,51 @@
                 return;
             }
 
-            console.log('[Ceník] Generuji PDF pomocí html2canvas...');
+            // Detekce aktuálního jazyka
+            const jazyk = window.ziskejAktualniJazyk ? window.ziskejAktualniJazyk() : 'cs';
+            console.log(`[Ceník] Generuji PDF v jazyce: ${jazyk}`);
+
+            // Překladové objekty
+            const preklady = {
+                cs: {
+                    title: 'Ceník služeb - White Glove Service',
+                    noteTitle: 'Poznámka:',
+                    noteText: 'Všechny ceny jsou uvedeny za práci BEZ materiálu. Materiál se účtuje zvlášť. Konečná cena může být ovlivněna složitostí opravy, dostupností materiálu a vzdáleností od naší dílny.',
+                    fromPrefix: 'Od',
+                    byAgreement: 'Dle dohody',
+                    footerQuestion: 'Máte dotazy k cenám?',
+                    footerContact: 'Neváhejte nás kontaktovat pro nezávaznou cenovou nabídku.',
+                    generated: 'Generováno',
+                    tel: 'Tel:',
+                    email: 'Email:'
+                },
+                en: {
+                    title: 'Price List - White Glove Service',
+                    noteTitle: 'Note:',
+                    noteText: 'All prices are for labor ONLY, excluding materials. Materials are charged separately. Final price may be affected by repair complexity, material availability, and distance from our workshop.',
+                    fromPrefix: 'From',
+                    byAgreement: 'By agreement',
+                    footerQuestion: 'Questions about pricing?',
+                    footerContact: 'Feel free to contact us for a non-binding quote.',
+                    generated: 'Generated',
+                    tel: 'Tel:',
+                    email: 'Email:'
+                },
+                it: {
+                    title: 'Listino Prezzi - White Glove Service',
+                    noteTitle: 'Nota:',
+                    noteText: 'Tutti i prezzi sono solo per il lavoro SENZA materiali. I materiali vengono fatturati separatamente. Il prezzo finale può essere influenzato dalla complessità della riparazione, dalla disponibilità dei materiali e dalla distanza dal nostro laboratorio.',
+                    fromPrefix: 'Da',
+                    byAgreement: 'Secondo accordo',
+                    footerQuestion: 'Domande sui prezzi?',
+                    footerContact: 'Non esitare a contattarci per un preventivo non vincolante.',
+                    generated: 'Generato',
+                    tel: 'Tel:',
+                    email: 'Email:'
+                }
+            };
+
+            const t = preklady[jazyk] || preklady.cs;
 
             // Vytvoření dočasného wrapper pro PDF (stejně jako v protokolu)
             const pdfWrapper = document.createElement('div');
@@ -452,7 +496,7 @@
             `;
             pdfWrapper.appendChild(header);
 
-            // Nadpis ceníku
+            // Nadpis ceníku (přeložený)
             const title = document.createElement('h1');
             title.style.cssText = `
                 font-size: 22px;
@@ -461,10 +505,10 @@
                 margin: 20px 0;
                 text-align: center;
             `;
-            title.textContent = 'Ceník služeb - White Glove Service';
+            title.textContent = t.title;
             pdfWrapper.appendChild(title);
 
-            // Poznámka
+            // Poznámka (přeložená)
             const note = document.createElement('div');
             note.style.cssText = `
                 background: #fff9f0;
@@ -476,9 +520,7 @@
                 line-height: 1.5;
             `;
             note.innerHTML = `
-                <strong>Poznámka:</strong> Všechny ceny jsou uvedeny za práci BEZ materiálu.
-                Materiál se účtuje zvlášť. Konečná cena může být ovlivněna složitostí opravy,
-                dostupností materiálu a vzdáleností od naší dílny.
+                <strong>${t.noteTitle}</strong> ${t.noteText}
             `;
             pdfWrapper.appendChild(note);
 
@@ -493,6 +535,16 @@
 
             // Vygenerovat kategorie a položky
             Object.keys(pricingData).sort().forEach(kategorie => {
+                // Získat přeložený název kategorie z první položky
+                const prvniPolozka = pricingData[kategorie][0];
+                let prelozenKategorie = kategorie;
+
+                if (jazyk === 'en' && prvniPolozka.category_en) {
+                    prelozenKategorie = prvniPolozka.category_en;
+                } else if (jazyk === 'it' && prvniPolozka.category_it) {
+                    prelozenKategorie = prvniPolozka.category_it;
+                }
+
                 // Hlavička kategorie
                 const categoryHeader = document.createElement('div');
                 categoryHeader.style.cssText = `
@@ -505,7 +557,7 @@
                     margin-bottom: 10px;
                     border-radius: 5px 5px 0 0;
                 `;
-                categoryHeader.textContent = kategorie;
+                categoryHeader.textContent = prelozenKategorie;
                 pdfWrapper.appendChild(categoryHeader);
 
                 // Container pro položky
@@ -540,7 +592,15 @@
                         color: #2a2a2a;
                         flex: 1;
                     `;
-                    itemName.textContent = item.service_name;
+
+                    // Získat přeložený název služby
+                    let nazevSluzby = item.service_name;
+                    if (jazyk === 'en' && item.service_name_en) {
+                        nazevSluzby = item.service_name_en;
+                    } else if (jazyk === 'it' && item.service_name_it) {
+                        nazevSluzby = item.service_name_it;
+                    }
+                    itemName.textContent = nazevSluzby;
 
                     const itemPrice = document.createElement('div');
                     itemPrice.style.cssText = `
@@ -551,23 +611,30 @@
                         margin-left: 20px;
                     `;
 
-                    // Zobrazit cenu
+                    // Zobrazit cenu s přeloženým prefixem
                     if (item.price_from && item.price_to) {
                         itemPrice.textContent = `${item.price_from} - ${item.price_to} ${item.price_unit}`;
                     } else if (item.price_from) {
-                        itemPrice.textContent = `Od ${item.price_from} ${item.price_unit}`;
+                        itemPrice.textContent = `${t.fromPrefix} ${item.price_from} ${item.price_unit}`;
                     } else if (item.price_to) {
                         itemPrice.textContent = `${item.price_to} ${item.price_unit}`;
                     } else {
-                        itemPrice.textContent = 'Dle dohody';
+                        itemPrice.textContent = t.byAgreement;
                     }
 
                     itemHeader.appendChild(itemName);
                     itemHeader.appendChild(itemPrice);
                     itemDiv.appendChild(itemHeader);
 
-                    // Popis
-                    if (item.description) {
+                    // Popis - přeložený
+                    let popis = item.description;
+                    if (jazyk === 'en' && item.description_en) {
+                        popis = item.description_en;
+                    } else if (jazyk === 'it' && item.description_it) {
+                        popis = item.description_it;
+                    }
+
+                    if (popis) {
                         const itemDesc = document.createElement('div');
                         itemDesc.style.cssText = `
                             font-size: 11px;
@@ -575,7 +642,7 @@
                             line-height: 1.5;
                             margin-top: 5px;
                         `;
-                        itemDesc.textContent = item.description;
+                        itemDesc.textContent = popis;
                         itemDiv.appendChild(itemDesc);
                     }
 
@@ -585,7 +652,7 @@
                 pdfWrapper.appendChild(itemsContainer);
             });
 
-            // Kontaktní informace na konci
+            // Kontaktní informace na konci (přeložené)
             const footer = document.createElement('div');
             footer.style.cssText = `
                 margin-top: 40px;
@@ -596,14 +663,14 @@
                 color: #333;
             `;
             footer.innerHTML = `
-                <div style="font-weight: 600; margin-bottom: 10px;">Máte dotazy k cenám?</div>
-                <div>Neváhejte nás kontaktovat pro nezávaznou cenovou nabídku.</div>
+                <div style="font-weight: 600; margin-bottom: 10px;">${t.footerQuestion}</div>
+                <div>${t.footerContact}</div>
                 <div style="margin-top: 10px;">
-                    <strong>Tel:</strong> +420 725 965 826 ·
-                    <strong>Email:</strong> reklamace@wgs-service.cz
+                    <strong>${t.tel}</strong> +420 725 965 826 ·
+                    <strong>${t.email}</strong> reklamace@wgs-service.cz
                 </div>
                 <div style="margin-top: 15px; font-size: 10px; color: #999;">
-                    www.wgs-service.cz · Generováno ${new Date().toLocaleDateString('cs-CZ')}
+                    www.wgs-service.cz · ${t.generated} ${new Date().toLocaleDateString('cs-CZ')}
                 </div>
             `;
             pdfWrapper.appendChild(footer);
@@ -677,11 +744,12 @@
             // Odstranit dočasný wrapper
             document.body.removeChild(pdfWrapper);
 
-            // Stáhnout PDF
+            // Stáhnout PDF s jazykovým suffixem
             const datum = new Date().toLocaleDateString('cs-CZ').replace(/\./g, '-');
-            pdf.save(`WGS-Cenik-${datum}.pdf`);
+            const jazykSuffix = jazyk.toUpperCase(); // CS, EN, IT
+            pdf.save(`WGS-Cenik-${jazykSuffix}-${datum}.pdf`);
 
-            console.log('[Ceník] PDF úspěšně vygenerováno a staženo');
+            console.log(`[Ceník] PDF úspěšně vygenerováno a staženo (jazyk: ${jazykSuffix})`);
 
         } catch (error) {
             console.error('[Ceník] Chyba při generování PDF:', error);
