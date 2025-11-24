@@ -80,12 +80,12 @@ try {
             )
             ON DUPLICATE KEY UPDATE
                 click_count = click_count + 1,
-                viewport_width_avg = IF(:viewport_width IS NOT NULL,
-                    (viewport_width_avg * click_count + :viewport_width) / (click_count + 1),
+                viewport_width_avg = IF(VALUES(viewport_width_avg) IS NOT NULL,
+                    (viewport_width_avg * click_count + VALUES(viewport_width_avg)) / (click_count + 1),
                     viewport_width_avg
                 ),
-                viewport_height_avg = IF(:viewport_height IS NOT NULL,
-                    (viewport_height_avg * click_count + :viewport_height) / (click_count + 1),
+                viewport_height_avg = IF(VALUES(viewport_height_avg) IS NOT NULL,
+                    (viewport_height_avg * click_count + VALUES(viewport_height_avg)) / (click_count + 1),
                     viewport_height_avg
                 ),
                 last_click = NOW()
@@ -125,12 +125,12 @@ try {
             )
             ON DUPLICATE KEY UPDATE
                 reach_count = reach_count + 1,
-                viewport_width_avg = IF(:viewport_width IS NOT NULL,
-                    (viewport_width_avg * reach_count + :viewport_width) / (reach_count + 1),
+                viewport_width_avg = IF(VALUES(viewport_width_avg) IS NOT NULL,
+                    (viewport_width_avg * reach_count + VALUES(viewport_width_avg)) / (reach_count + 1),
                     viewport_width_avg
                 ),
-                viewport_height_avg = IF(:viewport_height IS NOT NULL,
-                    (viewport_height_avg * reach_count + :viewport_height) / (reach_count + 1),
+                viewport_height_avg = IF(VALUES(viewport_height_avg) IS NOT NULL,
+                    (viewport_height_avg * reach_count + VALUES(viewport_height_avg)) / (reach_count + 1),
                     viewport_height_avg
                 ),
                 last_reach = NOW()
