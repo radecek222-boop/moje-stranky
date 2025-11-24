@@ -53,6 +53,7 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/login.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.css">
+  <link rel="stylesheet" href="assets/css/welcome-modal.css">
   <style>
     .admin-checkbox-group { margin-bottom: 1.5rem; padding: 1rem; background: #f5f5f5; border-radius: 4px; }
     .admin-checkbox-group input[type="checkbox"] { margin-right: 0.5rem; }
