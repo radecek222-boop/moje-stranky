@@ -67,6 +67,46 @@ try {
         sendJsonError($rateLimitResult['message'], 429);
     }
 
+    // ========================================
+    // BLACKLIST IP ADRES (admin/vlastník)
+    // ========================================
+    $blacklistedIPs = [
+        '2a00:11b1:10a2:5773:a4d3:7603:899e:d2f3',
+        '2a00:11b1:10a2:5773:',
+        '46.135.89.44',
+        '2a09:bac2:2756:137::1f:ac',
+        '2a09:bac2:2756:',
+        '104.28.114.10',
+    ];
+
+    foreach ($blacklistedIPs as $blacklistedIp) {
+        if ($clientIp === $blacklistedIp || strpos($clientIp, $blacklistedIp) === 0) {
+            sendJsonSuccess('OK', ['ignored' => true]);
+        }
+    }
+
+    // ========================================
+    // BLACKLIST REFERRER DOMÉN (GitHub apod.)
+    // ========================================
+    $blacklistedReferrers = [
+        'github.com',
+        'www.github.com',
+        'raw.githubusercontent.com',
+        'gist.github.com',
+    ];
+
+    $referrerHeader = $_SERVER['HTTP_REFERER'] ?? '';
+    if (!empty($referrerHeader)) {
+        $referrerHost = parse_url($referrerHeader, PHP_URL_HOST);
+        if ($referrerHost) {
+            foreach ($blacklistedReferrers as $blacklistedRef) {
+                if ($referrerHost === $blacklistedRef || strpos($referrerHost, $blacklistedRef) !== false) {
+                    sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'referrer']);
+                }
+            }
+        }
+    }
+
     // Získání JSON dat z request body
     $inputData = json_decode(file_get_contents('php://input'), true);
 
@@ -332,26 +372,98 @@ try {
         INSERT INTO wgs_pageviews (
             session_id,
             fingerprint_id,
-            url,
-            ip,
+            ip_address,
             user_agent,
-            datum
+            page_url,
+            page_title,
+            referrer,
+            device_type,
+            browser,
+            os,
+            screen_resolution,
+            language,
+            country_code,
+            city,
+            visit_duration,
+            is_bounce,
+            created_at
         ) VALUES (
             :session_id,
             :fingerprint_id,
-            :url,
-            :ip,
+            :ip_address,
             :user_agent,
+            :page_url,
+            :page_title,
+            :referrer,
+            :device_type,
+            :browser,
+            :os,
+            :screen_resolution,
+            :language,
+            :country_code,
+            :city,
+            :visit_duration,
+            :is_bounce,
             NOW()
         )
     ");
 
+    // Výpočet visit_duration z předchozího pageview ve stejné session
+    $visitDuration = 0;
+    $stmtPrevPageview = $pdo->prepare("
+        SELECT created_at FROM wgs_pageviews
+        WHERE session_id = :session_id
+        ORDER BY created_at DESC
+        LIMIT 1
+    ");
+    $stmtPrevPageview->execute(['session_id' => $sessionId]);
+    $prevPageview = $stmtPrevPageview->fetch(PDO::FETCH_ASSOC);
+
+    if ($prevPageview && $prevPageview['created_at']) {
+        $prevTime = strtotime($prevPageview['created_at']);
+        $currentTime = time();
+        $calculatedDuration = $currentTime - $prevTime;
+
+        // Omezit na max 30 minut (1800s) - déle = pravděpodobně nová session
+        if ($calculatedDuration > 0 && $calculatedDuration < 1800) {
+            // Aktualizovat předchozí pageview s vypočtenou dobou
+            $stmtUpdateDuration = $pdo->prepare("
+                UPDATE wgs_pageviews
+                SET visit_duration = :duration
+                WHERE session_id = :session_id
+                ORDER BY created_at DESC
+                LIMIT 1
+            ");
+            $stmtUpdateDuration->execute([
+                'duration' => $calculatedDuration,
+                'session_id' => $sessionId
+            ]);
+        }
+    }
+
+    // Screen resolution z device info
+    $screenResolution = null;
+    if (isset($inputData['screen_width']) && isset($inputData['screen_height'])) {
+        $screenResolution = (int)$inputData['screen_width'] . 'x' . (int)$inputData['screen_height'];
+    }
+
     $stmt->execute([
         'session_id' => $sessionId,
         'fingerprint_id' => $fingerprintId,
-        'url' => $pageUrl,
-        'ip' => $ipAdresaAnonymni,
-        'user_agent' => substr($userAgent, 0, 255)
+        'ip_address' => $ipAdresaAnonymni,
+        'user_agent' => substr($userAgent, 0, 500),
+        'page_url' => substr($pageUrl, 0, 500),
+        'page_title' => substr($sessionData['page_title'], 0, 200),
+        'referrer' => substr($sessionData['referrer'], 0, 500),
+        'device_type' => $sessionData['device_type'],
+        'browser' => substr($sessionData['browser'], 0, 100),
+        'os' => substr($sessionData['os'], 0, 100),
+        'screen_resolution' => $screenResolution,
+        'language' => substr($inputData['language'] ?? '', 0, 10),
+        'country_code' => $geoData['country_code'] ?? null,
+        'city' => $geoData['city'] ?? null,
+        'visit_duration' => 0,  // Bude aktualizováno při dalším pageview
+        'is_bounce' => $pocetPageviews <= 1 ? 1 : 0
     ]);
 
     $pageviewId = $pdo->lastInsertId();
