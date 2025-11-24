@@ -46,6 +46,9 @@ try {
         sendJsonError('Neplatný CSRF token', 403);
     }
 
+    // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+    session_write_close();
+
     $pdo = getDbConnection();
 
     // ========================================
