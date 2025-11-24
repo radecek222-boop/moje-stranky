@@ -116,13 +116,28 @@ try {
     // ========================================
     // BLACKLIST IP ADRES (admin/vlastník)
     // ========================================
-    // Tyto IP adresy jsou kompletně ignorovány v analytics
+    // Získat IP klienta
+    $clientIpForBlacklist = GeoIPHelper::ziskejKlientIP();
+
+    // 1. Kontrola databázové tabulky wgs_analytics_ignored_ips
+    $stmtIgnored = $pdo->prepare("
+        SELECT id FROM wgs_analytics_ignored_ips
+        WHERE ip_address = :ip
+        LIMIT 1
+    ");
+    $stmtIgnored->execute(['ip' => $clientIpForBlacklist]);
+    if ($stmtIgnored->fetch()) {
+        sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'db_blacklist']);
+    }
+
+    // 2. Hardcoded blacklist (včetně IPv6 prefix matchingu)
     $blacklistedIPs = [
         // IPv6 - Radek domácí
         '2a00:11b1:10a2:5773:a4d3:7603:899e:d2f3',
         '2a00:11b1:10a2:5773:',  // IPv6 prefix pro celou síť
         // IPv4 - Radek domácí
         '46.135.89.44',
+        '46.135.14.161',
         // IPv6 - VPN/proxy
         '2a09:bac2:2756:137::1f:ac',
         '2a09:bac2:2756:',  // IPv6 prefix
@@ -130,19 +145,10 @@ try {
         '104.28.114.10',
     ];
 
-    // Získat IP klienta
-    $clientIpForBlacklist = GeoIPHelper::ziskejKlientIP();
-
     // Kontrola blacklistu (přesná shoda nebo prefix match pro IPv6)
     foreach ($blacklistedIPs as $blacklistedIp) {
-        // Přesná shoda
-        if ($clientIpForBlacklist === $blacklistedIp) {
-            // Tiše ukončit - nelogovat, neukládat
-            sendJsonSuccess('OK', ['ignored' => true]);
-        }
-        // Prefix match (pro IPv6 sítě)
-        if (strpos($clientIpForBlacklist, $blacklistedIp) === 0) {
-            sendJsonSuccess('OK', ['ignored' => true]);
+        if ($clientIpForBlacklist === $blacklistedIp || strpos($clientIpForBlacklist, $blacklistedIp) === 0) {
+            sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'hardcoded_blacklist']);
         }
     }
 
