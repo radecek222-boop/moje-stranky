@@ -1037,13 +1037,15 @@ async function otevritModalPrijemcu(sablonaId) {
                 <div style="display: flex; flex-direction: column; gap: 1rem;">
                     <!-- Zákazník -->
                     <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px;">
-                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
                             <input type="checkbox" id="recipient-customer" ${currentRecipients.customer?.enabled ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
-                            <div style="flex: 1;">
-                                <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Zákazník</div>
-                                <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán zákazníkovi</div>
-                            </div>
-                            <select id="recipient-customer-type" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.85rem;">
+                            <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Zákazník</div>
+                        </div>
+                        <div style="color: #ccc; font-size: 0.8rem; margin-bottom: 0.5rem; padding-left: 30px;">
+                            Email bude odeslán zákazníkovi
+                        </div>
+                        <div style="padding-left: 30px;">
+                            <select id="recipient-customer-type" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.85rem; width: 100%; max-width: 250px;">
                                 <option value="to" ${currentRecipients.customer?.type === 'to' ? 'selected' : ''}>Příjemce (To)</option>
                                 <option value="cc" ${currentRecipients.customer?.type === 'cc' ? 'selected' : ''}>Kopie (Cc)</option>
                                 <option value="bcc" ${currentRecipients.customer?.type === 'bcc' ? 'selected' : ''}>Skrytá kopie (Bcc)</option>
@@ -1053,13 +1055,15 @@ async function otevritModalPrijemcu(sablonaId) {
 
                     <!-- Prodejce -->
                     <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px;">
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
                             <input type="checkbox" id="recipient-seller" ${currentRecipients.seller?.enabled ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
-                            <div style="flex: 1;">
-                                <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Prodejce</div>
-                                <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán prodejci, který vytvořil reklamaci</div>
-                            </div>
-                            <select id="recipient-seller-type" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.85rem;">
+                            <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Prodejce</div>
+                        </div>
+                        <div style="color: #ccc; font-size: 0.8rem; margin-bottom: 0.5rem; padding-left: 30px;">
+                            Email bude odeslán prodejci, který vytvořil reklamaci
+                        </div>
+                        <div style="padding-left: 30px;">
+                            <select id="recipient-seller-type" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.85rem; width: 100%; max-width: 250px;">
                                 <option value="to" ${currentRecipients.seller?.type === 'to' ? 'selected' : ''}>Příjemce (To)</option>
                                 <option value="cc" ${currentRecipients.seller?.type === 'cc' ? 'selected' : ''}>Kopie (Cc)</option>
                                 <option value="bcc" ${currentRecipients.seller?.type === 'bcc' ? 'selected' : ''}>Skrytá kopie (Bcc)</option>
@@ -1069,13 +1073,15 @@ async function otevritModalPrijemcu(sablonaId) {
 
                     <!-- Technik -->
                     <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px;">
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
                             <input type="checkbox" id="recipient-technician" ${currentRecipients.technician?.enabled ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
-                            <div style="flex: 1;">
-                                <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Technik</div>
-                                <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán technikovi, který pracoval na reklamaci</div>
-                            </div>
-                            <select id="recipient-technician-type" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.85rem;">
+                            <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Technik</div>
+                        </div>
+                        <div style="color: #ccc; font-size: 0.8rem; margin-bottom: 0.5rem; padding-left: 30px;">
+                            Email bude odeslán technikovi, který pracoval na reklamaci
+                        </div>
+                        <div style="padding-left: 30px;">
+                            <select id="recipient-technician-type" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.85rem; width: 100%; max-width: 250px;">
                                 <option value="to" ${currentRecipients.technician?.type === 'to' ? 'selected' : ''}>Příjemce (To)</option>
                                 <option value="cc" ${currentRecipients.technician?.type === 'cc' ? 'selected' : ''}>Kopie (Cc)</option>
                                 <option value="bcc" ${currentRecipients.technician?.type === 'bcc' ? 'selected' : ''}>Skrytá kopie (Bcc)</option>
@@ -1085,38 +1091,46 @@ async function otevritModalPrijemcu(sablonaId) {
 
                     <!-- Výrobce / Import -->
                     <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px;">
-                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
                             <input type="checkbox" id="recipient-importer" ${currentRecipients.importer?.enabled ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
-                            <div style="flex: 1;">
-                                <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Import zastupující / Výrobce</div>
-                                <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán na zadanou adresu výrobce</div>
-                            </div>
-                            <select id="recipient-importer-type" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.85rem;">
+                            <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Import zastupující / Výrobce</div>
+                        </div>
+                        <div style="color: #ccc; font-size: 0.8rem; margin-bottom: 0.5rem; padding-left: 30px;">
+                            Email bude odeslán na zadanou adresu výrobce
+                        </div>
+                        <div style="padding-left: 30px; margin-bottom: 0.5rem;">
+                            <select id="recipient-importer-type" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.85rem; width: 100%; max-width: 250px;">
                                 <option value="to" ${currentRecipients.importer?.type === 'to' ? 'selected' : ''}>Příjemce (To)</option>
                                 <option value="cc" ${currentRecipients.importer?.type === 'cc' ? 'selected' : ''}>Kopie (Cc)</option>
                                 <option value="bcc" ${currentRecipients.importer?.type === 'bcc' ? 'selected' : ''}>Skrytá kopie (Bcc)</option>
                             </select>
                         </div>
-                        <input type="email" id="recipient-importer-email" value="${currentRecipients.importer?.email || ''}" placeholder="email@vyrobce.cz"
-                               style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.9rem;">
+                        <div style="padding-left: 30px;">
+                            <input type="email" id="recipient-importer-email" value="${currentRecipients.importer?.email || ''}" placeholder="email@vyrobce.cz"
+                                   style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.9rem;">
+                        </div>
                     </div>
 
                     <!-- Jiné -->
                     <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px;">
-                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
                             <input type="checkbox" id="recipient-other" ${currentRecipients.other?.enabled ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
-                            <div style="flex: 1;">
-                                <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Jiné</div>
-                                <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán na vlastní emailovou adresu</div>
-                            </div>
-                            <select id="recipient-other-type" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.85rem;">
+                            <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Jiné</div>
+                        </div>
+                        <div style="color: #ccc; font-size: 0.8rem; margin-bottom: 0.5rem; padding-left: 30px;">
+                            Email bude odeslán na vlastní emailovou adresu
+                        </div>
+                        <div style="padding-left: 30px; margin-bottom: 0.5rem;">
+                            <select id="recipient-other-type" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.85rem; width: 100%; max-width: 250px;">
                                 <option value="to" ${currentRecipients.other?.type === 'to' ? 'selected' : ''}>Příjemce (To)</option>
                                 <option value="cc" ${currentRecipients.other?.type === 'cc' ? 'selected' : ''}>Kopie (Cc)</option>
                                 <option value="bcc" ${currentRecipients.other?.type === 'bcc' ? 'selected' : ''}>Skrytá kopie (Bcc)</option>
                             </select>
                         </div>
-                        <input type="email" id="recipient-other-email" value="${currentRecipients.other?.email || ''}" placeholder="vlastni@email.cz"
-                               style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.9rem;">
+                        <div style="padding-left: 30px;">
+                            <input type="email" id="recipient-other-email" value="${currentRecipients.other?.email || ''}" placeholder="vlastni@email.cz"
+                                   style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.9rem;">
+                        </div>
                     </div>
                 </div>
 
