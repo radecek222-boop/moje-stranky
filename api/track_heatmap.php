@@ -78,7 +78,8 @@ try {
     $pdo = getDbConnection();
 
     // Rate limiting - 1000 požadavků za hodinu per IP
-    $clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    // OPRAVA: Použít skutečnou IP klienta (s podporou Cloudflare/proxy)
+    $clientIp = GeoIPHelper::ziskejKlientIP();
     $rateLimiter = new RateLimiter($pdo);
 
     $rateLimitResult = $rateLimiter->checkLimit($clientIp, 'track_heatmap', [
@@ -194,15 +195,28 @@ try {
     // ========================================
     // BLACKLIST INTERNÍCH/ADMIN STRÁNEK
     // ========================================
+    // POZN: Zahrnout i verze bez .php (URL rewrite)
     $blacklistedPages = [
+        // S příponou .php
         'admin.php',
         'seznam.php',
         'statistiky.php',
         'protokol.php',
         'login.php',
         'registration.php',
+        'analytics.php',
         'analytics-heatmap.php',
         'vsechny_tabulky.php',
+        // Bez přípony (URL rewrite)
+        'admin',
+        'seznam',
+        'statistiky',
+        'protokol',
+        'login',
+        'registration',
+        'analytics',
+        'analytics-heatmap',
+        // Prefixy
         'kontrola_',
         'pridej_',
         'vycisti_',
