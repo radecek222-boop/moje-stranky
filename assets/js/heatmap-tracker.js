@@ -132,7 +132,7 @@
             page_url: window.location.href,
             device_type: deviceType,
             clicks: clickBuffer.splice(0), // Vyprázdnit buffer
-            scrolls: Array.from(scrollDepths),
+            scroll_depths: Array.from(scrollDepths), // OPRAVA: API očekává scroll_depths, ne scrolls
             csrf_token: csrfToken
         };
 
@@ -159,7 +159,7 @@
             console.error('[Heatmap Tracker] Network error:', error);
             // Vrátit data zpět do bufferu
             clickBuffer.unshift(...data.clicks);
-            data.scrolls.forEach(s => scrollDepths.add(s));
+            data.scroll_depths.forEach(s => scrollDepths.add(s)); // OPRAVA: používat scroll_depths
         }
     }
 
