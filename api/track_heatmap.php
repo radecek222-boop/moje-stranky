@@ -147,6 +147,29 @@ try {
     }
 
     // ========================================
+    // BLACKLIST REFERRER DOMÉN
+    // ========================================
+    // Ignorovat návštěvy z těchto referrer domén (např. GitHub)
+    $blacklistedReferrers = [
+        'github.com',
+        'www.github.com',
+        'raw.githubusercontent.com',
+        'gist.github.com',
+    ];
+
+    $referrer = $_SERVER['HTTP_REFERER'] ?? '';
+    if (!empty($referrer)) {
+        $referrerHost = parse_url($referrer, PHP_URL_HOST);
+        if ($referrerHost) {
+            foreach ($blacklistedReferrers as $blacklistedRef) {
+                if ($referrerHost === $blacklistedRef || strpos($referrerHost, $blacklistedRef) !== false) {
+                    sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'referrer']);
+                }
+            }
+        }
+    }
+
+    // ========================================
     // GEOLOKACE Z IP ADRESY
     // ========================================
     $geoData = null;
