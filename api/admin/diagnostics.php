@@ -184,7 +184,7 @@ switch ($action) {
 
     // ==================== CHECK JS ERRORS ====================
         case 'check_js_errors':
-            $jsLogFile = __DIR__ . '/../logs/js_errors.log';
+            $jsLogFile = LOGS_PATH . '/js_errors.log';
             $jsErrors = [];
 
             if (file_exists($jsLogFile)) {
@@ -366,9 +366,9 @@ switch ($action) {
 
     // ==================== GET RECENT ERRORS ====================
         case 'get_recent_errors':
-            $phpErrorsFile = __DIR__ . '/../logs/php_errors.log';
-            $jsErrorsFile = __DIR__ . '/../logs/js_errors.log';
-            $securityLogFile = __DIR__ . '/../logs/security.log';
+            $phpErrorsFile = LOGS_PATH . '/php_errors.log';
+            $jsErrorsFile = LOGS_PATH . '/js_errors.log';
+            $securityLogFile = LOGS_PATH . '/security.log';
 
             $phpErrors = [];
             $jsErrors = [];
@@ -477,11 +477,19 @@ switch ($action) {
     // ==================== CHECK PERMISSIONS ====================
         case 'check_permissions':
             $dirsToCheck = ['logs', 'uploads', 'temp', 'uploads/photos', 'uploads/protokoly'];
+            $projectRoot = dirname(__DIR__, 2); // /workspace/moje-stranky
             $writable = [];
             $notWritable = [];
+            $missing = [];
 
             foreach ($dirsToCheck as $dir) {
-                $fullPath = __DIR__ . '/../' . $dir;
+                $fullPath = $projectRoot . '/' . $dir;
+
+                if (!file_exists($fullPath)) {
+                    $missing[] = $dir;
+                    continue;
+                }
+
                 if (is_writable($fullPath)) {
                     $writable[] = $dir;
                 } else {
@@ -493,7 +501,8 @@ switch ($action) {
                 'status' => 'success',
                 'data' => [
                     'writable' => $writable,
-                    'not_writable' => $notWritable
+                    'not_writable' => $notWritable,
+                    'missing' => $missing
                 ]
             ]);
             break;
@@ -806,7 +815,7 @@ Stack: %s
             $stack
         );
 
-        $logFile = __DIR__ . '/../../logs/js_errors.log';
+        $logFile = LOGS_PATH . '/js_errors.log';
         $logDir = dirname($logFile);
         
         if (!is_dir($logDir)) {
