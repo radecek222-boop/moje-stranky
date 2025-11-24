@@ -63,6 +63,9 @@ try {
         if (!validateCSRFToken($csrfToken)) {
             sendJsonError('Neplatný CSRF token', 403);
         }
+
+        // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky (admin actions)
+        session_write_close();
     }
 
     // ========================================

@@ -119,12 +119,13 @@ $csrfToken = generateCSRFToken();
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
             z-index: 10;
-            opacity: 0.7;
-            min-width: 100%;
-            min-height: 600px;
-            border: 2px dashed rgba(51, 51, 51, 0.3); /* Debug border */
+            opacity: 0.85;
+            border: 2px dashed rgba(255, 0, 0, 0.5); /* DEBUG: červený border aby byl canvas viditelný */
+            box-sizing: border-box;
         }
 
         #page-mockup {
@@ -246,6 +247,7 @@ $csrfToken = generateCSRFToken();
 
             <div class="control-group" style="display: block; margin-top: 15px;">
                 <button id="load-heatmap" class="btn">Načíst Heatmap</button>
+                <button id="load-demo" class="btn btn-secondary">Načíst Demo Data</button>
                 <button id="export-png" class="btn btn-secondary">Export PNG</button>
             </div>
         </div>
@@ -294,8 +296,13 @@ $csrfToken = generateCSRFToken();
             const container = document.getElementById('page-mockup');
             const canvas = document.getElementById('heatmap-canvas');
 
-            canvas.width = container.offsetWidth;
-            canvas.height = container.offsetHeight;
+            const width = container.offsetWidth;
+            const height = container.offsetHeight;
+
+            console.log('[Heatmap] Resize canvas:', width, 'x', height, 'px');
+
+            canvas.width = width;
+            canvas.height = height;
 
             // Znovu vykreslit heatmap po resize
             if (currentData) {
@@ -362,6 +369,73 @@ $csrfToken = generateCSRFToken();
                 console.error('Chyba při načítání heatmap:', error);
                 document.getElementById('page-mockup').innerHTML = `<div class="error">Síťová chyba: ${error.message}</div>`;
             }
+        });
+
+        // Načtení demo dat pro testování
+        document.getElementById('load-demo').addEventListener('click', () => {
+            const type = document.getElementById('type-selector').value;
+
+            console.log('[Heatmap] Generuji demo data pro typ:', type);
+
+            if (type === 'click') {
+                // Generovat náhodná click data
+                const demoPoints = [];
+                const numPoints = 50;
+
+                for (let i = 0; i < numPoints; i++) {
+                    demoPoints.push({
+                        x: Math.random() * 80 + 10,  // 10-90% rozsah
+                        y: Math.random() * 80 + 10,
+                        count: Math.floor(Math.random() * 100) + 1
+                    });
+                }
+
+                currentData = {
+                    points: demoPoints,
+                    total_clicks: demoPoints.reduce((sum, p) => sum + p.count, 0),
+                    max_intensity: Math.max(...demoPoints.map(p => p.count)),
+                    points_count: demoPoints.length
+                };
+
+                // Zobrazit statistiky
+                document.getElementById('stats-container').style.display = 'block';
+                document.getElementById('stat-total').textContent = currentData.total_clicks.toLocaleString();
+                document.getElementById('stat-max').textContent = currentData.max_intensity;
+                document.getElementById('stat-points').textContent = currentData.points_count.toLocaleString();
+
+                document.getElementById('page-mockup').innerHTML = '<div style="min-height: 600px; padding: 40px;"><h2>Demo Click Heatmap</h2><p>Toto jsou testovací data pro vizualizaci click heatmap.</p></div>';
+                resizeCanvas();
+                HeatmapRenderer.renderClickHeatmap(currentData);
+
+            } else {
+                // Generovat scroll buckets (0, 10, 20, ..., 100)
+                const demoBuckets = [];
+                for (let depth = 0; depth <= 100; depth += 10) {
+                    demoBuckets.push({
+                        depth: depth,
+                        count: Math.max(100 - depth + Math.random() * 20, 10) // Více na začátku, méně dole
+                    });
+                }
+
+                currentData = {
+                    buckets: demoBuckets,
+                    total_views: demoBuckets[0].count,
+                    max_reach: Math.max(...demoBuckets.map(b => b.count)),
+                    buckets_count: demoBuckets.length
+                };
+
+                // Zobrazit statistiky
+                document.getElementById('stats-container').style.display = 'block';
+                document.getElementById('stat-total').textContent = currentData.total_views.toLocaleString();
+                document.getElementById('stat-max').textContent = Math.round(currentData.max_reach);
+                document.getElementById('stat-points').textContent = currentData.buckets_count;
+
+                document.getElementById('page-mockup').innerHTML = '<div style="min-height: 1200px; padding: 40px;"><h2>Demo Scroll Heatmap</h2><p>Scrollujte dolů...</p><br><br><br><br><p>Více obsahu...</p><br><br><br><br><p>Ještě více...</p><br><br><br><br><p>A ještě...</p></div>';
+                resizeCanvas();
+                HeatmapRenderer.renderScrollHeatmap(currentData);
+            }
+
+            console.log('[Heatmap] Demo data načtena:', currentData);
         });
 
         // Export PNG

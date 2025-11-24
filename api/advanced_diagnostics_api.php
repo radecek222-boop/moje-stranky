@@ -24,7 +24,7 @@ try {
         exit;
     }
 
-    // Rate limiting
+    // Extrakce dat ze session před uvolněním zámku
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     $userId = $_SESSION['user_id'] ?? 'admin';
     $identifier = "advanced_diagnostics_{$ip}_{$userId}";
@@ -83,6 +83,9 @@ try {
         ]);
         exit;
     }
+
+    // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+    session_write_close();
 
     $action = $_GET['action'] ?? '';
     $pdo = getDbConnection();

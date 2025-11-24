@@ -22,6 +22,9 @@ try {
         ]));
     }
 
+    // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+    session_write_close();
+
     // Získat ID zakázky
     $reklamaceId = $_GET['reklamace_id'] ?? $_GET['id'] ?? null;
 

@@ -21,6 +21,9 @@ if (!$isAdmin) {
     exit;
 }
 
+// PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+session_write_close();
+
 $action = $_GET['action'] ?? '';
 echo "2. Action: '$action'\n\n";
 

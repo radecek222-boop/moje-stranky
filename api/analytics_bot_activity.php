@@ -42,11 +42,13 @@ if (!isset($_SESSION['user_id']) && !isset($_SESSION['is_admin'])) {
     sendJsonError('Uživatel není přihlášen', 401);
 }
 
+// Extrakce dat ze session před uvolněním zámku
+$userId = $_SESSION['user_id'] ?? 'admin';
+
 try {
     $pdo = getDbConnection();
 
     // Rate limiting - 100 požadavků za hodinu per user
-    $userId = $_SESSION['user_id'] ?? 'admin';
     $rateLimiter = new RateLimiter($pdo);
 
     $rateLimitResult = $rateLimiter->checkLimit($userId, 'bot_activity_api', [
@@ -58,6 +60,9 @@ try {
     if (!$rateLimitResult['allowed']) {
         sendJsonError($rateLimitResult['message'], 429);
     }
+
+    // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+    session_write_close();
 
     // ========================================
     // PARSOVÁNÍ PARAMETRŮ

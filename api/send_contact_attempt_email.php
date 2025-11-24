@@ -123,6 +123,32 @@ try {
         $adresa = implode(', ', $parts);
     }
 
+    // Získání údajů o technikovi, který provádí akci
+    $technicianName = $_SESSION['user_name'] ?? 'White Glove Service';
+    $technicianEmail = $_SESSION['user_email'] ?? 'reklamace@wgs-service.cz';
+
+    // Pokud je přihlášený uživatel (ne admin), zkusit načíst telefon z databáze
+    $technicianPhone = '+420 725 965 826'; // Výchozí firemní telefon
+    if (isset($_SESSION['user_id']) && $_SESSION['user_id'] > 0) {
+        try {
+            $stmtUser = $pdo->prepare("
+                SELECT telefon, phone
+                FROM wgs_users
+                WHERE id = :user_id OR user_id = :user_id
+                LIMIT 1
+            ");
+            $stmtUser->execute(['user_id' => $_SESSION['user_id']]);
+            $userInfo = $stmtUser->fetch(PDO::FETCH_ASSOC);
+
+            if ($userInfo) {
+                $technicianPhone = $userInfo['telefon'] ?: $userInfo['phone'] ?: $technicianPhone;
+            }
+        } catch (PDOException $e) {
+            // Pokud telefon nelze načíst, použije se výchozí firemní telefon
+            error_log('Nepodařilo se načíst telefon technika: ' . $e->getMessage());
+        }
+    }
+
     // Náhrada proměnných v šabloně
     $subject = str_replace([
         '{{customer_name}}',
@@ -141,18 +167,28 @@ try {
         '{{order_id}}',
         '{{product}}',
         '{{date}}',
-        '{{address}}'
+        '{{address}}',
+        '{{technician_name}}',
+        '{{technician_email}}',
+        '{{technician_phone}}',
+        '{{company_email}}',
+        '{{company_phone}}'
     ], [
         $customerName,
         $orderId,
         $product,
         date('d.m.Y H:i'),
-        $adresa ?: 'Neuvedena'
+        $adresa ?: 'Neuvedena',
+        $technicianName,
+        $technicianEmail,
+        $technicianPhone,
+        'reklamace@wgs-service.cz',  // Obecný firemní email
+        '+420 725 965 826'            // Obecný firemní telefon
     ], $notification['template']);
 
     // Příprava SMS textu (zkrácená verze emailu pro SMS)
-    // Použijeme stejné proměnné jako v emailu pro konzistenci
-    $smsText = "Dobrý den {$customerName}, pokusili jsme se Vás kontaktovat ohledně servisní prohlídky č. {$orderId} ({$product}, " . date('d.m.Y') . "). Prosím zavolejte zpět na +420 725 965 826. Děkujeme, WGS Service";
+    // Profesionální SMS text pro Natuzzi servis
+    $smsText = "Dobrý den {$customerName}, kontaktujeme Vás v zastoupení Natuzzi ohledně servisní zakázky č. {$orderId}. Nepodařilo se nám Vás zastihnout. Zavolejte prosím zpět {$technicianName} na tel. {$technicianPhone}. Děkujeme, WGS Service - Autorizovaný servis Natuzzi";
 
     // Přidání emailu do fronty
     $emailQueue = new EmailQueue($pdo);

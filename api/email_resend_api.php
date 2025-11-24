@@ -17,6 +17,9 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     exit;
 }
 
+// PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+session_write_close();
+
 // Přečíst JSON data
 $input = file_get_contents('php://input');
 $data = json_decode($input, true);
