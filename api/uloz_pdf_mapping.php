@@ -21,6 +21,9 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     sendJsonError('Pouze administrátor může měnit mapping', 403);
 }
 
+// PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+session_write_close();
+
 try {
     $pdo = getDbConnection();
 

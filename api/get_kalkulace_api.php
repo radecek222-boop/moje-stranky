@@ -20,6 +20,9 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+session_write_close();
+
 try {
     $pdo = getDbConnection();
 

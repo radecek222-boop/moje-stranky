@@ -21,6 +21,9 @@ try {
         exit;
     }
 
+    // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+    session_write_close();
+
     // Kontrola metody
     if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         throw new Exception('Povolena pouze GET metoda');

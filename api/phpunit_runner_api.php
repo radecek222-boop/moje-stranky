@@ -35,6 +35,9 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     exit;
 }
 
+// PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+session_write_close();
+
 // CSRF ochrana
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCSRF();

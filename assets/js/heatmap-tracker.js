@@ -9,6 +9,7 @@
 
     // Config
     const CONFIG = {
+        enabled: true,       // Zapnuto - opcache vyčištěn, opravy aktivní
         apiUrl: '/api/track_heatmap.php',
         batchInterval: 5000, // Posílat data každých 5 sekund
         maxBatchSize: 50,    // Max 50 událostí v jednom batchi
@@ -132,7 +133,7 @@
             page_url: window.location.href,
             device_type: deviceType,
             clicks: clickBuffer.splice(0), // Vyprázdnit buffer
-            scrolls: Array.from(scrollDepths),
+            scroll_depths: Array.from(scrollDepths), // OPRAVA: API očekává scroll_depths, ne scrolls
             csrf_token: csrfToken
         };
 
@@ -149,6 +150,17 @@
                 body: JSON.stringify(data)
             });
 
+            // OPRAVA: Nejprve zkontrolovat HTTP status před parsováním JSON
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('[Heatmap Tracker] API HTTP error:', response.status, response.statusText);
+                console.error('[Heatmap Tracker] Response body:', errorText.substring(0, 200)); // První 200 znaků
+                // Vrátit data zpět do bufferu
+                clickBuffer.unshift(...data.clicks);
+                data.scroll_depths.forEach(s => scrollDepths.add(s));
+                return;
+            }
+
             const result = await response.json();
 
             if (result.status !== 'success') {
@@ -159,7 +171,7 @@
             console.error('[Heatmap Tracker] Network error:', error);
             // Vrátit data zpět do bufferu
             clickBuffer.unshift(...data.clicks);
-            data.scrolls.forEach(s => scrollDepths.add(s));
+            data.scroll_depths.forEach(s => scrollDepths.add(s)); // OPRAVA: používat scroll_depths
         }
     }
 
@@ -167,6 +179,12 @@
     // INITIALIZATION
     // ========================================
     function init() {
+        // Feature flag check
+        if (!CONFIG.enabled) {
+            console.log('[Heatmap Tracker] Disabled by config');
+            return;
+        }
+
         // Získat CSRF token
         csrfToken = getCSRFToken();
         if (!csrfToken) {
@@ -192,7 +210,7 @@
                     page_url: window.location.href,
                     device_type: deviceType,
                     clicks: clickBuffer,
-                    scrolls: Array.from(scrollDepths),
+                    scroll_depths: Array.from(scrollDepths), // OPRAVA: scroll_depths místo scrolls
                     csrf_token: csrfToken
                 };
 

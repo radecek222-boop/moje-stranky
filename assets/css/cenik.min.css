@@ -1772,6 +1772,15 @@
         padding: 1.5rem 1rem;
     }
 
+    .step-title {
+        font-size: 1.1rem;
+    }
+
+    .step-desc {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
     /* Počítadla pod sebou na mobilu */
     .counter-group {
         grid-template-columns: 1fr;
@@ -1779,12 +1788,12 @@
     }
 
     .counter-item {
-        padding: 0.75rem;
+        padding: 0.85rem;
     }
 
     .counter-item label {
-        font-size: 0.75rem;
-        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+        margin-bottom: 0.6rem;
     }
 
     .counter-controls {
@@ -1792,23 +1801,47 @@
     }
 
     .counter-btn {
-        width: 44px;
-        height: 44px;
-        font-size: 1.2rem;
+        width: 48px;
+        height: 48px;
+        font-size: 1.3rem;
     }
 
-    .counter-value {
-        font-size: 1.2rem;
-        min-width: 50px;
+    .counter-controls input[type="number"] {
+        width: 65px;
+        height: 40px;
+        font-size: 1.05rem;
     }
 
-    /* Radio a checkbox buttony na plnou šířku */
+    /* Radio a checkbox buttony - auto výška pro text */
     .radio-group, .checkbox-group {
-        gap: 0.5rem;
+        gap: 0.75rem;
     }
 
     .radio-card, .checkbox-card {
         width: 100%;
+        padding: 0.75rem 5rem 0.75rem 2.75rem !important;
+        min-height: 75px !important;
+        max-height: none !important;
+        height: auto !important;
+    }
+
+    .radio-title, .checkbox-title {
+        font-size: 0.9rem;
+        line-height: 1.3;
+    }
+
+    .radio-desc, .checkbox-desc {
+        font-size: 0.75rem;
+        line-height: 1.35;
+        margin-top: 0.3rem;
+    }
+
+    .radio-price, .checkbox-price {
+        font-size: 0.85rem;
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
     }
 
     .wizard-buttons {
@@ -1817,6 +1850,9 @@
 
     .btn-primary, .btn-secondary {
         width: 100%;
+        padding: 0.85rem 1.25rem;
+        font-size: 0.95rem;
+        min-height: 48px;
     }
 
     .pdf-preview-container {
@@ -1830,31 +1866,46 @@
     }
 
     .summary-line {
-        font-size: 0.9rem;
+        font-size: 0.95rem;
     }
 
     .summary-line.total {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
+    }
+
+    /* Ceník položky - větší texty */
+    .item-name {
+        font-size: 1rem;
+    }
+
+    .item-price {
+        font-size: 1.05rem;
+    }
+
+    .item-description {
+        font-size: 0.85rem;
+        line-height: 1.5;
     }
 }
 
 /* Extra small devices (PWA, phones < 480px) */
 @media (max-width: 480px) {
     .calculator-section {
-        padding: 0.75rem !important;
-        margin-bottom: 1rem !important;
+        padding: 1rem !important;
+        margin-bottom: 1.5rem !important;
     }
 
     .section-title {
-        font-size: 1.1rem !important;
+        font-size: 1.3rem !important;
     }
 
     .section-text {
-        font-size: 0.7rem !important;
+        font-size: 0.85rem !important;
+        line-height: 1.5 !important;
     }
 
     .wizard-progress {
-        padding: 0.25rem;
+        padding: 0.5rem;
         gap: 0.25rem;
     }
 
@@ -1863,149 +1914,201 @@
     }
 
     .step-number {
-        width: 28px;
-        height: 28px;
-        line-height: 28px;
-        font-size: 0.8rem;
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        font-size: 0.85rem;
     }
 
     .step-label {
-        font-size: 0.75rem;
-        margin-top: 0.15rem;
+        font-size: 0.65rem;
+        margin-top: 0.25rem;
     }
 
     .wizard-step {
-        padding: 1rem 0.5rem;
+        padding: 1.25rem 0.75rem;
     }
 
-    .wizard-step h3 {
-        font-size: 1rem !important;
+    .step-title {
+        font-size: 1.05rem !important;
+        margin-bottom: 0.5rem !important;
     }
 
-    /* Counter na velmi malých displejích */
+    .step-desc {
+        font-size: 0.85rem !important;
+        line-height: 1.5 !important;
+        margin-bottom: 1.25rem !important;
+    }
+
+    /* Counter na velmi malých displejích - VĚTŠÍ */
     .counter-group {
-        gap: 0.5rem;
-        margin: 1rem 0;
+        gap: 0.75rem;
+        margin: 1.25rem 0;
     }
 
     .counter-item {
-        padding: 0.6rem;
+        padding: 0.85rem;
     }
 
     .counter-item label {
-        font-size: 0.75rem;
-        margin-bottom: 0.4rem;
+        font-size: 0.85rem;
+        margin-bottom: 0.6rem;
     }
 
     .counter-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 1.1rem;
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 1.3rem;
     }
 
-    .counter-value {
-        font-size: 1.1rem;
-        min-width: 45px;
+    .counter-controls input[type="number"] {
+        width: 70px !important;
+        height: 42px !important;
+        font-size: 1.1rem !important;
     }
 
-    /* Radio a checkbox buttony */
+    /* Radio a checkbox buttony - VĚTŠÍ a AUTO VÝŠKA */
     .radio-card, .checkbox-card {
-        padding: 0.4rem 1.5rem 0.4rem 2rem !important;
-        min-height: 45px !important;
-        max-height: 45px !important;
-        height: 45px !important;
+        padding: 0.85rem 5.5rem 0.85rem 2.75rem !important;
+        min-height: 80px !important;
+        max-height: none !important;
+        height: auto !important;
     }
 
     .radio-title, .checkbox-title {
-        font-size: 0.75rem !important;
+        font-size: 0.9rem !important;
+        line-height: 1.3 !important;
     }
 
     .radio-desc, .checkbox-desc {
-        font-size: 0.65rem !important;
+        font-size: 0.75rem !important;
+        line-height: 1.35 !important;
+        margin-top: 0.3rem !important;
     }
 
     .radio-price, .checkbox-price {
-        font-size: 0.75rem !important;
+        font-size: 0.85rem !important;
+        right: 0.75rem !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        position: absolute !important;
     }
 
-    /* Tlačítka */
+    /* Tlačítka - VĚTŠÍ */
     .btn-primary, .btn-secondary {
-        padding: 0.75rem 1rem;
-        font-size: 0.9rem;
+        padding: 1rem 1.5rem !important;
+        font-size: 1rem !important;
+        min-height: 50px !important;
     }
 
-    /* Summary */
+    /* Summary - VĚTŠÍ TEXT */
     .summary-section {
-        padding: 0.75rem;
+        padding: 1rem;
     }
 
     .summary-line {
-        font-size: 0.85rem;
-        padding: 0.5rem 0;
+        font-size: 0.95rem;
+        padding: 0.6rem 0;
     }
 
     .summary-line.total {
-        font-size: 1rem;
-        padding: 0.75rem 0;
+        font-size: 1.3rem;
+        padding: 1rem 0;
     }
 
-    /* Address input */
+    /* Address input - VĚTŠÍ */
     .calc-input {
-        font-size: 0.85rem !important;
-        padding: 0.6rem !important;
+        font-size: 1rem !important;
+        padding: 0.85rem !important;
+        min-height: 50px !important;
     }
 
     #address-suggestions {
-        font-size: 0.85rem;
+        font-size: 0.95rem;
     }
 
-    .address-suggestion {
-        padding: 0.6rem;
+    .suggestion-item {
+        padding: 0.85rem;
+        font-size: 0.95rem;
     }
 
     /* Hero na PWA */
     .hero {
-        padding: 25px 10px !important;
+        padding: 30px 15px !important;
     }
 
     .hero-title {
-        font-size: 1.1rem !important;
-        margin-bottom: 0.25rem !important;
+        font-size: 1.3rem !important;
+        margin-bottom: 0.5rem !important;
     }
 
     .hero-subtitle {
-        font-size: 0.7rem !important;
+        font-size: 0.85rem !important;
     }
 
     /* Content section */
     .content-section {
-        padding: 0.75rem 10px !important;
+        padding: 1rem 15px !important;
     }
 
-    /* Pricing grid na úvodní stránce */
+    /* Pricing grid na úvodní stránce - VĚTŠÍ TEXTY */
     .pricing-grid {
-        gap: 0.75rem !important;
+        gap: 1rem !important;
     }
 
     .pricing-category {
-        margin-bottom: 0.75rem !important;
+        margin-bottom: 1rem !important;
     }
 
     .category-header {
-        padding: 0.5rem 0.75rem !important;
-        font-size: 0.8rem !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 1rem !important;
     }
 
     .pricing-item {
-        padding: 0.6rem 0.75rem !important;
+        padding: 0.85rem 1rem !important;
     }
 
     .item-name {
-        font-size: 0.8rem !important;
+        font-size: 1.05rem !important;
+        margin-bottom: 0.5rem !important;
     }
 
     .item-price {
+        font-size: 1.1rem !important;
+    }
+
+    .item-description {
+        font-size: 0.85rem !important;
+        line-height: 1.5 !important;
+    }
+
+    /* Admin edit button - VĚTŠÍ pro touch */
+    .item-edit-btn {
+        padding: 0.5rem 0.85rem !important;
         font-size: 0.8rem !important;
+        min-height: 44px !important;
+        min-width: 44px !important;
+    }
+
+    /* Parts summary - VĚTŠÍ */
+    .parts-summary {
+        font-size: 0.95rem;
+        padding: 1.25rem;
+    }
+
+    #total-parts {
+        font-size: 1.3rem;
+    }
+
+    /* Calc result box - VĚTŠÍ */
+    .result-box p {
+        font-size: 0.95rem;
+        margin: 0.6rem 0;
+    }
+
+    .highlight-price {
+        font-size: 1.2rem;
     }
 }
 

@@ -24,6 +24,76 @@ async function getCSRFToken() {
   }
 }
 
+// === TOAST NOTIFICATION FUNKCE ===
+function showToast(message, type = 'info') {
+  // Odstranit existující toast pokud existuje
+  const existingToast = document.getElementById('wgs-toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+
+  // Vytvořit nový toast element
+  const toast = document.createElement('div');
+  toast.id = 'wgs-toast';
+  toast.textContent = message;
+
+  // Styly pro toast
+  toast.style.cssText = `
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#333'};
+    color: white;
+    padding: 16px 24px;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 10000;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 250px;
+    max-width: 400px;
+    animation: slideIn 0.3s ease-out;
+  `;
+
+  // Přidat animaci
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  `;
+
+  if (!document.getElementById('wgs-toast-styles')) {
+    style.id = 'wgs-toast-styles';
+    document.head.appendChild(style);
+  }
+
+  document.body.appendChild(toast);
+
+  // Automaticky odstranit po 3 sekundách
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease-in';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
 // === GLOBÁLNÍ PROMĚNNÉ ===
 let WGS_DATA_CACHE = [];
 let ACTIVE_FILTER = 'all';
@@ -2714,6 +2784,9 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
       return;
     }
 
+    // Zobrazit loading overlay
+    showLoading('Odesílám email zákazníkovi... Prosím čekejte');
+
     // Získat CSRF token
     const csrfToken = await getCSRFToken();
 
@@ -2729,17 +2802,27 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
 
     const data = await odpoved.json();
 
+    // Skrýt loading overlay
+    hideLoading();
+
     if (data.success) {
       logger.log('✓ Email o pokusu o kontakt odeslán zákazníkovi');
+
+      // Zavřít detail modal
+      closeDetail();
+
+      // Zobrazit toast zprávu
       showToast('Email odeslán zákazníkovi', 'success');
 
       // ✅ DŮLEŽITÉ: SMS text je nyní generován na serveru ze stejných dat jako email
       // To znamená, že změna v emailové šabloně automaticky ovlivní i SMS
       const smsText = data.sms_text || `Dobrý den, pokusili jsme se Vás kontaktovat. Zavolejte prosím zpět na +420 725 965 826. Děkujeme, WGS Service`;
 
-      // Otevřít SMS aplikaci na telefonu s předvyplněným textem
-      const encodedText = encodeURIComponent(smsText);
-      window.location.href = `sms:${telefon}?body=${encodedText}`;
+      // Počkat 2 sekundy, aby technik viděl potvrzení, pak otevřít SMS aplikaci
+      setTimeout(() => {
+        const encodedText = encodeURIComponent(smsText);
+        window.location.href = `sms:${telefon}?body=${encodedText}`;
+      }, 2000);
 
     } else {
       logger.error('⚠ Chyba při odesílání emailu:', data.error || data.message);
@@ -2749,6 +2832,8 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
   } catch (chyba) {
     logger.error('❌ Chyba při odesílání kontaktního emailu:', chyba);
     showToast('Nepodařilo se odeslat email', 'error');
+    // Skrýt loading overlay i při chybě
+    hideLoading();
   }
 }
 

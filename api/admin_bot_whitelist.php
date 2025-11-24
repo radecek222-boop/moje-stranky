@@ -42,11 +42,17 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     sendJsonError('Přístup odepřen - pouze admin', 403);
 }
 
+// Extrakce dat ze session před uvolněním zámku
+$adminId = $_SESSION['user_id'] ?? $_SESSION['email'] ?? 'admin';
+$adminEmail = $_SESSION['email'] ?? 'admin';
+
+// PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+session_write_close();
+
 try {
     $pdo = getDbConnection();
 
     // Rate limiting - 50 požadavků za hodinu per admin
-    $adminId = $_SESSION['user_id'] ?? $_SESSION['email'] ?? 'admin';
     $rateLimiter = new RateLimiter($pdo);
 
     $rateLimitResult = $rateLimiter->checkLimit($adminId, 'bot_whitelist_api', [
@@ -165,7 +171,7 @@ try {
                 $ipRanges = $_POST['ip_ranges'] ?? null; // JSON string nebo pole
                 $isActive = isset($_POST['is_active']) ? ($_POST['is_active'] === 'true' || $_POST['is_active'] === '1') : true;
                 $notes = trim($_POST['notes'] ?? '');
-                $addedBy = $_SESSION['email'] ?? 'admin';
+                $addedBy = $adminEmail;
 
                 // Validace bot_type
                 $povolenoTypes = ['search_engine', 'social_media', 'monitoring', 'other'];
