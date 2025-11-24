@@ -14,6 +14,12 @@ async function showWelcomeModal(userName, userRole) {
   try {
     // Získej vtip z API
     const jokeResponse = await fetch('app/controllers/get_joke.php?t=' + Date.now());
+
+    // ✅ FIX: Kontrola HTTP status code
+    if (!jokeResponse.ok) {
+      throw new Error(`HTTP ${jokeResponse.status}`);
+    }
+
     const jokeData = await jokeResponse.json();
     const joke = jokeData.joke || 'Přeji ti krásný den! 😊';
 
@@ -21,7 +27,7 @@ async function showWelcomeModal(userName, userRole) {
     const safeUserName = escapeHtml(userName);
     const safeJoke = escapeHtml(joke);
 
-    // Vytvoř modal HTML
+    // Vytvoř modal HTML (bez inline onclick)
     const modalHTML = `
       <div class="welcome-modal-overlay" id="welcomeModal">
         <div class="welcome-modal">
@@ -34,7 +40,7 @@ async function showWelcomeModal(userName, userRole) {
           <div class="welcome-joke">
             ${safeJoke}
           </div>
-          <button class="welcome-close-btn" onclick="closeWelcomeModal('${escapeHtml(userRole || 'user')}')">
+          <button class="welcome-close-btn" id="welcomeCloseBtn">
             Začít pracovat
           </button>
         </div>
@@ -43,6 +49,11 @@ async function showWelcomeModal(userName, userRole) {
 
     // Přidej do stránky
     document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // ✅ FIX: Přidat event listener místo inline onclick
+    document.getElementById('welcomeCloseBtn').addEventListener('click', () => {
+      closeWelcomeModal(userRole || 'user');
+    });
 
     // Zobraz modal
     setTimeout(() => {
@@ -68,13 +79,18 @@ function showFallbackModal(userName, userRole) {
         <p class="welcome-message">
           Přeji ti hezký den plný úspěchů! 💪
         </p>
-        <button class="welcome-close-btn" onclick="closeWelcomeModal('${escapeHtml(userRole || 'user')}')">
+        <button class="welcome-close-btn" id="welcomeCloseBtnFallback">
           Začít pracovat
         </button>
       </div>
     </div>
   `;
   document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+  // ✅ FIX: Přidat event listener místo inline onclick
+  document.getElementById('welcomeCloseBtnFallback').addEventListener('click', () => {
+    closeWelcomeModal(userRole || 'user');
+  });
 }
 
 function closeWelcomeModal(userRole) {

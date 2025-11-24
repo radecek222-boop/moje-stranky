@@ -208,7 +208,22 @@ async function handleUserLogin() {
 
     if (data.status === 'success') {
       // Zobraz welcome modal s vtipem a předej roli pro správné přesměrování
-      showWelcomeModal(data.user.name, data.user.role);
+      if (typeof window.showWelcomeModal === 'function') {
+        showWelcomeModal(data.user.name, data.user.role);
+      } else {
+        // Fallback - přímý redirect bez modalu
+        logger.warn('showWelcomeModal není dostupná, přesměruji přímo');
+        showNotification('✅ Přihlášení úspěšné!', 'success');
+
+        setTimeout(() => {
+          const normalizedRole = (data.user.role || '').toLowerCase().trim();
+          if (normalizedRole === 'technik' || normalizedRole === 'technician') {
+            window.location.href = 'seznam.php';
+          } else {
+            window.location.href = 'novareklamace.php';
+          }
+        }, 1000);
+      }
     } else {
       showNotification(data.message || 'Přihlášení selhalo', 'error');
     }
