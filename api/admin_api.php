@@ -24,9 +24,16 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     exit;
 }
 
+// ✅ PERFORMANCE FIX: Načíst session data a uvolnit zámek
+// Audit 2025-11-24: Admin operations - různé délky operací
+$userId = $_SESSION['user_id'] ?? $_SESSION['admin_id'] ?? 'admin';
+$createdBy = $userId; // Pro použití v řádku 217
+
+// KRITICKÉ: Uvolnit session lock pro paralelní zpracování
+session_write_close();
+
 // HIGH PRIORITY FIX: Rate limiting na admin API
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-$userId = $_SESSION['user_id'] ?? $_SESSION['admin_id'] ?? 'admin';
 $identifier = "admin_api_{$ip}_{$userId}";
 
 $rateLimiter = new RateLimiter(getDbConnection());
@@ -214,7 +221,7 @@ function handleCreateKey(PDO $pdo, array $payload): void
         $stmt->bindValue(':max_usage', $maxUsage, PDO::PARAM_INT);
     }
 
-    $createdBy = $_SESSION['user_id'] ?? $_SESSION['admin_id'] ?? null;
+    // $createdBy již načteno výše (řádek 29)
     if ($createdBy !== null && is_numeric($createdBy)) {
         $stmt->bindValue(':created_by', (int) $createdBy, PDO::PARAM_INT);
     } else {

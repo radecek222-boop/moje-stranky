@@ -21,6 +21,10 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     exit;
 }
 
+// ✅ PERFORMANCE FIX: Uvolnit session lock pro paralelní zpracování
+// Audit 2025-11-24: Analytics queries - long-running
+session_write_close();
+
 $period = $_GET['period'] ?? 'week';
 
 try {
