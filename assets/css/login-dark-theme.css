@@ -9,23 +9,6 @@
  */
 
 /* ============================================
-   BODY - Černé pozadí celé stránky
-   ============================================ */
-
-body {
-    /* Černé pozadí celé stránky */
-    background: #000000 !important;
-
-    /* Bílý text */
-    color: #ffffff !important;
-}
-
-/* Main content - zachovat černé pozadí */
-.main-content {
-    background: #000000 !important;
-}
-
-/* ============================================
    LOGIN CONTAINER - Tmavý gradient box
    ============================================ */
 
