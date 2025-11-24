@@ -218,6 +218,8 @@ if ($initialBootstrapData) {
   <link rel="stylesheet" href="assets/css/protokol-mobile-fixes.css">
   <link rel="stylesheet" href="assets/css/cenik.min.css">
   <link rel="stylesheet" href="assets/css/protokol-calculator-modal.css">
+  <!-- Univerzální tmavý styl pro všechny modály -->
+  <link rel="stylesheet" href="assets/css/universal-modal-theme.css">
   <!-- mobile-responsive.css odstraněn - protokol.css má vlastní mobilní styly -->
 
   <!-- Analytics Tracker -->

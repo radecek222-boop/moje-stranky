@@ -35,6 +35,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/novareklamace.css">
   <link rel="stylesheet" href="assets/css/novareklamace-mobile-fixes.css">
+  <!-- Univerzální tmavý styl pro všechny modály -->
+  <link rel="stylesheet" href="assets/css/universal-modal-theme.css">
 
   <!-- Non-critical CSS - defer -->
   <link rel="preload" href="assets/css/mobile-responsive.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">

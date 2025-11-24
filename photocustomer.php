@@ -168,6 +168,8 @@ if (!$isAdmin && !$isTechnik) {
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/photocustomer.css">
   <link rel="stylesheet" href="assets/css/photocustomer-collapsible.css">
+  <!-- Univerzální tmavý styl pro všechny modály -->
+  <link rel="stylesheet" href="assets/css/universal-modal-theme.css">
 </head>
 
 <body>

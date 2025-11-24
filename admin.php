@@ -122,6 +122,8 @@ if ($activeTab === 'dashboard') {
 <link rel="stylesheet" href="/assets/css/admin-notifications.css">
   <link rel="stylesheet" href="/assets/css/mobile-responsive.css">
   <link rel="stylesheet" href="/assets/css/admin-mobile-fixes.css">
+  <!-- Univerzální tmavý styl pro všechny modály -->
+  <link rel="stylesheet" href="/assets/css/universal-modal-theme.css">
 
   <!-- Error Handler - zachytává všechny chyby -->
   <script src="/assets/js/error-handler.js"></script>

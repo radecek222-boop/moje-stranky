@@ -17,6 +17,8 @@
 
   <link rel="stylesheet" href="assets/css/psa-kalkulator.css">
   <link rel="stylesheet" href="assets/css/admin-header.css">
+  <!-- Univerzální tmavý styl pro všechny modály -->
+  <link rel="stylesheet" href="assets/css/universal-modal-theme.css">
 </head>
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>

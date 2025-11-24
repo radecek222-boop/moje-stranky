@@ -56,6 +56,8 @@ if (!$isLoggedIn && !$isAdmin) {
 <?php if ($isAdmin): ?>
 <link rel="stylesheet" href="assets/css/admin-header.css">
 <?php endif; ?>
+  <!-- Univerzální tmavý styl pro všechny modály -->
+  <link rel="stylesheet" href="assets/css/universal-modal-theme.css">
 <style>
 .search-bar {
   margin-top: 2rem !important;
