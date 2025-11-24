@@ -192,7 +192,7 @@
                     page_url: window.location.href,
                     device_type: deviceType,
                     clicks: clickBuffer,
-                    scrolls: Array.from(scrollDepths),
+                    scroll_depths: Array.from(scrollDepths), // OPRAVA: scroll_depths místo scrolls
                     csrf_token: csrfToken
                 };
 
