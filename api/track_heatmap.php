@@ -155,16 +155,65 @@ try {
         'www.github.com',
         'raw.githubusercontent.com',
         'gist.github.com',
+        'github.dev',
+        'githubusercontent.com',
     ];
 
+    // Kontrola HTTP_REFERER hlavičky
     $referrer = $_SERVER['HTTP_REFERER'] ?? '';
     if (!empty($referrer)) {
         $referrerHost = parse_url($referrer, PHP_URL_HOST);
         if ($referrerHost) {
             foreach ($blacklistedReferrers as $blacklistedRef) {
                 if ($referrerHost === $blacklistedRef || strpos($referrerHost, $blacklistedRef) !== false) {
-                    sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'referrer']);
+                    sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'referrer_header']);
                 }
+            }
+        }
+    }
+
+    // Kontrola referrer z POST dat
+    $referrerPost = $inputData['referrer'] ?? '';
+    if (!empty($referrerPost)) {
+        $referrerHostPost = parse_url($referrerPost, PHP_URL_HOST);
+        if ($referrerHostPost) {
+            foreach ($blacklistedReferrers as $blacklistedRef) {
+                if ($referrerHostPost === $blacklistedRef || strpos($referrerHostPost, $blacklistedRef) !== false) {
+                    sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'referrer_post']);
+                }
+            }
+        }
+    }
+
+    // ========================================
+    // BLACKLIST INTERNÍCH/ADMIN STRÁNEK
+    // ========================================
+    $blacklistedPages = [
+        'admin.php',
+        'seznam.php',
+        'statistiky.php',
+        'protokol.php',
+        'login.php',
+        'registration.php',
+        'analytics-heatmap.php',
+        'vsechny_tabulky.php',
+        'kontrola_',
+        'pridej_',
+        'vycisti_',
+        'migrace_',
+        'test_',
+        'doplnit_',
+    ];
+
+    $pageUrlToCheck = $inputData['page_url'] ?? '';
+    if (!empty($pageUrlToCheck)) {
+        $parsedPageUrl = parse_url($pageUrlToCheck);
+        $pagePath = $parsedPageUrl['path'] ?? '';
+        $pageName = basename($pagePath);
+
+        foreach ($blacklistedPages as $blacklistedPage) {
+            if ($pageName === $blacklistedPage || strpos($pageName, $blacklistedPage) === 0) {
+                sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'admin_page']);
             }
         }
     }

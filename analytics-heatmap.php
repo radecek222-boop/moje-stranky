@@ -270,6 +270,24 @@ $csrfToken = generateCSRFToken();
             </div>
         </div>
 
+        <div id="geo-stats-container" class="stats" style="display: none;">
+            <h2>Geolokace návštěvníků</h2>
+            <div id="geo-stats-table" style="margin-top: 15px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #333; color: white;">
+                            <th style="padding: 10px; text-align: left;">Země</th>
+                            <th style="padding: 10px; text-align: left;">Město</th>
+                            <th style="padding: 10px; text-align: right;">Kliků/Zobrazení</th>
+                        </tr>
+                    </thead>
+                    <tbody id="geo-stats-body">
+                        <!-- Dynamicky plněno JavaScriptem -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div id="heatmap-container">
             <div id="page-mockup">
                 <div class="loading">Vyberte parametry a klikněte na "Načíst Heatmap"</div>
@@ -362,8 +380,12 @@ $csrfToken = generateCSRFToken();
                         resizeCanvas();
                         HeatmapRenderer.renderScrollHeatmap(currentData);
                     }
+
+                    // Zobrazit geolokační statistiky
+                    zobrazitGeoStats(currentData.geo_stats, type);
                 } else {
                     document.getElementById('page-mockup').innerHTML = `<div class="error">Chyba: ${result.message}</div>`;
+                    document.getElementById('geo-stats-container').style.display = 'none';
                 }
             } catch (error) {
                 console.error('Chyba při načítání heatmap:', error);
@@ -446,6 +468,71 @@ $csrfToken = generateCSRFToken();
 
             HeatmapRenderer.exportToPNG(filename);
         });
+
+        /**
+         * Zobrazí geolokační statistiky v tabulce
+         */
+        function zobrazitGeoStats(geoStats, type) {
+            const container = document.getElementById('geo-stats-container');
+            const tbody = document.getElementById('geo-stats-body');
+
+            // Vyčistit předchozí data
+            tbody.innerHTML = '';
+
+            // Pokud nejsou žádná data
+            if (!geoStats || geoStats.length === 0) {
+                container.style.display = 'block';
+                tbody.innerHTML = '<tr><td colspan="3" style="padding: 20px; text-align: center; color: #666;">Žádná geolokační data</td></tr>';
+                return;
+            }
+
+            // Zobrazit container
+            container.style.display = 'block';
+
+            // Mapování kódů zemí na názvy
+            const zemeNazvy = {
+                'CZ': 'Česká republika',
+                'SK': 'Slovensko',
+                'DE': 'Německo',
+                'AT': 'Rakousko',
+                'PL': 'Polsko',
+                'US': 'USA',
+                'GB': 'Velká Británie',
+                'IT': 'Itálie',
+                'FR': 'Francie',
+                'NL': 'Nizozemsko',
+                'BE': 'Belgie',
+                'CH': 'Švýcarsko',
+                'HU': 'Maďarsko',
+                'UA': 'Ukrajina',
+                'RU': 'Rusko'
+            };
+
+            // Vykreslit řádky
+            geoStats.forEach((stat, index) => {
+                const tr = document.createElement('tr');
+                tr.style.cssText = index % 2 === 0 ? 'background: #f9f9f9;' : 'background: white;';
+
+                const zemeKod = stat.country_code || '-';
+                const zemeNazev = zemeNazvy[zemeKod] || zemeKod;
+                const mesto = stat.city || '-';
+                const pocet = type === 'click'
+                    ? (stat.total_clicks || 0).toLocaleString()
+                    : (stat.total_views || 0).toLocaleString();
+
+                tr.innerHTML = `
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">
+                        <strong>${zemeKod}</strong> ${zemeNazev}
+                    </td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${mesto}</td>
+                    <td style="padding: 10px; text-align: right; border-bottom: 1px solid #eee; font-weight: bold;">${pocet}</td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+
+            console.log('[Heatmap] Zobrazeno', geoStats.length, 'geolokačních záznamů');
+        }
     </script>
 </body>
 </html>
