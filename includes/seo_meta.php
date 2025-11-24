@@ -88,7 +88,7 @@ $seoStranky = [
     'index' => [
         'title' => 'Oprava sedacky, kresla, pohovky, gauce | Servis nabytku Natuzzi | Praha, Brno, CR',
         'description' => 'Profesionalni oprava a servis sedacek, kresel, pohovek znacky Natuzzi. Cisteni kozenych i latkovych sedacek. Precalouneni, renovace, reklamace. Oprava moderni sedacky, designove kreslo, rohova sedacka. Autorizovany servis Praha, Brno, cela CR. Tel: +420 725 965 826',
-        'keywords' => 'oprava sedacky, oprava kresla, oprava pohovky, oprava gauce, servis sedacky, servis nabytku, servis Natuzzi, cisteni sedacky, cisteni kozene sedacky, cisteni latkove sedacky, reklamace sedacky, reklamace nabytku, precalouneni sedacky, renovace sedacky, moderni sedacka, designova sedacka, trendy sedacka, luxusni sedacka, italska sedacka, rohova sedacka, kozena sedacka, latkova sedacka, rozkldaci sedacka, relaxacni kreslo, sedaci souprava, oprava mechanismu, oprava relaxu, cisteni koberce, koberec, polstare, Praha, Brno, Ostrava, Plzen, White Glove Service, WGS',
+        'keywords' => 'oprava sedacky, oprava kresla, oprava pohovky, oprava gauce, servis sedacky, servis nabytku, servis Natuzzi, cisteni sedacky, cisteni kozene sedacky, cisteni latkove sedacky, reklamace sedacky, reklamace nabytku, precalouneni sedacky, renovace sedacky, moderni sedacka, designova sedacka, trendy sedacka, luxusni sedacka, italska sedacka, rohova sedacka, kozena sedacka, latkova sedacka, rozkladaci sedacka, relaxacni kreslo, sedaci souprava, oprava mechanismu, oprava relaxu, cisteni koberce, koberec, polstare, Praha, Brno, Ostrava, Plzen, White Glove Service, WGS',
         'canonical' => 'https://wgs-service.cz/',
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ],
@@ -125,6 +125,13 @@ $seoStranky = [
         'description' => 'Informace o zpracovani osobnich udaju podle GDPR. White Glove Service - servis nabytku Natuzzi.',
         'keywords' => 'GDPR, osobni udaje, ochrana udaju, White Glove Service',
         'canonical' => 'https://wgs-service.cz/gdpr.php',
+        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+    ],
+    'aktuality' => [
+        'title' => 'Aktuality Natuzzi | Novinky o luxusnim nabytku | Pece o sedacky a kresla | WGS',
+        'description' => 'Denne aktuality o znacce Natuzzi. Novinky o luxusnim italskem nabytku, tipy na peci o kozene sedacky a kresla, showroomy v CR. Jak cistit kozenou sedacku, udrzba luxusniho nabytku, trendy v designu sedacek.',
+        'keywords' => 'aktuality Natuzzi, novinky nabytek, luxusni nabytek novinky, pece o kozenou sedacku, jak cistit sedacku, udrzba kozene sedacky, tipy na peci o nabytek, Natuzzi showroom, italsky nabytek aktuality, trendy sedacky, designovy nabytek novinky, kozena sedacka pece, kreslo udrzba, pohovka cisteni, White Glove Service aktuality',
+        'canonical' => 'https://wgs-service.cz/aktuality.php',
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ]
 ];
@@ -394,6 +401,16 @@ function renderSchemaOrg($stranka = 'index') {
                 "itemListElement" => [
                     ["@type" => "ListItem", "position" => 1, "name" => "Domu", "item" => "https://wgs-service.cz/"],
                     ["@type" => "ListItem", "position" => 2, "name" => "Objednat servis sedacky", "item" => "https://wgs-service.cz/novareklamace.php"]
+                ]
+            ];
+            break;
+        case 'aktuality':
+            $breadcrumbs = [
+                "@context" => "https://schema.org",
+                "@type" => "BreadcrumbList",
+                "itemListElement" => [
+                    ["@type" => "ListItem", "position" => 1, "name" => "Domu", "item" => "https://wgs-service.cz/"],
+                    ["@type" => "ListItem", "position" => 2, "name" => "Aktuality Natuzzi", "item" => "https://wgs-service.cz/aktuality.php"]
                 ]
             ];
             break;

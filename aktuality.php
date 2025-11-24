@@ -1,11 +1,12 @@
 <?php
 /**
- * Aktuality o značce Natuzzi
- * Zobrazení všech článků ve 2 sloupcích v náhodném pořadí
+ * Aktuality o znacce Natuzzi
+ * Zobrazeni vsech clanku ve 2 sloupcich v nahodnem poradi
  */
 
 require_once __DIR__ . '/init.php';
 require_once __DIR__ . '/includes/csrf_helper.php';
+require_once __DIR__ . '/includes/seo_meta.php';
 
 // Získat aktuality z databáze
 try {
@@ -127,8 +128,8 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
   <meta name="apple-mobile-web-app-title" content="WGS">
 
   <!-- SEO Meta Tags -->
-  <meta name="description" content="Denní aktuality o značce Natuzzi - novinky, tipy na péči o luxusní nábytek, showroomy v ČR. White Glove Service - autorizovaný servisní partner.">
-  <meta name="keywords" content="Natuzzi, aktuality, novinky, luxusní nábytek, kožené sedačky, péče o nábytek, White Glove Service">
+  <meta name="description" content="<?php echo getSeoDescription('aktuality'); ?>">
+  <?php renderSeoMeta('aktuality'); ?>
 
   <!-- PWA -->
   <link rel="manifest" href="./manifest.json">
@@ -136,7 +137,8 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
   <link rel="icon" type="image/png" sizes="192x192" href="./icon192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon512.png">
 
-  <title>Aktuality Natuzzi | White Glove Service</title>
+  <title><?php echo getSeoTitle('aktuality'); ?></title>
+  <?php renderSchemaOrg('aktuality'); ?>
 
   <!-- Preload critical resources -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
