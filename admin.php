@@ -710,7 +710,7 @@ function closeNotifModal() {
      */
 function loadNotifContent(type, body) {
         // Zobrazit loading
-        body.innerHTML = `<div style="text-align: center; padding: 2rem; color: #666;">${t('loading')}</div>`;
+        body.innerHTML = `<div style="text-align: center; padding: 2rem; color: #ccc;">${t('loading')}</div>`;
 
         // Pro email-templates zkusit použít reálná data z notifications-container
         if (type === 'email-templates') {
@@ -731,22 +731,22 @@ function loadNotifContent(type, body) {
         const content = {
             'email-templates': `
                 <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">${t('notif_edit_email_templates')}</p>
+                    <p style="margin-bottom: 1rem; color: #ccc; font-size: 0.85rem;">${t('notif_edit_email_templates')}</p>
                     <div id="notifications-container-clone"></div>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
                             <div style="font-weight: 600; margin-bottom: 0.5rem;">${t('notif_new_claim')}</div>
-                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">${t('notif_new_claim_desc')}</div>
+                            <div style="font-size: 0.8rem; color: #ccc; margin-bottom: 0.5rem;">${t('notif_new_claim_desc')}</div>
                             <button class="btn btn-sm" style="font-size: 0.7rem;">${t('edit_template')}</button>
                         </div>
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
                             <div style="font-weight: 600; margin-bottom: 0.5rem;">${t('notif_status_change')}</div>
-                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">${t('notif_status_change_desc')}</div>
+                            <div style="font-size: 0.8rem; color: #ccc; margin-bottom: 0.5rem;">${t('notif_status_change_desc')}</div>
                             <button class="btn btn-sm" style="font-size: 0.7rem;">${t('edit_template')}</button>
                         </div>
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
                             <div style="font-weight: 600; margin-bottom: 0.5rem;">${t('notif_claim_completion')}</div>
-                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">${t('notif_claim_completion_desc')}</div>
+                            <div style="font-size: 0.8rem; color: #ccc; margin-bottom: 0.5rem;">${t('notif_claim_completion_desc')}</div>
                             <button class="btn btn-sm" style="font-size: 0.7rem;">${t('edit_template')}</button>
                         </div>
                     </div>
@@ -754,16 +754,16 @@ function loadNotifContent(type, body) {
             `,
             'sms-templates': `
                 <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">${t('sms_templates_desc')}</p>
+                    <p style="margin-bottom: 1rem; color: #ccc; font-size: 0.85rem;">${t('sms_templates_desc')}</p>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
                             <div style="font-weight: 600; margin-bottom: 0.5rem;">${t('sms_for_customer')}</div>
-                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">Text: "Vaše reklamace {cislo} byla přijata"</div>
+                            <div style="font-size: 0.8rem; color: #ccc; margin-bottom: 0.5rem;">Text: "Vaše reklamace {cislo} byla přijata"</div>
                             <button class="btn btn-sm" style="font-size: 0.7rem;">${t('edit')}</button>
                         </div>
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
                             <div style="font-weight: 600; margin-bottom: 0.5rem;">${t('sms_for_technician')}</div>
-                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">Text: "Nová zakázka {cislo} - {mesto}"</div>
+                            <div style="font-size: 0.8rem; color: #ccc; margin-bottom: 0.5rem;">Text: "Nová zakázka {cislo} - {mesto}"</div>
                             <button class="btn btn-sm" style="font-size: 0.7rem;">${t('edit')}</button>
                         </div>
                     </div>
@@ -771,7 +771,7 @@ function loadNotifContent(type, body) {
             `,
             'email-recipients': `
                 <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">${t('email_recipients_desc')}</p>
+                    <p style="margin-bottom: 1rem; color: #ccc; font-size: 0.85rem;">${t('email_recipients_desc')}</p>
                     <div style="margin-bottom: 1rem;">
                         <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">${t('administrators')}</label>
                         <input type="text" placeholder="admin@example.com, admin2@example.com" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
@@ -785,7 +785,7 @@ function loadNotifContent(type, body) {
             `,
             'auto-notifications': `
                 <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Nastavení pravidel pro automatické odesílání</p>
+                    <p style="margin-bottom: 1rem; color: #ccc; font-size: 0.85rem;">Nastavení pravidel pro automatické odesílání</p>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; border: 1px solid #e0e0e0; border-radius: 6px;">
                             <input type="checkbox" checked>
@@ -807,19 +807,19 @@ function loadNotifContent(type, body) {
             `,
             'smtp-settings': `
                 <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Konfigurace SMTP serveru</p>
+                    <p style="margin-bottom: 1rem; color: #ccc; font-size: 0.85rem;">Konfigurace SMTP serveru</p>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <div>
-                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">SMTP Server *</label>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">SMTP Server *</label>
                             <input type="text" id="smtp_host" placeholder="smtp.gmail.com" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                             <div>
-                                <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Port</label>
+                                <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">Port</label>
                                 <input type="text" id="smtp_port" placeholder="587" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                             </div>
                             <div>
-                                <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Šifrování</label>
+                                <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">Šifrování</label>
                                 <select id="smtp_encryption" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                                     <option value="tls">TLS</option>
                                     <option value="ssl">SSL</option>
@@ -828,19 +828,19 @@ function loadNotifContent(type, body) {
                             </div>
                         </div>
                         <div>
-                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Uživatelské jméno *</label>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">Uživatelské jméno *</label>
                             <input type="text" id="smtp_username" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                         <div>
-                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Heslo *</label>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">Heslo *</label>
                             <input type="password" id="smtp_password" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                         <div>
-                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">FROM Email</label>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">FROM Email</label>
                             <input type="email" id="smtp_from" placeholder="reklamace@wgs-service.cz" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                         <div>
-                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">FROM Name</label>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">FROM Name</label>
                             <input type="text" id="smtp_from_name" placeholder="White Glove Service" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                     </div>
@@ -852,10 +852,10 @@ function loadNotifContent(type, body) {
             `,
             'sms-gateway': `
                 <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Nastavení SMS brány</p>
+                    <p style="margin-bottom: 1rem; color: #ccc; font-size: 0.85rem;">Nastavení SMS brány</p>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <div>
-                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Poskytovatel</label>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">Poskytovatel</label>
                             <select style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                                 <option>Twilio</option>
                                 <option>Nexmo</option>
