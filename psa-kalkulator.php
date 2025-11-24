@@ -1,4 +1,8 @@
-<?php require_once "init.php"; ?>
+<?php
+require_once "init.php";
+require_once __DIR__ . '/includes/csrf_helper.php';
+$csrfToken = generateCSRFToken();
+?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -11,9 +15,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=optional" rel="stylesheet">
-
-  <!-- QR Code Library -->
-  <script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"></script>
 
   <link rel="stylesheet" href="assets/css/psa-kalkulator.css">
 </head>
@@ -202,6 +203,10 @@
 
 <!-- Logger Utility (must be loaded first) -->
 <script src="assets/js/logger.js" defer></script>
+<script>
+  window.PSA_CSRF_TOKEN = '<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>';
+</script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer></script>
 
 <!-- Main JavaScript -->
 <script src="assets/js/psa-kalkulator.js" defer></script>
