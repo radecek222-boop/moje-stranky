@@ -82,7 +82,7 @@ try {
     if (isset($_GET['execute']) && $_GET['execute'] === '1') {
         echo "<div class='info'><strong>SPOUŠTÍM AKTUALIZACI VŠECH ŠABLON...</strong></div>";
 
-        // ŠABLONA 1: Pokus o kontakt
+        // Definice všech šablon s PŘESNÝMI názvy z databáze
         $sablony_data = [
             'Pokus o kontakt' => [
                 'subject' => 'Pokusili jsme se Vás kontaktovat - Servis Natuzzi',
@@ -122,7 +122,7 @@ Email: {{company_email}}
 Telefon: {{company_phone}}'
             ],
 
-            'Potvrzení termínu' => [
+            'Potvrzení termínu návštěvy' => [
                 'subject' => 'Potvrzení termínu servisní návštěvy - Natuzzi',
                 'template' => 'Dobrý den {{customer_name}},
 
@@ -159,7 +159,7 @@ Email: {{company_email}}
 Telefon: {{company_phone}}'
             ],
 
-            'Dokončení zakázky' => [
+            'Zakázka dokončena' => [
                 'subject' => 'Servisní zakázka dokončena - Natuzzi',
                 'template' => 'Dobrý den {{customer_name}},
 
@@ -182,6 +182,109 @@ Telefon: {{technician_phone}}
 
 Děkujeme za využití našich služeb.
 Pokud budete mít jakékoliv dotazy nebo připomínky, neváhejte nás kontaktovat.
+
+S pozdravem,
+White Glove Service
+Autorizovaný servis Natuzzi
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KONTAKT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Web: www.wgs-service.cz
+Email: {{company_email}}
+Telefon: {{company_phone}}'
+            ],
+
+            'Nová reklamace vytvořena' => [
+                'subject' => 'Nová servisní zakázka Natuzzi - č. {{order_id}}',
+                'template' => 'Dobrý den {{customer_name}},
+
+byla vytvořena nová servisní zakázka pro Váš produkt Natuzzi.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INFORMACE O SERVISNÍ ZAKÁZCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Číslo zakázky: {{order_id}}
+Produkt Natuzzi: {{product}}
+Datum vytvoření: {{date}}
+Adresa servisu: {{address}}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DALŠÍ POSTUP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Náš technik Vás bude kontaktovat pro domluvení termínu servisní návštěvy.
+
+Pokud máte jakékoliv dotazy, neváhejte nás kontaktovat.
+
+S pozdravem,
+White Glove Service
+Autorizovaný servis Natuzzi
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KONTAKT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Web: www.wgs-service.cz
+Email: {{company_email}}
+Telefon: {{company_phone}}'
+            ],
+
+            'Připomenutí termínu zákazníkovi' => [
+                'subject' => 'Připomínka termínu servisní návštěvy - Natuzzi',
+                'template' => 'Dobrý den {{customer_name}},
+
+připomínáme Vám blížící se termín servisní návštěvy pro Váš produkt Natuzzi.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TERMÍN SERVISNÍ NÁVŠTĚVY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Číslo zakázky: {{order_id}}
+Produkt Natuzzi: {{product}}
+Datum návštěvy: {{date}}
+Čas návštěvy: {{time}}
+Adresa: {{address}}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VÁŠ KONTAKTNÍ TECHNIK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Jméno: {{technician_name}}
+Email: {{technician_email}}
+Telefon: {{technician_phone}}
+
+Těšíme se na Vás v dohodnutém termínu.
+Pokud potřebujete termín změnit, kontaktujte nás prosím co nejdříve.
+
+S pozdravem,
+White Glove Service
+Autorizovaný servis Natuzzi
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KONTAKT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Web: www.wgs-service.cz
+Email: {{company_email}}
+Telefon: {{company_phone}}'
+            ],
+
+            'Zakázka znovu otevřena' => [
+                'subject' => 'Servisní zakázka Natuzzi znovu otevřena - č. {{order_id}}',
+                'template' => 'Dobrý den {{customer_name}},
+
+vaše servisní zakázka pro produkt Natuzzi byla znovu otevřena.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INFORMACE O ZAKÁZCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Číslo zakázky: {{order_id}}
+Produkt Natuzzi: {{product}}
+Datum znovuotevření: {{date}}
+Adresa: {{address}}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DALŠÍ POSTUP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Náš technik Vás bude kontaktovat pro domluvení nového termínu návštěvy.
+
+Pokud máte jakékoliv dotazy, neváhejte nás kontaktovat.
 
 S pozdravem,
 White Glove Service
@@ -262,9 +365,15 @@ Telefon: {{company_phone}}'
         // Náhled co bude provedeno
         echo "<h3>📋 Co bude provedeno:</h3>";
         echo "<div class='info'>";
-        echo "• Aktualizace šablon: <strong>Pokus o kontakt</strong>, <strong>Potvrzení termínu</strong>, <strong>Dokončení zakázky</strong><br>";
+        echo "• Aktualizace <strong>6 hlavních email šablon</strong>:<br>";
+        echo "&nbsp;&nbsp;- Pokus o kontakt<br>";
+        echo "&nbsp;&nbsp;- Potvrzení termínu návštěvy<br>";
+        echo "&nbsp;&nbsp;- Zakázka dokončena<br>";
+        echo "&nbsp;&nbsp;- Nová reklamace vytvořena<br>";
+        echo "&nbsp;&nbsp;- Připomenutí termínu zákazníkovi<br>";
+        echo "&nbsp;&nbsp;- Zakázka znovu otevřena<br>";
         echo "• Přidání informace o zastoupení firmy Natuzzi<br>";
-        echo "• Jednotný profesionální formát<br>";
+        echo "• Jednotný profesionální formát všech šablon<br>";
         echo "• Zachování všech proměnných<br>";
         echo "• Přidání proměnných pro technika a firmu<br>";
         echo "</div>";
