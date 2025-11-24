@@ -477,11 +477,19 @@ switch ($action) {
     // ==================== CHECK PERMISSIONS ====================
         case 'check_permissions':
             $dirsToCheck = ['logs', 'uploads', 'temp', 'uploads/photos', 'uploads/protokoly'];
+            $projectRoot = dirname(__DIR__, 2); // /workspace/moje-stranky
             $writable = [];
             $notWritable = [];
+            $missing = [];
 
             foreach ($dirsToCheck as $dir) {
-                $fullPath = __DIR__ . '/../' . $dir;
+                $fullPath = $projectRoot . '/' . $dir;
+
+                if (!file_exists($fullPath)) {
+                    $missing[] = $dir;
+                    continue;
+                }
+
                 if (is_writable($fullPath)) {
                     $writable[] = $dir;
                 } else {
@@ -493,7 +501,8 @@ switch ($action) {
                 'status' => 'success',
                 'data' => [
                     'writable' => $writable,
-                    'not_writable' => $notWritable
+                    'not_writable' => $notWritable,
+                    'missing' => $missing
                 ]
             ]);
             break;
