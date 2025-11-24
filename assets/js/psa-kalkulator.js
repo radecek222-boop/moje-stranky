@@ -8,7 +8,7 @@ let employees = [];
 let salaryRate = 150;
 let invoiceRate = 250;
 let currentPeriod = { month: 11, year: 2025 };
-const API_URL = 'data/psa-employees.json';
+const API_URL = 'app/psa_data.php';
 
 // === INITIALIZATION ===
 window.addEventListener('DOMContentLoaded', () => {
@@ -59,7 +59,18 @@ async function loadData(period = null) {
     logger.log('Loading data from JSON...', period ? `for period ${period}` : '');
 
     const response = await fetch(API_URL);
-    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(`Server responded with ${response.status}`);
+    }
+
+    const payload = await response.json();
+
+    if (payload.status !== 'success' || !payload.data) {
+      throw new Error(payload.message || 'Neplatná odpověď serveru');
+    }
+
+    const data = payload.data;
 
     // Load configuration
     if (data.config) {
@@ -136,7 +147,7 @@ async function saveToServer() {
   };
 
   try {
-    const response = await fetch('app/save_psa_data.php', {
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json; charset=utf-8'

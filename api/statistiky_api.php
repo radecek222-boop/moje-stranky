@@ -30,6 +30,13 @@ try {
     $pdo = getDbConnection();
 
     switch ($action) {
+        case 'ping':
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Statistiky API is reachable'
+            ]);
+            break;
+
         case 'summary':
             getSummaryStatistiky($pdo);
             break;
