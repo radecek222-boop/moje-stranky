@@ -482,20 +482,17 @@
             `;
             pdfWrapper.appendChild(note);
 
-            // Přidat položky ceníku
-            const kategorieGrouped = {};
+            // Kontrola jestli máme data
+            if (!pricingData || Object.keys(pricingData).length === 0) {
+                alert('Ceník není načten. Zkuste to prosím znovu.');
+                return;
+            }
 
-            // Seskupit položky podle kategorií
-            pricingData.forEach(item => {
-                const kategorie = item.category || 'Ostatní';
-                if (!kategorieGrouped[kategorie]) {
-                    kategorieGrouped[kategorie] = [];
-                }
-                kategorieGrouped[kategorie].push(item);
-            });
+            // pricingData je už objekt seskupený podle kategorií
+            // { "Čalounění": [...items...], "Mechanika": [...items...] }
 
             // Vygenerovat kategorie a položky
-            Object.keys(kategorieGrouped).forEach(kategorie => {
+            Object.keys(pricingData).sort().forEach(kategorie => {
                 // Hlavička kategorie
                 const categoryHeader = document.createElement('div');
                 categoryHeader.style.cssText = `
@@ -521,11 +518,11 @@
                     margin-bottom: 5px;
                 `;
 
-                kategorieGrouped[kategorie].forEach((item, index) => {
+                pricingData[kategorie].forEach((item, index) => {
                     const itemDiv = document.createElement('div');
                     itemDiv.style.cssText = `
                         padding: 12px 15px;
-                        ${index < kategorieGrouped[kategorie].length - 1 ? 'border-bottom: 1px solid #eee;' : ''}
+                        ${index < pricingData[kategorie].length - 1 ? 'border-bottom: 1px solid #eee;' : ''}
                     `;
 
                     const itemHeader = document.createElement('div');
