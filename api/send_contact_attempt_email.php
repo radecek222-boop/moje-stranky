@@ -187,8 +187,8 @@ try {
     ], $notification['template']);
 
     // Příprava SMS textu (zkrácená verze emailu pro SMS)
-    // Použijeme stejné proměnné jako v emailu pro konzistenci
-    $smsText = "Dobrý den {$customerName}, pokusili jsme se Vás kontaktovat ohledně servisní prohlídky č. {$orderId} ({$product}, " . date('d.m.Y') . "). Prosím zavolejte zpět na +420 725 965 826. Děkujeme, WGS Service";
+    // Profesionální SMS text pro Natuzzi servis
+    $smsText = "Dobrý den {$customerName}, kontaktujeme Vás v zastoupení Natuzzi ohledně servisní zakázky č. {$orderId}. Nepodařilo se nám Vás zastihnout. Zavolejte prosím zpět {$technicianName} na tel. {$technicianPhone}. Děkujeme, WGS Service - Autorizovaný servis Natuzzi";
 
     // Přidání emailu do fronty
     $emailQueue = new EmailQueue($pdo);
