@@ -65,6 +65,10 @@ try {
         sendJsonError('Neplatný CSRF token', 403);
     }
 
+    // ✅ PERFORMANCE FIX: Uvolnit session lock pro paralelní zpracování
+    // Audit 2025-11-24: Heatmap tracking - vysoká frekvence requestů
+    session_write_close();
+
     // ========================================
     // VALIDACE POVINNÝCH POLÍ
     // ========================================
@@ -103,12 +107,16 @@ try {
     // ========================================
     if (!empty($inputData['clicks']) && is_array($inputData['clicks'])) {
         foreach ($inputData['clicks'] as $click) {
-            if (!isset($click['x_percent']) || !isset($click['y_percent'])) {
+            // Akceptovat oba formáty: x/y (z JS) nebo x_percent/y_percent (starší formát)
+            $xValue = $click['x'] ?? $click['x_percent'] ?? null;
+            $yValue = $click['y'] ?? $click['y_percent'] ?? null;
+
+            if ($xValue === null || $yValue === null) {
                 continue; // Přeskočit neplatné kliky
             }
 
-            $xPercent = round((float)$click['x_percent'], 2);
-            $yPercent = round((float)$click['y_percent'], 2);
+            $xPercent = round((float)$xValue, 2);
+            $yPercent = round((float)$yValue, 2);
 
             // Validace rozsahu (0-100%)
             if ($xPercent < 0 || $xPercent > 100 || $yPercent < 0 || $yPercent > 100) {
@@ -171,8 +179,10 @@ try {
     // ========================================
     // AGREGACE SCROLL DATA
     // ========================================
-    if (!empty($inputData['scroll_depths']) && is_array($inputData['scroll_depths'])) {
-        foreach ($inputData['scroll_depths'] as $scrollDepth) {
+    // Akceptovat oba formáty: scrolls (z JS) nebo scroll_depths (starší formát)
+    $scrollData = $inputData['scrolls'] ?? $inputData['scroll_depths'] ?? [];
+    if (!empty($scrollData) && is_array($scrollData)) {
+        foreach ($scrollData as $scrollDepth) {
             $depth = (int)$scrollDepth;
 
             // Validace rozsahu (0-100)
@@ -257,13 +267,22 @@ try {
     ]);
 
 } catch (PDOException $e) {
-    error_log('Track Heatmap API Error: ' . $e->getMessage());
+    $errorMsg = $e->getMessage();
+    error_log('Track Heatmap API Error: ' . $errorMsg);
     error_log('Stack trace: ' . $e->getTraceAsString());
 
-    sendJsonError('Chyba při zpracování požadavku', 500);
+    // Detekce specifických chyb pro lepší debugging
+    if (strpos($errorMsg, "doesn't exist") !== false || strpos($errorMsg, 'Base table or view not found') !== false) {
+        // Tabulka neexistuje - spusťte migraci
+        error_log('Track Heatmap: TABULKY NEEXISTUJÍ - spusťte /migrace_module6_heatmaps.php?execute=1');
+        sendJsonError('Heatmap tabulky neexistují. Spusťte migraci.', 500);
+    } else {
+        sendJsonError('Chyba při zpracování požadavku', 500);
+    }
 
 } catch (Exception $e) {
     error_log('Track Heatmap API Unexpected Error: ' . $e->getMessage());
+    error_log('Stack trace: ' . $e->getTraceAsString());
     sendJsonError('Neočekávaná chyba serveru', 500);
 }
 
