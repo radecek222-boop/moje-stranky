@@ -438,6 +438,124 @@ function renderSchemaOrg($stranka = 'index') {
 }
 
 /**
+ * Vykresli FAQ Schema.org pro zobrazeni v Google vysledcich
+ *
+ * @param string $stranka Nazev stranky
+ */
+function renderFaqSchema($stranka = 'index') {
+    // FAQ otazky a odpovedi pro jednotlive stranky
+    $faqData = [
+        'index' => [
+            [
+                'otazka' => 'Kolik stoji oprava sedacky?',
+                'odpoved' => 'Cena opravy sedacky zacina od 110 EUR za diagnostiku. Konkretni cena zavisi na typu poskozeni a rozsahu opravy. Oprava kozene sedacky stoji od 205 EUR, oprava mechanismu od 45 EUR. Nabizime bezplatnou kalkulaci ceny.'
+            ],
+            [
+                'otazka' => 'Jak dlouho trva oprava sedacky nebo kresla?',
+                'odpoved' => 'Standardni oprava sedacky nebo kresla trva 2-4 tydny. Slozitejsi opravy jako kompletni precalouneni mohou trvat 4-6 tydnu. Expresni opravy jsou mozne za priplatek.'
+            ],
+            [
+                'otazka' => 'Opravujete i jine znacky nez Natuzzi?',
+                'odpoved' => 'Ano, opravujeme vsechny znacky luxusniho nabytku. Specializujeme se na Natuzzi, ale opravujeme take sedacky a kresla jinych vyrobcu - kozene i latkove.'
+            ],
+            [
+                'otazka' => 'Poskytujete servis v celem Cesku?',
+                'odpoved' => 'Ano, poskytujeme servis po cele Ceske republice. Svoz nabytku zajistujeme z Prahy, Brna, Ostravy, Plzne a dalsich mest. Nabidka zahrnuje i Slovensko.'
+            ],
+            [
+                'otazka' => 'Jak objednat opravu sedacky?',
+                'odpoved' => 'Opravu sedacky muzete objednat online pres formular na nasem webu, telefonicky na +420 725 965 826 nebo emailem na reklamace@wgs-service.cz. Odpovime do 24 hodin.'
+            ],
+            [
+                'otazka' => 'Jak vycistit kozenou sedacku doma?',
+                'odpoved' => 'Pro beznou udrzbu kozene sedacky pouzijte vlhky hadrik a specialni pripravek na kuzi. Vyhnete se agresivnim cisticum. Pro hluboke cisteni a renovaci doporucujeme profesionalni servis.'
+            ]
+        ],
+        'cenik' => [
+            [
+                'otazka' => 'Kolik stoji oprava kozene sedacky?',
+                'odpoved' => 'Oprava kozene sedacky zacina od 205 EUR. Cena zahrnuje diagnostiku, opravu a finalni upravu. Presna cena zavisi na rozsahu poskozeni - praskliny, odreni, ci celkova renovace.'
+            ],
+            [
+                'otazka' => 'Kolik stoji cisteni sedacky?',
+                'odpoved' => 'Profesionalni cisteni sedacky stoji od 80 EUR pro latkove sedacky a od 120 EUR pro kozene sedacky. Cena zahrnuje hluboke cisteni, odstraneni skvrn a osetreni materialu.'
+            ],
+            [
+                'otazka' => 'Kolik stoji oprava mechanismu sedacky?',
+                'odpoved' => 'Oprava mechanismu sedacky (relax, vyklapeciho systemu) stoji od 45 EUR za praci. K tomu se prictia naklady na nahradni dily podle typu mechanismu.'
+            ],
+            [
+                'otazka' => 'Kolik stoji precalouneni sedacky?',
+                'odpoved' => 'Precalouneni sedacky zacina od 205 EUR za praci. Celkova cena zahrnuje material (latka nebo kuze), praci a dopravu. Presnou kalkulaci vam pripravime zdarma.'
+            ],
+            [
+                'otazka' => 'Je diagnostika zdarma?',
+                'odpoved' => 'Diagnostika stoji 110 EUR a zahrnuje kompletni posouzeni stavu nabytku a detailni cenovou kalkulaci opravy. Pri realizaci opravy se cena diagnostiky odecita z celkove ceny.'
+            ]
+        ],
+        'novareklamace' => [
+            [
+                'otazka' => 'Jak podat reklamaci na nabytek Natuzzi?',
+                'odpoved' => 'Reklamaci nabytku Natuzzi podejte pres nas online formular. Vyplnte kontaktni udaje, popis problemu a prilozte fotografie. Reklamaci vyridime jako autorizovany servis.'
+            ],
+            [
+                'otazka' => 'Co potrebuji k objednani opravy?',
+                'odpoved' => 'K objednani opravy potrebujete: kontaktni udaje, adresu pro svoz nabytku, popis problemu a idealne fotografie poskozeni. Pomaha take cislo faktury nebo zaruky.'
+            ],
+            [
+                'otazka' => 'Jak rychle odpovite na objednavku?',
+                'odpoved' => 'Na vsechny objednavky odpovidame do 24 hodin v pracovni dny. Obdrzite potvrzeni objednavky a navrh terminu svozu ci navstevy technika.'
+            ],
+            [
+                'otazka' => 'Musim byt doma pri svozu nabytku?',
+                'odpoved' => 'Ano, pri svozu nabytku je nutna pritomnost dospele osoby, ktera preda nabytek a podepise predavaci protokol. Termin svozu si domluvime predem.'
+            ]
+        ],
+        'aktuality' => [
+            [
+                'otazka' => 'Kde najdu showroom Natuzzi v Cesku?',
+                'odpoved' => 'Showroomy Natuzzi najdete v Praze (KARE Design, Centrum nabytku) a v Brne. Aktualni seznam a oteviraci doby najdete v nasich aktualitach nebo na oficialnim webu Natuzzi.'
+            ],
+            [
+                'otazka' => 'Jak casto udrzovat kozenou sedacku?',
+                'odpoved' => 'Kozenou sedacku doporucujeme cistit a osetrit specialnim pripravkem kazdych 3-6 mesicu. Pravidelna udrzba prodluzuje zivotnost kuze a zachovava jeji vzhled.'
+            ],
+            [
+                'otazka' => 'Jake jsou trendy v designu sedacek?',
+                'odpoved' => 'Aktualni trendy zahrnuji modularni sedacky, minimalisticky design, prirodni materialy a neutralni barvy. Natuzzi nabizi kolekce kombinujici italsky design s modernimi trendy.'
+            ]
+        ]
+    ];
+
+    // Ziskat FAQ pro danou stranku
+    $faq = $faqData[$stranka] ?? $faqData['index'];
+
+    // Sestavit FAQ schema
+    $faqSchema = [
+        "@context" => "https://schema.org",
+        "@type" => "FAQPage",
+        "mainEntity" => []
+    ];
+
+    foreach ($faq as $polozka) {
+        $faqSchema['mainEntity'][] = [
+            "@type" => "Question",
+            "name" => $polozka['otazka'],
+            "acceptedAnswer" => [
+                "@type" => "Answer",
+                "text" => $polozka['odpoved']
+            ]
+        ];
+    }
+
+    // Vystup JSON-LD
+    echo "\n  <!-- FAQ Schema.org -->\n";
+    echo "  <script type=\"application/ld+json\">\n";
+    echo "  " . json_encode($faqSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+    echo "\n  </script>\n";
+}
+
+/**
  * Vrati title pro danou stranku
  */
 function getSeoTitle($stranka = 'index') {

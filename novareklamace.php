@@ -20,6 +20,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
   <?php renderSeoMeta('novareklamace'); ?>
   <?php renderSchemaOrg('novareklamace'); ?>
+  <?php renderFaqSchema('novareklamace'); ?>
   <title><?php echo getSeoTitle('novareklamace'); ?></title>
 
   <!-- Preconnect k CDN pro rychlejší načítání -->

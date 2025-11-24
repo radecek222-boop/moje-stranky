@@ -14,6 +14,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
   <meta name="description" content="<?php echo getSeoDescription('index'); ?>">
   <?php renderSeoMeta('index'); ?>
   <?php renderSchemaOrg('index'); ?>
+  <?php renderFaqSchema('index'); ?>
 
   <!-- PWA -->
   <link rel="manifest" href="./manifest.json">

@@ -23,6 +23,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
   <meta name="description" content="<?php echo getSeoDescription('cenik'); ?>">
   <?php renderSeoMeta('cenik'); ?>
   <?php renderSchemaOrg('cenik'); ?>
+  <?php renderFaqSchema('cenik'); ?>
 
   <!-- PWA -->
   <link rel="manifest" href="./manifest.json">

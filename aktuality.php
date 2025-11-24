@@ -130,6 +130,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
   <!-- SEO Meta Tags -->
   <meta name="description" content="<?php echo getSeoDescription('aktuality'); ?>">
   <?php renderSeoMeta('aktuality'); ?>
+  <?php renderFaqSchema('aktuality'); ?>
 
   <!-- PWA -->
   <link rel="manifest" href="./manifest.json">
