@@ -6,43 +6,42 @@
 
 require_once __DIR__ . '/../../init.php';
 
+// ✅ FIX: HTTP hlavičky pro zabránění cachování
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: 0');
 
 // Získat user info
 $userId = $_SESSION['user_id'] ?? 0;
 $userName = $_SESSION['user_name'] ?? 'Host';
 
-try {
-    // Pokus o načtení z JokeAPI (externí API) - VŽDY náhodný
-    $joke = fetchFromJokeAPI();
+// ✅ FIX: JokeAPI.dev vrací pořád stejný vtip pro češtinu
+// ŘEŠENÍ: Používat primárně lokální vtipy (máme jich 24 a plnou kontrolu)
+// JokeAPI se vypíná - nepoužívá se
 
-    if ($joke) {
-        echo json_encode([
-            'status' => 'success',
-            'joke' => $joke,
-            'source' => 'jokeapi'
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
-} catch (Exception $e) {
-    error_log("JokeAPI failed: " . $e->getMessage());
-}
+error_log("get_joke.php: Using PRIMARY source - local jokes database");
+$result = getLocalJoke();
+$joke = $result['joke'];
+$debug = $result['debug'];
 
-// Fallback: Použij lokální databázi vtipů - NÁHODNÝ vtip
-$joke = getLocalJoke();
+error_log("get_joke.php: LOCAL JOKE selected - Index: " . $debug['selected_index'] . ", Total: " . $debug['total_jokes'] . ", Joke: " . substr($joke, 0, 50) . "...");
 
 echo json_encode([
     'status' => 'success',
     'joke' => $joke,
-    'source' => 'local'
+    'source' => 'local',
+    'debug' => $debug
 ], JSON_UNESCAPED_UNICODE);
 
 /**
  * Získá vtip z JokeAPI.dev - VŽDY náhodný
  */
 function fetchFromJokeAPI(): ?string {
-    // JokeAPI v2 endpoint s češtinou
-    $url = 'https://v2.jokeapi.dev/joke/Any?lang=cs&type=single&format=json';
+    // JokeAPI v2 endpoint s češtinou + timestamp pro zabránění cachování
+    $timestamp = time() . rand(1000, 9999); // Extra randomizace
+    $url = 'https://v2.jokeapi.dev/joke/Any?lang=cs&type=single&format=json&_=' . $timestamp;
 
     $context = stream_context_create([
         'http' => [
@@ -74,7 +73,7 @@ function fetchFromJokeAPI(): ?string {
 /**
  * Vrátí NÁHODNÝ vtip z lokální databáze
  */
-function getLocalJoke(): string {
+function getLocalJoke(): array {
     $jokes = [
         // Pracovní humor
         "Proč programátoři nemají rádi přírodu?\nProtože tam je moc bugů! 🐛",
@@ -118,8 +117,26 @@ function getLocalJoke(): string {
         "Znám spoustu vtipů ve znakové řeči, které nikdo neslyšel! 🤟😄"
     ];
 
-    // NÁHODNÝ výběr - pokaždé jiný!
-    $index = array_rand($jokes);
+    $totalJokes = count($jokes);
+    error_log("get_joke.php: getLocalJoke() - Total jokes in array: " . $totalJokes);
 
-    return $jokes[$index];
+    // ✅ FIX: JEDNODUŠŠÍ randomizace - jen shuffle a vzít první prvek
+    // Toto je spolehlivější než kombinace shuffle + random_int
+    shuffle($jokes);
+
+    $selectedJoke = $jokes[0];
+    $selectedIndex = 0; // Po shuffle je to vždy první prvek
+
+    error_log("get_joke.php: getLocalJoke() - After shuffle, selected joke: " . substr($selectedJoke, 0, 30) . "...");
+
+    return [
+        'joke' => $selectedJoke,
+        'debug' => [
+            'total_jokes' => $totalJokes,
+            'selected_index' => $selectedIndex,
+            'method' => 'shuffle_first',
+            'timestamp' => time(),
+            'microtime' => microtime(true)
+        ]
+    ];
 }

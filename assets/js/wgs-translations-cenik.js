@@ -286,9 +286,9 @@ window.WGS_TRANSLATIONS_CENIK = {
   },
 
   'calc.step3b.label.extension': {
-    cs: 'Výsuvné mechanismy',
-    en: 'Extension mechanisms',
-    it: 'Meccanismi di estensione'
+    cs: 'Elektrické díly',
+    en: 'Electrical parts',
+    it: 'Parti elettriche'
   },
 
   'calc.step3b.price.perPiece': {
@@ -736,9 +736,9 @@ window.WGS_TRANSLATIONS_CENIK = {
   },
 
   'summary.slidingMechanisms': {
-    cs: 'Výsuvné mechanismy',
-    en: 'Sliding mechanisms',
-    it: 'Meccanismi scorrevoli'
+    cs: 'Elektrické díly',
+    en: 'Electrical parts',
+    it: 'Parti elettriche'
   },
 
   'summary.secondPerson': {

@@ -1,0 +1,242 @@
+/**
+ * WGS - Welcome Modal - Tmavý profesionální design
+ * Zobrazuje uvítání se statistikami po přihlášení
+ */
+
+/* Overlay - tmavé poloprůhledné pozadí */
+.welcome-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+}
+
+.welcome-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Modal container - tmavý box s elegantním stínem */
+.welcome-modal {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  padding: 3rem 3rem;
+  max-width: 600px;
+  width: 90%;
+  border-radius: 16px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6),
+              0 0 1px rgba(255, 255, 255, 0.1) inset;
+  transform: scale(0.85) translateY(30px);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: 'Poppins', sans-serif;
+}
+
+.welcome-modal-overlay.active .welcome-modal {
+  transform: scale(1) translateY(0);
+}
+
+/* Nadpis - bílý text s jemným stínem */
+.welcome-title {
+  font-size: 2.2rem;
+  font-weight: 300;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Jméno uživatele - světle šedé */
+.welcome-name {
+  color: #cccccc;
+  font-size: 1.6rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  letter-spacing: 0.02em;
+}
+
+/* Uvítací zpráva */
+.welcome-message {
+  font-size: 1rem;
+  color: #999999;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  font-weight: 300;
+}
+
+/* STATISTIKY - Třísloupcový layout */
+.welcome-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+/* Popisek statistiky - nahoře, menší */
+.stat-label {
+  font-size: 0.75rem;
+  color: #888888;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+  order: 1;
+}
+
+/* Číselná hodnota - dole, velké číslo */
+.stat-number {
+  font-size: 2.8rem;
+  font-weight: 300;
+  color: #ffffff;
+  line-height: 1;
+  text-shadow: 0 2px 12px rgba(255, 255, 255, 0.15);
+  order: 2;
+}
+
+/* NOTIFIKACE - červené zvýraznění */
+.stat-notifications .stat-label {
+  color: #ff4444;
+}
+
+.stat-notifications .stat-number {
+  color: #ff4444;
+  text-shadow: 0 2px 12px rgba(255, 68, 68, 0.3);
+}
+
+/* Notifikace na celou šířku */
+.stat-notifications {
+  grid-column: 1 / -1;
+  border-top: 1px solid rgba(255, 68, 68, 0.2);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+/* Tlačítko - černé s hover efektem */
+.welcome-close-btn {
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 3rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.welcome-close-btn:hover {
+  background: #1a1a1a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.welcome-close-btn:active {
+  transform: translateY(0);
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 768px) {
+  .welcome-modal {
+    padding: 2rem 1.5rem;
+    width: 95%;
+    max-width: 95%;
+  }
+
+  .welcome-title {
+    font-size: 1.6rem;
+  }
+
+  .welcome-name {
+    font-size: 1.3rem;
+  }
+
+  .welcome-message {
+    font-size: 0.9rem;
+  }
+
+  /* MOBILNÍ: Statistiky pod sebou (1 sloupec) */
+  .welcome-stats {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+  }
+
+  .stat-item {
+    padding: 0.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .stat-item:last-child {
+    border-bottom: none;
+  }
+
+  .stat-number {
+    font-size: 2.2rem;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+  }
+
+  /* Notifikace na mobilu - stejný styl jako ostatní */
+  .stat-notifications {
+    grid-column: 1 / -1;
+    border-top: 1px solid rgba(255, 68, 68, 0.2);
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+  }
+
+  .welcome-close-btn {
+    padding: 0.8rem 2rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-modal {
+    padding: 1.5rem 1rem;
+  }
+
+  .welcome-title {
+    font-size: 1.4rem;
+  }
+
+  .welcome-name {
+    font-size: 1.1rem;
+  }
+
+  /* Statistiky na velmi malých mobilech - stále menší */
+  .stat-number {
+    font-size: 1.8rem;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+  }
+}

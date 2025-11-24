@@ -346,6 +346,22 @@ textarea.form-control {
   font-family: 'Poppins';
 }
 
+/* Phone Input with Prefix Selector */
+.phone-input-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.phone-prefix {
+  flex: 0 0 120px;
+  min-width: 120px;
+}
+
+.phone-number {
+  flex: 1;
+}
+
 /* Map Container */
 .map-container {
   grid-column: 1 / -1;
@@ -792,6 +808,16 @@ textarea.form-control {
     flex-direction: column;
     align-items: stretch;
     gap: 0.8rem;
+  }
+
+  .phone-input-wrapper {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .phone-prefix {
+    flex: 1;
+    width: 100%;
   }
 
   .btn,
