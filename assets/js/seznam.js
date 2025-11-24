@@ -2737,6 +2737,11 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
 
     if (data.success) {
       logger.log('✓ Email o pokusu o kontakt odeslán zákazníkovi');
+
+      // Zavřít detail modal
+      closeDetail();
+
+      // Zobrazit toast zprávu
       showToast('Email odeslán zákazníkovi', 'success');
 
       // ✅ DŮLEŽITÉ: SMS text je nyní generován na serveru ze stejných dat jako email
