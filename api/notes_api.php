@@ -22,6 +22,16 @@ try {
         exit;
     }
 
+    // ✅ PERFORMANCE FIX: Načíst session data a uvolnit zámek
+    // Audit 2025-11-24: Session locking blokuje paralelní requesty
+    $currentUserEmail = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? null;
+    $userId = $_SESSION['user_id'] ?? null;
+    $userRole = strtolower(trim($_SESSION['role'] ?? 'guest'));
+    $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+
+    // KRITICKÉ: Uvolnit session lock pro paralelní zpracování
+    session_write_close();
+
     // Zjištění akce
     $action = '';
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -61,7 +71,7 @@ try {
             $claimId = $reklamace['id'];
 
             // Načtení poznámek z databáze s read status pro aktuálního uživatele
-            $currentUserEmail = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? null;
+            // $currentUserEmail již načteno výše (řádek 27)
 
             $stmt = $pdo->prepare("
                 SELECT
@@ -138,7 +148,7 @@ try {
             $claimId = $reklamace['id'];
 
             // Zjištění autora
-            $createdBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
+            $createdBy = $currentUserEmail ?? 'system';
 
             // Vložení do databáze
             $stmt = $pdo->prepare("
@@ -178,10 +188,9 @@ try {
 
             // ✅ SECURITY FIX: Kontrola vlastnictví poznámky
             // Poznámka: created_by je EMAIL, ne user_id!
-            $currentEmail = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? null;
-            $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+            // $currentUserEmail a $isAdmin již načteno výše (řádky 27, 30)
 
-            if (!$currentEmail && !$isAdmin) {
+            if (!$currentUserEmail && !$isAdmin) {
                 throw new Exception('Přístup odepřen');
             }
 
@@ -198,7 +207,7 @@ try {
                 ");
                 $stmt->execute([
                     ':id' => $noteId,
-                    ':user_email' => $currentEmail
+                    ':user_email' => $currentUserEmail
                 ]);
             }
 
@@ -215,10 +224,7 @@ try {
 
         case 'get_unread_counts':
             // Načtení počtu nepřečtených poznámek pro reklamace podle oprávnění
-            $currentUserEmail = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? null;
-            $userId = $_SESSION['user_id'] ?? null;
-            $userRole = strtolower(trim($_SESSION['role'] ?? 'guest'));
-            $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+            // $currentUserEmail, $userId, $userRole, $isAdmin již načteno výše (řádky 27-30)
 
             if (!$currentUserEmail) {
                 throw new Exception('Uživatel není přihlášen');

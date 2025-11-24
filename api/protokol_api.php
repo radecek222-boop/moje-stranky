@@ -26,6 +26,13 @@ try {
         exit;
     }
 
+    // ✅ PERFORMANCE FIX: Načíst session data a uvolnit zámek
+    // Audit 2025-11-24: PDF generation (1-3s) blokuje ostatní requesty
+    $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
+
+    // KRITICKÉ: Uvolnit session lock pro paralelní zpracování
+    session_write_close();
+
     // Získání akce
     $isPost = $_SERVER['REQUEST_METHOD'] === 'POST';
     $isGet = $_SERVER['REQUEST_METHOD'] === 'GET';
@@ -234,7 +241,7 @@ function savePdfOnly($data) {
                 )
             ");
 
-            $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
+            global $uploadedBy; // Načteno v hlavním scope (řádek 31)
 
             $stmt->execute([
                 ':claim_id' => $reklamace['id'],
@@ -365,7 +372,7 @@ function savePdfDocument($data) {
                 )
             ");
 
-            $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
+            global $uploadedBy; // Načteno v hlavním scope (řádek 31)
 
             $stmt->execute([
                 ':claim_id' => $claimId,
@@ -703,7 +710,7 @@ reklamace@wgs-service.cz
                     )
                 ");
 
-                $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
+                global $uploadedBy; // Načteno v hlavním scope (řádek 31)
 
                 $stmt->execute([
                     ':claim_id' => $reklamace['id'],
