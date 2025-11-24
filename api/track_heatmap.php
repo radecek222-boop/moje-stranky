@@ -78,7 +78,8 @@ try {
     $pdo = getDbConnection();
 
     // Rate limiting - 1000 požadavků za hodinu per IP
-    $clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    // OPRAVA: Použít skutečnou IP klienta (s podporou Cloudflare/proxy)
+    $clientIp = GeoIPHelper::ziskejKlientIP();
     $rateLimiter = new RateLimiter($pdo);
 
     $rateLimitResult = $rateLimiter->checkLimit($clientIp, 'track_heatmap', [
