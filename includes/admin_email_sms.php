@@ -853,6 +853,20 @@ async function otevritNotifikace(sablonaId) {
                     </label>
                 </div>
 
+                <!-- Příjemci -->
+                <div style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px;">
+                    <label style="display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #fff;">
+                        Příjemci emailu:
+                    </label>
+                    <div id="recipients-summary" style="color: #ccc; font-size: 0.85rem; margin-bottom: 0.75rem;">
+                        Načítání...
+                    </div>
+                    <button type="button" onclick="otevritModalPrijemcu('${sablonaId}')"
+                            style="padding: 0.5rem 1rem; background: #fff; color: #000; border: 1px solid #fff; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.8rem; cursor: pointer; border-radius: 3px;">
+                        Nastavit příjemce
+                    </button>
+                </div>
+
                 <!-- Alert -->
                 <div id="sablona-alert" style="display: none; padding: 0.75rem; border: 1px solid #000; font-size: 0.85rem; font-family: 'Poppins', sans-serif;"></div>
 
@@ -869,6 +883,10 @@ async function otevritNotifikace(sablonaId) {
                 </div>
             </form>
         `;
+
+        // Načíst a zobrazit příjemce
+        nacistAZobrazitPrijemce(sablonaId);
+
     } catch (error) {
         console.error('Chyba načítání šablony:', error);
         content.innerHTML = '<div style="color: #dc3545; text-align: center; padding: 2rem;">Chyba načítání šablony</div>';
@@ -932,6 +950,227 @@ async function ulozitSablonu(sablonaId) {
         alertEl.style.background = '#fef2f2';
         alertEl.style.color = '#991b1b';
         alertEl.textContent = 'Chyba: ' + error.message;
+    }
+}
+
+// =======================
+// MODAL PRO VÝBĚR PŘÍJEMCŮ
+// =======================
+
+// Globální proměnná pro uchování aktuálních příjemců
+let currentRecipients = null;
+let currentTemplateIdForRecipients = null;
+
+// Zobrazit souhrn příjemců
+function zobrazitSouhrnPrijemcu(recipients) {
+    const summary = document.getElementById('recipients-summary');
+    if (!summary) return;
+
+    if (!recipients) {
+        summary.innerHTML = '<span style="color: #999;">Žádní příjemci nastaveni</span>';
+        return;
+    }
+
+    const prijemci = [];
+    if (recipients.customer) prijemci.push('Zákazník');
+    if (recipients.seller) prijemci.push('Prodejce');
+    if (recipients.technician) prijemci.push('Technik');
+    if (recipients.importer && recipients.importer.enabled) {
+        prijemci.push('Výrobce (' + (recipients.importer.email || 'bez emailu') + ')');
+    }
+    if (recipients.other && recipients.other.enabled) {
+        prijemci.push('Jiné (' + (recipients.other.email || 'bez emailu') + ')');
+    }
+
+    if (prijemci.length === 0) {
+        summary.innerHTML = '<span style="color: #f44336;">⚠ Žádní příjemci!</span>';
+    } else {
+        summary.innerHTML = prijemci.join(', ');
+    }
+}
+
+// Otevřít modal pro výběr příjemců
+async function otevritModalPrijemcu(sablonaId) {
+    currentTemplateIdForRecipients = sablonaId;
+
+    // Načíst aktuální nastavení příjemců
+    try {
+        const response = await fetch(`/api/notification_api.php?action=get&id=${sablonaId}`);
+        const data = await response.json();
+
+        if (data.status === 'success' && data.notification) {
+            currentRecipients = data.notification.recipients || {
+                customer: true,
+                seller: false,
+                technician: false,
+                importer: { enabled: false, email: '' },
+                other: { enabled: false, email: '' }
+            };
+        }
+    } catch (error) {
+        console.error('Chyba načítání příjemců:', error);
+        currentRecipients = {
+            customer: true,
+            seller: false,
+            technician: false,
+            importer: { enabled: false, email: '' },
+            other: { enabled: false, email: '' }
+        };
+    }
+
+    // Vytvořit modal
+    const modalHTML = `
+        <div id="recipients-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100000; display: flex; align-items: center; justify-content: center;">
+            <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 2rem; border-radius: 10px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+                <h3 style="margin: 0 0 1.5rem 0; color: #fff; font-family: 'Poppins', sans-serif; font-size: 1.3rem;">
+                    Nastavení příjemců emailu
+                </h3>
+
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <!-- Zákazník -->
+                    <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px; cursor: pointer;">
+                        <input type="checkbox" id="recipient-customer" ${currentRecipients.customer ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Zákazník</div>
+                            <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán zákazníkovi</div>
+                        </div>
+                    </label>
+
+                    <!-- Prodejce -->
+                    <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px; cursor: pointer;">
+                        <input type="checkbox" id="recipient-seller" ${currentRecipients.seller ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Prodejce</div>
+                            <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán prodejci, který vytvořil reklamaci</div>
+                        </div>
+                    </label>
+
+                    <!-- Technik -->
+                    <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px; cursor: pointer;">
+                        <input type="checkbox" id="recipient-technician" ${currentRecipients.technician ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Technik</div>
+                            <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán technikovi, který pracoval na reklamaci</div>
+                        </div>
+                    </label>
+
+                    <!-- Výrobce / Import -->
+                    <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px;">
+                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin-bottom: 0.75rem;">
+                            <input type="checkbox" id="recipient-importer" ${currentRecipients.importer?.enabled ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
+                            <div>
+                                <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Import zastupující / Výrobce</div>
+                                <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán na zadanou adresu výrobce</div>
+                            </div>
+                        </label>
+                        <input type="email" id="recipient-importer-email" value="${currentRecipients.importer?.email || ''}" placeholder="email@vyrobce.cz"
+                               style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.9rem;">
+                    </div>
+
+                    <!-- Jiné -->
+                    <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px;">
+                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin-bottom: 0.75rem;">
+                            <input type="checkbox" id="recipient-other" ${currentRecipients.other?.enabled ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
+                            <div>
+                                <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Jiné</div>
+                                <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán na vlastní emailovou adresu</div>
+                            </div>
+                        </label>
+                        <input type="email" id="recipient-other-email" value="${currentRecipients.other?.email || ''}" placeholder="vlastni@email.cz"
+                               style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.9rem;">
+                    </div>
+                </div>
+
+                <!-- Tlačítka -->
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+                    <button type="button" onclick="zavritModalPrijemcu()"
+                            style="padding: 0.75rem 1.5rem; background: #666; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: 5px;">
+                        Zrušit
+                    </button>
+                    <button type="button" onclick="ulozitPrijemce()"
+                            style="padding: 0.75rem 1.5rem; background: #fff; color: #000; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: 5px;">
+                        Uložit příjemce
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Přidat modal do stránky
+    const existingModal = document.getElementById('recipients-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+// Zavřít modal příjemců
+function zavritModalPrijemcu() {
+    const modal = document.getElementById('recipients-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Uložit příjemce
+async function ulozitPrijemce() {
+    const recipients = {
+        customer: document.getElementById('recipient-customer').checked,
+        seller: document.getElementById('recipient-seller').checked,
+        technician: document.getElementById('recipient-technician').checked,
+        importer: {
+            enabled: document.getElementById('recipient-importer').checked,
+            email: document.getElementById('recipient-importer-email').value
+        },
+        other: {
+            enabled: document.getElementById('recipient-other').checked,
+            email: document.getElementById('recipient-other-email').value
+        }
+    };
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+    try {
+        const response = await fetch('/api/admin_api.php?action=update_email_recipients', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                csrf_token: csrfToken,
+                template_id: currentTemplateIdForRecipients,
+                recipients: recipients
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            // Aktualizovat souhrn
+            zobrazitSouhrnPrijemcu(recipients);
+            zavritModalPrijemcu();
+        } else {
+            throw new Error(result.message || 'Nepodařilo se uložit příjemce');
+        }
+    } catch (error) {
+        console.error('Chyba ukládání příjemců:', error);
+        alert('Chyba: ' + error.message);
+    }
+}
+
+// Načíst a zobrazit příjemce při otevření editace šablony
+async function nacistAZobrazitPrijemce(sablonaId) {
+    try {
+        const response = await fetch(`/api/notification_api.php?action=get&id=${sablonaId}`);
+        const data = await response.json();
+
+        if (data.status === 'success' && data.notification && data.notification.recipients) {
+            zobrazitSouhrnPrijemcu(data.notification.recipients);
+        } else {
+            zobrazitSouhrnPrijemcu(null);
+        }
+    } catch (error) {
+        console.error('Chyba načítání příjemců:', error);
+        zobrazitSouhrnPrijemcu(null);
     }
 }
 </script>

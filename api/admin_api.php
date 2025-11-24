@@ -146,6 +146,10 @@ try {
             handleUpdateEmailTemplate($pdo, $payload);
             break;
 
+        case 'update_email_recipients':
+            handleUpdateEmailRecipients($pdo, $payload);
+            break;
+
         default:
             respondError('Neznámá akce.', 400);
     }
@@ -849,6 +853,76 @@ function handleUpdateEmailTemplate(PDO $pdo, array $payload): void
     respondSuccess([
         'message' => 'Šablona byla úspěšně aktualizována',
         'template_id' => $templateId
+    ]);
+}
+
+/**
+ * Aktualizovat příjemce email šablony
+ */
+function handleUpdateEmailRecipients(PDO $pdo, array $payload): void
+{
+    $templateId = $payload['template_id'] ?? null;
+    $recipients = $payload['recipients'] ?? null;
+
+    if (!$templateId) {
+        throw new InvalidArgumentException('Chybí ID šablony');
+    }
+
+    if (!is_array($recipients)) {
+        throw new InvalidArgumentException('Příjemci musí být pole');
+    }
+
+    // Validace struktury recipients
+    $validatedRecipients = [
+        'customer' => isset($recipients['customer']) ? (bool)$recipients['customer'] : false,
+        'seller' => isset($recipients['seller']) ? (bool)$recipients['seller'] : false,
+        'technician' => isset($recipients['technician']) ? (bool)$recipients['technician'] : false,
+        'importer' => [
+            'enabled' => isset($recipients['importer']['enabled']) ? (bool)$recipients['importer']['enabled'] : false,
+            'email' => isset($recipients['importer']['email']) ? trim($recipients['importer']['email']) : ''
+        ],
+        'other' => [
+            'enabled' => isset($recipients['other']['enabled']) ? (bool)$recipients['other']['enabled'] : false,
+            'email' => isset($recipients['other']['email']) ? trim($recipients['other']['email']) : ''
+        ]
+    ];
+
+    // Validace emailů pokud jsou enabled
+    if ($validatedRecipients['importer']['enabled'] && !empty($validatedRecipients['importer']['email'])) {
+        if (!filter_var($validatedRecipients['importer']['email'], FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException('Neplatná emailová adresa výrobce');
+        }
+    }
+
+    if ($validatedRecipients['other']['enabled'] && !empty($validatedRecipients['other']['email'])) {
+        if (!filter_var($validatedRecipients['other']['email'], FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException('Neplatná emailová adresa v poli "Jiné"');
+        }
+    }
+
+    // Uložit do databáze jako JSON
+    $recipientsJson = json_encode($validatedRecipients, JSON_UNESCAPED_UNICODE);
+
+    $stmt = $pdo->prepare("
+        UPDATE wgs_notifications
+        SET recipients = :recipients,
+            updated_at = NOW()
+        WHERE id = :id
+    ");
+
+    $stmt->execute([
+        'recipients' => $recipientsJson,
+        'id' => $templateId
+    ]);
+
+    if ($stmt->rowCount() === 0) {
+        throw new InvalidArgumentException('Šablona nebyla nalezena nebo nebyla změněna');
+    }
+
+    respondSuccess([
+        'message' => 'Příjemci byli úspěšně aktualizováni',
+        'template_id' => $templateId,
+        'recipients' => $validatedRecipients
     ]);
 }
 
