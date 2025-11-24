@@ -207,7 +207,11 @@
                     csrf_token: csrfToken
                 };
 
-                navigator.sendBeacon(CONFIG.apiUrl, JSON.stringify(data));
+                // Safari/WebKit vyžaduje Blob místo plain stringu
+                navigator.sendBeacon(
+                    CONFIG.apiUrl,
+                    new Blob([JSON.stringify(data)], { type: 'application/json' })
+                );
             }
         });
 
