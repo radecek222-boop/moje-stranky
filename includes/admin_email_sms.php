@@ -837,7 +837,11 @@ async function otevritNotifikace(sablonaId) {
                     <textarea id="sablona-template" rows="12"
                               style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; font-family: monospace; line-height: 1.5;">${sablona.template.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
                     <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #ccc;">
-                        Použijte proměnné: {{customer_name}}, {{customer_email}}, {{date}}, {{time}}, atd.
+                        Dostupné proměnné:<br>
+                        • Zákazník: {{customer_name}}, {{customer_email}}, {{order_id}}, {{product}}, {{address}}<br>
+                        • Technik: {{technician_name}}, {{technician_email}}, {{technician_phone}}<br>
+                        • Firma: {{company_email}}, {{company_phone}}<br>
+                        • Datum/čas: {{date}}, {{time}}
                     </div>
                 </div>
 
