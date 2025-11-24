@@ -21,7 +21,7 @@ $seoKlicovaSlova = implode(', ', [
     'moderni kreslo', 'designove kreslo', 'retro sedacka', 'vintage sedacka',
 
     // Typy sedacek
-    'kozena sedacka', 'latkova sedacka', 'rohova sedacka', 'rozkldaci sedacka',
+    'kozena sedacka', 'latkova sedacka', 'rohova sedacka', 'rozkladaci sedacka',
     'kozene kreslo', 'relaxacni kreslo', 'masazni kreslo', 'houpaci kreslo',
     'sedaci souprava', 'obyvaci sedacka', 'kancelarska zidle', 'jidelni zidle',
     'barova zidle', 'konfercni zidle', 'loznicovy nabytek',
