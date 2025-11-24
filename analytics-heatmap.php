@@ -124,7 +124,8 @@ $csrfToken = generateCSRFToken();
             pointer-events: none;
             z-index: 10;
             opacity: 0.85;
-            /* border: 2px dashed rgba(51, 51, 51, 0.3); */ /* Debug border - vypnuto */
+            border: 2px dashed rgba(255, 0, 0, 0.5); /* DEBUG: červený border aby byl canvas viditelný */
+            box-sizing: border-box;
         }
 
         #page-mockup {
