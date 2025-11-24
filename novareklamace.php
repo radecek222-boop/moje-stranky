@@ -1,12 +1,13 @@
 <?php
 require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/includes/seo_meta.php';
 
 $isLoggedIn = isset($_SESSION['user_id']);
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 
-// Bezpečnostní kontrola: CSRF token se generuje pouze pokud je session aktivní
+// Bezpecnostni kontrola: CSRF token se generuje pouze pokud je session aktivni
 if (session_status() !== PHP_SESSION_ACTIVE) {
-    die('Session není aktivní. Obnovte stránku.');
+    die('Session neni aktivni. Obnovte stranku.');
 }
 ?>
 <!DOCTYPE html>
@@ -14,10 +15,12 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Reklamace luxusního nábytku Natuzzi. Rychlé a profesionální vyřízení reklamací sedaček a souprav. Autorizovaný servis v Praze, Brně, Bratislavě.">
+  <meta name="description" content="<?php echo getSeoDescription('novareklamace'); ?>">
   <meta name="theme-color" content="#000000">
   <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
-  <title>Objednat servis | WGS</title>
+  <?php renderSeoMeta('novareklamace'); ?>
+  <?php renderSchemaOrg('novareklamace'); ?>
+  <title><?php echo getSeoTitle('novareklamace'); ?></title>
 
   <!-- Preconnect k CDN pro rychlejší načítání -->
   <link rel="preconnect" href="https://fonts.googleapis.com">

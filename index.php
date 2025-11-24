@@ -1,4 +1,7 @@
-<?php require_once "init.php"; ?>
+<?php
+require_once "init.php";
+require_once __DIR__ . '/includes/seo_meta.php';
+?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -8,15 +11,17 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="WGS">
-  <meta name="description" content="Prémiový servis pro luxusní nábytek Natuzzi. Profesionální montáž, údržba a opravy s maximální péčí o každý detail.">
-  
+  <meta name="description" content="<?php echo getSeoDescription('index'); ?>">
+  <?php renderSeoMeta('index'); ?>
+  <?php renderSchemaOrg('index'); ?>
+
   <!-- PWA -->
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="./icon192.png">
   <link rel="icon" type="image/png" sizes="192x192" href="./icon192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon512.png">
-  
-  <title>White Glove Service – Domů</title>
+
+  <title><?php echo getSeoTitle('index'); ?></title>
   
   <!-- Preload critical resources -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
