@@ -6,7 +6,12 @@
 
 require_once __DIR__ . '/../../init.php';
 
+// ✅ FIX: HTTP hlavičky pro zabránění cachování
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: 0');
 
 // Získat user info
 $userId = $_SESSION['user_id'] ?? 0;
@@ -41,8 +46,9 @@ echo json_encode([
  * Získá vtip z JokeAPI.dev - VŽDY náhodný
  */
 function fetchFromJokeAPI(): ?string {
-    // JokeAPI v2 endpoint s češtinou
-    $url = 'https://v2.jokeapi.dev/joke/Any?lang=cs&type=single&format=json';
+    // JokeAPI v2 endpoint s češtinou + timestamp pro zabránění cachování
+    $timestamp = time() . rand(1000, 9999); // Extra randomizace
+    $url = 'https://v2.jokeapi.dev/joke/Any?lang=cs&type=single&format=json&_=' . $timestamp;
 
     $context = stream_context_create([
         'http' => [
@@ -118,8 +124,17 @@ function getLocalJoke(): string {
         "Znám spoustu vtipů ve znakové řeči, které nikdo neslyšel! 🤟😄"
     ];
 
-    // NÁHODNÝ výběr - pokaždé jiný!
-    $index = array_rand($jokes);
+    // ✅ FIX: Vylepšená randomizace pro skutečně náhodný výběr
+    // Shuffle pole pro lepší distribuci
+    shuffle($jokes);
+
+    // Použít random_int() místo array_rand() pro kryptograficky bezpečnější náhodnost
+    try {
+        $index = random_int(0, count($jokes) - 1);
+    } catch (Exception $e) {
+        // Fallback na array_rand pokud random_int selže
+        $index = array_rand($jokes);
+    }
 
     return $jokes[$index];
 }
