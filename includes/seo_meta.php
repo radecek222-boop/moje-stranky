@@ -169,6 +169,34 @@ function renderSeoMeta($stranka = 'index') {
     echo "  <meta name=\"twitter:title\" content=\"{$seo['title']}\">\n";
     echo "  <meta name=\"twitter:description\" content=\"{$seo['description']}\">\n";
     echo "  <meta name=\"twitter:image\" content=\"{$seo['og_image']}\">\n";
+
+    // Hreflang pro vicejazycnost (cesky, anglicky, italsky)
+    $pageFile = basename($seo['canonical']);
+    if (empty($pageFile) || $pageFile === 'wgs-service.cz') {
+        $pageFile = '';
+    }
+    echo "\n  <!-- Hreflang - vicejazycna podpora -->\n";
+    echo "  <link rel=\"alternate\" hreflang=\"cs\" href=\"https://wgs-service.cz/{$pageFile}\">\n";
+    echo "  <link rel=\"alternate\" hreflang=\"en\" href=\"https://wgs-service.cz/{$pageFile}?lang=en\">\n";
+    echo "  <link rel=\"alternate\" hreflang=\"it\" href=\"https://wgs-service.cz/{$pageFile}?lang=it\">\n";
+    echo "  <link rel=\"alternate\" hreflang=\"x-default\" href=\"https://wgs-service.cz/{$pageFile}\">\n";
+
+    // Seznam.cz specificke tagy
+    echo "\n  <!-- Seznam.cz -->\n";
+    echo "  <meta name=\"seznam-wmt\" content=\"wgs-service-verified\">\n";
+
+    // Geo lokace pro lokalni vyhledavani
+    echo "\n  <!-- Geo lokace -->\n";
+    echo "  <meta name=\"geo.region\" content=\"CZ\">\n";
+    echo "  <meta name=\"geo.placename\" content=\"Praha, Ceska republika\">\n";
+    echo "  <meta name=\"geo.position\" content=\"50.0755;14.5756\">\n";
+    echo "  <meta name=\"ICBM\" content=\"50.0755, 14.5756\">\n";
+
+    // Doplnkove meta tagy pro prohlizece
+    echo "\n  <!-- Prohlizece a kompatibilita -->\n";
+    echo "  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n";
+    echo "  <meta name=\"format-detection\" content=\"telephone=yes\">\n";
+    echo "  <meta name=\"mobile-web-app-capable\" content=\"yes\">\n";
 }
 
 /**
