@@ -655,8 +655,21 @@ textarea.form-input {
   color: #999999 !important;
 }
 
-/* Labels - také tmavé */
+/* Labels - BÍLÉ pro tmavé pozadí modalu */
 #editNotificationModal .form-label,
+#editNotificationModal label,
+#editNotificationModal h3,
+#editNotificationModal h4,
+#editNotificationModal p,
+#editNotificationModal .modal-title,
 .modal .form-label {
-  color: #333333 !important;
+  color: #ffffff !important;
+}
+
+/* Info texty - také bílé */
+#editNotificationModal .page-subtitle,
+#editNotificationModal .form-help,
+#editNotificationModal .notification-info-label,
+#editNotificationModal .notification-info-value {
+  color: #cccccc !important;
 }

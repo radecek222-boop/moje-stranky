@@ -813,7 +813,7 @@ async function otevritNotifikace(sablonaId) {
 
                 <!-- Popis -->
                 <div>
-                    <label style="display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #000;">
+                    <label style="display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #fff;">
                         Popis:
                     </label>
                     <input type="text" id="sablona-description" value="${sablona.description.replace(/"/g, '&quot;')}"
@@ -822,21 +822,21 @@ async function otevritNotifikace(sablonaId) {
 
                 <!-- Předmět -->
                 <div>
-                    <label style="display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #000;">
+                    <label style="display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #fff;">
                         Předmět emailu:
                     </label>
                     <input type="text" id="sablona-subject" value="${sablona.subject.replace(/"/g, '&quot;')}"
-                           style="width: 100%; padding: 0.75rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.85rem;" />
+                           style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; font-family: 'Poppins', sans-serif; font-size: 0.85rem;" />
                 </div>
 
                 <!-- Šablona -->
                 <div>
-                    <label style="display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #000;">
+                    <label style="display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #fff;">
                         Obsah emailu (HTML):
                     </label>
                     <textarea id="sablona-template" rows="12"
-                              style="width: 100%; padding: 0.75rem; border: 1px solid #000; font-family: monospace; line-height: 1.5;">${sablona.template.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
-                    <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #666;">
+                              style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; font-family: monospace; line-height: 1.5;">${sablona.template.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+                    <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #ccc;">
                         Použijte proměnné: {{customer_name}}, {{customer_email}}, {{date}}, {{time}}, atd.
                     </div>
                 </div>
