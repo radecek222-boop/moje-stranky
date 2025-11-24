@@ -19,27 +19,38 @@ $userName = $_SESSION['user_name'] ?? 'Host';
 
 try {
     // Pokus o načtení z JokeAPI (externí API) - VŽDY náhodný
+    error_log("get_joke.php: Attempting to fetch from JokeAPI...");
     $joke = fetchFromJokeAPI();
 
     if ($joke) {
+        error_log("get_joke.php: JokeAPI SUCCESS - Joke: " . substr($joke, 0, 50) . "...");
         echo json_encode([
             'status' => 'success',
             'joke' => $joke,
-            'source' => 'jokeapi'
+            'source' => 'jokeapi',
+            'debug' => 'from_external_api'
         ], JSON_UNESCAPED_UNICODE);
         exit;
+    } else {
+        error_log("get_joke.php: JokeAPI returned null, falling back to local");
     }
 } catch (Exception $e) {
-    error_log("JokeAPI failed: " . $e->getMessage());
+    error_log("get_joke.php: JokeAPI EXCEPTION: " . $e->getMessage());
 }
 
 // Fallback: Použij lokální databázi vtipů - NÁHODNÝ vtip
-$joke = getLocalJoke();
+error_log("get_joke.php: Using local jokes database");
+$result = getLocalJoke();
+$joke = $result['joke'];
+$debug = $result['debug'];
+
+error_log("get_joke.php: LOCAL JOKE selected - Index: " . $debug['selected_index'] . ", Total: " . $debug['total_jokes'] . ", Joke: " . substr($joke, 0, 50) . "...");
 
 echo json_encode([
     'status' => 'success',
     'joke' => $joke,
-    'source' => 'local'
+    'source' => 'local',
+    'debug' => $debug
 ], JSON_UNESCAPED_UNICODE);
 
 /**
@@ -80,7 +91,7 @@ function fetchFromJokeAPI(): ?string {
 /**
  * Vrátí NÁHODNÝ vtip z lokální databáze
  */
-function getLocalJoke(): string {
+function getLocalJoke(): array {
     $jokes = [
         // Pracovní humor
         "Proč programátoři nemají rádi přírodu?\nProtože tam je moc bugů! 🐛",
@@ -124,17 +135,26 @@ function getLocalJoke(): string {
         "Znám spoustu vtipů ve znakové řeči, které nikdo neslyšel! 🤟😄"
     ];
 
-    // ✅ FIX: Vylepšená randomizace pro skutečně náhodný výběr
-    // Shuffle pole pro lepší distribuci
+    $totalJokes = count($jokes);
+    error_log("get_joke.php: getLocalJoke() - Total jokes in array: " . $totalJokes);
+
+    // ✅ FIX: JEDNODUŠŠÍ randomizace - jen shuffle a vzít první prvek
+    // Toto je spolehlivější než kombinace shuffle + random_int
     shuffle($jokes);
 
-    // Použít random_int() místo array_rand() pro kryptograficky bezpečnější náhodnost
-    try {
-        $index = random_int(0, count($jokes) - 1);
-    } catch (Exception $e) {
-        // Fallback na array_rand pokud random_int selže
-        $index = array_rand($jokes);
-    }
+    $selectedJoke = $jokes[0];
+    $selectedIndex = 0; // Po shuffle je to vždy první prvek
 
-    return $jokes[$index];
+    error_log("get_joke.php: getLocalJoke() - After shuffle, selected joke: " . substr($selectedJoke, 0, 30) . "...");
+
+    return [
+        'joke' => $selectedJoke,
+        'debug' => [
+            'total_jokes' => $totalJokes,
+            'selected_index' => $selectedIndex,
+            'method' => 'shuffle_first',
+            'timestamp' => time(),
+            'microtime' => microtime(true)
+        ]
+    ];
 }

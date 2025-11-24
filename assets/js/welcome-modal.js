@@ -21,6 +21,17 @@ async function showWelcomeModal(userName, userRole) {
     }
 
     const jokeData = await jokeResponse.json();
+
+    // ✅ DEBUG: Výpis co API vrátilo
+    console.log('=== WELCOME MODAL DEBUG ===');
+    console.log('Response data:', jokeData);
+    console.log('Source:', jokeData.source);
+    console.log('Joke:', jokeData.joke);
+    if (jokeData.debug) {
+      console.log('Debug info:', jokeData.debug);
+    }
+    console.log('=========================');
+
     const joke = jokeData.joke || 'Přeji ti krásný den! 😊';
 
     // BEZPEČNOST: Escape HTML v userName a joke pro XSS protection
