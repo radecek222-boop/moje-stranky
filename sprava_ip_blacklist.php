@@ -245,6 +245,11 @@ $blacklistIPs = array_column($blacklist, 'ip_address');
     </style>
 </head>
 <body>
+    <div style="max-width: 1200px; margin: 20px auto; padding: 0 20px;">
+        <!-- ANALYTICS TABS NAVIGACE -->
+        <?php require_once __DIR__ . '/includes/analytics_tabs.php'; ?>
+    </div>
+
     <div class="container">
         <h1>Správa IP Blacklistu</h1>
 

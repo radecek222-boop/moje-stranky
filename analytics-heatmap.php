@@ -123,16 +123,25 @@ $csrfToken = generateCSRFToken();
             height: 100%;
             pointer-events: none;
             z-index: 10;
-            opacity: 0.85;
-            border: 2px dashed rgba(255, 0, 0, 0.5); /* DEBUG: červený border aby byl canvas viditelný */
+            opacity: 0.7;
             box-sizing: border-box;
+        }
+
+        #page-iframe {
+            width: 100%;
+            height: 800px;
+            border: none;
+            display: block;
         }
 
         #page-mockup {
             width: 100%;
-            min-height: 600px;
-            background: linear-gradient(180deg, #f0f0f0 0%, #ffffff 100%);
-            padding: 20px;
+            min-height: 800px;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
         }
 
         .legend {
@@ -220,10 +229,13 @@ $csrfToken = generateCSRFToken();
             <div class="control-group">
                 <label>Stránka:</label>
                 <select id="page-selector">
-                    <option value="https://www.wgs-service.cz/">Hlavní stránka</option>
-                    <option value="https://www.wgs-service.cz/novareklamace.php">Nová reklamace</option>
-                    <option value="https://www.wgs-service.cz/seznam.php">Seznam reklamací</option>
-                    <option value="https://www.wgs-service.cz/admin.php">Admin</option>
+                    <option value="https://www.wgs-service.cz/" data-path="/">DOMŮ</option>
+                    <option value="https://www.wgs-service.cz/novareklamace.php" data-path="/novareklamace.php">OBJEDNAT SERVIS</option>
+                    <option value="https://www.wgs-service.cz/nasesluzby.php" data-path="/nasesluzby.php">NAŠE SLUŽBY</option>
+                    <option value="https://www.wgs-service.cz/cenik.php" data-path="/cenik.php">CENÍK</option>
+                    <option value="https://www.wgs-service.cz/onas.php" data-path="/onas.php">O NÁS</option>
+                    <option value="https://www.wgs-service.cz/aktuality.php" data-path="/aktuality.php">AKTUALITY</option>
+                    <option value="https://www.wgs-service.cz/login.php" data-path="/login.php">PŘIHLÁŠENÍ</option>
                 </select>
             </div>
 
@@ -290,8 +302,9 @@ $csrfToken = generateCSRFToken();
 
         <div id="heatmap-container">
             <div id="page-mockup">
-                <div class="loading">Vyberte parametry a klikněte na "Načíst Heatmap"</div>
+                <div>Vyberte stránku a klikněte na "Načíst Heatmap"</div>
             </div>
+            <iframe id="page-iframe" style="display: none;"></iframe>
             <canvas id="heatmap-canvas"></canvas>
         </div>
 
@@ -309,13 +322,17 @@ $csrfToken = generateCSRFToken();
         // Vykreslit legendu
         HeatmapRenderer.renderLegend('legend-container');
 
-        // Resize canvas podle page-mockup
+        // Resize canvas podle iframe nebo mockup
         function resizeCanvas() {
-            const container = document.getElementById('page-mockup');
+            const iframe = document.getElementById('page-iframe');
+            const mockup = document.getElementById('page-mockup');
             const canvas = document.getElementById('heatmap-canvas');
 
+            // Použít iframe pokud je viditelný, jinak mockup
+            const container = iframe.style.display !== 'none' ? iframe : mockup;
+
             const width = container.offsetWidth;
-            const height = container.offsetHeight;
+            const height = container.offsetHeight || 800;
 
             console.log('[Heatmap] Resize canvas:', width, 'x', height, 'px');
 
@@ -333,6 +350,30 @@ $csrfToken = generateCSRFToken();
             }
         }
 
+        // Načíst stránku do iframe
+        function nacistStranku(url) {
+            const iframe = document.getElementById('page-iframe');
+            const mockup = document.getElementById('page-mockup');
+
+            // Použít relativní cestu pro iframe (stejná doména)
+            const selectedOption = document.querySelector('#page-selector option:checked');
+            const relativePath = selectedOption.dataset.path || '/';
+
+            console.log('[Heatmap] Načítám stránku:', relativePath);
+
+            // Skrýt mockup, zobrazit iframe
+            mockup.style.display = 'none';
+            iframe.style.display = 'block';
+
+            // Přidat parametr pro zakázání trackingu v iframe
+            iframe.src = relativePath + (relativePath.includes('?') ? '&' : '?') + '_heatmap_preview=1';
+
+            iframe.onload = function() {
+                console.log('[Heatmap] Stránka načtena');
+                resizeCanvas();
+            };
+        }
+
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
@@ -342,7 +383,9 @@ $csrfToken = generateCSRFToken();
             const deviceType = document.getElementById('device-selector').value;
             const type = document.getElementById('type-selector').value;
 
-            document.getElementById('page-mockup').innerHTML = '<div class="loading">Načítám data...</div>';
+            // Nejprve načíst stránku do iframe
+            nacistStranku(pageUrl);
+
             document.getElementById('stats-container').style.display = 'none';
 
             try {
@@ -368,36 +411,43 @@ $csrfToken = generateCSRFToken();
                         document.getElementById('stat-max').textContent = currentData.max_intensity;
                         document.getElementById('stat-points').textContent = currentData.points_count.toLocaleString();
 
-                        document.getElementById('page-mockup').innerHTML = '<div style="min-height: 600px; padding: 40px;">Mockup stránky (Click Heatmap)<br>Klikněte na různá místa...</div>';
-                        resizeCanvas();
-                        HeatmapRenderer.renderClickHeatmap(currentData);
+                        // Počkat na načtení iframe a pak vykreslit
+                        setTimeout(() => {
+                            resizeCanvas();
+                            HeatmapRenderer.renderClickHeatmap(currentData);
+                        }, 500);
                     } else {
                         document.getElementById('stat-total').textContent = currentData.total_views.toLocaleString();
                         document.getElementById('stat-max').textContent = '100%';
                         document.getElementById('stat-points').textContent = currentData.buckets_count;
 
-                        document.getElementById('page-mockup').innerHTML = '<div style="min-height: 1000px; padding: 40px;">Mockup stránky (Scroll Heatmap)<br>Scrollujte dolů...</div>';
-                        resizeCanvas();
-                        HeatmapRenderer.renderScrollHeatmap(currentData);
+                        setTimeout(() => {
+                            resizeCanvas();
+                            HeatmapRenderer.renderScrollHeatmap(currentData);
+                        }, 500);
                     }
 
                     // Zobrazit geolokační statistiky
                     zobrazitGeoStats(currentData.geo_stats, type);
                 } else {
-                    document.getElementById('page-mockup').innerHTML = `<div class="error">Chyba: ${result.message}</div>`;
+                    // Zobrazit chybu - ale stránka se stále zobrazí v iframe
+                    console.warn('[Heatmap] API chyba:', result.message);
                     document.getElementById('geo-stats-container').style.display = 'none';
                 }
             } catch (error) {
                 console.error('Chyba při načítání heatmap:', error);
-                document.getElementById('page-mockup').innerHTML = `<div class="error">Síťová chyba: ${error.message}</div>`;
             }
         });
 
         // Načtení demo dat pro testování
         document.getElementById('load-demo').addEventListener('click', () => {
             const type = document.getElementById('type-selector').value;
+            const pageUrl = document.getElementById('page-selector').value;
 
             console.log('[Heatmap] Generuji demo data pro typ:', type);
+
+            // Načíst stránku do iframe
+            nacistStranku(pageUrl);
 
             if (type === 'click') {
                 // Generovat náhodná click data
@@ -425,9 +475,11 @@ $csrfToken = generateCSRFToken();
                 document.getElementById('stat-max').textContent = currentData.max_intensity;
                 document.getElementById('stat-points').textContent = currentData.points_count.toLocaleString();
 
-                document.getElementById('page-mockup').innerHTML = '<div style="min-height: 600px; padding: 40px;"><h2>Demo Click Heatmap</h2><p>Toto jsou testovací data pro vizualizaci click heatmap.</p></div>';
-                resizeCanvas();
-                HeatmapRenderer.renderClickHeatmap(currentData);
+                // Počkat na načtení iframe a pak vykreslit
+                setTimeout(() => {
+                    resizeCanvas();
+                    HeatmapRenderer.renderClickHeatmap(currentData);
+                }, 500);
 
             } else {
                 // Generovat scroll buckets (0, 10, 20, ..., 100)
@@ -452,9 +504,10 @@ $csrfToken = generateCSRFToken();
                 document.getElementById('stat-max').textContent = Math.round(currentData.max_reach);
                 document.getElementById('stat-points').textContent = currentData.buckets_count;
 
-                document.getElementById('page-mockup').innerHTML = '<div style="min-height: 1200px; padding: 40px;"><h2>Demo Scroll Heatmap</h2><p>Scrollujte dolů...</p><br><br><br><br><p>Více obsahu...</p><br><br><br><br><p>Ještě více...</p><br><br><br><br><p>A ještě...</p></div>';
-                resizeCanvas();
-                HeatmapRenderer.renderScrollHeatmap(currentData);
+                setTimeout(() => {
+                    resizeCanvas();
+                    HeatmapRenderer.renderScrollHeatmap(currentData);
+                }, 500);
             }
 
             console.log('[Heatmap] Demo data načtena:', currentData);
