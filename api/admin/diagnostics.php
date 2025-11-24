@@ -184,7 +184,7 @@ switch ($action) {
 
     // ==================== CHECK JS ERRORS ====================
         case 'check_js_errors':
-            $jsLogFile = __DIR__ . '/../logs/js_errors.log';
+            $jsLogFile = LOGS_PATH . '/js_errors.log';
             $jsErrors = [];
 
             if (file_exists($jsLogFile)) {
@@ -366,9 +366,9 @@ switch ($action) {
 
     // ==================== GET RECENT ERRORS ====================
         case 'get_recent_errors':
-            $phpErrorsFile = __DIR__ . '/../logs/php_errors.log';
-            $jsErrorsFile = __DIR__ . '/../logs/js_errors.log';
-            $securityLogFile = __DIR__ . '/../logs/security.log';
+            $phpErrorsFile = LOGS_PATH . '/php_errors.log';
+            $jsErrorsFile = LOGS_PATH . '/js_errors.log';
+            $securityLogFile = LOGS_PATH . '/security.log';
 
             $phpErrors = [];
             $jsErrors = [];
@@ -806,7 +806,7 @@ Stack: %s
             $stack
         );
 
-        $logFile = __DIR__ . '/../../logs/js_errors.log';
+        $logFile = LOGS_PATH . '/js_errors.log';
         $logDir = dirname($logFile);
         
         if (!is_dir($logDir)) {
