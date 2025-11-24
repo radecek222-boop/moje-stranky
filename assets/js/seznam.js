@@ -2714,6 +2714,9 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
       return;
     }
 
+    // Zobrazit loading overlay
+    showLoading('Odesílám email zákazníkovi... Prosím čekejte');
+
     // Získat CSRF token
     const csrfToken = await getCSRFToken();
 
@@ -2728,6 +2731,9 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
     });
 
     const data = await odpoved.json();
+
+    // Skrýt loading overlay
+    hideLoading();
 
     if (data.success) {
       logger.log('✓ Email o pokusu o kontakt odeslán zákazníkovi');
@@ -2749,6 +2755,8 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
   } catch (chyba) {
     logger.error('❌ Chyba při odesílání kontaktního emailu:', chyba);
     showToast('Nepodařilo se odeslat email', 'error');
+    // Skrýt loading overlay i při chybě
+    hideLoading();
   }
 }
 
