@@ -598,3 +598,65 @@ textarea.form-input {
 .wgs-modal .modal-content {
   margin: 0 auto !important;
 }
+
+/* ============================================
+   FIX: Bílé pozadí modalu = TMAVÝ TEXT V INPUTECH
+   ============================================ */
+
+#editNotificationModal input[type="text"],
+#editNotificationModal input[type="email"],
+#editNotificationModal input[type="number"],
+#editNotificationModal textarea,
+#editNotificationModal select,
+.modal input[type="text"],
+.modal input[type="email"],
+.modal input[type="number"],
+.modal textarea,
+.modal select {
+  /* Světlé pozadí pro inputy v bílém modalu */
+  background: #f9f9f9 !important;
+
+  /* TMAVÝ TEXT - viditelný na světlém pozadí */
+  color: #000000 !important;
+
+  /* Border */
+  border: 1px solid #ddd !important;
+
+  /* Padding */
+  padding: 0.75rem !important;
+
+  /* Font */
+  font-size: 0.95rem !important;
+}
+
+/* Focus state */
+#editNotificationModal input:focus,
+#editNotificationModal textarea:focus,
+#editNotificationModal select:focus,
+.modal input:focus,
+.modal textarea:focus,
+.modal select:focus {
+  /* Světlejší pozadí při focusu */
+  background: #ffffff !important;
+
+  /* Výraznější border */
+  border-color: #2196F3 !important;
+
+  /* Outline */
+  outline: 2px solid rgba(33, 150, 243, 0.1) !important;
+}
+
+/* Placeholder text */
+#editNotificationModal input::placeholder,
+#editNotificationModal textarea::placeholder,
+.modal input::placeholder,
+.modal textarea::placeholder {
+  /* Šedý placeholder - viditelný na světlém pozadí */
+  color: #999999 !important;
+}
+
+/* Labels - také tmavé */
+#editNotificationModal .form-label,
+.modal .form-label {
+  color: #333333 !important;
+}
