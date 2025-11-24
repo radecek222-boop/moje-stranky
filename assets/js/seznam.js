@@ -24,6 +24,76 @@ async function getCSRFToken() {
   }
 }
 
+// === TOAST NOTIFICATION FUNKCE ===
+function showToast(message, type = 'info') {
+  // Odstranit existující toast pokud existuje
+  const existingToast = document.getElementById('wgs-toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+
+  // Vytvořit nový toast element
+  const toast = document.createElement('div');
+  toast.id = 'wgs-toast';
+  toast.textContent = message;
+
+  // Styly pro toast
+  toast.style.cssText = `
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#333'};
+    color: white;
+    padding: 16px 24px;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 10000;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 250px;
+    max-width: 400px;
+    animation: slideIn 0.3s ease-out;
+  `;
+
+  // Přidat animaci
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  `;
+
+  if (!document.getElementById('wgs-toast-styles')) {
+    style.id = 'wgs-toast-styles';
+    document.head.appendChild(style);
+  }
+
+  document.body.appendChild(toast);
+
+  // Automaticky odstranit po 3 sekundách
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease-in';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
 // === GLOBÁLNÍ PROMĚNNÉ ===
 let WGS_DATA_CACHE = [];
 let ACTIVE_FILTER = 'all';
