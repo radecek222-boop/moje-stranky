@@ -601,6 +601,46 @@ function buildSpaydPayload(data) {
   return parts.join('*');
 }
 
+function renderQrCode(qrElement, qrText, size, contextLabel = '') {
+  if (!window.QRCode || typeof QRCode.toCanvas !== 'function') {
+    throw new Error('Knihovna pro QR kódy není načtena');
+  }
+
+  const drawWithLevel = (level) => {
+    const canvas = document.createElement('canvas');
+
+    QRCode.toCanvas(
+      canvas,
+      qrText,
+      {
+        width: size,
+        height: size,
+        margin: 1,
+        errorCorrectionLevel: level
+      },
+      (err) => {
+        if (err) {
+          const isOverflow = /overflow/i.test(err.message || '');
+
+          if (level === 'M' && isOverflow) {
+            logger.warn(`QR payload příliš dlouhý${contextLabel ? ' (' + contextLabel + ')' : ''}, zkouším nižší úroveň korekce (L)`);
+            return drawWithLevel('L');
+          }
+
+          logger.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
+          qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
+          return;
+        }
+
+        qrElement.innerHTML = '';
+        qrElement.appendChild(canvas);
+      }
+    );
+  };
+
+  drawWithLevel('M');
+}
+
 // === NOTIFICATIONS ===
 function showSuccess(message) {
   alert(message);
@@ -914,14 +954,7 @@ function generatePaymentQR() {
         logger.log(`Generating QR for ${payment.name}:`, qrText);
 
         try {
-          new QRCode(qrElement, {
-            text: qrText,
-            width: 180,
-            height: 180,
-            colorDark: "#1a1a1a",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.M
-          });
+          renderQrCode(qrElement, qrText, 180, payment.name);
         } catch (error) {
           logger.error(`Failed to generate QR code for ${payment.name}:`, error);
           qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
@@ -1119,14 +1152,7 @@ function generateSingleEmployeeQR(index) {
     logger.log(`Generating single QR for ${emp.name}:`, qrText);
 
     try {
-      new QRCode(qrElement, {
-        text: qrText,
-        width: 220,
-        height: 220,
-        colorDark: "#1a1a1a",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.M
-      });
+      renderQrCode(qrElement, qrText, 220, emp.name);
     } catch (error) {
       logger.error(`Failed to generate QR code for ${emp.name}:`, error);
       qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';

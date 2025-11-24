@@ -12,6 +12,12 @@
  * - check_code_analysis, ping, log_client_error
  */
 
+// Základní cesty a konfigurace
+$projectRoot = realpath(__DIR__ . '/../..') ?: __DIR__ . '/../..';
+if (!defined('LOGS_PATH')) {
+    define('LOGS_PATH', $projectRoot . '/logs');
+}
+
 // Načíst akci
 $action = $_GET['action'] ?? $_POST['action'] ?? 'unknown';
 
