@@ -17,7 +17,8 @@ require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
 
-// Centrally zachytit fatální chyby a vrátit JSON místo prázdného těla
+// Centrálně zachytit fatální chyby a vrátit JSON místo prázdného těla
+// SECURITY: Detaily logovat, ale NEPOSÍLAT klientovi (Codex review P1)
 register_shutdown_function(function () {
     $error = error_get_last();
     if ($error === null) {
@@ -29,7 +30,15 @@ register_shutdown_function(function () {
         return;
     }
 
-    // Vyčistit buffery, pokud ještě existují (mohou obsahovat nedokončený output)
+    // Logovat detaily pro debugging (pouze server-side)
+    error_log(sprintf(
+        '[Track Heatmap FATAL] %s in %s on line %d',
+        $error['message'],
+        $error['file'],
+        $error['line']
+    ));
+
+    // Vyčistit buffery
     while (ob_get_level() > 0) {
         ob_end_clean();
     }
@@ -37,10 +46,10 @@ register_shutdown_function(function () {
     http_response_code(500);
     header('Content-Type: application/json; charset=utf-8');
 
+    // SECURITY: Pouze generická zpráva klientovi, žádné detaily!
     $payload = [
         'status' => 'error',
-        'message' => 'Neočekávaná chyba serveru',
-        'details' => sprintf('%s in %s on line %d', $error['message'], $error['file'], $error['line'])
+        'message' => 'Neočekávaná chyba serveru'
     ];
 
     echo json_encode($payload, JSON_UNESCAPED_UNICODE);
@@ -193,7 +202,8 @@ try {
 
             // UPSERT: INSERT nebo UPDATE click_count
             // POZN: VALUES() nefunguje v MariaDB 10.3+ - vrací NULL
-            // Řešení: Použít COALESCE pro viewport (uložit první hodnotu)
+            // Řešení: Rolling average pomocí více parametrů
+            // Vzorec: new_avg = (old_avg * count + new_value) / (count + 1)
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_analytics_heatmap_clicks (
                     page_url,
@@ -218,8 +228,14 @@ try {
                 )
                 ON DUPLICATE KEY UPDATE
                     click_count = click_count + 1,
-                    viewport_width_avg = COALESCE(viewport_width_avg, :viewport_width_upd),
-                    viewport_height_avg = COALESCE(viewport_height_avg, :viewport_height_upd),
+                    viewport_width_avg = IF(:vw_check IS NOT NULL,
+                        (COALESCE(viewport_width_avg, :vw_default) * click_count + :vw_new) / (click_count + 1),
+                        viewport_width_avg
+                    ),
+                    viewport_height_avg = IF(:vh_check IS NOT NULL,
+                        (COALESCE(viewport_height_avg, :vh_default) * click_count + :vh_new) / (click_count + 1),
+                        viewport_height_avg
+                    ),
                     last_click = NOW()
             ");
 
@@ -230,8 +246,12 @@ try {
                 'click_y_percent' => $yPercent,
                 'viewport_width' => $viewportWidth,
                 'viewport_height' => $viewportHeight,
-                'viewport_width_upd' => $viewportWidth,
-                'viewport_height_upd' => $viewportHeight
+                'vw_check' => $viewportWidth,
+                'vw_default' => $viewportWidth,
+                'vw_new' => $viewportWidth,
+                'vh_check' => $viewportHeight,
+                'vh_default' => $viewportHeight,
+                'vh_new' => $viewportHeight
             ]);
 
             $clicksAggregated++;
@@ -261,6 +281,7 @@ try {
 
             // UPSERT: INSERT nebo UPDATE reach_count
             // POZN: VALUES() nefunguje v MariaDB 10.3+ - vrací NULL
+            // Řešení: Rolling average pomocí více parametrů
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_analytics_heatmap_scroll (
                     page_url,
@@ -283,8 +304,14 @@ try {
                 )
                 ON DUPLICATE KEY UPDATE
                     reach_count = reach_count + 1,
-                    viewport_width_avg = COALESCE(viewport_width_avg, :viewport_width_upd),
-                    viewport_height_avg = COALESCE(viewport_height_avg, :viewport_height_upd),
+                    viewport_width_avg = IF(:vw_check IS NOT NULL,
+                        (COALESCE(viewport_width_avg, :vw_default) * reach_count + :vw_new) / (reach_count + 1),
+                        viewport_width_avg
+                    ),
+                    viewport_height_avg = IF(:vh_check IS NOT NULL,
+                        (COALESCE(viewport_height_avg, :vh_default) * reach_count + :vh_new) / (reach_count + 1),
+                        viewport_height_avg
+                    ),
                     last_reach = NOW()
             ");
 
@@ -294,8 +321,12 @@ try {
                 'scroll_depth_bucket' => $bucket,
                 'viewport_width' => $viewportWidth,
                 'viewport_height' => $viewportHeight,
-                'viewport_width_upd' => $viewportWidth,
-                'viewport_height_upd' => $viewportHeight
+                'vw_check' => $viewportWidth,
+                'vw_default' => $viewportWidth,
+                'vw_new' => $viewportWidth,
+                'vh_check' => $viewportHeight,
+                'vh_default' => $viewportHeight,
+                'vh_new' => $viewportHeight
             ]);
 
             $scrollBucketsUpdated++;
@@ -345,15 +376,6 @@ try {
     sendJsonError('Neočekávaná chyba serveru', 500);
 }
 
-/**
- * Pomocná funkce pro sanitizaci vstupu
- */
-function sanitizeInput($input): ?string
-{
-    if ($input === null || $input === '') {
-        return null;
-    }
-
-    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-}
+// POZNÁMKA: sanitizeInput() je definována v config/config.php (loadována přes init.php)
+// NEPOUŽÍVAT lokální definici - způsobí "Cannot redeclare sanitizeInput()" fatal error!
 ?>
