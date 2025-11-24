@@ -118,7 +118,7 @@
         } catch (err) {
             console.error('[Heatmap Tracker] Network error:', err);
             clickBuffer.unshift(...data.clicks);
-            data.scroll_depths.forEach(s => scrollDepths.add(s)); // OPRAVA: používat scroll_depths
+            data.scrolls.forEach(s => scrollDepths.add(s));
         }
     }
 
@@ -142,7 +142,7 @@
                     page_url: window.location.href,
                     device_type: deviceType,
                     clicks: clickBuffer,
-                    scroll_depths: Array.from(scrollDepths), // OPRAVA: scroll_depths místo scrolls
+                    scrolls: Array.from(scrollDepths),
                     csrf_token: csrfToken
                 };
 
