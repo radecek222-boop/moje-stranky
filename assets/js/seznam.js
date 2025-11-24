@@ -637,7 +637,7 @@ async function reopenOrder(id) {
     alert(t('record_not_found'));
     return;
   }
-  
+
   const customerName = Utils.getCustomerName(record);
   const product = Utils.getProduct(record);
   
@@ -705,6 +705,9 @@ async function reopenOrder(id) {
     alert(t('error_reopening_order') + ': ' + e.message);
   }
 }
+
+// Export pro inline event handler v seznam.php
+window.reopenOrder = reopenOrder;
 
 // === ZOBRAZENÍ HISTORIE PDF Z PŮVODNÍ ZAKÁZKY ===
 async function showHistoryPDF(originalReklamaceId) {
