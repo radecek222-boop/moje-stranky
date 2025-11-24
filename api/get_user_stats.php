@@ -81,6 +81,11 @@ try {
     $stats = $stmt->fetch(PDO::FETCH_ASSOC);
 
     // Získat počet nepřečtených poznámek (notifikací)
+    // Připravit parametry pro notifikační dotaz
+    $notifParams = $params; // Zkopírovat existující parametry (role-based)
+    $notifParams[':user_email'] = $userEmail;
+    $notifParams[':user_email_author'] = $userEmail;
+
     $sqlNotifications = "
         SELECT COUNT(*) as unread_count
         FROM wgs_notes n
@@ -92,7 +97,7 @@ try {
     ";
 
     $stmtNotif = $pdo->prepare($sqlNotifications);
-    $stmtNotif->execute($params);
+    $stmtNotif->execute($notifParams);
     $notificationCount = (int) $stmtNotif->fetchColumn();
 
     // Formátovat výstup
