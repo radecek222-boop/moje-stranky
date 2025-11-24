@@ -33,6 +33,7 @@ echo "<!DOCTYPE html>
     <p>Tento test zavolá skutečné API pomocí POST requestu (stejně jako JavaScript)</p>
 
     <button onclick='testAPI()'>Zavolat API</button>
+    <button onclick='testDebugAPI()'>Zavolat DEBUG API</button>
     <button onclick='testWithoutCSRF()'>Test BEZ CSRF tokenu</button>
 
     <h2>CSRF Token v session:</h2>
@@ -104,6 +105,45 @@ async function testAPI() {
 
     } catch (error) {
         resultsDiv.innerHTML += '<h2>Network Error:</h2>';
+        resultsDiv.innerHTML += '<pre class=\"error\">' + error.toString() + '</pre>';
+    }
+}
+
+async function testDebugAPI() {
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '<h2>Volám DEBUG API...</h2>';
+
+    const testData = {
+        page_url: 'https://www.wgs-service.cz/test.php',
+        device_type: 'desktop',
+        clicks: [
+            { x_percent: 50, y_percent: 30, viewport_width: 1920, viewport_height: 1080 }
+        ],
+        scroll_depths: [0, 10, 20],
+        csrf_token: csrfToken
+    };
+
+    resultsDiv.innerHTML += '<h2>Request Data:</h2><pre>' + JSON.stringify(testData, null, 2) + '</pre>';
+
+    try {
+        const response = await fetch('/api/track_heatmap_debug.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify(testData)
+        });
+
+        resultsDiv.innerHTML += '<h2>HTTP Status:</h2>';
+        resultsDiv.innerHTML += '<pre class=\"' + (response.ok ? 'success' : 'error') + '\">' +
+                                response.status + ' ' + response.statusText + '</pre>';
+
+        const text = await response.text();
+        resultsDiv.innerHTML += '<h2>Debug Output:</h2>';
+        resultsDiv.innerHTML += '<pre>' + htmlEscape(text) + '</pre>';
+
+    } catch (error) {
         resultsDiv.innerHTML += '<pre class=\"error\">' + error.toString() + '</pre>';
     }
 }
