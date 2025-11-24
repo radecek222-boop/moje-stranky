@@ -19,13 +19,18 @@ try {
         exit;
     }
 
-    $pdo = getDbConnection();
-
-    // Získat informace o uživateli
+    // ✅ PERFORMANCE FIX: Načíst session data a uvolnit zámek
+    // Audit 2025-11-24: Welcome modal stats - vysoká frekvence načítání
     $userId = $_SESSION['user_id'] ?? null;
     $userEmail = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? null;
     $userRole = strtolower(trim($_SESSION['role'] ?? 'guest'));
     $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+    $userName = $_SESSION['user_name'] ?? 'Uživatel';
+
+    // KRITICKÉ: Uvolnit session lock pro paralelní zpracování
+    session_write_close();
+
+    $pdo = getDbConnection();
 
     // Sestavit WHERE podmínky podle role (stejná logika jako v load.php)
     $whereParts = [];
@@ -112,7 +117,7 @@ try {
             'notifications' => $notificationCount
         ],
         'user' => [
-            'name' => $_SESSION['user_name'] ?? 'Uživatel',
+            'name' => $userName,
             'role' => $userRole,
             'is_admin' => $isAdmin
         ]

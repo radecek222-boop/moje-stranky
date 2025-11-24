@@ -22,6 +22,13 @@ require_once __DIR__ . '/../includes/api_response.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
+    // ✅ PERFORMANCE FIX: Načíst admin status a uvolnit zámek
+    // Audit 2025-11-24: Ceník API - vysoký objem GET requestů
+    $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+
+    // KRITICKÉ: Uvolnit session lock pro paralelní zpracování
+    session_write_close();
+
     $pdo = getDbConnection();
 
     // Parametry
@@ -91,7 +98,7 @@ try {
             }
 
             // Admin check
-            if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+            if (!$isAdmin) {
                 sendJsonError('Přístup odepřen', 403);
             }
 
@@ -161,7 +168,7 @@ try {
             }
 
             // Admin check
-            if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+            if (!$isAdmin) {
                 sendJsonError('Přístup odepřen', 403);
             }
 
@@ -220,7 +227,7 @@ try {
             }
 
             // Admin check
-            if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+            if (!$isAdmin) {
                 sendJsonError('Přístup odepřen', 403);
             }
 
@@ -248,7 +255,7 @@ try {
             }
 
             // Admin check
-            if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+            if (!$isAdmin) {
                 sendJsonError('Přístup odepřen', 403);
             }
 
