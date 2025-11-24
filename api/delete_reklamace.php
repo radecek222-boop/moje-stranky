@@ -41,6 +41,13 @@ try {
         return;
     }
 
+    // ✅ PERFORMANCE FIX: Načíst session data a uvolnit zámek
+    // Audit 2025-11-24: DELETE operations - může trvat delší dobu
+    $currentUserId = $_SESSION['user_id'] ?? 'admin';
+
+    // KRITICKÉ: Uvolnit session lock pro paralelní zpracování
+    session_write_close();
+
     $reklamaceId = $input['reklamace_id'] ?? $input['id'] ?? null;
     $reference = $input['reference'] ?? null;
 
@@ -183,7 +190,7 @@ try {
 
         $auditStmt = $pdo->prepare('INSERT INTO wgs_audit_log (user_id, action, details, created_at) VALUES (:user_id, :action, :details, NOW())');
         $auditStmt->execute([
-            ':user_id' => $_SESSION['user_id'] ?? 'admin',
+            ':user_id' => $currentUserId,
             ':action' => 'delete_reklamace',
             ':details' => $details
         ]);
