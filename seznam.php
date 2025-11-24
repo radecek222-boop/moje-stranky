@@ -998,26 +998,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log(`[EMERGENCY] Tlačítko kliknuto: ${action}`, { id, url });
 
     switch (action) {
-      case 'reopenOrder':
-        if (!id) {
-          console.error('[EMERGENCY] ❌ ID chybí!');
-          break;
-        }
-
-        // Zabránit duplicitnímu spuštění (normální handler v seznam.js)
-        e.stopPropagation();
-        e.preventDefault();
-
-        console.log('[EMERGENCY V5] 🔄 Delegování na novou funkci reopenOrder()');
-
-        // Delegovat na novou funkci ze seznam.js, která provádí klonování
-        if (typeof window.reopenOrder === 'function') {
-          window.reopenOrder(id);
-        } else {
-          console.error('[EMERGENCY] ❌ Funkce reopenOrder() není k dispozici!');
-          alert('Chyba: Funkce pro znovuotevření zakázky není načtena. Obnovte stránku.');
-        }
-        break;
+      // case 'reopenOrder' - REMOVED: normální handler v seznam.js funguje správně
 
       case 'showContactMenu':
         if (id && typeof showContactMenu === 'function') {
