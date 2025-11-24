@@ -16,6 +16,7 @@ require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
+require_once __DIR__ . '/../includes/geoip_helper.php';
 
 // Centrálně zachytit fatální chyby a vrátit JSON místo prázdného těla
 // SECURITY: Detaily logovat, ale NEPOSÍLAT klientovi (Codex review P1)
@@ -111,6 +112,28 @@ try {
     // ✅ PERFORMANCE FIX: Uvolnit session lock pro paralelní zpracování
     // Audit 2025-11-24: Heatmap tracking - vysoká frekvence requestů
     session_write_close();
+
+    // ========================================
+    // GEOLOKACE Z IP ADRESY
+    // ========================================
+    $geoData = null;
+    $countryCode = null;
+    $city = null;
+    $latitude = null;
+    $longitude = null;
+
+    // Získat skutečnou IP klienta (s podporou proxy/Cloudflare)
+    $realClientIp = GeoIPHelper::ziskejKlientIP();
+
+    // Získat geolokaci (cached, max 3s timeout)
+    $geoData = GeoIPHelper::ziskejLokaci($realClientIp);
+
+    if ($geoData !== null) {
+        $countryCode = $geoData['country_code'] ?? null;
+        $city = $geoData['city'] ?? null;
+        $latitude = $geoData['lat'] ?? null;
+        $longitude = $geoData['lng'] ?? null;
+    }
 
     // ========================================
     // VALIDACE POVINNÝCH POLÍ
@@ -213,6 +236,10 @@ try {
                     click_count,
                     viewport_width_avg,
                     viewport_height_avg,
+                    country_code,
+                    city,
+                    latitude,
+                    longitude,
                     first_click,
                     last_click
                 ) VALUES (
@@ -223,6 +250,10 @@ try {
                     1,
                     :viewport_width,
                     :viewport_height,
+                    :country_code,
+                    :city,
+                    :latitude,
+                    :longitude,
                     NOW(),
                     NOW()
                 )
@@ -236,6 +267,10 @@ try {
                         (COALESCE(viewport_height_avg, :vh_default) * click_count + :vh_new) / (click_count + 1),
                         viewport_height_avg
                     ),
+                    country_code = COALESCE(country_code, :country_code_upd),
+                    city = COALESCE(city, :city_upd),
+                    latitude = COALESCE(latitude, :latitude_upd),
+                    longitude = COALESCE(longitude, :longitude_upd),
                     last_click = NOW()
             ");
 
@@ -246,12 +281,20 @@ try {
                 'click_y_percent' => $yPercent,
                 'viewport_width' => $viewportWidth,
                 'viewport_height' => $viewportHeight,
+                'country_code' => $countryCode,
+                'city' => $city,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
                 'vw_check' => $viewportWidth,
                 'vw_default' => $viewportWidth,
                 'vw_new' => $viewportWidth,
                 'vh_check' => $viewportHeight,
                 'vh_default' => $viewportHeight,
-                'vh_new' => $viewportHeight
+                'vh_new' => $viewportHeight,
+                'country_code_upd' => $countryCode,
+                'city_upd' => $city,
+                'latitude_upd' => $latitude,
+                'longitude_upd' => $longitude
             ]);
 
             $clicksAggregated++;
@@ -290,6 +333,10 @@ try {
                     reach_count,
                     viewport_width_avg,
                     viewport_height_avg,
+                    country_code,
+                    city,
+                    latitude,
+                    longitude,
                     first_reach,
                     last_reach
                 ) VALUES (
@@ -299,6 +346,10 @@ try {
                     1,
                     :viewport_width,
                     :viewport_height,
+                    :country_code,
+                    :city,
+                    :latitude,
+                    :longitude,
                     NOW(),
                     NOW()
                 )
@@ -312,6 +363,10 @@ try {
                         (COALESCE(viewport_height_avg, :vh_default) * reach_count + :vh_new) / (reach_count + 1),
                         viewport_height_avg
                     ),
+                    country_code = COALESCE(country_code, :country_code_upd),
+                    city = COALESCE(city, :city_upd),
+                    latitude = COALESCE(latitude, :latitude_upd),
+                    longitude = COALESCE(longitude, :longitude_upd),
                     last_reach = NOW()
             ");
 
@@ -321,12 +376,20 @@ try {
                 'scroll_depth_bucket' => $bucket,
                 'viewport_width' => $viewportWidth,
                 'viewport_height' => $viewportHeight,
+                'country_code' => $countryCode,
+                'city' => $city,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
                 'vw_check' => $viewportWidth,
                 'vw_default' => $viewportWidth,
                 'vw_new' => $viewportWidth,
                 'vh_check' => $viewportHeight,
                 'vh_default' => $viewportHeight,
-                'vh_new' => $viewportHeight
+                'vh_new' => $viewportHeight,
+                'country_code_upd' => $countryCode,
+                'city_upd' => $city,
+                'latitude_upd' => $latitude,
+                'longitude_upd' => $longitude
             ]);
 
             $scrollBucketsUpdated++;
@@ -353,7 +416,11 @@ try {
         'clicks_aggregated' => $clicksAggregated,
         'scroll_buckets_updated' => $scrollBucketsUpdated,
         'page_url' => $normalizedUrl,
-        'device_type' => $deviceType
+        'device_type' => $deviceType,
+        'geo' => $geoData ? [
+            'country' => $countryCode,
+            'city' => $city
+        ] : null
     ]);
 
 } catch (PDOException $e) {
