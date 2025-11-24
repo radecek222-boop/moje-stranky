@@ -8,7 +8,8 @@ let employees = [];
 let salaryRate = 150;
 let invoiceRate = 250;
 let currentPeriod = { month: 11, year: 2025 };
-const API_URL = 'data/psa-employees.json';
+const API_URL = 'app/psa_data.php';
+const CSRF_TOKEN = window.PSA_CSRF_TOKEN || '';
 
 // === INITIALIZATION ===
 window.addEventListener('DOMContentLoaded', () => {
@@ -58,8 +59,19 @@ async function loadData(period = null) {
   try {
     logger.log('Loading data from JSON...', period ? `for period ${period}` : '');
 
-    const response = await fetch(API_URL);
-    const data = await response.json();
+    const response = await fetch(API_URL, { credentials: 'same-origin' });
+
+    if (!response.ok) {
+      throw new Error(`Server responded with ${response.status}`);
+    }
+
+    const payload = await response.json();
+
+    if (payload.status !== 'success' || !payload.data) {
+      throw new Error(payload.message || 'Neplatná odpověď serveru');
+    }
+
+    const data = payload.data;
 
     // Load configuration
     if (data.config) {
@@ -136,11 +148,13 @@ async function saveToServer() {
   };
 
   try {
-    const response = await fetch('app/save_psa_data.php', {
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json; charset=utf-8'
+        'Content-Type': 'application/json; charset=utf-8',
+        'X-CSRF-Token': CSRF_TOKEN
       },
+      credentials: 'same-origin',
       body: JSON.stringify(data)
     });
 
@@ -533,9 +547,98 @@ function formatNumber(num) {
 
 function formatBankCode(code) {
   if (!code) return '';
-  const str = code.toString();
-  if (str.length === 3) return '0' + str;
-  return str;
+  const digits = code.toString().replace(/\D/g, '');
+  if (!digits) return '';
+  return digits.padStart(4, '0').slice(-4);
+}
+
+function normalizeAccount(account) {
+  if (!account) return '';
+  const digits = account.toString().replace(/\D/g, '');
+  if (!digits) return '';
+  const accountPart = digits.slice(-10);
+  const prefixPart = digits.length > 10 ? digits.slice(0, -10) : '';
+  return prefixPart ? `${parseInt(prefixPart, 10)}-${accountPart}` : accountPart;
+}
+
+function sanitizeMessage(message) {
+  if (!message) return '';
+  return message
+    .toString()
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\*/g, ' ')
+    .trim()
+    .slice(0, 60);
+}
+
+function buildSpaydPayload(data) {
+  const account = normalizeAccount(data.account);
+  const bank = formatBankCode(data.bank);
+  const amount = Number(data.amount);
+
+  if (!account || !bank) {
+    throw new Error('Chybí číslo účtu nebo kód banky');
+  }
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error('Neplatná částka');
+  }
+
+  const vs = data.vs ? String(data.vs).replace(/\D/g, '').slice(0, 10) : '';
+  const message = sanitizeMessage(data.message || '');
+
+  const parts = [
+    'SPD',
+    '1.0',
+    `ACC:${account}/${bank}`,
+    `AM:${amount.toFixed(2)}`,
+    'CC:CZK'
+  ];
+
+  if (vs) parts.push(`X-VS:${vs}`);
+  if (message) parts.push(`MSG:${message}`);
+
+  return parts.join('*');
+}
+
+function renderQrCode(qrElement, qrText, size, contextLabel = '') {
+  if (!window.QRCode || typeof QRCode.toCanvas !== 'function') {
+    throw new Error('Knihovna pro QR kódy není načtena');
+  }
+
+  const drawWithLevel = (level) => {
+    const canvas = document.createElement('canvas');
+
+    QRCode.toCanvas(
+      canvas,
+      qrText,
+      {
+        width: size,
+        height: size,
+        margin: 1,
+        errorCorrectionLevel: level
+      },
+      (err) => {
+        if (err) {
+          const isOverflow = /overflow/i.test(err.message || '');
+
+          if (level === 'M' && isOverflow) {
+            logger.warn(`QR payload příliš dlouhý${contextLabel ? ' (' + contextLabel + ')' : ''}, zkouším nižší úroveň korekce (L)`);
+            return drawWithLevel('L');
+          }
+
+          logger.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
+          qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
+          return;
+        }
+
+        qrElement.innerHTML = '';
+        qrElement.appendChild(canvas);
+      }
+    );
+  };
+
+  drawWithLevel('M');
 }
 
 // === NOTIFICATIONS ===
@@ -834,25 +937,24 @@ function generatePaymentQR() {
         // BUGFIX: Clear element before generating new QR code
         qrElement.innerHTML = '';
 
-        const qrText = generateCzechPaymentString({
-          account: payment.account,
-          bank: payment.bank,
-          amount: qrAmount,
-          vs: currentPeriod.year * 100 + currentPeriod.month,
-          message: `Výplata ${payment.name} ${currentPeriod.month}/${currentPeriod.year}`
-        });
+        let qrText;
+        try {
+          qrText = generateCzechPaymentString({
+            account: payment.account,
+            bank: payment.bank,
+            amount: qrAmount,
+            vs: currentPeriod.year * 100 + currentPeriod.month,
+            message: `Výplata ${payment.name} ${currentPeriod.month}/${currentPeriod.year}`
+          });
+        } catch (err) {
+          qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err.message}</div>`;
+          return;
+        }
 
         logger.log(`Generating QR for ${payment.name}:`, qrText);
 
         try {
-          new QRCode(qrElement, {
-            text: qrText,
-            width: 180,
-            height: 180,
-            colorDark: "#1a1a1a",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.M
-          });
+          renderQrCode(qrElement, qrText, 180, payment.name);
         } catch (error) {
           logger.error(`Failed to generate QR code for ${payment.name}:`, error);
           qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
@@ -865,17 +967,7 @@ function generatePaymentQR() {
 }
 
 function generateCzechPaymentString(data) {
-  // Český formát QR platby (Short Payment Descriptor)
-  // Formát: SPD*1.0*ACC:{účet}/{banka}*AM:{částka}*CC:CZK*X-VS:{VS}*MSG:{zpráva}
-  let spayd = 'SPD*1.0*';
-  spayd += `ACC:${data.account}/${data.bank}*`;
-  spayd += `AM:${data.amount.toFixed(2)}*`;
-  spayd += `CC:CZK*`;
-  if (data.vs) {
-    spayd += `X-VS:${data.vs}*`;
-  }
-  spayd += `MSG:${data.message}`;
-  return spayd;
+  return buildSpaydPayload(data);
 }
 
 function copySWIFTDetails(name, iban, swift, amount) {
@@ -1043,25 +1135,24 @@ function generateSingleEmployeeQR(index) {
     // BUGFIX: Clear element before generating new QR code
     qrElement.innerHTML = '';
 
-    const qrText = generateCzechPaymentString({
-      account: emp.account,
-      bank: formatBankCode(emp.bank),
-      amount: amount,
-      vs: currentPeriod.year * 100 + currentPeriod.month,
-      message: `Výplata ${emp.name} ${currentPeriod.month}/${currentPeriod.year}`
-    });
+    let qrText;
+    try {
+      qrText = generateCzechPaymentString({
+        account: emp.account,
+        bank: formatBankCode(emp.bank),
+        amount: amount,
+        vs: currentPeriod.year * 100 + currentPeriod.month,
+        message: `Výplata ${emp.name} ${currentPeriod.month}/${currentPeriod.year}`
+      });
+    } catch (err) {
+      qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err.message}</div>`;
+      return;
+    }
 
     logger.log(`Generating single QR for ${emp.name}:`, qrText);
 
     try {
-      new QRCode(qrElement, {
-        text: qrText,
-        width: 220,
-        height: 220,
-        colorDark: "#1a1a1a",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.M
-      });
+      renderQrCode(qrElement, qrText, 220, emp.name);
     } catch (error) {
       logger.error(`Failed to generate QR code for ${emp.name}:`, error);
       qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
