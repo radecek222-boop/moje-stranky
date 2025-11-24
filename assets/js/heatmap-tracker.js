@@ -9,6 +9,7 @@
 
     // Config
     const CONFIG = {
+        enabled: false,      // DOČASNĚ VYPNUTO - debuguji 500 chyby
         apiUrl: '/api/track_heatmap.php',
         batchInterval: 5000, // Posílat data každých 5 sekund
         maxBatchSize: 50,    // Max 50 událostí v jednom batchi
@@ -167,6 +168,12 @@
     // INITIALIZATION
     // ========================================
     function init() {
+        // Feature flag check
+        if (!CONFIG.enabled) {
+            console.log('[Heatmap Tracker] Disabled by config');
+            return;
+        }
+
         // Získat CSRF token
         csrfToken = getCSRFToken();
         if (!csrfToken) {
