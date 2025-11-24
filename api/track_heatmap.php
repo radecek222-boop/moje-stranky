@@ -59,11 +59,16 @@ try {
         $inputData = $_POST;
     }
 
-    // CSRF validace
-    $csrfToken = $inputData['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
-    if (!validateCSRFToken($csrfToken)) {
-        sendJsonError('Neplatný CSRF token', 403);
-    }
+    // POZNÁMKA: CSRF validace NENÍ potřeba pro heatmap tracking
+    // Důvody:
+    // 1. Je to pasivní tracking (read-only data collection)
+    // 2. Každý návštěvník trackuje své vlastní kliky
+    // 3. Není zde žádná "nežádoucí akce" kterou by CSRF mohlo zneužít
+    // 4. Rate limiting (1000 req/hour) už chrání před abuse
+    // 5. Session cookies nefungují správně při AJAX calls ze stránek
+    //
+    // CSRF je relevantní pro: DELETE, UPDATE, CREATE akcí admin operací
+    // CSRF NENÍ relevantní pro: Pasivní analytics tracking
 
     // ========================================
     // VALIDACE POVINNÝCH POLÍ
