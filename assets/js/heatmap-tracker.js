@@ -102,15 +102,25 @@
                 body: JSON.stringify(data)
             });
 
+            // Přečíst tělo pouze jednou
+            const responseText = await response.text();
+
             if (!response.ok) {
-                console.error('[Heatmap Tracker] API HTTP error:', response.status);
-                console.error(await response.text());
+                console.error('[Heatmap Tracker] API HTTP error:', response.status, responseText.substring(0, 200));
                 clickBuffer.unshift(...data.clicks);
                 data.scrolls.forEach(s => scrollDepths.add(s));
                 return;
             }
 
-            const result = await response.json();
+            // Parsovat JSON z textu
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (parseErr) {
+                console.error('[Heatmap Tracker] JSON parse error:', parseErr);
+                return;
+            }
+
             if (result.status !== 'success') {
                 console.error('[Heatmap Tracker] API error:', result.message);
             }
@@ -118,7 +128,7 @@
         } catch (err) {
             console.error('[Heatmap Tracker] Network error:', err);
             clickBuffer.unshift(...data.clicks);
-            data.scroll_depths.forEach(s => scrollDepths.add(s)); // OPRAVA: používat scroll_depths
+            data.scrolls.forEach(s => scrollDepths.add(s));
         }
     }
 
@@ -142,7 +152,7 @@
                     page_url: window.location.href,
                     device_type: deviceType,
                     clicks: clickBuffer,
-                    scroll_depths: Array.from(scrollDepths), // OPRAVA: scroll_depths místo scrolls
+                    scrolls: Array.from(scrollDepths),
                     csrf_token: csrfToken
                 };
 
