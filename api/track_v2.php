@@ -23,6 +23,7 @@ require_once __DIR__ . '/../includes/SessionMerger.php';
 require_once __DIR__ . '/../includes/BotDetector.php';
 require_once __DIR__ . '/../includes/GeolocationService.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
+require_once __DIR__ . '/../includes/geoip_helper.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -51,8 +52,10 @@ try {
     // FIX P1: PDO musí být inicializováno PŘED vytvořením RateLimiter instance
     $pdo = getDbConnection();
 
+    // Získat skutečnou IP klienta (s podporou Cloudflare/proxy)
+    $clientIp = GeoIPHelper::ziskejKlientIP();
+
     // Rate limiting - 1000 požadavků za hodinu per IP
-    $clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     $rateLimiter = new RateLimiter($pdo);
 
     // FIX P1: checkLimit() vrací pole s klíčem 'allowed', ne boolean
@@ -151,21 +154,34 @@ try {
     // BLACKLIST INTERNÍCH/ADMIN STRÁNEK
     // ========================================
     // Tyto stránky vyžadují přihlášení nebo jsou admin-only
+    // POZN: Zahrnout i verze bez .php (URL rewrite)
     $blacklistedPages = [
+        // S příponou .php
         'admin.php',
         'seznam.php',
         'statistiky.php',
         'protokol.php',
         'login.php',
         'registration.php',
+        'analytics.php',
         'analytics-heatmap.php',
         'vsechny_tabulky.php',
-        'kontrola_',          // Všechny kontrola_*.php
-        'pridej_',            // Všechny pridej_*.php
-        'vycisti_',           // Všechny vycisti_*.php
-        'migrace_',           // Všechny migrace_*.php
-        'test_',              // Všechny test_*.php
-        'doplnit_',           // Všechny doplnit_*.php
+        // Bez přípony (URL rewrite)
+        'admin',
+        'seznam',
+        'statistiky',
+        'protokol',
+        'login',
+        'registration',
+        'analytics',
+        'analytics-heatmap',
+        // Prefixy (všechny soubory začínající takto)
+        'kontrola_',
+        'pridej_',
+        'vycisti_',
+        'migrace_',
+        'test_',
+        'doplnit_',
     ];
 
     // Kontrola page_url z POST/JSON dat

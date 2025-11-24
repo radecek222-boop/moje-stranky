@@ -194,15 +194,28 @@ try {
     // ========================================
     // BLACKLIST INTERNÍCH/ADMIN STRÁNEK
     // ========================================
+    // POZN: Zahrnout i verze bez .php (URL rewrite)
     $blacklistedPages = [
+        // S příponou .php
         'admin.php',
         'seznam.php',
         'statistiky.php',
         'protokol.php',
         'login.php',
         'registration.php',
+        'analytics.php',
         'analytics-heatmap.php',
         'vsechny_tabulky.php',
+        // Bez přípony (URL rewrite)
+        'admin',
+        'seznam',
+        'statistiky',
+        'protokol',
+        'login',
+        'registration',
+        'analytics',
+        'analytics-heatmap',
+        // Prefixy
         'kontrola_',
         'pridej_',
         'vycisti_',
