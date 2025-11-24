@@ -281,18 +281,6 @@ try {
     sendJsonError('Neočekávaná chyba serveru', 500);
 }
 
-/**
- * Pomocná funkce pro sanitizaci vstupu
- *
- * @param mixed $input
- * @return string|null
- */
-function sanitizeInput($input): ?string
-{
-    if ($input === null || $input === '') {
-        return null;
-    }
-
-    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-}
+// POZNÁMKA: sanitizeInput() je definována v config/config.php (loadována přes init.php)
+// NEPOUŽÍVAT lokální definici - způsobí "Cannot redeclare sanitizeInput()" fatal error!
 ?>

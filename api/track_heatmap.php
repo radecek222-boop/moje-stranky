@@ -16,8 +16,10 @@ require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
+require_once __DIR__ . '/../includes/geoip_helper.php';
 
-// Centrally zachytit fatální chyby a vrátit JSON místo prázdného těla
+// Centrálně zachytit fatální chyby a vrátit JSON místo prázdného těla
+// SECURITY: Detaily logovat, ale NEPOSÍLAT klientovi (Codex review P1)
 register_shutdown_function(function () {
     $error = error_get_last();
     if ($error === null) {
@@ -29,7 +31,15 @@ register_shutdown_function(function () {
         return;
     }
 
-    // Vyčistit buffery, pokud ještě existují (mohou obsahovat nedokončený output)
+    // Logovat detaily pro debugging (pouze server-side)
+    error_log(sprintf(
+        '[Track Heatmap FATAL] %s in %s on line %d',
+        $error['message'],
+        $error['file'],
+        $error['line']
+    ));
+
+    // Vyčistit buffery
     while (ob_get_level() > 0) {
         ob_end_clean();
     }
@@ -37,10 +47,10 @@ register_shutdown_function(function () {
     http_response_code(500);
     header('Content-Type: application/json; charset=utf-8');
 
+    // SECURITY: Pouze generická zpráva klientovi, žádné detaily!
     $payload = [
         'status' => 'error',
-        'message' => 'Neočekávaná chyba serveru',
-        'details' => sprintf('%s in %s on line %d', $error['message'], $error['file'], $error['line'])
+        'message' => 'Neočekávaná chyba serveru'
     ];
 
     echo json_encode($payload, JSON_UNESCAPED_UNICODE);
@@ -102,6 +112,61 @@ try {
     // ✅ PERFORMANCE FIX: Uvolnit session lock pro paralelní zpracování
     // Audit 2025-11-24: Heatmap tracking - vysoká frekvence requestů
     session_write_close();
+
+    // ========================================
+    // BLACKLIST IP ADRES (admin/vlastník)
+    // ========================================
+    // Tyto IP adresy jsou kompletně ignorovány v analytics
+    $blacklistedIPs = [
+        // IPv6 - Radek domácí
+        '2a00:11b1:10a2:5773:a4d3:7603:899e:d2f3',
+        '2a00:11b1:10a2:5773:',  // IPv6 prefix pro celou síť
+        // IPv4 - Radek domácí
+        '46.135.89.44',
+        // IPv6 - VPN/proxy
+        '2a09:bac2:2756:137::1f:ac',
+        '2a09:bac2:2756:',  // IPv6 prefix
+        // IPv4 - VPN/proxy
+        '104.28.114.10',
+    ];
+
+    // Získat IP klienta
+    $clientIpForBlacklist = GeoIPHelper::ziskejKlientIP();
+
+    // Kontrola blacklistu (přesná shoda nebo prefix match pro IPv6)
+    foreach ($blacklistedIPs as $blacklistedIp) {
+        // Přesná shoda
+        if ($clientIpForBlacklist === $blacklistedIp) {
+            // Tiše ukončit - nelogovat, neukládat
+            sendJsonSuccess('OK', ['ignored' => true]);
+        }
+        // Prefix match (pro IPv6 sítě)
+        if (strpos($clientIpForBlacklist, $blacklistedIp) === 0) {
+            sendJsonSuccess('OK', ['ignored' => true]);
+        }
+    }
+
+    // ========================================
+    // GEOLOKACE Z IP ADRESY
+    // ========================================
+    $geoData = null;
+    $countryCode = null;
+    $city = null;
+    $latitude = null;
+    $longitude = null;
+
+    // Získat skutečnou IP klienta (s podporou proxy/Cloudflare)
+    $realClientIp = GeoIPHelper::ziskejKlientIP();
+
+    // Získat geolokaci (cached, max 3s timeout)
+    $geoData = GeoIPHelper::ziskejLokaci($realClientIp);
+
+    if ($geoData !== null) {
+        $countryCode = $geoData['country_code'] ?? null;
+        $city = $geoData['city'] ?? null;
+        $latitude = $geoData['lat'] ?? null;
+        $longitude = $geoData['lng'] ?? null;
+    }
 
     // ========================================
     // VALIDACE POVINNÝCH POLÍ
@@ -193,7 +258,8 @@ try {
 
             // UPSERT: INSERT nebo UPDATE click_count
             // POZN: VALUES() nefunguje v MariaDB 10.3+ - vrací NULL
-            // Řešení: Použít COALESCE pro viewport (uložit první hodnotu)
+            // Řešení: Rolling average pomocí více parametrů
+            // Vzorec: new_avg = (old_avg * count + new_value) / (count + 1)
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_analytics_heatmap_clicks (
                     page_url,
@@ -203,6 +269,10 @@ try {
                     click_count,
                     viewport_width_avg,
                     viewport_height_avg,
+                    country_code,
+                    city,
+                    latitude,
+                    longitude,
                     first_click,
                     last_click
                 ) VALUES (
@@ -213,13 +283,27 @@ try {
                     1,
                     :viewport_width,
                     :viewport_height,
+                    :country_code,
+                    :city,
+                    :latitude,
+                    :longitude,
                     NOW(),
                     NOW()
                 )
                 ON DUPLICATE KEY UPDATE
                     click_count = click_count + 1,
-                    viewport_width_avg = COALESCE(viewport_width_avg, :viewport_width_upd),
-                    viewport_height_avg = COALESCE(viewport_height_avg, :viewport_height_upd),
+                    viewport_width_avg = IF(:vw_check IS NOT NULL,
+                        (COALESCE(viewport_width_avg, :vw_default) * click_count + :vw_new) / (click_count + 1),
+                        viewport_width_avg
+                    ),
+                    viewport_height_avg = IF(:vh_check IS NOT NULL,
+                        (COALESCE(viewport_height_avg, :vh_default) * click_count + :vh_new) / (click_count + 1),
+                        viewport_height_avg
+                    ),
+                    country_code = COALESCE(country_code, :country_code_upd),
+                    city = COALESCE(city, :city_upd),
+                    latitude = COALESCE(latitude, :latitude_upd),
+                    longitude = COALESCE(longitude, :longitude_upd),
                     last_click = NOW()
             ");
 
@@ -230,8 +314,20 @@ try {
                 'click_y_percent' => $yPercent,
                 'viewport_width' => $viewportWidth,
                 'viewport_height' => $viewportHeight,
-                'viewport_width_upd' => $viewportWidth,
-                'viewport_height_upd' => $viewportHeight
+                'country_code' => $countryCode,
+                'city' => $city,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'vw_check' => $viewportWidth,
+                'vw_default' => $viewportWidth,
+                'vw_new' => $viewportWidth,
+                'vh_check' => $viewportHeight,
+                'vh_default' => $viewportHeight,
+                'vh_new' => $viewportHeight,
+                'country_code_upd' => $countryCode,
+                'city_upd' => $city,
+                'latitude_upd' => $latitude,
+                'longitude_upd' => $longitude
             ]);
 
             $clicksAggregated++;
@@ -261,6 +357,7 @@ try {
 
             // UPSERT: INSERT nebo UPDATE reach_count
             // POZN: VALUES() nefunguje v MariaDB 10.3+ - vrací NULL
+            // Řešení: Rolling average pomocí více parametrů
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_analytics_heatmap_scroll (
                     page_url,
@@ -269,6 +366,10 @@ try {
                     reach_count,
                     viewport_width_avg,
                     viewport_height_avg,
+                    country_code,
+                    city,
+                    latitude,
+                    longitude,
                     first_reach,
                     last_reach
                 ) VALUES (
@@ -278,13 +379,27 @@ try {
                     1,
                     :viewport_width,
                     :viewport_height,
+                    :country_code,
+                    :city,
+                    :latitude,
+                    :longitude,
                     NOW(),
                     NOW()
                 )
                 ON DUPLICATE KEY UPDATE
                     reach_count = reach_count + 1,
-                    viewport_width_avg = COALESCE(viewport_width_avg, :viewport_width_upd),
-                    viewport_height_avg = COALESCE(viewport_height_avg, :viewport_height_upd),
+                    viewport_width_avg = IF(:vw_check IS NOT NULL,
+                        (COALESCE(viewport_width_avg, :vw_default) * reach_count + :vw_new) / (reach_count + 1),
+                        viewport_width_avg
+                    ),
+                    viewport_height_avg = IF(:vh_check IS NOT NULL,
+                        (COALESCE(viewport_height_avg, :vh_default) * reach_count + :vh_new) / (reach_count + 1),
+                        viewport_height_avg
+                    ),
+                    country_code = COALESCE(country_code, :country_code_upd),
+                    city = COALESCE(city, :city_upd),
+                    latitude = COALESCE(latitude, :latitude_upd),
+                    longitude = COALESCE(longitude, :longitude_upd),
                     last_reach = NOW()
             ");
 
@@ -294,8 +409,20 @@ try {
                 'scroll_depth_bucket' => $bucket,
                 'viewport_width' => $viewportWidth,
                 'viewport_height' => $viewportHeight,
-                'viewport_width_upd' => $viewportWidth,
-                'viewport_height_upd' => $viewportHeight
+                'country_code' => $countryCode,
+                'city' => $city,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'vw_check' => $viewportWidth,
+                'vw_default' => $viewportWidth,
+                'vw_new' => $viewportWidth,
+                'vh_check' => $viewportHeight,
+                'vh_default' => $viewportHeight,
+                'vh_new' => $viewportHeight,
+                'country_code_upd' => $countryCode,
+                'city_upd' => $city,
+                'latitude_upd' => $latitude,
+                'longitude_upd' => $longitude
             ]);
 
             $scrollBucketsUpdated++;
@@ -322,7 +449,11 @@ try {
         'clicks_aggregated' => $clicksAggregated,
         'scroll_buckets_updated' => $scrollBucketsUpdated,
         'page_url' => $normalizedUrl,
-        'device_type' => $deviceType
+        'device_type' => $deviceType,
+        'geo' => $geoData ? [
+            'country' => $countryCode,
+            'city' => $city
+        ] : null
     ]);
 
 } catch (PDOException $e) {
@@ -345,15 +476,6 @@ try {
     sendJsonError('Neočekávaná chyba serveru', 500);
 }
 
-/**
- * Pomocná funkce pro sanitizaci vstupu
- */
-function sanitizeInput($input): ?string
-{
-    if ($input === null || $input === '') {
-        return null;
-    }
-
-    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-}
+// POZNÁMKA: sanitizeInput() je definována v config/config.php (loadována přes init.php)
+// NEPOUŽÍVAT lokální definici - způsobí "Cannot redeclare sanitizeInput()" fatal error!
 ?>
