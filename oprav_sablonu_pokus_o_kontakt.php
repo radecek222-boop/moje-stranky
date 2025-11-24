@@ -102,18 +102,21 @@ Datum pokusu o kontakt: {{date}}
 
 📞 PROSÍME O ZPĚTNÉ ZAVOLÁNÍ:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Zavolejte prosím zpět na číslo: +420 725 965 826
-Nebo nám napište email na: reklamace@wgs-service.cz
+Kontaktní osoba: {{technician_name}}
+Email: {{technician_email}}
+Telefon: {{technician_phone}}
 
+Zavolejte prosím zpět na výše uvedené číslo.
 Rádi s Vámi domluvíme vhodný termín návštěvy našeho technika.
 
 S pozdravem,
+{{technician_name}}
 White Glove Service
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🌐 Web: www.wgs-service.cz
-📧 Email: reklamace@wgs-service.cz
-📱 Tel: +420 725 965 826';
+📧 Email: {{company_email}}
+📱 Tel: {{company_phone}}';
 
         $pdo->beginTransaction();
 
@@ -149,6 +152,8 @@ White Glove Service
             echo "• Odstraněn celý HTML dokument<br>";
             echo "• Převedeno na prostý text jako ostatní šablony<br>";
             echo "• Zachovány všechny proměnné ({{customer_name}}, {{order_id}}, atd.)<br>";
+            echo "• Přidány nové proměnné pro technika: {{technician_name}}, {{technician_email}}, {{technician_phone}}<br>";
+            echo "• Přidány proměnné pro firmu: {{company_email}}, {{company_phone}}<br>";
             echo "• Přidáno čitelné formátování s emoji pro přehlednost<br>";
             echo "• Aktualizováno updated_at pole<br>";
             echo "</div>";
@@ -190,6 +195,13 @@ pokusili jsme se Vás kontaktovat ohledně vaší servisní prohlídky.
 Číslo zakázky: {{order_id}}
 Produkt: {{product}}
 Adresa: {{address}}
+Datum pokusu o kontakt: {{date}}
+
+📞 PROSÍME O ZPĚTNÉ ZAVOLÁNÍ:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Kontaktní osoba: {{technician_name}}
+Email: {{technician_email}}
+Telefon: {{technician_phone}}
 ...");
         echo "</pre>";
 
