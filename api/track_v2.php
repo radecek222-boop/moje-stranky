@@ -86,6 +86,17 @@ try {
     }
 
     // ========================================
+    // NAČTENÍ INPUT DAT (pouze jednou!)
+    // ========================================
+    $rawInput = file_get_contents('php://input');
+    $inputData = json_decode($rawInput, true);
+
+    // Fallback na $_POST pokud není JSON
+    if (!$inputData) {
+        $inputData = $_POST;
+    }
+
+    // ========================================
     // BLACKLIST REFERRER DOMÉN (GitHub apod.)
     // ========================================
     $blacklistedReferrers = [
@@ -93,26 +104,70 @@ try {
         'www.github.com',
         'raw.githubusercontent.com',
         'gist.github.com',
+        'github.dev',
+        'githubusercontent.com',
     ];
 
+    // Kontrola HTTP_REFERER hlavičky
     $referrerHeader = $_SERVER['HTTP_REFERER'] ?? '';
     if (!empty($referrerHeader)) {
         $referrerHost = parse_url($referrerHeader, PHP_URL_HOST);
         if ($referrerHost) {
             foreach ($blacklistedReferrers as $blacklistedRef) {
                 if ($referrerHost === $blacklistedRef || strpos($referrerHost, $blacklistedRef) !== false) {
-                    sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'referrer']);
+                    sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'referrer_header']);
                 }
             }
         }
     }
 
-    // Získání JSON dat z request body
-    $inputData = json_decode(file_get_contents('php://input'), true);
+    // Kontrola referrer z POST dat (tracker posílá document.referrer)
+    $referrerPost = $inputData['referrer'] ?? '';
+    if (!empty($referrerPost)) {
+        $referrerHostPost = parse_url($referrerPost, PHP_URL_HOST);
+        if ($referrerHostPost) {
+            foreach ($blacklistedReferrers as $blacklistedRef) {
+                if ($referrerHostPost === $blacklistedRef || strpos($referrerHostPost, $blacklistedRef) !== false) {
+                    sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'referrer_post']);
+                }
+            }
+        }
+    }
 
-    // Fallback na $_POST pokud není JSON
-    if (!$inputData) {
-        $inputData = $_POST;
+    // ========================================
+    // BLACKLIST INTERNÍCH/ADMIN STRÁNEK
+    // ========================================
+    // Tyto stránky vyžadují přihlášení nebo jsou admin-only
+    $blacklistedPages = [
+        'admin.php',
+        'seznam.php',
+        'statistiky.php',
+        'protokol.php',
+        'login.php',
+        'registration.php',
+        'analytics-heatmap.php',
+        'vsechny_tabulky.php',
+        'kontrola_',          // Všechny kontrola_*.php
+        'pridej_',            // Všechny pridej_*.php
+        'vycisti_',           // Všechny vycisti_*.php
+        'migrace_',           // Všechny migrace_*.php
+        'test_',              // Všechny test_*.php
+        'doplnit_',           // Všechny doplnit_*.php
+    ];
+
+    // Kontrola page_url z POST/JSON dat
+    $pageUrlToCheck = $inputData['page_url'] ?? '';
+    if (!empty($pageUrlToCheck)) {
+        $parsedPageUrl = parse_url($pageUrlToCheck);
+        $pagePath = $parsedPageUrl['path'] ?? '';
+        $pageName = basename($pagePath);
+
+        foreach ($blacklistedPages as $blacklistedPage) {
+            // Přesná shoda nebo prefix match (pro kontrola_, pridej_, atd.)
+            if ($pageName === $blacklistedPage || strpos($pageName, $blacklistedPage) === 0) {
+                sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'admin_page']);
+            }
+        }
     }
 
     // ========================================
