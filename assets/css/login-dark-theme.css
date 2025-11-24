@@ -134,11 +134,15 @@ input::placeholder {
 }
 
 /* ============================================
-   LINKS - Světlé barvy
+   LINKS - Bílé barvy
    ============================================ */
 
 .links {
-    color: #999999 !important;
+    color: #ffffff !important;
+}
+
+.links p {
+    color: #ffffff !important;
 }
 
 .links a {
