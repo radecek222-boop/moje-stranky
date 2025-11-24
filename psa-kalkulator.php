@@ -206,7 +206,7 @@ $csrfToken = generateCSRFToken();
 <script>
   window.PSA_CSRF_TOKEN = '<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>';
 </script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer data-qr-lib="1"></script>
 
 <!-- Main JavaScript -->
 <script src="assets/js/psa-kalkulator.js" defer></script>

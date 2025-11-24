@@ -571,6 +571,50 @@ function sanitizeMessage(message) {
     .slice(0, 60);
 }
 
+let qrLibraryPromise = null;
+
+function ensureQrLibraryLoaded() {
+  if (window.QRCode && typeof QRCode.toCanvas === 'function') {
+    return Promise.resolve(window.QRCode);
+  }
+
+  if (!qrLibraryPromise) {
+    qrLibraryPromise = new Promise((resolve, reject) => {
+      const existing = document.querySelector('script[data-qr-lib]');
+
+      if (existing) {
+        if (window.QRCode && typeof QRCode.toCanvas === 'function') {
+          resolve(window.QRCode);
+          return;
+        }
+
+        existing.addEventListener('load', () => resolve(window.QRCode));
+        existing.addEventListener('error', () => reject(new Error('Nepodařilo se načíst knihovnu QR kódů')));
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+      script.defer = true;
+      script.dataset.qrLib = '1';
+      script.onload = () => {
+        if (window.QRCode && typeof QRCode.toCanvas === 'function') {
+          resolve(window.QRCode);
+        } else {
+          reject(new Error('Knihovna QR kódu se načetla, ale neobsahuje očekávané API'));
+        }
+      };
+      script.onerror = () => reject(new Error('Nepodařilo se načíst knihovnu QR kódů'));
+      document.head.appendChild(script);
+    }).catch((err) => {
+      qrLibraryPromise = null;
+      throw err;
+    });
+  }
+
+  return qrLibraryPromise;
+}
+
 function buildSpaydPayload(data) {
   const account = normalizeAccount(data.account);
   const bank = formatBankCode(data.bank);
@@ -601,12 +645,14 @@ function buildSpaydPayload(data) {
   return parts.join('*');
 }
 
-function renderQrCode(qrElement, qrText, size, contextLabel = '') {
+async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
+  await ensureQrLibraryLoaded();
+
   if (!window.QRCode || typeof QRCode.toCanvas !== 'function') {
     throw new Error('Knihovna pro QR kódy není načtena');
   }
 
-  const drawWithLevel = (level) => {
+  const drawWithLevel = (level) => new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas');
 
     QRCode.toCanvas(
@@ -624,21 +670,23 @@ function renderQrCode(qrElement, qrText, size, contextLabel = '') {
 
           if (level === 'M' && isOverflow) {
             logger.warn(`QR payload příliš dlouhý${contextLabel ? ' (' + contextLabel + ')' : ''}, zkouším nižší úroveň korekce (L)`);
-            return drawWithLevel('L');
+            return drawWithLevel('L').then(resolve).catch(reject);
           }
 
           logger.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
           qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
+          reject(err);
           return;
         }
 
         qrElement.innerHTML = '';
         qrElement.appendChild(canvas);
+        resolve();
       }
     );
-  };
+  });
 
-  drawWithLevel('M');
+  await drawWithLevel('M');
 }
 
 // === NOTIFICATIONS ===
@@ -927,7 +975,7 @@ function generatePaymentQR() {
       domesticGrid.appendChild(qrItem);
 
       // Generate QR code
-      setTimeout(() => {
+      setTimeout(async () => {
         const qrElement = document.getElementById(`qr-${index}`);
         if (!qrElement) {
           logger.error(`QR element not found: qr-${index}`);
@@ -954,7 +1002,7 @@ function generatePaymentQR() {
         logger.log(`Generating QR for ${payment.name}:`, qrText);
 
         try {
-          renderQrCode(qrElement, qrText, 180, payment.name);
+          await renderQrCode(qrElement, qrText, 180, payment.name);
         } catch (error) {
           logger.error(`Failed to generate QR code for ${payment.name}:`, error);
           qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
@@ -1125,7 +1173,7 @@ function generateSingleEmployeeQR(index) {
   container.appendChild(qrItem);
 
   // Generate QR code
-  setTimeout(() => {
+  setTimeout(async () => {
     const qrElement = document.getElementById('qr-single');
     if (!qrElement) {
       logger.error('QR element not found: qr-single');
@@ -1152,7 +1200,7 @@ function generateSingleEmployeeQR(index) {
     logger.log(`Generating single QR for ${emp.name}:`, qrText);
 
     try {
-      renderQrCode(qrElement, qrText, 220, emp.name);
+      await renderQrCode(qrElement, qrText, 220, emp.name);
     } catch (error) {
       logger.error(`Failed to generate QR code for ${emp.name}:`, error);
       qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
