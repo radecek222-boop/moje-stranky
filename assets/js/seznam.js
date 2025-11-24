@@ -554,15 +554,34 @@ async function showDetail(recordOrId) {
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
 
       <div style="width: 100%; margin-top: 0.25rem;">
-        ${record.documents && record.documents.length > 0 ? `
-          <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; font-weight: 600;"
-                  data-action="openPDF" data-url="${record.documents[0].file_path}">
-            📄 PDF REPORT
+        ${record.original_reklamace_id ? `
+          <!-- Zakázka je KLON - zobrazit Historie zákazníka + PDF REPORT -->
+          <button class="btn" style="background: #555; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; margin-bottom: 0.5rem;"
+                  data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">
+            📚 Historie zákazníka
           </button>
+          ${record.documents && record.documents.length > 0 ? `
+            <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; font-weight: 600;"
+                    data-action="openPDF" data-url="${record.documents[0].file_path}">
+              📄 PDF REPORT
+            </button>
+          ` : `
+            <div style="background: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 4px; padding: 0.5rem; text-align: center; color: #666; font-size: 0.75rem;">
+              PDF report ještě nebyl vytvořen
+            </div>
+          `}
         ` : `
-          <div style="background: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 4px; padding: 0.5rem; text-align: center; color: #666; font-size: 0.75rem;">
-            PDF report ještě nebyl vytvořen
-          </div>
+          <!-- Původní zakázka - standardní PDF tlačítko -->
+          ${record.documents && record.documents.length > 0 ? `
+            <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; font-weight: 600;"
+                    data-action="openPDF" data-url="${record.documents[0].file_path}">
+              📄 PDF REPORT
+            </button>
+          ` : `
+            <div style="background: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 4px; padding: 0.5rem; text-align: center; color: #666; font-size: 0.75rem;">
+              PDF report ještě nebyl vytvořen
+            </div>
+          `}
         `}
       </div>
 
@@ -578,6 +597,15 @@ async function showDetail(recordOrId) {
 
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+
+        ${record.original_reklamace_id ? `
+          <!-- Nedokončená zakázka s historií - přidat Historie PDF -->
+          <button class="btn" style="background: #555; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;"
+                  data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">
+            📚 Historie PDF
+          </button>
+        ` : ''}
+
         <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="closeDetail">Zavřít</button>
       </div>
     `;
@@ -629,11 +657,8 @@ async function reopenOrder(id) {
     const csrfToken = await getCSRFToken();
 
     const formData = new FormData();
-    formData.append('action', 'update');
-    formData.append('id', id);
-    formData.append('stav', 'ČEKÁ');
-    formData.append('termin', '');
-    formData.append('cas_navstevy', '');
+    formData.append('action', 'reopen');
+    formData.append('original_id', id);
     formData.append('csrf_token', csrfToken);
 
     const response = await fetch('/app/controllers/save.php', {
@@ -648,84 +673,77 @@ async function reopenOrder(id) {
     }
 
     if (result.status === 'success') {
-      const cacheRecord = WGS_DATA_CACHE.find(x => x.id == id);
-      if (cacheRecord) {
-        cacheRecord.stav = "ČEKÁ";
-        cacheRecord.termin = "";
-        cacheRecord.cas_navstevy = "";
-      }
-      
-      if (CURRENT_RECORD && CURRENT_RECORD.id == id) {
-        CURRENT_RECORD.stav = "ČEKÁ";
-        CURRENT_RECORD.termin = "";
-        CURRENT_RECORD.cas_navstevy = "";
-      }
-      
-      const noteText = `🔄 Zakázka znovu otevřena\n\nDokončená zakázka byla znovu otevřena pro nový problém nebo reklamaci.\n\nStav změněn: HOTOVO → NOVÁ\nTermín: vymazán`;
-      try {
-        if (typeof addNote === 'function') {
-          const addNoteResult = addNote(id, noteText);
-          if (addNoteResult && typeof addNoteResult.then === 'function') {
-            await addNoteResult;
-          }
-        }
-      } catch (noteError) {
-        logger.error('Chyba při přidávání poznámky:', noteError);
-      }
-      
-      try {
-        // Get CSRF token
-        const csrfToken = await getCSRFToken();
+      const newId = result.new_id;
+      const newWorkflowId = result.new_workflow_id;
 
-        const now = new Date();
-        const formattedDate = now.toLocaleDateString('cs-CZ', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
+      logger.log(`✅ Nová zakázka vytvořena: ${newWorkflowId} (ID: ${newId})`);
 
-        await fetch("/app/notification_sender.php", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            notification_id: "order_reopened",
-            csrf_token: csrfToken,
-            data: {
-              customer_name: customerName,
-              order_id: id,
-              product: product,
-              reopened_by: "admin@wgs-service.cz",
-              reopened_at: formattedDate
-            }
-          })
-        });
-      } catch (emailError) {
-        logger.error('Chyba při odesílání notifikace:', emailError);
-      }
-      
       alert(
-        `✓ ZAKÁZKA ZNOVU OTEVŘENA\n\n` +
-        `Stav změněn na: NOVÁ (žlutá)\n` +
-        `Termín byl vymazán.\n\n` +
+        `✓ NOVÁ ZAKÁZKA VYTVOŘENA\n\n` +
+        `Číslo: ${newWorkflowId}\n` +
+        `Stav: NOVÁ (žlutá karta)\n\n` +
+        `Původní zakázka zůstává dokončená.\n\n` +
         `Nyní můžete:\n` +
-        `→ Naplánovat nový termín návštěvy\n` +
-        `→ Zahájit novou návštěvu\n` +
+        `→ Naplánovat termín návštěvy\n` +
+        `→ Zahájit návštěvu\n` +
         `→ Aktualizovat detail zakázky`
       );
-      
-      showDetail(id);
-      
+
+      // Reload seznamu
       if (typeof loadAll === 'function') {
         await loadAll(ACTIVE_FILTER);
       }
+
+      // Zobrazit detail NOVÉ zakázky (ne původní)
+      showDetail(newId);
+
     } else {
-      throw new Error(result.message || 'Nepodařilo se uložit změny');
+      throw new Error(result.message || 'Nepodařilo se vytvořit novou zakázku');
     }
   } catch (e) {
     logger.error('Chyba při znovuotevření zakázky:', e);
     alert(t('error_reopening_order') + ': ' + e.message);
+  }
+}
+
+// === ZOBRAZENÍ HISTORIE PDF Z PŮVODNÍ ZAKÁZKY ===
+async function showHistoryPDF(originalReklamaceId) {
+  if (!originalReklamaceId) {
+    alert('Chybí ID původní zakázky');
+    return;
+  }
+
+  try {
+    logger.log(`📚 Načítám historii PDF z původní zakázky: ${originalReklamaceId}`);
+
+    // Načíst dokumenty z původní zakázky
+    const response = await fetch(`/api/get_original_documents.php?reklamace_id=${encodeURIComponent(originalReklamaceId)}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+
+    if (result.status === 'error') {
+      throw new Error(result.message || 'Nepodařilo se načíst dokumenty');
+    }
+
+    if (!result.documents || result.documents.length === 0) {
+      alert('Historie PDF není k dispozici.\n\nPůvodní zakázka ještě nemá vytvořený PDF dokument.');
+      return;
+    }
+
+    // Zobrazit první PDF dokument
+    const firstDoc = result.documents[0];
+    logger.log(`✅ Otevírám PDF: ${firstDoc.file_path}`);
+
+    // Otevřít PDF v novém okně
+    window.open(firstDoc.file_path, '_blank');
+
+  } catch (error) {
+    logger.error('Chyba při načítání historie PDF:', error);
+    alert(`Nepodařilo se načíst historii PDF:\n${error.message}`);
   }
 }
 
@@ -2765,6 +2783,11 @@ document.addEventListener('click', (e) => {
 
     case 'openPDF':
       if (url) window.open(url, '_blank');
+      break;
+
+    case 'showHistoryPDF':
+      const originalId = button.getAttribute('data-original-id');
+      if (originalId) showHistoryPDF(originalId);
       break;
 
     case 'showPhotoFullscreen':

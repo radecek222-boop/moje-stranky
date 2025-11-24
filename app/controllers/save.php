@@ -347,6 +347,174 @@ function handleUpdate(PDO $pdo, array $input): array
     }
 }
 
+/**
+ * Znovu otevře zakázku vytvořením klonu původní zakázky
+ *
+ * Funkce vytvoří úplnou kopii zakázky s novým ID a stavem ČEKÁ.
+ * Původní zakázka zůstává HOTOVO pro správné statistiky.
+ *
+ * @param PDO $pdo Database connection
+ * @param array $input Vstupní data (original_id)
+ * @return array Výsledek operace
+ * @throws Exception Při chybě oprávnění nebo DB operace
+ */
+function handleReopen(PDO $pdo, array $input): array
+{
+    error_log("⏱️ handleReopen START");
+    $t0 = microtime(true);
+
+    // Kontrola oprávnění
+    $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+    $userId = $_SESSION['user_id'] ?? null;
+
+    if (!$isAdmin && !$userId) {
+        throw new Exception('Neautorizovaný přístup.');
+    }
+
+    // Získat ID původní zakázky
+    $originalId = $input['original_id'] ?? $input['id'] ?? null;
+    if ($originalId === null || $originalId === '') {
+        throw new Exception('Chybí ID původní zakázky.');
+    }
+
+    // Načíst původní zakázku
+    $stmt = $pdo->prepare("SELECT * FROM wgs_reklamace WHERE id = :id LIMIT 1");
+    $stmt->execute(['id' => $originalId]);
+    $original = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$original) {
+        throw new Exception('Původní zakázka nebyla nalezena.');
+    }
+
+    // Kontrola stavu - musí být dokončená
+    if ($original['stav'] !== 'done') {
+        throw new Exception('Lze klonovat pouze dokončené zakázky (stav HOTOVO).');
+    }
+
+    // Zahájit transakci
+    $pdo->beginTransaction();
+
+    try {
+        // Vygenerovat nové ID
+        $newWorkflowId = generateWorkflowId($pdo);
+        $now = date('Y-m-d H:i:s');
+
+        // Připravit data pro klon
+        $columns = [
+            'reklamace_id' => $newWorkflowId,
+            'original_reklamace_id' => $original['reklamace_id'] ?? $original['id'],
+            'typ' => $original['typ'] ?? 'servis',
+            'cislo' => $original['cislo'],
+            'datum_prodeje' => $original['datum_prodeje'],
+            'datum_reklamace' => null, // Nová reklamace
+            'jmeno' => $original['jmeno'],
+            'email' => $original['email'],
+            'telefon' => $original['telefon'],
+            'adresa' => $original['adresa'],
+            'ulice' => $original['ulice'],
+            'mesto' => $original['mesto'],
+            'psc' => $original['psc'],
+            'model' => $original['model'],
+            'provedeni' => $original['provedeni'],
+            'barva' => $original['barva'],
+            'seriove_cislo' => $original['seriove_cislo'],
+            'popis_problemu' => $original['popis_problemu'],
+            'doplnujici_info' => $original['doplnujici_info'],
+            'fakturace_firma' => $original['fakturace_firma'],
+            'stav' => 'wait', // Nová zakázka
+            'termin' => null,
+            'cas_navstevy' => null,
+            'datum_dokonceni' => null,
+            'zpracoval_id' => $userId,
+            'created_by' => $userId,
+            'created_by_role' => $_SESSION['role'] ?? 'user',
+            'created_at' => $now,
+            'updated_at' => $now
+        ];
+
+        // Sestavit INSERT dotaz
+        $columnNames = array_keys($columns);
+        $placeholders = array_map(fn($col) => ':' . $col, $columnNames);
+
+        $sql = 'INSERT INTO wgs_reklamace (' . implode(', ', $columnNames) . ')
+                VALUES (' . implode(', ', $placeholders) . ')';
+
+        $stmt = $pdo->prepare($sql);
+
+        // Připravit parametry
+        $parameters = [];
+        foreach ($columns as $column => $value) {
+            $parameters[':' . $column] = $value === '' ? null : $value;
+        }
+
+        if (!$stmt->execute($parameters)) {
+            throw new Exception('Chyba při vytváření klonu zakázky');
+        }
+
+        $newId = $pdo->lastInsertId();
+
+        // Přidat poznámku do nové zakázky
+        $noteTextNew = "🔄 Zakázka otevřena jako klon původní zakázky\n\n" .
+                       "Původní zakázka: " . ($original['reklamace_id'] ?? $original['id']) . "\n" .
+                       "Stav: NOVÁ (čeká na zpracování)\n" .
+                       "Vytvořil: " . ($_SESSION['user_name'] ?? 'Uživatel') . "\n" .
+                       "Datum: " . date('d.m.Y H:i');
+
+        $stmtNote = $pdo->prepare("
+            INSERT INTO wgs_notes (reklamace_id, note_text, created_by, created_at, is_read)
+            VALUES (:reklamace_id, :note_text, :created_by, :created_at, 0)
+        ");
+        $stmtNote->execute([
+            'reklamace_id' => $newId,
+            'note_text' => $noteTextNew,
+            'created_by' => $userId ?? 0,
+            'created_at' => $now
+        ]);
+
+        // Přidat poznámku do původní zakázky
+        $noteTextOriginal = "🔗 Založena nová zakázka (reklamace)\n\n" .
+                            "Nová zakázka: " . $newWorkflowId . "\n" .
+                            "Zákazník znovu nahlásil problém.\n" .
+                            "Vytvořil: " . ($_SESSION['user_name'] ?? 'Uživatel') . "\n" .
+                            "Datum: " . date('d.m.Y H:i');
+
+        $stmtNote2 = $pdo->prepare("
+            INSERT INTO wgs_notes (reklamace_id, note_text, created_by, created_at, is_read)
+            VALUES (:reklamace_id, :note_text, :created_by, :created_at, 0)
+        ");
+        $stmtNote2->execute([
+            'reklamace_id' => $originalId,
+            'note_text' => $noteTextOriginal,
+            'created_by' => $userId ?? 0,
+            'created_at' => $now
+        ]);
+
+        // Commit transakce
+        $pdo->commit();
+
+        $t1 = microtime(true);
+        error_log(sprintf("⏱️ handleReopen DONE: %.0fms", ($t1 - $t0) * 1000));
+
+        return [
+            'status' => 'success',
+            'message' => 'Nová zakázka vytvořena jako klon',
+            'new_id' => $newId,
+            'new_workflow_id' => $newWorkflowId,
+            'original_id' => $originalId
+        ];
+
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
+        $tError = microtime(true);
+        error_log(sprintf("⏱️ ❌ handleReopen CHYBA: %.0fms - %s", ($tError - $t0) * 1000, $e->getMessage()));
+
+        throw $e;
+    }
+}
+
 header('Content-Type: application/json');
 
 try {
@@ -378,6 +546,12 @@ try {
 
     if ($action === 'update') {
         $response = handleUpdate($pdo, $requestData);
+        echo json_encode($response);
+        return;
+    }
+
+    if ($action === 'reopen') {
+        $response = handleReopen($pdo, $requestData);
         echo json_encode($response);
         return;
     }
