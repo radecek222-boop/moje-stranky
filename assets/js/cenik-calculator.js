@@ -20,12 +20,11 @@
         diagnostika: 110, // Inspekce/diagnostika
         prvniDil: 205, // První díl čalounění
         dalsiDil: 70, // Každý další díl
-        rohovyDil: 220, // Rohový díl
-        ottoman: 260, // Ottoman s terminálem
         zakladniSazba: 165, // Základní servisní sazba (mechanické opravy)
         mechanismusPriplatek: 45, // Příplatek za mechanismus (relax, výsuv)
         druhaOsoba: 95, // Druhá osoba pro těžký nábytek nad 50kg
-        material: 50 // Materiál (alternativní výplně)
+        material: 50, // Materiál (alternativní výplně)
+        vyzvednutiSklad: 10 // Vyzvednutí dílu pro reklamaci na skladě
     };
 
     // Stav kalkulačky
@@ -35,6 +34,7 @@
         vzdalenost: 0,
         dopravne: 0,
         reklamaceBezDopravy: false,
+        vyzvednutiSklad: false,
         typServisu: 'calouneni', // diagnostika, calouneni, mechanika, kombinace
 
         // Čalounické práce
@@ -42,8 +42,6 @@
         operky: 0,
         podrucky: 0,
         panely: 0,
-        rohovyDil: false,
-        ottoman: false,
 
         // Mechanické práce
         relax: 0,
@@ -80,18 +78,18 @@
         });
 
         // Checkboxy
-        const checkboxy = ['rohovy-dil', 'ottoman', 'tezky-nabytek', 'material'];
+        const checkboxy = ['tezky-nabytek', 'material', 'vyzvednuti-sklad'];
         checkboxy.forEach(id => {
             const checkbox = document.getElementById(id);
             if (checkbox) {
                 checkbox.addEventListener('change', (e) => {
                     const key = id.replace(/-/g, '');
-                    stav[key === 'rohovydil' ? 'rohovyDil' :
-                          key === 'tezkynabytek' ? 'tezkyNabytek' : key] = e.target.checked;
-
-                    // Aktualizovat souhrn dílů
-                    if (id === 'rohovy-dil' || id === 'ottoman') {
-                        aktualizovatSouhrnDilu();
+                    if (key === 'tezkynabytek') {
+                        stav.tezkyNabytek = e.target.checked;
+                    } else if (key === 'vyzvednutisklad') {
+                        stav.vyzvednutiSklad = e.target.checked;
+                    } else {
+                        stav[key] = e.target.checked;
                     }
                 });
             }
@@ -402,16 +400,6 @@
                 cena = CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
                 priceBreakdownEl.textContent = `(1× ${CENY.prvniDil}€ + ${celkemDilu - 1}× ${CENY.dalsiDil}€ = ${cena}€)`;
             }
-
-            // Přidat rohový díl a ottoman
-            if (stav.rohovyDil) {
-                cena += CENY.rohovyDil;
-                priceBreakdownEl.textContent += ` + ${window.t('summary.cornerPiece').toLowerCase()} (${CENY.rohovyDil}€)`;
-            }
-            if (stav.ottoman) {
-                cena += CENY.ottoman;
-                priceBreakdownEl.textContent += ` + ${window.t('summary.ottoman').toLowerCase()} (${CENY.ottoman}€)`;
-            }
         } else if (priceBreakdownEl) {
             priceBreakdownEl.textContent = '';
         }
@@ -465,24 +453,6 @@
                 }
 
                 celkem += cenaDilu;
-            }
-
-            // Rohový díl
-            if (stav.rohovyDil) {
-                html += `<div class="summary-line">
-                    <span>${window.t('summary.cornerPiece')}:</span>
-                    <span class="summary-price">${CENY.rohovyDil.toFixed(2)} €</span>
-                </div>`;
-                celkem += CENY.rohovyDil;
-            }
-
-            // Ottoman
-            if (stav.ottoman) {
-                html += `<div class="summary-line">
-                    <span>${window.t('summary.ottoman')}:</span>
-                    <span class="summary-price">${CENY.ottoman.toFixed(2)} €</span>
-                </div>`;
-                celkem += CENY.ottoman;
             }
         }
 
@@ -540,6 +510,15 @@
             celkem += CENY.material;
         }
 
+        // Vyzvednutí dílu na skladě
+        if (stav.vyzvednutiSklad) {
+            html += `<div class="summary-line">
+                <span>${window.t('summary.warehousePickup') || 'Vyzvednutí dílu na skladě'}:</span>
+                <span class="summary-price">${CENY.vyzvednutiSklad.toFixed(2)} €</span>
+            </div>`;
+            celkem += CENY.vyzvednutiSklad;
+        }
+
         summaryDetails.innerHTML = html;
         grandTotal.innerHTML = `<strong>${celkem.toFixed(2)} €</strong>`;
 
@@ -577,13 +556,13 @@
             adresa: null,
             vzdalenost: 0,
             dopravne: 0,
+            reklamaceBezDopravy: false,
+            vyzvednutiSklad: false,
             typServisu: 'calouneni',
             sedaky: 0,
             operky: 0,
             podrucky: 0,
             panely: 0,
-            rohovyDil: false,
-            ottoman: false,
             relax: 0,
             vysuv: 0,
             tezkyNabytek: false,
@@ -605,7 +584,7 @@
         });
 
         // Reset checkboxů
-        ['rohovy-dil', 'ottoman', 'tezky-nabytek', 'material'].forEach(id => {
+        ['tezky-nabytek', 'material', 'reklamace-bez-dopravy', 'vyzvednuti-sklad'].forEach(id => {
             const checkbox = document.getElementById(id);
             if (checkbox) checkbox.checked = false;
         });
@@ -650,8 +629,6 @@
                     const cenaDilu = celkemDilu === 1 ? CENY.prvniDil : CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
                     celkem += cenaDilu;
                 }
-                if (stav.rohovyDil) celkem += CENY.rohovyDil;
-                if (stav.ottoman) celkem += CENY.ottoman;
             }
 
             // Mechanické práce
@@ -672,6 +649,9 @@
 
             // Materiál
             if (stav.material) celkem += CENY.material;
+
+            // Vyzvednutí na skladě
+            if (stav.vyzvednutiSklad) celkem += CENY.vyzvednutiSklad;
 
             // Vytvořit HTML strukturu pro PDF (vždy desktop šířka, i na mobilu)
             const pdfContent = document.createElement('div');
@@ -739,11 +719,9 @@
                 if (stav.operky > 0) htmlContent += `<li>Opěrky: ${stav.operky}×</li>`;
                 if (stav.podrucky > 0) htmlContent += `<li>Područky: ${stav.podrucky}×</li>`;
                 if (stav.panely > 0) htmlContent += `<li>Panely: ${stav.panely}×</li>`;
-                if (stav.rohovyDil) htmlContent += `<li>Rohový díl: Ano</li>`;
-                if (stav.ottoman) htmlContent += `<li>Ottoman / Lehátko: Ano</li>`;
 
                 const celkemDilu = stav.sedaky + stav.operky + stav.podrucky + stav.panely;
-                if (celkemDilu === 0 && !stav.rohovyDil && !stav.ottoman) {
+                if (celkemDilu === 0) {
                     htmlContent += `<li style="color: #999;">Nebyly vybrány žádné díly</li>`;
                 }
 
@@ -776,7 +754,10 @@
             if (stav.material) {
                 htmlContent += `<li>Materiál dodán od WGS: Ano</li>`;
             }
-            if (!stav.tezkyNabytek && !stav.material) {
+            if (stav.vyzvednutiSklad) {
+                htmlContent += `<li>Vyzvednutí dílu na skladě: Ano</li>`;
+            }
+            if (!stav.tezkyNabytek && !stav.material && !stav.vyzvednutiSklad) {
                 htmlContent += `<li style="color: #999;">Žádné doplňkové služby</li>`;
             }
 
@@ -827,24 +808,6 @@
                             </tr>
                         `;
                     }
-                }
-
-                if (stav.rohovyDil) {
-                    htmlContent += `
-                        <tr style="border-bottom: 1px solid #eee;">
-                            <td style="padding: 8px 0;">Rohový díl:</td>
-                            <td style="padding: 8px 0; text-align: right; font-weight: bold;">${CENY.rohovyDil.toFixed(2)} €</td>
-                        </tr>
-                    `;
-                }
-
-                if (stav.ottoman) {
-                    htmlContent += `
-                        <tr style="border-bottom: 1px solid #eee;">
-                            <td style="padding: 8px 0;">Ottoman / Lehátko:</td>
-                            <td style="padding: 8px 0; text-align: right; font-weight: bold;">${CENY.ottoman.toFixed(2)} €</td>
-                        </tr>
-                    `;
                 }
             }
 
@@ -903,6 +866,16 @@
                     <tr style="border-bottom: 1px solid #eee;">
                         <td style="padding: 8px 0;">Materiál dodán od WGS:</td>
                         <td style="padding: 8px 0; text-align: right; font-weight: bold;">${CENY.material.toFixed(2)} €</td>
+                    </tr>
+                `;
+            }
+
+            // Vyzvednutí na skladě
+            if (stav.vyzvednutiSklad) {
+                htmlContent += `
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 8px 0;">Vyzvednutí dílu na skladě:</td>
+                        <td style="padding: 8px 0; text-align: right; font-weight: bold;">${CENY.vyzvednutiSklad.toFixed(2)} €</td>
                     </tr>
                 `;
             }
@@ -1021,8 +994,6 @@
                     CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
                 celkovaCena += cenaDilu;
             }
-            if (stav.rohovyDil) celkovaCena += CENY.rohovyDil;
-            if (stav.ottoman) celkovaCena += CENY.ottoman;
         }
 
         // Mechanické práce
@@ -1048,6 +1019,11 @@
             celkovaCena += CENY.material;
         }
 
+        // Vyzvednutí na skladě
+        if (stav.vyzvednutiSklad) {
+            celkovaCena += CENY.vyzvednutiSklad;
+        }
+
         // Sestavit data pro protokol
         const kalkulaceData = {
             celkovaCena: celkovaCena,
@@ -1055,6 +1031,7 @@
             vzdalenost: stav.vzdalenost,
             dopravne: stav.dopravne,
             reklamaceBezDopravy: stav.reklamaceBezDopravy,
+            vyzvednutiSklad: stav.vyzvednutiSklad,
             typServisu: stav.typServisu,
             rozpis: {
                 diagnostika: stav.typServisu === 'diagnostika' ? CENY.diagnostika : 0,
@@ -1062,9 +1039,7 @@
                     sedaky: stav.sedaky,
                     operky: stav.operky,
                     podrucky: stav.podrucky,
-                    panely: stav.panely,
-                    rohovyDil: stav.rohovyDil,
-                    ottoman: stav.ottoman
+                    panely: stav.panely
                 },
                 mechanika: {
                     relax: stav.relax,
@@ -1072,7 +1047,8 @@
                 },
                 doplnky: {
                     tezkyNabytek: stav.tezkyNabytek,
-                    material: stav.material
+                    material: stav.material,
+                    vyzvednutiSklad: stav.vyzvednutiSklad
                 }
             }
         };

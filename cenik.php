@@ -130,6 +130,12 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
             <span class="checkbox-label" data-lang-cs="Jedná se o reklamaci – neúčtuje se dopravné" data-lang-en="This is a claim – no transportation fee" data-lang-it="Questo è un reclamo – nessun costo di trasporto">Jedná se o reklamaci – neúčtuje se dopravné</span>
           </label>
         </div>
+        <div class="form-group" style="margin-top: 10px;">
+          <label class="checkbox-container">
+            <input type="checkbox" id="vyzvednuti-sklad">
+            <span class="checkbox-label" data-lang-cs="Vyzvednutí dílu pro reklamaci na skladě + 10 €" data-lang-en="Part pickup for claim at warehouse + 10 €" data-lang-it="Ritiro del pezzo per reclamo presso magazzino + 10 €">Vyzvednutí dílu pro reklamaci na skladě + 10 €</span>
+          </label>
+        </div>
         <?php endif; ?>
 
         <div id="distance-result" class="calc-result" style="display: none;">
@@ -236,24 +242,6 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
           </div>
         </div>
 
-        <div class="checkbox-group">
-          <label class="checkbox-card">
-            <input type="checkbox" id="rohovy-dil">
-            <div class="checkbox-content">
-              <div class="checkbox-title" data-lang-cs="Rohový díl (1 modul + 2 díly navíc)" data-lang-en="Corner piece (1 module + 2 extra parts)" data-lang-it="Pezzo angolare (1 modulo + 2 parti extra)">Rohový díl (1 modul + 2 díly navíc)</div>
-              <div class="checkbox-price">+ 330 €</div>
-            </div>
-          </label>
-
-          <label class="checkbox-card">
-            <input type="checkbox" id="ottoman">
-            <div class="checkbox-content">
-              <div class="checkbox-title" data-lang-cs="Ottoman / Lehátko" data-lang-en="Ottoman / Daybed" data-lang-it="Pouf / Divano letto">Ottoman / Lehátko</div>
-              <div class="checkbox-price">+ 260 €</div>
-            </div>
-          </label>
-        </div>
-
         <div class="parts-summary" id="parts-summary">
           <strong data-lang-cs="Celkem dílů:" data-lang-en="Total parts:" data-lang-it="Totale parti:">Celkem dílů:</strong> <span id="total-parts">0</span>
           <span class="price-breakdown" id="parts-price-breakdown"></span>
@@ -309,7 +297,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
             <div class="checkbox-content">
               <div class="checkbox-title" data-lang-cs="Nábytek je těžší než 50 kg" data-lang-en="Furniture weighs more than 50 kg" data-lang-it="Mobile pesa più di 50 kg">Nábytek je těžší než 50 kg</div>
               <div class="checkbox-desc" data-lang-cs="Bude potřeba druhá osoba pro manipulaci" data-lang-en="A second person will be needed for handling" data-lang-it="Sarà necessaria una seconda persona per la manipolazione">Bude potřeba druhá osoba pro manipulaci</div>
-              <div class="checkbox-price">+ 80 €</div>
+              <div class="checkbox-price">+ 95 €</div>
             </div>
           </label>
 
@@ -318,7 +306,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
             <div class="checkbox-content">
               <div class="checkbox-title" data-lang-cs="Materiál dodán od WGS" data-lang-en="Material supplied by WGS" data-lang-it="Materiale fornito da WGS">Materiál dodán od WGS</div>
               <div class="checkbox-desc" data-lang-cs="Výplně (vata, pěna) z naší zásoby" data-lang-en="Fillings (batting, foam) from our stock" data-lang-it="Imbottiture (ovatta, schiuma) dal nostro magazzino">Výplně (vata, pěna) z naší zásoby</div>
-              <div class="checkbox-price">+ 40 €</div>
+              <div class="checkbox-price">+ 50 €</div>
             </div>
           </label>
         </div>
