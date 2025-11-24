@@ -118,20 +118,40 @@ try {
     // SANITIZACE A VALIDACE DAT
     // ========================================
     // Bezpečná URL validace (FILTER_VALIDATE_URL selže na hash/query/diakritice)
-    $pageUrlRaw = trim($inputData['page_url']);
+    $pageUrlRaw = trim($inputData['page_url'] ?? '');
+
+    // Kontrola prázdné URL
+    if (empty($pageUrlRaw)) {
+        sendJsonError('Prázdná URL adresa', 400);
+    }
 
     // Odstranit hash a query parametry před parsováním
     $pageUrlClean = strtok($pageUrlRaw, '?#');
 
-    // Bezpečné parse_url
-    $parsedUrl = parse_url($pageUrlClean);
+    // Kontrola před parse_url - musí být neprázdný string
+    if (!is_string($pageUrlClean) || empty($pageUrlClean)) {
+        sendJsonError('Neplatná URL adresa (prázdná)', 400);
+    }
 
-    if (!$parsedUrl || !isset($parsedUrl['scheme']) || !isset($parsedUrl['host'])) {
-        sendJsonError('Neplatná URL adresa', 400);
+    // Bezpečné parse_url - může vrátit false
+    $parsedUrl = @parse_url($pageUrlClean);
+
+    // Striktní kontrola výsledku parse_url
+    if ($parsedUrl === false || !is_array($parsedUrl)) {
+        sendJsonError('Neplatná URL adresa (nelze parsovat)', 400);
+    }
+
+    if (!isset($parsedUrl['scheme']) || !isset($parsedUrl['host'])) {
+        sendJsonError('Neplatná URL adresa (chybí scheme nebo host)', 400);
+    }
+
+    // Validace scheme
+    $scheme = strtolower($parsedUrl['scheme']);
+    if (!in_array($scheme, ['http', 'https'], true)) {
+        sendJsonError('Neplatná URL adresa (nepovolený protokol)', 400);
     }
 
     // Bezpečná normalizace URL
-    $scheme = $parsedUrl['scheme'] ?? 'https';
     $host = $parsedUrl['host'];
     $path = $parsedUrl['path'] ?? '/';
     $normalizedUrl = $scheme . '://' . $host . $path;
@@ -172,6 +192,8 @@ try {
             $viewportHeight = isset($click['viewport_height']) ? (int)$click['viewport_height'] : null;
 
             // UPSERT: INSERT nebo UPDATE click_count
+            // POZN: VALUES() nefunguje v MariaDB 10.3+ - vrací NULL
+            // Řešení: Použít COALESCE pro viewport (uložit první hodnotu)
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_analytics_heatmap_clicks (
                     page_url,
@@ -196,14 +218,8 @@ try {
                 )
                 ON DUPLICATE KEY UPDATE
                     click_count = click_count + 1,
-                    viewport_width_avg = IF(VALUES(viewport_width_avg) IS NOT NULL,
-                        (viewport_width_avg * click_count + VALUES(viewport_width_avg)) / (click_count + 1),
-                        viewport_width_avg
-                    ),
-                    viewport_height_avg = IF(VALUES(viewport_height_avg) IS NOT NULL,
-                        (viewport_height_avg * click_count + VALUES(viewport_height_avg)) / (click_count + 1),
-                        viewport_height_avg
-                    ),
+                    viewport_width_avg = COALESCE(viewport_width_avg, :viewport_width_upd),
+                    viewport_height_avg = COALESCE(viewport_height_avg, :viewport_height_upd),
                     last_click = NOW()
             ");
 
@@ -213,7 +229,9 @@ try {
                 'click_x_percent' => $xPercent,
                 'click_y_percent' => $yPercent,
                 'viewport_width' => $viewportWidth,
-                'viewport_height' => $viewportHeight
+                'viewport_height' => $viewportHeight,
+                'viewport_width_upd' => $viewportWidth,
+                'viewport_height_upd' => $viewportHeight
             ]);
 
             $clicksAggregated++;
@@ -242,6 +260,7 @@ try {
             $viewportHeight = isset($inputData['viewport_height']) ? (int)$inputData['viewport_height'] : null;
 
             // UPSERT: INSERT nebo UPDATE reach_count
+            // POZN: VALUES() nefunguje v MariaDB 10.3+ - vrací NULL
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_analytics_heatmap_scroll (
                     page_url,
@@ -264,14 +283,8 @@ try {
                 )
                 ON DUPLICATE KEY UPDATE
                     reach_count = reach_count + 1,
-                    viewport_width_avg = IF(VALUES(viewport_width_avg) IS NOT NULL,
-                        (viewport_width_avg * reach_count + VALUES(viewport_width_avg)) / (reach_count + 1),
-                        viewport_width_avg
-                    ),
-                    viewport_height_avg = IF(VALUES(viewport_height_avg) IS NOT NULL,
-                        (viewport_height_avg * reach_count + VALUES(viewport_height_avg)) / (reach_count + 1),
-                        viewport_height_avg
-                    ),
+                    viewport_width_avg = COALESCE(viewport_width_avg, :viewport_width_upd),
+                    viewport_height_avg = COALESCE(viewport_height_avg, :viewport_height_upd),
                     last_reach = NOW()
             ");
 
@@ -280,7 +293,9 @@ try {
                 'device_type' => $deviceType,
                 'scroll_depth_bucket' => $bucket,
                 'viewport_width' => $viewportWidth,
-                'viewport_height' => $viewportHeight
+                'viewport_height' => $viewportHeight,
+                'viewport_width_upd' => $viewportWidth,
+                'viewport_height_upd' => $viewportHeight
             ]);
 
             $scrollBucketsUpdated++;

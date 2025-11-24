@@ -106,8 +106,7 @@
             const responseText = await response.text();
 
             if (!response.ok) {
-                const errorPreview = responseText ? responseText.substring(0, 200) : '';
-                console.error('[Heatmap Tracker] API HTTP error:', response.status, errorPreview);
+                console.error('[Heatmap Tracker] API HTTP error:', response.status, responseText.substring(0, 200));
                 clickBuffer.unshift(...data.clicks);
                 data.scrolls.forEach(s => scrollDepths.add(s));
                 return;
@@ -119,8 +118,6 @@
                 result = JSON.parse(responseText);
             } catch (parseErr) {
                 console.error('[Heatmap Tracker] JSON parse error:', parseErr);
-                clickBuffer.unshift(...data.clicks);
-                data.scrolls.forEach(s => scrollDepths.add(s));
                 return;
             }
 
