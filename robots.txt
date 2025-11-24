@@ -1,13 +1,60 @@
 # WGS Service - Robots.txt
 # https://www.robotstxt.org/
+# Aktualizovano: 2025-11-24
 
+# === GOOGLEBOT ===
+User-agent: Googlebot
+Allow: /
+Allow: /index.php
+Allow: /cenik.php
+Allow: /novareklamace.php
+Allow: /aktuality.php
+Allow: /psa-kalkulator.php
+Allow: /psa.php
+Allow: /gdpr.php
+Crawl-delay: 5
+
+# === SEZNAMBOT (Seznam.cz) ===
+User-agent: SeznamBot
+Allow: /
+Allow: /index.php
+Allow: /cenik.php
+Allow: /novareklamace.php
+Allow: /aktuality.php
+Allow: /psa-kalkulator.php
+Allow: /psa.php
+Allow: /gdpr.php
+Crawl-delay: 5
+
+# === BINGBOT ===
+User-agent: bingbot
+Allow: /
+Allow: /index.php
+Allow: /cenik.php
+Allow: /novareklamace.php
+Allow: /aktuality.php
+Crawl-delay: 5
+
+# === YANDEXBOT ===
+User-agent: YandexBot
+Allow: /
+Allow: /index.php
+Allow: /cenik.php
+Allow: /novareklamace.php
+Crawl-delay: 10
+
+# === VSECHNY OSTATNI BOTY ===
 User-agent: *
 
 # Allow main pages
 Allow: /
 Allow: /index.php
+Allow: /cenik.php
+Allow: /novareklamace.php
+Allow: /aktuality.php
 Allow: /psa-kalkulator.php
 Allow: /psa.php
+Allow: /gdpr.php
 Allow: /reklamace.php
 Allow: /seznam.php
 Allow: /protokol.php

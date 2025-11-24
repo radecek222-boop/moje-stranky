@@ -1,6 +1,8 @@
-<?php require_once "init.php"; ?>
 <?php
-// Načíst CSRF token pro admin edit mód
+require_once "init.php";
+require_once __DIR__ . '/includes/seo_meta.php';
+
+// Nacist CSRF token pro admin edit mod
 $csrfToken = '';
 if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
     require_once __DIR__ . '/includes/csrf_helper.php';
@@ -18,7 +20,10 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
   <meta name="apple-mobile-web-app-title" content="WGS">
 
   <!-- SEO Meta Tags -->
-  <meta name="description" content="Ceník servisu Natuzzi - White Glove Service. Transparentní ceny za opravy, reklamace, montáž. Autorizovaný servis s více než 5letou zkušeností. ☎ +420 725 965 826">
+  <meta name="description" content="<?php echo getSeoDescription('cenik'); ?>">
+  <?php renderSeoMeta('cenik'); ?>
+  <?php renderSchemaOrg('cenik'); ?>
+  <?php renderFaqSchema('cenik'); ?>
 
   <!-- PWA -->
   <link rel="manifest" href="./manifest.json">
@@ -26,7 +31,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
   <link rel="icon" type="image/png" sizes="192x192" href="./icon192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon512.png">
 
-  <title>Ceník služeb - White Glove Service | Servis Natuzzi | Praha, Brno</title>
+  <title><?php echo getSeoTitle('cenik'); ?></title>
 
   <!-- Preload critical resources -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
