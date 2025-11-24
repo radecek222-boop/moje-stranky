@@ -114,6 +114,39 @@ try {
     session_write_close();
 
     // ========================================
+    // BLACKLIST IP ADRES (admin/vlastník)
+    // ========================================
+    // Tyto IP adresy jsou kompletně ignorovány v analytics
+    $blacklistedIPs = [
+        // IPv6 - Radek domácí
+        '2a00:11b1:10a2:5773:a4d3:7603:899e:d2f3',
+        '2a00:11b1:10a2:5773:',  // IPv6 prefix pro celou síť
+        // IPv4 - Radek domácí
+        '46.135.89.44',
+        // IPv6 - VPN/proxy
+        '2a09:bac2:2756:137::1f:ac',
+        '2a09:bac2:2756:',  // IPv6 prefix
+        // IPv4 - VPN/proxy
+        '104.28.114.10',
+    ];
+
+    // Získat IP klienta
+    $clientIpForBlacklist = GeoIPHelper::ziskejKlientIP();
+
+    // Kontrola blacklistu (přesná shoda nebo prefix match pro IPv6)
+    foreach ($blacklistedIPs as $blacklistedIp) {
+        // Přesná shoda
+        if ($clientIpForBlacklist === $blacklistedIp) {
+            // Tiše ukončit - nelogovat, neukládat
+            sendJsonSuccess('OK', ['ignored' => true]);
+        }
+        // Prefix match (pro IPv6 sítě)
+        if (strpos($clientIpForBlacklist, $blacklistedIp) === 0) {
+            sendJsonSuccess('OK', ['ignored' => true]);
+        }
+    }
+
+    // ========================================
     // GEOLOKACE Z IP ADRESY
     // ========================================
     $geoData = null;
