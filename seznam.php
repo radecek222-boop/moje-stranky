@@ -1004,6 +1004,10 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         }
 
+        // Zabránit duplicitnímu spuštění (normální handler v seznam.js)
+        e.stopPropagation();
+        e.preventDefault();
+
         console.log('[EMERGENCY V5] 🔄 Delegování na novou funkci reopenOrder()');
 
         // Delegovat na novou funkci ze seznam.js, která provádí klonování
