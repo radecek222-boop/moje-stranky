@@ -17,29 +17,11 @@ header('Expires: 0');
 $userId = $_SESSION['user_id'] ?? 0;
 $userName = $_SESSION['user_name'] ?? 'Host';
 
-try {
-    // Pokus o načtení z JokeAPI (externí API) - VŽDY náhodný
-    error_log("get_joke.php: Attempting to fetch from JokeAPI...");
-    $joke = fetchFromJokeAPI();
+// ✅ FIX: JokeAPI.dev vrací pořád stejný vtip pro češtinu
+// ŘEŠENÍ: Používat primárně lokální vtipy (máme jich 24 a plnou kontrolu)
+// JokeAPI se vypíná - nepoužívá se
 
-    if ($joke) {
-        error_log("get_joke.php: JokeAPI SUCCESS - Joke: " . substr($joke, 0, 50) . "...");
-        echo json_encode([
-            'status' => 'success',
-            'joke' => $joke,
-            'source' => 'jokeapi',
-            'debug' => 'from_external_api'
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
-    } else {
-        error_log("get_joke.php: JokeAPI returned null, falling back to local");
-    }
-} catch (Exception $e) {
-    error_log("get_joke.php: JokeAPI EXCEPTION: " . $e->getMessage());
-}
-
-// Fallback: Použij lokální databázi vtipů - NÁHODNÝ vtip
-error_log("get_joke.php: Using local jokes database");
+error_log("get_joke.php: Using PRIMARY source - local jokes database");
 $result = getLocalJoke();
 $joke = $result['joke'];
 $debug = $result['debug'];
