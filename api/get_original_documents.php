@@ -36,36 +36,59 @@ try {
     // Připojení k databázi
     $pdo = getDbConnection();
 
+    // Nejprve najít interní ID zakázky podle reklamace_id
+    // (frontend posílá reklamace_id = workflow ID, ale wgs_documents používá claim_id = interní ID)
+    $stmtClaim = $pdo->prepare("
+        SELECT id FROM wgs_reklamace
+        WHERE reklamace_id = :reklamace_id OR id = :id
+        LIMIT 1
+    ");
+    $stmtClaim->execute([
+        'reklamace_id' => $reklamaceId,
+        'id' => $reklamaceId
+    ]);
+    $claim = $stmtClaim->fetch(PDO::FETCH_ASSOC);
+
+    if (!$claim) {
+        http_response_code(404);
+        die(json_encode([
+            'status' => 'error',
+            'message' => 'Zakázka nebyla nalezena'
+        ]));
+    }
+
+    $claimId = $claim['id'];
+
     // Načíst dokumenty z tabulky wgs_documents
     $stmt = $pdo->prepare("
         SELECT
-            document_id,
-            reklamace_id,
+            id,
+            claim_id,
             document_type,
-            file_path,
-            file_name,
+            document_path,
+            document_name,
             file_size,
-            created_at,
-            created_by
+            uploaded_at,
+            uploaded_by
         FROM wgs_documents
-        WHERE reklamace_id = :reklamace_id
-        ORDER BY created_at DESC
+        WHERE claim_id = :claim_id
+        ORDER BY uploaded_at DESC
     ");
 
-    $stmt->execute(['reklamace_id' => $reklamaceId]);
+    $stmt->execute(['claim_id' => $claimId]);
     $documents = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Formátovat data dokumentů
     $formattedDocuments = array_map(function($doc) {
         return [
-            'document_id' => $doc['document_id'],
-            'reklamace_id' => $doc['reklamace_id'],
+            'document_id' => $doc['id'],
+            'reklamace_id' => $doc['claim_id'],
             'type' => $doc['document_type'],
-            'file_path' => $doc['file_path'],
-            'file_name' => $doc['file_name'],
+            'file_path' => $doc['document_path'],
+            'file_name' => $doc['document_name'],
             'file_size' => $doc['file_size'],
-            'created_at' => $doc['created_at'],
-            'created_by' => $doc['created_by']
+            'created_at' => $doc['uploaded_at'],
+            'created_by' => $doc['uploaded_by']
         ];
     }, $documents);
 
