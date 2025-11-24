@@ -2743,9 +2743,11 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
       // To znamená, že změna v emailové šabloně automaticky ovlivní i SMS
       const smsText = data.sms_text || `Dobrý den, pokusili jsme se Vás kontaktovat. Zavolejte prosím zpět na +420 725 965 826. Děkujeme, WGS Service`;
 
-      // Otevřít SMS aplikaci na telefonu s předvyplněným textem
-      const encodedText = encodeURIComponent(smsText);
-      window.location.href = `sms:${telefon}?body=${encodedText}`;
+      // Počkat 2 sekundy, aby technik viděl potvrzení, pak otevřít SMS aplikaci
+      setTimeout(() => {
+        const encodedText = encodeURIComponent(smsText);
+        window.location.href = `sms:${telefon}?body=${encodedText}`;
+      }, 2000);
 
     } else {
       logger.error('⚠ Chyba při odesílání emailu:', data.error || data.message);
