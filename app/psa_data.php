@@ -2,6 +2,9 @@
 // PSA data handler: serves and saves calculator data
 header('Content-Type: application/json; charset=utf-8');
 
+require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
+
 $filePath = __DIR__ . '/../data/psa-employees.json';
 
 function respond(string $status, array $payload = [], int $code = 200): void
@@ -21,7 +24,20 @@ function ensureDataDirectory(string $path): void
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
+function requireAuth(): void
+{
+    $isAdmin = !empty($_SESSION['is_admin']);
+    $rawRole = strtolower((string) ($_SESSION['role'] ?? ''));
+    $isTechnik = strpos($rawRole, 'technik') !== false || strpos($rawRole, 'technician') !== false;
+
+    if (!$isAdmin && !$isTechnik) {
+        respond('error', ['message' => 'Neautorizovaný přístup'], 401);
+    }
+}
+
 try {
+    requireAuth();
+
     if ($method === 'GET') {
         if (!file_exists($filePath)) {
             respond('error', ['message' => 'Soubor s daty nebyl nalezen'], 404);
@@ -44,6 +60,10 @@ try {
 
         if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
             respond('error', ['message' => 'Neplatný JSON payload'], 400);
+        }
+
+        if (!validateCSRFToken($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '')) {
+            respond('error', ['message' => 'Neplatný CSRF token'], 403);
         }
 
         ensureDataDirectory($filePath);
