@@ -155,7 +155,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
             <div class="radio-content">
               <div class="radio-title" data-lang-cs="Pouze diagnostika / inspekce" data-lang-en="Diagnostic / Inspection Only" data-lang-it="Solo Diagnostica / Ispezione">Pouze diagnostika / inspekce</div>
               <div class="radio-desc" data-lang-cs="Technik provede pouze zjištění rozsahu poškození a posouzení stavu." data-lang-en="Technician will only assess the extent of damage and evaluate the condition." data-lang-it="Il tecnico valuterà solo l'entità del danno e valuterà le condizioni.">Technik provede pouze zjištění rozsahu poškození a posouzení stavu.</div>
-              <div class="radio-price">155 €</div>
+              <div class="radio-price">110 €</div>
             </div>
           </label>
 
@@ -164,7 +164,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
             <div class="radio-content">
               <div class="radio-title" data-lang-cs="Čalounické práce" data-lang-en="Upholstery Work" data-lang-it="Lavori di Tappezzeria">Čalounické práce</div>
               <div class="radio-desc" data-lang-cs="Oprava včetně rozčalounění konstrukce (sedáky, opěrky, područky)." data-lang-en="Repair including disassembly of structure (seats, backrests, armrests)." data-lang-it="Riparazione compreso smontaggio della struttura (sedili, schienali, braccioli).">Oprava včetně rozčalounění konstrukce (sedáky, opěrky, područky).</div>
-              <div class="radio-price" data-lang-cs="Od 190 €" data-lang-en="From 190 €" data-lang-it="Da 190 €">Od 190 €</div>
+              <div class="radio-price" data-lang-cs="Od 205 €" data-lang-en="From 205 €" data-lang-it="Da 205 €">Od 205 €</div>
             </div>
           </label>
 
@@ -173,7 +173,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
             <div class="radio-content">
               <div class="radio-title" data-lang-cs="Mechanické opravy" data-lang-en="Mechanical Repairs" data-lang-it="Riparazioni Meccaniche">Mechanické opravy</div>
               <div class="radio-desc" data-lang-cs="Oprava mechanismů (relax, výsuv) bez rozčalounění." data-lang-en="Repair of mechanisms (relax, slide) without disassembly." data-lang-it="Riparazione di meccanismi (relax, scorrimento) senza smontaggio.">Oprava mechanismů (relax, výsuv) bez rozčalounění.</div>
-              <div class="radio-price" data-lang-cs="155 € / díl" data-lang-en="155 € / part" data-lang-it="155 € / parte">155 € / díl</div>
+              <div class="radio-price" data-lang-cs="Od 165 €" data-lang-en="From 165 €" data-lang-it="Da 165 €">Od 165 €</div>
             </div>
           </label>
 
@@ -196,7 +196,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
       <!-- KROK 3A: Čalounické práce - počet dílů -->
       <div class="wizard-step" id="step-upholstery" style="display: none;">
         <h3 class="step-title" data-lang-cs="3. Kolik dílů potřebuje přečalounit?" data-lang-en="3. How many parts need reupholstering?" data-lang-it="3. Quante parti necessitano di ritappezzatura?">3. Kolik dílů potřebuje přečalounit?</h3>
-        <p class="step-desc" data-lang-cs="Jeden díl = sedák NEBO opěrka NEBO područka NEBO panel. První díl stojí 190€, každý další 70€." data-lang-en="One part = seat OR backrest OR armrest OR panel. First part costs 190€, each additional 70€." data-lang-it="Una parte = sedile O schienale O bracciolo O pannello. La prima parte costa 190€, ogni aggiuntiva 70€.">Jeden díl = sedák NEBO opěrka NEBO područka NEBO panel. První díl stojí 190€, každý další 70€.</p>
+        <p class="step-desc" data-lang-cs="Jeden díl = sedák NEBO opěrka NEBO područka NEBO panel. První díl stojí 205€, každý další 70€." data-lang-en="One part = seat OR backrest OR armrest OR panel. First part costs 205€, each additional 70€." data-lang-it="Una parte = sedile O schienale O bracciolo O pannello. La prima parte costa 205€, ogni aggiuntiva 70€.">Jeden díl = sedák NEBO opěrka NEBO područka NEBO panel. První díl stojí 205€, každý další 70€.</p>
 
         <div class="counter-group">
           <div class="counter-item">
@@ -278,7 +278,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
               <input type="number" id="relax" value="0" min="0" max="10" readonly>
               <button class="btn-counter" onclick="incrementCounter('relax')">+</button>
             </div>
-            <div class="counter-price" data-lang-cs="155 € / kus" data-lang-en="155 € / piece" data-lang-it="155 € / pezzo">155 € / kus</div>
+            <div class="counter-price" data-lang-cs="45 € / kus" data-lang-en="45 € / piece" data-lang-it="45 € / pezzo">45 € / kus</div>
           </div>
 
           <div class="counter-item">
@@ -288,7 +288,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
               <input type="number" id="vysuv" value="0" min="0" max="10" readonly>
               <button class="btn-counter" onclick="incrementCounter('vysuv')">+</button>
             </div>
-            <div class="counter-price" data-lang-cs="155 € / kus" data-lang-en="155 € / piece" data-lang-it="155 € / pezzo">155 € / kus</div>
+            <div class="counter-price" data-lang-cs="45 € / kus" data-lang-en="45 € / piece" data-lang-it="45 € / pezzo">45 € / kus</div>
           </div>
         </div>
 

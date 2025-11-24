@@ -15,16 +15,17 @@
     // Režim kalkulačky: 'standalone' nebo 'protokol'
     let kalkulackaRezim = 'standalone';
 
-    // Ceník služeb
+    // Ceník služeb (aktualizováno 2025-11-24)
     const CENY = {
-        diagnostika: 155,
-        prvniDil: 190,
-        dalsiDil: 70,
-        rohovyDil: 330,
-        ottoman: 260,
-        mechanismus: 155, // relax nebo elektrické díly
-        druhaOsoba: 80, // Jednorázově 80€ pro těžký nábytek nad 50kg
-        material: 40
+        diagnostika: 110, // Inspekce/diagnostika
+        prvniDil: 205, // První díl čalounění
+        dalsiDil: 70, // Každý další díl
+        rohovyDil: 220, // Rohový díl
+        ottoman: 260, // Ottoman s terminálem
+        zakladniSazba: 165, // Základní servisní sazba (mechanické opravy)
+        mechanismusPriplatek: 45, // Příplatek za mechanismus (relax, výsuv)
+        druhaOsoba: 95, // Druhá osoba pro těžký nábytek nad 50kg
+        material: 50 // Materiál (alternativní výplně)
     };
 
     // Stav kalkulačky
@@ -489,8 +490,17 @@
         if (stav.typServisu === 'mechanika' || stav.typServisu === 'kombinace') {
             const celkemMechanismu = stav.relax + stav.vysuv;
 
+            // Pokud je POUZE mechanika, přidat základní sazbu
+            if (stav.typServisu === 'mechanika') {
+                html += `<div class="summary-line">
+                    <span>${window.t('summary.basicServiceRate') || 'Základní servisní sazba'}:</span>
+                    <span class="summary-price">${CENY.zakladniSazba.toFixed(2)} €</span>
+                </div>`;
+                celkem += CENY.zakladniSazba;
+            }
+
             if (celkemMechanismu > 0) {
-                const cenaMechanismu = celkemMechanismu * CENY.mechanismus;
+                const cenaMechanismu = celkemMechanismu * CENY.mechanismusPriplatek;
 
                 html += `<div class="summary-line">
                     <span>${window.t('summary.mechanicalParts')} (${celkemMechanismu}× ${window.t('summary.mechanism')}):</span>
@@ -499,12 +509,12 @@
 
                 if (stav.relax > 0) {
                     html += `<div class="summary-subline">
-                        ↳ ${window.t('summary.relaxMechanisms')}: ${stav.relax}× ${CENY.mechanismus}€
+                        ↳ ${window.t('summary.relaxMechanisms')}: ${stav.relax}× ${CENY.mechanismusPriplatek}€
                     </div>`;
                 }
                 if (stav.vysuv > 0) {
                     html += `<div class="summary-subline">
-                        ↳ ${window.t('summary.slidingMechanisms')}: ${stav.vysuv}× ${CENY.mechanismus}€
+                        ↳ ${window.t('summary.slidingMechanisms')}: ${stav.vysuv}× ${CENY.mechanismusPriplatek}€
                     </div>`;
                 }
 
@@ -646,9 +656,14 @@
 
             // Mechanické práce
             if (stav.typServisu === 'mechanika' || stav.typServisu === 'kombinace') {
+                // Pokud je POUZE mechanika, přidat základní sazbu
+                if (stav.typServisu === 'mechanika') {
+                    celkem += CENY.zakladniSazba;
+                }
+
                 const celkemMechanismu = stav.relax + stav.vysuv;
                 if (celkemMechanismu > 0) {
-                    celkem += celkemMechanismu * CENY.mechanismus;
+                    celkem += celkemMechanismu * CENY.mechanismusPriplatek;
                 }
             }
 
@@ -835,9 +850,19 @@
 
             // Mechanické práce
             if (stav.typServisu === 'mechanika' || stav.typServisu === 'kombinace') {
+                // Pokud je POUZE mechanika, přidat základní sazbu
+                if (stav.typServisu === 'mechanika') {
+                    htmlContent += `
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 8px 0;">Základní servisní sazba:</td>
+                            <td style="padding: 8px 0; text-align: right; font-weight: bold;">${CENY.zakladniSazba.toFixed(2)} €</td>
+                        </tr>
+                    `;
+                }
+
                 const celkemMechanismu = stav.relax + stav.vysuv;
                 if (celkemMechanismu > 0) {
-                    const cenaMechanismu = celkemMechanismu * CENY.mechanismus;
+                    const cenaMechanismu = celkemMechanismu * CENY.mechanismusPriplatek;
                     htmlContent += `
                         <tr style="border-bottom: 1px solid #eee;">
                             <td style="padding: 8px 0;">Mechanické části (${celkemMechanismu}× mechanismus):</td>
@@ -846,10 +871,10 @@
                     `;
                     if (stav.relax > 0 || stav.vysuv > 0) {
                         let detaily = '';
-                        if (stav.relax > 0) detaily += `Relax mechanismy: ${stav.relax}× ${CENY.mechanismus}€`;
+                        if (stav.relax > 0) detaily += `Relax mechanismy: ${stav.relax}× ${CENY.mechanismusPriplatek}€`;
                         if (stav.vysuv > 0) {
                             if (detaily) detaily += ', ';
-                            detaily += `Elektrické díly: ${stav.vysuv}× ${CENY.mechanismus}€`;
+                            detaily += `Elektrické díly: ${stav.vysuv}× ${CENY.mechanismusPriplatek}€`;
                         }
                         htmlContent += `
                             <tr>
@@ -1002,9 +1027,14 @@
 
         // Mechanické práce
         if (stav.typServisu === 'mechanika' || stav.typServisu === 'kombinace') {
+            // Pokud je POUZE mechanika, přidat základní sazbu
+            if (stav.typServisu === 'mechanika') {
+                celkovaCena += CENY.zakladniSazba;
+            }
+
             const celkemMechanismu = stav.relax + stav.vysuv;
             if (celkemMechanismu > 0) {
-                celkovaCena += celkemMechanismu * CENY.mechanismus;
+                celkovaCena += celkemMechanismu * CENY.mechanismusPriplatek;
             }
         }
 
