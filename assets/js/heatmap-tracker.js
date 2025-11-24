@@ -150,6 +150,17 @@
                 body: JSON.stringify(data)
             });
 
+            // OPRAVA: Nejprve zkontrolovat HTTP status před parsováním JSON
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('[Heatmap Tracker] API HTTP error:', response.status, response.statusText);
+                console.error('[Heatmap Tracker] Response body:', errorText.substring(0, 200)); // První 200 znaků
+                // Vrátit data zpět do bufferu
+                clickBuffer.unshift(...data.clicks);
+                data.scroll_depths.forEach(s => scrollDepths.add(s));
+                return;
+            }
+
             const result = await response.json();
 
             if (result.status !== 'success') {
