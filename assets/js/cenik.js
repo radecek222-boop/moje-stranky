@@ -712,34 +712,20 @@
             let imgWidth = availableWidth;
             let imgHeight = imgWidth * canvasRatio;
 
-            // Pokud je výška větší než stránka, rozdělíme na více stránek
+            // VŽDY NA JEDNÉ STRÁNCE - pokud je vyšší než stránka, zmenšit proporcionálně
             if (imgHeight > availableHeight) {
-                const pages = Math.ceil(imgHeight / availableHeight);
+                // Zmenšit tak, aby se vešel na výšku stránky
+                imgHeight = availableHeight;
+                imgWidth = imgHeight / canvasRatio;
 
-                for (let i = 0; i < pages; i++) {
-                    if (i > 0) {
-                        pdf.addPage();
-                    }
-
-                    const sourceY = i * (canvas.height / pages);
-                    const sourceHeight = canvas.height / pages;
-
-                    // Vytvořit dočasný canvas pro daný slice
-                    const tempCanvas = document.createElement('canvas');
-                    tempCanvas.width = canvas.width;
-                    tempCanvas.height = sourceHeight;
-                    const tempCtx = tempCanvas.getContext('2d');
-                    tempCtx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
-
-                    const pageImgData = tempCanvas.toDataURL('image/jpeg', 0.95);
-                    const pageHeight = availableHeight;
-
-                    pdf.addImage(pageImgData, 'JPEG', margin, margin, imgWidth, pageHeight);
-                }
-            } else {
-                // Vejde se na jednu stránku
-                pdf.addImage(imgData, 'JPEG', margin, margin, imgWidth, imgHeight);
+                console.log(`[Ceník] Obsah zmenšen na ${Math.round(imgWidth)}x${Math.round(imgHeight)}mm pro vložení na jednu A4`);
             }
+
+            // Vycentrovat horizontálně pokud je užší než stránka
+            const xOffset = margin + (availableWidth - imgWidth) / 2;
+
+            // Přidat celý obsah na jednu stránku
+            pdf.addImage(imgData, 'JPEG', xOffset, margin, imgWidth, imgHeight);
 
             // Odstranit dočasný wrapper
             document.body.removeChild(pdfWrapper);
