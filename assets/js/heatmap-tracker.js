@@ -9,7 +9,7 @@
 
     // Config
     const CONFIG = {
-        apiUrl: '/api/track_heatmap.php',
+        apiUrl: window.location.origin + '/api/track_heatmap.php',
         batchInterval: 5000, // Posílat data každých 5 sekund
         maxBatchSize: 50,    // Max 50 událostí v jednom batchi
         scrollBuckets: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
@@ -149,6 +149,13 @@
                 body: JSON.stringify(data)
             });
 
+            // Kontrola HTTP status před parsováním JSON
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('[Heatmap Tracker] API HTTP error:', response.status, errorText.substring(0, 200));
+                return;
+            }
+
             const result = await response.json();
 
             if (result.status !== 'success') {
@@ -156,10 +163,14 @@
             }
 
         } catch (error) {
-            console.error('[Heatmap Tracker] Network error:', error);
-            // Vrátit data zpět do bufferu
-            clickBuffer.unshift(...data.clicks);
-            data.scrolls.forEach(s => scrollDepths.add(s));
+            console.error('[Heatmap Tracker] Network error:', error.message || error);
+            // Vrátit data zpět do bufferu (pouze při síťové chybě)
+            if (data.clicks && data.clicks.length > 0) {
+                clickBuffer.unshift(...data.clicks);
+            }
+            if (data.scrolls) {
+                data.scrolls.forEach(s => scrollDepths.add(s));
+            }
         }
     }
 
