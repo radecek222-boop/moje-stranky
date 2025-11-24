@@ -88,14 +88,24 @@ try {
     // ========================================
     // SANITIZACE A VALIDACE DAT
     // ========================================
-    $pageUrl = filter_var($inputData['page_url'], FILTER_VALIDATE_URL);
-    if (!$pageUrl) {
+    // Bezpečná URL validace (FILTER_VALIDATE_URL selže na hash/query/diakritice)
+    $pageUrlRaw = trim($inputData['page_url']);
+
+    // Odstranit hash a query parametry před parsováním
+    $pageUrlClean = strtok($pageUrlRaw, '?#');
+
+    // Bezpečné parse_url
+    $parsedUrl = parse_url($pageUrlClean);
+
+    if (!$parsedUrl || !isset($parsedUrl['scheme']) || !isset($parsedUrl['host'])) {
         sendJsonError('Neplatná URL adresa', 400);
     }
 
-    // Normalizace URL (odstranit query params a hash)
-    $parsedUrl = parse_url($pageUrl);
-    $normalizedUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . ($parsedUrl['path'] ?? '/');
+    // Bezpečná normalizace URL
+    $scheme = $parsedUrl['scheme'] ?? 'https';
+    $host = $parsedUrl['host'];
+    $path = $parsedUrl['path'] ?? '/';
+    $normalizedUrl = $scheme . '://' . $host . $path;
 
     // Validace device_type
     $deviceType = sanitizeInput($inputData['device_type']);
