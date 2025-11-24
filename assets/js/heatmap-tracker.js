@@ -9,7 +9,7 @@
 
     // Config
     const CONFIG = {
-        enabled: false,      // DOČASNĚ VYPNUTO - debuguji 500 chyby
+        enabled: true,       // Zapnuto - opcache vyčištěn, opravy aktivní
         apiUrl: '/api/track_heatmap.php',
         batchInterval: 5000, // Posílat data každých 5 sekund
         maxBatchSize: 50,    // Max 50 událostí v jednom batchi
