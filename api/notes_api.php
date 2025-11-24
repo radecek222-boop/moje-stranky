@@ -214,29 +214,70 @@ try {
             break;
 
         case 'get_unread_counts':
-            // Načtení počtu nepřečtených poznámek pro všechny reklamace
+            // Načtení počtu nepřečtených poznámek pro reklamace podle oprávnění
             $currentUserEmail = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? null;
+            $userId = $_SESSION['user_id'] ?? null;
+            $userRole = strtolower(trim($_SESSION['role'] ?? 'guest'));
+            $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 
             if (!$currentUserEmail) {
                 throw new Exception('Uživatel není přihlášen');
             }
 
-            // Načíst všechny poznámky, které aktuální uživatel ještě nepřečetl
-            // a nejsou od něj (autor automaticky "přečetl" své vlastní poznámky)
-            $stmt = $pdo->prepare("
+            // Sestavit WHERE podmínky podle role (stejná logika jako v load.php)
+            $whereParts = [];
+            $params = [
+                ':user_email' => $currentUserEmail,
+                ':user_email_author' => $currentUserEmail
+            ];
+
+            if (!$isAdmin) {
+                $isProdejce = in_array($userRole, ['prodejce', 'user'], true);
+                $isTechnik = in_array($userRole, ['technik', 'technician'], true);
+
+                if ($isProdejce) {
+                    // PRODEJCE: Vidí pouze poznámky u SVÝCH reklamací
+                    if ($userId !== null) {
+                        $whereParts[] = 'r.created_by = :created_by';
+                        $params[':created_by'] = $userId;
+                    } else {
+                        $whereParts[] = '1 = 0'; // Bez user_id nevidí nic
+                    }
+                } elseif ($isTechnik) {
+                    // TECHNIK: Vidí poznámky u VŠECH reklamací (žádný filtr)
+                    // Necháme prázdné whereParts pro technika
+                } else {
+                    // GUEST: Vidí poznámky pouze u reklamací se svým emailem
+                    $guestConditions = [];
+                    $guestConditions[] = 'LOWER(TRIM(r.email)) = LOWER(TRIM(:guest_email))';
+                    $params[':guest_email'] = $currentUserEmail;
+                    $whereParts[] = '(' . implode(' OR ', $guestConditions) . ')';
+                }
+            }
+            // Admin vidí VŠE (žádný filtr)
+
+            // Sestavit SQL dotaz
+            $whereClause = '';
+            if (!empty($whereParts)) {
+                $whereClause = ' AND ' . implode(' AND ', $whereParts);
+            }
+
+            // Načíst nepřečtené poznámky s filtrováním podle oprávnění
+            $sql = "
                 SELECT
                     n.claim_id,
                     COUNT(*) as unread_count
                 FROM wgs_notes n
+                INNER JOIN wgs_reklamace r ON n.claim_id = r.id
                 LEFT JOIN wgs_notes_read nr ON n.id = nr.note_id AND nr.user_email = :user_email
                 WHERE nr.id IS NULL
                   AND n.created_by != :user_email_author
+                  $whereClause
                 GROUP BY n.claim_id
-            ");
-            $stmt->execute([
-                ':user_email' => $currentUserEmail,
-                ':user_email_author' => $currentUserEmail
-            ]);
+            ";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
             $unreadCounts = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
             echo json_encode([
