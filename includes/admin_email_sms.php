@@ -804,7 +804,7 @@ async function otevritNotifikace(sablonaId) {
             <form id="sablona-form" style="display: flex; flex-direction: column; gap: 1rem;">
                 <!-- Název -->
                 <div>
-                    <label style="display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #000;">
+                    <label style="display: block; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #fff;">
                         Název šablony:
                     </label>
                     <input type="text" id="sablona-name" value="${sablona.name.replace(/"/g, '&quot;')}"
@@ -848,7 +848,7 @@ async function otevritNotifikace(sablonaId) {
                 <!-- Aktivní -->
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <input type="checkbox" id="sablona-active" ${sablona.active ? 'checked' : ''} />
-                    <label for="sablona-active" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; color: #000; cursor: pointer;">
+                    <label for="sablona-active" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; color: #fff; cursor: pointer;">
                         Šablona je aktivní
                     </label>
                 </div>
