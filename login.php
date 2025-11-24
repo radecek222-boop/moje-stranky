@@ -112,11 +112,16 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
       </div>
 
       <!-- ✅ FIX 11: Remember Me checkbox -->
-      <div class="form-group" style="margin-top: 0.5rem;">
-        <input type="checkbox" id="rememberMe" name="remember_me" style="width: auto; margin-right: 8px;">
-        <label for="rememberMe" style="display: inline; font-weight: normal; cursor: pointer;" data-lang-cs="Zapamatovat si mě (30 dní)" data-lang-en="Remember me (30 days)" data-lang-it="Ricordami (30 giorni)">
-          Zapamatovat si mě (30 dní)
-        </label>
+      <div class="form-group remember-me-group" style="margin-top: 0.5rem;">
+        <div style="display: flex; align-items: center; margin-bottom: 0.3rem;">
+          <input type="checkbox" id="rememberMe" name="remember_me" style="width: auto; margin-right: 8px;">
+          <label for="rememberMe" style="display: inline; font-weight: 500; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.85rem;" data-lang-cs="Zapamatovat si mě (30 dní)" data-lang-en="Remember me (30 days)" data-lang-it="Ricordami (30 giorni)">
+            Zapamatovat si mě (30 dní)
+          </label>
+        </div>
+        <div class="remember-me-helper" style="margin-left: 28px; font-size: 0.75rem; color: #999; font-weight: 300;">
+          <span data-lang-cs="pouze na osobním zařízení" data-lang-en="personal device only" data-lang-it="solo su dispositivo personale">pouze na osobním zařízení</span>
+        </div>
       </div>
     </div>
 
@@ -143,9 +148,60 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
 </div>
 </main>
 
+<!-- Remember Me Confirmation Overlay -->
+<div id="rememberMeOverlay">
+  <div class="remember-me-confirm-box">
+    <h3 data-lang-cs="Upozornění" data-lang-en="Warning" data-lang-it="Avviso">Upozornění</h3>
+    <p data-lang-cs="Jste si jisti, že nepoužívá toto zařízení jiný uživatel?" data-lang-en="Are you sure this device is not used by another user?" data-lang-it="Sei sicuro che questo dispositivo non sia utilizzato da un altro utente?">
+      Jste si jisti, že nepoužívá toto zařízení jiný uživatel?
+    </p>
+    <div class="remember-me-confirm-buttons">
+      <button type="button" class="remember-me-btn-cancel" id="rememberMeCancelBtn" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
+      <button type="button" class="remember-me-btn-confirm" id="rememberMeConfirmBtn" data-lang-cs="Potvrdit" data-lang-en="Confirm" data-lang-it="Conferma">Potvrdit</button>
+    </div>
+  </div>
+</div>
+
 <script src="assets/js/logger.js" defer></script>
 <script src="assets/js/csrf-auto-inject.js" defer></script>
 <script src="assets/js/welcome-modal.js" defer></script>
 <script src="assets/js/login.js" defer></script>
+
+<!-- Remember Me Checkbox Handler -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const rememberMeCheckbox = document.getElementById('rememberMe');
+  const rememberMeOverlay = document.getElementById('rememberMeOverlay');
+  const confirmBtn = document.getElementById('rememberMeConfirmBtn');
+  const cancelBtn = document.getElementById('rememberMeCancelBtn');
+
+  // Při zaškrtnutí checkboxu zobrazit overlay
+  rememberMeCheckbox.addEventListener('change', function() {
+    if (this.checked) {
+      rememberMeOverlay.classList.add('active');
+    }
+  });
+
+  // Potvrdit - nechat zaškrtnuté a zavřít overlay
+  confirmBtn.addEventListener('click', function() {
+    rememberMeOverlay.classList.remove('active');
+  });
+
+  // Zrušit - odškrtnout checkbox a zavřít overlay
+  cancelBtn.addEventListener('click', function() {
+    rememberMeCheckbox.checked = false;
+    rememberMeOverlay.classList.remove('active');
+  });
+
+  // Kliknutí na pozadí overlay zavře a zruší
+  rememberMeOverlay.addEventListener('click', function(e) {
+    if (e.target === rememberMeOverlay) {
+      rememberMeCheckbox.checked = false;
+      rememberMeOverlay.classList.remove('active');
+    }
+  });
+});
+</script>
+
 </body>
 </html>
