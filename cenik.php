@@ -276,17 +276,17 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
               <input type="number" id="relax" value="0" min="0" max="10" readonly>
               <button class="btn-counter" onclick="incrementCounter('relax')">+</button>
             </div>
-            <div class="counter-price" data-lang-cs="70 € / kus" data-lang-en="70 € / piece" data-lang-it="70 € / pezzo">70 € / kus</div>
+            <div class="counter-price" data-lang-cs="155 € / kus" data-lang-en="155 € / piece" data-lang-it="155 € / pezzo">155 € / kus</div>
           </div>
 
           <div class="counter-item">
-            <label data-lang-cs="Výsuvné mechanismy" data-lang-en="Sliding mechanisms" data-lang-it="Meccanismi scorrevoli">Výsuvné mechanismy</label>
+            <label data-lang-cs="Elektrické díly" data-lang-en="Electrical parts" data-lang-it="Parti elettriche">Elektrické díly</label>
             <div class="counter-controls">
               <button class="btn-counter" onclick="decrementCounter('vysuv')">−</button>
               <input type="number" id="vysuv" value="0" min="0" max="10" readonly>
               <button class="btn-counter" onclick="incrementCounter('vysuv')">+</button>
             </div>
-            <div class="counter-price" data-lang-cs="70 € / kus" data-lang-en="70 € / piece" data-lang-it="70 € / pezzo">70 € / kus</div>
+            <div class="counter-price" data-lang-cs="155 € / kus" data-lang-en="155 € / piece" data-lang-it="155 € / pezzo">155 € / kus</div>
           </div>
         </div>
 

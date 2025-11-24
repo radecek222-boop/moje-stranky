@@ -22,7 +22,7 @@
         dalsiDil: 70,
         rohovyDil: 330,
         ottoman: 260,
-        mechanismus: 70, // relax nebo výsuv
+        mechanismus: 155, // relax nebo elektrické díly
         druhaOsoba: 80, // Jednorázově 80€ pro těžký nábytek nad 50kg
         material: 40
     };
@@ -741,7 +741,7 @@
                 htmlContent += `<ul style="margin: 5px 0 5px 20px; font-size: 14px; line-height: 1.8;">`;
 
                 if (stav.relax > 0) htmlContent += `<li>Relax mechanismy: ${stav.relax}×</li>`;
-                if (stav.vysuv > 0) htmlContent += `<li>Výsuvné mechanismy: ${stav.vysuv}×</li>`;
+                if (stav.vysuv > 0) htmlContent += `<li>Elektrické díly: ${stav.vysuv}×</li>`;
 
                 const celkemMechanismu = stav.relax + stav.vysuv;
                 if (celkemMechanismu === 0) {
@@ -849,7 +849,7 @@
                         if (stav.relax > 0) detaily += `Relax mechanismy: ${stav.relax}× ${CENY.mechanismus}€`;
                         if (stav.vysuv > 0) {
                             if (detaily) detaily += ', ';
-                            detaily += `Výsuvné mechanismy: ${stav.vysuv}× ${CENY.mechanismus}€`;
+                            detaily += `Elektrické díly: ${stav.vysuv}× ${CENY.mechanismus}€`;
                         }
                         htmlContent += `
                             <tr>
