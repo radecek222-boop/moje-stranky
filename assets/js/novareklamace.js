@@ -730,7 +730,12 @@ const WGS = {
       formData.append('datum_reklamace', document.getElementById('datum_reklamace').value || '');
       formData.append('jmeno', document.getElementById('jmeno').value || '');
       formData.append('email', document.getElementById('email').value || '');
-      formData.append('telefon', document.getElementById('telefon').value || '');
+
+      // Spojit předvolbu + telefonní číslo
+      const phonePrefix = document.getElementById('phone-prefix')?.value || '+420';
+      const phoneNumber = document.getElementById('telefon')?.value || '';
+      const fullPhone = phoneNumber ? `${phonePrefix} ${phoneNumber.trim()}` : '';
+      formData.append('telefon', fullPhone);
 
       const ulice = document.getElementById('ulice')?.value || '';
       const mesto = document.getElementById('mesto')?.value || '';
