@@ -872,18 +872,35 @@ function handleUpdateEmailRecipients(PDO $pdo, array $payload): void
         throw new InvalidArgumentException('Příjemci musí být pole');
     }
 
+    // Validace typu (to/cc/bcc)
+    $validTypes = ['to', 'cc', 'bcc'];
+    $validateType = function($type) use ($validTypes) {
+        return in_array($type, $validTypes) ? $type : 'to';
+    };
+
     // Validace struktury recipients
     $validatedRecipients = [
-        'customer' => isset($recipients['customer']) ? (bool)$recipients['customer'] : false,
-        'seller' => isset($recipients['seller']) ? (bool)$recipients['seller'] : false,
-        'technician' => isset($recipients['technician']) ? (bool)$recipients['technician'] : false,
+        'customer' => [
+            'enabled' => isset($recipients['customer']['enabled']) ? (bool)$recipients['customer']['enabled'] : false,
+            'type' => $validateType($recipients['customer']['type'] ?? 'to')
+        ],
+        'seller' => [
+            'enabled' => isset($recipients['seller']['enabled']) ? (bool)$recipients['seller']['enabled'] : false,
+            'type' => $validateType($recipients['seller']['type'] ?? 'cc')
+        ],
+        'technician' => [
+            'enabled' => isset($recipients['technician']['enabled']) ? (bool)$recipients['technician']['enabled'] : false,
+            'type' => $validateType($recipients['technician']['type'] ?? 'cc')
+        ],
         'importer' => [
             'enabled' => isset($recipients['importer']['enabled']) ? (bool)$recipients['importer']['enabled'] : false,
-            'email' => isset($recipients['importer']['email']) ? trim($recipients['importer']['email']) : ''
+            'email' => isset($recipients['importer']['email']) ? trim($recipients['importer']['email']) : '',
+            'type' => $validateType($recipients['importer']['type'] ?? 'cc')
         ],
         'other' => [
             'enabled' => isset($recipients['other']['enabled']) ? (bool)$recipients['other']['enabled'] : false,
-            'email' => isset($recipients['other']['email']) ? trim($recipients['other']['email']) : ''
+            'email' => isset($recipients['other']['email']) ? trim($recipients['other']['email']) : '',
+            'type' => $validateType($recipients['other']['type'] ?? 'cc')
         ]
     ];
 

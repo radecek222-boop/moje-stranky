@@ -972,14 +972,22 @@ function zobrazitSouhrnPrijemcu(recipients) {
     }
 
     const prijemci = [];
-    if (recipients.customer) prijemci.push('Zákazník');
-    if (recipients.seller) prijemci.push('Prodejce');
-    if (recipients.technician) prijemci.push('Technik');
+    const typeLabel = { 'to': 'To', 'cc': 'Cc', 'bcc': 'Bcc' };
+
+    if (recipients.customer && recipients.customer.enabled) {
+        prijemci.push('Zákazník (' + typeLabel[recipients.customer.type] + ')');
+    }
+    if (recipients.seller && recipients.seller.enabled) {
+        prijemci.push('Prodejce (' + typeLabel[recipients.seller.type] + ')');
+    }
+    if (recipients.technician && recipients.technician.enabled) {
+        prijemci.push('Technik (' + typeLabel[recipients.technician.type] + ')');
+    }
     if (recipients.importer && recipients.importer.enabled) {
-        prijemci.push('Výrobce (' + (recipients.importer.email || 'bez emailu') + ')');
+        prijemci.push('Výrobce (' + typeLabel[recipients.importer.type] + ', ' + (recipients.importer.email || 'bez emailu') + ')');
     }
     if (recipients.other && recipients.other.enabled) {
-        prijemci.push('Jiné (' + (recipients.other.email || 'bez emailu') + ')');
+        prijemci.push('Jiné (' + typeLabel[recipients.other.type] + ', ' + (recipients.other.email || 'bez emailu') + ')');
     }
 
     if (prijemci.length === 0) {
@@ -1000,21 +1008,21 @@ async function otevritModalPrijemcu(sablonaId) {
 
         if (data.status === 'success' && data.notification) {
             currentRecipients = data.notification.recipients || {
-                customer: true,
-                seller: false,
-                technician: false,
-                importer: { enabled: false, email: '' },
-                other: { enabled: false, email: '' }
+                customer: { enabled: true, type: 'to' },
+                seller: { enabled: false, type: 'cc' },
+                technician: { enabled: false, type: 'cc' },
+                importer: { enabled: false, email: '', type: 'cc' },
+                other: { enabled: false, email: '', type: 'cc' }
             };
         }
     } catch (error) {
         console.error('Chyba načítání příjemců:', error);
         currentRecipients = {
-            customer: true,
-            seller: false,
-            technician: false,
-            importer: { enabled: false, email: '' },
-            other: { enabled: false, email: '' }
+            customer: { enabled: true, type: 'to' },
+            seller: { enabled: false, type: 'cc' },
+            technician: { enabled: false, type: 'cc' },
+            importer: { enabled: false, email: '', type: 'cc' },
+            other: { enabled: false, email: '', type: 'cc' }
         };
     }
 
@@ -1028,54 +1036,85 @@ async function otevritModalPrijemcu(sablonaId) {
 
                 <div style="display: flex; flex-direction: column; gap: 1rem;">
                     <!-- Zákazník -->
-                    <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px; cursor: pointer;">
-                        <input type="checkbox" id="recipient-customer" ${currentRecipients.customer ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
-                        <div>
-                            <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Zákazník</div>
-                            <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán zákazníkovi</div>
+                    <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                            <input type="checkbox" id="recipient-customer" ${currentRecipients.customer?.enabled ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
+                            <div style="flex: 1;">
+                                <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Zákazník</div>
+                                <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán zákazníkovi</div>
+                            </div>
+                            <select id="recipient-customer-type" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.85rem;">
+                                <option value="to" ${currentRecipients.customer?.type === 'to' ? 'selected' : ''}>Příjemce (To)</option>
+                                <option value="cc" ${currentRecipients.customer?.type === 'cc' ? 'selected' : ''}>Kopie (Cc)</option>
+                                <option value="bcc" ${currentRecipients.customer?.type === 'bcc' ? 'selected' : ''}>Skrytá kopie (Bcc)</option>
+                            </select>
                         </div>
-                    </label>
+                    </div>
 
                     <!-- Prodejce -->
-                    <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px; cursor: pointer;">
-                        <input type="checkbox" id="recipient-seller" ${currentRecipients.seller ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
-                        <div>
-                            <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Prodejce</div>
-                            <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán prodejci, který vytvořil reklamaci</div>
+                    <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <input type="checkbox" id="recipient-seller" ${currentRecipients.seller?.enabled ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
+                            <div style="flex: 1;">
+                                <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Prodejce</div>
+                                <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán prodejci, který vytvořil reklamaci</div>
+                            </div>
+                            <select id="recipient-seller-type" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.85rem;">
+                                <option value="to" ${currentRecipients.seller?.type === 'to' ? 'selected' : ''}>Příjemce (To)</option>
+                                <option value="cc" ${currentRecipients.seller?.type === 'cc' ? 'selected' : ''}>Kopie (Cc)</option>
+                                <option value="bcc" ${currentRecipients.seller?.type === 'bcc' ? 'selected' : ''}>Skrytá kopie (Bcc)</option>
+                            </select>
                         </div>
-                    </label>
+                    </div>
 
                     <!-- Technik -->
-                    <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px; cursor: pointer;">
-                        <input type="checkbox" id="recipient-technician" ${currentRecipients.technician ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
-                        <div>
-                            <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Technik</div>
-                            <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán technikovi, který pracoval na reklamaci</div>
+                    <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <input type="checkbox" id="recipient-technician" ${currentRecipients.technician?.enabled ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
+                            <div style="flex: 1;">
+                                <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Technik</div>
+                                <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán technikovi, který pracoval na reklamaci</div>
+                            </div>
+                            <select id="recipient-technician-type" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.85rem;">
+                                <option value="to" ${currentRecipients.technician?.type === 'to' ? 'selected' : ''}>Příjemce (To)</option>
+                                <option value="cc" ${currentRecipients.technician?.type === 'cc' ? 'selected' : ''}>Kopie (Cc)</option>
+                                <option value="bcc" ${currentRecipients.technician?.type === 'bcc' ? 'selected' : ''}>Skrytá kopie (Bcc)</option>
+                            </select>
                         </div>
-                    </label>
+                    </div>
 
                     <!-- Výrobce / Import -->
                     <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px;">
-                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin-bottom: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
                             <input type="checkbox" id="recipient-importer" ${currentRecipients.importer?.enabled ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
-                            <div>
+                            <div style="flex: 1;">
                                 <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Import zastupující / Výrobce</div>
                                 <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán na zadanou adresu výrobce</div>
                             </div>
-                        </label>
+                            <select id="recipient-importer-type" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.85rem;">
+                                <option value="to" ${currentRecipients.importer?.type === 'to' ? 'selected' : ''}>Příjemce (To)</option>
+                                <option value="cc" ${currentRecipients.importer?.type === 'cc' ? 'selected' : ''}>Kopie (Cc)</option>
+                                <option value="bcc" ${currentRecipients.importer?.type === 'bcc' ? 'selected' : ''}>Skrytá kopie (Bcc)</option>
+                            </select>
+                        </div>
                         <input type="email" id="recipient-importer-email" value="${currentRecipients.importer?.email || ''}" placeholder="email@vyrobce.cz"
                                style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.9rem;">
                     </div>
 
                     <!-- Jiné -->
                     <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 5px;">
-                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin-bottom: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
                             <input type="checkbox" id="recipient-other" ${currentRecipients.other?.enabled ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
-                            <div>
+                            <div style="flex: 1;">
                                 <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">Jiné</div>
                                 <div style="color: #ccc; font-size: 0.8rem;">Email bude odeslán na vlastní emailovou adresu</div>
                             </div>
-                        </label>
+                            <select id="recipient-other-type" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.85rem;">
+                                <option value="to" ${currentRecipients.other?.type === 'to' ? 'selected' : ''}>Příjemce (To)</option>
+                                <option value="cc" ${currentRecipients.other?.type === 'cc' ? 'selected' : ''}>Kopie (Cc)</option>
+                                <option value="bcc" ${currentRecipients.other?.type === 'bcc' ? 'selected' : ''}>Skrytá kopie (Bcc)</option>
+                            </select>
+                        </div>
                         <input type="email" id="recipient-other-email" value="${currentRecipients.other?.email || ''}" placeholder="vlastni@email.cz"
                                style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.9rem;">
                     </div>
@@ -1116,16 +1155,27 @@ function zavritModalPrijemcu() {
 // Uložit příjemce
 async function ulozitPrijemce() {
     const recipients = {
-        customer: document.getElementById('recipient-customer').checked,
-        seller: document.getElementById('recipient-seller').checked,
-        technician: document.getElementById('recipient-technician').checked,
+        customer: {
+            enabled: document.getElementById('recipient-customer').checked,
+            type: document.getElementById('recipient-customer-type').value
+        },
+        seller: {
+            enabled: document.getElementById('recipient-seller').checked,
+            type: document.getElementById('recipient-seller-type').value
+        },
+        technician: {
+            enabled: document.getElementById('recipient-technician').checked,
+            type: document.getElementById('recipient-technician-type').value
+        },
         importer: {
             enabled: document.getElementById('recipient-importer').checked,
-            email: document.getElementById('recipient-importer-email').value
+            email: document.getElementById('recipient-importer-email').value,
+            type: document.getElementById('recipient-importer-type').value
         },
         other: {
             enabled: document.getElementById('recipient-other').checked,
-            email: document.getElementById('recipient-other-email').value
+            email: document.getElementById('recipient-other-email').value,
+            type: document.getElementById('recipient-other-type').value
         }
     };
 
