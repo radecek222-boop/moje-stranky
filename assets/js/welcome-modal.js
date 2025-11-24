@@ -29,15 +29,15 @@ async function showWelcomeModal(userName, userRole) {
           <div class="welcome-stats">
             <div class="stat-item">
               <div class="stat-number">${stats.nevyreseno}</div>
-              <div class="stat-label">Nevyřešených</div>
+              <div class="stat-label">Nevyřešených reklamací</div>
             </div>
             <div class="stat-item">
               <div class="stat-number">${stats.hotovo}</div>
-              <div class="stat-label">Dokončených</div>
+              <div class="stat-label">Dokončených reklamací</div>
             </div>
             <div class="stat-item">
               <div class="stat-number">${stats.total}</div>
-              <div class="stat-label">Celkem</div>
+              <div class="stat-label">Celkem reklamací</div>
             </div>
           </div>
         `;
