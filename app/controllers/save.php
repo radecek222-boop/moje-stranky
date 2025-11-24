@@ -391,18 +391,25 @@ function handleReopen(PDO $pdo, array $input): array
         throw new Exception('Lze klonovat pouze dokončené zakázky (stav HOTOVO).');
     }
 
+    // Kontrola existence sloupců v tabulce
+    $hasReklamaceId = db_table_has_column($pdo, 'wgs_reklamace', 'reklamace_id');
+    $hasOriginalReklamaceId = db_table_has_column($pdo, 'wgs_reklamace', 'original_reklamace_id');
+    $hasCreatedBy = db_table_has_column($pdo, 'wgs_reklamace', 'created_by');
+    $hasCreatedByRole = db_table_has_column($pdo, 'wgs_reklamace', 'created_by_role');
+    $hasZpracovalId = db_table_has_column($pdo, 'wgs_reklamace', 'zpracoval_id');
+    $hasCreatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'created_at');
+    $hasUpdatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'updated_at');
+
     // Zahájit transakci
     $pdo->beginTransaction();
 
     try {
         // Vygenerovat nové ID
-        $newWorkflowId = generateWorkflowId($pdo);
+        $newWorkflowId = $hasReklamaceId ? generateWorkflowId($pdo) : null;
         $now = date('Y-m-d H:i:s');
 
-        // Připravit data pro klon
+        // Připravit data pro klon - pouze sloupce které existují
         $columns = [
-            'reklamace_id' => $newWorkflowId,
-            'original_reklamace_id' => $original['reklamace_id'] ?? $original['id'],
             'typ' => $original['typ'] ?? 'servis',
             'cislo' => $original['cislo'],
             'datum_prodeje' => $original['datum_prodeje'],
@@ -424,13 +431,37 @@ function handleReopen(PDO $pdo, array $input): array
             'stav' => 'wait', // Nová zakázka
             'termin' => null,
             'cas_navstevy' => null,
-            'datum_dokonceni' => null,
-            'zpracoval_id' => $userId,
-            'created_by' => $userId,
-            'created_by_role' => $_SESSION['role'] ?? 'user',
-            'created_at' => $now,
-            'updated_at' => $now
+            'datum_dokonceni' => null
         ];
+
+        // Přidat volitelné sloupce pouze pokud existují
+        if ($hasReklamaceId && $newWorkflowId !== null) {
+            $columns['reklamace_id'] = $newWorkflowId;
+        }
+
+        if ($hasOriginalReklamaceId) {
+            $columns['original_reklamace_id'] = $original['reklamace_id'] ?? $original['id'];
+        }
+
+        if ($hasZpracovalId) {
+            $columns['zpracoval_id'] = $userId;
+        }
+
+        if ($hasCreatedBy) {
+            $columns['created_by'] = $userId;
+        }
+
+        if ($hasCreatedByRole) {
+            $columns['created_by_role'] = $_SESSION['role'] ?? 'user';
+        }
+
+        if ($hasCreatedAt) {
+            $columns['created_at'] = $now;
+        }
+
+        if ($hasUpdatedAt) {
+            $columns['updated_at'] = $now;
+        }
 
         // Sestavit INSERT dotaz
         $columnNames = array_keys($columns);
@@ -461,11 +492,11 @@ function handleReopen(PDO $pdo, array $input): array
                        "Datum: " . date('d.m.Y H:i');
 
         $stmtNote = $pdo->prepare("
-            INSERT INTO wgs_notes (reklamace_id, note_text, created_by, created_at, is_read)
-            VALUES (:reklamace_id, :note_text, :created_by, :created_at, 0)
+            INSERT INTO wgs_notes (claim_id, note_text, created_by, created_at)
+            VALUES (:claim_id, :note_text, :created_by, :created_at)
         ");
         $stmtNote->execute([
-            'reklamace_id' => $newId,
+            'claim_id' => $newId,
             'note_text' => $noteTextNew,
             'created_by' => $userId ?? 0,
             'created_at' => $now
@@ -473,17 +504,17 @@ function handleReopen(PDO $pdo, array $input): array
 
         // Přidat poznámku do původní zakázky
         $noteTextOriginal = "🔗 Založena nová zakázka (reklamace)\n\n" .
-                            "Nová zakázka: " . $newWorkflowId . "\n" .
+                            "Nová zakázka: " . ($newWorkflowId ?? $newId) . "\n" .
                             "Zákazník znovu nahlásil problém.\n" .
                             "Vytvořil: " . ($_SESSION['user_name'] ?? 'Uživatel') . "\n" .
                             "Datum: " . date('d.m.Y H:i');
 
         $stmtNote2 = $pdo->prepare("
-            INSERT INTO wgs_notes (reklamace_id, note_text, created_by, created_at, is_read)
-            VALUES (:reklamace_id, :note_text, :created_by, :created_at, 0)
+            INSERT INTO wgs_notes (claim_id, note_text, created_by, created_at)
+            VALUES (:claim_id, :note_text, :created_by, :created_at)
         ");
         $stmtNote2->execute([
-            'reklamace_id' => $originalId,
+            'claim_id' => $originalId,
             'note_text' => $noteTextOriginal,
             'created_by' => $userId ?? 0,
             'created_at' => $now
