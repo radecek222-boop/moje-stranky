@@ -17,6 +17,35 @@ require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
 
+// Centrally zachytit fatální chyby a vrátit JSON místo prázdného těla
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if ($error === null) {
+        return;
+    }
+
+    $fatalTypes = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR];
+    if (!in_array($error['type'], $fatalTypes, true)) {
+        return;
+    }
+
+    // Vyčistit buffery, pokud ještě existují (mohou obsahovat nedokončený output)
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+
+    $payload = [
+        'status' => 'error',
+        'message' => 'Neočekávaná chyba serveru',
+        'details' => sprintf('%s in %s on line %d', $error['message'], $error['file'], $error['line'])
+    ];
+
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+});
+
 header('Content-Type: application/json; charset=utf-8');
 
 // CORS headers
