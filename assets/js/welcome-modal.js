@@ -25,6 +25,17 @@ async function showWelcomeModal(userName, userRole) {
       if (statsData.status === 'success') {
         const stats = statsData.stats;
 
+        // Přidat řádek s notifikacemi (červeně) pokud existují
+        let notificationsHTML = '';
+        if (stats.notifications && stats.notifications > 0) {
+          notificationsHTML = `
+            <div class="stat-item stat-notifications">
+              <div class="stat-label">NEPŘEČTENÝCH POZNÁMEK</div>
+              <div class="stat-number">${stats.notifications}</div>
+            </div>
+          `;
+        }
+
         statsHTML = `
           <div class="welcome-stats">
             <div class="stat-item">
@@ -39,6 +50,7 @@ async function showWelcomeModal(userName, userRole) {
               <div class="stat-label">CELKEM REKLAMACÍ</div>
               <div class="stat-number">${stats.total}</div>
             </div>
+            ${notificationsHTML}
           </div>
         `;
       }

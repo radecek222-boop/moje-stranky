@@ -103,7 +103,7 @@
   order: 1;
 }
 
-/* Číselná hodnota - dole, velké číslo v závorkách */
+/* Číselná hodnota - dole, velké číslo */
 .stat-number {
   font-size: 2.8rem;
   font-weight: 300;
@@ -111,6 +111,24 @@
   line-height: 1;
   text-shadow: 0 2px 12px rgba(255, 255, 255, 0.15);
   order: 2;
+}
+
+/* NOTIFIKACE - červené zvýraznění */
+.stat-notifications .stat-label {
+  color: #ff4444;
+}
+
+.stat-notifications .stat-number {
+  color: #ff4444;
+  text-shadow: 0 2px 12px rgba(255, 68, 68, 0.3);
+}
+
+/* Notifikace na celou šířku */
+.stat-notifications {
+  grid-column: 1 / -1;
+  border-top: 1px solid rgba(255, 68, 68, 0.2);
+  padding-top: 1rem;
+  margin-top: 1rem;
 }
 
 /* Tlačítko - černé s hover efektem */
@@ -161,19 +179,37 @@
     font-size: 0.9rem;
   }
 
-  /* Statistiky na mobilu - menší rozestupy */
+  /* MOBILNÍ: Statistiky pod sebou (1 sloupec) */
   .welcome-stats {
-    gap: 1rem;
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
     margin-bottom: 2rem;
     padding: 1rem 0;
   }
 
+  .stat-item {
+    padding: 0.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .stat-item:last-child {
+    border-bottom: none;
+  }
+
   .stat-number {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
 
   .stat-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  /* Notifikace na mobilu - stejný styl jako ostatní */
+  .stat-notifications {
+    grid-column: 1 / -1;
+    border-top: 1px solid rgba(255, 68, 68, 0.2);
+    margin-top: 0.5rem;
+    padding-top: 1rem;
   }
 
   .welcome-close-btn {

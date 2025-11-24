@@ -80,6 +80,21 @@ try {
     $stmt->execute($params);
     $stats = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    // Získat počet nepřečtených poznámek (notifikací)
+    $sqlNotifications = "
+        SELECT COUNT(*) as unread_count
+        FROM wgs_notes n
+        INNER JOIN wgs_reklamace r ON n.claim_id = r.id
+        LEFT JOIN wgs_notes_read nr ON n.id = nr.note_id AND nr.user_email = :user_email
+        WHERE nr.id IS NULL
+          AND n.created_by != :user_email_author
+          $whereClause
+    ";
+
+    $stmtNotif = $pdo->prepare($sqlNotifications);
+    $stmtNotif->execute($params);
+    $notificationCount = (int) $stmtNotif->fetchColumn();
+
     // Formátovat výstup
     echo json_encode([
         'status' => 'success',
@@ -88,7 +103,8 @@ try {
             'ceka' => (int) $stats['ceka'],
             'domluvena' => (int) $stats['domluvena'],
             'hotovo' => (int) $stats['hotovo'],
-            'nevyreseno' => (int) $stats['ceka'] + (int) $stats['domluvena']
+            'nevyreseno' => (int) $stats['ceka'] + (int) $stats['domluvena'],
+            'notifications' => $notificationCount
         ],
         'user' => [
             'name' => $_SESSION['user_name'] ?? 'Uživatel',
