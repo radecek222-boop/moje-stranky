@@ -2128,3 +2128,96 @@
         transition: all 0.1s ease;
     }
 }
+
+/* ========================================================================
+   CALCULATOR MOBILE OVERFLOW FIX - Oprava přetékání cen na mobilu
+   ======================================================================== */
+
+/* Kontejner kalkulačky - zabránit přetékání */
+#kalkulacka,
+.calculator-section,
+.wizard-step,
+.summary-section,
+#summary-details {
+    overflow: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Summary line - lepší responzivita */
+@media (max-width: 480px) {
+    .summary-line {
+        grid-template-columns: 1fr auto;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+        overflow: hidden;
+        word-break: break-word;
+    }
+
+    .summary-line > span:first-child {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .summary-price,
+    .total-price {
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-width: fit-content;
+        font-size: 0.9rem;
+    }
+
+    .summary-line.total .summary-price,
+    .summary-line.total .total-price,
+    #grand-total {
+        font-size: 1.1rem;
+    }
+
+    .summary-subline {
+        font-size: 0.7rem;
+        padding-left: 0.5rem;
+        word-break: break-word;
+    }
+
+    /* Souhrn - kompaktnější na mobilu */
+    .summary-section {
+        padding: 0.75rem;
+    }
+
+    .summary-section h3 {
+        font-size: 1rem;
+    }
+}
+
+/* Velmi malé obrazovky - stack layout */
+@media (max-width: 360px) {
+    .summary-line {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: flex-start;
+    }
+
+    .summary-line > span:first-child {
+        width: 100%;
+        font-size: 0.85rem;
+    }
+
+    .summary-price,
+    .total-price {
+        align-self: flex-end;
+        font-size: 0.95rem;
+    }
+
+    .summary-line.total {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .summary-line.total .summary-price,
+    #grand-total strong {
+        font-size: 1.2rem;
+    }
+}

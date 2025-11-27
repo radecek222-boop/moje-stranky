@@ -148,6 +148,7 @@ body:not(.calculator-page) .section-title {
 
     .calculator-modal-body {
         padding: 10px;
+        overflow-x: hidden;
     }
 
     .btn-calculator {
@@ -161,5 +162,26 @@ body:not(.calculator-page) .section-title {
         height: 48px;
         min-width: 48px;
         min-height: 48px;
+    }
+
+    /* Oprava přetékání cen v modalu */
+    .calculator-modal-body .summary-line {
+        grid-template-columns: 1fr auto;
+        gap: 0.5rem;
+        overflow: hidden;
+    }
+
+    .calculator-modal-body .summary-line > span:first-child {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .calculator-modal-body .summary-price {
+        font-size: 0.9rem;
+    }
+
+    .calculator-modal-body #grand-total {
+        font-size: 1.1rem;
     }
 }
