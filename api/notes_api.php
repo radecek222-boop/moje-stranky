@@ -177,10 +177,9 @@ try {
                 if ($webPush->jeInicializovano()) {
                     // Načíst info o reklamaci pro notifikaci
                     $stmtInfo = $pdo->prepare("
-                        SELECT r.reklamace_id, r.jmeno, r.cislo, u.email as technik_email
-                        FROM wgs_reklamace r
-                        LEFT JOIN wgs_users u ON r.technik_id = u.user_id
-                        WHERE r.id = :id
+                        SELECT reklamace_id, jmeno, cislo
+                        FROM wgs_reklamace
+                        WHERE id = :id
                     ");
                     $stmtInfo->execute([':id' => $claimId]);
                     $infoReklamace = $stmtInfo->fetch(PDO::FETCH_ASSOC);
