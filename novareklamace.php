@@ -368,7 +368,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     </div>
     <?php endif; ?>
     
-    <!-- ✅ FIX M-4: Přidat action attribute pro fallback (pokud JS selže) -->
+    <!-- FIX M-4: Pridat action attribute pro fallback (pokud JS selze) -->
     <form id="reklamaceForm" action="app/controllers/save.php" method="POST">
 
       <!-- PANEL PRO NAHRÁNÍ POVĚŘENÍ - pouze pro přihlášené uživatele -->

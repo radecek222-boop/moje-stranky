@@ -623,7 +623,7 @@ body {
           <div class="notif-card-title">Email Management</div>
           <div class="notif-card-description">Kompletní správa emailů - historie, fronta, selhavší + možnost znovu odeslat</div>
           <div class="notif-card-meta">
-            <span class="notif-card-badge">📧 Historie + Fronta</span>
+            <span class="notif-card-badge">Historie + Fronta</span>
           </div>
         </div>
 
@@ -1136,7 +1136,7 @@ function loadNotifContent(type, body) {
 <!-- External JavaScript -->
 <script src="/assets/js/logger.js"></script>
 <script src="/assets/js/csrf-auto-inject.js"></script>
-<!-- ✅ logout-handler.js je v hamburger-menu.php (načítá se VŠUDE včetně dashboardu) -->
+<!-- logout-handler.js je v hamburger-menu.php (nacita se VSUDE vcetne dashboardu) -->
 <script src="/assets/js/utils.js"></script>
 <script src="/assets/js/admin-notifications.js"></script>
 <script src="/assets/js/smtp-config.js"></script>

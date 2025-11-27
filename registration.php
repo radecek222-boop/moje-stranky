@@ -1,7 +1,7 @@
 <?php
 require_once "init.php";
 
-// ✅ FIX 1: Generovat CSRF token v PHP pro okamžitou dostupnost v HTML
+// FIX 1: Generovat CSRF token v PHP pro okamzitou dostupnost v HTML
 // Eliminuje race condition s async fetch v csrf-auto-inject.js
 $csrfToken = generateCSRFToken();
 ?>
@@ -46,7 +46,7 @@ $csrfToken = generateCSRFToken();
   <div id="notification" class="notification"></div>
 
   <form id="registrationForm">
-    <!-- ✅ FIX 1: CSRF token vložen přímo v PHP - okamžitě dostupný, žádná race condition -->
+    <!-- FIX 1: CSRF token vlozen primo v PHP - okamzite dostupny, zadna race condition -->
     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
 
     <div class="form-group">

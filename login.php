@@ -1,17 +1,17 @@
 <?php
 require_once "init.php";
 
-// ✅ FIX 1: Generovat CSRF token v PHP pro okamžitou dostupnost v HTML
+// FIX 1: Generovat CSRF token v PHP pro okamzitou dostupnost v HTML
 // Eliminuje race condition s async fetch v csrf-auto-inject.js
 $csrfToken = generateCSRFToken();
 
-// ✅ FIX: Pokud je uživatel JIŽ PŘIHLÁŠEN a má redirect parametr, přesměrovat ho tam
-// SCÉNÁŘ: photocustomer.php redirectuje na login.php?redirect=photocustomer.php
-// ale technik JE stále přihlášen → neměl by vidět login formulář, měl by skočit na photocustomer.php
+// FIX: Pokud je uzivatel JIZ PRIHLASEN a ma redirect parametr, presmerovat ho tam
+// SCENAR: photocustomer.php redirectuje na login.php?redirect=photocustomer.php
+// ale technik JE stale prihlasen -> nemel by videt login formular, mel by skocit na photocustomer.php
 if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
     $redirect = $_GET['redirect'];
 
-    // ✅ BEZPEČNOST: Whitelist povolených redirect URLs (ochrana proti open redirect)
+    // BEZPECNOST: Whitelist povolenych redirect URLs (ochrana proti open redirect)
     $allowedRedirects = [
         'photocustomer.php',
         'seznam.php',
@@ -83,7 +83,7 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
   <div id="notification" class="notification"></div>
 
   <form id="loginForm">
-    <!-- ✅ FIX 1: CSRF token vložen přímo v PHP - okamžitě dostupný, žádná race condition -->
+    <!-- FIX 1: CSRF token vlozen primo v PHP - okamzite dostupny, zadna race condition -->
     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
 
     <!-- CHECKBOX: Jsem administrátor -->
@@ -111,7 +111,7 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
                placeholder="••••••••">
       </div>
 
-      <!-- ✅ FIX 11: Remember Me checkbox -->
+      <!-- FIX 11: Remember Me checkbox -->
       <div class="form-group remember-me-group" style="margin-top: 0.5rem;">
         <div style="display: flex; align-items: center; margin-bottom: 0.3rem;">
           <input type="checkbox" id="rememberMe" name="remember_me" style="width: auto; margin-right: 8px;">
