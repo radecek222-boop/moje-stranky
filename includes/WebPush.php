@@ -53,21 +53,10 @@ class WGSWebPush {
                 ],
             ];
 
-            // Defaultni nastaveni
+            // Defaultni nastaveni - VZDY pouzit lokalni cacert.pem pokud existuje
+            // (system CA bundle muze byt nekompletni a nezna Apple Push CA)
             $defaultOptions = [];
-
-            // Pokud server nema spravne CA certifikaty, zkusit najit cacert.pem
-            $caCertPath = '/etc/ssl/certs/ca-certificates.crt';
-            if (!file_exists($caCertPath)) {
-                $caCertPath = '/etc/pki/tls/certs/ca-bundle.crt';
-            }
-            if (!file_exists($caCertPath)) {
-                $caCertPath = '/etc/ssl/ca-bundle.pem';
-            }
-            if (!file_exists($caCertPath)) {
-                // Zkusit lokalni cacert.pem v projektu
-                $caCertPath = __DIR__ . '/../cacert.pem';
-            }
+            $caCertPath = __DIR__ . '/../cacert.pem';
 
             if (file_exists($caCertPath)) {
                 $defaultOptions = [
@@ -75,6 +64,9 @@ class WGSWebPush {
                         CURLOPT_CAINFO => $caCertPath,
                     ],
                 ];
+                error_log('[WebPush] Pouzivam CA bundle: ' . $caCertPath);
+            } else {
+                error_log('[WebPush] VAROVANI: cacert.pem nenalezen na ' . $caCertPath);
             }
 
             $this->webPush = new \Minishlink\WebPush\WebPush($auth, $defaultOptions);
