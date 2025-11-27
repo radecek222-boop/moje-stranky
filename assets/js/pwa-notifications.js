@@ -203,7 +203,7 @@
     try {
       // Ziskat CSRF token
       const csrfInput = document.querySelector('input[name="csrf_token"]');
-      const csrfToken = csrfInput ? csrfInput.value : '';
+      let csrfToken = csrfInput ? csrfInput.value : '';
 
       if (!csrfToken) {
         // Zkusit nacist CSRF z API
