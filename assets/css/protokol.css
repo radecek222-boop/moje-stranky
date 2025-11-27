@@ -788,10 +788,12 @@ button.btn:hover {
     min-height: 44px;
     width: 100%;
     box-sizing: border-box;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
     line-height: 1.2;
+    height: auto;
   }
 
   .btns {
@@ -1170,5 +1172,47 @@ body.pdf-export-mode #signature-pad {
 
 .pdf-clone-desktop #signature-pad {
   height: 180px !important;
+}
+
+/* ========================================================================
+   VELMI MALÉ OBRAZOVKY - Oprava tlačítek pro malé telefony
+   ======================================================================== */
+@media (max-width: 480px) {
+  /* Tlačítka - menší font, ale text se vejde */
+  button.btn {
+    font-size: 10px;
+    padding: 8px 4px;
+    min-height: 44px;
+    height: auto;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.15;
+  }
+
+  /* Grid tlačítek - 2 sloupce zůstávají, ale s menší mezerou */
+  .btns {
+    gap: 6px;
+  }
+
+  /* Clear button */
+  .btn-clear {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}
+
+/* Extrémně malé obrazovky - tlačítka pod sebou */
+@media (max-width: 360px) {
+  button.btn {
+    font-size: 9px;
+    padding: 8px 3px;
+    line-height: 1.1;
+  }
+
+  /* Pokud jsou tlačítka moc úzká, dej je pod sebe */
+  .btns {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
 }
 
