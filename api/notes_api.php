@@ -172,6 +172,7 @@ try {
             // ========================================
             try {
                 $webPush = new WGSWebPush($pdo);
+                error_log('[Notes] WebPush inicializace: ' . ($webPush->jeInicializovano() ? 'OK' : 'FAILED'));
 
                 if ($webPush->jeInicializovano()) {
                     // Načíst info o reklamaci pro notifikaci
@@ -199,10 +200,13 @@ try {
                         ]
                     ];
 
+                    // DEBUG: Logovat autora
+                    error_log('[Notes] Autor poznamky: ' . $createdBy);
+
                     // Odeslat všem (kromě autora poznámky)
                     // TODO: V budoucnu filtrovat podle oprávnění
                     $stmtSubs = $pdo->prepare("
-                        SELECT ps.id, ps.endpoint, ps.p256dh, ps.auth, u.email
+                        SELECT ps.id, ps.endpoint, ps.p256dh, ps.auth, ps.user_id, u.email
                         FROM wgs_push_subscriptions ps
                         LEFT JOIN wgs_users u ON ps.user_id = u.user_id
                         WHERE ps.aktivni = 1
@@ -211,10 +215,20 @@ try {
                     $stmtSubs->execute([':author_email' => $createdBy]);
                     $subscriptions = $stmtSubs->fetchAll(PDO::FETCH_ASSOC);
 
+                    // DEBUG: Logovat počet subscriptions
+                    error_log('[Notes] Nalezeno subscriptions: ' . count($subscriptions));
+                    foreach ($subscriptions as $s) {
+                        error_log('[Notes] Sub ID=' . $s['id'] . ', user_id=' . ($s['user_id'] ?? 'NULL') . ', email=' . ($s['email'] ?? 'NULL') . ', endpoint=' . substr($s['endpoint'], 0, 50) . '...');
+                    }
+
                     if (!empty($subscriptions)) {
                         $vysledek = $webPush->odeslatVice($subscriptions, $payload);
-                        error_log('[Notes] Push odeslano: ' . json_encode($vysledek));
+                        error_log('[Notes] Push vysledek: ' . json_encode($vysledek));
+                    } else {
+                        error_log('[Notes] Zadne subscriptions k odeslani (vsechny patrily autorovi nebo neexistuji)');
                     }
+                } else {
+                    error_log('[Notes] WebPush neni inicializovan');
                 }
             } catch (Exception $pushError) {
                 // Push chyby neblokuji přidání poznámky
