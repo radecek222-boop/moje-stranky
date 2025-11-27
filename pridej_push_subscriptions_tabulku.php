@@ -34,8 +34,7 @@ CREATE TABLE IF NOT EXISTS wgs_push_subscriptions (
     UNIQUE KEY unique_endpoint (endpoint(255)),
     INDEX idx_user_id (user_id),
     INDEX idx_aktivni (aktivni),
-    INDEX idx_platforma (platforma),
-    FOREIGN KEY (user_id) REFERENCES wgs_users(user_id) ON DELETE CASCADE
+    INDEX idx_platforma (platforma)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci
 COMMENT='Web Push subscriptions pro PWA notifikace'
 ";
@@ -334,7 +333,7 @@ try {
         </thead>
         <tbody>
             <tr><td>id</td><td>INT AUTO_INCREMENT</td><td>Primarni klic</td></tr>
-            <tr><td>user_id</td><td>INT NULL</td><td>ID uzivatele (FK na wgs_users)</td></tr>
+            <tr><td>user_id</td><td>INT NULL</td><td>ID uzivatele</td></tr>
             <tr><td>endpoint</td><td>VARCHAR(500)</td><td>Push endpoint URL</td></tr>
             <tr><td>p256dh</td><td>VARCHAR(200)</td><td>Public key pro sifrovani</td></tr>
             <tr><td>auth</td><td>VARCHAR(100)</td><td>Auth secret</td></tr>
