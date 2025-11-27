@@ -203,13 +203,12 @@ try {
                     error_log('[Notes] Autor poznamky: ' . $createdBy);
 
                     // Odeslat všem (kromě autora poznámky)
-                    // TODO: V budoucnu filtrovat podle oprávnění
+                    // Filtruje podle emailu přímo v tabulce subscriptions
                     $stmtSubs = $pdo->prepare("
-                        SELECT ps.id, ps.endpoint, ps.p256dh, ps.auth, ps.user_id, u.email
-                        FROM wgs_push_subscriptions ps
-                        LEFT JOIN wgs_users u ON ps.user_id = u.user_id
-                        WHERE ps.aktivni = 1
-                          AND (u.email IS NULL OR u.email != :author_email)
+                        SELECT id, endpoint, p256dh, auth, user_id, email
+                        FROM wgs_push_subscriptions
+                        WHERE aktivni = 1
+                          AND (email IS NULL OR email != :author_email)
                     ");
                     $stmtSubs->execute([':author_email' => $createdBy]);
                     $subscriptions = $stmtSubs->fetchAll(PDO::FETCH_ASSOC);

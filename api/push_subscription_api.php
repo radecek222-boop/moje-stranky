@@ -67,6 +67,7 @@ try {
 
             // Pridat uzivatelska data
             $subscription['user_id'] = $userId;
+            $subscription['email'] = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? null;
             $subscription['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
             $subscription['platforma'] = $_POST['platforma'] ?? null;
 
