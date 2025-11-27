@@ -242,10 +242,6 @@ if (!$embedMode && $activeTab === 'dashboard'):
                 <div class="cc-card-description" data-lang-cs="Nevyřešené úkoly a plánované akce" data-lang-en="Unresolved tasks and scheduled actions" data-lang-it="Compiti non risolti e azioni pianificate">Nevyřešené úkoly a plánované akce</div>
             </div>
 
-            <div class="cc-card" onclick="window.location='admin.php?tab=tools'">
-                <div class="cc-card-title" data-lang-cs="Nástroje" data-lang-en="Tools" data-lang-it="Strumenti">Nástroje</div>
-                <div class="cc-card-description" data-lang-cs="Diagnostické nástroje a utilities" data-lang-en="Diagnostic tools and utilities" data-lang-it="Strumenti diagnostici e utility">Diagnostické nástroje a utilities</div>
-            </div>
         </div>
     </div>
 
@@ -253,11 +249,6 @@ if (!$embedMode && $activeTab === 'dashboard'):
     <div class="admin-kategorie">
         <h2 class="admin-kategorie-nadpis" data-lang-cs="Vývoj & Testování" data-lang-en="Development & Testing" data-lang-it="Sviluppo & Test">Vývoj & Testování</h2>
         <div class="cc-grid">
-            <div class="cc-card" onclick="window.location='admin.php?tab=admin_phpunit'">
-                <div class="cc-card-title" data-lang-cs="PHPUnit Testy" data-lang-en="PHPUnit Tests" data-lang-it="Test PHPUnit">PHPUnit Testy</div>
-                <div class="cc-card-description" data-lang-cs="Spuštění automatických testů" data-lang-en="Run automated tests" data-lang-it="Esegui test automatici">Spuštění automatických testů</div>
-            </div>
-
             <div class="cc-card" onclick="window.location='admin.php?tab=admin_testing_simulator'">
                 <div class="cc-card-title" data-lang-cs="E2E Testing" data-lang-en="E2E Testing" data-lang-it="Test E2E">E2E Testing</div>
                 <div class="cc-card-description" data-lang-cs="End-to-end testování celého workflow" data-lang-en="End-to-end testing of entire workflow" data-lang-it="Test end-to-end dell'intero flusso di lavoro">End-to-end testování celého workflow</div>
@@ -267,6 +258,7 @@ if (!$embedMode && $activeTab === 'dashboard'):
                 <div class="cc-card-title" data-lang-cs="Konzole" data-lang-en="Console" data-lang-it="Console">Konzole</div>
                 <div class="cc-card-description" data-lang-cs="Diagnostika HTML/PHP/JS/CSS/SQL" data-lang-en="Diagnostics HTML/PHP/JS/CSS/SQL" data-lang-it="Diagnostica HTML/PHP/JS/CSS/SQL">Diagnostika HTML/PHP/JS/CSS/SQL</div>
             </div>
+
         </div>
     </div>
 
@@ -274,16 +266,6 @@ if (!$embedMode && $activeTab === 'dashboard'):
     <div class="admin-kategorie">
         <h2 class="admin-kategorie-nadpis" data-lang-cs="Design & Databáze" data-lang-en="Design & Database" data-lang-it="Design & Database">Design & Databáze</h2>
         <div class="cc-grid">
-            <div class="cc-card" onclick="window.location='admin.php?tab=admin_appearance'">
-                <div class="cc-card-title" data-lang-cs="Vzhled & Design" data-lang-en="Appearance & Design" data-lang-it="Aspetto & Design">Vzhled & Design</div>
-                <div class="cc-card-description" data-lang-cs="Barvy, fonty, logo, branding" data-lang-en="Colors, fonts, logo, branding" data-lang-it="Colori, caratteri, logo, branding">Barvy, fonty, logo, branding</div>
-            </div>
-
-            <div class="cc-card" onclick="window.location='admin.php?tab=admin_content'">
-                <div class="cc-card-title" data-lang-cs="Správa Obsahu" data-lang-en="Content Management" data-lang-it="Gestione Contenuti">Správa Obsahu</div>
-                <div class="cc-card-description" data-lang-cs="Editace textů a obsahových bloků" data-lang-en="Edit texts and content blocks" data-lang-it="Modifica testi e blocchi di contenuto">Editace textů a obsahových bloků</div>
-            </div>
-
             <div class="cc-card" onclick="openSQLPage()">
                 <div class="cc-card-title" data-lang-cs="SQL Databáze" data-lang-en="SQL Database" data-lang-it="Database SQL">SQL Databáze</div>
                 <div class="cc-card-description" data-lang-cs="Zobrazit všechny SQL tabulky (aktuální živá data)" data-lang-en="View all SQL tables (current live data)" data-lang-it="Visualizza tutte le tabelle SQL (dati live attuali)">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
@@ -996,11 +978,6 @@ function loadNotifContent(type, body) {
   </div>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'admin_phpunit'): ?>
-  <!-- TAB: PHPUNIT TEST RUNNER -->
-  <?php require_once __DIR__ . '/includes/admin_phpunit.php'; ?>
-  <?php endif; ?>
-
   <?php if ($activeTab === 'admin_testing'): ?>
   <!-- TAB: TESTING ENVIRONMENT (OLD) -->
   <?php require_once __DIR__ . '/includes/admin_testing.php'; ?>
@@ -1014,16 +991,6 @@ function loadNotifContent(type, body) {
   <?php if ($activeTab === 'admin_testing_simulator'): ?>
   <!-- TAB: E2E WORKFLOW SIMULATOR -->
   <?php require_once __DIR__ . '/includes/admin_testing_simulator.php'; ?>
-  <?php endif; ?>
-
-  <?php if ($activeTab === 'admin_appearance'): ?>
-  <!-- TAB: VZHLED & DESIGN -->
-  <?php require_once __DIR__ . '/includes/admin_appearance.php'; ?>
-  <?php endif; ?>
-
-  <?php if ($activeTab === 'admin_content'): ?>
-  <!-- TAB: OBSAH & TEXTY -->
-  <?php require_once __DIR__ . '/includes/admin_content.php'; ?>
   <?php endif; ?>
 
   <?php if ($activeTab === 'admin_console'): ?>
@@ -1041,12 +1008,6 @@ function loadNotifContent(type, body) {
   <?php require_once __DIR__ . '/includes/admin_configuration.php'; ?>
   <?php endif; ?>
 
-  <?php if ($activeTab === 'tools'): ?>
-  <!-- TAB: TOOLS & DIAGNOSTICS -->
-  <div id="tab-tools" class="tab-content">
-  <?php require_once __DIR__ . '/includes/admin_tools.php'; ?>
-  </div>
-  <?php endif; ?>
 
   <?php if ($activeTab === 'online'): ?>
   <!-- TAB: ONLINE -->
