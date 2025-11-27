@@ -91,7 +91,8 @@ try {
         if (isset($_GET['execute']) && $_GET['execute'] === '1') {
             echo "<div class='info'>Spoustim migraci...</div>";
 
-            $pdo->beginTransaction();
+            // POZNAMKA: DDL prikazy (ALTER TABLE) v MySQL automaticky commituji
+            // Proto nepouzivame transakce - kazdy prikaz je atomicky sam o sobe
 
             try {
                 // Pridat sloupec assigned_to
@@ -103,15 +104,15 @@ try {
                 echo "<pre>$sql</pre>";
 
                 $pdo->exec($sql);
+                echo "<div class='success'>Sloupec <code>assigned_to</code> pridan.</div>";
 
                 // Pridat index pro rychlejsi vyhledavani
                 $sqlIndex = "ALTER TABLE wgs_reklamace ADD INDEX idx_assigned_to (assigned_to)";
                 echo "<pre>$sqlIndex</pre>";
                 $pdo->exec($sqlIndex);
+                echo "<div class='success'>Index <code>idx_assigned_to</code> vytvoren.</div>";
 
-                $pdo->commit();
-
-                echo "<div class='success'>";
+                echo "<div class='success' style='margin-top: 20px;'>";
                 echo "<strong>MIGRACE USPESNE DOKONCENA!</strong><br><br>";
                 echo "Sloupec <code>assigned_to</code> byl pridan do tabulky <code>wgs_reklamace</code>.<br>";
                 echo "Index <code>idx_assigned_to</code> byl vytvoren.";
@@ -124,7 +125,6 @@ try {
                 echo "</div>";
 
             } catch (PDOException $e) {
-                $pdo->rollBack();
                 echo "<div class='error'>";
                 echo "<strong>CHYBA PRI MIGRACI:</strong><br>";
                 echo htmlspecialchars($e->getMessage());
