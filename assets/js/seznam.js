@@ -590,8 +590,13 @@ async function renderOrders(items = null) {
       address = parts.slice(0, 2).join(', ');
     }
 
+    // Datum termínu se ukazuje POUZE u stavu DOMLUVENÁ (open)
+    // - NOVÁ: bez datumu
+    // - DOMLUVENÁ: s datem termínu
+    // - HOTOVO: bez datumu
     let appointmentText = '';
-    if (rec.termin && rec.cas_navstevy) {
+    const isDomluvena = status.class === 'open';
+    if (isDomluvena && rec.termin && rec.cas_navstevy) {
       appointmentText = formatAppointment(rec.termin, rec.cas_navstevy);
     }
 
