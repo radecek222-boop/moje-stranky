@@ -38,7 +38,7 @@ async function initAuth() {
 async function handleLogout(event) {
   if (!confirm('Opravdu se chcete odhlásit?')) return;
 
-  // ✅ KRITICKÁ OPRAVA: Použít CSRF-protected logout z logout-handler.js
+  // KRITICKÁ OPRAVA: Použít CSRF-protected logout z logout-handler.js
   // Důvod: Přímý GET redirect neposílá CSRF token → zobrazuje se potvrzovací formulář
   if (typeof window.secureLogout === 'function') {
     // Použít globální secure logout handler (POST s CSRF tokenem)

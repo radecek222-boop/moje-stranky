@@ -30,7 +30,7 @@ function redirectToLogin(redirectTarget = '') {
 // TAB MANAGEMENT
 // ============================================================
 function initAdminPanel() {
-  safeLogger.log('✅ Admin panel initialized');
+  safeLogger.log('Admin panel initialized');
   setupNavigation();
   initUserManagement();
 }
@@ -42,7 +42,7 @@ if (document.readyState === 'loading') {
   initAdminPanel();
 }
 
-safeLogger.log('✅ admin.js loaded');
+safeLogger.log('admin.js loaded');
 
 // ============================================================
 // GLOBAL ERROR HANDLER
@@ -81,12 +81,12 @@ function setupNavigation() {
       e.preventDefault();
       const url = button.getAttribute('data-navigate');
       if (url) {
-        logger.log('🔄 Navigating to:', url);
+        logger.log('[Sync] Navigating to:', url);
         window.location.href = url;
       }
     });
   });
-  logger.log('✅ Navigation setup complete');
+  logger.log('Navigation setup complete');
 }
 
 // ============================================================
@@ -177,7 +177,7 @@ async function loadUsers() {
         const statusText = user.status === 'active' ? 'Aktivní' : 'Neaktivní';
         const createdDate = new Date(user.created_at).toLocaleDateString('cs-CZ');
 
-        // ✅ Přidán onclick handler pro zobrazení detailu
+        // Přidán onclick handler pro zobrazení detailu
         html += '<tr style="cursor: pointer;" onclick="zobrazDetailUzivatele(' + user.id + ')" title="Klikněte pro zobrazení detailu">';
         html += '<td>#' + user.id + '</td>';
         html += '<td>' + escapeHtml(user.name || user.full_name) + '</td>'; // API returns 'name' not 'full_name'
@@ -443,8 +443,8 @@ function initUserManagement() {
 // Debug mode - set to false in production
 if (typeof DEBUG_MODE === 'undefined') { var DEBUG_MODE = false; }
 if (DEBUG_MODE) {
-    console.log('%c🔧 Control Center v2025.11.12-1430 loaded', 'background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;');
-    console.log('✅ executeAction is ASYNC + event.target captured BEFORE await');
+    console.log('%c[Fix] Control Center v2025.11.12-1430 loaded', 'background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;');
+    console.log('executeAction is ASYNC + event.target captured BEFORE await');
 }
 
 // Helper function to check if API response is successful
@@ -557,7 +557,7 @@ function openCCModal(section) {
     overlay.classList.add('active');
     modal.classList.add('active');
 
-    // ✅ iOS scroll lock (position: fixed místo overflow: hidden)
+    // iOS scroll lock (position: fixed místo overflow: hidden)
     window.ccModalScrollPosition = window.pageYOffset;
     document.body.style.position = 'fixed';
     document.body.style.top = `-${window.ccModalScrollPosition}px`;
@@ -623,7 +623,7 @@ function closeCCModal() {
     overlay.classList.remove('active');
     modal.classList.remove('active');
 
-    // ✅ Obnovit scroll (iOS scroll lock unlock)
+    // Obnovit scroll (iOS scroll lock unlock)
     document.body.style.position = '';
     document.body.style.top = '';
     document.body.style.width = '';
@@ -1151,7 +1151,7 @@ async function executeAction(actionId) {
 
         if (isSuccess(data)) {
             const execTime = data.execution_time || 'neznámý čas';
-            alert(`✓ Akce dokončena!\n\n${data.message}\n\nČas provedení: ${execTime}`);
+            alert(`Akce dokončena!\n\n${data.message}\n\nČas provedení: ${execTime}`);
             loadActionsModal();
         } else {
             console.error('[executeAction] Action failed:', data);
@@ -1258,23 +1258,23 @@ async function clearCacheAndReload() {
                 localStorage.setItem(key, storage[key]);
             });
 
-            console.log('✓ localStorage vymazán');
+            console.log('localStorage vymazán');
         }
 
         // Vymazat sessionStorage
         if (window.sessionStorage) {
             sessionStorage.clear();
-            console.log('✓ sessionStorage vymazán');
+            console.log('sessionStorage vymazán');
         }
 
         // Vymazat Service Worker cache (pokud existuje)
         if ('caches' in window) {
             const names = await caches.keys();
             await Promise.all(names.map(name => caches.delete(name)));
-            console.log('✓ Service Worker cache vymazán (' + names.length + ' cache(s))');
+            console.log('Service Worker cache vymazán (' + names.length + ' cache(s))');
         }
 
-        console.log('🔄 Reloaduji stránku s force refresh...');
+        console.log('[Sync] Reloaduji stránku s force refresh...');
 
         // Force reload s timestamp pro cache busting
         const timestamp = new Date().getTime();
@@ -1458,13 +1458,13 @@ async function zobrazDetailUzivatele(userId) {
               </div>
 
               <button onclick="ulozitZmenyUzivatele(${user.id})" style="width: 100%; padding: 0.8rem; background: #333333; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
-                💾 Uložit změny
+                [Save] Uložit změny
               </button>
             </div>
 
             <!-- Změna hesla -->
             <div style="margin-bottom: 2rem; padding: 1rem; background: #f9f9f9; border-radius: 8px;">
-              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #d97706;">🔒 Změna hesla</h3>
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #d97706;">[Lock] Změna hesla</h3>
 
               <div style="margin-bottom: 1rem;">
                 <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Nové heslo (min. 8 znaků)</label>
@@ -1483,7 +1483,7 @@ async function zobrazDetailUzivatele(userId) {
               <div style="margin-bottom: 1rem;">
                 <strong>Aktuální stav:</strong>
                 <span style="font-weight: bold; color: ${user.status === 'active' ? '#059669' : '#dc2626'};">
-                  ${user.status === 'active' ? '✅ AKTIVNÍ' : '❌ NEAKTIVNÍ'}
+                  ${user.status === 'active' ? 'AKTIVNÍ' : 'NEAKTIVNÍ'}
                 </span>
               </div>
 
@@ -1500,7 +1500,7 @@ async function zobrazDetailUzivatele(userId) {
               ` : ''}
 
               <button onclick="prepnoutStatusUzivatele(${user.id}, '${user.status === 'active' ? 'inactive' : 'active'}')" style="width: 100%; padding: 0.8rem; background: ${user.status === 'active' ? '#dc2626' : '#059669'}; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer;">
-                ${user.status === 'active' ? '🚫 Deaktivovat uživatele' : '✅ Aktivovat uživatele'}
+                ${user.status === 'active' ? 'Deaktivovat uživatele' : 'Aktivovat uživatele'}
               </button>
             </div>
           </div>
@@ -1573,11 +1573,11 @@ async function ulozitZmenyUzivatele(userId) {
     const data = await response.json();
 
     if (data.status === 'success') {
-      alert('✅ Změny byly uloženy!');
+      alert('Změny byly uloženy!');
       zavritDetailUzivatele();
       loadUsers(); // Obnovit tabulku
     } else {
-      alert('❌ Chyba: ' + (data.message || 'Nepodařilo se uložit změny'));
+      alert('Chyba: ' + (data.message || 'Nepodařilo se uložit změny'));
     }
   } catch (error) {
     logger.error('Chyba při ukládání změn:', error);
@@ -1628,10 +1628,10 @@ async function zmenitHesloUzivatele(userId) {
     const data = await response.json();
 
     if (data.status === 'success') {
-      alert('✅ Heslo bylo změněno!');
+      alert('Heslo bylo změněno!');
       document.getElementById('edit-user-password').value = ''; // Vymazat pole
     } else {
-      alert('❌ Chyba: ' + (data.message || 'Nepodařilo se změnit heslo'));
+      alert('Chyba: ' + (data.message || 'Nepodařilo se změnit heslo'));
     }
   } catch (error) {
     logger.error('Chyba při změně hesla:', error);
@@ -1671,11 +1671,11 @@ async function prepnoutStatusUzivatele(userId, newStatus) {
     const data = await response.json();
 
     if (data.status === 'success') {
-      alert(`✅ Uživatel byl ${newStatus === 'active' ? 'aktivován' : 'deaktivován'}!`);
+      alert(`Uživatel byl ${newStatus === 'active' ? 'aktivován' : 'deaktivován'}!`);
       zavritDetailUzivatele();
       loadUsers(); // Obnovit tabulku
     } else {
-      alert('❌ Chyba: ' + (data.message || 'Nepodařilo se změnit status'));
+      alert('Chyba: ' + (data.message || 'Nepodařilo se změnit status'));
     }
   } catch (error) {
     logger.error('Chyba při změně statusu:', error);

@@ -10,7 +10,7 @@ const originalExportBothPDFs = window.exportBothPDFs;
 window.exportBothPDFs = async function() {
     try {
         showLoading(true);
-        logger.log('📋 Generuji kompletní PDF (protokol+fotodokumentace)...');
+        logger.log('[List] Generuji kompletní PDF (protokol+fotodokumentace)...');
 
         // Vytvořit JEDNO PDF s protokolem
         const doc = await generateProtocolPDF();
@@ -45,10 +45,10 @@ window.exportBothPDFs = async function() {
                             const result = await response.json();
                             
                             if (result.success) {
-                                logger.log('✅ PDF uloženo na server:', result.path);
+                                logger.log('PDF uloženo na server:', result.path);
                                 resolve(result.path);
                             } else {
-                                logger.error('❌ Chyba ukládání PDF:', result.error);
+                                logger.error('Chyba ukládání PDF:', result.error);
                                 reject(result.error);
                             }
                         } catch (err) {
@@ -60,17 +60,17 @@ window.exportBothPDFs = async function() {
                     reader.readAsDataURL(pdfBlob);
                 });
                 
-                showNotif("success", "✓ PDF uloženo na server");
+                showNotif("success", "PDF uloženo na server");
                 
             } catch (uploadErr) {
-                logger.error('⚠️ Nepodařilo se uložit PDF na server:', uploadErr);
+                logger.error('Nepodařilo se uložit PDF na server:', uploadErr);
                 showNotif("warning", "PDF vygenerováno, ale nebylo uloženo");
             }
         }
 
         // Pokračovat se zbytkem (fotky atd.)
         if (attachedPhotos.length > 0) {
-            logger.log('📸 Přidávám fotodokumentaci...');
+            logger.log('[Photo] Přidávám fotodokumentaci...');
             
             const pageWidth = doc.internal.pageSize.getWidth();
             const pageHeight = doc.internal.pageSize.getHeight();
@@ -94,7 +94,7 @@ window.exportBothPDFs = async function() {
         await saveProtokolToDB();
 
         // Označit jako hotovou
-        logger.log('📋 Označuji reklamaci jako hotovou...');
+        logger.log('[List] Označuji reklamaci jako hotovou...');
         try {
             const csrfToken = typeof fetchCsrfToken === 'function'
                 ? await fetchCsrfToken()
@@ -113,18 +113,18 @@ window.exportBothPDFs = async function() {
 
             const markResult = await markResponse.json();
             if (markResult.status === 'success') {
-                logger.log('✅ Reklamace označena jako hotová');
+                logger.log('Reklamace označena jako hotová');
             }
         } catch (err) {
-            logger.error('❌ Chyba při označování:', err);
+            logger.error('Chyba při označování:', err);
         }
 
     } catch (error) {
-        logger.error('❌ Chyba při generování PDF:', error);
+        logger.error('Chyba při generování PDF:', error);
         showNotif("error", "Chyba při vytváření PDF");
     } finally {
         showLoading(false);
     }
 };
 
-logger.log('✅ PDF upload patch načten');
+logger.log('PDF upload patch načten');

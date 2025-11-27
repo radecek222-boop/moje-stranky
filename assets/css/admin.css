@@ -19,13 +19,13 @@
    =========================================================================== */
 
 :root {
-  --cc-primary: #667eea;
-  --cc-primary-dark: #5a67d8;
-  --cc-secondary: #764ba2;
-  --cc-success: #28a745;
-  --cc-warning: #ffc107;
-  --cc-danger: #dc3545;
-  --cc-info: #17a2b8;
+  --cc-primary: #444;
+  --cc-primary-dark: #333;
+  --cc-secondary: #555;
+  --cc-success: #666;
+  --cc-warning: #888;
+  --cc-danger: #444;
+  --cc-info: #777;
 
   --cc-bg-primary: #f5f5f7;
   --cc-bg-secondary: #ffffff;
@@ -49,11 +49,11 @@
   --c-light-grey: #999999;
   --c-border: #e0e0e0;
   --c-success: #333333;
-  --c-error: #8b0000;
-  --c-warning: #b8860b;
-  --c-primary: #667eea;
+  --c-error: #333333;
+  --c-warning: #555555;
+  --c-primary: #444;
   --c-online: #333333;
-  --c-info: #1a73e8;
+  --c-info: #555;
 }
 
 
@@ -431,13 +431,13 @@
    PROMĚNNÉ
    ============================================ */
 :root {
-  --cc-primary: #667eea;
-  --cc-primary-dark: #5a67d8;
-  --cc-secondary: #764ba2;
-  --cc-success: #28a745;
-  --cc-warning: #ffc107;
-  --cc-danger: #dc3545;
-  --cc-info: #17a2b8;
+  --cc-primary: #444;
+  --cc-primary-dark: #333;
+  --cc-secondary: #555;
+  --cc-success: #666;
+  --cc-warning: #888;
+  --cc-danger: #444;
+  --cc-info: #777;
 
   --cc-bg-primary: #f5f5f7;
   --cc-bg-secondary: #ffffff;
@@ -683,22 +683,22 @@
 
 .control-card-status-dot.green {
   background: var(--cc-success);
-  box-shadow: 0 0 8px rgba(40, 167, 69, 0.5);
+  box-shadow: 0 0 8px rgba(102, 102, 102, 0.5);
 }
 
 .control-card-status-dot.red {
   background: var(--cc-danger);
-  box-shadow: 0 0 8px rgba(220, 53, 69, 0.5);
+  box-shadow: 0 0 8px rgba(68, 68, 68, 0.5);
 }
 
 .control-card-status-dot.yellow {
   background: var(--cc-warning);
-  box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+  box-shadow: 0 0 8px rgba(136, 136, 136, 0.5);
 }
 
 .control-card-status-dot.blue {
-  background: #0E639C;
-  box-shadow: 0 0 8px rgba(14, 99, 156, 0.5);
+  background: #555;
+  box-shadow: 0 0 8px rgba(85, 85, 85, 0.5);
 }
 
 /* ============================================
@@ -1035,27 +1035,27 @@
 }
 
 .cc-alert.success {
-  background: rgba(40, 167, 69, 0.1);
-  color: #155724;
-  border: 1px solid rgba(40, 167, 69, 0.2);
+  background: rgba(102, 102, 102, 0.1);
+  color: #333;
+  border: 1px solid rgba(102, 102, 102, 0.2);
 }
 
 .cc-alert.warning {
-  background: rgba(255, 193, 7, 0.1);
-  color: #856404;
-  border: 1px solid rgba(255, 193, 7, 0.2);
+  background: rgba(136, 136, 136, 0.1);
+  color: #444;
+  border: 1px solid rgba(136, 136, 136, 0.2);
 }
 
 .cc-alert.danger {
-  background: rgba(220, 53, 69, 0.1);
-  color: #721c24;
-  border: 1px solid rgba(220, 53, 69, 0.2);
+  background: rgba(68, 68, 68, 0.1);
+  color: #333;
+  border: 1px solid rgba(68, 68, 68, 0.2);
 }
 
 .cc-alert.info {
-  background: rgba(23, 162, 184, 0.1);
-  color: #0c5460;
-  border: 1px solid rgba(23, 162, 184, 0.2);
+  background: rgba(119, 119, 119, 0.1);
+  color: #444;
+  border: 1px solid rgba(119, 119, 119, 0.2);
 }
 
 /* ============================================

@@ -16,7 +16,7 @@ const ANALYTICS = {
 
 // === INIT ===
 window.addEventListener('DOMContentLoaded', () => {
-    logger.log('🚀 Analytics dashboard inicialization...');
+    logger.log('[Start] Analytics dashboard inicialization...');
     checkAuth();
     nactiData();
     inicializovatEventListeners();
@@ -34,7 +34,7 @@ function inicializovatEventListeners() {
         });
     });
 
-    logger.log('✅ Event listeners registrovány');
+    logger.log('Event listeners registrovány');
 }
 
 // === AUTH ===
@@ -101,10 +101,10 @@ async function nactiData() {
     try {
         const response = await fetch(`/api/analytics_api.php?period=${ANALYTICS.timePeriod}`);
 
-        logger.log('📊 Response status:', response.status);
+        logger.log('[Stats] Response status:', response.status);
 
         if (!response.ok) {
-            logger.error('❌ Response není OK!');
+            logger.error('Response není OK!');
             return;
         }
 
@@ -118,14 +118,14 @@ async function nactiData() {
             ANALYTICS.data.browsersDevices = data.data.browsersDevices || {browsers: [], devices: []};
             ANALYTICS.data.timeline = data.data.timeline || [];
 
-            logger.log('✅ Data úspěšně načtena');
+            logger.log('Data úspěšně načtena');
             aktualizovatUI();
         } else {
-            logger.error('❌ API error:', data.message);
+            logger.error('API error:', data.message);
         }
 
     } catch (error) {
-        logger.error('❌ Fetch error:', error);
+        logger.error('Fetch error:', error);
     }
 }
 
@@ -134,7 +134,7 @@ function aktualizovatUI() {
     const stats = ANALYTICS.data.stats;
 
     if (!stats) {
-        logger.error('⚠️ Žádná stats data');
+        logger.error('Žádná stats data');
         return;
     }
 
@@ -176,7 +176,7 @@ function aktualizovatUI() {
     zobrazitZarizeni();
     vykreslitGraf();
 
-    logger.log('✅ UI úspěšně aktualizováno');
+    logger.log('UI úspěšně aktualizováno');
 }
 
 function getPeriodText() {

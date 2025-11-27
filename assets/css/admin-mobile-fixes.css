@@ -216,19 +216,19 @@
 }
 
 .priority-badge[data-priority="kritické"] {
-  background: #DC3545;
+  background: #333;
 }
 
 .priority-badge[data-priority="vysoká"] {
-  background: #FF6B6B;
+  background: #555;
 }
 
 .priority-badge[data-priority="střední"] {
-  background: #FFC107;
+  background: #777;
 }
 
 .priority-badge[data-priority="nízká"] {
-  background: #28A745;
+  background: #999;
 }
 
 @media (max-width: 768px) {

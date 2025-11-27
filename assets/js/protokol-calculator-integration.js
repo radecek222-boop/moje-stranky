@@ -240,11 +240,11 @@
             const csrfToken = await window.fetchCsrfToken();
 
             if (!csrfToken) {
-                console.error('[Protokol-Kalkulačka] ❌ Nepodařilo se získat CSRF token');
+                console.error('[Protokol-Kalkulačka] Nepodařilo se získat CSRF token');
                 return;
             }
 
-            console.log('[Protokol-Kalkulačka] ✅ CSRF token získán');
+            console.log('[Protokol-Kalkulačka] CSRF token získán');
 
             const response = await fetch('/api/protokol_api.php', {
                 method: 'POST',
@@ -264,13 +264,13 @@
             if (result.status === 'success') {
                 console.log('[Protokol-Kalkulačka] Kalkulace uložena do DB');
 
-                // ✅ KRITICKÁ OPRAVA: Aktualizovat globální proměnnou
+                // KRITICKÁ OPRAVA: Aktualizovat globální proměnnou
                 if (typeof window.kalkulaceData !== 'undefined') {
                     window.kalkulaceData = data;
-                    console.log('[Protokol-Kalkulačka] ✅ Globální kalkulaceData aktualizována');
+                    console.log('[Protokol-Kalkulačka] Globální kalkulaceData aktualizována');
                     console.log('[Protokol-Kalkulačka] Celková cena:', data.celkovaCena, '€');
                 } else {
-                    console.warn('[Protokol-Kalkulačka] ⚠️ window.kalkulaceData není definována');
+                    console.warn('[Protokol-Kalkulačka] window.kalkulaceData není definována');
                 }
             } else {
                 console.error('[Protokol-Kalkulačka] Chyba při ukládání:', result.message);

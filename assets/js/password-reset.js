@@ -126,7 +126,7 @@ if (changePasswordForm) {
       const data = await response.json();
       
       if (data.status === 'success') {
-        showNotification('✅ Heslo úspěšně změněno! Přesměrovávám na přihlášení...', 'success');
+        showNotification('Heslo úspěšně změněno! Přesměrovávám na přihlášení...', 'success');
         setTimeout(() => {
           window.location.href = 'login.php';
         }, 2000);
@@ -169,4 +169,4 @@ function showNotification(message, type = 'info') {
   }
 }
 
-logger.log('✅ Password reset system loaded');
+logger.log('Password reset system loaded');

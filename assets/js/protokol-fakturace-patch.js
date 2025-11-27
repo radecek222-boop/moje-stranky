@@ -4,7 +4,7 @@
  */
 
 (function() {
-  logger.log('✅ Protokol fakturace patch loaded');
+  logger.log('Protokol fakturace patch loaded');
 
   // Přepsat původní loadReklamace funkci s podporou fakturace_firma
   const originalLoadReklamace = window.loadReklamace;
@@ -25,10 +25,10 @@
         } else if (fakturaceFirma === 'SK') {
           fakturaceField.value = '🇸🇰 Slovensko (SK)';
         }
-        logger.log(`✅ Fakturace nastavena: ${fakturaceFirma}`);
+        logger.log(`Fakturace nastavena: ${fakturaceFirma}`);
       }
     }, 100);
   };
 
-  logger.log('✅ Protokol fakturace patch ready');
+  logger.log('Protokol fakturace patch ready');
 })();

@@ -14,10 +14,10 @@ let aktualniPdfNazev = 'protokol.pdf';
  */
 function otevritPdfPreview(pdfBlob, nazevSouboru = 'protokol.pdf') {
   try {
-    logger.log('📄 Otevírám PDF preview modal...');
-    logger.log('📄 PDF Blob:', pdfBlob);
-    logger.log('📄 PDF Blob size:', pdfBlob.size, 'bytes');
-    logger.log('📄 PDF Blob type:', pdfBlob.type);
+    logger.log('[Doc] Otevírám PDF preview modal...');
+    logger.log('[Doc] PDF Blob:', pdfBlob);
+    logger.log('[Doc] PDF Blob size:', pdfBlob.size, 'bytes');
+    logger.log('[Doc] PDF Blob type:', pdfBlob.type);
 
     // Uložit referenci
     aktualniPdfBlob = pdfBlob;
@@ -25,24 +25,24 @@ function otevritPdfPreview(pdfBlob, nazevSouboru = 'protokol.pdf') {
 
     // Vytvořit URL pro iframe
     const pdfUrl = URL.createObjectURL(pdfBlob);
-    logger.log('📄 PDF URL vytvořena:', pdfUrl);
+    logger.log('[Doc] PDF URL vytvořena:', pdfUrl);
 
     // Nastavit iframe src
     const iframe = document.getElementById('pdfPreviewFrame');
     if (!iframe) {
-      logger.error('❌ iframe #pdfPreviewFrame nenalezen!');
+      logger.error('iframe #pdfPreviewFrame nenalezen!');
       showNotif('error', 'Chyba: iframe nenalezen');
       return;
     }
 
-    logger.log('📄 Nastavuji iframe.src...');
+    logger.log('[Doc] Nastavuji iframe.src...');
 
-    // ✅ FIX: Vyčistit iframe PŘED nastavením nového src
+    // FIX: Vyčistit iframe PŘED nastavením nového src
     // srcdoc má prioritu nad src, proto musíme nejprve kompletně vyčistit iframe
     iframe.removeAttribute('srcdoc');
     iframe.src = '';  // Vyčistit starý src
 
-    // ✅ FIX: Zobrazit loading během načítání PDF
+    // FIX: Zobrazit loading během načítání PDF
     const pdfBody = iframe.closest('.pdf-preview-body');
     if (pdfBody) {
       pdfBody.style.position = 'relative';
@@ -74,11 +74,11 @@ function otevritPdfPreview(pdfBlob, nazevSouboru = 'protokol.pdf') {
 
     // Nastavit nový src
     newIframe.src = pdfUrl;
-    logger.log('📄 iframe.src nastavena:', newIframe.src);
+    logger.log('[Doc] iframe.src nastavena:', newIframe.src);
 
-    // ✅ FIX: Skrýt loading po načtení PDF
+    // FIX: Skrýt loading po načtení PDF
     newIframe.onload = () => {
-      logger.log('✅ PDF úspěšně načten v iframe');
+      logger.log('PDF úspěšně načten v iframe');
       const loadingDiv = pdfBody?.querySelector('div[style*="position: absolute"]');
       if (loadingDiv) {
         loadingDiv.remove();
@@ -89,7 +89,7 @@ function otevritPdfPreview(pdfBlob, nazevSouboru = 'protokol.pdf') {
     setTimeout(() => {
       const loadingDiv = pdfBody?.querySelector('div[style*="position: absolute"]');
       if (loadingDiv) {
-        logger.warn('⚠️ Loading skrytý po timeoutu (3s)');
+        logger.warn('Loading skrytý po timeoutu (3s)');
         loadingDiv.remove();
       }
     }, 3000);
@@ -116,32 +116,32 @@ function otevritPdfPreview(pdfBlob, nazevSouboru = 'protokol.pdf') {
     // Zobrazit modal
     const overlay = document.getElementById('pdfPreviewOverlay');
     if (!overlay) {
-      logger.error('❌ overlay #pdfPreviewOverlay nenalezen!');
+      logger.error('overlay #pdfPreviewOverlay nenalezen!');
       showNotif('error', 'Chyba: modal nenalezen');
       return;
     }
 
     overlay.classList.add('active');
-    logger.log('✅ Modal zobrazen (active class přidána)');
+    logger.log('Modal zobrazen (active class přidána)');
 
     // FALLBACK: Pokud iframe nedokáže zobrazit PDF (některé browsery mají problémy),
     // zobraz tlačítko "Otevřít v novém okně"
     setTimeout(() => {
       if (!iframe.contentDocument && !iframe.contentWindow) {
-        logger.warn('⚠️ iframe pravděpodobně neobsahuje PDF - možná problém s CORS nebo prohlížeč');
-        logger.log('💡 Zkuste tlačítko Sdílet/Stáhnout pro zobrazení v novém okně');
+        logger.warn('iframe pravděpodobně neobsahuje PDF - možná problém s CORS nebo prohlížeč');
+        logger.log('[Tip] Zkuste tlačítko Sdílet/Stáhnout pro zobrazení v novém okně');
       } else {
-        logger.log('✅ PDF preview úspěšně zobrazen v iframe');
+        logger.log('PDF preview úspěšně zobrazen v iframe');
       }
     }, 1000);
 
   } catch (error) {
-    logger.error('❌ Chyba při otevírání PDF preview:', error);
+    logger.error('Chyba při otevírání PDF preview:', error);
     showNotif('error', 'Chyba při zobrazení PDF: ' + error.message);
 
     // Fallback: otevřít v novém okně
     if (pdfBlob) {
-      logger.log('💡 Fallback: Otevírám PDF v novém okně...');
+      logger.log('[Tip] Fallback: Otevírám PDF v novém okně...');
       const url = URL.createObjectURL(pdfBlob);
       window.open(url, '_blank');
     }
@@ -152,12 +152,12 @@ function otevritPdfPreview(pdfBlob, nazevSouboru = 'protokol.pdf') {
  * Zavře PDF preview modal
  */
 function zavritPdfPreview() {
-  logger.log('🔒 Zavírám PDF preview...');
+  logger.log('[Lock] Zavírám PDF preview...');
 
   const overlay = document.getElementById('pdfPreviewOverlay');
   overlay.classList.remove('active');
 
-  // ✅ FIX: Vyčistit iframe a PDF URL
+  // FIX: Vyčistit iframe a PDF URL
   const iframe = document.getElementById('pdfPreviewFrame');
   if (iframe) {
     if (iframe.src) {
@@ -182,7 +182,7 @@ function zavritPdfPreview() {
   aktualniPdfBlob = null;
   aktualniPdfNazev = 'protokol.pdf';
 
-  logger.log('✅ PDF preview zavřen');
+  logger.log('PDF preview zavřen');
 }
 
 /**
@@ -216,14 +216,14 @@ async function sdiletNeboStahnutPdf() {
           text: 'Servisní protokol White Glove Service'
         });
 
-        logger.log('✅ PDF úspěšně sdílen pomocí Web Share API');
-        showNotif('success', '✓ PDF sdílen');
+        logger.log('PDF úspěšně sdílen pomocí Web Share API');
+        showNotif('success', 'PDF sdílen');
         return;
       }
     }
 
     // Fallback: Stáhnout soubor (desktop nebo starší mobily)
-    logger.log('💾 Stahuji PDF...');
+    logger.log('[Save] Stahuji PDF...');
 
     const url = URL.createObjectURL(aktualniPdfBlob);
     const odkaz = document.createElement('a');
@@ -238,8 +238,8 @@ async function sdiletNeboStahnutPdf() {
     // Uvolnit URL po krátké prodlevě
     setTimeout(() => URL.revokeObjectURL(url), 100);
 
-    logger.log('✅ PDF úspěšně stažen');
-    showNotif('success', '✓ PDF stažen');
+    logger.log('PDF úspěšně stažen');
+    showNotif('success', 'PDF stažen');
 
   } catch (error) {
     // Pokud uživatel zruší sdílení, nezobrazovat chybu
@@ -248,7 +248,7 @@ async function sdiletNeboStahnutPdf() {
       return;
     }
 
-    logger.error('❌ Chyba při sdílení/stahování PDF:', error);
+    logger.error('Chyba při sdílení/stahování PDF:', error);
     showNotif('error', 'Chyba při zpracování PDF');
   }
 }
@@ -257,7 +257,7 @@ async function sdiletNeboStahnutPdf() {
  * Inicializace PDF preview event listenerů
  */
 function initPdfPreview() {
-  logger.log('🔧 Inicializuji PDF preview...');
+  logger.log('[Fix] Inicializuji PDF preview...');
 
   // Tlačítko Zavřít
   const zavritBtn = document.getElementById('pdfCloseBtn');
@@ -280,7 +280,7 @@ function initPdfPreview() {
       if (typeof potvrditAOdeslat === 'function') {
         potvrditAOdeslat();
       } else {
-        logger.error('❌ Funkce potvrditAOdeslat není dostupná');
+        logger.error('Funkce potvrditAOdeslat není dostupná');
         showNotif('error', 'Chyba při odesílání');
       }
     });
@@ -303,7 +303,7 @@ function initPdfPreview() {
     }
   });
 
-  logger.log('✅ PDF preview inicializován');
+  logger.log('PDF preview inicializován');
 }
 
 // Inicializovat po načtení DOMu

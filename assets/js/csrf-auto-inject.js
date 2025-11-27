@@ -44,22 +44,22 @@ async function getCSRFToken() {
                     input.value = data.token;
                 });
                 if (typeof logger !== 'undefined') {
-                    logger.log('✅ CSRF tokens injected');
+                    logger.log('CSRF tokens injected');
                 }
             } else {
-                // ✅ FIX 2: Error handling - token nebyl úspěšně získán
+                // FIX 2: Error handling - token nebyl úspěšně získán
                 console.error('CSRF token fetch failed:', data);
                 showCsrfError('Bezpečnostní token se nepodařilo načíst. Zkontrolujte připojení.');
             }
         })
         .catch(err => {
-            // ✅ FIX 2: Error handling - network error nebo server error
+            // FIX 2: Error handling - network error nebo server error
             console.error('CSRF Error:', err);
             showCsrfError('Bezpečnostní token se nepodařilo načíst. Obnovte stránku.');
         });
 })();
 
-// ✅ FIX 2: Helper funkce pro zobrazení CSRF chyby
+// FIX 2: Helper funkce pro zobrazení CSRF chyby
 function showCsrfError(message) {
     // Pokud už existuje warning, neukládat další
     if (document.getElementById('csrf-warning')) return;
@@ -68,7 +68,7 @@ function showCsrfError(message) {
     warning.id = 'csrf-warning';
     warning.className = 'csrf-error-notification';
     warning.innerHTML = `
-        <strong>⚠️ Bezpečnostní upozornění</strong>
+        <strong>Bezpečnostní upozornění</strong>
         <p>${message}</p>
         <button onclick="location.reload()">Obnovit stránku</button>
     `;

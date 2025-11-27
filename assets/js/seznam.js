@@ -101,7 +101,7 @@ let CURRENT_RECORD = null;
 let SELECTED_DATE = null;
 let SELECTED_TIME = null;
 
-// ✅ PAGINATION FIX: Tracking pagination state
+// PAGINATION FIX: Tracking pagination state
 let CURRENT_PAGE = 1;
 let HAS_MORE_PAGES = false;
 let LOADING_MORE = false;
@@ -168,7 +168,7 @@ const CacheManager = {
       const cached = localStorage.getItem('wgs_distance_cache');
       if (cached) {
         DISTANCE_CACHE = JSON.parse(cached);
-        logger.log('✓ Načteno', Object.keys(DISTANCE_CACHE).length, 'vzdáleností z cache');
+        logger.log('Načteno', Object.keys(DISTANCE_CACHE).length, 'vzdáleností z cache');
       }
     } catch (e) {
       logger.error('Chyba při načítání cache:', e);
@@ -230,7 +230,7 @@ function clearSearch() {
 function highlightText(text, query) {
   if (!query || !text) return escapeHtml(text);
 
-  // ✅ SECURITY FIX: Escape HTML PŘED highlightováním
+  // SECURITY FIX: Escape HTML PŘED highlightováním
   const escapedText = escapeHtml(text);
   const escapedQuery = escapeRegex(query);
 
@@ -307,7 +307,7 @@ function updateCounts(items) {
 // === NAČTENÍ DAT ===
 async function loadAll(status = 'all', append = false) {
   try {
-    // ✅ PAGINATION FIX: Přidat page a per_page parametry
+    // PAGINATION FIX: Přidat page a per_page parametry
     const page = append ? CURRENT_PAGE + 1 : 1;
     const response = await fetch(`app/controllers/load.php?status=${status}&page=${page}&per_page=${PER_PAGE}`);
     if (!response.ok) throw new Error('Chyba načítání');
@@ -321,7 +321,7 @@ async function loadAll(status = 'all', append = false) {
       items = json;
     }
 
-    // ✅ PAGINATION: Append místo replace při loadMore
+    // PAGINATION: Append místo replace při loadMore
     if (append) {
       WGS_DATA_CACHE = [...WGS_DATA_CACHE, ...items];
       CURRENT_PAGE = page;
@@ -330,7 +330,7 @@ async function loadAll(status = 'all', append = false) {
       CURRENT_PAGE = 1;
     }
 
-    // ✅ PAGINATION: Detekce zda jsou další stránky
+    // PAGINATION: Detekce zda jsou další stránky
     HAS_MORE_PAGES = items.length === PER_PAGE;
     LOADING_MORE = false;
 
@@ -339,7 +339,7 @@ async function loadAll(status = 'all', append = false) {
     updateCounts(userItems);
     renderOrders(userItems);
 
-    // ✅ PAGINATION: Zobrazit/skrýt "Načíst další" tlačítko
+    // PAGINATION: Zobrazit/skrýt "Načíst další" tlačítko
     updateLoadMoreButton();
   } catch (err) {
     logger.error('Chyba:', err);
@@ -535,7 +535,7 @@ function filterUnreadNotes() {
 // === MODAL MANAGER ===
 const ModalManager = {
   show: (content) => {
-    // ✅ iOS scroll lock
+    // iOS scroll lock
     window.modalScrollPosition = window.pageYOffset;
     document.body.style.position = 'fixed';
     document.body.style.top = `-${window.modalScrollPosition}px`;
@@ -550,7 +550,7 @@ const ModalManager = {
   close: () => {
     document.getElementById('detailOverlay').classList.remove('active');
 
-    // ✅ Obnovit scroll
+    // Obnovit scroll
     document.body.style.position = '';
     document.body.style.top = '';
     document.body.style.width = '';
@@ -633,7 +633,7 @@ async function showDetail(recordOrId) {
           ${record.documents && record.documents.length > 0 ? `
             <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; font-weight: 600;"
                     data-action="openPDF" data-url="${record.documents[0].file_path}">
-              📄 PDF REPORT
+              [Doc] PDF REPORT
             </button>
           ` : `
             <div style="background: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 4px; padding: 0.5rem; text-align: center; color: #666; font-size: 0.75rem;">
@@ -645,7 +645,7 @@ async function showDetail(recordOrId) {
           ${record.documents && record.documents.length > 0 ? `
             <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; font-weight: 600;"
                     data-action="openPDF" data-url="${record.documents[0].file_path}">
-              📄 PDF REPORT
+              [Doc] PDF REPORT
             </button>
           ` : `
             <div style="background: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 4px; padding: 0.5rem; text-align: center; color: #666; font-size: 0.75rem;">
@@ -718,7 +718,7 @@ async function reopenOrder(id) {
   );
   
   if (!confirmed) {
-    logger.log('❌ Znovuotevření zrušeno uživatelem');
+    logger.log('Znovuotevření zrušeno uživatelem');
     return;
   }
   
@@ -746,10 +746,10 @@ async function reopenOrder(id) {
       const newId = result.new_id;
       const newWorkflowId = result.new_workflow_id;
 
-      logger.log(`✅ Nová zakázka vytvořena: ${newWorkflowId} (ID: ${newId})`);
+      logger.log(`Nová zakázka vytvořena: ${newWorkflowId} (ID: ${newId})`);
 
       alert(
-        `✓ NOVÁ ZAKÁZKA VYTVOŘENA\n\n` +
+        `NOVÁ ZAKÁZKA VYTVOŘENA\n\n` +
         `Číslo: ${newWorkflowId}\n` +
         `Stav: NOVÁ (žlutá karta)\n\n` +
         `Původní zakázka zůstává dokončená.\n\n` +
@@ -809,7 +809,7 @@ async function showHistoryPDF(originalReklamaceId) {
 
     // Zobrazit první PDF dokument
     const firstDoc = result.documents[0];
-    logger.log(`✅ Otevírám PDF: ${firstDoc.file_path}`);
+    logger.log(`Otevírám PDF: ${firstDoc.file_path}`);
 
     // Otevřít PDF v novém okně
     window.open(firstDoc.file_path, '_blank');
@@ -858,44 +858,44 @@ function startVisit(id) {
 
   // Ochrana proti duplicitnímu volání
   if (startVisitInProgress) {
-    console.log('[startVisit] ⚠️ Funkce již běží, ignoruji duplicitní volání');
+    console.log('[startVisit] Funkce již běží, ignoruji duplicitní volání');
     return;
   }
   startVisitInProgress = true;
 
   const z = WGS_DATA_CACHE.find(x => x.id == id);
-  console.log('[startVisit] 📋 Nalezený záznam:', z);
+  console.log('[startVisit] [List] Nalezený záznam:', z);
 
   if (!z) {
-    console.error('[startVisit] ❌ Záznam nenalezen v cache!');
+    console.error('[startVisit] Záznam nenalezen v cache!');
     alert(t('record_not_found'));
     startVisitInProgress = false;
     return;
   }
 
-  console.log('[startVisit] ✅ Záznam nalezen, stav:', z.stav);
+  console.log('[startVisit] Záznam nalezen, stav:', z.stav);
 
   if (Utils.isCompleted(z)) {
-    console.error('[startVisit] ❌ Návštěva již dokončena!');
+    console.error('[startVisit] Návštěva již dokončena!');
     alert(t('visit_already_completed'));
     startVisitInProgress = false;
     return;
   }
 
-  console.log('[startVisit] 📝 Normalizuji data...');
+  console.log('[startVisit] [Edit] Normalizuji data...');
   const normalizedData = normalizeCustomerData(z);
-  console.log('[startVisit] ✅ Data normalizována:', normalizedData);
+  console.log('[startVisit] Data normalizována:', normalizedData);
 
-  console.log('[startVisit] 💾 Ukládám do localStorage...');
+  console.log('[startVisit] [Save] Ukládám do localStorage...');
   localStorage.setItem('currentCustomer', JSON.stringify(normalizedData));
   localStorage.setItem('visitStartTime', new Date().toISOString());
 
   const photoKey = 'photoSections_' + normalizedData.id;
   localStorage.removeItem(photoKey);
 
-  logger.log('✅ Normalizovaná data uložena:', normalizedData);
+  logger.log('Normalizovaná data uložena:', normalizedData);
 
-  console.log('[startVisit] 🚀 Přesměrovávám na photocustomer.php...');
+  console.log('[startVisit] [Start] Přesměrovávám na photocustomer.php...');
   window.location.href = 'photocustomer.php?new=true';
 }
 
@@ -1131,14 +1131,14 @@ function renderCalendar(m, y) {
       document.querySelectorAll('.cal-day').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
 
-      // ✅ PERFORMANCE: Vzdálenosti vypnuty kvůli API problémům
+      // PERFORMANCE: Vzdálenosti vypnuty kvůli API problémům
       let displayText = `Vybraný den: ${SELECTED_DATE}`;
       document.getElementById('selectedDateDisplay').textContent = displayText;
 
       // Zobrazit časy okamžitě
       renderTimeGrid();
 
-      // ✅ PERFORMANCE: Vypnuto kvůli problémům s get_distance.php
+      // PERFORMANCE: Vypnuto kvůli problémům s get_distance.php
       // showDayBookingsWithDistances(SELECTED_DATE);
     };
     daysGrid.appendChild(el);
@@ -1239,7 +1239,7 @@ async function getDistancesBatch(pairs) {
 
 // === ZOBRAZENÍ TERMÍNŮ S VZDÁLENOSTMI ===
 async function showDayBookingsWithDistances(date) {
-  // ✅ PERFORMANCE: Funkce vypnuta kvůli problémům s get_distance.php API
+  // PERFORMANCE: Funkce vypnuta kvůli problémům s get_distance.php API
   // Vzdálenosti se nezobrazují
   const distanceContainer = document.getElementById('distanceInfo');
   const bookingsContainer = document.getElementById('dayBookings');
@@ -1277,13 +1277,13 @@ async function showDayBookingsWithDistances(date) {
   const cacheKey = `${WGS_ADDRESS}|${currentAddress}`;
   const isCached = DISTANCE_CACHE[cacheKey] !== undefined;
   
-  // ✅ PERFORMANCE FIX: Zobrazit loading a vypočítat vzdálenost asynchronně
+  // PERFORMANCE FIX: Zobrazit loading a vypočítat vzdálenost asynchronně
   if (!isCached) {
     distanceContainer.innerHTML = `<div style="text-align: center; color: var(--c-grey); font-size: 0.7rem; padding: 0.5rem;">${t('loading')}</div>`;
   }
 
   if (bookings.length === 0) {
-    // ✅ PERFORMANCE FIX: Neblokovat UI - vzdálenost načíst asynchronně
+    // PERFORMANCE FIX: Neblokovat UI - vzdálenost načíst asynchronně
     getDistance(WGS_ADDRESS, currentAddress)
       .then(distToCustomer => {
         if (distToCustomer) {
@@ -1496,16 +1496,16 @@ function renderTimeGrid() {
         document.querySelectorAll('.time-slot').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
 
-        // ✅ PERFORMANCE: Zobrazit termín bez vzdálenosti
+        // PERFORMANCE: Zobrazit termín bez vzdálenosti
         let displayText = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
 
         if (occupiedTimes[time]) {
-          displayText += ` ⚠️ KOLIZE: ${occupiedTimes[time].zakaznik}`;
+          displayText += ` KOLIZE: ${occupiedTimes[time].zakaznik}`;
         }
 
         document.getElementById('selectedDateDisplay').textContent = displayText;
 
-        // ✅ PERFORMANCE: getDistance() a showDayBookingsWithDistances() vypnuty
+        // PERFORMANCE: getDistance() a showDayBookingsWithDistances() vypnuty
       };
       t.appendChild(el);
     }
@@ -1607,7 +1607,7 @@ async function saveSelectedDate() {
       const tAfterCache = performance.now();
       logger.log(`⏱️ Cache update: ${(tAfterCache - tBeforeCache).toFixed(0)}ms`);
 
-      // ✅ PERFORMANCE FIX: Odstranění zbytečného loadAll()
+      // PERFORMANCE FIX: Odstranění zbytečného loadAll()
       // Cache je už aktualizovaná (řádky výše), seznam se obnoví automaticky
       // když uživatel zavře detail. Nemusíme čekat na reload celého seznamu.
 
@@ -1652,7 +1652,7 @@ async function saveSelectedDate() {
 
       // ⏱️ CELKOVÝ ČAS
       const tTotal = performance.now();
-      logger.log(`⏱️ ✅ CELKOVÝ ČAS: ${(tTotal - t0).toFixed(0)}ms (${((tTotal - t0) / 1000).toFixed(1)}s)`);
+      logger.log(`⏱️ CELKOVÝ ČAS: ${(tTotal - t0).toFixed(0)}ms (${((tTotal - t0) / 1000).toFixed(1)}s)`);
     } else {
       hideLoading();
       alert(t('error') + ': ' + (result.message || t('failed_to_save')));
@@ -1664,7 +1664,7 @@ async function saveSelectedDate() {
 
     // ⏱️ Log času i při chybě
     const tError = performance.now();
-    logger.log(`⏱️ ❌ Čas do chyby: ${(tError - t0).toFixed(0)}ms`);
+    logger.log(`⏱️ Čas do chyby: ${(tError - t0).toFixed(0)}ms`);
   }
 }
 
@@ -1767,7 +1767,7 @@ async function loadMapAndRoute() {
       </div>
     `;
 
-    // ✅ PERFORMANCE: getDistance() vypnuto kvůli API problémům
+    // PERFORMANCE: getDistance() vypnuto kvůli API problémům
     // Vzdálenost se nezobrazuje, zobrazí se jen '—'
     document.getElementById('mapDistance').textContent = '—';
     document.getElementById('mapDuration').textContent = '—';
@@ -2131,18 +2131,18 @@ async function sendAppointmentConfirmation(customer, date, time) {
     const result = await response.json();
 
     if (result.success === true) {
-      logger.log('✓ Potvrzení termínu odesláno zákazníkovi');
+      logger.log('Potvrzení termínu odesláno zákazníkovi');
       if (result.sent) {
-        logger.log('  ✓ Email odeslán na:', result.to || email);
+        logger.log('  Email odeslán na:', result.to || email);
       }
       if (result.sms_sent) {
-        logger.log('  ✓ SMS odeslána na:', phone);
+        logger.log('  SMS odeslána na:', phone);
       }
     } else {
       logger.error('⚠ Chyba při odesílání potvrzení:', result.error || result.message);
     }
   } catch (error) {
-    logger.error('❌ Chyba při odesílání potvrzení:', error);
+    logger.error('Chyba při odesílání potvrzení:', error);
   }
 }
 
@@ -2582,17 +2582,17 @@ async function deleteReklamace(reklamaceId) {
     }
 
     if (result.success || result.status === 'success') {
-      logger.log('✅ Smazáno!');
+      logger.log('Smazáno!');
       alert(t('claim_deleted_successfully'));
       closeDetail();
       setTimeout(() => location.reload(), 500);
     } else {
       const errorMsg = result.message || result.error || t('delete_failed');
-      logger.error('❌ Chyba:', errorMsg);
+      logger.error('Chyba:', errorMsg);
       alert(t('error') + ': ' + errorMsg);
     }
   } catch (error) {
-    logger.error('❌ Chyba při mazání:', error);
+    logger.error('Chyba při mazání:', error);
     alert(t('delete_error') + ': ' + error.message);
   }
 }
@@ -2667,7 +2667,7 @@ async function pokracovatSmazaniFotky(photoId, photoUrl) {
     }
 
     if (result.status === 'success') {
-      logger.log('✅ Fotka smazána!');
+      logger.log('Fotka smazána!');
 
       // Odstranit fotku z DOM
       const fotoElements = document.querySelectorAll('.foto-wrapper img');
@@ -2697,11 +2697,11 @@ async function pokracovatSmazaniFotky(photoId, photoUrl) {
       alert(t('photo_deleted_successfully'));
     } else {
       const errorMsg = result.message || result.error || t('delete_failed');
-      logger.error('❌ Chyba:', errorMsg);
+      logger.error('Chyba:', errorMsg);
       alert(t('error') + ': ' + errorMsg);
     }
   } catch (error) {
-    logger.error('❌ Chyba při mazání fotky:', error);
+    logger.error('Chyba při mazání fotky:', error);
     alert(t('photo_delete_error') + ': ' + error.message);
   }
 }
@@ -2714,7 +2714,7 @@ async function loadPhotosFromDB(reklamaceId) {
 
     const data = await response.json();
     if (data.success && data.photos) {
-      // ✅ Vrátit celé objekty včetně ID pro možnost mazání
+      // Vrátit celé objekty včetně ID pro možnost mazání
       return data.photos.map(p => ({
         id: p.id,
         photo_path: p.photo_path,
@@ -2728,7 +2728,7 @@ async function loadPhotosFromDB(reklamaceId) {
   }
 }
 
-// ✅ PAGINATION: Load more handler
+// PAGINATION: Load more handler
 async function loadMoreOrders() {
   if (LOADING_MORE || !HAS_MORE_PAGES) return;
 
@@ -2742,7 +2742,7 @@ async function loadMoreOrders() {
   await loadAll(ACTIVE_FILTER, true); // append = true
 }
 
-// ✅ PAGINATION: Update "Load More" button visibility
+// PAGINATION: Update "Load More" button visibility
 function updateLoadMoreButton() {
   let btn = document.getElementById('loadMoreBtn');
 
@@ -2806,7 +2806,7 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
     hideLoading();
 
     if (data.success) {
-      logger.log('✓ Email o pokusu o kontakt odeslán zákazníkovi');
+      logger.log('Email o pokusu o kontakt odeslán zákazníkovi');
 
       // Zavřít detail modal
       closeDetail();
@@ -2814,7 +2814,7 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
       // Zobrazit toast zprávu
       showToast('Email odeslán zákazníkovi', 'success');
 
-      // ✅ DŮLEŽITÉ: SMS text je nyní generován na serveru ze stejných dat jako email
+      // DŮLEŽITÉ: SMS text je nyní generován na serveru ze stejných dat jako email
       // To znamená, že změna v emailové šabloně automaticky ovlivní i SMS
       const smsText = data.sms_text || `Dobrý den, pokusili jsme se Vás kontaktovat. Zavolejte prosím zpět na +420 725 965 826. Děkujeme, WGS Service`;
 
@@ -2830,7 +2830,7 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
     }
 
   } catch (chyba) {
-    logger.error('❌ Chyba při odesílání kontaktního emailu:', chyba);
+    logger.error('Chyba při odesílání kontaktního emailu:', chyba);
     showToast('Nepodařilo se odeslat email', 'error');
     // Skrýt loading overlay i při chybě
     hideLoading();

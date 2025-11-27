@@ -10,13 +10,13 @@ let vybraneProdejci = [];
 let vybraneTechnici = [];
 let vybraneZeme = ['cz', 'sk']; // Defaultně obě země
 
-console.log('📊 Statistiky 2.0 - načítání...');
+console.log('[Statistiky] 2.0 - načítání...');
 
 /**
  * Inicializace při načtení stránky
  */
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('📊 Statistiky 2.0 - inicializace');
+    console.log('[Statistiky] 2.0 - inicializace');
 
     // Inicializovat multi-select dropdowny
     inicializujMultiselect();
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         aplikovatFiltry();
     });
 
-    console.log('📊 Statistiky 2.0 - inicializace dokončena');
+    console.log('[Statistiky] 2.0 - inicializace dokončena');
 });
 
 /**
@@ -298,7 +298,7 @@ function renderTabulka(data) {
     const tableCount = document.getElementById('table-count');
 
     if (!data.zakazky || data.zakazky.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div>Žádné zakázky podle filtrů</div>';
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"></div>Žádné zakázky podle filtrů</div>';
         tableCount.textContent = '0 zakázek';
         return;
     }
@@ -524,7 +524,7 @@ function resetovitFiltry() {
  */
 async function exportovatPDF() {
     try {
-        console.log('📄 Exportuji PDF...');
+        console.log('[Doc] Exportuji PDF...');
 
         // Načíst VŠECHNA data (bez limitu)
         const filterParams = getFilterParams();
@@ -633,7 +633,7 @@ async function exportovatPDF() {
         document.body.appendChild(pdfContainer);
 
         // Renderovat pomocí html2canvas
-        console.log('📸 Renderuji HTML pomocí html2canvas...');
+        console.log('[Photo] Renderuji HTML pomocí html2canvas...');
         const canvas = await html2canvas(pdfContainer, {
             scale: 2,
             backgroundColor: '#fff',
@@ -715,7 +715,7 @@ async function exportovatPDF() {
         const nazevSouboru = `statistiky_${rok}_${mesicValue || 'vsechny'}_${new Date().toISOString().split('T')[0]}.pdf`;
         doc.save(nazevSouboru);
 
-        console.log('✅ PDF exportováno:', nazevSouboru);
+        console.log('PDF exportováno:', nazevSouboru);
 
     } catch (error) {
         console.error('Chyba exportu PDF:', error);

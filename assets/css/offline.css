@@ -88,11 +88,11 @@
     .status {
       margin-top: 2rem;
       padding: 1rem;
-      background: rgba(255,150,0,0.1);
-      border: 1px solid rgba(255,150,0,0.3);
+      background: rgba(150,150,150,0.1);
+      border: 1px solid rgba(150,150,150,0.3);
       border-radius: 8px;
       font-size: 0.9rem;
-      color: #ffc97f;
+      color: #999;
     }
 
     .wifi-icon {

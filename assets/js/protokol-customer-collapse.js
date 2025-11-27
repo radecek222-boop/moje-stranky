@@ -63,7 +63,7 @@
       }
     });
 
-    logger.log('✅ Customer info collapse inicializován');
+    logger.log('Customer info collapse inicializován');
   }
 
   // Inicializovat po načtení DOMu

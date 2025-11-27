@@ -100,7 +100,7 @@
 
     // Log initialization (only in debug mode)
     if (isDebugMode()) {
-        console.log('🔧 Logger initialized - Debug mode ENABLED');
-        console.log('💡 To disable debug logs in production, set DEBUG_MODE = false or deploy to non-localhost');
+        console.log('[Fix] Logger initialized - Debug mode ENABLED');
+        console.log('[Tip] To disable debug logs in production, set DEBUG_MODE = false or deploy to non-localhost');
     }
 })();
