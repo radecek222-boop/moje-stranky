@@ -53,7 +53,31 @@ class WGSWebPush {
                 ],
             ];
 
-            $this->webPush = new \Minishlink\WebPush\WebPush($auth);
+            // Defaultni nastaveni
+            $defaultOptions = [];
+
+            // Pokud server nema spravne CA certifikaty, zkusit najit cacert.pem
+            $caCertPath = '/etc/ssl/certs/ca-certificates.crt';
+            if (!file_exists($caCertPath)) {
+                $caCertPath = '/etc/pki/tls/certs/ca-bundle.crt';
+            }
+            if (!file_exists($caCertPath)) {
+                $caCertPath = '/etc/ssl/ca-bundle.pem';
+            }
+            if (!file_exists($caCertPath)) {
+                // Zkusit lokalni cacert.pem v projektu
+                $caCertPath = __DIR__ . '/../cacert.pem';
+            }
+
+            if (file_exists($caCertPath)) {
+                $defaultOptions = [
+                    'curl' => [
+                        CURLOPT_CAINFO => $caCertPath,
+                    ],
+                ];
+            }
+
+            $this->webPush = new \Minishlink\WebPush\WebPush($auth, $defaultOptions);
             $this->webPush->setReuseVAPIDHeaders(true);
             $this->inicializovano = true;
 
