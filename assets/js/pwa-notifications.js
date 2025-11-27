@@ -118,8 +118,9 @@
       const response = await fetch(CONFIG.pushApiEndpoint + '?action=vapid-key');
       const data = await response.json();
 
-      if (data.status === 'success' && data.data && data.data.vapidPublicKey) {
-        vapidPublicKey = data.data.vapidPublicKey;
+      // API vraci vapidPublicKey primo v odpovedi (ne v data.data)
+      if (data.status === 'success' && data.vapidPublicKey) {
+        vapidPublicKey = data.vapidPublicKey;
         console.log('[Notifikace] VAPID key nacten');
         return vapidPublicKey;
       } else if (data.status === 'error') {
