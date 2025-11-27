@@ -94,38 +94,44 @@ if (!defined('LOGS_PATH')) {
 // TEMP_PATH je již definována v init.php - nemusíme ji zde znovu definovat
 
 // ========== SECURITY LOGGING ==========
-function logSecurity($message) {
-    $file = LOGS_PATH . '/security.log';
-    $timestamp = date('Y-m-d H:i:s');
-    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+if (!function_exists('logSecurity')) {
+    function logSecurity($message) {
+        $file = LOGS_PATH . '/security.log';
+        $timestamp = date('Y-m-d H:i:s');
+        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 
-    $message = mb_convert_encoding($message, 'UTF-8', 'UTF-8');
-    $line = "[$timestamp] [$ip] $message\n";
+        $message = mb_convert_encoding($message, 'UTF-8', 'UTF-8');
+        $line = "[$timestamp] [$ip] $message\n";
 
-    if (!file_exists($file)) {
-        touch($file);
-        chmod($file, 0600);
+        if (!file_exists($file)) {
+            touch($file);
+            chmod($file, 0600);
+        }
+
+        file_put_contents($file, $line, FILE_APPEND | LOCK_EX);
     }
-
-    file_put_contents($file, $line, FILE_APPEND | LOCK_EX);
 }
 
 // ========== UTILITY FUNKCE ==========
-function generateRegistrationKey($prefix = 'KEY') {
-    $year = date('Y');
-    $random = strtoupper(bin2hex(random_bytes(4)));
-    return $prefix . $year . $random;
+if (!function_exists('generateRegistrationKey')) {
+    function generateRegistrationKey($prefix = 'KEY') {
+        $year = date('Y');
+        $random = strtoupper(bin2hex(random_bytes(4)));
+        return $prefix . $year . $random;
+    }
 }
 
-function sanitizeInput($data) {
-    if (is_array($data)) {
-        return array_map('sanitizeInput', $data);
+if (!function_exists('sanitizeInput')) {
+    function sanitizeInput($data) {
+        if (is_array($data)) {
+            return array_map('sanitizeInput', $data);
+        }
+
+        $data = trim($data);
+        $data = stripslashes($data);
+        $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
+        return $data;
     }
-    
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
-    return $data;
 }
 
 /**

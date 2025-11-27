@@ -268,10 +268,6 @@ if (!$embedMode && $activeTab === 'dashboard'):
                 <div class="cc-card-description" data-lang-cs="Diagnostika HTML/PHP/JS/CSS/SQL" data-lang-en="Diagnostics HTML/PHP/JS/CSS/SQL" data-lang-it="Diagnostica HTML/PHP/JS/CSS/SQL">Diagnostika HTML/PHP/JS/CSS/SQL</div>
             </div>
 
-            <div class="cc-card" onclick="window.location='admin.php?tab=admin_terminal'">
-                <div class="cc-card-title" data-lang-cs="Terminal" data-lang-en="Terminal" data-lang-it="Terminale">Terminal</div>
-                <div class="cc-card-description" data-lang-cs="Serverovy shell terminal pro prikazy" data-lang-en="Server shell terminal for commands" data-lang-it="Terminale shell server per comandi">Serverovy shell terminal pro prikazy</div>
-            </div>
         </div>
     </div>
 
@@ -1034,11 +1030,6 @@ function loadNotifContent(type, body) {
   <?php if ($activeTab === 'admin_console'): ?>
   <!-- TAB: KONZOLE -->
   <?php require_once __DIR__ . '/includes/admin_console.php'; ?>
-  <?php endif; ?>
-
-  <?php if ($activeTab === 'admin_terminal'): ?>
-  <!-- TAB: TERMINAL -->
-  <?php require_once __DIR__ . '/includes/admin_terminal.php'; ?>
   <?php endif; ?>
 
   <?php if ($activeTab === 'admin_actions'): ?>
