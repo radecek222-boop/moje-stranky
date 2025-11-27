@@ -139,47 +139,49 @@ if (!function_exists('sanitizeInput')) {
  * @param string $password Heslo ke kontrole
  * @return true|array True pokud je heslo silné, jinak array s chybami
  */
-function isStrongPassword($password) {
-    $errors = [];
+if (!function_exists('isStrongPassword')) {
+    function isStrongPassword($password) {
+        $errors = [];
 
-    // Minimální délka 12 znaků
-    if (strlen($password) < 12) {
-        $errors[] = 'Minimálně 12 znaků';
+        // Minimální délka 12 znaků
+        if (strlen($password) < 12) {
+            $errors[] = 'Minimálně 12 znaků';
+        }
+
+        // Alespoň jedno velké písmeno
+        if (!preg_match('/[A-Z]/', $password)) {
+            $errors[] = 'Alespoň 1 velké písmeno (A-Z)';
+        }
+
+        // Alespoň jedno malé písmeno
+        if (!preg_match('/[a-z]/', $password)) {
+            $errors[] = 'Alespoň 1 malé písmeno (a-z)';
+        }
+
+        // Alespoň jedno číslo
+        if (!preg_match('/[0-9]/', $password)) {
+            $errors[] = 'Alespoň 1 číslo (0-9)';
+        }
+
+        // Alespoň jeden speciální znak
+        if (!preg_match('/[^A-Za-z0-9]/', $password)) {
+            $errors[] = 'Alespoň 1 speciální znak (!@#$%^&*...)';
+        }
+
+        // Kontrola proti běžným heslům
+        $commonPasswords = [
+            'password', 'password123', 'heslo', 'heslo123', 'admin123',
+            '12345678', '123456789', 'qwerty123', 'abc123456',
+            'password1234', 'admin1234', 'natuzzi123'
+        ];
+
+        if (in_array(strtolower($password), $commonPasswords)) {
+            $errors[] = 'Heslo je příliš běžné, zvolte unikátnější';
+        }
+
+        // Vrátit true nebo pole s chybami
+        return empty($errors) ? true : $errors;
     }
-
-    // Alespoň jedno velké písmeno
-    if (!preg_match('/[A-Z]/', $password)) {
-        $errors[] = 'Alespoň 1 velké písmeno (A-Z)';
-    }
-
-    // Alespoň jedno malé písmeno
-    if (!preg_match('/[a-z]/', $password)) {
-        $errors[] = 'Alespoň 1 malé písmeno (a-z)';
-    }
-
-    // Alespoň jedno číslo
-    if (!preg_match('/[0-9]/', $password)) {
-        $errors[] = 'Alespoň 1 číslo (0-9)';
-    }
-
-    // Alespoň jeden speciální znak
-    if (!preg_match('/[^A-Za-z0-9]/', $password)) {
-        $errors[] = 'Alespoň 1 speciální znak (!@#$%^&*...)';
-    }
-
-    // Kontrola proti běžným heslům
-    $commonPasswords = [
-        'password', 'password123', 'heslo', 'heslo123', 'admin123',
-        '12345678', '123456789', 'qwerty123', 'abc123456',
-        'password1234', 'admin1234', 'natuzzi123'
-    ];
-
-    if (in_array(strtolower($password), $commonPasswords)) {
-        $errors[] = 'Heslo je příliš běžné, zvolte unikátnější';
-    }
-
-    // Vrátit true nebo pole s chybami
-    return empty($errors) ? true : $errors;
 }
 
 // ========== CSRF FUNKCE ==========
@@ -202,44 +204,48 @@ if (($_SERVER['SERVER_NAME'] ?? 'localhost') === 'localhost' ||
 }
 
 // ========== BEZPEČNOSTNÍ HLAVIČKY ==========
-function setSecurityHeaders() {
-    header("X-Content-Type-Options: nosniff");
-    header("X-Frame-Options: SAMEORIGIN");
-    header("X-XSS-Protection: 1; mode=block");
-    // CSP - odstraněn 'unsafe-eval' pro lepší bezpečnost
-    header("Content-Security-Policy: " .
-        "default-src 'self'; " .
-        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; " .
-        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com; " .
-        "img-src 'self' data: blob: https://maps.geoapify.com; " .
-        "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com; " .
-        "connect-src 'self' data: https://api.geoapify.com https://maps.geoapify.com https://fonts.googleapis.com https://fonts.gstatic.com;"
-    );
-    header("Referrer-Policy: strict-origin-when-cross-origin");
+if (!function_exists('setSecurityHeaders')) {
+    function setSecurityHeaders() {
+        header("X-Content-Type-Options: nosniff");
+        header("X-Frame-Options: SAMEORIGIN");
+        header("X-XSS-Protection: 1; mode=block");
+        // CSP - odstraněn 'unsafe-eval' pro lepší bezpečnost
+        header("Content-Security-Policy: " .
+            "default-src 'self'; " .
+            "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; " .
+            "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com; " .
+            "img-src 'self' data: blob: https://maps.geoapify.com; " .
+            "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com; " .
+            "connect-src 'self' data: https://api.geoapify.com https://maps.geoapify.com https://fonts.googleapis.com https://fonts.gstatic.com;"
+        );
+        header("Referrer-Policy: strict-origin-when-cross-origin");
+    }
 }
 
 // ========== DATABÁZOVÉ PŘIPOJENÍ ==========
-function getDbConnection() {
-    static $pdo = null;
-    
-    if ($pdo === null) {
-        try {
-            $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
-            $options = [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
-                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
-            ];
-            
-            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-        } catch (PDOException $e) {
-            error_log("Database connection failed: " . $e->getMessage());
-            die("Database connection failed. Please contact administrator.");
+if (!function_exists('getDbConnection')) {
+    function getDbConnection() {
+        static $pdo = null;
+
+        if ($pdo === null) {
+            try {
+                $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+                $options = [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false,
+                    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
+                ];
+
+                $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+            } catch (PDOException $e) {
+                error_log("Database connection failed: " . $e->getMessage());
+                die("Database connection failed. Please contact administrator.");
+            }
         }
+
+        return $pdo;
     }
-    
-    return $pdo;
 }
 
 // ========== AUTOMATICKÉ ČIŠTĚNÍ STARÝCH SESSIONS ==========
