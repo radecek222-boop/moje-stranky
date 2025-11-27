@@ -572,15 +572,15 @@ async function renderOrders(items = null) {
   }
 
   filtered.sort((a, b) => {
-    const dateA = new Date(a.datum || a.timestamp || 0);
-    const dateB = new Date(b.datum || b.timestamp || 0);
+    const dateA = new Date(a.created_at || a.datum_reklamace || a.timestamp || 0);
+    const dateB = new Date(b.created_at || b.datum_reklamace || b.timestamp || 0);
     return dateB - dateA;
   });
 
   grid.innerHTML = filtered.map((rec, index) => {
     const customerName = Utils.getCustomerName(rec);
     const product = Utils.getProduct(rec);
-    const date = formatDate(rec.datum);
+    const date = formatDate(rec.created_at || rec.datum_reklamace);
     const status = getStatus(rec.stav);
     const orderId = Utils.getOrderId(rec, index);
 
@@ -630,16 +630,18 @@ async function renderOrders(items = null) {
         </div>
         <div class="order-body">
           <div class="order-customer">${highlightedCustomer}</div>
-          <div class="order-detail">
-            <div class="order-detail-line">${highlightedAddress}</div>
-            <div class="order-detail-line">${highlightedProduct}</div>
-            <div class="order-detail-line" style="opacity: 0.6;">${date}</div>
+          <div class="order-detail-line">${highlightedAddress}</div>
+          <div class="order-detail-row">
+            <div class="order-detail-left">
+              <div class="order-detail-line">${highlightedProduct}</div>
+              <div class="order-detail-line" style="opacity: 0.6;">${date}</div>
+            </div>
+            <div class="order-detail-right">
+              ${appointmentText
+                ? `<span class="order-appointment">${appointmentText}</span>`
+                : `<span class="order-status-text status-${status.class}">${status.text}</span>`}
+            </div>
           </div>
-        </div>
-        <div class="order-footer">
-          ${appointmentText
-            ? `<span class="order-appointment">${appointmentText}</span>`
-            : `<span class="order-status-text status-${status.class}">${status.text}</span>`}
         </div>
       </div>
     `;

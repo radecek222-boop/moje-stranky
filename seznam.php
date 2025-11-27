@@ -336,7 +336,7 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 
   .order-detail-line {
-    font-size: 0.55rem !important;
+    font-size: 0.6rem !important;
     line-height: 1.1 !important;
   }
 
@@ -378,7 +378,7 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 
   .order-detail-line {
-    font-size: 0.52rem !important;
+    font-size: 0.55rem !important;
     line-height: 1.05 !important;
   }
 
