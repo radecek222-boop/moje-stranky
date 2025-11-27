@@ -7,6 +7,49 @@
  * a opravují kritické touch target problémy.
  */
 
+/* ========================================================================
+   ✅ SJEDNOCENÍ FONTU A VELIKOSTI NA KARTĚ ZÁKAZNÍKA
+   ======================================================================== */
+
+/* Číslo zakázky, adresa, model, datum - stejný font a velikost */
+.order-number,
+.order-detail-line {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  color: #333 !important;
+}
+
+/* Jméno zákazníka - větší a tučnější */
+.order-customer {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+}
+
+@media (max-width: 768px) {
+  .order-number,
+  .order-detail-line {
+    font-size: 0.65rem !important;
+  }
+
+  .order-customer {
+    font-size: 0.7rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .order-number,
+  .order-detail-line {
+    font-size: 0.6rem !important;
+  }
+
+  .order-customer {
+    font-size: 0.65rem !important;
+  }
+}
+
 @media (max-width: 768px) {
   /* ========================================================================
      ✅ FIX #1: Calendar Days - KRITICKY MALÉ (28px → 44px)
