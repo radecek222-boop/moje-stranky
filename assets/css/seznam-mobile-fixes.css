@@ -170,3 +170,121 @@
 .order-notes-badge:active {
   opacity: 0.5;
 }
+
+/* ========================================================================
+   ✅ ORDER FOOTER - Termín v levém dolním rohu karty
+   ======================================================================== */
+
+/* Footer karty - spodní část */
+.order-footer {
+  margin-top: 0.5rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* Termín - větší písmo, levý dolní roh */
+.order-appointment {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Mobilní zobrazení - ještě větší písmo */
+@media (max-width: 768px) {
+  .order-appointment {
+    font-size: 1rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+/* ========================================================================
+   BUTTON TEXT FIT - Text se vždy vejde do tlačítek
+   ======================================================================== */
+
+/* Základní pravidlo pro všechny tlačítka - povolení zalamování */
+.btn,
+button,
+.filter-btn,
+.action-btn,
+.modal-btn,
+.order-action-btn,
+[class*="btn-"] {
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  text-align: center;
+  line-height: 1.3;
+  height: auto;
+  min-height: 44px;
+}
+
+/* Speciální opravy pro různé typy tlačítek */
+@media (max-width: 480px) {
+  /* Filter tlačítka v seznamu */
+  .filter-btn,
+  .status-filter-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Akční tlačítka v kartách */
+  .action-btn,
+  .order-action-btn {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.75rem;
+    min-height: 40px;
+  }
+
+  /* Modal tlačítka */
+  .modal-btn,
+  .modal-footer .btn,
+  .modal-footer button {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    flex: 1;
+  }
+
+  /* Tlačítka v řádku - flex wrap */
+  .btn-group,
+  .button-group,
+  .action-buttons,
+  .modal-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+/* Velmi malé obrazovky */
+@media (max-width: 360px) {
+  .filter-btn,
+  .status-filter-btn {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .action-btn,
+  .order-action-btn {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.7rem;
+    min-height: 36px;
+  }
+
+  .modal-btn,
+  .modal-footer .btn {
+    font-size: 0.8rem;
+    padding: 0.6rem 0.75rem;
+  }
+}

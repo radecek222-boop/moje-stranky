@@ -62,13 +62,16 @@ body:not(.calculator-page) .section-title {
     font-size: 2rem;
     line-height: 1;
     cursor: pointer;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     transition: background 0.3s;
+    touch-action: manipulation;
 }
 
 .calculator-modal-close:hover {
@@ -145,10 +148,40 @@ body:not(.calculator-page) .section-title {
 
     .calculator-modal-body {
         padding: 10px;
+        overflow-x: hidden;
     }
 
     .btn-calculator {
-        padding: 0.35rem 0.6rem;
-        font-size: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem; /* 14px minimum */
+        min-height: 44px;
+    }
+
+    .calculator-modal-close {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        min-height: 48px;
+    }
+
+    /* Oprava přetékání cen v modalu */
+    .calculator-modal-body .summary-line {
+        grid-template-columns: 1fr auto;
+        gap: 0.5rem;
+        overflow: hidden;
+    }
+
+    .calculator-modal-body .summary-line > span:first-child {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .calculator-modal-body .summary-price {
+        font-size: 0.9rem;
+    }
+
+    .calculator-modal-body #grand-total {
+        font-size: 1.1rem;
     }
 }

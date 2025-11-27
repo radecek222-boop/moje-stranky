@@ -6,7 +6,11 @@
  *
  * @author: WGS Service Team
  * @date: 2025-11-20
+ * @updated: 2025-11-27 - Přidán import button-fixes-global.css
  */
+
+/* Import globálních oprav tlačítek */
+@import url('button-fixes-global.css');
 
 /* ============================================
    ZÁKLADNÍ MOBILNÍ OPTIMALIZACE

@@ -184,6 +184,11 @@ const CacheManager = {
   }
 };
 
+// === AUTO-REFRESH KONFIGURACE ===
+const AUTO_REFRESH_INTERVAL = 60000; // 60 sekund
+let autoRefreshTimer = null;
+let lastRefreshTime = Date.now();
+
 // === INIT ===
 window.addEventListener('DOMContentLoaded', async () => {
   CacheManager.load();
@@ -193,6 +198,24 @@ window.addEventListener('DOMContentLoaded', async () => {
   initSearch();
   await loadAll();
 
+  // Spustit auto-refresh
+  startAutoRefresh();
+
+  // Inicializovat pull-to-refresh pro PWA
+  initPullToRefresh();
+
+  // Refresh pri navratu na stranku (tab visibility)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      const timeSinceLastRefresh = Date.now() - lastRefreshTime;
+      // Refresh pokud byl tab skryty dele nez 30 sekund
+      if (timeSinceLastRefresh > 30000) {
+        logger.log('[AutoRefresh] Tab aktivni - nacitam nova data...');
+        loadAll(ACTIVE_FILTER);
+      }
+    }
+  });
+
   // Zobrazit dialog pro povoleni notifikaci (po 3 sekundach)
   setTimeout(() => {
     if (window.WGSNotifikace && typeof window.WGSNotifikace.zobrazitDialogPovoleni === 'function') {
@@ -200,6 +223,126 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   }, 3000);
 });
+
+// === AUTO-REFRESH FUNKCE ===
+function startAutoRefresh() {
+  // Zastavit predchozi timer pokud existuje
+  if (autoRefreshTimer) {
+    clearInterval(autoRefreshTimer);
+  }
+
+  // Spustit novy timer
+  autoRefreshTimer = setInterval(async () => {
+    // Pouze refreshovat pokud je stranka viditelna
+    if (document.visibilityState === 'visible') {
+      logger.log('[AutoRefresh] Automaticka aktualizace dat...');
+      await loadAll(ACTIVE_FILTER);
+      lastRefreshTime = Date.now();
+    }
+  }, AUTO_REFRESH_INTERVAL);
+
+  logger.log(`[AutoRefresh] Spusten - interval ${AUTO_REFRESH_INTERVAL/1000}s`);
+}
+
+function stopAutoRefresh() {
+  if (autoRefreshTimer) {
+    clearInterval(autoRefreshTimer);
+    autoRefreshTimer = null;
+    logger.log('[AutoRefresh] Zastaven');
+  }
+}
+
+// === PULL TO REFRESH (PWA) ===
+let pullStartY = 0;
+let pullDistance = 0;
+let isPulling = false;
+const PULL_THRESHOLD = 80; // px pro aktivaci refreshe
+
+function initPullToRefresh() {
+  const container = document.getElementById('orderGrid');
+  if (!container) return;
+
+  // Vytvorit indikator
+  const indicator = document.createElement('div');
+  indicator.id = 'pullToRefreshIndicator';
+  indicator.innerHTML = 'Tahni pro obnoveni...';
+  indicator.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background: #222;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transform: translateY(-100%);
+    transition: transform 0.2s ease;
+    z-index: 9999;
+  `;
+  document.body.appendChild(indicator);
+
+  // Touch events
+  document.addEventListener('touchstart', (e) => {
+    // Pouze kdyz jsme na vrchu stranky
+    if (window.scrollY <= 0) {
+      pullStartY = e.touches[0].clientY;
+      isPulling = true;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isPulling || window.scrollY > 0) return;
+
+    const currentY = e.touches[0].clientY;
+    pullDistance = currentY - pullStartY;
+
+    // Pouze tazeni dolu
+    if (pullDistance > 0) {
+      const progress = Math.min(pullDistance / PULL_THRESHOLD, 1);
+      indicator.style.transform = `translateY(${-100 + (progress * 100)}%)`;
+
+      if (pullDistance >= PULL_THRESHOLD) {
+        indicator.innerHTML = 'Pust pro obnoveni';
+      } else {
+        indicator.innerHTML = 'Tahni pro obnoveni...';
+      }
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', async () => {
+    if (!isPulling) return;
+
+    if (pullDistance >= PULL_THRESHOLD) {
+      indicator.innerHTML = 'Nacitam...';
+      indicator.style.transform = 'translateY(0)';
+
+      // Refresh data
+      await loadAll(ACTIVE_FILTER);
+      lastRefreshTime = Date.now();
+
+      // Aktualizovat badge
+      if (window.WGSNotifikace) {
+        window.WGSNotifikace.aktualizovat();
+      }
+
+      logger.log('[PullToRefresh] Data obnovena');
+    }
+
+    // Reset
+    setTimeout(() => {
+      indicator.style.transform = 'translateY(-100%)';
+    }, 500);
+
+    pullStartY = 0;
+    pullDistance = 0;
+    isPulling = false;
+  }, { passive: true });
+
+  logger.log('[PullToRefresh] Inicializovan');
+}
 
 // === VYHLEDÁVÁNÍ ===
 function initSearch() {
@@ -348,6 +491,9 @@ async function loadAll(status = 'all', append = false) {
 
     // PAGINATION: Zobrazit/skrýt "Načíst další" tlačítko
     updateLoadMoreButton();
+
+    // Aktualizovat cas posledniho refreshe
+    lastRefreshTime = Date.now();
   } catch (err) {
     logger.error('Chyba:', err);
     WGS_DATA_CACHE = [];
@@ -482,10 +628,10 @@ async function renderOrders(items = null) {
           <div class="order-detail">
             <div class="order-detail-line">${highlightedAddress}</div>
             <div class="order-detail-line">${highlightedProduct}</div>
-            ${appointmentText ? `<div class="order-detail-line" style="color: #00d4ff; font-weight: 700; font-size: 0.55rem;">${appointmentText}</div>` : ''}
             <div class="order-detail-line" style="opacity: 0.6;">${date}</div>
           </div>
         </div>
+        ${appointmentText ? `<div class="order-footer"><div class="order-appointment">${appointmentText}</div></div>` : ''}
       </div>
     `;
   }).join('');
@@ -617,28 +763,28 @@ async function showDetail(recordOrId) {
     buttonsHtml = `
       <div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 0.75rem; margin-bottom: 1rem; border-radius: 4px;">
         <div style="text-align: center;">
-          <div style="font-size: 0.85rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem;">Zakázka dokončena</div>
+          <div style="font-size: 0.9rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem;">Zakázka dokončena</div>
           <div style="font-size: 0.75rem; color: #666;">Tato zakázka byla již vyřízena</div>
         </div>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; background: #333; color: white; font-weight: 600; font-size: 0.85rem;" data-action="reopenOrder" data-id="${record.id}">
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; background: #333; color: white; font-weight: 600; font-size: 0.9rem;" data-action="reopenOrder" data-id="${record.id}">
           Znovu otevřít
         </button>
 
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
 
       <div style="width: 100%; margin-top: 0.25rem;">
         ${record.original_reklamace_id ? `
           <!-- Zakázka je KLON - zobrazit Historie zákazníka + PDF REPORT -->
-          <button class="btn" style="background: #555; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; margin-bottom: 0.5rem;"
+          <button class="btn" style="background: #555; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; margin-bottom: 0.5rem;"
                   data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">
             📚 Historie zákazníka
           </button>
           ${record.documents && record.documents.length > 0 ? `
-            <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; font-weight: 600;"
+            <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; font-weight: 600;"
                     data-action="openPDF" data-url="${record.documents[0].file_path}">
               [Doc] PDF REPORT
             </button>
@@ -650,7 +796,7 @@ async function showDetail(recordOrId) {
         ` : `
           <!-- Původní zakázka - standardní PDF tlačítko -->
           ${record.documents && record.documents.length > 0 ? `
-            <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; font-weight: 600;"
+            <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; font-weight: 600;"
                     data-action="openPDF" data-url="${record.documents[0].file_path}">
               [Doc] PDF REPORT
             </button>
@@ -662,28 +808,28 @@ async function showDetail(recordOrId) {
         `}
       </div>
 
-        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="closeDetail">Zavřít</button>
+        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   } else {
     buttonsHtml = `
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
 
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
 
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
 
         ${record.original_reklamace_id ? `
           <!-- Nedokončená zakázka s historií - přidat Historie PDF -->
-          <button class="btn" style="background: #555; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;"
+          <button class="btn" style="background: #555; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;"
                   data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">
             📚 Historie PDF
           </button>
         ` : ''}
 
-        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="closeDetail">Zavřít</button>
+        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   }
@@ -1700,10 +1846,10 @@ function showContactMenu(id) {
       <div class="modal-section">
         <h3 class="section-title">Rychlé akce</h3>
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-          ${phone ? `<a href="tel:${phone}" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center; background: #1a1a1a; color: white;">Zavolat</a>` : ''}
-          <button class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; background: #1a1a1a; color: white;" onclick="closeDetail(); setTimeout(() => showCalendar('${id}'), 100)">Termín návštěvy</button>
-          ${phone ? `<button class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; background: #444; color: white;" onclick="sendContactAttemptEmail('${id}', '${phone}')">Odeslat SMS</button>` : ''}
-          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; text-decoration: none; display: block; text-align: center; background: #444; color: white;" target="_blank">Navigovat (Waze)</a>` : ''}
+          ${phone ? `<a href="tel:${phone}" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.9rem; text-decoration: none; display: block; text-align: center; background: #1a1a1a; color: white;">Zavolat</a>` : ''}
+          <button class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.9rem; background: #1a1a1a; color: white;" onclick="closeDetail(); setTimeout(() => showCalendar('${id}'), 100)">Termín návštěvy</button>
+          ${phone ? `<button class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.9rem; background: #444; color: white;" onclick="sendContactAttemptEmail('${id}', '${phone}')">Odeslat SMS</button>` : ''}
+          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.9rem; text-decoration: none; display: block; text-align: center; background: #444; color: white;" target="_blank">Navigovat (Waze)</a>` : ''}
         </div>
       </div>
     </div>
@@ -1837,45 +1983,45 @@ async function showCustomerDetail(id) {
 
       <!-- KOMPAKTNÍ INFO BLOK -->
       <div style="background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
-        <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; font-size: 0.85rem;">
+        <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; font-size: 0.9rem;">
           <span style="color: #666; font-weight: 600;">Číslo objednávky:</span>
-          <input type="text" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; background: white;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
+          <input type="text" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: white;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
 
           <span style="color: #666; font-weight: 600;">Zadavatel:</span>
-          <input type="text" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem; background: #f8f9fa;" value="${Utils.escapeHtml(zadavatel)}" readonly placeholder="Prodejce/Uživatel">
+          <input type="text" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #f8f9fa;" value="${Utils.escapeHtml(zadavatel)}" readonly placeholder="Prodejce/Uživatel">
 
           <span style="color: #666; font-weight: 600;">Číslo reklamace:</span>
-          <input type="text" id="edit_cislo" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${Utils.escapeHtml(cislo)}">
+          <input type="text" id="edit_cislo" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${Utils.escapeHtml(cislo)}">
 
           <span style="color: #666; font-weight: 600;">Fakturace:</span>
           <span style="color: #1a1a1a; font-weight: 600; padding: 0.25rem 0;">${fakturace_firma.toUpperCase() === 'SK' ? 'Slovensko (SK)' : 'Česká republika (CZ)'}</span>
 
           <span style="color: #666; font-weight: 600;">Datum prodeje:</span>
-          <input type="text" id="edit_datum_prodeje" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${Utils.escapeHtml(datum_prodeje)}" placeholder="DD.MM.RRRR">
+          <input type="text" id="edit_datum_prodeje" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${Utils.escapeHtml(datum_prodeje)}" placeholder="DD.MM.RRRR">
 
           <span style="color: #666; font-weight: 600;">Datum reklamace:</span>
-          <input type="text" id="edit_datum_reklamace" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${Utils.escapeHtml(datum_reklamace)}" placeholder="DD.MM.RRRR">
+          <input type="text" id="edit_datum_reklamace" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${Utils.escapeHtml(datum_reklamace)}" placeholder="DD.MM.RRRR">
 
           <span style="color: #666; font-weight: 600;">Jméno:</span>
-          <input type="text" id="edit_jmeno" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${customerName}">
+          <input type="text" id="edit_jmeno" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${customerName}">
 
           <span style="color: #666; font-weight: 600;">Telefon:</span>
-          <input type="tel" id="edit_telefon" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${phone}">
+          <input type="tel" id="edit_telefon" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${phone}">
 
           <span style="color: #666; font-weight: 600;">Email:</span>
-          <input type="email" id="edit_email" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${email}">
+          <input type="email" id="edit_email" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${email}">
 
           <span style="color: #666; font-weight: 600;">Adresa:</span>
-          <input type="text" id="edit_adresa" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${address}">
+          <input type="text" id="edit_adresa" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${address}">
 
           <span style="color: #666; font-weight: 600;">Model:</span>
-          <input type="text" id="edit_model" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${product}">
+          <input type="text" id="edit_model" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${product}">
 
           <span style="color: #666; font-weight: 600;">Provedení:</span>
-          <input type="text" id="edit_provedeni" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${Utils.escapeHtml(provedeni)}" placeholder="Látka / Kůže">
+          <input type="text" id="edit_provedeni" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${Utils.escapeHtml(provedeni)}" placeholder="Látka / Kůže">
 
           <span style="color: #666; font-weight: 600;">Barva:</span>
-          <input type="text" id="edit_barva" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;" value="${Utils.escapeHtml(barva)}">
+          <input type="text" id="edit_barva" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${Utils.escapeHtml(barva)}">
         </div>
       </div>
 
@@ -1883,7 +2029,7 @@ async function showCustomerDetail(id) {
       <div style="margin-bottom: 1rem;">
         <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace od prodejce:</label>
         <div onclick="showTextOverlay('doplnujici_info')"
-             style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem; min-height: 50px; background: white; cursor: pointer; white-space: pre-wrap; color: ${doplnujici_info ? '#1a1a1a' : '#999'};">
+             style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 50px; background: white; cursor: pointer; white-space: pre-wrap; color: ${doplnujici_info ? '#1a1a1a' : '#999'};">
           ${doplnujici_info || 'Klikněte pro zobrazení/zadání doplňujících informací od prodejce'}
         </div>
       </div>
@@ -1892,7 +2038,7 @@ async function showCustomerDetail(id) {
       <div style="margin-bottom: 2rem;">
         <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému od zákazníka:</label>
         <div onclick="showTextOverlay('popis_problemu')"
-             style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.85rem; min-height: 60px; background: white; cursor: pointer; white-space: pre-wrap; color: ${description ? '#1a1a1a' : '#999'};">
+             style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 60px; background: white; cursor: pointer; white-space: pre-wrap; color: ${description ? '#1a1a1a' : '#999'};">
           ${description || 'Klikněte pro zobrazení/zadání popisu problému od zákazníka'}
         </div>
       </div>
@@ -1951,7 +2097,7 @@ async function showCustomerDetail(id) {
             <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF Report:</label>
             <button data-action="openPDF"
                     data-url="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}"
-                    style="width: 100%; padding: 0.75rem; background: #333333; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer; font-weight: 600;">
+                    style="width: 100%; padding: 0.75rem; background: #333333; color: white; border: none; border-radius: 4px; font-size: 0.9rem; cursor: pointer; font-weight: 600;">
               Otevřít PDF Report
             </button>
           </div>
@@ -1962,7 +2108,7 @@ async function showCustomerDetail(id) {
         <div style="border-top: 1px solid #e0e0e0; padding-top: 1rem; margin-top: 1rem;">
           <button data-action="deleteReklamace"
                   data-id="${id}"
-                  style="width: 100%; padding: 0.5rem; background: #dc3545; color: white; border: none; border-radius: 3px; font-size: 0.85rem; cursor: pointer; font-weight: 600;">
+                  style="width: 100%; padding: 0.5rem; background: #dc3545; color: white; border: none; border-radius: 3px; font-size: 0.9rem; cursor: pointer; font-weight: 600;">
             Smazat reklamaci
           </button>
           <p style="font-size: 0.7rem; color: #999; margin-top: 0.25rem; text-align: center;">Smaže vše včetně fotek a PDF</p>
@@ -2024,7 +2170,7 @@ function showTextOverlay(fieldName) {
   buttonRow.style.cssText = 'display: flex; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid #dee2e6;';
 
   const saveBtn = document.createElement('button');
-  saveBtn.style.cssText = 'flex: 1; padding: 0.5rem 1rem; background: #1a1a1a; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer; font-weight: 600;';
+  saveBtn.style.cssText = 'flex: 1; padding: 0.5rem 1rem; background: #1a1a1a; color: white; border: none; border-radius: 4px; font-size: 0.9rem; cursor: pointer; font-weight: 600;';
   saveBtn.textContent = t('save_changes');
   saveBtn.onclick = async () => {
     const newValue = textarea.value;
@@ -2064,7 +2210,7 @@ function showTextOverlay(fieldName) {
   };
 
   const cancelBtn = document.createElement('button');
-  cancelBtn.style.cssText = 'flex: 1; padding: 0.5rem 1rem; background: #666; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer;';
+  cancelBtn.style.cssText = 'flex: 1; padding: 0.5rem 1rem; background: #666; color: white; border: none; border-radius: 4px; font-size: 0.9rem; cursor: pointer;';
   cancelBtn.textContent = t('cancel');
   cancelBtn.onclick = () => overlay.remove();
 
@@ -2113,6 +2259,13 @@ async function sendAppointmentConfirmation(customer, date, time) {
   const phone = customer.telefon || '';
   const email = customer.email || '';
   const orderId = Utils.getOrderId(customer);
+  const address = Utils.getAddress(customer) || '';
+  const product = customer.nazev_produktu || customer.produkt || customer.popis_produktu || '';
+
+  // Data technika
+  const technikJmeno = customer.technik_jmeno || customer.assigned_technician || '';
+  const technikEmail = customer.technik_email || '';
+  const technikTelefon = customer.technik_telefon || '';
 
   try {
     // Get CSRF token
@@ -2127,10 +2280,16 @@ async function sendAppointmentConfirmation(customer, date, time) {
         data: {
           customer_name: customerName,
           customer_email: email,
+          customer_phone: phone,
           seller_email: "admin@wgs-service.cz",
           date: date,
           time: time,
-          order_id: orderId
+          order_id: orderId,
+          address: address,
+          product: product,
+          technician_name: technikJmeno,
+          technician_email: technikEmail,
+          technician_phone: technikTelefon
         }
       })
     });
@@ -2705,7 +2864,7 @@ async function pokracovatSmazaniFotky(photoId, photoUrl) {
           const fotoContainer = fotkyNadpis.closest('div');
           const grid = fotoContainer.querySelector('[style*="grid"]');
           if (grid) {
-            grid.innerHTML = `<p style="color: var(--c-grey); text-align: center; padding: 1rem; font-size: 0.85rem;">${t('no_photos')}</p>`;
+            grid.innerHTML = `<p style="color: var(--c-grey); text-align: center; padding: 1rem; font-size: 0.9rem;">${t('no_photos')}</p>`;
           }
         }
       }

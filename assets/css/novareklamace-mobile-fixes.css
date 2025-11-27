@@ -2,10 +2,14 @@
  * NOVAREKLAMACE-MOBILE-FIXES.CSS
  * PWA Responsive Opravy pro novareklamace.php
  * Datum: 2025-11-22
+ * Updated: 2025-11-27 - Přidán import button-fixes-global.css
  *
  * Tyto styly se načítají NAVÍC k novareklamace.css
  * a opravují kritické iOS a touch target problémy.
  */
+
+/* Import globálních oprav tlačítek */
+@import url('button-fixes-global.css');
 
 @media (max-width: 768px) {
   /* ========================================================================

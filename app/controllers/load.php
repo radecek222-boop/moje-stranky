@@ -120,9 +120,13 @@ try {
         SELECT
             r.*,
             r.id as claim_id,
-            u.name as created_by_name
+            u.name as created_by_name,
+            t.name as technik_jmeno,
+            t.email as technik_email,
+            t.phone as technik_telefon
         FROM wgs_reklamace r
         LEFT JOIN wgs_users u ON r.created_by = u.id
+        LEFT JOIN wgs_users t ON r.assigned_to = t.id
         $whereClause
         ORDER BY r.created_at DESC
         LIMIT :limit OFFSET :offset

@@ -165,9 +165,13 @@ try {
         '{{reopened_by}}' => $notificationData['reopened_by'] ?? '',
         '{{reopened_at}}' => $notificationData['reopened_at'] ?? '',
         '{{technician_name}}' => $notificationData['technician_name'] ?? '',
+        '{{technician_email}}' => $notificationData['technician_email'] ?? '',
+        '{{technician_phone}}' => $notificationData['technician_phone'] ?? '',
         '{{seller_name}}' => $notificationData['seller_name'] ?? '',
         '{{created_at}}' => $notificationData['created_at'] ?? date('d.m.Y H:i'),
         '{{completed_at}}' => $notificationData['completed_at'] ?? '',
+        '{{company_email}}' => 'reklamace@wgs-service.cz',
+        '{{company_phone}}' => '+420 777 888 999',
     ];
 
     // Replace variables in subject and message

@@ -461,6 +461,97 @@ button[onclick*="history.back"] {
 }
 
 /* ============================================
+   POZNÁMKY V MODÁLECH - Notes styling
+   ============================================ */
+
+/* Kontejner poznámek */
+.modal-body .notes-container,
+.modal-content .notes-container {
+    background: transparent !important;
+}
+
+/* Jednotlivé poznámky - tmavé pozadí */
+.modal-body .note-item,
+.modal-content .note-item {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px;
+}
+
+/* Nepřečtené poznámky */
+.modal-body .note-item.unread,
+.modal-content .note-item.unread {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-left: 4px solid #999 !important;
+}
+
+/* Header poznámky */
+.modal-body .note-header,
+.modal-content .note-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+/* Autor poznámky - světlý text */
+.modal-body .note-author,
+.modal-content .note-author {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* Čas poznámky - šedý text */
+.modal-body .note-time,
+.modal-content .note-time {
+    color: #888888 !important;
+    font-size: 0.85rem;
+}
+
+/* Text poznámky - světle šedý */
+.modal-body .note-text,
+.modal-content .note-text {
+    color: #cccccc !important;
+    line-height: 1.6;
+}
+
+/* Prázdné poznámky */
+.modal-body .empty-notes,
+.modal-content .empty-notes {
+    color: #666666 !important;
+    font-style: italic;
+    text-align: center;
+    padding: 2rem;
+}
+
+/* Textarea pro novou poznámku */
+.modal-body .note-textarea,
+.modal-content .note-textarea {
+    background: #2a2a2a !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 6px;
+}
+
+.modal-body .note-textarea::placeholder,
+.modal-content .note-textarea::placeholder {
+    color: #666666 !important;
+}
+
+.modal-body .note-textarea:focus,
+.modal-content .note-textarea:focus {
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    outline: none;
+}
+
+/* Input area pro poznámky */
+.modal-body .note-input-area,
+.modal-content .note-input-area {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================
    RESPONSIVE - Mobilní zařízení
    ============================================ */
 

@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/reklamace_id_validator.php';
+require_once __DIR__ . '/../includes/WebPush.php';
 
 header('Content-Type: application/json');
 
@@ -165,6 +166,60 @@ try {
             ]);
 
             $noteId = $pdo->lastInsertId();
+
+            // ========================================
+            // PUSH NOTIFIKACE - Odeslat relevantním uživatelům
+            // ========================================
+            try {
+                $webPush = new WGSWebPush($pdo);
+
+                if ($webPush->jeInicializovano()) {
+                    // Načíst info o reklamaci pro notifikaci
+                    $stmtInfo = $pdo->prepare("
+                        SELECT r.reklamace_id, r.jmeno, r.cislo, u.email as technik_email
+                        FROM wgs_reklamace r
+                        LEFT JOIN wgs_users u ON r.technik_id = u.user_id
+                        WHERE r.id = :id
+                    ");
+                    $stmtInfo->execute([':id' => $claimId]);
+                    $infoReklamace = $stmtInfo->fetch(PDO::FETCH_ASSOC);
+
+                    // Sestavit payload
+                    $payload = [
+                        'title' => 'Nova poznamka',
+                        'body' => 'Zakazka ' . ($infoReklamace['cislo'] ?? $infoReklamace['reklamace_id']) . ' - ' . ($infoReklamace['jmeno'] ?? 'bez jmena'),
+                        'icon' => '/icon192.png',
+                        'tag' => 'wgs-note-' . $noteId,
+                        'typ' => 'nova_poznamka',
+                        'data' => [
+                            'claim_id' => $claimId,
+                            'reklamace_id' => $infoReklamace['reklamace_id'] ?? null,
+                            'note_id' => $noteId,
+                            'url' => '/seznam.php?highlight=' . $claimId
+                        ]
+                    ];
+
+                    // Odeslat všem (kromě autora poznámky)
+                    // TODO: V budoucnu filtrovat podle oprávnění
+                    $stmtSubs = $pdo->prepare("
+                        SELECT ps.id, ps.endpoint, ps.p256dh, ps.auth, u.email
+                        FROM wgs_push_subscriptions ps
+                        LEFT JOIN wgs_users u ON ps.user_id = u.user_id
+                        WHERE ps.aktivni = 1
+                          AND (u.email IS NULL OR u.email != :author_email)
+                    ");
+                    $stmtSubs->execute([':author_email' => $createdBy]);
+                    $subscriptions = $stmtSubs->fetchAll(PDO::FETCH_ASSOC);
+
+                    if (!empty($subscriptions)) {
+                        $vysledek = $webPush->odeslatVice($subscriptions, $payload);
+                        error_log('[Notes] Push odeslano: ' . json_encode($vysledek));
+                    }
+                }
+            } catch (Exception $pushError) {
+                // Push chyby neblokuji přidání poznámky
+                error_log('[Notes] Push chyba: ' . $pushError->getMessage());
+            }
 
             echo json_encode([
                 'status' => 'success',
