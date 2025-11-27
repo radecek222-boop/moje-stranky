@@ -24,13 +24,7 @@
     "autoload": {
         "psr-4": {
             "WGS\\": "app/"
-        },
-        "files": [
-            "config/config.php",
-            "includes/csrf_helper.php",
-            "includes/api_response.php",
-            "includes/db_metadata.php"
-        ]
+        }
     },
     "autoload-dev": {
         "psr-4": {
