@@ -100,7 +100,7 @@ try {
         logMessage("Sablona 'appointment_reminder' neni v databazi - pouzivam fallback");
         $template = [
             'subject' => 'Pripominka: Zitrejsi navsteva technika - WGS Service',
-            'template' => "Dobry den {{customer_name}},\n\npripominame Vam zitrejsi navstevu technika WGS Service.\n\nTermin: {{date}} v {{time}}\nAdresa: {{address}}\nTechnik: {{technician_name}}, tel. {{technician_phone}}\n\nV pripade potreby zmeny terminu nas kontaktujte.\n\nS pozdravem,\nWGS Service\nTel: +420 725 965 826\nEmail: reklamace@wgs-service.cz"
+            'template' => "Dobry den {{customer_name}},\n\npripominame Vam zitrejsi navstevu technika WGS Service.\n\nTermin: {{date}} v {{time}}\nAdresa: {{address}}\nTechnik: {{technician_name}}, tel. {{technician_phone}}\n\nDULEZITE: Prosime, pripravte nabytek pred prichodem technika. Odstrante z nej vsechny osobni veci a luzkoviny, aby technik mohl bez prekazek provest servisni zasah.\n\nV pripade potreby zmeny terminu nas kontaktujte.\n\nS pozdravem,\nWGS Service\nTel: +420 725 965 826\nEmail: reklamace@wgs-service.cz"
         ];
     }
 

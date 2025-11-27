@@ -74,7 +74,7 @@ try {
             'recipient_type' => 'customer',
             'type' => 'sms',
             'subject' => 'Termin navstevy - WGS Service',
-            'template' => 'Dobry den {{customer_name}}, potvrzujeme termin navstevy na {{date}} v {{time}}. Adresa: {{address}}. Technik: {{technician_name}}, tel. {{technician_phone}}. WGS Service',
+            'template' => 'Dobry den {{customer_name}}, potvrzujeme termin navstevy na {{date}} v {{time}}. Adresa: {{address}}. Technik: {{technician_name}}, tel. {{technician_phone}}. Prosime, pripravte nabytek - odstrante z nej osobni veci a luzkoviny. WGS Service',
             'active' => 1
         ],
         [
@@ -84,7 +84,7 @@ try {
             'recipient_type' => 'customer',
             'type' => 'sms',
             'subject' => 'Pripominka - WGS Service',
-            'template' => 'Dobry den {{customer_name}}, pripominame zitrejsi navstevu technika WGS Service. Termin: {{date}} v {{time}}. V pripade zmeny volejte {{technician_phone}}. Dekujeme.',
+            'template' => 'Dobry den {{customer_name}}, pripominame zitrejsi navstevu technika WGS Service. Termin: {{date}} v {{time}}. Prosime, pripravte nabytek - odstrante osobni veci a luzkoviny. V pripade zmeny volejte {{technician_phone}}. Dekujeme.',
             'active' => 1
         ],
         [
@@ -136,6 +136,11 @@ try {
             $pridano = 0;
             $preskoceno = 0;
 
+            // Zjistit aktualni max ID
+            $stmtMaxId = $pdo->query("SELECT COALESCE(MAX(id), 0) as max_id FROM wgs_notifications");
+            $maxIdRow = $stmtMaxId->fetch(PDO::FETCH_ASSOC);
+            $nextId = (int)$maxIdRow['max_id'] + 1;
+
             foreach ($smsSablony as $sablona) {
                 // Kontrola jestli už existuje
                 $stmt = $pdo->prepare("SELECT id FROM wgs_notifications WHERE name = :name");
@@ -147,15 +152,16 @@ try {
                     continue;
                 }
 
-                // Vložit novou šablonu
+                // Vložit novou šablonu s explicitním ID
                 $stmt = $pdo->prepare("
                     INSERT INTO wgs_notifications
-                    (name, description, trigger_event, recipient_type, type, subject, template, active, created_at, updated_at)
+                    (id, name, description, trigger_event, recipient_type, type, subject, template, active, created_at, updated_at)
                     VALUES
-                    (:name, :description, :trigger_event, :recipient_type, :type, :subject, :template, :active, NOW(), NOW())
+                    (:id, :name, :description, :trigger_event, :recipient_type, :type, :subject, :template, :active, NOW(), NOW())
                 ");
 
                 $stmt->execute([
+                    'id' => $nextId,
                     'name' => $sablona['name'],
                     'description' => $sablona['description'],
                     'trigger_event' => $sablona['trigger_event'],
@@ -166,6 +172,7 @@ try {
                     'active' => $sablona['active']
                 ]);
 
+                $nextId++;
                 $pridano++;
                 echo "<div class='success'>Pridana sablona: " . htmlspecialchars($sablona['name']) . "</div>";
             }
