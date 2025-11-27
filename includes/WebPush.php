@@ -58,13 +58,13 @@ class WGSWebPush {
             // - Hosting blokuje vlastni CA soubory (error 77)
             // Proto docasne vypneme SSL verifikaci (funguje - testovano)
             // TODO: Kontaktovat hosting pro opravu SSL/CA konfigurace
+            //
+            // Minishlink/WebPush pouziva Guzzle HTTP klient, ne prime cURL
+            // Proto pouzivame Guzzle options (verify => false)
             $defaultOptions = [
-                'curl' => [
-                    CURLOPT_SSL_VERIFYPEER => false,
-                    CURLOPT_SSL_VERIFYHOST => 0,
-                ],
+                'verify' => false,  // Guzzle option pro vypnuti SSL verifikace
             ];
-            error_log('[WebPush] VAROVANI: SSL verifikace vypnuta kvuli omezeni hostingu');
+            error_log('[WebPush] VAROVANI: SSL verifikace vypnuta kvuli omezeni hostingu (Guzzle verify=false)');
 
             $this->webPush = new \Minishlink\WebPush\WebPush($auth, $defaultOptions);
             $this->webPush->setReuseVAPIDHeaders(true);
