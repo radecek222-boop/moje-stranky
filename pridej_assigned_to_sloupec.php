@@ -29,25 +29,25 @@ echo "<!DOCTYPE html>
                      box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         h1 { color: #333; border-bottom: 3px solid #333;
              padding-bottom: 10px; margin-top: 0; }
-        .success { background: #d4edda; border: 1px solid #c3e6cb;
-                   color: #155724; padding: 15px; border-radius: 5px;
+        .success { background: #e8e8e8; border: 1px solid #ccc;
+                   color: #222; padding: 15px; border-radius: 5px;
                    margin: 15px 0; }
-        .error { background: #f8d7da; border: 1px solid #f5c6cb;
-                 color: #721c24; padding: 15px; border-radius: 5px;
+        .error { background: #f5f5f5; border: 2px solid #333;
+                 color: #222; padding: 15px; border-radius: 5px;
                  margin: 15px 0; }
-        .warning { background: #fff3cd; border: 1px solid #ffeaa7;
-                   color: #856404; padding: 15px; border-radius: 5px;
+        .warning { background: #fafafa; border-left: 4px solid #666;
+                   color: #333; padding: 15px; border-radius: 0 5px 5px 0;
                    margin: 15px 0; }
-        .info { background: #d1ecf1; border: 1px solid #bee5eb;
-                color: #0c5460; padding: 15px; border-radius: 5px;
+        .info { background: #f9f9f9; border: 1px solid #ddd;
+                color: #444; padding: 15px; border-radius: 5px;
                 margin: 15px 0; }
         .btn { display: inline-block; padding: 12px 24px;
                background: #333; color: white; text-decoration: none;
                border-radius: 5px; margin: 10px 5px 10px 0;
                border: none; cursor: pointer; font-size: 1rem; }
         .btn:hover { background: #555; }
-        .btn-success { background: #28a745; }
-        .btn-success:hover { background: #218838; }
+        .btn-secondary { background: #777; }
+        .btn-secondary:hover { background: #999; }
         pre { background: #1a1a1a; color: #eee; padding: 15px;
               border-radius: 5px; overflow-x: auto; }
         code { background: #eee; padding: 2px 6px; border-radius: 3px; }
@@ -61,20 +61,23 @@ echo "<h1>Migrace: Pridani sloupce assigned_to</h1>";
 try {
     $pdo = getDbConnection();
 
-    // Kontrola zda sloupec jiz existuje
+    // Kontrola zda sloupec jiz existuje pomoci SHOW COLUMNS
     echo "<div class='info'>Kontroluji zda sloupec <code>assigned_to</code> jiz existuje...</div>";
 
-    $columns = db_get_table_columns($pdo, 'wgs_reklamace');
+    $checkStmt = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'assigned_to'");
+    $sloupcekExistuje = $checkStmt->rowCount() > 0;
 
-    if (in_array('assigned_to', $columns)) {
+    if ($sloupcekExistuje) {
         echo "<div class='success'>";
         echo "<strong>Sloupec <code>assigned_to</code> jiz existuje!</strong><br>";
         echo "Migrace neni potreba. Tabulka je v poradku.";
         echo "</div>";
 
+        // Zobrazit info o indexu
+        $indexStmt = $pdo->query("SHOW INDEX FROM wgs_reklamace WHERE Key_name = 'idx_assigned_to'");
+        $indexExistuje = $indexStmt->rowCount() > 0;
         echo "<div class='info'>";
-        echo "<strong>Aktualni sloupce v tabulce wgs_reklamace:</strong><br>";
-        echo implode(', ', $columns);
+        echo "Index <code>idx_assigned_to</code>: " . ($indexExistuje ? "Existuje" : "Neexistuje");
         echo "</div>";
 
     } else {
@@ -142,8 +145,8 @@ AFTER created_by;
 ALTER TABLE wgs_reklamace ADD INDEX idx_assigned_to (assigned_to);</pre>";
 
             echo "<p>";
-            echo "<a href='?execute=1' class='btn btn-success'>SPUSTIT MIGRACI</a>";
-            echo "<a href='/admin.php' class='btn'>Zrusit</a>";
+            echo "<a href='?execute=1' class='btn'>SPUSTIT MIGRACI</a>";
+            echo "<a href='/admin.php' class='btn btn-secondary'>Zrusit</a>";
             echo "</p>";
         }
     }
