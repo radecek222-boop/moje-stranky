@@ -304,9 +304,12 @@ if (!$isLoggedIn && !$isAdmin) {
     padding-bottom: 0.05rem !important;
   }
 
-  .order-number {
+  .order-number,
+  .order-detail-line {
+    font-family: 'Poppins', sans-serif !important;
     font-size: 0.6rem !important;
-    font-weight: 600 !important;
+    font-weight: 500 !important;
+    line-height: 1.2 !important;
   }
 
   .order-status {
@@ -326,6 +329,7 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 
   .order-customer {
+    font-family: 'Poppins', sans-serif !important;
     font-size: 0.65rem !important;
     font-weight: 600 !important;
     margin-bottom: 0.05rem !important;
@@ -333,11 +337,6 @@ if (!$isLoggedIn && !$isAdmin) {
 
   .order-detail {
     gap: 0.02rem !important;
-  }
-
-  .order-detail-line {
-    font-size: 0.6rem !important;
-    line-height: 1.1 !important;
   }
 
   /* Grid - menší mezery mezi kartami */
@@ -360,8 +359,10 @@ if (!$isLoggedIn && !$isAdmin) {
     padding-bottom: 0.03rem !important;
   }
 
-  .order-number {
+  .order-number,
+  .order-detail-line {
     font-size: 0.55rem !important;
+    line-height: 1.1 !important;
   }
 
   .order-body {
@@ -375,11 +376,6 @@ if (!$isLoggedIn && !$isAdmin) {
 
   .order-detail {
     gap: 0.01rem !important;
-  }
-
-  .order-detail-line {
-    font-size: 0.55rem !important;
-    line-height: 1.05 !important;
   }
 
   .order-grid,
