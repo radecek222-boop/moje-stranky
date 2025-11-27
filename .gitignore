@@ -34,6 +34,9 @@ Thumbs.db
 vendor/
 node_modules/
 
+# CA Certificate bundle (download via: wget https://curl.se/ca/cacert.pem)
+cacert.pem
+
 # Logs
 *.log
 logs/
