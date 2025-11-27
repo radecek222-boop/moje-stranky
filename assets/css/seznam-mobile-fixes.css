@@ -183,15 +183,16 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  gap: 0.5rem;
 }
 
-/* Termín - větší písmo, levý dolní roh */
+/* Termín - menší písmo, stejné jako jméno zákazníka */
 .order-appointment {
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 500;
   color: #1a1a1a;
   background: rgba(0, 0, 0, 0.05);
-  padding: 0.3rem 0.6rem;
+  padding: 0.2rem 0.5rem;
   border-radius: 4px;
   white-space: nowrap;
   overflow: hidden;
@@ -199,11 +200,39 @@
   max-width: 100%;
 }
 
-/* Mobilní zobrazení - ještě větší písmo */
+/* Stav zakázky ve footeru */
+.order-status-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.order-status-text.status-wait {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.order-status-text.status-open {
+  background: #e8e8e8;
+  color: #333;
+}
+
+.order-status-text.status-done {
+  background: #d0d0d0;
+  color: #000;
+}
+
+/* Mobilní zobrazení */
 @media (max-width: 768px) {
   .order-appointment {
-    font-size: 1rem;
-    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .order-status-text {
+    font-size: 0.7rem;
   }
 }
 
