@@ -411,6 +411,7 @@ class WGSWebPush {
                     SET p256dh = :p256dh,
                         auth = :auth,
                         user_id = :user_id,
+                        email = :email,
                         user_agent = :user_agent,
                         platforma = :platforma,
                         aktivni = 1,
@@ -423,6 +424,7 @@ class WGSWebPush {
                     'p256dh' => $p256dh,
                     'auth' => $auth,
                     'user_id' => $data['user_id'] ?? null,
+                    'email' => $data['email'] ?? null,
                     'user_agent' => $data['user_agent'] ?? null,
                     'platforma' => $data['platforma'] ?? $this->detekujPlatformu($data['user_agent'] ?? ''),
                     'endpoint' => $endpoint
@@ -434,9 +436,9 @@ class WGSWebPush {
                 // Vlozit novou
                 $stmt = $this->pdo->prepare("
                     INSERT INTO wgs_push_subscriptions
-                    (endpoint, p256dh, auth, user_id, user_agent, platforma, aktivni)
+                    (endpoint, p256dh, auth, user_id, email, user_agent, platforma, aktivni)
                     VALUES
-                    (:endpoint, :p256dh, :auth, :user_id, :user_agent, :platforma, 1)
+                    (:endpoint, :p256dh, :auth, :user_id, :email, :user_agent, :platforma, 1)
                 ");
 
                 $stmt->execute([
@@ -444,6 +446,7 @@ class WGSWebPush {
                     'p256dh' => $p256dh,
                     'auth' => $auth,
                     'user_id' => $data['user_id'] ?? null,
+                    'email' => $data['email'] ?? null,
                     'user_agent' => $data['user_agent'] ?? null,
                     'platforma' => $data['platforma'] ?? $this->detekujPlatformu($data['user_agent'] ?? '')
                 ]);
