@@ -368,7 +368,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     </div>
     <?php endif; ?>
     
-    <!-- ✅ FIX M-4: Přidat action attribute pro fallback (pokud JS selže) -->
+    <!-- FIX M-4: Pridat action attribute pro fallback (pokud JS selze) -->
     <form id="reklamaceForm" action="app/controllers/save.php" method="POST">
 
       <!-- PANEL PRO NAHRÁNÍ POVĚŘENÍ - pouze pro přihlášené uživatele -->
@@ -629,6 +629,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 <script src="assets/js/csrf-auto-inject.js" defer></script>
 <script src="assets/js/novareklamace.min.js?v=1762458261" defer></script>
 
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 <?php renderHeatmapTracker(); ?>
 </body>
 </html>

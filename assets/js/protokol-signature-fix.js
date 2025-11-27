@@ -3,7 +3,7 @@
  * Tento patch zajišťuje, že signaturePad je dostupný globálně
  */
 (function() {
-  console.log('🔧 Protokol Signature Fix - Inicializace...');
+  console.log('[Fix] Protokol Signature Fix - Inicializace...');
 
   // Počkat na inicializaci signature padu
   const maxAttempts = 50; // 5 sekund (50 × 100ms)
@@ -16,17 +16,17 @@
     const canvas = document.getElementById('signature-pad');
 
     if (!canvas) {
-      console.warn('⚠️ Canvas #signature-pad ještě neexistuje');
+      console.warn('Canvas #signature-pad ještě neexistuje');
       if (attempts >= maxAttempts) {
         clearInterval(checkInterval);
-        console.error('❌ Canvas #signature-pad nenalezen po 5 sekundách');
+        console.error('Canvas #signature-pad nenalezen po 5 sekundách');
       }
       return;
     }
 
     // Zkontrolovat, jestli už signaturePad existuje v window
     if (window.signaturePad && typeof window.signaturePad.clear === 'function') {
-      console.log('✅ window.signaturePad již existuje');
+      console.log('window.signaturePad již existuje');
       clearInterval(checkInterval);
       return;
     }
@@ -76,13 +76,13 @@
         backgroundColor: 'white'
       });
 
-      console.log('✅ SignaturePad vytvořen a uložen do window.signaturePad');
+      console.log('SignaturePad vytvořen a uložen do window.signaturePad');
       clearInterval(checkInterval);
     } else {
-      console.warn('⚠️ SignaturePad class ještě není dostupná');
+      console.warn('SignaturePad class ještě není dostupná');
       if (attempts >= maxAttempts) {
         clearInterval(checkInterval);
-        console.error('❌ SignaturePad class nenalezena po 5 sekundách');
+        console.error('SignaturePad class nenalezena po 5 sekundách');
       }
     }
   }, 100); // Kontrolovat každých 100ms

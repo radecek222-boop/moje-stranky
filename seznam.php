@@ -63,7 +63,7 @@ if (!$isLoggedIn && !$isAdmin) {
   margin-top: 2rem !important;
 }
 
-/* 📱 MOBILNÍ OPTIMALIZACE SEARCH BAR */
+/* MOBILNÍ OPTIMALIZACE SEARCH BAR */
 @media (max-width: 768px) {
   .search-bar {
     padding: 0.15rem 0.4rem !important;
@@ -134,7 +134,7 @@ if (!$isLoggedIn && !$isAdmin) {
   100% { transform: rotate(360deg); }
 }
 
-/* ✅ PAGINATION FIX: Load More Button */
+/* PAGINATION FIX: Load More Button */
 .load-more-btn {
   display: block;
   margin: 2rem auto;
@@ -167,7 +167,7 @@ if (!$isLoggedIn && !$isAdmin) {
   opacity: 0.6;
 }
 
-/* ✅ MAZÁNÍ FOTEK: Křížek na miniatuře */
+/* MAZÁNÍ FOTEK: Křížek na miniatuře */
 .foto-wrapper {
   position: relative;
 }
@@ -209,7 +209,7 @@ if (!$isLoggedIn && !$isAdmin) {
   opacity: 1;
 }
 
-/* ✅ MINIMALISTICKÝ REDESIGN: Zmenšení info panelů a nadpisů */
+/* MINIMALISTICKÝ REDESIGN: Zmenšení info panelů a nadpisů */
 .info-grid {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -255,7 +255,7 @@ if (!$isLoggedIn && !$isAdmin) {
   padding: 0.75rem 1rem !important;
 }
 
-/* ✅ POSUN MODALU OD HEADERU */
+/* POSUN MODALU OD HEADERU */
 .modal-overlay {
   padding-top: 3rem !important;
 }
@@ -290,7 +290,7 @@ if (!$isLoggedIn && !$isAdmin) {
   background: rgba(76, 175, 80, 0.12) !important;
 }
 
-/* 📱 MOBILNÍ OPTIMALIZACE KARET ZÁKAZNÍKŮ */
+/* MOBILNÍ OPTIMALIZACE KARET ZÁKAZNÍKŮ */
 @media (max-width: 768px) {
   /* Karty zákazníků - kompaktní pro zobrazení více karet (50% menší) */
   .order-box {
@@ -348,7 +348,7 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 }
 
-/* 📱 Extra malé displeje - ještě kompaktnější (50% menší) */
+/* Extra malé displeje - ještě kompaktnější (50% menší) */
 @media (max-width: 480px) {
   .order-box {
     padding: 0.25rem !important;
@@ -389,7 +389,7 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 }
 
-/* 📱 MOBILNÍ OPTIMALIZACE FILTER TLAČÍTEK (větší o 50% pro lepší klikání) */
+/* MOBILNÍ OPTIMALIZACE FILTER TLAČÍTEK (větší o 50% pro lepší klikání) */
 @media (max-width: 768px) {
   /* Filter bar - stack filters */
   .filter-bar {
@@ -425,7 +425,7 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 }
 
-/* 📱 MOBILNÍ OPTIMALIZACE KALENDÁŘE A PANELŮ */
+/* MOBILNÍ OPTIMALIZACE KALENDÁŘE A PANELŮ */
 @media (max-width: 768px) {
   /* Modal title - "Vyberte termín návštěvy" menší pro mobil */
   .modal-title {
@@ -516,7 +516,7 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 }
 
-/* 📱 Ještě menší displeje - ultra kompaktní */
+/* Ještě menší displeje - ultra kompaktní */
 @media (max-width: 480px) {
   .modal-title {
     font-size: 0.8rem !important;
@@ -540,7 +540,7 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 }
 
-/* 📱 DETAIL ZÁKAZNÍKA - MOBILNÍ OPTIMALIZACE */
+/* DETAIL ZÁKAZNÍKA - MOBILNÍ OPTIMALIZACE */
 @media (max-width: 768px) {
   /* Grid v detailu zákazníka - jednoduchý layout na mobilu */
   .modal-body > div[style*="grid-template-columns"] {
@@ -568,7 +568,7 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 }
 
-/* 📱 KOMPLETNÍ OPTIMALIZACE DETAIL MODALU - ULTRA KOMPAKTNÍ STYL */
+/* KOMPLETNÍ OPTIMALIZACE DETAIL MODALU - ULTRA KOMPAKTNÍ STYL */
 @media (max-width: 768px) {
   /* Modal overlay - lepší scrollování, uprostřed displeje */
   .modal-overlay {
@@ -815,7 +815,7 @@ if (!$isLoggedIn && !$isAdmin) {
   }
 }
 
-/* 📱 Extra malé displeje - ultra kompaktnější modal */
+/* Extra malé displeje - ultra kompaktnější modal */
 @media (max-width: 480px) {
   .modal-header {
     padding: 0.15rem !important;
@@ -987,7 +987,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 <script>
 // CACHE BUSTER: 2025-11-23-19:35:00 - VLASTNÍ MODAL DIALOG
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('🔧 EMERGENCY event delegation V5 se načítá... [2025-11-23-19:35:00 - VLASTNÍ MODAL]');
+  console.log('[Seznam] EMERGENCY event delegation V5 se nacita... [2025-11-23-19:35:00 - VLASTNI MODAL]');
 
   document.addEventListener('click', (e) => {
     const button = e.target.closest('[data-action]');
@@ -1016,16 +1016,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
       case 'openPDF':
         if (!url) {
-          console.error('[EMERGENCY] ❌ PDF URL chybí!');
+          console.error('[EMERGENCY] PDF URL chybi!');
           break;
         }
 
-        console.log('[EMERGENCY] ✅ Otevírám PDF:', url);
+        console.log('[EMERGENCY] Oteviram PDF:', url);
 
-        // Obejít pop-up blocker: Otevřít v SOUČASNÉM okně místo nového tabu
-        // Uživatel může použít "Zpět" pro návrat
+        // Obejit pop-up blocker: Otevrit v SOUCASNEM okne misto noveho tabu
+        // Uzivatel muze pouzit "Zpet" pro navrat
         window.location.href = url;
-        console.log('[EMERGENCY] ✅ Přesměrování na PDF');
+        console.log('[EMERGENCY] Presmerovani na PDF');
         break;
 
       case 'closeDetail':
@@ -1036,19 +1036,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
       case 'startVisit':
         if (id && typeof startVisit === 'function') {
-          console.log('[EMERGENCY] ✅ Zahajuji návštěvu ID:', id);
+          console.log('[EMERGENCY] Zahajuji navstevu ID:', id);
           startVisit(id);
         } else {
-          console.error('[EMERGENCY] ❌ startVisit funkce není dostupná nebo ID chybí');
+          console.error('[EMERGENCY] startVisit funkce neni dostupna nebo ID chybi');
         }
         break;
 
       case 'showCalendar':
         if (id && typeof showCalendar === 'function') {
-          console.log('[EMERGENCY] ✅ Otevírám kalendář pro ID:', id);
+          console.log('[EMERGENCY] Oteviram kalendar pro ID:', id);
           showCalendar(id);
         } else {
-          console.error('[EMERGENCY] ❌ showCalendar funkce není dostupná nebo ID chybí');
+          console.error('[EMERGENCY] showCalendar funkce neni dostupna nebo ID chybi');
         }
         break;
 
@@ -1057,8 +1057,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('✅ EMERGENCY event delegation V5 načten [2025-11-23-19:35:00] - VLASTNÍ MODAL DIALOG');
+  console.log('[Seznam] Event delegation V5 nacten - VLASTNI MODAL DIALOG');
 });
 </script>
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>

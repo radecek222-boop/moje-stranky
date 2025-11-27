@@ -121,7 +121,7 @@ function displayJSError(error) {
 
     let bodyHTML = `
         <div style="margin-bottom: 10px;">
-            <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">📋 ZPRÁVA:</div>
+            <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">[List] ZPRÁVA:</div>
             <div style="color: #ff6b6b; word-break: break-word;">${escapeHtml(error.message)}</div>
         </div>
     `;
@@ -129,7 +129,7 @@ function displayJSError(error) {
     if (error.file) {
         bodyHTML += `
             <div style="margin-bottom: 10px;">
-                <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">📍 SOUBOR:</div>
+                <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">[Loc] SOUBOR:</div>
                 <div style="color: #4dabf7; word-break: break-all;">${escapeHtml(error.file)}</div>
             </div>
         `;
@@ -138,7 +138,7 @@ function displayJSError(error) {
     if (error.line) {
         bodyHTML += `
             <div style="margin-bottom: 10px;">
-                <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">📍 ŘÁDEK:</div>
+                <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">[Loc] ŘÁDEK:</div>
                 <div style="color: #51cf66; font-weight: bold;">
                     ${error.line}${error.column ? ':' + error.column : ''}
                 </div>
@@ -163,10 +163,10 @@ function displayJSError(error) {
             <button onclick="copyJSError()"
                     style="background: #28a745; color: white; border: none; padding: 8px 15px;
                            border-radius: 4px; cursor: pointer; font-family: 'Courier New', monospace; font-size: 12px;">
-                📋 Kopírovat pro Claude Code nebo Codex
+                [List] Kopírovat pro Claude Code nebo Codex
             </button>
             <div id="js-copy-status" style="color: #28a745; margin-top: 8px; display: none; font-size: 11px;">
-                ✅ Zkopírováno! Vložte CTRL+V do zprávy pro Claude/Codex
+                Zkopírováno! Vložte CTRL+V do zprávy pro Claude/Codex
             </div>
         </div>
     `;
@@ -284,10 +284,10 @@ const errorLogger = {
             // Pokud dostaneme HTTP 429, přestat logovat na 5 minut
             if (response.status === 429) {
                 this.rateLimited = true;
-                console.warn('⚠️ Error logging rate limited - paused for 5 minutes');
+                console.warn('Error logging rate limited - paused for 5 minutes');
                 setTimeout(() => {
                     this.rateLimited = false;
-                    console.log('✅ Error logging resumed');
+                    console.log('Error logging resumed');
                 }, 5 * 60 * 1000);
             }
         } catch (err) {
@@ -327,7 +327,7 @@ window.fetch = function(...args) {
         .then(async response => {
             // Pokud je to error response, zkusit extrahovat detaily
             if (!response.ok) {
-                // ✅ OPRAVA: Clone response aby šel přečíst 2x (jako text i JSON)
+                // OPRAVA: Clone response aby šel přečíst 2x (jako text i JSON)
                 const clonedResponse = response.clone();
 
                 try {
@@ -359,7 +359,7 @@ window.fetch = function(...args) {
                     // JSON je OK, ale nemá error/message → vrátit response
                     throw new Error(`HTTP ${response.status}: ${JSON.stringify(data)}`);
                 } catch (jsonError) {
-                    // ✅ OPRAVA: Pokud JSON parsing selhal, přečíst jako text
+                    // OPRAVA: Pokud JSON parsing selhal, přečíst jako text
                     try {
                         const errorText = await clonedResponse.text();
                         console.error('🔴 HTTP Error (non-JSON response):', {
@@ -413,4 +413,4 @@ function formatBacktrace(backtrace) {
     }).join('\n');
 }
 
-console.log('✅ WGS Error Handler loaded - All errors will be caught and displayed');
+console.log('WGS Error Handler loaded - All errors will be caught and displayed');

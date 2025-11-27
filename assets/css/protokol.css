@@ -347,9 +347,9 @@ button.btn:hover {
   color: #fff;
 }
 .btn-clear {
-  background: #ffe6e6;
-  color: #c62828;
-  border: 1px solid #ef9a9a;
+  background: #e5e5e5;
+  color: #444;
+  border: 1px solid #999;
   padding: 4px 10px;
   font-size: 0.75em;
   cursor: pointer;
@@ -358,8 +358,8 @@ button.btn:hover {
   white-space: nowrap;
 }
 .btn-clear:hover {
-  background: #ffcdd2;
-  color: #b71c1c;
+  background: #d5d5d5;
+  color: #333;
 }
 .notif {
   position: fixed;
@@ -386,8 +386,8 @@ button.btn:hover {
   color: #fff;
 }
 .notif.error {
-  border-color: #f00;
-  color: #f00;
+  border-color: #666;
+  color: #333;
 }
 .loading-overlay {
   position: fixed;
@@ -561,12 +561,12 @@ button.btn:hover {
 }
 
 .pdf-close-btn {
-  border-color: #dc3545;
+  border-color: #666;
 }
 
 .pdf-close-btn:hover {
-  background: #dc3545;
-  border-color: #dc3545;
+  background: #666;
+  border-color: #666;
   color: white;
 }
 

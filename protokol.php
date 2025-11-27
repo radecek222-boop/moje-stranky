@@ -430,52 +430,52 @@ if ($initialBootstrapData) {
     if (overlay) {
       overlay.classList.remove('show');
       overlay.style.display = 'none';
-      console.log('✅ Loading overlay force-hidden');
+      console.log('[OK] Loading overlay force-hidden');
     } else {
-      console.error('❌ Loading overlay NOT FOUND');
+      console.error('[ERROR] Loading overlay NOT FOUND');
     }
 
     // Check initial data
     const dataNode = document.getElementById('initialReklamaceData');
     if (dataNode) {
-      console.log('✅ initialReklamaceData found');
+      console.log('[OK] initialReklamaceData found');
       const raw = (dataNode.textContent || dataNode.innerText || '').trim();
-      console.log('📦 Raw data length:', raw.length);
-      console.log('📦 Raw data preview:', raw.substring(0, 200));
+      console.log('[DATA] Raw data length:', raw.length);
+      console.log('[DATA] Raw data preview:', raw.substring(0, 200));
 
       try {
         const parsed = JSON.parse(raw);
-        console.log('✅ JSON parsed successfully');
-        console.log('📋 Parsed data:', parsed);
+        console.log('[OK] JSON parsed successfully');
+        console.log('[DATA] Parsed data:', parsed);
       } catch (e) {
-        console.error('❌ JSON parse failed:', e);
+        console.error('[ERROR] JSON parse failed:', e);
       }
     } else {
-      console.error('❌ initialReklamaceData NOT FOUND');
+      console.error('[ERROR] initialReklamaceData NOT FOUND');
     }
 
     // Check all form fields
     const fieldIds = ['order-number', 'claim-number', 'customer', 'address', 'phone', 'email', 'brand', 'model', 'technician'];
-    console.log('🔍 Checking form fields:');
+    console.log('[CHECK] Checking form fields:');
     fieldIds.forEach(id => {
       const field = document.getElementById(id);
       if (field) {
-        console.log(`  ✅ ${id}: "${field.value}"`);
+        console.log(`  [OK] ${id}: "${field.value}"`);
       } else {
-        console.error(`  ❌ ${id}: NOT FOUND`);
+        console.error(`  [ERROR] ${id}: NOT FOUND`);
       }
     });
 
     // Check signature pad
     const canvas = document.getElementById('signature-pad');
     if (canvas) {
-      console.log('✅ Signature pad canvas found');
+      console.log('[OK] Signature pad canvas found');
       console.log('  Canvas size:', canvas.offsetWidth, 'x', canvas.offsetHeight);
     } else {
-      console.error('❌ Signature pad canvas NOT FOUND');
+      console.error('[ERROR] Signature pad canvas NOT FOUND');
     }
 
-    console.log('🚨 EMERGENCY DIAGNOSTICS COMPLETE');
+    console.log('[DIAGNOSTICS] EMERGENCY DIAGNOSTICS COMPLETE');
   });
 })();
 </script>
@@ -492,5 +492,6 @@ if ($initialBootstrapData) {
 <!-- Kalkulačka integrace -->
 <script src="assets/js/cenik-calculator.js" defer></script>
 <script src="assets/js/protokol-calculator-integration.js" defer></script>
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>

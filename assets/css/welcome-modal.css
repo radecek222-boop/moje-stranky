@@ -113,20 +113,20 @@
   order: 2;
 }
 
-/* NOTIFIKACE - červené zvýraznění */
+/* NOTIFIKACE - zvýraznění */
 .stat-notifications .stat-label {
-  color: #ff4444;
+  color: #999;
 }
 
 .stat-notifications .stat-number {
-  color: #ff4444;
-  text-shadow: 0 2px 12px rgba(255, 68, 68, 0.3);
+  color: #ccc;
+  text-shadow: 0 2px 12px rgba(200, 200, 200, 0.3);
 }
 
 /* Notifikace na celou šířku */
 .stat-notifications {
   grid-column: 1 / -1;
-  border-top: 1px solid rgba(255, 68, 68, 0.2);
+  border-top: 1px solid rgba(150, 150, 150, 0.2);
   padding-top: 1rem;
   margin-top: 1rem;
 }

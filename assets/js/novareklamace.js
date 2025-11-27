@@ -1,6 +1,6 @@
 const logger = window.logger || console;
 
-// ✅ FIX L-2: Konstanty pro magic numbers
+// FIX L-2: Konstanty pro magic numbers
 const CONSTANTS = {
   MAX_PHOTOS: 10,              // Max počet fotek na upload
   MAX_IMAGE_WIDTH: 1200,       // Max šířka obrázku v px
@@ -17,8 +17,8 @@ const WGS = {
   photos: [],
   povereniPDF: null, // PDF soubor s pověřením k reklamaci
   map: null,
-  // ✅ REFACTOR: marker a routeLayer jsou nyní spravovány WGSMap modulem
-  companyLocation: window.WGS_COMPANY_LOCATION || { lat: 50.080312092724114, lon: 14.598113797415476 }, // ✅ FIX M-3: Konfigurovatelná lokace
+  // REFACTOR: marker a routeLayer jsou nyní spravovány WGSMap modulem
+  companyLocation: window.WGS_COMPANY_LOCATION || { lat: 50.080312092724114, lon: 14.598113797415476 }, // FIX M-3: Konfigurovatelná lokace
   isLoggedIn: false,
   calculateRouteTimeout: null,
 
@@ -26,7 +26,7 @@ const WGS = {
   // Všechny geocoding, autocomplete a routing funkce nyní používají WGSMap API
   
   init() {
-    logger.log('🚀 WGS init...');
+    logger.log('[Start] WGS init...');
     this.checkLoginStatus();
     this.initUserMode();
     this.initCalculationDisplay();
@@ -43,13 +43,13 @@ const WGS = {
   checkLoginStatus() {
     const userToken = localStorage.getItem('wgs_user_token') || sessionStorage.getItem('wgs_user_token');
     this.isLoggedIn = window.WGS_USER_LOGGED_IN !== undefined ? window.WGS_USER_LOGGED_IN : !!userToken;
-    logger.log('👤 Logged in:', this.isLoggedIn);
+    logger.log('[User] Logged in:', this.isLoggedIn);
   },
   
   initMap() {
-    // ✅ REFACTOR: Použití WGSMap modulu místo přímého Leaflet
+    // REFACTOR: Použití WGSMap modulu místo přímého Leaflet
     if (typeof WGSMap === 'undefined') {
-      logger.error('❌ WGSMap module not loaded');
+      logger.error('WGSMap module not loaded');
       return;
     }
 
@@ -57,13 +57,13 @@ const WGS = {
       center: [49.8, 15.5],
       zoom: 7,
       onInit: (mapInstance) => {
-        logger.log('✅ Map initialized via WGSMap');
+        logger.log('Map initialized via WGSMap');
         this.initAddressGeocoding();
       }
     });
 
     if (!this.map) {
-      logger.error('❌ Map initialization failed');
+      logger.error('Map initialization failed');
       return;
     }
   },
@@ -73,19 +73,19 @@ const WGS = {
     const mestoInput = document.getElementById('mesto');
     const pscInput = document.getElementById('psc');
     
-    // ✅ REFACTOR: Použití WGSMap.addMarker() místo přímého L.marker()
+    // REFACTOR: Použití WGSMap.addMarker() místo přímého L.marker()
     const updateMapWithGPS = (lat, lon) => {
       WGSMap.removeMarker('customer'); // Odstranit starý marker pokud existuje
       WGSMap.addMarker('customer', [lat, lon], {
         draggable: false
       });
       WGSMap.flyTo([lat, lon], 15);
-      logger.log(`📍 Map updated to GPS: ${lat}, ${lon}`);
+      logger.log(`[Loc] Map updated to GPS: ${lat}, ${lon}`);
     };
     
     this.updateMapWithGPS = updateMapWithGPS;
     
-    // ✅ REFACTOR: Použití WGSMap.geocode() místo manuálního fetch
+    // REFACTOR: Použití WGSMap.geocode() místo manuálního fetch
     const geocodeAddress = async () => {
       const ulice = uliceInput.value.trim();
       const mesto = mestoInput.value.trim();
@@ -141,7 +141,7 @@ const WGS = {
     const highlightMatch = (text, query) => {
       if (!query) return escapeHtml(text);
 
-      // ✅ SECURITY FIX: Escape HTML PŘED highlightováním
+      // SECURITY FIX: Escape HTML PŘED highlightováním
       const escapedText = escapeHtml(text);
       const escapedQuery = escapeRegex(query);
 
@@ -160,7 +160,7 @@ const WGS = {
       return div.innerHTML;
     };
 
-    // ✅ REFACTOR: Použití WGSMap.autocomplete() a WGSMap.debounce()
+    // REFACTOR: Použití WGSMap.autocomplete() a WGSMap.debounce()
     if (uliceInput && dropdownUlice) {
       const debouncedAutocompleteUlice = WGSMap.debounce(async (query) => {
         if (query.length < CONSTANTS.AUTOCOMPLETE_MIN_CHARS) {
@@ -252,13 +252,13 @@ const WGS = {
                 const [lon, lat] = feature.geometry.coordinates;
                 this.updateMapWithGPS(lat, lon);
 
-                // ✅ PERFORMANCE: Výpočet trasy vypnut kvůli problémům s API
+                // PERFORMANCE: Výpočet trasy vypnut kvůli problémům s API
                 // if (this.calculateRoute) {
                 //   this.calculateRoute(lat, lon);
                 // }
 
                 dropdownUlice.style.display = 'none';
-                this.toast('✓ Adresa vyplněna', 'success');
+                this.toast('Adresa vyplněna', 'success');
               });
 
               dropdownUlice.appendChild(div);
@@ -277,7 +277,7 @@ const WGS = {
       });
     }
     
-    // ✅ REFACTOR: Použití WGSMap.autocomplete() a WGSMap.debounce()
+    // REFACTOR: Použití WGSMap.autocomplete() a WGSMap.debounce()
     if (mestoInput && dropdownMesto) {
       const debouncedAutocompleteMesto = WGSMap.debounce(async (query) => {
         if (query.length < CONSTANTS.AUTOCOMPLETE_MIN_CHARS) {
@@ -333,7 +333,7 @@ const WGS = {
                 }
 
                 dropdownMesto.style.display = 'none';
-                this.toast('✓ Město vybráno', 'success');
+                this.toast('Město vybráno', 'success');
 
                 // Pokud je město vybráno, pokus se najít souřadnice
                 if (feature.geometry && feature.geometry.coordinates) {
@@ -372,15 +372,15 @@ const WGS = {
     });
   },
 
-  // ✅ PERFORMANCE: Funkce vypnuta kvůli problémům s get_distance API
+  // PERFORMANCE: Funkce vypnuta kvůli problémům s get_distance API
   async calculateRoute(destLat, destLon) {
     // Funkce deaktivována - žádný výpočet trasy
-    logger.log('⚠️ Výpočet trasy vypnut (API nefunguje)');
+    logger.log('Výpočet trasy vypnut (API nefunguje)');
     return;
 
     /* VYPNUTO - ROUTING API NEFUNGUJE
     if (!this.map) {
-      logger.warn('⚠️ Mapa není inicializována');
+      logger.warn('Mapa není inicializována');
       return;
     }
 
@@ -410,14 +410,14 @@ const WGS = {
           this.renderRoute(routeData);
         }
       } catch (err) {
-        logger.error('❌ Chyba při výpočtu trasy:', err);
+        logger.error('Chyba při výpočtu trasy:', err);
         // Tiché selhání - trasa není kritická
       }
     }, CONSTANTS.ROUTE_DEBOUNCE);
     */
   },
 
-  // ✅ REFACTOR: Použití WGSMap.drawRoute() a WGSMap.addMarker()
+  // REFACTOR: Použití WGSMap.drawRoute() a WGSMap.addMarker()
   renderRoute(routeData) {
     const { coordinates, distance, duration, start } = routeData;
 
@@ -442,7 +442,7 @@ const WGS = {
     const durationMin = Math.ceil(duration / 60); // sekundy na minuty
 
     this.toast(`🚗 Trasa: ${distanceKm} km, cca ${durationMin} min`, 'info');
-    logger.log(`✅ Trasa vypočítána: ${distanceKm} km, ${durationMin} min`);
+    logger.log(`Trasa vypočítána: ${distanceKm} km, ${durationMin} min`);
 
     // Uložit info o trase pro pozdější použití
     this.routeInfo = { distance: distanceKm, duration: durationMin };
@@ -511,7 +511,7 @@ const WGS = {
         document.getElementById('modeDescription').textContent = t('mode_customer_desc');
       }
       
-      logger.log('📋 Mode: Customer');
+      logger.log('[List] Mode: Customer');
     } else {
       if (calculatorBox) {
         calculatorBox.style.display = 'none';
@@ -524,7 +524,7 @@ const WGS = {
         document.getElementById('modeTitle').textContent = t('mode_seller_title');
         document.getElementById('modeDescription').textContent = t('mode_seller_desc');
       }
-      logger.log('📋 Mode: Seller');
+      logger.log('[List] Mode: Seller');
     }
   },
   
@@ -548,7 +548,7 @@ const WGS = {
     const menuOverlay = document.getElementById("menuOverlay");
     
     if (!hamburger || !nav || !menuOverlay) {
-      logger.warn("⚠️ initMobileMenu skipped - elements not found");
+      logger.warn("initMobileMenu skipped - elements not found");
       return;
     }
     
@@ -579,7 +579,7 @@ const WGS = {
       });
     });
     
-    logger.log('✅ Mobile menu fully initialized');
+    logger.log('Mobile menu fully initialized');
   },
   
   initForm() {
@@ -604,7 +604,7 @@ const WGS = {
       });
     }
 
-    // ✅ Event listenery pro odstranění červeného označení při psaní
+    // Event listenery pro odstranění červeného označení při psaní
     const povinnaPoleIds = ['jmeno', 'email', 'telefon', 'ulice', 'mesto', 'psc', 'popis_problemu'];
     povinnaPoleIds.forEach(poleId => {
       const element = document.getElementById(poleId);
@@ -650,7 +650,7 @@ const WGS = {
     povinnaPole.forEach(pole => {
       const element = document.getElementById(pole.id);
       if (!element) {
-        logger.warn(`⚠️ Pole ${pole.id} nebylo nalezeno v DOM`);
+        logger.warn(`Pole ${pole.id} nebylo nalezeno v DOM`);
         return;
       }
 
@@ -682,10 +682,10 @@ const WGS = {
   },
 
   async submitForm() {
-    // ✅ VALIDACE VŠECH POVINNÝCH POLÍ
+    // VALIDACE VŠECH POVINNÝCH POLÍ
     const validace = this.validatePovinnaPole();
     if (!validace.valid) {
-      this.toast(`❌ Vyplňte prosím všechna povinná pole: ${validace.chybejici.join(', ')}`, 'error');
+      this.toast(`Vyplňte prosím všechna povinná pole: ${validace.chybejici.join(', ')}`, 'error');
       return;
     }
 
@@ -698,7 +698,7 @@ const WGS = {
       return;
     }
 
-    // ✅ FIX H-2: Frontend validace telefonu
+    // FIX H-2: Frontend validace telefonu
     const telefonInput = document.getElementById('telefon');
 
     // PSČ validace odstraněna - autocomplete vrací různé formáty ("110 00", "11000", atd.)
@@ -707,9 +707,9 @@ const WGS = {
     if (telefonInput && telefonInput.value.trim()) {
       const telefon = telefonInput.value.trim();
       const cleanPhone = telefon.replace(/\D/g, '');
-      // ✅ FIX L-2: Použít konstantu PHONE_MIN_LENGTH
+      // FIX L-2: Použít konstantu PHONE_MIN_LENGTH
       if (cleanPhone.length < CONSTANTS.PHONE_MIN_LENGTH) {
-        this.toast(`❌ Neplatné telefonní číslo (minimálně ${CONSTANTS.PHONE_MIN_LENGTH} číslic)`, 'error');
+        this.toast(`Neplatné telefonní číslo (minimálně ${CONSTANTS.PHONE_MIN_LENGTH} číslic)`, 'error');
         telefonInput.focus();
         return;
       }
@@ -717,7 +717,7 @@ const WGS = {
 
     this.toast('Odesílám...', 'info');
     try {
-      // ✅ FIX H-1: Získat CSRF token JEDNOU pro celý submit proces
+      // FIX H-1: Získat CSRF token JEDNOU pro celý submit proces
       const csrfResponse = await fetch('app/controllers/get_csrf_token.php');
       const csrfData = await csrfResponse.json();
       const csrfToken = csrfData.status === 'success' ? csrfData.token : '';
@@ -765,10 +765,10 @@ const WGS = {
       // Přiložení PDF pověření k reklamaci (pokud bylo nahráno)
       if (this.povereniPDF) {
         formData.append('povereni_pdf', this.povereniPDF);
-        logger.log(`📄 Přikládám PDF pověření: ${this.povereniPDF.name}`);
+        logger.log(`[Doc] Přikládám PDF pověření: ${this.povereniPDF.name}`);
       }
 
-      // ✅ FIX H-1: Použít CSRF token získaný výše
+      // FIX H-1: Použít CSRF token získaný výše
       formData.append('csrf_token', csrfToken);
 
       formData.append("action", "create");
@@ -788,7 +788,7 @@ const WGS = {
         const referenceNumber = result.reference || (document.getElementById('cislo')?.value || '').trim();
 
         if (this.photos && this.photos.length > 0) {
-          // ✅ FIX H-1: Předat stejný CSRF token do uploadPhotos
+          // FIX H-1: Předat stejný CSRF token do uploadPhotos
           await this.uploadPhotos(workflowId, csrfToken);
         }
 
@@ -805,7 +805,7 @@ const WGS = {
           logger.log('🧹 PDF pověření vyčištěno po úspěšném uložení');
         }
 
-        this.toast('✓ Požadavek byl úspěšně odeslán!', 'success');
+        this.toast('Požadavek byl úspěšně odeslán!', 'success');
         setTimeout(() => {
           if (this.isLoggedIn) {
             window.location.href = 'seznam.php';
@@ -827,20 +827,20 @@ const WGS = {
   },
   
   /**
-   * ✅ FIX H-1: Uploaduje fotky s předaným CSRF tokenem (bez duplicitního fetch)
-   * ✅ FIX L-1: Změna console.log na logger.log
+   * FIX H-1: Uploaduje fotky s předaným CSRF tokenem (bez duplicitního fetch)
+   * FIX L-1: Změna console.log na logger.log
    * @param {string} reklamaceId - ID reklamace
    * @param {string} csrfToken - CSRF token (předaný z submitForm)
    */
   async uploadPhotos(reklamaceId, csrfToken) {
-    logger.log("🚀 uploadPhotos VOLÁNO!", reklamaceId);
+    logger.log("[Start] uploadPhotos VOLÁNO!", reklamaceId);
     if (!this.photos || this.photos.length === 0) return;
-    logger.log("📸 Počet fotek:", this.photos.length);
+    logger.log("[Photo] Počet fotek:", this.photos.length);
     try {
       const formData = new FormData();
       formData.append('reklamace_id', reklamaceId);
       formData.append('photo_type', 'problem');
-      formData.append('csrf_token', csrfToken); // ✅ Použít předaný token
+      formData.append('csrf_token', csrfToken); // Použít předaný token
       this.photos.forEach((photo, index) => {
         formData.append(`photo_${index}`, photo.data);
         formData.append(`filename_${index}`, `photo_${index + 1}.jpg`);
@@ -860,7 +860,7 @@ const WGS = {
       if (result.status !== 'success') {
         throw new Error(result.error || 'Nepodařilo se nahrát fotky');
       }
-      logger.log('✓ Fotky úspěšně nahrány');
+      logger.log('Fotky úspěšně nahrány');
     } catch (error) {
       logger.error('Chyba při nahrávání fotek:', error);
     }
@@ -877,9 +877,9 @@ const WGS = {
     btn.addEventListener('click', () => photoInput.click());
     photoInput.addEventListener('change', async (e) => {
       const files = Array.from(e.target.files);
-      // ✅ FIX L-2 & L-3: Použít konstantu MAX_PHOTOS (sjednocení s backendem)
+      // FIX L-2 & L-3: Použít konstantu MAX_PHOTOS (sjednocení s backendem)
       if (this.photos.length + files.length > CONSTANTS.MAX_PHOTOS) {
-        this.toast(`❌ Maximálně ${CONSTANTS.MAX_PHOTOS} fotografií`, 'error');
+        this.toast(`Maximálně ${CONSTANTS.MAX_PHOTOS} fotografií`, 'error');
         return;
       }
       for (const file of files) {
@@ -888,7 +888,7 @@ const WGS = {
         this.photos.push({ data: base64, file: compressed });
       }
       this.renderPhotos();
-      this.toast(`✓ Přidáno ${files.length} fotek`, 'success');
+      this.toast(`Přidáno ${files.length} fotek`, 'success');
     });
   },
   
@@ -899,7 +899,7 @@ const WGS = {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          // ✅ FIX L-2: Použít konstanty MAX_IMAGE_WIDTH a IMAGE_QUALITY
+          // FIX L-2: Použít konstanty MAX_IMAGE_WIDTH a IMAGE_QUALITY
           const scale = Math.min(1, CONSTANTS.MAX_IMAGE_WIDTH / img.width);
           canvas.width = img.width * scale;
           canvas.height = img.height * scale;
@@ -934,7 +934,7 @@ const WGS = {
       div.querySelector(".photo-remove").addEventListener("click", () => {
         this.photos.splice(index, 1);
         this.renderPhotos();
-        this.toast("✓ Fotka odstraněna", "info");
+        this.toast("Fotka odstraněna", "info");
       });
       container.appendChild(div);
     });
@@ -947,7 +947,7 @@ const WGS = {
     const statusSpan = document.getElementById('povereniStatus');
 
     if (!btn || !pdfInput || !statusSpan) {
-      logger.warn('📄 PDF pověření prvky nebyly nalezeny, initPovereniPDF se přeskočí');
+      logger.warn('[Doc] PDF pověření prvky nebyly nalezeny, initPovereniPDF se přeskočí');
       return;
     }
 
@@ -964,7 +964,7 @@ const WGS = {
 
       // Validace typu souboru
       if (file.type !== 'application/pdf') {
-        this.toast('❌ Pouze PDF soubory jsou povoleny', 'error');
+        this.toast('Pouze PDF soubory jsou povoleny', 'error');
         pdfInput.value = '';
         return;
       }
@@ -972,7 +972,7 @@ const WGS = {
       // Validace velikosti (max 10MB)
       const maxSize = 10 * 1024 * 1024; // 10MB v bytech
       if (file.size > maxSize) {
-        this.toast('❌ Soubor je příliš velký (max 10MB)', 'error');
+        this.toast('Soubor je příliš velký (max 10MB)', 'error');
         pdfInput.value = '';
         return;
       }
@@ -987,7 +987,7 @@ const WGS = {
       statusSpan.style.fontWeight = '600';
 
       this.toast(t('processing_file').replace('{filename}', 'PDF pověření'), 'info');
-      logger.log(`📄 PDF pověření připojeno: ${file.name}, velikost: ${velikostMB} MB`);
+      logger.log(`[Doc] PDF pověření připojeno: ${file.name}, velikost: ${velikostMB} MB`);
 
       // Extrakce textu z PDF a parsování dat
       try {
@@ -996,7 +996,7 @@ const WGS = {
           .replace('{filename}', file.name)
           .replace('{size}', velikostMB);
         statusSpan.style.color = '#333333';
-        this.toast(`✓ Formulář byl předvyplněn z PDF pověření`, 'success');
+        this.toast(`Formulář byl předvyplněn z PDF pověření`, 'success');
       } catch (error) {
         logger.error('Chyba při zpracování PDF:', error);
         statusSpan.textContent = t('file_processing_error')
@@ -1024,7 +1024,7 @@ const WGS = {
     const arrayBuffer = await pdfFile.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
-    logger.log(`📄 PDF má ${pdf.numPages} stránek`);
+    logger.log(`[Doc] PDF má ${pdf.numPages} stránek`);
 
     // Extrakce textu ze všech stránek
     let celkovyText = '';
@@ -1035,7 +1035,7 @@ const WGS = {
       celkovyText += textItems + '\n';
     }
 
-    logger.log(`📄 Extrahovaný text (${celkovyText.length} znaků):`, celkovyText.substring(0, 200) + '...');
+    logger.log(`[Doc] Extrahovaný text (${celkovyText.length} znaků):`, celkovyText.substring(0, 200) + '...');
 
     // Odeslání textu na backend pro parsování
     const csrfResponse = await fetch('app/controllers/get_csrf_token.php');
@@ -1066,7 +1066,7 @@ const WGS = {
     const extrahovanaData = result.data.data || result.data;
     const configName = result.data.config_name || 'Výchozí parser';
 
-    logger.log(`✓ Použita konfigurace: ${configName}`);
+    logger.log(`Použita konfigurace: ${configName}`);
 
     // Předvyplnění formuláře s extrahovanými daty
     this.predvyplnFormularZPDF(extrahovanaData);
@@ -1077,7 +1077,7 @@ const WGS = {
    * @param {Object} data - Extrahovaná data z PDF
    */
   predvyplnFormularZPDF(data) {
-    logger.log('📝 Předvyplňuji formulář daty z PDF:', data);
+    logger.log('[Edit] Předvyplňuji formulář daty z PDF:', data);
 
     // Helper funkce pro bezpečné nastavení hodnoty pole
     const nastavPole = (id, hodnota) => {
@@ -1085,7 +1085,7 @@ const WGS = {
       const element = document.getElementById(id);
       if (element && !element.value) { // Nepřepsat pokud už je vyplněno
         element.value = hodnota;
-        logger.log(`✓ Vyplněno pole ${id}: ${hodnota}`);
+        logger.log(`Vyplněno pole ${id}: ${hodnota}`);
       }
     };
 
@@ -1139,7 +1139,7 @@ const WGS = {
         const value = card.dataset.value;
         document.getElementById('provedeni').value = value;
         overlay.classList.remove('active');
-        this.toast(`✓ Provedení: ${value}`, 'info');
+        this.toast(`Provedení: ${value}`, 'info');
       });
     });
   },
@@ -1202,11 +1202,11 @@ const WGS = {
   },
 
   /**
-   * ✅ FIX M-1: Warranty calculation pouze pro přihlášené uživatele
+   * FIX M-1: Warranty calculation pouze pro přihlášené uživatele
    * Nepřihlášení mají datum_prodeje a datum_reklamace = "nevyplňuje se" (readonly)
    */
   calculateWarranty() {
-    // ✅ FIX M-1: Warranty calculation pouze pro přihlášené
+    // FIX M-1: Warranty calculation pouze pro přihlášené
     if (!this.isLoggedIn) {
       return; // Nepřihlášení nemají přístup k těmto datům
     }
@@ -1215,7 +1215,7 @@ const WGS = {
     const datumReklamace = document.getElementById('datum_reklamace').value;
     const warning = document.getElementById('warrantyWarning');
 
-    // ✅ FIX M-1: Zkontrolovat platnost hodnot
+    // FIX M-1: Zkontrolovat platnost hodnot
     if (!datumProdeje || !datumReklamace ||
         datumProdeje === 'nevyplňuje se' ||
         datumReklamace === 'nevyplňuje se') {
@@ -1232,7 +1232,7 @@ const WGS = {
       const prodej = parseCzDate(datumProdeje);
       const reklamace = parseCzDate(datumReklamace);
       const warrantyEnd = new Date(prodej);
-      // ✅ FIX L-2: Použít konstantu WARRANTY_YEARS
+      // FIX L-2: Použít konstantu WARRANTY_YEARS
       warrantyEnd.setFullYear(warrantyEnd.getFullYear() + CONSTANTS.WARRANTY_YEARS);
       const daysRemaining = Math.ceil((warrantyEnd - reklamace) / (1000 * 60 * 60 * 24));
 

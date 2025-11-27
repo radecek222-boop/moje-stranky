@@ -22,6 +22,11 @@ require_once __DIR__ . '/includes/seo_meta.php';
   <link rel="icon" type="image/png" sizes="192x192" href="./icon192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon512.png">
 
+  <!-- Cache Control pro PWA aktualizace -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
   <title><?php echo getSeoTitle('index'); ?></title>
   
   <!-- Preload critical resources -->
@@ -138,6 +143,9 @@ require_once __DIR__ . '/includes/seo_meta.php';
 <script src="assets/js/logger.js" defer></script>
 
 <script src="assets/js/index.js" defer></script>
+
+<!-- PWA Service Worker Registration -->
+<script src="assets/js/sw-register.js"></script>
 
 <?php renderHeatmapTracker(); ?>
 </body>

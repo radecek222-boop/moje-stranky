@@ -14,14 +14,14 @@ async function getCsrfTokenFromForm(form, maxRetries = 3) {
   // Zkusit získat token z již existujícího inputu
   const tokenInput = form.querySelector('input[name="csrf_token"]');
   if (tokenInput && tokenInput.value) {
-    logger.log('📋 CSRF token nalezen v formuláři');
+    logger.log('[List] CSRF token nalezen v formuláři');
     return tokenInput.value;
   }
 
   // Pokusit se získat token z API s retry mechanikou
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      logger.log(`🔄 Získávám CSRF token (pokus ${attempt}/${maxRetries})...`);
+      logger.log(`[CSRF] Získávám token (pokus ${attempt}/${maxRetries})...`);
 
       const response = await fetch('app/controllers/get_csrf_token.php', {
         method: 'GET',
@@ -32,7 +32,7 @@ async function getCsrfTokenFromForm(form, maxRetries = 3) {
       });
 
       if (!response.ok) {
-        logger.warn(`⚠️ CSRF API vrátilo ${response.status}`);
+        logger.warn(`[CSRF] API vrátilo ${response.status}`);
         if (attempt < maxRetries) {
           await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
           continue;
@@ -43,7 +43,7 @@ async function getCsrfTokenFromForm(form, maxRetries = 3) {
       const data = await response.json();
 
       if ((data.status === 'success' || data.success === true) && data.token) {
-        logger.log('✅ CSRF token úspěšně získán');
+        logger.log('[CSRF] Token úspěšně získán');
 
         // Uložit token do formuláře pro další použití
         if (tokenInput) {
@@ -52,11 +52,11 @@ async function getCsrfTokenFromForm(form, maxRetries = 3) {
 
         return data.token;
       } else {
-        logger.warn('⚠️ CSRF API nevrátilo platný token:', data);
+        logger.warn('[CSRF] API nevrátilo platný token:', data);
       }
 
     } catch (error) {
-      logger.error(`❌ CSRF fetch pokus ${attempt} selhal:`, error);
+      logger.error(`[CSRF] Fetch pokus ${attempt} selhal:`, error);
 
       if (attempt < maxRetries) {
         // Exponenciální backoff: 1s, 2s, 3s
@@ -65,7 +65,7 @@ async function getCsrfTokenFromForm(form, maxRetries = 3) {
     }
   }
 
-  logger.error('❌ Nepodařilo se získat CSRF token po ' + maxRetries + ' pokusech');
+  logger.error('[CSRF] Nepodařilo se získat token po ' + maxRetries + ' pokusech');
   return null;
 }
 
@@ -128,7 +128,7 @@ async function handleAdminLogin() {
 
   const csrfToken = await getCsrfTokenFromForm(loginForm);
   if (!csrfToken) {
-    showNotification('⚠️ Problém se zabezpečením. Zkontrolujte:\n• Cookies jsou povoleny\n• Používáte HTTPS\n• Nejste v režimu inkognito', 'error');
+    showNotification('Problém se zabezpečením. Zkontrolujte: Cookies jsou povoleny, Používáte HTTPS, Nejste v režimu inkognito', 'error');
     return;
   }
   
@@ -151,7 +151,7 @@ async function handleAdminLogin() {
     
     if (data.status === 'success') {
       localStorage.removeItem('admin_login_attempts');
-      showNotification('✅ Admin přihlášení úspěšné!', 'success');
+      showNotification('Admin přihlášení úspěšné!', 'success');
       setTimeout(() => {
         window.location.href = 'admin.php';
       }, 1500);
@@ -161,9 +161,9 @@ async function handleAdminLogin() {
       showNotification(msg, 'error');
       
       if (attempts >= 3) {
-        logger.log('🔓 Recovery mode activated!');
+        logger.log('[Login] Recovery mode activated!');
         setTimeout(() => {
-          showNotification('⚠️ Recovery mód aktivován!', 'warning');
+          showNotification('Recovery mód aktivován!', 'warning');
           showRecoveryModal();
           localStorage.removeItem('admin_login_attempts');
         }, 1000);
@@ -182,7 +182,7 @@ async function handleUserLogin() {
   const email = document.getElementById('userEmail').value.trim();
   const password = document.getElementById('userPassword').value.trim();
 
-  // ✅ FIX 11: Remember Me checkbox
+  // FIX 11: Remember Me checkbox
   const rememberMe = document.getElementById('rememberMe')?.checked || false;
 
   if (!email || !password) {
@@ -192,7 +192,7 @@ async function handleUserLogin() {
 
   const csrfToken = await getCsrfTokenFromForm(loginForm);
   if (!csrfToken) {
-    showNotification('⚠️ Problém se zabezpečením. Zkontrolujte:\n• Cookies jsou povoleny\n• Používáte HTTPS\n• Nejste v režimu inkognito', 'error');
+    showNotification('Problém se zabezpečením. Zkontrolujte: Cookies jsou povoleny, Používáte HTTPS, Nejste v režimu inkognito', 'error');
     return;
   }
 
@@ -213,7 +213,7 @@ async function handleUserLogin() {
       } else {
         // Fallback - přímý redirect bez modalu
         logger.warn('showWelcomeModal není dostupná, přesměruji přímo');
-        showNotification('✅ Přihlášení úspěšné!', 'success');
+        showNotification('Přihlášení úspěšné!', 'success');
 
         setTimeout(() => {
           const normalizedRole = (data.user.role || '').toLowerCase().trim();
@@ -303,11 +303,11 @@ async function verifyHighKey() {
     const data = await response.json();
     
     if (data.status === 'success') {
-      showNotification('✅ High key ověřen!', 'success');
+      showNotification('High key ověřen!', 'success');
       closeRecoveryModal();
       setTimeout(() => showCreateNewAdminKeyModal(), 500);
     } else {
-      showNotification('❌ Neplatný high key', 'error');
+      showNotification('Neplatný high key', 'error');
     }
   } catch (error) {
     logger.error('High key error:', error);
@@ -394,11 +394,11 @@ async function createNewAdminKey() {
     const data = await response.json();
     
     if (data.status === 'success') {
-      showNotification('✅ Klíč vytvořen! Restartuju...', 'success');
+      showNotification('Klíč vytvořen! Restartuju...', 'success');
       closeNewAdminKeyModal();
       setTimeout(() => location.reload(), 2000);
     } else {
-      showNotification('❌ ' + (data.message || 'Chyba'), 'error');
+      showNotification('' + (data.message || 'Chyba'), 'error');
     }
   } catch (error) {
     logger.error('Create key error:', error);
@@ -423,4 +423,4 @@ function showNotification(message, type = 'info') {
   }
 }
 
-logger.log('✅ Login system loaded');
+logger.log('Login system loaded');

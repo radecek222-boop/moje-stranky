@@ -4,7 +4,7 @@
  */
 
 (function() {
-    console.log('🔧 Mazací tlačítko patch se načítá...');
+    console.log('[Patch] Mazací tlačítko patch se načítá...');
 
     const overlay = document.getElementById('detailOverlay');
     if (!overlay) {
@@ -50,8 +50,8 @@
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
         deleteBtn.setAttribute('data-action', 'deleteReklamace');
-        deleteBtn.textContent = '🗑️ Smazat reklamaci';
-        deleteBtn.style.background = '#ff4444';
+        deleteBtn.textContent = 'Smazat reklamaci';
+        deleteBtn.style.background = '#444';
         deleteBtn.style.color = '#fff';
         deleteBtn.style.border = 'none';
         deleteBtn.style.padding = '0.9rem 1.2rem';
@@ -61,10 +61,10 @@
         deleteBtn.style.cursor = 'pointer';
 
         deleteBtn.addEventListener('mouseenter', () => {
-            deleteBtn.style.background = '#cc0000';
+            deleteBtn.style.background = '#333';
         });
         deleteBtn.addEventListener('mouseleave', () => {
-            deleteBtn.style.background = '#ff4444';
+            deleteBtn.style.background = '#444';
         });
 
         deleteBtn.addEventListener('click', (event) => {
@@ -87,9 +87,9 @@
             primaryActions.insertAdjacentElement('beforeend', deleteBtn);
         }
 
-        console.log('✅ Mazací tlačítko přidáno');
+        console.log('[Patch] Mazací tlačítko přidáno');
     }
 
-    console.log('✅ Mazací tlačítko patch načten');
+    console.log('[Patch] Mazací tlačítko patch načten');
 })();
 

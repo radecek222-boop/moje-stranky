@@ -536,6 +536,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 
 <script src="assets/js/cenik-calculator.js" defer></script>
 
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 <?php renderHeatmapTracker(); ?>
 </body>
 </html>

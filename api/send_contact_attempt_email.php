@@ -186,9 +186,51 @@ try {
         '+420 725 965 826'            // Obecný firemní telefon
     ], $notification['template']);
 
-    // Příprava SMS textu (zkrácená verze emailu pro SMS)
-    // Profesionální SMS text pro Natuzzi servis
-    $smsText = "Dobrý den {$customerName}, kontaktujeme Vás v zastoupení Natuzzi ohledně servisní zakázky č. {$orderId}. Nepodařilo se nám Vás zastihnout. Zavolejte prosím zpět {$technicianName} na tel. {$technicianPhone}. Děkujeme, WGS Service - Autorizovaný servis Natuzzi";
+    // Nacist SMS sablonu z databaze (pokud existuje)
+    $smsText = null;
+    try {
+        $stmtSms = $pdo->prepare("
+            SELECT template FROM wgs_notifications
+            WHERE trigger_event = 'contact_attempt' AND type = 'sms' AND active = 1
+            LIMIT 1
+        ");
+        $stmtSms->execute();
+        $smsSablona = $stmtSms->fetch(PDO::FETCH_ASSOC);
+
+        if ($smsSablona && !empty($smsSablona['template'])) {
+            // Nahradit promenne v SMS sablone
+            $smsText = str_replace([
+                '{{customer_name}}',
+                '{{order_id}}',
+                '{{product}}',
+                '{{date}}',
+                '{{address}}',
+                '{{technician_name}}',
+                '{{technician_email}}',
+                '{{technician_phone}}',
+                '{{company_email}}',
+                '{{company_phone}}'
+            ], [
+                $customerName,
+                $orderId,
+                $product,
+                date('d.m.Y'),
+                $adresa ?: 'Neuvedena',
+                $technicianName,
+                $technicianEmail,
+                $technicianPhone,
+                'reklamace@wgs-service.cz',
+                '+420 725 965 826'
+            ], $smsSablona['template']);
+        }
+    } catch (PDOException $e) {
+        error_log('Chyba pri nacitani SMS sablony: ' . $e->getMessage());
+    }
+
+    // Fallback pokud SMS sablona neexistuje
+    if (!$smsText) {
+        $smsText = "Dobry den {$customerName}, kontaktujeme Vas v zastoupeni Natuzzi ohledne servisni zakazky c. {$orderId}. Nepodarilo se nam Vas zastihnout. Zavolejte prosim zpet {$technicianName} na tel. {$technicianPhone}. Dekujeme, WGS Service";
+    }
 
     // Přidání emailu do fronty
     $emailQueue = new EmailQueue($pdo);
@@ -209,7 +251,7 @@ try {
     }
 
     // Logování akce
-    error_log("✉️ EMAIL - Pokus o kontakt: Zákazník: {$customerName}, Email: {$customerEmail}, Zakázka: {$orderId}");
+    error_log("[EMAIL] Pokus o kontakt: Zakaznik: {$customerName}, Email: {$customerEmail}, Zakazka: {$orderId}");
 
     // Úspěšná odpověď
     echo json_encode([
@@ -219,7 +261,7 @@ try {
         'recipient' => $customerEmail,
         'customer_name' => $customerName,
         'order_id' => $orderId,
-        'sms_text' => $smsText,  // ✅ SMS text se generuje ze stejných dat jako email
+        'sms_text' => $smsText,  // SMS text se generuje ze stejnych dat jako email
         'product' => $product
     ]);
 

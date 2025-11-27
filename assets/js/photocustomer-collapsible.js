@@ -64,7 +64,7 @@
       }
     });
 
-    logger.log('✅ Customer info collapse inicializován (photocustomer)');
+    logger.log('Customer info collapse inicializován (photocustomer)');
   }
 
   // Inicializovat po načtení DOMu

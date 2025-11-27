@@ -1,7 +1,7 @@
 /**
  * LOGOUT HANDLER - CSRF Protected Logout
  *
- * ✅ SECURITY FIX: Chrání logout proti force-logout útokům
+ * SECURITY FIX: Chrání logout proti force-logout útokům
  * Odchytí všechny logout odkazy a pošle POST request s CSRF tokenem
  */
 
@@ -27,7 +27,7 @@
       // 2. Pokud není, zkusit fetch z API (s timeoutem)
       if (!csrfToken) {
         try {
-          // ✅ OPRAVA: Přidat timeout 5 sekund pro fetch
+          // OPRAVA: Přidat timeout 5 sekund pro fetch
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000);
 
@@ -108,7 +108,7 @@
     });
 
     if (logoutLinks.length > 0) {
-      console.log(`✅ Logout handler: ${logoutLinks.length} logout links protected`);
+      console.log(`[Logout] Handler: ${logoutLinks.length} logout links protected`);
     }
   }
 

@@ -1,12 +1,12 @@
 // === LANGUAGE SWITCHER ===
-// ✅ REMOVED: Duplikovaný kód přesunut do centrálního language-switcher.js
+// REMOVED: Duplikovaný kód přesunut do centrálního language-switcher.js
 // Jazykové přepínání je nyní automatické přes assets/js/language-switcher.js
 
 // === MOBILE MENU ===
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const nav = document.querySelector('.nav');
 
-// ✅ KONTROLA - Pokud elementy neexistují, zastav inicializaci
+// KONTROLA - Pokud elementy neexistují, zastav inicializaci
 if (mobileMenuBtn && nav) {
   // Vytvořit overlay pro zavření menu
   let menuOverlay = document.createElement('div');
@@ -48,6 +48,6 @@ if (mobileMenuBtn && nav) {
     });
   });
 } else {
-  // ✅ Debug info (můžeš smazat po opravě)
+  // Debug info (můžeš smazat po opravě)
   console.log('ℹ️ Mobile menu: Elements not found (this is OK if using hamburger-menu.php)');
 }

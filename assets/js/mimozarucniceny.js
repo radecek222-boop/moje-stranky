@@ -6,7 +6,7 @@ const CALC_CONSTANTS = {
 
 const CALC = {
   map: null,
-  // ✅ REFACTOR: marker, warehouseMarker, routeLayer jsou nyní spravovány WGSMap modulem
+  // REFACTOR: marker, warehouseMarker, routeLayer jsou nyní spravovány WGSMap modulem
   customerAddress: null,
   distance: 0,
   warehouse: { lat: 50.08026389885034, lon: 14.59812452579323, address: 'Do Dubče 364, Běchovice 190 11' },
@@ -31,11 +31,11 @@ const CALC = {
     const menuOverlay = document.getElementById('menuOverlay');
     
     if (!hamburger || !mainNav || !menuOverlay) {
-      logger.error('❌ Menu elements not found');
+      logger.error('Menu elements not found');
       return;
     }
     
-    logger.log('✅ All menu elements found');
+    logger.log('All menu elements found');
     
     hamburger.addEventListener('click', (e) => {
       e.preventDefault();
@@ -47,15 +47,15 @@ const CALC = {
       
       if (mainNav.classList.contains('active')) {
         document.body.style.overflow = 'hidden';
-        logger.log('✅ Menu opened');
+        logger.log('Menu opened');
       } else {
         document.body.style.overflow = 'auto';
-        logger.log('✅ Menu closed');
+        logger.log('Menu closed');
       }
     });
     
     menuOverlay.addEventListener('click', () => {
-      logger.log('🔄 Overlay clicked - closing menu');
+      logger.log('[Sync] Overlay clicked - closing menu');
       hamburger.classList.remove('active');
       mainNav.classList.remove('active');
       menuOverlay.classList.remove('active');
@@ -65,7 +65,7 @@ const CALC = {
     const navLinks = mainNav.querySelectorAll('a');
     navLinks.forEach(link => {
       link.addEventListener('click', () => {
-        logger.log('🔗 Nav link clicked - closing menu');
+        logger.log('[Link] Nav link clicked - closing menu');
         hamburger.classList.remove('active');
         mainNav.classList.remove('active');
         menuOverlay.classList.remove('active');
@@ -73,13 +73,13 @@ const CALC = {
       });
     });
     
-    logger.log('✅ Mobile menu fully initialized');
+    logger.log('Mobile menu fully initialized');
   },
   
-  // ✅ REFACTOR: Použití WGSMap modulu místo přímého Leaflet
+  // REFACTOR: Použití WGSMap modulu místo přímého Leaflet
   initMap() {
     if (typeof WGSMap === 'undefined') {
-      logger.error('❌ WGSMap module not loaded');
+      logger.error('WGSMap module not loaded');
       return;
     }
 
@@ -87,7 +87,7 @@ const CALC = {
       center: [49.8, 15.5],
       zoom: 7,
       onInit: (mapInstance) => {
-        logger.log('✅ Map initialized via WGSMap');
+        logger.log('Map initialized via WGSMap');
 
         // Přidat marker skladu pomocí WGSMap
         WGSMap.addMarker('warehouse', [this.warehouse.lat, this.warehouse.lon], {
@@ -97,12 +97,12 @@ const CALC = {
           iconAnchor: [50, 15]
         });
 
-        logger.log('✅ Warehouse marker added:', this.warehouse.lat, this.warehouse.lon);
+        logger.log('Warehouse marker added:', this.warehouse.lat, this.warehouse.lon);
       }
     });
 
     if (!this.map) {
-      logger.error('❌ Map initialization failed');
+      logger.error('Map initialization failed');
       return;
     }
   },
@@ -195,7 +195,7 @@ const CALC = {
     if (document.getElementById('priceSummary').style.display !== 'none') this.calculatePrice();
   },
   
-  // ✅ REFACTOR: Použití WGSMap.autocomplete()
+  // REFACTOR: Použití WGSMap.autocomplete()
   async searchAddress(query) {
     try {
       const data = await WGSMap.autocomplete(query, { type: 'street', limit: 5 });
@@ -232,11 +232,11 @@ const CALC = {
         dropdown.style.display = 'none';
       }
     } catch (err) {
-      logger.error('❌ Autocomplete error:', err);
+      logger.error('Autocomplete error:', err);
     }
   },
   
-  // ✅ REFACTOR: Použití WGSMap.addMarker()
+  // REFACTOR: Použití WGSMap.addMarker()
   async selectAddress(feature) {
     const street = feature.properties.street || '';
     const houseNumber = feature.properties.housenumber || '';
@@ -260,10 +260,10 @@ const CALC = {
     });
 
     await this.calculateRoute();
-    this.toast('✓ Adresa vybrána', 'success');
+    this.toast('Adresa vybrána', 'success');
   },
   
-  // ✅ REFACTOR: Použití WGSMap.calculateRoute()
+  // REFACTOR: Použití WGSMap.calculateRoute()
   async calculateRoute() {
     // ⚡ DEBOUNCING: Počkat než uživatel přestane klikat
     clearTimeout(this.calculateRouteTimeout);
@@ -288,20 +288,20 @@ const CALC = {
 
           // VAROVÁNÍ: Pokud se používá vzdušná čára
           if (provider === 'haversine') {
-            this.toast('⚠️ Použita vzdušná čára - routing API nedostupné', 'warning');
-            logger.warn('⚠️ Using haversine distance (straight line)');
+            this.toast('Použita vzdušná čára - routing API nedostupné', 'warning');
+            logger.warn('Using haversine distance (straight line)');
           } else if (provider === 'OSRM') {
-            logger.log('✅ Route calculated by OSRM (road distance)');
+            logger.log('Route calculated by OSRM (road distance)');
           }
         }
       } catch (err) {
-        logger.error('❌ Route error:', err);
-        this.toast('❌ Nepodařilo se vypočítat trasu', 'error');
+        logger.error('Route error:', err);
+        this.toast('Nepodařilo se vypočítat trasu', 'error');
       }
     }, 500); // Debounce 500ms
   },
 
-  // ✅ REFACTOR: Použití WGSMap.drawRoute()
+  // REFACTOR: Použití WGSMap.drawRoute()
   renderRoute(routeData) {
     const { distanceKm, coordinates } = routeData;
 
@@ -326,7 +326,7 @@ const CALC = {
     `;
 
     document.getElementById('distanceInfo').classList.add('show');
-    logger.log(`✓ Route: ${this.distance.toFixed(1)} km`);
+    logger.log(`Route: ${this.distance.toFixed(1)} km`);
   },
   
   calculatePrice() {
@@ -336,7 +336,7 @@ const CALC = {
     const partCount = parseInt(document.getElementById('partCount').value) || 1;
     
     if (serviceLocation === 'home' && !this.customerAddress) {
-      this.toast('⚠️ Nejdříve zadejte adresu', 'error');
+      this.toast('Nejdříve zadejte adresu', 'error');
       return;
     }
     
@@ -413,13 +413,13 @@ const CALC = {
     document.getElementById('priceSummary').style.display = 'block';
     document.getElementById('priceSummary').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     
-    this.toast('✓ Cena vypočítána', 'success');
+    this.toast('Cena vypočítána', 'success');
   },
   
   orderService() {
     const summary = document.getElementById('priceSummary');
     if (summary.style.display === 'none') {
-      this.toast('⚠️ Nejdříve spočítejte cenu', 'error');
+      this.toast('Nejdříve spočítejte cenu', 'error');
       return;
     }
     

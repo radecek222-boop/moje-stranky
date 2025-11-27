@@ -325,11 +325,11 @@ function handleUpdate(PDO $pdo, array $input): array
         $t7 = microtime(true);
         $pdo->commit();
         $t8 = microtime(true);
-        error_log(sprintf("⏱️ commit: %.0fms", ($t8 - $t7) * 1000));
+        error_log(sprintf("[TIMING] commit: %.0fms", ($t8 - $t7) * 1000));
 
-        // ⏱️ CELKOVÝ ČAS
+        // CELKOVY CAS
         $tTotal = microtime(true);
-        error_log(sprintf("⏱️ ✅ handleUpdate TOTAL: %.0fms (%.1fs)", ($tTotal - $t0) * 1000, $tTotal - $t0));
+        error_log(sprintf("[TIMING] handleUpdate TOTAL: %.0fms (%.1fs)", ($tTotal - $t0) * 1000, $tTotal - $t0));
 
         return [
             'status' => 'success',
@@ -339,9 +339,9 @@ function handleUpdate(PDO $pdo, array $input): array
     } catch (Exception $e) {
         $pdo->rollBack();
 
-        // ⏱️ Log času i při chybě
+        // Log casu i pri chybe
         $tError = microtime(true);
-        error_log(sprintf("⏱️ ❌ Čas do chyby: %.0fms", ($tError - $t0) * 1000));
+        error_log(sprintf("[TIMING] Cas do chyby: %.0fms", ($tError - $t0) * 1000));
 
         throw $e;
     }
@@ -485,7 +485,7 @@ function handleReopen(PDO $pdo, array $input): array
         $newId = $pdo->lastInsertId();
 
         // Přidat poznámku do nové zakázky
-        $noteTextNew = "🔄 Zakázka otevřena jako klon původní zakázky\n\n" .
+        $noteTextNew = "Zakázka otevřena jako klon původní zakázky\n\n" .
                        "Původní zakázka: " . ($original['reklamace_id'] ?? $original['id']) . "\n" .
                        "Stav: NOVÁ (čeká na zpracování)\n" .
                        "Vytvořil: " . ($_SESSION['user_name'] ?? 'Uživatel') . "\n" .
@@ -503,7 +503,7 @@ function handleReopen(PDO $pdo, array $input): array
         ]);
 
         // Přidat poznámku do původní zakázky
-        $noteTextOriginal = "🔗 Založena nová zakázka (reklamace)\n\n" .
+        $noteTextOriginal = "Založena nová zakázka (reklamace)\n\n" .
                             "Nová zakázka: " . ($newWorkflowId ?? $newId) . "\n" .
                             "Zákazník znovu nahlásil problém.\n" .
                             "Vytvořil: " . ($_SESSION['user_name'] ?? 'Uživatel') . "\n" .
@@ -524,7 +524,7 @@ function handleReopen(PDO $pdo, array $input): array
         $pdo->commit();
 
         $t1 = microtime(true);
-        error_log(sprintf("⏱️ handleReopen DONE: %.0fms", ($t1 - $t0) * 1000));
+        error_log(sprintf("[TIMING] handleReopen DONE: %.0fms", ($t1 - $t0) * 1000));
 
         return [
             'status' => 'success',
@@ -540,7 +540,7 @@ function handleReopen(PDO $pdo, array $input): array
         }
 
         $tError = microtime(true);
-        error_log(sprintf("⏱️ ❌ handleReopen CHYBA: %.0fms - %s", ($tError - $t0) * 1000, $e->getMessage()));
+        error_log(sprintf("[TIMING] handleReopen CHYBA: %.0fms - %s", ($tError - $t0) * 1000, $e->getMessage()));
 
         throw $e;
     }
@@ -791,6 +791,80 @@ try {
         $primaryId = $pdo->lastInsertId();
         $identifierForClient = $workflowId ?? $primaryId;
 
+        // ========================================
+        // AUTOMATICKA NOTIFIKACE: Odeslat email zakaznikovi a adminovi
+        // ========================================
+        try {
+            // Nacist email sablonu pro novou reklamaci
+            $stmtNotif = $pdo->prepare("
+                SELECT * FROM wgs_notifications
+                WHERE trigger_event = 'complaint_created' AND type = 'email' AND active = 1
+                LIMIT 1
+            ");
+            $stmtNotif->execute();
+            $notifSablona = $stmtNotif->fetch(PDO::FETCH_ASSOC);
+
+            if ($notifSablona && !empty($email)) {
+                require_once __DIR__ . '/../../includes/EmailQueue.php';
+
+                // Pripravit data pro sablonu
+                $notifSubject = str_replace([
+                    '{{customer_name}}',
+                    '{{order_id}}',
+                    '{{product}}',
+                    '{{date}}'
+                ], [
+                    $jmeno,
+                    $identifierForClient,
+                    $model ?: 'Nabytek Natuzzi',
+                    date('d.m.Y')
+                ], $notifSablona['subject']);
+
+                $notifBody = str_replace([
+                    '{{customer_name}}',
+                    '{{order_id}}',
+                    '{{product}}',
+                    '{{date}}',
+                    '{{address}}',
+                    '{{description}}',
+                    '{{customer_email}}',
+                    '{{customer_phone}}',
+                    '{{company_email}}',
+                    '{{company_phone}}'
+                ], [
+                    $jmeno,
+                    $identifierForClient,
+                    $model ?: 'Nabytek Natuzzi',
+                    date('d.m.Y H:i'),
+                    $adresa ?: 'Neuvedena',
+                    $popisProblemu,
+                    $email,
+                    $telefon,
+                    'reklamace@wgs-service.cz',
+                    '+420 725 965 826'
+                ], $notifSablona['template']);
+
+                // Pridat email do fronty
+                $emailQueue = new EmailQueue($pdo);
+                $emailQueue->add(
+                    $email,
+                    $notifSubject,
+                    $notifBody,
+                    [
+                        'notification_id' => $notifSablona['id'],
+                        'reklamace_id' => $primaryId,
+                        'trigger' => 'complaint_created'
+                    ]
+                );
+
+                error_log("[Notifikace] Email o nove reklamaci pridan do fronty: {$email}, Zakazka: {$identifierForClient}");
+            }
+        } catch (Exception $notifError) {
+            // Chyba notifikace nesmí rozbít celý request
+            error_log("[Notifikace] Chyba pri odesilani: " . $notifError->getMessage());
+        }
+        // ========================================
+
     } catch (Exception $e) {
         // CRITICAL FIX: ROLLBACK při chybě
         if ($pdo->inTransaction()) {
@@ -813,7 +887,7 @@ try {
     // Log error for debugging
     error_log('SAVE.PHP ERROR: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ':' . $e->getLine());
 
-    // ✅ SECURITY FIX: Sanitizovat POST data před logováním (odstranit citlivá pole)
+    // SECURITY FIX: Sanitizovat POST data pred logovanim (odstranit citliva pole)
     $safePost = $_POST;
     $sensitiveKeys = ['password', 'csrf_token', 'credit_card', 'pin', 'ssn', 'card_number'];
     foreach ($sensitiveKeys as $key) {

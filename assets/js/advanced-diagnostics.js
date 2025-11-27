@@ -88,7 +88,7 @@ class AdvancedDiagnostics {
 
         const header = `
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 WGS SERVICE - ULTRA HLOUBKOVÁ DIAGNOSTIKA
+[Start] WGS SERVICE - ULTRA HLOUBKOVÁ DIAGNOSTIKA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Začátek analýzy: ${new Date().toLocaleString('cs-CZ')}
@@ -107,7 +107,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
         this.log('');
         this.log(`${section.icon} ${section.name.toUpperCase()}`, 'section-header');
         this.log(`─`.repeat(79), 'separator');
-        this.log(`📊 ${section.description}...`, 'info');
+        this.log(`[Stats] ${section.description}...`, 'info');
         this.log('');
 
         try {
@@ -127,10 +127,10 @@ Režim: Produkčně bezpečný (READ-ONLY)
                 this.results[section.action] = data.data;
                 this.displayResults(section, data.data);
             } else {
-                this.log(`❌ Chyba: ${data.message}`, 'error');
+                this.log(`Chyba: ${data.message}`, 'error');
             }
         } catch (error) {
-            this.log(`❌ Chyba při analýze: ${error.message}`, 'error');
+            this.log(`Chyba při analýze: ${error.message}`, 'error');
         }
     }
 
@@ -182,7 +182,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
             // Zobrazit prvních 10 kritických
             critical.slice(0, 10).forEach((idx, i) => {
                 this.log(`${i + 1}. ${idx.table}.${idx.column}`, 'warning');
-                this.log(`   📋 Důvod: ${idx.reason}`, 'info');
+                this.log(`   [List] Důvod: ${idx.reason}`, 'info');
                 this.log(`   ⚡ Dopad: ${idx.estimated_impact}`, 'info');
                 this.log(`   💻 SQL: ${idx.sql_command}`, 'code');
                 this.log('');
@@ -192,7 +192,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
                 this.log(`... a dalších ${data.missing_indexes.length - 10} indexů`, 'info');
             }
         } else {
-            this.log('✅ Všechny důležité indexy jsou přítomny', 'success');
+            this.log('Všechny důležité indexy jsou přítomny', 'success');
         }
 
         this.log('');
@@ -205,33 +205,33 @@ Režim: Produkčně bezpečný (READ-ONLY)
             data.orphaned_records.forEach(orphan => {
                 this.log(`📦 ${orphan.table}: ${orphan.count} záznamů`, 'warning');
                 this.log(`   ${orphan.description}`, 'info');
-                this.log(`   🔧 Doporučení: ${orphan.recommended_action}`, 'info');
+                this.log(`   [Fix] Doporučení: ${orphan.recommended_action}`, 'info');
                 this.log('');
             });
         } else {
-            this.log('✅ Žádné orphaned records', 'success');
+            this.log('Žádné orphaned records', 'success');
         }
 
         this.log('');
 
         // Data Integrity
         if (data.data_integrity_issues && data.data_integrity_issues.length > 0) {
-            this.log(`⚠️ PROBLÉMY S INTEGRITOU DAT (${data.data_integrity_issues.length})`, 'error');
+            this.log(`PROBLÉMY S INTEGRITOU DAT (${data.data_integrity_issues.length})`, 'error');
             this.log('═'.repeat(79), 'separator');
 
             data.data_integrity_issues.forEach(issue => {
-                this.log(`📊 ${issue.table}.${issue.column}`, 'error');
+                this.log(`[Stats] ${issue.table}.${issue.column}`, 'error');
                 this.log(`   ${issue.issue}`, 'warning');
                 this.log('');
             });
         } else {
-            this.log('✅ Data integrity OK', 'success');
+            this.log('Data integrity OK', 'success');
         }
 
         // Table Statistics
         if (data.table_statistics && data.table_statistics.length > 0) {
             this.log('');
-            this.log('📊 TOP 5 NEJVĚTŠÍCH TABULEK', 'info');
+            this.log('[Stats] TOP 5 NEJVĚTŠÍCH TABULEK', 'info');
             this.log('─'.repeat(79), 'separator');
 
             data.table_statistics.slice(0, 5).forEach((table, i) => {
@@ -255,9 +255,9 @@ Režim: Produkčně bezpečný (READ-ONLY)
             data.dead_code.slice(0, 10).forEach((item, i) => {
                 this.log(`${i + 1}. ${item.type}: ${item.name}`, 'warning');
                 item.locations.forEach(loc => {
-                    this.log(`   📄 ${loc.file}:${loc.line}`, 'info');
+                    this.log(`   [Doc] ${loc.file}:${loc.line}`, 'info');
                 });
-                this.log(`   💡 ${item.recommendation}`, 'info');
+                this.log(`   [Tip] ${item.recommendation}`, 'info');
                 this.log('');
             });
 
@@ -265,25 +265,25 @@ Režim: Produkčně bezpečný (READ-ONLY)
                 this.log(`... a dalších ${data.dead_code.length - 10} položek`, 'info');
             }
         } else {
-            this.log('✅ Žádný dead code detekován', 'success');
+            this.log('Žádný dead code detekován', 'success');
         }
 
         this.log('');
 
         // Duplicates
         if (data.duplicates && data.duplicates.length > 0) {
-            this.log(`📋 DUPLICITNÍ SOUBORY (${data.duplicates.length})`, 'warning');
+            this.log(`[List] DUPLICITNÍ SOUBORY (${data.duplicates.length})`, 'warning');
             this.log('═'.repeat(79), 'separator');
 
             data.duplicates.forEach((dup, i) => {
                 this.log(`${i + 1}. ${dup.type}`, 'warning');
-                this.log(`   📄 ${dup.file1}`, 'info');
-                this.log(`   📄 ${dup.file2}`, 'info');
-                this.log(`   💡 ${dup.recommendation}`, 'info');
+                this.log(`   [Doc] ${dup.file1}`, 'info');
+                this.log(`   [Doc] ${dup.file2}`, 'info');
+                this.log(`   [Tip] ${dup.recommendation}`, 'info');
                 this.log('');
             });
         } else {
-            this.log('✅ Žádné duplicitní soubory', 'success');
+            this.log('Žádné duplicitní soubory', 'success');
         }
 
         this.log('');
@@ -300,19 +300,19 @@ Režim: Produkčně bezpečný (READ-ONLY)
 
             critical.slice(0, 5).forEach((item, i) => {
                 this.log(`${i + 1}. ${item.function}() - Komplexita: ${item.complexity}`, 'error');
-                this.log(`   📄 ${item.file}`, 'info');
-                this.log(`   💡 ${item.recommendation}`, 'info');
+                this.log(`   [Doc] ${item.file}`, 'info');
+                this.log(`   [Tip] ${item.recommendation}`, 'info');
                 this.log('');
             });
         } else {
-            this.log('✅ Komplexita kódu v normě', 'success');
+            this.log('Komplexita kódu v normě', 'success');
         }
 
         this.log('');
 
         // Syntax Issues
         if (data.syntax_issues && data.syntax_issues.length > 0) {
-            this.log(`❌ SYNTAX ERRORS (${data.syntax_issues.length})`, 'error');
+            this.log(`SYNTAX ERRORS (${data.syntax_issues.length})`, 'error');
             this.log('═'.repeat(79), 'separator');
 
             data.syntax_issues.forEach((issue, i) => {
@@ -321,14 +321,14 @@ Režim: Produkčně bezpečný (READ-ONLY)
                 this.log('');
             });
         } else {
-            this.log('✅ Žádné syntax errors', 'success');
+            this.log('Žádné syntax errors', 'success');
         }
 
         this.log('');
 
         // Best Practices
         if (data.best_practices && data.best_practices.length > 0) {
-            this.log(`⚠️ BEST PRACTICES VIOLATIONS (${data.best_practices.length})`, 'warning');
+            this.log(`BEST PRACTICES VIOLATIONS (${data.best_practices.length})`, 'warning');
             this.log('═'.repeat(79), 'separator');
 
             const critical = data.best_practices.filter(bp => bp.severity === 'critical');
@@ -340,12 +340,12 @@ Režim: Produkčně bezpečný (READ-ONLY)
 
             [...critical, ...high].slice(0, 10).forEach((bp, i) => {
                 this.log(`${i + 1}. [${bp.severity.toUpperCase()}] ${bp.file}`, bp.severity === 'critical' ? 'error' : 'warning');
-                this.log(`   ⚠️ ${bp.issue}`, 'warning');
-                this.log(`   💡 ${bp.recommendation}`, 'info');
+                this.log(`   ${bp.issue}`, 'warning');
+                this.log(`   [Tip] ${bp.recommendation}`, 'info');
                 this.log('');
             });
         } else {
-            this.log('✅ Best practices dodrženy', 'success');
+            this.log('Best practices dodrženy', 'success');
         }
     }
 
@@ -360,12 +360,12 @@ Režim: Produkčně bezpečný (READ-ONLY)
             (data.file_upload_risks?.length || 0);
 
         if (totalIssues === 0) {
-            this.log('✅ Žádná kritická bezpečnostní rizika nenalezena', 'success');
+            this.log('Žádná kritická bezpečnostní rizika nenalezena', 'success');
             this.log('');
             return;
         }
 
-        this.log(`🔒 CELKEM NALEZENO: ${totalIssues} bezpečnostních rizik`, 'warning');
+        this.log(`[Lock] CELKEM NALEZENO: ${totalIssues} bezpečnostních rizik`, 'warning');
         this.log('═'.repeat(79), 'separator');
         this.log('');
 
@@ -376,11 +376,11 @@ Režim: Produkčně bezpečný (READ-ONLY)
 
             data.xss_risks.slice(0, 5).forEach((risk, i) => {
                 this.log(`${i + 1}. ${risk.file}:${risk.line}`, 'error');
-                this.log(`   ⚠️ ${risk.pattern}`, 'warning');
+                this.log(`   ${risk.pattern}`, 'warning');
                 this.log(`   Severity: ${risk.severity.toUpperCase()}`, 'error');
 
                 if (risk.context && risk.context.length > 0) {
-                    this.log('   📝 Kontext:', 'info');
+                    this.log('   [Edit] Kontext:', 'info');
                     risk.context.forEach(ctx => {
                         const prefix = ctx.is_error_line ? '   >>> ' : '       ';
                         this.log(`${prefix}${ctx.line}: ${ctx.content}`, ctx.is_error_line ? 'error' : 'code');
@@ -403,11 +403,11 @@ Režim: Produkčně bezpečný (READ-ONLY)
 
             data.sql_injection_risks.slice(0, 5).forEach((risk, i) => {
                 this.log(`${i + 1}. ${risk.file}:${risk.line}`, 'error');
-                this.log(`   ⚠️ ${risk.pattern}`, 'warning');
+                this.log(`   ${risk.pattern}`, 'warning');
                 this.log(`   Severity: CRITICAL`, 'error');
 
                 if (risk.context && risk.context.length > 0) {
-                    this.log('   📝 Kontext:', 'info');
+                    this.log('   [Edit] Kontext:', 'info');
                     risk.context.forEach(ctx => {
                         const prefix = ctx.is_error_line ? '   >>> ' : '       ';
                         this.log(`${prefix}${ctx.line}: ${ctx.content}`, ctx.is_error_line ? 'error' : 'code');
@@ -433,12 +433,12 @@ Režim: Produkčně bezpečný (READ-ONLY)
 
         // Exposed Files
         if (data.exposed_files && data.exposed_files.length > 0) {
-            this.log(`⚠️ EXPONOVANÉ SOUBORY (${data.exposed_files.length})`, 'warning');
+            this.log(`EXPONOVANÉ SOUBORY (${data.exposed_files.length})`, 'warning');
             this.log('─'.repeat(79), 'separator');
 
             data.exposed_files.forEach((file, i) => {
                 this.log(`${i + 1}. ${file.file} [${file.severity.toUpperCase()}]`, file.severity === 'critical' ? 'error' : 'warning');
-                this.log(`   💡 ${file.recommendation}`, 'info');
+                this.log(`   [Tip] ${file.recommendation}`, 'info');
                 this.log('');
             });
         }
@@ -456,7 +456,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
             data.large_files.slice(0, 10).forEach((file, i) => {
                 const severity = file.size_bytes > 2000000 ? 'error' : 'warning';
                 this.log(`${i + 1}. ${file.file}: ${file.size}`, severity);
-                this.log(`   💡 ${file.recommendation}`, 'info');
+                this.log(`   [Tip] ${file.recommendation}`, 'info');
                 this.log('');
             });
 
@@ -464,7 +464,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
                 this.log(`... a dalších ${data.large_files.length - 10} souborů`, 'info');
             }
         } else {
-            this.log('✅ Žádné nadměrně velké soubory', 'success');
+            this.log('Žádné nadměrně velké soubory', 'success');
         }
 
         this.log('');
@@ -476,7 +476,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
 
             data.unminified_assets.slice(0, 10).forEach((asset, i) => {
                 this.log(`${i + 1}. ${asset.file}: ${asset.size}`, 'info');
-                this.log(`   💾 Potenciální úspora: ${asset.potential_savings}`, 'success');
+                this.log(`   [Save] Potenciální úspora: ${asset.potential_savings}`, 'success');
                 this.log('');
             });
 
@@ -484,7 +484,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
                 this.log(`... a dalších ${data.unminified_assets.length - 10} souborů`, 'info');
             }
         } else {
-            this.log('✅ Všechny assets minifikovány', 'success');
+            this.log('Všechny assets minifikovány', 'success');
         }
 
         this.log('');
@@ -503,7 +503,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
                 this.log(`${i + 1}. ${file}: ${count} obrázků`, 'warning');
             });
         } else {
-            this.log('✅ Lazy loading správně nastaven', 'success');
+            this.log('Lazy loading správně nastaven', 'success');
         }
     }
 
@@ -513,23 +513,23 @@ Režim: Produkčně bezpečný (READ-ONLY)
     displayDependencyResults(data) {
         // Missing Files
         if (data.missing_files && data.missing_files.length > 0) {
-            this.log(`❌ CHYBĚJÍCÍ SOUBORY (${data.missing_files.length})`, 'error');
+            this.log(`CHYBĚJÍCÍ SOUBORY (${data.missing_files.length})`, 'error');
             this.log('═'.repeat(79), 'separator');
 
             data.missing_files.forEach((missing, i) => {
                 this.log(`${i + 1}. ${missing.file}`, 'error');
-                this.log(`   ❌ Chybí: ${missing.missing_dependency}`, 'error');
+                this.log(`   Chybí: ${missing.missing_dependency}`, 'error');
                 this.log('');
             });
         } else {
-            this.log('✅ Všechny závislosti nalezeny', 'success');
+            this.log('Všechny závislosti nalezeny', 'success');
         }
 
         this.log('');
 
         // Circular Dependencies
         if (data.circular_dependencies && data.circular_dependencies.length > 0) {
-            this.log(`🔄 CYKLICKÉ ZÁVISLOSTI (${data.circular_dependencies.length})`, 'warning');
+            this.log(`[Sync] CYKLICKÉ ZÁVISLOSTI (${data.circular_dependencies.length})`, 'warning');
             this.log('═'.repeat(79), 'separator');
 
             data.circular_dependencies.forEach((circ, i) => {
@@ -537,11 +537,11 @@ Režim: Produkčně bezpečný (READ-ONLY)
                 this.log(`   ${circ.file1}`, 'info');
                 this.log(`   ↔️`, 'info');
                 this.log(`   ${circ.file2}`, 'info');
-                this.log(`   💡 ${circ.recommendation}`, 'info');
+                this.log(`   [Tip] ${circ.recommendation}`, 'info');
                 this.log('');
             });
         } else {
-            this.log('✅ Žádné cyklické závislosti', 'success');
+            this.log('Žádné cyklické závislosti', 'success');
         }
 
         this.log('');
@@ -551,7 +551,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
             const totalFiles = Object.keys(data.require_map).length;
             const totalDeps = Object.values(data.require_map).reduce((sum, deps) => sum + deps.length, 0);
 
-            this.log('📊 DEPENDENCY MAP STATISTICS', 'info');
+            this.log('[Stats] DEPENDENCY MAP STATISTICS', 'info');
             this.log('─'.repeat(79), 'separator');
             this.log(`Total Files: ${totalFiles}`, 'info');
             this.log(`Total Dependencies: ${totalDeps}`, 'info');
@@ -570,7 +570,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
 
         // By Extension
         if (data.by_extension) {
-            this.log('📄 PODLE TYPU SOUBORU:', 'info');
+            this.log('[Doc] PODLE TYPU SOUBORU:', 'info');
             this.log('─'.repeat(79), 'separator');
 
             const sorted = Object.entries(data.by_extension).sort((a, b) => b[1] - a[1]);
@@ -595,7 +595,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
 
         // Deep Nesting
         if (data.deep_nesting && data.deep_nesting.length > 0) {
-            this.log(`⚠️ PŘÍLIŠ HLUBOKÉ VNOŘOVÁNÍ (${data.deep_nesting.length})`, 'warning');
+            this.log(`PŘÍLIŠ HLUBOKÉ VNOŘOVÁNÍ (${data.deep_nesting.length})`, 'warning');
             this.log('─'.repeat(79), 'separator');
 
             data.deep_nesting.slice(0, 5).forEach((file, i) => {
@@ -609,7 +609,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
      */
     displayAPIResults(data) {
         if (!data || data.length === 0) {
-            this.log('⚠️ Žádná API data', 'warning');
+            this.log('Žádná API data', 'warning');
             return;
         }
 
@@ -618,7 +618,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
         this.log('');
 
         data.forEach((endpoint, i) => {
-            const statusIcon = endpoint.status === 'OK' ? '✅' : '❌';
+            const statusIcon = endpoint.status === 'OK' ? '' : '';
             const statusClass = endpoint.status === 'OK' ? 'success' : 'error';
 
             this.log(`${i + 1}. ${statusIcon} ${endpoint.endpoint}`, statusClass);
@@ -637,7 +637,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
 
         this.log('');
         this.log('━'.repeat(79), 'separator');
-        this.log('📊 FINÁLNÍ SHRNUTÍ', 'header');
+        this.log('[Stats] FINÁLNÍ SHRNUTÍ', 'header');
         this.log('━'.repeat(79), 'separator');
         this.log('');
 
@@ -653,7 +653,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
         this.log('');
 
         // Export možnosti
-        this.log('💾 EXPORT MOŽNOSTI', 'info');
+        this.log('[Save] EXPORT MOŽNOSTI', 'info');
         this.log('─'.repeat(79), 'separator');
         this.log('Diagnostika dokončena. Data jsou k dispozici pro export:', 'info');
         this.log('  • JSON Export - pro další zpracování', 'info');
@@ -662,7 +662,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
         this.log('');
 
         this.log('━'.repeat(79), 'separator');
-        this.log('✅ DIAGNOSTIKA DOKONČENA', 'success');
+        this.log('DIAGNOSTIKA DOKONČENA', 'success');
         this.log('━'.repeat(79), 'separator');
     }
 
@@ -768,7 +768,7 @@ Režim: Produkčně bezpečný (READ-ONLY)
                 this.log(JSON.stringify(data.data, null, 2), 'code');
             }
         } catch (error) {
-            this.log(`❌ Chyba při přípravě AI dat: ${error.message}`, 'error');
+            this.log(`Chyba při přípravě AI dat: ${error.message}`, 'error');
         }
     }
 

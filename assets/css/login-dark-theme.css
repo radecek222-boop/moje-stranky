@@ -193,9 +193,9 @@ input::placeholder {
 }
 
 .notification.error {
-    background: rgba(255, 68, 68, 0.1) !important;
-    border-color: rgba(255, 68, 68, 0.3) !important;
-    color: #ff4444 !important;
+    background: rgba(80, 80, 80, 0.2) !important;
+    border-color: rgba(100, 100, 100, 0.3) !important;
+    color: #aaa !important;
 }
 
 .notification.info {

@@ -9,7 +9,7 @@
 
     if (typeof url === 'string' && url.includes('protokol_api.php')) {
       console.log('🌐 FETCH INTERCEPTED:', url);
-      console.trace('📍 Call stack:');
+      console.trace('[Loc] Call stack:');
 
       // Pokud je to POST, vypiš body
       if (args[1] && args[1].method === 'POST') {
@@ -26,9 +26,9 @@
     return originalFetch.apply(this, args)
       .then(response => {
         if (typeof url === 'string' && url.includes('protokol_api.php')) {
-          console.log('✅ Response status:', response.status);
+          console.log('Response status:', response.status);
           if (!response.ok) {
-            console.error('❌ Response failed:', response.status, response.statusText);
+            console.error('Response failed:', response.status, response.statusText);
           }
         }
         return response;
@@ -41,5 +41,5 @@
       });
   };
 
-  console.log('✅ Fetch interceptor installed');
+  console.log('Fetch interceptor installed');
 })();

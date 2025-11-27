@@ -27,7 +27,7 @@ function toggleMenu() {
   const isActive = navMenu.classList.contains('active');
 
   if (!isActive) {
-    // ✅ Otevírání - zamknout scroll (iOS fix)
+    // Otevírání - zamknout scroll (iOS fix)
     window.menuScrollPosition = window.pageYOffset;
     document.body.style.position = 'fixed';
     document.body.style.top = `-${window.menuScrollPosition}px`;
@@ -37,7 +37,7 @@ function toggleMenu() {
     navMenu.classList.add('active');
     hamburger.classList.add('active');
   } else {
-    // ✅ Zavírání - obnovit scroll
+    // Zavírání - obnovit scroll
     navMenu.classList.remove('active');
     hamburger.classList.remove('active');
     document.body.style.position = '';
@@ -63,7 +63,7 @@ function showNotification(message, type = 'info') {
   notification.style.display = 'block';
   notification.style.opacity = '1';
 
-  // ✅ Tap-to-dismiss (iOS touch feedback)
+  // Tap-to-dismiss (iOS touch feedback)
   const skryjNotifikaci = () => {
     notification.style.opacity = '0';
     setTimeout(() => {
@@ -71,7 +71,7 @@ function showNotification(message, type = 'info') {
     }, 300);
   };
 
-  // ✅ Click pro okamžité zavření
+  // Click pro okamžité zavření
   notification.onclick = skryjNotifikaci;
 
   // Auto-hide po 3 sekundách (kromě error)
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
       nav.classList.remove('active');
       hamburger.classList.remove('active');
 
-      // ✅ Obnovit scroll při zavření menu (iOS fix)
+      // Obnovit scroll při zavření menu (iOS fix)
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
@@ -149,30 +149,30 @@ async function fetchCsrfToken() {
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
-  logger.log('🚀 Inicializace protokolu...');
+  logger.log('[Start] Inicializace protokolu...');
   initSignaturePad();
 
   const urlParams = new URLSearchParams(window.location.search);
   currentReklamaceId = urlParams.get('id');
 
-  logger.log('📋 ID z URL:', currentReklamaceId);
+  logger.log('[List] ID z URL:', currentReklamaceId);
 
   if (currentReklamaceId) {
-    logger.log('✅ ID nalezeno v URL');
+    logger.log('ID nalezeno v URL');
     await loadReklamace(currentReklamaceId);
     loadPhotosFromDatabase(currentReklamaceId);
     loadKalkulaceFromDatabase(currentReklamaceId);
   } else {
-    logger.warn('⚠️ Chybí ID v URL - zkusím načíst z localStorage');
+    logger.warn('Chybí ID v URL - zkusím načíst z localStorage');
     await loadReklamace(null);
 
     if (currentReklamace && currentReklamace.id) {
-      logger.log('✅ ID nalezeno v načtených datech:', currentReklamace.id);
+      logger.log('ID nalezeno v načtených datech:', currentReklamace.id);
       currentReklamaceId = currentReklamace.id;
       loadPhotosFromDatabase(currentReklamaceId);
       loadKalkulaceFromDatabase(currentReklamaceId);
     } else {
-      logger.error('❌ ID se nepodařilo najít!');
+      logger.error('ID se nepodařilo najít!');
     }
   }
 
@@ -209,7 +209,7 @@ function setupAutoTranslate() {
         if (czField.value.trim().length > 5) {
           translateField(field, true);
         }
-      }, 2500); // ✅ Zvýšeno z 1500ms - prevence lagování na pomalejších mobilech
+      }, 2500); // Zvýšeno z 1500ms - prevence lagování na pomalejších mobilech
     });
   });
 }
@@ -226,16 +226,16 @@ function initSignaturePad() {
     canvas.height = cssHeight * ratio;
     canvas.getContext("2d").scale(ratio, ratio);
   };
-  window.addEventListener("resize", resize, { passive: true }); // ✅ PŘIDÁNO passive
+  window.addEventListener("resize", resize, { passive: true }); // PŘIDÁNO passive
   resize();
   signaturePad = new SignaturePad(canvas, {
     minWidth: 1,
     maxWidth: 2.5,
     penColor: "black",
     backgroundColor: "white",
-    throttle: 8,               // ✅ PŘIDÁNO - throttle pro lepší performance
-    velocityFilterWeight: 0.5, // ✅ PŘIDÁNO - hladší linie
-    minDistance: 2             // ✅ PŘIDÁNO - méně bodů = méně laguje
+    throttle: 8,               // PŘIDÁNO - throttle pro lepší performance
+    velocityFilterWeight: 0.5, // PŘIDÁNO - hladší linie
+    minDistance: 2             // PŘIDÁNO - méně bodů = méně laguje
   });
 }
 
@@ -256,13 +256,13 @@ async function loadPhotosFromDatabase(customerId) {
     const data = await response.json();
 
     if (!data.success || data.total_photos === 0) {
-      logger.log('❌ Fotky nenalezeny v databázi');
+      logger.log('Fotky nenalezeny v databázi');
       showNotif("warning", "Nebyly nalezeny fotky");
       logger.log('═══════════════════════════════════════');
       return;
     }
 
-    logger.log('✅ Fotky načteny z databáze!');
+    logger.log('Fotky načteny z databáze!');
     const sections = data.sections;
 
     logger.log('📦 Sekce:', Object.keys(sections));
@@ -303,22 +303,22 @@ async function loadPhotosFromDatabase(customerId) {
       });
     });
 
-    logger.log(`📊 CELKEM: ${totalPhotos} fotek, ${totalVideos} videí`);
+    logger.log(`[Stats] CELKEM: ${totalPhotos} fotek, ${totalVideos} videí`);
 
     if (attachedPhotos.length > 0) {
       const previewPhotos = attachedPhotos.map(p => typeof p === 'string' ? p : p.data);
       renderPhotoPreview(previewPhotos);
-      showNotif("success", `✓ Načteno ${totalPhotos} fotek`);
-      logger.log('✅ Fotky úspěšně načteny s popisky');
+      showNotif("success", `Načteno ${totalPhotos} fotek`);
+      logger.log('Fotky úspěšně načteny s popisky');
     } else {
-      logger.log('⚠️ Žádné fotky k zobrazení');
+      logger.log('Žádné fotky k zobrazení');
       showNotif("info", "Žádné fotky");
     }
 
     logger.log('═══════════════════════════════════════');
 
   } catch (error) {
-    logger.error('❌ Chyba při načítání fotek:', error);
+    logger.error('Chyba při načítání fotek:', error);
     showNotif("error", "Chyba načítání fotek");
   }
 }
@@ -340,7 +340,7 @@ async function loadKalkulaceFromDatabase(customerId) {
     const data = await response.json();
 
     if (!data.success) {
-      logger.log('❌ Kalkulace nenalezena v databázi:', data.error);
+      logger.log('Kalkulace nenalezena v databázi:', data.error);
       logger.log('═══════════════════════════════════════');
       return;
     }
@@ -351,20 +351,20 @@ async function loadKalkulaceFromDatabase(customerId) {
       return;
     }
 
-    logger.log('✅ Kalkulace načtena z databáze!');
+    logger.log('Kalkulace načtena z databáze!');
     kalkulaceData = data.kalkulace;
 
     logger.log('📦 Kalkulace data:', kalkulaceData);
     logger.log('💰 Celková cena:', kalkulaceData.celkovaCena, '€');
-    logger.log('📍 Adresa:', kalkulaceData.adresa);
+    logger.log('[Loc] Adresa:', kalkulaceData.adresa);
     logger.log('📏 Vzdálenost:', kalkulaceData.vzdalenost, 'km');
     logger.log('═══════════════════════════════════════');
 
     // Zobrazit notifikaci
-    showNotif("success", `✓ Kalkulace načtena (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
+    showNotif("success", `Kalkulace načtena (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
 
   } catch (error) {
-    logger.error('❌ Chyba při načítání kalkulace:', error);
+    logger.error('Chyba při načítání kalkulace:', error);
     showNotif("error", "Chyba načítání kalkulace");
   }
 }
@@ -374,18 +374,18 @@ async function loadReklamace(id) {
 
   try {
     logger.log('🔍 Načítám data zákazníka...');
-    logger.log('📋 ID z URL:', id);
+    logger.log('[List] ID z URL:', id);
 
     const localData = localStorage.getItem('currentCustomer');
 
     if (localData) {
-      logger.log('✅ Data nalezena v localStorage');
+      logger.log('Data nalezena v localStorage');
       const customer = JSON.parse(localData);
       logger.log('📦 Data zákazníka:', customer);
 
-      // ✅ KONTROLA OPRÁVNĚNÍ
+      // KONTROLA OPRÁVNĚNÍ
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-      logger.log('👤 Aktuální uživatel:', currentUser.name, '| Role:', currentUser.role);
+      logger.log('[User] Aktuální uživatel:', currentUser.name, '| Role:', currentUser.role);
 
       if (currentUser.role === 'prodejce') {
         // Prodejce může vidět jen své zakázky
@@ -397,7 +397,7 @@ async function loadReklamace(id) {
         }
       }
       // Admin a technik vidí všechny zakázky - bez kontroly
-      logger.log('✅ Oprávnění potvrzeno');
+      logger.log('Oprávnění potvrzeno');
 
       const customerName = customer.jmeno || customer.zakaznik || '';
       let ulice = '', mesto = '', psc = '';
@@ -407,15 +407,15 @@ async function loadReklamace(id) {
         ulice = parts[0] || '';
         mesto = parts[1] || '';
         psc = parts[2] || '';
-        logger.log('📍 Adresa (nový formát):', { ulice, mesto, psc });
+        logger.log('[Loc] Adresa (nový formát):', { ulice, mesto, psc });
       } else {
         ulice = customer.ulice || '';
         mesto = customer.mesto || '';
         psc = customer.psc || '';
-        logger.log('📍 Adresa (starý formát):', { ulice, mesto, psc });
+        logger.log('[Loc] Adresa (starý formát):', { ulice, mesto, psc });
       }
 
-      logger.log('📝 Vyplňuji formulář...');
+      logger.log('[Edit] Vyplňuji formulář...');
       document.getElementById("order-number").value = customer.reklamace_id || "";
       document.getElementById("claim-number").value = customer.cislo || "";
       document.getElementById("customer").value = customerName;
@@ -429,13 +429,13 @@ async function loadReklamace(id) {
       currentReklamace = customer;
       currentReklamaceId = customer.reklamace_id || customer.cislo || customer.id;
 
-      logger.log('✅ Data zákazníka úspěšně načtena a vyplněna');
-      showNotif("success", "✓ Data načtena");
+      logger.log('Data zákazníka úspěšně načtena a vyplněna');
+      showNotif("success", "Data načtena");
       showLoading(false);
       return;
     }
 
-    logger.warn('⚠️ Data v localStorage nenalezena');
+    logger.warn('Data v localStorage nenalezena');
 
     if (!id) {
       showNotif("error", "Chybí ID reklamace");
@@ -457,10 +457,10 @@ async function loadReklamace(id) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      logger.error('❌ Load reklamace error:', response.status, errorText);
+      logger.error('Load reklamace error:', response.status, errorText);
       try {
         const errorJson = JSON.parse(errorText);
-        logger.error('❌ Load error detail:', errorJson);
+        logger.error('Load error detail:', errorJson);
         throw new Error(errorJson.error || errorJson.message || `Server error ${response.status}`);
       } catch (parseErr) {
         throw new Error(`Server error ${response.status}: ${errorText.substring(0, 200)}`);
@@ -470,7 +470,7 @@ async function loadReklamace(id) {
     const result = await response.json();
 
     if (result.status === 'success') {
-      logger.log('✅ Data načtena z API');
+      logger.log('Data načtena z API');
       currentReklamace = result.reklamace;
 
       const customerName = currentReklamace.jmeno || currentReklamace.zakaznik || '';
@@ -501,7 +501,7 @@ async function loadReklamace(id) {
       showNotif("error", result.message || "Reklamace nenalezena");
     }
   } catch (error) {
-    logger.error('❌ Chyba načítání:', error);
+    logger.error('Chyba načítání:', error);
     showNotif("error", "Chyba načítání");
   } finally {
     showLoading(false);
@@ -608,14 +608,14 @@ function renderPhotoPreview(arr) {
   arr.forEach(src => {
     const photoData = typeof src === 'string' ? src : src.data;
 
-    // ✅ Wrapper pro touch feedback (scale 0.95 on :active)
+    // Wrapper pro touch feedback (scale 0.95 on :active)
     const wrapper = document.createElement("div");
     wrapper.className = "photo-thumb-wrapper";
 
     const img = document.createElement("img");
     img.src = photoData;
 
-    // ✅ Event delegation místo inline onclick
+    // Event delegation místo inline onclick
     wrapper.addEventListener('click', () => {
       window.open(photoData, "_blank");
     });
@@ -631,7 +631,7 @@ async function generateProtocolPDF() {
 
   const wrapper = document.querySelector(".wrapper");
 
-  logger.log('📄 Vytvářím desktop clone pro PDF generování...');
+  logger.log('[Doc] Vytvářím desktop clone pro PDF generování...');
 
   // ❗ CLONE APPROACH: Vytvoření skrytého desktop wrapper mimo viewport
   // Tento přístup zajistí identický PDF na mobilu i desktopu
@@ -642,33 +642,33 @@ async function generateProtocolPDF() {
   // Přidat clone do DOM (mimo viewport, neviditelný)
   document.body.appendChild(clone);
 
-  // ✅ FIX: Odstranit interaktivní prvky z PDF (tlačítka, akce)
+  // FIX: Odstranit interaktivní prvky z PDF (tlačítka, akce)
   // Odstranit celý kontejner signature-actions (tlačítko + label)
   const signatureActions = clone.querySelector('.signature-actions');
   if (signatureActions) {
     signatureActions.remove();
-    logger.log('✅ Signature actions (tlačítko "Vymazat podpis" + label) odstraněny z PDF');
+    logger.log('Signature actions (tlačítko "Vymazat podpis" + label) odstraněny z PDF');
   }
 
   // Odstranit dolní tlačítka (Export, Odeslat, Zpět)
   const btnsContainer = clone.querySelector('.btns');
   if (btnsContainer) {
     btnsContainer.remove();
-    logger.log('✅ Dolní tlačítka odstraněna z PDF');
+    logger.log('Dolní tlačítka odstraněna z PDF');
   }
 
   // Odstranit photoPreviewContainer pokud existuje
   const photoPreview = clone.querySelector('#photoPreviewContainer');
   if (photoPreview) {
     photoPreview.remove();
-    logger.log('✅ Photo preview odstraněn z PDF (fotky jsou v samostatné sekci)');
+    logger.log('Photo preview odstraněn z PDF (fotky jsou v samostatné sekci)');
   }
 
   // Odstranit šipku u rozbalovací hlavičky (není interaktivní v PDF)
   const customerInfoArrow = clone.querySelector('.customer-info-arrow');
   if (customerInfoArrow) {
     customerInfoArrow.remove();
-    logger.log('✅ Šipka u zákaznické hlavičky odstraněna z PDF');
+    logger.log('Šipka u zákaznické hlavičky odstraněna z PDF');
   }
 
   // Ujistit se, že customer-info-content je viditelný (není skrytý)
@@ -677,7 +677,7 @@ async function generateProtocolPDF() {
     customerInfoContent.style.display = 'block';
     customerInfoContent.style.maxHeight = 'none';
     customerInfoContent.style.overflow = 'visible';
-    logger.log('✅ Zákaznický obsah nastaven jako viditelný v PDF');
+    logger.log('Zákaznický obsah nastaven jako viditelný v PDF');
   }
 
   // Zkopírovat signature pad canvas obsah do clone
@@ -687,16 +687,16 @@ async function generateProtocolPDF() {
     try {
       const ctx = cloneCanvas.getContext('2d');
       ctx.drawImage(originalCanvas, 0, 0);
-      logger.log('✅ Signature pad zkopírován do clone');
+      logger.log('Signature pad zkopírován do clone');
     } catch (e) {
-      logger.warn('⚠️ Nepodařilo se zkopírovat signature pad:', e);
+      logger.warn('Nepodařilo se zkopírovat signature pad:', e);
     }
   }
 
   // Počkat na reflow clone (desktop layout se aplikuje)
   await new Promise(resolve => setTimeout(resolve, 150));
 
-  logger.log('📸 Renderuji clone pomocí html2canvas...');
+  logger.log('[Photo] Renderuji clone pomocí html2canvas...');
 
   const canvas = await html2canvas(clone, {
     scale: 3,
@@ -734,7 +734,7 @@ async function generateProtocolPDF() {
 
   // ❗ Odstranit clone z DOM
   document.body.removeChild(clone);
-  logger.log('✅ Clone odstraněn, PDF vygenerováno');
+  logger.log('Clone odstraněn, PDF vygenerováno');
 
   return doc;
 }
@@ -760,7 +760,7 @@ async function generatePhotosPDF() {
   const cellWidth = availableWidth / cols;
   const cellHeight = availableHeight / rows;
 
-  logger.log(`📄 Vytvářím PDF: ${attachedPhotos.length} fotek, ${Math.ceil(attachedPhotos.length / photosPerPage)} stránek`);
+  logger.log(`[Doc] Vytvářím PDF: ${attachedPhotos.length} fotek, ${Math.ceil(attachedPhotos.length / photosPerPage)} stránek`);
 
   for (let i = 0; i < attachedPhotos.length; i++) {
     const photo = attachedPhotos[i];
@@ -770,7 +770,7 @@ async function generatePhotosPDF() {
 
     if (i > 0 && i % photosPerPage === 0) {
       pdf.addPage();
-      logger.log(`📄 Přidána nová stránka (fotka ${i + 1})`);
+      logger.log(`[Doc] Přidána nová stránka (fotka ${i + 1})`);
     }
 
     const indexOnPage = i % photosPerPage;
@@ -822,15 +822,15 @@ async function generatePhotosPDF() {
 
       pdf.addImage(photoData, "JPEG", x + offsetX, photoY + offsetY, finalWidth, finalHeight, undefined, 'MEDIUM');
 
-      logger.log(`  📸 Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel || 'bez popisku'} (${imgWidth}x${imgHeight} → ${Math.round(finalWidth)}x${Math.round(finalHeight)}mm)`);
+      logger.log(`  [Photo] Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel || 'bez popisku'} (${imgWidth}x${imgHeight} → ${Math.round(finalWidth)}x${Math.round(finalHeight)}mm)`);
 
     } catch (err) {
-      logger.warn(`⚠️ Nelze detekovat velikost fotky ${i + 1}, používám celou buňku`);
+      logger.warn(`Nelze detekovat velikost fotky ${i + 1}, používám celou buňku`);
       pdf.addImage(photoData, "JPEG", x, photoY, maxPhotoWidth, maxPhotoHeight, undefined, 'MEDIUM');
     }
   }
 
-  logger.log(`✅ PDF s fotkami vytvořeno (${attachedPhotos.length} fotek s popisky)`);
+  logger.log(`PDF s fotkami vytvořeno (${attachedPhotos.length} fotek s popisky)`);
 
   return pdf;
 }
@@ -1005,7 +1005,7 @@ async function generatePricelistPDF() {
     });
   }
 
-  logger.log(`✅ PDF PRICELIST vytvořen (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
+  logger.log(`PDF PRICELIST vytvořen (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
 
   return pdf;
 }
@@ -1014,7 +1014,7 @@ async function exportBothPDFs() {
   try {
     showLoading(true);
 
-    logger.log('📋 Generuji kompletní PDF (protokol + PRICELIST + fotodokumentace)...');
+    logger.log('[List] Generuji kompletní PDF (protokol + PRICELIST + fotodokumentace)...');
     logger.log('💰 Kontrola kalkulace - kalkulaceData:', kalkulaceData);
 
     // Vytvořit JEDNO PDF s protokolem
@@ -1022,8 +1022,8 @@ async function exportBothPDFs() {
 
     // Pokud existuje kalkulace, přidat PRICELIST
     if (kalkulaceData) {
-      logger.log('✅ Kalkulace nalezena - přidávám PRICELIST...');
-      logger.log('📊 Kalkulace data:', kalkulaceData);
+      logger.log('Kalkulace nalezena - přidávám PRICELIST...');
+      logger.log('[Stats] Kalkulace data:', kalkulaceData);
 
       // NOVÁ STRÁNKA: PRICELIST
       doc.addPage();
@@ -1150,9 +1150,9 @@ async function exportBothPDFs() {
       doc.text('CELKEM:', margin, yPos);
       doc.text(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
 
-      logger.log(`✅ PRICELIST přidán (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
+      logger.log(`PRICELIST přidán (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
     } else {
-      logger.warn('⚠️ Kalkulace nenalezena - PRICELIST nebude v PDF');
+      logger.warn('Kalkulace nenalezena - PRICELIST nebude v PDF');
       logger.warn('   Možné příčiny:');
       logger.warn('   1. Kalkulace nebyla vytvořena');
       logger.warn('   2. Kalkulace nebyla uložena do databáze');
@@ -1161,7 +1161,7 @@ async function exportBothPDFs() {
 
     // Pokud jsou fotky, přidat fotodokumentaci na KONEC protokolu
     if (attachedPhotos.length > 0) {
-      logger.log('📸 Přidávám fotodokumentaci...');
+      logger.log('[Photo] Přidávám fotodokumentaci...');
 
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
@@ -1234,11 +1234,11 @@ async function exportBothPDFs() {
           doc.setFontSize(7);
           doc.text(`${i + 1}. ${photoLabel}`, x, y + thumbSize + 3, { maxWidth: thumbSize });
         } catch (err) {
-          logger.warn(`⚠️ Nelze přidat miniaturu ${i + 1}`);
+          logger.warn(`Nelze přidat miniaturu ${i + 1}`);
         }
       }
 
-      logger.log(`✅ Index ${attachedPhotos.length} fotek vytvořen`);
+      logger.log(`Index ${attachedPhotos.length} fotek vytvořen`);
 
       // DALŠÍ STRÁNKY: Velké fotky 4 na stránku
       doc.addPage();
@@ -1311,23 +1311,23 @@ async function exportBothPDFs() {
 
           doc.addImage(photoData, "JPEG", x + offsetX, photoY + offsetY, finalWidth, finalHeight, undefined, 'MEDIUM');
 
-          logger.log(`  📸 Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel}`);
+          logger.log(`  [Photo] Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel}`);
 
         } catch (err) {
-          logger.warn(`⚠️ Chyba fotky ${i + 1}`);
+          logger.warn(`Chyba fotky ${i + 1}`);
           doc.addImage(photoData, "JPEG", x, photoY, maxPhotoWidth, maxPhotoHeight, undefined, 'MEDIUM');
         }
       }
 
-      logger.log(`✅ Fotodokumentace přidána (${attachedPhotos.length} fotek)`);
-      showNotif("success", `✓ PDF vytvořeno (protokol + ${attachedPhotos.length} fotek)`);
+      logger.log(`Fotodokumentace přidána (${attachedPhotos.length} fotek)`);
+      showNotif("success", `PDF vytvořeno (protokol + ${attachedPhotos.length} fotek)`);
 
     } else {
-      showNotif("success", "✓ Protokol vytvořen (bez fotek)");
+      showNotif("success", "Protokol vytvořen (bez fotek)");
     }
 
     // Uložit PDF do databáze (stejně jako při odeslání emailem)
-    logger.log('💾 Ukládám PDF do databáze...');
+    logger.log('[Save] Ukládám PDF do databáze...');
     try {
       const csrfToken = await fetchCsrfToken();
       const completePdfBase64 = doc.output("datauristring").split(",")[1];
@@ -1346,13 +1346,13 @@ async function exportBothPDFs() {
       if (saveResponse.ok) {
         const saveResult = await saveResponse.json();
         if (saveResult.status === 'success') {
-          logger.log('✅ PDF úspěšně uložen do databáze');
+          logger.log('PDF úspěšně uložen do databáze');
         } else {
-          logger.warn('⚠️ PDF se nepodařilo uložit:', saveResult.message);
+          logger.warn('PDF se nepodařilo uložit:', saveResult.message);
         }
       }
     } catch (err) {
-      logger.error('❌ Chyba při ukládání PDF:', err);
+      logger.error('Chyba při ukládání PDF:', err);
       // Pokračujeme i přes chybu - alespoň zobrazíme PDF
     }
 
@@ -1378,7 +1378,7 @@ async function exportBothPDFs() {
     await saveProtokolToDB();
 
     // Označit jako hotovou
-    logger.log('📋 Označuji reklamaci jako hotovou...');
+    logger.log('[List] Označuji reklamaci jako hotovou...');
     try {
       const csrfToken = await fetchCsrfToken();
       const markResponse = await fetch('app/controllers/save.php', {
@@ -1395,14 +1395,14 @@ async function exportBothPDFs() {
       const markResult = await markResponse.json();
 
       if (markResult.status === 'success') {
-        logger.log('✅ Reklamace označena jako hotová');
+        logger.log('Reklamace označena jako hotová');
       }
     } catch (err) {
-      logger.error('❌ Chyba při označování:', err);
+      logger.error('Chyba při označování:', err);
     }
 
   } catch (error) {
-    logger.error('❌ Chyba při generování PDF:', error);
+    logger.error('Chyba při generování PDF:', error);
     showNotif("error", "Chyba při vytváření PDF");
   } finally {
     showLoading(false);
@@ -1413,7 +1413,7 @@ async function sendToCustomer() {
   try {
     // FÁZE 1: Generování kompletního PDF (protokol + fotky) pro NÁHLED
     showLoadingWithMessage(true, 'Generuji protokol... Prosím čekejte');
-    logger.log('📋 Generuji kompletní PDF pro náhled před odesláním...');
+    logger.log('[List] Generuji kompletní PDF pro náhled před odesláním...');
     logger.log('💰 Kontrola kalkulace - kalkulaceData:', kalkulaceData);
 
     // Vytvořit JEDNO PDF s protokolem
@@ -1422,8 +1422,8 @@ async function sendToCustomer() {
     // Pokud existuje kalkulace, přidat PRICELIST
     if (kalkulaceData) {
       showLoadingWithMessage(true, `Přidávám PRICELIST (${kalkulaceData.celkovaCena.toFixed(2)} €)... Prosím čekejte`);
-      logger.log('✅ Kalkulace nalezena - přidávám PRICELIST...');
-      logger.log('📊 Kalkulace data:', kalkulaceData);
+      logger.log('Kalkulace nalezena - přidávám PRICELIST...');
+      logger.log('[Stats] Kalkulace data:', kalkulaceData);
 
       // NOVÁ STRÁNKA: PRICELIST
       doc.addPage();
@@ -1550,16 +1550,16 @@ async function sendToCustomer() {
       doc.text('CELKEM:', margin, yPos);
       doc.text(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
 
-      logger.log(`✅ PRICELIST přidán (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
+      logger.log(`PRICELIST přidán (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
     } else {
-      logger.warn('⚠️ Kalkulace nenalezena - PRICELIST nebude v emailu');
+      logger.warn('Kalkulace nenalezena - PRICELIST nebude v emailu');
       logger.warn('   Zkontrolujte, zda byla kalkulace vytvořena a uložena');
     }
 
     // Pokud jsou fotky, přidat fotodokumentaci na KONEC protokolu (stejně jako exportBothPDFs)
     if (attachedPhotos.length > 0) {
       showLoadingWithMessage(true, `Přidávám ${attachedPhotos.length} fotografií... Prosím čekejte`);
-      logger.log('📸 Přidávám fotodokumentaci...');
+      logger.log('[Photo] Přidávám fotodokumentaci...');
 
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
@@ -1632,11 +1632,11 @@ async function sendToCustomer() {
           doc.setFontSize(7);
           doc.text(`${i + 1}. ${photoLabel}`, x, y + thumbSize + 3, { maxWidth: thumbSize });
         } catch (err) {
-          logger.warn(`⚠️ Nelze přidat miniaturu ${i + 1}`);
+          logger.warn(`Nelze přidat miniaturu ${i + 1}`);
         }
       }
 
-      logger.log(`✅ Index ${attachedPhotos.length} fotek vytvořen`);
+      logger.log(`Index ${attachedPhotos.length} fotek vytvořen`);
 
       // DALŠÍ STRÁNKY: Velké fotky 4 na stránku
       doc.addPage();
@@ -1709,15 +1709,15 @@ async function sendToCustomer() {
 
           doc.addImage(photoData, "JPEG", x + offsetX, photoY + offsetY, finalWidth, finalHeight, undefined, 'MEDIUM');
 
-          logger.log(`  📸 Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel}`);
+          logger.log(`  [Photo] Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel}`);
 
         } catch (err) {
-          logger.warn(`⚠️ Chyba fotky ${i + 1}`);
+          logger.warn(`Chyba fotky ${i + 1}`);
           doc.addImage(photoData, "JPEG", x, photoY, maxPhotoWidth, maxPhotoHeight, undefined, 'MEDIUM');
         }
       }
 
-      logger.log(`✅ Fotodokumentace přidána (${attachedPhotos.length} fotek)`);
+      logger.log(`Fotodokumentace přidána (${attachedPhotos.length} fotek)`);
     }
 
     // Konverze na base64 a uložení pro odeslání
@@ -1728,12 +1728,12 @@ async function sendToCustomer() {
     cachedPdfBase64 = completePdfBase64;
     pdfPreviewContext = 'send';
 
-    // ✅ PERFORMANCE: Rovnou odeslat bez preview modalu
+    // PERFORMANCE: Rovnou odeslat bez preview modalu
     logger.log('📧 Odesílám email přímo bez náhledu...');
     await potvrditAOdeslat();
 
   } catch (error) {
-    logger.error('❌ Chyba při generování PDF:', error);
+    logger.error('Chyba při generování PDF:', error);
     showNotif("error", "Chyba při vytváření PDF");
     showLoadingWithMessage(false);
   }
@@ -1741,7 +1741,7 @@ async function sendToCustomer() {
 
 /**
  * Potvrzení a odeslání emailu se zákazníkovi
- * ✅ Volá se ROVNOU z sendToCustomer() bez preview modalu
+ * Volá se ROVNOU z sendToCustomer() bez preview modalu
  */
 async function potvrditAOdeslat() {
   if (!cachedPdfBase64) {
@@ -1750,7 +1750,7 @@ async function potvrditAOdeslat() {
   }
 
   try {
-    // ✅ PERFORMANCE: Preview modal vypnut, rovnou odesílání emailu
+    // PERFORMANCE: Preview modal vypnut, rovnou odesílání emailu
     showLoadingWithMessage(true, 'Odesílám email zákazníkovi... Prosím čekejte');
     logger.log('📧 Odesílám PDF zákazníkovi...');
 
@@ -1770,10 +1770,10 @@ async function potvrditAOdeslat() {
     // Detailní výpis chyby pokud response není OK
     if (!response.ok) {
       const errorText = await response.text();
-      logger.error('❌ Server error:', response.status, errorText);
+      logger.error('Server error:', response.status, errorText);
       try {
         const errorJson = JSON.parse(errorText);
-        logger.error('❌ Error detail:', errorJson);
+        logger.error('Error detail:', errorJson);
         throw new Error(errorJson.error || errorJson.message || `Server error ${response.status}`);
       } catch (parseErr) {
         throw new Error(`Server error ${response.status}: ${errorText.substring(0, 200)}`);
@@ -1783,10 +1783,10 @@ async function potvrditAOdeslat() {
     const result = await response.json();
 
     if (result.status === 'success') {
-      showNotif("success", "✓ Email odeslán zákazníkovi");
+      showNotif("success", "Email odeslán zákazníkovi");
       await saveProtokolToDB();
 
-      logger.log('📋 Označuji reklamaci jako hotovou...');
+      logger.log('[List] Označuji reklamaci jako hotovou...');
       const markResponse = await fetch('app/controllers/save.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -1801,9 +1801,9 @@ async function potvrditAOdeslat() {
       const markResult = await markResponse.json();
 
       if (markResult.status === 'success') {
-        logger.log('✅ Reklamace označena jako hotová');
+        logger.log('Reklamace označena jako hotová');
       } else {
-        logger.warn('⚠️ Nepodařilo se označit jako hotovou:', markResult.message);
+        logger.warn('Nepodařilo se označit jako hotovou:', markResult.message);
       }
 
       if (currentReklamaceId) {
@@ -1813,7 +1813,7 @@ async function potvrditAOdeslat() {
         localStorage.removeItem(pdfKey);
         localStorage.removeItem('photosReadyForProtocol');
         localStorage.removeItem('photosCustomerId');
-        logger.log('✅ Fotky a PDF vymazány z localStorage');
+        logger.log('Fotky a PDF vymazány z localStorage');
       }
 
       setTimeout(() => {
@@ -1921,13 +1921,13 @@ async function translateText(sourceId, targetId) {
   }
 
   try {
-    logger.log('🔄 Překládám:', text.substring(0, 50) + '...');
+    logger.log('[Sync] Překládám:', text.substring(0, 50) + '...');
     const translated = await translateTextApi(text, 'cs', 'en');
 
     if (translated) {
       targetField.value = translated;
-      logger.log('✅ Přeloženo:', translated.substring(0, 50) + '...');
-      showNotification('✅ Text přeložen', 'success');
+      logger.log('Přeloženo:', translated.substring(0, 50) + '...');
+      showNotification('Text přeložen', 'success');
     } else {
       showNotification('Překlad selhal', 'error');
     }
@@ -1950,7 +1950,7 @@ async function autoTranslateField(fieldId) {
   const text = field.value.trim();
   if (!text) return;
 
-  logger.log('🔄 Překládám pole:', fieldId);
+  logger.log('[Sync] Překládám pole:', fieldId);
 
   let enLabel = field.parentElement.querySelector('.en-label');
 
@@ -1970,7 +1970,7 @@ async function autoTranslateField(fieldId) {
 
   if (translated) {
     enLabel.textContent = translated;
-    logger.log('✅ Přeloženo:', fieldId, '->', translated.substring(0, 50) + '...');
+    logger.log('Přeloženo:', fieldId, '->', translated.substring(0, 50) + '...');
   }
 }
 
@@ -1999,7 +1999,7 @@ function initAutoTranslation() {
       translateText(source, target);
     });
 
-    logger.log('✅ Auto-překlad aktivován pro:', source, '→', target);
+    logger.log('Auto-překlad aktivován pro:', source, '→', target);
   });
 }
 
@@ -2064,7 +2064,7 @@ async function reopenOrder(id) {
   );
 
   if (!confirmed) {
-    logger.log('[reopenOrder] ❌ Znovuotevření zrušeno uživatelem');
+    logger.log('[reopenOrder] Znovuotevření zrušeno uživatelem');
     return;
   }
 
@@ -2090,7 +2090,7 @@ async function reopenOrder(id) {
     const result = await response.json();
 
     if (result.status === 'success') {
-      logger.log('[reopenOrder] ✅ Zakázka úspěšně znovu otevřena');
+      logger.log('[reopenOrder] Zakázka úspěšně znovu otevřena');
       showNotif('success', 'Zakázka byla znovu otevřena');
 
       // Obnovit stránku po 1 sekundě
@@ -2102,7 +2102,7 @@ async function reopenOrder(id) {
     }
 
   } catch (error) {
-    logger.error('[reopenOrder] ❌ Chyba:', error);
+    logger.error('[reopenOrder] Chyba:', error);
     showNotif('error', 'Chyba při znovuotevření: ' + error.message);
   } finally {
     showLoadingWithMessage(false);

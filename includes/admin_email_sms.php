@@ -385,14 +385,90 @@ try {
 
         <!-- SMS -->
         <div id="section-sms" class="cc-section <?= $currentSection === 'sms' ? 'active' : '' ?>">
-            <div class="cc-alert info">
+            <?php
+            // Nacist SMS sablony
+            $smsSablony = [];
+            try {
+                $stmt = $pdo->query("
+                    SELECT id, name, description, trigger_event, recipient_type,
+                           type, subject, template, active, created_at, updated_at
+                    FROM wgs_notifications
+                    WHERE type = 'sms'
+                    ORDER BY name ASC
+                ");
+                $smsSablony = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (PDOException $e) {
+                $smsSablony = [];
+            }
+            ?>
+
+            <div class="cc-alert info" style="margin-bottom: 1.5rem;">
                 <div class="cc-alert-content">
-                    <div class="cc-alert-title">SMS Notifikace</div>
+                    <div class="cc-alert-title">Jak SMS funguje</div>
                     <div class="cc-alert-message">
-                        SMS funkce je ve vývoji. Prozatím použijte pouze emailové notifikace.
+                        SMS se odesilaji pres nativni aplikaci telefonu (iPhone/Android).
+                        Kdyz technik klikne na "Odeslat SMS", otevre se aplikace Zpravy s predvyplnenym textem.
+                        Technik pak jen potvrdi odeslani.
                     </div>
                 </div>
             </div>
+
+            <?php if (count($smsSablony) === 0): ?>
+                <div class="cc-alert" style="background: #f5f5f5; border: 1px solid #ddd;">
+                    <div class="cc-alert-content">
+                        <div class="cc-alert-title">Zadne SMS sablony</div>
+                        <div class="cc-alert-message">
+                            SMS sablony zatim nebyly vytvoreny.
+                            <a href="/pridej_sms_sablony.php" style="color: #333; text-decoration: underline;">Spustit migraci pro pridani SMS sablon</a>
+                        </div>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1rem;">
+                    <?php foreach ($smsSablony as $sablona): ?>
+                    <div style="background: #fff; border: 1px solid #ddd; padding: 1.25rem; transition: box-shadow 0.2s;"
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
+                         onmouseout="this.style.boxShadow='none'">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                            <h4 style="margin: 0; font-size: 0.95rem; font-weight: 600; font-family: 'Poppins', sans-serif;">
+                                <?= htmlspecialchars($sablona['name']) ?>
+                            </h4>
+                            <span style="display: inline-block; padding: 0.2rem 0.5rem; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #000; background: <?= $sablona['active'] ? '#000' : '#fff' ?>; color: <?= $sablona['active'] ? '#fff' : '#000' ?>;">
+                                <?= $sablona['active'] ? 'AKTIVNI' : 'VYPNUTO' ?>
+                            </span>
+                        </div>
+                        <p style="margin: 0 0 0.75rem; font-size: 0.8rem; color: #666; font-family: 'Poppins', sans-serif;">
+                            <?= htmlspecialchars($sablona['description'] ?? '') ?>
+                        </p>
+                        <div style="font-size: 0.75rem; color: #999; margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif;">
+                            Trigger: <code style="background: #f5f5f5; padding: 0.1rem 0.3rem;"><?= htmlspecialchars($sablona['trigger_event']) ?></code>
+                        </div>
+                        <div style="background: #f9f9f9; padding: 0.75rem; font-size: 0.8rem; font-family: monospace; border: 1px solid #eee; margin-bottom: 0.75rem; max-height: 80px; overflow: hidden;">
+                            <?= htmlspecialchars(substr($sablona['template'], 0, 150)) ?><?= strlen($sablona['template']) > 150 ? '...' : '' ?>
+                        </div>
+                        <button onclick="editSmsTemplate(<?= $sablona['id'] ?>)"
+                                style="width: 100%; padding: 0.5rem; background: #333; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; font-size: 0.75rem;">
+                            Upravit sablonu
+                        </button>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- SMS promenne -->
+                <div style="margin-top: 2rem; padding: 1rem; background: #f9f9f9; border: 1px solid #ddd;">
+                    <h4 style="margin: 0 0 0.75rem; font-size: 0.85rem; font-weight: 600; font-family: 'Poppins', sans-serif;">Dostupne promenne pro SMS:</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{customer_name}}</code>
+                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{order_id}}</code>
+                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{product}}</code>
+                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{date}}</code>
+                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{time}}</code>
+                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{address}}</code>
+                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{technician_name}}</code>
+                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{technician_phone}}</code>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
 
         <!-- EMAIL MANAGEMENT -->
@@ -1235,6 +1311,140 @@ async function nacistAZobrazitPrijemce(sablonaId) {
     } catch (error) {
         console.error('Chyba načítání příjemců:', error);
         zobrazitSouhrnPrijemcu(null);
+    }
+}
+
+// ========================================
+// SMS SABLONY - EDITACE
+// ========================================
+
+// Aktualni editovana SMS sablona
+let currentSmsTemplateId = null;
+
+// Otevrit modal pro editaci SMS sablony
+async function editSmsTemplate(id) {
+    currentSmsTemplateId = id;
+
+    try {
+        const response = await fetch(`/api/notification_api.php?action=get&id=${id}`);
+        const data = await response.json();
+
+        if (data.status !== 'success' || !data.notification) {
+            alert('Chyba: Nelze nacist SMS sablonu');
+            return;
+        }
+
+        const sablona = data.notification;
+
+        // Zobrazit modal
+        const modal = document.getElementById('editSmsModal');
+        if (!modal) {
+            vytvorSmsModal();
+        }
+
+        // Naplnit data
+        document.getElementById('sms-template-name').textContent = sablona.name || '';
+        document.getElementById('sms-template-description').textContent = sablona.description || '';
+        document.getElementById('sms-template-content').value = sablona.template || '';
+        document.getElementById('sms-template-active').checked = sablona.active == 1;
+
+        // Zobrazit modal
+        document.getElementById('editSmsModal').style.display = 'flex';
+
+    } catch (error) {
+        console.error('Chyba pri nacitani SMS sablony:', error);
+        alert('Chyba pri nacitani SMS sablony');
+    }
+}
+
+// Vytvorit SMS modal (pokud neexistuje)
+function vytvorSmsModal() {
+    const modalHtml = `
+    <div id="editSmsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; padding: 1rem;">
+        <div style="background: white; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #ddd;">
+                <h3 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 600;">Upravit SMS sablonu</h3>
+                <button onclick="closeSmsModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-weight: 500; margin-bottom: 0.25rem; font-family: 'Poppins', sans-serif; font-size: 0.85rem;">Nazev:</label>
+                    <div id="sms-template-name" style="padding: 0.5rem; background: #f5f5f5; border: 1px solid #ddd; font-family: 'Poppins', sans-serif;"></div>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-weight: 500; margin-bottom: 0.25rem; font-family: 'Poppins', sans-serif; font-size: 0.85rem;">Popis:</label>
+                    <div id="sms-template-description" style="padding: 0.5rem; background: #f5f5f5; border: 1px solid #ddd; font-family: 'Poppins', sans-serif; font-size: 0.85rem; color: #666;"></div>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-weight: 500; margin-bottom: 0.25rem; font-family: 'Poppins', sans-serif; font-size: 0.85rem;">Text SMS zpravy:</label>
+                    <textarea id="sms-template-content" rows="6" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; font-family: monospace; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"></textarea>
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 0.25rem;">Max 160 znaku pro 1 SMS. Delsi zpravy se rozdeli.</div>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.85rem;">
+                        <input type="checkbox" id="sms-template-active">
+                        <span>Sablona je aktivni</span>
+                    </label>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding: 1rem 1.5rem; border-top: 1px solid #ddd;">
+                <button onclick="closeSmsModal()" style="padding: 0.5rem 1rem; background: #fff; border: 1px solid #333; color: #333; font-family: 'Poppins', sans-serif; cursor: pointer;">Zrusit</button>
+                <button onclick="saveSmsTemplate()" style="padding: 0.5rem 1rem; background: #333; border: 1px solid #333; color: #fff; font-family: 'Poppins', sans-serif; cursor: pointer; font-weight: 600;">Ulozit</button>
+            </div>
+        </div>
+    </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+// Zavrit SMS modal
+function closeSmsModal() {
+    const modal = document.getElementById('editSmsModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    currentSmsTemplateId = null;
+}
+
+// Ulozit SMS sablonu
+async function saveSmsTemplate() {
+    if (!currentSmsTemplateId) {
+        alert('Chyba: ID sablony neni nastaveno');
+        return;
+    }
+
+    const template = document.getElementById('sms-template-content').value;
+    const active = document.getElementById('sms-template-active').checked ? 1 : 0;
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+        const formData = new FormData();
+        formData.append('action', 'update');
+        formData.append('id', currentSmsTemplateId);
+        formData.append('template', template);
+        formData.append('active', active);
+        formData.append('csrf_token', csrfToken);
+
+        const response = await fetch('/api/notification_api.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            alert('SMS sablona byla ulozena');
+            closeSmsModal();
+            // Reload stranky pro zobrazeni zmen
+            window.location.reload();
+        } else {
+            alert('Chyba: ' + (data.message || 'Nepodarilo se ulozit'));
+        }
+
+    } catch (error) {
+        console.error('Chyba pri ukladani SMS sablony:', error);
+        alert('Chyba pri ukladani SMS sablony');
     }
 }
 </script>

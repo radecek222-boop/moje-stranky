@@ -3,7 +3,7 @@
  * BEZPEČNÝ fallback - kontroluje, jestli už handler existuje
  */
 (function() {
-  console.log('🔧 Protokol Buttons Fix - Kontrola...');
+  console.log('[Protokol] Buttons Fix - Kontrola...');
 
   // Flag pro detekci, jestli už byly handlery nastavené
   let handlersInitialized = false;
@@ -33,13 +33,13 @@
 
       // Pokud testAction byl zavolán, handlers už existují
       if (testActionCalled) {
-        console.log('✅ Event handlers už fungují (protokol.min.js je aktivní)');
+        console.log('[Protokol] Event handlers už fungují (protokol.min.js je aktivní)');
         handlersInitialized = true;
         return;
       }
 
       // Pokud ne, přidat fallback handlers
-      console.warn('⚠️ Event handlers NEFUNGUJÍ - přidávám fallback');
+      console.warn('[Protokol] Event handlers NEFUNGUJÍ - přidávám fallback');
 
       // Fallback handler pro data-action
       document.addEventListener('click', (event) => {
@@ -49,16 +49,16 @@
         if (!button) return;
 
         const action = button.getAttribute('data-action');
-        console.log(`🔘 [FALLBACK] Kliknuto na: ${action}`);
+        console.log(`[FALLBACK] Kliknuto na: ${action}`);
 
         if (typeof window[action] === 'function') {
           try {
             window[action]();
           } catch (err) {
-            console.error(`❌ Chyba při volání ${action}():`, err);
+            console.error(`[Chyba] při volání ${action}():`, err);
           }
         } else {
-          console.error(`❌ Funkce ${action}() NEEXISTUJE`);
+          console.error(`[Chyba] Funkce ${action}() NEEXISTUJE`);
         }
       });
 
@@ -70,11 +70,11 @@
         if (!button) return;
 
         const url = button.getAttribute('data-navigate');
-        console.log(`🔘 [FALLBACK] Navigace na: ${url}`);
+        console.log(`[FALLBACK] Navigace na: ${url}`);
         window.location.href = url;
       });
 
-      console.log('✅ Fallback event listeners nastaveny');
+      console.log('[Protokol] Fallback event listeners nastaveny');
     }, 500); // Počkat 500ms na načtení protokol.min.js
   });
 })();

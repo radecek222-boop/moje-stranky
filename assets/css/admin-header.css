@@ -177,12 +177,12 @@ body.embed-mode .container {
 }
 
 .hamburger-logout {
-    color: #ff6b6b !important;
+    color: #999 !important;
     font-weight: 600 !important;
 }
 
 .hamburger-logout:hover {
-    color: #ff4444 !important;
+    color: #ccc !important;
 }
 
 .hamburger-overlay {
