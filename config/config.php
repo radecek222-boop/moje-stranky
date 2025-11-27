@@ -73,21 +73,39 @@ if (!defined('DB_PASS')) {
 // ========== ADMIN KLÍČ ==========
 // Admin se přihlašuje pouze registračním klíčem (hashovaný v .env)
 // FALLBACK: Development hodnota pokud není v env
-define('ADMIN_KEY_HASH', getEnvValue('ADMIN_KEY_HASH', 'change-in-production'));
+if (!defined('ADMIN_KEY_HASH')) {
+    define('ADMIN_KEY_HASH', getEnvValue('ADMIN_KEY_HASH', 'change-in-production'));
+}
 $adminHighKeyHash = getEnvValue('ADMIN_HIGH_KEY_HASH');
-define('ADMIN_HIGH_KEY_HASH', $adminHighKeyHash ?: null);
+if (!defined('ADMIN_HIGH_KEY_HASH')) {
+    define('ADMIN_HIGH_KEY_HASH', $adminHighKeyHash ?: null);
+}
 
 // ========== EMAIL / SMTP ==========
 // FALLBACK: Development hodnoty pokud nejsou v env
-define('SMTP_HOST', getEnvValue('SMTP_HOST', 'localhost'));
-define('SMTP_PORT', getEnvValue('SMTP_PORT', '587'));
-define('SMTP_FROM', getEnvValue('SMTP_FROM', 'noreply@localhost'));
-define('SMTP_FROM_NAME', 'White Glove Service');
-define('SMTP_USER', getEnvValue('SMTP_USER', ''));
-define('SMTP_PASS', getEnvValue('SMTP_PASS', ''));
+if (!defined('SMTP_HOST')) {
+    define('SMTP_HOST', getEnvValue('SMTP_HOST', 'localhost'));
+}
+if (!defined('SMTP_PORT')) {
+    define('SMTP_PORT', getEnvValue('SMTP_PORT', '587'));
+}
+if (!defined('SMTP_FROM')) {
+    define('SMTP_FROM', getEnvValue('SMTP_FROM', 'noreply@localhost'));
+}
+if (!defined('SMTP_FROM_NAME')) {
+    define('SMTP_FROM_NAME', 'White Glove Service');
+}
+if (!defined('SMTP_USER')) {
+    define('SMTP_USER', getEnvValue('SMTP_USER', ''));
+}
+if (!defined('SMTP_PASS')) {
+    define('SMTP_PASS', getEnvValue('SMTP_PASS', ''));
+}
 
 // ========== PATHS ==========
-define('ROOT_PATH', dirname(__DIR__));
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(__DIR__));
+}
 if (!defined('LOGS_PATH')) {
     define('LOGS_PATH', ROOT_PATH . '/logs');
 }
@@ -267,11 +285,15 @@ if (!function_exists('getDbConnection')) {
 // }
 
 // ========== DEEPL API PRO PŘEKLADY ==========
-define('DEEPL_API_KEY', getEnvValue('DEEPL_API_KEY') ?: 'optional_later');
+if (!defined('DEEPL_API_KEY')) {
+    define('DEEPL_API_KEY', getEnvValue('DEEPL_API_KEY') ?: 'optional_later');
+}
 
 // ========== JWT SECRET ==========
 // FALLBACK: Development hodnota pokud není v env
-define('JWT_SECRET', getEnvValue('JWT_SECRET', 'change-this-in-production-INSECURE'));
+if (!defined('JWT_SECRET')) {
+    define('JWT_SECRET', getEnvValue('JWT_SECRET', 'change-this-in-production-INSECURE'));
+}
 
 // ========== GEOAPIFY API (MAPY) ==========
 // FALLBACK: Development hodnota pokud není v env
@@ -287,7 +309,9 @@ if (!defined('GEOAPIFY_KEY')) {
 // ========== ENVIRONMENT CONFIGURATION ==========
 // Určení prostředí (development, staging, production)
 $environment = getEnvValue('ENVIRONMENT') ?? 'production';
-define('APP_ENV', $environment);
+if (!defined('APP_ENV')) {
+    define('APP_ENV', $environment);
+}
 if (!defined('IS_PRODUCTION')) {
     define('IS_PRODUCTION', $environment === 'production');
 }
