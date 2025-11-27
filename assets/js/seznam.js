@@ -187,11 +187,18 @@ const CacheManager = {
 // === INIT ===
 window.addEventListener('DOMContentLoaded', async () => {
   CacheManager.load();
-  
-  
+
+
   initFilters();
   initSearch();
   await loadAll();
+
+  // Zobrazit dialog pro povoleni notifikaci (po 3 sekundach)
+  setTimeout(() => {
+    if (window.WGSNotifikace && typeof window.WGSNotifikace.zobrazitDialogPovoleni === 'function') {
+      window.WGSNotifikace.zobrazitDialogPovoleni();
+    }
+  }, 3000);
 });
 
 // === VYHLEDÁVÁNÍ ===
@@ -2291,6 +2298,10 @@ async function showNotes(recordOrId) {
   setTimeout(async () => {
     await markNotesAsRead(record.id);
     await loadAll(ACTIVE_FILTER);
+    // Aktualizovat badge na ikone PWA
+    if (window.WGSNotifikace) {
+      window.WGSNotifikace.aktualizovat();
+    }
   }, 1000);
 }
 
@@ -2310,6 +2321,11 @@ async function saveNewNote(orderId) {
     await showNotes(record);
 
     await loadAll(ACTIVE_FILTER);
+
+    // Aktualizovat badge na ikone PWA (nova poznamka)
+    if (window.WGSNotifikace) {
+      window.WGSNotifikace.aktualizovat();
+    }
   } catch (e) {
     alert(t('note_save_error') + ': ' + e.message);
   }
