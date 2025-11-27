@@ -12,12 +12,12 @@ if (file_exists($autoloadSoubor)) {
     require_once $autoloadSoubor;
 }
 
-use Minishlink\WebPush\WebPush;
-use Minishlink\WebPush\Subscription;
+// POZOR: use statements jsou uvnitr metod jako fully qualified names
+// aby nedoslo k fatal error kdyz knihovna neni nainstalovana
 
 class WGSWebPush {
 
-    private ?WebPush $webPush = null;
+    private $webPush = null; // Minishlink\WebPush\WebPush
     private ?PDO $pdo = null;
     private bool $inicializovano = false;
     private string $chyba = '';
@@ -53,7 +53,7 @@ class WGSWebPush {
                 ],
             ];
 
-            $this->webPush = new WebPush($auth);
+            $this->webPush = new \Minishlink\WebPush\WebPush($auth);
             $this->webPush->setReuseVAPIDHeaders(true);
             $this->inicializovano = true;
 
@@ -98,7 +98,7 @@ class WGSWebPush {
 
         try {
             // Vytvorit Subscription objekt
-            $sub = Subscription::create([
+            $sub = \Minishlink\WebPush\Subscription::create([
                 'endpoint' => $subscription['endpoint'],
                 'publicKey' => $subscription['p256dh'],
                 'authToken' => $subscription['auth'],
@@ -215,7 +215,7 @@ class WGSWebPush {
 
         foreach ($subscriptions as $sub) {
             try {
-                $subscription = Subscription::create([
+                $subscription = \Minishlink\WebPush\Subscription::create([
                     'endpoint' => $sub['endpoint'],
                     'publicKey' => $sub['p256dh'],
                     'authToken' => $sub['auth'],
