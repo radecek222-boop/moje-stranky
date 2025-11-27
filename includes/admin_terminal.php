@@ -11,14 +11,26 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die('<div class="error">Pristup odepren</div>');
 }
 
+// Kontrola dostupnosti shell funkci
+$disabledFunctions = array_map('trim', explode(',', ini_get('disable_functions')));
+$shellExecPovoleno = function_exists('shell_exec') && !in_array('shell_exec', $disabledFunctions);
+$execPovoleno = function_exists('exec') && !in_array('exec', $disabledFunctions);
+$procOpenPovoleno = function_exists('proc_open') && !in_array('proc_open', $disabledFunctions);
+
+$shellDostupny = $shellExecPovoleno || $execPovoleno || $procOpenPovoleno;
+
 // Zpracovat prikaz pokud byl odeslan
 $vystupTerminalu = '';
 $posledniPrikaz = '';
 $chybaTerminalu = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['terminal_prikaz'])) {
+    // Kontrola shell funkci
+    if (!$shellDostupny) {
+        $chybaTerminalu = 'Shell funkce jsou na tomto hostingu zakazany. Terminal neni dostupny.';
+    }
     // CSRF kontrola
-    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+    elseif (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
         $chybaTerminalu = 'Neplatny CSRF token';
     } else {
         $prikaz = trim($_POST['terminal_prikaz']);
@@ -110,6 +122,17 @@ $serverInfo = php_uname('s') . ' ' . php_uname('r');
             </div>
         </div>
 
+        <?php if (!$shellDostupny): ?>
+        <div class="terminal-disabled">
+            <h4>Terminal neni dostupny</h4>
+            <p>Shell funkce (shell_exec, exec, proc_open) jsou na tomto hostingu zakazany.</p>
+            <p>Pro spusteni prikazu pouzijte:</p>
+            <ul>
+                <li><strong>SSH pristup</strong> - pripojte se pres SSH klienta</li>
+                <li><strong>Hosting panel</strong> - nektere hostingy maji webovy terminal</li>
+            </ul>
+        </div>
+        <?php else: ?>
         <div class="terminal-body">
             <!-- Vystup -->
             <div class="terminal-output" id="terminalVystup">
@@ -179,6 +202,7 @@ $serverInfo = php_uname('s') . ' ' . php_uname('r');
                 <li>Vystup je omezen na textovy format</li>
             </ul>
         </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -265,6 +289,39 @@ $serverInfo = php_uname('s') . ' ' . php_uname('r');
 .terminal-error {
     color: #ff6b6b;
     margin: 10px 0;
+}
+
+.terminal-disabled {
+    background: #2d2d2d;
+    padding: 40px;
+    text-align: center;
+    color: #ccc;
+}
+
+.terminal-disabled h4 {
+    color: #ff6b6b;
+    margin: 0 0 15px 0;
+    font-size: 1.2rem;
+}
+
+.terminal-disabled p {
+    margin: 10px 0;
+    color: #999;
+}
+
+.terminal-disabled ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0 0;
+}
+
+.terminal-disabled li {
+    margin: 10px 0;
+    color: #888;
+}
+
+.terminal-disabled strong {
+    color: #ccc;
 }
 
 .terminal-input-form {
