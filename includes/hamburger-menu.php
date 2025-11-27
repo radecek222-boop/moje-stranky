@@ -37,6 +37,7 @@ if ($isAdmin) {
         </a>
       <?php endforeach; ?>
       <a href="/logout.php" class="hamburger-logout">ODHLÁŠENÍ</a>
+      <a href="#" id="notif-enable-btn-admin" class="hamburger-notif-btn" style="display:none;" data-lang-cs="POVOLIT NOTIFIKACE" data-lang-en="ENABLE NOTIFICATIONS" data-lang-it="ABILITA NOTIFICHE">POVOLIT NOTIFIKACE</a>
       <div class="hamburger-lang-switcher">
         <span class="lang-flag active" data-lang="cs">🇨🇿</span>
         <span class="lang-flag" data-lang="en">🇬🇧</span>
@@ -48,6 +49,7 @@ if ($isAdmin) {
       <a href="novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
       <a href="seznam.php" <?php if($current == "seznam.php") echo 'class="active"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
       <a href="/logout.php" class="hamburger-logout" data-lang-cs="ODHLÁŠENÍ" data-lang-en="LOGOUT" data-lang-it="DISCONNETTERSI">ODHLÁŠENÍ</a>
+      <a href="#" id="notif-enable-btn-user" class="hamburger-notif-btn" style="display:none;" data-lang-cs="POVOLIT NOTIFIKACE" data-lang-en="ENABLE NOTIFICATIONS" data-lang-it="ABILITA NOTIFICHE">POVOLIT NOTIFIKACE</a>
       <div class="hamburger-lang-switcher">
         <span class="lang-flag active" data-lang="cs">🇨🇿</span>
         <span class="lang-flag" data-lang="en">🇬🇧</span>
@@ -169,6 +171,35 @@ if ($isAdmin) {
 
 .hamburger-logout:hover {
   color: #ff4444 !important;
+}
+
+.hamburger-notif-btn {
+  color: #999 !important;
+  font-weight: 500 !important;
+  border: 1px solid #666 !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 4px;
+  margin: 0.5rem 0;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.hamburger-notif-btn:hover {
+  color: #fff !important;
+  border-color: #999 !important;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+  .hamburger-notif-btn {
+    display: block !important;
+    margin: 0;
+    border: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 0;
+    padding: 1rem 1.5rem !important;
+    text-align: left;
+  }
 }
 
 .hamburger-lang-switcher {
@@ -384,11 +415,107 @@ function closeMenu() {
     };
     console.log('Hamburger menu inicializován');
   }
-  
+
+  /**
+   * InitNotifButton - Inicializace tlačítka pro povolení notifikací
+   */
+  function initNotifButton() {
+    const btnAdmin = document.getElementById('notif-enable-btn-admin');
+    const btnUser = document.getElementById('notif-enable-btn-user');
+    const btn = btnAdmin || btnUser;
+
+    if (!btn) {
+      return;
+    }
+
+    // Kontrola podpory notifikací
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+      console.log('Notifikace nejsou podporovány');
+      return;
+    }
+
+    // Kontrola zda je PWA (standalone mode) nebo iOS
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                         window.navigator.standalone === true;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+    // Zobrazit tlačítko pokud notifikace nejsou povoleny
+    if (Notification.permission === 'default') {
+      btn.style.display = '';
+      console.log('Notifikace: Tlačítko zobrazeno (permission = default)');
+    } else if (Notification.permission === 'denied') {
+      btn.style.display = '';
+      btn.textContent = btn.getAttribute('data-lang-cs') || 'NOTIFIKACE ZABLOKOVÁNY';
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+      console.log('Notifikace: Tlačítko zobrazeno (permission = denied)');
+    } else {
+      console.log('Notifikace: Již povoleny');
+      return;
+    }
+
+    // Handler pro kliknutí
+    btn.addEventListener('click', async function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (Notification.permission === 'denied') {
+        alert('Notifikace jsou zablokovány. Povolte je v nastavení prohlížeče.');
+        return;
+      }
+
+      try {
+        // Použít WGSNotifikace pokud existuje
+        if (window.WGSNotifikace && typeof window.WGSNotifikace.pozadatOPovoleni === 'function') {
+          const vysledek = await window.WGSNotifikace.pozadatOPovoleni();
+          if (vysledek) {
+            btn.style.display = 'none';
+            console.log('Notifikace: Úspěšně povoleny přes WGSNotifikace');
+          }
+        } else {
+          // Fallback - přímé povolení
+          const permission = await Notification.requestPermission();
+          if (permission === 'granted') {
+            btn.style.display = 'none';
+            console.log('Notifikace: Úspěšně povoleny');
+
+            // Registrovat subscription pokud je k dispozici service worker
+            if ('serviceWorker' in navigator && 'PushManager' in window) {
+              const registration = await navigator.serviceWorker.ready;
+              const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: window.VAPID_PUBLIC_KEY || null
+              });
+
+              // Odeslat na server
+              if (subscription) {
+                const response = await fetch('/api/push_subscribe.php', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(subscription)
+                });
+                console.log('Subscription odeslána na server');
+              }
+            }
+          } else if (permission === 'denied') {
+            btn.textContent = 'NOTIFIKACE ZABLOKOVÁNY';
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+          }
+        }
+      } catch (error) {
+        console.error('Chyba při povolování notifikací:', error);
+        alert('Nepodařilo se povolit notifikace. Zkuste to znovu.');
+      }
+    });
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initHamburgerMenu);
+    document.addEventListener('DOMContentLoaded', initNotifButton);
   } else {
     initHamburgerMenu();
+    initNotifButton();
   }
 })();
 </script>
