@@ -590,8 +590,13 @@ async function renderOrders(items = null) {
       address = parts.slice(0, 2).join(', ');
     }
 
+    // Datum termínu se ukazuje POUZE u stavu DOMLUVENÁ (open)
+    // - NOVÁ: bez datumu
+    // - DOMLUVENÁ: s datem termínu
+    // - HOTOVO: bez datumu
     let appointmentText = '';
-    if (rec.termin && rec.cas_navstevy) {
+    const isDomluvena = status.class === 'open';
+    if (isDomluvena && rec.termin && rec.cas_navstevy) {
       appointmentText = formatAppointment(rec.termin, rec.cas_navstevy);
     }
 
@@ -631,7 +636,11 @@ async function renderOrders(items = null) {
             <div class="order-detail-line" style="opacity: 0.6;">${date}</div>
           </div>
         </div>
-        ${appointmentText ? `<div class="order-footer"><div class="order-appointment">${appointmentText}</div></div>` : ''}
+        <div class="order-footer">
+          ${appointmentText
+            ? `<span class="order-appointment">${appointmentText}</span>`
+            : `<span class="order-status-text status-${status.class}">${status.text}</span>`}
+        </div>
       </div>
     `;
   }).join('');
