@@ -11,6 +11,7 @@
   const CONFIG = {
     pollingInterval: 30000,  // 30 sekund
     apiEndpoint: '/api/notes_api.php?action=get_unread_counts',
+    pushApiEndpoint: '/api/push_subscription_api.php',
     notificationIcon: '/icon192.png',
     notificationTag: 'wgs-notes'
   };
@@ -21,6 +22,8 @@
   let pollingTimer = null;
   let notificationPermission = 'default';
   let swRegistration = null;
+  let pushSubscription = null;
+  let vapidPublicKey = null;
 
   // ========================================
   // DETEKCE PLATFORMY
@@ -58,6 +61,14 @@
       try {
         swRegistration = await navigator.serviceWorker.ready;
         console.log('[Notifikace] Service Worker připraven');
+
+        // Zkontrolovat existujici push subscription
+        if ('PushManager' in window) {
+          pushSubscription = await swRegistration.pushManager.getSubscription();
+          if (pushSubscription) {
+            console.log('[Notifikace] Existujici push subscription nalezena');
+          }
+        }
       } catch (e) {
         console.log('[Notifikace] Service Worker není dostupný:', e);
       }
@@ -74,6 +85,11 @@
     } else {
       notificationPermission = Notification.permission;
       console.log('[Notifikace] Aktualni povoleni:', notificationPermission);
+
+      // Pokud jsou povoleny a mame SW, registrovat push
+      if (notificationPermission === 'granted' && swRegistration && !pushSubscription) {
+        await registrovatPushSubscription();
+      }
     }
 
     // Nacist pocatecni stav
@@ -86,6 +102,177 @@
     document.addEventListener('visibilitychange', onVisibilityChange);
 
     console.log('[Notifikace] Inicializace dokoncena');
+  }
+
+  // ========================================
+  // WEB PUSH SUBSCRIPTION
+  // ========================================
+
+  /**
+   * Nacist VAPID public key ze serveru
+   */
+  async function nacistVapidKey() {
+    if (vapidPublicKey) return vapidPublicKey;
+
+    try {
+      const response = await fetch(CONFIG.pushApiEndpoint + '?action=vapid-key');
+      const data = await response.json();
+
+      if (data.status === 'success' && data.data.vapidPublicKey) {
+        vapidPublicKey = data.data.vapidPublicKey;
+        console.log('[Notifikace] VAPID key nacten');
+        return vapidPublicKey;
+      }
+    } catch (e) {
+      console.error('[Notifikace] Chyba pri nacitani VAPID key:', e);
+    }
+
+    return null;
+  }
+
+  /**
+   * Konverze VAPID key z base64url na Uint8Array
+   */
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
+  /**
+   * Registrovat push subscription na serveru
+   */
+  async function registrovatPushSubscription() {
+    if (!swRegistration || !('PushManager' in window)) {
+      console.log('[Notifikace] PushManager neni podporovan');
+      return false;
+    }
+
+    try {
+      // Nacist VAPID key
+      const vapidKey = await nacistVapidKey();
+      if (!vapidKey) {
+        console.log('[Notifikace] VAPID key nenacten - push neni nakonfigurovany');
+        return false;
+      }
+
+      // Vytvorit subscription
+      pushSubscription = await swRegistration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidKey)
+      });
+
+      console.log('[Notifikace] Push subscription vytvorena');
+
+      // Odeslat na server
+      const ulozeno = await ulozitSubscriptionNaServer(pushSubscription);
+      if (ulozeno) {
+        console.log('[Notifikace] Subscription ulozena na serveru');
+        return true;
+      }
+
+    } catch (e) {
+      console.error('[Notifikace] Chyba pri registraci push:', e);
+
+      // Pokud je permission denied, nezobrazovat jako chybu
+      if (e.name === 'NotAllowedError') {
+        console.log('[Notifikace] Uzivatel zamitnul push notifikace');
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Ulozit subscription na server
+   */
+  async function ulozitSubscriptionNaServer(subscription) {
+    try {
+      // Ziskat CSRF token
+      const csrfInput = document.querySelector('input[name="csrf_token"]');
+      const csrfToken = csrfInput ? csrfInput.value : '';
+
+      if (!csrfToken) {
+        // Zkusit nacist CSRF z API
+        const csrfResponse = await fetch('/app/controllers/get_csrf_token.php');
+        const csrfData = await csrfResponse.json();
+        if (csrfData.token) {
+          csrfToken = csrfData.token;
+        }
+      }
+
+      const formData = new FormData();
+      formData.append('action', 'subscribe');
+      formData.append('csrf_token', csrfToken);
+      formData.append('subscription', JSON.stringify(subscription));
+      formData.append('platforma', detekujPlatformu());
+
+      const response = await fetch(CONFIG.pushApiEndpoint, {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+      return data.status === 'success';
+
+    } catch (e) {
+      console.error('[Notifikace] Chyba pri ukladani subscription:', e);
+      return false;
+    }
+  }
+
+  /**
+   * Zrusit push subscription
+   */
+  async function zrusitPushSubscription() {
+    if (!pushSubscription) return true;
+
+    try {
+      const endpoint = pushSubscription.endpoint;
+
+      // Zrusit lokalne
+      await pushSubscription.unsubscribe();
+      pushSubscription = null;
+
+      // Zrusit na serveru
+      const csrfInput = document.querySelector('input[name="csrf_token"]');
+      const csrfToken = csrfInput ? csrfInput.value : '';
+
+      const formData = new FormData();
+      formData.append('action', 'unsubscribe');
+      formData.append('csrf_token', csrfToken);
+      formData.append('endpoint', endpoint);
+
+      await fetch(CONFIG.pushApiEndpoint, {
+        method: 'POST',
+        body: formData
+      });
+
+      console.log('[Notifikace] Push subscription zrusena');
+      return true;
+
+    } catch (e) {
+      console.error('[Notifikace] Chyba pri ruseni subscription:', e);
+      return false;
+    }
+  }
+
+  /**
+   * Detekovat platformu
+   */
+  function detekujPlatformu() {
+    if (isIOS) return 'ios';
+    if (/Android/.test(navigator.userAgent)) return 'android';
+    return 'desktop';
   }
 
   /**
@@ -104,6 +291,11 @@
 
     if (Notification.permission === 'granted') {
       notificationPermission = 'granted';
+
+      // Registrovat push pokud jeste neni
+      if (!pushSubscription && swRegistration) {
+        await registrovatPushSubscription();
+      }
       return true;
     }
 
@@ -116,6 +308,12 @@
       const permission = await Notification.requestPermission();
       notificationPermission = permission;
       console.log('[Notifikace] Uzivatel odpoveděl:', permission);
+
+      // Po povoleni registrovat push
+      if (permission === 'granted' && swRegistration) {
+        await registrovatPushSubscription();
+      }
+
       return permission === 'granted';
     } catch (e) {
       console.error('[Notifikace] Chyba pri zadosti o povoleni:', e);
@@ -527,10 +725,14 @@
     aktualizovat: aktualizovatPocetNeprectenych,
     zobrazitDialogPovoleni: zobrazitDialogPovoleni,
     zobrazitIOSNavod: zobrazitIOSNavod,
+    registrovatPush: registrovatPushSubscription,
+    zrusitPush: zrusitPushSubscription,
     getTotal: () => totalUnread,
+    getPushSubscription: () => pushSubscription,
     isIOS: isIOS,
     isPWA: isPWA,
-    iosVersion: iosVersion
+    iosVersion: iosVersion,
+    iosSupportsWebPush: iosSupportsWebPush
   };
 
   // Auto-init po nacteni stranky
