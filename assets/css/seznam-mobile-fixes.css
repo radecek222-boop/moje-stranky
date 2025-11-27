@@ -170,3 +170,39 @@
 .order-notes-badge:active {
   opacity: 0.5;
 }
+
+/* ========================================================================
+   ✅ ORDER FOOTER - Termín v levém dolním rohu karty
+   ======================================================================== */
+
+/* Footer karty - spodní část */
+.order-footer {
+  margin-top: 0.5rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* Termín - větší písmo, levý dolní roh */
+.order-appointment {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Mobilní zobrazení - ještě větší písmo */
+@media (max-width: 768px) {
+  .order-appointment {
+    font-size: 1rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
