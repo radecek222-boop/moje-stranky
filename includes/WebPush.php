@@ -53,36 +53,18 @@ class WGSWebPush {
                 ],
             ];
 
-            // Defaultni nastaveni - VZDY pouzit lokalni cacert.pem pokud existuje
-            // (system CA bundle muze byt nekompletni a nezna Apple Push CA)
-            $defaultOptions = [];
-            $caCertPath = null;
-
-            // Zkusit vice moznych lokaci (kvuli symlinkum na serveru)
-            $mozneLoace = [
-                '/wgs-service.cz/www/cacert.pem',                    // Absolutni cesta na serveru
-                dirname(__DIR__) . '/cacert.pem',                    // Relativni od includes/
-                realpath(__DIR__ . '/..') . '/cacert.pem',           // S realpath
-                $_SERVER['DOCUMENT_ROOT'] . '/cacert.pem',           // Document root
+            // POZOR: Hosting neumi overit Apple Push SSL certifikaty
+            // - System CA bundle nema Apple certifikaty (error 60)
+            // - Hosting blokuje vlastni CA soubory (error 77)
+            // Proto docasne vypneme SSL verifikaci (funguje - testovano)
+            // TODO: Kontaktovat hosting pro opravu SSL/CA konfigurace
+            $defaultOptions = [
+                'curl' => [
+                    CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_SSL_VERIFYHOST => 0,
+                ],
             ];
-
-            foreach ($mozneLoace as $cesta) {
-                if ($cesta && file_exists($cesta)) {
-                    $caCertPath = $cesta;
-                    break;
-                }
-            }
-
-            if ($caCertPath) {
-                $defaultOptions = [
-                    'curl' => [
-                        CURLOPT_CAINFO => $caCertPath,
-                    ],
-                ];
-                error_log('[WebPush] Pouzivam CA bundle: ' . $caCertPath);
-            } else {
-                error_log('[WebPush] VAROVANI: cacert.pem nenalezen. Zkousene cesty: ' . implode(', ', array_filter($mozneLoace)));
-            }
+            error_log('[WebPush] VAROVANI: SSL verifikace vypnuta kvuli omezeni hostingu');
 
             $this->webPush = new \Minishlink\WebPush\WebPush($auth, $defaultOptions);
             $this->webPush->setReuseVAPIDHeaders(true);
