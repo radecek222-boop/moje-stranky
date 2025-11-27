@@ -200,17 +200,17 @@ try {
                     ];
 
                     // DEBUG: Logovat autora
-                    error_log('[Notes] Autor poznamky: ' . $createdBy);
+                    error_log('[Notes] Autor poznamky: user_id=' . $userId . ', email=' . $createdBy);
 
                     // Odeslat všem (kromě autora poznámky)
-                    // Filtruje podle emailu přímo v tabulce subscriptions
+                    // Filtruje podle user_id - každý uživatel má unikátní ID
                     $stmtSubs = $pdo->prepare("
                         SELECT id, endpoint, p256dh, auth, user_id, email
                         FROM wgs_push_subscriptions
                         WHERE aktivni = 1
-                          AND (email IS NULL OR email != :author_email)
+                          AND (user_id IS NULL OR user_id != :author_user_id)
                     ");
-                    $stmtSubs->execute([':author_email' => $createdBy]);
+                    $stmtSubs->execute([':author_user_id' => $userId]);
                     $subscriptions = $stmtSubs->fetchAll(PDO::FETCH_ASSOC);
 
                     // DEBUG: Logovat počet subscriptions
