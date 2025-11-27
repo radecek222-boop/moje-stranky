@@ -133,4 +133,86 @@ self.addEventListener('message', (event) => {
   }
 });
 
+// ========================================
+// WEB PUSH NOTIFIKACE - Pro iOS 16.4+ a ostatní prohlížeče
+// ========================================
+
+// Push event - přijímání push zpráv ze serveru
+self.addEventListener('push', (event) => {
+  console.log(`[SW ${SW_VERSION}] Push zpráva přijata`);
+
+  let data = {
+    title: 'WGS Notifikace',
+    body: 'Máte novou zprávu',
+    icon: '/icon192.png',
+    badge: '/icon192.png',
+    tag: 'wgs-notification',
+    data: {}
+  };
+
+  // Pokusit se parsovat JSON data z push zprávy
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      data = { ...data, ...payload };
+    } catch (e) {
+      // Pokud není JSON, použít jako text
+      data.body = event.data.text();
+    }
+  }
+
+  const options = {
+    body: data.body,
+    icon: data.icon || '/icon192.png',
+    badge: data.badge || '/icon192.png',
+    tag: data.tag || 'wgs-notification',
+    vibrate: [200, 100, 200],
+    data: data.data || {},
+    actions: data.actions || [],
+    requireInteraction: false
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+// Kliknutí na notifikaci
+self.addEventListener('notificationclick', (event) => {
+  console.log(`[SW ${SW_VERSION}] Kliknuto na notifikaci`);
+
+  event.notification.close();
+
+  // Získat URL pro otevření
+  let urlToOpen = '/seznam.php';
+  if (event.notification.data && event.notification.data.url) {
+    urlToOpen = event.notification.data.url;
+  } else if (event.notification.data && event.notification.data.claim_id) {
+    urlToOpen = '/seznam.php?highlight=' + event.notification.data.claim_id;
+  }
+
+  // Otevřít nebo focusnout okno
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Zkusit najít existující okno
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin) && 'focus' in client) {
+            client.navigate(urlToOpen);
+            return client.focus();
+          }
+        }
+        // Pokud není otevřené, otevřít nové
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(urlToOpen);
+        }
+      })
+  );
+});
+
+// Zavření notifikace
+self.addEventListener('notificationclose', (event) => {
+  console.log(`[SW ${SW_VERSION}] Notifikace zavřena`);
+});
+
 console.log(`[SW ${SW_VERSION}] Service Worker načten`);

@@ -1,6 +1,7 @@
 /**
  * PWA Notifications Manager
  * Badge na ikone + lokalni notifikace pro nove poznamky
+ * Podpora pro iOS 16.4+ Web Push
  */
 
 (function() {
@@ -19,16 +20,57 @@
   let totalUnread = 0;
   let pollingTimer = null;
   let notificationPermission = 'default';
+  let swRegistration = null;
+
+  // ========================================
+  // DETEKCE PLATFORMY
+  // ========================================
+
+  // Detekce iOS
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isIOSSafari = isIOS && /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS/.test(navigator.userAgent);
+
+  // Detekce PWA (spuštěno z plochy)
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+                window.navigator.standalone === true;
+
+  // iOS verze (16.4+ podporuje Web Push v PWA)
+  function getIOSVersion() {
+    if (!isIOS) return 0;
+    const match = navigator.userAgent.match(/OS (\d+)_(\d+)/);
+    if (match) {
+      return parseFloat(match[1] + '.' + match[2]);
+    }
+    return 0;
+  }
+  const iosVersion = getIOSVersion();
+  const iosSupportsWebPush = isIOS && iosVersion >= 16.4 && isPWA;
 
   /**
    * Inicializace notifikacniho systemu
    */
   async function init() {
     console.log('[Notifikace] Inicializace...');
+    console.log('[Notifikace] iOS:', isIOS, 'verze:', iosVersion, 'PWA:', isPWA);
 
-    // Zkontrolovat podporu
+    // Registrace Service Worker
+    if ('serviceWorker' in navigator) {
+      try {
+        swRegistration = await navigator.serviceWorker.ready;
+        console.log('[Notifikace] Service Worker připraven');
+      } catch (e) {
+        console.log('[Notifikace] Service Worker není dostupný:', e);
+      }
+    }
+
+    // Zkontrolovat podporu notifikací
     if (!('Notification' in window)) {
       console.log('[Notifikace] Notification API neni podporovano');
+
+      // Na iOS v prohlížeči (ne PWA) zobrazit návod
+      if (isIOS && !isPWA) {
+        setTimeout(() => zobrazitIOSNavod(), 3000);
+      }
     } else {
       notificationPermission = Notification.permission;
       console.log('[Notifikace] Aktualni povoleni:', notificationPermission);
@@ -52,6 +94,11 @@
   async function pozadatOPovoleni() {
     if (!('Notification' in window)) {
       console.log('[Notifikace] Notification API neni podporovano');
+
+      // Na iOS bez PWA nabídnout návod
+      if (isIOS && !isPWA) {
+        zobrazitIOSNavod();
+      }
       return false;
     }
 
@@ -100,8 +147,9 @@
 
   /**
    * Zobrazit lokalni notifikaci
+   * Na iOS PWA pouziva ServiceWorker, jinak klasicky Notification API
    */
-  function zobrazitNotifikaci(titulek, text, data = {}) {
+  async function zobrazitNotifikaci(titulek, text, data = {}) {
     if (notificationPermission !== 'granted') {
       console.log('[Notifikace] Notifikace nejsou povoleny');
       return;
@@ -114,26 +162,40 @@
     }
 
     try {
-      const notification = new Notification(titulek, {
-        body: text,
-        icon: CONFIG.notificationIcon,
-        tag: CONFIG.notificationTag,
-        badge: CONFIG.notificationIcon,
-        vibrate: [200, 100, 200],
-        data: data,
-        requireInteraction: false
-      });
+      // Na iOS PWA preferujeme ServiceWorker showNotification
+      if (swRegistration && (iosSupportsWebPush || isPWA)) {
+        await swRegistration.showNotification(titulek, {
+          body: text,
+          icon: CONFIG.notificationIcon,
+          badge: CONFIG.notificationIcon,
+          tag: CONFIG.notificationTag,
+          vibrate: [200, 100, 200],
+          data: data,
+          requireInteraction: false
+        });
+        console.log('[Notifikace] SW notifikace zobrazena:', titulek);
+      } else {
+        // Fallback na klasický Notification API
+        const notification = new Notification(titulek, {
+          body: text,
+          icon: CONFIG.notificationIcon,
+          tag: CONFIG.notificationTag,
+          badge: CONFIG.notificationIcon,
+          vibrate: [200, 100, 200],
+          data: data,
+          requireInteraction: false
+        });
 
-      notification.onclick = function() {
-        window.focus();
-        this.close();
-        // Pokud mame claim_id, otevrit detail
-        if (data.claim_id) {
-          window.location.href = '/seznam.php?highlight=' + data.claim_id;
-        }
-      };
+        notification.onclick = function() {
+          window.focus();
+          this.close();
+          if (data.claim_id) {
+            window.location.href = '/seznam.php?highlight=' + data.claim_id;
+          }
+        };
 
-      console.log('[Notifikace] Notifikace zobrazena:', titulek);
+        console.log('[Notifikace] Notifikace zobrazena:', titulek);
+      }
     } catch (e) {
       console.error('[Notifikace] Chyba pri zobrazeni notifikace:', e);
     }
@@ -325,6 +387,137 @@
     });
   }
 
+  /**
+   * Zobrazit návod pro iOS uživatele - Přidání na plochu
+   */
+  function zobrazitIOSNavod() {
+    // Nezobrazovat pokud už je PWA
+    if (isPWA) return;
+
+    // Nezobrazovat pokud už byl zobrazen
+    if (localStorage.getItem('wgs_ios_guide_shown') === 'true') return;
+
+    // Pouze na iOS Safari
+    if (!isIOSSafari) return;
+
+    const dialog = document.createElement('div');
+    dialog.id = 'ios-install-guide';
+    dialog.innerHTML = `
+      <div style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        color: #222;
+        padding: 24px;
+        box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+        z-index: 99999;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 14px;
+        border-top: 1px solid #ddd;
+      ">
+        <button id="ios-guide-close" style="
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          background: none;
+          border: none;
+          font-size: 24px;
+          color: #999;
+          cursor: pointer;
+          padding: 4px;
+          line-height: 1;
+        ">×</button>
+
+        <div style="font-weight: 700; font-size: 17px; margin-bottom: 12px;">
+          Nainstalujte aplikaci WGS
+        </div>
+
+        <div style="color: #666; line-height: 1.5; margin-bottom: 16px;">
+          Pro plnou funkčnost včetně notifikací přidejte aplikaci na plochu:
+        </div>
+
+        <div style="background: #f5f5f5; border-radius: 8px; padding: 16px;">
+          <div style="display: flex; align-items: center; margin-bottom: 12px;">
+            <span style="
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              width: 28px;
+              height: 28px;
+              background: #222;
+              color: #fff;
+              border-radius: 50%;
+              font-weight: 700;
+              font-size: 14px;
+              margin-right: 12px;
+            ">1</span>
+            <span>Klepněte na tlačítko <strong>Sdílet</strong> (ikona se šipkou)</span>
+          </div>
+
+          <div style="display: flex; align-items: center; margin-bottom: 12px;">
+            <span style="
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              width: 28px;
+              height: 28px;
+              background: #222;
+              color: #fff;
+              border-radius: 50%;
+              font-weight: 700;
+              font-size: 14px;
+              margin-right: 12px;
+            ">2</span>
+            <span>Vyberte <strong>Přidat na plochu</strong></span>
+          </div>
+
+          <div style="display: flex; align-items: center;">
+            <span style="
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              width: 28px;
+              height: 28px;
+              background: #222;
+              color: #fff;
+              border-radius: 50%;
+              font-weight: 700;
+              font-size: 14px;
+              margin-right: 12px;
+            ">3</span>
+            <span>Potvrďte <strong>Přidat</strong></span>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; text-align: center;">
+          <button id="ios-guide-dismiss" style="
+            background: #222;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            width: 100%;
+          ">Rozumím</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(dialog);
+
+    const zavritDialog = () => {
+      dialog.remove();
+      localStorage.setItem('wgs_ios_guide_shown', 'true');
+    };
+
+    document.getElementById('ios-guide-close').addEventListener('click', zavritDialog);
+    document.getElementById('ios-guide-dismiss').addEventListener('click', zavritDialog);
+  }
+
   // Exportovat funkce pro globalni pouziti
   window.WGSNotifikace = {
     init: init,
@@ -333,7 +526,11 @@
     zobrazitNotifikaci: zobrazitNotifikaci,
     aktualizovat: aktualizovatPocetNeprectenych,
     zobrazitDialogPovoleni: zobrazitDialogPovoleni,
-    getTotal: () => totalUnread
+    zobrazitIOSNavod: zobrazitIOSNavod,
+    getTotal: () => totalUnread,
+    isIOS: isIOS,
+    isPWA: isPWA,
+    iosVersion: iosVersion
   };
 
   // Auto-init po nacteni stranky
