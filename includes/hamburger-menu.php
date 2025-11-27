@@ -37,7 +37,7 @@ if ($isAdmin) {
         </a>
       <?php endforeach; ?>
       <a href="/logout.php" class="hamburger-logout">ODHLÁŠENÍ</a>
-      <a href="#" id="notif-enable-btn-admin" class="hamburger-notif-btn" style="display:none;" data-lang-cs="POVOLIT NOTIFIKACE" data-lang-en="ENABLE NOTIFICATIONS" data-lang-it="ABILITA NOTIFICHE">POVOLIT NOTIFIKACE</a>
+      <a href="#" id="notif-enable-btn-admin" class="hamburger-notif-btn" style="display:none;" data-lang-cs="NOTIFY ME ON" data-lang-en="NOTIFY ME ON" data-lang-it="NOTIFY ME ON">NOTIFY ME ON</a>
       <div class="hamburger-lang-switcher">
         <span class="lang-flag active" data-lang="cs">🇨🇿</span>
         <span class="lang-flag" data-lang="en">🇬🇧</span>
@@ -49,7 +49,7 @@ if ($isAdmin) {
       <a href="novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
       <a href="seznam.php" <?php if($current == "seznam.php") echo 'class="active"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
       <a href="/logout.php" class="hamburger-logout" data-lang-cs="ODHLÁŠENÍ" data-lang-en="LOGOUT" data-lang-it="DISCONNETTERSI">ODHLÁŠENÍ</a>
-      <a href="#" id="notif-enable-btn-user" class="hamburger-notif-btn" style="display:none;" data-lang-cs="POVOLIT NOTIFIKACE" data-lang-en="ENABLE NOTIFICATIONS" data-lang-it="ABILITA NOTIFICHE">POVOLIT NOTIFIKACE</a>
+      <a href="#" id="notif-enable-btn-user" class="hamburger-notif-btn" style="display:none;" data-lang-cs="NOTIFY ME ON" data-lang-en="NOTIFY ME ON" data-lang-it="NOTIFY ME ON">NOTIFY ME ON</a>
       <div class="hamburger-lang-switcher">
         <span class="lang-flag active" data-lang="cs">🇨🇿</span>
         <span class="lang-flag" data-lang="en">🇬🇧</span>
@@ -188,6 +188,11 @@ if ($isAdmin) {
   color: #fff !important;
   border-color: #999 !important;
   background: rgba(255, 255, 255, 0.1);
+}
+
+.hamburger-notif-btn.notif-active {
+  color: #fff !important;
+  border-color: #fff !important;
 }
 
 @media (max-width: 768px) {
@@ -439,19 +444,22 @@ function closeMenu() {
                          window.navigator.standalone === true;
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-    // Zobrazit tlačítko pokud notifikace nejsou povoleny
-    if (Notification.permission === 'default') {
-      btn.style.display = '';
-      console.log('Notifikace: Tlačítko zobrazeno (permission = default)');
+    // Zobrazit tlačítko - vždy (ON/OFF toggle)
+    btn.style.display = '';
+
+    if (Notification.permission === 'granted') {
+      btn.textContent = 'NOTIFY ME OFF';
+      btn.classList.add('notif-active');
+      console.log('Notifikace: Tlačítko zobrazeno (permission = granted)');
     } else if (Notification.permission === 'denied') {
-      btn.style.display = '';
-      btn.textContent = btn.getAttribute('data-lang-cs') || 'NOTIFIKACE ZABLOKOVÁNY';
+      btn.textContent = 'NOTIFY ME OFF';
       btn.style.opacity = '0.5';
       btn.style.cursor = 'not-allowed';
+      btn.title = 'Notifikace jsou zablokovány v nastavení prohlížeče';
       console.log('Notifikace: Tlačítko zobrazeno (permission = denied)');
     } else {
-      console.log('Notifikace: Již povoleny');
-      return;
+      btn.textContent = 'NOTIFY ME ON';
+      console.log('Notifikace: Tlačítko zobrazeno (permission = default)');
     }
 
     // Handler pro kliknutí
@@ -459,24 +467,34 @@ function closeMenu() {
       e.preventDefault();
       e.stopPropagation();
 
-      if (Notification.permission === 'denied') {
-        alert('Notifikace jsou zablokovány. Povolte je v nastavení prohlížeče.');
+      // Pokud jsou notifikace povoleny - vysvětlit jak vypnout
+      if (Notification.permission === 'granted') {
+        alert('Notifikace jsou aktivní.\n\nPro vypnutí:\n• iOS: Nastavení > Notifikace > WGS\n• Android: Nastavení > Aplikace > WGS > Notifikace\n• Desktop: Klikněte na ikonu zámku v adresním řádku');
         return;
       }
 
+      // Pokud jsou zablokovány - vysvětlit jak povolit
+      if (Notification.permission === 'denied') {
+        alert('Notifikace jsou zablokovány.\n\nPro povolení:\n• iOS: Nastavení > Notifikace > WGS\n• Android: Nastavení > Aplikace > WGS > Notifikace\n• Desktop: Klikněte na ikonu zámku v adresním řádku');
+        return;
+      }
+
+      // Permission = default - požádat o povolení
       try {
         // Použít WGSNotifikace pokud existuje
         if (window.WGSNotifikace && typeof window.WGSNotifikace.pozadatOPovoleni === 'function') {
           const vysledek = await window.WGSNotifikace.pozadatOPovoleni();
           if (vysledek) {
-            btn.style.display = 'none';
+            btn.textContent = 'NOTIFY ME OFF';
+            btn.classList.add('notif-active');
             console.log('Notifikace: Úspěšně povoleny přes WGSNotifikace');
           }
         } else {
           // Fallback - přímé povolení
           const permission = await Notification.requestPermission();
           if (permission === 'granted') {
-            btn.style.display = 'none';
+            btn.textContent = 'NOTIFY ME OFF';
+            btn.classList.add('notif-active');
             console.log('Notifikace: Úspěšně povoleny');
 
             // Registrovat subscription pokud je k dispozici service worker
@@ -498,7 +516,7 @@ function closeMenu() {
               }
             }
           } else if (permission === 'denied') {
-            btn.textContent = 'NOTIFIKACE ZABLOKOVÁNY';
+            btn.textContent = 'NOTIFY ME OFF';
             btn.style.opacity = '0.5';
             btn.style.cursor = 'not-allowed';
           }
