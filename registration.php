@@ -95,5 +95,6 @@ $csrfToken = generateCSRFToken();
 <script src="assets/js/csrf-auto-inject.js" defer></script>
 <script src="assets/js/registration.js" defer></script>
 
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>

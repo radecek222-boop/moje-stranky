@@ -203,5 +203,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>

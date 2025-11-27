@@ -492,5 +492,6 @@ if ($initialBootstrapData) {
 <!-- Kalkulačka integrace -->
 <script src="assets/js/cenik-calculator.js" defer></script>
 <script src="assets/js/protokol-calculator-integration.js" defer></script>
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>

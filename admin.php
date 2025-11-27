@@ -1200,6 +1200,6 @@ function loadNotifContent(type, body) {
   </div>
 </div>
 
-
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>
