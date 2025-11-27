@@ -33,7 +33,7 @@ echo "<!DOCTYPE html>
 <h1>Reaktivace Push Subscriptions</h1>";
 
 // Aktualni stav
-$stmt = $pdo->query("SELECT id, LEFT(endpoint, 50) as endpoint_zkraceny, platforma, aktivni, pocet_chyb, created_at FROM wgs_push_subscriptions");
+$stmt = $pdo->query("SELECT * FROM wgs_push_subscriptions");
 $subs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 echo "<h2>Aktualni stav</h2>";
@@ -41,15 +41,13 @@ if (empty($subs)) {
     echo "<div class='info'>Zadne subscriptions v databazi.</div>";
 } else {
     echo "<table>";
-    echo "<tr><th>ID</th><th>Endpoint</th><th>Platforma</th><th>Aktivni</th><th>Chyby</th><th>Vytvoreno</th></tr>";
+    echo "<tr><th>ID</th><th>Endpoint</th><th>Platforma</th><th>Aktivni</th></tr>";
     foreach ($subs as $sub) {
         echo "<tr>";
-        echo "<td>{$sub['id']}</td>";
-        echo "<td><code>{$sub['endpoint_zkraceny']}...</code></td>";
-        echo "<td>" . ($sub['platforma'] ?: '-') . "</td>";
-        echo "<td>" . ($sub['aktivni'] ? 'Ano' : 'Ne') . "</td>";
-        echo "<td>" . ($sub['pocet_chyb'] ?? 0) . "</td>";
-        echo "<td>" . ($sub['created_at'] ?? '-') . "</td>";
+        echo "<td>" . ($sub['id'] ?? '-') . "</td>";
+        echo "<td><code>" . substr($sub['endpoint'] ?? '', 0, 50) . "...</code></td>";
+        echo "<td>" . ($sub['platforma'] ?? '-') . "</td>";
+        echo "<td>" . (($sub['aktivni'] ?? 0) ? 'Ano' : 'Ne') . "</td>";
         echo "</tr>";
     }
     echo "</table>";
@@ -57,7 +55,7 @@ if (empty($subs)) {
 
 // Reaktivace
 if (isset($_GET['reaktivuj']) && $_GET['reaktivuj'] === '1') {
-    $stmt = $pdo->exec("UPDATE wgs_push_subscriptions SET aktivni = 1, pocet_chyb = 0");
+    $stmt = $pdo->exec("UPDATE wgs_push_subscriptions SET aktivni = 1");
     echo "<div class='success'><strong>Hotovo!</strong> Vsechny subscriptions byly reaktivovany a pocitadlo chyb vynulovano.</div>";
     echo "<p><a href='reaktivuj_subscriptions.php' class='btn'>Obnovit stranku</a></p>";
 } else {
