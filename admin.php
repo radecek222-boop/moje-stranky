@@ -253,11 +253,6 @@ if (!$embedMode && $activeTab === 'dashboard'):
     <div class="admin-kategorie">
         <h2 class="admin-kategorie-nadpis" data-lang-cs="Vývoj & Testování" data-lang-en="Development & Testing" data-lang-it="Sviluppo & Test">Vývoj & Testování</h2>
         <div class="cc-grid">
-            <div class="cc-card" onclick="window.location='admin.php?tab=admin_phpunit'">
-                <div class="cc-card-title" data-lang-cs="PHPUnit Testy" data-lang-en="PHPUnit Tests" data-lang-it="Test PHPUnit">PHPUnit Testy</div>
-                <div class="cc-card-description" data-lang-cs="Spuštění automatických testů" data-lang-en="Run automated tests" data-lang-it="Esegui test automatici">Spuštění automatických testů</div>
-            </div>
-
             <div class="cc-card" onclick="window.location='admin.php?tab=admin_testing_simulator'">
                 <div class="cc-card-title" data-lang-cs="E2E Testing" data-lang-en="E2E Testing" data-lang-it="Test E2E">E2E Testing</div>
                 <div class="cc-card-description" data-lang-cs="End-to-end testování celého workflow" data-lang-en="End-to-end testing of entire workflow" data-lang-it="Test end-to-end dell'intero flusso di lavoro">End-to-end testování celého workflow</div>
@@ -995,11 +990,6 @@ function loadNotifContent(type, body) {
           </div>
       </div>
   </div>
-  <?php endif; ?>
-
-  <?php if ($activeTab === 'admin_phpunit'): ?>
-  <!-- TAB: PHPUNIT TEST RUNNER -->
-  <?php require_once __DIR__ . '/includes/admin_phpunit.php'; ?>
   <?php endif; ?>
 
   <?php if ($activeTab === 'admin_testing'): ?>
