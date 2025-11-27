@@ -33,7 +33,7 @@ echo "<!DOCTYPE html>
 <h1>Reaktivace Push Subscriptions</h1>";
 
 // Aktualni stav
-$stmt = $pdo->query("SELECT id, LEFT(endpoint, 50) as endpoint_zkraceny, platforma, aktivni, pocet_chyb, datum_registrace FROM wgs_push_subscriptions");
+$stmt = $pdo->query("SELECT id, LEFT(endpoint, 50) as endpoint_zkraceny, platforma, aktivni, pocet_chyb, created_at FROM wgs_push_subscriptions");
 $subs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 echo "<h2>Aktualni stav</h2>";
@@ -41,15 +41,15 @@ if (empty($subs)) {
     echo "<div class='info'>Zadne subscriptions v databazi.</div>";
 } else {
     echo "<table>";
-    echo "<tr><th>ID</th><th>Endpoint</th><th>Platforma</th><th>Aktivni</th><th>Chyby</th><th>Registrace</th></tr>";
+    echo "<tr><th>ID</th><th>Endpoint</th><th>Platforma</th><th>Aktivni</th><th>Chyby</th><th>Vytvoreno</th></tr>";
     foreach ($subs as $sub) {
         echo "<tr>";
         echo "<td>{$sub['id']}</td>";
         echo "<td><code>{$sub['endpoint_zkraceny']}...</code></td>";
         echo "<td>" . ($sub['platforma'] ?: '-') . "</td>";
         echo "<td>" . ($sub['aktivni'] ? 'Ano' : 'Ne') . "</td>";
-        echo "<td>{$sub['pocet_chyb']}</td>";
-        echo "<td>{$sub['datum_registrace']}</td>";
+        echo "<td>" . ($sub['pocet_chyb'] ?? 0) . "</td>";
+        echo "<td>" . ($sub['created_at'] ?? '-') . "</td>";
         echo "</tr>";
     }
     echo "</table>";
