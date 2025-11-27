@@ -2113,6 +2113,13 @@ async function sendAppointmentConfirmation(customer, date, time) {
   const phone = customer.telefon || '';
   const email = customer.email || '';
   const orderId = Utils.getOrderId(customer);
+  const address = Utils.getAddress(customer) || '';
+  const product = customer.nazev_produktu || customer.produkt || customer.popis_produktu || '';
+
+  // Data technika
+  const technikJmeno = customer.technik_jmeno || customer.assigned_technician || '';
+  const technikEmail = customer.technik_email || '';
+  const technikTelefon = customer.technik_telefon || '';
 
   try {
     // Get CSRF token
@@ -2127,10 +2134,16 @@ async function sendAppointmentConfirmation(customer, date, time) {
         data: {
           customer_name: customerName,
           customer_email: email,
+          customer_phone: phone,
           seller_email: "admin@wgs-service.cz",
           date: date,
           time: time,
-          order_id: orderId
+          order_id: orderId,
+          address: address,
+          product: product,
+          technician_name: technikJmeno,
+          technician_email: technikEmail,
+          technician_phone: technikTelefon
         }
       })
     });
