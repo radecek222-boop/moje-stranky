@@ -184,6 +184,11 @@ const CacheManager = {
   }
 };
 
+// === AUTO-REFRESH KONFIGURACE ===
+const AUTO_REFRESH_INTERVAL = 60000; // 60 sekund
+let autoRefreshTimer = null;
+let lastRefreshTime = Date.now();
+
 // === INIT ===
 window.addEventListener('DOMContentLoaded', async () => {
   CacheManager.load();
@@ -193,6 +198,21 @@ window.addEventListener('DOMContentLoaded', async () => {
   initSearch();
   await loadAll();
 
+  // Spustit auto-refresh
+  startAutoRefresh();
+
+  // Refresh pri navratu na stranku (tab visibility)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      const timeSinceLastRefresh = Date.now() - lastRefreshTime;
+      // Refresh pokud byl tab skryty dele nez 30 sekund
+      if (timeSinceLastRefresh > 30000) {
+        logger.log('[AutoRefresh] Tab aktivni - nacitam nova data...');
+        loadAll(ACTIVE_FILTER);
+      }
+    }
+  });
+
   // Zobrazit dialog pro povoleni notifikaci (po 3 sekundach)
   setTimeout(() => {
     if (window.WGSNotifikace && typeof window.WGSNotifikace.zobrazitDialogPovoleni === 'function') {
@@ -200,6 +220,34 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   }, 3000);
 });
+
+// === AUTO-REFRESH FUNKCE ===
+function startAutoRefresh() {
+  // Zastavit predchozi timer pokud existuje
+  if (autoRefreshTimer) {
+    clearInterval(autoRefreshTimer);
+  }
+
+  // Spustit novy timer
+  autoRefreshTimer = setInterval(async () => {
+    // Pouze refreshovat pokud je stranka viditelna
+    if (document.visibilityState === 'visible') {
+      logger.log('[AutoRefresh] Automaticka aktualizace dat...');
+      await loadAll(ACTIVE_FILTER);
+      lastRefreshTime = Date.now();
+    }
+  }, AUTO_REFRESH_INTERVAL);
+
+  logger.log(`[AutoRefresh] Spusten - interval ${AUTO_REFRESH_INTERVAL/1000}s`);
+}
+
+function stopAutoRefresh() {
+  if (autoRefreshTimer) {
+    clearInterval(autoRefreshTimer);
+    autoRefreshTimer = null;
+    logger.log('[AutoRefresh] Zastaven');
+  }
+}
 
 // === VYHLEDÁVÁNÍ ===
 function initSearch() {
@@ -348,6 +396,9 @@ async function loadAll(status = 'all', append = false) {
 
     // PAGINATION: Zobrazit/skrýt "Načíst další" tlačítko
     updateLoadMoreButton();
+
+    // Aktualizovat cas posledniho refreshe
+    lastRefreshTime = Date.now();
   } catch (err) {
     logger.error('Chyba:', err);
     WGS_DATA_CACHE = [];
