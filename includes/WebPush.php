@@ -56,20 +56,22 @@ class WGSWebPush {
             // POZOR: Hosting neumi overit Apple Push SSL certifikaty
             // - System CA bundle nema Apple certifikaty (error 60)
             // - Hosting blokuje vlastni CA soubory (error 77)
-            // Proto docasne vypneme SSL verifikaci (funguje - testovano)
+            // Proto vytvorime vlastni Guzzle client s vypnutym SSL
             // TODO: Kontaktovat hosting pro opravu SSL/CA konfigurace
-            //
-            // Kombinace curl i Guzzle options pro uplne vypnuti SSL verifikace
-            $defaultOptions = [
-                'verify' => false,  // Guzzle top-level option
+
+            // Vytvorit vlastni Guzzle HTTP client s vypnutou SSL verifikaci
+            $httpClient = new \GuzzleHttp\Client([
+                'verify' => false,
                 'curl' => [
                     CURLOPT_SSL_VERIFYPEER => false,
                     CURLOPT_SSL_VERIFYHOST => 0,
                 ],
-            ];
-            error_log('[WebPush] VAROVANI: SSL verifikace vypnuta kvuli omezeni hostingu');
+            ]);
 
-            $this->webPush = new \Minishlink\WebPush\WebPush($auth, $defaultOptions);
+            error_log('[WebPush] VAROVANI: SSL verifikace vypnuta - pouzivam vlastni Guzzle client');
+
+            // Predat vlastni HTTP client do WebPush (4. parametr)
+            $this->webPush = new \Minishlink\WebPush\WebPush($auth, [], 30, $httpClient);
             $this->webPush->setReuseVAPIDHeaders(true);
             $this->inicializovano = true;
 
