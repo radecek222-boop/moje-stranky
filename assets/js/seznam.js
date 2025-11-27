@@ -637,8 +637,9 @@ async function renderOrders(items = null) {
           </div>
         </div>
         <div class="order-footer">
-          <span class="order-status-text status-${status.class}">${status.text}</span>
-          ${appointmentText ? `<span class="order-appointment">${appointmentText}</span>` : ''}
+          ${appointmentText
+            ? `<span class="order-appointment">${appointmentText}</span>`
+            : `<span class="order-status-text status-${status.class}">${status.text}</span>`}
         </div>
       </div>
     `;
