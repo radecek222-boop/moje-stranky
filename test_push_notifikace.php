@@ -36,11 +36,22 @@ if (isset($_GET['send']) && $_GET['send'] === '1') {
             $vysledek = $webPush->odeslatVsem($payload);
 
             if ($vysledek['uspech']) {
-                $zprava = "Notifikace odeslana! Uspesne: {$vysledek['uspesne']}, Selhalo: {$vysledek['selhalo']}";
+                $zprava = "Notifikace odeslana! Uspesne: {$vysledek['odeslano']}, Selhalo: {$vysledek['chyby']}";
                 $typ = 'success';
             } else {
                 $zprava = "Chyba: " . ($vysledek['zprava'] ?? 'Neznama chyba');
                 $typ = 'error';
+
+                // Detaily - zkontrolovat subscription data
+                $stmt = $pdo->query("SELECT id, endpoint, p256dh, auth, platforma FROM wgs_push_subscriptions WHERE aktivni = 1 LIMIT 1");
+                $sub = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($sub) {
+                    $zprava .= "<br><br><strong>Debug info:</strong><br>";
+                    $zprava .= "Endpoint: " . substr($sub['endpoint'], 0, 80) . "...<br>";
+                    $zprava .= "p256dh delka: " . strlen($sub['p256dh']) . " znaku<br>";
+                    $zprava .= "auth delka: " . strlen($sub['auth']) . " znaku<br>";
+                    $zprava .= "Platforma: " . ($sub['platforma'] ?: 'neurcena');
+                }
             }
         }
     } catch (Exception $e) {
