@@ -785,7 +785,7 @@ async function showDetail(recordOrId) {
           </button>
           ${record.documents && record.documents.length > 0 ? `
             <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; font-weight: 600;"
-                    data-action="openPDF" data-url="${record.documents[0].file_path}">
+                    data-action="openPDF" data-url="${record.documents[0].file_path}" data-id="${record.id}">
               [Doc] PDF REPORT
             </button>
           ` : `
@@ -797,7 +797,7 @@ async function showDetail(recordOrId) {
           <!-- Původní zakázka - standardní PDF tlačítko -->
           ${record.documents && record.documents.length > 0 ? `
             <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; font-weight: 600;"
-                    data-action="openPDF" data-url="${record.documents[0].file_path}">
+                    data-action="openPDF" data-url="${record.documents[0].file_path}" data-id="${record.id}">
               [Doc] PDF REPORT
             </button>
           ` : `
@@ -2126,6 +2126,140 @@ async function showCustomerDetail(id) {
   ModalManager.show(content);
 }
 
+/**
+ * Zobrazí PDF v modálním okně s tlačítky Zavřít a Odeslat
+ */
+function zobrazPDFModal(pdfUrl, claimId) {
+  // Vytvořit overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'pdfModalOverlay';
+  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;';
+
+  // Kontejner pro PDF
+  const pdfContainer = document.createElement('div');
+  pdfContainer.style.cssText = 'width: 95%; height: calc(100% - 80px); max-width: 900px; background: white; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;';
+
+  // Header s názvem
+  const header = document.createElement('div');
+  header.style.cssText = 'padding: 12px 16px; background: #333; color: white; font-weight: 600; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center;';
+  header.innerHTML = '<span>PDF Report</span><span style="font-size: 0.8rem; opacity: 0.7;">ID: ' + (claimId || '-') + '</span>';
+
+  // Iframe pro PDF
+  const iframe = document.createElement('iframe');
+  iframe.src = pdfUrl;
+  iframe.style.cssText = 'flex: 1; width: 100%; border: none;';
+
+  pdfContainer.appendChild(header);
+  pdfContainer.appendChild(iframe);
+
+  // Tlačítka
+  const buttonContainer = document.createElement('div');
+  buttonContainer.style.cssText = 'display: flex; gap: 12px; margin-top: 16px; padding: 0 16px;';
+
+  // Tlačítko Zavřít
+  const btnZavrit = document.createElement('button');
+  btnZavrit.textContent = 'Zavrit';
+  btnZavrit.style.cssText = 'padding: 12px 32px; font-size: 1rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 120px;';
+  btnZavrit.onclick = () => overlay.remove();
+
+  // Tlačítko Odeslat
+  const btnOdeslat = document.createElement('button');
+  btnOdeslat.textContent = 'Odeslat';
+  btnOdeslat.style.cssText = 'padding: 12px 32px; font-size: 1rem; font-weight: 600; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 120px;';
+  btnOdeslat.onclick = async () => {
+    if (!claimId) {
+      alert('Chyba: Chybí ID zakázky');
+      return;
+    }
+
+    // Najít reklamaci v datech
+    const reklamace = window.REKLAMACE_DATA?.find(r => r.id == claimId);
+    if (!reklamace || !reklamace.email) {
+      alert('Chyba: Nenalezen email zákazníka');
+      return;
+    }
+
+    if (!confirm('Odeslat PDF na email: ' + reklamace.email + '?')) {
+      return;
+    }
+
+    btnOdeslat.disabled = true;
+    btnOdeslat.textContent = 'Odesílám...';
+
+    try {
+      // Načíst PDF jako base64
+      const response = await fetch(pdfUrl);
+      const blob = await response.blob();
+      const reader = new FileReader();
+
+      reader.onload = async function() {
+        const base64 = reader.result.split(',')[1];
+
+        // Odeslat email
+        const formData = new FormData();
+        formData.append('action', 'send_email');
+        formData.append('reklamace_id', reklamace.reklamace_id || claimId);
+        formData.append('customer_email', reklamace.email);
+        formData.append('customer_name', reklamace.jmeno || 'Zákazník');
+        formData.append('complete_pdf', base64);
+
+        const csrfToken = document.querySelector('input[name="csrf_token"]')?.value;
+        if (csrfToken) {
+          formData.append('csrf_token', csrfToken);
+        }
+
+        const emailResponse = await fetch('/api/protokol_api.php', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await emailResponse.json();
+
+        if (result.status === 'success') {
+          alert('Email byl úspěšně odeslán!');
+          overlay.remove();
+        } else {
+          throw new Error(result.message || 'Neznámá chyba');
+        }
+      };
+
+      reader.onerror = () => {
+        throw new Error('Nepodařilo se načíst PDF');
+      };
+
+      reader.readAsDataURL(blob);
+
+    } catch (error) {
+      console.error('Chyba při odesílání:', error);
+      alert('Chyba při odesílání: ' + error.message);
+      btnOdeslat.disabled = false;
+      btnOdeslat.textContent = 'Odeslat';
+    }
+  };
+
+  buttonContainer.appendChild(btnZavrit);
+  buttonContainer.appendChild(btnOdeslat);
+
+  overlay.appendChild(pdfContainer);
+  overlay.appendChild(buttonContainer);
+
+  // Zavřít při kliknutí mimo
+  overlay.onclick = (e) => {
+    if (e.target === overlay) overlay.remove();
+  };
+
+  // Zavřít při ESC
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      overlay.remove();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+
+  document.body.appendChild(overlay);
+}
+
 function showPhotoFullscreen(photoUrl) {
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; align-items: center; justify-content: center; cursor: pointer;';
@@ -3045,7 +3179,7 @@ document.addEventListener('click', (e) => {
       break;
 
     case 'openPDF':
-      if (url) window.open(url, '_blank');
+      if (url) zobrazPDFModal(url, id);
       break;
 
     case 'showHistoryPDF':
