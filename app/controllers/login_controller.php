@@ -91,8 +91,8 @@ function handleAdminLogin(string $adminKey): void
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
     $_SESSION['is_admin'] = true;
-    $_SESSION['admin_id'] = $_SESSION['admin_id'] ?? 'WGS_ADMIN';
-    $_SESSION['user_id'] = $_SESSION['user_id'] ?? 0;
+    $_SESSION['admin_id'] = 'ADMIN001';
+    $_SESSION['user_id'] = 'ADMIN001';
     $_SESSION['user_name'] = 'Administrátor';
     $_SESSION['user_email'] = 'admin@wgs-service.cz';
     $_SESSION['role'] = 'admin';

@@ -175,14 +175,17 @@ try {
                 error_log('[Notes] WebPush inicializace: ' . ($webPush->jeInicializovano() ? 'OK' : 'FAILED'));
 
                 if ($webPush->jeInicializovano()) {
-                    // Načíst info o reklamaci pro notifikaci
+                    // Načíst info o reklamaci včetně vlastníka (created_by)
                     $stmtInfo = $pdo->prepare("
-                        SELECT reklamace_id, jmeno, cislo
+                        SELECT reklamace_id, jmeno, cislo, created_by
                         FROM wgs_reklamace
                         WHERE id = :id
                     ");
                     $stmtInfo->execute([':id' => $claimId]);
                     $infoReklamace = $stmtInfo->fetch(PDO::FETCH_ASSOC);
+
+                    // Vlastník reklamace (prodejce který ji vytvořil)
+                    $vlastnikReklamace = $infoReklamace['created_by'] ?? null;
 
                     // Sestavit payload
                     $payload = [
@@ -199,19 +202,53 @@ try {
                         ]
                     ];
 
-                    // DEBUG: Logovat autora
-                    error_log('[Notes] Autor poznamky: ' . $createdBy);
+                    // DEBUG: Logovat autora a vlastníka
+                    error_log('[Notes] Autor poznamky: user_id=' . $userId . ', email=' . $createdBy);
+                    error_log('[Notes] Vlastnik reklamace: ' . ($vlastnikReklamace ?? 'NULL'));
 
-                    // Odeslat všem (kromě autora poznámky)
-                    // Filtruje podle emailu přímo v tabulce subscriptions
+                    // ========================================
+                    // PRAVIDLA PRO NOTIFIKACE:
+                    // - Admin/Technik: vidí vše → dostane notifikaci (pokud není autor)
+                    // - Prodejce: vidí jen své → dostane notifikaci jen pokud je vlastník reklamace
+                    // - Autor poznámky NIKDY nedostane notifikaci
+                    // ========================================
                     $stmtSubs = $pdo->prepare("
-                        SELECT id, endpoint, p256dh, auth, user_id, email
-                        FROM wgs_push_subscriptions
-                        WHERE aktivni = 1
-                          AND (email IS NULL OR email != :author_email)
+                        SELECT ps.id, ps.endpoint, ps.p256dh, ps.auth, ps.user_id, ps.email, u.role
+                        FROM wgs_push_subscriptions ps
+                        LEFT JOIN wgs_users u ON ps.user_id = u.user_id
+                        WHERE ps.aktivni = 1
+                          AND (ps.user_id IS NULL OR ps.user_id != :author_user_id)
                     ");
-                    $stmtSubs->execute([':author_email' => $createdBy]);
-                    $subscriptions = $stmtSubs->fetchAll(PDO::FETCH_ASSOC);
+                    $stmtSubs->execute([':author_user_id' => $userId]);
+                    $vsechnySubscriptions = $stmtSubs->fetchAll(PDO::FETCH_ASSOC);
+
+                    // Filtrovat podle pravidel viditelnosti
+                    $subscriptions = [];
+                    foreach ($vsechnySubscriptions as $sub) {
+                        $subRole = strtolower(trim($sub['role'] ?? 'guest'));
+                        $subUserId = $sub['user_id'] ?? null;
+
+                        // Admin a Technik vidí vše
+                        if (in_array($subRole, ['admin', 'technik', 'technician'])) {
+                            $subscriptions[] = $sub;
+                            error_log('[Notes] Sub ID=' . $sub['id'] . ' (' . $subRole . ') - POVOLENO (vidi vse)');
+                        }
+                        // Prodejce vidí jen své reklamace
+                        elseif (in_array($subRole, ['prodejce', 'user'])) {
+                            if ($vlastnikReklamace !== null && $subUserId === $vlastnikReklamace) {
+                                $subscriptions[] = $sub;
+                                error_log('[Notes] Sub ID=' . $sub['id'] . ' (prodejce) - POVOLENO (vlastnik reklamace)');
+                            } else {
+                                error_log('[Notes] Sub ID=' . $sub['id'] . ' (prodejce) - ZAMITNUTO (cizi reklamace)');
+                            }
+                        }
+                        // Ostatní (guest apod.) - povoleno pokud odpovídá vlastníkovi
+                        else {
+                            if ($vlastnikReklamace !== null && $subUserId === $vlastnikReklamace) {
+                                $subscriptions[] = $sub;
+                            }
+                        }
+                    }
 
                     // DEBUG: Logovat počet subscriptions
                     error_log('[Notes] Nalezeno subscriptions: ' . count($subscriptions));
