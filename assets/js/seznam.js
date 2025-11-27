@@ -630,16 +630,18 @@ async function renderOrders(items = null) {
         </div>
         <div class="order-body">
           <div class="order-customer">${highlightedCustomer}</div>
-          <div class="order-detail">
-            <div class="order-detail-line">${highlightedAddress}</div>
-            <div class="order-detail-line">${highlightedProduct}</div>
-            <div class="order-detail-line" style="opacity: 0.6;">${date}</div>
+          <div class="order-detail-line">${highlightedAddress}</div>
+          <div class="order-detail-row">
+            <div class="order-detail-left">
+              <div class="order-detail-line">${highlightedProduct}</div>
+              <div class="order-detail-line" style="opacity: 0.6;">${date}</div>
+            </div>
+            <div class="order-detail-right">
+              ${appointmentText
+                ? `<span class="order-appointment">${appointmentText}</span>`
+                : `<span class="order-status-text status-${status.class}">${status.text}</span>`}
+            </div>
           </div>
-        </div>
-        <div class="order-footer">
-          ${appointmentText
-            ? `<span class="order-appointment">${appointmentText}</span>`
-            : `<span class="order-status-text status-${status.class}">${status.text}</span>`}
         </div>
       </div>
     `;
