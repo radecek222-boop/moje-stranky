@@ -501,11 +501,11 @@ button[onclick*="history.back"] {
     font-weight: 600;
 }
 
-/* Čas poznámky - šedý text */
+/* Čas poznámky - šedý text, menší */
 .modal-body .note-time,
 .modal-content .note-time {
     color: #888888 !important;
-    font-size: 0.85rem;
+    font-size: 0.7rem !important;
 }
 
 /* Tlacitko smazani poznamky - pouze cerveny krizek */
