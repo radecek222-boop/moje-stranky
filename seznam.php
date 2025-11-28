@@ -387,37 +387,40 @@ if (!$isLoggedIn && !$isAdmin) {
 
 /* MOBILNÍ OPTIMALIZACE FILTER TLAČÍTEK (větší o 50% pro lepší klikání) */
 @media (max-width: 768px) {
-  /* Filter bar - stack filters */
+  /* Filter bar - 2x2 grid s mezerami */
   .filter-bar {
-    flex-direction: column !important;
-    gap: 0.05rem !important;
-    margin-bottom: 0.25rem !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+    padding: 0.25rem !important;
   }
 
   .filter-btn {
     width: 100% !important;
-    padding: 0.375rem 0.6rem !important;
-    font-size: 0.65rem !important;
+    padding: 0.5rem 0.6rem !important;
+    font-size: 0.7rem !important;
     line-height: 1.2 !important;
-    min-height: 27px !important;
+    min-height: 36px !important;
     border-width: 1px !important;
+    border-radius: 6px !important;
   }
 
   .filter-btn.active {
-    border-width: 1px !important;
+    border-width: 2px !important;
   }
 }
 
 @media (max-width: 375px) {
   .filter-btn {
-    padding: 0.375rem 0.6rem !important;
+    padding: 0.4rem 0.5rem !important;
     font-size: 0.65rem !important;
     line-height: 1.2 !important;
-    min-height: 27px !important;
+    min-height: 32px !important;
   }
 
   .filter-bar {
-    gap: 0.05rem !important;
+    gap: 0.4rem !important;
   }
 }
 
