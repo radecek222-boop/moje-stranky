@@ -2625,6 +2625,7 @@ async function showNotes(recordOrId) {
                 ${hasAudio ? `
                 <div class="note-audio">
                   <audio controls preload="metadata" class="note-audio-player">
+                    <source src="${note.audio_url}" type="audio/mp4">
                     <source src="${note.audio_url}" type="audio/webm">
                     <source src="${note.audio_url}" type="audio/mpeg">
                     Vas prohlizec nepodporuje prehravani audia.
@@ -2809,13 +2810,33 @@ async function startRecording(orderId) {
     window.wgsAudioRecorder.permissionGranted = true;
 
     // Vybrat podporovany format
+    // Safari/iOS: preferovat MP4 (WebM nefunguje pri prehravani)
+    // Chrome/Firefox: preferovat WebM (lepsi komprese)
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
+                     /iPad|iPhone|iPod/.test(navigator.userAgent);
+
     let mimeType = 'audio/webm';
-    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-      mimeType = 'audio/webm;codecs=opus';
-    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-      mimeType = 'audio/mp4';
-    } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
-      mimeType = 'audio/ogg';
+
+    if (isSafari) {
+      // Safari/iOS - pouzit MP4 (jediny spolehlivy format)
+      if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        mimeType = 'audio/mp4';
+      } else if (MediaRecorder.isTypeSupported('audio/aac')) {
+        mimeType = 'audio/aac';
+      }
+      // Fallback na cokoliv co funguje
+      logger.log('[Audio] Safari detekovan, preferuji MP4');
+    } else {
+      // Chrome/Firefox - pouzit WebM (lepsi komprese)
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        mimeType = 'audio/webm;codecs=opus';
+      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+        mimeType = 'audio/webm';
+      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        mimeType = 'audio/mp4';
+      } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
+        mimeType = 'audio/ogg';
+      }
     }
 
     logger.log('[Audio] Pouzivam format:', mimeType);

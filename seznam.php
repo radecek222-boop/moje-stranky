@@ -1660,54 +1660,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
-      // Audio nahravani - Hlasove poznamky
-      case 'showNotes':
-        if (id && typeof showNotesModal === 'function') {
-          showNotesModal(id);
-        }
-        break;
-
-      case 'startRecording':
-        if (id && typeof startRecording === 'function') {
-          e.stopPropagation();
-          startRecording(id);
-        }
-        break;
-
-      case 'stopRecording':
-        if (typeof stopRecording === 'function') {
-          e.stopPropagation();
-          stopRecording();
-        }
-        break;
-
-      case 'deleteAudioPreview':
-        if (typeof deleteAudioPreview === 'function') {
-          e.stopPropagation();
-          deleteAudioPreview();
-        }
-        break;
-
-      case 'saveNewNote':
-        if (id && typeof saveNewNote === 'function') {
-          saveNewNote(id);
-        }
-        break;
-
-      case 'closeNotesModal':
-        if (typeof closeNotesModal === 'function') {
-          closeNotesModal();
-        }
-        break;
-
-      case 'deleteNote':
-        const noteId = button.getAttribute('data-note-id');
-        const orderId = button.getAttribute('data-order-id');
-        if (noteId && typeof deleteNote === 'function') {
-          e.stopPropagation();
-          deleteNote(noteId, orderId);
-        }
-        break;
+      // Audio nahravani a poznamky - ODEBRANO, nyni v seznam.js
+      // Tyto akce zpracovava seznam.js: showNotes, startRecording, stopRecording,
+      // deleteAudioPreview, saveNewNote, closeNotesModal, deleteNote
 
       default:
         console.warn(`[EMERGENCY] Neznámá akce: ${action}`);
