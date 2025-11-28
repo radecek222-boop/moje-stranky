@@ -2548,16 +2548,20 @@ async function showNotes(recordOrId) {
     <div class="modal-body">
       <div class="notes-container">
         ${notes.length > 0
-          ? notes.map(note => `
-              <div class="note-item ${note.read ? '' : 'unread'}">
+          ? notes.map(note => {
+              const canDelete = CURRENT_USER && (CURRENT_USER.is_admin || note.author === CURRENT_USER.email);
+              return `
+              <div class="note-item ${note.read ? '' : 'unread'}" data-note-id="${note.id}">
                 <div class="note-header">
                   <span class="note-author">${note.author_name || note.author}</span>
                   <span class="note-time">${formatDateTime(note.timestamp)}</span>
+                  ${canDelete ? `<button class="note-delete-btn" data-action="deleteNote" data-note-id="${note.id}" data-order-id="${record.id}" title="Smazat poznamku">x</button>` : ''}
                 </div>
                 <div class="note-text">${Utils.escapeHtml(note.text)}</div>
               </div>
-            `).join('')
-          : '<div class="empty-notes">Zatím žádné poznámky</div>'
+            `;
+            }).join('')
+          : '<div class="empty-notes">Zatim zadne poznamky</div>'
         }
       </div>
 
