@@ -46,7 +46,7 @@ if ($isAdmin) {
     <?php
     elseif ($isLoggedIn):
         // Kontrola role technika pro zobrazení provizí
-        $userRole = $_SESSION['user_role'] ?? null;
+        $userRole = $_SESSION['role'] ?? null;
         $isTechnik = ($userRole === 'technik');
     ?>
       <?php if ($isTechnik): ?>
