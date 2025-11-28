@@ -1767,10 +1767,10 @@ function showContactMenu(id) {
       <div class="modal-section">
         <h3 class="section-title">Rychlé akce</h3>
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-          ${phone ? `<a href="tel:${phone}" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.9rem; text-decoration: none; display: block; text-align: center; background: #1a1a1a; color: white;">Zavolat</a>` : ''}
-          <button class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.9rem; background: #1a1a1a; color: white;" onclick="closeDetail(); setTimeout(() => showCalendar('${id}'), 100)">Termín návštěvy</button>
-          ${phone ? `<button class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.9rem; background: #444; color: white;" onclick="sendContactAttemptEmail('${id}', '${phone}')">Odeslat SMS</button>` : ''}
-          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.9rem; text-decoration: none; display: block; text-align: center; background: #444; color: white;" target="_blank">Navigovat (Waze)</a>` : ''}
+          ${phone ? `<a href="tel:${phone}" class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: white; box-sizing: border-box;">Zavolat</a>` : ''}
+          <button class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; background: #1a1a1a; color: white; box-sizing: border-box;" onclick="closeDetail(); setTimeout(() => showCalendar('${id}'), 100)">Termín návštěvy</button>
+          ${phone ? `<button class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; background: #444; color: white; box-sizing: border-box;" onclick="sendContactAttemptEmail('${id}', '${phone}')">Odeslat SMS</button>` : ''}
+          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; justify-content: center; background: #444; color: white; box-sizing: border-box;" target="_blank">Navigovat (Waze)</a>` : ''}
         </div>
       </div>
     </div>
