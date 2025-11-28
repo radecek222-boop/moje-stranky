@@ -413,14 +413,14 @@ if (!$isLoggedIn && !$isAdmin) {
   color: #ffffff !important;
 }
 
-/* Editovatelná pole - tmavá */
+/* Editovatelná pole - světlá s jemným odlišením */
 #detailOverlay .editable-field {
-  background: #2a2a2a !important;
-  border-color: #444444 !important;
+  background: #f5f5f5 !important;
+  border-color: #e0e0e0 !important;
 }
 
 #detailOverlay .field-label {
-  color: #888888 !important;
+  color: #666666 !important;
 }
 
 #detailOverlay .field-input,
@@ -428,15 +428,49 @@ if (!$isLoggedIn && !$isAdmin) {
 #detailOverlay input,
 #detailOverlay textarea,
 #detailOverlay select {
-  background: #333333 !important;
-  border-color: #444444 !important;
-  color: #ffffff !important;
+  background: #f8f8f8 !important;
+  border-color: #e0e0e0 !important;
+  color: #333333 !important;
+}
+
+#detailOverlay input:focus,
+#detailOverlay textarea:focus,
+#detailOverlay select:focus {
+  background: #ffffff !important;
+  border-color: #999999 !important;
+  outline: none !important;
 }
 
 #detailOverlay .field-input::placeholder,
 #detailOverlay .field-textarea::placeholder,
 #detailOverlay input::placeholder,
 #detailOverlay textarea::placeholder {
+  color: #999999 !important;
+}
+
+/* Info bloky v detailu zákazníka - světlé s jemným kontrastem */
+#detailOverlay .modal-body > div[style*="background: #f8f9fa"],
+#detailOverlay .modal-body > div[style*="background:#f8f9fa"] {
+  background: #f0f0f0 !important;
+  border-color: #ddd !important;
+}
+
+/* Labely v detailu zákazníka */
+#detailOverlay .modal-body label,
+#detailOverlay .modal-body span[style*="color: #666"] {
+  color: #555555 !important;
+}
+
+/* Div jako textarea (popisy) - světlé odlišené */
+#detailOverlay .modal-body > div > div[onclick*="showTextOverlay"] {
+  background: #f8f8f8 !important;
+  border-color: #e0e0e0 !important;
+  color: #333333 !important;
+}
+
+/* Readonly inputy - trochu jiný odstín */
+#detailOverlay input[readonly] {
+  background: #eeeeee !important;
   color: #666666 !important;
 }
 
