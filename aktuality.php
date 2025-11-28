@@ -8,62 +8,35 @@ require_once __DIR__ . '/init.php';
 require_once __DIR__ . '/includes/csrf_helper.php';
 require_once __DIR__ . '/includes/seo_meta.php';
 
-// Získat aktuality z databáze
+// Získat VŠECHNY aktuality z databáze
 try {
     $pdo = getDbConnection();
 
-    // Získat datum které má uživatel zobrazit (default = nejnovější)
-    $vybraneDatum = $_GET['datum'] ?? null;
+    // Jazyk
+    $jazyk = $_GET['lang'] ?? 'cz';
+    $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
-    if ($vybraneDatum) {
-        // Pokud je vybrané konkrétní datum, zobrazit články z toho dne
-        $stmt = $pdo->prepare("
-            SELECT * FROM wgs_natuzzi_aktuality
-            WHERE datum = :datum
-            LIMIT 1
-        ");
-        $stmt->execute(['datum' => $vybraneDatum]);
-        $hlavniAktualita = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Načíst VŠECHNY aktuality (seřazené od nejnovějších)
+    $stmt = $pdo->query("
+        SELECT * FROM wgs_natuzzi_aktuality
+        ORDER BY datum DESC
+    ");
+    $vsechnyAktuality = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if (!$hlavniAktualita) {
-            // Pokud datum neexistuje, zobrazit nejnovější
-            $stmt = $pdo->query("
-                SELECT * FROM wgs_natuzzi_aktuality
-                ORDER BY datum DESC
-                LIMIT 1
-            ");
-            $hlavniAktualita = $stmt->fetch(PDO::FETCH_ASSOC);
+    $articles = [];
+    $obsahSloupec = 'obsah_' . $jazyk;
+
+    // Pro každou aktualitu parsovat články
+    foreach ($vsechnyAktuality as $aktualita) {
+        $celyObsah = $aktualita[$obsahSloupec] ?? '';
+        if (!empty($celyObsah)) {
+            $clankyzAktuality = parseClankyzObsahu($celyObsah, $aktualita['id'], $jazyk);
+            $articles = array_merge($articles, $clankyzAktuality);
         }
-    } else {
-        // Zobrazit nejnovější aktualitu
-        $stmt = $pdo->query("
-            SELECT * FROM wgs_natuzzi_aktuality
-            ORDER BY datum DESC
-            LIMIT 1
-        ");
-        $hlavniAktualita = $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Pokud existuje hlavní aktualita, načíst její obsah
-    if ($hlavniAktualita) {
-        $datumAktuality = $hlavniAktualita['datum'];
-
-        // Rozdělit obsah na jednotlivé články podle ## nadpisů
-        $jazyk = $_GET['lang'] ?? 'cz';
-        $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
-
-        $obsahSloupec = 'obsah_' . $jazyk;
-        $celyObsah = $hlavniAktualita[$obsahSloupec] ?? '';
-
-        // Parse článků z markdown obsahu
-        $articles = parseClankyzObsahu($celyObsah, $hlavniAktualita['id'], $jazyk);
-
-        // Články se nemíchají při každém načtení - pořadí je dané obsahem z databáze
-        // Inteligentní rozdělení do sloupců podle délky se provede níže při zobrazování
-    } else {
-        $articles = [];
-        $datumAktuality = null;
-    }
+    // Datum nejnovější aktuality pro zobrazení
+    $datumAktuality = !empty($vsechnyAktuality) ? $vsechnyAktuality[0]['datum'] : null;
 
 } catch (Exception $e) {
     error_log("Chyba při načítání aktualit: " . $e->getMessage());
@@ -103,9 +76,6 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
     return $articles;
 }
-
-$jazyk = $_GET['lang'] ?? 'cz';
-$jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $jazyk; ?>">
