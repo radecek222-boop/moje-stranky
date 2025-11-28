@@ -269,40 +269,54 @@ if (!$isLoggedIn && !$isAdmin) {
   padding: 0.75rem 1rem !important;
 }
 
-/* POSUN MODALU OD HEADERU */
-.modal-overlay {
+/* POSUN MODALU OD HEADERU - pro běžné modaly */
+.modal-overlay:not(#detailOverlay) {
   padding-top: 3rem !important;
 }
 
-.modal-content {
+.modal-overlay:not(#detailOverlay) .modal-content {
   margin-top: 2rem !important;
 }
 
-/* DETAIL OVERLAY - TMAVÉ POZADÍ KOMPLET */
+/* DETAIL OVERLAY - TMAVÉ POZADÍ + PŘESNÉ CENTROVÁNÍ */
 #detailOverlay {
-  --c-bg: #1a1a1a;  /* Tmavé pozadí pro všechny vnořené prvky */
+  --c-bg: #1a1a1a;
   --c-bg-card: #222222;
   --c-text: #ffffff;
   --c-text-muted: #aaaaaa;
   --c-border: #333333;
   background: #0a0a0a !important;
+  /* Přesné centrování - tlačítko Kontaktovat uprostřed */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
 }
 
 #detailOverlay .modal-content {
   background: #1a1a1a !important;
   border: none !important;
   box-shadow: none !important;
-  max-width: 100% !important;
-  width: 100% !important;
+  max-width: 500px !important;
+  width: 95% !important;
   color: #ffffff !important;
+  margin: 0 auto !important;
+  /* Omezit výšku aby se vešlo na displej */
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  border-radius: 12px !important;
 }
 
-/* Hlavička modalu - větší a vycentrovaná */
+/* Hlavička modalu - větší a vše vycentrováno */
 #detailOverlay .modal-header {
   background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
   padding: 1.5rem 2rem !important;
   text-align: center !important;
   border-bottom: 1px solid #333333 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 #detailOverlay .modal-title {
@@ -311,15 +325,35 @@ if (!$isLoggedIn && !$isAdmin) {
   color: #ffffff !important;
   margin-bottom: 0.5rem !important;
   text-align: center !important;
+  width: 100% !important;
 }
 
 #detailOverlay .modal-subtitle {
   font-size: 0.9rem !important;
   color: #888888 !important;
   text-align: center !important;
+  width: 100% !important;
+}
+
+/* Tlačítka v hlavičce - centrované */
+#detailOverlay .modal-header .btn,
+#detailOverlay .modal-header button {
+  margin: 0 auto !important;
 }
 
 @media (max-width: 768px) {
+  /* Mobilní centrování - přesně uprostřed */
+  #detailOverlay {
+    padding: 0.5rem !important;
+  }
+
+  #detailOverlay .modal-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: 95vh !important;
+    border-radius: 8px !important;
+  }
+
   #detailOverlay .modal-header {
     padding: 1rem 1.5rem !important;
   }
@@ -338,6 +372,22 @@ if (!$isLoggedIn && !$isAdmin) {
 #detailOverlay .modal-body {
   background: #1a1a1a !important;
   color: #ffffff !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  padding: 1rem !important;
+}
+
+/* Všechny prvky v body centrované */
+#detailOverlay .modal-body > * {
+  width: 100% !important;
+  max-width: 400px !important;
+}
+
+/* Tlačítka v body - centrované */
+#detailOverlay .modal-body .btn {
+  display: block !important;
+  margin: 0.5rem auto !important;
 }
 
 #detailOverlay .modal-section {
@@ -894,8 +944,8 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
 
 /* KOMPLETNÍ OPTIMALIZACE DETAIL MODALU - ULTRA KOMPAKTNÍ STYL */
 @media (max-width: 768px) {
-  /* Modal overlay - lepší scrollování, uprostřed displeje */
-  .modal-overlay {
+  /* Modal overlay - lepší scrollování (NE pro #detailOverlay - ten má vlastní styling) */
+  .modal-overlay:not(#detailOverlay) {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
     touch-action: pan-y !important;
@@ -903,13 +953,13 @@ body:has(.modal-overlay.active) #pull-refresh-indicator {
     padding: 2rem 0.5rem !important;
   }
 
-  .modal-content {
+  .modal-overlay:not(#detailOverlay) .modal-content {
     margin: 0 auto !important;
     max-height: none !important;
   }
 
-  /* Modal header - ultra kompaktní */
-  .modal-header {
+  /* Modal header - ultra kompaktní (NE pro #detailOverlay) */
+  .modal-overlay:not(#detailOverlay) .modal-header {
     padding: 0.2rem !important;
   }
 
