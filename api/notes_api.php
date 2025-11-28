@@ -212,10 +212,11 @@ try {
                     // - Prodejce: vidí jen své → dostane notifikaci jen pokud je vlastník reklamace
                     // - Autor poznámky NIKDY nedostane notifikaci
                     // ========================================
+                    // COLLATE pro reseni rozdilnych kolaci mezi tabulkami
                     $stmtSubs = $pdo->prepare("
                         SELECT ps.id, ps.endpoint, ps.p256dh, ps.auth, ps.user_id, ps.email, u.role
                         FROM wgs_push_subscriptions ps
-                        LEFT JOIN wgs_users u ON ps.user_id = u.user_id
+                        LEFT JOIN wgs_users u ON ps.user_id COLLATE utf8mb4_unicode_ci = u.user_id
                         WHERE ps.aktivni = 1
                           AND (ps.user_id IS NULL OR ps.user_id != :author_user_id)
                     ");

@@ -127,10 +127,11 @@ try {
     // ========================================
     echo "<h2>4. Aktivni Subscriptions</h2>";
 
+    // COLLATE pro reseni rozdilnych kolaci mezi tabulkami
     $stmt = $pdo->query("
         SELECT ps.*, u.name as user_name, u.role as user_role
         FROM wgs_push_subscriptions ps
-        LEFT JOIN wgs_users u ON ps.user_id = u.user_id
+        LEFT JOIN wgs_users u ON ps.user_id COLLATE utf8mb4_unicode_ci = u.user_id
         ORDER BY ps.datum_vytvoreni DESC
     ");
     $subscriptions = $stmt->fetchAll(PDO::FETCH_ASSOC);
