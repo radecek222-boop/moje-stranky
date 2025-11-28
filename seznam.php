@@ -335,11 +335,11 @@ body.modal-open {
   --c-text-muted: #aaaaaa;
   --c-border: #333333;
   background: #0a0a0a !important;
-  /* Přesné centrování - tlačítko Kontaktovat uprostřed */
+  /* FIX: Začít shora aby byla vidět hlavička */
   display: flex !important;
-  align-items: center !important;
+  align-items: flex-start !important;
   justify-content: center !important;
-  padding: 0 !important;
+  padding: 2rem 0 0 0 !important;
 }
 
 #detailOverlay .modal-content {
@@ -402,9 +402,9 @@ body.modal-open {
 }
 
 @media (max-width: 768px) {
-  /* Mobilní centrování - přesně uprostřed */
+  /* Mobilní - začít shora aby byla vidět hlavička */
   #detailOverlay {
-    padding: 0.5rem !important;
+    padding: 1rem 0.5rem 0.5rem 0.5rem !important;
     /* FIX: iOS Safari - zajistit že overlay je přes celou obrazovku */
     height: 100vh !important;
     height: 100dvh !important; /* Dynamic viewport height */
@@ -413,9 +413,9 @@ body.modal-open {
   #detailOverlay .modal-content {
     max-width: 100% !important;
     width: 100% !important;
-    /* FIX: iOS Safari viewport - dynamická výška (zmenšeno z 95vh na 80vh) */
-    max-height: 80vh !important;
-    max-height: 80dvh !important; /* Dynamic viewport height - Safari 15.4+ */
+    /* FIX: iOS Safari viewport - dynamická výška (vráceno na 90vh, problém byl v centrování) */
+    max-height: 90vh !important;
+    max-height: 90dvh !important; /* Dynamic viewport height - Safari 15.4+ */
     border-radius: 8px !important;
 
     /* FIX: Touch scrolling pro mobil */
@@ -450,9 +450,9 @@ body.modal-open {
   }
 
   #detailOverlay .modal-content {
-    /* PWA modal - optimalizace pro standalone režim (zmenšeno z 92vh na 80vh) */
-    max-height: 80vh !important;
-    max-height: 80dvh !important; /* Dynamic viewport height */
+    /* PWA modal - optimalizace pro standalone režim (vráceno na 90vh) */
+    max-height: 90vh !important;
+    max-height: 90dvh !important; /* Dynamic viewport height */
 
     /* PWA scroll fix */
     -webkit-overflow-scrolling: touch !important;
@@ -484,10 +484,10 @@ body.modal-open {
     }
 
     #detailOverlay .modal-content {
-      /* iOS PWA modal centrování (zmenšeno z 90vh na 80vh) */
+      /* iOS PWA modal (vráceno na 90vh, problém byl v align-items) */
       margin: auto !important;
-      max-height: 80vh !important;
-      max-height: 80dvh !important;
+      max-height: 90vh !important;
+      max-height: 90dvh !important;
     }
   }
 }
