@@ -80,7 +80,7 @@ try {
     // 1. KONTROLA PŘIDANÝCH INDEXŮ (wgs_notes)
     // ==========================================
 
-    echo "<h2>✅ 1. Kontrola přidaných indexů - wgs_notes</h2>";
+    echo "<h2>1. Kontrola přidaných indexů - wgs_notes</h2>";
 
     $stmt = $pdo->query("SHOW INDEX FROM wgs_notes");
     $indexy = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -111,7 +111,7 @@ try {
             $skutecneSloupce = array_map(function($idx) { return $idx['Column_name']; }, $indexyMap[$indexName]);
 
             if ($skutecneSloupce == $info['sloupce']) {
-                echo "<td><span class='badge badge-success'>✅ OK</span></td>";
+                echo "<td><span class='badge badge-success'>OK</span></td>";
                 echo "<td>Index existuje a má správnou strukturu</td>";
             } else {
                 echo "<td><span class='badge badge-warning'>⚠️ ČÁSTEČNĚ</span></td>";
@@ -120,7 +120,7 @@ try {
                 $problemy[] = "Index {$indexName} má nesprávnou strukturu";
             }
         } else {
-            echo "<td><span class='badge badge-danger'>❌ CHYBÍ</span></td>";
+            echo "<td><span class='badge badge-danger'>CHYBÍ</span></td>";
             echo "<td>Index nebyl vytvořen</td>";
             $vsechnoOK = false;
             $problemy[] = "Index {$indexName} chybí";
@@ -177,10 +177,10 @@ try {
             echo "<td><code>{$indexName}</code></td>";
 
             if (!isset($existujiciMap[$indexName])) {
-                echo "<td><span class='badge badge-success'>✅ ODSTRANĚN</span></td>";
+                echo "<td><span class='badge badge-success'>ODSTRANĚN</span></td>";
                 echo "<td>Redundantní index byl úspěšně odstraněn</td>";
             } else {
-                echo "<td><span class='badge badge-danger'>❌ EXISTUJE</span></td>";
+                echo "<td><span class='badge badge-danger'>EXISTUJE</span></td>";
                 echo "<td>Index stále existuje - nebyl odstraněn</td>";
                 $vsechnoOK = false;
                 $problemy[] = "Redundantní index {$tabulka}.{$indexName} stále existuje";
@@ -316,13 +316,13 @@ try {
 
     if ($vsechnoOK) {
         echo "<div class='success'>";
-        echo "✅ <strong>MIGRACE PROBĚHLY ÚSPĚŠNĚ</strong><br><br>";
+        echo "<strong>MIGRACE PROBĚHLY ÚSPĚŠNĚ</strong><br><br>";
         echo "Všechny indexy byly správně přidány a redundantní indexy byly odstraněny.<br>";
         echo "Systém je nyní optimalizován pro lepší výkon.";
         echo "</div>";
     } else {
         echo "<div class='error'>";
-        echo "❌ <strong>DETEKOVANÉ PROBLÉMY</strong><br><br>";
+        echo "<strong>DETEKOVANÉ PROBLÉMY</strong><br><br>";
         echo "<ul>";
         foreach ($problemy as $problem) {
             echo "<li>{$problem}</li>";
@@ -340,8 +340,8 @@ try {
 
     echo "<div class='info'>";
     echo "<strong>Hotovo:</strong><br>";
-    echo "✅ Přidány 3 nové indexy na wgs_notes<br>";
-    echo "✅ Odstraněny 3 redundantní indexy<br><br>";
+    echo "Přidány 3 nové indexy na wgs_notes<br>";
+    echo "Odstraněny 3 redundantní indexy<br><br>";
 
     echo "<strong>Další optimalizace podle auditu:</strong><br>";
     echo "1️⃣ <strong>Priorita CRITICAL:</strong> Přidat session_write_close() do 40+ API endpointů (2-3 dny)<br>";
@@ -360,7 +360,7 @@ try {
 
 } catch (Exception $e) {
     echo "<div class='error'>";
-    echo "<strong>❌ CHYBA PŘI KONTROLE:</strong><br>";
+    echo "<strong>CHYBA PŘI KONTROLE:</strong><br>";
     echo htmlspecialchars($e->getMessage());
     echo "</div>";
 }

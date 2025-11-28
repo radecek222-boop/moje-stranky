@@ -105,6 +105,6 @@
         }
     });
 
-    console.log('📊 WGS Analytics Tracker loaded');
+    console.log('WGS Analytics Tracker loaded');
 
 })();

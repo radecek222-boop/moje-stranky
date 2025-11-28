@@ -10,7 +10,7 @@ require_once __DIR__ . '/../includes/reklamace_id_validator.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
 
 header('Content-Type: application/json');
-// ✅ PERFORMANCE: Cache-Control header (10 minut)
+// PERFORMANCE: Cache-Control header (10 minut)
 // Protokoly (PDF dokumenty) se nemění často
 header('Cache-Control: private, max-age=600'); // 10 minut
 
@@ -26,7 +26,7 @@ try {
         exit;
     }
 
-    // ✅ PERFORMANCE FIX: Načíst session data a uvolnit zámek
+    // PERFORMANCE FIX: Načíst session data a uvolnit zámek
     // Audit 2025-11-24: PDF generation (1-3s) blokuje ostatní requesty
     $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
 
@@ -70,7 +70,7 @@ try {
         throw new Exception('Povolena pouze POST nebo GET metoda');
     }
 
-    // ✅ FIX 9: Databázový rate limiting pouze pro POST operace (upload, save, send)
+    // FIX 9: Databázový rate limiting pouze pro POST operace (upload, save, send)
     if ($isPost && in_array($action, ['save_pdf_document', 'save_protokol', 'send_email'])) {
         $pdo = getDbConnection();
         $rateLimiter = new RateLimiter($pdo);
@@ -92,7 +92,7 @@ try {
             exit;
         }
 
-        // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
+        // FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
     }
 
     switch ($action) {
@@ -252,7 +252,7 @@ function savePdfOnly($data) {
                 ':uploaded_by' => $uploadedBy
             ]);
 
-            error_log("✅ PDF report uložen přes EXPORT: {$filename} ({$fileSize} bytes)");
+            error_log("PDF report uložen přes EXPORT: {$filename} ({$fileSize} bytes)");
 
             return [
                 'status' => 'success',
@@ -680,7 +680,7 @@ reklamace@wgs-service.cz
         // Odeslat
         $mail->send();
 
-        // ✅ Uložit kompletní PDF do databáze (protokol + fotodokumentace)
+        // Uložit kompletní PDF do databáze (protokol + fotodokumentace)
         // Vytvoření uploads/protokoly adresáře
         $uploadsDir = __DIR__ . '/../uploads/protokoly';
         if (!is_dir($uploadsDir)) {
@@ -726,7 +726,7 @@ reklamace@wgs-service.cz
                     ':uploaded_by' => $uploadedBy
                 ]);
 
-                error_log("✅ Kompletní PDF report uložen: {$filename} ({$fileSize} bytes)");
+                error_log("Kompletní PDF report uložen: {$filename} ({$fileSize} bytes)");
 
             } catch (PDOException $e) {
                 // Logovat chybu ale nepřerušovat odeslání emailu

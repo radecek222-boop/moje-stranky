@@ -126,7 +126,7 @@ try {
 
     if ($sloupecExistuje) {
         echo "<div class='success'>";
-        echo "<strong>✅ SLOUPEC 'kalkulace_data' JIŽ EXISTUJE</strong><br>";
+        echo "<strong>SLOUPEC 'kalkulace_data' JIŽ EXISTUJE</strong><br>";
         echo "Migrace není potřeba. Databáze je v pořádku.";
         echo "</div>";
     } else {
@@ -155,7 +155,7 @@ try {
                 $pdo->commit();
 
                 echo "<div class='success'>";
-                echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
+                echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
                 echo "Sloupec 'kalkulace_data' byl úspěšně přidán do tabulky wgs_reklamace.<br>";
                 echo "Typ: TEXT (pro JSON data)<br>";
                 echo "Pozice: Po sloupci 'updated_at'<br>";
@@ -177,7 +177,7 @@ try {
 
                 if ($newColumn) {
                     echo "<div class='success'>";
-                    echo "<strong>✅ OVĚŘENÍ ÚSPĚŠNÉ</strong><br>";
+                    echo "<strong>OVĚŘENÍ ÚSPĚŠNÉ</strong><br>";
                     echo "<pre>";
                     echo "Field: " . $newColumn['Field'] . "\n";
                     echo "Type: " . $newColumn['Type'] . "\n";
@@ -190,7 +190,7 @@ try {
             } catch (PDOException $e) {
                 $pdo->rollBack();
                 echo "<div class='error'>";
-                echo "<strong>❌ CHYBA PŘI MIGRACI:</strong><br>";
+                echo "<strong>CHYBA PŘI MIGRACI:</strong><br>";
                 echo htmlspecialchars($e->getMessage());
                 echo "</div>";
             }
@@ -223,7 +223,7 @@ try {
 
 } catch (Exception $e) {
     echo "<div class='error'>";
-    echo "<strong>❌ CHYBA:</strong><br>";
+    echo "<strong>CHYBA:</strong><br>";
     echo htmlspecialchars($e->getMessage());
     echo "</div>";
 }

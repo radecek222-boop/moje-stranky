@@ -15,7 +15,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die(json_encode(['status' => 'error', 'message' => 'Unauthorized']));
 }
 
-// ✅ PERFORMANCE FIX: Uvolnit session lock pro paralelní zpracování
+// PERFORMANCE FIX: Uvolnit session lock pro paralelní zpracování
 // Audit 2025-11-24: Backup operace trvají 5-30s!
 session_write_close();
 

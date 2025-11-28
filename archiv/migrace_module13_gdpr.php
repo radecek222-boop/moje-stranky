@@ -136,7 +136,7 @@ try {
         echo "</div>";
     } else {
         echo "<div class='info'>";
-        echo "<strong>✅ Tabulky neexistují</strong><br>";
+        echo "<strong>Tabulky neexistují</strong><br>";
         echo "Budou vytvořeny nové tabulky.";
         echo "</div>";
     }
@@ -261,24 +261,24 @@ CREATE TABLE IF NOT EXISTS wgs_gdpr_audit_log (
             foreach ($existingTables as $table) {
                 echo "<div class='info'>⏳ Odstraňuji starou tabulku {$table}...</div>";
                 $pdo->exec("DROP TABLE IF EXISTS {$table}");
-                echo "<div class='success'>✅ Stará tabulka odstraněna</div>";
+                echo "<div class='success'>Stará tabulka odstraněna</div>";
             }
 
             // Vytvoření nových tabulek
             echo "<div class='info'>⏳ Vytvářím tabulku wgs_gdpr_consents...</div>";
             $pdo->exec($ddl1);
-            echo "<div class='success'>✅ Tabulka wgs_gdpr_consents vytvořena</div>";
+            echo "<div class='success'>Tabulka wgs_gdpr_consents vytvořena</div>";
 
             echo "<div class='info'>⏳ Vytvářím tabulku wgs_gdpr_data_requests...</div>";
             $pdo->exec($ddl2);
-            echo "<div class='success'>✅ Tabulka wgs_gdpr_data_requests vytvořena</div>";
+            echo "<div class='success'>Tabulka wgs_gdpr_data_requests vytvořena</div>";
 
             echo "<div class='info'>⏳ Vytvářím tabulku wgs_gdpr_audit_log...</div>";
             $pdo->exec($ddl3);
-            echo "<div class='success'>✅ Tabulka wgs_gdpr_audit_log vytvořena</div>";
+            echo "<div class='success'>Tabulka wgs_gdpr_audit_log vytvořena</div>";
 
             echo "<div class='success'>";
-            echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
+            echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
             echo "Vytvořeno:<br>";
             echo "• Tabulka: wgs_gdpr_consents (3 indexy)<br>";
             echo "• Tabulka: wgs_gdpr_data_requests (4 indexy)<br>";
@@ -299,7 +299,7 @@ CREATE TABLE IF NOT EXISTS wgs_gdpr_audit_log (
 
         } catch (PDOException $e) {
             echo "<div class='error'>";
-            echo "<strong>❌ CHYBA PŘI MIGRACI</strong><br>";
+            echo "<strong>CHYBA PŘI MIGRACI</strong><br>";
             echo htmlspecialchars($e->getMessage());
             echo "</div>";
         }
@@ -317,7 +317,7 @@ CREATE TABLE IF NOT EXISTS wgs_gdpr_audit_log (
 
 } catch (Exception $e) {
     echo "<div class='error'>";
-    echo "<strong>❌ NEOČEKÁVANÁ CHYBA</strong><br>";
+    echo "<strong>NEOČEKÁVANÁ CHYBA</strong><br>";
     echo htmlspecialchars($e->getMessage());
     echo "</div>";
 }

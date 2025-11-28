@@ -203,7 +203,7 @@ try {
 
     } else {
         echo "<div class='success'>";
-        echo "✅ Tabulky neexistují. Můžeme pokračovat s migrací.";
+        echo "Tabulky neexistují. Můžeme pokračovat s migrací.";
         echo "</div>";
 
         // ========================================
@@ -381,7 +381,7 @@ try {
                 $pdo->commit();
 
                 echo "<div class='success'>";
-                echo "<h2 style='color: white; border: none; margin: 0 0 10px 0; padding: 0;'>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</h2>";
+                echo "<h2 style='color: white; border: none; margin: 0 0 10px 0; padding: 0;'>MIGRACE ÚSPĚŠNĚ DOKONČENA</h2>";
                 echo "<strong>Vytvořené tabulky:</strong><br>";
                 echo "- wgs_analytics_conversions<br>";
                 echo "- wgs_analytics_funnels<br>";
@@ -461,7 +461,7 @@ try {
                 $pdo->rollBack();
 
                 echo "<div class='error'>";
-                echo "<h2 style='color: white; border: none; margin: 0 0 10px 0; padding: 0;'>❌ CHYBA PŘI MIGRACI</h2>";
+                echo "<h2 style='color: white; border: none; margin: 0 0 10px 0; padding: 0;'>CHYBA PŘI MIGRACI</h2>";
                 echo "<strong>Chybová zpráva:</strong><br>";
                 echo "<pre style='background: rgba(255,255,255,0.2); border: none; color: white;'>" . htmlspecialchars($e->getMessage()) . "</pre>";
                 echo "</div>";
@@ -474,7 +474,7 @@ try {
 
 } catch (Exception $e) {
     echo "<div class='error'>";
-    echo "<h2 style='color: white; border: none; margin: 0 0 10px 0; padding: 0;'>❌ NEOČEKÁVANÁ CHYBA</h2>";
+    echo "<h2 style='color: white; border: none; margin: 0 0 10px 0; padding: 0;'>NEOČEKÁVANÁ CHYBA</h2>";
     echo htmlspecialchars($e->getMessage());
     echo "</div>";
 

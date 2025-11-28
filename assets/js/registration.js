@@ -100,4 +100,4 @@ function showNotification(message, type = 'info') {
   }
 }
 
-logger.log('✅ Registration system loaded');
+logger.log('Registration system loaded');

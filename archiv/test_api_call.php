@@ -66,7 +66,7 @@ async function testAPI() {
         responseEl.textContent += 'Response body length: ' + text.length + ' bytes\n\n';
         
         if (text.length === 0) {
-            responseEl.textContent += '❌ EMPTY RESPONSE (500 error bez output)\n';
+            responseEl.textContent += 'EMPTY RESPONSE (500 error bez output)\n';
             responseEl.textContent += 'Pravděpodobně PHP fatal error nebo opcache issue.\n';
             responseEl.className = 'error';
         } else {
@@ -76,12 +76,12 @@ async function testAPI() {
                 responseEl.textContent += JSON.stringify(json, null, 2);
                 responseEl.className = json.status === 'success' ? 'success' : 'error';
             } catch (e) {
-                responseEl.textContent += '❌ NOT JSON:\n\n' + text;
+                responseEl.textContent += 'NOT JSON:\n\n' + text;
                 responseEl.className = 'error';
             }
         }
     } catch (error) {
-        responseEl.textContent += '❌ Network error: ' + error.message;
+        responseEl.textContent += 'Network error: ' + error.message;
         responseEl.className = 'error';
     }
 }

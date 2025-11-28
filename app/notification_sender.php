@@ -65,7 +65,7 @@ try {
     // ============================================
     $pdo = getDbConnection();
 
-    // ✅ FIX 9: Databázový rate limiting - ochrana proti spamování
+    // FIX 9: Databázový rate limiting - ochrana proti spamování
     $rateLimiter = new RateLimiter($pdo);
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 
@@ -84,7 +84,7 @@ try {
         exit;
     }
 
-    // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
+    // FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
 
     // ============================================
     // NAČTENÍ ŠABLONY Z DATABÁZE

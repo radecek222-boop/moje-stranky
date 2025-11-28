@@ -575,12 +575,12 @@ try {
 
     if ($allOk) {
         echo "<div style='background: #d4edda; padding: 20px; border-radius: 8px; margin-top: 30px;'>";
-        echo "<h3 style='color: #155724; margin: 0 0 10px 0;'>✅ SYSTEM COMPREHENSIVE TEST: PASSED</h3>";
+        echo "<h3 style='color: #155724; margin: 0 0 10px 0;'>SYSTEM COMPREHENSIVE TEST: PASSED</h3>";
         echo "<p style='color: #155724; margin: 0;'>Všechny komponenty Enterprise Analytics System jsou přítomny a funkční!</p>";
         echo "</div>";
     } else {
         echo "<div style='background: #f8d7da; padding: 20px; border-radius: 8px; margin-top: 30px;'>";
-        echo "<h3 style='color: #721c24; margin: 0 0 10px 0;'>❌ SYSTEM COMPREHENSIVE TEST: ISSUES FOUND</h3>";
+        echo "<h3 style='color: #721c24; margin: 0 0 10px 0;'>SYSTEM COMPREHENSIVE TEST: ISSUES FOUND</h3>";
         echo "<p style='color: #721c24; margin: 0;'>Některé komponenty chybí nebo nejsou dostupné. Zkontrolujte červené položky výše.</p>";
         echo "</div>";
     }

@@ -15,7 +15,7 @@ require_once __DIR__ . '/../init.php';
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 if (!$isAdmin) {
     die('
-        <h1>❌ Neautorizovaný přístup</h1>
+        <h1>Neautorizovaný přístup</h1>
         <p>Tento script může spustit pouze přihlášený admin.</p>
         <p><a href="/admin.php">Přihlásit se jako admin</a></p>
     ');
@@ -119,7 +119,7 @@ Dopad: Zabezpečení proti neoprávněnému přístupu k setup scriptům',
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>✅ Produkční úkoly přidány</title>
+        <title>Produkční úkoly přidány</title>
         <style>
             * {
                 margin: 0;
@@ -220,7 +220,7 @@ Dopad: Zabezpečení proti neoprávněnému přístupu k setup scriptům',
     </head>
     <body>
         <div class="container">
-            <div class="success-icon">✅</div>
+            <div class="success-icon"></div>
             <h1>Produkční úkoly úspěšně přidány!</h1>
 
             <div class="stats">
@@ -274,7 +274,7 @@ Dopad: Zabezpečení proti neoprávněnému přístupu k setup scriptům',
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>❌ Chyba</title>
+        <title>Chyba</title>
         <style>
             body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -301,7 +301,7 @@ Dopad: Zabezpečení proti neoprávněnému přístupu k setup scriptům',
     </head>
     <body>
         <div class="error">
-            <h1>❌ Chyba při přidávání úkolů</h1>
+            <h1>Chyba při přidávání úkolů</h1>
             <p><?= htmlspecialchars($e->getMessage()) ?></p>
             <p style="margin-top: 20px;">
                 <a href="/admin.php" style="color: #667eea;">← Zpět na admin</a>

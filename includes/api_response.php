@@ -10,7 +10,7 @@ class ApiResponse
      */
     public static function success($data = [], ?string $message = null, $meta = null, int $httpCode = 200): void
     {
-        // ✅ OPRAVA: Vyčistit output buffer PŘED odesláním odpovědi
+        // OPRAVA: Vyčistit output buffer PŘED odesláním odpovědi
         while (ob_get_level() > 0) {
             ob_end_clean();
         }
@@ -40,7 +40,7 @@ class ApiResponse
      */
     public static function error($message = 'Došlo k chybě.', int $httpCode = 400, $details = null): void
     {
-        // ✅ OPRAVA: Vyčistit output buffer PŘED odesláním odpovědi
+        // OPRAVA: Vyčistit output buffer PŘED odesláním odpovědi
         while (ob_get_level() > 0) {
             ob_end_clean();
         }

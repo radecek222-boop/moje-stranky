@@ -91,8 +91,8 @@ try {
         $enClass = !empty($data['en']) ? 'filled' : 'empty';
         $itClass = !empty($data['it']) ? 'filled' : 'empty';
 
-        $enText = !empty($data['en']) ? htmlspecialchars($data['en']) : '❌ CHYBÍ';
-        $itText = !empty($data['it']) ? htmlspecialchars($data['it']) : '❌ CHYBÍ';
+        $enText = !empty($data['en']) ? htmlspecialchars($data['en']) : 'CHYBÍ';
+        $itText = !empty($data['it']) ? htmlspecialchars($data['it']) : 'CHYBÍ';
 
         echo "<tr>
                 <td><strong>" . htmlspecialchars($data['cs']) . "</strong></td>
@@ -142,8 +142,8 @@ try {
         $enClass = !empty($polozka['category_en']) ? 'filled' : 'empty';
         $itClass = !empty($polozka['category_it']) ? 'filled' : 'empty';
 
-        $enText = !empty($polozka['category_en']) ? htmlspecialchars($polozka['category_en']) : '❌';
-        $itText = !empty($polozka['category_it']) ? htmlspecialchars($polozka['category_it']) : '❌';
+        $enText = !empty($polozka['category_en']) ? htmlspecialchars($polozka['category_en']) : '';
+        $itText = !empty($polozka['category_it']) ? htmlspecialchars($polozka['category_it']) : '';
 
         echo "<tr>
                 <td>{$polozka['id']}</td>

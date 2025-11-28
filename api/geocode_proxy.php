@@ -149,7 +149,7 @@ try {
     $countryCodes = 'cz,sk';
     $fallbackBbox = '11.5,47.0,24.5,51.5'; // CZ + SK
 
-    // ✅ FIX: Helper pro HTTP requesty s cURL (podporuje proxy)
+    // FIX: Helper pro HTTP requesty s cURL (podporuje proxy)
     function fetchUrl($url, $userAgent = 'WGS Service/1.0', $timeout = 8) {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -286,7 +286,7 @@ try {
                 'apiKey' => $apiKey,
                 'format' => 'geojson',
                 'limit' => 5,
-                'lang' => 'cs' // ✅ FIX: České názvy míst (Praha místo Capital city)
+                'lang' => 'cs' // FIX: České názvy míst (Praha místo Capital city)
             ];
 
             // Filtr podle typu
@@ -615,7 +615,7 @@ try {
     $response = fetchUrl($url, $userAgent);
 
     if ($response === false) {
-        // ✅ FALLBACK: Pokud Geoapify selže (např. síťový problém), zkusit alternativu
+        // FALLBACK: Pokud Geoapify selže (např. síťový problém), zkusit alternativu
         error_log('⚠️ Geoapify API failed, trying fallback for action: ' . $action);
 
         // Pro autocomplete zkusit Photon API jako fallback

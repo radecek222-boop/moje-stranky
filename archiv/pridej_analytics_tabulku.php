@@ -96,7 +96,7 @@ try {
 
     } else {
         echo "<div class='info'>";
-        echo "✅ Tabulka <code>wgs_pageviews</code> neexistuje. Připraveno k vytvoření.";
+        echo "Tabulka <code>wgs_pageviews</code> neexistuje. Připraveno k vytvoření.";
         echo "</div>";
     }
 
@@ -193,7 +193,7 @@ try {
             // Výpis výsledku migrace (mimo try-catch)
             if ($migrationSuccess) {
                 echo "<div class='success'>";
-                echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
+                echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
                 echo "Vytvořené tabulky:<br>";
                 echo "• <code>wgs_pageviews</code> - sledování návštěvnosti<br>";
                 echo "• <code>wgs_analytics_ignored_ips</code> - ignorované IP adresy<br><br>";

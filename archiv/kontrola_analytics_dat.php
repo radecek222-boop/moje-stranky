@@ -69,7 +69,7 @@ try {
 
     if (count($ignoredIPs) > 0) {
         echo "<div class='success'>";
-        echo "<strong>✅ Nalezeno " . count($ignoredIPs) . " ignorovaných IP adres:</strong>";
+        echo "<strong>Nalezeno " . count($ignoredIPs) . " ignorovaných IP adres:</strong>";
         echo "</div>";
 
         echo "<table>";
@@ -220,7 +220,7 @@ try {
 
     echo "<br><br>";
     echo "<div class='success'>";
-    echo "<strong>✅ TRACKING FUNGUJE!</strong><br>";
+    echo "<strong>TRACKING FUNGUJE!</strong><br>";
     echo "Analytics data se úspěšně zaznamenávají do databáze.";
     echo "</div>";
 

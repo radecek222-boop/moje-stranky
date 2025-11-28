@@ -181,7 +181,7 @@ foreach (array_keys($filesToFix) as $filePath) {
 }
 
 echo "\n" . str_repeat("=", 70) . "\n";
-echo "✅ DOKONČENO!\n";
+echo "DOKONČENO!\n";
 echo str_repeat("=", 70) . "\n\n";
 
 echo "📊 Statistiky:\n";

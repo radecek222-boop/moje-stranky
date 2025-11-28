@@ -134,7 +134,7 @@ async function testAPI() {
         logDebug(`📊 Response status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
 
         if (!response.ok) {
-            logDebug('❌ Response není OK!', 'error');
+            logDebug('Response není OK!', 'error');
             return;
         }
 
@@ -144,23 +144,23 @@ async function testAPI() {
         let data;
         try {
             data = JSON.parse(text);
-            logDebug('✅ JSON parse successful', 'success');
+            logDebug('JSON parse successful', 'success');
             logDebug(`📦 Data: ${JSON.stringify(data, null, 2)}`);
         } catch (e) {
-            logDebug(`❌ JSON parse error: ${e.message}`, 'error');
+            logDebug(`JSON parse error: ${e.message}`, 'error');
             logDebug(`Raw text: ${text}`, 'error');
             return;
         }
 
         if (data.status === 'success') {
-            logDebug('✅ API vrátilo úspěch', 'success');
+            logDebug('API vrátilo úspěch', 'success');
             updateUI(data.data.stats);
         } else {
-            logDebug(`❌ API error: ${data.message}`, 'error');
+            logDebug(`API error: ${data.message}`, 'error');
         }
 
     } catch (error) {
-        logDebug(`❌ Fetch error: ${error.message}`, 'error');
+        logDebug(`Fetch error: ${error.message}`, 'error');
         console.error('Fetch error:', error);
     }
 }
@@ -180,7 +180,7 @@ function updateUI(stats) {
     document.getElementById('conversion-rate').textContent = (stats.conversionRate || 0).toFixed(1) + '%';
     document.getElementById('online-now').textContent = Math.floor(Math.random() * 15) + 5;
 
-    logDebug('✅ UI aktualizováno', 'success');
+    logDebug('UI aktualizováno', 'success');
 }
 
 function formatDuration(seconds) {

@@ -23,7 +23,7 @@ try {
         exit;
     }
 
-    // ✅ PERFORMANCE FIX: Načíst session data a uvolnit zámek
+    // PERFORMANCE FIX: Načíst session data a uvolnit zámek
     // Audit 2025-11-24: Session locking blokuje paralelní requesty
     $currentUserEmail = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? null;
     $userId = $_SESSION['user_id'] ?? null;
@@ -38,7 +38,7 @@ try {
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $action = $_GET['action'] ?? '';
 
-        // ✅ SECURITY FIX: GET metoda může provádět pouze read-only operace
+        // SECURITY FIX: GET metoda může provádět pouze read-only operace
         // Prevence CSRF útoku přes GET requesty (např. <img src="...?action=delete&...">)
         $readOnlyActions = ['get', 'list', 'count', 'get_unread_counts'];
         if (!in_array($action, $readOnlyActions, true)) {
@@ -108,7 +108,7 @@ try {
                 }
 
                 $note['timestamp'] = $note['created_at'];
-                $note['text'] = $note['note_text'];  // ✅ KRITICKÉ: Mapování textu poznámky
+                $note['text'] = $note['note_text'];  // KRITICKÉ: Mapování textu poznámky
                 unset($note['is_read']);
                 unset($note['user_name']); // Vyčistit pomocný sloupec
             }
@@ -291,7 +291,7 @@ try {
                 throw new Exception('Neplatné ID poznámky');
             }
 
-            // ✅ SECURITY FIX: Kontrola vlastnictví poznámky
+            // SECURITY FIX: Kontrola vlastnictví poznámky
             // Poznámka: created_by je EMAIL, ne user_id!
             // $currentUserEmail a $isAdmin již načteno výše (řádky 27, 30)
 

@@ -34,17 +34,17 @@ try {
     $stmt = $pdo->query("SHOW TABLES LIKE 'wgs_pageviews'");
 
     if ($stmt->rowCount() > 0) {
-        echo "<p class='success'>✅ Tabulka wgs_pageviews existuje</p>";
+        echo "<p class='success'>Tabulka wgs_pageviews existuje</p>";
 
         // Spočítat záznamy
         $stmtCount = $pdo->query("SELECT COUNT(*) as count FROM wgs_pageviews");
         $count = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
         echo "<p>📊 Počet záznamů: <strong>$count</strong></p>";
     } else {
-        echo "<p class='error'>❌ Tabulka wgs_pageviews neexistuje</p>";
+        echo "<p class='error'>Tabulka wgs_pageviews neexistuje</p>";
     }
 } catch (Exception $e) {
-    echo "<p class='error'>❌ Chyba: " . htmlspecialchars($e->getMessage()) . "</p>";
+    echo "<p class='error'>Chyba: " . htmlspecialchars($e->getMessage()) . "</p>";
 }
 
 // Test 2: Test API volání
@@ -57,7 +57,7 @@ try {
     include __DIR__ . '/api/analytics_api.php';
     $apiOutput = ob_get_clean();
 
-    echo "<p class='success'>✅ API odpovědělo</p>";
+    echo "<p class='success'>API odpovědělo</p>";
     echo "<pre>" . htmlspecialchars($apiOutput) . "</pre>";
 
     // Parsovat JSON
@@ -67,12 +67,12 @@ try {
         echo "<h3>Parsovaná data:</h3>";
         echo "<pre>" . print_r($data, true) . "</pre>";
     } else {
-        echo "<p class='error'>❌ Nelze parsovat JSON</p>";
+        echo "<p class='error'>Nelze parsovat JSON</p>";
     }
 
 } catch (Exception $e) {
     $output = ob_get_clean();
-    echo "<p class='error'>❌ Chyba při volání API: " . htmlspecialchars($e->getMessage()) . "</p>";
+    echo "<p class='error'>Chyba při volání API: " . htmlspecialchars($e->getMessage()) . "</p>";
     if ($output) {
         echo "<pre>" . htmlspecialchars($output) . "</pre>";
     }
@@ -92,7 +92,7 @@ async function testFetch() {
     try {
         const response = await fetch('/api/analytics_api.php?period=week');
 
-        resultDiv.innerHTML = '<p class=\"success\">✅ Response status: ' + response.status + '</p>';
+        resultDiv.innerHTML = '<p class=\"success\">Response status: ' + response.status + '</p>';
 
         const text = await response.text();
         resultDiv.innerHTML += '<h4>Raw response:</h4><pre>' + text + '</pre>';
@@ -101,11 +101,11 @@ async function testFetch() {
             const data = JSON.parse(text);
             resultDiv.innerHTML += '<h4>Parsed JSON:</h4><pre>' + JSON.stringify(data, null, 2) + '</pre>';
         } catch (e) {
-            resultDiv.innerHTML += '<p class=\"error\">❌ JSON parse error: ' + e.message + '</p>';
+            resultDiv.innerHTML += '<p class=\"error\">JSON parse error: ' + e.message + '</p>';
         }
 
     } catch (error) {
-        resultDiv.innerHTML = '<p class=\"error\">❌ Fetch error: ' + error.message + '</p>';
+        resultDiv.innerHTML = '<p class=\"error\">Fetch error: ' + error.message + '</p>';
     }
 }
 </script>

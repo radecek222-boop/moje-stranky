@@ -105,13 +105,13 @@ try {
             $pdo->commit();
 
             echo "<div class='success'>";
-            echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
+            echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
             echo "Sloupec 'recipients' byl úspěšně přidán do tabulky wgs_notifications.<br>";
             echo "Všechny existující šablony mají nastaveny výchozí příjemce (zákazník).<br>";
             echo "</div>";
 
             echo "<div class='info'>";
-            echo "<strong>✅ CO BYLO PROVEDENO:</strong><br>";
+            echo "<strong>CO BYLO PROVEDENO:</strong><br>";
             echo "• Přidán sloupec 'recipients' (JSON) do tabulky wgs_notifications<br>";
             echo "• Výchozí hodnota: email se odesílá pouze zákazníkovi<br>";
             echo "• Možnost výběru příjemců:<br>";
@@ -161,7 +161,7 @@ try {
   }
 }</pre>";
 
-        echo "<a href='?execute=1' class='btn'>✅ SPUSTIT MIGRACI</a>";
+        echo "<a href='?execute=1' class='btn'>SPUSTIT MIGRACI</a>";
         echo "<a href='/admin.php' class='btn' style='background: #666;'>← Zpět do Admin panelu</a>";
     }
 

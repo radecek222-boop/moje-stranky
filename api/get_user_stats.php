@@ -19,7 +19,7 @@ try {
         exit;
     }
 
-    // ✅ PERFORMANCE FIX: Načíst session data a uvolnit zámek
+    // PERFORMANCE FIX: Načíst session data a uvolnit zámek
     // Audit 2025-11-24: Welcome modal stats - vysoká frekvence načítání
     $userId = $_SESSION['user_id'] ?? null;
     $userEmail = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? null;

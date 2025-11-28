@@ -13,9 +13,9 @@ echo "=== TEST STATISTIKY API ===\n\n";
 echo "1. Načítání init.php...\n";
 try {
     require_once __DIR__ . '/init.php';
-    echo "   ✅ init.php načten\n\n";
+    echo "   init.php načten\n\n";
 } catch (Exception $e) {
-    echo "   ❌ Chyba: " . $e->getMessage() . "\n\n";
+    echo "   Chyba: " . $e->getMessage() . "\n\n";
     exit;
 }
 
@@ -32,9 +32,9 @@ echo "   Nastaveno is_admin = true\n\n";
 echo "3. Test databázového připojení...\n";
 try {
     $pdo = getDbConnection();
-    echo "   ✅ Připojení k databázi OK\n\n";
+    echo "   Připojení k databázi OK\n\n";
 } catch (Exception $e) {
-    echo "   ❌ Chyba DB: " . $e->getMessage() . "\n\n";
+    echo "   Chyba DB: " . $e->getMessage() . "\n\n";
     exit;
 }
 
@@ -43,9 +43,9 @@ echo "4. Test základního SQL dotazu...\n";
 try {
     $stmt = $pdo->query("SELECT COUNT(*) as count FROM wgs_reklamace");
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    echo "   ✅ SQL dotaz OK - počet reklamací: " . $result['count'] . "\n\n";
+    echo "   SQL dotaz OK - počet reklamací: " . $result['count'] . "\n\n";
 } catch (Exception $e) {
-    echo "   ❌ Chyba SQL: " . $e->getMessage() . "\n\n";
+    echo "   Chyba SQL: " . $e->getMessage() . "\n\n";
     exit;
 }
 
@@ -77,9 +77,9 @@ try {
     list($where, $params) = buildFilterWhere_test();
     echo "   WHERE: " . $where . "\n";
     echo "   Params: " . print_r($params, true) . "\n";
-    echo "   ✅ buildFilterWhere OK\n\n";
+    echo "   buildFilterWhere OK\n\n";
 } catch (Exception $e) {
-    echo "   ❌ Chyba: " . $e->getMessage() . "\n\n";
+    echo "   Chyba: " . $e->getMessage() . "\n\n";
 }
 
 // Test 6: Test getSummaryStatistiky
@@ -98,9 +98,9 @@ try {
     $revenueAll = (float)($stmtRevenueAll->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
     echo "   Revenue all: $revenueAll €\n";
 
-    echo "   ✅ getSummaryStatistiky simulace OK\n\n";
+    echo "   getSummaryStatistiky simulace OK\n\n";
 } catch (Exception $e) {
-    echo "   ❌ Chyba: " . $e->getMessage() . "\n\n";
+    echo "   Chyba: " . $e->getMessage() . "\n\n";
 }
 
 echo "=== VŠECHNY TESTY DOKONČENY ===\n";

@@ -82,7 +82,7 @@ try {
 
     $scores = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo "✅ SELECT OK - nalezeno " . count($scores) . " záznamů\n\n";
+    echo "SELECT OK - nalezeno " . count($scores) . " záznamů\n\n";
 
     // Test 2: COUNT query
     echo "TEST 2: COUNT query\n";
@@ -109,13 +109,13 @@ try {
     $countStmt->execute($countParams);
     $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-    echo "✅ COUNT OK - celkem {$total} záznamů\n\n";
+    echo "COUNT OK - celkem {$total} záznamů\n\n";
 
-    echo "✅✅✅ VŠECHNY TESTY PROŠLY!\n";
+    echo "VŠECHNY TESTY PROŠLY!\n";
     echo "API by mělo fungovat. Problém je možná jinde.\n";
 
 } catch (PDOException $e) {
-    echo "\n❌ PDO EXCEPTION!\n";
+    echo "\nPDO EXCEPTION!\n";
     echo str_repeat('=', 60) . "\n";
     echo "Error Code: " . $e->getCode() . "\n";
     echo "Error Message: " . $e->getMessage() . "\n";
@@ -126,7 +126,7 @@ try {
     echo "\nStack Trace:\n";
     echo $e->getTraceAsString() . "\n";
 } catch (Exception $e) {
-    echo "\n❌ EXCEPTION!\n";
+    echo "\nEXCEPTION!\n";
     echo str_repeat('=', 60) . "\n";
     echo "Type: " . get_class($e) . "\n";
     echo "Message: " . $e->getMessage() . "\n";

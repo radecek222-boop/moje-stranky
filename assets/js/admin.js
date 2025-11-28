@@ -1626,7 +1626,7 @@ async function zobrazDetailUzivatele(userId) {
               </div>
 
               <button onclick="zmenitHesloUzivatele(${user.id})" style="width: 100%; padding: 0.8rem; background: #d97706; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
-                🔑 Změnit heslo
+                Změnit heslo
               </button>
             </div>
 

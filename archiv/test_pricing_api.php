@@ -12,10 +12,10 @@ try {
     $exists = $stmt->rowCount() > 0;
 
     if (!$exists) {
-        echo "<h1 style='color: red;'>❌ TABULKA wgs_pricing NEEXISTUJE!</h1>";
+        echo "<h1 style='color: red;'>TABULKA wgs_pricing NEEXISTUJE!</h1>";
         echo "<p>Musíte spustit migraci: <a href='update_cenik_2025.php'>update_cenik_2025.php</a></p>";
     } else {
-        echo "<h1 style='color: green;'>✅ Tabulka wgs_pricing existuje</h1>";
+        echo "<h1 style='color: green;'>Tabulka wgs_pricing existuje</h1>";
 
         // Zjistit počet položek
         $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_pricing");
@@ -40,16 +40,16 @@ try {
 
             $decoded = json_decode($apiOutput, true);
             if ($decoded && isset($decoded['status']) && $decoded['status'] === 'success') {
-                echo "<p style='color: green;'>✅ API funguje!</p>";
+                echo "<p style='color: green;'>API funguje!</p>";
                 echo "<p>Počet položek v odpovědi: " . count($decoded['items'] ?? []) . "</p>";
             } else {
-                echo "<p style='color: red;'>❌ API vrací chybnou odpověď</p>";
+                echo "<p style='color: red;'>API vrací chybnou odpověď</p>";
             }
         }
     }
 
 } catch (Exception $e) {
-    echo "<h1 style='color: red;'>❌ CHYBA</h1>";
+    echo "<h1 style='color: red;'>CHYBA</h1>";
     echo "<p>" . htmlspecialchars($e->getMessage()) . "</p>";
 }
 ?>

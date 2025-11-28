@@ -154,7 +154,7 @@ try {
             $count = $pdo->query("SELECT COUNT(*) FROM {$tabulka}")->fetchColumn();
             echo "<div class='info'>📊 Počet záznamů: <strong>{$count}</strong></div>";
         } else {
-            echo "<div class='info'>✅ Tabulka <code>{$tabulka}</code> neexistuje - bude vytvořena</div>";
+            echo "<div class='info'>Tabulka <code>{$tabulka}</code> neexistuje - bude vytvořena</div>";
         }
     }
 
@@ -223,7 +223,7 @@ try {
                     COMMENT='Modul #3: Detekce botů a jejich aktivity'
                 ");
 
-                echo "<div class='success'>✅ Tabulka <code>wgs_analytics_bot_detections</code> vytvořena (22 sloupců, 8 indexů)</div>";
+                echo "<div class='success'>Tabulka <code>wgs_analytics_bot_detections</code> vytvořena (22 sloupců, 8 indexů)</div>";
             } else {
                 echo "<div class='warning'>⚠️ Tabulka <code>wgs_analytics_bot_detections</code> již existuje - přeskakuji</div>";
             }
@@ -255,7 +255,7 @@ try {
                     COMMENT='Modul #3: Whitelist legitimních botů'
                 ");
 
-                echo "<div class='success'>✅ Tabulka <code>wgs_analytics_bot_whitelist</code> vytvořena</div>";
+                echo "<div class='success'>Tabulka <code>wgs_analytics_bot_whitelist</code> vytvořena</div>";
 
                 // ------------------------------------------------------------
                 // SEED DATA: Známé legitimní boty
@@ -342,7 +342,7 @@ try {
                     $insertCount++;
                 }
 
-                echo "<div class='success'>✅ Vloženo {$insertCount} legitimních botů do whitelistu</div>";
+                echo "<div class='success'>Vloženo {$insertCount} legitimních botů do whitelistu</div>";
             } else {
                 echo "<div class='warning'>⚠️ Tabulka <code>wgs_analytics_bot_whitelist</code> již existuje - přeskakuji seed data</div>";
             }
@@ -351,7 +351,7 @@ try {
 
             echo "<h2>3️⃣ Výsledek migrace</h2>";
             echo "<div class='success'>";
-            echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
+            echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
             echo "Vytvořeno:<br>";
             echo "• Tabulka <code>wgs_analytics_bot_detections</code> (22 sloupců, 8 indexů)<br>";
             echo "• Tabulka <code>wgs_analytics_bot_whitelist</code> (10 sloupců, 3 indexy)<br>";
@@ -395,7 +395,7 @@ try {
             $pdo->rollBack();
 
             echo "<div class='error'>";
-            echo "<strong>❌ CHYBA PŘI MIGRACI:</strong><br>";
+            echo "<strong>CHYBA PŘI MIGRACI:</strong><br>";
             echo htmlspecialchars($e->getMessage());
             echo "</div>";
 
@@ -423,12 +423,12 @@ try {
 
         echo "<br>";
         echo "<a href='?execute=1' class='btn'>🚀 SPUSTIT MIGRACI</a>";
-        echo "<a href='/admin.php' class='btn btn-danger'>❌ Zrušit</a>";
+        echo "<a href='/admin.php' class='btn btn-danger'>Zrušit</a>";
     }
 
 } catch (Exception $e) {
     echo "<div class='error'>";
-    echo "<strong>❌ KRITICKÁ CHYBA:</strong><br>";
+    echo "<strong>KRITICKÁ CHYBA:</strong><br>";
     echo htmlspecialchars($e->getMessage());
     echo "</div>";
 

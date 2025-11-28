@@ -144,7 +144,7 @@ try {
     if ($sessionTableExists) {
         echo "<div class='warning'>⚠️ Tabulka <code>wgs_analytics_sessions</code> již existuje.</div>";
     } else {
-        echo "<div class='info'>✅ Tabulka <code>wgs_analytics_sessions</code> neexistuje - bude vytvořena.</div>";
+        echo "<div class='info'>Tabulka <code>wgs_analytics_sessions</code> neexistuje - bude vytvořena.</div>";
     }
 
     // Kontrola sloupců v wgs_pageviews
@@ -157,13 +157,13 @@ try {
     if ($sessionIdExists) {
         echo "<div class='warning'>⚠️ Sloupec <code>wgs_pageviews.session_id</code> již existuje.</div>";
     } else {
-        echo "<div class='info'>✅ Sloupec <code>wgs_pageviews.session_id</code> neexistuje - bude přidán.</div>";
+        echo "<div class='info'>Sloupec <code>wgs_pageviews.session_id</code> neexistuje - bude přidán.</div>";
     }
 
     if ($fingerprintIdExists) {
         echo "<div class='warning'>⚠️ Sloupec <code>wgs_pageviews.fingerprint_id</code> již existuje.</div>";
     } else {
-        echo "<div class='info'>✅ Sloupec <code>wgs_pageviews.fingerprint_id</code> neexistuje - bude přidán.</div>";
+        echo "<div class='info'>Sloupec <code>wgs_pageviews.fingerprint_id</code> neexistuje - bude přidán.</div>";
     }
 
     // Kontrola existence tabulky wgs_analytics_fingerprints (závislost z Modulu #1)
@@ -172,7 +172,7 @@ try {
 
     if (!$fingerprintsTableExists) {
         echo "<div class='error'>";
-        echo "<strong>❌ CHYBA:</strong> Tabulka <code>wgs_analytics_fingerprints</code> neexistuje!<br>";
+        echo "<strong>CHYBA:</strong> Tabulka <code>wgs_analytics_fingerprints</code> neexistuje!<br>";
         echo "Modul #2 vyžaduje Modul #1 (Fingerprinting Engine).<br>";
         echo "Nejprve spusťte migraci: <code>migrace_module1_fingerprinting.php</code>";
         echo "</div>";
@@ -180,7 +180,7 @@ try {
         echo "</div></body></html>";
         exit;
     } else {
-        echo "<div class='success'>✅ Tabulka <code>wgs_analytics_fingerprints</code> existuje (Modul #1).</div>";
+        echo "<div class='success'>Tabulka <code>wgs_analytics_fingerprints</code> existuje (Modul #1).</div>";
     }
 
     echo "</div>"; // close step 1
@@ -278,7 +278,7 @@ try {
 
                 $pdo->exec($sqlCreateSessions);
                 $changesApplied[] = "Vytvořena tabulka <code>wgs_analytics_sessions</code> s 33 sloupci a 11 indexy";
-                echo "<div class='success'>✅ Tabulka <code>wgs_analytics_sessions</code> úspěšně vytvořena.</div>";
+                echo "<div class='success'>Tabulka <code>wgs_analytics_sessions</code> úspěšně vytvořena.</div>";
             }
 
             // ========================================
@@ -295,7 +295,7 @@ try {
                 ");
 
                 $changesApplied[] = "Přidán sloupec <code>wgs_pageviews.session_id</code>";
-                echo "<div class='success'>✅ Sloupec <code>session_id</code> přidán.</div>";
+                echo "<div class='success'>Sloupec <code>session_id</code> přidán.</div>";
             }
 
             if (!$fingerprintIdExists) {
@@ -309,7 +309,7 @@ try {
                 ");
 
                 $changesApplied[] = "Přidán sloupec <code>wgs_pageviews.fingerprint_id</code>";
-                echo "<div class='success'>✅ Sloupec <code>fingerprint_id</code> přidán.</div>";
+                echo "<div class='success'>Sloupec <code>fingerprint_id</code> přidán.</div>";
             }
 
             // ========================================
@@ -323,7 +323,7 @@ try {
                 echo "<p>📝 Vytvářím index na <code>wgs_pageviews.session_id</code>...</p>";
                 $pdo->exec("ALTER TABLE `wgs_pageviews` ADD INDEX `idx_session_id` (`session_id`)");
                 $changesApplied[] = "Vytvořen index <code>idx_session_id</code> na tabulce <code>wgs_pageviews</code>";
-                echo "<div class='success'>✅ Index <code>idx_session_id</code> vytvořen.</div>";
+                echo "<div class='success'>Index <code>idx_session_id</code> vytvořen.</div>";
             }
 
             $stmt = $pdo->query("SHOW INDEX FROM wgs_pageviews WHERE Key_name = 'idx_fingerprint_id'");
@@ -333,7 +333,7 @@ try {
                 echo "<p>📝 Vytvářím index na <code>wgs_pageviews.fingerprint_id</code>...</p>";
                 $pdo->exec("ALTER TABLE `wgs_pageviews` ADD INDEX `idx_fingerprint_id` (`fingerprint_id`)");
                 $changesApplied[] = "Vytvořen index <code>idx_fingerprint_id</code> na tabulce <code>wgs_pageviews</code>";
-                echo "<div class='success'>✅ Index <code>idx_fingerprint_id</code> vytvořen.</div>";
+                echo "<div class='success'>Index <code>idx_fingerprint_id</code> vytvořen.</div>";
             }
 
             // Commit transakce
@@ -349,7 +349,7 @@ try {
 
             if (count($changesApplied) > 0) {
                 echo "<div class='success'>";
-                echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
+                echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
                 echo "<strong>Provedené změny:</strong><ul>";
                 foreach ($changesApplied as $change) {
                     echo "<li>{$change}</li>";
@@ -370,7 +370,7 @@ try {
             $tableCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
 
             if ($tableCount == 1) {
-                echo "<div class='success'>✅ Tabulka <code>wgs_analytics_sessions</code> existuje v databázi.</div>";
+                echo "<div class='success'>Tabulka <code>wgs_analytics_sessions</code> existuje v databázi.</div>";
             }
 
             $stmt = $pdo->query("SELECT COUNT(*) as count FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'wgs_analytics_sessions'");
@@ -437,7 +437,7 @@ LIMIT 10;</pre>";
             $pdo->rollBack();
             echo "</div>"; // close step 2 if error
             echo "<div class='error'>";
-            echo "<strong>❌ CHYBA PŘI MIGRACI:</strong><br>";
+            echo "<strong>CHYBA PŘI MIGRACI:</strong><br>";
             echo htmlspecialchars($e->getMessage());
             echo "</div>";
 
@@ -456,16 +456,16 @@ LIMIT 10;</pre>";
         echo "<strong>📋 NÁSLEDUJÍCÍ ZMĚNY BUDOU PROVEDENY:</strong><br><br>";
 
         if (!$sessionTableExists) {
-            echo "✅ Vytvoření tabulky <code>wgs_analytics_sessions</code> (33 sloupců, 11 indexů)<br>";
+            echo "Vytvoření tabulky <code>wgs_analytics_sessions</code> (33 sloupců, 11 indexů)<br>";
         }
         if (!$sessionIdExists) {
-            echo "✅ Přidání sloupce <code>wgs_pageviews.session_id</code><br>";
+            echo "Přidání sloupce <code>wgs_pageviews.session_id</code><br>";
         }
         if (!$fingerprintIdExists) {
-            echo "✅ Přidání sloupce <code>wgs_pageviews.fingerprint_id</code><br>";
+            echo "Přidání sloupce <code>wgs_pageviews.fingerprint_id</code><br>";
         }
         if (!$sessionIdExists || !$fingerprintIdExists) {
-            echo "✅ Vytvoření indexů na nových sloupcích<br>";
+            echo "Vytvoření indexů na nových sloupcích<br>";
         }
 
         echo "</div>";
@@ -489,7 +489,7 @@ ALTER TABLE `wgs_pageviews` DROP COLUMN IF EXISTS `fingerprint_id`;</pre>";
 
 } catch (Exception $e) {
     echo "<div class='error'>";
-    echo "<strong>❌ KRITICKÁ CHYBA:</strong><br>";
+    echo "<strong>KRITICKÁ CHYBA:</strong><br>";
     echo htmlspecialchars($e->getMessage());
     echo "</div>";
 }

@@ -68,7 +68,7 @@ try {
         ");
         $stmt->execute(['cutoff_date' => $cutoffDate]);
 
-        echo "✅ Anonymizováno {$oldSessionsCount} sessions (IP + User Agent)\n\n";
+        echo "Anonymizováno {$oldSessionsCount} sessions (IP + User Agent)\n\n";
     } else {
         echo "Žádné sessions k anonymizaci.\n\n";
     }
@@ -98,7 +98,7 @@ try {
         ");
         $stmt->execute(['cutoff_date' => $cutoffDate]);
 
-        echo "✅ Anonymizováno {$oldEventsCount} events (event_properties smazány)\n\n";
+        echo "Anonymizováno {$oldEventsCount} events (event_properties smazány)\n\n";
     } else {
         echo "Žádné events k anonymizaci.\n\n";
     }
@@ -128,7 +128,7 @@ try {
         ");
         $stmt->execute(['cutoff_date' => $cutoffDate]);
 
-        echo "✅ Anonymizováno {$oldPageviewsCount} pageviews (referrer smazán)\n\n";
+        echo "Anonymizováno {$oldPageviewsCount} pageviews (referrer smazán)\n\n";
     } else {
         echo "Žádné pageviews k anonymizaci.\n\n";
     }
@@ -158,7 +158,7 @@ try {
         ");
         $stmt->execute(['cutoff_date' => $cutoffDate]);
 
-        echo "✅ Smazáno {$oldConsentsCount} starých withdrawn consents\n\n";
+        echo "Smazáno {$oldConsentsCount} starých withdrawn consents\n\n";
     } else {
         echo "Žádné consent records ke smazání.\n\n";
     }
@@ -190,7 +190,7 @@ try {
         ");
         $stmt->execute(['cutoff_date' => $requestsCutoffDate]);
 
-        echo "✅ Smazáno {$oldRequestsCount} completed requests\n\n";
+        echo "Smazáno {$oldRequestsCount} completed requests\n\n";
     } else {
         echo "Žádné requests ke smazání.\n\n";
     }
@@ -220,7 +220,7 @@ try {
         ");
         $stmt->execute(['cutoff_date' => $auditCutoffDate]);
 
-        echo "✅ Smazáno {$oldAuditLogsCount} starých audit logs\n\n";
+        echo "Smazáno {$oldAuditLogsCount} starých audit logs\n\n";
     } else {
         echo "Žádné audit logs ke smazání.\n\n";
     }
@@ -256,14 +256,14 @@ try {
     ]);
 
     echo "==========================================\n";
-    echo "GDPR RETENTION POLICY - DOKONČENO ✅\n";
+    echo "GDPR RETENTION POLICY - DOKONČENO \n";
     echo "==========================================\n";
     echo "Konec: " . date('Y-m-d H:i:s') . "\n";
 
 } catch (PDOException $e) {
     echo "\n";
     echo "==========================================\n";
-    echo "CHYBA DATABÁZE ❌\n";
+    echo "CHYBA DATABÁZE \n";
     echo "==========================================\n";
     echo $e->getMessage() . "\n";
     exit(1);
@@ -271,7 +271,7 @@ try {
 } catch (Exception $e) {
     echo "\n";
     echo "==========================================\n";
-    echo "NEOČEKÁVANÁ CHYBA ❌\n";
+    echo "NEOČEKÁVANÁ CHYBA \n";
     echo "==========================================\n";
     echo $e->getMessage() . "\n";
     exit(1);

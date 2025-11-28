@@ -331,12 +331,12 @@ Telefon: {{company_phone}}'
             $pdo->commit();
 
             echo "<div class='success'>";
-            echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
+            echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
             echo "Aktualizováno šablon: {$updatedCount} / " . count($sablony_data) . "<br>";
             echo "</div>";
 
             echo "<div class='info'>";
-            echo "<strong>✅ CO BYLO PROVEDENO:</strong><br>";
+            echo "<strong>CO BYLO PROVEDENO:</strong><br>";
             echo "• Přidána informace o zastoupení firmy Natuzzi<br>";
             echo "• Jednotný profesionální formát pro všechny šablony<br>";
             echo "• Zachovány všechny proměnné ({{customer_name}}, {{order_id}}, atd.)<br>";
@@ -395,7 +395,7 @@ Produkt Natuzzi: {{product}}
         echo "</pre>";
         echo "</div>";
 
-        echo "<a href='?execute=1' class='btn'>✅ SPUSTIT AKTUALIZACI</a>";
+        echo "<a href='?execute=1' class='btn'>SPUSTIT AKTUALIZACI</a>";
         echo "<a href='/admin.php' class='btn' style='background: #666;'>← Zpět do Admin panelu</a>";
     }
 

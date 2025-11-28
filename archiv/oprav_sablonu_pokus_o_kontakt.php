@@ -138,7 +138,7 @@ White Glove Service
             $pdo->commit();
 
             echo "<div class='success'>";
-            echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
+            echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
             echo "Šablona 'Pokus o kontakt' byla úspěšně opravena.<br>";
             echo "Změněno řádků: " . $stmt->rowCount() . "<br><br>";
             echo "<strong>Nový předmět:</strong><br>";
@@ -148,7 +148,7 @@ White Glove Service
             echo "</div>";
 
             echo "<div class='info'>";
-            echo "<strong>✅ CO BYLO PROVEDENO:</strong><br>";
+            echo "<strong>CO BYLO PROVEDENO:</strong><br>";
             echo "• Odstraněn celý HTML dokument<br>";
             echo "• Převedeno na prostý text jako ostatní šablony<br>";
             echo "• Zachovány všechny proměnné ({{customer_name}}, {{order_id}}, atd.)<br>";
@@ -205,7 +205,7 @@ Telefon: {{technician_phone}}
 ...");
         echo "</pre>";
 
-        echo "<a href='?execute=1' class='btn'>✅ SPUSTIT OPRAVU</a>";
+        echo "<a href='?execute=1' class='btn'>SPUSTIT OPRAVU</a>";
         echo "<a href='/admin.php' class='btn' style='background: #666;'>← Zpět do Admin panelu</a>";
     }
 

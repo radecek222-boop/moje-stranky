@@ -39,7 +39,7 @@ echo "Response Body:\n";
 echo $body . "\n";
 
 if ($httpCode === 400) {
-    echo "\n❌ HTTP 400 - pravděpodobně chybí parametr nebo CSRF error\n";
+    echo "\nHTTP 400 - pravděpodobně chybí parametr nebo CSRF error\n";
 }
 
 echo "</pre>";

@@ -206,14 +206,14 @@ logMessage("Celkové trvání: {$totalDuration}s");
 logMessage("==========================================");
 
 if ($errorCount > 0) {
-    logError("ULTRA MASTER CRON DOKONČEN S CHYBAMI ❌");
+    logError("ULTRA MASTER CRON DOKONČEN S CHYBAMI ");
     sendErrorEmail(
         "Ultra Master Cron - Dokončeno s chybami ({$errorCount} errors)",
         "Úspěšné joby: {$successCount}\nNeúspěšné joby: {$errorCount}\nTrvání: {$totalDuration}s\n\nKontrolujte log: {$config['log_file']}"
     );
     exit(1);
 } else {
-    logSuccess("ULTRA MASTER CRON DOKONČEN ÚSPĚŠNĚ ✅");
+    logSuccess("ULTRA MASTER CRON DOKONČEN ÚSPĚŠNĚ ");
     exit(0);
 }
 ?>

@@ -100,7 +100,7 @@ try {
                 echo "<td style='color: orange;'>⚠️ Existuje</td>";
                 $nalezeneIndexy[] = ['tabulka' => $tabulka, 'index' => $indexName];
             } else {
-                echo "<td style='color: green;'>✅ Již odstraněn</td>";
+                echo "<td style='color: green;'>Již odstraněn</td>";
                 $chybejiciIndexy[] = ['tabulka' => $tabulka, 'index' => $indexName];
             }
 
@@ -112,7 +112,7 @@ try {
 
     if (empty($nalezeneIndexy)) {
         echo "<div class='success'>";
-        echo "<strong>✅ ŽÁDNÉ REDUNDANTNÍ INDEXY</strong><br>";
+        echo "<strong>ŽÁDNÉ REDUNDANTNÍ INDEXY</strong><br>";
         echo "Všechny redundantní indexy již byly odstraněny. Není potřeba provádět migraci.";
         echo "</div>";
     } else {
@@ -169,13 +169,13 @@ try {
             echo "<td><code>{$vysledek['tabulka']}</code></td>";
             echo "<td><code>{$vysledek['index']}</code></td>";
             if ($vysledek['status'] === 'success') {
-                echo "<td style='color: green;'>✅ Úspěch</td>";
+                echo "<td style='color: green;'>Úspěch</td>";
                 echo "<td>{$vysledek['message']}</td>";
             } elseif ($vysledek['status'] === 'warning') {
                 echo "<td style='color: orange;'>⚠️ Varování</td>";
                 echo "<td>{$vysledek['message']}</td>";
             } else {
-                echo "<td style='color: red;'>❌ Chyba</td>";
+                echo "<td style='color: red;'>Chyba</td>";
                 echo "<td>" . htmlspecialchars($vysledek['message']) . "</td>";
             }
             echo "</tr>";
@@ -199,7 +199,7 @@ try {
                     echo "<td><code>{$index['Key_name']}</code></td>";
                     echo "<td>{$index['Column_name']}</td>";
                     echo "<td>" . ($index['Key_name'] === 'PRIMARY' ? 'PRIMARY KEY' : ($index['Non_unique'] == 0 ? 'UNIQUE KEY' : 'INDEX')) . "</td>";
-                    echo "<td>" . ($index['Non_unique'] == 0 ? '✅ Ano' : '❌ Ne') . "</td>";
+                    echo "<td>" . ($index['Non_unique'] == 0 ? 'Ano' : 'Ne') . "</td>";
                     echo "</tr>";
                 }
                 echo "</table>";
@@ -209,7 +209,7 @@ try {
         }
 
         echo "<div class='success'>";
-        echo "<strong>✅ MIGRACE DOKONČENA</strong><br>";
+        echo "<strong>MIGRACE DOKONČENA</strong><br>";
         echo "Očekávaný přínos: <strong>5-15% rychlejší INSERT/UPDATE operace, ~150 KB úspora místa</strong>";
         echo "</div>";
 
@@ -244,7 +244,7 @@ try {
 
 } catch (Exception $e) {
     echo "<div class='error'>";
-    echo "<strong>❌ CHYBA:</strong><br>";
+    echo "<strong>CHYBA:</strong><br>";
     echo htmlspecialchars($e->getMessage());
     echo "</div>";
 }

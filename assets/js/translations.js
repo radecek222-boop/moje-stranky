@@ -423,9 +423,9 @@ window.WGS_TRANSLATIONS = {
     it: 'Numero errato. Eliminazione annullata.'
   },
   'claim_deleted_successfully': {
-    cs: '✅ Reklamace byla úspěšně smazána!',
-    en: '✅ Claim successfully deleted!',
-    it: '✅ Reclamo eliminato con successo!'
+    cs: 'Reklamace byla úspěšně smazána!',
+    en: 'Claim successfully deleted!',
+    it: 'Reclamo eliminato con successo!'
   },
   'delete_error': {
     cs: 'Chyba při mazání',
@@ -433,9 +433,9 @@ window.WGS_TRANSLATIONS = {
     it: 'Errore di eliminazione'
   },
   'photo_deleted_successfully': {
-    cs: '✅ Fotka byla úspěšně smazána!',
-    en: '✅ Photo successfully deleted!',
-    it: '✅ Foto eliminata con successo!'
+    cs: 'Fotka byla úspěšně smazána!',
+    en: 'Photo successfully deleted!',
+    it: 'Foto eliminata con successo!'
   },
   'photo_delete_error': {
     cs: 'Chyba při mazání fotky',
@@ -631,9 +631,9 @@ window.WGS_TRANSLATIONS = {
 
   // === NOVAREKLAMACE.JS - Formulář nové reklamace ===
   'mode_customer_title': {
-    cs: '📋 Režim: Zákazník (bez přihlášení)',
-    en: '📋 Mode: Customer (not logged in)',
-    it: '📋 Modalità: Cliente (non autenticato)'
+    cs: 'Režim: Zákazník (bez přihlášení)',
+    en: 'Mode: Customer (not logged in)',
+    it: 'Modalità: Cliente (non autenticato)'
   },
   'mode_customer_desc': {
     cs: 'Objednáváte mimozáruční servis. Některá pole jsou předvyplněna a nelze je měnit.',
@@ -671,9 +671,9 @@ window.WGS_TRANSLATIONS = {
     it: 'Grazie! Il tuo ordine è stato ricevuto.\n\nTi invieremo il numero del reclamo via email.\n\nTi contatteremo presto.'
   },
   'submit_error': {
-    cs: '❌ Chyba při odesílání',
-    en: '❌ Error submitting',
-    it: '❌ Errore di invio'
+    cs: 'Chyba při odesílání',
+    en: 'Error submitting',
+    it: 'Errore di invio'
   },
   'processing_file': {
     cs: '⏳ Zpracovávám {filename}...',

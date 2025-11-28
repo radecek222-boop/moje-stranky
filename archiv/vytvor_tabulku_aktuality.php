@@ -141,7 +141,7 @@ try {
             // Výstup MIMO transakci
             if ($migrationSuccess) {
                 echo "<div class='success'>";
-                echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
+                echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
                 echo "Tabulka <code>wgs_natuzzi_aktuality</code> byla vytvořena.<br><br>";
                 echo "<strong>Struktura tabulky:</strong>";
                 echo "<ul>";
@@ -194,7 +194,7 @@ try {
 )";
             echo "</pre>";
 
-            echo "<a href='?execute=1' class='btn'>✅ SPUSTIT MIGRACI</a>";
+            echo "<a href='?execute=1' class='btn'>SPUSTIT MIGRACI</a>";
         }
     }
 

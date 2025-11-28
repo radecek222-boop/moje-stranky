@@ -88,7 +88,7 @@ try {
         echo "<tr>";
         echo "<td><code>{$indexName}</code><br><small>{$popis}</small></td>";
         if ($existuje) {
-            echo "<td><span style='color: green;'>✅ Existuje</span></td>";
+            echo "<td><span style='color: green;'>Existuje</span></td>";
             echo "<td>-</td>";
             $indexyExistují[] = $indexName;
         } else {
@@ -102,7 +102,7 @@ try {
 
     if (empty($indexyChybi)) {
         echo "<div class='success'>";
-        echo "<strong>✅ VŠECHNY INDEXY JIŽ EXISTUJÍ</strong><br>";
+        echo "<strong>VŠECHNY INDEXY JIŽ EXISTUJÍ</strong><br>";
         echo "Není potřeba provádět migraci.";
         echo "</div>";
     } else {
@@ -168,13 +168,13 @@ try {
             echo "<tr>";
             echo "<td><code>{$vysledek['index']}</code></td>";
             if ($vysledek['status'] === 'success') {
-                echo "<td style='color: green;'>✅ Úspěch</td>";
+                echo "<td style='color: green;'>Úspěch</td>";
                 echo "<td>{$vysledek['message']}</td>";
             } elseif ($vysledek['status'] === 'warning') {
                 echo "<td style='color: orange;'>⚠️ Varování</td>";
                 echo "<td>{$vysledek['message']}</td>";
             } else {
-                echo "<td style='color: red;'>❌ Chyba</td>";
+                echo "<td style='color: red;'>Chyba</td>";
                 echo "<td>" . htmlspecialchars($vysledek['message']) . "</td>";
             }
             echo "</tr>";
@@ -202,7 +202,7 @@ try {
         echo "</table>";
 
         echo "<div class='success'>";
-        echo "<strong>✅ MIGRACE DOKONČENA</strong><br>";
+        echo "<strong>MIGRACE DOKONČENA</strong><br>";
         echo "Očekávaný přínos: <strong>10-30% zrychlení Notes API</strong>";
         echo "</div>";
 
@@ -236,7 +236,7 @@ try {
 
 } catch (Exception $e) {
     echo "<div class='error'>";
-    echo "<strong>❌ CHYBA:</strong><br>";
+    echo "<strong>CHYBA:</strong><br>";
     echo htmlspecialchars($e->getMessage());
     echo "</div>";
 }

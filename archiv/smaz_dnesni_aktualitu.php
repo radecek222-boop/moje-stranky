@@ -82,7 +82,7 @@ try {
             $stmtDelete->execute(['datum' => $dnes]);
 
             echo "<div class='success'>";
-            echo "<strong>✅ ZÁZNAM SMAZÁN</strong><br>";
+            echo "<strong>ZÁZNAM SMAZÁN</strong><br>";
             echo "Dnešní aktualita byla úspěšně smazána z databáze.<br><br>";
             echo "Nyní můžete vygenerovat novou aktualitu BEZ EMOJI:<br>";
             echo "<a href='api/generuj_aktuality_debug.php' class='btn btn-secondary'>Vygenerovat novou aktualitu</a>";
