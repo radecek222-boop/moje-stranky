@@ -413,9 +413,9 @@ body.modal-open {
   #detailOverlay .modal-content {
     max-width: 100% !important;
     width: 100% !important;
-    /* FIX: iOS Safari viewport - dynamická výška */
-    max-height: 95vh !important;
-    max-height: 95dvh !important; /* Dynamic viewport height - Safari 15.4+ */
+    /* FIX: iOS Safari viewport - dynamická výška (zmenšeno z 95vh na 80vh) */
+    max-height: 80vh !important;
+    max-height: 80dvh !important; /* Dynamic viewport height - Safari 15.4+ */
     border-radius: 8px !important;
 
     /* FIX: Touch scrolling pro mobil */
@@ -450,9 +450,9 @@ body.modal-open {
   }
 
   #detailOverlay .modal-content {
-    /* PWA modal - optimalizace pro standalone režim */
-    max-height: 92vh !important;
-    max-height: 92dvh !important; /* O něco větší než v browseru */
+    /* PWA modal - optimalizace pro standalone režim (zmenšeno z 92vh na 80vh) */
+    max-height: 80vh !important;
+    max-height: 80dvh !important; /* Dynamic viewport height */
 
     /* PWA scroll fix */
     -webkit-overflow-scrolling: touch !important;
@@ -484,10 +484,10 @@ body.modal-open {
     }
 
     #detailOverlay .modal-content {
-      /* iOS PWA modal centrování */
+      /* iOS PWA modal centrování (zmenšeno z 90vh na 80vh) */
       margin: auto !important;
-      max-height: 90vh !important;
-      max-height: 90dvh !important;
+      max-height: 80vh !important;
+      max-height: 80dvh !important;
     }
   }
 }
