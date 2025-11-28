@@ -2737,6 +2737,10 @@ function closeNotesModal() {
   if (window.wgsAudioRecorder && window.wgsAudioRecorder.isRecording) {
     stopRecording();
   }
+  // Uvolnit mikrofon (kdyby zustal aktivni)
+  if (typeof releaseMicrophone === 'function') {
+    releaseMicrophone();
+  }
   closeDetail();
   renderOrders();
 }
@@ -2751,7 +2755,8 @@ window.wgsAudioRecorder = {
   isRecording: false,
   recordingStartTime: null,
   recordingTimer: null,
-  permissionGranted: false // Zapamatovat ze bylo povoleno
+  permissionGranted: false, // Zapamatovat ze bylo povoleno
+  stream: null // Ulozit stream pro pozdejsi zastaveni
 };
 
 // Zkontrolovat stav opravneni mikrofonu
@@ -2805,6 +2810,9 @@ async function startRecording(orderId) {
 
     // Pozadat o pristup k mikrofonu
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    // Ulozit stream pro pozdejsi zastaveni
+    window.wgsAudioRecorder.stream = stream;
 
     // Zapamatovat ze bylo povoleno
     window.wgsAudioRecorder.permissionGranted = true;
@@ -2875,8 +2883,8 @@ async function startRecording(orderId) {
 
       logger.log('[Audio] Blob vytvoren:', recorder.audioBlob.size, 'bytes, type:', blobType);
 
-      // Zastavit stream
-      stream.getTracks().forEach(track => track.stop());
+      // Uvolnit mikrofon
+      releaseMicrophone();
 
       // Zobrazit nahled
       showAudioPreview(recorder.audioBlob);
@@ -2926,8 +2934,23 @@ function stopRecording() {
   }
 
   // Aktualizovat UI
-  document.getElementById('recordingIndicator').style.display = 'none';
-  document.getElementById('btnStartRecord').style.display = 'block';
+  const recordingIndicator = document.getElementById('recordingIndicator');
+  const btnStartRecord = document.getElementById('btnStartRecord');
+  if (recordingIndicator) recordingIndicator.style.display = 'none';
+  if (btnStartRecord) btnStartRecord.style.display = 'block';
+}
+
+// Uvolnit mikrofon - zastavit stream
+function releaseMicrophone() {
+  const recorder = window.wgsAudioRecorder;
+  if (recorder.stream) {
+    recorder.stream.getTracks().forEach(track => {
+      track.stop();
+      logger.log('[Audio] Track zastaven:', track.kind);
+    });
+    recorder.stream = null;
+    logger.log('[Audio] Mikrofon uvolnen');
+  }
 }
 
 function showAudioPreview(audioBlob) {
