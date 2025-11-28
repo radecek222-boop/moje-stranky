@@ -780,14 +780,6 @@ async function generatePhotosPDF() {
     const x = margin + (col * (cellWidth + gap));
     const y = margin + (row * (cellHeight + gap));
 
-    // Text VŽDY nahoře vlevo na horní hraně fotky
-    if (photoLabel) {
-      pdf.setFontSize(8);
-      pdf.setFont('helvetica', 'bold');
-      pdf.setTextColor(0, 0, 0);
-      pdf.text(photoLabel, x + 1, y + 3);
-    }
-
     const photoY = y + labelHeight;
     const maxPhotoWidth = cellWidth;
     const maxPhotoHeight = cellHeight - labelHeight;
@@ -820,12 +812,29 @@ async function generatePhotosPDF() {
       const offsetX = (maxPhotoWidth - finalWidth) / 2;
       const offsetY = (maxPhotoHeight - finalHeight) / 2;
 
+      // Label přesně nad fotkou (ne nad buňkou)
+      if (photoLabel) {
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(photoLabel, x + offsetX, photoY + offsetY - 2);
+      }
+
       pdf.addImage(photoData, "JPEG", x + offsetX, photoY + offsetY, finalWidth, finalHeight, undefined, 'MEDIUM');
 
       logger.log(`  [Photo] Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel || 'bez popisku'} (${imgWidth}x${imgHeight} → ${Math.round(finalWidth)}x${Math.round(finalHeight)}mm)`);
 
     } catch (err) {
       logger.warn(`Nelze detekovat velikost fotky ${i + 1}, používám celou buňku`);
+
+      // Fallback: label ve středu buňky
+      if (photoLabel) {
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(photoLabel, x, photoY - 2);
+      }
+
       pdf.addImage(photoData, "JPEG", x, photoY, maxPhotoWidth, maxPhotoHeight, undefined, 'MEDIUM');
     }
   }
@@ -1270,13 +1279,6 @@ async function exportBothPDFs() {
         const x = margin + (col * (cellWidth + gap));
         const y = margin + (row * (cellHeight + gap));
 
-        if (photoLabel) {
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'bold');
-          doc.setTextColor(0, 0, 0);
-          doc.text(photoLabel, x + 1, y + 3);
-        }
-
         const photoY = y + labelHeight;
         const maxPhotoWidth = cellWidth;
         const maxPhotoHeight = cellHeight - labelHeight;
@@ -1309,12 +1311,29 @@ async function exportBothPDFs() {
           const offsetX = (maxPhotoWidth - finalWidth) / 2;
           const offsetY = (maxPhotoHeight - finalHeight) / 2;
 
+          // Label přesně nad fotkou (ne nad buňkou)
+          if (photoLabel) {
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.text(photoLabel, x + offsetX, photoY + offsetY - 2);
+          }
+
           doc.addImage(photoData, "JPEG", x + offsetX, photoY + offsetY, finalWidth, finalHeight, undefined, 'MEDIUM');
 
           logger.log(`  [Photo] Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel}`);
 
         } catch (err) {
           logger.warn(`Chyba fotky ${i + 1}`);
+
+          // Fallback: label ve středu buňky
+          if (photoLabel) {
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.text(photoLabel, x, photoY - 2);
+          }
+
           doc.addImage(photoData, "JPEG", x, photoY, maxPhotoWidth, maxPhotoHeight, undefined, 'MEDIUM');
         }
       }
@@ -1668,13 +1687,6 @@ async function sendToCustomer() {
         const x = margin + (col * (cellWidth + gap));
         const y = margin + (row * (cellHeight + gap));
 
-        if (photoLabel) {
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'bold');
-          doc.setTextColor(0, 0, 0);
-          doc.text(photoLabel, x + 1, y + 3);
-        }
-
         const photoY = y + labelHeight;
         const maxPhotoWidth = cellWidth;
         const maxPhotoHeight = cellHeight - labelHeight;
@@ -1707,12 +1719,29 @@ async function sendToCustomer() {
           const offsetX = (maxPhotoWidth - finalWidth) / 2;
           const offsetY = (maxPhotoHeight - finalHeight) / 2;
 
+          // Label přesně nad fotkou (ne nad buňkou)
+          if (photoLabel) {
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.text(photoLabel, x + offsetX, photoY + offsetY - 2);
+          }
+
           doc.addImage(photoData, "JPEG", x + offsetX, photoY + offsetY, finalWidth, finalHeight, undefined, 'MEDIUM');
 
           logger.log(`  [Photo] Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel}`);
 
         } catch (err) {
           logger.warn(`Chyba fotky ${i + 1}`);
+
+          // Fallback: label ve středu buňky
+          if (photoLabel) {
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.text(photoLabel, x, photoY - 2);
+          }
+
           doc.addImage(photoData, "JPEG", x, photoY, maxPhotoWidth, maxPhotoHeight, undefined, 'MEDIUM');
         }
       }
