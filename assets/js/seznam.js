@@ -4316,8 +4316,8 @@ document.addEventListener('click', (e) => {
       break;
 
     case 'deleteNote':
-      const noteId = target.dataset.noteId;
-      const orderId = target.dataset.orderId;
+      const noteId = button.getAttribute('data-note-id');
+      const orderId = button.getAttribute('data-order-id');
       if (noteId && typeof deleteNote === 'function') {
         e.stopPropagation();
         deleteNote(noteId, orderId);
