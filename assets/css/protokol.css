@@ -761,19 +761,28 @@ button.btn:hover {
 
   /* Textarea - menší font pro více textu (4-7 vět) */
   textarea {
-    min-height: 120px;
-    font-size: 11px !important;
-    padding: 10px 6px !important;
+    min-height: 80px;
+    height: auto;
+    font-size: 10px !important;
+    padding: 8px 6px !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    line-height: 1.4;
+    line-height: 1.35;
+    overflow: hidden; /* Pro auto-resize */
+    resize: none; /* Zakázat manuální resize na mobilu */
   }
 
   textarea::placeholder {
-    font-size: 11px !important;
+    font-size: 10px !important;
     padding-left: 0 !important;
     text-indent: 0 !important;
+  }
+
+  /* Split-section textareas - auto-výška podle obsahu */
+  .split-section textarea {
+    min-height: 60px;
+    height: auto;
   }
 
   /* Table cells větší padding pro lepší čitelnost */
@@ -948,6 +957,8 @@ body.pdf-export-mode textarea {
   font-size: 12px !important;
   padding: 4px 8px !important;
   min-height: auto !important;
+  height: auto !important;
+  overflow: visible !important;
 }
 
 body.pdf-export-mode .label {
@@ -1077,6 +1088,8 @@ body.pdf-export-mode #signature-pad {
   font-size: 12px !important;
   padding: 4px 8px !important;
   min-height: auto !important;
+  height: auto !important;
+  overflow: visible !important;
 }
 
 .pdf-clone-desktop .label {
