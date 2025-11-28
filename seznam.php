@@ -74,20 +74,24 @@ if (!$isLoggedIn && !$isAdmin) {
     min-height: 16px !important;
   }
 
-  .search-input {
+  .search-input,
+  .search-input:focus,
+  .search-input:active,
+  input.search-input,
+  input#searchInput {
     font-size: 0.65rem !important;
     line-height: 1.0 !important;
     padding: 0 !important;
-    border: none !important;
-    outline: none !important;
+    border: 0 !important;
+    border-width: 0 !important;
+    outline: 0 !important;
+    outline-width: 0 !important;
     box-shadow: none !important;
+    -webkit-box-shadow: none !important;
     background: transparent !important;
-  }
-
-  .search-input:focus {
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    border-radius: 0 !important;
   }
 
   .search-icon {
