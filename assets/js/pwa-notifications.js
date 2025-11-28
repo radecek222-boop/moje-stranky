@@ -77,11 +77,6 @@
     // Zkontrolovat podporu notifikací
     if (!('Notification' in window)) {
       console.log('[Notifikace] Notification API neni podporovano');
-
-      // Na iOS v prohlížeči (ne PWA) zobrazit návod
-      if (isIOS && !isPWA) {
-        setTimeout(() => zobrazitIOSNavod(), 3000);
-      }
     } else {
       notificationPermission = Notification.permission;
       console.log('[Notifikace] Aktualni povoleni:', notificationPermission);
@@ -285,11 +280,6 @@
   async function pozadatOPovoleni() {
     if (!('Notification' in window)) {
       console.log('[Notifikace] Notification API neni podporovano');
-
-      // Na iOS bez PWA nabídnout návod
-      if (isIOS && !isPWA) {
-        zobrazitIOSNavod();
-      }
       return false;
     }
 
@@ -589,64 +579,6 @@
     });
   }
 
-  /**
-   * Globalni funkce pro zavreni iOS dialogu - volana primo z onclick
-   */
-  window.zavritIOSDialog = function() {
-    var dialog = document.getElementById('ios-install-guide');
-    if (dialog) {
-      dialog.parentNode.removeChild(dialog);
-    }
-    localStorage.setItem('wgs_ios_guide_shown', 'true');
-    return false;
-  };
-
-  /**
-   * Zobrazit návod pro iOS uživatele - Přidání na plochu
-   */
-  function zobrazitIOSNavod() {
-    // Nezobrazovat pokud už je PWA
-    if (isPWA) return;
-
-    // Nezobrazovat pokud už byl zobrazen
-    if (localStorage.getItem('wgs_ios_guide_shown') === 'true') return;
-
-    // Pouze na iOS Safari
-    if (!isIOSSafari) return;
-
-    // Odstranit existujici dialog pokud existuje
-    var existujici = document.getElementById('ios-install-guide');
-    if (existujici) {
-      existujici.parentNode.removeChild(existujici);
-    }
-
-    var dialog = document.createElement('div');
-    dialog.id = 'ios-install-guide';
-    dialog.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:rgba(0,0,0,0.6);display:flex;align-items:flex-end;';
-
-    // Kliknuti na pozadi zavira dialog
-    dialog.onclick = function(e) {
-      if (e.target === dialog) {
-        zavritIOSDialog();
-      }
-    };
-
-    dialog.innerHTML = '<div style="background:#1a1a1a;color:#fff;padding:24px;width:100%;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;position:relative;border-radius:16px 16px 0 0;">' +
-      '<div onclick="return zavritIOSDialog();" style="position:absolute;top:12px;right:12px;background:#333;border:none;font-size:20px;color:#fff;padding:10px 14px;line-height:1;border-radius:8px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:rgba(255,255,255,0.1);">X</div>' +
-      '<div style="font-weight:700;font-size:18px;margin-bottom:12px;padding-right:50px;color:#fff;">Nainstalujte aplikaci WGS</div>' +
-      '<div style="color:#aaa;line-height:1.5;margin-bottom:16px;">Pro plnou funkčnost včetně notifikací přidejte aplikaci na plochu:</div>' +
-      '<div style="background:#2a2a2a;border-radius:8px;padding:16px;color:#fff;">' +
-        '<div style="display:flex;align-items:center;margin-bottom:12px;"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:#fff;color:#000;border-radius:50%;font-weight:700;font-size:14px;margin-right:12px;flex-shrink:0;">1</span><span>Klepněte na tlačítko <strong>Sdílet</strong> (ikona se šipkou)</span></div>' +
-        '<div style="display:flex;align-items:center;margin-bottom:12px;"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:#fff;color:#000;border-radius:50%;font-weight:700;font-size:14px;margin-right:12px;flex-shrink:0;">2</span><span>Vyberte <strong>Přidat na plochu</strong></span></div>' +
-        '<div style="display:flex;align-items:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:#fff;color:#000;border-radius:50%;font-weight:700;font-size:14px;margin-right:12px;flex-shrink:0;">3</span><span>Potvrďte <strong>Přidat</strong></span></div>' +
-      '</div>' +
-      '<div style="margin-top:16px;text-align:center;">' +
-        '<div onclick="return zavritIOSDialog();" style="background:#fff;color:#000;border:none;padding:16px 24px;border-radius:8px;font-weight:600;font-size:16px;cursor:pointer;width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:rgba(0,0,0,0.2);-webkit-appearance:none;box-sizing:border-box;">Rozumím</div>' +
-      '</div>' +
-    '</div>';
-
-    document.body.appendChild(dialog);
-  }
 
   // Exportovat funkce pro globalni pouziti
   window.WGSNotifikace = {
@@ -656,7 +588,6 @@
     zobrazitNotifikaci: zobrazitNotifikaci,
     aktualizovat: aktualizovatPocetNeprectenych,
     zobrazitDialogPovoleni: zobrazitDialogPovoleni,
-    zobrazitIOSNavod: zobrazitIOSNavod,
     registrovatPush: registrovatPushSubscription,
     zrusitPush: zrusitPushSubscription,
     getTotal: () => totalUnread,

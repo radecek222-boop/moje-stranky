@@ -360,7 +360,7 @@ if (!$isLoggedIn && !$isAdmin) {
 
   #detailOverlay .modal-title {
     font-size: 1.1rem !important;
-    padding-right: 2.5rem !important; /* Místo pro zavírací tlačítko */
+    padding: 0 !important; /* Centrovaný - bez odsazení */
   }
 
   #detailOverlay .modal-subtitle {
