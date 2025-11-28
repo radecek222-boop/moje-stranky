@@ -15,7 +15,7 @@
 .audio-preview audio{flex:1;height:40px;max-width:100%}
 .btn-delete-audio{background:var(--c-error);color:var(--c-white);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0}
 .btn-delete-audio:hover{background:#6b0000;transform:scale(1.1)}
-.note-audio{margin-top:0.4rem;padding:0.4rem;background:var(--c-bg);border:1px solid var(--c-border)}
-.note-audio audio{width:100%;height:32px}
+.note-audio{margin-top:0.15rem;padding:0}
+.note-audio audio{width:100%;height:28px}
 .note-audio-label{font-size:0.65rem;color:var(--c-grey);margin-bottom:0.2rem;text-transform:uppercase;letter-spacing:0.05em}
 @media (max-width:768px){.note-input-controls{flex-direction:column;align-items:stretch}.btn-record{justify-content:center}.recording-indicator{flex-direction:column;text-align:center;gap:0.5rem}.audio-preview{flex-direction:column}.audio-preview audio{width:100%}}
