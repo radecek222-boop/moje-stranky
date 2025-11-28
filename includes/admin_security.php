@@ -1107,11 +1107,26 @@ async function odeslatVytvoreniKlice() {
 // POZVÁNKOVÝ SYSTÉM
 // ==========================================
 
+// Globální nastavení šablony (výchozí hodnoty)
+let sablonaSettings = {
+    datumSpusteni: '1. ledna 2026',
+    telefonPodpora: '+420 725 965 826',
+    emailPodpora: 'info@wgs-service.cz',
+    textSkoleni: 'Radi vas proskolime po telefonu nebo osobne. Staci se nam ozvat a domluvime se.',
+    dobaSkoleni: '15-30 minut',
+    nazevFirmy: 'White Glove Service',
+    popisFirmy: 'Autorizovany servis Natuzzi pro CR a SR',
+    webFirmy: 'www.wgs-service.cz'
+};
+
 // Otevřít modal pro pozvánku
 function otevritPozvanku() {
     // Odstranit existující modal
     const existujici = document.getElementById('modalPozvanka');
     if (existujici) existujici.remove();
+
+    // Načíst uložená nastavení
+    nacistNastaveniSablony();
 
     const modal = document.createElement('div');
     modal.id = 'modalPozvanka';
@@ -1124,94 +1139,190 @@ function otevritPozvanku() {
 
     modal.innerHTML = `
         <div style="background: #1a1a1a; padding: 30px; border-radius: 12px;
-                    max-width: 700px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                    max-width: 900px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
                     border: 1px solid #333; max-height: 90vh; overflow-y: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="margin: 0; color: #fff; font-size: 1.3rem;">
-                    Pozvat uzivatele do systemu
-                </h3>
-                <button onclick="document.getElementById('modalPozvanka').remove()"
-                        style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer;">&times;</button>
-            </div>
 
-            <!-- Výběr role -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Typ pozvanky</label>
-                <div style="display: flex; gap: 10px;">
-                    <label style="flex: 1; display: flex; align-items: center; padding: 15px;
-                                  background: #252525; border-radius: 8px; cursor: pointer;
-                                  border: 2px solid transparent;" id="labelTechnik">
-                        <input type="radio" name="typPozvanky" value="technik" onchange="aktualizovatNahled()"
-                               style="width: 18px; height: 18px; margin-right: 12px; accent-color: #fff;">
-                        <div>
-                            <div style="color: #fff; font-weight: 600;">Technik</div>
-                            <div style="color: #888; font-size: 0.8rem;">Servisni technik</div>
-                        </div>
-                    </label>
-                    <label style="flex: 1; display: flex; align-items: center; padding: 15px;
-                                  background: #252525; border-radius: 8px; cursor: pointer;
-                                  border: 2px solid transparent;" id="labelProdejce">
-                        <input type="radio" name="typPozvanky" value="prodejce" onchange="aktualizovatNahled()"
-                               style="width: 18px; height: 18px; margin-right: 12px; accent-color: #fff;">
-                        <div>
-                            <div style="color: #fff; font-weight: 600;">Prodejce</div>
-                            <div style="color: #888; font-size: 0.8rem;">Obchodni zastupce</div>
-                        </div>
-                    </label>
+            <!-- Header s taby -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                <h3 style="margin: 0; color: #fff; font-size: 1.3rem;">Pozvankovy system</h3>
+                <div style="display: flex; gap: 5px; align-items: center;">
+                    <button onclick="prepnoutTab('odeslat')" id="tabOdeslat"
+                            style="background: #fff; color: #000; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                        Odeslat
+                    </button>
+                    <button onclick="prepnoutTab('sablona')" id="tabSablona"
+                            style="background: #333; color: #aaa; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
+                        Upravit sablonu
+                    </button>
+                    <button onclick="document.getElementById('modalPozvanka').remove()"
+                            style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer; margin-left: 10px;">&times;</button>
                 </div>
             </div>
 
-            <!-- Výběr klíče -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Registracni klic</label>
-                <select id="vyberKlice" onchange="aktualizovatNahled()" style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444;
-                        border-radius: 6px; color: #fff; font-size: 0.9rem;">
-                    <option value="">-- Nacitam klice... --</option>
-                </select>
-                <div style="color: #666; font-size: 0.75rem; margin-top: 5px;">Nebo bude vytvoren novy klic automaticky</div>
-            </div>
-
-            <!-- Emaily -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">
-                    Emailove adresy (kazdy email na novy radek, max 30)
-                </label>
-                <textarea id="emailyPozvanky" rows="5" placeholder="jan.novak@example.com&#10;petr.svoboda@example.com&#10;marie.kralova@example.com"
-                          style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444;
-                          border-radius: 6px; color: #fff; font-size: 0.9rem; resize: vertical; font-family: monospace;"></textarea>
-                <div style="color: #666; font-size: 0.75rem; margin-top: 5px;">
-                    Zadano: <span id="pocetEmailu">0</span> / 30 emailu
-                </div>
-            </div>
-
-            <!-- Náhled šablony -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Nahled emailu</label>
-                <div id="nahledSablony" style="background: #fff; color: #333; padding: 20px; border-radius: 6px;
-                     max-height: 300px; overflow-y: auto; font-size: 0.85rem; line-height: 1.6;">
-                    <div style="text-align: center; color: #999; padding: 40px;">
-                        Vyberte typ pozvanky pro zobrazeni nahledu
+            <!-- ==================== TAB: ODESLAT ==================== -->
+            <div id="tabContentOdeslat">
+                <!-- Výběr role -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Typ pozvanky</label>
+                    <div style="display: flex; gap: 10px;">
+                        <label style="flex: 1; display: flex; align-items: center; padding: 15px;
+                                      background: #252525; border-radius: 8px; cursor: pointer;
+                                      border: 2px solid transparent;" id="labelTechnik">
+                            <input type="radio" name="typPozvanky" value="technik" onchange="aktualizovatNahled()"
+                                   style="width: 18px; height: 18px; margin-right: 12px; accent-color: #fff;">
+                            <div>
+                                <div style="color: #fff; font-weight: 600;">Technik</div>
+                                <div style="color: #888; font-size: 0.8rem;">Servisni technik</div>
+                            </div>
+                        </label>
+                        <label style="flex: 1; display: flex; align-items: center; padding: 15px;
+                                      background: #252525; border-radius: 8px; cursor: pointer;
+                                      border: 2px solid transparent;" id="labelProdejce">
+                            <input type="radio" name="typPozvanky" value="prodejce" onchange="aktualizovatNahled()"
+                                   style="width: 18px; height: 18px; margin-right: 12px; accent-color: #fff;">
+                            <div>
+                                <div style="color: #fff; font-weight: 600;">Prodejce</div>
+                                <div style="color: #888; font-size: 0.8rem;">Obchodni zastupce</div>
+                            </div>
+                        </label>
                     </div>
                 </div>
+
+                <!-- Výběr klíče -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Registracni klic</label>
+                    <select id="vyberKlice" onchange="aktualizovatNahled()" style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444;
+                            border-radius: 6px; color: #fff; font-size: 0.9rem;">
+                        <option value="">-- Nacitam klice... --</option>
+                    </select>
+                    <div style="color: #666; font-size: 0.75rem; margin-top: 5px;">Nebo bude vytvoren novy klic automaticky</div>
+                </div>
+
+                <!-- Emaily -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">
+                        Emailove adresy (kazdy email na novy radek, max 30)
+                    </label>
+                    <textarea id="emailyPozvanky" rows="5" placeholder="jan.novak@example.com&#10;petr.svoboda@example.com&#10;marie.kralova@example.com"
+                              style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444;
+                              border-radius: 6px; color: #fff; font-size: 0.9rem; resize: vertical; font-family: monospace;"></textarea>
+                    <div style="color: #666; font-size: 0.75rem; margin-top: 5px;">
+                        Zadano: <span id="pocetEmailu">0</span> / 30 emailu
+                    </div>
+                </div>
+
+                <!-- Náhled šablony -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Nahled emailu</label>
+                    <div id="nahledSablony" style="background: #fff; color: #333; padding: 20px; border-radius: 6px;
+                         max-height: 300px; overflow-y: auto; font-size: 0.85rem; line-height: 1.6;">
+                        <div style="text-align: center; color: #999; padding: 40px;">
+                            Vyberte typ pozvanky pro zobrazeni nahledu
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tlačítka -->
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="odeslatPozvanky()" id="btnOdeslatPozvanky" disabled
+                            style="flex: 1; padding: 14px; background: #fff; color: #000; border: none;
+                            border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;
+                            opacity: 0.5; transition: opacity 0.2s;">
+                        Odeslat pozvanky
+                    </button>
+                    <button onclick="document.getElementById('modalPozvanka').remove()"
+                            style="flex: 1; padding: 14px; background: #333; color: #fff;
+                            border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+                        Zrusit
+                    </button>
+                </div>
+
+                <!-- Status -->
+                <div id="statusPozvanky" style="margin-top: 15px; display: none; padding: 12px; border-radius: 6px;"></div>
             </div>
 
-            <!-- Tlačítka -->
-            <div style="display: flex; gap: 10px;">
-                <button onclick="odeslatPozvanky()" id="btnOdeslatPozvanky" disabled
-                        style="flex: 1; padding: 14px; background: #fff; color: #000; border: none;
-                        border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;
-                        opacity: 0.5; transition: opacity 0.2s;">
-                    Odeslat pozvanky
-                </button>
-                <button onclick="document.getElementById('modalPozvanka').remove()"
-                        style="flex: 1; padding: 14px; background: #333; color: #fff;
-                        border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">
-                    Zrusit
-                </button>
+            <!-- ==================== TAB: UPRAVIT SABLONU ==================== -->
+            <div id="tabContentSablona" style="display: none;">
+                <p style="color: #888; font-size: 0.85rem; margin: 0 0 20px;">
+                    Zde muzete upravit texty, ktere se zobrazi v pozvankových emailech.
+                </p>
+
+                <!-- Datum spuštění -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Datum spusteni systemu</label>
+                    <input type="text" id="sablonaDatumSpusteni" value="${sablonaSettings.datumSpusteni}"
+                           style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem;">
+                </div>
+
+                <!-- Kontaktní údaje -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Telefon pro podporu</label>
+                        <input type="text" id="sablonaTelefon" value="${sablonaSettings.telefonPodpora}"
+                               style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Email pro podporu</label>
+                        <input type="text" id="sablonaEmail" value="${sablonaSettings.emailPodpora}"
+                               style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem;">
+                    </div>
+                </div>
+
+                <!-- Text o školení -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Text o skoleni</label>
+                    <textarea id="sablonaTextSkoleni" rows="2"
+                              style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem; resize: vertical;">${sablonaSettings.textSkoleni}</textarea>
+                </div>
+
+                <!-- Doba školení -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Doba skoleni</label>
+                    <input type="text" id="sablonaDobaSkoleni" value="${sablonaSettings.dobaSkoleni}"
+                           style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem;">
+                </div>
+
+                <!-- Firemní údaje -->
+                <div style="border-top: 1px solid #333; padding-top: 15px; margin-top: 20px;">
+                    <h4 style="color: #fff; margin: 0 0 15px; font-size: 0.95rem;">Paticka emailu</h4>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Nazev firmy</label>
+                        <input type="text" id="sablonaNazevFirmy" value="${sablonaSettings.nazevFirmy}"
+                               style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem;">
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Popis firmy</label>
+                        <input type="text" id="sablonaPopisFirmy" value="${sablonaSettings.popisFirmy}"
+                               style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem;">
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Web firmy</label>
+                        <input type="text" id="sablonaWebFirmy" value="${sablonaSettings.webFirmy}"
+                               style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem;">
+                    </div>
+                </div>
+
+                <!-- Tlačítka pro uložení -->
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button onclick="ulozitNastaveniSablony()"
+                            style="flex: 1; padding: 14px; background: #fff; color: #000; border: none;
+                            border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;">
+                        Ulozit nastaveni
+                    </button>
+                    <button onclick="obnovitVychoziSablonu()"
+                            style="padding: 14px 20px; background: #333; color: #fff;
+                            border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                        Obnovit vychozi
+                    </button>
+                </div>
+
+                <!-- Status uložení -->
+                <div id="statusSablony" style="margin-top: 15px; display: none; padding: 12px; border-radius: 6px;"></div>
             </div>
 
-            <!-- Status -->
-            <div id="statusPozvanky" style="margin-top: 15px; display: none; padding: 12px; border-radius: 6px;"></div>
         </div>
     `;
 
@@ -1219,6 +1330,9 @@ function otevritPozvanku() {
 
     // Načíst klíče do selectu
     nacistKliceProPozvanku();
+
+    // Naplnit pole šablony aktuálními hodnotami
+    naplnitPoleSablony();
 
     // Event listener pro počítání emailů
     document.getElementById('emailyPozvanky').addEventListener('input', function() {
@@ -1231,6 +1345,136 @@ function otevritPozvanku() {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.remove();
     });
+}
+
+// Přepnout tab
+function prepnoutTab(tab) {
+    const tabOdeslat = document.getElementById('tabOdeslat');
+    const tabSablona = document.getElementById('tabSablona');
+    const contentOdeslat = document.getElementById('tabContentOdeslat');
+    const contentSablona = document.getElementById('tabContentSablona');
+
+    if (tab === 'odeslat') {
+        tabOdeslat.style.background = '#fff';
+        tabOdeslat.style.color = '#000';
+        tabOdeslat.style.fontWeight = '600';
+        tabSablona.style.background = '#333';
+        tabSablona.style.color = '#aaa';
+        tabSablona.style.fontWeight = 'normal';
+        contentOdeslat.style.display = 'block';
+        contentSablona.style.display = 'none';
+    } else {
+        tabSablona.style.background = '#fff';
+        tabSablona.style.color = '#000';
+        tabSablona.style.fontWeight = '600';
+        tabOdeslat.style.background = '#333';
+        tabOdeslat.style.color = '#aaa';
+        tabOdeslat.style.fontWeight = 'normal';
+        contentOdeslat.style.display = 'none';
+        contentSablona.style.display = 'block';
+    }
+}
+
+// Naplnit pole šablony aktuálními hodnotami
+function naplnitPoleSablony() {
+    document.getElementById('sablonaDatumSpusteni').value = sablonaSettings.datumSpusteni || '';
+    document.getElementById('sablonaTelefon').value = sablonaSettings.telefonPodpora || '';
+    document.getElementById('sablonaEmail').value = sablonaSettings.emailPodpora || '';
+    document.getElementById('sablonaTextSkoleni').value = sablonaSettings.textSkoleni || '';
+    document.getElementById('sablonaDobaSkoleni').value = sablonaSettings.dobaSkoleni || '';
+    document.getElementById('sablonaNazevFirmy').value = sablonaSettings.nazevFirmy || '';
+    document.getElementById('sablonaPopisFirmy').value = sablonaSettings.popisFirmy || '';
+    document.getElementById('sablonaWebFirmy').value = sablonaSettings.webFirmy || '';
+}
+
+// Načíst nastavení šablony z databáze
+async function nacistNastaveniSablony() {
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        const odpoved = await fetch('/api/admin_api.php?action=get_invitation_template');
+        const data = await odpoved.json();
+
+        if (data.status === 'success' && data.settings) {
+            sablonaSettings = { ...sablonaSettings, ...data.settings };
+        }
+    } catch (e) {
+        console.log('Pouzivam vychozi nastaveni sablony');
+    }
+}
+
+// Uložit nastavení šablony
+async function ulozitNastaveniSablony() {
+    const statusEl = document.getElementById('statusSablony');
+
+    // Načíst hodnoty z polí
+    sablonaSettings.datumSpusteni = document.getElementById('sablonaDatumSpusteni').value.trim();
+    sablonaSettings.telefonPodpora = document.getElementById('sablonaTelefon').value.trim();
+    sablonaSettings.emailPodpora = document.getElementById('sablonaEmail').value.trim();
+    sablonaSettings.textSkoleni = document.getElementById('sablonaTextSkoleni').value.trim();
+    sablonaSettings.dobaSkoleni = document.getElementById('sablonaDobaSkoleni').value.trim();
+    sablonaSettings.nazevFirmy = document.getElementById('sablonaNazevFirmy').value.trim();
+    sablonaSettings.popisFirmy = document.getElementById('sablonaPopisFirmy').value.trim();
+    sablonaSettings.webFirmy = document.getElementById('sablonaWebFirmy').value.trim();
+
+    statusEl.style.display = 'block';
+    statusEl.style.background = '#d1ecf1';
+    statusEl.style.color = '#0c5460';
+    statusEl.textContent = 'Ukladam...';
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (!csrfToken) throw new Error('CSRF token neni k dispozici');
+
+        const odpoved = await fetch('/api/admin_api.php?action=save_invitation_template', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                settings: sablonaSettings,
+                csrf_token: csrfToken
+            })
+        });
+
+        const data = await odpoved.json();
+
+        if (data.status === 'success') {
+            statusEl.style.background = '#d4edda';
+            statusEl.style.color = '#155724';
+            statusEl.textContent = 'Nastaveni bylo ulozeno!';
+            setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+        } else {
+            throw new Error(data.message || 'Chyba pri ukladani');
+        }
+    } catch (chyba) {
+        statusEl.style.background = '#f8d7da';
+        statusEl.style.color = '#721c24';
+        statusEl.textContent = 'Chyba: ' + chyba.message;
+    }
+}
+
+// Obnovit výchozí šablonu
+function obnovitVychoziSablonu() {
+    if (!confirm('Opravdu chcete obnovit vychozi nastaveni sablony?')) return;
+
+    sablonaSettings = {
+        datumSpusteni: '1. ledna 2026',
+        telefonPodpora: '+420 725 965 826',
+        emailPodpora: 'info@wgs-service.cz',
+        textSkoleni: 'Radi vas proskolime po telefonu nebo osobne. Staci se nam ozvat a domluvime se.',
+        dobaSkoleni: '15-30 minut',
+        nazevFirmy: 'White Glove Service',
+        popisFirmy: 'Autorizovany servis Natuzzi pro CR a SR',
+        webFirmy: 'www.wgs-service.cz'
+    };
+
+    naplnitPoleSablony();
+
+    const statusEl = document.getElementById('statusSablony');
+    statusEl.style.display = 'block';
+    statusEl.style.background = '#d1ecf1';
+    statusEl.style.color = '#0c5460';
+    statusEl.textContent = 'Vychozi nastaveni obnoveno. Nezapomente ulozit!';
+    setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
 }
 
 // Načíst klíče pro pozvánku
