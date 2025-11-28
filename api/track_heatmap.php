@@ -19,7 +19,7 @@ require_once __DIR__ . '/../includes/rate_limiter.php';
 require_once __DIR__ . '/../includes/geoip_helper.php';
 
 // Centrálně zachytit fatální chyby a vrátit JSON místo prázdného těla
-// SECURITY: Detaily logovat, ale NEPOSÍLAT klientovi (Codex review P1)
+// SECURITY: Detaily logovat, ale NEPOSÍLAT klientovi
 register_shutdown_function(function () {
     $error = error_get_last();
     if ($error === null) {

@@ -38,7 +38,7 @@ try {
     $updated = 0;
 
     foreach ($urlMappings as $oldUrl => $newUrl) {
-        // OPRAVA: Update pro PENDING i FAILED actions (Codex fix)
+        // OPRAVA: Update pro PENDING i FAILED actions
         // Opravujeme URL bez ohledu na status, protože failed actions mají špatné URL
         $stmt = $pdo->prepare("
             UPDATE wgs_pending_actions

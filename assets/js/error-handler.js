@@ -163,10 +163,10 @@ function displayJSError(error) {
             <button onclick="copyJSError()"
                     style="background: #28a745; color: white; border: none; padding: 8px 15px;
                            border-radius: 4px; cursor: pointer; font-family: 'Courier New', monospace; font-size: 12px;">
-                [List] Kopírovat pro Claude Code nebo Codex
+                Kopírovat chybový report
             </button>
             <div id="js-copy-status" style="color: #28a745; margin-top: 8px; display: none; font-size: 11px;">
-                Zkopírováno! Vložte CTRL+V do zprávy pro Claude/Codex
+                Zkopírováno do schránky
             </div>
         </div>
     `;
