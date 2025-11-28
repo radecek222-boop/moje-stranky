@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/db_metadata.php';
+require_once __DIR__ . '/../includes/rate_limiter.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -41,7 +42,26 @@ try {
         return;
     }
 
-    // ✅ PERFORMANCE FIX: Načíst session data a uvolnit zámek
+    // BEZPECNOST: Rate limiting pro delete operace
+    $pdo = getDbConnection();
+    $rateLimiter = new RateLimiter($pdo);
+    $clientIdentifier = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $rateLimitResult = $rateLimiter->checkLimit($clientIdentifier, 'delete_reklamace', [
+        'max_attempts' => 20,
+        'window_minutes' => 10,
+        'block_minutes' => 30
+    ]);
+
+    if (!$rateLimitResult['allowed']) {
+        http_response_code(429);
+        echo json_encode([
+            'status' => 'error',
+            'message' => $rateLimitResult['message']
+        ], JSON_UNESCAPED_UNICODE);
+        return;
+    }
+
+    // PERFORMANCE FIX: Nacist session data a uvolnit zamek
     // Audit 2025-11-24: DELETE operations - může trvat delší dobu
     $currentUserId = $_SESSION['user_id'] ?? 'admin';
 
@@ -55,7 +75,7 @@ try {
         throw new Exception('Chybí identifikátor reklamace.');
     }
 
-    $pdo = getDbConnection();
+    // $pdo jiz inicializovano vyse pro rate limiter
     $pdo->beginTransaction();
 
     $columns = db_get_table_columns($pdo, 'wgs_reklamace');

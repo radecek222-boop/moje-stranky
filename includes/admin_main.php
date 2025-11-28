@@ -220,7 +220,7 @@ try {
         <div class="control-card" data-section="analytics" onclick="openSection('analytics')">
             <div class="control-card-header">
                 <div>
-                    <div class="control-card-icon">📊</div>
+                    <div class="control-card-icon">[STAT]</div>
                     <h3 class="control-card-title">Statistiky & Reporty</h3>
                     <p class="control-card-description">Dashboard, grafy, exporty</p>
                 </div>
@@ -281,7 +281,7 @@ function openSection(section) {
     }
 }
 
-console.log('✅ Admin Control Center loaded');
+console.log('[OK] Admin Control Center loaded');
 </script>
 
 

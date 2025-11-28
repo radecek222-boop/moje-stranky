@@ -1126,7 +1126,7 @@ function showTestResult(passed, errorMessage = null) {
 
     const successHtml = `
         <div style="background: #e8f5e9; border: 2px solid var(--c-success); padding: 2rem; text-align: center; margin-bottom: 2rem;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+            <div style="font-size: 2rem; margin-bottom: 1rem; font-weight: bold;">OK</div>
             <div style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--c-success);">
                 Test prošel úspěšně!
             </div>
@@ -1138,7 +1138,7 @@ function showTestResult(passed, errorMessage = null) {
 
     const failureHtml = `
         <div style="background: #ffebee; border: 2px solid var(--c-error); padding: 2rem; text-align: center; margin-bottom: 2rem;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
+            <div style="font-size: 2rem; margin-bottom: 1rem; font-weight: bold;">CHYBA</div>
             <div style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--c-error);">
                 Test selhal
             </div>
@@ -1232,13 +1232,13 @@ async function cleanupTestData() {
         const result = await response.json();
 
         if (result.success) {
-            alert('✅ Testovací data smazána!');
+            alert('Testovací data smazána!');
             resetTest();
         } else {
-            alert('❌ Chyba: ' + (result.error || 'Unknown error'));
+            alert('Chyba: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
-        alert('❌ Chyba: ' + error.message);
+        alert('Chyba: ' + error.message);
     }
 }
 

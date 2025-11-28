@@ -48,7 +48,7 @@ try {
         ) VALUES (
             'install_phpmailer',
             '📧 Nainstalovat PHPMailer',
-            'PHPMailer je potřeba pro odesílání emailů přes SMTP. Bez něj email queue používá pouze PHP mail() funkci, která často nefunguje na sdíleném hostingu.\n\nPo instalaci:\n✅ Emaily budou odcházet spolehlivě přes SMTP\n✅ Email queue cron bude fungovat správně\n✅ Budete vidět detailní chybové zprávy při problémech',
+            'PHPMailer je potřeba pro odesílání emailů přes SMTP. Bez něj email queue používá pouze PHP mail() funkci, která často nefunguje na sdíleném hostingu.\n\nPo instalaci:\nEmaily budou odcházet spolehlivě přes SMTP\nEmail queue cron bude fungovat správně\nBudete vidět detailní chybové zprávy při problémech',
             'scripts/install_phpmailer.php',
             'high',
             'pending'
@@ -58,7 +58,7 @@ try {
     $stmt->execute();
     $taskId = $pdo->lastInsertId();
 
-    echo "✅ Úkol úspěšně vytvořen! (ID: {$taskId})\n";
+    echo "Úkol úspěšně vytvořen! (ID: {$taskId})\n";
     echo "\n";
     echo "==========================================\n";
     echo "JAK SPUSTIT INSTALACI:\n";
@@ -74,7 +74,7 @@ try {
     echo "https://www.wgs-service.cz/admin.php&detail=actions\n";
 
 } catch (PDOException $e) {
-    echo "❌ CHYBA: " . $e->getMessage() . "\n";
+    echo "CHYBA: " . $e->getMessage() . "\n";
 
     if (strpos($e->getMessage(), "doesn't exist") !== false) {
         echo "\n";
