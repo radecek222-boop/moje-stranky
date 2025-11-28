@@ -1039,13 +1039,95 @@ function deleteKey(keyCode) {
 }
 
 /**
- * CreateKey
+ * CreateKey - zobrazí modal pro výběr typu klíče
  */
 function createKey() {
-    const keyType = prompt('Typ klíče (admin/technik/prodejce/partner):');
-    if (!keyType) return;
+    // Vytvořit modal pro výběr typu klíče
+    const existujiciModal = document.getElementById('createKeyModal');
+    if (existujiciModal) existujiciModal.remove();
 
+    const modal = document.createElement('div');
+    modal.id = 'createKeyModal';
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.6); display: flex;
+        align-items: center; justify-content: center; z-index: 10000;
+    `;
+
+    modal.innerHTML = `
+        <div style="background: #1a1a1a; padding: 30px; border-radius: 12px;
+                    max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                    border: 1px solid #333;">
+            <h3 style="margin: 0 0 20px 0; color: #fff; font-size: 1.3rem;">
+                Vytvořit nový registrační klíč
+            </h3>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; padding: 15px;
+                              background: #252525; border-radius: 8px; cursor: pointer;
+                              margin-bottom: 10px; border: 2px solid transparent;
+                              transition: all 0.2s;"
+                       onmouseover="this.style.borderColor='#555'"
+                       onmouseout="this.style.borderColor=this.querySelector('input').checked ? '#fff' : 'transparent'">
+                    <input type="radio" name="keyType" value="technik"
+                           style="width: 20px; height: 20px; margin-right: 15px; accent-color: #fff;">
+                    <div>
+                        <div style="color: #fff; font-weight: 600; font-size: 1.1rem;">TECHNIK</div>
+                        <div style="color: #888; font-size: 0.85rem;">Pro servisní techniky</div>
+                    </div>
+                </label>
+
+                <label style="display: flex; align-items: center; padding: 15px;
+                              background: #252525; border-radius: 8px; cursor: pointer;
+                              border: 2px solid transparent; transition: all 0.2s;"
+                       onmouseover="this.style.borderColor='#555'"
+                       onmouseout="this.style.borderColor=this.querySelector('input').checked ? '#fff' : 'transparent'">
+                    <input type="radio" name="keyType" value="prodejce"
+                           style="width: 20px; height: 20px; margin-right: 15px; accent-color: #fff;">
+                    <div>
+                        <div style="color: #fff; font-weight: 600; font-size: 1.1rem;">PRODEJCE</div>
+                        <div style="color: #888; font-size: 0.85rem;">Pro prodejce a obchodníky</div>
+                    </div>
+                </label>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button onclick="vytvorKlicZModalu()" style="flex: 1; padding: 12px;
+                        background: #fff; color: #000; border: none; border-radius: 6px;
+                        font-weight: 600; cursor: pointer; font-size: 1rem;">
+                    Vytvořit klíč
+                </button>
+                <button onclick="document.getElementById('createKeyModal').remove()"
+                        style="flex: 1; padding: 12px; background: #333; color: #fff;
+                        border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+                    Zrušit
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Zavřít při kliknutí na pozadí
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+/**
+ * VytvorKlicZModalu - odešle požadavek na vytvoření klíče
+ */
+function vytvorKlicZModalu() {
+    const vybranyTyp = document.querySelector('input[name="keyType"]:checked');
+
+    if (!vybranyTyp) {
+        alert('Vyberte typ klíče');
+        return;
+    }
+
+    const keyType = vybranyTyp.value;
     const csrfToken = getCSRFToken();
+
     if (!csrfToken) {
         alert(t('csrf_token_not_found'));
         return;
@@ -1061,6 +1143,8 @@ function createKey() {
     })
     .then(r => r.json())
     .then(data => {
+        document.getElementById('createKeyModal')?.remove();
+
         if (isSuccess(data)) {
             alert(t('key_created').replace('{key}', data.key_code));
             loadKeysModal(); // Reload
