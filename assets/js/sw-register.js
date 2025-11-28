@@ -1,6 +1,8 @@
 /**
  * Service Worker Registration & Update Handler
  * Automaticky aktualizuje PWA při změně verze
+ *
+ * Vylepseno pro iOS PWA - agresivnejsi kontrola aktualizaci
  */
 
 (function() {
@@ -13,35 +15,69 @@
   }
 
   let refreshing = false;
+  let swRegistration = null;
+
+  // Detekce iOS
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+                window.navigator.standalone === true;
+
+  // Interval pro kontrolu aktualizaci (iOS PWA potrebuje castejsi kontroly)
+  const UPDATE_CHECK_INTERVAL = isIOS && isPWA ? 60000 : 300000; // 1 min pro iOS PWA, 5 min pro ostatni
 
   // Registrace Service Workeru
   window.addEventListener('load', async () => {
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
+      swRegistration = await navigator.serviceWorker.register('/sw.js', {
+        scope: '/',
+        updateViaCache: 'none' // Vzdy kontrolovat novou verzi SW souboru
       });
 
-      console.log('[PWA] Service Worker registrován:', registration.scope);
+      console.log('[PWA] Service Worker registrován:', swRegistration.scope);
 
-      // Kontrolovat aktualizace při každém načtení stránky
-      registration.update();
+      // Kontrolovat aktualizace pri nacteni
+      await zkontrolujAktualizaceTiche();
 
       // Listener pro novou verzi
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
+      swRegistration.addEventListener('updatefound', () => {
+        const newWorker = swRegistration.installing;
         console.log('[PWA] Nalezena nová verze Service Workeru...');
 
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // Nová verze je připravena
             console.log('[PWA] Nová verze připravena k aktivaci');
-            zobrazitAktualizacniBanner();
+
+            // Pro iOS PWA: Automaticky aktivovat bez ptani
+            if (isIOS && isPWA) {
+              console.log('[PWA] iOS PWA - automaticka aktivace');
+              aktivovatNovouVerzi();
+            } else {
+              zobrazitAktualizacniBanner();
+            }
           }
         });
       });
 
+      // Periodicka kontrola aktualizaci
+      setInterval(zkontrolujAktualizaceTiche, UPDATE_CHECK_INTERVAL);
+
     } catch (error) {
       console.error('[PWA] Chyba registrace Service Workeru:', error);
+    }
+  });
+
+  // Kontrola aktualizaci kdyz se stranka stane viditelnou (iOS PWA fix)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && swRegistration) {
+      console.log('[PWA] Stranka viditelna - kontroluji aktualizace');
+      zkontrolujAktualizaceTiche();
+    }
+  });
+
+  // Kontrola pri focus (iOS PWA fix)
+  window.addEventListener('focus', () => {
+    if (swRegistration) {
+      zkontrolujAktualizaceTiche();
     }
   });
 
@@ -53,6 +89,27 @@
       window.location.reload();
     }
   });
+
+  /**
+   * Ticha kontrola aktualizaci (bez logovani pokud neni nova verze)
+   */
+  async function zkontrolujAktualizaceTiche() {
+    if (!swRegistration) return;
+    try {
+      await swRegistration.update();
+    } catch (e) {
+      // Ticha chyba - muze byt offline
+    }
+  }
+
+  /**
+   * Aktivovat novou verzi (pro automatickou aktualizaci)
+   */
+  function aktivovatNovouVerzi() {
+    if (swRegistration && swRegistration.waiting) {
+      swRegistration.waiting.postMessage('SKIP_WAITING');
+    }
+  }
 
   // Zprávy od Service Workeru
   navigator.serviceWorker.addEventListener('message', (event) => {
