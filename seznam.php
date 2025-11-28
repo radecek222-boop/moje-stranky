@@ -59,6 +59,55 @@ if (!$isLoggedIn && !$isAdmin) {
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.css">
 <style>
+/* ============================================
+   🔧 FIX: iOS/Safari/PWA Modal Scroll Lock
+   ============================================ */
+
+/* Scroll lock pro html a body když je modal otevřený */
+html.modal-open,
+body.modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+
+/* iOS Safari - použít CSS proměnnou pro scroll pozici */
+body.modal-open {
+  top: calc(var(--scroll-y, 0px) * -1) !important;
+}
+
+/* PWA Standalone mode detekce */
+@media all and (display-mode: standalone) {
+  body.modal-open {
+    /* PWA má jiné viewport chování */
+    height: 100vh !important;
+    position: fixed !important;
+  }
+}
+
+/* iOS Safari specifické fixy */
+@supports (-webkit-touch-callout: none) {
+  /* Tohle targetuje pouze iOS Safari */
+  body.modal-open {
+    position: fixed !important;
+    overflow: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  #detailOverlay.active {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
 .search-bar {
   margin-top: 2rem !important;
 }
@@ -301,10 +350,21 @@ if (!$isLoggedIn && !$isAdmin) {
   width: 95% !important;
   color: #ffffff !important;
   margin: 0 auto !important;
-  /* Omezit výšku aby se vešlo na displej */
+  /* FIX: iOS Safari viewport - použít dvh místo vh kde je podporováno */
   max-height: 90vh !important;
+  max-height: 90dvh !important; /* Dynamic viewport height - Safari 15.4+ */
   overflow-y: auto !important;
+  overflow-x: hidden !important;
   border-radius: 12px !important;
+
+  /* FIX: iOS momentum scrolling - plynulý scroll */
+  -webkit-overflow-scrolling: touch !important;
+
+  /* FIX: Safari scrollbar fix */
+  overscroll-behavior: contain !important;
+
+  /* FIX: Pozice relativní pro správné centrování */
+  position: relative !important;
 }
 
 /* Hlavička modalu - větší a vše vycentrováno */
@@ -345,13 +405,22 @@ if (!$isLoggedIn && !$isAdmin) {
   /* Mobilní centrování - přesně uprostřed */
   #detailOverlay {
     padding: 0.5rem !important;
+    /* FIX: iOS Safari - zajistit že overlay je přes celou obrazovku */
+    height: 100vh !important;
+    height: 100dvh !important; /* Dynamic viewport height */
   }
 
   #detailOverlay .modal-content {
     max-width: 100% !important;
     width: 100% !important;
+    /* FIX: iOS Safari viewport - dynamická výška */
     max-height: 95vh !important;
+    max-height: 95dvh !important; /* Dynamic viewport height - Safari 15.4+ */
     border-radius: 8px !important;
+
+    /* FIX: Touch scrolling pro mobil */
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
   }
 
   #detailOverlay .modal-header {
@@ -365,6 +434,61 @@ if (!$isLoggedIn && !$isAdmin) {
 
   #detailOverlay .modal-subtitle {
     font-size: 0.75rem !important;
+  }
+}
+
+/* ============================================
+   🔧 FIX: PWA Standalone Mode Specifické Styly
+   ============================================ */
+
+@media all and (display-mode: standalone) {
+  /* PWA má jiný viewport než Safari browser */
+  #detailOverlay {
+    /* Zajistit že overlay je přes celou obrazovku v PWA */
+    height: 100vh !important;
+    height: 100dvh !important;
+  }
+
+  #detailOverlay .modal-content {
+    /* PWA modal - optimalizace pro standalone režim */
+    max-height: 92vh !important;
+    max-height: 92dvh !important; /* O něco větší než v browseru */
+
+    /* PWA scroll fix */
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+  }
+
+  /* PWA - tlačítka větší pro lepší touch */
+  #detailOverlay .modal-body .btn,
+  #detailOverlay .modal-actions .btn {
+    min-height: 48px !important; /* Apple touch target guideline */
+    padding: 0.75rem 1rem !important;
+    font-size: 0.95rem !important;
+  }
+}
+
+/* iOS Safari v PWA módu - kombinace obou podmínek */
+@supports (-webkit-touch-callout: none) {
+  @media all and (display-mode: standalone) {
+    #detailOverlay {
+      /* iOS PWA specifický fix */
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+    }
+
+    #detailOverlay .modal-content {
+      /* iOS PWA modal centrování */
+      margin: auto !important;
+      max-height: 90vh !important;
+      max-height: 90dvh !important;
+    }
   }
 }
 
@@ -1369,9 +1493,6 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
   "is_admin" => false
 ]); ?>;
 </script>
-
-<!-- Analytics Tracker -->
-<?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
 </head>
 
 <body>

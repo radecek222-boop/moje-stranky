@@ -128,9 +128,6 @@ if ($activeTab === 'dashboard') {
   <!-- Error Handler - zachytává všechny chyby -->
   <script src="/assets/js/error-handler.js"></script>
   <script src="/assets/js/html-sanitizer.js"></script>
-
-  <!-- Analytics Tracker -->
-  <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
 </head>
 
 <body<?php

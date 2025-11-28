@@ -221,9 +221,6 @@ if ($initialBootstrapData) {
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.css">
   <!-- mobile-responsive.css odstraněn - protokol.css má vlastní mobilní styly -->
-
-  <!-- Analytics Tracker -->
-  <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
 </head>
 
 <body>

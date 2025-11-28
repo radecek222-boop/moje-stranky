@@ -29,9 +29,6 @@ $csrfToken = generateCSRFToken();
   <link rel="stylesheet" href="assets/css/mobile-responsive.css">
   <!-- Tmavý styl pro login box -->
   <link rel="stylesheet" href="assets/css/login-dark-theme.css">
-
-  <!-- Analytics Tracker -->
-  <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
 </head>
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
