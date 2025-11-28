@@ -609,28 +609,43 @@ function filterUnreadNotes() {
 // === MODAL MANAGER ===
 const ModalManager = {
   show: (content) => {
-    // iOS scroll lock
-    window.modalScrollPosition = window.pageYOffset;
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${window.modalScrollPosition}px`;
-    document.body.style.width = '100%';
-    document.body.style.left = '0';
-    document.body.style.right = '0';
+    // FIX: iOS/Safari/PWA scroll lock - lepší metoda
+    window.modalScrollPosition = window.pageYOffset || window.scrollY || 0;
+
+    // Přidat třídu místo inline stylů (lepší pro Safari)
+    document.documentElement.classList.add('modal-open');
+    document.body.classList.add('modal-open');
+
+    // CSS proměnná pro scroll pozici (použije se v CSS)
+    document.documentElement.style.setProperty('--scroll-y', `${window.modalScrollPosition}px`);
 
     document.getElementById('modalContent').innerHTML = content;
     document.getElementById('detailOverlay').classList.add('active');
+
+    // FIX: Safari focus fix - zajistí že modal je v DOM před scrollem
+    setTimeout(() => {
+      const modalContent = document.querySelector('#detailOverlay .modal-content');
+      if (modalContent) {
+        modalContent.scrollTop = 0; // Reset scroll pozice modalu
+      }
+    }, 10);
   },
 
   close: () => {
-    document.getElementById('detailOverlay').classList.remove('active');
+    const overlay = document.getElementById('detailOverlay');
+    overlay.classList.remove('active');
 
-    // Obnovit scroll
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    document.body.style.left = '';
-    document.body.style.right = '';
-    window.scrollTo(0, window.modalScrollPosition);
+    // Počkat na CSS transition než odstraníme třídu
+    setTimeout(() => {
+      document.documentElement.classList.remove('modal-open');
+      document.body.classList.remove('modal-open');
+
+      // Obnovit původní scroll pozici
+      window.scrollTo(0, window.modalScrollPosition || 0);
+
+      // Vyčistit CSS proměnnou
+      document.documentElement.style.removeProperty('--scroll-y');
+    }, 50); // Kratší delay než transition (300ms)
 
     CURRENT_RECORD = null;
     SELECTED_DATE = null;
