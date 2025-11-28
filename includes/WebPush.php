@@ -521,4 +521,44 @@ class WGSWebPush {
             return [];
         }
     }
+
+    /**
+     * Odeslat notifikaci technikům a adminům
+     *
+     * @param array $payload Data notifikace ['title', 'body', 'icon', 'url', 'data']
+     * @return array Výsledky odeslání
+     */
+    public function odeslatTechnikumAAdminum(array $payload): array {
+        if (!$this->pdo) {
+            return ['uspech' => false, 'zprava' => 'Není připojení k databázi'];
+        }
+
+        // Načíst user_id všech techniků a adminů
+        $stmt = $this->pdo->prepare("
+            SELECT user_id FROM wgs_users
+            WHERE role IN ('admin', 'technik') AND is_active = 1
+        ");
+        $stmt->execute();
+        $users = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        if (empty($users)) {
+            return ['uspech' => true, 'zprava' => 'Žádní technici nebo admini', 'odeslano' => 0];
+        }
+
+        // Načíst všechny aktivní subscriptions pro tyto uživatele
+        $placeholders = implode(',', array_fill(0, count($users), '?'));
+        $stmt = $this->pdo->prepare("
+            SELECT id, endpoint, p256dh, auth, user_id
+            FROM wgs_push_subscriptions
+            WHERE user_id IN ($placeholders) AND aktivni = 1
+        ");
+        $stmt->execute($users);
+        $subscriptions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($subscriptions)) {
+            return ['uspech' => true, 'zprava' => 'Žádné aktivní subscriptions pro techniky/adminy', 'odeslano' => 0];
+        }
+
+        return $this->odeslatVice($subscriptions, $payload);
+    }
 }
