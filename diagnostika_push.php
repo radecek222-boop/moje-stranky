@@ -262,9 +262,14 @@ try {
 
     $stmt = $pdo->query("SHOW TABLES LIKE 'wgs_push_log'");
     if ($stmt->rowCount() > 0) {
+        // Zjistit spravny nazev sloupce pro razeni
+        $colStmt = $pdo->query("SHOW COLUMNS FROM wgs_push_log");
+        $cols = $colStmt->fetchAll(PDO::FETCH_COLUMN);
+        $orderBy = in_array('created_at', $cols) ? 'created_at' : (in_array('datum_vytvoreni', $cols) ? 'datum_vytvoreni' : 'id');
+
         $stmt = $pdo->query("
             SELECT * FROM wgs_push_log
-            ORDER BY created_at DESC
+            ORDER BY {$orderBy} DESC
             LIMIT 10
         ");
         $logy = $stmt->fetchAll(PDO::FETCH_ASSOC);
