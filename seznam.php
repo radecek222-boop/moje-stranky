@@ -1647,6 +1647,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
+      case 'showHistoryPDF':
+        const originalId = button.getAttribute('data-original-id');
+        if (originalId && typeof showHistoryPDF === 'function') {
+          console.log('[EMERGENCY] Nacitam historii PDF pro original ID:', originalId);
+          showHistoryPDF(originalId);
+        } else {
+          console.error('[EMERGENCY] showHistoryPDF funkce neni dostupna nebo original ID chybi');
+        }
+        break;
+
       default:
         console.warn(`[EMERGENCY] Neznámá akce: ${action}`);
     }
