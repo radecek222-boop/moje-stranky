@@ -52,6 +52,11 @@ if (!function_exists('loadAdminNavigation')) {
                 'tab_label' => 'Uživatelé',
                 'tab' => 'users',
             ],
+            'zakaznici' => [
+                'href' => 'admin.php?tab=zakaznici',
+                'tab_label' => 'Zákazníci',
+                'tab' => 'zakaznici',
+            ],
             'tools' => [
                 'href' => 'admin.php?tab=tools',
                 'tab_label' => 'Diagnostika',

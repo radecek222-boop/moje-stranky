@@ -258,10 +258,21 @@ function stopAutoRefresh() {
 function initSearch() {
   const searchInput = document.getElementById('searchInput');
   const searchClear = document.getElementById('searchClear');
-  
+
+  // Načíst vyhledávací dotaz z URL parametru (pro přesměrování z admin zákazníků)
+  const urlParams = new URLSearchParams(window.location.search);
+  const searchParam = urlParams.get('search');
+  if (searchParam) {
+    searchInput.value = searchParam;
+    SEARCH_QUERY = searchParam.trim().toLowerCase();
+    searchClear.classList.add('visible');
+    // Vyčistit URL (odstranit ?search= parametr)
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
   searchInput.addEventListener('input', (e) => {
     SEARCH_QUERY = e.target.value.trim().toLowerCase();
-    
+
     searchClear.classList.toggle('visible', SEARCH_QUERY.length > 0);
 
     let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
