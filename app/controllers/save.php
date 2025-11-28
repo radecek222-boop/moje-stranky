@@ -10,6 +10,13 @@ require_once __DIR__ . '/../../includes/db_metadata.php';
 require_once __DIR__ . '/../../includes/email_domain_validator.php';
 require_once __DIR__ . '/../../includes/rate_limiter.php';
 
+// Helper pro timing logy - pouze v development rezimu
+function logTiming(string $message): void {
+    if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
+        error_log($message);
+    }
+}
+
 /**
  * Generuje unikátní ID pro reklamaci ve formátu WGSyymmdd-XXXXXX
  *
@@ -140,7 +147,7 @@ function handleUpdate(PDO $pdo, array $input): array
 {
     // PERFORMANCE: Backend timing
     $t0 = microtime(true);
-    error_log("[TIMING] handleUpdate START");
+    logTiming("[TIMING] handleUpdate START");
 
     $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
     $userId = $_SESSION['user_id'] ?? null;
@@ -361,7 +368,7 @@ function handleUpdate(PDO $pdo, array $input): array
  */
 function handleReopen(PDO $pdo, array $input): array
 {
-    error_log("[TIMING] handleReopen START");
+    logTiming("[TIMING] handleReopen START");
     $t0 = microtime(true);
 
     // Kontrola oprávnění

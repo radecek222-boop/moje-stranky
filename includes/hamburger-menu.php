@@ -327,7 +327,7 @@ function toggleMenu() {
       hamburger.classList.toggle('active');
       hamburger.setAttribute('aria-expanded', !isActive);
       if (!isActive) {
-        // ✅ Otevírání - zamknout scroll (iOS fix)
+        // Otevirani - zamknout scroll (iOS fix)
         window.mainMenuScrollPosition = window.pageYOffset;
         document.body.style.position = 'fixed';
         document.body.style.top = `-${window.mainMenuScrollPosition}px`;
@@ -336,7 +336,7 @@ function toggleMenu() {
         document.body.style.right = '0';
         document.body.classList.add('hamburger-menu-open');
       } else {
-        // ✅ Zavírání - obnovit scroll
+        // Zavirani - obnovit scroll
         document.body.classList.remove('hamburger-menu-open');
         document.body.style.position = '';
         document.body.style.top = '';
@@ -357,7 +357,7 @@ function closeMenu() {
       hamburger.setAttribute('aria-expanded', 'false');
       document.body.classList.remove('hamburger-menu-open');
 
-      // ✅ Obnovit scroll (iOS fix)
+      // Obnovit scroll (iOS fix)
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
@@ -575,5 +575,5 @@ function closeMenu() {
 <script src="/assets/js/translations.js"></script>
 <!-- Language Switcher - centralizovaný jazykový přepínač -->
 <script src="/assets/js/language-switcher.js" defer></script>
-<!-- ✅ KRITICKÁ OPRAVA: logout-handler.js MUSÍ být zde, protože hamburger-menu se načítá VŠUDE! -->
+<!-- KRITICKA OPRAVA: logout-handler.js MUSI byt zde, protoze hamburger-menu se nacita VSUDE! -->
 <script src="/assets/js/logout-handler.js"></script>
