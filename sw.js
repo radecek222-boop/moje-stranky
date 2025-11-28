@@ -4,7 +4,7 @@
  */
 
 // VERZE - ZMĚŇ PŘI KAŽDÉM RELEASU!
-const SW_VERSION = '2025.11.27.001';
+const SW_VERSION = '2025.11.28.001';
 const CACHE_NAME = `wgs-cache-${SW_VERSION}`;
 
 // Soubory k cachování (základní shell)
@@ -13,6 +13,16 @@ const STATIC_ASSETS = [
   '/assets/css/offline.css',
   '/icon192.png',
   '/icon512.png'
+];
+
+// FIX: Stranky ktere se NIKDY nesmi cachovat (obsahuji CSRF tokeny)
+// Tyto stranky musi vzdy jit primo na server pro cerstva data
+const NEVER_CACHE_PAGES = [
+  '/login.php',
+  '/registration.php',
+  '/password_reset.php',
+  '/app/controllers/get_csrf_token.php',
+  '/app/controllers/login_controller.php'
 ];
 
 // Instalace - cachovat základní soubory
@@ -79,6 +89,23 @@ self.addEventListener('fetch', (event) => {
 
   // Ignorovat external requesty (API, CDN)
   if (!url.origin.includes(self.location.origin)) {
+    return;
+  }
+
+  // FIX: Stranky s CSRF tokeny - VZDY network only, NIKDY cache
+  // Reseni problemu "Neplatny CSRF token" pri prvnim prihlaseni z PWA
+  const jeNevercachePage = NEVER_CACHE_PAGES.some(stranka => url.pathname.endsWith(stranka));
+  if (jeNevercachePage) {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          // Pokud jsme offline a jde o login, ukazat offline stranku
+          if (url.pathname.endsWith('.php')) {
+            return caches.match('/offline.php');
+          }
+          return new Response('Offline', { status: 503 });
+        })
+    );
     return;
   }
 

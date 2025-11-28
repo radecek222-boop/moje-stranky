@@ -11,28 +11,26 @@ const loginForm = document.getElementById('loginForm');
 async function getCsrfTokenFromForm(form, maxRetries = 3) {
   if (!form) return null;
 
-  // Zkusit získat token z již existujícího inputu
   const tokenInput = form.querySelector('input[name="csrf_token"]');
-  if (tokenInput && tokenInput.value) {
-    logger.log('[List] CSRF token nalezen v formuláři');
-    return tokenInput.value;
-  }
 
+  // FIX: VZDY fetchovat cerstvy token z API (reseni PWA cache problemu)
+  // Token v HTML muze byt stary z PWA cache a neodpovida aktualni session
   // Pokusit se získat token z API s retry mechanikou
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      logger.log(`[CSRF] Získávám token (pokus ${attempt}/${maxRetries})...`);
+      logger.log(`[CSRF] Ziskavam CERSTVY token (pokus ${attempt}/${maxRetries})...`);
 
       const response = await fetch('app/controllers/get_csrf_token.php', {
         method: 'GET',
         credentials: 'same-origin',
         headers: {
-          'Cache-Control': 'no-cache'
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
         }
       });
 
       if (!response.ok) {
-        logger.warn(`[CSRF] API vrátilo ${response.status}`);
+        logger.warn(`[CSRF] API vratilo ${response.status}`);
         if (attempt < maxRetries) {
           await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
           continue;
@@ -43,29 +41,35 @@ async function getCsrfTokenFromForm(form, maxRetries = 3) {
       const data = await response.json();
 
       if ((data.status === 'success' || data.success === true) && data.token) {
-        logger.log('[CSRF] Token úspěšně získán');
+        logger.log('[CSRF] Cerstvy token uspesne ziskan');
 
-        // Uložit token do formuláře pro další použití
+        // Aktualizovat token ve formulari
         if (tokenInput) {
           tokenInput.value = data.token;
         }
 
         return data.token;
       } else {
-        logger.warn('[CSRF] API nevrátilo platný token:', data);
+        logger.warn('[CSRF] API nevratilo platny token:', data);
       }
 
     } catch (error) {
       logger.error(`[CSRF] Fetch pokus ${attempt} selhal:`, error);
 
       if (attempt < maxRetries) {
-        // Exponenciální backoff: 1s, 2s, 3s
+        // Exponencialni backoff: 1s, 2s, 3s
         await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
       }
     }
   }
 
-  logger.error('[CSRF] Nepodařilo se získat token po ' + maxRetries + ' pokusech');
+  // Fallback: pokud API selhalo, zkusit token z formulare (lepsi nez nic)
+  if (tokenInput && tokenInput.value) {
+    logger.warn('[CSRF] Pouzivam token z formulare jako fallback (API selhalo)');
+    return tokenInput.value;
+  }
+
+  logger.error('[CSRF] Nepodarilo se ziskat token po ' + maxRetries + ' pokusech');
   return null;
 }
 
