@@ -1,8 +1,8 @@
 <?php
 /**
- * Migrace: Oprava kolace tabulky wgs_push_subscriptions
+ * Migrace: Sjednoceni kolace tabulek na utf8mb4_unicode_ci
  *
- * Zmeni kolaci na utf8mb4_czech_ci aby odpovidala ostatnim tabulkam.
+ * Sjednoti kolaci vsech tabulek podle wgs_users (utf8mb4_unicode_ci).
  * Resi chybu: "Illegal mix of collations (utf8mb4_czech_ci) and (utf8mb4_unicode_ci)"
  */
 
@@ -17,7 +17,7 @@ echo "<!DOCTYPE html>
 <html lang='cs'>
 <head>
     <meta charset='UTF-8'>
-    <title>Migrace: Oprava kolace</title>
+    <title>Migrace: Sjednoceni kolace</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; max-width: 900px;
                margin: 50px auto; padding: 20px; background: #f5f5f5; }
@@ -49,24 +49,36 @@ echo "<!DOCTYPE html>
 <body>
 <div class='container'>";
 
+// Cilova kolace - stejna jako wgs_users
+$cilovaKolace = 'utf8mb4_unicode_ci';
+
 try {
     $pdo = getDbConnection();
 
-    echo "<h1>Migrace: Oprava kolace tabulek</h1>";
-    echo "<p>Zmeni kolaci tabulek na <code>utf8mb4_czech_ci</code> aby odpovidala ostatnim tabulkam.</p>";
+    echo "<h1>Migrace: Sjednoceni kolace tabulek</h1>";
+    echo "<p>Sjednoti kolaci vsech tabulek na <code>{$cilovaKolace}</code> (stejna jako wgs_users).</p>";
 
-    // Tabulky k oprave
+    // Tabulky k oprave - vsechny push-related tabulky
     $tabulky = [
         'wgs_push_subscriptions',
         'wgs_push_log',
-        'wgs_notes_read'
+        'wgs_notes_read',
+        'wgs_notes'
     ];
 
+    // Zjistit kolaci wgs_users
+    echo "<h3>Referencni tabulka wgs_users:</h3>";
+    $stmt = $pdo->query("SHOW TABLE STATUS WHERE Name = 'wgs_users'");
+    $status = $stmt->fetch(PDO::FETCH_ASSOC);
+    $usersKolace = $status['Collation'] ?? 'neznama';
+    echo "<pre>Kolace: " . htmlspecialchars($usersKolace) . "</pre>";
+
     // Kontrola aktualni kolace
-    echo "<h3>Aktualni stav:</h3>";
+    echo "<h3>Aktualni stav tabulek:</h3>";
     echo "<table><tr><th>Tabulka</th><th>Aktualni kolace</th><th>Stav</th></tr>";
 
     $potrebaOpravy = false;
+    $tabulkyKOprave = [];
 
     foreach ($tabulky as $tabulka) {
         // Zkontrolovat jestli tabulka existuje
@@ -81,21 +93,16 @@ try {
         $status = $stmt->fetch(PDO::FETCH_ASSOC);
         $kolace = $status['Collation'] ?? 'neznama';
 
-        if (stripos($kolace, 'czech') === false) {
+        if ($kolace !== $cilovaKolace) {
             echo "<tr><td>{$tabulka}</td><td>{$kolace}</td><td style='color:#c00;font-weight:bold;'>POTREBUJE OPRAVU</td></tr>";
             $potrebaOpravy = true;
+            $tabulkyKOprave[] = $tabulka;
         } else {
             echo "<tr><td>{$tabulka}</td><td>{$kolace}</td><td style='color:#080;'>OK</td></tr>";
         }
     }
 
     echo "</table>";
-
-    // Zkontrolovat take wgs_users pro porovnani
-    echo "<h3>Referencni tabulka wgs_users:</h3>";
-    $stmt = $pdo->query("SHOW TABLE STATUS WHERE Name = 'wgs_users'");
-    $status = $stmt->fetch(PDO::FETCH_ASSOC);
-    echo "<pre>Kolace: " . htmlspecialchars($status['Collation'] ?? 'neznama') . "</pre>";
 
     // Spustit migraci
     if (isset($_GET['execute']) && $_GET['execute'] === '1') {
@@ -105,28 +112,13 @@ try {
         } else {
             echo "<h3>Provadim migraci:</h3>";
 
-            foreach ($tabulky as $tabulka) {
-                // Zkontrolovat jestli tabulka existuje
-                $stmt = $pdo->query("SHOW TABLES LIKE '{$tabulka}'");
-                if ($stmt->rowCount() === 0) {
-                    continue;
-                }
-
-                // Zjistit kolaci
-                $stmt = $pdo->query("SHOW TABLE STATUS WHERE Name = '{$tabulka}'");
-                $status = $stmt->fetch(PDO::FETCH_ASSOC);
-                $kolace = $status['Collation'] ?? '';
-
-                if (stripos($kolace, 'czech') !== false) {
-                    continue; // Uz je spravne
-                }
-
-                $sql = "ALTER TABLE {$tabulka} CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_czech_ci";
+            foreach ($tabulkyKOprave as $tabulka) {
+                $sql = "ALTER TABLE {$tabulka} CONVERT TO CHARACTER SET utf8mb4 COLLATE {$cilovaKolace}";
                 echo "<pre>{$sql}</pre>";
 
                 try {
                     $pdo->exec($sql);
-                    echo "<div class='success'>OK: {$tabulka} zmenena na utf8mb4_czech_ci</div>";
+                    echo "<div class='success'>OK: {$tabulka} zmenena na {$cilovaKolace}</div>";
                 } catch (Exception $e) {
                     echo "<div class='error'>CHYBA: " . htmlspecialchars($e->getMessage()) . "</div>";
                 }
@@ -138,8 +130,8 @@ try {
 
     } else {
         if ($potrebaOpravy) {
-            echo "<div class='warning'><strong>Nalezeny tabulky s jinou kolaci!</strong> Kliknete na tlacitko pro opravu.</div>";
-            echo "<a href='?execute=1' class='btn'>SPUSTIT OPRAVU KOLACE</a>";
+            echo "<div class='warning'><strong>Nalezeny tabulky s jinou kolaci!</strong> Kliknete na tlacitko pro sjednoceni.</div>";
+            echo "<a href='?execute=1' class='btn'>SJEDNOTIT KOLACI</a>";
         } else {
             echo "<div class='success'>Vsechny tabulky jsou v poradku.</div>";
         }
