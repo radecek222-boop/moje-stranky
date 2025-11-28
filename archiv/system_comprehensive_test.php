@@ -11,7 +11,6 @@
  *
  * @version 1.0.0
  * @date 2025-11-23
- * @author Claude AI
  */
 
 require_once __DIR__ . '/init.php';

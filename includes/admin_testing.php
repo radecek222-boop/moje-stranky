@@ -329,7 +329,7 @@ $pdo = getDbConnection();
             <div class="result-title">Některé testy selhaly</div>
             <div class="result-desc">Test data NEBYLA smazána. Můžete je prohlédnout pro debug.</div>
             <div class="result-actions">
-                <button class="btn btn-danger" onclick="copyResults()">📋 Kopírovat chyby pro Claude</button>
+                <button class="btn btn-danger" onclick="copyResults()">Kopírovat chyby</button>
                 <button class="btn btn-secondary" onclick="viewTestDataInDB()">🔍 Prohlédnout v DB</button>
                 <button class="btn" onclick="cleanupTestData()">🧹 Ručně smazat</button>
             </div>
@@ -567,7 +567,7 @@ ${'-'.repeat(80)}
     report += `\n${'='.repeat(80)}\n`;
 
     navigator.clipboard.writeText(report.trim()).then(() => {
-        alert('✅ Zkopírováno! Vložte CTRL+V do zprávy pro Claude Code');
+        alert('Zkopírováno do schránky');
     });
 }
 
