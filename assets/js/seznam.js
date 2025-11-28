@@ -696,11 +696,16 @@ async function showDetail(recordOrId) {
   let buttonsHtml = '';
   
   if (isCompleted) {
+    // Formátovat datum a čas dokončení
+    const dokoncenoDatum = record.updated_at ? formatDate(record.updated_at) : '—';
+    const dokoncenoData = record.updated_at ? new Date(record.updated_at) : null;
+    const dokoncenoCas = dokoncenoData ? `${dokoncenoData.getHours()}:${String(dokoncenoData.getMinutes()).padStart(2, '0')}` : '—';
+
     buttonsHtml = `
       <div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 0.75rem; margin-bottom: 1rem; border-radius: 4px;">
         <div style="text-align: center;">
           <div style="font-size: 0.9rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem;">Zakázka dokončena</div>
-          <div style="font-size: 0.75rem; color: #666;">Tato zakázka byla již vyřízena</div>
+          <div style="font-size: 0.75rem; color: #666;">Tato zakázka byla již vyřízena dne ${dokoncenoDatum} v ${dokoncenoCas} hod</div>
         </div>
       </div>
 
@@ -2090,18 +2095,29 @@ function zobrazPDFModal(pdfUrl, claimId) {
 
   // Tlačítka
   const buttonContainer = document.createElement('div');
-  buttonContainer.style.cssText = 'display: flex; gap: 12px; margin-top: 16px; padding: 0 16px;';
+  buttonContainer.style.cssText = 'display: flex; gap: 12px; margin-top: 16px; padding: 0 16px; flex-wrap: wrap; justify-content: center;';
+
+  // Tlačítko Uložit (nové)
+  const btnUlozit = document.createElement('button');
+  btnUlozit.textContent = 'Uložit';
+  btnUlozit.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #555; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 110px; touch-action: manipulation;';
+  btnUlozit.onclick = () => {
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = `PDF_Report_${claimId || 'dokument'}.pdf`;
+    link.click();
+  };
+
+  // Tlačítko Sdílet (původně Odeslat)
+  const btnOdeslat = document.createElement('button');
+  btnOdeslat.textContent = 'Sdílet';
+  btnOdeslat.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 110px; touch-action: manipulation;';
 
   // Tlačítko Zavřít
   const btnZavrit = document.createElement('button');
-  btnZavrit.textContent = 'Zavrit';
-  btnZavrit.style.cssText = 'padding: 12px 32px; font-size: 1rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 120px;';
+  btnZavrit.textContent = 'Zavřít';
+  btnZavrit.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 110px; touch-action: manipulation;';
   btnZavrit.onclick = () => overlay.remove();
-
-  // Tlačítko Odeslat
-  const btnOdeslat = document.createElement('button');
-  btnOdeslat.textContent = 'Odeslat';
-  btnOdeslat.style.cssText = 'padding: 12px 32px; font-size: 1rem; font-weight: 600; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 120px;';
   btnOdeslat.onclick = async () => {
     if (!claimId) {
       alert('Chyba: Chybí ID zakázky');
@@ -2169,12 +2185,13 @@ function zobrazPDFModal(pdfUrl, claimId) {
       console.error('Chyba při odesílání:', error);
       alert('Chyba při odesílání: ' + error.message);
       btnOdeslat.disabled = false;
-      btnOdeslat.textContent = 'Odeslat';
+      btnOdeslat.textContent = 'Sdílet';
     }
   };
 
-  buttonContainer.appendChild(btnZavrit);
+  buttonContainer.appendChild(btnUlozit);
   buttonContainer.appendChild(btnOdeslat);
+  buttonContainer.appendChild(btnZavrit);
 
   overlay.appendChild(pdfContainer);
   overlay.appendChild(buttonContainer);
