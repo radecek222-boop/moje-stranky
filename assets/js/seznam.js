@@ -2621,8 +2621,8 @@ async function saveNewNote(orderId) {
   try {
     await addNote(orderId, text);
 
-    const record = CURRENT_RECORD;
-    await showNotes(record);
+    // Zavrit modal po uspesnem pridani poznamky
+    closeNotesModal();
 
     await loadAll(ACTIVE_FILTER);
 
