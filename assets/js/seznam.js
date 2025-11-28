@@ -2457,7 +2457,7 @@ async function getNotes(orderId) {
   }
 }
 
-async function addNote(orderId, text) {
+async function addNote(orderId, text, audioBlob = null) {
   try {
     const record = WGS_DATA_CACHE.find(x => x.id == orderId || x.reklamace_id == orderId);
     if (!record) {
@@ -2473,6 +2473,19 @@ async function addNote(orderId, text) {
     formData.append('reklamace_id', reklamaceId);
     formData.append('text', text.trim());
     formData.append('csrf_token', csrfToken);
+
+    // Pridat audio pokud existuje
+    if (audioBlob) {
+      // Urcit priponu podle MIME typu
+      let ext = 'webm';
+      if (audioBlob.type.includes('mp4')) ext = 'm4a';
+      else if (audioBlob.type.includes('ogg')) ext = 'ogg';
+      else if (audioBlob.type.includes('mp3') || audioBlob.type.includes('mpeg')) ext = 'mp3';
+      else if (audioBlob.type.includes('wav')) ext = 'wav';
+
+      formData.append('audio', audioBlob, `nahravka.${ext}`);
+      logger.log('[Audio] Odesilam nahravku:', Math.round(audioBlob.size / 1024), 'KB');
+    }
 
     const response = await fetch('api/notes_api.php', {
       method: 'POST',
@@ -2593,14 +2606,25 @@ async function showNotes(recordOrId) {
         ${notes.length > 0
           ? notes.map(note => {
               const canDelete = CURRENT_USER && (CURRENT_USER.is_admin || note.author === CURRENT_USER.email);
+              const hasAudio = note.has_audio && note.audio_url;
+              const isVoiceNote = note.text === '[Hlasová poznámka]' || note.text === '[Hlasova poznamka]';
               return `
-              <div class="note-item ${note.read ? '' : 'unread'}" data-note-id="${note.id}">
+              <div class="note-item ${note.read ? '' : 'unread'} ${hasAudio ? 'has-audio' : ''}" data-note-id="${note.id}">
                 <div class="note-header">
                   <span class="note-author">${note.author_name || note.author}</span>
                   <span class="note-time">${formatDateTime(note.timestamp)}</span>
                   ${canDelete ? `<button class="note-delete-btn" data-action="deleteNote" data-note-id="${note.id}" data-order-id="${record.id}" title="Smazat poznamku">x</button>` : ''}
                 </div>
-                <div class="note-text">${Utils.escapeHtml(note.text)}</div>
+                ${!isVoiceNote ? `<div class="note-text">${Utils.escapeHtml(note.text)}</div>` : ''}
+                ${hasAudio ? `
+                <div class="note-audio">
+                  <audio controls preload="metadata" class="note-audio-player">
+                    <source src="${note.audio_url}" type="audio/webm">
+                    <source src="${note.audio_url}" type="audio/mpeg">
+                    Vas prohlizec nepodporuje prehravani audia.
+                  </audio>
+                </div>
+                ` : ''}
               </div>
             `;
             }).join('')
@@ -2612,14 +2636,31 @@ async function showNotes(recordOrId) {
         <textarea
           class="note-textarea"
           id="newNoteText"
-          placeholder="Napište poznámku..."
+          placeholder="Napiste poznamku..."
         ></textarea>
+        <div class="note-audio-controls">
+          <button type="button" class="btn-record" id="btnStartRecord" data-action="startRecording" data-id="${record.id}" title="Nahrat hlasovou zpravu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+            </svg>
+          </button>
+          <div class="recording-indicator" id="recordingIndicator" style="display: none;">
+            <span class="recording-dot"></span>
+            <span class="recording-time" id="recordingTime">0:00</span>
+            <button type="button" class="btn-stop-record" id="btnStopRecord" data-action="stopRecording" data-id="${record.id}">Stop</button>
+          </div>
+          <div class="audio-preview" id="audioPreview" style="display: none;">
+            <audio id="audioPreviewPlayer" controls></audio>
+            <button type="button" class="btn-delete-audio" id="btnDeleteAudio" data-action="deleteAudioPreview" title="Smazat nahravku">x</button>
+          </div>
+        </div>
       </div>
     </div>
 
     ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="closeNotesModal">Zavřít</button>',
-      '<button class="btn btn-success" data-action="saveNewNote" data-id="' + record.id + '">Přidat poznámku</button>'
+      '<button class="btn btn-secondary" data-action="closeNotesModal">Zavrit</button>',
+      '<button class="btn btn-success" data-action="saveNewNote" data-id="' + record.id + '">Pridat poznamku</button>'
     ])}
   `;
 
@@ -2638,14 +2679,22 @@ async function showNotes(recordOrId) {
 async function saveNewNote(orderId) {
   const textarea = document.getElementById('newNoteText');
   const text = textarea.value.trim();
+  const audioBlob = window.wgsAudioRecorder ? window.wgsAudioRecorder.audioBlob : null;
 
-  if (!text) {
+  // Musi byt text NEBO audio
+  if (!text && !audioBlob) {
     alert(t('write_note_text'));
     return;
   }
 
   try {
-    await addNote(orderId, text);
+    await addNote(orderId, text, audioBlob);
+
+    // Vycistit audio recorder
+    if (window.wgsAudioRecorder) {
+      window.wgsAudioRecorder.audioBlob = null;
+      window.wgsAudioRecorder.audioChunks = [];
+    }
 
     // Zavrit modal po uspesnem pridani poznamky
     closeNotesModal();
@@ -2662,8 +2711,151 @@ async function saveNewNote(orderId) {
 }
 
 function closeNotesModal() {
+  // Zastavit nahravani pokud probiha
+  if (window.wgsAudioRecorder && window.wgsAudioRecorder.isRecording) {
+    stopRecording();
+  }
   closeDetail();
   renderOrders();
+}
+
+// ========================================
+// AUDIO NAHRAVANI - Hlasove poznamky
+// ========================================
+window.wgsAudioRecorder = {
+  mediaRecorder: null,
+  audioChunks: [],
+  audioBlob: null,
+  isRecording: false,
+  recordingStartTime: null,
+  recordingTimer: null
+};
+
+async function startRecording(orderId) {
+  logger.log('[Audio] Spoustim nahravani...');
+
+  try {
+    // Zkontrolovat podporu
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('Vas prohlizec nepodporuje nahravani zvuku');
+    }
+
+    // Pozadat o pristup k mikrofonu
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    // Vybrat podporovany format
+    let mimeType = 'audio/webm';
+    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+      mimeType = 'audio/webm;codecs=opus';
+    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+      mimeType = 'audio/mp4';
+    } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
+      mimeType = 'audio/ogg';
+    }
+
+    logger.log('[Audio] Pouzivam format:', mimeType);
+
+    const recorder = window.wgsAudioRecorder;
+    recorder.mediaRecorder = new MediaRecorder(stream, { mimeType });
+    recorder.audioChunks = [];
+    recorder.isRecording = true;
+    recorder.recordingStartTime = Date.now();
+
+    // Sbírat data
+    recorder.mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) {
+        recorder.audioChunks.push(e.data);
+      }
+    };
+
+    // Po ukonceni nahravani
+    recorder.mediaRecorder.onstop = () => {
+      recorder.audioBlob = new Blob(recorder.audioChunks, { type: mimeType });
+      recorder.isRecording = false;
+
+      // Zastavit stream
+      stream.getTracks().forEach(track => track.stop());
+
+      // Zobrazit nahled
+      showAudioPreview(recorder.audioBlob);
+    };
+
+    // Spustit nahravani
+    recorder.mediaRecorder.start();
+
+    // Aktualizovat UI
+    document.getElementById('btnStartRecord').style.display = 'none';
+    document.getElementById('recordingIndicator').style.display = 'flex';
+
+    // Casovac
+    recorder.recordingTimer = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - recorder.recordingStartTime) / 1000);
+      const mins = Math.floor(elapsed / 60);
+      const secs = elapsed % 60;
+      document.getElementById('recordingTime').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+    }, 1000);
+
+    logger.log('[Audio] Nahravani spusteno');
+
+  } catch (err) {
+    logger.error('[Audio] Chyba pri nahravani:', err);
+
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      alert('Pristup k mikrofonu byl odepren. Povolte pristup v nastaveni prohlizece.');
+    } else {
+      alert('Chyba pri nahravani: ' + err.message);
+    }
+  }
+}
+
+function stopRecording() {
+  logger.log('[Audio] Zastavuji nahravani...');
+
+  const recorder = window.wgsAudioRecorder;
+
+  if (recorder.mediaRecorder && recorder.isRecording) {
+    recorder.mediaRecorder.stop();
+  }
+
+  // Zastavit casovac
+  if (recorder.recordingTimer) {
+    clearInterval(recorder.recordingTimer);
+    recorder.recordingTimer = null;
+  }
+
+  // Aktualizovat UI
+  document.getElementById('recordingIndicator').style.display = 'none';
+  document.getElementById('btnStartRecord').style.display = 'block';
+}
+
+function showAudioPreview(audioBlob) {
+  const audioUrl = URL.createObjectURL(audioBlob);
+  const previewPlayer = document.getElementById('audioPreviewPlayer');
+  const previewContainer = document.getElementById('audioPreview');
+
+  previewPlayer.src = audioUrl;
+  previewContainer.style.display = 'flex';
+
+  logger.log('[Audio] Nahled zobrazen, velikost:', Math.round(audioBlob.size / 1024), 'KB');
+}
+
+function deleteAudioPreview() {
+  const recorder = window.wgsAudioRecorder;
+  recorder.audioBlob = null;
+  recorder.audioChunks = [];
+
+  const previewPlayer = document.getElementById('audioPreviewPlayer');
+  const previewContainer = document.getElementById('audioPreview');
+
+  if (previewPlayer.src) {
+    URL.revokeObjectURL(previewPlayer.src);
+    previewPlayer.src = '';
+  }
+
+  previewContainer.style.display = 'none';
+  document.getElementById('btnStartRecord').style.display = 'block';
+
+  logger.log('[Audio] Nahled smazan');
 }
 
 function formatDateTime(isoString) {
@@ -4000,6 +4192,27 @@ document.addEventListener('click', (e) => {
       if (noteId && typeof deleteNote === 'function') {
         e.stopPropagation();
         deleteNote(noteId, orderId);
+      }
+      break;
+
+    case 'startRecording':
+      if (id && typeof startRecording === 'function') {
+        e.stopPropagation();
+        startRecording(id);
+      }
+      break;
+
+    case 'stopRecording':
+      if (typeof stopRecording === 'function') {
+        e.stopPropagation();
+        stopRecording();
+      }
+      break;
+
+    case 'deleteAudioPreview':
+      if (typeof deleteAudioPreview === 'function') {
+        e.stopPropagation();
+        deleteAudioPreview();
       }
       break;
 
