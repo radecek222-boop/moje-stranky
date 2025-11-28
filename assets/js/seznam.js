@@ -766,7 +766,7 @@ async function showDetail(recordOrId) {
           <!-- Nedokončená zakázka s historií - přidat Historie PDF -->
           <button class="btn" style="background: #555; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;"
                   data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">
-            📚 Historie PDF
+            Historie PDF
           </button>
         ` : ''}
 
