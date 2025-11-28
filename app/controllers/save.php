@@ -485,11 +485,7 @@ function handleReopen(PDO $pdo, array $input): array
         $newId = $pdo->lastInsertId();
 
         // Přidat poznámku do nové zakázky
-        $noteTextNew = "Zakázka otevřena jako klon původní zakázky\n\n" .
-                       "Původní zakázka: " . ($original['reklamace_id'] ?? $original['id']) . "\n" .
-                       "Stav: NOVÁ (čeká na zpracování)\n" .
-                       "Vytvořil: " . ($_SESSION['user_name'] ?? 'Uživatel') . "\n" .
-                       "Datum: " . date('d.m.Y H:i');
+        $noteTextNew = "Zakázka " . ($original['reklamace_id'] ?? $original['id']) . " byla znovu otevřena! " . ($_SESSION['user_name'] ?? 'Uživatel');
 
         $stmtNote = $pdo->prepare("
             INSERT INTO wgs_notes (claim_id, note_text, created_by, created_at)
