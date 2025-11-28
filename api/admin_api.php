@@ -158,21 +158,9 @@ try {
             handleListKeys($pdo);
             break;
 
-        case 'get_invitation_template':
-            handleGetInvitationTemplate($pdo);
-            break;
-
-        case 'save_invitation_template':
-            handleSaveInvitationTemplate($pdo, $payload);
-            break;
-
-        case 'get_invitation_texts':
-            handleGetInvitationTexts($pdo);
-            break;
-
-        case 'save_invitation_texts':
-            handleSaveInvitationTexts($pdo, $payload);
-            break;
+        // Pozvanky nyni pouzivaji sablony z wgs_notifications
+        // (invitation_prodejce, invitation_technik)
+        // Editace sablon je v karce "Email sablony"
 
         default:
             respondError('Neznámá akce.', 400);
@@ -981,7 +969,7 @@ function handleSendInvitations(PDO $pdo, array $payload): void
         throw new InvalidArgumentException('Neplatny typ pozvanky');
     }
 
-    // Validace emailů
+    // Validace emailu
     if (!is_array($emaily) || count($emaily) === 0) {
         throw new InvalidArgumentException('Zadejte alespon jeden email');
     }
@@ -1003,10 +991,10 @@ function handleSendInvitations(PDO $pdo, array $payload): void
         throw new InvalidArgumentException('Zadny z emailu neni platny');
     }
 
-    // Získat nebo vytvořit klíč
+    // Ziskat nebo vytvorit klic
     $pouzityKlic = '';
     if ($klic === 'auto' || $klic === '') {
-        // Vytvořit nový klíč
+        // Vytvorit novy klic
         $prefix = strtoupper(substr($typ, 0, 3));
         $pouzityKlic = generateRegistrationKey($prefix);
 
@@ -1019,7 +1007,7 @@ function handleSendInvitations(PDO $pdo, array $payload): void
             ':key_type' => $typ
         ]);
     } else {
-        // Ověřit že klíč existuje a je aktivní
+        // Overit ze klic existuje a je aktivni
         $stmt = $pdo->prepare('SELECT key_code, key_type, is_active FROM wgs_registration_keys WHERE key_code = :klic');
         $stmt->execute([':klic' => $klic]);
         $klicData = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -1034,37 +1022,43 @@ function handleSendInvitations(PDO $pdo, array $payload): void
         $pouzityKlic = $klicData['key_code'];
     }
 
-    // Připravit email šablonu
+    // ============================================
+    // NACIST SABLONU Z WGS_NOTIFICATIONS
+    // ============================================
+    $notificationId = 'invitation_' . $typ; // invitation_prodejce nebo invitation_technik
+
+    $stmt = $pdo->prepare("
+        SELECT subject, template FROM wgs_notifications
+        WHERE id = :id AND active = 1
+        LIMIT 1
+    ");
+    $stmt->execute(['id' => $notificationId]);
+    $sablona = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$sablona) {
+        throw new InvalidArgumentException('Sablona pozvanky nenalezena: ' . $notificationId . '. Spustte migraci add_invitation_templates.sql');
+    }
+
+    // Pripravit promenne pro nahrazeni
     $appUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'www.wgs-service.cz');
-    $rok = date('Y');
 
-    // Načíst vlastní texty z databáze
-    $vlastniTexty = null;
-    try {
-        $stmtTexty = $pdo->prepare("
-            SELECT config_value FROM wgs_system_config
-            WHERE config_key = 'invitation_template_texts' LIMIT 1
-        ");
-        $stmtTexty->execute();
-        $resultTexty = $stmtTexty->fetch(PDO::FETCH_ASSOC);
-        if ($resultTexty && !empty($resultTexty['config_value'])) {
-            $vlastniTexty = json_decode($resultTexty['config_value'], true);
-        }
-    } catch (PDOException $e) {
-        error_log("Chyba nacitani textu pro pozvanku: " . $e->getMessage());
+    // Nahradit promenne v sablone
+    $predmet = $sablona['subject'];
+    $telo = $sablona['template'];
+
+    $nahrazeni = [
+        '{{registration_key}}' => $pouzityKlic,
+        '{{app_url}}' => $appUrl
+    ];
+
+    foreach ($nahrazeni as $promenna => $hodnota) {
+        $predmet = str_replace($promenna, $hodnota, $predmet);
+        $telo = str_replace($promenna, $hodnota, $telo);
     }
 
-    // Předmět emailu - z vlastních textů nebo výchozí
-    $roleNazev = $typ === 'technik' ? 'Servisni technik' : 'Prodejce';
-    if ($vlastniTexty && !empty($vlastniTexty['predmetEmailu'])) {
-        $predmet = str_replace('{ROLE}', $roleNazev, $vlastniTexty['predmetEmailu']);
-    } else {
-        $predmet = 'Pozvanka do systemu WGS - ' . $roleNazev;
-    }
-
-    $htmlSablona = vytvorPozvankovouSablonu($typ, $pouzityKlic, $appUrl, $rok, $vlastniTexty);
-
-    // Odeslat emaily primo pres PHPMailer
+    // ============================================
+    // ODESLAT EMAILY
+    // ============================================
     require_once __DIR__ . '/../includes/EmailQueue.php';
     $emailQueue = new EmailQueue($pdo);
 
@@ -1073,12 +1067,11 @@ function handleSendInvitations(PDO $pdo, array $payload): void
 
     foreach ($platneEmaily as $email) {
         try {
-            // Odeslat primo (ne do fronty)
             $queueItem = [
                 'recipient_email' => $email,
                 'recipient_name' => null,
                 'subject' => $predmet,
-                'body' => $htmlSablona
+                'body' => $telo
             ];
 
             $result = $emailQueue->sendEmail($queueItem);
@@ -1102,310 +1095,9 @@ function handleSendInvitations(PDO $pdo, array $payload): void
     ]);
 }
 
-/**
- * Načíst uložená nastavení šablony pozvánky
- */
-function handleGetInvitationTemplate(PDO $pdo): void
-{
-    // Výchozí nastavení
-    $vychoziNastaveni = [
-        'datumSpusteni' => '1. ledna 2026',
-        'telefonPodpora' => '+420 725 965 826',
-        'emailPodpora' => 'info@wgs-service.cz',
-        'textSkoleni' => 'Radi vas proskolime po telefonu nebo osobne. Staci se nam ozvat a domluvime se.',
-        'dobaSkoleni' => '15-30 minut',
-        'nazevFirmy' => 'White Glove Service',
-        'popisFirmy' => 'Autorizovany servis Natuzzi pro CR a SR',
-        'webFirmy' => 'www.wgs-service.cz'
-    ];
-
-    try {
-        // Zkusit načíst z databáze
-        $stmt = $pdo->prepare("
-            SELECT config_value
-            FROM wgs_system_config
-            WHERE config_key = 'invitation_template_settings'
-            LIMIT 1
-        ");
-        $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($result && !empty($result['config_value'])) {
-            $ulozeneNastaveni = json_decode($result['config_value'], true);
-            if (is_array($ulozeneNastaveni)) {
-                // Sloučit s výchozími (pro případ nových polí)
-                $nastaveni = array_merge($vychoziNastaveni, $ulozeneNastaveni);
-                respondSuccess(['settings' => $nastaveni, 'source' => 'database']);
-                return;
-            }
-        }
-    } catch (PDOException $e) {
-        error_log("Chyba načítání nastavení šablony: " . $e->getMessage());
-    }
-
-    // Vrátit výchozí nastavení
-    respondSuccess(['settings' => $vychoziNastaveni, 'source' => 'default']);
-}
-
-/**
- * Uložit nastavení šablony pozvánky
- */
-function handleSaveInvitationTemplate(PDO $pdo, array $payload): void
-{
-    $nastaveni = $payload['settings'] ?? null;
-
-    if (!is_array($nastaveni)) {
-        respondError('Chybí nastavení šablony.');
-        return;
-    }
-
-    // Validace povolených polí
-    $povolenaPole = [
-        'datumSpusteni',
-        'telefonPodpora',
-        'emailPodpora',
-        'textSkoleni',
-        'dobaSkoleni',
-        'nazevFirmy',
-        'popisFirmy',
-        'webFirmy'
-    ];
-
-    $filtrovanaNastaveni = [];
-    foreach ($povolenaPole as $pole) {
-        if (isset($nastaveni[$pole])) {
-            $filtrovanaNastaveni[$pole] = trim((string)$nastaveni[$pole]);
-        }
-    }
-
-    $jsonNastaveni = json_encode($filtrovanaNastaveni, JSON_UNESCAPED_UNICODE);
-
-    try {
-        // Zkusit UPDATE, pokud neexistuje, tak INSERT
-        $stmt = $pdo->prepare("
-            INSERT INTO wgs_system_config (config_key, config_value, config_type, updated_at)
-            VALUES ('invitation_template_settings', ?, 'json', NOW())
-            ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), updated_at = NOW()
-        ");
-        $stmt->execute([$jsonNastaveni]);
-
-        respondSuccess(['message' => 'Nastavení šablony uloženo.', 'settings' => $filtrovanaNastaveni]);
-
-    } catch (PDOException $e) {
-        error_log("Chyba ukládání nastavení šablony: " . $e->getMessage());
-        respondError('Chyba při ukládání nastavení.');
-    }
-}
-
-/**
- * Vytvořit PLAIN TEXT šablonu pro pozvánku
- * Jednoduché, spolehlivé, žádné problémy s renderováním
- *
- * @param string $typ Typ role (technik/prodejce)
- * @param string $klic Registrační klíč
- * @param string $appUrl URL aplikace
- * @param string $rok Aktuální rok
- * @param array|null $vlastniTexty Vlastní texty z databáze
- * @return string Plain text email
- */
-function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, string $rok, ?array $vlastniTexty = null): string
-{
-    $roleNazev = $typ === 'technik' ? 'Servisni technik' : 'Prodejce';
-    $roleMale = $typ === 'technik' ? 'technik' : 'prodejce';
-
-    // Uvitaci text
-    $uvitani = "Byli jste pozvani jako $roleMale do systemu White Glove Service pro spravu servisnich zakazek Natuzzi.";
-    if ($vlastniTexty && !empty($vlastniTexty['uvitaciText'])) {
-        $uvitani = str_replace('{ROLE}', $roleMale, $vlastniTexty['uvitaciText']);
-        $uvitani = preg_replace('/\*\*([^*]+)\*\*/', '$1', $uvitani); // Odstranit **bold**
-    }
-
-    // Funkce podle role
-    $funkceTxt = '';
-    if ($typ === 'technik') {
-        $funkceList = [
-            'Videt sve prirazene zakazky v prehlednem seznamu',
-            'Menit stav zakazky (Ceka / Domluvena / Hotovo)',
-            'Vyplnovat servisni protokoly s automatickym prekladem',
-            'Nahravat fotky pred a po oprave',
-            'Videt adresu zakaznika na mape s navigaci',
-            'Nechat zakaznika elektronicky podepsat protokol',
-            'Exportovat protokol do PDF a poslat zakaznikovi'
-        ];
-    } else {
-        $funkceList = [
-            'Zadavat nove reklamace pro vase zakazniky',
-            'Sledovat stav vasich zakazek v realnem case',
-            'Videt historii vsech reklamaci ktere jste zadali',
-            'Nahravat dokumenty a fotky k zakazkam',
-            'Pridavat poznamky pro techniky',
-            'Videt kdy technik navstivi zakaznika'
-        ];
-    }
-
-    foreach ($funkceList as $f) {
-        $funkceTxt .= "  - $f\n";
-    }
-
-    $text = "
-================================================================================
-                         WHITE GLOVE SERVICE
-                    Pozvanka do systemu WGS
-================================================================================
-
-Dobry den,
-
-$uvitani
-
---------------------------------------------------------------------------------
-                         VAS REGISTRACNI KLIC
---------------------------------------------------------------------------------
-
-                              $klic
-
-     (Zkopirujte tento klic - budete ho potrebovat pri registraci)
-
---------------------------------------------------------------------------------
-                    JAK SE ZAREGISTROVAT
---------------------------------------------------------------------------------
-
-KROK 1: Otevrete stranku registrace
-        $appUrl/registration.php
-
-KROK 2: Vyplnte formular
-        - Registracni klic: vlozte klic z tohoto emailu
-        - Jmeno a prijmeni: vase cele jmeno
-        - Email: vase emailova adresa
-        - Telefon: vase telefonni cislo
-        - Heslo: vymyslete si heslo (min. 12 znaku)
-
-KROK 3: Prihlaste se
-        $appUrl/login.php
-
---------------------------------------------------------------------------------
-                    CO BUDETE MOCT DELAT V SYSTEMU
---------------------------------------------------------------------------------
-
-$funkceTxt
---------------------------------------------------------------------------------
-                         DULEZITE UPOZORNENI
---------------------------------------------------------------------------------
-
-System bude spusten od 1. ledna 2026.
-Zaregistrujte se prosim predem, abyste byli pripraveni.
-
-Registracni klic je urcen pouze pro vas.
-Prosim, nesdílejte ho s nikym dalsim.
-
---------------------------------------------------------------------------------
-                    POTREBUJETE POMOC?
---------------------------------------------------------------------------------
-
-Radi vas proskolime po telefonu nebo osobne.
-Skoleni je zdarma a trva priblizne 15-30 minut.
-
-Telefon: +420 777 123 456
-Email:   info@wgs-service.cz
-
-================================================================================
-               White Glove Service - Autorizovany servis Natuzzi
-                           www.wgs-service.cz
-                       (c) $rok WGS Service
-================================================================================
-";
-
-    return trim($text);
-}
-
-
-/**
- * Načíst texty šablony pozvánky z databáze
- */
-function handleGetInvitationTexts(PDO $pdo): void
-{
-    // Výchozí texty
-    $vychoziTexty = [
-        'predmetEmailu' => 'Pozvanka do systemu WGS - {ROLE}',
-        'uvitaciText' => 'Byli jste pozvani jako **{ROLE}** do systemu White Glove Service pro spravu servisnich zakazek Natuzzi.',
-        'funkceProdejce' => "Zadavat **nove reklamace** pro vase zakazniky\nSledovat **stav vasich zakazek** v realnem case\nVidet **historii vsech reklamaci** ktere jste zadali\nNahravat **dokumenty a fotky** k zakazkam\nPridavat **poznamky** pro techniky\nVidet kdy technik **navstivi zakaznika**",
-        'funkceTechnik' => "Videt sve **prirazene zakazky** v prehlednem seznamu\nMenit **stav zakazky** (Ceka / Domluvena / Hotovo)\nVyplnovat **servisni protokoly** s automatickym prekladem\nNahravat **fotky pred a po oprave**\nVidet **adresu zakaznika na mape** s navigaci\nNechat zakaznika **elektronicky podepsat** protokol\nExportovat protokol do **PDF** a poslat zakaznikovi",
-        'navodProdejce' => "# JAK OBJEDNAT SERVIS PRO ZAKAZNIKA\n\nPo prihlaseni kliknete na **\"Objednat servis\"** v menu. Formular ma 5 casti:\n\n## 1. ZAKLADNI UDAJE\n- Cislo objednavky/reklamace - vase interni cislo\n- Fakturace - CZ nebo SK\n- Datum prodeje a reklamace\n\n## 2. KONTAKTNI UDAJE\n- Jmeno a prijmeni zakaznika\n- Email a telefon\n\n## 3. ADRESA\n- Ulice, mesto, PSC\n- Po zadani se zobrazi mapa\n\n## 4. PRODUKT\n- Model, provedeni, barva\n\n## 5. PROBLEM\n- Popis zavady + fotky",
-        'navodTechnik' => "# PREHLED VASICH ZAKAZEK\n\nPo prihlaseni uvidite seznam vsech prirazenych zakazek.\n\n## Co vidite na karte:\n- Cislo zakazky (napr. WGS-2025-001)\n- Barevny stav (zluta/modra/zelena)\n- Jmeno a adresa zakaznika\n\n## Filtrovani:\n- Vsechny / Cekajici / V reseni / Vyrizene\n\n# SERVISNI PROTOKOL\n\nProtokol se predvyplni automaticky. Vy doplnite:\n- Problem zjisteny technikem\n- Navrh opravy\n- Uctovani\n\nPo dokonceni nechte zakaznika podepsat a exportujte PDF."
-    ];
-
-    try {
-        // Zkusit načíst z databáze
-        $stmt = $pdo->prepare("
-            SELECT config_value
-            FROM wgs_system_config
-            WHERE config_key = 'invitation_template_texts'
-            LIMIT 1
-        ");
-        $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($result && !empty($result['config_value'])) {
-            $ulozeneTexty = json_decode($result['config_value'], true);
-            if (is_array($ulozeneTexty)) {
-                // Sloučit s výchozími (pro případ nových polí)
-                $texty = array_merge($vychoziTexty, $ulozeneTexty);
-                respondSuccess(['texts' => $texty, 'source' => 'database']);
-                return;
-            }
-        }
-    } catch (PDOException $e) {
-        error_log("Chyba nacitani textu sablony: " . $e->getMessage());
-    }
-
-    // Vrátit výchozí texty
-    respondSuccess(['texts' => $vychoziTexty, 'source' => 'default']);
-}
-
-/**
- * Uložit texty šablony pozvánky
- */
-function handleSaveInvitationTexts(PDO $pdo, array $payload): void
-{
-    $texty = $payload['texts'] ?? null;
-
-    if (!is_array($texty)) {
-        respondError('Chybi texty sablony.');
-        return;
-    }
-
-    // Validace povolených polí
-    $povolenaPole = [
-        'predmetEmailu',
-        'uvitaciText',
-        'funkceProdejce',
-        'funkceTechnik',
-        'navodProdejce',
-        'navodTechnik'
-    ];
-
-    $filtrovanetexty = [];
-    foreach ($povolenaPole as $pole) {
-        if (isset($texty[$pole])) {
-            $filtrovanetexty[$pole] = trim((string)$texty[$pole]);
-        }
-    }
-
-    $jsonTexty = json_encode($filtrovanetexty, JSON_UNESCAPED_UNICODE);
-
-    try {
-        // Upsert - INSERT nebo UPDATE
-        $stmt = $pdo->prepare("
-            INSERT INTO wgs_system_config (config_key, config_value, config_group, updated_at)
-            VALUES ('invitation_template_texts', ?, 'templates', NOW())
-            ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), updated_at = NOW()
-        ");
-        $stmt->execute([$jsonTexty]);
-
-        respondSuccess(['message' => 'Texty sablony ulozeny.', 'texts' => $filtrovanetexty]);
-
-    } catch (PDOException $e) {
-        error_log("Chyba ukladani textu sablony: " . $e->getMessage());
-        respondError('Chyba pri ukladani textu.');
-    }
-}
+// ============================================
+// POZVANKY NYNI POUZIVAJI SABLONY Z WGS_NOTIFICATIONS
+// (invitation_prodejce, invitation_technik)
+// Editace sablon je v karce "Email sablony" v admin panelu
+// ============================================
 
