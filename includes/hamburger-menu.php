@@ -51,7 +51,7 @@ if ($isAdmin) {
     ?>
       <?php if ($isTechnik): ?>
         <!-- Provize technika jako navigační položka - úplně nahoře -->
-        <a href="#" class="tech-provize-link" id="tech-provize-box" style="cursor: default; pointer-events: none;">Provize <span id="provize-mesic">...</span>: <span id="provize-castka">...</span> €</a>
+        <a href="#" class="tech-provize-link" id="tech-provize-box" style="cursor: default; pointer-events: none;">PROVIZE / <span id="provize-mesic">...</span> / <span id="provize-castka">...</span> €</a>
       <?php endif; ?>
       <a href="novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
       <a href="seznam.php" <?php if($current == "seznam.php") echo 'class="active"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
@@ -212,10 +212,11 @@ if ($isAdmin) {
   }
 }
 
-/* Provize technika - jako běžná navigační položka */
+/* Provize technika - červená barva jako odhlášení */
 .tech-provize-link {
-  opacity: 0.9 !important;
-  font-weight: 500 !important;
+  color: #ff6b6b !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
 }
 
 .hamburger-lang-switcher {
