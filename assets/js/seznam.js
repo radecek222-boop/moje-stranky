@@ -766,7 +766,7 @@ async function showDetail(recordOrId) {
           <!-- Nedokončená zakázka s historií - přidat Historie PDF -->
           <button class="btn" style="background: #555; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;"
                   data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">
-            📚 Historie PDF
+            Historie PDF
           </button>
         ` : ''}
 
@@ -893,6 +893,11 @@ async function showHistoryPDF(originalReklamaceId) {
     const result = await response.json();
 
     if (result.status === 'error') {
+      // Pokud je původní zakázka smazána, zobrazit specifickou hlášku
+      if (result.message && result.message.includes('nebyla nalezena')) {
+        alert('Původní zakázka byla smazána.\n\nHistorie PDF není k dispozici.');
+        return;
+      }
       throw new Error(result.message || 'Nepodařilo se načíst dokumenty');
     }
 
@@ -2069,12 +2074,18 @@ async function showCustomerDetail(id) {
 
 /**
  * Zobrazí PDF v modálním okně s tlačítky Zavřít a Odeslat
+ * Univerzální řešení pro desktop, PWA, iOS Safari
  */
 function zobrazPDFModal(pdfUrl, claimId) {
+  // Detekce iOS a mobilních zařízení
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
   // Vytvořit overlay
   const overlay = document.createElement('div');
   overlay.id = 'pdfModalOverlay';
-  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;';
+  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10003; display: flex; flex-direction: column; align-items: center; justify-content: center;';
 
   // Kontejner pro PDF
   const pdfContainer = document.createElement('div');
@@ -2085,13 +2096,42 @@ function zobrazPDFModal(pdfUrl, claimId) {
   header.style.cssText = 'padding: 12px 16px; background: #333; color: white; font-weight: 600; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center;';
   header.innerHTML = '<span>PDF Report</span><span style="font-size: 0.8rem; opacity: 0.7;">ID: ' + (claimId || '-') + '</span>';
 
-  // Iframe pro PDF
-  const iframe = document.createElement('iframe');
-  iframe.src = pdfUrl;
-  iframe.style.cssText = 'flex: 1; width: 100%; border: none;';
+  // PDF náhled - různé přístupy pro různé platformy
+  let pdfViewer;
+
+  if (isIOS || (isMobile && isPWA)) {
+    // iOS a PWA mobil: Zobrazit tlačítko pro otevření v novém okně + náhled pomocí object
+    pdfViewer = document.createElement('div');
+    pdfViewer.style.cssText = 'flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f5f5f5; padding: 2rem;';
+
+    // Zkusit zobrazit pomocí <object> (funguje lépe na iOS)
+    const objectEmbed = document.createElement('object');
+    objectEmbed.data = pdfUrl;
+    objectEmbed.type = 'application/pdf';
+    objectEmbed.style.cssText = 'width: 100%; height: 100%; border: none;';
+
+    // Fallback pokud object nefunguje
+    const fallback = document.createElement('div');
+    fallback.style.cssText = 'text-align: center; padding: 2rem;';
+    fallback.innerHTML = `
+      <p style="color: #666; margin-bottom: 1rem;">Náhled PDF není k dispozici na tomto zařízení.</p>
+      <button onclick="window.open('${pdfUrl}', '_blank')"
+              style="padding: 12px 24px; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600;">
+        Otevřít PDF v novém okně
+      </button>
+    `;
+
+    objectEmbed.appendChild(fallback);
+    pdfViewer.appendChild(objectEmbed);
+  } else {
+    // Desktop a Android: Použít iframe
+    pdfViewer = document.createElement('iframe');
+    pdfViewer.src = pdfUrl;
+    pdfViewer.style.cssText = 'flex: 1; width: 100%; border: none;';
+  }
 
   pdfContainer.appendChild(header);
-  pdfContainer.appendChild(iframe);
+  pdfContainer.appendChild(pdfViewer);
 
   // Tlačítka
   const buttonContainer = document.createElement('div');
