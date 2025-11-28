@@ -574,10 +574,10 @@ if (!function_exists('displayErrorHTML')) {
                 <!-- Copy button -->
                 <div style="text-align: center; margin-top: 20px;">
                     <button class="copy-btn" onclick="copyErrorReport()">
-                        Kopírovat pro Claude Code nebo Codex
+                        Kopírovat chybový report
                     </button>
                     <div id="copyStatus" style="color: #28a745; margin-top: 10px; display: none;">
-                        Zkopírováno! Vložte CTRL+V do zprávy pro Claude/Codex
+                        Zkopírováno do schránky
                     </div>
                 </div>
             </div>

@@ -360,14 +360,6 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
-<?php
-// Admin a User header jsou zakomentované, protože hamburger-menu.php už poskytuje navigaci
-// if ($isAdmin) {
-//   require_once __DIR__ . "/includes/admin_header.php";
-// } else {
-//   require_once __DIR__ . "/includes/user_header.php";
-// }
-?>
 
 <main>
 <!-- HERO -->

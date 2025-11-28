@@ -541,7 +541,6 @@ if ($initialBootstrapData) {
 </script>
 
 <!-- External JavaScript -->
-<script src="assets/js/protokol-diagnostic.js"></script>
 <script src="assets/js/protokol-pdf-preview.js" defer></script>
 <script src="assets/js/protokol-customer-collapse.js" defer></script>
 <script src="assets/js/protokol-data-patch.js" defer></script>

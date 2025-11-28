@@ -986,39 +986,28 @@ function normalizeCustomerData(data) {
 let startVisitInProgress = false;
 
 function startVisit(id) {
-  console.log('[startVisit] 🔍 Zahajuji návštěvu, ID:', id);
-
   // Ochrana proti duplicitnímu volání
   if (startVisitInProgress) {
-    console.log('[startVisit] Funkce již běží, ignoruji duplicitní volání');
     return;
   }
   startVisitInProgress = true;
 
   const z = WGS_DATA_CACHE.find(x => x.id == id);
-  console.log('[startVisit] [List] Nalezený záznam:', z);
 
   if (!z) {
-    console.error('[startVisit] Záznam nenalezen v cache!');
     alert(t('record_not_found'));
     startVisitInProgress = false;
     return;
   }
 
-  console.log('[startVisit] Záznam nalezen, stav:', z.stav);
-
   if (Utils.isCompleted(z)) {
-    console.error('[startVisit] Návštěva již dokončena!');
     alert(t('visit_already_completed'));
     startVisitInProgress = false;
     return;
   }
 
-  console.log('[startVisit] [Edit] Normalizuji data...');
   const normalizedData = normalizeCustomerData(z);
-  console.log('[startVisit] Data normalizována:', normalizedData);
 
-  console.log('[startVisit] [Save] Ukládám do localStorage...');
   localStorage.setItem('currentCustomer', JSON.stringify(normalizedData));
   localStorage.setItem('visitStartTime', new Date().toISOString());
 
@@ -1027,7 +1016,6 @@ function startVisit(id) {
 
   logger.log('Normalizovaná data uložena:', normalizedData);
 
-  console.log('[startVisit] [Start] Přesměrovávám na photocustomer.php...');
   window.location.href = 'photocustomer.php?new=true';
 }
 
@@ -2225,15 +2213,9 @@ function zobrazPDFModal(pdfUrl, claimId) {
       // Sdílet přes systémové menu (email, SMS, WhatsApp, atd.)
       await navigator.share(shareData);
 
-      // Úspěch (uživatel vybral aplikaci)
-      console.log('PDF úspěšně sdíleno');
-
     } catch (error) {
       // AbortError = uživatel zrušil sdílení (to není chyba)
-      if (error.name === 'AbortError') {
-        console.log('Sdílení zrušeno uživatelem');
-      } else {
-        console.error('Chyba při sdílení:', error);
+      if (error.name !== 'AbortError') {
         alert('Chyba při sdílení: ' + error.message);
       }
     } finally {

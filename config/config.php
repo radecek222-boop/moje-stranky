@@ -266,24 +266,6 @@ if (!function_exists('getDbConnection')) {
     }
 }
 
-// ========== AUTOMATICKÉ ČIŠTĚNÍ STARÝCH SESSIONS ==========
-// POZNÁMKA: wgs_sessions tabulka byla odstraněna - používáme PHP file-based sessions
-// Cleanup již není potřeba, PHP sessions se čistí automaticky přes garbage collection
-
-// function cleanupOldSessions() {
-//     try {
-//         $pdo = getDbConnection();
-//         $stmt = $pdo->prepare("DELETE FROM wgs_sessions WHERE last_activity < DATE_SUB(NOW(), INTERVAL 24 HOUR)");
-//         $stmt->execute();
-//     } catch (Exception $e) {
-//         error_log("Session cleanup failed: " . $e->getMessage());
-//     }
-// }
-//
-// if (rand(1, 100) === 1) {
-//     cleanupOldSessions();
-// }
-
 // ========== DEEPL API PRO PŘEKLADY ==========
 if (!defined('DEEPL_API_KEY')) {
     define('DEEPL_API_KEY', getEnvValue('DEEPL_API_KEY') ?: 'optional_later');
