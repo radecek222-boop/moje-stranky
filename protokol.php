@@ -336,11 +336,8 @@ if ($initialBootstrapData) {
   <!-- Tlačítko pro otevření modalu se souhrnem pro zákazníka -->
   <button type="button" class="btn-podepsat-protokol" id="btnPodepsatProtokol" data-lang-cs="Podepsat protokol" data-lang-en="Sign protocol" data-lang-it="Firma protocollo">Podepsat protokol</button>
 
-  <canvas id="signature-pad"></canvas>
-  <div class="signature-actions">
-    <div class="signature-label" data-lang-cs="Podepište se prstem nebo myší" data-lang-en="Sign with finger or mouse" data-lang-it="Firma con dito o mouse">Podepište se prstem nebo myší</div>
-    <button class="btn-clear" type="button" data-action="clearSignaturePad" data-lang-cs="Vymazat podpis" data-lang-en="Clear signature" data-lang-it="Cancella firma">Vymazat podpis</button>
-  </div>
+  <!-- Pouze zobrazení podpisu (read-only) -->
+  <canvas id="signature-pad" class="signature-display"></canvas>
   <div class="gdpr-clause" style="margin-top: 10px; padding: 8px; font-size: 8px; line-height: 1.4; color: #666; border-top: 1px solid #ddd; text-align: justify;">
     <strong>Ochrana osobních údajů (GDPR):</strong> Podpisem tohoto protokolu souhlasíte se zpracováním Vašich osobních údajů společností White Glove Service za účelem poskytování servisních služeb, komunikace s výrobcem, prodejcem a dalšími techniky. Vaše údaje budou zpracovávány v souladu s GDPR a budou použity pouze pro účely vyřízení této reklamace. Máte právo na přístup k údajům, jejich opravu nebo výmaz. Více na www.wgs-service.cz/gdpr
   </div>

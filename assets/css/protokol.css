@@ -1509,3 +1509,9 @@ body.pdf-export-mode #signature-pad {
   }
 }
 
+/* Podpis - pouze zobrazení (read-only) */
+.signature-display {
+  pointer-events: none;
+  cursor: default;
+}
+
