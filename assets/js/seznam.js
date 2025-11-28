@@ -2912,6 +2912,9 @@ async function startRecording(orderId) {
   } catch (err) {
     logger.error('[Audio] Chyba pri nahravani:', err);
 
+    // Uvolnit prostredky pri chybe (dulezite pro iOS PWA)
+    releaseMicrophone();
+
     if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
       alert('Pristup k mikrofonu byl odepren. Povolte pristup v nastaveni prohlizece.');
     } else {
@@ -2951,16 +2954,29 @@ function stopRecording() {
 }
 
 // Uvolnit mikrofon - zastavit stream
+// Dulezite pro iOS PWA - bez kompletniho uvolneni nahravani funguje jen jednou
 function releaseMicrophone() {
   const recorder = window.wgsAudioRecorder;
+
+  // Zastavit vsechny tracky streamu
   if (recorder.stream) {
     recorder.stream.getTracks().forEach(track => {
       track.stop();
       logger.log('[Audio] Track zastaven:', track.kind);
     });
     recorder.stream = null;
-    logger.log('[Audio] Mikrofon uvolnen');
   }
+
+  // Reset MediaRecorder (dulezite pro iOS PWA)
+  if (recorder.mediaRecorder) {
+    recorder.mediaRecorder = null;
+  }
+
+  // Reset stavu
+  recorder.isRecording = false;
+  recorder.audioChunks = [];
+
+  logger.log('[Audio] Mikrofon a MediaRecorder uvolneny');
 }
 
 function showAudioPreview(audioBlob) {
