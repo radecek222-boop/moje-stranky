@@ -69,7 +69,7 @@ if (!$isLoggedIn && !$isAdmin) {
     padding: 0.15rem 0.4rem !important;
     margin-top: 0.05rem !important;
     margin-bottom: 0.2rem !important;
-    border-width: 2px !important;
+    border: 2px solid #1a1a1a !important;
     line-height: 1.0 !important;
     min-height: 16px !important;
   }
@@ -78,6 +78,16 @@ if (!$isLoggedIn && !$isAdmin) {
     font-size: 0.65rem !important;
     line-height: 1.0 !important;
     padding: 0 !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .search-input:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
   }
 
   .search-icon {
