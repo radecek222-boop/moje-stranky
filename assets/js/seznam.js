@@ -2666,6 +2666,21 @@ async function showNotes(recordOrId) {
 
   ModalManager.show(content);
 
+  // Pridat error handling pro vsechny audio prehravace
+  setTimeout(() => {
+    const audioPlayers = document.querySelectorAll('.note-audio-player');
+    audioPlayers.forEach(audio => {
+      audio.onerror = function() {
+        logger.log('[Audio] Chyba pri nacitani ulozene nahravky');
+        // Nahradit audio element chybovou zpravou
+        const parent = audio.closest('.note-audio');
+        if (parent) {
+          parent.innerHTML = '<span style="color: var(--c-grey); font-size: 0.75rem;">Audio nelze nacist</span>';
+        }
+      };
+    });
+  }, 100);
+
   setTimeout(async () => {
     await markNotesAsRead(record.id);
     await loadAll(ACTIVE_FILTER);
@@ -2876,6 +2891,25 @@ function showAudioPreview(audioBlob) {
   const audioUrl = URL.createObjectURL(audioBlob);
   const previewPlayer = document.getElementById('audioPreviewPlayer');
   const previewContainer = document.getElementById('audioPreview');
+
+  // Odstranit predchozi error handlery
+  previewPlayer.onerror = null;
+  previewPlayer.oncanplay = null;
+
+  // Pridat error handler
+  previewPlayer.onerror = function(e) {
+    logger.log('[Audio] Chyba pri nacitani nahravky:', e);
+    // Skryt preview a zobrazit tlacitko pro nahravani
+    previewContainer.style.display = 'none';
+    document.getElementById('btnStartRecord').style.display = 'block';
+    alert('Nahravka se nepodarila nacist. Zkuste nahrat znovu.');
+
+    // Uvolnit blob URL
+    if (previewPlayer.src) {
+      URL.revokeObjectURL(previewPlayer.src);
+      previewPlayer.src = '';
+    }
+  };
 
   previewPlayer.src = audioUrl;
   previewContainer.style.display = 'flex';
