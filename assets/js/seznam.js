@@ -2085,7 +2085,7 @@ function zobrazPDFModal(pdfUrl, claimId) {
   // Vytvořit overlay
   const overlay = document.createElement('div');
   overlay.id = 'pdfModalOverlay';
-  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;';
+  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10003; display: flex; flex-direction: column; align-items: center; justify-content: center;';
 
   // Kontejner pro PDF
   const pdfContainer = document.createElement('div');
