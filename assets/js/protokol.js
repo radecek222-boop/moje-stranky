@@ -2155,3 +2155,268 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// === MODAL PRO SCHVÁLENÍ ZÁKAZNÍKEM ===
+(function() {
+  let zakaznikSignaturePad = null;
+
+  // Inicializace při načtení stránky
+  document.addEventListener('DOMContentLoaded', () => {
+    const btnPodepsat = document.getElementById('btnPodepsatProtokol');
+    const overlay = document.getElementById('zakaznikSchvaleniOverlay');
+    const btnClose = document.getElementById('zakaznikSchvaleniClose');
+    const btnZrusit = document.getElementById('zakaznikSchvaleniZrusit');
+    const btnPouzit = document.getElementById('zakaznikSchvaleniPouzit');
+    const btnVymazat = document.getElementById('zakaznikVymazatPodpis');
+    const canvas = document.getElementById('zakaznikSchvaleniPad');
+
+    if (!btnPodepsat || !overlay || !canvas) {
+      console.log('[ZakaznikSchvaleni] Elementy nenalezeny, přeskakuji inicializaci');
+      return;
+    }
+
+    // Otevření modalu
+    btnPodepsat.addEventListener('click', () => {
+      otevritZakaznikModal();
+    });
+
+    // Zavření modalu
+    btnClose?.addEventListener('click', zavritZakaznikModal);
+    btnZrusit?.addEventListener('click', zavritZakaznikModal);
+
+    // Klik mimo modal zavře
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        zavritZakaznikModal();
+      }
+    });
+
+    // Vymazat podpis
+    btnVymazat?.addEventListener('click', () => {
+      if (zakaznikSignaturePad) {
+        zakaznikSignaturePad.clear();
+      }
+    });
+
+    // Potvrdit podpis
+    btnPouzit?.addEventListener('click', () => {
+      potvrditPodpis();
+    });
+  });
+
+  function otevritZakaznikModal() {
+    const overlay = document.getElementById('zakaznikSchvaleniOverlay');
+    const canvas = document.getElementById('zakaznikSchvaleniPad');
+
+    // Naplnit souhrn daty z formuláře
+    naplnitSouhrn();
+
+    // Zobrazit modal
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    // Inicializovat signature pad (po zobrazení, aby měl správné rozměry)
+    setTimeout(() => {
+      inicializovatZakaznikPad(canvas);
+    }, 100);
+  }
+
+  function zavritZakaznikModal() {
+    const overlay = document.getElementById('zakaznikSchvaleniOverlay');
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+
+    // Vyčistit signature pad
+    if (zakaznikSignaturePad) {
+      zakaznikSignaturePad.clear();
+    }
+  }
+
+  function naplnitSouhrn() {
+    // Návrh opravy
+    const repairText = document.getElementById('repair-cz')?.value || '';
+    const textEl = document.getElementById('zakaznikSchvaleniText');
+    if (textEl) {
+      textEl.textContent = repairText || '(Není vyplněno)';
+    }
+
+    // Platí zákazník?
+    const payment = document.getElementById('payment')?.value || '-';
+    document.getElementById('souhrn-plati-zakaznik').textContent = payment;
+
+    // Datum podpisu
+    const signDate = document.getElementById('sign-date')?.value || '-';
+    let formattedDate = '-';
+    if (signDate && signDate !== '-') {
+      const d = new Date(signDate);
+      if (!isNaN(d.getTime())) {
+        formattedDate = d.toLocaleDateString('cs-CZ');
+      } else {
+        formattedDate = signDate;
+      }
+    }
+    document.getElementById('souhrn-datum-podpisu').textContent = formattedDate;
+
+    // Vyřešeno?
+    const solved = document.getElementById('solved')?.value || '-';
+    document.getElementById('souhrn-vyreseno').textContent = solved;
+
+    // Nutné vyjádření prodejce
+    const dealer = document.getElementById('dealer')?.value || '-';
+    document.getElementById('souhrn-prodejce').textContent = dealer;
+
+    // Poškození technikem?
+    const damage = document.getElementById('damage')?.value || '-';
+    document.getElementById('souhrn-poskozeni').textContent = damage;
+  }
+
+  function inicializovatZakaznikPad(canvas) {
+    if (!canvas) return;
+
+    // Nastavit rozměry canvasu
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * (window.devicePixelRatio || 1);
+    canvas.height = rect.height * (window.devicePixelRatio || 1);
+
+    const ctx = canvas.getContext('2d');
+    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+
+    // Vytvořit jednoduchý signature pad
+    zakaznikSignaturePad = {
+      canvas: canvas,
+      ctx: ctx,
+      isDrawing: false,
+      lastX: 0,
+      lastY: 0,
+
+      clear: function() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      },
+
+      isEmpty: function() {
+        const pixelData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height).data;
+        for (let i = 3; i < pixelData.length; i += 4) {
+          if (pixelData[i] > 0) return false;
+        }
+        return true;
+      },
+
+      toDataURL: function() {
+        return this.canvas.toDataURL('image/png');
+      }
+    };
+
+    // Nastavit styl čáry
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Event listenery pro kreslení
+    const getCoords = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      if (e.touches && e.touches.length > 0) {
+        return {
+          x: e.touches[0].clientX - rect.left,
+          y: e.touches[0].clientY - rect.top
+        };
+      }
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    };
+
+    const startDrawing = (e) => {
+      e.preventDefault();
+      zakaznikSignaturePad.isDrawing = true;
+      const coords = getCoords(e);
+      zakaznikSignaturePad.lastX = coords.x;
+      zakaznikSignaturePad.lastY = coords.y;
+    };
+
+    const draw = (e) => {
+      if (!zakaznikSignaturePad.isDrawing) return;
+      e.preventDefault();
+      const coords = getCoords(e);
+
+      ctx.beginPath();
+      ctx.moveTo(zakaznikSignaturePad.lastX, zakaznikSignaturePad.lastY);
+      ctx.lineTo(coords.x, coords.y);
+      ctx.stroke();
+
+      zakaznikSignaturePad.lastX = coords.x;
+      zakaznikSignaturePad.lastY = coords.y;
+    };
+
+    const stopDrawing = () => {
+      zakaznikSignaturePad.isDrawing = false;
+    };
+
+    // Mouse events
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    // Touch events
+    canvas.addEventListener('touchstart', startDrawing, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
+    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('touchcancel', stopDrawing);
+  }
+
+  function potvrditPodpis() {
+    if (!zakaznikSignaturePad || zakaznikSignaturePad.isEmpty()) {
+      if (typeof showNotif === 'function') {
+        showNotif('error', 'Prosím podepište se před potvrzením');
+      } else {
+        alert('Prosím podepište se před potvrzením');
+      }
+      return;
+    }
+
+    // Přenést podpis do hlavního signature padu
+    const signatureData = zakaznikSignaturePad.toDataURL();
+    const mainCanvas = document.getElementById('signature-pad');
+
+    if (mainCanvas) {
+      const ctx = mainCanvas.getContext('2d');
+      const img = new Image();
+
+      img.onload = () => {
+        // Vyčistit hlavní canvas
+        ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+
+        // Nakreslit podpis (přizpůsobit velikosti)
+        const scale = Math.min(
+          mainCanvas.width / img.width,
+          mainCanvas.height / img.height
+        );
+        const x = (mainCanvas.width - img.width * scale) / 2;
+        const y = (mainCanvas.height - img.height * scale) / 2;
+
+        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+
+        // Oznámit změnu hlavnímu signature padu (pokud existuje)
+        if (window.signaturePad && typeof window.signaturePad.fromDataURL === 'function') {
+          // Některé knihovny signature pad mají tuto metodu
+          try {
+            window.signaturePad.fromDataURL(signatureData);
+          } catch (e) {
+            console.log('[ZakaznikSchvaleni] Použit přímý přenos na canvas');
+          }
+        }
+
+        if (typeof showNotif === 'function') {
+          showNotif('success', 'Podpis byl přenesen do protokolu');
+        }
+      };
+
+      img.src = signatureData;
+    }
+
+    // Zavřít modal
+    zavritZakaznikModal();
+  }
+})();

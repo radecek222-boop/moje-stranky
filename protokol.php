@@ -332,6 +332,10 @@ if ($initialBootstrapData) {
   </div>
 
   <div class="section-title" data-lang-cs="Podpis zákazníka" data-lang-en="Customer signature" data-lang-it="Firma del cliente">Podpis zákazníka<span class="en-label">Customer signature</span></div>
+
+  <!-- Tlačítko pro otevření modalu se souhrnem pro zákazníka -->
+  <button type="button" class="btn-podepsat-protokol" id="btnPodepsatProtokol" data-lang-cs="Podepsat protokol" data-lang-en="Sign protocol" data-lang-it="Firma protocollo">Podepsat protokol</button>
+
   <canvas id="signature-pad"></canvas>
   <div class="signature-actions">
     <div class="signature-label" data-lang-cs="Podepište se prstem nebo myší" data-lang-en="Sign with finger or mouse" data-lang-it="Firma con dito o mouse">Podepište se prstem nebo myší</div>
@@ -406,22 +410,49 @@ if ($initialBootstrapData) {
 <div class="zakaznik-schvaleni-overlay" id="zakaznikSchvaleniOverlay" style="display: none;">
   <div class="zakaznik-schvaleni-container">
     <div class="zakaznik-schvaleni-header">
-      <h2 data-lang-cs="Návrh opravy" data-lang-en="Repair Proposal" data-lang-it="Proposta di riparazione">Návrh opravy</h2>
+      <h2 data-lang-cs="Souhrn protokolu" data-lang-en="Protocol Summary" data-lang-it="Riepilogo protocollo">Souhrn protokolu</h2>
       <button type="button" class="zakaznik-schvaleni-close" id="zakaznikSchvaleniClose">×</button>
     </div>
 
     <div class="zakaznik-schvaleni-body">
       <!-- Text návrhu opravy -->
-      <div class="zakaznik-schvaleni-text-sekce">
-        <label data-lang-cs="Text návrhu opravy:" data-lang-en="Repair proposal text:" data-lang-it="Testo proposta riparazione:">Text návrhu opravy:</label>
+      <div class="zakaznik-schvaleni-sekce">
+        <label data-lang-cs="Návrh opravy:" data-lang-en="Repair proposal:" data-lang-it="Proposta di riparazione:">Návrh opravy:</label>
         <div class="zakaznik-schvaleni-text" id="zakaznikSchvaleniText">
           <!-- Text se naplní z repair-cz -->
         </div>
       </div>
 
+      <!-- Souhrn důležitých informací -->
+      <div class="zakaznik-schvaleni-sekce">
+        <label data-lang-cs="Informace o servisu:" data-lang-en="Service information:" data-lang-it="Informazioni servizio:">Informace o servisu:</label>
+        <table class="zakaznik-schvaleni-tabulka">
+          <tr>
+            <td class="tabulka-label" data-lang-cs="Platí zákazník?" data-lang-en="Customer pays?" data-lang-it="Paga il cliente?">Platí zákazník?</td>
+            <td class="tabulka-hodnota" id="souhrn-plati-zakaznik">-</td>
+          </tr>
+          <tr>
+            <td class="tabulka-label" data-lang-cs="Datum podpisu" data-lang-en="Signature date" data-lang-it="Data firma">Datum podpisu</td>
+            <td class="tabulka-hodnota" id="souhrn-datum-podpisu">-</td>
+          </tr>
+          <tr>
+            <td class="tabulka-label" data-lang-cs="Vyřešeno?" data-lang-en="Solved?" data-lang-it="Risolto?">Vyřešeno?</td>
+            <td class="tabulka-hodnota" id="souhrn-vyreseno">-</td>
+          </tr>
+          <tr>
+            <td class="tabulka-label" data-lang-cs="Nutné vyjádření prodejce" data-lang-en="Dealer statement needed" data-lang-it="Dichiarazione rivenditore">Nutné vyjádření prodejce</td>
+            <td class="tabulka-hodnota" id="souhrn-prodejce">-</td>
+          </tr>
+          <tr>
+            <td class="tabulka-label" data-lang-cs="Poškození technikem?" data-lang-en="Damage by technician?" data-lang-it="Danno tecnico?">Poškození technikem?</td>
+            <td class="tabulka-hodnota" id="souhrn-poskozeni">-</td>
+          </tr>
+        </table>
+      </div>
+
       <!-- Podpisové pole -->
-      <div class="zakaznik-schvaleni-podpis-sekce">
-        <label data-lang-cs="Podpis zákazníka (souhlas s opravou):" data-lang-en="Customer signature (repair approval):" data-lang-it="Firma cliente (approvazione riparazione):">Podpis zákazníka (souhlas s opravou):</label>
+      <div class="zakaznik-schvaleni-sekce zakaznik-schvaleni-podpis-sekce">
+        <label data-lang-cs="Podpis zákazníka:" data-lang-en="Customer signature:" data-lang-it="Firma cliente:">Podpis zákazníka:</label>
         <canvas id="zakaznikSchvaleniPad"></canvas>
         <div class="zakaznik-schvaleni-podpis-akce">
           <span class="zakaznik-schvaleni-hint" data-lang-cs="Podepište se prstem nebo myší" data-lang-en="Sign with finger or mouse" data-lang-it="Firma con dito o mouse">Podepište se prstem nebo myší</span>
@@ -432,7 +463,7 @@ if ($initialBootstrapData) {
 
     <div class="zakaznik-schvaleni-footer">
       <button type="button" class="btn-zrusit" id="zakaznikSchvaleniZrusit" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
-      <button type="button" class="btn-pouzit" id="zakaznikSchvaleniPouzit" data-lang-cs="Použít" data-lang-en="Use" data-lang-it="Usa">Použít</button>
+      <button type="button" class="btn-pouzit" id="zakaznikSchvaleniPouzit" data-lang-cs="Potvrdit podpis" data-lang-en="Confirm signature" data-lang-it="Conferma firma">Potvrdit podpis</button>
     </div>
   </div>
 </div>
