@@ -2475,6 +2475,8 @@ async function addNote(orderId, text, audioBlob = null) {
     formData.append('csrf_token', csrfToken);
 
     // Pridat audio pokud existuje
+    logger.log('[Audio] audioBlob status:', audioBlob ? 'existuje' : 'null', audioBlob ? audioBlob.size + ' bytes' : '');
+
     if (audioBlob) {
       // Urcit priponu podle MIME typu
       let ext = 'webm';
@@ -2484,23 +2486,27 @@ async function addNote(orderId, text, audioBlob = null) {
       else if (audioBlob.type.includes('wav')) ext = 'wav';
 
       formData.append('audio', audioBlob, `nahravka.${ext}`);
-      logger.log('[Audio] Odesilam nahravku:', Math.round(audioBlob.size / 1024), 'KB');
+      logger.log('[Audio] Odesilam nahravku:', Math.round(audioBlob.size / 1024), 'KB, type:', audioBlob.type);
     }
 
+    logger.log('[Notes] Odesilam poznamku na API...');
     const response = await fetch('api/notes_api.php', {
       method: 'POST',
       body: formData
     });
 
+    logger.log('[Notes] API odpoved status:', response.status);
     const data = await response.json();
+    logger.log('[Notes] API odpoved data:', JSON.stringify(data));
 
     if (data.status === 'success' || data.success === true) {
       return { success: true, note_id: data.note_id };
     } else {
-      throw new Error(data.message || 'Chyba při přidávání poznámky');
+      // PHP vraci 'error' ne 'message'
+      throw new Error(data.error || data.message || 'Chyba pri pridavani poznamky');
     }
   } catch (e) {
-    logger.error('Chyba při přidávání poznámky:', e);
+    logger.error('Chyba pri pridavani poznamky:', e);
     throw e;
   }
 }
@@ -2619,6 +2625,7 @@ async function showNotes(recordOrId) {
                 ${hasAudio ? `
                 <div class="note-audio">
                   <audio controls preload="metadata" class="note-audio-player">
+                    <source src="${note.audio_url}" type="audio/mp4">
                     <source src="${note.audio_url}" type="audio/webm">
                     <source src="${note.audio_url}" type="audio/mpeg">
                     Vas prohlizec nepodporuje prehravani audia.
@@ -2730,6 +2737,10 @@ function closeNotesModal() {
   if (window.wgsAudioRecorder && window.wgsAudioRecorder.isRecording) {
     stopRecording();
   }
+  // Uvolnit mikrofon (kdyby zustal aktivni)
+  if (typeof releaseMicrophone === 'function') {
+    releaseMicrophone();
+  }
   closeDetail();
   renderOrders();
 }
@@ -2744,7 +2755,8 @@ window.wgsAudioRecorder = {
   isRecording: false,
   recordingStartTime: null,
   recordingTimer: null,
-  permissionGranted: false // Zapamatovat ze bylo povoleno
+  permissionGranted: false, // Zapamatovat ze bylo povoleno
+  stream: null // Ulozit stream pro pozdejsi zastaveni
 };
 
 // Zkontrolovat stav opravneni mikrofonu
@@ -2799,17 +2811,40 @@ async function startRecording(orderId) {
     // Pozadat o pristup k mikrofonu
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
+    // Ulozit stream pro pozdejsi zastaveni
+    window.wgsAudioRecorder.stream = stream;
+
     // Zapamatovat ze bylo povoleno
     window.wgsAudioRecorder.permissionGranted = true;
 
     // Vybrat podporovany format
+    // Safari/iOS: preferovat MP4 (WebM nefunguje pri prehravani)
+    // Chrome/Firefox: preferovat WebM (lepsi komprese)
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
+                     /iPad|iPhone|iPod/.test(navigator.userAgent);
+
     let mimeType = 'audio/webm';
-    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-      mimeType = 'audio/webm;codecs=opus';
-    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-      mimeType = 'audio/mp4';
-    } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
-      mimeType = 'audio/ogg';
+
+    if (isSafari) {
+      // Safari/iOS - pouzit MP4 (jediny spolehlivy format)
+      if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        mimeType = 'audio/mp4';
+      } else if (MediaRecorder.isTypeSupported('audio/aac')) {
+        mimeType = 'audio/aac';
+      }
+      // Fallback na cokoliv co funguje
+      logger.log('[Audio] Safari detekovan, preferuji MP4');
+    } else {
+      // Chrome/Firefox - pouzit WebM (lepsi komprese)
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        mimeType = 'audio/webm;codecs=opus';
+      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+        mimeType = 'audio/webm';
+      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        mimeType = 'audio/mp4';
+      } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
+        mimeType = 'audio/ogg';
+      }
     }
 
     logger.log('[Audio] Pouzivam format:', mimeType);
@@ -2848,8 +2883,8 @@ async function startRecording(orderId) {
 
       logger.log('[Audio] Blob vytvoren:', recorder.audioBlob.size, 'bytes, type:', blobType);
 
-      // Zastavit stream
-      stream.getTracks().forEach(track => track.stop());
+      // Uvolnit mikrofon
+      releaseMicrophone();
 
       // Zobrazit nahled
       showAudioPreview(recorder.audioBlob);
@@ -2899,8 +2934,23 @@ function stopRecording() {
   }
 
   // Aktualizovat UI
-  document.getElementById('recordingIndicator').style.display = 'none';
-  document.getElementById('btnStartRecord').style.display = 'block';
+  const recordingIndicator = document.getElementById('recordingIndicator');
+  const btnStartRecord = document.getElementById('btnStartRecord');
+  if (recordingIndicator) recordingIndicator.style.display = 'none';
+  if (btnStartRecord) btnStartRecord.style.display = 'block';
+}
+
+// Uvolnit mikrofon - zastavit stream
+function releaseMicrophone() {
+  const recorder = window.wgsAudioRecorder;
+  if (recorder.stream) {
+    recorder.stream.getTracks().forEach(track => {
+      track.stop();
+      logger.log('[Audio] Track zastaven:', track.kind);
+    });
+    recorder.stream = null;
+    logger.log('[Audio] Mikrofon uvolnen');
+  }
 }
 
 function showAudioPreview(audioBlob) {
@@ -4289,8 +4339,8 @@ document.addEventListener('click', (e) => {
       break;
 
     case 'deleteNote':
-      const noteId = target.dataset.noteId;
-      const orderId = target.dataset.orderId;
+      const noteId = button.getAttribute('data-note-id');
+      const orderId = button.getAttribute('data-order-id');
       if (noteId && typeof deleteNote === 'function') {
         e.stopPropagation();
         deleteNote(noteId, orderId);
