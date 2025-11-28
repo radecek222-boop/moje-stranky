@@ -262,16 +262,6 @@ if (!$embedMode && $activeTab === 'dashboard'):
                 <div class="cc-card-title" data-lang-cs="SQL Databáze" data-lang-en="SQL Database" data-lang-it="Database SQL">SQL Databáze</div>
                 <div class="cc-card-description" data-lang-cs="Zobrazit všechny SQL tabulky (aktuální živá data)" data-lang-en="View all SQL tables (current live data)" data-lang-it="Visualizza tutte le tabelle SQL (dati live attuali)">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
             </div>
-
-            <div class="cc-card" onclick="window.location='kontrola_analytics_dat.php'">
-                <div class="cc-card-title" data-lang-cs="Analytics Data" data-lang-en="Analytics Data" data-lang-it="Dati Analytics">Analytics Data</div>
-                <div class="cc-card-description" data-lang-cs="Kontrola trackingu návštěvnosti a ignorovaných IP" data-lang-en="Check visitor tracking and ignored IPs" data-lang-it="Controlla il tracciamento dei visitatori e gli IP ignorati">Kontrola trackingu návštěvnosti a ignorovaných IP</div>
-            </div>
-
-            <div class="cc-card" onclick="window.location='vytvor_tabulku_aktuality.php'">
-                <div class="cc-card-title" data-lang-cs="Migrace: Aktuality" data-lang-en="Migration: News" data-lang-it="Migrazione: Notizie">Migrace: Aktuality</div>
-                <div class="cc-card-description" data-lang-cs="Vytvoření tabulky pro automatické denní aktuality Natuzzi" data-lang-en="Create table for automatic daily Natuzzi news" data-lang-it="Crea tabella per notizie quotidiane automatiche Natuzzi">Vytvoření tabulky pro automatické denní aktuality Natuzzi</div>
-            </div>
         </div>
     </div>
 </div>
