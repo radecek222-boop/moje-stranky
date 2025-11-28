@@ -402,6 +402,41 @@ if ($initialBootstrapData) {
   </div>
 </div>
 
+<!-- Modal pro schválení zákazníkem -->
+<div class="zakaznik-schvaleni-overlay" id="zakaznikSchvaleniOverlay" style="display: none;">
+  <div class="zakaznik-schvaleni-container">
+    <div class="zakaznik-schvaleni-header">
+      <h2 data-lang-cs="Návrh opravy" data-lang-en="Repair Proposal" data-lang-it="Proposta di riparazione">Návrh opravy</h2>
+      <button type="button" class="zakaznik-schvaleni-close" id="zakaznikSchvaleniClose">×</button>
+    </div>
+
+    <div class="zakaznik-schvaleni-body">
+      <!-- Text návrhu opravy -->
+      <div class="zakaznik-schvaleni-text-sekce">
+        <label data-lang-cs="Text návrhu opravy:" data-lang-en="Repair proposal text:" data-lang-it="Testo proposta riparazione:">Text návrhu opravy:</label>
+        <div class="zakaznik-schvaleni-text" id="zakaznikSchvaleniText">
+          <!-- Text se naplní z repair-cz -->
+        </div>
+      </div>
+
+      <!-- Podpisové pole -->
+      <div class="zakaznik-schvaleni-podpis-sekce">
+        <label data-lang-cs="Podpis zákazníka (souhlas s opravou):" data-lang-en="Customer signature (repair approval):" data-lang-it="Firma cliente (approvazione riparazione):">Podpis zákazníka (souhlas s opravou):</label>
+        <canvas id="zakaznikSchvaleniPad"></canvas>
+        <div class="zakaznik-schvaleni-podpis-akce">
+          <span class="zakaznik-schvaleni-hint" data-lang-cs="Podepište se prstem nebo myší" data-lang-en="Sign with finger or mouse" data-lang-it="Firma con dito o mouse">Podepište se prstem nebo myší</span>
+          <button type="button" class="btn-vymazat-podpis" id="zakaznikVymazatPodpis" data-lang-cs="Vymazat" data-lang-en="Clear" data-lang-it="Cancella">Vymazat</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="zakaznik-schvaleni-footer">
+      <button type="button" class="btn-zrusit" id="zakaznikSchvaleniZrusit" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
+      <button type="button" class="btn-pouzit" id="zakaznikSchvaleniPouzit" data-lang-cs="Použít" data-lang-en="Use" data-lang-it="Usa">Použít</button>
+    </div>
+  </div>
+</div>
+
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-spinner"></div>
   <div class="loading-text" id="loadingText">Načítání...</div>
