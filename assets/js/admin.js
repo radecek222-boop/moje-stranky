@@ -541,14 +541,6 @@ function initUserManagement() {
   }
 }
 
-// Control Center Unified - Version Check
-// Debug mode - set to false in production
-if (typeof DEBUG_MODE === 'undefined') { var DEBUG_MODE = false; }
-if (DEBUG_MODE) {
-    console.log('%c[Fix] Control Center v2025.11.12-1430 loaded', 'background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;');
-    console.log('executeAction is ASYNC + event.target captured BEFORE await');
-}
-
 // Helper function to check if API response is successful
 /**
  * IsSuccess
@@ -585,9 +577,7 @@ function getCSRFToken() {
     // Ujistit se že token je string
     const tokenStr = token ? String(token).trim() : null;
 
-    if (tokenStr) {
-        if (DEBUG_MODE) console.log('CSRF token loaded:', tokenStr.substring(0, 10) + '... (length: ' + tokenStr.length + ')');
-    } else {
+    if (!tokenStr) {
         console.error('CSRF token is empty');
     }
 
@@ -1263,32 +1253,21 @@ function vytvorKlicZModalu() {
  * ExecuteAction
  */
 async function executeAction(actionId) {
-    if (DEBUG_MODE) console.log('[executeAction] Starting with actionId:', actionId);
-
-    // Capture button reference BEFORE any await (event becomes undefined after await in async functions)
+    // Zachytit tlačítko PŘED jakýmkoliv await
     const btn = event.target;
     const originalText = btn.textContent;
 
-    // Await the CSRF token (handles both sync and async getCSRFToken)
     const csrfToken = await getCSRFToken();
-    if (DEBUG_MODE) console.log('[executeAction] CSRF token retrieved:', {
-        type: typeof csrfToken,
-        value: csrfToken && typeof csrfToken === 'string' ? csrfToken.substring(0, 10) + '...' : csrfToken,
-        length: csrfToken ? csrfToken.length : 0
-    });
 
     if (!csrfToken || typeof csrfToken !== 'string' || csrfToken.length === 0) {
         alert('Chyba: CSRF token nebyl nalezen nebo je neplatný. Obnovte stránku.');
-        console.error('[executeAction] CSRF token is invalid:', {type: typeof csrfToken, value: csrfToken});
         return;
     }
 
     if (!confirm('Spustit tuto akci? Bude provedena automaticky.')) {
-        if (DEBUG_MODE) console.log('[executeAction] User cancelled');
         return;
     }
 
-    // Disable button during execution
     btn.disabled = true;
     btn.textContent = 'Provádění...';
 
@@ -1297,30 +1276,23 @@ async function executeAction(actionId) {
         csrf_token: csrfToken
     };
 
-    if (DEBUG_MODE) console.log('[executeAction] Sending request with payload:', payload);
-
     fetch('api/admin.php?action=execute_action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     })
     .then(async r => {
-        if (DEBUG_MODE) console.log('[executeAction] Response status:', r.status);
-
-        // Zkusit načíst JSON i při chybě
         let responseData;
         try {
             responseData = await r.json();
-            if (DEBUG_MODE) console.log('[executeAction] Response data:', responseData);
         } catch (e) {
-            console.error('[executeAction] Failed to parse JSON:', e);
             responseData = null;
         }
 
         if (!r.ok) {
             let errorMsg = `HTTP ${r.status}`;
             if (responseData) {
-                errorMsg = responseData.message || 'Unknown error';
+                errorMsg = responseData.message || 'Neznámá chyba';
                 if (responseData.debug) {
                     errorMsg += '\n\n' + Object.entries(responseData.debug)
                         .map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v, null, 2) : v}`)
@@ -1333,22 +1305,18 @@ async function executeAction(actionId) {
         return responseData;
     })
     .then(data => {
-        if (DEBUG_MODE) console.log('[executeAction] Success data:', data);
-
         if (isSuccess(data)) {
             const execTime = data.execution_time || 'neznámý čas';
             alert(`Akce dokončena!\n\n${data.message}\n\nČas provedení: ${execTime}`);
             loadActionsModal();
         } else {
-            console.error('[executeAction] Action failed:', data);
-            alert('✗ Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+            alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
             btn.disabled = false;
             btn.textContent = originalText;
         }
     })
     .catch(err => {
-        console.error('[executeAction] Error:', err);
-        alert('✗ Chyba při provádění akce: ' + err.message);
+        alert('Chyba při provádění akce: ' + err.message);
         btn.disabled = false;
         btn.textContent = originalText;
     });

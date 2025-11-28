@@ -2,7 +2,6 @@
 -- MIGRACE: Přidání chybějících indexů
 -- ==========================================
 -- Datum: 2025-11-24
--- Autor: Claude AI Technical Audit
 -- Popis: Přidává chybějící indexy identifikované v auditu
 -- Očekávaný přínos: 10-30% zrychlení dotazů
 -- ==========================================

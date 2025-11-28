@@ -2,7 +2,6 @@
 -- MIGRACE: Odstranění redundantních indexů
 -- ==========================================
 -- Datum: 2025-11-24
--- Autor: Claude AI Technical Audit
 -- Popis: Odstraňuje duplicitní indexy pro lepší INSERT/UPDATE výkon
 -- Očekávaný přínos: 5-15% rychlejší INSERT/UPDATE, úspora ~150 KB
 -- ==========================================

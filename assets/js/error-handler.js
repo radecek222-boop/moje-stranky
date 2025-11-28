@@ -17,7 +17,7 @@ window.addEventListener('error', function(event) {
         userAgent: navigator.userAgent
     };
 
-    console.error('🔴 JavaScript Error Caught:', error);
+    console.error('JavaScript Error Caught:', error);
 
     // Zobrazit error v UI
     displayJSError(error);
@@ -37,7 +37,7 @@ window.addEventListener('unhandledrejection', function(event) {
         userAgent: navigator.userAgent
     };
 
-    console.error('🔴 Unhandled Promise Rejection:', error);
+    console.error('Unhandled Promise Rejection:', error);
 
     // Zobrazit error v UI
     displayJSError(error);
@@ -104,7 +104,7 @@ function displayJSError(error) {
         font-size: 14px;
     `;
     header.innerHTML = `
-        <span>🔴 ${error.type}</span>
+        <span>${error.type}</span>
         <button onclick="document.getElementById('js-error-container').remove()"
                 style="background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; line-height: 1;">
             ×
@@ -150,7 +150,7 @@ function displayJSError(error) {
         const stackLines = error.stack.split('\n').slice(0, 10);
         bodyHTML += `
             <div style="margin-bottom: 10px;">
-                <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">📚 STACK TRACE:</div>
+                <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">STACK TRACE:</div>
                 <div style="background: #1a1a1a; padding: 10px; border-radius: 4px; overflow-x: auto; max-height: 150px;">
                     <pre style="margin: 0; color: #868e96; font-size: 11px; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(stackLines.join('\n'))}</pre>
                 </div>
@@ -163,10 +163,10 @@ function displayJSError(error) {
             <button onclick="copyJSError()"
                     style="background: #28a745; color: white; border: none; padding: 8px 15px;
                            border-radius: 4px; cursor: pointer; font-family: 'Courier New', monospace; font-size: 12px;">
-                [List] Kopírovat pro Claude Code nebo Codex
+                Kopírovat chybový report
             </button>
             <div id="js-copy-status" style="color: #28a745; margin-top: 8px; display: none; font-size: 11px;">
-                Zkopírováno! Vložte CTRL+V do zprávy pro Claude/Codex
+                Zkopírováno do schránky
             </div>
         </div>
     `;
@@ -189,7 +189,7 @@ window.copyJSError = function() {
     if (!error) return;
 
     const report = `
-🔴 WGS JAVASCRIPT ERROR REPORT
+WGS JAVASCRIPT ERROR REPORT
 ${'='.repeat(80)}
 Type: ${error.type}
 Message: ${error.message}
@@ -341,7 +341,7 @@ window.fetch = function(...args) {
 
                         // Pokud je to PHP error s detaily, zobrazit
                         if (data.file && data.line) {
-                            console.error('🔴 API Error:', {
+                            console.error('API Error:', {
                                 message: data.message || data.error,
                                 file: data.file,
                                 full_path: data.full_path,
@@ -362,7 +362,7 @@ window.fetch = function(...args) {
                     // OPRAVA: Pokud JSON parsing selhal, přečíst jako text
                     try {
                         const errorText = await clonedResponse.text();
-                        console.error('🔴 HTTP Error (non-JSON response):', {
+                        console.error('HTTP Error (non-JSON response):', {
                             status: response.status,
                             statusText: response.statusText,
                             body: errorText,
@@ -378,7 +378,7 @@ window.fetch = function(...args) {
             return response;
         })
         .catch(error => {
-            console.error('🔴 Fetch Error:', error);
+            console.error('Fetch Error:', error);
             throw error;
         });
 };
