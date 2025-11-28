@@ -2377,43 +2377,60 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Přenést podpis do hlavního signature padu
-    const signatureData = zakaznikSignaturePad.toDataURL();
     const mainCanvas = document.getElementById('signature-pad');
 
-    if (mainCanvas) {
+    if (mainCanvas && window.signaturePad) {
+      // Použít SignaturePad knihovnu - správně škáluje
+      const modalCanvas = zakaznikSignaturePad.canvas;
+
+      // Vyčistit hlavní signature pad
+      window.signaturePad.clear();
+
+      // Získat rozměry hlavního canvasu (bez devicePixelRatio)
+      const mainRect = mainCanvas.getBoundingClientRect();
+      const modalRect = modalCanvas.getBoundingClientRect();
+
+      // Získat data z modálního canvasu
       const ctx = mainCanvas.getContext('2d');
-      const img = new Image();
+      const ratio = window.devicePixelRatio || 1;
 
-      img.onload = () => {
-        // Vyčistit hlavní canvas
-        ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+      // Vyplnit bílým pozadím
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
 
-        // Nakreslit podpis (přizpůsobit velikosti)
-        const scale = Math.min(
-          mainCanvas.width / img.width,
-          mainCanvas.height / img.height
-        );
-        const x = (mainCanvas.width - img.width * scale) / 2;
-        const y = (mainCanvas.height - img.height * scale) / 2;
+      // Vypočítat škálování - zachovat poměr stran
+      const scaleX = mainRect.width / modalRect.width;
+      const scaleY = mainRect.height / modalRect.height;
+      const scale = Math.min(scaleX, scaleY) * 0.9; // 90% pro okraj
 
-        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+      // Centrovat podpis
+      const scaledWidth = modalRect.width * scale;
+      const scaledHeight = modalRect.height * scale;
+      const offsetX = (mainRect.width - scaledWidth) / 2;
+      const offsetY = (mainRect.height - scaledHeight) / 2;
 
-        // Oznámit změnu hlavnímu signature padu (pokud existuje)
-        if (window.signaturePad && typeof window.signaturePad.fromDataURL === 'function') {
-          // Některé knihovny signature pad mají tuto metodu
-          try {
-            window.signaturePad.fromDataURL(signatureData);
-          } catch (e) {
-            console.log('[ZakaznikSchvaleni] Použit přímý přenos na canvas');
-          }
-        }
+      // Nakreslit podpis ze zdrojového canvasu
+      ctx.drawImage(
+        modalCanvas,
+        0, 0, modalCanvas.width, modalCanvas.height,  // source
+        offsetX * ratio, offsetY * ratio, scaledWidth * ratio, scaledHeight * ratio  // destination
+      );
 
-        if (typeof showNotif === 'function') {
-          showNotif('success', 'Podpis byl přenesen do protokolu');
-        }
-      };
+      console.log('[ZakaznikSchvaleni] Podpis přenesen', {
+        modalSize: { w: modalRect.width, h: modalRect.height },
+        mainSize: { w: mainRect.width, h: mainRect.height },
+        scale: scale,
+        offset: { x: offsetX, y: offsetY }
+      });
 
-      img.src = signatureData;
+      if (typeof showNotif === 'function') {
+        showNotif('success', 'Podpis byl přenesen do protokolu');
+      }
+    } else {
+      console.error('[ZakaznikSchvaleni] Hlavní signature pad nenalezen');
+      if (typeof showNotif === 'function') {
+        showNotif('error', 'Chyba při přenosu podpisu');
+      }
     }
 
     // Zavřít modal
