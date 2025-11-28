@@ -278,18 +278,9 @@ if (!$isLoggedIn && !$isAdmin) {
   margin-top: 2rem !important;
 }
 
-/* DETAIL OVERLAY - ČISTĚ BÍLÉ POZADÍ VŠUDE */
+/* DETAIL OVERLAY - BÍLÉ POZADÍ A PŘEPIS PROMĚNNÉ PRO VNOŘENÉ PRVKY */
 #detailOverlay {
-  background: #ffffff !important;
-}
-
-#detailOverlay .modal-content,
-#detailOverlay .modal-header,
-#detailOverlay .modal-body,
-#detailOverlay .detail-modal,
-#detailOverlay #modalContent,
-#detailOverlay .info-grid,
-#detailOverlay .modal-section {
+  --c-bg: #ffffff;  /* Přepis proměnné pro všechny vnořené prvky */
   background: #ffffff !important;
 }
 
