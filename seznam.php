@@ -474,6 +474,27 @@ if (!$isLoggedIn && !$isAdmin) {
   color: #666666 !important;
 }
 
+/* Grid s popisky a inputy - horizontální zarovnání */
+#detailOverlay .modal-body div[style*="grid-template-columns"] {
+  grid-template-columns: auto 1fr !important;
+  align-items: center !important;
+}
+
+#detailOverlay .modal-body div[style*="grid-template-columns"] > span {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 32px !important;
+  padding-right: 0.5rem !important;
+  white-space: nowrap !important;
+}
+
+#detailOverlay .modal-body div[style*="grid-template-columns"] > input,
+#detailOverlay .modal-body div[style*="grid-template-columns"] > span:not([style*="color: #666"]) {
+  min-height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
 /* Tlačítko smazat reklamaci - červené */
 #detailOverlay button[data-action="deleteReklamace"] {
   background: #dc3545 !important;
