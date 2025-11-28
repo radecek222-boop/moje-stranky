@@ -1509,6 +1509,9 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </head>
 
 <body>
+<!-- CSRF Token pro AJAX requesty -->
+<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+
 <?php if (!$embedMode): ?>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 <?php endif; ?>

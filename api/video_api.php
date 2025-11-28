@@ -27,9 +27,6 @@ try {
         ]));
     }
 
-    // PERFORMANCE: Uvolnění session zámku
-    session_write_close();
-
     $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
     $pdo = getDbConnection();
@@ -38,11 +35,14 @@ try {
 
         // ==================== NAHRÁT VIDEO ====================
         case 'upload_video':
-            // CSRF validace
+            // CSRF validace (před session_write_close!)
             if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
                 die(json_encode(['status' => 'error', 'message' => 'Neplatný CSRF token']));
             }
+
+            // PERFORMANCE: Uvolnění session zámku (až po CSRF validaci)
+            session_write_close();
 
             $claimId = $_POST['claim_id'] ?? null;
             $userId = $_SESSION['user_id'] ?? null;
@@ -52,13 +52,17 @@ try {
                 die(json_encode(['status' => 'error', 'message' => 'Chybí ID zakázky']));
             }
 
-            // Kontrola zda zakázka existuje
-            $stmt = $pdo->prepare("SELECT id FROM wgs_reklamace WHERE id = :id");
+            // Kontrola zda zakázka existuje a získání čísla reklamace
+            $stmt = $pdo->prepare("SELECT id, reklamace_id, cislo FROM wgs_reklamace WHERE id = :id");
             $stmt->execute(['id' => $claimId]);
-            if (!$stmt->fetch()) {
+            $zakaz = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$zakaz) {
                 http_response_code(404);
                 die(json_encode(['status' => 'error', 'message' => 'Zakázka nenalezena']));
             }
+
+            $reklamaceCislo = $zakaz['reklamace_id'] ?? $zakaz['cislo'] ?? 'video';
 
             // Kontrola nahraného souboru
             if (!isset($_FILES['video']) || $_FILES['video']['error'] !== UPLOAD_ERR_OK) {
@@ -103,10 +107,19 @@ try {
                 mkdir($uploadDir, 0755, true);
             }
 
-            // Generovat unikátní název souboru
-            $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-            $safeName = preg_replace('/[^a-zA-Z0-9_-]/', '_', pathinfo($fileName, PATHINFO_FILENAME));
-            $uniqueName = $safeName . '_' . time() . '.' . $extension;
+            // Generovat název souboru jako u fotek: reklamace_datum_vidX.ext
+            $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+            $datum = date('Ymd'); // 20251128
+
+            // Spočítat kolik už je videí pro tuto zakázku (aby byl unikátní index)
+            $stmtCount = $pdo->prepare("SELECT COUNT(*) FROM wgs_videos WHERE claim_id = :claim_id");
+            $stmtCount->execute(['claim_id' => $claimId]);
+            $videoCount = $stmtCount->fetchColumn() + 1;
+
+            // Bezpečný název reklamace (bez lomítek)
+            $safeReklamace = str_replace('/', '-', $reklamaceCislo);
+
+            $uniqueName = "{$safeReklamace}_{$datum}_vid{$videoCount}.{$extension}";
             $filePath = $uploadDir . '/' . $uniqueName;
 
             // Přesunout soubor
@@ -129,7 +142,7 @@ try {
 
             $stmt->execute([
                 'claim_id' => $claimId,
-                'video_name' => $fileName,
+                'video_name' => $uniqueName,  // Generovaný název místo originálního
                 'video_path' => $relativePath,
                 'file_size' => $fileSize,
                 'duration' => $duration,
@@ -160,6 +173,7 @@ try {
                 die(json_encode(['status' => 'error', 'message' => 'Chybí ID zakázky']));
             }
 
+            // Načíst videa + info o zakázce
             $stmt = $pdo->prepare("
                 SELECT
                     v.id,
@@ -171,9 +185,13 @@ try {
                     v.thumbnail_path,
                     v.uploaded_at,
                     v.uploaded_by,
-                    u.email as uploader_email
+                    u.email as uploader_email,
+                    r.jmeno as customer_name,
+                    r.reklamace_id,
+                    r.cislo
                 FROM wgs_videos v
                 LEFT JOIN wgs_users u ON v.uploaded_by = u.user_id
+                LEFT JOIN wgs_reklamace r ON v.claim_id = r.id
                 WHERE v.claim_id = :claim_id
                 ORDER BY v.uploaded_at DESC
             ");
@@ -181,20 +199,40 @@ try {
             $stmt->execute(['claim_id' => $claimId]);
             $videos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+            // Získat info o zakázce pro nadpis modalu
+            $customerName = '';
+            $reklamaceNum = '';
+            if (!empty($videos)) {
+                $customerName = $videos[0]['customer_name'] ?? '';
+                $reklamaceNum = $videos[0]['reklamace_id'] ?? $videos[0]['cislo'] ?? '';
+            } else {
+                // Pokud nejsou videa, načíst info o zakázce samostatně
+                $stmtClaim = $pdo->prepare("SELECT jmeno, reklamace_id, cislo FROM wgs_reklamace WHERE id = :id");
+                $stmtClaim->execute(['id' => $claimId]);
+                $claim = $stmtClaim->fetch(PDO::FETCH_ASSOC);
+                $customerName = $claim['jmeno'] ?? '';
+                $reklamaceNum = $claim['reklamace_id'] ?? $claim['cislo'] ?? '';
+            }
+
             echo json_encode([
                 'status' => 'success',
                 'videos' => $videos,
-                'count' => count($videos)
+                'count' => count($videos),
+                'customer_name' => $customerName,
+                'reklamace_cislo' => $reklamaceNum
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             break;
 
         // ==================== SMAZAT VIDEO ====================
         case 'delete_video':
-            // CSRF validace
+            // CSRF validace (před session_write_close!)
             if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
                 die(json_encode(['status' => 'error', 'message' => 'Neplatný CSRF token']));
             }
+
+            // PERFORMANCE: Uvolnění session zámku (až po CSRF validaci)
+            session_write_close();
 
             $videoId = $_POST['video_id'] ?? null;
 

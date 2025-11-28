@@ -171,6 +171,11 @@ if (!$embedMode && $activeTab === 'dashboard'):
                 <div class="cc-card-description" data-lang-cs="Přehled všech reklamací a servisních požadavků" data-lang-en="Overview of all claims and service requests" data-lang-it="Panoramica di tutti i reclami e le richieste di servizio">Přehled všech reklamací a servisních požadavků</div>
             </div>
 
+            <div class="cc-card" onclick="window.location='admin.php?tab=zakaznici'">
+                <div class="cc-card-title" data-lang-cs="Seznam zákazníků" data-lang-en="Customer List" data-lang-it="Elenco Clienti">Seznam zákazníků</div>
+                <div class="cc-card-description" data-lang-cs="Přehled všech zákazníků s kontaktními údaji a zakázkami" data-lang-en="Overview of all customers with contact information and orders" data-lang-it="Panoramica di tutti i clienti con informazioni di contatto e ordini">Přehled všech zákazníků s kontaktními údaji a zakázkami</div>
+            </div>
+
             <div class="cc-card" onclick="window.location='protokol.php'">
                 <div class="cc-card-title" data-lang-cs="Nový protokol" data-lang-en="New Protocol" data-lang-it="Nuovo Protocollo">Nový protokol</div>
                 <div class="cc-card-description" data-lang-cs="Vytvořit nový servisní protokol" data-lang-en="Create new service protocol" data-lang-it="Crea nuovo protocollo di servizio">Vytvořit nový servisní protokol</div>
@@ -935,7 +940,7 @@ function loadNotifContent(type, body) {
           <button class="btn btn-sm" id="refreshUsersBtn" data-lang-cs="Obnovit" data-lang-en="Refresh" data-lang-it="Aggiorna">Obnovit</button>
         </div>
       </div>
-      
+
       <table>
         <thead>
           <tr>
@@ -951,6 +956,39 @@ function loadNotifContent(type, body) {
         <tbody id="users-table">
           <tr>
             <td colspan="7" class="loading" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <?php if ($activeTab === 'zakaznici'): ?>
+  <!-- TAB: ZÁKAZNÍCI -->
+  <div id="tab-zakaznici" class="tab-content">
+    <div class="table-container">
+      <div class="table-header">
+        <h3 class="table-title" data-lang-cs="Všichni zákazníci" data-lang-en="All Customers" data-lang-it="Tutti i Clienti">Všichni zákazníci</h3>
+        <div class="table-actions">
+          <input type="text" class="search-box" id="search-zakaznici" data-lang-cs-placeholder="Hledat..." data-lang-en-placeholder="Search..." data-lang-it-placeholder="Cerca..." placeholder="Hledat...">
+          <button class="btn btn-sm" id="refreshZakazniciBtn" data-lang-cs="Obnovit" data-lang-en="Refresh" data-lang-it="Aggiorna">Obnovit</button>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th data-lang-cs="Jméno" data-lang-en="Name" data-lang-it="Nome">Jméno</th>
+            <th data-lang-cs="Adresa" data-lang-en="Address" data-lang-it="Indirizzo">Adresa</th>
+            <th data-lang-cs="Telefon" data-lang-en="Phone" data-lang-it="Telefono">Telefon</th>
+            <th>Email</th>
+            <th data-lang-cs="Počet zakázek" data-lang-en="Orders Count" data-lang-it="Numero Ordini">Počet zakázek</th>
+            <th data-lang-cs="Akce" data-lang-en="Actions" data-lang-it="Azioni">Akce</th>
+          </tr>
+        </thead>
+        <tbody id="zakaznici-table">
+          <tr>
+            <td colspan="6" class="loading" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
           </tr>
         </tbody>
       </table>

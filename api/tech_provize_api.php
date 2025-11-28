@@ -24,10 +24,10 @@ try {
     }
 
     // PERFORMANCE: Uvolnění session zámku
-    session_write_close();
-
     $userId = $_SESSION['user_id'];
-    $userRole = $_SESSION['user_role'] ?? null;
+    $userRole = $_SESSION['role'] ?? null;
+
+    session_write_close();
 
     // Kontrola že uživatel je technik
     if ($userRole !== 'technik') {

@@ -201,6 +201,87 @@ async function loadUsers() {
   }
 }
 
+// ============================================================
+// LOAD ZÁKAZNÍCI - Seznam zákazníků
+// ============================================================
+async function loadZakaznici() {
+  const tbody = document.getElementById('zakaznici-table');
+  if (!tbody) return;
+
+  try {
+    tbody.innerHTML = '<tr><td colspan="6" class="loading">Načítání...</td></tr>';
+
+    // Vyhledávací parametr (pokud existuje)
+    const searchInput = document.getElementById('search-zakaznici');
+    const searchQuery = searchInput ? searchInput.value.trim() : '';
+    const url = searchQuery
+      ? `/api/zakaznici_api.php?action=list_zakaznici&search=${encodeURIComponent(searchQuery)}`
+      : '/api/zakaznici_api.php?action=list_zakaznici';
+
+    const response = await fetch(url, {
+      credentials: 'same-origin'
+    });
+
+    if (!response.ok) {
+      if (isUnauthorizedStatus(response.status)) {
+        tbody.innerHTML = `<tr><td colspan="6" class="error-message">${SESSION_EXPIRED_MESSAGE()}</td></tr>`;
+        setTimeout(() => redirectToLogin('admin.php?tab=zakaznici'), 800);
+        return;
+      }
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      const zakaznici = data.zakaznici || [];
+
+      if (zakaznici.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">Žádní zákazníci</td></tr>';
+        return;
+      }
+
+      let html = '';
+      zakaznici.forEach(zakaznik => {
+        const jmeno = zakaznik.jmeno || '—';
+        const adresa = zakaznik.adresa || '—';
+        const telefon = zakaznik.telefon || '—';
+        const email = zakaznik.email || '—';
+        const pocetZakazek = zakaznik.pocet_zakazek || 0;
+
+        // Onclick handler - přesměrování na seznam.php s vyhledáváním
+        const onclickHandler = `otevritZakazkyZakaznika('${escapeHtml(jmeno)}', '${escapeHtml(email)}')`;
+
+        html += `<tr style="cursor: pointer;" onclick="${onclickHandler}" title="Klikněte pro zobrazení zakázek">`;
+        html += `<td><strong>${escapeHtml(jmeno)}</strong></td>`;
+        html += `<td>${escapeHtml(adresa)}</td>`;
+        html += `<td>${escapeHtml(telefon)}</td>`;
+        html += `<td>${escapeHtml(email)}</td>`;
+        html += `<td><span class="badge badge-active">${pocetZakazek}</span></td>`;
+        html += `<td><button class="btn btn-sm" onclick="event.stopPropagation(); otevritZakazkyZakaznika('${escapeHtml(jmeno)}', '${escapeHtml(email)}')">Zobrazit zakázky</button></td>`;
+        html += '</tr>';
+      });
+
+      tbody.innerHTML = html;
+    } else {
+      tbody.innerHTML = `<tr><td colspan="6" class="error-message">${data.message || 'Nepodařilo se načíst zákazníky.'}</td></tr>`;
+    }
+  } catch (error) {
+    tbody.innerHTML = '<tr><td colspan="6" class="error-message">Chyba načítání</td></tr>';
+    logger.error('Zakaznici load error:', error);
+    logClientError(error, 'loadZakaznici');
+  }
+}
+
+/**
+ * Otevře seznam.php s filtrováním podle jména zákazníka
+ */
+function otevritZakazkyZakaznika(jmeno, email) {
+  // Použít jméno nebo email jako vyhledávací dotaz
+  const searchQuery = jmeno && jmeno !== '—' ? jmeno : email;
+  window.location.href = `seznam.php?search=${encodeURIComponent(searchQuery)}`;
+}
+
 async function addUser() {
   const modal = document.getElementById('addUserModal');
   const errorDiv = document.getElementById('modal-error');
@@ -391,6 +472,8 @@ function initUserManagement() {
   const closeModalBtn = document.getElementById('closeModalBtn');
   const cancelModalBtn = document.getElementById('cancelModalBtn');
   const refreshOnlineBtn = document.getElementById('refreshOnlineBtn');
+  const refreshZakazniciBtn = document.getElementById('refreshZakazniciBtn');
+  const searchZakazniciInput = document.getElementById('search-zakaznici');
 
   if (addUserBtn) {
     addUserBtn.addEventListener('click', () => {
@@ -422,6 +505,22 @@ function initUserManagement() {
     refreshOnlineBtn.addEventListener('click', loadOnline);
   }
 
+  // Event listenery pro zákazníky
+  if (refreshZakazniciBtn) {
+    refreshZakazniciBtn.addEventListener('click', loadZakaznici);
+  }
+
+  if (searchZakazniciInput) {
+    // Vyhledávání při psaní (debounce 500ms)
+    let searchTimeout;
+    searchZakazniciInput.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        loadZakaznici();
+      }, 500);
+    });
+  }
+
   // Auto-load based on active tab
   const urlParams = new URLSearchParams(window.location.search);
   const tab = urlParams.get('tab');
@@ -429,6 +528,7 @@ function initUserManagement() {
   const hasDashboard = document.getElementById('tab-dashboard');
   const hasUsers = document.getElementById('tab-users');
   const hasOnline = document.getElementById('tab-online');
+  const hasZakaznici = document.getElementById('tab-zakaznici');
 
   if ((!tab || tab === 'dashboard') && hasDashboard) {
     loadDashboard();
@@ -436,6 +536,8 @@ function initUserManagement() {
     loadUsers();
   } else if (tab === 'online' && hasOnline) {
     loadOnline();
+  } else if (tab === 'zakaznici' && hasZakaznici) {
+    loadZakaznici();
   }
 }
 

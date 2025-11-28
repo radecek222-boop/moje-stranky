@@ -258,10 +258,21 @@ function stopAutoRefresh() {
 function initSearch() {
   const searchInput = document.getElementById('searchInput');
   const searchClear = document.getElementById('searchClear');
-  
+
+  // Načíst vyhledávací dotaz z URL parametru (pro přesměrování z admin zákazníků)
+  const urlParams = new URLSearchParams(window.location.search);
+  const searchParam = urlParams.get('search');
+  if (searchParam) {
+    searchInput.value = searchParam;
+    SEARCH_QUERY = searchParam.trim().toLowerCase();
+    searchClear.classList.add('visible');
+    // Vyčistit URL (odstranit ?search= parametr)
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
   searchInput.addEventListener('input', (e) => {
     SEARCH_QUERY = e.target.value.trim().toLowerCase();
-    
+
     searchClear.classList.toggle('visible', SEARCH_QUERY.length > 0);
 
     let userItems = Utils.filterByUserRole(WGS_DATA_CACHE);
@@ -3149,39 +3160,49 @@ async function zobrazVideotekaArchiv(claimId) {
   const container = document.createElement('div');
   container.style.cssText = 'width: 95%; max-width: 900px; height: 90%; background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;';
 
-  // Header
+  // Header (bude aktualizován po načtení dat z API)
   const header = document.createElement('div');
   header.style.cssText = 'padding: 16px 20px; background: #333; color: white; font-weight: 600; font-size: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #444;';
-  header.innerHTML = `<span>Videotéka</span><span style="font-size: 0.85rem; opacity: 0.7;">Zakázka ID: ${claimId}</span>`;
+  header.innerHTML = `<span>Načítání...</span>`;
 
   // Content area - seznam videí
   const content = document.createElement('div');
   content.id = 'videotekaContent';
-  content.style.cssText = 'flex: 1; overflow-y: auto; padding: 20px; background: #1a1a1a;';
+  content.style.cssText = 'flex: 1; overflow-y: auto; padding: 20px; background: #1a1a1a; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; align-content: start;';
 
   // Načíst videa z API
   try {
     const response = await fetch(`/api/video_api.php?action=list_videos&claim_id=${claimId}`);
     const result = await response.json();
 
-    if (result.status === 'success' && result.videos && result.videos.length > 0) {
-      // Zobrazit seznam videí
-      result.videos.forEach(video => {
-        const videoCard = vytvorVideoKartu(video, claimId);
-        content.appendChild(videoCard);
-      });
-    } else {
-      // Žádná videa
-      content.innerHTML = `
-        <div style="text-align: center; padding: 3rem; color: #999;">
-          <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📹</div>
-          <div style="font-size: 1.1rem; margin-bottom: 0.5rem;">Žádná videa v archivu</div>
-          <div style="font-size: 0.9rem; opacity: 0.7;">Nahrajte první video pomocí tlačítka níže</div>
-        </div>
-      `;
+    if (result.status === 'success') {
+      // Aktualizovat nadpis s jménem zákazníka a číslem reklamace
+      const customerName = result.customer_name || 'Neznámý zákazník';
+      const reklamaceNum = result.reklamace_cislo || claimId;
+      header.innerHTML = `<span>${customerName}</span><span style="font-size: 0.85rem; opacity: 0.7;">${reklamaceNum}</span>`;
+
+      if (result.videos && result.videos.length > 0) {
+        // Zobrazit seznam videí
+        result.videos.forEach(video => {
+          const videoCard = vytvorVideoKartu(video, claimId);
+          content.appendChild(videoCard);
+        });
+      } else {
+        // Žádná videa - změna na grid layout s centrováním
+        content.style.display = 'flex';
+        content.style.alignItems = 'center';
+        content.style.justifyContent = 'center';
+        content.innerHTML = `
+          <div style="text-align: center; padding: 3rem; color: #999;">
+            <div style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 1rem;">Žádná videa v archivu</div>
+            <div style="font-size: 1.05rem; font-weight: 500;">Nahrajte první video pomocí tlačítka níže</div>
+          </div>
+        `;
+      }
     }
   } catch (error) {
     logger.error('[Videotéka] Chyba při načítání videí:', error);
+    header.innerHTML = `<span>Chyba</span>`;
     content.innerHTML = `
       <div style="text-align: center; padding: 3rem; color: #f44;">
         <div style="font-size: 1rem; margin-bottom: 0.5rem;">Chyba při načítání videí</div>
@@ -3239,48 +3260,53 @@ async function zobrazVideotekaArchiv(claimId) {
  * @returns {HTMLElement}
  */
 function vytvorVideoKartu(video, claimId) {
+  // Karta - vertikální layout: náhled → název → velikost → datum → tlačítka
   const card = document.createElement('div');
-  card.style.cssText = 'background: #2a2a2a; border-radius: 8px; padding: 16px; margin-bottom: 16px; display: flex; gap: 16px; align-items: flex-start; border: 1px solid #444;';
+  card.style.cssText = 'background: #2a2a2a; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #444;';
 
-  // Video thumbnail placeholder (později můžeme přidat generování thumbnailů)
+  // Video thumbnail (statický náhled)
   const thumbnail = document.createElement('div');
-  thumbnail.style.cssText = 'width: 120px; height: 80px; background: #1a1a1a; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #555;';
-  thumbnail.innerHTML = '<span style="font-size: 2rem; opacity: 0.5;">▶</span>';
+  thumbnail.style.cssText = 'width: 100%; aspect-ratio: 16/9; background: #1a1a1a; border-radius: 4px; display: flex; align-items: center; justify-content: center; border: 1px solid #555; cursor: pointer;';
+  thumbnail.innerHTML = '<span style="font-size: 3rem; opacity: 0.4;">▶</span>';
+  thumbnail.onclick = () => prehratVideo(video.video_path, video.video_name);
 
-  // Informace o videu
-  const info = document.createElement('div');
-  info.style.cssText = 'flex: 1; color: #fff;';
-
+  // Název souboru
   const nazev = document.createElement('div');
-  nazev.style.cssText = 'font-weight: 600; font-size: 0.95rem; margin-bottom: 6px; color: #fff;';
+  nazev.style.cssText = 'font-weight: 500; font-size: 0.85rem; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
   nazev.textContent = video.video_name || 'Video';
+  nazev.title = video.video_name; // Tooltip pro dlouhé názvy
 
-  const meta = document.createElement('div');
-  meta.style.cssText = 'font-size: 0.8rem; color: #999; margin-bottom: 10px;';
+  // Velikost
+  const velikost = document.createElement('div');
+  velikost.style.cssText = 'font-size: 0.75rem; color: #999;';
+  velikost.textContent = `Velikost: ${(video.file_size / 1024 / 1024).toFixed(2)} MB`;
 
-  const velikost = (video.file_size / 1024 / 1024).toFixed(2);
-  const datum = video.uploaded_at ? new Date(video.uploaded_at).toLocaleString('cs-CZ') : '—';
+  // Datum nahrání
+  const datum = document.createElement('div');
+  datum.style.cssText = 'font-size: 0.75rem; color: #999;';
+  const datumText = video.uploaded_at ? new Date(video.uploaded_at).toLocaleString('cs-CZ', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }) : '—';
+  datum.textContent = `Nahráno: ${datumText}`;
 
-  meta.innerHTML = `
-    <div>Velikost: ${velikost} MB</div>
-    <div>Nahráno: ${datum}</div>
-    ${video.uploader_email ? `<div>Uživatel: ${video.uploader_email}</div>` : ''}
-  `;
-
-  // Tlačítka
+  // Tlačítka - styl stejný jako v showDetail modalu
   const buttons = document.createElement('div');
-  buttons.style.cssText = 'display: flex; gap: 8px; flex-wrap: wrap;';
+  buttons.style.cssText = 'display: flex; flex-direction: column; gap: 8px; margin-top: 6px;';
 
   // Tlačítko Přehrát
   const btnPrehrat = document.createElement('button');
   btnPrehrat.textContent = 'Přehrát';
-  btnPrehrat.style.cssText = 'padding: 8px 16px; font-size: 0.85rem; background: #2D5016; color: white; border: none; border-radius: 4px; cursor: pointer; touch-action: manipulation;';
+  btnPrehrat.style.cssText = 'width: 100%; min-height: 44px; padding: 0.5rem 0.75rem; font-size: 0.9rem; background: #1a1a1a; color: white; border: none; border-radius: 4px; cursor: pointer; touch-action: manipulation; box-sizing: border-box;';
   btnPrehrat.onclick = () => prehratVideo(video.video_path, video.video_name);
 
   // Tlačítko Stáhnout
   const btnStahnout = document.createElement('button');
   btnStahnout.textContent = 'Stáhnout';
-  btnStahnout.style.cssText = 'padding: 8px 16px; font-size: 0.85rem; background: #555; color: white; border: none; border-radius: 4px; cursor: pointer; touch-action: manipulation;';
+  btnStahnout.style.cssText = 'width: 100%; min-height: 44px; padding: 0.5rem 0.75rem; font-size: 0.9rem; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer; touch-action: manipulation; box-sizing: border-box;';
   btnStahnout.onclick = () => {
     const link = document.createElement('a');
     link.href = video.video_path;
@@ -3291,7 +3317,7 @@ function vytvorVideoKartu(video, claimId) {
   // Tlačítko Smazat
   const btnSmazat = document.createElement('button');
   btnSmazat.textContent = 'Smazat';
-  btnSmazat.style.cssText = 'padding: 8px 16px; font-size: 0.85rem; background: #c33; color: white; border: none; border-radius: 4px; cursor: pointer; touch-action: manipulation;';
+  btnSmazat.style.cssText = 'width: 100%; min-height: 44px; padding: 0.5rem 0.75rem; font-size: 0.9rem; background: #c33; color: white; border: none; border-radius: 4px; cursor: pointer; touch-action: manipulation; box-sizing: border-box;';
   btnSmazat.onclick = async () => {
     if (!confirm(`Opravdu smazat video "${video.video_name}"?`)) return;
 
@@ -3324,12 +3350,11 @@ function vytvorVideoKartu(video, claimId) {
   buttons.appendChild(btnStahnout);
   buttons.appendChild(btnSmazat);
 
-  info.appendChild(nazev);
-  info.appendChild(meta);
-  info.appendChild(buttons);
-
   card.appendChild(thumbnail);
-  card.appendChild(info);
+  card.appendChild(nazev);
+  card.appendChild(velikost);
+  card.appendChild(datum);
+  card.appendChild(buttons);
 
   return card;
 }
