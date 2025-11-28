@@ -2461,5 +2461,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Zavřít modal
     zavritZakaznikModal();
+
+    // Vynutit překlad všech textových polí
+    vynutitPreklad();
+  }
+
+  // Funkce pro vynucení překladu všech polí
+  function vynutitPreklad() {
+    console.log('[ZakaznikSchvaleni] Spouštím překlad polí...');
+
+    const fieldsToTranslate = [
+      { source: 'description-cz', target: 'description-en' },
+      { source: 'problem-cz', target: 'problem-en' },
+      { source: 'repair-cz', target: 'repair-en' }
+    ];
+
+    fieldsToTranslate.forEach(({ source, target }) => {
+      const sourceField = document.getElementById(source);
+      if (sourceField && sourceField.value.trim()) {
+        // Použít globální funkci translateText pokud existuje
+        if (typeof translateText === 'function') {
+          translateText(source, target);
+          console.log('[ZakaznikSchvaleni] Překlad:', source, '→', target);
+        }
+      }
+    });
   }
 })();
