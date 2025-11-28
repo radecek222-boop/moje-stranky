@@ -893,6 +893,11 @@ async function showHistoryPDF(originalReklamaceId) {
     const result = await response.json();
 
     if (result.status === 'error') {
+      // Pokud je původní zakázka smazána, zobrazit specifickou hlášku
+      if (result.message && result.message.includes('nebyla nalezena')) {
+        alert('Původní zakázka byla smazána.\n\nHistorie PDF není k dispozici.');
+        return;
+      }
       throw new Error(result.message || 'Nepodařilo se načíst dokumenty');
     }
 
