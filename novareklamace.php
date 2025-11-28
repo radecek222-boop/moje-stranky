@@ -79,12 +79,34 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.8);
-  display: none;              /* <-- PŘIDEJ TENTO ŘÁDEK */
-  align-items: center;         /* <-- PŘIDEJ TENTO ŘÁDEK */
-  justify-content: center;     /* <-- PŘIDEJ TENTO ŘÁDEK */
+  display: none;
+  /* FIX: Začít shora aby byla vidět hlavička - ne center! */
+  align-items: flex-start;
+  justify-content: center;
+  /* FIX: Padding shora aby byl vidět obsah */
+  padding: 2rem 0 0 0;
   z-index: 9999;
 }
 .calendar-overlay.active { display: flex; }
+
+/* FIX: Mobilní optimalizace kalendáře */
+@media (max-width: 768px) {
+  .calendar-overlay {
+    padding: 1rem 0.5rem 0.5rem 0.5rem;
+    /* iOS Safari viewport fix */
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .calendar-box {
+    max-width: 100%;
+    width: 95%;
+    max-height: 90vh;
+    max-height: 90dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
 
 .calendar-box {
   background: white;
@@ -234,11 +256,33 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.4);
   display: none;
-  align-items: center;
+  /* FIX: Začít shora aby byla vidět hlavička - ne center! */
+  align-items: flex-start;
   justify-content: center;
+  /* FIX: Padding shora aby byl vidět obsah */
+  padding: 2rem 0 0 0;
   z-index: 9999;
 }
 .overlay-provedeni.active { display: flex; }
+
+/* FIX: Mobilní optimalizace overlay provedení */
+@media (max-width: 768px) {
+  .overlay-provedeni {
+    padding: 1rem 0.5rem 0.5rem 0.5rem;
+    /* iOS Safari viewport fix */
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .provedeni-box {
+    max-width: 100%;
+    width: 95%;
+    max-height: 90vh;
+    max-height: 90dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
 
 .provedeni-box {
   position: relative;
