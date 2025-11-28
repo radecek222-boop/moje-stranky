@@ -1104,679 +1104,178 @@ async function odeslatVytvoreniKlice() {
 }
 
 // ==========================================
-// POZVÁNKOVÝ SYSTÉM
+// POZVANKOVY SYSTEM (ZJEDNODUSENY)
+// Sablony jsou nyni v databazi wgs_notifications
 // ==========================================
 
-// Globální nastavení šablony (výchozí hodnoty)
-let sablonaSettings = {
-    datumSpusteni: '1. ledna 2026',
-    telefonPodpora: '+420 725 965 826',
-    emailPodpora: 'info@wgs-service.cz',
-    textSkoleni: 'Radi vas proskolime po telefonu nebo osobne. Staci se nam ozvat a domluvime se.',
-    dobaSkoleni: '15-30 minut',
-    nazevFirmy: 'White Glove Service',
-    popisFirmy: 'Autorizovany servis Natuzzi pro CR a SR',
-    webFirmy: 'www.wgs-service.cz'
-};
-
-// Otevřít modal pro pozvánku
+// Otevrit modal pro pozvanku
 function otevritPozvanku() {
-    // Odstranit existující modal
+    // Odstranit existujici modal
     const existujici = document.getElementById('modalPozvanka');
     if (existujici) existujici.remove();
-
-    // Načíst uložená nastavení
-    nacistNastaveniSablony();
 
     const modal = document.createElement('div');
     modal.id = 'modalPozvanka';
     modal.style.cssText = `
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(0,0,0,0.7); display: flex;
-        align-items: flex-start; justify-content: center; z-index: 10000;
-        padding: 80px 20px 20px 20px; overflow-y: auto;
+        align-items: center; justify-content: center; z-index: 10000;
     `;
 
     modal.innerHTML = `
         <div style="background: #1a1a1a; padding: 30px; border-radius: 12px;
-                    max-width: 900px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-                    border: 1px solid #333; max-height: calc(100vh - 100px); overflow-y: auto;">
+                    max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                    border: 1px solid #333;">
 
-            <!-- Header s taby -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                <h3 style="margin: 0; color: #fff; font-size: 1.3rem;">Pozvankovy system</h3>
-                <div style="display: flex; gap: 5px; align-items: center;">
-                    <button onclick="prepnoutTab('odeslat')" id="tabOdeslat"
-                            style="background: #fff; color: #000; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
-                        Odeslat
-                    </button>
-                    <button onclick="prepnoutTab('texty')" id="tabTexty"
-                            style="background: #333; color: #aaa; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
-                        Texty sablony
-                    </button>
-                    <button onclick="prepnoutTab('sablona')" id="tabSablona"
-                            style="background: #333; color: #aaa; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
-                        Nastaveni
-                    </button>
-                    <button onclick="document.getElementById('modalPozvanka').remove()"
-                            style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer; margin-left: 10px;">&times;</button>
-                </div>
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3 style="margin: 0; color: #fff; font-size: 1.2rem;">Odeslat pozvanku</h3>
+                <button onclick="document.getElementById('modalPozvanka').remove()"
+                        style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer;">&times;</button>
             </div>
 
-            <!-- ==================== TAB: ODESLAT ==================== -->
-            <div id="tabContentOdeslat">
-                <!-- Výběr role -->
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Typ pozvanky</label>
-                    <div style="display: flex; gap: 10px;">
-                        <label style="flex: 1; display: flex; align-items: center; padding: 15px;
-                                      background: #252525; border-radius: 8px; cursor: pointer;
-                                      border: 2px solid transparent;" id="labelTechnik">
-                            <input type="radio" name="typPozvanky" value="technik" onchange="aktualizovatNahled()"
-                                   style="width: 18px; height: 18px; margin-right: 12px; accent-color: #fff;">
-                            <div>
-                                <div style="color: #fff; font-weight: 600;">Technik</div>
-                                <div style="color: #888; font-size: 0.8rem;">Servisni technik</div>
-                            </div>
-                        </label>
-                        <label style="flex: 1; display: flex; align-items: center; padding: 15px;
-                                      background: #252525; border-radius: 8px; cursor: pointer;
-                                      border: 2px solid transparent;" id="labelProdejce">
-                            <input type="radio" name="typPozvanky" value="prodejce" onchange="aktualizovatNahled()"
-                                   style="width: 18px; height: 18px; margin-right: 12px; accent-color: #fff;">
-                            <div>
-                                <div style="color: #fff; font-weight: 600;">Prodejce</div>
-                                <div style="color: #888; font-size: 0.8rem;">Obchodni zastupce</div>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Výběr klíče -->
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Registracni klic</label>
-                    <select id="vyberKlice" onchange="aktualizovatNahled()" style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444;
-                            border-radius: 6px; color: #fff; font-size: 0.9rem;">
-                        <option value="">-- Nacitam klice... --</option>
-                    </select>
-                    <div style="color: #666; font-size: 0.75rem; margin-top: 5px;">Nebo bude vytvoren novy klic automaticky</div>
-                </div>
-
-                <!-- Emaily -->
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">
-                        Emailove adresy (kazdy email na novy radek, max 30)
-                    </label>
-                    <textarea id="emailyPozvanky" rows="5" placeholder="jan.novak@example.com&#10;petr.svoboda@example.com&#10;marie.kralova@example.com"
-                              style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444;
-                              border-radius: 6px; color: #fff; font-size: 0.9rem; resize: vertical; font-family: monospace;"></textarea>
-                    <div style="color: #666; font-size: 0.75rem; margin-top: 5px;">
-                        Zadano: <span id="pocetEmailu">0</span> / 30 emailu
-                    </div>
-                </div>
-
-                <!-- Náhled šablony -->
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Nahled emailu</label>
-                    <div id="nahledSablony" style="background: #fff; color: #333; padding: 20px; border-radius: 6px;
-                         max-height: 300px; overflow-y: auto; font-size: 0.85rem; line-height: 1.6;">
-                        <div style="text-align: center; color: #999; padding: 40px;">
-                            Vyberte typ pozvanky pro zobrazeni nahledu
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tlačítka -->
+            <!-- Vyber role -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Typ pozvanky</label>
                 <div style="display: flex; gap: 10px;">
-                    <button onclick="odeslatPozvanky()" id="btnOdeslatPozvanky" disabled
-                            style="flex: 1; padding: 14px; background: #fff; color: #000; border: none;
-                            border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;
-                            opacity: 0.5; transition: opacity 0.2s;">
-                        Odeslat pozvanky
-                    </button>
-                    <button onclick="document.getElementById('modalPozvanka').remove()"
-                            style="flex: 1; padding: 14px; background: #333; color: #fff;
-                            border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">
-                        Zrusit
-                    </button>
+                    <label style="flex: 1; display: flex; align-items: center; padding: 12px;
+                                  background: #252525; border-radius: 6px; cursor: pointer;
+                                  border: 2px solid transparent;" id="labelTechnik">
+                        <input type="radio" name="typPozvanky" value="technik" onchange="aktualizovatVyber()"
+                               style="width: 16px; height: 16px; margin-right: 10px; accent-color: #fff;">
+                        <span style="color: #fff;">Technik</span>
+                    </label>
+                    <label style="flex: 1; display: flex; align-items: center; padding: 12px;
+                                  background: #252525; border-radius: 6px; cursor: pointer;
+                                  border: 2px solid transparent;" id="labelProdejce">
+                        <input type="radio" name="typPozvanky" value="prodejce" onchange="aktualizovatVyber()"
+                               style="width: 16px; height: 16px; margin-right: 10px; accent-color: #fff;">
+                        <span style="color: #fff;">Prodejce</span>
+                    </label>
                 </div>
-
-                <!-- Status -->
-                <div id="statusPozvanky" style="margin-top: 15px; display: none; padding: 12px; border-radius: 6px;"></div>
             </div>
 
-            <!-- ==================== TAB: TEXTY SABLONY ==================== -->
-            <div id="tabContentTexty" style="display: none;">
-                <p style="color: #888; font-size: 0.85rem; margin: 0 0 20px;">
-                    Upravte hlavni textovy obsah emailove pozvanky. Pouzijte promenne: <code style="background: #333; padding: 2px 6px; border-radius: 3px;">{KLIC}</code>, <code style="background: #333; padding: 2px 6px; border-radius: 3px;">{ROLE}</code>, <code style="background: #333; padding: 2px 6px; border-radius: 3px;">{DATUM}</code>
-                </p>
-
-                <!-- Předmět emailu -->
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; color: #fff; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600;">Predmet emailu</label>
-                    <input type="text" id="sablonaPredmet" placeholder="Pozvanka do systemu WGS Service"
-                           style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.95rem;">
-                </div>
-
-                <!-- Uvítací text -->
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; color: #fff; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600;">Uvitaci text (po registracnim klici)</label>
-                    <textarea id="sablonaUvitaciText" rows="3" placeholder="Byli jste pozváni do systému WGS Service jako {ROLE}..."
-                              style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem; resize: vertical;"></textarea>
-                </div>
-
-                <!-- Co budou moct dělat - PRODEJCE -->
-                <div style="margin-bottom: 20px; border: 1px solid #444; border-radius: 8px; padding: 15px;">
-                    <label style="display: block; color: #fff; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600;">
-                        Text pro PRODEJCE - "Co budete moct delat"
-                    </label>
-                    <p style="color: #666; font-size: 0.75rem; margin: 0 0 10px;">Kazdy bod na novy radek</p>
-                    <textarea id="sablonaFunkceProdejce" rows="6" placeholder="Zadavat nove reklamace pro vase zakazniky
-Sledovat stav vasich zakazek v realnem case
-Videt historii vsech reklamaci ktere jste zadali
-Nahravat dokumenty a fotky k zakazkam
-Pridavat poznamky pro techniky
-Videt kdy technik navstivi zakaznika"
-                              style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem; resize: vertical; font-family: monospace;"></textarea>
-                </div>
-
-                <!-- Co budou moct dělat - TECHNIK -->
-                <div style="margin-bottom: 20px; border: 1px solid #444; border-radius: 8px; padding: 15px;">
-                    <label style="display: block; color: #fff; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600;">
-                        Text pro TECHNIKY - "Co budete moct delat"
-                    </label>
-                    <p style="color: #666; font-size: 0.75rem; margin: 0 0 10px;">Kazdy bod na novy radek</p>
-                    <textarea id="sablonaFunkceTechnik" rows="6" placeholder="Videt sve prirazene zakazky v prehlednem seznamu
-Menit stav zakazky (Ceka / Domluvena / Hotovo)
-Vyplnovat servisni protokoly s automatickym prekladem
-Nahravat fotky pred a po oprave
-Videt adresu zakaznika na mape s navigaci
-Nechat zakaznika elektronicky podepsat protokol"
-                              style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem; resize: vertical; font-family: monospace;"></textarea>
-                </div>
-
-                <!-- Detailní návod PRODEJCE -->
-                <div style="margin-bottom: 20px; border: 1px solid #444; border-radius: 8px; padding: 15px;">
-                    <label style="display: block; color: #fff; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600;">
-                        Detailni navod pro PRODEJCE
-                    </label>
-                    <p style="color: #666; font-size: 0.75rem; margin: 0 0 10px;">Kompletni navod jak pouzivat system. Formatovani: **tucne**, novy radek = novy odstavec</p>
-                    <textarea id="sablonaNavodProdejce" rows="10"
-                              style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.85rem; resize: vertical; font-family: monospace;"></textarea>
-                </div>
-
-                <!-- Detailní návod TECHNIK -->
-                <div style="margin-bottom: 20px; border: 1px solid #444; border-radius: 8px; padding: 15px;">
-                    <label style="display: block; color: #fff; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600;">
-                        Detailni navod pro TECHNIKY
-                    </label>
-                    <p style="color: #666; font-size: 0.75rem; margin: 0 0 10px;">Kompletni navod jak pouzivat system. Formatovani: **tucne**, novy radek = novy odstavec</p>
-                    <textarea id="sablonaNavodTechnik" rows="10"
-                              style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.85rem; resize: vertical; font-family: monospace;"></textarea>
-                </div>
-
-                <!-- Tlačítka pro uložení textů -->
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button onclick="ulozitTextySablony()"
-                            style="flex: 1; padding: 14px; background: #fff; color: #000; border: none;
-                            border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;">
-                        Ulozit texty
-                    </button>
-                    <button onclick="nacistVychoziTexty()"
-                            style="padding: 14px 20px; background: #333; color: #fff;
-                            border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
-                        Nacist vychozi
-                    </button>
-                </div>
-
-                <!-- Status uložení textů -->
-                <div id="statusTexty" style="margin-top: 15px; display: none; padding: 12px; border-radius: 6px;"></div>
+            <!-- Vyber klice -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Registracni klic</label>
+                <select id="vyberKlice" style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444;
+                        border-radius: 6px; color: #fff; font-size: 0.9rem;">
+                    <option value="auto">Vytvorit novy klic automaticky</option>
+                </select>
             </div>
 
-            <!-- ==================== TAB: NASTAVENI ==================== -->
-            <div id="tabContentSablona" style="display: none;">
-                <p style="color: #888; font-size: 0.85rem; margin: 0 0 20px;">
-                    Kontaktni udaje a firemni informace v patice emailu.
-                </p>
-
-                <!-- Datum spuštění -->
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Datum spusteni systemu</label>
-                    <input type="text" id="sablonaDatumSpusteni" value="${sablonaSettings.datumSpusteni}"
-                           style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem;">
+            <!-- Emaily -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">
+                    Emailove adresy (kazdy na novy radek)
+                </label>
+                <textarea id="emailyPozvanky" rows="4" placeholder="jan.novak@example.com"
+                          style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444;
+                          border-radius: 6px; color: #fff; font-size: 0.9rem; resize: vertical; font-family: monospace;"></textarea>
+                <div style="color: #666; font-size: 0.75rem; margin-top: 5px;">
+                    Zadano: <span id="pocetEmailu">0</span> / 30 emailu
                 </div>
-
-                <!-- Kontaktní údaje -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                    <div>
-                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Telefon pro podporu</label>
-                        <input type="text" id="sablonaTelefon" value="${sablonaSettings.telefonPodpora}"
-                               style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem;">
-                    </div>
-                    <div>
-                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Email pro podporu</label>
-                        <input type="text" id="sablonaEmail" value="${sablonaSettings.emailPodpora}"
-                               style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem;">
-                    </div>
-                </div>
-
-                <!-- Text o školení -->
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Text o skoleni</label>
-                    <textarea id="sablonaTextSkoleni" rows="2"
-                              style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem; resize: vertical;">${sablonaSettings.textSkoleni}</textarea>
-                </div>
-
-                <!-- Doba školení -->
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Doba skoleni</label>
-                    <input type="text" id="sablonaDobaSkoleni" value="${sablonaSettings.dobaSkoleni}"
-                           style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem;">
-                </div>
-
-                <!-- Firemní údaje -->
-                <div style="border-top: 1px solid #333; padding-top: 15px; margin-top: 20px;">
-                    <h4 style="color: #fff; margin: 0 0 15px; font-size: 0.95rem;">Paticka emailu</h4>
-
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Nazev firmy</label>
-                        <input type="text" id="sablonaNazevFirmy" value="${sablonaSettings.nazevFirmy}"
-                               style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem;">
-                    </div>
-
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Popis firmy</label>
-                        <input type="text" id="sablonaPopisFirmy" value="${sablonaSettings.popisFirmy}"
-                               style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem;">
-                    </div>
-
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 5px;">Web firmy</label>
-                        <input type="text" id="sablonaWebFirmy" value="${sablonaSettings.webFirmy}"
-                               style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem;">
-                    </div>
-                </div>
-
-                <!-- Tlačítka pro uložení -->
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button onclick="ulozitNastaveniSablony()"
-                            style="flex: 1; padding: 14px; background: #fff; color: #000; border: none;
-                            border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;">
-                        Ulozit nastaveni
-                    </button>
-                    <button onclick="obnovitVychoziSablonu()"
-                            style="padding: 14px 20px; background: #333; color: #fff;
-                            border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
-                        Obnovit vychozi
-                    </button>
-                </div>
-
-                <!-- Status uložení -->
-                <div id="statusSablony" style="margin-top: 15px; display: none; padding: 12px; border-radius: 6px;"></div>
             </div>
 
+            <!-- Info o sablone -->
+            <div style="background: #252525; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
+                <div style="color: #888; font-size: 0.8rem;">
+                    Sablona se nacte z databaze (wgs_notifications).
+                    Editovat ji muzete v karte "Email sablony".
+                </div>
+            </div>
+
+            <!-- Tlacitka -->
+            <div style="display: flex; gap: 10px;">
+                <button onclick="odeslatPozvanky()" id="btnOdeslatPozvanky" disabled
+                        style="flex: 1; padding: 12px; background: #fff; color: #000; border: none;
+                        border-radius: 6px; font-weight: 600; cursor: pointer; opacity: 0.5;">
+                    Odeslat
+                </button>
+                <button onclick="document.getElementById('modalPozvanka').remove()"
+                        style="flex: 1; padding: 12px; background: #333; color: #fff;
+                        border: none; border-radius: 6px; cursor: pointer;">
+                    Zrusit
+                </button>
+            </div>
+
+            <!-- Status -->
+            <div id="statusPozvanky" style="margin-top: 15px; display: none; padding: 12px; border-radius: 6px;"></div>
         </div>
     `;
 
     document.body.appendChild(modal);
 
-    // Načíst klíče do selectu
+    // Nacist klice do selectu
     nacistKliceProPozvanku();
 
-    // Naplnit pole šablony aktuálními hodnotami
-    naplnitPoleSablony();
+    // Event listener pro pocitani emailu
+    const emailyEl = document.getElementById('emailyPozvanky');
+    if (emailyEl) {
+        emailyEl.addEventListener('input', function() {
+            const emaily = this.value.split('\\n').filter(e => e.trim() !== '');
+            const pocetEl = document.getElementById('pocetEmailu');
+            if (pocetEl) pocetEl.textContent = emaily.length;
+            aktualizovatTlacitkoOdeslat();
+        });
+    }
 
-    // Event listener pro počítání emailů
-    document.getElementById('emailyPozvanky').addEventListener('input', function() {
-        const emaily = this.value.split('\\n').filter(e => e.trim() !== '');
-        document.getElementById('pocetEmailu').textContent = emaily.length;
-        aktualizovatTlacitkoOdeslat();
-    });
-
-    // Zavřít při kliknutí na pozadí
+    // Zavrit pri kliknuti na pozadi
     modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.remove();
     });
 }
 
-// Přepnout tab
-function prepnoutTab(tab) {
-    const tabs = ['Odeslat', 'Texty', 'Sablona'];
-    const contents = ['tabContentOdeslat', 'tabContentTexty', 'tabContentSablona'];
+// Aktualizovat vyber typu pozvanky (vizualni)
+function aktualizovatVyber() {
+    const typ = document.querySelector('input[name="typPozvanky"]:checked')?.value;
+    const labelTechnik = document.getElementById('labelTechnik');
+    const labelProdejce = document.getElementById('labelProdejce');
 
-    // Resetovat všechny taby
-    tabs.forEach(t => {
-        const tabEl = document.getElementById('tab' + t);
-        if (tabEl) {
-            tabEl.style.background = '#333';
-            tabEl.style.color = '#aaa';
-            tabEl.style.fontWeight = 'normal';
-        }
-    });
+    if (labelTechnik) labelTechnik.style.borderColor = typ === 'technik' ? '#fff' : 'transparent';
+    if (labelProdejce) labelProdejce.style.borderColor = typ === 'prodejce' ? '#fff' : 'transparent';
 
-    // Skrýt všechny obsahy
-    contents.forEach(c => {
-        const contentEl = document.getElementById(c);
-        if (contentEl) contentEl.style.display = 'none';
-    });
-
-    // Aktivovat vybraný tab
-    const aktivniTab = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
-    if (aktivniTab) {
-        aktivniTab.style.background = '#fff';
-        aktivniTab.style.color = '#000';
-        aktivniTab.style.fontWeight = '600';
-    }
-
-    // Zobrazit vybraný obsah
-    const aktivniContent = document.getElementById('tabContent' + tab.charAt(0).toUpperCase() + tab.slice(1));
-    if (aktivniContent) aktivniContent.style.display = 'block';
-
-    // Při přepnutí na Texty načíst texty
-    if (tab === 'texty') {
-        nacistTextySablony();
-    }
+    aktualizovatTlacitkoOdeslat();
 }
 
-// Naplnit pole šablony aktuálními hodnotami
-function naplnitPoleSablony() {
-    document.getElementById('sablonaDatumSpusteni').value = sablonaSettings.datumSpusteni || '';
-    document.getElementById('sablonaTelefon').value = sablonaSettings.telefonPodpora || '';
-    document.getElementById('sablonaEmail').value = sablonaSettings.emailPodpora || '';
-    document.getElementById('sablonaTextSkoleni').value = sablonaSettings.textSkoleni || '';
-    document.getElementById('sablonaDobaSkoleni').value = sablonaSettings.dobaSkoleni || '';
-    document.getElementById('sablonaNazevFirmy').value = sablonaSettings.nazevFirmy || '';
-    document.getElementById('sablonaPopisFirmy').value = sablonaSettings.popisFirmy || '';
-    document.getElementById('sablonaWebFirmy').value = sablonaSettings.webFirmy || '';
-}
+// Aktualizovat stav tlacitka odeslat
+function aktualizovatTlacitkoOdeslat() {
+    const typ = document.querySelector('input[name="typPozvanky"]:checked')?.value;
+    const emailyEl = document.getElementById('emailyPozvanky');
+    const emaily = emailyEl ? emailyEl.value.split('\\n').filter(e => e.trim() !== '') : [];
+    const btn = document.getElementById('btnOdeslatPozvanky');
 
-// Načíst nastavení šablony z databáze
-async function nacistNastaveniSablony() {
-    try {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-        const odpoved = await fetch('/api/admin_api.php?action=get_invitation_template');
-        const data = await odpoved.json();
-
-        if (data.status === 'success' && data.settings) {
-            sablonaSettings = { ...sablonaSettings, ...data.settings };
-        }
-    } catch (e) {
-        console.log('Pouzivam vychozi nastaveni sablony');
-    }
-}
-
-// Uložit nastavení šablony
-async function ulozitNastaveniSablony() {
-    const statusEl = document.getElementById('statusSablony');
-
-    // Načíst hodnoty z polí
-    sablonaSettings.datumSpusteni = document.getElementById('sablonaDatumSpusteni').value.trim();
-    sablonaSettings.telefonPodpora = document.getElementById('sablonaTelefon').value.trim();
-    sablonaSettings.emailPodpora = document.getElementById('sablonaEmail').value.trim();
-    sablonaSettings.textSkoleni = document.getElementById('sablonaTextSkoleni').value.trim();
-    sablonaSettings.dobaSkoleni = document.getElementById('sablonaDobaSkoleni').value.trim();
-    sablonaSettings.nazevFirmy = document.getElementById('sablonaNazevFirmy').value.trim();
-    sablonaSettings.popisFirmy = document.getElementById('sablonaPopisFirmy').value.trim();
-    sablonaSettings.webFirmy = document.getElementById('sablonaWebFirmy').value.trim();
-
-    statusEl.style.display = 'block';
-    statusEl.style.background = '#d1ecf1';
-    statusEl.style.color = '#0c5460';
-    statusEl.textContent = 'Ukladam...';
-
-    try {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-        if (!csrfToken) throw new Error('CSRF token neni k dispozici');
-
-        const odpoved = await fetch('/api/admin_api.php?action=save_invitation_template', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                settings: sablonaSettings,
-                csrf_token: csrfToken
-            })
-        });
-
-        const data = await odpoved.json();
-
-        if (data.status === 'success') {
-            statusEl.style.background = '#d4edda';
-            statusEl.style.color = '#155724';
-            statusEl.textContent = 'Nastaveni bylo ulozeno!';
-            setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+    if (btn) {
+        if (typ && emaily.length > 0 && emaily.length <= 30) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
         } else {
-            throw new Error(data.message || 'Chyba pri ukladani');
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
         }
-    } catch (chyba) {
-        statusEl.style.background = '#f8d7da';
-        statusEl.style.color = '#721c24';
-        statusEl.textContent = 'Chyba: ' + chyba.message;
     }
 }
 
-// Obnovit výchozí šablonu
-function obnovitVychoziSablonu() {
-    if (!confirm('Opravdu chcete obnovit vychozi nastaveni sablony?')) return;
-
-    sablonaSettings = {
-        datumSpusteni: '1. ledna 2026',
-        telefonPodpora: '+420 725 965 826',
-        emailPodpora: 'info@wgs-service.cz',
-        textSkoleni: 'Radi vas proskolime po telefonu nebo osobne. Staci se nam ozvat a domluvime se.',
-        dobaSkoleni: '15-30 minut',
-        nazevFirmy: 'White Glove Service',
-        popisFirmy: 'Autorizovany servis Natuzzi pro CR a SR',
-        webFirmy: 'www.wgs-service.cz'
-    };
-
-    naplnitPoleSablony();
-
-    const statusEl = document.getElementById('statusSablony');
-    statusEl.style.display = 'block';
-    statusEl.style.background = '#d1ecf1';
-    statusEl.style.color = '#0c5460';
-    statusEl.textContent = 'Vychozi nastaveni obnoveno. Nezapomente ulozit!';
-    setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
-}
-
-// Načíst klíče pro pozvánku
+// Nacist klice pro pozvanku
 async function nacistKliceProPozvanku() {
     try {
         const odpoved = await fetch('/api/admin_api.php?action=get_keys');
         const data = await odpoved.json();
 
         const select = document.getElementById('vyberKlice');
-        if (data.status === 'success' && data.keys) {
+        if (select && data.status === 'success' && data.keys) {
             let options = '<option value="auto">Vytvorit novy klic automaticky</option>';
             data.keys.forEach(klic => {
                 if (klic.is_active) {
                     const limit = klic.max_usage === null ? 'neomezeno' : klic.max_usage;
-                    options += `<option value="${klic.key_code}" data-type="${klic.key_type}">
-                        ${klic.key_code} (${klic.key_type.toUpperCase()}) - ${klic.usage_count}/${limit}
-                    </option>`;
+                    options += `<option value="${klic.key_code}">${klic.key_code} (${klic.key_type.toUpperCase()}) - ${klic.usage_count}/${limit}</option>`;
                 }
             });
             select.innerHTML = options;
         }
     } catch (e) {
-        console.error('Chyba načítání klíčů:', e);
+        console.error('Chyba nacitani klicu:', e);
     }
-}
-
-// Aktualizovat náhled šablony
-function aktualizovatNahled() {
-    const typ = document.querySelector('input[name="typPozvanky"]:checked')?.value;
-    const nahled = document.getElementById('nahledSablony');
-    const klicSelect = document.getElementById('vyberKlice');
-    const klic = klicSelect.value === 'auto' ? 'BUDE-VYGENEROVAN' : klicSelect.value;
-
-    if (!typ) {
-        nahled.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">Vyberte typ pozvanky pro zobrazeni nahledu</div>';
-        return;
-    }
-
-    // Aktualizovat styl labelů
-    document.getElementById('labelTechnik').style.borderColor = typ === 'technik' ? '#fff' : 'transparent';
-    document.getElementById('labelProdejce').style.borderColor = typ === 'prodejce' ? '#fff' : 'transparent';
-
-    const sablona = ziskatSablonuPozvanky(typ, klic);
-    nahled.innerHTML = sablona;
-
-    aktualizovatTlacitkoOdeslat();
-}
-
-// Aktualizovat stav tlačítka odeslat
-function aktualizovatTlacitkoOdeslat() {
-    const typ = document.querySelector('input[name="typPozvanky"]:checked')?.value;
-    const emaily = document.getElementById('emailyPozvanky').value.split('\\n').filter(e => e.trim() !== '');
-    const btn = document.getElementById('btnOdeslatPozvanky');
-
-    if (typ && emaily.length > 0 && emaily.length <= 30) {
-        btn.disabled = false;
-        btn.style.opacity = '1';
-    } else {
-        btn.disabled = true;
-        btn.style.opacity = '0.5';
-    }
-}
-
-// Získat HTML šablonu pro pozvánku
-function ziskatSablonuPozvanky(typ, klic) {
-    const appUrl = window.location.origin;
-    const rokAktualni = new Date().getFullYear();
-
-    if (typ === 'technik') {
-        return `
-            <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <!-- Header -->
-                <div style="background: #1a1a1a; color: #fff; padding: 30px; text-align: center;">
-                    <h1 style="margin: 0; font-size: 24px; font-weight: 600;">WGS - White Glove Service</h1>
-                    <p style="margin: 10px 0 0; color: #aaa; font-size: 14px;">Servisni system Natuzzi</p>
-                </div>
-
-                <!-- Body -->
-                <div style="padding: 30px; background: #f9f9f9;">
-                    <h2 style="color: #333; margin-top: 0;">Vitejte v tymu WGS!</h2>
-
-                    <p style="color: #555;">Byli jste pozvan/a jako <strong>servisni technik</strong> do systemu White Glove Service pro spravu servisnich zakazek Natuzzi.</p>
-
-                    <div style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin: 20px 0;">
-                        <h3 style="margin-top: 0; color: #333;">Vas registracni klic:</h3>
-                        <div style="background: #1a1a1a; color: #fff; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 18px; text-align: center; letter-spacing: 2px;">
-                            ${klic}
-                        </div>
-                    </div>
-
-                    <h3 style="color: #333;">Jak zacit:</h3>
-                    <ol style="color: #555; line-height: 1.8;">
-                        <li>Prejdete na stranku registrace: <a href="${appUrl}/registration.php" style="color: #000;">${appUrl}/registration.php</a></li>
-                        <li>Zadejte registracni klic uvedeny vyse</li>
-                        <li>Vyplnte sve udaje (jmeno, email, telefon)</li>
-                        <li>Vytvorte si heslo (min. 12 znaku)</li>
-                        <li>Po registraci se prihlaste na: <a href="${appUrl}/login.php" style="color: #000;">${appUrl}/login.php</a></li>
-                    </ol>
-
-                    <h3 style="color: #333;">Co muzete delat jako technik:</h3>
-                    <ul style="color: #555; line-height: 1.8;">
-                        <li><strong>Prohlizet zakazky</strong> - Vidite vsechny servisni pozadavky prirazene vam</li>
-                        <li><strong>Aktualizovat stav</strong> - Menit stav zakazky (Ceka / Domluvena / Hotovo)</li>
-                        <li><strong>Vyplnovat protokoly</strong> - Dokumentovat provedenou praci</li>
-                        <li><strong>Nahravat fotografie</strong> - Pred a po oprave</li>
-                        <li><strong>Prohlizet mapu</strong> - Videt polohu zakaznika a vypocitat vzdalenost</li>
-                    </ul>
-
-                    <h3 style="color: #333;">Budete informovani o:</h3>
-                    <ul style="color: #555; line-height: 1.8;">
-                        <li>Novych zakazkach prirazenych vam</li>
-                        <li>Zmenach terminu navstev</li>
-                        <li>Dulezitych aktualizacich systemu</li>
-                    </ul>
-
-                    <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin: 20px 0;">
-                        <strong style="color: #856404;">Dulezite:</strong>
-                        <span style="color: #856404;">Tento registracni klic je urcen pouze pro vas. Nesdílejte jej s nikym dalsim.</span>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div style="background: #1a1a1a; color: #aaa; padding: 25px; text-align: center; font-size: 12px;">
-                    <p style="margin: 0 0 10px;"><strong style="color: #fff;">White Glove Service</strong></p>
-                    <p style="margin: 0 0 5px;">Autorizovany servis Natuzzi pro Ceskou republiku a Slovensko</p>
-                    <p style="margin: 0 0 15px;">
-                        <a href="${appUrl}" style="color: #aaa;">www.wgs-service.cz</a>
-                    </p>
-                    <p style="margin: 0; color: #666; font-size: 11px;">&copy; ${rokAktualni} WGS Service. Vsechna prava vyhrazena.</p>
-                </div>
-            </div>
-        `;
-    } else if (typ === 'prodejce') {
-        return `
-            <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <!-- Header -->
-                <div style="background: #1a1a1a; color: #fff; padding: 30px; text-align: center;">
-                    <h1 style="margin: 0; font-size: 24px; font-weight: 600;">WGS - White Glove Service</h1>
-                    <p style="margin: 10px 0 0; color: #aaa; font-size: 14px;">Servisni system Natuzzi</p>
-                </div>
-
-                <!-- Body -->
-                <div style="padding: 30px; background: #f9f9f9;">
-                    <h2 style="color: #333; margin-top: 0;">Vitejte v tymu WGS!</h2>
-
-                    <p style="color: #555;">Byli jste pozvan/a jako <strong>prodejce</strong> do systemu White Glove Service pro spravu servisnich pozadavku Natuzzi.</p>
-
-                    <div style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin: 20px 0;">
-                        <h3 style="margin-top: 0; color: #333;">Vas registracni klic:</h3>
-                        <div style="background: #1a1a1a; color: #fff; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 18px; text-align: center; letter-spacing: 2px;">
-                            ${klic}
-                        </div>
-                    </div>
-
-                    <h3 style="color: #333;">Jak zacit:</h3>
-                    <ol style="color: #555; line-height: 1.8;">
-                        <li>Prejdete na stranku registrace: <a href="${appUrl}/registration.php" style="color: #000;">${appUrl}/registration.php</a></li>
-                        <li>Zadejte registracni klic uvedeny vyse</li>
-                        <li>Vyplnte sve udaje (jmeno, email, telefon)</li>
-                        <li>Vytvorte si heslo (min. 12 znaku)</li>
-                        <li>Po registraci se prihlaste na: <a href="${appUrl}/login.php" style="color: #000;">${appUrl}/login.php</a></li>
-                    </ol>
-
-                    <h3 style="color: #333;">Co muzete delat jako prodejce:</h3>
-                    <ul style="color: #555; line-height: 1.8;">
-                        <li><strong>Zadavat nove reklamace</strong> - Vytvorit servisni pozadavek pro zakaznika</li>
-                        <li><strong>Sledovat stav</strong> - Videt aktualni stav vsech vasich zakazek</li>
-                        <li><strong>Prohlizet historii</strong> - Pristup k historii reklamaci a servisu</li>
-                        <li><strong>Nahravat dokumenty</strong> - Pridavat faktury, fotky a dalsi podklady</li>
-                        <li><strong>Komunikovat</strong> - Pridavat poznamky k zakazkam</li>
-                    </ul>
-
-                    <h3 style="color: #333;">Budete informovani o:</h3>
-                    <ul style="color: #555; line-height: 1.8;">
-                        <li>Zmenach stavu vasich zakazek</li>
-                        <li>Dokonceni servisu</li>
-                        <li>Dulezitych aktualizacich systemu</li>
-                    </ul>
-
-                    <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin: 20px 0;">
-                        <strong style="color: #856404;">Dulezite:</strong>
-                        <span style="color: #856404;">Tento registracni klic je urcen pouze pro vas. Nesdílejte jej s nikym dalsim.</span>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div style="background: #1a1a1a; color: #aaa; padding: 25px; text-align: center; font-size: 12px;">
-                    <p style="margin: 0 0 10px;"><strong style="color: #fff;">White Glove Service</strong></p>
-                    <p style="margin: 0 0 5px;">Autorizovany servis Natuzzi pro Ceskou republiku a Slovensko</p>
-                    <p style="margin: 0 0 15px;">
-                        <a href="${appUrl}" style="color: #aaa;">www.wgs-service.cz</a>
-                    </p>
-                    <p style="margin: 0; color: #666; font-size: 11px;">&copy; ${rokAktualni} WGS Service. Vsechna prava vyhrazena.</p>
-                </div>
-            </div>
-        `;
-    }
-
-    return '';
 }
 
 // Odeslat pozvánky
@@ -2307,230 +1806,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 console.log('Security centrum načteno');
-
-// ==========================================
-// TEXTY ŠABLONY - ukládání a načítání
-// ==========================================
-
-// Globální objekt pro texty šablony
-let sablonaTexty = {
-    predmet: 'Pozvanka do systemu WGS Service',
-    uvitaciText: 'Byli jste pozvani do systemu WGS Service. Tento system slouzi ke sprave servisnich pozadavku pro nabytek Natuzzi.',
-    funkceProdejce: `Zadavat nove reklamace pro vase zakazniky
-Sledovat stav vasich zakazek v realnem case
-Videt historii vsech reklamaci ktere jste zadali
-Nahravat dokumenty a fotky k zakazkam
-Pridavat poznamky pro techniky
-Videt kdy technik navstivi zakaznika`,
-    funkceTechnik: `Videt sve prirazene zakazky v prehlednem seznamu
-Menit stav zakazky (Ceka / Domluvena / Hotovo)
-Vyplnovat servisni protokoly s automatickym prekladem
-Nahravat fotky pred a po oprave
-Videt adresu zakaznika na mape s navigaci
-Nechat zakaznika elektronicky podepsat protokol
-Exportovat protokol do PDF a poslat zakaznikovi`,
-    navodProdejce: `**1. JAK OBJEDNAT SERVIS PRO ZAKAZNIKA**
-
-Po prihlaseni kliknete na "Objednat servis" v menu. Vyplnte formular:
-- Cislo objednavky - vase interni cislo z prodejny
-- Fakturace - vyberte CZ nebo SK
-- Kontaktni udaje zakaznika - jmeno, email, telefon
-- Adresa - kam ma technik prijet
-- Model a barva - nazev modelu a oznaceni barvy
-- Popis problemu - co je spatne (cim podrobneji, tim lepe)
-- Fotografie - nahrajte fotky zavady
-
-**2. JAK SLEDOVAT ZAKAZKY**
-
-V menu kliknete na "Moje reklamace". Uvidite:
-- Zluta = Ceka na zpracovani
-- Modra = Termin domluven
-- Zelena = Hotovo
-
-Kliknete na kartu pro zobrazeni detailu, fotek a poznamek.`,
-    navodTechnik: `**1. PREHLED ZAKAZEK**
-
-Po prihlaseni uvidite seznam prirazenych zakazek. Kazda karta ukazuje:
-- Cislo zakazky a stav
-- Jmeno a adresa zakaznika
-- Pocet poznamek
-
-Filtry nahore umoznuji zobrazit pouze Cekajici / V reseni / Vyrizene.
-
-**2. SERVISNI PROTOKOL**
-
-Kliknete na "Otevrit protokol". Vyplnte:
-- Problem zjisteny technikem - co jste skutecne nasli
-- Navrh opravy - co jste udelali nebo doporucujete
-- Uctovano za servis - kalkulacka ceny
-- Plati zakaznik? - ANO/NE
-
-**3. PODPIS ZAKAZNIKA**
-
-Kliknete "Podepsat protokol" a zakaznik se podepise prstem na displeji.
-
-**4. EXPORT**
-
-Nahrajte fotky pred/po oprave, pak "Export do PDF" nebo "Odeslat zakaznikovi".`
-};
-
-// Načíst texty šablony z databáze
-async function nacistTextySablony() {
-    try {
-        const odpoved = await fetch('/api/admin_api.php?action=get_invitation_texts');
-        const data = await odpoved.json();
-
-        if (data.status === 'success' && data.texts) {
-            sablonaTexty = { ...sablonaTexty, ...data.texts };
-        }
-    } catch (e) {
-        console.log('Pouzivam vychozi texty sablony');
-    }
-
-    // Naplnit pole
-    naplnitPoleTetxy();
-}
-
-// Naplnit pole textů aktuálními hodnotami
-function naplnitPoleTetxy() {
-    const pole = {
-        'sablonaPredmet': 'predmet',
-        'sablonaUvitaciText': 'uvitaciText',
-        'sablonaFunkceProdejce': 'funkceProdejce',
-        'sablonaFunkceTechnik': 'funkceTechnik',
-        'sablonaNavodProdejce': 'navodProdejce',
-        'sablonaNavodTechnik': 'navodTechnik'
-    };
-
-    for (const [elId, key] of Object.entries(pole)) {
-        const el = document.getElementById(elId);
-        if (el) el.value = sablonaTexty[key] || '';
-    }
-}
-
-// Uložit texty šablony
-async function ulozitTextySablony() {
-    const statusEl = document.getElementById('statusTexty');
-
-    // Načíst hodnoty z polí
-    sablonaTexty.predmet = document.getElementById('sablonaPredmet')?.value.trim() || '';
-    sablonaTexty.uvitaciText = document.getElementById('sablonaUvitaciText')?.value.trim() || '';
-    sablonaTexty.funkceProdejce = document.getElementById('sablonaFunkceProdejce')?.value.trim() || '';
-    sablonaTexty.funkceTechnik = document.getElementById('sablonaFunkceTechnik')?.value.trim() || '';
-    sablonaTexty.navodProdejce = document.getElementById('sablonaNavodProdejce')?.value.trim() || '';
-    sablonaTexty.navodTechnik = document.getElementById('sablonaNavodTechnik')?.value.trim() || '';
-
-    statusEl.style.display = 'block';
-    statusEl.style.background = '#d1ecf1';
-    statusEl.style.color = '#0c5460';
-    statusEl.textContent = 'Ukladam texty...';
-
-    try {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-        if (!csrfToken) throw new Error('CSRF token neni k dispozici');
-
-        const odpoved = await fetch('/api/admin_api.php?action=save_invitation_texts', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                texts: sablonaTexty,
-                csrf_token: csrfToken
-            })
-        });
-
-        const data = await odpoved.json();
-
-        if (data.status === 'success') {
-            statusEl.style.background = '#d4edda';
-            statusEl.style.color = '#155724';
-            statusEl.textContent = 'Texty ulozeny!';
-        } else {
-            throw new Error(data.message || 'Neznama chyba');
-        }
-    } catch (chyba) {
-        statusEl.style.background = '#f8d7da';
-        statusEl.style.color = '#721c24';
-        statusEl.textContent = 'Chyba: ' + chyba.message;
-    }
-
-    setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
-}
-
-// Načíst výchozí texty
-function nacistVychoziTexty() {
-    if (!confirm('Opravdu chcete obnovit vychozi texty?')) return;
-
-    sablonaTexty = {
-        predmet: 'Pozvanka do systemu WGS Service',
-        uvitaciText: 'Byli jste pozvani do systemu WGS Service. Tento system slouzi ke sprave servisnich pozadavku pro nabytek Natuzzi.',
-        funkceProdejce: `Zadavat nove reklamace pro vase zakazniky
-Sledovat stav vasich zakazek v realnem case
-Videt historii vsech reklamaci ktere jste zadali
-Nahravat dokumenty a fotky k zakazkam
-Pridavat poznamky pro techniky
-Videt kdy technik navstivi zakaznika`,
-        funkceTechnik: `Videt sve prirazene zakazky v prehlednem seznamu
-Menit stav zakazky (Ceka / Domluvena / Hotovo)
-Vyplnovat servisni protokoly s automatickym prekladem
-Nahravat fotky pred a po oprave
-Videt adresu zakaznika na mape s navigaci
-Nechat zakaznika elektronicky podepsat protokol
-Exportovat protokol do PDF a poslat zakaznikovi`,
-        navodProdejce: `**1. JAK OBJEDNAT SERVIS PRO ZAKAZNIKA**
-
-Po prihlaseni kliknete na "Objednat servis" v menu. Vyplnte formular:
-- Cislo objednavky - vase interni cislo z prodejny
-- Fakturace - vyberte CZ nebo SK
-- Kontaktni udaje zakaznika - jmeno, email, telefon
-- Adresa - kam ma technik prijet
-- Model a barva - nazev modelu a oznaceni barvy
-- Popis problemu - co je spatne (cim podrobneji, tim lepe)
-- Fotografie - nahrajte fotky zavady
-
-**2. JAK SLEDOVAT ZAKAZKY**
-
-V menu kliknete na "Moje reklamace". Uvidite:
-- Zluta = Ceka na zpracovani
-- Modra = Termin domluven
-- Zelena = Hotovo
-
-Kliknete na kartu pro zobrazeni detailu, fotek a poznamek.`,
-        navodTechnik: `**1. PREHLED ZAKAZEK**
-
-Po prihlaseni uvidite seznam prirazenych zakazek. Kazda karta ukazuje:
-- Cislo zakazky a stav
-- Jmeno a adresa zakaznika
-- Pocet poznamek
-
-Filtry nahore umoznuji zobrazit pouze Cekajici / V reseni / Vyrizene.
-
-**2. SERVISNI PROTOKOL**
-
-Kliknete na "Otevrit protokol". Vyplnte:
-- Problem zjisteny technikem - co jste skutecne nasli
-- Navrh opravy - co jste udelali nebo doporucujete
-- Uctovano za servis - kalkulacka ceny
-- Plati zakaznik? - ANO/NE
-
-**3. PODPIS ZAKAZNIKA**
-
-Kliknete "Podepsat protokol" a zakaznik se podepise prstem na displeji.
-
-**4. EXPORT**
-
-Nahrajte fotky pred/po oprave, pak "Export do PDF" nebo "Odeslat zakaznikovi".`
-    };
-
-    naplnitPoleTetxy();
-
-    const statusEl = document.getElementById('statusTexty');
-    statusEl.style.display = 'block';
-    statusEl.style.background = '#d1ecf1';
-    statusEl.style.color = '#0c5460';
-    statusEl.textContent = 'Vychozi texty nacteny. Nezapomente ulozit!';
-    setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
-}
 
 </script>
 
