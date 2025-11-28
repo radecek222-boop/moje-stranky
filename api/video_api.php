@@ -27,9 +27,6 @@ try {
         ]));
     }
 
-    // PERFORMANCE: Uvolnění session zámku
-    session_write_close();
-
     $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
     $pdo = getDbConnection();
@@ -38,11 +35,14 @@ try {
 
         // ==================== NAHRÁT VIDEO ====================
         case 'upload_video':
-            // CSRF validace
+            // CSRF validace (před session_write_close!)
             if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
                 die(json_encode(['status' => 'error', 'message' => 'Neplatný CSRF token']));
             }
+
+            // PERFORMANCE: Uvolnění session zámku (až po CSRF validaci)
+            session_write_close();
 
             $claimId = $_POST['claim_id'] ?? null;
             $userId = $_SESSION['user_id'] ?? null;
@@ -190,11 +190,14 @@ try {
 
         // ==================== SMAZAT VIDEO ====================
         case 'delete_video':
-            // CSRF validace
+            // CSRF validace (před session_write_close!)
             if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
                 die(json_encode(['status' => 'error', 'message' => 'Neplatný CSRF token']));
             }
+
+            // PERFORMANCE: Uvolnění session zámku (až po CSRF validaci)
+            session_write_close();
 
             $videoId = $_POST['video_id'] ?? null;
 
