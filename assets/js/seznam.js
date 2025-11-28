@@ -2158,72 +2158,54 @@ function zobrazPDFModal(pdfUrl, claimId) {
   btnZavrit.textContent = 'Zavřít';
   btnZavrit.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 110px; touch-action: manipulation;';
   btnZavrit.onclick = () => overlay.remove();
+
+  // Tlačítko Sdílet - Web Share API (nativní systémové sdílení)
   btnOdeslat.onclick = async () => {
-    if (!claimId) {
-      alert('Chyba: Chybí ID zakázky');
-      return;
-    }
-
-    // Najít reklamaci v datech
-    const reklamace = window.REKLAMACE_DATA?.find(r => r.id == claimId);
-    if (!reklamace || !reklamace.email) {
-      alert('Chyba: Nenalezen email zákazníka');
-      return;
-    }
-
-    if (!confirm('Odeslat PDF na email: ' + reklamace.email + '?')) {
-      return;
-    }
-
-    btnOdeslat.disabled = true;
-    btnOdeslat.textContent = 'Odesílám...';
-
     try {
-      // Načíst PDF jako base64
+      // Zkontrolovat podporu Web Share API
+      if (!navigator.share && !navigator.canShare) {
+        alert('Sdílení není podporováno v tomto prohlížeči.\n\nPoužijte tlačítko "Uložit" a pak sdílejte soubor ručně.');
+        return;
+      }
+
+      btnOdeslat.disabled = true;
+      btnOdeslat.textContent = 'Načítám...';
+
+      // Načíst PDF jako Blob
       const response = await fetch(pdfUrl);
       const blob = await response.blob();
-      const reader = new FileReader();
 
-      reader.onload = async function() {
-        const base64 = reader.result.split(',')[1];
+      // Vytvořit File objekt z Blobu
+      const fileName = `PDF_Report_${claimId || 'dokument'}.pdf`;
+      const file = new File([blob], fileName, { type: 'application/pdf' });
 
-        // Odeslat email
-        const formData = new FormData();
-        formData.append('action', 'send_email');
-        formData.append('reklamace_id', reklamace.reklamace_id || claimId);
-        formData.append('customer_email', reklamace.email);
-        formData.append('customer_name', reklamace.jmeno || 'Zákazník');
-        formData.append('complete_pdf', base64);
-
-        const csrfToken = document.querySelector('input[name="csrf_token"]')?.value;
-        if (csrfToken) {
-          formData.append('csrf_token', csrfToken);
-        }
-
-        const emailResponse = await fetch('/api/protokol_api.php', {
-          method: 'POST',
-          body: formData
-        });
-
-        const result = await emailResponse.json();
-
-        if (result.status === 'success') {
-          alert('Email byl úspěšně odeslán!');
-          overlay.remove();
-        } else {
-          throw new Error(result.message || 'Neznámá chyba');
-        }
+      // Web Share API
+      const shareData = {
+        title: `PDF Report - ${claimId || 'WGS'}`,
+        text: `PDF dokument zakázky ${claimId || ''}`,
+        files: [file]
       };
 
-      reader.onerror = () => {
-        throw new Error('Nepodařilo se načíst PDF');
-      };
+      // Zkontrolovat zda lze sdílet soubory
+      if (navigator.canShare && !navigator.canShare(shareData)) {
+        throw new Error('Sdílení souborů není podporováno');
+      }
 
-      reader.readAsDataURL(blob);
+      // Sdílet přes systémové menu (email, SMS, WhatsApp, atd.)
+      await navigator.share(shareData);
+
+      // Úspěch (uživatel vybral aplikaci)
+      console.log('PDF úspěšně sdíleno');
 
     } catch (error) {
-      console.error('Chyba při odesílání:', error);
-      alert('Chyba při odesílání: ' + error.message);
+      // AbortError = uživatel zrušil sdílení (to není chyba)
+      if (error.name === 'AbortError') {
+        console.log('Sdílení zrušeno uživatelem');
+      } else {
+        console.error('Chyba při sdílení:', error);
+        alert('Chyba při sdílení: ' + error.message);
+      }
+    } finally {
       btnOdeslat.disabled = false;
       btnOdeslat.textContent = 'Sdílet';
     }
