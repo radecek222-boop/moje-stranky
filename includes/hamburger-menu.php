@@ -145,8 +145,7 @@ if ($isAdmin) {
   display: flex;
   gap: 2rem;
   align-items: center;
-  
-  
+  flex-wrap: wrap; /* Povolit zalamování na nový řádek */
 }
 
 .hamburger-nav a {
@@ -220,6 +219,10 @@ if ($isAdmin) {
 
 /* Provize technika v hamburger menu */
 .tech-provize-box {
+  /* Desktop: Plná šířka, vlastní řádek nahoře */
+  width: 100%;
+  flex-basis: 100%;
+  order: -1; /* Zobrazit jako první */
   padding: 1rem 1.5rem;
   border-bottom: 2px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.05);
