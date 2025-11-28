@@ -1840,8 +1840,8 @@ function handleSaveInvitationTexts(PDO $pdo, array $payload): void
     try {
         // Upsert - INSERT nebo UPDATE
         $stmt = $pdo->prepare("
-            INSERT INTO wgs_system_config (config_key, config_value, config_type, updated_at)
-            VALUES ('invitation_template_texts', ?, 'json', NOW())
+            INSERT INTO wgs_system_config (config_key, config_value, config_group, updated_at)
+            VALUES ('invitation_template_texts', ?, 'templates', NOW())
             ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), updated_at = NOW()
         ");
         $stmt->execute([$jsonTexty]);
