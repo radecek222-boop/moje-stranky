@@ -623,13 +623,18 @@
           position: absolute;
           top: 12px;
           right: 12px;
-          background: none;
+          background: #f0f0f0;
           border: none;
           font-size: 24px;
-          color: #999;
+          color: #333;
           cursor: pointer;
-          padding: 4px;
+          padding: 8px 12px;
           line-height: 1;
+          border-radius: 8px;
+          min-width: 44px;
+          min-height: 44px;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
         ">×</button>
 
         <div style="font-weight: 700; font-size: 17px; margin-bottom: 12px;">
@@ -698,12 +703,16 @@
             background: #222;
             color: #fff;
             border: none;
-            padding: 12px 24px;
+            padding: 16px 24px;
             border-radius: 8px;
             font-weight: 600;
-            font-size: 15px;
+            font-size: 16px;
             cursor: pointer;
             width: 100%;
+            min-height: 50px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-appearance: none;
           ">Rozumím</button>
         </div>
       </div>
@@ -711,13 +720,30 @@
 
     document.body.appendChild(dialog);
 
-    const zavritDialog = () => {
+    const zavritDialog = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       dialog.remove();
       localStorage.setItem('wgs_ios_guide_shown', 'true');
     };
 
-    document.getElementById('ios-guide-close').addEventListener('click', zavritDialog);
-    document.getElementById('ios-guide-dismiss').addEventListener('click', zavritDialog);
+    // Pouzit timeout aby se elementy spravne renderovaly pred pridanim event listeneru
+    setTimeout(() => {
+      const closeBtn = document.getElementById('ios-guide-close');
+      const dismissBtn = document.getElementById('ios-guide-dismiss');
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', zavritDialog, { passive: false });
+        closeBtn.addEventListener('touchend', zavritDialog, { passive: false });
+      }
+
+      if (dismissBtn) {
+        dismissBtn.addEventListener('click', zavritDialog, { passive: false });
+        dismissBtn.addEventListener('touchend', zavritDialog, { passive: false });
+      }
+    }, 100);
   }
 
   // Exportovat funkce pro globalni pouziti
