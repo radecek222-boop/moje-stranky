@@ -1750,7 +1750,7 @@ function showContactMenu(id) {
   const address = Utils.getAddress(CURRENT_RECORD);
   
   const content = `
-    ${ModalManager.createHeader('Kontaktovat zákazníka', customerName)}
+    ${ModalManager.createHeader(customerName, 'Kontaktovat zákazníka')}
     
     <div class="modal-body">
       <div class="info-grid" style="margin-bottom: 1rem;">
