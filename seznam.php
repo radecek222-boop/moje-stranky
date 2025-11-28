@@ -340,6 +340,13 @@ body.modal-open {
   align-items: flex-start !important;
   justify-content: center !important;
   padding: 2rem 0 0 0 !important;
+  /* FIX: Z-index nad hamburger headerem (který má 10001) */
+  z-index: 10002 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
 }
 
 #detailOverlay .modal-content {
