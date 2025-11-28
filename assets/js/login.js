@@ -140,7 +140,7 @@ async function handleAdminLogin() {
   attempts++;
   localStorage.setItem('admin_login_attempts', attempts);
   
-  logger.log('🔑 Admin login attempt ' + attempts);
+  logger.log('[ADMIN] Login attempt ' + attempts);
   
   try {
     const response = await fetch('app/controllers/login_controller.php', {
@@ -247,11 +247,11 @@ function showRecoveryModal() {
     .recovery-modal h2 { margin: 0 0 0.5rem 0; color: #1a1a1a; font-size: 1.8rem; font-weight: 600; }
     .recovery-modal p { color: #666; margin: 0.5rem 0 1.5rem 0; font-size: 0.95rem; }
     .recovery-modal input { width: 100%; padding: 0.875rem 1rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; margin-bottom: 1.5rem; transition: all 0.3s; box-sizing: border-box; }
-    .recovery-modal input:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
+    .recovery-modal input:focus { outline: none; border-color: #333; box-shadow: 0 0 0 3px rgba(0,0,0,0.1); }
     .recovery-buttons { display: flex; gap: 1rem; }
     .recovery-btn { flex: 1; padding: 0.875rem 1.5rem; border: none; border-radius: 6px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.3s; }
-    .recovery-btn-primary { background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; }
-    .recovery-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,123,255,0.3); }
+    .recovery-btn-primary { background: linear-gradient(135deg, #333 0%, #555 100%); color: white; }
+    .recovery-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     .recovery-btn-secondary { background: #f0f0f0; color: #333; border: 1px solid #ddd; }
     .recovery-btn-secondary:hover { background: #e8e8e8; }
   `;
@@ -338,7 +338,7 @@ function showCreateNewAdminKeyModal() {
     <style>${styles}</style>
     <div class="newkey-overlay">
       <div class="newkey-modal">
-        <h2>🔑 Nový Admin Klíč</h2>
+        <h2>Novy Admin Klic</h2>
         
         <input type="password" id="newAdminKey" placeholder="Nový klíč (min. 12 znaků)" minlength="12" autocomplete="off">
         <div class="newkey-hint">Minimálně 12 znaků</div>

@@ -584,7 +584,7 @@ body {
       </div>
       <button class="btn" onclick="resetovitFiltry()">Reset</button>
       <button class="btn btn-primary" onclick="aplikovatFiltry()">Aplikovat filtry</button>
-      <button class="btn btn-export" onclick="exportovatPDF()">📄 Exportovat PDF</button>
+      <button class="btn btn-export" onclick="exportovatPDF()">Exportovat PDF</button>
     </div>
   </div>
 

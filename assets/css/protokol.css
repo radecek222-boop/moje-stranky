@@ -547,19 +547,19 @@ button.btn:hover {
 }
 
 .pdf-share-btn:hover {
-  background: #3a6b1e;
-  border-color: #3a6b1e;
+  background: #555;
+  border-color: #555;
   color: white;
 }
 
 .pdf-send-btn {
-  border-color: #007bff;
-  background: #007bff;
+  border-color: #333;
+  background: #333;
 }
 
 .pdf-send-btn:hover {
-  background: #0056b3;
-  border-color: #0056b3;
+  background: #555;
+  border-color: #555;
   color: white;
 }
 
