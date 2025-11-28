@@ -476,6 +476,7 @@ button[onclick*="history.back"] {
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: 8px;
+    margin-bottom: 12px !important;
 }
 
 /* Nepřečtené poznámky */
@@ -509,31 +510,39 @@ button[onclick*="history.back"] {
 
 /* Tlacitko smazani poznamky - pouze cerveny krizek */
 .modal-body .note-delete-btn,
-.modal-content .note-delete-btn {
+.modal-content .note-delete-btn,
+.notes-container .note-delete-btn,
+button.note-delete-btn {
     background: none !important;
     border: none !important;
-    color: #8b0000 !important;
+    color: #cc0000 !important;
     width: auto !important;
     height: auto !important;
     min-width: 0 !important;
     min-height: 0 !important;
     border-radius: 0 !important;
-    cursor: pointer;
-    font-size: 0.7rem;
-    line-height: 1;
-    padding: 0 !important;
-    margin-left: auto;
-    opacity: 0.6;
+    cursor: pointer !important;
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    padding: 4px !important;
+    margin-left: auto !important;
+    opacity: 0.9 !important;
     box-shadow: none !important;
     outline: none !important;
+    pointer-events: auto !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
 }
 
 .modal-body .note-delete-btn:hover,
-.modal-content .note-delete-btn:hover {
+.modal-content .note-delete-btn:hover,
+.notes-container .note-delete-btn:hover,
+button.note-delete-btn:hover {
     background: none !important;
     border: none !important;
-    color: #8b0000 !important;
-    opacity: 1;
+    color: #ff0000 !important;
+    opacity: 1 !important;
     box-shadow: none !important;
 }
 
