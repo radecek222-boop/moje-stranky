@@ -2890,8 +2890,10 @@ async function startRecording(orderId) {
       showAudioPreview(recorder.audioBlob);
     };
 
-    // Spustit nahravani
-    recorder.mediaRecorder.start();
+    // Spustit nahravani s timeslice 1000ms
+    // Timeslice zajisti ze ondataavailable se vola kazdou sekundu
+    // To je dulezite pro mobilni prohlizece/PWA kde bez timeslice muze byt nespolehlivy
+    recorder.mediaRecorder.start(1000);
 
     // Aktualizovat UI
     document.getElementById('btnStartRecord').style.display = 'none';
@@ -2924,6 +2926,14 @@ function stopRecording() {
   const recorder = window.wgsAudioRecorder;
 
   if (recorder.mediaRecorder && recorder.isRecording) {
+    // Vyzadat posledni data pred zastavenim (dulezite pro mobilni prohlizece)
+    if (recorder.mediaRecorder.state === 'recording') {
+      try {
+        recorder.mediaRecorder.requestData();
+      } catch (e) {
+        logger.log('[Audio] requestData neni podporovano:', e.message);
+      }
+    }
     recorder.mediaRecorder.stop();
   }
 
