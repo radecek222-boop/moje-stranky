@@ -49,15 +49,11 @@ if ($isAdmin) {
         $userRole = $_SESSION['role'] ?? null;
         $isTechnik = ($userRole === 'technik');
     ?>
-      <?php if ($isTechnik): ?>
-        <!-- Sekce s provizemi pro techniky -->
-        <div class="tech-provize-box" id="tech-provize-box">
-          <div class="tech-provize-mesic">Provize: <span id="provize-mesic">...</span></div>
-          <div class="tech-provize-castka"><span id="provize-castka">...</span> €</div>
-        </div>
-      <?php endif; ?>
-
       <a href="novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
+      <?php if ($isTechnik): ?>
+        <!-- Provize technika jako navigační položka -->
+        <a href="#" class="tech-provize-link" id="tech-provize-box" style="cursor: default; pointer-events: none;">Provize <span id="provize-mesic">...</span>: <span id="provize-castka">...</span> €</a>
+      <?php endif; ?>
       <a href="seznam.php" <?php if($current == "seznam.php") echo 'class="active"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
       <a href="/logout.php" class="hamburger-logout" data-lang-cs="ODHLÁŠENÍ" data-lang-en="LOGOUT" data-lang-it="DISCONNETTERSI">ODHLÁŠENÍ</a>
       <a href="#" id="notif-enable-btn-user" class="hamburger-notif-btn" style="display:none;" data-lang-cs="NOTIFY ME ON" data-lang-en="NOTIFY ME ON" data-lang-it="NOTIFY ME ON">NOTIFY ME ON</a>
@@ -145,7 +141,6 @@ if ($isAdmin) {
   display: flex;
   gap: 2rem;
   align-items: center;
-  flex-wrap: wrap; /* Povolit zalamování na nový řádek */
 }
 
 .hamburger-nav a {
@@ -217,37 +212,10 @@ if ($isAdmin) {
   }
 }
 
-/* Provize technika v hamburger menu */
-.tech-provize-box {
-  /* Desktop: Plná šířka, vlastní řádek nahoře */
-  width: 100%;
-  flex-basis: 100%;
-  order: -1; /* Zobrazit jako první */
-  padding: 1rem 1.5rem;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.05);
-  margin-bottom: 1rem;
-}
-
-.tech-provize-mesic {
-  font-size: 0.85rem;
-  color: #999;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.tech-provize-castka {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #fff;
-}
-
-@media (max-width: 768px) {
-  .tech-provize-box {
-    padding: 1rem 1.5rem;
-    margin-bottom: 0;
-  }
+/* Provize technika - jako běžná navigační položka */
+.tech-provize-link {
+  opacity: 0.9 !important;
+  font-weight: 500 !important;
 }
 
 .hamburger-lang-switcher {
