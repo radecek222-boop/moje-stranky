@@ -1,0 +1,114 @@
+<?php
+/**
+ * API endpoint pro načtení provizí technika
+ *
+ * Vrací provize aktuálně přihlášeného technika za aktuální měsíc
+ * Provize = 33% z celkové ceny zakázky
+ */
+
+require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/api_response.php';
+
+header('Content-Type: application/json; charset=utf-8');
+
+try {
+    // Kontrola přihlášení
+    $isLoggedIn = isset($_SESSION['user_id']);
+
+    if (!$isLoggedIn) {
+        http_response_code(401);
+        die(json_encode([
+            'status' => 'error',
+            'message' => 'Neautorizovaný přístup'
+        ]));
+    }
+
+    // PERFORMANCE: Uvolnění session zámku
+    session_write_close();
+
+    $userId = $_SESSION['user_id'];
+    $userRole = $_SESSION['user_role'] ?? null;
+
+    // Kontrola že uživatel je technik
+    if ($userRole !== 'technik') {
+        http_response_code(403);
+        die(json_encode([
+            'status' => 'error',
+            'message' => 'Pouze pro techniky'
+        ]));
+    }
+
+    $pdo = getDbConnection();
+
+    // Získat aktuální měsíc a rok
+    $aktualniRok = date('Y');
+    $aktualniMesic = date('m');
+
+    // České názvy měsíců
+    $mesiceCS = [
+        '01' => 'leden',
+        '02' => 'únor',
+        '03' => 'březen',
+        '04' => 'duben',
+        '05' => 'květen',
+        '06' => 'červen',
+        '07' => 'červenec',
+        '08' => 'srpen',
+        '09' => 'září',
+        '10' => 'říjen',
+        '11' => 'listopad',
+        '12' => 'prosinec'
+    ];
+
+    $nazevMesice = $mesiceCS[$aktualniMesic] ?? 'neznámý';
+
+    // Spočítat provizi za aktuální měsíc
+    $stmt = $pdo->prepare("
+        SELECT
+            COUNT(*) as pocet_zakazek,
+            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem_castka,
+            SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * 0.33 as provize_celkem
+        FROM wgs_reklamace r
+        WHERE r.zpracoval_id = :user_id
+          AND YEAR(r.created_at) = :rok
+          AND MONTH(r.created_at) = :mesic
+          AND r.stav = 'done'
+    ");
+
+    $stmt->execute([
+        'user_id' => $userId,
+        'rok' => $aktualniRok,
+        'mesic' => $aktualniMesic
+    ]);
+
+    $vysledek = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $pocetZakazek = (int)($vysledek['pocet_zakazek'] ?? 0);
+    $celkemCastka = (float)($vysledek['celkem_castka'] ?? 0);
+    $provizeCelkem = (float)($vysledek['provize_celkem'] ?? 0);
+
+    echo json_encode([
+        'status' => 'success',
+        'mesic' => $nazevMesice,
+        'rok' => $aktualniRok,
+        'pocet_zakazek' => $pocetZakazek,
+        'celkem_castka' => number_format($celkemCastka, 2, '.', ''),
+        'provize_celkem' => number_format($provizeCelkem, 2, '.', '')
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+} catch (PDOException $e) {
+    error_log("Database error in tech_provize_api.php: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Chyba při načítání provizí'
+    ]);
+} catch (Exception $e) {
+    error_log("Error in tech_provize_api.php: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Chyba serveru'
+    ]);
+}
+?>

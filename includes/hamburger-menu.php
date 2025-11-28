@@ -45,7 +45,18 @@ if ($isAdmin) {
       </div>
     <?php
     elseif ($isLoggedIn):
+        // Kontrola role technika pro zobrazení provizí
+        $userRole = $_SESSION['user_role'] ?? null;
+        $isTechnik = ($userRole === 'technik');
     ?>
+      <?php if ($isTechnik): ?>
+        <!-- Sekce s provizemi pro techniky -->
+        <div class="tech-provize-box" id="tech-provize-box">
+          <div class="tech-provize-mesic">Provize: <span id="provize-mesic">...</span></div>
+          <div class="tech-provize-castka"><span id="provize-castka">...</span> €</div>
+        </div>
+      <?php endif; ?>
+
       <a href="novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
       <a href="seznam.php" <?php if($current == "seznam.php") echo 'class="active"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
       <a href="/logout.php" class="hamburger-logout" data-lang-cs="ODHLÁŠENÍ" data-lang-en="LOGOUT" data-lang-it="DISCONNETTERSI">ODHLÁŠENÍ</a>
@@ -204,6 +215,35 @@ if ($isAdmin) {
     border-radius: 0;
     padding: 1rem 1.5rem !important;
     text-align: left;
+  }
+}
+
+/* Provize technika v hamburger menu */
+.tech-provize-box {
+  padding: 1rem 1.5rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 1rem;
+}
+
+.tech-provize-mesic {
+  font-size: 0.85rem;
+  color: #999;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tech-provize-castka {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .tech-provize-box {
+    padding: 1rem 1.5rem;
+    margin-bottom: 0;
   }
 }
 
@@ -528,12 +568,50 @@ function closeMenu() {
     });
   }
 
+  /**
+   * InitTechProvize - Načtení provizí pro techniky
+   */
+  async function initTechProvize() {
+    const provizeBox = document.getElementById('tech-provize-box');
+
+    if (!provizeBox) {
+      // Není technik nebo není prvek
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/tech_provize_api.php');
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        const mesicEl = document.getElementById('provize-mesic');
+        const castkaEl = document.getElementById('provize-castka');
+
+        if (mesicEl) {
+          mesicEl.textContent = result.mesic || '---';
+        }
+
+        if (castkaEl) {
+          castkaEl.textContent = result.provize_celkem || '0.00';
+        }
+
+        console.log('[Tech Provize] Načteno:', result);
+      } else {
+        console.warn('[Tech Provize] Chyba:', result.message);
+      }
+    } catch (error) {
+      console.error('[Tech Provize] Chyba při načítání:', error);
+    }
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initHamburgerMenu);
     document.addEventListener('DOMContentLoaded', initNotifButton);
+    document.addEventListener('DOMContentLoaded', initTechProvize);
   } else {
     initHamburgerMenu();
     initNotifButton();
+    initTechProvize();
   }
 })();
 </script>
