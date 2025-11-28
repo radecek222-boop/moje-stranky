@@ -73,8 +73,8 @@
 }
 
 .section-text.note {
-    background: #fff3cd;
-    border-left: 4px solid #ffc107;
+    background: #f5f5f5;
+    border-left: 4px solid #666;
     padding: 15px 20px;
     border-radius: 5px;
     text-align: left;
@@ -358,12 +358,12 @@
 }
 
 .btn-danger {
-    background: #dc3545;
+    background: #666;
     color: white;
 }
 
 .btn-danger:hover {
-    background: #c82333;
+    background: #555;
 }
 
 /* Admin Actions */
@@ -1448,7 +1448,7 @@
 
 /* Parts Summary */
 .parts-summary {
-    background: #e8f4f8;
+    background: #f0f0f0;
     border: 2px solid #4a4a4a;
     border-radius: 6px;
     padding: 1rem;
@@ -1571,8 +1571,8 @@
 .summary-note {
     margin-top: 1.5rem;
     padding: 1rem;
-    background: #fff9f0;
-    border-left: 4px solid #ff9900;
+    background: #f5f5f5;
+    border-left: 4px solid #666;
     font-size: 0.8rem;
     color: #333;
     line-height: 1.5;
@@ -1617,7 +1617,7 @@
 }
 
 .result-box {
-    background: #e8f4f8;
+    background: #f0f0f0;
     border: 2px solid #4a4a4a;
     border-radius: 6px;
     padding: 1rem;
@@ -1735,8 +1735,8 @@
 }
 
 .pdf-close-btn:hover {
-    background: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
+    background: rgba(0, 0, 0, 0.1);
+    color: #666;
 }
 
 .pdf-preview-body {

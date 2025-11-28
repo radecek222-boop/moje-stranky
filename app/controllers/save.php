@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
 require_once __DIR__ . '/../../includes/db_metadata.php';
 require_once __DIR__ . '/../../includes/email_domain_validator.php';
+require_once __DIR__ . '/../../includes/rate_limiter.php';
 
 /**
  * Generuje unikátní ID pro reklamaci ve formátu WGSyymmdd-XXXXXX
@@ -137,9 +138,9 @@ function normalizeDateInput(?string $value): ?string
  */
 function handleUpdate(PDO $pdo, array $input): array
 {
-    // ⏱️ PERFORMANCE: Backend timing
+    // PERFORMANCE: Backend timing
     $t0 = microtime(true);
-    error_log("⏱️ handleUpdate START");
+    error_log("[TIMING] handleUpdate START");
 
     $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
     $userId = $_SESSION['user_id'] ?? null;
@@ -151,7 +152,7 @@ function handleUpdate(PDO $pdo, array $input): array
     $t1 = microtime(true);
     $columns = db_get_table_columns($pdo, 'wgs_reklamace');
     $t2 = microtime(true);
-    error_log(sprintf("⏱️ db_get_table_columns: %.0fms", ($t2 - $t1) * 1000));
+    error_log(sprintf("[TIMING] db_get_table_columns: %.0fms", ($t2 - $t1) * 1000));
     if (empty($columns)) {
         throw new Exception('Nelze načíst strukturu tabulky reklamací.');
     }
@@ -304,7 +305,7 @@ function handleUpdate(PDO $pdo, array $input): array
     $t3 = microtime(true);
     $pdo->beginTransaction();
     $t4 = microtime(true);
-    error_log(sprintf("⏱️ beginTransaction: %.0fms", ($t4 - $t3) * 1000));
+    error_log(sprintf("[TIMING] beginTransaction: %.0fms", ($t4 - $t3) * 1000));
 
     try {
         $sql = 'UPDATE wgs_reklamace SET ' . implode(', ', $setParts) . ' WHERE `' . $identifierColumn . '` = :identifier';
@@ -316,7 +317,7 @@ function handleUpdate(PDO $pdo, array $input): array
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $t6 = microtime(true);
-        error_log(sprintf("⏱️ SQL UPDATE execute: %.0fms", ($t6 - $t5) * 1000));
+        error_log(sprintf("[TIMING] SQL UPDATE execute: %.0fms", ($t6 - $t5) * 1000));
 
         if ($stmt->rowCount() === 0) {
             throw new Exception('Reklamace nebyla nalezena nebo nebyla změněna.');
@@ -360,7 +361,7 @@ function handleUpdate(PDO $pdo, array $input): array
  */
 function handleReopen(PDO $pdo, array $input): array
 {
-    error_log("⏱️ handleReopen START");
+    error_log("[TIMING] handleReopen START");
     $t0 = microtime(true);
 
     // Kontrola oprávnění
@@ -587,6 +588,21 @@ try {
         throw new Exception('Neznámá akce.');
     }
 
+    // BEZPECNOST: Rate limiting pro create akci
+    // Omezeni: max 10 pokusu za 5 minut, blokace na 30 minut
+    $rateLimiter = new RateLimiter($pdo);
+    $clientIdentifier = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $rateLimitResult = $rateLimiter->checkLimit($clientIdentifier, 'create_reklamace', [
+        'max_attempts' => 10,
+        'window_minutes' => 5,
+        'block_minutes' => 30
+    ]);
+
+    if (!$rateLimitResult['allowed']) {
+        http_response_code(429);
+        throw new Exception($rateLimitResult['message']);
+    }
+
     $isLoggedIn = isset($_SESSION['user_id']) || (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true);
 
     // Získání dat z formuláře - BEZPEČNOST: Sanitizace všech vstupů
@@ -736,6 +752,7 @@ try {
     ];
 
     // Pridat gdpr_note pokud sloupec existuje
+    $existingColumns = db_get_table_columns($pdo, 'wgs_reklamace');
     $hasGdprNote = in_array('gdpr_note', $existingColumns);
     if ($hasGdprNote && !empty($gdprNote)) {
         $columns['gdpr_note'] = $gdprNote;

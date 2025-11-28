@@ -421,8 +421,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
           Nahrajte pověření od prodejce k této reklamaci ve formátu PDF. Dokument bude připojen k objednávce.
         </p>
         <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-          <button type="button" id="nahrajPovereniBtn" style="display: inline-block; padding: 0.7rem 2rem; background: #333333; color: white; border: 2px solid #333333; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; cursor: pointer;" data-lang-cs="📄 VYBRAT PDF SOUBOR" data-lang-en="📄 SELECT PDF FILE" data-lang-it="📄 SELEZIONA FILE PDF">
-            📄 VYBRAT PDF SOUBOR
+          <button type="button" id="nahrajPovereniBtn" style="display: inline-block; padding: 0.7rem 2rem; background: #333333; color: white; border: 2px solid #333333; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; cursor: pointer;" data-lang-cs="VYBRAT PDF SOUBOR" data-lang-en="SELECT PDF FILE" data-lang-it="SELEZIONA FILE PDF">
+            VYBRAT PDF SOUBOR
           </button>
           <span id="povereniStatus" style="font-size: 0.85rem; color: #666;"></span>
         </div>

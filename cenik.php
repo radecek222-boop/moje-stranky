@@ -381,7 +381,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
     <!-- Admin Tlačítka -->
     <div class="admin-actions" style="margin-top: 40px; text-align: center; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
       <button class="btn-admin" onclick="pridatPolozku()" data-lang-cs="+ Přidat novou položku" data-lang-en="+ Add New Item" data-lang-it="+ Aggiungi Nuovo Elemento">+ Přidat novou položku</button>
-      <button class="btn-admin" onclick="exportovatCenikDoPDF()" data-lang-cs="📄 Export ceníku do PDF" data-lang-en="📄 Export Pricing to PDF" data-lang-it="📄 Esporta Listino in PDF">📄 Export ceníku do PDF</button>
+      <button class="btn-admin" onclick="exportovatCenikDoPDF()" data-lang-cs="Export ceniku do PDF" data-lang-en="Export Pricing to PDF" data-lang-it="Esporta Listino in PDF">Export ceniku do PDF</button>
     </div>
     <?php endif; ?>
 
