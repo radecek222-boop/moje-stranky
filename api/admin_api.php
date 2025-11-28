@@ -1587,7 +1587,6 @@ function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, str
                     <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
                         <li><strong>Jmeno</strong>, <strong>adresa</strong>, <strong>termin</strong>, <strong>stav</strong></li>
                         <li>Tlacitko <strong>"DETAIL ZAKAZNIKA"</strong> - otevre kompletni informace</li>
-                        <li>Tlacitko <strong>"KONTAKTOVAT"</strong> - telefon/email zakaznika</li>
                         <li>Tlacitko <strong>"ZAVRIT"</strong> - zpet na seznam</li>
                     </ul>
                 </div>

@@ -712,6 +712,9 @@ async function showDetail(recordOrId) {
     const dokoncenoData = record.updated_at ? new Date(record.updated_at) : null;
     const dokoncenoCas = dokoncenoData ? `${dokoncenoData.getHours()}:${String(dokoncenoData.getMinutes()).padStart(2, '0')}` : '—';
 
+    // Tlacitka podle role - prodejce nema pristup k technickim funkcim
+    const jeProdejce = CURRENT_USER && CURRENT_USER.role === 'prodejce';
+
     buttonsHtml = `
       <div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 0.75rem; margin-bottom: 1rem; border-radius: 4px;">
         <div style="text-align: center;">
@@ -721,11 +724,13 @@ async function showDetail(recordOrId) {
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; background: #333; color: white; font-weight: 600; font-size: 0.9rem;" data-action="reopenOrder" data-id="${record.id}">
-          Znovu otevřít
-        </button>
+        ${!jeProdejce ? `
+          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; background: #333; color: white; font-weight: 600; font-size: 0.9rem;" data-action="reopenOrder" data-id="${record.id}">
+            Znovu otevřít
+          </button>
 
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        ` : ''}
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
 
       <div style="width: 100%; margin-top: 0.25rem;">
@@ -770,13 +775,18 @@ async function showDetail(recordOrId) {
       </div>
     `;
   } else {
+    // Tlacitka podle role - prodejce nema pristup k technickim funkcim
+    const jeProdejce = CURRENT_USER && CURRENT_USER.role === 'prodejce';
+
     buttonsHtml = `
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
+        ${!jeProdejce ? `
+          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
 
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
+          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
 
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        ` : ''}
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
 
         ${record.original_reklamace_id ? `
