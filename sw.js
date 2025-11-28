@@ -4,7 +4,7 @@
  */
 
 // VERZE - ZMĚŇ PŘI KAŽDÉM RELEASU!
-const SW_VERSION = '2025.11.28.018';
+const SW_VERSION = '2025.11.28.019';
 const CACHE_NAME = `wgs-cache-${SW_VERSION}`;
 
 // Soubory k cachování (základní shell)

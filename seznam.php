@@ -474,6 +474,17 @@ if (!$isLoggedIn && !$isAdmin) {
   color: #666666 !important;
 }
 
+/* Tlačítko smazat reklamaci - červené */
+#detailOverlay button[data-action="deleteReklamace"] {
+  background: #dc3545 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+#detailOverlay button[data-action="deleteReklamace"]:hover {
+  background: #c82333 !important;
+}
+
 /* Kalendář - bílý */
 #detailOverlay .calendar-container {
   background: #ffffff !important;
