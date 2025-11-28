@@ -1147,13 +1147,10 @@ function handleSaveInvitationTemplate(PDO $pdo, array $payload): void
         // Zkusit UPDATE, pokud neexistuje, tak INSERT
         $stmt = $pdo->prepare("
             INSERT INTO wgs_system_config (config_key, config_value, config_type, updated_at)
-            VALUES ('invitation_template_settings', :value, 'json', NOW())
-            ON DUPLICATE KEY UPDATE config_value = :value2, updated_at = NOW()
+            VALUES ('invitation_template_settings', ?, 'json', NOW())
+            ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), updated_at = NOW()
         ");
-        $stmt->execute([
-            ':value' => $jsonNastaveni,
-            ':value2' => $jsonNastaveni
-        ]);
+        $stmt->execute([$jsonNastaveni]);
 
         respondSuccess(['message' => 'Nastavení šablony uloženo.', 'settings' => $filtrovanaNastaveni]);
 

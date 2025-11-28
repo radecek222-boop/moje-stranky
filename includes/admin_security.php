@@ -1133,14 +1133,14 @@ function otevritPozvanku() {
     modal.style.cssText = `
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(0,0,0,0.7); display: flex;
-        align-items: center; justify-content: center; z-index: 10000;
-        padding: 20px; overflow-y: auto;
+        align-items: flex-start; justify-content: center; z-index: 10000;
+        padding: 80px 20px 20px 20px; overflow-y: auto;
     `;
 
     modal.innerHTML = `
         <div style="background: #1a1a1a; padding: 30px; border-radius: 12px;
                     max-width: 900px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-                    border: 1px solid #333; max-height: 90vh; overflow-y: auto;">
+                    border: 1px solid #333; max-height: calc(100vh - 100px); overflow-y: auto;">
 
             <!-- Header s taby -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
