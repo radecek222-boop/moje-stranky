@@ -1848,8 +1848,10 @@ async function odeslatPozvanky() {
 
             // Vyčistit formulář po 3s
             setTimeout(() => {
-                document.getElementById('emailyPozvanky').value = '';
-                document.getElementById('pocetEmailu').textContent = '0';
+                const emailyEl = document.getElementById('emailyPozvanky');
+                const pocetEl = document.getElementById('pocetEmailu');
+                if (emailyEl) emailyEl.value = '';
+                if (pocetEl) pocetEl.textContent = '0';
             }, 3000);
         } else {
             throw new Error(data.message || 'Nepodarilo se odeslat pozvanky');
