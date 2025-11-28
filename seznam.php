@@ -440,60 +440,80 @@ if (!$isLoggedIn && !$isAdmin) {
   color: #666666 !important;
 }
 
-/* Kalendář - tmavý */
+/* Kalendář - bílý */
 #detailOverlay .calendar-container {
-  background: #222222 !important;
+  background: #ffffff !important;
+  border-radius: 8px !important;
+  padding: 1rem !important;
+}
+
+#detailOverlay .calendar-controls {
+  background: #ffffff !important;
+}
+
+#detailOverlay .calendar-month-title {
+  color: #333333 !important;
+}
+
+#detailOverlay .calendar-nav-btn {
+  background: #f5f5f5 !important;
+  color: #333333 !important;
+  border-color: #e0e0e0 !important;
+}
+
+#detailOverlay .calendar-nav-btn:hover {
+  background: #e8e8e8 !important;
 }
 
 #detailOverlay .calendar-weekdays {
-  color: #888888 !important;
+  color: #666666 !important;
 }
 
 #detailOverlay .cal-day {
-  background: #2a2a2a !important;
-  border-color: #444444 !important;
-  color: #ffffff !important;
+  background: #f5f5f5 !important;
+  border-color: #e0e0e0 !important;
+  color: #333333 !important;
 }
 
 #detailOverlay .cal-day:hover {
-  background: #333333 !important;
-  border-color: #666666 !important;
+  background: #e8e8e8 !important;
+  border-color: #cccccc !important;
 }
 
 #detailOverlay .cal-day.selected {
-  background: #ffffff !important;
-  color: #000000 !important;
-  border-color: #ffffff !important;
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+  border-color: #1a1a1a !important;
 }
 
 #detailOverlay .cal-day.occupied {
-  background: #3a2020 !important;
-  border-color: #8b0000 !important;
-  color: #ff6666 !important;
+  background: #ffeeee !important;
+  border-color: #ffcccc !important;
+  color: #cc0000 !important;
 }
 
-/* Časové sloty - tmavé */
+/* Časové sloty - bílé */
 #detailOverlay .time-slot {
-  background: #2a2a2a !important;
-  border-color: #444444 !important;
-  color: #ffffff !important;
+  background: #f5f5f5 !important;
+  border-color: #e0e0e0 !important;
+  color: #333333 !important;
 }
 
 #detailOverlay .time-slot:hover {
-  background: #333333 !important;
-  border-color: #666666 !important;
+  background: #e8e8e8 !important;
+  border-color: #cccccc !important;
 }
 
 #detailOverlay .time-slot.selected {
-  background: #ffffff !important;
-  color: #000000 !important;
-  border-color: #ffffff !important;
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+  border-color: #1a1a1a !important;
 }
 
 #detailOverlay .time-slot.occupied {
-  background: #3a2020 !important;
-  border-color: #8b0000 !important;
-  color: #ff6666 !important;
+  background: #ffeeee !important;
+  border-color: #ffcccc !important;
+  color: #cc0000 !important;
 }
 
 /* Panel vzdálenosti - tmavý */
