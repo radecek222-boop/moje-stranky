@@ -79,6 +79,7 @@ try {
                     n.id,
                     n.claim_id,
                     n.note_text,
+                    n.audio_path,
                     n.created_by,
                     n.created_at,
                     CASE WHEN nr.id IS NOT NULL THEN 1 ELSE 0 END as is_read,
@@ -109,6 +110,14 @@ try {
 
                 $note['timestamp'] = $note['created_at'];
                 $note['text'] = $note['note_text'];  // KRITICKÉ: Mapování textu poznámky
+
+                // Audio podpora
+                $note['has_audio'] = !empty($note['audio_path']);
+                // Pokud existuje audio, přidat URL pro přehrávání
+                if ($note['has_audio']) {
+                    $note['audio_url'] = $note['audio_path'];
+                }
+
                 unset($note['is_read']);
                 unset($note['user_name']); // Vyčistit pomocný sloupec
             }
@@ -120,18 +129,71 @@ try {
             break;
 
         case 'add':
-            // Přidání poznámky
+            // Přidání poznámky (textové nebo hlasové)
             $reklamaceId = sanitizeReklamaceId($_POST['reklamace_id'] ?? null, 'reklamace_id');
             $text = $_POST['text'] ?? null;
+            $audioPath = null;
 
-            if (!$text) {
-                throw new Exception('Chybí text poznámky');
+            // Zpracování audio souboru pokud byl nahrán
+            if (isset($_FILES['audio']) && $_FILES['audio']['error'] === UPLOAD_ERR_OK) {
+                $audioFile = $_FILES['audio'];
+
+                // BEZPEČNOST: Validace typu souboru
+                $allowedMimes = ['audio/webm', 'audio/mp3', 'audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/mp4', 'audio/x-m4a'];
+                $finfo = new finfo(FILEINFO_MIME_TYPE);
+                $mimeType = $finfo->file($audioFile['tmp_name']);
+
+                if (!in_array($mimeType, $allowedMimes, true)) {
+                    throw new Exception('Nepovolený typ audio souboru: ' . $mimeType);
+                }
+
+                // BEZPEČNOST: Maximální velikost 10MB
+                if ($audioFile['size'] > 10 * 1024 * 1024) {
+                    throw new Exception('Audio soubor je příliš velký (max 10MB)');
+                }
+
+                // Vytvořit adresář pokud neexistuje
+                $uploadDir = __DIR__ . '/../uploads/audio/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+
+                // Vygenerovat unikátní název souboru
+                $extension = 'webm'; // Výchozí pro MediaRecorder
+                if ($mimeType === 'audio/mp3' || $mimeType === 'audio/mpeg') {
+                    $extension = 'mp3';
+                } elseif ($mimeType === 'audio/ogg') {
+                    $extension = 'ogg';
+                } elseif ($mimeType === 'audio/wav') {
+                    $extension = 'wav';
+                } elseif ($mimeType === 'audio/mp4' || $mimeType === 'audio/x-m4a') {
+                    $extension = 'm4a';
+                }
+
+                $filename = 'audio_' . date('Ymd_His') . '_' . bin2hex(random_bytes(8)) . '.' . $extension;
+                $targetPath = $uploadDir . $filename;
+
+                if (!move_uploaded_file($audioFile['tmp_name'], $targetPath)) {
+                    throw new Exception('Nepodařilo se uložit audio soubor');
+                }
+
+                $audioPath = 'uploads/audio/' . $filename;
+
+                // Pro hlasovou poznámku bez textu nastavit výchozí text
+                if (empty($text)) {
+                    $text = '[Hlasová poznámka]';
+                }
+            }
+
+            // Validace - musí být alespoň text nebo audio
+            if (empty($text) && empty($audioPath)) {
+                throw new Exception('Chybí text poznámky nebo audio');
             }
 
             // BEZPEČNOST: Validace textu
             $text = trim($text);
-            if (strlen($text) < 1 || strlen($text) > 5000) {
-                throw new Exception('Text poznámky musí mít 1-5000 znaků');
+            if (strlen($text) > 5000) {
+                throw new Exception('Text poznámky je příliš dlouhý (max 5000 znaků)');
             }
 
             // BEZPEČNOST: XSS ochrana - sanitizace HTML
@@ -151,17 +213,18 @@ try {
             // Zjištění autora
             $createdBy = $currentUserEmail ?? 'system';
 
-            // Vložení do databáze
+            // Vložení do databáze (s audio_path pokud existuje)
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_notes (
-                    claim_id, note_text, created_by, created_at
+                    claim_id, note_text, audio_path, created_by, created_at
                 ) VALUES (
-                    :claim_id, :note_text, :created_by, NOW()
+                    :claim_id, :note_text, :audio_path, :created_by, NOW()
                 )
             ");
             $stmt->execute([
                 ':claim_id' => $claimId,
                 ':note_text' => $text,
+                ':audio_path' => $audioPath,
                 ':created_by' => $createdBy
             ]);
 
@@ -299,26 +362,35 @@ try {
                 throw new Exception('Přístup odepřen');
             }
 
-            // Smazání z databáze - pouze vlastní poznámky nebo admin
-            if ($isAdmin) {
-                // Admin může smazat jakoukoliv poznámku
-                $stmt = $pdo->prepare("DELETE FROM wgs_notes WHERE id = :id");
-                $stmt->execute([':id' => $noteId]);
-            } else {
-                // Ostatní uživatelé pouze své vlastní (kontrola podle created_by email)
-                $stmt = $pdo->prepare("
-                    DELETE FROM wgs_notes
-                    WHERE id = :id AND created_by = :user_email
-                ");
-                $stmt->execute([
-                    ':id' => $noteId,
-                    ':user_email' => $currentUserEmail
-                ]);
+            // Nejdřív načíst audio_path pro případné smazání souboru
+            $stmtAudio = $pdo->prepare("SELECT audio_path, created_by FROM wgs_notes WHERE id = :id");
+            $stmtAudio->execute([':id' => $noteId]);
+            $noteData = $stmtAudio->fetch(PDO::FETCH_ASSOC);
+
+            // Kontrola oprávnění
+            if (!$noteData) {
+                throw new Exception('Poznámka nebyla nalezena');
             }
+
+            if (!$isAdmin && $noteData['created_by'] !== $currentUserEmail) {
+                throw new Exception('Nemáte oprávnění smazat tuto poznámku');
+            }
+
+            // Smazat audio soubor pokud existuje
+            if (!empty($noteData['audio_path'])) {
+                $audioFile = __DIR__ . '/../' . $noteData['audio_path'];
+                if (file_exists($audioFile)) {
+                    unlink($audioFile);
+                }
+            }
+
+            // Smazání z databáze
+            $stmt = $pdo->prepare("DELETE FROM wgs_notes WHERE id = :id");
+            $stmt->execute([':id' => $noteId]);
 
             // Kontrola zda byla poznámka smazána
             if ($stmt->rowCount() === 0) {
-                throw new Exception('Poznámku nelze smazat - neexistuje nebo nemáte oprávnění');
+                throw new Exception('Poznámku nelze smazat');
             }
 
             echo json_encode([

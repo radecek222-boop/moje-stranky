@@ -17,7 +17,8 @@ header("X-XSS-Protection: 1; mode=block");
 header("Referrer-Policy: strict-origin-when-cross-origin");
 
 // Permissions Policy - zakázat nepotřebné browser features
-header("Permissions-Policy: geolocation=(), microphone=(), camera=(self)");
+// microphone=(self) - povoleno pro hlasové poznámky
+header("Permissions-Policy: geolocation=(), microphone=(self), camera=(self)");
 
 // Strict-Transport-Security (pouze pokud je HTTPS)
 if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
@@ -33,6 +34,7 @@ $csp = [
     "img-src 'self' data: blob: https: https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
     "font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
     "connect-src 'self' https://api.geoapify.com https://maps.geoapify.com https://fonts.googleapis.com https://fonts.gstatic.com https://router.project-osrm.org https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
+    "media-src 'self' blob:", // Povolit blob URLs pro audio prehravac (hlasove poznamky)
     "frame-src 'self' blob:", // Povolit blob URLs v iframe (PDF preview)
     "worker-src 'self' blob:", // Povolit PDF.js workers
     "frame-ancestors 'self'",
