@@ -749,6 +749,12 @@ async function showDetail(recordOrId) {
         `}
       </div>
 
+        <!-- Videotéka - archiv videí zakázky -->
+        <button class="btn" style="background: #444; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; margin-top: 0.5rem;"
+                data-action="showVideoteka" data-id="${record.id}">
+          Videotéka
+        </button>
+
         <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="closeDetail">Zavřít</button>
       </div>
     `;
@@ -769,6 +775,12 @@ async function showDetail(recordOrId) {
             Historie PDF
           </button>
         ` : ''}
+
+        <!-- Videotéka - archiv videí zakázky -->
+        <button class="btn" style="background: #444; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; margin-top: 0.5rem;"
+                data-action="showVideoteka" data-id="${record.id}">
+          Videotéka
+        </button>
 
         <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="closeDetail">Zavřít</button>
       </div>
@@ -2158,72 +2170,54 @@ function zobrazPDFModal(pdfUrl, claimId) {
   btnZavrit.textContent = 'Zavřít';
   btnZavrit.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 110px; touch-action: manipulation;';
   btnZavrit.onclick = () => overlay.remove();
+
+  // Tlačítko Sdílet - Web Share API (nativní systémové sdílení)
   btnOdeslat.onclick = async () => {
-    if (!claimId) {
-      alert('Chyba: Chybí ID zakázky');
-      return;
-    }
-
-    // Najít reklamaci v datech
-    const reklamace = window.REKLAMACE_DATA?.find(r => r.id == claimId);
-    if (!reklamace || !reklamace.email) {
-      alert('Chyba: Nenalezen email zákazníka');
-      return;
-    }
-
-    if (!confirm('Odeslat PDF na email: ' + reklamace.email + '?')) {
-      return;
-    }
-
-    btnOdeslat.disabled = true;
-    btnOdeslat.textContent = 'Odesílám...';
-
     try {
-      // Načíst PDF jako base64
+      // Zkontrolovat podporu Web Share API
+      if (!navigator.share && !navigator.canShare) {
+        alert('Sdílení není podporováno v tomto prohlížeči.\n\nPoužijte tlačítko "Uložit" a pak sdílejte soubor ručně.');
+        return;
+      }
+
+      btnOdeslat.disabled = true;
+      btnOdeslat.textContent = 'Načítám...';
+
+      // Načíst PDF jako Blob
       const response = await fetch(pdfUrl);
       const blob = await response.blob();
-      const reader = new FileReader();
 
-      reader.onload = async function() {
-        const base64 = reader.result.split(',')[1];
+      // Vytvořit File objekt z Blobu
+      const fileName = `PDF_Report_${claimId || 'dokument'}.pdf`;
+      const file = new File([blob], fileName, { type: 'application/pdf' });
 
-        // Odeslat email
-        const formData = new FormData();
-        formData.append('action', 'send_email');
-        formData.append('reklamace_id', reklamace.reklamace_id || claimId);
-        formData.append('customer_email', reklamace.email);
-        formData.append('customer_name', reklamace.jmeno || 'Zákazník');
-        formData.append('complete_pdf', base64);
-
-        const csrfToken = document.querySelector('input[name="csrf_token"]')?.value;
-        if (csrfToken) {
-          formData.append('csrf_token', csrfToken);
-        }
-
-        const emailResponse = await fetch('/api/protokol_api.php', {
-          method: 'POST',
-          body: formData
-        });
-
-        const result = await emailResponse.json();
-
-        if (result.status === 'success') {
-          alert('Email byl úspěšně odeslán!');
-          overlay.remove();
-        } else {
-          throw new Error(result.message || 'Neznámá chyba');
-        }
+      // Web Share API
+      const shareData = {
+        title: `PDF Report - ${claimId || 'WGS'}`,
+        text: `PDF dokument zakázky ${claimId || ''}`,
+        files: [file]
       };
 
-      reader.onerror = () => {
-        throw new Error('Nepodařilo se načíst PDF');
-      };
+      // Zkontrolovat zda lze sdílet soubory
+      if (navigator.canShare && !navigator.canShare(shareData)) {
+        throw new Error('Sdílení souborů není podporováno');
+      }
 
-      reader.readAsDataURL(blob);
+      // Sdílet přes systémové menu (email, SMS, WhatsApp, atd.)
+      await navigator.share(shareData);
+
+      // Úspěch (uživatel vybral aplikaci)
+      console.log('PDF úspěšně sdíleno');
 
     } catch (error) {
-      console.error('Chyba při odesílání:', error);
-      alert('Chyba při odesílání: ' + error.message);
+      // AbortError = uživatel zrušil sdílení (to není chyba)
+      if (error.name === 'AbortError') {
+        console.log('Sdílení zrušeno uživatelem');
+      } else {
+        console.error('Chyba při sdílení:', error);
+        alert('Chyba při sdílení: ' + error.message);
+      }
+    } finally {
       btnOdeslat.disabled = false;
       btnOdeslat.textContent = 'Sdílet';
     }
@@ -3139,6 +3133,545 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
   }
 }
 
+/**
+ * Zobrazí modal s archivem videí pro zakázku
+ * @param {number} claimId - ID zakázky
+ */
+async function zobrazVideotekaArchiv(claimId) {
+  logger.log(`[Videotéka] Otevírám archiv pro zakázku ID: ${claimId}`);
+
+  // Vytvořit overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'videotekaOverlay';
+  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10004; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;';
+
+  // Kontejner
+  const container = document.createElement('div');
+  container.style.cssText = 'width: 95%; max-width: 900px; height: 90%; background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;';
+
+  // Header
+  const header = document.createElement('div');
+  header.style.cssText = 'padding: 16px 20px; background: #333; color: white; font-weight: 600; font-size: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #444;';
+  header.innerHTML = `<span>Videotéka</span><span style="font-size: 0.85rem; opacity: 0.7;">Zakázka ID: ${claimId}</span>`;
+
+  // Content area - seznam videí
+  const content = document.createElement('div');
+  content.id = 'videotekaContent';
+  content.style.cssText = 'flex: 1; overflow-y: auto; padding: 20px; background: #1a1a1a;';
+
+  // Načíst videa z API
+  try {
+    const response = await fetch(`/api/video_api.php?action=list_videos&claim_id=${claimId}`);
+    const result = await response.json();
+
+    if (result.status === 'success' && result.videos && result.videos.length > 0) {
+      // Zobrazit seznam videí
+      result.videos.forEach(video => {
+        const videoCard = vytvorVideoKartu(video, claimId);
+        content.appendChild(videoCard);
+      });
+    } else {
+      // Žádná videa
+      content.innerHTML = `
+        <div style="text-align: center; padding: 3rem; color: #999;">
+          <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📹</div>
+          <div style="font-size: 1.1rem; margin-bottom: 0.5rem;">Žádná videa v archivu</div>
+          <div style="font-size: 0.9rem; opacity: 0.7;">Nahrajte první video pomocí tlačítka níže</div>
+        </div>
+      `;
+    }
+  } catch (error) {
+    logger.error('[Videotéka] Chyba při načítání videí:', error);
+    content.innerHTML = `
+      <div style="text-align: center; padding: 3rem; color: #f44;">
+        <div style="font-size: 1rem; margin-bottom: 0.5rem;">Chyba při načítání videí</div>
+        <div style="font-size: 0.85rem; opacity: 0.7;">${error.message}</div>
+      </div>
+    `;
+  }
+
+  // Footer s tlačítky
+  const footer = document.createElement('div');
+  footer.style.cssText = 'padding: 16px 20px; background: #333; border-top: 2px solid #444; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;';
+
+  // Tlačítko Nahrát video
+  const btnNahrat = document.createElement('button');
+  btnNahrat.textContent = 'Nahrát video';
+  btnNahrat.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #2D5016; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 140px; touch-action: manipulation;';
+  btnNahrat.onclick = () => otevritNahravaniVidea(claimId, overlay);
+
+  // Tlačítko Zavřít
+  const btnZavrit = document.createElement('button');
+  btnZavrit.textContent = 'Zavřít';
+  btnZavrit.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 140px; touch-action: manipulation;';
+  btnZavrit.onclick = () => overlay.remove();
+
+  footer.appendChild(btnNahrat);
+  footer.appendChild(btnZavrit);
+
+  // Sestavit modal
+  container.appendChild(header);
+  container.appendChild(content);
+  container.appendChild(footer);
+  overlay.appendChild(container);
+
+  // Zavřít při kliknutí mimo
+  overlay.onclick = (e) => {
+    if (e.target === overlay) overlay.remove();
+  };
+
+  // Zavřít při ESC
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      overlay.remove();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+
+  document.body.appendChild(overlay);
+}
+
+/**
+ * Vytvoří kartu s video náhledem a tlačítky
+ * @param {object} video - Video objekt z databáze
+ * @param {number} claimId - ID zakázky
+ * @returns {HTMLElement}
+ */
+function vytvorVideoKartu(video, claimId) {
+  const card = document.createElement('div');
+  card.style.cssText = 'background: #2a2a2a; border-radius: 8px; padding: 16px; margin-bottom: 16px; display: flex; gap: 16px; align-items: flex-start; border: 1px solid #444;';
+
+  // Video thumbnail placeholder (později můžeme přidat generování thumbnailů)
+  const thumbnail = document.createElement('div');
+  thumbnail.style.cssText = 'width: 120px; height: 80px; background: #1a1a1a; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #555;';
+  thumbnail.innerHTML = '<span style="font-size: 2rem; opacity: 0.5;">▶</span>';
+
+  // Informace o videu
+  const info = document.createElement('div');
+  info.style.cssText = 'flex: 1; color: #fff;';
+
+  const nazev = document.createElement('div');
+  nazev.style.cssText = 'font-weight: 600; font-size: 0.95rem; margin-bottom: 6px; color: #fff;';
+  nazev.textContent = video.video_name || 'Video';
+
+  const meta = document.createElement('div');
+  meta.style.cssText = 'font-size: 0.8rem; color: #999; margin-bottom: 10px;';
+
+  const velikost = (video.file_size / 1024 / 1024).toFixed(2);
+  const datum = video.uploaded_at ? new Date(video.uploaded_at).toLocaleString('cs-CZ') : '—';
+
+  meta.innerHTML = `
+    <div>Velikost: ${velikost} MB</div>
+    <div>Nahráno: ${datum}</div>
+    ${video.uploader_email ? `<div>Uživatel: ${video.uploader_email}</div>` : ''}
+  `;
+
+  // Tlačítka
+  const buttons = document.createElement('div');
+  buttons.style.cssText = 'display: flex; gap: 8px; flex-wrap: wrap;';
+
+  // Tlačítko Přehrát
+  const btnPrehrat = document.createElement('button');
+  btnPrehrat.textContent = 'Přehrát';
+  btnPrehrat.style.cssText = 'padding: 8px 16px; font-size: 0.85rem; background: #2D5016; color: white; border: none; border-radius: 4px; cursor: pointer; touch-action: manipulation;';
+  btnPrehrat.onclick = () => prehratVideo(video.video_path, video.video_name);
+
+  // Tlačítko Stáhnout
+  const btnStahnout = document.createElement('button');
+  btnStahnout.textContent = 'Stáhnout';
+  btnStahnout.style.cssText = 'padding: 8px 16px; font-size: 0.85rem; background: #555; color: white; border: none; border-radius: 4px; cursor: pointer; touch-action: manipulation;';
+  btnStahnout.onclick = () => {
+    const link = document.createElement('a');
+    link.href = video.video_path;
+    link.download = video.video_name || 'video.mp4';
+    link.click();
+  };
+
+  // Tlačítko Smazat
+  const btnSmazat = document.createElement('button');
+  btnSmazat.textContent = 'Smazat';
+  btnSmazat.style.cssText = 'padding: 8px 16px; font-size: 0.85rem; background: #c33; color: white; border: none; border-radius: 4px; cursor: pointer; touch-action: manipulation;';
+  btnSmazat.onclick = async () => {
+    if (!confirm(`Opravdu smazat video "${video.video_name}"?`)) return;
+
+    try {
+      const formData = new FormData();
+      formData.append('action', 'delete_video');
+      formData.append('video_id', video.id);
+      formData.append('csrf_token', document.querySelector('input[name="csrf_token"]')?.value || '');
+
+      const response = await fetch('/api/video_api.php', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        showToast('Video bylo smazáno', 'success');
+        card.remove();
+      } else {
+        throw new Error(result.message || 'Chyba při mazání');
+      }
+    } catch (error) {
+      logger.error('[Videotéka] Chyba při mazání videa:', error);
+      showToast('Chyba při mazání videa: ' + error.message, 'error');
+    }
+  };
+
+  buttons.appendChild(btnPrehrat);
+  buttons.appendChild(btnStahnout);
+  buttons.appendChild(btnSmazat);
+
+  info.appendChild(nazev);
+  info.appendChild(meta);
+  info.appendChild(buttons);
+
+  card.appendChild(thumbnail);
+  card.appendChild(info);
+
+  return card;
+}
+
+/**
+ * Přehraje video v modálním okně
+ * @param {string} videoPath - Cesta k video souboru
+ * @param {string} videoName - Název videa
+ */
+function prehratVideo(videoPath, videoName) {
+  // Vytvořit overlay pro přehrávač
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10005; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;';
+
+  // Video element
+  const video = document.createElement('video');
+  video.src = videoPath;
+  video.controls = true;
+  video.autoplay = true;
+  video.style.cssText = 'max-width: 95%; max-height: 85vh; border-radius: 8px;';
+
+  // Název videa
+  const title = document.createElement('div');
+  title.style.cssText = 'color: white; font-size: 1rem; margin-top: 16px; text-align: center;';
+  title.textContent = videoName || 'Video';
+
+  // Tlačítko Zavřít
+  const btnClose = document.createElement('button');
+  btnClose.textContent = 'Zavřít';
+  btnClose.style.cssText = 'margin-top: 16px; padding: 10px 24px; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;';
+  btnClose.onclick = () => {
+    video.pause();
+    overlay.remove();
+  };
+
+  overlay.appendChild(video);
+  overlay.appendChild(title);
+  overlay.appendChild(btnClose);
+
+  // Zavřít při kliknutí mimo video
+  overlay.onclick = (e) => {
+    if (e.target === overlay) {
+      video.pause();
+      overlay.remove();
+    }
+  };
+
+  // ESC zavře přehrávač
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      video.pause();
+      overlay.remove();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+
+  document.body.appendChild(overlay);
+}
+
+/**
+ * Otevře modal pro nahrání nového videa s automatickou kompresí
+ * @param {number} claimId - ID zakázky
+ * @param {HTMLElement} parentOverlay - Rodičovský overlay (videotéka archiv)
+ */
+function otevritNahravaniVidea(claimId, parentOverlay) {
+  logger.log(`[Videotéka] Otevírám upload pro zakázku ID: ${claimId}`);
+
+  // Vytvořit overlay pro upload
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10006; display: flex; align-items: center; justify-content: center; padding: 1rem;';
+
+  // Kontejner
+  const container = document.createElement('div');
+  container.style.cssText = 'background: #2a2a2a; border-radius: 8px; padding: 24px; max-width: 500px; width: 100%; border: 2px solid #444;';
+
+  // Nadpis
+  const nadpis = document.createElement('h3');
+  nadpis.style.cssText = 'color: white; margin: 0 0 20px 0; font-size: 1.1rem;';
+  nadpis.textContent = 'Nahrát video';
+
+  // File input
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'video/*';
+  fileInput.style.cssText = 'display: block; width: 100%; padding: 12px; background: #1a1a1a; color: white; border: 1px solid #555; border-radius: 4px; margin-bottom: 16px; font-size: 0.9rem;';
+
+  // Info o velikosti
+  const infoBox = document.createElement('div');
+  infoBox.style.cssText = 'background: #1a1a1a; padding: 12px; border-radius: 4px; margin-bottom: 16px; color: #999; font-size: 0.85rem; border: 1px solid #555;';
+  infoBox.innerHTML = `
+    <div style="margin-bottom: 6px;">ℹ️ <strong>Informace o nahrávání:</strong></div>
+    <div style="margin-left: 24px;">
+      <div>• Maximální velikost: 500 MB</div>
+      <div>• Podporované formáty: MP4, MOV, AVI, WebM</div>
+      <div>• Video nad 500 MB bude automaticky komprimováno</div>
+    </div>
+  `;
+
+  // Progress bar (skrytý)
+  const progressContainer = document.createElement('div');
+  progressContainer.style.cssText = 'display: none; margin-bottom: 16px;';
+
+  const progressBar = document.createElement('div');
+  progressBar.style.cssText = 'width: 100%; height: 24px; background: #1a1a1a; border-radius: 4px; overflow: hidden; border: 1px solid #555;';
+
+  const progressFill = document.createElement('div');
+  progressFill.style.cssText = 'height: 100%; background: #2D5016; width: 0%; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem; font-weight: 600;';
+
+  progressBar.appendChild(progressFill);
+  progressContainer.appendChild(progressBar);
+
+  // Status text
+  const statusText = document.createElement('div');
+  statusText.style.cssText = 'text-align: center; color: #999; font-size: 0.85rem; margin-top: 8px; display: none;';
+
+  progressContainer.appendChild(statusText);
+
+  // Tlačítka
+  const buttonContainer = document.createElement('div');
+  buttonContainer.style.cssText = 'display: flex; gap: 12px; justify-content: flex-end;';
+
+  const btnZrusit = document.createElement('button');
+  btnZrusit.textContent = 'Zrušit';
+  btnZrusit.style.cssText = 'padding: 10px 20px; background: #666; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;';
+  btnZrusit.onclick = () => overlay.remove();
+
+  const btnNahrat = document.createElement('button');
+  btnNahrat.textContent = 'Nahrát';
+  btnNahrat.style.cssText = 'padding: 10px 20px; background: #2D5016; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600;';
+  btnNahrat.onclick = async () => {
+    const file = fileInput.files[0];
+    if (!file) {
+      alert('Vyberte video soubor');
+      return;
+    }
+
+    // Kontrola velikosti
+    const maxSize = 524288000; // 500 MB
+    const needsCompression = file.size > maxSize;
+
+    btnNahrat.disabled = true;
+    btnZrusit.disabled = true;
+    progressContainer.style.display = 'block';
+    statusText.style.display = 'block';
+
+    try {
+      let uploadFile = file;
+
+      // Komprese pokud je potřeba
+      if (needsCompression) {
+        statusText.textContent = 'Komprimuji video...';
+        progressFill.style.width = '10%';
+        progressFill.textContent = '10%';
+
+        uploadFile = await komprimovatVideo(file, (progress) => {
+          const percent = Math.round(10 + progress * 40); // 10% - 50%
+          progressFill.style.width = percent + '%';
+          progressFill.textContent = percent + '%';
+        });
+
+        logger.log(`[Videotéka] Video komprimováno: ${file.size} → ${uploadFile.size} bytů`);
+      }
+
+      // Upload
+      statusText.textContent = 'Nahrávám video...';
+      progressFill.style.width = '50%';
+      progressFill.textContent = '50%';
+
+      const formData = new FormData();
+      formData.append('action', 'upload_video');
+      formData.append('claim_id', claimId);
+      formData.append('video', uploadFile, uploadFile.name || file.name);
+      formData.append('csrf_token', document.querySelector('input[name="csrf_token"]')?.value || '');
+
+      const response = await fetch('/api/video_api.php', {
+        method: 'POST',
+        body: formData
+      });
+
+      progressFill.style.width = '90%';
+      progressFill.textContent = '90%';
+
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        progressFill.style.width = '100%';
+        progressFill.textContent = '100%';
+        statusText.textContent = 'Hotovo!';
+        progressFill.style.background = '#2D5016';
+
+        showToast('Video bylo úspěšně nahráno', 'success');
+
+        // Zavřít upload modal
+        setTimeout(() => {
+          overlay.remove();
+
+          // Reload videotéky
+          parentOverlay.remove();
+          zobrazVideotekaArchiv(claimId);
+        }, 1000);
+
+      } else {
+        throw new Error(result.message || 'Chyba při nahrávání');
+      }
+
+    } catch (error) {
+      logger.error('[Videotéka] Chyba při uploadu:', error);
+      progressFill.style.background = '#c33';
+      statusText.textContent = 'Chyba: ' + error.message;
+      btnNahrat.disabled = false;
+      btnZrusit.disabled = false;
+      showToast('Chyba při nahrávání videa: ' + error.message, 'error');
+    }
+  };
+
+  buttonContainer.appendChild(btnZrusit);
+  buttonContainer.appendChild(btnNahrat);
+
+  // Sestavit modal
+  container.appendChild(nadpis);
+  container.appendChild(infoBox);
+  container.appendChild(fileInput);
+  container.appendChild(progressContainer);
+  container.appendChild(buttonContainer);
+  overlay.appendChild(container);
+
+  // Zavřít při ESC
+  const escHandler = (e) => {
+    if (e.key === 'Escape' && !btnNahrat.disabled) {
+      overlay.remove();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+
+  document.body.appendChild(overlay);
+}
+
+/**
+ * Komprimuje video pomocí MediaRecorder API
+ * @param {File} videoFile - Původní video soubor
+ * @param {Function} progressCallback - Callback pro progress update
+ * @returns {Promise<Blob>} - Komprimované video
+ */
+async function komprimovatVideo(videoFile, progressCallback) {
+  return new Promise((resolve, reject) => {
+    try {
+      // Vytvořit video element
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.muted = true;
+
+      video.onloadedmetadata = () => {
+        const width = video.videoWidth;
+        const height = video.videoHeight;
+
+        // Maximální rozlišení 1920x1080
+        let targetWidth = width;
+        let targetHeight = height;
+
+        if (width > 1920 || height > 1080) {
+          const ratio = Math.min(1920 / width, 1080 / height);
+          targetWidth = Math.round(width * ratio);
+          targetHeight = Math.round(height * ratio);
+        }
+
+        // Vytvořit canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext('2d');
+
+        // Vytvořit stream z canvasu
+        const stream = canvas.captureStream(30); // 30 FPS
+
+        // MediaRecorder s kompresí
+        const mimeType = 'video/webm;codecs=vp9';
+        const options = {
+          mimeType: mimeType,
+          videoBitsPerSecond: 2500000 // 2.5 Mbps - dobrá komprese při zachování kvality
+        };
+
+        const mediaRecorder = new MediaRecorder(stream, options);
+        const chunks = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) {
+            chunks.push(e.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(chunks, { type: mimeType });
+          resolve(blob);
+        };
+
+        mediaRecorder.onerror = (e) => {
+          reject(new Error('Chyba při kompresi videa'));
+        };
+
+        // Spustit záznam
+        mediaRecorder.start();
+
+        // Přehrát video a renderovat do canvasu
+        video.play();
+
+        const renderFrame = () => {
+          if (!video.paused && !video.ended) {
+            ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
+
+            // Update progress
+            if (progressCallback) {
+              const progress = video.currentTime / video.duration;
+              progressCallback(progress);
+            }
+
+            requestAnimationFrame(renderFrame);
+          } else {
+            // Video skončilo
+            mediaRecorder.stop();
+          }
+        };
+
+        video.onplay = () => {
+          renderFrame();
+        };
+
+        video.onerror = () => {
+          reject(new Error('Chyba při načítání videa'));
+        };
+      };
+
+      // Načíst video
+      video.src = URL.createObjectURL(videoFile);
+
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
 // ========================================
 // EVENT DELEGATION PRO TLAČÍTKA V DETAILU
 // ========================================
@@ -3226,6 +3759,13 @@ document.addEventListener('click', (e) => {
     case 'saveNewNote':
       if (id && typeof saveNewNote === 'function') {
         saveNewNote(id);
+      }
+      break;
+
+    case 'showVideoteka':
+      if (id && typeof zobrazVideotekaArchiv === 'function') {
+        e.stopPropagation();
+        zobrazVideotekaArchiv(id);
       }
       break;
 

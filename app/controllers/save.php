@@ -485,11 +485,7 @@ function handleReopen(PDO $pdo, array $input): array
         $newId = $pdo->lastInsertId();
 
         // Přidat poznámku do nové zakázky
-        $noteTextNew = "Zakázka otevřena jako klon původní zakázky\n\n" .
-                       "Původní zakázka: " . ($original['reklamace_id'] ?? $original['id']) . "\n" .
-                       "Stav: NOVÁ (čeká na zpracování)\n" .
-                       "Vytvořil: " . ($_SESSION['user_name'] ?? 'Uživatel') . "\n" .
-                       "Datum: " . date('d.m.Y H:i');
+        $noteTextNew = "Zakázka " . ($original['reklamace_id'] ?? $original['id']) . " byla znovu otevřena! " . ($_SESSION['user_name'] ?? 'Uživatel');
 
         $stmtNote = $pdo->prepare("
             INSERT INTO wgs_notes (claim_id, note_text, created_by, created_at)
@@ -862,6 +858,39 @@ try {
         } catch (Exception $notifError) {
             // Chyba notifikace nesmí rozbít celý request
             error_log("[Notifikace] Chyba pri odesilani: " . $notifError->getMessage());
+        }
+
+        // ========================================
+        // PUSH NOTIFIKACE: Odeslat technikům a adminům o nové zakázce
+        // ========================================
+        try {
+            require_once __DIR__ . '/../../includes/WebPush.php';
+
+            $webPush = new WGSWebPush($pdo);
+
+            $notifikacePayload = [
+                'title' => 'Nová zakázka v systému',
+                'body' => "Do systému byla přidána nová objednávka s číslem {$identifierForClient} - {$jmeno}",
+                'icon' => '/assets/img/logo.png',
+                'url' => "/seznam.php?id={$primaryId}",
+                'data' => [
+                    'zakazka_id' => $primaryId,
+                    'reklamace_id' => $identifierForClient,
+                    'jmeno' => $jmeno,
+                    'typ' => 'nova_zakazka'
+                ]
+            ];
+
+            $vysledek = $webPush->odeslatTechnikumAAdminum($notifikacePayload);
+
+            if ($vysledek['uspech']) {
+                error_log("[Push Notifikace] Notifikace o nove zakazce odeslana technikum/adminum: {$identifierForClient}, Odeslano: " . ($vysledek['odeslano'] ?? 0));
+            } else {
+                error_log("[Push Notifikace] Chyba pri odesilani: " . ($vysledek['zprava'] ?? 'Neznama chyba'));
+            }
+        } catch (Exception $pushError) {
+            // Chyba push notifikace nesmí rozbít celý request
+            error_log("[Push Notifikace] Chyba: " . $pushError->getMessage());
         }
         // ========================================
 
