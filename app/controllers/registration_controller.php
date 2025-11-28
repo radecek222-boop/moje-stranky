@@ -72,10 +72,10 @@ try {
     $now = date('Y-m-d H:i:s');
 
     // CRITICAL: Vygenerovat user_id podle role
-    // Mapovani roli na prefixy: technik=TCH, prodejce=PRD, ostatni=USR
+    // Mapovani roli na prefixy: technik=TCH, prodejce=PRO, ostatni=USR
     $rolePrefixMap = [
         'technik' => 'TCH',
-        'prodejce' => 'PRD',
+        'prodejce' => 'PRO',
         'user' => 'USR'
     ];
     $rolePrefix = $rolePrefixMap[$role] ?? 'USR';
