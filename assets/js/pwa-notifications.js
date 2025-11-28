@@ -77,11 +77,6 @@
     // Zkontrolovat podporu notifikací
     if (!('Notification' in window)) {
       console.log('[Notifikace] Notification API neni podporovano');
-
-      // Na iOS v prohlížeči (ne PWA) zobrazit návod
-      if (isIOS && !isPWA) {
-        setTimeout(() => zobrazitIOSNavod(), 3000);
-      }
     } else {
       notificationPermission = Notification.permission;
       console.log('[Notifikace] Aktualni povoleni:', notificationPermission);
@@ -285,11 +280,6 @@
   async function pozadatOPovoleni() {
     if (!('Notification' in window)) {
       console.log('[Notifikace] Notification API neni podporovano');
-
-      // Na iOS bez PWA nabídnout návod
-      if (isIOS && !isPWA) {
-        zobrazitIOSNavod();
-      }
       return false;
     }
 
@@ -589,136 +579,6 @@
     });
   }
 
-  /**
-   * Zobrazit návod pro iOS uživatele - Přidání na plochu
-   */
-  function zobrazitIOSNavod() {
-    // Nezobrazovat pokud už je PWA
-    if (isPWA) return;
-
-    // Nezobrazovat pokud už byl zobrazen
-    if (localStorage.getItem('wgs_ios_guide_shown') === 'true') return;
-
-    // Pouze na iOS Safari
-    if (!isIOSSafari) return;
-
-    const dialog = document.createElement('div');
-    dialog.id = 'ios-install-guide';
-    dialog.innerHTML = `
-      <div style="
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #fff;
-        color: #222;
-        padding: 24px;
-        box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
-        z-index: 99999;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        font-size: 14px;
-        border-top: 1px solid #ddd;
-      ">
-        <button id="ios-guide-close" style="
-          position: absolute;
-          top: 12px;
-          right: 12px;
-          background: none;
-          border: none;
-          font-size: 24px;
-          color: #999;
-          cursor: pointer;
-          padding: 4px;
-          line-height: 1;
-        ">×</button>
-
-        <div style="font-weight: 700; font-size: 17px; margin-bottom: 12px;">
-          Nainstalujte aplikaci WGS
-        </div>
-
-        <div style="color: #666; line-height: 1.5; margin-bottom: 16px;">
-          Pro plnou funkčnost včetně notifikací přidejte aplikaci na plochu:
-        </div>
-
-        <div style="background: #f5f5f5; border-radius: 8px; padding: 16px;">
-          <div style="display: flex; align-items: center; margin-bottom: 12px;">
-            <span style="
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              width: 28px;
-              height: 28px;
-              background: #222;
-              color: #fff;
-              border-radius: 50%;
-              font-weight: 700;
-              font-size: 14px;
-              margin-right: 12px;
-            ">1</span>
-            <span>Klepněte na tlačítko <strong>Sdílet</strong> (ikona se šipkou)</span>
-          </div>
-
-          <div style="display: flex; align-items: center; margin-bottom: 12px;">
-            <span style="
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              width: 28px;
-              height: 28px;
-              background: #222;
-              color: #fff;
-              border-radius: 50%;
-              font-weight: 700;
-              font-size: 14px;
-              margin-right: 12px;
-            ">2</span>
-            <span>Vyberte <strong>Přidat na plochu</strong></span>
-          </div>
-
-          <div style="display: flex; align-items: center;">
-            <span style="
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              width: 28px;
-              height: 28px;
-              background: #222;
-              color: #fff;
-              border-radius: 50%;
-              font-weight: 700;
-              font-size: 14px;
-              margin-right: 12px;
-            ">3</span>
-            <span>Potvrďte <strong>Přidat</strong></span>
-          </div>
-        </div>
-
-        <div style="margin-top: 16px; text-align: center;">
-          <button id="ios-guide-dismiss" style="
-            background: #222;
-            color: #fff;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            width: 100%;
-          ">Rozumím</button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(dialog);
-
-    const zavritDialog = () => {
-      dialog.remove();
-      localStorage.setItem('wgs_ios_guide_shown', 'true');
-    };
-
-    document.getElementById('ios-guide-close').addEventListener('click', zavritDialog);
-    document.getElementById('ios-guide-dismiss').addEventListener('click', zavritDialog);
-  }
 
   // Exportovat funkce pro globalni pouziti
   window.WGSNotifikace = {
@@ -728,7 +588,6 @@
     zobrazitNotifikaci: zobrazitNotifikaci,
     aktualizovat: aktualizovatPocetNeprectenych,
     zobrazitDialogPovoleni: zobrazitDialogPovoleni,
-    zobrazitIOSNavod: zobrazitIOSNavod,
     registrovatPush: registrovatPushSubscription,
     zrusitPush: zrusitPushSubscription,
     getTotal: () => totalUnread,

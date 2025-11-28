@@ -14,6 +14,8 @@ $pwaUzivatelPrihlasen = isset($_SESSION['user_id']) || (isset($_SESSION['is_admi
 ?>
 <!-- PWA Service Worker Registration -->
 <script src="/assets/js/sw-register.js"></script>
+<!-- PWA Pull-to-Refresh -->
+<script src="/assets/js/pull-to-refresh.js"></script>
 <?php if ($pwaUzivatelPrihlasen): ?>
 <!-- PWA Notifications (Badge + Local Notifications) -->
 <script src="/assets/js/pwa-notifications.js"></script>

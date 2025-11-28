@@ -69,15 +69,29 @@ if (!$isLoggedIn && !$isAdmin) {
     padding: 0.15rem 0.4rem !important;
     margin-top: 0.05rem !important;
     margin-bottom: 0.2rem !important;
-    border-width: 2px !important;
+    border: 2px solid #1a1a1a !important;
     line-height: 1.0 !important;
     min-height: 16px !important;
   }
 
-  .search-input {
+  .search-input,
+  .search-input:focus,
+  .search-input:active,
+  input.search-input,
+  input#searchInput {
     font-size: 0.65rem !important;
     line-height: 1.0 !important;
     padding: 0 !important;
+    border: 0 !important;
+    border-width: 0 !important;
+    outline: 0 !important;
+    outline-width: 0 !important;
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    background: transparent !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    border-radius: 0 !important;
   }
 
   .search-icon {
@@ -255,13 +269,460 @@ if (!$isLoggedIn && !$isAdmin) {
   padding: 0.75rem 1rem !important;
 }
 
-/* POSUN MODALU OD HEADERU */
-.modal-overlay {
+/* POSUN MODALU OD HEADERU - pro běžné modaly */
+.modal-overlay:not(#detailOverlay) {
   padding-top: 3rem !important;
 }
 
-.modal-content {
+.modal-overlay:not(#detailOverlay) .modal-content {
   margin-top: 2rem !important;
+}
+
+/* DETAIL OVERLAY - TMAVÉ POZADÍ + PŘESNÉ CENTROVÁNÍ */
+#detailOverlay {
+  --c-bg: #1a1a1a;
+  --c-bg-card: #222222;
+  --c-text: #ffffff;
+  --c-text-muted: #aaaaaa;
+  --c-border: #333333;
+  background: #0a0a0a !important;
+  /* Přesné centrování - tlačítko Kontaktovat uprostřed */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+#detailOverlay .modal-content {
+  background: #1a1a1a !important;
+  border: none !important;
+  box-shadow: none !important;
+  max-width: 500px !important;
+  width: 95% !important;
+  color: #ffffff !important;
+  margin: 0 auto !important;
+  /* Omezit výšku aby se vešlo na displej */
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  border-radius: 12px !important;
+}
+
+/* Hlavička modalu - větší a vše vycentrováno */
+#detailOverlay .modal-header {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
+  padding: 1.5rem 2rem !important;
+  text-align: center !important;
+  border-bottom: 1px solid #333333 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#detailOverlay .modal-title {
+  font-size: 1.4rem !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
+  margin-bottom: 0.5rem !important;
+  text-align: center !important;
+  width: 100% !important;
+}
+
+#detailOverlay .modal-subtitle {
+  font-size: 0.9rem !important;
+  color: #888888 !important;
+  text-align: center !important;
+  width: 100% !important;
+}
+
+/* Tlačítka v hlavičce - centrované */
+#detailOverlay .modal-header .btn,
+#detailOverlay .modal-header button {
+  margin: 0 auto !important;
+}
+
+@media (max-width: 768px) {
+  /* Mobilní centrování - přesně uprostřed */
+  #detailOverlay {
+    padding: 0.5rem !important;
+  }
+
+  #detailOverlay .modal-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: 95vh !important;
+    border-radius: 8px !important;
+  }
+
+  #detailOverlay .modal-header {
+    padding: 1rem 1.5rem !important;
+  }
+
+  #detailOverlay .modal-title {
+    font-size: 1.1rem !important;
+    padding: 0 !important; /* Centrovaný - bez odsazení */
+  }
+
+  #detailOverlay .modal-subtitle {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Tmavý styl pro všechny sekce v detailu */
+#detailOverlay .modal-body {
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  padding: 1rem !important;
+}
+
+/* Všechny prvky v body centrované */
+#detailOverlay .modal-body > * {
+  width: 100% !important;
+  max-width: 400px !important;
+}
+
+/* Tlačítka v body - centrované */
+#detailOverlay .modal-body .btn {
+  display: block !important;
+  margin: 0.5rem auto !important;
+}
+
+#detailOverlay .modal-section {
+  background: #222222 !important;
+  border: 1px solid #333333 !important;
+  color: #ffffff !important;
+}
+
+#detailOverlay .section-title {
+  color: #aaaaaa !important;
+  border-bottom-color: #333333 !important;
+}
+
+#detailOverlay .info-grid {
+  color: #ffffff !important;
+}
+
+#detailOverlay .info-label {
+  color: #888888 !important;
+}
+
+#detailOverlay .info-value {
+  color: #ffffff !important;
+}
+
+/* Editovatelná pole - světlá s jemným odlišením */
+#detailOverlay .editable-field {
+  background: #f5f5f5 !important;
+  border-color: #e0e0e0 !important;
+}
+
+#detailOverlay .field-label {
+  color: #666666 !important;
+}
+
+#detailOverlay .field-input,
+#detailOverlay .field-textarea,
+#detailOverlay input,
+#detailOverlay textarea,
+#detailOverlay select {
+  background: #f8f8f8 !important;
+  border-color: #e0e0e0 !important;
+  color: #333333 !important;
+}
+
+#detailOverlay input:focus,
+#detailOverlay textarea:focus,
+#detailOverlay select:focus {
+  background: #ffffff !important;
+  border-color: #999999 !important;
+  outline: none !important;
+}
+
+#detailOverlay .field-input::placeholder,
+#detailOverlay .field-textarea::placeholder,
+#detailOverlay input::placeholder,
+#detailOverlay textarea::placeholder {
+  color: #999999 !important;
+}
+
+/* Info bloky v detailu zákazníka - světlé s jemným kontrastem */
+#detailOverlay .modal-body > div[style*="background: #f8f9fa"],
+#detailOverlay .modal-body > div[style*="background:#f8f9fa"] {
+  background: #f0f0f0 !important;
+  border-color: #ddd !important;
+}
+
+/* Labely v detailu zákazníka */
+#detailOverlay .modal-body label,
+#detailOverlay .modal-body span[style*="color: #666"] {
+  color: #555555 !important;
+}
+
+/* Div jako textarea (popisy) - světlé odlišené */
+#detailOverlay .modal-body > div > div[onclick*="showTextOverlay"] {
+  background: #f8f8f8 !important;
+  border-color: #e0e0e0 !important;
+  color: #333333 !important;
+}
+
+/* Readonly inputy - trochu jiný odstín */
+#detailOverlay input[readonly] {
+  background: #eeeeee !important;
+  color: #666666 !important;
+}
+
+/* Grid s popisky a inputy - horizontální zarovnání */
+#detailOverlay .modal-body div[style*="grid-template-columns"] {
+  grid-template-columns: auto 1fr !important;
+  align-items: center !important;
+}
+
+#detailOverlay .modal-body div[style*="grid-template-columns"] > span {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 32px !important;
+  padding-right: 0.5rem !important;
+  white-space: nowrap !important;
+}
+
+#detailOverlay .modal-body div[style*="grid-template-columns"] > input,
+#detailOverlay .modal-body div[style*="grid-template-columns"] > span:not([style*="color: #666"]) {
+  min-height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Tlačítko smazat reklamaci - červené */
+#detailOverlay button[data-action="deleteReklamace"] {
+  background: #dc3545 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+#detailOverlay button[data-action="deleteReklamace"]:hover {
+  background: #c82333 !important;
+}
+
+/* Kalendář - bílý */
+#detailOverlay .calendar-container {
+  background: #ffffff !important;
+  border-radius: 8px !important;
+  padding: 1rem !important;
+}
+
+#detailOverlay .calendar-controls {
+  background: #ffffff !important;
+}
+
+#detailOverlay .calendar-month-title {
+  color: #333333 !important;
+}
+
+#detailOverlay .calendar-nav-btn {
+  background: #f5f5f5 !important;
+  color: #333333 !important;
+  border-color: #e0e0e0 !important;
+}
+
+#detailOverlay .calendar-nav-btn:hover {
+  background: #e8e8e8 !important;
+}
+
+#detailOverlay .calendar-weekdays {
+  color: #666666 !important;
+}
+
+#detailOverlay .cal-day {
+  background: #f5f5f5 !important;
+  border-color: #e0e0e0 !important;
+  color: #333333 !important;
+}
+
+#detailOverlay .cal-day:hover {
+  background: #e8e8e8 !important;
+  border-color: #cccccc !important;
+}
+
+#detailOverlay .cal-day.selected {
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+  border-color: #1a1a1a !important;
+}
+
+#detailOverlay .cal-day.occupied {
+  background: #ffeeee !important;
+  border-color: #ffcccc !important;
+  color: #cc0000 !important;
+}
+
+/* Časové sloty - bílé */
+#detailOverlay .time-slot {
+  background: #f5f5f5 !important;
+  border-color: #e0e0e0 !important;
+  color: #333333 !important;
+}
+
+#detailOverlay .time-slot:hover {
+  background: #e8e8e8 !important;
+  border-color: #cccccc !important;
+}
+
+#detailOverlay .time-slot.selected {
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+  border-color: #1a1a1a !important;
+}
+
+#detailOverlay .time-slot.occupied {
+  background: #ffeeee !important;
+  border-color: #ffcccc !important;
+  color: #cc0000 !important;
+}
+
+/* Panel vzdálenosti - tmavý */
+#detailOverlay .distance-info-panel {
+  background: #222222 !important;
+  border-color: #333333 !important;
+}
+
+#detailOverlay .distance-info-title {
+  color: #888888 !important;
+}
+
+#detailOverlay .distance-stat {
+  background: #2a2a2a !important;
+  border-color: #444444 !important;
+}
+
+#detailOverlay .distance-stat-label {
+  color: #888888 !important;
+}
+
+#detailOverlay .distance-stat-value {
+  color: #ffffff !important;
+}
+
+#detailOverlay .route-item {
+  color: #ffffff !important;
+}
+
+#detailOverlay .route-distance {
+  background: #333333 !important;
+  border-color: #444444 !important;
+  color: #ffffff !important;
+}
+
+/* Rezervace na den - tmavé */
+#detailOverlay .day-bookings {
+  background: #2a1515 !important;
+  border-color: #8b0000 !important;
+}
+
+#detailOverlay .day-bookings h4 {
+  color: #ff6666 !important;
+}
+
+#detailOverlay .booking-item {
+  background: #1a1a1a !important;
+  border-color: #444444 !important;
+  color: #ffffff !important;
+}
+
+/* Tlačítka v detailu - tmavá */
+#detailOverlay .btn {
+  background: #333333 !important;
+  border-color: #555555 !important;
+  color: #ffffff !important;
+}
+
+#detailOverlay .btn:hover {
+  background: #444444 !important;
+  border-color: #666666 !important;
+}
+
+#detailOverlay .btn-success {
+  background: #2a4a2a !important;
+  border-color: #3a6a3a !important;
+}
+
+#detailOverlay .btn-danger {
+  background: #4a2a2a !important;
+  border-color: #8b0000 !important;
+  color: #ff6666 !important;
+}
+
+/* Modal actions - tmavé */
+#detailOverlay .modal-actions {
+  background: #1a1a1a !important;
+  border-top-color: #333333 !important;
+}
+
+/* Zavírací tlačítko */
+#detailOverlay .modal-close {
+  color: #ffffff !important;
+  background: #333333 !important;
+}
+
+#detailOverlay .modal-close:hover {
+  background: #444444 !important;
+}
+
+/* Mapa - tmavé pozadí */
+#detailOverlay .map-panel {
+  background: #222222 !important;
+  border-color: #333333 !important;
+}
+
+#detailOverlay .map-toggle {
+  background: #333333 !important;
+  color: #ffffff !important;
+}
+
+#detailOverlay .map-content {
+  background: #1a1a1a !important;
+}
+
+#detailOverlay .map-stat {
+  background: #2a2a2a !important;
+  border-color: #444444 !important;
+}
+
+#detailOverlay .map-stat-label {
+  color: #888888 !important;
+}
+
+#detailOverlay .map-stat-value {
+  color: #ffffff !important;
+}
+
+/* Fotky - tmavé pozadí */
+#detailOverlay .foto-wrapper {
+  background: #222222 !important;
+  border-color: #444444 !important;
+}
+
+/* Text overlay pro popisy */
+#detailOverlay div[onclick*="showTextOverlay"] {
+  background: #2a2a2a !important;
+  border-color: #444444 !important;
+  color: #ffffff !important;
+}
+
+/* Poznámky badge */
+#detailOverlay .order-notes-badge {
+  background: #444444 !important;
+  color: #ffffff !important;
+}
+
+/* Skrýt pull-to-refresh když je modal otevřený */
+.modal-overlay.active ~ #pull-refresh-indicator,
+#detailOverlay.active ~ #pull-refresh-indicator,
+body:has(.modal-overlay.active) #pull-refresh-indicator {
+  display: none !important;
+  height: 0 !important;
 }
 
 /* Barevné nádechy karet podle stavu (velmi světlé) */
@@ -387,37 +848,40 @@ if (!$isLoggedIn && !$isAdmin) {
 
 /* MOBILNÍ OPTIMALIZACE FILTER TLAČÍTEK (větší o 50% pro lepší klikání) */
 @media (max-width: 768px) {
-  /* Filter bar - stack filters */
+  /* Filter bar - 2x2 grid s mezerami */
   .filter-bar {
-    flex-direction: column !important;
-    gap: 0.05rem !important;
-    margin-bottom: 0.25rem !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+    padding: 0.25rem !important;
   }
 
   .filter-btn {
     width: 100% !important;
-    padding: 0.375rem 0.6rem !important;
-    font-size: 0.65rem !important;
+    padding: 0.5rem 0.6rem !important;
+    font-size: 0.7rem !important;
     line-height: 1.2 !important;
-    min-height: 27px !important;
+    min-height: 36px !important;
     border-width: 1px !important;
+    border-radius: 6px !important;
   }
 
   .filter-btn.active {
-    border-width: 1px !important;
+    border-width: 2px !important;
   }
 }
 
 @media (max-width: 375px) {
   .filter-btn {
-    padding: 0.375rem 0.6rem !important;
+    padding: 0.4rem 0.5rem !important;
     font-size: 0.65rem !important;
     line-height: 1.2 !important;
-    min-height: 27px !important;
+    min-height: 32px !important;
   }
 
   .filter-bar {
-    gap: 0.05rem !important;
+    gap: 0.4rem !important;
   }
 }
 
@@ -566,8 +1030,8 @@ if (!$isLoggedIn && !$isAdmin) {
 
 /* KOMPLETNÍ OPTIMALIZACE DETAIL MODALU - ULTRA KOMPAKTNÍ STYL */
 @media (max-width: 768px) {
-  /* Modal overlay - lepší scrollování, uprostřed displeje */
-  .modal-overlay {
+  /* Modal overlay - lepší scrollování (NE pro #detailOverlay - ten má vlastní styling) */
+  .modal-overlay:not(#detailOverlay) {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
     touch-action: pan-y !important;
@@ -575,13 +1039,13 @@ if (!$isLoggedIn && !$isAdmin) {
     padding: 2rem 0.5rem !important;
   }
 
-  .modal-content {
+  .modal-overlay:not(#detailOverlay) .modal-content {
     margin: 0 auto !important;
     max-height: none !important;
   }
 
-  /* Modal header - ultra kompaktní */
-  .modal-header {
+  /* Modal header - ultra kompaktní (NE pro #detailOverlay) */
+  .modal-overlay:not(#detailOverlay) .modal-header {
     padding: 0.2rem !important;
   }
 

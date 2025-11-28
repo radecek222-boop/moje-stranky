@@ -198,7 +198,7 @@ function handleListKeys(PDO $pdo): void
 function handleCreateKey(PDO $pdo, array $payload): void
 {
     $keyType = strtolower(trim($payload['key_type'] ?? ''));
-    $allowedTypes = ['admin', 'technik', 'prodejce', 'partner'];
+    $allowedTypes = ['technik', 'prodejce'];
 
     if (!in_array($keyType, $allowedTypes, true)) {
         throw new InvalidArgumentException('Neplatný typ klíče.');

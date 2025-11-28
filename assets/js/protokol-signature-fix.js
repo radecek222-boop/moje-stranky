@@ -1,89 +1,93 @@
 /**
  * FIX: Oprava scope pro signaturePad
- * Tento patch zajišťuje, že signaturePad je dostupný globálně
+ * Canvas je pouze pro zobrazení (read-only)
+ * Podpis se dělá pouze přes modal "Podepsat protokol"
  */
 (function() {
-  console.log('[Fix] Protokol Signature Fix - Inicializace...');
+  console.log('[Fix] Protokol Signature Display - Inicializace...');
 
-  // Počkat na inicializaci signature padu
-  const maxAttempts = 50; // 5 sekund (50 × 100ms)
+  // Počkat na DOM
+  const maxAttempts = 50;
   let attempts = 0;
 
   const checkInterval = setInterval(() => {
     attempts++;
 
-    // Zkusit najít canvas element
     const canvas = document.getElementById('signature-pad');
 
     if (!canvas) {
-      console.warn('Canvas #signature-pad ještě neexistuje');
       if (attempts >= maxAttempts) {
         clearInterval(checkInterval);
-        console.error('Canvas #signature-pad nenalezen po 5 sekundách');
+        console.error('Canvas #signature-pad nenalezen');
       }
       return;
     }
 
-    // Zkontrolovat, jestli už signaturePad existuje v window
-    if (window.signaturePad && typeof window.signaturePad.clear === 'function') {
-      console.log('window.signaturePad již existuje');
+    // Už inicializováno
+    if (window.signaturePad) {
       clearInterval(checkInterval);
       return;
     }
 
-    // Pokud signaturePad neexistuje, vytvořit nový
-    if (typeof SignaturePad === 'function') {
-      console.log('🎨 Vytvářím nový SignaturePad...');
+    console.log('[SignatureDisplay] Inicializuji canvas pro zobrazení...');
 
-      // Nastavit velikost canvas
-      const resizeCanvas = () => {
-        const rect = canvas.getBoundingClientRect();
-        const canvasWidth = rect.width;
-        const canvasHeight = rect.height;
-        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    // Nastavit velikost canvas
+    const resizeCanvas = () => {
+      const rect = canvas.getBoundingClientRect();
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
-        console.log('📐 Resize canvas:', {
-          clientWidth: canvasWidth,
-          clientHeight: canvasHeight,
-          ratio: ratio,
-          physicalWidth: canvasWidth * ratio,
-          physicalHeight: canvasHeight * ratio
-        });
+      canvas.width = rect.width * ratio;
+      canvas.height = rect.height * ratio;
 
-        // Nastavit fyzickou velikost canvas
-        canvas.width = canvasWidth * ratio;
-        canvas.height = canvasHeight * ratio;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.scale(ratio, ratio);
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, rect.width, rect.height);
+      }
+    };
 
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Vytvořit minimální signaturePad objekt (pro kompatibilitu s přenosem)
+    window.signaturePad = {
+      canvas: canvas,
+
+      clear: function() {
         const ctx = canvas.getContext('2d');
-        if (ctx) {
-          // Scale context pro sharp rendering
-          ctx.scale(ratio, ratio);
+        const rect = canvas.getBoundingClientRect();
+        const ratio = window.devicePixelRatio || 1;
 
-          // Vyplnit bílou barvou (celý canvas včetně scaled velikosti)
-          ctx.fillStyle = 'white';
-          ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.restore();
+      },
+
+      isEmpty: function() {
+        const ctx = canvas.getContext('2d');
+        const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        // Kontrola jestli jsou tam jen bílé pixely
+        for (let i = 0; i < pixelData.length; i += 4) {
+          // Pokud není bílá (255,255,255) nebo průhledná
+          if (pixelData[i] < 250 || pixelData[i+1] < 250 || pixelData[i+2] < 250) {
+            if (pixelData[i+3] > 10) { // není průhledný
+              return false;
+            }
+          }
         }
-      };
+        return true;
+      },
 
-      resizeCanvas();
-      window.addEventListener('resize', resizeCanvas);
-
-      // Vytvořit nový signaturePad a uložit do globálního scope
-      window.signaturePad = new SignaturePad(canvas, {
-        minWidth: 1,
-        maxWidth: 2.5,
-        penColor: 'black',
-        backgroundColor: 'white'
-      });
-
-      console.log('SignaturePad vytvořen a uložen do window.signaturePad');
-      clearInterval(checkInterval);
-    } else {
-      console.warn('SignaturePad class ještě není dostupná');
-      if (attempts >= maxAttempts) {
-        clearInterval(checkInterval);
-        console.error('SignaturePad class nenalezena po 5 sekundách');
+      toDataURL: function() {
+        return canvas.toDataURL('image/png');
       }
-    }
-  }, 100); // Kontrolovat každých 100ms
+    };
+
+    console.log('[SignatureDisplay] Canvas připraven pro zobrazení podpisu');
+    clearInterval(checkInterval);
+
+  }, 100);
 })();

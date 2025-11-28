@@ -990,10 +990,85 @@ async function nactiRegistracniKlice() {
     }
 }
 
-// Vytvořit nový klíč
-async function vytvorNovyKlic() {
-    const typKlice = prompt('Zadejte typ klíče (admin/technik/prodejce/partner):');
-    if (!typKlice) return;
+// Vytvořit nový klíč - zobrazí modal pro výběr typu
+function vytvorNovyKlic() {
+    // Odstranit existující modal pokud existuje
+    const existujici = document.getElementById('modalVytvorKlic');
+    if (existujici) existujici.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'modalVytvorKlic';
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.6); display: flex;
+        align-items: center; justify-content: center; z-index: 10000;
+    `;
+
+    modal.innerHTML = `
+        <div style="background: #1a1a1a; padding: 30px; border-radius: 12px;
+                    max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                    border: 1px solid #333;">
+            <h3 style="margin: 0 0 20px 0; color: #fff; font-size: 1.3rem;">
+                Vytvořit nový registrační klíč
+            </h3>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; padding: 15px;
+                              background: #252525; border-radius: 8px; cursor: pointer;
+                              margin-bottom: 10px; border: 2px solid transparent;">
+                    <input type="radio" name="typKliceVyber" value="technik"
+                           style="width: 20px; height: 20px; margin-right: 15px; accent-color: #fff;">
+                    <div>
+                        <div style="color: #fff; font-weight: 600; font-size: 1.1rem;">TECHNIK</div>
+                        <div style="color: #888; font-size: 0.85rem;">Pro servisní techniky</div>
+                    </div>
+                </label>
+
+                <label style="display: flex; align-items: center; padding: 15px;
+                              background: #252525; border-radius: 8px; cursor: pointer;
+                              border: 2px solid transparent;">
+                    <input type="radio" name="typKliceVyber" value="prodejce"
+                           style="width: 20px; height: 20px; margin-right: 15px; accent-color: #fff;">
+                    <div>
+                        <div style="color: #fff; font-weight: 600; font-size: 1.1rem;">PRODEJCE</div>
+                        <div style="color: #888; font-size: 0.85rem;">Pro prodejce a obchodníky</div>
+                    </div>
+                </label>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button onclick="odeslatVytvoreniKlice()" style="flex: 1; padding: 12px;
+                        background: #fff; color: #000; border: none; border-radius: 6px;
+                        font-weight: 600; cursor: pointer; font-size: 1rem;">
+                    Vytvořit klíč
+                </button>
+                <button onclick="document.getElementById('modalVytvorKlic').remove()"
+                        style="flex: 1; padding: 12px; background: #333; color: #fff;
+                        border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+                    Zrušit
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Zavřít při kliknutí na pozadí
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+// Odeslat požadavek na vytvoření klíče
+async function odeslatVytvoreniKlice() {
+    const vybrany = document.querySelector('input[name="typKliceVyber"]:checked');
+
+    if (!vybrany) {
+        alert('Vyberte typ klíče');
+        return;
+    }
+
+    const typKlice = vybrany.value;
 
     try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -1012,6 +1087,8 @@ async function vytvorNovyKlic() {
         });
 
         const data = await odpoved.json();
+
+        document.getElementById('modalVytvorKlic')?.remove();
 
         if (data.status === 'success') {
             alert('Klíč vytvořen: ' + data.key_code);

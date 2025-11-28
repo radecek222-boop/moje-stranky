@@ -201,8 +201,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Spustit auto-refresh
   startAutoRefresh();
 
-  // Inicializovat pull-to-refresh pro PWA
-  initPullToRefresh();
+  // POZNÁMKA: Pull-to-refresh je nyní v samostatném souboru pull-to-refresh.js
 
   // Refresh pri navratu na stranku (tab visibility)
   document.addEventListener('visibilitychange', () => {
@@ -252,97 +251,8 @@ function stopAutoRefresh() {
   }
 }
 
-// === PULL TO REFRESH (PWA) ===
-let pullStartY = 0;
-let pullDistance = 0;
-let isPulling = false;
-const PULL_THRESHOLD = 80; // px pro aktivaci refreshe
-
-function initPullToRefresh() {
-  const container = document.getElementById('orderGrid');
-  if (!container) return;
-
-  // Vytvorit indikator
-  const indicator = document.createElement('div');
-  indicator.id = 'pullToRefreshIndicator';
-  indicator.innerHTML = 'Tahni pro obnoveni...';
-  indicator.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 50px;
-    background: #222;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    transform: translateY(-100%);
-    transition: transform 0.2s ease;
-    z-index: 9999;
-  `;
-  document.body.appendChild(indicator);
-
-  // Touch events
-  document.addEventListener('touchstart', (e) => {
-    // Pouze kdyz jsme na vrchu stranky
-    if (window.scrollY <= 0) {
-      pullStartY = e.touches[0].clientY;
-      isPulling = true;
-    }
-  }, { passive: true });
-
-  document.addEventListener('touchmove', (e) => {
-    if (!isPulling || window.scrollY > 0) return;
-
-    const currentY = e.touches[0].clientY;
-    pullDistance = currentY - pullStartY;
-
-    // Pouze tazeni dolu
-    if (pullDistance > 0) {
-      const progress = Math.min(pullDistance / PULL_THRESHOLD, 1);
-      indicator.style.transform = `translateY(${-100 + (progress * 100)}%)`;
-
-      if (pullDistance >= PULL_THRESHOLD) {
-        indicator.innerHTML = 'Pust pro obnoveni';
-      } else {
-        indicator.innerHTML = 'Tahni pro obnoveni...';
-      }
-    }
-  }, { passive: true });
-
-  document.addEventListener('touchend', async () => {
-    if (!isPulling) return;
-
-    if (pullDistance >= PULL_THRESHOLD) {
-      indicator.innerHTML = 'Nacitam...';
-      indicator.style.transform = 'translateY(0)';
-
-      // Refresh data
-      await loadAll(ACTIVE_FILTER);
-      lastRefreshTime = Date.now();
-
-      // Aktualizovat badge
-      if (window.WGSNotifikace) {
-        window.WGSNotifikace.aktualizovat();
-      }
-
-      logger.log('[PullToRefresh] Data obnovena');
-    }
-
-    // Reset
-    setTimeout(() => {
-      indicator.style.transform = 'translateY(-100%)';
-    }, 500);
-
-    pullStartY = 0;
-    pullDistance = 0;
-    isPulling = false;
-  }, { passive: true });
-
-  logger.log('[PullToRefresh] Inicializovan');
-}
+// === PULL TO REFRESH - PŘESUNUTO DO pull-to-refresh.js ===
+// Starý kód byl odstraněn - nyní používáme samostatný soubor s lepším UI
 
 // === VYHLEDÁVÁNÍ ===
 function initSearch() {
@@ -1840,7 +1750,7 @@ function showContactMenu(id) {
   const address = Utils.getAddress(CURRENT_RECORD);
   
   const content = `
-    ${ModalManager.createHeader('Kontaktovat zákazníka', customerName)}
+    ${ModalManager.createHeader(customerName, 'Kontaktovat zákazníka')}
     
     <div class="modal-body">
       <div class="info-grid" style="margin-bottom: 1rem;">
@@ -1857,10 +1767,10 @@ function showContactMenu(id) {
       <div class="modal-section">
         <h3 class="section-title">Rychlé akce</h3>
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-          ${phone ? `<a href="tel:${phone}" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.9rem; text-decoration: none; display: block; text-align: center; background: #1a1a1a; color: white;">Zavolat</a>` : ''}
-          <button class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.9rem; background: #1a1a1a; color: white;" onclick="closeDetail(); setTimeout(() => showCalendar('${id}'), 100)">Termín návštěvy</button>
-          ${phone ? `<button class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.9rem; background: #444; color: white;" onclick="sendContactAttemptEmail('${id}', '${phone}')">Odeslat SMS</button>` : ''}
-          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.9rem; text-decoration: none; display: block; text-align: center; background: #444; color: white;" target="_blank">Navigovat (Waze)</a>` : ''}
+          ${phone ? `<a href="tel:${phone}" class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: white; box-sizing: border-box;">Zavolat</a>` : ''}
+          <button class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; background: #1a1a1a; color: white; box-sizing: border-box;" onclick="closeDetail(); setTimeout(() => showCalendar('${id}'), 100)">Termín návštěvy</button>
+          ${phone ? `<button class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; background: #444; color: white; box-sizing: border-box;" onclick="sendContactAttemptEmail('${id}', '${phone}')">Odeslat SMS</button>` : ''}
+          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; justify-content: center; background: #444; color: white; box-sizing: border-box;" target="_blank">Navigovat (Waze)</a>` : ''}
         </div>
       </div>
     </div>
@@ -2621,8 +2531,8 @@ async function saveNewNote(orderId) {
   try {
     await addNote(orderId, text);
 
-    const record = CURRENT_RECORD;
-    await showNotes(record);
+    // Zavrit modal po uspesnem pridani poznamky
+    closeNotesModal();
 
     await loadAll(ACTIVE_FILTER);
 

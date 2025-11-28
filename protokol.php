@@ -332,11 +332,12 @@ if ($initialBootstrapData) {
   </div>
 
   <div class="section-title" data-lang-cs="Podpis zákazníka" data-lang-en="Customer signature" data-lang-it="Firma del cliente">Podpis zákazníka<span class="en-label">Customer signature</span></div>
-  <canvas id="signature-pad"></canvas>
-  <div class="signature-actions">
-    <div class="signature-label" data-lang-cs="Podepište se prstem nebo myší" data-lang-en="Sign with finger or mouse" data-lang-it="Firma con dito o mouse">Podepište se prstem nebo myší</div>
-    <button class="btn-clear" type="button" data-action="clearSignaturePad" data-lang-cs="Vymazat podpis" data-lang-en="Clear signature" data-lang-it="Cancella firma">Vymazat podpis</button>
-  </div>
+
+  <!-- Tlačítko pro otevření modalu se souhrnem pro zákazníka -->
+  <button type="button" class="btn-podepsat-protokol" id="btnPodepsatProtokol" data-lang-cs="Podepsat protokol" data-lang-en="Sign protocol" data-lang-it="Firma protocollo">Podepsat protokol</button>
+
+  <!-- Pouze zobrazení podpisu (read-only) -->
+  <canvas id="signature-pad" class="signature-display"></canvas>
   <div class="gdpr-clause" style="margin-top: 10px; padding: 8px; font-size: 8px; line-height: 1.4; color: #666; border-top: 1px solid #ddd; text-align: justify;">
     <strong>Ochrana osobních údajů (GDPR):</strong> Podpisem tohoto protokolu souhlasíte se zpracováním Vašich osobních údajů společností White Glove Service za účelem poskytování servisních služeb, komunikace s výrobcem, prodejcem a dalšími techniky. Vaše údaje budou zpracovávány v souladu s GDPR a budou použity pouze pro účely vyřízení této reklamace. Máte právo na přístup k údajům, jejich opravu nebo výmaz. Více na www.wgs-service.cz/gdpr
   </div>
@@ -398,6 +399,68 @@ if ($initialBootstrapData) {
     </div>
     <div class="pdf-preview-body">
       <iframe id="pdfPreviewFrame" class="pdf-preview-frame"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- Modal pro schválení zákazníkem -->
+<div class="zakaznik-schvaleni-overlay" id="zakaznikSchvaleniOverlay" style="display: none;">
+  <div class="zakaznik-schvaleni-container">
+    <div class="zakaznik-schvaleni-header">
+      <h2 data-lang-cs="Souhrn protokolu" data-lang-en="Protocol Summary" data-lang-it="Riepilogo protocollo">Souhrn protokolu</h2>
+      <button type="button" class="zakaznik-schvaleni-close" id="zakaznikSchvaleniClose">×</button>
+    </div>
+
+    <div class="zakaznik-schvaleni-body">
+      <!-- Text návrhu opravy -->
+      <div class="zakaznik-schvaleni-sekce">
+        <label data-lang-cs="Návrh opravy:" data-lang-en="Repair proposal:" data-lang-it="Proposta di riparazione:">Návrh opravy:</label>
+        <div class="zakaznik-schvaleni-text" id="zakaznikSchvaleniText">
+          <!-- Text se naplní z repair-cz -->
+        </div>
+      </div>
+
+      <!-- Souhrn důležitých informací -->
+      <div class="zakaznik-schvaleni-sekce">
+        <label data-lang-cs="Informace o servisu:" data-lang-en="Service information:" data-lang-it="Informazioni servizio:">Informace o servisu:</label>
+        <table class="zakaznik-schvaleni-tabulka">
+          <tr>
+            <td class="tabulka-label" data-lang-cs="Platí zákazník?" data-lang-en="Customer pays?" data-lang-it="Paga il cliente?">Platí zákazník?</td>
+            <td class="tabulka-hodnota" id="souhrn-plati-zakaznik">-</td>
+          </tr>
+          <tr>
+            <td class="tabulka-label" data-lang-cs="Datum podpisu" data-lang-en="Signature date" data-lang-it="Data firma">Datum podpisu</td>
+            <td class="tabulka-hodnota" id="souhrn-datum-podpisu">-</td>
+          </tr>
+          <tr>
+            <td class="tabulka-label" data-lang-cs="Vyřešeno?" data-lang-en="Solved?" data-lang-it="Risolto?">Vyřešeno?</td>
+            <td class="tabulka-hodnota" id="souhrn-vyreseno">-</td>
+          </tr>
+          <tr>
+            <td class="tabulka-label" data-lang-cs="Nutné vyjádření prodejce" data-lang-en="Dealer statement needed" data-lang-it="Dichiarazione rivenditore">Nutné vyjádření prodejce</td>
+            <td class="tabulka-hodnota" id="souhrn-prodejce">-</td>
+          </tr>
+          <tr>
+            <td class="tabulka-label" data-lang-cs="Poškození technikem?" data-lang-en="Damage by technician?" data-lang-it="Danno tecnico?">Poškození technikem?</td>
+            <td class="tabulka-hodnota" id="souhrn-poskozeni">-</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Podpisové pole -->
+      <div class="zakaznik-schvaleni-sekce zakaznik-schvaleni-podpis-sekce">
+        <label data-lang-cs="Podpis zákazníka:" data-lang-en="Customer signature:" data-lang-it="Firma cliente:">Podpis zákazníka:</label>
+        <canvas id="zakaznikSchvaleniPad"></canvas>
+        <div class="zakaznik-schvaleni-podpis-akce">
+          <span class="zakaznik-schvaleni-hint" data-lang-cs="Podepište se prstem nebo myší" data-lang-en="Sign with finger or mouse" data-lang-it="Firma con dito o mouse">Podepište se prstem nebo myší</span>
+          <button type="button" class="btn-vymazat-podpis" id="zakaznikVymazatPodpis" data-lang-cs="Vymazat" data-lang-en="Clear" data-lang-it="Cancella">Vymazat</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="zakaznik-schvaleni-footer">
+      <button type="button" class="btn-zrusit" id="zakaznikSchvaleniZrusit" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
+      <button type="button" class="btn-pouzit" id="zakaznikSchvaleniPouzit" data-lang-cs="Potvrdit podpis" data-lang-en="Confirm signature" data-lang-it="Conferma firma">Potvrdit podpis</button>
     </div>
   </div>
 </div>
@@ -489,6 +552,9 @@ if ($initialBootstrapData) {
 <script src="assets/js/protokol-fakturace-patch.js" defer></script>
 <!-- Fix pro tlačítka (načíst až po protokol.js) -->
 <script src="assets/js/protokol-buttons-fix.js" defer></script>
+<!-- Překlady pro kalkulačku -->
+<script src="assets/js/wgs-translations-cenik.js"></script>
+<script src="assets/js/language-switcher.js"></script>
 <!-- Kalkulačka integrace -->
 <script src="assets/js/cenik-calculator.js" defer></script>
 <script src="assets/js/protokol-calculator-integration.js" defer></script>

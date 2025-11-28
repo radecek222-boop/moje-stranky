@@ -546,12 +546,17 @@ function sendEmailToCustomer($data) {
         $pdfSize / (1024 * 1024)
     ));
 
-    // Načíst PHPMailer
-    $autoloadPath = __DIR__ . '/../vendor/autoload.php';
-    if (!file_exists($autoloadPath)) {
+    // Načíst PHPMailer - zkusit lib/autoload.php nebo vendor/autoload.php
+    $libAutoload = __DIR__ . '/../lib/autoload.php';
+    $vendorAutoload = __DIR__ . '/../vendor/autoload.php';
+
+    if (file_exists($libAutoload)) {
+        require_once $libAutoload;
+    } elseif (file_exists($vendorAutoload)) {
+        require_once $vendorAutoload;
+    } else {
         throw new Exception('PHPMailer není nainstalován. Spusťte Email System Installer na /admin/install_email_system.php');
     }
-    require_once $autoloadPath;
 
     // Ověřit, že PHPMailer class existuje
     if (!class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
