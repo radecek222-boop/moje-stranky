@@ -507,6 +507,38 @@ button[onclick*="history.back"] {
     font-size: 0.85rem;
 }
 
+/* Tlacitko smazani poznamky */
+.modal-body .note-delete-btn,
+.modal-content .note-delete-btn {
+    background: transparent;
+    border: 1px solid #666;
+    color: #888;
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0;
+    margin-left: auto;
+    transition: all 0.2s ease;
+}
+
+.modal-body .note-delete-btn:hover,
+.modal-content .note-delete-btn:hover {
+    background: #333;
+    border-color: #999;
+    color: #fff;
+}
+
+/* Note header flexbox pro tlacitko */
+.modal-body .note-header,
+.modal-content .note-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 /* Text poznámky - světle šedý */
 .modal-body .note-text,
 .modal-content .note-text {

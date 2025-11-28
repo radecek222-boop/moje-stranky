@@ -2492,6 +2492,49 @@ async function addNote(orderId, text) {
   }
 }
 
+async function deleteNote(noteId, orderId) {
+  if (!confirm('Opravdu chcete smazat tuto poznamku?')) {
+    return;
+  }
+
+  try {
+    const csrfToken = await getCSRFToken();
+
+    const formData = new FormData();
+    formData.append('action', 'delete');
+    formData.append('note_id', noteId);
+    formData.append('csrf_token', csrfToken);
+
+    const response = await fetch('api/notes_api.php', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      // Odstranit poznamku z DOM
+      const noteElement = document.querySelector(`[data-note-id="${noteId}"]`);
+      if (noteElement) {
+        noteElement.remove();
+      }
+
+      // Zkontrolovat zda jsou jeste nejake poznamky
+      const notesContainer = document.querySelector('.notes-container');
+      if (notesContainer && notesContainer.querySelectorAll('.note-item').length === 0) {
+        notesContainer.innerHTML = '<div class="empty-notes">Zatim zadne poznamky</div>';
+      }
+
+      await loadAll(ACTIVE_FILTER);
+    } else {
+      alert('Chyba: ' + (data.error || data.message || 'Neznama chyba'));
+    }
+  } catch (e) {
+    logger.error('Chyba pri mazani poznamky:', e);
+    alert('Chyba pri mazani poznamky: ' + e.message);
+  }
+}
+
 async function markNotesAsRead(orderId) {
   try {
     const record = WGS_DATA_CACHE.find(x => x.id == orderId || x.reklamace_id == orderId);
@@ -3948,6 +3991,15 @@ document.addEventListener('click', (e) => {
     case 'saveNewNote':
       if (id && typeof saveNewNote === 'function') {
         saveNewNote(id);
+      }
+      break;
+
+    case 'deleteNote':
+      const noteId = target.dataset.noteId;
+      const orderId = target.dataset.orderId;
+      if (noteId && typeof deleteNote === 'function') {
+        e.stopPropagation();
+        deleteNote(noteId, orderId);
       }
       break;
 
