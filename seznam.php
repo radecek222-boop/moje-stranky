@@ -1369,9 +1369,6 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
   "is_admin" => false
 ]); ?>;
 </script>
-
-<!-- Analytics Tracker -->
-<?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
 </head>
 
 <body>
