@@ -1064,23 +1064,31 @@ function handleSendInvitations(PDO $pdo, array $payload): void
 
     $htmlSablona = vytvorPozvankovouSablonu($typ, $pouzityKlic, $appUrl, $rok, $vlastniTexty);
 
-    // Odeslat emaily
+    // Odeslat emaily primo pres PHPMailer
+    require_once __DIR__ . '/../includes/EmailQueue.php';
+    $emailQueue = new EmailQueue($pdo);
+
     $odeslanoPocet = 0;
     $chyby = [];
 
     foreach ($platneEmaily as $email) {
         try {
-            // Použít email queue
-            $stmt = $pdo->prepare("
-                INSERT INTO wgs_email_queue (to_email, subject, body, status, created_at, scheduled_at)
-                VALUES (:to_email, :subject, :body, 'pending', NOW(), NOW())
-            ");
-            $stmt->execute([
-                ':to_email' => $email,
-                ':subject' => $predmet,
-                ':body' => $htmlSablona
-            ]);
-            $odeslanoPocet++;
+            // Odeslat primo (ne do fronty)
+            $queueItem = [
+                'recipient_email' => $email,
+                'recipient_name' => null,
+                'subject' => $predmet,
+                'body' => $htmlSablona
+            ];
+
+            $result = $emailQueue->sendEmail($queueItem);
+
+            if ($result['success']) {
+                $odeslanoPocet++;
+            } else {
+                $chyby[] = $email . ': ' . ($result['error'] ?? 'Neznama chyba');
+                error_log("Chyba odeslani pozvanky na {$email}: " . ($result['error'] ?? 'Neznama chyba'));
+            }
         } catch (Exception $e) {
             $chyby[] = $email . ': ' . $e->getMessage();
             error_log("Chyba odeslani pozvanky na {$email}: " . $e->getMessage());
