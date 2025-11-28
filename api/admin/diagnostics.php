@@ -407,8 +407,8 @@ switch ($action) {
                     }
                     // Pokud to není PHP error ale vypadá to jako logovací řádek
                     elseif (preg_match('/\[(.*?)\]\s+(.*)/', $line, $matches)) {
-                        // DEBUG, ✅ atp. - přeskočit
-                        if (stripos($matches[2], 'DEBUG:') === 0 || stripos($matches[2], '✅') === 0) {
+                        // DEBUG, atp. - přeskočit
+                        if (stripos($matches[2], 'DEBUG:') === 0 || stripos($matches[2], '') === 0) {
                             continue;
                         }
                         // Jiné logování - zobrazit jako raw

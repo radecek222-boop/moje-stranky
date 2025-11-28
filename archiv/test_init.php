@@ -35,11 +35,11 @@ try {
     $valid = validateCSRFToken($token);
     echo "13. Token valid: " . ($valid ? 'YES' : 'NO') . "\n";
 
-    echo "\n✅ VŠECHNO FUNGUJE!\n";
+    echo "\nVŠECHNO FUNGUJE!\n";
     echo "Problem NENÍ v init.php, csrf_helper.php ani api_response.php\n";
 
 } catch (Throwable $e) {
-    echo "\n❌ CHYBA:\n";
+    echo "\nCHYBA:\n";
     echo "Message: " . $e->getMessage() . "\n";
     echo "File: " . $e->getFile() . "\n";
     echo "Line: " . $e->getLine() . "\n";

@@ -222,7 +222,7 @@ require_once "init.php";
       e.preventDefault();
     }, { passive: false });
 
-    console.log('✅ PWA Splash Screen loaded');
+    console.log('PWA Splash Screen loaded');
   </script>
 </body>
 </html>

@@ -153,7 +153,7 @@ foreach ($allIndexes as $i => $sql) {
         $results['success'][] = "{$tableName}.{$indexName}";
 
         if (!$isApiCall) {
-            echo "✅ [{$num}/" . count($allIndexes) . "] {$tableName}.{$indexName}\n";
+            echo "[{$num}/" . count($allIndexes) . "] {$tableName}.{$indexName}\n";
         }
 
     } catch (PDOException $e) {
@@ -177,7 +177,7 @@ foreach ($allIndexes as $i => $sql) {
         else {
             $results['failed'][] = "{$tableName}.{$indexName}: {$errorMsg}";
             if (!$isApiCall) {
-                echo "❌ [{$num}/" . count($allIndexes) . "] {$tableName}.{$indexName} - ERROR: {$errorMsg}\n";
+                echo "[{$num}/" . count($allIndexes) . "] {$tableName}.{$indexName} - ERROR: {$errorMsg}\n";
             }
         }
     }
@@ -210,13 +210,13 @@ if ($isApiCall) {
 
 // CLI output only
 echo "\n" . str_repeat("=", 70) . "\n";
-echo "✅ HOTOVO!\n";
+echo "HOTOVO!\n";
 echo str_repeat("=", 70) . "\n\n";
 
 echo "📊 Výsledky:\n";
-echo "  ✅ Úspěšně přidáno: " . count($results['success']) . " indexů\n";
+echo "  Úspěšně přidáno: " . count($results['success']) . " indexů\n";
 echo "  ⏭️  Přeskočeno (existují): " . count($results['skipped']) . "\n";
-echo "  ❌ Selhalo: " . count($results['failed']) . "\n";
+echo "  Selhalo: " . count($results['failed']) . "\n";
 
 if (!empty($results['failed'])) {
     echo "\n⚠️  CHYBY:\n";

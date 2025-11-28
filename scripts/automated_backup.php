@@ -19,7 +19,7 @@ try {
     $backupDir = __DIR__ . '/../backups';
     if (!is_dir($backupDir)) {
         mkdir($backupDir, 0755, true);
-        echo "✅ Vytvořen adresář: {$backupDir}\n";
+        echo "Vytvořen adresář: {$backupDir}\n";
     }
 
     // Název backup souboru s timestampem
@@ -46,7 +46,7 @@ try {
         $fileSize = filesize($backupFile);
         $fileSizeMB = round($fileSize / 1024 / 1024, 2);
 
-        echo "✅ Záloha vytvořena úspěšně!\n";
+        echo "Záloha vytvořena úspěšně!\n";
         echo "   Soubor: " . basename($backupFile) . "\n";
         echo "   Velikost: {$fileSizeMB} MB\n\n";
 
@@ -59,7 +59,7 @@ try {
             $gzSizeMB = round($gzSize / 1024 / 1024, 2);
             $ratio = round((1 - ($gzSize / $fileSize)) * 100, 1);
 
-            echo "✅ Komprese dokončena!\n";
+            echo "Komprese dokončena!\n";
             echo "   Soubor: " . basename($backupFile) . ".gz\n";
             echo "   Velikost: {$gzSizeMB} MB\n";
             echo "   Kompresní poměr: {$ratio}%\n\n";
@@ -84,10 +84,10 @@ try {
             echo "   Žádné staré zálohy ke smazání\n";
         }
 
-        echo "\n✅ BACKUP DOKONČEN!\n";
+        echo "\nBACKUP DOKONČEN!\n";
 
     } else {
-        echo "❌ Záloha selhala!\n";
+        echo "Záloha selhala!\n";
         echo "Return code: {$returnCode}\n";
         if (!empty($output)) {
             echo "Output: " . implode("\n", $output) . "\n";
@@ -96,6 +96,6 @@ try {
     }
 
 } catch (Exception $e) {
-    echo "❌ KRITICKÁ CHYBA: " . $e->getMessage() . "\n";
+    echo "KRITICKÁ CHYBA: " . $e->getMessage() . "\n";
     exit(1);
 }

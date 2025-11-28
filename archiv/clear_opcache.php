@@ -22,7 +22,7 @@ if (function_exists('opcache_reset')) {
         
         echo "\n✓ Zkus nyní znovu zavolat track_heatmap.php API\n";
     } else {
-        echo "❌ Failed to clear OPcache\n";
+        echo "Failed to clear OPcache\n";
     }
 } else {
     echo "⚠ OPcache is not enabled or not available\n";

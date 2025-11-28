@@ -77,12 +77,12 @@ try {
                 if ($success) {
                     $successCount++;
                     if ($debug) {
-                        echo "  ✅ {$sessionId} - úspěšně přepočítáno\n";
+                        echo "  {$sessionId} - úspěšně přepočítáno\n";
                     }
                 } else {
                     $errorCount++;
                     if ($debug) {
-                        echo "  ❌ {$sessionId} - chyba při přepočítání\n";
+                        echo "  {$sessionId} - chyba při přepočítání\n";
                     }
                 }
 
@@ -90,7 +90,7 @@ try {
 
             } catch (Exception $e) {
                 $errorCount++;
-                echo "  ❌ {$sessionId} - Exception: " . $e->getMessage() . "\n";
+                echo "  {$sessionId} - Exception: " . $e->getMessage() . "\n";
             }
         }
 
@@ -134,12 +134,12 @@ try {
                 if ($success) {
                     $successCount++;
                     if ($debug) {
-                        echo "  ✅ {$sessionId} - aktualizováno\n";
+                        echo "  {$sessionId} - aktualizováno\n";
                     }
                 } else {
                     $errorCount++;
                     if ($debug) {
-                        echo "  ❌ {$sessionId} - chyba při aktualizaci\n";
+                        echo "  {$sessionId} - chyba při aktualizaci\n";
                     }
                 }
 
@@ -147,7 +147,7 @@ try {
 
             } catch (Exception $e) {
                 $errorCount++;
-                echo "  ❌ {$sessionId} - Exception: " . $e->getMessage() . "\n";
+                echo "  {$sessionId} - Exception: " . $e->getMessage() . "\n";
             }
         }
 
@@ -179,14 +179,14 @@ try {
     echo "Průměrný zájem: " . round($stats['avg_interest'], 2) . "\n\n";
 
     echo "==========================================\n";
-    echo "RECALCULATE USER SCORES - DOKONČENO ✅\n";
+    echo "RECALCULATE USER SCORES - DOKONČENO \n";
     echo "==========================================\n";
     echo "Konec: " . date('Y-m-d H:i:s') . "\n";
 
 } catch (PDOException $e) {
     echo "\n";
     echo "==========================================\n";
-    echo "CHYBA DATABÁZE ❌\n";
+    echo "CHYBA DATABÁZE \n";
     echo "==========================================\n";
     echo $e->getMessage() . "\n";
     exit(1);
@@ -194,7 +194,7 @@ try {
 } catch (Exception $e) {
     echo "\n";
     echo "==========================================\n";
-    echo "NEOČEKÁVANÁ CHYBA ❌\n";
+    echo "NEOČEKÁVANÁ CHYBA \n";
     echo "==========================================\n";
     echo $e->getMessage() . "\n";
     exit(1);

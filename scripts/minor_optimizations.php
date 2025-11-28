@@ -165,7 +165,7 @@ echo "Celkem optimization opportunities: {$totalIssues}\n";
 echo "Souborů s issues: " . count($findings) . "\n\n";
 
 if (empty($findings)) {
-    echo "✅ Žádné minor optimization issues nenalezeny!\n";
+    echo "Žádné minor optimization issues nenalezeny!\n";
 } else {
     echo "⚡ OPTIMIZATION OPPORTUNITIES:\n";
     echo str_repeat("=", 70) . "\n\n";

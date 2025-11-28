@@ -193,7 +193,7 @@ try {
 
     $pdo->commit();
 
-    // ✅ FIX 10: Audit log pro compliance a forensics
+    // FIX 10: Audit log pro compliance a forensics
     auditLog('user_registration', [
         'email' => $email,
         'user_id' => $generatedUserId,

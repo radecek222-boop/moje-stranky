@@ -53,7 +53,7 @@ foreach ($actions as $action) {
             echo "<pre>" . print_r($json, true) . "</pre>";
 
             if (isset($json['status'])) {
-                echo "<p><strong>Status:</strong> " . ($json['status'] === 'success' ? '<span class="success">✅ SUCCESS</span>' : '<span class="error">❌ ERROR</span>') . "</p>";
+                echo "<p><strong>Status:</strong> " . ($json['status'] === 'success' ? '<span class="success">SUCCESS</span>' : '<span class="error">ERROR</span>') . "</p>";
             }
         } else {
             echo "<p class='error'>Failed to parse JSON</p>";

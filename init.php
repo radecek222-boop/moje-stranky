@@ -27,7 +27,7 @@ require_once INCLUDES_PATH . '/env_loader.php';
 // Load configuration
 require_once CONFIG_PATH . '/config.php';
 
-// ✅ SECURITY HEADERS - načíst před jakýmkoli outputem
+// SECURITY HEADERS - načíst před jakýmkoli outputem
 require_once INCLUDES_PATH . '/security_headers.php';
 
 // Load helper functions
@@ -50,12 +50,12 @@ if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
 
 // Session configuration - nastavujeme správně a spouštíme session
 if (session_status() === PHP_SESSION_NONE) {
-    // ✅ FIX 5: Secure cookie flag podle environmentu (ne runtime detekce)
+    // FIX 5: Secure cookie flag podle environmentu (ne runtime detekce)
     // Eliminuje HTTP/HTTPS cookie mismatch - environment-based secure flag
     $isProduction = (getEnvValue('ENVIRONMENT') ?? 'production') === 'production';
     $secureFlag = $isProduction ? true : false;
 
-    // ✅ FIX 5: HTTPS redirect na produkci
+    // FIX 5: HTTPS redirect na produkci
     // Zajišťuje, že produkce vždy používá HTTPS → eliminuje mismatch
     if ($isProduction) {
         $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
@@ -67,22 +67,22 @@ if (session_status() === PHP_SESSION_NONE) {
         }
     }
 
-    // ✅ FIX Safari ITP: Explicitní session name
+    // FIX Safari ITP: Explicitní session name
     session_name('WGS_SESSION');
 
-    // ✅ FIX: Použití session_set_cookie_params() se STAROU syntaxí pro PHP 7.x kompatibilitu
+    // FIX: Použití session_set_cookie_params() se STAROU syntaxí pro PHP 7.x kompatibilitu
     // Safari ITP fix: domain = NULL místo prázdného stringu, lifetime = 0 (browser session)
-    // ✅ FIX 5: secure flag je nyní environment-based (ne runtime)
+    // FIX 5: secure flag je nyní environment-based (ne runtime)
     session_set_cookie_params(
         0,              // lifetime - 0 = do zavření prohlížeče (lepší pro Safari ITP)
         '/',            // path - celá doména
         NULL,           // domain - NULL místo '' (Safari compatibility)
-        $secureFlag,    // ✅ FIX 5: secure - environment-based (production=true, dev=false)
+        $secureFlag,    // FIX 5: secure - environment-based (production=true, dev=false)
         true            // httponly - ochrana proti XSS
     );
 
     // SameSite musí být nastaven přes ini_set (není v session_set_cookie_params v PHP 7.2)
-    // ✅ SECURITY FIX: Změněno z 'Lax' na 'Strict' pro lepší CSRF ochranu
+    // SECURITY FIX: Změněno z 'Lax' na 'Strict' pro lepší CSRF ochranu
     // 'Strict' zajistí, že session cookie se NIKDY nepošle při cross-site requestech
     // (včetně GET requestů z jiných domén)
     if (PHP_VERSION_ID >= 70300) {
@@ -90,14 +90,14 @@ if (session_status() === PHP_SESSION_NONE) {
     }
 
     // Nastavení garbage collection
-    // ✅ FIX 3: Zvýšení gc_maxlifetime z 1 hodiny na 24 hodin
+    // FIX 3: Zvýšení gc_maxlifetime z 1 hodiny na 24 hodin
     // Eliminuje předčasné vypršení session a ztrátu CSRF tokenu
     ini_set('session.gc_maxlifetime', 86400);  // 24 hodin (24 * 60 * 60)
     ini_set('session.use_only_cookies', 1);
 
     session_start();
 
-    // ✅ FIX 6: Inactivity timeout - automatické vypršení session po 30 min neaktivity
+    // FIX 6: Inactivity timeout - automatické vypršení session po 30 min neaktivity
     // Ochrana proti session hijacking na opuštěných zařízeních (Security Issue 6)
     // OWASP A07: Identification and Authentication Failures - CWE-613 mitigation
     $inactivityTimeout = 1800; // 30 minut (30 * 60 sekund)
@@ -107,7 +107,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
         if ($lastActivity !== null && (time() - $lastActivity) > $inactivityTimeout) {
             // Session vypršela z důvodu neaktivity
-            // ✅ SECURITY FIX: Regenerovat session ID pro prevenci session fixation
+            // SECURITY FIX: Regenerovat session ID pro prevenci session fixation
             // Pokud útočník ukradl session ID, nemůže ho použít po timeout + relogin
             session_regenerate_id(true);
 
@@ -134,7 +134,7 @@ if (session_status() === PHP_SESSION_NONE) {
         }
     }
 
-    // ✅ FIX 11: Auto-login z Remember Me tokenu
+    // FIX 11: Auto-login z Remember Me tokenu
     // Funguje i po inactivity timeout - pokud session byla prázdná, Remember Me přihlásí
     if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_me'])) {
         require_once __DIR__ . '/includes/remember_me_handler.php';

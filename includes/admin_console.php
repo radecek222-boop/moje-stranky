@@ -339,7 +339,7 @@ endif;
                         Optimize DB
                     </button>
                     <button class="console-btn danger" onclick="cleanupLogsMaintenance()" title="Vyčistit logy, cache a spustit backup">
-                        🧹 Cleanup
+                        Cleanup
                     </button>
                     <button class="console-btn" onclick="archiveLogsMaintenance()" title="Archivovat staré logy">
                         Archive
@@ -1492,7 +1492,7 @@ async function optimizeDatabaseMaintenance() {
  * CleanupLogsMaintenance
  */
 async function cleanupLogsMaintenance() {
-    logHeader('🧹 CLEANUP LOGS & BACKUP');
+    logHeader('CLEANUP LOGS & BACKUP');
     log('Spouštím kompletní cleanup...');
     log('Toto smaže staré logy (.gz, .20*.log), zkrátí php_errors.log, vyčistí cache a spustí backup...');
     log('');
@@ -2549,7 +2549,7 @@ async function checkCodeAnalysis() {
                 const location = `${err.file}:${err.line}` + (err.column > 0 ? `:${err.column}` : '');
 
                 logError(`${prefix} ${err.type.toUpperCase()}: ${err.message}`);
-                log(`📄 ${location}`);
+                log(`${location}`);
 
                 if (err.context && err.context.trim()) {
                     log(`📝 Kontext:`);
@@ -2574,7 +2574,7 @@ async function checkCodeAnalysis() {
                 const location = `${warn.file}:${warn.line}` + (warn.column > 0 ? `:${warn.column}` : '');
 
                 logWarning(`${prefix} ${warn.type.toUpperCase()}: ${warn.message}`);
-                log(`📄 ${location}`);
+                log(`${location}`);
 
                 if (warn.context && warn.context.trim()) {
                     log(`📝 Kontext:`);
@@ -2604,7 +2604,7 @@ async function checkCodeAnalysis() {
                 const location = `${err.file}:${err.line}` + (err.column > 0 ? `:${err.column}` : '');
 
                 logError(`${prefix} ${err.type.toUpperCase()}: ${err.message}`);
-                log(`📄 ${location}`);
+                log(`${location}`);
 
                 if (err.context && err.context.trim()) {
                     log(`📝 Kontext:`);
@@ -2629,7 +2629,7 @@ async function checkCodeAnalysis() {
                 const location = `${warn.file}:${warn.line}` + (warn.column > 0 ? `:${warn.column}` : '');
 
                 logWarning(`${prefix} ${warn.type.toUpperCase()}: ${warn.message}`);
-                log(`📄 ${location}`);
+                log(`${location}`);
 
                 if (warn.context && warn.context.trim()) {
                     log(`📝 ${warn.context}`);
@@ -2657,7 +2657,7 @@ async function checkCodeAnalysis() {
                 const location = `${err.file}:${err.line}`;
 
                 logError(`${prefix} ${err.type.toUpperCase()}: ${err.message}`);
-                log(`📄 ${location}`);
+                log(`${location}`);
 
                 if (err.context && err.context.trim()) {
                     log(`📝 ${err.context}`);
@@ -2681,7 +2681,7 @@ async function checkCodeAnalysis() {
                 const location = `${warn.file}:${warn.line}`;
 
                 logWarning(`${prefix} ${warn.message}`);
-                log(`📄 ${location}`);
+                log(`${location}`);
 
                 addWarning('CSS/' + warn.type, location, warn.message);
             });
@@ -2723,7 +2723,7 @@ async function checkCodeAnalysis() {
                     // PHP error from log
                     const location = `${err.file}:${err.line}`;
                     logError(`${prefix} ${err.type.toUpperCase()}: ${err.message}`);
-                    log(`📄 ${location}`);
+                    log(`${location}`);
 
                     addError('PHP/' + err.type, location, err.message);
                 }
@@ -2741,7 +2741,7 @@ async function checkCodeAnalysis() {
         // FINAL SUMMARY
         // ============================================
         log('═'.repeat(79));
-        logHeader('📋 FINÁLNÍ SOUHRN');
+        logHeader('FINÁLNÍ SOUHRN');
         log('');
 
         if (summary.total_errors > 0) {

@@ -121,7 +121,7 @@ echo "Celkem zakomentovaných řádků kódu: {$totalCommentedLines}\n";
 echo "Souborů s zakomentovaným kódem: " . count($results) . "\n\n";
 
 if (empty($results)) {
-    echo "✅ Žádný zakomentovaný kód nenalezen!\n";
+    echo "Žádný zakomentovaný kód nenalezen!\n";
 } else {
     echo "🔴 SOUBORY S NEJVÍCE ZAKOMENTOVANÝM KÓDEM:\n";
     echo str_repeat("=", 70) . "\n\n";

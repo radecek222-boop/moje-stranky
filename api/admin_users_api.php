@@ -22,7 +22,7 @@ try {
         exit;
     }
 
-    // ✅ PERFORMANCE FIX: Uvolnit session lock pro paralelní zpracování
+    // PERFORMANCE FIX: Uvolnit session lock pro paralelní zpracování
     // Audit 2025-11-24: User management operations
     session_write_close();
 
@@ -150,7 +150,7 @@ try {
             throw new Exception('Jméno, email a heslo jsou povinné');
         }
 
-        // ✅ SECURITY FIX: Posílená email validace
+        // SECURITY FIX: Posílená email validace
         $emailValidation = validateEmailStrong($email, false);
         if (!$emailValidation['valid']) {
             throw new Exception($emailValidation['error']);
@@ -378,7 +378,7 @@ try {
             throw new Exception('Jméno a email jsou povinné');
         }
 
-        // ✅ SECURITY FIX: Posílená email validace
+        // SECURITY FIX: Posílená email validace
         $emailValidation = validateEmailStrong($email, false);
         if (!$emailValidation['valid']) {
             throw new Exception($emailValidation['error']);

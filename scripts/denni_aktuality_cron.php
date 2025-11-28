@@ -34,7 +34,7 @@ require_once __DIR__ . '/../init.php';
 
 try {
     $pdo = getDbConnection();
-    logMessage("✅ Připojení k databázi úspěšné");
+    logMessage("Připojení k databázi úspěšné");
 
     // Zkontrolovat, jestli už pro dnešek neexistuje záznam
     $dnes = date('Y-m-d');
@@ -51,27 +51,27 @@ try {
 
     // === KROK 1: Získat svátek ===
     $svatek = ziskatSvatekCZ();
-    logMessage("✅ Svátek získán: " . ($svatek['jmeno'] ?? 'neznámý'));
+    logMessage("Svátek získán: " . ($svatek['jmeno'] ?? 'neznámý'));
 
     // === KROK 2: Získat novinky o Natuzzi z internetu ===
     $novinkyNatuzzi = ziskatNovinkyNatuzziZInternetu();
-    logMessage("✅ Načteno " . count($novinkyNatuzzi['novinky'] ?? []) . " novinek o Natuzzi");
+    logMessage("Načteno " . count($novinkyNatuzzi['novinky'] ?? []) . " novinek o Natuzzi");
 
     // === KROK 3: Získat tipy na péči ===
     $peceTipy = ziskatTipyNaPeciONabytek();
-    logMessage("✅ Načteno " . count($peceTipy['tipy'] ?? []) . " tipů na péči");
+    logMessage("Načteno " . count($peceTipy['tipy'] ?? []) . " tipů na péči");
 
     // === KROK 4: Vygenerovat obsah v češtině ===
     $obsahCZ = vygenerujKompletniObsahCZ($dnes, $svatek, $novinkyNatuzzi, $peceTipy);
-    logMessage("✅ Obsah v češtině vygenerován (" . strlen($obsahCZ) . " znaků)");
+    logMessage("Obsah v češtině vygenerován (" . strlen($obsahCZ) . " znaků)");
 
     // === KROK 5: Přeložit do angličtiny ===
     $obsahEN = prelozitDoAnglictiny($obsahCZ, $svatek, $novinkyNatuzzi, $peceTipy);
-    logMessage("✅ Obsah přeložen do angličtiny (" . strlen($obsahEN) . " znaků)");
+    logMessage("Obsah přeložen do angličtiny (" . strlen($obsahEN) . " znaků)");
 
     // === KROK 6: Přeložit do italštiny ===
     $obsahIT = prelozitDoItalstiny($obsahCZ, $svatek, $novinkyNatuzzi, $peceTipy);
-    logMessage("✅ Obsah přeložen do italštiny (" . strlen($obsahIT) . " znaků)");
+    logMessage("Obsah přeložen do italštiny (" . strlen($obsahIT) . " znaků)");
 
     // === KROK 7: Uložit do databáze ===
     $stmt = $pdo->prepare("
@@ -99,7 +99,7 @@ try {
         'zdroje' => $zdroje
     ]);
 
-    logMessage("✅ Aktualita úspěšně uložena do databáze (ID: " . $pdo->lastInsertId() . ")");
+    logMessage("Aktualita úspěšně uložena do databáze (ID: " . $pdo->lastInsertId() . ")");
 
     $endTime = microtime(true);
     $duration = round($endTime - $startTime, 2);
@@ -110,7 +110,7 @@ try {
     exit(0);
 
 } catch (Exception $e) {
-    logMessage("❌ CHYBA: " . $e->getMessage(), 'ERROR');
+    logMessage("CHYBA: " . $e->getMessage(), 'ERROR');
     logMessage("Stack trace: " . $e->getTraceAsString(), 'ERROR');
 
     // Poslat notifikaci adminovi (pokud je nastaveno)

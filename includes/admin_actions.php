@@ -335,7 +335,7 @@ function getPriorityBadge($priority) {
 
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">🧹 Session Cleanup</div>
+                    <div class="setting-item-label">Session Cleanup</div>
                     <div class="setting-item-description">Vymazání starých sessions (každých 24 hodin)</div>
                 </div>
                 <div class="setting-item-right">

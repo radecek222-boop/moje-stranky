@@ -45,7 +45,7 @@ try {
             $count = $countStmt->fetch(PDO::FETCH_ASSOC)['cnt'];
             echo "✓ {$table}: EXISTUJE ({$count} záznamů)\n";
         } else {
-            echo "❌ {$table}: NEEXISTUJE\n";
+            echo "{$table}: NEEXISTUJE\n";
         }
     }
 
@@ -65,10 +65,10 @@ try {
             $calculator = new UserScoreCalculator($pdo);
             echo "✓ UserScoreCalculator instance vytvořena\n";
         } else {
-            echo "❌ UserScoreCalculator třída neexistuje\n";
+            echo "UserScoreCalculator třída neexistuje\n";
         }
     } else {
-        echo "❌ UserScoreCalculator.php soubor neexistuje\n";
+        echo "UserScoreCalculator.php soubor neexistuje\n";
     }
 
     echo "\n" . str_repeat('-', 60) . "\n\n";
@@ -94,14 +94,14 @@ try {
         include __DIR__ . '/api/analytics_user_scores.php';
         $output = ob_get_clean();
 
-        echo "\n✅ API PROBĚHLO BEZ CHYBY\n\n";
+        echo "\nAPI PROBĚHLO BEZ CHYBY\n\n";
         echo "OUTPUT:\n";
         echo $output . "\n";
 
         // Parse JSON
         $json = json_decode($output, true);
         if (json_last_error() === JSON_ERROR_NONE) {
-            echo "\n✅ Validní JSON\n";
+            echo "\nValidní JSON\n";
             echo "Status: " . ($json['status'] ?? 'N/A') . "\n";
 
             if (isset($json['message'])) {
@@ -112,12 +112,12 @@ try {
                 echo "Scores count: " . count($json['scores']) . "\n";
             }
         } else {
-            echo "\n❌ JSON Parse Error: " . json_last_error_msg() . "\n";
+            echo "\nJSON Parse Error: " . json_last_error_msg() . "\n";
         }
 
     } catch (Throwable $e) {
         ob_end_clean();
-        echo "\n❌ CHYBA ZACHYCENA:\n";
+        echo "\nCHYBA ZACHYCENA:\n";
         echo "Type: " . get_class($e) . "\n";
         echo "Message: " . $e->getMessage() . "\n";
         echo "File: " . $e->getFile() . "\n";
@@ -127,7 +127,7 @@ try {
     }
 
 } catch (Exception $e) {
-    echo "\n❌ FATAL ERROR:\n";
+    echo "\nFATAL ERROR:\n";
     echo $e->getMessage() . "\n";
     echo $e->getTraceAsString() . "\n";
 }

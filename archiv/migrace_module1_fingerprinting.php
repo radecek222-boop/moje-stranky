@@ -190,7 +190,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
         } else {
             echo "<div class='success'>";
-            echo "✅ Tabulka <code>wgs_analytics_fingerprints</code> neexistuje. Připraveno k vytvoření.";
+            echo "Tabulka <code>wgs_analytics_fingerprints</code> neexistuje. Připraveno k vytvoření.";
             echo "</div>";
         }
 
@@ -202,7 +202,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
             if ($columnExists) {
                 echo "<div class='info'>";
-                echo "✅ Sloupec <code>fingerprint_id</code> již existuje v tabulce <code>wgs_pageviews</code>.";
+                echo "Sloupec <code>fingerprint_id</code> již existuje v tabulce <code>wgs_pageviews</code>.";
                 echo "</div>";
             } else {
                 echo "<div class='warning'>";
@@ -307,7 +307,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
                     $pdo->exec($sql);
 
                     echo "<div class='success'>";
-                    echo "✅ Tabulka <code>wgs_analytics_fingerprints</code> vytvořena.";
+                    echo "Tabulka <code>wgs_analytics_fingerprints</code> vytvořena.";
                     echo "</div>";
 
                     // Add fingerprint_id column to wgs_pageviews if it doesn't exist
@@ -324,14 +324,14 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
                             ");
 
                             echo "<div class='success'>";
-                            echo "✅ Sloupec <code>fingerprint_id</code> přidán do tabulky <code>wgs_pageviews</code>.";
+                            echo "Sloupec <code>fingerprint_id</code> přidán do tabulky <code>wgs_pageviews</code>.";
                             echo "</div>";
                         }
                     }
 
                     $pdo->commit();
 
-                    echo "<h2>✅ Migrace úspěšně dokončena!</h2>";
+                    echo "<h2>Migrace úspěšně dokončena!</h2>";
 
                     echo "<div class='info'>";
                     echo "<strong>🎯 Další kroky:</strong><br>";
@@ -354,7 +354,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
                 } catch (PDOException $e) {
                     $pdo->rollBack();
                     echo "<div class='error'>";
-                    echo "<strong>❌ CHYBA PŘI MIGRACI:</strong><br>";
+                    echo "<strong>CHYBA PŘI MIGRACI:</strong><br>";
                     echo htmlspecialchars($e->getMessage());
                     echo "</div>";
                 }

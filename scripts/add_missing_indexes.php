@@ -81,10 +81,10 @@ try {
         try {
             $sql = "ALTER TABLE {$table} ADD INDEX {$indexName} ({$column})";
             $pdo->exec($sql);
-            echo "✅ Přidán index: {$indexName} na {$table}.{$column}\n";
+            echo "Přidán index: {$indexName} na {$table}.{$column}\n";
             $added++;
         } catch (PDOException $e) {
-            echo "❌ Chyba při přidávání {$indexName}: " . $e->getMessage() . "\n";
+            echo "Chyba při přidávání {$indexName}: " . $e->getMessage() . "\n";
             $errors++;
         }
     }
@@ -95,7 +95,7 @@ try {
     echo "Chyby: {$errors}\n";
 
     if ($added > 0) {
-        echo "\n✅ SUCCESS: Indexy byly úspěšně přidány!\n";
+        echo "\nSUCCESS: Indexy byly úspěšně přidány!\n";
     } else if ($errors > 0) {
         echo "\n⚠️  WARNING: Některé indexy se nepodařilo přidat!\n";
     } else {
@@ -103,6 +103,6 @@ try {
     }
 
 } catch (Exception $e) {
-    echo "❌ KRITICKÁ CHYBA: " . $e->getMessage() . "\n";
+    echo "KRITICKÁ CHYBA: " . $e->getMessage() . "\n";
     exit(1);
 }

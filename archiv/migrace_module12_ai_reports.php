@@ -131,7 +131,7 @@ try {
         echo "</div>";
     } else {
         echo "<div class='info'>";
-        echo "<strong>✅ Tabulky neexistují</strong><br>";
+        echo "<strong>Tabulky neexistují</strong><br>";
         echo "Budou vytvořeny nové tabulky.";
         echo "</div>";
     }
@@ -229,26 +229,26 @@ CREATE TABLE IF NOT EXISTS wgs_analytics_report_schedules (
             if ($reportsExist) {
                 echo "<div class='info'>⏳ Odstraňuji starou tabulku wgs_analytics_reports...</div>";
                 $pdo->exec("DROP TABLE IF EXISTS wgs_analytics_reports");
-                echo "<div class='success'>✅ Stará tabulka odstraněna</div>";
+                echo "<div class='success'>Stará tabulka odstraněna</div>";
             }
 
             if ($schedulesExist) {
                 echo "<div class='info'>⏳ Odstraňuji starou tabulku wgs_analytics_report_schedules...</div>";
                 $pdo->exec("DROP TABLE IF EXISTS wgs_analytics_report_schedules");
-                echo "<div class='success'>✅ Stará tabulka odstraněna</div>";
+                echo "<div class='success'>Stará tabulka odstraněna</div>";
             }
 
             // Vytvoření nových tabulek
             echo "<div class='info'>⏳ Vytvářím tabulku wgs_analytics_reports...</div>";
             $pdo->exec($ddl1);
-            echo "<div class='success'>✅ Tabulka wgs_analytics_reports vytvořena</div>";
+            echo "<div class='success'>Tabulka wgs_analytics_reports vytvořena</div>";
 
             echo "<div class='info'>⏳ Vytvářím tabulku wgs_analytics_report_schedules...</div>";
             $pdo->exec($ddl2);
-            echo "<div class='success'>✅ Tabulka wgs_analytics_report_schedules vytvořena</div>";
+            echo "<div class='success'>Tabulka wgs_analytics_report_schedules vytvořena</div>";
 
             echo "<div class='success'>";
-            echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
+            echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
             echo "Vytvořeno:<br>";
             echo "• Tabulka: wgs_analytics_reports (4 indexy)<br>";
             echo "• Tabulka: wgs_analytics_report_schedules (2 indexy)<br>";
@@ -268,7 +268,7 @@ CREATE TABLE IF NOT EXISTS wgs_analytics_report_schedules (
 
         } catch (PDOException $e) {
             echo "<div class='error'>";
-            echo "<strong>❌ CHYBA PŘI MIGRACI</strong><br>";
+            echo "<strong>CHYBA PŘI MIGRACI</strong><br>";
             echo htmlspecialchars($e->getMessage());
             echo "</div>";
         }
@@ -286,7 +286,7 @@ CREATE TABLE IF NOT EXISTS wgs_analytics_report_schedules (
 
 } catch (Exception $e) {
     echo "<div class='error'>";
-    echo "<strong>❌ NEOČEKÁVANÁ CHYBA</strong><br>";
+    echo "<strong>NEOČEKÁVANÁ CHYBA</strong><br>";
     echo htmlspecialchars($e->getMessage());
     echo "</div>";
 }

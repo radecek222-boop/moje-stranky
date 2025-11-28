@@ -20,7 +20,7 @@ if (!$isAdmin) {
     exit;
 }
 
-// ✅ PERFORMANCE FIX: Uvolnit session lock pro paralelní zpracování
+// PERFORMANCE FIX: Uvolnit session lock pro paralelní zpracování
 // Audit 2025-11-24: Long-running statistiky queries blokují ostatní requesty
 session_write_close();
 

@@ -194,7 +194,7 @@ try {
         echo "</div>";
     } else {
         echo "<div class='info'>";
-        echo "✅ Tabulka <code>wgs_analytics_replay_frames</code> neexistuje - bude vytvořena.";
+        echo "Tabulka <code>wgs_analytics_replay_frames</code> neexistuje - bude vytvořena.";
         echo "</div>";
     }
 
@@ -264,7 +264,7 @@ try {
                 ");
 
                 echo "<div class='success'>";
-                echo "✅ Tabulka <code>wgs_analytics_replay_frames</code> úspěšně vytvořena<br>";
+                echo "Tabulka <code>wgs_analytics_replay_frames</code> úspěšně vytvořena<br>";
                 echo "• 13 sloupců<br>";
                 echo "• 8 indexů pro optimalizaci dotazů<br>";
                 echo "• JSON sloupec pro flexibilní event data<br>";
@@ -282,7 +282,7 @@ try {
             // ========================================
             $pdo->commit();
 
-            echo "<h2>✅ Migrace úspěšně dokončena</h2>";
+            echo "<h2>Migrace úspěšně dokončena</h2>";
 
             echo "<div class='success'>";
             echo "<strong>HOTOVO!</strong> Modul #7 (Session Replay Engine) byl úspěšně nainstalován.<br><br>";
@@ -397,7 +397,7 @@ LIMIT 10000;</pre>";
             $pdo->rollBack();
 
             echo "<div class='error'>";
-            echo "<strong>❌ CHYBA PŘI MIGRACI:</strong><br>";
+            echo "<strong>CHYBA PŘI MIGRACI:</strong><br>";
             echo htmlspecialchars($e->getMessage());
             echo "</div>";
 
@@ -415,7 +415,7 @@ LIMIT 10000;</pre>";
         echo "<strong>Tato migrace provede následující:</strong><br><br>";
 
         if (!$tabulkaExistuje) {
-            echo "✅ Vytvoří tabulku <code>wgs_analytics_replay_frames</code><br>";
+            echo "Vytvoří tabulku <code>wgs_analytics_replay_frames</code><br>";
             echo "• 13 sloupců (BIGINT id, session_id, page_url, page_index, frame_index, timestamp_offset, event_type, event_data, viewport_width/height, device_type, created_at, expires_at)<br>";
             echo "• 8 indexů pro optimalizaci dotazů<br>";
             echo "• JSON sloupec pro flexibilní event data<br>";
@@ -436,7 +436,7 @@ LIMIT 10000;</pre>";
 
 } catch (Exception $e) {
     echo "<div class='error'>";
-    echo "<strong>❌ NEOČEKÁVANÁ CHYBA:</strong><br>";
+    echo "<strong>NEOČEKÁVANÁ CHYBA:</strong><br>";
     echo htmlspecialchars($e->getMessage());
     echo "</div>";
 

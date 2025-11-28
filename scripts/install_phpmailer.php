@@ -228,14 +228,14 @@ PHP;
     $version = $mailTest::VERSION;
 
     logInstall("====================================");
-    logInstall("✅ PHPMailer {$version} úspěšně nainstalován!");
+    logInstall("PHPMailer {$version} úspěšně nainstalován!");
     logInstall("====================================");
 
     return true;
 
 } catch (Exception $e) {
     logInstall("====================================");
-    logInstall("❌ CHYBA: " . $e->getMessage());
+    logInstall("CHYBA: " . $e->getMessage());
     logInstall("====================================");
 
     // Vyhodit exception, aby Control Center API zachytil chybu

@@ -14,7 +14,7 @@ $projectRoot = __DIR__ . '/..';
 $reportFile = __DIR__ . '/dead_code_report.txt';
 
 if (!file_exists($reportFile)) {
-    die("❌ Report nenalezen: {$reportFile}\n");
+    die("Report nenalezen: {$reportFile}\n");
 }
 
 $report = file_get_contents($reportFile);
@@ -166,7 +166,7 @@ foreach ($deadClasses as $class) {
 }
 
 echo "\n" . str_repeat("=", 70) . "\n";
-echo "✅ DOKONČENO!\n";
+echo "DOKONČENO!\n";
 echo str_repeat("=", 70) . "\n\n";
 
 echo "📊 Statistiky:\n";

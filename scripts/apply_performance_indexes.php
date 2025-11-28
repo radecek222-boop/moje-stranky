@@ -111,7 +111,7 @@ try {
 
     echo json_encode([
         'success' => true,
-        'message' => "✅ Hotovo! Vytvořeno $totalCreated indexů, přeskočeno $totalSkipped (již existují), chyb: $totalErrors",
+        'message' => "Hotovo! Vytvořeno $totalCreated indexů, přeskočeno $totalSkipped (již existují), chyb: $totalErrors",
         'details' => [
             'total_attempted' => $totalAttempted,
             'created' => $totalCreated,

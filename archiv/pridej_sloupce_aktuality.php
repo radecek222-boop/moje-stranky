@@ -89,7 +89,7 @@ try {
                     ADD COLUMN created_by_admin BOOLEAN DEFAULT FALSE
                     COMMENT 'Byla aktualita vytvořena ručně adminem?'
                 ");
-                echo "<div class='success'>✅ Přidán sloupec <code>created_by_admin</code></div>";
+                echo "<div class='success'>Přidán sloupec <code>created_by_admin</code></div>";
                 $migrated = true;
             }
 
@@ -100,7 +100,7 @@ try {
                     ADD COLUMN upraveno_at TIMESTAMP NULL DEFAULT NULL
                     COMMENT 'Kdy byl článek naposledy upraven'
                 ");
-                echo "<div class='success'>✅ Přidán sloupec <code>upraveno_at</code></div>";
+                echo "<div class='success'>Přidán sloupec <code>upraveno_at</code></div>";
                 $migrated = true;
             }
 
@@ -108,7 +108,7 @@ try {
 
             if ($migrated) {
                 echo "<div class='success'>";
-                echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong>";
+                echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong>";
                 echo "</div>";
 
                 echo "<h2>Přidané sloupce:</h2>";
@@ -128,7 +128,7 @@ try {
         } catch (PDOException $e) {
             $pdo->rollBack();
             echo "<div class='error'>";
-            echo "<strong>❌ CHYBA:</strong><br>";
+            echo "<strong>CHYBA:</strong><br>";
             echo htmlspecialchars($e->getMessage());
             echo "</div>";
         }

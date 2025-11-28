@@ -110,7 +110,7 @@ try {
     // CSRF je relevantní pro: DELETE, UPDATE, CREATE akcí admin operací
     // CSRF NENÍ relevantní pro: Pasivní analytics tracking
 
-    // ✅ PERFORMANCE FIX: Uvolnit session lock pro paralelní zpracování
+    // PERFORMANCE FIX: Uvolnit session lock pro paralelní zpracování
     // Audit 2025-11-24: Heatmap tracking - vysoká frekvence requestů
     session_write_close();
 

@@ -320,7 +320,7 @@ $pdo = getDbConnection();
             <div class="result-actions">
                 <button class="btn btn-success" onclick="cleanupTestData()">[OK] Potvrdit a smazat test data</button>
                 <button class="btn btn-secondary" onclick="viewTestDataInDB()">Prohlédnout v DB</button>
-                <button class="btn" onclick="copyResults()">📋 Kopírovat</button>
+                <button class="btn" onclick="copyResults()">Kopírovat</button>
             </div>
         </div>
 
@@ -543,7 +543,7 @@ Datum: ${new Date().toLocaleString('cs-CZ')}
 VÝSLEDKY:
 [OK] Úspěšné: ${passed}
 [X] Selhání: ${failed}
-📋 Celkem: ${testResults.steps.length}
+Celkem: ${testResults.steps.length}
 
 TEST DATA IDs:
 • User ID: ${testResults.testUserId || 'N/A'}

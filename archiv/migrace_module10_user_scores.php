@@ -193,7 +193,7 @@ try {
     }
 
     echo "<div class='success'>";
-    echo "✅ Tabulka <code>wgs_analytics_user_scores</code> neexistuje. Můžeme pokračovat.";
+    echo "Tabulka <code>wgs_analytics_user_scores</code> neexistuje. Můžeme pokračovat.";
     echo "</div>";
 
     // ========================================
@@ -318,7 +318,7 @@ try {
         $pdo->exec($sql);
 
         echo "<div class='success'>";
-        echo "✅ Tabulka <code>wgs_analytics_user_scores</code> úspěšně vytvořena.";
+        echo "Tabulka <code>wgs_analytics_user_scores</code> úspěšně vytvořena.";
         echo "</div>";
 
         // ========================================
@@ -327,7 +327,7 @@ try {
         $pdo->commit();
 
         echo "<div class='success'>";
-        echo "<h2>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</h2>";
+        echo "<h2>MIGRACE ÚSPĚŠNĚ DOKONČENA</h2>";
         echo "<p>Všechny databázové struktury byly úspěšně vytvořeny.</p>";
         echo "</div>";
 
@@ -357,7 +357,7 @@ try {
         $pdo->rollBack();
 
         echo "<div class='error'>";
-        echo "<h3>❌ CHYBA PŘI MIGRACI</h3>";
+        echo "<h3>CHYBA PŘI MIGRACI</h3>";
         echo "<p><strong>Chybová zpráva:</strong></p>";
         echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
         echo "<p><strong>SQL State:</strong> " . $e->getCode() . "</p>";
@@ -368,7 +368,7 @@ try {
 
 } catch (Exception $e) {
     echo "<div class='error'>";
-    echo "<h3>❌ NEOČEKÁVANÁ CHYBA</h3>";
+    echo "<h3>NEOČEKÁVANÁ CHYBA</h3>";
     echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
     echo "</div>";
 

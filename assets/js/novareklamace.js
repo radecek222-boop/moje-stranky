@@ -451,7 +451,7 @@ const WGS = {
   checkAndUpdateMapFromAddress() {
     const uliceInput = document.getElementById('ulice');
     if (uliceInput && uliceInput.value.trim()) {
-      logger.log('🔍 Checking pre-filled address...');
+      logger.log('Checking pre-filled address...');
       if (this.geocodeAddress) {
         this.geocodeAddress();
       }
@@ -802,7 +802,7 @@ const WGS = {
             statusSpan.textContent = '';
             statusSpan.style.color = '#666';
           }
-          logger.log('🧹 PDF pověření vyčištěno po úspěšném uložení');
+          logger.log('PDF pověření vyčištěno po úspěšném uložení');
         }
 
         this.toast('Požadavek byl úspěšně odeslán!', 'success');

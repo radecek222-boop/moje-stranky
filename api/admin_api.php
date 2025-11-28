@@ -24,7 +24,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     exit;
 }
 
-// ✅ PERFORMANCE FIX: Načíst session data a uvolnit zámek
+// PERFORMANCE FIX: Načíst session data a uvolnit zámek
 // Audit 2025-11-24: Admin operations - různé délky operací
 $userId = $_SESSION['user_id'] ?? $_SESSION['admin_id'] ?? 'admin';
 $createdBy = $userId; // Pro použití v řádku 217
@@ -262,7 +262,7 @@ function handleDeleteKey(PDO $pdo, array $payload): void
         throw new InvalidArgumentException('Chybí kód klíče.');
     }
 
-    // ✅ OPRAVA: Fyzické smazání místo soft delete (is_active = 0)
+    // OPRAVA: Fyzické smazání místo soft delete (is_active = 0)
     // Důvod: UI zobrazuje i neaktivní klíče, ale UPDATE ... SET is_active = 0
     // nefunguje pro klíče které už jsou neaktivní (rowCount = 0)
     // Řešení: DELETE fyzicky odstraní klíč z databáze

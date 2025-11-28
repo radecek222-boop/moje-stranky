@@ -144,11 +144,11 @@ if (typeof window !== 'undefined') {
   window.clearSignaturePad = function() {
     if (window.signaturePad) {
       window.signaturePad.clear();
-      console.log('✅ Podpis vymazán');
+      console.log('Podpis vymazán');
     } else {
       console.warn('⚠️ signaturePad není inicializován');
     }
   };
 }
 
-console.log('✅ SignaturePad načten (lokální implementace)');
+console.log('SignaturePad načten (lokální implementace)');

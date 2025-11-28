@@ -199,7 +199,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 
         if (count($missingTables) > 0) {
             echo "<div class='success'>";
-            echo "<strong>✅ Tabulky k vytvoření (" . count($missingTables) . "):</strong><br>";
+            echo "<strong>Tabulky k vytvoření (" . count($missingTables) . "):</strong><br>";
             foreach ($missingTables as $table => $desc) {
                 echo "• <code>$table</code> - $desc<br>";
             }
@@ -859,7 +859,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
                 $pdo->commit();
 
                 // Success summary
-                echo "<h2>✅ Migrace úspěšně dokončena!</h2>";
+                echo "<h2>Migrace úspěšně dokončena!</h2>";
 
                 echo "<div class='stats'>";
                 echo "<div class='stat-card green'>";
@@ -899,7 +899,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
             } catch (PDOException $e) {
                 $pdo->rollBack();
                 echo "<div class='error'>";
-                echo "<strong>❌ CHYBA PŘI MIGRACI:</strong><br>";
+                echo "<strong>CHYBA PŘI MIGRACI:</strong><br>";
                 echo htmlspecialchars($e->getMessage());
                 echo "</div>";
             }

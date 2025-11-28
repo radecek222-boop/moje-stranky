@@ -39,23 +39,23 @@ try {
 
     $output = ob_get_clean();
 
-    echo "\n✅ API PROBĚHLO\n";
+    echo "\nAPI PROBĚHLO\n";
     echo "OUTPUT:\n";
     echo $output . "\n";
 
     // Parse JSON
     $json = json_decode($output, true);
     if (json_last_error() === JSON_ERROR_NONE) {
-        echo "\n✅ Validní JSON\n";
+        echo "\nValidní JSON\n";
         print_r($json);
     } else {
-        echo "\n❌ JSON Parse Error: " . json_last_error_msg() . "\n";
+        echo "\nJSON Parse Error: " . json_last_error_msg() . "\n";
     }
 
 } catch (Throwable $e) {
     ob_end_clean();
 
-    echo "\n❌ CHYBA:\n";
+    echo "\nCHYBA:\n";
     echo "Type: " . get_class($e) . "\n";
     echo "Message: " . $e->getMessage() . "\n";
     echo "File: " . $e->getFile() . "\n";

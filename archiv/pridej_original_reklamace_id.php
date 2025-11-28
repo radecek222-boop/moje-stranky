@@ -139,7 +139,7 @@ try {
             } catch (PDOException $e) {
                 $pdo->rollBack();
                 echo "<div class='error'>";
-                echo "<strong>❌ CHYBA:</strong><br>";
+                echo "<strong>CHYBA:</strong><br>";
                 echo htmlspecialchars($e->getMessage());
                 echo "</div>";
             }

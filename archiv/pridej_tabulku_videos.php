@@ -119,7 +119,7 @@ try {
                 $pdo->commit();
 
                 echo "<div class='success'>";
-                echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
+                echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
                 echo "Tabulka <code>wgs_videos</code> byla úspěšně vytvořena.<br><br>";
                 echo "<strong>Struktura tabulky:</strong>";
                 echo "<pre>";
@@ -140,7 +140,7 @@ try {
                 if (!is_dir($videoDir)) {
                     mkdir($videoDir, 0755, true);
                     echo "<div class='success'>";
-                    echo "✅ Složka <code>/uploads/videos/</code> byla vytvořena.";
+                    echo "Složka <code>/uploads/videos/</code> byla vytvořena.";
                     echo "</div>";
                 } else {
                     echo "<div class='info'>";
@@ -151,7 +151,7 @@ try {
             } catch (PDOException $e) {
                 $pdo->rollBack();
                 echo "<div class='error'>";
-                echo "<strong>❌ CHYBA:</strong><br>";
+                echo "<strong>CHYBA:</strong><br>";
                 echo htmlspecialchars($e->getMessage());
                 echo "</div>";
             }

@@ -71,7 +71,7 @@ try {
 
     $result = $campaignAttribution->agregujDenniStatistiky($date);
 
-    log_message("✅ Agregace dokončena:", 'success');
+    log_message("Agregace dokončena:", 'success');
     log_message("  - Datum: {$result['date']}", 'success');
     log_message("  - Zpracováno kampaní: {$result['campaigns_processed']}", 'success');
     log_message("  - Agregováno řádků: {$result['agregated_rows']}", 'success');
@@ -140,12 +140,12 @@ try {
     log_message('📊 Campaign Stats Aggregation - DOKONČENO', 'success');
 
 } catch (PDOException $e) {
-    log_message('❌ DATABASE ERROR: ' . $e->getMessage(), 'error');
+    log_message('DATABASE ERROR: ' . $e->getMessage(), 'error');
     error_log('Campaign Stats Aggregation Error: ' . $e->getMessage());
     error_log('Stack trace: ' . $e->getTraceAsString());
 
 } catch (Exception $e) {
-    log_message('❌ ERROR: ' . $e->getMessage(), 'error');
+    log_message('ERROR: ' . $e->getMessage(), 'error');
     error_log('Campaign Stats Aggregation Unexpected Error: ' . $e->getMessage());
 }
 

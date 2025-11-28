@@ -37,7 +37,7 @@ try {
     $tableExists = $stmt->rowCount() > 0;
 
     if ($tableExists) {
-        echo "<p class='ok'>✅ Tabulka wgs_notes_read EXISTUJE</p>";
+        echo "<p class='ok'>Tabulka wgs_notes_read EXISTUJE</p>";
 
         // Zobrazit strukturu
         $stmt = $pdo->query("DESCRIBE wgs_notes_read");
@@ -54,7 +54,7 @@ try {
         echo "<p>Počet read záznamů: <strong>{$count}</strong></p>";
 
     } else {
-        echo "<p class='error'>❌ Tabulka wgs_notes_read NEEXISTUJE!</p>";
+        echo "<p class='error'>Tabulka wgs_notes_read NEEXISTUJE!</p>";
         echo "<p class='warning'>⚠️ MUSÍŠ SPUSTIT MIGRACI:</p>";
         echo "<p><a href='pridej_notes_read_tracking.php' style='background: red; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>SPUSTIT MIGRACI</a></p>";
     }
@@ -63,7 +63,7 @@ try {
     echo "<h2>2. Kontrola tabulky wgs_notes</h2>";
     $stmt = $pdo->query("SHOW TABLES LIKE 'wgs_notes'");
     if ($stmt->rowCount() > 0) {
-        echo "<p class='ok'>✅ Tabulka wgs_notes existuje</p>";
+        echo "<p class='ok'>Tabulka wgs_notes existuje</p>";
 
         $stmt = $pdo->query("SELECT COUNT(*) FROM wgs_notes");
         $count = $stmt->fetchColumn();
@@ -83,7 +83,7 @@ try {
         }
         echo "</pre>";
     } else {
-        echo "<p class='error'>❌ Tabulka wgs_notes NEEXISTUJE!</p>";
+        echo "<p class='error'>Tabulka wgs_notes NEEXISTUJE!</p>";
     }
 
     // 3. Test get_unread_counts endpoint
@@ -115,12 +115,12 @@ try {
 
         $total = array_sum($unreadCounts);
         if ($total > 0) {
-            echo "<p class='ok'>✅ Máte {$total} nepřečtených poznámek</p>";
+            echo "<p class='ok'>Máte {$total} nepřečtených poznámek</p>";
         } else {
             echo "<p class='warning'>⚠️ Žádné nepřečtené poznámky (nebo všechny jsou vaše vlastní)</p>";
         }
     } else {
-        echo "<p class='error'>❌ Nelze testovat - tabulka wgs_notes_read neexistuje</p>";
+        echo "<p class='error'>Nelze testovat - tabulka wgs_notes_read neexistuje</p>";
     }
 
     // 4. Test mark_read
@@ -137,7 +137,7 @@ try {
         echo "</div>";
     } else {
         echo "<div style='background: #e0ffe0; padding: 20px; border: 2px solid green; border-radius: 10px;'>";
-        echo "<h3 style='color: green;'>✅ Systém je funkční!</h3>";
+        echo "<h3 style='color: green;'>Systém je funkční!</h3>";
         echo "<p>Pokud stále nevidíš pulsování:</p>";
         echo "<ol>";
         echo "<li>Vyčisti cache prohlížeče (Ctrl+F5)</li>";

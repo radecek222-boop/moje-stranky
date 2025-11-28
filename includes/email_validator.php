@@ -97,7 +97,7 @@ function validateEmailStrong($email, $checkDNS = false) {
         }
     }
 
-    // ✅ Email je validní
+    // Email je validní
     $result['valid'] = true;
     $result['email'] = strtolower($sanitized); // Normalizovat na lowercase
     return $result;

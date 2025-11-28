@@ -126,7 +126,7 @@ try {
         echo "</div>";
     } else {
         echo "<div class='info'>";
-        echo "<strong>✅ Tabulka wgs_analytics_realtime neexistuje</strong><br>";
+        echo "<strong>Tabulka wgs_analytics_realtime neexistuje</strong><br>";
         echo "Bude vytvořena nová tabulka.";
         echo "</div>";
     }
@@ -210,16 +210,16 @@ CREATE TABLE IF NOT EXISTS wgs_analytics_realtime (
             if ($tabulkaExistuje) {
                 echo "<div class='info'>⏳ Odstraňuji starou tabulku wgs_analytics_realtime...</div>";
                 $pdo->exec("DROP TABLE IF EXISTS wgs_analytics_realtime");
-                echo "<div class='success'>✅ Stará tabulka odstraněna</div>";
+                echo "<div class='success'>Stará tabulka odstraněna</div>";
             }
 
             // Vytvoření nové tabulky
             echo "<div class='info'>⏳ Vytvářím tabulku wgs_analytics_realtime...</div>";
             $pdo->exec($ddl);
-            echo "<div class='success'>✅ Tabulka wgs_analytics_realtime vytvořena</div>";
+            echo "<div class='success'>Tabulka wgs_analytics_realtime vytvořena</div>";
 
             echo "<div class='success'>";
-            echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
+            echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br><br>";
             echo "Vytvořeno:<br>";
             echo "• Tabulka: wgs_analytics_realtime<br>";
             echo "• 7 indexů pro optimalizaci dotazů<br>";
@@ -246,7 +246,7 @@ CREATE TABLE IF NOT EXISTS wgs_analytics_realtime (
 
         } catch (PDOException $e) {
             echo "<div class='error'>";
-            echo "<strong>❌ CHYBA PŘI MIGRACI</strong><br>";
+            echo "<strong>CHYBA PŘI MIGRACI</strong><br>";
             echo htmlspecialchars($e->getMessage());
             echo "</div>";
         }
@@ -264,7 +264,7 @@ CREATE TABLE IF NOT EXISTS wgs_analytics_realtime (
 
 } catch (Exception $e) {
     echo "<div class='error'>";
-    echo "<strong>❌ NEOČEKÁVANÁ CHYBA</strong><br>";
+    echo "<strong>NEOČEKÁVANÁ CHYBA</strong><br>";
     echo htmlspecialchars($e->getMessage());
     echo "</div>";
 }

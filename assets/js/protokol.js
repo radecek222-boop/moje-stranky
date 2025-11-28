@@ -247,7 +247,7 @@ async function loadPhotosFromDatabase(customerId) {
     logger.log('═══════════════════════════════════════');
     logger.log('🖼️ NAČÍTÁM FOTKY Z DATABÁZE');
     logger.log('═══════════════════════════════════════');
-    logger.log('🔑 customerId:', customerId);
+    logger.log('customerId:', customerId);
 
     // Načíst z API
     const response = await fetch(`api/get_photos_api.php?reklamace_id=${customerId}`);
@@ -331,7 +331,7 @@ async function loadKalkulaceFromDatabase(customerId) {
     logger.log('═══════════════════════════════════════');
     logger.log('💶 NAČÍTÁM KALKULACI Z DATABÁZE');
     logger.log('═══════════════════════════════════════');
-    logger.log('🔑 customerId:', customerId);
+    logger.log('customerId:', customerId);
 
     // Načíst z API
     const response = await fetch(`api/get_kalkulace_api.php?reklamace_id=${customerId}`);
@@ -371,7 +371,7 @@ async function loadReklamace(id) {
   showLoading(true);
 
   try {
-    logger.log('🔍 Načítám data zákazníka...');
+    logger.log('Načítám data zákazníka...');
     logger.log('[List] ID z URL:', id);
 
     const localData = localStorage.getItem('currentCustomer');

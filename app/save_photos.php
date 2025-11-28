@@ -57,7 +57,7 @@ try {
         throw new Exception('Povolena pouze POST metoda');
     }
 
-    // ✅ FIX 9: Databázový rate limiting - ochrana proti DoS útokům
+    // FIX 9: Databázový rate limiting - ochrana proti DoS útokům
     $pdo = getDbConnection();
     $rateLimiter = new RateLimiter($pdo);
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
@@ -78,7 +78,7 @@ try {
         exit;
     }
 
-    // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
+    // FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
 
     // JSON data už jsou načtena výše (pro CSRF kontrolu)
     // $data je už k dispozici
@@ -144,7 +144,7 @@ try {
         }
 
         foreach ($photos as $index => $photoData) {
-            // ✅ OPRAVENO: Fotky jsou objekty {type, data, size} ne jen string
+            // OPRAVENO: Fotky jsou objekty {type, data, size} ne jen string
             // Frontend posílá: {type: 'image', data: 'base64...', size: 12345}
             $base64Data = '';
             $photoType = 'image';
@@ -222,7 +222,7 @@ try {
                 ':photo_path' => $relativePathForDb,
                 ':file_path' => $relativePathForDb,
                 ':file_name' => $filename,
-                ':photo_type' => $photoType, // ✅ Použití správného photo_type
+                ':photo_type' => $photoType, // Použití správného photo_type
                 ':photo_order' => $photoOrder
             ]);
 

@@ -115,7 +115,7 @@ try {
                 $pdo->commit();
 
                 echo "<div class='success'>";
-                echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br>";
+                echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br>";
                 echo "Tabulka 'wgs_notes_read' byla vytvořena.<br>";
                 echo "Nyní lze trackovat, kdo už poznámku přečetl.";
                 echo "</div>";
@@ -133,7 +133,7 @@ try {
             } catch (PDOException $e) {
                 $pdo->rollBack();
                 echo "<div class='error'>";
-                echo "<strong>❌ CHYBA:</strong><br>";
+                echo "<strong>CHYBA:</strong><br>";
                 echo htmlspecialchars($e->getMessage());
                 echo "</div>";
             }
@@ -148,7 +148,7 @@ try {
 
 } catch (Exception $e) {
     echo "<div class='error'>";
-    echo "<strong>❌ CHYBA:</strong><br>";
+    echo "<strong>CHYBA:</strong><br>";
     echo htmlspecialchars($e->getMessage());
     echo "</div>";
 }

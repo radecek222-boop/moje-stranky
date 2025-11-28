@@ -69,7 +69,7 @@ try {
             $pdo->commit();
 
             echo "<div class='success'>";
-            echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br>";
+            echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br>";
             echo "Tabulka <code>wgs_remember_tokens</code> byla vytvořena.";
             echo "</div>";
 
