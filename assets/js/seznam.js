@@ -717,7 +717,7 @@ async function showDetail(recordOrId) {
           <!-- Zakázka je KLON - zobrazit Historie zákazníka + PDF REPORT -->
           <button class="btn" style="background: #555; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; margin-bottom: 0.5rem;"
                   data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">
-            📚 Historie zákazníka
+            Historie zákazníka
           </button>
           ${record.documents && record.documents.length > 0 ? `
             <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; font-weight: 600;"
@@ -900,8 +900,8 @@ async function showHistoryPDF(originalReklamaceId) {
     const firstDoc = result.documents[0];
     logger.log(`Otevírám PDF: ${firstDoc.file_path}`);
 
-    // Otevřít PDF v novém okně
-    window.open(firstDoc.file_path, '_blank');
+    // Otevřít PDF v modal okně (funguje lépe na mobilu než window.open)
+    zobrazPDFModal(firstDoc.file_path, originalReklamaceId);
 
   } catch (error) {
     logger.error('Chyba při načítání historie PDF:', error);

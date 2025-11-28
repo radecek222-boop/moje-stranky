@@ -519,6 +519,12 @@ body.modal-open {
 #detailOverlay .modal-body .btn {
   display: block !important;
   margin: 0.5rem auto !important;
+  /* FIX: Touch optimalizace pro mobil */
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 1 !important;
 }
 
 #detailOverlay .modal-section {
