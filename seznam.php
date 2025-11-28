@@ -278,8 +278,18 @@ if (!$isLoggedIn && !$isAdmin) {
   margin-top: 2rem !important;
 }
 
-/* DETAIL OVERLAY - BÍLÉ POZADÍ */
+/* DETAIL OVERLAY - ČISTĚ BÍLÉ POZADÍ VŠUDE */
 #detailOverlay {
+  background: #ffffff !important;
+}
+
+#detailOverlay .modal-content,
+#detailOverlay .modal-header,
+#detailOverlay .modal-body,
+#detailOverlay .detail-modal,
+#detailOverlay #modalContent,
+#detailOverlay .info-grid,
+#detailOverlay .modal-section {
   background: #ffffff !important;
 }
 
