@@ -2475,6 +2475,8 @@ async function addNote(orderId, text, audioBlob = null) {
     formData.append('csrf_token', csrfToken);
 
     // Pridat audio pokud existuje
+    logger.log('[Audio] audioBlob status:', audioBlob ? 'existuje' : 'null', audioBlob ? audioBlob.size + ' bytes' : '');
+
     if (audioBlob) {
       // Urcit priponu podle MIME typu
       let ext = 'webm';
@@ -2484,23 +2486,27 @@ async function addNote(orderId, text, audioBlob = null) {
       else if (audioBlob.type.includes('wav')) ext = 'wav';
 
       formData.append('audio', audioBlob, `nahravka.${ext}`);
-      logger.log('[Audio] Odesilam nahravku:', Math.round(audioBlob.size / 1024), 'KB');
+      logger.log('[Audio] Odesilam nahravku:', Math.round(audioBlob.size / 1024), 'KB, type:', audioBlob.type);
     }
 
+    logger.log('[Notes] Odesilam poznamku na API...');
     const response = await fetch('api/notes_api.php', {
       method: 'POST',
       body: formData
     });
 
+    logger.log('[Notes] API odpoved status:', response.status);
     const data = await response.json();
+    logger.log('[Notes] API odpoved data:', JSON.stringify(data));
 
     if (data.status === 'success' || data.success === true) {
       return { success: true, note_id: data.note_id };
     } else {
-      throw new Error(data.message || 'Chyba při přidávání poznámky');
+      // PHP vraci 'error' ne 'message'
+      throw new Error(data.error || data.message || 'Chyba pri pridavani poznamky');
     }
   } catch (e) {
-    logger.error('Chyba při přidávání poznámky:', e);
+    logger.error('Chyba pri pridavani poznamky:', e);
     throw e;
   }
 }
