@@ -150,6 +150,30 @@ try {
             handleUpdateEmailRecipients($pdo, $payload);
             break;
 
+        case 'send_invitations':
+            handleSendInvitations($pdo, $payload);
+            break;
+
+        case 'get_keys':
+            handleListKeys($pdo);
+            break;
+
+        case 'get_invitation_template':
+            handleGetInvitationTemplate($pdo);
+            break;
+
+        case 'save_invitation_template':
+            handleSaveInvitationTemplate($pdo, $payload);
+            break;
+
+        case 'get_invitation_texts':
+            handleGetInvitationTexts($pdo);
+            break;
+
+        case 'save_invitation_texts':
+            handleSaveInvitationTexts($pdo, $payload);
+            break;
+
         default:
             respondError('Neznámá akce.', 400);
     }
@@ -941,5 +965,828 @@ function handleUpdateEmailRecipients(PDO $pdo, array $payload): void
         'template_id' => $templateId,
         'recipients' => $validatedRecipients
     ]);
+}
+
+/**
+ * Odeslat pozvánky na registraci
+ */
+function handleSendInvitations(PDO $pdo, array $payload): void
+{
+    $typ = strtolower(trim($payload['typ'] ?? ''));
+    $klic = trim($payload['klic'] ?? '');
+    $emaily = $payload['emaily'] ?? [];
+
+    // Validace typu
+    if (!in_array($typ, ['technik', 'prodejce'], true)) {
+        throw new InvalidArgumentException('Neplatny typ pozvanky');
+    }
+
+    // Validace emailů
+    if (!is_array($emaily) || count($emaily) === 0) {
+        throw new InvalidArgumentException('Zadejte alespon jeden email');
+    }
+
+    if (count($emaily) > 30) {
+        throw new InvalidArgumentException('Maximalne 30 emailu najednou');
+    }
+
+    // Filtrovat a validovat emaily
+    $platneEmaily = [];
+    foreach ($emaily as $email) {
+        $email = trim($email);
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $platneEmaily[] = $email;
+        }
+    }
+
+    if (count($platneEmaily) === 0) {
+        throw new InvalidArgumentException('Zadny z emailu neni platny');
+    }
+
+    // Získat nebo vytvořit klíč
+    $pouzityKlic = '';
+    if ($klic === 'auto' || $klic === '') {
+        // Vytvořit nový klíč
+        $prefix = strtoupper(substr($typ, 0, 3));
+        $pouzityKlic = generateRegistrationKey($prefix);
+
+        $stmt = $pdo->prepare(
+            'INSERT INTO wgs_registration_keys (key_code, key_type, max_usage, usage_count, is_active, created_at)
+             VALUES (:key_code, :key_type, NULL, 0, 1, NOW())'
+        );
+        $stmt->execute([
+            ':key_code' => $pouzityKlic,
+            ':key_type' => $typ
+        ]);
+    } else {
+        // Ověřit že klíč existuje a je aktivní
+        $stmt = $pdo->prepare('SELECT key_code, key_type, is_active FROM wgs_registration_keys WHERE key_code = :klic');
+        $stmt->execute([':klic' => $klic]);
+        $klicData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$klicData) {
+            throw new InvalidArgumentException('Registracni klic nebyl nalezen');
+        }
+        if (!$klicData['is_active']) {
+            throw new InvalidArgumentException('Registracni klic neni aktivni');
+        }
+
+        $pouzityKlic = $klicData['key_code'];
+    }
+
+    // Připravit email šablonu
+    $appUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'www.wgs-service.cz');
+    $rok = date('Y');
+
+    // Načíst vlastní texty z databáze
+    $vlastniTexty = null;
+    try {
+        $stmtTexty = $pdo->prepare("
+            SELECT config_value FROM wgs_system_config
+            WHERE config_key = 'invitation_template_texts' LIMIT 1
+        ");
+        $stmtTexty->execute();
+        $resultTexty = $stmtTexty->fetch(PDO::FETCH_ASSOC);
+        if ($resultTexty && !empty($resultTexty['config_value'])) {
+            $vlastniTexty = json_decode($resultTexty['config_value'], true);
+        }
+    } catch (PDOException $e) {
+        error_log("Chyba nacitani textu pro pozvanku: " . $e->getMessage());
+    }
+
+    // Předmět emailu - z vlastních textů nebo výchozí
+    $roleNazev = $typ === 'technik' ? 'Servisni technik' : 'Prodejce';
+    if ($vlastniTexty && !empty($vlastniTexty['predmetEmailu'])) {
+        $predmet = str_replace('{ROLE}', $roleNazev, $vlastniTexty['predmetEmailu']);
+    } else {
+        $predmet = 'Pozvanka do systemu WGS - ' . $roleNazev;
+    }
+
+    $htmlSablona = vytvorPozvankovouSablonu($typ, $pouzityKlic, $appUrl, $rok, $vlastniTexty);
+
+    // Odeslat emaily
+    $odeslanoPocet = 0;
+    $chyby = [];
+
+    foreach ($platneEmaily as $email) {
+        try {
+            // Použít email queue
+            $stmt = $pdo->prepare("
+                INSERT INTO wgs_email_queue (to_email, subject, body, status, created_at, scheduled_at)
+                VALUES (:to_email, :subject, :body, 'pending', NOW(), NOW())
+            ");
+            $stmt->execute([
+                ':to_email' => $email,
+                ':subject' => $predmet,
+                ':body' => $htmlSablona
+            ]);
+            $odeslanoPocet++;
+        } catch (Exception $e) {
+            $chyby[] = $email . ': ' . $e->getMessage();
+            error_log("Chyba odeslani pozvanky na {$email}: " . $e->getMessage());
+        }
+    }
+
+    respondSuccess([
+        'sent_count' => $odeslanoPocet,
+        'key_code' => $pouzityKlic,
+        'errors' => $chyby
+    ]);
+}
+
+/**
+ * Načíst uložená nastavení šablony pozvánky
+ */
+function handleGetInvitationTemplate(PDO $pdo): void
+{
+    // Výchozí nastavení
+    $vychoziNastaveni = [
+        'datumSpusteni' => '1. ledna 2026',
+        'telefonPodpora' => '+420 725 965 826',
+        'emailPodpora' => 'info@wgs-service.cz',
+        'textSkoleni' => 'Radi vas proskolime po telefonu nebo osobne. Staci se nam ozvat a domluvime se.',
+        'dobaSkoleni' => '15-30 minut',
+        'nazevFirmy' => 'White Glove Service',
+        'popisFirmy' => 'Autorizovany servis Natuzzi pro CR a SR',
+        'webFirmy' => 'www.wgs-service.cz'
+    ];
+
+    try {
+        // Zkusit načíst z databáze
+        $stmt = $pdo->prepare("
+            SELECT config_value
+            FROM wgs_system_config
+            WHERE config_key = 'invitation_template_settings'
+            LIMIT 1
+        ");
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($result && !empty($result['config_value'])) {
+            $ulozeneNastaveni = json_decode($result['config_value'], true);
+            if (is_array($ulozeneNastaveni)) {
+                // Sloučit s výchozími (pro případ nových polí)
+                $nastaveni = array_merge($vychoziNastaveni, $ulozeneNastaveni);
+                respondSuccess(['settings' => $nastaveni, 'source' => 'database']);
+                return;
+            }
+        }
+    } catch (PDOException $e) {
+        error_log("Chyba načítání nastavení šablony: " . $e->getMessage());
+    }
+
+    // Vrátit výchozí nastavení
+    respondSuccess(['settings' => $vychoziNastaveni, 'source' => 'default']);
+}
+
+/**
+ * Uložit nastavení šablony pozvánky
+ */
+function handleSaveInvitationTemplate(PDO $pdo, array $payload): void
+{
+    $nastaveni = $payload['settings'] ?? null;
+
+    if (!is_array($nastaveni)) {
+        respondError('Chybí nastavení šablony.');
+        return;
+    }
+
+    // Validace povolených polí
+    $povolenaPole = [
+        'datumSpusteni',
+        'telefonPodpora',
+        'emailPodpora',
+        'textSkoleni',
+        'dobaSkoleni',
+        'nazevFirmy',
+        'popisFirmy',
+        'webFirmy'
+    ];
+
+    $filtrovanaNastaveni = [];
+    foreach ($povolenaPole as $pole) {
+        if (isset($nastaveni[$pole])) {
+            $filtrovanaNastaveni[$pole] = trim((string)$nastaveni[$pole]);
+        }
+    }
+
+    $jsonNastaveni = json_encode($filtrovanaNastaveni, JSON_UNESCAPED_UNICODE);
+
+    try {
+        // Zkusit UPDATE, pokud neexistuje, tak INSERT
+        $stmt = $pdo->prepare("
+            INSERT INTO wgs_system_config (config_key, config_value, config_type, updated_at)
+            VALUES ('invitation_template_settings', ?, 'json', NOW())
+            ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), updated_at = NOW()
+        ");
+        $stmt->execute([$jsonNastaveni]);
+
+        respondSuccess(['message' => 'Nastavení šablony uloženo.', 'settings' => $filtrovanaNastaveni]);
+
+    } catch (PDOException $e) {
+        error_log("Chyba ukládání nastavení šablony: " . $e->getMessage());
+        respondError('Chyba při ukládání nastavení.');
+    }
+}
+
+/**
+ * Vytvořit HTML šablonu pro pozvánku - SUPER JEDNODUCHÉ pro netechnické uživatele
+ * S DETAILNÍMI NÁVODY PRO KAŽDOU ROLI
+ *
+ * @param string $typ Typ role (technik/prodejce)
+ * @param string $klic Registrační klíč
+ * @param string $appUrl URL aplikace
+ * @param string $rok Aktuální rok
+ * @param array|null $vlastniTexty Vlastní texty z databáze
+ * @return string HTML šablona emailu
+ */
+function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, string $rok, ?array $vlastniTexty = null): string
+{
+    $roleNazev = $typ === 'technik' ? 'servisni technik' : 'prodejce';
+    $roleVelke = $typ === 'technik' ? 'TECHNIK' : 'PRODEJCE';
+
+    // Helper pro převod **text** na <strong>text</strong>
+    $formatujText = function($text) {
+        return preg_replace('/\*\*([^*]+)\*\*/', '<strong>$1</strong>', htmlspecialchars($text));
+    };
+
+    // Uvítací text - z vlastních textů nebo výchozí
+    $uvitaciText = 'Byli jste pozvani jako <strong>' . $roleNazev . '</strong> do systemu White Glove Service pro spravu servisnich zakazek Natuzzi.';
+    if ($vlastniTexty && !empty($vlastniTexty['uvitaciText'])) {
+        $uvitaciText = str_replace('{ROLE}', $roleNazev, $formatujText($vlastniTexty['uvitaciText']));
+    }
+
+    // Specifické funkce a návody podle role
+    $funkce = '';
+    $navodHlavni = '';
+
+    if ($typ === 'technik') {
+        // ============================================
+        // NÁVOD PRO TECHNIKY
+        // ============================================
+
+        // Seznam funkcí - z vlastních textů nebo výchozí
+        $funkceSeznam = '';
+        if ($vlastniTexty && !empty($vlastniTexty['funkceTechnik'])) {
+            $radky = explode("\n", $vlastniTexty['funkceTechnik']);
+            foreach ($radky as $radek) {
+                $radek = trim($radek);
+                if (!empty($radek)) {
+                    $funkceSeznam .= '<li>' . $formatujText($radek) . '</li>';
+                }
+            }
+        } else {
+            $funkceSeznam = '
+                    <li>Videt sve <strong>prirazene zakazky</strong> v prehlednem seznamu</li>
+                    <li>Menit <strong>stav zakazky</strong> (Ceka / Domluvena / Hotovo)</li>
+                    <li>Vyplnovat <strong>servisni protokoly</strong> s automatickym prekladem</li>
+                    <li>Nahravat <strong>fotky pred a po oprave</strong></li>
+                    <li>Videt <strong>adresu zakaznika na mape</strong> s navigaci</li>
+                    <li>Nechat zakaznika <strong>elektronicky podepsat</strong> protokol</li>
+                    <li>Exportovat protokol do <strong>PDF</strong> a poslat zakaznikovi</li>
+            ';
+        }
+
+        $funkce = '
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #333; margin-top: 0; font-size: 16px;">Co budete moct delat v systemu:</h3>
+                <ul style="color: #555; line-height: 2; margin: 0; padding-left: 20px;">
+                    ' . $funkceSeznam . '
+                </ul>
+            </div>
+        ';
+
+        // DETAILNÍ NÁVOD PRO TECHNIKY
+        $navodHlavni = '
+            <!-- NÁVOD: PŘEHLED ZAKÁZEK -->
+            <div style="border: 2px solid #333; border-radius: 8px; padding: 25px; margin: 30px 0;">
+                <h3 style="color: #333; margin: 0 0 20px; font-size: 18px; border-bottom: 2px solid #333; padding-bottom: 10px;">
+                    1. PREHLED VASICH ZAKAZEK (seznam.php)
+                </h3>
+
+                <p style="color: #555; font-size: 14px; margin: 0 0 20px;">
+                    Po prihlaseni uvidite <strong>seznam vsech vasich prirazenych zakazek</strong>. Kazda zakazka je zobrazena jako karta.
+                </p>
+
+                <h4 style="color: #333; margin: 20px 0 10px; font-size: 15px;">Co vidite na karte zakazky:</h4>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Cislo zakazky</strong> - unikatni identifikator (napr. WGS-2025-001)</li>
+                        <li><strong>Barevny indikator stavu</strong> - zluta = ceka, modra = domluvena, zelena = hotovo</li>
+                        <li><strong>Jmeno zakaznika</strong> - komu pojedete</li>
+                        <li><strong>Adresa</strong> - kam pojedete</li>
+                        <li><strong>Pocet poznamek</strong> - pokud jsou nejake poznamky k zakazce</li>
+                    </ul>
+                </div>
+
+                <h4 style="color: #333; margin: 20px 0 10px; font-size: 15px;">Filtrovani zakazek:</h4>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Vsechny</strong> - zobrazit vse</li>
+                        <li><strong>Cekajici</strong> - zakazky, ktere jeste nemaji domluveny termin</li>
+                        <li><strong>V reseni</strong> - zakazky s domluvenym terminem</li>
+                        <li><strong>Vyrizene</strong> - dokoncene zakazky</li>
+                    </ul>
+                </div>
+
+                <h4 style="color: #333; margin: 20px 0 10px; font-size: 15px;">Co muzete delat po kliknuti na kartu:</h4>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px;">
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Zobrazit detail</strong> - vsechny informace o zakazce</li>
+                        <li><strong>Vybrat termin</strong> - kalendar pro domluveni navstevy</li>
+                        <li><strong>Otevrit protokol</strong> - vyplnit servisni protokol</li>
+                        <li><strong>Kontaktovat zakaznika</strong> - volat nebo poslat SMS/email</li>
+                        <li><strong>Zobrazit na mape</strong> - videt adresu a navigovat</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- NÁVOD: SERVISNÍ PROTOKOL -->
+            <div style="border: 2px solid #333; border-radius: 8px; padding: 25px; margin: 30px 0;">
+                <h3 style="color: #333; margin: 0 0 20px; font-size: 18px; border-bottom: 2px solid #333; padding-bottom: 10px;">
+                    2. JAK VYPLNIT SERVISNI PROTOKOL (protokol.php)
+                </h3>
+
+                <p style="color: #555; font-size: 14px; margin: 0 0 20px;">
+                    Protokol se <strong>automaticky predvyplni</strong> udaji ze zakazky. Vy doplnite pouze to, co jste zjistili a opravili.
+                </p>
+
+                <!-- HLAVIČKA PROTOKOLU -->
+                <div style="background: #e8f4fd; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">HLAVICKA (predvyplneno automaticky):</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Cislo objednavky</strong> - interni WGS cislo</li>
+                        <li><strong>Cislo reklamace</strong> - cislo od prodejce</li>
+                        <li><strong>Zakaznik</strong> - jmeno, telefon, email, adresa</li>
+                        <li><strong>Zadavatel</strong> - kdo zakazku vytvoril (prodejce)</li>
+                        <li><strong>Model</strong> - jaky nabytek</li>
+                        <li><strong>Technik</strong> - vyberte sve jmeno z rozbalovaci nabidky</li>
+                    </ul>
+                </div>
+
+                <!-- POLE K VYPLNĚNÍ -->
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">CO VYPLNUJETE VY:</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Zakaznik reklamuje</strong> - predvyplneno, muzete upravit</li>
+                        <li><strong>Problem zjisteny technikem</strong> - CO jste skutecne nasli</li>
+                        <li><strong>Navrh opravy</strong> - CO jste udelali nebo doporucujete</li>
+                    </ul>
+                    <p style="color: #888; margin: 10px 0 0; font-size: 12px;">
+                        TIP: Text se automaticky prelozi do anglictiny pro Natuzzi.
+                    </p>
+                </div>
+
+                <!-- ÚČTOVÁNÍ -->
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">UCTOVANI A STAV:</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Uctovano za servis</strong> - kliknete a otevre se kalkulacka ceny</li>
+                        <li><strong>Plati zakaznik?</strong> - ANO/NE (u reklamace obvykle NE)</li>
+                        <li><strong>Datum podpisu</strong> - dnesni datum</li>
+                        <li><strong>Vyreseno?</strong> - ANO pokud je vse opraveno</li>
+                        <li><strong>Nutne vyjadreni prodejce</strong> - pokud potrebujete schvaleni</li>
+                        <li><strong>Poskozeni technikem?</strong> - pokud jste neco poskodili</li>
+                    </ul>
+                </div>
+
+                <!-- PODPIS -->
+                <div style="background: #fff3cd; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">PODPIS ZAKAZNIKA:</p>
+                    <ol style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li>Kliknete na tlacitko <strong>"Podepsat protokol"</strong></li>
+                        <li>Otevre se souhrn pro zakaznika - ukazete mu, co jste udelali</li>
+                        <li>Zakaznik se <strong>podepise prstem</strong> na displeji (nebo mysi na PC)</li>
+                        <li>Kliknete na <strong>"Potvrdit podpis"</strong></li>
+                    </ol>
+                </div>
+
+                <!-- EXPORT -->
+                <div style="background: #d4edda; padding: 15px; border-radius: 6px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">EXPORT A ODESLANI:</p>
+                    <ul style="color: #155724; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Pridat fotky</strong> - nahrajte fotky pred/po oprave</li>
+                        <li><strong>Export do PDF</strong> - stazeni protokolu jako PDF</li>
+                        <li><strong>Odeslat zakaznikovi</strong> - automaticky posle email s protokolem</li>
+                    </ul>
+                </div>
+            </div>
+        ';
+
+    } else {
+        // ============================================
+        // NÁVOD PRO PRODEJCE
+        // ============================================
+
+        // Seznam funkcí - z vlastních textů nebo výchozí
+        $funkceSeznam = '';
+        if ($vlastniTexty && !empty($vlastniTexty['funkceProdejce'])) {
+            $radky = explode("\n", $vlastniTexty['funkceProdejce']);
+            foreach ($radky as $radek) {
+                $radek = trim($radek);
+                if (!empty($radek)) {
+                    $funkceSeznam .= '<li>' . $formatujText($radek) . '</li>';
+                }
+            }
+        } else {
+            $funkceSeznam = '
+                    <li>Zadavat <strong>nove reklamace</strong> pro vase zakazniky</li>
+                    <li>Sledovat <strong>stav vasich zakazek</strong> v realnem case</li>
+                    <li>Videt <strong>historii vsech reklamaci</strong> ktere jste zadali</li>
+                    <li>Nahravat <strong>dokumenty a fotky</strong> k zakazkam</li>
+                    <li>Pridavat <strong>poznamky</strong> pro techniky</li>
+                    <li>Videt kdy technik <strong>navstivi zakaznika</strong></li>
+            ';
+        }
+
+        $funkce = '
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #333; margin-top: 0; font-size: 16px;">Co budete moct delat v systemu:</h3>
+                <ul style="color: #555; line-height: 2; margin: 0; padding-left: 20px;">
+                    ' . $funkceSeznam . '
+                </ul>
+            </div>
+        ';
+
+        // DETAILNÍ NÁVOD PRO PRODEJCE
+        $navodHlavni = '
+            <!-- NÁVOD: OBJEDNAT SERVIS -->
+            <div style="border: 2px solid #333; border-radius: 8px; padding: 25px; margin: 30px 0;">
+                <h3 style="color: #333; margin: 0 0 20px; font-size: 18px; border-bottom: 2px solid #333; padding-bottom: 10px;">
+                    1. JAK OBJEDNAT SERVIS PRO ZAKAZNIKA
+                </h3>
+
+                <p style="color: #555; font-size: 14px; margin: 0 0 20px;">
+                    Po prihlaseni kliknete na <strong>"Objednat servis"</strong> v menu. Otevre se formular, ktery ma 5 casti:
+                </p>
+
+                <!-- ČÁST 1 -->
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">1. ZAKLADNI UDAJE</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Cislo objednavky/reklamace</strong> - vase interni cislo z prodejny</li>
+                        <li><strong>Fakturace</strong> - vyberte CZ nebo SK podle zeme</li>
+                        <li><strong>Datum prodeje</strong> - kdy zakaznik nabytek koupil (kvuli zaruce)</li>
+                        <li><strong>Datum reklamace</strong> - dnesni datum</li>
+                    </ul>
+                    <p style="color: #888; margin: 10px 0 0; font-size: 12px;">
+                        TIP: System automaticky spocita, jestli je nabytek v zaruce (2 roky).
+                    </p>
+                </div>
+
+                <!-- ČÁST 2 -->
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">2. KONTAKTNI UDAJE ZAKAZNIKA</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Jmeno a prijmeni</strong> - cele jmeno zakaznika</li>
+                        <li><strong>E-mail</strong> - zakaznik dostane potvrzeni emailem</li>
+                        <li><strong>Telefon</strong> - vyberte predvolbu (+420 CZ, +421 SK) a zadejte cislo</li>
+                    </ul>
+                </div>
+
+                <!-- ČÁST 3 -->
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">3. ADRESA ZAKAZNIKA (kde se bude opravovat)</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Ulice a cislo popisne</strong> - napr. "Vaclavske namesti 1"</li>
+                        <li><strong>Mesto</strong> - napr. "Praha"</li>
+                        <li><strong>PSC</strong> - napr. "110 00"</li>
+                    </ul>
+                    <p style="color: #888; margin: 10px 0 0; font-size: 12px;">
+                        TIP: Po zadani adresy se zobrazi mapa - zkontrolujte, ze je spravna.
+                    </p>
+                </div>
+
+                <!-- ČÁST 4 -->
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">4. INFORMACE O PRODUKTU</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Model</strong> - nazev modelu (napr. "Natuzzi Editions B845")</li>
+                        <li><strong>Provedeni</strong> - vyberte: Latka / Kuze / Kombinace</li>
+                        <li><strong>Oznaceni barvy</strong> - kod barvy (napr. "BF12")</li>
+                        <li><strong>Doplnujici informace</strong> - cokoli dalsiho (pristup k domu apod.)</li>
+                    </ul>
+                </div>
+
+                <!-- ČÁST 5 -->
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">5. POPIS PROBLEMU A FOTKY</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Popis problemu</strong> - CO je spatne? Popisujte podrobne!</li>
+                        <li><strong>Fotografie</strong> - nahrajte az 10 fotek zavady (hodne pomaha technikovi)</li>
+                    </ul>
+                </div>
+
+                <!-- ODESLÁNÍ -->
+                <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 6px; padding: 15px;">
+                    <p style="color: #155724; margin: 0; font-size: 13px;">
+                        <strong>Po odeslani:</strong> Zakaznik dostane automaticky email s potvrzenim. Vy uvidite zakazku v sekci "Moje reklamace" a muzete sledovat jeji stav.
+                    </p>
+                </div>
+            </div>
+
+            <!-- NÁVOD: MOJE REKLAMACE -->
+            <div style="border: 2px solid #333; border-radius: 8px; padding: 25px; margin: 30px 0;">
+                <h3 style="color: #333; margin: 0 0 20px; font-size: 18px; border-bottom: 2px solid #333; padding-bottom: 10px;">
+                    2. JAK SLEDOVAT VASE ZAKAZKY (Moje reklamace)
+                </h3>
+
+                <p style="color: #555; font-size: 14px; margin: 0 0 20px;">
+                    V menu kliknete na <strong>"Moje reklamace"</strong> - uvidite seznam vsech zakazek, ktere jste zadali.
+                </p>
+
+                <h4 style="color: #333; margin: 20px 0 10px; font-size: 15px;">Co vidite na karte zakazky:</h4>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Cislo zakazky</strong> - unikatni identifikator (napr. WGS-2025-001)</li>
+                        <li><strong>Barevny indikator</strong>:
+                            <ul style="margin: 5px 0; padding-left: 15px;">
+                                <li style="color: #f5a623;">ZLUTA = Ceka na zpracovani</li>
+                                <li style="color: #2196f3;">MODRA = Termin domluven</li>
+                                <li style="color: #4caf50;">ZELENA = Hotovo</li>
+                            </ul>
+                        </li>
+                        <li><strong>Jmeno zakaznika</strong></li>
+                        <li><strong>Cislo poznamek</strong> - kolik je poznamek k zakazce</li>
+                    </ul>
+                </div>
+
+                <h4 style="color: #333; margin: 20px 0 10px; font-size: 15px;">Filtrovani zakazek (tlacitka nahoře):</h4>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Vsechny</strong> - zobrazit vsechny zakazky</li>
+                        <li><strong>Cekajici</strong> - zakazky bez domluveneho terminu</li>
+                        <li><strong>V reseni</strong> - zakazky s domluvenym terminem</li>
+                        <li><strong>Vyrizene</strong> - dokoncene zakazky</li>
+                    </ul>
+                </div>
+
+                <h4 style="color: #333; margin: 20px 0 10px; font-size: 15px;">Vyhledavani:</h4>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #555; margin: 0; font-size: 13px;">
+                        Pouzijte <strong>vyhledavaci pole nahoře</strong> - muzete hledat podle jmena zakaznika, cisla zakazky, adresy...
+                    </p>
+                </div>
+
+                <h4 style="color: #333; margin: 20px 0 10px; font-size: 15px;">Co vidite po kliknuti na kartu (detail zakazky):</h4>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px;">
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Vsechny udaje o zakaznikovi</strong> - jmeno, adresa, telefon, email</li>
+                        <li><strong>Informace o produktu</strong> - model, barva, provedeni</li>
+                        <li><strong>Popis problemu</strong> - co zakaznik reklamuje</li>
+                        <li><strong>Stav zakazky</strong> - v jake je fazi</li>
+                        <li><strong>Termin navstevy</strong> - kdy prijede technik</li>
+                        <li><strong>Fotografie</strong> - fotky nahrane k zakazce</li>
+                        <li><strong>Poznamky</strong> - komunikace s techniky</li>
+                        <li><strong>PDF protokolu</strong> - po dokonceni muzete stahnout</li>
+                    </ul>
+                </div>
+            </div>
+        ';
+    }
+
+    return '
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background: #f0f0f0;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background: #f0f0f0; padding: 20px;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+
+                    <!-- HLAVICKA -->
+                    <tr>
+                        <td style="background: #1a1a1a; padding: 30px; text-align: center;">
+                            <h1 style="color: #fff; margin: 0; font-size: 28px; font-weight: bold;">WGS</h1>
+                            <p style="color: #888; margin: 10px 0 0; font-size: 14px;">White Glove Service</p>
+                        </td>
+                    </tr>
+
+                    <!-- OBSAH -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+
+                            <!-- UVITANI -->
+                            <h2 style="color: #333; margin: 0 0 20px; font-size: 22px;">Dobry den!</h2>
+
+                            <p style="color: #555; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+                                ' . $uvitaciText . '
+                            </p>
+
+                            <!-- DATUM SPUSTENI -->
+                            <div style="background: #e8f4fd; border: 2px solid #333; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+                                <p style="color: #333; margin: 0; font-size: 16px;">
+                                    <strong>System bude spusten od 1. ledna 2026</strong>
+                                </p>
+                                <p style="color: #555; margin: 10px 0 0; font-size: 14px;">
+                                    Zaregistrujte se prosim predem, abyste byli pripraveni.
+                                </p>
+                            </div>
+
+                            <!-- REGISTRACNI KLIC - VELKY A ZRETELNY -->
+                            <div style="background: #1a1a1a; padding: 25px; border-radius: 8px; text-align: center; margin: 30px 0;">
+                                <p style="color: #888; margin: 0 0 10px; font-size: 14px;">VAS REGISTRACNI KLIC:</p>
+                                <div style="color: #fff; font-size: 28px; font-weight: bold; letter-spacing: 3px; font-family: monospace;">
+                                    ' . htmlspecialchars($klic) . '
+                                </div>
+                                <p style="color: #666; margin: 15px 0 0; font-size: 12px;">Zkopirujte tento klic - budete ho potrebovat pri registraci</p>
+                            </div>
+
+                            <!-- NAVOD KROK ZA KROKEM -->
+                            <h3 style="color: #333; margin: 30px 0 20px; font-size: 18px; border-bottom: 2px solid #333; padding-bottom: 10px;">
+                                JAK SE ZAREGISTROVAT (3 jednoduche kroky)
+                            </h3>
+
+                            <!-- KROK 1 -->
+                            <div style="display: flex; margin-bottom: 25px; align-items: flex-start;">
+                                <div style="background: #1a1a1a; color: #fff; width: 35px; height: 35px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; flex-shrink: 0;">1</div>
+                                <div style="margin-left: 15px; flex: 1;">
+                                    <p style="color: #333; margin: 0 0 5px; font-weight: bold; font-size: 16px;">Otevrete stranku registrace</p>
+                                    <p style="color: #555; margin: 0 0 10px; font-size: 14px;">Kliknete na tlacitko nize nebo zkopirujte odkaz do prohlizece:</p>
+                                    <a href="' . $appUrl . '/registration.php" style="display: inline-block; background: #333; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">OTEVRIT REGISTRACI</a>
+                                    <p style="color: #888; margin: 10px 0 0; font-size: 12px; word-break: break-all;">' . $appUrl . '/registration.php</p>
+                                </div>
+                            </div>
+
+                            <!-- KROK 2 -->
+                            <div style="display: flex; margin-bottom: 25px; align-items: flex-start;">
+                                <div style="background: #1a1a1a; color: #fff; width: 35px; height: 35px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; flex-shrink: 0;">2</div>
+                                <div style="margin-left: 15px; flex: 1;">
+                                    <p style="color: #333; margin: 0 0 5px; font-weight: bold; font-size: 16px;">Vyplnte formular</p>
+                                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.8;">
+                                        <li><strong>Registracni klic</strong> - vlozte klic z tohoto emailu (viz vyse)</li>
+                                        <li><strong>Jmeno a prijmeni</strong> - vase cele jmeno</li>
+                                        <li><strong>Email</strong> - vase emailova adresa</li>
+                                        <li><strong>Telefon</strong> - vase telefonni cislo</li>
+                                        <li><strong>Heslo</strong> - vymyslete si heslo (minimalne 12 znaku)</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- KROK 3 -->
+                            <div style="display: flex; margin-bottom: 25px; align-items: flex-start;">
+                                <div style="background: #1a1a1a; color: #fff; width: 35px; height: 35px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; flex-shrink: 0;">3</div>
+                                <div style="margin-left: 15px; flex: 1;">
+                                    <p style="color: #333; margin: 0 0 5px; font-weight: bold; font-size: 16px;">Prihlaste se</p>
+                                    <p style="color: #555; margin: 0 0 10px; font-size: 14px;">Po uspesne registraci se muzete prihlasit:</p>
+                                    <a href="' . $appUrl . '/login.php" style="display: inline-block; background: #666; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-size: 14px;">PRIHLASIT SE</a>
+                                </div>
+                            </div>
+
+                            <!-- FUNKCE PODLE ROLE -->
+                            ' . $funkce . '
+
+                            <!-- DETAILNI NAVOD PODLE ROLE -->
+                            ' . $navodHlavni . '
+
+                            <!-- DULEZITE UPOZORNENI -->
+                            <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin: 25px 0;">
+                                <p style="color: #856404; margin: 0; font-size: 14px;">
+                                    <strong>Dulezite:</strong> Registracni klic je urcen pouze pro vas. Prosim, nesdílejte ho s nikym dalsim.
+                                </p>
+                            </div>
+
+                            <!-- SKOLENI A PODPORA -->
+                            <div style="background: #f5f5f5; border-radius: 8px; padding: 25px; margin: 25px 0;">
+                                <h3 style="color: #333; margin: 0 0 15px; font-size: 16px; text-align: center;">Potrebujete vysvetlit, jak system funguje?</h3>
+
+                                <p style="color: #555; font-size: 14px; text-align: center; margin: 0 0 20px; line-height: 1.6;">
+                                    Zadny problem! Radi vas <strong>proskolime po telefonu</strong> nebo <strong>osobne</strong>.<br>
+                                    Staci se nam ozvat a domluvime se.
+                                </p>
+
+                                <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                                    <div style="text-align: center;">
+                                        <p style="color: #333; margin: 0 0 5px; font-weight: bold; font-size: 14px;">Telefon</p>
+                                        <a href="tel:+420777123456" style="color: #333; font-size: 16px; text-decoration: none;">+420 777 123 456</a>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <p style="color: #333; margin: 0 0 5px; font-weight: bold; font-size: 14px;">Email</p>
+                                        <a href="mailto:info@wgs-service.cz" style="color: #333; font-size: 16px; text-decoration: none;">info@wgs-service.cz</a>
+                                    </div>
+                                </div>
+
+                                <p style="color: #888; font-size: 12px; text-align: center; margin: 20px 0 0;">
+                                    Skoleni je zdarma a trva priblizne 15-30 minut.
+                                </p>
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <!-- PATICKA -->
+                    <tr>
+                        <td style="background: #1a1a1a; padding: 30px; text-align: center;">
+                            <p style="color: #fff; margin: 0 0 5px; font-size: 16px; font-weight: bold;">White Glove Service</p>
+                            <p style="color: #888; margin: 0 0 15px; font-size: 13px;">Autorizovany servis Natuzzi pro CR a SR</p>
+                            <p style="color: #666; margin: 0; font-size: 12px;">
+                                <a href="' . $appUrl . '" style="color: #888; text-decoration: none;">www.wgs-service.cz</a>
+                            </p>
+                            <p style="color: #555; margin: 20px 0 0; font-size: 11px;">&copy; ' . $rok . ' WGS Service. Vsechna prava vyhrazena.</p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+    ';
+}
+
+/**
+ * Načíst texty šablony pozvánky z databáze
+ */
+function handleGetInvitationTexts(PDO $pdo): void
+{
+    // Výchozí texty
+    $vychoziTexty = [
+        'predmetEmailu' => 'Pozvanka do systemu WGS - {ROLE}',
+        'uvitaciText' => 'Byli jste pozvani jako **{ROLE}** do systemu White Glove Service pro spravu servisnich zakazek Natuzzi.',
+        'funkceProdejce' => "Zadavat **nove reklamace** pro vase zakazniky\nSledovat **stav vasich zakazek** v realnem case\nVidet **historii vsech reklamaci** ktere jste zadali\nNahravat **dokumenty a fotky** k zakazkam\nPridavat **poznamky** pro techniky\nVidet kdy technik **navstivi zakaznika**",
+        'funkceTechnik' => "Videt sve **prirazene zakazky** v prehlednem seznamu\nMenit **stav zakazky** (Ceka / Domluvena / Hotovo)\nVyplnovat **servisni protokoly** s automatickym prekladem\nNahravat **fotky pred a po oprave**\nVidet **adresu zakaznika na mape** s navigaci\nNechat zakaznika **elektronicky podepsat** protokol\nExportovat protokol do **PDF** a poslat zakaznikovi",
+        'navodProdejce' => "# JAK OBJEDNAT SERVIS PRO ZAKAZNIKA\n\nPo prihlaseni kliknete na **\"Objednat servis\"** v menu. Formular ma 5 casti:\n\n## 1. ZAKLADNI UDAJE\n- Cislo objednavky/reklamace - vase interni cislo\n- Fakturace - CZ nebo SK\n- Datum prodeje a reklamace\n\n## 2. KONTAKTNI UDAJE\n- Jmeno a prijmeni zakaznika\n- Email a telefon\n\n## 3. ADRESA\n- Ulice, mesto, PSC\n- Po zadani se zobrazi mapa\n\n## 4. PRODUKT\n- Model, provedeni, barva\n\n## 5. PROBLEM\n- Popis zavady + fotky",
+        'navodTechnik' => "# PREHLED VASICH ZAKAZEK\n\nPo prihlaseni uvidite seznam vsech prirazenych zakazek.\n\n## Co vidite na karte:\n- Cislo zakazky (napr. WGS-2025-001)\n- Barevny stav (zluta/modra/zelena)\n- Jmeno a adresa zakaznika\n\n## Filtrovani:\n- Vsechny / Cekajici / V reseni / Vyrizene\n\n# SERVISNI PROTOKOL\n\nProtokol se predvyplni automaticky. Vy doplnite:\n- Problem zjisteny technikem\n- Navrh opravy\n- Uctovani\n\nPo dokonceni nechte zakaznika podepsat a exportujte PDF."
+    ];
+
+    try {
+        // Zkusit načíst z databáze
+        $stmt = $pdo->prepare("
+            SELECT config_value
+            FROM wgs_system_config
+            WHERE config_key = 'invitation_template_texts'
+            LIMIT 1
+        ");
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($result && !empty($result['config_value'])) {
+            $ulozeneTexty = json_decode($result['config_value'], true);
+            if (is_array($ulozeneTexty)) {
+                // Sloučit s výchozími (pro případ nových polí)
+                $texty = array_merge($vychoziTexty, $ulozeneTexty);
+                respondSuccess(['texts' => $texty, 'source' => 'database']);
+                return;
+            }
+        }
+    } catch (PDOException $e) {
+        error_log("Chyba nacitani textu sablony: " . $e->getMessage());
+    }
+
+    // Vrátit výchozí texty
+    respondSuccess(['texts' => $vychoziTexty, 'source' => 'default']);
+}
+
+/**
+ * Uložit texty šablony pozvánky
+ */
+function handleSaveInvitationTexts(PDO $pdo, array $payload): void
+{
+    $texty = $payload['texts'] ?? null;
+
+    if (!is_array($texty)) {
+        respondError('Chybi texty sablony.');
+        return;
+    }
+
+    // Validace povolených polí
+    $povolenaPole = [
+        'predmetEmailu',
+        'uvitaciText',
+        'funkceProdejce',
+        'funkceTechnik',
+        'navodProdejce',
+        'navodTechnik'
+    ];
+
+    $filtrovanetexty = [];
+    foreach ($povolenaPole as $pole) {
+        if (isset($texty[$pole])) {
+            $filtrovanetexty[$pole] = trim((string)$texty[$pole]);
+        }
+    }
+
+    $jsonTexty = json_encode($filtrovanetexty, JSON_UNESCAPED_UNICODE);
+
+    try {
+        // Upsert - INSERT nebo UPDATE
+        $stmt = $pdo->prepare("
+            INSERT INTO wgs_system_config (config_key, config_value, config_type, updated_at)
+            VALUES ('invitation_template_texts', ?, 'json', NOW())
+            ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), updated_at = NOW()
+        ");
+        $stmt->execute([$jsonTexty]);
+
+        respondSuccess(['message' => 'Texty sablony ulozeny.', 'texts' => $filtrovanetexty]);
+
+    } catch (PDOException $e) {
+        error_log("Chyba ukladani textu sablony: " . $e->getMessage());
+        respondError('Chyba pri ukladani textu.');
+    }
 }
 

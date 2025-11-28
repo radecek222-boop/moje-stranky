@@ -8,76 +8,39 @@ require_once __DIR__ . '/init.php';
 require_once __DIR__ . '/includes/csrf_helper.php';
 require_once __DIR__ . '/includes/seo_meta.php';
 
-// Získat aktuality z databáze
+// Získat VŠECHNY aktuality z databáze
 try {
     $pdo = getDbConnection();
 
-    // Získat datum které má uživatel zobrazit (default = nejnovější)
-    $vybraneDatum = $_GET['datum'] ?? null;
+    // Jazyk
+    $jazyk = $_GET['lang'] ?? 'cz';
+    $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
-    if ($vybraneDatum) {
-        // Pokud je vybrané konkrétní datum, zobrazit články z toho dne
-        $stmt = $pdo->prepare("
-            SELECT * FROM wgs_natuzzi_aktuality
-            WHERE datum = :datum
-            LIMIT 1
-        ");
-        $stmt->execute(['datum' => $vybraneDatum]);
-        $hlavniAktualita = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$hlavniAktualita) {
-            // Pokud datum neexistuje, zobrazit nejnovější
-            $stmt = $pdo->query("
-                SELECT * FROM wgs_natuzzi_aktuality
-                ORDER BY datum DESC
-                LIMIT 1
-            ");
-            $hlavniAktualita = $stmt->fetch(PDO::FETCH_ASSOC);
-        }
-    } else {
-        // Zobrazit nejnovější aktualitu
-        $stmt = $pdo->query("
-            SELECT * FROM wgs_natuzzi_aktuality
-            ORDER BY datum DESC
-            LIMIT 1
-        ");
-        $hlavniAktualita = $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    // Pokud existuje hlavní aktualita, načíst její obsah
-    if ($hlavniAktualita) {
-        $datumAktuality = $hlavniAktualita['datum'];
-
-        // Rozdělit obsah na jednotlivé články podle ## nadpisů
-        $jazyk = $_GET['lang'] ?? 'cz';
-        $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
-
-        $obsahSloupec = 'obsah_' . $jazyk;
-        $celyObsah = $hlavniAktualita[$obsahSloupec] ?? '';
-
-        // Parse článků z markdown obsahu
-        $articles = parseClankyzObsahu($celyObsah, $hlavniAktualita['id'], $jazyk);
-
-        // Články se nemíchají při každém načtení - pořadí je dané obsahem z databáze
-        // Inteligentní rozdělení do sloupců podle délky se provede níže při zobrazování
-    } else {
-        $articles = [];
-        $datumAktuality = null;
-    }
-
-    // Získat seznam posledních 30 aktualit pro archiv
-    $stmtArchiv = $pdo->query("
-        SELECT datum, svatek_cz
-        FROM wgs_natuzzi_aktuality
+    // Načíst VŠECHNY aktuality (seřazené od nejnovějších)
+    $stmt = $pdo->query("
+        SELECT * FROM wgs_natuzzi_aktuality
         ORDER BY datum DESC
-        LIMIT 30
     ");
-    $archiv = $stmtArchiv->fetchAll(PDO::FETCH_ASSOC);
+    $vsechnyAktuality = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $articles = [];
+    $obsahSloupec = 'obsah_' . $jazyk;
+
+    // Pro každou aktualitu parsovat články
+    foreach ($vsechnyAktuality as $aktualita) {
+        $celyObsah = $aktualita[$obsahSloupec] ?? '';
+        if (!empty($celyObsah)) {
+            $clankyzAktuality = parseClankyzObsahu($celyObsah, $aktualita['id'], $jazyk);
+            $articles = array_merge($articles, $clankyzAktuality);
+        }
+    }
+
+    // Datum nejnovější aktuality pro zobrazení
+    $datumAktuality = !empty($vsechnyAktuality) ? $vsechnyAktuality[0]['datum'] : null;
 
 } catch (Exception $e) {
     error_log("Chyba při načítání aktualit: " . $e->getMessage());
     $articles = [];
-    $archiv = [];
     $datumAktuality = null;
 }
 
@@ -113,9 +76,6 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
     return $articles;
 }
-
-$jazyk = $_GET['lang'] ?? 'cz';
-$jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $jazyk; ?>">
@@ -428,47 +388,6 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       transform: scale(1.05);
     }
 
-    .archiv-section {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      margin-top: 40px;
-    }
-
-    .archiv-section h3 {
-      color: #1a1a1a;
-      font-size: 1.5em;
-      margin: 0 0 20px 0;
-      font-weight: 600;
-    }
-
-    .archiv-link {
-      display: block;
-      padding: 12px 15px;
-      margin: 8px 0;
-      background: #f5f5f7;
-      border-radius: 8px;
-      text-decoration: none;
-      color: #333;
-      transition: all 0.3s;
-      border-left: 4px solid transparent;
-    }
-
-    .archiv-link:hover {
-      background: #333333;
-      color: white;
-      border-left-color: #1a1a1a;
-      transform: translateX(5px);
-    }
-
-    .archiv-link.active {
-      background: #1a1a1a;
-      color: white;
-      border-left-color: #000000;
-      font-weight: 600;
-    }
-
     @media (max-width: 768px) {
       .hero {
         padding: 60px 20px;
@@ -537,31 +456,18 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       <!-- GRID SE 2 SLOUPCI VŠECH ČLÁNKŮ S INTELIGENTNÍM VYVÁŽENÍM -->
       <div class="clanky-grid">
         <?php
-        // INTELIGENTNÍ ROZDĚLENÍ ČLÁNKŮ podle délky textu
-        // Spočítat délku každého článku
-        foreach ($articles as $key => $article) {
-            $articles[$key]['delka'] = strlen($article['obsah']);
-        }
+        // NÁHODNÉ POŘADÍ ČLÁNKŮ pro SEO (stránka vypadá aktivně)
+        shuffle($articles);
 
-        // Seřadit podle délky (sestupně) pro lepší rozdělení
-        usort($articles, function($a, $b) {
-            return $b['delka'] - $a['delka'];
-        });
-
-        // Rozdělit na 2 sloupce tak, aby celková délka byla vyrovnaná
+        // Rozdělit na 2 sloupce střídavě (lichý/sudý)
         $levySloupec = [];
         $pravySloupec = [];
-        $levaSuma = 0;
-        $pravaSuma = 0;
 
-        foreach ($articles as $article) {
-            // Přidat do sloupce s menší celkovou délkou
-            if ($levaSuma <= $pravaSuma) {
+        foreach ($articles as $index => $article) {
+            if ($index % 2 === 0) {
                 $levySloupec[] = $article;
-                $levaSuma += $article['delka'];
             } else {
                 $pravySloupec[] = $article;
-                $pravaSuma += $article['delka'];
             }
         }
 
@@ -597,24 +503,6 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
           <?php endforeach; ?>
         </div>
       </div>
-
-      <?php if (!empty($archiv) && count($archiv) > 1): ?>
-        <div class="archiv-section">
-          <h3><?php
-            echo $jazyk === 'en' ? 'News Archive' : ($jazyk === 'it' ? 'Archivio Notizie' : 'Archiv aktualit');
-            ?>
-          </h3>
-          <?php foreach (array_slice($archiv, 0, 10) as $polozka): ?>
-            <a href="?datum=<?php echo $polozka['datum']; ?>&lang=<?php echo $jazyk; ?>"
-               class="archiv-link <?php echo $polozka['datum'] === $datumAktuality ? 'active' : ''; ?>">
-              <?php echo date('d.m.Y', strtotime($polozka['datum'])); ?>
-              <?php if ($polozka['svatek_cz']): ?>
-                - <?php echo htmlspecialchars($polozka['svatek_cz']); ?>
-              <?php endif; ?>
-            </a>
-          <?php endforeach; ?>
-        </div>
-      <?php endif; ?>
 
     <?php else: ?>
 

@@ -161,11 +161,6 @@ if (!$embedMode && $activeTab === 'dashboard'):
     <div class="admin-kategorie">
         <h2 class="admin-kategorie-nadpis" data-lang-cs="Hlavní navigace" data-lang-en="Main Navigation" data-lang-it="Navigazione Principale">Hlavní navigace</h2>
         <div class="cc-grid">
-            <div class="cc-card" onclick="window.location='index.php'">
-                <div class="cc-card-title" data-lang-cs="Domů" data-lang-en="Home" data-lang-it="Home">Domů</div>
-                <div class="cc-card-description" data-lang-cs="Hlavní stránka aplikace" data-lang-en="Main application page" data-lang-it="Pagina principale dell'applicazione">Hlavní stránka aplikace</div>
-            </div>
-
             <div class="cc-card" onclick="window.location='seznam.php'">
                 <div class="cc-card-title" data-lang-cs="Seznam reklamací" data-lang-en="Claims List" data-lang-it="Elenco Reclami">Seznam reklamací</div>
                 <div class="cc-card-description" data-lang-cs="Přehled všech reklamací a servisních požadavků" data-lang-en="Overview of all claims and service requests" data-lang-it="Panoramica di tutti i reclami e le richieste di servizio">Přehled všech reklamací a servisních požadavků</div>
@@ -174,11 +169,6 @@ if (!$embedMode && $activeTab === 'dashboard'):
             <div class="cc-card" onclick="window.location='admin.php?tab=zakaznici'">
                 <div class="cc-card-title" data-lang-cs="Seznam zákazníků" data-lang-en="Customer List" data-lang-it="Elenco Clienti">Seznam zákazníků</div>
                 <div class="cc-card-description" data-lang-cs="Přehled všech zákazníků s kontaktními údaji a zakázkami" data-lang-en="Overview of all customers with contact information and orders" data-lang-it="Panoramica di tutti i clienti con informazioni di contatto e ordini">Přehled všech zákazníků s kontaktními údaji a zakázkami</div>
-            </div>
-
-            <div class="cc-card" onclick="window.location='protokol.php'">
-                <div class="cc-card-title" data-lang-cs="Nový protokol" data-lang-en="New Protocol" data-lang-it="Nuovo Protocollo">Nový protokol</div>
-                <div class="cc-card-description" data-lang-cs="Vytvořit nový servisní protokol" data-lang-en="Create new service protocol" data-lang-it="Crea nuovo protocollo di servizio">Vytvořit nový servisní protokol</div>
             </div>
 
             <div class="cc-card" onclick="window.location='statistiky.php'">
