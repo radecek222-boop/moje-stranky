@@ -278,17 +278,307 @@ if (!$isLoggedIn && !$isAdmin) {
   margin-top: 2rem !important;
 }
 
-/* DETAIL OVERLAY - BÍLÉ POZADÍ A PŘEPIS PROMĚNNÉ PRO VNOŘENÉ PRVKY */
+/* DETAIL OVERLAY - TMAVÉ POZADÍ KOMPLET */
 #detailOverlay {
-  --c-bg: #ffffff;  /* Přepis proměnné pro všechny vnořené prvky */
-  background: #ffffff !important;
+  --c-bg: #1a1a1a;  /* Tmavé pozadí pro všechny vnořené prvky */
+  --c-bg-card: #222222;
+  --c-text: #ffffff;
+  --c-text-muted: #aaaaaa;
+  --c-border: #333333;
+  background: #0a0a0a !important;
 }
 
 #detailOverlay .modal-content {
+  background: #1a1a1a !important;
   border: none !important;
   box-shadow: none !important;
   max-width: 100% !important;
   width: 100% !important;
+  color: #ffffff !important;
+}
+
+/* Hlavička modalu - větší a vycentrovaná */
+#detailOverlay .modal-header {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
+  padding: 1.5rem 2rem !important;
+  text-align: center !important;
+  border-bottom: 1px solid #333333 !important;
+}
+
+#detailOverlay .modal-title {
+  font-size: 1.4rem !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
+  margin-bottom: 0.5rem !important;
+  text-align: center !important;
+}
+
+#detailOverlay .modal-subtitle {
+  font-size: 0.9rem !important;
+  color: #888888 !important;
+  text-align: center !important;
+}
+
+@media (max-width: 768px) {
+  #detailOverlay .modal-header {
+    padding: 1rem 1.5rem !important;
+  }
+
+  #detailOverlay .modal-title {
+    font-size: 1.1rem !important;
+    padding-right: 2.5rem !important; /* Místo pro zavírací tlačítko */
+  }
+
+  #detailOverlay .modal-subtitle {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Tmavý styl pro všechny sekce v detailu */
+#detailOverlay .modal-body {
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+#detailOverlay .modal-section {
+  background: #222222 !important;
+  border: 1px solid #333333 !important;
+  color: #ffffff !important;
+}
+
+#detailOverlay .section-title {
+  color: #aaaaaa !important;
+  border-bottom-color: #333333 !important;
+}
+
+#detailOverlay .info-grid {
+  color: #ffffff !important;
+}
+
+#detailOverlay .info-label {
+  color: #888888 !important;
+}
+
+#detailOverlay .info-value {
+  color: #ffffff !important;
+}
+
+/* Editovatelná pole - tmavá */
+#detailOverlay .editable-field {
+  background: #2a2a2a !important;
+  border-color: #444444 !important;
+}
+
+#detailOverlay .field-label {
+  color: #888888 !important;
+}
+
+#detailOverlay .field-input,
+#detailOverlay .field-textarea,
+#detailOverlay input,
+#detailOverlay textarea,
+#detailOverlay select {
+  background: #333333 !important;
+  border-color: #444444 !important;
+  color: #ffffff !important;
+}
+
+#detailOverlay .field-input::placeholder,
+#detailOverlay .field-textarea::placeholder,
+#detailOverlay input::placeholder,
+#detailOverlay textarea::placeholder {
+  color: #666666 !important;
+}
+
+/* Kalendář - tmavý */
+#detailOverlay .calendar-container {
+  background: #222222 !important;
+}
+
+#detailOverlay .calendar-weekdays {
+  color: #888888 !important;
+}
+
+#detailOverlay .cal-day {
+  background: #2a2a2a !important;
+  border-color: #444444 !important;
+  color: #ffffff !important;
+}
+
+#detailOverlay .cal-day:hover {
+  background: #333333 !important;
+  border-color: #666666 !important;
+}
+
+#detailOverlay .cal-day.selected {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #ffffff !important;
+}
+
+#detailOverlay .cal-day.occupied {
+  background: #3a2020 !important;
+  border-color: #8b0000 !important;
+  color: #ff6666 !important;
+}
+
+/* Časové sloty - tmavé */
+#detailOverlay .time-slot {
+  background: #2a2a2a !important;
+  border-color: #444444 !important;
+  color: #ffffff !important;
+}
+
+#detailOverlay .time-slot:hover {
+  background: #333333 !important;
+  border-color: #666666 !important;
+}
+
+#detailOverlay .time-slot.selected {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #ffffff !important;
+}
+
+#detailOverlay .time-slot.occupied {
+  background: #3a2020 !important;
+  border-color: #8b0000 !important;
+  color: #ff6666 !important;
+}
+
+/* Panel vzdálenosti - tmavý */
+#detailOverlay .distance-info-panel {
+  background: #222222 !important;
+  border-color: #333333 !important;
+}
+
+#detailOverlay .distance-info-title {
+  color: #888888 !important;
+}
+
+#detailOverlay .distance-stat {
+  background: #2a2a2a !important;
+  border-color: #444444 !important;
+}
+
+#detailOverlay .distance-stat-label {
+  color: #888888 !important;
+}
+
+#detailOverlay .distance-stat-value {
+  color: #ffffff !important;
+}
+
+#detailOverlay .route-item {
+  color: #ffffff !important;
+}
+
+#detailOverlay .route-distance {
+  background: #333333 !important;
+  border-color: #444444 !important;
+  color: #ffffff !important;
+}
+
+/* Rezervace na den - tmavé */
+#detailOverlay .day-bookings {
+  background: #2a1515 !important;
+  border-color: #8b0000 !important;
+}
+
+#detailOverlay .day-bookings h4 {
+  color: #ff6666 !important;
+}
+
+#detailOverlay .booking-item {
+  background: #1a1a1a !important;
+  border-color: #444444 !important;
+  color: #ffffff !important;
+}
+
+/* Tlačítka v detailu - tmavá */
+#detailOverlay .btn {
+  background: #333333 !important;
+  border-color: #555555 !important;
+  color: #ffffff !important;
+}
+
+#detailOverlay .btn:hover {
+  background: #444444 !important;
+  border-color: #666666 !important;
+}
+
+#detailOverlay .btn-success {
+  background: #2a4a2a !important;
+  border-color: #3a6a3a !important;
+}
+
+#detailOverlay .btn-danger {
+  background: #4a2a2a !important;
+  border-color: #8b0000 !important;
+  color: #ff6666 !important;
+}
+
+/* Modal actions - tmavé */
+#detailOverlay .modal-actions {
+  background: #1a1a1a !important;
+  border-top-color: #333333 !important;
+}
+
+/* Zavírací tlačítko */
+#detailOverlay .modal-close {
+  color: #ffffff !important;
+  background: #333333 !important;
+}
+
+#detailOverlay .modal-close:hover {
+  background: #444444 !important;
+}
+
+/* Mapa - tmavé pozadí */
+#detailOverlay .map-panel {
+  background: #222222 !important;
+  border-color: #333333 !important;
+}
+
+#detailOverlay .map-toggle {
+  background: #333333 !important;
+  color: #ffffff !important;
+}
+
+#detailOverlay .map-content {
+  background: #1a1a1a !important;
+}
+
+#detailOverlay .map-stat {
+  background: #2a2a2a !important;
+  border-color: #444444 !important;
+}
+
+#detailOverlay .map-stat-label {
+  color: #888888 !important;
+}
+
+#detailOverlay .map-stat-value {
+  color: #ffffff !important;
+}
+
+/* Fotky - tmavé pozadí */
+#detailOverlay .foto-wrapper {
+  background: #222222 !important;
+  border-color: #444444 !important;
+}
+
+/* Text overlay pro popisy */
+#detailOverlay div[onclick*="showTextOverlay"] {
+  background: #2a2a2a !important;
+  border-color: #444444 !important;
+  color: #ffffff !important;
+}
+
+/* Poznámky badge */
+#detailOverlay .order-notes-badge {
+  background: #444444 !important;
+  color: #ffffff !important;
 }
 
 /* Skrýt pull-to-refresh když je modal otevřený */
