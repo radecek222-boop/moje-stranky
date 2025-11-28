@@ -49,11 +49,11 @@ if ($isAdmin) {
         $userRole = $_SESSION['role'] ?? null;
         $isTechnik = ($userRole === 'technik');
     ?>
-      <a href="novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
       <?php if ($isTechnik): ?>
-        <!-- Provize technika jako navigační položka -->
+        <!-- Provize technika jako navigační položka - úplně nahoře -->
         <a href="#" class="tech-provize-link" id="tech-provize-box" style="cursor: default; pointer-events: none;">Provize <span id="provize-mesic">...</span>: <span id="provize-castka">...</span> €</a>
       <?php endif; ?>
+      <a href="novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
       <a href="seznam.php" <?php if($current == "seznam.php") echo 'class="active"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
       <a href="/logout.php" class="hamburger-logout" data-lang-cs="ODHLÁŠENÍ" data-lang-en="LOGOUT" data-lang-it="DISCONNETTERSI">ODHLÁŠENÍ</a>
       <a href="#" id="notif-enable-btn-user" class="hamburger-notif-btn" style="display:none;" data-lang-cs="NOTIFY ME ON" data-lang-en="NOTIFY ME ON" data-lang-it="NOTIFY ME ON">NOTIFY ME ON</a>
