@@ -139,7 +139,8 @@ try {
                 $audioFile = $_FILES['audio'];
 
                 // BEZPEČNOST: Validace typu souboru
-                $allowedMimes = ['audio/webm', 'audio/mp3', 'audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/mp4', 'audio/x-m4a'];
+                // video/webm a video/mp4 - Safari/WebKit nahrává audio jako video MIME typ
+                $allowedMimes = ['audio/webm', 'audio/mp3', 'audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/mp4', 'audio/x-m4a', 'video/webm', 'video/mp4'];
                 $finfo = new finfo(FILEINFO_MIME_TYPE);
                 $mimeType = $finfo->file($audioFile['tmp_name']);
 
