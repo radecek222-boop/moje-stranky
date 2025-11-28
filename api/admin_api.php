@@ -166,6 +166,14 @@ try {
             handleSaveInvitationTemplate($pdo, $payload);
             break;
 
+        case 'get_invitation_texts':
+            handleGetInvitationTexts($pdo);
+            break;
+
+        case 'save_invitation_texts':
+            handleSaveInvitationTexts($pdo, $payload);
+            break;
+
         default:
             respondError('Neznámá akce.', 400);
     }
@@ -1029,11 +1037,32 @@ function handleSendInvitations(PDO $pdo, array $payload): void
     // Připravit email šablonu
     $appUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'www.wgs-service.cz');
     $rok = date('Y');
-    $predmet = $typ === 'technik'
-        ? 'Pozvanka do systemu WGS - Servisni technik'
-        : 'Pozvanka do systemu WGS - Prodejce';
 
-    $htmlSablona = vytvorPozvankovouSablonu($typ, $pouzityKlic, $appUrl, $rok);
+    // Načíst vlastní texty z databáze
+    $vlastniTexty = null;
+    try {
+        $stmtTexty = $pdo->prepare("
+            SELECT config_value FROM wgs_system_config
+            WHERE config_key = 'invitation_template_texts' LIMIT 1
+        ");
+        $stmtTexty->execute();
+        $resultTexty = $stmtTexty->fetch(PDO::FETCH_ASSOC);
+        if ($resultTexty && !empty($resultTexty['config_value'])) {
+            $vlastniTexty = json_decode($resultTexty['config_value'], true);
+        }
+    } catch (PDOException $e) {
+        error_log("Chyba nacitani textu pro pozvanku: " . $e->getMessage());
+    }
+
+    // Předmět emailu - z vlastních textů nebo výchozí
+    $roleNazev = $typ === 'technik' ? 'Servisni technik' : 'Prodejce';
+    if ($vlastniTexty && !empty($vlastniTexty['predmetEmailu'])) {
+        $predmet = str_replace('{ROLE}', $roleNazev, $vlastniTexty['predmetEmailu']);
+    } else {
+        $predmet = 'Pozvanka do systemu WGS - ' . $roleNazev;
+    }
+
+    $htmlSablona = vytvorPozvankovouSablonu($typ, $pouzityKlic, $appUrl, $rok, $vlastniTexty);
 
     // Odeslat emaily
     $odeslanoPocet = 0;
@@ -1163,11 +1192,29 @@ function handleSaveInvitationTemplate(PDO $pdo, array $payload): void
 /**
  * Vytvořit HTML šablonu pro pozvánku - SUPER JEDNODUCHÉ pro netechnické uživatele
  * S DETAILNÍMI NÁVODY PRO KAŽDOU ROLI
+ *
+ * @param string $typ Typ role (technik/prodejce)
+ * @param string $klic Registrační klíč
+ * @param string $appUrl URL aplikace
+ * @param string $rok Aktuální rok
+ * @param array|null $vlastniTexty Vlastní texty z databáze
+ * @return string HTML šablona emailu
  */
-function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, string $rok): string
+function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, string $rok, ?array $vlastniTexty = null): string
 {
     $roleNazev = $typ === 'technik' ? 'servisni technik' : 'prodejce';
     $roleVelke = $typ === 'technik' ? 'TECHNIK' : 'PRODEJCE';
+
+    // Helper pro převod **text** na <strong>text</strong>
+    $formatujText = function($text) {
+        return preg_replace('/\*\*([^*]+)\*\*/', '<strong>$1</strong>', htmlspecialchars($text));
+    };
+
+    // Uvítací text - z vlastních textů nebo výchozí
+    $uvitaciText = 'Byli jste pozvani jako <strong>' . $roleNazev . '</strong> do systemu White Glove Service pro spravu servisnich zakazek Natuzzi.';
+    if ($vlastniTexty && !empty($vlastniTexty['uvitaciText'])) {
+        $uvitaciText = str_replace('{ROLE}', $roleNazev, $formatujText($vlastniTexty['uvitaciText']));
+    }
 
     // Specifické funkce a návody podle role
     $funkce = '';
@@ -1177,10 +1224,19 @@ function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, str
         // ============================================
         // NÁVOD PRO TECHNIKY
         // ============================================
-        $funkce = '
-            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="color: #333; margin-top: 0; font-size: 16px;">Co budete moct delat v systemu:</h3>
-                <ul style="color: #555; line-height: 2; margin: 0; padding-left: 20px;">
+
+        // Seznam funkcí - z vlastních textů nebo výchozí
+        $funkceSeznam = '';
+        if ($vlastniTexty && !empty($vlastniTexty['funkceTechnik'])) {
+            $radky = explode("\n", $vlastniTexty['funkceTechnik']);
+            foreach ($radky as $radek) {
+                $radek = trim($radek);
+                if (!empty($radek)) {
+                    $funkceSeznam .= '<li>' . $formatujText($radek) . '</li>';
+                }
+            }
+        } else {
+            $funkceSeznam = '
                     <li>Videt sve <strong>prirazene zakazky</strong> v prehlednem seznamu</li>
                     <li>Menit <strong>stav zakazky</strong> (Ceka / Domluvena / Hotovo)</li>
                     <li>Vyplnovat <strong>servisni protokoly</strong> s automatickym prekladem</li>
@@ -1188,6 +1244,14 @@ function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, str
                     <li>Videt <strong>adresu zakaznika na mape</strong> s navigaci</li>
                     <li>Nechat zakaznika <strong>elektronicky podepsat</strong> protokol</li>
                     <li>Exportovat protokol do <strong>PDF</strong> a poslat zakaznikovi</li>
+            ';
+        }
+
+        $funkce = '
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #333; margin-top: 0; font-size: 16px;">Co budete moct delat v systemu:</h3>
+                <ul style="color: #555; line-height: 2; margin: 0; padding-left: 20px;">
+                    ' . $funkceSeznam . '
                 </ul>
             </div>
         ';
@@ -1313,16 +1377,33 @@ function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, str
         // ============================================
         // NÁVOD PRO PRODEJCE
         // ============================================
-        $funkce = '
-            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="color: #333; margin-top: 0; font-size: 16px;">Co budete moct delat v systemu:</h3>
-                <ul style="color: #555; line-height: 2; margin: 0; padding-left: 20px;">
+
+        // Seznam funkcí - z vlastních textů nebo výchozí
+        $funkceSeznam = '';
+        if ($vlastniTexty && !empty($vlastniTexty['funkceProdejce'])) {
+            $radky = explode("\n", $vlastniTexty['funkceProdejce']);
+            foreach ($radky as $radek) {
+                $radek = trim($radek);
+                if (!empty($radek)) {
+                    $funkceSeznam .= '<li>' . $formatujText($radek) . '</li>';
+                }
+            }
+        } else {
+            $funkceSeznam = '
                     <li>Zadavat <strong>nove reklamace</strong> pro vase zakazniky</li>
                     <li>Sledovat <strong>stav vasich zakazek</strong> v realnem case</li>
                     <li>Videt <strong>historii vsech reklamaci</strong> ktere jste zadali</li>
                     <li>Nahravat <strong>dokumenty a fotky</strong> k zakazkam</li>
                     <li>Pridavat <strong>poznamky</strong> pro techniky</li>
                     <li>Videt kdy technik <strong>navstivi zakaznika</strong></li>
+            ';
+        }
+
+        $funkce = '
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #333; margin-top: 0; font-size: 16px;">Co budete moct delat v systemu:</h3>
+                <ul style="color: #555; line-height: 2; margin: 0; padding-left: 20px;">
+                    ' . $funkceSeznam . '
                 </ul>
             </div>
         ';
@@ -1493,7 +1574,7 @@ function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, str
                             <h2 style="color: #333; margin: 0 0 20px; font-size: 22px;">Dobry den!</h2>
 
                             <p style="color: #555; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
-                                Byli jste pozvani jako <strong>' . $roleNazev . '</strong> do systemu White Glove Service pro spravu servisnich zakazek Natuzzi.
+                                ' . $uvitaciText . '
                             </p>
 
                             <!-- DATUM SPUSTENI -->
@@ -1616,5 +1697,96 @@ function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, str
 </body>
 </html>
     ';
+}
+
+/**
+ * Načíst texty šablony pozvánky z databáze
+ */
+function handleGetInvitationTexts(PDO $pdo): void
+{
+    // Výchozí texty
+    $vychoziTexty = [
+        'predmetEmailu' => 'Pozvanka do systemu WGS - {ROLE}',
+        'uvitaciText' => 'Byli jste pozvani jako **{ROLE}** do systemu White Glove Service pro spravu servisnich zakazek Natuzzi.',
+        'funkceProdejce' => "Zadavat **nove reklamace** pro vase zakazniky\nSledovat **stav vasich zakazek** v realnem case\nVidet **historii vsech reklamaci** ktere jste zadali\nNahravat **dokumenty a fotky** k zakazkam\nPridavat **poznamky** pro techniky\nVidet kdy technik **navstivi zakaznika**",
+        'funkceTechnik' => "Videt sve **prirazene zakazky** v prehlednem seznamu\nMenit **stav zakazky** (Ceka / Domluvena / Hotovo)\nVyplnovat **servisni protokoly** s automatickym prekladem\nNahravat **fotky pred a po oprave**\nVidet **adresu zakaznika na mape** s navigaci\nNechat zakaznika **elektronicky podepsat** protokol\nExportovat protokol do **PDF** a poslat zakaznikovi",
+        'navodProdejce' => "# JAK OBJEDNAT SERVIS PRO ZAKAZNIKA\n\nPo prihlaseni kliknete na **\"Objednat servis\"** v menu. Formular ma 5 casti:\n\n## 1. ZAKLADNI UDAJE\n- Cislo objednavky/reklamace - vase interni cislo\n- Fakturace - CZ nebo SK\n- Datum prodeje a reklamace\n\n## 2. KONTAKTNI UDAJE\n- Jmeno a prijmeni zakaznika\n- Email a telefon\n\n## 3. ADRESA\n- Ulice, mesto, PSC\n- Po zadani se zobrazi mapa\n\n## 4. PRODUKT\n- Model, provedeni, barva\n\n## 5. PROBLEM\n- Popis zavady + fotky",
+        'navodTechnik' => "# PREHLED VASICH ZAKAZEK\n\nPo prihlaseni uvidite seznam vsech prirazenych zakazek.\n\n## Co vidite na karte:\n- Cislo zakazky (napr. WGS-2025-001)\n- Barevny stav (zluta/modra/zelena)\n- Jmeno a adresa zakaznika\n\n## Filtrovani:\n- Vsechny / Cekajici / V reseni / Vyrizene\n\n# SERVISNI PROTOKOL\n\nProtokol se predvyplni automaticky. Vy doplnite:\n- Problem zjisteny technikem\n- Navrh opravy\n- Uctovani\n\nPo dokonceni nechte zakaznika podepsat a exportujte PDF."
+    ];
+
+    try {
+        // Zkusit načíst z databáze
+        $stmt = $pdo->prepare("
+            SELECT config_value
+            FROM wgs_system_config
+            WHERE config_key = 'invitation_template_texts'
+            LIMIT 1
+        ");
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($result && !empty($result['config_value'])) {
+            $ulozeneTexty = json_decode($result['config_value'], true);
+            if (is_array($ulozeneTexty)) {
+                // Sloučit s výchozími (pro případ nových polí)
+                $texty = array_merge($vychoziTexty, $ulozeneTexty);
+                respondSuccess(['texts' => $texty, 'source' => 'database']);
+                return;
+            }
+        }
+    } catch (PDOException $e) {
+        error_log("Chyba nacitani textu sablony: " . $e->getMessage());
+    }
+
+    // Vrátit výchozí texty
+    respondSuccess(['texts' => $vychoziTexty, 'source' => 'default']);
+}
+
+/**
+ * Uložit texty šablony pozvánky
+ */
+function handleSaveInvitationTexts(PDO $pdo, array $payload): void
+{
+    $texty = $payload['texts'] ?? null;
+
+    if (!is_array($texty)) {
+        respondError('Chybi texty sablony.');
+        return;
+    }
+
+    // Validace povolených polí
+    $povolenaPole = [
+        'predmetEmailu',
+        'uvitaciText',
+        'funkceProdejce',
+        'funkceTechnik',
+        'navodProdejce',
+        'navodTechnik'
+    ];
+
+    $filtrovanetexty = [];
+    foreach ($povolenaPole as $pole) {
+        if (isset($texty[$pole])) {
+            $filtrovanetexty[$pole] = trim((string)$texty[$pole]);
+        }
+    }
+
+    $jsonTexty = json_encode($filtrovanetexty, JSON_UNESCAPED_UNICODE);
+
+    try {
+        // Upsert - INSERT nebo UPDATE
+        $stmt = $pdo->prepare("
+            INSERT INTO wgs_system_config (config_key, config_value, config_type, updated_at)
+            VALUES ('invitation_template_texts', ?, 'json', NOW())
+            ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), updated_at = NOW()
+        ");
+        $stmt->execute([$jsonTexty]);
+
+        respondSuccess(['message' => 'Texty sablony ulozeny.', 'texts' => $filtrovanetexty]);
+
+    } catch (PDOException $e) {
+        error_log("Chyba ukladani textu sablony: " . $e->getMessage());
+        respondError('Chyba pri ukladani textu.');
+    }
 }
 

@@ -1150,9 +1150,13 @@ function otevritPozvanku() {
                             style="background: #fff; color: #000; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
                         Odeslat
                     </button>
+                    <button onclick="prepnoutTab('texty')" id="tabTexty"
+                            style="background: #333; color: #aaa; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
+                        Texty sablony
+                    </button>
                     <button onclick="prepnoutTab('sablona')" id="tabSablona"
                             style="background: #333; color: #aaa; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
-                        Upravit sablonu
+                        Nastaveni
                     </button>
                     <button onclick="document.getElementById('modalPozvanka').remove()"
                             style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer; margin-left: 10px;">&times;</button>
@@ -1241,10 +1245,98 @@ function otevritPozvanku() {
                 <div id="statusPozvanky" style="margin-top: 15px; display: none; padding: 12px; border-radius: 6px;"></div>
             </div>
 
-            <!-- ==================== TAB: UPRAVIT SABLONU ==================== -->
+            <!-- ==================== TAB: TEXTY SABLONY ==================== -->
+            <div id="tabContentTexty" style="display: none;">
+                <p style="color: #888; font-size: 0.85rem; margin: 0 0 20px;">
+                    Upravte hlavni textovy obsah emailove pozvanky. Pouzijte promenne: <code style="background: #333; padding: 2px 6px; border-radius: 3px;">{KLIC}</code>, <code style="background: #333; padding: 2px 6px; border-radius: 3px;">{ROLE}</code>, <code style="background: #333; padding: 2px 6px; border-radius: 3px;">{DATUM}</code>
+                </p>
+
+                <!-- Předmět emailu -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #fff; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600;">Predmet emailu</label>
+                    <input type="text" id="sablonaPredmet" placeholder="Pozvanka do systemu WGS Service"
+                           style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.95rem;">
+                </div>
+
+                <!-- Uvítací text -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #fff; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600;">Uvitaci text (po registracnim klici)</label>
+                    <textarea id="sablonaUvitaciText" rows="3" placeholder="Byli jste pozváni do systému WGS Service jako {ROLE}..."
+                              style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem; resize: vertical;"></textarea>
+                </div>
+
+                <!-- Co budou moct dělat - PRODEJCE -->
+                <div style="margin-bottom: 20px; border: 1px solid #444; border-radius: 8px; padding: 15px;">
+                    <label style="display: block; color: #fff; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600;">
+                        Text pro PRODEJCE - "Co budete moct delat"
+                    </label>
+                    <p style="color: #666; font-size: 0.75rem; margin: 0 0 10px;">Kazdy bod na novy radek</p>
+                    <textarea id="sablonaFunkceProdejce" rows="6" placeholder="Zadavat nove reklamace pro vase zakazniky
+Sledovat stav vasich zakazek v realnem case
+Videt historii vsech reklamaci ktere jste zadali
+Nahravat dokumenty a fotky k zakazkam
+Pridavat poznamky pro techniky
+Videt kdy technik navstivi zakaznika"
+                              style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem; resize: vertical; font-family: monospace;"></textarea>
+                </div>
+
+                <!-- Co budou moct dělat - TECHNIK -->
+                <div style="margin-bottom: 20px; border: 1px solid #444; border-radius: 8px; padding: 15px;">
+                    <label style="display: block; color: #fff; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600;">
+                        Text pro TECHNIKY - "Co budete moct delat"
+                    </label>
+                    <p style="color: #666; font-size: 0.75rem; margin: 0 0 10px;">Kazdy bod na novy radek</p>
+                    <textarea id="sablonaFunkceTechnik" rows="6" placeholder="Videt sve prirazene zakazky v prehlednem seznamu
+Menit stav zakazky (Ceka / Domluvena / Hotovo)
+Vyplnovat servisni protokoly s automatickym prekladem
+Nahravat fotky pred a po oprave
+Videt adresu zakaznika na mape s navigaci
+Nechat zakaznika elektronicky podepsat protokol"
+                              style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.9rem; resize: vertical; font-family: monospace;"></textarea>
+                </div>
+
+                <!-- Detailní návod PRODEJCE -->
+                <div style="margin-bottom: 20px; border: 1px solid #444; border-radius: 8px; padding: 15px;">
+                    <label style="display: block; color: #fff; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600;">
+                        Detailni navod pro PRODEJCE
+                    </label>
+                    <p style="color: #666; font-size: 0.75rem; margin: 0 0 10px;">Kompletni navod jak pouzivat system. Formatovani: **tucne**, novy radek = novy odstavec</p>
+                    <textarea id="sablonaNavodProdejce" rows="10"
+                              style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.85rem; resize: vertical; font-family: monospace;"></textarea>
+                </div>
+
+                <!-- Detailní návod TECHNIK -->
+                <div style="margin-bottom: 20px; border: 1px solid #444; border-radius: 8px; padding: 15px;">
+                    <label style="display: block; color: #fff; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600;">
+                        Detailni navod pro TECHNIKY
+                    </label>
+                    <p style="color: #666; font-size: 0.75rem; margin: 0 0 10px;">Kompletni navod jak pouzivat system. Formatovani: **tucne**, novy radek = novy odstavec</p>
+                    <textarea id="sablonaNavodTechnik" rows="10"
+                              style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.85rem; resize: vertical; font-family: monospace;"></textarea>
+                </div>
+
+                <!-- Tlačítka pro uložení textů -->
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button onclick="ulozitTextySablony()"
+                            style="flex: 1; padding: 14px; background: #fff; color: #000; border: none;
+                            border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;">
+                        Ulozit texty
+                    </button>
+                    <button onclick="nacistVychoziTexty()"
+                            style="padding: 14px 20px; background: #333; color: #fff;
+                            border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                        Nacist vychozi
+                    </button>
+                </div>
+
+                <!-- Status uložení textů -->
+                <div id="statusTexty" style="margin-top: 15px; display: none; padding: 12px; border-radius: 6px;"></div>
+            </div>
+
+            <!-- ==================== TAB: NASTAVENI ==================== -->
             <div id="tabContentSablona" style="display: none;">
                 <p style="color: #888; font-size: 0.85rem; margin: 0 0 20px;">
-                    Zde muzete upravit texty, ktere se zobrazi v pozvankových emailech.
+                    Kontaktni udaje a firemni informace v patice emailu.
                 </p>
 
                 <!-- Datum spuštění -->
@@ -1349,29 +1441,40 @@ function otevritPozvanku() {
 
 // Přepnout tab
 function prepnoutTab(tab) {
-    const tabOdeslat = document.getElementById('tabOdeslat');
-    const tabSablona = document.getElementById('tabSablona');
-    const contentOdeslat = document.getElementById('tabContentOdeslat');
-    const contentSablona = document.getElementById('tabContentSablona');
+    const tabs = ['Odeslat', 'Texty', 'Sablona'];
+    const contents = ['tabContentOdeslat', 'tabContentTexty', 'tabContentSablona'];
 
-    if (tab === 'odeslat') {
-        tabOdeslat.style.background = '#fff';
-        tabOdeslat.style.color = '#000';
-        tabOdeslat.style.fontWeight = '600';
-        tabSablona.style.background = '#333';
-        tabSablona.style.color = '#aaa';
-        tabSablona.style.fontWeight = 'normal';
-        contentOdeslat.style.display = 'block';
-        contentSablona.style.display = 'none';
-    } else {
-        tabSablona.style.background = '#fff';
-        tabSablona.style.color = '#000';
-        tabSablona.style.fontWeight = '600';
-        tabOdeslat.style.background = '#333';
-        tabOdeslat.style.color = '#aaa';
-        tabOdeslat.style.fontWeight = 'normal';
-        contentOdeslat.style.display = 'none';
-        contentSablona.style.display = 'block';
+    // Resetovat všechny taby
+    tabs.forEach(t => {
+        const tabEl = document.getElementById('tab' + t);
+        if (tabEl) {
+            tabEl.style.background = '#333';
+            tabEl.style.color = '#aaa';
+            tabEl.style.fontWeight = 'normal';
+        }
+    });
+
+    // Skrýt všechny obsahy
+    contents.forEach(c => {
+        const contentEl = document.getElementById(c);
+        if (contentEl) contentEl.style.display = 'none';
+    });
+
+    // Aktivovat vybraný tab
+    const aktivniTab = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+    if (aktivniTab) {
+        aktivniTab.style.background = '#fff';
+        aktivniTab.style.color = '#000';
+        aktivniTab.style.fontWeight = '600';
+    }
+
+    // Zobrazit vybraný obsah
+    const aktivniContent = document.getElementById('tabContent' + tab.charAt(0).toUpperCase() + tab.slice(1));
+    if (aktivniContent) aktivniContent.style.display = 'block';
+
+    // Při přepnutí na Texty načíst texty
+    if (tab === 'texty') {
+        nacistTextySablony();
     }
 }
 
@@ -2202,6 +2305,231 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 console.log('Security centrum načteno');
+
+// ==========================================
+// TEXTY ŠABLONY - ukládání a načítání
+// ==========================================
+
+// Globální objekt pro texty šablony
+let sablonaTexty = {
+    predmet: 'Pozvanka do systemu WGS Service',
+    uvitaciText: 'Byli jste pozvani do systemu WGS Service. Tento system slouzi ke sprave servisnich pozadavku pro nabytek Natuzzi.',
+    funkceProdejce: `Zadavat nove reklamace pro vase zakazniky
+Sledovat stav vasich zakazek v realnem case
+Videt historii vsech reklamaci ktere jste zadali
+Nahravat dokumenty a fotky k zakazkam
+Pridavat poznamky pro techniky
+Videt kdy technik navstivi zakaznika`,
+    funkceTechnik: `Videt sve prirazene zakazky v prehlednem seznamu
+Menit stav zakazky (Ceka / Domluvena / Hotovo)
+Vyplnovat servisni protokoly s automatickym prekladem
+Nahravat fotky pred a po oprave
+Videt adresu zakaznika na mape s navigaci
+Nechat zakaznika elektronicky podepsat protokol
+Exportovat protokol do PDF a poslat zakaznikovi`,
+    navodProdejce: `**1. JAK OBJEDNAT SERVIS PRO ZAKAZNIKA**
+
+Po prihlaseni kliknete na "Objednat servis" v menu. Vyplnte formular:
+- Cislo objednavky - vase interni cislo z prodejny
+- Fakturace - vyberte CZ nebo SK
+- Kontaktni udaje zakaznika - jmeno, email, telefon
+- Adresa - kam ma technik prijet
+- Model a barva - nazev modelu a oznaceni barvy
+- Popis problemu - co je spatne (cim podrobneji, tim lepe)
+- Fotografie - nahrajte fotky zavady
+
+**2. JAK SLEDOVAT ZAKAZKY**
+
+V menu kliknete na "Moje reklamace". Uvidite:
+- Zluta = Ceka na zpracovani
+- Modra = Termin domluven
+- Zelena = Hotovo
+
+Kliknete na kartu pro zobrazeni detailu, fotek a poznamek.`,
+    navodTechnik: `**1. PREHLED ZAKAZEK**
+
+Po prihlaseni uvidite seznam prirazenych zakazek. Kazda karta ukazuje:
+- Cislo zakazky a stav
+- Jmeno a adresa zakaznika
+- Pocet poznamek
+
+Filtry nahore umoznuji zobrazit pouze Cekajici / V reseni / Vyrizene.
+
+**2. SERVISNI PROTOKOL**
+
+Kliknete na "Otevrit protokol". Vyplnte:
+- Problem zjisteny technikem - co jste skutecne nasli
+- Navrh opravy - co jste udelali nebo doporucujete
+- Uctovano za servis - kalkulacka ceny
+- Plati zakaznik? - ANO/NE
+
+**3. PODPIS ZAKAZNIKA**
+
+Kliknete "Podepsat protokol" a zakaznik se podepise prstem na displeji.
+
+**4. EXPORT**
+
+Nahrajte fotky pred/po oprave, pak "Export do PDF" nebo "Odeslat zakaznikovi".`
+};
+
+// Načíst texty šablony z databáze
+async function nacistTextySablony() {
+    try {
+        const odpoved = await fetch('/api/admin_api.php?action=get_invitation_texts');
+        const data = await odpoved.json();
+
+        if (data.status === 'success' && data.texts) {
+            sablonaTexty = { ...sablonaTexty, ...data.texts };
+        }
+    } catch (e) {
+        console.log('Pouzivam vychozi texty sablony');
+    }
+
+    // Naplnit pole
+    naplnitPoleTetxy();
+}
+
+// Naplnit pole textů aktuálními hodnotami
+function naplnitPoleTetxy() {
+    const pole = {
+        'sablonaPredmet': 'predmet',
+        'sablonaUvitaciText': 'uvitaciText',
+        'sablonaFunkceProdejce': 'funkceProdejce',
+        'sablonaFunkceTechnik': 'funkceTechnik',
+        'sablonaNavodProdejce': 'navodProdejce',
+        'sablonaNavodTechnik': 'navodTechnik'
+    };
+
+    for (const [elId, key] of Object.entries(pole)) {
+        const el = document.getElementById(elId);
+        if (el) el.value = sablonaTexty[key] || '';
+    }
+}
+
+// Uložit texty šablony
+async function ulozitTextySablony() {
+    const statusEl = document.getElementById('statusTexty');
+
+    // Načíst hodnoty z polí
+    sablonaTexty.predmet = document.getElementById('sablonaPredmet')?.value.trim() || '';
+    sablonaTexty.uvitaciText = document.getElementById('sablonaUvitaciText')?.value.trim() || '';
+    sablonaTexty.funkceProdejce = document.getElementById('sablonaFunkceProdejce')?.value.trim() || '';
+    sablonaTexty.funkceTechnik = document.getElementById('sablonaFunkceTechnik')?.value.trim() || '';
+    sablonaTexty.navodProdejce = document.getElementById('sablonaNavodProdejce')?.value.trim() || '';
+    sablonaTexty.navodTechnik = document.getElementById('sablonaNavodTechnik')?.value.trim() || '';
+
+    statusEl.style.display = 'block';
+    statusEl.style.background = '#d1ecf1';
+    statusEl.style.color = '#0c5460';
+    statusEl.textContent = 'Ukladam texty...';
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (!csrfToken) throw new Error('CSRF token neni k dispozici');
+
+        const odpoved = await fetch('/api/admin_api.php?action=save_invitation_texts', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                texts: sablonaTexty,
+                csrf_token: csrfToken
+            })
+        });
+
+        const data = await odpoved.json();
+
+        if (data.status === 'success') {
+            statusEl.style.background = '#d4edda';
+            statusEl.style.color = '#155724';
+            statusEl.textContent = 'Texty ulozeny!';
+        } else {
+            throw new Error(data.message || 'Neznama chyba');
+        }
+    } catch (chyba) {
+        statusEl.style.background = '#f8d7da';
+        statusEl.style.color = '#721c24';
+        statusEl.textContent = 'Chyba: ' + chyba.message;
+    }
+
+    setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+}
+
+// Načíst výchozí texty
+function nacistVychoziTexty() {
+    if (!confirm('Opravdu chcete obnovit vychozi texty?')) return;
+
+    sablonaTexty = {
+        predmet: 'Pozvanka do systemu WGS Service',
+        uvitaciText: 'Byli jste pozvani do systemu WGS Service. Tento system slouzi ke sprave servisnich pozadavku pro nabytek Natuzzi.',
+        funkceProdejce: `Zadavat nove reklamace pro vase zakazniky
+Sledovat stav vasich zakazek v realnem case
+Videt historii vsech reklamaci ktere jste zadali
+Nahravat dokumenty a fotky k zakazkam
+Pridavat poznamky pro techniky
+Videt kdy technik navstivi zakaznika`,
+        funkceTechnik: `Videt sve prirazene zakazky v prehlednem seznamu
+Menit stav zakazky (Ceka / Domluvena / Hotovo)
+Vyplnovat servisni protokoly s automatickym prekladem
+Nahravat fotky pred a po oprave
+Videt adresu zakaznika na mape s navigaci
+Nechat zakaznika elektronicky podepsat protokol
+Exportovat protokol do PDF a poslat zakaznikovi`,
+        navodProdejce: `**1. JAK OBJEDNAT SERVIS PRO ZAKAZNIKA**
+
+Po prihlaseni kliknete na "Objednat servis" v menu. Vyplnte formular:
+- Cislo objednavky - vase interni cislo z prodejny
+- Fakturace - vyberte CZ nebo SK
+- Kontaktni udaje zakaznika - jmeno, email, telefon
+- Adresa - kam ma technik prijet
+- Model a barva - nazev modelu a oznaceni barvy
+- Popis problemu - co je spatne (cim podrobneji, tim lepe)
+- Fotografie - nahrajte fotky zavady
+
+**2. JAK SLEDOVAT ZAKAZKY**
+
+V menu kliknete na "Moje reklamace". Uvidite:
+- Zluta = Ceka na zpracovani
+- Modra = Termin domluven
+- Zelena = Hotovo
+
+Kliknete na kartu pro zobrazeni detailu, fotek a poznamek.`,
+        navodTechnik: `**1. PREHLED ZAKAZEK**
+
+Po prihlaseni uvidite seznam prirazenych zakazek. Kazda karta ukazuje:
+- Cislo zakazky a stav
+- Jmeno a adresa zakaznika
+- Pocet poznamek
+
+Filtry nahore umoznuji zobrazit pouze Cekajici / V reseni / Vyrizene.
+
+**2. SERVISNI PROTOKOL**
+
+Kliknete na "Otevrit protokol". Vyplnte:
+- Problem zjisteny technikem - co jste skutecne nasli
+- Navrh opravy - co jste udelali nebo doporucujete
+- Uctovano za servis - kalkulacka ceny
+- Plati zakaznik? - ANO/NE
+
+**3. PODPIS ZAKAZNIKA**
+
+Kliknete "Podepsat protokol" a zakaznik se podepise prstem na displeji.
+
+**4. EXPORT**
+
+Nahrajte fotky pred/po oprave, pak "Export do PDF" nebo "Odeslat zakaznikovi".`
+    };
+
+    naplnitPoleTetxy();
+
+    const statusEl = document.getElementById('statusTexty');
+    statusEl.style.display = 'block';
+    statusEl.style.background = '#d1ecf1';
+    statusEl.style.color = '#0c5460';
+    statusEl.textContent = 'Vychozi texty nacteny. Nezapomente ulozit!';
+    setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+}
+
 </script>
 
 
