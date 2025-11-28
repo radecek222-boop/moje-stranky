@@ -28,8 +28,12 @@
     pullIndicator.id = 'pull-refresh-indicator';
     pullIndicator.innerHTML = `
       <div class="pull-refresh-content">
-        <div class="pull-refresh-arrow"></div>
-        <span class="pull-refresh-text">Potahni pro aktualizaci</span>
+        <div class="pull-refresh-spinner">
+          <svg viewBox="0 0 50 50">
+            <circle cx="25" cy="25" r="20" fill="none" stroke-width="4"></circle>
+          </svg>
+        </div>
+        <span class="pull-refresh-text">Potahni dolu</span>
       </div>
     `;
     pullIndicator.style.cssText = `
@@ -38,57 +42,72 @@
       left: 0;
       right: 0;
       height: 0;
-      background: #f5f5f5;
+      background: linear-gradient(to bottom, #f0f0f0, #e8e8e8);
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
       z-index: 99999;
       transition: none;
-      border-bottom: 1px solid #ddd;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     `;
 
     const style = document.createElement('style');
     style.textContent = `
-      .pull-refresh-content {
+      #pull-refresh-indicator .pull-refresh-content {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.3rem;
+        gap: 0.4rem;
         opacity: 0;
-        transform: translateY(-10px);
+        transform: scale(0.8);
         transition: opacity 0.2s, transform 0.2s;
       }
-      .pull-refresh-content.visible {
+      #pull-refresh-indicator .pull-refresh-content.visible {
         opacity: 1;
-        transform: translateY(0);
+        transform: scale(1);
       }
-      .pull-refresh-arrow {
-        width: 20px;
-        height: 20px;
-        border: 2px solid #333;
-        border-top: none;
-        border-right: none;
-        transform: rotate(-45deg);
-        transition: transform 0.2s;
+      #pull-refresh-indicator .pull-refresh-spinner {
+        width: 32px;
+        height: 32px;
       }
-      .pull-refresh-arrow.ready {
-        transform: rotate(135deg);
+      #pull-refresh-indicator .pull-refresh-spinner svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
       }
-      .pull-refresh-arrow.loading {
-        animation: spin 0.8s linear infinite;
-        border-radius: 50%;
-        border: 2px solid #333;
-        border-top-color: transparent;
-        transform: none;
+      #pull-refresh-indicator .pull-refresh-spinner circle {
+        stroke: #333;
+        stroke-dasharray: 126;
+        stroke-dashoffset: 126;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 0.1s linear;
       }
-      @keyframes spin {
-        to { transform: rotate(360deg); }
+      #pull-refresh-indicator .pull-refresh-spinner.ready circle {
+        stroke-dashoffset: 0;
       }
-      .pull-refresh-text {
-        font-size: 0.75rem;
-        color: #666;
-        font-family: 'Poppins', sans-serif;
+      #pull-refresh-indicator .pull-refresh-spinner.loading svg {
+        animation: ptr-spin 0.8s linear infinite;
+        transform: rotate(0deg);
+      }
+      #pull-refresh-indicator .pull-refresh-spinner.loading circle {
+        stroke-dashoffset: 90;
+        animation: ptr-dash 1.2s ease-in-out infinite;
+      }
+      @keyframes ptr-spin {
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes ptr-dash {
+        0% { stroke-dashoffset: 90; }
+        50% { stroke-dashoffset: 30; }
+        100% { stroke-dashoffset: 90; }
+      }
+      #pull-refresh-indicator .pull-refresh-text {
+        font-size: 0.7rem;
+        color: #555;
+        font-family: 'Poppins', -apple-system, sans-serif;
+        font-weight: 500;
+        letter-spacing: 0.02em;
       }
     `;
     document.head.appendChild(style);
@@ -124,19 +143,25 @@
       pullIndicator.style.height = pullDistance + 'px';
 
       const content = pullIndicator.querySelector('.pull-refresh-content');
-      const arrow = pullIndicator.querySelector('.pull-refresh-arrow');
+      const spinner = pullIndicator.querySelector('.pull-refresh-spinner');
+      const circle = pullIndicator.querySelector('.pull-refresh-spinner circle');
       const text = pullIndicator.querySelector('.pull-refresh-text');
 
-      if (pullDistance > 20) {
+      if (pullDistance > 15) {
         content.classList.add('visible');
       }
 
+      // Progresivni vyplnovani kruhu
+      const progress = Math.min(pullDistance / PULL_THRESHOLD, 1);
+      const dashOffset = 126 - (progress * 126);
+      circle.style.strokeDashoffset = dashOffset;
+
       if (pullDistance >= PULL_THRESHOLD) {
-        arrow.classList.add('ready');
-        text.textContent = 'Uvolni pro aktualizaci';
+        spinner.classList.add('ready');
+        text.textContent = 'Uvolni';
       } else {
-        arrow.classList.remove('ready');
-        text.textContent = 'Potahni pro aktualizaci';
+        spinner.classList.remove('ready');
+        text.textContent = 'Potahni dolu';
       }
 
       // Posunout obsah stranky
@@ -158,24 +183,28 @@
 
     if (pullDistance >= PULL_THRESHOLD) {
       // Aktivovat refresh
-      const arrow = pullIndicator.querySelector('.pull-refresh-arrow');
+      const spinner = pullIndicator.querySelector('.pull-refresh-spinner');
       const text = pullIndicator.querySelector('.pull-refresh-text');
 
-      arrow.classList.remove('ready');
-      arrow.classList.add('loading');
+      spinner.classList.remove('ready');
+      spinner.classList.add('loading');
       text.textContent = 'Aktualizuji...';
 
-      pullIndicator.style.height = '60px';
-      document.body.style.transform = 'translateY(60px)';
+      pullIndicator.style.height = '70px';
+      document.body.style.transform = 'translateY(70px)';
 
       // Reload po kratke pauze
       setTimeout(() => {
         window.location.reload();
-      }, 500);
+      }, 600);
     } else {
       // Zrusit - vratit zpet
       pullIndicator.style.height = '0';
       document.body.style.transform = 'translateY(0)';
+
+      // Reset kruhu
+      const circle = pullIndicator.querySelector('.pull-refresh-spinner circle');
+      circle.style.strokeDashoffset = '126';
     }
 
     touchStartY = 0;
