@@ -53,8 +53,6 @@ function toggleMenu() {
 function showNotification(message, type = 'info') {
   const notification = document.getElementById('notif');
   if (!notification) {
-    console.warn('Notification element not found, falling back to console');
-    console.log(`[${type.toUpperCase()}] ${message}`);
     return;
   }
 
