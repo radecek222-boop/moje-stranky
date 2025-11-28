@@ -2815,6 +2815,7 @@ async function startRecording(orderId) {
     logger.log('[Audio] Pouzivam format:', mimeType);
 
     const recorder = window.wgsAudioRecorder;
+    recorder.mimeType = mimeType; // Ulozit pro pouziti v onstop
     recorder.mediaRecorder = new MediaRecorder(stream, { mimeType });
     recorder.audioChunks = [];
     recorder.isRecording = true;
@@ -2824,13 +2825,28 @@ async function startRecording(orderId) {
     recorder.mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) {
         recorder.audioChunks.push(e.data);
+        logger.log('[Audio] Data chunk:', e.data.size, 'bytes');
       }
     };
 
     // Po ukonceni nahravani
     recorder.mediaRecorder.onstop = () => {
-      recorder.audioBlob = new Blob(recorder.audioChunks, { type: mimeType });
+      logger.log('[Audio] Nahravani ukonceno, chunks:', recorder.audioChunks.length);
+
+      if (recorder.audioChunks.length === 0) {
+        logger.error('[Audio] Zadna data nebyla nahrana');
+        alert('Nahravka je prazdna. Zkuste to prosim znovu.');
+        document.getElementById('btnStartRecord').style.display = 'block';
+        document.getElementById('recordingIndicator').style.display = 'none';
+        return;
+      }
+
+      // Pouzit ulozeny mimeType
+      const blobType = recorder.mimeType || 'audio/webm';
+      recorder.audioBlob = new Blob(recorder.audioChunks, { type: blobType });
       recorder.isRecording = false;
+
+      logger.log('[Audio] Blob vytvoren:', recorder.audioBlob.size, 'bytes, type:', blobType);
 
       // Zastavit stream
       stream.getTracks().forEach(track => track.stop());
@@ -2896,19 +2912,27 @@ function showAudioPreview(audioBlob) {
   previewPlayer.onerror = null;
   previewPlayer.oncanplay = null;
 
+  // Flag aby se error zobrazil jen jednou
+  let errorShown = false;
+
   // Pridat error handler
   previewPlayer.onerror = function(e) {
+    if (errorShown) return; // Zabranit opakovanemu zobrazeni
+    errorShown = true;
+
     logger.log('[Audio] Chyba pri nacitani nahravky:', e);
     // Skryt preview a zobrazit tlacitko pro nahravani
     previewContainer.style.display = 'none';
     document.getElementById('btnStartRecord').style.display = 'block';
-    alert('Nahravka se nepodarila nacist. Zkuste nahrat znovu.');
 
     // Uvolnit blob URL
     if (previewPlayer.src) {
       URL.revokeObjectURL(previewPlayer.src);
       previewPlayer.src = '';
     }
+
+    // Zobrazit info v console misto alertu
+    logger.error('[Audio] Nahravka se nepodarila nacist');
   };
 
   previewPlayer.src = audioUrl;
