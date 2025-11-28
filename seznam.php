@@ -278,6 +278,26 @@ if (!$isLoggedIn && !$isAdmin) {
   margin-top: 2rem !important;
 }
 
+/* DETAIL OVERLAY - BÍLÉ POZADÍ */
+#detailOverlay {
+  background: #ffffff !important;
+}
+
+#detailOverlay .modal-content {
+  border: none !important;
+  box-shadow: none !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Skrýt pull-to-refresh když je modal otevřený */
+.modal-overlay.active ~ #pull-refresh-indicator,
+#detailOverlay.active ~ #pull-refresh-indicator,
+body:has(.modal-overlay.active) #pull-refresh-indicator {
+  display: none !important;
+  height: 0 !important;
+}
+
 /* Barevné nádechy karet podle stavu (velmi světlé) */
 .order-box.status-bg-wait {
   background: rgba(255, 235, 59, 0.08) !important; /* Žlutá nádech - ČEKÁ */
