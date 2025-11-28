@@ -2492,6 +2492,49 @@ async function addNote(orderId, text) {
   }
 }
 
+async function deleteNote(noteId, orderId) {
+  if (!confirm('Opravdu chcete smazat tuto poznamku?')) {
+    return;
+  }
+
+  try {
+    const csrfToken = await getCSRFToken();
+
+    const formData = new FormData();
+    formData.append('action', 'delete');
+    formData.append('note_id', noteId);
+    formData.append('csrf_token', csrfToken);
+
+    const response = await fetch('api/notes_api.php', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      // Odstranit poznamku z DOM
+      const noteElement = document.querySelector(`[data-note-id="${noteId}"]`);
+      if (noteElement) {
+        noteElement.remove();
+      }
+
+      // Zkontrolovat zda jsou jeste nejake poznamky
+      const notesContainer = document.querySelector('.notes-container');
+      if (notesContainer && notesContainer.querySelectorAll('.note-item').length === 0) {
+        notesContainer.innerHTML = '<div class="empty-notes">Zatim zadne poznamky</div>';
+      }
+
+      await loadAll(ACTIVE_FILTER);
+    } else {
+      alert('Chyba: ' + (data.error || data.message || 'Neznama chyba'));
+    }
+  } catch (e) {
+    logger.error('Chyba pri mazani poznamky:', e);
+    alert('Chyba pri mazani poznamky: ' + e.message);
+  }
+}
+
 async function markNotesAsRead(orderId) {
   try {
     const record = WGS_DATA_CACHE.find(x => x.id == orderId || x.reklamace_id == orderId);
@@ -2548,16 +2591,20 @@ async function showNotes(recordOrId) {
     <div class="modal-body">
       <div class="notes-container">
         ${notes.length > 0
-          ? notes.map(note => `
-              <div class="note-item ${note.read ? '' : 'unread'}">
+          ? notes.map(note => {
+              const canDelete = CURRENT_USER && (CURRENT_USER.is_admin || note.author === CURRENT_USER.email);
+              return `
+              <div class="note-item ${note.read ? '' : 'unread'}" data-note-id="${note.id}">
                 <div class="note-header">
                   <span class="note-author">${note.author_name || note.author}</span>
                   <span class="note-time">${formatDateTime(note.timestamp)}</span>
+                  ${canDelete ? `<button class="note-delete-btn" data-action="deleteNote" data-note-id="${note.id}" data-order-id="${record.id}" title="Smazat poznamku">x</button>` : ''}
                 </div>
                 <div class="note-text">${Utils.escapeHtml(note.text)}</div>
               </div>
-            `).join('')
-          : '<div class="empty-notes">Zatím žádné poznámky</div>'
+            `;
+            }).join('')
+          : '<div class="empty-notes">Zatim zadne poznamky</div>'
         }
       </div>
 
@@ -3944,6 +3991,15 @@ document.addEventListener('click', (e) => {
     case 'saveNewNote':
       if (id && typeof saveNewNote === 'function') {
         saveNewNote(id);
+      }
+      break;
+
+    case 'deleteNote':
+      const noteId = target.dataset.noteId;
+      const orderId = target.dataset.orderId;
+      if (noteId && typeof deleteNote === 'function') {
+        e.stopPropagation();
+        deleteNote(noteId, orderId);
       }
       break;
 

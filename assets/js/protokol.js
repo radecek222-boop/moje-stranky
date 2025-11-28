@@ -178,6 +178,14 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("sign-date").value = today;
 
   setupAutoTranslate();
+  setupTextareaAutoResize();
+
+  // Spustit resize po nacteni dat s malym zpozdenim
+  setTimeout(() => {
+    if (window.triggerTextareaResize) {
+      window.triggerTextareaResize();
+    }
+  }, 300);
 
   // Propojení polí Vyřešeno? a Nutné vyjádření prodejce
   const solvedSelect = document.getElementById("solved");
@@ -210,6 +218,64 @@ function setupAutoTranslate() {
       }, 2500); // Zvýšeno z 1500ms - prevence lagování na pomalejších mobilech
     });
   });
+}
+
+/**
+ * Auto-resize textareas podle obsahu
+ * Zajistuje, ze se textarea automaticky zvetsuje podle delky textu
+ * Dulezite pro PDF export - text nebude orezan
+ */
+function setupTextareaAutoResize() {
+  const textareas = document.querySelectorAll('.split-section textarea');
+
+  function autoResize(textarea) {
+    // Ulozit puvodni hodnotu
+    const minHeight = parseInt(window.getComputedStyle(textarea).minHeight) || 60;
+
+    // Reset vysky pro spravny vypocet scrollHeight
+    textarea.style.height = 'auto';
+
+    // Nastavit novou vysku podle obsahu (minimalne minHeight)
+    const newHeight = Math.max(textarea.scrollHeight, minHeight);
+    textarea.style.height = newHeight + 'px';
+  }
+
+  textareas.forEach(textarea => {
+    // Auto-resize pri psani
+    textarea.addEventListener('input', () => autoResize(textarea));
+
+    // Auto-resize pri nacteni obsahu (pro predvyplnena data)
+    textarea.addEventListener('change', () => autoResize(textarea));
+
+    // Pocatecni resize pokud uz je obsah
+    if (textarea.value.trim().length > 0) {
+      // Maly delay pro zajisteni spravneho renderingu
+      setTimeout(() => autoResize(textarea), 100);
+    }
+  });
+
+  // Resize pri zmene orientace obrazovky (mobil)
+  window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+      textareas.forEach(textarea => autoResize(textarea));
+    }, 200);
+  });
+
+  // Resize pri zmene velikosti okna
+  window.addEventListener('resize', () => {
+    textareas.forEach(textarea => autoResize(textarea));
+  });
+
+  logger.log('[AutoResize] Textarea auto-resize aktivovan pro', textareas.length, 'poli');
+
+  // Globalni funkce pro manualni spusteni resize (volana po nacteni dat)
+  window.triggerTextareaResize = function() {
+    textareas.forEach(textarea => {
+      if (textarea.value.trim().length > 0) {
+        autoResize(textarea);
+      }
+    });
+  };
 }
 
 function initSignaturePad() {
@@ -677,6 +743,31 @@ async function generateProtocolPDF() {
     customerInfoContent.style.overflow = 'visible';
     logger.log('Zákaznický obsah nastaven jako viditelný v PDF');
   }
+
+  // Zkopírovat hodnoty a vysky textarea do clone
+  const originalTextareas = wrapper.querySelectorAll('textarea');
+  const cloneTextareas = clone.querySelectorAll('textarea');
+  originalTextareas.forEach((original, index) => {
+    if (cloneTextareas[index]) {
+      cloneTextareas[index].value = original.value;
+      // Zkopirovat vysku (dulezite pro auto-resize)
+      if (original.style.height) {
+        cloneTextareas[index].style.height = original.style.height;
+      }
+      // Nastavit min-height podle obsahu
+      cloneTextareas[index].style.minHeight = original.scrollHeight + 'px';
+    }
+  });
+  logger.log('Textarea hodnoty a vysky zkopirovany do clone');
+
+  // Zkopírovat hodnoty input a select do clone
+  const originalInputs = wrapper.querySelectorAll('input, select');
+  const cloneInputs = clone.querySelectorAll('input, select');
+  originalInputs.forEach((original, index) => {
+    if (cloneInputs[index]) {
+      cloneInputs[index].value = original.value;
+    }
+  });
 
   // Zkopírovat signature pad canvas obsah do clone
   const originalCanvas = wrapper.querySelector('#signature-pad');
@@ -2202,9 +2293,19 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Otevření modalu
-    btnPodepsat.addEventListener('click', () => {
-      otevritZakaznikModal();
+    // Otevření modalu - async kvuli pojistce prekladu
+    btnPodepsat.addEventListener('click', async () => {
+      // Zobrazit loading behem prekladu
+      btnPodepsat.disabled = true;
+      btnPodepsat.textContent = 'Pripravuji...';
+
+      try {
+        await otevritZakaznikModal();
+      } finally {
+        // Obnovit tlacitko
+        btnPodepsat.disabled = false;
+        btnPodepsat.textContent = 'Podepsat protokol';
+      }
     });
 
     // Zavření modalu
@@ -2231,9 +2332,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  function otevritZakaznikModal() {
+  async function otevritZakaznikModal() {
     const overlay = document.getElementById('zakaznikSchvaleniOverlay');
     const canvas = document.getElementById('zakaznikSchvaleniPad');
+
+    // POJISTKA: Vynutit preklad vsech poli pred podpisem
+    // Aby anglicke preklady byly vzdy aktualni v PDF
+    logger.log('[Podpis] Spoustim pojistku prekladu pred podpisem...');
+    const fieldsToTranslate = ['description', 'problem', 'repair'];
+
+    for (const field of fieldsToTranslate) {
+      const czField = document.getElementById(field + '-cz');
+      const enField = document.getElementById(field + '-en');
+
+      if (czField && enField && czField.value.trim().length > 5) {
+        // Pokud anglicke pole je prazdne nebo obsahuje "Prekladam...", vynutit preklad
+        if (!enField.value || enField.value === 'Prekladam...' || enField.value.trim() === '') {
+          logger.log('[Podpis] Prekladam pole:', field);
+          try {
+            await translateField(field, true);
+          } catch (e) {
+            logger.warn('[Podpis] Preklad selhal pro:', field, e);
+          }
+        }
+      }
+    }
+    logger.log('[Podpis] Pojistka prekladu dokoncena');
 
     // Naplnit souhrn daty z formuláře
     naplnitSouhrn();
