@@ -551,7 +551,31 @@ button.note-delete-btn:hover {
 .modal-content .note-header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.3rem;
+    flex-wrap: nowrap;
+}
+
+/* Autor a cas na jednom radku, tlacitko vpravo */
+.modal-body .note-header .note-author,
+.modal-content .note-header .note-author {
+    flex-shrink: 0;
+}
+
+.modal-body .note-header .note-time,
+.modal-content .note-header .note-time {
+    flex-shrink: 0;
+    margin-right: auto;
+}
+
+/* Delete button v headeru - vzdy viditelne */
+.modal-body .note-header .note-delete-btn,
+.modal-content .note-header .note-delete-btn {
+    flex-shrink: 0 !important;
+    display: inline-block !important;
+    visibility: visible !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    text-align: center !important;
 }
 
 /* Text poznámky - světle šedý */
