@@ -2293,9 +2293,19 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Otevření modalu
-    btnPodepsat.addEventListener('click', () => {
-      otevritZakaznikModal();
+    // Otevření modalu - async kvuli pojistce prekladu
+    btnPodepsat.addEventListener('click', async () => {
+      // Zobrazit loading behem prekladu
+      btnPodepsat.disabled = true;
+      btnPodepsat.textContent = 'Pripravuji...';
+
+      try {
+        await otevritZakaznikModal();
+      } finally {
+        // Obnovit tlacitko
+        btnPodepsat.disabled = false;
+        btnPodepsat.textContent = 'Podepsat protokol';
+      }
     });
 
     // Zavření modalu
@@ -2322,9 +2332,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  function otevritZakaznikModal() {
+  async function otevritZakaznikModal() {
     const overlay = document.getElementById('zakaznikSchvaleniOverlay');
     const canvas = document.getElementById('zakaznikSchvaleniPad');
+
+    // POJISTKA: Vynutit preklad vsech poli pred podpisem
+    // Aby anglicke preklady byly vzdy aktualni v PDF
+    logger.log('[Podpis] Spoustim pojistku prekladu pred podpisem...');
+    const fieldsToTranslate = ['description', 'problem', 'repair'];
+
+    for (const field of fieldsToTranslate) {
+      const czField = document.getElementById(field + '-cz');
+      const enField = document.getElementById(field + '-en');
+
+      if (czField && enField && czField.value.trim().length > 5) {
+        // Pokud anglicke pole je prazdne nebo obsahuje "Prekladam...", vynutit preklad
+        if (!enField.value || enField.value === 'Prekladam...' || enField.value.trim() === '') {
+          logger.log('[Podpis] Prekladam pole:', field);
+          try {
+            await translateField(field, true);
+          } catch (e) {
+            logger.warn('[Podpis] Preklad selhal pro:', field, e);
+          }
+        }
+      }
+    }
+    logger.log('[Podpis] Pojistka prekladu dokoncena');
 
     // Naplnit souhrn daty z formuláře
     naplnitSouhrn();
