@@ -2728,8 +2728,32 @@ window.wgsAudioRecorder = {
   audioBlob: null,
   isRecording: false,
   recordingStartTime: null,
-  recordingTimer: null
+  recordingTimer: null,
+  permissionGranted: false // Zapamatovat ze bylo povoleno
 };
+
+// Zkontrolovat stav opravneni mikrofonu
+async function checkMicrophonePermission() {
+  try {
+    // Pouzit Permissions API pokud je k dispozici
+    if (navigator.permissions && navigator.permissions.query) {
+      const result = await navigator.permissions.query({ name: 'microphone' });
+      logger.log('[Audio] Stav opravneni mikrofonu:', result.state);
+
+      if (result.state === 'granted') {
+        window.wgsAudioRecorder.permissionGranted = true;
+        return 'granted';
+      } else if (result.state === 'denied') {
+        return 'denied';
+      }
+      return 'prompt'; // Jeste se nezeptalo
+    }
+  } catch (e) {
+    // Permissions API neni podporovano (napr. Safari)
+    logger.log('[Audio] Permissions API neni podporovano, zkusim primo');
+  }
+  return 'unknown';
+}
 
 async function startRecording(orderId) {
   logger.log('[Audio] Spoustim nahravani...');
@@ -2740,8 +2764,28 @@ async function startRecording(orderId) {
       throw new Error('Vas prohlizec nepodporuje nahravani zvuku');
     }
 
+    // Zkontrolovat stav opravneni
+    const permissionState = await checkMicrophonePermission();
+
+    if (permissionState === 'denied') {
+      throw new Error('Pristup k mikrofonu byl trvale odepren. Povolte ho v nastaveni prohlizece.');
+    }
+
+    // Pokud jeste nebylo povoleno, zobrazit vysvetleni (jen poprve)
+    if (!window.wgsAudioRecorder.permissionGranted && permissionState !== 'granted') {
+      // Ulozit do localStorage ze jsme uz vysvetleni zobrazili
+      const explanationShown = localStorage.getItem('wgs_mic_explained');
+      if (!explanationShown) {
+        alert('Pro nahravani hlasovych poznamek potrebujeme pristup k mikrofonu. Po kliknuti na OK vas prohlizec pozada o povoleni.');
+        localStorage.setItem('wgs_mic_explained', '1');
+      }
+    }
+
     // Pozadat o pristup k mikrofonu
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    // Zapamatovat ze bylo povoleno
+    window.wgsAudioRecorder.permissionGranted = true;
 
     // Vybrat podporovany format
     let mimeType = 'audio/webm';
