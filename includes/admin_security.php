@@ -430,6 +430,7 @@ endif;
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <h2 style="margin: 0; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Registrační klíče</h2>
             <div style="display: flex; gap: 0.5rem;">
+                <button onclick="otevritPozvanku()" class="cc-btn cc-btn-primary" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">Pozvat</button>
                 <button onclick="vytvorNovyKlic()" class="cc-btn cc-btn-success" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">+ Nový</button>
                 <button onclick="nactiRegistracniKlice()" class="cc-btn cc-btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">Obnovit</button>
             </div>
@@ -1100,6 +1101,420 @@ async function odeslatVytvoreniKlice() {
         alert('Chyba: ' + chyba.message);
         console.error('[Security] Chyba vytváření klíče:', chyba);
     }
+}
+
+// ==========================================
+// POZVÁNKOVÝ SYSTÉM
+// ==========================================
+
+// Otevřít modal pro pozvánku
+function otevritPozvanku() {
+    // Odstranit existující modal
+    const existujici = document.getElementById('modalPozvanka');
+    if (existujici) existujici.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'modalPozvanka';
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.7); display: flex;
+        align-items: center; justify-content: center; z-index: 10000;
+        padding: 20px; overflow-y: auto;
+    `;
+
+    modal.innerHTML = `
+        <div style="background: #1a1a1a; padding: 30px; border-radius: 12px;
+                    max-width: 700px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                    border: 1px solid #333; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: #fff; font-size: 1.3rem;">
+                    Pozvat uzivatele do systemu
+                </h3>
+                <button onclick="document.getElementById('modalPozvanka').remove()"
+                        style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+
+            <!-- Výběr role -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Typ pozvanky</label>
+                <div style="display: flex; gap: 10px;">
+                    <label style="flex: 1; display: flex; align-items: center; padding: 15px;
+                                  background: #252525; border-radius: 8px; cursor: pointer;
+                                  border: 2px solid transparent;" id="labelTechnik">
+                        <input type="radio" name="typPozvanky" value="technik" onchange="aktualizovatNahled()"
+                               style="width: 18px; height: 18px; margin-right: 12px; accent-color: #fff;">
+                        <div>
+                            <div style="color: #fff; font-weight: 600;">Technik</div>
+                            <div style="color: #888; font-size: 0.8rem;">Servisni technik</div>
+                        </div>
+                    </label>
+                    <label style="flex: 1; display: flex; align-items: center; padding: 15px;
+                                  background: #252525; border-radius: 8px; cursor: pointer;
+                                  border: 2px solid transparent;" id="labelProdejce">
+                        <input type="radio" name="typPozvanky" value="prodejce" onchange="aktualizovatNahled()"
+                               style="width: 18px; height: 18px; margin-right: 12px; accent-color: #fff;">
+                        <div>
+                            <div style="color: #fff; font-weight: 600;">Prodejce</div>
+                            <div style="color: #888; font-size: 0.8rem;">Obchodni zastupce</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Výběr klíče -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Registracni klic</label>
+                <select id="vyberKlice" onchange="aktualizovatNahled()" style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444;
+                        border-radius: 6px; color: #fff; font-size: 0.9rem;">
+                    <option value="">-- Nacitam klice... --</option>
+                </select>
+                <div style="color: #666; font-size: 0.75rem; margin-top: 5px;">Nebo bude vytvoren novy klic automaticky</div>
+            </div>
+
+            <!-- Emaily -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">
+                    Emailove adresy (kazdy email na novy radek, max 30)
+                </label>
+                <textarea id="emailyPozvanky" rows="5" placeholder="jan.novak@example.com&#10;petr.svoboda@example.com&#10;marie.kralova@example.com"
+                          style="width: 100%; padding: 12px; background: #252525; border: 1px solid #444;
+                          border-radius: 6px; color: #fff; font-size: 0.9rem; resize: vertical; font-family: monospace;"></textarea>
+                <div style="color: #666; font-size: 0.75rem; margin-top: 5px;">
+                    Zadano: <span id="pocetEmailu">0</span> / 30 emailu
+                </div>
+            </div>
+
+            <!-- Náhled šablony -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Nahled emailu</label>
+                <div id="nahledSablony" style="background: #fff; color: #333; padding: 20px; border-radius: 6px;
+                     max-height: 300px; overflow-y: auto; font-size: 0.85rem; line-height: 1.6;">
+                    <div style="text-align: center; color: #999; padding: 40px;">
+                        Vyberte typ pozvanky pro zobrazeni nahledu
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tlačítka -->
+            <div style="display: flex; gap: 10px;">
+                <button onclick="odeslatPozvanky()" id="btnOdeslatPozvanky" disabled
+                        style="flex: 1; padding: 14px; background: #fff; color: #000; border: none;
+                        border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;
+                        opacity: 0.5; transition: opacity 0.2s;">
+                    Odeslat pozvanky
+                </button>
+                <button onclick="document.getElementById('modalPozvanka').remove()"
+                        style="flex: 1; padding: 14px; background: #333; color: #fff;
+                        border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+                    Zrusit
+                </button>
+            </div>
+
+            <!-- Status -->
+            <div id="statusPozvanky" style="margin-top: 15px; display: none; padding: 12px; border-radius: 6px;"></div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Načíst klíče do selectu
+    nacistKliceProPozvanku();
+
+    // Event listener pro počítání emailů
+    document.getElementById('emailyPozvanky').addEventListener('input', function() {
+        const emaily = this.value.split('\\n').filter(e => e.trim() !== '');
+        document.getElementById('pocetEmailu').textContent = emaily.length;
+        aktualizovatTlacitkoOdeslat();
+    });
+
+    // Zavřít při kliknutí na pozadí
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+// Načíst klíče pro pozvánku
+async function nacistKliceProPozvanku() {
+    try {
+        const odpoved = await fetch('/api/admin_api.php?action=get_keys');
+        const data = await odpoved.json();
+
+        const select = document.getElementById('vyberKlice');
+        if (data.status === 'success' && data.keys) {
+            let options = '<option value="auto">Vytvorit novy klic automaticky</option>';
+            data.keys.forEach(klic => {
+                if (klic.is_active) {
+                    const limit = klic.max_usage === null ? 'neomezeno' : klic.max_usage;
+                    options += `<option value="${klic.key_code}" data-type="${klic.key_type}">
+                        ${klic.key_code} (${klic.key_type.toUpperCase()}) - ${klic.usage_count}/${limit}
+                    </option>`;
+                }
+            });
+            select.innerHTML = options;
+        }
+    } catch (e) {
+        console.error('Chyba načítání klíčů:', e);
+    }
+}
+
+// Aktualizovat náhled šablony
+function aktualizovatNahled() {
+    const typ = document.querySelector('input[name="typPozvanky"]:checked')?.value;
+    const nahled = document.getElementById('nahledSablony');
+    const klicSelect = document.getElementById('vyberKlice');
+    const klic = klicSelect.value === 'auto' ? 'BUDE-VYGENEROVAN' : klicSelect.value;
+
+    if (!typ) {
+        nahled.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">Vyberte typ pozvanky pro zobrazeni nahledu</div>';
+        return;
+    }
+
+    // Aktualizovat styl labelů
+    document.getElementById('labelTechnik').style.borderColor = typ === 'technik' ? '#fff' : 'transparent';
+    document.getElementById('labelProdejce').style.borderColor = typ === 'prodejce' ? '#fff' : 'transparent';
+
+    const sablona = ziskatSablonuPozvanky(typ, klic);
+    nahled.innerHTML = sablona;
+
+    aktualizovatTlacitkoOdeslat();
+}
+
+// Aktualizovat stav tlačítka odeslat
+function aktualizovatTlacitkoOdeslat() {
+    const typ = document.querySelector('input[name="typPozvanky"]:checked')?.value;
+    const emaily = document.getElementById('emailyPozvanky').value.split('\\n').filter(e => e.trim() !== '');
+    const btn = document.getElementById('btnOdeslatPozvanky');
+
+    if (typ && emaily.length > 0 && emaily.length <= 30) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+    } else {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+    }
+}
+
+// Získat HTML šablonu pro pozvánku
+function ziskatSablonuPozvanky(typ, klic) {
+    const appUrl = window.location.origin;
+    const rokAktualni = new Date().getFullYear();
+
+    if (typ === 'technik') {
+        return `
+            <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <!-- Header -->
+                <div style="background: #1a1a1a; color: #fff; padding: 30px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 24px; font-weight: 600;">WGS - White Glove Service</h1>
+                    <p style="margin: 10px 0 0; color: #aaa; font-size: 14px;">Servisni system Natuzzi</p>
+                </div>
+
+                <!-- Body -->
+                <div style="padding: 30px; background: #f9f9f9;">
+                    <h2 style="color: #333; margin-top: 0;">Vitejte v tymu WGS!</h2>
+
+                    <p style="color: #555;">Byli jste pozvan/a jako <strong>servisni technik</strong> do systemu White Glove Service pro spravu servisnich zakazek Natuzzi.</p>
+
+                    <div style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #333;">Vas registracni klic:</h3>
+                        <div style="background: #1a1a1a; color: #fff; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 18px; text-align: center; letter-spacing: 2px;">
+                            ${klic}
+                        </div>
+                    </div>
+
+                    <h3 style="color: #333;">Jak zacit:</h3>
+                    <ol style="color: #555; line-height: 1.8;">
+                        <li>Prejdete na stranku registrace: <a href="${appUrl}/registration.php" style="color: #000;">${appUrl}/registration.php</a></li>
+                        <li>Zadejte registracni klic uvedeny vyse</li>
+                        <li>Vyplnte sve udaje (jmeno, email, telefon)</li>
+                        <li>Vytvorte si heslo (min. 12 znaku)</li>
+                        <li>Po registraci se prihlaste na: <a href="${appUrl}/login.php" style="color: #000;">${appUrl}/login.php</a></li>
+                    </ol>
+
+                    <h3 style="color: #333;">Co muzete delat jako technik:</h3>
+                    <ul style="color: #555; line-height: 1.8;">
+                        <li><strong>Prohlizet zakazky</strong> - Vidite vsechny servisni pozadavky prirazene vam</li>
+                        <li><strong>Aktualizovat stav</strong> - Menit stav zakazky (Ceka / Domluvena / Hotovo)</li>
+                        <li><strong>Vyplnovat protokoly</strong> - Dokumentovat provedenou praci</li>
+                        <li><strong>Nahravat fotografie</strong> - Pred a po oprave</li>
+                        <li><strong>Prohlizet mapu</strong> - Videt polohu zakaznika a vypocitat vzdalenost</li>
+                    </ul>
+
+                    <h3 style="color: #333;">Budete informovani o:</h3>
+                    <ul style="color: #555; line-height: 1.8;">
+                        <li>Novych zakazkach prirazenych vam</li>
+                        <li>Zmenach terminu navstev</li>
+                        <li>Dulezitych aktualizacich systemu</li>
+                    </ul>
+
+                    <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin: 20px 0;">
+                        <strong style="color: #856404;">Dulezite:</strong>
+                        <span style="color: #856404;">Tento registracni klic je urcen pouze pro vas. Nesdílejte jej s nikym dalsim.</span>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="background: #1a1a1a; color: #aaa; padding: 25px; text-align: center; font-size: 12px;">
+                    <p style="margin: 0 0 10px;"><strong style="color: #fff;">White Glove Service</strong></p>
+                    <p style="margin: 0 0 5px;">Autorizovany servis Natuzzi pro Ceskou republiku a Slovensko</p>
+                    <p style="margin: 0 0 15px;">
+                        <a href="${appUrl}" style="color: #aaa;">www.wgs-service.cz</a>
+                    </p>
+                    <p style="margin: 0; color: #666; font-size: 11px;">&copy; ${rokAktualni} WGS Service. Vsechna prava vyhrazena.</p>
+                </div>
+            </div>
+        `;
+    } else if (typ === 'prodejce') {
+        return `
+            <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <!-- Header -->
+                <div style="background: #1a1a1a; color: #fff; padding: 30px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 24px; font-weight: 600;">WGS - White Glove Service</h1>
+                    <p style="margin: 10px 0 0; color: #aaa; font-size: 14px;">Servisni system Natuzzi</p>
+                </div>
+
+                <!-- Body -->
+                <div style="padding: 30px; background: #f9f9f9;">
+                    <h2 style="color: #333; margin-top: 0;">Vitejte v tymu WGS!</h2>
+
+                    <p style="color: #555;">Byli jste pozvan/a jako <strong>prodejce</strong> do systemu White Glove Service pro spravu servisnich pozadavku Natuzzi.</p>
+
+                    <div style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #333;">Vas registracni klic:</h3>
+                        <div style="background: #1a1a1a; color: #fff; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 18px; text-align: center; letter-spacing: 2px;">
+                            ${klic}
+                        </div>
+                    </div>
+
+                    <h3 style="color: #333;">Jak zacit:</h3>
+                    <ol style="color: #555; line-height: 1.8;">
+                        <li>Prejdete na stranku registrace: <a href="${appUrl}/registration.php" style="color: #000;">${appUrl}/registration.php</a></li>
+                        <li>Zadejte registracni klic uvedeny vyse</li>
+                        <li>Vyplnte sve udaje (jmeno, email, telefon)</li>
+                        <li>Vytvorte si heslo (min. 12 znaku)</li>
+                        <li>Po registraci se prihlaste na: <a href="${appUrl}/login.php" style="color: #000;">${appUrl}/login.php</a></li>
+                    </ol>
+
+                    <h3 style="color: #333;">Co muzete delat jako prodejce:</h3>
+                    <ul style="color: #555; line-height: 1.8;">
+                        <li><strong>Zadavat nove reklamace</strong> - Vytvorit servisni pozadavek pro zakaznika</li>
+                        <li><strong>Sledovat stav</strong> - Videt aktualni stav vsech vasich zakazek</li>
+                        <li><strong>Prohlizet historii</strong> - Pristup k historii reklamaci a servisu</li>
+                        <li><strong>Nahravat dokumenty</strong> - Pridavat faktury, fotky a dalsi podklady</li>
+                        <li><strong>Komunikovat</strong> - Pridavat poznamky k zakazkam</li>
+                    </ul>
+
+                    <h3 style="color: #333;">Budete informovani o:</h3>
+                    <ul style="color: #555; line-height: 1.8;">
+                        <li>Zmenach stavu vasich zakazek</li>
+                        <li>Dokonceni servisu</li>
+                        <li>Dulezitych aktualizacich systemu</li>
+                    </ul>
+
+                    <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin: 20px 0;">
+                        <strong style="color: #856404;">Dulezite:</strong>
+                        <span style="color: #856404;">Tento registracni klic je urcen pouze pro vas. Nesdílejte jej s nikym dalsim.</span>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="background: #1a1a1a; color: #aaa; padding: 25px; text-align: center; font-size: 12px;">
+                    <p style="margin: 0 0 10px;"><strong style="color: #fff;">White Glove Service</strong></p>
+                    <p style="margin: 0 0 5px;">Autorizovany servis Natuzzi pro Ceskou republiku a Slovensko</p>
+                    <p style="margin: 0 0 15px;">
+                        <a href="${appUrl}" style="color: #aaa;">www.wgs-service.cz</a>
+                    </p>
+                    <p style="margin: 0; color: #666; font-size: 11px;">&copy; ${rokAktualni} WGS Service. Vsechna prava vyhrazena.</p>
+                </div>
+            </div>
+        `;
+    }
+
+    return '';
+}
+
+// Odeslat pozvánky
+async function odeslatPozvanky() {
+    const typ = document.querySelector('input[name="typPozvanky"]:checked')?.value;
+    const emailyText = document.getElementById('emailyPozvanky').value;
+    const klicSelect = document.getElementById('vyberKlice');
+    const klic = klicSelect.value;
+    const statusEl = document.getElementById('statusPozvanky');
+    const btn = document.getElementById('btnOdeslatPozvanky');
+
+    // Parsovat emaily
+    const emaily = emailyText.split('\\n')
+        .map(e => e.trim())
+        .filter(e => e !== '' && e.includes('@'));
+
+    if (emaily.length === 0) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = '#f8d7da';
+        statusEl.style.color = '#721c24';
+        statusEl.textContent = 'Zadejte alespon jeden platny email';
+        return;
+    }
+
+    if (emaily.length > 30) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = '#f8d7da';
+        statusEl.style.color = '#721c24';
+        statusEl.textContent = 'Maximalne 30 emailu najednou';
+        return;
+    }
+
+    // Disable button
+    btn.disabled = true;
+    btn.textContent = 'Odesilam...';
+    statusEl.style.display = 'block';
+    statusEl.style.background = '#d1ecf1';
+    statusEl.style.color = '#0c5460';
+    statusEl.textContent = `Odesilam pozvanky na ${emaily.length} adres...`;
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (!csrfToken) {
+            throw new Error('CSRF token neni k dispozici');
+        }
+
+        const odpoved = await fetch('/api/admin_api.php?action=send_invitations', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                typ: typ,
+                klic: klic,
+                emaily: emaily,
+                csrf_token: csrfToken
+            })
+        });
+
+        const data = await odpoved.json();
+
+        if (data.status === 'success') {
+            statusEl.style.background = '#d4edda';
+            statusEl.style.color = '#155724';
+            statusEl.innerHTML = `<strong>Uspech!</strong> Odeslano ${data.sent_count} pozvanek.` +
+                (data.key_code ? ` Pouzity klic: <code>${data.key_code}</code>` : '');
+
+            // Refresh klíčů
+            nactiRegistracniKlice();
+
+            // Vyčistit formulář po 3s
+            setTimeout(() => {
+                document.getElementById('emailyPozvanky').value = '';
+                document.getElementById('pocetEmailu').textContent = '0';
+            }, 3000);
+        } else {
+            throw new Error(data.message || 'Nepodarilo se odeslat pozvanky');
+        }
+    } catch (chyba) {
+        statusEl.style.background = '#f8d7da';
+        statusEl.style.color = '#721c24';
+        statusEl.textContent = 'Chyba: ' + chyba.message;
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Odeslat pozvanky';
 }
 
 // Smazat klíč

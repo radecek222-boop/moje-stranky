@@ -150,6 +150,14 @@ try {
             handleUpdateEmailRecipients($pdo, $payload);
             break;
 
+        case 'send_invitations':
+            handleSendInvitations($pdo, $payload);
+            break;
+
+        case 'get_keys':
+            handleListKeys($pdo);
+            break;
+
         default:
             respondError('Neznámá akce.', 400);
     }
@@ -941,5 +949,370 @@ function handleUpdateEmailRecipients(PDO $pdo, array $payload): void
         'template_id' => $templateId,
         'recipients' => $validatedRecipients
     ]);
+}
+
+/**
+ * Odeslat pozvánky na registraci
+ */
+function handleSendInvitations(PDO $pdo, array $payload): void
+{
+    $typ = strtolower(trim($payload['typ'] ?? ''));
+    $klic = trim($payload['klic'] ?? '');
+    $emaily = $payload['emaily'] ?? [];
+
+    // Validace typu
+    if (!in_array($typ, ['technik', 'prodejce'], true)) {
+        throw new InvalidArgumentException('Neplatny typ pozvanky');
+    }
+
+    // Validace emailů
+    if (!is_array($emaily) || count($emaily) === 0) {
+        throw new InvalidArgumentException('Zadejte alespon jeden email');
+    }
+
+    if (count($emaily) > 30) {
+        throw new InvalidArgumentException('Maximalne 30 emailu najednou');
+    }
+
+    // Filtrovat a validovat emaily
+    $platneEmaily = [];
+    foreach ($emaily as $email) {
+        $email = trim($email);
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $platneEmaily[] = $email;
+        }
+    }
+
+    if (count($platneEmaily) === 0) {
+        throw new InvalidArgumentException('Zadny z emailu neni platny');
+    }
+
+    // Získat nebo vytvořit klíč
+    $pouzityKlic = '';
+    if ($klic === 'auto' || $klic === '') {
+        // Vytvořit nový klíč
+        $prefix = strtoupper(substr($typ, 0, 3));
+        $pouzityKlic = generateRegistrationKey($prefix);
+
+        $stmt = $pdo->prepare(
+            'INSERT INTO wgs_registration_keys (key_code, key_type, max_usage, usage_count, is_active, created_at)
+             VALUES (:key_code, :key_type, NULL, 0, 1, NOW())'
+        );
+        $stmt->execute([
+            ':key_code' => $pouzityKlic,
+            ':key_type' => $typ
+        ]);
+    } else {
+        // Ověřit že klíč existuje a je aktivní
+        $stmt = $pdo->prepare('SELECT key_code, key_type, is_active FROM wgs_registration_keys WHERE key_code = :klic');
+        $stmt->execute([':klic' => $klic]);
+        $klicData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$klicData) {
+            throw new InvalidArgumentException('Registracni klic nebyl nalezen');
+        }
+        if (!$klicData['is_active']) {
+            throw new InvalidArgumentException('Registracni klic neni aktivni');
+        }
+
+        $pouzityKlic = $klicData['key_code'];
+    }
+
+    // Připravit email šablonu
+    $appUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'www.wgs-service.cz');
+    $rok = date('Y');
+    $predmet = $typ === 'technik'
+        ? 'Pozvanka do systemu WGS - Servisni technik'
+        : 'Pozvanka do systemu WGS - Prodejce';
+
+    $htmlSablona = vytvorPozvankovouSablonu($typ, $pouzityKlic, $appUrl, $rok);
+
+    // Odeslat emaily
+    $odeslanoPocet = 0;
+    $chyby = [];
+
+    foreach ($platneEmaily as $email) {
+        try {
+            // Použít email queue
+            $stmt = $pdo->prepare("
+                INSERT INTO wgs_email_queue (to_email, subject, body, status, created_at, scheduled_at)
+                VALUES (:to_email, :subject, :body, 'pending', NOW(), NOW())
+            ");
+            $stmt->execute([
+                ':to_email' => $email,
+                ':subject' => $predmet,
+                ':body' => $htmlSablona
+            ]);
+            $odeslanoPocet++;
+        } catch (Exception $e) {
+            $chyby[] = $email . ': ' . $e->getMessage();
+            error_log("Chyba odeslani pozvanky na {$email}: " . $e->getMessage());
+        }
+    }
+
+    respondSuccess([
+        'sent_count' => $odeslanoPocet,
+        'key_code' => $pouzityKlic,
+        'errors' => $chyby
+    ]);
+}
+
+/**
+ * Vytvořit HTML šablonu pro pozvánku - SUPER JEDNODUCHÉ pro netechnické uživatele
+ */
+function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, string $rok): string
+{
+    $roleNazev = $typ === 'technik' ? 'servisni technik' : 'prodejce';
+    $roleVelke = $typ === 'technik' ? 'TECHNIK' : 'PRODEJCE';
+
+    // Specifické funkce podle role
+    $funkce = '';
+    $navodObjednatServis = '';
+
+    if ($typ === 'technik') {
+        $funkce = '
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #333; margin-top: 0; font-size: 16px;">Co budete moct delat:</h3>
+                <ul style="color: #555; line-height: 2; margin: 0; padding-left: 20px;">
+                    <li>Videt sve prirazene zakazky</li>
+                    <li>Menit stav zakazky (Ceka / Domluvena / Hotovo)</li>
+                    <li>Vyplnovat servisni protokoly</li>
+                    <li>Nahravat fotky pred a po oprave</li>
+                    <li>Videt adresu zakaznika na mape</li>
+                </ul>
+            </div>
+        ';
+    } else {
+        $funkce = '
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #333; margin-top: 0; font-size: 16px;">Co budete moct delat:</h3>
+                <ul style="color: #555; line-height: 2; margin: 0; padding-left: 20px;">
+                    <li>Zadavat nove reklamace pro zakazniky</li>
+                    <li>Sledovat stav vasich zakazek</li>
+                    <li>Videt historii vsech reklamaci</li>
+                    <li>Nahravat dokumenty a fotky</li>
+                    <li>Pridavat poznamky k zakazkam</li>
+                </ul>
+            </div>
+        ';
+
+        // Návod na vyplnění objednávky servisu - POUZE PRO PRODEJCE
+        $navodObjednatServis = '
+            <div style="border: 2px solid #333; border-radius: 8px; padding: 25px; margin: 30px 0;">
+                <h3 style="color: #333; margin: 0 0 20px; font-size: 18px; border-bottom: 2px solid #333; padding-bottom: 10px;">
+                    JAK OBJEDNAT SERVIS PRO ZAKAZNIKA
+                </h3>
+
+                <p style="color: #555; font-size: 14px; margin: 0 0 20px;">
+                    Po prihlaseni kliknete na tlacitko <strong>"Objednat servis"</strong> nebo prejdete na:
+                    <a href="' . $appUrl . '/novareklamace.php" style="color: #333;">' . $appUrl . '/novareklamace.php</a>
+                </p>
+
+                <h4 style="color: #333; margin: 20px 0 10px; font-size: 15px;">Formular ma 4 casti:</h4>
+
+                <!-- CAST 1 -->
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">1. TYP POZADAVKU</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Reklamace</strong> - zavada na vyrobku v zarucni dobe</li>
+                        <li><strong>Servis</strong> - placena oprava mimo zaruku</li>
+                        <li><strong>Instalace</strong> - montaz noveho nabytku</li>
+                    </ul>
+                </div>
+
+                <!-- CAST 2 -->
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">2. UDAJE O ZAKAZNIKOVI</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Jmeno a prijmeni</strong> - cele jmeno zakaznika</li>
+                        <li><strong>Telefon</strong> - na ktere cislo volat</li>
+                        <li><strong>Email</strong> - pro zaslani potvrzeni</li>
+                        <li><strong>Adresa</strong> - ulice, mesto, PSC (kde se bude opravovat)</li>
+                    </ul>
+                </div>
+
+                <!-- CAST 3 -->
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">3. UDAJE O VYROBKU</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Model</strong> - nazev modelu (napr. "Natuzzi Editions B845")</li>
+                        <li><strong>Cislo objednavky/faktury</strong> - pro dohledani v systemu</li>
+                        <li><strong>Datum prodeje</strong> - kdy byl nakoupen</li>
+                        <li><strong>Seriove cislo</strong> - pokud je k dispozici</li>
+                        <li><strong>Barva/provedeni</strong> - popis barvy a materialu</li>
+                    </ul>
+                </div>
+
+                <!-- CAST 4 -->
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">4. POPIS PROBLEMU</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Popis zavady</strong> - co presne je spatne (cim podrobneji, tim lepe)</li>
+                        <li><strong>Fotografie</strong> - nahrajte fotky zavady (pomaha technikovi)</li>
+                        <li><strong>Doplnujici informace</strong> - cokoli dalsiho (pristup k domu, kdy je zakaznik doma, apod.)</li>
+                    </ul>
+                </div>
+
+                <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 6px; padding: 15px; margin-top: 15px;">
+                    <p style="color: #155724; margin: 0; font-size: 13px;">
+                        <strong>TIP:</strong> Po odeslani formulare dostane zakaznik automaticky email s potvrzenim. Vy uvidite zakazku v seznamu a muzete sledovat jeji stav.
+                    </p>
+                </div>
+            </div>
+        ';
+    }
+
+    return '
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background: #f0f0f0;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background: #f0f0f0; padding: 20px;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+
+                    <!-- HLAVICKA -->
+                    <tr>
+                        <td style="background: #1a1a1a; padding: 30px; text-align: center;">
+                            <h1 style="color: #fff; margin: 0; font-size: 28px; font-weight: bold;">WGS</h1>
+                            <p style="color: #888; margin: 10px 0 0; font-size: 14px;">White Glove Service</p>
+                        </td>
+                    </tr>
+
+                    <!-- OBSAH -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+
+                            <!-- UVITANI -->
+                            <h2 style="color: #333; margin: 0 0 20px; font-size: 22px;">Dobry den!</h2>
+
+                            <p style="color: #555; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+                                Byli jste pozvani jako <strong>' . $roleNazev . '</strong> do systemu White Glove Service pro spravu servisnich zakazek Natuzzi.
+                            </p>
+
+                            <!-- DATUM SPUSTENI -->
+                            <div style="background: #e8f4fd; border: 2px solid #333; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+                                <p style="color: #333; margin: 0; font-size: 16px;">
+                                    <strong>System bude spusten od 1. ledna 2026</strong>
+                                </p>
+                                <p style="color: #555; margin: 10px 0 0; font-size: 14px;">
+                                    Zaregistrujte se prosim predem, abyste byli pripraveni.
+                                </p>
+                            </div>
+
+                            <!-- REGISTRACNI KLIC - VELKY A ZRETELNY -->
+                            <div style="background: #1a1a1a; padding: 25px; border-radius: 8px; text-align: center; margin: 30px 0;">
+                                <p style="color: #888; margin: 0 0 10px; font-size: 14px;">VAS REGISTRACNI KLIC:</p>
+                                <div style="color: #fff; font-size: 28px; font-weight: bold; letter-spacing: 3px; font-family: monospace;">
+                                    ' . htmlspecialchars($klic) . '
+                                </div>
+                                <p style="color: #666; margin: 15px 0 0; font-size: 12px;">Zkopirujte tento klic - budete ho potrebovat pri registraci</p>
+                            </div>
+
+                            <!-- NAVOD KROK ZA KROKEM -->
+                            <h3 style="color: #333; margin: 30px 0 20px; font-size: 18px; border-bottom: 2px solid #333; padding-bottom: 10px;">
+                                JAK SE ZAREGISTROVAT (3 jednoduche kroky)
+                            </h3>
+
+                            <!-- KROK 1 -->
+                            <div style="display: flex; margin-bottom: 25px; align-items: flex-start;">
+                                <div style="background: #1a1a1a; color: #fff; width: 35px; height: 35px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; flex-shrink: 0;">1</div>
+                                <div style="margin-left: 15px; flex: 1;">
+                                    <p style="color: #333; margin: 0 0 5px; font-weight: bold; font-size: 16px;">Otevrete stranku registrace</p>
+                                    <p style="color: #555; margin: 0 0 10px; font-size: 14px;">Kliknete na tlacitko nize nebo zkopirujte odkaz do prohlizece:</p>
+                                    <a href="' . $appUrl . '/registration.php" style="display: inline-block; background: #333; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">OTEVRIT REGISTRACI</a>
+                                    <p style="color: #888; margin: 10px 0 0; font-size: 12px; word-break: break-all;">' . $appUrl . '/registration.php</p>
+                                </div>
+                            </div>
+
+                            <!-- KROK 2 -->
+                            <div style="display: flex; margin-bottom: 25px; align-items: flex-start;">
+                                <div style="background: #1a1a1a; color: #fff; width: 35px; height: 35px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; flex-shrink: 0;">2</div>
+                                <div style="margin-left: 15px; flex: 1;">
+                                    <p style="color: #333; margin: 0 0 5px; font-weight: bold; font-size: 16px;">Vyplnte formular</p>
+                                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.8;">
+                                        <li><strong>Registracni klic</strong> - vlozte klic z tohoto emailu (viz vyse)</li>
+                                        <li><strong>Jmeno a prijmeni</strong> - vase cele jmeno</li>
+                                        <li><strong>Email</strong> - vase emailova adresa</li>
+                                        <li><strong>Telefon</strong> - vase telefonni cislo</li>
+                                        <li><strong>Heslo</strong> - vymyslete si heslo (minimalne 12 znaku)</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- KROK 3 -->
+                            <div style="display: flex; margin-bottom: 25px; align-items: flex-start;">
+                                <div style="background: #1a1a1a; color: #fff; width: 35px; height: 35px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; flex-shrink: 0;">3</div>
+                                <div style="margin-left: 15px; flex: 1;">
+                                    <p style="color: #333; margin: 0 0 5px; font-weight: bold; font-size: 16px;">Prihlaste se</p>
+                                    <p style="color: #555; margin: 0 0 10px; font-size: 14px;">Po uspesne registraci se muzete prihlasit:</p>
+                                    <a href="' . $appUrl . '/login.php" style="display: inline-block; background: #666; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-size: 14px;">PRIHLASIT SE</a>
+                                </div>
+                            </div>
+
+                            <!-- FUNKCE PODLE ROLE -->
+                            ' . $funkce . '
+
+                            <!-- NAVOD NA OBJEDNANI SERVISU (pouze pro prodejce) -->
+                            ' . $navodObjednatServis . '
+
+                            <!-- DULEZITE UPOZORNENI -->
+                            <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin: 25px 0;">
+                                <p style="color: #856404; margin: 0; font-size: 14px;">
+                                    <strong>Dulezite:</strong> Registracni klic je urcen pouze pro vas. Prosim, nesdílejte ho s nikym dalsim.
+                                </p>
+                            </div>
+
+                            <!-- SKOLENI A PODPORA -->
+                            <div style="background: #f5f5f5; border-radius: 8px; padding: 25px; margin: 25px 0;">
+                                <h3 style="color: #333; margin: 0 0 15px; font-size: 16px; text-align: center;">Potrebujete vysvetlit, jak system funguje?</h3>
+
+                                <p style="color: #555; font-size: 14px; text-align: center; margin: 0 0 20px; line-height: 1.6;">
+                                    Zadny problem! Radi vas <strong>proskolime po telefonu</strong> nebo <strong>osobne</strong>.<br>
+                                    Staci se nam ozvat a domluvime se.
+                                </p>
+
+                                <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                                    <div style="text-align: center;">
+                                        <p style="color: #333; margin: 0 0 5px; font-weight: bold; font-size: 14px;">Telefon</p>
+                                        <a href="tel:+420777123456" style="color: #333; font-size: 16px; text-decoration: none;">+420 777 123 456</a>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <p style="color: #333; margin: 0 0 5px; font-weight: bold; font-size: 14px;">Email</p>
+                                        <a href="mailto:info@wgs-service.cz" style="color: #333; font-size: 16px; text-decoration: none;">info@wgs-service.cz</a>
+                                    </div>
+                                </div>
+
+                                <p style="color: #888; font-size: 12px; text-align: center; margin: 20px 0 0;">
+                                    Skoleni je zdarma a trva priblizne 15-30 minut.
+                                </p>
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <!-- PATICKA -->
+                    <tr>
+                        <td style="background: #1a1a1a; padding: 30px; text-align: center;">
+                            <p style="color: #fff; margin: 0 0 5px; font-size: 16px; font-weight: bold;">White Glove Service</p>
+                            <p style="color: #888; margin: 0 0 15px; font-size: 13px;">Autorizovany servis Natuzzi pro CR a SR</p>
+                            <p style="color: #666; margin: 0; font-size: 12px;">
+                                <a href="' . $appUrl . '" style="color: #888; text-decoration: none;">www.wgs-service.cz</a>
+                            </p>
+                            <p style="color: #555; margin: 20px 0 0; font-size: 11px;">&copy; ' . $rok . ' WGS Service. Vsechna prava vyhrazena.</p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+    ';
 }
 
