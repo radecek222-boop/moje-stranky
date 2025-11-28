@@ -712,6 +712,9 @@ async function showDetail(recordOrId) {
     const dokoncenoData = record.updated_at ? new Date(record.updated_at) : null;
     const dokoncenoCas = dokoncenoData ? `${dokoncenoData.getHours()}:${String(dokoncenoData.getMinutes()).padStart(2, '0')}` : '—';
 
+    // Tlacitka podle role - prodejce nema pristup k technickim funkcim
+    const jeProdejce = CURRENT_USER && CURRENT_USER.role === 'prodejce';
+
     buttonsHtml = `
       <div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 0.75rem; margin-bottom: 1rem; border-radius: 4px;">
         <div style="text-align: center;">
@@ -721,11 +724,13 @@ async function showDetail(recordOrId) {
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; background: #333; color: white; font-weight: 600; font-size: 0.9rem;" data-action="reopenOrder" data-id="${record.id}">
-          Znovu otevřít
-        </button>
+        ${!jeProdejce ? `
+          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; background: #333; color: white; font-weight: 600; font-size: 0.9rem;" data-action="reopenOrder" data-id="${record.id}">
+            Znovu otevřít
+          </button>
 
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        ` : ''}
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
 
       <div style="width: 100%; margin-top: 0.25rem;">
@@ -770,13 +775,18 @@ async function showDetail(recordOrId) {
       </div>
     `;
   } else {
+    // Tlacitka podle role - prodejce nema pristup k technickim funkcim
+    const jeProdejce = CURRENT_USER && CURRENT_USER.role === 'prodejce';
+
     buttonsHtml = `
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
+        ${!jeProdejce ? `
+          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
 
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
+          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
 
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        ` : ''}
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
 
         ${record.original_reklamace_id ? `
@@ -1997,19 +2007,17 @@ async function showCustomerDetail(id) {
       <!-- DOPLŇUJÍCÍ INFORMACE OD PRODEJCE -->
       <div style="margin-bottom: 1rem;">
         <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace od prodejce:</label>
-        <div onclick="showTextOverlay('doplnujici_info')"
-             style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 50px; background: white; cursor: pointer; white-space: pre-wrap; color: ${doplnujici_info ? '#1a1a1a' : '#999'};">
-          ${doplnujici_info || 'Klikněte pro zobrazení/zadání doplňujících informací od prodejce'}
-        </div>
+        <textarea id="edit_doplnujici_info"
+                  style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 60px; background: white; resize: vertical; font-family: inherit;"
+                  placeholder="Zadejte doplňující informace od prodejce">${Utils.escapeHtml(doplnujici_info)}</textarea>
       </div>
 
       <!-- POPIS PROBLÉMU OD ZÁKAZNÍKA -->
       <div style="margin-bottom: 2rem;">
         <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému od zákazníka:</label>
-        <div onclick="showTextOverlay('popis_problemu')"
-             style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 60px; background: white; cursor: pointer; white-space: pre-wrap; color: ${description ? '#1a1a1a' : '#999'};">
-          ${description || 'Klikněte pro zobrazení/zadání popisu problému od zákazníka'}
-        </div>
+        <textarea id="edit_popis_problemu"
+                  style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 80px; background: white; resize: vertical; font-family: inherit;"
+                  placeholder="Zadejte popis problému od zákazníka">${Utils.escapeHtml(description)}</textarea>
       </div>
 
       <!-- FOTOGRAFIE -->
@@ -2379,7 +2387,9 @@ async function saveAllCustomerData(id) {
     adresa: document.getElementById('edit_adresa').value,
     model: document.getElementById('edit_model').value,
     provedeni: document.getElementById('edit_provedeni').value,
-    barva: document.getElementById('edit_barva').value
+    barva: document.getElementById('edit_barva').value,
+    doplnujici_info: document.getElementById('edit_doplnujici_info').value,
+    popis_problemu: document.getElementById('edit_popis_problemu').value
   };
 
   await saveData(data, 'Všechny údaje byly aktualizovány');

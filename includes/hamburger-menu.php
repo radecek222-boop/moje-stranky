@@ -179,37 +179,20 @@ if ($isAdmin) {
 }
 
 .hamburger-notif-btn {
-  color: #999 !important;
-  font-weight: 500 !important;
-  border: 1px solid #666 !important;
-  padding: 0.5rem 1rem !important;
-  border-radius: 4px;
-  margin: 0.5rem 0;
-  text-align: center;
+  color: #4a9eff !important;
+  font-weight: 600 !important;
+  border: none !important;
+  background: transparent !important;
   transition: all 0.2s ease;
 }
 
 .hamburger-notif-btn:hover {
-  color: #fff !important;
-  border-color: #999 !important;
-  background: rgba(255, 255, 255, 0.1);
+  color: #7bb8ff !important;
+  background: transparent !important;
 }
 
 .hamburger-notif-btn.notif-active {
-  color: #fff !important;
-  border-color: #fff !important;
-}
-
-@media (max-width: 768px) {
-  .hamburger-notif-btn {
-    display: block !important;
-    margin: 0;
-    border: none !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 0;
-    padding: 1rem 1.5rem !important;
-    text-align: left;
-  }
+  color: #4a9eff !important;
 }
 
 /* Provize technika - červená barva jako odhlášení */

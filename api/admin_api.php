@@ -1064,23 +1064,31 @@ function handleSendInvitations(PDO $pdo, array $payload): void
 
     $htmlSablona = vytvorPozvankovouSablonu($typ, $pouzityKlic, $appUrl, $rok, $vlastniTexty);
 
-    // Odeslat emaily
+    // Odeslat emaily primo pres PHPMailer
+    require_once __DIR__ . '/../includes/EmailQueue.php';
+    $emailQueue = new EmailQueue($pdo);
+
     $odeslanoPocet = 0;
     $chyby = [];
 
     foreach ($platneEmaily as $email) {
         try {
-            // Použít email queue
-            $stmt = $pdo->prepare("
-                INSERT INTO wgs_email_queue (to_email, subject, body, status, created_at, scheduled_at)
-                VALUES (:to_email, :subject, :body, 'pending', NOW(), NOW())
-            ");
-            $stmt->execute([
-                ':to_email' => $email,
-                ':subject' => $predmet,
-                ':body' => $htmlSablona
-            ]);
-            $odeslanoPocet++;
+            // Odeslat primo (ne do fronty)
+            $queueItem = [
+                'recipient_email' => $email,
+                'recipient_name' => null,
+                'subject' => $predmet,
+                'body' => $htmlSablona
+            ];
+
+            $result = $emailQueue->sendEmail($queueItem);
+
+            if ($result['success']) {
+                $odeslanoPocet++;
+            } else {
+                $chyby[] = $email . ': ' . ($result['error'] ?? 'Neznama chyba');
+                error_log("Chyba odeslani pozvanky na {$email}: " . ($result['error'] ?? 'Neznama chyba'));
+            }
         } catch (Exception $e) {
             $chyby[] = $email . ': ' . $e->getMessage();
             error_log("Chyba odeslani pozvanky na {$email}: " . $e->getMessage());
@@ -1261,42 +1269,63 @@ function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, str
             <!-- NÁVOD: PŘEHLED ZAKÁZEK -->
             <div style="border: 2px solid #333; border-radius: 8px; padding: 25px; margin: 30px 0;">
                 <h3 style="color: #333; margin: 0 0 20px; font-size: 18px; border-bottom: 2px solid #333; padding-bottom: 10px;">
-                    1. PREHLED VASICH ZAKAZEK (seznam.php)
+                    1. PREHLED VASICH ZAKAZEK
                 </h3>
 
                 <p style="color: #555; font-size: 14px; margin: 0 0 20px;">
                     Po prihlaseni uvidite <strong>seznam vsech vasich prirazenych zakazek</strong>. Kazda zakazka je zobrazena jako karta.
                 </p>
 
-                <h4 style="color: #333; margin: 20px 0 10px; font-size: 15px;">Co vidite na karte zakazky:</h4>
+                <!-- CO VIDÍTE NA KARTĚ -->
                 <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">CO VIDITE NA KARTE ZAKAZKY:</p>
                     <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
-                        <li><strong>Cislo zakazky</strong> - unikatni identifikator (napr. WGS-2025-001)</li>
-                        <li><strong>Barevny indikator stavu</strong> - zluta = ceka, modra = domluvena, zelena = hotovo</li>
-                        <li><strong>Jmeno zakaznika</strong> - komu pojedete</li>
-                        <li><strong>Adresa</strong> - kam pojedete</li>
-                        <li><strong>Pocet poznamek</strong> - pokud jsou nejake poznamky k zakazce</li>
+                        <li><strong>Cislo zakazky</strong> - napr. NCN-000768</li>
+                        <li><strong>Barevny indikator stavu</strong>:
+                            <ul style="margin: 5px 0; padding-left: 15px;">
+                                <li><span style="color: #f5a623; font-weight: bold;">ZLUTA</span> = NOVA/CEKA</li>
+                                <li><span style="color: #2196f3; font-weight: bold;">MODRA</span> = V RESENI</li>
+                                <li><span style="color: #4caf50; font-weight: bold;">ZELENA</span> = HOTOVO</li>
+                            </ul>
+                        </li>
+                        <li><strong>Jmeno zakaznika</strong> a <strong>adresa</strong> - kam pojedete</li>
+                        <li><strong>Datum vytvoreni</strong></li>
                     </ul>
                 </div>
 
-                <h4 style="color: #333; margin: 20px 0 10px; font-size: 15px;">Filtrovani zakazek:</h4>
+                <!-- FILTROVÁNÍ -->
                 <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">FILTROVANI ZAKAZEK:</p>
                     <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
-                        <li><strong>Vsechny</strong> - zobrazit vse</li>
-                        <li><strong>Cekajici</strong> - zakazky, ktere jeste nemaji domluveny termin</li>
-                        <li><strong>V reseni</strong> - zakazky s domluvenym terminem</li>
-                        <li><strong>Vyrizene</strong> - dokoncene zakazky</li>
+                        <li><strong>VSECHNY</strong> - vsechny vase zakazky</li>
+                        <li><strong>CEKAJICI</strong> - bez domluveneho terminu</li>
+                        <li><strong>V RESENI</strong> - s domluvenym terminem</li>
+                        <li><strong>VYRIZENE</strong> - dokoncene</li>
                     </ul>
                 </div>
 
-                <h4 style="color: #333; margin: 20px 0 10px; font-size: 15px;">Co muzete delat po kliknuti na kartu:</h4>
+                <!-- PO KLIKNUTÍ NA KARTU -->
+                <div style="background: #e8f4fd; padding: 15px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #333;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">PO KLIKNUTI NA KARTU - AKCNI TLACITKA:</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>"ZAHAJIT NAVSTEVU"</strong> - spusti servisni navstevu, stav se zmeni na V RESENI</li>
+                        <li><strong>"NAPLANOVAT TERMIN"</strong> - otevre kalendar pro vyber data a casu</li>
+                        <li><strong>"KONTAKTOVAT"</strong> - telefon a email zakaznika</li>
+                        <li><strong>"DETAIL ZAKAZNIKA"</strong> - kompletni informace ze servisniho formulare</li>
+                        <li><strong>"VIDEOTEKA"</strong> - knihovna servisnich videi</li>
+                        <li><strong>"ZAVRIT"</strong> - zpet na seznam</li>
+                    </ul>
+                </div>
+
+                <!-- DETAIL ZÁKAZNÍKA -->
                 <div style="background: #f9f9f9; padding: 15px; border-radius: 6px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">DETAIL ZAKAZNIKA OBSAHUJE:</p>
                     <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
-                        <li><strong>Zobrazit detail</strong> - vsechny informace o zakazce</li>
-                        <li><strong>Vybrat termin</strong> - kalendar pro domluveni navstevy</li>
-                        <li><strong>Otevrit protokol</strong> - vyplnit servisni protokol</li>
-                        <li><strong>Kontaktovat zakaznika</strong> - volat nebo poslat SMS/email</li>
-                        <li><strong>Zobrazit na mape</strong> - videt adresu a navigovat</li>
+                        <li><strong>Identifikacni udaje</strong> - cislo objednavky, zadavatel, fakturace, datumy</li>
+                        <li><strong>Kontaktni udaje</strong> - jmeno, telefon, email, adresa</li>
+                        <li><strong>Informace o produktu</strong> - model, provedeni, barva</li>
+                        <li><strong>Popis problemu</strong> - od zakaznika i od prodejce</li>
+                        <li><strong>Fotografie</strong> - vsechny nahrane fotky zavady</li>
                     </ul>
                 </div>
             </div>
@@ -1417,20 +1446,29 @@ function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, str
                 </h3>
 
                 <p style="color: #555; font-size: 14px; margin: 0 0 20px;">
-                    Po prihlaseni kliknete na <strong>"Objednat servis"</strong> v menu. Otevre se formular, ktery ma 5 casti:
+                    Po prihlaseni kliknete na <strong>"Objednat servis"</strong> v menu. Otevre se formular s nasledujicimi sekcemi:
                 </p>
+
+                <!-- POVĚŘENÍ K REKLAMACI -->
+                <div style="background: #e8f4fd; padding: 15px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #333;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">0. POVERENI K REKLAMACI (volitelne)</p>
+                    <p style="color: #555; margin: 0; font-size: 13px; line-height: 1.6;">
+                        Pokud reklamaci podavate za zakaznika, <strong>nahrajte poverovaci dokument</strong> ve formatu PDF.
+                        Kliknete na tlacitko "VYBRAT PDF SOUBOR" a vyberte dokument z vaseho zarizeni.
+                    </p>
+                </div>
 
                 <!-- ČÁST 1 -->
                 <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
                     <p style="color: #333; margin: 0 0 10px; font-weight: bold;">1. ZAKLADNI UDAJE</p>
                     <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
-                        <li><strong>Cislo objednavky/reklamace</strong> - vase interni cislo z prodejny</li>
-                        <li><strong>Fakturace</strong> - vyberte CZ nebo SK podle zeme</li>
-                        <li><strong>Datum prodeje</strong> - kdy zakaznik nabytek koupil (kvuli zaruce)</li>
-                        <li><strong>Datum reklamace</strong> - dnesni datum</li>
+                        <li><strong>Cislo objednavky/reklamace</strong> - vase interni cislo z prodejny (povinne)</li>
+                        <li><strong>Fakturace</strong> - vyberte CZ nebo SK podle zeme fakturace</li>
+                        <li><strong>Datum prodeje</strong> - kdy zakaznik nabytek koupil (pro vypocet zaruky)</li>
+                        <li><strong>Datum reklamace</strong> - kdy byla reklamace nahlasena</li>
                     </ul>
                     <p style="color: #888; margin: 10px 0 0; font-size: 12px;">
-                        TIP: System automaticky spocita, jestli je nabytek v zaruce (2 roky).
+                        TIP: System automaticky spocita, jestli je nabytek v zaruce (2 roky od prodeje).
                     </p>
                 </div>
 
@@ -1438,22 +1476,22 @@ function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, str
                 <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
                     <p style="color: #333; margin: 0 0 10px; font-weight: bold;">2. KONTAKTNI UDAJE ZAKAZNIKA</p>
                     <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
-                        <li><strong>Jmeno a prijmeni</strong> - cele jmeno zakaznika</li>
-                        <li><strong>E-mail</strong> - zakaznik dostane potvrzeni emailem</li>
-                        <li><strong>Telefon</strong> - vyberte predvolbu (+420 CZ, +421 SK) a zadejte cislo</li>
+                        <li><strong>Jmeno zakaznika</strong> - cele jmeno a prijmeni (povinne)</li>
+                        <li><strong>E-mail</strong> - zakaznik dostane potvrzeni a protokol emailem (povinne)</li>
+                        <li><strong>Telefon</strong> - vyberte predvolbu (+420 CZ, +421 SK, +39 IT...) a zadejte cislo (povinne)</li>
                     </ul>
                 </div>
 
                 <!-- ČÁST 3 -->
                 <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">3. ADRESA ZAKAZNIKA (kde se bude opravovat)</p>
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">3. ADRESA ZAKAZNIKA</p>
                     <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
-                        <li><strong>Ulice a cislo popisne</strong> - napr. "Vaclavske namesti 1"</li>
+                        <li><strong>Ulice a cislo popisne</strong> - napr. "Vinohradska 50"</li>
                         <li><strong>Mesto</strong> - napr. "Praha"</li>
-                        <li><strong>PSC</strong> - napr. "110 00"</li>
+                        <li><strong>PSC</strong> - napr. "120 00"</li>
                     </ul>
                     <p style="color: #888; margin: 10px 0 0; font-size: 12px;">
-                        TIP: Po zadani adresy se zobrazi mapa - zkontrolujte, ze je spravna.
+                        TIP: Pod formularem se zobrazi interaktivni mapa - zkontrolujte spravnost adresy!
                     </p>
                 </div>
 
@@ -1461,27 +1499,43 @@ function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, str
                 <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
                     <p style="color: #333; margin: 0 0 10px; font-weight: bold;">4. INFORMACE O PRODUKTU</p>
                     <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
-                        <li><strong>Model</strong> - nazev modelu (napr. "Natuzzi Editions B845")</li>
-                        <li><strong>Provedeni</strong> - vyberte: Latka / Kuze / Kombinace</li>
-                        <li><strong>Oznaceni barvy</strong> - kod barvy (napr. "BF12")</li>
-                        <li><strong>Doplnujici informace</strong> - cokoli dalsiho (pristup k domu apod.)</li>
+                        <li><strong>Model</strong> - nazev nebo kod modelu (napr. "B845")</li>
+                        <li><strong>Provedeni</strong> - kliknete VYBRAT a zvolte: Latka / Kuze / Kombinace</li>
+                        <li><strong>Oznaceni barvy</strong> - kod barvy z katalogu (napr. "BF12")</li>
+                        <li><strong>Doplnujici informace</strong> - pristup k domu, kod do branky, kontakt na domovnika apod.</li>
                     </ul>
                 </div>
 
                 <!-- ČÁST 5 -->
                 <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">5. POPIS PROBLEMU A FOTKY</p>
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">5. POPIS PROBLEMU</p>
                     <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
-                        <li><strong>Popis problemu</strong> - CO je spatne? Popisujte podrobne!</li>
-                        <li><strong>Fotografie</strong> - nahrajte az 10 fotek zavady (hodne pomaha technikovi)</li>
+                        <li><strong>Popis problemu od zakaznika</strong> - popiste detailne co je spatne (povinne)</li>
                     </ul>
                 </div>
 
-                <!-- ODESLÁNÍ -->
-                <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 6px; padding: 15px;">
-                    <p style="color: #155724; margin: 0; font-size: 13px;">
-                        <strong>Po odeslani:</strong> Zakaznik dostane automaticky email s potvrzenim. Vy uvidite zakazku v sekci "Moje reklamace" a muzete sledovat jeji stav.
+                <!-- ČÁST 6 -->
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">6. FOTODOKUMENTACE</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li>Kliknete na <strong>"VYBRAT FOTOGRAFIE"</strong></li>
+                        <li>Muzete nahrat az <strong>10 fotografii</strong> zavady</li>
+                        <li>System provede <strong>automatickou kompresi</strong> - neni treba fotky upravovat</li>
+                    </ul>
+                    <p style="color: #888; margin: 10px 0 0; font-size: 12px;">
+                        TIP: Vice fotek = rychlejsi diagnostika technikem!
                     </p>
+                </div>
+
+                <!-- ODESLÁNÍ -->
+                <div style="background: #e8e8e8; border: 2px solid #333; border-radius: 6px; padding: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">7. ODESLANI POZADAVKU</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li>Zkontrolujte vsechna pole (povinne jsou oznacene <strong>*</strong>)</li>
+                        <li>Kliknete na <strong>"ODESLAT POZADAVEK"</strong></li>
+                        <li>Zakaznik dostane automaticky email s potvrzenim</li>
+                        <li>Vy uvidite zakazku v sekci "Moje reklamace"</li>
+                    </ul>
                 </div>
             </div>
 
@@ -1492,53 +1546,71 @@ function vytvorPozvankovouSablonu(string $typ, string $klic, string $appUrl, str
                 </h3>
 
                 <p style="color: #555; font-size: 14px; margin: 0 0 20px;">
-                    V menu kliknete na <strong>"Moje reklamace"</strong> - uvidite seznam vsech zakazek, ktere jste zadali.
+                    V menu kliknete na <strong>"Moje reklamace"</strong> - uvidite prehled vsech servisnich pozadavku.
                 </p>
 
-                <h4 style="color: #333; margin: 20px 0 10px; font-size: 15px;">Co vidite na karte zakazky:</h4>
+                <!-- PŘEHLED KARET -->
                 <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">CO VIDITE NA KARTE ZAKAZKY:</p>
                     <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
-                        <li><strong>Cislo zakazky</strong> - unikatni identifikator (napr. WGS-2025-001)</li>
-                        <li><strong>Barevny indikator</strong>:
+                        <li><strong>Cislo zakazky</strong> - napr. NCN-000768 (vase cislo z prodejny)</li>
+                        <li><strong>Barevny indikator stavu</strong>:
                             <ul style="margin: 5px 0; padding-left: 15px;">
-                                <li style="color: #f5a623;">ZLUTA = Ceka na zpracovani</li>
-                                <li style="color: #2196f3;">MODRA = Termin domluven</li>
-                                <li style="color: #4caf50;">ZELENA = Hotovo</li>
+                                <li><span style="color: #f5a623; font-weight: bold;">ZLUTA</span> = NOVA/CEKA na zpracovani</li>
+                                <li><span style="color: #2196f3; font-weight: bold;">MODRA</span> = V RESENI (termin domluven)</li>
+                                <li><span style="color: #4caf50; font-weight: bold;">ZELENA</span> = HOTOVO</li>
                             </ul>
                         </li>
-                        <li><strong>Jmeno zakaznika</strong></li>
-                        <li><strong>Cislo poznamek</strong> - kolik je poznamek k zakazce</li>
+                        <li><strong>Jmeno zakaznika</strong> a <strong>adresa</strong></li>
+                        <li><strong>Kod technika</strong> - kdo ma zakazku prirazenu</li>
+                        <li><strong>Datum vytvoreni</strong></li>
                     </ul>
                 </div>
 
-                <h4 style="color: #333; margin: 20px 0 10px; font-size: 15px;">Filtrovani zakazek (tlacitka nahoře):</h4>
+                <!-- FILTROVÁNÍ -->
                 <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">FILTROVANI ZAKAZEK (tlacitka nahoře):</p>
                     <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
-                        <li><strong>Vsechny</strong> - zobrazit vsechny zakazky</li>
-                        <li><strong>Cekajici</strong> - zakazky bez domluveneho terminu</li>
-                        <li><strong>V reseni</strong> - zakazky s domluvenym terminem</li>
-                        <li><strong>Vyrizene</strong> - dokoncene zakazky</li>
+                        <li><strong>VSECHNY (pocet)</strong> - celkovy pocet zakazek</li>
+                        <li><strong>CEKAJICI (pocet)</strong> - jeste nezpracovane</li>
+                        <li><strong>V RESENI (pocet)</strong> - probiha servis</li>
+                        <li><strong>VYRIZENE (pocet)</strong> - dokoncene</li>
                     </ul>
                 </div>
 
-                <h4 style="color: #333; margin: 20px 0 10px; font-size: 15px;">Vyhledavani:</h4>
+                <!-- VYHLEDÁVÁNÍ -->
                 <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">VYHLEDAVANI:</p>
                     <p style="color: #555; margin: 0; font-size: 13px;">
-                        Pouzijte <strong>vyhledavaci pole nahoře</strong> - muzete hledat podle jmena zakaznika, cisla zakazky, adresy...
+                        Pouzijte <strong>vyhledavaci pole</strong> nahoře - hledejte podle jmena, cisla zakazky, adresy nebo cehokoli dalsiho.
                     </p>
                 </div>
 
-                <h4 style="color: #333; margin: 20px 0 10px; font-size: 15px;">Co vidite po kliknuti na kartu (detail zakazky):</h4>
-                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px;">
+                <!-- DETAIL KARTY -->
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">PO KLIKNUTI NA KARTU - ZAKLADNI PREHLED:</p>
+                    <p style="color: #555; margin: 0 0 10px; font-size: 13px;">
+                        Zobrazi se okno s informacemi o zakaznikovi a tlacitky:
+                    </p>
                     <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
-                        <li><strong>Vsechny udaje o zakaznikovi</strong> - jmeno, adresa, telefon, email</li>
-                        <li><strong>Informace o produktu</strong> - model, barva, provedeni</li>
-                        <li><strong>Popis problemu</strong> - co zakaznik reklamuje</li>
-                        <li><strong>Stav zakazky</strong> - v jake je fazi</li>
-                        <li><strong>Termin navstevy</strong> - kdy prijede technik</li>
-                        <li><strong>Fotografie</strong> - fotky nahrane k zakazce</li>
-                        <li><strong>Poznamky</strong> - komunikace s techniky</li>
-                        <li><strong>PDF protokolu</strong> - po dokonceni muzete stahnout</li>
+                        <li><strong>Jmeno</strong>, <strong>adresa</strong>, <strong>termin</strong>, <strong>stav</strong></li>
+                        <li>Tlacitko <strong>"DETAIL ZAKAZNIKA"</strong> - otevre kompletni informace</li>
+                        <li>Tlacitko <strong>"ZAVRIT"</strong> - zpet na seznam</li>
+                    </ul>
+                </div>
+
+                <!-- KOMPLETNÍ DETAIL -->
+                <div style="background: #e8e8e8; padding: 15px; border-radius: 6px;">
+                    <p style="color: #333; margin: 0 0 10px; font-weight: bold;">DETAIL ZAKAZNIKA - KOMPLETNI INFORMACE:</p>
+                    <ul style="color: #555; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Zakladni udaje</strong> - cislo objednavky, zadavatel, fakturace, datumy</li>
+                        <li><strong>Kontaktni udaje</strong> - jmeno, telefon, email, adresa</li>
+                        <li><strong>Informace o produktu</strong> - model, provedeni, barva</li>
+                        <li><strong>Doplnujici informace od prodejce</strong></li>
+                        <li><strong>Popis problemu</strong> - od zakaznika i od prodejce</li>
+                        <li><strong>Fotografie</strong> - vsechny nahrane fotky</li>
+                        <li><strong>PDF protokolu</strong> - po dokonceni servisu ke stazeni</li>
+                        <li><strong>GDPR souhlas</strong> - jak byl osteren</li>
                     </ul>
                 </div>
             </div>
@@ -1776,8 +1848,8 @@ function handleSaveInvitationTexts(PDO $pdo, array $payload): void
     try {
         // Upsert - INSERT nebo UPDATE
         $stmt = $pdo->prepare("
-            INSERT INTO wgs_system_config (config_key, config_value, config_type, updated_at)
-            VALUES ('invitation_template_texts', ?, 'json', NOW())
+            INSERT INTO wgs_system_config (config_key, config_value, config_group, updated_at)
+            VALUES ('invitation_template_texts', ?, 'templates', NOW())
             ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), updated_at = NOW()
         ");
         $stmt->execute([$jsonTexty]);

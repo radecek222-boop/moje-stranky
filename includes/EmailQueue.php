@@ -252,10 +252,24 @@ function sendWithPHPMailer($queueItem, $settings) {
                 }
             }
 
-            // Content
-            $mail->isHTML(false);
+            // Content - auto-detect HTML
+            $body = $queueItem['body'];
+            $isHtml = isset($queueItem['is_html']) ? $queueItem['is_html'] : (
+                stripos($body, '<html') !== false ||
+                stripos($body, '<body') !== false ||
+                stripos($body, '<div') !== false ||
+                stripos($body, '<table') !== false ||
+                stripos($body, '<p>') !== false
+            );
+
+            $mail->isHTML($isHtml);
             $mail->Subject = $queueItem['subject'];
-            $mail->Body = $queueItem['body'];
+            $mail->Body = $body;
+
+            // Pro HTML emaily pridat i plain text verzi
+            if ($isHtml) {
+                $mail->AltBody = strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $body));
+            }
 
             $mail->send();
 

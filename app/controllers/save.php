@@ -650,11 +650,8 @@ try {
         $gdprNote = "GDPR souhlas ošetřen smluvně (User ID: {$userId}, Role: {$userRole})";
     }
 
-    if (!empty($doplnujiciInfo)) {
-        $doplnujiciInfo = trim($doplnujiciInfo) . "\n\n" . $gdprNote;
-    } else {
-        $doplnujiciInfo = $gdprNote;
-    }
+    // GDPR poznamka se nyni uklada do samostatneho sloupce gdpr_note
+    // a nepridava se do doplnujici_info
 
     // Dodatečná validace emailu - pouze pokud je vyplněn
     if (!empty($email)) {
@@ -737,6 +734,12 @@ try {
         'doplnujici_info' => $doplnujiciInfo,
         'fakturace_firma' => $fakturaceFirma
     ];
+
+    // Pridat gdpr_note pokud sloupec existuje
+    $hasGdprNote = in_array('gdpr_note', $existingColumns);
+    if ($hasGdprNote && !empty($gdprNote)) {
+        $columns['gdpr_note'] = $gdprNote;
+    }
 
     if ($hasReklamaceId && $workflowId !== null) {
         $columns['reklamace_id'] = $workflowId;
