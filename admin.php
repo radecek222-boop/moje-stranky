@@ -408,10 +408,6 @@ body {
 </style>
 <?php endif; ?>
 
-<?php if (!$embedMode && $activeTab !== 'dashboard'): ?>
-<?php require_once __DIR__ . "/includes/admin_header.php"; ?>
-<?php endif; ?>
-
 <?php if ($activeTab !== 'dashboard'): ?>
 <!-- MAIN CONTENT -->
 <main>
