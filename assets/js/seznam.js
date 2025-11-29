@@ -3743,15 +3743,22 @@ function vytvorVideoKartu(video, claimId) {
 
   // Informace o videu
   const infoContainer = document.createElement('div');
-  infoContainer.style.cssText = 'flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 0;';
+  infoContainer.style.cssText = 'flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 2px; min-width: 0;';
+  infoContainer.title = video.video_name; // Název souboru v tooltipu
 
-  // Název souboru
-  const nazev = document.createElement('div');
-  nazev.style.cssText = `font-weight: 600; font-size: ${isMobile ? '0.85rem' : '0.9rem'}; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;`;
-  nazev.textContent = video.video_name || 'Video';
-  nazev.title = video.video_name;
+  // Kdo přidal video (hlavní řádek)
+  const autorRow = document.createElement('div');
+  autorRow.style.cssText = `font-weight: 500; font-size: ${isMobile ? '0.85rem' : '0.9rem'}; color: #fff;`;
+  if (video.uploader_email) {
+    const emailKratky = video.uploader_email.split('@')[0];
+    autorRow.textContent = emailKratky;
+    autorRow.title = video.uploader_email;
+  } else {
+    autorRow.textContent = 'Admin';
+    autorRow.style.color = '#aaa';
+  }
 
-  // Velikost, datum a autor
+  // Velikost a datum (sekundární řádek)
   const metaRow = document.createElement('div');
   metaRow.style.cssText = 'display: flex; gap: 8px; flex-wrap: wrap; align-items: center;';
 
@@ -3773,24 +3780,7 @@ function vytvorVideoKartu(video, claimId) {
   metaRow.appendChild(velikost);
   metaRow.appendChild(datum);
 
-  // Kdo nahrál (pokud je info k dispozici)
-  if (video.uploader_email) {
-    const oddelovac = document.createElement('span');
-    oddelovac.style.cssText = 'font-size: 0.7rem; color: #555;';
-    oddelovac.textContent = '·';
-
-    const autor = document.createElement('span');
-    autor.style.cssText = 'font-size: 0.7rem; color: #666; font-style: italic;';
-    // Zobrazit jen část před @ pro kratší zobrazení
-    const emailKratky = video.uploader_email.split('@')[0];
-    autor.textContent = emailKratky;
-    autor.title = video.uploader_email; // Celý email v tooltipu
-
-    metaRow.appendChild(oddelovac);
-    metaRow.appendChild(autor);
-  }
-
-  infoContainer.appendChild(nazev);
+  infoContainer.appendChild(autorRow);
   infoContainer.appendChild(metaRow);
 
   topRow.appendChild(thumbnailContainer);
