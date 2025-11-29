@@ -143,9 +143,11 @@ try {
         try {
             $pridano = 0;
 
-            // Zjistit nejvyssi ID
-            $maxIdStmt = $pdo->query("SELECT MAX(id) as max_id FROM wgs_notifications");
-            $maxId = (int)($maxIdStmt->fetch(PDO::FETCH_ASSOC)['max_id'] ?? 0);
+            // Zjistit nejvyssi ID - MIMO TRANSAKCI
+            $maxIdStmt = $pdo->query("SELECT COALESCE(MAX(CAST(id AS UNSIGNED)), 0) as max_id FROM wgs_notifications");
+            $maxId = (int)($maxIdStmt->fetch(PDO::FETCH_ASSOC)['max_id']);
+
+            echo "<div class='info'>Aktualni nejvyssi ID: {$maxId}</div>";
 
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_notifications
@@ -156,6 +158,7 @@ try {
 
             foreach ($kPridani as $sablona) {
                 $maxId++;
+                echo "<div class='info'>Vkladam ID: {$maxId} - " . htmlspecialchars($sablona['name']) . "</div>";
                 $stmt->execute([
                     'id' => $maxId,
                     'name' => $sablona['name'],
