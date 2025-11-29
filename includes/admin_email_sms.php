@@ -72,34 +72,57 @@ try {
 $emailSablony = [];
 $smsSablonyAll = [];
 $sablonyParovane = [];
+
+// Normalizace trigger_event - mapovani ruznych nazvu na stejny klic
+function normalizujTrigger($trigger) {
+    $mapa = [
+        'order_created' => 'nova_reklamace',
+        'complaint_created' => 'nova_reklamace',
+        'order_completed' => 'dokonceno',
+        'complaint_completed' => 'dokonceno',
+        'order_reopened' => 'znovu_otevreno',
+        'complaint_reopened' => 'znovu_otevreno',
+        'appointment_confirmed' => 'potvrzeni_terminu',
+        'appointment_reminder' => 'pripominka_terminu',
+        'appointment_assigned' => 'prirazeni_terminu',
+        'contact_attempt' => 'pokus_o_kontakt',
+        'invitation_send' => 'pozvanka'
+    ];
+    return $mapa[$trigger] ?? $trigger;
+}
+
 try {
     $stmt = $pdo->query("
         SELECT
             id, name, description, trigger_event, recipient_type,
             type, subject, template, active, created_at, updated_at
         FROM wgs_notifications
-        ORDER BY trigger_event ASC, type ASC
+        ORDER BY name ASC
     ");
     $vsechnySablony = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Rozdelit na EMAIL a SMS
+    // Rozdelit na EMAIL a SMS podle normalizovaneho triggeru
     foreach ($vsechnySablony as $s) {
+        $normTrigger = normalizujTrigger($s['trigger_event']);
+        // Pridat recipient_type k klici pro odliseni (napr. pozvanka pro technika vs prodejce)
+        $klic = $normTrigger . '_' . $s['recipient_type'];
+
         if ($s['type'] === 'sms') {
-            $smsSablonyAll[$s['trigger_event']] = $s;
+            $smsSablonyAll[$klic] = $s;
         } else {
-            $emailSablony[$s['trigger_event']] = $s;
+            $emailSablony[$klic] = $s;
         }
     }
 
-    // Sparovat podle trigger_event
-    $vsechnyTriggery = array_unique(array_merge(array_keys($emailSablony), array_keys($smsSablonyAll)));
-    sort($vsechnyTriggery);
+    // Sparovat podle klice
+    $vsechnyKlice = array_unique(array_merge(array_keys($emailSablony), array_keys($smsSablonyAll)));
+    sort($vsechnyKlice);
 
-    foreach ($vsechnyTriggery as $trigger) {
+    foreach ($vsechnyKlice as $klic) {
         $sablonyParovane[] = [
-            'trigger' => $trigger,
-            'email' => $emailSablony[$trigger] ?? null,
-            'sms' => $smsSablonyAll[$trigger] ?? null
+            'trigger' => $klic,
+            'email' => $emailSablony[$klic] ?? null,
+            'sms' => $smsSablonyAll[$klic] ?? null
         ];
     }
 } catch (PDOException $e) {
@@ -300,17 +323,16 @@ try {
             <?php else: ?>
                 <?php
                 $triggerLabels = [
-                    'appointment_confirmed' => 'Potvrzeni terminu',
-                    'appointment_assigned' => 'Prirazeni terminu',
-                    'appointment_reminder' => 'Pripominka terminu',
-                    'contact_attempt' => 'Pokus o kontakt',
-                    'complaint_created' => 'Nova reklamace',
-                    'order_created' => 'Nova reklamace',
-                    'complaint_completed' => 'Dokonceni zakazky',
-                    'order_completed' => 'Dokonceni zakazky',
-                    'complaint_reopened' => 'Znovu otevreno',
-                    'order_reopened' => 'Znovu otevreno',
-                    'invitation_send' => 'Pozvanka'
+                    'potvrzeni_terminu_customer' => 'Potvrzeni terminu',
+                    'prirazeni_terminu_technician' => 'Prirazeni terminu',
+                    'pripominka_terminu_customer' => 'Pripominka terminu',
+                    'pokus_o_kontakt_customer' => 'Pokus o kontakt',
+                    'nova_reklamace_admin' => 'Nova reklamace',
+                    'nova_reklamace_customer' => 'Nova reklamace',
+                    'dokonceno_customer' => 'Dokonceni zakazky',
+                    'znovu_otevreno_admin' => 'Znovu otevreno',
+                    'pozvanka_seller' => 'Pozvanka pro prodejce',
+                    'pozvanka_technician' => 'Pozvanka pro technika'
                 ];
                 ?>
 
