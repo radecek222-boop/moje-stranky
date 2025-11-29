@@ -759,9 +759,11 @@ reklamace@wgs-service.cz
         $mail->AltBody = $messageText; // Textová verze pro klienty bez HTML
 
         // Přiložit kompletní PDF (protokol + fotodokumentace)
-        // Nazev prilohy pouziva zakaznicke cislo reklamace (ne interni WGS cislo)
+        // Nazev prilohy pouziva zakaznicke cislo reklamace + jmeno zakaznika
         $pdfData = base64_decode($completePdf);
-        $attachmentName = "Protokol_" . reklamaceStorageKey($cisloReklamace) . ".pdf";
+        $safeCustomerName = preg_replace('/[^a-zA-Z0-9_-]/', '-', iconv('UTF-8', 'ASCII//TRANSLIT', $customerName));
+        $safeCustomerName = preg_replace('/-+/', '-', trim($safeCustomerName, '-'));
+        $attachmentName = "Protokol_" . reklamaceStorageKey($cisloReklamace) . "_" . $safeCustomerName . ".pdf";
         $mail->addStringAttachment($pdfData, $attachmentName, 'base64', 'application/pdf');
 
         // Odeslat

@@ -54,8 +54,8 @@ try {
                 die(json_encode(['status' => 'error', 'message' => 'Chybí ID zakázky']));
             }
 
-            // Kontrola zda zakázka existuje a získání čísla reklamace
-            $stmt = $pdo->prepare("SELECT id, reklamace_id, cislo FROM wgs_reklamace WHERE id = :id");
+            // Kontrola zda zakázka existuje a získání čísla reklamace + jména zákazníka
+            $stmt = $pdo->prepare("SELECT id, reklamace_id, cislo, jmeno, zakaznik FROM wgs_reklamace WHERE id = :id");
             $stmt->execute(['id' => $claimId]);
             $zakaz = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -66,6 +66,14 @@ try {
 
             // Pouzit zakaznicke cislo (cislo) pro nazvy souboru, ne interni WGS cislo
             $reklamaceCislo = $zakaz['cislo'] ?? $zakaz['reklamace_id'] ?? 'video';
+            // Pridat jmeno zakaznika do nazvu souboru
+            $jmenoZakaznika = $zakaz['jmeno'] ?? $zakaz['zakaznik'] ?? '';
+            if ($jmenoZakaznika) {
+                $safeJmeno = preg_replace('/[^a-zA-Z0-9_-]/', '-', @iconv('UTF-8', 'ASCII//TRANSLIT', $jmenoZakaznika) ?: $jmenoZakaznika);
+                $safeJmeno = preg_replace('/-+/', '-', trim($safeJmeno, '-'));
+            } else {
+                $safeJmeno = '';
+            }
 
             // Kontrola nahraného souboru
             if (!isset($_FILES['video']) || $_FILES['video']['error'] !== UPLOAD_ERR_OK) {
@@ -161,7 +169,12 @@ try {
             // Bezpečný název reklamace (bez lomítek)
             $safeReklamace = str_replace('/', '-', $reklamaceCislo);
 
-            $uniqueName = "{$safeReklamace}_{$datum}_vid{$videoCount}.{$extension}";
+            // Nazev videa: cislo_jmeno_datum_vidX.ext
+            if ($safeJmeno) {
+                $uniqueName = "{$safeReklamace}_{$safeJmeno}_{$datum}_vid{$videoCount}.{$extension}";
+            } else {
+                $uniqueName = "{$safeReklamace}_{$datum}_vid{$videoCount}.{$extension}";
+            }
             $filePath = $uploadDir . '/' . $uniqueName;
 
             // Přesunout soubor
