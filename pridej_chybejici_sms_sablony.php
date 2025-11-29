@@ -142,15 +142,22 @@ try {
 
         try {
             $pridano = 0;
+
+            // Zjistit nejvyssi ID
+            $maxIdStmt = $pdo->query("SELECT MAX(id) as max_id FROM wgs_notifications");
+            $maxId = (int)($maxIdStmt->fetch(PDO::FETCH_ASSOC)['max_id'] ?? 0);
+
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_notifications
-                (name, description, trigger_event, recipient_type, type, subject, template, active, created_at, updated_at)
+                (id, name, description, trigger_event, recipient_type, type, subject, template, active, created_at, updated_at)
                 VALUES
-                (:name, :description, :trigger_event, :recipient_type, 'sms', :subject, :template, 0, NOW(), NOW())
+                (:id, :name, :description, :trigger_event, :recipient_type, 'sms', :subject, :template, 0, NOW(), NOW())
             ");
 
             foreach ($kPridani as $sablona) {
+                $maxId++;
                 $stmt->execute([
+                    'id' => $maxId,
                     'name' => $sablona['name'],
                     'description' => $sablona['description'],
                     'trigger_event' => $sablona['trigger_event'],
@@ -159,7 +166,7 @@ try {
                     'template' => $sablona['template']
                 ]);
                 $pridano++;
-                echo "<div class='success'>Pridano: " . htmlspecialchars($sablona['name']) . "</div>";
+                echo "<div class='success'>Pridano (ID: {$maxId}): " . htmlspecialchars($sablona['name']) . "</div>";
             }
 
             $pdo->commit();
