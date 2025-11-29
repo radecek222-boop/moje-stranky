@@ -3873,7 +3873,8 @@ function vytvorVideoKartu(video, claimId) {
 
   // Tlačítka - na mobilu vertikálně se stejnou výškou jako video náhled
   const buttonsContainer = document.createElement('div');
-  // Na mobilu: výška = thumbHeight (45px), tlačítka vertikálně
+  // Na mobilu: výška kontejneru = thumbHeight (60px), tlačítka vertikálně
+  // Každé tlačítko = (60 - 4px gap) / 2 = 28px
   // Na desktopu: horizontálně
   const btnGap = 4;
   const mobileBtnHeight = Math.floor((thumbHeight - btnGap) / 2); // Každé tlačítko = polovina výšky videa
@@ -3883,7 +3884,8 @@ function vytvorVideoKartu(video, claimId) {
     : 'display: flex; flex-direction: row; align-items: center; gap: 6px; flex-shrink: 0;';
 
   // Společný styl pro ikony na mobilu - výška = polovina video náhledu
-  const ikonaBtnStyle = `height: ${mobileBtnHeight}px; width: 36px; padding: 0; border-radius: 3px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; border: 1px solid #555;`;
+  // box-sizing: border-box zajistí že border je UVNITŘ výšky, ne navíc
+  const ikonaBtnStyle = `height: ${mobileBtnHeight}px; width: 36px; padding: 0; border-radius: 3px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; border: 1px solid #555; box-sizing: border-box;`;
 
   // Tlačítko Stáhnout - ikona na mobilu, text na desktopu
   const btnStahnout = document.createElement('button');
