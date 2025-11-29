@@ -6,7 +6,7 @@
  * Můžete jej spustit vícekrát - neprovede duplicitní operace.
  */
 
-require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/../init.php';
 
 // Bezpečnostní kontrola - pouze admin
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
@@ -136,7 +136,7 @@ try {
                 echo "</div>";
 
                 // Vytvořit složku pro videa
-                $videoDir = __DIR__ . '/uploads/videos';
+                $videoDir = __DIR__ . '/../uploads/videos';
                 if (!is_dir($videoDir)) {
                     mkdir($videoDir, 0755, true);
                     echo "<div class='success'>";
