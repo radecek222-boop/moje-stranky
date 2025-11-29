@@ -49,6 +49,35 @@ function toggleMenu() {
   }
 }
 
+// === KONTROLA PDF KNIHOVEN ===
+async function zkontrolujPdfKnihovny() {
+  const maxPokusy = 50; // Max 5 sekund (50 * 100ms)
+  let pokusy = 0;
+
+  // Cekej na jsPDF
+  while ((!window.jspdf || !window.jspdf.jsPDF) && pokusy < maxPokusy) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    pokusy++;
+  }
+
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    throw new Error('jsPDF knihovna se nepodařila načíst. Zkuste obnovit stránku (F5).');
+  }
+
+  // Cekej na html2canvas
+  pokusy = 0;
+  while (typeof html2canvas === 'undefined' && pokusy < maxPokusy) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    pokusy++;
+  }
+
+  if (typeof html2canvas === 'undefined') {
+    throw new Error('html2canvas knihovna se nepodařila načíst. Zkuste obnovit stránku (F5).');
+  }
+
+  return true;
+}
+
 // === NOTIFIKACE ===
 function showNotification(message, type = 'info') {
   const notification = document.getElementById('notif');
@@ -690,6 +719,9 @@ function renderPhotoPreview(arr) {
 }
 
 async function generateProtocolPDF() {
+  // Kontrola dostupnosti PDF knihoven (jsPDF + html2canvas)
+  await zkontrolujPdfKnihovny();
+
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF("p", "mm", "a4");
 
@@ -712,6 +744,13 @@ async function generateProtocolPDF() {
   if (signatureActions) {
     signatureActions.remove();
     logger.log('Signature actions (tlačítko "Vymazat podpis" + label) odstraněny z PDF');
+  }
+
+  // Odstranit tlacitko "Podepsat protokol"
+  const btnPodepsatProtokol = clone.querySelector('.btn-podepsat-protokol');
+  if (btnPodepsatProtokol) {
+    btnPodepsatProtokol.remove();
+    logger.log('Tlacitko "Podepsat protokol" odstraneno z PDF');
   }
 
   // Odstranit dolní tlačítka (Export, Odeslat, Zpět)
@@ -831,6 +870,9 @@ async function generateProtocolPDF() {
 async function generatePhotosPDF() {
   if (!attachedPhotos.length) return null;
 
+  // Kontrola dostupnosti PDF knihoven
+  await zkontrolujPdfKnihovny();
+
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF("p", "mm", "a4");
 
@@ -935,11 +977,14 @@ async function generatePhotosPDF() {
 
 async function generatePricelistPDF() {
   if (!kalkulaceData) {
-    logger.log('ℹ️ Kalkulace neexistuje - PRICELIST PDF nebude vygenerováno');
+    logger.log('Kalkulace neexistuje - PRICELIST PDF nebude vygenerovano');
     return null;
   }
 
-  logger.log('💶 Generuji PDF PRICELIST...');
+  logger.log('Generuji PDF PRICELIST...');
+
+  // Kontrola dostupnosti PDF knihoven
+  await zkontrolujPdfKnihovny();
 
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF("p", "mm", "a4");

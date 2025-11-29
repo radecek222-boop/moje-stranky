@@ -601,6 +601,36 @@ function sendEmailToCustomer($data) {
         throw new Exception('Neplatná emailová adresa zákazníka');
     }
 
+    // Kontrola jestli existuji videa pro tuto zakazku
+    $videoDownloadUrl = null;
+    $stmt = $pdo->prepare("SELECT COUNT(*) as pocet FROM wgs_videos WHERE claim_id = :claim_id");
+    $stmt->execute([':claim_id' => $reklamace['id']]);
+    $videaCount = $stmt->fetch(PDO::FETCH_ASSOC)['pocet'];
+
+    if ($videaCount > 0) {
+        // Vytvorit token pro stahovani videi
+        $videoToken = bin2hex(random_bytes(32)); // 64 znaku
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+7 days'));
+
+        $stmt = $pdo->prepare("
+            INSERT INTO wgs_video_tokens (token, claim_id, expires_at, customer_email)
+            VALUES (:token, :claim_id, :expires_at, :email)
+        ");
+        $stmt->execute([
+            ':token' => $videoToken,
+            ':claim_id' => $reklamace['id'],
+            ':expires_at' => $expiresAt,
+            ':email' => $customerEmail
+        ]);
+
+        // Sestavit URL pro stahovani
+        $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+                   . '://' . ($_SERVER['HTTP_HOST'] ?? 'www.wgs-service.cz');
+        $videoDownloadUrl = $baseUrl . '/api/video_download.php?token=' . $videoToken;
+
+        error_log("Video token vytvoren pro reklamaci {$reklamaceId}: {$videoToken}");
+    }
+
     // Načtení SMTP nastavení z databáze
     $stmt = $pdo->query("
         SELECT * FROM wgs_smtp_settings
@@ -619,14 +649,66 @@ function sendEmailToCustomer($data) {
     $subject = "Servisní protokol WGS - Reklamace č. {$reklamaceId}";
     $customerName = $reklamace['jmeno'] ?? $reklamace['zakaznik'] ?? 'Zákazník';
 
+    // Sestavit sekci videodokumentace pokud existuji videa
+    $videoSection = '';
+    if ($videoDownloadUrl) {
+        $videoSection = "
+<br>
+<table cellpadding='0' cellspacing='0' border='0' style='margin: 20px 0; background: #f5f5f5; border-radius: 8px; width: 100%;'>
+    <tr>
+        <td style='padding: 20px;'>
+            <p style='margin: 0 0 12px 0; font-weight: bold; color: #333;'>Videodokumentace</p>
+            <p style='margin: 0 0 12px 0; color: #666;'>K této zakázce je k dispozici videodokumentace ({$videaCount} " . ($videaCount == 1 ? 'video' : 'videí') . ").</p>
+            <a href='{$videoDownloadUrl}' style='display: inline-block; background: #333; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;'>Stáhnout videodokumentaci</a>
+            <p style='margin: 12px 0 0 0; font-size: 12px; color: #999;'>Odkaz je platný 7 dní</p>
+        </td>
+    </tr>
+</table>
+";
+    }
+
+    // HTML email zpráva
     $message = "
-Dobrý den {$customerName},
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='UTF-8'>
+</head>
+<body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;'>
+    <p>Dobrý den {$customerName},</p>
+
+    <p>zasíláme Vám kompletní servisní report k reklamaci č. <strong>{$reklamaceId}</strong>.</p>
+
+    <p><strong>V příloze naleznete:</strong></p>
+    <ul>
+        <li>Servisní protokol s fotodokumentací (PDF)</li>
+    </ul>
+    {$videoSection}
+    <p>V případě dotazů nás prosím kontaktujte.</p>
+
+    <p style='margin-top: 30px;'>
+        S pozdravem,<br>
+        <strong>White Glove Service</strong><br>
+        <a href='mailto:reklamace@wgs-service.cz' style='color: #333;'>reklamace@wgs-service.cz</a><br>
+        +420 725 965 826
+    </p>
+</body>
+</html>
+";
+
+    // Textová verze pro klienty bez HTML
+    $messageText = "Dobrý den {$customerName},
 
 zasíláme Vám kompletní servisní report k reklamaci č. {$reklamaceId}.
 
 V příloze naleznete:
-- Servisní protokol s fotodokumentací (v jednom PDF)
-
+- Servisní protokol s fotodokumentací (PDF)
+" . ($videoDownloadUrl ? "
+VIDEODOKUMENTACE
+K této zakázce je k dispozici videodokumentace ({$videaCount} videí).
+Ke stažení: {$videoDownloadUrl}
+Odkaz je platný 7 dní.
+" : "") . "
 V případě dotazů nás prosím kontaktujte.
 
 S pozdravem,
@@ -668,10 +750,11 @@ reklamace@wgs-service.cz
         $mail->addAddress($customerEmail, $customerName);
         $mail->addReplyTo('reklamace@wgs-service.cz', 'White Glove Service');
 
-        // Obsah emailu
-        $mail->isHTML(false);
+        // Obsah emailu - HTML s textovou alternativou
+        $mail->isHTML(true);
         $mail->Subject = $subject;
         $mail->Body = $message;
+        $mail->AltBody = $messageText; // Textová verze pro klienty bez HTML
 
         // Přiložit kompletní PDF (protokol + fotodokumentace)
         $pdfData = base64_decode($completePdf);
