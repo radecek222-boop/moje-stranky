@@ -3796,8 +3796,8 @@ function vytvorVideoKartu(video, claimId) {
 
   // Video thumbnail (náhled)
   const thumbnailContainer = document.createElement('div');
-  const thumbWidth = isMobile ? 80 : 120;
-  const thumbHeight = isMobile ? 45 : 68;
+  const thumbWidth = isMobile ? 100 : 120;
+  const thumbHeight = isMobile ? 60 : 68;
   thumbnailContainer.style.cssText = `
     flex-shrink: 0;
     width: ${thumbWidth}px;
