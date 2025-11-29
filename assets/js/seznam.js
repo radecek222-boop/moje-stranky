@@ -3751,16 +3751,16 @@ function vytvorVideoKartu(video, claimId) {
   nazev.textContent = video.video_name || 'Video';
   nazev.title = video.video_name;
 
-  // Velikost a datum
+  // Velikost, datum a autor
   const metaRow = document.createElement('div');
-  metaRow.style.cssText = 'display: flex; gap: 12px; flex-wrap: wrap;';
+  metaRow.style.cssText = 'display: flex; gap: 8px; flex-wrap: wrap; align-items: center;';
 
   const velikost = document.createElement('span');
-  velikost.style.cssText = 'font-size: 0.75rem; color: #888;';
+  velikost.style.cssText = 'font-size: 0.7rem; color: #777;';
   velikost.textContent = `${(video.file_size / 1024 / 1024).toFixed(1)} MB`;
 
   const datum = document.createElement('span');
-  datum.style.cssText = 'font-size: 0.75rem; color: #888;';
+  datum.style.cssText = 'font-size: 0.7rem; color: #777;';
   const datumText = video.uploaded_at ? new Date(video.uploaded_at).toLocaleString('cs-CZ', {
     day: '2-digit',
     month: '2-digit',
@@ -3772,6 +3772,24 @@ function vytvorVideoKartu(video, claimId) {
 
   metaRow.appendChild(velikost);
   metaRow.appendChild(datum);
+
+  // Kdo nahrál (pokud je info k dispozici)
+  if (video.uploader_email) {
+    const oddelovac = document.createElement('span');
+    oddelovac.style.cssText = 'font-size: 0.7rem; color: #555;';
+    oddelovac.textContent = '·';
+
+    const autor = document.createElement('span');
+    autor.style.cssText = 'font-size: 0.7rem; color: #666; font-style: italic;';
+    // Zobrazit jen část před @ pro kratší zobrazení
+    const emailKratky = video.uploader_email.split('@')[0];
+    autor.textContent = emailKratky;
+    autor.title = video.uploader_email; // Celý email v tooltipu
+
+    metaRow.appendChild(oddelovac);
+    metaRow.appendChild(autor);
+  }
+
   infoContainer.appendChild(nazev);
   infoContainer.appendChild(metaRow);
 
