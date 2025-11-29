@@ -3534,6 +3534,13 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
 async function zobrazVideotekaArchiv(claimId) {
   logger.log(`[Videotéka] Otevírám archiv pro zakázku ID: ${claimId}`);
 
+  // Kontrola - pokud už overlay existuje, nezobrazovat znovu (prevence dvojitého kliknutí)
+  const existujiciOverlay = document.getElementById('videotekaOverlay');
+  if (existujiciOverlay) {
+    logger.log('[Videotéka] Overlay už existuje, ignoruji');
+    return;
+  }
+
   // Vytvořit overlay
   const overlay = document.createElement('div');
   overlay.id = 'videotekaOverlay';
@@ -3544,8 +3551,11 @@ async function zobrazVideotekaArchiv(claimId) {
   container.style.cssText = 'width: 95%; max-width: 900px; height: 90%; background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;';
 
   // Header (bude aktualizován po načtení dat z API)
+  const isMobileHeader = window.innerWidth < 600;
   const header = document.createElement('div');
-  header.style.cssText = 'padding: 16px 20px; background: #333; color: white; font-weight: 600; font-size: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #444;';
+  header.style.cssText = isMobileHeader
+    ? 'padding: 12px 16px; background: #333; color: white; font-weight: 600; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; border-bottom: 2px solid #444;'
+    : 'padding: 16px 20px; background: #333; color: white; font-weight: 600; font-size: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #444;';
   header.innerHTML = `<span>Načítání...</span>`;
 
   // Content area - seznam videí (s drag & drop podporou) - sloupcový layout
@@ -3614,7 +3624,16 @@ async function zobrazVideotekaArchiv(claimId) {
       // Aktualizovat nadpis s jménem zákazníka a číslem reklamace
       const customerName = result.customer_name || 'Neznámý zákazník';
       const reklamaceNum = result.reklamace_cislo || claimId;
-      header.innerHTML = `<span>${customerName}</span><span style="font-size: 0.85rem; opacity: 0.7;">${reklamaceNum}</span>`;
+      if (isMobileHeader) {
+        // Mobil: jméno nahoře, číslo pod tím menší, centrované
+        header.innerHTML = `
+          <span style="font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${customerName}</span>
+          <span style="font-size: 0.75rem; opacity: 0.6;">${reklamaceNum}</span>
+        `;
+      } else {
+        // Desktop: vedle sebe
+        header.innerHTML = `<span>${customerName}</span><span style="font-size: 0.85rem; opacity: 0.7;">${reklamaceNum}</span>`;
+      }
 
       if (result.videos && result.videos.length > 0) {
         // Zobrazit seznam videí
@@ -3752,33 +3771,28 @@ function generujNahledVidea(videoPath, sirka, vyska) {
  * @returns {HTMLElement}
  */
 function vytvorVideoKartu(video, claimId) {
-  // Karta - RESPONZIVNÍ layout
-  // Desktop: [náhled] | [info] | [tlačítka] - horizontálně
-  // Mobil:  [náhled | info] / [tlačítka] - 2 řádky
+  // Karta - jednoduchý layout: [video] [info] [tlačítka]
+  // Všechno zarovnané nahoru (flex-start), tlačítka mají stejnou výšku jako video
   const isMobile = window.innerWidth < 600;
 
   const card = document.createElement('div');
   card.style.cssText = `
     background: #2a2a2a;
     border-radius: 6px;
-    padding: 12px;
+    padding: ${isMobile ? '8px' : '12px'};
     display: flex;
-    flex-direction: ${isMobile ? 'column' : 'row'};
-    align-items: ${isMobile ? 'stretch' : 'center'};
-    gap: 12px;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: ${isMobile ? '8px' : '12px'};
     border: 1px solid #444;
     width: 100%;
     box-sizing: border-box;
   `;
 
-  // Horní řádek: náhled + info (vždy vedle sebe)
-  const topRow = document.createElement('div');
-  topRow.style.cssText = 'display: flex; flex-direction: row; align-items: center; gap: 12px; flex: 1; min-width: 0;';
-
   // Video thumbnail (náhled)
   const thumbnailContainer = document.createElement('div');
-  const thumbWidth = isMobile ? 80 : 120;
-  const thumbHeight = isMobile ? 45 : 68;
+  const thumbWidth = isMobile ? 100 : 120;
+  const thumbHeight = isMobile ? 60 : 68;
   thumbnailContainer.style.cssText = `
     flex-shrink: 0;
     width: ${thumbWidth}px;
@@ -3815,35 +3829,32 @@ function vytvorVideoKartu(video, claimId) {
   infoContainer.style.cssText = 'flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 2px; min-width: 0;';
   infoContainer.title = video.video_name; // Název souboru v tooltipu
 
-  // Kdo přidal video (hlavní řádek)
+  // Kdo přidal video (hlavní řádek) - menší na mobilu
   const autorRow = document.createElement('div');
-  autorRow.style.cssText = `font-weight: 500; font-size: ${isMobile ? '0.85rem' : '0.9rem'}; color: #fff;`;
+  autorRow.style.cssText = `font-weight: 500; font-size: ${isMobile ? '0.7rem' : '0.9rem'}; color: ${isMobile ? '#aaa' : '#fff'};`;
   if (video.uploader_email) {
     const emailKratky = video.uploader_email.split('@')[0];
     autorRow.textContent = emailKratky;
     autorRow.title = video.uploader_email;
   } else {
     autorRow.textContent = 'Admin';
-    autorRow.style.color = '#aaa';
+    autorRow.style.color = '#888';
   }
 
-  // Velikost a datum (sekundární řádek)
+  // Velikost a datum (sekundární řádek) - menší na mobilu
   const metaRow = document.createElement('div');
-  metaRow.style.cssText = 'display: flex; gap: 8px; flex-wrap: wrap; align-items: center;';
+  metaRow.style.cssText = `display: flex; gap: ${isMobile ? '6px' : '8px'}; flex-wrap: wrap; align-items: center;`;
 
   const velikost = document.createElement('span');
-  velikost.style.cssText = 'font-size: 0.7rem; color: #777;';
+  velikost.style.cssText = `font-size: ${isMobile ? '0.6rem' : '0.7rem'}; color: #666;`;
   velikost.textContent = `${(video.file_size / 1024 / 1024).toFixed(1)} MB`;
 
   const datum = document.createElement('span');
-  datum.style.cssText = 'font-size: 0.7rem; color: #777;';
-  const datumText = video.uploaded_at ? new Date(video.uploaded_at).toLocaleString('cs-CZ', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }) : '—';
+  datum.style.cssText = `font-size: ${isMobile ? '0.6rem' : '0.7rem'}; color: #666;`;
+  // Na mobilu kratší formát data
+  const datumText = video.uploaded_at ? new Date(video.uploaded_at).toLocaleString('cs-CZ',
+    isMobile ? { day: '2-digit', month: '2-digit' } : { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }
+  ) : '—';
   datum.textContent = datumText;
 
   metaRow.appendChild(velikost);
@@ -3852,28 +3863,32 @@ function vytvorVideoKartu(video, claimId) {
   infoContainer.appendChild(autorRow);
   infoContainer.appendChild(metaRow);
 
-  topRow.appendChild(thumbnailContainer);
-  topRow.appendChild(infoContainer);
-
-  // Tlačítka
+  // Tlačítka - na mobilu vertikálně se stejnou výškou jako video náhled
   const buttonsContainer = document.createElement('div');
-  buttonsContainer.style.cssText = `
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-    ${isMobile ? 'width: 100%;' : ''}
-  `;
+  // Na mobilu: výška kontejneru = thumbHeight (60px), tlačítka vertikálně
+  // Každé tlačítko = (60 - 4px gap) / 2 = 28px
+  // Na desktopu: horizontálně
+  const btnGap = 4;
+  const mobileBtnHeight = Math.floor((thumbHeight - btnGap) / 2); // Každé tlačítko = polovina výšky videa
 
-  const btnStyle = isMobile
-    ? 'flex: 1; min-height: 40px; padding: 0.5rem; font-size: 0.8rem; border-radius: 4px; cursor: pointer; touch-action: manipulation; white-space: nowrap; border: none;'
-    : 'min-height: 36px; padding: 0.4rem 0.8rem; font-size: 0.8rem; border: 1px solid #555; border-radius: 4px; cursor: pointer; touch-action: manipulation; white-space: nowrap;';
+  buttonsContainer.style.cssText = isMobile
+    ? `display: flex; flex-direction: column; align-items: center; gap: ${btnGap}px; flex-shrink: 0; height: ${thumbHeight}px; justify-content: space-between;`
+    : 'display: flex; flex-direction: row; align-items: center; gap: 6px; flex-shrink: 0;';
 
-  // Tlačítko Stáhnout
+  // Společný styl pro ikony na mobilu - výška = polovina video náhledu
+  // box-sizing: border-box zajistí že border je UVNITŘ výšky, ne navíc
+  const ikonaBtnStyle = `height: ${mobileBtnHeight}px; width: 36px; padding: 0; border-radius: 3px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; border: 1px solid #555; box-sizing: border-box;`;
+
+  // Tlačítko Stáhnout - ikona na mobilu, text na desktopu
   const btnStahnout = document.createElement('button');
-  btnStahnout.textContent = 'Stáhnout';
-  btnStahnout.style.cssText = btnStyle + ' background: #444; color: white;';
+  if (isMobile) {
+    btnStahnout.innerHTML = '<i class="fas fa-download"></i>';
+    btnStahnout.title = 'Stáhnout video';
+    btnStahnout.style.cssText = ikonaBtnStyle + ' background: #444; color: #ccc; font-size: 0.75rem;';
+  } else {
+    btnStahnout.textContent = 'Stáhnout';
+    btnStahnout.style.cssText = 'min-height: 36px; padding: 0.4rem 0.8rem; font-size: 0.8rem; border: 1px solid #555; border-radius: 4px; cursor: pointer; touch-action: manipulation; white-space: nowrap; background: #444; color: white;';
+  }
   btnStahnout.onclick = () => {
     const link = document.createElement('a');
     link.href = video.video_path;
@@ -3881,11 +3896,13 @@ function vytvorVideoKartu(video, claimId) {
     link.click();
   };
 
-  // Tlačítko Smazat - pouze červený křížek
+  // Tlačítko Smazat - ikona vždy
   const btnSmazat = document.createElement('button');
   btnSmazat.innerHTML = '&#10005;'; // × křížek
   btnSmazat.title = 'Smazat video';
-  btnSmazat.style.cssText = 'min-height: 36px; width: 36px; padding: 0; font-size: 1.1rem; font-weight: bold; background: #553333; color: #c66; border: 1px solid #664444; border-radius: 4px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center;';
+  btnSmazat.style.cssText = isMobile
+    ? ikonaBtnStyle + ' background: #442222; color: #c66; font-size: 0.85rem; font-weight: bold;'
+    : 'min-height: 36px; width: 36px; padding: 0; font-size: 1.1rem; font-weight: bold; background: #553333; color: #c66; border: 1px solid #664444; border-radius: 4px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center;';
   btnSmazat.onclick = async () => {
     if (!confirm(`Opravdu smazat video "${video.video_name}"?`)) return;
 
@@ -3917,8 +3934,9 @@ function vytvorVideoKartu(video, claimId) {
   buttonsContainer.appendChild(btnStahnout);
   buttonsContainer.appendChild(btnSmazat);
 
-  // Sestavit kartu
-  card.appendChild(topRow);
+  // Sestavit kartu: [video] [info] [tlačítka]
+  card.appendChild(thumbnailContainer);
+  card.appendChild(infoContainer);
   card.appendChild(buttonsContainer);
 
   return card;
