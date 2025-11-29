@@ -28,9 +28,80 @@ try {
         exit;
     }
 
-    // Kontrola metody
+    $pdo = getDbConnection();
+
+    // GET akce - pouze pro cteni (bez CSRF)
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        switch ($action) {
+            case 'get':
+                // Nacteni jedne notifikace podle ID (muze byt cislo i retezec)
+                $id = $_GET['id'] ?? null;
+                if (!$id) {
+                    throw new Exception('Chybi ID notifikace');
+                }
+                // Sanitizace - povoleny jen alfanumericke znaky a podtrzitko
+                $id = preg_replace('/[^a-zA-Z0-9_]/', '', $id);
+
+                $stmt = $pdo->prepare("
+                    SELECT id, name, description, trigger_event, recipient_type,
+                           type, subject, template, active, cc_emails, bcc_emails,
+                           created_at, updated_at
+                    FROM wgs_notifications
+                    WHERE id = :id
+                    LIMIT 1
+                ");
+                $stmt->execute([':id' => $id]);
+                $notification = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$notification) {
+                    throw new Exception('Notifikace nenalezena');
+                }
+
+                // Dekodovat JSON pole
+                $notification['cc_emails'] = json_decode($notification['cc_emails'] ?? '[]', true) ?: [];
+                $notification['bcc_emails'] = json_decode($notification['bcc_emails'] ?? '[]', true) ?: [];
+
+                echo json_encode([
+                    'status' => 'success',
+                    'notification' => $notification
+                ]);
+                exit;
+
+            case 'list':
+                // Seznam vsech notifikaci
+                $type = $_GET['type'] ?? null;
+                $whereClause = '';
+                $params = [];
+
+                if ($type && in_array($type, ['email', 'sms'])) {
+                    $whereClause = 'WHERE type = :type';
+                    $params[':type'] = $type;
+                }
+
+                $stmt = $pdo->prepare("
+                    SELECT id, name, description, trigger_event, recipient_type,
+                           type, subject, template, active, created_at, updated_at
+                    FROM wgs_notifications
+                    $whereClause
+                    ORDER BY name ASC
+                ");
+                $stmt->execute($params);
+                $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                echo json_encode([
+                    'status' => 'success',
+                    'notifications' => $notifications
+                ]);
+                exit;
+
+            default:
+                throw new Exception('Neplatna GET akce: ' . $action);
+        }
+    }
+
+    // POST akce - vyzaduji CSRF
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Povolena pouze POST metoda');
+        throw new Exception('Povolena pouze GET nebo POST metoda');
     }
 
     // Načtení JSON dat PŘED CSRF kontrolou
@@ -59,8 +130,6 @@ try {
     // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
     session_write_close();
 
-    $pdo = getDbConnection();
-
     switch ($action) {
         case 'toggle':
             // Přepnutí aktivního stavu notifikace
@@ -71,10 +140,8 @@ try {
                 throw new Exception('Chybí notification_id nebo active');
             }
 
-            // BEZPEČNOST: Validace ID (pouze čísla)
-            if (!is_numeric($notificationId)) {
-                throw new Exception('Neplatné ID notifikace');
-            }
+            // BEZPEČNOST: Sanitizace ID (alfanumericke + podtrzitko)
+            $notificationId = preg_replace('/[^a-zA-Z0-9_]/', '', $notificationId);
 
             $stmt = $pdo->prepare("
                 UPDATE wgs_notifications
@@ -109,10 +176,8 @@ try {
                 throw new Exception('Šablona nesmí být prázdná');
             }
 
-            // BEZPEČNOST: Validace ID
-            if (!is_numeric($notificationId)) {
-                throw new Exception('Neplatné ID notifikace');
-            }
+            // BEZPEČNOST: Sanitizace ID (alfanumericke + podtrzitko)
+            $notificationId = preg_replace('/[^a-zA-Z0-9_]/', '', $notificationId);
 
             // BEZPEČNOST: Validace recipient
             $allowedRecipients = ['customer', 'admin', 'technician', 'seller'];
