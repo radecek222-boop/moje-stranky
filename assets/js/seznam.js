@@ -3874,7 +3874,8 @@ function vytvorVideoKartu(video, claimId) {
     : 'display: flex; flex-direction: row; align-items: center; gap: 6px; flex-shrink: 0;';
 
   // Společný styl pro ikony na mobilu - pevná výška 28px
-  const ikonaBtnStyle = `height: 28px; width: 36px; padding: 0; margin: 0; border-radius: 3px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; border: 1px solid #555; box-sizing: border-box;`;
+  // !important přepíše globální min-height: 44px z seznam-mobile-fixes.css
+  const ikonaBtnStyle = `height: 28px !important; min-height: 28px !important; max-height: 28px !important; width: 36px; padding: 0; margin: 0; border-radius: 3px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; border: 1px solid #555; box-sizing: border-box;`;
 
   // Tlačítko Stáhnout - ikona na mobilu, text na desktopu
   const btnStahnout = document.createElement('button');
