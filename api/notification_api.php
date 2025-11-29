@@ -28,9 +28,78 @@ try {
         exit;
     }
 
-    // Kontrola metody
+    $pdo = getDbConnection();
+
+    // GET akce - pouze pro cteni (bez CSRF)
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        switch ($action) {
+            case 'get':
+                // Nacteni jedne notifikace podle ID
+                $id = $_GET['id'] ?? null;
+                if (!$id || !is_numeric($id)) {
+                    throw new Exception('Chybi nebo neplatne ID notifikace');
+                }
+
+                $stmt = $pdo->prepare("
+                    SELECT id, name, description, trigger_event, recipient_type,
+                           type, subject, template, active, cc_emails, bcc_emails,
+                           created_at, updated_at
+                    FROM wgs_notifications
+                    WHERE id = :id
+                    LIMIT 1
+                ");
+                $stmt->execute([':id' => $id]);
+                $notification = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$notification) {
+                    throw new Exception('Notifikace nenalezena');
+                }
+
+                // Dekodovat JSON pole
+                $notification['cc_emails'] = json_decode($notification['cc_emails'] ?? '[]', true) ?: [];
+                $notification['bcc_emails'] = json_decode($notification['bcc_emails'] ?? '[]', true) ?: [];
+
+                echo json_encode([
+                    'status' => 'success',
+                    'notification' => $notification
+                ]);
+                exit;
+
+            case 'list':
+                // Seznam vsech notifikaci
+                $type = $_GET['type'] ?? null;
+                $whereClause = '';
+                $params = [];
+
+                if ($type && in_array($type, ['email', 'sms'])) {
+                    $whereClause = 'WHERE type = :type';
+                    $params[':type'] = $type;
+                }
+
+                $stmt = $pdo->prepare("
+                    SELECT id, name, description, trigger_event, recipient_type,
+                           type, subject, template, active, created_at, updated_at
+                    FROM wgs_notifications
+                    $whereClause
+                    ORDER BY name ASC
+                ");
+                $stmt->execute($params);
+                $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                echo json_encode([
+                    'status' => 'success',
+                    'notifications' => $notifications
+                ]);
+                exit;
+
+            default:
+                throw new Exception('Neplatna GET akce: ' . $action);
+        }
+    }
+
+    // POST akce - vyzaduji CSRF
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Povolena pouze POST metoda');
+        throw new Exception('Povolena pouze GET nebo POST metoda');
     }
 
     // Načtení JSON dat PŘED CSRF kontrolou
@@ -58,8 +127,6 @@ try {
 
     // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
     session_write_close();
-
-    $pdo = getDbConnection();
 
     switch ($action) {
         case 'toggle':
