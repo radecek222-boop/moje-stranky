@@ -121,10 +121,10 @@ try {
     $poradiSablon = [
         'nova_reklamace_customer',      // 1. Nova reklamace - zakaznik
         'nova_reklamace_admin',         // 2. Nova reklamace - admin
-        'potvrzeni_terminu_customer',   // 3. Potvrzeni terminu
-        'pripominka_terminu_customer',  // 4. Pripominka terminu
-        'prirazeni_terminu_technician', // 5. Prirazeni terminu technikovi
-        'pokus_o_kontakt_customer',     // 6. Pokus o kontakt
+        'pokus_o_kontakt_customer',     // 3. Pokus o kontakt
+        'potvrzeni_terminu_customer',   // 4. Potvrzeni terminu
+        'pripominka_terminu_customer',  // 5. Pripominka terminu
+        'prirazeni_terminu_technician', // 6. Prirazeni terminu technikovi
         'znovu_otevreno_admin',         // 7. Znovu otevreno
         'dokonceno_customer',           // 8. Dokonceni zakazky
         'pozvanka_seller',              // 9. Pozvanka pro prodejce (na konci)
