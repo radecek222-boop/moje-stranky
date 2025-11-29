@@ -9,11 +9,45 @@
  * - get_video: Získat video pro přehrání
  */
 
+// DEBUG: Zachytit všechny chyby
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+
+// Vlastní error handler pro zachycení všech chyb
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    error_log("video_api.php ERROR [$errno]: $errstr in $errfile:$errline");
+    return false;
+});
+
+// Zachytit fatální chyby
+register_shutdown_function(function() {
+    $error = error_get_last();
+    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        error_log("video_api.php FATAL: " . $error['message'] . " in " . $error['file'] . ":" . $error['line']);
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
+            http_response_code(500);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Interní chyba serveru: ' . $error['message'],
+                'debug' => [
+                    'file' => basename($error['file']),
+                    'line' => $error['line']
+                ]
+            ]);
+        }
+    }
+});
+
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
 
 header('Content-Type: application/json; charset=utf-8');
+
+// Debug log - request info
+error_log("video_api.php: Request received - Method: " . $_SERVER['REQUEST_METHOD'] . ", Action: " . ($_POST['action'] ?? $_GET['action'] ?? 'none'));
 
 try {
     // Kontrola přihlášení
@@ -35,17 +69,24 @@ try {
 
         // ==================== NAHRÁT VIDEO ====================
         case 'upload_video':
+            error_log("video_api.php: [1] Začátek upload_video");
+
             // CSRF validace (před session_write_close!)
             if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                error_log("video_api.php: CSRF validace selhala");
                 http_response_code(403);
                 die(json_encode(['status' => 'error', 'message' => 'Neplatný CSRF token']));
             }
+            error_log("video_api.php: [2] CSRF OK");
 
             // PERFORMANCE: Uvolnění session zámku (až po CSRF validaci)
             session_write_close();
 
             $claimId = $_POST['claim_id'] ?? null;
-            $userId = $_SESSION['user_id'] ?? null;
+            $rawUserId = $_SESSION['user_id'] ?? null;
+            // uploaded_by je INT - pokud je user_id string (např. 'ADMIN001'), nastavit NULL
+            $userId = (is_numeric($rawUserId)) ? (int)$rawUserId : null;
+            error_log("video_api.php: [3] claimId=$claimId, rawUserId=$rawUserId, userId=" . ($userId ?? 'NULL'));
 
             if (!$claimId) {
                 http_response_code(400);
@@ -53,23 +94,29 @@ try {
             }
 
             // Kontrola zda zakázka existuje a získání čísla reklamace
+            error_log("video_api.php: [4] Kontroluji zakázku v DB");
             $stmt = $pdo->prepare("SELECT id, reklamace_id, cislo FROM wgs_reklamace WHERE id = :id");
             $stmt->execute(['id' => $claimId]);
             $zakaz = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$zakaz) {
+                error_log("video_api.php: Zakázka $claimId nenalezena");
                 http_response_code(404);
                 die(json_encode(['status' => 'error', 'message' => 'Zakázka nenalezena']));
             }
+            error_log("video_api.php: [5] Zakázka nalezena: " . json_encode($zakaz));
 
             $reklamaceCislo = $zakaz['reklamace_id'] ?? $zakaz['cislo'] ?? 'video';
 
             // Kontrola nahraného souboru
+            error_log("video_api.php: [6] Kontroluji FILES: " . json_encode($_FILES));
             if (!isset($_FILES['video']) || $_FILES['video']['error'] !== UPLOAD_ERR_OK) {
+                $errorCode = $_FILES['video']['error'] ?? 'FILE_NOT_SET';
+                error_log("video_api.php: Chyba souboru: $errorCode");
                 http_response_code(400);
                 die(json_encode([
                     'status' => 'error',
-                    'message' => 'Chyba při nahrávání videa: ' . ($_FILES['video']['error'] ?? 'Soubor nebyl nahrán')
+                    'message' => 'Chyba při nahrávání videa: ' . $errorCode
                 ]));
             }
 
@@ -77,6 +124,7 @@ try {
             $fileSize = $videoFile['size'];
             $fileName = basename($videoFile['name']);
             $tmpPath = $videoFile['tmp_name'];
+            error_log("video_api.php: [7] Soubor: $fileName, velikost: $fileSize, tmp: $tmpPath");
 
             // Kontrola velikosti (max 500MB = 524288000 bytů)
             if ($fileSize > 524288000) {
@@ -113,21 +161,25 @@ try {
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             $mimeType = finfo_file($finfo, $tmpPath);
             finfo_close($finfo);
+            error_log("video_api.php: [8] MIME: $mimeType, Extension: $extension");
 
             // Povolit pokud MIME odpovídá NEBO přípona je povolená video přípona
             $mimeOk = in_array($mimeType, $allowedMimes);
             $extOk = in_array($extension, $allowedExtensions);
 
             if (!$mimeOk && !$extOk) {
+                error_log("video_api.php: Nepodporovaný formát - MIME: $mimeType, Ext: $extension");
                 http_response_code(400);
                 die(json_encode([
                     'status' => 'error',
                     'message' => 'Nepodporovaný formát videa. Podporované formáty: MP4, MOV, AVI, WebM, MKV, WMV, MPEG, M4V, FLV, 3GP, OGG'
                 ]));
             }
+            error_log("video_api.php: [9] Formát OK");
 
             // Vytvořit složku pro videa (hlavní)
             $videosDir = __DIR__ . '/../uploads/videos';
+            error_log("video_api.php: [10] Videos dir: $videosDir, exists: " . (is_dir($videosDir) ? 'yes' : 'no'));
             if (!is_dir($videosDir)) {
                 if (!mkdir($videosDir, 0755, true)) {
                     error_log("video_api.php: Nelze vytvořit složku $videosDir");
@@ -138,6 +190,7 @@ try {
 
             // Vytvořit složku pro zakázku
             $uploadDir = $videosDir . '/' . $claimId;
+            error_log("video_api.php: [11] Upload dir: $uploadDir, exists: " . (is_dir($uploadDir) ? 'yes' : 'no'));
             if (!is_dir($uploadDir)) {
                 if (!mkdir($uploadDir, 0755, true)) {
                     error_log("video_api.php: Nelze vytvořit složku $uploadDir");
@@ -145,27 +198,34 @@ try {
                     die(json_encode(['status' => 'error', 'message' => 'Chyba při vytváření složky pro zakázku']));
                 }
             }
+            error_log("video_api.php: [12] Složky připraveny");
 
             // Generovat název souboru jako u fotek: reklamace_datum_vidX.ext
             // $extension je již definována výše při kontrole formátu
             $datum = date('Ymd'); // 20251128
 
             // Spočítat kolik už je videí pro tuto zakázku (aby byl unikátní index)
+            error_log("video_api.php: [13] Počítám videa pro claim $claimId");
             $stmtCount = $pdo->prepare("SELECT COUNT(*) FROM wgs_videos WHERE claim_id = :claim_id");
             $stmtCount->execute(['claim_id' => $claimId]);
             $videoCount = $stmtCount->fetchColumn() + 1;
+            error_log("video_api.php: [14] Video count: $videoCount");
 
             // Bezpečný název reklamace (bez lomítek)
             $safeReklamace = str_replace('/', '-', $reklamaceCislo);
 
             $uniqueName = "{$safeReklamace}_{$datum}_vid{$videoCount}.{$extension}";
             $filePath = $uploadDir . '/' . $uniqueName;
+            error_log("video_api.php: [15] Cílová cesta: $filePath");
 
             // Přesunout soubor
+            error_log("video_api.php: [16] Přesouvám soubor z $tmpPath do $filePath");
             if (!move_uploaded_file($tmpPath, $filePath)) {
+                error_log("video_api.php: Chyba při move_uploaded_file - tmp exists: " . (file_exists($tmpPath) ? 'yes' : 'no'));
                 http_response_code(500);
                 die(json_encode(['status' => 'error', 'message' => 'Chyba při ukládání videa']));
             }
+            error_log("video_api.php: [17] Soubor přesunut úspěšně");
 
             // Získat délku videa (pokud je dostupné getID3 nebo ffprobe)
             $duration = null;
@@ -173,22 +233,27 @@ try {
 
             // Uložit do databáze
             $relativePath = '/uploads/videos/' . $claimId . '/' . $uniqueName;
+            error_log("video_api.php: [18] Ukládám do DB - relativePath: $relativePath");
 
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_videos (claim_id, video_name, video_path, file_size, duration, uploaded_by)
                 VALUES (:claim_id, :video_name, :video_path, :file_size, :duration, :uploaded_by)
             ");
 
-            $stmt->execute([
+            $params = [
                 'claim_id' => $claimId,
-                'video_name' => $uniqueName,  // Generovaný název místo originálního
+                'video_name' => $uniqueName,
                 'video_path' => $relativePath,
                 'file_size' => $fileSize,
                 'duration' => $duration,
                 'uploaded_by' => $userId
-            ]);
+            ];
+            error_log("video_api.php: [19] DB params: " . json_encode($params));
+
+            $stmt->execute($params);
 
             $videoId = $pdo->lastInsertId();
+            error_log("video_api.php: [20] Video uloženo s ID: $videoId");
 
             echo json_encode([
                 'status' => 'success',
@@ -201,6 +266,7 @@ try {
                     'uploaded_at' => date('Y-m-d H:i:s')
                 ]
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            error_log("video_api.php: [21] Upload dokončen úspěšně");
             break;
 
         // ==================== SEZNAM VIDEÍ ====================
