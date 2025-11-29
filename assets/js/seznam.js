@@ -3551,8 +3551,11 @@ async function zobrazVideotekaArchiv(claimId) {
   container.style.cssText = 'width: 95%; max-width: 900px; height: 90%; background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;';
 
   // Header (bude aktualizován po načtení dat z API)
+  const isMobileHeader = window.innerWidth < 600;
   const header = document.createElement('div');
-  header.style.cssText = 'padding: 16px 20px; background: #333; color: white; font-weight: 600; font-size: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #444;';
+  header.style.cssText = isMobileHeader
+    ? 'padding: 12px 16px; background: #333; color: white; font-weight: 600; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; border-bottom: 2px solid #444;'
+    : 'padding: 16px 20px; background: #333; color: white; font-weight: 600; font-size: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #444;';
   header.innerHTML = `<span>Načítání...</span>`;
 
   // Content area - seznam videí (s drag & drop podporou) - sloupcový layout
@@ -3621,7 +3624,16 @@ async function zobrazVideotekaArchiv(claimId) {
       // Aktualizovat nadpis s jménem zákazníka a číslem reklamace
       const customerName = result.customer_name || 'Neznámý zákazník';
       const reklamaceNum = result.reklamace_cislo || claimId;
-      header.innerHTML = `<span>${customerName}</span><span style="font-size: 0.85rem; opacity: 0.7;">${reklamaceNum}</span>`;
+      if (isMobileHeader) {
+        // Mobil: jméno nahoře, číslo pod tím menší, centrované
+        header.innerHTML = `
+          <span style="font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${customerName}</span>
+          <span style="font-size: 0.75rem; opacity: 0.6;">${reklamaceNum}</span>
+        `;
+      } else {
+        // Desktop: vedle sebe
+        header.innerHTML = `<span>${customerName}</span><span style="font-size: 0.85rem; opacity: 0.7;">${reklamaceNum}</span>`;
+      }
 
       if (result.videos && result.videos.length > 0) {
         // Zobrazit seznam videí
