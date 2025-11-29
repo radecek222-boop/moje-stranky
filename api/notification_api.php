@@ -34,11 +34,13 @@ try {
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         switch ($action) {
             case 'get':
-                // Nacteni jedne notifikace podle ID
+                // Nacteni jedne notifikace podle ID (muze byt cislo i retezec)
                 $id = $_GET['id'] ?? null;
-                if (!$id || !is_numeric($id)) {
-                    throw new Exception('Chybi nebo neplatne ID notifikace');
+                if (!$id) {
+                    throw new Exception('Chybi ID notifikace');
                 }
+                // Sanitizace - povoleny jen alfanumericke znaky a podtrzitko
+                $id = preg_replace('/[^a-zA-Z0-9_]/', '', $id);
 
                 $stmt = $pdo->prepare("
                     SELECT id, name, description, trigger_event, recipient_type,
@@ -138,10 +140,8 @@ try {
                 throw new Exception('Chybí notification_id nebo active');
             }
 
-            // BEZPEČNOST: Validace ID (pouze čísla)
-            if (!is_numeric($notificationId)) {
-                throw new Exception('Neplatné ID notifikace');
-            }
+            // BEZPEČNOST: Sanitizace ID (alfanumericke + podtrzitko)
+            $notificationId = preg_replace('/[^a-zA-Z0-9_]/', '', $notificationId);
 
             $stmt = $pdo->prepare("
                 UPDATE wgs_notifications
@@ -176,10 +176,8 @@ try {
                 throw new Exception('Šablona nesmí být prázdná');
             }
 
-            // BEZPEČNOST: Validace ID
-            if (!is_numeric($notificationId)) {
-                throw new Exception('Neplatné ID notifikace');
-            }
+            // BEZPEČNOST: Sanitizace ID (alfanumericke + podtrzitko)
+            $notificationId = preg_replace('/[^a-zA-Z0-9_]/', '', $notificationId);
 
             // BEZPEČNOST: Validace recipient
             $allowedRecipients = ['customer', 'admin', 'technician', 'seller'];
