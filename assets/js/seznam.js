@@ -3865,19 +3865,17 @@ function vytvorVideoKartu(video, claimId) {
 
   // Tlačítka - na mobilu vertikálně se stejnou výškou jako video náhled
   const buttonsContainer = document.createElement('div');
-  // Na mobilu: výška kontejneru = thumbHeight (60px), tlačítka vertikálně
-  // Každé tlačítko = (60 - 4px gap) / 2 = 28px
+  // Na mobilu: kontejner má výšku videa, tlačítka se roztáhnou pomocí flex:1
   // Na desktopu: horizontálně
   const btnGap = 4;
-  const mobileBtnHeight = Math.floor((thumbHeight - btnGap) / 2); // Každé tlačítko = polovina výšky videa
 
   buttonsContainer.style.cssText = isMobile
-    ? `display: flex; flex-direction: column; align-items: center; gap: ${btnGap}px; flex-shrink: 0; height: ${thumbHeight}px; overflow: hidden; box-sizing: border-box;`
+    ? `display: flex; flex-direction: column; gap: ${btnGap}px; flex-shrink: 0; height: ${thumbHeight}px; box-sizing: border-box;`
     : 'display: flex; flex-direction: row; align-items: center; gap: 6px; flex-shrink: 0;';
 
-  // Společný styl pro ikony na mobilu - výška = polovina video náhledu
+  // Společný styl pro ikony na mobilu - flex:1 automaticky vyplní prostor
   // box-sizing: border-box, margin: 0 - reset browser defaults
-  const ikonaBtnStyle = `height: ${mobileBtnHeight}px; width: 36px; padding: 0; margin: 0; border-radius: 3px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; border: 1px solid #555; box-sizing: border-box;`;
+  const ikonaBtnStyle = `flex: 1; width: 36px; padding: 0; margin: 0; border-radius: 3px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; border: 1px solid #555; box-sizing: border-box;`;
 
   // Tlačítko Stáhnout - ikona na mobilu, text na desktopu
   const btnStahnout = document.createElement('button');
