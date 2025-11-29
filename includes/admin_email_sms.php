@@ -114,9 +114,32 @@ try {
         }
     }
 
-    // Sparovat podle klice
+    // Sparovat podle klice - vlastni poradi (logicka posloupnost procesu)
     $vsechnyKlice = array_unique(array_merge(array_keys($emailSablony), array_keys($smsSablonyAll)));
-    sort($vsechnyKlice);
+
+    // Definovat poradi sablon (od zacatku procesu do konce)
+    $poradiSablon = [
+        'nova_reklamace_customer',      // 1. Nova reklamace - zakaznik
+        'nova_reklamace_admin',         // 2. Nova reklamace - admin
+        'potvrzeni_terminu_customer',   // 3. Potvrzeni terminu
+        'pripominka_terminu_customer',  // 4. Pripominka terminu
+        'prirazeni_terminu_technician', // 5. Prirazeni terminu technikovi
+        'pokus_o_kontakt_customer',     // 6. Pokus o kontakt
+        'znovu_otevreno_admin',         // 7. Znovu otevreno
+        'dokonceno_customer',           // 8. Dokonceni zakazky
+        'pozvanka_seller',              // 9. Pozvanka pro prodejce (na konci)
+        'pozvanka_technician'           // 10. Pozvanka pro technika (na konci)
+    ];
+
+    // Seradit podle definovaneho poradi
+    usort($vsechnyKlice, function($a, $b) use ($poradiSablon) {
+        $indexA = array_search($a, $poradiSablon);
+        $indexB = array_search($b, $poradiSablon);
+        // Pokud neni v poradi, dat na konec
+        if ($indexA === false) $indexA = 999;
+        if ($indexB === false) $indexB = 999;
+        return $indexA - $indexB;
+    });
 
     foreach ($vsechnyKlice as $klic) {
         $sablonyParovane[] = [
