@@ -3534,6 +3534,13 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
 async function zobrazVideotekaArchiv(claimId) {
   logger.log(`[Videotéka] Otevírám archiv pro zakázku ID: ${claimId}`);
 
+  // Kontrola - pokud už overlay existuje, nezobrazovat znovu (prevence dvojitého kliknutí)
+  const existujiciOverlay = document.getElementById('videotekaOverlay');
+  if (existujiciOverlay) {
+    logger.log('[Videotéka] Overlay už existuje, ignoruji');
+    return;
+  }
+
   // Vytvořit overlay
   const overlay = document.createElement('div');
   overlay.id = 'videotekaOverlay';
