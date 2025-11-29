@@ -3772,27 +3772,27 @@ function generujNahledVidea(videoPath, sirka, vyska) {
  */
 function vytvorVideoKartu(video, claimId) {
   // Karta - RESPONZIVNÍ layout
-  // Desktop: [náhled] | [info] | [tlačítka] - horizontálně
-  // Mobil:  [náhled | info] / [tlačítka] - 2 řádky
+  // Vždy horizontální: [náhled] | [info] | [tlačítka]
+  // Na mobilu tlačítka vertikálně se stejnou výškou jako video
   const isMobile = window.innerWidth < 600;
 
   const card = document.createElement('div');
   card.style.cssText = `
     background: #2a2a2a;
     border-radius: 6px;
-    padding: 12px;
+    padding: ${isMobile ? '8px' : '12px'};
     display: flex;
-    flex-direction: ${isMobile ? 'column' : 'row'};
-    align-items: ${isMobile ? 'stretch' : 'center'};
-    gap: 12px;
+    flex-direction: row;
+    align-items: center;
+    gap: ${isMobile ? '8px' : '12px'};
     border: 1px solid #444;
     width: 100%;
     box-sizing: border-box;
   `;
 
-  // Horní řádek: náhled + info (vždy vedle sebe)
+  // Levá část: náhled + info (vždy vedle sebe)
   const topRow = document.createElement('div');
-  topRow.style.cssText = 'display: flex; flex-direction: row; align-items: center; gap: 12px; flex: 1; min-width: 0;';
+  topRow.style.cssText = 'display: flex; flex-direction: row; align-items: center; gap: 8px; flex: 1; min-width: 0;';
 
   // Video thumbnail (náhled)
   const thumbnailContainer = document.createElement('div');
@@ -3871,25 +3871,26 @@ function vytvorVideoKartu(video, claimId) {
   topRow.appendChild(thumbnailContainer);
   topRow.appendChild(infoContainer);
 
-  // Tlačítka - na mobilu jako ikony vertikálně, na desktopu horizontálně
+  // Tlačítka - na mobilu vertikálně se stejnou výškou jako video náhled
   const buttonsContainer = document.createElement('div');
-  buttonsContainer.style.cssText = `
-    display: flex;
-    flex-direction: ${isMobile ? 'column' : 'row'};
-    align-items: center;
-    gap: ${isMobile ? '4px' : '6px'};
-    flex-shrink: 0;
-  `;
+  // Na mobilu: výška = thumbHeight (45px), tlačítka vertikálně
+  // Na desktopu: horizontálně
+  const btnGap = 4;
+  const mobileBtnHeight = Math.floor((thumbHeight - btnGap) / 2); // Každé tlačítko = polovina výšky videa
 
-  // Společný styl pro ikony na mobilu
-  const ikonaBtnStyle = 'min-height: 32px; width: 32px; padding: 0; border-radius: 4px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; border: 1px solid #555;';
+  buttonsContainer.style.cssText = isMobile
+    ? `display: flex; flex-direction: column; align-items: center; gap: ${btnGap}px; flex-shrink: 0; height: ${thumbHeight}px; justify-content: space-between;`
+    : 'display: flex; flex-direction: row; align-items: center; gap: 6px; flex-shrink: 0;';
+
+  // Společný styl pro ikony na mobilu - výška = polovina video náhledu
+  const ikonaBtnStyle = `height: ${mobileBtnHeight}px; width: 36px; padding: 0; border-radius: 3px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; border: 1px solid #555;`;
 
   // Tlačítko Stáhnout - ikona na mobilu, text na desktopu
   const btnStahnout = document.createElement('button');
   if (isMobile) {
     btnStahnout.innerHTML = '<i class="fas fa-download"></i>';
     btnStahnout.title = 'Stáhnout video';
-    btnStahnout.style.cssText = ikonaBtnStyle + ' background: #444; color: #ccc; font-size: 0.85rem;';
+    btnStahnout.style.cssText = ikonaBtnStyle + ' background: #444; color: #ccc; font-size: 0.75rem;';
   } else {
     btnStahnout.textContent = 'Stáhnout';
     btnStahnout.style.cssText = 'min-height: 36px; padding: 0.4rem 0.8rem; font-size: 0.8rem; border: 1px solid #555; border-radius: 4px; cursor: pointer; touch-action: manipulation; white-space: nowrap; background: #444; color: white;';
@@ -3906,7 +3907,7 @@ function vytvorVideoKartu(video, claimId) {
   btnSmazat.innerHTML = '&#10005;'; // × křížek
   btnSmazat.title = 'Smazat video';
   btnSmazat.style.cssText = isMobile
-    ? ikonaBtnStyle + ' background: #442222; color: #c66; font-size: 1rem; font-weight: bold;'
+    ? ikonaBtnStyle + ' background: #442222; color: #c66; font-size: 0.85rem; font-weight: bold;'
     : 'min-height: 36px; width: 36px; padding: 0; font-size: 1.1rem; font-weight: bold; background: #553333; color: #c66; border: 1px solid #664444; border-radius: 4px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center;';
   btnSmazat.onclick = async () => {
     if (!confirm(`Opravdu smazat video "${video.video_name}"?`)) return;
