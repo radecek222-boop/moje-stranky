@@ -83,8 +83,10 @@ try {
             session_write_close();
 
             $claimId = $_POST['claim_id'] ?? null;
-            $userId = $_SESSION['user_id'] ?? null;
-            error_log("video_api.php: [3] claimId=$claimId, userId=$userId");
+            $rawUserId = $_SESSION['user_id'] ?? null;
+            // uploaded_by je INT - pokud je user_id string (např. 'ADMIN001'), nastavit NULL
+            $userId = (is_numeric($rawUserId)) ? (int)$rawUserId : null;
+            error_log("video_api.php: [3] claimId=$claimId, rawUserId=$rawUserId, userId=" . ($userId ?? 'NULL'));
 
             if (!$claimId) {
                 http_response_code(400);
