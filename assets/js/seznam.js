@@ -3694,6 +3694,58 @@ async function zobrazVideotekaArchiv(claimId) {
 }
 
 /**
+ * Generuje náhled (thumbnail) z videa pomocí HTML5 video + canvas
+ * @param {string} videoPath - Cesta k videu
+ * @param {number} sirka - Šířka náhledu
+ * @param {number} vyska - Výška náhledu
+ * @returns {Promise<string|null>} Data URL obrázku nebo null při chybě
+ */
+function generujNahledVidea(videoPath, sirka, vyska) {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    video.crossOrigin = 'anonymous';
+    video.muted = true;
+    video.preload = 'metadata';
+
+    // Timeout - pokud se video nenačte do 5 sekund, vrátit null
+    const timeout = setTimeout(() => {
+      video.src = '';
+      resolve(null);
+    }, 5000);
+
+    video.onloadedmetadata = () => {
+      // Seeknout na 1 sekundu nebo 10% délky (co je menší)
+      const seekCas = Math.min(1, video.duration * 0.1);
+      video.currentTime = seekCas;
+    };
+
+    video.onseeked = () => {
+      clearTimeout(timeout);
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = sirka * 2; // 2x rozlišení pro ostrost
+        canvas.height = vyska * 2;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        video.src = ''; // Uvolnit video
+        resolve(dataUrl);
+      } catch (e) {
+        video.src = '';
+        resolve(null);
+      }
+    };
+
+    video.onerror = () => {
+      clearTimeout(timeout);
+      resolve(null);
+    };
+
+    video.src = videoPath;
+  });
+}
+
+/**
  * Vytvoří kartu s video náhledem a tlačítky
  * @param {object} video - Video objekt z databáze
  * @param {number} claimId - ID zakázky
@@ -3725,10 +3777,12 @@ function vytvorVideoKartu(video, claimId) {
 
   // Video thumbnail (náhled)
   const thumbnailContainer = document.createElement('div');
+  const thumbWidth = isMobile ? 80 : 120;
+  const thumbHeight = isMobile ? 45 : 68;
   thumbnailContainer.style.cssText = `
     flex-shrink: 0;
-    width: ${isMobile ? '80px' : '120px'};
-    height: ${isMobile ? '45px' : '68px'};
+    width: ${thumbWidth}px;
+    height: ${thumbHeight}px;
     background: #1a1a1a;
     border-radius: 4px;
     display: flex;
@@ -3737,9 +3791,24 @@ function vytvorVideoKartu(video, claimId) {
     border: 1px solid #555;
     cursor: pointer;
     overflow: hidden;
+    position: relative;
   `;
+  // Placeholder s ikonou play (zobrazí se dokud se nenačte náhled)
   thumbnailContainer.innerHTML = `<span style="font-size: ${isMobile ? '1.5rem' : '2rem'}; opacity: 0.5; color: #fff;">▶</span>`;
   thumbnailContainer.onclick = () => prehratVideo(video.video_path, video.video_name);
+
+  // Generovat skutečný náhled z videa
+  generujNahledVidea(video.video_path, thumbWidth, thumbHeight).then(nahledUrl => {
+    if (nahledUrl) {
+      // Nahradit placeholder obrázkem s malou ikonou play
+      thumbnailContainer.innerHTML = `
+        <img src="${nahledUrl}" style="width: 100%; height: 100%; object-fit: cover;">
+        <span style="position: absolute; font-size: ${isMobile ? '1.2rem' : '1.5rem'}; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); opacity: 0.9;">▶</span>
+      `;
+    }
+  }).catch(() => {
+    // Pokud se náhled nepodaří, zůstane placeholder
+  });
 
   // Informace o videu
   const infoContainer = document.createElement('div');
