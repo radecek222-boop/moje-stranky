@@ -1404,7 +1404,7 @@ async function editSmsTemplate(id) {
 // Vytvorit SMS modal (pokud neexistuje)
 function vytvorSmsModal() {
     const modalHtml = `
-    <div id="editSmsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; padding: 1rem;">
+    <div id="editSmsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100001; justify-content: center; align-items: center; padding: 1rem;">
         <div style="background: white; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border-radius: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #ddd;">
                 <h3 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 600;">Upravit SMS sablonu</h3>
