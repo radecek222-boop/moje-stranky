@@ -3548,10 +3548,10 @@ async function zobrazVideotekaArchiv(claimId) {
   header.style.cssText = 'padding: 16px 20px; background: #333; color: white; font-weight: 600; font-size: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #444;';
   header.innerHTML = `<span>Načítání...</span>`;
 
-  // Content area - seznam videí (s drag & drop podporou)
+  // Content area - seznam videí (s drag & drop podporou) - sloupcový layout
   const content = document.createElement('div');
   content.id = 'videotekaContent';
-  content.style.cssText = 'flex: 1; overflow-y: auto; padding: 20px; background: #1a1a1a; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; align-content: start; position: relative; transition: background 0.2s ease;';
+  content.style.cssText = 'flex: 1; overflow-y: auto; padding: 16px; background: #1a1a1a; display: flex; flex-direction: column; gap: 12px; align-content: start; position: relative; transition: background 0.2s ease;';
 
   // Drag & drop overlay (skrytý, zobrazí se při přetahování)
   const dropOverlay = document.createElement('div');
@@ -3700,30 +3700,66 @@ async function zobrazVideotekaArchiv(claimId) {
  * @returns {HTMLElement}
  */
 function vytvorVideoKartu(video, claimId) {
-  // Karta - vertikální layout: náhled → název → velikost → datum → tlačítka
+  // Karta - KOMPAKTNÍ HORIZONTÁLNÍ layout: [náhled] | [info] | [tlačítka]
   const card = document.createElement('div');
-  card.style.cssText = 'background: #2a2a2a; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #444;';
+  card.style.cssText = `
+    background: #2a2a2a;
+    border-radius: 6px;
+    padding: 12px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #444;
+    width: 100%;
+    box-sizing: border-box;
+  `;
 
-  // Video thumbnail (statický náhled)
-  const thumbnail = document.createElement('div');
-  thumbnail.style.cssText = 'width: 100%; aspect-ratio: 16/9; background: #1a1a1a; border-radius: 4px; display: flex; align-items: center; justify-content: center; border: 1px solid #555; cursor: pointer;';
-  thumbnail.innerHTML = '<span style="font-size: 3rem; opacity: 0.4;">▶</span>';
-  thumbnail.onclick = () => prehratVideo(video.video_path, video.video_name);
+  // LEVÁ ČÁST: Video thumbnail (náhled) - menší
+  const thumbnailContainer = document.createElement('div');
+  thumbnailContainer.style.cssText = `
+    flex-shrink: 0;
+    width: 120px;
+    height: 68px;
+    background: #1a1a1a;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #555;
+    cursor: pointer;
+    overflow: hidden;
+  `;
+  thumbnailContainer.innerHTML = '<span style="font-size: 2rem; opacity: 0.5; color: #fff;">▶</span>';
+  thumbnailContainer.onclick = () => prehratVideo(video.video_path, video.video_name);
+
+  // STŘEDNÍ ČÁST: Informace o videu
+  const infoContainer = document.createElement('div');
+  infoContainer.style.cssText = `
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    min-width: 0;
+  `;
 
   // Název souboru
   const nazev = document.createElement('div');
-  nazev.style.cssText = 'font-weight: 500; font-size: 0.85rem; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+  nazev.style.cssText = 'font-weight: 600; font-size: 0.9rem; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
   nazev.textContent = video.video_name || 'Video';
-  nazev.title = video.video_name; // Tooltip pro dlouhé názvy
+  nazev.title = video.video_name;
 
-  // Velikost
-  const velikost = document.createElement('div');
-  velikost.style.cssText = 'font-size: 0.75rem; color: #999;';
-  velikost.textContent = `Velikost: ${(video.file_size / 1024 / 1024).toFixed(2)} MB`;
+  // Velikost a datum na jednom řádku
+  const metaRow = document.createElement('div');
+  metaRow.style.cssText = 'display: flex; gap: 12px; flex-wrap: wrap;';
 
-  // Datum nahrání
-  const datum = document.createElement('div');
-  datum.style.cssText = 'font-size: 0.75rem; color: #999;';
+  const velikost = document.createElement('span');
+  velikost.style.cssText = 'font-size: 0.75rem; color: #888;';
+  velikost.textContent = `${(video.file_size / 1024 / 1024).toFixed(1)} MB`;
+
+  const datum = document.createElement('span');
+  datum.style.cssText = 'font-size: 0.75rem; color: #888;';
   const datumText = video.uploaded_at ? new Date(video.uploaded_at).toLocaleString('cs-CZ', {
     day: '2-digit',
     month: '2-digit',
@@ -3731,22 +3767,34 @@ function vytvorVideoKartu(video, claimId) {
     hour: '2-digit',
     minute: '2-digit'
   }) : '—';
-  datum.textContent = `Nahráno: ${datumText}`;
+  datum.textContent = datumText;
 
-  // Tlačítka - styl stejný jako v showDetail modalu
-  const buttons = document.createElement('div');
-  buttons.style.cssText = 'display: flex; flex-direction: column; gap: 8px; margin-top: 6px;';
+  metaRow.appendChild(velikost);
+  metaRow.appendChild(datum);
+
+  infoContainer.appendChild(nazev);
+  infoContainer.appendChild(metaRow);
+
+  // PRAVÁ ČÁST: Tlačítka (horizontálně, kompaktní)
+  const buttonsContainer = document.createElement('div');
+  buttonsContainer.style.cssText = `
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  `;
 
   // Tlačítko Přehrát
   const btnPrehrat = document.createElement('button');
   btnPrehrat.textContent = 'Přehrát';
-  btnPrehrat.style.cssText = 'width: 100%; min-height: 44px; padding: 0.5rem 0.75rem; font-size: 0.9rem; background: #1a1a1a; color: white; border: none; border-radius: 4px; cursor: pointer; touch-action: manipulation; box-sizing: border-box;';
+  btnPrehrat.style.cssText = 'min-height: 36px; padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer; touch-action: manipulation; white-space: nowrap;';
   btnPrehrat.onclick = () => prehratVideo(video.video_path, video.video_name);
 
   // Tlačítko Stáhnout
   const btnStahnout = document.createElement('button');
   btnStahnout.textContent = 'Stáhnout';
-  btnStahnout.style.cssText = 'width: 100%; min-height: 44px; padding: 0.5rem 0.75rem; font-size: 0.9rem; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer; touch-action: manipulation; box-sizing: border-box;';
+  btnStahnout.style.cssText = 'min-height: 36px; padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #444; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer; touch-action: manipulation; white-space: nowrap;';
   btnStahnout.onclick = () => {
     const link = document.createElement('a');
     link.href = video.video_path;
@@ -3757,7 +3805,7 @@ function vytvorVideoKartu(video, claimId) {
   // Tlačítko Smazat
   const btnSmazat = document.createElement('button');
   btnSmazat.textContent = 'Smazat';
-  btnSmazat.style.cssText = 'width: 100%; min-height: 44px; padding: 0.5rem 0.75rem; font-size: 0.9rem; background: #c33; color: white; border: none; border-radius: 4px; cursor: pointer; touch-action: manipulation; box-sizing: border-box;';
+  btnSmazat.style.cssText = 'min-height: 36px; padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #553333; color: #ccc; border: 1px solid #664444; border-radius: 4px; cursor: pointer; touch-action: manipulation; white-space: nowrap;';
   btnSmazat.onclick = async () => {
     if (!confirm(`Opravdu smazat video "${video.video_name}"?`)) return;
 
@@ -3786,15 +3834,14 @@ function vytvorVideoKartu(video, claimId) {
     }
   };
 
-  buttons.appendChild(btnPrehrat);
-  buttons.appendChild(btnStahnout);
-  buttons.appendChild(btnSmazat);
+  buttonsContainer.appendChild(btnPrehrat);
+  buttonsContainer.appendChild(btnStahnout);
+  buttonsContainer.appendChild(btnSmazat);
 
-  card.appendChild(thumbnail);
-  card.appendChild(nazev);
-  card.appendChild(velikost);
-  card.appendChild(datum);
-  card.appendChild(buttons);
+  // Sestavit kartu
+  card.appendChild(thumbnailContainer);
+  card.appendChild(infoContainer);
+  card.appendChild(buttonsContainer);
 
   return card;
 }
