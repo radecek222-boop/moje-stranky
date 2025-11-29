@@ -1660,6 +1660,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
+      case 'showVideoteka':
+        if (id && typeof zobrazVideotekaArchiv === 'function') {
+          console.log('[EMERGENCY] Oteviram videoteku pro ID:', id);
+          zobrazVideotekaArchiv(id);
+        } else {
+          console.error('[EMERGENCY] zobrazVideotekaArchiv funkce neni dostupna nebo ID chybi');
+        }
+        break;
+
+      case 'showNotes':
+        if (id && typeof showNotes === 'function') {
+          console.log('[EMERGENCY] Oteviram poznamky pro ID:', id);
+          showNotes(id);
+        } else {
+          console.error('[EMERGENCY] showNotes funkce neni dostupna nebo ID chybi');
+        }
+        break;
+
+      case 'closeNotesModal':
+        if (typeof closeNotesModal === 'function') {
+          closeNotesModal();
+        }
+        break;
+
       // Audio nahravani a poznamky - ODEBRANO, nyni v seznam.js
       // Tyto akce zpracovava seznam.js: showNotes, startRecording, stopRecording,
       // deleteAudioPreview, saveNewNote, closeNotesModal, deleteNote
