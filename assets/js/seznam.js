@@ -2890,8 +2890,10 @@ async function startRecording(orderId) {
       showAudioPreview(recorder.audioBlob);
     };
 
-    // Spustit nahravani
-    recorder.mediaRecorder.start();
+    // Spustit nahravani s timeslice 1000ms
+    // Timeslice zajisti ze ondataavailable se vola kazdou sekundu
+    // To je dulezite pro mobilni prohlizece/PWA kde bez timeslice muze byt nespolehlivy
+    recorder.mediaRecorder.start(1000);
 
     // Aktualizovat UI
     document.getElementById('btnStartRecord').style.display = 'none';
@@ -2910,6 +2912,9 @@ async function startRecording(orderId) {
   } catch (err) {
     logger.error('[Audio] Chyba pri nahravani:', err);
 
+    // Uvolnit prostredky pri chybe (dulezite pro iOS PWA)
+    releaseMicrophone();
+
     if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
       alert('Pristup k mikrofonu byl odepren. Povolte pristup v nastaveni prohlizece.');
     } else {
@@ -2924,6 +2929,14 @@ function stopRecording() {
   const recorder = window.wgsAudioRecorder;
 
   if (recorder.mediaRecorder && recorder.isRecording) {
+    // Vyzadat posledni data pred zastavenim (dulezite pro mobilni prohlizece)
+    if (recorder.mediaRecorder.state === 'recording') {
+      try {
+        recorder.mediaRecorder.requestData();
+      } catch (e) {
+        logger.log('[Audio] requestData neni podporovano:', e.message);
+      }
+    }
     recorder.mediaRecorder.stop();
   }
 
@@ -2941,16 +2954,29 @@ function stopRecording() {
 }
 
 // Uvolnit mikrofon - zastavit stream
+// Dulezite pro iOS PWA - bez kompletniho uvolneni nahravani funguje jen jednou
 function releaseMicrophone() {
   const recorder = window.wgsAudioRecorder;
+
+  // Zastavit vsechny tracky streamu
   if (recorder.stream) {
     recorder.stream.getTracks().forEach(track => {
       track.stop();
       logger.log('[Audio] Track zastaven:', track.kind);
     });
     recorder.stream = null;
-    logger.log('[Audio] Mikrofon uvolnen');
   }
+
+  // Reset MediaRecorder (dulezite pro iOS PWA)
+  if (recorder.mediaRecorder) {
+    recorder.mediaRecorder = null;
+  }
+
+  // Reset stavu
+  recorder.isRecording = false;
+  recorder.audioChunks = [];
+
+  logger.log('[Audio] Mikrofon a MediaRecorder uvolneny');
 }
 
 function showAudioPreview(audioBlob) {
