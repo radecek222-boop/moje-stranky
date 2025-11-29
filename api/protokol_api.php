@@ -646,7 +646,9 @@ function sendEmailToCustomer($data) {
 
     // Příprava emailu
     $storageKey = reklamaceStorageKey($reklamaceId);
-    $subject = "Servisní protokol WGS - Reklamace č. {$reklamaceId}";
+    // Pouzit zakaznicke cislo reklamace (cislo), ne interni WGS cislo (reklamace_id)
+    $cisloReklamace = $reklamace['cislo'] ?? $reklamace['reklamace_id'] ?? $reklamaceId;
+    $subject = "Servisní protokol WGS - Reklamace č. {$cisloReklamace}";
     $customerName = $reklamace['jmeno'] ?? $reklamace['zakaznik'] ?? 'Zákazník';
 
     // Sestavit sekci videodokumentace pokud existuji videa
@@ -677,7 +679,7 @@ function sendEmailToCustomer($data) {
 <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;'>
     <p>Dobrý den {$customerName},</p>
 
-    <p>zasíláme Vám kompletní servisní report k reklamaci č. <strong>{$reklamaceId}</strong>.</p>
+    <p>zasíláme Vám kompletní servisní report k reklamaci č. <strong>{$cisloReklamace}</strong>.</p>
 
     <p><strong>V příloze naleznete:</strong></p>
     <ul>
@@ -699,7 +701,7 @@ function sendEmailToCustomer($data) {
     // Textová verze pro klienty bez HTML
     $messageText = "Dobrý den {$customerName},
 
-zasíláme Vám kompletní servisní report k reklamaci č. {$reklamaceId}.
+zasíláme Vám kompletní servisní report k reklamaci č. {$cisloReklamace}.
 
 V příloze naleznete:
 - Servisní protokol s fotodokumentací (PDF)
@@ -757,8 +759,12 @@ reklamace@wgs-service.cz
         $mail->AltBody = $messageText; // Textová verze pro klienty bez HTML
 
         // Přiložit kompletní PDF (protokol + fotodokumentace)
+        // Nazev prilohy pouziva zakaznicke cislo reklamace + jmeno zakaznika
         $pdfData = base64_decode($completePdf);
-        $mail->addStringAttachment($pdfData, "WGS_Report_{$storageKey}.pdf", 'base64', 'application/pdf');
+        $safeCustomerName = preg_replace('/[^a-zA-Z0-9_-]/', '-', iconv('UTF-8', 'ASCII//TRANSLIT', $customerName));
+        $safeCustomerName = preg_replace('/-+/', '-', trim($safeCustomerName, '-'));
+        $attachmentName = "Protokol_" . reklamaceStorageKey($cisloReklamace) . "_" . $safeCustomerName . ".pdf";
+        $mail->addStringAttachment($pdfData, $attachmentName, 'base64', 'application/pdf');
 
         // Odeslat
         $mail->send();

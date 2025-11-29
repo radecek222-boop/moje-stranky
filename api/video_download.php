@@ -27,7 +27,7 @@ try {
 
     // Overit token
     $stmt = $pdo->prepare("
-        SELECT t.*, r.jmeno, r.reklamace_id as cislo_reklamace
+        SELECT t.*, r.jmeno, COALESCE(r.cislo, r.reklamace_id) as cislo_reklamace
         FROM wgs_video_tokens t
         JOIN wgs_reklamace r ON t.claim_id = r.id
         WHERE t.token = :token
