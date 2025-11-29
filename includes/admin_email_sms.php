@@ -125,8 +125,8 @@ try {
         'potvrzeni_terminu_customer',   // 4. Potvrzeni terminu
         'pripominka_terminu_customer',  // 5. Pripominka terminu
         'prirazeni_terminu_technician', // 6. Prirazeni terminu technikovi
-        'znovu_otevreno_admin',         // 7. Znovu otevreno
-        'dokonceno_customer',           // 8. Dokonceni zakazky
+        'dokonceno_customer',           // 7. Dokonceni zakazky
+        'znovu_otevreno_admin',         // 8. Znovu otevreno
         'pozvanka_seller',              // 9. Pozvanka pro prodejce (na konci)
         'pozvanka_technician'           // 10. Pozvanka pro technika (na konci)
     ];
