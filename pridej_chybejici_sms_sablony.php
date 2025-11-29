@@ -138,16 +138,21 @@ try {
     if (isset($_GET['execute']) && $_GET['execute'] === '1') {
         echo "<div class='info'><strong>PROVADIM PRIDANI...</strong></div>";
 
+        // Zjistit nejvyssi ID PRED TRANSAKCI
+        $maxIdStmt = $pdo->query("SELECT id FROM wgs_notifications ORDER BY CAST(id AS UNSIGNED) DESC LIMIT 1");
+        $maxIdRow = $maxIdStmt->fetch(PDO::FETCH_ASSOC);
+        $maxId = $maxIdRow ? (int)$maxIdRow['id'] : 0;
+
+        echo "<div class='info'>Aktualni nejvyssi ID v tabulce: {$maxId}</div>";
+
+        // Zobrazit vsechna ID pro debug
+        $allIds = $pdo->query("SELECT id FROM wgs_notifications ORDER BY CAST(id AS UNSIGNED)")->fetchAll(PDO::FETCH_COLUMN);
+        echo "<div class='info'>Vsechna ID: " . implode(', ', $allIds) . "</div>";
+
         $pdo->beginTransaction();
 
         try {
             $pridano = 0;
-
-            // Zjistit nejvyssi ID - MIMO TRANSAKCI
-            $maxIdStmt = $pdo->query("SELECT COALESCE(MAX(CAST(id AS UNSIGNED)), 0) as max_id FROM wgs_notifications");
-            $maxId = (int)($maxIdStmt->fetch(PDO::FETCH_ASSOC)['max_id']);
-
-            echo "<div class='info'>Aktualni nejvyssi ID: {$maxId}</div>";
 
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_notifications
