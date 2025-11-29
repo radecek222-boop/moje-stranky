@@ -3872,12 +3872,12 @@ function vytvorVideoKartu(video, claimId) {
   const mobileBtnHeight = Math.floor((thumbHeight - btnGap) / 2); // Každé tlačítko = polovina výšky videa
 
   buttonsContainer.style.cssText = isMobile
-    ? `display: flex; flex-direction: column; align-items: center; gap: ${btnGap}px; flex-shrink: 0; height: ${thumbHeight}px; justify-content: space-between;`
+    ? `display: flex; flex-direction: column; align-items: center; gap: ${btnGap}px; flex-shrink: 0; height: ${thumbHeight}px; overflow: hidden; box-sizing: border-box;`
     : 'display: flex; flex-direction: row; align-items: center; gap: 6px; flex-shrink: 0;';
 
   // Společný styl pro ikony na mobilu - výška = polovina video náhledu
-  // box-sizing: border-box zajistí že border je UVNITŘ výšky, ne navíc
-  const ikonaBtnStyle = `height: ${mobileBtnHeight}px; width: 36px; padding: 0; border-radius: 3px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; border: 1px solid #555; box-sizing: border-box;`;
+  // box-sizing: border-box, margin: 0 - reset browser defaults
+  const ikonaBtnStyle = `height: ${mobileBtnHeight}px; width: 36px; padding: 0; margin: 0; border-radius: 3px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; border: 1px solid #555; box-sizing: border-box;`;
 
   // Tlačítko Stáhnout - ikona na mobilu, text na desktopu
   const btnStahnout = document.createElement('button');
