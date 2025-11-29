@@ -357,7 +357,9 @@ try {
                                 <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600; color: #000; margin: 0;">
                                     <?= htmlspecialchars($par['email']['name']) ?>
                                 </h4>
-                                <span style="padding: 0.2rem 0.4rem; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; border: 1px solid #000; background: <?= $par['email']['active'] ? '#000' : '#fff' ?>; color: <?= $par['email']['active'] ? '#fff' : '#000' ?>;">
+                                <span onclick="toggleNotifikaceActive('<?= htmlspecialchars($par['email']['id']) ?>', this)"
+                                      style="padding: 0.2rem 0.4rem; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; border: 1px solid #000; background: <?= $par['email']['active'] ? '#000' : '#fff' ?>; color: <?= $par['email']['active'] ? '#fff' : '#000' ?>; cursor: pointer;"
+                                      data-active="<?= $par['email']['active'] ? '1' : '0' ?>">
                                     <?= $par['email']['active'] ? 'AKTIVNI' : 'VYPNUTO' ?>
                                 </span>
                             </div>
@@ -386,7 +388,9 @@ try {
                                 <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600; color: #000; margin: 0;">
                                     <?= htmlspecialchars($par['sms']['name']) ?>
                                 </h4>
-                                <span style="padding: 0.2rem 0.4rem; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; border: 1px solid #000; background: <?= $par['sms']['active'] ? '#000' : '#fff' ?>; color: <?= $par['sms']['active'] ? '#fff' : '#000' ?>;">
+                                <span onclick="toggleNotifikaceActive('<?= htmlspecialchars($par['sms']['id']) ?>', this)"
+                                      style="padding: 0.2rem 0.4rem; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; border: 1px solid #000; background: <?= $par['sms']['active'] ? '#000' : '#fff' ?>; color: <?= $par['sms']['active'] ? '#fff' : '#000' ?>; cursor: pointer;"
+                                      data-active="<?= $par['sms']['active'] ? '1' : '0' ?>">
                                     <?= $par['sms']['active'] ? 'AKTIVNI' : 'VYPNUTO' ?>
                                 </span>
                             </div>
@@ -477,7 +481,9 @@ try {
                             <h4 style="margin: 0; font-size: 0.95rem; font-weight: 600; font-family: 'Poppins', sans-serif;">
                                 <?= htmlspecialchars($sablona['name']) ?>
                             </h4>
-                            <span style="display: inline-block; padding: 0.2rem 0.5rem; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #000; background: <?= $sablona['active'] ? '#000' : '#fff' ?>; color: <?= $sablona['active'] ? '#fff' : '#000' ?>;">
+                            <span onclick="toggleNotifikaceActive('<?= htmlspecialchars($sablona['id']) ?>', this)"
+                                  style="display: inline-block; padding: 0.2rem 0.5rem; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #000; background: <?= $sablona['active'] ? '#000' : '#fff' ?>; color: <?= $sablona['active'] ? '#fff' : '#000' ?>; cursor: pointer;"
+                                  data-active="<?= $sablona['active'] ? '1' : '0' ?>">
                                 <?= $sablona['active'] ? 'AKTIVNI' : 'VYPNUTO' ?>
                             </span>
                         </div>
@@ -708,6 +714,51 @@ function switchSection(section) {
     // Update sections
     document.querySelectorAll('.cc-section').forEach(sec => sec.classList.remove('active'));
     document.getElementById('section-' + section)?.classList.add('active');
+}
+
+// Toggle aktivni stav notifikace
+async function toggleNotifikaceActive(notificationId, element) {
+    const currentActive = element.dataset.active === '1';
+    const newActive = !currentActive;
+
+    // Vizualni feedback - okamzite prepnout
+    element.style.background = newActive ? '#000' : '#fff';
+    element.style.color = newActive ? '#fff' : '#000';
+    element.textContent = newActive ? 'AKTIVNI' : 'VYPNUTO';
+    element.dataset.active = newActive ? '1' : '0';
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+        const response = await fetch('/api/notification_api.php?action=toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                csrf_token: csrfToken,
+                notification_id: notificationId,
+                active: newActive
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.status !== 'success') {
+            // Vratit zpet pri chybe
+            element.style.background = currentActive ? '#000' : '#fff';
+            element.style.color = currentActive ? '#fff' : '#000';
+            element.textContent = currentActive ? 'AKTIVNI' : 'VYPNUTO';
+            element.dataset.active = currentActive ? '1' : '0';
+            alert('Chyba: ' + (result.message || 'Nepodařilo se změnit stav'));
+        }
+    } catch (error) {
+        // Vratit zpet pri chybe
+        element.style.background = currentActive ? '#000' : '#fff';
+        element.style.color = currentActive ? '#fff' : '#000';
+        element.textContent = currentActive ? 'AKTIVNI' : 'VYPNUTO';
+        element.dataset.active = currentActive ? '1' : '0';
+        console.error('Chyba toggle notifikace:', error);
+        alert('Chyba pri zmene stavu notifikace');
+    }
 }
 
 // Toggle password visibility
