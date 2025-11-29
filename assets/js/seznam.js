@@ -3896,12 +3896,11 @@ function vytvorVideoKartu(video, claimId) {
   const btnGap = 4;
 
   buttonsContainer.style.cssText = isMobile
-    ? `display: flex; flex-direction: column; gap: ${btnGap}px; flex-shrink: 0; height: ${thumbHeight}px; box-sizing: border-box;`
+    ? `display: flex; flex-direction: column; gap: ${btnGap}px; flex-shrink: 0; height: ${thumbHeight}px; max-height: ${thumbHeight}px; overflow: hidden; box-sizing: border-box;`
     : 'display: flex; flex-direction: row; align-items: center; gap: 6px; flex-shrink: 0;';
 
-  // Společný styl pro ikony na mobilu - flex:1 automaticky vyplní prostor
-  // box-sizing: border-box, margin: 0 - reset browser defaults
-  const ikonaBtnStyle = `flex: 1; width: 36px; padding: 0; margin: 0; border-radius: 3px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; border: 1px solid #555; box-sizing: border-box;`;
+  // Společný styl pro ikony na mobilu - pevná výška 28px
+  const ikonaBtnStyle = `height: 28px; width: 36px; padding: 0; margin: 0; border-radius: 3px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; border: 1px solid #555; box-sizing: border-box;`;
 
   // Tlačítko Stáhnout - ikona na mobilu, text na desktopu
   const btnStahnout = document.createElement('button');
