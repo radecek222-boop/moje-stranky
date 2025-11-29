@@ -397,7 +397,7 @@ try {
                             <div style="background: #f9f9f9; padding: 0.5rem; font-size: 0.65rem; font-family: monospace; max-height: 50px; overflow: hidden; margin-bottom: 0.5rem; border: 1px solid #eee;">
                                 <?= htmlspecialchars(substr($par['sms']['template'], 0, 100)) ?>...
                             </div>
-                            <button onclick="editSmsTemplate(<?= $par['sms']['id'] ?>)"
+                            <button onclick="editSmsTemplate('<?= htmlspecialchars($par['sms']['id']) ?>')"
                                 style="width: 100%; padding: 0.5rem; background: #333; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; cursor: pointer;">
                                 Upravit
                             </button>
@@ -490,7 +490,7 @@ try {
                         <div style="background: #f9f9f9; padding: 0.75rem; font-size: 0.8rem; font-family: monospace; border: 1px solid #eee; margin-bottom: 0.75rem; max-height: 80px; overflow: hidden;">
                             <?= htmlspecialchars(substr($sablona['template'], 0, 150)) ?><?= strlen($sablona['template']) > 150 ? '...' : '' ?>
                         </div>
-                        <button onclick="editSmsTemplate(<?= $sablona['id'] ?>)"
+                        <button onclick="editSmsTemplate('<?= htmlspecialchars($sablona['id']) ?>')"
                                 style="width: 100%; padding: 0.5rem; background: #333; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; font-size: 0.75rem;">
                             Upravit sablonu
                         </button>
