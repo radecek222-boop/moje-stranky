@@ -3771,9 +3771,8 @@ function generujNahledVidea(videoPath, sirka, vyska) {
  * @returns {HTMLElement}
  */
 function vytvorVideoKartu(video, claimId) {
-  // Karta - RESPONZIVNÍ layout
-  // Vždy horizontální: [náhled] | [info] | [tlačítka]
-  // Na mobilu tlačítka vertikálně se stejnou výškou jako video
+  // Karta - jednoduchý layout: [video] [info] [tlačítka]
+  // Všechno zarovnané nahoru (flex-start), tlačítka mají stejnou výšku jako video
   const isMobile = window.innerWidth < 600;
 
   const card = document.createElement('div');
@@ -3783,16 +3782,12 @@ function vytvorVideoKartu(video, claimId) {
     padding: ${isMobile ? '8px' : '12px'};
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     gap: ${isMobile ? '8px' : '12px'};
     border: 1px solid #444;
     width: 100%;
     box-sizing: border-box;
   `;
-
-  // Levá část: náhled + info (vždy vedle sebe)
-  const topRow = document.createElement('div');
-  topRow.style.cssText = 'display: flex; flex-direction: row; align-items: center; gap: 8px; flex: 1; min-width: 0;';
 
   // Video thumbnail (náhled)
   const thumbnailContainer = document.createElement('div');
@@ -3868,9 +3863,6 @@ function vytvorVideoKartu(video, claimId) {
   infoContainer.appendChild(autorRow);
   infoContainer.appendChild(metaRow);
 
-  topRow.appendChild(thumbnailContainer);
-  topRow.appendChild(infoContainer);
-
   // Tlačítka - na mobilu vertikálně se stejnou výškou jako video náhled
   const buttonsContainer = document.createElement('div');
   // Na mobilu: výška kontejneru = thumbHeight (60px), tlačítka vertikálně
@@ -3942,8 +3934,9 @@ function vytvorVideoKartu(video, claimId) {
   buttonsContainer.appendChild(btnStahnout);
   buttonsContainer.appendChild(btnSmazat);
 
-  // Sestavit kartu
-  card.appendChild(topRow);
+  // Sestavit kartu: [video] [info] [tlačítka]
+  card.appendChild(thumbnailContainer);
+  card.appendChild(infoContainer);
   card.appendChild(buttonsContainer);
 
   return card;
