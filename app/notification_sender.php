@@ -90,12 +90,28 @@ try {
     // NAČTENÍ ŠABLONY Z DATABÁZE
     // ============================================
 
-    $stmt = $pdo->prepare("
-        SELECT * FROM wgs_notifications
-        WHERE id = :notification_id AND active = 1
-        LIMIT 1
-    ");
-    $stmt->execute(['notification_id' => $notificationId]);
+    // Podpora pro oba formaty: ciselne ID nebo trigger_event string
+    if (is_numeric($notificationId)) {
+        // Hledani podle ID
+        $stmt = $pdo->prepare("
+            SELECT * FROM wgs_notifications
+            WHERE id = :notification_id AND active = 1
+            LIMIT 1
+        ");
+        $stmt->execute(['notification_id' => $notificationId]);
+    } else {
+        // Hledani podle trigger_event (napr. "appointment_confirmed")
+        $recipientType = $notificationData['recipient_type'] ?? 'customer';
+        $stmt = $pdo->prepare("
+            SELECT * FROM wgs_notifications
+            WHERE trigger_event = :trigger_event AND recipient_type = :recipient_type AND type = 'email' AND active = 1
+            LIMIT 1
+        ");
+        $stmt->execute([
+            'trigger_event' => $notificationId,
+            'recipient_type' => $recipientType
+        ]);
+    }
     $notification = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$notification) {
