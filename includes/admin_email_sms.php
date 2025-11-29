@@ -908,8 +908,8 @@ async function otevritNotifikace(sablonaId) {
     content.innerHTML = '<div style="text-align: center; padding: 2rem; color: #999;">Načítám šablonu...</div>';
 
     try {
-        // Načíst data šablony z databáze
-        const sablona = <?= json_encode($emailSablony) ?>.find(s => s.id == sablonaId);
+        // Načíst data šablony z databáze (Object.values prevede objekt na pole)
+        const sablona = Object.values(<?= json_encode($emailSablony) ?>).find(s => s.id == sablonaId);
 
         if (!sablona) {
             content.innerHTML = '<div style="color: #dc3545; text-align: center; padding: 2rem;">Šablona nebyla nalezena</div>';
