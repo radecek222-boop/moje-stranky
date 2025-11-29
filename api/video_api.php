@@ -64,7 +64,8 @@ try {
                 die(json_encode(['status' => 'error', 'message' => 'Zakázka nenalezena']));
             }
 
-            $reklamaceCislo = $zakaz['reklamace_id'] ?? $zakaz['cislo'] ?? 'video';
+            // Pouzit zakaznicke cislo (cislo) pro nazvy souboru, ne interni WGS cislo
+            $reklamaceCislo = $zakaz['cislo'] ?? $zakaz['reklamace_id'] ?? 'video';
 
             // Kontrola nahraného souboru
             if (!isset($_FILES['video']) || $_FILES['video']['error'] !== UPLOAD_ERR_OK) {
