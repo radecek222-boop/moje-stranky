@@ -87,28 +87,67 @@ try {
                 ]));
             }
 
-            // Kontrola formátu (povolit běžné video formáty)
-            $allowedMimes = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'video/avi'];
+            // Kontrola formátu (povolit všechny běžné video formáty)
+            $allowedMimes = [
+                'video/mp4',
+                'video/quicktime',       // MOV
+                'video/x-msvideo',       // AVI
+                'video/webm',            // WebM
+                'video/avi',             // AVI alternativní
+                'video/x-matroska',      // MKV
+                'video/3gpp',            // 3GP
+                'video/3gpp2',           // 3G2
+                'video/x-flv',           // FLV
+                'video/x-ms-wmv',        // WMV
+                'video/mpeg',            // MPEG
+                'video/x-m4v',           // M4V
+                'video/ogg',             // OGG
+                'video/x-ms-asf',        // ASF
+                'application/octet-stream' // Fallback pro neznámé video soubory
+            ];
+
+            // Povolené přípony souborů
+            $allowedExtensions = ['mp4', 'mov', 'avi', 'webm', 'mkv', '3gp', '3g2', 'flv', 'wmv', 'mpg', 'mpeg', 'm4v', 'ogv', 'asf'];
+            $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             $mimeType = finfo_file($finfo, $tmpPath);
             finfo_close($finfo);
 
-            if (!in_array($mimeType, $allowedMimes)) {
+            // Povolit pokud MIME odpovídá NEBO přípona je povolená video přípona
+            $mimeOk = in_array($mimeType, $allowedMimes);
+            $extOk = in_array($extension, $allowedExtensions);
+
+            if (!$mimeOk && !$extOk) {
                 http_response_code(400);
                 die(json_encode([
                     'status' => 'error',
-                    'message' => 'Nepodporovaný formát videa. Podporované formáty: MP4, MOV, AVI, WebM'
+                    'message' => 'Nepodporovaný formát videa. Podporované formáty: MP4, MOV, AVI, WebM, MKV, WMV, MPEG, M4V, FLV, 3GP, OGG'
                 ]));
             }
 
+            // Vytvořit složku pro videa (hlavní)
+            $videosDir = __DIR__ . '/../uploads/videos';
+            if (!is_dir($videosDir)) {
+                if (!mkdir($videosDir, 0755, true)) {
+                    error_log("video_api.php: Nelze vytvořit složku $videosDir");
+                    http_response_code(500);
+                    die(json_encode(['status' => 'error', 'message' => 'Chyba při vytváření složky pro videa']));
+                }
+            }
+
             // Vytvořit složku pro zakázku
-            $uploadDir = __DIR__ . '/../uploads/videos/' . $claimId;
+            $uploadDir = $videosDir . '/' . $claimId;
             if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
+                if (!mkdir($uploadDir, 0755, true)) {
+                    error_log("video_api.php: Nelze vytvořit složku $uploadDir");
+                    http_response_code(500);
+                    die(json_encode(['status' => 'error', 'message' => 'Chyba při vytváření složky pro zakázku']));
+                }
             }
 
             // Generovat název souboru jako u fotek: reklamace_datum_vidX.ext
-            $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+            // $extension je již definována výše při kontrole formátu
             $datum = date('Ymd'); // 20251128
 
             // Spočítat kolik už je videí pro tuto zakázku (aby byl unikátní index)
