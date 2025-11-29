@@ -5,6 +5,7 @@
  * Endpointy:
  * - GET ?token=XXX - Zobrazit stranku se seznamem videi
  * - GET ?token=XXX&video_id=123 - Stahnout konkretni video
+ * - GET ?token=XXX&video_id=123&stream=1 - Streamovat video pro prehravani
  * - GET ?token=XXX&action=zip - Stahnout vsechna videa jako ZIP
  */
 
@@ -14,6 +15,7 @@ require_once __DIR__ . '/../init.php';
 $token = $_GET['token'] ?? null;
 $videoId = $_GET['video_id'] ?? null;
 $action = $_GET['action'] ?? null;
+$stream = isset($_GET['stream']);
 
 if (!$token) {
     zobrazChybu('Chybejici token', 'Pro pristup k videodokumentaci je potreba platny odkaz.');
@@ -50,11 +52,7 @@ try {
         exit;
     }
 
-    // Kontrola poctu stazeni
-    if ($tokenData['download_count'] >= $tokenData['max_downloads']) {
-        zobrazChybu('Limit stazeni', 'Byl dosazen maximalni pocet stazeni pro tento odkaz.');
-        exit;
-    }
+    // Limit stazeni odstranen - neomezene stahovani pro vsechny uzivatele
 
     // Nacist videa pro danou zakazku
     $stmt = $pdo->prepare("
@@ -71,7 +69,7 @@ try {
         exit;
     }
 
-    // Akce: Stahnout konkretni video
+    // Akce: Streamovat nebo stahnout konkretni video
     if ($videoId) {
         $video = null;
         foreach ($videa as $v) {
@@ -92,10 +90,51 @@ try {
             exit;
         }
 
-        // Inkrementovat pocet stazeni
-        inkrementovatStazeni($pdo, $token);
+        // Streamovani pro prehravani (nepocita se do limitu stazeni)
+        if ($stream) {
+            $fileSize = filesize($filePath);
+            $mimeType = 'video/mp4';
 
-        // Stahnout soubor
+            // Podpora Range requests pro seekovani ve videu
+            if (isset($_SERVER['HTTP_RANGE'])) {
+                $range = $_SERVER['HTTP_RANGE'];
+                list($unit, $range) = explode('=', $range, 2);
+                list($start, $end) = explode('-', $range, 2);
+
+                $start = intval($start);
+                $end = $end === '' ? $fileSize - 1 : intval($end);
+
+                if ($start > $end || $start >= $fileSize) {
+                    header('HTTP/1.1 416 Requested Range Not Satisfiable');
+                    header("Content-Range: bytes */$fileSize");
+                    exit;
+                }
+
+                $length = $end - $start + 1;
+                header('HTTP/1.1 206 Partial Content');
+                header("Content-Range: bytes $start-$end/$fileSize");
+                header("Content-Length: $length");
+                header("Content-Type: $mimeType");
+                header('Accept-Ranges: bytes');
+                header('Cache-Control: public, max-age=3600');
+
+                $fp = fopen($filePath, 'rb');
+                fseek($fp, $start);
+                echo fread($fp, $length);
+                fclose($fp);
+                exit;
+            }
+
+            // Bez Range - vratit cele video
+            header("Content-Type: $mimeType");
+            header("Content-Length: $fileSize");
+            header('Accept-Ranges: bytes');
+            header('Cache-Control: public, max-age=3600');
+            readfile($filePath);
+            exit;
+        }
+
+        // Stahnout soubor (bez pocitani stazeni)
         header('Content-Type: video/mp4');
         header('Content-Disposition: attachment; filename="' . basename($video['video_name']) . '"');
         header('Content-Length: ' . filesize($filePath));
@@ -131,10 +170,7 @@ try {
         }
         $zip->close();
 
-        // Inkrementovat pocet stazeni
-        inkrementovatStazeni($pdo, $token);
-
-        // Stahnout ZIP
+        // Stahnout ZIP (bez pocitani stazeni)
         header('Content-Type: application/zip');
         header('Content-Disposition: attachment; filename="' . $zipName . '"');
         header('Content-Length: ' . filesize($zipPath));
@@ -150,14 +186,6 @@ try {
 } catch (Exception $e) {
     error_log("Video download error: " . $e->getMessage());
     zobrazChybu('Chyba serveru', 'Doslo k chybe pri zpracovani pozadavku.');
-}
-
-/**
- * Inkrementuje pocet stazeni pro token
- */
-function inkrementovatStazeni($pdo, $token) {
-    $stmt = $pdo->prepare("UPDATE wgs_video_tokens SET download_count = download_count + 1 WHERE token = :token");
-    $stmt->execute([':token' => $token]);
 }
 
 /**
@@ -210,7 +238,6 @@ function zobrazStranku($tokenData, $videa, $token) {
     }
     $pocetVidei = count($videa);
     $expirace = date('d.m.Y', strtotime($tokenData['expires_at']));
-    $zbyvajiciStazeni = $tokenData['max_downloads'] - $tokenData['download_count'];
     ?>
     <!DOCTYPE html>
     <html lang="cs">
@@ -250,13 +277,20 @@ function zobrazStranku($tokenData, $videa, $token) {
                 display: flex; align-items: center; gap: 16px;
                 border: 1px solid #444;
             }
-            .video-icon { font-size: 1.5rem; opacity: 0.5; }
+            .video-icon {
+                font-size: 1.5rem; opacity: 0.7; cursor: pointer;
+                width: 48px; height: 48px; display: flex; align-items: center;
+                justify-content: center; background: #333; border-radius: 8px;
+                transition: all 0.2s;
+            }
+            .video-icon:hover { background: #444; opacity: 1; }
             .video-info { flex: 1; min-width: 0; }
             .video-name {
                 font-weight: 500; margin-bottom: 4px;
                 white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             }
             .video-meta { font-size: 0.8rem; color: #888; }
+            .video-actions { display: flex; gap: 8px; }
             .btn {
                 background: #444; color: #fff; border: none; padding: 10px 20px;
                 border-radius: 6px; cursor: pointer; font-size: 0.9rem;
@@ -264,8 +298,36 @@ function zobrazStranku($tokenData, $videa, $token) {
                 transition: background 0.2s;
             }
             .btn:hover { background: #555; }
+            .btn-play { background: #333; padding: 10px 16px; }
+            .btn-play:hover { background: #444; }
             .btn-primary { background: #333; border: 1px solid #555; }
             .btn-primary:hover { background: #444; }
+
+            /* Video Player Modal */
+            .video-modal {
+                display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.95); z-index: 1000;
+                align-items: center; justify-content: center; padding: 20px;
+            }
+            .video-modal.active { display: flex; }
+            .video-modal-content {
+                max-width: 900px; width: 100%; max-height: 90vh;
+                display: flex; flex-direction: column;
+            }
+            .video-modal-header {
+                display: flex; justify-content: space-between; align-items: center;
+                padding: 12px 0; color: #fff;
+            }
+            .video-modal-title { font-size: 1rem; opacity: 0.8; }
+            .video-modal-close {
+                background: none; border: none; color: #fff; font-size: 2rem;
+                cursor: pointer; opacity: 0.7; line-height: 1;
+            }
+            .video-modal-close:hover { opacity: 1; }
+            .video-player {
+                width: 100%; background: #000; border-radius: 8px;
+                max-height: calc(90vh - 100px);
+            }
 
             .download-all {
                 background: #2a2a2a; border-radius: 12px; padding: 24px;
@@ -276,9 +338,12 @@ function zobrazStranku($tokenData, $videa, $token) {
 
             @media (max-width: 600px) {
                 .video-item { flex-direction: column; align-items: stretch; gap: 12px; }
-                .video-item .btn { width: 100%; text-align: center; }
+                .video-actions { flex-direction: column; }
+                .video-actions .btn { width: 100%; text-align: center; }
                 .meta { flex-direction: column; gap: 8px; }
                 .info-bar { flex-direction: column; text-align: center; }
+                .video-modal-content { max-height: 100vh; }
+                .video-player { max-height: calc(100vh - 80px); }
             }
         </style>
     </head>
@@ -296,13 +361,13 @@ function zobrazStranku($tokenData, $videa, $token) {
 
             <div class="info-bar">
                 <span>Platnost odkazu: do <?= $expirace ?></span>
-                <span class="warning">Zbyvajici stazeni: <?= $zbyvajiciStazeni ?></span>
+                <span>Neomezene stahovani</span>
             </div>
 
             <div class="video-list">
                 <?php foreach ($videa as $index => $video): ?>
                 <div class="video-item">
-                    <div class="video-icon">&#9658;</div>
+                    <div class="video-icon" onclick="prehratVideo(<?= $video['id'] ?>, '<?= htmlspecialchars(addslashes($video['video_name'])) ?>')" title="Prehrat video">&#9658;</div>
                     <div class="video-info">
                         <div class="video-name"><?= htmlspecialchars($video['video_name']) ?></div>
                         <div class="video-meta">
@@ -310,9 +375,14 @@ function zobrazStranku($tokenData, $videa, $token) {
                             <?= date('d.m.Y H:i', strtotime($video['uploaded_at'])) ?>
                         </div>
                     </div>
-                    <a href="?token=<?= htmlspecialchars($token) ?>&video_id=<?= $video['id'] ?>" class="btn">
-                        Stahnout
-                    </a>
+                    <div class="video-actions">
+                        <button class="btn btn-play" onclick="prehratVideo(<?= $video['id'] ?>, '<?= htmlspecialchars(addslashes($video['video_name'])) ?>')" title="Prehrat">
+                            &#9658; Prehrat
+                        </button>
+                        <a href="?token=<?= htmlspecialchars($token) ?>&video_id=<?= $video['id'] ?>" class="btn" onclick="stahnoutAZavrit(event, this.href)">
+                            Stahnout
+                        </a>
+                    </div>
                 </div>
                 <?php endforeach; ?>
             </div>
@@ -320,12 +390,92 @@ function zobrazStranku($tokenData, $videa, $token) {
             <?php if ($pocetVidei > 1): ?>
             <div class="download-all">
                 <h2>Stahnout vsechna videa najednou</h2>
-                <a href="?token=<?= htmlspecialchars($token) ?>&action=zip" class="btn btn-primary">
+                <a href="?token=<?= htmlspecialchars($token) ?>&action=zip" class="btn btn-primary" onclick="stahnoutAZavrit(event, this.href)">
                     Stahnout ZIP (<?= formatovatVelikost($celkovaVelikost) ?>)
                 </a>
             </div>
             <?php endif; ?>
         </div>
+
+        <!-- Video Player Modal -->
+        <div class="video-modal" id="videoModal">
+            <div class="video-modal-content">
+                <div class="video-modal-header">
+                    <span class="video-modal-title" id="videoModalTitle"></span>
+                    <button class="video-modal-close" onclick="zavritVideo()">&times;</button>
+                </div>
+                <video class="video-player" id="videoPlayer" controls playsinline>
+                    Vas prohlizec nepodporuje prehravani videa.
+                </video>
+            </div>
+        </div>
+
+        <script>
+            const token = '<?= htmlspecialchars($token) ?>';
+            const videoModal = document.getElementById('videoModal');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const videoModalTitle = document.getElementById('videoModalTitle');
+
+            // Stahnout a zavrit stranku
+            function stahnoutAZavrit(event, url) {
+                event.preventDefault();
+
+                // Vytvorit neviditelny iframe pro stazeni
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = url;
+                document.body.appendChild(iframe);
+
+                // Zobrazit zpravu
+                document.querySelector('.container').innerHTML =
+                    '<div style="text-align: center; padding: 60px 20px;">' +
+                    '<div style="font-size: 3rem; margin-bottom: 20px;">&#10003;</div>' +
+                    '<h1 style="margin-bottom: 16px;">Stahovani zahajeno</h1>' +
+                    '<p style="color: #888; margin-bottom: 30px;">Video se stahuje. Tato stranka se za chvili zavre.</p>' +
+                    '<p style="color: #666; font-size: 0.85rem;">Pokud se okno nezavrelo, muzete jej zavrit rucne.</p>' +
+                    '</div>';
+
+                // Zkusit zavrit okno po 3 sekundach
+                setTimeout(function() {
+                    window.close();
+                    // Pokud se nezavrelo (nektere prohlizece to blokuji),
+                    // presmerovat na prazdnou stranku
+                    setTimeout(function() {
+                        window.location.href = 'about:blank';
+                    }, 500);
+                }, 3000);
+            }
+
+            function prehratVideo(videoId, nazev) {
+                const streamUrl = '?token=' + token + '&video_id=' + videoId + '&stream=1';
+                videoPlayer.src = streamUrl;
+                videoModalTitle.textContent = nazev;
+                videoModal.classList.add('active');
+                videoPlayer.play().catch(function(e) {
+                    console.log('Autoplay blocked:', e);
+                });
+            }
+
+            function zavritVideo() {
+                videoPlayer.pause();
+                videoPlayer.src = '';
+                videoModal.classList.remove('active');
+            }
+
+            // Zavrit modal kliknutim mimo video
+            videoModal.addEventListener('click', function(e) {
+                if (e.target === videoModal) {
+                    zavritVideo();
+                }
+            });
+
+            // Zavrit modal klavesou Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && videoModal.classList.contains('active')) {
+                    zavritVideo();
+                }
+            });
+        </script>
     </body>
     </html>
     <?php
