@@ -363,6 +363,19 @@ try {
                         </a>
                     </div>
 
+                    <!-- Migrace wgs_videos -->
+                    <div style="background: white; border: 2px solid #000; padding: 1.5rem;">
+                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600;">
+                            Migrace wgs_videos (jen pokud chybí)
+                        </h3>
+                        <p style="margin: 0.5rem 0; font-size: 0.85rem; color: #666;">
+                            Spusťte jen pokud tabulka není v databázi nebo potřebujete znovu založit složku uploads/videos. Na produkci už tabulka existuje.
+                        </p>
+                        <a href="migrations/2025_12_01_pridej_tabulku_wgs_videos.php" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;">
+                            Otevřít migraci
+                        </a>
+                    </div>
+
                 </div>
 
                 <div style="margin-top: 2rem; padding: 1rem; background: #fffbea; border: 2px solid #fbbf24;">
