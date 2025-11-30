@@ -4046,6 +4046,8 @@ function otevritNahravaniVidea(claimId, parentOverlay) {
   // File input
   const fileInput = document.createElement('input');
   fileInput.type = 'file';
+  fileInput.id = 'video';
+  fileInput.name = 'video';
   fileInput.accept = 'video/*';
   fileInput.style.cssText = 'display: block; width: 100%; padding: 12px; background: #1a1a1a; color: white; border: 1px solid #555; border-radius: 4px; margin-bottom: 16px; font-size: 0.9rem;';
 

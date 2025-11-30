@@ -3,6 +3,10 @@
 // Spouštějte z prohlížeče jako přihlášený admin/technik. Skript nic nemění trvale;
 // testovací INSERT se vrací zpět a soubory se ukládají jen do temp a následně smažou.
 
+error_reporting(E_ALL);
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
 require_once __DIR__ . '/init.php';
 require_once __DIR__ . '/includes/api_response.php';
 require_once __DIR__ . '/includes/csrf_helper.php';
@@ -10,6 +14,74 @@ require_once __DIR__ . '/includes/csrf_helper.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $results = [];
+$phpErrors = [];
+$outputSent = false;
+
+set_error_handler(function ($severity, $message, $file, $line) use (&$phpErrors) {
+    $phpErrors[] = [
+        'type' => $severity,
+        'message' => $message,
+        'file' => $file,
+        'line' => $line,
+    ];
+
+    // Pokračuj v běžném toku (nepřevádíme na výjimku, chceme pokračovat)
+    return true;
+});
+
+set_exception_handler(function (Throwable $e) use (&$phpErrors, &$outputSent) {
+    if ($outputSent) {
+        return;
+    }
+
+    $phpErrors[] = [
+        'type' => 'UNCAUGHT_EXCEPTION',
+        'message' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'trace' => $e->getTraceAsString(),
+    ];
+
+    http_response_code(500);
+    echo json_encode([
+        'status' => 'fatal_error',
+        'message' => 'Nezachycená výjimka při diagnostice',
+        'php_errors' => $phpErrors,
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+    $outputSent = true;
+});
+
+register_shutdown_function(function () use (&$phpErrors, &$outputSent) {
+    $lastError = error_get_last();
+    $fatalTypes = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR];
+
+    if ($outputSent) {
+        return;
+    }
+
+    if ($lastError && in_array($lastError['type'], $fatalTypes, true)) {
+        $phpErrors[] = $lastError;
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'fatal_error',
+            'message' => 'Skript skončil fatální chybou – viz php_errors',
+            'php_errors' => $phpErrors,
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $outputSent = true;
+    }
+});
+
+function sendOutput(array $payload, int $status, bool &$outputSent): void
+{
+    if ($outputSent) {
+        return;
+    }
+
+    http_response_code($status);
+    echo json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $outputSent = true;
+}
 
 function addResult(array &$results, string $title, callable $fn): void {
     try {
@@ -130,8 +202,7 @@ addResult($results, 'Test INSERT (bez souboru)', function () {
 
 // 7) Volitelný test s reálným uploadem přes API (spustí se jen pokud je přiložen soubor video)
 if (!empty($_FILES['video'])) {
-    addResult($results, 'Volání API /video_api.php?action=upload_video', function () {
-        // Vytvoříme požadavek podobný frontendu, ale s testovacím claim_id
+    addResult($results, 'Volání API /api/video_api.php (curl)', function () {
         $pdo = getDbConnection();
         $claim = $pdo->query('SELECT id FROM wgs_reklamace ORDER BY id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
         if (!$claim) {
@@ -139,30 +210,68 @@ if (!empty($_FILES['video'])) {
         }
 
         $claimId = (int)$claim['id'];
-        $_POST['action'] = 'upload_video';
-        $_POST['claim_id'] = $claimId;
-
-        // Vytvoříme platný CSRF token podle helperu
         $token = generateCSRFToken();
-        $_POST['csrf_token'] = $token;
 
-        // Předelegujeme na původní endpoint a zachytíme výstup
-        ob_start();
-        include __DIR__ . '/api/video_api.php';
-        $response = ob_get_clean();
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $apiUrl = $scheme . '://' . $host . '/api/video_api.php';
+
+        $cookieHeader = $_SERVER['HTTP_COOKIE'] ?? (session_name() . '=' . session_id());
+
+        $postFields = [
+            'action' => 'upload_video',
+            'claim_id' => $claimId,
+            'csrf_token' => $token,
+            'video' => new CURLFile(
+                $_FILES['video']['tmp_name'],
+                $_FILES['video']['type'] ?? 'application/octet-stream',
+                $_FILES['video']['name'] ?? 'diagnostics_video.mp4'
+            ),
+        ];
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $apiUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $postFields,
+            CURLOPT_HTTPHEADER => [
+                'Cookie: ' . $cookieHeader,
+            ],
+        ]);
+
+        $rawResponse = curl_exec($ch);
+        if ($rawResponse === false) {
+            $err = curl_error($ch);
+            curl_close($ch);
+            throw new RuntimeException('cURL error: ' . $err);
+        }
+
+        $info = curl_getinfo($ch);
+        curl_close($ch);
+
+        $headerSize = $info['header_size'] ?? 0;
+        $responseHeadersRaw = substr($rawResponse, 0, $headerSize);
+        $responseBody = substr($rawResponse, $headerSize);
+        $decoded = json_decode($responseBody, true);
 
         return [
+            'url' => $apiUrl,
             'claim_id' => $claimId,
-            'api_response' => json_decode($response, true) ?? $response,
+            'http_code' => $info['http_code'] ?? null,
+            'response_headers' => $responseHeadersRaw,
+            'response_json' => $decoded ?: null,
+            'response_body' => $decoded ? null : $responseBody,
         ];
     });
 }
 
 // Výstup
-http_response_code(200);
-echo json_encode([
+sendOutput([
     'status' => 'done',
     'checks' => $results,
-], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    'php_errors' => $phpErrors,
+], 200, $outputSent);
 
 ?>
