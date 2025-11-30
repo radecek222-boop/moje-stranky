@@ -64,20 +64,18 @@ if (!$isLoggedIn && !$isAdmin) {
    ============================================ */
 
 /* Scroll lock pro html a body když je modal otevřený */
-html.modal-open,
+html.modal-open {
+  overflow: hidden !important;
+}
+
+/* Omezit scroll lock jen na body, aby layout headeru nezkracoval ani při otevřeném modalu */
 body.modal-open {
   overflow: hidden !important;
   position: fixed !important;
   width: 100% !important;
-  height: 100% !important;
-  top: 0 !important;
+  top: calc(var(--scroll-y, 0px) * -1) !important;
   left: 0 !important;
   right: 0 !important;
-}
-
-/* iOS Safari - použít CSS proměnnou pro scroll pozici */
-body.modal-open {
-  top: calc(var(--scroll-y, 0px) * -1) !important;
 }
 
 /* PWA Standalone mode detekce */
@@ -327,27 +325,34 @@ body.modal-open {
   margin-top: 2rem !important;
 }
 
-/* DETAIL OVERLAY - TMAVÉ POZADÍ + PŘESNÉ CENTROVÁNÍ */
-#detailOverlay {
+  /* DETAIL OVERLAY - TMAVÉ POZADÍ + PŘESNÉ CENTROVÁNÍ */
+  #detailOverlay {
   --c-bg: #1a1a1a;
   --c-bg-card: #222222;
   --c-text: #ffffff;
   --c-text-muted: #aaaaaa;
   --c-border: #333333;
   background: #0a0a0a !important;
-  /* FIX: Začít shora aby byla vidět hlavička */
-  display: flex !important;
-  align-items: flex-start !important;
-  justify-content: center !important;
-  padding: 2rem 0 0 0 !important;
+    /* FIX: Začít shora aby byla vidět hlavička */
+    display: none !important; /* default hidden to avoid clipping hamburger menu */
+    align-items: flex-start !important;
+    justify-content: center !important;
+    padding: 2rem 0 0 0 !important;
   /* FIX: Z-index nad hamburger headerem (který má 10001) */
-  z-index: 10002 !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-}
+    z-index: 10002 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Show overlay only when activated by JS */
+  #detailOverlay.active {
+    display: flex !important;
+    pointer-events: auto !important;
+  }
 
 #detailOverlay .modal-content {
   background: #1a1a1a !important;

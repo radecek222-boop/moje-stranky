@@ -624,7 +624,6 @@ const ModalManager = {
     window.modalScrollPosition = window.pageYOffset || window.scrollY || 0;
 
     // Přidat třídu místo inline stylů (lepší pro Safari)
-    document.documentElement.classList.add('modal-open');
     document.body.classList.add('modal-open');
 
     // CSS proměnná pro scroll pozici (použije se v CSS)
@@ -648,7 +647,6 @@ const ModalManager = {
 
     // Počkat na CSS transition než odstraníme třídu
     setTimeout(() => {
-      document.documentElement.classList.remove('modal-open');
       document.body.classList.remove('modal-open');
 
       // Obnovit původní scroll pozici
