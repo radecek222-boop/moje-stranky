@@ -327,27 +327,34 @@ body.modal-open {
   margin-top: 2rem !important;
 }
 
-/* DETAIL OVERLAY - TMAVÉ POZADÍ + PŘESNÉ CENTROVÁNÍ */
-#detailOverlay {
+  /* DETAIL OVERLAY - TMAVÉ POZADÍ + PŘESNÉ CENTROVÁNÍ */
+  #detailOverlay {
   --c-bg: #1a1a1a;
   --c-bg-card: #222222;
   --c-text: #ffffff;
   --c-text-muted: #aaaaaa;
   --c-border: #333333;
   background: #0a0a0a !important;
-  /* FIX: Začít shora aby byla vidět hlavička */
-  display: flex !important;
-  align-items: flex-start !important;
-  justify-content: center !important;
-  padding: 2rem 0 0 0 !important;
+    /* FIX: Začít shora aby byla vidět hlavička */
+    display: none !important; /* default hidden to avoid clipping hamburger menu */
+    align-items: flex-start !important;
+    justify-content: center !important;
+    padding: 2rem 0 0 0 !important;
   /* FIX: Z-index nad hamburger headerem (který má 10001) */
-  z-index: 10002 !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-}
+    z-index: 10002 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Show overlay only when activated by JS */
+  #detailOverlay.active {
+    display: flex !important;
+    pointer-events: auto !important;
+  }
 
 #detailOverlay .modal-content {
   background: #1a1a1a !important;
