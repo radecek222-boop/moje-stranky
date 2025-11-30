@@ -41,9 +41,6 @@ try {
                 die(json_encode(['status' => 'error', 'message' => 'Neplatný CSRF token']));
             }
 
-            // PERFORMANCE: Uvolnění session zámku (až po CSRF validaci)
-            session_write_close();
-
             $claimId = $_POST['claim_id'] ?? null;
             $rawUserId = $_SESSION['user_id'] ?? null;
             // uploaded_by je INT - pokud je user_id string (např. 'ADMIN001'), nastavit NULL
@@ -205,6 +202,9 @@ try {
             ]);
 
             $videoId = $pdo->lastInsertId();
+
+            // Session uvolňujeme až po práci s uploadovaným souborem a databází
+            session_write_close();
 
             echo json_encode([
                 'status' => 'success',
