@@ -84,20 +84,18 @@ try {
                 // SQL pro vytvoření tabulky
                 $sql = "
                 CREATE TABLE wgs_videos (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    claim_id INT NOT NULL COMMENT 'ID zakázky (wgs_reklamace.id)',
-                    video_name VARCHAR(255) NOT NULL COMMENT 'Název videa',
-                    video_path VARCHAR(500) NOT NULL COMMENT 'Cesta k video souboru',
-                    file_size BIGINT NOT NULL COMMENT 'Velikost souboru v bytech',
-                    duration INT DEFAULT NULL COMMENT 'Délka videa v sekundách',
-                    thumbnail_path VARCHAR(500) DEFAULT NULL COMMENT 'Cesta k náhledovému obrázku',
-                    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Datum nahrání',
-                    uploaded_by INT DEFAULT NULL COMMENT 'ID uživatele který nahrál (wgs_users.user_id)',
+                    id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                    claim_id INT(11) NOT NULL,
+                    video_name VARCHAR(255) NOT NULL,
+                    video_path VARCHAR(500) NOT NULL,
+                    file_size BIGINT(20) NOT NULL,
+                    duration INT(11) DEFAULT NULL,
+                    thumbnail_path VARCHAR(500) DEFAULT NULL,
+                    uploaded_at DATETIME DEFAULT NULL,
+                    uploaded_by INT(11) DEFAULT NULL,
 
                     INDEX idx_claim_id (claim_id),
-                    INDEX idx_uploaded_at (uploaded_at),
-
-                    FOREIGN KEY (claim_id) REFERENCES wgs_reklamace(id) ON DELETE CASCADE
+                    INDEX idx_uploaded_at (uploaded_at)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
                   COMMENT='Video archiv zakázek - nahraná videa pro jednotlivé zakázky';
                 ";
@@ -110,15 +108,15 @@ try {
                 echo "Tabulka <code>wgs_videos</code> byla úspěšně vytvořena.<br><br>";
                 echo "<strong>Struktura tabulky:</strong>";
                 echo "<pre>";
-                echo "id              INT             Auto increment primary key\n";
-                echo "claim_id        INT             ID zakázky (foreign key)\n";
+                echo "id              INT(11)         Auto increment primary key\n";
+                echo "claim_id        INT(11)         ID zakázky\n";
                 echo "video_name      VARCHAR(255)    Název videa\n";
                 echo "video_path      VARCHAR(500)    Cesta k video souboru\n";
-                echo "file_size       BIGINT          Velikost v bytech\n";
-                echo "duration        INT             Délka videa (sekundy)\n";
+                echo "file_size       BIGINT(20)      Velikost v bytech\n";
+                echo "duration        INT(11)         Délka videa (sekundy)\n";
                 echo "thumbnail_path  VARCHAR(500)    Náhledový obrázek\n";
-                echo "uploaded_at     DATETIME        Datum nahrání\n";
-                echo "uploaded_by     INT             ID uživatele\n";
+                echo "uploaded_at     DATETIME        Datum nahrání (NULL = neuvedeno)\n";
+                echo "uploaded_by     INT(11)         ID uživatele\n";
                 echo "</pre>";
                 echo "</div>";
 
@@ -147,18 +145,17 @@ try {
             echo "<h3>SQL příkaz k provedení:</h3>";
             echo "<pre>";
             echo "CREATE TABLE wgs_videos (\n";
-            echo "    id INT AUTO_INCREMENT PRIMARY KEY,\n";
-            echo "    claim_id INT NOT NULL,\n";
+            echo "    id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,\n";
+            echo "    claim_id INT(11) NOT NULL,\n";
             echo "    video_name VARCHAR(255) NOT NULL,\n";
             echo "    video_path VARCHAR(500) NOT NULL,\n";
-            echo "    file_size BIGINT NOT NULL,\n";
-            echo "    duration INT DEFAULT NULL,\n";
+            echo "    file_size BIGINT(20) NOT NULL,\n";
+            echo "    duration INT(11) DEFAULT NULL,\n";
             echo "    thumbnail_path VARCHAR(500) DEFAULT NULL,\n";
-            echo "    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,\n";
-            echo "    uploaded_by INT DEFAULT NULL,\n";
+            echo "    uploaded_at DATETIME DEFAULT NULL,\n";
+            echo "    uploaded_by INT(11) DEFAULT NULL,\n";
             echo "    INDEX idx_claim_id (claim_id),\n";
             echo "    INDEX idx_uploaded_at (uploaded_at),\n";
-            echo "    FOREIGN KEY (claim_id) REFERENCES wgs_reklamace(id) ON DELETE CASCADE\n";
             echo ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;\n";
             echo "</pre>";
 
