@@ -43,8 +43,11 @@ try {
 
             $claimId = $_POST['claim_id'] ?? null;
             $rawUserId = $_SESSION['user_id'] ?? null;
-            // uploaded_by je INT - pokud je user_id string (např. 'ADMIN001'), nastavit NULL
-            $userId = (is_numeric($rawUserId)) ? (int)$rawUserId : null;
+            if (is_numeric($rawUserId)) {
+                $userId = (int)$rawUserId;
+            } else {
+                $userId = 1; // fallback admin ID
+            }
 
             if (!$claimId) {
                 http_response_code(400);
@@ -52,7 +55,7 @@ try {
             }
 
             // Kontrola zda zakázka existuje a získání čísla reklamace + jména zákazníka
-            $stmt = $pdo->prepare("SELECT id, reklamace_id, cislo, jmeno, zakaznik FROM wgs_reklamace WHERE id = :id");
+            $stmt = $pdo->prepare("SELECT id, reklamace_id, cislo, jmeno FROM wgs_reklamace WHERE id = :id");
             $stmt->execute(['id' => $claimId]);
             $zakaz = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -64,7 +67,7 @@ try {
             // Pouzit zakaznicke cislo (cislo) pro nazvy souboru, ne interni WGS cislo
             $reklamaceCislo = $zakaz['cislo'] ?? $zakaz['reklamace_id'] ?? 'video';
             // Pridat jmeno zakaznika do nazvu souboru
-            $jmenoZakaznika = $zakaz['jmeno'] ?? $zakaz['zakaznik'] ?? '';
+            $jmenoZakaznika = $zakaz['jmeno'] ?? '';
             if ($jmenoZakaznika) {
                 $safeJmeno = preg_replace('/[^a-zA-Z0-9_-]/', '-', @iconv('UTF-8', 'ASCII//TRANSLIT', $jmenoZakaznika) ?: $jmenoZakaznika);
                 $safeJmeno = preg_replace('/-+/', '-', trim($safeJmeno, '-'));
@@ -245,7 +248,7 @@ try {
                     r.reklamace_id,
                     r.cislo
                 FROM wgs_videos v
-                LEFT JOIN wgs_users u ON v.uploaded_by = u.user_id
+                LEFT JOIN wgs_users u ON v.uploaded_by = u.id
                 LEFT JOIN wgs_reklamace r ON v.claim_id = r.id
                 WHERE v.claim_id = :claim_id
                 ORDER BY v.uploaded_at DESC
