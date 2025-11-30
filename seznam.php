@@ -64,20 +64,18 @@ if (!$isLoggedIn && !$isAdmin) {
    ============================================ */
 
 /* Scroll lock pro html a body když je modal otevřený */
-html.modal-open,
+html.modal-open {
+  overflow: hidden !important;
+}
+
+/* Omezit scroll lock jen na body, aby layout headeru nezkracoval ani při otevřeném modalu */
 body.modal-open {
   overflow: hidden !important;
   position: fixed !important;
   width: 100% !important;
-  height: 100% !important;
-  top: 0 !important;
+  top: calc(var(--scroll-y, 0px) * -1) !important;
   left: 0 !important;
   right: 0 !important;
-}
-
-/* iOS Safari - použít CSS proměnnou pro scroll pozici */
-body.modal-open {
-  top: calc(var(--scroll-y, 0px) * -1) !important;
 }
 
 /* PWA Standalone mode detekce */
