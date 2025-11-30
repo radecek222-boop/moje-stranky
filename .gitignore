@@ -62,3 +62,6 @@ phpunit.xml.dist
 # User uploads (keep directory structure but ignore content)
 uploads/*
 !uploads/.gitkeep
+!uploads/videos
+!uploads/videos/
+!uploads/videos/.gitkeep
