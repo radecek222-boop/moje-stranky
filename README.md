@@ -668,6 +668,17 @@ session.save_path = "tcp://127.0.0.1:6379?database=1"
 | `migrace_module13_gdpr.php` | 2025-11-23 | DOKONCENO |
 | `migrace_email_worker.sql` | 2025-11 | DOKONCENO |
 
+#### Jak spustit migraci `2025_12_01_pridej_tabulku_wgs_videos.php`
+
+> **Tip:** Na produkci už tabulka `wgs_videos` podle přehledu ve `vsechny_tabulky.php` existuje. Skript spouštějte pouze pokud by chyběla (např. v jiné instanci), nebo pokud potřebujete znovu vytvořit složku `uploads/videos`.
+>
+> Aktuální struktura v DB: `id`, `claim_id`, `video_name`, `video_path`, `file_size`, `duration`, `thumbnail_path`, `uploaded_at` (NULLable), `uploaded_by`.
+
+1. Přihlašte se do administrace jako uživatel s příznakem `is_admin = true` (skript kontroluje session).
+2. Otevřete v prohlížeči adresu `https://<domena>/migrations/2025_12_01_pridej_tabulku_wgs_videos.php`.
+3. Pokud tabulka neexistuje, zobrazí se tlačítko **SPUSTIT MIGRACI** – kliknutím spustíte vytvoření tabulky a založení složky `uploads/videos`.
+4. Migraci lze spustit opakovaně; pokud tabulka už existuje, skript pouze vypíše její aktuální strukturu.
+
 ### 13.2 Soubory presunuty do /archiv/ (2025-11-28)
 
 89 souboru presunuto do slozky `/archiv/`:
