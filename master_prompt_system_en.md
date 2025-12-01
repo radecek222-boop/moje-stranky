@@ -642,3 +642,14 @@ If in doubt: **stop, explain, and ask**.
 - `index.js` reduced to 14-line deprecation stub
 - Source JS files are clean; minified versions need regeneration
 
+## [Step 21]: Orphaned Files Audit and Cleanup
+- **What:** Audited the `includes/` directory for orphaned files. Identified and documented `user_header.php` as orphaned. Removed unnecessary script loading from `index.php`.
+- **How:** (1) Ran `grep -r "user_header" --include="*.php"` across entire codebase - found 0 references to `user_header.php`. (2) Removed `<script src="assets/js/index.js" defer>` from `index.php:145` since `index.js` is now an empty deprecation stub. (3) Added `@deprecated` comment to `user_header.php` documenting that it's orphaned and can be safely deleted in future.
+- **Why:** The orphaned file audit revealed that `user_header.php` (172 lines) is never included anywhere in the codebase - it was replaced by the centralized `hamburger-menu.php` but never removed. Loading `index.js` (which is now empty) was wasting an HTTP request on every homepage visit.
+- **Files touched:** `/home/user/moje-stranky/index.php` (MODIFIED, removed script tag), `/home/user/moje-stranky/includes/user_header.php` (MODIFIED, added deprecation comment)
+- **Notes / risks:** Minimal risk. The script tag removal saves one HTTP request per homepage load. The `user_header.php` file was not deleted to allow for future review, but is now clearly marked as orphaned. Note: `user_header.php` also violates the color policy (uses `#ff6b6b` red for logout link) - another reason it should be removed in future.
+
+**ORPHANED FILES IDENTIFIED:**
+- `includes/user_header.php` (172 lines) - marked deprecated, can be deleted
+- `assets/js/index.js` (14 lines stub) - kept for backwards compatibility, script tag removed from index.php
+

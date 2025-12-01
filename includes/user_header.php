@@ -2,6 +2,11 @@
 /**
  * USER HEADER - Navigace pro přihlášené prodejce
  * Zobrazuje: Objednat servis | Moje reklamace | Odhlášení
+ *
+ * @deprecated 2024-12 ORPHANED FILE - Tento soubor není nikde používán.
+ * Veškerá navigace je nyní centrálně v hamburger-menu.php.
+ * Soubor může být bezpečně smazán v budoucí verzi.
+ * Naposledy analyzováno: grep -r "user_header" --include="*.php" . = 0 výsledků
  */
 
 // Kontrola přihlášení - dočasně vypnuto
