@@ -735,3 +735,14 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** None (audit only)
 - **Result:** Complete inventory of minified assets. Ready for Step 27 (delete orphaned CSS) or minification pipeline setup.
 
+## [Step 27]: Delete Orphaned CSS Files
+- **What:** Permanently deleted 2 orphaned .min.css files identified in Step 26.
+- **How:** Ran `rm` after confirming 0 references via grep search.
+- **Why:** Files were not used anywhere in the codebase:
+  - `statistiky.min.css` (15KB) - statistiky.php uses inline `<style>` instead
+  - `mimozarucniceny.min.css` (12KB) - mimozarucniceny.php is just a 301 redirect to cenik.php
+- **Files touched:**
+  - `assets/css/statistiky.min.css` (DELETED, 15KB)
+  - `assets/css/mimozarucniceny.min.css` (DELETED, 12KB)
+- **Result:** Removed ~27KB of dead code. Assets directory is now cleaner.
+
