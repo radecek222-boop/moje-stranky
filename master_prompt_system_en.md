@@ -490,3 +490,10 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/includes/hamburger-menu.php` (MODIFIED, ~20 lines changed)
 - **Notes / risks:** Low risk. The `hamburger-menu-open` CSS class is still applied for backwards compatibility with existing CSS rules. The behavior is functionally identical to before, but now uses the shared utility. Rollback: revert the file to previous commit.
 
+## [Step 3]: Wire Scroll-Lock Utility into Detail Modal (seznam.js)
+- **What:** Replaced the inline scroll-locking code in the `ModalManager` object with calls to the centralized `scroll-lock.js` utility.
+- **How:** Modified `ModalManager.show()` and `ModalManager.close()` methods in `seznam.js` (lines 621-660). Replaced manual scroll position tracking (`window.modalScrollPosition`) and CSS variable manipulation (`--scroll-y`) with `scrollLock.enable('detail-overlay')` and `scrollLock.disable('detail-overlay')` calls. Added defensive `if (window.scrollLock)` checks. Preserved `modal-open` CSS class for backwards compatibility.
+- **Why:** The detail modal in `seznam.js` was the second major scroll-locking component that conflicted with the hamburger menu on mobile. Both components now use the same coordinated scroll-lock stack, which properly handles nested overlays and prevents scroll position conflicts on iOS Safari.
+- **Files touched:** `/home/user/moje-stranky/assets/js/seznam.js` (MODIFIED, ~15 lines changed in ModalManager)
+- **Notes / risks:** Low risk. The `modal-open` CSS class is still applied for backwards compatibility. The `scroll-lock.js` is loaded via `hamburger-menu.php` which is included in `seznam.php` before `seznam.js`. Rollback: revert the file to previous commit.
+

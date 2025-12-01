@@ -620,14 +620,13 @@ function filterUnreadNotes() {
 // === MODAL MANAGER ===
 const ModalManager = {
   show: (content) => {
-    // FIX: iOS/Safari/PWA scroll lock - lepší metoda
-    window.modalScrollPosition = window.pageYOffset || window.scrollY || 0;
+    // Zamknout scroll pres centralizovanou utilitu (iOS/Safari/PWA kompatibilni)
+    if (window.scrollLock) {
+      window.scrollLock.enable('detail-overlay');
+    }
 
-    // Přidat třídu místo inline stylů (lepší pro Safari)
+    // Zachovat modal-open tridu pro zpetnou kompatibilitu s CSS
     document.body.classList.add('modal-open');
-
-    // CSS proměnná pro scroll pozici (použije se v CSS)
-    document.documentElement.style.setProperty('--scroll-y', `${window.modalScrollPosition}px`);
 
     document.getElementById('modalContent').innerHTML = content;
     document.getElementById('detailOverlay').classList.add('active');
@@ -645,15 +644,14 @@ const ModalManager = {
     const overlay = document.getElementById('detailOverlay');
     overlay.classList.remove('active');
 
-    // Počkat na CSS transition než odstraníme třídu
+    // Počkat na CSS transition než odemkneme scroll
     setTimeout(() => {
       document.body.classList.remove('modal-open');
 
-      // Obnovit původní scroll pozici
-      window.scrollTo(0, window.modalScrollPosition || 0);
-
-      // Vyčistit CSS proměnnou
-      document.documentElement.style.removeProperty('--scroll-y');
+      // Odemknout scroll pres centralizovanou utilitu
+      if (window.scrollLock) {
+        window.scrollLock.disable('detail-overlay');
+      }
     }, 50); // Kratší delay než transition (300ms)
 
     CURRENT_RECORD = null;
