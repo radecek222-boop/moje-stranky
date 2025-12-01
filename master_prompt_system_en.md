@@ -560,3 +560,10 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/includes/user_header.php` (MODIFIED, 2 lines changed)
 - **Notes / risks:** Low risk. The `!important` declarations were preserved. This file uses the same z-index values as hamburger-menu.php (10000, 9999), so using the same CSS variables ensures they stay synchronized. Rollback: revert the file to previous commit.
 
+## [Step 13]: Migrate Novareklamace.css Z-Index to CSS Variables
+- **What:** Replaced all 10 hardcoded z-index values in `novareklamace.css` with CSS custom properties from the centralized z-index system.
+- **How:** Modified 10 z-index declarations: (1) `.top-bar`: `100` → `var(--z-topbar, 100)`, (2) `.hamburger`: `1002` → `var(--z-hamburger-button-nova, 1002)`, (3) `.menu-overlay`: `10000` → `var(--z-modal-top, 10000)`, (4) `.hero::before`: `1` → `var(--z-background, 1)`, (5) `.hero > div`: `2` → `var(--z-content, 2)`, (6) `.form-container`: `10` → `var(--z-sticky, 10)`, (7) `.toast`: `1000` → `var(--z-dropdown, 1000)`, (8) `.overlay-provedeni`: `2000` → `var(--z-modal, 2000)`, (9) `.nav` (mobile): `10000` → `var(--z-hamburger-nav, 10000)`, (10) `.menu-overlay` (mobile): `9999` → `var(--z-hamburger-overlay, 9999)`.
+- **Why:** `novareklamace.css` is the largest CSS file with z-index declarations, containing styles for the new complaint form. By migrating all 10 values to CSS variables, this major page now participates fully in the coordinated z-index system. The mobile menu uses the same variables as hamburger-menu.php for consistency.
+- **Files touched:** `/home/user/moje-stranky/assets/css/novareklamace.css` (MODIFIED, 10 lines changed)
+- **Notes / risks:** Low risk. All fallback values match the original hardcoded values. This is the largest single migration so far (10 values). The hero section uses low z-index values (1, 2) for internal layering which don't conflict with overlay/modal layers. Rollback: revert the file to previous commit.
+
