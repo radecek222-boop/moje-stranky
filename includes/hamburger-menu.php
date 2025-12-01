@@ -56,7 +56,7 @@ if ($isAdmin) {
         <!-- Provize technika - Alpine.js komponenta (Step 34) -->
         <a
           x-data="techProvize"
-          x-init="nacist()"
+          x-init="() => load()"
           class="tech-provize-link"
           style="cursor: default; pointer-events: none;"
         >PROVIZE / <span x-text="mesic"></span> / <span x-text="castka"></span> €</a>
@@ -333,7 +333,7 @@ document.addEventListener('alpine:init', () => {
     mesic: '...',
     castka: '...',
 
-    async nacist() {
+    async load() {
       try {
         const response = await fetch('/api/tech_provize_api.php');
         const result = await response.json();
