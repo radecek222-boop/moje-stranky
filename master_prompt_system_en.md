@@ -653,3 +653,21 @@ If in doubt: **stop, explain, and ask**.
 - `includes/user_header.php` (172 lines) - marked deprecated, can be deleted
 - `assets/js/index.js` (14 lines stub) - kept for backwards compatibility, script tag removed from index.php
 
+## [Step 22]: Normalize Extreme Inline Z-Index Values in JavaScript
+- **What:** Normalized all extremely high inline z-index values in JavaScript files from 99999-99999999 down to values within the established z-index hierarchy (10002-10003).
+- **How:** Modified 6 JavaScript files:
+  - `seznam.js`: Changed 4 occurrences of `z-index:99999999` to `z-index:10003` (delete confirmation modals, error modal, success modal)
+  - `csrf-auto-inject.js`: Changed `z-index: 999999` to `z-index: 10003` (CSRF error toast)
+  - `error-handler.js`: Changed `z-index: 999999` to `z-index: 10003` (error display modal)
+  - `pull-to-refresh.js`: Changed `z-index: 99999` to `z-index: 10003` (pull-to-refresh indicator)
+  - `sw-register.js`: Changed `z-index: 99999` to `z-index: 10003` (PWA update notification banner)
+  - `pwa-notifications.js`: Changed `z-index: 99998` to `z-index: 10002` (notification permission prompt)
+- **Why:** The extremely high z-index values (up to 99999999) were arbitrary and could cause unpredictable stacking behavior. By normalizing them to values within the established hierarchy (--z-top-layer: 10003, --z-detail-overlay: 10002), all overlays now participate in the coordinated z-index system. The value 10003 is the highest layer in the hierarchy, appropriate for critical modals like delete confirmations and error displays.
+- **Files touched:** 6 JS files (seznam.js, csrf-auto-inject.js, error-handler.js, pull-to-refresh.js, sw-register.js, pwa-notifications.js)
+- **Notes / risks:** Low risk. The normalized values (10002-10003) are still above all other UI elements. The `.min.js` files still contain old values and need regeneration. Note: seznam.js still has some inline z-index values (10004-10007) for progressive overlay stacking - these are intentional and within reasonable bounds.
+
+**INLINE Z-INDEX NORMALIZATION COMPLETE:**
+- Eliminated all z-index values > 10007 from source JS files
+- 9 inline z-index declarations normalized across 6 files
+- All critical overlays now use 10002-10003 (within hierarchy)
+
