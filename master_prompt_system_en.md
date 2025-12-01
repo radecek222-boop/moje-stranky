@@ -567,3 +567,10 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/assets/css/novareklamace.css` (MODIFIED, 10 lines changed)
 - **Notes / risks:** Low risk. All fallback values match the original hardcoded values. This is the largest single migration so far (10 values). The hero section uses low z-index values (1, 2) for internal layering which don't conflict with overlay/modal layers. Rollback: revert the file to previous commit.
 
+## [Step 14]: Migrate Mobile-Responsive.css Z-Index to CSS Variables
+- **What:** Replaced all 3 hardcoded z-index values in `mobile-responsive.css` with CSS custom properties from the centralized z-index system.
+- **How:** Modified 3 z-index declarations: (1) `.modal-header, .calendar-header`: `10` → `var(--z-sticky, 10)`, (2) `.nav` (slide-in menu): `9999` → `var(--z-menu-overlay, 9999)`, (3) `.menu-overlay`: `9998` → `var(--z-overlay-backdrop, 9998)`. Note: This file uses different z-index values (9999/9998) than hamburger-menu.php (10000/9999), which is an intentional layering difference.
+- **Why:** `mobile-responsive.css` provides cross-page mobile responsive styles. By migrating to CSS variables, these styles now participate in the coordinated z-index system. The sticky modal/calendar header uses the same `--z-sticky` variable as other sticky elements.
+- **Files touched:** `/home/user/moje-stranky/assets/css/mobile-responsive.css` (MODIFIED, 3 lines changed)
+- **Notes / risks:** Low risk. The different z-index values (9998/9999 vs 10000/9999) suggest this mobile menu system may be used in different contexts than hamburger-menu.php. The fallback values preserve the original layering. Rollback: revert the file to previous commit.
+
