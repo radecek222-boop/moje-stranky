@@ -497,3 +497,10 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/assets/js/seznam.js` (MODIFIED, ~15 lines changed in ModalManager)
 - **Notes / risks:** Low risk. The `modal-open` CSS class is still applied for backwards compatibility. The `scroll-lock.js` is loaded via `hamburger-menu.php` which is included in `seznam.php` before `seznam.js`. Rollback: revert the file to previous commit.
 
+## [Step 4]: Wire Scroll-Lock Utility into Protocol Page (protokol.js)
+- **What:** Replaced inline scroll-locking code in `protokol.js` for two components: (1) the duplicate hamburger menu implementation, and (2) the customer signature approval modal.
+- **How:** (1) Modified `toggleMenu()` function (lines 22-44) - replaced manual `position: fixed` manipulation with `scrollLock.enable('protokol-menu')` / `scrollLock.disable('protokol-menu')`. (2) Modified `otevritZakaznikModal()` and `zavritZakaznikModal()` functions (lines ~2405-2427) - replaced `overflow: hidden` with `scrollLock.enable('zakaznik-schvaleni-overlay')` / `scrollLock.disable('zakaznik-schvaleni-overlay')`. Added defensive `if (window.scrollLock)` checks.
+- **Why:** protokol.js had two separate scroll-locking implementations that were not coordinated with other components. The hamburger menu code was a duplicate of the main implementation. The signature modal used simple `overflow: hidden` which doesn't work properly on iOS Safari. Both now use the centralized utility for consistent behavior.
+- **Files touched:** `/home/user/moje-stranky/assets/js/protokol.js` (MODIFIED, ~20 lines changed)
+- **Notes / risks:** Low risk. The `scroll-lock.js` is loaded via `hamburger-menu.php` which is included in `protokol.php` (line 227). The signature modal (`zakaznikSchvaleniOverlay`) now has iOS-compatible scroll locking. Rollback: revert the file to previous commit.
+
