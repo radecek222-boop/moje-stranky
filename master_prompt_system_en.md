@@ -693,8 +693,17 @@ If in doubt: **stop, explain, and ask**.
 - Setup scripts: Various installation/migration scripts (non-user-facing)
 
 **Remaining color policy violations to address:**
-- `hamburger-menu.php` line 176, 203: `#ff6b6b` on logout link - consider changing to gray
-- `replay-player.js` line 303: `#4ECDC4` teal - decorative, should be grayscale
+- ~~`hamburger-menu.php` line 176, 203: `#ff6b6b` on logout link - consider changing to gray~~ FIXED in Step 24
+- ~~`replay-player.js` line 303: `#4ECDC4` teal - decorative, should be grayscale~~ FIXED in Step 24
 
 **Note:** The grayscale-only policy applies to decorative/UI elements. Semantic feedback colors are now explicitly permitted for user comprehension.
+
+## [Step 24]: Fix Remaining Decorative Color Violations
+- **What:** Fixed all remaining decorative color violations identified in Step 23. Changed non-feedback colors to grayscale.
+- **How:** Edited hamburger-menu.php and replay-player.js to replace decorative colors with grayscale equivalents.
+- **Why:** Decorative elements (logout links, notification buttons, canvas cursors) should follow color policy. Only semantic feedback colors are exempt.
+- **Files touched:**
+  - `includes/hamburger-menu.php`: logout link #ff6b6b → #999, notification button #4a9eff → #ccc, tech-provize #ff6b6b → #999
+  - `assets/js/replay-player.js`: cursor #FF6B6B → #666, click ripple #4ECDC4 → #888
+- **Result:** All decorative colors now comply with grayscale-only policy. Color policy enforcement complete.
 
