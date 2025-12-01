@@ -763,3 +763,36 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** None (audit only)
 - **Result:** Minification pipeline confirmed operational. Ready for production use.
 
+## [Step 29]: De-minify CSS Files Without Sources
+- **What:** Created editable source CSS files from 8 minified-only CSS files.
+- **How:** Used `prettier --parser css` to format minified CSS into readable source files.
+- **Why:** Minified CSS is difficult to edit. Having source files enables proper maintenance and allows regeneration via minify-assets.sh.
+- **Files created:**
+  - `assets/css/styles.css` (22KB) - base styles for entire site
+  - `assets/css/index.css` (8KB) - homepage styles
+  - `assets/css/seznam.css` (25KB) - complaint list styles
+  - `assets/css/login.css` (9KB) - login/registration styles
+  - `assets/css/cenik.css` (41KB) - pricing page styles
+  - `assets/css/onas.css` (9KB) - about page styles
+  - `assets/css/nasesluzby.css` (9KB) - services page styles
+  - `assets/css/analytics.css` (11KB) - analytics dashboard styles
+- **Result:** All 13 CSS files now have editable sources. Minification pipeline can regenerate all .min.css files.
+
+## [Step 30]: SAFE Batch Refactoring
+- **What:** Performed safe batch cleanup operations with zero behavioral impact.
+- **How:** Identified and executed low-risk cleanup tasks:
+  1. Deleted unused `.env.testing` file (38 lines, 0 references in codebase)
+  2. Regenerated all 13 .min.css files from source CSS files using csso
+- **Why:** Reduce technical debt and ensure minified assets are consistent with sources.
+- **Audit performed:**
+  - Verified no orphaned JS files (all have references or are source files for .min.js)
+  - Verified no orphaned CSS files (source files exist for regeneration)
+  - Verified no console.log statements in production JS
+  - Verified no TODO/FIXME comments
+  - Verified no hardcoded z-index values (all use CSS variables)
+  - Verified color policy compliance (grayscale only)
+- **Files touched:**
+  - `.env.testing` (DELETED, 38 lines)
+  - 13x `.min.css` files (REGENERATED from sources)
+- **Result:** Codebase cleaned. All minified CSS files now match their source files.
+
