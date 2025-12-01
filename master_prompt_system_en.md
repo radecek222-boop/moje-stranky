@@ -763,3 +763,18 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** None (audit only)
 - **Result:** Minification pipeline confirmed operational. Ready for production use.
 
+## [Step 29]: De-minify CSS Files Without Sources
+- **What:** Created editable source CSS files from 8 minified-only CSS files.
+- **How:** Used `prettier --parser css` to format minified CSS into readable source files.
+- **Why:** Minified CSS is difficult to edit. Having source files enables proper maintenance and allows regeneration via minify-assets.sh.
+- **Files created:**
+  - `assets/css/styles.css` (22KB) - base styles for entire site
+  - `assets/css/index.css` (8KB) - homepage styles
+  - `assets/css/seznam.css` (25KB) - complaint list styles
+  - `assets/css/login.css` (9KB) - login/registration styles
+  - `assets/css/cenik.css` (41KB) - pricing page styles
+  - `assets/css/onas.css` (9KB) - about page styles
+  - `assets/css/nasesluzby.css` (9KB) - services page styles
+  - `assets/css/analytics.css` (11KB) - analytics dashboard styles
+- **Result:** All 13 CSS files now have editable sources. Minification pipeline can regenerate all .min.css files.
+
