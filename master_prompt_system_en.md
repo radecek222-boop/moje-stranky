@@ -539,3 +539,10 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/assets/css/z-index-layers.css` (NEW, ~85 lines), `/home/user/moje-stranky/includes/hamburger-menu.php` (MODIFIED, 2 lines added)
 - **Notes / risks:** Minimal risk. This is purely additive - no existing z-index values were changed. The CSS variables are defined but not yet used by existing components. Gradual migration to use these variables will be done in subsequent steps. Rollback: delete the CSS file and remove the link from hamburger-menu.php.
 
+## [Step 10]: Migrate Hamburger Menu Z-Index to CSS Variables
+- **What:** Replaced all hardcoded z-index values in `hamburger-menu.php` with CSS custom properties from the centralized z-index system.
+- **How:** Modified 4 z-index declarations: (1) `.hamburger-header`: `10001` → `var(--z-hamburger-header, 10001)`, (2) `.hamburger-toggle`: `10001` → `var(--z-hamburger-toggle, 10001)`, (3) `.hamburger-overlay`: `9999` → `var(--z-hamburger-overlay, 9999)`, (4) `.hamburger-nav` (mobile): `10000` → `var(--z-hamburger-nav, 10000)`. Each declaration includes a fallback value for browsers that don't support CSS variables.
+- **Why:** This is the first migration of hardcoded z-index values to the centralized CSS variable system created in Step 9. The hamburger menu was chosen as the starting point because: (a) it loads on all pages, (b) it's the most frequently used overlay component, (c) it demonstrates the migration pattern for other components.
+- **Files touched:** `/home/user/moje-stranky/includes/hamburger-menu.php` (MODIFIED, 4 lines changed)
+- **Notes / risks:** Low risk. Functionally equivalent - the fallback values ensure identical behavior even if CSS variables fail to load. This establishes the migration pattern: `z-index: var(--z-semantic-name, original-value)`. Other components can be migrated in subsequent steps. Rollback: revert the file to previous commit.
+
