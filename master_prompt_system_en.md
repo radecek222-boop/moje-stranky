@@ -671,3 +671,30 @@ If in doubt: **stop, explain, and ask**.
 - 9 inline z-index declarations normalized across 6 files
 - All critical overlays now use 10002-10003 (within hierarchy)
 
+## [Step 23]: Color Policy Audit and Exception Documentation
+- **What:** Conducted a comprehensive audit of color usage across the codebase. Identified 39 source files with non-grayscale colors. Documented approved exceptions for user feedback colors.
+- **How:** Ran grep for common Bootstrap/Material Design colors (`#dc3545`, `#28a745`, `#ff6b6b`, `#d32f2f`, `#ffc107`, `#17a2b8`, `#4ECDC4`). Found violations in admin, setup, includes, and JS utility files. Most colors are used for error/success/warning feedback states.
+- **Why:** The CLAUDE.md color policy states only black/white/gray are allowed. However, semantic feedback colors (red for errors, green for success) are industry-standard UX conventions that aid user comprehension. Removing them would degrade user experience.
+- **Decision:** Project owner approved exception for feedback state colors.
+- **Files touched:** None (audit and documentation only)
+
+**COLOR POLICY EXCEPTION - APPROVED FEEDBACK COLORS:**
+
+| Color | Hex Code | Usage | Status |
+|-------|----------|-------|--------|
+| Error/Danger | `#dc3545`, `#d32f2f`, `#ff6b6b` | Error messages, delete buttons, failed states | APPROVED |
+| Success | `#28a745`, `#1e7e34` | Success messages, save confirmations | APPROVED |
+| Warning | `#ffc107` | Warning alerts, caution states | APPROVED |
+| Info | `#17a2b8` | Informational messages | APPROVED |
+
+**Files with approved color exceptions (39 total):**
+- Admin includes: `admin_security.php`, `admin_actions.php`, `admin_configuration.php`, `error_handler.php`
+- JS utilities: `error-handler.js`, `login.js`, `smtp-config.js`, `novareklamace.js`
+- Setup scripts: Various installation/migration scripts (non-user-facing)
+
+**Remaining color policy violations to address:**
+- `hamburger-menu.php` line 176, 203: `#ff6b6b` on logout link - consider changing to gray
+- `replay-player.js` line 303: `#4ECDC4` teal - decorative, should be grayscale
+
+**Note:** The grayscale-only policy applies to decorative/UI elements. Semantic feedback colors are now explicitly permitted for user comprehension.
+
