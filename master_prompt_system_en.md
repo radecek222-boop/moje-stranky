@@ -707,3 +707,10 @@ If in doubt: **stop, explain, and ask**.
   - `assets/js/replay-player.js`: cursor #FF6B6B → #666, click ripple #4ECDC4 → #888
 - **Result:** All decorative colors now comply with grayscale-only policy. Color policy enforcement complete.
 
+## [Step 25]: Delete Orphaned user_header.php File
+- **What:** Permanently deleted the orphaned `includes/user_header.php` file (176 lines).
+- **How:** Ran `rm /home/user/moje-stranky/includes/user_header.php` after confirming 0 references in codebase.
+- **Why:** File was identified as orphaned in Step 21 - `grep -r "user_header" --include="*.php"` returned 0 results. It was a legacy file replaced by centralized `hamburger-menu.php` but never removed. Keeping orphaned files increases maintenance burden and confusion.
+- **Files touched:** `includes/user_header.php` (DELETED, 176 lines)
+- **Result:** Codebase is now cleaner with one less orphaned file. All header/navigation functionality is centralized in `hamburger-menu.php`.
+
