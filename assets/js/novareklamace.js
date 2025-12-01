@@ -1135,24 +1135,10 @@ const WGS = {
   },
 
   initProvedeni() {
-    const btn = document.getElementById('selectProvedeniBtn');
-    const overlay = document.getElementById('provedeniOverlay');
-    const closeBtn = document.getElementById('closeProvedeni');
-    const cards = document.querySelectorAll('.provedeni-card');
-    
-    btn.addEventListener('click', () => overlay.classList.add('active'));
-    closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) overlay.classList.remove('active');
-    });
-    cards.forEach(card => {
-      card.addEventListener('click', () => {
-        const value = card.dataset.value;
-        document.getElementById('provedeni').value = value;
-        overlay.classList.remove('active');
-        this.toast(`Provedení: ${value}`, 'info');
-      });
-    });
+    // Step 37: Migrace na Alpine.js CSP-safe
+    // Logika open/close/select je nyní řízena přes Alpine komponentu provedeniModal
+    // v hamburger-menu.php. Tato funkce je ponechána prázdná pro zpětnou kompatibilitu.
+    console.log('[Provedeni] Řízeno Alpine.js komponentou provedeniModal');
   },
   
   toast(message, type = 'info') {
