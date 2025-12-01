@@ -304,6 +304,17 @@ if ($isAdmin) {
 }
 </style>
 
+<!-- ============================================
+     PHASE 2: HTMX + Alpine.js Infrastructure
+     Přidáno v Step 30 pro postupnou modernizaci UI
+     ============================================ -->
+
+<!-- HTMX 2.0.4 - Pro server-driven UI updates -->
+<script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+
+<!-- Alpine.js 3.14.3 - Pro deklarativní UI state -->
+<script defer src="https://unpkg.com/alpinejs@3.14.3/dist/cdn.min.js"></script>
+
 <!-- Centralizovaná utilita pro zamykání scrollu -->
 <script src="/assets/js/scroll-lock.js"></script>
 

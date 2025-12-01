@@ -803,3 +803,24 @@ If in doubt: **stop, explain, and ask**.
 
 Phase 2 should begin with careful planning and explicit human approval for each behavioral change.
 
+---
+
+# PHASE 2: Behavioral Refactor & Modernization
+
+## [Step 30]: Add HTMX and Alpine.js Infrastructure
+- **What:** Added HTMX 2.0.4 and Alpine.js 3.14.3 libraries to the project via CDN, making them available on all pages.
+- **How:** Added two `<script>` tags with `defer` attribute to `includes/hamburger-menu.php` (which loads on every page). Used unpkg.com CDN for reliable delivery.
+- **Why:** HTMX and Alpine.js are the foundation for Phase 2 modernization:
+  - HTMX enables server-driven UI updates without complex JavaScript
+  - Alpine.js provides declarative UI state management
+  - Both libraries are designed to work with existing HTML/PHP without rewrites
+- **Files touched:** `includes/hamburger-menu.php` (MODIFIED, +10 lines)
+- **Libraries added:**
+  - HTMX 2.0.4: `https://unpkg.com/htmx.org@2.0.4`
+  - Alpine.js 3.14.3: `https://unpkg.com/alpinejs@3.14.3/dist/cdn.min.js`
+- **Result:** Infrastructure ready for incremental migration. No behavioral changes - libraries are loaded but not yet used.
+- **Next candidates for migration:**
+  - Simple `onclick` handlers → Alpine.js `@click`
+  - Form submissions → HTMX `hx-post`
+  - Hamburger menu toggle → Alpine.js `x-data`/`x-show`
+
