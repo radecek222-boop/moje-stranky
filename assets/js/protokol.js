@@ -27,25 +27,19 @@ function toggleMenu() {
   const isActive = navMenu.classList.contains('active');
 
   if (!isActive) {
-    // Otevírání - zamknout scroll (iOS fix)
-    window.menuScrollPosition = window.pageYOffset;
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${window.menuScrollPosition}px`;
-    document.body.style.width = '100%';
-    document.body.style.left = '0';
-    document.body.style.right = '0';
+    // Otevírání - zamknout scroll (pres centralizovanou utilitu)
+    if (window.scrollLock) {
+      window.scrollLock.enable('protokol-menu');
+    }
     navMenu.classList.add('active');
     hamburger.classList.add('active');
   } else {
     // Zavírání - obnovit scroll
     navMenu.classList.remove('active');
     hamburger.classList.remove('active');
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    document.body.style.left = '';
-    document.body.style.right = '';
-    window.scrollTo(0, window.menuScrollPosition);
+    if (window.scrollLock) {
+      window.scrollLock.disable('protokol-menu');
+    }
   }
 }
 
@@ -2409,7 +2403,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Zobrazit modal
     overlay.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
+    // Zamknout scroll pres centralizovanou utilitu (iOS kompatibilni)
+    if (window.scrollLock) {
+      window.scrollLock.enable('zakaznik-schvaleni-overlay');
+    }
 
     // Inicializovat signature pad (po zobrazení, aby měl správné rozměry)
     setTimeout(() => {
@@ -2420,7 +2417,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function zavritZakaznikModal() {
     const overlay = document.getElementById('zakaznikSchvaleniOverlay');
     overlay.style.display = 'none';
-    document.body.style.overflow = '';
+    // Odemknout scroll pres centralizovanou utilitu
+    if (window.scrollLock) {
+      window.scrollLock.disable('zakaznik-schvaleni-overlay');
+    }
 
     // Vyčistit signature pad
     if (zakaznikSignaturePad) {
