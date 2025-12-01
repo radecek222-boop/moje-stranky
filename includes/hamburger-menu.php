@@ -324,11 +324,11 @@ if ($isAdmin) {
 
 <!-- Alpine.js komponenty - registrace přes Alpine.data() (CSP-safe) -->
 <script>
-/**
- * Tech Provize - Alpine.js komponenta (Step 34)
- * Načítá provize technika z API a zobrazuje v navigaci
- */
 document.addEventListener('alpine:init', () => {
+  /**
+   * Tech Provize - Alpine.js komponenta (Step 34)
+   * Načítá provize technika z API a zobrazuje v navigaci
+   */
   Alpine.data('techProvize', () => ({
     mesic: '...',
     castka: '...',
@@ -347,6 +347,46 @@ document.addEventListener('alpine:init', () => {
         }
       } catch (e) {
         console.error('[TechProvize] Chyba při načítání:', e);
+      }
+    }
+  }));
+
+  /**
+   * WGS Modal - Alpine.js komponenta (Step 35)
+   * Jednotný CSP-safe modal framework pro WGS
+   */
+  Alpine.data('wgsModal', () => ({
+    open: false,
+
+    init() {
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.open) {
+          this.close();
+        }
+      });
+      console.log('[wgsModal] Inicializován (Alpine.js CSP-safe)');
+    },
+
+    toggle() {
+      this.open = !this.open;
+      this.updateScrollLock();
+    },
+
+    openModal() {
+      this.open = true;
+      this.updateScrollLock();
+    },
+
+    close() {
+      this.open = false;
+      this.updateScrollLock();
+    },
+
+    updateScrollLock() {
+      if (this.open) {
+        window.scrollLock?.enable('wgs-modal');
+      } else {
+        window.scrollLock?.disable('wgs-modal');
       }
     }
   }));
