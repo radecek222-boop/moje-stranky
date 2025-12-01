@@ -86,7 +86,7 @@ function displayJSError(error) {
         border: 3px solid #dc3545;
         border-radius: 8px;
         box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-        z-index: 999999;
+        z-index: 10003;
         font-family: 'Courier New', monospace;
         color: #f0f0f0;
         overflow: hidden;

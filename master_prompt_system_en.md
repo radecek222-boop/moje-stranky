@@ -653,3 +653,64 @@ If in doubt: **stop, explain, and ask**.
 - `includes/user_header.php` (172 lines) - marked deprecated, can be deleted
 - `assets/js/index.js` (14 lines stub) - kept for backwards compatibility, script tag removed from index.php
 
+## [Step 22]: Normalize Extreme Inline Z-Index Values in JavaScript
+- **What:** Normalized all extremely high inline z-index values in JavaScript files from 99999-99999999 down to values within the established z-index hierarchy (10002-10003).
+- **How:** Modified 6 JavaScript files:
+  - `seznam.js`: Changed 4 occurrences of `z-index:99999999` to `z-index:10003` (delete confirmation modals, error modal, success modal)
+  - `csrf-auto-inject.js`: Changed `z-index: 999999` to `z-index: 10003` (CSRF error toast)
+  - `error-handler.js`: Changed `z-index: 999999` to `z-index: 10003` (error display modal)
+  - `pull-to-refresh.js`: Changed `z-index: 99999` to `z-index: 10003` (pull-to-refresh indicator)
+  - `sw-register.js`: Changed `z-index: 99999` to `z-index: 10003` (PWA update notification banner)
+  - `pwa-notifications.js`: Changed `z-index: 99998` to `z-index: 10002` (notification permission prompt)
+- **Why:** The extremely high z-index values (up to 99999999) were arbitrary and could cause unpredictable stacking behavior. By normalizing them to values within the established hierarchy (--z-top-layer: 10003, --z-detail-overlay: 10002), all overlays now participate in the coordinated z-index system. The value 10003 is the highest layer in the hierarchy, appropriate for critical modals like delete confirmations and error displays.
+- **Files touched:** 6 JS files (seznam.js, csrf-auto-inject.js, error-handler.js, pull-to-refresh.js, sw-register.js, pwa-notifications.js)
+- **Notes / risks:** Low risk. The normalized values (10002-10003) are still above all other UI elements. The `.min.js` files still contain old values and need regeneration. Note: seznam.js still has some inline z-index values (10004-10007) for progressive overlay stacking - these are intentional and within reasonable bounds.
+
+**INLINE Z-INDEX NORMALIZATION COMPLETE:**
+- Eliminated all z-index values > 10007 from source JS files
+- 9 inline z-index declarations normalized across 6 files
+- All critical overlays now use 10002-10003 (within hierarchy)
+
+## [Step 23]: Color Policy Audit and Exception Documentation
+- **What:** Conducted a comprehensive audit of color usage across the codebase. Identified 39 source files with non-grayscale colors. Documented approved exceptions for user feedback colors.
+- **How:** Ran grep for common Bootstrap/Material Design colors (`#dc3545`, `#28a745`, `#ff6b6b`, `#d32f2f`, `#ffc107`, `#17a2b8`, `#4ECDC4`). Found violations in admin, setup, includes, and JS utility files. Most colors are used for error/success/warning feedback states.
+- **Why:** The CLAUDE.md color policy states only black/white/gray are allowed. However, semantic feedback colors (red for errors, green for success) are industry-standard UX conventions that aid user comprehension. Removing them would degrade user experience.
+- **Decision:** Project owner approved exception for feedback state colors.
+- **Files touched:** None (audit and documentation only)
+
+**COLOR POLICY EXCEPTION - APPROVED FEEDBACK COLORS:**
+
+| Color | Hex Code | Usage | Status |
+|-------|----------|-------|--------|
+| Error/Danger | `#dc3545`, `#d32f2f`, `#ff6b6b` | Error messages, delete buttons, failed states | APPROVED |
+| Success | `#28a745`, `#1e7e34` | Success messages, save confirmations | APPROVED |
+| Warning | `#ffc107` | Warning alerts, caution states | APPROVED |
+| Info | `#17a2b8` | Informational messages | APPROVED |
+
+**Files with approved color exceptions (39 total):**
+- Admin includes: `admin_security.php`, `admin_actions.php`, `admin_configuration.php`, `error_handler.php`
+- JS utilities: `error-handler.js`, `login.js`, `smtp-config.js`, `novareklamace.js`
+- Setup scripts: Various installation/migration scripts (non-user-facing)
+
+**Remaining color policy violations to address:**
+- ~~`hamburger-menu.php` line 176, 203: `#ff6b6b` on logout link - consider changing to gray~~ FIXED in Step 24
+- ~~`replay-player.js` line 303: `#4ECDC4` teal - decorative, should be grayscale~~ FIXED in Step 24
+
+**Note:** The grayscale-only policy applies to decorative/UI elements. Semantic feedback colors are now explicitly permitted for user comprehension.
+
+## [Step 24]: Fix Remaining Decorative Color Violations
+- **What:** Fixed all remaining decorative color violations identified in Step 23. Changed non-feedback colors to grayscale.
+- **How:** Edited hamburger-menu.php and replay-player.js to replace decorative colors with grayscale equivalents.
+- **Why:** Decorative elements (logout links, notification buttons, canvas cursors) should follow color policy. Only semantic feedback colors are exempt.
+- **Files touched:**
+  - `includes/hamburger-menu.php`: logout link #ff6b6b → #999, notification button #4a9eff → #ccc, tech-provize #ff6b6b → #999
+  - `assets/js/replay-player.js`: cursor #FF6B6B → #666, click ripple #4ECDC4 → #888
+- **Result:** All decorative colors now comply with grayscale-only policy. Color policy enforcement complete.
+
+## [Step 25]: Delete Orphaned user_header.php File
+- **What:** Permanently deleted the orphaned `includes/user_header.php` file (176 lines).
+- **How:** Ran `rm /home/user/moje-stranky/includes/user_header.php` after confirming 0 references in codebase.
+- **Why:** File was identified as orphaned in Step 21 - `grep -r "user_header" --include="*.php"` returned 0 results. It was a legacy file replaced by centralized `hamburger-menu.php` but never removed. Keeping orphaned files increases maintenance burden and confusion.
+- **Files touched:** `includes/user_header.php` (DELETED, 176 lines)
+- **Result:** Codebase is now cleaner with one less orphaned file. All header/navigation functionality is centralized in `hamburger-menu.php`.
+

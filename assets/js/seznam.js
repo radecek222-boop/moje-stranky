@@ -3135,7 +3135,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function showDeleteConfirmModal(reklamaceNumber) {
   return new Promise((resolve) => {
     const modalDiv = document.createElement('div');
-    modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999999;display:flex;align-items:center;justify-content:center;';
+    modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10003;display:flex;align-items:center;justify-content:center;';
 
     const modalContent = document.createElement('div');
     modalContent.style.cssText = 'background:white;padding:30px;border-radius:8px;max-width:450px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
@@ -3178,7 +3178,7 @@ function showDeleteConfirmModal(reklamaceNumber) {
 function showDeleteInputModal(reklamaceNumber) {
   return new Promise((resolve) => {
     const modalDiv = document.createElement('div');
-    modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999999;display:flex;align-items:center;justify-content:center;';
+    modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10003;display:flex;align-items:center;justify-content:center;';
 
     const modalContent = document.createElement('div');
     modalContent.style.cssText = 'background:white;padding:30px;border-radius:8px;max-width:450px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
@@ -3252,7 +3252,7 @@ async function deleteReklamace(reklamaceId) {
 
     // Zobrazit chybovou hlášku
     const errorModal = document.createElement('div');
-    errorModal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999999;display:flex;align-items:center;justify-content:center;';
+    errorModal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10003;display:flex;align-items:center;justify-content:center;';
     errorModal.innerHTML = `
       <div style="background:white;padding:30px;border-radius:8px;max-width:400px;width:90%;text-align:center;">
         <h2 style="margin:0 0 20px 0;color:#666;">Nesprávné číslo!</h2>
@@ -3311,7 +3311,7 @@ async function smazatFotku(photoId, photoUrl) {
   return new Promise((resolve) => {
     const modalDiv = document.createElement('div');
     modalDiv.id = 'deleteFotoModal';
-    modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999999;display:flex;align-items:center;justify-content:center;';
+    modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10003;display:flex;align-items:center;justify-content:center;';
 
     const modalContent = document.createElement('div');
     modalContent.style.cssText = 'background:white;padding:30px;border-radius:8px;max-width:400px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);';

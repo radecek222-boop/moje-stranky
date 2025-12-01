@@ -47,7 +47,7 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      z-index: 99999;
+      z-index: 10003;
       transition: none;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     `;

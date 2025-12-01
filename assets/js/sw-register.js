@@ -143,7 +143,7 @@
         display: flex;
         align-items: center;
         gap: 16px;
-        z-index: 99999;
+        z-index: 10003;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         font-size: 14px;
         max-width: 90vw;

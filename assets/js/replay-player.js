@@ -280,8 +280,8 @@
             ctx.arc(x + 2, y + 2, 8, 0, Math.PI * 2);
             ctx.fill();
 
-            // Inner circle
-            ctx.fillStyle = '#FF6B6B';
+            // Inner circle (grayscale per color policy)
+            ctx.fillStyle = '#666';
             ctx.beginPath();
             ctx.arc(x, y, 8, 0, Math.PI * 2);
             ctx.fill();
@@ -299,8 +299,8 @@
         drawClickAnimation: function(x, y) {
             const ctx = this.state.ctx;
 
-            // Ripple effect
-            ctx.strokeStyle = '#4ECDC4';
+            // Ripple effect (grayscale per color policy)
+            ctx.strokeStyle = '#888';
             ctx.lineWidth = 3;
 
             for (let i = 1; i <= 3; i++) {
