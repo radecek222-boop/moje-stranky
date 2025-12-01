@@ -14,6 +14,9 @@ if ($isAdmin) {
 }
 ?>
 
+<!-- Centralizovaný z-index systém -->
+<link rel="stylesheet" href="/assets/css/z-index-layers.css">
+
 <header class="hamburger-header">
   <a href="index.php" class="hamburger-logo">WGS<span>WHITE GLOVE SERVICE</span></a>
   <button class="hamburger-toggle" id="hamburger-toggle" aria-label="Otevřít menu" aria-expanded="false">
