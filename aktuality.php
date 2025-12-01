@@ -1088,8 +1088,6 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 </script>
 <?php endif; ?>
 
-<script src="assets/js/hamburger-menu.js" defer></script>
-
 <?php renderHeatmapTracker(); ?>
 </body>
 </html>
