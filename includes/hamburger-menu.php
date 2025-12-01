@@ -173,16 +173,16 @@ if ($isAdmin) {
 }
 
 .hamburger-logout {
-  color: #ff6b6b !important;
+  color: #999 !important;
   font-weight: 600 !important;
 }
 
 .hamburger-logout:hover {
-  color: #ff4444 !important;
+  color: #777 !important;
 }
 
 .hamburger-notif-btn {
-  color: #4a9eff !important;
+  color: #ccc !important;
   font-weight: 600 !important;
   border: none !important;
   background: transparent !important;
@@ -190,17 +190,17 @@ if ($isAdmin) {
 }
 
 .hamburger-notif-btn:hover {
-  color: #7bb8ff !important;
+  color: #aaa !important;
   background: transparent !important;
 }
 
 .hamburger-notif-btn.notif-active {
-  color: #4a9eff !important;
+  color: #fff !important;
 }
 
-/* Provize technika - červená barva jako odhlášení */
+/* Provize technika - šedá barva konzistentní s UI */
 .tech-provize-link {
-  color: #ff6b6b !important;
+  color: #999 !important;
   font-weight: 600 !important;
   opacity: 1 !important;
 }
