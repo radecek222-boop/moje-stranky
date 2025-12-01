@@ -763,3 +763,43 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** None (audit only)
 - **Result:** Minification pipeline confirmed operational. Ready for production use.
 
+## [Step 29]: Final Safe Cleanup - Delete Orphaned index.js
+- **What:** Deleted the orphaned `assets/js/index.js` file (14-line deprecated stub) as the final safe cleanup operation.
+- **How:** (1) Verified file was not loaded anywhere via grep (only referenced in HTML comment). (2) Ran `rm /home/user/moje-stranky/assets/js/index.js`. (3) Analyzed remaining patch/fix files for consolidation potential.
+- **Why:** The `index.js` file was marked as deprecated in Step 20 and its script tag was removed from `index.php` in Step 21. The file served no purpose - all functionality was moved to `hamburger-menu.php` and `language-switcher.js`.
+- **Files touched:** `assets/js/index.js` (DELETED, 14 lines)
+- **Analysis of remaining technical debt:**
+  - **Mobile-fixes CSS (4 files, 865 lines):** NOT consolidated - each file is page-specific, merging would change CSS cascade
+  - **Patch JS files (5 files, ~500 lines):** NOT consolidated - use monkey-patching, require integration into main JS files (behavioral change)
+  - **Duplicate CSS selectors:** NOT consolidated - too risky without visual testing
+- **Result:** All safe cleanup operations complete. Remaining technical debt requires behavioral refactoring (Phase 2).
+
+---
+
+## PHASE 1 COMPLETE: Safe Cleanup Summary
+
+**Steps 1-29 have completed the "Safe Cleanup" phase of the WGS frontend modernization.**
+
+### Achievements:
+
+| Category | Result |
+|----------|--------|
+| **Scroll-lock** | Centralized in `scroll-lock.js`, integrated into 8 components |
+| **Z-index** | 56+ declarations migrated to CSS variables in `z-index-layers.css` |
+| **Dead code** | ~170 lines removed from 5 JS files |
+| **Orphaned files** | 4 files deleted (user_header.php, index.js, statistiky.min.css, mimozarucniceny.min.css) |
+| **Color policy** | Enforced grayscale-only, exceptions documented for feedback colors |
+| **Minification** | Pipeline verified, 6 JS + 5 CSS regeneratable |
+
+### Remaining Technical Debt (Phase 2 - Behavioral):
+
+1. **Consolidate mobile-fixes.css** → Requires visual testing
+2. **Integrate patch.js into main files** → Requires functional testing
+3. **HTMX migration** → Major architectural change
+4. **Alpine.js for local state** → Major architectural change
+5. **Unified modal system** → Requires design decisions
+
+### Next Steps:
+
+Phase 2 should begin with careful planning and explicit human approval for each behavioral change.
+
