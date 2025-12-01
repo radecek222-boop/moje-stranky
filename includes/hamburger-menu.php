@@ -390,6 +390,71 @@ document.addEventListener('alpine:init', () => {
       }
     }
   }));
+
+  /**
+   * Remember Me Modal - Alpine.js komponenta (Step 36)
+   * Specifický modal pro potvrzení "Zapamatovat si mě" na login stránce
+   * Migrace z vanilla JS na CSP-safe Alpine.js
+   */
+  Alpine.data('rememberMeModal', () => ({
+    open: false,
+
+    init() {
+      // ESC zavře modal a zruší checkbox
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.open) {
+          this.cancel();
+        }
+      });
+      console.log('[rememberMeModal] Inicializován (Alpine.js CSP-safe)');
+    },
+
+    // Handler pro checkbox change event (CSP-safe)
+    onCheckboxChange(event) {
+      if (event.target.checked) {
+        this.show();
+      }
+    },
+
+    // Otevřít modal - přidá CSS class pro zachování původních animací
+    show() {
+      this.open = true;
+      const overlay = document.getElementById('rememberMeOverlay');
+      if (overlay) {
+        overlay.classList.add('active');
+      }
+    },
+
+    // Potvrdit - ponechat checkbox zaškrtnutý, zavřít modal
+    confirm() {
+      this.open = false;
+      const overlay = document.getElementById('rememberMeOverlay');
+      if (overlay) {
+        overlay.classList.remove('active');
+      }
+    },
+
+    // Zrušit - odškrtnout checkbox, zavřít modal
+    cancel() {
+      const checkbox = document.getElementById('rememberMe');
+      if (checkbox) {
+        checkbox.checked = false;
+      }
+      this.open = false;
+      const overlay = document.getElementById('rememberMeOverlay');
+      if (overlay) {
+        overlay.classList.remove('active');
+      }
+    },
+
+    // Klik na overlay - stejné jako cancel
+    overlayClick(event) {
+      // Pouze pokud klik byl přímo na overlay (ne na obsah uvnitř)
+      if (event.target.id === 'rememberMeOverlay') {
+        this.cancel();
+      }
+    }
+  }));
 });
 </script>
 
