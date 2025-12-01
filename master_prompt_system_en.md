@@ -848,3 +848,35 @@ Phase 2 should begin with careful planning and explicit human approval for each 
   ```
 - **Result:** First working Alpine.js component in the project. Functionally identical behavior, cleaner declarative code.
 
+## [Step 32]: Hamburger Menu Migration to Alpine.js
+- **What:** Migrated the hamburger menu component from vanilla JavaScript (~100 lines) to Alpine.js (~55 lines).
+- **How:**
+  1. Wrapped `<header>` and overlay in Alpine.js scope: `<div x-data="hamburgerMenu()">`
+  2. Replaced event listeners with Alpine directives:
+     - `@click.stop="prepnout()"` on toggle button
+     - `@click="zavrit()"` on overlay
+     - `@keydown.escape.window` for Escape key
+     - `@resize.window.debounce.250ms` for responsive close
+  3. Replaced CSS class toggling with reactive bindings: `:class="{ 'active': otevreno }"`
+  4. Created `hamburgerMenu()` function with Czech method names (`prepnout`, `zavrit`, `otevrit`, `aktualizovatScrollLock`)
+  5. Preserved scroll-lock integration via `aktualizovatScrollLock()` method
+  6. Preserved `window.hamburgerMenu` API for backwards compatibility
+  7. Left `initNotifButton()` and `initTechProvize()` as vanilla JS (future migration candidates)
+- **Why:**
+  - Hamburger menu is the most used UI component (loads on every page)
+  - Demonstrates Alpine.js state management capabilities
+  - Reduces code from ~100 lines to ~55 lines (45% reduction)
+  - Makes menu state explicit (`otevreno: true/false`) instead of implicit (CSS classes)
+  - All event handling now declarative in HTML
+- **Files touched:** `includes/hamburger-menu.php` (MODIFIED, major refactor)
+- **Alpine.js features used:**
+  - `x-data` - component state
+  - `@click`, `@keydown.escape.window`, `@resize.window.debounce` - event handlers
+  - `:class`, `:aria-expanded` - reactive bindings
+  - `init()` - lifecycle hook for backwards compatibility API
+- **Backwards compatibility:**
+  - `window.hamburgerMenu.toggle()`, `.open()`, `.close()`, `.isOpen()` still work
+  - CSS classes (`active`, `hamburger-menu-open`) still applied for styling
+  - Scroll-lock integration preserved
+- **Result:** Central navigation component now uses Alpine.js. Ready for similar migrations in other components.
+
