@@ -588,3 +588,10 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/assets/css/admin.css` (MODIFIED, 11 lines changed)
 - **Notes / risks:** Low risk. Most values were direct mappings. The `.admin-planet:hover` z-index was normalized from 20 to 10 (using `--z-sticky`) as the exact value doesn't matter for local element stacking within the planet animation context. Rollback: revert the file to previous commit.
 
+## [Step 17]: Migrate Admin-Header.css Z-Index to CSS Variables
+- **What:** Replaced all 4 hardcoded z-index values in `admin-header.css` with CSS custom properties from the centralized z-index system.
+- **How:** Modified 4 z-index declarations: (1) `.admin-header`: `10000 !important` → `var(--z-modal-top, 10000) !important`, (2) `.hamburger-toggle`: `10001` → `var(--z-hamburger-toggle, 10001)`, (3) `.hamburger-overlay`: `9999` → `var(--z-hamburger-overlay, 9999)`, (4) `.hamburger-nav` (mobile): `10000` → `var(--z-hamburger-nav, 10000)`.
+- **Why:** `admin-header.css` contains the admin panel sticky header and its mobile hamburger menu. Using the same CSS variables as `hamburger-menu.php` ensures consistent stacking behavior between the main site hamburger and the admin panel hamburger.
+- **Files touched:** `/home/user/moje-stranky/assets/css/admin-header.css` (MODIFIED, 4 lines changed)
+- **Notes / risks:** Low risk. Direct mappings to semantic variables. The !important on `.admin-header` was preserved. Rollback: revert the file to previous commit.
+
