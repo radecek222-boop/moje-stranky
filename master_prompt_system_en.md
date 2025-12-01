@@ -567,3 +567,45 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/assets/css/novareklamace.css` (MODIFIED, 10 lines changed)
 - **Notes / risks:** Low risk. All fallback values match the original hardcoded values. This is the largest single migration so far (10 values). The hero section uses low z-index values (1, 2) for internal layering which don't conflict with overlay/modal layers. Rollback: revert the file to previous commit.
 
+## [Step 14]: Migrate Mobile-Responsive.css Z-Index to CSS Variables
+- **What:** Replaced all 3 hardcoded z-index values in `mobile-responsive.css` with CSS custom properties from the centralized z-index system.
+- **How:** Modified 3 z-index declarations: (1) `.modal-header, .calendar-header`: `10` → `var(--z-sticky, 10)`, (2) `.nav` (slide-in menu): `9999` → `var(--z-menu-overlay, 9999)`, (3) `.menu-overlay`: `9998` → `var(--z-overlay-backdrop, 9998)`. Note: This file uses different z-index values (9999/9998) than hamburger-menu.php (10000/9999), which is an intentional layering difference.
+- **Why:** `mobile-responsive.css` provides cross-page mobile responsive styles. By migrating to CSS variables, these styles now participate in the coordinated z-index system. The sticky modal/calendar header uses the same `--z-sticky` variable as other sticky elements.
+- **Files touched:** `/home/user/moje-stranky/assets/css/mobile-responsive.css` (MODIFIED, 3 lines changed)
+- **Notes / risks:** Low risk. The different z-index values (9998/9999 vs 10000/9999) suggest this mobile menu system may be used in different contexts than hamburger-menu.php. The fallback values preserve the original layering. Rollback: revert the file to previous commit.
+
+## [Step 15]: Migrate Protokol.css Z-Index to CSS Variables
+- **What:** Replaced all 7 hardcoded z-index values in `protokol.css` with CSS custom properties from the centralized z-index system. Also normalized problematic high values.
+- **How:** Modified 7 z-index declarations: (1) `.top-bar`: `100` → `var(--z-topbar, 100)`, (2) `.translate-btn`: `10` → `var(--z-sticky, 10)`, (3) `.notif` (toast): `3000` → `var(--z-toast, 1500)` (normalized from 3000 to 1500), (4) `.loading-overlay`: `99999` → `var(--z-top-layer, 10003)` (critical normalization from excessive 99999), (5) `.pdf-preview-overlay`: `9999` → `var(--z-menu-overlay, 9999)`, (6) `.nav` (mobile): `99` → `var(--z-topbar, 100)` (increased from 99 to 100 for proper hierarchy), (7) `.zakaznik-schvaleni-overlay`: `9999` → `var(--z-menu-overlay, 9999)`.
+- **Why:** `protokol.css` had problematic z-index values including 99999 (way too high) and 99 (too low for mobile nav). By normalizing to the centralized system, the protokol page now has predictable layering. The loading overlay (previously 99999) now uses `--z-top-layer` (10003) which is still the highest layer but within the controlled hierarchy.
+- **Files touched:** `/home/user/moje-stranky/assets/css/protokol.css` (MODIFIED, 7 lines changed)
+- **Notes / risks:** Medium risk due to value normalization. The loading overlay z-index was reduced from 99999 to 10003 - functionally equivalent as it's still above all other layers. The notification z-index was reduced from 3000 to 1500 - should still be visible above content. Rollback: revert the file to previous commit.
+
+## [Step 16]: Migrate Admin.css Z-Index to CSS Variables
+- **What:** Replaced all 11 hardcoded z-index values in `admin.css` with CSS custom properties from the centralized z-index system.
+- **How:** Modified 11 z-index declarations: (1) `.control-detail`: `10000` → `var(--z-modal-top, 10000)`, (2) `.control-detail-header`: `10` → `var(--z-sticky, 10)`, (3) `.admin-modal-overlay`: `9998` → `var(--z-overlay-backdrop, 9998)`, (4) `.admin-modal`: `9999` → `var(--z-menu-overlay, 9999)`, (5) `.admin-card-loader`: `10` → `var(--z-sticky, 10)`, (6) `.cc-overlay`: `10002` → `var(--z-detail-overlay, 10002)`, (7) `.cc-modal`: `10003` → `var(--z-top-layer, 10003)`, (8) `.cc-modal-loading`: `1` → `var(--z-background, 1)`, (9) `.admin-landing-planets`: `9999` → `var(--z-menu-overlay, 9999)`, (10) `.admin-sun`: `10` → `var(--z-sticky, 10)`, (11) `.admin-planet:hover`: `20` → `var(--z-sticky, 10)` (normalized from 20 to 10).
+- **Why:** `admin.css` is the largest CSS file in the project (3000+ lines) and contains the Control Center UI. By migrating all 11 z-index values to CSS variables, the admin panel now participates fully in the coordinated z-index system. The old comments about specific z-index values can now be removed as the hierarchy is documented in z-index-layers.css.
+- **Files touched:** `/home/user/moje-stranky/assets/css/admin.css` (MODIFIED, 11 lines changed)
+- **Notes / risks:** Low risk. Most values were direct mappings. The `.admin-planet:hover` z-index was normalized from 20 to 10 (using `--z-sticky`) as the exact value doesn't matter for local element stacking within the planet animation context. Rollback: revert the file to previous commit.
+
+## [Step 17]: Migrate Admin-Header.css Z-Index to CSS Variables
+- **What:** Replaced all 4 hardcoded z-index values in `admin-header.css` with CSS custom properties from the centralized z-index system.
+- **How:** Modified 4 z-index declarations: (1) `.admin-header`: `10000 !important` → `var(--z-modal-top, 10000) !important`, (2) `.hamburger-toggle`: `10001` → `var(--z-hamburger-toggle, 10001)`, (3) `.hamburger-overlay`: `9999` → `var(--z-hamburger-overlay, 9999)`, (4) `.hamburger-nav` (mobile): `10000` → `var(--z-hamburger-nav, 10000)`.
+- **Why:** `admin-header.css` contains the admin panel sticky header and its mobile hamburger menu. Using the same CSS variables as `hamburger-menu.php` ensures consistent stacking behavior between the main site hamburger and the admin panel hamburger.
+- **Files touched:** `/home/user/moje-stranky/assets/css/admin-header.css` (MODIFIED, 4 lines changed)
+- **Notes / risks:** Low risk. Direct mappings to semantic variables. The !important on `.admin-header` was preserved. Rollback: revert the file to previous commit.
+
+## [Step 18]: Batch Migration of Remaining CSS Files Z-Index Values
+- **What:** Replaced all remaining hardcoded z-index values in 7 smaller CSS files with CSS custom properties from the centralized z-index system.
+- **How:** Modified 12 z-index declarations across 7 files:
+  - `photocustomer.css` (3): `.top-bar`: 100 → `var(--z-topbar, 100)`, `.alert`: 1000 → `var(--z-dropdown, 1000)`, `.wait-dialog`: 2000 → `var(--z-modal, 2000)`
+  - `psa-kalkulator.css` (2): `.top-bar`: 100 → `var(--z-topbar, 100)`, `.modal`: 1000 → `var(--z-dropdown, 1000)`
+  - `admin-notifications.css` (2): `.modal`: 9999 → `var(--z-menu-overlay, 9999)`, `#editNotificationModal`: 9999 → `var(--z-menu-overlay, 9999)`
+  - `seznam-mobile-fixes.css` (2): `.modal-header`: 10 → `var(--z-sticky, 10)`, `.modal-footer`: 10 → `var(--z-sticky, 10)`
+  - `welcome-modal.css` (1): `.welcome-modal-overlay`: 10000 → `var(--z-modal-top, 10000)`
+  - `login-dark-theme.css` (1): `#rememberMeOverlay`: 10000 → `var(--z-modal-top, 10000)`
+  - `protokol-calculator-modal.css` (1): `.calculator-modal-overlay`: 10000 → `var(--z-modal-top, 10000)`
+- **Why:** These smaller CSS files had isolated z-index values that weren't part of the centralized system. Migrating them ensures consistent stacking behavior across all pages and modals.
+- **Files touched:** 7 CSS files (photocustomer.css, psa-kalkulator.css, admin-notifications.css, seznam-mobile-fixes.css, welcome-modal.css, login-dark-theme.css, protokol-calculator-modal.css)
+- **Notes / risks:** Low risk. All mappings are direct with fallback values. Total z-index migration progress: 56 declarations migrated across 14 CSS files + 2 PHP files.
+

@@ -344,7 +344,7 @@ input::placeholder {
     background: rgba(0, 0, 0, 0.92);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    z-index: 10000;
+    z-index: var(--z-modal-top, 10000);
     align-items: center;
     justify-content: center;
 }

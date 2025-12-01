@@ -44,7 +44,7 @@ body {
   border-bottom: 1px solid var(--c-black);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: var(--z-topbar, 100);
   box-shadow: var(--shadow-md);
 }
 
@@ -439,7 +439,7 @@ body {
 .modal {
   display: none;
   position: fixed;
-  z-index: 1000;
+  z-index: var(--z-dropdown, 1000);
   left: 0;
   top: 0;
   width: 100%;
