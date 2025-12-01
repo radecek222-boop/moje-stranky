@@ -848,35 +848,27 @@ Phase 2 should begin with careful planning and explicit human approval for each 
   ```
 - **Result:** First working Alpine.js component in the project. Functionally identical behavior, cleaner declarative code.
 
-## [Step 32]: Hamburger Menu Migration to Alpine.js
-- **What:** Migrated the hamburger menu component from vanilla JavaScript (~100 lines) to Alpine.js (~55 lines).
-- **How:**
-  1. Wrapped `<header>` and overlay in Alpine.js scope: `<div x-data="hamburgerMenu()">`
-  2. Replaced event listeners with Alpine directives:
-     - `@click.stop="prepnout()"` on toggle button
-     - `@click="zavrit()"` on overlay
-     - `@keydown.escape.window` for Escape key
-     - `@resize.window.debounce.250ms` for responsive close
-  3. Replaced CSS class toggling with reactive bindings: `:class="{ 'active': otevreno }"`
-  4. Created `hamburgerMenu()` function with Czech method names (`prepnout`, `zavrit`, `otevrit`, `aktualizovatScrollLock`)
-  5. Preserved scroll-lock integration via `aktualizovatScrollLock()` method
-  6. Preserved `window.hamburgerMenu` API for backwards compatibility
-  7. Left `initNotifButton()` and `initTechProvize()` as vanilla JS (future migration candidates)
-- **Why:**
-  - Hamburger menu is the most used UI component (loads on every page)
-  - Demonstrates Alpine.js state management capabilities
-  - Reduces code from ~100 lines to ~55 lines (45% reduction)
-  - Makes menu state explicit (`otevreno: true/false`) instead of implicit (CSS classes)
-  - All event handling now declarative in HTML
-- **Files touched:** `includes/hamburger-menu.php` (MODIFIED, major refactor)
-- **Alpine.js features used:**
-  - `x-data` - component state
-  - `@click`, `@keydown.escape.window`, `@resize.window.debounce` - event handlers
-  - `:class`, `:aria-expanded` - reactive bindings
-  - `init()` - lifecycle hook for backwards compatibility API
-- **Backwards compatibility:**
-  - `window.hamburgerMenu.toggle()`, `.open()`, `.close()`, `.isOpen()` still work
-  - CSS classes (`active`, `hamburger-menu-open`) still applied for styling
-  - Scroll-lock integration preserved
-- **Result:** Central navigation component now uses Alpine.js. Ready for similar migrations in other components.
+## [Step 32]: Hamburger Menu Migration to Alpine.js (REVERTED)
+- **What:** Attempted to migrate hamburger menu to Alpine.js, but **REVERTED due to CSP incompatibility**.
+- **Problem discovered:**
+  - Standard Alpine.js build (cdn.min.js) uses `new Function()` for expression evaluation
+  - This requires `unsafe-eval` in Content-Security-Policy header
+  - WGS has strict CSP that blocks `unsafe-eval` (security requirement)
+  - ALL Alpine.js expressions failed: `x-data`, `@click`, `:class`, etc.
+- **Resolution:**
+  1. Reverted hamburger menu HTML back to vanilla (removed all Alpine directives)
+  2. Reverted JavaScript back to vanilla IIFE pattern
+  3. Removed orphaned `<script src="assets/js/hamburger-menu.js">` tags from `aktuality.php` and `nova_aktualita.php`
+  4. Added CSP warning comments to HTMX/Alpine.js section
+  5. Kept HTMX (does not require eval) and Alpine.js CDN (for future CSP build)
+- **Files touched:**
+  - `includes/hamburger-menu.php` (REVERTED to vanilla JS)
+  - `aktuality.php` (removed orphaned script tag)
+  - `nova_aktualita.php` (removed orphaned script tag)
+- **Key learning:**
+  - **Standard Alpine.js CANNOT be used with strict CSP**
+  - For CSP-safe Alpine.js, must use `@alpinejs/csp` build
+  - HTMX remains viable for server-driven UI updates
+  - Simple Alpine.js components (Step 31 copy-to-clipboard) may work if they don't use complex expressions
+- **Result:** Hamburger menu restored to working vanilla JS. Alpine.js migration requires CSP build evaluation.
 
