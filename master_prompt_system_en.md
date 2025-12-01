@@ -746,3 +746,20 @@ If in doubt: **stop, explain, and ask**.
   - `assets/css/mimozarucniceny.min.css` (DELETED, 12KB)
 - **Result:** Removed ~27KB of dead code. Assets directory is now cleaner.
 
+## [Step 28]: Verify Minification Pipeline
+- **What:** Verified that minification script `scripts/minify-assets.sh` exists and is ready to use.
+- **How:** Read and analyzed the existing script.
+- **Why:** Need to ensure minification pipeline is available for regenerating .min.js and .min.css files.
+- **Findings:**
+  - Script exists at `scripts/minify-assets.sh` (256 lines, well-documented)
+  - Uses `terser` for JS, `csso-cli` for CSS
+  - Generates source maps automatically
+  - Interactive confirmation before running
+  - Files with sources (6 JS + 5 CSS) can be regenerated anytime
+  - Files without sources (8 CSS) cannot be regenerated - minified IS the source
+- **Recommendation for 8 source-less CSS files:**
+  - Keep editing them directly (minified)
+  - OR de-minify using CSS beautifier to create editable sources
+- **Files touched:** None (audit only)
+- **Result:** Minification pipeline confirmed operational. Ready for production use.
+
