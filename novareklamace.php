@@ -361,7 +361,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
 
-<main>
+<main x-data="provedeniModal" x-init="init">
 <!-- HERO -->
 <section class="hero">
   <div>
@@ -525,9 +525,10 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
           </div>
           <div class="form-group">
             <label class="form-label" for="provedeni" data-lang-cs="Provedení" data-lang-en="Version" data-lang-it="Versione">Provedení</label>
+            <!-- Provedeni - Alpine.js handler (Step 37) -->
             <div class="provedeni-group">
               <input type="text" class="form-control provedeni-input" id="provedeni" name="provedeni" data-lang-cs-placeholder="Vyberte..." data-lang-en-placeholder="Select..." data-lang-it-placeholder="Seleziona..." placeholder="Vyberte..." readonly>
-              <button type="button" class="btn-select" id="selectProvedeniBtn" data-lang-cs="VYBRAT" data-lang-en="SELECT" data-lang-it="SELEZIONA">VYBRAT</button>
+              <button type="button" class="btn-select" id="selectProvedeniBtn" @click="openModal" data-lang-cs="VYBRAT" data-lang-en="SELECT" data-lang-it="SELEZIONA">VYBRAT</button>
             </div>
           </div>
           <div class="form-group">
@@ -587,6 +588,20 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     </form>
   </div>
 </div>
+
+<!-- PROVEDENI OVERLAY - Alpine.js (Step 37) -->
+<div class="overlay-provedeni" id="provedeniOverlay" @click="overlayClick">
+  <div class="provedeni-box">
+    <h3 data-lang-cs="Provedení" data-lang-en="Version" data-lang-it="Versione">Provedení</h3>
+    <div class="provedeni-grid">
+      <div class="provedeni-card" data-value="Látka" @click="selectProvedeni" data-lang-cs="Látka" data-lang-en="Fabric" data-lang-it="Tessuto">Látka</div>
+      <div class="provedeni-card" data-value="Kůže" @click="selectProvedeni" data-lang-cs="Kůže" data-lang-en="Leather" data-lang-it="Pelle">Kůže</div>
+      <div class="provedeni-card" data-value="Kombinace" @click="selectProvedeni" data-lang-cs="Kombinace" data-lang-en="Combination" data-lang-it="Combinazione">Kombinace</div>
+    </div>
+    <button class="btn btn-secondary" @click="close">×</button>
+  </div>
+</div>
+
 </main>
 
 <!-- FOOTER -->
@@ -622,19 +637,6 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     </div>
   </div>
 </footer>
-
-<!-- PROVEDENI OVERLAY -->
-<div class="overlay-provedeni" id="provedeniOverlay">
-  <div class="provedeni-box">
-    <h3 data-lang-cs="Provedení" data-lang-en="Version" data-lang-it="Versione">Provedení</h3>
-    <div class="provedeni-grid">
-      <div class="provedeni-card" data-value="Látka" data-lang-cs="Látka" data-lang-en="Fabric" data-lang-it="Tessuto">Látka</div>
-      <div class="provedeni-card" data-value="Kůže" data-lang-cs="Kůže" data-lang-en="Leather" data-lang-it="Pelle">Kůže</div>
-      <div class="provedeni-card" data-value="Kombinace" data-lang-cs="Kombinace" data-lang-en="Combination" data-lang-it="Combinazione">Kombinace</div>
-    </div>
-    <button class="btn btn-secondary" id="closeProvedeni">×</button>
-  </div>
-</div>
 
 <!-- CUSTOM CALENDAR -->
 <div class="calendar-overlay" id="calendarOverlay">

@@ -455,6 +455,65 @@ document.addEventListener('alpine:init', () => {
       }
     }
   }));
+
+  /**
+   * Provedeni Modal - Alpine.js komponenta (Step 37)
+   * Modal pro výběr provedení (Látka/Kůže/Kombinace) na novareklamace stránce
+   * Migrace z vanilla JS na CSP-safe Alpine.js
+   */
+  Alpine.data('provedeniModal', () => ({
+    open: false,
+
+    init() {
+      // ESC zavře modal
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.open) {
+          this.close();
+        }
+      });
+      console.log('[provedeniModal] Inicializován (Alpine.js CSP-safe)');
+    },
+
+    // Otevřít modal
+    openModal() {
+      this.open = true;
+      const overlay = document.getElementById('provedeniOverlay');
+      if (overlay) {
+        overlay.classList.add('active');
+      }
+    },
+
+    // Zavřít modal
+    close() {
+      this.open = false;
+      const overlay = document.getElementById('provedeniOverlay');
+      if (overlay) {
+        overlay.classList.remove('active');
+      }
+    },
+
+    // Klik na overlay pozadí
+    overlayClick(event) {
+      if (event.target.id === 'provedeniOverlay') {
+        this.close();
+      }
+    },
+
+    // Výběr provedení
+    selectProvedeni(event) {
+      const card = event.currentTarget;
+      const value = card.dataset.value;
+      const provedeniInput = document.getElementById('provedeni');
+      if (provedeniInput) {
+        provedeniInput.value = value;
+      }
+      this.close();
+      // Toast notifikace - volat globální funkci pokud existuje
+      if (typeof WGSFormController !== 'undefined' && WGSFormController.toast) {
+        WGSFormController.toast('Provedení: ' + value, 'info');
+      }
+    }
+  }));
 });
 </script>
 
