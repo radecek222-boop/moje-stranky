@@ -79,7 +79,7 @@ function showCsrfError(message) {
         top: 20px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 999999;
+        z-index: 10003;
         background: linear-gradient(135deg, #333 0%, #555 100%);
         color: white;
         padding: 20px 25px;
