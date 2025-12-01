@@ -581,3 +581,10 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/assets/css/protokol.css` (MODIFIED, 7 lines changed)
 - **Notes / risks:** Medium risk due to value normalization. The loading overlay z-index was reduced from 99999 to 10003 - functionally equivalent as it's still above all other layers. The notification z-index was reduced from 3000 to 1500 - should still be visible above content. Rollback: revert the file to previous commit.
 
+## [Step 16]: Migrate Admin.css Z-Index to CSS Variables
+- **What:** Replaced all 11 hardcoded z-index values in `admin.css` with CSS custom properties from the centralized z-index system.
+- **How:** Modified 11 z-index declarations: (1) `.control-detail`: `10000` → `var(--z-modal-top, 10000)`, (2) `.control-detail-header`: `10` → `var(--z-sticky, 10)`, (3) `.admin-modal-overlay`: `9998` → `var(--z-overlay-backdrop, 9998)`, (4) `.admin-modal`: `9999` → `var(--z-menu-overlay, 9999)`, (5) `.admin-card-loader`: `10` → `var(--z-sticky, 10)`, (6) `.cc-overlay`: `10002` → `var(--z-detail-overlay, 10002)`, (7) `.cc-modal`: `10003` → `var(--z-top-layer, 10003)`, (8) `.cc-modal-loading`: `1` → `var(--z-background, 1)`, (9) `.admin-landing-planets`: `9999` → `var(--z-menu-overlay, 9999)`, (10) `.admin-sun`: `10` → `var(--z-sticky, 10)`, (11) `.admin-planet:hover`: `20` → `var(--z-sticky, 10)` (normalized from 20 to 10).
+- **Why:** `admin.css` is the largest CSS file in the project (3000+ lines) and contains the Control Center UI. By migrating all 11 z-index values to CSS variables, the admin panel now participates fully in the coordinated z-index system. The old comments about specific z-index values can now be removed as the hierarchy is documented in z-index-layers.css.
+- **Files touched:** `/home/user/moje-stranky/assets/css/admin.css` (MODIFIED, 11 lines changed)
+- **Notes / risks:** Low risk. Most values were direct mappings. The `.admin-planet:hover` z-index was normalized from 20 to 10 (using `--z-sticky`) as the exact value doesn't matter for local element stacking within the planet animation context. Rollback: revert the file to previous commit.
+
