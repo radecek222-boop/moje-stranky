@@ -872,3 +872,17 @@ Phase 2 should begin with careful planning and explicit human approval for each 
   - Simple Alpine.js components (Step 31 copy-to-clipboard) may work if they don't use complex expressions
 - **Result:** Hamburger menu restored to working vanilla JS. Alpine.js migration requires CSP build evaluation.
 
+## [Step 33]: Switch to Alpine.js CSP Build
+- **What:** Replaced standard Alpine.js CDN with CSP-safe `@alpinejs/csp` build.
+- **How:** Changed script src from `alpinejs@3.14.3/dist/cdn.min.js` to `@alpinejs/csp@3.14.3/dist/cdn.min.js`
+- **Why:**
+  - Standard Alpine.js uses `new Function()` for expression evaluation → blocked by CSP
+  - `@alpinejs/csp` build pre-compiles expressions → no eval needed → CSP-safe
+  - This should enable Alpine.js usage without modifying CSP policy
+- **Files touched:** `includes/hamburger-menu.php` (MODIFIED, CDN URL change)
+- **Testing required:**
+  - Visit any page and check browser console for CSP errors
+  - Verify Step 31 copy-to-clipboard button still works in `vsechny_tabulky.php`
+  - If CSP errors persist, Alpine.js cannot be used and should be removed
+- **Result:** Alpine.js CSP build deployed. Awaiting production testing.
+
