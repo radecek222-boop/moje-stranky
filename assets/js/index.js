@@ -19,12 +19,14 @@ if (mobileMenuBtn && nav) {
     nav.classList.toggle('active');
     menuOverlay.classList.toggle('active');
     mobileMenuBtn.textContent = !isActive ? '✕' : '☰';
-    
-    // Zabránit scrollování těla když je menu otevřené
-    if (!isActive) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
+
+    // Scroll-lock pres centralizovanou utilitu (iOS kompatibilni)
+    if (window.scrollLock) {
+      if (!isActive) {
+        window.scrollLock.enable('index-menu');
+      } else {
+        window.scrollLock.disable('index-menu');
+      }
     }
   }
 

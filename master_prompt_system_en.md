@@ -518,3 +518,10 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/assets/js/novareklamace.js` (MODIFIED, ~15 lines changed)
 - **Notes / risks:** Low risk. The `scroll-lock.js` is loaded via `hamburger-menu.php` which is included in `novareklamace.php` (line 361). This was the last major page with a duplicate mobile menu scroll-lock implementation. Rollback: revert the file to previous commit.
 
+## [Step 7]: Wire Scroll-Lock Utility into Homepage (index.js)
+- **What:** Replaced inline scroll-locking code in the mobile menu implementation within `index.js`.
+- **How:** Modified `toggleMenu()` function (lines 17-31) - replaced simple `document.body.style.overflow = 'hidden'/''` with `scrollLock.enable('index-menu')` / `scrollLock.disable('index-menu')` calls. Added defensive `if (window.scrollLock)` check.
+- **Why:** The homepage (`index.php`) had a standalone mobile menu implementation using simple `overflow: hidden` which doesn't work properly on iOS Safari. Now uses the iOS-compatible `position: fixed` technique via the centralized utility.
+- **Files touched:** `/home/user/moje-stranky/assets/js/index.js` (MODIFIED, ~5 lines changed)
+- **Notes / risks:** Low risk. The `scroll-lock.js` is loaded via `hamburger-menu.php` which is included in `index.php` (line 54). Note: This file has a fallback message when elements are not found, suggesting it may not always be active if hamburger-menu.php is handling the menu. Rollback: revert the file to previous commit.
+
