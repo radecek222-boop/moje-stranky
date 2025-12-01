@@ -574,3 +574,10 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/assets/css/mobile-responsive.css` (MODIFIED, 3 lines changed)
 - **Notes / risks:** Low risk. The different z-index values (9998/9999 vs 10000/9999) suggest this mobile menu system may be used in different contexts than hamburger-menu.php. The fallback values preserve the original layering. Rollback: revert the file to previous commit.
 
+## [Step 15]: Migrate Protokol.css Z-Index to CSS Variables
+- **What:** Replaced all 7 hardcoded z-index values in `protokol.css` with CSS custom properties from the centralized z-index system. Also normalized problematic high values.
+- **How:** Modified 7 z-index declarations: (1) `.top-bar`: `100` → `var(--z-topbar, 100)`, (2) `.translate-btn`: `10` → `var(--z-sticky, 10)`, (3) `.notif` (toast): `3000` → `var(--z-toast, 1500)` (normalized from 3000 to 1500), (4) `.loading-overlay`: `99999` → `var(--z-top-layer, 10003)` (critical normalization from excessive 99999), (5) `.pdf-preview-overlay`: `9999` → `var(--z-menu-overlay, 9999)`, (6) `.nav` (mobile): `99` → `var(--z-topbar, 100)` (increased from 99 to 100 for proper hierarchy), (7) `.zakaznik-schvaleni-overlay`: `9999` → `var(--z-menu-overlay, 9999)`.
+- **Why:** `protokol.css` had problematic z-index values including 99999 (way too high) and 99 (too low for mobile nav). By normalizing to the centralized system, the protokol page now has predictable layering. The loading overlay (previously 99999) now uses `--z-top-layer` (10003) which is still the highest layer but within the controlled hierarchy.
+- **Files touched:** `/home/user/moje-stranky/assets/css/protokol.css` (MODIFIED, 7 lines changed)
+- **Notes / risks:** Medium risk due to value normalization. The loading overlay z-index was reduced from 99999 to 10003 - functionally equivalent as it's still above all other layers. The notification z-index was reduced from 3000 to 1500 - should still be visible above content. Rollback: revert the file to previous commit.
+
