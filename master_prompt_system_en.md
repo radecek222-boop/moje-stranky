@@ -546,3 +546,10 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/includes/hamburger-menu.php` (MODIFIED, 4 lines changed)
 - **Notes / risks:** Low risk. Functionally equivalent - the fallback values ensure identical behavior even if CSS variables fail to load. This establishes the migration pattern: `z-index: var(--z-semantic-name, original-value)`. Other components can be migrated in subsequent steps. Rollback: revert the file to previous commit.
 
+## [Step 11]: Migrate Seznam.php Z-Index to CSS Variables
+- **What:** Replaced all hardcoded z-index values in `seznam.php` with CSS custom properties from the centralized z-index system.
+- **How:** Modified 4 z-index declarations: (1) `.loading-overlay`: `10000` → `var(--z-modal-top, 10000)`, (2) `.foto-delete-btn`: `10` → `var(--z-sticky, 10)`, (3) `#detailOverlay`: `10002 !important` → `var(--z-detail-overlay, 10002) !important`, (4) `#detailOverlay .modal-body .btn`: `1 !important` → `var(--z-background, 1) !important`. Each declaration includes a fallback value.
+- **Why:** `seznam.php` contains the critical detail overlay (complaint view) that was previously fixed with `!important` to appear above the hamburger menu. By using the centralized variable `--z-detail-overlay`, this relationship is now documented and maintainable. The loading overlay and button z-indices are also now part of the coordinated system.
+- **Files touched:** `/home/user/moje-stranky/seznam.php` (MODIFIED, 4 lines changed)
+- **Notes / risks:** Low risk. The `!important` declarations were preserved to maintain existing specificity. The detail overlay z-index (10002) is documented in the z-index-layers.css hierarchy. Rollback: revert the file to previous commit.
+
