@@ -525,3 +525,10 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/assets/js/index.js` (MODIFIED, ~5 lines changed)
 - **Notes / risks:** Low risk. The `scroll-lock.js` is loaded via `hamburger-menu.php` which is included in `index.php` (line 54). Note: This file has a fallback message when elements are not found, suggesting it may not always be active if hamburger-menu.php is handling the menu. Rollback: revert the file to previous commit.
 
+## [Step 8]: Wire Scroll-Lock Utility into Analytics Page (analytics.js)
+- **What:** Replaced inline scroll-locking code in the mobile menu implementation within `analytics.js`.
+- **How:** Modified `toggleMobileMenu()` function (lines 428-445) - replaced simple `document.body.style.overflow = 'hidden'/''` with `scrollLock.enable('analytics-menu')` / `scrollLock.disable('analytics-menu')` calls. Added defensive `if (window.scrollLock)` check.
+- **Why:** The analytics page (`analytics.php`) had a mobile menu implementation using simple `overflow: hidden` which doesn't work properly on iOS Safari. Now uses the iOS-compatible `position: fixed` technique via the centralized utility.
+- **Files touched:** `/home/user/moje-stranky/assets/js/analytics.js` (MODIFIED, ~5 lines changed)
+- **Notes / risks:** Low risk. The `scroll-lock.js` is loaded via `hamburger-menu.php` which is included in `analytics.php` (line 38). This completes the integration of all known mobile menu scroll-locking implementations in the codebase. Rollback: revert the file to previous commit.
+

@@ -434,11 +434,13 @@ function toggleMobileMenu() {
     if (mobileMenu) mobileMenu.classList.toggle('show');
     if (backdrop) backdrop.classList.toggle('show');
 
-    // Prevent body scroll when menu is open
-    if (mobileMenu && mobileMenu.classList.contains('show')) {
-        document.body.style.overflow = 'hidden';
-    } else {
-        document.body.style.overflow = '';
+    // Scroll-lock pres centralizovanou utilitu (iOS kompatibilni)
+    if (window.scrollLock) {
+        if (mobileMenu && mobileMenu.classList.contains('show')) {
+            window.scrollLock.enable('analytics-menu');
+        } else {
+            window.scrollLock.disable('analytics-menu');
+        }
     }
 }
 
