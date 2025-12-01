@@ -94,7 +94,7 @@ if ($isAdmin) {
   background: var(--c-bg-dark, #000);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
-  z-index: 10001;
+  z-index: var(--z-hamburger-header, 10001);
 }
 
 .hamburger-logo {
@@ -128,7 +128,7 @@ if ($isAdmin) {
   justify-content: center;
   align-items: center;
   gap: 5px;
-  z-index: 10001;
+  z-index: var(--z-hamburger-toggle, 10001);
   transition: all 0.3s ease;
 }
 
@@ -229,7 +229,7 @@ if ($isAdmin) {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
+  z-index: var(--z-hamburger-overlay, 9999);
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
@@ -261,7 +261,7 @@ if ($isAdmin) {
     padding: 80px 0 0 0;
     gap: 0;
     margin: 0;
-    z-index: 10000;
+    z-index: var(--z-hamburger-nav, 10000);
     overflow-y: auto;
     transition: right 0.3s ease;
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
