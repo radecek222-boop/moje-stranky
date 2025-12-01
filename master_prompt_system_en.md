@@ -595,3 +595,17 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/assets/css/admin-header.css` (MODIFIED, 4 lines changed)
 - **Notes / risks:** Low risk. Direct mappings to semantic variables. The !important on `.admin-header` was preserved. Rollback: revert the file to previous commit.
 
+## [Step 18]: Batch Migration of Remaining CSS Files Z-Index Values
+- **What:** Replaced all remaining hardcoded z-index values in 7 smaller CSS files with CSS custom properties from the centralized z-index system.
+- **How:** Modified 12 z-index declarations across 7 files:
+  - `photocustomer.css` (3): `.top-bar`: 100 → `var(--z-topbar, 100)`, `.alert`: 1000 → `var(--z-dropdown, 1000)`, `.wait-dialog`: 2000 → `var(--z-modal, 2000)`
+  - `psa-kalkulator.css` (2): `.top-bar`: 100 → `var(--z-topbar, 100)`, `.modal`: 1000 → `var(--z-dropdown, 1000)`
+  - `admin-notifications.css` (2): `.modal`: 9999 → `var(--z-menu-overlay, 9999)`, `#editNotificationModal`: 9999 → `var(--z-menu-overlay, 9999)`
+  - `seznam-mobile-fixes.css` (2): `.modal-header`: 10 → `var(--z-sticky, 10)`, `.modal-footer`: 10 → `var(--z-sticky, 10)`
+  - `welcome-modal.css` (1): `.welcome-modal-overlay`: 10000 → `var(--z-modal-top, 10000)`
+  - `login-dark-theme.css` (1): `#rememberMeOverlay`: 10000 → `var(--z-modal-top, 10000)`
+  - `protokol-calculator-modal.css` (1): `.calculator-modal-overlay`: 10000 → `var(--z-modal-top, 10000)`
+- **Why:** These smaller CSS files had isolated z-index values that weren't part of the centralized system. Migrating them ensures consistent stacking behavior across all pages and modals.
+- **Files touched:** 7 CSS files (photocustomer.css, psa-kalkulator.css, admin-notifications.css, seznam-mobile-fixes.css, welcome-modal.css, login-dark-theme.css, protokol-calculator-modal.css)
+- **Notes / risks:** Low risk. All mappings are direct with fallback values. Total z-index migration progress: 56 declarations migrated across 14 CSS files + 2 PHP files.
+
