@@ -164,7 +164,7 @@ body.modal-open {
   display: none;
   justify-content: center;
   align-items: center;
-  z-index: 10000;
+  z-index: var(--z-modal-top, 10000);
   flex-direction: column;
 }
 
@@ -251,7 +251,7 @@ body.modal-open {
   justify-content: center;
   transition: all 0.2s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  z-index: 10;
+  z-index: var(--z-sticky, 10);
   padding: 0;
   font-weight: bold;
 }
@@ -339,7 +339,7 @@ body.modal-open {
     justify-content: center !important;
     padding: 2rem 0 0 0 !important;
   /* FIX: Z-index nad hamburger headerem (který má 10001) */
-    z-index: 10002 !important;
+    z-index: var(--z-detail-overlay, 10002) !important;
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
@@ -529,7 +529,7 @@ body.modal-open {
   -webkit-tap-highlight-color: transparent !important;
   cursor: pointer !important;
   position: relative !important;
-  z-index: 1 !important;
+  z-index: var(--z-background, 1) !important;
 }
 
 #detailOverlay .modal-section {
