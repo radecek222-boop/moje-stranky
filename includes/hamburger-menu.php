@@ -53,8 +53,13 @@ if ($isAdmin) {
         $isTechnik = ($userRole === 'technik');
     ?>
       <?php if ($isTechnik): ?>
-        <!-- Provize technika jako navigační položka - úplně nahoře -->
-        <a href="#" class="tech-provize-link" id="tech-provize-box" style="cursor: default; pointer-events: none;">PROVIZE / <span id="provize-mesic">...</span> / <span id="provize-castka">...</span> €</a>
+        <!-- Provize technika - Alpine.js komponenta (Step 34) -->
+        <a
+          x-data="techProvize"
+          x-init="nacist()"
+          class="tech-provize-link"
+          style="cursor: default; pointer-events: none;"
+        >PROVIZE / <span x-text="mesic"></span> / <span x-text="castka"></span> €</a>
       <?php endif; ?>
       <a href="novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
       <a href="seznam.php" <?php if($current == "seznam.php") echo 'class="active"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
@@ -317,6 +322,37 @@ if ($isAdmin) {
 <!-- CSP-SAFE: Používá @alpinejs/csp build bez new Function() -->
 <script defer src="https://unpkg.com/@alpinejs/csp@3.14.3/dist/cdn.min.js"></script>
 
+<!-- Alpine.js komponenty - registrace přes Alpine.data() (CSP-safe) -->
+<script>
+/**
+ * Tech Provize - Alpine.js komponenta (Step 34)
+ * Načítá provize technika z API a zobrazuje v navigaci
+ */
+document.addEventListener('alpine:init', () => {
+  Alpine.data('techProvize', () => ({
+    mesic: '...',
+    castka: '...',
+
+    async nacist() {
+      try {
+        const response = await fetch('/api/tech_provize_api.php');
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          this.mesic = result.mesic || '---';
+          this.castka = result.provize_celkem || '0.00';
+          console.log('[TechProvize] Načteno (Alpine.js):', result);
+        } else {
+          console.warn('[TechProvize] Chyba:', result.message);
+        }
+      } catch (e) {
+        console.error('[TechProvize] Chyba při načítání:', e);
+      }
+    }
+  }));
+});
+</script>
+
 <!-- Centralizovaná utilita pro zamykání scrollu -->
 <script src="/assets/js/scroll-lock.js"></script>
 
@@ -528,50 +564,12 @@ if ($isAdmin) {
     });
   }
 
-  /**
-   * InitTechProvize - Načtení provizí pro techniky
-   */
-  async function initTechProvize() {
-    const provizeBox = document.getElementById('tech-provize-box');
-
-    if (!provizeBox) {
-      // Není technik nebo není prvek
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/tech_provize_api.php');
-      const result = await response.json();
-
-      if (result.status === 'success') {
-        const mesicEl = document.getElementById('provize-mesic');
-        const castkaEl = document.getElementById('provize-castka');
-
-        if (mesicEl) {
-          mesicEl.textContent = result.mesic || '---';
-        }
-
-        if (castkaEl) {
-          castkaEl.textContent = result.provize_celkem || '0.00';
-        }
-
-        console.log('[Tech Provize] Načteno:', result);
-      } else {
-        console.warn('[Tech Provize] Chyba:', result.message);
-      }
-    } catch (error) {
-      console.error('[Tech Provize] Chyba při načítání:', error);
-    }
-  }
-
-  // Alpine.js handles hamburgerMenu initialization automatically via x-data
-  // Only initNotifButton and initTechProvize need manual initialization
+  // Tech Provize nyní řešeno přes Alpine.js komponentu (Step 34)
+  // initNotifButton stále vyžaduje vanilla JS inicializaci
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initNotifButton);
-    document.addEventListener('DOMContentLoaded', initTechProvize);
   } else {
     initNotifButton();
-    initTechProvize();
   }
 })();
 </script>
