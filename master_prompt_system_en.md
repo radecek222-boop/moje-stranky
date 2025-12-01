@@ -511,3 +511,10 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/assets/js/admin.js` (MODIFIED, ~15 lines changed)
 - **Notes / risks:** Low risk. The `scroll-lock.js` is loaded via `hamburger-menu.php` which is included in `admin.php` (line 140). Other dynamically-created modals in admin.js (createKey modal, user-detail-modal) were not modified in this step - they use inline `position: fixed` but don't have scroll-locking logic. They could be addressed in a future step. Rollback: revert the file to previous commit.
 
+## [Step 6]: Wire Scroll-Lock Utility into New Complaint Form (novareklamace.js)
+- **What:** Replaced inline scroll-locking code in the mobile menu implementation within `novareklamace.js`.
+- **How:** Modified `initMobileMenu()` method (lines ~557-591) - replaced simple `document.body.style.overflow = 'hidden'/'auto'` with `scrollLock.enable('novareklamace-menu')` / `scrollLock.disable('novareklamace-menu')` calls. Updated three event handlers: hamburger click, overlay click, and nav link clicks. Added defensive `if (window.scrollLock)` checks.
+- **Why:** The new complaint form (`novareklamace.php`) had a duplicate hamburger menu implementation using simple `overflow: hidden` which doesn't work properly on iOS Safari. Now uses the iOS-compatible `position: fixed` technique via the centralized utility, consistent with all other pages.
+- **Files touched:** `/home/user/moje-stranky/assets/js/novareklamace.js` (MODIFIED, ~15 lines changed)
+- **Notes / risks:** Low risk. The `scroll-lock.js` is loaded via `hamburger-menu.php` which is included in `novareklamace.php` (line 361). This was the last major page with a duplicate mobile menu scroll-lock implementation. Rollback: revert the file to previous commit.
+

@@ -560,22 +560,33 @@ const WGS = {
       hamburger.classList.toggle('active');
       nav.classList.toggle('active');
       menuOverlay.classList.toggle('active');
-      document.body.style.overflow = nav.classList.contains('active') ? 'hidden' : 'auto';
+      // Scroll-lock pres centralizovanou utilitu (iOS kompatibilni)
+      if (window.scrollLock) {
+        if (nav.classList.contains('active')) {
+          window.scrollLock.enable('novareklamace-menu');
+        } else {
+          window.scrollLock.disable('novareklamace-menu');
+        }
+      }
     });
-    
+
     menuOverlay.addEventListener('click', () => {
       hamburger.classList.remove('active');
       nav.classList.remove('active');
       menuOverlay.classList.remove('active');
-      document.body.style.overflow = 'auto';
+      if (window.scrollLock) {
+        window.scrollLock.disable('novareklamace-menu');
+      }
     });
-    
+
     nav.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
         hamburger.classList.remove('active');
         nav.classList.remove('active');
         menuOverlay.classList.remove('active');
-        document.body.style.overflow = 'auto';
+        if (window.scrollLock) {
+          window.scrollLock.disable('novareklamace-menu');
+        }
       });
     });
     
