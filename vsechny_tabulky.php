@@ -445,7 +445,15 @@ try {
                 <details style="margin: 1rem 0; border: 2px solid #ddd; padding: 1rem; border-radius: 5px;">
                     <summary style="cursor: pointer; font-weight: 600; user-select: none;">Zobrazit CREATE TABLE příkaz</summary>
                     <pre style="background: #f5f5f5; padding: 1rem; margin-top: 1rem; overflow-x: auto; border: 1px solid #ddd; border-radius: 3px; font-size: 0.85rem; line-height: 1.5;"><code><?php echo htmlspecialchars($detail['ddl']); ?></code></pre>
-                    <button onclick="navigator.clipboard.writeText(<?php echo htmlspecialchars(json_encode($detail['ddl']), ENT_QUOTES); ?>); this.textContent='Zkopírováno!'; setTimeout(() => this.textContent='Kopírovat do schránky', 2000);" style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #000; color: #fff; border: none; cursor: pointer; font-family: Poppins; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Kopírovat do schránky</button>
+                    <!-- Alpine.js: Copy-to-clipboard komponenta (Step 31) -->
+                    <button
+                        x-data="{ zkopirovan: false }"
+                        @click="navigator.clipboard.writeText($el.dataset.ddl); zkopirovan = true; setTimeout(() => zkopirovan = false, 2000)"
+                        x-text="zkopirovan ? 'Zkopírováno!' : 'Kopírovat do schránky'"
+                        :style="zkopirovan ? 'background: #333' : 'background: #000'"
+                        data-ddl="<?php echo htmlspecialchars($detail['ddl'], ENT_QUOTES); ?>"
+                        style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #000; color: #fff; border: none; cursor: pointer; font-family: Poppins; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;"
+                    >Kopírovat do schránky</button>
                 </details>
                 <?php endif; ?>
 

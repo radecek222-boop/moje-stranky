@@ -824,3 +824,27 @@ Phase 2 should begin with careful planning and explicit human approval for each 
   - Form submissions → HTMX `hx-post`
   - Hamburger menu toggle → Alpine.js `x-data`/`x-show`
 
+## [Step 31]: First Alpine.js Migration - Copy-to-Clipboard Button
+- **What:** Migrated the first UI component to Alpine.js - the "Copy to Clipboard" button in `vsechny_tabulky.php`.
+- **How:** Replaced inline `onclick` handler with Alpine.js declarative syntax:
+  - `x-data="{ zkopirovan: false }"` - component state
+  - `@click` - clipboard action with state toggle
+  - `x-text` - reactive button text
+  - `:style` - reactive background color feedback
+  - `data-ddl` - DDL content stored in data attribute
+- **Why:** This is the ideal first Alpine.js migration because:
+  - Self-contained component with no external dependencies
+  - Simple boolean state (copied: true/false)
+  - Located in admin-only diagnostic tool (low risk)
+  - Establishes the pattern for future migrations
+- **Files touched:** `vsechny_tabulky.php` (MODIFIED, 1 button refactored)
+- **Before (inline JS):**
+  ```html
+  <button onclick="navigator.clipboard.writeText(...); this.textContent='Zkopírováno!'; setTimeout(...)">
+  ```
+- **After (Alpine.js):**
+  ```html
+  <button x-data="{ zkopirovan: false }" @click="..." x-text="zkopirovan ? 'Zkopírováno!' : 'Kopírovat do schránky'">
+  ```
+- **Result:** First working Alpine.js component in the project. Functionally identical behavior, cleaner declarative code.
+
