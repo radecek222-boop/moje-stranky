@@ -504,3 +504,10 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/assets/js/protokol.js` (MODIFIED, ~20 lines changed)
 - **Notes / risks:** Low risk. The `scroll-lock.js` is loaded via `hamburger-menu.php` which is included in `protokol.php` (line 227). The signature modal (`zakaznikSchvaleniOverlay`) now has iOS-compatible scroll locking. Rollback: revert the file to previous commit.
 
+## [Step 5]: Wire Scroll-Lock Utility into Admin Panel (admin.js)
+- **What:** Replaced inline scroll-locking code in the admin Control Center modal (`openCCModal` / `closeCCModal` functions).
+- **How:** Modified `openCCModal()` function (lines ~648-655) - replaced manual `position: fixed` manipulation and scroll position tracking (`window.ccModalScrollPosition`) with `scrollLock.enable('admin-modal')`. Modified `closeCCModal()` function (lines ~708-719) - replaced manual style cleanup and `window.scrollTo()` restoration with `scrollLock.disable('admin-modal')`. Added defensive `if (window.scrollLock)` checks. Reduced function from 17 lines to 12 lines.
+- **Why:** The admin Control Center modal is heavily used by administrators and had its own iOS scroll-lock implementation that was not coordinated with other components. Now participates in the global scroll-lock stack, preventing conflicts when admin modal is opened alongside other overlays.
+- **Files touched:** `/home/user/moje-stranky/assets/js/admin.js` (MODIFIED, ~15 lines changed)
+- **Notes / risks:** Low risk. The `scroll-lock.js` is loaded via `hamburger-menu.php` which is included in `admin.php` (line 140). Other dynamically-created modals in admin.js (createKey modal, user-detail-modal) were not modified in this step - they use inline `position: fixed` but don't have scroll-locking logic. They could be addressed in a future step. Rollback: revert the file to previous commit.
+

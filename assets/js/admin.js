@@ -649,13 +649,10 @@ function openCCModal(section) {
     overlay.classList.add('active');
     modal.classList.add('active');
 
-    // iOS scroll lock (position: fixed místo overflow: hidden)
-    window.ccModalScrollPosition = window.pageYOffset;
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${window.ccModalScrollPosition}px`;
-    document.body.style.width = '100%';
-    document.body.style.left = '0';
-    document.body.style.right = '0';
+    // Zamknout scroll pres centralizovanou utilitu (iOS kompatibilni)
+    if (window.scrollLock) {
+        window.scrollLock.enable('admin-modal');
+    }
 
     // Show loading
     modalBody.innerHTML = '<div class="cc-modal-loading"><div class="cc-modal-spinner"></div><div style="margin-top: 1rem;">Načítání...</div></div>';
@@ -715,14 +712,9 @@ function closeCCModal() {
     overlay.classList.remove('active');
     modal.classList.remove('active');
 
-    // Obnovit scroll (iOS scroll lock unlock)
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    document.body.style.left = '';
-    document.body.style.right = '';
-    if (typeof window.ccModalScrollPosition !== 'undefined') {
-        window.scrollTo(0, window.ccModalScrollPosition);
+    // Odemknout scroll pres centralizovanou utilitu
+    if (window.scrollLock) {
+        window.scrollLock.disable('admin-modal');
     }
 }
 
