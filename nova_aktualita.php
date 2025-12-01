@@ -534,7 +534,5 @@ Benvenuti alle notizie di oggi sui mobili italiani di lusso Natuzzi..."></textar
 })();
 </script>
 
-<script src="assets/js/hamburger-menu.js" defer></script>
-
 </body>
 </html>

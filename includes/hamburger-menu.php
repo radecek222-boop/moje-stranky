@@ -17,25 +17,12 @@ if ($isAdmin) {
 <!-- Centralizovaný z-index systém -->
 <link rel="stylesheet" href="/assets/css/z-index-layers.css">
 
-<!-- Alpine.js: Hamburger Menu Component (Step 32) - CSP-SAFE -->
-<div
-  x-data="hamburgerMenu"
-  @keydown.escape.window="otevreno && zavrit()"
-  @resize.window.debounce.250ms="window.innerWidth > 768 && otevreno && zavrit()"
->
 <header class="hamburger-header">
   <a href="index.php" class="hamburger-logo">WGS<span>WHITE GLOVE SERVICE</span></a>
-  <button
-    class="hamburger-toggle"
-    id="hamburger-toggle"
-    aria-label="Otevřít menu"
-    :aria-expanded="otevreno.toString()"
-    :class="{ 'active': otevreno }"
-    @click.stop="prepnout()"
-  >
+  <button class="hamburger-toggle" id="hamburger-toggle" aria-label="Otevřít menu" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
-  <nav class="hamburger-nav" id="hamburger-nav" :class="{ 'active': otevreno }" role="navigation">
+  <nav class="hamburger-nav" id="hamburger-nav">
     <?php
     if ($isAdmin):
     ?>
@@ -96,8 +83,7 @@ if ($isAdmin) {
     <?php endif; ?>
   </nav>
 </header>
-<div class="hamburger-overlay" id="hamburger-overlay" :class="{ 'active': otevreno }" @click="zavrit()"></div>
-</div><!-- /Alpine.js hamburgerMenu scope -->
+<div class="hamburger-overlay" id="hamburger-overlay"></div>
 
 <style>
 .hamburger-header {
@@ -321,12 +307,15 @@ if ($isAdmin) {
 <!-- ============================================
      PHASE 2: HTMX + Alpine.js Infrastructure
      Přidáno v Step 30 pro postupnou modernizaci UI
+     NOTE: Alpine.js NELZE použít pro komplexní expressions kvůli CSP
      ============================================ -->
 
 <!-- HTMX 2.0.4 - Pro server-driven UI updates -->
 <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
 
 <!-- Alpine.js 3.14.3 - Pro deklarativní UI state -->
+<!-- POZOR: Standardní Alpine.js build vyžaduje unsafe-eval v CSP -->
+<!-- Pro CSP-safe použití nutno použít @alpinejs/csp build -->
 <script defer src="https://unpkg.com/alpinejs@3.14.3/dist/cdn.min.js"></script>
 
 <!-- Centralizovaná utilita pro zamykání scrollu -->
@@ -334,61 +323,101 @@ if ($isAdmin) {
 
 <script>
 /**
- * Alpine.js: Hamburger Menu Component (Step 32)
- * CSP-SAFE: Používá Alpine.data() registraci místo inline funkce
- * FIX: Oprava pro CSP kompatibilitu - žádné eval()
+ * Hamburger Menu - Vanilla JS (CSP-SAFE)
+ * Vráceno z Alpine.js kvůli CSP omezením
  */
-document.addEventListener('alpine:init', () => {
-  Alpine.data('hamburgerMenu', () => ({
-    otevreno: false,
+(function() {
+  'use strict';
 
-    prepnout() {
-      this.otevreno = !this.otevreno;
-      this.aktualizovatScrollLock();
-    },
+  function initHamburgerMenu() {
+    const hamburger = document.getElementById('hamburger-toggle');
+    const nav = document.getElementById('hamburger-nav');
+    const overlay = document.getElementById('hamburger-overlay');
 
-    zavrit() {
-      if (!this.otevreno) return;
-      this.otevreno = false;
-      this.aktualizovatScrollLock();
-    },
+    if (!hamburger || !nav || !overlay) {
+      console.warn('Hamburger menu: Chybí HTML elementy!');
+      return;
+    }
 
-    otevrit() {
-      if (this.otevreno) return;
-      this.otevreno = true;
-      this.aktualizovatScrollLock();
-    },
+    function toggleMenu() {
+      const isActive = nav.classList.contains('active');
+      nav.classList.toggle('active');
+      overlay.classList.toggle('active');
+      hamburger.classList.toggle('active');
+      hamburger.setAttribute('aria-expanded', !isActive);
 
-    aktualizovatScrollLock() {
-      if (this.otevreno) {
-        window.scrollLock?.enable('hamburger-menu');
+      if (!isActive) {
+        if (window.scrollLock) {
+          window.scrollLock.enable('hamburger-menu');
+        }
         document.body.classList.add('hamburger-menu-open');
       } else {
-        window.scrollLock?.disable('hamburger-menu');
         document.body.classList.remove('hamburger-menu-open');
+        if (window.scrollLock) {
+          window.scrollLock.disable('hamburger-menu');
+        }
       }
-    },
-
-    init() {
-      // Expose global API for backwards compatibility
-      window.hamburgerMenu = {
-        toggle: () => this.prepnout(),
-        open: () => this.otevrit(),
-        close: () => this.zavrit(),
-        isOpen: () => this.otevreno
-      };
-
-      // Close menu when clicking nav links (with delay for navigation)
-      this.$el.querySelectorAll('.hamburger-nav a').forEach(link => {
-        link.addEventListener('click', () => {
-          setTimeout(() => this.zavrit(), 100);
-        });
-      });
-
-      console.log('Hamburger menu inicializován (Alpine.js CSP-safe)');
     }
-  }));
-});
+
+    function closeMenu() {
+      nav.classList.remove('active');
+      overlay.classList.remove('active');
+      hamburger.classList.remove('active');
+      hamburger.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('hamburger-menu-open');
+      if (window.scrollLock) {
+        window.scrollLock.disable('hamburger-menu');
+      }
+    }
+
+    hamburger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    overlay.addEventListener('click', closeMenu);
+
+    nav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        setTimeout(closeMenu, 100);
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && nav.classList.contains('active')) {
+        closeMenu();
+      }
+    });
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (window.innerWidth > 768 && nav.classList.contains('active')) {
+          closeMenu();
+        }
+      }, 250);
+    });
+
+    hamburger.setAttribute('aria-expanded', 'false');
+    nav.setAttribute('role', 'navigation');
+
+    window.hamburgerMenu = {
+      toggle: toggleMenu,
+      open: function() { if (!nav.classList.contains('active')) toggleMenu(); },
+      close: closeMenu,
+      isOpen: () => nav.classList.contains('active')
+    };
+
+    console.log('Hamburger menu inicializován (vanilla JS, CSP-safe)');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHamburgerMenu);
+  } else {
+    initHamburgerMenu();
+  }
+})();
 
 (function() {
   'use strict';
