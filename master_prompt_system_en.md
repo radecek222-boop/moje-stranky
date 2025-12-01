@@ -886,3 +886,30 @@ Phase 2 should begin with careful planning and explicit human approval for each 
   - If CSP errors persist, Alpine.js cannot be used and should be removed
 - **Result:** Alpine.js CSP build deployed. Awaiting production testing.
 
+## [Step 34]: Tech Provize Migration to Alpine.js (CSP-safe)
+- **What:** Migrated "Tech Provize" component from vanilla JS to Alpine.js using CSP-safe pattern.
+- **How:**
+  1. Created `Alpine.data('techProvize')` component registered inside `alpine:init` event
+  2. Replaced vanilla HTML with Alpine directives:
+     - `x-data="techProvize"` - component binding (no parentheses for CSP)
+     - `x-init="nacist()"` - auto-load on component init
+     - `x-text="mesic"` / `x-text="castka"` - reactive text bindings
+  3. Removed vanilla JS `initTechProvize()` function and its DOMContentLoaded calls
+  4. Preserved identical API call to `/api/tech_provize_api.php`
+- **Why:**
+  - First real Alpine.js component with async data fetching
+  - Tests Alpine.js CSP build with fetch() operations
+  - Isolated, low-risk migration (only affects technician users)
+  - Prepares pattern for future component migrations
+- **Files touched:** `includes/hamburger-menu.php` (MODIFIED)
+- **Alpine.js features used:**
+  - `Alpine.data()` - CSP-safe component registration
+  - `x-data`, `x-init`, `x-text` - declarative bindings
+  - Async method for API fetching
+- **Code reduction:** ~35 lines vanilla JS → ~25 lines Alpine.js
+- **Testing required:**
+  - Login as technician user
+  - Verify "PROVIZE / [mesic] / [castka] €" displays correctly
+  - Check console for CSP errors or fetch errors
+- **Result:** Second Alpine.js component successfully deployed. Pattern validated for future migrations.
+
