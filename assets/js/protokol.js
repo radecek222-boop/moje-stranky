@@ -2272,6 +2272,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // === MODAL PRO SCHVÁLENÍ ZÁKAZNÍKEM ===
+// Step 39: Migrace na Alpine.js - open/close logika přesunuta do zakaznikSchvaleniModal komponenty
+// Business logika (překlad, signature pad, souhrn) zůstává zde
 (function() {
   let zakaznikSignaturePad = null;
 
@@ -2279,8 +2281,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('DOMContentLoaded', () => {
     const btnPodepsat = document.getElementById('btnPodepsatProtokol');
     const overlay = document.getElementById('zakaznikSchvaleniOverlay');
-    const btnClose = document.getElementById('zakaznikSchvaleniClose');
-    const btnZrusit = document.getElementById('zakaznikSchvaleniZrusit');
     const btnPouzit = document.getElementById('zakaznikSchvaleniPouzit');
     const btnVymazat = document.getElementById('zakaznikVymazatPodpis');
     const canvas = document.getElementById('zakaznikSchvaleniPad');
@@ -2305,16 +2305,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Zavření modalu
-    btnClose?.addEventListener('click', zavritZakaznikModal);
-    btnZrusit?.addEventListener('click', zavritZakaznikModal);
-
-    // Klik mimo modal zavře
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) {
-        zavritZakaznikModal();
-      }
-    });
+    // Step 39: Zavírání modalu nyní řeší Alpine.js (btnClose, btnZrusit, overlay click, ESC)
+    // Vanilla JS event listenery pro close/cancel/overlay odstraněny
 
     // Vymazat podpis
     btnVymazat?.addEventListener('click', () => {
@@ -2330,7 +2322,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   async function otevritZakaznikModal() {
-    const overlay = document.getElementById('zakaznikSchvaleniOverlay');
     const canvas = document.getElementById('zakaznikSchvaleniPad');
 
     // POJISTKA: Vynutit preklad vsech poli pred podpisem
@@ -2359,11 +2350,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Naplnit souhrn daty z formuláře
     naplnitSouhrn();
 
-    // Zobrazit modal
-    overlay.style.display = 'flex';
-    // Zamknout scroll pres centralizovanou utilitu (iOS kompatibilni)
-    if (window.scrollLock) {
-      window.scrollLock.enable('zakaznik-schvaleni-overlay');
+    // Step 39: Zobrazit modal přes Alpine.js API (scroll lock je v Alpine komponentě)
+    if (window.zakaznikSchvaleniModal && window.zakaznikSchvaleniModal.open) {
+      window.zakaznikSchvaleniModal.open();
+    } else {
+      // Fallback pro zpětnou kompatibilitu
+      const overlay = document.getElementById('zakaznikSchvaleniOverlay');
+      if (overlay) {
+        overlay.style.display = 'flex';
+      }
+      if (window.scrollLock) {
+        window.scrollLock.enable('zakaznik-schvaleni-overlay');
+      }
     }
 
     // Inicializovat signature pad (po zobrazení, aby měl správné rozměry)
@@ -2373,11 +2371,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function zavritZakaznikModal() {
-    const overlay = document.getElementById('zakaznikSchvaleniOverlay');
-    overlay.style.display = 'none';
-    // Odemknout scroll pres centralizovanou utilitu
-    if (window.scrollLock) {
-      window.scrollLock.disable('zakaznik-schvaleni-overlay');
+    // Step 39: Zavřít modal přes Alpine.js API (scroll lock je v Alpine komponentě)
+    if (window.zakaznikSchvaleniModal && window.zakaznikSchvaleniModal.close) {
+      window.zakaznikSchvaleniModal.close();
+    } else {
+      // Fallback pro zpětnou kompatibilitu
+      const overlay = document.getElementById('zakaznikSchvaleniOverlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
+      if (window.scrollLock) {
+        window.scrollLock.disable('zakaznik-schvaleni-overlay');
+      }
     }
 
     // Vyčistit signature pad
