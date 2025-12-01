@@ -17,9 +17,9 @@ if ($isAdmin) {
 <!-- Centralizovaný z-index systém -->
 <link rel="stylesheet" href="/assets/css/z-index-layers.css">
 
-<!-- Alpine.js: Hamburger Menu Component (Step 32) -->
+<!-- Alpine.js: Hamburger Menu Component (Step 32) - CSP-SAFE -->
 <div
-  x-data="hamburgerMenu()"
+  x-data="hamburgerMenu"
   @keydown.escape.window="otevreno && zavrit()"
   @resize.window.debounce.250ms="window.innerWidth > 768 && otevreno && zavrit()"
 >
@@ -335,10 +335,11 @@ if ($isAdmin) {
 <script>
 /**
  * Alpine.js: Hamburger Menu Component (Step 32)
- * Nahrazuje vanilla JS initHamburgerMenu() funkci
+ * CSP-SAFE: Používá Alpine.data() registraci místo inline funkce
+ * FIX: Oprava pro CSP kompatibilitu - žádné eval()
  */
-function hamburgerMenu() {
-  return {
+document.addEventListener('alpine:init', () => {
+  Alpine.data('hamburgerMenu', () => ({
     otevreno: false,
 
     prepnout() {
@@ -384,10 +385,10 @@ function hamburgerMenu() {
         });
       });
 
-      console.log('Hamburger menu inicializován (Alpine.js)');
+      console.log('Hamburger menu inicializován (Alpine.js CSP-safe)');
     }
-  };
-}
+  }));
+});
 
 (function() {
   'use strict';
