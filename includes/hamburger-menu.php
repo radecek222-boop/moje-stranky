@@ -514,6 +514,59 @@ document.addEventListener('alpine:init', () => {
       }
     }
   }));
+
+  /**
+   * Calendar Modal - Alpine.js komponenta (Step 38)
+   * Modal pro výběr data na novareklamace stránce
+   * Migrace open/close logiky z vanilla JS na CSP-safe Alpine.js
+   * Renderování kalendáře zůstává v vanilla JS (initCustomCalendar)
+   */
+  Alpine.data('calendarModal', () => ({
+    open: false,
+
+    init() {
+      // ESC zavře modal (bonus - původně nebylo)
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.open) {
+          this.close();
+        }
+      });
+
+      // Exponovat metody pro vanilla JS (initCustomCalendar)
+      window.calendarModal = {
+        open: () => this.openModal(),
+        close: () => this.close(),
+        isOpen: () => this.open
+      };
+
+      console.log('[calendarModal] Inicializován (Alpine.js CSP-safe)');
+    },
+
+    // Otevřít modal
+    openModal() {
+      this.open = true;
+      const overlay = document.getElementById('calendarOverlay');
+      if (overlay) {
+        overlay.classList.add('active');
+      }
+    },
+
+    // Zavřít modal
+    close() {
+      this.open = false;
+      const overlay = document.getElementById('calendarOverlay');
+      if (overlay) {
+        overlay.classList.remove('active');
+      }
+    },
+
+    // Klik na overlay pozadí
+    overlayClick(event) {
+      if (event.target.id === 'calendarOverlay') {
+        this.close();
+      }
+    }
+  }));
 });
 </script>
 

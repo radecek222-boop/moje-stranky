@@ -638,8 +638,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   </div>
 </footer>
 
-<!-- CUSTOM CALENDAR -->
-<div class="calendar-overlay" id="calendarOverlay">
+<!-- CUSTOM CALENDAR - Alpine.js (Step 38) -->
+<div class="calendar-overlay" id="calendarOverlay" x-data="calendarModal" x-init="init" @click="overlayClick">
   <div class="calendar-box">
     <div class="calendar-header">
       <h3 id="calendarTitle" data-lang-cs="Vyberte datum" data-lang-en="Select Date" data-lang-it="Seleziona Data">Vyberte datum</h3>
@@ -650,7 +650,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     </div>
     <div id="calendarMonthYear" style="text-align:center;margin-bottom:1rem;font-weight:600;font-size:1.1rem;"></div>
     <div class="calendar-grid" id="calendarGrid"></div>
-    <button class="btn btn-secondary" style="display:block;margin:1.5rem auto 0;width:100%;" id="closeCalendar" data-lang-cs="Zavřít" data-lang-en="Close" data-lang-it="Chiudi">Zavřít</button>
+    <button class="btn btn-secondary" style="display:block;margin:1.5rem auto 0;width:100%;" @click="close" data-lang-cs="Zavřít" data-lang-en="Close" data-lang-it="Chiudi">Zavřít</button>
   </div>
 </div>
 
