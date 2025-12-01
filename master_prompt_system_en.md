@@ -532,3 +532,10 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/assets/js/analytics.js` (MODIFIED, ~5 lines changed)
 - **Notes / risks:** Low risk. The `scroll-lock.js` is loaded via `hamburger-menu.php` which is included in `analytics.php` (line 38). This completes the integration of all known mobile menu scroll-locking implementations in the codebase. Rollback: revert the file to previous commit.
 
+## [Step 9]: Create Centralized Z-Index Layer System
+- **What:** Created a new CSS file `z-index-layers.css` that defines CSS custom properties (variables) for all z-index values used in the application, establishing a clear visual hierarchy.
+- **How:** (1) Created `/home/user/moje-stranky/assets/css/z-index-layers.css` with 20+ CSS variables organized into semantic layers: background (-1 to 2), sticky (10), navigation (100), dropdowns/tooltips (1000), toast (1500), modals (2000), overlays (9998-9999), hamburger menu (10000-10001), detail overlay (10002), and top layer (10003). (2) Added `<link rel="stylesheet" href="/assets/css/z-index-layers.css">` to `hamburger-menu.php` so it loads on all pages.
+- **Why:** Z-index analysis revealed 10+ components using `z-index: 10000` and 7+ using `z-index: 9999` with no coordination, causing unpredictable stacking on mobile devices. The new system provides: (a) documented hierarchy, (b) CSS variables for consistent usage, (c) semantic naming (e.g., `--z-modal`, `--z-dropdown`), (d) foundation for gradual migration of hardcoded values.
+- **Files touched:** `/home/user/moje-stranky/assets/css/z-index-layers.css` (NEW, ~85 lines), `/home/user/moje-stranky/includes/hamburger-menu.php` (MODIFIED, 2 lines added)
+- **Notes / risks:** Minimal risk. This is purely additive - no existing z-index values were changed. The CSS variables are defined but not yet used by existing components. Gradual migration to use these variables will be done in subsequent steps. Rollback: delete the CSS file and remove the link from hamburger-menu.php.
+
