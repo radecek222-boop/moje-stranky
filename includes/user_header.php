@@ -103,7 +103,7 @@ $current = basename($_SERVER["PHP_SELF"]);
     box-shadow: -2px 0 10px rgba(0,0,0,0.3) !important;
     transition: right 0.3s ease-in-out, opacity 0.3s ease-in-out !important;
     opacity: 0 !important;
-    z-index: 10000 !important;
+    z-index: var(--z-hamburger-nav, 10000) !important;
     overflow-y: auto !important;
     pointer-events: none !important;
   }
@@ -127,7 +127,7 @@ $current = basename($_SERVER["PHP_SELF"]);
   }
 
   .menu-overlay {
-    z-index: 9999 !important;
+    z-index: var(--z-hamburger-overlay, 9999) !important;
     pointer-events: none !important;
   }
 

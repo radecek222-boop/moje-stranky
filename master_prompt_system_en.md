@@ -553,3 +553,10 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `/home/user/moje-stranky/seznam.php` (MODIFIED, 4 lines changed)
 - **Notes / risks:** Low risk. The `!important` declarations were preserved to maintain existing specificity. The detail overlay z-index (10002) is documented in the z-index-layers.css hierarchy. Rollback: revert the file to previous commit.
 
+## [Step 12]: Migrate User Header Z-Index to CSS Variables
+- **What:** Replaced hardcoded z-index values in `user_header.php` with CSS custom properties from the centralized z-index system.
+- **How:** Modified 2 z-index declarations inside @media (max-width: 768px): (1) `.nav`: `10000 !important` → `var(--z-hamburger-nav, 10000) !important`, (2) `.menu-overlay`: `9999 !important` → `var(--z-hamburger-overlay, 9999) !important`. Both use the same semantic variables as hamburger-menu.php for consistency.
+- **Why:** `user_header.php` is an alternative header component that duplicates some mobile menu styling. By using the same CSS variables as `hamburger-menu.php`, both components now share the same z-index hierarchy, ensuring consistent stacking behavior across all pages regardless of which header is used.
+- **Files touched:** `/home/user/moje-stranky/includes/user_header.php` (MODIFIED, 2 lines changed)
+- **Notes / risks:** Low risk. The `!important` declarations were preserved. This file uses the same z-index values as hamburger-menu.php (10000, 9999), so using the same CSS variables ensures they stay synchronized. Rollback: revert the file to previous commit.
+
