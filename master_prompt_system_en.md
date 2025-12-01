@@ -476,3 +476,10 @@ If in doubt: **stop, explain, and ask**.
 
 *(Claude must append all step logs here, in English, without modifying previous entries.)*
 
+## [Step 1]: Create Centralized Scroll-Lock Utility
+- **What:** Created a new JavaScript utility file `scroll-lock.js` that provides a unified, iOS-compatible scroll-locking mechanism for all modals and overlays.
+- **How:** Implemented a stack-based scroll-lock system using the iOS Safari compatible `position: fixed` technique. The utility tracks active locks, preserves scroll position, and supports nested modals. Exposed a simple API: `scrollLock.enable('id')` / `scrollLock.disable('id')` with Czech aliases.
+- **Why:** The hamburger menu (`hamburger-menu.php`, lines 295-369) and detail modal (`seznam.js`, lines 624-653) currently use different, uncoordinated scroll-locking techniques that conflict on mobile devices, causing unpredictable scroll behavior on iOS Safari.
+- **Files touched:** `/home/user/moje-stranky/assets/js/scroll-lock.js` (NEW, ~115 lines)
+- **Notes / risks:** This is a purely additive change. No existing code was modified. The utility is not yet wired into any existing components - that will be done in subsequent steps. Rollback: delete the file.
+
