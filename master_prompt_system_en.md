@@ -714,3 +714,24 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** `includes/user_header.php` (DELETED, 176 lines)
 - **Result:** Codebase is now cleaner with one less orphaned file. All header/navigation functionality is centralized in `hamburger-menu.php`.
 
+## [Step 26]: Audit Minified Assets - Source File Verification
+- **What:** Complete audit of all .min.js and .min.css files to verify existence of corresponding source files.
+- **How:** Used `ls -la` and `grep` to catalog all minified files and trace their usage in the codebase.
+- **Why:** Before any minification pipeline changes, need to know which files have editable sources vs which are "source = minified".
+- **Findings:**
+  - **JS (6 files):** ALL have source files ✅
+    - analytics.min.js, cenik-calculator.min.js, novareklamace.min.js, photocustomer.min.js, protokol.min.js, seznam.min.js
+  - **CSS with sources (5 files):** ✅
+    - admin.min.css, mobile-responsive.min.css, novareklamace.min.css, photocustomer.min.css, protokol.min.css
+  - **CSS without sources - ACTIVELY USED (8 files):** ⚠️
+    - styles.min.css (20+ pages), index.min.css, seznam.min.css, login.min.css, cenik.min.css, onas.min.css, nasesluzby.min.css, analytics.min.css
+  - **CSS orphaned - NOT USED (2 files):** 🗑️
+    - statistiky.min.css (statistiky.php uses inline `<style>`)
+    - mimozarucniceny.min.css (mimozarucniceny.php is just a redirect)
+- **Recommendation:**
+  - For files with sources: Use `terser` (JS) and `csso-cli` (CSS) for regeneration
+  - For files without sources: Keep as-is (editing minified files directly) or de-minify first
+  - For orphaned files: Can be safely deleted
+- **Files touched:** None (audit only)
+- **Result:** Complete inventory of minified assets. Ready for Step 27 (delete orphaned CSS) or minification pipeline setup.
+
