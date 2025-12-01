@@ -20,28 +20,7 @@
 })();
 
 // === HAMBURGER MENU ===
-function toggleMenu() {
-  const navMenu = document.getElementById('navMenu');
-  const hamburger = document.querySelector('.hamburger');
-
-  const isActive = navMenu.classList.contains('active');
-
-  if (!isActive) {
-    // Otevírání - zamknout scroll (pres centralizovanou utilitu)
-    if (window.scrollLock) {
-      window.scrollLock.enable('protokol-menu');
-    }
-    navMenu.classList.add('active');
-    hamburger.classList.add('active');
-  } else {
-    // Zavírání - obnovit scroll
-    navMenu.classList.remove('active');
-    hamburger.classList.remove('active');
-    if (window.scrollLock) {
-      window.scrollLock.disable('protokol-menu');
-    }
-  }
-}
+// REMOVED: Mrtvý kód - menu je nyní centrálně v hamburger-menu.php
 
 // === KONTROLA PDF KNIHOVEN ===
 async function zkontrolujPdfKnihovny() {
@@ -104,28 +83,7 @@ function showNotification(message, type = 'info') {
   }
 }
 
-// Zavřít menu při kliknutí na odkaz
-document.addEventListener('DOMContentLoaded', () => {
-  const navLinks = document.querySelectorAll('.nav a');
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      const nav = document.getElementById('navMenu');
-      const hamburger = document.querySelector('.hamburger');
-      nav.classList.remove('active');
-      hamburger.classList.remove('active');
-
-      // Obnovit scroll při zavření menu (iOS fix)
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      if (typeof window.menuScrollPosition !== 'undefined') {
-        window.scrollTo(0, window.menuScrollPosition);
-      }
-    });
-  });
-});
+// REMOVED: Mrtvý kód pro zavírání menu - řešeno centrálně v hamburger-menu.php
 
 let signaturePad;
 let attachedPhotos = [];

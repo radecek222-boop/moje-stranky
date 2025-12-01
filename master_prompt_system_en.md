@@ -609,3 +609,36 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** 7 CSS files (photocustomer.css, psa-kalkulator.css, admin-notifications.css, seznam-mobile-fixes.css, welcome-modal.css, login-dark-theme.css, protokol-calculator-modal.css)
 - **Notes / risks:** Low risk. All mappings are direct with fallback values. Total z-index migration progress: 56 declarations migrated across 14 CSS files + 2 PHP files.
 
+## [Step 19]: Z-Index Migration Summary & Minification Note
+- **What:** Completed full z-index migration audit. Verified all source CSS files are migrated. Noted that minified `.min.css` files need regeneration.
+- **How:** Ran grep for remaining `z-index: [number]` patterns. Found 22 occurrences remaining - all in `.min.css` files (generated from source files) and documentation examples in `z-index-layers.css`.
+- **Why:** The source CSS files (`.css`) have all been migrated to use CSS variables with fallbacks. The minified files (`.min.css`) are generated artifacts that should be regenerated using the existing minification script at `/home/user/moje-stranky/scripts/minify-assets.sh`.
+- **Action required:** After deploying changes to production, run `npm install -g terser csso-cli && ./scripts/minify-assets.sh` to regenerate all `.min.css` files with the updated CSS variable syntax.
+- **Files touched:** None (audit/documentation only)
+- **Notes / risks:** No risk. The source files are complete and CSS variables include fallback values, so even the old minified files will continue to work. However, regenerating them will make debugging easier and ensure consistency.
+
+**Z-INDEX MIGRATION COMPLETE - SUMMARY:**
+- Created centralized z-index layer system (`z-index-layers.css`) with 20+ CSS variables
+- Migrated 56+ z-index declarations across 14 CSS files + 2 PHP files
+- Normalized problematic values (99999 → 10003, 99 → 100, etc.)
+- All source files now use semantic variables like `var(--z-modal-top, 10000)`
+- Scroll-lock integration completed in Steps 1-8 (8 JS files)
+
+## [Step 20]: Dead Code Cleanup - Remove Orphaned Hamburger Menu Functions
+- **What:** Removed dead/orphaned JavaScript code for hamburger menu handling from 5 JS files. This code was duplicating functionality now centralized in `hamburger-menu.php`.
+- **How:** Cleaned up the following files:
+  - `index.js`: Entire file replaced with deprecation stub (was 100% dead code - language switcher moved to `language-switcher.js`, mobile menu moved to `hamburger-menu.php`)
+  - `photocustomer.js`: Removed dead `toggleMenu()` function (lines 21-40)
+  - `analytics.js`: Removed dead `toggleMobileMenu()` and `navigateTo()` functions (lines 428-458)
+  - `protokol.js`: Removed dead `toggleMenu()` function and DOMContentLoaded handler for nav links (lines 23-44, 86-107)
+  - `seznam.js`: Removed dead `toggleMenu()` function (lines 3103-3109)
+- **Why:** During the scroll-lock integration (Steps 1-8), it was discovered that multiple JS files contained `toggleMenu()` functions targeting HTML elements (`#navMenu`, `#navLinks`, `.nav a`) that no longer exist in the DOM. The hamburger menu is now handled centrally by `hamburger-menu.php` which is included on all pages. This dead code was confusing, increased bundle size, and could potentially cause JavaScript errors if the code paths were reached.
+- **Files touched:** 5 JS files (index.js, photocustomer.js, analytics.js, protokol.js, seznam.js)
+- **Notes / risks:** Low risk. All removed code was dead - targeting non-existent DOM elements. The `.min.js` files still contain the old code and need regeneration via `npm install -g terser csso-cli && ./scripts/minify-assets.sh`. Each file now has a comment `// REMOVED: Mrtvý kód - menu je nyní centrálně v hamburger-menu.php` documenting the removal.
+
+**DEAD CODE CLEANUP COMPLETE - SUMMARY:**
+- Removed 156 lines of dead code across 5 JS files
+- All hamburger menu functionality is now centralized in `hamburger-menu.php`
+- `index.js` reduced to 14-line deprecation stub
+- Source JS files are clean; minified versions need regeneration
+

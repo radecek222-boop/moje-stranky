@@ -3100,13 +3100,7 @@ function formatAppointment(dateStr, timeStr) {
 }
 
 // === HAMBURGER MENU ===
-function toggleMenu() {
-  const navLinks = document.getElementById('navLinks');
-  const hamburger = document.querySelector('.hamburger');
-  
-  navLinks.classList.toggle('active');
-  hamburger.classList.toggle('active');
-}
+// REMOVED: Mrtvý kód - menu je nyní centrálně v hamburger-menu.php
 
 // DUPLICITNÍ EVENT DELEGATION ODSTRANĚN
 // Používá se hlavní event delegation na řádku 2587
