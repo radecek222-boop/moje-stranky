@@ -19,25 +19,7 @@
 })();
 
 // === HAMBURGER MENU ===
-function toggleMenu() {
-  const navMenu = document.getElementById('navMenu');
-  const hamburger = document.querySelector('.hamburger');
-  navMenu.classList.toggle('active');
-  hamburger.classList.toggle('active');
-}
-
-// Zavřít menu při kliknutí na odkaz
-document.addEventListener('DOMContentLoaded', () => {
-  const navLinks = document.querySelectorAll('.nav a');
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      const nav = document.getElementById('navMenu');
-      const hamburger = document.querySelector('.hamburger');
-      nav.classList.remove('active');
-      hamburger.classList.remove('active');
-    });
-  });
-});
+// REMOVED: Mrtvý kód - menu je nyní centrálně v hamburger-menu.php
 
 // === GLOBÁLNÍ PROMĚNNÉ ===
 let currentCustomerData = null;

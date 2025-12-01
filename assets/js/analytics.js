@@ -425,34 +425,4 @@ function logout() {
 }
 
 // === MOBILE MENU ===
-function toggleMobileMenu() {
-    const hamburger = document.getElementById('hamburger');
-    const mobileMenu = document.getElementById('mobileMenu');
-    const backdrop = document.getElementById('mobileMenuBackdrop');
-
-    if (hamburger) hamburger.classList.toggle('active');
-    if (mobileMenu) mobileMenu.classList.toggle('show');
-    if (backdrop) backdrop.classList.toggle('show');
-
-    // Scroll-lock pres centralizovanou utilitu (iOS kompatibilni)
-    if (window.scrollLock) {
-        if (mobileMenu && mobileMenu.classList.contains('show')) {
-            window.scrollLock.enable('analytics-menu');
-        } else {
-            window.scrollLock.disable('analytics-menu');
-        }
-    }
-}
-
-function navigateTo(url) {
-    // Close mobile menu before navigation
-    const mobileMenu = document.getElementById('mobileMenu');
-    if (mobileMenu && mobileMenu.classList.contains('show')) {
-        toggleMobileMenu();
-    }
-
-    // Small delay for smooth transition
-    setTimeout(() => {
-        window.location.href = url;
-    }, 300);
-}
+// REMOVED: Mrtvý kód - menu je nyní centrálně v hamburger-menu.php
