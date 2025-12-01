@@ -17,12 +17,25 @@ if ($isAdmin) {
 <!-- Centralizovaný z-index systém -->
 <link rel="stylesheet" href="/assets/css/z-index-layers.css">
 
+<!-- Alpine.js: Hamburger Menu Component (Step 32) -->
+<div
+  x-data="hamburgerMenu()"
+  @keydown.escape.window="otevreno && zavrit()"
+  @resize.window.debounce.250ms="window.innerWidth > 768 && otevreno && zavrit()"
+>
 <header class="hamburger-header">
   <a href="index.php" class="hamburger-logo">WGS<span>WHITE GLOVE SERVICE</span></a>
-  <button class="hamburger-toggle" id="hamburger-toggle" aria-label="Otevřít menu" aria-expanded="false">
+  <button
+    class="hamburger-toggle"
+    id="hamburger-toggle"
+    aria-label="Otevřít menu"
+    :aria-expanded="otevreno.toString()"
+    :class="{ 'active': otevreno }"
+    @click.stop="prepnout()"
+  >
     <span></span><span></span><span></span>
   </button>
-  <nav class="hamburger-nav" id="hamburger-nav">
+  <nav class="hamburger-nav" id="hamburger-nav" :class="{ 'active': otevreno }" role="navigation">
     <?php
     if ($isAdmin):
     ?>
@@ -83,7 +96,8 @@ if ($isAdmin) {
     <?php endif; ?>
   </nav>
 </header>
-<div class="hamburger-overlay" id="hamburger-overlay"></div>
+<div class="hamburger-overlay" id="hamburger-overlay" :class="{ 'active': otevreno }" @click="zavrit()"></div>
+</div><!-- /Alpine.js hamburgerMenu scope -->
 
 <style>
 .hamburger-header {
@@ -319,108 +333,64 @@ if ($isAdmin) {
 <script src="/assets/js/scroll-lock.js"></script>
 
 <script>
-(function() {
-  'use strict';
-    /**
-   * InitHamburgerMenu
-   */
-function initHamburgerMenu() {
-    const hamburger = document.getElementById('hamburger-toggle');
-    const nav = document.getElementById('hamburger-nav');
-    const overlay = document.getElementById('hamburger-overlay');
+/**
+ * Alpine.js: Hamburger Menu Component (Step 32)
+ * Nahrazuje vanilla JS initHamburgerMenu() funkci
+ */
+function hamburgerMenu() {
+  return {
+    otevreno: false,
 
-    if (!hamburger || !nav || !overlay) {
-      console.warn('Hamburger menu: Chybí HTML elementy!');
-      return;
-    }
-    
-        /**
-     * ToggleMenu
-     */
-function toggleMenu() {
-      const isActive = nav.classList.contains('active');
-      nav.classList.toggle('active');
-      overlay.classList.toggle('active');
-      hamburger.classList.toggle('active');
-      hamburger.setAttribute('aria-expanded', !isActive);
-      if (!isActive) {
-        // Otevirani - zamknout scroll (pres centralizovanou utilitu)
-        if (window.scrollLock) {
-          window.scrollLock.enable('hamburger-menu');
-        }
+    prepnout() {
+      this.otevreno = !this.otevreno;
+      this.aktualizovatScrollLock();
+    },
+
+    zavrit() {
+      if (!this.otevreno) return;
+      this.otevreno = false;
+      this.aktualizovatScrollLock();
+    },
+
+    otevrit() {
+      if (this.otevreno) return;
+      this.otevreno = true;
+      this.aktualizovatScrollLock();
+    },
+
+    aktualizovatScrollLock() {
+      if (this.otevreno) {
+        window.scrollLock?.enable('hamburger-menu');
         document.body.classList.add('hamburger-menu-open');
       } else {
-        // Zavirani - obnovit scroll
+        window.scrollLock?.disable('hamburger-menu');
         document.body.classList.remove('hamburger-menu-open');
-        if (window.scrollLock) {
-          window.scrollLock.disable('hamburger-menu');
-        }
       }
-    }
+    },
 
-        /**
-     * CloseMenu
-     */
-function closeMenu() {
-      nav.classList.remove('active');
-      overlay.classList.remove('active');
-      hamburger.classList.remove('active');
-      hamburger.setAttribute('aria-expanded', 'false');
-      document.body.classList.remove('hamburger-menu-open');
+    init() {
+      // Expose global API for backwards compatibility
+      window.hamburgerMenu = {
+        toggle: () => this.prepnout(),
+        open: () => this.otevrit(),
+        close: () => this.zavrit(),
+        isOpen: () => this.otevreno
+      };
 
-      // Obnovit scroll (pres centralizovanou utilitu)
-      if (window.scrollLock) {
-        window.scrollLock.disable('hamburger-menu');
-      }
-    }
-    
-    hamburger.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleMenu();
-    });
-    
-    overlay.addEventListener('click', closeMenu);
-    nav.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        setTimeout(closeMenu, 100);
+      // Close menu when clicking nav links (with delay for navigation)
+      this.$el.querySelectorAll('.hamburger-nav a').forEach(link => {
+        link.addEventListener('click', () => {
+          setTimeout(() => this.zavrit(), 100);
+        });
       });
-    });
-    
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && nav.classList.contains('active')) {
-        closeMenu();
-      }
-    });
-    
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        if (window.innerWidth > 768 && nav.classList.contains('active')) {
-          closeMenu();
-        }
-      }, 250);
-    });
-    
-    document.addEventListener('click', (e) => {
-      if (nav.classList.contains('active') && 
-          !hamburger.contains(e.target) && 
-          !nav.contains(e.target) && 
-          !overlay.contains(e.target)) {
-        closeMenu();
-      }
-    });
-    
-    hamburger.setAttribute('aria-expanded', 'false');
-    nav.setAttribute('role', 'navigation');
-    window.hamburgerMenu = {
-      toggle: toggleMenu,
-      open: function() { return openMenu(); },
-      close: function() { return closeMenu(); },
-      isOpen: () => nav.classList.contains('active')
-    };
-    console.log('Hamburger menu inicializován');
-  }
+
+      console.log('Hamburger menu inicializován (Alpine.js)');
+    }
+  };
+}
+
+(function() {
+  'use strict';
 
   /**
    * InitNotifButton - Inicializace tlačítka pro povolení notifikací
@@ -565,12 +535,12 @@ function closeMenu() {
     }
   }
 
+  // Alpine.js handles hamburgerMenu initialization automatically via x-data
+  // Only initNotifButton and initTechProvize need manual initialization
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initHamburgerMenu);
     document.addEventListener('DOMContentLoaded', initNotifButton);
     document.addEventListener('DOMContentLoaded', initTechProvize);
   } else {
-    initHamburgerMenu();
     initNotifButton();
     initTechProvize();
   }
