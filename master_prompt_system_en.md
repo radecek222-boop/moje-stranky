@@ -476,3 +476,17 @@ If in doubt: **stop, explain, and ask**.
 
 *(Claude must append all step logs here, in English, without modifying previous entries.)*
 
+## [Step 1]: Create Centralized Scroll-Lock Utility
+- **What:** Created a new JavaScript utility file `scroll-lock.js` that provides a unified, iOS-compatible scroll-locking mechanism for all modals and overlays.
+- **How:** Implemented a stack-based scroll-lock system using the iOS Safari compatible `position: fixed` technique. The utility tracks active locks, preserves scroll position, and supports nested modals. Exposed a simple API: `scrollLock.enable('id')` / `scrollLock.disable('id')` with Czech aliases.
+- **Why:** The hamburger menu (`hamburger-menu.php`, lines 295-369) and detail modal (`seznam.js`, lines 624-653) currently use different, uncoordinated scroll-locking techniques that conflict on mobile devices, causing unpredictable scroll behavior on iOS Safari.
+- **Files touched:** `/home/user/moje-stranky/assets/js/scroll-lock.js` (NEW, ~115 lines)
+- **Notes / risks:** This is a purely additive change. No existing code was modified. The utility is not yet wired into any existing components - that will be done in subsequent steps. Rollback: delete the file.
+
+## [Step 2]: Wire Scroll-Lock Utility into Hamburger Menu
+- **What:** Replaced the inline scroll-locking code in the hamburger menu with calls to the centralized `scroll-lock.js` utility.
+- **How:** (1) Added `<script src="/assets/js/scroll-lock.js"></script>` before the hamburger menu script block. (2) Replaced the inline `position: fixed` / scroll position manipulation in `toggleMenu()` and `closeMenu()` functions with `scrollLock.enable('hamburger-menu')` and `scrollLock.disable('hamburger-menu')` calls. (3) Added defensive `if (window.scrollLock)` checks to ensure graceful fallback if the utility fails to load.
+- **Why:** This is the first integration of the centralized scroll-lock utility. The hamburger menu was the primary source of scroll-locking conflicts on mobile devices. By using the shared utility, the hamburger menu now participates in the coordinated scroll-lock stack, preventing conflicts with other overlays (like detail modals).
+- **Files touched:** `/home/user/moje-stranky/includes/hamburger-menu.php` (MODIFIED, ~20 lines changed)
+- **Notes / risks:** Low risk. The `hamburger-menu-open` CSS class is still applied for backwards compatibility with existing CSS rules. The behavior is functionally identical to before, but now uses the shared utility. Rollback: revert the file to previous commit.
+

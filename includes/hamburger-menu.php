@@ -301,6 +301,9 @@ if ($isAdmin) {
 }
 </style>
 
+<!-- Centralizovaná utilita pro zamykání scrollu -->
+<script src="/assets/js/scroll-lock.js"></script>
+
 <script>
 (function() {
   'use strict';
@@ -327,23 +330,17 @@ function toggleMenu() {
       hamburger.classList.toggle('active');
       hamburger.setAttribute('aria-expanded', !isActive);
       if (!isActive) {
-        // Otevirani - zamknout scroll (iOS fix)
-        window.mainMenuScrollPosition = window.pageYOffset;
-        document.body.style.position = 'fixed';
-        document.body.style.top = `-${window.mainMenuScrollPosition}px`;
-        document.body.style.width = '100%';
-        document.body.style.left = '0';
-        document.body.style.right = '0';
+        // Otevirani - zamknout scroll (pres centralizovanou utilitu)
+        if (window.scrollLock) {
+          window.scrollLock.enable('hamburger-menu');
+        }
         document.body.classList.add('hamburger-menu-open');
       } else {
         // Zavirani - obnovit scroll
         document.body.classList.remove('hamburger-menu-open');
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.left = '';
-        document.body.style.right = '';
-        window.scrollTo(0, window.mainMenuScrollPosition);
+        if (window.scrollLock) {
+          window.scrollLock.disable('hamburger-menu');
+        }
       }
     }
 
@@ -357,14 +354,9 @@ function closeMenu() {
       hamburger.setAttribute('aria-expanded', 'false');
       document.body.classList.remove('hamburger-menu-open');
 
-      // Obnovit scroll (iOS fix)
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      if (typeof window.mainMenuScrollPosition !== 'undefined') {
-        window.scrollTo(0, window.mainMenuScrollPosition);
+      // Obnovit scroll (pres centralizovanou utilitu)
+      if (window.scrollLock) {
+        window.scrollLock.disable('hamburger-menu');
       }
     }
     
