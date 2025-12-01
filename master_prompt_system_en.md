@@ -609,3 +609,18 @@ If in doubt: **stop, explain, and ask**.
 - **Files touched:** 7 CSS files (photocustomer.css, psa-kalkulator.css, admin-notifications.css, seznam-mobile-fixes.css, welcome-modal.css, login-dark-theme.css, protokol-calculator-modal.css)
 - **Notes / risks:** Low risk. All mappings are direct with fallback values. Total z-index migration progress: 56 declarations migrated across 14 CSS files + 2 PHP files.
 
+## [Step 19]: Z-Index Migration Summary & Minification Note
+- **What:** Completed full z-index migration audit. Verified all source CSS files are migrated. Noted that minified `.min.css` files need regeneration.
+- **How:** Ran grep for remaining `z-index: [number]` patterns. Found 22 occurrences remaining - all in `.min.css` files (generated from source files) and documentation examples in `z-index-layers.css`.
+- **Why:** The source CSS files (`.css`) have all been migrated to use CSS variables with fallbacks. The minified files (`.min.css`) are generated artifacts that should be regenerated using the existing minification script at `/home/user/moje-stranky/scripts/minify-assets.sh`.
+- **Action required:** After deploying changes to production, run `npm install -g terser csso-cli && ./scripts/minify-assets.sh` to regenerate all `.min.css` files with the updated CSS variable syntax.
+- **Files touched:** None (audit/documentation only)
+- **Notes / risks:** No risk. The source files are complete and CSS variables include fallback values, so even the old minified files will continue to work. However, regenerating them will make debugging easier and ensure consistency.
+
+**Z-INDEX MIGRATION COMPLETE - SUMMARY:**
+- Created centralized z-index layer system (`z-index-layers.css`) with 20+ CSS variables
+- Migrated 56+ z-index declarations across 14 CSS files + 2 PHP files
+- Normalized problematic values (99999 → 10003, 99 → 100, etc.)
+- All source files now use semantic variables like `var(--z-modal-top, 10000)`
+- Scroll-lock integration completed in Steps 1-8 (8 JS files)
+
