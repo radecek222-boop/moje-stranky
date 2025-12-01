@@ -307,16 +307,15 @@ if ($isAdmin) {
 <!-- ============================================
      PHASE 2: HTMX + Alpine.js Infrastructure
      Přidáno v Step 30 pro postupnou modernizaci UI
-     NOTE: Alpine.js NELZE použít pro komplexní expressions kvůli CSP
+     Step 33: Změna na @alpinejs/csp build (CSP-safe)
      ============================================ -->
 
 <!-- HTMX 2.0.4 - Pro server-driven UI updates -->
 <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
 
-<!-- Alpine.js 3.14.3 - Pro deklarativní UI state -->
-<!-- POZOR: Standardní Alpine.js build vyžaduje unsafe-eval v CSP -->
-<!-- Pro CSP-safe použití nutno použít @alpinejs/csp build -->
-<script defer src="https://unpkg.com/alpinejs@3.14.3/dist/cdn.min.js"></script>
+<!-- Alpine.js 3.14.3 CSP Build - Pro deklarativní UI state -->
+<!-- CSP-SAFE: Používá @alpinejs/csp build bez new Function() -->
+<script defer src="https://unpkg.com/@alpinejs/csp@3.14.3/dist/cdn.min.js"></script>
 
 <!-- Centralizovaná utilita pro zamykání scrollu -->
 <script src="/assets/js/scroll-lock.js"></script>
