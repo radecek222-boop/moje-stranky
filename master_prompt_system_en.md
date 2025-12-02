@@ -1299,8 +1299,34 @@ fetch('/api/endpoint.php')           // 1. Fetch JSON
 | SMS Gateway | Static JS | Config form |
 | Test odesílání | Static JS | Test form |
 
-### Next HTMX Migration Candidates:
-1. Statistics cards (load summary data)
-2. Notes panel in seznam.php
-3. Complaint detail loading
+### HTMX Migration Analysis - Complex Components:
+
+| Component | Complexity | Analysis |
+|-----------|------------|----------|
+| Statistiky | High | Multiple filters, pagination, charts - requires major refactoring |
+| Seznam notes | High | CRUD operations, real-time updates, state management |
+| Videotéka | High | Drag & drop, file upload, video playback |
+| Complaint detail | High | Complex modal with many interactive elements |
+
+**Conclusion:** The HTMX foundation is now established with admin notifications. More complex components would benefit from HTMX but require significant refactoring that should be planned separately.
+
+### HTMX Pattern Available For Reuse:
+
+```php
+// api/component_html.php
+header('Content-Type: text/html; charset=utf-8');
+// Return HTML fragment directly
+```
+
+```html
+<!-- Any element can use HTMX -->
+<div hx-get="/api/component_html.php"
+     hx-target="#container"
+     hx-trigger="click|load|change">
+```
+
+### Future HTMX Migration Opportunities:
+1. **Admin settings pages** - Static forms could use hx-post for submissions
+2. **Search/filter results** - hx-trigger="keyup changed delay:500ms"
+3. **Infinite scroll** - hx-trigger="revealed" for lazy loading
 
