@@ -104,13 +104,13 @@ function otevritPdfPreview(pdfBlob, nazevSouboru = 'protokol.pdf') {
 
     if (kontext === 'send') {
       // Režim "Odeslat zákazníkovi"
-      shareBtn.style.display = 'none';
-      sendBtn.style.display = 'flex';
+      shareBtn.classList.add('hidden');
+      sendBtn.classList.remove('hidden');
       logger.log('📧 Režim: Odeslání zákazníkovi');
     } else {
       // Režim "Export/Sdílení"
-      shareBtn.style.display = 'flex';
-      sendBtn.style.display = 'none';
+      shareBtn.classList.remove('hidden');
+      sendBtn.classList.add('hidden');
       logger.log('📤 Režim: Export/Sdílení');
     }
 
@@ -235,7 +235,7 @@ async function sdiletNeboStahnutPdf() {
     const odkaz = document.createElement('a');
     odkaz.href = url;
     odkaz.download = aktualniPdfNazev;
-    odkaz.style.display = 'none';
+    odkaz.classList.add('hidden');
 
     document.body.appendChild(odkaz);
     odkaz.click();

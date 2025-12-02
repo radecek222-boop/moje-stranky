@@ -60,14 +60,14 @@ function showNotification(message, type = 'info') {
 
   notification.textContent = message;
   notification.className = `notif ${type}`;
-  notification.style.display = 'block';
+  notification.classList.remove('hidden');
   notification.style.opacity = '1';
 
   // Tap-to-dismiss (iOS touch feedback)
   const skryjNotifikaci = () => {
     notification.style.opacity = '0';
     setTimeout(() => {
-      notification.style.display = 'none';
+      notification.classList.add('hidden');
     }, 300);
   };
 
@@ -562,7 +562,7 @@ async function attachPhotos() {
   input.accept = "image/*";
   input.multiple = true;
   input.capture = "environment";
-  input.style.display = "none";
+  input.classList.add("hidden");
   document.body.appendChild(input);
   input.onchange = async (e) => {
     const files = Array.from(e.target.files || []);
@@ -709,7 +709,7 @@ async function generateProtocolPDF() {
   // Ujistit se, že customer-info-content je viditelný (není skrytý)
   const customerInfoContent = clone.querySelector('.customer-info-content');
   if (customerInfoContent) {
-    customerInfoContent.style.display = 'block';
+    customerInfoContent.classList.remove('hidden');
     customerInfoContent.style.maxHeight = 'none';
     customerInfoContent.style.overflow = 'visible';
     logger.log('Zákaznický obsah nastaven jako viditelný v PDF');
@@ -2327,7 +2327,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Fallback pro zpětnou kompatibilitu
       const overlay = document.getElementById('zakaznikSchvaleniOverlay');
       if (overlay) {
-        overlay.style.display = 'flex';
+        overlay.classList.remove('hidden');
       }
       if (window.scrollLock) {
         window.scrollLock.enable('zakaznik-schvaleni-overlay');
@@ -2348,7 +2348,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Fallback pro zpětnou kompatibilitu
       const overlay = document.getElementById('zakaznikSchvaleniOverlay');
       if (overlay) {
-        overlay.style.display = 'none';
+        overlay.classList.add('hidden');
       }
       if (window.scrollLock) {
         window.scrollLock.disable('zakaznik-schvaleni-overlay');

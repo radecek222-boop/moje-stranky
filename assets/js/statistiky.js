@@ -356,11 +356,11 @@ function updateStrankovani(data) {
     const nextBtn = document.getElementById('next-page');
 
     if (data.celkem_stranek <= 1) {
-        pagination.style.display = 'none';
+        pagination.classList.add('hidden');
         return;
     }
 
-    pagination.style.display = 'flex';
+    pagination.classList.remove('hidden');
     pageInfo.textContent = `Strana ${data.stranka} z ${data.celkem_stranek}`;
 
     prevBtn.disabled = data.stranka === 1;

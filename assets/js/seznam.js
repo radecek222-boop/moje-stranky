@@ -450,9 +450,9 @@ async function renderOrders(items = null) {
       searchResultsInfo.className = 'search-results-info no-results';
       searchResultsInfo.textContent = t('no_search_results').replace('{query}', SEARCH_QUERY);
     }
-    searchResultsInfo.style.display = 'block';
+    searchResultsInfo.classList.remove('hidden');
   } else {
-    searchResultsInfo.style.display = 'none';
+    searchResultsInfo.classList.add('hidden');
   }
 
   if (filtered.length === 0) {
@@ -558,9 +558,9 @@ async function renderOrders(items = null) {
 
   if (totalUnreadCount > 0) {
     unreadCountSpan.textContent = totalUnreadCount;
-    unreadIndicator.style.display = 'block';
+    unreadIndicator.classList.remove('hidden');
   } else {
-    unreadIndicator.style.display = 'none';
+    unreadIndicator.classList.add('hidden');
   }
 
   // Uložit unreadCountsMap pro filtrování
@@ -2824,8 +2824,8 @@ async function startRecording(orderId) {
       if (recorder.audioChunks.length === 0) {
         logger.error('[Audio] Zadna data nebyla nahrana');
         wgsToast.warning('Nahravka je prazdna. Zkuste to prosim znovu.');
-        document.getElementById('btnStartRecord').style.display = 'block';
-        document.getElementById('recordingIndicator').style.display = 'none';
+        document.getElementById('btnStartRecord').classList.remove('hidden');
+        document.getElementById('recordingIndicator').classList.add('hidden');
         return;
       }
 
@@ -2849,8 +2849,8 @@ async function startRecording(orderId) {
     recorder.mediaRecorder.start(1000);
 
     // Aktualizovat UI
-    document.getElementById('btnStartRecord').style.display = 'none';
-    document.getElementById('recordingIndicator').style.display = 'flex';
+    document.getElementById('btnStartRecord').classList.add('hidden');
+    document.getElementById('recordingIndicator').classList.remove('hidden');
 
     // Casovac
     recorder.recordingTimer = setInterval(() => {
@@ -2902,8 +2902,8 @@ function stopRecording() {
   // Aktualizovat UI
   const recordingIndicator = document.getElementById('recordingIndicator');
   const btnStartRecord = document.getElementById('btnStartRecord');
-  if (recordingIndicator) recordingIndicator.style.display = 'none';
-  if (btnStartRecord) btnStartRecord.style.display = 'block';
+  if (recordingIndicator) recordingIndicator.classList.add('hidden');
+  if (btnStartRecord) btnStartRecord.classList.remove('hidden');
 }
 
 // Uvolnit mikrofon - zastavit stream
@@ -2951,8 +2951,8 @@ function showAudioPreview(audioBlob) {
 
     logger.log('[Audio] Chyba pri nacitani nahravky:', e);
     // Skryt preview a zobrazit tlacitko pro nahravani
-    previewContainer.style.display = 'none';
-    document.getElementById('btnStartRecord').style.display = 'block';
+    previewContainer.classList.add('hidden');
+    document.getElementById('btnStartRecord').classList.remove('hidden');
 
     // Uvolnit blob URL
     if (previewPlayer.src) {
@@ -2965,7 +2965,7 @@ function showAudioPreview(audioBlob) {
   };
 
   previewPlayer.src = audioUrl;
-  previewContainer.style.display = 'flex';
+  previewContainer.classList.remove('hidden');
 
   logger.log('[Audio] Nahled zobrazen, velikost:', Math.round(audioBlob.size / 1024), 'KB');
 }
@@ -2983,8 +2983,8 @@ function deleteAudioPreview() {
     previewPlayer.src = '';
   }
 
-  previewContainer.style.display = 'none';
-  document.getElementById('btnStartRecord').style.display = 'block';
+  previewContainer.classList.add('hidden');
+  document.getElementById('btnStartRecord').classList.remove('hidden');
 
   logger.log('[Audio] Nahled smazan');
 }
@@ -3425,7 +3425,7 @@ function updateLoadMoreButton() {
 
   // Show/hide based on HAS_MORE_PAGES
   if (btn) {
-    btn.style.display = HAS_MORE_PAGES ? 'block' : 'none';
+    btn.classList.toggle('hidden', !HAS_MORE_PAGES);
     btn.disabled = LOADING_MORE;
     btn.textContent = LOADING_MORE ? t('loading') : t('load_more_page').replace('{page}', CURRENT_PAGE + 1);
   }
@@ -3549,7 +3549,7 @@ async function zobrazVideotekaArchiv(claimId) {
     e.preventDefault();
     e.stopPropagation();
     dragCounter++;
-    dropOverlay.style.display = 'flex';
+    dropOverlay.classList.remove('hidden');
     content.style.background = '#252525';
   });
 
@@ -3558,7 +3558,7 @@ async function zobrazVideotekaArchiv(claimId) {
     e.stopPropagation();
     dragCounter--;
     if (dragCounter === 0) {
-      dropOverlay.style.display = 'none';
+      dropOverlay.classList.add('hidden');
       content.style.background = '#1a1a1a';
     }
   });
@@ -3572,7 +3572,7 @@ async function zobrazVideotekaArchiv(claimId) {
     e.preventDefault();
     e.stopPropagation();
     dragCounter = 0;
-    dropOverlay.style.display = 'none';
+    dropOverlay.classList.add('hidden');
     content.style.background = '#1a1a1a';
 
     const files = e.dataTransfer.files;
@@ -3616,9 +3616,7 @@ async function zobrazVideotekaArchiv(claimId) {
         });
       } else {
         // Žádná videa - změna na grid layout s centrováním
-        content.style.display = 'flex';
-        content.style.alignItems = 'center';
-        content.style.justifyContent = 'center';
+        content.classList.add('flex-center');
         const emptyState = document.createElement('div');
         emptyState.style.cssText = 'text-align: center; padding: 3rem; color: #999;';
         emptyState.innerHTML = `
@@ -4054,8 +4052,8 @@ function otevritNahravaniVidea(claimId, parentOverlay) {
 
     btnNahrat.disabled = true;
     btnZrusit.disabled = true;
-    progressContainer.style.display = 'block';
-    statusText.style.display = 'block';
+    progressContainer.classList.remove('hidden');
+    statusText.classList.remove('hidden');
 
     try {
       let uploadFile = file;

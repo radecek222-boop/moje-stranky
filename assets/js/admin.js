@@ -327,7 +327,7 @@ async function addUser() {
     const data = await response.json();
 
     if (data.status === 'success' || data.success === true) {
-      modal.style.display = 'none';
+      modal.classList.add('hidden');
 
       // Reset formuláře
       document.getElementById('add-name').value = '';
@@ -467,19 +467,19 @@ function initUserManagement() {
 
   if (addUserBtn) {
     addUserBtn.addEventListener('click', () => {
-      document.getElementById('addUserModal').style.display = 'flex';
+      document.getElementById('addUserModal').classList.remove('hidden');
     });
   }
 
   if (closeModalBtn) {
     closeModalBtn.addEventListener('click', () => {
-      document.getElementById('addUserModal').style.display = 'none';
+      document.getElementById('addUserModal').classList.add('hidden');
     });
   }
 
   if (cancelModalBtn) {
     cancelModalBtn.addEventListener('click', () => {
-      document.getElementById('addUserModal').style.display = 'none';
+      document.getElementById('addUserModal').classList.add('hidden');
     });
   }
 
