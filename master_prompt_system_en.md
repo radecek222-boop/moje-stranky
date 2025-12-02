@@ -1849,3 +1849,17 @@ header('Content-Type: text/html; charset=utf-8');
   - Both files: JavaScript updated to set aria-selected on tab switch
 - **Result:** Tab interfaces are now properly accessible with correct roles and keyboard navigation support.
 
+## [Step 91]: Filter Dropdown Accessibility
+- **Date:** 2025-12-02
+- **What:** Added ARIA listbox pattern to multiselect filter dropdowns in statistiky.php.
+- **Analysis:**
+  - Filter select labels need `for` attribute linking to select IDs
+  - Custom multiselect triggers need role="button", tabindex, aria-haspopup, aria-expanded
+  - Dropdown containers need role="listbox", aria-labelledby
+  - Options inside dropdowns need role="option"
+  - JavaScript must update aria-expanded when dropdowns open/close
+- **Files modified:**
+  - `statistiky.php`: Added `for` to filter labels, ARIA listbox pattern to Prodejci/Technici/Země multiselects
+  - `assets/js/statistiky.js`: Updated toggleDropdown() to manage aria-expanded state
+- **Result:** Filter dropdowns are now accessible with proper ARIA roles and state management.
+

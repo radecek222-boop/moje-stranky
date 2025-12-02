@@ -86,17 +86,25 @@ function inicializujMultiselect() {
  */
 function toggleDropdown(typ) {
     const dropdown = document.getElementById(`${typ}-dropdown`);
+    const trigger = document.getElementById(`${typ}-trigger`);
     const jineDropdowny = document.querySelectorAll('.multiselect-dropdown');
+    const jineTrigery = document.querySelectorAll('.multiselect-trigger');
 
-    // Zavřít ostatní
-    jineDropdowny.forEach(d => {
+    // Zavřít ostatní a resetovat aria-expanded
+    jineDropdowny.forEach((d, index) => {
         if (d !== dropdown) {
             d.classList.remove('active');
         }
     });
+    jineTrigery.forEach(t => {
+        if (t !== trigger) {
+            t.setAttribute('aria-expanded', 'false');
+        }
+    });
 
     // Toggle aktuální
-    dropdown.classList.toggle('active');
+    const jeOtevreno = dropdown.classList.toggle('active');
+    trigger.setAttribute('aria-expanded', jeOtevreno ? 'true' : 'false');
 }
 
 /**

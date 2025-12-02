@@ -499,7 +499,7 @@ body {
     <div class="filters-grid">
       <!-- Rok -->
       <div class="filter-group">
-        <label class="filter-label">Rok</label>
+        <label class="filter-label" for="filter-year">Rok</label>
         <select class="filter-select" id="filter-year">
           <option value="">Všechny</option>
           <option value="2024">2024</option>
@@ -510,7 +510,7 @@ body {
 
       <!-- Měsíc -->
       <div class="filter-group">
-        <label class="filter-label">Měsíc</label>
+        <label class="filter-label" for="filter-month">Měsíc</label>
         <select class="filter-select" id="filter-month">
           <option value="">Všechny</option>
           <option value="1">Leden</option>
@@ -530,13 +530,13 @@ body {
 
       <!-- Prodejci (multi-select) -->
       <div class="filter-group">
-        <label class="filter-label">Prodejci</label>
+        <label class="filter-label" id="label-prodejci">Prodejci</label>
         <div class="filter-multiselect">
-          <div class="multiselect-trigger" id="prodejci-trigger">
+          <div class="multiselect-trigger" id="prodejci-trigger" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="label-prodejci">
             <span id="prodejci-label">Všichni</span>
-            <span>▼</span>
+            <span aria-hidden="true">▼</span>
           </div>
-          <div class="multiselect-dropdown" id="prodejci-dropdown">
+          <div class="multiselect-dropdown" id="prodejci-dropdown" role="listbox" aria-labelledby="label-prodejci">
             <!-- Načte se dynamicky -->
           </div>
         </div>
@@ -544,13 +544,13 @@ body {
 
       <!-- Technici (multi-select) -->
       <div class="filter-group">
-        <label class="filter-label">Technici</label>
+        <label class="filter-label" id="label-technici">Technici</label>
         <div class="filter-multiselect">
-          <div class="multiselect-trigger" id="technici-trigger">
+          <div class="multiselect-trigger" id="technici-trigger" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="label-technici">
             <span id="technici-label">Všichni</span>
-            <span>▼</span>
+            <span aria-hidden="true">▼</span>
           </div>
-          <div class="multiselect-dropdown" id="technici-dropdown">
+          <div class="multiselect-dropdown" id="technici-dropdown" role="listbox" aria-labelledby="label-technici">
             <!-- Načte se dynamicky -->
           </div>
         </div>
@@ -558,18 +558,18 @@ body {
 
       <!-- Země -->
       <div class="filter-group">
-        <label class="filter-label">Země</label>
+        <label class="filter-label" id="label-zeme">Země</label>
         <div class="filter-multiselect">
-          <div class="multiselect-trigger" id="zeme-trigger">
+          <div class="multiselect-trigger" id="zeme-trigger" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="label-zeme">
             <span id="zeme-label">Všechny</span>
-            <span>▼</span>
+            <span aria-hidden="true">▼</span>
           </div>
-          <div class="multiselect-dropdown" id="zeme-dropdown">
-            <div class="multiselect-option">
+          <div class="multiselect-dropdown" id="zeme-dropdown" role="listbox" aria-labelledby="label-zeme">
+            <div class="multiselect-option" role="option">
               <input type="checkbox" id="zeme-cz" value="cz" checked>
               <label for="zeme-cz">🇨🇿 Česko</label>
             </div>
-            <div class="multiselect-option">
+            <div class="multiselect-option" role="option">
               <input type="checkbox" id="zeme-sk" value="sk" checked>
               <label for="zeme-sk">🇸🇰 Slovensko</label>
             </div>
