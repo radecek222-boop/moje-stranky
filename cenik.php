@@ -66,7 +66,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
 <!-- HERO SEKCE -->
-<main>
+<main id="main-content">
 <section class="hero">
   <div class="hero-content">
     <h1 class="hero-title" data-lang-cs="Ceník služeb" data-lang-en="Price List" data-lang-it="Listino Prezzi">Ceník služeb</h1>

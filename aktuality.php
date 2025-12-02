@@ -415,7 +415,7 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
 <!-- HERO SEKCE S FOTKOU -->
-<main>
+<main id="main-content">
 <section class="hero">
   <div class="hero-content">
     <h1 class="hero-title"

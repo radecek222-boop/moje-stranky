@@ -40,7 +40,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 <?php endif; ?>
 
 <!-- MAIN CONTENT -->
-<main<?php if ($embedMode) echo ' style="margin-top: 0; padding-top: 1rem;"'; ?>>
+<main id="main-content"<?php if ($embedMode) echo ' style="margin-top: 0; padding-top: 1rem;"'; ?>>
 <div class="container">
 
   <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 0.5rem; padding: 0.5rem; background: var(--c-white); border: 1px solid var(--c-border); border-radius: 6px;">

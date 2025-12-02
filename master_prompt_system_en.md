@@ -1875,3 +1875,47 @@ header('Content-Type: text/html; charset=utf-8');
   - `assets/js/psa-kalkulator.js`: Added keyboard event delegation for data-action elements with role="button"
 - **Result:** Interactive elements can now be activated using keyboard, improving accessibility for users who cannot use a mouse.
 
+## [Step 93]: ARIA Roles for Status Messages and Language Tabs
+- **Date:** 2025-12-02
+- **What:** Added ARIA roles to dynamically created alerts and language tabs in nova_aktualita.php.
+- **Analysis:**
+  - Alert messages need role="status" (success) or role="alert" (error) for screen readers
+  - Tab interfaces need full ARIA tab pattern (tablist/tab/tabpanel)
+  - Dynamically created alerts in JavaScript must include ARIA roles
+- **Files modified:**
+  - `sprava_ip_blacklist.php`: Added role="status/alert" with aria-live to success/error/warning divs
+  - `nova_aktualita.php`: Added complete ARIA tab pattern to language tabs (tablist, tab, tabpanel, aria-selected, aria-controls)
+  - `gdpr-portal.php`: Added role="status/alert" to dynamically created alert divs in JavaScript
+  - `admin/email_queue.php`: Added role="status/alert" with aria-live to message divs
+  - `admin/smtp_settings.php`: Added role="status/alert" with aria-live to message divs
+- **Result:** Status messages and language tabs are now properly announced by screen readers.
+
+## [Step 94]: Skip Link for Keyboard Navigation
+- **Date:** 2025-12-02
+- **What:** Added skip-to-content link for keyboard users to bypass navigation.
+- **Analysis:**
+  - Skip links allow keyboard users to jump directly to main content
+  - Hidden by default, visible only when focused
+  - Target id="main-content" must exist on all pages
+- **Files modified:**
+  - `includes/hamburger-menu.php`: Added skip link before header
+  - `assets/css/styles.css`: Added .skip-link styles (hidden, visible on focus)
+  - Multiple pages: Added id="main-content" to main elements:
+    - index.php, novareklamace.php, login.php, cenik.php, admin.php
+    - aktuality.php, offline.php, gdpr.php, onas.php, protokol.php
+    - nasesluzby.php, psa-kalkulator.php, statistiky.php
+    - password_reset.php, registration.php, psa.php, analytics.php
+- **Result:** Keyboard users can now skip navigation and jump directly to main content by pressing Tab then Enter.
+
+## [Step 95]: Label-Input Associations for Form Accessibility
+- **Date:** 2025-12-02
+- **What:** Added proper label-input associations using `for` and `id` attributes.
+- **Analysis:**
+  - Labels without `for` attribute don't properly associate with inputs
+  - Screen readers need explicit associations to announce form fields correctly
+  - Clicking a label should focus the associated input
+- **Files modified:**
+  - `admin/smtp_settings.php`: Added for/id pairs to all form fields (smtp_host, smtp_port, smtp_encryption, smtp_username, smtp_password, smtp_from_email, smtp_from_name, test_email)
+  - `gdpr-portal.php`: Added for/id pairs to export and deletion email inputs
+- **Result:** Form fields are now properly associated with their labels, improving accessibility for screen reader users.
+

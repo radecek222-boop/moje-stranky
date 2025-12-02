@@ -52,7 +52,7 @@
 <!-- ČERNÝ HORNÍ PANEL -->
 
 <!-- Hlavní obsah -->
-<main>
+<main id="main-content">
 
 <!-- HERO SEKCE -->
 <section class="hero">

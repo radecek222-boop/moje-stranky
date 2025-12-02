@@ -288,8 +288,8 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 
                 <form id="export-form">
                     <div class="form-group">
-                        <label>Email pro zaslání exportu</label>
-                        <input type="email" name="email" required>
+                        <label for="export-email">Email pro zaslání exportu</label>
+                        <input type="email" id="export-email" name="email" required>
                     </div>
                     <button type="submit" class="btn">Požádat o export</button>
                 </form>
@@ -303,8 +303,8 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 
                 <form id="deletion-form">
                     <div class="form-group">
-                        <label>Email pro potvrzení</label>
-                        <input type="email" name="email" required>
+                        <label for="deletion-email">Email pro potvrzení</label>
+                        <input type="email" id="deletion-email" name="email" required>
                     </div>
                     <button type="submit" class="btn btn-danger">Požádat o smazání</button>
                 </form>
@@ -386,13 +386,13 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-success">Preference uloženy!</div>';
+                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-success" role="status">Preference uloženy!</div>';
                 } else {
-                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-error">Chyba: ' + result.message + '</div>';
+                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-error" role="alert">Chyba: ' + result.message + '</div>';
                 }
             } catch (error) {
                 console.error(error);
-                document.getElementById('consent-status').innerHTML = '<div class="alert alert-error">Chyba při ukládání</div>';
+                document.getElementById('consent-status').innerHTML = '<div class="alert alert-error" role="alert">Chyba při ukládání</div>';
             }
         }
 
@@ -416,11 +416,11 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-success">Souhlasy odvolány</div>';
+                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-success" role="status">Souhlasy odvolány</div>';
                     document.getElementById('consent-analytics').checked = false;
                     document.getElementById('consent-marketing').checked = false;
                 } else {
-                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-error">Chyba: ' + result.message + '</div>';
+                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-error" role="alert">Chyba: ' + result.message + '</div>';
                 }
             } catch (error) {
                 console.error(error);
@@ -445,10 +445,10 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    document.getElementById('export-status').innerHTML = '<div class="alert alert-success">Žádost odeslána! Request ID: ' + result.request_id + '</div>';
+                    document.getElementById('export-status').innerHTML = '<div class="alert alert-success" role="status">Žádost odeslána! Request ID: ' + result.request_id + '</div>';
                     e.target.reset();
                 } else {
-                    document.getElementById('export-status').innerHTML = '<div class="alert alert-error">Chyba: ' + result.message + '</div>';
+                    document.getElementById('export-status').innerHTML = '<div class="alert alert-error" role="alert">Chyba: ' + result.message + '</div>';
                 }
             } catch (error) {
                 console.error(error);
@@ -477,10 +477,10 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    document.getElementById('deletion-status').innerHTML = '<div class="alert alert-success">Žádost odeslána! Request ID: ' + result.request_id + '</div>';
+                    document.getElementById('deletion-status').innerHTML = '<div class="alert alert-success" role="status">Žádost odeslána! Request ID: ' + result.request_id + '</div>';
                     e.target.reset();
                 } else {
-                    document.getElementById('deletion-status').innerHTML = '<div class="alert alert-error">Chyba: ' + result.message + '</div>';
+                    document.getElementById('deletion-status').innerHTML = '<div class="alert alert-error" role="alert">Chyba: ' + result.message + '</div>';
                 }
             } catch (error) {
                 console.error(error);

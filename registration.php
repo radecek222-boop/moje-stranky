@@ -35,7 +35,7 @@ $csrfToken = generateCSRFToken();
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
-<main class="main-content">
+<main id="main-content" class="main-content">
 <div class="container">
   <div class="logo">
     <h1 data-lang-cs="Registrace" data-lang-en="Registration" data-lang-it="Registrazione">Registrace</h1>

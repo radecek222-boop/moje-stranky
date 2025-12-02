@@ -26,7 +26,7 @@
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
-<main class="main-content">
+<main id="main-content" class="main-content">
 <div class="container">
   <div class="logo">
     <h1>Reset Hesla</h1>

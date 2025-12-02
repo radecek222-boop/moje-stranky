@@ -229,7 +229,7 @@ if ($initialBootstrapData) {
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 <!-- ČERNÁ HORNÍ PANEL -->
 
-<main>
+<main id="main-content">
 <div class="wrapper">
   <div class="header">
     <div>WHITE GLOVE SERVICE</div>

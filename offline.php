@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="assets/css/offline.min.css">
 </head>
 <body>
-<main>
+<main id="main-content">
   <div class="offline-container">
     <div class="offline-icon">
       <div class="wifi-icon"></div>
