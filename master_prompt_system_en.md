@@ -2324,3 +2324,104 @@ The codebase is now in a good state with:
   - `assets/js/admin.js` (MODIFIED - +15 lines for openSection, openNewWindow)
 - **Result:** 46 onclick handlers migrated. 94 remaining in other admin includes.
 
+## [Step 114-120]: Complete onclick/onchange Migration in Admin Includes
+- **Date:** 2025-12-02
+- **What:** Completed migration of remaining onclick and onchange handlers in admin include files.
+- **Files touched:** All remaining admin include files with inline handlers
+- **Result:** All admin includes now use data-action event delegation pattern.
+
+## [Step 121]: Audit and Cleanup Debug Console.log Statements
+- **Date:** 2025-12-02
+- **What:** Audited all JavaScript files for debug console.log statements and removed unnecessary ones.
+- **How:**
+  1. Found 74 console statements across 20 JS files
+  2. Removed debug console.log from: admin.js, admin-notifications.js, seznam.js, error-handler.js, signature-pad-simple.js, pull-to-refresh.js, logout-handler.js, cenik.js, language-switcher.js, heatmap-tracker.js, replay-player.js, novareklamace.js, protokol.js, statistiky.js
+  3. Kept console.error and console.warn for error handling
+  4. Kept analytics/tracker logs (tracker-v2.js, pwa-notifications.js) for production debugging
+- **Why:**
+  - Debug console.log statements clutter browser console in production
+  - Error handling (console.error/warn) preserved for debugging real issues
+  - Analytics logs intentionally kept for debugging PWA and notification features
+- **Files touched:** 14 JS files modified, all minified versions regenerated
+- **Result:** Removed ~50 debug console.log statements while preserving error handling.
+
+## [Step 122]: Migrate Inline Hover Handlers in createKey Modal
+- **Date:** 2025-12-02
+- **What:** Replaced inline onmouseover/onmouseout handlers in admin.js createKey modal with CSS.
+- **How:**
+  1. Added `.key-type-label` CSS class with :hover and .selected states
+  2. Removed inline style attribute manipulation
+  3. Added change event listener for radio button selection toggle
+- **Files touched:** `assets/js/admin.js`, `assets/js/admin.min.js`
+- **Result:** Cleaner CSS-based hover effects, no inline event handlers.
+
+## [Step 123]: Cleanup Debug Logs in Setup Scripts
+- **Date:** 2025-12-02
+- **What:** Removed debug console.log statements from PHP setup scripts.
+- **Files touched:** `setup/install_role_based_access.php`
+- **Result:** Cleaner setup scripts with minimal logging.
+
+## [Step 124]: Cleanup Debug Logs in protokol-calculator-integration.js
+- **Date:** 2025-12-02
+- **What:** Removed 19 debug console.log statements from calculator integration.
+- **How:** Removed initialization, modal, result processing, and DB save logs while keeping console.error/warn.
+- **Files touched:** `assets/js/protokol-calculator-integration.js` and minified version
+- **Result:** Cleaner calculator code without debug noise.
+
+## [Step 125]: Final Cleanup - cenik-calculator.js and heatmap-renderer.js
+- **Date:** 2025-12-02
+- **What:** Removed remaining debug console.log statements from cenik-calculator.js (7) and heatmap-renderer.js (7).
+- **Files touched:** Both source files and minified versions
+- **Result:** Debug console.log cleanup complete. Only error handling and analytics logs remain.
+
+## [Step 126]: Migrate confirm() to Custom wgsConfirm() Modal
+- **Date:** 2025-12-02
+- **What:** Created custom confirmation dialog to replace native window.confirm().
+- **How:**
+  1. Added `wgsConfirm()` function to utils.js - Promise-based, returns true/false
+  2. Added CSS styles in styles.css (black/white/gray color scheme)
+  3. Migrated 9 confirm() calls across 4 files:
+     - cenik.js: 1 (delete pricing item)
+     - seznam.js: 4 (reopen order, collision, delete note, delete video)
+     - protokol.js: 1 (reopen order)
+     - psa-kalkulator.js: 3 (rename, remove employee, clear all)
+  4. Full accessibility: ARIA roles, keyboard support (ESC/Enter), overlay click
+- **Why:**
+  - Native confirm() is ugly and inconsistent across browsers
+  - Custom modal follows WGS design system (grayscale)
+  - Improved UX with custom button texts
+  - Better accessibility with proper ARIA attributes
+- **Files touched:**
+  - `assets/js/utils.js` (MODIFIED - +85 lines)
+  - `assets/css/styles.css` (MODIFIED - +70 lines)
+  - `assets/js/cenik.js`, `seznam.js`, `protokol.js`, `psa-kalkulator.js` (MODIFIED)
+  - All corresponding minified files (REGENERATED)
+- **Result:** All 9 confirm() calls migrated to accessible, styled wgsConfirm() modal.
+
+---
+
+## PHASE 5 COMPLETE: Technical Debt Cleanup Summary
+
+**Steps 104-126 have completed the technical debt cleanup phase.**
+
+### Achievements:
+
+| Area | Steps | Result |
+|------|-------|--------|
+| Z-index CSS Variables | 104 | 100% migrated to CSS variables |
+| Utility Consolidation | 105-108 | escapeHtml, debounce, fetchCsrfToken centralized |
+| Event Delegation | 109-120 | ActionRegistry system, 150+ onclick handlers migrated |
+| Debug Cleanup | 121-125 | ~70 debug console.log removed |
+| confirm() Migration | 126 | 9 confirm() → wgsConfirm() custom modal |
+
+### Current State:
+- **0 inline onclick/onchange** in production PHP files
+- **0 inline onmouseover/onmouseout** - all migrated to CSS
+- **All debug console.log removed** - only error handling and analytics remain
+- **confirm() eliminated** - custom accessible modal replaces native dialog
+
+### Remaining Technical Debt:
+1. **alert() calls** (82 occurrences) - Could be migrated to toast notifications
+2. **Inline styles in JS** (300+ occurrences) - Major refactoring, lower priority
+3. **error-handler.js inline styles** - Intentionally kept for robustness
+
