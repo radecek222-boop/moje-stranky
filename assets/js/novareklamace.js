@@ -38,6 +38,31 @@ const WGS = {
     this.initProvedeni();
     this.initLanguage();
     this.initCustomCalendar();
+    this.initTypZakaznika(); // Vzájemně výlučné checkboxy IČO/fyzická osoba
+  },
+
+  // Inicializace vzájemně výlučných checkboxů pro typ zákazníka
+  initTypZakaznika() {
+    const icoCheckbox = document.getElementById('objednavkaICO');
+    const fyzickaCheckbox = document.getElementById('objednavkaFyzicka');
+
+    if (!icoCheckbox || !fyzickaCheckbox) return;
+
+    // Když zaškrtnu IČO, odškrtnu fyzickou osobu
+    icoCheckbox.addEventListener('change', () => {
+      if (icoCheckbox.checked) {
+        fyzickaCheckbox.checked = false;
+      }
+    });
+
+    // Když zaškrtnu fyzickou osobu, odškrtnu IČO
+    fyzickaCheckbox.addEventListener('change', () => {
+      if (fyzickaCheckbox.checked) {
+        icoCheckbox.checked = false;
+      }
+    });
+
+    logger.log('[TypZakaznika] Inicializovány vzájemně výlučné checkboxy');
   },
   
   checkLoginStatus() {

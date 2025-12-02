@@ -464,6 +464,19 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
       <!-- KONTAKTNÍ ÚDAJE -->
       <div class="form-section">
         <h2 class="section-title" data-lang-cs="Kontaktní údaje" data-lang-en="Contact Information" data-lang-it="Informazioni di Contatto">Kontaktní údaje</h2>
+
+        <!-- Typ zákazníka - IČO nebo fyzická osoba -->
+        <div class="typ-zakaznika-wrapper" style="display: flex; gap: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+          <label class="typ-zakaznika-label" style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
+            <input type="checkbox" id="objednavkaICO" name="objednavka_ico" style="width: auto; margin-right: 0.5rem; cursor: pointer;">
+            <span data-lang-cs="Objednávka byla na IČO" data-lang-en="Order was on company ID" data-lang-it="Ordine su partita IVA">Objednávka byla na IČO</span>
+          </label>
+          <label class="typ-zakaznika-label" style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
+            <input type="checkbox" id="objednavkaFyzicka" name="objednavka_fyzicka" style="width: auto; margin-right: 0.5rem; cursor: pointer;">
+            <span data-lang-cs="Objednávka byla na fyzickou osobu" data-lang-en="Order was on individual" data-lang-it="Ordine su persona fisica">Objednávka byla na fyzickou osobu</span>
+          </label>
+        </div>
+
         <div class="form-grid form-grid-3">
           <div class="form-group">
             <label class="form-label" for="jmeno" data-lang-cs="Jméno zákazníka *" data-lang-en="Customer Name *" data-lang-it="Nome Cliente *">Jméno zákazníka *</label>
