@@ -210,6 +210,6 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
 <script src="assets/js/logger.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
-<script src="assets/js/analytics.js" defer></script>
+<script src="assets/js/analytics.min.js" defer></script>
 </body>
 </html>

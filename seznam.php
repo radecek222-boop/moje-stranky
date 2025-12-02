@@ -53,7 +53,7 @@ if (!$isLoggedIn && !$isAdmin) {
   <link rel="stylesheet" href="assets/css/seznam.min.css?v=20251202">
   <!-- seznam-mobile-fixes.css sloučen do seznam.css (Step 50) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
-  <link rel="stylesheet" href="assets/css/mobile-responsive.css?v=20251121-02">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.min.css?v=20251121-02">
 <?php if ($isAdmin): ?>
 <link rel="stylesheet" href="assets/css/admin-header.min.css">
 <?php endif; ?>

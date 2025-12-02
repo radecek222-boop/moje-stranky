@@ -1421,3 +1421,18 @@ header('Content-Type: text/html; charset=utf-8');
   - `includes/hamburger-menu.php`
 - **Result:** All CSS files now minified. Total: 24 minified CSS files with source maps.
 
+## [Step 60]: Fix Remaining Non-Minified Asset References
+- **Date:** 2025-12-02
+- **What:** Audited all PHP files and fixed remaining references to non-minified JS/CSS assets.
+- **How:** Used grep to find all `src=*.js"` and `href=*.css"` references, then updated files not using `.min.*` versions.
+- **JS references fixed (3):**
+  - `analytics.php`: analytics.js → analytics.min.js
+  - `protokol.php`: cenik-calculator.js → cenik-calculator.min.js
+  - `photocustomer.php`: photocustomer.js → photocustomer.min.js
+- **CSS references fixed (12):**
+  - `mobile-responsive.css` → `.min.css` in: index.php, seznam.php, nasesluzby.php, statistiky.php, login.php, admin.php, registration.php, onas.php
+  - `protokol.css` → `.min.css` in: protokol.php (both preload and stylesheet)
+  - `novareklamace.css` → `.min.css` in: novareklamace.php
+  - `photocustomer.css` → `.min.css` in: photocustomer.php
+- **Result:** All PHP files now reference minified assets. Zero non-minified references remain.
+
