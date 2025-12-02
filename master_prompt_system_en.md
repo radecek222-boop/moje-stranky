@@ -20,20 +20,20 @@
 | **Phase 7** | Code Deduplication | COMPLETE | Steps 134 |
 | **Phase 8** | Inline Styles Migration | COMPLETE | Steps 135-137 |
 | **Phase 9** | HTMX Migration | DEFERRED (low priority) | Steps 141-150 |
-| **Phase 10** | Testing & Documentation | **IN PROGRESS** | Steps 151-165 |
-| **Phase 11** | Performance Optimization | PENDING | Steps 166-175 |
+| **Phase 10** | Testing & Documentation | COMPLETE | Steps 151-165 |
+| **Phase 11** | Performance Optimization | **PENDING** | Steps 166-175 |
 
 ## Current Work
 
-**Active Phase:** 10 - Testing & Documentation
-**Current Step:** 156 - E2E checklist (COMPLETE)
-**Next Step:** 161 - API Documentation
+**Active Phase:** 10 - Testing & Documentation - COMPLETE
+**Current Step:** 165 - API Reference (COMPLETE)
+**Next Step:** 166 - Bundle Optimization (Phase 11)
 
 ## Quick Reference
 
-- **Last completed step:** 156 (E2E test checklist)
-- **Total steps completed:** 156
-- **Estimated remaining:** ~19 steps
+- **Last completed step:** 165 (API Reference)
+- **Total steps completed:** 165
+- **Estimated remaining:** ~10 steps (Phase 11)
 - **See:** [ROADMAP TO 100% COMPLETION](#roadmap-to-100-completion) section at end of file
 
 ## Phase 9 Deferral Note
@@ -2812,19 +2812,25 @@ composer install && composer test
 npm install && npm test
 ```
 
-## [Step 161-165]: API Documentation
+## [Step 161-165]: API Documentation - COMPLETE
 
 **Current state:**
-- 55 API endpoints
-- No formal API documentation
-- Some inline comments
+- 56 API endpoints documented
+- Comprehensive API reference created
 
 **Tasks:**
-- [ ] Step 161: Document authentication APIs
-- [ ] Step 162: Document complaint/reklamace APIs
-- [ ] Step 163: Document analytics APIs
-- [ ] Step 164: Document admin APIs
-- [ ] Step 165: Create API reference in README or separate file
+- [x] Step 161: Document authentication APIs
+- [x] Step 162: Document complaint/reklamace APIs
+- [x] Step 163: Document analytics APIs
+- [x] Step 164: Document admin APIs
+- [x] Step 165: Create API reference in README or separate file
+
+**Step 161-165 Summary (COMPLETE):**
+
+- `docs/API_REFERENCE.md` - Kompletní API dokumentace
+- 56 API endpointů v 9 kategoriích
+- Příklady požadavků a odpovědí
+- HTTP status kódy a chybové odpovědi
 
 ---
 
