@@ -181,7 +181,7 @@ function renderHeatmapTracker() {
     ?>
 <!-- Heatmap Tracker -->
 <meta name="csrf-token" content="<?php echo htmlspecialchars($csrfToken); ?>">
-<script src="/assets/js/heatmap-tracker.js" defer></script>
+<script src="/assets/js/heatmap-tracker.min.js" defer></script>
 <?php
 }
 

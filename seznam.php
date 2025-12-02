@@ -40,8 +40,8 @@ if (!$isLoggedIn && !$isAdmin) {
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
 
 <!-- Logger Utility (must be loaded first) -->
-<script src="assets/js/logger.js" defer></script>
-<script src="assets/js/utils.js" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
+<script src="assets/js/utils.min.js" defer></script>
 
 
 <!-- External CSS -->

@@ -179,7 +179,7 @@ if ($initialBootstrapData) {
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <!-- Logger Utility (must be loaded first) -->
-<script src="assets/js/logger.js"></script>
+<script src="assets/js/logger.min.js"></script>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -473,15 +473,15 @@ if ($initialBootstrapData) {
 </main>
 
 <!-- Lokální signature-pad (nahrazuje blokovaný CDN) -->
-<script src="assets/js/signature-pad-simple.js"></script>
+<script src="assets/js/signature-pad-simple.min.js"></script>
 <!-- Fix pro globální scope signaturePad -->
-<script src="assets/js/protokol-signature-fix.js"></script>
+<script src="assets/js/protokol-signature-fix.min.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" defer></script>
 
-<script src="assets/js/csrf-auto-inject.js" defer></script>
+<script src="assets/js/csrf-auto-inject.min.js" defer></script>
 
 <!-- EMERGENCY DIAGNOSTIC SCRIPT -->
 <script>
@@ -546,12 +546,12 @@ if ($initialBootstrapData) {
 
 <!-- External JavaScript -->
 <script src="assets/js/protokol-pdf-preview.min.js" defer></script>
-<script src="assets/js/protokol-customer-collapse.js" defer></script>
-<script src="assets/js/protokol-data-patch.js" defer></script>
+<script src="assets/js/protokol-customer-collapse.min.js" defer></script>
+<script src="assets/js/protokol-data-patch.min.js" defer></script>
 <script src="assets/js/protokol.js?v=20251202" defer></script>
 <!-- protokol-fakturace-patch.js byl sloučen do protokol-data-patch.js (Step 47) -->
 <!-- Fix pro tlačítka (načíst až po protokol.js) -->
-<script src="assets/js/protokol-buttons-fix.js" defer></script>
+<script src="assets/js/protokol-buttons-fix.min.js" defer></script>
 <!-- Překlady pro kalkulačku -->
 <script src="assets/js/wgs-translations-cenik.min.js"></script>
 <script src="assets/js/language-switcher.min.js"></script>

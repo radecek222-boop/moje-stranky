@@ -88,9 +88,9 @@ $csrfToken = generateCSRFToken();
 </div>
 </main>
 
-<script src="assets/js/logger.js" defer></script>
-<script src="assets/js/csrf-auto-inject.js" defer></script>
-<script src="assets/js/registration.js" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
+<script src="assets/js/csrf-auto-inject.min.js" defer></script>
+<script src="assets/js/registration.min.js" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
