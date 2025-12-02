@@ -242,7 +242,7 @@ endif;
     <!-- Header -->
     <?php if (!$directAccess): ?>
     <div class="control-detail-header">
-        <button class="control-detail-back" onclick="window.location.href='admin.php'">
+        <button class="control-detail-back" data-href="admin.php">
             <span>&lt;</span>
             <span>Zpět</span>
         </button>
@@ -323,25 +323,25 @@ endif;
         <div class="console-container">
             <div class="console-header">
                 <div class="console-actions">
-                    <button class="console-btn success" id="btn-run-diagnostics" onclick="runDiagnostics()">
+                    <button class="console-btn success" id="btn-run-diagnostics" data-action="runDiagnostics">
                         Spustit diagnostiku
                     </button>
-                    <button class="console-btn" id="btn-clear" onclick="clearConsole()" disabled>
+                    <button class="console-btn" id="btn-clear" data-action="clearConsole" disabled>
                         Vymazat
                     </button>
-                    <button class="console-btn" id="btn-export" onclick="exportLog()" disabled>
+                    <button class="console-btn" id="btn-export" data-action="exportLog" disabled>
                         Export
                     </button>
-                    <button class="console-btn" onclick="clearCacheMaintenance()" title="Vymazat cache">
+                    <button class="console-btn" data-action="clearCacheMaintenance" title="Vymazat cache">
                         Cache
                     </button>
-                    <button class="console-btn" onclick="optimizeDatabaseMaintenance()" title="Optimalizovat databázi">
+                    <button class="console-btn" data-action="optimizeDatabaseMaintenance" title="Optimalizovat databázi">
                         Optimize DB
                     </button>
-                    <button class="console-btn danger" onclick="cleanupLogsMaintenance()" title="Vyčistit logy, cache a spustit backup">
+                    <button class="console-btn danger" data-action="cleanupLogsMaintenance" title="Vyčistit logy, cache a spustit backup">
                         Cleanup
                     </button>
-                    <button class="console-btn" onclick="archiveLogsMaintenance()" title="Archivovat staré logy">
+                    <button class="console-btn" data-action="archiveLogsMaintenance" title="Archivovat staré logy">
                         Archive
                     </button>
                 </div>
@@ -2772,6 +2772,17 @@ async function checkCodeAnalysis() {
 }
 
 if (DEBUG_MODE) console.log('Console loaded');
+
+// ACTION REGISTRY - Step 113
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('runDiagnostics', () => runDiagnostics());
+    Utils.registerAction('clearConsole', () => clearConsole());
+    Utils.registerAction('exportLog', () => exportLog());
+    Utils.registerAction('clearCacheMaintenance', () => clearCacheMaintenance());
+    Utils.registerAction('optimizeDatabaseMaintenance', () => optimizeDatabaseMaintenance());
+    Utils.registerAction('cleanupLogsMaintenance', () => cleanupLogsMaintenance());
+    Utils.registerAction('archiveLogsMaintenance', () => archiveLogsMaintenance());
+}
 </script>
 
 
