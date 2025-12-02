@@ -583,7 +583,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
       <!-- BUTTONS -->
       <div class="form-actions">
         <button type="submit" class="btn" data-lang-cs="ODESLAT POŽADAVEK" data-lang-en="SUBMIT REQUEST" data-lang-it="INVIA RICHIESTA">ODESLAT POŽADAVEK</button>
-        <button type="button" class="btn btn-secondary" onclick="window.history.back()" data-lang-cs="ZPĚT" data-lang-en="BACK" data-lang-it="INDIETRO">ZPĚT</button>
+        <button type="button" class="btn btn-secondary" data-action="historyBack" data-lang-cs="ZPĚT" data-lang-en="BACK" data-lang-it="INDIETRO">ZPĚT</button>
       </div>
       
     </form>

@@ -447,7 +447,7 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
       <div class="datum-bar">
         <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-          <button class="pridat-clanek-btn" onclick="pridatNovyClanek()">
+          <button class="pridat-clanek-btn" data-action="pridatNovyClanek">
             Přidat nový článek
           </button>
         <?php endif; ?>
@@ -477,7 +477,7 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
           <?php foreach ($levySloupec as $clanek): ?>
             <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
               <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-                <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>', <?php echo $clanek['index']; ?>)">
+                <button class="admin-edit-btn" data-action="upravitClanek" data-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
                   Upravit článek
                 </button>
               <?php endif; ?>
@@ -492,7 +492,7 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
           <?php foreach ($pravySloupec as $clanek): ?>
             <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
               <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-                <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>', <?php echo $clanek['index']; ?>)">
+                <button class="admin-edit-btn" data-action="upravitClanek" data-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
                   Upravit článek
                 </button>
               <?php endif; ?>

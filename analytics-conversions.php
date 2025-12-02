@@ -222,8 +222,8 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         <h1>Conversion Tracking & Funnels</h1>
 
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('conversions')">Konverze</button>
-            <button class="tab" onclick="switchTab('funnels')">Funnels</button>
+            <button class="tab active" data-action="switchTab" data-tab="conversions">Konverze</button>
+            <button class="tab" data-action="switchTab" data-tab="funnels">Funnels</button>
         </div>
 
         <!-- TAB 1: Conversions List -->
@@ -337,7 +337,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
 
-            document.querySelector(`button[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.querySelector(`button[data-tab="${tabName}"]`).classList.add('active');
             document.getElementById(`${tabName}-tab`).classList.add('active');
 
             if (tabName === 'funnels') {

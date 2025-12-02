@@ -273,8 +273,8 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                     <label for="consent-functional">Funkční cookies (nutné pro provoz webu)</label>
                 </div>
 
-                <button class="btn" onclick="saveConsent()">Uložit preference</button>
-                <button class="btn btn-danger" onclick="withdrawConsent()">Odvolat všechny souhlasy</button>
+                <button class="btn" data-action="saveConsent">Uložit preference</button>
+                <button class="btn btn-danger" data-action="withdrawConsent">Odvolat všechny souhlasy</button>
 
                 <div id="consent-status"></div>
             </div>
@@ -535,9 +535,9 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 
                 if (req.status === 'pending') {
                     if (req.request_type === 'export') {
-                        html += `<button class="btn btn-secondary" onclick="processExport(${req.request_id})">Zpracovat export</button>`;
+                        html += `<button class="btn btn-secondary" data-action="processExport" data-id="${req.request_id}">Zpracovat export</button>`;
                     } else if (req.request_type === 'delete') {
-                        html += `<button class="btn btn-danger" onclick="processDeletion(${req.request_id})">Zpracovat smazání</button>`;
+                        html += `<button class="btn btn-danger" data-action="processDeletion" data-id="${req.request_id}">Zpracovat smazání</button>`;
                     }
                 } else if (req.status === 'completed' && req.request_type === 'export') {
                     html += `<a href="/api/gdpr_api.php?action=download_export&request_id=${req.request_id}&csrf_token=${csrfToken}" class="btn">Stáhnout</a>`;
