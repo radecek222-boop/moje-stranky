@@ -824,12 +824,14 @@ async function reopenOrder(id) {
   const customerName = Utils.getCustomerName(record);
   const product = Utils.getProduct(record);
   
-  const confirmed = window.confirm(
+  const confirmed = await wgsConfirm(
     t('confirm_reopen_order')
       .replace('{customer}', customerName)
-      .replace('{product}', product)
+      .replace('{product}', product),
+    t('confirm_yes') || 'Ano',
+    t('confirm_no') || 'Ne'
   );
-  
+
   if (!confirmed) {
     logger.log('Znovuotevření zrušeno uživatelem');
     return;
@@ -1612,13 +1614,15 @@ async function saveSelectedDate() {
 
   if (collision) {
     const collisionName = Utils.getCustomerName(collision);
-    const confirm = window.confirm(
+    const potvrdit = await wgsConfirm(
       t('confirm_appointment_collision')
         .replace('{date}', SELECTED_DATE)
         .replace('{time}', SELECTED_TIME)
-        .replace('{customer}', collisionName)
+        .replace('{customer}', collisionName),
+      t('confirm_yes') || 'Ano',
+      t('confirm_no') || 'Ne'
     );
-    if (!confirm) return;
+    if (!potvrdit) return;
   }
 
   // ZOBRAZIT LOADING OVERLAY
@@ -2470,7 +2474,7 @@ async function addNote(orderId, text, audioBlob = null) {
 }
 
 async function deleteNote(noteId, orderId) {
-  if (!confirm('Opravdu chcete smazat tuto poznamku?')) {
+  if (!await wgsConfirm('Opravdu chcete smazat tuto poznámku?', 'Smazat', 'Zrušit')) {
     return;
   }
 
@@ -3880,7 +3884,7 @@ function vytvorVideoKartu(video, claimId) {
     ? ikonaBtnStyle + ' background: #442222; color: #c66; font-size: 0.85rem; font-weight: bold;'
     : 'min-height: 36px; width: 36px; padding: 0; font-size: 1.1rem; font-weight: bold; background: #553333; color: #c66; border: 1px solid #664444; border-radius: 4px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center;';
   btnSmazat.onclick = async () => {
-    if (!confirm(`Opravdu smazat video "${video.video_name}"?`)) return;
+    if (!await wgsConfirm(`Opravdu smazat video "${video.video_name}"?`, 'Smazat', 'Zrušit')) return;
 
     try {
       const formData = new FormData();

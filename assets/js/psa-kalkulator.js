@@ -247,7 +247,7 @@ async function addEmployee() {
 async function updateEmployee(index, field, value, needConfirm = false) {
   if (field === 'name' && needConfirm) {
     const oldName = employees[index].name;
-    if (oldName !== value && !confirm(`Opravdu chcete změnit jméno z "${oldName}" na "${value}"?`)) {
+    if (oldName !== value && !await wgsConfirm(`Opravdu chcete změnit jméno z "${oldName}" na "${value}"?`, 'Změnit', 'Zrušit')) {
       renderTable();
       return;
     }
@@ -275,7 +275,7 @@ async function updateEmployee(index, field, value, needConfirm = false) {
 }
 
 async function removeEmployee(index) {
-  if (confirm(`Opravdu chcete odstranit zaměstnance ${employees[index].name}?`)) {
+  if (await wgsConfirm(`Opravdu chcete odstranit zaměstnance ${employees[index].name}?`, 'Odstranit', 'Zrušit')) {
     employees.splice(index, 1);
     renderTable();
     updateStats();
@@ -788,7 +788,7 @@ function printReport() {
 }
 
 async function clearAll() {
-  if (confirm('Opravdu chcete vymazat všechna data?')) {
+  if (await wgsConfirm('Opravdu chcete vymazat všechna data?', 'Vymazat vše', 'Zrušit')) {
     employees = [];
     renderTable();
     updateStats();

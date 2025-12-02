@@ -2138,9 +2138,10 @@ window.addEventListener('load', () => {
 async function reopenOrder(id) {
   logger.log('[reopenOrder] Znovuotevírání zakázky ID:', id);
 
-  const confirmed = window.confirm(
-    'Opravdu chcete znovu otevřít tuto dokončenou zakázku?\n\n' +
-    'Zakázka bude vrácena do stavu "ČEKÁ" a bude možné ji znovu upravit.'
+  const confirmed = await wgsConfirm(
+    'Opravdu chcete znovu otevřít tuto dokončenou zakázku? Zakázka bude vrácena do stavu "ČEKÁ" a bude možné ji znovu upravit.',
+    'Otevřít',
+    'Zrušit'
   );
 
   if (!confirmed) {
