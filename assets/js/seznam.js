@@ -154,10 +154,23 @@ const Utils = {
   },
   
   filterByUserRole: (items) => {
-    if (!CURRENT_USER || CURRENT_USER.role !== 'prodejce') {
+    // Admin vidí vše
+    if (!CURRENT_USER || CURRENT_USER.is_admin || CURRENT_USER.role !== 'prodejce') {
       return items;
     }
-    return items.filter(x => String(x.zpracoval_id) === String(CURRENT_USER.id));
+
+    // Prodejce vidí své zakázky + zakázky supervizovaných uživatelů
+    const myId = String(CURRENT_USER.id);
+    const supervisedIds = (CURRENT_USER.supervised_user_ids || []).map(String);
+
+    return items.filter(x => {
+      const zpracovalId = String(x.zpracoval_id);
+      // Moje zakázky
+      if (zpracovalId === myId) return true;
+      // Zakázky supervizovaných prodejců
+      if (supervisedIds.includes(zpracovalId)) return true;
+      return false;
+    });
   }
 };
 

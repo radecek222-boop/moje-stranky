@@ -1647,10 +1647,27 @@ async function zobrazDetailUzivatele(userId) {
                 ${user.status === 'active' ? 'Deaktivovat uživatele' : 'Aktivovat uživatele'}
               </button>
             </div>
+
+            <!-- Supervizor sekce -->
+            <div style="margin-top: 2rem; padding: 1rem; background: #f0f4ff; border-radius: 8px; border: 2px solid #6366f1;">
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #4f46e5;">Supervizor</h3>
+              <p style="font-size: 0.85rem; color: #666; margin-bottom: 1rem;">
+                Jako supervizor tento uživatel uvidí zakázky vybraných prodejců.
+              </p>
+              <div id="supervisorAssignmentsPreview" style="margin-bottom: 1rem; font-size: 0.9rem; color: #333;">
+                Načítám přiřazení...
+              </div>
+              <button data-action="otevritSpravuSupervize" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #4f46e5; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+                Spravovat přiřazení
+              </button>
+            </div>
           </div>
         </div>
       </div>
     `;
+
+    // Načíst supervizor přiřazení po vykreslení
+    setTimeout(() => nactiSupervizorPrirazeni(user.id), 100);
 
     // Přidat modal do DOM
     const modalContainer = document.createElement('div');
@@ -1827,12 +1844,171 @@ async function prepnoutStatusUzivatele(userId, newStatus) {
   }
 }
 
+// ============================================================
+// SUPERVIZOR - SPRÁVA PŘIŘAZENÍ PRODEJCŮ
+// ============================================================
+
+/**
+ * Načtení supervizor přiřazení pro náhled v detailu
+ */
+async function nactiSupervizorPrirazeni(userId) {
+  try {
+    const preview = document.getElementById('supervisorAssignmentsPreview');
+    if (!preview) return;
+
+    const response = await fetch(`/api/supervisor_api.php?action=getAssignments&user_id=${userId}`, {
+      credentials: 'same-origin'
+    });
+
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      const assignments = data.data.assignments || [];
+      if (assignments.length === 0) {
+        preview.innerHTML = '<span style="color: #999;">Žádní přiřazení prodejci</span>';
+      } else {
+        const names = assignments.map(a => escapeHtml(a.jmeno || a.email)).join(', ');
+        preview.innerHTML = `<strong>Přiřazení prodejci (${assignments.length}):</strong><br>${names}`;
+      }
+    } else {
+      preview.innerHTML = '<span style="color: #dc2626;">Chyba načítání</span>';
+    }
+  } catch (error) {
+    logger.error('Chyba při načítání supervizor přiřazení:', error);
+    const preview = document.getElementById('supervisorAssignmentsPreview');
+    if (preview) {
+      preview.innerHTML = '<span style="color: #dc2626;">Chyba: ' + escapeHtml(error.message) + '</span>';
+    }
+  }
+}
+
+/**
+ * Otevření overlay pro správu supervize
+ */
+async function otevritSpravuSupervize(userId) {
+  try {
+    // Načíst všechny prodejce a aktuální přiřazení
+    const [salespersonsRes, assignmentsRes] = await Promise.all([
+      fetch(`/api/supervisor_api.php?action=getSalespersons&exclude_user_id=${userId}`, { credentials: 'same-origin' }),
+      fetch(`/api/supervisor_api.php?action=getAssignments&user_id=${userId}`, { credentials: 'same-origin' })
+    ]);
+
+    const salespersonsData = await salespersonsRes.json();
+    const assignmentsData = await assignmentsRes.json();
+
+    if (salespersonsData.status !== 'success') {
+      throw new Error(salespersonsData.message || 'Chyba načítání prodejců');
+    }
+
+    const salespersons = salespersonsData.data.salespersons || [];
+    const assignedIds = (assignmentsData.data?.assignments || []).map(a => a.salesperson_user_id);
+
+    // Vytvořit overlay
+    const overlayHTML = `
+      <div id="supervisorOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10001; display: flex; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
+          <div style="background: #4f46e5; color: white; padding: 1.5rem; position: relative;">
+            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">Správa supervize</h3>
+            <p style="margin: 0.5rem 0 0; font-size: 0.85rem; opacity: 0.9;">Vyberte prodejce, jejichž zakázky bude supervizor vidět</p>
+            <button data-action="zavritSupervizorOverlay" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
+          </div>
+          <div style="padding: 1.5rem; max-height: 50vh; overflow-y: auto;">
+            ${salespersons.length === 0 ? '<p style="color: #999; text-align: center;">Žádní další uživatelé v systému</p>' : ''}
+            ${salespersons.map(s => `
+              <label style="display: flex; align-items: center; padding: 0.8rem; margin-bottom: 0.5rem; background: #f9f9f9; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
+                <input type="checkbox" class="supervisor-checkbox" value="${s.user_id}" ${assignedIds.includes(s.user_id) ? 'checked' : ''} style="width: 20px; height: 20px; margin-right: 1rem; accent-color: #4f46e5;">
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #333;">${escapeHtml(s.jmeno || 'Bez jména')}</div>
+                  <div style="font-size: 0.85rem; color: #666;">${escapeHtml(s.email)} - ${escapeHtml(s.role || 'prodejce')}</div>
+                </div>
+              </label>
+            `).join('')}
+          </div>
+          <div style="padding: 1rem 1.5rem; border-top: 1px solid #eee; display: flex; gap: 1rem;">
+            <button data-action="zavritSupervizorOverlay" style="flex: 1; padding: 0.8rem; background: #e5e7eb; color: #333; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+              Zrušit
+            </button>
+            <button data-action="ulozitSupervizorPrirazeni" data-id="${userId}" style="flex: 1; padding: 0.8rem; background: #4f46e5; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+              Uložit
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Přidat overlay do DOM
+    const overlayContainer = document.createElement('div');
+    overlayContainer.innerHTML = overlayHTML;
+    document.body.appendChild(overlayContainer.firstElementChild);
+
+  } catch (error) {
+    logger.error('Chyba při otevírání správy supervize:', error);
+    alert('Chyba: ' + error.message);
+  }
+}
+
+/**
+ * Zavření supervizor overlay
+ */
+function zavritSupervizorOverlay() {
+  const overlay = document.getElementById('supervisorOverlay');
+  if (overlay) {
+    overlay.remove();
+  }
+}
+
+/**
+ * Uložení supervizor přiřazení
+ */
+async function ulozitSupervizorPrirazeni(userId) {
+  try {
+    // Získat zaškrtnuté prodejce
+    const checkboxes = document.querySelectorAll('.supervisor-checkbox:checked');
+    const salespersonIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+    const csrfToken = await getCSRFToken();
+    if (!csrfToken) {
+      throw new Error('CSRF token není k dispozici');
+    }
+
+    const formData = new FormData();
+    formData.append('action', 'saveAssignments');
+    formData.append('supervisor_id', userId);
+    formData.append('salesperson_ids', JSON.stringify(salespersonIds));
+    formData.append('csrf_token', csrfToken);
+
+    const response = await fetch('/api/supervisor_api.php', {
+      method: 'POST',
+      credentials: 'same-origin',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      alert(data.message || 'Přiřazení uloženo!');
+      zavritSupervizorOverlay();
+      // Aktualizovat náhled v detailu
+      nactiSupervizorPrirazeni(userId);
+    } else {
+      alert('Chyba: ' + (data.message || 'Nepodařilo se uložit'));
+    }
+  } catch (error) {
+    logger.error('Chyba při ukládání supervizor přiřazení:', error);
+    alert('Chyba: ' + error.message);
+  }
+}
+
 // Zpřístupnit funkce globálně
 window.zobrazDetailUzivatele = zobrazDetailUzivatele;
 window.zavritDetailUzivatele = zavritDetailUzivatele;
 window.ulozitZmenyUzivatele = ulozitZmenyUzivatele;
 window.zmenitHesloUzivatele = zmenitHesloUzivatele;
 window.prepnoutStatusUzivatele = prepnoutStatusUzivatele;
+window.nactiSupervizorPrirazeni = nactiSupervizorPrirazeni;
+window.otevritSpravuSupervize = otevritSpravuSupervize;
+window.zavritSupervizorOverlay = zavritSupervizorOverlay;
+window.ulozitSupervizorPrirazeni = ulozitSupervizorPrirazeni;
 
 // Posluchač postMessage pro přepínání tabů z iframe
 window.addEventListener('message', function(event) {
@@ -1979,6 +2155,25 @@ if (typeof Utils !== 'undefined' && Utils.registerAction) {
   Utils.registerAction('prepnoutStatusUzivatele', (el, data) => {
     if (data.id && data.status && typeof prepnoutStatusUzivatele === 'function') {
       prepnoutStatusUzivatele(data.id, data.status);
+    }
+  });
+
+  // Supervizor akce
+  Utils.registerAction('otevritSpravuSupervize', (el, data) => {
+    if (data.id && typeof otevritSpravuSupervize === 'function') {
+      otevritSpravuSupervize(data.id);
+    }
+  });
+
+  Utils.registerAction('zavritSupervizorOverlay', () => {
+    if (typeof zavritSupervizorOverlay === 'function') {
+      zavritSupervizorOverlay();
+    }
+  });
+
+  Utils.registerAction('ulozitSupervizorPrirazeni', (el, data) => {
+    if (data.id && typeof ulozitSupervizorPrirazeni === 'function') {
+      ulozitSupervizorPrirazeni(data.id);
     }
   });
 
