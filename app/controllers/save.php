@@ -642,6 +642,7 @@ try {
     $popisProblemu = sanitizeInput($_POST['popis_problemu'] ?? '');
     $doplnujiciInfo = sanitizeInput($_POST['doplnujici_info'] ?? '');
     $fakturaceFirma = strtolower(trim($_POST['fakturace_firma'] ?? 'cz')); // DB používá lowercase ENUM
+    $typZakaznika = sanitizeInput($_POST['typ_zakaznika'] ?? ''); // IČO nebo Fyzická osoba
     // GDPR souhlas - pouze pro neregistrované uživatele
     // Registrovaní uživatelé (prodejce, technik, admin) mají souhlas ošetřen ve smlouvách
     $gdprConsentRaw = $_POST['gdpr_consent'] ?? null;
@@ -756,7 +757,8 @@ try {
         'seriove_cislo' => $serioveCislo,
         'popis_problemu' => $popisProblemu,
         'doplnujici_info' => $doplnujiciInfo,
-        'fakturace_firma' => $fakturaceFirma
+        'fakturace_firma' => $fakturaceFirma,
+        'typ_zakaznika' => $typZakaznika
     ];
 
     // Pridat gdpr_note pokud sloupec existuje
