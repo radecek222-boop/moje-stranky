@@ -1515,3 +1515,13 @@ header('Content-Type: text/html; charset=utf-8');
   - `setup/install_role_based_access.php`: Changed display=swap → display=optional
 - **Result:** Consistent font loading behavior, eliminated potential layout shifts.
 
+## [Step 67]: Protocol-Relative URL Fix
+- **Date:** 2025-12-02
+- **What:** Fixed protocol-relative URL to use explicit HTTPS for security and consistency.
+- **Analysis:**
+  - Found 1 protocol-relative URL (`//translate.google.com/...`) in offline.php
+  - Protocol-relative URLs can cause mixed content issues and are deprecated
+- **Files modified:**
+  - `offline.php`: Changed `//translate.google.com` → `https://translate.google.com`
+- **Result:** All external URLs now use explicit HTTPS protocol.
+
