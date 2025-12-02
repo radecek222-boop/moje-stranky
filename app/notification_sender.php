@@ -162,20 +162,6 @@ try {
     }
 
     // ============================================
-    // AUTOMATICKÉ PŘIDÁNÍ PRODEJCE DO CC
-    // ============================================
-    // Pokud posíláme email zákazníkovi, přidáme prodejce (vytvořil zakázku) do kopie
-    if ($notification['recipient_type'] === 'customer') {
-        $sellerEmail = $notificationData['seller_email'] ?? null;
-        if ($sellerEmail && filter_var($sellerEmail, FILTER_VALIDATE_EMAIL)) {
-            // Přidat pouze pokud už tam není
-            if (!in_array($sellerEmail, $ccEmails)) {
-                $ccEmails[] = $sellerEmail;
-            }
-        }
-    }
-
-    // ============================================
     // NÁHRADA PROMĚNNÝCH V ŠABLONĚ
     // ============================================
     $subject = $notification['subject'] ?? 'Notifikace z WGS';
@@ -209,6 +195,28 @@ try {
     foreach ($variableMap as $variable => $value) {
         $subject = str_replace($variable, $value, $subject);
         $message = str_replace($variable, $value, $message);
+    }
+
+    // ============================================
+    // NÁHRADA PROMĚNNÝCH V CC/BCC EMAILECH
+    // ============================================
+    // Umožňuje použít {{seller_email}}, {{technician_email}} atd. v CC/BCC polích
+    if (!empty($ccEmails) && is_array($ccEmails)) {
+        $ccEmails = array_map(function($email) use ($variableMap) {
+            foreach ($variableMap as $variable => $value) {
+                $email = str_replace($variable, $value, $email);
+            }
+            return trim($email);
+        }, $ccEmails);
+    }
+
+    if (!empty($bccEmails) && is_array($bccEmails)) {
+        $bccEmails = array_map(function($email) use ($variableMap) {
+            foreach ($variableMap as $variable => $value) {
+                $email = str_replace($variable, $value, $email);
+            }
+            return trim($email);
+        }, $bccEmails);
     }
 
     // ============================================

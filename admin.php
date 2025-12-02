@@ -1148,16 +1148,22 @@ function loadNotifContent(type, body) {
       </div>
       <div class="form-group">
         <label class="form-label" data-lang-cs="Dodatečné kopie emailů (CC)" data-lang-en="Additional Email Copies (CC)" data-lang-it="Copie Email Aggiuntive (CC)">Dodatečné kopie emailů (CC)</label>
+        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;">
+          <strong>Tip:</strong> Můžete použít proměnné jako <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{seller_email}}</code>, <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{technician_email}}</code> atd.
+        </div>
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-          <input type="email" class="form-input" id="new-cc-email" data-lang-cs-placeholder="novy@email.cz" data-lang-en-placeholder="new@email.com" data-lang-it-placeholder="nuovo@email.it" placeholder="novy@email.cz" style="flex: 1;">
+          <input type="email" class="form-input" id="new-cc-email" data-lang-cs-placeholder="novy@email.cz nebo {{seller_email}}" data-lang-en-placeholder="new@email.com or {{seller_email}}" data-lang-it-placeholder="nuovo@email.it o {{seller_email}}" placeholder="novy@email.cz nebo {{seller_email}}" style="flex: 1;">
           <button class="btn btn-sm" data-action="addCCEmail" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
         </div>
         <div id="admin-emails-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
       </div>
       <div class="form-group">
         <label class="form-label" data-lang-cs="Skryté kopie (BCC)" data-lang-en="Blind Copies (BCC)" data-lang-it="Copie Nascoste (BCC)">Skryté kopie (BCC)</label>
+        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;">
+          <strong>Tip:</strong> Můžete použít proměnné jako <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{seller_email}}</code>, <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{technician_email}}</code> atd.
+        </div>
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-          <input type="email" class="form-input" id="new-bcc-email" data-lang-cs-placeholder="skryta@email.cz" data-lang-en-placeholder="hidden@email.com" data-lang-it-placeholder="nascosta@email.it" placeholder="skryta@email.cz" style="flex: 1;">
+          <input type="email" class="form-input" id="new-bcc-email" data-lang-cs-placeholder="skryta@email.cz nebo {{seller_email}}" data-lang-en-placeholder="hidden@email.com or {{seller_email}}" data-lang-it-placeholder="nascosta@email.it o {{seller_email}}" placeholder="skryta@email.cz nebo {{seller_email}}" style="flex: 1;">
           <button class="btn btn-sm" data-action="addBCCEmail" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
         </div>
         <div id="bcc-emails-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
