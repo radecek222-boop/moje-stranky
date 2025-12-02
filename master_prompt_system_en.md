@@ -2098,3 +2098,42 @@ CSP refinement, additional input validation, security headers audit.
   - All .min.css files regenerated
 - **Result:** All focusable elements now have visible focus indicators for keyboard users.
 
+## [Step 103]: Technical Debt Analysis - HTMX Migration Scope
+- **Date:** 2025-12-02
+- **What:** Analyzed remaining technical debt items and determined scope for future work.
+- **Analysis:**
+  - **Inline onclick handlers (57 occurrences):** Functional, working code. Low priority - no user-facing issues.
+  - **HTMX complex migrations:** Seznam (notes), Statistiky (charts, filters), Videotéka require significant refactoring:
+    - Would need new HTML-returning API endpoints
+    - Would need restructuring of existing JS logic
+    - Risk of breaking existing functionality
+  - **Recommendation:** Complex HTMX migrations should be planned as separate projects with proper testing.
+- **Decision:** Mark Phase 4 as complete. Complex migrations deferred to future phases.
+
+---
+
+## PHASE 4 COMPLETE: Technical Debt Addressed
+
+### Summary:
+
+| Item | Status | Notes |
+|------|--------|-------|
+| CSS outline:none | **FIXED** | Added box-shadow focus indicators |
+| Inline onclick handlers | **DEFERRED** | Working code, low priority |
+| Complex HTMX migrations | **DEFERRED** | Requires separate planning |
+
+### Ready for Phase 5:
+
+The codebase is now in a good state with:
+- All accessibility requirements addressed (33 A11Y steps)
+- All focus indicators visible for keyboard users
+- HTMX foundation established for future migrations
+- All assets minified
+- Performance optimizations applied
+
+### Recommended Future Work (Not Started):
+
+1. **HTMX Notes Integration** - Migrate notes CRUD to server-rendered HTML
+2. **HTMX Statistics Filters** - Server-side filtering with HTML responses
+3. **Event Listener Migration** - Gradual replacement of inline onclick handlers
+
