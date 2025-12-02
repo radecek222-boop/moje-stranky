@@ -1135,6 +1135,16 @@ function createKey() {
     `;
 
     modal.innerHTML = `
+        <style>
+            .key-type-label {
+                display: flex; align-items: center; padding: 15px;
+                background: #252525; border-radius: 8px; cursor: pointer;
+                border: 2px solid transparent; transition: all 0.2s;
+            }
+            .key-type-label:hover { border-color: #555; }
+            .key-type-label.selected { border-color: #fff; }
+            .key-type-label:first-child { margin-bottom: 10px; }
+        </style>
         <div style="background: #1a1a1a; padding: 30px; border-radius: 12px;
                     max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
                     border: 1px solid #333;">
@@ -1143,12 +1153,7 @@ function createKey() {
             </h3>
 
             <div style="margin-bottom: 20px;">
-                <label style="display: flex; align-items: center; padding: 15px;
-                              background: #252525; border-radius: 8px; cursor: pointer;
-                              margin-bottom: 10px; border: 2px solid transparent;
-                              transition: all 0.2s;"
-                       onmouseover="this.style.borderColor='#555'"
-                       onmouseout="this.style.borderColor=this.querySelector('input').checked ? '#fff' : 'transparent'">
+                <label class="key-type-label">
                     <input type="radio" name="keyType" value="technik"
                            style="width: 20px; height: 20px; margin-right: 15px; accent-color: #fff;">
                     <div>
@@ -1157,11 +1162,7 @@ function createKey() {
                     </div>
                 </label>
 
-                <label style="display: flex; align-items: center; padding: 15px;
-                              background: #252525; border-radius: 8px; cursor: pointer;
-                              border: 2px solid transparent; transition: all 0.2s;"
-                       onmouseover="this.style.borderColor='#555'"
-                       onmouseout="this.style.borderColor=this.querySelector('input').checked ? '#fff' : 'transparent'">
+                <label class="key-type-label">
                     <input type="radio" name="keyType" value="prodejce"
                            style="width: 20px; height: 20px; margin-right: 15px; accent-color: #fff;">
                     <div>
@@ -1187,6 +1188,15 @@ function createKey() {
     `;
 
     document.body.appendChild(modal);
+
+    // Event listener pro radio buttony - toggle selected class
+    modal.querySelectorAll('input[name="keyType"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            modal.querySelectorAll('.key-type-label').forEach(label => {
+                label.classList.toggle('selected', label.contains(radio) && radio.checked);
+            });
+        });
+    });
 
     // Zavřít při kliknutí na pozadí
     modal.addEventListener('click', (e) => {
