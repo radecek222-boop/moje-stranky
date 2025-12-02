@@ -317,7 +317,7 @@ try {
                         Chyba: <?php echo htmlspecialchars($chyba['chyba']); ?>
                     </p>
                     <?php if (strpos($chyba['nazev'], 'provize') !== false): ?>
-                    <a href="oprav_view_provize.php" target="_blank" style="display: inline-block; margin-top: 0.5rem; padding: 0.5rem 1rem; background: #92400e; color: #fff; text-decoration: none; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; border-radius: 3px;">
+                    <a href="oprav_view_provize.php" target="_blank" rel="noopener" style="display: inline-block; margin-top: 0.5rem; padding: 0.5rem 1rem; background: #92400e; color: #fff; text-decoration: none; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; border-radius: 3px;">
                         Opravit VIEW
                     </a>
                     <?php endif; ?>

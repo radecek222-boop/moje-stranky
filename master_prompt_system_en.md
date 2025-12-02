@@ -1560,3 +1560,14 @@ header('Content-Type: text/html; charset=utf-8');
   - `api/protokol_api.php`: Added lang='cs' to email HTML template
 - **Result:** All HTML documents now have proper language declaration.
 
+## [Step 71]: Link Security Audit (rel="noopener")
+- **Date:** 2025-12-02
+- **What:** Added `rel="noopener"` to links with `target="_blank"` for security.
+- **Analysis:**
+  - Found 3 links with target="_blank" missing rel="noopener"
+  - Missing noopener can allow linked page to access window.opener
+- **Files modified:**
+  - `vsechny_tabulky.php`: Added rel="noopener" to oprav_view_provize link
+  - `api/admin_api.php`: Added rel="noopener" to photo and protokol links (2 places)
+- **Result:** All target="_blank" links now have proper security attributes.
+
