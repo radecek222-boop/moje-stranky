@@ -2350,6 +2350,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // Naplnit souhrn daty z formuláře
     naplnitSouhrn();
 
+    // Zobrazit/skrýt checkbox prodloužení lhůty podle typu zákazníka
+    // Checkbox se zobrazí pouze pro fyzické osoby (ne pro IČO)
+    const typZakaznika = document.getElementById('typ-zakaznika')?.value || '';
+    const checkboxRow = document.querySelector('.tabulka-checkbox-row');
+    const checkboxProdlouzeni = document.getElementById('checkboxProdlouzeniLhuty');
+    const textProdlouzeniModal = document.getElementById('prodlouzeniLhutyText');
+
+    if (checkboxRow) {
+      // Zobrazit pouze pro fyzické osoby (hodnota obsahuje "Fyzická" nebo je prázdná/jiná než IČO)
+      const jeFyzickaOsoba = typZakaznika.toLowerCase().includes('fyzická') ||
+                            typZakaznika.toLowerCase().includes('fyzicka') ||
+                            typZakaznika === 'Fyzická osoba';
+
+      if (jeFyzickaOsoba) {
+        checkboxRow.style.display = '';
+        logger.log('[ZakaznikSchvaleni] Checkbox prodloužení lhůty zobrazen (fyzická osoba)');
+      } else {
+        checkboxRow.style.display = 'none';
+        // Resetovat checkbox a skrýt text
+        if (checkboxProdlouzeni) checkboxProdlouzeni.checked = false;
+        if (textProdlouzeniModal) textProdlouzeniModal.style.display = 'none';
+        logger.log('[ZakaznikSchvaleni] Checkbox prodloužení lhůty skryt (IČO:', typZakaznika, ')');
+      }
+    }
+
     // Step 39: Zobrazit modal přes Alpine.js API (scroll lock je v Alpine komponentě)
     if (window.zakaznikSchvaleniModal && window.zakaznikSchvaleniModal.open) {
       window.zakaznikSchvaleniModal.open();
