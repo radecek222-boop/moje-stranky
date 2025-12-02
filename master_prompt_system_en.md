@@ -1571,3 +1571,17 @@ header('Content-Type: text/html; charset=utf-8');
   - `api/admin_api.php`: Added rel="noopener" to photo and protokol links (2 places)
 - **Result:** All target="_blank" links now have proper security attributes.
 
+## [Step 72]: Autocomplete Attributes for Password Fields
+- **Date:** 2025-12-02
+- **What:** Added proper `autocomplete` attributes to all password input fields for better UX and security.
+- **Analysis:**
+  - User login passwords: `autocomplete="current-password"` (existing password entry)
+  - New password fields: `autocomplete="new-password"` (registration, password reset, user creation)
+  - Secret keys (admin key, registration key, API secrets): `autocomplete="off"` (prevent browser saving)
+- **Files modified:**
+  - `login.php`: Added autocomplete="current-password" to user password, autocomplete="off" to admin key
+  - `registration.php`: Added autocomplete="new-password" to password fields, autocomplete="off" to registration key
+  - `password_reset.php`: Added autocomplete="new-password" to new password fields, autocomplete="off" to reset key
+  - `admin.php`: Added autocomplete="new-password" to add-user password, autocomplete="off" to SMTP and SMS API secrets
+- **Result:** Improved browser password manager integration and prevented saving of sensitive keys.
+

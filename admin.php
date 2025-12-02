@@ -788,7 +788,7 @@ function loadNotifContent(type, body) {
                         </div>
                         <div>
                             <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">Heslo *</label>
-                            <input type="password" id="smtp_password" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                            <input type="password" id="smtp_password" autocomplete="off" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                         <div>
                             <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">FROM Email</label>
@@ -823,7 +823,7 @@ function loadNotifContent(type, body) {
                         </div>
                         <div>
                             <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">API Secret</label>
-                            <input type="password" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                            <input type="password" autocomplete="off" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                     </div>
                     <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
@@ -1092,7 +1092,7 @@ function loadNotifContent(type, body) {
 
       <div class="form-group">
         <label class="form-label" data-lang-cs="Heslo * (min. 8 znaků)" data-lang-en="Password * (min. 8 characters)" data-lang-it="Password * (min. 8 caratteri)">Heslo * (min. 8 znaků)</label>
-        <input type="password" class="form-input" id="add-password" required minlength="8">
+        <input type="password" class="form-input" id="add-password" required minlength="8" autocomplete="new-password">
       </div>
     </div>
     <div class="modal-footer" style="padding: 1.5rem 2rem; border-top: 1px solid #ddd; flex-shrink: 0;">
