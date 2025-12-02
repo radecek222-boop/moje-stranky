@@ -2305,6 +2305,20 @@ document.addEventListener('DOMContentLoaded', () => {
     btnPouzit?.addEventListener('click', () => {
       potvrditPodpis();
     });
+
+    // Checkbox prodloužení lhůty - zobrazit/skrýt text v modalu
+    const checkboxProdlouzeni = document.getElementById('checkboxProdlouzeniLhuty');
+    const textProdlouzeniModal = document.getElementById('prodlouzeniLhutyText');
+
+    if (checkboxProdlouzeni && textProdlouzeniModal) {
+      checkboxProdlouzeni.addEventListener('change', () => {
+        if (checkboxProdlouzeni.checked) {
+          textProdlouzeniModal.style.display = 'block';
+        } else {
+          textProdlouzeniModal.style.display = 'none';
+        }
+      });
+    }
   });
 
   async function otevritZakaznikModal() {
@@ -2596,6 +2610,19 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     img.src = signatureDataURL;
+
+    // Zkontrolovat checkbox prodloužení lhůty a zobrazit text v hlavním formuláři
+    const checkboxProdlouzeni = document.getElementById('checkboxProdlouzeniLhuty');
+    const textProdlouzeniHlavni = document.getElementById('prodlouzeniLhutyHlavni');
+
+    if (checkboxProdlouzeni && textProdlouzeniHlavni) {
+      if (checkboxProdlouzeni.checked) {
+        textProdlouzeniHlavni.style.display = 'block';
+        logger.log('[ZakaznikSchvaleni] Text prodloužení lhůty zobrazen v hlavním formuláři');
+      } else {
+        textProdlouzeniHlavni.style.display = 'none';
+      }
+    }
 
     // Zavřít modal
     zavritZakaznikModal();
