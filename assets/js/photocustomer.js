@@ -396,6 +396,7 @@ function renderPreview(section) {
 
     const img = document.createElement('img');
     img.className = 'photo-thumb';
+    img.alt = media.type === 'video' ? 'Náhled videa' : 'Náhled fotky';
     img.src = media.type === 'video' ? media.thumb : media.data;
 
     const deleteBtn = document.createElement('button');

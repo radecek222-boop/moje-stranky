@@ -1531,6 +1531,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
   <div class="search-bar">
     <span class="search-icon"></span>
     <input type="text" class="search-input" id="searchInput"
+           enterkeyhint="search"
            data-lang-cs-placeholder="Hledat v reklamacích..."
            data-lang-en-placeholder="Search in claims..."
            data-lang-it-placeholder="Cerca nei reclami..."

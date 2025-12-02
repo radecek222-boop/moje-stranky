@@ -741,11 +741,11 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
         ">
 
         <div id="fotkaPreview" style="margin-top: 10px; display: none;">
-          <img id="fotkaPreviewImg" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 5px;">
+          <img id="fotkaPreviewImg" alt="Náhled vybrané fotky" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 5px;">
         </div>
         <div id="fotkaExisting" style="margin-top: 10px; display: none;">
           <p style="font-size: 13px; color: #666; margin-bottom: 5px;">Stávající fotka:</p>
-          <img id="fotkaExistingImg" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 5px;">
+          <img id="fotkaExistingImg" alt="Stávající fotka" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 5px;">
           <p style="font-size: 12px; color: #999; margin-top: 5px;">Pokud vyberete novou fotku, nahradí tuto stávající.</p>
         </div>
 

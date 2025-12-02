@@ -50,7 +50,7 @@ $csrfToken = generateCSRFToken();
 
     <div class="form-group">
       <label for="regKey" data-lang-cs="Registrační klíč *" data-lang-en="Registration Key *" data-lang-it="Chiave di Registrazione *">Registrační klíč *</label>
-      <input type="password" id="regKey" name="registration_key" data-lang-cs-placeholder="Zadejte klíč" data-lang-en-placeholder="Enter key" data-lang-it-placeholder="Inserisci chiave" placeholder="Zadejte klíč" required>
+      <input type="password" id="regKey" name="registration_key" autocomplete="off" data-lang-cs-placeholder="Zadejte klíč" data-lang-en-placeholder="Enter key" data-lang-it-placeholder="Inserisci chiave" placeholder="Zadejte klíč" required>
       <div class="helper-text" data-lang-cs="Klíč dostáváte od administátora" data-lang-en="You receive the key from the administrator" data-lang-it="Ricevi la chiave dall'amministratore">Klíč dostáváte od administátora</div>
     </div>
 
@@ -71,13 +71,13 @@ $csrfToken = generateCSRFToken();
 
     <div class="form-group">
       <label for="regPassword" data-lang-cs="Heslo" data-lang-en="Password" data-lang-it="Password">Heslo</label>
-      <input type="password" id="regPassword" name="password" placeholder="••••••••" required>
+      <input type="password" id="regPassword" name="password" placeholder="••••••••" required autocomplete="new-password">
       <div class="helper-text" data-lang-cs="Minimálně 12 znaků (velké/malé písmena, čísla a znaky)" data-lang-en="At least 12 characters (uppercase/lowercase letters, numbers and symbols)" data-lang-it="Almeno 12 caratteri (lettere maiuscole/minuscole, numeri e simboli)">Minimálně 12 znaků (velké/malé písmena, čísla a znaky)</div>
     </div>
 
     <div class="form-group">
       <label for="regPasswordConfirm" data-lang-cs="Potvrzení hesla" data-lang-en="Password Confirmation" data-lang-it="Conferma Password">Potvrzení hesla</label>
-      <input type="password" id="regPasswordConfirm" name="passwordConfirm" placeholder="••••••••" required>
+      <input type="password" id="regPasswordConfirm" name="passwordConfirm" placeholder="••••••••" required autocomplete="new-password" enterkeyhint="done">
     </div>
 
     <button type="submit" class="btn btn-primary" style="width: 100%;" data-lang-cs="Zaregistrovat se" data-lang-en="Register" data-lang-it="Registrati">Zaregistrovat se</button>
