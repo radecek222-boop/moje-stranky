@@ -71,10 +71,10 @@ if (!$isAdmin && !$isTechnik) {
   <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
-  <link rel="preload" href="assets/css/photocustomer.css" as="style">
+  <link rel="preload" href="assets/css/photocustomer.min.css" as="style">
 
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/photocustomer.css">
+  <link rel="stylesheet" href="assets/css/photocustomer.min.css">
   <link rel="stylesheet" href="assets/css/photocustomer-collapsible.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
@@ -175,6 +175,6 @@ if (!$isAdmin && !$isTechnik) {
 
 <!-- External JavaScript -->
 <script src="assets/js/photocustomer-collapsible.min.js" defer></script>
-<script src="assets/js/photocustomer.js" defer></script>
+<script src="assets/js/photocustomer.min.js" defer></script>
 </body>
 </html>

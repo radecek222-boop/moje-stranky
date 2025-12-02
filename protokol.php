@@ -209,19 +209,19 @@ if ($initialBootstrapData) {
 
   <!-- Preload critical CSS -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
-  <link rel="preload" href="assets/css/protokol.css" as="style">
+  <link rel="preload" href="assets/css/protokol.min.css" as="style">
 
   <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/protokol.css">
-  <!-- protokol-mobile-fixes.css sloučen do protokol.css (Step 48) -->
+  <link rel="stylesheet" href="assets/css/protokol.min.css">
+  <!-- protokol-mobile-fixes.css sloučen do protokol.min.css (Step 48) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <link rel="stylesheet" href="assets/css/cenik.min.css">
   <link rel="stylesheet" href="assets/css/protokol-calculator-modal.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
-  <!-- mobile-responsive.css odstraněn - protokol.css má vlastní mobilní styly -->
+  <!-- mobile-responsive.css odstraněn - protokol.min.css má vlastní mobilní styly -->
 </head>
 
 <body>
@@ -556,7 +556,7 @@ if ($initialBootstrapData) {
 <script src="assets/js/wgs-translations-cenik.min.js"></script>
 <script src="assets/js/language-switcher.min.js"></script>
 <!-- Kalkulačka integrace -->
-<script src="assets/js/cenik-calculator.js" defer></script>
+<script src="assets/js/cenik-calculator.min.js" defer></script>
 <script src="assets/js/protokol-calculator-integration.min.js" defer></script>
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>

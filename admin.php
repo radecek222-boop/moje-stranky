@@ -120,7 +120,7 @@ if ($activeTab === 'dashboard') {
   <link rel="stylesheet" href="/assets/css/admin.css">
 <link rel="stylesheet" href="/assets/css/admin-header.min.css">
 <link rel="stylesheet" href="/assets/css/admin-notifications.min.css">
-  <link rel="stylesheet" href="/assets/css/mobile-responsive.css">
+  <link rel="stylesheet" href="/assets/css/mobile-responsive.min.css">
   <!-- admin-mobile-fixes.css sloučen do admin.css (Step 51) -->
   <link rel="stylesheet" href="/assets/css/button-fixes-global.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
