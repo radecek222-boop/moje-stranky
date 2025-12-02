@@ -2398,11 +2398,73 @@ The codebase is now in a good state with:
   - All corresponding minified files (REGENERATED)
 - **Result:** All 9 confirm() calls migrated to accessible, styled wgsConfirm() modal.
 
+## [Step 127]: Documentation Update
+- **Date:** 2025-12-02
+- **What:** Updated master_prompt_system_en.md with Steps 114-126 documentation.
+- **Result:** All completed steps properly documented.
+
+## [Step 128]: wgsToast Notification System
+- **Date:** 2025-12-02
+- **What:** Created custom toast notification system to replace window.alert().
+- **How:**
+  1. Added `wgsToast()` function to utils.js with 4 types: success, error, warning, info
+  2. Added CSS styles in styles.css (black/white/gray color scheme)
+  3. Toast container dynamically created and appended to body
+  4. Auto-dismiss with configurable duration (default: 3s, error: 5s, warning: 4s)
+  5. Close button for manual dismissal
+  6. CSS animations for slide-in/out effects
+- **Features:**
+  - `wgsToast.success(msg)` - success notifications
+  - `wgsToast.error(msg)` - error notifications (longer duration)
+  - `wgsToast.warning(msg)` - warning notifications
+  - `wgsToast.info(msg)` - info notifications
+- **Files touched:**
+  - `assets/js/utils.js` (MODIFIED - +90 lines)
+  - `assets/css/styles.css` (MODIFIED - +95 lines)
+- **Result:** Toast notification system ready for alert() migration.
+
+## [Step 129-130]: Migrate alert() to wgsToast()
+- **Date:** 2025-12-02
+- **What:** Migrated 81 window.alert() calls to wgsToast() notifications.
+- **Files migrated (10 files):**
+  1. `cenik.js` - 9 alerts (CRUD operations, PDF export)
+  2. `admin-notifications.js` - 6 alerts (session, email validation)
+  3. `psa-kalkulator.js` - 7 alerts (clipboard, validation)
+  4. `seznam.js` - 43 alerts (CRUD, calendar, notes, videos)
+  5. `cenik-calculator.js` - 6 alerts
+  6. `logout-handler.js` - 2 alerts
+  7. `protokol.js` - 3 alerts
+  8. `statistiky.js` - 3 alerts
+  9. `novareklamace.js` - 1 alert
+  10. `analytics.js` - 1 alert
+- **Mapping logic:**
+  - Success messages → `wgsToast.success()`
+  - Error messages → `wgsToast.error()`
+  - Warning messages → `wgsToast.warning()`
+  - Info messages → `wgsToast.info()`
+- **Exception kept:**
+  - `error-handler.js` line 216: clipboard fallback alert intentionally preserved
+- **Result:** 81/82 alert() calls migrated. Only 1 intentional exception remains.
+
+## [Step 131]: Final Technical Debt Audit
+- **Date:** 2025-12-02
+- **What:** Comprehensive audit of remaining technical debt.
+- **Audit results:**
+  - ✅ **0 inline onclick** in production PHP files
+  - ✅ **0 inline onchange** in production PHP files
+  - ✅ **0 confirm()** - all migrated to wgsConfirm()
+  - ✅ **1 alert()** - intentional clipboard fallback in error-handler.js
+  - ✅ **0 debug console.log** - only error handling and analytics logs remain
+- **Remaining (low priority):**
+  - Inline styles in JS (300+) - major refactoring, would require CSS class system
+  - error-handler.js inline styles - intentionally kept for error overlay robustness
+- **Result:** Technical debt cleanup phase complete.
+
 ---
 
 ## PHASE 5 COMPLETE: Technical Debt Cleanup Summary
 
-**Steps 104-126 have completed the technical debt cleanup phase.**
+**Steps 104-131 have completed the technical debt cleanup phase.**
 
 ### Achievements:
 
@@ -2413,15 +2475,21 @@ The codebase is now in a good state with:
 | Event Delegation | 109-120 | ActionRegistry system, 150+ onclick handlers migrated |
 | Debug Cleanup | 121-125 | ~70 debug console.log removed |
 | confirm() Migration | 126 | 9 confirm() → wgsConfirm() custom modal |
+| wgsToast System | 128 | Toast notification system created |
+| alert() Migration | 129-130 | 81 alert() → wgsToast() notifications |
+| Final Audit | 131 | All technical debt verified and documented |
 
-### Current State:
+### Final State:
 - **0 inline onclick/onchange** in production PHP files
 - **0 inline onmouseover/onmouseout** - all migrated to CSS
+- **0 confirm()** - all migrated to wgsConfirm() custom modal
+- **1 alert()** - intentional clipboard fallback in error-handler.js
 - **All debug console.log removed** - only error handling and analytics remain
-- **confirm() eliminated** - custom accessible modal replaces native dialog
+- **wgsToast notification system** - modern toast UI for all user feedback
 
-### Remaining Technical Debt:
-1. **alert() calls** (82 occurrences) - Could be migrated to toast notifications
-2. **Inline styles in JS** (300+ occurrences) - Major refactoring, lower priority
-3. **error-handler.js inline styles** - Intentionally kept for robustness
+### Remaining (Low Priority):
+1. **Inline styles in JS** (300+ occurrences) - Major refactoring project
+2. **error-handler.js inline styles** - Intentionally kept for robustness
+
+### Technical Debt Cleanup Complete ✓
 
