@@ -1202,19 +1202,19 @@ $includesWithActions = [
     __DIR__ . '/includes/admin_testing_simulator.php',
 ];
 
-// Načíst všechny includes a extrahovat jejich <script> bloky
+// Načíst všechny includes pomocí output buffering (vykoná PHP kód)
 foreach ($includesWithActions as $includeFile) {
     if (file_exists($includeFile)) {
-        // Načíst obsah souboru
-        $content = file_get_contents($includeFile);
+        // Zachytit výstup include souboru (PHP se vykoná)
+        ob_start();
+        include $includeFile;
+        $renderedContent = ob_get_clean();
 
-        // Extrahovat všechny <script> bloky
-        if (preg_match_all('/<script[^>]*>(.*?)<\/script>/si', $content, $matches)) {
-            foreach ($matches[1] as $scriptContent) {
-                // Vypsat script blok
-                echo "<script>\n";
-                echo $scriptContent;
-                echo "\n</script>\n";
+        // Extrahovat všechny <script> bloky z vyrenderovaného HTML
+        if (preg_match_all('/<script[^>]*>(.*?)<\/script>/si', $renderedContent, $matches)) {
+            foreach ($matches[0] as $scriptBlock) {
+                // Vypsat celý script blok
+                echo $scriptBlock . "\n";
             }
         }
     }
