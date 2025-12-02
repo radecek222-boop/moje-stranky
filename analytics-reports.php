@@ -334,7 +334,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 html += `<td>${report.report_period_start} - ${report.report_period_end}</td>`;
                 html += `<td><span class="badge ${statusBadge}">${report.status}</span></td>`;
                 html += `<td>${new Date(report.generated_at).toLocaleString('cs-CZ')}</td>`;
-                html += `<td><button class="btn btn-secondary" onclick="downloadReport(${report.report_id})">Stáhnout</button></td>`;
+                html += `<td><button class="btn btn-secondary" data-action="downloadReport" data-id="${report.report_id}">Stáhnout</button></td>`;
                 html += '</tr>';
             });
 

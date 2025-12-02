@@ -301,7 +301,7 @@ $stats = $queue->getStats();
 
                             <form method="POST" style="display: inline;">
                                 <input type="hidden" name="id" value="<?php echo $email['id']; ?>">
-                                <button type="submit" name="delete" class="btn-small btn-delete" onclick="return confirm('Opravdu smazat?')">🗑️ Smazat</button>
+                                <button type="submit" name="delete" class="btn-small btn-delete" data-action="confirmDelete" data-confirm="Opravdu smazat?">Smazat</button>
                             </form>
                         </div>
                     </div>

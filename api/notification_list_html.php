@@ -106,14 +106,14 @@ try {
         $template = $notif['template'] ?? '';
 ?>
     <div class="notification-card">
-        <div class="notification-header" onclick="toggleNotificationBody('<?= e($notif['id']) ?>')">
+        <div class="notification-header" data-action="toggleNotificationBody" data-id="<?= e($notif['id']) ?>">
             <div class="notification-title">
                 <span class="badge badge-<?= $isActive ? 'active' : 'inactive' ?>"><?= $isActive ? 'Aktivní' : 'Neaktivní' ?></span>
                 <span><?= e($name) ?></span>
             </div>
             <div class="notification-toggle">
                 <div class="toggle-switch <?= $isActive ? 'active' : '' ?>"
-                     onclick="event.stopPropagation(); toggleNotification('<?= e($notif['id']) ?>')"></div>
+                     data-action="toggleNotification" data-id="<?= e($notif['id']) ?>" data-stop-propagation="true"></div>
             </div>
         </div>
         <div class="notification-body" id="notification-body-<?= e($notif['id']) ?>">
@@ -143,7 +143,7 @@ try {
                 <div class="template-preview"><?= nl2br(e($template)) ?></div>
             </div>
 
-            <button class="btn btn-sm" onclick="openEditNotificationModal('<?= e($notif['id']) ?>')">Editovat šablonu</button>
+            <button class="btn btn-sm" data-action="openEditNotificationModal" data-id="<?= e($notif['id']) ?>">Editovat šablonu</button>
         </div>
     </div>
 <?php

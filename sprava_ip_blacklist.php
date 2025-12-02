@@ -310,7 +310,7 @@ $blacklistIPs = array_column($blacklist, 'ip_address');
                                 <form method="POST" style="display: inline;">
                                     <input type="hidden" name="action" value="remove_from_blacklist">
                                     <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                    <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('Opravdu odebrat?')">Odebrat</button>
+                                    <button type="submit" class="btn btn-danger btn-small" data-action="confirmRemove" data-confirm="Opravdu odebrat?">Odebrat</button>
                                 </form>
                             </td>
                         </tr>

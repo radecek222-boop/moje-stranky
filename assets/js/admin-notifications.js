@@ -517,7 +517,6 @@ if (typeof Utils !== 'undefined' && Utils.registerAction) {
 
   Utils.registerAction('toggleNotification', (el, data) => {
     if (data.id && typeof toggleNotification === 'function') {
-      el.dispatchEvent(new Event('click', { bubbles: false }));
       toggleNotification(data.id);
     }
   });

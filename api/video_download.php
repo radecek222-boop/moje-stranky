@@ -367,7 +367,7 @@ function zobrazStranku($tokenData, $videa, $token) {
             <div class="video-list">
                 <?php foreach ($videa as $index => $video): ?>
                 <div class="video-item">
-                    <div class="video-icon" onclick="prehratVideo(<?= $video['id'] ?>, '<?= htmlspecialchars(addslashes($video['video_name'])) ?>')" title="Prehrat video">&#9658;</div>
+                    <div class="video-icon" data-action="prehratVideo" data-id="<?= $video['id'] ?>" data-name="<?= htmlspecialchars($video['video_name']) ?>" title="Prehrat video">&#9658;</div>
                     <div class="video-info">
                         <div class="video-name"><?= htmlspecialchars($video['video_name']) ?></div>
                         <div class="video-meta">
@@ -376,10 +376,10 @@ function zobrazStranku($tokenData, $videa, $token) {
                         </div>
                     </div>
                     <div class="video-actions">
-                        <button class="btn btn-play" onclick="prehratVideo(<?= $video['id'] ?>, '<?= htmlspecialchars(addslashes($video['video_name'])) ?>')" title="Prehrat">
+                        <button class="btn btn-play" data-action="prehratVideo" data-id="<?= $video['id'] ?>" data-name="<?= htmlspecialchars($video['video_name']) ?>" title="Prehrat">
                             &#9658; Prehrat
                         </button>
-                        <a href="?token=<?= htmlspecialchars($token) ?>&video_id=<?= $video['id'] ?>" class="btn" onclick="stahnoutAZavrit(event, this.href)">
+                        <a href="?token=<?= htmlspecialchars($token) ?>&video_id=<?= $video['id'] ?>" class="btn" data-action="stahnoutAZavrit">
                             Stahnout
                         </a>
                     </div>
@@ -390,7 +390,7 @@ function zobrazStranku($tokenData, $videa, $token) {
             <?php if ($pocetVidei > 1): ?>
             <div class="download-all">
                 <h2>Stahnout vsechna videa najednou</h2>
-                <a href="?token=<?= htmlspecialchars($token) ?>&action=zip" class="btn btn-primary" onclick="stahnoutAZavrit(event, this.href)">
+                <a href="?token=<?= htmlspecialchars($token) ?>&action=zip" class="btn btn-primary" data-action="stahnoutAZavrit">
                     Stahnout ZIP (<?= formatovatVelikost($celkovaVelikost) ?>)
                 </a>
             </div>
@@ -402,7 +402,7 @@ function zobrazStranku($tokenData, $videa, $token) {
             <div class="video-modal-content">
                 <div class="video-modal-header">
                     <span class="video-modal-title" id="videoModalTitle"></span>
-                    <button class="video-modal-close" onclick="zavritVideo()" aria-label="Zavřít video">&times;</button>
+                    <button class="video-modal-close" data-action="zavritVideo" aria-label="Zavřít video">&times;</button>
                 </div>
                 <video class="video-player" id="videoPlayer" controls playsinline>
                     Vas prohlizec nepodporuje prehravani videa.

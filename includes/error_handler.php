@@ -573,7 +573,7 @@ if (!function_exists('displayErrorHTML')) {
 
                 <!-- Copy button -->
                 <div style="text-align: center; margin-top: 20px;">
-                    <button class="copy-btn" onclick="copyErrorReport()">
+                    <button class="copy-btn" data-action="copyErrorReport">
                         Kopírovat chybový report
                     </button>
                     <div id="copyStatus" style="color: #28a745; margin-top: 10px; display: none;">
