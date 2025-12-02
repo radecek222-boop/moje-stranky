@@ -76,10 +76,36 @@ echo "<!DOCTYPE html>
 
 echo "<h1>PHP Error Log - Posledních {$pocetRadku} řádků</h1>";
 
-$logFile = __DIR__ . '/logs/php_errors.log';
+// Zkusit různé možné umístění log souboru
+$mozneUmisteni = [
+    __DIR__ . '/logs/php_errors.log',
+    __DIR__ . '/logs/error.log',
+    __DIR__ . '/error.log',
+    '/var/log/php_errors.log',
+    ini_get('error_log')
+];
 
-if (!file_exists($logFile)) {
-    echo "<div class='log-warning'>⚠️ Log soubor neexistuje: {$logFile}</div>";
+$logFile = null;
+foreach ($mozneUmisteni as $cesta) {
+    if ($cesta && file_exists($cesta)) {
+        $logFile = $cesta;
+        break;
+    }
+}
+
+if (!$logFile) {
+    echo "<div class='log-warning'>";
+    echo "<strong>⚠️ Log soubor nebyl nalezen</strong><br>";
+    echo "Zkoušel jsem následující umístění:<br><ul>";
+    foreach ($mozneUmisteni as $cesta) {
+        echo "<li><code>" . htmlspecialchars($cesta) . "</code></li>";
+    }
+    echo "</ul>";
+    echo "<br><strong>Možná řešení:</strong><br>";
+    echo "1. Vytvořte složku <code>logs/</code> v kořenovém adresáři<br>";
+    echo "2. Vytvořte soubor <code>logs/php_errors.log</code> s právy 666<br>";
+    echo "3. Nebo zkontrolujte <code>php.ini</code> nastavení <code>error_log</code>";
+    echo "</div>";
     echo "</div></body></html>";
     exit;
 }
