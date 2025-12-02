@@ -238,7 +238,7 @@ if ($initialBootstrapData) {
 
   <!-- Rozbalovací sekce zákaznických dat -->
   <div class="customer-info-collapsible">
-    <div class="customer-info-header" id="customerInfoToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="customerInfoContent" aria-label="Rozbalit informace o zákazníkovi">
+    <div class="customer-info-header" id="customerInfoToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="customerInfoContent" aria-label="Rozbalit informace o zákazníkovi" data-storage-key="customer-info-expanded">
       <span class="customer-info-name" id="customerInfoName"><?= wgs_escape($prefillFields['customer']) ?: 'Zákazník' ?></span>
       <svg class="customer-info-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <polyline points="6 9 12 15 18 9"></polyline>
@@ -547,7 +547,7 @@ if ($initialBootstrapData) {
 
 <!-- External JavaScript -->
 <script src="assets/js/protokol-pdf-preview.min.js" defer></script>
-<script src="assets/js/protokol-customer-collapse.min.js" defer></script>
+<script src="assets/js/customer-collapse.min.js" defer></script>
 <script src="assets/js/protokol-data-patch.min.js" defer></script>
 <script src="assets/js/protokol.js?v=20251202" defer></script>
 <!-- protokol-fakturace-patch.js byl sloučen do protokol-data-patch.min.js (Step 47) -->

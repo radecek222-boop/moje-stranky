@@ -89,7 +89,7 @@ if (!$isAdmin && !$isTechnik) {
 
   <!-- ROZBALOVACÍ INFORMACE O ZÁKAZNÍKOVI -->
   <div class="customer-info-collapsible">
-    <div class="customer-info-header" id="customerInfoToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="customerInfoContent" aria-label="Rozbalit informace o zákazníkovi">
+    <div class="customer-info-header" id="customerInfoToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="customerInfoContent" aria-label="Rozbalit informace o zákazníkovi" data-storage-key="photocustomer-info-expanded">
       <span class="customer-info-name" id="customerInfoName">Zákazník</span>
       <svg class="customer-info-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <polyline points="6 9 12 15 18 9"></polyline>
@@ -174,7 +174,7 @@ if (!$isAdmin && !$isTechnik) {
 <input type="file" id="mediaInput" accept="image/*,video/*" capture="environment" multiple>
 
 <!-- External JavaScript -->
-<script src="assets/js/photocustomer-collapsible.min.js" defer></script>
+<script src="assets/js/customer-collapse.min.js" defer></script>
 <script src="assets/js/photocustomer.min.js" defer></script>
 </body>
 </html>
