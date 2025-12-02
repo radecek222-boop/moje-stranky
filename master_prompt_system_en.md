@@ -1996,3 +1996,85 @@ header('Content-Type: text/html; charset=utf-8');
   - `includes/admin_testing_simulator.php`: Added aria-hidden to 2 test-spinner divs
 - **Result:** Screen readers will skip decorative spinners and only announce meaningful loading text.
 
+---
+
+## PHASE 3 COMPLETE: HTMX Foundation + Comprehensive Accessibility
+
+### Summary of Phase 3 Achievements:
+
+| Category | Steps | Result |
+|----------|-------|--------|
+| **HTMX Migration** | 53-54 | Email + SMS templates via server-rendered HTML |
+| **JS Minification** | 55 | All 44 JS files minified (.min.js) |
+| **Performance Optimization** | 62-67 | Preload, cache headers, DNS prefetch, defer, fonts |
+| **Accessibility (A11Y)** | 69-101 | 33 steps covering WCAG 2.1 compliance |
+
+### A11Y Improvements Summary (Steps 69-101):
+
+| Area | Implementation |
+|------|----------------|
+| **ARIA Labels** | All interactive elements (buttons, inputs, modals) |
+| **ARIA Roles** | status, alert, dialog, tab, tabpanel, tablist |
+| **ARIA States** | aria-expanded, aria-selected, aria-current, aria-hidden |
+| **Form Accessibility** | Labels, for/id, aria-describedby, autocomplete |
+| **Keyboard Navigation** | Skip links, tabindex, focus management |
+| **Screen Reader Support** | aria-live regions, semantic HTML |
+| **Modal Accessibility** | role="dialog", aria-modal, aria-labelledby |
+
+### Files Minified:
+
+- **JavaScript:** 44 source files → 44 .min.js files
+- **CSS:** 24 source files → 24 .min.css files
+- **All PHP references:** Updated to use minified versions
+
+### HTMX Pattern Established:
+
+```php
+// Server returns HTML fragment
+header('Content-Type: text/html; charset=utf-8');
+echo '<div class="item">...</div>';
+```
+
+```html
+<!-- Client uses HTMX attributes -->
+<div hx-get="/api/component_html.php"
+     hx-target="#container"
+     hx-trigger="click">
+```
+
+### Remaining Technical Debt (For Future Phases):
+
+1. **CSS `outline: none`** - Some buttons remove focus outline (accessibility risk)
+2. **Inline onclick handlers** - Present in some admin pages (could be migrated to event listeners)
+3. **Complex HTMX migrations** - Statistics, Seznam, Videotéka require significant refactoring
+
+### Phase 3 Completion Criteria Met:
+
+- [x] HTMX foundation established with reusable pattern
+- [x] All assets minified
+- [x] Performance optimizations applied
+- [x] Comprehensive accessibility audit completed (33 steps)
+- [x] All pages have lang attribute
+- [x] All forms have proper labels and associations
+- [x] All modals have ARIA dialog pattern
+- [x] Skip links for keyboard navigation
+- [x] Loading indicators accessible
+
+---
+
+# PHASE 4: Proposed Focus Areas
+
+## Option A: Advanced HTMX Migration
+Migrate complex components (Statistics, Seznam detail, Notes) to HTMX pattern.
+
+## Option B: JavaScript Reduction
+Reduce size of large JS files (seznam.js, protokol.js, admin.js).
+
+## Option C: CSS Consolidation
+Further simplify CSS, address outline:none issues, reduce duplication.
+
+## Option D: Security Hardening
+CSP refinement, additional input validation, security headers audit.
+
+**Awaiting human decision on Phase 4 direction.**
+
