@@ -1875,3 +1875,18 @@ header('Content-Type: text/html; charset=utf-8');
   - `assets/js/psa-kalkulator.js`: Added keyboard event delegation for data-action elements with role="button"
 - **Result:** Interactive elements can now be activated using keyboard, improving accessibility for users who cannot use a mouse.
 
+## [Step 93]: ARIA Roles for Status Messages and Language Tabs
+- **Date:** 2025-12-02
+- **What:** Added ARIA roles to dynamically created alerts and language tabs in nova_aktualita.php.
+- **Analysis:**
+  - Alert messages need role="status" (success) or role="alert" (error) for screen readers
+  - Tab interfaces need full ARIA tab pattern (tablist/tab/tabpanel)
+  - Dynamically created alerts in JavaScript must include ARIA roles
+- **Files modified:**
+  - `sprava_ip_blacklist.php`: Added role="status/alert" with aria-live to success/error/warning divs
+  - `nova_aktualita.php`: Added complete ARIA tab pattern to language tabs (tablist, tab, tabpanel, aria-selected, aria-controls)
+  - `gdpr-portal.php`: Added role="status/alert" to dynamically created alert divs in JavaScript
+  - `admin/email_queue.php`: Added role="status/alert" with aria-live to message divs
+  - `admin/smtp_settings.php`: Added role="status/alert" with aria-live to message divs
+- **Result:** Status messages and language tabs are now properly announced by screen readers.
+

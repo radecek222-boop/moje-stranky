@@ -254,11 +254,11 @@ $blacklistIPs = array_column($blacklist, 'ip_address');
         <h1>Správa IP Blacklistu</h1>
 
         <?php if ($zprava): ?>
-            <div class="success"><?= htmlspecialchars($zprava) ?></div>
+            <div class="success" role="status" aria-live="polite"><?= htmlspecialchars($zprava) ?></div>
         <?php endif; ?>
 
         <?php if ($chyba): ?>
-            <div class="error"><?= htmlspecialchars($chyba) ?></div>
+            <div class="error" role="alert" aria-live="assertive"><?= htmlspecialchars($chyba) ?></div>
         <?php endif; ?>
 
         <div class="info">
@@ -292,7 +292,7 @@ $blacklistIPs = array_column($blacklist, 'ip_address');
             </form>
 
             <?php if (empty($blacklist)): ?>
-                <div class="warning">Žádné IP adresy v blacklistu.</div>
+                <div class="warning" role="status">Žádné IP adresy v blacklistu.</div>
             <?php else: ?>
                 <table>
                     <tr>
@@ -325,7 +325,7 @@ $blacklistIPs = array_column($blacklist, 'ip_address');
             <p>Klikněte na tlačítko pro přidání IP do blacklistu.</p>
 
             <?php if (empty($navstevy)): ?>
-                <div class="warning">Žádné návštěvy za posledních 7 dní.</div>
+                <div class="warning" role="status">Žádné návštěvy za posledních 7 dní.</div>
             <?php else: ?>
                 <table>
                     <tr>

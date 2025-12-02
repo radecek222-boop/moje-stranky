@@ -215,11 +215,11 @@ $stats = $queue->getStats();
             <p>Správa asynchronního odesílání emailů</p>
 
             <?php if ($message): ?>
-                <div class="alert alert-success"><?php echo htmlspecialchars($message); ?></div>
+                <div class="alert alert-success" role="status" aria-live="polite"><?php echo htmlspecialchars($message); ?></div>
             <?php endif; ?>
 
             <?php if ($error): ?>
-                <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+                <div class="alert alert-danger" role="alert" aria-live="assertive"><?php echo htmlspecialchars($error); ?></div>
             <?php endif; ?>
 
             <form method="POST" style="margin-top: 1rem;">

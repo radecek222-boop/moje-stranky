@@ -181,16 +181,16 @@ try {
         <h1>⚙️ SMTP Nastavení</h1>
 
         <?php if ($message): ?>
-            <div class="alert alert-success"><?php echo htmlspecialchars($message); ?></div>
+            <div class="alert alert-success" role="status" aria-live="polite"><?php echo htmlspecialchars($message); ?></div>
         <?php endif; ?>
 
         <?php if ($error): ?>
-            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+            <div class="alert alert-danger" role="alert" aria-live="assertive"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
 
         <?php if (!$settings): ?>
-            <div class="alert alert-danger">
-                <strong>⚠️ Email queue systém není nainstalován!</strong><br>
+            <div class="alert alert-danger" role="alert">
+                <strong>Email queue systém není nainstalován!</strong><br>
                 <a href="/admin/install_email_system.php" style="color: #721c24; text-decoration: underline;">Klikněte zde pro instalaci</a>
             </div>
         <?php endif; ?>
