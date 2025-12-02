@@ -1388,3 +1388,20 @@ header('Content-Type: text/html; charset=utf-8');
     - + 19 more core files
 - **Result:** All 44 minified JS files now have source maps. Complete debugging coverage for production code.
 
+## [Step 58]: Generate Source Maps for CSS Files
+- **Date:** 2025-12-02
+- **What:** Generated source maps for all 21 minified CSS files using `csso`.
+- **How:** Ran `csso [file].css -o [file].min.css --source-map file` for each CSS file.
+- **Why:**
+  - CSS source maps enable debugging of minified stylesheets in browser DevTools
+  - Developers can see original selectors, properties, and line numbers
+  - Completes source map coverage for all frontend assets (JS + CSS)
+- **Files touched:**
+  - **21 new .min.css.map files created** including:
+    - `admin.min.css.map` (95KB) - largest admin stylesheet
+    - `cenik.min.css.map` (53KB)
+    - `seznam.min.css.map` (42KB)
+    - `protokol.min.css.map` (41KB)
+    - + 17 more CSS files
+- **Result:** All minified assets (44 JS + 21 CSS = 65 total) now have source maps for complete debugging coverage.
+
