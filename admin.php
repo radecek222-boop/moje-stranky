@@ -1180,6 +1180,47 @@ function loadNotifContent(type, body) {
   </div>
 </div>
 
+<?php
+/**
+ * FIX: Pre-load všech include souborů pro registraci JS akcí
+ *
+ * Problém: Akce byly registrovány pouze když byla karta aktivní
+ * Řešení: Načíst všechny includes VŽDY a extrahovat jejich <script> bloky
+ */
+
+// Seznam všech include souborů s JS akcemi
+$includesWithActions = [
+    __DIR__ . '/includes/admin_actions.php',
+    __DIR__ . '/includes/admin_configuration.php',
+    __DIR__ . '/includes/admin_diagnostics.php',
+    __DIR__ . '/includes/admin_email_sms.php',
+    __DIR__ . '/includes/admin_reklamace_management.php',
+    __DIR__ . '/includes/admin_security.php',
+    __DIR__ . '/includes/admin_console.php',
+    __DIR__ . '/includes/admin_testing.php',
+    __DIR__ . '/includes/admin_testing_interactive.php',
+    __DIR__ . '/includes/admin_testing_simulator.php',
+];
+
+// Načíst všechny includes a extrahovat jejich <script> bloky
+foreach ($includesWithActions as $includeFile) {
+    if (file_exists($includeFile)) {
+        // Načíst obsah souboru
+        $content = file_get_contents($includeFile);
+
+        // Extrahovat všechny <script> bloky
+        if (preg_match_all('/<script[^>]*>(.*?)<\/script>/si', $content, $matches)) {
+            foreach ($matches[1] as $scriptContent) {
+                // Vypsat script blok
+                echo "<script>\n";
+                echo $scriptContent;
+                echo "\n</script>\n";
+            }
+        }
+    }
+}
+?>
+
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>
