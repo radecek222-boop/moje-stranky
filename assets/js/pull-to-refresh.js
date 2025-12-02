@@ -218,8 +218,6 @@
     document.addEventListener('touchstart', onTouchStart, { passive: true });
     document.addEventListener('touchmove', onTouchMove, { passive: false });
     document.addEventListener('touchend', onTouchEnd, { passive: true });
-
-    console.log('[PWA] Pull-to-refresh aktivovan');
   }
 
   // Spustit po nacteni

@@ -68,7 +68,6 @@
             // Setup controls
             this.setupControls();
 
-            console.log('[Replay Player] Inicializováno pro session:', sessionId, 'page:', pageIndex);
             return true;
         },
 
@@ -109,8 +108,6 @@
                     if (pageInfoEl) {
                         pageInfoEl.textContent = `${result.data.page_url} (${result.data.total_frames} framů, ${this.formatTime(totalTimeMs)})`;
                     }
-
-                    console.log('[Replay Player] Data načtena:', this.state.frames.length, 'framů');
 
                     // Hide loading
                     if (loadingEl) {

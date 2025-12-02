@@ -287,7 +287,6 @@ const errorLogger = {
                 console.warn('Error logging rate limited - paused for 5 minutes');
                 setTimeout(() => {
                     this.rateLimited = false;
-                    console.log('Error logging resumed');
                 }, 5 * 60 * 1000);
             }
         } catch (err) {
@@ -406,8 +405,6 @@ function formatBacktrace(backtrace) {
         return `#${i} ${func}() at ${trace.full_path || trace.file}:${trace.line}`;
     }).join('\n');
 }
-
-console.log('WGS Error Handler loaded - All errors will be caught and displayed');
 
 // ============================================
 // ACTION REGISTRY - Step 115

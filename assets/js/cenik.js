@@ -421,7 +421,6 @@
 
             // Detekce aktuálního jazyka
             const jazyk = window.ziskejAktualniJazyk ? window.ziskejAktualniJazyk() : 'cs';
-            console.log(`[Ceník] Generuji PDF v jazyce: ${jazyk}`);
 
             // Překladové objekty
             const preklady = {
@@ -684,8 +683,6 @@
             // Počkat na reflow
             await new Promise(resolve => setTimeout(resolve, 200));
 
-            console.log('[Ceník] Renderuji pomocí html2canvas...');
-
             // Vyrenderovat pomocí html2canvas
             const canvas = await html2canvas(pdfWrapper, {
                 scale: 2,
@@ -720,8 +717,6 @@
                 // Zmenšit tak, aby se vešel na výšku stránky
                 imgHeight = availableHeight;
                 imgWidth = imgHeight / canvasRatio;
-
-                console.log(`[Ceník] Obsah zmenšen na ${Math.round(imgWidth)}x${Math.round(imgHeight)}mm pro vložení na jednu A4`);
             }
 
             // Vycentrovat horizontálně pokud je užší než stránka
@@ -737,8 +732,6 @@
             const datum = new Date().toLocaleDateString('cs-CZ').replace(/\./g, '-');
             const jazykSuffix = jazyk.toUpperCase(); // CS, EN, IT
             pdf.save(`WGS-Cenik-${jazykSuffix}-${datum}.pdf`);
-
-            console.log(`[Ceník] PDF úspěšně vygenerováno a staženo (jazyk: ${jazykSuffix})`);
 
         } catch (error) {
             console.error('[Ceník] Chyba při generování PDF:', error);

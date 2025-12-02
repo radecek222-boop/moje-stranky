@@ -37,8 +37,6 @@
 
     // Aktualizovat title stránky (pokud existuje)
     aktualizujTitle(jazyk);
-
-    console.log('Jazyk přepnut na:', jazyk);
   };
 
   /**
@@ -251,8 +249,6 @@
 
     // Nastavit aktivní vlajku
     aktualizujVlajky(aktualniJazyk);
-
-    console.log('WGS Language Switcher inicializován. Aktuální jazyk:', aktualniJazyk);
   }
 
   // Spustit inicializaci při načtení DOMu

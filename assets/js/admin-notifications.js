@@ -216,8 +216,6 @@ if (document.readyState === 'loading') {
   initNotifications();
 }
 
-console.log('admin-notifications.js loaded');
-
 // ============================================
 // MODAL FUNCTIONS
 // ============================================
@@ -468,8 +466,6 @@ function renderBCCEmails() {
     </div>
   `).join('');
 }
-
-console.log('Modal functions loaded');
 
 // Override pro zajištění správné velikosti
 function addModalStyles() {

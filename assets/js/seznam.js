@@ -1,6 +1,5 @@
 // VERSION CHECK: 20251202-01 - Step 43: Alpine.js detailModal migrace
 // Step 43: Migrace detailModal na CSP-safe Alpine.js
-console.log('[SEZNAM.JS] NACTEN - VERZE: 20251202-01 (Alpine.js detailModal)');
 
 // BEZPEČNOST: Cache CSRF tokenu pro prevenci nekonečné smyčky
 window.csrfTokenCache = window.csrfTokenCache || null;
