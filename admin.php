@@ -1017,6 +1017,10 @@ function loadNotifContent(type, body) {
   <?php require_once __DIR__ . '/includes/admin_configuration.php'; ?>
   <?php endif; ?>
 
+  <?php if ($activeTab === 'tools'): ?>
+  <!-- TAB: DIAGNOSTIKA & ÚDRŽBA -->
+  <?php require_once __DIR__ . '/includes/admin_diagnostics.php'; ?>
+  <?php endif; ?>
 
   <?php if ($activeTab === 'online'): ?>
   <!-- TAB: ONLINE -->
