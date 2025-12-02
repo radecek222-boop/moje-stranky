@@ -309,14 +309,8 @@ function logErrorToServer(error) {
     errorLogger.add(error);
 }
 
-/**
- * Escape HTML pro bezpečné zobrazení
- */
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+// escapeHtml přesunuto do utils.js (Step 107)
+// Funkce je dostupná jako window.escapeHtml() nebo Utils.escapeHtml()
 
 /**
  * Enhanced fetch wrapper s error handlingem
