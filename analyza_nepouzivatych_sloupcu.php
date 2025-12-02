@@ -170,46 +170,58 @@ try {
     // 5. Hledat sloupce v PHP kódu
     echo "<h2>3. Kontrola použití v PHP kódu</h2>";
 
-    echo "<div class='info'>";
-    echo "Hledám výskyty sloupců v PHP souborech...";
-    echo "</div>";
+    // Kontrola, zda je exec() dostupná
+    if (!function_exists('exec')) {
+        echo "<div class='warning'>";
+        echo "<strong>⚠️ FUNKCE exec() NENÍ DOSTUPNÁ</strong><br>";
+        echo "Funkce <code>exec()</code> je zakázána na tomto serveru.<br>";
+        echo "Kontrola výskytů v PHP kódu není možná.<br><br>";
+        echo "<strong>Manuální kontrola:</strong><br>";
+        echo "Použijte IDE nebo příkaz grep lokálně pro vyhledání sloupců v kódu:<br>";
+        echo "<code>grep -r 'nazev_sloupce' /cesta/k/projektu --include='*.php'</code>";
+        echo "</div>";
+    } else {
+        echo "<div class='info'>";
+        echo "Hledám výskyty sloupců v PHP souborech...";
+        echo "</div>";
 
-    // Seznam podezřelých sloupců ke kontrole
-    $podezreleSloupce = array_merge(
-        array_column($vzhdyNull, 'sloupec'),
-        array_column($casteNull, 'sloupec')
-    );
+        // Seznam podezřelých sloupců ke kontrole
+        $podezreleSloupce = array_merge(
+            array_column($vzhdyNull, 'sloupec'),
+            array_column($casteNull, 'sloupec')
+        );
 
-    if (!empty($podezreleSloupce)) {
-        echo "<table>";
-        echo "<tr><th>Sloupec</th><th>Výskyty v PHP</th><th>Status</th></tr>";
+        if (!empty($podezreleSloupce)) {
+            echo "<table>";
+            echo "<tr><th>Sloupec</th><th>Výskyty v PHP</th><th>Status</th></tr>";
 
-        foreach ($podezreleSloupce as $sloupec) {
-            // Hledat v PHP souborech
-            $searchPaths = [
-                __DIR__ . '/app',
-                __DIR__ . '/api',
-                __DIR__ . '/includes'
-            ];
+            foreach ($podezreleSloupce as $sloupec) {
+                // Hledat v PHP souborech
+                $searchPaths = [
+                    __DIR__ . '/app',
+                    __DIR__ . '/api',
+                    __DIR__ . '/includes'
+                ];
 
-            $vyskyt = 0;
-            foreach ($searchPaths as $path) {
-                if (is_dir($path)) {
-                    exec("grep -r \"{$sloupec}\" {$path} --include='*.php' 2>/dev/null | wc -l", $output);
-                    $vyskyt += (int)($output[0] ?? 0);
-                    unset($output);
+                $vyskyt = 0;
+                foreach ($searchPaths as $path) {
+                    if (is_dir($path)) {
+                        exec("grep -r \"{$sloupec}\" {$path} --include='*.php' 2>/dev/null | wc -l", $output);
+                        $vyskyt += (int)($output[0] ?? 0);
+                        unset($output);
+                    }
                 }
+
+                $status = $vyskyt > 0 ? "<span class='status-used'>✅ Používá se ({$vyskyt}×)</span>" : "<span class='status-unused'>❌ NEPOUŽÍVÁ SE</span>";
+
+                echo "<tr>";
+                echo "<td><code>{$sloupec}</code></td>";
+                echo "<td>{$vyskyt}</td>";
+                echo "<td>{$status}</td>";
+                echo "</tr>";
             }
-
-            $status = $vyskyt > 0 ? "<span class='status-used'>✅ Používá se ({$vyskyt}×)</span>" : "<span class='status-unused'>❌ NEPOUŽÍVÁ SE</span>";
-
-            echo "<tr>";
-            echo "<td><code>{$sloupec}</code></td>";
-            echo "<td>{$vyskyt}</td>";
-            echo "<td>{$status}</td>";
-            echo "</tr>";
+            echo "</table>";
         }
-        echo "</table>";
     }
 
     // 6. Doporučení
