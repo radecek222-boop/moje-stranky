@@ -467,10 +467,13 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
         <!-- Typ zákazníka - IČO nebo fyzická osoba -->
         <div class="typ-zakaznika-wrapper" style="display: flex; gap: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
-          <label class="typ-zakaznika-label" style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
-            <input type="checkbox" id="objednavkaICO" name="objednavka_ico" style="width: auto; margin-right: 0.5rem; cursor: pointer;">
-            <span data-lang-cs="Objednávka byla na IČO" data-lang-en="Order was on company ID" data-lang-it="Ordine su partita IVA">Objednávka byla na IČO</span>
-          </label>
+          <div style="display: flex; flex-direction: column;">
+            <label class="typ-zakaznika-label" style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
+              <input type="checkbox" id="objednavkaICO" name="objednavka_ico" style="width: auto; margin-right: 0.5rem; cursor: pointer;">
+              <span data-lang-cs="Objednávka byla na IČO" data-lang-en="Order was on company ID" data-lang-it="Ordine su partita IVA">Objednávka byla na IČO</span>
+            </label>
+            <span style="font-size: 0.75rem; color: #c00; margin-left: 1.5rem; margin-top: 0.25rem;" data-lang-cs="Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně" data-lang-en="The buyer has been informed that the 30-day consumer period does not apply; processing will be done promptly within a reasonable time" data-lang-it="L'acquirente è stato informato che non si applica il periodo di 30 giorni per i consumatori; l'elaborazione avverrà tempestivamente">Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně</span>
+          </div>
           <label class="typ-zakaznika-label" style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
             <input type="checkbox" id="objednavkaFyzicka" name="objednavka_fyzicka" style="width: auto; margin-right: 0.5rem; cursor: pointer;">
             <span data-lang-cs="Objednávka byla na fyzickou osobu" data-lang-en="Order was on individual" data-lang-it="Ordine su persona fisica">Objednávka byla na fyzickou osobu</span>

@@ -341,6 +341,7 @@ if ($initialBootstrapData) {
   <!-- Pouze zobrazení podpisu (read-only) -->
   <canvas id="signature-pad" class="signature-display"></canvas>
   <div class="gdpr-clause" style="margin-top: 10px; padding: 8px; font-size: 8px; line-height: 1.4; color: #666; border-top: 1px solid #ddd; text-align: justify;">
+    <span data-lang-cs="Podpisem stvrzuji, že jsem byl(a) seznámen(a) s obsahem." data-lang-en="By signing, I confirm that I have been informed of the content." data-lang-it="Con la firma confermo di essere stato informato del contenuto.">Podpisem stvrzuji, že jsem byl(a) seznámen(a) s obsahem.</span><br><br>
     <strong>Ochrana osobních údajů (GDPR):</strong> Podpisem tohoto protokolu souhlasíte se zpracováním Vašich osobních údajů společností White Glove Service za účelem poskytování servisních služeb, komunikace s výrobcem, prodejcem a dalšími techniky. Vaše údaje budou zpracovávány v souladu s GDPR a budou použity pouze pro účely vyřízení této reklamace. Máte právo na přístup k údajům, jejich opravu nebo výmaz. Více na www.wgs-service.cz/gdpr
   </div>
 
