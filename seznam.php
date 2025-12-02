@@ -52,10 +52,10 @@ if (!$isLoggedIn && !$isAdmin) {
   <link rel="stylesheet" href="assets/css/styles.min.css?v=20251121-02">
   <link rel="stylesheet" href="assets/css/seznam.min.css?v=20251202">
   <!-- seznam-mobile-fixes.css sloučen do seznam.css (Step 50) -->
-  <link rel="stylesheet" href="assets/css/button-fixes-global.css">
+  <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.css?v=20251121-02">
 <?php if ($isAdmin): ?>
-<link rel="stylesheet" href="assets/css/admin-header.css">
+<link rel="stylesheet" href="assets/css/admin-header.min.css">
 <?php endif; ?>
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
@@ -1586,7 +1586,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 <!-- External JavaScript -->
 <script src="assets/js/seznam.js?v=20251202" defer></script>
 <!-- seznam-delete-patch.js odstraněn - delete button je přímo v showCustomerDetail (Step 52) -->
-<script src="assets/js/pwa-notifications.js" defer></script>
+<script src="assets/js/pwa-notifications.min.js" defer></script>
 
 <!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
 <script>
