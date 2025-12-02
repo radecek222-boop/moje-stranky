@@ -523,6 +523,7 @@
 .calc-input:focus {
   outline: none;
   border-color: #4a4a4a;
+  box-shadow: 0 0 0 2px rgba(74, 74, 74, 0.2);
 }
 
 .suggestions-dropdown {
@@ -880,6 +881,7 @@
 .calc-input:focus {
   border-color: #4a4a4a !important;
   outline: none !important;
+  box-shadow: 0 0 0 2px rgba(74, 74, 74, 0.2) !important;
 }
 
 .suggestions-dropdown {
@@ -1625,6 +1627,7 @@
 .calc-input:focus {
   outline: none;
   border-color: #4a4a4a;
+  box-shadow: 0 0 0 2px rgba(74, 74, 74, 0.2);
 }
 
 .calc-result {

@@ -546,6 +546,14 @@ button.note-delete-btn:hover {
     box-shadow: none !important;
 }
 
+.modal-body .note-delete-btn:focus,
+.modal-content .note-delete-btn:focus,
+.notes-container .note-delete-btn:focus,
+button.note-delete-btn:focus {
+    outline: 2px solid rgba(0, 0, 0, 0.5) !important;
+    outline-offset: 2px !important;
+}
+
 /* Note header flexbox pro tlacitko */
 .modal-body .note-header,
 .modal-content .note-header {
@@ -612,6 +620,7 @@ button.note-delete-btn:hover {
 .modal-content .note-textarea:focus {
     border-color: rgba(255, 255, 255, 0.3) !important;
     outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important;
 }
 
 /* Input area pro poznámky */
