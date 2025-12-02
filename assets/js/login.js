@@ -8,6 +8,83 @@ const userLoginFields = document.getElementById('userLoginFields');
 const adminLoginFields = document.getElementById('adminLoginFields');
 const loginForm = document.getElementById('loginForm');
 
+// ============================================================
+// FIX: DETEKCE BROWSER AUTOFILL (PWA problem)
+// Browser autofill nespouští input/change eventy
+// ============================================================
+function detekujAutofill() {
+  const emailInput = document.getElementById('userEmail');
+  const passwordInput = document.getElementById('userPassword');
+  const adminKeyInput = document.getElementById('adminKey');
+
+  // Metoda 1: Kontrola :autofill pseudo-class (Chrome/Safari)
+  function jeAutofilled(input) {
+    if (!input) return false;
+    try {
+      // Chrome/Safari autofill detection
+      return input.matches(':-webkit-autofill') ||
+             input.matches(':autofill') ||
+             // Fallback: kontrola computed style (žluté pozadí)
+             getComputedStyle(input).backgroundColor !== 'rgb(255, 255, 255)';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Metoda 2: Kontrola hodnoty přímo
+  function maHodnotu(input) {
+    if (!input) return false;
+    return input.value && input.value.length > 0;
+  }
+
+  // Trigger input event pro autofilled pole
+  function triggerInputEvent(input) {
+    if (!input) return;
+    if (jeAutofilled(input) || maHodnotu(input)) {
+      // Dispatch input event aby JavaScript věděl o hodnotě
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      logger.log('[Autofill] Detekován autofill pro:', input.id);
+    }
+  }
+
+  // Zkontrolovat všechna pole
+  [emailInput, passwordInput, adminKeyInput].forEach(triggerInputEvent);
+}
+
+// Spustit detekci autofill po načtení stránky
+// Musí být s malým zpožděním, protože browser autofill probíhá async
+document.addEventListener('DOMContentLoaded', () => {
+  // Okamžitá kontrola
+  setTimeout(detekujAutofill, 100);
+  // Opakovaná kontrola po 500ms (pro pomalejší autofill)
+  setTimeout(detekujAutofill, 500);
+  // Další kontrola po 1s (pro PWA kde může být zpoždění)
+  setTimeout(detekujAutofill, 1000);
+});
+
+// Metoda 3: Listener na animationstart (Chrome autofill spouští animaci)
+document.addEventListener('animationstart', (e) => {
+  if (e.animationName === 'onAutoFillStart' || e.animationName.includes('autofill')) {
+    detekujAutofill();
+  }
+}, true);
+
+// Metoda 4: Focus na pole spustí kontrolu
+['userEmail', 'userPassword', 'adminKey'].forEach(id => {
+  const input = document.getElementById(id);
+  if (input) {
+    input.addEventListener('focus', () => {
+      // Při focusu zkontrolovat zda má hodnotu z autofill
+      setTimeout(() => {
+        if (input.value && input.value.length > 0) {
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }, 50);
+    });
+  }
+});
+
 async function getCsrfTokenFromForm(form, maxRetries = 3) {
   if (!form) return null;
 
@@ -183,8 +260,21 @@ async function handleAdminLogin() {
 // USER LOGIN
 // ============================================================
 async function handleUserLogin() {
-  const email = document.getElementById('userEmail').value.trim();
-  const password = document.getElementById('userPassword').value.trim();
+  const emailInput = document.getElementById('userEmail');
+  const passwordInput = document.getElementById('userPassword');
+
+  // FIX: Přečíst hodnoty přímo z DOM (autofill fix)
+  // Některé prohlížeče nereportují .value správně pro autofilled pole
+  let email = emailInput ? emailInput.value.trim() : '';
+  let password = passwordInput ? passwordInput.value.trim() : '';
+
+  // FIX: Pokud jsou pole prázdná, zkusit je přečíst znovu po malém zpoždění
+  // (některé prohlížeče potřebují čas na propagaci autofill hodnot)
+  if (!email || !password) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    email = emailInput ? emailInput.value.trim() : '';
+    password = passwordInput ? passwordInput.value.trim() : '';
+  }
 
   // FIX 11: Remember Me checkbox
   const rememberMe = document.getElementById('rememberMe')?.checked || false;
