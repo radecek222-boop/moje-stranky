@@ -3,6 +3,16 @@
  * Zachytává všechny JS chyby a zobrazuje detailní informace
  */
 
+// Fallback pro escapeHtml pokud utils.js není načten
+if (typeof escapeHtml === 'undefined') {
+  window.escapeHtml = function(text) {
+    if (text === null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+  };
+}
+
 // Global error handler
 window.addEventListener('error', function(event) {
     const error = {

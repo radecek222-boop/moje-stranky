@@ -38,6 +38,31 @@ const WGS = {
     this.initProvedeni();
     this.initLanguage();
     this.initCustomCalendar();
+    this.initTypZakaznika(); // Vzájemně výlučné checkboxy IČO/fyzická osoba
+  },
+
+  // Inicializace vzájemně výlučných checkboxů pro typ zákazníka
+  initTypZakaznika() {
+    const icoCheckbox = document.getElementById('objednavkaICO');
+    const fyzickaCheckbox = document.getElementById('objednavkaFyzicka');
+
+    if (!icoCheckbox || !fyzickaCheckbox) return;
+
+    // Když zaškrtnu IČO, odškrtnu fyzickou osobu
+    icoCheckbox.addEventListener('change', () => {
+      if (icoCheckbox.checked) {
+        fyzickaCheckbox.checked = false;
+      }
+    });
+
+    // Když zaškrtnu fyzickou osobu, odškrtnu IČO
+    fyzickaCheckbox.addEventListener('change', () => {
+      if (fyzickaCheckbox.checked) {
+        icoCheckbox.checked = false;
+      }
+    });
+
+    logger.log('[TypZakaznika] Inicializovány vzájemně výlučné checkboxy');
   },
   
   checkLoginStatus() {
@@ -635,6 +660,7 @@ const WGS = {
    * @returns {Object} { valid: boolean, chybejici: string[] }
    */
   validatePovinnaPole() {
+    // Základní povinná pole pro všechny
     const povinnaPole = [
       { id: 'jmeno', label: 'Jméno a příjmení' },
       { id: 'email', label: 'E-mail' },
@@ -644,6 +670,15 @@ const WGS = {
       { id: 'psc', label: 'PSČ' },
       { id: 'popis_problemu', label: 'Popis problému' }
     ];
+
+    // Přidat pole povinná pouze pro přihlášené uživatele
+    if (this.isLoggedIn) {
+      povinnaPole.unshift(
+        { id: 'cislo', label: 'Číslo zakázky' },
+        { id: 'datum_prodeje', label: 'Datum prodeje' },
+        { id: 'datum_reklamace', label: 'Datum reklamace' }
+      );
+    }
 
     const chybejici = [];
     let prvniPrazdne = null;
@@ -741,6 +776,17 @@ const WGS = {
       formData.append('datum_reklamace', document.getElementById('datum_reklamace').value || '');
       formData.append('jmeno', document.getElementById('jmeno').value || '');
       formData.append('email', document.getElementById('email').value || '');
+
+      // Typ zákazníka - IČO nebo fyzická osoba
+      const icoCheckbox = document.getElementById('objednavkaICO');
+      const fyzickaCheckbox = document.getElementById('objednavkaFyzicka');
+      let typZakaznika = '';
+      if (icoCheckbox?.checked) {
+        typZakaznika = 'IČO';
+      } else if (fyzickaCheckbox?.checked) {
+        typZakaznika = 'Fyzická osoba';
+      }
+      formData.append('typ_zakaznika', typZakaznika);
 
       // Spojit předvolbu + telefonní číslo
       const phonePrefix = document.getElementById('phone-prefix')?.value || '+420';

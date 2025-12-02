@@ -4,6 +4,15 @@
 
 // escapeHtml přesunuto do utils.js (Step 107)
 // Funkce je dostupná jako window.escapeHtml() nebo Utils.escapeHtml()
+// Fallback pokud utils.js není načten
+if (typeof escapeHtml === 'undefined') {
+  window.escapeHtml = function(text) {
+    if (text === null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+  };
+}
 
 async function showWelcomeModal(userName, userRole) {
   try {
