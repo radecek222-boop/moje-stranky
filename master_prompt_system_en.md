@@ -2171,3 +2171,23 @@ The codebase is now in a good state with:
 - Total declarations migrated: 80+ (across all phases)
 - Coverage: 100% of source CSS files
 
+## [Step 105]: Extract Utility Functions to utils.js
+- **Date:** 2025-12-02
+- **What:** Extracted `escapeRegex()` and `highlightText()` from seznam.js to centralized utils.js.
+- **How:**
+  1. Added `escapeRegex()` function to utils.js - escapes regex special characters
+  2. Added `highlightText()` function to utils.js - highlights search matches with HTML span
+  3. Updated seznam.js to use Utils.highlightText with fallback for backwards compatibility
+  4. Removed dead code (empty `if (unreadCount > 0) {}` block)
+  5. Regenerated seznam.min.js and utils.min.js with source maps
+- **Why:**
+  - `escapeRegex()` was duplicated in seznam.js and novareklamace.js
+  - `highlightText()` is a general utility suitable for reuse
+  - Dead code (empty if block) was leftover from development
+  - Moves toward smaller, more focused JS files per master plan section 5.1
+- **Files touched:**
+  - `assets/js/utils.js` (MODIFIED - +30 lines)
+  - `assets/js/seznam.js` (MODIFIED - -12 lines)
+  - `assets/js/utils.min.js`, `seznam.min.js` + source maps (REGENERATED)
+- **Result:** Code deduplication complete. seznam.js reduced by 12 lines, utils.js now provides shared text utilities.
+
