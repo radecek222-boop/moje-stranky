@@ -1038,5 +1038,18 @@ Alpine.data('modalName', () => ({
 1. **HTMX migration** - Server-driven UI updates (not started)
 2. **CSS consolidation** - Merge mobile-fixes.css files (requires visual testing)
 3. **Patch.js integration** - Merge into main JS files (requires functional testing)
-4. **Minified files regeneration** - Run `./scripts/minify-assets.sh`
+4. ~~**Minified files regeneration**~~ - ✅ Completed in Step 46
+
+## [Step 46]: Regenerate All Minified Assets
+- **What:** Regenerated all outdated .min.js and .min.css files to include Alpine.js migration and z-index CSS variable changes.
+- **How:**
+  - JS: Used `terser` to regenerate 5 files (novareklamace, seznam, protokol, analytics, photocustomer)
+  - CSS: Used `csso-cli` to regenerate 13 files (admin, analytics, cenik, index, login, mobile-responsive, nasesluzby, novareklamace, onas, photocustomer, protokol, seznam, styles)
+  - Updated cache-busting version numbers in PHP files
+- **Why:** Minified files were outdated after Alpine.js modal migrations (Steps 35-45) and z-index CSS variable migration (Steps 9-18). Old minified files could cause JavaScript errors and incorrect z-index stacking.
+- **Files touched:**
+  - 5 JS files: `*.min.js`
+  - 13 CSS files: `*.min.css`
+  - 3 PHP files: version number updates (novareklamace.php, protokol.php, seznam.php)
+- **Result:** All minified assets are now synchronized with source files. No more cache issues.
 
