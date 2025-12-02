@@ -323,9 +323,80 @@ console.log('Checkbox Fyzická element:', fyzCheck);
 </pre>";
 echo "</div>";
 
+// =============================================================================
+// KROK 9: Přímý SQL test - stejný jako protokol.php
+// =============================================================================
+echo "<div class='container'>";
+echo "<h2><span class='step'>9</span> Přímý SQL test (stejný jako protokol.php)</h2>";
+
+$testValue = $_GET['sql_test'] ?? 'WGS/2025/02-12/00002';
+
+echo "<form method='get' style='margin-bottom:20px;'>";
+echo "<label>Hodnota pro SQL test: </label>";
+echo "<input type='text' name='sql_test' value='" . htmlspecialchars($testValue) . "' style='padding:8px; width:400px;'>";
+echo "<button type='submit' class='btn'>Spustit SQL</button>";
+echo "</form>";
+
+echo "<div class='info'>";
+echo "<strong>SQL dotaz (stejný jako v protokol.php):</strong><br>";
+echo "<code>SELECT * FROM wgs_reklamace WHERE reklamace_id = :value OR cislo = :value OR id = :value2</code><br>";
+echo "<strong>Hodnota:</strong> <code>" . htmlspecialchars($testValue) . "</code>";
+echo "</div>";
+
+try {
+    $stmt = $pdo->prepare(
+        "SELECT id, reklamace_id, cislo, jmeno, typ_zakaznika
+         FROM wgs_reklamace
+         WHERE reklamace_id = :value OR cislo = :value OR id = :value2
+         LIMIT 1"
+    );
+    $stmt->execute([':value' => $testValue, ':value2' => $testValue]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($result) {
+        echo "<div class='success'>";
+        echo "<strong>ZÁZNAM NALEZEN!</strong><br>";
+        echo "<pre>" . htmlspecialchars(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . "</pre>";
+        echo "</div>";
+    } else {
+        echo "<div class='error'>";
+        echo "<strong>ZÁZNAM NENALEZEN!</strong><br>";
+        echo "SQL dotaz nevrátil žádné výsledky.";
+        echo "</div>";
+
+        // Zkusit najít podobné záznamy
+        echo "<h3>Hledám podobné záznamy...</h3>";
+        $stmt2 = $pdo->prepare("SELECT id, reklamace_id, cislo FROM wgs_reklamace WHERE reklamace_id LIKE :pattern LIMIT 5");
+        $stmt2->execute([':pattern' => '%' . substr($testValue, 0, 20) . '%']);
+        $similar = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($similar) {
+            echo "<table>";
+            echo "<tr><th>ID</th><th>reklamace_id (HEX)</th><th>cislo</th></tr>";
+            foreach ($similar as $row) {
+                echo "<tr>";
+                echo "<td>{$row['id']}</td>";
+                echo "<td>" . htmlspecialchars($row['reklamace_id']) . "<br><small>HEX: " . bin2hex($row['reklamace_id']) . "</small></td>";
+                echo "<td>" . htmlspecialchars($row['cislo']) . "</td>";
+                echo "</tr>";
+            }
+            echo "</table>";
+
+            echo "<div class='warning'>";
+            echo "<strong>Porovnání HEX:</strong><br>";
+            echo "Hledaná hodnota HEX: <code>" . bin2hex($testValue) . "</code>";
+            echo "</div>";
+        }
+    }
+} catch (PDOException $e) {
+    echo "<div class='error'>SQL Error: " . htmlspecialchars($e->getMessage()) . "</div>";
+}
+echo "</div>";
+
 echo "<div class='container'>";
 echo "<a href='admin.php' class='btn' style='background:#666;'>Zpět do administrace</a>";
 echo "<a href='?test_id=" . urlencode($reklamace[0]['reklamace_id'] ?? '') . "' class='btn'>Testovat nejnovější záznam</a>";
+echo "<a href='?sql_test=" . urlencode($reklamace[0]['reklamace_id'] ?? '') . "' class='btn'>SQL test nejnovějšího</a>";
 echo "</div>";
 
 echo "</body></html>";
