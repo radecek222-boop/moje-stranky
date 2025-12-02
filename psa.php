@@ -179,7 +179,7 @@
 <script src="assets/js/logger.js" defer></script>
 
 <!-- Main JavaScript -->
-<script src="assets/js/psa-kalkulator.js" defer></script>
+<script src="assets/js/psa-kalkulator.min.js" defer></script>
 
 </body>
 </html>
