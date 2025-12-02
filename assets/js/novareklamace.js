@@ -46,11 +46,24 @@ const WGS = {
     const icoCheckbox = document.getElementById('objednavkaICO');
     const fyzickaCheckbox = document.getElementById('objednavkaFyzicka');
     const typZakaznikaWrapper = document.querySelector('.typ-zakaznika-wrapper');
+    const hiddenValidace = document.getElementById('typZakaznikaValidace');
 
     if (!icoCheckbox || !fyzickaCheckbox) return;
 
-    // Funkce pro odstranění červeného označení při zaškrtnutí
-    const odstranitCerveneOznaceni = () => {
+    // Funkce pro aktualizaci hidden inputu a odstranění červeného označení
+    const aktualizovatValidaci = () => {
+      // Nastavit hodnotu hidden inputu pro HTML5 validaci
+      if (hiddenValidace) {
+        if (icoCheckbox.checked) {
+          hiddenValidace.value = 'ICO';
+        } else if (fyzickaCheckbox.checked) {
+          hiddenValidace.value = 'FYZICKA';
+        } else {
+          hiddenValidace.value = '';
+        }
+      }
+
+      // Odstranit červené označení pokud je něco zaškrtnuto
       if (typZakaznikaWrapper && (icoCheckbox.checked || fyzickaCheckbox.checked)) {
         typZakaznikaWrapper.style.border = '';
         typZakaznikaWrapper.style.backgroundColor = '';
@@ -64,7 +77,7 @@ const WGS = {
       if (icoCheckbox.checked) {
         fyzickaCheckbox.checked = false;
       }
-      odstranitCerveneOznaceni();
+      aktualizovatValidaci();
     });
 
     // Když zaškrtnu fyzickou osobu, odškrtnu IČO
@@ -72,10 +85,10 @@ const WGS = {
       if (fyzickaCheckbox.checked) {
         icoCheckbox.checked = false;
       }
-      odstranitCerveneOznaceni();
+      aktualizovatValidaci();
     });
 
-    logger.log('[TypZakaznika] Inicializovány vzájemně výlučné checkboxy');
+    logger.log('[TypZakaznika] Inicializovány vzájemně výlučné checkboxy s validací');
   },
   
   checkLoginStatus() {
