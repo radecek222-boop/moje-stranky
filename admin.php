@@ -156,7 +156,7 @@ if (!$embedMode && $activeTab === 'dashboard'):
         <p class="admin-dashboard-subtitle" data-lang-cs="Centrální řídicí panel pro správu celé aplikace" data-lang-en="Central control panel for managing the entire application" data-lang-it="Pannello di controllo centrale per la gestione dell'intera applicazione">Centrální řídicí panel pro správu celé aplikace</p>
         <div class="admin-dashboard-actions">
             <span class="admin-version-info" id="adminVersionInfo" title="Verze Admin - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
-            <button class="admin-cache-btn" onclick="clearCacheAndReload()" data-lang-cs="Vymazat cache & Reload" data-lang-en="Clear cache & Reload" data-lang-it="Cancella cache & Ricarica">Vymazat cache & Reload</button>
+            <button class="admin-cache-btn" data-action="clearCacheAndReload" data-lang-cs="Vymazat cache & Reload" data-lang-en="Clear cache & Reload" data-lang-it="Cancella cache & Ricarica">Vymazat cache & Reload</button>
         </div>
     </div>
 
@@ -976,7 +976,7 @@ function loadNotifContent(type, body) {
   <div class="cc-modal" id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
       <div class="cc-modal-header">
           <h2 id="adminModalTitle" class="sr-only">Modal</h2>
-          <button class="cc-modal-close" onclick="closeCCModal()" aria-label="Zavřít">×</button>
+          <button class="cc-modal-close" data-action="closeCCModal" aria-label="Zavřít">×</button>
       </div>
       <div class="cc-modal-body" id="adminModalBody">
           <div class="cc-modal-loading">
@@ -1117,7 +1117,7 @@ function loadNotifContent(type, body) {
   <div class="modal-content" style="width: 1200px; max-width: 90vw; height: 80vh; display: flex; flex-direction: column; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
     <div class="modal-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #ddd; flex-shrink: 0;">
       <h3 class="modal-title" id="editNotificationTitle" data-lang-cs="Editovat notifikaci" data-lang-en="Edit Notification" data-lang-it="Modifica Notifica">Editovat notifikaci</h3>
-      <button class="modal-close" onclick="closeEditNotificationModal()" aria-label="Zavřít">×</button>
+      <button class="modal-close" data-action="closeEditNotificationModal" aria-label="Zavřít">×</button>
     </div>
     <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 2rem;">
       <div id="edit-notification-error" class="error-message" style="display: none;" role="alert"></div>
@@ -1150,7 +1150,7 @@ function loadNotifContent(type, body) {
         <label class="form-label" data-lang-cs="Dodatečné kopie emailů (CC)" data-lang-en="Additional Email Copies (CC)" data-lang-it="Copie Email Aggiuntive (CC)">Dodatečné kopie emailů (CC)</label>
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
           <input type="email" class="form-input" id="new-cc-email" data-lang-cs-placeholder="novy@email.cz" data-lang-en-placeholder="new@email.com" data-lang-it-placeholder="nuovo@email.it" placeholder="novy@email.cz" style="flex: 1;">
-          <button class="btn btn-sm" onclick="addCCEmail()" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
+          <button class="btn btn-sm" data-action="addCCEmail" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
         </div>
         <div id="admin-emails-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
       </div>
@@ -1158,14 +1158,14 @@ function loadNotifContent(type, body) {
         <label class="form-label" data-lang-cs="Skryté kopie (BCC)" data-lang-en="Blind Copies (BCC)" data-lang-it="Copie Nascoste (BCC)">Skryté kopie (BCC)</label>
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
           <input type="email" class="form-input" id="new-bcc-email" data-lang-cs-placeholder="skryta@email.cz" data-lang-en-placeholder="hidden@email.com" data-lang-it-placeholder="nascosta@email.it" placeholder="skryta@email.cz" style="flex: 1;">
-          <button class="btn btn-sm" onclick="addBCCEmail()" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
+          <button class="btn btn-sm" data-action="addBCCEmail" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
         </div>
         <div id="bcc-emails-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
       </div>
     </div>
     <div class="modal-footer" style="padding: 1.5rem 2rem; border-top: 1px solid #ddd; flex-shrink: 0;">
-      <button class="btn" onclick="closeEditNotificationModal()" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
-      <button class="btn btn-success" onclick="saveNotificationTemplate()" data-lang-cs="Uložit" data-lang-en="Save" data-lang-it="Salva">Uložit</button>
+      <button class="btn" data-action="closeEditNotificationModal" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
+      <button class="btn btn-success" data-action="saveNotificationTemplate" data-lang-cs="Uložit" data-lang-en="Save" data-lang-it="Salva">Uložit</button>
     </div>
   </div>
 </div>

@@ -1860,7 +1860,7 @@ window.addEventListener('message', function(event) {
   }
 });
 
-// === ACTION REGISTRY - Registrace akcí pro event delegation (Step 110) ===
+// === ACTION REGISTRY - Registrace akcí pro event delegation (Step 110-111) ===
 if (typeof Utils !== 'undefined' && Utils.registerAction) {
   // Navigace na SQL stránku
   Utils.registerAction('openSQLPage', () => openSQLPage());
@@ -1869,6 +1869,45 @@ if (typeof Utils !== 'undefined' && Utils.registerAction) {
   Utils.registerAction('openNotifModal', (el, data) => {
     if (data.modal && typeof openNotifModal === 'function') {
       openNotifModal(data.modal);
+    }
+  });
+
+  // Cache clear a reload
+  Utils.registerAction('clearCacheAndReload', () => {
+    if (typeof clearCacheAndReload === 'function') {
+      clearCacheAndReload();
+    }
+  });
+
+  // Modal close akce
+  Utils.registerAction('closeCCModal', () => {
+    if (typeof closeCCModal === 'function') {
+      closeCCModal();
+    }
+  });
+
+  Utils.registerAction('closeEditNotificationModal', () => {
+    if (typeof closeEditNotificationModal === 'function') {
+      closeEditNotificationModal();
+    }
+  });
+
+  // Email management akce
+  Utils.registerAction('addCCEmail', () => {
+    if (typeof addCCEmail === 'function') {
+      addCCEmail();
+    }
+  });
+
+  Utils.registerAction('addBCCEmail', () => {
+    if (typeof addBCCEmail === 'function') {
+      addBCCEmail();
+    }
+  });
+
+  Utils.registerAction('saveNotificationTemplate', () => {
+    if (typeof saveNotificationTemplate === 'function') {
+      saveNotificationTemplate();
     }
   });
 }
