@@ -127,8 +127,8 @@ if ($activeTab === 'dashboard') {
   <link rel="stylesheet" href="/assets/css/universal-modal-theme.min.css">
 
   <!-- Error Handler - zachytává všechny chyby -->
-  <script src="/assets/js/error-handler.js"></script>
-  <script src="/assets/js/html-sanitizer.js"></script>
+  <script src="/assets/js/error-handler.min.js"></script>
+  <script src="/assets/js/html-sanitizer.min.js"></script>
 </head>
 
 <body<?php
@@ -1105,7 +1105,7 @@ function loadNotifContent(type, body) {
 <script src="/assets/js/csrf-auto-inject.js"></script>
 <!-- logout-handler.js je v hamburger-menu.php (nacita se VSUDE vcetne dashboardu) -->
 <script src="/assets/js/utils.js"></script>
-<script src="/assets/js/admin-notifications.js"></script>
+<script src="/assets/js/admin-notifications.min.js"></script>
 <script src="/assets/js/smtp-config.js"></script>
 <script src="/assets/js/admin.min.js"></script>
 

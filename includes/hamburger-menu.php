@@ -1193,6 +1193,6 @@ document.addEventListener('alpine:init', () => {
 <!-- Translations - překladový slovník pro dynamický obsah -->
 <script src="/assets/js/translations.min.js"></script>
 <!-- Language Switcher - centralizovaný jazykový přepínač -->
-<script src="/assets/js/language-switcher.js" defer></script>
+<script src="/assets/js/language-switcher.min.js" defer></script>
 <!-- KRITICKA OPRAVA: logout-handler.js MUSI byt zde, protoze hamburger-menu se nacita VSUDE! -->
 <script src="/assets/js/logout-handler.js"></script>
