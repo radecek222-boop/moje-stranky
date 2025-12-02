@@ -1071,3 +1071,22 @@ Alpine.data('modalName', () => ({
   - `assets/js/protokol-fakturace-patch.js` (DELETED)
 - **Result:** Reduced from 2 loadReklamace wrappers to 1. One less patch file to maintain.
 
+## [Step 48]: Merge protokol-mobile-fixes.css into protokol.css
+- **What:** Merged `protokol-mobile-fixes.css` into the main `protokol.css` and removed the redundant file.
+- **How:**
+  - Added mobile-specific styles to the end of protokol.css (customer header, iOS zoom prevention, photo grid, PDF preview)
+  - Replaced @import of button-fixes-global.css with direct `<link>` in protokol.php
+  - Deleted protokol-mobile-fixes.css
+  - Regenerated protokol.min.css using csso
+- **Why:**
+  - Per section 4.1 of master plan: "move these fixes into the main code paths and then retire the patch files"
+  - Reduces CSS file fragmentation (1 less file to load)
+  - Simplifies maintenance - all protokol styles in one place
+  - button-fixes-global.css still loaded directly for global button touch targets
+- **Files touched:**
+  - `assets/css/protokol.css` (MODIFIED - added ~100 lines of mobile fixes)
+  - `assets/css/protokol.min.css` (REGENERATED)
+  - `protokol.php` (MODIFIED - replaced link to mobile-fixes with button-fixes-global)
+  - `assets/css/protokol-mobile-fixes.css` (DELETED)
+- **Result:** One less CSS file to maintain. Mobile fixes now integrated into main stylesheet.
+

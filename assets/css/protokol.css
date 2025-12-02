@@ -1528,3 +1528,109 @@ body.pdf-export-mode #signature-pad {
   cursor: default;
 }
 
+/* ============================================================================
+   MOBILE FIXES - Sloučeno z protokol-mobile-fixes.css (Step 48)
+   PWA Responsive opravy pro protokol.php
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  /* Customer Info Header - Touch target 44px */
+  .customer-info-header {
+    padding: 16px 15px !important;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Input Font-Size - Prevent iOS Auto-Zoom */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+    padding: 10px 6px !important;
+    min-height: 44px;
+    line-height: 1.4;
+  }
+
+  /* Výjimka pro readonly pole */
+  input[readonly],
+  select[disabled] {
+    font-size: 13px !important;
+  }
+
+  /* Section Title - Zvýšit padding */
+  .section-title {
+    padding: 18px 10px !important;
+    min-height: 48px;
+  }
+
+  /* Photo Preview Grid Touch Feedback */
+  #photoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .photo-thumb-wrapper {
+    min-height: 80px;
+    min-width: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid rgba(255,255,255,0.15);
+    cursor: pointer;
+  }
+
+  .photo-thumb-wrapper:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .photo-thumb-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Touch Optimization pro všechny buttons */
+  .btn,
+  button,
+  .translate-btn {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Notification - Touch to Dismiss */
+  .notif,
+  #notif {
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* PDF Preview Modal - Touch Optimization */
+  .pdf-preview-container {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .pdf-action-btn {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    touch-action: manipulation;
+  }
+}
+

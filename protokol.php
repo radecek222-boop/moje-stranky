@@ -215,7 +215,8 @@ if ($initialBootstrapData) {
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/protokol.css">
-  <link rel="stylesheet" href="assets/css/protokol-mobile-fixes.css">
+  <!-- protokol-mobile-fixes.css sloučen do protokol.css (Step 48) -->
+  <link rel="stylesheet" href="assets/css/button-fixes-global.css">
   <link rel="stylesheet" href="assets/css/cenik.min.css">
   <link rel="stylesheet" href="assets/css/protokol-calculator-modal.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
