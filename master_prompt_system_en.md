@@ -1462,3 +1462,15 @@ header('Content-Type: text/html; charset=utf-8');
   - `statistiky.php`: Added preload for styles.min.css
 - **Result:** All main user-facing pages now have preload hints for faster CSS loading.
 
+## [Step 63]: Cache Headers Audit
+- **Date:** 2025-12-02
+- **What:** Audited and enhanced cache headers in .htaccess for all asset types.
+- **Analysis:**
+  - Existing cache headers already well configured for CSS, JS, images, fonts
+  - Missing: Source map files (.map) - 68 files without explicit cache rules
+  - Missing: application/json in mod_expires
+- **Changes to .htaccess:**
+  - Added Cache-Control for `.map` files: `public, max-age=31536000, immutable`
+  - Added ExpiresByType for `application/json`: 1 year
+- **Result:** Complete cache coverage for all static asset types including source maps.
+
