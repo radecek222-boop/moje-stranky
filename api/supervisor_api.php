@@ -69,19 +69,28 @@ try {
                 throw new Exception('Neplatné ID supervizora');
             }
 
+            // Zjistit strukturu tabulky wgs_users
+            $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
+            $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            // Zjistit primární klíč
+            $idCol = in_array('user_id', $columns) ? 'user_id' : 'id';
+            // Zjistit sloupec pro jméno
+            $nameCol = in_array('name', $columns) ? 'name' : (in_array('jmeno', $columns) ? 'jmeno' : 'email');
+
             // Načíst přiřazené prodejce
             $stmt = $pdo->prepare("
                 SELECT
                     sa.id as assignment_id,
                     sa.salesperson_user_id,
                     sa.created_at,
-                    u.jmeno,
+                    u.{$nameCol} as jmeno,
                     u.email,
                     u.role
                 FROM wgs_supervisor_assignments sa
-                JOIN wgs_users u ON u.user_id = sa.salesperson_user_id
+                JOIN wgs_users u ON u.{$idCol} = sa.salesperson_user_id
                 WHERE sa.supervisor_user_id = :supervisor_id
-                ORDER BY u.jmeno ASC
+                ORDER BY u.{$nameCol} ASC
             ");
             $stmt->execute([':supervisor_id' => $supervisorId]);
             $assignments = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -99,24 +108,32 @@ try {
         case 'getSalespersons':
             $excludeUserId = intval($_GET['exclude_user_id'] ?? 0);
 
+            // Zjistit strukturu tabulky wgs_users
+            $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
+            $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            $idCol = in_array('user_id', $columns) ? 'user_id' : 'id';
+            $nameCol = in_array('name', $columns) ? 'name' : (in_array('jmeno', $columns) ? 'jmeno' : 'email');
+            $activeCol = in_array('is_active', $columns) ? 'is_active = 1' : '1=1';
+
             // Načíst všechny aktivní uživatele kromě sebe sama
             $sql = "
                 SELECT
-                    user_id,
-                    jmeno,
+                    {$idCol} as user_id,
+                    {$nameCol} as jmeno,
                     email,
                     role
                 FROM wgs_users
-                WHERE is_active = 1
+                WHERE {$activeCol}
             ";
 
             $params = [];
             if ($excludeUserId > 0) {
-                $sql .= " AND user_id != :exclude_id";
+                $sql .= " AND {$idCol} != :exclude_id";
                 $params[':exclude_id'] = $excludeUserId;
             }
 
-            $sql .= " ORDER BY jmeno ASC";
+            $sql .= " ORDER BY {$nameCol} ASC";
 
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
