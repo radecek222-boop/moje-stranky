@@ -1585,3 +1585,19 @@ header('Content-Type: text/html; charset=utf-8');
   - `admin.php`: Added autocomplete="new-password" to add-user password, autocomplete="off" to SMTP and SMS API secrets
 - **Result:** Improved browser password manager integration and prevented saving of sensitive keys.
 
+## [Step 73]: Enterkeyhint Attributes for Mobile Keyboard UX
+- **Date:** 2025-12-02
+- **What:** Added `enterkeyhint` attributes to form inputs for better mobile keyboard experience.
+- **Analysis:**
+  - Search fields: `enterkeyhint="search"` (shows search icon on Enter key)
+  - Login forms: `enterkeyhint="send"` (shows send/go button for submission)
+  - Multi-field forms: `enterkeyhint="done"` on last field (indicates form completion)
+- **Files modified:**
+  - `seznam.php`: Added enterkeyhint="search" to search input
+  - `admin.php`: Added enterkeyhint="search" to user and customer search boxes
+  - `includes/admin_main.php`: Added enterkeyhint="search" to control center search
+  - `login.php`: Added enterkeyhint="send" to password and admin key fields
+  - `registration.php`: Added enterkeyhint="done" to password confirmation field
+  - `password_reset.php`: Added enterkeyhint="done" to password confirmation field
+- **Result:** Improved mobile keyboard UX with contextual Enter key labels.
+

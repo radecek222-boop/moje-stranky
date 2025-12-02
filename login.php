@@ -108,6 +108,7 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
         <label for="userPassword" data-lang-cs="Heslo" data-lang-en="Password" data-lang-it="Password">Heslo</label>
         <input type="password" id="userPassword" name="password"
                autocomplete="current-password"
+               enterkeyhint="send"
                data-lang-cs-placeholder="••••••••"
                data-lang-en-placeholder="••••••••"
                data-lang-it-placeholder="••••••••"
@@ -134,6 +135,7 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
         <label for="adminKey" data-lang-cs="Administrátorský klíč" data-lang-en="Administrator key" data-lang-it="Chiave amministratore">Administrátorský klíč</label>
         <input type="password" id="adminKey" name="admin_key"
                autocomplete="off"
+               enterkeyhint="send"
                data-lang-cs-placeholder="Zadejte klíč"
                data-lang-en-placeholder="Enter key"
                data-lang-it-placeholder="Inserisci chiave"

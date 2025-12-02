@@ -68,6 +68,7 @@ try {
         <input type="text"
                id="cc-search"
                placeholder="Hledat nastavení..."
+               enterkeyhint="search"
                autocomplete="off">
     </div>
 

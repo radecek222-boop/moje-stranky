@@ -77,7 +77,7 @@ $csrfToken = generateCSRFToken();
 
     <div class="form-group">
       <label for="regPasswordConfirm" data-lang-cs="Potvrzení hesla" data-lang-en="Password Confirmation" data-lang-it="Conferma Password">Potvrzení hesla</label>
-      <input type="password" id="regPasswordConfirm" name="passwordConfirm" placeholder="••••••••" required autocomplete="new-password">
+      <input type="password" id="regPasswordConfirm" name="passwordConfirm" placeholder="••••••••" required autocomplete="new-password" enterkeyhint="done">
     </div>
 
     <button type="submit" class="btn btn-primary" style="width: 100%;" data-lang-cs="Zaregistrovat se" data-lang-en="Register" data-lang-it="Registrati">Zaregistrovat se</button>

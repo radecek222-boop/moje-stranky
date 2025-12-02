@@ -68,7 +68,7 @@
 
       <div class="form-group">
         <label for="newPasswordConfirm">Potvrzení hesla</label>
-        <input type="password" id="newPasswordConfirm" name="new_password_confirm" placeholder="••••••••" required minlength="8" autocomplete="new-password">
+        <input type="password" id="newPasswordConfirm" name="new_password_confirm" placeholder="••••••••" required minlength="8" autocomplete="new-password" enterkeyhint="done">
       </div>
 
       <button type="submit" class="btn btn-success" style="width: 100%;">Nastavit nové heslo</button>
