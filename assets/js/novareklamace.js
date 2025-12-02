@@ -660,6 +660,7 @@ const WGS = {
    * @returns {Object} { valid: boolean, chybejici: string[] }
    */
   validatePovinnaPole() {
+    // Základní povinná pole pro všechny
     const povinnaPole = [
       { id: 'jmeno', label: 'Jméno a příjmení' },
       { id: 'email', label: 'E-mail' },
@@ -669,6 +670,15 @@ const WGS = {
       { id: 'psc', label: 'PSČ' },
       { id: 'popis_problemu', label: 'Popis problému' }
     ];
+
+    // Přidat pole povinná pouze pro přihlášené uživatele
+    if (this.isLoggedIn) {
+      povinnaPole.unshift(
+        { id: 'cislo', label: 'Číslo zakázky' },
+        { id: 'datum_prodeje', label: 'Datum prodeje' },
+        { id: 'datum_reklamace', label: 'Datum reklamace' }
+      );
+    }
 
     const chybejici = [];
     let prvniPrazdne = null;

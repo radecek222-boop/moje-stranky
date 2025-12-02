@@ -466,13 +466,13 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         <h2 class="section-title" data-lang-cs="Kontaktní údaje" data-lang-en="Contact Information" data-lang-it="Informazioni di Contatto">Kontaktní údaje</h2>
 
         <!-- Typ zákazníka - IČO nebo fyzická osoba -->
-        <div class="typ-zakaznika-wrapper" style="display: flex; gap: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <div class="typ-zakaznika-wrapper" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
           <div style="display: flex; flex-direction: column;">
             <label class="typ-zakaznika-label" style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
               <input type="checkbox" id="objednavkaICO" name="objednavka_ico" style="width: auto; margin-right: 0.5rem; cursor: pointer;">
               <span data-lang-cs="Objednávka byla na IČO" data-lang-en="Order was on company ID" data-lang-it="Ordine su partita IVA">Objednávka byla na IČO</span>
             </label>
-            <span style="font-size: 0.65rem; color: #c00; margin-left: 1.6rem; margin-top: 0.15rem; line-height: 1.3;" data-lang-cs="Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně" data-lang-en="The buyer has been informed that the 30-day consumer period does not apply; processing will be done promptly within a reasonable time" data-lang-it="L'acquirente è stato informato che non si applica il periodo di 30 giorni per i consumatori; l'elaborazione avverrà tempestivamente">Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně</span>
+            <span style="font-size: 0.65rem; color: #c00; margin-left: 1.35rem; margin-top: 0.15rem; line-height: 1.3;" data-lang-cs="Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně" data-lang-en="The buyer has been informed that the 30-day consumer period does not apply; processing will be done promptly within a reasonable time" data-lang-it="L'acquirente è stato informato che non si applica il periodo di 30 giorni per i consumatori; l'elaborazione avverrà tempestivamente">Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně</span>
           </div>
           <label class="typ-zakaznika-label" style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
             <input type="checkbox" id="objednavkaFyzicka" name="objednavka_fyzicka" style="width: auto; margin-right: 0.5rem; cursor: pointer;">
@@ -513,18 +513,18 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <h2 class="section-title" data-lang-cs="Adresa zákazníka" data-lang-en="Customer Address" data-lang-it="Indirizzo Cliente">Adresa zákazníka</h2>
   <div class="form-grid form-grid-address">
     <div class="form-group" style="position:relative;">
-      <label class="form-label" for="ulice" data-lang-cs="Ulice a číslo popisné" data-lang-en="Street and Number" data-lang-it="Via e Numero">Ulice a číslo popisné</label>
-      <input type="text" class="form-control" id="ulice" name="ulice" autocomplete="address-line1" data-lang-cs-placeholder="Ulice a číslo popisné" data-lang-en-placeholder="Street and Number" data-lang-it-placeholder="Via e Numero" placeholder="Ulice a číslo popisné">
+      <label class="form-label" for="ulice" data-lang-cs="Ulice a číslo popisné *" data-lang-en="Street and Number *" data-lang-it="Via e Numero *">Ulice a číslo popisné *</label>
+      <input type="text" class="form-control" id="ulice" name="ulice" autocomplete="address-line1" data-lang-cs-placeholder="Ulice a číslo popisné" data-lang-en-placeholder="Street and Number" data-lang-it-placeholder="Via e Numero" placeholder="Ulice a číslo popisné" required>
       <div id="autocompleteDropdownUlice" style="display:none;position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
     </div>
     <div class="form-group" style="position:relative;">
-      <label class="form-label" for="mesto" data-lang-cs="Město" data-lang-en="City" data-lang-it="Città">Město</label>
-      <input type="text" class="form-control" id="mesto" name="mesto" autocomplete="address-level2" data-lang-cs-placeholder="Město" data-lang-en-placeholder="City" data-lang-it-placeholder="Città" placeholder="Město">
+      <label class="form-label" for="mesto" data-lang-cs="Město *" data-lang-en="City *" data-lang-it="Città *">Město *</label>
+      <input type="text" class="form-control" id="mesto" name="mesto" autocomplete="address-level2" data-lang-cs-placeholder="Město" data-lang-en-placeholder="City" data-lang-it-placeholder="Città" placeholder="Město" required>
       <div id="autocompleteDropdown" style="display:none;position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
     </div>
     <div class="form-group">
-      <label class="form-label" for="psc" data-lang-cs="PSČ" data-lang-en="ZIP Code" data-lang-it="CAP">PSČ</label>
-      <input type="text" class="form-control" id="psc" name="psc" autocomplete="postal-code" data-lang-cs-placeholder="PSČ" data-lang-en-placeholder="ZIP Code" data-lang-it-placeholder="CAP" placeholder="PSČ">
+      <label class="form-label" for="psc" data-lang-cs="PSČ *" data-lang-en="ZIP Code *" data-lang-it="CAP *">PSČ *</label>
+      <input type="text" class="form-control" id="psc" name="psc" autocomplete="postal-code" data-lang-cs-placeholder="PSČ" data-lang-en-placeholder="ZIP Code" data-lang-it-placeholder="CAP" placeholder="PSČ" required>
     </div>
     <div class="map-container">
       <div id="mapContainer"></div>
