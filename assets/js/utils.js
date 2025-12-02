@@ -253,3 +253,82 @@ if (typeof window.escapeHtml === 'undefined') {
 // Expose fetchCsrfToken globally for backwards compatibility
 // (protokol-calculator-integration.js uses window.fetchCsrfToken)
 window.fetchCsrfToken = fetchCsrfToken;
+
+/**
+ * Event Delegation System - Centralizovaná správa click eventů
+ * Umožňuje nahradit inline onclick handlery data atributy
+ *
+ * Použití v HTML:
+ *   <button data-action="save" data-id="123">Uložit</button>
+ *   <a data-href="/seznam.php">Seznam</a>
+ *
+ * Registrace handleru:
+ *   Utils.registerAction('save', (element, data) => { ... });
+ *
+ * @author Claude Code
+ * @version 1.0.0
+ */
+const ActionRegistry = {
+    handlers: {},
+
+    /**
+     * Registrovat handler pro akci
+     * @param {string} actionName - Název akce (data-action hodnota)
+     * @param {Function} handler - Handler funkce (element, dataset) => void
+     */
+    register(actionName, handler) {
+        this.handlers[actionName] = handler;
+    },
+
+    /**
+     * Spustit handler pro akci
+     * @param {string} actionName - Název akce
+     * @param {HTMLElement} element - Element který vyvolal akci
+     * @returns {boolean} - true pokud handler existoval a byl spuštěn
+     */
+    execute(actionName, element) {
+        const handler = this.handlers[actionName];
+        if (handler) {
+            handler(element, element.dataset);
+            return true;
+        }
+        return false;
+    }
+};
+
+/**
+ * Inicializovat event delegation pro celý dokument
+ * Volá se automaticky při načtení DOM
+ */
+function initEventDelegation() {
+    document.addEventListener('click', function(event) {
+        const target = event.target.closest('[data-action]');
+        if (target) {
+            const action = target.dataset.action;
+            if (ActionRegistry.execute(action, target)) {
+                event.preventDefault();
+            }
+        }
+
+        // Navigace pomocí data-href
+        const hrefTarget = event.target.closest('[data-href]');
+        if (hrefTarget && !event.target.closest('a')) {
+            event.preventDefault();
+            const href = hrefTarget.dataset.href;
+            if (href) {
+                window.location.href = href;
+            }
+        }
+    });
+}
+
+// Auto-init při DOMContentLoaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEventDelegation);
+} else {
+    initEventDelegation();
+}
+
+// Export pro použití
+window.Utils.ActionRegistry = ActionRegistry;
+window.Utils.registerAction = ActionRegistry.register.bind(ActionRegistry);

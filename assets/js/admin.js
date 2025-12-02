@@ -1860,3 +1860,15 @@ window.addEventListener('message', function(event) {
   }
 });
 
+// === ACTION REGISTRY - Registrace akcí pro event delegation (Step 110) ===
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+  // Navigace na SQL stránku
+  Utils.registerAction('openSQLPage', () => openSQLPage());
+
+  // Otevření notifikačního modalu
+  Utils.registerAction('openNotifModal', (el, data) => {
+    if (data.modal && typeof openNotifModal === 'function') {
+      openNotifModal(data.modal);
+    }
+  });
+}
