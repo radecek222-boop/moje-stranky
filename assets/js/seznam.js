@@ -2260,6 +2260,7 @@ function showPhotoFullscreen(photoUrl) {
   overlay.onclick = () => overlay.remove();
 
   const img = document.createElement('img');
+  img.alt = 'Zvětšená fotka reklamace';
   img.src = photoUrl;
   img.style.cssText = 'max-width: 95%; max-height: 95%; object-fit: contain;';
 

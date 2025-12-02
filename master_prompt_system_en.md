@@ -1601,3 +1601,16 @@ header('Content-Type: text/html; charset=utf-8');
   - `password_reset.php`: Added enterkeyhint="done" to password confirmation field
 - **Result:** Improved mobile keyboard UX with contextual Enter key labels.
 
+## [Step 74]: Image Alt Attributes for Accessibility
+- **Date:** 2025-12-02
+- **What:** Added missing `alt` attributes to dynamically generated images for screen reader accessibility.
+- **Analysis:**
+  - Found preview images in aktuality.php without alt text
+  - Found dynamically created img elements in JS files without alt attributes
+- **Files modified:**
+  - `aktuality.php`: Added alt="Náhled vybrané fotky" and alt="Stávající fotka" to preview images
+  - `assets/js/photocustomer.js`: Added dynamic alt based on media type (video/photo)
+  - `assets/js/seznam.js`: Added alt="Zvětšená fotka reklamace" to lightbox image
+  - Regenerated minified versions: photocustomer.min.js, seznam.min.js
+- **Result:** All images now have descriptive alt text for screen readers.
+
