@@ -913,3 +913,130 @@ Phase 2 should begin with careful planning and explicit human approval for each 
   - Check console for CSP errors or fetch errors
 - **Result:** Second Alpine.js component successfully deployed. Pattern validated for future migrations.
 
+## [Step 35]: Create wgsModal CSP-safe Alpine Modal Framework
+- **What:** Created reusable `wgsModal` Alpine.js component as the foundation for migrating all modals to CSP-safe Alpine.js.
+- **How:** Registered `Alpine.data('wgsModal')` component with open/close methods, ESC key handler, overlay click handler, and `window.wgsModal` API exposure for vanilla JS interop.
+- **Why:** Establishes the standard pattern for all modal migrations: CSP-safe registration, window API exposure, fallback compatibility.
+- **Files touched:** `includes/hamburger-menu.php` (MODIFIED)
+- **Result:** Base modal framework ready. Pattern: `Alpine.data()` + `window.*` API + ESC/overlay handlers.
+
+## [Step 36]: Migrate rememberMeModal to CSP-safe Alpine.js
+- **What:** Migrated "Remember Me" confirmation modal on login.php to Alpine.js.
+- **How:** Created `rememberMeModal` component with checkbox change handler, overlay click, confirm/cancel methods. Added `x-data`, `@click`, `@change` directives to login.php HTML.
+- **Why:** Low-risk migration - only affects login page "remember me" checkbox confirmation flow.
+- **Files touched:** `includes/hamburger-menu.php`, `login.php`
+- **Result:** Remember Me modal now controlled by Alpine.js with ESC and overlay click support.
+
+## [Step 37]: Migrate provedeniModal to CSP-safe Alpine.js
+- **What:** Migrated "Provedení" (execution type) selection modal on novareklamace.php to Alpine.js.
+- **How:** Created `provedeniModal` component with open/close/selectProvedeni methods. Removed vanilla JS `initProvedeni()` code. Added Alpine directives to overlay HTML.
+- **Why:** Simplifies provedení selection modal code, adds ESC and overlay click handlers.
+- **Files touched:** `includes/hamburger-menu.php`, `novareklamace.php`, `novareklamace.js`
+- **Result:** Provedení modal migrated. `initProvedeni()` now empty stub for backward compatibility.
+
+## [Step 38]: Migrate calendarModal to CSP-safe Alpine.js
+- **What:** Migrated custom calendar date picker modal on novareklamace.php to Alpine.js.
+- **How:** Created `calendarModal` component with open/close methods. Calendar rendering logic stays in vanilla JS (`initCustomCalendar`), only modal open/close/ESC migrated.
+- **Why:** Adds ESC handler and overlay click to calendar modal while preserving complex rendering logic.
+- **Files touched:** `includes/hamburger-menu.php`, `novareklamace.php`, `novareklamace.js`
+- **Result:** Calendar modal now has ESC and overlay click support via Alpine.js.
+
+## [Step 39]: Migrate zakaznikSchvaleniModal to CSP-safe Alpine.js
+- **What:** Migrated customer signature approval modal on protokol.php to Alpine.js.
+- **How:** Created `zakaznikSchvaleniModal` component. Business logic (signature canvas, confirm/cancel) stays in vanilla JS, only modal open/close/ESC migrated.
+- **Why:** Adds ESC and overlay click support to signature modal without changing signature capture logic.
+- **Files touched:** `includes/hamburger-menu.php`, `protokol.php`, `protokol.js`
+- **Result:** Customer approval modal now controlled by Alpine.js API.
+
+## [Step 40]: Migrate calculatorModal to CSP-safe Alpine.js
+- **What:** Migrated price calculator modal on protokol.php to Alpine.js.
+- **How:** Created `calculatorModal` component. Calculator loading and business logic stays in `protokol-calculator-integration.js`, only modal open/close/ESC migrated.
+- **Why:** Adds ESC and overlay click support to calculator modal.
+- **Files touched:** `includes/hamburger-menu.php`, `protokol.php`, `protokol-calculator-integration.js`
+- **Result:** Calculator modal now uses Alpine.js API with fallbacks.
+
+## [Step 41]: Migrate hamburgerMenu to CSP-safe Alpine.js
+- **What:** Migrated main hamburger navigation menu to Alpine.js.
+- **How:** Created `hamburgerMenu` component with toggle/close methods and body scroll lock integration. Removed vanilla JS IIFE, added Alpine directives to nav HTML.
+- **Why:** Centralizes hamburger menu control, adds ESC handler, simplifies code.
+- **Files touched:** `includes/hamburger-menu.php`
+- **Result:** Hamburger menu now fully controlled by Alpine.js with scroll lock integration.
+
+## [Step 42]: Migrate pdfPreviewModal to CSP-safe Alpine.js
+- **What:** Migrated PDF preview modal on protokol.php to Alpine.js.
+- **How:** Created `pdfPreviewModal` component. PDF rendering (iframe, blob URL) stays in `protokol-pdf-preview.js`, only modal open/close/ESC migrated.
+- **Why:** Adds ESC and overlay click support to PDF preview.
+- **Files touched:** `includes/hamburger-menu.php`, `protokol.php`, `protokol-pdf-preview.js`
+- **Result:** PDF preview modal now uses Alpine.js API with cleanup callback to vanilla JS.
+
+## [Step 43]: Migrate detailModal to CSP-safe Alpine.js
+- **What:** Migrated complaint detail modal on seznam.php to Alpine.js.
+- **How:** Created `detailModal` component integrated with ModalManager in seznam.js. Added scroll lock and body class management.
+- **Why:** Adds ESC and overlay click support (bonus - not in original) to detail modal.
+- **Files touched:** `includes/hamburger-menu.php`, `seznam.php`, `seznam.js`
+- **Result:** Detail modal now has ESC and overlay click handlers via Alpine.js.
+
+## [Step 44]: Migrate notifModal to CSP-safe Alpine.js
+- **What:** Migrated notification modal on admin.php to Alpine.js.
+- **How:** Created `notifModal` component with body overflow management. Fixed bug: original code referenced `.admin-modal` but HTML had `.cc-modal`.
+- **Why:** Adds ESC and overlay click support to notification modal.
+- **Files touched:** `includes/hamburger-menu.php`, `admin.php`
+- **Result:** Notification modal now controlled by Alpine.js.
+
+## [Step 45]: Migrate adminModal to CSP-safe Alpine.js
+- **What:** Migrated main Control Centre modal on admin.php to Alpine.js.
+- **How:** Created `adminModal` component. Updated `openCCModal`/`closeCCModal` functions in admin.js to use Alpine API with fallbacks.
+- **Why:** Adds ESC and overlay click support to admin Control Centre modal.
+- **Files touched:** `includes/hamburger-menu.php`, `admin.php`, `admin.js`
+- **Result:** Admin modal now uses Alpine.js API. All planned modal migrations complete.
+
+---
+
+## PHASE 2 ALPINE.JS MODAL MIGRATION COMPLETE - SUMMARY
+
+**Steps 35-45 have completed the Alpine.js modal migration phase.**
+
+### Achievements:
+
+| Modal | Page | ESC Key | Overlay Click | Scroll Lock |
+|-------|------|---------|---------------|-------------|
+| wgsModal | global | ✅ | ✅ | - |
+| rememberMeModal | login.php | ✅ | ✅ | - |
+| provedeniModal | novareklamace.php | ✅ | ✅ | - |
+| calendarModal | novareklamace.php | ✅ | ✅ | - |
+| zakaznikSchvaleniModal | protokol.php | ✅ | ✅ | - |
+| calculatorModal | protokol.php | ✅ | ✅ | - |
+| hamburgerMenu | global | ✅ | ✅ | ✅ |
+| pdfPreviewModal | protokol.php | ✅ | ✅ | - |
+| detailModal | seznam.php | ✅ | ✅ | ✅ |
+| notifModal | admin.php | ✅ | ✅ | - |
+| adminModal | admin.php | ✅ | ✅ | ✅ |
+
+### Technical Pattern Established:
+
+```javascript
+Alpine.data('modalName', () => ({
+  open: false,
+  init() {
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.open) this.close();
+    });
+    window.modalName = {
+      open: () => this.openModal(),
+      close: () => this.close(),
+      isOpen: () => this.open
+    };
+  },
+  openModal() { /* ... */ },
+  close() { /* ... */ },
+  overlayClick(event) { /* ... */ }
+}));
+```
+
+### Remaining Phase 2 Tasks:
+
+1. **HTMX migration** - Server-driven UI updates (not started)
+2. **CSS consolidation** - Merge mobile-fixes.css files (requires visual testing)
+3. **Patch.js integration** - Merge into main JS files (requires functional testing)
+4. **Minified files regeneration** - Run `./scripts/minify-assets.sh`
+

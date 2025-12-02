@@ -547,7 +547,7 @@ if ($initialBootstrapData) {
 <script src="assets/js/protokol-pdf-preview.js" defer></script>
 <script src="assets/js/protokol-customer-collapse.js" defer></script>
 <script src="assets/js/protokol-data-patch.js" defer></script>
-<script src="assets/js/protokol.js?v=20251129" defer></script>
+<script src="assets/js/protokol.js?v=20251202" defer></script>
 <script src="assets/js/protokol-fakturace-patch.js" defer></script>
 <!-- Fix pro tlačítka (načíst až po protokol.js) -->
 <script src="assets/js/protokol-buttons-fix.js" defer></script>
