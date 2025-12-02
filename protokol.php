@@ -202,6 +202,24 @@ if ($initialBootstrapData) {
 
 <?php if ($initialBootstrapJson): ?>
 <script id="initialReklamaceData" type="application/json"><?= $initialBootstrapJson; ?></script>
+<?php else: ?>
+<!-- DEBUG: initialReklamaceData CHYBÍ!
+     Důvod: <?php
+        if (empty($_GET['id'])) {
+            echo 'URL neobsahuje parametr ?id=...';
+        } elseif ($lookupValue === null) {
+            echo 'lookupValue je null';
+        } elseif ($initialBootstrapData === null) {
+            echo 'Záznam nenalezen v databázi pro ID: ' . htmlspecialchars($_GET['id'] ?? '');
+        } else {
+            echo 'Neznámý důvod';
+        }
+     ?>
+-->
+<script>
+console.warn('[PROTOKOL] Data nenačtena! URL parametr id: "<?= htmlspecialchars($_GET['id'] ?? '') ?>"');
+console.warn('[PROTOKOL] Pro načtení dat použijte URL: protokol.php?id=CISLO_REKLAMACE');
+</script>
 <?php endif; ?>
 
 <!-- Google Fonts - Natuzzi style -->
