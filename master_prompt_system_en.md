@@ -1550,3 +1550,13 @@ header('Content-Type: text/html; charset=utf-8');
   - `nova_aktualita.php`: Added aria-label="Odstranit" to photo remove button
 - **Result:** All icon-only buttons now have proper accessible names for screen readers.
 
+## [Step 70]: HTML Lang Attribute Audit
+- **Date:** 2025-12-02
+- **What:** Added missing `lang` attribute to HTML email template.
+- **Analysis:**
+  - Found 1 HTML email template in protokol_api.php missing lang attribute
+  - Lang attribute is important for email client accessibility features
+- **Files modified:**
+  - `api/protokol_api.php`: Added lang='cs' to email HTML template
+- **Result:** All HTML documents now have proper language declaration.
+
