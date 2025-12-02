@@ -467,8 +467,6 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
         <!-- Typ zákazníka - IČO nebo fyzická osoba (POVINNÉ) -->
         <div class="typ-zakaznika-wrapper" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-          <!-- Hidden input pro HTML5 validaci - hodnota se nastaví JavaScriptem -->
-          <input type="hidden" id="typZakaznikaValidace" name="typ_zakaznika_validace" value="" required>
           <div style="display: flex; flex-direction: column;">
             <label class="typ-zakaznika-label" style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
               <input type="checkbox" id="objednavkaICO" name="objednavka_ico" style="width: auto; margin-right: 0.5rem; cursor: pointer;">
