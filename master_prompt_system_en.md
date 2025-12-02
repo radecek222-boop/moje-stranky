@@ -1716,3 +1716,19 @@ header('Content-Type: text/html; charset=utf-8');
   - `psa.php`: Added aria-live="polite" to tbody, role="status" to loading cell
 - **Result:** Screen readers now announce loading states and content updates for better dynamic content accessibility.
 
+## [Step 82]: Autocomplete Attributes for Better Browser Autofill
+- **Date:** 2025-12-02
+- **What:** Added autocomplete attributes to form inputs for improved browser autofill support.
+- **Analysis:**
+  - Autocomplete attributes help browsers provide better autofill suggestions
+  - Improves user experience by reducing manual data entry
+  - Helps users with motor disabilities who rely on autofill
+- **Files modified:**
+  - `registration.php`: Added autocomplete="name", "email", "tel" to registration form fields
+  - `login.php`: Added autocomplete="email" to email input
+  - `password_reset.php`: Added autocomplete="email" to email input
+  - `novareklamace.php`: Added autocomplete attributes for contact and address fields:
+    - name, email, tel-national for contact info
+    - address-line1, address-level2, postal-code for address fields
+- **Result:** Forms now provide better autofill suggestions, reducing data entry time and improving accessibility.
+

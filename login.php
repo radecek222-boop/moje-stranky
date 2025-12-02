@@ -99,6 +99,7 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
       <div class="form-group">
         <label for="userEmail" data-lang-cs="Email" data-lang-en="Email" data-lang-it="Email">Email</label>
         <input type="email" id="userEmail" name="email"
+               autocomplete="email"
                data-lang-cs-placeholder="vas@email.cz"
                data-lang-en-placeholder="your@email.com"
                data-lang-it-placeholder="tua@email.it"
