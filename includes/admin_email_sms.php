@@ -192,7 +192,7 @@ try {
     <?php if (!$directAccess): ?>
     <!-- Header -->
     <div class="control-detail-header">
-        <button class="control-detail-back" onclick="window.location.href='admin.php'">
+        <button class="control-detail-back" data-href="admin.php">
             <span>‹</span>
             <span>Zpět</span>
         </button>
@@ -205,23 +205,23 @@ try {
         <!-- Navigation Tabs -->
         <div class="cc-tabs">
             <button class="cc-tab <?= $currentSection === 'overview' ? 'active' : '' ?>"
-                    onclick="switchSection('overview')">
+                    data-action="switchEmailSection" data-section="overview">
                 Přehled
             </button>
             <button class="cc-tab <?= $currentSection === 'smtp' ? 'active' : '' ?>"
-                    onclick="switchSection('smtp')">
+                    data-action="switchEmailSection" data-section="smtp">
                 SMTP Konfigurace
             </button>
             <button class="cc-tab <?= $currentSection === 'templates' ? 'active' : '' ?>"
-                    onclick="switchSection('templates')">
+                    data-action="switchEmailSection" data-section="templates">
                 Email šablony
             </button>
             <button class="cc-tab <?= $currentSection === 'sms' ? 'active' : '' ?>"
-                    onclick="switchSection('sms')">
+                    data-action="switchEmailSection" data-section="sms">
                 SMS
             </button>
             <button class="cc-tab <?= $currentSection === 'management' ? 'active' : '' ?>"
-                    onclick="switchSection('management')">
+                    data-action="switchEmailSection" data-section="management">
                 Email Management
             </button>
         </div>
@@ -287,7 +287,7 @@ try {
                                                    placeholder="<?= $config['config_value_display'] ?>"
                                                    style="flex: 1;">
                                             <button class="cc-btn cc-btn-sm cc-btn-secondary"
-                                                    onclick="togglePasswordVisibility(<?= $config['id'] ?>)"
+                                                    data-action="togglePasswordVisibility" data-id="<?= $config['id'] ?>"
                                                     style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                                                 Zobrazit
                                             </button>
@@ -299,7 +299,7 @@ try {
                                                    style="flex: 1; font-size: 0.85rem;">
                                         <?php endif; ?>
                                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                                onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')"
+                                                data-action="saveEmailConfig" data-id="<?= $config['id'] ?>" data-key="<?= htmlspecialchars($config['config_key']) ?>"
                                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                                             Uložit
                                         </button>
@@ -327,7 +327,7 @@ try {
                                    placeholder="vas@email.cz"
                                    autocomplete="email"
                                    style="width: 200px; margin-right: 0.5rem;">
-                            <button class="cc-btn cc-btn-sm cc-btn-primary" onclick="sendTestEmail()" style="font-size: 0.75rem; padding: 0.4rem 0.75rem;">
+                            <button class="cc-btn cc-btn-sm cc-btn-primary" data-action="sendTestEmail" style="font-size: 0.75rem; padding: 0.4rem 0.75rem;">
                                 Odeslat test
                             </button>
                         </div>
@@ -388,7 +388,7 @@ try {
                                 <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600; color: #000; margin: 0;">
                                     <?= htmlspecialchars($par['email']['name']) ?>
                                 </h4>
-                                <span onclick="toggleNotifikaceActive('<?= htmlspecialchars($par['email']['id']) ?>', this)"
+                                <span data-action="toggleNotifikaceActive" data-id="<?= htmlspecialchars($par['email']['id']) ?>"
                                       style="padding: 0.2rem 0.4rem; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; border: 1px solid #000; background: <?= $par['email']['active'] ? '#000' : '#fff' ?>; color: <?= $par['email']['active'] ? '#fff' : '#000' ?>; cursor: pointer;"
                                       data-active="<?= $par['email']['active'] ? '1' : '0' ?>">
                                     <?= $par['email']['active'] ? 'AKTIVNI' : 'VYPNUTO' ?>
@@ -400,7 +400,7 @@ try {
                             <div style="font-size: 0.7rem; color: #333; margin-bottom: 0.75rem;">
                                 <strong>Predmet:</strong> <?= htmlspecialchars(substr($par['email']['subject'], 0, 50)) ?><?= strlen($par['email']['subject']) > 50 ? '...' : '' ?>
                             </div>
-                            <button onclick="otevritNotifikace('<?= $par['email']['id'] ?>')"
+                            <button data-action="otevritNotifikace" data-id="<?= $par['email']['id'] ?>"
                                 style="width: 100%; padding: 0.5rem; background: #333; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; cursor: pointer;">
                                 Upravit
                             </button>
@@ -419,7 +419,7 @@ try {
                                 <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600; color: #000; margin: 0;">
                                     <?= htmlspecialchars($par['sms']['name']) ?>
                                 </h4>
-                                <span onclick="toggleNotifikaceActive('<?= htmlspecialchars($par['sms']['id']) ?>', this)"
+                                <span data-action="toggleNotifikaceActive" data-id="<?= htmlspecialchars($par['sms']['id']) ?>"
                                       style="padding: 0.2rem 0.4rem; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; border: 1px solid #000; background: <?= $par['sms']['active'] ? '#000' : '#fff' ?>; color: <?= $par['sms']['active'] ? '#fff' : '#000' ?>; cursor: pointer;"
                                       data-active="<?= $par['sms']['active'] ? '1' : '0' ?>">
                                     <?= $par['sms']['active'] ? 'AKTIVNI' : 'VYPNUTO' ?>
@@ -431,7 +431,7 @@ try {
                             <div style="background: #f9f9f9; padding: 0.5rem; font-size: 0.65rem; font-family: monospace; max-height: 50px; overflow: hidden; margin-bottom: 0.5rem; border: 1px solid #eee;">
                                 <?= htmlspecialchars(substr($par['sms']['template'], 0, 100)) ?>...
                             </div>
-                            <button onclick="editSmsTemplate('<?= htmlspecialchars($par['sms']['id']) ?>')"
+                            <button data-action="editSmsTemplate" data-id="<?= htmlspecialchars($par['sms']['id']) ?>"
                                 style="width: 100%; padding: 0.5rem; background: #333; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; cursor: pointer;">
                                 Upravit
                             </button>
@@ -512,7 +512,7 @@ try {
                             <h4 style="margin: 0; font-size: 0.95rem; font-weight: 600; font-family: 'Poppins', sans-serif;">
                                 <?= htmlspecialchars($sablona['name']) ?>
                             </h4>
-                            <span onclick="toggleNotifikaceActive('<?= htmlspecialchars($sablona['id']) ?>', this)"
+                            <span data-action="toggleNotifikaceActive" data-id="<?= htmlspecialchars($sablona['id']) ?>"
                                   style="display: inline-block; padding: 0.2rem 0.5rem; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #000; background: <?= $sablona['active'] ? '#000' : '#fff' ?>; color: <?= $sablona['active'] ? '#fff' : '#000' ?>; cursor: pointer;"
                                   data-active="<?= $sablona['active'] ? '1' : '0' ?>">
                                 <?= $sablona['active'] ? 'AKTIVNI' : 'VYPNUTO' ?>
@@ -527,7 +527,7 @@ try {
                         <div style="background: #f9f9f9; padding: 0.75rem; font-size: 0.8rem; font-family: monospace; border: 1px solid #eee; margin-bottom: 0.75rem; max-height: 80px; overflow: hidden;">
                             <?= htmlspecialchars(substr($sablona['template'], 0, 150)) ?><?= strlen($sablona['template']) > 150 ? '...' : '' ?>
                         </div>
-                        <button onclick="editSmsTemplate('<?= htmlspecialchars($sablona['id']) ?>')"
+                        <button data-action="editSmsTemplate" data-id="<?= htmlspecialchars($sablona['id']) ?>"
                                 style="width: 100%; padding: 0.5rem; background: #333; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; font-size: 0.75rem;">
                             Upravit sablonu
                         </button>
@@ -560,19 +560,19 @@ try {
 
             <!-- Filter Stats -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 1rem;">
-                <button type="button" onclick="filterEmaily('all')" style="display: block; width: 100%; font-family: inherit; background: <?= $filterStatus === 'all' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
+                <button type="button" data-action="filterEmaily" data-filter="all" style="display: block; width: 100%; font-family: inherit; background: <?= $filterStatus === 'all' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
                     <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStatus === 'all' ? '#fff' : '#000' ?>;"><?= $emailStats['all'] ?></div>
                     <div style="font-size: 0.75rem; color: <?= $filterStatus === 'all' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Celkem</div>
                 </button>
-                <button type="button" onclick="filterEmaily('sent')" style="display: block; width: 100%; font-family: inherit; background: <?= $filterStatus === 'sent' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
+                <button type="button" data-action="filterEmaily" data-filter="sent" style="display: block; width: 100%; font-family: inherit; background: <?= $filterStatus === 'sent' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
                     <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStatus === 'sent' ? '#fff' : '#000' ?>;"><?= $emailStats['sent'] ?></div>
                     <div style="font-size: 0.75rem; color: <?= $filterStatus === 'sent' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Odesláno</div>
                 </button>
-                <button type="button" onclick="filterEmaily('pending')" style="display: block; width: 100%; font-family: inherit; background: <?= $filterStatus === 'pending' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
+                <button type="button" data-action="filterEmaily" data-filter="pending" style="display: block; width: 100%; font-family: inherit; background: <?= $filterStatus === 'pending' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
                     <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStatus === 'pending' ? '#fff' : '#000' ?>;"><?= $emailStats['pending'] ?></div>
                     <div style="font-size: 0.75rem; color: <?= $filterStatus === 'pending' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Ve frontě</div>
                 </button>
-                <button type="button" onclick="filterEmaily('failed')" style="display: block; width: 100%; font-family: inherit; background: <?= $filterStatus === 'failed' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
+                <button type="button" data-action="filterEmaily" data-filter="failed" style="display: block; width: 100%; font-family: inherit; background: <?= $filterStatus === 'failed' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;">
                     <div style="font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStatus === 'failed' ? '#fff' : '#000' ?>;"><?= $emailStats['failed'] ?></div>
                     <div style="font-size: 0.75rem; color: <?= $filterStatus === 'failed' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Selhalo</div>
                 </button>
@@ -589,7 +589,7 @@ try {
                         Vybráno: <strong id="selected-email-count">0</strong>
                     </span>
                 </div>
-                <button id="resend-emails-btn" onclick="resendVybraneEmaily()" disabled
+                <button id="resend-emails-btn" data-action="resendVybraneEmaily" disabled
                         style="padding: 0.5rem 1rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; font-size: 0.75rem; transition: all 0.2s;">
                     Znovu odeslat vybrané
                 </button>
@@ -636,7 +636,7 @@ try {
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= date('d.m.Y H:i', strtotime($email['created_at'])) ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['sent_at'] ? date('d.m.Y H:i', strtotime($email['sent_at'])) : '-' ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
-                                <button class="cc-btn cc-btn-sm cc-btn-link" onclick="toggleEmailDetail(<?= $email['id'] ?>)">
+                                <button class="cc-btn cc-btn-sm cc-btn-link" data-action="toggleEmailDetail" data-id="<?= $email['id'] ?>">
                                     Zobrazit
                                 </button>
                                 <div id="email-detail-<?= $email['id'] ?>" style="display: none; margin-top: 0.5rem;">
@@ -676,7 +676,7 @@ try {
         <!-- Header -->
         <div style="padding: 1.5rem; background: #000; color: #fff; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
             <h2 id="sablona-modal-title" style="font-family: 'Poppins', sans-serif; font-size: 1.2rem; font-weight: 600; margin: 0;">Editace email šablony</h2>
-            <button onclick="zavritSablonaModal()" aria-label="Zavřít" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
+            <button data-action="zavritSablonaModal" aria-label="Zavřít" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
         </div>
 
         <!-- Obsah -->
@@ -1063,7 +1063,7 @@ async function otevritNotifikace(sablonaId) {
                     <div id="recipients-summary" style="color: #ccc; font-size: 0.85rem; margin-bottom: 0.75rem;">
                         Načítání...
                     </div>
-                    <button type="button" onclick="otevritModalPrijemcu('${sablonaId}')"
+                    <button type="button" data-action="otevritModalPrijemcu" data-id="${sablonaId}"
                             style="padding: 0.5rem 1rem; background: #fff; color: #000; border: 1px solid #fff; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.8rem; cursor: pointer; border-radius: 3px;">
                         Nastavit příjemce
                     </button>
@@ -1074,11 +1074,11 @@ async function otevritNotifikace(sablonaId) {
 
                 <!-- Tlačítka -->
                 <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 0.5rem;">
-                    <button type="button" onclick="zavritSablonaModal()"
+                    <button type="button" data-action="zavritSablonaModal"
                             style="padding: 0.75rem 1.5rem; background: #fff; color: #000; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: 3px;">
                         Zrušit
                     </button>
-                    <button type="button" onclick="ulozitSablonu('${sablonaId}')"
+                    <button type="button" data-action="ulozitSablonu" data-id="${sablonaId}"
                             style="padding: 0.75rem 1.5rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: 3px;">
                         Uložit změny
                     </button>
@@ -1338,11 +1338,11 @@ async function otevritModalPrijemcu(sablonaId) {
 
                 <!-- Tlačítka -->
                 <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
-                    <button type="button" onclick="zavritModalPrijemcu()"
+                    <button type="button" data-action="zavritModalPrijemcu"
                             style="padding: 0.75rem 1.5rem; background: #666; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: 5px;">
                         Zrušit
                     </button>
-                    <button type="button" onclick="ulozitPrijemce()"
+                    <button type="button" data-action="ulozitPrijemce"
                             style="padding: 0.75rem 1.5rem; background: #fff; color: #000; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: 5px;">
                         Uložit příjemce
                     </button>
@@ -1490,7 +1490,7 @@ function vytvorSmsModal() {
         <div style="background: white; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border-radius: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #ddd;">
                 <h3 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 600;">Upravit SMS sablonu</h3>
-                <button onclick="closeSmsModal()" aria-label="Zavřít" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+                <button data-action="closeSmsModal" aria-label="Zavřít" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
             </div>
             <div style="padding: 1.5rem;">
                 <div style="margin-bottom: 1rem;">
@@ -1514,8 +1514,8 @@ function vytvorSmsModal() {
                 </div>
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding: 1rem 1.5rem; border-top: 1px solid #ddd;">
-                <button onclick="closeSmsModal()" style="padding: 0.5rem 1rem; background: #fff; border: 1px solid #333; color: #333; font-family: 'Poppins', sans-serif; cursor: pointer;">Zrusit</button>
-                <button onclick="saveSmsTemplate()" style="padding: 0.5rem 1rem; background: #333; border: 1px solid #333; color: #fff; font-family: 'Poppins', sans-serif; cursor: pointer; font-weight: 600;">Ulozit</button>
+                <button data-action="closeSmsModal" style="padding: 0.5rem 1rem; background: #fff; border: 1px solid #333; color: #333; font-family: 'Poppins', sans-serif; cursor: pointer;">Zrusit</button>
+                <button data-action="saveSmsTemplate" style="padding: 0.5rem 1rem; background: #333; border: 1px solid #333; color: #fff; font-family: 'Poppins', sans-serif; cursor: pointer; font-weight: 600;">Ulozit</button>
             </div>
         </div>
     </div>
@@ -1572,6 +1572,47 @@ async function saveSmsTemplate() {
         console.error('Chyba pri ukladani SMS sablony:', error);
         alert('Chyba pri ukladani SMS sablony');
     }
+}
+
+// ACTION REGISTRY - Step 113
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('switchEmailSection', (el, data) => {
+        if (data.section) switchSection(data.section);
+    });
+    Utils.registerAction('togglePasswordVisibility', (el, data) => {
+        if (data.id) togglePasswordVisibility(parseInt(data.id));
+    });
+    Utils.registerAction('saveEmailConfig', (el, data) => {
+        if (data.id && data.key) saveConfig(parseInt(data.id), data.key);
+    });
+    Utils.registerAction('sendTestEmail', () => sendTestEmail());
+    Utils.registerAction('toggleNotifikaceActive', (el, data) => {
+        if (data.id) toggleNotifikaceActive(data.id, el);
+    });
+    Utils.registerAction('otevritNotifikace', (el, data) => {
+        if (data.id) otevritNotifikace(data.id);
+    });
+    Utils.registerAction('editSmsTemplate', (el, data) => {
+        if (data.id) editSmsTemplate(data.id);
+    });
+    Utils.registerAction('filterEmaily', (el, data) => {
+        if (data.filter) filterEmaily(data.filter);
+    });
+    Utils.registerAction('resendVybraneEmaily', () => resendVybraneEmaily());
+    Utils.registerAction('toggleEmailDetail', (el, data) => {
+        if (data.id) toggleEmailDetail(parseInt(data.id));
+    });
+    Utils.registerAction('zavritSablonaModal', () => zavritSablonaModal());
+    Utils.registerAction('otevritModalPrijemcu', (el, data) => {
+        if (data.id) otevritModalPrijemcu(data.id);
+    });
+    Utils.registerAction('ulozitSablonu', (el, data) => {
+        if (data.id) ulozitSablonu(data.id);
+    });
+    Utils.registerAction('zavritModalPrijemcu', () => zavritModalPrijemcu());
+    Utils.registerAction('ulozitPrijemce', () => ulozitPrijemce());
+    Utils.registerAction('closeSmsModal', () => closeSmsModal());
+    Utils.registerAction('saveSmsTemplate', () => saveSmsTemplate());
 }
 </script>
 
