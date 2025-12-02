@@ -404,10 +404,10 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         </form>
 
         <div class="test-controls">
-            <button class="btn btn-success" onclick="startTest()">
+            <button class="btn btn-success" data-action="startTest">
                 Spustit test workflow
             </button>
-            <button class="btn btn-secondary" onclick="resetSimulator()">
+            <button class="btn btn-secondary" data-action="resetSimulator">
                 Reset
             </button>
         </div>
@@ -457,10 +457,10 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         </div>
 
         <div class="test-controls">
-            <button class="btn btn-success" onclick="goToStage(4)">
+            <button class="btn btn-success" data-action="goToStage" data-stage="4">
                 Reklamace nalezena - Pokračovat
             </button>
-            <button class="btn btn-secondary" onclick="flagError(3, 'Reklamace se nezobrazuje v seznamu')">
+            <button class="btn btn-secondary" data-action="flagError" data-stage="3" data-message="Reklamace se nezobrazuje v seznamu">
                 Reklamace chybí
             </button>
         </div>
@@ -485,10 +485,10 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         </div>
 
         <div class="test-controls">
-            <button class="btn btn-success" onclick="goToStage(5)">
+            <button class="btn btn-success" data-action="goToStage" data-stage="5">
                 Detail v pořádku - Pokračovat
             </button>
-            <button class="btn btn-secondary" onclick="flagError(4, 'Detail se nenačetl správně')">
+            <button class="btn btn-secondary" data-action="flagError" data-stage="4" data-message="Detail se nenačetl správně">
                 Chyba v detailu
             </button>
         </div>
@@ -522,10 +522,10 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         <div class="diagnostics-panel" id="diagnosticsPanel6"></div>
 
         <div class="test-controls">
-            <button class="btn btn-success" onclick="cleanupTest()">
+            <button class="btn btn-success" data-action="cleanupTest">
                 Smazat testovací data
             </button>
-            <button class="btn btn-secondary" onclick="resetSimulator()">
+            <button class="btn btn-secondary" data-action="resetSimulator">
                 Nový test
             </button>
         </div>
@@ -819,5 +819,18 @@ async function cleanupTest() {
  */
 function resetSimulator() {
     location.reload();
+}
+
+// ACTION REGISTRY - Step 113
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('startTest', () => startTest());
+    Utils.registerAction('resetSimulator', () => resetSimulator());
+    Utils.registerAction('cleanupTest', () => cleanupTest());
+    Utils.registerAction('goToStage', (el, data) => {
+        if (data.stage) goToStage(parseInt(data.stage));
+    });
+    Utils.registerAction('flagError', (el, data) => {
+        if (data.stage && data.message) flagError(parseInt(data.stage), data.message);
+    });
 }
 </script>
