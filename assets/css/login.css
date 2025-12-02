@@ -520,3 +520,56 @@ input:focus {
   font-weight: 300;
   margin-top: 1rem;
 }
+
+/* ============================================================
+   FIX: AUTOFILL DETECTION PRO PWA
+   Browser autofill má žluté pozadí a nespouští JS eventy
+   ============================================================ */
+
+/* Keyframes pro detekci autofill - Chrome/Safari spouští tuto animaci */
+@keyframes onAutoFillStart {
+  from { opacity: 1; }
+  to { opacity: 1; }
+}
+
+@keyframes onAutoFillCancel {
+  from { opacity: 1; }
+  to { opacity: 1; }
+}
+
+/* Aplikovat animaci na autofilled pole */
+input:-webkit-autofill {
+  animation-name: onAutoFillStart;
+  animation-duration: 0.001s;
+}
+
+input:not(:-webkit-autofill) {
+  animation-name: onAutoFillCancel;
+  animation-duration: 0.001s;
+}
+
+/* Zlepšit viditelnost autofilled polí - přepsat žluté pozadí */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #f0f0f0 inset !important;
+  -webkit-text-fill-color: var(--c-black) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Pro dark theme */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #2a2a2a inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Zajistit že autofilled pole jsou vizuálně aktivní */
+input:-webkit-autofill + label,
+input:autofill + label {
+  color: var(--c-black);
+  font-weight: 500;
+}
