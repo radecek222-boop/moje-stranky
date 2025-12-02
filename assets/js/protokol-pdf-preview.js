@@ -1,6 +1,7 @@
 /**
  * PDF Preview Modal s možností sdílení
  * Zobrazí PDF v modalu s křížkem a ikonou pro sdílení/stažení
+ * Step 42: Migrace na Alpine.js - close/overlay click/ESC handlery přesunuty do pdfPreviewModal komponenty
  */
 
 // Globální reference na aktuální PDF
@@ -113,7 +114,7 @@ function otevritPdfPreview(pdfBlob, nazevSouboru = 'protokol.pdf') {
       logger.log('📤 Režim: Export/Sdílení');
     }
 
-    // Zobrazit modal
+    // Step 42: Zobrazit modal přes Alpine.js API
     const overlay = document.getElementById('pdfPreviewOverlay');
     if (!overlay) {
       logger.error('overlay #pdfPreviewOverlay nenalezen!');
@@ -121,8 +122,13 @@ function otevritPdfPreview(pdfBlob, nazevSouboru = 'protokol.pdf') {
       return;
     }
 
-    overlay.classList.add('active');
-    logger.log('Modal zobrazen (active class přidána)');
+    if (window.pdfPreviewModal && window.pdfPreviewModal.open) {
+      window.pdfPreviewModal.open();
+    } else {
+      // Fallback pro zpětnou kompatibilitu
+      overlay.classList.add('active');
+    }
+    logger.log('Modal zobrazen (Alpine.js API)');
 
     // FALLBACK: Pokud iframe nedokáže zobrazit PDF (některé browsery mají problémy),
     // zobraz tlačítko "Otevřít v novém okně"
@@ -255,15 +261,13 @@ async function sdiletNeboStahnutPdf() {
 
 /**
  * Inicializace PDF preview event listenerů
+ * Step 42: Zavírání modalu (close btn, overlay click, ESC) řeší Alpine.js
+ *          Zde zůstávají pouze business tlačítka (sdílet, odeslat)
  */
 function initPdfPreview() {
   logger.log('[Fix] Inicializuji PDF preview...');
 
-  // Tlačítko Zavřít
-  const zavritBtn = document.getElementById('pdfCloseBtn');
-  if (zavritBtn) {
-    zavritBtn.addEventListener('click', zavritPdfPreview);
-  }
+  // Step 42: Tlačítko Zavřít nyní řeší Alpine.js (@click="close")
 
   // Tlačítko Sdílet/Stáhnout (pro export)
   const sdiletBtn = document.getElementById('pdfShareBtn');
@@ -286,24 +290,9 @@ function initPdfPreview() {
     });
   }
 
-  // Zavřít při kliknutí mimo modal
-  const overlay = document.getElementById('pdfPreviewOverlay');
-  if (overlay) {
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) {
-        zavritPdfPreview();
-      }
-    });
-  }
+  // Step 42: Overlay click a ESC nyní řeší Alpine.js komponenta
 
-  // Zavřít ESC klávesou
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && overlay && overlay.classList.contains('active')) {
-      zavritPdfPreview();
-    }
-  });
-
-  logger.log('PDF preview inicializován');
+  logger.log('PDF preview inicializován (Alpine.js Step 42)');
 }
 
 // Inicializovat po načtení DOMu

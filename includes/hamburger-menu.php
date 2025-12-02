@@ -800,6 +800,65 @@ document.addEventListener('alpine:init', () => {
       }
     }
   }));
+
+  /**
+   * PDF Preview Modal - Alpine.js komponenta (Step 42)
+   * Modal pro náhled vygenerovaného PDF protokolu
+   * Migrace open/close/ESC/overlay logiky z vanilla JS na CSP-safe Alpine.js
+   * Business logika (iframe, blob URL, share/download) zůstává v protokol-pdf-preview.js
+   */
+  Alpine.data('pdfPreviewModal', () => ({
+    open: false,
+
+    init() {
+      // ESC zavře modal
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.open) {
+          this.close();
+        }
+      });
+
+      // Exponovat metody pro vanilla JS (protokol-pdf-preview.js)
+      window.pdfPreviewModal = {
+        open: () => this.openModal(),
+        close: () => this.close(),
+        isOpen: () => this.open
+      };
+
+      console.log('[pdfPreviewModal] Inicializován (Alpine.js CSP-safe)');
+    },
+
+    // Otevřít modal - používá classList.add('active') pro zachování původních animací
+    openModal() {
+      this.open = true;
+      const overlay = document.getElementById('pdfPreviewOverlay');
+      if (overlay) {
+        overlay.classList.add('active');
+      }
+    },
+
+    // Zavřít modal - volá zavritPdfPreview() z protokol-pdf-preview.js pro cleanup
+    close() {
+      this.open = false;
+      // Volat původní funkci pro cleanup (revoke URL, vyčistit iframe)
+      if (typeof zavritPdfPreview === 'function') {
+        zavritPdfPreview();
+      } else {
+        // Fallback - jen skrýt overlay
+        const overlay = document.getElementById('pdfPreviewOverlay');
+        if (overlay) {
+          overlay.classList.remove('active');
+        }
+      }
+    },
+
+    // Klik na overlay pozadí
+    overlayClick(event) {
+      if (event.target.id === 'pdfPreviewOverlay') {
+        this.close();
+      }
+    }
+  }));
 });
 </script>
 
