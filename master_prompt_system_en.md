@@ -1108,3 +1108,22 @@ Alpine.data('modalName', () => ({
   - `assets/css/novareklamace-mobile-fixes.css` (DELETED)
 - **Result:** Two mobile-fixes files now consolidated. Remaining: seznam-mobile-fixes.css, admin-mobile-fixes.css.
 
+## [Step 50]: Merge seznam-mobile-fixes.css into seznam.css
+- **What:** Merged `seznam-mobile-fixes.css` (391 lines) into the main `seznam.css` and removed the redundant file.
+- **How:**
+  - Added all mobile-specific styles to the end of seznam.css (calendar touch targets, time slots, modal fullscreen, notes badge, order layout, button text fit)
+  - Replaced link to mobile-fixes with button-fixes-global.css in seznam.php
+  - Updated cache-busting version number
+  - Deleted seznam-mobile-fixes.css
+  - Regenerated seznam.min.css using csso
+- **Why:**
+  - Continues Phase 2 CSS consolidation
+  - This was the largest mobile-fixes file (391 lines)
+  - All seznam styles now in one file for easier maintenance
+- **Files touched:**
+  - `assets/css/seznam.css` (MODIFIED - added ~340 lines of mobile fixes)
+  - `assets/css/seznam.min.css` (REGENERATED)
+  - `seznam.php` (MODIFIED - replaced link, updated version)
+  - `assets/css/seznam-mobile-fixes.css` (DELETED)
+- **Result:** Three mobile-fixes files consolidated. Remaining: admin-mobile-fixes.css only.
+
