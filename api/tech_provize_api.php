@@ -69,7 +69,7 @@ try {
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem_castka,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * 0.33 as provize_celkem
         FROM wgs_reklamace r
-        WHERE r.zpracoval_id = :user_id
+        WHERE r.assigned_to = :user_id
           AND YEAR(r.created_at) = :rok
           AND MONTH(r.created_at) = :mesic
           AND r.stav = 'done'

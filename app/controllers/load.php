@@ -125,7 +125,7 @@ try {
                     CASE r.created_by_role
                         WHEN 'admin' THEN 'Administrátor'
                         WHEN 'technik' THEN COALESCE(r.technik, 'Technik')
-                        ELSE COALESCE(r.prodejce, 'Neznámý')
+                        ELSE 'Neznámý'
                     END
                 ELSE u.name
             END as created_by_name,
