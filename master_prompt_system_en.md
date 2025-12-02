@@ -2230,3 +2230,22 @@ The codebase is now in a good state with:
   - All corresponding `.min.js` and `.min.js.map` files (REGENERATED)
 - **Result:** Eliminated ~19 lines of duplicate code. escapeHtml now centralized in utils.js with global exports.
 
+## [Step 108]: Consolidate debounce to utils.js
+- **Date:** 2025-12-02
+- **What:** Consolidated `debounce()` function from protokol.js and wgs-map.js to centralized utils.js.
+- **How:**
+  1. Added `debounce()` function to utils.js with `window.debounce` and `Utils.debounce` exports
+  2. Removed local definition from protokol.js (-10 lines)
+  3. Updated WGSMap.debounce() to use global version with fallback for backwards compatibility
+  4. Regenerated all minified files with source maps
+- **Why:**
+  - debounce was duplicated identically in protokol.js and wgs-map.js
+  - novareklamace.js uses WGSMap.debounce() - needs backwards compatibility
+  - Standard utility function that belongs in shared utils
+- **Files touched:**
+  - `assets/js/utils.js` (MODIFIED - +18 lines)
+  - `assets/js/protokol.js` (MODIFIED - -10 lines)
+  - `assets/js/wgs-map.js` (MODIFIED - wrapper with fallback)
+  - All corresponding `.min.js` and `.min.js.map` files (REGENERATED)
+- **Result:** Eliminated ~10 lines of duplicate code. debounce now centralized in utils.js.
+
