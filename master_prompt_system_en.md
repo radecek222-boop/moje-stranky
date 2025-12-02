@@ -1732,3 +1732,20 @@ header('Content-Type: text/html; charset=utf-8');
     - address-line1, address-level2, postal-code for address fields
 - **Result:** Forms now provide better autofill suggestions, reducing data entry time and improving accessibility.
 
+## [Step 83]: Modal Dialog Accessibility with ARIA Attributes
+- **Date:** 2025-12-02
+- **What:** Added proper ARIA roles and attributes to modal dialogs.
+- **Analysis:**
+  - Modal dialogs require role="dialog" for screen readers to recognize them
+  - aria-modal="true" indicates the content behind is inert
+  - aria-labelledby links the dialog to its title for announcement
+  - Screen reader only titles added where visible title was missing
+- **Files modified:**
+  - `cenik.php`: Added role="dialog", aria-modal="true", aria-labelledby to edit modal
+  - `admin.php`: Added dialog roles to addUserModal, editNotificationModal, notifModalOverlay, adminModal
+  - `psa-kalkulator.php`: Added dialog roles to qrModal
+  - `psa.php`: Added dialog roles to qrModal
+  - `seznam.php`: Added dialog roles to detailOverlay modal, added sr-only title
+  - `assets/css/styles.css`: Added `.sr-only` utility class for screen reader only content
+- **Result:** Modal dialogs are now properly announced by screen readers with correct roles and labeling.
+

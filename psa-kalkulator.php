@@ -184,10 +184,10 @@ $csrfToken = generateCSRFToken();
   </div>
 
   <!-- QR CODE MODAL -->
-  <div id="qrModal" class="modal">
+  <div id="qrModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="qrModalTitle">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title">QR Kódy pro platby</h2>
+        <h2 class="modal-title" id="qrModalTitle">QR Kódy pro platby</h2>
         <span class="close-modal" data-action="closeQRModal" role="button" tabindex="0" aria-label="Zavřít">&times;</span>
       </div>
 

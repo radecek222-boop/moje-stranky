@@ -590,7 +590,7 @@ body {
     </div>
 
     <!-- MODAL OVERLAY - Alpine.js (Step 44) -->
-    <div class="cc-modal-overlay" id="notifModalOverlay"
+    <div class="cc-modal-overlay" id="notifModalOverlay" role="dialog" aria-modal="true" aria-labelledby="notifModalTitle"
          x-data="notifModal" x-init="init" @click="overlayClick">
         <div class="cc-modal" @click.stop>
             <div class="cc-modal-header">
@@ -973,8 +973,9 @@ function loadNotifContent(type, body) {
   <?php if (!$embedMode): ?>
   <div class="cc-overlay" id="adminOverlay"
        x-data="adminModal" x-init="init" @click="overlayClick"></div>
-  <div class="cc-modal" id="adminModal">
+  <div class="cc-modal" id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
       <div class="cc-modal-header">
+          <h2 id="adminModalTitle" class="sr-only">Modal</h2>
           <button class="cc-modal-close" onclick="closeCCModal()" aria-label="Zavřít">×</button>
       </div>
       <div class="cc-modal-body" id="adminModalBody">
@@ -1053,10 +1054,10 @@ function loadNotifContent(type, body) {
 <?php endif; // Konec MAIN (pokud není dashboard) ?>
 
 <!-- MODAL: Add User -->
-<div class="modal" id="addUserModal">
+<div class="modal" id="addUserModal" role="dialog" aria-modal="true" aria-labelledby="addUserModalTitle">
   <div class="modal-content" style="width: 90vw !important; height: 80vh !important; max-width: 90vw !important; max-height: 80vh !important; display: flex; flex-direction: column;">
     <div class="modal-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #ddd; flex-shrink: 0;">
-      <h3 class="modal-title" data-lang-cs="Přidat uživatele" data-lang-en="Add User" data-lang-it="Aggiungi Utente">Přidat uživatele</h3>
+      <h3 class="modal-title" id="addUserModalTitle" data-lang-cs="Přidat uživatele" data-lang-en="Add User" data-lang-it="Aggiungi Utente">Přidat uživatele</h3>
       <button class="modal-close" id="closeModalBtn" aria-label="Zavřít">×</button>
     </div>
     <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 2rem;">
@@ -1112,7 +1113,7 @@ function loadNotifContent(type, body) {
 <script src="/assets/js/admin.min.js" defer></script>
 
 <!-- MODAL: Edit Notification -->
-<div class="wgs-modal" id="editNotificationModal" style="display: none;">
+<div class="wgs-modal" id="editNotificationModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="editNotificationTitle">
   <div class="modal-content" style="width: 1200px; max-width: 90vw; height: 80vh; display: flex; flex-direction: column; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
     <div class="modal-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #ddd; flex-shrink: 0;">
       <h3 class="modal-title" id="editNotificationTitle" data-lang-cs="Editovat notifikaci" data-lang-en="Edit Notification" data-lang-it="Modifica Notifica">Editovat notifikaci</h3>
