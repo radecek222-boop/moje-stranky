@@ -97,12 +97,6 @@ if ($lookupValue !== null) {
     try {
         $pdo = getDbConnection();
 
-        // DEBUG: Log hledané hodnoty
-        error_log("=== PROTOKOL.PHP DEBUG NAČÍTÁNÍ DAT ===");
-        error_log("Hledané ID (lookupValue): " . $lookupValue);
-        error_log("Délka: " . strlen($lookupValue));
-        error_log("Typ: " . gettype($lookupValue));
-
         $stmt = $pdo->prepare(
             "SELECT r.*, u.name as created_by_name
              FROM wgs_reklamace r
@@ -112,18 +106,6 @@ if ($lookupValue !== null) {
         );
         $stmt->execute([$lookupValue, $lookupValue, $lookupValue]);
         $record = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        // DEBUG: Log výsledek
-        if ($record) {
-            error_log("✅ ZÁZNAM NALEZEN!");
-            error_log("ID záznamu: " . ($record['id'] ?? 'NULL'));
-            error_log("reklamace_id: " . ($record['reklamace_id'] ?? 'NULL'));
-            error_log("cislo: " . ($record['cislo'] ?? 'NULL'));
-        } else {
-            error_log("❌ ZÁZNAM NENALEZEN!");
-            error_log("SQL dotaz NENAŠEL žádný záznam pro hodnotu: " . $lookupValue);
-        }
-        error_log("========================================");
 
         if ($record) {
             $address = wgs_format_address($record);
@@ -525,67 +507,6 @@ if ($initialBootstrapData) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" defer></script>
 
 <script src="assets/js/csrf-auto-inject.min.js" defer></script>
-
-<!-- EMERGENCY DIAGNOSTIC SCRIPT -->
-<script>
-(function() {
-  console.log('🚨 EMERGENCY DIAGNOSTICS STARTING...');
-
-  // FORCE HIDE LOADING OVERLAY IMMEDIATELY
-  window.addEventListener('DOMContentLoaded', function() {
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay) {
-      overlay.classList.remove('show');
-      overlay.style.display = 'none';
-      console.log('[OK] Loading overlay force-hidden');
-    } else {
-      console.error('[ERROR] Loading overlay NOT FOUND');
-    }
-
-    // Check initial data
-    const dataNode = document.getElementById('initialReklamaceData');
-    if (dataNode) {
-      console.log('[OK] initialReklamaceData found');
-      const raw = (dataNode.textContent || dataNode.innerText || '').trim();
-      console.log('[DATA] Raw data length:', raw.length);
-      console.log('[DATA] Raw data preview:', raw.substring(0, 200));
-
-      try {
-        const parsed = JSON.parse(raw);
-        console.log('[OK] JSON parsed successfully');
-        console.log('[DATA] Parsed data:', parsed);
-      } catch (e) {
-        console.error('[ERROR] JSON parse failed:', e);
-      }
-    } else {
-      console.error('[ERROR] initialReklamaceData NOT FOUND');
-    }
-
-    // Check all form fields
-    const fieldIds = ['order-number', 'claim-number', 'customer', 'address', 'phone', 'email', 'brand', 'model', 'technician'];
-    console.log('[CHECK] Checking form fields:');
-    fieldIds.forEach(id => {
-      const field = document.getElementById(id);
-      if (field) {
-        console.log(`  [OK] ${id}: "${field.value}"`);
-      } else {
-        console.error(`  [ERROR] ${id}: NOT FOUND`);
-      }
-    });
-
-    // Check signature pad
-    const canvas = document.getElementById('signature-pad');
-    if (canvas) {
-      console.log('[OK] Signature pad canvas found');
-      console.log('  Canvas size:', canvas.offsetWidth, 'x', canvas.offsetHeight);
-    } else {
-      console.error('[ERROR] Signature pad canvas NOT FOUND');
-    }
-
-    console.log('[DIAGNOSTICS] EMERGENCY DIAGNOSTICS COMPLETE');
-  });
-})();
-</script>
 
 <!-- External JavaScript -->
 <script src="assets/js/protokol-pdf-preview.min.js" defer></script>
