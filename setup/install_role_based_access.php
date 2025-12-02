@@ -629,31 +629,17 @@ function updateProgress($percent) {
             }
         });
 
-        // Debug pro formulář
+        // Formulář handling
         const form = document.getElementById('installForm');
         const btn = document.getElementById('installBtn');
 
         if (form && btn) {
-            console.log('Formulář nalezen, přidávám event listener');
-
             form.addEventListener('submit', function(e) {
-                console.log('Formulář se odesílá...');
-                console.log('Action:', form.action);
-                console.log('Method:', form.method);
-                console.log('FormData:', new FormData(form));
-
                 // Změň text tlačítka
                 btn.textContent = 'SPOUŠTÍM...';
                 btn.disabled = true;
-
-                // Nech formulář odeslat normálně (nepoužívej e.preventDefault())
+                // Nech formulář odeslat normálně
             });
-
-            btn.addEventListener('click', function(e) {
-                console.log('Tlačítko bylo kliknuto');
-            });
-        } else {
-            console.log('Formulář nebo tlačítko nenalezeno - pravděpodobně již nainstalováno');
         }
     </script>
 </body>
