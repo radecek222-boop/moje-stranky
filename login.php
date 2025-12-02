@@ -46,6 +46,8 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
   <link rel="icon" type="image/png" sizes="192x192" href="./icon192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon512.png">
   <title>White Glove Service – Přihlášení</title>
+  <link rel="preload" href="assets/css/styles.min.css" as="style">
+  <link rel="preload" href="assets/css/login.min.css" as="style">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet" media="print" onload="this.media='all'">

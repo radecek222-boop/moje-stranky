@@ -1449,3 +1449,16 @@ header('Content-Type: text/html; charset=utf-8');
   - `api/admin_api.php`: Added `loading="lazy"` to dynamically generated photo thumbnails
 - **Result:** Minimal impact - project uses CSS backgrounds for most imagery. One img tag optimized.
 
+## [Step 62]: Preload Critical Assets
+- **Date:** 2025-12-02
+- **What:** Added `<link rel="preload">` for critical CSS assets to pages missing them.
+- **Analysis:**
+  - 10 pages already had preload tags (index.php, seznam.php, protokol.php, etc.)
+  - 4 main pages were missing preloads: login.php, registration.php, admin.php, statistiky.php
+- **Files modified:**
+  - `login.php`: Added preload for styles.min.css, login.min.css
+  - `registration.php`: Added preload for styles.min.css, login.min.css
+  - `admin.php`: Added preload for styles.min.css, admin.min.css + fixed admin.css → admin.min.css
+  - `statistiky.php`: Added preload for styles.min.css
+- **Result:** All main user-facing pages now have preload hints for faster CSS loading.
+
