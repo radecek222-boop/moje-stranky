@@ -1749,3 +1749,45 @@ header('Content-Type: text/html; charset=utf-8');
   - `assets/css/styles.css`: Added `.sr-only` utility class for screen reader only content
 - **Result:** Modal dialogs are now properly announced by screen readers with correct roles and labeling.
 
+## [Step 84]: Navigation and Notification Accessibility
+- **Date:** 2025-12-02
+- **What:** Improved accessibility for navigation, pagination, calendar controls and notification areas.
+- **Analysis:**
+  - Navigation landmarks need aria-label for screen reader identification
+  - Pagination should be wrapped in nav element with aria-label
+  - Icon-only buttons need aria-label for screen readers
+  - Notification areas need role="alert" and aria-live for announcements
+- **Files modified:**
+  - `includes/hamburger-menu.php`: Added aria-label="Hlavní navigace" to nav element
+  - `statistiky.php`: Wrapped pagination in nav with aria-label, added aria-labels to prev/next buttons
+  - `novareklamace.php`: Added aria-labels to calendar month navigation buttons, dialog attributes to calendar overlay, aria-live to toast
+  - `registration.php`, `login.php`, `password_reset.php`: Added role="alert" aria-live="assertive" to notification divs
+- **Result:** Improved navigation, pagination and notification accessibility for screen reader users.
+
+## [Step 85]: Semantic Search Inputs with ARIA Labels
+- **Date:** 2025-12-02
+- **What:** Changed search inputs from type="text" to type="search" with proper aria-labels.
+- **Analysis:**
+  - Using type="search" provides semantic meaning and enables browser search features (clear button, history)
+  - aria-label helps screen readers announce the purpose of search fields
+  - enterkeyhint="search" shows correct keyboard action on mobile
+- **Files modified:**
+  - `seznam.php`: Changed searchInput to type="search" with aria-label="Hledat v reklamacích"
+  - `admin.php`: Changed search-users and search-zakaznici inputs to type="search" with aria-labels
+  - `includes/admin_main.php`: Changed cc-search to type="search" with aria-label="Hledat nastavení"
+- **Result:** Search inputs now have proper semantic HTML and accessibility labeling.
+
+## [Step 86]: Counter Button Accessibility Labels
+- **Date:** 2025-12-02
+- **What:** Added aria-labels to counter increment/decrement buttons and number inputs in cenik.php calculator.
+- **Analysis:**
+  - Buttons showing only `+` or `−` symbols are not accessible to screen readers
+  - Screen reader users cannot understand the purpose of icon-only buttons
+  - Number inputs need aria-label when the visible label is on a separate element
+- **Files modified:**
+  - `cenik.php`: Added aria-labels to all counter buttons (sedáky, opěrky, područky, panely, relax, elektrické díly)
+    - Decrement buttons: "Snížit počet [název]"
+    - Increment buttons: "Zvýšit počet [název]"
+    - Number inputs: "Počet [název]"
+- **Result:** Counter controls in price calculator are now fully accessible to screen reader users.
+

@@ -65,10 +65,11 @@ try {
 
     <!-- Search -->
     <div class="control-center-search">
-        <input type="text"
+        <input type="search"
                id="cc-search"
                placeholder="Hledat nastavení..."
                enterkeyhint="search"
+               aria-label="Hledat nastavení"
                autocomplete="off">
     </div>
 

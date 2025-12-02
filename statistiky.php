@@ -601,11 +601,11 @@ body {
     </div>
 
     <!-- Stránkování -->
-    <div class="pagination" id="pagination" style="display: none;">
-      <button id="prev-page" onclick="predchoziStranka()">← Předchozí</button>
-      <span class="page-info" id="page-info">Strana 1 z 1</span>
-      <button id="next-page" onclick="dalsiStranka()">Další →</button>
-    </div>
+    <nav class="pagination" id="pagination" style="display: none;" aria-label="Stránkování">
+      <button id="prev-page" onclick="predchoziStranka()" aria-label="Předchozí strana">← Předchozí</button>
+      <span class="page-info" id="page-info" aria-live="polite">Strana 1 z 1</span>
+      <button id="next-page" onclick="dalsiStranka()" aria-label="Další strana">Další →</button>
+    </nav>
   </div>
 
   <!-- Grafy a statistiky -->

@@ -42,7 +42,7 @@ $csrfToken = generateCSRFToken();
     <div class="subtitle" data-lang-cs="Vyplňte registrační formulář" data-lang-en="Fill in the registration form" data-lang-it="Compila il modulo di registrazione">Vyplňte registrační formulář</div>
   </div>
 
-  <div id="notification" class="notification"></div>
+  <div id="notification" class="notification" role="alert" aria-live="assertive"></div>
 
   <form id="registrationForm">
     <!-- FIX 1: CSRF token vlozen primo v PHP - okamzite dostupny, zadna race condition -->

@@ -82,7 +82,7 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
     <div class="subtitle" data-lang-cs="White Glove Service" data-lang-en="White Glove Service" data-lang-it="White Glove Service">White Glove Service</div>
   </div>
 
-  <div id="notification" class="notification"></div>
+  <div id="notification" class="notification" role="alert" aria-live="assertive"></div>
 
   <form id="loginForm">
     <!-- FIX 1: CSRF token vlozen primo v PHP - okamzite dostupny, zadna race condition -->

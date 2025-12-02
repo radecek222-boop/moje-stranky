@@ -906,7 +906,7 @@ function loadNotifContent(type, body) {
       <div class="table-header">
         <h3 class="table-title" data-lang-cs="Všichni uživatelé" data-lang-en="All Users" data-lang-it="Tutti gli Utenti">Všichni uživatelé</h3>
         <div class="table-actions">
-          <input type="text" class="search-box" id="search-users" enterkeyhint="search" data-lang-cs-placeholder="Hledat..." data-lang-en-placeholder="Search..." data-lang-it-placeholder="Cerca..." placeholder="Hledat...">
+          <input type="search" class="search-box" id="search-users" enterkeyhint="search" aria-label="Hledat uživatele" data-lang-cs-placeholder="Hledat..." data-lang-en-placeholder="Search..." data-lang-it-placeholder="Cerca..." placeholder="Hledat...">
           <button class="btn btn-sm btn-success" id="addUserBtn" data-lang-cs="Přidat" data-lang-en="Add" data-lang-it="Aggiungi">Přidat</button>
           <button class="btn btn-sm" id="refreshUsersBtn" data-lang-cs="Obnovit" data-lang-en="Refresh" data-lang-it="Aggiorna">Obnovit</button>
         </div>
@@ -941,7 +941,7 @@ function loadNotifContent(type, body) {
       <div class="table-header">
         <h3 class="table-title" data-lang-cs="Všichni zákazníci" data-lang-en="All Customers" data-lang-it="Tutti i Clienti">Všichni zákazníci</h3>
         <div class="table-actions">
-          <input type="text" class="search-box" id="search-zakaznici" enterkeyhint="search" data-lang-cs-placeholder="Hledat..." data-lang-en-placeholder="Search..." data-lang-it-placeholder="Cerca..." placeholder="Hledat...">
+          <input type="search" class="search-box" id="search-zakaznici" enterkeyhint="search" aria-label="Hledat zákazníky" data-lang-cs-placeholder="Hledat..." data-lang-en-placeholder="Search..." data-lang-it-placeholder="Cerca..." placeholder="Hledat...">
           <button class="btn btn-sm" id="refreshZakazniciBtn" data-lang-cs="Obnovit" data-lang-en="Refresh" data-lang-it="Aggiorna">Obnovit</button>
         </div>
       </div>

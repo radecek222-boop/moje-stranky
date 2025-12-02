@@ -1530,8 +1530,9 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 <div class="container"<?php if ($embedMode) echo ' style="margin-top: 0; padding-top: 1rem;"'; ?>>
   <div class="search-bar">
     <span class="search-icon"></span>
-    <input type="text" class="search-input" id="searchInput"
+    <input type="search" class="search-input" id="searchInput"
            enterkeyhint="search"
+           aria-label="Hledat v reklamacích"
            data-lang-cs-placeholder="Hledat v reklamacích..."
            data-lang-en-placeholder="Search in claims..."
            data-lang-it-placeholder="Cerca nei reclami..."

@@ -640,13 +640,13 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 </footer>
 
 <!-- CUSTOM CALENDAR - Alpine.js (Step 38) -->
-<div class="calendar-overlay" id="calendarOverlay" x-data="calendarModal" x-init="init" @click="overlayClick">
+<div class="calendar-overlay" id="calendarOverlay" role="dialog" aria-modal="true" aria-labelledby="calendarTitle" x-data="calendarModal" x-init="init" @click="overlayClick">
   <div class="calendar-box">
     <div class="calendar-header">
       <h3 id="calendarTitle" data-lang-cs="Vyberte datum" data-lang-en="Select Date" data-lang-it="Seleziona Data">Vyberte datum</h3>
       <div class="calendar-nav">
-        <button id="prevMonth">&larr;</button>
-        <button id="nextMonth">&rarr;</button>
+        <button id="prevMonth" aria-label="Předchozí měsíc">&larr;</button>
+        <button id="nextMonth" aria-label="Další měsíc">&rarr;</button>
       </div>
     </div>
     <div id="calendarMonthYear" style="text-align:center;margin-bottom:1rem;font-weight:600;font-size:1.1rem;"></div>
@@ -655,7 +655,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
   window.WGS_USER_LOGGED_IN = <?php echo $isLoggedIn ? "true" : "false"; ?>;
