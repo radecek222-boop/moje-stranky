@@ -1090,3 +1090,21 @@ Alpine.data('modalName', () => ({
   - `assets/css/protokol-mobile-fixes.css` (DELETED)
 - **Result:** One less CSS file to maintain. Mobile fixes now integrated into main stylesheet.
 
+## [Step 49]: Merge novareklamace-mobile-fixes.css into novareklamace.css
+- **What:** Merged `novareklamace-mobile-fixes.css` into the main `novareklamace.css` and removed the redundant file.
+- **How:**
+  - Added mobile-specific styles to the end of novareklamace.css (iOS zoom prevention, calendar touch targets, autocomplete styling)
+  - Replaced @import of button-fixes-global.css with direct `<link>` in novareklamace.php
+  - Deleted novareklamace-mobile-fixes.css
+  - Regenerated novareklamace.min.css using csso
+- **Why:**
+  - Continues Phase 2 CSS consolidation from Step 48
+  - Reduces HTTP requests and file fragmentation
+  - All novareklamace styles now in one maintainable file
+- **Files touched:**
+  - `assets/css/novareklamace.css` (MODIFIED - added ~90 lines of mobile fixes)
+  - `assets/css/novareklamace.min.css` (REGENERATED)
+  - `novareklamace.php` (MODIFIED - replaced link to mobile-fixes with button-fixes-global)
+  - `assets/css/novareklamace-mobile-fixes.css` (DELETED)
+- **Result:** Two mobile-fixes files now consolidated. Remaining: seznam-mobile-fixes.css, admin-mobile-fixes.css.
+
