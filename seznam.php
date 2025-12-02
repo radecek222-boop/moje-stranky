@@ -8,12 +8,33 @@ $isLoggedIn = isset($_SESSION["user_id"]);
 $isAdmin = isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] === true;
 
 // Export user data pro JavaScript
+$currentUserId = $_SESSION["user_id"] ?? $_SESSION["admin_id"] ?? null;
+
+// Načíst supervizované uživatele (pokud je přihlášený jako prodejce/supervizor)
+$supervisedUserIds = [];
+if ($currentUserId && !$isAdmin) {
+    try {
+        $pdo = getDbConnection();
+        $stmt = $pdo->prepare("
+            SELECT salesperson_user_id
+            FROM wgs_supervisor_assignments
+            WHERE supervisor_user_id = :user_id
+        ");
+        $stmt->execute([':user_id' => $currentUserId]);
+        $supervisedUserIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    } catch (Exception $e) {
+        // Tabulka možná ještě neexistuje - tiše ignorovat
+        error_log("Supervisor table check: " . $e->getMessage());
+    }
+}
+
 $currentUserData = [
-    "id" => $_SESSION["user_id"] ?? $_SESSION["admin_id"] ?? null,
+    "id" => $currentUserId,
     "name" => $_SESSION["user_name"] ?? "Admin",
     "email" => $_SESSION["user_email"] ?? "admin@wgs-service.cz",
     "role" => $_SESSION["role"] ?? "admin",
-    "is_admin" => $isAdmin
+    "is_admin" => $isAdmin,
+    "supervised_user_ids" => $supervisedUserIds
 ];
 
 // Redirect nepřihlášené na login
