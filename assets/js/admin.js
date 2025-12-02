@@ -1910,4 +1910,17 @@ if (typeof Utils !== 'undefined' && Utils.registerAction) {
       saveNotificationTemplate();
     }
   });
+
+  // Step 113 - Admin main cards
+  Utils.registerAction('openSection', (el, data) => {
+    if (data.section && typeof openSection === 'function') {
+      openSection(data.section);
+    }
+  });
+
+  Utils.registerAction('openNewWindow', (el, data) => {
+    if (data.url) {
+      window.open(data.url, '_blank');
+    }
+  });
 }

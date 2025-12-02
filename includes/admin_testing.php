@@ -318,9 +318,9 @@ $pdo = getDbConnection();
             <div class="result-title">Všechny testy proběhly úspěšně!</div>
             <div class="result-desc">Proběhlo dle potřeb? Potvrďte a test data budou smazána.</div>
             <div class="result-actions">
-                <button class="btn btn-success" onclick="cleanupTestData()">[OK] Potvrdit a smazat test data</button>
-                <button class="btn btn-secondary" onclick="viewTestDataInDB()">Prohlédnout v DB</button>
-                <button class="btn" onclick="copyResults()">Kopírovat</button>
+                <button class="btn btn-success" data-action="cleanupTestData">[OK] Potvrdit a smazat test data</button>
+                <button class="btn btn-secondary" data-action="viewTestDataInDB">Prohlédnout v DB</button>
+                <button class="btn" data-action="copyResults">Kopírovat</button>
             </div>
         </div>
 
@@ -329,9 +329,9 @@ $pdo = getDbConnection();
             <div class="result-title">Některé testy selhaly</div>
             <div class="result-desc">Test data NEBYLA smazána. Můžete je prohlédnout pro debug.</div>
             <div class="result-actions">
-                <button class="btn btn-danger" onclick="copyResults()">Kopírovat chyby</button>
-                <button class="btn btn-secondary" onclick="viewTestDataInDB()">Prohlédnout v DB</button>
-                <button class="btn" onclick="cleanupTestData()">Ručně smazat</button>
+                <button class="btn btn-danger" data-action="copyResults">Kopírovat chyby</button>
+                <button class="btn btn-secondary" data-action="viewTestDataInDB">Prohlédnout v DB</button>
+                <button class="btn" data-action="cleanupTestData">Ručně smazat</button>
             </div>
             <div id="errorDetails" style="margin-top: 1rem; padding: 1rem; background: var(--c-white); border: 1px solid var(--c-border); text-align: left; font-family: 'Courier New', monospace; font-size: 0.85rem;">
                 <!-- Error details will be filled here -->
@@ -576,5 +576,12 @@ ${'-'.repeat(80)}
  */
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ACTION REGISTRY - Step 113
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('cleanupTestData', () => cleanupTestData());
+    Utils.registerAction('viewTestDataInDB', () => viewTestDataInDB());
+    Utils.registerAction('copyResults', () => copyResults());
 }
 </script>
