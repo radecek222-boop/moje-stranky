@@ -363,8 +363,9 @@ if ($initialBootstrapData) {
   </div>
 </div>
 
-<!-- PDF Preview Modal -->
-<div class="pdf-preview-overlay" id="pdfPreviewOverlay" style="display: none;">
+<!-- PDF Preview Modal - Alpine.js (Step 42) -->
+<div class="pdf-preview-overlay" id="pdfPreviewOverlay" style="display: none;"
+     x-data="pdfPreviewModal" x-init="init" @click="overlayClick">
   <div class="pdf-preview-container">
     <div class="pdf-preview-header">
       <h3 class="pdf-preview-title" data-lang-cs="Náhled PDF" data-lang-en="PDF Preview" data-lang-it="Anteprima PDF">Náhled PDF</h3>
@@ -386,8 +387,8 @@ if ($initialBootstrapData) {
           </svg>
         </button>
 
-        <!-- Tlačítko zavřít (vždy viditelné) -->
-        <button class="pdf-action-btn pdf-close-btn" id="pdfCloseBtn" data-lang-cs-title="Zavřít" data-lang-en-title="Close" data-lang-it-title="Chiudi" title="Zavřít">
+        <!-- Tlačítko zavřít (vždy viditelné) - Alpine.js (Step 42) -->
+        <button class="pdf-action-btn pdf-close-btn" id="pdfCloseBtn" data-lang-cs-title="Zavřít" data-lang-en-title="Close" data-lang-it-title="Chiudi" title="Zavřít" @click="close">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
