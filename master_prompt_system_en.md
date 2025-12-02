@@ -1330,3 +1330,31 @@ header('Content-Type: text/html; charset=utf-8');
 2. **Search/filter results** - hx-trigger="keyup changed delay:500ms"
 3. **Infinite scroll** - hx-trigger="revealed" for lazy loading
 
+---
+
+## [Step 55]: Minify Additional Utility JS Files
+- **Date:** 2025-12-02
+- **What:** Generated minified versions for 21 utility JS files that previously lacked `.min.js` counterparts, and updated all PHP references to use the minified versions.
+- **How:**
+  1. Installed `terser` and `csso-cli` globally via npm
+  2. Ran `terser` on all 21 utility JS files to create `.min.js` versions
+  3. Used `sed` to batch-update all PHP files, replacing `.js` references with `.min.js`
+- **Why:**
+  - 21 JS files in `assets/js/` were being loaded unminified in production
+  - Key utilities like `scroll-lock.js`, `logger.js`, `utils.js`, `csrf-auto-inject.js` are loaded on every page
+  - Minification reduces bandwidth and improves page load times
+- **Files touched:**
+  - **21 new .min.js files created:**
+    - `csrf-auto-inject.min.js`, `heatmap-renderer.min.js`, `heatmap-tracker.min.js`, `logger.min.js`, `logout-handler.min.js`, `offline.min.js`, `password-reset.min.js`, `photocustomer-collapsible.min.js`, `protokol-buttons-fix.min.js`, `protokol-customer-collapse.min.js`, `protokol-data-patch.min.js`, `protokol-signature-fix.min.js`, `pull-to-refresh.min.js`, `registration.min.js`, `scroll-lock.min.js`, `signature-pad-simple.min.js`, `smtp-config.min.js`, `sw-register.min.js`, `tracker.min.js`, `utils.min.js`, `welcome-modal.min.js`
+  - **~25 PHP files updated** with new references (index.php, admin.php, login.php, seznam.php, protokol.php, novareklamace.php, registration.php, password_reset.php, cenik.php, statistiky.php, analytics.php, photocustomer.php, offline.php, gdpr.php, psa.php, psa-kalkulator.php, nasesluzby.php, onas.php, includes/hamburger-menu.php, includes/pwa_scripts.php, includes/admin_*.php)
+- **Size savings (total ~48 KB):**
+  | File | Original | Minified | Savings |
+  |------|----------|----------|---------|
+  | logger.js | 2.8 KB | 0.5 KB | 82% |
+  | scroll-lock.js | 4.3 KB | 1.4 KB | 68% |
+  | utils.js | 3.9 KB | 1.4 KB | 63% |
+  | heatmap-renderer.js | 9.9 KB | 4.2 KB | 57% |
+  | heatmap-tracker.js | 5.3 KB | 2.3 KB | 56% |
+  | ... | ... | ... | avg 50% |
+- **Result:** All utility JS files are now minified and production-ready. Pages load faster due to reduced JS payload.
+
