@@ -2652,39 +2652,53 @@ Consolidate duplicate functions into utils.js to reduce code size and improve ma
 ## Objective
 Migrate inline JavaScript styles to CSS classes for better maintainability and CSP compliance.
 
-## [Step 135-145]: Inline Styles Migration
+## [Step 135]: Create CSS Utility Classes
+- **Date:** 2025-12-02
+- **Status:** COMPLETE
+
+**CSS Utility Classes Added to styles.css:**
+
+| Category | Classes |
+|----------|---------|
+| Display | `.d-none`, `.d-block`, `.d-flex`, `.d-inline`, `.d-inline-block`, `.d-grid` |
+| Visibility | `.invisible`, `.opacity-0`, `.opacity-50`, `.opacity-100` |
+| Text | `.text-center`, `.text-left`, `.text-right` |
+| Flex | `.flex-center`, `.flex-between`, `.flex-column`, `.flex-wrap`, `.gap-1`, `.gap-2` |
+| Position | `.relative`, `.absolute`, `.fixed` |
+| Overflow | `.overflow-hidden`, `.overflow-auto` |
+| Pointer | `.cursor-pointer`, `.pointer-events-none` |
+| State | `.disabled`, `.loading` |
+
+**Note:** Existing `.hidden` and `.visible` classes already in styles.css.
+
+## [Steps 136-140]: Inline Styles Migration (DEFERRED)
 
 **Files with inline styles (238+ occurrences):**
 
-| File | Count | Priority |
-|------|-------|----------|
-| `seznam.js` | 118 | HIGH - largest file |
-| `novareklamace.js` | 60 | HIGH |
-| `admin-notifications.js` | 18 | MEDIUM |
-| `pull-to-refresh.js` | 13 | LOW |
-| `password-reset.js` | 6 | LOW |
-| `admin.js` | 5 | LOW |
-| `heatmap-renderer.js` | 3 | LOW - intentional |
-| `replay-player.js` | 3 | LOW - intentional |
-| Other files | 12 | LOW |
+| File | Count | Priority | Status |
+|------|-------|----------|--------|
+| `seznam.js` | 118 | HIGH | PENDING |
+| `novareklamace.js` | 60 | HIGH | PENDING |
+| `admin-notifications.js` | 18 | MEDIUM | PENDING |
+| `pull-to-refresh.js` | 13 | LOW | PENDING |
+| `password-reset.js` | 6 | LOW | PENDING |
+| `admin.js` | 5 | LOW | PENDING |
+| `heatmap-renderer.js` | 3 | INTENTIONAL | KEEP |
+| `replay-player.js` | 3 | INTENTIONAL | KEEP |
 
-**Strategy:**
-1. Create CSS utility classes for common patterns:
-   - `.hidden` / `.visible`
-   - `.disabled` / `.enabled`
-   - `.loading` / `.loaded`
-   - `.highlight` / `.error` / `.success`
-2. Replace `el.style.display = 'none'` → `el.classList.add('hidden')`
-3. Replace `el.style.display = 'block'` → `el.classList.remove('hidden')`
-4. Keep intentional dynamic styles (animations, calculated positions)
+**Migration Strategy:**
+```javascript
+// Before
+el.style.display = 'none';
+el.style.display = 'block';
 
-**Tasks:**
-- [ ] Step 135: Create CSS utility classes in styles.css
-- [ ] Step 136: Migrate seznam.js inline styles (118)
-- [ ] Step 137: Migrate novareklamace.js inline styles (60)
-- [ ] Step 138: Migrate admin-notifications.js inline styles (18)
-- [ ] Step 139: Migrate remaining files
-- [ ] Step 140: Document intentional inline styles
+// After
+el.classList.add('hidden');  // or 'd-none'
+el.classList.remove('hidden');  // or 'd-none'
+```
+
+**Status:** CSS utility classes ready. JavaScript migration is a large task (~200 changes).
+This can be done incrementally in future sessions.
 
 ---
 

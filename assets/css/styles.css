@@ -965,6 +965,64 @@ tbody tr:last-child td {
 .visible {
   display: block !important;
 }
+
+/* ========================================
+   Step 135: CSS Utility Classes for inline style migration
+   ======================================== */
+
+/* Display utilities */
+.d-none { display: none !important; }
+.d-block { display: block !important; }
+.d-flex { display: flex !important; }
+.d-inline { display: inline !important; }
+.d-inline-block { display: inline-block !important; }
+.d-grid { display: grid !important; }
+
+/* Visibility utilities */
+.invisible { visibility: hidden !important; }
+.opacity-0 { opacity: 0 !important; }
+.opacity-50 { opacity: 0.5 !important; }
+.opacity-100 { opacity: 1 !important; }
+
+/* Text utilities */
+.text-center { text-align: center !important; }
+.text-left { text-align: left !important; }
+.text-right { text-align: right !important; }
+
+/* Flex utilities */
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-column { flex-direction: column !important; }
+.flex-wrap { flex-wrap: wrap !important; }
+.gap-1 { gap: 0.5rem !important; }
+.gap-2 { gap: 1rem !important; }
+
+/* Position utilities */
+.relative { position: relative !important; }
+.absolute { position: absolute !important; }
+.fixed { position: fixed !important; }
+
+/* Overflow utilities */
+.overflow-hidden { overflow: hidden !important; }
+.overflow-auto { overflow: auto !important; }
+
+/* Pointer utilities */
+.cursor-pointer { cursor: pointer !important; }
+.pointer-events-none { pointer-events: none !important; }
+
+/* State utilities */
+.disabled {
+  opacity: 0.5 !important;
+  pointer-events: none !important;
+  cursor: not-allowed !important;
+}
+.loading {
+  opacity: 0.7 !important;
+  pointer-events: none !important;
+}
+
+/* ======================================== */
+
 .hero,
 .hero-section,
 .hero-content {
