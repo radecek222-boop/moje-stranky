@@ -633,8 +633,15 @@ const WGS = {
   
   initForm() {
     const form = document.getElementById('reklamaceForm');
+    if (!form) {
+      logger.error('[initForm] Formulář reklamaceForm nenalezen!');
+      return;
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      e.stopPropagation();
+      logger.log('[initForm] Submit zachycen, spouštím validaci...');
       await this.submitForm();
     });
 
