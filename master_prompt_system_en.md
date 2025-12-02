@@ -26,14 +26,14 @@
 ## Current Work
 
 **Active Phase:** 10 - Testing & Documentation
-**Current Step:** 154 - Utils.js tests (COMPLETE)
-**Next Step:** 155 - wgsConfirm/wgsToast tests
+**Current Step:** 156 - E2E checklist (COMPLETE)
+**Next Step:** 161 - API Documentation
 
 ## Quick Reference
 
-- **Last completed step:** 154 (utils.js tests)
-- **Total steps completed:** 154
-- **Estimated remaining:** ~21 steps
+- **Last completed step:** 156 (E2E test checklist)
+- **Total steps completed:** 156
+- **Estimated remaining:** ~19 steps
 - **See:** [ROADMAP TO 100% COMPLETION](#roadmap-to-100-completion) section at end of file
 
 ## Phase 9 Deferral Note
@@ -2784,8 +2784,13 @@ composer test
 - [x] Step 152: Write tests for critical API endpoints
 - [x] Step 153: Set up Jest for JavaScript tests
 - [x] Step 154: Write tests for utils.js functions
-- [ ] Step 155: Write tests for wgsConfirm/wgsToast
-- [ ] Step 156: Create E2E test scenarios (manual checklist)
+- [x] Step 155: Write tests for wgsConfirm/wgsToast
+- [x] Step 156: Create E2E test scenarios (manual checklist)
+
+**Step 155-156 Summary (COMPLETE):**
+
+- `tests/js/wgs-modal.test.js` - wgsConfirm a wgsToast testy (40+ tests)
+- `tests/E2E_TEST_CHECKLIST.md` - Manuální testovací scénáře
 
 **Step 152-154 Summary (COMPLETE):**
 
