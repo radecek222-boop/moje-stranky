@@ -255,5 +255,115 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // ============================================
+    // SMTP CONFIGURATION (admin.php)
+    // ============================================
+
+    Utils.registerAction('testSmtpConnection', async () => {
+        try {
+            // Získat CSRF token
+            let csrf = null;
+            if (typeof getCSRFToken === 'function') {
+                csrf = await getCSRFToken();
+            } else {
+                const csrfInput = document.querySelector('input[name="csrf_token"]');
+                csrf = csrfInput ? csrfInput.value : null;
+            }
+
+            if (!csrf) {
+                throw new Error('CSRF token není dostupný');
+            }
+
+            const res = await fetch('/api/control_center_api.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'test_smtp_connection',
+                    csrf_token: csrf
+                })
+            });
+
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok || data.status === 'error') {
+                throw new Error(data.message || `HTTP ${res.status}`);
+            }
+
+            // Zobrazit úspěšnou zprávu
+            if (typeof wgsToast !== 'undefined' && wgsToast.success) {
+                wgsToast.success(data.message || 'SMTP test úspěšný');
+            } else {
+                alert(data.message || 'SMTP test úspěšný');
+            }
+        } catch (e) {
+            console.error('[SMTP] Test failed:', e);
+            if (typeof wgsToast !== 'undefined' && wgsToast.error) {
+                wgsToast.error(e?.message || 'Chyba při testu SMTP');
+            } else {
+                alert('Chyba: ' + (e?.message || 'Chyba při testu SMTP'));
+            }
+        }
+    });
+
+    Utils.registerAction('saveSmtpConfig', async () => {
+        try {
+            // Získat CSRF token
+            let csrf = null;
+            if (typeof getCSRFToken === 'function') {
+                csrf = await getCSRFToken();
+            } else {
+                const csrfInput = document.querySelector('input[name="csrf_token"]');
+                csrf = csrfInput ? csrfInput.value : null;
+            }
+
+            if (!csrf) {
+                throw new Error('CSRF token není dostupný');
+            }
+
+            // Získat hodnoty z formuláře
+            const payload = {
+                smtp_host: document.getElementById('smtp_host')?.value?.trim() || '',
+                smtp_port: document.getElementById('smtp_port')?.value?.trim() || '587',
+                smtp_encryption: document.getElementById('smtp_encryption')?.value || 'tls',
+                smtp_username: document.getElementById('smtp_username')?.value?.trim() || '',
+                smtp_password: document.getElementById('smtp_password')?.value || '',
+                smtp_from: document.getElementById('smtp_from')?.value?.trim() || '',
+                smtp_from_name: document.getElementById('smtp_from_name')?.value?.trim() || ''
+            };
+
+            const res = await fetch('/api/control_center_api.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'save_smtp_config',
+                    ...payload,
+                    csrf_token: csrf
+                })
+            });
+
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok || data.status === 'error') {
+                throw new Error(data.message || `HTTP ${res.status}`);
+            }
+
+            // Zobrazit úspěšnou zprávu
+            if (typeof wgsToast !== 'undefined' && wgsToast.success) {
+                wgsToast.success(data.message || 'SMTP konfigurace uložena');
+            } else {
+                alert(data.message || 'SMTP konfigurace uložena');
+            }
+        } catch (e) {
+            console.error('[SMTP] Save failed:', e);
+            if (typeof wgsToast !== 'undefined' && wgsToast.error) {
+                wgsToast.error(e?.message || 'Chyba při ukládání SMTP');
+            } else {
+                alert('Chyba: ' + (e?.message || 'Chyba při ukládání SMTP'));
+            }
+        }
+    });
+
     console.log('[AdminActions] ✓ Všechny akce zaregistrovány');
 });
