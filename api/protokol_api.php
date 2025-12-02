@@ -672,7 +672,7 @@ function sendEmailToCustomer($data) {
     // HTML email zpráva
     $message = "
 <!DOCTYPE html>
-<html>
+<html lang='cs'>
 <head>
     <meta charset='UTF-8'>
 </head>

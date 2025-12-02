@@ -595,7 +595,7 @@ body {
         <div class="cc-modal" @click.stop>
             <div class="cc-modal-header">
                 <h2 class="cc-modal-title" id="notifModalTitle">Notifikace</h2>
-                <button class="cc-modal-close" @click="close">×</button>
+                <button class="cc-modal-close" @click="close" aria-label="Zavřít">×</button>
             </div>
             <div class="cc-modal-body" id="notifModalBody">
                 <!-- Obsah se načte dynamicky -->
@@ -1057,7 +1057,7 @@ function loadNotifContent(type, body) {
   <div class="modal-content" style="width: 90vw !important; height: 80vh !important; max-width: 90vw !important; max-height: 80vh !important; display: flex; flex-direction: column;">
     <div class="modal-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #ddd; flex-shrink: 0;">
       <h3 class="modal-title" data-lang-cs="Přidat uživatele" data-lang-en="Add User" data-lang-it="Aggiungi Utente">Přidat uživatele</h3>
-      <button class="modal-close" id="closeModalBtn">×</button>
+      <button class="modal-close" id="closeModalBtn" aria-label="Zavřít">×</button>
     </div>
     <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 2rem;">
       <div id="modal-error" class="error-message hidden"></div>
@@ -1116,7 +1116,7 @@ function loadNotifContent(type, body) {
   <div class="modal-content" style="width: 1200px; max-width: 90vw; height: 80vh; display: flex; flex-direction: column; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
     <div class="modal-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #ddd; flex-shrink: 0;">
       <h3 class="modal-title" id="editNotificationTitle" data-lang-cs="Editovat notifikaci" data-lang-en="Edit Notification" data-lang-it="Modifica Notifica">Editovat notifikaci</h3>
-      <button class="modal-close" onclick="closeEditNotificationModal()">×</button>
+      <button class="modal-close" onclick="closeEditNotificationModal()" aria-label="Zavřít">×</button>
     </div>
     <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 2rem;">
       <div id="edit-notification-error" class="error-message" style="display: none;"></div>

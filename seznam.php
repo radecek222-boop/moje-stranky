@@ -1535,7 +1535,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
            data-lang-en-placeholder="Search in claims..."
            data-lang-it-placeholder="Cerca nei reclami..."
            placeholder="Hledat v reklamacích...">
-    <button class="search-clear" id="searchClear">×</button>
+    <button class="search-clear" id="searchClear" aria-label="Vymazat hledání">×</button>
   </div>
 
   <!-- FILTERS -->
@@ -1572,7 +1572,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 <div class="modal-overlay" id="detailOverlay"
      x-data="detailModal" x-init="init" @click="overlayClick">
   <div class="modal-content">
-    <button class="modal-close" data-action="closeDetail" @click="close">×</button>
+    <button class="modal-close" data-action="closeDetail" @click="close" aria-label="Zavřít">×</button>
     <div id="modalContent"></div>
   </div>
 </div>

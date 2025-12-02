@@ -599,7 +599,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
       <div class="provedeni-card" data-value="Kůže" @click="selectProvedeni" data-lang-cs="Kůže" data-lang-en="Leather" data-lang-it="Pelle">Kůže</div>
       <div class="provedeni-card" data-value="Kombinace" @click="selectProvedeni" data-lang-cs="Kombinace" data-lang-en="Combination" data-lang-it="Combinazione">Kombinace</div>
     </div>
-    <button class="btn btn-secondary" @click="close">×</button>
+    <button class="btn btn-secondary" @click="close" aria-label="Zavřít">×</button>
   </div>
 </div>
 

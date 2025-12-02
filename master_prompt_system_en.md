@@ -1536,3 +1536,38 @@ header('Content-Type: text/html; charset=utf-8');
   - `setup/pridej_remember_tokens.php`: Added viewport meta tag
 - **Result:** All HTML-outputting scripts now have proper viewport configuration.
 
+## [Step 69]: Accessibility Aria-Label Audit
+- **Date:** 2025-12-02
+- **What:** Added `aria-label` attributes to icon-only close buttons for screen reader accessibility.
+- **Analysis:**
+  - Found 10 close buttons with only `×` symbol and no accessible name
+  - Screen readers cannot announce the purpose of icon-only buttons without aria-label
+- **Files modified:**
+  - `novareklamace.php`: Added aria-label="Zavřít" to provedeni modal close button
+  - `protokol.php`: Added aria-label to 2 modal close buttons (calculator, zakaznik-schvaleni)
+  - `admin.php`: Added aria-label to 3 modal close buttons
+  - `seznam.php`: Added aria-label to search clear and detail modal close buttons
+  - `nova_aktualita.php`: Added aria-label="Odstranit" to photo remove button
+- **Result:** All icon-only buttons now have proper accessible names for screen readers.
+
+## [Step 70]: HTML Lang Attribute Audit
+- **Date:** 2025-12-02
+- **What:** Added missing `lang` attribute to HTML email template.
+- **Analysis:**
+  - Found 1 HTML email template in protokol_api.php missing lang attribute
+  - Lang attribute is important for email client accessibility features
+- **Files modified:**
+  - `api/protokol_api.php`: Added lang='cs' to email HTML template
+- **Result:** All HTML documents now have proper language declaration.
+
+## [Step 71]: Link Security Audit (rel="noopener")
+- **Date:** 2025-12-02
+- **What:** Added `rel="noopener"` to links with `target="_blank"` for security.
+- **Analysis:**
+  - Found 3 links with target="_blank" missing rel="noopener"
+  - Missing noopener can allow linked page to access window.opener
+- **Files modified:**
+  - `vsechny_tabulky.php`: Added rel="noopener" to oprav_view_provize link
+  - `api/admin_api.php`: Added rel="noopener" to photo and protokol links (2 places)
+- **Result:** All target="_blank" links now have proper security attributes.
+

@@ -477,7 +477,7 @@ Benvenuti alle notizie di oggi sui mobili italiani di lusso Natuzzi..."></textar
         photoItem.className = 'photo-item';
         photoItem.innerHTML = `
           <img src="${e.target.result}" alt="${file.name}">
-          <button type="button" class="remove-btn" data-filename="${file.name}">×</button>
+          <button type="button" class="remove-btn" data-filename="${file.name}" aria-label="Odstranit">×</button>
         `;
 
         photoPreview.appendChild(photoItem);

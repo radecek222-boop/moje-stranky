@@ -357,7 +357,7 @@ if ($initialBootstrapData) {
   <div class="calculator-modal-container">
     <div class="calculator-modal-header">
       <h3>Kalkulace ceny servisu</h3>
-      <button type="button" class="calculator-modal-close" id="calculatorModalClose" @click="close">×</button>
+      <button type="button" class="calculator-modal-close" id="calculatorModalClose" @click="close" aria-label="Zavřít">×</button>
     </div>
     <div class="calculator-modal-body" id="calculatorModalBody">
       <!-- Kalkulačka se vloží dynamicky -->
@@ -410,7 +410,7 @@ if ($initialBootstrapData) {
   <div class="zakaznik-schvaleni-container">
     <div class="zakaznik-schvaleni-header">
       <h2 data-lang-cs="Souhrn protokolu" data-lang-en="Protocol Summary" data-lang-it="Riepilogo protocollo">Souhrn protokolu</h2>
-      <button type="button" class="zakaznik-schvaleni-close" id="zakaznikSchvaleniClose" @click="close">×</button>
+      <button type="button" class="zakaznik-schvaleni-close" id="zakaznikSchvaleniClose" @click="close" aria-label="Zavřít">×</button>
     </div>
 
     <div class="zakaznik-schvaleni-body">
