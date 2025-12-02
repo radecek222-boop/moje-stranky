@@ -1275,8 +1275,32 @@ fetch('/api/endpoint.php')           // 1. Fetch JSON
      hx-trigger="click">               <!-- 3. Done! -->
 ```
 
+## [Step 54]: SMS Templates HTMX Migration
+- **Date:** 2025-12-02
+- **What:** Extended notification_list_html.php with type filtering and migrated SMS templates card to HTMX.
+- **How:**
+  1. Added `?type=sms|email` parameter to notification_list_html.php for filtering
+  2. Updated Email šablony card to use `?type=email`
+  3. Migrated SMS šablony card to HTMX with `?type=sms`
+- **Files touched:**
+  - `api/notification_list_html.php` (MODIFIED - added type filtering)
+  - `admin.php` (MODIFIED - SMS šablony now uses HTMX)
+- **Result:** Both Email and SMS template cards now use HTMX with shared endpoint.
+
+### Admin Notifications Panel - HTMX Migration Status:
+
+| Card | Status | Notes |
+|------|--------|-------|
+| Email šablony | HTMX | `?type=email` |
+| SMS šablony | HTMX | `?type=sms` |
+| Příjemci emailů | Static JS | Form - no dynamic data |
+| Automatické notifikace | Static JS | Settings form |
+| SMTP nastavení | Static JS | Config form |
+| SMS Gateway | Static JS | Config form |
+| Test odesílání | Static JS | Test form |
+
 ### Next HTMX Migration Candidates:
-1. SMS šablony (similar pattern to email templates)
-2. Statistics cards (load summary data)
-3. Notes panel in seznam.php
+1. Statistics cards (load summary data)
+2. Notes panel in seznam.php
+3. Complaint detail loading
 
