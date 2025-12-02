@@ -22,6 +22,22 @@
 // === HAMBURGER MENU ===
 // REMOVED: Mrtvý kód - menu je nyní centrálně v hamburger-menu.php
 
+// === DEBOUNCE FALLBACK ===
+// Fallback pokud utils.js není načten
+if (typeof debounce === 'undefined') {
+  window.debounce = function(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  };
+}
+
 // === KONTROLA PDF KNIHOVEN ===
 async function zkontrolujPdfKnihovny() {
   const maxPokusy = 50; // Max 5 sekund (50 * 100ms)
