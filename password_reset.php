@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/login.min.css">
   <!-- Tmavý styl pro login box -->
-  <link rel="stylesheet" href="assets/css/login-dark-theme.css">
+  <link rel="stylesheet" href="assets/css/login-dark-theme.min.css">
 </head>
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
