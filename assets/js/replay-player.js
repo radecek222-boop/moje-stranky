@@ -111,7 +111,7 @@
 
                     // Hide loading
                     if (loadingEl) {
-                        loadingEl.style.display = 'none';
+                        loadingEl.classList.add('hidden');
                     }
 
                     // Draw first frame

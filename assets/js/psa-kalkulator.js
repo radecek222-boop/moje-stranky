@@ -1026,7 +1026,7 @@ function generatePaymentQR() {
     });
   }
 
-  modal.style.display = 'block';
+  modal.classList.remove('hidden');
 }
 
 function generateCzechPaymentString(data) {
@@ -1060,7 +1060,7 @@ function downloadQR(qrId, employeeName) {
 }
 
 function closeQRModal() {
-  document.getElementById('qrModal').style.display = 'none';
+  document.getElementById('qrModal').classList.add('hidden');
 }
 
 // === SINGLE EMPLOYEE QR GENERATION ===
@@ -1146,7 +1146,7 @@ function generateSingleEmployeeQR(index) {
     `;
 
     container.appendChild(swiftItem);
-    modal.style.display = 'block';
+    modal.classList.remove('hidden');
     return;
   }
 
@@ -1222,14 +1222,14 @@ function generateSingleEmployeeQR(index) {
     }
   }, 100);
 
-  modal.style.display = 'block';
+  modal.classList.remove('hidden');
 }
 
 // Close modal on outside click
 window.onclick = function(event) {
   const modal = document.getElementById('qrModal');
   if (event.target == modal) {
-    modal.style.display = 'none';
+    modal.classList.add('hidden');
   }
 }
 

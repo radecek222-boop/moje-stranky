@@ -89,7 +89,7 @@
         const grid = document.getElementById('pricing-grid');
         const loading = document.getElementById('loading-indicator');
 
-        loading.style.display = 'none';
+        loading.classList.add('hidden');
         grid.style.display = 'grid';
         grid.innerHTML = '';
 
@@ -278,7 +278,7 @@
         document.getElementById('delete-btn').style.display = 'inline-block';
 
         // Otevřít modal
-        document.getElementById('edit-modal').style.display = 'flex';
+        document.getElementById('edit-modal').classList.remove('hidden');
     };
 
     // ========================================
@@ -304,10 +304,10 @@
         }
 
         // Skrýt delete tlačítko
-        document.getElementById('delete-btn').style.display = 'none';
+        document.getElementById('delete-btn').classList.add('hidden');
 
         // Otevřít modal
-        document.getElementById('edit-modal').style.display = 'flex';
+        document.getElementById('edit-modal').classList.remove('hidden');
     };
 
     // ========================================
@@ -393,7 +393,7 @@
     // ZAVŘÍT MODAL
     // ========================================
     window.zavritModal = function() {
-        document.getElementById('edit-modal').style.display = 'none';
+        document.getElementById('edit-modal').classList.add('hidden');
         currentEditItem = null;
     };
 

@@ -91,11 +91,11 @@ function showNotification(message, type = 'info') {
   
   notification.textContent = message;
   notification.className = `notification ${type}`;
-  notification.style.display = 'block';
+  notification.classList.remove('hidden');
   
   if (type !== 'error') {
     setTimeout(() => {
-      notification.style.display = 'none';
+      notification.classList.add('hidden');
     }, 3000);
   }
 }

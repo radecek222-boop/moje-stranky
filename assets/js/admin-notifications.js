@@ -247,7 +247,7 @@ function openEditNotificationModal(notificationId) {
   updateTemplatePreview();
   
   const modal = document.getElementById("editNotificationModal");
-  modal.style.display = "flex";
+  modal.classList.remove("hidden");
   modal.style.position = "fixed";
   modal.style.top = "0";
   modal.style.left = "0";
@@ -260,10 +260,10 @@ function openEditNotificationModal(notificationId) {
 }
 
 function closeEditNotificationModal() {
-  document.getElementById('editNotificationModal').style.display = 'none';
+  document.getElementById('editNotificationModal').classList.add('hidden');
   notificationState.currentEditing = null;
-  document.getElementById('edit-notification-error').style.display = 'none';
-  document.getElementById('edit-notification-success').style.display = 'none';
+  document.getElementById('edit-notification-error').classList.add('hidden');
+  document.getElementById('edit-notification-success').classList.add('hidden');
 }
 
 function insertVariable(variable) {
@@ -325,8 +325,8 @@ if (document.readyState === 'loading') {
 async function saveNotificationTemplate() {
   const errorDiv = document.getElementById('edit-notification-error');
   const successDiv = document.getElementById('edit-notification-success');
-  errorDiv.style.display = 'none';
-  successDiv.style.display = 'none';
+  errorDiv.classList.add('hidden');
+  successDiv.classList.add('hidden');
   
   if (!notificationState.currentEditing) return;
   
@@ -340,7 +340,7 @@ async function saveNotificationTemplate() {
   
   if (!data.template.trim()) {
     errorDiv.textContent = 'Text zprávy nesmí být prázdný';
-    errorDiv.style.display = 'block';
+    errorDiv.classList.remove('hidden');
     return;
   }
   
@@ -369,7 +369,7 @@ async function saveNotificationTemplate() {
     const result = await res.json();
     if (result.status === 'success') {
       successDiv.textContent = 'Šablona byla úspěšně uložena!';
-      successDiv.style.display = 'block';
+      successDiv.classList.remove('hidden');
 
       // Update state
       notificationState.notifications = notificationState.notifications.map(n => 
@@ -385,11 +385,11 @@ async function saveNotificationTemplate() {
       }, 1500);
     } else {
       errorDiv.textContent = result.message || 'Chyba při ukládání šablony';
-      errorDiv.style.display = 'block';
+      errorDiv.classList.remove('hidden');
     }
   } catch (err) {
     errorDiv.textContent = 'Chyba při ukládání šablony';
-    errorDiv.style.display = 'block';
+    errorDiv.classList.remove('hidden');
     console.error(err);
   }
 }

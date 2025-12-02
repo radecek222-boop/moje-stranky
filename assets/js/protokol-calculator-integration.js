@@ -65,7 +65,7 @@
                 window.calculatorModal.open();
             } else {
                 // Fallback pro zpětnou kompatibilitu
-                modalOverlay.style.display = 'flex';
+                modalOverlay.classList.remove('hidden');
             }
 
             // Načíst HTML kalkulačky z cenik.php
@@ -155,7 +155,7 @@
             window.calculatorModal.close();
         } else {
             // Fallback pro zpětnou kompatibilitu
-            modalOverlay.style.display = 'none';
+            modalOverlay.classList.add('hidden');
         }
 
         modalBody.innerHTML = '';

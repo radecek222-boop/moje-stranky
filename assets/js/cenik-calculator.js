@@ -122,7 +122,7 @@
             const query = e.target.value.trim();
 
             if (query.length < 3) {
-                dropdown.style.display = 'none';
+                dropdown.classList.add('hidden');
                 return;
             }
 
@@ -141,11 +141,11 @@
             if (data && data.features && data.features.length > 0) {
                 zobrazitNavrhy(data.features, dropdown);
             } else {
-                dropdown.style.display = 'none';
+                dropdown.classList.add('hidden');
             }
         } catch (error) {
             console.error('[Kalkulačka] Chyba autocomplete:', error);
-            dropdown.style.display = 'none';
+            dropdown.classList.add('hidden');
         }
     }
 
@@ -160,13 +160,13 @@
             item.addEventListener('click', () => {
                 const coords = feature.geometry.coordinates;
                 vybratAdresu(feature.properties.formatted || feature.properties.address_line1, coords[1], coords[0]);
-                dropdown.style.display = 'none';
+                dropdown.classList.add('hidden');
             });
 
             dropdown.appendChild(item);
         });
 
-        dropdown.style.display = 'block';
+        dropdown.classList.remove('hidden');
     }
 
     // ========================================
@@ -202,7 +202,7 @@
 
                 document.getElementById('distance-value').textContent = distanceKm;
                 document.getElementById('transport-cost').textContent = stav.dopravne.toFixed(2) + (jeReklamace ? ' (' + window.t('summary.claim') + ')' : '');
-                document.getElementById('distance-result').style.display = 'block';
+                document.getElementById('distance-result').classList.remove('hidden');
 
                 // Uživatel pokračuje ručně tlačítkem "Pokračovat"
             } else {
@@ -240,7 +240,7 @@
         // Skrýt aktuální krok
         const currentStep = document.querySelector('.wizard-step[style*="display: block"]');
         if (currentStep) {
-            currentStep.style.display = 'none';
+            currentStep.classList.add('hidden');
         }
 
         stav.krok++;
@@ -280,7 +280,7 @@
         // Zobrazit další krok
         const nextStep = document.getElementById(nextStepId);
         if (nextStep) {
-            nextStep.style.display = 'block';
+            nextStep.classList.remove('hidden');
         }
 
         aktualizovatProgress();
@@ -291,7 +291,7 @@
         // Skrýt aktuální krok
         const currentStep = document.querySelector('.wizard-step[style*="display: block"]');
         if (currentStep) {
-            currentStep.style.display = 'none';
+            currentStep.classList.add('hidden');
         }
 
         stav.krok--;
@@ -323,7 +323,7 @@
         // Zobrazit předchozí krok
         const prevStep = document.getElementById(prevStepId);
         if (prevStep) {
-            prevStep.style.display = 'block';
+            prevStep.classList.remove('hidden');
         }
 
         aktualizovatProgress();
@@ -569,8 +569,8 @@
 
         // Reset formuláře
         document.getElementById('calc-address').value = '';
-        document.getElementById('distance-result').style.display = 'none';
-        document.getElementById('address-suggestions').style.display = 'none';
+        document.getElementById('distance-result').classList.add('hidden');
+        document.getElementById('address-suggestions').classList.add('hidden');
 
         // Reset radio buttons
         document.querySelector('input[name="service-type"][value="calouneni"]').checked = true;
@@ -589,11 +589,11 @@
 
         // Skrýt všechny kroky
         document.querySelectorAll('.wizard-step').forEach(step => {
-            step.style.display = 'none';
+            step.classList.add('hidden');
         });
 
         // Zobrazit první krok
-        document.getElementById('step-address').style.display = 'block';
+        document.getElementById('step-address').classList.remove('hidden');
 
         aktualizovatProgress();
         scrollToTop();

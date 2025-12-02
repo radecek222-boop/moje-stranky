@@ -84,16 +84,16 @@ if (isAdminCheckbox) {
 
     if (e.target.checked) {
       // Admin mode - skrýt user pole a odstranit required
-      userLoginFields.style.display = 'none';
-      adminLoginFields.style.display = 'block';
+      userLoginFields.classList.add('hidden');
+      adminLoginFields.classList.remove('hidden');
 
       if (userEmail) userEmail.removeAttribute('required');
       if (userPassword) userPassword.removeAttribute('required');
       if (adminKey) adminKey.setAttribute('required', 'required');
     } else {
       // User mode - zobrazit user pole a přidat required
-      userLoginFields.style.display = 'block';
-      adminLoginFields.style.display = 'none';
+      userLoginFields.classList.remove('hidden');
+      adminLoginFields.classList.add('hidden');
 
       if (userEmail) userEmail.setAttribute('required', 'required');
       if (userPassword) userPassword.setAttribute('required', 'required');
@@ -418,11 +418,11 @@ function showNotification(message, type = 'info') {
   
   notification.textContent = message;
   notification.className = `notification ${type}`;
-  notification.style.display = 'block';
+  notification.classList.remove('hidden');
   
   if (type !== 'error') {
     setTimeout(() => {
-      notification.style.display = 'none';
+      notification.classList.add('hidden');
     }, 3000);
   }
 }

@@ -18,22 +18,22 @@
 | **Phase 5** | Technical Debt Cleanup | COMPLETE | Steps 104-131 |
 | **Phase 6** | Security Hardening | COMPLETE | Steps 132-133 |
 | **Phase 7** | Code Deduplication | COMPLETE | Steps 134 |
-| **Phase 8** | Inline Styles Migration | **IN PROGRESS** | Steps 135-140 |
-| **Phase 9** | HTMX Migration | PENDING | Steps 141-150 |
+| **Phase 8** | Inline Styles Migration | COMPLETE | Steps 135-137 |
+| **Phase 9** | HTMX Migration | **IN PROGRESS** | Steps 141-150 |
 | **Phase 10** | Testing & Documentation | PENDING | Steps 151-165 |
 | **Phase 11** | Performance Optimization | PENDING | Steps 166-175 |
 
 ## Current Work
 
-**Active Phase:** 8 - Inline Styles Migration
-**Current Step:** 135 - Create CSS Utility Classes
-**Next Step:** 136 - Migrate seznam.js inline styles
+**Active Phase:** 9 - HTMX Migration
+**Current Step:** 141 - Create HTMX HTML endpoint for notes
+**Next Step:** 142 - Migrate notes CRUD to HTMX
 
 ## Quick Reference
 
-- **Last completed step:** 134 (Code Deduplication)
-- **Total steps completed:** 134
-- **Estimated remaining:** ~41 steps
+- **Last completed step:** 137 (Display Styles Migration)
+- **Total steps completed:** 137
+- **Estimated remaining:** ~38 steps
 - **See:** [ROADMAP TO 100% COMPLETION](#roadmap-to-100-completion) section at end of file
 
 ---
@@ -2671,34 +2671,39 @@ Migrate inline JavaScript styles to CSS classes for better maintainability and C
 
 **Note:** Existing `.hidden` and `.visible` classes already in styles.css.
 
-## [Steps 136-140]: Inline Styles Migration (DEFERRED)
+## [Steps 136-137]: Display Styles Migration
+- **Date:** 2025-12-02
+- **Status:** COMPLETE
 
-**Files with inline styles (238+ occurrences):**
+**Migrated `.style.display` to `.classList` in 14 files:**
 
-| File | Count | Priority | Status |
-|------|-------|----------|--------|
-| `seznam.js` | 118 | HIGH | PENDING |
-| `novareklamace.js` | 60 | HIGH | PENDING |
-| `admin-notifications.js` | 18 | MEDIUM | PENDING |
-| `pull-to-refresh.js` | 13 | LOW | PENDING |
-| `password-reset.js` | 6 | LOW | PENDING |
-| `admin.js` | 5 | LOW | PENDING |
-| `heatmap-renderer.js` | 3 | INTENTIONAL | KEEP |
-| `replay-player.js` | 3 | INTENTIONAL | KEEP |
+| File | Changes |
+|------|---------|
+| `seznam.js` | 21 display styles → classList |
+| `novareklamace.js` | 20 display styles → classList |
+| `admin-notifications.js` | 10 display styles → classList |
+| `cenik.js`, `cenik-calculator.js` | 19 combined |
+| `login.js`, `password-reset.js`, `registration.js` | 14 combined |
+| `protokol.js`, `psa-kalkulator.js`, `admin.js` | 11 combined |
+| `protokol-pdf-preview.js`, `protokol-calculator-integration.js` | 7 combined |
+| `statistiky.js` | 2 display styles |
 
-**Migration Strategy:**
-```javascript
-// Before
-el.style.display = 'none';
-el.style.display = 'block';
+**Total migrated:** ~106 display style changes
+**Remaining:** 2 in error-handler.js (intentionally kept)
 
-// After
-el.classList.add('hidden');  // or 'd-none'
-el.classList.remove('hidden');  // or 'd-none'
-```
+## [Steps 138-140]: Remaining Inline Styles (LOW PRIORITY)
 
-**Status:** CSS utility classes ready. JavaScript migration is a large task (~200 changes).
-This can be done incrementally in future sessions.
+**Non-display inline styles remaining (~85):**
+
+| File | Count | Type |
+|------|-------|------|
+| `novareklamace.js` | 40 | Autocomplete dropdown, form states |
+| `pull-to-refresh.js` | 13 | Animation/position (intentional) |
+| `admin-notifications.js` | 8 | Various styling |
+| `error-handler.js` | 5 | Error overlay (intentional) |
+| `heatmap-renderer.js` | 3 | Canvas positioning (intentional) |
+
+**Decision:** Complex inline styles deferred - require significant CSS refactoring.
 
 ---
 

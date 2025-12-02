@@ -164,7 +164,7 @@ const WGS = {
     if (uliceInput && dropdownUlice) {
       const debouncedAutocompleteUlice = WGSMap.debounce(async (query) => {
         if (query.length < CONSTANTS.AUTOCOMPLETE_MIN_CHARS) {
-          dropdownUlice.style.display = 'none';
+          dropdownUlice.classList.add('hidden');
           return;
         }
 
@@ -184,7 +184,7 @@ const WGS = {
 
           if (data && data.features && data.features.length > 0) {
             dropdownUlice.innerHTML = '';
-            dropdownUlice.style.display = 'block';
+            dropdownUlice.classList.remove('hidden');
 
             // Seřadit podle relevance - preferovat úplné adresy
             const sortedFeatures = data.features.sort((a, b) => {
@@ -257,18 +257,18 @@ const WGS = {
                 //   this.calculateRoute(lat, lon);
                 // }
 
-                dropdownUlice.style.display = 'none';
+                dropdownUlice.classList.add('hidden');
                 this.toast('Adresa vyplněna', 'success');
               });
 
               dropdownUlice.appendChild(div);
             });
           } else {
-            dropdownUlice.style.display = 'none';
+            dropdownUlice.classList.add('hidden');
           }
         } catch (err) {
           logger.error('Autocomplete error:', err);
-          dropdownUlice.style.display = 'none';
+          dropdownUlice.classList.add('hidden');
         }
       }, CONSTANTS.AUTOCOMPLETE_DEBOUNCE);
 
@@ -281,7 +281,7 @@ const WGS = {
     if (mestoInput && dropdownMesto) {
       const debouncedAutocompleteMesto = WGSMap.debounce(async (query) => {
         if (query.length < CONSTANTS.AUTOCOMPLETE_MIN_CHARS) {
-          dropdownMesto.style.display = 'none';
+          dropdownMesto.classList.add('hidden');
           return;
         }
 
@@ -290,7 +290,7 @@ const WGS = {
 
           if (data && data.features && data.features.length > 0) {
             dropdownMesto.innerHTML = '';
-            dropdownMesto.style.display = 'block';
+            dropdownMesto.classList.remove('hidden');
 
             // Seřadit podle relevance - preferovat s PSČ
             const sortedFeatures = data.features.sort((a, b) => {
@@ -332,7 +332,7 @@ const WGS = {
                   document.getElementById('psc').value = postcode;
                 }
 
-                dropdownMesto.style.display = 'none';
+                dropdownMesto.classList.add('hidden');
                 this.toast('Město vybráno', 'success');
 
                 // Pokud je město vybráno, pokus se najít souřadnice
@@ -345,11 +345,11 @@ const WGS = {
               dropdownMesto.appendChild(div);
             });
           } else {
-            dropdownMesto.style.display = 'none';
+            dropdownMesto.classList.add('hidden');
           }
         } catch (err) {
           logger.error('Autocomplete error:', err);
-          dropdownMesto.style.display = 'none';
+          dropdownMesto.classList.add('hidden');
         }
       }, CONSTANTS.AUTOCOMPLETE_DEBOUNCE);
 
@@ -363,11 +363,11 @@ const WGS = {
       const clickedInsideMesto = dropdownMesto && dropdownMesto.contains(e.target);
 
       if (dropdownUlice && !clickedInsideUlice && e.target !== uliceInput) {
-        dropdownUlice.style.display = 'none';
+        dropdownUlice.classList.add('hidden');
       }
 
       if (dropdownMesto && !clickedInsideMesto && e.target !== mestoInput) {
-        dropdownMesto.style.display = 'none';
+        dropdownMesto.classList.add('hidden');
       }
     });
   },
@@ -471,7 +471,7 @@ const WGS = {
       const doplnujiciInfoTextarea = document.getElementById('doplnujici_info');
       
       if (calculatorBox && !fromCalculator) {
-        calculatorBox.style.display = 'block';
+        calculatorBox.classList.remove('hidden');
       }
       
       if (cisloInput) {
@@ -506,7 +506,7 @@ const WGS = {
       }
       
       if (modeInfo) {
-        modeInfo.style.display = 'block';
+        modeInfo.classList.remove('hidden');
         document.getElementById('modeTitle').textContent = t('mode_customer_title');
         document.getElementById('modeDescription').textContent = t('mode_customer_desc');
       }
@@ -514,11 +514,11 @@ const WGS = {
       logger.log('[List] Mode: Customer');
     } else {
       if (calculatorBox) {
-        calculatorBox.style.display = 'none';
+        calculatorBox.classList.add('hidden');
       }
       
       if (modeInfo) {
-        modeInfo.style.display = 'block';
+        modeInfo.classList.remove('hidden');
         modeInfo.style.borderLeftColor = '#006600';
         modeInfo.style.background = '#f0fff0';
         document.getElementById('modeTitle').textContent = t('mode_seller_title');
@@ -535,7 +535,7 @@ const WGS = {
     if (fromCalculator === 'true') {
       const calculationBox = document.getElementById('calculationBox');
       if (calculationBox) {
-        calculationBox.style.display = 'block';
+        calculationBox.classList.remove('hidden');
         const totalPrice = urlParams.get('calc_total');
         document.getElementById('calculationTotal').textContent = totalPrice;
       }
@@ -1242,7 +1242,7 @@ const WGS = {
     if (!datumProdeje || !datumReklamace ||
         datumProdeje === 'nevyplňuje se' ||
         datumReklamace === 'nevyplňuje se') {
-      if (warning) warning.style.display = 'none';
+      if (warning) warning.classList.add('hidden');
       return;
     }
 
@@ -1260,7 +1260,7 @@ const WGS = {
       const daysRemaining = Math.ceil((warrantyEnd - reklamace) / (1000 * 60 * 60 * 24));
 
       if (warning) {
-        warning.style.display = 'block';
+        warning.classList.remove('hidden');
         if (daysRemaining > 0) {
           warning.className = '';
           warning.innerHTML = t('warranty_valid')
@@ -1275,7 +1275,7 @@ const WGS = {
       }
     } catch (err) {
       logger.error('Chyba při výpočtu záruky:', err);
-      if (warning) warning.style.display = 'none';
+      if (warning) warning.classList.add('hidden');
     }
   },
 
