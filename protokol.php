@@ -554,8 +554,8 @@ if ($initialBootstrapData) {
 <!-- Fix pro tlačítka (načíst až po protokol.js) -->
 <script src="assets/js/protokol-buttons-fix.min.js" defer></script>
 <!-- Překlady pro kalkulačku -->
-<script src="assets/js/wgs-translations-cenik.min.js"></script>
-<script src="assets/js/language-switcher.min.js"></script>
+<script src="assets/js/wgs-translations-cenik.min.js" defer></script>
+<script src="assets/js/language-switcher.min.js" defer></script>
 <!-- Kalkulačka integrace -->
 <script src="assets/js/cenik-calculator.min.js" defer></script>
 <script src="assets/js/protokol-calculator-integration.min.js" defer></script>

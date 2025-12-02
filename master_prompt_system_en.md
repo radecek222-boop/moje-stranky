@@ -1488,3 +1488,17 @@ header('Content-Type: text/html; charset=utf-8');
   - `psa-kalkulator.php`: Added dns-prefetch for cdn.jsdelivr.net (QR code lib)
 - **Result:** Reduced DNS lookup latency for pages loading external libraries.
 
+## [Step 65]: Script Loading Optimization (defer)
+- **Date:** 2025-12-02
+- **What:** Added `defer` attribute to scripts that were loading synchronously but didn't need to block rendering.
+- **Analysis:**
+  - Many scripts at end of body were loading synchronously
+  - Scripts used by inline handlers still work with defer (executed before DOMContentLoaded)
+  - Some scripts (sw-register, replay-player, heatmap-renderer) must stay synchronous due to immediate inline usage
+- **Files modified:**
+  - `statistiky.php`: Added defer to jspdf, autotable, html2canvas (3 scripts)
+  - `protokol.php`: Added defer to wgs-translations-cenik.min.js, language-switcher.min.js
+  - `admin.php`: Added defer to all 6 JS files (logger, csrf, utils, admin-notifications, smtp-config, admin)
+  - `includes/hamburger-menu.php`: Added defer to scroll-lock, translations, logout-handler (3 scripts)
+- **Result:** Reduced render-blocking scripts, improved page load performance.
+
