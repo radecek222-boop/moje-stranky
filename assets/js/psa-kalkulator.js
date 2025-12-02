@@ -702,11 +702,11 @@ async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
 
 // === NOTIFICATIONS ===
 function showSuccess(message) {
-  alert(message);
+  wgsToast.success(message);
 }
 
 function showError(message) {
-  alert(message);
+  wgsToast.error(message);
 }
 
 // === EXPORT ===
@@ -1038,10 +1038,10 @@ Poplatky: OUR (hradí odesílatel)
 Zpráva: Výplata ${name} ${currentPeriod.month}/${currentPeriod.year}`;
 
   navigator.clipboard.writeText(text).then(() => {
-    alert('SWIFT údaje byly zkopírovány do schránky');
+    wgsToast.success('SWIFT údaje byly zkopírovány do schránky');
   }).catch(err => {
     logger.error('Chyba při kopírování:', err);
-    alert('Nepodařilo se zkopírovat údaje');
+    wgsToast.error('Nepodařilo se zkopírovat údaje');
   });
 }
 
@@ -1063,7 +1063,7 @@ function closeQRModal() {
 function generateSingleEmployeeQR(index) {
   const emp = employees[index];
   if (!emp) {
-    alert('Zaměstnanec nenalezen');
+    wgsToast.error('Zaměstnanec nenalezen');
     return;
   }
 
@@ -1100,7 +1100,7 @@ function generateSingleEmployeeQR(index) {
 
   // Check if payment is possible
   if (amount <= 0) {
-    alert('Částka k výplatě je 0 Kč. Zadejte prosím hodiny nebo nastavte mzdu.');
+    wgsToast.warning('Částka k výplatě je 0 Kč. Zadejte prosím hodiny nebo nastavte mzdu.');
     return;
   }
 
@@ -1148,7 +1148,7 @@ function generateSingleEmployeeQR(index) {
 
   // For domestic payments - check account and bank
   if (!emp.account || !emp.bank) {
-    alert('Prosím zadejte číslo účtu a kód banky pro ' + emp.name);
+    wgsToast.warning('Prosím zadejte číslo účtu a kód banky pro ' + emp.name);
     return;
   }
 

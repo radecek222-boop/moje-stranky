@@ -388,7 +388,7 @@ function exportAnalytics(format) {
     if (format === 'csv') {
         exportToCSV();
     } else if (format === 'pdf') {
-        alert('PDF export - připraveno pro budoucí implementaci');
+        wgsToast.info('PDF export - připraveno pro budoucí implementaci');
     }
 }
 

@@ -529,14 +529,14 @@ async function exportovatPDF() {
         const result = await response.json();
 
         if (result.status !== 'success' || !result.data.zakazky) {
-            alert('Chyba při načítání dat pro export');
+            wgsToast.error('Chyba při načítání dat pro export');
             return;
         }
 
         const zakazky = result.data.zakazky;
 
         if (zakazky.length === 0) {
-            alert('Žádná data k exportu podle filtrů');
+            wgsToast.warning('Žádná data k exportu podle filtrů');
             return;
         }
 
@@ -713,6 +713,6 @@ async function exportovatPDF() {
 
     } catch (error) {
         console.error('Chyba exportu PDF:', error);
-        alert('Chyba při exportu PDF: ' + error.message);
+        wgsToast.error('Chyba při exportu PDF: ' + error.message);
     }
 }

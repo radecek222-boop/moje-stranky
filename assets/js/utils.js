@@ -437,3 +437,90 @@ function wgsConfirm(message, okText = 'OK', cancelText = 'Zrušit') {
 // Export wgsConfirm
 window.wgsConfirm = wgsConfirm;
 window.Utils.wgsConfirm = wgsConfirm;
+
+/**
+ * Toast notifikační systém nahrazující window.alert()
+ * Zobrazí neinvazivní notifikaci v dolní části obrazovky
+ *
+ * Použití:
+ *   wgsToast('Uloženo');                          // Info toast
+ *   wgsToast('Úspěšně uloženo', 'success');      // Success toast
+ *   wgsToast('Chyba při ukládání', 'error');     // Error toast
+ *   wgsToast('Pozor!', 'warning', 5000);         // Warning, 5s
+ *
+ * @param {string} message - Zpráva k zobrazení
+ * @param {string} [type='info'] - Typ: 'success', 'error', 'warning', 'info'
+ * @param {number} [duration=3000] - Doba zobrazení v ms (0 = nezmizí automaticky)
+ */
+function wgsToast(message, type = 'info', duration = 3000) {
+    // Zajistit kontejner pro toasty
+    let container = document.getElementById('wgs-toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'wgs-toast-container';
+        container.className = 'wgs-toast-container';
+        document.body.appendChild(container);
+    }
+
+    // Vytvořit toast element
+    const toast = document.createElement('div');
+    toast.className = `wgs-toast wgs-toast-${type}`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+
+    // Obsah toastu
+    const messageEl = document.createElement('span');
+    messageEl.className = 'wgs-toast-message';
+    messageEl.textContent = message;
+
+    // Zavírací tlačítko
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'wgs-toast-close';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.setAttribute('aria-label', 'Zavřít');
+
+    toast.appendChild(messageEl);
+    toast.appendChild(closeBtn);
+
+    // Přidat do kontejneru
+    container.appendChild(toast);
+
+    // Animace vstupu
+    requestAnimationFrame(() => {
+        toast.classList.add('wgs-toast-visible');
+    });
+
+    // Funkce pro zavření
+    function closeToast() {
+        toast.classList.remove('wgs-toast-visible');
+        toast.classList.add('wgs-toast-hiding');
+        setTimeout(() => {
+            toast.remove();
+            // Odstranit kontejner pokud je prázdný
+            if (container && container.children.length === 0) {
+                container.remove();
+            }
+        }, 300);
+    }
+
+    // Event listener pro zavření
+    closeBtn.addEventListener('click', closeToast);
+
+    // Auto-dismiss
+    if (duration > 0) {
+        setTimeout(closeToast, duration);
+    }
+
+    return toast;
+}
+
+// Zkratky pro různé typy toastů
+wgsToast.success = (msg, duration) => wgsToast(msg, 'success', duration);
+wgsToast.error = (msg, duration) => wgsToast(msg, 'error', duration || 5000);
+wgsToast.warning = (msg, duration) => wgsToast(msg, 'warning', duration || 4000);
+wgsToast.info = (msg, duration) => wgsToast(msg, 'info', duration);
+
+// Export wgsToast
+window.wgsToast = wgsToast;
+window.Utils.wgsToast = wgsToast;

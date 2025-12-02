@@ -327,15 +327,15 @@
             const result = await response.json();
 
             if (result.status === 'success') {
-                alert(itemId ? window.t('pricingGrid.alert.updated') : window.t('pricingGrid.alert.created'));
+                wgsToast.success(itemId ? window.t('pricingGrid.alert.updated') : window.t('pricingGrid.alert.created'));
                 zavritModal();
                 nactiCenik(); // Reload ceníku
             } else {
-                alert(window.t('pricingGrid.alert.error') + ': ' + result.message);
+                wgsToast.error(window.t('pricingGrid.alert.error') + ': ' + result.message);
             }
         } catch (error) {
             console.error('[Ceník] Chyba při ukládání:', error);
-            alert(window.t('pricingGrid.alert.saveError'));
+            wgsToast.error(window.t('pricingGrid.alert.saveError'));
         }
     };
 
@@ -363,15 +363,15 @@
             const result = await response.json();
 
             if (result.status === 'success') {
-                alert(window.t('pricingGrid.alert.deleted'));
+                wgsToast.success(window.t('pricingGrid.alert.deleted'));
                 zavritModal();
                 nactiCenik(); // Reload ceníku
             } else {
-                alert(window.t('pricingGrid.alert.error') + ': ' + result.message);
+                wgsToast.error(window.t('pricingGrid.alert.error') + ': ' + result.message);
             }
         } catch (error) {
             console.error('[Ceník] Chyba při mazání:', error);
-            alert(window.t('pricingGrid.alert.deleteError'));
+            wgsToast.error(window.t('pricingGrid.alert.deleteError'));
         }
     };
 
@@ -415,7 +415,7 @@
         try {
             // Kontrola jestli jsou knihovny načteny
             if (typeof window.jspdf === 'undefined' || typeof html2canvas === 'undefined') {
-                alert('Knihovny pro PDF export se ještě načítají. Zkuste to prosím za chvíli.');
+                wgsToast.warning('Knihovny pro PDF export se ještě načítají. Zkuste to prosím za chvíli.');
                 return;
             }
 
@@ -528,7 +528,7 @@
 
             // Kontrola jestli máme data
             if (!pricingData || Object.keys(pricingData).length === 0) {
-                alert('Ceník není načten. Zkuste to prosím znovu.');
+                wgsToast.error('Ceník není načten. Zkuste to prosím znovu.');
                 return;
             }
 
@@ -735,7 +735,7 @@
 
         } catch (error) {
             console.error('[Ceník] Chyba při generování PDF:', error);
-            alert('Chyba při generování PDF: ' + error.message);
+            wgsToast.error('Chyba při generování PDF: ' + error.message);
         }
     };
 
