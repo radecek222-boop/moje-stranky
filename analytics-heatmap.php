@@ -227,7 +227,7 @@ $csrfToken = generateCSRFToken();
 
         <div class="controls">
             <div class="control-group">
-                <label>Stránka:</label>
+                <label for="page-selector">Stránka:</label>
                 <select id="page-selector">
                     <option value="https://www.wgs-service.cz/" data-path="/">DOMŮ</option>
                     <option value="https://www.wgs-service.cz/novareklamace.php" data-path="/novareklamace.php">OBJEDNAT SERVIS</option>
@@ -240,7 +240,7 @@ $csrfToken = generateCSRFToken();
             </div>
 
             <div class="control-group">
-                <label>Zařízení:</label>
+                <label for="device-selector">Zařízení:</label>
                 <select id="device-selector">
                     <option value="">Všechna zařízení</option>
                     <option value="desktop">Desktop</option>
@@ -250,7 +250,7 @@ $csrfToken = generateCSRFToken();
             </div>
 
             <div class="control-group">
-                <label>Typ heatmap:</label>
+                <label for="type-selector">Typ heatmap:</label>
                 <select id="type-selector">
                     <option value="click">Click Heatmap</option>
                     <option value="scroll">Scroll Heatmap</option>

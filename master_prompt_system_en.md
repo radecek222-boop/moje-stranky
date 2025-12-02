@@ -1639,3 +1639,15 @@ header('Content-Type: text/html; charset=utf-8');
   - `includes/admin_testing_simulator.php`: Added titles to seznam and detail preview iframes
 - **Result:** All iframes now have descriptive titles for assistive technologies.
 
+## [Step 77]: Form Label Associations for Accessibility
+- **Date:** 2025-12-02
+- **What:** Fixed form label associations for screen reader accessibility.
+- **Analysis:**
+  - Labels without `for` attribute cannot be programmatically associated with inputs
+  - Select elements without labels need aria-label
+- **Files modified:**
+  - `novareklamace.php`: Added aria-label="Telefonní předvolba" to phone prefix select
+  - `analytics-replay.php`: Added for="speed-select" to speed label
+  - `analytics-heatmap.php`: Added for attributes to page, device, and type selector labels
+- **Result:** All form controls now have proper label associations for assistive technologies.
+

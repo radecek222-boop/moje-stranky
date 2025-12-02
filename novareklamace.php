@@ -476,7 +476,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
           <div class="form-group">
             <label class="form-label" for="telefon" data-lang-cs="Telefon *" data-lang-en="Phone *" data-lang-it="Telefono *">Telefon *</label>
             <div class="phone-input-wrapper">
-              <select class="form-control phone-prefix" id="phone-prefix" name="phone_prefix">
+              <select class="form-control phone-prefix" id="phone-prefix" name="phone_prefix" aria-label="Telefonní předvolba">
                 <option value="+420" selected>🇨🇿 +420</option>
                 <option value="+421">🇸🇰 +421</option>
                 <option value="+39">🇮🇹 +39</option>
