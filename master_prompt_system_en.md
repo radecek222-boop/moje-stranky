@@ -1371,3 +1371,20 @@ header('Content-Type: text/html; charset=utf-8');
   - Each minified file now references its source map via `//# sourceMappingURL=` comment
 - **Result:** Debugging minified JS is now possible in browser DevTools. Stack traces will show original file names and line numbers.
 
+## [Step 57]: Generate Source Maps for Core JS Files
+- **Date:** 2025-12-02
+- **What:** Generated source maps for remaining 23 core JS files that were missing `.map` files.
+- **How:** Ran `terser` with `--source-map` option on all core JS files including the large ones (seznam.js, protokol.js, admin.js).
+- **Why:**
+  - Step 56 covered utility files; this step completes source map coverage for all JS
+  - Large files like seznam.js (102KB) and protokol.js (45KB) especially benefit from source maps
+  - Full debugging capability now available for entire JS codebase
+- **Files touched:**
+  - **23 new .min.js.map files created** including:
+    - `seznam.min.js.map` (67KB) - largest, most complex file
+    - `protokol.min.js.map` (45KB)
+    - `admin.min.js.map` (25KB)
+    - `novareklamace.min.js.map` (26KB)
+    - + 19 more core files
+- **Result:** All 44 minified JS files now have source maps. Complete debugging coverage for production code.
+
