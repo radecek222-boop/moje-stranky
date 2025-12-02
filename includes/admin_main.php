@@ -84,10 +84,10 @@ try {
                     <h3 class="control-card-title">Vzhled & Design</h3>
                     <p class="control-card-description">Barvy, fonty, logo a branding</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot green"></span>
+                <span class="control-card-status-dot green" aria-hidden="true"></span>
                 <span>Aktivní</span>
             </div>
         </div>
@@ -100,10 +100,10 @@ try {
                     <h3 class="control-card-title">SQL</h3>
                     <p class="control-card-description">Zobrazit všechny SQL tabulky (aktuální živá data)</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot green"></span>
+                <span class="control-card-status-dot green" aria-hidden="true"></span>
                 <span>Aktivní</span>
             </div>
         </div>
@@ -119,10 +119,10 @@ try {
                     <h3 class="control-card-title">Uživatelé & Oprávnění</h3>
                     <p class="control-card-description">Technici, prodejci, administrátoři</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot green"></span>
+                <span class="control-card-status-dot green" aria-hidden="true"></span>
                 <span><?= $userCount ?> uživatelů</span>
             </div>
         </div>
@@ -138,10 +138,10 @@ try {
                     <h3 class="control-card-title">Notifikace</h3>
                     <p class="control-card-description">Email & SMS šablony</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot green"></span>
+                <span class="control-card-status-dot green" aria-hidden="true"></span>
                 <span><?= $notificationCount ?> aktivních</span>
             </div>
         </div>
@@ -155,10 +155,10 @@ try {
                     <h3 class="control-card-title">Konfigurace</h3>
                     <p class="control-card-description">SMTP, API klíče, databáze</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot yellow"></span>
+                <span class="control-card-status-dot yellow" aria-hidden="true"></span>
                 <span>Vyžaduje restart</span>
             </div>
         </div>
@@ -174,10 +174,10 @@ try {
                     <h3 class="control-card-title">Diagnostika</h3>
                     <p class="control-card-description">Logy, chyby, výkon systému</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot <?= $systemStatus === 'healthy' ? 'green' : ($systemStatus === 'warning' ? 'yellow' : 'red') ?>"></span>
+                <span class="control-card-status-dot <?= $systemStatus === 'healthy' ? 'green' : ($systemStatus === 'warning' ? 'yellow' : 'red') ?>" aria-hidden="true"></span>
                 <span><?= ucfirst($systemStatus) ?></span>
             </div>
         </div>
@@ -193,10 +193,10 @@ try {
                     <h3 class="control-card-title">Akce & Úkoly</h3>
                     <p class="control-card-description">GitHub, migrace, pending tasks</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot <?= $pendingCount > 0 ? 'red' : 'green' ?>"></span>
+                <span class="control-card-status-dot <?= $pendingCount > 0 ? 'red' : 'green' ?>" aria-hidden="true"></span>
                 <span><?= $pendingCount ?> nevyřešených</span>
             </div>
         </div>
@@ -210,10 +210,10 @@ try {
                     <h3 class="control-card-title">Konzole</h3>
                     <p class="control-card-description">Diagnostika HTML/PHP/JS/CSS/SQL</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot blue"></span>
+                <span class="control-card-status-dot blue" aria-hidden="true"></span>
                 <span>Developer Tools</span>
             </div>
         </div>
@@ -226,10 +226,10 @@ try {
                     <h3 class="control-card-title">Statistiky & Reporty</h3>
                     <p class="control-card-description">Dashboard, grafy, exporty</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot green"></span>
+                <span class="control-card-status-dot green" aria-hidden="true"></span>
                 <span>Real-time data</span>
             </div>
         </div>

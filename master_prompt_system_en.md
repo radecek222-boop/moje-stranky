@@ -1932,3 +1932,16 @@ header('Content-Type: text/html; charset=utf-8');
   - `includes/admin_testing_interactive.php`: Added for attributes to existing labeled inputs (jmeno, email, telefon, popis_problemu, photo)
 - **Result:** Admin and analytics forms are now fully accessible with proper label associations.
 
+## [Step 97]: Aria-hidden for Decorative Elements
+- **Date:** 2025-12-02
+- **What:** Added aria-hidden="true" to decorative/presentational elements.
+- **Analysis:**
+  - Decorative icons and arrows should be hidden from screen readers
+  - Status indicator dots are visual-only (text labels provide the information)
+  - Search icons next to labeled inputs are decorative
+- **Files modified:**
+  - `seznam.php`: Added aria-hidden to search-icon span
+  - `offline.php`: Added aria-hidden to wifi-icon container
+  - `includes/admin_main.php`: Added aria-hidden to control-card-arrow elements (8 occurrences) and control-card-status-dot elements (9 occurrences)
+- **Result:** Screen readers now skip decorative elements, providing cleaner navigation for blind users.
+
