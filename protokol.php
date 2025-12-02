@@ -97,9 +97,6 @@ if ($lookupValue !== null) {
     try {
         $pdo = getDbConnection();
 
-        // DEBUG LOG
-        error_log("PROTOKOL DEBUG: lookupValue = '$lookupValue'");
-
         $stmt = $pdo->prepare(
             "SELECT r.*, u.name as created_by_name
              FROM wgs_reklamace r
@@ -109,9 +106,6 @@ if ($lookupValue !== null) {
         );
         $stmt->execute([':val1' => $lookupValue, ':val2' => $lookupValue, ':val3' => $lookupValue]);
         $record = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        // DEBUG LOG
-        error_log("PROTOKOL DEBUG: record found = " . ($record ? 'YES (id=' . $record['id'] . ')' : 'NO'));
 
         if ($record) {
             $address = wgs_format_address($record);
@@ -209,22 +203,6 @@ if ($initialBootstrapData) {
 
 <?php if ($initialBootstrapJson): ?>
 <script id="initialReklamaceData" type="application/json"><?= $initialBootstrapJson; ?></script>
-<?php else: ?>
-<!-- DEBUG: initialReklamaceData CHYBÍ!
-     GET[id]: <?= htmlspecialchars($_GET['id'] ?? '(prázdné)') ?>
-     lookupValue: <?= htmlspecialchars($lookupValue ?? '(null)') ?>
-     initialBootstrapData: <?= $initialBootstrapData ? 'EXISTUJE' : 'NULL' ?>
--->
-<script>
-console.error('[PROTOKOL] DATA NENAČTENA!');
-console.log('[PROTOKOL] GET id: "<?= htmlspecialchars($_GET['id'] ?? '') ?>"');
-console.log('[PROTOKOL] lookupValue: "<?= htmlspecialchars($lookupValue ?? '') ?>"');
-console.log('[PROTOKOL] Záznam nalezen: <?= $initialBootstrapData ? 'ANO' : 'NE' ?>');
-<?php if (!empty($_GET['id']) && $initialBootstrapData === null): ?>
-console.error('[PROTOKOL] Záznam "<?= htmlspecialchars($_GET['id']) ?>" NENALEZEN v databázi!');
-console.log('[PROTOKOL] Zkontrolujte zda existuje v tabulce wgs_reklamace');
-<?php endif; ?>
-</script>
 <?php endif; ?>
 
 <!-- Google Fonts - Natuzzi style -->
