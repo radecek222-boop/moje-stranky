@@ -2249,3 +2249,78 @@ The codebase is now in a good state with:
   - All corresponding `.min.js` and `.min.js.map` files (REGENERATED)
 - **Result:** Eliminated ~10 lines of duplicate code. debounce now centralized in utils.js.
 
+## [Step 109]: Create ActionRegistry Event Delegation System
+- **Date:** 2025-12-02
+- **What:** Created centralized event delegation system to replace inline onclick handlers.
+- **How:**
+  1. Added `ActionRegistry` object to utils.js with register/execute methods
+  2. Added `initEventDelegation()` function that listens for clicks on `[data-action]` elements
+  3. Added `data-href` support for simple navigation clicks
+  4. Exposed `Utils.registerAction()` for registering action handlers
+  5. Auto-initializes on DOMContentLoaded
+- **Why:**
+  - Inline onclick handlers are security concern (CSP restrictions)
+  - Centralized event handling improves maintainability
+  - Data attributes are more semantic and testable
+- **Files touched:**
+  - `assets/js/utils.js` (MODIFIED - +50 lines)
+  - `assets/js/utils.min.js` (REGENERATED)
+- **Result:** Foundation for onclick migration established.
+
+## [Step 110-111]: Migrate onclick Handlers in admin.php
+- **Date:** 2025-12-02
+- **What:** Migrated 27 inline onclick handlers in admin.php to event delegation.
+- **How:**
+  1. Converted navigation cards from `onclick="window.location='url'"` to `data-href="url"`
+  2. Converted notification cards from `onclick="openNotifModal('type')"` to `data-action="openNotifModal" data-modal="type"`
+  3. Converted button clicks to `data-action="functionName"`
+  4. Added ActionRegistry registrations in admin.js
+- **Why:**
+  - Security: Removes inline JavaScript from HTML
+  - Maintainability: Centralized event handling
+  - CSP compliance: No inline event handlers
+- **Files touched:**
+  - `admin.php` (MODIFIED - 27 onclick → data-action/data-href)
+  - `assets/js/admin.js` (MODIFIED - +30 lines ActionRegistry registrations)
+  - `assets/js/admin.min.js` (REGENERATED)
+- **Result:** admin.php now has 0 inline onclick handlers (except 2 in JS template literals).
+
+## [Step 112]: Migrate onclick Handlers in cenik.php
+- **Date:** 2025-12-02
+- **What:** Migrated 32 inline onclick handlers in cenik.php to event delegation.
+- **How:**
+  1. Converted wizard buttons (nextStep, previousStep) to `data-action`
+  2. Converted counter buttons to `data-action="incrementCounter" data-counter="name"`
+  3. Converted admin modal buttons (zavritModal, smazatPolozku, pridatPolozku)
+  4. Added submit handler for edit form via addEventListener
+  5. Added utils.min.js include to cenik.php
+  6. Added ActionRegistry registrations in cenik.js and cenik-calculator.js
+- **Files touched:**
+  - `cenik.php` (MODIFIED - 32 onclick → 0)
+  - `assets/js/cenik.js` (MODIFIED - +40 lines)
+  - `assets/js/cenik-calculator.js` (MODIFIED - +45 lines)
+  - All corresponding `.min.js` files (REGENERATED)
+- **Result:** cenik.php now has 0 inline onclick handlers.
+
+## [Step 113]: Migrate onclick Handlers in Admin Includes (Partial)
+- **Date:** 2025-12-02
+- **What:** Migrated onclick handlers in 6 admin include files (46 handlers total).
+- **How:**
+  1. `admin_configuration.php`: 2 onclick → saveConfig with data-id/data-key
+  2. `admin_testing.php`: 6 onclick → cleanupTestData, viewTestDataInDB, copyResults
+  3. `admin_main.php`: 9 onclick → openSection (using existing data-section), openNewWindow
+  4. `admin_console.php`: 8 onclick → runDiagnostics, maintenance functions
+  5. `admin_actions.php`: 10 onclick → executeAction, completeAction, dismissAction, webhooks
+  6. `admin_diagnostics.php`: 11 onclick → viewLog with data-log, maintenance functions
+  7. Added ActionRegistry registrations in each file's inline script
+  8. Added reloadPage action for universal page refresh
+- **Files touched:**
+  - `includes/admin_configuration.php` (MODIFIED - 2 onclick → 0)
+  - `includes/admin_testing.php` (MODIFIED - 6 onclick → 0)
+  - `includes/admin_main.php` (MODIFIED - 9 onclick → 0)
+  - `includes/admin_console.php` (MODIFIED - 8 onclick → 0)
+  - `includes/admin_actions.php` (MODIFIED - 10 onclick → 0)
+  - `includes/admin_diagnostics.php` (MODIFIED - 11 onclick → 0)
+  - `assets/js/admin.js` (MODIFIED - +15 lines for openSection, openNewWindow)
+- **Result:** 46 onclick handlers migrated. 94 remaining in other admin includes.
+
