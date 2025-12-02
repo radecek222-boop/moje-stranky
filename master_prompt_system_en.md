@@ -1945,3 +1945,16 @@ header('Content-Type: text/html; charset=utf-8');
   - `includes/admin_main.php`: Added aria-hidden to control-card-arrow elements (8 occurrences) and control-card-status-dot elements (9 occurrences)
 - **Result:** Screen readers now skip decorative elements, providing cleaner navigation for blind users.
 
+## [Step 98]: Label-Input Associations in Analytics Filter Forms
+- **Date:** 2025-12-02
+- **What:** Added proper label-input associations to date and filter fields in analytics pages.
+- **Analysis:**
+  - Analytics filter forms had labels without for attributes
+  - Date pickers and select elements need proper label associations
+  - Improves form navigation for screen reader users
+- **Files modified:**
+  - `analytics-conversions.php`: Added for/id pairs to date-from, date-to, conversion-type, funnel-select, funnel-date-from, funnel-date-to
+  - `analytics-campaigns.php`: Added for/id pairs to date-from, date-to, utm-source, utm-medium, device-type
+  - `analytics-user-scores.php`: Added for/id pairs to date-from, date-to
+- **Result:** All analytics filter forms are now properly labeled for accessibility.
+

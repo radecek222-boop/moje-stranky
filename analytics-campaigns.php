@@ -259,17 +259,17 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         <div class="filters">
             <div class="filter-row">
                 <div class="filter-group">
-                    <label>Datum od:</label>
+                    <label for="date-from">Datum od:</label>
                     <input type="date" id="date-from" value="<?php echo date('Y-m-d', strtotime('-30 days')); ?>">
                 </div>
 
                 <div class="filter-group">
-                    <label>Datum do:</label>
+                    <label for="date-to">Datum do:</label>
                     <input type="date" id="date-to" value="<?php echo date('Y-m-d'); ?>">
                 </div>
 
                 <div class="filter-group">
-                    <label>UTM Source:</label>
+                    <label for="utm-source">UTM Source:</label>
                     <select id="utm-source">
                         <option value="">Všechny</option>
                         <!-- Dynamically filled -->
@@ -277,7 +277,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 </div>
 
                 <div class="filter-group">
-                    <label>UTM Medium:</label>
+                    <label for="utm-medium">UTM Medium:</label>
                     <select id="utm-medium">
                         <option value="">Všechny</option>
                         <!-- Dynamically filled -->
@@ -285,7 +285,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 </div>
 
                 <div class="filter-group">
-                    <label>Device Type:</label>
+                    <label for="device-type">Device Type:</label>
                     <select id="device-type">
                         <option value="">Všechny</option>
                         <option value="desktop">Desktop</option>

@@ -265,11 +265,11 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         <div class="filters">
             <div class="filter-row">
                 <div class="filter-group">
-                    <label>Datum od:</label>
+                    <label for="date-from">Datum od:</label>
                     <input type="date" id="date-from" value="<?php echo date('Y-m-d', strtotime('-30 days')); ?>">
                 </div>
                 <div class="filter-group">
-                    <label>Datum do:</label>
+                    <label for="date-to">Datum do:</label>
                     <input type="date" id="date-to" value="<?php echo date('Y-m-d'); ?>">
                 </div>
                 <div class="filter-group">
