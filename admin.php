@@ -980,7 +980,7 @@ function loadNotifContent(type, body) {
       </div>
       <div class="cc-modal-body" id="adminModalBody">
           <div class="cc-modal-loading">
-              <div class="cc-modal-spinner"></div>
+              <div class="cc-modal-spinner" aria-hidden="true"></div>
               <div style="margin-top: 1rem;">Načítání...</div>
           </div>
       </div>

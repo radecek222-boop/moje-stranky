@@ -1983,3 +1983,16 @@ header('Content-Type: text/html; charset=utf-8');
   - `includes/hamburger-menu.php`: Added aria-current="page" to all active navigation links in admin, user, and public navigation sections
 - **Result:** Screen reader users can now identify the current page within navigation.
 
+## [Step 101]: Aria-hidden for Loading Spinners
+- **Date:** 2025-12-02
+- **What:** Added aria-hidden="true" to decorative loading spinner elements.
+- **Analysis:**
+  - Loading spinners are purely visual/decorative elements
+  - Screen readers should not announce these decorative elements
+  - The adjacent text already provides loading status information
+- **Files modified:**
+  - `protokol.php`: Added aria-hidden to loading-spinner div
+  - `admin.php`: Added aria-hidden to cc-modal-spinner div
+  - `includes/admin_testing_simulator.php`: Added aria-hidden to 2 test-spinner divs
+- **Result:** Screen readers will skip decorative spinners and only announce meaningful loading text.
+

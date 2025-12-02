@@ -431,7 +431,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         </div>
 
         <div class="test-loading" id="apiLoading">
-            <div class="test-spinner"></div>
+            <div class="test-spinner" aria-hidden="true"></div>
             <div>Odesílám data na server...</div>
         </div>
 
@@ -507,7 +507,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         <div id="protocolCheck">
             <div class="test-loading">
-                <div class="test-spinner"></div>
+                <div class="test-spinner" aria-hidden="true"></div>
                 <div>Kontroluji protokol...</div>
             </div>
         </div>
