@@ -633,29 +633,33 @@ async function logClientError(error, context = '') {
 // Open modal with specific section
 /**
  * OpenCCModal
+ * Step 45: Migrace na Alpine.js - open/close/ESC/overlay click nyní řeší adminModal komponenta
  */
 function openCCModal(section) {
-    const overlay = document.getElementById('adminOverlay');
-    const modal = document.getElementById('adminModal');
     const modalBody = document.getElementById('adminModalBody');
 
     // Kontrola existence elementů
-    if (!overlay || !modal || !modalBody) {
-        console.error('Modal elementy nenalezeny:', { overlay, modal, modalBody });
+    if (!modalBody) {
+        console.error('Modal body nenalezen');
         return;
     }
 
-    // Show overlay and modal
-    overlay.classList.add('active');
-    modal.classList.add('active');
-
-    // Zamknout scroll pres centralizovanou utilitu (iOS kompatibilni)
-    if (window.scrollLock) {
-        window.scrollLock.enable('admin-modal');
-    }
-
-    // Show loading
+    // Show loading first
     modalBody.innerHTML = '<div class="cc-modal-loading"><div class="cc-modal-spinner"></div><div style="margin-top: 1rem;">Načítání...</div></div>';
+
+    // Step 45: Zobrazit modal přes Alpine.js API
+    if (window.adminModal && window.adminModal.open) {
+        window.adminModal.open();
+    } else {
+        // Fallback pro zpětnou kompatibilitu
+        const overlay = document.getElementById('adminOverlay');
+        const modal = document.getElementById('adminModal');
+        if (overlay) overlay.classList.add('active');
+        if (modal) modal.classList.add('active');
+        if (window.scrollLock) {
+            window.scrollLock.enable('admin-modal');
+        }
+    }
 
     // Load section content
     switch(section) {
@@ -704,17 +708,21 @@ function openCCModal(section) {
 // Close modal
 /**
  * CloseCCModal
+ * Step 45: Migrace na Alpine.js
  */
 function closeCCModal() {
-    const overlay = document.getElementById('adminOverlay');
-    const modal = document.getElementById('adminModal');
-
-    overlay.classList.remove('active');
-    modal.classList.remove('active');
-
-    // Odemknout scroll pres centralizovanou utilitu
-    if (window.scrollLock) {
-        window.scrollLock.disable('admin-modal');
+    // Step 45: Zavřít modal přes Alpine.js API
+    if (window.adminModal && window.adminModal.close) {
+        window.adminModal.close();
+    } else {
+        // Fallback pro zpětnou kompatibilitu
+        const overlay = document.getElementById('adminOverlay');
+        const modal = document.getElementById('adminModal');
+        if (overlay) overlay.classList.remove('active');
+        if (modal) modal.classList.remove('active');
+        if (window.scrollLock) {
+            window.scrollLock.disable('admin-modal');
+        }
     }
 }
 

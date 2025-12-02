@@ -575,12 +575,13 @@ body {
 
     </div>
 
-    <!-- MODAL OVERLAY -->
-    <div class="cc-modal-overlay" id="notifModalOverlay" onclick="closeNotifModal()">
-        <div class="cc-modal" onclick="event.stopPropagation()">
+    <!-- MODAL OVERLAY - Alpine.js (Step 44) -->
+    <div class="cc-modal-overlay" id="notifModalOverlay"
+         x-data="notifModal" x-init="init" @click="overlayClick">
+        <div class="cc-modal" @click.stop>
             <div class="cc-modal-header">
                 <h2 class="cc-modal-title" id="notifModalTitle">Notifikace</h2>
-                <button class="cc-modal-close" onclick="closeNotifModal()">×</button>
+                <button class="cc-modal-close" @click="close">×</button>
             </div>
             <div class="cc-modal-body" id="notifModalBody">
                 <!-- Obsah se načte dynamicky -->
@@ -590,12 +591,11 @@ body {
 
     <script>
     // Modal systém pro notifikace
+    // Step 44: Migrace na Alpine.js - close/overlay click/ESC nyní řeší notifModal komponenta
         /**
      * OpenNotifModal
      */
 function openNotifModal(type) {
-        const overlay = document.getElementById('notifModalOverlay');
-        const modal = overlay.querySelector('.admin-modal');
         const title = document.getElementById('notifModalTitle');
         const body = document.getElementById('notifModalBody');
 
@@ -616,23 +616,34 @@ function openNotifModal(type) {
         // Načíst obsah podle typu
         loadNotifContent(type, body);
 
-        // Zobrazit modal - add active classes
-        overlay.classList.add('active');
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        // Step 44: Zobrazit modal přes Alpine.js API
+        if (window.notifModal && window.notifModal.open) {
+            window.notifModal.open();
+        } else {
+            // Fallback pro zpětnou kompatibilitu
+            const overlay = document.getElementById('notifModalOverlay');
+            const modal = overlay?.querySelector('.cc-modal');
+            overlay?.classList.add('active');
+            modal?.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
     }
 
         /**
      * CloseNotifModal
      */
 function closeNotifModal() {
-        const overlay = document.getElementById('notifModalOverlay');
-        const modal = overlay.querySelector('.admin-modal');
-
-        // Skrýt modal - remove active classes
-        overlay.classList.remove('active');
-        modal.classList.remove('active');
-        document.body.style.overflow = 'auto';
+        // Step 44: Zavřít modal přes Alpine.js API
+        if (window.notifModal && window.notifModal.close) {
+            window.notifModal.close();
+        } else {
+            // Fallback pro zpětnou kompatibilitu
+            const overlay = document.getElementById('notifModalOverlay');
+            const modal = overlay?.querySelector('.cc-modal');
+            overlay?.classList.remove('active');
+            modal?.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
     }
 
         /**
@@ -944,8 +955,10 @@ function loadNotifContent(type, body) {
 
 
   <!-- Overlay & Modal - MUST be outside dashboard condition so it exists in DOM -->
+  <!-- Alpine.js (Step 45) -->
   <?php if (!$embedMode): ?>
-  <div class="cc-overlay" id="adminOverlay" onclick="closeCCModal()"></div>
+  <div class="cc-overlay" id="adminOverlay"
+       x-data="adminModal" x-init="init" @click="overlayClick"></div>
   <div class="cc-modal" id="adminModal">
       <div class="cc-modal-header">
           <button class="cc-modal-close" onclick="closeCCModal()" aria-label="Zavřít">×</button>
