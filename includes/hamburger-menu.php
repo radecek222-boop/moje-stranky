@@ -569,6 +569,59 @@ document.addEventListener('alpine:init', () => {
   }));
 
   /**
+   * Calculator Modal - Alpine.js komponenta (Step 40)
+   * Modal pro kalkulačku ceny servisu na protokol stránce
+   * Migrace open/close logiky z vanilla JS na CSP-safe Alpine.js
+   * Business logika (načítání kalkulačky, výpočty) zůstává v protokol-calculator-integration.js
+   */
+  Alpine.data('calculatorModal', () => ({
+    open: false,
+
+    init() {
+      // ESC zavře modal (bonus - původně nebylo)
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.open) {
+          this.close();
+        }
+      });
+
+      // Exponovat metody pro vanilla JS (protokol-calculator-integration.js)
+      window.calculatorModal = {
+        open: () => this.openModal(),
+        close: () => this.close(),
+        isOpen: () => this.open
+      };
+
+      console.log('[calculatorModal] Inicializován (Alpine.js CSP-safe)');
+    },
+
+    // Otevřít modal - používá style.display pro zachování původního chování
+    openModal() {
+      this.open = true;
+      const overlay = document.getElementById('calculatorModalOverlay');
+      if (overlay) {
+        overlay.style.display = 'flex';
+      }
+    },
+
+    // Zavřít modal
+    close() {
+      this.open = false;
+      const overlay = document.getElementById('calculatorModalOverlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
+    },
+
+    // Klik na overlay pozadí
+    overlayClick(event) {
+      if (event.target.id === 'calculatorModalOverlay') {
+        this.close();
+      }
+    }
+  }));
+
+  /**
    * Zákazník Schválení Modal - Alpine.js komponenta (Step 39)
    * Modal pro zobrazení souhrnu protokolu a podpis zákazníka
    * Migrace open/close logiky z vanilla JS na CSP-safe Alpine.js

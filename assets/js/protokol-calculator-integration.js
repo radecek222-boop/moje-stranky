@@ -16,6 +16,7 @@
 
     // ========================================
     // INICIALIZACE
+    // Step 40: Migrace na Alpine.js - close/overlay click handlery přesunuty do calculatorModal komponenty
     // ========================================
     document.addEventListener('DOMContentLoaded', () => {
         console.log('[Protokol-Kalkulačka] DOM loaded');
@@ -23,7 +24,6 @@
         modalOverlay = document.getElementById('calculatorModalOverlay');
         modalBody = document.getElementById('calculatorModalBody');
         const priceTotalInput = document.getElementById('price-total');
-        const closeBtn = document.getElementById('calculatorModalClose');
 
         if (!modalOverlay || !modalBody) {
             console.error('[Protokol-Kalkulačka] Modal elementy nenalezeny!');
@@ -37,17 +37,8 @@
             priceTotalInput.style.cursor = 'pointer';
         }
 
-        // Event listener pro zavření modalu
-        if (closeBtn) {
-            closeBtn.addEventListener('click', zavritModal);
-        }
-
-        // Zavřít při kliknutí mimo modal
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) {
-                zavritModal();
-            }
-        });
+        // Step 40: Zavírání modalu nyní řeší Alpine.js (closeBtn, overlay click, ESC)
+        // Vanilla JS event listenery odstraněny
 
         console.log('[Protokol-Kalkulačka] Inicializace dokončena');
     });
@@ -77,8 +68,13 @@
                 document.head.appendChild(style);
             }
 
-            // Zobrazit modal
-            modalOverlay.style.display = 'flex';
+            // Step 40: Zobrazit modal přes Alpine.js API
+            if (window.calculatorModal && window.calculatorModal.open) {
+                window.calculatorModal.open();
+            } else {
+                // Fallback pro zpětnou kompatibilitu
+                modalOverlay.style.display = 'flex';
+            }
 
             // Načíst HTML kalkulačky z cenik.php
             const response = await fetch('cenik.php');
@@ -174,10 +170,19 @@
 
     // ========================================
     // ZAVŘENÍ MODALU
+    // Step 40: Migrace na Alpine.js
     // ========================================
     function zavritModal() {
         console.log('[Protokol-Kalkulačka] Zavírám modal...');
-        modalOverlay.style.display = 'none';
+
+        // Step 40: Zavřít modal přes Alpine.js API
+        if (window.calculatorModal && window.calculatorModal.close) {
+            window.calculatorModal.close();
+        } else {
+            // Fallback pro zpětnou kompatibilitu
+            modalOverlay.style.display = 'none';
+        }
+
         modalBody.innerHTML = '';
         kalkulaceData = null;
 

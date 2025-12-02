@@ -349,12 +349,13 @@ if ($initialBootstrapData) {
   <div id="notif" class="notif"></div>
 </div>
 
-<!-- Calculator Modal -->
-<div class="calculator-modal-overlay" id="calculatorModalOverlay" style="display: none;">
+<!-- Calculator Modal - Alpine.js (Step 40) -->
+<div class="calculator-modal-overlay" id="calculatorModalOverlay" style="display: none;"
+     x-data="calculatorModal" x-init="init" @click="overlayClick">
   <div class="calculator-modal-container">
     <div class="calculator-modal-header">
       <h3>Kalkulace ceny servisu</h3>
-      <button type="button" class="calculator-modal-close" id="calculatorModalClose">×</button>
+      <button type="button" class="calculator-modal-close" id="calculatorModalClose" @click="close">×</button>
     </div>
     <div class="calculator-modal-body" id="calculatorModalBody">
       <!-- Kalkulačka se vloží dynamicky -->
