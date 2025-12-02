@@ -1474,3 +1474,17 @@ header('Content-Type: text/html; charset=utf-8');
   - Added ExpiresByType for `application/json`: 1 year
 - **Result:** Complete cache coverage for all static asset types including source maps.
 
+## [Step 64]: DNS Prefetch for External Resources
+- **Date:** 2025-12-02
+- **What:** Added `dns-prefetch` hints for external CDN resources to reduce DNS lookup latency.
+- **Analysis:**
+  - External resources: cdn.jsdelivr.net, cdnjs.cloudflare.com, unpkg.com, api.geoapify.com
+  - novareklamace.php already had preconnect for unpkg and cdnjs
+  - Other pages loading external scripts were missing dns-prefetch
+- **Files modified:**
+  - `analytics.php`: Added dns-prefetch for cdn.jsdelivr.net (Chart.js)
+  - `protokol.php`: Added dns-prefetch for cdnjs.cloudflare.com (jsPDF, html2canvas, pdf-lib)
+  - `cenik.php`: Added dns-prefetch for cdnjs.cloudflare.com (jsPDF, html2canvas)
+  - `psa-kalkulator.php`: Added dns-prefetch for cdn.jsdelivr.net (QR code lib)
+- **Result:** Reduced DNS lookup latency for pages loading external libraries.
+
