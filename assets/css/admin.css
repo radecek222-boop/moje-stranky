@@ -360,6 +360,15 @@
     display: block;
 }
 
+/* Sections - pro Email & SMS karty */
+.cc-section {
+    display: none;
+}
+
+.cc-section.active {
+    display: block;
+}
+
 /* Mini stats grid */
 .cc-mini-stats {
     display: grid;
