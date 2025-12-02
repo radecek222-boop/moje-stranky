@@ -1764,3 +1764,16 @@ header('Content-Type: text/html; charset=utf-8');
   - `registration.php`, `login.php`, `password_reset.php`: Added role="alert" aria-live="assertive" to notification divs
 - **Result:** Improved navigation, pagination and notification accessibility for screen reader users.
 
+## [Step 85]: Semantic Search Inputs with ARIA Labels
+- **Date:** 2025-12-02
+- **What:** Changed search inputs from type="text" to type="search" with proper aria-labels.
+- **Analysis:**
+  - Using type="search" provides semantic meaning and enables browser search features (clear button, history)
+  - aria-label helps screen readers announce the purpose of search fields
+  - enterkeyhint="search" shows correct keyboard action on mobile
+- **Files modified:**
+  - `seznam.php`: Changed searchInput to type="search" with aria-label="Hledat v reklamacích"
+  - `admin.php`: Changed search-users and search-zakaznici inputs to type="search" with aria-labels
+  - `includes/admin_main.php`: Changed cc-search to type="search" with aria-label="Hledat nastavení"
+- **Result:** Search inputs now have proper semantic HTML and accessibility labeling.
+
