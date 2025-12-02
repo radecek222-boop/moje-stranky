@@ -1698,3 +1698,21 @@ header('Content-Type: text/html; charset=utf-8');
   - `gdpr-portal.php`: Added scope="col" to 10 th elements (2 dynamic tables)
 - **Result:** All user-facing tables now have proper scope attributes for screen reader table navigation.
 
+## [Step 81]: ARIA Live Regions for Dynamic Content
+- **Date:** 2025-12-02
+- **What:** Added aria-live regions and role attributes for loading states and status messages.
+- **Analysis:**
+  - Screen readers need aria-live regions to announce dynamic content changes
+  - Loading indicators should have role="status" for proper announcement
+  - Error messages should have role="alert" for immediate announcement
+- **Files modified:**
+  - `statistiky.php`: Added aria-live="polite" to 5 chart containers, role="status" to loading divs
+  - `admin.php`: Added aria-live="polite" to 3 table bodies, role="status" to loading cells, role="alert" to error messages
+  - `analytics-campaigns.php`: Added aria-live="polite" to table container, role="status" to loading div
+  - `analytics-conversions.php`: Added aria-live="polite" to table container, role="status" to loading div
+  - `analytics-user-scores.php`: Added aria-live="polite" to table container, role="status" to loading div
+  - `analytics-realtime.php`: Added aria-live="polite" and role="status" to sessions and events lists
+  - `psa-kalkulator.php`: Added aria-live="polite" to tbody, role="status" to loading cell
+  - `psa.php`: Added aria-live="polite" to tbody, role="status" to loading cell
+- **Result:** Screen readers now announce loading states and content updates for better dynamic content accessibility.
+

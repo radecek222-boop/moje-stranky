@@ -924,9 +924,9 @@ function loadNotifContent(type, body) {
             <th scope="col" data-lang-cs="Akce" data-lang-en="Actions" data-lang-it="Azioni">Akce</th>
           </tr>
         </thead>
-        <tbody id="users-table">
+        <tbody id="users-table" aria-live="polite">
           <tr>
-            <td colspan="7" class="loading" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
+            <td colspan="7" class="loading" role="status" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
           </tr>
         </tbody>
       </table>
@@ -957,9 +957,9 @@ function loadNotifContent(type, body) {
             <th scope="col" data-lang-cs="Akce" data-lang-en="Actions" data-lang-it="Azioni">Akce</th>
           </tr>
         </thead>
-        <tbody id="zakaznici-table">
+        <tbody id="zakaznici-table" aria-live="polite">
           <tr>
-            <td colspan="6" class="loading" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
+            <td colspan="6" class="loading" role="status" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
           </tr>
         </tbody>
       </table>
@@ -1038,9 +1038,9 @@ function loadNotifContent(type, body) {
             <th scope="col" data-lang-cs="Poslední aktivita" data-lang-en="Last Activity" data-lang-it="Ultima Attività">Poslední aktivita</th>
           </tr>
         </thead>
-        <tbody id="online-table">
+        <tbody id="online-table" aria-live="polite">
           <tr>
-            <td colspan="5" class="loading" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
+            <td colspan="5" class="loading" role="status" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
           </tr>
         </tbody>
       </table>
@@ -1060,7 +1060,7 @@ function loadNotifContent(type, body) {
       <button class="modal-close" id="closeModalBtn" aria-label="Zavřít">×</button>
     </div>
     <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 2rem;">
-      <div id="modal-error" class="error-message hidden"></div>
+      <div id="modal-error" class="error-message hidden" role="alert"></div>
 
       <div class="form-group">
         <label class="form-label" data-lang-cs="Jméno *" data-lang-en="Name *" data-lang-it="Nome *">Jméno *</label>
@@ -1119,8 +1119,8 @@ function loadNotifContent(type, body) {
       <button class="modal-close" onclick="closeEditNotificationModal()" aria-label="Zavřít">×</button>
     </div>
     <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 2rem;">
-      <div id="edit-notification-error" class="error-message" style="display: none;"></div>
-      <div id="edit-notification-success" class="success-message" style="display: none;"></div>
+      <div id="edit-notification-error" class="error-message" style="display: none;" role="alert"></div>
+      <div id="edit-notification-success" class="success-message" style="display: none;" role="status"></div>
       <div class="form-group">
         <label class="form-label" data-lang-cs="Příjemce" data-lang-en="Recipient" data-lang-it="Destinatario">Příjemce</label>
         <select class="form-select" id="edit-recipient">

@@ -596,8 +596,8 @@ body {
       <div class="table-count" id="table-count">0 zakázek</div>
     </div>
 
-    <div id="table-container">
-      <div class="loading">Načítání dat...</div>
+    <div id="table-container" aria-live="polite">
+      <div class="loading" role="status">Načítání dat...</div>
     </div>
 
     <!-- Stránkování -->
@@ -613,32 +613,32 @@ body {
     <!-- Nejporuchovější modely -->
     <div class="chart-card">
       <div class="chart-title">Nejporuchovější modely</div>
-      <div class="chart-content" id="chart-models">
-        <div class="loading">Načítání...</div>
+      <div class="chart-content" id="chart-models" aria-live="polite">
+        <div class="loading" role="status">Načítání...</div>
       </div>
     </div>
 
     <!-- Lokality -->
     <div class="chart-card">
       <div class="chart-title">Lokality (města)</div>
-      <div class="chart-content" id="chart-cities">
-        <div class="loading">Načítání...</div>
+      <div class="chart-content" id="chart-cities" aria-live="polite">
+        <div class="loading" role="status">Načítání...</div>
       </div>
     </div>
 
     <!-- Statistiky prodejců -->
     <div class="chart-card">
       <div class="chart-title">Statistiky prodejců</div>
-      <div class="chart-content" id="chart-salespersons">
-        <div class="loading">Načítání...</div>
+      <div class="chart-content" id="chart-salespersons" aria-live="polite">
+        <div class="loading" role="status">Načítání...</div>
       </div>
     </div>
 
     <!-- Statistiky techniků -->
     <div class="chart-card">
       <div class="chart-title">Statistiky techniků</div>
-      <div class="chart-content" id="chart-technicians">
-        <div class="loading">Načítání...</div>
+      <div class="chart-content" id="chart-technicians" aria-live="polite">
+        <div class="loading" role="status">Načítání...</div>
       </div>
     </div>
   </div>

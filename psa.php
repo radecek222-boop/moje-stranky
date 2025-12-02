@@ -128,9 +128,9 @@
             <th scope="col" class="text-center">Akce</th>
           </tr>
         </thead>
-        <tbody id="employeeTableBody">
+        <tbody id="employeeTableBody" aria-live="polite">
           <tr>
-            <td colspan="7" class="text-center loading-cell">
+            <td colspan="7" class="text-center loading-cell" role="status">
               <div class="loading"></div>
               Načítání dat...
             </td>

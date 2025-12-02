@@ -303,13 +303,13 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             <!-- Active Sessions -->
             <div class="sessions-container">
                 <h3>Aktivní sessions (<span id="sessions-count">0</span>)</h3>
-                <div id="sessions-list" class="loading">Načítám sessions...</div>
+                <div id="sessions-list" class="loading" role="status" aria-live="polite">Načítám sessions...</div>
             </div>
 
             <!-- Live Events -->
             <div class="events-container">
                 <h3>Živé eventy</h3>
-                <div id="events-list" class="loading">Načítám eventy...</div>
+                <div id="events-list" class="loading" role="status" aria-live="polite">Načítám eventy...</div>
             </div>
         </div>
     </div>

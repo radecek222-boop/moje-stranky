@@ -296,9 +296,9 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         </div>
 
         <!-- Sessions Table -->
-        <div class="table-container">
+        <div class="table-container" aria-live="polite">
             <h3 style="margin-bottom: 15px;">Sessions se Scores</h3>
-            <div id="loading-message" class="loading">Načítám data...</div>
+            <div id="loading-message" class="loading" role="status">Načítám data...</div>
             <table id="scores-table" style="display: none;">
                 <thead>
                     <tr>

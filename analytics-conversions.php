@@ -277,8 +277,8 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 </div>
             </div>
 
-            <div class="conversions-table">
-                <div id="loading-message" class="loading">Klikněte na "Načíst data" pro zobrazení konverzí</div>
+            <div class="conversions-table" aria-live="polite">
+                <div id="loading-message" class="loading" role="status">Klikněte na "Načíst data" pro zobrazení konverzí</div>
 
                 <table id="conversions-table" style="display: none;">
                     <thead>

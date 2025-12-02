@@ -352,8 +352,8 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             <canvas id="timeline-canvas"></canvas>
         </div>
 
-        <div class="campaigns-table">
-            <div id="loading-message" class="loading">Klikněte na "Načíst data" pro zobrazení campaign statistik</div>
+        <div class="campaigns-table" aria-live="polite">
+            <div id="loading-message" class="loading" role="status">Klikněte na "Načíst data" pro zobrazení campaign statistik</div>
 
             <table id="campaigns-table" style="display: none;">
                 <thead>
