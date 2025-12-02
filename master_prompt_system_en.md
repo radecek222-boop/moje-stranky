@@ -1405,3 +1405,19 @@ header('Content-Type: text/html; charset=utf-8');
     - + 17 more CSS files
 - **Result:** All minified assets (44 JS + 21 CSS = 65 total) now have source maps for complete debugging coverage.
 
+## [Step 59]: Minify Remaining CSS Files
+- **Date:** 2025-12-02
+- **What:** Minified 3 remaining CSS files that were missing `.min.css` versions and updated PHP references.
+- **How:**
+  1. Ran `csso` on each file with `--source-map file` option
+  2. Updated PHP files to reference `.min.css` versions
+- **Files minified:**
+  - `offline.css` → `offline.min.css` (used in offline.php)
+  - `photocustomer-collapsible.css` → `photocustomer-collapsible.min.css` (used in photocustomer.php)
+  - `z-index-layers.css` → `z-index-layers.min.css` (used in hamburger-menu.php - loaded globally)
+- **PHP files updated:**
+  - `offline.php`
+  - `photocustomer.php`
+  - `includes/hamburger-menu.php`
+- **Result:** All CSS files now minified. Total: 24 minified CSS files with source maps.
+

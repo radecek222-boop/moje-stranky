@@ -15,7 +15,7 @@ if ($isAdmin) {
 ?>
 
 <!-- Centralizovaný z-index systém -->
-<link rel="stylesheet" href="/assets/css/z-index-layers.css">
+<link rel="stylesheet" href="/assets/css/z-index-layers.min.css">
 
 <!-- Hamburger Menu Wrapper - Alpine.js (Step 41) -->
 <div x-data="hamburgerMenu" x-init="init">
