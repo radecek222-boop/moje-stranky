@@ -60,7 +60,6 @@
     });
 
     function initKalkulacka() {
-        console.log('[Kalkulačka] Inicializace wizardu');
         initAddressAutocomplete();
         initEventListeners();
         aktualizovatProgress();
@@ -235,7 +234,6 @@
                 stav.vzdalenost = 0;
                 stav.reklamaceBezDopravy = true;
                 stav.adresa = window.t('summary.claimNoTransport');
-                console.log('[Kalkulačka] Reklamace bez dopravy - pokračuji bez adresy');
             }
         }
 
@@ -612,8 +610,6 @@
                 return;
             }
 
-            console.log('[Kalkulačka] Generuji PDF pomocí html2canvas...');
-
             // Vypočítat celkovou cenu
             let celkem = stav.dopravne;
 
@@ -909,7 +905,6 @@
             await new Promise(resolve => setTimeout(resolve, 100));
 
             // Převést HTML na canvas (stejné nastavení jako protokol.php)
-            console.log('[Kalkulačka] Renderuji HTML pomocí html2canvas...');
             const canvas = await html2canvas(pdfContent, {
                 scale: 3,
                 backgroundColor: '#ffffff',
@@ -955,8 +950,6 @@
             const nazevSouboru = `kalkulace_${new Date().getTime()}.pdf`;
             doc.save(nazevSouboru);
 
-            console.log('[Kalkulačka] PDF staženo:', nazevSouboru);
-
         } catch (error) {
             console.error('[Kalkulačka] Chyba při exportu PDF:', error);
             alert(window.t('alert.pdfError'));
@@ -968,15 +961,12 @@
     // ========================================
     window.nastavitKalkulackuRezim = function(rezim) {
         kalkulackaRezim = rezim;
-        console.log('[Kalkulačka] Režim nastaven na:', rezim);
     };
 
     // ========================================
     // ZAPOČÍTAT DO PROTOKOLU
     // ========================================
     window.zapocitatDoProtokolu = function() {
-        console.log('[Kalkulačka] Započítávám do protokolu...');
-
         // Vypočítat celkovou cenu
         let celkovaCena = stav.dopravne;
 
