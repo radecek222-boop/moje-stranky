@@ -45,14 +45,26 @@ const WGS = {
   initTypZakaznika() {
     const icoCheckbox = document.getElementById('objednavkaICO');
     const fyzickaCheckbox = document.getElementById('objednavkaFyzicka');
+    const typZakaznikaWrapper = document.querySelector('.typ-zakaznika-wrapper');
 
     if (!icoCheckbox || !fyzickaCheckbox) return;
+
+    // Funkce pro odstranění červeného označení při zaškrtnutí
+    const odstranitCerveneOznaceni = () => {
+      if (typZakaznikaWrapper && (icoCheckbox.checked || fyzickaCheckbox.checked)) {
+        typZakaznikaWrapper.style.border = '';
+        typZakaznikaWrapper.style.backgroundColor = '';
+        typZakaznikaWrapper.style.borderRadius = '';
+        typZakaznikaWrapper.style.padding = '';
+      }
+    };
 
     // Když zaškrtnu IČO, odškrtnu fyzickou osobu
     icoCheckbox.addEventListener('change', () => {
       if (icoCheckbox.checked) {
         fyzickaCheckbox.checked = false;
       }
+      odstranitCerveneOznaceni();
     });
 
     // Když zaškrtnu fyzickou osobu, odškrtnu IČO
@@ -60,6 +72,7 @@ const WGS = {
       if (fyzickaCheckbox.checked) {
         icoCheckbox.checked = false;
       }
+      odstranitCerveneOznaceni();
     });
 
     logger.log('[TypZakaznika] Inicializovány vzájemně výlučné checkboxy');
@@ -719,6 +732,37 @@ const WGS = {
     if (prvniPrazdne) {
       prvniPrazdne.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setTimeout(() => prvniPrazdne.focus(), 500);
+    }
+
+    // Validace typu zákazníka - musí být zaškrtnut jeden z checkboxů
+    const icoCheckbox = document.getElementById('objednavkaICO');
+    const fyzickaCheckbox = document.getElementById('objednavkaFyzicka');
+    const typZakaznikaWrapper = document.querySelector('.typ-zakaznika-wrapper');
+
+    if (icoCheckbox && fyzickaCheckbox) {
+      // Odebrat červené označení
+      if (typZakaznikaWrapper) {
+        typZakaznikaWrapper.style.borderColor = '';
+        typZakaznikaWrapper.style.backgroundColor = '';
+      }
+
+      // Zkontrolovat, zda je zaškrtnut alespoň jeden checkbox
+      if (!icoCheckbox.checked && !fyzickaCheckbox.checked) {
+        chybejici.push('Typ zákazníka (IČO nebo Fyzická osoba)');
+
+        // Označit červeně
+        if (typZakaznikaWrapper) {
+          typZakaznikaWrapper.style.border = '2px solid #dc3545';
+          typZakaznikaWrapper.style.backgroundColor = '#fff5f5';
+          typZakaznikaWrapper.style.borderRadius = '8px';
+          typZakaznikaWrapper.style.padding = '0.75rem';
+
+          // Scrollnout na wrapper pokud je první chyba
+          if (!prvniPrazdne) {
+            typZakaznikaWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      }
     }
 
     return {
