@@ -249,7 +249,7 @@ $pageIndex = isset($_GET['page']) ? (int)$_GET['page'] : 0;
         </div>
     </div>
 
-    <script src="/assets/js/replay-player.js"></script>
+    <script src="/assets/js/replay-player.min.js"></script>
     <script>
         const sessionIdFromUrl = '<?php echo htmlspecialchars($sessionId); ?>';
         const pageIndexFromUrl = <?php echo $pageIndex; ?>;

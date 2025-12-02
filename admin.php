@@ -127,8 +127,8 @@ if ($activeTab === 'dashboard') {
   <link rel="stylesheet" href="/assets/css/universal-modal-theme.min.css">
 
   <!-- Error Handler - zachytává všechny chyby -->
-  <script src="/assets/js/error-handler.js"></script>
-  <script src="/assets/js/html-sanitizer.js"></script>
+  <script src="/assets/js/error-handler.min.js"></script>
+  <script src="/assets/js/html-sanitizer.min.js"></script>
 </head>
 
 <body<?php

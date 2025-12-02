@@ -545,7 +545,7 @@ if ($initialBootstrapData) {
 </script>
 
 <!-- External JavaScript -->
-<script src="assets/js/protokol-pdf-preview.js" defer></script>
+<script src="assets/js/protokol-pdf-preview.min.js" defer></script>
 <script src="assets/js/protokol-customer-collapse.js" defer></script>
 <script src="assets/js/protokol-data-patch.js" defer></script>
 <script src="assets/js/protokol.js?v=20251202" defer></script>
@@ -554,10 +554,10 @@ if ($initialBootstrapData) {
 <script src="assets/js/protokol-buttons-fix.js" defer></script>
 <!-- Překlady pro kalkulačku -->
 <script src="assets/js/wgs-translations-cenik.min.js"></script>
-<script src="assets/js/language-switcher.js"></script>
+<script src="assets/js/language-switcher.min.js"></script>
 <!-- Kalkulačka integrace -->
 <script src="assets/js/cenik-calculator.js" defer></script>
-<script src="assets/js/protokol-calculator-integration.js" defer></script>
+<script src="assets/js/protokol-calculator-integration.min.js" defer></script>
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>
