@@ -467,11 +467,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         <div class="form-grid form-grid-3">
           <div class="form-group">
             <label class="form-label" for="jmeno" data-lang-cs="Jméno zákazníka *" data-lang-en="Customer Name *" data-lang-it="Nome Cliente *">Jméno zákazníka *</label>
-            <input type="text" class="form-control" id="jmeno" name="jmeno" required>
+            <input type="text" class="form-control" id="jmeno" name="jmeno" autocomplete="name" required>
           </div>
           <div class="form-group">
             <label class="form-label" for="email">E-mail *</label>
-            <input type="email" class="form-control" id="email" name="email" required>
+            <input type="email" class="form-control" id="email" name="email" autocomplete="email" required>
           </div>
           <div class="form-group">
             <label class="form-label" for="telefon" data-lang-cs="Telefon *" data-lang-en="Phone *" data-lang-it="Telefono *">Telefon *</label>
@@ -486,7 +486,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
                 <option value="+44">🇬🇧 +44</option>
                 <option value="+48">🇵🇱 +48</option>
               </select>
-              <input type="tel" class="form-control phone-number" id="telefon" name="telefon" placeholder="123 456 789" required>
+              <input type="tel" class="form-control phone-number" id="telefon" name="telefon" autocomplete="tel-national" placeholder="123 456 789" required>
             </div>
           </div>
         </div>
@@ -498,17 +498,17 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <div class="form-grid form-grid-address">
     <div class="form-group" style="position:relative;">
       <label class="form-label" for="ulice" data-lang-cs="Ulice a číslo popisné" data-lang-en="Street and Number" data-lang-it="Via e Numero">Ulice a číslo popisné</label>
-      <input type="text" class="form-control" id="ulice" name="ulice" data-lang-cs-placeholder="Ulice a číslo popisné" data-lang-en-placeholder="Street and Number" data-lang-it-placeholder="Via e Numero" placeholder="Ulice a číslo popisné">
+      <input type="text" class="form-control" id="ulice" name="ulice" autocomplete="address-line1" data-lang-cs-placeholder="Ulice a číslo popisné" data-lang-en-placeholder="Street and Number" data-lang-it-placeholder="Via e Numero" placeholder="Ulice a číslo popisné">
       <div id="autocompleteDropdownUlice" style="display:none;position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
     </div>
     <div class="form-group" style="position:relative;">
       <label class="form-label" for="mesto" data-lang-cs="Město" data-lang-en="City" data-lang-it="Città">Město</label>
-      <input type="text" class="form-control" id="mesto" name="mesto" data-lang-cs-placeholder="Město" data-lang-en-placeholder="City" data-lang-it-placeholder="Città" placeholder="Město">
+      <input type="text" class="form-control" id="mesto" name="mesto" autocomplete="address-level2" data-lang-cs-placeholder="Město" data-lang-en-placeholder="City" data-lang-it-placeholder="Città" placeholder="Město">
       <div id="autocompleteDropdown" style="display:none;position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
     </div>
     <div class="form-group">
       <label class="form-label" for="psc" data-lang-cs="PSČ" data-lang-en="ZIP Code" data-lang-it="CAP">PSČ</label>
-      <input type="text" class="form-control" id="psc" name="psc" data-lang-cs-placeholder="PSČ" data-lang-en-placeholder="ZIP Code" data-lang-it-placeholder="CAP" placeholder="PSČ">
+      <input type="text" class="form-control" id="psc" name="psc" autocomplete="postal-code" data-lang-cs-placeholder="PSČ" data-lang-en-placeholder="ZIP Code" data-lang-it-placeholder="CAP" placeholder="PSČ">
     </div>
     <div class="map-container">
       <div id="mapContainer"></div>

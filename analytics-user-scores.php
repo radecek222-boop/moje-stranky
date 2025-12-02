@@ -296,20 +296,20 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         </div>
 
         <!-- Sessions Table -->
-        <div class="table-container">
+        <div class="table-container" aria-live="polite">
             <h3 style="margin-bottom: 15px;">Sessions se Scores</h3>
-            <div id="loading-message" class="loading">Načítám data...</div>
+            <div id="loading-message" class="loading" role="status">Načítám data...</div>
             <table id="scores-table" style="display: none;">
                 <thead>
                     <tr>
-                        <th>Session ID</th>
-                        <th>Datum</th>
-                        <th>Engagement</th>
-                        <th>Frustration</th>
-                        <th>Interest</th>
-                        <th>Clicks</th>
-                        <th>Pageviews</th>
-                        <th>Zařízení</th>
+                        <th scope="col">Session ID</th>
+                        <th scope="col">Datum</th>
+                        <th scope="col">Engagement</th>
+                        <th scope="col">Frustration</th>
+                        <th scope="col">Interest</th>
+                        <th scope="col">Clicks</th>
+                        <th scope="col">Pageviews</th>
+                        <th scope="col">Zařízení</th>
                     </tr>
                 </thead>
                 <tbody id="scores-tbody"></tbody>

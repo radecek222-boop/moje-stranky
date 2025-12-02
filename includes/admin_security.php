@@ -773,13 +773,13 @@ endif;
         <table class="user-access-table" id="security-users-table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Jméno</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Registrace</th>
-                    <th>Poslední přihlášení</th>
+                    <th scope="col">ID</th>
+                    <th scope="col">Jméno</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Registrace</th>
+                    <th scope="col">Poslední přihlášení</th>
                 </tr>
             </thead>
             <tbody>
@@ -1131,6 +1131,7 @@ function otevritPozvanku() {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                 <h3 style="margin: 0; color: #fff; font-size: 1.2rem;">Odeslat pozvanku</h3>
                 <button onclick="document.getElementById('modalPozvanka').remove()"
+                        aria-label="Zavřít"
                         style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer;">&times;</button>
             </div>
 

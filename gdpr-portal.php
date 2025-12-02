@@ -514,7 +514,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             }
 
             let html = '<table><thead><tr>';
-            html += '<th>ID</th><th>Email</th><th>Typ</th><th>Status</th><th>Vytvořeno</th><th>Akce</th>';
+            html += '<th scope="col">ID</th><th scope="col">Email</th><th scope="col">Typ</th><th scope="col">Status</th><th scope="col">Vytvořeno</th><th scope="col">Akce</th>';
             html += '</tr></thead><tbody>';
 
             requests.forEach(req => {
@@ -633,7 +633,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             }
 
             let html = '<table><thead><tr>';
-            html += '<th>Datum</th><th>Akce</th><th>Fingerprint</th><th>IP</th>';
+            html += '<th scope="col">Datum</th><th scope="col">Akce</th><th scope="col">Fingerprint</th><th scope="col">IP</th>';
             html += '</tr></thead><tbody>';
 
             logs.forEach(log => {

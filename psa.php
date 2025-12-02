@@ -119,18 +119,18 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Jméno</th>
-            <th class="text-center">Hodiny</th>
-            <th class="text-right">Výplata</th>
-            <th class="text-right">Faktura</th>
-            <th>Číslo účtu</th>
-            <th>Kód banky</th>
-            <th class="text-center">Akce</th>
+            <th scope="col">Jméno</th>
+            <th scope="col" class="text-center">Hodiny</th>
+            <th scope="col" class="text-right">Výplata</th>
+            <th scope="col" class="text-right">Faktura</th>
+            <th scope="col">Číslo účtu</th>
+            <th scope="col">Kód banky</th>
+            <th scope="col" class="text-center">Akce</th>
           </tr>
         </thead>
-        <tbody id="employeeTableBody">
+        <tbody id="employeeTableBody" aria-live="polite">
           <tr>
-            <td colspan="7" class="text-center loading-cell">
+            <td colspan="7" class="text-center loading-cell" role="status">
               <div class="loading"></div>
               Načítání dat...
             </td>
@@ -156,11 +156,11 @@
   </div>
 
   <!-- QR CODE MODAL -->
-  <div id="qrModal" class="modal">
+  <div id="qrModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="qrModalTitle">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title">QR Kódy pro platby</h2>
-        <span class="close-modal" data-action="closeQRModal">&times;</span>
+        <h2 class="modal-title" id="qrModalTitle">QR Kódy pro platby</h2>
+        <span class="close-modal" data-action="closeQRModal" role="button" tabindex="0" aria-label="Zavřít">&times;</span>
       </div>
 
       <div class="payment-summary">

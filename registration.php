@@ -56,17 +56,17 @@ $csrfToken = generateCSRFToken();
 
     <div class="form-group">
       <label for="regName" data-lang-cs="Jméno a příjmení" data-lang-en="Full Name" data-lang-it="Nome Completo">Jméno a příjmení</label>
-      <input type="text" id="regName" name="name" data-lang-cs-placeholder="Jan Novák" data-lang-en-placeholder="John Doe" data-lang-it-placeholder="Mario Rossi" placeholder="Jan Novák" required>
+      <input type="text" id="regName" name="name" autocomplete="name" data-lang-cs-placeholder="Jan Novák" data-lang-en-placeholder="John Doe" data-lang-it-placeholder="Mario Rossi" placeholder="Jan Novák" required>
     </div>
 
     <div class="form-group">
       <label for="regEmail">Email</label>
-      <input type="email" id="regEmail" name="email" data-lang-cs-placeholder="vas@email.cz" data-lang-en-placeholder="your@email.com" data-lang-it-placeholder="tua@email.it" placeholder="vas@email.cz" required>
+      <input type="email" id="regEmail" name="email" autocomplete="email" data-lang-cs-placeholder="vas@email.cz" data-lang-en-placeholder="your@email.com" data-lang-it-placeholder="tua@email.it" placeholder="vas@email.cz" required>
     </div>
 
     <div class="form-group">
       <label for="regPhone" data-lang-cs="Telefon (volitelně)" data-lang-en="Phone (optional)" data-lang-it="Telefono (opzionale)">Telefon (volitelně)</label>
-      <input type="tel" id="regPhone" name="phone" placeholder="+420 777 777 777">
+      <input type="tel" id="regPhone" name="phone" autocomplete="tel" placeholder="+420 777 777 777">
     </div>
 
     <div class="form-group">

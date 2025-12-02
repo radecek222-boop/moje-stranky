@@ -1651,3 +1651,101 @@ header('Content-Type: text/html; charset=utf-8');
   - `analytics-heatmap.php`: Added for attributes to page, device, and type selector labels
 - **Result:** All form controls now have proper label associations for assistive technologies.
 
+## [Step 78]: Aria-Label for Icon-Only Close Buttons
+- **Date:** 2025-12-02
+- **What:** Added `aria-label` to remaining icon-only close buttons (×) for screen reader accessibility.
+- **Analysis:**
+  - Found 8 additional close buttons using × character without aria-label
+  - These buttons are not announced properly by screen readers
+- **Files modified:**
+  - `api/video_download.php`: Added aria-label="Zavřít video" to video modal close
+  - `psa-kalkulator.php`: Added role, tabindex, aria-label to QR modal close span
+  - `psa.php`: Added role, tabindex, aria-label to QR modal close span
+  - `includes/admin_reklamace_management.php`: Added aria-label to detail modal close
+  - `includes/admin_email_sms.php`: Added aria-label to 2 modal close buttons
+  - `includes/admin_security.php`: Added aria-label to invitation modal close
+- **Result:** All icon-only close buttons now have accessible names for screen readers.
+
+## [Step 79]: Language Switcher and Button Link Accessibility
+- **Date:** 2025-12-02
+- **What:** Improved accessibility for language switchers and notification button links in hamburger menu.
+- **Analysis:**
+  - Language flag spans were clickable but not keyboard accessible
+  - Notification links with href="#" should have role="button"
+- **Files modified:**
+  - `includes/hamburger-menu.php`:
+    - Added role="button" to 2 notification enable links (admin and user)
+    - Added role="button", tabindex="0", aria-label to 9 language flag spans (3 per menu variant)
+- **Result:** Language switcher and notification buttons are now keyboard accessible with proper ARIA roles.
+
+## [Step 80]: Table Header Scope Attributes for Screen Readers
+- **Date:** 2025-12-02
+- **What:** Added scope="col" to all table header `<th>` elements for better screen reader compatibility.
+- **Analysis:**
+  - Screen readers use scope attribute to understand table structure
+  - Column headers should have scope="col" for proper association with data cells
+- **Files modified:**
+  - `sprava_ip_blacklist.php`: Added scope="col" to 8 th elements (2 tables)
+  - `psa-kalkulator.php`: Added scope="col" to 7 th elements
+  - `psa.php`: Added scope="col" to 7 th elements
+  - `admin.php`: Added scope="col" to 18 th elements (3 tables)
+  - `analytics-campaigns.php`: Added scope="col" to 9 th elements
+  - `analytics-conversions.php`: Added scope="col" to 8 th elements
+  - `analytics-user-scores.php`: Added scope="col" to 8 th elements
+  - `analytics-reports.php`: Added scope="col" to 11 th elements (2 dynamic tables)
+  - `includes/admin_security.php`: Added scope="col" to 7 th elements
+  - `vsechny_tabulky.php`: Added scope="col" to 10 th elements (3 tables)
+  - `gdpr-portal.php`: Added scope="col" to 10 th elements (2 dynamic tables)
+- **Result:** All user-facing tables now have proper scope attributes for screen reader table navigation.
+
+## [Step 81]: ARIA Live Regions for Dynamic Content
+- **Date:** 2025-12-02
+- **What:** Added aria-live regions and role attributes for loading states and status messages.
+- **Analysis:**
+  - Screen readers need aria-live regions to announce dynamic content changes
+  - Loading indicators should have role="status" for proper announcement
+  - Error messages should have role="alert" for immediate announcement
+- **Files modified:**
+  - `statistiky.php`: Added aria-live="polite" to 5 chart containers, role="status" to loading divs
+  - `admin.php`: Added aria-live="polite" to 3 table bodies, role="status" to loading cells, role="alert" to error messages
+  - `analytics-campaigns.php`: Added aria-live="polite" to table container, role="status" to loading div
+  - `analytics-conversions.php`: Added aria-live="polite" to table container, role="status" to loading div
+  - `analytics-user-scores.php`: Added aria-live="polite" to table container, role="status" to loading div
+  - `analytics-realtime.php`: Added aria-live="polite" and role="status" to sessions and events lists
+  - `psa-kalkulator.php`: Added aria-live="polite" to tbody, role="status" to loading cell
+  - `psa.php`: Added aria-live="polite" to tbody, role="status" to loading cell
+- **Result:** Screen readers now announce loading states and content updates for better dynamic content accessibility.
+
+## [Step 82]: Autocomplete Attributes for Better Browser Autofill
+- **Date:** 2025-12-02
+- **What:** Added autocomplete attributes to form inputs for improved browser autofill support.
+- **Analysis:**
+  - Autocomplete attributes help browsers provide better autofill suggestions
+  - Improves user experience by reducing manual data entry
+  - Helps users with motor disabilities who rely on autofill
+- **Files modified:**
+  - `registration.php`: Added autocomplete="name", "email", "tel" to registration form fields
+  - `login.php`: Added autocomplete="email" to email input
+  - `password_reset.php`: Added autocomplete="email" to email input
+  - `novareklamace.php`: Added autocomplete attributes for contact and address fields:
+    - name, email, tel-national for contact info
+    - address-line1, address-level2, postal-code for address fields
+- **Result:** Forms now provide better autofill suggestions, reducing data entry time and improving accessibility.
+
+## [Step 83]: Modal Dialog Accessibility with ARIA Attributes
+- **Date:** 2025-12-02
+- **What:** Added proper ARIA roles and attributes to modal dialogs.
+- **Analysis:**
+  - Modal dialogs require role="dialog" for screen readers to recognize them
+  - aria-modal="true" indicates the content behind is inert
+  - aria-labelledby links the dialog to its title for announcement
+  - Screen reader only titles added where visible title was missing
+- **Files modified:**
+  - `cenik.php`: Added role="dialog", aria-modal="true", aria-labelledby to edit modal
+  - `admin.php`: Added dialog roles to addUserModal, editNotificationModal, notifModalOverlay, adminModal
+  - `psa-kalkulator.php`: Added dialog roles to qrModal
+  - `psa.php`: Added dialog roles to qrModal
+  - `seznam.php`: Added dialog roles to detailOverlay modal, added sr-only title
+  - `assets/css/styles.css`: Added `.sr-only` utility class for screen reader only content
+- **Result:** Modal dialogs are now properly announced by screen readers with correct roles and labeling.
+

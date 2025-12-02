@@ -675,7 +675,7 @@ try {
         <!-- Header -->
         <div style="padding: 1.5rem; background: #000; color: #fff; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
             <h2 id="sablona-modal-title" style="font-family: 'Poppins', sans-serif; font-size: 1.2rem; font-weight: 600; margin: 0;">Editace email šablony</h2>
-            <button onclick="zavritSablonaModal()" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
+            <button onclick="zavritSablonaModal()" aria-label="Zavřít" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
         </div>
 
         <!-- Obsah -->
@@ -1489,7 +1489,7 @@ function vytvorSmsModal() {
         <div style="background: white; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border-radius: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #ddd;">
                 <h3 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 600;">Upravit SMS sablonu</h3>
-                <button onclick="closeSmsModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+                <button onclick="closeSmsModal()" aria-label="Zavřít" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
             </div>
             <div style="padding: 1.5rem;">
                 <div style="margin-bottom: 1rem;">

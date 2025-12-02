@@ -296,10 +296,10 @@ $blacklistIPs = array_column($blacklist, 'ip_address');
             <?php else: ?>
                 <table>
                     <tr>
-                        <th>IP adresa</th>
-                        <th>Popis</th>
-                        <th>Přidáno</th>
-                        <th>Akce</th>
+                        <th scope="col">IP adresa</th>
+                        <th scope="col">Popis</th>
+                        <th scope="col">Přidáno</th>
+                        <th scope="col">Akce</th>
                     </tr>
                     <?php foreach ($blacklist as $row): ?>
                         <tr>
@@ -329,10 +329,10 @@ $blacklistIPs = array_column($blacklist, 'ip_address');
             <?php else: ?>
                 <table>
                     <tr>
-                        <th>IP adresa</th>
-                        <th>Návštěvy</th>
-                        <th>Poslední</th>
-                        <th>Akce</th>
+                        <th scope="col">IP adresa</th>
+                        <th scope="col">Návštěvy</th>
+                        <th scope="col">Poslední</th>
+                        <th scope="col">Akce</th>
                     </tr>
                     <?php foreach ($navstevy as $row): ?>
                         <?php $jeIgnorovana = in_array($row['ip_address'], $blacklistIPs); ?>

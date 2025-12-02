@@ -40,7 +40,7 @@
     <form id="verifyForm">
       <div class="form-group">
         <label for="resetEmail">Email</label>
-        <input type="email" id="resetEmail" name="email" placeholder="vas@email.cz" required>
+        <input type="email" id="resetEmail" name="email" autocomplete="email" placeholder="vas@email.cz" required>
       </div>
 
       <div class="form-group">

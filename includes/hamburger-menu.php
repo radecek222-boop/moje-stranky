@@ -42,11 +42,11 @@ if ($isAdmin) {
         </a>
       <?php endforeach; ?>
       <a href="/logout.php" class="hamburger-logout">ODHLÁŠENÍ</a>
-      <a href="#" id="notif-enable-btn-admin" class="hamburger-notif-btn" style="display:none;" data-lang-cs="NOTIFY ME ON" data-lang-en="NOTIFY ME ON" data-lang-it="NOTIFY ME ON">NOTIFY ME ON</a>
+      <a href="#" id="notif-enable-btn-admin" class="hamburger-notif-btn" role="button" style="display:none;" data-lang-cs="NOTIFY ME ON" data-lang-en="NOTIFY ME ON" data-lang-it="NOTIFY ME ON">NOTIFY ME ON</a>
       <div class="hamburger-lang-switcher">
-        <span class="lang-flag active" data-lang="cs">🇨🇿</span>
-        <span class="lang-flag" data-lang="en">🇬🇧</span>
-        <span class="lang-flag" data-lang="it">🇮🇹</span>
+        <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština">🇨🇿</span>
+        <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English">🇬🇧</span>
+        <span class="lang-flag" data-lang="it" role="button" tabindex="0" aria-label="Italiano">🇮🇹</span>
       </div>
     <?php
     elseif ($isLoggedIn):
@@ -66,11 +66,11 @@ if ($isAdmin) {
       <a href="novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
       <a href="seznam.php" <?php if($current == "seznam.php") echo 'class="active"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
       <a href="/logout.php" class="hamburger-logout" data-lang-cs="ODHLÁŠENÍ" data-lang-en="LOGOUT" data-lang-it="DISCONNETTERSI">ODHLÁŠENÍ</a>
-      <a href="#" id="notif-enable-btn-user" class="hamburger-notif-btn" style="display:none;" data-lang-cs="NOTIFY ME ON" data-lang-en="NOTIFY ME ON" data-lang-it="NOTIFY ME ON">NOTIFY ME ON</a>
+      <a href="#" id="notif-enable-btn-user" class="hamburger-notif-btn" role="button" style="display:none;" data-lang-cs="NOTIFY ME ON" data-lang-en="NOTIFY ME ON" data-lang-it="NOTIFY ME ON">NOTIFY ME ON</a>
       <div class="hamburger-lang-switcher">
-        <span class="lang-flag active" data-lang="cs">🇨🇿</span>
-        <span class="lang-flag" data-lang="en">🇬🇧</span>
-        <span class="lang-flag" data-lang="it">🇮🇹</span>
+        <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština">🇨🇿</span>
+        <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English">🇬🇧</span>
+        <span class="lang-flag" data-lang="it" role="button" tabindex="0" aria-label="Italiano">🇮🇹</span>
       </div>
     <?php
     else:
@@ -83,9 +83,9 @@ if ($isAdmin) {
       <a href="aktuality.php" <?php if($current == "aktuality.php") echo 'class="active"'; ?> data-lang-cs="AKTUALITY" data-lang-en="NEWS" data-lang-it="NOTIZIE">AKTUALITY</a>
       <a href="login.php" <?php if($current == "login.php") echo 'class="active"'; ?> data-lang-cs="PŘIHLÁŠENÍ" data-lang-en="LOGIN" data-lang-it="ACCESSO">PŘIHLÁŠENÍ</a>
       <div class="hamburger-lang-switcher">
-        <span class="lang-flag active" data-lang="cs">🇨🇿</span>
-        <span class="lang-flag" data-lang="en">🇬🇧</span>
-        <span class="lang-flag" data-lang="it">🇮🇹</span>
+        <span class="lang-flag active" data-lang="cs" role="button" tabindex="0" aria-label="Čeština">🇨🇿</span>
+        <span class="lang-flag" data-lang="en" role="button" tabindex="0" aria-label="English">🇬🇧</span>
+        <span class="lang-flag" data-lang="it" role="button" tabindex="0" aria-label="Italiano">🇮🇹</span>
       </div>
     <?php endif; ?>
   </nav>

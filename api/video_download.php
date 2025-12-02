@@ -402,7 +402,7 @@ function zobrazStranku($tokenData, $videa, $token) {
             <div class="video-modal-content">
                 <div class="video-modal-header">
                     <span class="video-modal-title" id="videoModalTitle"></span>
-                    <button class="video-modal-close" onclick="zavritVideo()">&times;</button>
+                    <button class="video-modal-close" onclick="zavritVideo()" aria-label="Zavřít video">&times;</button>
                 </div>
                 <video class="video-player" id="videoPlayer" controls playsinline>
                     Vas prohlizec nepodporuje prehravani videa.
