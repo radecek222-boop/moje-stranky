@@ -1114,6 +1114,7 @@ function loadNotifContent(type, body) {
 <script src="/assets/js/utils.min.js?v=<?= filemtime(__DIR__ . '/assets/js/utils.min.js') ?>" defer></script>
 <script src="/assets/js/admin-notifications.min.js?v=<?= filemtime(__DIR__ . '/assets/js/admin-notifications.min.js') ?>" defer></script>
 <script src="/assets/js/smtp-config.min.js?v=<?= filemtime(__DIR__ . '/assets/js/smtp-config.min.js') ?>" defer></script>
+<script src="/assets/js/admin-actions-registry.js?v=<?= filemtime(__DIR__ . '/assets/js/admin-actions-registry.js') ?>" defer></script>
 <script src="/assets/js/admin.min.js?v=<?= filemtime(__DIR__ . '/assets/js/admin.min.js') ?>" defer></script>
 
 <!-- MODAL: Edit Notification -->
@@ -1182,43 +1183,14 @@ function loadNotifContent(type, body) {
 
 <?php
 /**
- * FIX: Pre-load všech include souborů pro registraci JS akcí
+ * POZNÁMKA: Centralizace registrací JS akcí
  *
- * Problém: Akce byly registrovány pouze když byla karta aktivní
- * Řešení: Načíst všechny includes VŽDY a extrahovat jejich <script> bloky
+ * Problém "hluchých" tlačítek byl vyřešen vytvořením statického souboru
+ * /assets/js/admin-actions-registry.js, který se načítá VŽDY (viz řádek 1117)
+ *
+ * Tento soubor obsahuje všechny Utils.registerAction() volání pro všechny admin akce.
+ * Akce jsou zaregistrovány globálně, ale vykonávají se pouze pokud existuje jejich funkce.
  */
-
-// Seznam všech include souborů s JS akcemi
-$includesWithActions = [
-    __DIR__ . '/includes/admin_actions.php',
-    __DIR__ . '/includes/admin_configuration.php',
-    __DIR__ . '/includes/admin_diagnostics.php',
-    __DIR__ . '/includes/admin_email_sms.php',
-    __DIR__ . '/includes/admin_reklamace_management.php',
-    __DIR__ . '/includes/admin_security.php',
-    __DIR__ . '/includes/admin_console.php',
-    __DIR__ . '/includes/admin_testing.php',
-    __DIR__ . '/includes/admin_testing_interactive.php',
-    __DIR__ . '/includes/admin_testing_simulator.php',
-];
-
-// Načíst všechny includes pomocí output buffering (vykoná PHP kód)
-foreach ($includesWithActions as $includeFile) {
-    if (file_exists($includeFile)) {
-        // Zachytit výstup include souboru (PHP se vykoná)
-        ob_start();
-        include $includeFile;
-        $renderedContent = ob_get_clean();
-
-        // Extrahovat všechny <script> bloky z vyrenderovaného HTML
-        if (preg_match_all('/<script[^>]*>(.*?)<\/script>/si', $renderedContent, $matches)) {
-            foreach ($matches[0] as $scriptBlock) {
-                // Vypsat celý script blok
-                echo $scriptBlock . "\n";
-            }
-        }
-    }
-}
 ?>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
