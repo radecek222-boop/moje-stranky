@@ -2137,3 +2137,37 @@ The codebase is now in a good state with:
 2. **HTMX Statistics Filters** - Server-side filtering with HTML responses
 3. **Event Listener Migration** - Gradual replacement of inline onclick handlers
 
+---
+
+# PHASE 5: Remaining Z-Index Consolidation
+
+## [Step 104]: Complete Z-Index CSS Variable Migration
+- **Date:** 2025-12-02
+- **What:** Converted all remaining hardcoded z-index values in source CSS files to use centralized CSS variables from `z-index-layers.css`.
+- **How:**
+  1. Added new CSS variables to `z-index-layers.css`:
+     - `--z-mobile-sidebar: 99` (for mobile sidebars below topbar)
+     - `--z-mobile-sidebar-backdrop: 98` (backdrop for mobile sidebars)
+  2. Converted 24 hardcoded z-index values across 6 CSS files:
+     - `analytics.css` (4): topbar, hamburger, mobile-sidebar, backdrop
+     - `login.css` (3): topbar, popup-overlay, hamburger
+     - `nasesluzby.css` (5): topbar, hero bg/content, nav, menu-overlay
+     - `onas.css` (5): topbar, hero bg/content, nav, menu-overlay
+     - `seznam.css` (2): topbar, modal-overlay
+     - `styles.css` (5): skip-link, nav, menu-overlay, admin-status, welcome-modal
+  3. Regenerated all minified CSS files with source maps using `csso`
+- **Why:**
+  - Z-index values were already migrated in Steps 9-19 for most files, but some remained
+  - This completes the centralized z-index system with 100% coverage
+  - All source CSS files now use semantic variable names with fallback values
+- **Files touched:**
+  - `z-index-layers.css` (MODIFIED - added 2 new variables, updated documentation)
+  - `analytics.css`, `login.css`, `nasesluzby.css`, `onas.css`, `seznam.css`, `styles.css` (MODIFIED)
+  - All corresponding `.min.css` and `.min.css.map` files (REGENERATED)
+- **Result:** Z-index migration 100% complete. Zero hardcoded z-index values remain in source CSS files.
+
+**Z-INDEX MIGRATION FINAL STATUS:**
+- Total CSS variables defined: 26+
+- Total declarations migrated: 80+ (across all phases)
+- Coverage: 100% of source CSS files
+

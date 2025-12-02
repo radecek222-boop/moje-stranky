@@ -128,7 +128,7 @@ html {
   padding: 12px 24px;
   text-decoration: none;
   font-weight: var(--fw-semibold, 600);
-  z-index: 10000;
+  z-index: var(--z-modal-top, 10000);
   border-radius: 0 0 8px 8px;
   transition: top 0.2s ease;
 }
@@ -696,7 +696,7 @@ tbody tr:last-child td {
       right 0.3s ease-in-out,
       opacity 0.3s ease-in-out;
     opacity: 0;
-    z-index: 10000;
+    z-index: var(--z-hamburger-nav, 10000);
     pointer-events: none;
     overflow-y: auto;
   }
@@ -723,7 +723,7 @@ tbody tr:last-child td {
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
+    z-index: var(--z-menu-overlay, 9999);
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
     pointer-events: none;
@@ -923,7 +923,7 @@ footer a:hover,
   font-size: 0.75rem;
   color: #555555;
   font-weight: 400;
-  z-index: 9999;
+  z-index: var(--z-menu-overlay, 9999);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 .admin-status.active {
@@ -1004,7 +1004,7 @@ footer a:hover,
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10000;
+  z-index: var(--z-modal-top, 10000);
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;

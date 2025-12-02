@@ -30,7 +30,7 @@ body {
   border-bottom: 1px solid var(--c-black);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: var(--z-topbar, 100);
 }
 .top-bar-container {
   max-width: 1400px;
@@ -114,7 +114,7 @@ body {
   flex-direction: column;
   cursor: pointer;
   padding: 0.3rem;
-  z-index: 101;
+  z-index: var(--z-hamburger-button-alt, 101);
 }
 .hamburger span {
   width: 20px;
@@ -509,7 +509,7 @@ body {
     border-right: 1px solid var(--c-border);
     overflow-y: auto;
     transition: left 0.3s ease;
-    z-index: 99;
+    z-index: var(--z-mobile-sidebar, 99);
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   }
   .tabs.show {
@@ -539,7 +539,7 @@ body {
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 98;
+    z-index: var(--z-mobile-sidebar-backdrop, 98);
   }
   .mobile-menu-backdrop.show {
     display: block;

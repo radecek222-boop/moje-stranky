@@ -8,6 +8,8 @@
  * -1 ... Pozadí pod obsahem
  *  1 ... Základní obsah (hero overlay)
  * 10 ... Sticky elementy, tlačítka v kontextu
+ * 98 ... Mobilní sidebar backdrop (pod topbar)
+ * 99 ... Mobilní sidebar (pod topbar)
  * 100 ... Navigační lišty (top-bar)
  * 1000 ... Dropdowny, autocomplete, tooltipy
  * 1500 ... Toast notifikace
@@ -34,6 +36,10 @@
     /* === STICKY ELEMENTY === */
     --z-sticky: 10;
     --z-button-context: 10;
+
+    /* === POD TOPBAR (mobilní sidebary) === */
+    --z-mobile-sidebar-backdrop: 98;
+    --z-mobile-sidebar: 99;
 
     /* === NAVIGACE === */
     --z-topbar: 100;
