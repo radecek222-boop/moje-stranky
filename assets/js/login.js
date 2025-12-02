@@ -266,8 +266,8 @@ function showRecoveryModal() {
         <input type="password" id="recoveryHighKey" placeholder="High Key" autocomplete="off">
         
         <div class="recovery-buttons">
-          <button class="recovery-btn recovery-btn-primary" onclick="verifyHighKey()">Ověřit</button>
-          <button class="recovery-btn recovery-btn-secondary" onclick="closeRecoveryModal()">Zrušit</button>
+          <button class="recovery-btn recovery-btn-primary" data-action="verifyHighKey">Ověřit</button>
+          <button class="recovery-btn recovery-btn-secondary" data-action="closeRecoveryModal">Zrušit</button>
         </div>
       </div>
     </div>
@@ -346,8 +346,8 @@ function showCreateNewAdminKeyModal() {
         <input type="password" id="newAdminKeyConfirm" placeholder="Potvrzení klíče" minlength="12" autocomplete="off" style="margin-top: 0.5rem;">
         
         <div class="newkey-buttons">
-          <button class="newkey-btn newkey-btn-success" onclick="createNewAdminKey()">Vytvořit Klíč</button>
-          <button class="newkey-btn newkey-btn-cancel" onclick="closeNewAdminKeyModal()">Zrušit</button>
+          <button class="newkey-btn newkey-btn-success" data-action="createNewAdminKey">Vytvořit Klíč</button>
+          <button class="newkey-btn newkey-btn-cancel" data-action="closeNewAdminKeyModal">Zrušit</button>
         </div>
       </div>
     </div>
@@ -428,3 +428,32 @@ function showNotification(message, type = 'info') {
 }
 
 logger.log('Login system loaded');
+
+// ============================================================
+// ACTION REGISTRY - Step 115
+// ============================================================
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+  Utils.registerAction('verifyHighKey', () => {
+    if (typeof verifyHighKey === 'function') {
+      verifyHighKey();
+    }
+  });
+
+  Utils.registerAction('closeRecoveryModal', () => {
+    if (typeof closeRecoveryModal === 'function') {
+      closeRecoveryModal();
+    }
+  });
+
+  Utils.registerAction('createNewAdminKey', () => {
+    if (typeof createNewAdminKey === 'function') {
+      createNewAdminKey();
+    }
+  });
+
+  Utils.registerAction('closeNewAdminKeyModal', () => {
+    if (typeof closeNewAdminKeyModal === 'function') {
+      closeNewAdminKeyModal();
+    }
+  });
+}

@@ -70,7 +70,7 @@ function showCsrfError(message) {
     warning.innerHTML = `
         <strong>Bezpečnostní upozornění</strong>
         <p>${message}</p>
-        <button onclick="location.reload()">Obnovit stránku</button>
+        <button data-action="reloadPage">Obnovit stránku</button>
     `;
 
     // Inline styly pro univerzální zobrazení
@@ -143,4 +143,13 @@ function showCsrfError(message) {
     if (typeof logger !== 'undefined') {
         logger.error('CSRF warning displayed to user');
     }
+}
+
+// ============================================
+// ACTION REGISTRY - Step 115
+// ============================================
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('reloadPage', () => {
+        location.reload();
+    });
 }

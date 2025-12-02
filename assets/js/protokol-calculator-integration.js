@@ -146,7 +146,7 @@
                     <h2>Chyba</h2>
                     <p style="color: #d32f2f;">Nepodařilo se načíst kalkulačku.</p>
                     <p>${error.message}</p>
-                    <button class="btn-primary" onclick="window.protokolKalkulacka.zavritModal()">Zavřít</button>
+                    <button class="btn-primary" data-action="zavritProtokolModal">Zavřít</button>
                 </div>
             `;
         }
@@ -293,5 +293,16 @@
         zpracovatVysledek: zpracovatVysledekKalkulace,
         zavritModal: zavritModal
     };
+
+    // ========================================
+    // ACTION REGISTRY - Step 115
+    // ========================================
+    if (typeof Utils !== 'undefined' && Utils.registerAction) {
+        Utils.registerAction('zavritProtokolModal', () => {
+            if (window.protokolKalkulacka && typeof window.protokolKalkulacka.zavritModal === 'function') {
+                window.protokolKalkulacka.zavritModal();
+            }
+        });
+    }
 
 })();

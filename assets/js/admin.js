@@ -177,16 +177,16 @@ async function loadUsers() {
         const statusText = user.status === 'active' ? 'Aktivní' : 'Neaktivní';
         const createdDate = new Date(user.created_at).toLocaleDateString('cs-CZ');
 
-        // Přidán onclick handler pro zobrazení detailu
-        html += '<tr style="cursor: pointer;" onclick="zobrazDetailUzivatele(' + user.id + ')" title="Klikněte pro zobrazení detailu">';
+        // data-action handler pro zobrazení detailu
+        html += '<tr style="cursor: pointer;" data-action="zobrazDetailUzivatele" data-id="' + user.id + '" title="Klikněte pro zobrazení detailu">';
         html += '<td>#' + user.id + '</td>';
         html += '<td>' + escapeHtml(user.name || user.full_name) + '</td>'; // API returns 'name' not 'full_name'
         html += '<td>' + escapeHtml(user.email) + '</td>';
         html += '<td>' + escapeHtml(user.role.toUpperCase()) + '</td>';
         html += '<td><span class="badge ' + statusClass + '">' + statusText.toUpperCase() + '</span></td>';
         html += '<td>' + createdDate + '</td>';
-        html += '<td onclick="event.stopPropagation();">';
-        html += '<button class="btn btn-sm btn-danger" onclick="deleteUser(' + user.id + ')">Smazat</button>';
+        html += '<td data-action="stopPropagation">';
+        html += '<button class="btn btn-sm btn-danger" data-action="deleteUser" data-id="' + user.id + '">Smazat</button>';
         html += '</td>';
         html += '</tr>';
       });
@@ -249,16 +249,14 @@ async function loadZakaznici() {
         const email = zakaznik.email || '—';
         const pocetZakazek = zakaznik.pocet_zakazek || 0;
 
-        // Onclick handler - přesměrování na seznam.php s vyhledáváním
-        const onclickHandler = `otevritZakazkyZakaznika('${escapeHtml(jmeno)}', '${escapeHtml(email)}')`;
-
-        html += `<tr style="cursor: pointer;" onclick="${onclickHandler}" title="Klikněte pro zobrazení zakázek">`;
+        // data-action handler - přesměrování na seznam.php s vyhledáváním
+        html += `<tr style="cursor: pointer;" data-action="otevritZakazkyZakaznika" data-jmeno="${escapeHtml(jmeno)}" data-email="${escapeHtml(email)}" title="Klikněte pro zobrazení zakázek">`;
         html += `<td><strong>${escapeHtml(jmeno)}</strong></td>`;
         html += `<td>${escapeHtml(adresa)}</td>`;
         html += `<td>${escapeHtml(telefon)}</td>`;
         html += `<td>${escapeHtml(email)}</td>`;
         html += `<td><span class="badge badge-active">${pocetZakazek}</span></td>`;
-        html += `<td><button class="btn btn-sm" onclick="event.stopPropagation(); otevritZakazkyZakaznika('${escapeHtml(jmeno)}', '${escapeHtml(email)}')">Zobrazit zakázky</button></td>`;
+        html += `<td><button class="btn btn-sm" data-action="otevritZakazkyZakaznika" data-jmeno="${escapeHtml(jmeno)}" data-email="${escapeHtml(email)}">Zobrazit zakázky</button></td>`;
         html += '</tr>';
       });
 
@@ -859,8 +857,8 @@ function loadUsersModal() {
     modalBody.innerHTML = `
         <div class="cc-actions">
             <input type="text" class="search-box" id="adminSearchUsers" placeholder="Hledat uživatele..." style="flex: 1; max-width: 300px;">
-            <button class="btn btn-sm btn-success" onclick="window.location.href='admin.php?tab=users'">+ Přidat uživatele</button>
-            <button class="btn btn-sm" onclick="loadUsersModal()">Obnovit</button>
+            <button class="btn btn-sm btn-success" data-action="navigateToAddUser">+ Přidat uživatele</button>
+            <button class="btn btn-sm" data-action="loadUsersModal">Obnovit</button>
         </div>
         <div id="usersTableContainer">Načítání uživatelů...</div>
     `;
@@ -1181,12 +1179,12 @@ function createKey() {
             </div>
 
             <div style="display: flex; gap: 10px;">
-                <button onclick="vytvorKlicZModalu()" style="flex: 1; padding: 12px;
+                <button data-action="vytvorKlicZModalu" style="flex: 1; padding: 12px;
                         background: #fff; color: #000; border: none; border-radius: 6px;
                         font-weight: 600; cursor: pointer; font-size: 1rem;">
                     Vytvořit klíč
                 </button>
-                <button onclick="document.getElementById('createKeyModal').remove()"
+                <button data-action="zavritCreateKeyModal"
                         style="flex: 1; padding: 12px; background: #333; color: #fff;
                         border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">
                     Zrušit
@@ -1570,7 +1568,7 @@ async function zobrazDetailUzivatele(userId) {
           <!-- Header -->
           <div style="background: #333333; color: white; padding: 1.5rem; border-radius: 12px 12px 0 0; position: relative;">
             <h2 style="margin: 0; font-size: 1.3rem; font-weight: 600;">Detail uživatele #${user.id}</h2>
-            <button onclick="zavritDetailUzivatele()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; line-height: 1; padding: 0; width: 32px; height: 32px;">&times;</button>
+            <button data-action="zavritDetailUzivatele" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; line-height: 1; padding: 0; width: 32px; height: 32px;">&times;</button>
           </div>
 
           <!-- Body -->
@@ -1608,7 +1606,7 @@ async function zobrazDetailUzivatele(userId) {
                 </select>
               </div>
 
-              <button onclick="ulozitZmenyUzivatele(${user.id})" style="width: 100%; padding: 0.8rem; background: #333333; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+              <button data-action="ulozitZmenyUzivatele" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #333333; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
                 [Save] Uložit změny
               </button>
             </div>
@@ -1622,7 +1620,7 @@ async function zobrazDetailUzivatele(userId) {
                 <input type="password" id="edit-user-password" placeholder="••••••••" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
               </div>
 
-              <button onclick="zmenitHesloUzivatele(${user.id})" style="width: 100%; padding: 0.8rem; background: #d97706; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+              <button data-action="zmenitHesloUzivatele" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #d97706; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
                 Změnit heslo
               </button>
             </div>
@@ -1650,7 +1648,7 @@ async function zobrazDetailUzivatele(userId) {
                 </div>
               ` : ''}
 
-              <button onclick="prepnoutStatusUzivatele(${user.id}, '${user.status === 'active' ? 'inactive' : 'active'}')" style="width: 100%; padding: 0.8rem; background: ${user.status === 'active' ? '#dc2626' : '#059669'}; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer;">
+              <button data-action="prepnoutStatusUzivatele" data-id="${user.id}" data-status="${user.status === 'active' ? 'inactive' : 'active'}" style="width: 100%; padding: 0.8rem; background: ${user.status === 'active' ? '#dc2626' : '#059669'}; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer;">
                 ${user.status === 'active' ? 'Deaktivovat uživatele' : 'Aktivovat uživatele'}
               </button>
             </div>
@@ -1921,6 +1919,71 @@ if (typeof Utils !== 'undefined' && Utils.registerAction) {
   Utils.registerAction('openNewWindow', (el, data) => {
     if (data.url) {
       window.open(data.url, '_blank');
+    }
+  });
+
+  // Step 114 - Nové akce z migrace onclick
+  Utils.registerAction('zobrazDetailUzivatele', (el, data) => {
+    if (data.id && typeof zobrazDetailUzivatele === 'function') {
+      zobrazDetailUzivatele(data.id);
+    }
+  });
+
+  Utils.registerAction('deleteUser', (el, data) => {
+    if (data.id && typeof deleteUser === 'function') {
+      el.closest('[data-action="stopPropagation"]')?.dispatchEvent(new Event('click', { bubbles: false }));
+      deleteUser(data.id);
+    }
+  });
+
+  Utils.registerAction('otevritZakazkyZakaznika', (el, data) => {
+    if (data.jmeno && data.email && typeof otevritZakazkyZakaznika === 'function') {
+      otevritZakazkyZakaznika(data.jmeno, data.email);
+    }
+  });
+
+  Utils.registerAction('navigateToAddUser', () => {
+    window.location.href = 'admin.php?tab=users';
+  });
+
+  Utils.registerAction('loadUsersModal', () => {
+    if (typeof loadUsersModal === 'function') {
+      loadUsersModal();
+    }
+  });
+
+  Utils.registerAction('vytvorKlicZModalu', () => {
+    if (typeof vytvorKlicZModalu === 'function') {
+      vytvorKlicZModalu();
+    }
+  });
+
+  Utils.registerAction('zavritCreateKeyModal', () => {
+    const modal = document.getElementById('createKeyModal');
+    if (modal) modal.remove();
+  });
+
+  Utils.registerAction('zavritDetailUzivatele', () => {
+    if (typeof zavritDetailUzivatele === 'function') {
+      zavritDetailUzivatele();
+    }
+  });
+
+  Utils.registerAction('ulozitZmenyUzivatele', (el, data) => {
+    if (data.id && typeof ulozitZmenyUzivatele === 'function') {
+      ulozitZmenyUzivatele(data.id);
+    }
+  });
+
+  Utils.registerAction('zmenitHesloUzivatele', (el, data) => {
+    if (data.id && typeof zmenitHesloUzivatele === 'function') {
+      zmenitHesloUzivatele(data.id);
+    }
+  });
+
+  Utils.registerAction('prepnoutStatusUzivatele', (el, data) => {
+    if (data.id && data.status && typeof prepnoutStatusUzivatele === 'function') {
+      prepnoutStatusUzivatele(data.id, data.status);
     }
   });
 }

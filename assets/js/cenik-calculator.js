@@ -533,15 +533,15 @@
         if (kalkulackaRezim === 'protokol') {
             // Protokol režim - zobrazit Zpět a Započítat
             wizardButtons.innerHTML = `
-                <button class="btn-secondary" onclick="previousStep()">${window.t('btn.back')}</button>
-                <button class="btn-primary" onclick="zapocitatDoProtokolu()">${window.t('btn.addToProtocol')}</button>
+                <button class="btn-secondary" data-action="previousStep">${window.t('btn.back')}</button>
+                <button class="btn-primary" data-action="zapocitatDoProtokolu">${window.t('btn.addToProtocol')}</button>
             `;
         } else {
             // Standalone režim - zobrazit Zpět, Export PDF a Nová kalkulace
             wizardButtons.innerHTML = `
-                <button class="btn-secondary" onclick="previousStep()">${window.t('btn.back')}</button>
-                <button class="btn-primary" onclick="exportovatCenikPDF()">${window.t('btn.exportPDF')}</button>
-                <button class="btn-primary" onclick="resetovatKalkulacku()">${window.t('btn.newCalculation')}</button>
+                <button class="btn-secondary" data-action="previousStep">${window.t('btn.back')}</button>
+                <button class="btn-primary" data-action="exportovatCenikPDF">${window.t('btn.exportPDF')}</button>
+                <button class="btn-primary" data-action="resetovatKalkulacku">${window.t('btn.newCalculation')}</button>
             `;
         }
     }
@@ -1105,6 +1105,13 @@ if (typeof window.Utils !== 'undefined' && window.Utils.registerAction) {
     window.Utils.registerAction('resetovatKalkulacku', () => {
         if (typeof window.resetovatKalkulacku === 'function') {
             window.resetovatKalkulacku();
+        }
+    });
+
+    // Step 115 - Protokol režim
+    window.Utils.registerAction('zapocitatDoProtokolu', () => {
+        if (typeof window.zapocitatDoProtokolu === 'function') {
+            window.zapocitatDoProtokolu();
         }
     });
 }

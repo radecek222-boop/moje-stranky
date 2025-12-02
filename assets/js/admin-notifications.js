@@ -107,14 +107,14 @@ function renderNotifications() {
 
     return `
       <div class="notification-card">
-        <div class="notification-header" onclick="toggleNotificationBody('${notif.id}')">
+        <div class="notification-header" data-action="toggleNotificationBody" data-id="${notif.id}">
           <div class="notification-title">
             <span class="badge badge-${notif.active ? 'active' : 'inactive'}">${notif.active ? 'Aktivní' : 'Neaktivní'}</span>
             <span>${safeName}</span>
           </div>
           <div class="notification-toggle">
             <div class="toggle-switch ${notif.active ? 'active' : ''}"
-                 onclick="event.stopPropagation(); toggleNotification('${notif.id}')"></div>
+                 data-action="toggleNotification" data-id="${notif.id}"></div>
           </div>
         </div>
         <div class="notification-body" id="notification-body-${notif.id}">
@@ -144,7 +144,7 @@ function renderNotifications() {
             <div class="template-preview">${safeTemplate}</div>
           </div>
 
-          <button class="btn btn-sm" onclick="openEditNotificationModal('${notif.id}')">Editovat šablonu</button>
+          <button class="btn btn-sm" data-action="openEditNotificationModal" data-id="${notif.id}">Editovat šablonu</button>
         </div>
       </div>
     `;
@@ -236,7 +236,7 @@ function openEditNotificationModal(notificationId) {
   const variablesContainer = document.getElementById('available-variables');
   if (variablesContainer && notif.variables) {
     variablesContainer.innerHTML = notif.variables.map(v => 
-      `<span class="variable-tag" onclick="insertVariable('${v}')">${v}</span>`
+      `<span class="variable-tag" data-action="insertVariable" data-variable="${v}">${v}</span>`
     ).join('');
   }
   
@@ -429,7 +429,7 @@ function renderCCEmails() {
   container.innerHTML = notificationState.ccEmails.map(email => `
     <div class="email-tag">
       ${email}
-      <span class="email-tag-remove" onclick="removeCCEmail('${email}')">×</span>
+      <span class="email-tag-remove" data-action="removeCCEmail" data-email="${email}">×</span>
     </div>
   `).join('');
 }
@@ -464,7 +464,7 @@ function renderBCCEmails() {
   container.innerHTML = notificationState.bccEmails.map(email => `
     <div class="email-tag">
       ${email}
-      <span class="email-tag-remove" onclick="removeBCCEmail('${email}')">×</span>
+      <span class="email-tag-remove" data-action="removeBCCEmail" data-email="${email}">×</span>
     </div>
   `).join('');
 }
@@ -503,4 +503,46 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', addModalStyles);
 } else {
   addModalStyles();
+}
+
+// ============================================
+// ACTION REGISTRY - Step 115
+// ============================================
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+  Utils.registerAction('toggleNotificationBody', (el, data) => {
+    if (data.id && typeof toggleNotificationBody === 'function') {
+      toggleNotificationBody(data.id);
+    }
+  });
+
+  Utils.registerAction('toggleNotification', (el, data) => {
+    if (data.id && typeof toggleNotification === 'function') {
+      el.dispatchEvent(new Event('click', { bubbles: false }));
+      toggleNotification(data.id);
+    }
+  });
+
+  Utils.registerAction('openEditNotificationModal', (el, data) => {
+    if (data.id && typeof openEditNotificationModal === 'function') {
+      openEditNotificationModal(data.id);
+    }
+  });
+
+  Utils.registerAction('insertVariable', (el, data) => {
+    if (data.variable && typeof insertVariable === 'function') {
+      insertVariable(data.variable);
+    }
+  });
+
+  Utils.registerAction('removeCCEmail', (el, data) => {
+    if (data.email && typeof removeCCEmail === 'function') {
+      removeCCEmail(data.email);
+    }
+  });
+
+  Utils.registerAction('removeBCCEmail', (el, data) => {
+    if (data.email && typeof removeBCCEmail === 'function') {
+      removeBCCEmail(data.email);
+    }
+  });
 }
