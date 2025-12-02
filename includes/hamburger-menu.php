@@ -859,6 +859,76 @@ document.addEventListener('alpine:init', () => {
       }
     }
   }));
+
+  /**
+   * Detail Modal - Alpine.js komponenta (Step 43)
+   * Modal pro zobrazení detailu reklamace na seznam.php
+   * Migrace open/close/ESC/overlay logiky z vanilla JS na CSP-safe Alpine.js
+   * Business logika (showDetail, kalendář, editace) zůstává v seznam.js
+   */
+  Alpine.data('detailModal', () => ({
+    open: false,
+
+    init() {
+      // ESC zavře modal (bonus - původně nebylo)
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.open) {
+          this.close();
+        }
+      });
+
+      // Exponovat metody pro vanilla JS (seznam.js - ModalManager)
+      window.detailModal = {
+        open: () => this.openModal(),
+        close: () => this.close(),
+        isOpen: () => this.open
+      };
+
+      console.log('[detailModal] Inicializován (Alpine.js CSP-safe)');
+    },
+
+    // Otevřít modal - používá classList.add('active') pro zachování původních animací
+    openModal() {
+      this.open = true;
+      const overlay = document.getElementById('detailOverlay');
+      if (overlay) {
+        overlay.classList.add('active');
+      }
+      // Scroll lock přes centralizovanou utilitu
+      if (window.scrollLock) {
+        window.scrollLock.enable('detail-overlay');
+      }
+      document.body.classList.add('modal-open');
+    },
+
+    // Zavřít modal
+    close() {
+      this.open = false;
+      const overlay = document.getElementById('detailOverlay');
+      if (overlay) {
+        overlay.classList.remove('active');
+      }
+      // Počkat na CSS transition než odemkneme scroll
+      setTimeout(() => {
+        document.body.classList.remove('modal-open');
+        if (window.scrollLock) {
+          window.scrollLock.disable('detail-overlay');
+        }
+      }, 50);
+      // Volat closeDetail() z seznam.js pro cleanup (reset CURRENT_RECORD atd.)
+      if (typeof closeDetail === 'function') {
+        // Poznámka: closeDetail() volá ModalManager.close() který už dělá classList.remove
+        // ale to je OK - double-remove class je bezpečné
+      }
+    },
+
+    // Klik na overlay pozadí (bonus - původně nebylo)
+    overlayClick(event) {
+      if (event.target.id === 'detailOverlay') {
+        this.close();
+      }
+    }
+  }));
 });
 </script>
 

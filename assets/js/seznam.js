@@ -1,5 +1,6 @@
-// VERSION CHECK: 20251122-04 - Distance API vypnuto
-console.log('[SEZNAM.JS] NACTEN - VERZE: 20251122-04 (distance API vypnuto)');
+// VERSION CHECK: 20251202-01 - Step 43: Alpine.js detailModal migrace
+// Step 43: Migrace detailModal na CSP-safe Alpine.js
+console.log('[SEZNAM.JS] NACTEN - VERZE: 20251202-01 (Alpine.js detailModal)');
 
 // BEZPEČNOST: Cache CSRF tokenu pro prevenci nekonečné smyčky
 window.csrfTokenCache = window.csrfTokenCache || null;
@@ -618,18 +619,23 @@ function filterUnreadNotes() {
 }
 
 // === MODAL MANAGER ===
+// Step 43: Migrace na Alpine.js - open/close/overlay click/ESC nyní řeší detailModal komponenta
 const ModalManager = {
   show: (content) => {
-    // Zamknout scroll pres centralizovanou utilitu (iOS/Safari/PWA kompatibilni)
-    if (window.scrollLock) {
-      window.scrollLock.enable('detail-overlay');
-    }
-
-    // Zachovat modal-open tridu pro zpetnou kompatibilitu s CSS
-    document.body.classList.add('modal-open');
-
+    // Nastavit obsah modalu
     document.getElementById('modalContent').innerHTML = content;
-    document.getElementById('detailOverlay').classList.add('active');
+
+    // Step 43: Otevřít modal přes Alpine.js API
+    if (window.detailModal && window.detailModal.open) {
+      window.detailModal.open();
+    } else {
+      // Fallback pro zpětnou kompatibilitu
+      if (window.scrollLock) {
+        window.scrollLock.enable('detail-overlay');
+      }
+      document.body.classList.add('modal-open');
+      document.getElementById('detailOverlay').classList.add('active');
+    }
 
     // FIX: Safari focus fix - zajistí že modal je v DOM před scrollem
     setTimeout(() => {
@@ -641,19 +647,23 @@ const ModalManager = {
   },
 
   close: () => {
-    const overlay = document.getElementById('detailOverlay');
-    overlay.classList.remove('active');
+    // Step 43: Zavřít modal přes Alpine.js API
+    if (window.detailModal && window.detailModal.close) {
+      window.detailModal.close();
+    } else {
+      // Fallback pro zpětnou kompatibilitu
+      const overlay = document.getElementById('detailOverlay');
+      overlay.classList.remove('active');
 
-    // Počkat na CSS transition než odemkneme scroll
-    setTimeout(() => {
-      document.body.classList.remove('modal-open');
+      setTimeout(() => {
+        document.body.classList.remove('modal-open');
+        if (window.scrollLock) {
+          window.scrollLock.disable('detail-overlay');
+        }
+      }, 50);
+    }
 
-      // Odemknout scroll pres centralizovanou utilitu
-      if (window.scrollLock) {
-        window.scrollLock.disable('detail-overlay');
-      }
-    }, 50); // Kratší delay než transition (300ms)
-
+    // Cleanup - reset state variables
     CURRENT_RECORD = null;
     SELECTED_DATE = null;
     SELECTED_TIME = null;
