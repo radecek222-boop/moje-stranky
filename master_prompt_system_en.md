@@ -1436,3 +1436,29 @@ header('Content-Type: text/html; charset=utf-8');
   - `photocustomer.css` → `.min.css` in: photocustomer.php
 - **Result:** All PHP files now reference minified assets. Zero non-minified references remain.
 
+## [Step 61]: Lazy Loading Audit for Images
+- **Date:** 2025-12-02
+- **What:** Audited all `<img>` tags in PHP files and added `loading="lazy"` where applicable.
+- **Analysis:**
+  - Most images in the project are CSS background images (hero sections, etc.) - lazy loading N/A
+  - `aktuality.php`: Already has `loading="lazy"` for markdown-parsed images
+  - `nova_aktualita.php`: JS preview images (immediate display, no lazy needed)
+  - `api/admin_api.php`: Dynamic photo gallery in timeline - **added loading="lazy"**
+  - Other img tags are either empty src placeholders or library code (PHPMailer)
+- **Files modified:**
+  - `api/admin_api.php`: Added `loading="lazy"` to dynamically generated photo thumbnails
+- **Result:** Minimal impact - project uses CSS backgrounds for most imagery. One img tag optimized.
+
+## [Step 62]: Preload Critical Assets
+- **Date:** 2025-12-02
+- **What:** Added `<link rel="preload">` for critical CSS assets to pages missing them.
+- **Analysis:**
+  - 10 pages already had preload tags (index.php, seznam.php, protokol.php, etc.)
+  - 4 main pages were missing preloads: login.php, registration.php, admin.php, statistiky.php
+- **Files modified:**
+  - `login.php`: Added preload for styles.min.css, login.min.css
+  - `registration.php`: Added preload for styles.min.css, login.min.css
+  - `admin.php`: Added preload for styles.min.css, admin.min.css + fixed admin.css → admin.min.css
+  - `statistiky.php`: Added preload for styles.min.css
+- **Result:** All main user-facing pages now have preload hints for faster CSS loading.
+

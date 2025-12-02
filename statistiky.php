@@ -16,6 +16,7 @@ if (!$isAdmin) {
   <title>Statistiky a reporty | White Glove Service</title>
   <meta name="description" content="Statistiky a reporty pro vyúčtování - prodejci, technici, zakázky.">
   <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
+  <link rel="preload" href="assets/css/styles.min.css" as="style">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
