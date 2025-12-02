@@ -21,7 +21,7 @@
     <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/offline.css">
+  <link rel="stylesheet" href="assets/css/offline.min.css">
 </head>
 <body>
 <main>

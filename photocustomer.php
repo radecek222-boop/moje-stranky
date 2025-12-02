@@ -75,7 +75,7 @@ if (!$isAdmin && !$isTechnik) {
 
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/photocustomer.css">
-  <link rel="stylesheet" href="assets/css/photocustomer-collapsible.css">
+  <link rel="stylesheet" href="assets/css/photocustomer-collapsible.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
 </head>
