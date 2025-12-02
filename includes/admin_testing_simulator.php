@@ -384,12 +384,12 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
             <div class="form-group">
                 <label for="sim-email">Email *</label>
-                <input type="email" id="sim-email" name="email" value="test@example.com" required>
+                <input type="email" id="sim-email" name="email" value="test@example.com" autocomplete="email" required>
             </div>
 
             <div class="form-group">
                 <label for="sim-telefon">Telefon *</label>
-                <input type="tel" id="sim-telefon" name="telefon" value="+420 123 456 789" required>
+                <input type="tel" id="sim-telefon" name="telefon" value="+420 123 456 789" autocomplete="tel" required>
             </div>
 
             <div class="form-group">
@@ -431,7 +431,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         </div>
 
         <div class="test-loading" id="apiLoading">
-            <div class="test-spinner"></div>
+            <div class="test-spinner" aria-hidden="true"></div>
             <div>Odesílám data na server...</div>
         </div>
 
@@ -507,7 +507,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         <div id="protocolCheck">
             <div class="test-loading">
-                <div class="test-spinner"></div>
+                <div class="test-spinner" aria-hidden="true"></div>
                 <div>Kontroluji protokol...</div>
             </div>
         </div>

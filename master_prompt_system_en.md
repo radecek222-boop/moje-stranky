@@ -1958,3 +1958,41 @@ header('Content-Type: text/html; charset=utf-8');
   - `analytics-user-scores.php`: Added for/id pairs to date-from, date-to
 - **Result:** All analytics filter forms are now properly labeled for accessibility.
 
+## [Step 99]: Autocomplete Attributes for Form Inputs
+- **Date:** 2025-12-02
+- **What:** Added autocomplete attributes to email and telephone inputs for better accessibility and autofill support.
+- **Analysis:**
+  - WCAG 2.1 SC 1.3.5 requires autocomplete attributes for user input fields
+  - Several email/tel inputs were missing autocomplete tokens
+  - Autocomplete helps users with assistive technologies fill forms more easily
+- **Files modified:**
+  - `gdpr-portal.php`: Added autocomplete="email" to export-email and deletion-email inputs
+  - `includes/admin_testing_simulator.php`: Added autocomplete="email" and autocomplete="tel" to form fields
+  - `includes/admin_testing_interactive.php`: Added autocomplete="email" and autocomplete="tel" to E2E test form
+  - `includes/admin_email_sms.php`: Added autocomplete="email" to test email input
+- **Result:** All email and tel inputs now have proper autocomplete attributes for accessibility.
+
+## [Step 100]: Aria-current for Navigation Links
+- **Date:** 2025-12-02
+- **What:** Added aria-current="page" attribute to active navigation links.
+- **Analysis:**
+  - WCAG 2.4.8 recommends indicating current location within navigation
+  - aria-current="page" tells screen readers which page is currently active
+  - Applied to all navigation sections: admin, user, and public
+- **Files modified:**
+  - `includes/hamburger-menu.php`: Added aria-current="page" to all active navigation links in admin, user, and public navigation sections
+- **Result:** Screen reader users can now identify the current page within navigation.
+
+## [Step 101]: Aria-hidden for Loading Spinners
+- **Date:** 2025-12-02
+- **What:** Added aria-hidden="true" to decorative loading spinner elements.
+- **Analysis:**
+  - Loading spinners are purely visual/decorative elements
+  - Screen readers should not announce these decorative elements
+  - The adjacent text already provides loading status information
+- **Files modified:**
+  - `protokol.php`: Added aria-hidden to loading-spinner div
+  - `admin.php`: Added aria-hidden to cc-modal-spinner div
+  - `includes/admin_testing_simulator.php`: Added aria-hidden to 2 test-spinner divs
+- **Result:** Screen readers will skip decorative spinners and only announce meaningful loading text.
+
