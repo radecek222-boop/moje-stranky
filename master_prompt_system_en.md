@@ -1808,3 +1808,16 @@ header('Content-Type: text/html; charset=utf-8');
   - Both .min.js files regenerated
 - **Result:** Collapsible sections are now fully accessible via keyboard and properly announced by screen readers.
 
+## [Step 88]: Form Helper Text Accessibility
+- **Date:** 2025-12-02
+- **What:** Added aria-describedby to link form inputs with their helper/description text.
+- **Analysis:**
+  - Helper text below form fields should be programmatically associated with inputs
+  - aria-describedby allows screen readers to announce helper text when field is focused
+  - Improves form usability for screen reader users
+- **Files modified:**
+  - `password_reset.php`: Added aria-describedby to resetKey and newPassword inputs, IDs to helper divs
+  - `registration.php`: Added aria-describedby to regKey and regPassword inputs, IDs to helper divs
+  - `login.php`: Added aria-describedby to rememberMe checkbox, ID to helper div
+- **Result:** Form helper text is now properly announced by screen readers when users focus on related fields.
+
