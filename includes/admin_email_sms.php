@@ -325,6 +325,7 @@ try {
                                    id="test-email"
                                    class="cc-input"
                                    placeholder="vas@email.cz"
+                                   autocomplete="email"
                                    style="width: 200px; margin-right: 0.5rem;">
                             <button class="cc-btn cc-btn-sm cc-btn-primary" onclick="sendTestEmail()" style="font-size: 0.75rem; padding: 0.4rem 0.75rem;">
                                 Odeslat test

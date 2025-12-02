@@ -1958,3 +1958,17 @@ header('Content-Type: text/html; charset=utf-8');
   - `analytics-user-scores.php`: Added for/id pairs to date-from, date-to
 - **Result:** All analytics filter forms are now properly labeled for accessibility.
 
+## [Step 99]: Autocomplete Attributes for Form Inputs
+- **Date:** 2025-12-02
+- **What:** Added autocomplete attributes to email and telephone inputs for better accessibility and autofill support.
+- **Analysis:**
+  - WCAG 2.1 SC 1.3.5 requires autocomplete attributes for user input fields
+  - Several email/tel inputs were missing autocomplete tokens
+  - Autocomplete helps users with assistive technologies fill forms more easily
+- **Files modified:**
+  - `gdpr-portal.php`: Added autocomplete="email" to export-email and deletion-email inputs
+  - `includes/admin_testing_simulator.php`: Added autocomplete="email" and autocomplete="tel" to form fields
+  - `includes/admin_testing_interactive.php`: Added autocomplete="email" and autocomplete="tel" to E2E test form
+  - `includes/admin_email_sms.php`: Added autocomplete="email" to test email input
+- **Result:** All email and tel inputs now have proper autocomplete attributes for accessibility.
+

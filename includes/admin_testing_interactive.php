@@ -549,11 +549,11 @@ function loadStep1_Formular(panel) {
             </div>
             <div class="form-group">
                 <label for="email">Email *</label>
-                <input type="email" id="email" value="test-e2e@wgs-service.cz" required>
+                <input type="email" id="email" value="test-e2e@wgs-service.cz" autocomplete="email" required>
             </div>
             <div class="form-group">
                 <label for="telefon">Telefon *</label>
-                <input type="tel" id="telefon" value="+420777888999" required>
+                <input type="tel" id="telefon" value="+420777888999" autocomplete="tel" required>
             </div>
             <div class="form-group">
                 <label for="popis_problemu">Popis problému *</label>
