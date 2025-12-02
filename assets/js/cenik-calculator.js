@@ -206,11 +206,11 @@
 
                 // Uživatel pokračuje ručně tlačítkem "Pokračovat"
             } else {
-                alert(window.t('alert.distanceError'));
+                wgsToast.error(window.t('alert.distanceError'));
             }
         } catch (error) {
             console.error('[Kalkulačka] Chyba výpočtu vzdálenosti:', error);
-            alert(window.t('alert.distanceCalculationError'));
+            wgsToast.error(window.t('alert.distanceCalculationError'));
         }
     }
 
@@ -226,7 +226,7 @@
 
             if (!jeReklamace) {
                 // Pokud není reklamace, adresa je povinná
-                alert(window.t('alert.selectAddress'));
+                wgsToast.warning(window.t('alert.selectAddress'));
                 return;
             } else {
                 // Pokud je reklamace, nastavit dopravné a vzdálenost na 0
@@ -606,7 +606,7 @@
         try {
             // Kontrola jestli jsou knihovny načteny
             if (typeof window.jspdf === 'undefined' || typeof html2canvas === 'undefined') {
-                alert(window.t('alert.pdfLoading'));
+                wgsToast.info(window.t('alert.pdfLoading'));
                 return;
             }
 
@@ -952,7 +952,7 @@
 
         } catch (error) {
             console.error('[Kalkulačka] Chyba při exportu PDF:', error);
-            alert(window.t('alert.pdfError'));
+            wgsToast.error(window.t('alert.pdfError'));
         }
     };
 
@@ -1049,7 +1049,7 @@
             window.protokolKalkulacka.zpracovatVysledek(kalkulaceData);
         } else {
             console.error('[Kalkulačka] Funkce protokolKalkulacka.zpracovatVysledek není dostupná!');
-            alert('Chyba: Nelze přenést data do protokolu.');
+            wgsToast.error('Chyba: Nelze přenést data do protokolu.');
         }
     };
 

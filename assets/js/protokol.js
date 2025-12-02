@@ -5,13 +5,13 @@
         const data = await response.json();
 
         if (!data.logged_in) {
-            alert(t('please_log_in'));
+            wgsToast.error(t('please_log_in'));
             window.location.href = "login.php";
             return;
         }
 
         if (data.role === "prodejce") {
-            alert(t('page_for_techs_admins_only'));
+            wgsToast.error(t('page_for_techs_admins_only'));
             window.location.href = "seznam.php";
         }
     } catch (err) {
@@ -2505,7 +2505,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof showNotif === 'function') {
         showNotif('error', 'Prosím podepište se před potvrzením');
       } else {
-        alert('Prosím podepište se před potvrzením');
+        wgsToast.warning('Prosím podepište se před potvrzením');
       }
       return;
     }

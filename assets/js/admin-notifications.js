@@ -23,7 +23,7 @@ function handleNotificationsUnauthorized(response, container, tab = 'notificatio
     if (container) {
       container.innerHTML = `<div class="error-message">${ADMIN_SESSION_EXPIRED_MESSAGE}</div>`;
     } else {
-      alert(ADMIN_SESSION_EXPIRED_MESSAGE);
+      wgsToast.error(ADMIN_SESSION_EXPIRED_MESSAGE);
     }
 
     setTimeout(() => redirectToAdminLogin(tab), 800);
@@ -193,7 +193,7 @@ async function toggleNotification(notificationId) {
     }
   } catch (err) {
     console.error('Toggle failed:', err);
-    alert('Chyba při změně stavu notifikace');
+    wgsToast.error('Chyba při změně stavu notifikace');
   }
 }
 
@@ -403,14 +403,14 @@ function addCCEmail() {
   
   if (!email) return;
   if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-    alert('Neplatný formát emailu');
+    wgsToast.warning('Neplatný formát emailu');
     return;
   }
   if (notificationState.ccEmails.includes(email)) {
-    alert('Tento email už je přidán');
+    wgsToast.warning('Tento email už je přidán');
     return;
   }
-  
+
   notificationState.ccEmails.push(email);
   input.value = '';
   renderCCEmails();
@@ -438,14 +438,14 @@ function addBCCEmail() {
   
   if (!email) return;
   if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-    alert('Neplatný formát emailu');
+    wgsToast.warning('Neplatný formát emailu');
     return;
   }
   if (notificationState.bccEmails.includes(email)) {
-    alert('Tento email už je přidán');
+    wgsToast.warning('Tento email už je přidán');
     return;
   }
-  
+
   notificationState.bccEmails.push(email);
   input.value = '';
   renderBCCEmails();

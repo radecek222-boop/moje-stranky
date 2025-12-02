@@ -673,7 +673,7 @@ async function showDetail(recordOrId) {
   if (typeof recordOrId === 'string') {
     record = WGS_DATA_CACHE.find(x => x.id == recordOrId || x.reklamace_id == recordOrId);
     if (!record) {
-      alert(t('record_not_found'));
+      wgsToast.error(t('record_not_found'));
       return;
     }
   } else {
@@ -817,7 +817,7 @@ function closeDetail() {
 async function reopenOrder(id) {
   const record = WGS_DATA_CACHE.find(x => x.id == id);
   if (!record) {
-    alert(t('record_not_found'));
+    wgsToast.error(t('record_not_found'));
     return;
   }
 
@@ -863,16 +863,7 @@ async function reopenOrder(id) {
 
       logger.log(`Nová zakázka vytvořena: ${newWorkflowId} (ID: ${newId})`);
 
-      alert(
-        `NOVÁ ZAKÁZKA VYTVOŘENA\n\n` +
-        `Číslo: ${newWorkflowId}\n` +
-        `Stav: NOVÁ (žlutá karta)\n\n` +
-        `Původní zakázka zůstává dokončená.\n\n` +
-        `Nyní můžete:\n` +
-        `→ Naplánovat termín návštěvy\n` +
-        `→ Zahájit návštěvu\n` +
-        `→ Aktualizovat detail zakázky`
-      );
+      wgsToast.success(`Nová zakázka ${newWorkflowId} vytvořena`, 5000);
 
       // Reload seznamu
       if (typeof loadAll === 'function') {
@@ -887,7 +878,7 @@ async function reopenOrder(id) {
     }
   } catch (e) {
     logger.error('Chyba při znovuotevření zakázky:', e);
-    alert(t('error_reopening_order') + ': ' + e.message);
+    wgsToast.error(t('error_reopening_order') + ': ' + e.message);
   }
 }
 
@@ -897,7 +888,7 @@ window.reopenOrder = reopenOrder;
 // === ZOBRAZENÍ HISTORIE PDF Z PŮVODNÍ ZAKÁZKY ===
 async function showHistoryPDF(originalReklamaceId) {
   if (!originalReklamaceId) {
-    alert('Chybí ID původní zakázky');
+    wgsToast.error('Chybí ID původní zakázky');
     return;
   }
 
@@ -916,14 +907,14 @@ async function showHistoryPDF(originalReklamaceId) {
     if (result.status === 'error') {
       // Pokud je původní zakázka smazána, zobrazit specifickou hlášku
       if (result.message && result.message.includes('nebyla nalezena')) {
-        alert('Původní zakázka byla smazána.\n\nHistorie PDF není k dispozici.');
+        wgsToast.error('Původní zakázka byla smazána.\n\nHistorie PDF není k dispozici.');
         return;
       }
       throw new Error(result.message || 'Nepodařilo se načíst dokumenty');
     }
 
     if (!result.documents || result.documents.length === 0) {
-      alert('Historie PDF není k dispozici.\n\nPůvodní zakázka ještě nemá vytvořený PDF dokument.');
+      wgsToast.info('Historie PDF není k dispozici.\n\nPůvodní zakázka ještě nemá vytvořený PDF dokument.');
       return;
     }
 
@@ -936,7 +927,7 @@ async function showHistoryPDF(originalReklamaceId) {
 
   } catch (error) {
     logger.error('Chyba při načítání historie PDF:', error);
-    alert(`Nepodařilo se načíst historii PDF:\n${error.message}`);
+    wgsToast.error(`Nepodařilo se načíst historii PDF:\n${error.message}`);
   }
 }
 
@@ -983,13 +974,13 @@ function startVisit(id) {
   const z = WGS_DATA_CACHE.find(x => x.id == id);
 
   if (!z) {
-    alert(t('record_not_found'));
+    wgsToast.error(t('record_not_found'));
     startVisitInProgress = false;
     return;
   }
 
   if (Utils.isCompleted(z)) {
-    alert(t('visit_already_completed'));
+    wgsToast.warning(t('visit_already_completed'));
     startVisitInProgress = false;
     return;
   }
@@ -1044,7 +1035,7 @@ async function saveData(data, successMsg) {
         }
       });
 
-      alert(successMsg);
+      wgsToast.success(successMsg);
 
       // Reload all data from DB to ensure consistency
       await loadAll(ACTIVE_FILTER);
@@ -1057,11 +1048,11 @@ async function saveData(data, successMsg) {
         closeDetail();
       }
     } else {
-      alert(t('error') + ': ' + (result.message || t('failed_to_save')));
+      wgsToast.error(t('error') + ': ' + (result.message || t('failed_to_save')));
     }
   } catch (e) {
     logger.error('Chyba při ukládání:', e);
-    alert(t('save_error') + ': ' + e.message);
+    wgsToast.error(t('save_error') + ': ' + e.message);
   }
 }
 
@@ -1134,7 +1125,7 @@ function previousMonth() {
 
   // Don't allow going to past months
   if (prevYear < currentYear || (prevYear === currentYear && prevMonth < currentMonth)) {
-    alert(t('cannot_show_past_months'));
+    wgsToast.warning(t('cannot_show_past_months'));
     return;
   }
 
@@ -1231,7 +1222,7 @@ function renderCalendar(m, y) {
     el.onclick = () => {
       // Prevent selection of past dates
       if (isPast) {
-        alert(t('cannot_select_past_date'));
+        wgsToast.warning(t('cannot_select_past_date'));
         return;
       }
 
@@ -1498,7 +1489,7 @@ function showBookingDetail(bookingOrId) {
   if (typeof bookingOrId === 'string' || typeof bookingOrId === 'number') {
     booking = WGS_DATA_CACHE.find(x => x.id == bookingOrId || x.reklamace_id == bookingOrId);
     if (!booking) {
-      alert(t('record_not_found'));
+      wgsToast.error(t('record_not_found'));
       return;
     }
   } else {
@@ -1593,12 +1584,12 @@ function renderTimeGrid() {
 
 async function saveSelectedDate() {
   if (!SELECTED_DATE || !SELECTED_TIME) {
-    alert(t('select_date_and_time'));
+    wgsToast.warning(t('select_date_and_time'));
     return;
   }
 
   if (!CURRENT_RECORD) {
-    alert(t('no_record_to_save'));
+    wgsToast.warning(t('no_record_to_save'));
     return;
   }
 
@@ -1701,7 +1692,7 @@ async function saveSelectedDate() {
       // ZOBRAZIT ÚSPĚCH
       const tBeforeAlert = performance.now();
       logger.log(`⏱️ TĚSNĚ PŘED ALERT: ${(tBeforeAlert - t0).toFixed(0)}ms od začátku`);
-      alert(t('appointment_saved_success').replace('{date}', SELECTED_DATE).replace('{time}', SELECTED_TIME));
+      wgsToast.success(t('appointment_saved_success').replace('{date}', SELECTED_DATE).replace('{time}', SELECTED_TIME));
       const tAfterAlert = performance.now();
       logger.log(`⏱️ alert() dokončen: ${(tAfterAlert - tBeforeAlert).toFixed(0)}ms`);
 
@@ -1736,12 +1727,12 @@ async function saveSelectedDate() {
       logger.log(`⏱️ CELKOVÝ ČAS: ${(tTotal - t0).toFixed(0)}ms (${((tTotal - t0) / 1000).toFixed(1)}s)`);
     } else {
       hideLoading();
-      alert(t('error') + ': ' + (result.message || t('failed_to_save')));
+      wgsToast.error(t('error') + ': ' + (result.message || t('failed_to_save')));
     }
   } catch (e) {
     hideLoading();
     logger.error('Chyba při ukládání:', e);
-    alert(t('save_error') + ': ' + e.message);
+    wgsToast.error(t('save_error') + ': ' + e.message);
 
     // ⏱️ Log času i při chybě
     const tError = performance.now();
@@ -2144,7 +2135,7 @@ function zobrazPDFModal(pdfUrl, claimId) {
     try {
       // Zkontrolovat podporu Web Share API
       if (!navigator.share && !navigator.canShare) {
-        alert('Sdílení není podporováno v tomto prohlížeči.\n\nPoužijte tlačítko "Uložit" a pak sdílejte soubor ručně.');
+        wgsToast.info('Sdílení není podporováno v tomto prohlížeči.\n\nPoužijte tlačítko "Uložit" a pak sdílejte soubor ručně.');
         return;
       }
 
@@ -2177,7 +2168,7 @@ function zobrazPDFModal(pdfUrl, claimId) {
     } catch (error) {
       // AbortError = uživatel zrušil sdílení (to není chyba)
       if (error.name !== 'AbortError') {
-        alert('Chyba při sdílení: ' + error.message);
+        wgsToast.error('Chyba při sdílení: ' + error.message);
       }
     } finally {
       btnOdeslat.disabled = false;
@@ -2284,12 +2275,12 @@ function showTextOverlay(fieldName) {
         overlay.remove();
         // Znovu otevřít detail s aktualizovanými daty
         showCustomerDetail(CURRENT_RECORD.id);
-        alert(t('text_saved_successfully'));
+        wgsToast.success(t('text_saved_successfully'));
       } else {
-        alert(t('save_error') + ': ' + result.message);
+        wgsToast.error(t('save_error') + ': ' + result.message);
       }
     } catch (error) {
-      alert(t('save_error') + ': ' + error.message);
+      wgsToast.error(t('save_error') + ': ' + error.message);
     }
   };
 
@@ -2508,11 +2499,11 @@ async function deleteNote(noteId, orderId) {
 
       await loadAll(ACTIVE_FILTER);
     } else {
-      alert('Chyba: ' + (data.error || data.message || 'Neznama chyba'));
+      wgsToast.error('Chyba: ' + (data.error || data.message || 'Neznama chyba'));
     }
   } catch (e) {
     logger.error('Chyba pri mazani poznamky:', e);
-    alert('Chyba pri mazani poznamky: ' + e.message);
+    wgsToast.error('Chyba pri mazani poznamky: ' + e.message);
   }
 }
 
@@ -2544,7 +2535,7 @@ async function showNotes(recordOrId) {
   if (typeof recordOrId === 'string' || typeof recordOrId === 'number') {
     record = WGS_DATA_CACHE.find(x => x.id == recordOrId || x.reklamace_id == recordOrId);
     if (!record) {
-      alert(t('record_not_found'));
+      wgsToast.error(t('record_not_found'));
       return;
     }
   } else {
@@ -2667,7 +2658,7 @@ async function saveNewNote(orderId) {
 
   // Musi byt text NEBO audio
   if (!text && !audioBlob) {
-    alert(t('write_note_text'));
+    wgsToast.warning(t('write_note_text'));
     return;
   }
 
@@ -2690,7 +2681,7 @@ async function saveNewNote(orderId) {
       window.WGSNotifikace.aktualizovat();
     }
   } catch (e) {
-    alert(t('note_save_error') + ': ' + e.message);
+    wgsToast.error(t('note_save_error') + ': ' + e.message);
   }
 }
 
@@ -2765,7 +2756,7 @@ async function startRecording(orderId) {
       // Ulozit do localStorage ze jsme uz vysvetleni zobrazili
       const explanationShown = localStorage.getItem('wgs_mic_explained');
       if (!explanationShown) {
-        alert('Pro nahravani hlasovych poznamek potrebujeme pristup k mikrofonu. Po kliknuti na OK vas prohlizec pozada o povoleni.');
+        wgsToast.info('Pro nahravani hlasovych poznamek potrebujeme pristup k mikrofonu. Po kliknuti na OK vas prohlizec pozada o povoleni.');
         localStorage.setItem('wgs_mic_explained', '1');
       }
     }
@@ -2832,7 +2823,7 @@ async function startRecording(orderId) {
 
       if (recorder.audioChunks.length === 0) {
         logger.error('[Audio] Zadna data nebyla nahrana');
-        alert('Nahravka je prazdna. Zkuste to prosim znovu.');
+        wgsToast.warning('Nahravka je prazdna. Zkuste to prosim znovu.');
         document.getElementById('btnStartRecord').style.display = 'block';
         document.getElementById('recordingIndicator').style.display = 'none';
         return;
@@ -2878,9 +2869,9 @@ async function startRecording(orderId) {
     releaseMicrophone();
 
     if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-      alert('Pristup k mikrofonu byl odepren. Povolte pristup v nastaveni prohlizece.');
+      wgsToast.error('Pristup k mikrofonu byl odepren. Povolte pristup v nastaveni prohlizece.');
     } else {
-      alert('Chyba pri nahravani: ' + err.message);
+      wgsToast.error('Chyba pri nahravani: ' + err.message);
     }
   }
 }
@@ -3255,17 +3246,17 @@ async function deleteReklamace(reklamaceId) {
 
     if (result.success || result.status === 'success') {
       logger.log('Smazáno!');
-      alert(t('claim_deleted_successfully'));
+      wgsToast.success(t('claim_deleted_successfully'));
       closeDetail();
       setTimeout(() => location.reload(), 500);
     } else {
       const errorMsg = result.message || result.error || t('delete_failed');
       logger.error('Chyba:', errorMsg);
-      alert(t('error') + ': ' + errorMsg);
+      wgsToast.error(t('error') + ': ' + errorMsg);
     }
   } catch (error) {
     logger.error('Chyba při mazání:', error);
-    alert(t('delete_error') + ': ' + error.message);
+    wgsToast.error(t('delete_error') + ': ' + error.message);
   }
 }
 
@@ -3366,15 +3357,15 @@ async function pokracovatSmazaniFotky(photoId, photoUrl) {
         }
       }
 
-      alert(t('photo_deleted_successfully'));
+      wgsToast.success(t('photo_deleted_successfully'));
     } else {
       const errorMsg = result.message || result.error || t('delete_failed');
       logger.error('Chyba:', errorMsg);
-      alert(t('error') + ': ' + errorMsg);
+      wgsToast.error(t('error') + ': ' + errorMsg);
     }
   } catch (error) {
     logger.error('Chyba při mazání fotky:', error);
-    alert(t('photo_delete_error') + ': ' + error.message);
+    wgsToast.error(t('photo_delete_error') + ': ' + error.message);
   }
 }
 
@@ -4053,7 +4044,7 @@ function otevritNahravaniVidea(claimId, parentOverlay) {
   btnNahrat.onclick = async () => {
     const file = fileInput.files[0];
     if (!file) {
-      alert('Vyberte video soubor');
+      wgsToast.warning('Vyberte video soubor');
       return;
     }
 

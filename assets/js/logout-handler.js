@@ -52,7 +52,7 @@
       }
 
       if (!csrfToken) {
-        alert('Nepodařilo se získat bezpečnostní token. Obnovte stránku a zkuste to znovu.');
+        wgsToast.error('Nepodařilo se získat bezpečnostní token. Obnovte stránku a zkuste to znovu.');
         // Fallback: přesměrovat na potvrzovací logout stránku (bezpečnější než neudělat nic)
         window.location.href = '/logout.php';
         return;
@@ -74,7 +74,7 @@
 
   } catch (error) {
     console.error('Logout error:', error);
-    alert('Chyba při odhlašování. Zkuste to prosím znovu.');
+    wgsToast.error('Chyba při odhlašování. Zkuste to prosím znovu.');
     // Fallback pro nečekané chyby - zobrazit potvrzovací stránku
     window.location.href = '/logout.php';
   }
