@@ -205,6 +205,7 @@ if ($initialBootstrapData) {
 <!-- Google Fonts - Natuzzi style -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
 
   <!-- Preload critical CSS -->
@@ -553,8 +554,8 @@ if ($initialBootstrapData) {
 <!-- Fix pro tlačítka (načíst až po protokol.js) -->
 <script src="assets/js/protokol-buttons-fix.min.js" defer></script>
 <!-- Překlady pro kalkulačku -->
-<script src="assets/js/wgs-translations-cenik.min.js"></script>
-<script src="assets/js/language-switcher.min.js"></script>
+<script src="assets/js/wgs-translations-cenik.min.js" defer></script>
+<script src="assets/js/language-switcher.min.js" defer></script>
 <!-- Kalkulačka integrace -->
 <script src="assets/js/cenik-calculator.min.js" defer></script>
 <script src="assets/js/protokol-calculator-integration.min.js" defer></script>

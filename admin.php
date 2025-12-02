@@ -1103,13 +1103,13 @@ function loadNotifContent(type, body) {
 </div>
 
 <!-- External JavaScript -->
-<script src="/assets/js/logger.min.js"></script>
-<script src="/assets/js/csrf-auto-inject.min.js"></script>
+<script src="/assets/js/logger.min.js" defer></script>
+<script src="/assets/js/csrf-auto-inject.min.js" defer></script>
 <!-- logout-handler.js je v hamburger-menu.php (nacita se VSUDE vcetne dashboardu) -->
-<script src="/assets/js/utils.min.js"></script>
-<script src="/assets/js/admin-notifications.min.js"></script>
-<script src="/assets/js/smtp-config.min.js"></script>
-<script src="/assets/js/admin.min.js"></script>
+<script src="/assets/js/utils.min.js" defer></script>
+<script src="/assets/js/admin-notifications.min.js" defer></script>
+<script src="/assets/js/smtp-config.min.js" defer></script>
+<script src="/assets/js/admin.min.js" defer></script>
 
 <!-- MODAL: Edit Notification -->
 <div class="wgs-modal" id="editNotificationModal" style="display: none;">

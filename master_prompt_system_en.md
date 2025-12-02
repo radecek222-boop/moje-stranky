@@ -1462,3 +1462,43 @@ header('Content-Type: text/html; charset=utf-8');
   - `statistiky.php`: Added preload for styles.min.css
 - **Result:** All main user-facing pages now have preload hints for faster CSS loading.
 
+## [Step 63]: Cache Headers Audit
+- **Date:** 2025-12-02
+- **What:** Audited and enhanced cache headers in .htaccess for all asset types.
+- **Analysis:**
+  - Existing cache headers already well configured for CSS, JS, images, fonts
+  - Missing: Source map files (.map) - 68 files without explicit cache rules
+  - Missing: application/json in mod_expires
+- **Changes to .htaccess:**
+  - Added Cache-Control for `.map` files: `public, max-age=31536000, immutable`
+  - Added ExpiresByType for `application/json`: 1 year
+- **Result:** Complete cache coverage for all static asset types including source maps.
+
+## [Step 64]: DNS Prefetch for External Resources
+- **Date:** 2025-12-02
+- **What:** Added `dns-prefetch` hints for external CDN resources to reduce DNS lookup latency.
+- **Analysis:**
+  - External resources: cdn.jsdelivr.net, cdnjs.cloudflare.com, unpkg.com, api.geoapify.com
+  - novareklamace.php already had preconnect for unpkg and cdnjs
+  - Other pages loading external scripts were missing dns-prefetch
+- **Files modified:**
+  - `analytics.php`: Added dns-prefetch for cdn.jsdelivr.net (Chart.js)
+  - `protokol.php`: Added dns-prefetch for cdnjs.cloudflare.com (jsPDF, html2canvas, pdf-lib)
+  - `cenik.php`: Added dns-prefetch for cdnjs.cloudflare.com (jsPDF, html2canvas)
+  - `psa-kalkulator.php`: Added dns-prefetch for cdn.jsdelivr.net (QR code lib)
+- **Result:** Reduced DNS lookup latency for pages loading external libraries.
+
+## [Step 65]: Script Loading Optimization (defer)
+- **Date:** 2025-12-02
+- **What:** Added `defer` attribute to scripts that were loading synchronously but didn't need to block rendering.
+- **Analysis:**
+  - Many scripts at end of body were loading synchronously
+  - Scripts used by inline handlers still work with defer (executed before DOMContentLoaded)
+  - Some scripts (sw-register, replay-player, heatmap-renderer) must stay synchronous due to immediate inline usage
+- **Files modified:**
+  - `statistiky.php`: Added defer to jspdf, autotable, html2canvas (3 scripts)
+  - `protokol.php`: Added defer to wgs-translations-cenik.min.js, language-switcher.min.js
+  - `admin.php`: Added defer to all 6 JS files (logger, csrf, utils, admin-notifications, smtp-config, admin)
+  - `includes/hamburger-menu.php`: Added defer to scroll-lock, translations, logout-handler (3 scripts)
+- **Result:** Reduced render-blocking scripts, improved page load performance.
+
