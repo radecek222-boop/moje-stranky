@@ -397,7 +397,7 @@ Benvenuti alle notizie di oggi sui mobili italiani di lusso Natuzzi..."></textar
     <!-- Tlačítka -->
     <div class="form-card">
       <div class="submit-section">
-        <button type="button" class="btn btn-cancel" onclick="window.location.href='admin.php'">
+        <button type="button" class="btn btn-cancel" data-action="navigateToAdmin">
           Zrušit
         </button>
         <button type="submit" class="btn btn-submit">

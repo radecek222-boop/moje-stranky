@@ -588,7 +588,7 @@ function updateProgress($percent) {
                         </a>
                     </div>
 
-                    <button onclick="window.close()" class="button button-grey">
+                    <button data-action="closeWindow" class="button button-grey">
                         ZAVŘÍT OKNO
                     </button>
                 <?php else: ?>
@@ -617,6 +617,18 @@ function updateProgress($percent) {
     </div>
 
     <script>
+        // Event delegation pro data-action
+        document.addEventListener('click', function(e) {
+            const target = e.target.closest('[data-action]');
+            if (!target) return;
+
+            const action = target.getAttribute('data-action');
+
+            if (action === 'closeWindow') {
+                window.close();
+            }
+        });
+
         // Debug pro formulář
         const form = document.getElementById('installForm');
         const btn = document.getElementById('installBtn');

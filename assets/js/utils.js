@@ -305,6 +305,12 @@ function initEventDelegation() {
         const target = event.target.closest('[data-action]');
         if (target) {
             const action = target.dataset.action;
+
+            // Podpora pro zastavení propagace
+            if (target.dataset.stopPropagation === 'true') {
+                event.stopPropagation();
+            }
+
             if (ActionRegistry.execute(action, target)) {
                 event.preventDefault();
             }
