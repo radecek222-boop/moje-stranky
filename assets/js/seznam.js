@@ -694,7 +694,11 @@ async function showDetail(recordOrId) {
   }
   
   CURRENT_RECORD = record;
-  
+
+  // Automatické přiřazení technika (fire-and-forget)
+  autoAssignTechnician(record.reklamace_id || record.cislo || record.id)
+    .catch(err => logger.warn('Auto-assign technika se nezdařilo:', err.message));
+
   const customerName = Utils.getCustomerName(record);
   const address = Utils.getAddress(record);
   const termin = record.termin ? formatDate(record.termin) : '—';
@@ -2402,6 +2406,37 @@ async function sendAppointmentConfirmation(customer, date, time) {
     }
   } catch (error) {
     logger.error('Chyba při odesílání potvrzení:', error);
+  }
+}
+
+// === AUTOMATICKÉ PŘIŘAZENÍ TECHNIKA ===
+async function autoAssignTechnician(reklamaceId) {
+  try {
+    const csrfToken = await getCSRFToken();
+
+    const response = await fetch('api/auto_assign_technician.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reklamace_id: reklamaceId,
+        csrf_token: csrfToken
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success && result.assigned) {
+      logger.log(`✓ Technik ${result.technician_name} (${result.technician_email}) byl automaticky přiřazen`);
+      // Obnovit data v cache, aby se zobrazilo jméno technika
+      await loadData(ACTIVE_FILTER);
+    } else if (result.success && !result.assigned) {
+      // Není technik nebo už má přiřazeného - to je v pořádku
+      logger.log('Auto-assign: ' + (result.message || 'Žádné přiřazení'));
+    } else {
+      logger.warn('Auto-assign selhalo:', result.error);
+    }
+  } catch (error) {
+    logger.error('Chyba při auto-assign technika:', error);
   }
 }
 
