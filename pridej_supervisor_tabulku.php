@@ -79,6 +79,13 @@ try {
         if (isset($_GET['execute']) && $_GET['execute'] === '1') {
             echo "<div class='info'><strong>SPOUŠTÍM MIGRACI...</strong></div>";
 
+            // Nejprve zjistit název primárního klíče v wgs_users
+            $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users WHERE `Key` = 'PRI'");
+            $pkColumn = $stmt->fetch(PDO::FETCH_ASSOC);
+            $userPkName = $pkColumn ? $pkColumn['Field'] : 'user_id';
+
+            echo "<div class='info'>Primární klíč wgs_users: <strong>{$userPkName}</strong></div>";
+
             $sql = "
                 CREATE TABLE wgs_supervisor_assignments (
                     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -88,11 +95,7 @@ try {
                     created_by INT DEFAULT NULL COMMENT 'Admin který přiřazení vytvořil',
                     UNIQUE KEY unique_assignment (supervisor_user_id, salesperson_user_id),
                     KEY idx_supervisor (supervisor_user_id),
-                    KEY idx_salesperson (salesperson_user_id),
-                    CONSTRAINT fk_supervisor FOREIGN KEY (supervisor_user_id)
-                        REFERENCES wgs_users(user_id) ON DELETE CASCADE,
-                    CONSTRAINT fk_salesperson FOREIGN KEY (salesperson_user_id)
-                        REFERENCES wgs_users(user_id) ON DELETE CASCADE
+                    KEY idx_salesperson (salesperson_user_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci
                 COMMENT='Přiřazení prodejců pod supervizory - supervizor vidí zakázky přiřazených prodejců'
             ";
