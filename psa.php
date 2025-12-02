@@ -176,7 +176,7 @@
 </main>
 
 <!-- Logger Utility (must be loaded first) -->
-<script src="assets/js/logger.js" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
 
 <!-- Main JavaScript -->
 <script src="assets/js/psa-kalkulator.min.js" defer></script>

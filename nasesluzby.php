@@ -287,7 +287,7 @@
 
 <!-- External JavaScript -->
 <!-- Logger Utility (must be loaded first) -->
-<script src="assets/js/logger.js" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
 
 <?php renderHeatmapTracker(); ?>
 </body>

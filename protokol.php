@@ -179,7 +179,7 @@ if ($initialBootstrapData) {
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <!-- Logger Utility (must be loaded first) -->
-<script src="assets/js/logger.js"></script>
+<script src="assets/js/logger.min.js"></script>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -546,7 +546,7 @@ if ($initialBootstrapData) {
 
 <!-- External JavaScript -->
 <script src="assets/js/protokol-pdf-preview.min.js" defer></script>
-<script src="assets/js/protokol-customer-collapse.js" defer></script>
+<script src="assets/js/protokol-customer-collapse.min.js" defer></script>
 <script src="assets/js/protokol-data-patch.min.js" defer></script>
 <script src="assets/js/protokol.js?v=20251202" defer></script>
 <!-- protokol-fakturace-patch.js byl sloučen do protokol-data-patch.min.js (Step 47) -->

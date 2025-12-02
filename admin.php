@@ -1101,7 +1101,7 @@ function loadNotifContent(type, body) {
 </div>
 
 <!-- External JavaScript -->
-<script src="/assets/js/logger.js"></script>
+<script src="/assets/js/logger.min.js"></script>
 <script src="/assets/js/csrf-auto-inject.min.js"></script>
 <!-- logout-handler.js je v hamburger-menu.php (nacita se VSUDE vcetne dashboardu) -->
 <script src="/assets/js/utils.min.js"></script>

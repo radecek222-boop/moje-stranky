@@ -163,7 +163,7 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
 
 </main>
 
-<script src="assets/js/logger.js" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
 <script src="assets/js/csrf-auto-inject.min.js" defer></script>
 <script src="assets/js/welcome-modal.min.js" defer></script>
 <script src="assets/js/login.min.js" defer></script>
