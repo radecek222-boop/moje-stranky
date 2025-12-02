@@ -40,7 +40,6 @@
             }
 
             this.ctx = this.canvas.getContext('2d');
-            console.log('[Heatmap Renderer] Inicializováno');
             return true;
         },
 
@@ -61,8 +60,6 @@
                 return;
             }
 
-            console.log('[Heatmap Renderer] Renderuji', data.points.length, 'click bodů');
-
             // Max intensity pro normalizaci
             const maxIntensity = Math.max(...data.points.map(p => p.count));
 
@@ -77,8 +74,6 @@
 
             // Aplikovat barevný gradient
             this.applyGradient();
-
-            console.log('[Heatmap Renderer] Click heatmap vykreslena');
         },
 
         /**
@@ -98,8 +93,6 @@
                 return;
             }
 
-            console.log('[Heatmap Renderer] Renderuji', data.buckets.length, 'scroll buckets');
-
             // Výška pro každý bucket (10% stránky = canvas_height / 10)
             const bucketHeight = this.canvas.height / 10;
 
@@ -112,8 +105,6 @@
                 this.ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a / 255})`;
                 this.ctx.fillRect(0, y, this.canvas.width, bucketHeight);
             });
-
-            console.log('[Heatmap Renderer] Scroll heatmap vykreslena');
         },
 
         /**
@@ -248,8 +239,6 @@
             container.style.position = 'relative';
             container.appendChild(legendCanvas);
             container.appendChild(labels);
-
-            console.log('[Heatmap Renderer] Legenda vykreslena');
         },
 
         /**
@@ -265,8 +254,6 @@
             link.download = filename;
             link.href = this.canvas.toDataURL('image/png');
             link.click();
-
-            console.log('[Heatmap Renderer] Export PNG:', filename);
         }
     };
 
