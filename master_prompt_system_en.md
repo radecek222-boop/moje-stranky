@@ -1863,3 +1863,15 @@ header('Content-Type: text/html; charset=utf-8');
   - `assets/js/statistiky.js`: Updated toggleDropdown() to manage aria-expanded state
 - **Result:** Filter dropdowns are now accessible with proper ARIA roles and state management.
 
+## [Step 92]: Keyboard Support for Interactive Elements
+- **Date:** 2025-12-02
+- **What:** Added keyboard support (Enter/Space) for language switcher and data-action buttons.
+- **Analysis:**
+  - Elements with role="button" and tabindex must respond to Enter and Space keys
+  - Language switcher flags need keyboard events for accessibility
+  - Data-action elements with role="button" need keyboard activation
+- **Files modified:**
+  - `assets/js/language-switcher.js`: Added keydown event listener for Enter/Space on language flags
+  - `assets/js/psa-kalkulator.js`: Added keyboard event delegation for data-action elements with role="button"
+- **Result:** Interactive elements can now be activated using keyboard, improving accessibility for users who cannot use a mouse.
+
