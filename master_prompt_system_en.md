@@ -1165,6 +1165,71 @@ Alpine.data('modalName', () => ({
 - Provides global touch targets (44px min) and button styling
 
 ### Remaining Phase 2 Tasks:
-1. **Patch.js integration** - 3 remaining files (protokol-signature-fix.js, protokol-buttons-fix.js, seznam-delete-patch.js)
+1. ~~**Patch.js integration**~~ - ✅ Completed in Step 52
 2. **HTMX migration** - Server-driven UI (major architectural change)
+
+---
+
+## [Step 52]: Patch.js Analysis and Cleanup
+- **Date:** 2025-12-02
+- **What:** Analyzed the 3 remaining patch.js files to determine which should be integrated, kept, or deleted.
+- **Analysis:**
+  | File | Lines | Decision | Reason |
+  |------|-------|----------|--------|
+  | seznam-delete-patch.js | 96 | DELETED | Redundant - delete button already exists in `showCustomerDetail()` (seznam.js:2078-2087) |
+  | protokol-signature-fix.js | 94 | KEPT | Defensive fallback - creates minimal signaturePad object for canvas compatibility |
+  | protokol-buttons-fix.js | 81 | KEPT | Defensive fallback - tests data-action handlers and adds backup if needed |
+- **Why:**
+  - `seznam-delete-patch.js` used MutationObserver to add delete button dynamically, but main seznam.js already includes it in showCustomerDetail template
+  - `protokol-signature-fix.js` and `protokol-buttons-fix.js` are small (~80-90 lines each), self-contained safety nets
+  - These defensive patches ensure functionality even if main JS fails to load properly
+- **Files touched:**
+  - `seznam.php` (MODIFIED - removed script tag, added comment)
+  - `assets/js/seznam-delete-patch.js` (DELETED)
+- **Result:** 1 redundant patch file removed. 2 defensive fallbacks retained.
+
+---
+
+## PHASE 2 PATCH.JS CONSOLIDATION COMPLETE - SUMMARY
+
+**Steps 47 and 52 have completed the patch.js consolidation phase.**
+
+### Patch Files Status:
+
+| Original File | Status | Action |
+|---------------|--------|--------|
+| protokol-fakturace-patch.js | DELETED | Merged into protokol-data-patch.js (Step 47) |
+| seznam-delete-patch.js | DELETED | Redundant - functionality in main seznam.js (Step 52) |
+| protokol-data-patch.js | KEPT | Consolidated patch file for protokol page |
+| protokol-signature-fix.js | KEPT | Defensive fallback for SignaturePad |
+| protokol-buttons-fix.js | KEPT | Defensive fallback for event handlers |
+
+### Retained Defensive Files:
+These files are intentionally kept as small (~80-90 lines) safety nets:
+- `protokol-signature-fix.js` - Creates minimal signaturePad if library fails to load
+- `protokol-buttons-fix.js` - Tests if handlers work, adds fallback if not
+
+---
+
+## PHASE 2 COMPLETE: All Consolidation Tasks Done
+
+### Summary of Phase 2 Achievements:
+
+| Area | Steps | Result |
+|------|-------|--------|
+| Alpine.js Modal Migration | 35-45 | 11 modals migrated to CSP-safe Alpine.js |
+| Minified Files | 46 | All .min.js and .min.css files regenerated |
+| CSS Mobile-Fixes | 48-51 | 4 files merged into main CSS (865 lines consolidated) |
+| Patch.js Files | 47, 52 | 2 redundant files removed, 3 defensive files retained |
+
+### Total Files Removed in Phase 2:
+- `protokol-fakturace-patch.js`
+- `seznam-delete-patch.js`
+- `protokol-mobile-fixes.css`
+- `novareklamace-mobile-fixes.css`
+- `seznam-mobile-fixes.css`
+- `admin-mobile-fixes.css`
+
+### Remaining for Phase 3:
+1. **HTMX migration** - Server-driven UI updates (major architectural change)
 
