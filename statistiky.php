@@ -651,7 +651,7 @@ body {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script src="assets/js/logger.js" defer></script>
-<script src="assets/js/statistiky.js?v=2.2" defer></script>
+<script src="assets/js/statistiky.min.js?v=2.3" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>

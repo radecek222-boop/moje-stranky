@@ -528,13 +528,13 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <!-- Translations for pricing page -->
 <script src="assets/js/wgs-translations-cenik.js"></script>
 
-<script src="assets/js/cenik.js" defer></script>
+<script src="assets/js/cenik.min.js" defer></script>
 
 <!-- PDF Export Libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 
-<script src="assets/js/cenik-calculator.js" defer></script>
+<script src="assets/js/cenik-calculator.min.js" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 <?php renderHeatmapTracker(); ?>
