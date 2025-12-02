@@ -33,7 +33,7 @@
     <div class="subtitle">Obnovte si heslo pomocí registračního klíče</div>
   </div>
 
-  <div id="notification" class="notification"></div>
+  <div id="notification" class="notification" role="alert" aria-live="assertive"></div>
 
   <!-- STEP 1: Verify -->
   <div id="step1-verify">

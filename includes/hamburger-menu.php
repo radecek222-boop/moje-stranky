@@ -24,7 +24,7 @@ if ($isAdmin) {
   <button class="hamburger-toggle" id="hamburger-toggle" aria-label="Otevřít menu" aria-expanded="false" @click.stop="prepnout">
     <span></span><span></span><span></span>
   </button>
-  <nav class="hamburger-nav" id="hamburger-nav">
+  <nav class="hamburger-nav" id="hamburger-nav" aria-label="Hlavní navigace">
     <?php
     if ($isAdmin):
     ?>

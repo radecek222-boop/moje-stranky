@@ -1749,3 +1749,18 @@ header('Content-Type: text/html; charset=utf-8');
   - `assets/css/styles.css`: Added `.sr-only` utility class for screen reader only content
 - **Result:** Modal dialogs are now properly announced by screen readers with correct roles and labeling.
 
+## [Step 84]: Navigation and Notification Accessibility
+- **Date:** 2025-12-02
+- **What:** Improved accessibility for navigation, pagination, calendar controls and notification areas.
+- **Analysis:**
+  - Navigation landmarks need aria-label for screen reader identification
+  - Pagination should be wrapped in nav element with aria-label
+  - Icon-only buttons need aria-label for screen readers
+  - Notification areas need role="alert" and aria-live for announcements
+- **Files modified:**
+  - `includes/hamburger-menu.php`: Added aria-label="Hlavní navigace" to nav element
+  - `statistiky.php`: Wrapped pagination in nav with aria-label, added aria-labels to prev/next buttons
+  - `novareklamace.php`: Added aria-labels to calendar month navigation buttons, dialog attributes to calendar overlay, aria-live to toast
+  - `registration.php`, `login.php`, `password_reset.php`: Added role="alert" aria-live="assertive" to notification divs
+- **Result:** Improved navigation, pagination and notification accessibility for screen reader users.
+
