@@ -1142,14 +1142,14 @@ function otevritPozvanku() {
                     <label style="flex: 1; display: flex; align-items: center; padding: 12px;
                                   background: #252525; border-radius: 6px; cursor: pointer;
                                   border: 2px solid transparent;" id="labelTechnik">
-                        <input type="radio" name="typPozvanky" value="technik" onchange="aktualizovatVyber()"
+                        <input type="radio" name="typPozvanky" value="technik" data-action="aktualizovatVyber"
                                style="width: 16px; height: 16px; margin-right: 10px; accent-color: #fff;">
                         <span style="color: #fff;">Technik</span>
                     </label>
                     <label style="flex: 1; display: flex; align-items: center; padding: 12px;
                                   background: #252525; border-radius: 6px; cursor: pointer;
                                   border: 2px solid transparent;" id="labelProdejce">
-                        <input type="radio" name="typPozvanky" value="prodejce" onchange="aktualizovatVyber()"
+                        <input type="radio" name="typPozvanky" value="prodejce" data-action="aktualizovatVyber"
                                style="width: 16px; height: 16px; margin-right: 10px; accent-color: #fff;">
                         <span style="color: #fff;">Prodejce</span>
                     </label>

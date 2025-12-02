@@ -130,7 +130,9 @@ $groupNames = [
                                             <input type="checkbox"
                                                    id="config-<?= $config['id'] ?>"
                                                    <?= $config['config_value'] == '1' ? 'checked' : '' ?>
-                                                   onchange="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')">
+                                                   data-action="onChangeConfig"
+                                                   data-id="<?= $config['id'] ?>"
+                                                   data-key="<?= htmlspecialchars($config['config_key']) ?>">
                                             <span class="cc-toggle-slider"></span>
                                         </label>
                                     <?php else: ?>

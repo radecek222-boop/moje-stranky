@@ -301,6 +301,7 @@ const ActionRegistry = {
  * Volá se automaticky při načtení DOM
  */
 function initEventDelegation() {
+    // Click event delegation
     document.addEventListener('click', function(event) {
         const target = event.target.closest('[data-action]');
         if (target) {
@@ -324,6 +325,15 @@ function initEventDelegation() {
             if (href) {
                 window.location.href = href;
             }
+        }
+    });
+
+    // Change event delegation (pro select, input, checkbox, radio)
+    document.addEventListener('change', function(event) {
+        const target = event.target.closest('[data-action]');
+        if (target) {
+            const action = target.dataset.action;
+            ActionRegistry.execute(action, target);
         }
     });
 }
