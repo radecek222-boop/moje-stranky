@@ -746,4 +746,47 @@
         }
     };
 
+    // ========================================
+    // FORMULÁŘ SUBMIT HANDLER
+    // ========================================
+    window.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('edit-form');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                window.ulozitPolozku(event);
+            });
+        }
+    });
+
 })();
+
+// ========================================
+// ACTION REGISTRY - Registrace akcí pro event delegation (Step 112)
+// ========================================
+if (typeof window.Utils !== 'undefined' && window.Utils.registerAction) {
+    // Admin funkce
+    window.Utils.registerAction('pridatPolozku', () => {
+        if (typeof window.pridatPolozku === 'function') {
+            window.pridatPolozku();
+        }
+    });
+
+    window.Utils.registerAction('exportovatCenikDoPDF', () => {
+        if (typeof window.exportovatCenikDoPDF === 'function') {
+            window.exportovatCenikDoPDF();
+        }
+    });
+
+    window.Utils.registerAction('zavritModal', () => {
+        if (typeof window.zavritModal === 'function') {
+            window.zavritModal();
+        }
+    });
+
+    window.Utils.registerAction('smazatPolozku', () => {
+        if (typeof window.smazatPolozku === 'function') {
+            window.smazatPolozku();
+        }
+    });
+}

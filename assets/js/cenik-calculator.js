@@ -1064,3 +1064,47 @@
     };
 
 })();
+
+// ========================================
+// ACTION REGISTRY - Registrace akcí pro event delegation (Step 112)
+// ========================================
+if (typeof window.Utils !== 'undefined' && window.Utils.registerAction) {
+    // Wizard navigace
+    window.Utils.registerAction('nextStep', () => {
+        if (typeof window.nextStep === 'function') {
+            window.nextStep();
+        }
+    });
+
+    window.Utils.registerAction('previousStep', () => {
+        if (typeof window.previousStep === 'function') {
+            window.previousStep();
+        }
+    });
+
+    // Counter ovládání (s parametrem data-counter)
+    window.Utils.registerAction('incrementCounter', (el, data) => {
+        if (data.counter && typeof window.incrementCounter === 'function') {
+            window.incrementCounter(data.counter);
+        }
+    });
+
+    window.Utils.registerAction('decrementCounter', (el, data) => {
+        if (data.counter && typeof window.decrementCounter === 'function') {
+            window.decrementCounter(data.counter);
+        }
+    });
+
+    // Export a reset
+    window.Utils.registerAction('exportovatCenikPDF', () => {
+        if (typeof window.exportovatCenikPDF === 'function') {
+            window.exportovatCenikPDF();
+        }
+    });
+
+    window.Utils.registerAction('resetovatKalkulacku', () => {
+        if (typeof window.resetovatKalkulacku === 'function') {
+            window.resetovatKalkulacku();
+        }
+    });
+}
