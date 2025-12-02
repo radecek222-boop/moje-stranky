@@ -11,12 +11,26 @@
     let currentEditItem = null;
 
     // ========================================
-    // HELPER: Markdown parsing
+    // HELPER: Escape HTML for XSS prevention
+    // ========================================
+    function escapeHtml(str) {
+        if (typeof Utils !== 'undefined' && Utils.escapeHtml) {
+            return Utils.escapeHtml(str);
+        }
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+
+    // ========================================
+    // HELPER: Markdown parsing (with HTML escape)
     // ========================================
     function parseMarkdown(text) {
         if (!text) return '';
+        // Escape HTML first to prevent XSS
+        const escaped = escapeHtml(text);
         // **text** → <strong>text</strong>
-        return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        return escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     }
 
     // ========================================
