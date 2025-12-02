@@ -929,6 +929,69 @@ document.addEventListener('alpine:init', () => {
       }
     }
   }));
+
+  /**
+   * Notif Modal - Alpine.js komponenta (Step 44)
+   * Modal pro notifikace na admin.php
+   * Migrace open/close/ESC/overlay logiky z inline JS na CSP-safe Alpine.js
+   * Business logika (loadNotifContent) zůstává v admin.php
+   */
+  Alpine.data('notifModal', () => ({
+    open: false,
+
+    init() {
+      // ESC zavře modal (bonus - původně nebylo)
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.open) {
+          this.close();
+        }
+      });
+
+      // Exponovat metody pro vanilla JS (admin.php)
+      window.notifModal = {
+        open: () => this.openModal(),
+        close: () => this.close(),
+        isOpen: () => this.open
+      };
+
+      console.log('[notifModal] Inicializován (Alpine.js CSP-safe)');
+    },
+
+    // Otevřít modal - používá classList.add('active') pro zachování původních animací
+    openModal() {
+      this.open = true;
+      const overlay = document.getElementById('notifModalOverlay');
+      const modal = overlay?.querySelector('.cc-modal');
+      if (overlay) {
+        overlay.classList.add('active');
+      }
+      if (modal) {
+        modal.classList.add('active');
+      }
+      document.body.style.overflow = 'hidden';
+    },
+
+    // Zavřít modal
+    close() {
+      this.open = false;
+      const overlay = document.getElementById('notifModalOverlay');
+      const modal = overlay?.querySelector('.cc-modal');
+      if (overlay) {
+        overlay.classList.remove('active');
+      }
+      if (modal) {
+        modal.classList.remove('active');
+      }
+      document.body.style.overflow = 'auto';
+    },
+
+    // Klik na overlay pozadí
+    overlayClick(event) {
+      if (event.target.id === 'notifModalOverlay') {
+        this.close();
+      }
+    }
+  }));
 });
 </script>
 
