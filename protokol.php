@@ -96,15 +96,22 @@ if (is_string($requestedId)) {
 if ($lookupValue !== null) {
     try {
         $pdo = getDbConnection();
+
+        // DEBUG LOG
+        error_log("PROTOKOL DEBUG: lookupValue = '$lookupValue'");
+
         $stmt = $pdo->prepare(
             "SELECT r.*, u.name as created_by_name
              FROM wgs_reklamace r
              LEFT JOIN wgs_users u ON r.created_by = u.id
-             WHERE r.reklamace_id = :value OR r.cislo = :value OR r.id = :value
+             WHERE r.reklamace_id = :value OR r.cislo = :value OR r.id = :value2
              LIMIT 1"
         );
-        $stmt->execute([':value' => $lookupValue]);
+        $stmt->execute([':value' => $lookupValue, ':value2' => $lookupValue]);
         $record = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // DEBUG LOG
+        error_log("PROTOKOL DEBUG: record found = " . ($record ? 'YES (id=' . $record['id'] . ')' : 'NO'));
 
         if ($record) {
             $address = wgs_format_address($record);
@@ -204,21 +211,19 @@ if ($initialBootstrapData) {
 <script id="initialReklamaceData" type="application/json"><?= $initialBootstrapJson; ?></script>
 <?php else: ?>
 <!-- DEBUG: initialReklamaceData CHYBÍ!
-     Důvod: <?php
-        if (empty($_GET['id'])) {
-            echo 'URL neobsahuje parametr ?id=...';
-        } elseif ($lookupValue === null) {
-            echo 'lookupValue je null';
-        } elseif ($initialBootstrapData === null) {
-            echo 'Záznam nenalezen v databázi pro ID: ' . htmlspecialchars($_GET['id'] ?? '');
-        } else {
-            echo 'Neznámý důvod';
-        }
-     ?>
+     GET[id]: <?= htmlspecialchars($_GET['id'] ?? '(prázdné)') ?>
+     lookupValue: <?= htmlspecialchars($lookupValue ?? '(null)') ?>
+     initialBootstrapData: <?= $initialBootstrapData ? 'EXISTUJE' : 'NULL' ?>
 -->
 <script>
-console.warn('[PROTOKOL] Data nenačtena! URL parametr id: "<?= htmlspecialchars($_GET['id'] ?? '') ?>"');
-console.warn('[PROTOKOL] Pro načtení dat použijte URL: protokol.php?id=CISLO_REKLAMACE');
+console.error('[PROTOKOL] DATA NENAČTENA!');
+console.log('[PROTOKOL] GET id: "<?= htmlspecialchars($_GET['id'] ?? '') ?>"');
+console.log('[PROTOKOL] lookupValue: "<?= htmlspecialchars($lookupValue ?? '') ?>"');
+console.log('[PROTOKOL] Záznam nalezen: <?= $initialBootstrapData ? 'ANO' : 'NE' ?>');
+<?php if (!empty($_GET['id']) && $initialBootstrapData === null): ?>
+console.error('[PROTOKOL] Záznam "<?= htmlspecialchars($_GET['id']) ?>" NENALEZEN v databázi!');
+console.log('[PROTOKOL] Zkontrolujte zda existuje v tabulce wgs_reklamace');
+<?php endif; ?>
 </script>
 <?php endif; ?>
 
