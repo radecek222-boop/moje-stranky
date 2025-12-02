@@ -72,7 +72,7 @@
       </div>
 
       <button type="submit" class="btn btn-success" style="width: 100%;">Nastavit nové heslo</button>
-      <button type="button" class="btn" style="width: 100%; margin-top: 0.5rem;" onclick="goBack()">Zpět</button>
+      <button type="button" class="btn" style="width: 100%; margin-top: 0.5rem;" data-action="goBack">Zpět</button>
     </form>
   </div>
 

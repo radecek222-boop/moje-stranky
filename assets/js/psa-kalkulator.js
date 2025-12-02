@@ -406,8 +406,8 @@ function renderTable() {
                  onchange="updateEmployee(${index}, 'bank', this.value)">
         </td>
         <td class="text-center">
-          <button class="btn btn-sm" style="background: var(--c-info); color: white; margin-right: 0.25rem;" onclick="generateSingleEmployeeQR(${index})" title="Generovat QR platbu">QR</button>
-          <button class="btn btn-danger btn-sm" onclick="removeEmployee(${index})">×</button>
+          <button class="btn btn-sm" style="background: var(--c-info); color: white; margin-right: 0.25rem;" data-action="generateSingleEmployeeQR" data-index="${index}" title="Generovat QR platbu">QR</button>
+          <button class="btn btn-danger btn-sm" data-action="removeEmployee" data-index="${index}">×</button>
         </td>
       </tr>
     `;
@@ -934,7 +934,7 @@ function generatePaymentQR() {
             <strong>Poplatky: OUR</strong> (všechny poplatky hradí odesílatel)
           </div>
         </div>
-        <button class="btn btn-sm" onclick="copySWIFTDetails('${payment.name}', '${payment.swiftData.iban}', '${payment.swiftData.swift}', ${payment.amount})">
+        <button class="btn btn-sm" data-action="copySWIFTDetails" data-name="${payment.name}" data-iban="${payment.swiftData.iban}" data-swift="${payment.swiftData.swift}" data-amount="${payment.amount}">
           Kopírovat údaje
         </button>
       `;
@@ -967,7 +967,7 @@ function generatePaymentQR() {
         ${payment.isSpecial ? '<div style="font-size: 0.75rem; color: var(--c-success);">Včetně prémií</div>' : ''}
         <div class="qr-account">${payment.account}/${payment.bank}</div>
         <div class="qr-code-wrapper" id="qr-${index}"></div>
-        <button class="btn btn-sm" style="margin-top: 1rem;" onclick="downloadQR('qr-${index}', '${payment.name}')">
+        <button class="btn btn-sm" style="margin-top: 1rem;" data-action="downloadQR" data-qrid="qr-${index}" data-name="${payment.name}">
           Stáhnout QR
         </button>
       `;
@@ -1125,7 +1125,7 @@ function generateSingleEmployeeQR(index) {
           <strong>Poplatky: OUR</strong> (všechny poplatky hradí odesílatel)
         </div>
       </div>
-      <button class="btn btn-sm" onclick="copySWIFTDetails('${emp.name}', '${emp.swiftData.iban}', '${emp.swiftData.swift}', ${amount})">
+      <button class="btn btn-sm" data-action="copySWIFTDetails" data-name="${emp.name}" data-iban="${emp.swiftData.iban}" data-swift="${emp.swiftData.swift}" data-amount="${amount}">
         Kopírovat údaje
       </button>
     `;
@@ -1165,7 +1165,7 @@ function generateSingleEmployeeQR(index) {
     ${isLenka ? '<div style="font-size: 0.75rem; color: var(--c-info);">Paušální mzda</div>' : ''}
     <div class="qr-account">${emp.account}/${formatBankCode(emp.bank)}</div>
     <div class="qr-code-wrapper" id="qr-single"></div>
-    <button class="btn btn-sm" style="margin-top: 1rem;" onclick="downloadQR('qr-single', '${emp.name}')">
+    <button class="btn btn-sm" style="margin-top: 1rem;" data-action="downloadQR" data-qrid="qr-single" data-name="${emp.name}">
       Stáhnout QR
     </button>
   `;
@@ -1228,6 +1228,41 @@ document.addEventListener('DOMContentLoaded', () => {
     if (action === 'reload') {
       location.reload();
       return;
+    }
+
+    // Step 115 - Podpora parametrů pro onclick migraci
+    switch (action) {
+      case 'generateSingleEmployeeQR':
+        const gIndex = target.getAttribute('data-index');
+        if (gIndex !== null && typeof generateSingleEmployeeQR === 'function') {
+          generateSingleEmployeeQR(parseInt(gIndex));
+        }
+        return;
+
+      case 'removeEmployee':
+        const rIndex = target.getAttribute('data-index');
+        if (rIndex !== null && typeof removeEmployee === 'function') {
+          removeEmployee(parseInt(rIndex));
+        }
+        return;
+
+      case 'copySWIFTDetails':
+        const name = target.getAttribute('data-name');
+        const iban = target.getAttribute('data-iban');
+        const swift = target.getAttribute('data-swift');
+        const amount = parseFloat(target.getAttribute('data-amount'));
+        if (name && iban && swift && typeof copySWIFTDetails === 'function') {
+          copySWIFTDetails(name, iban, swift, amount);
+        }
+        return;
+
+      case 'downloadQR':
+        const qrid = target.getAttribute('data-qrid');
+        const dName = target.getAttribute('data-name');
+        if (qrid && dName && typeof downloadQR === 'function') {
+          downloadQR(qrid, dName);
+        }
+        return;
     }
 
     // Try to call function if it exists

@@ -583,9 +583,9 @@ body {
         <input type="checkbox" id="zobrazitOdmenu" checked style="cursor: pointer;">
         <label for="zobrazitOdmenu" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit odměnu technika v PDF</label>
       </div>
-      <button class="btn" onclick="resetovitFiltry()">Reset</button>
-      <button class="btn btn-primary" onclick="aplikovatFiltry()">Aplikovat filtry</button>
-      <button class="btn btn-export" onclick="exportovatPDF()">Exportovat PDF</button>
+      <button class="btn" data-action="resetovitFiltry">Reset</button>
+      <button class="btn btn-primary" data-action="aplikovatFiltry">Aplikovat filtry</button>
+      <button class="btn btn-export" data-action="exportovatPDF">Exportovat PDF</button>
     </div>
   </div>
 
@@ -602,9 +602,9 @@ body {
 
     <!-- Stránkování -->
     <nav class="pagination" id="pagination" style="display: none;" aria-label="Stránkování">
-      <button id="prev-page" onclick="predchoziStranka()" aria-label="Předchozí strana">← Předchozí</button>
+      <button id="prev-page" data-action="predchoziStranka" aria-label="Předchozí strana">← Předchozí</button>
       <span class="page-info" id="page-info" aria-live="polite">Strana 1 z 1</span>
-      <button id="next-page" onclick="dalsiStranka()" aria-label="Další strana">Další →</button>
+      <button id="next-page" data-action="dalsiStranka" aria-label="Další strana">Další →</button>
     </nav>
   </div>
 

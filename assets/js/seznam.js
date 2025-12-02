@@ -521,7 +521,7 @@ async function renderOrders(items = null) {
     const statusBgClass = `status-bg-${status.class}`;
 
     return `
-      <div class="order-box ${searchMatchClass} ${statusBgClass}" onclick='showDetail("${rec.id}")'>
+      <div class="order-box ${searchMatchClass} ${statusBgClass}" data-action="showDetailById" data-id="${rec.id}">
         <div class="order-header">
           <div class="order-number">${highlightedOrderId}</div>
           <div style="display: flex; gap: 0.4rem; align-items: center;">
@@ -1093,7 +1093,7 @@ function showCalendar(id) {
   const content = `
     <div class="modal-header">
       <div id="selectedDateDisplay" style="color: var(--c-grey); font-size: 0.9rem; font-weight: 600; text-align: center;">Zatím nevybráno</div>
-      <button class="modal-close" onclick="ModalManager.close()">✕</button>
+      <button class="modal-close" data-action="closeModal">✕</button>
     </div>
     
     <div class="modal-body" style="max-height: 80vh; overflow-y: auto; padding: 1rem;">
@@ -1106,8 +1106,8 @@ function showCalendar(id) {
     </div>
     
     ${ModalManager.createActions([
-      '<button class="btn btn-secondary" onclick="showDetail(CURRENT_RECORD)">Zpět</button>',
-      '<button class="btn btn-success" onclick="saveSelectedDate()">Uložit termín</button>'
+      '<button class="btn btn-secondary" data-action="showDetail">Zpět</button>',
+      '<button class="btn btn-success" data-action="saveSelectedDate">Uložit termín</button>'
     ])}
   `;
   
@@ -1161,9 +1161,9 @@ function renderCalendar(m, y) {
   const navHeader = document.createElement('div');
   navHeader.className = 'calendar-controls';
   navHeader.innerHTML = `
-    <button class="calendar-nav-btn" onclick="previousMonth()">◀ Předchozí</button>
+    <button class="calendar-nav-btn" data-action="previousMonth">◀ Předchozí</button>
     <span class="calendar-month-title">${monthNames[m]} ${y}</span>
-    <button class="calendar-nav-btn" onclick="event.stopPropagation(); nextMonth(event)">Další ▶</button>
+    <button class="calendar-nav-btn" data-action="nextMonth">Další ▶</button>
   `;
   grid.appendChild(navHeader);
   
@@ -1480,7 +1480,7 @@ async function showDayBookingsWithDistances(date) {
     bookings.forEach(b => {
       const customerName = Utils.getCustomerName(b);
       html += `
-        <div class="booking-item" onclick='showBookingDetail("${b.id}")'>
+        <div class="booking-item" data-action="showBookingDetail" data-id="${b.id}">
           <strong>${b.cas_navstevy || '—'}</strong> — ${customerName}
           <span style="opacity:.7">(${Utils.getProduct(b)})</span>
         </div>`;
@@ -1534,7 +1534,7 @@ function showBookingDetail(bookingOrId) {
     </div>
     
     ${ModalManager.createActions([
-      '<button class="btn btn-secondary" onclick="showCalendar(\'' + CURRENT_RECORD.id + '\')">Zpět na kalendář</button>'
+      '<button class="btn btn-secondary" data-action="showCalendarBack">Zpět na kalendář</button>'
     ])}
   `;
   
@@ -1772,15 +1772,15 @@ function showContactMenu(id) {
         <h3 class="section-title">Rychlé akce</h3>
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
           ${phone ? `<a href="tel:${phone}" class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: white; box-sizing: border-box;">Zavolat</a>` : ''}
-          <button class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; background: #1a1a1a; color: white; box-sizing: border-box;" onclick="closeDetail(); setTimeout(() => showCalendar('${id}'), 100)">Termín návštěvy</button>
-          ${phone ? `<button class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; background: #444; color: white; box-sizing: border-box;" onclick="sendContactAttemptEmail('${id}', '${phone}')">Odeslat SMS</button>` : ''}
+          <button class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; background: #1a1a1a; color: white; box-sizing: border-box;" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
+          ${phone ? `<button class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; background: #444; color: white; box-sizing: border-box;" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
           ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; justify-content: center; background: #444; color: white; box-sizing: border-box;" target="_blank">Navigovat (Waze)</a>` : ''}
         </div>
       </div>
     </div>
     
     ${ModalManager.createActions([
-      '<button class="btn btn-secondary" onclick="showDetail(CURRENT_RECORD)">Zpět</button>'
+      '<button class="btn btn-secondary" data-action="showDetail">Zpět</button>'
     ])}
   `;
   
@@ -2092,7 +2092,7 @@ function zobrazPDFModal(pdfUrl, claimId) {
     fallback.style.cssText = 'text-align: center; padding: 2rem;';
     fallback.innerHTML = `
       <p style="color: #666; margin-bottom: 1rem;">Náhled PDF není k dispozici na tomto zařízení.</p>
-      <button onclick="window.open('${pdfUrl}', '_blank')"
+      <button data-action="openPdfNewWindow" data-url="${pdfUrl}"
               style="padding: 12px 24px; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600;">
         Otevřít PDF v novém okně
       </button>
@@ -3220,7 +3220,7 @@ async function deleteReklamace(reklamaceId) {
       <div style="background:white;padding:30px;border-radius:8px;max-width:400px;width:90%;text-align:center;">
         <h2 style="margin:0 0 20px 0;color:#666;">Nesprávné číslo!</h2>
         <p style="margin:0 0 25px 0;color:#555;">Zadali jste nesprávné číslo reklamace.<br>Mazání bylo zrušeno.</p>
-        <button onclick="this.closest('div').parentElement.remove()" style="padding:12px 24px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;">
+        <button data-action="closeErrorModal" style="padding:12px 24px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;">
           OK
         </button>
       </div>
@@ -4551,6 +4551,78 @@ document.addEventListener('click', (e) => {
       if (id && typeof zobrazVideotekaArchiv === 'function') {
         e.stopPropagation();
         zobrazVideotekaArchiv(id);
+      }
+      break;
+
+    // Step 114 - Nové akce z migrace onclick
+    case 'showDetailById':
+      if (id && typeof showDetail === 'function') {
+        showDetail(id);
+      }
+      break;
+
+    case 'closeModal':
+      if (typeof ModalManager !== 'undefined' && ModalManager.close) {
+        ModalManager.close();
+      }
+      break;
+
+    case 'saveSelectedDate':
+      if (typeof saveSelectedDate === 'function') {
+        saveSelectedDate();
+      }
+      break;
+
+    case 'previousMonth':
+      if (typeof previousMonth === 'function') {
+        e.stopPropagation();
+        previousMonth();
+      }
+      break;
+
+    case 'nextMonth':
+      if (typeof nextMonth === 'function') {
+        e.stopPropagation();
+        nextMonth(e);
+      }
+      break;
+
+    case 'showBookingDetail':
+      if (id && typeof showBookingDetail === 'function') {
+        showBookingDetail(id);
+      }
+      break;
+
+    case 'showCalendarBack':
+      if (CURRENT_RECORD && typeof showCalendar === 'function') {
+        showCalendar(CURRENT_RECORD.id);
+      }
+      break;
+
+    case 'openCalendarFromDetail':
+      if (id) {
+        closeDetail();
+        setTimeout(() => showCalendar(id), 100);
+      }
+      break;
+
+    case 'sendContactAttemptEmail':
+      const phone = button.getAttribute('data-phone');
+      if (id && phone && typeof sendContactAttemptEmail === 'function') {
+        sendContactAttemptEmail(id, phone);
+      }
+      break;
+
+    case 'openPdfNewWindow':
+      if (url) {
+        window.open(url, '_blank');
+      }
+      break;
+
+    case 'closeErrorModal':
+      const errorModalEl = button.closest('div[style*="position:fixed"]');
+      if (errorModalEl) {
+        errorModalEl.remove();
       }
       break;
 

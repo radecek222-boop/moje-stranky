@@ -105,7 +105,7 @@ function displayJSError(error) {
     `;
     header.innerHTML = `
         <span>${error.type}</span>
-        <button onclick="document.getElementById('js-error-container').remove()"
+        <button data-action="closeJsErrorContainer"
                 style="background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; line-height: 1;">
             ×
         </button>
@@ -160,7 +160,7 @@ function displayJSError(error) {
 
     bodyHTML += `
         <div style="text-align: center; margin-top: 15px;">
-            <button onclick="copyJSError()"
+            <button data-action="copyJSError"
                     style="background: #28a745; color: white; border: none; padding: 8px 15px;
                            border-radius: 4px; cursor: pointer; font-family: 'Courier New', monospace; font-size: 12px;">
                 Kopírovat chybový report
@@ -408,3 +408,19 @@ function formatBacktrace(backtrace) {
 }
 
 console.log('WGS Error Handler loaded - All errors will be caught and displayed');
+
+// ============================================
+// ACTION REGISTRY - Step 115
+// ============================================
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('closeJsErrorContainer', () => {
+        const container = document.getElementById('js-error-container');
+        if (container) container.remove();
+    });
+
+    Utils.registerAction('copyJSError', () => {
+        if (typeof copyJSError === 'function') {
+            copyJSError();
+        }
+    });
+}

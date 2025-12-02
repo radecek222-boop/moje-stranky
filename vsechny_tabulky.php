@@ -294,9 +294,9 @@ try {
             <h1>KOMPLETNÍ PŘEHLED VŠECH SQL TABULEK</h1>
             <p style="margin-top: 0.5rem; opacity: 0.9; font-size: 0.95rem;">Databáze: <?php echo htmlspecialchars($_ENV['DB_NAME'] ?? 'wgs-servicecz01'); ?> | Live Production Data</p>
             <div style="margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-                <button onclick="exportAllDDL()" style="padding: 0.75rem 1.5rem; background: #fff; color: #000; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">Stáhnout všechny DDL</button>
-                <button onclick="window.print()" style="padding: 0.75rem 1.5rem; background: transparent; color: #fff; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">Tisk</button>
-                <button onclick="window.location.reload()" style="padding: 0.75rem 1.5rem; background: transparent; color: #fff; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">Obnovit aktuální SQL</button>
+                <button data-action="exportAllDDL" style="padding: 0.75rem 1.5rem; background: #fff; color: #000; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">Stáhnout všechny DDL</button>
+                <button data-action="printPage" style="padding: 0.75rem 1.5rem; background: transparent; color: #fff; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">Tisk</button>
+                <button data-action="reloadPage" style="padding: 0.75rem 1.5rem; background: transparent; color: #fff; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">Obnovit aktuální SQL</button>
             </div>
         </div>
 

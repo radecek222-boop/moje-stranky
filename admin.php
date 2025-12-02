@@ -800,8 +800,8 @@ function loadNotifContent(type, body) {
                         </div>
                     </div>
                     <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-                        <button class="btn btn-sm" id="testSmtpBtn" onclick="testSmtpConnection()" style="font-size: 0.7rem;">Test připojení</button>
-                        <button class="btn btn-sm btn-success" id="saveSmtpBtn" onclick="saveSmtpConfig()" style="font-size: 0.7rem;">Uložit</button>
+                        <button class="btn btn-sm" id="testSmtpBtn" data-action="testSmtpConnection" style="font-size: 0.7rem;">Test připojení</button>
+                        <button class="btn btn-sm btn-success" id="saveSmtpBtn" data-action="saveSmtpConfig" style="font-size: 0.7rem;">Uložit</button>
                     </div>
                 </div>
             `,
