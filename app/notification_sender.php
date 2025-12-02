@@ -162,6 +162,20 @@ try {
     }
 
     // ============================================
+    // AUTOMATICKÉ PŘIDÁNÍ PRODEJCE DO CC
+    // ============================================
+    // Pokud posíláme email zákazníkovi, přidáme prodejce (vytvořil zakázku) do kopie
+    if ($notification['recipient_type'] === 'customer') {
+        $sellerEmail = $notificationData['seller_email'] ?? null;
+        if ($sellerEmail && filter_var($sellerEmail, FILTER_VALIDATE_EMAIL)) {
+            // Přidat pouze pokud už tam není
+            if (!in_array($sellerEmail, $ccEmails)) {
+                $ccEmails[] = $sellerEmail;
+            }
+        }
+    }
+
+    // ============================================
     // NÁHRADA PROMĚNNÝCH V ŠABLONĚ
     // ============================================
     $subject = $notification['subject'] ?? 'Notifikace z WGS';
