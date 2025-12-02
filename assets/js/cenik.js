@@ -345,7 +345,7 @@
     window.smazatPolozku = async function() {
         if (!currentEditItem) return;
 
-        if (!confirm(window.t('pricingGrid.alert.deleteConfirm'))) {
+        if (!await wgsConfirm(window.t('pricingGrid.alert.deleteConfirm'), window.t('pricingGrid.alert.delete') || 'Smazat', window.t('pricingGrid.alert.cancel') || 'Zrušit')) {
             return;
         }
 

@@ -348,3 +348,92 @@ if (document.readyState === 'loading') {
 // Export pro použití
 window.Utils.ActionRegistry = ActionRegistry;
 window.Utils.registerAction = ActionRegistry.register.bind(ActionRegistry);
+
+/**
+ * Vlastní potvrzovací dialog nahrazující window.confirm()
+ * Vrací Promise<boolean> - true = potvrzeno, false = zrušeno
+ *
+ * Použití:
+ *   const confirmed = await wgsConfirm('Opravdu smazat?');
+ *   if (confirmed) { ... }
+ *
+ * S vlastními texty tlačítek:
+ *   const confirmed = await wgsConfirm('Smazat položku?', 'Smazat', 'Zrušit');
+ *
+ * @param {string} message - Zpráva k zobrazení
+ * @param {string} [okText='OK'] - Text potvrzovacího tlačítka
+ * @param {string} [cancelText='Zrušit'] - Text zrušovacího tlačítka
+ * @returns {Promise<boolean>} - true pokud uživatel potvrdil
+ */
+function wgsConfirm(message, okText = 'OK', cancelText = 'Zrušit') {
+    return new Promise((resolve) => {
+        // Vytvořit overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'wgs-confirm-overlay';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-labelledby', 'wgs-confirm-message');
+
+        // Vytvořit dialog box
+        const dialog = document.createElement('div');
+        dialog.className = 'wgs-confirm-dialog';
+
+        // Zpráva
+        const messageEl = document.createElement('p');
+        messageEl.id = 'wgs-confirm-message';
+        messageEl.className = 'wgs-confirm-message';
+        messageEl.textContent = message;
+
+        // Tlačítka
+        const buttons = document.createElement('div');
+        buttons.className = 'wgs-confirm-buttons';
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.className = 'wgs-confirm-btn wgs-confirm-cancel';
+        cancelBtn.textContent = cancelText;
+
+        const okBtn = document.createElement('button');
+        okBtn.type = 'button';
+        okBtn.className = 'wgs-confirm-btn wgs-confirm-ok';
+        okBtn.textContent = okText;
+
+        buttons.appendChild(cancelBtn);
+        buttons.appendChild(okBtn);
+        dialog.appendChild(messageEl);
+        dialog.appendChild(buttons);
+        overlay.appendChild(dialog);
+
+        // Cleanup funkce
+        function cleanup(result) {
+            document.removeEventListener('keydown', handleKeydown);
+            overlay.remove();
+            resolve(result);
+        }
+
+        // Keyboard handler
+        function handleKeydown(e) {
+            if (e.key === 'Escape') {
+                cleanup(false);
+            } else if (e.key === 'Enter') {
+                cleanup(true);
+            }
+        }
+
+        // Event listenery
+        okBtn.addEventListener('click', () => cleanup(true));
+        cancelBtn.addEventListener('click', () => cleanup(false));
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) cleanup(false);
+        });
+        document.addEventListener('keydown', handleKeydown);
+
+        // Přidat do DOM a fokus na OK
+        document.body.appendChild(overlay);
+        okBtn.focus();
+    });
+}
+
+// Export wgsConfirm
+window.wgsConfirm = wgsConfirm;
+window.Utils.wgsConfirm = wgsConfirm;
