@@ -304,7 +304,7 @@ $csrfToken = generateCSRFToken();
             <div id="page-mockup">
                 <div>Vyberte stránku a klikněte na "Načíst Heatmap"</div>
             </div>
-            <iframe id="page-iframe" style="display: none;"></iframe>
+            <iframe id="page-iframe" title="Náhled stránky pro heatmapu" style="display: none;"></iframe>
             <canvas id="heatmap-canvas"></canvas>
         </div>
 

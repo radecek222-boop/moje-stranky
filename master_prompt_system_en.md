@@ -1627,3 +1627,15 @@ header('Content-Type: text/html; charset=utf-8');
   - `cenik.php`: Added role="button", tabindex="0", aria-label to modal close span
 - **Result:** Improved screen reader experience by hiding decorative icons and making custom interactive elements accessible.
 
+## [Step 76]: Iframe Title Attributes for Accessibility
+- **Date:** 2025-12-02
+- **What:** Added `title` attributes to all iframe elements for screen reader accessibility.
+- **Analysis:**
+  - Iframes without titles are confusing for screen reader users
+  - Found 4 iframes missing title attributes
+- **Files modified:**
+  - `analytics-heatmap.php`: Added title="Náhled stránky pro heatmapu"
+  - `protokol.php`: Added title="Náhled PDF protokolu"
+  - `includes/admin_testing_simulator.php`: Added titles to seznam and detail preview iframes
+- **Result:** All iframes now have descriptive titles for assistive technologies.
+

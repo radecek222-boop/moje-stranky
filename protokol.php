@@ -399,7 +399,7 @@ if ($initialBootstrapData) {
       </div>
     </div>
     <div class="pdf-preview-body">
-      <iframe id="pdfPreviewFrame" class="pdf-preview-frame"></iframe>
+      <iframe id="pdfPreviewFrame" class="pdf-preview-frame" title="Náhled PDF protokolu"></iframe>
     </div>
   </div>
 </div>
