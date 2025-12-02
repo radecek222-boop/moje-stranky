@@ -1567,10 +1567,11 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 
 </div>
 
-<!-- MODAL DETAIL -->
-<div class="modal-overlay" id="detailOverlay">
+<!-- MODAL DETAIL - Alpine.js (Step 43) -->
+<div class="modal-overlay" id="detailOverlay"
+     x-data="detailModal" x-init="init" @click="overlayClick">
   <div class="modal-content">
-    <button class="modal-close" data-action="closeDetail">×</button>
+    <button class="modal-close" data-action="closeDetail" @click="close">×</button>
     <div id="modalContent"></div>
   </div>
 </div>
