@@ -1127,3 +1127,44 @@ Alpine.data('modalName', () => ({
   - `assets/css/seznam-mobile-fixes.css` (DELETED)
 - **Result:** Three mobile-fixes files consolidated. Remaining: admin-mobile-fixes.css only.
 
+## [Step 51]: Merge admin-mobile-fixes.css into admin.css
+- **What:** Merged `admin-mobile-fixes.css` (240 lines) into the main `admin.css` and removed the redundant file.
+- **How:**
+  - Added all mobile-specific styles to the end of admin.css (dashboard buttons, toggle switches, modals, iOS zoom prevention, tabs, priority badges)
+  - Replaced link to mobile-fixes with button-fixes-global.css in admin.php
+  - Deleted admin-mobile-fixes.css
+  - Regenerated admin.min.css using csso
+- **Why:**
+  - Completes Phase 2 CSS consolidation
+  - All 4 mobile-fixes files now merged into their main stylesheets
+  - Reduces HTTP requests and simplifies maintenance
+- **Files touched:**
+  - `assets/css/admin.css` (MODIFIED - added ~200 lines of mobile fixes)
+  - `assets/css/admin.min.css` (REGENERATED)
+  - `admin.php` (MODIFIED - replaced link to mobile-fixes with button-fixes-global)
+  - `assets/css/admin-mobile-fixes.css` (DELETED)
+- **Result:** ALL mobile-fixes files consolidated. Phase 2 CSS consolidation COMPLETE.
+
+---
+
+## PHASE 2 CSS CONSOLIDATION COMPLETE - SUMMARY
+
+**Steps 48-51 have completed the CSS mobile-fixes consolidation phase.**
+
+### Files Merged and Deleted:
+
+| Original File | Merged Into | Lines | Status |
+|---------------|-------------|-------|--------|
+| protokol-mobile-fixes.css | protokol.css | ~100 | DELETED |
+| novareklamace-mobile-fixes.css | novareklamace.css | ~90 | DELETED |
+| seznam-mobile-fixes.css | seznam.css | ~340 | DELETED |
+| admin-mobile-fixes.css | admin.css | ~200 | DELETED |
+
+### button-fixes-global.css:
+- Now loaded directly via `<link>` in each PHP file instead of via @import
+- Provides global touch targets (44px min) and button styling
+
+### Remaining Phase 2 Tasks:
+1. **Patch.js integration** - 3 remaining files (protokol-signature-fix.js, protokol-buttons-fix.js, seznam-delete-patch.js)
+2. **HTMX migration** - Server-driven UI (major architectural change)
+
