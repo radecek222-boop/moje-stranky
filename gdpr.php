@@ -372,7 +372,7 @@
   </div>
 </footer>
 
-<script src="assets/js/logger.js" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>

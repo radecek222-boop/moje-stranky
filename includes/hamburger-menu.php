@@ -1065,7 +1065,7 @@ document.addEventListener('alpine:init', () => {
 </script>
 
 <!-- Centralizovaná utilita pro zamykání scrollu -->
-<script src="/assets/js/scroll-lock.js"></script>
+<script src="/assets/js/scroll-lock.min.js"></script>
 
 <!-- Step 41: Hamburger Menu migrace na Alpine.js - vanilla JS odstraněn -->
 
@@ -1195,4 +1195,4 @@ document.addEventListener('alpine:init', () => {
 <!-- Language Switcher - centralizovaný jazykový přepínač -->
 <script src="/assets/js/language-switcher.min.js" defer></script>
 <!-- KRITICKA OPRAVA: logout-handler.js MUSI byt zde, protoze hamburger-menu se nacita VSUDE! -->
-<script src="/assets/js/logout-handler.js"></script>
+<script src="/assets/js/logout-handler.min.js"></script>

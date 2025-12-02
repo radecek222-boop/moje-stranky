@@ -393,7 +393,7 @@ function getPriorityBadge($priority) {
     </div>
 </div>
 
-<script src="/assets/js/csrf-auto-inject.js"></script>
+<script src="/assets/js/csrf-auto-inject.min.js"></script>
 <script>
 // Debug mode - set to false in production
 if (typeof DEBUG_MODE === 'undefined') { var DEBUG_MODE = false; }

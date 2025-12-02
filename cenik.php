@@ -522,7 +522,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <?php endif; ?>
 
 <!-- External JavaScript -->
-<script src="assets/js/logger.js" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
 <script src="assets/js/wgs-map.min.js" defer></script>
 
 <!-- Translations for pricing page -->

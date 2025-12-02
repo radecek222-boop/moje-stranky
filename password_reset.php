@@ -83,9 +83,9 @@
 </div>
 </main>
 
-<script src="assets/js/logger.js" defer></script>
-<script src="assets/js/csrf-auto-inject.js" defer></script>
-<script src="assets/js/password-reset.js" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
+<script src="assets/js/csrf-auto-inject.min.js" defer></script>
+<script src="assets/js/password-reset.min.js" defer></script>
 
 </body>
 </html>
