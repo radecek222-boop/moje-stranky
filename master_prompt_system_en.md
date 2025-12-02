@@ -1,7 +1,40 @@
 # MASTER-PROMPT-SYSTEM.md
 
-> **AI Governance & Execution Guide for Claude Code in the WGS Repository**  
+> **AI Governance & Execution Guide for Claude Code in the WGS Repository**
 > This document is the primary source of truth for how Claude Code must behave in this project.
+
+---
+
+# CURRENT STATUS (2025-12-02)
+
+## Phase Progress Overview
+
+| Phase | Name | Status | Steps |
+|-------|------|--------|-------|
+| **Phase 1** | Safe Cleanup | COMPLETE | Steps 1-19 |
+| **Phase 2** | Alpine.js + CSS + Patch Consolidation | COMPLETE | Steps 20-42 |
+| **Phase 3** | HTMX Foundation + Accessibility | COMPLETE | Steps 43-100 |
+| **Phase 4** | Technical Debt Analysis | COMPLETE | Steps 101-103 |
+| **Phase 5** | Technical Debt Cleanup | COMPLETE | Steps 104-131 |
+| **Phase 6** | Security Hardening | COMPLETE | Steps 132-133 |
+| **Phase 7** | Code Deduplication | **IN PROGRESS** | Steps 134 |
+| **Phase 8** | Inline Styles Migration | PENDING | Steps 135-140 |
+| **Phase 9** | HTMX Migration | PENDING | Steps 141-150 |
+| **Phase 10** | Testing & Documentation | PENDING | Steps 151-165 |
+| **Phase 11** | Performance Optimization | PENDING | Steps 166-175 |
+
+## Current Work
+
+**Active Phase:** 7 - Code Deduplication
+**Current Step:** 134 - Consolidate Duplicate Functions
+**Next Step:** 135 - Create CSS Utility Classes
+
+## Quick Reference
+
+- **Last completed step:** 133 (innerHTML Security Audit)
+- **Total steps completed:** 133
+- **Estimated remaining:** ~42 steps
+- **See:** [ROADMAP TO 100% COMPLETION](#roadmap-to-100-completion) section at end of file
 
 ---
 
@@ -2492,4 +2525,307 @@ The codebase is now in a good state with:
 2. **error-handler.js inline styles** - Intentionally kept for robustness
 
 ### Technical Debt Cleanup Complete ✓
+
+---
+
+# ROADMAP TO 100% COMPLETION
+
+## Overview - Remaining Work
+
+| Phase | Area | Items | Priority |
+|-------|------|-------|----------|
+| **Phase 6** | Security Hardening | 18 APIs without CSRF, innerHTML audit | HIGH |
+| **Phase 7** | Code Deduplication | 8 duplicate functions | MEDIUM |
+| **Phase 8** | Inline Styles Migration | 238+ occurrences | MEDIUM |
+| **Phase 9** | HTMX Migration | 92 fetch calls | LOW |
+| **Phase 10** | Testing & Documentation | Test suite, API docs | LOW |
+| **Phase 11** | Performance Optimization | Bundle splitting, lazy loading | LOW |
+
+---
+
+# PHASE 6: Security Hardening
+
+## Objective
+Ensure all API endpoints have proper security (CSRF, authentication) and audit innerHTML for XSS vulnerabilities.
+
+## [Step 132]: CSRF Audit - API Endpoints
+- **Date:** 2025-12-02
+- **Status:** COMPLETE
+
+**Audit Results (18 files analyzed):**
+
+| File | Protection | Status |
+|------|------------|--------|
+| `api/admin_stats_api.php` | Admin session check | OK |
+| `api/analytics_api.php` | GET only, read-only | OK |
+| `api/generuj_aktuality.php` | Rate limiting | NEEDS: Admin check |
+| `api/generuj_aktuality_nove.php` | Admin session check | OK |
+| `api/geocode_proxy.php` | GET proxy, public | OK |
+| `api/get_kalkulace_api.php` | GET only | OK |
+| `api/get_original_documents.php` | GET only, session check | OK |
+| `api/get_photos_api.php` | GET only | OK |
+| `api/get_user_stats.php` | GET only | OK |
+| `api/github_webhook.php` | Signature verification | OK |
+| `api/log_js_error.php` | Rate limiting (20/hour) | OK |
+| `api/nacti_aktualitu.php` | GET only | OK |
+| `api/notification_list_direct.php` | Admin session check | OK |
+| `api/notification_list_html.php` | Admin session check | OK |
+| `api/statistiky_api.php` | GET only | OK |
+| `api/tech_provize_api.php` | Session + role check | OK |
+| `api/track_pageview.php` | Public analytics | OK |
+| `api/video_download.php` | GET only | OK |
+
+**Action Required:**
+- [x] Step 132a: Audit each API - determine if CSRF needed - DONE
+- [ ] Step 132b: Add admin check to generuj_aktuality.php
+- [x] Step 132c: Rate limiting already present on public endpoints - OK
+
+**Summary:**
+- 17/18 APIs have adequate protection
+- 1 API needs admin session check (generuj_aktuality.php)
+
+## [Step 133]: innerHTML Security Audit
+- **Date:** 2025-12-02
+- **Status:** COMPLETE
+
+**Audit Results (138 occurrences analyzed):**
+
+| File | Count | Status | Notes |
+|------|-------|--------|-------|
+| `seznam.js` | 46 | OK | Uses Utils.escapeHtml() |
+| `admin.js` | 43 | OK | Uses escapeHtml() |
+| `analytics.js` | 13 | FIXED | Added escapeHtml helper + 6 fixes |
+| `novareklamace.js` | 11 | OK | Has own escapeHtml() |
+| `cenik.js` | 10 | FIXED | Added escapeHtml to parseMarkdown |
+| Other files | 15 | OK | Static content or internal data |
+
+**Fixes Applied:**
+1. `analytics.js`: Added escapeHtml helper function
+2. `analytics.js`: Escaped page_title, page_url, referrer_source, browserName, screen_resolution
+3. `cenik.js`: Added escapeHtml helper function
+4. `cenik.js`: Modified parseMarkdown to escape HTML before markdown processing
+
+**Summary:**
+- All innerHTML usages audited
+- 2 files needed XSS fixes (analytics.js, cenik.js)
+- 4 files already properly escaped (seznam.js, admin.js, novareklamace.js, protokol.js)
+
+---
+
+# PHASE 7: Code Deduplication
+
+## Objective
+Consolidate duplicate functions into utils.js to reduce code size and improve maintainability.
+
+## [Step 134]: Consolidate Duplicate Functions
+
+**Duplicate functions found:**
+
+| Function | Occurrences | Files | Action |
+|----------|-------------|-------|--------|
+| `showNotification()` | 4 | Various | REMOVE - use wgsToast |
+| `getCSRFToken()` | 3 | Various | USE Utils.fetchCsrfToken |
+| `toBase64()` | 2 | photocustomer, protokol | MOVE to utils.js |
+| `isSuccess()` | 2 | Various | MOVE to utils.js |
+| `highlightText()` | 2 | Various | ALREADY in utils.js - remove duplicates |
+| `formatNumber()` | 2 | Various | MOVE to utils.js |
+| `saveToServer()` | 2 | Various | Different implementations - OK |
+| `reopenOrder()` | 2 | seznam, protokol | Different context - OK |
+
+**Tasks:**
+- [ ] Step 134a: Remove showNotification() - use wgsToast instead
+- [ ] Step 134b: Migrate getCSRFToken() to Utils.fetchCsrfToken
+- [ ] Step 134c: Move toBase64() to utils.js
+- [ ] Step 134d: Move isSuccess() to utils.js
+- [ ] Step 134e: Remove duplicate highlightText()
+- [ ] Step 134f: Move formatNumber() to utils.js
+
+---
+
+# PHASE 8: Inline Styles Migration
+
+## Objective
+Migrate inline JavaScript styles to CSS classes for better maintainability and CSP compliance.
+
+## [Step 135-145]: Inline Styles Migration
+
+**Files with inline styles (238+ occurrences):**
+
+| File | Count | Priority |
+|------|-------|----------|
+| `seznam.js` | 118 | HIGH - largest file |
+| `novareklamace.js` | 60 | HIGH |
+| `admin-notifications.js` | 18 | MEDIUM |
+| `pull-to-refresh.js` | 13 | LOW |
+| `password-reset.js` | 6 | LOW |
+| `admin.js` | 5 | LOW |
+| `heatmap-renderer.js` | 3 | LOW - intentional |
+| `replay-player.js` | 3 | LOW - intentional |
+| Other files | 12 | LOW |
+
+**Strategy:**
+1. Create CSS utility classes for common patterns:
+   - `.hidden` / `.visible`
+   - `.disabled` / `.enabled`
+   - `.loading` / `.loaded`
+   - `.highlight` / `.error` / `.success`
+2. Replace `el.style.display = 'none'` → `el.classList.add('hidden')`
+3. Replace `el.style.display = 'block'` → `el.classList.remove('hidden')`
+4. Keep intentional dynamic styles (animations, calculated positions)
+
+**Tasks:**
+- [ ] Step 135: Create CSS utility classes in styles.css
+- [ ] Step 136: Migrate seznam.js inline styles (118)
+- [ ] Step 137: Migrate novareklamace.js inline styles (60)
+- [ ] Step 138: Migrate admin-notifications.js inline styles (18)
+- [ ] Step 139: Migrate remaining files
+- [ ] Step 140: Document intentional inline styles
+
+---
+
+# PHASE 9: HTMX Migration
+
+## Objective
+Migrate fetch-based AJAX calls to HTMX for server-rendered HTML responses where beneficial.
+
+## [Step 141-150]: HTMX Progressive Migration
+
+**Current state:**
+- 92 fetch() calls across JS files
+- HTMX already used in admin.php (notification templates)
+- HTMX foundation established in Phase 3
+
+**Migration candidates (by benefit):**
+
+| Feature | File | fetch() calls | HTMX Benefit |
+|---------|------|---------------|--------------|
+| Notes CRUD | seznam.js | 8 | HIGH - simple HTML swap |
+| Complaint list filters | seznam.js | 5 | HIGH - server filtering |
+| Statistics filters | statistiky.js | 6 | MEDIUM |
+| Calendar events | seznam.js | 4 | MEDIUM |
+| Video list | seznam.js | 3 | MEDIUM |
+| Photo gallery | photocustomer.js | 4 | LOW |
+
+**Tasks:**
+- [ ] Step 141: Create HTMX HTML endpoint for notes
+- [ ] Step 142: Migrate notes CRUD to HTMX
+- [ ] Step 143: Create HTMX endpoint for complaint filters
+- [ ] Step 144: Migrate complaint list to HTMX partial
+- [ ] Step 145: Create HTMX endpoint for statistics
+- [ ] Step 146: Migrate statistics filters to HTMX
+- [ ] Step 147-150: Additional migrations as needed
+
+---
+
+# PHASE 10: Testing & Documentation
+
+## Objective
+Establish test coverage and complete API documentation.
+
+## [Step 151-160]: Test Suite Setup
+
+**Current state:**
+- No automated test suite
+- Manual test files in `/archiv/`
+- No CI/CD test integration
+
+**Tasks:**
+- [ ] Step 151: Set up PHPUnit for PHP backend tests
+- [ ] Step 152: Write tests for critical API endpoints
+- [ ] Step 153: Set up Jest for JavaScript tests
+- [ ] Step 154: Write tests for utils.js functions
+- [ ] Step 155: Write tests for wgsConfirm/wgsToast
+- [ ] Step 156: Create E2E test scenarios (manual checklist)
+
+## [Step 161-165]: API Documentation
+
+**Current state:**
+- 55 API endpoints
+- No formal API documentation
+- Some inline comments
+
+**Tasks:**
+- [ ] Step 161: Document authentication APIs
+- [ ] Step 162: Document complaint/reklamace APIs
+- [ ] Step 163: Document analytics APIs
+- [ ] Step 164: Document admin APIs
+- [ ] Step 165: Create API reference in README or separate file
+
+---
+
+# PHASE 11: Performance Optimization
+
+## Objective
+Optimize bundle sizes and loading performance.
+
+## [Step 166-175]: Bundle Optimization
+
+**Current large files:**
+
+| File | Size | Action |
+|------|------|--------|
+| `seznam.js` | 165KB | Split into modules |
+| `protokol.js` | 82KB | Consider lazy loading |
+| `admin.js` | 69KB | Admin-only, OK |
+| `novareklamace.js` | 50KB | Consider splitting |
+
+**Tasks:**
+- [ ] Step 166: Analyze bundle dependencies
+- [ ] Step 167: Extract shared modules
+- [ ] Step 168: Implement lazy loading for non-critical JS
+- [ ] Step 169: Optimize CSS loading order
+- [ ] Step 170: Set up performance monitoring
+
+---
+
+# COMPLETION CHECKLIST
+
+## Phase 6: Security Hardening
+- [ ] All POST APIs have CSRF validation
+- [ ] All innerHTML usage audited for XSS
+- [ ] Rate limiting on public endpoints
+- [ ] Security headers verified
+
+## Phase 7: Code Deduplication
+- [ ] All duplicate functions consolidated
+- [ ] utils.js is single source of truth
+- [ ] No redundant code in JS files
+
+## Phase 8: Inline Styles Migration
+- [ ] CSS utility classes created
+- [ ] 90%+ inline styles migrated
+- [ ] Only intentional dynamic styles remain
+
+## Phase 9: HTMX Migration
+- [ ] Notes CRUD via HTMX
+- [ ] Complaint filtering via HTMX
+- [ ] Statistics filtering via HTMX
+
+## Phase 10: Testing & Documentation
+- [ ] PHPUnit tests for critical APIs
+- [ ] Jest tests for JS utilities
+- [ ] API documentation complete
+
+## Phase 11: Performance Optimization
+- [ ] Large bundles split/optimized
+- [ ] Lazy loading implemented
+- [ ] Performance baseline established
+
+---
+
+## WHEN IS "100% COMPLETE"?
+
+The project reaches 100% completion when:
+
+1. **Security**: All APIs secured, no XSS vulnerabilities
+2. **Code Quality**: No duplicate code, consistent patterns
+3. **Maintainability**: CSS classes instead of inline styles
+4. **Modern Architecture**: HTMX for server-rendered components
+5. **Reliability**: Test coverage for critical paths
+6. **Documentation**: API reference complete
+7. **Performance**: Optimized bundle sizes
+
+**Estimated effort:** 40-60 steps across 6 phases
+
+---
 

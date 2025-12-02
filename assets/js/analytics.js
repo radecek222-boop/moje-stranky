@@ -14,6 +14,16 @@ const ANALYTICS = {
     }
 };
 
+// === SECURITY: escapeHtml helper ===
+const escapeHtml = (str) => {
+    if (typeof Utils !== 'undefined' && Utils.escapeHtml) {
+        return Utils.escapeHtml(str);
+    }
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+};
+
 // === INIT ===
 window.addEventListener('DOMContentLoaded', () => {
     logger.log('[Start] Analytics dashboard inicialization...');
@@ -219,8 +229,8 @@ function zobrazitTopStranky() {
     tbody.innerHTML = pages.map(page => `
         <tr style="border-bottom: 1px solid #e5e7eb;">
             <td style="padding: 0.75rem;">
-                <div style="font-weight: 500; color: #1d1f2c;">${page.page_title || page.page_url}</div>
-                <div style="font-size: 0.75rem; color: #6b7280;">${page.page_url}</div>
+                <div style="font-weight: 500; color: #1d1f2c;">${escapeHtml(page.page_title || page.page_url)}</div>
+                <div style="font-size: 0.75rem; color: #6b7280;">${escapeHtml(page.page_url)}</div>
             </td>
             <td style="padding: 0.75rem;">${formatNumber(page.visits)}</td>
             <td style="padding: 0.75rem;">${formatNumber(page.unique_visitors)}</td>
@@ -240,7 +250,7 @@ function zobrazitReferrery() {
 
     tbody.innerHTML = referrers.map(ref => `
         <tr style="border-bottom: 1px solid #e5e7eb;">
-            <td style="padding: 0.75rem; font-weight: 500;">${ref.referrer_source}</td>
+            <td style="padding: 0.75rem; font-weight: 500;">${escapeHtml(ref.referrer_source)}</td>
             <td style="padding: 0.75rem;">${formatNumber(ref.visits)}</td>
             <td style="padding: 0.75rem;">${formatNumber(ref.unique_visitors)}</td>
         </tr>
@@ -260,7 +270,7 @@ function zobrazitProhlizece() {
         const browserName = parsujUserAgent(browser.user_agent);
         return `
             <tr style="border-bottom: 1px solid #e5e7eb;">
-                <td style="padding: 0.75rem; font-weight: 500;">${browserName}</td>
+                <td style="padding: 0.75rem; font-weight: 500;">${escapeHtml(browserName)}</td>
                 <td style="padding: 0.75rem;">${formatNumber(browser.visits)}</td>
             </tr>
         `;
@@ -278,7 +288,7 @@ function zobrazitZarizeni() {
 
     tbody.innerHTML = devices.map(device => `
         <tr style="border-bottom: 1px solid #e5e7eb;">
-            <td style="padding: 0.75rem; font-weight: 500;">${device.screen_resolution}</td>
+            <td style="padding: 0.75rem; font-weight: 500;">${escapeHtml(device.screen_resolution)}</td>
             <td style="padding: 0.75rem;">${formatNumber(device.visits)}</td>
         </tr>
     `).join('');
