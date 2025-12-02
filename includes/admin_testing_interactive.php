@@ -302,25 +302,25 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
     <div class="role-selector" id="roleSelector">
         <h3>Vyberte roli pro testování:</h3>
         <div class="role-buttons">
-            <div class="role-btn" onclick="selectRole('admin')" data-role="admin">
+            <div class="role-btn" data-action="selectRole" data-role="admin">
                 <div class="role-name">Admin</div>
                 <div class="role-desc">Plný přístup</div>
             </div>
-            <div class="role-btn" onclick="selectRole('prodejce')" data-role="prodejce">
+            <div class="role-btn" data-action="selectRole" data-role="prodejce">
                 <div class="role-name">Prodejce</div>
                 <div class="role-desc">Vlastní reklamace</div>
             </div>
-            <div class="role-btn" onclick="selectRole('technik')" data-role="technik">
+            <div class="role-btn" data-action="selectRole" data-role="technik">
                 <div class="role-name">Technik</div>
                 <div class="role-desc">Všechny reklamace</div>
             </div>
-            <div class="role-btn" onclick="selectRole('guest')" data-role="guest">
+            <div class="role-btn" data-action="selectRole" data-role="guest">
                 <div class="role-name">Host</div>
                 <div class="role-desc">Základní funkce</div>
             </div>
         </div>
         <div class="btn-group" style="margin-top: 1rem; justify-content: center;">
-            <button type="button" class="btn btn-success" onclick="startTest()" id="startTestBtn" disabled>
+            <button type="button" class="btn btn-success" data-action="startInteractiveTest" id="startTestBtn" disabled>
                 Zahájit test →
             </button>
         </div>
@@ -574,10 +574,10 @@ function loadStep1_Formular(panel) {
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-success" onclick="executeStep1()">
+            <button class="btn btn-success" data-action="executeStep1">
                 Validovat a pokračovat →
             </button>
-            <button class="btn btn-secondary" onclick="resetTest()">
+            <button class="btn btn-secondary" data-action="resetInteractiveTest">
                 Reset
             </button>
         </div>
@@ -633,7 +633,7 @@ function loadStep2_APICall(panel) {
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-secondary" onclick="goToStep(1)">
+            <button class="btn btn-secondary" data-action="goToInteractiveStep" data-step="1">
                 ← Zpět
             </button>
         </div>
@@ -726,7 +726,7 @@ function loadStep3_Seznam(panel) {
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-secondary" onclick="goToStep(2)">
+            <button class="btn btn-secondary" data-action="goToInteractiveStep" data-step="2">
                 ← Zpět
             </button>
         </div>
@@ -806,10 +806,10 @@ function loadStep4_Detail(panel) {
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-success" onclick="goToStep(5)">
+            <button class="btn btn-success" data-action="goToInteractiveStep" data-step="5">
                 Zahájit návštěvu → PhotoCustomer
             </button>
-            <button class="btn btn-secondary" onclick="goToStep(3)">
+            <button class="btn btn-secondary" data-action="goToInteractiveStep" data-step="3">
                 ← Zpět
             </button>
         </div>
@@ -843,7 +843,7 @@ async function loadStep5_PhotoCustomer(panel) {
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-secondary" onclick="goToStep(4)">
+            <button class="btn btn-secondary" data-action="goToInteractiveStep" data-step="4">
                 ← Zpět
             </button>
         </div>
@@ -924,7 +924,7 @@ async function loadStep6_Protokol(panel) {
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-secondary" onclick="goToStep(5)">
+            <button class="btn btn-secondary" data-action="goToInteractiveStep" data-step="5">
                 ← Zpět
             </button>
         </div>
@@ -1187,11 +1187,11 @@ function showTestResult(passed, errorMessage = null) {
 
         <div class="btn-group" style="justify-content: center;">
             ${testData.claimId ? `
-                <button class="btn btn-danger" onclick="cleanupTestData()">
+                <button class="btn btn-danger" data-action="cleanupInteractiveTestData">
                     SMAZAT TESTOVACÍ DATA
                 </button>
             ` : ''}
-            <button class="btn btn-secondary" onclick="resetTest()">
+            <button class="btn btn-secondary" data-action="resetInteractiveTest">
                 NOVÝ TEST
             </button>
         </div>
@@ -1247,5 +1247,19 @@ async function cleanupTestData() {
  */
 function resetTest() {
     location.reload();
+}
+
+// ACTION REGISTRY - Step 113
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('selectRole', (el, data) => {
+        if (data.role) selectRole(data.role);
+    });
+    Utils.registerAction('startInteractiveTest', () => startTest());
+    Utils.registerAction('executeStep1', () => executeStep1());
+    Utils.registerAction('resetInteractiveTest', () => resetTest());
+    Utils.registerAction('goToInteractiveStep', (el, data) => {
+        if (data.step) goToStep(parseInt(data.step));
+    });
+    Utils.registerAction('cleanupInteractiveTestData', () => cleanupTestData());
 }
 </script>
