@@ -1,6 +1,10 @@
 /**
- * Rozbalovací sekce zákaznických dat - POUZE MOBIL
+ * Rozbalovací sekce zákaznických dat - UNIVERZÁLNÍ MODUL
  * Umožňuje technikům schovat statická data a vidět jen jméno zákazníka
+ * Používá se na: protokol.php, photocustomer.php
+ *
+ * Konfigurace přes data-* atributy na toggle elementu:
+ * - data-storage-key: klíč pro localStorage (výchozí: 'customer-info-expanded')
  */
 
 (function() {
@@ -19,8 +23,11 @@
       return; // Elementy neexistují
     }
 
+    // Získat klíč pro localStorage z data atributu nebo použít výchozí
+    const storageKey = toggle.dataset.storageKey || 'customer-info-expanded';
+
     // Kontrola localStorage pro uložený stav
-    const savedState = localStorage.getItem('customer-info-expanded');
+    const savedState = localStorage.getItem(storageKey);
     const isExpanded = savedState === 'true';
 
     // Funkce pro aktualizaci aria-expanded
@@ -53,13 +60,13 @@
       if (isCurrentlyExpanded) {
         // Sbalit
         collapsible.classList.remove('expanded');
-        localStorage.setItem('customer-info-expanded', 'false');
+        localStorage.setItem(storageKey, 'false');
         aktualizovatAriaExpanded(false);
         logger.log('Zakaznicke udaje sbaleny');
       } else {
         // Rozbalit
         collapsible.classList.add('expanded');
-        localStorage.setItem('customer-info-expanded', 'true');
+        localStorage.setItem(storageKey, 'true');
         aktualizovatAriaExpanded(true);
         logger.log('Zakaznicke udaje rozbaleny');
       }
@@ -85,7 +92,7 @@
       }
     });
 
-    logger.log('Customer info collapse inicializován');
+    logger.log('Customer info collapse inicializován (' + storageKey + ')');
   }
 
   // Inicializovat po načtení DOMu
