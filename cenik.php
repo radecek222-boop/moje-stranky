@@ -523,10 +523,10 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 
 <!-- External JavaScript -->
 <script src="assets/js/logger.js" defer></script>
-<script src="assets/js/wgs-map.js" defer></script>
+<script src="assets/js/wgs-map.min.js" defer></script>
 
 <!-- Translations for pricing page -->
-<script src="assets/js/wgs-translations-cenik.js"></script>
+<script src="assets/js/wgs-translations-cenik.min.js"></script>
 
 <script src="assets/js/cenik.min.js" defer></script>
 
