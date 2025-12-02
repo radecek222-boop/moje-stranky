@@ -206,14 +206,14 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         <p class="subtitle">Automatické generování analytických reportů s AI insights</p>
 
         <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" data-tab="reports">Reporty</button>
-            <button class="tab" data-tab="generate">Generovat nový</button>
-            <button class="tab" data-tab="schedules">Naplánované</button>
+        <div class="tabs" role="tablist" aria-label="Sekce reportů">
+            <button class="tab active" data-tab="reports" role="tab" id="tab-btn-reports" aria-selected="true" aria-controls="tab-reports">Reporty</button>
+            <button class="tab" data-tab="generate" role="tab" id="tab-btn-generate" aria-selected="false" aria-controls="tab-generate">Generovat nový</button>
+            <button class="tab" data-tab="schedules" role="tab" id="tab-btn-schedules" aria-selected="false" aria-controls="tab-schedules">Naplánované</button>
         </div>
 
         <!-- Tab: Reports -->
-        <div class="tab-content active" id="tab-reports">
+        <div class="tab-content active" id="tab-reports" role="tabpanel" aria-labelledby="tab-btn-reports">
             <div class="card">
                 <h3>Vygenerované reporty</h3>
                 <div id="reports-list" class="loading">Načítám reporty...</div>
@@ -221,7 +221,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         </div>
 
         <!-- Tab: Generate -->
-        <div class="tab-content" id="tab-generate">
+        <div class="tab-content" id="tab-generate" role="tabpanel" aria-labelledby="tab-btn-generate">
             <div class="card">
                 <h3>Vygenerovat nový report</h3>
                 <form id="generate-form">
@@ -248,7 +248,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         </div>
 
         <!-- Tab: Schedules -->
-        <div class="tab-content" id="tab-schedules">
+        <div class="tab-content" id="tab-schedules" role="tabpanel" aria-labelledby="tab-btn-schedules">
             <div class="card">
                 <h3>Naplánované reporty</h3>
                 <div id="schedules-list" class="loading">Načítám schedules...</div>
@@ -264,9 +264,13 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             tab.addEventListener('click', () => {
                 const targetTab = tab.dataset.tab;
 
-                // Update tabs
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                // Update tabs - visual and ARIA
+                document.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
                 tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
 
                 // Update content
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));

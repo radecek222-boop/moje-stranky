@@ -1835,3 +1835,43 @@ header('Content-Type: text/html; charset=utf-8');
   - `photocustomer.php`: Added ARIA to progress bar (role="progressbar", aria-value*), wait dialog and alert container
 - **Result:** Loading states and progress are now properly announced to screen reader users.
 
+## [Step 90]: Tab Interface Accessibility
+- **Date:** 2025-12-02
+- **What:** Added proper ARIA tab pattern attributes to tab interfaces.
+- **Analysis:**
+  - Tab containers need role="tablist" with aria-label
+  - Tab buttons need role="tab", aria-selected, aria-controls
+  - Tab panels need role="tabpanel", aria-labelledby
+  - JavaScript must update aria-selected when switching tabs
+- **Files modified:**
+  - `analytics-reports.php`: Added complete ARIA tab pattern to Reports/Generate/Schedules tabs
+  - `gdpr-portal.php`: Added ARIA tab pattern to Consent/Requests/Admin/Audit tabs
+  - Both files: JavaScript updated to set aria-selected on tab switch
+- **Result:** Tab interfaces are now properly accessible with correct roles and keyboard navigation support.
+
+## [Step 91]: Filter Dropdown Accessibility
+- **Date:** 2025-12-02
+- **What:** Added ARIA listbox pattern to multiselect filter dropdowns in statistiky.php.
+- **Analysis:**
+  - Filter select labels need `for` attribute linking to select IDs
+  - Custom multiselect triggers need role="button", tabindex, aria-haspopup, aria-expanded
+  - Dropdown containers need role="listbox", aria-labelledby
+  - Options inside dropdowns need role="option"
+  - JavaScript must update aria-expanded when dropdowns open/close
+- **Files modified:**
+  - `statistiky.php`: Added `for` to filter labels, ARIA listbox pattern to Prodejci/Technici/Země multiselects
+  - `assets/js/statistiky.js`: Updated toggleDropdown() to manage aria-expanded state
+- **Result:** Filter dropdowns are now accessible with proper ARIA roles and state management.
+
+## [Step 92]: Keyboard Support for Interactive Elements
+- **Date:** 2025-12-02
+- **What:** Added keyboard support (Enter/Space) for language switcher and data-action buttons.
+- **Analysis:**
+  - Elements with role="button" and tabindex must respond to Enter and Space keys
+  - Language switcher flags need keyboard events for accessibility
+  - Data-action elements with role="button" need keyboard activation
+- **Files modified:**
+  - `assets/js/language-switcher.js`: Added keydown event listener for Enter/Space on language flags
+  - `assets/js/psa-kalkulator.js`: Added keyboard event delegation for data-action elements with role="button"
+- **Result:** Interactive elements can now be activated using keyboard, improving accessibility for users who cannot use a mouse.
+

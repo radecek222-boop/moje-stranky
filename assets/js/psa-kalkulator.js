@@ -1220,22 +1220,38 @@ window.onclick = function(event) {
 
 // === UNIVERSAL EVENT DELEGATION FOR REMOVED INLINE HANDLERS ===
 document.addEventListener('DOMContentLoaded', () => {
-  // Handle data-action buttons
-  document.addEventListener('click', (e) => {
-    const target = e.target.closest('[data-action]');
-    if (!target) return;
-    
+  // Společná funkce pro zpracování data-action
+  function zpracujDataAction(target) {
     const action = target.getAttribute('data-action');
-    
+
     // Special cases
     if (action === 'reload') {
       location.reload();
       return;
     }
-    
+
     // Try to call function if it exists
     if (typeof window[action] === 'function') {
       window[action]();
+    }
+  }
+
+  // Handle data-action buttons - kliknutí
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    zpracujDataAction(target);
+  });
+
+  // Handle data-action buttons - klávesnice (Enter/Space) pro přístupnost
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    // Jen pro elementy s role="button" (ne skutečné buttony, ty to mají automaticky)
+    if (target.tagName !== 'BUTTON' && target.getAttribute('role') === 'button') {
+      e.preventDefault();
+      zpracujDataAction(target);
     }
   });
 

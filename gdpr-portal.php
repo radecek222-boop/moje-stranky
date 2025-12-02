@@ -243,17 +243,17 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         <p class="subtitle">Správa souhlasů a práva subjektů údajů</p>
 
         <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" data-tab="consent">Správa souhlasů</button>
-            <button class="tab" data-tab="requests">Žádosti o data</button>
+        <div class="tabs" role="tablist" aria-label="GDPR sekce">
+            <button class="tab active" data-tab="consent" role="tab" id="tab-btn-consent" aria-selected="true" aria-controls="tab-consent">Správa souhlasů</button>
+            <button class="tab" data-tab="requests" role="tab" id="tab-btn-requests" aria-selected="false" aria-controls="tab-requests">Žádosti o data</button>
             <?php if ($isAdmin): ?>
-            <button class="tab" data-tab="admin">Admin (Zpracování)</button>
-            <button class="tab" data-tab="audit">Audit Log</button>
+            <button class="tab" data-tab="admin" role="tab" id="tab-btn-admin" aria-selected="false" aria-controls="tab-admin">Admin (Zpracování)</button>
+            <button class="tab" data-tab="audit" role="tab" id="tab-btn-audit" aria-selected="false" aria-controls="tab-audit">Audit Log</button>
             <?php endif; ?>
         </div>
 
         <!-- Tab: Consent Management -->
-        <div class="tab-content active" id="tab-consent">
+        <div class="tab-content active" id="tab-consent" role="tabpanel" aria-labelledby="tab-btn-consent">
             <div class="card">
                 <h3>Správa souhlasů</h3>
                 <p>Můžete upravit své preference ohledně zpracování osobních údajů.</p>
@@ -281,7 +281,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         </div>
 
         <!-- Tab: Data Requests -->
-        <div class="tab-content" id="tab-requests">
+        <div class="tab-content" id="tab-requests" role="tabpanel" aria-labelledby="tab-btn-requests">
             <div class="card">
                 <h3>Žádost o export dat</h3>
                 <p>Vyžádejte si kopii všech vašich osobních údajů (GDPR Článek 15).</p>
@@ -315,7 +315,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 
         <?php if ($isAdmin): ?>
         <!-- Tab: Admin Processing -->
-        <div class="tab-content" id="tab-admin">
+        <div class="tab-content" id="tab-admin" role="tabpanel" aria-labelledby="tab-btn-admin">
             <div class="card">
                 <h3>Zpracování žádostí (Admin)</h3>
                 <div id="admin-requests-list" class="loading">Načítám žádosti...</div>
@@ -323,7 +323,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         </div>
 
         <!-- Tab: Audit Log -->
-        <div class="tab-content" id="tab-audit">
+        <div class="tab-content" id="tab-audit" role="tabpanel" aria-labelledby="tab-btn-audit">
             <div class="card">
                 <h3>Audit Log</h3>
                 <div id="audit-log-list" class="loading">Načítám audit log...</div>
@@ -344,8 +344,13 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             tab.addEventListener('click', () => {
                 const targetTab = tab.dataset.tab;
 
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                // Update tabs - visual and ARIA
+                document.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
                 tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
 
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 document.getElementById('tab-' + targetTab).classList.add('active');

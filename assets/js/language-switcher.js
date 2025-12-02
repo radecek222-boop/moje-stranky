@@ -235,10 +235,17 @@
       prepniJazyk(aktualniJazyk);
     }
 
-    // Přidat event listenery na vlajky
+    // Přidat event listenery na vlajky - kliknutí i klávesnice
     document.querySelectorAll('.lang-flag').forEach(vlajka => {
       vlajka.addEventListener('click', () => {
         prepniJazyk(vlajka.dataset.lang);
+      });
+      // Podpora klávesnice (Enter/Space) pro přístupnost
+      vlajka.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          prepniJazyk(vlajka.dataset.lang);
+        }
       });
     });
 
