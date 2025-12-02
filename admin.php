@@ -118,11 +118,11 @@ if ($activeTab === 'dashboard') {
     <!-- Unified Design System -->
   <link rel="stylesheet" href="/assets/css/styles.min.css">
   <link rel="stylesheet" href="/assets/css/admin.css">
-<link rel="stylesheet" href="/assets/css/admin-header.css">
+<link rel="stylesheet" href="/assets/css/admin-header.min.css">
 <link rel="stylesheet" href="/assets/css/admin-notifications.min.css">
   <link rel="stylesheet" href="/assets/css/mobile-responsive.css">
   <!-- admin-mobile-fixes.css sloučen do admin.css (Step 51) -->
-  <link rel="stylesheet" href="/assets/css/button-fixes-global.css">
+  <link rel="stylesheet" href="/assets/css/button-fixes-global.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="/assets/css/universal-modal-theme.min.css">
 
