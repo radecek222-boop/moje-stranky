@@ -727,7 +727,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
             foreach ($fotkySekce as $fotka) {
                 $cesta = $fotka['file_path'] ?: $fotka['photo_path'];
                 $fotkyHtml .= '<a href="/' . htmlspecialchars($cesta) . '" target="_blank" style="display: block; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; transition: transform 0.2s;" onmouseover="this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'">';
-                $fotkyHtml .= '<img src="/' . htmlspecialchars($cesta) . '" style="width: 100%; height: 120px; object-fit: cover;" alt="' . htmlspecialchars($fotka['file_name']) . '">';
+                $fotkyHtml .= '<img src="/' . htmlspecialchars($cesta) . '" style="width: 100%; height: 120px; object-fit: cover;" alt="' . htmlspecialchars($fotka['file_name']) . '" loading="lazy">';
                 $fotkyHtml .= '</a>';
             }
             $fotkyHtml .= '</div>';

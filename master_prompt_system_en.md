@@ -1436,3 +1436,16 @@ header('Content-Type: text/html; charset=utf-8');
   - `photocustomer.css` → `.min.css` in: photocustomer.php
 - **Result:** All PHP files now reference minified assets. Zero non-minified references remain.
 
+## [Step 61]: Lazy Loading Audit for Images
+- **Date:** 2025-12-02
+- **What:** Audited all `<img>` tags in PHP files and added `loading="lazy"` where applicable.
+- **Analysis:**
+  - Most images in the project are CSS background images (hero sections, etc.) - lazy loading N/A
+  - `aktuality.php`: Already has `loading="lazy"` for markdown-parsed images
+  - `nova_aktualita.php`: JS preview images (immediate display, no lazy needed)
+  - `api/admin_api.php`: Dynamic photo gallery in timeline - **added loading="lazy"**
+  - Other img tags are either empty src placeholders or library code (PHPMailer)
+- **Files modified:**
+  - `api/admin_api.php`: Added `loading="lazy"` to dynamically generated photo thumbnails
+- **Result:** Minimal impact - project uses CSS backgrounds for most imagery. One img tag optimized.
+
