@@ -184,6 +184,7 @@ try {
         '{{technician_email}}' => $notificationData['technician_email'] ?? '',
         '{{technician_phone}}' => $notificationData['technician_phone'] ?? '',
         '{{seller_name}}' => $notificationData['seller_name'] ?? '',
+        '{{seller_email}}' => $notificationData['seller_email'] ?? '',
         '{{created_at}}' => $notificationData['created_at'] ?? date('d.m.Y H:i'),
         '{{completed_at}}' => $notificationData['completed_at'] ?? '',
         '{{company_email}}' => 'reklamace@wgs-service.cz',

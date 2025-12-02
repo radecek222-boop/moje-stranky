@@ -2357,6 +2357,9 @@ async function sendAppointmentConfirmation(customer, date, time) {
   const technikEmail = customer.technik_email || '';
   const technikTelefon = customer.technik_telefon || '';
 
+  // Email prodejce (vytvořil zakázku)
+  const prodejceEmail = customer.created_by_email || 'admin@wgs-service.cz';
+
   try {
     // Get CSRF token
     const csrfToken = await getCSRFToken();
@@ -2371,7 +2374,7 @@ async function sendAppointmentConfirmation(customer, date, time) {
           customer_name: customerName,
           customer_email: email,
           customer_phone: phone,
-          seller_email: "admin@wgs-service.cz",
+          seller_email: prodejceEmail,
           date: date,
           time: time,
           order_id: orderId,

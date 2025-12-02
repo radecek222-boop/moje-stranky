@@ -85,12 +85,6 @@ try {
                 $params[':user_email'] = $userEmail;
             }
 
-            // Filter podle prodejce_email
-            if ($userEmail && in_array('prodejce_email', $columns, true)) {
-                $guestConditions[] = 'LOWER(TRIM(r.prodejce_email)) = LOWER(TRIM(:prodejce_email))';
-                $params[':prodejce_email'] = $userEmail;
-            }
-
             if (!empty($guestConditions)) {
                 $whereParts[] = '(' . implode(' OR ', $guestConditions) . ')';
             } else {
@@ -129,6 +123,7 @@ try {
                     END
                 ELSE u.name
             END as created_by_name,
+            u.email as created_by_email,
             t.name as technik_jmeno,
             t.email as technik_email,
             t.phone as technik_telefon
