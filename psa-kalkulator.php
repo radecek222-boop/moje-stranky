@@ -20,7 +20,7 @@ $csrfToken = generateCSRFToken();
   <link rel="stylesheet" href="assets/css/psa-kalkulator.min.css">
 </head>
 <body>
-<main>
+<main id="main-content">
 
 <!-- TOP BAR -->
 <div class="top-bar">

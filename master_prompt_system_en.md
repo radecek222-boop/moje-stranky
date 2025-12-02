@@ -1890,3 +1890,20 @@ header('Content-Type: text/html; charset=utf-8');
   - `admin/smtp_settings.php`: Added role="status/alert" with aria-live to message divs
 - **Result:** Status messages and language tabs are now properly announced by screen readers.
 
+## [Step 94]: Skip Link for Keyboard Navigation
+- **Date:** 2025-12-02
+- **What:** Added skip-to-content link for keyboard users to bypass navigation.
+- **Analysis:**
+  - Skip links allow keyboard users to jump directly to main content
+  - Hidden by default, visible only when focused
+  - Target id="main-content" must exist on all pages
+- **Files modified:**
+  - `includes/hamburger-menu.php`: Added skip link before header
+  - `assets/css/styles.css`: Added .skip-link styles (hidden, visible on focus)
+  - Multiple pages: Added id="main-content" to main elements:
+    - index.php, novareklamace.php, login.php, cenik.php, admin.php
+    - aktuality.php, offline.php, gdpr.php, onas.php, protokol.php
+    - nasesluzby.php, psa-kalkulator.php, statistiky.php
+    - password_reset.php, registration.php, psa.php, analytics.php
+- **Result:** Keyboard users can now skip navigation and jump directly to main content by pressing Tab then Enter.
+

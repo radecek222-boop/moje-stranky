@@ -456,7 +456,7 @@ body {
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
-<main>
+<main id="main-content">
 <div class="stats-container">
 
   <!-- Header -->

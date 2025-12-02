@@ -373,7 +373,7 @@ body {
 
 <?php if ($activeTab !== 'dashboard'): ?>
 <!-- MAIN CONTENT -->
-<main>
+<main id="main-content">
 <div class="container">
 
   <?php if (!$embedMode && !str_starts_with($activeTab, 'admin_') && $activeTab !== 'dashboard'): ?>

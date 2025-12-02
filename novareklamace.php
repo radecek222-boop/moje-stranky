@@ -362,7 +362,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
 
-<main x-data="provedeniModal" x-init="init">
+<main id="main-content" x-data="provedeniModal" x-init="init">
 <!-- HERO -->
 <section class="hero">
   <div>

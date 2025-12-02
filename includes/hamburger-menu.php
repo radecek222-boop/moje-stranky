@@ -14,6 +14,9 @@ if ($isAdmin) {
 }
 ?>
 
+<!-- Skip link pro přístupnost -->
+<a href="#main-content" class="skip-link">Přeskočit na hlavní obsah</a>
+
 <!-- Centralizovaný z-index systém -->
 <link rel="stylesheet" href="/assets/css/z-index-layers.min.css">
 

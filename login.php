@@ -75,7 +75,7 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
-<main class="main-content" x-data="rememberMeModal" x-init="init">
+<main id="main-content" class="main-content" x-data="rememberMeModal" x-init="init">
 <div class="container">
   <div class="logo">
     <h1>WGS</h1>
