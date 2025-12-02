@@ -108,8 +108,8 @@ if ($activeTab === 'dashboard') {
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="WGS Admin">
   <title>Administrace | White Glove Service</title>
-  <link rel="preload" href="/assets/css/styles.min.css" as="style">
-  <link rel="preload" href="/assets/css/admin.min.css" as="style">
+  <link rel="preload" href="/assets/css/styles.min.css?v=<?= filemtime(__DIR__ . '/assets/css/styles.min.css') ?>" as="style">
+  <link rel="preload" href="/assets/css/admin.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin.min.css') ?>" as="style">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -118,10 +118,10 @@ if ($activeTab === 'dashboard') {
 
     <!-- External CSS -->
     <!-- Unified Design System -->
-  <link rel="stylesheet" href="/assets/css/styles.min.css">
-  <link rel="stylesheet" href="/assets/css/admin.min.css">
-<link rel="stylesheet" href="/assets/css/admin-header.min.css">
-<link rel="stylesheet" href="/assets/css/admin-notifications.min.css">
+  <link rel="stylesheet" href="/assets/css/styles.min.css?v=<?= filemtime(__DIR__ . '/assets/css/styles.min.css') ?>">
+  <link rel="stylesheet" href="/assets/css/admin.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin.min.css') ?>">
+<link rel="stylesheet" href="/assets/css/admin-header.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin-header.min.css') ?>">
+<link rel="stylesheet" href="/assets/css/admin-notifications.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin-notifications.min.css') ?>">
   <link rel="stylesheet" href="/assets/css/mobile-responsive.min.css">
   <!-- admin-mobile-fixes.css sloučen do admin.css (Step 51) -->
   <link rel="stylesheet" href="/assets/css/button-fixes-global.min.css">
@@ -1108,13 +1108,13 @@ function loadNotifContent(type, body) {
 </div>
 
 <!-- External JavaScript -->
-<script src="/assets/js/logger.min.js" defer></script>
-<script src="/assets/js/csrf-auto-inject.min.js" defer></script>
+<script src="/assets/js/logger.min.js?v=<?= filemtime(__DIR__ . '/assets/js/logger.min.js') ?>" defer></script>
+<script src="/assets/js/csrf-auto-inject.min.js?v=<?= filemtime(__DIR__ . '/assets/js/csrf-auto-inject.min.js') ?>" defer></script>
 <!-- logout-handler.js je v hamburger-menu.php (nacita se VSUDE vcetne dashboardu) -->
-<script src="/assets/js/utils.min.js" defer></script>
-<script src="/assets/js/admin-notifications.min.js" defer></script>
-<script src="/assets/js/smtp-config.min.js" defer></script>
-<script src="/assets/js/admin.min.js" defer></script>
+<script src="/assets/js/utils.min.js?v=<?= filemtime(__DIR__ . '/assets/js/utils.min.js') ?>" defer></script>
+<script src="/assets/js/admin-notifications.min.js?v=<?= filemtime(__DIR__ . '/assets/js/admin-notifications.min.js') ?>" defer></script>
+<script src="/assets/js/smtp-config.min.js?v=<?= filemtime(__DIR__ . '/assets/js/smtp-config.min.js') ?>" defer></script>
+<script src="/assets/js/admin.min.js?v=<?= filemtime(__DIR__ . '/assets/js/admin.min.js') ?>" defer></script>
 
 <!-- MODAL: Edit Notification -->
 <div class="wgs-modal" id="editNotificationModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="editNotificationTitle">
