@@ -1231,5 +1231,52 @@ These files are intentionally kept as small (~80-90 lines) safety nets:
 - `admin-mobile-fixes.css`
 
 ### Remaining for Phase 3:
-1. **HTMX migration** - Server-driven UI updates (major architectural change)
+1. **HTMX migration** - Server-driven UI updates (in progress)
+
+---
+
+# PHASE 3: HTMX Server-Driven UI Migration
+
+## [Step 53]: First HTMX Migration - Email Templates
+- **Date:** 2025-12-02
+- **What:** Created the first HTMX-powered component - Email templates notifications list in admin panel.
+- **How:**
+  1. Created `api/notification_list_html.php` - PHP endpoint that returns HTML fragment instead of JSON
+  2. Modified "Email šablony" card in admin.php to use HTMX attributes:
+     - `hx-get="/api/notification_list_html.php"` - fetch HTML from server
+     - `hx-target="#notifModalBody"` - insert into modal body
+     - `hx-trigger="click"` - trigger on card click
+     - `hx-on::before-request` - set modal title before request
+     - `hx-on::after-request` - open modal after content loads
+- **Why:**
+  - Demonstrates HTMX pattern for server-driven UI
+  - Reduces client-side JS complexity (no fetch + JSON parsing + DOM building)
+  - Server controls HTML rendering - easier to maintain and secure
+  - First step in gradual HTMX migration
+- **Files touched:**
+  - `api/notification_list_html.php` (NEW - 127 lines)
+  - `admin.php` (MODIFIED - added HTMX attributes to email-templates card)
+- **Result:** Email templates now load via HTMX server-rendered HTML instead of client-side JS rendering.
+
+### HTMX Migration Pattern Established:
+
+**Before (JavaScript-driven):**
+```javascript
+fetch('/api/endpoint.php')           // 1. Fetch JSON
+  .then(res => res.json())           // 2. Parse JSON
+  .then(data => renderHTML(data))    // 3. Build HTML in JS
+  .then(html => container.innerHTML = html)  // 4. Insert into DOM
+```
+
+**After (HTMX server-driven):**
+```html
+<div hx-get="/api/endpoint_html.php"   <!-- 1. Fetch HTML directly -->
+     hx-target="#container"            <!-- 2. Insert into target -->
+     hx-trigger="click">               <!-- 3. Done! -->
+```
+
+### Next HTMX Migration Candidates:
+1. SMS šablony (similar pattern to email templates)
+2. Statistics cards (load summary data)
+3. Notes panel in seznam.php
 
