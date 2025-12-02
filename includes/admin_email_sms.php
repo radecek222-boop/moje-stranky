@@ -505,9 +505,7 @@ try {
             <?php else: ?>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1rem;">
                     <?php foreach ($smsSablony as $sablona): ?>
-                    <div style="background: #fff; border: 1px solid #ddd; padding: 1.25rem; transition: box-shadow 0.2s;"
-                         onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
-                         onmouseout="this.style.boxShadow='none'">
+                    <div class="sms-card-hover" style="background: #fff; border: 1px solid #ddd; padding: 1.25rem;">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
                             <h4 style="margin: 0; font-size: 0.95rem; font-weight: 600; font-family: 'Poppins', sans-serif;">
                                 <?= htmlspecialchars($sablona['name']) ?>
@@ -582,7 +580,7 @@ try {
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: #f5f5f5; border: 1px solid #000; margin-bottom: 1rem;">
                 <div style="display: flex; gap: 1rem; align-items: center;">
                     <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; font-family: 'Poppins', sans-serif;">
-                        <input type="checkbox" id="select-all-emails" onchange="toggleSelectAllEmails()">
+                        <input type="checkbox" id="select-all-emails" data-action="toggleSelectAllEmails">
                         <span>Vybrat vše</span>
                     </label>
                     <span style="font-size: 0.85rem; color: #666; font-family: 'Poppins', sans-serif;">
@@ -602,7 +600,7 @@ try {
                     <thead>
                         <tr>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem; width: 30px;">
-                                <input type="checkbox" id="select-all-emails-header" onchange="toggleSelectAllEmails()">
+                                <input type="checkbox" id="select-all-emails-header" data-action="toggleSelectAllEmails">
                             </th>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">ID</th>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Status</th>
@@ -616,9 +614,9 @@ try {
                     </thead>
                     <tbody>
                         <?php foreach ($emaily as $email): ?>
-                        <tr style="transition: background 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fff'">
+                        <tr class="email-queue-row">
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
-                                <input type="checkbox" class="email-checkbox-item" value="<?= $email['id'] ?>" onchange="updateSelectedEmailCount()">
+                                <input type="checkbox" class="email-checkbox-item" value="<?= $email['id'] ?>" data-action="updateSelectedEmailCount">
                             </td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['id'] ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
@@ -727,6 +725,48 @@ try {
 
 .cc-section.active {
     display: block;
+}
+
+.email-queue-row {
+    transition: background 0.2s;
+    background: #fff;
+}
+
+.email-queue-row:hover {
+    background: #f5f5f5;
+}
+
+.admin-hover-row {
+    transition: background 0.2s;
+    background: #fff;
+}
+
+.admin-hover-row:hover {
+    background: #f5f5f5;
+}
+
+.sms-card-hover {
+    transition: box-shadow 0.2s;
+}
+
+.sms-card-hover:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.photo-hover-scale {
+    transition: transform 0.2s;
+}
+
+.photo-hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.protokol-hover-bg {
+    transition: background 0.2s;
+}
+
+.protokol-hover-bg:hover {
+    background: #e5e5e5 !important;
 }
 </style>
 

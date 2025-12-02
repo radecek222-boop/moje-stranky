@@ -1986,4 +1986,35 @@ if (typeof Utils !== 'undefined' && Utils.registerAction) {
       prepnoutStatusUzivatele(data.id, data.status);
     }
   });
+
+  // Step 119 - Migrace onchange handlerů
+  Utils.registerAction('onChangeConfig', (el, data) => {
+    if (data.id && data.key && typeof saveConfig === 'function') {
+      saveConfig(data.id, data.key);
+    }
+  });
+
+  Utils.registerAction('toggleSelectAllEmails', () => {
+    if (typeof toggleSelectAllEmails === 'function') {
+      toggleSelectAllEmails();
+    }
+  });
+
+  Utils.registerAction('updateSelectedEmailCount', () => {
+    if (typeof updateSelectedEmailCount === 'function') {
+      updateSelectedEmailCount();
+    }
+  });
+
+  Utils.registerAction('zmenitStavReklamace', (el, data) => {
+    if (data.id && typeof zmenitStavReklamace === 'function') {
+      zmenitStavReklamace(data.id, el.value);
+    }
+  });
+
+  Utils.registerAction('aktualizovatVyber', () => {
+    if (typeof aktualizovatVyber === 'function') {
+      aktualizovatVyber();
+    }
+  });
 }

@@ -357,7 +357,10 @@ function renderTable() {
                  value="${emp.name}"
                  class="table-input"
                  style="font-weight: 600; min-width: 150px;"
-                 onchange="updateEmployee(${index}, 'name', this.value, true)">
+                 data-action="updateEmployeeField"
+                 data-index="${index}"
+                 data-field="name"
+                 data-recalculate="true">
           ${displayInfo}
         </td>
         <td class="text-center">
@@ -371,13 +374,17 @@ function renderTable() {
                      class="table-input"
                      style="width: 100px; text-align: center; font-weight: 600; background: #fff3cd;"
                      placeholder="Částka (Kč)"
-                     onchange="updateEmployee(${index}, 'bonusAmount', this.value)">` :
+                     data-action="updateEmployeeField"
+                     data-index="${index}"
+                     data-field="bonusAmount">` :
               `<input type="number"
                      value="${emp.hours}"
                      min="0"
                      class="table-input"
                      style="width: 80px; text-align: center; font-weight: 600;"
-                     onchange="updateEmployee(${index}, 'hours', this.value)">`
+                     data-action="updateEmployeeField"
+                     data-index="${index}"
+                     data-field="hours">`
           }
         </td>
         <td class="text-right" style="font-weight: 600; color: var(--c-success);">
@@ -394,7 +401,9 @@ function renderTable() {
                  placeholder="Číslo účtu"
                  class="table-input"
                  ${emp.type === 'swift' ? 'readonly' : ''}
-                 onchange="updateEmployee(${index}, 'account', this.value)">
+                 data-action="updateEmployeeField"
+                 data-index="${index}"
+                 data-field="account">
         </td>
         <td>
           <input type="text"
@@ -403,7 +412,9 @@ function renderTable() {
                  class="table-input"
                  style="width: 100px; text-align: center;"
                  ${emp.type === 'swift' ? 'readonly' : ''}
-                 onchange="updateEmployee(${index}, 'bank', this.value)">
+                 data-action="updateEmployeeField"
+                 data-index="${index}"
+                 data-field="bank">
         </td>
         <td class="text-center">
           <button class="btn btn-sm" style="background: var(--c-info); color: white; margin-right: 0.25rem;" data-action="generateSingleEmployeeQR" data-index="${index}" title="Generovat QR platbu">QR</button>
@@ -1263,6 +1274,15 @@ document.addEventListener('DOMContentLoaded', () => {
           downloadQR(qrid, dName);
         }
         return;
+
+      case 'updateEmployeeField':
+        const empIndex = parseInt(target.getAttribute('data-index'));
+        const empField = target.getAttribute('data-field');
+        const empRecalculate = target.getAttribute('data-recalculate') === 'true';
+        if (!isNaN(empIndex) && empField && typeof updateEmployee === 'function') {
+          updateEmployee(empIndex, empField, target.value, empRecalculate);
+        }
+        return;
     }
 
     // Try to call function if it exists
@@ -1273,6 +1293,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle data-action buttons - kliknutí
   document.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    zpracujDataAction(target);
+  });
+
+  // Handle data-action inputs - změna hodnoty (pro onchange migraci)
+  document.addEventListener('change', (e) => {
     const target = e.target.closest('[data-action]');
     if (!target) return;
     zpracujDataAction(target);

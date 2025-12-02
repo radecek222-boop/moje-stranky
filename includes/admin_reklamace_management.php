@@ -178,9 +178,7 @@ try {
             </div>
 
             <?php foreach ($reklamace as $rek): ?>
-            <div class="reklamace-row" style="border-bottom: 1px solid #e5e5e5; padding: 0.4rem 0.75rem; transition: background 0.2s; display: grid; grid-template-columns: 130px 150px 100px 1fr 150px 90px 310px; gap: 0.75rem; align-items: center; font-size: 0.75rem;"
-                 onmouseover="this.style.background='#f9f9f9'"
-                 onmouseout="this.style.background='#fff'">
+            <div class="reklamace-row admin-hover-row" style="border-bottom: 1px solid #e5e5e5; padding: 0.4rem 0.75rem; display: grid; grid-template-columns: 130px 150px 100px 1fr 150px 90px 310px; gap: 0.75rem; align-items: center; font-size: 0.75rem;">
 
                 <!-- Číslo -->
                 <div style="font-family: 'Poppins', sans-serif; font-weight: 600; color: #000;">
@@ -232,7 +230,8 @@ try {
                     <!-- Změna stavu -->
                     <select class="reklamace-stav-select"
                             data-reklamace-id="<?= htmlspecialchars($rek['reklamace_id']) ?>"
-                            onchange="zmenitStavReklamace('<?= htmlspecialchars($rek['reklamace_id']) ?>', this.value)"
+                            data-action="zmenitStavReklamace"
+                            data-id="<?= htmlspecialchars($rek['reklamace_id']) ?>"
                             style="padding: 0.05rem 0.4rem; background: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px;">
                         <option value="wait" <?= $rek['stav'] === 'wait' ? 'selected' : '' ?>>ČEKÁ</option>
                         <option value="open" <?= $rek['stav'] === 'open' ? 'selected' : '' ?>>ŘEŠÍ</option>

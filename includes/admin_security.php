@@ -969,7 +969,7 @@ async function nactiRegistracniKlice() {
             html += '</tr></thead><tbody>';
 
             data.keys.forEach(klic => {
-                html += '<tr style="border-bottom: 1px solid #e0e0e0;" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'#fff\'">';
+                html += '<tr class="admin-hover-row" style="border-bottom: 1px solid #e0e0e0;">';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><span style="display: inline-block; padding: 0.2rem 0.5rem; background: #000; color: #fff; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 500;">' + escapujHtml(klic.key_type) + '</span></td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><code style="background: #f5f5f5; padding: 0.25rem 0.5rem; font-size: 0.8rem; border: 1px solid #ddd;">' + escapujHtml(klic.key_code) + '</code></td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + klic.usage_count + ' / ' + (klic.max_usage || '∞') + '</td>';
@@ -1142,14 +1142,14 @@ function otevritPozvanku() {
                     <label style="flex: 1; display: flex; align-items: center; padding: 12px;
                                   background: #252525; border-radius: 6px; cursor: pointer;
                                   border: 2px solid transparent;" id="labelTechnik">
-                        <input type="radio" name="typPozvanky" value="technik" onchange="aktualizovatVyber()"
+                        <input type="radio" name="typPozvanky" value="technik" data-action="aktualizovatVyber"
                                style="width: 16px; height: 16px; margin-right: 10px; accent-color: #fff;">
                         <span style="color: #fff;">Technik</span>
                     </label>
                     <label style="flex: 1; display: flex; align-items: center; padding: 12px;
                                   background: #252525; border-radius: 6px; cursor: pointer;
                                   border: 2px solid transparent;" id="labelProdejce">
-                        <input type="radio" name="typPozvanky" value="prodejce" onchange="aktualizovatVyber()"
+                        <input type="radio" name="typPozvanky" value="prodejce" data-action="aktualizovatVyber"
                                style="width: 16px; height: 16px; margin-right: 10px; accent-color: #fff;">
                         <span style="color: #fff;">Prodejce</span>
                     </label>
