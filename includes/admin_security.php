@@ -342,22 +342,22 @@ endif;
 
     <!-- Tab Navigation -->
     <div class="cc-tabs">
-        <button class="cc-tab <?= $currentSection === 'prehled' ? 'active' : '' ?>" onclick="switchSection('prehled')">
+        <button class="cc-tab <?= $currentSection === 'prehled' ? 'active' : '' ?>" data-action="switchSecuritySection" data-section="prehled">
             Přehled
         </button>
-        <button class="cc-tab <?= $currentSection === 'registracni_klice' ? 'active' : '' ?>" onclick="switchSection('registracni_klice')">
+        <button class="cc-tab <?= $currentSection === 'registracni_klice' ? 'active' : '' ?>" data-action="switchSecuritySection" data-section="registracni_klice">
             Registrační klíče
         </button>
-        <button class="cc-tab <?= $currentSection === 'api_klice' ? 'active' : '' ?>" onclick="switchSection('api_klice')">
+        <button class="cc-tab <?= $currentSection === 'api_klice' ? 'active' : '' ?>" data-action="switchSecuritySection" data-section="api_klice">
             API Klíče
         </button>
-        <button class="cc-tab <?= $currentSection === 'bezpecnost' ? 'active' : '' ?>" onclick="switchSection('bezpecnost')">
+        <button class="cc-tab <?= $currentSection === 'bezpecnost' ? 'active' : '' ?>" data-action="switchSecuritySection" data-section="bezpecnost">
             Bezpečnost
         </button>
-        <button class="cc-tab <?= $currentSection === 'uzivatele' ? 'active' : '' ?>" onclick="switchSection('uzivatele')">
+        <button class="cc-tab <?= $currentSection === 'uzivatele' ? 'active' : '' ?>" data-action="switchSecuritySection" data-section="uzivatele">
             Uživatelé
         </button>
-        <button class="cc-tab <?= $currentSection === 'audit' ? 'active' : '' ?>" onclick="switchSection('audit')">
+        <button class="cc-tab <?= $currentSection === 'audit' ? 'active' : '' ?>" data-action="switchSecuritySection" data-section="audit">
             Audit Log
         </button>
     </div>
@@ -409,16 +409,16 @@ endif;
         <div class="setting-group">
             <h3 class="setting-group-title">Rychlé akce</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem;">
-                <button class="cc-btn cc-btn-primary" onclick="switchSection('registracni_klice')" style="font-size: 0.8rem; padding: 0.5rem;">
+                <button class="cc-btn cc-btn-primary" data-action="switchSecuritySection" data-section="registracni_klice" style="font-size: 0.8rem; padding: 0.5rem;">
                     Spravovat klíče
                 </button>
-                <button class="cc-btn cc-btn-secondary" onclick="switchSection('uzivatele')" style="font-size: 0.8rem; padding: 0.5rem;">
+                <button class="cc-btn cc-btn-secondary" data-action="switchSecuritySection" data-section="uzivatele" style="font-size: 0.8rem; padding: 0.5rem;">
                     Zobrazit uživatele
                 </button>
-                <button class="cc-btn cc-btn-secondary" onclick="switchSection('audit')" style="font-size: 0.8rem; padding: 0.5rem;">
+                <button class="cc-btn cc-btn-secondary" data-action="switchSecuritySection" data-section="audit" style="font-size: 0.8rem; padding: 0.5rem;">
                     Audit Log
                 </button>
-                <button class="cc-btn cc-btn-secondary" onclick="switchSection('api_klice')" style="font-size: 0.8rem; padding: 0.5rem;">
+                <button class="cc-btn cc-btn-secondary" data-action="switchSecuritySection" data-section="api_klice" style="font-size: 0.8rem; padding: 0.5rem;">
                     API Klíče
                 </button>
             </div>
@@ -430,9 +430,9 @@ endif;
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <h2 style="margin: 0; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Registrační klíče</h2>
             <div style="display: flex; gap: 0.5rem;">
-                <button onclick="otevritPozvanku()" class="cc-btn cc-btn-primary" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">Pozvat</button>
-                <button onclick="vytvorNovyKlic()" class="cc-btn cc-btn-success" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">+ Nový</button>
-                <button onclick="nactiRegistracniKlice()" class="cc-btn cc-btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">Obnovit</button>
+                <button data-action="otevritPozvanku" class="cc-btn cc-btn-primary" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">Pozvat</button>
+                <button data-action="vytvorNovyKlic" class="cc-btn cc-btn-success" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">+ Nový</button>
+                <button data-action="nactiRegistracniKlice" class="cc-btn cc-btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">Obnovit</button>
             </div>
         </div>
 
@@ -478,12 +478,12 @@ endif;
                                placeholder="API klíč Geoapify"
                                style="flex: 1; font-family: monospace; font-size: 0.85rem;">
                         <button class="cc-btn cc-btn-sm cc-btn-secondary"
-                                onclick="togglePasswordVisibilitySimple('api-geoapify')"
+                                data-action="togglePasswordVisibilitySimple" data-input="api-geoapify"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Zobrazit
                         </button>
                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                onclick="ulozitApiKlic('GEOAPIFY_API_KEY', 'api-geoapify')"
+                                data-action="ulozitApiKlic" data-key="GEOAPIFY_API_KEY" data-input="api-geoapify"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Uložit
                         </button>
@@ -510,7 +510,7 @@ endif;
                                placeholder="smtp.gmail.com"
                                style="flex: 1; font-size: 0.85rem;">
                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                onclick="ulozitApiKlic('SMTP_HOST', 'api-smtp-host')"
+                                data-action="ulozitApiKlic" data-key="SMTP_HOST" data-input="api-smtp-host"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Uložit
                         </button>
@@ -532,7 +532,7 @@ endif;
                                placeholder="587"
                                style="width: 120px; font-size: 0.85rem;">
                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                onclick="ulozitApiKlic('SMTP_PORT', 'api-smtp-port')"
+                                data-action="ulozitApiKlic" data-key="SMTP_PORT" data-input="api-smtp-port"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Uložit
                         </button>
@@ -554,7 +554,7 @@ endif;
                                placeholder="user@example.com"
                                style="flex: 1; font-size: 0.85rem;">
                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                onclick="ulozitApiKlic('SMTP_USER', 'api-smtp-user')"
+                                data-action="ulozitApiKlic" data-key="SMTP_USER" data-input="api-smtp-user"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Uložit
                         </button>
@@ -576,12 +576,12 @@ endif;
                                placeholder="••••••••"
                                style="flex: 1; font-family: monospace; font-size: 0.85rem;">
                         <button class="cc-btn cc-btn-sm cc-btn-secondary"
-                                onclick="togglePasswordVisibilitySimple('api-smtp-pass')"
+                                data-action="togglePasswordVisibilitySimple" data-input="api-smtp-pass"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Zobrazit
                         </button>
                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                onclick="ulozitApiKlic('SMTP_PASS', 'api-smtp-pass')"
+                                data-action="ulozitApiKlic" data-key="SMTP_PASS" data-input="api-smtp-pass"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Uložit
                         </button>
@@ -618,12 +618,12 @@ endif;
                                            placeholder="<?= $config['config_value_display'] ?>"
                                            style="flex: 1; font-family: monospace; font-size: 0.85rem;">
                                     <button class="cc-btn cc-btn-sm cc-btn-secondary"
-                                            onclick="togglePasswordVisibility(<?= $config['id'] ?>)"
+                                            data-action="togglePasswordVisibility" data-id="<?= $config['id'] ?>"
                                             style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                                         Zobrazit
                                     </button>
                                     <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                            onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')"
+                                            data-action="saveSecurityConfig" data-id="<?= $config['id'] ?>" data-key="<?= htmlspecialchars($config['config_key']) ?>"
                                             style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                                         Uložit
                                     </button>
@@ -676,7 +676,7 @@ endif;
                                placeholder="Nové heslo"
                                style="flex: 1; font-size: 0.85rem;">
                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                onclick="zmenitAdminHeslo()"
+                                data-action="zmenitAdminHeslo"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Změnit
                         </button>
@@ -706,7 +706,7 @@ endif;
                                placeholder="Nové heslo"
                                style="flex: 1; font-size: 0.85rem;">
                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                onclick="resetovatUzivatelskeHeslo()"
+                                data-action="resetovatUzivatelskeHeslo"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                                 Reset
                         </button>
@@ -742,7 +742,7 @@ endif;
                                            value="<?= htmlspecialchars($config['config_value']) ?>"
                                            style="width: 120px;">
                                     <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                            onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')"
+                                            data-action="saveSecurityConfig" data-id="<?= $config['id'] ?>" data-key="<?= htmlspecialchars($config['config_key']) ?>"
                                             style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                                         Uložit
                                     </button>
@@ -830,7 +830,7 @@ endif;
                     </select>
                 </div>
                 <div style="display: flex; align-items: flex-end;">
-                    <button onclick="nactiAuditLogy()" style="width: 100%; padding: 0.5rem 1rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; text-transform: uppercase;">
+                    <button data-action="nactiAuditLogy" style="width: 100%; padding: 0.5rem 1rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; text-transform: uppercase;">
                         Načíst záznamy
                     </button>
                 </div>
@@ -975,8 +975,8 @@ async function nactiRegistracniKlice() {
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + klic.usage_count + ' / ' + (klic.max_usage || '∞') + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + (klic.is_active ? '<span style="color: #000;">Ano</span>' : '<span style="color: #999;">Ne</span>') + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + new Date(klic.created_at).toLocaleDateString('cs-CZ') + '</td>';
-                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><button onclick="kopirovatDoSchranky(\'' + klic.key_code.replace(/'/g, "\\'") + '\')" class="cc-btn cc-btn-sm cc-btn-primary" style="margin-right: 0.25rem;">Kopírovat</button>';
-                html += '<button onclick="smazatKlic(\'' + klic.key_code.replace(/'/g, "\\'") + '\')" class="cc-btn cc-btn-sm cc-btn-secondary">Smazat</button></td>';
+                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><button data-action="kopirovatDoSchranky" data-code="' + escapujHtml(klic.key_code) + '" class="cc-btn cc-btn-sm cc-btn-primary" style="margin-right: 0.25rem;">Kopírovat</button>';
+                html += '<button data-action="smazatKlic" data-code="' + escapujHtml(klic.key_code) + '" class="cc-btn cc-btn-sm cc-btn-secondary">Smazat</button></td>';
                 html += '</tr>';
             });
 
@@ -1038,12 +1038,12 @@ function vytvorNovyKlic() {
             </div>
 
             <div style="display: flex; gap: 10px;">
-                <button onclick="odeslatVytvoreniKlice()" style="flex: 1; padding: 12px;
+                <button data-action="odeslatVytvoreniKlice" style="flex: 1; padding: 12px;
                         background: #fff; color: #000; border: none; border-radius: 6px;
                         font-weight: 600; cursor: pointer; font-size: 1rem;">
                     Vytvořit klíč
                 </button>
-                <button onclick="document.getElementById('modalVytvorKlic').remove()"
+                <button data-action="zavritModalVytvorKlic"
                         style="flex: 1; padding: 12px; background: #333; color: #fff;
                         border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">
                     Zrušit
@@ -1130,7 +1130,7 @@ function otevritPozvanku() {
             <!-- Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                 <h3 style="margin: 0; color: #fff; font-size: 1.2rem;">Odeslat pozvanku</h3>
-                <button onclick="document.getElementById('modalPozvanka').remove()"
+                <button data-action="zavritModalPozvanka"
                         aria-label="Zavřít"
                         style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer;">&times;</button>
             </div>
@@ -1188,12 +1188,12 @@ function otevritPozvanku() {
 
             <!-- Tlacitka -->
             <div style="display: flex; gap: 10px;">
-                <button onclick="odeslatPozvanky()" id="btnOdeslatPozvanky" disabled
+                <button data-action="odeslatPozvanky" id="btnOdeslatPozvanky" disabled
                         style="flex: 1; padding: 12px; background: #fff; color: #000; border: none;
                         border-radius: 6px; font-weight: 600; cursor: pointer; opacity: 0.5;">
                     Odeslat
                 </button>
-                <button onclick="document.getElementById('modalPozvanka').remove()"
+                <button data-action="zavritModalPozvanka"
                         style="flex: 1; padding: 12px; background: #333; color: #fff;
                         border: none; border-radius: 6px; cursor: pointer;">
                     Zrusit
@@ -1807,6 +1807,47 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 console.log('Security centrum načteno');
+
+// ACTION REGISTRY - Step 113
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('switchSecuritySection', (el, data) => {
+        if (data.section) switchSection(data.section);
+    });
+    Utils.registerAction('otevritPozvanku', () => otevritPozvanku());
+    Utils.registerAction('vytvorNovyKlic', () => vytvorNovyKlic());
+    Utils.registerAction('nactiRegistracniKlice', () => nactiRegistracniKlice());
+    Utils.registerAction('togglePasswordVisibilitySimple', (el, data) => {
+        if (data.input) togglePasswordVisibilitySimple(data.input);
+    });
+    Utils.registerAction('ulozitApiKlic', (el, data) => {
+        if (data.key && data.input) ulozitApiKlic(data.key, data.input);
+    });
+    Utils.registerAction('togglePasswordVisibility', (el, data) => {
+        if (data.id) togglePasswordVisibility(parseInt(data.id));
+    });
+    Utils.registerAction('saveSecurityConfig', (el, data) => {
+        if (data.id && data.key) saveConfig(parseInt(data.id), data.key);
+    });
+    Utils.registerAction('zmenitAdminHeslo', () => zmenitAdminHeslo());
+    Utils.registerAction('resetovatUzivatelskeHeslo', () => resetovatUzivatelskeHeslo());
+    Utils.registerAction('nactiAuditLogy', () => nactiAuditLogy());
+    Utils.registerAction('kopirovatDoSchranky', (el, data) => {
+        if (data.code) kopirovatDoSchranky(data.code);
+    });
+    Utils.registerAction('smazatKlic', (el, data) => {
+        if (data.code) smazatKlic(data.code);
+    });
+    Utils.registerAction('odeslatVytvoreniKlice', () => odeslatVytvoreniKlice());
+    Utils.registerAction('zavritModalVytvorKlic', () => {
+        const modal = document.getElementById('modalVytvorKlic');
+        if (modal) modal.remove();
+    });
+    Utils.registerAction('zavritModalPozvanka', () => {
+        const modal = document.getElementById('modalPozvanka');
+        if (modal) modal.remove();
+    });
+    Utils.registerAction('odeslatPozvanky', () => odeslatPozvanky());
+}
 
 </script>
 
