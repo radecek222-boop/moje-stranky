@@ -77,7 +77,7 @@ try {
     <div class="control-center-grid" id="cc-grid">
 
         <!-- 1. VZHLED & DESIGN -->
-        <div class="control-card" data-section="appearance" onclick="openSection('appearance')">
+        <div class="control-card" data-section="appearance" data-action="openSection">
             <div class="control-card-header">
                 <div>
                     <div class="control-card-icon">🎨</div>
@@ -93,7 +93,7 @@ try {
         </div>
 
         <!-- 2. SQL DATABÁZE -->
-        <div class="control-card" data-section="sql" onclick="window.open('vsechny_tabulky.php', '_blank')">
+        <div class="control-card" data-section="sql" data-action="openNewWindow" data-url="vsechny_tabulky.php">
             <div class="control-card-header">
                 <div>
                     <div class="control-card-icon">🗄️</div>
@@ -109,7 +109,7 @@ try {
         </div>
 
         <!-- 3. UŽIVATELÉ & OPRÁVNĚNÍ -->
-        <div class="control-card" data-section="users" onclick="openSection('users')">
+        <div class="control-card" data-section="users" data-action="openSection">
             <?php if ($userCount > 0): ?>
                 <div class="control-card-badge"><?= $userCount ?></div>
             <?php endif; ?>
@@ -128,7 +128,7 @@ try {
         </div>
 
         <!-- 4. NOTIFIKACE -->
-        <div class="control-card" data-section="notifications" onclick="openSection('notifications')">
+        <div class="control-card" data-section="notifications" data-action="openSection">
             <?php if ($notificationCount > 0): ?>
                 <div class="control-card-badge success"><?= $notificationCount ?></div>
             <?php endif; ?>
@@ -147,7 +147,7 @@ try {
         </div>
 
         <!-- 5. KONFIGURACE -->
-        <div class="control-card" data-section="configuration" onclick="openSection('configuration')">
+        <div class="control-card" data-section="configuration" data-action="openSection">
             <div class="control-card-badge warning">⚠️</div>
             <div class="control-card-header">
                 <div>
@@ -164,7 +164,7 @@ try {
         </div>
 
         <!-- 6. DIAGNOSTIKA -->
-        <div class="control-card" data-section="diagnostics" onclick="openSection('diagnostics')">
+        <div class="control-card" data-section="diagnostics" data-action="openSection">
             <div class="control-card-badge <?= $systemStatus === 'healthy' ? 'success' : ($systemStatus === 'warning' ? 'warning' : '') ?>">
                 <?= $systemStatus === 'healthy' ? '✓' : '!' ?>
             </div>
@@ -183,7 +183,7 @@ try {
         </div>
 
         <!-- 7. AKCE & ÚKOLY -->
-        <div class="control-card" data-section="actions" onclick="openSection('actions')">
+        <div class="control-card" data-section="actions" data-action="openSection">
             <?php if ($pendingCount > 0): ?>
                 <div class="control-card-badge"><?= $pendingCount ?></div>
             <?php endif; ?>
@@ -202,7 +202,7 @@ try {
         </div>
 
         <!-- 8. KONZOLE -->
-        <div class="control-card" data-section="console" onclick="openSection('console')">
+        <div class="control-card" data-section="console" data-action="openSection">
             <div class="control-card-badge warning">⚡</div>
             <div class="control-card-header">
                 <div>
@@ -219,7 +219,7 @@ try {
         </div>
 
         <!-- 9. STATISTIKY & REPORTY -->
-        <div class="control-card" data-section="analytics" onclick="openSection('analytics')">
+        <div class="control-card" data-section="analytics" data-action="openSection">
             <div class="control-card-header">
                 <div>
                     <div class="control-card-icon">[STAT]</div>

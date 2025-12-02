@@ -152,7 +152,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
         </div>
 
         <div class="wizard-buttons">
-          <button class="btn-primary" onclick="nextStep()" data-lang-cs="Pokračovat" data-lang-en="Continue" data-lang-it="Continua">Pokračovat</button>
+          <button class="btn-primary" data-action="nextStep" data-lang-cs="Pokračovat" data-lang-en="Continue" data-lang-it="Continua">Pokračovat</button>
         </div>
       </div>
 
@@ -200,8 +200,8 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
         </div>
 
         <div class="wizard-buttons">
-          <button class="btn-secondary" onclick="previousStep()" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
-          <button class="btn-primary" onclick="nextStep()" data-lang-cs="Pokračovat" data-lang-en="Continue" data-lang-it="Continua">Pokračovat</button>
+          <button class="btn-secondary" data-action="previousStep" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
+          <button class="btn-primary" data-action="nextStep" data-lang-cs="Pokračovat" data-lang-en="Continue" data-lang-it="Continua">Pokračovat</button>
         </div>
       </div>
 
@@ -214,36 +214,36 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
           <div class="counter-item">
             <label data-lang-cs="Sedáky" data-lang-en="Seats" data-lang-it="Sedili">Sedáky</label>
             <div class="counter-controls">
-              <button class="btn-counter" onclick="decrementCounter('sedaky')" aria-label="Snížit počet sedáků">−</button>
+              <button class="btn-counter" data-action="decrementCounter" data-counter="sedaky" aria-label="Snížit počet sedáků">−</button>
               <input type="number" id="sedaky" value="0" min="0" max="20" readonly aria-label="Počet sedáků">
-              <button class="btn-counter" onclick="incrementCounter('sedaky')" aria-label="Zvýšit počet sedáků">+</button>
+              <button class="btn-counter" data-action="incrementCounter" data-counter="sedaky" aria-label="Zvýšit počet sedáků">+</button>
             </div>
           </div>
 
           <div class="counter-item">
             <label data-lang-cs="Opěrky" data-lang-en="Backrests" data-lang-it="Schienali">Opěrky</label>
             <div class="counter-controls">
-              <button class="btn-counter" onclick="decrementCounter('operky')" aria-label="Snížit počet opěrek">−</button>
+              <button class="btn-counter" data-action="decrementCounter" data-counter="operky" aria-label="Snížit počet opěrek">−</button>
               <input type="number" id="operky" value="0" min="0" max="20" readonly aria-label="Počet opěrek">
-              <button class="btn-counter" onclick="incrementCounter('operky')" aria-label="Zvýšit počet opěrek">+</button>
+              <button class="btn-counter" data-action="incrementCounter" data-counter="operky" aria-label="Zvýšit počet opěrek">+</button>
             </div>
           </div>
 
           <div class="counter-item">
             <label data-lang-cs="Područky" data-lang-en="Armrests" data-lang-it="Braccioli">Područky</label>
             <div class="counter-controls">
-              <button class="btn-counter" onclick="decrementCounter('podrucky')" aria-label="Snížit počet područek">−</button>
+              <button class="btn-counter" data-action="decrementCounter" data-counter="podrucky" aria-label="Snížit počet područek">−</button>
               <input type="number" id="podrucky" value="0" min="0" max="20" readonly aria-label="Počet područek">
-              <button class="btn-counter" onclick="incrementCounter('podrucky')" aria-label="Zvýšit počet područek">+</button>
+              <button class="btn-counter" data-action="incrementCounter" data-counter="podrucky" aria-label="Zvýšit počet područek">+</button>
             </div>
           </div>
 
           <div class="counter-item">
             <label data-lang-cs="Panely (zadní/boční)" data-lang-en="Panels (back/side)" data-lang-it="Pannelli (posteriore/laterale)">Panely (zadní/boční)</label>
             <div class="counter-controls">
-              <button class="btn-counter" onclick="decrementCounter('panely')" aria-label="Snížit počet panelů">−</button>
+              <button class="btn-counter" data-action="decrementCounter" data-counter="panely" aria-label="Snížit počet panelů">−</button>
               <input type="number" id="panely" value="0" min="0" max="20" readonly aria-label="Počet panelů">
-              <button class="btn-counter" onclick="incrementCounter('panely')" aria-label="Zvýšit počet panelů">+</button>
+              <button class="btn-counter" data-action="incrementCounter" data-counter="panely" aria-label="Zvýšit počet panelů">+</button>
             </div>
           </div>
         </div>
@@ -254,8 +254,8 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
         </div>
 
         <div class="wizard-buttons">
-          <button class="btn-secondary" onclick="previousStep()" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
-          <button class="btn-primary" onclick="nextStep()" data-lang-cs="Pokračovat" data-lang-en="Continue" data-lang-it="Continua">Pokračovat</button>
+          <button class="btn-secondary" data-action="previousStep" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
+          <button class="btn-primary" data-action="nextStep" data-lang-cs="Pokračovat" data-lang-en="Continue" data-lang-it="Continua">Pokračovat</button>
         </div>
       </div>
 
@@ -268,9 +268,9 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
           <div class="counter-item">
             <label data-lang-cs="Relax mechanismy" data-lang-en="Relax mechanisms" data-lang-it="Meccanismi relax">Relax mechanismy</label>
             <div class="counter-controls">
-              <button class="btn-counter" onclick="decrementCounter('relax')" aria-label="Snížit počet relax mechanismů">−</button>
+              <button class="btn-counter" data-action="decrementCounter" data-counter="relax" aria-label="Snížit počet relax mechanismů">−</button>
               <input type="number" id="relax" value="0" min="0" max="10" readonly aria-label="Počet relax mechanismů">
-              <button class="btn-counter" onclick="incrementCounter('relax')" aria-label="Zvýšit počet relax mechanismů">+</button>
+              <button class="btn-counter" data-action="incrementCounter" data-counter="relax" aria-label="Zvýšit počet relax mechanismů">+</button>
             </div>
             <div class="counter-price" data-lang-cs="45 € / kus" data-lang-en="45 € / piece" data-lang-it="45 € / pezzo">45 € / kus</div>
           </div>
@@ -278,17 +278,17 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
           <div class="counter-item">
             <label data-lang-cs="Elektrické díly" data-lang-en="Electrical parts" data-lang-it="Parti elettriche">Elektrické díly</label>
             <div class="counter-controls">
-              <button class="btn-counter" onclick="decrementCounter('vysuv')" aria-label="Snížit počet elektrických dílů">−</button>
+              <button class="btn-counter" data-action="decrementCounter" data-counter="vysuv" aria-label="Snížit počet elektrických dílů">−</button>
               <input type="number" id="vysuv" value="0" min="0" max="10" readonly aria-label="Počet elektrických dílů">
-              <button class="btn-counter" onclick="incrementCounter('vysuv')" aria-label="Zvýšit počet elektrických dílů">+</button>
+              <button class="btn-counter" data-action="incrementCounter" data-counter="vysuv" aria-label="Zvýšit počet elektrických dílů">+</button>
             </div>
             <div class="counter-price" data-lang-cs="45 € / kus" data-lang-en="45 € / piece" data-lang-it="45 € / pezzo">45 € / kus</div>
           </div>
         </div>
 
         <div class="wizard-buttons">
-          <button class="btn-secondary" onclick="previousStep()" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
-          <button class="btn-primary" onclick="nextStep()" data-lang-cs="Pokračovat" data-lang-en="Continue" data-lang-it="Continua">Pokračovat</button>
+          <button class="btn-secondary" data-action="previousStep" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
+          <button class="btn-primary" data-action="nextStep" data-lang-cs="Pokračovat" data-lang-en="Continue" data-lang-it="Continua">Pokračovat</button>
         </div>
       </div>
 
@@ -318,8 +318,8 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
         </div>
 
         <div class="wizard-buttons">
-          <button class="btn-secondary" onclick="previousStep()" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
-          <button class="btn-primary" onclick="nextStep()" data-lang-cs="Zobrazit souhrn" data-lang-en="Show Summary" data-lang-it="Mostra Riepilogo">Zobrazit souhrn</button>
+          <button class="btn-secondary" data-action="previousStep" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
+          <button class="btn-primary" data-action="nextStep" data-lang-cs="Zobrazit souhrn" data-lang-en="Show Summary" data-lang-it="Mostra Riepilogo">Zobrazit souhrn</button>
         </div>
       </div>
 
@@ -344,9 +344,9 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
         </div>
 
         <div class="wizard-buttons">
-          <button class="btn-secondary" onclick="previousStep()" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
-          <button class="btn-primary" onclick="exportovatCenikPDF()" data-lang-cs="Export do PDF" data-lang-en="Export to PDF" data-lang-it="Esporta in PDF">Export do PDF</button>
-          <button class="btn-primary" onclick="resetovatKalkulacku()" data-lang-cs="Nová kalkulace" data-lang-en="New Calculation" data-lang-it="Nuovo Calcolo">Nová kalkulace</button>
+          <button class="btn-secondary" data-action="previousStep" data-lang-cs="Zpět" data-lang-en="Back" data-lang-it="Indietro">Zpět</button>
+          <button class="btn-primary" data-action="exportovatCenikPDF" data-lang-cs="Export do PDF" data-lang-en="Export to PDF" data-lang-it="Esporta in PDF">Export do PDF</button>
+          <button class="btn-primary" data-action="resetovatKalkulacku" data-lang-cs="Nová kalkulace" data-lang-en="New Calculation" data-lang-it="Nuovo Calcolo">Nová kalkulace</button>
         </div>
       </div>
 
@@ -381,8 +381,8 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
     <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
     <!-- Admin Tlačítka -->
     <div class="admin-actions" style="margin-top: 40px; text-align: center; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-      <button class="btn-admin" onclick="pridatPolozku()" data-lang-cs="+ Přidat novou položku" data-lang-en="+ Add New Item" data-lang-it="+ Aggiungi Nuovo Elemento">+ Přidat novou položku</button>
-      <button class="btn-admin" onclick="exportovatCenikDoPDF()" data-lang-cs="Export ceniku do PDF" data-lang-en="Export Pricing to PDF" data-lang-it="Esporta Listino in PDF">Export ceniku do PDF</button>
+      <button class="btn-admin" data-action="pridatPolozku" data-lang-cs="+ Přidat novou položku" data-lang-en="+ Add New Item" data-lang-it="+ Aggiungi Nuovo Elemento">+ Přidat novou položku</button>
+      <button class="btn-admin" data-action="exportovatCenikDoPDF" data-lang-cs="Export ceniku do PDF" data-lang-en="Export Pricing to PDF" data-lang-it="Esporta Listino in PDF">Export ceniku do PDF</button>
     </div>
     <?php endif; ?>
 
@@ -440,7 +440,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
 <div id="edit-modal" class="modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal-content">
-    <span class="modal-close" onclick="zavritModal()" role="button" tabindex="0" aria-label="Zavřít">&times;</span>
+    <span class="modal-close" data-action="zavritModal" role="button" tabindex="0" aria-label="Zavřít">&times;</span>
     <h2 id="modal-title" data-lang-cs="Upravit položku" data-lang-en="Edit Item" data-lang-it="Modifica Elemento">Upravit položku</h2>
 
     <!-- Info: Upravuješ v aktuálním jazyce stránky -->
@@ -452,7 +452,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
       </span>
     </div>
 
-    <form id="edit-form" onsubmit="ulozitPolozku(event)">
+    <form id="edit-form">
       <input type="hidden" id="item-id" name="id">
       <input type="hidden" id="edit-lang" name="edit_lang" value="cs">
 
@@ -499,9 +499,9 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
       </div>
 
       <div class="modal-actions">
-        <button type="button" class="btn-secondary" onclick="zavritModal()" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
+        <button type="button" class="btn-secondary" data-action="zavritModal" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
         <button type="submit" class="btn-primary" data-lang-cs="Uložit" data-lang-en="Save" data-lang-it="Salva">Uložit</button>
-        <button type="button" class="btn-danger" onclick="smazatPolozku()" id="delete-btn" style="display: none;" data-lang-cs="Smazat" data-lang-en="Delete" data-lang-it="Elimina">Smazat</button>
+        <button type="button" class="btn-danger" data-action="smazatPolozku" id="delete-btn" style="display: none;" data-lang-cs="Smazat" data-lang-en="Delete" data-lang-it="Elimina">Smazat</button>
       </div>
     </form>
   </div>
@@ -523,6 +523,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <?php endif; ?>
 
 <!-- External JavaScript -->
+<script src="assets/js/utils.min.js" defer></script>
 <script src="assets/js/logger.min.js" defer></script>
 <script src="assets/js/wgs-map.min.js" defer></script>
 

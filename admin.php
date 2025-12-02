@@ -156,42 +156,42 @@ if (!$embedMode && $activeTab === 'dashboard'):
         <p class="admin-dashboard-subtitle" data-lang-cs="Centrální řídicí panel pro správu celé aplikace" data-lang-en="Central control panel for managing the entire application" data-lang-it="Pannello di controllo centrale per la gestione dell'intera applicazione">Centrální řídicí panel pro správu celé aplikace</p>
         <div class="admin-dashboard-actions">
             <span class="admin-version-info" id="adminVersionInfo" title="Verze Admin - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
-            <button class="admin-cache-btn" onclick="clearCacheAndReload()" data-lang-cs="Vymazat cache & Reload" data-lang-en="Clear cache & Reload" data-lang-it="Cancella cache & Ricarica">Vymazat cache & Reload</button>
+            <button class="admin-cache-btn" data-action="clearCacheAndReload" data-lang-cs="Vymazat cache & Reload" data-lang-en="Clear cache & Reload" data-lang-it="Cancella cache & Ricarica">Vymazat cache & Reload</button>
         </div>
     </div>
 
     <div class="cc-grid">
-        <div class="cc-card" onclick="window.location='seznam.php'">
+        <div class="cc-card" data-href="seznam.php">
             <div class="cc-card-title" data-lang-cs="Seznam reklamací" data-lang-en="Claims List" data-lang-it="Elenco Reclami">Seznam reklamací</div>
             <div class="cc-card-description" data-lang-cs="Přehled všech reklamací a servisních požadavků" data-lang-en="Overview of all claims and service requests" data-lang-it="Panoramica di tutti i reclami e le richieste di servizio">Přehled všech reklamací a servisních požadavků</div>
         </div>
 
-        <div class="cc-card" onclick="window.location='admin.php?tab=zakaznici'">
+        <div class="cc-card" data-href="admin.php?tab=zakaznici">
             <div class="cc-card-title" data-lang-cs="Seznam zákazníků" data-lang-en="Customer List" data-lang-it="Elenco Clienti">Seznam zákazníků</div>
             <div class="cc-card-description" data-lang-cs="Přehled všech zákazníků s kontaktními údaji a zakázkami" data-lang-en="Overview of all customers with contact information and orders" data-lang-it="Panoramica di tutti i clienti con informazioni di contatto e ordini">Přehled všech zákazníků s kontaktními údaji a zakázkami</div>
         </div>
 
-        <div class="cc-card" onclick="window.location='statistiky.php'">
+        <div class="cc-card" data-href="statistiky.php">
             <div class="cc-card-title" data-lang-cs="Statistiky" data-lang-en="Statistics" data-lang-it="Statistiche">Statistiky</div>
             <div class="cc-card-description" data-lang-cs="Přehledy, grafy a analytické reporty" data-lang-en="Overviews, charts and analytical reports" data-lang-it="Panoramiche, grafici e report analitici">Přehledy, grafy a analytické reporty</div>
         </div>
 
-        <div class="cc-card" onclick="window.location='analytics.php'">
+        <div class="cc-card" data-href="analytics.php">
             <div class="cc-card-title" data-lang-cs="Web Analytics" data-lang-en="Web Analytics" data-lang-it="Web Analytics">Web Analytics</div>
             <div class="cc-card-description" data-lang-cs="Návštěvnost webu, zařízení, konverze" data-lang-en="Website traffic, devices, conversions" data-lang-it="Traffico sito web, dispositivi, conversioni">Návštěvnost webu, zařízení, konverze</div>
         </div>
 
-        <div class="cc-card" onclick="window.location='aktuality.php'">
+        <div class="cc-card" data-href="aktuality.php">
             <div class="cc-card-title" data-lang-cs="Natuzzi Aktuality" data-lang-en="Natuzzi News" data-lang-it="Notizie Natuzzi">Natuzzi Aktuality</div>
             <div class="cc-card-description" data-lang-cs="Automatické denní aktuality o značce Natuzzi (CZ/EN/IT)" data-lang-en="Automatic daily news about Natuzzi brand (CZ/EN/IT)" data-lang-it="Notizie quotidiane automatiche sul marchio Natuzzi (CZ/EN/IT)">Automatické denní aktuality o značce Natuzzi (CZ/EN/IT)</div>
         </div>
 
-        <div class="cc-card" onclick="window.location='admin.php?tab=users'">
+        <div class="cc-card" data-href="admin.php?tab=users">
             <div class="cc-card-title" data-lang-cs="Uživatelé" data-lang-en="Users" data-lang-it="Utenti">Uživatelé</div>
             <div class="cc-card-description" data-lang-cs="Správa uživatelských účtů a oprávnění" data-lang-en="User account and permission management" data-lang-it="Gestione account utente e permessi">Správa uživatelských účtů a oprávnění</div>
         </div>
 
-        <div class="cc-card" onclick="window.location='admin.php?tab=keys'">
+        <div class="cc-card" data-href="admin.php?tab=keys">
             <?php if ($activeKeys > 0): ?>
                 <div class="cc-card-badge"><?= $activeKeys ?></div>
             <?php endif; ?>
@@ -199,22 +199,22 @@ if (!$embedMode && $activeTab === 'dashboard'):
             <div class="cc-card-description" data-lang-cs="Registrační klíče, API klíče, bezpečnostní nastavení" data-lang-en="Registration keys, API keys, security settings" data-lang-it="Chiavi di registrazione, chiavi API, impostazioni di sicurezza">Registrační klíče, API klíče, bezpečnostní nastavení</div>
         </div>
 
-        <div class="cc-card" onclick="window.location='admin.php?tab=notifications'">
+        <div class="cc-card" data-href="admin.php?tab=notifications">
             <div class="cc-card-title" data-lang-cs="Email & SMS" data-lang-en="Email & SMS" data-lang-it="Email & SMS">Email & SMS</div>
             <div class="cc-card-description" data-lang-cs="Správa emailových a SMS notifikací" data-lang-en="Email and SMS notification management" data-lang-it="Gestione notifiche email e SMS">Správa emailových a SMS notifikací</div>
         </div>
 
-        <div class="cc-card" onclick="window.location='admin.php?tab=online'">
+        <div class="cc-card" data-href="admin.php?tab=online">
             <div class="cc-card-title" data-lang-cs="Online uživatelé" data-lang-en="Online Users" data-lang-it="Utenti Online">Online uživatelé</div>
             <div class="cc-card-description" data-lang-cs="Aktuálně přihlášení uživatelé v systému" data-lang-en="Currently logged in users in the system" data-lang-it="Utenti attualmente connessi al sistema">Aktuálně přihlášení uživatelé v systému</div>
         </div>
 
-        <div class="cc-card" onclick="window.location='admin.php?tab=admin_configuration'">
+        <div class="cc-card" data-href="admin.php?tab=admin_configuration">
             <div class="cc-card-title" data-lang-cs="Konfigurace" data-lang-en="Configuration" data-lang-it="Configurazione">Konfigurace</div>
             <div class="cc-card-description" data-lang-cs="SMTP, API klíče, systémová nastavení" data-lang-en="SMTP, API keys, system settings" data-lang-it="SMTP, chiavi API, impostazioni di sistema">SMTP, API klíče, systémová nastavení</div>
         </div>
 
-        <div class="cc-card" onclick="window.location='admin.php?tab=admin_actions'">
+        <div class="cc-card" data-href="admin.php?tab=admin_actions">
             <?php if ($pendingActions > 0): ?>
                 <div class="cc-card-badge"><?= $pendingActions ?></div>
             <?php endif; ?>
@@ -222,17 +222,17 @@ if (!$embedMode && $activeTab === 'dashboard'):
             <div class="cc-card-description" data-lang-cs="Nevyřešené úkoly a plánované akce" data-lang-en="Unresolved tasks and scheduled actions" data-lang-it="Compiti non risolti e azioni pianificate">Nevyřešené úkoly a plánované akce</div>
         </div>
 
-        <div class="cc-card" onclick="window.location='admin.php?tab=admin_testing_simulator'">
+        <div class="cc-card" data-href="admin.php?tab=admin_testing_simulator">
             <div class="cc-card-title" data-lang-cs="E2E Testing" data-lang-en="E2E Testing" data-lang-it="Test E2E">E2E Testing</div>
             <div class="cc-card-description" data-lang-cs="End-to-end testování celého workflow" data-lang-en="End-to-end testing of entire workflow" data-lang-it="Test end-to-end dell'intero flusso di lavoro">End-to-end testování celého workflow</div>
         </div>
 
-        <div class="cc-card" onclick="window.location='admin.php?tab=admin_console'">
+        <div class="cc-card" data-href="admin.php?tab=admin_console">
             <div class="cc-card-title" data-lang-cs="Konzole" data-lang-en="Console" data-lang-it="Console">Konzole</div>
             <div class="cc-card-description" data-lang-cs="Diagnostika HTML/PHP/JS/CSS/SQL" data-lang-en="Diagnostics HTML/PHP/JS/CSS/SQL" data-lang-it="Diagnostica HTML/PHP/JS/CSS/SQL">Diagnostika HTML/PHP/JS/CSS/SQL</div>
         </div>
 
-        <div class="cc-card" onclick="openSQLPage()">
+        <div class="cc-card" data-action="openSQLPage">
             <div class="cc-card-title" data-lang-cs="SQL Databáze" data-lang-en="SQL Database" data-lang-it="Database SQL">SQL Databáze</div>
             <div class="cc-card-description" data-lang-cs="Zobrazit všechny SQL tabulky (aktuální živá data)" data-lang-en="View all SQL tables (current live data)" data-lang-it="Visualizza tutte le tabelle SQL (dati live attuali)">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
         </div>
@@ -526,7 +526,7 @@ body {
         </div>
 
         <!-- Příjemci emailů -->
-        <div class="notif-card" onclick="openNotifModal('email-recipients')">
+        <div class="notif-card" data-action="openNotifModal" data-modal="email-recipients">
           <div class="notif-card-title">Příjemci emailů</div>
           <div class="notif-card-description">Správa seznamu příjemců pro různé typy notifikací</div>
           <div class="notif-card-meta">
@@ -535,7 +535,7 @@ body {
         </div>
 
         <!-- Automatické notifikace -->
-        <div class="notif-card" onclick="openNotifModal('auto-notifications')">
+        <div class="notif-card" data-action="openNotifModal" data-modal="auto-notifications">
           <div class="notif-card-title">Automatické notifikace</div>
           <div class="notif-card-description">Nastavení pravidel pro automatické odesílání emailů a SMS</div>
           <div class="notif-card-meta">
@@ -544,7 +544,7 @@ body {
         </div>
 
         <!-- SMTP nastavení -->
-        <div class="notif-card" onclick="openNotifModal('smtp-settings')">
+        <div class="notif-card" data-action="openNotifModal" data-modal="smtp-settings">
           <div class="notif-card-title">SMTP nastavení</div>
           <div class="notif-card-description">Konfigurace SMTP serveru pro odesílání emailů</div>
           <div class="notif-card-meta">
@@ -553,7 +553,7 @@ body {
         </div>
 
         <!-- SMS gateway -->
-        <div class="notif-card" onclick="openNotifModal('sms-gateway')">
+        <div class="notif-card" data-action="openNotifModal" data-modal="sms-gateway">
           <div class="notif-card-title">SMS Gateway</div>
           <div class="notif-card-description">Nastavení SMS brány a API klíčů pro odesílání SMS</div>
           <div class="notif-card-meta">
@@ -562,7 +562,7 @@ body {
         </div>
 
         <!-- Email Management -->
-        <div class="notif-card" onclick="window.location.href='email_management.php'">
+        <div class="notif-card" data-href="email_management.php">
           <div class="notif-card-title">Email Management</div>
           <div class="notif-card-description">Kompletní správa emailů - historie, fronta, selhavší + možnost znovu odeslat</div>
           <div class="notif-card-meta">
@@ -571,7 +571,7 @@ body {
         </div>
 
         <!-- Test odesílání -->
-        <div class="notif-card" onclick="openNotifModal('test-sending')">
+        <div class="notif-card" data-action="openNotifModal" data-modal="test-sending">
           <div class="notif-card-title">Test odesílání</div>
           <div class="notif-card-description">Otestujte funkčnost email a SMS notifikací</div>
           <div class="notif-card-meta">
@@ -976,7 +976,7 @@ function loadNotifContent(type, body) {
   <div class="cc-modal" id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
       <div class="cc-modal-header">
           <h2 id="adminModalTitle" class="sr-only">Modal</h2>
-          <button class="cc-modal-close" onclick="closeCCModal()" aria-label="Zavřít">×</button>
+          <button class="cc-modal-close" data-action="closeCCModal" aria-label="Zavřít">×</button>
       </div>
       <div class="cc-modal-body" id="adminModalBody">
           <div class="cc-modal-loading">
@@ -1117,7 +1117,7 @@ function loadNotifContent(type, body) {
   <div class="modal-content" style="width: 1200px; max-width: 90vw; height: 80vh; display: flex; flex-direction: column; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
     <div class="modal-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #ddd; flex-shrink: 0;">
       <h3 class="modal-title" id="editNotificationTitle" data-lang-cs="Editovat notifikaci" data-lang-en="Edit Notification" data-lang-it="Modifica Notifica">Editovat notifikaci</h3>
-      <button class="modal-close" onclick="closeEditNotificationModal()" aria-label="Zavřít">×</button>
+      <button class="modal-close" data-action="closeEditNotificationModal" aria-label="Zavřít">×</button>
     </div>
     <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 2rem;">
       <div id="edit-notification-error" class="error-message" style="display: none;" role="alert"></div>
@@ -1150,7 +1150,7 @@ function loadNotifContent(type, body) {
         <label class="form-label" data-lang-cs="Dodatečné kopie emailů (CC)" data-lang-en="Additional Email Copies (CC)" data-lang-it="Copie Email Aggiuntive (CC)">Dodatečné kopie emailů (CC)</label>
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
           <input type="email" class="form-input" id="new-cc-email" data-lang-cs-placeholder="novy@email.cz" data-lang-en-placeholder="new@email.com" data-lang-it-placeholder="nuovo@email.it" placeholder="novy@email.cz" style="flex: 1;">
-          <button class="btn btn-sm" onclick="addCCEmail()" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
+          <button class="btn btn-sm" data-action="addCCEmail" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
         </div>
         <div id="admin-emails-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
       </div>
@@ -1158,14 +1158,14 @@ function loadNotifContent(type, body) {
         <label class="form-label" data-lang-cs="Skryté kopie (BCC)" data-lang-en="Blind Copies (BCC)" data-lang-it="Copie Nascoste (BCC)">Skryté kopie (BCC)</label>
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
           <input type="email" class="form-input" id="new-bcc-email" data-lang-cs-placeholder="skryta@email.cz" data-lang-en-placeholder="hidden@email.com" data-lang-it-placeholder="nascosta@email.it" placeholder="skryta@email.cz" style="flex: 1;">
-          <button class="btn btn-sm" onclick="addBCCEmail()" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
+          <button class="btn btn-sm" data-action="addBCCEmail" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
         </div>
         <div id="bcc-emails-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
       </div>
     </div>
     <div class="modal-footer" style="padding: 1.5rem 2rem; border-top: 1px solid #ddd; flex-shrink: 0;">
-      <button class="btn" onclick="closeEditNotificationModal()" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
-      <button class="btn btn-success" onclick="saveNotificationTemplate()" data-lang-cs="Uložit" data-lang-en="Save" data-lang-it="Salva">Uložit</button>
+      <button class="btn" data-action="closeEditNotificationModal" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
+      <button class="btn btn-success" data-action="saveNotificationTemplate" data-lang-cs="Uložit" data-lang-en="Save" data-lang-it="Salva">Uložit</button>
     </div>
   </div>
 </div>
