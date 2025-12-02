@@ -475,8 +475,7 @@ if ($initialBootstrapData) {
 
 <!-- Lokální signature-pad (nahrazuje blokovaný CDN) -->
 <script src="assets/js/signature-pad-simple.min.js"></script>
-<!-- Fix pro globální scope signaturePad -->
-<script src="assets/js/protokol-signature-fix.min.js"></script>
+<!-- protokol-signature-fix.js odstraněn - window.signaturePad je nyní v protokol.js (Step 110) -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
@@ -551,8 +550,7 @@ if ($initialBootstrapData) {
 <script src="assets/js/protokol-data-patch.min.js" defer></script>
 <script src="assets/js/protokol.js?v=20251202" defer></script>
 <!-- protokol-fakturace-patch.js byl sloučen do protokol-data-patch.min.js (Step 47) -->
-<!-- Fix pro tlačítka (načíst až po protokol.js) -->
-<script src="assets/js/protokol-buttons-fix.min.js" defer></script>
+<!-- protokol-buttons-fix.js odstraněn - handlery jsou již v protokol.js (Step 109) -->
 <!-- Překlady pro kalkulačku -->
 <script src="assets/js/wgs-translations-cenik.min.js" defer></script>
 <script src="assets/js/language-switcher.min.js" defer></script>
