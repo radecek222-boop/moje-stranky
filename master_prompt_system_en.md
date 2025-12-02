@@ -17,23 +17,23 @@
 | **Phase 4** | Technical Debt Analysis | COMPLETE | Steps 101-103 |
 | **Phase 5** | Technical Debt Cleanup | COMPLETE | Steps 104-131 |
 | **Phase 6** | Security Hardening | COMPLETE | Steps 132-133 |
-| **Phase 7** | Code Deduplication | **IN PROGRESS** | Steps 134 |
-| **Phase 8** | Inline Styles Migration | PENDING | Steps 135-140 |
+| **Phase 7** | Code Deduplication | COMPLETE | Steps 134 |
+| **Phase 8** | Inline Styles Migration | **IN PROGRESS** | Steps 135-140 |
 | **Phase 9** | HTMX Migration | PENDING | Steps 141-150 |
 | **Phase 10** | Testing & Documentation | PENDING | Steps 151-165 |
 | **Phase 11** | Performance Optimization | PENDING | Steps 166-175 |
 
 ## Current Work
 
-**Active Phase:** 7 - Code Deduplication
-**Current Step:** 134 - Consolidate Duplicate Functions
-**Next Step:** 135 - Create CSS Utility Classes
+**Active Phase:** 8 - Inline Styles Migration
+**Current Step:** 135 - Create CSS Utility Classes
+**Next Step:** 136 - Migrate seznam.js inline styles
 
 ## Quick Reference
 
-- **Last completed step:** 133 (innerHTML Security Audit)
-- **Total steps completed:** 133
-- **Estimated remaining:** ~42 steps
+- **Last completed step:** 134 (Code Deduplication)
+- **Total steps completed:** 134
+- **Estimated remaining:** ~41 steps
 - **See:** [ROADMAP TO 100% COMPLETION](#roadmap-to-100-completion) section at end of file
 
 ---
@@ -2618,27 +2618,32 @@ Ensure all API endpoints have proper security (CSRF, authentication) and audit i
 Consolidate duplicate functions into utils.js to reduce code size and improve maintainability.
 
 ## [Step 134]: Consolidate Duplicate Functions
+- **Date:** 2025-12-02
+- **Status:** COMPLETE
 
-**Duplicate functions found:**
+**Actions Taken:**
 
-| Function | Occurrences | Files | Action |
-|----------|-------------|-------|--------|
-| `showNotification()` | 4 | Various | REMOVE - use wgsToast |
-| `getCSRFToken()` | 3 | Various | USE Utils.fetchCsrfToken |
-| `toBase64()` | 2 | photocustomer, protokol | MOVE to utils.js |
-| `isSuccess()` | 2 | Various | MOVE to utils.js |
-| `highlightText()` | 2 | Various | ALREADY in utils.js - remove duplicates |
-| `formatNumber()` | 2 | Various | MOVE to utils.js |
-| `saveToServer()` | 2 | Various | Different implementations - OK |
-| `reopenOrder()` | 2 | seznam, protokol | Different context - OK |
+| Function | Status | Notes |
+|----------|--------|-------|
+| `toBase64()` | CENTRALIZED | Added to utils.js, local copies use Utils.toBase64 with fallback |
+| `formatNumber()` | CENTRALIZED | Added to utils.js (Intl.NumberFormat), local copies use Utils.formatNumber |
+| `isSuccess()` | ALREADY CENTRAL | Already in utils.js |
+| `showNotification()` | KEPT AS-IS | Page-specific implementations using #notif element |
+| `getCSRFToken()` | KEPT AS-IS | Already centralized in csrf-auto-inject.js |
+| `highlightText()` | ALREADY CENTRAL | Already in utils.js |
 
-**Tasks:**
-- [ ] Step 134a: Remove showNotification() - use wgsToast instead
-- [ ] Step 134b: Migrate getCSRFToken() to Utils.fetchCsrfToken
-- [ ] Step 134c: Move toBase64() to utils.js
-- [ ] Step 134d: Move isSuccess() to utils.js
-- [ ] Step 134e: Remove duplicate highlightText()
-- [ ] Step 134f: Move formatNumber() to utils.js
+**Files Modified:**
+- `utils.js`: Added toBase64(), formatNumber()
+- `photocustomer.js`: Updated toBase64 to use Utils.toBase64
+- `protokol.js`: Updated toBase64 to use Utils.toBase64
+- `analytics.js`: Updated formatNumber to use Utils.formatNumber
+- `psa-kalkulator.js`: Updated formatNumber to use Utils.formatNumber
+
+**Decision: showNotification() kept separate**
+- Different pages have different notification UI (#notif element vs wgsToast)
+- wgsToast creates its own container, showNotification uses existing DOM
+- Forcing migration would break page-specific styling
+- Low priority - these are not true duplicates but same-named different functions
 
 ---
 

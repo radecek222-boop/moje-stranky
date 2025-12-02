@@ -370,7 +370,12 @@ function applyExifOrientation(ctx, orientation, width, height) {
   }
 }
 
+// Step 134: Use centralized toBase64 from utils.js if available
 function toBase64(blob) {
+  if (window.Utils && window.Utils.toBase64) {
+    return window.Utils.toBase64(blob);
+  }
+  // Fallback for backwards compatibility
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onloadend = () => resolve(reader.result);

@@ -524,3 +524,33 @@ wgsToast.info = (msg, duration) => wgsToast(msg, 'info', duration);
 // Export wgsToast
 window.wgsToast = wgsToast;
 window.Utils.wgsToast = wgsToast;
+
+// ========================================
+// HELPER: toBase64 - Convert Blob to Base64
+// Step 134: Centralized from photocustomer.js, protokol.js
+// ========================================
+function toBase64(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
+
+// Export toBase64
+window.toBase64 = toBase64;
+window.Utils.toBase64 = toBase64;
+
+// ========================================
+// HELPER: formatNumber - Format number with Czech locale
+// Step 134: Centralized from analytics.js, psa-kalkulator.js
+// ========================================
+function formatNumber(num) {
+    if (num === null || num === undefined) return '0';
+    return new Intl.NumberFormat('cs-CZ').format(num);
+}
+
+// Export formatNumber
+window.formatNumber = formatNumber;
+window.Utils.formatNumber = formatNumber;

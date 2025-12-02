@@ -607,7 +607,12 @@ function loadImage(src) {
   });
 }
 
+// Step 134: Use centralized toBase64 from utils.js if available
 function toBase64(blob) {
+  if (window.Utils && window.Utils.toBase64) {
+    return window.Utils.toBase64(blob);
+  }
+  // Fallback
   return new Promise((r, j) => {
     const fr = new FileReader();
     fr.onload = () => r(fr.result);

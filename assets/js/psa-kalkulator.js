@@ -552,7 +552,11 @@ function formatCurrency(amount) {
   }).format(amount);
 }
 
+// Step 134: Use centralized formatNumber from utils.js if available
 function formatNumber(num) {
+  if (window.Utils && window.Utils.formatNumber) {
+    return window.Utils.formatNumber(num);
+  }
   return new Intl.NumberFormat('cs-CZ').format(num);
 }
 
