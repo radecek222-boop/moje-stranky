@@ -1194,5 +1194,5 @@ document.addEventListener('alpine:init', () => {
 <script src="/assets/js/translations.min.js"></script>
 <!-- Language Switcher - centralizovaný jazykový přepínač -->
 <script src="/assets/js/language-switcher.min.js" defer></script>
-<!-- KRITICKA OPRAVA: logout-handler.js MUSI byt zde, protoze hamburger-menu se nacita VSUDE! -->
+<!-- KRITICKA OPRAVA: logout-handler.min.js MUSI byt zde, protoze hamburger-menu se nacita VSUDE! -->
 <script src="/assets/js/logout-handler.min.js"></script>

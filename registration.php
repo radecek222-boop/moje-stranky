@@ -2,7 +2,7 @@
 require_once "init.php";
 
 // FIX 1: Generovat CSRF token v PHP pro okamzitou dostupnost v HTML
-// Eliminuje race condition s async fetch v csrf-auto-inject.js
+// Eliminuje race condition s async fetch v csrf-auto-inject.min.js
 $csrfToken = generateCSRFToken();
 ?>
 <!DOCTYPE html>
