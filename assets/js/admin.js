@@ -456,11 +456,8 @@ async function loadOnline() {
 // ============================================================
 // HELPER FUNCTIONS
 // ============================================================
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
+// escapeHtml přesunuto do utils.js (Step 107)
+// Funkce je dostupná jako window.escapeHtml() nebo Utils.escapeHtml()
 
 // ============================================================
 // INIT USER MANAGEMENT

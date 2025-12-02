@@ -2,13 +2,8 @@
  * WGS - Welcome Modal - Profesionální uvítání se statistikami
  */
 
-// BEZPEČNOST: HTML escaping pro prevenci XSS
-function escapeHtml(text) {
-  if (!text) return '';
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
+// escapeHtml přesunuto do utils.js (Step 107)
+// Funkce je dostupná jako window.escapeHtml() nebo Utils.escapeHtml()
 
 async function showWelcomeModal(userName, userRole) {
   try {

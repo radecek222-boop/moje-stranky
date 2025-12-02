@@ -213,9 +213,16 @@ async function fetchCsrfToken() {
 
 // Global Utils object for browser usage
 window.Utils = window.Utils || {};
+window.Utils.escapeHtml = escapeHtml;
 window.Utils.escapeRegex = escapeRegex;
 window.Utils.highlightText = highlightText;
 window.Utils.fetchCsrfToken = fetchCsrfToken;
+
+// Expose escapeHtml globally for backwards compatibility
+// (welcome-modal.js, admin.js, error-handler.js používají globální escapeHtml)
+if (typeof window.escapeHtml === 'undefined') {
+    window.escapeHtml = escapeHtml;
+}
 
 // Expose fetchCsrfToken globally for backwards compatibility
 // (protokol-calculator-integration.js uses window.fetchCsrfToken)

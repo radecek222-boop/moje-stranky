@@ -2210,3 +2210,23 @@ The codebase is now in a good state with:
   - All corresponding `.min.js` and `.min.js.map` files (REGENERATED)
 - **Result:** Eliminated 56 lines of duplicate code. CSRF token handling now centralized in utils.js.
 
+## [Step 107]: Consolidate escapeHtml to utils.js
+- **Date:** 2025-12-02
+- **What:** Consolidated 3 duplicate `escapeHtml()` functions from welcome-modal.js, admin.js, and error-handler.js to centralized utils.js.
+- **How:**
+  1. Added `window.escapeHtml` and `Utils.escapeHtml` exports to utils.js
+  2. Removed local definitions from welcome-modal.js (-6 lines), admin.js (-5 lines), error-handler.js (-8 lines)
+  3. Added comments indicating the function was moved to utils.js
+  4. Regenerated all minified files with source maps
+- **Why:**
+  - escapeHtml was duplicated in 4 files (3 duplicates + 1 original in utils.js)
+  - All implementations were functionally identical (DOM-based HTML escaping)
+  - Reduces maintenance burden - single point for XSS protection helper
+- **Files touched:**
+  - `assets/js/utils.js` (MODIFIED - added global exports)
+  - `assets/js/welcome-modal.js` (MODIFIED - -6 lines)
+  - `assets/js/admin.js` (MODIFIED - -5 lines)
+  - `assets/js/error-handler.js` (MODIFIED - -8 lines)
+  - All corresponding `.min.js` and `.min.js.map` files (REGENERATED)
+- **Result:** Eliminated ~19 lines of duplicate code. escapeHtml now centralized in utils.js with global exports.
+
