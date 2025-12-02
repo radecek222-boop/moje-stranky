@@ -544,23 +544,23 @@ function loadStep1_Formular(panel) {
 
         <form id="testForm">
             <div class="form-group">
-                <label>Jméno *</label>
+                <label for="jmeno">Jméno *</label>
                 <input type="text" id="jmeno" value="Test Zákazník E2E" required>
             </div>
             <div class="form-group">
-                <label>Email *</label>
+                <label for="email">Email *</label>
                 <input type="email" id="email" value="test-e2e@wgs-service.cz" required>
             </div>
             <div class="form-group">
-                <label>Telefon *</label>
+                <label for="telefon">Telefon *</label>
                 <input type="tel" id="telefon" value="+420777888999" required>
             </div>
             <div class="form-group">
-                <label>Popis problému *</label>
+                <label for="popis_problemu">Popis problému *</label>
                 <textarea id="popis_problemu" rows="3" required>E2E test workflow - kompletní průchod systémem</textarea>
             </div>
             <div class="form-group">
-                <label>Fotografie (volitelné)</label>
+                <label for="photo">Fotografie (volitelné)</label>
                 <input type="file" id="photo" accept="image/*">
                 <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--c-grey);">
                     Pro zjednodušení testu můžete vynechat

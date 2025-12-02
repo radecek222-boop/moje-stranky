@@ -378,28 +378,28 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         <form id="testForm" class="test-form">
             <div class="form-group">
-                <label>Jméno zákazníka *</label>
-                <input type="text" name="jmeno" value="Test Uživatel" required>
+                <label for="sim-jmeno">Jméno zákazníka *</label>
+                <input type="text" id="sim-jmeno" name="jmeno" value="Test Uživatel" required>
             </div>
 
             <div class="form-group">
-                <label>Email *</label>
-                <input type="email" name="email" value="test@example.com" required>
+                <label for="sim-email">Email *</label>
+                <input type="email" id="sim-email" name="email" value="test@example.com" required>
             </div>
 
             <div class="form-group">
-                <label>Telefon *</label>
-                <input type="tel" name="telefon" value="+420 123 456 789" required>
+                <label for="sim-telefon">Telefon *</label>
+                <input type="tel" id="sim-telefon" name="telefon" value="+420 123 456 789" required>
             </div>
 
             <div class="form-group">
-                <label>Fotografie (volitelné)</label>
-                <input type="file" name="photo" accept="image/*">
+                <label for="sim-photo">Fotografie (volitelné)</label>
+                <input type="file" id="sim-photo" name="photo" accept="image/*">
             </div>
 
             <div class="form-group full-width">
-                <label>Popis problému *</label>
-                <textarea name="popis" rows="3" required>Test popis - simulace workflow</textarea>
+                <label for="sim-popis">Popis problému *</label>
+                <textarea id="sim-popis" name="popis" rows="3" required>Test popis - simulace workflow</textarea>
             </div>
         </form>
 

@@ -226,20 +226,20 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 <h3>Vygenerovat nový report</h3>
                 <form id="generate-form">
                     <div class="form-group">
-                        <label>Typ reportu</label>
-                        <select name="report_type" required>
+                        <label for="report_type">Typ reportu</label>
+                        <select id="report_type" name="report_type" required>
                             <option value="daily">Daily (denní)</option>
                             <option value="weekly">Weekly (týdenní)</option>
                             <option value="monthly">Monthly (měsíční)</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Od data</label>
-                        <input type="date" name="date_from" required>
+                        <label for="date_from">Od data</label>
+                        <input type="date" id="date_from" name="date_from" required>
                     </div>
                     <div class="form-group">
-                        <label>Do data</label>
-                        <input type="date" name="date_to" required>
+                        <label for="date_to">Do data</label>
+                        <input type="date" id="date_to" name="date_to" required>
                     </div>
                     <button type="submit" class="btn">Generovat report</button>
                 </form>

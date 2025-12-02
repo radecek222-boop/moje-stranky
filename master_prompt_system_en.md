@@ -1919,3 +1919,16 @@ header('Content-Type: text/html; charset=utf-8');
   - `gdpr-portal.php`: Added for/id pairs to export and deletion email inputs
 - **Result:** Form fields are now properly associated with their labels, improving accessibility for screen reader users.
 
+## [Step 96]: More Label-Input Associations (Admin & Analytics)
+- **Date:** 2025-12-02
+- **What:** Added proper label-input associations to admin testing and analytics forms.
+- **Analysis:**
+  - Forms in admin testing simulator lacked for/id associations
+  - Analytics report generation form needed label associations
+  - E2E interactive testing form needed label associations
+- **Files modified:**
+  - `analytics-reports.php`: Added for/id pairs to report generation form (report_type, date_from, date_to)
+  - `includes/admin_testing_simulator.php`: Added for/id pairs to test form fields (sim-jmeno, sim-email, sim-telefon, sim-photo, sim-popis)
+  - `includes/admin_testing_interactive.php`: Added for attributes to existing labeled inputs (jmeno, email, telefon, popis_problemu, photo)
+- **Result:** Admin and analytics forms are now fully accessible with proper label associations.
+
