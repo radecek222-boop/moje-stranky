@@ -1614,3 +1614,40 @@ header('Content-Type: text/html; charset=utf-8');
   - Regenerated minified versions: photocustomer.min.js, seznam.min.js
 - **Result:** All images now have descriptive alt text for screen readers.
 
+## [Step 75]: SVG Accessibility (aria-hidden) and Interactive Elements
+- **Date:** 2025-12-02
+- **What:** Added `aria-hidden="true"` to decorative SVG icons and improved accessibility for interactive non-button elements.
+- **Analysis:**
+  - Decorative SVG icons should be hidden from screen readers
+  - Non-semantic interactive elements (span, div with onclick) need role and tabindex
+- **Files modified:**
+  - `protokol.php`: Added aria-hidden="true" to 4 decorative SVG icons (arrow, share, send, close)
+  - `photocustomer.php`: Added aria-hidden="true" to collapsible arrow SVG
+  - `novareklamace.php`: Added aria-hidden="true" to document icon SVG
+  - `cenik.php`: Added role="button", tabindex="0", aria-label to modal close span
+- **Result:** Improved screen reader experience by hiding decorative icons and making custom interactive elements accessible.
+
+## [Step 76]: Iframe Title Attributes for Accessibility
+- **Date:** 2025-12-02
+- **What:** Added `title` attributes to all iframe elements for screen reader accessibility.
+- **Analysis:**
+  - Iframes without titles are confusing for screen reader users
+  - Found 4 iframes missing title attributes
+- **Files modified:**
+  - `analytics-heatmap.php`: Added title="Náhled stránky pro heatmapu"
+  - `protokol.php`: Added title="Náhled PDF protokolu"
+  - `includes/admin_testing_simulator.php`: Added titles to seznam and detail preview iframes
+- **Result:** All iframes now have descriptive titles for assistive technologies.
+
+## [Step 77]: Form Label Associations for Accessibility
+- **Date:** 2025-12-02
+- **What:** Fixed form label associations for screen reader accessibility.
+- **Analysis:**
+  - Labels without `for` attribute cannot be programmatically associated with inputs
+  - Select elements without labels need aria-label
+- **Files modified:**
+  - `novareklamace.php`: Added aria-label="Telefonní předvolba" to phone prefix select
+  - `analytics-replay.php`: Added for="speed-select" to speed label
+  - `analytics-heatmap.php`: Added for attributes to page, device, and type selector labels
+- **Result:** All form controls now have proper label associations for assistive technologies.
+

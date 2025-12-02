@@ -233,7 +233,7 @@ $pageIndex = isset($_GET['page']) ? (int)$_GET['page'] : 0;
             </div>
 
             <div class="speed-control">
-                <label>Rychlost:</label>
+                <label for="speed-select">Rychlost:</label>
                 <select id="speed-select">
                     <option value="0.5">0.5x</option>
                     <option value="1.0" selected>1.0x</option>

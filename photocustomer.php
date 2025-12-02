@@ -91,7 +91,7 @@ if (!$isAdmin && !$isTechnik) {
   <div class="customer-info-collapsible">
     <div class="customer-info-header" id="customerInfoToggle">
       <span class="customer-info-name" id="customerInfoName">Zákazník</span>
-      <svg class="customer-info-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg class="customer-info-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <polyline points="6 9 12 15 18 9"></polyline>
       </svg>
     </div>

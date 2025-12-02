@@ -452,7 +452,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         <div class="mini-preview">
             <div class="mini-preview-header">NÁHLED: seznam.php</div>
             <div class="mini-preview-body">
-                <iframe id="seznamPreview" src=""></iframe>
+                <iframe id="seznamPreview" src="" title="Náhled seznamu reklamací"></iframe>
             </div>
         </div>
 
@@ -480,7 +480,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         <div class="mini-preview">
             <div class="mini-preview-header">NÁHLED: protokol.php</div>
             <div class="mini-preview-body">
-                <iframe id="detailPreview" src=""></iframe>
+                <iframe id="detailPreview" src="" title="Náhled detailu reklamace"></iframe>
             </div>
         </div>
 
