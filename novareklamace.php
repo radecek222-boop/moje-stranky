@@ -38,7 +38,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <!-- Critical CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/novareklamace.css">
-  <link rel="stylesheet" href="assets/css/novareklamace-mobile-fixes.css">
+  <!-- novareklamace-mobile-fixes.css sloučen do novareklamace.css (Step 49) -->
+  <link rel="stylesheet" href="assets/css/button-fixes-global.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.css">
 

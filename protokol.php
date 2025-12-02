@@ -215,7 +215,8 @@ if ($initialBootstrapData) {
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/protokol.css">
-  <link rel="stylesheet" href="assets/css/protokol-mobile-fixes.css">
+  <!-- protokol-mobile-fixes.css sloučen do protokol.css (Step 48) -->
+  <link rel="stylesheet" href="assets/css/button-fixes-global.css">
   <link rel="stylesheet" href="assets/css/cenik.min.css">
   <link rel="stylesheet" href="assets/css/protokol-calculator-modal.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
@@ -548,7 +549,7 @@ if ($initialBootstrapData) {
 <script src="assets/js/protokol-customer-collapse.js" defer></script>
 <script src="assets/js/protokol-data-patch.js" defer></script>
 <script src="assets/js/protokol.js?v=20251202" defer></script>
-<script src="assets/js/protokol-fakturace-patch.js" defer></script>
+<!-- protokol-fakturace-patch.js byl sloučen do protokol-data-patch.js (Step 47) -->
 <!-- Fix pro tlačítka (načíst až po protokol.js) -->
 <script src="assets/js/protokol-buttons-fix.js" defer></script>
 <!-- Překlady pro kalkulačku -->

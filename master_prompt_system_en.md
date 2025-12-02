@@ -1038,5 +1038,133 @@ Alpine.data('modalName', () => ({
 1. **HTMX migration** - Server-driven UI updates (not started)
 2. **CSS consolidation** - Merge mobile-fixes.css files (requires visual testing)
 3. **Patch.js integration** - Merge into main JS files (requires functional testing)
-4. **Minified files regeneration** - Run `./scripts/minify-assets.sh`
+4. ~~**Minified files regeneration**~~ - ✅ Completed in Step 46
+
+## [Step 46]: Regenerate All Minified Assets
+- **What:** Regenerated all outdated .min.js and .min.css files to include Alpine.js migration and z-index CSS variable changes.
+- **How:**
+  - JS: Used `terser` to regenerate 5 files (novareklamace, seznam, protokol, analytics, photocustomer)
+  - CSS: Used `csso-cli` to regenerate 13 files (admin, analytics, cenik, index, login, mobile-responsive, nasesluzby, novareklamace, onas, photocustomer, protokol, seznam, styles)
+  - Updated cache-busting version numbers in PHP files
+- **Why:** Minified files were outdated after Alpine.js modal migrations (Steps 35-45) and z-index CSS variable migration (Steps 9-18). Old minified files could cause JavaScript errors and incorrect z-index stacking.
+- **Files touched:**
+  - 5 JS files: `*.min.js`
+  - 13 CSS files: `*.min.css`
+  - 3 PHP files: version number updates (novareklamace.php, protokol.php, seznam.php)
+- **Result:** All minified assets are now synchronized with source files. No more cache issues.
+
+## [Step 47]: Merge protokol-fakturace-patch.js into protokol-data-patch.js
+- **What:** Merged redundant `protokol-fakturace-patch.js` functionality into `protokol-data-patch.js` and removed the redundant file.
+- **How:**
+  - Added `aktualizujFakturaci()` helper function to protokol-data-patch.js
+  - Modified `patchedLoadReklamace()` to always call fakturace update after any loadReklamace call
+  - Removed protokol-fakturace-patch.js script reference from protokol.php
+  - Deleted the redundant file
+- **Why:**
+  - Both files were wrapping `window.loadReklamace`, creating unnecessary complexity
+  - `protokol-fakturace-patch.js` (35 lines) had overlapping logic with `protokol-data-patch.js` (193 lines)
+  - Double-wrapping of functions creates maintenance burden and potential race conditions
+  - This is part of Phase 2 patch consolidation goal from section 4.1
+- **Files touched:**
+  - `assets/js/protokol-data-patch.js` (MODIFIED - added fakturace logic)
+  - `protokol.php` (MODIFIED - removed script tag, added comment)
+  - `assets/js/protokol-fakturace-patch.js` (DELETED)
+- **Result:** Reduced from 2 loadReklamace wrappers to 1. One less patch file to maintain.
+
+## [Step 48]: Merge protokol-mobile-fixes.css into protokol.css
+- **What:** Merged `protokol-mobile-fixes.css` into the main `protokol.css` and removed the redundant file.
+- **How:**
+  - Added mobile-specific styles to the end of protokol.css (customer header, iOS zoom prevention, photo grid, PDF preview)
+  - Replaced @import of button-fixes-global.css with direct `<link>` in protokol.php
+  - Deleted protokol-mobile-fixes.css
+  - Regenerated protokol.min.css using csso
+- **Why:**
+  - Per section 4.1 of master plan: "move these fixes into the main code paths and then retire the patch files"
+  - Reduces CSS file fragmentation (1 less file to load)
+  - Simplifies maintenance - all protokol styles in one place
+  - button-fixes-global.css still loaded directly for global button touch targets
+- **Files touched:**
+  - `assets/css/protokol.css` (MODIFIED - added ~100 lines of mobile fixes)
+  - `assets/css/protokol.min.css` (REGENERATED)
+  - `protokol.php` (MODIFIED - replaced link to mobile-fixes with button-fixes-global)
+  - `assets/css/protokol-mobile-fixes.css` (DELETED)
+- **Result:** One less CSS file to maintain. Mobile fixes now integrated into main stylesheet.
+
+## [Step 49]: Merge novareklamace-mobile-fixes.css into novareklamace.css
+- **What:** Merged `novareklamace-mobile-fixes.css` into the main `novareklamace.css` and removed the redundant file.
+- **How:**
+  - Added mobile-specific styles to the end of novareklamace.css (iOS zoom prevention, calendar touch targets, autocomplete styling)
+  - Replaced @import of button-fixes-global.css with direct `<link>` in novareklamace.php
+  - Deleted novareklamace-mobile-fixes.css
+  - Regenerated novareklamace.min.css using csso
+- **Why:**
+  - Continues Phase 2 CSS consolidation from Step 48
+  - Reduces HTTP requests and file fragmentation
+  - All novareklamace styles now in one maintainable file
+- **Files touched:**
+  - `assets/css/novareklamace.css` (MODIFIED - added ~90 lines of mobile fixes)
+  - `assets/css/novareklamace.min.css` (REGENERATED)
+  - `novareklamace.php` (MODIFIED - replaced link to mobile-fixes with button-fixes-global)
+  - `assets/css/novareklamace-mobile-fixes.css` (DELETED)
+- **Result:** Two mobile-fixes files now consolidated. Remaining: seznam-mobile-fixes.css, admin-mobile-fixes.css.
+
+## [Step 50]: Merge seznam-mobile-fixes.css into seznam.css
+- **What:** Merged `seznam-mobile-fixes.css` (391 lines) into the main `seznam.css` and removed the redundant file.
+- **How:**
+  - Added all mobile-specific styles to the end of seznam.css (calendar touch targets, time slots, modal fullscreen, notes badge, order layout, button text fit)
+  - Replaced link to mobile-fixes with button-fixes-global.css in seznam.php
+  - Updated cache-busting version number
+  - Deleted seznam-mobile-fixes.css
+  - Regenerated seznam.min.css using csso
+- **Why:**
+  - Continues Phase 2 CSS consolidation
+  - This was the largest mobile-fixes file (391 lines)
+  - All seznam styles now in one file for easier maintenance
+- **Files touched:**
+  - `assets/css/seznam.css` (MODIFIED - added ~340 lines of mobile fixes)
+  - `assets/css/seznam.min.css` (REGENERATED)
+  - `seznam.php` (MODIFIED - replaced link, updated version)
+  - `assets/css/seznam-mobile-fixes.css` (DELETED)
+- **Result:** Three mobile-fixes files consolidated. Remaining: admin-mobile-fixes.css only.
+
+## [Step 51]: Merge admin-mobile-fixes.css into admin.css
+- **What:** Merged `admin-mobile-fixes.css` (240 lines) into the main `admin.css` and removed the redundant file.
+- **How:**
+  - Added all mobile-specific styles to the end of admin.css (dashboard buttons, toggle switches, modals, iOS zoom prevention, tabs, priority badges)
+  - Replaced link to mobile-fixes with button-fixes-global.css in admin.php
+  - Deleted admin-mobile-fixes.css
+  - Regenerated admin.min.css using csso
+- **Why:**
+  - Completes Phase 2 CSS consolidation
+  - All 4 mobile-fixes files now merged into their main stylesheets
+  - Reduces HTTP requests and simplifies maintenance
+- **Files touched:**
+  - `assets/css/admin.css` (MODIFIED - added ~200 lines of mobile fixes)
+  - `assets/css/admin.min.css` (REGENERATED)
+  - `admin.php` (MODIFIED - replaced link to mobile-fixes with button-fixes-global)
+  - `assets/css/admin-mobile-fixes.css` (DELETED)
+- **Result:** ALL mobile-fixes files consolidated. Phase 2 CSS consolidation COMPLETE.
+
+---
+
+## PHASE 2 CSS CONSOLIDATION COMPLETE - SUMMARY
+
+**Steps 48-51 have completed the CSS mobile-fixes consolidation phase.**
+
+### Files Merged and Deleted:
+
+| Original File | Merged Into | Lines | Status |
+|---------------|-------------|-------|--------|
+| protokol-mobile-fixes.css | protokol.css | ~100 | DELETED |
+| novareklamace-mobile-fixes.css | novareklamace.css | ~90 | DELETED |
+| seznam-mobile-fixes.css | seznam.css | ~340 | DELETED |
+| admin-mobile-fixes.css | admin.css | ~200 | DELETED |
+
+### button-fixes-global.css:
+- Now loaded directly via `<link>` in each PHP file instead of via @import
+- Provides global touch targets (44px min) and button styling
+
+### Remaining Phase 2 Tasks:
+1. **Patch.js integration** - 3 remaining files (protokol-signature-fix.js, protokol-buttons-fix.js, seznam-delete-patch.js)
+2. **HTMX migration** - Server-driven UI (major architectural change)
 
