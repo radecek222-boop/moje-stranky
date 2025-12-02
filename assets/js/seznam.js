@@ -300,10 +300,10 @@ function clearSearch() {
 }
 
 function highlightText(text, query) {
-  if (!query || !text) return escapeHtml(text);
+  if (!query || !text) return Utils.escapeHtml(text);
 
   // SECURITY FIX: Escape HTML PŘED highlightováním
-  const escapedText = escapeHtml(text);
+  const escapedText = Utils.escapeHtml(text);
   const escapedQuery = escapeRegex(query);
 
   const regex = new RegExp(`(${escapedQuery})`, 'gi');
@@ -314,12 +314,7 @@ function escapeRegex(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function escapeHtml(str) {
-  if (!str) return '';
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
+// escapeHtml odstraněn - používej Utils.escapeHtml()
 
 function matchesSearch(record, query) {
   if (!query) return true;

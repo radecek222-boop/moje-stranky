@@ -11,14 +11,7 @@ let notificationState = {
 
 const ADMIN_SESSION_EXPIRED_MESSAGE = 'Vaše administrátorská relace vypršela. Přihlaste se prosím znovu.';
 
-function escapeHtml(text) {
-  if (text === null || text === undefined) {
-    return '';
-  }
-  const div = document.createElement('div');
-  div.textContent = String(text);
-  return div.innerHTML;
-}
+// escapeHtml odstraněn - používej Utils.escapeHtml()
 
 function redirectToAdminLogin(tab = '') {
   const redirectTarget = tab ? `admin.php?tab=${tab}` : 'admin.php';
@@ -106,11 +99,11 @@ function renderNotifications() {
     const typeName = notif.type === 'both' ? 'Email + SMS' :
                      notif.type === 'email' ? 'Email' : 'SMS';
 
-    const safeName = escapeHtml(notif.name);
-    const safeDescription = escapeHtml(notif.description || 'Bez popisu');
-    const safeTrigger = escapeHtml(notif.trigger_event || '');
-    const safeSubject = escapeHtml(notif.subject || '');
-    const safeTemplate = escapeHtml(notif.template || '').replace(/\n/g, '<br>');
+    const safeName = Utils.escapeHtml(notif.name);
+    const safeDescription = Utils.escapeHtml(notif.description || 'Bez popisu');
+    const safeTrigger = Utils.escapeHtml(notif.trigger_event || '');
+    const safeSubject = Utils.escapeHtml(notif.subject || '');
+    const safeTemplate = Utils.escapeHtml(notif.template || '').replace(/\n/g, '<br>');
 
     return `
       <div class="notification-card">
