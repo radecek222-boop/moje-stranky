@@ -955,8 +955,10 @@ function loadNotifContent(type, body) {
 
 
   <!-- Overlay & Modal - MUST be outside dashboard condition so it exists in DOM -->
+  <!-- Alpine.js (Step 45) -->
   <?php if (!$embedMode): ?>
-  <div class="cc-overlay" id="adminOverlay" onclick="closeCCModal()"></div>
+  <div class="cc-overlay" id="adminOverlay"
+       x-data="adminModal" x-init="init" @click="overlayClick"></div>
   <div class="cc-modal" id="adminModal">
       <div class="cc-modal-header">
           <button class="cc-modal-close" onclick="closeCCModal()" aria-label="Zavřít">×</button>
