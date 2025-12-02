@@ -497,7 +497,7 @@ body {
 
         <!-- Email šablony - Step 53: HTMX migrace -->
         <div class="notif-card"
-             hx-get="/api/notification_list_html.php"
+             hx-get="/api/notification_list_html.php?type=email"
              hx-target="#notifModalBody"
              hx-trigger="click"
              hx-on::before-request="document.getElementById('notifModalTitle').textContent = 'Email šablony'"
@@ -509,12 +509,17 @@ body {
           </div>
         </div>
 
-        <!-- SMS šablony -->
-        <div class="notif-card" onclick="openNotifModal('sms-templates')">
+        <!-- SMS šablony - Step 54: HTMX migrace -->
+        <div class="notif-card"
+             hx-get="/api/notification_list_html.php?type=sms"
+             hx-target="#notifModalBody"
+             hx-trigger="click"
+             hx-on::before-request="document.getElementById('notifModalTitle').textContent = 'SMS šablony'"
+             hx-on::after-request="if(window.notifModal) window.notifModal.open()">
           <div class="notif-card-title">SMS šablony</div>
           <div class="notif-card-description">Nastavení SMS notifikací pro zákazníky a techniky</div>
           <div class="notif-card-meta">
-            <span class="notif-card-badge active">3 šablony</span>
+            <span class="notif-card-badge active">HTMX</span>
           </div>
         </div>
 

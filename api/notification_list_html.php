@@ -44,12 +44,30 @@ try {
         exit;
     }
 
-    // Načtení notifikací
-    $stmt = $pdo->query("
-        SELECT *
-        FROM wgs_notifications
-        ORDER BY id ASC
-    ");
+    // Filtrování podle typu (volitelné)
+    $typeFilter = $_GET['type'] ?? null;
+
+    if ($typeFilter === 'sms') {
+        // Pouze SMS notifikace
+        $stmt = $pdo->query("
+            SELECT * FROM wgs_notifications
+            WHERE type = 'sms' OR type = 'both'
+            ORDER BY id ASC
+        ");
+    } elseif ($typeFilter === 'email') {
+        // Pouze email notifikace
+        $stmt = $pdo->query("
+            SELECT * FROM wgs_notifications
+            WHERE type = 'email' OR type = 'both'
+            ORDER BY id ASC
+        ");
+    } else {
+        // Všechny notifikace
+        $stmt = $pdo->query("
+            SELECT * FROM wgs_notifications
+            ORDER BY id ASC
+        ");
+    }
     $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (empty($notifications)) {
