@@ -1358,3 +1358,16 @@ header('Content-Type: text/html; charset=utf-8');
   | ... | ... | ... | avg 50% |
 - **Result:** All utility JS files are now minified and production-ready. Pages load faster due to reduced JS payload.
 
+## [Step 56]: Generate Source Maps for Minified JS Files
+- **Date:** 2025-12-02
+- **What:** Generated source maps (`.map` files) for all 21 utility JS files minified in Step 55.
+- **How:** Re-ran `terser` with `--source-map` option to generate `.min.js.map` files alongside each minified file.
+- **Why:**
+  - Source maps enable debugging of minified code in browser DevTools
+  - Developers can see original source code, line numbers, and variable names when debugging production issues
+  - Industry best practice for production JavaScript
+- **Files touched:**
+  - **21 new .min.js.map files created** in `assets/js/`
+  - Each minified file now references its source map via `//# sourceMappingURL=` comment
+- **Result:** Debugging minified JS is now possible in browser DevTools. Stack traces will show original file names and line numbers.
+
