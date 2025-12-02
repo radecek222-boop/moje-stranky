@@ -143,8 +143,8 @@ if (!$isAdmin && !$isTechnik) {
   </div>
   
   <!-- PROGRESS BAR -->
-  <div class="progress-container">
-    <div class="progress-bar">
+  <div class="progress-container" role="status" aria-live="polite">
+    <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Průběh nahrávání">
       <div class="progress-fill" id="progressBar"></div>
     </div>
     <div class="progress-text" id="compressionInfo">Celkem nahráno: 0 souborů (max 30 doporučeno)</div>
@@ -159,15 +159,15 @@ if (!$isAdmin && !$isTechnik) {
 </div>
 
 <!-- WAIT DIALOG -->
-<div class="wait-dialog" id="waitDialog">
+<div class="wait-dialog" id="waitDialog" role="status" aria-live="polite" aria-label="Probíhá operace">
   <div class="wait-content">
-    <div class="spinner"></div>
+    <div class="spinner" aria-hidden="true"></div>
     <div class="wait-text" id="waitMsg">Čekejte...</div>
   </div>
 </div>
 
 <!-- ALERT -->
-<div class="alert" id="alert"></div>
+<div class="alert" id="alert" role="alert" aria-live="assertive"></div>
 
 <!-- HIDDEN FILE INPUT -->
 <!-- OPRAVENO: accept="image/*,video/*" místo špatného "assets/img/*" -->

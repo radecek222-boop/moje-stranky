@@ -1821,3 +1821,17 @@ header('Content-Type: text/html; charset=utf-8');
   - `login.php`: Added aria-describedby to rememberMe checkbox, ID to helper div
 - **Result:** Form helper text is now properly announced by screen readers when users focus on related fields.
 
+## [Step 89]: Loading and Progress Indicator Accessibility
+- **Date:** 2025-12-02
+- **What:** Added ARIA attributes to loading indicators, spinners, progress bars and alert containers.
+- **Analysis:**
+  - Loading overlays need role="status" and aria-live for screen reader announcements
+  - Spinners are decorative and should have aria-hidden="true"
+  - Progress bars need role="progressbar" with aria-valuenow, aria-valuemin, aria-valuemax
+  - Alert containers need role="alert" and aria-live="assertive" for immediate announcements
+- **Files modified:**
+  - `seznam.php`: Added role="status", aria-live, aria-label to loadingOverlay, aria-hidden to spinner
+  - `cenik.php`: Added role="status", aria-live to loading-indicator, aria-hidden to spinner
+  - `photocustomer.php`: Added ARIA to progress bar (role="progressbar", aria-value*), wait dialog and alert container
+- **Result:** Loading states and progress are now properly announced to screen reader users.
+

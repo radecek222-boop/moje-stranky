@@ -1581,8 +1581,8 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </div>
 
 <!-- LOADING OVERLAY -->
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-spinner"></div>
+<div class="loading-overlay" id="loadingOverlay" role="status" aria-live="polite" aria-label="Načítání">
+  <div class="loading-spinner" aria-hidden="true"></div>
   <div class="loading-text" id="loadingText" data-lang-cs="Ukládám termín..." data-lang-en="Saving appointment..." data-lang-it="Salvataggio appuntamento...">Ukládám termín...</div>
 </div>
 
