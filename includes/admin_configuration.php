@@ -174,7 +174,7 @@ $groupNames = [
     </div>
 </div>
 
-<script src="/assets/js/csrf-auto-inject.js"></script>
+<script src="/assets/js/csrf-auto-inject.min.js"></script>
 <script>
 // Toggle password visibility
 /**

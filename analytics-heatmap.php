@@ -311,7 +311,7 @@ $csrfToken = generateCSRFToken();
         <div class="legend" id="legend-container"></div>
     </div>
 
-    <script src="/assets/js/heatmap-renderer.js"></script>
+    <script src="/assets/js/heatmap-renderer.min.js"></script>
     <script>
         const csrfToken = '<?php echo htmlspecialchars($csrfToken); ?>';
         let currentData = null;

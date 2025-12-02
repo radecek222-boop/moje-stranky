@@ -41,7 +41,7 @@ if (!$isLoggedIn && !$isAdmin) {
 
 <!-- Logger Utility (must be loaded first) -->
 <script src="assets/js/logger.js" defer></script>
-<script src="assets/js/utils.js" defer></script>
+<script src="assets/js/utils.min.js" defer></script>
 
 
 <!-- External CSS -->

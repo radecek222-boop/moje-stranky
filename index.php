@@ -145,7 +145,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
 <!-- REMOVED: index.js - veškerá funkcionalita přesunuta do hamburger-menu.php a language-switcher.js -->
 
 <!-- PWA Service Worker Registration -->
-<script src="assets/js/sw-register.js"></script>
+<script src="assets/js/sw-register.min.js"></script>
 
 <?php renderHeatmapTracker(); ?>
 </body>

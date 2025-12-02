@@ -662,7 +662,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 </script>
 <script src="assets/js/logger.js" defer></script>
 <script src="assets/js/wgs-map.min.js" defer></script>
-<script src="assets/js/csrf-auto-inject.js" defer></script>
+<script src="assets/js/csrf-auto-inject.min.js" defer></script>
 <script src="assets/js/novareklamace.min.js?v=1764635649" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>

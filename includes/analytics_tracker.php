@@ -6,4 +6,4 @@
  */
 ?>
 <!-- WGS Analytics Tracker -->
-<script src="/assets/js/tracker.js" defer></script>
+<script src="/assets/js/tracker.min.js" defer></script>

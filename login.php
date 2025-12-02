@@ -2,7 +2,7 @@
 require_once "init.php";
 
 // FIX 1: Generovat CSRF token v PHP pro okamzitou dostupnost v HTML
-// Eliminuje race condition s async fetch v csrf-auto-inject.js
+// Eliminuje race condition s async fetch v csrf-auto-inject.min.js
 $csrfToken = generateCSRFToken();
 
 // FIX: Pokud je uzivatel JIZ PRIHLASEN a ma redirect parametr, presmerovat ho tam
@@ -164,8 +164,8 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
 </main>
 
 <script src="assets/js/logger.js" defer></script>
-<script src="assets/js/csrf-auto-inject.js" defer></script>
-<script src="assets/js/welcome-modal.js" defer></script>
+<script src="assets/js/csrf-auto-inject.min.js" defer></script>
+<script src="assets/js/welcome-modal.min.js" defer></script>
 <script src="assets/js/login.min.js" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>

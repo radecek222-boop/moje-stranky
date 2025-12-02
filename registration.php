@@ -2,7 +2,7 @@
 require_once "init.php";
 
 // FIX 1: Generovat CSRF token v PHP pro okamzitou dostupnost v HTML
-// Eliminuje race condition s async fetch v csrf-auto-inject.js
+// Eliminuje race condition s async fetch v csrf-auto-inject.min.js
 $csrfToken = generateCSRFToken();
 ?>
 <!DOCTYPE html>
@@ -89,8 +89,8 @@ $csrfToken = generateCSRFToken();
 </main>
 
 <script src="assets/js/logger.js" defer></script>
-<script src="assets/js/csrf-auto-inject.js" defer></script>
-<script src="assets/js/registration.js" defer></script>
+<script src="assets/js/csrf-auto-inject.min.js" defer></script>
+<script src="assets/js/registration.min.js" defer></script>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
