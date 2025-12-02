@@ -55,11 +55,11 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
   <link rel="stylesheet" href="assets/css/mobile-responsive.css">
   <link rel="stylesheet" href="assets/css/welcome-modal.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
-  <link rel="stylesheet" href="assets/css/universal-modal-theme.css">
+  <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
   <!-- Tmavý styl pro login box -->
-  <link rel="stylesheet" href="assets/css/login-dark-theme.css">
+  <link rel="stylesheet" href="assets/css/login-dark-theme.min.css">
   <style>
-    /* Admin checkbox group - tmavý styl je v login-dark-theme.css */
+    /* Admin checkbox group - tmavý styl je v login-dark-theme.min.css */
     .admin-checkbox-group { margin-bottom: 1.5rem; padding: 1rem; border-radius: 4px; }
     .admin-checkbox-group input[type="checkbox"] { margin-right: 0.5rem; }
     .admin-checkbox-group label { font-weight: 500; cursor: pointer; }

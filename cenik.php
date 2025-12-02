@@ -48,7 +48,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
   <link rel="stylesheet" href="assets/css/cenik.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
-  <link rel="stylesheet" href="assets/css/universal-modal-theme.css">
+  <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
 
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>

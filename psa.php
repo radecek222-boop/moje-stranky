@@ -15,10 +15,10 @@
   <!-- QR Code Library -->
   <script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"></script>
 
-  <link rel="stylesheet" href="assets/css/psa-kalkulator.css">
+  <link rel="stylesheet" href="assets/css/psa-kalkulator.min.css">
   <link rel="stylesheet" href="assets/css/admin-header.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
-  <link rel="stylesheet" href="assets/css/universal-modal-theme.css">
+  <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
 </head>
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
