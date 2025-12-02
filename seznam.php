@@ -1586,7 +1586,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 <!-- External JavaScript -->
 <script src="assets/js/seznam.js?v=20251202" defer></script>
 <!-- seznam-delete-patch.js odstraněn - delete button je přímo v showCustomerDetail (Step 52) -->
-<script src="assets/js/pwa-notifications.js" defer></script>
+<script src="assets/js/pwa-notifications.min.js" defer></script>
 
 <!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
 <script>
