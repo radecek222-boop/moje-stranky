@@ -26,14 +26,14 @@
 ## Current Work
 
 **Active Phase:** 10 - Testing & Documentation
-**Current Step:** 151 - PHPUnit setup (COMPLETE)
-**Next Step:** 152 - CSRF, API response tests
+**Current Step:** 154 - Utils.js tests (COMPLETE)
+**Next Step:** 155 - wgsConfirm/wgsToast tests
 
 ## Quick Reference
 
-- **Last completed step:** 151 (PHPUnit setup)
-- **Total steps completed:** 151
-- **Estimated remaining:** ~24 steps
+- **Last completed step:** 154 (utils.js tests)
+- **Total steps completed:** 154
+- **Estimated remaining:** ~21 steps
 - **See:** [ROADMAP TO 100% COMPLETION](#roadmap-to-100-completion) section at end of file
 
 ## Phase 9 Deferral Note
@@ -2781,11 +2781,31 @@ composer test
 
 **Tasks:**
 - [x] Step 151: Set up PHPUnit for PHP backend tests
-- [ ] Step 152: Write tests for critical API endpoints
-- [ ] Step 153: Set up Jest for JavaScript tests
-- [ ] Step 154: Write tests for utils.js functions
+- [x] Step 152: Write tests for critical API endpoints
+- [x] Step 153: Set up Jest for JavaScript tests
+- [x] Step 154: Write tests for utils.js functions
 - [ ] Step 155: Write tests for wgsConfirm/wgsToast
 - [ ] Step 156: Create E2E test scenarios (manual checklist)
+
+**Step 152-154 Summary (COMPLETE):**
+
+PHP Tests (`tests/Unit/`):
+- `ApiResponseTest.php` - API response structure (10 tests)
+- `InputValidationTest.php` - email, phone, XSS, CSRF validation (20+ tests)
+- `SessionSecurityTest.php` - session handling, admin checks (15 tests)
+
+JavaScript Tests (`tests/js/`):
+- `setup.js` - Jest environment with mocks (localStorage, fetch, logger)
+- `utils.test.js` - isSuccess, escapeHtml, debounce, highlightText (40+ tests)
+
+Run tests:
+```bash
+# PHP
+composer install && composer test
+
+# JavaScript
+npm install && npm test
+```
 
 ## [Step 161-165]: API Documentation
 
