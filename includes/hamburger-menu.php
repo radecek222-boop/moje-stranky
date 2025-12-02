@@ -17,9 +17,11 @@ if ($isAdmin) {
 <!-- Centralizovaný z-index systém -->
 <link rel="stylesheet" href="/assets/css/z-index-layers.css">
 
+<!-- Hamburger Menu Wrapper - Alpine.js (Step 41) -->
+<div x-data="hamburgerMenu" x-init="init">
 <header class="hamburger-header">
   <a href="index.php" class="hamburger-logo">WGS<span>WHITE GLOVE SERVICE</span></a>
-  <button class="hamburger-toggle" id="hamburger-toggle" aria-label="Otevřít menu" aria-expanded="false">
+  <button class="hamburger-toggle" id="hamburger-toggle" aria-label="Otevřít menu" aria-expanded="false" @click.stop="prepnout">
     <span></span><span></span><span></span>
   </button>
   <nav class="hamburger-nav" id="hamburger-nav">
@@ -88,7 +90,8 @@ if ($isAdmin) {
     <?php endif; ?>
   </nav>
 </header>
-<div class="hamburger-overlay" id="hamburger-overlay"></div>
+<div class="hamburger-overlay" id="hamburger-overlay" @click="zavrit"></div>
+</div><!-- /Hamburger Menu Wrapper -->
 
 <style>
 .hamburger-header {
@@ -325,6 +328,122 @@ if ($isAdmin) {
 <!-- Alpine.js komponenty - registrace přes Alpine.data() (CSP-safe) -->
 <script>
 document.addEventListener('alpine:init', () => {
+  /**
+   * Hamburger Menu - Alpine.js komponenta (Step 41)
+   * Migrace z vanilla JS na CSP-safe Alpine.js
+   * Zachovává 1:1 chování: open/close, scroll-lock, ESC, overlay, resize close
+   */
+  Alpine.data('hamburgerMenu', () => ({
+    otevreno: false,
+    resizeTimer: null,
+
+    init() {
+      const nav = document.getElementById('hamburger-nav');
+      const hamburger = document.getElementById('hamburger-toggle');
+
+      // ESC zavře menu
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.otevreno) {
+          this.zavrit();
+        }
+      });
+
+      // Resize handler - zavřít menu při přechodu na desktop
+      window.addEventListener('resize', () => {
+        clearTimeout(this.resizeTimer);
+        this.resizeTimer = setTimeout(() => {
+          if (window.innerWidth > 768 && this.otevreno) {
+            this.zavrit();
+          }
+        }, 250);
+      });
+
+      // Kliknutí na odkazy v nav zavře menu
+      if (nav) {
+        nav.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', () => {
+            setTimeout(() => this.zavrit(), 100);
+          });
+        });
+      }
+
+      // Nastavit ARIA atributy
+      if (hamburger) {
+        hamburger.setAttribute('aria-expanded', 'false');
+      }
+      if (nav) {
+        nav.setAttribute('role', 'navigation');
+      }
+
+      // Exponovat metody pro vanilla JS (fallback kompatibilita)
+      window.hamburgerMenu = {
+        toggle: () => this.prepnout(),
+        open: () => this.otevrit(),
+        close: () => this.zavrit(),
+        isOpen: () => this.otevreno
+      };
+
+      console.log('[hamburgerMenu] Inicializován (Alpine.js CSP-safe)');
+    },
+
+    // Přepnout menu
+    prepnout() {
+      if (this.otevreno) {
+        this.zavrit();
+      } else {
+        this.otevrit();
+      }
+    },
+
+    // Otevřít menu
+    otevrit() {
+      this.otevreno = true;
+      this.aktualizovatCSS(true);
+      this.aktualizovatScrollLock(true);
+    },
+
+    // Zavřít menu
+    zavrit() {
+      this.otevreno = false;
+      this.aktualizovatCSS(false);
+      this.aktualizovatScrollLock(false);
+    },
+
+    // Aktualizovat CSS třídy (classList toggle)
+    aktualizovatCSS(aktivni) {
+      const nav = document.getElementById('hamburger-nav');
+      const overlay = document.getElementById('hamburger-overlay');
+      const hamburger = document.getElementById('hamburger-toggle');
+
+      if (nav) {
+        nav.classList.toggle('active', aktivni);
+      }
+      if (overlay) {
+        overlay.classList.toggle('active', aktivni);
+      }
+      if (hamburger) {
+        hamburger.classList.toggle('active', aktivni);
+        hamburger.setAttribute('aria-expanded', aktivni ? 'true' : 'false');
+      }
+      if (aktivni) {
+        document.body.classList.add('hamburger-menu-open');
+      } else {
+        document.body.classList.remove('hamburger-menu-open');
+      }
+    },
+
+    // Aktualizovat scroll lock
+    aktualizovatScrollLock(aktivni) {
+      if (window.scrollLock) {
+        if (aktivni) {
+          window.scrollLock.enable('hamburger-menu');
+        } else {
+          window.scrollLock.disable('hamburger-menu');
+        }
+      }
+    }
+  }));
+
   /**
    * Tech Provize - Alpine.js komponenta (Step 34)
    * Načítá provize technika z API a zobrazuje v navigaci
@@ -687,104 +806,9 @@ document.addEventListener('alpine:init', () => {
 <!-- Centralizovaná utilita pro zamykání scrollu -->
 <script src="/assets/js/scroll-lock.js"></script>
 
+<!-- Step 41: Hamburger Menu migrace na Alpine.js - vanilla JS odstraněn -->
+
 <script>
-/**
- * Hamburger Menu - Vanilla JS (CSP-SAFE)
- * Vráceno z Alpine.js kvůli CSP omezením
- */
-(function() {
-  'use strict';
-
-  function initHamburgerMenu() {
-    const hamburger = document.getElementById('hamburger-toggle');
-    const nav = document.getElementById('hamburger-nav');
-    const overlay = document.getElementById('hamburger-overlay');
-
-    if (!hamburger || !nav || !overlay) {
-      console.warn('Hamburger menu: Chybí HTML elementy!');
-      return;
-    }
-
-    function toggleMenu() {
-      const isActive = nav.classList.contains('active');
-      nav.classList.toggle('active');
-      overlay.classList.toggle('active');
-      hamburger.classList.toggle('active');
-      hamburger.setAttribute('aria-expanded', !isActive);
-
-      if (!isActive) {
-        if (window.scrollLock) {
-          window.scrollLock.enable('hamburger-menu');
-        }
-        document.body.classList.add('hamburger-menu-open');
-      } else {
-        document.body.classList.remove('hamburger-menu-open');
-        if (window.scrollLock) {
-          window.scrollLock.disable('hamburger-menu');
-        }
-      }
-    }
-
-    function closeMenu() {
-      nav.classList.remove('active');
-      overlay.classList.remove('active');
-      hamburger.classList.remove('active');
-      hamburger.setAttribute('aria-expanded', 'false');
-      document.body.classList.remove('hamburger-menu-open');
-      if (window.scrollLock) {
-        window.scrollLock.disable('hamburger-menu');
-      }
-    }
-
-    hamburger.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleMenu();
-    });
-
-    overlay.addEventListener('click', closeMenu);
-
-    nav.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        setTimeout(closeMenu, 100);
-      });
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && nav.classList.contains('active')) {
-        closeMenu();
-      }
-    });
-
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        if (window.innerWidth > 768 && nav.classList.contains('active')) {
-          closeMenu();
-        }
-      }, 250);
-    });
-
-    hamburger.setAttribute('aria-expanded', 'false');
-    nav.setAttribute('role', 'navigation');
-
-    window.hamburgerMenu = {
-      toggle: toggleMenu,
-      open: function() { if (!nav.classList.contains('active')) toggleMenu(); },
-      close: closeMenu,
-      isOpen: () => nav.classList.contains('active')
-    };
-
-    console.log('Hamburger menu inicializován (vanilla JS, CSP-safe)');
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initHamburgerMenu);
-  } else {
-    initHamburgerMenu();
-  }
-})();
-
 (function() {
   'use strict';
 
