@@ -1502,3 +1502,37 @@ header('Content-Type: text/html; charset=utf-8');
   - `includes/hamburger-menu.php`: Added defer to scroll-lock, translations, logout-handler (3 scripts)
 - **Result:** Reduced render-blocking scripts, improved page load performance.
 
+## [Step 66]: Font Loading Optimization
+- **Date:** 2025-12-02
+- **What:** Unified font-display strategy to `optional` across all pages for consistent behavior.
+- **Analysis:**
+  - Most pages already use `display=optional` (no layout shift, font may not show if slow)
+  - 4 pages were using `display=swap` (causes layout shift when font loads)
+- **Files modified:**
+  - `gdpr.php`: Changed display=swap → display=optional
+  - `vsechny_tabulky.php`: Changed display=swap → display=optional
+  - `pwa-splash.php`: Changed display=swap → display=optional
+  - `setup/install_role_based_access.php`: Changed display=swap → display=optional
+- **Result:** Consistent font loading behavior, eliminated potential layout shifts.
+
+## [Step 67]: Protocol-Relative URL Fix
+- **Date:** 2025-12-02
+- **What:** Fixed protocol-relative URL to use explicit HTTPS for security and consistency.
+- **Analysis:**
+  - Found 1 protocol-relative URL (`//translate.google.com/...`) in offline.php
+  - Protocol-relative URLs can cause mixed content issues and are deprecated
+- **Files modified:**
+  - `offline.php`: Changed `//translate.google.com` → `https://translate.google.com`
+- **Result:** All external URLs now use explicit HTTPS protocol.
+
+## [Step 68]: Meta Viewport Tag Audit
+- **Date:** 2025-12-02
+- **What:** Added missing viewport meta tags to migration scripts for proper mobile display.
+- **Analysis:**
+  - Found 2 migration scripts missing viewport meta tag
+  - These scripts output HTML pages that should be responsive
+- **Files modified:**
+  - `pridej_audio_do_poznamek.php`: Added viewport meta tag
+  - `setup/pridej_remember_tokens.php`: Added viewport meta tag
+- **Result:** All HTML-outputting scripts now have proper viewport configuration.
+
