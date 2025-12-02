@@ -1138,7 +1138,6 @@ const WGS = {
     // Step 37: Migrace na Alpine.js CSP-safe
     // Logika open/close/select je nyní řízena přes Alpine komponentu provedeniModal
     // v hamburger-menu.php. Tato funkce je ponechána prázdná pro zpětnou kompatibilitu.
-    console.log('[Provedeni] Řízeno Alpine.js komponentou provedeniModal');
   },
   
   toast(message, type = 'info') {
@@ -1223,7 +1222,6 @@ const WGS = {
     document.getElementById('prevMonth').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); });
     document.getElementById('nextMonth').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); });
     // Step 38: Close button a overlay click jsou nyní řízeny Alpine.js
-    console.log('[Calendar] Řízeno Alpine.js komponentou calendarModal');
   },
 
   /**

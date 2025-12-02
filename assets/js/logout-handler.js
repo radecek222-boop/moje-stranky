@@ -106,10 +106,6 @@
     logoutLinks.forEach(link => {
       link.addEventListener('click', handleLogout);
     });
-
-    if (logoutLinks.length > 0) {
-      console.log(`[Logout] Handler: ${logoutLinks.length} logout links protected`);
-    }
   }
 
   // Inicializovat po načtení DOM

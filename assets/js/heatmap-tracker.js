@@ -162,8 +162,6 @@
                 );
             }
         });
-
-        console.log('[Heatmap Tracker] Initialized - device:', deviceType);
     }
 
     if (document.readyState === 'loading') {

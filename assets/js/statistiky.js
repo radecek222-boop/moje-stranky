@@ -10,14 +10,10 @@ let vybraneProdejci = [];
 let vybraneTechnici = [];
 let vybraneZeme = ['cz', 'sk']; // Defaultně obě země
 
-console.log('[Statistiky] 2.0 - načítání...');
-
 /**
  * Inicializace při načtení stránky
  */
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('[Statistiky] 2.0 - inicializace');
-
     // Inicializovat multi-select dropdowny
     inicializujMultiselect();
 
@@ -38,8 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
         aktualniStranka = 1;
         aplikovatFiltry();
     });
-
-    console.log('[Statistiky] 2.0 - inicializace dokončena');
 });
 
 /**
@@ -485,7 +479,6 @@ function renderCharty(data) {
  * Aplikovat filtry
  */
 function aplikovatFiltry() {
-    console.log('Aplikuji filtry...');
     aktualniStranka = 1;
     nactiSummary();
     nactiZakazky();
@@ -496,8 +489,6 @@ function aplikovatFiltry() {
  * Resetovat filtry
  */
 function resetovitFiltry() {
-    console.log('Resetuji filtry...');
-
     // Reset year, month
     document.getElementById('filter-year').value = '2025';
     document.getElementById('filter-month').value = '11';
@@ -532,8 +523,6 @@ function resetovitFiltry() {
  */
 async function exportovatPDF() {
     try {
-        console.log('[Doc] Exportuji PDF...');
-
         // Načíst VŠECHNA data (bez limitu)
         const filterParams = getFilterParams();
         const response = await fetch(`/api/statistiky_api.php?action=get_zakazky&${filterParams}&pro_export=1`);
@@ -641,7 +630,6 @@ async function exportovatPDF() {
         document.body.appendChild(pdfContainer);
 
         // Renderovat pomocí html2canvas
-        console.log('[Photo] Renderuji HTML pomocí html2canvas...');
         const canvas = await html2canvas(pdfContainer, {
             scale: 2,
             backgroundColor: '#fff',
@@ -722,8 +710,6 @@ async function exportovatPDF() {
         // Stáhnout PDF
         const nazevSouboru = `statistiky_${rok}_${mesicValue || 'vsechny'}_${new Date().toISOString().split('T')[0]}.pdf`;
         doc.save(nazevSouboru);
-
-        console.log('PDF exportováno:', nazevSouboru);
 
     } catch (error) {
         console.error('Chyba exportu PDF:', error);

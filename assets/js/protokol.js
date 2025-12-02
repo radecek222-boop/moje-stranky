@@ -2251,7 +2251,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('zakaznikSchvaleniPad');
 
     if (!btnPodepsat || !overlay || !canvas) {
-      console.log('[ZakaznikSchvaleni] Elementy nenalezeny, přeskakuji inicializaci');
       return;
     }
 
@@ -2562,13 +2561,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // Nakreslit podpis
       ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
 
-      console.log('[ZakaznikSchvaleni] Podpis přenesen', {
-        imgSize: { w: img.width, h: img.height },
-        canvasSize: { w: canvasW, h: canvasH },
-        drawSize: { w: drawWidth, h: drawHeight },
-        position: { x: drawX, y: drawY }
-      });
-
       if (typeof showNotif === 'function') {
         showNotif('success', 'Podpis byl přenesen do protokolu');
       }
@@ -2592,8 +2584,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Funkce pro vynucení překladu všech polí
   function vynutitPreklad() {
-    console.log('[ZakaznikSchvaleni] Spouštím překlad polí...');
-
     const fieldsToTranslate = [
       { source: 'description-cz', target: 'description-en' },
       { source: 'problem-cz', target: 'problem-en' },
@@ -2606,7 +2596,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Použít globální funkci translateText pokud existuje
         if (typeof translateText === 'function') {
           translateText(source, target);
-          console.log('[ZakaznikSchvaleni] Překlad:', source, '→', target);
         }
       }
     });

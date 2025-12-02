@@ -30,7 +30,6 @@ function redirectToLogin(redirectTarget = '') {
 // TAB MANAGEMENT
 // ============================================================
 function initAdminPanel() {
-  safeLogger.log('Admin panel initialized');
   setupNavigation();
   initUserManagement();
 }
@@ -41,8 +40,6 @@ if (document.readyState === 'loading') {
 } else {
   initAdminPanel();
 }
-
-safeLogger.log('admin.js loaded');
 
 // ============================================================
 // GLOBAL ERROR HANDLER
@@ -81,12 +78,10 @@ function setupNavigation() {
       e.preventDefault();
       const url = button.getAttribute('data-navigate');
       if (url) {
-        logger.log('[Sync] Navigating to:', url);
         window.location.href = url;
       }
     });
   });
-  logger.log('Navigation setup complete');
 }
 
 // ============================================================
@@ -839,7 +834,6 @@ function loadKeysModal() {
         <iframe
             src="/includes/admin_security.php?embed=1"
             style="width: 100%; height: 80vh; border: none; border-radius: 4px;"
-            onload="console.log('Security centrum načteno')"
         ></iframe>
     `;
 }
@@ -938,7 +932,6 @@ function loadClaimsModal() {
         <iframe
             src="/includes/admin_reklamace_management.php?embed=1&filter=all&_t=${timestamp}"
             style="width: 100%; height: 80vh; border: none; border-radius: 4px;"
-            onload="console.log('Správa reklamací načtena');"
             id="claimsIframe"
         ></iframe>
     `;
@@ -1406,24 +1399,18 @@ async function clearCacheAndReload() {
             Object.keys(storage).forEach(key => {
                 localStorage.setItem(key, storage[key]);
             });
-
-            console.log('localStorage vymazán');
         }
 
         // Vymazat sessionStorage
         if (window.sessionStorage) {
             sessionStorage.clear();
-            console.log('sessionStorage vymazán');
         }
 
         // Vymazat Service Worker cache (pokud existuje)
         if ('caches' in window) {
             const names = await caches.keys();
             await Promise.all(names.map(name => caches.delete(name)));
-            console.log('Service Worker cache vymazán (' + names.length + ' cache(s))');
         }
-
-        console.log('[Sync] Reloaduji stránku s force refresh...');
 
         // Force reload s timestamp pro cache busting
         const timestamp = new Date().getTime();
@@ -1543,8 +1530,6 @@ window.openCCModal = function(...args) {
  */
 async function zobrazDetailUzivatele(userId) {
   try {
-    logger.log('Načítání detailu uživatele:', userId);
-
     const response = await fetch(`/api/admin_users_api.php?action=get&user_id=${userId}`, {
       credentials: 'same-origin'
     });
