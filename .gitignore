@@ -13,6 +13,7 @@ FINALNI_*.php
 !CLAUDE.md
 !README.md
 !tests/*.md
+!docs/*.md
 !master_prompt_system*.md
 *.txt
 live_test_pdf.html
