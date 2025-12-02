@@ -1053,3 +1053,21 @@ Alpine.data('modalName', () => ({
   - 3 PHP files: version number updates (novareklamace.php, protokol.php, seznam.php)
 - **Result:** All minified assets are now synchronized with source files. No more cache issues.
 
+## [Step 47]: Merge protokol-fakturace-patch.js into protokol-data-patch.js
+- **What:** Merged redundant `protokol-fakturace-patch.js` functionality into `protokol-data-patch.js` and removed the redundant file.
+- **How:**
+  - Added `aktualizujFakturaci()` helper function to protokol-data-patch.js
+  - Modified `patchedLoadReklamace()` to always call fakturace update after any loadReklamace call
+  - Removed protokol-fakturace-patch.js script reference from protokol.php
+  - Deleted the redundant file
+- **Why:**
+  - Both files were wrapping `window.loadReklamace`, creating unnecessary complexity
+  - `protokol-fakturace-patch.js` (35 lines) had overlapping logic with `protokol-data-patch.js` (193 lines)
+  - Double-wrapping of functions creates maintenance burden and potential race conditions
+  - This is part of Phase 2 patch consolidation goal from section 4.1
+- **Files touched:**
+  - `assets/js/protokol-data-patch.js` (MODIFIED - added fakturace logic)
+  - `protokol.php` (MODIFIED - removed script tag, added comment)
+  - `assets/js/protokol-fakturace-patch.js` (DELETED)
+- **Result:** Reduced from 2 loadReklamace wrappers to 1. One less patch file to maintain.
+

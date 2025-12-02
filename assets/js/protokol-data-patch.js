@@ -152,6 +152,20 @@
     hydrateStaticFields();
   }
 
+  // Pomocná funkce pro aktualizaci fakturace pole (nahrazuje protokol-fakturace-patch.js)
+  const aktualizujFakturaci = (zakaznik) => {
+    const fakturaceField = document.getElementById('fakturace-firma');
+    if (!fakturaceField) return;
+
+    const kod = ((zakaznik.fakturace_firma || 'cz')).toString().trim().toUpperCase();
+    if (kod === 'CZ') {
+      fakturaceField.value = '🇨🇿 Česká republika (CZ)';
+    } else if (kod === 'SK') {
+      fakturaceField.value = '🇸🇰 Slovensko (SK)';
+    }
+    log('log', `Fakturace nastavena: ${kod}`);
+  };
+
   const attachLoadPatch = () => {
     if (typeof window.loadReklamace !== 'function') {
       attachLoadPatch._attempts = (attachLoadPatch._attempts || 0) + 1;
@@ -166,26 +180,40 @@
     const originalLoadReklamace = window.loadReklamace;
     window.loadReklamace = async function patchedLoadReklamace(id) {
       const normalizedParam = (id || '').toString().trim();
+      let vysledek;
 
       if (!normalizedParam && bootstrapId) {
         log('info', 'ℹ️ Protokol data patch: doplňuji ID z bootstrap payloadu');
         hydrateStaticFields();
-        return await originalLoadReklamace.call(this, bootstrapId);
-      }
-
-      if (bootstrapId && normalizedParam && normalizedParam === bootstrapId) {
+        vysledek = await originalLoadReklamace.call(this, bootstrapId);
+      } else if (bootstrapId && normalizedParam && normalizedParam === bootstrapId) {
         hydrateStaticFields();
+        try {
+          vysledek = await originalLoadReklamace.apply(this, arguments);
+        } catch (error) {
+          log('warn', 'Původní loadReklamace selhal, zachovávám bootstrap data', error);
+          return null;
+        }
+      } else {
+        // Pro jiné ID - zavolat originál a pak aktualizovat fakturaci
+        try {
+          vysledek = await originalLoadReklamace.apply(this, arguments);
+        } catch (error) {
+          log('warn', 'Původní loadReklamace selhal', error);
+          return null;
+        }
       }
 
-      try {
-        return await originalLoadReklamace.apply(this, arguments);
-      } catch (error) {
-        log('warn', 'Původní loadReklamace selhal, zachovávám bootstrap data', error);
-        return null;
-      }
+      // VŽDY aktualizovat fakturaci po loadReklamace (nahrazuje protokol-fakturace-patch.js)
+      setTimeout(() => {
+        const zakaznik = window.currentReklamace || JSON.parse(localStorage.getItem('currentCustomer') || '{}');
+        aktualizujFakturaci(zakaznik);
+      }, 100);
+
+      return vysledek;
     };
 
-    log('log', 'Protokol data patch aktivován');
+    log('log', 'Protokol data patch aktivován (včetně fakturace)');
   };
 
   attachLoadPatch();

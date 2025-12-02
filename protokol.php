@@ -548,7 +548,7 @@ if ($initialBootstrapData) {
 <script src="assets/js/protokol-customer-collapse.js" defer></script>
 <script src="assets/js/protokol-data-patch.js" defer></script>
 <script src="assets/js/protokol.js?v=20251202" defer></script>
-<script src="assets/js/protokol-fakturace-patch.js" defer></script>
+<!-- protokol-fakturace-patch.js byl sloučen do protokol-data-patch.js (Step 47) -->
 <!-- Fix pro tlačítka (načíst až po protokol.js) -->
 <script src="assets/js/protokol-buttons-fix.js" defer></script>
 <!-- Překlady pro kalkulačku -->
