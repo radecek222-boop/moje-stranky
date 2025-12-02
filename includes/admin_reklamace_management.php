@@ -271,7 +271,7 @@ try {
         <!-- Header -->
         <div style="padding: 1.5rem; background: #000; color: #fff; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
             <h2 style="font-family: 'Poppins', sans-serif; font-size: 1.2rem; font-weight: 600; margin: 0;">Detail reklamace + Historie</h2>
-            <button onclick="zavritDetailModal()" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
+            <button onclick="zavritDetailModal()" aria-label="Zavřít" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
         </div>
 
         <!-- Obsah -->

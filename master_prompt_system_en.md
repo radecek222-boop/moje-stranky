@@ -1651,3 +1651,18 @@ header('Content-Type: text/html; charset=utf-8');
   - `analytics-heatmap.php`: Added for attributes to page, device, and type selector labels
 - **Result:** All form controls now have proper label associations for assistive technologies.
 
+## [Step 78]: Aria-Label for Icon-Only Close Buttons
+- **Date:** 2025-12-02
+- **What:** Added `aria-label` to remaining icon-only close buttons (×) for screen reader accessibility.
+- **Analysis:**
+  - Found 8 additional close buttons using × character without aria-label
+  - These buttons are not announced properly by screen readers
+- **Files modified:**
+  - `api/video_download.php`: Added aria-label="Zavřít video" to video modal close
+  - `psa-kalkulator.php`: Added role, tabindex, aria-label to QR modal close span
+  - `psa.php`: Added role, tabindex, aria-label to QR modal close span
+  - `includes/admin_reklamace_management.php`: Added aria-label to detail modal close
+  - `includes/admin_email_sms.php`: Added aria-label to 2 modal close buttons
+  - `includes/admin_security.php`: Added aria-label to invitation modal close
+- **Result:** All icon-only close buttons now have accessible names for screen readers.
+
