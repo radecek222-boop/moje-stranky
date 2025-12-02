@@ -1791,3 +1791,20 @@ header('Content-Type: text/html; charset=utf-8');
     - Number inputs: "Počet [název]"
 - **Result:** Counter controls in price calculator are now fully accessible to screen reader users.
 
+## [Step 87]: Collapsible Section Accessibility
+- **Date:** 2025-12-02
+- **What:** Added full keyboard support and ARIA attributes to collapsible customer info sections.
+- **Analysis:**
+  - Collapsible sections need role="button" and tabindex for keyboard access
+  - aria-expanded must reflect current state and update on toggle
+  - aria-controls links button to controlled content
+  - Content region needs aria-labelledby for proper association
+  - Keyboard users need Enter/Space to toggle sections
+- **Files modified:**
+  - `protokol.php`: Added role="button", tabindex, aria-expanded, aria-controls, aria-label to customerInfoToggle
+  - `photocustomer.php`: Same ARIA attributes added to collapsible header
+  - `assets/js/protokol-customer-collapse.js`: Added aria-expanded updates, keyboard support (Enter/Space)
+  - `assets/js/photocustomer-collapsible.js`: Same JS accessibility improvements
+  - Both .min.js files regenerated
+- **Result:** Collapsible sections are now fully accessible via keyboard and properly announced by screen readers.
+
