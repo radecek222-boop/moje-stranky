@@ -24,18 +24,26 @@
     const savedState = localStorage.getItem('photocustomer-info-expanded');
     const isExpanded = savedState === 'true';
 
+    // Funkce pro aktualizaci aria-expanded
+    function aktualizovatAriaExpanded(rozbalenoStav) {
+      toggle.setAttribute('aria-expanded', rozbalenoStav ? 'true' : 'false');
+      toggle.setAttribute('aria-label', rozbalenoStav ? 'Sbalit informace o zákazníkovi' : 'Rozbalit informace o zákazníkovi');
+    }
+
     // Nastavit počáteční stav
     if (jeMobil()) {
       if (isExpanded) {
         collapsible.classList.add('expanded');
       }
+      aktualizovatAriaExpanded(isExpanded);
     } else {
       // Na desktopu vždy rozbaleno
       collapsible.classList.add('expanded');
+      aktualizovatAriaExpanded(true);
     }
 
-    // Event listener pro toggle
-    toggle.addEventListener('click', function() {
+    // Funkce pro přepnutí stavu
+    function prepnoutStav() {
       // Funguje pouze na mobilu
       if (!jeMobil()) {
         return;
@@ -47,12 +55,25 @@
         // Sbalit
         collapsible.classList.remove('expanded');
         localStorage.setItem('photocustomer-info-expanded', 'false');
-        logger.log('📦 Zákaznické údaje sbaleny');
+        aktualizovatAriaExpanded(false);
+        logger.log('Zakaznicke udaje sbaleny');
       } else {
         // Rozbalit
         collapsible.classList.add('expanded');
         localStorage.setItem('photocustomer-info-expanded', 'true');
-        logger.log('📂 Zákaznické údaje rozbaleny');
+        aktualizovatAriaExpanded(true);
+        logger.log('Zakaznicke udaje rozbaleny');
+      }
+    }
+
+    // Event listener pro toggle - kliknutí
+    toggle.addEventListener('click', prepnoutStav);
+
+    // Event listener pro toggle - klávesnice (Enter/Space)
+    toggle.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        prepnoutStav();
       }
     });
 
@@ -61,6 +82,7 @@
       if (!jeMobil()) {
         // Na desktopu vždy rozbaleno
         collapsible.classList.add('expanded');
+        aktualizovatAriaExpanded(true);
       }
     });
 

@@ -370,8 +370,8 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
     </div>
 
     <!-- Loading Indicator -->
-    <div id="loading-indicator" style="text-align: center; padding: 40px;">
-      <div class="spinner"></div>
+    <div id="loading-indicator" style="text-align: center; padding: 40px;" role="status" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
       <p data-lang-cs="Načítám ceník..." data-lang-en="Loading price list..." data-lang-it="Caricamento listino prezzi...">Načítám ceník...</p>
     </div>
 

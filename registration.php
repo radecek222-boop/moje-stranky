@@ -50,8 +50,8 @@ $csrfToken = generateCSRFToken();
 
     <div class="form-group">
       <label for="regKey" data-lang-cs="Registrační klíč *" data-lang-en="Registration Key *" data-lang-it="Chiave di Registrazione *">Registrační klíč *</label>
-      <input type="password" id="regKey" name="registration_key" autocomplete="off" data-lang-cs-placeholder="Zadejte klíč" data-lang-en-placeholder="Enter key" data-lang-it-placeholder="Inserisci chiave" placeholder="Zadejte klíč" required>
-      <div class="helper-text" data-lang-cs="Klíč dostáváte od administátora" data-lang-en="You receive the key from the administrator" data-lang-it="Ricevi la chiave dall'amministratore">Klíč dostáváte od administátora</div>
+      <input type="password" id="regKey" name="registration_key" autocomplete="off" data-lang-cs-placeholder="Zadejte klíč" data-lang-en-placeholder="Enter key" data-lang-it-placeholder="Inserisci chiave" placeholder="Zadejte klíč" required aria-describedby="regKeyHelp">
+      <div class="helper-text" id="regKeyHelp" data-lang-cs="Klíč dostáváte od administátora" data-lang-en="You receive the key from the administrator" data-lang-it="Ricevi la chiave dall'amministratore">Klíč dostáváte od administátora</div>
     </div>
 
     <div class="form-group">
@@ -71,8 +71,8 @@ $csrfToken = generateCSRFToken();
 
     <div class="form-group">
       <label for="regPassword" data-lang-cs="Heslo" data-lang-en="Password" data-lang-it="Password">Heslo</label>
-      <input type="password" id="regPassword" name="password" placeholder="••••••••" required autocomplete="new-password">
-      <div class="helper-text" data-lang-cs="Minimálně 12 znaků (velké/malé písmena, čísla a znaky)" data-lang-en="At least 12 characters (uppercase/lowercase letters, numbers and symbols)" data-lang-it="Almeno 12 caratteri (lettere maiuscole/minuscole, numeri e simboli)">Minimálně 12 znaků (velké/malé písmena, čísla a znaky)</div>
+      <input type="password" id="regPassword" name="password" placeholder="••••••••" required autocomplete="new-password" aria-describedby="regPasswordHelp">
+      <div class="helper-text" id="regPasswordHelp" data-lang-cs="Minimálně 12 znaků (velké/malé písmena, čísla a znaky)" data-lang-en="At least 12 characters (uppercase/lowercase letters, numbers and symbols)" data-lang-it="Almeno 12 caratteri (lettere maiuscole/minuscole, numeri e simboli)">Minimálně 12 znaků (velké/malé písmena, čísla a znaky)</div>
     </div>
 
     <div class="form-group">

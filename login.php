@@ -119,12 +119,12 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
       <!-- FIX 11: Remember Me checkbox - Alpine.js handler (Step 36) -->
       <div class="form-group remember-me-group" style="margin-top: 0.5rem;">
         <div style="display: flex; align-items: center; margin-bottom: 0.3rem;">
-          <input type="checkbox" id="rememberMe" name="remember_me" style="width: auto; margin-right: 8px;" @change="onCheckboxChange">
+          <input type="checkbox" id="rememberMe" name="remember_me" style="width: auto; margin-right: 8px;" @change="onCheckboxChange" aria-describedby="rememberMeHelp">
           <label for="rememberMe" style="display: inline; font-weight: 500; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.85rem;" data-lang-cs="Zapamatovat si mě (30 dní)" data-lang-en="Remember me (30 days)" data-lang-it="Ricordami (30 giorni)">
             Zapamatovat si mě (30 dní)
           </label>
         </div>
-        <div class="remember-me-helper" style="margin-left: 28px; font-size: 0.75rem; color: #999; font-weight: 300;">
+        <div class="remember-me-helper" id="rememberMeHelp" style="margin-left: 28px; font-size: 0.75rem; color: #999; font-weight: 300;">
           <span data-lang-cs="pouze na osobním zařízení" data-lang-en="personal device only" data-lang-it="solo su dispositivo personale">pouze na osobním zařízení</span>
         </div>
       </div>

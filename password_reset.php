@@ -45,8 +45,8 @@
 
       <div class="form-group">
         <label for="resetKey">Registrační klíč</label>
-        <input type="password" id="resetKey" name="registration_key" autocomplete="off" placeholder="Váš registrační klíč" required>
-        <div class="helper-text">Klíč, kterým jste se registrovali</div>
+        <input type="password" id="resetKey" name="registration_key" autocomplete="off" placeholder="Váš registrační klíč" required aria-describedby="resetKeyHelp">
+        <div class="helper-text" id="resetKeyHelp">Klíč, kterým jste se registrovali</div>
       </div>
 
       <button type="submit" class="btn btn-primary" style="width: 100%;">Ověřit identitu</button>
@@ -62,8 +62,8 @@
 
       <div class="form-group">
         <label for="newPassword">Nové heslo</label>
-        <input type="password" id="newPassword" name="new_password" placeholder="••••••••" required minlength="8" autocomplete="new-password">
-        <div class="helper-text">Minimálně 8 znaků</div>
+        <input type="password" id="newPassword" name="new_password" placeholder="••••••••" required minlength="8" autocomplete="new-password" aria-describedby="newPasswordHelp">
+        <div class="helper-text" id="newPasswordHelp">Minimálně 8 znaků</div>
       </div>
 
       <div class="form-group">

@@ -1791,3 +1791,47 @@ header('Content-Type: text/html; charset=utf-8');
     - Number inputs: "Počet [název]"
 - **Result:** Counter controls in price calculator are now fully accessible to screen reader users.
 
+## [Step 87]: Collapsible Section Accessibility
+- **Date:** 2025-12-02
+- **What:** Added full keyboard support and ARIA attributes to collapsible customer info sections.
+- **Analysis:**
+  - Collapsible sections need role="button" and tabindex for keyboard access
+  - aria-expanded must reflect current state and update on toggle
+  - aria-controls links button to controlled content
+  - Content region needs aria-labelledby for proper association
+  - Keyboard users need Enter/Space to toggle sections
+- **Files modified:**
+  - `protokol.php`: Added role="button", tabindex, aria-expanded, aria-controls, aria-label to customerInfoToggle
+  - `photocustomer.php`: Same ARIA attributes added to collapsible header
+  - `assets/js/protokol-customer-collapse.js`: Added aria-expanded updates, keyboard support (Enter/Space)
+  - `assets/js/photocustomer-collapsible.js`: Same JS accessibility improvements
+  - Both .min.js files regenerated
+- **Result:** Collapsible sections are now fully accessible via keyboard and properly announced by screen readers.
+
+## [Step 88]: Form Helper Text Accessibility
+- **Date:** 2025-12-02
+- **What:** Added aria-describedby to link form inputs with their helper/description text.
+- **Analysis:**
+  - Helper text below form fields should be programmatically associated with inputs
+  - aria-describedby allows screen readers to announce helper text when field is focused
+  - Improves form usability for screen reader users
+- **Files modified:**
+  - `password_reset.php`: Added aria-describedby to resetKey and newPassword inputs, IDs to helper divs
+  - `registration.php`: Added aria-describedby to regKey and regPassword inputs, IDs to helper divs
+  - `login.php`: Added aria-describedby to rememberMe checkbox, ID to helper div
+- **Result:** Form helper text is now properly announced by screen readers when users focus on related fields.
+
+## [Step 89]: Loading and Progress Indicator Accessibility
+- **Date:** 2025-12-02
+- **What:** Added ARIA attributes to loading indicators, spinners, progress bars and alert containers.
+- **Analysis:**
+  - Loading overlays need role="status" and aria-live for screen reader announcements
+  - Spinners are decorative and should have aria-hidden="true"
+  - Progress bars need role="progressbar" with aria-valuenow, aria-valuemin, aria-valuemax
+  - Alert containers need role="alert" and aria-live="assertive" for immediate announcements
+- **Files modified:**
+  - `seznam.php`: Added role="status", aria-live, aria-label to loadingOverlay, aria-hidden to spinner
+  - `cenik.php`: Added role="status", aria-live to loading-indicator, aria-hidden to spinner
+  - `photocustomer.php`: Added ARIA to progress bar (role="progressbar", aria-value*), wait dialog and alert container
+- **Result:** Loading states and progress are now properly announced to screen reader users.
+
