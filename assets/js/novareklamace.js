@@ -786,6 +786,7 @@ const WGS = {
       } else if (fyzickaCheckbox?.checked) {
         typZakaznika = 'Fyzická osoba';
       }
+      logger.log('[TypZakaznika] IČO checked:', icoCheckbox?.checked, ', Fyzická checked:', fyzickaCheckbox?.checked, ', Odesílám:', typZakaznika);
       formData.append('typ_zakaznika', typZakaznika);
 
       // Spojit předvolbu + telefonní číslo
