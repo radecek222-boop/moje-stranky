@@ -505,9 +505,7 @@ try {
             <?php else: ?>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1rem;">
                     <?php foreach ($smsSablony as $sablona): ?>
-                    <div style="background: #fff; border: 1px solid #ddd; padding: 1.25rem; transition: box-shadow 0.2s;"
-                         onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
-                         onmouseout="this.style.boxShadow='none'">
+                    <div class="sms-card-hover" style="background: #fff; border: 1px solid #ddd; padding: 1.25rem;">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
                             <h4 style="margin: 0; font-size: 0.95rem; font-weight: 600; font-family: 'Poppins', sans-serif;">
                                 <?= htmlspecialchars($sablona['name']) ?>
@@ -736,6 +734,39 @@ try {
 
 .email-queue-row:hover {
     background: #f5f5f5;
+}
+
+.admin-hover-row {
+    transition: background 0.2s;
+    background: #fff;
+}
+
+.admin-hover-row:hover {
+    background: #f5f5f5;
+}
+
+.sms-card-hover {
+    transition: box-shadow 0.2s;
+}
+
+.sms-card-hover:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.photo-hover-scale {
+    transition: transform 0.2s;
+}
+
+.photo-hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.protokol-hover-bg {
+    transition: background 0.2s;
+}
+
+.protokol-hover-bg:hover {
+    background: #e5e5e5 !important;
 }
 </style>
 

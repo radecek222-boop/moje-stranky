@@ -726,7 +726,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
             $fotkyHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px;">';
             foreach ($fotkySekce as $fotka) {
                 $cesta = $fotka['file_path'] ?: $fotka['photo_path'];
-                $fotkyHtml .= '<a href="/' . htmlspecialchars($cesta) . '" target="_blank" rel="noopener" style="display: block; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; transition: transform 0.2s;" onmouseover="this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'">';
+                $fotkyHtml .= '<a href="/' . htmlspecialchars($cesta) . '" target="_blank" rel="noopener" class="photo-hover-scale" style="display: block; border: 1px solid #ddd; border-radius: 4px; overflow: hidden;">';
                 $fotkyHtml .= '<img src="/' . htmlspecialchars($cesta) . '" style="width: 100%; height: 120px; object-fit: cover;" alt="' . htmlspecialchars($fotka['file_name']) . '" loading="lazy">';
                 $fotkyHtml .= '</a>';
             }
@@ -755,7 +755,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
 
         foreach ($protokoly as $protokol) {
             $protokolyHtml = '<div style="margin-top: 10px;">';
-            $protokolyHtml .= '<a href="/' . htmlspecialchars($protokol['file_path']) . '" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 10px; padding: 10px 15px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #000; transition: background 0.2s;" onmouseover="this.style.background=\'#e5e5e5\'" onmouseout="this.style.background=\'#f5f5f5\'">';
+            $protokolyHtml .= '<a href="/' . htmlspecialchars($protokol['file_path']) . '" target="_blank" rel="noopener" class="protokol-hover-bg" style="display: inline-flex; align-items: center; gap: 10px; padding: 10px 15px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #000;">';
             $protokolyHtml .= '<span style="font-size: 1.5rem; font-weight: 600; color: #dc3545;">PDF</span>';
             $protokolyHtml .= '<div>';
             $protokolyHtml .= '<div style="font-weight: 600;">' . htmlspecialchars($protokol['original_filename']) . '</div>';

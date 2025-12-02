@@ -178,9 +178,7 @@ try {
             </div>
 
             <?php foreach ($reklamace as $rek): ?>
-            <div class="reklamace-row" style="border-bottom: 1px solid #e5e5e5; padding: 0.4rem 0.75rem; transition: background 0.2s; display: grid; grid-template-columns: 130px 150px 100px 1fr 150px 90px 310px; gap: 0.75rem; align-items: center; font-size: 0.75rem;"
-                 onmouseover="this.style.background='#f9f9f9'"
-                 onmouseout="this.style.background='#fff'">
+            <div class="reklamace-row admin-hover-row" style="border-bottom: 1px solid #e5e5e5; padding: 0.4rem 0.75rem; display: grid; grid-template-columns: 130px 150px 100px 1fr 150px 90px 310px; gap: 0.75rem; align-items: center; font-size: 0.75rem;">
 
                 <!-- Číslo -->
                 <div style="font-family: 'Poppins', sans-serif; font-weight: 600; color: #000;">

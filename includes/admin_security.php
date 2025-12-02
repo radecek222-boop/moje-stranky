@@ -969,7 +969,7 @@ async function nactiRegistracniKlice() {
             html += '</tr></thead><tbody>';
 
             data.keys.forEach(klic => {
-                html += '<tr style="border-bottom: 1px solid #e0e0e0;" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'#fff\'">';
+                html += '<tr class="admin-hover-row" style="border-bottom: 1px solid #e0e0e0;">';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><span style="display: inline-block; padding: 0.2rem 0.5rem; background: #000; color: #fff; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 500;">' + escapujHtml(klic.key_type) + '</span></td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><code style="background: #f5f5f5; padding: 0.25rem 0.5rem; font-size: 0.8rem; border: 1px solid #ddd;">' + escapujHtml(klic.key_code) + '</code></td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + klic.usage_count + ' / ' + (klic.max_usage || '∞') + '</td>';
