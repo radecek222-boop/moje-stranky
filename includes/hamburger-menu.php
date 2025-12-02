@@ -514,6 +514,173 @@ document.addEventListener('alpine:init', () => {
       }
     }
   }));
+
+  /**
+   * Calendar Modal - Alpine.js komponenta (Step 38)
+   * Modal pro výběr data na novareklamace stránce
+   * Migrace open/close logiky z vanilla JS na CSP-safe Alpine.js
+   * Renderování kalendáře zůstává v vanilla JS (initCustomCalendar)
+   */
+  Alpine.data('calendarModal', () => ({
+    open: false,
+
+    init() {
+      // ESC zavře modal (bonus - původně nebylo)
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.open) {
+          this.close();
+        }
+      });
+
+      // Exponovat metody pro vanilla JS (initCustomCalendar)
+      window.calendarModal = {
+        open: () => this.openModal(),
+        close: () => this.close(),
+        isOpen: () => this.open
+      };
+
+      console.log('[calendarModal] Inicializován (Alpine.js CSP-safe)');
+    },
+
+    // Otevřít modal
+    openModal() {
+      this.open = true;
+      const overlay = document.getElementById('calendarOverlay');
+      if (overlay) {
+        overlay.classList.add('active');
+      }
+    },
+
+    // Zavřít modal
+    close() {
+      this.open = false;
+      const overlay = document.getElementById('calendarOverlay');
+      if (overlay) {
+        overlay.classList.remove('active');
+      }
+    },
+
+    // Klik na overlay pozadí
+    overlayClick(event) {
+      if (event.target.id === 'calendarOverlay') {
+        this.close();
+      }
+    }
+  }));
+
+  /**
+   * Calculator Modal - Alpine.js komponenta (Step 40)
+   * Modal pro kalkulačku ceny servisu na protokol stránce
+   * Migrace open/close logiky z vanilla JS na CSP-safe Alpine.js
+   * Business logika (načítání kalkulačky, výpočty) zůstává v protokol-calculator-integration.js
+   */
+  Alpine.data('calculatorModal', () => ({
+    open: false,
+
+    init() {
+      // ESC zavře modal (bonus - původně nebylo)
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.open) {
+          this.close();
+        }
+      });
+
+      // Exponovat metody pro vanilla JS (protokol-calculator-integration.js)
+      window.calculatorModal = {
+        open: () => this.openModal(),
+        close: () => this.close(),
+        isOpen: () => this.open
+      };
+
+      console.log('[calculatorModal] Inicializován (Alpine.js CSP-safe)');
+    },
+
+    // Otevřít modal - používá style.display pro zachování původního chování
+    openModal() {
+      this.open = true;
+      const overlay = document.getElementById('calculatorModalOverlay');
+      if (overlay) {
+        overlay.style.display = 'flex';
+      }
+    },
+
+    // Zavřít modal
+    close() {
+      this.open = false;
+      const overlay = document.getElementById('calculatorModalOverlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
+    },
+
+    // Klik na overlay pozadí
+    overlayClick(event) {
+      if (event.target.id === 'calculatorModalOverlay') {
+        this.close();
+      }
+    }
+  }));
+
+  /**
+   * Zákazník Schválení Modal - Alpine.js komponenta (Step 39)
+   * Modal pro zobrazení souhrnu protokolu a podpis zákazníka
+   * Migrace open/close logiky z vanilla JS na CSP-safe Alpine.js
+   * Business logika (překlad, signature pad, souhrn) zůstává v protokol.js
+   */
+  Alpine.data('zakaznikSchvaleniModal', () => ({
+    open: false,
+
+    init() {
+      // ESC zavře modal
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.open) {
+          this.close();
+        }
+      });
+
+      // Exponovat metody pro vanilla JS (protokol.js)
+      window.zakaznikSchvaleniModal = {
+        open: () => this.openModal(),
+        close: () => this.close(),
+        isOpen: () => this.open
+      };
+
+      console.log('[zakaznikSchvaleniModal] Inicializován (Alpine.js CSP-safe)');
+    },
+
+    // Otevřít modal - používá style.display pro zachování původního chování
+    openModal() {
+      this.open = true;
+      const overlay = document.getElementById('zakaznikSchvaleniOverlay');
+      if (overlay) {
+        overlay.style.display = 'flex';
+      }
+      // Scroll lock přes centralizovanou utilitu
+      if (window.scrollLock) {
+        window.scrollLock.enable('zakaznik-schvaleni-overlay');
+      }
+    },
+
+    // Zavřít modal
+    close() {
+      this.open = false;
+      const overlay = document.getElementById('zakaznikSchvaleniOverlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
+      // Odemknout scroll
+      if (window.scrollLock) {
+        window.scrollLock.disable('zakaznik-schvaleni-overlay');
+      }
+    },
+
+    // Klik na overlay pozadí
+    overlayClick(event) {
+      if (event.target.id === 'zakaznikSchvaleniOverlay') {
+        this.close();
+      }
+    }
+  }));
 });
 </script>
 

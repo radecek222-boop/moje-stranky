@@ -349,12 +349,13 @@ if ($initialBootstrapData) {
   <div id="notif" class="notif"></div>
 </div>
 
-<!-- Calculator Modal -->
-<div class="calculator-modal-overlay" id="calculatorModalOverlay" style="display: none;">
+<!-- Calculator Modal - Alpine.js (Step 40) -->
+<div class="calculator-modal-overlay" id="calculatorModalOverlay" style="display: none;"
+     x-data="calculatorModal" x-init="init" @click="overlayClick">
   <div class="calculator-modal-container">
     <div class="calculator-modal-header">
       <h3>Kalkulace ceny servisu</h3>
-      <button type="button" class="calculator-modal-close" id="calculatorModalClose">×</button>
+      <button type="button" class="calculator-modal-close" id="calculatorModalClose" @click="close">×</button>
     </div>
     <div class="calculator-modal-body" id="calculatorModalBody">
       <!-- Kalkulačka se vloží dynamicky -->
@@ -400,12 +401,13 @@ if ($initialBootstrapData) {
   </div>
 </div>
 
-<!-- Modal pro schválení zákazníkem -->
-<div class="zakaznik-schvaleni-overlay" id="zakaznikSchvaleniOverlay" style="display: none;">
+<!-- Modal pro schválení zákazníkem - Alpine.js (Step 39) -->
+<div class="zakaznik-schvaleni-overlay" id="zakaznikSchvaleniOverlay" style="display: none;"
+     x-data="zakaznikSchvaleniModal" x-init="init" @click="overlayClick">
   <div class="zakaznik-schvaleni-container">
     <div class="zakaznik-schvaleni-header">
       <h2 data-lang-cs="Souhrn protokolu" data-lang-en="Protocol Summary" data-lang-it="Riepilogo protocollo">Souhrn protokolu</h2>
-      <button type="button" class="zakaznik-schvaleni-close" id="zakaznikSchvaleniClose">×</button>
+      <button type="button" class="zakaznik-schvaleni-close" id="zakaznikSchvaleniClose" @click="close">×</button>
     </div>
 
     <div class="zakaznik-schvaleni-body">
@@ -456,7 +458,7 @@ if ($initialBootstrapData) {
     </div>
 
     <div class="zakaznik-schvaleni-footer">
-      <button type="button" class="btn-zrusit" id="zakaznikSchvaleniZrusit" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
+      <button type="button" class="btn-zrusit" id="zakaznikSchvaleniZrusit" @click="close" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
       <button type="button" class="btn-pouzit" id="zakaznikSchvaleniPouzit" data-lang-cs="Potvrdit podpis" data-lang-en="Confirm signature" data-lang-it="Conferma firma">Potvrdit podpis</button>
     </div>
   </div>

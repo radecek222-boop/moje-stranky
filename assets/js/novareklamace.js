@@ -1151,6 +1151,8 @@ const WGS = {
   
 
   initCustomCalendar() {
+    // Step 38: Open/close logika migrována na Alpine.js (calendarModal)
+    // Renderování kalendáře zůstává vanilla JS
     const overlay = document.getElementById('calendarOverlay');
     if (!overlay) return;
     const grid = document.getElementById('calendarGrid');
@@ -1160,6 +1162,25 @@ const WGS = {
     const monthNames = [t('january'), t('february'), t('march'), t('april'), t('may'), t('june'), t('july'), t('august'), t('september'), t('october'), t('november'), t('december')];
     const weekDays = [t('monday'), t('tuesday'), t('wednesday'), t('thursday'), t('friday'), t('saturday'), t('sunday')];
     const self = this;
+
+    // Helper pro zavření modalu (Alpine nebo fallback)
+    const closeModal = () => {
+      if (window.calendarModal && window.calendarModal.close) {
+        window.calendarModal.close();
+      } else {
+        overlay.classList.remove('active');
+      }
+    };
+
+    // Helper pro otevření modalu (Alpine nebo fallback)
+    const openModal = () => {
+      if (window.calendarModal && window.calendarModal.open) {
+        window.calendarModal.open();
+      } else {
+        overlay.classList.add('active');
+      }
+    };
+
     const renderCalendar = () => {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
@@ -1177,7 +1198,7 @@ const WGS = {
         div.addEventListener('click', () => {
           const selected = day.toString().padStart(2, '0') + '.' + (month + 1).toString().padStart(2, '0') + '.' + year;
           if (selectedInput) { selectedInput.value = selected; if (selectedInput.id === 'datum_reklamace') { self.calculateWarranty(); } }
-          overlay.classList.remove('active');
+          closeModal(); // Step 38: Použít Alpine close
         });
         grid.appendChild(div);
       }
@@ -1188,14 +1209,21 @@ const WGS = {
         const wrapper = input.closest('.date-input-wrapper');
         if (wrapper) {
           wrapper.style.cursor = 'pointer';
-          wrapper.addEventListener('click', () => { if (!input.readOnly || self.isLoggedIn) { selectedInput = input; currentDate = new Date(); renderCalendar(); overlay.classList.add('active'); } });
+          wrapper.addEventListener('click', () => {
+            if (!input.readOnly || self.isLoggedIn) {
+              selectedInput = input;
+              currentDate = new Date();
+              renderCalendar();
+              openModal(); // Step 38: Použít Alpine open
+            }
+          });
         }
       }
     });
     document.getElementById('prevMonth').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); });
     document.getElementById('nextMonth').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); });
-    document.getElementById('closeCalendar').addEventListener('click', () => { overlay.classList.remove('active'); });
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
+    // Step 38: Close button a overlay click jsou nyní řízeny Alpine.js
+    console.log('[Calendar] Řízeno Alpine.js komponentou calendarModal');
   },
 
   /**
