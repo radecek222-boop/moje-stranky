@@ -1907,3 +1907,15 @@ header('Content-Type: text/html; charset=utf-8');
     - password_reset.php, registration.php, psa.php, analytics.php
 - **Result:** Keyboard users can now skip navigation and jump directly to main content by pressing Tab then Enter.
 
+## [Step 95]: Label-Input Associations for Form Accessibility
+- **Date:** 2025-12-02
+- **What:** Added proper label-input associations using `for` and `id` attributes.
+- **Analysis:**
+  - Labels without `for` attribute don't properly associate with inputs
+  - Screen readers need explicit associations to announce form fields correctly
+  - Clicking a label should focus the associated input
+- **Files modified:**
+  - `admin/smtp_settings.php`: Added for/id pairs to all form fields (smtp_host, smtp_port, smtp_encryption, smtp_username, smtp_password, smtp_from_email, smtp_from_name, test_email)
+  - `gdpr-portal.php`: Added for/id pairs to export and deletion email inputs
+- **Result:** Form fields are now properly associated with their labels, improving accessibility for screen reader users.
+

@@ -288,8 +288,8 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 
                 <form id="export-form">
                     <div class="form-group">
-                        <label>Email pro zaslání exportu</label>
-                        <input type="email" name="email" required>
+                        <label for="export-email">Email pro zaslání exportu</label>
+                        <input type="email" id="export-email" name="email" required>
                     </div>
                     <button type="submit" class="btn">Požádat o export</button>
                 </form>
@@ -303,8 +303,8 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 
                 <form id="deletion-form">
                     <div class="form-group">
-                        <label>Email pro potvrzení</label>
-                        <input type="email" name="email" required>
+                        <label for="deletion-email">Email pro potvrzení</label>
+                        <input type="email" id="deletion-email" name="email" required>
                     </div>
                     <button type="submit" class="btn btn-danger">Požádat o smazání</button>
                 </form>
