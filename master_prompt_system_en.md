@@ -19,22 +19,30 @@
 | **Phase 6** | Security Hardening | COMPLETE | Steps 132-133 |
 | **Phase 7** | Code Deduplication | COMPLETE | Steps 134 |
 | **Phase 8** | Inline Styles Migration | COMPLETE | Steps 135-137 |
-| **Phase 9** | HTMX Migration | **IN PROGRESS** | Steps 141-150 |
-| **Phase 10** | Testing & Documentation | PENDING | Steps 151-165 |
+| **Phase 9** | HTMX Migration | DEFERRED (low priority) | Steps 141-150 |
+| **Phase 10** | Testing & Documentation | **IN PROGRESS** | Steps 151-165 |
 | **Phase 11** | Performance Optimization | PENDING | Steps 166-175 |
 
 ## Current Work
 
-**Active Phase:** 9 - HTMX Migration
-**Current Step:** 141 - Create HTMX HTML endpoint for notes
-**Next Step:** 142 - Migrate notes CRUD to HTMX
+**Active Phase:** 10 - Testing & Documentation
+**Current Step:** 151 - PHPUnit setup (COMPLETE)
+**Next Step:** 152 - CSRF, API response tests
 
 ## Quick Reference
 
-- **Last completed step:** 137 (Display Styles Migration)
-- **Total steps completed:** 137
-- **Estimated remaining:** ~38 steps
+- **Last completed step:** 151 (PHPUnit setup)
+- **Total steps completed:** 151
+- **Estimated remaining:** ~24 steps
 - **See:** [ROADMAP TO 100% COMPLETION](#roadmap-to-100-completion) section at end of file
+
+## Phase 9 Deferral Note
+
+Phase 9 (HTMX Migration) was deferred because:
+1. Requires significant PHP backend changes for HTML endpoints
+2. Current JSON API architecture works well
+3. Lower priority compared to testing and documentation
+4. Can be revisited after Phase 11 if needed
 
 ---
 
@@ -2749,12 +2757,30 @@ Establish test coverage and complete API documentation.
 ## [Step 151-160]: Test Suite Setup
 
 **Current state:**
-- No automated test suite
-- Manual test files in `/archiv/`
-- No CI/CD test integration
+- PHPUnit configured (Step 151 COMPLETE)
+- Initial unit tests created
+- Needs `composer install` to run tests
+
+**Step 151 - PHPUnit Setup (COMPLETE):**
+
+Files created:
+- `phpunit.xml` - PHPUnit 11 configuration
+- `tests/bootstrap.php` - Test environment setup
+- `tests/TestCase.php` - Base test class with helpers
+- `tests/Unit/CsrfHelperTest.php` - CSRF token tests (10 tests)
+- `tests/Unit/EnvLoaderTest.php` - Environment loader tests (9 tests)
+- `tests/Unit/ReklamaceIdValidatorTest.php` - ID validation tests (17 tests)
+
+To run tests:
+```bash
+composer install
+composer test
+# or
+./vendor/bin/phpunit
+```
 
 **Tasks:**
-- [ ] Step 151: Set up PHPUnit for PHP backend tests
+- [x] Step 151: Set up PHPUnit for PHP backend tests
 - [ ] Step 152: Write tests for critical API endpoints
 - [ ] Step 153: Set up Jest for JavaScript tests
 - [ ] Step 154: Write tests for utils.js functions
