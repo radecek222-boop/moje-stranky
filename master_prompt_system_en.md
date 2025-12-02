@@ -2191,3 +2191,22 @@ The codebase is now in a good state with:
   - `assets/js/utils.min.js`, `seznam.min.js` + source maps (REGENERATED)
 - **Result:** Code deduplication complete. seznam.js reduced by 12 lines, utils.js now provides shared text utilities.
 
+## [Step 106]: Extract fetchCsrfToken to utils.js
+- **Date:** 2025-12-02
+- **What:** Extracted duplicated `fetchCsrfToken()` from protokol.js and seznam.js to centralized utils.js.
+- **How:**
+  1. Added `fetchCsrfToken()` function to utils.js with all fallback mechanisms
+  2. Exposed as `window.fetchCsrfToken` for backwards compatibility (protokol-calculator-integration.js uses it)
+  3. Removed local definitions from protokol.js and seznam.js
+  4. Regenerated all minified files with source maps
+- **Why:**
+  - Identical 28-line function was duplicated in both protokol.js and seznam.js
+  - protokol-calculator-integration.js calls `window.fetchCsrfToken()` - needs global exposure
+  - Reduces maintenance burden - single point for CSRF token logic
+- **Files touched:**
+  - `assets/js/utils.js` (MODIFIED - +45 lines)
+  - `assets/js/protokol.js` (MODIFIED - -28 lines)
+  - `assets/js/seznam.js` (MODIFIED - -28 lines)
+  - All corresponding `.min.js` and `.min.js.map` files (REGENERATED)
+- **Result:** Eliminated 56 lines of duplicate code. CSRF token handling now centralized in utils.js.
+
