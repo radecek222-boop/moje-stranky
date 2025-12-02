@@ -299,22 +299,11 @@ function clearSearch() {
     renderOrders(userItems);
 }
 
+// highlightText a escapeRegex přesunuty do utils.js (Step 105)
+// Použij Utils.highlightText(text, query) a Utils.escapeRegex(string)
 function highlightText(text, query) {
-  if (!query || !text) return Utils.escapeHtml(text);
-
-  // SECURITY FIX: Escape HTML PŘED highlightováním
-  const escapedText = Utils.escapeHtml(text);
-  const escapedQuery = escapeRegex(query);
-
-  const regex = new RegExp(`(${escapedQuery})`, 'gi');
-  return escapedText.replace(regex, '<span class="highlight">$1</span>');
+  return Utils.highlightText ? Utils.highlightText(text, query) : Utils.escapeHtml(text);
 }
-
-function escapeRegex(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-// escapeHtml odstraněn - používej Utils.escapeHtml()
 
 function matchesSearch(record, query) {
   if (!query) return true;
@@ -522,9 +511,6 @@ async function renderOrders(items = null) {
     const unreadCount = unreadCountsMap[claimId] || 0;
     const hasUnread = unreadCount > 0;
 
-    if (unreadCount > 0) {
-    }
-    
     const highlightedCustomer = SEARCH_QUERY ? highlightText(customerName, SEARCH_QUERY) : customerName;
     const highlightedAddress = SEARCH_QUERY ? highlightText(address, SEARCH_QUERY) : address;
     const highlightedProduct = SEARCH_QUERY ? highlightText(product, SEARCH_QUERY) : product;
@@ -1268,37 +1254,8 @@ function renderCalendar(m, y) {
   grid.appendChild(daysGrid);
 }
 
-// === CSRF TOKEN HELPER ===
-async function fetchCsrfToken() {
-  if (typeof getCSRFToken === 'function') {
-    try {
-      const token = await getCSRFToken();
-      if (token) {
-        return token;
-      }
-    } catch (err) {
-      logger?.warn?.('CSRF token z getCSRFToken selhal:', err);
-    }
-  }
-
-  if (typeof getCSRFTokenFromMeta === 'function') {
-    const metaToken = getCSRFTokenFromMeta();
-    if (metaToken) {
-      return metaToken;
-    }
-  }
-
-  const fallbackMeta = document.querySelector('meta[name="csrf-token"]');
-  if (fallbackMeta) {
-    const token = fallbackMeta.getAttribute('content');
-    if (token) {
-      window.csrfTokenCache = token;
-      return token;
-    }
-  }
-
-  throw new Error('CSRF token není k dispozici. Obnovte stránku a zkuste to znovu.');
-}
+// fetchCsrfToken přesunuto do utils.js (Step 106)
+// Funkce je dostupná jako window.fetchCsrfToken() nebo Utils.fetchCsrfToken()
 
 // === VÝPOČET VZDÁLENOSTI ===
 async function getDistance(fromAddress, toAddress) {

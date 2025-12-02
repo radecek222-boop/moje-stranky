@@ -126,6 +126,33 @@ function formatDateTimeCZ(date) {
     }
 }
 
+/**
+ * Escape special regex characters in a string
+ * @param {string} string - String to escape
+ * @returns {string} - Regex-safe string
+ */
+function escapeRegex(string) {
+    if (!string) return '';
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Highlight search query in text with HTML span
+ * @param {string} text - Text to highlight in
+ * @param {string} query - Query to highlight
+ * @returns {string} - HTML with highlighted matches
+ */
+function highlightText(text, query) {
+    if (!query || !text) return escapeHtml(text);
+
+    // SECURITY: Escape HTML BEFORE highlighting
+    const escapedText = escapeHtml(text);
+    const escapedQuery = escapeRegex(query);
+
+    const regex = new RegExp(`(${escapedQuery})`, 'gi');
+    return escapedText.replace(regex, '<span class="highlight">$1</span>');
+}
+
 // Export for module usage (if needed)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
@@ -135,6 +162,61 @@ if (typeof module !== 'undefined' && module.exports) {
         escapeHtml,
         getCSRFTokenFromMeta,
         formatDateCZ,
-        formatDateTimeCZ
+        formatDateTimeCZ,
+        escapeRegex,
+        highlightText,
+        fetchCsrfToken
     };
 }
+
+/**
+ * Fetch CSRF token from available sources
+ * Tries getCSRFToken(), getCSRFTokenFromMeta(), then meta tag directly
+ * @returns {Promise<string>} - CSRF token
+ * @throws {Error} - If no token is available
+ */
+async function fetchCsrfToken() {
+    // Try global getCSRFToken function first
+    if (typeof getCSRFToken === 'function') {
+        try {
+            const token = await getCSRFToken();
+            if (token) {
+                return token;
+            }
+        } catch (err) {
+            if (typeof logger !== 'undefined' && logger?.warn) {
+                logger.warn('CSRF token z getCSRFToken selhal:', err);
+            }
+        }
+    }
+
+    // Try getCSRFTokenFromMeta
+    if (typeof getCSRFTokenFromMeta === 'function') {
+        const metaToken = getCSRFTokenFromMeta();
+        if (metaToken) {
+            return metaToken;
+        }
+    }
+
+    // Fallback: read directly from meta tag
+    const fallbackMeta = document.querySelector('meta[name="csrf-token"]');
+    if (fallbackMeta) {
+        const token = fallbackMeta.getAttribute('content');
+        if (token) {
+            window.csrfTokenCache = token;
+            return token;
+        }
+    }
+
+    throw new Error('CSRF token není k dispozici. Obnovte stránku a zkuste to znovu.');
+}
+
+// Global Utils object for browser usage
+window.Utils = window.Utils || {};
+window.Utils.escapeRegex = escapeRegex;
+window.Utils.highlightText = highlightText;
+window.Utils.fetchCsrfToken = fetchCsrfToken;
+
+// Expose fetchCsrfToken globally for backwards compatibility
+// (protokol-calculator-integration.js uses window.fetchCsrfToken)
+window.fetchCsrfToken = fetchCsrfToken;

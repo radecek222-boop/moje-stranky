@@ -96,36 +96,8 @@ let pdfPreviewContext = null; // 'export' nebo 'send'
 let cachedPdfDoc = null; // uložený jsPDF document
 let cachedPdfBase64 = null; // uložený base64 pro odeslání
 
-async function fetchCsrfToken() {
-  if (typeof getCSRFToken === 'function') {
-    try {
-      const token = await getCSRFToken();
-      if (token) {
-        return token;
-      }
-    } catch (err) {
-      logger?.warn?.('CSRF token z getCSRFToken selhal:', err);
-    }
-  }
-
-  if (typeof getCSRFTokenFromMeta === 'function') {
-    const metaToken = getCSRFTokenFromMeta();
-    if (metaToken) {
-      return metaToken;
-    }
-  }
-
-  const fallbackMeta = document.querySelector('meta[name="csrf-token"]');
-  if (fallbackMeta) {
-    const token = fallbackMeta.getAttribute('content');
-    if (token) {
-      window.csrfTokenCache = token;
-      return token;
-    }
-  }
-
-  throw new Error('CSRF token není k dispozici. Obnovte stránku a zkuste to znovu.');
-}
+// fetchCsrfToken přesunuto do utils.js (Step 106)
+// Funkce je dostupná jako window.fetchCsrfToken() nebo Utils.fetchCsrfToken()
 
 window.addEventListener("DOMContentLoaded", async () => {
   logger.log('[Start] Inicializace protokolu...');
