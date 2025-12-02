@@ -1666,3 +1666,15 @@ header('Content-Type: text/html; charset=utf-8');
   - `includes/admin_security.php`: Added aria-label to invitation modal close
 - **Result:** All icon-only close buttons now have accessible names for screen readers.
 
+## [Step 79]: Language Switcher and Button Link Accessibility
+- **Date:** 2025-12-02
+- **What:** Improved accessibility for language switchers and notification button links in hamburger menu.
+- **Analysis:**
+  - Language flag spans were clickable but not keyboard accessible
+  - Notification links with href="#" should have role="button"
+- **Files modified:**
+  - `includes/hamburger-menu.php`:
+    - Added role="button" to 2 notification enable links (admin and user)
+    - Added role="button", tabindex="0", aria-label to 9 language flag spans (3 per menu variant)
+- **Result:** Language switcher and notification buttons are now keyboard accessible with proper ARIA roles.
+
