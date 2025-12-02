@@ -495,12 +495,17 @@ body {
       <!-- Card Grid -->
       <div class="notif-card-grid">
 
-        <!-- Email šablony -->
-        <div class="notif-card" onclick="openNotifModal('email-templates')">
+        <!-- Email šablony - Step 53: HTMX migrace -->
+        <div class="notif-card"
+             hx-get="/api/notification_list_html.php"
+             hx-target="#notifModalBody"
+             hx-trigger="click"
+             hx-on::before-request="document.getElementById('notifModalTitle').textContent = 'Email šablony'"
+             hx-on::after-request="if(window.notifModal) window.notifModal.open()">
           <div class="notif-card-title">Email šablony</div>
           <div class="notif-card-description">Editace šablon pro automatické emaily (nová reklamace, změna stavu, dokončení)</div>
           <div class="notif-card-meta">
-            <span class="notif-card-badge active">5 šablon</span>
+            <span class="notif-card-badge active">HTMX</span>
           </div>
         </div>
 
@@ -569,9 +574,10 @@ body {
 
       </div>
 
-      <!-- Hidden container for admin-notifications.js to load real data -->
+      <!-- Step 53: Hidden container DEPRECATED - HTMX nyní načítá přímo do modalu -->
+      <!-- Ponecháno pro zpětnou kompatibilitu s ostatními modal typy -->
       <div id="notifications-container" style="display: none;">
-        <div class="loading">Načítání notifikací...</div>
+        <div class="loading">Používejte HTMX endpoint</div>
       </div>
 
     </div>
