@@ -130,11 +130,11 @@ try {
     // 4. PODOBNÁ SHODA - LIKE dotaz
     echo "<h2>4. Hledání podobných záznamů (LIKE)</h2>";
     $stmt4 = $pdo->prepare("
-        SELECT id, reklamace_id, cislo, jmeno, telefon, email, stav, datum_vytvoreni
+        SELECT id, reklamace_id, cislo, jmeno, telefon, email, stav, created_at
         FROM wgs_reklamace
         WHERE reklamace_id LIKE :pattern
            OR cislo LIKE :pattern
-        ORDER BY datum_vytvoreni DESC
+        ORDER BY created_at DESC
         LIMIT 10
     ");
     $stmt4->execute(['pattern' => '%' . $hledaneId . '%']);
@@ -153,7 +153,7 @@ try {
             echo "<td>" . htmlspecialchars($zaznam['telefon'] ?? '') . "</td>";
             echo "<td>" . htmlspecialchars($zaznam['email'] ?? '') . "</td>";
             echo "<td>" . htmlspecialchars($zaznam['stav'] ?? '') . "</td>";
-            echo "<td>" . htmlspecialchars($zaznam['datum_vytvoreni'] ?? '') . "</td>";
+            echo "<td>" . htmlspecialchars($zaznam['created_at'] ?? '') . "</td>";
             echo "</tr>";
         }
         echo "</table>";
@@ -164,9 +164,9 @@ try {
     // 5. POSLEDNÍCH 10 ZÁZNAMŮ
     echo "<h2>5. Posledních 10 záznamů v databázi</h2>";
     $stmt5 = $pdo->query("
-        SELECT id, reklamace_id, cislo, jmeno, stav, datum_vytvoreni
+        SELECT id, reklamace_id, cislo, jmeno, stav, created_at
         FROM wgs_reklamace
-        ORDER BY datum_vytvoreni DESC
+        ORDER BY created_at DESC
         LIMIT 10
     ");
     $vysledky5 = $stmt5->fetchAll(PDO::FETCH_ASSOC);
@@ -181,7 +181,7 @@ try {
             echo "<td>" . htmlspecialchars($zaznam['cislo'] ?? '') . "</td>";
             echo "<td>" . htmlspecialchars($zaznam['jmeno'] ?? '') . "</td>";
             echo "<td>" . htmlspecialchars($zaznam['stav'] ?? '') . "</td>";
-            echo "<td>" . htmlspecialchars($zaznam['datum_vytvoreni'] ?? '') . "</td>";
+            echo "<td>" . htmlspecialchars($zaznam['created_at'] ?? '') . "</td>";
             echo "</tr>";
         }
         echo "</table>";

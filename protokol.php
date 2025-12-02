@@ -96,6 +96,13 @@ if (is_string($requestedId)) {
 if ($lookupValue !== null) {
     try {
         $pdo = getDbConnection();
+
+        // DEBUG: Log hledané hodnoty
+        error_log("=== PROTOKOL.PHP DEBUG NAČÍTÁNÍ DAT ===");
+        error_log("Hledané ID (lookupValue): " . $lookupValue);
+        error_log("Délka: " . strlen($lookupValue));
+        error_log("Typ: " . gettype($lookupValue));
+
         $stmt = $pdo->prepare(
             "SELECT r.*, u.name as created_by_name
              FROM wgs_reklamace r
@@ -105,6 +112,18 @@ if ($lookupValue !== null) {
         );
         $stmt->execute([':value' => $lookupValue]);
         $record = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // DEBUG: Log výsledek
+        if ($record) {
+            error_log("✅ ZÁZNAM NALEZEN!");
+            error_log("ID záznamu: " . ($record['id'] ?? 'NULL'));
+            error_log("reklamace_id: " . ($record['reklamace_id'] ?? 'NULL'));
+            error_log("cislo: " . ($record['cislo'] ?? 'NULL'));
+        } else {
+            error_log("❌ ZÁZNAM NENALEZEN!");
+            error_log("SQL dotaz NENAŠEL žádný záznam pro hodnotu: " . $lookupValue);
+        }
+        error_log("========================================");
 
         if ($record) {
             $address = wgs_format_address($record);
