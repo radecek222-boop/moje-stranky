@@ -282,6 +282,9 @@ function initSignaturePad() {
     velocityFilterWeight: 0.5, // PŘIDÁNO - hladší linie
     minDistance: 2             // PŘIDÁNO - méně bodů = méně laguje
   });
+
+  // Export do window pro globální funkci clearSignaturePad() (Step 110)
+  window.signaturePad = signaturePad;
 }
 
 async function loadPhotosFromDatabase(customerId) {

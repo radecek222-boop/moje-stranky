@@ -475,8 +475,7 @@ if ($initialBootstrapData) {
 
 <!-- Lokální signature-pad (nahrazuje blokovaný CDN) -->
 <script src="assets/js/signature-pad-simple.min.js"></script>
-<!-- Fix pro globální scope signaturePad -->
-<script src="assets/js/protokol-signature-fix.min.js"></script>
+<!-- protokol-signature-fix.js odstraněn - window.signaturePad je nyní v protokol.js (Step 110) -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
