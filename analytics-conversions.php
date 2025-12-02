@@ -231,15 +231,15 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             <div class="filters">
                 <div class="filter-row">
                     <div class="filter-group">
-                        <label>Datum od:</label>
+                        <label for="date-from">Datum od:</label>
                         <input type="date" id="date-from" value="<?php echo date('Y-m-d', strtotime('-30 days')); ?>">
                     </div>
                     <div class="filter-group">
-                        <label>Datum do:</label>
+                        <label for="date-to">Datum do:</label>
                         <input type="date" id="date-to" value="<?php echo date('Y-m-d'); ?>">
                     </div>
                     <div class="filter-group">
-                        <label>Typ konverze:</label>
+                        <label for="conversion-type">Typ konverze:</label>
                         <select id="conversion-type">
                             <option value="">Všechny</option>
                             <option value="form_submit">Formulář</option>
@@ -303,17 +303,17 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             <div class="filters">
                 <div class="filter-row">
                     <div class="filter-group">
-                        <label>Vybrat Funnel:</label>
+                        <label for="funnel-select">Vybrat Funnel:</label>
                         <select id="funnel-select">
                             <option value="">-- Načtěte funnely --</option>
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label>Datum od:</label>
+                        <label for="funnel-date-from">Datum od:</label>
                         <input type="date" id="funnel-date-from" value="<?php echo date('Y-m-d', strtotime('-30 days')); ?>">
                     </div>
                     <div class="filter-group">
-                        <label>Datum do:</label>
+                        <label for="funnel-date-to">Datum do:</label>
                         <input type="date" id="funnel-date-to" value="<?php echo date('Y-m-d'); ?>">
                     </div>
                     <div class="filter-group">

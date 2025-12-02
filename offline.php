@@ -26,7 +26,7 @@
 <body>
 <main id="main-content">
   <div class="offline-container">
-    <div class="offline-icon">
+    <div class="offline-icon" aria-hidden="true">
       <div class="wifi-icon"></div>
     </div>
     

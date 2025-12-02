@@ -1919,3 +1919,42 @@ header('Content-Type: text/html; charset=utf-8');
   - `gdpr-portal.php`: Added for/id pairs to export and deletion email inputs
 - **Result:** Form fields are now properly associated with their labels, improving accessibility for screen reader users.
 
+## [Step 96]: More Label-Input Associations (Admin & Analytics)
+- **Date:** 2025-12-02
+- **What:** Added proper label-input associations to admin testing and analytics forms.
+- **Analysis:**
+  - Forms in admin testing simulator lacked for/id associations
+  - Analytics report generation form needed label associations
+  - E2E interactive testing form needed label associations
+- **Files modified:**
+  - `analytics-reports.php`: Added for/id pairs to report generation form (report_type, date_from, date_to)
+  - `includes/admin_testing_simulator.php`: Added for/id pairs to test form fields (sim-jmeno, sim-email, sim-telefon, sim-photo, sim-popis)
+  - `includes/admin_testing_interactive.php`: Added for attributes to existing labeled inputs (jmeno, email, telefon, popis_problemu, photo)
+- **Result:** Admin and analytics forms are now fully accessible with proper label associations.
+
+## [Step 97]: Aria-hidden for Decorative Elements
+- **Date:** 2025-12-02
+- **What:** Added aria-hidden="true" to decorative/presentational elements.
+- **Analysis:**
+  - Decorative icons and arrows should be hidden from screen readers
+  - Status indicator dots are visual-only (text labels provide the information)
+  - Search icons next to labeled inputs are decorative
+- **Files modified:**
+  - `seznam.php`: Added aria-hidden to search-icon span
+  - `offline.php`: Added aria-hidden to wifi-icon container
+  - `includes/admin_main.php`: Added aria-hidden to control-card-arrow elements (8 occurrences) and control-card-status-dot elements (9 occurrences)
+- **Result:** Screen readers now skip decorative elements, providing cleaner navigation for blind users.
+
+## [Step 98]: Label-Input Associations in Analytics Filter Forms
+- **Date:** 2025-12-02
+- **What:** Added proper label-input associations to date and filter fields in analytics pages.
+- **Analysis:**
+  - Analytics filter forms had labels without for attributes
+  - Date pickers and select elements need proper label associations
+  - Improves form navigation for screen reader users
+- **Files modified:**
+  - `analytics-conversions.php`: Added for/id pairs to date-from, date-to, conversion-type, funnel-select, funnel-date-from, funnel-date-to
+  - `analytics-campaigns.php`: Added for/id pairs to date-from, date-to, utm-source, utm-medium, device-type
+  - `analytics-user-scores.php`: Added for/id pairs to date-from, date-to
+- **Result:** All analytics filter forms are now properly labeled for accessibility.
+
