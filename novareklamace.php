@@ -515,12 +515,12 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     <div class="form-group" style="position:relative;">
       <label class="form-label" for="ulice" data-lang-cs="Ulice a číslo popisné *" data-lang-en="Street and Number *" data-lang-it="Via e Numero *">Ulice a číslo popisné *</label>
       <input type="text" class="form-control" id="ulice" name="ulice" autocomplete="address-line1" data-lang-cs-placeholder="Ulice a číslo popisné" data-lang-en-placeholder="Street and Number" data-lang-it-placeholder="Via e Numero" placeholder="Ulice a číslo popisné" required>
-      <div id="autocompleteDropdownUlice" style="display:none;position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
+      <div id="autocompleteDropdownUlice" class="hidden" style="position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
     </div>
     <div class="form-group" style="position:relative;">
       <label class="form-label" for="mesto" data-lang-cs="Město *" data-lang-en="City *" data-lang-it="Città *">Město *</label>
       <input type="text" class="form-control" id="mesto" name="mesto" autocomplete="address-level2" data-lang-cs-placeholder="Město" data-lang-en-placeholder="City" data-lang-it-placeholder="Città" placeholder="Město" required>
-      <div id="autocompleteDropdown" style="display:none;position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
+      <div id="autocompleteDropdown" class="hidden" style="position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
     </div>
     <div class="form-group">
       <label class="form-label" for="psc" data-lang-cs="PSČ *" data-lang-en="ZIP Code *" data-lang-it="CAP *">PSČ *</label>
