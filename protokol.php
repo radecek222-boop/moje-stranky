@@ -70,6 +70,7 @@ $prefillFields = [
     'address' => '',
     'phone' => '',
     'email' => '',
+    'typ_zakaznika' => '', // IČO nebo fyzická osoba
     'brand' => '',
     'model' => '',
     'description' => '',
@@ -133,6 +134,7 @@ if ($lookupValue !== null) {
                 'address' => $record['adresa'] ?? $address,
                 'phone' => $record['telefon'] ?? '',
                 'email' => $record['email'] ?? '',
+                'typ_zakaznika' => $record['typ_zakaznika'] ?? '',
 
                 // Produktové údaje
                 'brand' => $record['created_by_name'] ?? $record['prodejce'] ?? '', // Zadavatel = kdo vytvořil zakázku
@@ -255,6 +257,7 @@ if ($initialBootstrapData) {
             <tr><td class="label">Adresa<span class="en-label">Address</span></td><td><input type="text" id="address" value="<?= wgs_escape($prefillFields['address']); ?>" readonly></td></tr>
             <tr><td class="label">Telefon<span class="en-label">Phone</span></td><td><input type="tel" id="phone" value="<?= wgs_escape($prefillFields['phone']); ?>" readonly></td></tr>
             <tr><td class="label">Email<span class="en-label">Email</span></td><td><input type="email" id="email" value="<?= wgs_escape($prefillFields['email']); ?>" readonly></td></tr>
+            <tr><td class="label">Typ zákazníka<span class="en-label">Customer type</span></td><td><input type="text" id="typ-zakaznika" value="<?= wgs_escape($prefillFields['typ_zakaznika']); ?>" readonly></td></tr>
           </table>
         </div>
 

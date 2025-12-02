@@ -767,6 +767,17 @@ const WGS = {
       formData.append('jmeno', document.getElementById('jmeno').value || '');
       formData.append('email', document.getElementById('email').value || '');
 
+      // Typ zákazníka - IČO nebo fyzická osoba
+      const icoCheckbox = document.getElementById('objednavkaICO');
+      const fyzickaCheckbox = document.getElementById('objednavkaFyzicka');
+      let typZakaznika = '';
+      if (icoCheckbox?.checked) {
+        typZakaznika = 'IČO';
+      } else if (fyzickaCheckbox?.checked) {
+        typZakaznika = 'Fyzická osoba';
+      }
+      formData.append('typ_zakaznika', typZakaznika);
+
       // Spojit předvolbu + telefonní číslo
       const phonePrefix = document.getElementById('phone-prefix')?.value || '+420';
       const phoneNumber = document.getElementById('telefon')?.value || '';

@@ -193,6 +193,7 @@ function handleUpdate(PDO $pdo, array $input): array
         'jmeno',
         'telefon',
         'email',
+        'typ_zakaznika', // IČO nebo fyzická osoba
         'adresa',
         'ulice',
         'mesto',
