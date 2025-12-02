@@ -137,7 +137,7 @@ try {
     <?php if (!$directAccess): ?>
     <!-- Header -->
     <div class="control-detail-header">
-        <button class="control-detail-back" onclick="window.location.href='admin.php'">
+        <button class="control-detail-back" data-href="admin.php">
             <span>‹</span>
             <span>Zpět</span>
         </button>
@@ -152,19 +152,19 @@ try {
 
         <!-- Statistiky - kompaktní -->
         <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
-            <div onclick="filterReklamace('all')" style="background: <?= $filterStav === 'all' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
+            <div data-action="filterReklamace" data-filter="all" style="background: <?= $filterStav === 'all' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
                 <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'all' ? '#fff' : '#000' ?>;"><?= $stats['all'] ?></span>
                 <span style="font-size: 0.7rem; color: <?= $filterStav === 'all' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">Celkem</span>
             </div>
-            <div onclick="filterReklamace('wait')" style="background: <?= $filterStav === 'wait' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
+            <div data-action="filterReklamace" data-filter="wait" style="background: <?= $filterStav === 'wait' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
                 <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'wait' ? '#fff' : '#000' ?>;"><?= $stats['wait'] ?></span>
                 <span style="font-size: 0.7rem; color: <?= $filterStav === 'wait' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">Čekající</span>
             </div>
-            <div onclick="filterReklamace('open')" style="background: <?= $filterStav === 'open' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
+            <div data-action="filterReklamace" data-filter="open" style="background: <?= $filterStav === 'open' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
                 <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'open' ? '#fff' : '#000' ?>;"><?= $stats['open'] ?></span>
                 <span style="font-size: 0.7rem; color: <?= $filterStav === 'open' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">V řešení</span>
             </div>
-            <div onclick="filterReklamace('done')" style="background: <?= $filterStav === 'done' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
+            <div data-action="filterReklamace" data-filter="done" style="background: <?= $filterStav === 'done' ? '#000' : '#fff' ?>; border: 1px solid #000; padding: 0.4rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s; min-width: 90px;">
                 <span style="font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif; color: <?= $filterStav === 'done' ? '#fff' : '#000' ?>;"><?= $stats['done'] ?></span>
                 <span style="font-size: 0.7rem; color: <?= $filterStav === 'done' ? '#fff' : '#666' ?>; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 0.3rem;">Vyřízené</span>
             </div>
@@ -240,13 +240,16 @@ try {
                     </select>
 
                     <!-- Smazat -->
-                    <button onclick="smazatReklamaci('<?= htmlspecialchars($rek['reklamace_id']) ?>', '<?= htmlspecialchars($rek['cislo'] ?? $rek['reklamace_id']) ?>')"
+                    <button data-action="smazatReklamaci"
+                            data-id="<?= htmlspecialchars($rek['reklamace_id']) ?>"
+                            data-cislo="<?= htmlspecialchars($rek['cislo'] ?? $rek['reklamace_id']) ?>"
                             style="padding: 0.05rem 0.5rem; background: #dc3545; color: #fff; border: 1px solid #dc3545; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px; text-transform: uppercase;">
                         Smazat
                     </button>
 
                     <!-- Detail -->
-                    <button onclick="otevritDetailReklamace('<?= htmlspecialchars($rek['reklamace_id']) ?>')"
+                    <button data-action="otevritDetailReklamace"
+                            data-id="<?= htmlspecialchars($rek['reklamace_id']) ?>"
                             style="padding: 0.05rem 0.5rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px; text-transform: uppercase;">
                         Detail + Historie
                     </button>
@@ -271,7 +274,7 @@ try {
         <!-- Header -->
         <div style="padding: 1.5rem; background: #000; color: #fff; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
             <h2 style="font-family: 'Poppins', sans-serif; font-size: 1.2rem; font-weight: 600; margin: 0;">Detail reklamace + Historie</h2>
-            <button onclick="zavritDetailModal()" aria-label="Zavřít" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
+            <button data-action="zavritDetailModal" aria-label="Zavřít" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
         </div>
 
         <!-- Obsah -->
@@ -494,6 +497,20 @@ document.getElementById('detail-reklamace-modal')?.addEventListener('click', fun
         zavritDetailModal();
     }
 });
+
+// ACTION REGISTRY - Step 113
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('filterReklamace', (el, data) => {
+        if (data.filter) filterReklamace(data.filter);
+    });
+    Utils.registerAction('smazatReklamaci', (el, data) => {
+        if (data.id && data.cislo) smazatReklamaci(data.id, data.cislo);
+    });
+    Utils.registerAction('otevritDetailReklamace', (el, data) => {
+        if (data.id) otevritDetailReklamace(data.id);
+    });
+    Utils.registerAction('zavritDetailModal', () => zavritDetailModal());
+}
 </script>
 
 
