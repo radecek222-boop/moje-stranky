@@ -24,6 +24,28 @@ const escapeHtml = (str) => {
     return div.innerHTML;
 };
 
+// ========================================
+// CDN GUARD: Chart.js
+// ========================================
+if (typeof window.Chart === 'undefined') {
+    console.warn('[Analytics] Chart.js není načten (CDN?). Grafy nebudou dostupné.');
+    // Zobrazit upozornění uživateli
+    window.addEventListener('DOMContentLoaded', () => {
+        const canvas = document.getElementById('visits-chart');
+        if (canvas) {
+            const container = canvas.parentElement;
+            if (container) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666; background: #f9f9f9; border-radius: 8px;">
+                        <p style="font-size: 16px; margin-bottom: 10px; font-weight: 600;">Graf se nepodařilo načíst</p>
+                        <p style="font-size: 14px;">Zkuste obnovit stránku (F5) nebo zkontrolujte připojení k internetu.</p>
+                    </div>
+                `;
+            }
+        }
+    });
+}
+
 // === INIT ===
 window.addEventListener('DOMContentLoaded', () => {
     logger.log('[Start] Analytics dashboard inicialization...');
@@ -303,6 +325,18 @@ let visitsChart = null;
 function vykreslitGraf() {
     const canvas = document.getElementById('visits-chart');
     if (!canvas) return;
+
+    // CDN Guard: Kontrola dostupnosti Chart.js
+    if (typeof window.Chart === 'undefined') {
+        console.warn('[Analytics] Chart.js není dostupný, graf nebude vykreslen');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = '14px Poppins';
+        ctx.fillStyle = '#999';
+        ctx.textAlign = 'center';
+        ctx.fillText('Graf se nepodařilo načíst. Zkuste obnovit stránku (F5).', canvas.width / 2, canvas.height / 2);
+        return;
+    }
 
     const timeline = ANALYTICS.data.timeline || [];
 
