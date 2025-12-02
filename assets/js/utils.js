@@ -164,11 +164,59 @@ if (typeof module !== 'undefined' && module.exports) {
         formatDateCZ,
         formatDateTimeCZ,
         escapeRegex,
-        highlightText
+        highlightText,
+        fetchCsrfToken
     };
+}
+
+/**
+ * Fetch CSRF token from available sources
+ * Tries getCSRFToken(), getCSRFTokenFromMeta(), then meta tag directly
+ * @returns {Promise<string>} - CSRF token
+ * @throws {Error} - If no token is available
+ */
+async function fetchCsrfToken() {
+    // Try global getCSRFToken function first
+    if (typeof getCSRFToken === 'function') {
+        try {
+            const token = await getCSRFToken();
+            if (token) {
+                return token;
+            }
+        } catch (err) {
+            if (typeof logger !== 'undefined' && logger?.warn) {
+                logger.warn('CSRF token z getCSRFToken selhal:', err);
+            }
+        }
+    }
+
+    // Try getCSRFTokenFromMeta
+    if (typeof getCSRFTokenFromMeta === 'function') {
+        const metaToken = getCSRFTokenFromMeta();
+        if (metaToken) {
+            return metaToken;
+        }
+    }
+
+    // Fallback: read directly from meta tag
+    const fallbackMeta = document.querySelector('meta[name="csrf-token"]');
+    if (fallbackMeta) {
+        const token = fallbackMeta.getAttribute('content');
+        if (token) {
+            window.csrfTokenCache = token;
+            return token;
+        }
+    }
+
+    throw new Error('CSRF token není k dispozici. Obnovte stránku a zkuste to znovu.');
 }
 
 // Global Utils object for browser usage
 window.Utils = window.Utils || {};
 window.Utils.escapeRegex = escapeRegex;
 window.Utils.highlightText = highlightText;
+window.Utils.fetchCsrfToken = fetchCsrfToken;
+
+// Expose fetchCsrfToken globally for backwards compatibility
+// (protokol-calculator-integration.js uses window.fetchCsrfToken)
+window.fetchCsrfToken = fetchCsrfToken;
