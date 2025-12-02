@@ -15,12 +15,34 @@ $supervisedUserIds = [];
 if ($currentUserId && !$isAdmin) {
     try {
         $pdo = getDbConnection();
+
+        // Zjistit strukturu tabulky wgs_users
+        $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
+        $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $idCol = in_array('user_id', $columns) ? 'user_id' : 'id';
+        $numericIdCol = 'id'; // Numeric ID pro supervisor_assignments
+
+        // Nejdříve získat numerické ID aktuálního uživatele
+        // (pokud session ukládá VARCHAR user_id, musíme najít odpovídající INT id)
+        $currentNumericId = $currentUserId;
+        if (!is_numeric($currentUserId)) {
+            $stmt = $pdo->prepare("SELECT id FROM wgs_users WHERE user_id = :user_id LIMIT 1");
+            $stmt->execute([':user_id' => $currentUserId]);
+            $numericId = $stmt->fetchColumn();
+            if ($numericId) {
+                $currentNumericId = $numericId;
+            }
+        }
+
+        // Načíst VARCHAR user_id kódy supervizovaných prodejců
+        // (supervisor_assignments ukládá INT id, ale potřebujeme VARCHAR user_id pro porovnání s zpracoval_id)
         $stmt = $pdo->prepare("
-            SELECT salesperson_user_id
-            FROM wgs_supervisor_assignments
-            WHERE supervisor_user_id = :user_id
+            SELECT u.{$idCol}
+            FROM wgs_supervisor_assignments sa
+            JOIN wgs_users u ON u.{$numericIdCol} = sa.salesperson_user_id
+            WHERE sa.supervisor_user_id = :user_id
         ");
-        $stmt->execute([':user_id' => $currentUserId]);
+        $stmt->execute([':user_id' => $currentNumericId]);
         $supervisedUserIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
     } catch (Exception $e) {
         // Tabulka možná ještě neexistuje - tiše ignorovat

@@ -1901,9 +1901,11 @@ async function otevritSpravuSupervize(userId) {
     }
 
     const salespersons = salespersonsData.data.salespersons || [];
-    const assignedIds = (assignmentsData.data?.assignments || []).map(a => a.salesperson_user_id);
+    // assignedIds obsahuje INT salesperson_user_id z tabulky supervisor_assignments
+    const assignedIds = (assignmentsData.data?.assignments || []).map(a => parseInt(a.salesperson_user_id));
 
     // Vytvořit overlay
+    // Používáme numeric_id (INT) pro checkbox value, protože supervisor_assignments ukládá INT
     const overlayHTML = `
       <div id="supervisorOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10001; display: flex; align-items: center; justify-content: center;">
         <div style="background: white; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
@@ -1916,7 +1918,7 @@ async function otevritSpravuSupervize(userId) {
             ${salespersons.length === 0 ? '<p style="color: #999; text-align: center;">Žádní další uživatelé v systému</p>' : ''}
             ${salespersons.map(s => `
               <label style="display: flex; align-items: center; padding: 0.8rem; margin-bottom: 0.5rem; background: #f9f9f9; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
-                <input type="checkbox" class="supervisor-checkbox" value="${s.user_id}" ${assignedIds.includes(s.user_id) ? 'checked' : ''} style="width: 20px; height: 20px; margin-right: 1rem; accent-color: #4f46e5;">
+                <input type="checkbox" class="supervisor-checkbox" value="${s.numeric_id}" ${assignedIds.includes(parseInt(s.numeric_id)) ? 'checked' : ''} style="width: 20px; height: 20px; margin-right: 1rem; accent-color: #4f46e5;">
                 <div style="flex: 1;">
                   <div style="font-weight: 600; color: #333;">${escapeHtml(s.jmeno || 'Bez jména')}</div>
                   <div style="font-size: 0.85rem; color: #666;">${escapeHtml(s.email)} - ${escapeHtml(s.role || 'prodejce')}</div>

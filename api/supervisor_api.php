@@ -63,22 +63,36 @@ try {
 
         // === NAČTENÍ PŘIŘAZENÝCH PRODEJCŮ PRO SUPERVIZORA ===
         case 'getAssignments':
-            $supervisorId = intval($_GET['user_id'] ?? 0);
-
-            if ($supervisorId <= 0) {
-                throw new Exception('Neplatné ID supervizora');
-            }
+            $supervisorIdParam = $_GET['user_id'] ?? 0;
 
             // Zjistit strukturu tabulky wgs_users
             $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
             $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-            // Zjistit primární klíč
-            $idCol = in_array('user_id', $columns) ? 'user_id' : 'id';
             // Zjistit sloupec pro jméno
             $nameCol = in_array('name', $columns) ? 'name' : (in_array('jmeno', $columns) ? 'jmeno' : 'email');
 
+            // Konvertovat user_id parametr na numerické ID (pokud je VARCHAR)
+            $supervisorId = $supervisorIdParam;
+            if (!is_numeric($supervisorIdParam)) {
+                $stmt = $pdo->prepare("SELECT id FROM wgs_users WHERE user_id = :user_id LIMIT 1");
+                $stmt->execute([':user_id' => $supervisorIdParam]);
+                $numericId = $stmt->fetchColumn();
+                if ($numericId) {
+                    $supervisorId = intval($numericId);
+                } else {
+                    throw new Exception('Supervizor nenalezen');
+                }
+            } else {
+                $supervisorId = intval($supervisorIdParam);
+            }
+
+            if ($supervisorId <= 0) {
+                throw new Exception('Neplatné ID supervizora');
+            }
+
             // Načíst přiřazené prodejce
+            // JOIN používá numerické id, protože supervisor_assignments ukládá INT
             $stmt = $pdo->prepare("
                 SELECT
                     sa.id as assignment_id,
@@ -88,7 +102,7 @@ try {
                     u.email,
                     u.role
                 FROM wgs_supervisor_assignments sa
-                JOIN wgs_users u ON u.{$idCol} = sa.salesperson_user_id
+                JOIN wgs_users u ON u.id = sa.salesperson_user_id
                 WHERE sa.supervisor_user_id = :supervisor_id
                 ORDER BY u.{$nameCol} ASC
             ");
@@ -112,24 +126,39 @@ try {
             $stmt = $pdo->query("SHOW COLUMNS FROM wgs_users");
             $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-            $idCol = in_array('user_id', $columns) ? 'user_id' : 'id';
+            $hasUserIdCol = in_array('user_id', $columns);
             $nameCol = in_array('name', $columns) ? 'name' : (in_array('jmeno', $columns) ? 'jmeno' : 'email');
             $activeCol = in_array('is_active', $columns) ? 'is_active = 1' : '1=1';
 
             // Načíst všechny aktivní uživatele kromě sebe sama
-            $sql = "
-                SELECT
-                    {$idCol} as user_id,
-                    {$nameCol} as jmeno,
-                    email,
-                    role
-                FROM wgs_users
-                WHERE {$activeCol}
-            ";
+            // Vrací OBĚ id (numerické pro ukládání) i user_id (VARCHAR pro zobrazení)
+            if ($hasUserIdCol) {
+                $sql = "
+                    SELECT
+                        id as numeric_id,
+                        user_id,
+                        {$nameCol} as jmeno,
+                        email,
+                        role
+                    FROM wgs_users
+                    WHERE {$activeCol}
+                ";
+            } else {
+                $sql = "
+                    SELECT
+                        id as numeric_id,
+                        id as user_id,
+                        {$nameCol} as jmeno,
+                        email,
+                        role
+                    FROM wgs_users
+                    WHERE {$activeCol}
+                ";
+            }
 
             $params = [];
             if ($excludeUserId > 0) {
-                $sql .= " AND {$idCol} != :exclude_id";
+                $sql .= " AND id != :exclude_id";
                 $params[':exclude_id'] = $excludeUserId;
             }
 
@@ -175,8 +204,23 @@ try {
 
         // === ULOŽENÍ PŘIŘAZENÍ (POUZE ADMIN) ===
         case 'saveAssignments':
-            $supervisorId = intval($_POST['supervisor_id'] ?? 0);
+            $supervisorIdParam = $_POST['supervisor_id'] ?? 0;
             $salespersonIds = $_POST['salesperson_ids'] ?? [];
+
+            // Konvertovat supervisor_id na numerické ID (pokud je VARCHAR)
+            $supervisorId = $supervisorIdParam;
+            if (!is_numeric($supervisorIdParam)) {
+                $stmt = $pdo->prepare("SELECT id FROM wgs_users WHERE user_id = :user_id LIMIT 1");
+                $stmt->execute([':user_id' => $supervisorIdParam]);
+                $numericId = $stmt->fetchColumn();
+                if ($numericId) {
+                    $supervisorId = intval($numericId);
+                } else {
+                    throw new Exception('Supervizor nenalezen');
+                }
+            } else {
+                $supervisorId = intval($supervisorIdParam);
+            }
 
             if ($supervisorId <= 0) {
                 throw new Exception('Neplatné ID supervizora');
