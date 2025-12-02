@@ -153,6 +153,24 @@ function highlightText(text, query) {
     return escapedText.replace(regex, '<span class="highlight">$1</span>');
 }
 
+/**
+ * Debounce funkce - odloží volání funkce dokud neuplyne čekací doba
+ * @param {Function} func - Funkce k debounce
+ * @param {number} wait - Čekací doba v ms
+ * @returns {Function} - Debounced funkce
+ */
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 // Export for module usage (if needed)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
@@ -165,6 +183,7 @@ if (typeof module !== 'undefined' && module.exports) {
         formatDateTimeCZ,
         escapeRegex,
         highlightText,
+        debounce,
         fetchCsrfToken
     };
 }
@@ -216,7 +235,14 @@ window.Utils = window.Utils || {};
 window.Utils.escapeHtml = escapeHtml;
 window.Utils.escapeRegex = escapeRegex;
 window.Utils.highlightText = highlightText;
+window.Utils.debounce = debounce;
 window.Utils.fetchCsrfToken = fetchCsrfToken;
+
+// Expose debounce globally for backwards compatibility
+// (protokol.js používá globální debounce)
+if (typeof window.debounce === 'undefined') {
+    window.debounce = debounce;
+}
 
 // Expose escapeHtml globally for backwards compatibility
 // (welcome-modal.js, admin.js, error-handler.js používají globální escapeHtml)

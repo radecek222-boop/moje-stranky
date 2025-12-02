@@ -418,12 +418,17 @@ const WGSMap = {
   },
 
   /**
-   * Helper: Debounce funkce
+   * Helper: Debounce funkce - wrapper pro Utils.debounce (Step 108)
    * @param {Function} func - Funkce k debounce
    * @param {number} wait - Čekací doba v ms
    * @returns {Function} - Debounced funkce
    */
   debounce(func, wait) {
+    // Použít globální debounce z utils.js pokud existuje
+    if (typeof window.debounce === 'function') {
+      return window.debounce(func, wait);
+    }
+    // Fallback pro případ že utils.js ještě není načteno
     let timeout;
     return function executedFunction(...args) {
       const later = () => {

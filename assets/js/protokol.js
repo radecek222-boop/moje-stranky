@@ -1954,18 +1954,8 @@ async function saveProtokolToDB() {
   }
 }
 
-// Debounce funkce
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
+// debounce přesunuto do utils.js (Step 108)
+// Funkce je dostupná jako window.debounce() nebo Utils.debounce()
 
 // Funkce pro překlad textu přes Google Translate API
 async function translateTextApi(text, sourceLang = 'cs', targetLang = 'en') {
