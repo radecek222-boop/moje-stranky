@@ -409,7 +409,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
       <?php if ($isLoggedIn): ?>
       <div id="povereniBox" style="padding: 1.5rem; margin-bottom: 1.5rem; border: 2px solid #333333; background: #f9fdf7; box-shadow: 0 2px 8px rgba(51,51,51,0.1);">
         <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 0.8rem; color: #333333; text-transform: uppercase; display: flex; align-items: center; gap: 0.5rem;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>

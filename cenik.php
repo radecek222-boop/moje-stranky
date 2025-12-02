@@ -440,7 +440,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
 <div id="edit-modal" class="modal" style="display: none;">
   <div class="modal-content">
-    <span class="modal-close" onclick="zavritModal()">&times;</span>
+    <span class="modal-close" onclick="zavritModal()" role="button" tabindex="0" aria-label="Zavřít">&times;</span>
     <h2 id="modal-title" data-lang-cs="Upravit položku" data-lang-en="Edit Item" data-lang-it="Modifica Elemento">Upravit položku</h2>
 
     <!-- Info: Upravuješ v aktuálním jazyce stránky -->

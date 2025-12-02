@@ -1614,3 +1614,16 @@ header('Content-Type: text/html; charset=utf-8');
   - Regenerated minified versions: photocustomer.min.js, seznam.min.js
 - **Result:** All images now have descriptive alt text for screen readers.
 
+## [Step 75]: SVG Accessibility (aria-hidden) and Interactive Elements
+- **Date:** 2025-12-02
+- **What:** Added `aria-hidden="true"` to decorative SVG icons and improved accessibility for interactive non-button elements.
+- **Analysis:**
+  - Decorative SVG icons should be hidden from screen readers
+  - Non-semantic interactive elements (span, div with onclick) need role and tabindex
+- **Files modified:**
+  - `protokol.php`: Added aria-hidden="true" to 4 decorative SVG icons (arrow, share, send, close)
+  - `photocustomer.php`: Added aria-hidden="true" to collapsible arrow SVG
+  - `novareklamace.php`: Added aria-hidden="true" to document icon SVG
+  - `cenik.php`: Added role="button", tabindex="0", aria-label to modal close span
+- **Result:** Improved screen reader experience by hiding decorative icons and making custom interactive elements accessible.
+

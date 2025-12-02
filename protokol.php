@@ -240,7 +240,7 @@ if ($initialBootstrapData) {
   <div class="customer-info-collapsible">
     <div class="customer-info-header" id="customerInfoToggle">
       <span class="customer-info-name" id="customerInfoName"><?= wgs_escape($prefillFields['customer']) ?: 'Zákazník' ?></span>
-      <svg class="customer-info-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg class="customer-info-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <polyline points="6 9 12 15 18 9"></polyline>
       </svg>
     </div>
@@ -374,7 +374,7 @@ if ($initialBootstrapData) {
       <div class="pdf-preview-actions">
         <!-- Tlačítko pro export (sdílení/stažení) -->
         <button class="pdf-action-btn pdf-share-btn" id="pdfShareBtn" data-lang-cs-title="Sdílet / Stáhnout" data-lang-en-title="Share / Download" data-lang-it-title="Condividi / Scarica" title="Sdílet / Stáhnout" style="display: none;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
             <polyline points="16 6 12 2 8 6"></polyline>
             <line x1="12" y1="2" x2="12" y2="15"></line>
@@ -383,7 +383,7 @@ if ($initialBootstrapData) {
 
         <!-- Tlačítko pro odeslání zákazníkovi -->
         <button class="pdf-action-btn pdf-send-btn" id="pdfSendBtn" data-lang-cs-title="Odeslat zákazníkovi" data-lang-en-title="Send to Customer" data-lang-it-title="Invia al Cliente" title="Odeslat zákazníkovi" style="display: none;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <line x1="22" y1="2" x2="11" y2="13"></line>
             <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
           </svg>
@@ -391,7 +391,7 @@ if ($initialBootstrapData) {
 
         <!-- Tlačítko zavřít (vždy viditelné) - Alpine.js (Step 42) -->
         <button class="pdf-action-btn pdf-close-btn" id="pdfCloseBtn" data-lang-cs-title="Zavřít" data-lang-en-title="Close" data-lang-it-title="Chiudi" title="Zavřít" @click="close">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
