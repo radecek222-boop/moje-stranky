@@ -1678,3 +1678,23 @@ header('Content-Type: text/html; charset=utf-8');
     - Added role="button", tabindex="0", aria-label to 9 language flag spans (3 per menu variant)
 - **Result:** Language switcher and notification buttons are now keyboard accessible with proper ARIA roles.
 
+## [Step 80]: Table Header Scope Attributes for Screen Readers
+- **Date:** 2025-12-02
+- **What:** Added scope="col" to all table header `<th>` elements for better screen reader compatibility.
+- **Analysis:**
+  - Screen readers use scope attribute to understand table structure
+  - Column headers should have scope="col" for proper association with data cells
+- **Files modified:**
+  - `sprava_ip_blacklist.php`: Added scope="col" to 8 th elements (2 tables)
+  - `psa-kalkulator.php`: Added scope="col" to 7 th elements
+  - `psa.php`: Added scope="col" to 7 th elements
+  - `admin.php`: Added scope="col" to 18 th elements (3 tables)
+  - `analytics-campaigns.php`: Added scope="col" to 9 th elements
+  - `analytics-conversions.php`: Added scope="col" to 8 th elements
+  - `analytics-user-scores.php`: Added scope="col" to 8 th elements
+  - `analytics-reports.php`: Added scope="col" to 11 th elements (2 dynamic tables)
+  - `includes/admin_security.php`: Added scope="col" to 7 th elements
+  - `vsechny_tabulky.php`: Added scope="col" to 10 th elements (3 tables)
+  - `gdpr-portal.php`: Added scope="col" to 10 th elements (2 dynamic tables)
+- **Result:** All user-facing tables now have proper scope attributes for screen reader table navigation.
+

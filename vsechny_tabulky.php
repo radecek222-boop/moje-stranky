@@ -463,13 +463,13 @@ try {
                     <table>
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>Sloupec</th>
-                                <th>Typ</th>
-                                <th>Null</th>
-                                <th>Key</th>
-                                <th>Default</th>
-                                <th>Extra</th>
+                                <th scope="col">#</th>
+                                <th scope="col">Sloupec</th>
+                                <th scope="col">Typ</th>
+                                <th scope="col">Null</th>
+                                <th scope="col">Key</th>
+                                <th scope="col">Default</th>
+                                <th scope="col">Extra</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -512,8 +512,8 @@ try {
                 <table>
                     <thead>
                         <tr>
-                            <th>Název indexu</th>
-                            <th>Sloupce</th>
+                            <th scope="col">Název indexu</th>
+                            <th scope="col">Sloupce</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -535,7 +535,7 @@ try {
                         <thead>
                             <tr>
                                 <?php foreach (array_keys($detail['ukazka'][0]) as $klic): ?>
-                                <th><?php echo htmlspecialchars($klic); ?></th>
+                                <th scope="col"><?php echo htmlspecialchars($klic); ?></th>
                                 <?php endforeach; ?>
                             </tr>
                         </thead>

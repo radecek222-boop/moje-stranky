@@ -119,13 +119,13 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Jméno</th>
-            <th class="text-center">Hodiny</th>
-            <th class="text-right">Výplata</th>
-            <th class="text-right">Faktura</th>
-            <th>Číslo účtu</th>
-            <th>Kód banky</th>
-            <th class="text-center">Akce</th>
+            <th scope="col">Jméno</th>
+            <th scope="col" class="text-center">Hodiny</th>
+            <th scope="col" class="text-right">Výplata</th>
+            <th scope="col" class="text-right">Faktura</th>
+            <th scope="col">Číslo účtu</th>
+            <th scope="col">Kód banky</th>
+            <th scope="col" class="text-center">Akce</th>
           </tr>
         </thead>
         <tbody id="employeeTableBody">

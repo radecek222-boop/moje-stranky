@@ -302,14 +302,14 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             <table id="scores-table" style="display: none;">
                 <thead>
                     <tr>
-                        <th>Session ID</th>
-                        <th>Datum</th>
-                        <th>Engagement</th>
-                        <th>Frustration</th>
-                        <th>Interest</th>
-                        <th>Clicks</th>
-                        <th>Pageviews</th>
-                        <th>Zařízení</th>
+                        <th scope="col">Session ID</th>
+                        <th scope="col">Datum</th>
+                        <th scope="col">Engagement</th>
+                        <th scope="col">Frustration</th>
+                        <th scope="col">Interest</th>
+                        <th scope="col">Clicks</th>
+                        <th scope="col">Pageviews</th>
+                        <th scope="col">Zařízení</th>
                     </tr>
                 </thead>
                 <tbody id="scores-tbody"></tbody>

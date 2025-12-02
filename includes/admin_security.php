@@ -773,13 +773,13 @@ endif;
         <table class="user-access-table" id="security-users-table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Jméno</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Registrace</th>
-                    <th>Poslední přihlášení</th>
+                    <th scope="col">ID</th>
+                    <th scope="col">Jméno</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Registrace</th>
+                    <th scope="col">Poslední přihlášení</th>
                 </tr>
             </thead>
             <tbody>

@@ -283,14 +283,14 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 <table id="conversions-table" style="display: none;">
                     <thead>
                         <tr>
-                            <th>Datum</th>
-                            <th>Typ</th>
-                            <th>Label</th>
-                            <th>Hodnota</th>
-                            <th>Čas</th>
-                            <th>Kroky</th>
-                            <th>UTM Campaign</th>
-                            <th>Device</th>
+                            <th scope="col">Datum</th>
+                            <th scope="col">Typ</th>
+                            <th scope="col">Label</th>
+                            <th scope="col">Hodnota</th>
+                            <th scope="col">Čas</th>
+                            <th scope="col">Kroky</th>
+                            <th scope="col">UTM Campaign</th>
+                            <th scope="col">Device</th>
                         </tr>
                     </thead>
                     <tbody id="conversions-tbody"></tbody>

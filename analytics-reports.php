@@ -314,12 +314,12 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             }
 
             let html = '<table><thead><tr>';
-            html += '<th>ID</th>';
-            html += '<th>Typ</th>';
-            html += '<th>Perioda</th>';
-            html += '<th>Status</th>';
-            html += '<th>Vygenerováno</th>';
-            html += '<th>Akce</th>';
+            html += '<th scope="col">ID</th>';
+            html += '<th scope="col">Typ</th>';
+            html += '<th scope="col">Perioda</th>';
+            html += '<th scope="col">Status</th>';
+            html += '<th scope="col">Vygenerováno</th>';
+            html += '<th scope="col">Akce</th>';
             html += '</tr></thead><tbody>';
 
             reports.forEach(report => {
@@ -412,11 +412,11 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             }
 
             let html = '<table><thead><tr>';
-            html += '<th>Název</th>';
-            html += '<th>Typ</th>';
-            html += '<th>Frekvence</th>';
-            html += '<th>Next Run</th>';
-            html += '<th>Status</th>';
+            html += '<th scope="col">Název</th>';
+            html += '<th scope="col">Typ</th>';
+            html += '<th scope="col">Frekvence</th>';
+            html += '<th scope="col">Next Run</th>';
+            html += '<th scope="col">Status</th>';
             html += '</tr></thead><tbody>';
 
             schedules.forEach(schedule => {

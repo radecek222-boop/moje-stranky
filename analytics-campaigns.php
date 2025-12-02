@@ -358,15 +358,15 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             <table id="campaigns-table" style="display: none;">
                 <thead>
                     <tr>
-                        <th class="sortable" data-sort="utm_campaign">Campaign</th>
-                        <th class="sortable" data-sort="utm_source">Source</th>
-                        <th class="sortable" data-sort="utm_medium">Medium</th>
-                        <th class="sortable" data-sort="device_type">Device</th>
-                        <th class="sortable" data-sort="total_sessions">Sessions</th>
-                        <th class="sortable" data-sort="total_conversions">Conversions</th>
-                        <th class="sortable" data-sort="avg_conversion_rate">Conv. Rate</th>
-                        <th class="sortable" data-sort="total_revenue">Revenue</th>
-                        <th class="sortable" data-sort="avg_bounce_rate">Bounce %</th>
+                        <th scope="col" class="sortable" data-sort="utm_campaign">Campaign</th>
+                        <th scope="col" class="sortable" data-sort="utm_source">Source</th>
+                        <th scope="col" class="sortable" data-sort="utm_medium">Medium</th>
+                        <th scope="col" class="sortable" data-sort="device_type">Device</th>
+                        <th scope="col" class="sortable" data-sort="total_sessions">Sessions</th>
+                        <th scope="col" class="sortable" data-sort="total_conversions">Conversions</th>
+                        <th scope="col" class="sortable" data-sort="avg_conversion_rate">Conv. Rate</th>
+                        <th scope="col" class="sortable" data-sort="total_revenue">Revenue</th>
+                        <th scope="col" class="sortable" data-sort="avg_bounce_rate">Bounce %</th>
                     </tr>
                 </thead>
                 <tbody id="campaigns-tbody">

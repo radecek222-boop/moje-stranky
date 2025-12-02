@@ -915,13 +915,13 @@ function loadNotifContent(type, body) {
       <table>
         <thead>
           <tr>
-            <th>ID</th>
-            <th data-lang-cs="Jméno" data-lang-en="Name" data-lang-it="Nome">Jméno</th>
-            <th>Email</th>
-            <th data-lang-cs="Role" data-lang-en="Role" data-lang-it="Ruolo">Role</th>
-            <th>Status</th>
-            <th data-lang-cs="Registrace" data-lang-en="Registration" data-lang-it="Registrazione">Registrace</th>
-            <th data-lang-cs="Akce" data-lang-en="Actions" data-lang-it="Azioni">Akce</th>
+            <th scope="col">ID</th>
+            <th scope="col" data-lang-cs="Jméno" data-lang-en="Name" data-lang-it="Nome">Jméno</th>
+            <th scope="col">Email</th>
+            <th scope="col" data-lang-cs="Role" data-lang-en="Role" data-lang-it="Ruolo">Role</th>
+            <th scope="col">Status</th>
+            <th scope="col" data-lang-cs="Registrace" data-lang-en="Registration" data-lang-it="Registrazione">Registrace</th>
+            <th scope="col" data-lang-cs="Akce" data-lang-en="Actions" data-lang-it="Azioni">Akce</th>
           </tr>
         </thead>
         <tbody id="users-table">
@@ -949,12 +949,12 @@ function loadNotifContent(type, body) {
       <table>
         <thead>
           <tr>
-            <th data-lang-cs="Jméno" data-lang-en="Name" data-lang-it="Nome">Jméno</th>
-            <th data-lang-cs="Adresa" data-lang-en="Address" data-lang-it="Indirizzo">Adresa</th>
-            <th data-lang-cs="Telefon" data-lang-en="Phone" data-lang-it="Telefono">Telefon</th>
-            <th>Email</th>
-            <th data-lang-cs="Počet zakázek" data-lang-en="Orders Count" data-lang-it="Numero Ordini">Počet zakázek</th>
-            <th data-lang-cs="Akce" data-lang-en="Actions" data-lang-it="Azioni">Akce</th>
+            <th scope="col" data-lang-cs="Jméno" data-lang-en="Name" data-lang-it="Nome">Jméno</th>
+            <th scope="col" data-lang-cs="Adresa" data-lang-en="Address" data-lang-it="Indirizzo">Adresa</th>
+            <th scope="col" data-lang-cs="Telefon" data-lang-en="Phone" data-lang-it="Telefono">Telefon</th>
+            <th scope="col">Email</th>
+            <th scope="col" data-lang-cs="Počet zakázek" data-lang-en="Orders Count" data-lang-it="Numero Ordini">Počet zakázek</th>
+            <th scope="col" data-lang-cs="Akce" data-lang-en="Actions" data-lang-it="Azioni">Akce</th>
           </tr>
         </thead>
         <tbody id="zakaznici-table">
@@ -1031,11 +1031,11 @@ function loadNotifContent(type, body) {
       <table>
         <thead>
           <tr>
-            <th>Status</th>
-            <th data-lang-cs="Uživatel" data-lang-en="User" data-lang-it="Utente">Uživatel</th>
-            <th data-lang-cs="Role" data-lang-en="Role" data-lang-it="Ruolo">Role</th>
-            <th>Email</th>
-            <th data-lang-cs="Poslední aktivita" data-lang-en="Last Activity" data-lang-it="Ultima Attività">Poslední aktivita</th>
+            <th scope="col">Status</th>
+            <th scope="col" data-lang-cs="Uživatel" data-lang-en="User" data-lang-it="Utente">Uživatel</th>
+            <th scope="col" data-lang-cs="Role" data-lang-en="Role" data-lang-it="Ruolo">Role</th>
+            <th scope="col">Email</th>
+            <th scope="col" data-lang-cs="Poslední aktivita" data-lang-en="Last Activity" data-lang-it="Ultima Attività">Poslední aktivita</th>
           </tr>
         </thead>
         <tbody id="online-table">
