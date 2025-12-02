@@ -8,8 +8,6 @@
 (function() {
     'use strict';
 
-    console.log('[Protokol-Kalkulačka] Inicializace integrace...');
-
     let kalkulaceData = null; // Aktuální data z kalkulačky
     let modalOverlay = null;
     let modalBody = null;
@@ -19,8 +17,6 @@
     // Step 40: Migrace na Alpine.js - close/overlay click handlery přesunuty do calculatorModal komponenty
     // ========================================
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('[Protokol-Kalkulačka] DOM loaded');
-
         modalOverlay = document.getElementById('calculatorModalOverlay');
         modalBody = document.getElementById('calculatorModalBody');
         const priceTotalInput = document.getElementById('price-total');
@@ -39,16 +35,12 @@
 
         // Step 40: Zavírání modalu nyní řeší Alpine.js (closeBtn, overlay click, ESC)
         // Vanilla JS event listenery odstraněny
-
-        console.log('[Protokol-Kalkulačka] Inicializace dokončena');
     });
 
     // ========================================
     // OTEVŘENÍ MODALU S KALKULAČKOU
     // ========================================
     async function otevritKalkulacku() {
-        console.log('[Protokol-Kalkulačka] Otevírám modal...');
-
         try {
             // Zobrazit loading
             modalBody.innerHTML = `
@@ -99,7 +91,6 @@
             // Reinicializovat kalkulačku - připojit event listenery k novému DOMu
             if (typeof window.initKalkulacka === 'function') {
                 window.initKalkulacka();
-                console.log('[Protokol-Kalkulačka] Kalkulačka reinicializována');
             } else {
                 console.warn('[Protokol-Kalkulačka] Funkce initKalkulacka není dostupná');
             }
@@ -107,7 +98,6 @@
             // Nastavit kalkulačku do protokol režimu
             if (typeof window.nastavitKalkulackuRezim === 'function') {
                 window.nastavitKalkulackuRezim('protokol');
-                console.log('[Protokol-Kalkulačka] Režim nastaven na "protokol"');
             }
 
             // Načíst data zákazníka z protokolu
@@ -115,18 +105,11 @@
             const customerName = document.getElementById('customer')?.value;
             const claimNumber = document.getElementById('claim-number')?.value;
 
-            console.log('[Protokol-Kalkulačka] Data zákazníka:', {
-                address: customerAddress,
-                name: customerName,
-                claim: claimNumber
-            });
-
             // Předvyplnit adresu do kalkulačky
             if (customerAddress && customerAddress.trim() !== '') {
                 const calcAddressInput = document.getElementById('calc-address');
                 if (calcAddressInput) {
                     calcAddressInput.value = customerAddress;
-                    console.log('[Protokol-Kalkulačka] Adresa předvyplněna:', customerAddress);
 
                     // Automaticky spustit vyhledávání adresy po krátké prodlevě
                     setTimeout(() => {
@@ -136,8 +119,6 @@
                     }, 300);
                 }
             }
-
-            console.log('[Protokol-Kalkulačka] Kalkulačka načtena');
 
         } catch (error) {
             console.error('[Protokol-Kalkulačka] Chyba při načítání kalkulačky:', error);
@@ -156,16 +137,12 @@
     // INICIALIZACE KALKULAČKY V MODALU
     // ========================================
     function inicializovatKalkulackuVModalu() {
-        console.log('[Protokol-Kalkulačka] Inicializuji kalkulačku v modalu...');
-
         // Zkontrolovat jestli existuje globální funkce z cenik-calculator.js
         // (Kalkulačka by měla být již načtená přes defer)
 
         // TODO: Potřebujeme upravit cenik-calculator.js aby:
         // 1. Neexportoval PDF přímo
         // 2. Místo toho zobrazil souhrn s tlačítky Zpět/Započítat
-
-        console.log('[Protokol-Kalkulačka] Kalkulačka inicializována');
     }
 
     // ========================================
@@ -173,8 +150,6 @@
     // Step 40: Migrace na Alpine.js
     // ========================================
     function zavritModal() {
-        console.log('[Protokol-Kalkulačka] Zavírám modal...');
-
         // Step 40: Zavřít modal přes Alpine.js API
         if (window.calculatorModal && window.calculatorModal.close) {
             window.calculatorModal.close();
@@ -196,8 +171,6 @@
     // ZPRACOVÁNÍ VÝSLEDKU KALKULACE
     // ========================================
     function zpracovatVysledekKalkulace(data) {
-        console.log('[Protokol-Kalkulačka] Zpracovávám výsledek:', data);
-
         // Uložit data kalkulace
         kalkulaceData = data;
 
@@ -222,8 +195,6 @@
 
         // Uložit kalkulaci do databáze
         ulozitKalkulaciDoDB(data);
-
-        console.log('[Protokol-Kalkulačka] Výsledek zpracován');
     }
 
     // ========================================
@@ -231,8 +202,6 @@
     // ========================================
     async function ulozitKalkulaciDoDB(data) {
         try {
-            console.log('[Protokol-Kalkulačka] Ukládám kalkulaci do DB...');
-
             // Získat ID reklamace
             const reklamaceId = currentReklamaceId || new URLSearchParams(window.location.search).get('id');
 
@@ -248,8 +217,6 @@
                 console.error('[Protokol-Kalkulačka] Nepodařilo se získat CSRF token');
                 return;
             }
-
-            console.log('[Protokol-Kalkulačka] CSRF token získán');
 
             const response = await fetch('/api/protokol_api.php', {
                 method: 'POST',
@@ -267,13 +234,9 @@
             const result = await response.json();
 
             if (result.status === 'success') {
-                console.log('[Protokol-Kalkulačka] Kalkulace uložena do DB');
-
                 // KRITICKÁ OPRAVA: Aktualizovat globální proměnnou
                 if (typeof window.kalkulaceData !== 'undefined') {
                     window.kalkulaceData = data;
-                    console.log('[Protokol-Kalkulačka] Globální kalkulaceData aktualizována');
-                    console.log('[Protokol-Kalkulačka] Celková cena:', data.celkovaCena, '€');
                 } else {
                     console.warn('[Protokol-Kalkulačka] window.kalkulaceData není definována');
                 }
