@@ -347,10 +347,10 @@ try {
     $stmt = $pdo->prepare(
         "SELECT id, reklamace_id, cislo, jmeno, typ_zakaznika
          FROM wgs_reklamace
-         WHERE reklamace_id = :value OR cislo = :value OR id = :value2
+         WHERE reklamace_id = :val1 OR cislo = :val2 OR id = :val3
          LIMIT 1"
     );
-    $stmt->execute([':value' => $testValue, ':value2' => $testValue]);
+    $stmt->execute([':val1' => $testValue, ':val2' => $testValue, ':val3' => $testValue]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($result) {

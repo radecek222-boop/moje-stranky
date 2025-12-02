@@ -104,10 +104,10 @@ if ($lookupValue !== null) {
             "SELECT r.*, u.name as created_by_name
              FROM wgs_reklamace r
              LEFT JOIN wgs_users u ON r.created_by = u.id
-             WHERE r.reklamace_id = :value OR r.cislo = :value OR r.id = :value2
+             WHERE r.reklamace_id = :val1 OR r.cislo = :val2 OR r.id = :val3
              LIMIT 1"
         );
-        $stmt->execute([':value' => $lookupValue, ':value2' => $lookupValue]);
+        $stmt->execute([':val1' => $lookupValue, ':val2' => $lookupValue, ':val3' => $lookupValue]);
         $record = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // DEBUG LOG
