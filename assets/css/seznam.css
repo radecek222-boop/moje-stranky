@@ -31,7 +31,7 @@ body {
   border-bottom: 1px solid var(--c-black);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: var(--z-topbar, 100);
 }
 .top-bar-container {
   max-width: 1400px;
@@ -398,7 +398,7 @@ body {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+  z-index: var(--z-dropdown, 1000);
   align-items: flex-start;
   justify-content: center;
   overflow-y: auto;
