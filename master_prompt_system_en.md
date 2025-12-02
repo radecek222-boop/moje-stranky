@@ -1777,3 +1777,17 @@ header('Content-Type: text/html; charset=utf-8');
   - `includes/admin_main.php`: Changed cc-search to type="search" with aria-label="Hledat nastavení"
 - **Result:** Search inputs now have proper semantic HTML and accessibility labeling.
 
+## [Step 86]: Counter Button Accessibility Labels
+- **Date:** 2025-12-02
+- **What:** Added aria-labels to counter increment/decrement buttons and number inputs in cenik.php calculator.
+- **Analysis:**
+  - Buttons showing only `+` or `−` symbols are not accessible to screen readers
+  - Screen reader users cannot understand the purpose of icon-only buttons
+  - Number inputs need aria-label when the visible label is on a separate element
+- **Files modified:**
+  - `cenik.php`: Added aria-labels to all counter buttons (sedáky, opěrky, područky, panely, relax, elektrické díly)
+    - Decrement buttons: "Snížit počet [název]"
+    - Increment buttons: "Zvýšit počet [název]"
+    - Number inputs: "Počet [název]"
+- **Result:** Counter controls in price calculator are now fully accessible to screen reader users.
+

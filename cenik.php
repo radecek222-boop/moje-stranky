@@ -214,36 +214,36 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
           <div class="counter-item">
             <label data-lang-cs="Sedáky" data-lang-en="Seats" data-lang-it="Sedili">Sedáky</label>
             <div class="counter-controls">
-              <button class="btn-counter" onclick="decrementCounter('sedaky')">−</button>
-              <input type="number" id="sedaky" value="0" min="0" max="20" readonly>
-              <button class="btn-counter" onclick="incrementCounter('sedaky')">+</button>
+              <button class="btn-counter" onclick="decrementCounter('sedaky')" aria-label="Snížit počet sedáků">−</button>
+              <input type="number" id="sedaky" value="0" min="0" max="20" readonly aria-label="Počet sedáků">
+              <button class="btn-counter" onclick="incrementCounter('sedaky')" aria-label="Zvýšit počet sedáků">+</button>
             </div>
           </div>
 
           <div class="counter-item">
             <label data-lang-cs="Opěrky" data-lang-en="Backrests" data-lang-it="Schienali">Opěrky</label>
             <div class="counter-controls">
-              <button class="btn-counter" onclick="decrementCounter('operky')">−</button>
-              <input type="number" id="operky" value="0" min="0" max="20" readonly>
-              <button class="btn-counter" onclick="incrementCounter('operky')">+</button>
+              <button class="btn-counter" onclick="decrementCounter('operky')" aria-label="Snížit počet opěrek">−</button>
+              <input type="number" id="operky" value="0" min="0" max="20" readonly aria-label="Počet opěrek">
+              <button class="btn-counter" onclick="incrementCounter('operky')" aria-label="Zvýšit počet opěrek">+</button>
             </div>
           </div>
 
           <div class="counter-item">
             <label data-lang-cs="Područky" data-lang-en="Armrests" data-lang-it="Braccioli">Područky</label>
             <div class="counter-controls">
-              <button class="btn-counter" onclick="decrementCounter('podrucky')">−</button>
-              <input type="number" id="podrucky" value="0" min="0" max="20" readonly>
-              <button class="btn-counter" onclick="incrementCounter('podrucky')">+</button>
+              <button class="btn-counter" onclick="decrementCounter('podrucky')" aria-label="Snížit počet područek">−</button>
+              <input type="number" id="podrucky" value="0" min="0" max="20" readonly aria-label="Počet područek">
+              <button class="btn-counter" onclick="incrementCounter('podrucky')" aria-label="Zvýšit počet područek">+</button>
             </div>
           </div>
 
           <div class="counter-item">
             <label data-lang-cs="Panely (zadní/boční)" data-lang-en="Panels (back/side)" data-lang-it="Pannelli (posteriore/laterale)">Panely (zadní/boční)</label>
             <div class="counter-controls">
-              <button class="btn-counter" onclick="decrementCounter('panely')">−</button>
-              <input type="number" id="panely" value="0" min="0" max="20" readonly>
-              <button class="btn-counter" onclick="incrementCounter('panely')">+</button>
+              <button class="btn-counter" onclick="decrementCounter('panely')" aria-label="Snížit počet panelů">−</button>
+              <input type="number" id="panely" value="0" min="0" max="20" readonly aria-label="Počet panelů">
+              <button class="btn-counter" onclick="incrementCounter('panely')" aria-label="Zvýšit počet panelů">+</button>
             </div>
           </div>
         </div>
@@ -268,9 +268,9 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
           <div class="counter-item">
             <label data-lang-cs="Relax mechanismy" data-lang-en="Relax mechanisms" data-lang-it="Meccanismi relax">Relax mechanismy</label>
             <div class="counter-controls">
-              <button class="btn-counter" onclick="decrementCounter('relax')">−</button>
-              <input type="number" id="relax" value="0" min="0" max="10" readonly>
-              <button class="btn-counter" onclick="incrementCounter('relax')">+</button>
+              <button class="btn-counter" onclick="decrementCounter('relax')" aria-label="Snížit počet relax mechanismů">−</button>
+              <input type="number" id="relax" value="0" min="0" max="10" readonly aria-label="Počet relax mechanismů">
+              <button class="btn-counter" onclick="incrementCounter('relax')" aria-label="Zvýšit počet relax mechanismů">+</button>
             </div>
             <div class="counter-price" data-lang-cs="45 € / kus" data-lang-en="45 € / piece" data-lang-it="45 € / pezzo">45 € / kus</div>
           </div>
@@ -278,9 +278,9 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
           <div class="counter-item">
             <label data-lang-cs="Elektrické díly" data-lang-en="Electrical parts" data-lang-it="Parti elettriche">Elektrické díly</label>
             <div class="counter-controls">
-              <button class="btn-counter" onclick="decrementCounter('vysuv')">−</button>
-              <input type="number" id="vysuv" value="0" min="0" max="10" readonly>
-              <button class="btn-counter" onclick="incrementCounter('vysuv')">+</button>
+              <button class="btn-counter" onclick="decrementCounter('vysuv')" aria-label="Snížit počet elektrických dílů">−</button>
+              <input type="number" id="vysuv" value="0" min="0" max="10" readonly aria-label="Počet elektrických dílů">
+              <button class="btn-counter" onclick="incrementCounter('vysuv')" aria-label="Zvýšit počet elektrických dílů">+</button>
             </div>
             <div class="counter-price" data-lang-cs="45 € / kus" data-lang-en="45 € / piece" data-lang-it="45 € / pezzo">45 € / kus</div>
           </div>
