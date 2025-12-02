@@ -505,14 +505,14 @@ async function createNewAdminKey() {
 function showNotification(message, type = 'info') {
   const notification = document.getElementById('notification');
   if (!notification) return;
-  
+
   notification.textContent = message;
-  notification.className = `notification ${type}`;
-  notification.classList.remove('hidden');
-  
+  // FIX: CSS pouziva tridu 'active' pro zobrazeni, ne 'hidden' pro skryti
+  notification.className = `notification ${type} active`;
+
   if (type !== 'error') {
     setTimeout(() => {
-      notification.classList.add('hidden');
+      notification.classList.remove('active');
     }, 3000);
   }
 }
