@@ -233,6 +233,7 @@ input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--c-black);
   border-width: 2px;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 textarea {
   min-height: 80px;

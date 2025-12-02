@@ -2078,3 +2078,23 @@ CSP refinement, additional input validation, security headers audit.
 
 **Awaiting human decision on Phase 4 direction.**
 
+---
+
+# PHASE 4: Technical Debt Cleanup
+
+## [Step 102]: Focus Ring Visibility Fix (CSS outline:none)
+- **Date:** 2025-12-02
+- **What:** Added visible focus indicators to all elements that had `outline: none` without alternative focus styling.
+- **Analysis:**
+  - WCAG 2.4.7 requires visible focus indication for keyboard navigation
+  - Several CSS files had `outline: none` without box-shadow or other focus indicator
+  - This made keyboard navigation difficult for users who don't use mouse
+- **Files modified:**
+  - `assets/css/admin-notifications.css`: Added box-shadow on .form-input:focus, .form-select:focus
+  - `assets/css/login.css`: Added box-shadow on input:focus
+  - `assets/css/protokol.css`: Added box-shadow on input/select/textarea:focus
+  - `assets/css/cenik.css`: Added box-shadow on .calc-input:focus (3 occurrences)
+  - `assets/css/universal-modal-theme.css`: Added focus styles for note-delete-btn and note-textarea
+  - All .min.css files regenerated
+- **Result:** All focusable elements now have visible focus indicators for keyboard users.
+

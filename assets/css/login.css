@@ -168,6 +168,7 @@ input:focus {
   outline: none;
   border-color: var(--c-black);
   background: #fafafa;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
 }
 ::placeholder {
   color: #aaaaaa;
