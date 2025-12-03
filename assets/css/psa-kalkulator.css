@@ -315,6 +315,21 @@ body {
   font-size: 0.85rem !important;
   width: 100%;
   transition: all 0.2s ease !important;
+  color: var(--c-black) !important;
+}
+
+/* Placeholder - černý text */
+.table-input::placeholder {
+  color: var(--c-grey) !important;
+  opacity: 1;
+}
+
+.form-input::placeholder,
+.form-select::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: var(--c-grey) !important;
+  opacity: 1;
 }
 
 .table-input:hover {

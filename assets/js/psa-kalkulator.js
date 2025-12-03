@@ -1058,8 +1058,31 @@ async function clearAll() {
   }
 }
 
+// === SYNCHRONIZACE VSTUPŮ ===
+// Synchronizovat data z input polí před generováním QR
+function synchronizovatVstupy() {
+  const inputs = document.querySelectorAll('[data-action="updateEmployeeField"]');
+  inputs.forEach(input => {
+    const index = parseInt(input.getAttribute('data-index'));
+    const field = input.getAttribute('data-field');
+    if (!isNaN(index) && field && employees[index]) {
+      if (field === 'hours' || field === 'bonusAmount') {
+        employees[index][field] = parseInt(input.value) || 0;
+      } else if (field === 'bank') {
+        employees[index][field] = formatBankCode(input.value);
+      } else {
+        employees[index][field] = input.value;
+      }
+    }
+  });
+  // Aktualizovat statistiky
+  updateStats();
+}
+
 // === QR PAYMENTS ===
 function generatePaymentQR() {
+  // Synchronizovat vstupy před generováním QR
+  synchronizovatVstupy();
   const modal = document.getElementById('qrModal');
   const container = document.getElementById('qrCodesContainer');
   const summaryDiv = document.getElementById('paymentSummary');
@@ -1315,6 +1338,9 @@ function closeQRModal() {
 
 // === SINGLE EMPLOYEE QR GENERATION ===
 function generateSingleEmployeeQR(index) {
+  // Synchronizovat vstupy před generováním QR
+  synchronizovatVstupy();
+
   const emp = employees[index];
   if (!emp) {
     wgsToast.error('Zaměstnanec nenalezen');
@@ -1607,9 +1633,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Handle data-action buttons - kliknutí
+  // DŮLEŽITÉ: Vyloučit INPUT pole - ty se zpracují pouze při change eventu
   document.addEventListener('click', (e) => {
     const target = e.target.closest('[data-action]');
     if (!target) return;
+
+    // Přeskočit INPUT a TEXTAREA - tyto elementy se zpracují pouze při change
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
     zpracujDataAction(target);
   });
 
