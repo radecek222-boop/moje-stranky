@@ -11,6 +11,12 @@ require_once __DIR__ . '/../includes/WebPush.php';
 
 header('Content-Type: application/json');
 
+// DEBUG: Logovat request info
+error_log('[Notes API DEBUG] REQUEST_METHOD=' . ($_SERVER['REQUEST_METHOD'] ?? 'UNDEFINED'));
+error_log('[Notes API DEBUG] POST=' . json_encode($_POST));
+error_log('[Notes API DEBUG] GET=' . json_encode($_GET));
+error_log('[Notes API DEBUG] php://input=' . file_get_contents('php://input'));
+
 try {
     // BEZPEČNOST: Kontrola přihlášení
     $isLoggedIn = isset($_SESSION['user_id']) || (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true);
@@ -418,7 +424,13 @@ try {
                 throw new Exception('Poznámka nebyla nalezena');
             }
 
-            if (!$isAdmin && $noteData['created_by'] !== $currentUserEmail) {
+            // DEBUG: Log pro diagnostiku
+            error_log('[Notes DELETE] currentUserEmail=' . ($currentUserEmail ?? 'NULL') . ', noteCreatedBy=' . ($noteData['created_by'] ?? 'NULL') . ', isAdmin=' . ($isAdmin ? 'true' : 'false'));
+
+            // Autor muze smazat svou poznamku, admin muze smazat cokoliv
+            $jeAutor = $currentUserEmail && $noteData['created_by'] === $currentUserEmail;
+            if (!$isAdmin && !$jeAutor) {
+                error_log('[Notes DELETE] ZAMITNUTO - neni autor ani admin');
                 throw new Exception('Nemáte oprávnění smazat tuto poznámku');
             }
 
@@ -566,6 +578,7 @@ try {
     }
 
 } catch (Exception $e) {
+    error_log('[Notes API] CHYBA: ' . $e->getMessage() . ' | Action: ' . ($action ?? 'undefined'));
     http_response_code(400);
     echo json_encode([
         'status' => 'error',

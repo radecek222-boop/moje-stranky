@@ -2516,22 +2516,32 @@ async function addNote(orderId, text, audioBlob = null) {
 }
 
 async function deleteNote(noteId, orderId) {
+  console.log('[deleteNote] Zacinam mazat poznamku ID:', noteId);
+
   if (!await wgsConfirm('Opravdu chcete smazat tuto poznámku?', 'Smazat', 'Zrušit')) {
+    console.log('[deleteNote] Uzivatel zrusil');
     return;
   }
 
+  console.log('[deleteNote] Uzivatel potvrdil, pripravuji request...');
+
   try {
     const csrfToken = await getCSRFToken();
+    console.log('[deleteNote] CSRF token:', csrfToken ? 'OK (' + csrfToken.substring(0, 10) + '...)' : 'CHYBI!');
 
     const formData = new FormData();
     formData.append('action', 'delete');
     formData.append('note_id', noteId);
     formData.append('csrf_token', csrfToken);
 
-    const response = await fetch('api/notes_api.php', {
+    console.log('[deleteNote] FormData pripravena, odesilam POST na /api/notes_api.php...');
+
+    const response = await fetch('/api/notes_api.php', {
       method: 'POST',
       body: formData
     });
+
+    console.log('[deleteNote] Response status:', response.status, response.statusText);
 
     const data = await response.json();
 
