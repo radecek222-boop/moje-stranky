@@ -6,6 +6,11 @@
   --c-border: #e0e0e0;
   --c-accent: #2a2a2a;
 }
+
+/* Třída pro skrytí elementů - používá JavaScript pro přepínání formulářů */
+.hidden {
+  display: none !important;
+}
 * {
   box-sizing: border-box;
   margin: 0;

@@ -65,8 +65,6 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
     .admin-checkbox-group { margin-bottom: 1.5rem; padding: 1rem; border-radius: 4px; }
     .admin-checkbox-group input[type="checkbox"] { margin-right: 0.5rem; }
     .admin-checkbox-group label { font-weight: 500; cursor: pointer; }
-    #userLoginFields { display: block; }
-    #adminLoginFields { display: none; }
   </style>
 
   <!-- Analytics Tracker -->
@@ -131,7 +129,7 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
     </div>
 
     <!-- ADMIN LOGIN (ADMIN KEY ONLY) -->
-    <div id="adminLoginFields">
+    <div id="adminLoginFields" class="hidden">
       <div class="form-group">
         <label for="adminKey" data-lang-cs="Administrátorský klíč" data-lang-en="Administrator key" data-lang-it="Chiave amministratore">Administrátorský klíč</label>
         <input type="password" id="adminKey" name="admin_key"
