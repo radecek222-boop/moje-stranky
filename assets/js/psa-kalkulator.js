@@ -585,11 +585,18 @@ function loadFromLocalStorage() {
 function addEmployee() {
   // Najít zaměstnance, kteří nejsou v aktuálním seznamu (kromě permanentních)
   const currentIds = employees.map(e => e.id);
+  // Typy které se NESMÍ přidávat (jsou permanentní nebo speciální)
+  const excludedTypes = ['special', 'special2', 'pausalni', 'premie_polozka'];
   const availableEmployees = allEmployeesDatabase.filter(emp =>
     !currentIds.includes(emp.id) &&
     !PERMANENT_EMPLOYEE_IDS.includes(emp.id) &&
-    emp.type === 'standard'  // Pouze standardní zaměstnanci
+    !excludedTypes.includes(emp.type)  // Všichni kromě speciálních typů
   );
+
+  // Debug log
+  logger.log('addEmployee - currentIds:', currentIds);
+  logger.log('addEmployee - allEmployeesDatabase:', allEmployeesDatabase.length);
+  logger.log('addEmployee - availableEmployees:', availableEmployees.length, availableEmployees.map(e => e.name));
 
   // Vytvořit modal pro výběr
   const modal = document.createElement('div');
