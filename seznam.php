@@ -1741,13 +1741,17 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
 
       case 'deleteNote':
+        e.preventDefault();
+        e.stopPropagation();
         const noteId = button.getAttribute('data-note-id');
         const orderId = button.getAttribute('data-order-id');
+        console.log('[EMERGENCY] deleteNote - noteId:', noteId, 'orderId:', orderId, 'funkce dostupna:', typeof deleteNote === 'function');
         if (noteId && typeof deleteNote === 'function') {
           console.log('[EMERGENCY] Mazu poznamku ID:', noteId);
           deleteNote(noteId, orderId);
         } else {
           console.error('[EMERGENCY] deleteNote funkce neni dostupna nebo note ID chybi');
+          alert('Chyba: Funkce pro mazání není dostupná. Zkuste obnovit stránku.');
         }
         break;
 
