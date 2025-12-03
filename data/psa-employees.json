@@ -210,6 +210,16 @@
       "type": "special2",
       "active": true,
       "note": "Bonus 20 Kč za každou odpracovanou hodinu všech ostatních zaměstnanců + skryté prémie holek"
+    },
+    {
+      "id": 22,
+      "name": "Prémie",
+      "hours": 0,
+      "account": "",
+      "bank": "",
+      "type": "premie_polozka",
+      "active": true,
+      "premieCastka": 0
     }
   ],
   "periods": {
