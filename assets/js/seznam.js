@@ -3951,15 +3951,40 @@ function vytvorVideoKartu(video, claimId) {
     link.click();
   };
 
-  // Tlačítko Smazat - ikona vždy
+  // Tlačítko Smazat - dva-klikove potvrzeni (obchazi z-index problemy s wgsConfirm)
   const btnSmazat = document.createElement('button');
-  btnSmazat.innerHTML = '&#10005;'; // × křížek
-  btnSmazat.title = 'Smazat video';
-  btnSmazat.style.cssText = isMobile
+  const origBtnStyle = isMobile
     ? ikonaBtnStyle + ' background: #442222; color: #c66; font-size: 0.85rem; font-weight: bold;'
     : 'min-height: 36px; width: 36px; padding: 0; font-size: 1.1rem; font-weight: bold; background: #553333; color: #c66; border: 1px solid #664444; border-radius: 4px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center;';
-  btnSmazat.onclick = async () => {
-    if (!await wgsConfirm(`Opravdu smazat video "${video.video_name}"?`, 'Smazat', 'Zrušit')) return;
+  btnSmazat.innerHTML = '&#10005;'; // × křížek
+  btnSmazat.title = 'Smazat video';
+  btnSmazat.style.cssText = origBtnStyle;
+
+  let potvrzeniTimeout = null;
+  btnSmazat.onclick = async (e) => {
+    e.stopPropagation();
+
+    // Prvni klik - zobrazit potvrzeni
+    if (!btnSmazat.classList.contains('potvrzeni-video')) {
+      btnSmazat.classList.add('potvrzeni-video');
+      btnSmazat.innerHTML = 'Smazat?';
+      btnSmazat.style.cssText = isMobile
+        ? ikonaBtnStyle + ' background: #662222; color: #fff; font-size: 0.7rem; font-weight: bold; min-width: 50px;'
+        : 'min-height: 36px; padding: 0 8px; font-size: 0.75rem; font-weight: bold; background: #662222; color: #fff; border: 1px solid #884444; border-radius: 4px; cursor: pointer; touch-action: manipulation; white-space: nowrap;';
+
+      // Reset po 3s
+      potvrzeniTimeout = setTimeout(() => {
+        btnSmazat.classList.remove('potvrzeni-video');
+        btnSmazat.innerHTML = '&#10005;';
+        btnSmazat.style.cssText = origBtnStyle;
+      }, 3000);
+      return;
+    }
+
+    // Druhy klik - smazat
+    clearTimeout(potvrzeniTimeout);
+    btnSmazat.innerHTML = '...';
+    btnSmazat.disabled = true;
 
     try {
       const formData = new FormData();
@@ -3983,6 +4008,11 @@ function vytvorVideoKartu(video, claimId) {
     } catch (error) {
       logger.error('[Videotéka] Chyba při mazání videa:', error);
       showToast('Chyba při mazání videa: ' + error.message, 'error');
+      // Vratit tlacitko
+      btnSmazat.classList.remove('potvrzeni-video');
+      btnSmazat.innerHTML = '&#10005;';
+      btnSmazat.style.cssText = origBtnStyle;
+      btnSmazat.disabled = false;
     }
   };
 
