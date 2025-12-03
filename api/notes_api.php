@@ -11,6 +11,12 @@ require_once __DIR__ . '/../includes/WebPush.php';
 
 header('Content-Type: application/json');
 
+// DEBUG: Logovat request info
+error_log('[Notes API DEBUG] REQUEST_METHOD=' . ($_SERVER['REQUEST_METHOD'] ?? 'UNDEFINED'));
+error_log('[Notes API DEBUG] POST=' . json_encode($_POST));
+error_log('[Notes API DEBUG] GET=' . json_encode($_GET));
+error_log('[Notes API DEBUG] php://input=' . file_get_contents('php://input'));
+
 try {
     // BEZPEČNOST: Kontrola přihlášení
     $isLoggedIn = isset($_SESSION['user_id']) || (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true);
