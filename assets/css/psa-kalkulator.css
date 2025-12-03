@@ -632,7 +632,7 @@ body {
   gap: 1rem;
   padding: 1rem 1.5rem;
   background: var(--c-white);
-  border: 2px solid var(--c-border);
+  border: 2px solid var(--c-black);
   margin-bottom: 1.5rem;
 }
 
