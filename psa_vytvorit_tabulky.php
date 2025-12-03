@@ -139,12 +139,15 @@ try {
         $prikazy = array_filter(array_map('trim', explode(';', $sqlTabulky)));
 
         foreach ($prikazy as $prikaz) {
-            if (empty($prikaz) || strpos($prikaz, '--') === 0) continue;
+            // Odstranit komentáře na začátku příkazu
+            $prikaz = preg_replace('/^\s*--.*$/m', '', $prikaz);
+            $prikaz = trim($prikaz);
+            if (empty($prikaz)) continue;
 
             try {
                 $pdo->exec($prikaz);
-                // Extrahovat název tabulky z CREATE TABLE
-                if (preg_match('/CREATE TABLE.*?(\w+)\s*\(/i', $prikaz, $m)) {
+                // Extrahovat název tabulky z CREATE TABLE (správně zpracovat IF NOT EXISTS)
+                if (preg_match('/CREATE TABLE(?:\s+IF\s+NOT\s+EXISTS)?\s+(psa_\w+)/i', $prikaz, $m)) {
                     echo "<div class='success'>Tabulka <strong>{$m[1]}</strong> vytvořena/ověřena</div>";
                 }
             } catch (PDOException $e) {
