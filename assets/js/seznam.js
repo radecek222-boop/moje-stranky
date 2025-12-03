@@ -941,7 +941,7 @@ async function showHistoryPDF(originalReklamaceId) {
     logger.log(`Otevírám PDF: ${firstDoc.file_path}`);
 
     // Otevřít PDF v modal okně (funguje lépe na mobilu než window.open)
-    zobrazPDFModal(firstDoc.file_path, originalReklamaceId);
+    zobrazPDFModal(firstDoc.file_path, originalReklamaceId, 'historie');
 
   } catch (error) {
     logger.error('Chyba při načítání historie PDF:', error);
@@ -2064,8 +2064,11 @@ async function showCustomerDetail(id) {
 /**
  * Zobrazí PDF v modálním okně s tlačítky Zavřít a Odeslat
  * Univerzální řešení pro desktop, PWA, iOS Safari
+ * @param {string} pdfUrl - URL k PDF souboru
+ * @param {string} claimId - ID zakázky
+ * @param {string} typ - Typ PDF: 'report' (výchozí) nebo 'historie'
  */
-function zobrazPDFModal(pdfUrl, claimId) {
+function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
   // Detekce iOS a mobilních zařízení
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -2080,10 +2083,41 @@ function zobrazPDFModal(pdfUrl, claimId) {
   const pdfContainer = document.createElement('div');
   pdfContainer.style.cssText = 'width: 95%; height: calc(100% - 80px); max-width: 900px; background: white; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;';
 
-  // Header s názvem
+  // Header s názvem a tlačítky (pro PWA přístupnost)
   const header = document.createElement('div');
-  header.style.cssText = 'padding: 12px 16px; background: #333; color: white; font-weight: 600; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center;';
-  header.innerHTML = '<span>PDF Report</span><span style="font-size: 0.8rem; opacity: 0.7;">ID: ' + (claimId || '-') + '</span>';
+  header.style.cssText = 'padding: 10px 12px; background: #333; color: white; font-weight: 600; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-shrink: 0;';
+
+  // Levá část - název a ID (rozlišení podle typu)
+  const headerLeft = document.createElement('div');
+  headerLeft.style.cssText = 'display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;';
+  const titulek = typ === 'historie' ? 'Historie PDF' : 'PDF Report';
+  headerLeft.innerHTML = '<span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + titulek + '</span><span style="font-size: 0.75rem; opacity: 0.7;">ID: ' + (claimId || '-') + '</span>';
+
+  // Pravá část - tlačítka v headeru
+  const headerButtons = document.createElement('div');
+  headerButtons.style.cssText = 'display: flex; gap: 8px; flex-shrink: 0;';
+
+  // Tlačítko Stáhnout v headeru
+  const btnStahnoutHeader = document.createElement('button');
+  btnStahnoutHeader.innerHTML = 'Stáhnout';
+  btnStahnoutHeader.style.cssText = 'padding: 8px 14px; font-size: 0.8rem; font-weight: 600; background: #555; color: white; border: none; border-radius: 5px; cursor: pointer; touch-action: manipulation;';
+  btnStahnoutHeader.onclick = () => {
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = `PDF_Report_${claimId || 'dokument'}.pdf`;
+    link.click();
+  };
+
+  // Tlačítko Zpět (X) v headeru
+  const btnZpetHeader = document.createElement('button');
+  btnZpetHeader.innerHTML = 'Zpět';
+  btnZpetHeader.style.cssText = 'padding: 8px 14px; font-size: 0.8rem; font-weight: 600; background: #777; color: white; border: none; border-radius: 5px; cursor: pointer; touch-action: manipulation;';
+  btnZpetHeader.onclick = () => overlay.remove();
+
+  headerButtons.appendChild(btnStahnoutHeader);
+  headerButtons.appendChild(btnZpetHeader);
+  header.appendChild(headerLeft);
+  header.appendChild(headerButtons);
 
   // PDF náhled - různé přístupy pro různé platformy
   let pdfViewer;
@@ -3552,8 +3586,12 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
       // Zavřít detail modal
       closeDetail();
 
-      // Zobrazit toast zprávu
-      showToast('Email odeslán zákazníkovi', 'success');
+      // Zobrazit neonový toast (WGSToast pro důležité akce)
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit('Email odeslán zákazníkovi', { titulek: 'WGS' });
+      } else {
+        showToast('Email odeslán zákazníkovi', 'success');
+      }
 
       // DŮLEŽITÉ: SMS text je nyní generován na serveru ze stejných dat jako email
       // To znamená, že změna v emailové šabloně automaticky ovlivní i SMS
@@ -4239,9 +4277,14 @@ function otevritNahravaniVidea(claimId, parentOverlay) {
         progressFill.style.width = '100%';
         progressFill.textContent = '100%';
         statusText.textContent = 'Hotovo!';
-        progressFill.style.background = '#2D5016';
+        progressFill.style.background = '#333';
 
-        showToast('Video bylo úspěšně nahráno', 'success');
+        // Neonový toast pro úspěšný upload
+        if (typeof WGSToast !== 'undefined') {
+          WGSToast.zobrazit('Video bylo úspěšně nahráno', { titulek: 'WGS' });
+        } else {
+          showToast('Video bylo úspěšně nahráno', 'success');
+        }
 
         // Zavřít upload modal
         setTimeout(() => {
@@ -4371,9 +4414,14 @@ async function nahratVideoDragDrop(file, claimId, parentOverlay) {
       progressBarInner.style.width = '100%';
       progressBarInner.textContent = '100%';
       progressStatus.textContent = 'Hotovo!';
-      progressBarInner.style.background = '#2D5016';
+      progressBarInner.style.background = '#333';
 
-      showToast('Video bylo úspěšně nahráno', 'success');
+      // Neonový toast pro úspěšný upload
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit('Video bylo úspěšně nahráno', { titulek: 'WGS' });
+      } else {
+        showToast('Video bylo úspěšně nahráno', 'success');
+      }
 
       // Zavřít progress a reload videotéky
       setTimeout(() => {

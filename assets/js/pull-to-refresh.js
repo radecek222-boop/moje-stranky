@@ -1,6 +1,7 @@
 /**
  * Pull-to-Refresh pro PWA
- * Swipe down pro aktualizaci stranky
+ * iOS-like swipe down pro aktualizaci stranky
+ * Vyzaduje potahnuti a podrzeni jako nativni iOS aplikace
  */
 
 (function() {
@@ -19,8 +20,14 @@
   let touchCurrentY = 0;
   let isPulling = false;
   let pullIndicator = null;
-  const PULL_THRESHOLD = 80; // px pro aktivaci refreshe
-  const MAX_PULL = 120; // maximalni vytazeni
+  let holdStartTime = null;        // Cas kdy uzivatel dosahl prahu
+  let isReadyToRefresh = false;    // Pripraveno k aktualizaci (drzeno dost dlouho)
+
+  // KONFIGURACE - iOS-like chovani
+  const PULL_THRESHOLD = 120;       // px pro dosazeni "pripraveno" stavu (zvyseno z 80)
+  const MAX_PULL = 160;             // maximalni vytazeni
+  const HOLD_DURATION = 400;        // ms - jak dlouho musi drzet pred uvolnenim (jako iOS)
+  const MIN_PULL_START = 30;        // px - minimalni tah pred aktivaci (zabranuje nahodnemu spusteni)
 
   // Vytvorit indikator
   function vytvorIndikator() {
@@ -81,10 +88,15 @@
         stroke-dasharray: 126;
         stroke-dashoffset: 126;
         stroke-linecap: round;
-        transition: stroke-dashoffset 0.1s linear;
+        transition: stroke-dashoffset 0.05s linear;
+      }
+      #pull-refresh-indicator .pull-refresh-spinner.holding circle {
+        stroke: #666;
+        animation: ptr-pulse 0.5s ease-in-out infinite;
       }
       #pull-refresh-indicator .pull-refresh-spinner.ready circle {
         stroke-dashoffset: 0;
+        stroke: #222;
       }
       #pull-refresh-indicator .pull-refresh-spinner.loading svg {
         animation: ptr-spin 0.8s linear infinite;
@@ -92,6 +104,7 @@
       }
       #pull-refresh-indicator .pull-refresh-spinner.loading circle {
         stroke-dashoffset: 90;
+        stroke: #333;
         animation: ptr-dash 1.2s ease-in-out infinite;
       }
       @keyframes ptr-spin {
@@ -102,12 +115,21 @@
         50% { stroke-dashoffset: 30; }
         100% { stroke-dashoffset: 90; }
       }
+      @keyframes ptr-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+      }
       #pull-refresh-indicator .pull-refresh-text {
         font-size: 0.7rem;
         color: #555;
         font-family: 'Poppins', -apple-system, sans-serif;
         font-weight: 500;
         letter-spacing: 0.02em;
+        transition: color 0.2s;
+      }
+      #pull-refresh-indicator .pull-refresh-text.ready {
+        color: #222;
+        font-weight: 600;
       }
     `;
     document.head.appendChild(style);
@@ -124,71 +146,117 @@
     if (!jeNaVrchu()) return;
 
     touchStartY = e.touches[0].clientY;
-    isPulling = true;
+    touchCurrentY = touchStartY;
+    isPulling = false;  // Zacne az po MIN_PULL_START
+    holdStartTime = null;
+    isReadyToRefresh = false;
     pullIndicator.style.transition = 'none';
   }
 
   // Touch move
   function onTouchMove(e) {
-    if (!isPulling || !jeNaVrchu()) return;
+    if (!jeNaVrchu()) return;
 
     touchCurrentY = e.touches[0].clientY;
-    const pullDistance = Math.min(touchCurrentY - touchStartY, MAX_PULL);
+    const pullDistance = touchCurrentY - touchStartY;
 
-    if (pullDistance > 0) {
+    // Aktivovat pulling az po MIN_PULL_START (zabrani nahodnemu spusteni)
+    if (!isPulling && pullDistance > MIN_PULL_START) {
+      isPulling = true;
+    }
+
+    if (!isPulling) return;
+
+    const actualPull = Math.min(pullDistance - MIN_PULL_START, MAX_PULL);
+
+    if (actualPull > 0) {
       // Zpomalit scroll stranky
       e.preventDefault();
 
+      // Odpor - cim vic tahne, tim tezsi (iOS-like)
+      const resistance = 0.5;
+      const displayPull = actualPull * resistance + Math.min(actualPull * 0.3, 30);
+
       // Aktualizovat indikator
-      pullIndicator.style.height = pullDistance + 'px';
+      pullIndicator.style.height = displayPull + 'px';
 
       const content = pullIndicator.querySelector('.pull-refresh-content');
       const spinner = pullIndicator.querySelector('.pull-refresh-spinner');
       const circle = pullIndicator.querySelector('.pull-refresh-spinner circle');
       const text = pullIndicator.querySelector('.pull-refresh-text');
 
-      if (pullDistance > 15) {
+      if (displayPull > 20) {
         content.classList.add('visible');
       }
 
       // Progresivni vyplnovani kruhu
-      const progress = Math.min(pullDistance / PULL_THRESHOLD, 1);
+      const progress = Math.min(actualPull / PULL_THRESHOLD, 1);
       const dashOffset = 126 - (progress * 126);
       circle.style.strokeDashoffset = dashOffset;
 
-      if (pullDistance >= PULL_THRESHOLD) {
-        spinner.classList.add('ready');
-        text.textContent = 'Uvolni';
-      } else {
-        spinner.classList.remove('ready');
-        text.textContent = 'Potahni dolu';
-      }
-
-      // Posunout obsah stranky
-      document.body.style.transform = `translateY(${pullDistance}px)`;
+      // Posunout obsah stranky s odporem
+      document.body.style.transform = `translateY(${displayPull}px)`;
       document.body.style.transition = 'none';
+
+      // Logika pro iOS-like "drz a uvolni"
+      if (actualPull >= PULL_THRESHOLD) {
+        // Dosahl prahu - zacit pocitat cas drzeni
+        if (holdStartTime === null) {
+          holdStartTime = Date.now();
+          spinner.classList.add('holding');
+          spinner.classList.remove('ready');
+          text.textContent = 'Podrz...';
+          text.classList.remove('ready');
+        }
+
+        // Zkontrolovat jestli drzel dost dlouho
+        const holdTime = Date.now() - holdStartTime;
+        if (holdTime >= HOLD_DURATION && !isReadyToRefresh) {
+          isReadyToRefresh = true;
+          spinner.classList.remove('holding');
+          spinner.classList.add('ready');
+          text.textContent = 'Uvolni pro aktualizaci';
+          text.classList.add('ready');
+
+          // Hapticky feedback pokud je dostupny
+          if (navigator.vibrate) {
+            navigator.vibrate(10);
+          }
+        }
+      } else {
+        // Pod prahem - resetovat
+        holdStartTime = null;
+        isReadyToRefresh = false;
+        spinner.classList.remove('ready', 'holding');
+        text.textContent = 'Potahni dolu';
+        text.classList.remove('ready');
+      }
     }
   }
 
   // Touch end
   function onTouchEnd() {
-    if (!isPulling) return;
+    if (!isPulling) {
+      touchStartY = 0;
+      touchCurrentY = 0;
+      return;
+    }
     isPulling = false;
-
-    const pullDistance = touchCurrentY - touchStartY;
 
     // Animace navratu
     pullIndicator.style.transition = 'height 0.3s ease';
     document.body.style.transition = 'transform 0.3s ease';
 
-    if (pullDistance >= PULL_THRESHOLD) {
-      // Aktivovat refresh
-      const spinner = pullIndicator.querySelector('.pull-refresh-spinner');
-      const text = pullIndicator.querySelector('.pull-refresh-text');
+    const content = pullIndicator.querySelector('.pull-refresh-content');
+    const spinner = pullIndicator.querySelector('.pull-refresh-spinner');
+    const text = pullIndicator.querySelector('.pull-refresh-text');
 
-      spinner.classList.remove('ready');
+    if (isReadyToRefresh) {
+      // Aktivovat refresh - drzel dost dlouho
+      spinner.classList.remove('ready', 'holding');
       spinner.classList.add('loading');
       text.textContent = 'Aktualizuji...';
+      text.classList.remove('ready');
 
       pullIndicator.style.height = '70px';
       document.body.style.transform = 'translateY(70px)';
@@ -196,19 +264,31 @@
       // Reload po kratke pauze
       setTimeout(() => {
         window.location.reload();
-      }, 600);
+      }, 500);
     } else {
-      // Zrusit - vratit zpet
+      // Zrusit - vratit zpet (nedrzel dost dlouho nebo nedosahl prahu)
       pullIndicator.style.height = '0';
       document.body.style.transform = 'translateY(0)';
 
-      // Reset kruhu
-      const circle = pullIndicator.querySelector('.pull-refresh-spinner circle');
-      circle.style.strokeDashoffset = '126';
+      // Reset
+      spinner.classList.remove('ready', 'holding', 'loading');
+      text.classList.remove('ready');
+
+      // Reset kruhu s malym zpozdenim
+      setTimeout(() => {
+        const circle = pullIndicator.querySelector('.pull-refresh-spinner circle');
+        if (circle) {
+          circle.style.strokeDashoffset = '126';
+        }
+        content.classList.remove('visible');
+      }, 300);
     }
 
+    // Reset stavu
     touchStartY = 0;
     touchCurrentY = 0;
+    holdStartTime = null;
+    isReadyToRefresh = false;
   }
 
   // Inicializace

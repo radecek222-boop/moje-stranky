@@ -63,6 +63,8 @@ $csrfToken = generateCSRFToken();
         <option value="2026">2026</option>
       </select>
       <div class="period-display" id="periodDisplay">Listopad 2025</div>
+      <button class="btn btn-sm" data-action="loadPeriod" title="Načíst uložená data pro zvolené období">Načíst období</button>
+      <button class="btn btn-sm btn-secondary" data-action="clearHours" title="Vynulovat hodiny všech zaměstnanců">Vynulovat</button>
     </div>
   </div>
 
@@ -80,16 +82,6 @@ $csrfToken = generateCSRFToken();
         <div class="form-group">
           <label class="form-label">Sazba fakturace (Kč/hodina)</label>
           <input type="number" class="form-input" id="invoiceRate" value="250" min="0" data-onchange="updateRates">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Rychlé nastavení</label>
-          <select class="form-select" data-onchange="setQuickRate">
-            <option value="">Vyberte sazbu...</option>
-            <option value="100-200">100/200 Kč</option>
-            <option value="150-250">150/250 Kč (výchozí)</option>
-            <option value="200-300">200/300 Kč</option>
-            <option value="250-400">250/400 Kč</option>
-          </select>
         </div>
       </div>
     </div>
@@ -129,6 +121,18 @@ $csrfToken = generateCSRFToken();
       <div class="stat-value" id="avgHoursPerEmployee">0h</div>
       <div class="stat-label">Průměr/zaměstnanec</div>
       <div class="stat-info" id="avgSalaryPerEmployee">0 Kč</div>
+    </div>
+  </div>
+
+  <!-- ULOŽENÁ OBDOBÍ -->
+  <div class="card saved-periods-card" id="savedPeriodsCard" style="display: none;">
+    <div class="card-header">
+      <h2 class="card-title">Uložená období</h2>
+    </div>
+    <div class="card-body">
+      <div id="savedPeriodsList" class="saved-periods-list">
+        <!-- Dynamicky generováno JavaScriptem -->
+      </div>
     </div>
   </div>
 
