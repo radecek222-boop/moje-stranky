@@ -300,11 +300,24 @@ try {
                         }
 
                         // Nacist roli uzivatele z wgs_users
+                        // Zkusit nejdrive podle user_id, pak podle id (zpetna kompatibilita)
                         $subRole = 'guest';
                         if ($subUserId !== null) {
+                            // Zkusit podle user_id (spravny zpusob)
                             $stmtRole = $pdo->prepare("SELECT role FROM wgs_users WHERE user_id = :uid LIMIT 1");
                             $stmtRole->execute([':uid' => $subUserId]);
                             $roleRow = $stmtRole->fetch(PDO::FETCH_ASSOC);
+
+                            // Fallback: zkusit podle id (pro stare subscriptions s auto-increment id)
+                            if (!$roleRow && is_numeric($subUserId)) {
+                                $stmtRole = $pdo->prepare("SELECT role FROM wgs_users WHERE id = :uid LIMIT 1");
+                                $stmtRole->execute([':uid' => (int)$subUserId]);
+                                $roleRow = $stmtRole->fetch(PDO::FETCH_ASSOC);
+                                if ($roleRow) {
+                                    error_log('[Notes] Sub ID=' . $sub['id'] . ' - pouzit fallback (id misto user_id)');
+                                }
+                            }
+
                             $subRole = strtolower(trim($roleRow['role'] ?? 'guest'));
                         }
 
