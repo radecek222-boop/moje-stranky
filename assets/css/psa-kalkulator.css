@@ -858,6 +858,119 @@ textarea::placeholder {
   flex: 1;
 }
 
+/* === NEW PERIOD SELECTOR MODAL === */
+.new-period-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+
+.new-period-modal.active {
+  display: flex;
+  animation: overlayFadeIn 0.15s ease-out;
+}
+
+.new-period-dialog {
+  background: var(--c-white);
+  min-width: 320px;
+  max-width: 400px;
+  border: 2px solid var(--c-black);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.new-period-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--c-black);
+  color: var(--c-white);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.new-period-close {
+  background: none;
+  border: none;
+  color: var(--c-white);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.new-period-close:hover {
+  opacity: 1;
+}
+
+.new-period-body {
+  padding: 1.5rem;
+}
+
+.new-period-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.new-period-field {
+  flex: 1;
+}
+
+.new-period-field label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--c-grey);
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.new-period-field select {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--c-border);
+  font-size: 0.9rem;
+  background: var(--c-white);
+  color: var(--c-black);
+}
+
+.new-period-field select:focus {
+  outline: none;
+  border-color: var(--c-black);
+}
+
+.new-period-info {
+  font-size: 0.8rem;
+  color: var(--c-grey);
+  padding: 0.75rem;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  margin-top: 0.5rem;
+}
+
+.new-period-footer {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--c-bg);
+  border-top: 1px solid var(--c-border);
+}
+
+.new-period-footer .btn {
+  flex: 1;
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
   .container {

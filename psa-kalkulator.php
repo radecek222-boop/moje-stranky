@@ -45,15 +45,8 @@ $csrfToken = generateCSRFToken();
   </div>
 
   <!-- FILTR OBDOBÍ -->
-  <div class="period-filter-card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-    <!-- VLEVO: Nová docházka -->
-    <div>
-      <button class="btn" data-action="newAttendance" id="newAttendanceBtn" style="font-weight: 600;">
-        Nová docházka <span id="newAttendanceMonth">PROSINEC</span>
-      </button>
-    </div>
-
-    <!-- VPRAVO: Historie -->
+  <div class="period-filter-card" style="display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <!-- Historie -->
     <div class="period-display-wrapper">
       <div class="period-filter-label" style="margin-bottom: 0;">Historie</div>
       <div class="period-display clickable" id="periodDisplay" data-action="togglePeriodOverlay" role="button" tabindex="0" title="Klikněte pro výběr období">
@@ -71,7 +64,8 @@ $csrfToken = generateCSRFToken();
           <div class="period-loading">Načítám období...</div>
         </div>
         <div class="period-overlay-footer">
-          <button class="btn btn-sm" data-action="closePeriodOverlay">Zavřít</button>
+          <button class="btn btn-sm" data-action="showNewPeriodSelector">+ Přidat období</button>
+          <button class="btn btn-sm btn-secondary" data-action="closePeriodOverlay">Zavřít</button>
         </div>
       </div>
     </div>

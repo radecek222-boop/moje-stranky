@@ -214,12 +214,9 @@ if (!$embedMode && $activeTab === 'dashboard'):
             <div class="cc-card-description" data-lang-cs="SMTP, API klíče, systémová nastavení" data-lang-en="SMTP, API keys, system settings" data-lang-it="SMTP, chiavi API, impostazioni di sistema">SMTP, API klíče, systémová nastavení</div>
         </div>
 
-        <div class="cc-card" data-href="admin.php?tab=admin_actions">
-            <?php if ($pendingActions > 0): ?>
-                <div class="cc-card-badge"><?= $pendingActions ?></div>
-            <?php endif; ?>
-            <div class="cc-card-title" data-lang-cs="Akce & Úkoly" data-lang-en="Actions & Tasks" data-lang-it="Azioni & Compiti">Akce & Úkoly</div>
-            <div class="cc-card-description" data-lang-cs="Nevyřešené úkoly a plánované akce" data-lang-en="Unresolved tasks and scheduled actions" data-lang-it="Compiti non risolti e azioni pianificate">Nevyřešené úkoly a plánované akce</div>
+        <div class="cc-card" data-href="psa-kalkulator.php">
+            <div class="cc-card-title" data-lang-cs="PSA Kalkulátor" data-lang-en="PSA Calculator" data-lang-it="Calcolatore PSA">PSA Kalkulátor</div>
+            <div class="cc-card-description" data-lang-cs="Výpočet mezd a docházky zaměstnanců" data-lang-en="Employee salary and attendance calculation" data-lang-it="Calcolo stipendi e presenze dipendenti">Výpočet mezd a docházky zaměstnanců</div>
         </div>
 
         <div class="cc-card" data-href="admin.php?tab=admin_testing_simulator">
