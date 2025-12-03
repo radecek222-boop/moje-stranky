@@ -82,11 +82,12 @@ if (session_status() === PHP_SESSION_NONE) {
     );
 
     // SameSite musí být nastaven přes ini_set (není v session_set_cookie_params v PHP 7.2)
-    // SECURITY FIX: Změněno z 'Lax' na 'Strict' pro lepší CSRF ochranu
-    // 'Strict' zajistí, že session cookie se NIKDY nepošle při cross-site requestech
-    // (včetně GET requestů z jiných domén)
+    // FIX PWA: Změněno zpět na 'Lax' kvůli PWA kompatibilitě
+    // 'Strict' způsoboval problémy s admin login v PWA módu (iOS Safari, Android Chrome)
+    // 'Lax' stále chrání POST requesty proti CSRF, ale umožňuje session při navigaci z PWA
+    // Poznámka: CSRF token validace poskytuje dodatečnou ochranu
     if (PHP_VERSION_ID >= 70300) {
-        ini_set('session.cookie_samesite', 'Strict');
+        ini_set('session.cookie_samesite', 'Lax');
     }
 
     // Nastavení garbage collection
