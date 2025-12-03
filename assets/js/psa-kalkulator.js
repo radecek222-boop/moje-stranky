@@ -179,7 +179,8 @@ async function loadPeriod() {
         ...emp,
         bank: formatBankCode(emp.bank),
         hours: periodEmp ? (periodEmp.hours || 0) : 0,
-        bonusAmount: periodEmp ? (periodEmp.bonusAmount || 0) : (emp.bonusAmount || 0)
+        bonusAmount: periodEmp ? (periodEmp.bonusAmount || 0) : (emp.bonusAmount || 0),
+        premie: periodEmp ? (periodEmp.premie || 0) : 0
       };
     });
 
@@ -242,7 +243,8 @@ async function loadData(period = null) {
           ...emp,
           bank: formatBankCode(emp.bank),
           hours: periodEmp ? (periodEmp.hours || 0) : 0,
-          bonusAmount: emp.bonusAmount || 0
+          bonusAmount: emp.bonusAmount || 0,
+          premie: periodEmp ? (periodEmp.premie || 0) : 0
         };
       });
       logger.log(`Loaded period ${period} with ${employees.length} employees`);
@@ -253,7 +255,8 @@ async function loadData(period = null) {
           ...emp,
           bank: formatBankCode(emp.bank),
           hours: emp.hours || 0,
-          bonusAmount: emp.bonusAmount || 0
+          bonusAmount: emp.bonusAmount || 0,
+          premie: emp.premie || 0
         }));
       }
       logger.log(`Loaded ${employees.length} employees`);
@@ -308,13 +311,20 @@ async function saveToServer() {
   // Spočítat statistiky pro období
   const stats = calculateStats();
 
-  // Připravit data období - pouze hodiny a základní info
-  const periodEmployees = employees.filter(e => e.active !== false && e.hours > 0).map(emp => ({
+  // Připravit data období - hodiny, premie a základní info
+  // Zahrnout: zaměstnance s hodinami > 0 NEBO special zaměstnance s premiemi
+  const periodEmployees = employees.filter(e => {
+    if (e.active === false) return false;
+    if (e.hours > 0) return true;
+    if ((e.type === 'special' || e.type === 'special2') && (e.premie || 0) > 0) return true;
+    return false;
+  }).map(emp => ({
     id: emp.id,
     name: emp.name,
     hours: emp.hours || 0,
     type: emp.type || 'standard',
-    bonusAmount: emp.bonusAmount || 0
+    bonusAmount: emp.bonusAmount || 0,
+    premie: emp.premie || 0
   }));
 
   // Zachovat existující periods a přidat/aktualizovat aktuální
@@ -326,7 +336,9 @@ async function saveToServer() {
     totalInvoice: stats.totalInvoice,
     profit: stats.profit,
     marekBonus: stats.marekBonus || 0,
+    marekPremie: stats.marekPremie || 0,
     radekBonus: stats.radekBonus || 0,
+    radekPremie: stats.radekPremie || 0,
     girlsBonus: stats.girlsBonus || 0,
     radekTotal: stats.radekTotal || 0,
     lastModified: new Date().toISOString()
@@ -410,16 +422,20 @@ function calculateStats() {
     }
   });
 
-  // Marek bonus (special) - 20 Kč za každou hodinu ostatních
+  // Marek bonus (special) - 20 Kč za každou hodinu ostatních + premie
+  const marekEmp = employees.find(e => e.type === 'special');
   const marekBonus = totalHours * 20;
+  const marekPremie = marekEmp ? (marekEmp.premie || 0) : 0;
 
-  // Radek bonus (special2) - 20 Kč za hodinu + bonus od holek (15%)
+  // Radek bonus (special2) - 20 Kč za hodinu + bonus od holek (15%) + premie
+  const radekEmp = employees.find(e => e.type === 'special2');
   const girlsBonus = girlsHours * salaryRate * 0.15;
   const radekBonus = totalHours * 20;
-  const radekTotal = radekBonus + girlsBonus;
+  const radekPremie = radekEmp ? (radekEmp.premie || 0) : 0;
+  const radekTotal = radekBonus + girlsBonus + radekPremie;
 
-  // Přičíst bonusy k výplatě
-  totalSalary += marekBonus + radekTotal;
+  // Přičíst bonusy k výplatě (včetně premií)
+  totalSalary += marekBonus + marekPremie + radekTotal;
 
   return {
     totalHours,
@@ -427,7 +443,9 @@ function calculateStats() {
     totalInvoice,
     profit: totalInvoice - totalSalary,
     marekBonus,
+    marekPremie,
     radekBonus,
+    radekPremie,
     girlsBonus,
     radekTotal
   };
@@ -512,7 +530,7 @@ async function updateEmployee(index, field, value, needConfirm = false) {
     }
   }
 
-  if (field === 'hours' || field === 'bonusAmount') {
+  if (field === 'hours' || field === 'bonusAmount' || field === 'premie') {
     employees[index][field] = parseInt(value) || 0;
   } else if (field === 'bank') {
     employees[index][field] = formatBankCode(value);
@@ -590,7 +608,10 @@ function renderTable() {
       invoice = Math.min(emp.hours * invoiceRate, monthlyRate - monthlyTax);
       displayInfo = '<span class="employee-type-badge">Paušál</span>';
     } else if (emp.type === 'special' || emp.type === 'special2') {
-      salary = totalOtherHours * 20;
+      // Bonus z hodin + volitelné premie
+      const bonus = totalOtherHours * 20;
+      const premie = emp.premie || 0;
+      salary = bonus + premie;
       invoice = 0;
       displayInfo = '<span class="employee-type-badge">Pouze bonus</span>';
     } else {
@@ -623,8 +644,19 @@ function renderTable() {
           ${displayInfo}
         </td>
         <td class="text-center">
-          ${(emp.type === 'special' || emp.type === 'special2' || isLenka) ?
+          ${isLenka ?
             '<span style="color: var(--c-grey);">–</span>' :
+            (emp.type === 'special' || emp.type === 'special2') ?
+              `<input type="number"
+                     value="${emp.premie || 0}"
+                     min="0"
+                     step="100"
+                     class="table-input"
+                     style="width: 100px; text-align: center; font-weight: 600;"
+                     placeholder="Prémie (Kč)"
+                     data-action="updateEmployeeField"
+                     data-index="${index}"
+                     data-field="premie">` :
             emp.type === 'bonus_girls' ?
               `<input type="number"
                      value="${emp.bonusAmount || 0}"
@@ -649,7 +681,8 @@ function renderTable() {
         <td class="text-right" style="font-weight: 600; color: var(--c-success);">
           ${formatCurrency(salary)}
           ${(emp.type === 'special' || emp.type === 'special2') ?
-            '<br><span style="font-size: 0.75rem; color: var(--c-grey);">' + totalOtherHours + 'h × 20 Kč</span>' : ''}
+            '<br><span style="font-size: 0.75rem; color: var(--c-grey);">' + totalOtherHours + 'h × 20 Kč' +
+            ((emp.premie || 0) > 0 ? ' + ' + formatCurrency(emp.premie) + ' prémie' : '') + '</span>' : ''}
         </td>
         <td class="text-right" style="font-weight: 600; color: var(--c-info);">
           ${formatCurrency(invoice)}
@@ -720,9 +753,13 @@ function updateStats() {
       // Bonus pro holky - editovatelná částka (NEPOČÍTÁ SE do zaměstnanců)
       totalSalary += (emp.bonusAmount || 0);
       // activeEmployeesCount++; ← ODSTRANĚNO, bonus_girls se nepočítá
-    } else if ((emp.type === 'special' || emp.type === 'special2') && bonusPerSpecial > 0) {
+    } else if (emp.type === 'special' || emp.type === 'special2') {
       // Special zaměstnanci (Marek, Radek) - NEPOČÍTAJÍ SE do zaměstnanců
-      totalSalary += bonusPerSpecial;
+      // Bonus z hodin + volitelné premie
+      const premie = emp.premie || 0;
+      if (bonusPerSpecial > 0 || premie > 0) {
+        totalSalary += bonusPerSpecial + premie;
+      }
       // activeEmployeesCount++; ← ODSTRANĚNO, special se nepočítají
     } else if (emp.hours > 0) {
       // Ostatní zaměstnanci jen pokud mají hodiny > 0
@@ -1055,7 +1092,7 @@ function synchronizovatVstupy() {
     const index = parseInt(input.getAttribute('data-index'));
     const field = input.getAttribute('data-field');
     if (!isNaN(index) && field && employees[index]) {
-      if (field === 'hours' || field === 'bonusAmount') {
+      if (field === 'hours' || field === 'bonusAmount' || field === 'premie') {
         employees[index][field] = parseInt(input.value) || 0;
       } else if (field === 'bank') {
         employees[index][field] = formatBankCode(input.value);
@@ -1110,7 +1147,8 @@ function generatePaymentQR() {
       } else if (emp.type === 'pausalni' && emp.pausalni) {
         amount = emp.hours * salaryRate;
       } else if (emp.type === 'special' || emp.type === 'special2') {
-        amount = bonusPerSpecial;
+        // Bonus z hodin + premie
+        amount = bonusPerSpecial + (emp.premie || 0);
       } else {
         amount = emp.hours * salaryRate;
       }
@@ -1371,7 +1409,8 @@ function generateSingleEmployeeQR(index) {
   } else if (emp.type === 'pausalni' && emp.pausalni) {
     amount = emp.hours * salaryRate;
   } else if (emp.type === 'special' || emp.type === 'special2') {
-    amount = totalOtherHours * 20;
+    // Bonus z hodin + premie
+    amount = (totalOtherHours * 20) + (emp.premie || 0);
   } else {
     amount = emp.hours * salaryRate;
   }
