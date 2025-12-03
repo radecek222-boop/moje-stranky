@@ -1078,8 +1078,14 @@ function printReport() {
 }
 
 async function clearAll() {
-  if (await wgsConfirm('Opravdu chcete vymazat všechna data?', 'Vymazat vše', 'Zrušit')) {
-    employees = [];
+  if (await wgsConfirm('Opravdu chcete vynulovat hodiny pro toto období?', 'Vynulovat', 'Zrušit')) {
+    // Pouze vynulovat hodiny a bonusy, NE mazat zaměstnance!
+    employees.forEach(emp => {
+      emp.hours = 0;
+      if (emp.type === 'bonus_girls') emp.bonusAmount = 0;
+      if (emp.type === 'premie_polozka') emp.premieCastka = 0;
+    });
+
     renderTable();
     updateStats();
 
@@ -1087,9 +1093,10 @@ async function clearAll() {
     try {
       saveToLocalStorage();
       await saveToServer();
-      logger.log('All data cleared and saved');
+      logger.log('Hours cleared for current period');
+      showSuccess('Hodiny vynulovány pro aktuální období');
     } catch (error) {
-      logger.error('Failed to save after clearing data:', error);
+      logger.error('Failed to save after clearing hours:', error);
     }
   }
 }
