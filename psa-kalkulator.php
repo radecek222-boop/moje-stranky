@@ -213,7 +213,7 @@ $csrfToken = generateCSRFToken();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer data-qr-lib="1"></script>
 
-<!-- Main JavaScript -->
+<!-- Main JavaScript - v2025.12.03 -->
 <script src="assets/js/psa-kalkulator.min.js" defer></script>
 
 </body>
