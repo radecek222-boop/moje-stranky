@@ -3764,11 +3764,11 @@ async function zobrazVideotekaArchiv(claimId) {
 /**
  * Generuje náhled (thumbnail) z videa pomocí HTML5 video + canvas
  * @param {string} videoPath - Cesta k videu
- * @param {number} sirka - Šířka náhledu
- * @param {number} vyska - Výška náhledu
+ * @param {number} maxSirka - Maximální šířka náhledu
+ * @param {number} maxVyska - Maximální výška náhledu
  * @returns {Promise<string|null>} Data URL obrázku nebo null při chybě
  */
-function generujNahledVidea(videoPath, sirka, vyska) {
+function generujNahledVidea(videoPath, maxSirka, maxVyska) {
   return new Promise((resolve) => {
     const video = document.createElement('video');
     video.crossOrigin = 'anonymous';
@@ -3791,8 +3791,15 @@ function generujNahledVidea(videoPath, sirka, vyska) {
       clearTimeout(timeout);
       try {
         const canvas = document.createElement('canvas');
-        canvas.width = sirka * 2; // 2x rozlišení pro ostrost
-        canvas.height = vyska * 2;
+
+        // FIX: Zachovat pomer stran - nikdy nedeformovat video
+        const videoWidth = video.videoWidth;
+        const videoHeight = video.videoHeight;
+        const scale = Math.min(maxSirka / videoWidth, maxVyska / videoHeight, 1);
+
+        canvas.width = Math.round(videoWidth * scale * 2); // 2x pro ostrost
+        canvas.height = Math.round(videoHeight * scale * 2);
+
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
