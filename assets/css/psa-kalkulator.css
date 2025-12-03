@@ -136,15 +136,15 @@ body {
 /* === STATS GRID === */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
 }
 
 .stat-card {
   background: var(--c-white);
   border: 1px solid var(--c-border);
-  padding: 1.5rem;
+  padding: 0.75rem 0.5rem;
   transition: all 0.3s ease;
   text-align: center;
 }
@@ -160,28 +160,29 @@ body {
 }
 
 .stat-icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .stat-value {
-  font-size: 1.8rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--c-black);
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.15rem;
+  line-height: 1.2;
 }
 
 .stat-label {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
   color: var(--c-grey);
   font-weight: 600;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.15rem;
 }
 
 .stat-info {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: var(--c-light-grey);
   font-weight: 400;
 }
@@ -882,7 +883,7 @@ textarea::placeholder {
   }
 
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .form-row {

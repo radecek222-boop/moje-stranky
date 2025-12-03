@@ -23,6 +23,11 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // === PERIOD MANAGEMENT ===
+const MONTHS_CZ = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
+                   'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
+const MONTHS_CZ_UPPER = ['', 'LEDEN', 'ÚNOR', 'BŘEZEN', 'DUBEN', 'KVĚTEN', 'ČERVEN',
+                         'ČERVENEC', 'SRPEN', 'ZÁŘÍ', 'ŘÍJEN', 'LISTOPAD', 'PROSINEC'];
+
 function initializePeriod() {
   // Vždy pracujeme s MINULÝM měsícem (výplaty za uplynulý měsíc)
   const now = new Date();
@@ -31,16 +36,61 @@ function initializePeriod() {
   currentPeriod.month = now.getMonth() + 1;  // getMonth() vrací 0-11
   currentPeriod.year = now.getFullYear();
   updatePeriodDisplay();
+  updateNewAttendanceMonth();
 }
 
 function updatePeriodDisplay() {
-  const months = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
-                  'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
-  const periodText = `${months[currentPeriod.month]} ${currentPeriod.year}`;
+  const periodText = `${MONTHS_CZ[currentPeriod.month]} ${currentPeriod.year}`;
   const displayEl = document.getElementById('periodDisplayText');
   if (displayEl) {
     displayEl.textContent = periodText;
   }
+  // Aktualizovat i patičku tabulky
+  updateFooterMonth();
+}
+
+// Aktualizovat měsíc v tlačítku "Nová docházka"
+function updateNewAttendanceMonth() {
+  const now = new Date();
+  // Aktuální měsíc (pro novou docházku) = skutečný aktuální měsíc
+  const nextMonth = now.getMonth() + 1;  // getMonth() vrací 0-11
+  const monthEl = document.getElementById('newAttendanceMonth');
+  if (monthEl) {
+    monthEl.textContent = MONTHS_CZ_UPPER[nextMonth] || 'NOVÝ';
+  }
+}
+
+// Aktualizovat měsíc v patičce tabulky
+function updateFooterMonth() {
+  const footerLabel = document.getElementById('footerMonthLabel');
+  if (footerLabel) {
+    footerLabel.textContent = `CELKEM za ${MONTHS_CZ[currentPeriod.month]}`;
+  }
+}
+
+// === NOVÁ DOCHÁZKA (aktuální měsíc) ===
+async function newAttendance() {
+  const now = new Date();
+  const newMonth = now.getMonth() + 1;  // Aktuální měsíc
+  const newYear = now.getFullYear();
+
+  // Kontrola jestli aktuální měsíc není stejný jako zobrazený
+  if (currentPeriod.month === newMonth && currentPeriod.year === newYear) {
+    wgsToast.info(`Už jste v období ${MONTHS_CZ[newMonth]} ${newYear}`);
+    return;
+  }
+
+  // Přepnout na nový měsíc
+  currentPeriod.month = newMonth;
+  currentPeriod.year = newYear;
+
+  updatePeriodDisplay();
+
+  // Načíst data pro nové období (pokud existuje) nebo zobrazit prázdné
+  await loadData();
+
+  showSuccess(`Nová docházka za ${MONTHS_CZ[newMonth]} ${newYear}`);
+  logger.log(`Switched to new attendance period: ${newMonth}/${newYear}`);
 }
 
 // === PERIOD OVERLAY ===
@@ -93,8 +143,6 @@ async function naplnitPeriodOverlay() {
     }
 
     const periods = payload.data.periods || {};
-    const months = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
-                    'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
 
     // Seřadit období sestupně
     const sortedPeriods = Object.keys(periods).sort().reverse();
@@ -111,7 +159,7 @@ async function naplnitPeriodOverlay() {
     const html = sortedPeriods.map(key => {
       const [year, month] = key.split('-');
       const monthNum = parseInt(month);
-      const label = `${months[monthNum]} ${year}`;
+      const label = `${MONTHS_CZ[monthNum]} ${year}`;
       const data = periods[key];
       const hours = data.totalHours || 0;
       const salary = data.totalSalary ? Math.round(data.totalSalary).toLocaleString('cs-CZ') : '0';
@@ -152,8 +200,6 @@ async function selectPeriod(periodKey) {
 // === NAČÍST OBDOBÍ ===
 async function loadPeriod() {
   const periodKey = `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
-  const months = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
-                  'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
 
   try {
     const response = await fetch(API_URL, { credentials: 'same-origin' });
@@ -168,7 +214,7 @@ async function loadPeriod() {
 
     // Zkontrolovat jestli období existuje
     if (!data.periods || !data.periods[periodKey]) {
-      showError(`Období ${months[currentPeriod.month]} ${currentPeriod.year} nebylo nalezeno. Nejprve uložte data pro toto období.`);
+      showError(`Období ${MONTHS_CZ[currentPeriod.month]} ${currentPeriod.year} nebylo nalezeno. Nejprve uložte data pro toto období.`);
       // Vynulovat hodiny
       employees.forEach(emp => emp.hours = 0);
       renderTable();
@@ -212,7 +258,7 @@ async function loadPeriod() {
 
     renderTable();
     updateStats();
-    showSuccess(`Načteno období: ${months[currentPeriod.month]} ${currentPeriod.year} (${periodData.totalHours || 0} hodin)`);
+    showSuccess(`Načteno období: ${MONTHS_CZ[currentPeriod.month]} ${currentPeriod.year} (${periodData.totalHours || 0} hodin)`);
     logger.log(`Loaded period ${periodKey}:`, periodData);
 
   } catch (error) {
@@ -545,37 +591,118 @@ function addEmployee() {
     emp.type === 'standard'  // Pouze standardní zaměstnanci
   );
 
-  if (availableEmployees.length === 0) {
-    wgsToast.info('Všichni zaměstnanci jsou již přidáni');
-    return;
-  }
-
   // Vytvořit modal pro výběr
   const modal = document.createElement('div');
   modal.className = 'modal';
   modal.id = 'addEmployeeModal';
   modal.innerHTML = `
-    <div class="modal-content" style="max-width: 400px;">
+    <div class="modal-content" style="max-width: 450px;">
       <div class="modal-header">
         <h2 class="modal-title">Přidat zaměstnance</h2>
         <span class="close-modal" onclick="document.getElementById('addEmployeeModal').remove()">&times;</span>
       </div>
       <div style="padding: 1.5rem;">
-        <label class="form-label">Vyberte zaměstnance:</label>
-        <select id="selectEmployeeToAdd" class="form-input" style="width: 100%; padding: 0.75rem;">
-          <option value="">-- Vyberte --</option>
-          ${availableEmployees.map(emp =>
-            `<option value="${emp.id}">${emp.name}</option>`
-          ).join('')}
-        </select>
-        <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
+        ${availableEmployees.length > 0 ? `
+          <div style="margin-bottom: 1.5rem;">
+            <label class="form-label">Vybrat z databáze:</label>
+            <select id="selectEmployeeToAdd" class="form-input" style="width: 100%; padding: 0.75rem;">
+              <option value="">-- Vyberte zaměstnance --</option>
+              ${availableEmployees.map(emp =>
+                `<option value="${emp.id}">${emp.name}</option>`
+              ).join('')}
+            </select>
+            <button class="btn" style="margin-top: 0.75rem; width: 100%;" onclick="confirmAddEmployee()">Přidat z databáze</button>
+          </div>
+          <div style="text-align: center; color: var(--c-grey); margin: 1rem 0;">nebo</div>
+        ` : ''}
+        <div>
+          <label class="form-label">Vytvořit nového zaměstnance:</label>
+          <button class="btn btn-secondary" style="width: 100%;" onclick="addNewBlankEmployee()">Nový zaměstnanec</button>
+          <p style="font-size: 0.8rem; color: var(--c-grey); margin-top: 0.5rem;">
+            Vytvoří prázdný řádek, který můžete vyplnit. Poté uložte do databáze.
+          </p>
+        </div>
+        <div style="margin-top: 1.5rem; text-align: right;">
           <button class="btn btn-secondary" onclick="document.getElementById('addEmployeeModal').remove()">Zrušit</button>
-          <button class="btn" onclick="confirmAddEmployee()">Přidat</button>
         </div>
       </div>
     </div>
   `;
   document.body.appendChild(modal);
+}
+
+// Přidat nového prázdného zaměstnance
+function addNewBlankEmployee() {
+  // Zavřít modal
+  const modal = document.getElementById('addEmployeeModal');
+  if (modal) modal.remove();
+
+  // Vygenerovat dočasné ID (záporné, aby se nepletlo s existujícími)
+  const tempId = -(Date.now());
+
+  // Přidat prázdného zaměstnance
+  employees.push({
+    id: tempId,
+    name: '',
+    hours: 0,
+    account: '',
+    bank: '',
+    type: 'standard',
+    active: true,
+    isNew: true  // Označit jako nového (ještě není v databázi)
+  });
+
+  renderTable();
+  updateStats();
+
+  // Focus na pole jméno
+  setTimeout(() => {
+    const lastRow = document.querySelector(`[data-index="${employees.length - 1}"][data-field="name"]`);
+    if (lastRow) lastRow.focus();
+  }, 100);
+
+  showSuccess('Vyplňte údaje nového zaměstnance a uložte do databáze');
+}
+
+// Uložit nového zaměstnance do databáze
+async function saveEmployeeToDatabase(index) {
+  const emp = employees[index];
+
+  if (!emp.name || emp.name.trim() === '') {
+    wgsToast.error('Zadejte jméno zaměstnance');
+    return;
+  }
+
+  // Vygenerovat nové ID
+  const maxId = Math.max(...allEmployeesDatabase.map(e => e.id || 0), 0);
+  const newId = maxId + 1;
+
+  // Aktualizovat zaměstnance
+  emp.id = newId;
+  emp.isNew = false;
+  emp.name = emp.name.trim();
+
+  // Přidat do databáze
+  allEmployeesDatabase.push({
+    id: newId,
+    name: emp.name,
+    account: emp.account || '',
+    bank: emp.bank || '',
+    type: 'standard',
+    active: true
+  });
+
+  renderTable();
+
+  // Uložit na server
+  try {
+    await saveToServer();
+    showSuccess(`Zaměstnanec ${emp.name} uložen do databáze`);
+    logger.log('New employee saved to database:', emp.name);
+  } catch (error) {
+    logger.error('Failed to save new employee:', error);
+    wgsToast.error('Chyba při ukládání do databáze');
+  }
 }
 
 async function confirmAddEmployee() {
@@ -817,8 +944,11 @@ function renderTable() {
                  data-index="${index}"
                  data-field="bank">
         </td>
-        <td class="text-center">
-          <button class="btn btn-sm" style="background: var(--c-info); color: white; margin-right: 0.25rem;" data-action="generateSingleEmployeeQR" data-index="${index}" title="Generovat QR platbu">QR</button>
+        <td class="text-center" style="white-space: nowrap;">
+          ${emp.isNew ?
+            `<button class="btn btn-sm" style="background: var(--c-success); color: white; margin-right: 0.25rem;" data-action="saveEmployeeToDatabase" data-index="${index}" title="Uložit do databáze">Uložit do DB</button>` :
+            `<button class="btn btn-sm" style="background: var(--c-info); color: white; margin-right: 0.25rem;" data-action="generateSingleEmployeeQR" data-index="${index}" title="Generovat QR platbu">QR</button>`
+          }
           ${PERMANENT_EMPLOYEE_IDS.includes(emp.id) ? '' :
             `<button class="btn btn-danger btn-sm" data-action="removeEmployee" data-index="${index}" title="Odebrat z období">×</button>`
           }
@@ -1688,6 +1818,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return;
 
+      case 'saveEmployeeToDatabase':
+        const sIndex = target.getAttribute('data-index');
+        if (sIndex !== null && typeof saveEmployeeToDatabase === 'function') {
+          saveEmployeeToDatabase(parseInt(sIndex));
+        }
+        return;
+
       case 'removeEmployee':
         const rIndex = target.getAttribute('data-index');
         if (rIndex !== null && typeof removeEmployee === 'function') {
@@ -1781,6 +1918,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       case 'clearHours':
         if (typeof clearHours === 'function') clearHours();
+        return;
+
+      case 'newAttendance':
+        if (typeof newAttendance === 'function') newAttendance();
         return;
     }
 
