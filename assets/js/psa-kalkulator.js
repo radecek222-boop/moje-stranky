@@ -114,6 +114,167 @@ function closePeriodOverlay() {
   periodBtn.classList.remove('active');
 }
 
+// === NEW PERIOD SELECTOR ===
+function showNewPeriodSelector() {
+  // Zavřít period overlay
+  closePeriodOverlay();
+
+  // Aktuální datum pro výchozí hodnoty
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+
+  // Vytvořit modal
+  const modal = document.createElement('div');
+  modal.className = 'new-period-modal active';
+  modal.id = 'newPeriodModal';
+
+  // Generovat options pro měsíce
+  const monthOptions = MONTHS_CZ.map((name, idx) => {
+    if (idx === 0) return '';  // Přeskočit prázdný první prvek
+    const selected = idx === currentMonth ? 'selected' : '';
+    return `<option value="${idx}" ${selected}>${name}</option>`;
+  }).join('');
+
+  // Generovat options pro roky (aktuální rok + 2 roky dopředu a 3 roky zpět)
+  const yearOptions = [];
+  for (let y = currentYear - 3; y <= currentYear + 2; y++) {
+    const selected = y === currentYear ? 'selected' : '';
+    yearOptions.push(`<option value="${y}" ${selected}>${y}</option>`);
+  }
+
+  modal.innerHTML = `
+    <div class="new-period-dialog">
+      <div class="new-period-header">
+        <span>Přidat nové období</span>
+        <button class="new-period-close" data-action="closeNewPeriodSelector" title="Zavřít">&times;</button>
+      </div>
+      <div class="new-period-body">
+        <div class="new-period-row">
+          <div class="new-period-field">
+            <label for="newPeriodMonth">Měsíc</label>
+            <select id="newPeriodMonth">
+              ${monthOptions}
+            </select>
+          </div>
+          <div class="new-period-field">
+            <label for="newPeriodYear">Rok</label>
+            <select id="newPeriodYear">
+              ${yearOptions.join('')}
+            </select>
+          </div>
+        </div>
+        <div class="new-period-info">
+          Nové období bude obsahovat pouze permanentní zaměstnance (Marek, Lenka, Radek, Prémie). Další zaměstnance můžete přidat ručně.
+        </div>
+      </div>
+      <div class="new-period-footer">
+        <button class="btn btn-secondary" data-action="closeNewPeriodSelector">Zrušit</button>
+        <button class="btn" data-action="confirmNewPeriod">Vytvořit období</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Zavřít při kliknutí mimo dialog
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeNewPeriodSelector();
+    }
+  });
+
+  // Zavřít při Escape
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      closeNewPeriodSelector();
+      document.removeEventListener('keydown', handleEscape);
+    }
+  };
+  document.addEventListener('keydown', handleEscape);
+}
+
+function closeNewPeriodSelector() {
+  const modal = document.getElementById('newPeriodModal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+async function confirmNewPeriod() {
+  const monthSelect = document.getElementById('newPeriodMonth');
+  const yearSelect = document.getElementById('newPeriodYear');
+
+  if (!monthSelect || !yearSelect) {
+    wgsToast.error('Chyba při načítání hodnot');
+    return;
+  }
+
+  const newMonth = parseInt(monthSelect.value);
+  const newYear = parseInt(yearSelect.value);
+
+  if (!newMonth || !newYear) {
+    wgsToast.error('Vyberte měsíc a rok');
+    return;
+  }
+
+  // Zkontrolovat jestli období už existuje
+  const periodKey = `${newYear}-${String(newMonth).padStart(2, '0')}`;
+
+  try {
+    const response = await fetch(API_URL, { credentials: 'same-origin' });
+    const payload = await response.json();
+
+    if (payload.status === 'success' && payload.data && payload.data.periods && payload.data.periods[periodKey]) {
+      // Období už existuje - přepnout na něj
+      if (await wgsConfirm(`Období ${MONTHS_CZ[newMonth]} ${newYear} již existuje. Chcete se na něj přepnout?`, 'Přepnout', 'Zrušit')) {
+        closeNewPeriodSelector();
+        currentPeriod.month = newMonth;
+        currentPeriod.year = newYear;
+        updatePeriodDisplay();
+        await loadPeriod();
+        showSuccess(`Přepnuto na ${MONTHS_CZ[newMonth]} ${newYear}`);
+      }
+      return;
+    }
+  } catch (error) {
+    logger.error('Chyba při kontrole období:', error);
+  }
+
+  // Vytvořit nové období pouze s permanentními zaměstnanci
+  closeNewPeriodSelector();
+
+  // Přepnout na nové období
+  currentPeriod.month = newMonth;
+  currentPeriod.year = newYear;
+  updatePeriodDisplay();
+
+  // Nastavit pouze permanentní zaměstnance s nulovými hodinami
+  employees = allEmployeesDatabase
+    .filter(emp => PERMANENT_EMPLOYEE_IDS.includes(emp.id))
+    .map(emp => ({
+      ...emp,
+      bank: formatBankCode(emp.bank),
+      hours: 0,
+      bonusAmount: 0,
+      premieCastka: 0
+    }));
+
+  renderTable();
+  updateStats();
+
+  // Uložit nové období na server
+  try {
+    saveToLocalStorage();
+    await saveToServer();
+    showSuccess(`Vytvořeno nové období: ${MONTHS_CZ[newMonth]} ${newYear}`);
+    logger.log(`Created new period ${periodKey} with permanent employees only`);
+  } catch (error) {
+    logger.error('Chyba při ukládání nového období:', error);
+    wgsToast.error('Chyba při ukládání období');
+  }
+}
+
 // Zavřít overlay při kliknutí mimo
 document.addEventListener('click', (e) => {
   const overlay = document.getElementById('periodOverlay');
@@ -2025,6 +2186,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
       case 'closePeriodOverlay':
         if (typeof closePeriodOverlay === 'function') closePeriodOverlay();
+        return;
+
+      case 'showNewPeriodSelector':
+        if (typeof showNewPeriodSelector === 'function') showNewPeriodSelector();
+        return;
+
+      case 'closeNewPeriodSelector':
+        if (typeof closeNewPeriodSelector === 'function') closeNewPeriodSelector();
+        return;
+
+      case 'confirmNewPeriod':
+        if (typeof confirmNewPeriod === 'function') confirmNewPeriod();
         return;
 
       case 'selectPeriod':

@@ -64,7 +64,8 @@ $csrfToken = generateCSRFToken();
           <div class="period-loading">Načítám období...</div>
         </div>
         <div class="period-overlay-footer">
-          <button class="btn btn-sm" data-action="closePeriodOverlay">Zavřít</button>
+          <button class="btn btn-sm" data-action="showNewPeriodSelector">+ Přidat období</button>
+          <button class="btn btn-sm btn-secondary" data-action="closePeriodOverlay">Zavřít</button>
         </div>
       </div>
     </div>
