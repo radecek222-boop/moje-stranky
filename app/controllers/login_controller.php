@@ -355,6 +355,9 @@ function createRememberToken(PDO $pdo, string $userId): void
     // Nastavit cookie (selector:validator)
     $cookieValue = $selector . ':' . $validator;
 
+    // FIX PWA: SameSite='Lax' pro PWA kompatibilitu
+    // 'Strict' způsoboval problémy s Remember Me v PWA módu
+    // 'Lax' je bezpečné - Remember Me cookie není citlivá na CSRF (jen čte data)
     setcookie(
         'remember_me',
         $cookieValue,
@@ -364,7 +367,7 @@ function createRememberToken(PDO $pdo, string $userId): void
             'domain' => '',
             'secure' => true,
             'httponly' => true,
-            'samesite' => 'Strict'  // SECURITY FIX: Změněno z 'Lax' na 'Strict' pro CSRF ochranu
+            'samesite' => 'Lax'
         ]
     );
 
