@@ -2638,7 +2638,7 @@ async function showNotes(recordOrId) {
                 <div class="note-header">
                   <span class="note-author">${note.author_name || note.author}</span>
                   <span class="note-time">${formatDateTime(note.timestamp)}</span>
-                  ${canDelete ? `<button class="note-delete-btn" onclick="event.stopPropagation(); deleteNote('${note.id}', '${record.id}');" title="Smazat poznamku">x</button>` : ''}
+                  ${canDelete ? `<button class="note-delete-btn" style="position:relative; z-index:99999; pointer-events:auto !important;" onclick="console.log('[CLICK] Delete btn clicked!'); event.stopPropagation(); event.preventDefault(); deleteNote('${note.id}', '${record.id}'); return false;" title="Smazat poznamku">x</button>` : ''}
                 </div>
                 ${!isVoiceNote ? `<div class="note-text">${Utils.escapeHtml(note.text)}</div>` : ''}
                 ${hasAudio ? `
