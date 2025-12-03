@@ -5,11 +5,15 @@
 
 // === GLOBAL VARIABLES ===
 let employees = [];
+let allEmployeesDatabase = [];  // Kompletní seznam zaměstnanců z databáze
 let salaryRate = 150;
 let invoiceRate = 250;
 let currentPeriod = { month: 11, year: 2025 };
 const API_URL = 'app/psa_data.php';
 const CSRF_TOKEN = window.PSA_CSRF_TOKEN || '';
+
+// Speciální zaměstnanci - vždy zobrazeni, nelze smazat
+const PERMANENT_EMPLOYEE_IDS = [19, 20, 21, 22];  // Marek, Lenka, Radek, Prémie
 
 // === INITIALIZATION ===
 window.addEventListener('DOMContentLoaded', () => {
@@ -19,6 +23,11 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // === PERIOD MANAGEMENT ===
+const MONTHS_CZ = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
+                   'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
+const MONTHS_CZ_UPPER = ['', 'LEDEN', 'ÚNOR', 'BŘEZEN', 'DUBEN', 'KVĚTEN', 'ČERVEN',
+                         'ČERVENEC', 'SRPEN', 'ZÁŘÍ', 'ŘÍJEN', 'LISTOPAD', 'PROSINEC'];
+
 function initializePeriod() {
   // Vždy pracujeme s MINULÝM měsícem (výplaty za uplynulý měsíc)
   const now = new Date();
@@ -27,16 +36,61 @@ function initializePeriod() {
   currentPeriod.month = now.getMonth() + 1;  // getMonth() vrací 0-11
   currentPeriod.year = now.getFullYear();
   updatePeriodDisplay();
+  updateNewAttendanceMonth();
 }
 
 function updatePeriodDisplay() {
-  const months = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
-                  'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
-  const periodText = `${months[currentPeriod.month]} ${currentPeriod.year}`;
+  const periodText = `${MONTHS_CZ[currentPeriod.month]} ${currentPeriod.year}`;
   const displayEl = document.getElementById('periodDisplayText');
   if (displayEl) {
     displayEl.textContent = periodText;
   }
+  // Aktualizovat i patičku tabulky
+  updateFooterMonth();
+}
+
+// Aktualizovat měsíc v tlačítku "Nová docházka"
+function updateNewAttendanceMonth() {
+  const now = new Date();
+  // Aktuální měsíc (pro novou docházku) = skutečný aktuální měsíc
+  const nextMonth = now.getMonth() + 1;  // getMonth() vrací 0-11
+  const monthEl = document.getElementById('newAttendanceMonth');
+  if (monthEl) {
+    monthEl.textContent = MONTHS_CZ_UPPER[nextMonth] || 'NOVÝ';
+  }
+}
+
+// Aktualizovat měsíc v patičce tabulky
+function updateFooterMonth() {
+  const footerLabel = document.getElementById('footerMonthLabel');
+  if (footerLabel) {
+    footerLabel.textContent = `CELKEM za ${MONTHS_CZ[currentPeriod.month]}`;
+  }
+}
+
+// === NOVÁ DOCHÁZKA (aktuální měsíc) ===
+async function newAttendance() {
+  const now = new Date();
+  const newMonth = now.getMonth() + 1;  // Aktuální měsíc
+  const newYear = now.getFullYear();
+
+  // Kontrola jestli aktuální měsíc není stejný jako zobrazený
+  if (currentPeriod.month === newMonth && currentPeriod.year === newYear) {
+    wgsToast.info(`Už jste v období ${MONTHS_CZ[newMonth]} ${newYear}`);
+    return;
+  }
+
+  // Přepnout na nový měsíc
+  currentPeriod.month = newMonth;
+  currentPeriod.year = newYear;
+
+  updatePeriodDisplay();
+
+  // Načíst data pro nové období (pokud existuje) nebo zobrazit prázdné
+  await loadData();
+
+  showSuccess(`Nová docházka za ${MONTHS_CZ[newMonth]} ${newYear}`);
+  logger.log(`Switched to new attendance period: ${newMonth}/${newYear}`);
 }
 
 // === PERIOD OVERLAY ===
@@ -89,8 +143,6 @@ async function naplnitPeriodOverlay() {
     }
 
     const periods = payload.data.periods || {};
-    const months = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
-                    'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
 
     // Seřadit období sestupně
     const sortedPeriods = Object.keys(periods).sort().reverse();
@@ -107,7 +159,7 @@ async function naplnitPeriodOverlay() {
     const html = sortedPeriods.map(key => {
       const [year, month] = key.split('-');
       const monthNum = parseInt(month);
-      const label = `${months[monthNum]} ${year}`;
+      const label = `${MONTHS_CZ[monthNum]} ${year}`;
       const data = periods[key];
       const hours = data.totalHours || 0;
       const salary = data.totalSalary ? Math.round(data.totalSalary).toLocaleString('cs-CZ') : '0';
@@ -148,8 +200,6 @@ async function selectPeriod(periodKey) {
 // === NAČÍST OBDOBÍ ===
 async function loadPeriod() {
   const periodKey = `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
-  const months = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
-                  'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
 
   try {
     const response = await fetch(API_URL, { credentials: 'same-origin' });
@@ -164,7 +214,7 @@ async function loadPeriod() {
 
     // Zkontrolovat jestli období existuje
     if (!data.periods || !data.periods[periodKey]) {
-      showError(`Období ${months[currentPeriod.month]} ${currentPeriod.year} nebylo nalezeno. Nejprve uložte data pro toto období.`);
+      showError(`Období ${MONTHS_CZ[currentPeriod.month]} ${currentPeriod.year} nebylo nalezeno. Nejprve uložte data pro toto období.`);
       // Vynulovat hodiny
       employees.forEach(emp => emp.hours = 0);
       renderTable();
@@ -175,25 +225,40 @@ async function loadPeriod() {
     // Načíst data období
     const periodData = data.periods[periodKey];
 
-    // Aktualizovat data zaměstnanců podle uloženého období
-    // Hodiny, prémie a účty se načítají z období (pokud existují)
-    employees = data.employees.map(emp => {
-      const periodEmp = periodData.employees.find(pe => pe.id === emp.id);
-      return {
-        ...emp,
-        // Účet a banka - preferovat hodnotu z období, jinak hlavní
-        account: periodEmp && periodEmp.account ? periodEmp.account : (emp.account || ''),
-        bank: formatBankCode(periodEmp && periodEmp.bank ? periodEmp.bank : (emp.bank || '')),
-        // Hodiny a bonusy z období
-        hours: periodEmp ? (periodEmp.hours || 0) : 0,
-        bonusAmount: periodEmp ? (periodEmp.bonusAmount || 0) : (emp.bonusAmount || 0),
-        premieCastka: periodEmp ? (periodEmp.premieCastka || 0) : 0
-      };
-    });
+    // Aktualizovat databázi zaměstnanců
+    allEmployeesDatabase = data.employees.map(emp => ({
+      ...emp,
+      bank: formatBankCode(emp.bank)
+    }));
+
+    // Filtrovat zaměstnance pro období:
+    // 1. Permanentní zaměstnanci (Marek, Lenka, Radek, Prémie) - vždy
+    // 2. Zaměstnanci kteří mají v období hours > 0
+    employees = data.employees
+      .filter(emp => {
+        const periodEmp = periodData.employees.find(pe => pe.id === emp.id);
+        // Permanentní zaměstnanci vždy
+        if (PERMANENT_EMPLOYEE_IDS.includes(emp.id)) return true;
+        // Ostatní jen pokud mají hodiny v období
+        return periodEmp && periodEmp.hours > 0;
+      })
+      .map(emp => {
+        const periodEmp = periodData.employees.find(pe => pe.id === emp.id);
+        return {
+          ...emp,
+          // Účet a banka - preferovat hodnotu z období, jinak hlavní
+          account: periodEmp && periodEmp.account ? periodEmp.account : (emp.account || ''),
+          bank: formatBankCode(periodEmp && periodEmp.bank ? periodEmp.bank : (emp.bank || '')),
+          // Hodiny a bonusy z období
+          hours: periodEmp ? (periodEmp.hours || 0) : 0,
+          bonusAmount: periodEmp ? (periodEmp.bonusAmount || 0) : (emp.bonusAmount || 0),
+          premieCastka: periodEmp ? (periodEmp.premieCastka || 0) : 0
+        };
+      });
 
     renderTable();
     updateStats();
-    showSuccess(`Načteno období: ${months[currentPeriod.month]} ${currentPeriod.year} (${periodData.totalHours || 0} hodin)`);
+    showSuccess(`Načteno období: ${MONTHS_CZ[currentPeriod.month]} ${currentPeriod.year} (${periodData.totalHours || 0} hodin)`);
     logger.log(`Loaded period ${periodKey}:`, periodData);
 
   } catch (error) {
@@ -232,6 +297,17 @@ async function loadData(period = null) {
 
     const data = payload.data;
 
+    // Uložit kompletní databázi zaměstnanců pro výběr
+    if (data.employees) {
+      allEmployeesDatabase = data.employees.map(emp => ({
+        ...emp,
+        bank: formatBankCode(emp.bank)
+      }));
+      logger.log('loadData: allEmployeesDatabase loaded with', allEmployeesDatabase.length, 'employees');
+    } else {
+      logger.warn('loadData: data.employees is empty or undefined');
+    }
+
     // Load configuration
     if (data.config) {
       salaryRate = data.config.salaryRate || 150;
@@ -240,35 +316,46 @@ async function loadData(period = null) {
       document.getElementById('invoiceRate').value = invoiceRate;
     }
 
-    // Load employees for specific period or current data
-    if (period && data.periods && data.periods[period]) {
-      // Load historical period data
-      const periodData = data.periods[period];
-      employees = data.employees.map(emp => {
-        const periodEmp = periodData.employees.find(pe => pe.id === emp.id);
-        return {
-          ...emp,
-          // Účet a banka - preferovat hodnotu z období, jinak hlavní
-          account: periodEmp && periodEmp.account ? periodEmp.account : (emp.account || ''),
-          bank: formatBankCode(periodEmp && periodEmp.bank ? periodEmp.bank : (emp.bank || '')),
-          hours: periodEmp ? (periodEmp.hours || 0) : 0,
-          bonusAmount: periodEmp ? (periodEmp.bonusAmount || 0) : (emp.bonusAmount || 0),
-          premieCastka: periodEmp ? (periodEmp.premieCastka || 0) : 0
-        };
-      });
-      logger.log(`Loaded period ${period} with ${employees.length} employees`);
+    // Určit klíč období - buď předaný nebo aktuální
+    const periodKey = period || `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
+
+    // Načíst zaměstnance podle období
+    if (data.periods && data.periods[periodKey]) {
+      // Období existuje - filtrovat zaměstnance
+      const periodData = data.periods[periodKey];
+
+      employees = data.employees
+        .filter(emp => {
+          const periodEmp = periodData.employees.find(pe => pe.id === emp.id);
+          // Permanentní zaměstnanci vždy
+          if (PERMANENT_EMPLOYEE_IDS.includes(emp.id)) return true;
+          // Ostatní jen pokud mají hodiny v období
+          return periodEmp && periodEmp.hours > 0;
+        })
+        .map(emp => {
+          const periodEmp = periodData.employees.find(pe => pe.id === emp.id);
+          return {
+            ...emp,
+            account: periodEmp && periodEmp.account ? periodEmp.account : (emp.account || ''),
+            bank: formatBankCode(periodEmp && periodEmp.bank ? periodEmp.bank : (emp.bank || '')),
+            hours: periodEmp ? (periodEmp.hours || 0) : 0,
+            bonusAmount: periodEmp ? (periodEmp.bonusAmount || 0) : (emp.bonusAmount || 0),
+            premieCastka: periodEmp ? (periodEmp.premieCastka || 0) : 0
+          };
+        });
+      logger.log(`Loaded period ${periodKey} with ${employees.length} employees`);
     } else {
-      // Load current data
-      if (data.employees) {
-        employees = data.employees.map(emp => ({
+      // Období neexistuje - zobrazit pouze permanentní zaměstnance
+      employees = data.employees
+        .filter(emp => PERMANENT_EMPLOYEE_IDS.includes(emp.id))
+        .map(emp => ({
           ...emp,
           bank: formatBankCode(emp.bank),
-          hours: emp.hours || 0,
-          bonusAmount: emp.bonusAmount || 0,
-          premieCastka: emp.premieCastka || 0
+          hours: 0,
+          bonusAmount: 0,
+          premieCastka: 0
         }));
-      }
-      logger.log(`Loaded ${employees.length} employees`);
+      logger.log(`New period ${periodKey} - showing only permanent employees`);
     }
 
     renderTable();
@@ -498,22 +585,268 @@ function loadFromLocalStorage() {
 }
 
 // === EMPLOYEE MANAGEMENT ===
-async function addEmployee() {
-  const name = prompt('Zadejte jméno nového zaměstnance:');
-  if (!name || name.trim() === '') return;
+function addEmployee() {
+  // Použít nový employee selector s checkboxy
+  showEmployeeSelector();
+}
 
-  const newId = employees.length > 0 ? Math.max(...employees.map(e => e.id || 0)) + 1 : 1;
+// === EMPLOYEE SELECTOR (checkbox overlay) ===
+async function showEmployeeSelector() {
+  // Pokud je databáze prázdná, zkusit načíst data znovu
+  if (allEmployeesDatabase.length === 0) {
+    logger.log('allEmployeesDatabase is empty, trying to reload data...');
+    try {
+      await loadData();
+    } catch (err) {
+      logger.error('Failed to reload data:', err);
+    }
+  }
 
+  const currentIds = employees.map(e => e.id);
+  const excludedTypes = ['special', 'special2', 'pausalni', 'premie_polozka'];
+
+  // Všichni zaměstnanci z databáze (kromě speciálních a permanentních)
+  const allAvailable = allEmployeesDatabase.filter(emp =>
+    !PERMANENT_EMPLOYEE_IDS.includes(emp.id) &&
+    !excludedTypes.includes(emp.type)
+  );
+
+  logger.log('Employee selector - allEmployeesDatabase:', allEmployeesDatabase.length, 'allAvailable:', allAvailable.length);
+
+  if (allAvailable.length === 0) {
+    wgsToast.info('Žádní zaměstnanci v databázi - zkontrolujte přihlášení');
+    return;
+  }
+
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.id = 'employeeSelectorModal';
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Vybrat zaměstnance</h2>
+        <span class="close-modal" data-action="closeEmployeeSelector">&times;</span>
+      </div>
+      <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--c-border); display: flex; gap: 1rem;">
+        <button class="btn btn-sm" data-action="selectAllEmployees">Vybrat vše</button>
+        <button class="btn btn-sm btn-secondary" data-action="deselectAllEmployees">Zrušit výběr</button>
+      </div>
+      <div style="padding: 1rem 1.5rem; max-height: 400px; overflow-y: auto;">
+        ${allAvailable.map(emp => {
+          const isAlreadyAdded = currentIds.includes(emp.id);
+          return `
+            <label style="display: flex; align-items: center; padding: 0.75rem; margin-bottom: 0.5rem; border: 1px solid var(--c-border); border-radius: 4px; cursor: pointer; ${isAlreadyAdded ? 'opacity: 0.5; background: var(--c-bg);' : ''}" ${isAlreadyAdded ? 'title="Už je v seznamu"' : ''}>
+              <input type="checkbox"
+                     name="selectedEmployee"
+                     value="${emp.id}"
+                     ${isAlreadyAdded ? 'disabled checked' : ''}
+                     style="width: 18px; height: 18px; margin-right: 0.75rem; accent-color: var(--c-black);">
+              <div style="flex: 1;">
+                <div style="font-weight: 600;">${emp.name}</div>
+                <div style="font-size: 0.8rem; color: var(--c-grey);">
+                  ${emp.account ? emp.account + '/' + emp.bank : 'Bez účtu'}
+                  ${emp.type === 'swift' ? ' (SWIFT)' : ''}
+                </div>
+              </div>
+              ${isAlreadyAdded ? '<span style="font-size: 0.75rem; color: var(--c-grey);">v seznamu</span>' : ''}
+            </label>
+          `;
+        }).join('')}
+      </div>
+      <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--c-border); display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.85rem; color: var(--c-grey);">Vybráno: <strong id="selectedCount">0</strong></span>
+        <div>
+          <button class="btn btn-secondary" data-action="closeEmployeeSelector">Zrušit</button>
+          <button class="btn" data-action="confirmEmployeeSelection" style="margin-left: 0.5rem;">Přidat vybrané</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.style.display = 'block';
+
+  // Aktualizovat počet vybraných
+  updateSelectedCount();
+
+  // Event listener pro checkboxy
+  modal.querySelectorAll('input[name="selectedEmployee"]').forEach(cb => {
+    cb.addEventListener('change', updateSelectedCount);
+  });
+}
+
+function updateSelectedCount() {
+  const modal = document.getElementById('employeeSelectorModal');
+  if (!modal) return;
+
+  const checked = modal.querySelectorAll('input[name="selectedEmployee"]:checked:not(:disabled)').length;
+  const countEl = modal.querySelector('#selectedCount');
+  if (countEl) countEl.textContent = checked;
+}
+
+function selectAllEmployees() {
+  const modal = document.getElementById('employeeSelectorModal');
+  if (!modal) return;
+
+  modal.querySelectorAll('input[name="selectedEmployee"]:not(:disabled)').forEach(cb => {
+    cb.checked = true;
+  });
+  updateSelectedCount();
+}
+
+function deselectAllEmployees() {
+  const modal = document.getElementById('employeeSelectorModal');
+  if (!modal) return;
+
+  modal.querySelectorAll('input[name="selectedEmployee"]:not(:disabled)').forEach(cb => {
+    cb.checked = false;
+  });
+  updateSelectedCount();
+}
+
+function closeEmployeeSelector() {
+  const modal = document.getElementById('employeeSelectorModal');
+  if (modal) modal.remove();
+}
+
+async function confirmEmployeeSelection() {
+  const modal = document.getElementById('employeeSelectorModal');
+  if (!modal) return;
+
+  const selectedIds = Array.from(modal.querySelectorAll('input[name="selectedEmployee"]:checked:not(:disabled)'))
+    .map(cb => parseInt(cb.value));
+
+  if (selectedIds.length === 0) {
+    wgsToast.warning('Nevybrali jste žádné zaměstnance');
+    return;
+  }
+
+  // Přidat vybrané zaměstnance
+  selectedIds.forEach(id => {
+    const emp = allEmployeesDatabase.find(e => e.id === id);
+    if (emp && !employees.find(e => e.id === id)) {
+      employees.push({
+        ...emp,
+        hours: 0,
+        bonusAmount: 0,
+        premieCastka: 0
+      });
+    }
+  });
+
+  closeEmployeeSelector();
+  renderTable();
+  updateStats();
+
+  // Uložit na server
+  try {
+    saveToLocalStorage();
+    await saveToServer();
+    showSuccess(`Přidáno ${selectedIds.length} zaměstnanců`);
+  } catch (error) {
+    logger.error('Failed to save after adding employees:', error);
+  }
+}
+
+// Přidat nového prázdného zaměstnance
+function addNewBlankEmployee() {
+  // Zavřít modal
+  const modal = document.getElementById('addEmployeeModal');
+  if (modal) modal.remove();
+
+  // Vygenerovat dočasné ID (záporné, aby se nepletlo s existujícími)
+  const tempId = -(Date.now());
+
+  // Přidat prázdného zaměstnance
   employees.push({
-    id: newId,
-    name: name.trim(),
+    id: tempId,
+    name: '',
     hours: 0,
-    bonusAmount: 0,
     account: '',
     bank: '',
     type: 'standard',
+    active: true,
+    isNew: true  // Označit jako nového (ještě není v databázi)
+  });
+
+  renderTable();
+  updateStats();
+
+  // Focus na pole jméno
+  setTimeout(() => {
+    const lastRow = document.querySelector(`[data-index="${employees.length - 1}"][data-field="name"]`);
+    if (lastRow) lastRow.focus();
+  }, 100);
+
+  showSuccess('Vyplňte údaje nového zaměstnance a uložte do databáze');
+}
+
+// Uložit nového zaměstnance do databáze
+async function saveEmployeeToDatabase(index) {
+  const emp = employees[index];
+
+  if (!emp.name || emp.name.trim() === '') {
+    wgsToast.error('Zadejte jméno zaměstnance');
+    return;
+  }
+
+  // Vygenerovat nové ID
+  const maxId = Math.max(...allEmployeesDatabase.map(e => e.id || 0), 0);
+  const newId = maxId + 1;
+
+  // Aktualizovat zaměstnance
+  emp.id = newId;
+  emp.isNew = false;
+  emp.name = emp.name.trim();
+
+  // Přidat do databáze
+  allEmployeesDatabase.push({
+    id: newId,
+    name: emp.name,
+    account: emp.account || '',
+    bank: emp.bank || '',
+    type: 'standard',
     active: true
   });
+
+  renderTable();
+
+  // Uložit na server
+  try {
+    await saveToServer();
+    showSuccess(`Zaměstnanec ${emp.name} uložen do databáze`);
+    logger.log('New employee saved to database:', emp.name);
+  } catch (error) {
+    logger.error('Failed to save new employee:', error);
+    wgsToast.error('Chyba při ukládání do databáze');
+  }
+}
+
+async function confirmAddEmployee() {
+  const select = document.getElementById('selectEmployeeToAdd');
+  const selectedId = parseInt(select.value);
+
+  if (!selectedId) {
+    wgsToast.error('Vyberte zaměstnance');
+    return;
+  }
+
+  // Najít zaměstnance v databázi
+  const empToAdd = allEmployeesDatabase.find(e => e.id === selectedId);
+  if (!empToAdd) {
+    wgsToast.error('Zaměstnanec nenalezen');
+    return;
+  }
+
+  // Přidat do seznamu s nulovými hodinami
+  employees.push({
+    ...empToAdd,
+    hours: 0,
+    bonusAmount: 0,
+    premieCastka: 0
+  });
+
+  // Zavřít modal
+  document.getElementById('addEmployeeModal').remove();
 
   renderTable();
   updateStats();
@@ -522,7 +855,8 @@ async function addEmployee() {
   try {
     saveToLocalStorage();
     await saveToServer();
-    logger.log('Employee added and saved');
+    logger.log('Employee added and saved:', empToAdd.name);
+    showSuccess(`Zaměstnanec ${empToAdd.name} přidán`);
   } catch (error) {
     logger.error('Failed to save after adding employee:', error);
   }
@@ -559,7 +893,15 @@ async function updateEmployee(index, field, value, needConfirm = false) {
 }
 
 async function removeEmployee(index) {
-  if (await wgsConfirm(`Opravdu chcete odstranit zaměstnance ${employees[index].name}?`, 'Odstranit', 'Zrušit')) {
+  const emp = employees[index];
+
+  // Permanentní zaměstnance nelze odebrat
+  if (PERMANENT_EMPLOYEE_IDS.includes(emp.id)) {
+    wgsToast.error('Tento zaměstnanec je permanentní a nelze ho odebrat');
+    return;
+  }
+
+  if (await wgsConfirm(`Opravdu chcete odebrat zaměstnance ${emp.name} z tohoto období?`, 'Odebrat', 'Zrušit')) {
     employees.splice(index, 1);
     renderTable();
     updateStats();
@@ -568,7 +910,8 @@ async function removeEmployee(index) {
     try {
       saveToLocalStorage();
       await saveToServer();
-      logger.log('Employee removed and saved');
+      logger.log('Employee removed from period:', emp.name);
+      showSuccess(`${emp.name} odebrán z období`);
     } catch (error) {
       logger.error('Failed to save after removing employee:', error);
     }
@@ -580,7 +923,19 @@ function renderTable() {
   const tbody = document.getElementById('employeeTableBody');
 
   if (employees.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding: 2rem; color: var(--c-grey);">Žádní zaměstnanci - použijte tlačítko "Přidat"</td></tr>';
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center" style="padding: 3rem;">
+          <div data-action="showEmployeeSelector"
+               style="cursor: pointer; display: inline-block; padding: 1.5rem 2.5rem; border: 2px dashed var(--c-grey); border-radius: 8px; transition: all 0.2s ease;"
+               onmouseover="this.style.borderColor='var(--c-black)'; this.style.background='rgba(0,0,0,0.02)'"
+               onmouseout="this.style.borderColor='var(--c-grey)'; this.style.background='transparent'">
+            <div style="font-size: 2.5rem; font-weight: 300; color: var(--c-grey); line-height: 1;">+</div>
+            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--c-grey);">Přidat zaměstnance</div>
+          </div>
+        </td>
+      </tr>
+    `;
     return;
   }
 
@@ -717,9 +1072,14 @@ function renderTable() {
                  data-index="${index}"
                  data-field="bank">
         </td>
-        <td class="text-center">
-          <button class="btn btn-sm" style="background: var(--c-info); color: white; margin-right: 0.25rem;" data-action="generateSingleEmployeeQR" data-index="${index}" title="Generovat QR platbu">QR</button>
-          <button class="btn btn-danger btn-sm" data-action="removeEmployee" data-index="${index}">×</button>
+        <td class="text-center" style="white-space: nowrap;">
+          ${emp.isNew ?
+            `<button class="btn btn-sm" style="background: var(--c-success); color: white; margin-right: 0.25rem;" data-action="saveEmployeeToDatabase" data-index="${index}" title="Uložit do databáze">Uložit do DB</button>` :
+            `<button class="btn btn-sm" style="background: var(--c-info); color: white; margin-right: 0.25rem;" data-action="generateSingleEmployeeQR" data-index="${index}" title="Generovat QR platbu">QR</button>`
+          }
+          ${PERMANENT_EMPLOYEE_IDS.includes(emp.id) ? '' :
+            `<button class="btn btn-danger btn-sm" data-action="removeEmployee" data-index="${index}" title="Odebrat z období">×</button>`
+          }
         </td>
       </tr>
     `;
@@ -1586,6 +1946,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return;
 
+      case 'saveEmployeeToDatabase':
+        const sIndex = target.getAttribute('data-index');
+        if (sIndex !== null && typeof saveEmployeeToDatabase === 'function') {
+          saveEmployeeToDatabase(parseInt(sIndex));
+        }
+        return;
+
       case 'removeEmployee':
         const rIndex = target.getAttribute('data-index');
         if (rIndex !== null && typeof removeEmployee === 'function') {
@@ -1679,6 +2046,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
       case 'clearHours':
         if (typeof clearHours === 'function') clearHours();
+        return;
+
+      case 'newAttendance':
+        if (typeof newAttendance === 'function') newAttendance();
+        return;
+
+      // === EMPLOYEE SELECTOR ===
+      case 'showEmployeeSelector':
+        if (typeof showEmployeeSelector === 'function') showEmployeeSelector();
+        return;
+
+      case 'closeEmployeeSelector':
+        if (typeof closeEmployeeSelector === 'function') closeEmployeeSelector();
+        return;
+
+      case 'selectAllEmployees':
+        if (typeof selectAllEmployees === 'function') selectAllEmployees();
+        return;
+
+      case 'deselectAllEmployees':
+        if (typeof deselectAllEmployees === 'function') deselectAllEmployees();
+        return;
+
+      case 'confirmEmployeeSelection':
+        if (typeof confirmEmployeeSelection === 'function') confirmEmployeeSelection();
         return;
     }
 

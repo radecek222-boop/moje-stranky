@@ -45,11 +45,19 @@ $csrfToken = generateCSRFToken();
   </div>
 
   <!-- FILTR OBDOBÍ -->
-  <div class="period-filter-card">
-    <div class="period-filter-label">Období</div>
+  <div class="period-filter-card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <!-- VLEVO: Nová docházka -->
+    <div>
+      <button class="btn" data-action="newAttendance" id="newAttendanceBtn" style="font-weight: 600;">
+        Nová docházka <span id="newAttendanceMonth">PROSINEC</span>
+      </button>
+    </div>
+
+    <!-- VPRAVO: Historie -->
     <div class="period-display-wrapper">
+      <div class="period-filter-label" style="margin-bottom: 0;">Historie</div>
       <div class="period-display clickable" id="periodDisplay" data-action="togglePeriodOverlay" role="button" tabindex="0" title="Klikněte pro výběr období">
-        <span id="periodDisplayText">Prosinec 2025</span>
+        <span id="periodDisplayText">Listopad 2025</span>
         <span class="period-arrow">▼</span>
       </div>
       <!-- Mini-overlay pro výběr období -->
@@ -64,7 +72,6 @@ $csrfToken = generateCSRFToken();
         </div>
         <div class="period-overlay-footer">
           <button class="btn btn-sm" data-action="closePeriodOverlay">Zavřít</button>
-          <button class="btn btn-sm btn-secondary" data-action="clearHours">Nové období</button>
         </div>
       </div>
     </div>
@@ -128,14 +135,9 @@ $csrfToken = generateCSRFToken();
 
   <!-- TABULKA ZAMĚSTNANCŮ -->
   <div class="card">
-    <div class="card-header">
-      <h2 class="card-title">Seznam zaměstnanců</h2>
-      <div class="btn-group">
-        <button class="btn btn-sm" data-action="addEmployee">Přidat</button>
-        <button class="btn btn-sm" data-action="saveData">Uložit</button>
-        <button class="btn btn-sm" data-action="exportToExcel">Export CSV</button>
-        <button class="btn btn-sm" data-action="printReport">Tisk</button>
-      </div>
+    <div class="card-header" style="flex-direction: column; align-items: flex-start; gap: 0.5rem;">
+      <h2 class="card-title" style="margin: 0;">Seznam zaměstnanců</h2>
+      <button class="btn btn-sm" data-action="addEmployee" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">+ Přidat zaměstnance</button>
     </div>
     <div class="table-container">
       <table class="data-table">
@@ -160,7 +162,7 @@ $csrfToken = generateCSRFToken();
         </tbody>
         <tfoot>
           <tr class="total-row">
-            <td><strong>CELKEM</strong></td>
+            <td><strong id="footerMonthLabel">CELKEM za Listopad</strong></td>
             <td class="text-center"><strong id="footerTotalHours">0</strong></td>
             <td class="text-right"><strong id="footerTotalSalary">0 Kč</strong></td>
             <td class="text-right"><strong id="footerTotalInvoice">0 Kč</strong></td>
@@ -176,6 +178,8 @@ $csrfToken = generateCSRFToken();
     <button class="btn btn-secondary" data-action="clearAll">Vynulovat hodiny</button>
     <button class="btn" data-action="saveData">Uložit období</button>
     <button class="btn" data-action="generatePaymentQR">Generovat QR platby</button>
+    <button class="btn btn-secondary" data-action="exportToExcel">Export CSV</button>
+    <button class="btn btn-secondary" data-action="printReport">Tisk</button>
   </div>
 
   <!-- QR CODE MODAL -->
