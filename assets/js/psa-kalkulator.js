@@ -583,60 +583,153 @@ function loadFromLocalStorage() {
 
 // === EMPLOYEE MANAGEMENT ===
 function addEmployee() {
-  // Najít zaměstnance, kteří nejsou v aktuálním seznamu (kromě permanentních)
+  // Použít nový employee selector s checkboxy
+  showEmployeeSelector();
+}
+
+// === EMPLOYEE SELECTOR (checkbox overlay) ===
+function showEmployeeSelector() {
   const currentIds = employees.map(e => e.id);
-  // Typy které se NESMÍ přidávat (jsou permanentní nebo speciální)
   const excludedTypes = ['special', 'special2', 'pausalni', 'premie_polozka'];
-  const availableEmployees = allEmployeesDatabase.filter(emp =>
-    !currentIds.includes(emp.id) &&
+
+  // Všichni zaměstnanci z databáze (kromě speciálních a permanentních)
+  const allAvailable = allEmployeesDatabase.filter(emp =>
     !PERMANENT_EMPLOYEE_IDS.includes(emp.id) &&
-    !excludedTypes.includes(emp.type)  // Všichni kromě speciálních typů
+    !excludedTypes.includes(emp.type)
   );
 
-  // Debug log
-  logger.log('addEmployee - currentIds:', currentIds);
-  logger.log('addEmployee - allEmployeesDatabase:', allEmployeesDatabase.length);
-  logger.log('addEmployee - availableEmployees:', availableEmployees.length, availableEmployees.map(e => e.name));
+  if (allAvailable.length === 0) {
+    wgsToast.info('Žádní zaměstnanci v databázi');
+    return;
+  }
 
-  // Vytvořit modal pro výběr
   const modal = document.createElement('div');
   modal.className = 'modal';
-  modal.id = 'addEmployeeModal';
+  modal.id = 'employeeSelectorModal';
   modal.innerHTML = `
-    <div class="modal-content" style="max-width: 450px;">
+    <div class="modal-content" style="max-width: 500px;">
       <div class="modal-header">
-        <h2 class="modal-title">Přidat zaměstnance</h2>
-        <span class="close-modal" onclick="document.getElementById('addEmployeeModal').remove()">&times;</span>
+        <h2 class="modal-title">Vybrat zaměstnance</h2>
+        <span class="close-modal" data-action="closeEmployeeSelector">&times;</span>
       </div>
-      <div style="padding: 1.5rem;">
-        ${availableEmployees.length > 0 ? `
-          <div style="margin-bottom: 1.5rem;">
-            <label class="form-label">Vybrat z databáze:</label>
-            <select id="selectEmployeeToAdd" class="form-input" style="width: 100%; padding: 0.75rem;">
-              <option value="">-- Vyberte zaměstnance --</option>
-              ${availableEmployees.map(emp =>
-                `<option value="${emp.id}">${emp.name}</option>`
-              ).join('')}
-            </select>
-            <button class="btn" style="margin-top: 0.75rem; width: 100%;" onclick="confirmAddEmployee()">Přidat z databáze</button>
-          </div>
-          <div style="text-align: center; color: var(--c-grey); margin: 1rem 0;">nebo</div>
-        ` : ''}
+      <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--c-border); display: flex; gap: 1rem;">
+        <button class="btn btn-sm" data-action="selectAllEmployees">Vybrat vše</button>
+        <button class="btn btn-sm btn-secondary" data-action="deselectAllEmployees">Zrušit výběr</button>
+      </div>
+      <div style="padding: 1rem 1.5rem; max-height: 400px; overflow-y: auto;">
+        ${allAvailable.map(emp => {
+          const isAlreadyAdded = currentIds.includes(emp.id);
+          return `
+            <label style="display: flex; align-items: center; padding: 0.75rem; margin-bottom: 0.5rem; border: 1px solid var(--c-border); border-radius: 4px; cursor: pointer; ${isAlreadyAdded ? 'opacity: 0.5; background: var(--c-bg);' : ''}" ${isAlreadyAdded ? 'title="Už je v seznamu"' : ''}>
+              <input type="checkbox"
+                     name="selectedEmployee"
+                     value="${emp.id}"
+                     ${isAlreadyAdded ? 'disabled checked' : ''}
+                     style="width: 18px; height: 18px; margin-right: 0.75rem; accent-color: var(--c-black);">
+              <div style="flex: 1;">
+                <div style="font-weight: 600;">${emp.name}</div>
+                <div style="font-size: 0.8rem; color: var(--c-grey);">
+                  ${emp.account ? emp.account + '/' + emp.bank : 'Bez účtu'}
+                  ${emp.type === 'swift' ? ' (SWIFT)' : ''}
+                </div>
+              </div>
+              ${isAlreadyAdded ? '<span style="font-size: 0.75rem; color: var(--c-grey);">v seznamu</span>' : ''}
+            </label>
+          `;
+        }).join('')}
+      </div>
+      <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--c-border); display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.85rem; color: var(--c-grey);">Vybráno: <strong id="selectedCount">0</strong></span>
         <div>
-          <label class="form-label">Vytvořit nového zaměstnance:</label>
-          <button class="btn btn-secondary" style="width: 100%;" onclick="addNewBlankEmployee()">Nový zaměstnanec</button>
-          <p style="font-size: 0.8rem; color: var(--c-grey); margin-top: 0.5rem;">
-            Vytvoří prázdný řádek, který můžete vyplnit. Poté uložte do databáze.
-          </p>
-        </div>
-        <div style="margin-top: 1.5rem; text-align: right;">
-          <button class="btn btn-secondary" onclick="document.getElementById('addEmployeeModal').remove()">Zrušit</button>
+          <button class="btn btn-secondary" data-action="closeEmployeeSelector">Zrušit</button>
+          <button class="btn" data-action="confirmEmployeeSelection" style="margin-left: 0.5rem;">Přidat vybrané</button>
         </div>
       </div>
     </div>
   `;
   document.body.appendChild(modal);
-  modal.style.display = 'block';  // Zobrazit modal
+  modal.style.display = 'block';
+
+  // Aktualizovat počet vybraných
+  updateSelectedCount();
+
+  // Event listener pro checkboxy
+  modal.querySelectorAll('input[name="selectedEmployee"]').forEach(cb => {
+    cb.addEventListener('change', updateSelectedCount);
+  });
+}
+
+function updateSelectedCount() {
+  const modal = document.getElementById('employeeSelectorModal');
+  if (!modal) return;
+
+  const checked = modal.querySelectorAll('input[name="selectedEmployee"]:checked:not(:disabled)').length;
+  const countEl = modal.querySelector('#selectedCount');
+  if (countEl) countEl.textContent = checked;
+}
+
+function selectAllEmployees() {
+  const modal = document.getElementById('employeeSelectorModal');
+  if (!modal) return;
+
+  modal.querySelectorAll('input[name="selectedEmployee"]:not(:disabled)').forEach(cb => {
+    cb.checked = true;
+  });
+  updateSelectedCount();
+}
+
+function deselectAllEmployees() {
+  const modal = document.getElementById('employeeSelectorModal');
+  if (!modal) return;
+
+  modal.querySelectorAll('input[name="selectedEmployee"]:not(:disabled)').forEach(cb => {
+    cb.checked = false;
+  });
+  updateSelectedCount();
+}
+
+function closeEmployeeSelector() {
+  const modal = document.getElementById('employeeSelectorModal');
+  if (modal) modal.remove();
+}
+
+async function confirmEmployeeSelection() {
+  const modal = document.getElementById('employeeSelectorModal');
+  if (!modal) return;
+
+  const selectedIds = Array.from(modal.querySelectorAll('input[name="selectedEmployee"]:checked:not(:disabled)'))
+    .map(cb => parseInt(cb.value));
+
+  if (selectedIds.length === 0) {
+    wgsToast.warning('Nevybrali jste žádné zaměstnance');
+    return;
+  }
+
+  // Přidat vybrané zaměstnance
+  selectedIds.forEach(id => {
+    const emp = allEmployeesDatabase.find(e => e.id === id);
+    if (emp && !employees.find(e => e.id === id)) {
+      employees.push({
+        ...emp,
+        hours: 0,
+        bonusAmount: 0,
+        premieCastka: 0
+      });
+    }
+  });
+
+  closeEmployeeSelector();
+  renderTable();
+  updateStats();
+
+  // Uložit na server
+  try {
+    saveToLocalStorage();
+    await saveToServer();
+    showSuccess(`Přidáno ${selectedIds.length} zaměstnanců`);
+  } catch (error) {
+    logger.error('Failed to save after adding employees:', error);
+  }
 }
 
 // Přidat nového prázdného zaměstnance
@@ -815,7 +908,19 @@ function renderTable() {
   const tbody = document.getElementById('employeeTableBody');
 
   if (employees.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding: 2rem; color: var(--c-grey);">Žádní zaměstnanci - použijte tlačítko "Přidat"</td></tr>';
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center" style="padding: 3rem;">
+          <div data-action="showEmployeeSelector"
+               style="cursor: pointer; display: inline-block; padding: 1.5rem 2.5rem; border: 2px dashed var(--c-grey); border-radius: 8px; transition: all 0.2s ease;"
+               onmouseover="this.style.borderColor='var(--c-black)'; this.style.background='rgba(0,0,0,0.02)'"
+               onmouseout="this.style.borderColor='var(--c-grey)'; this.style.background='transparent'">
+            <div style="font-size: 2.5rem; font-weight: 300; color: var(--c-grey); line-height: 1;">+</div>
+            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--c-grey);">Přidat zaměstnance</div>
+          </div>
+        </td>
+      </tr>
+    `;
     return;
   }
 
@@ -1930,6 +2035,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
       case 'newAttendance':
         if (typeof newAttendance === 'function') newAttendance();
+        return;
+
+      // === EMPLOYEE SELECTOR ===
+      case 'showEmployeeSelector':
+        if (typeof showEmployeeSelector === 'function') showEmployeeSelector();
+        return;
+
+      case 'closeEmployeeSelector':
+        if (typeof closeEmployeeSelector === 'function') closeEmployeeSelector();
+        return;
+
+      case 'selectAllEmployees':
+        if (typeof selectAllEmployees === 'function') selectAllEmployees();
+        return;
+
+      case 'deselectAllEmployees':
+        if (typeof deselectAllEmployees === 'function') deselectAllEmployees();
+        return;
+
+      case 'confirmEmployeeSelection':
+        if (typeof confirmEmployeeSelection === 'function') confirmEmployeeSelection();
         return;
     }
 
