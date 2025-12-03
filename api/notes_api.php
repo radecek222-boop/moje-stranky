@@ -276,47 +276,67 @@ try {
                     // - Prodejce: vidí jen své → dostane notifikaci jen pokud je vlastník reklamace
                     // - Autor poznámky NIKDY nedostane notifikaci
                     // ========================================
-                    // COLLATE pro reseni rozdilnych kolaci mezi tabulkami
+                    // OPRAVA: Zjednoduseny dotaz - nacist VSE a filtrovat v PHP
+                    // (reseni problemu s datovymi typy user_id mezi tabulkami)
                     $stmtSubs = $pdo->prepare("
-                        SELECT ps.id, ps.endpoint, ps.p256dh, ps.auth, ps.user_id, ps.email, u.role
+                        SELECT ps.id, ps.endpoint, ps.p256dh, ps.auth, ps.user_id, ps.email
                         FROM wgs_push_subscriptions ps
-                        LEFT JOIN wgs_users u ON ps.user_id COLLATE utf8mb4_unicode_ci = u.user_id
                         WHERE ps.aktivni = 1
-                          AND (ps.user_id IS NULL OR ps.user_id != :author_user_id)
                     ");
-                    $stmtSubs->execute([':author_user_id' => $userId]);
+                    $stmtSubs->execute();
                     $vsechnySubscriptions = $stmtSubs->fetchAll(PDO::FETCH_ASSOC);
+
+                    error_log('[Notes] SQL vratil subscriptions: ' . count($vsechnySubscriptions));
 
                     // Filtrovat podle pravidel viditelnosti
                     $subscriptions = [];
                     foreach ($vsechnySubscriptions as $sub) {
-                        $subRole = strtolower(trim($sub['role'] ?? 'guest'));
                         $subUserId = $sub['user_id'] ?? null;
 
-                        // Admin a Technik vidí vše
+                        // Preskocit autora poznamky (striktni porovnani jako string)
+                        if ($subUserId !== null && (string)$subUserId === (string)$userId) {
+                            error_log('[Notes] Sub ID=' . $sub['id'] . ' - PRESKOCENO (autor poznamky)');
+                            continue;
+                        }
+
+                        // Nacist roli uzivatele z wgs_users
+                        $subRole = 'guest';
+                        if ($subUserId !== null) {
+                            $stmtRole = $pdo->prepare("SELECT role FROM wgs_users WHERE user_id = :uid LIMIT 1");
+                            $stmtRole->execute([':uid' => $subUserId]);
+                            $roleRow = $stmtRole->fetch(PDO::FETCH_ASSOC);
+                            $subRole = strtolower(trim($roleRow['role'] ?? 'guest'));
+                        }
+
+                        error_log('[Notes] Sub ID=' . $sub['id'] . ', user_id=' . ($subUserId ?? 'NULL') . ', role=' . $subRole);
+
+                        // Admin a Technik vidí vše - dostanou notifikaci
                         if (in_array($subRole, ['admin', 'technik', 'technician'])) {
                             $subscriptions[] = $sub;
                             error_log('[Notes] Sub ID=' . $sub['id'] . ' (' . $subRole . ') - POVOLENO (vidi vse)');
                         }
                         // Prodejce vidí jen své reklamace
                         elseif (in_array($subRole, ['prodejce', 'user'])) {
-                            if ($vlastnikReklamace !== null && $subUserId === $vlastnikReklamace) {
+                            if ($vlastnikReklamace !== null && (string)$subUserId === (string)$vlastnikReklamace) {
                                 $subscriptions[] = $sub;
                                 error_log('[Notes] Sub ID=' . $sub['id'] . ' (prodejce) - POVOLENO (vlastnik reklamace)');
                             } else {
                                 error_log('[Notes] Sub ID=' . $sub['id'] . ' (prodejce) - ZAMITNUTO (cizi reklamace)');
                             }
                         }
-                        // Ostatní (guest apod.) - povoleno pokud odpovídá vlastníkovi
+                        // Ostatní (guest) - povoleno pokud odpovídá vlastníkovi
                         else {
-                            if ($vlastnikReklamace !== null && $subUserId === $vlastnikReklamace) {
+                            if ($vlastnikReklamace !== null && (string)$subUserId === (string)$vlastnikReklamace) {
                                 $subscriptions[] = $sub;
+                                error_log('[Notes] Sub ID=' . $sub['id'] . ' (guest) - POVOLENO (vlastnik)');
+                            } else {
+                                error_log('[Notes] Sub ID=' . $sub['id'] . ' (guest) - ZAMITNUTO');
                             }
                         }
                     }
 
                     // DEBUG: Logovat počet subscriptions
-                    error_log('[Notes] Nalezeno subscriptions: ' . count($subscriptions));
+                    error_log('[Notes] Po filtraci subscriptions: ' . count($subscriptions));
                     foreach ($subscriptions as $s) {
                         error_log('[Notes] Sub ID=' . $s['id'] . ', user_id=' . ($s['user_id'] ?? 'NULL') . ', email=' . ($s['email'] ?? 'NULL') . ', endpoint=' . substr($s['endpoint'], 0, 50) . '...');
                     }
