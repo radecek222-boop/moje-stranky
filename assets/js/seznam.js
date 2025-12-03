@@ -568,12 +568,13 @@ async function renderOrders(items = null) {
   const unreadIndicator = document.getElementById('unreadNotesIndicator');
   const unreadCountSpan = document.getElementById('unreadNotesCount');
 
-
-  if (totalUnreadCount > 0) {
-    unreadCountSpan.textContent = totalUnreadCount;
-    unreadIndicator.classList.remove('hidden');
-  } else {
-    unreadIndicator.classList.add('hidden');
+  if (unreadIndicator && unreadCountSpan) {
+    if (totalUnreadCount > 0) {
+      unreadCountSpan.textContent = totalUnreadCount;
+      unreadIndicator.style.display = 'block';
+    } else {
+      unreadIndicator.style.display = 'none';
+    }
   }
 
   // Uložit unreadCountsMap pro filtrování
