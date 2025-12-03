@@ -1740,9 +1740,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
-      // Audio nahravani a poznamky - ODEBRANO, nyni v seznam.js
-      // Tyto akce zpracovava seznam.js: showNotes, startRecording, stopRecording,
-      // deleteAudioPreview, saveNewNote, closeNotesModal, deleteNote
+      case 'deleteNote':
+        const noteId = button.getAttribute('data-note-id');
+        const orderId = button.getAttribute('data-order-id');
+        if (noteId && typeof deleteNote === 'function') {
+          console.log('[EMERGENCY] Mazu poznamku ID:', noteId);
+          deleteNote(noteId, orderId);
+        } else {
+          console.error('[EMERGENCY] deleteNote funkce neni dostupna nebo note ID chybi');
+        }
+        break;
 
       default:
         console.warn(`[EMERGENCY] Neznámá akce: ${action}`);
