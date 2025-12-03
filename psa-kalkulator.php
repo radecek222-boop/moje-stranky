@@ -17,7 +17,7 @@ $csrfToken = generateCSRFToken();
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=optional" rel="stylesheet">
 
-  <link rel="stylesheet" href="assets/css/psa-kalkulator.min.css">
+  <link rel="stylesheet" href="assets/css/psa-kalkulator.min.css?v=<?= filemtime(__DIR__ . '/assets/css/psa-kalkulator.min.css') ?>">
 </head>
 <body>
 <main id="main-content">
@@ -213,8 +213,8 @@ $csrfToken = generateCSRFToken();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer data-qr-lib="1"></script>
 
-<!-- Main JavaScript - v2025.12.03 -->
-<script src="assets/js/psa-kalkulator.min.js" defer></script>
+<!-- Main JavaScript -->
+<script src="assets/js/psa-kalkulator.min.js?v=<?= filemtime(__DIR__ . '/assets/js/psa-kalkulator.min.js') ?>" defer></script>
 
 </body>
 </html>
