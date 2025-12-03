@@ -1765,14 +1765,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // INLINE FIX: Prepis deleteNote funkce - obchazi cache seznam.js
 window.deleteNote = async function(noteId, orderId) {
-  console.log('[INLINE deleteNote] Zacinam mazat poznamku ID:', noteId);
+  console.log('[INLINE deleteNote v2] Zacinam mazat poznamku ID:', noteId);
 
-  if (!await wgsConfirm('Opravdu chcete smazat tuto poznámku?', 'Smazat', 'Zrušit')) {
-    console.log('[INLINE deleteNote] Uzivatel zrusil');
+  // FIX: Pouzit nativni confirm() misto wgsConfirm - obchazi z-index problemy s modaly
+  if (!confirm('Opravdu chcete smazat tuto poznámku?')) {
+    console.log('[INLINE deleteNote v2] Uzivatel zrusil');
     return;
   }
 
-  console.log('[INLINE deleteNote] Uzivatel potvrdil');
+  console.log('[INLINE deleteNote v2] Uzivatel potvrdil');
 
   try {
     const csrfToken = await getCSRFToken();
@@ -1808,7 +1809,7 @@ window.deleteNote = async function(noteId, orderId) {
     alert('Chyba: ' + e.message);
   }
 };
-console.log('[INLINE] deleteNote funkce prepsana - verze 20251203-01');
+console.log('[INLINE] deleteNote funkce prepsana - verze 20251203-02 (nativni confirm)');
 </script>
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
