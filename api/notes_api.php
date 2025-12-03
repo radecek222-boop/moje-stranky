@@ -251,10 +251,22 @@ try {
                     // Vlastník reklamace (prodejce který ji vytvořil)
                     $vlastnikReklamace = $infoReklamace['created_by'] ?? null;
 
+                    // Zjistit jmeno autora poznamky
+                    $jmenoAutora = $createdBy; // fallback na email
+                    $stmtAutor = $pdo->prepare("SELECT name FROM wgs_users WHERE email = :email LIMIT 1");
+                    $stmtAutor->execute([':email' => $createdBy]);
+                    $autorRow = $stmtAutor->fetch(PDO::FETCH_ASSOC);
+                    if ($autorRow && !empty($autorRow['name'])) {
+                        $jmenoAutora = $autorRow['name'];
+                    }
+
+                    // Cislo reklamace
+                    $cisloReklamace = $infoReklamace['cislo'] ?? $infoReklamace['reklamace_id'] ?? '';
+
                     // Sestavit payload
                     $payload = [
-                        'title' => 'Nova poznamka',
-                        'body' => 'Zakazka ' . ($infoReklamace['cislo'] ?? $infoReklamace['reklamace_id']) . ' - ' . ($infoReklamace['jmeno'] ?? 'bez jmena'),
+                        'title' => 'WGS',
+                        'body' => $jmenoAutora . ' prave pridal poznamku k ' . $cisloReklamace,
                         'icon' => '/icon192.png',
                         'tag' => 'wgs-note-' . $noteId,
                         'typ' => 'nova_poznamka',
