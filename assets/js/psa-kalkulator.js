@@ -54,6 +54,134 @@ function updatePeriodDisplay() {
   document.getElementById('periodDisplay').textContent = periodText;
 }
 
+// === NAČÍST OBDOBÍ ===
+async function loadPeriod() {
+  const periodKey = `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
+  const months = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
+                  'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
+
+  try {
+    const response = await fetch(API_URL, { credentials: 'same-origin' });
+    if (!response.ok) throw new Error('Nepodařilo se načíst data');
+
+    const payload = await response.json();
+    if (payload.status !== 'success' || !payload.data) {
+      throw new Error('Neplatná odpověď serveru');
+    }
+
+    const data = payload.data;
+
+    // Zkontrolovat jestli období existuje
+    if (!data.periods || !data.periods[periodKey]) {
+      showError(`Období ${months[currentPeriod.month]} ${currentPeriod.year} nebylo nalezeno. Nejprve uložte data pro toto období.`);
+      // Vynulovat hodiny
+      employees.forEach(emp => emp.hours = 0);
+      renderTable();
+      updateStats();
+      return;
+    }
+
+    // Načíst data období
+    const periodData = data.periods[periodKey];
+
+    // Aktualizovat hodiny zaměstnanců podle uloženého období
+    employees = data.employees.map(emp => {
+      const periodEmp = periodData.employees.find(pe => pe.id === emp.id);
+      return {
+        ...emp,
+        bank: formatBankCode(emp.bank),
+        hours: periodEmp ? (periodEmp.hours || 0) : 0,
+        bonusAmount: periodEmp ? (periodEmp.bonusAmount || 0) : (emp.bonusAmount || 0)
+      };
+    });
+
+    renderTable();
+    updateStats();
+    showSuccess(`Načteno období: ${months[currentPeriod.month]} ${currentPeriod.year} (${periodData.totalHours || 0} hodin)`);
+    logger.log(`Loaded period ${periodKey}:`, periodData);
+
+  } catch (error) {
+    logger.error('Chyba při načítání období:', error);
+    showError('Chyba při načítání období: ' + error.message);
+  }
+}
+
+// === ZOBRAZIT ULOŽENÁ OBDOBÍ ===
+async function updateSavedPeriodsDisplay() {
+  const container = document.getElementById('savedPeriodsList');
+  const card = document.getElementById('savedPeriodsCard');
+  if (!container) return;
+
+  try {
+    const response = await fetch(API_URL, { credentials: 'same-origin' });
+    if (!response.ok) return;
+
+    const payload = await response.json();
+    if (payload.status !== 'success' || !payload.data) return;
+
+    const periods = payload.data.periods || {};
+    const months = ['', 'Led', 'Úno', 'Bře', 'Dub', 'Kvě', 'Čvn',
+                    'Čvc', 'Srp', 'Zář', 'Říj', 'Lis', 'Pro'];
+
+    // Seřadit období sestupně
+    const sortedPeriods = Object.keys(periods).sort().reverse();
+
+    if (sortedPeriods.length === 0) {
+      if (card) card.style.display = 'none';
+      return;
+    }
+
+    // Zobrazit kartu
+    if (card) card.style.display = 'block';
+
+    const periodButtons = sortedPeriods.slice(0, 12).map(key => {
+      const [year, month] = key.split('-');
+      const monthNum = parseInt(month);
+      const label = `${months[monthNum]} ${year}`;
+      const data = periods[key];
+      const hours = data.totalHours || 0;
+      const salary = data.totalSalary ? Math.round(data.totalSalary).toLocaleString('cs-CZ') : '0';
+      return `<button class="saved-period-btn" data-action="loadSavedPeriod" data-period="${key}">
+        <strong>${label}</strong>
+        <span class="saved-period-info">${hours}h / ${salary} Kč</span>
+      </button>`;
+    }).join('');
+
+    container.innerHTML = periodButtons;
+
+  } catch (error) {
+    logger.error('Chyba při načítání seznamu období:', error);
+  }
+}
+
+// === NAČÍST KONKRÉTNÍ ULOŽENÉ OBDOBÍ ===
+async function loadSavedPeriod(periodKey) {
+  // Parsovat období a nastavit selectory
+  const [year, month] = periodKey.split('-');
+  currentPeriod.year = parseInt(year);
+  currentPeriod.month = parseInt(month);
+
+  // Aktualizovat selectory v UI
+  const monthSelect = document.getElementById('monthSelect');
+  const yearSelect = document.getElementById('yearSelect');
+  if (monthSelect) monthSelect.value = currentPeriod.month;
+  if (yearSelect) yearSelect.value = currentPeriod.year;
+
+  updatePeriodDisplay();
+  await loadPeriod();
+}
+
+// === VYČISTIT HODINY (NOVÉ OBDOBÍ) ===
+function clearHours() {
+  employees.forEach(emp => {
+    emp.hours = 0;
+    if (emp.type === 'bonus_girls') emp.bonusAmount = 0;
+  });
+  renderTable();
+  updateStats();
+  showSuccess('Hodiny vynulovány - připraveno pro nové období');
+}
+
 // === DATA LOADING ===
 async function loadData(period = null) {
   try {
@@ -110,6 +238,7 @@ async function loadData(period = null) {
 
     renderTable();
     updateStats();
+    updateSavedPeriodsDisplay();
   } catch (error) {
     logger.error('Error loading data:', error);
     // Try to load from localStorage as fallback
@@ -137,6 +266,51 @@ async function saveData() {
 
 // === SERVER SAVE ===
 async function saveToServer() {
+  // Nejprve načíst existující data ze serveru
+  let existingData = {};
+  try {
+    const loadResponse = await fetch(API_URL, { credentials: 'same-origin' });
+    if (loadResponse.ok) {
+      const loadResult = await loadResponse.json();
+      if (loadResult.status === 'success' && loadResult.data) {
+        existingData = loadResult.data;
+      }
+    }
+  } catch (e) {
+    logger.warn('Nelze načíst existující data, vytvářím nová:', e);
+  }
+
+  // Vytvořit klíč období (YYYY-MM)
+  const periodKey = `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
+
+  // Spočítat statistiky pro období
+  const stats = calculateStats();
+
+  // Připravit data období - pouze hodiny a základní info
+  const periodEmployees = employees.filter(e => e.active !== false && e.hours > 0).map(emp => ({
+    id: emp.id,
+    name: emp.name,
+    hours: emp.hours || 0,
+    type: emp.type || 'standard',
+    bonusAmount: emp.bonusAmount || 0
+  }));
+
+  // Zachovat existující periods a přidat/aktualizovat aktuální
+  const periods = existingData.periods || {};
+  periods[periodKey] = {
+    employees: periodEmployees,
+    totalHours: stats.totalHours,
+    totalSalary: stats.totalSalary,
+    totalInvoice: stats.totalInvoice,
+    profit: stats.profit,
+    marekBonus: stats.marekBonus || 0,
+    radekBonus: stats.radekBonus || 0,
+    girlsBonus: stats.girlsBonus || 0,
+    radekTotal: stats.radekTotal || 0,
+    lastModified: new Date().toISOString()
+  };
+
+  // Kompletní data k uložení
   const data = {
     config: {
       salaryRate: salaryRate,
@@ -144,8 +318,17 @@ async function saveToServer() {
       company: 'White Glove Service',
       currency: 'CZK'
     },
-    employees: employees
+    employees: employees,
+    periods: periods,
+    metadata: existingData.metadata || {
+      version: '1.1',
+      lastModified: new Date().toISOString(),
+      createdBy: 'PSA Kalkulátor'
+    }
   };
+
+  // Aktualizovat metadata
+  data.metadata.lastModified = new Date().toISOString();
 
   try {
     const response = await fetch(API_URL, {
@@ -164,12 +347,69 @@ async function saveToServer() {
       throw new Error(result.message || 'Nepodařilo se uložit data na server');
     }
 
-    logger.log('Data saved to server successfully', result);
+    logger.log(`Data pro období ${periodKey} úspěšně uložena`, result);
+    updateSavedPeriodsDisplay();
     return result;
   } catch (error) {
     logger.error('Server save failed:', error);
     throw error;
   }
+}
+
+// === VÝPOČET STATISTIK ===
+function calculateStats() {
+  let totalHours = 0;
+  let totalSalary = 0;
+  let totalInvoice = 0;
+  let girlsHours = 0;
+
+  employees.forEach(emp => {
+    if (emp.active === false) return;
+
+    const hours = parseFloat(emp.hours) || 0;
+
+    // Standardní a SWIFT zaměstnanci
+    if (emp.type === 'standard' || emp.type === 'swift') {
+      totalHours += hours;
+      totalSalary += hours * salaryRate;
+      totalInvoice += hours * invoiceRate;
+
+      // Holky pro bonus Radka (id 12-17 podle původní logiky)
+      if ([12, 13, 14, 15, 16, 17].includes(emp.id)) {
+        girlsHours += hours;
+      }
+    }
+    // Paušální zaměstnanci
+    else if (emp.type === 'pausalni' && emp.pausalni) {
+      totalSalary += emp.pausalni.tax || 0;
+    }
+    // Bonus Girls
+    else if (emp.type === 'bonus_girls') {
+      totalSalary += parseFloat(emp.bonusAmount) || 0;
+    }
+  });
+
+  // Marek bonus (special) - 20 Kč za každou hodinu ostatních
+  const marekBonus = totalHours * 20;
+
+  // Radek bonus (special2) - 20 Kč za hodinu + bonus od holek (15%)
+  const girlsBonus = girlsHours * salaryRate * 0.15;
+  const radekBonus = totalHours * 20;
+  const radekTotal = radekBonus + girlsBonus;
+
+  // Přičíst bonusy k výplatě
+  totalSalary += marekBonus + radekTotal;
+
+  return {
+    totalHours,
+    totalSalary,
+    totalInvoice,
+    profit: totalInvoice - totalSalary,
+    marekBonus,
+    radekBonus,
+    girlsBonus,
+    radekTotal
+  };
 }
 
 // === LOCAL STORAGE (BACKUP) ===
@@ -1323,6 +1563,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
       case 'updateRates':
         if (typeof updateRates === 'function') updateRates();
+        return;
+
+      // === OBDOBÍ MANAGEMENT ===
+      case 'loadPeriod':
+        if (typeof loadPeriod === 'function') loadPeriod();
+        return;
+
+      case 'loadSavedPeriod':
+        const periodToLoad = target.getAttribute('data-period');
+        if (periodToLoad && typeof loadSavedPeriod === 'function') {
+          loadSavedPeriod(periodToLoad);
+        }
+        return;
+
+      case 'clearHours':
+        if (typeof clearHours === 'function') clearHours();
         return;
     }
 

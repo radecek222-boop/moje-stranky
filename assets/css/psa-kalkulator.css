@@ -583,6 +583,48 @@ body {
   display: inline-block;
 }
 
+/* === SAVED PERIODS === */
+.saved-periods-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.saved-period-btn {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid var(--c-border);
+  background: var(--c-white);
+  color: var(--c-black);
+}
+
+.saved-period-btn:hover {
+  background: var(--c-bg);
+  border-color: var(--c-grey);
+}
+
+.saved-period-btn.active {
+  background: var(--c-black);
+  color: var(--c-white);
+  border-color: var(--c-black);
+}
+
+.saved-period-info {
+  font-size: 0.7rem;
+  color: var(--c-light-grey);
+  display: block;
+  margin-top: 0.2rem;
+}
+
+.no-periods-msg {
+  color: var(--c-grey);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
   .container {
