@@ -21,6 +21,7 @@ $sqlTabulka = "
 CREATE TABLE IF NOT EXISTS wgs_push_subscriptions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NULL COMMENT 'ID uzivatele (pokud je prihlasen)',
+    email VARCHAR(255) NULL COMMENT 'Email uzivatele pro notifikace',
     endpoint VARCHAR(500) NOT NULL COMMENT 'Push endpoint URL',
     p256dh VARCHAR(200) NOT NULL COMMENT 'Public key pro sifrovani',
     auth VARCHAR(100) NOT NULL COMMENT 'Auth secret',
@@ -334,6 +335,7 @@ try {
         <tbody>
             <tr><td>id</td><td>INT AUTO_INCREMENT</td><td>Primarni klic</td></tr>
             <tr><td>user_id</td><td>INT NULL</td><td>ID uzivatele</td></tr>
+            <tr><td>email</td><td>VARCHAR(255)</td><td>Email uzivatele pro notifikace</td></tr>
             <tr><td>endpoint</td><td>VARCHAR(500)</td><td>Push endpoint URL</td></tr>
             <tr><td>p256dh</td><td>VARCHAR(200)</td><td>Public key pro sifrovani</td></tr>
             <tr><td>auth</td><td>VARCHAR(100)</td><td>Auth secret</td></tr>

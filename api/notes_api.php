@@ -255,17 +255,22 @@ try {
                 error_log('[Notes] WebPush inicializace: ' . ($webPush->jeInicializovano() ? 'OK' : 'FAILED'));
 
                 if ($webPush->jeInicializovano()) {
-                    // Načíst info o reklamaci včetně vlastníka (created_by)
+                    // Načíst info o reklamaci včetně vlastníka (created_by + email vlastníka)
                     $stmtInfo = $pdo->prepare("
-                        SELECT reklamace_id, jmeno, cislo, created_by
-                        FROM wgs_reklamace
-                        WHERE id = :id
+                        SELECT r.reklamace_id, r.jmeno, r.cislo, r.created_by,
+                               u.email as vlastnik_email
+                        FROM wgs_reklamace r
+                        LEFT JOIN wgs_users u ON (
+                            u.user_id = r.created_by OR u.id = r.created_by
+                        )
+                        WHERE r.id = :id
                     ");
                     $stmtInfo->execute([':id' => $claimId]);
                     $infoReklamace = $stmtInfo->fetch(PDO::FETCH_ASSOC);
 
                     // Vlastník reklamace (prodejce který ji vytvořil)
                     $vlastnikReklamace = $infoReklamace['created_by'] ?? null;
+                    $vlastnikEmail = $infoReklamace['vlastnik_email'] ?? null;
 
                     // Zjistit jmeno autora poznamky
                     $jmenoAutora = $createdBy; // fallback na email
@@ -296,7 +301,7 @@ try {
 
                     // DEBUG: Logovat autora a vlastníka
                     error_log('[Notes] Autor poznamky: user_id=' . $userId . ', email=' . $createdBy);
-                    error_log('[Notes] Vlastnik reklamace: ' . ($vlastnikReklamace ?? 'NULL'));
+                    error_log('[Notes] Vlastnik reklamace: user_id=' . ($vlastnikReklamace ?? 'NULL') . ', email=' . ($vlastnikEmail ?? 'NULL'));
 
                     // ========================================
                     // PRAVIDLA PRO NOTIFIKACE:
@@ -371,18 +376,44 @@ try {
                             $subscriptions[] = $sub;
                             error_log('[Notes] Sub ID=' . $sub['id'] . ' (' . $subRole . ') - POVOLENO (vidi vse)');
                         }
-                        // Prodejce vidí jen své reklamace
+                        // Prodejce vidí jen své reklamace - kontrola podle user_id NEBO email
                         elseif (in_array($subRole, ['prodejce', 'user'])) {
-                            if ($vlastnikReklamace !== null && (string)$subUserId === (string)$vlastnikReklamace) {
+                            $jeVlastnik = false;
+
+                            // Kontrola 1: Podle user_id
+                            if ($vlastnikReklamace !== null && $subUserId !== null && (string)$subUserId === (string)$vlastnikReklamace) {
+                                $jeVlastnik = true;
+                                error_log('[Notes] Sub ID=' . $sub['id'] . ' - vlastnik (user_id match)');
+                            }
+
+                            // Kontrola 2: Podle emailu (fallback)
+                            if (!$jeVlastnik && $vlastnikEmail !== null && $subEmail !== null && strtolower($subEmail) === strtolower($vlastnikEmail)) {
+                                $jeVlastnik = true;
+                                error_log('[Notes] Sub ID=' . $sub['id'] . ' - vlastnik (email match)');
+                            }
+
+                            if ($jeVlastnik) {
                                 $subscriptions[] = $sub;
                                 error_log('[Notes] Sub ID=' . $sub['id'] . ' (prodejce) - POVOLENO (vlastnik reklamace)');
                             } else {
                                 error_log('[Notes] Sub ID=' . $sub['id'] . ' (prodejce) - ZAMITNUTO (cizi reklamace)');
                             }
                         }
-                        // Ostatní (guest) - povoleno pokud odpovídá vlastníkovi
+                        // Ostatní (guest) - povoleno pokud odpovídá vlastníkovi (user_id NEBO email)
                         else {
-                            if ($vlastnikReklamace !== null && (string)$subUserId === (string)$vlastnikReklamace) {
+                            $jeVlastnik = false;
+
+                            // Kontrola 1: Podle user_id
+                            if ($vlastnikReklamace !== null && $subUserId !== null && (string)$subUserId === (string)$vlastnikReklamace) {
+                                $jeVlastnik = true;
+                            }
+
+                            // Kontrola 2: Podle emailu (fallback)
+                            if (!$jeVlastnik && $vlastnikEmail !== null && $subEmail !== null && strtolower($subEmail) === strtolower($vlastnikEmail)) {
+                                $jeVlastnik = true;
+                            }
+
+                            if ($jeVlastnik) {
                                 $subscriptions[] = $sub;
                                 error_log('[Notes] Sub ID=' . $sub['id'] . ' (guest) - POVOLENO (vlastnik)');
                             } else {
