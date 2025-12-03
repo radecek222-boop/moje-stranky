@@ -839,7 +839,8 @@ function sanitizeMessage(message) {
 let qrLibraryPromise = null;
 
 function ensureQrLibraryLoaded() {
-  if (window.QRCode && typeof QRCode.toCanvas === 'function') {
+  // qrcodejs2 knihovna - kontrola existence konstruktoru
+  if (window.QRCode && typeof window.QRCode === 'function') {
     return Promise.resolve(window.QRCode);
   }
 
@@ -848,7 +849,7 @@ function ensureQrLibraryLoaded() {
       const existing = document.querySelector('script[data-qr-lib]');
 
       if (existing) {
-        if (window.QRCode && typeof QRCode.toCanvas === 'function') {
+        if (window.QRCode && typeof window.QRCode === 'function') {
           resolve(window.QRCode);
           return;
         }
@@ -859,11 +860,11 @@ function ensureQrLibraryLoaded() {
       }
 
       const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+      script.src = 'assets/js/qrcode.min.js';
       script.defer = true;
       script.dataset.qrLib = '1';
       script.onload = () => {
-        if (window.QRCode && typeof QRCode.toCanvas === 'function') {
+        if (window.QRCode && typeof window.QRCode === 'function') {
           resolve(window.QRCode);
         } else {
           reject(new Error('Knihovna QR kódu se načetla, ale neobsahuje očekávané API'));
@@ -913,45 +914,33 @@ function buildSpaydPayload(data) {
 async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
   await ensureQrLibraryLoaded();
 
-  if (!window.QRCode || typeof QRCode.toCanvas !== 'function') {
+  if (!window.QRCode || typeof window.QRCode !== 'function') {
     throw new Error('Knihovna pro QR kódy není načtena');
   }
 
-  const drawWithLevel = (level) => new Promise((resolve, reject) => {
-    const canvas = document.createElement('canvas');
+  return new Promise((resolve, reject) => {
+    try {
+      // Vyčistit element
+      qrElement.innerHTML = '';
 
-    QRCode.toCanvas(
-      canvas,
-      qrText,
-      {
+      // qrcodejs2 API - vytvoří QR kód přímo do elementu
+      new QRCode(qrElement, {
+        text: qrText,
         width: size,
         height: size,
-        margin: 1,
-        errorCorrectionLevel: level
-      },
-      (err) => {
-        if (err) {
-          const isOverflow = /overflow/i.test(err.message || '');
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
 
-          if (level === 'M' && isOverflow) {
-            logger.warn(`QR payload příliš dlouhý${contextLabel ? ' (' + contextLabel + ')' : ''}, zkouším nižší úroveň korekce (L)`);
-            return drawWithLevel('L').then(resolve).catch(reject);
-          }
-
-          logger.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
-          qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
-          reject(err);
-          return;
-        }
-
-        qrElement.innerHTML = '';
-        qrElement.appendChild(canvas);
-        resolve();
-      }
-    );
+      logger.log(`QR code generated${contextLabel ? ' for ' + contextLabel : ''}`);
+      resolve();
+    } catch (err) {
+      logger.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
+      qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
+      reject(err);
+    }
   });
-
-  await drawWithLevel('M');
 }
 
 // === NOTIFICATIONS ===
@@ -1323,12 +1312,21 @@ Zpráva: Výplata ${name} ${currentPeriod.month}/${currentPeriod.year}`;
 }
 
 function downloadQR(qrId, employeeName) {
+  // qrcodejs2 vytváří img element (nebo canvas jako fallback)
+  const qrImg = document.querySelector(`#${qrId} img`);
   const qrCanvas = document.querySelector(`#${qrId} canvas`);
-  if (qrCanvas) {
-    const link = document.createElement('a');
-    link.download = `QR_platba_${employeeName}_${currentPeriod.month}_${currentPeriod.year}.png`;
+
+  const link = document.createElement('a');
+  link.download = `QR_platba_${employeeName}_${currentPeriod.month}_${currentPeriod.year}.png`;
+
+  if (qrImg && qrImg.src) {
+    link.href = qrImg.src;
+    link.click();
+  } else if (qrCanvas) {
     link.href = qrCanvas.toDataURL();
     link.click();
+  } else {
+    wgsToast.error('QR kód nenalezen');
   }
 }
 

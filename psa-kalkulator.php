@@ -207,8 +207,8 @@ $csrfToken = generateCSRFToken();
 <script>
   window.PSA_CSRF_TOKEN = '<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>';
 </script>
-<!-- QR Code library - jsdelivr CDN -->
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer data-qr-lib="1"></script>
+<!-- QR Code library - lokální kopie -->
+<script src="assets/js/qrcode.min.js" defer data-qr-lib="1"></script>
 
 <!-- Main JavaScript -->
 <script src="assets/js/psa-kalkulator.min.js?v=<?= filemtime(__DIR__ . '/assets/js/psa-kalkulator.min.js') ?>" defer></script>
