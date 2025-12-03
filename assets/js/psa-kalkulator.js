@@ -637,52 +637,76 @@ async function saveToServer() {
 }
 
 // === VÝPOČET STATISTIK ===
+// Používá STEJNOU logiku jako updateStats() - počítá přesně jako v tabulce
 function calculateStats() {
   let totalHours = 0;
   let totalSalary = 0;
   let totalInvoice = 0;
-  let girlsHours = 0;
 
+  // Nejprve spočítat celkové hodiny pro bonus special zaměstnanců
+  let totalOtherHours = 0;
   employees.forEach(emp => {
     if (emp.active === false) return;
-
-    const hours = parseFloat(emp.hours) || 0;
-
-    // Standardní a SWIFT zaměstnanci
-    if (emp.type === 'standard' || emp.type === 'swift') {
-      totalHours += hours;
-      totalSalary += hours * salaryRate;
-      totalInvoice += hours * invoiceRate;
-
-      // Holky pro bonus Radka (id 12-17 podle původní logiky)
-      if ([12, 13, 14, 15, 16, 17].includes(emp.id)) {
-        girlsHours += hours;
+    if (emp.type !== 'special' && emp.type !== 'special2' && emp.type !== 'bonus_girls' && emp.type !== 'premie_polozka') {
+      const isLenka = emp.name === 'Lenka' || emp.name.includes('Lenka');
+      if (!isLenka) {
+        totalOtherHours += parseFloat(emp.hours) || 0;
       }
-    }
-    // Paušální zaměstnanci
-    else if (emp.type === 'pausalni' && emp.pausalni) {
-      totalSalary += emp.pausalni.tax || 0;
-    }
-    // Bonus Girls
-    else if (emp.type === 'bonus_girls') {
-      totalSalary += parseFloat(emp.bonusAmount) || 0;
     }
   });
 
-  // Marek bonus (special) - 20 Kč za každou hodinu ostatních
-  const marekBonus = totalHours * 20;
+  // Projít všechny zaměstnance a sečíst PŘESNĚ jako v tabulce
+  employees.forEach(emp => {
+    if (emp.active === false) return;
 
-  // Radek bonus (special2) - 20 Kč za hodinu + bonus od holek (15%)
-  const girlsBonus = girlsHours * salaryRate * 0.15;
-  const radekBonus = totalHours * 20;
-  const radekTotal = radekBonus + girlsBonus;
+    const isLenka = emp.name === 'Lenka' || emp.name.includes('Lenka');
+    let salary = 0;
+    let invoice = 0;
 
-  // Prémie položka - součet všech prémií
+    if (isLenka) {
+      // Lenka má paušální mzdu 8716 Kč
+      salary = 8716;
+      invoice = 0;
+    } else if (emp.type === 'bonus_girls') {
+      // Bonus pro holky - editovatelná částka
+      salary = parseFloat(emp.bonusAmount) || 0;
+      invoice = 0;
+    } else if (emp.type === 'special' || emp.type === 'special2') {
+      // Special zaměstnanci (Marek, Radek) - bonus z hodin ostatních
+      salary = totalOtherHours * 20;
+      invoice = 0;
+    } else if (emp.type === 'premie_polozka') {
+      // Prémie položka - editovatelná částka
+      salary = parseFloat(emp.premieCastka) || 0;
+      invoice = 0;
+    } else if (emp.type === 'pausalni' && emp.pausalni) {
+      // Paušální zaměstnanci
+      const hours = parseFloat(emp.hours) || 0;
+      const monthlyRate = emp.pausalni.rate / 12;
+      const monthlyTax = emp.pausalni.tax;
+      salary = hours * salaryRate;
+      invoice = Math.min(hours * invoiceRate, monthlyRate - monthlyTax);
+    } else {
+      // Standardní zaměstnanci
+      const hours = parseFloat(emp.hours) || 0;
+      salary = hours * salaryRate;
+      invoice = hours * invoiceRate;
+    }
+
+    totalSalary += salary;
+    totalInvoice += invoice;
+
+    // Hodiny jen pro běžné zaměstnance
+    if (emp.type !== 'special' && emp.type !== 'special2' && emp.type !== 'bonus_girls' && emp.type !== 'premie_polozka' && !isLenka) {
+      totalHours += parseFloat(emp.hours) || 0;
+    }
+  });
+
+  // Bonusy pro zpětnou kompatibilitu (používá se při ukládání do DB)
+  const marekBonus = totalOtherHours * 20;
+  const radekBonus = totalOtherHours * 20;
   const premiePolozky = employees.filter(e => e.type === 'premie_polozka');
-  const premieCelkem = premiePolozky.reduce((sum, e) => sum + (e.premieCastka || 0), 0);
-
-  // Přičíst bonusy a prémie k výplatě
-  totalSalary += marekBonus + radekTotal + premieCelkem;
+  const premieCelkem = premiePolozky.reduce((sum, e) => sum + (parseFloat(e.premieCastka) || 0), 0);
 
   return {
     totalHours,
@@ -691,8 +715,8 @@ function calculateStats() {
     profit: totalInvoice - totalSalary,
     marekBonus,
     radekBonus,
-    girlsBonus,
-    radekTotal,
+    girlsBonus: 0,  // Již se nepočítá zvlášť
+    radekTotal: radekBonus,
     premieCelkem
   };
 }
