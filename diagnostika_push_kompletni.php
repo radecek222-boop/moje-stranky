@@ -209,6 +209,65 @@ try {
 }
 
 // ============================================
+// 3b. KONTROLA USER_ID MAPPING
+// ============================================
+echo "<h2>3b. Kontrola user_id mapping</h2>";
+
+try {
+    // Subscriptions s jejich user_id
+    $stmt = $pdo->query("SELECT id, user_id, platforma FROM wgs_push_subscriptions WHERE aktivni = 1 LIMIT 10");
+    $subs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo "<h3>Push subscriptions:</h3><table><tr><th>Sub ID</th><th>user_id</th><th>Platforma</th><th>Nalezen v wgs_users?</th><th>Role</th></tr>";
+
+    foreach ($subs as $s) {
+        $uid = $s['user_id'];
+        $nalezen = 'NE';
+        $role = '-';
+
+        if ($uid !== null) {
+            // Zkusit najit v wgs_users
+            $stmtU = $pdo->prepare("SELECT user_id, role FROM wgs_users WHERE user_id = :uid LIMIT 1");
+            $stmtU->execute([':uid' => $uid]);
+            $user = $stmtU->fetch(PDO::FETCH_ASSOC);
+
+            if ($user) {
+                $nalezen = 'ANO';
+                $role = $user['role'] ?? '-';
+            }
+        }
+
+        $class = $nalezen === 'ANO' ? 'ok' : 'chyba';
+        echo "<tr>
+            <td>" . $s['id'] . "</td>
+            <td>" . htmlspecialchars($uid ?? 'NULL') . "</td>
+            <td>" . $s['platforma'] . "</td>
+            <td class='{$class}'>{$nalezen}</td>
+            <td>{$role}</td>
+        </tr>";
+    }
+    echo "</table>";
+
+    // Ukazat strukturu wgs_users
+    echo "<h3>Uzivatele v wgs_users (prvnich 10):</h3>";
+    $stmt = $pdo->query("SELECT user_id, email, role FROM wgs_users LIMIT 10");
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo "<table><tr><th>user_id</th><th>email</th><th>role</th></tr>";
+    foreach ($users as $u) {
+        echo "<tr>
+            <td>" . htmlspecialchars($u['user_id'] ?? '-') . "</td>
+            <td>" . htmlspecialchars($u['email'] ?? '-') . "</td>
+            <td>" . htmlspecialchars($u['role'] ?? '-') . "</td>
+        </tr>";
+    }
+    echo "</table>";
+
+} catch (PDOException $e) {
+    echo "<div class='chyba'>Chyba: " . htmlspecialchars($e->getMessage()) . "</div>";
+}
+
+// ============================================
 // 4. WEBPUSH INICIALIZACE
 // ============================================
 echo "<h2>4. WebPush inicializace</h2>";
