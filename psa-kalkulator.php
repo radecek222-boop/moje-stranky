@@ -42,29 +42,31 @@ $csrfToken = generateCSRFToken();
       <h1 class="title">Kalkulátor Mezd PSA</h1>
       <p class="subtitle">Výpočet mezd a fakturace pro zaměstnance</p>
     </div>
-    <div class="period-selector">
-      <select id="monthSelect" class="form-select" data-onchange="updatePeriod">
-        <option value="1">Leden</option>
-        <option value="2">Únor</option>
-        <option value="3">Březen</option>
-        <option value="4">Duben</option>
-        <option value="5">Květen</option>
-        <option value="6">Červen</option>
-        <option value="7">Červenec</option>
-        <option value="8">Srpen</option>
-        <option value="9">Září</option>
-        <option value="10">Říjen</option>
-        <option value="11">Listopad</option>
-        <option value="12">Prosinec</option>
-      </select>
-      <select id="yearSelect" class="form-select" data-onchange="updatePeriod">
-        <option value="2024">2024</option>
-        <option value="2025" selected>2025</option>
-        <option value="2026">2026</option>
-      </select>
-      <div class="period-display" id="periodDisplay">Listopad 2025</div>
-      <button class="btn btn-sm" data-action="loadPeriod" title="Načíst uložená data pro zvolené období">Načíst období</button>
-      <button class="btn btn-sm btn-secondary" data-action="clearHours" title="Vynulovat hodiny všech zaměstnanců">Vynulovat</button>
+  </div>
+
+  <!-- FILTR OBDOBÍ -->
+  <div class="period-filter-card">
+    <div class="period-filter-label">Období</div>
+    <div class="period-display-wrapper">
+      <div class="period-display clickable" id="periodDisplay" data-action="togglePeriodOverlay" role="button" tabindex="0" title="Klikněte pro výběr období">
+        <span id="periodDisplayText">Prosinec 2025</span>
+        <span class="period-arrow">▼</span>
+      </div>
+      <!-- Mini-overlay pro výběr období -->
+      <div class="period-overlay" id="periodOverlay">
+        <div class="period-overlay-header">
+          <span>Archiv období</span>
+          <button class="period-overlay-close" data-action="closePeriodOverlay" title="Zavřít">&times;</button>
+        </div>
+        <div class="period-overlay-content" id="periodOverlayContent">
+          <!-- Dynamicky generováno JavaScriptem -->
+          <div class="period-loading">Načítám období...</div>
+        </div>
+        <div class="period-overlay-footer">
+          <button class="btn btn-sm" data-action="closePeriodOverlay">Zavřít</button>
+          <button class="btn btn-sm btn-secondary" data-action="clearHours">Nové období</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -121,18 +123,6 @@ $csrfToken = generateCSRFToken();
       <div class="stat-value" id="avgHoursPerEmployee">0h</div>
       <div class="stat-label">Průměr/zaměstnanec</div>
       <div class="stat-info" id="avgSalaryPerEmployee">0 Kč</div>
-    </div>
-  </div>
-
-  <!-- ULOŽENÁ OBDOBÍ -->
-  <div class="card saved-periods-card" id="savedPeriodsCard" style="display: none;">
-    <div class="card-header">
-      <h2 class="card-title">Uložená období</h2>
-    </div>
-    <div class="card-body">
-      <div id="savedPeriodsList" class="saved-periods-list">
-        <!-- Dynamicky generováno JavaScriptem -->
-      </div>
     </div>
   </div>
 

@@ -23,35 +23,123 @@ function initializePeriod() {
   const now = new Date();
   currentPeriod.month = now.getMonth() + 1;
   currentPeriod.year = now.getFullYear();
-
-  const monthSelect = document.getElementById('monthSelect');
-  const yearSelect = document.getElementById('yearSelect');
-
-  if (monthSelect) {
-    monthSelect.value = currentPeriod.month;
-  }
-  if (yearSelect) {
-    yearSelect.value = currentPeriod.year;
-  }
-
   updatePeriodDisplay();
-}
-
-function updatePeriod() {
-  currentPeriod.month = parseInt(document.getElementById('monthSelect').value);
-  currentPeriod.year = parseInt(document.getElementById('yearSelect').value);
-  updatePeriodDisplay();
-
-  // Load data for the selected period
-  const periodKey = `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
-  loadData(periodKey);
 }
 
 function updatePeriodDisplay() {
   const months = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
                   'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
   const periodText = `${months[currentPeriod.month]} ${currentPeriod.year}`;
-  document.getElementById('periodDisplay').textContent = periodText;
+  const displayEl = document.getElementById('periodDisplayText');
+  if (displayEl) {
+    displayEl.textContent = periodText;
+  }
+}
+
+// === PERIOD OVERLAY ===
+function togglePeriodOverlay() {
+  const overlay = document.getElementById('periodOverlay');
+  const periodBtn = document.getElementById('periodDisplay');
+
+  if (overlay.classList.contains('active')) {
+    closePeriodOverlay();
+  } else {
+    overlay.classList.add('active');
+    periodBtn.classList.add('active');
+    naplnitPeriodOverlay();
+  }
+}
+
+function closePeriodOverlay() {
+  const overlay = document.getElementById('periodOverlay');
+  const periodBtn = document.getElementById('periodDisplay');
+  overlay.classList.remove('active');
+  periodBtn.classList.remove('active');
+}
+
+// Zavřít overlay při kliknutí mimo
+document.addEventListener('click', (e) => {
+  const overlay = document.getElementById('periodOverlay');
+  const periodBtn = document.getElementById('periodDisplay');
+
+  if (overlay && overlay.classList.contains('active')) {
+    if (!overlay.contains(e.target) && !periodBtn.contains(e.target)) {
+      closePeriodOverlay();
+    }
+  }
+});
+
+// Naplnit overlay uloženými obdobími
+async function naplnitPeriodOverlay() {
+  const container = document.getElementById('periodOverlayContent');
+  if (!container) return;
+
+  container.innerHTML = '<div class="period-loading">Načítám období...</div>';
+
+  try {
+    const response = await fetch(API_URL, { credentials: 'same-origin' });
+    if (!response.ok) throw new Error('Nepodařilo se načíst data');
+
+    const payload = await response.json();
+    if (payload.status !== 'success' || !payload.data) {
+      throw new Error('Neplatná odpověď serveru');
+    }
+
+    const periods = payload.data.periods || {};
+    const months = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
+                    'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
+
+    // Seřadit období sestupně
+    const sortedPeriods = Object.keys(periods).sort().reverse();
+
+    if (sortedPeriods.length === 0) {
+      container.innerHTML = '<div class="period-no-data">Žádná uložená období</div>';
+      return;
+    }
+
+    // Aktuální klíč období
+    const currentKey = `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
+
+    // Generovat položky
+    const html = sortedPeriods.map(key => {
+      const [year, month] = key.split('-');
+      const monthNum = parseInt(month);
+      const label = `${months[monthNum]} ${year}`;
+      const data = periods[key];
+      const hours = data.totalHours || 0;
+      const salary = data.totalSalary ? Math.round(data.totalSalary).toLocaleString('cs-CZ') : '0';
+      const isCurrent = key === currentKey;
+
+      return `
+        <div class="period-item${isCurrent ? ' current' : ''}" data-action="selectPeriod" data-period="${key}">
+          <div class="period-item-checkbox"></div>
+          <div class="period-item-info">
+            <div class="period-item-name">${label}</div>
+            <div class="period-item-stats">${hours} hodin / ${salary} Kč</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    container.innerHTML = html;
+
+  } catch (error) {
+    logger.error('Chyba při načítání období pro overlay:', error);
+    container.innerHTML = '<div class="period-no-data">Chyba při načítání období</div>';
+  }
+}
+
+// Vybrat období z overlay
+async function selectPeriod(periodKey) {
+  // Parsovat období
+  const [year, month] = periodKey.split('-');
+  currentPeriod.year = parseInt(year);
+  currentPeriod.month = parseInt(month);
+
+  updatePeriodDisplay();
+  closePeriodOverlay();
+
+  await loadPeriod();
 }
 
 // === NAČÍST OBDOBÍ ===
@@ -104,71 +192,6 @@ async function loadPeriod() {
     logger.error('Chyba při načítání období:', error);
     showError('Chyba při načítání období: ' + error.message);
   }
-}
-
-// === ZOBRAZIT ULOŽENÁ OBDOBÍ ===
-async function updateSavedPeriodsDisplay() {
-  const container = document.getElementById('savedPeriodsList');
-  const card = document.getElementById('savedPeriodsCard');
-  if (!container) return;
-
-  try {
-    const response = await fetch(API_URL, { credentials: 'same-origin' });
-    if (!response.ok) return;
-
-    const payload = await response.json();
-    if (payload.status !== 'success' || !payload.data) return;
-
-    const periods = payload.data.periods || {};
-    const months = ['', 'Led', 'Úno', 'Bře', 'Dub', 'Kvě', 'Čvn',
-                    'Čvc', 'Srp', 'Zář', 'Říj', 'Lis', 'Pro'];
-
-    // Seřadit období sestupně
-    const sortedPeriods = Object.keys(periods).sort().reverse();
-
-    if (sortedPeriods.length === 0) {
-      if (card) card.style.display = 'none';
-      return;
-    }
-
-    // Zobrazit kartu
-    if (card) card.style.display = 'block';
-
-    const periodButtons = sortedPeriods.slice(0, 12).map(key => {
-      const [year, month] = key.split('-');
-      const monthNum = parseInt(month);
-      const label = `${months[monthNum]} ${year}`;
-      const data = periods[key];
-      const hours = data.totalHours || 0;
-      const salary = data.totalSalary ? Math.round(data.totalSalary).toLocaleString('cs-CZ') : '0';
-      return `<button class="saved-period-btn" data-action="loadSavedPeriod" data-period="${key}">
-        <strong>${label}</strong>
-        <span class="saved-period-info">${hours}h / ${salary} Kč</span>
-      </button>`;
-    }).join('');
-
-    container.innerHTML = periodButtons;
-
-  } catch (error) {
-    logger.error('Chyba při načítání seznamu období:', error);
-  }
-}
-
-// === NAČÍST KONKRÉTNÍ ULOŽENÉ OBDOBÍ ===
-async function loadSavedPeriod(periodKey) {
-  // Parsovat období a nastavit selectory
-  const [year, month] = periodKey.split('-');
-  currentPeriod.year = parseInt(year);
-  currentPeriod.month = parseInt(month);
-
-  // Aktualizovat selectory v UI
-  const monthSelect = document.getElementById('monthSelect');
-  const yearSelect = document.getElementById('yearSelect');
-  if (monthSelect) monthSelect.value = currentPeriod.month;
-  if (yearSelect) yearSelect.value = currentPeriod.year;
-
-  updatePeriodDisplay();
-  await loadPeriod();
 }
 
 // === VYČISTIT HODINY (NOVÉ OBDOBÍ) ===
@@ -238,7 +261,6 @@ async function loadData(period = null) {
 
     renderTable();
     updateStats();
-    updateSavedPeriodsDisplay();
   } catch (error) {
     logger.error('Error loading data:', error);
     // Try to load from localStorage as fallback
@@ -348,7 +370,6 @@ async function saveToServer() {
     }
 
     logger.log(`Data pro období ${periodKey} úspěšně uložena`, result);
-    updateSavedPeriodsDisplay();
     return result;
   } catch (error) {
     logger.error('Server save failed:', error);
@@ -436,8 +457,6 @@ function loadFromLocalStorage() {
 
       if (data.period) {
         currentPeriod = data.period;
-        document.getElementById('monthSelect').value = currentPeriod.month;
-        document.getElementById('yearSelect').value = currentPeriod.year;
         updatePeriodDisplay();
       }
 
@@ -1557,15 +1576,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
 
       // === OBDOBÍ MANAGEMENT ===
-      case 'loadPeriod':
-        if (typeof loadPeriod === 'function') loadPeriod();
+      case 'togglePeriodOverlay':
+        if (typeof togglePeriodOverlay === 'function') togglePeriodOverlay();
         return;
 
-      case 'loadSavedPeriod':
-        const periodToLoad = target.getAttribute('data-period');
-        if (periodToLoad && typeof loadSavedPeriod === 'function') {
-          loadSavedPeriod(periodToLoad);
+      case 'closePeriodOverlay':
+        if (typeof closePeriodOverlay === 'function') closePeriodOverlay();
+        return;
+
+      case 'selectPeriod':
+        const periodToSelect = target.getAttribute('data-period');
+        if (periodToSelect && typeof selectPeriod === 'function') {
+          selectPeriod(periodToSelect);
         }
+        return;
+
+      case 'loadPeriod':
+        if (typeof loadPeriod === 'function') loadPeriod();
         return;
 
       case 'clearHours':
