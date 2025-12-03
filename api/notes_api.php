@@ -418,7 +418,13 @@ try {
                 throw new Exception('Poznámka nebyla nalezena');
             }
 
-            if (!$isAdmin && $noteData['created_by'] !== $currentUserEmail) {
+            // DEBUG: Log pro diagnostiku
+            error_log('[Notes DELETE] currentUserEmail=' . ($currentUserEmail ?? 'NULL') . ', noteCreatedBy=' . ($noteData['created_by'] ?? 'NULL') . ', isAdmin=' . ($isAdmin ? 'true' : 'false'));
+
+            // Autor muze smazat svou poznamku, admin muze smazat cokoliv
+            $jeAutor = $currentUserEmail && $noteData['created_by'] === $currentUserEmail;
+            if (!$isAdmin && !$jeAutor) {
+                error_log('[Notes DELETE] ZAMITNUTO - neni autor ani admin');
                 throw new Exception('Nemáte oprávnění smazat tuto poznámku');
             }
 
