@@ -174,6 +174,7 @@ $csrfToken = generateCSRFToken();
   <!-- AKČNÍ TLAČÍTKA -->
   <div class="action-buttons">
     <button class="btn btn-secondary" data-action="clearAll">Vymazat vše</button>
+    <button class="btn" data-action="saveData">Uložit období</button>
     <button class="btn" data-action="generatePaymentQR">Generovat QR platby</button>
   </div>
 
