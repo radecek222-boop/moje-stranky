@@ -36,6 +36,9 @@ try {
     $userRole = strtolower(trim($_SESSION['role'] ?? 'guest'));
     $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 
+    // DEBUG: Logovat session data pro diagnostiku notifikaci
+    error_log('[Notes] Session: user_id=' . var_export($userId, true) . ', email=' . $currentUserEmail . ', role=' . $userRole);
+
     // KRITICKÉ: Uvolnit session lock pro paralelní zpracování
     session_write_close();
 
@@ -317,9 +320,24 @@ try {
                     $subscriptions = [];
                     foreach ($vsechnySubscriptions as $sub) {
                         $subUserId = $sub['user_id'] ?? null;
+                        $subEmail = $sub['email'] ?? null;
 
-                        // Preskocit autora poznamky (striktni porovnani jako string)
-                        if ($subUserId !== null && (string)$subUserId === (string)$userId) {
+                        // DEBUG: Logovat porovnani
+                        error_log('[Notes] Porovnani: sub_user_id=' . var_export($subUserId, true) . ' vs session_user_id=' . var_export($userId, true));
+                        error_log('[Notes] Porovnani: sub_email=' . var_export($subEmail, true) . ' vs session_email=' . var_export($createdBy, true));
+
+                        // Preskocit autora poznamky - kontrolovat OBOJE user_id i email
+                        // FIX: Nekteri uzivatele nemaji user_id v session, tak porovnavame i email
+                        $jeAutor = false;
+                        if ($subUserId !== null && $userId !== null && (string)$subUserId === (string)$userId) {
+                            $jeAutor = true;
+                            error_log('[Notes] Sub ID=' . $sub['id'] . ' - JE AUTOR (user_id match)');
+                        }
+                        if ($subEmail !== null && $createdBy !== null && strtolower($subEmail) === strtolower($createdBy)) {
+                            $jeAutor = true;
+                            error_log('[Notes] Sub ID=' . $sub['id'] . ' - JE AUTOR (email match)');
+                        }
+                        if ($jeAutor) {
                             error_log('[Notes] Sub ID=' . $sub['id'] . ' - PRESKOCENO (autor poznamky)');
                             continue;
                         }
