@@ -303,6 +303,9 @@ async function loadData(period = null) {
         ...emp,
         bank: formatBankCode(emp.bank)
       }));
+      logger.log('loadData: allEmployeesDatabase loaded with', allEmployeesDatabase.length, 'employees');
+    } else {
+      logger.warn('loadData: data.employees is empty or undefined');
     }
 
     // Load configuration
@@ -588,7 +591,17 @@ function addEmployee() {
 }
 
 // === EMPLOYEE SELECTOR (checkbox overlay) ===
-function showEmployeeSelector() {
+async function showEmployeeSelector() {
+  // Pokud je databáze prázdná, zkusit načíst data znovu
+  if (allEmployeesDatabase.length === 0) {
+    logger.log('allEmployeesDatabase is empty, trying to reload data...');
+    try {
+      await loadData();
+    } catch (err) {
+      logger.error('Failed to reload data:', err);
+    }
+  }
+
   const currentIds = employees.map(e => e.id);
   const excludedTypes = ['special', 'special2', 'pausalni', 'premie_polozka'];
 
@@ -598,8 +611,10 @@ function showEmployeeSelector() {
     !excludedTypes.includes(emp.type)
   );
 
+  logger.log('Employee selector - allEmployeesDatabase:', allEmployeesDatabase.length, 'allAvailable:', allAvailable.length);
+
   if (allAvailable.length === 0) {
-    wgsToast.info('Žádní zaměstnanci v databázi');
+    wgsToast.info('Žádní zaměstnanci v databázi - zkontrolujte přihlášení');
     return;
   }
 
