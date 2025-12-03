@@ -303,9 +303,9 @@ async function loadData(period = null) {
         ...emp,
         bank: formatBankCode(emp.bank)
       }));
-      logger.log('loadData: allEmployeesDatabase loaded with', allEmployeesDatabase.length, 'employees');
+      console.error('DEBUG loadData: allEmployeesDatabase loaded with', allEmployeesDatabase.length, 'employees');
     } else {
-      logger.warn('loadData: data.employees is empty or undefined');
+      console.error('DEBUG loadData: data.employees is empty or undefined, data =', data);
     }
 
     // Load configuration
@@ -592,13 +592,16 @@ function addEmployee() {
 
 // === EMPLOYEE SELECTOR (checkbox overlay) ===
 async function showEmployeeSelector() {
+  console.error('DEBUG: showEmployeeSelector started, allEmployeesDatabase.length =', allEmployeesDatabase.length);
+
   // Pokud je databáze prázdná, zkusit načíst data znovu
   if (allEmployeesDatabase.length === 0) {
-    logger.log('allEmployeesDatabase is empty, trying to reload data...');
+    console.error('DEBUG: allEmployeesDatabase is empty, trying to reload data...');
     try {
       await loadData();
+      console.error('DEBUG: After loadData, allEmployeesDatabase.length =', allEmployeesDatabase.length);
     } catch (err) {
-      logger.error('Failed to reload data:', err);
+      console.error('DEBUG: Failed to reload data:', err);
     }
   }
 
@@ -611,7 +614,7 @@ async function showEmployeeSelector() {
     !excludedTypes.includes(emp.type)
   );
 
-  logger.log('Employee selector - allEmployeesDatabase:', allEmployeesDatabase.length, 'allAvailable:', allAvailable.length);
+  console.error('DEBUG: Employee selector - allEmployeesDatabase:', allEmployeesDatabase.length, 'allAvailable:', allAvailable.length);
 
   if (allAvailable.length === 0) {
     wgsToast.info('Žádní zaměstnanci v databázi - zkontrolujte přihlášení');
