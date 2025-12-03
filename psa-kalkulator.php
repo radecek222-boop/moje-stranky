@@ -208,10 +208,16 @@ $csrfToken = generateCSRFToken();
 
 <!-- Logger Utility (must be loaded first) -->
 <script src="assets/js/logger.min.js" defer></script>
+<!-- Utils (wgsConfirm) -->
+<script src="assets/js/utils.min.js" defer></script>
+<!-- WGS Toast notifikace -->
+<link rel="stylesheet" href="assets/css/wgs-toast.css">
+<script src="assets/js/wgs-toast.js" defer></script>
 <script>
   window.PSA_CSRF_TOKEN = '<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>';
 </script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer data-qr-lib="1"></script>
+<!-- QR Code library -->
+<script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js" defer data-qr-lib="1"></script>
 
 <!-- Main JavaScript -->
 <script src="assets/js/psa-kalkulator.min.js?v=<?= filemtime(__DIR__ . '/assets/js/psa-kalkulator.min.js') ?>" defer></script>
