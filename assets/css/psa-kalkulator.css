@@ -315,6 +315,21 @@ body {
   font-size: 0.85rem !important;
   width: 100%;
   transition: all 0.2s ease !important;
+  color: var(--c-black) !important;
+}
+
+/* Placeholder - černý text */
+.table-input::placeholder {
+  color: var(--c-grey) !important;
+  opacity: 1;
+}
+
+.form-input::placeholder,
+.form-select::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: var(--c-grey) !important;
+  opacity: 1;
 }
 
 .table-input:hover {
@@ -625,6 +640,223 @@ body {
   font-style: italic;
 }
 
+/* === PERIOD FILTER CARD === */
+.period-filter-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--c-white);
+  border: 2px solid var(--c-black);
+  margin-bottom: 1.5rem;
+}
+
+.period-filter-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--c-grey);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.period-display-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.period-display.clickable {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--c-black);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.period-display.clickable:hover {
+  background: var(--c-white);
+  border-color: var(--c-grey);
+}
+
+.period-display.clickable:focus {
+  outline: 2px solid var(--c-black);
+  outline-offset: 2px;
+}
+
+.period-display.clickable.active {
+  background: var(--c-white);
+  border-color: var(--c-black);
+}
+
+.period-arrow {
+  font-size: 0.7rem;
+  color: var(--c-grey);
+  transition: transform 0.2s ease;
+}
+
+.period-display.clickable.active .period-arrow {
+  transform: rotate(180deg);
+}
+
+/* === PERIOD OVERLAY === */
+.period-overlay {
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  min-width: 320px;
+  max-width: 400px;
+  background: var(--c-white);
+  border: 2px solid var(--c-black);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.period-overlay.active {
+  display: block;
+  animation: overlayFadeIn 0.15s ease-out;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.period-overlay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--c-black);
+  color: var(--c-white);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.period-overlay-close {
+  background: none;
+  border: none;
+  color: var(--c-white);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.period-overlay-close:hover {
+  opacity: 1;
+}
+
+.period-overlay-content {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0.75rem;
+}
+
+.period-loading {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--c-grey);
+  font-size: 0.9rem;
+}
+
+.period-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid var(--c-border);
+}
+
+.period-item:last-child {
+  border-bottom: none;
+}
+
+.period-item:hover {
+  background: var(--c-bg);
+}
+
+.period-item.current {
+  background: var(--c-black);
+  color: var(--c-white);
+}
+
+.period-item-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--c-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.period-item.current .period-item-checkbox {
+  border-color: var(--c-white);
+  background: var(--c-white);
+}
+
+.period-item.current .period-item-checkbox::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background: var(--c-black);
+}
+
+.period-item-info {
+  flex: 1;
+}
+
+.period-item-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.period-item-stats {
+  font-size: 0.75rem;
+  color: var(--c-grey);
+  margin-top: 0.15rem;
+}
+
+.period-item.current .period-item-stats {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.period-no-data {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--c-grey);
+  font-size: 0.9rem;
+}
+
+.period-overlay-footer {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--c-bg);
+  border-top: 1px solid var(--c-border);
+}
+
+.period-overlay-footer .btn {
+  flex: 1;
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
   .container {
@@ -672,6 +904,109 @@ body {
   .action-buttons .btn {
     width: 100%;
   }
+
+  .period-filter-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .period-filter-label {
+    text-align: center;
+  }
+
+  .period-display.clickable {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .period-overlay {
+    left: 0;
+    right: 0;
+    min-width: auto;
+    max-width: none;
+  }
+}
+
+/* === WGS CONFIRM DIALOG === */
+.wgs-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.wgs-confirm-dialog {
+  background: var(--c-white);
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  border: 2px solid var(--c-black);
+}
+
+.wgs-confirm-message {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--c-black);
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.wgs-confirm-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.wgs-confirm-btn {
+  padding: 10px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  min-width: 100px;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.wgs-confirm-btn:hover {
+  transform: translateY(-1px);
+}
+
+.wgs-confirm-btn:active {
+  transform: translateY(0);
+}
+
+.wgs-confirm-btn:focus {
+  outline: 3px solid var(--c-grey);
+  outline-offset: 2px;
+}
+
+.wgs-confirm-cancel {
+  background: var(--c-bg);
+  color: var(--c-black);
+  border: 1px solid var(--c-border);
+}
+
+.wgs-confirm-cancel:hover {
+  background: var(--c-border);
+}
+
+.wgs-confirm-ok {
+  background: var(--c-black);
+  color: var(--c-white);
+}
+
+.wgs-confirm-ok:hover {
+  background: #444;
 }
 
 /* === PRINT STYLES === */

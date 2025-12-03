@@ -23,35 +23,123 @@ function initializePeriod() {
   const now = new Date();
   currentPeriod.month = now.getMonth() + 1;
   currentPeriod.year = now.getFullYear();
-
-  const monthSelect = document.getElementById('monthSelect');
-  const yearSelect = document.getElementById('yearSelect');
-
-  if (monthSelect) {
-    monthSelect.value = currentPeriod.month;
-  }
-  if (yearSelect) {
-    yearSelect.value = currentPeriod.year;
-  }
-
   updatePeriodDisplay();
-}
-
-function updatePeriod() {
-  currentPeriod.month = parseInt(document.getElementById('monthSelect').value);
-  currentPeriod.year = parseInt(document.getElementById('yearSelect').value);
-  updatePeriodDisplay();
-
-  // Load data for the selected period
-  const periodKey = `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
-  loadData(periodKey);
 }
 
 function updatePeriodDisplay() {
   const months = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
                   'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
   const periodText = `${months[currentPeriod.month]} ${currentPeriod.year}`;
-  document.getElementById('periodDisplay').textContent = periodText;
+  const displayEl = document.getElementById('periodDisplayText');
+  if (displayEl) {
+    displayEl.textContent = periodText;
+  }
+}
+
+// === PERIOD OVERLAY ===
+function togglePeriodOverlay() {
+  const overlay = document.getElementById('periodOverlay');
+  const periodBtn = document.getElementById('periodDisplay');
+
+  if (overlay.classList.contains('active')) {
+    closePeriodOverlay();
+  } else {
+    overlay.classList.add('active');
+    periodBtn.classList.add('active');
+    naplnitPeriodOverlay();
+  }
+}
+
+function closePeriodOverlay() {
+  const overlay = document.getElementById('periodOverlay');
+  const periodBtn = document.getElementById('periodDisplay');
+  overlay.classList.remove('active');
+  periodBtn.classList.remove('active');
+}
+
+// Zavřít overlay při kliknutí mimo
+document.addEventListener('click', (e) => {
+  const overlay = document.getElementById('periodOverlay');
+  const periodBtn = document.getElementById('periodDisplay');
+
+  if (overlay && overlay.classList.contains('active')) {
+    if (!overlay.contains(e.target) && !periodBtn.contains(e.target)) {
+      closePeriodOverlay();
+    }
+  }
+});
+
+// Naplnit overlay uloženými obdobími
+async function naplnitPeriodOverlay() {
+  const container = document.getElementById('periodOverlayContent');
+  if (!container) return;
+
+  container.innerHTML = '<div class="period-loading">Načítám období...</div>';
+
+  try {
+    const response = await fetch(API_URL, { credentials: 'same-origin' });
+    if (!response.ok) throw new Error('Nepodařilo se načíst data');
+
+    const payload = await response.json();
+    if (payload.status !== 'success' || !payload.data) {
+      throw new Error('Neplatná odpověď serveru');
+    }
+
+    const periods = payload.data.periods || {};
+    const months = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
+                    'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
+
+    // Seřadit období sestupně
+    const sortedPeriods = Object.keys(periods).sort().reverse();
+
+    if (sortedPeriods.length === 0) {
+      container.innerHTML = '<div class="period-no-data">Žádná uložená období</div>';
+      return;
+    }
+
+    // Aktuální klíč období
+    const currentKey = `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
+
+    // Generovat položky
+    const html = sortedPeriods.map(key => {
+      const [year, month] = key.split('-');
+      const monthNum = parseInt(month);
+      const label = `${months[monthNum]} ${year}`;
+      const data = periods[key];
+      const hours = data.totalHours || 0;
+      const salary = data.totalSalary ? Math.round(data.totalSalary).toLocaleString('cs-CZ') : '0';
+      const isCurrent = key === currentKey;
+
+      return `
+        <div class="period-item${isCurrent ? ' current' : ''}" data-action="selectPeriod" data-period="${key}">
+          <div class="period-item-checkbox"></div>
+          <div class="period-item-info">
+            <div class="period-item-name">${label}</div>
+            <div class="period-item-stats">${hours} hodin / ${salary} Kč</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    container.innerHTML = html;
+
+  } catch (error) {
+    logger.error('Chyba při načítání období pro overlay:', error);
+    container.innerHTML = '<div class="period-no-data">Chyba při načítání období</div>';
+  }
+}
+
+// Vybrat období z overlay
+async function selectPeriod(periodKey) {
+  // Parsovat období
+  const [year, month] = periodKey.split('-');
+  currentPeriod.year = parseInt(year);
+  currentPeriod.month = parseInt(month);
+
+  updatePeriodDisplay();
+  closePeriodOverlay();
+
+  await loadPeriod();
 }
 
 // === NAČÍST OBDOBÍ ===
@@ -91,7 +179,8 @@ async function loadPeriod() {
         ...emp,
         bank: formatBankCode(emp.bank),
         hours: periodEmp ? (periodEmp.hours || 0) : 0,
-        bonusAmount: periodEmp ? (periodEmp.bonusAmount || 0) : (emp.bonusAmount || 0)
+        bonusAmount: periodEmp ? (periodEmp.bonusAmount || 0) : (emp.bonusAmount || 0),
+        premie: periodEmp ? (periodEmp.premie || 0) : 0
       };
     });
 
@@ -104,71 +193,6 @@ async function loadPeriod() {
     logger.error('Chyba při načítání období:', error);
     showError('Chyba při načítání období: ' + error.message);
   }
-}
-
-// === ZOBRAZIT ULOŽENÁ OBDOBÍ ===
-async function updateSavedPeriodsDisplay() {
-  const container = document.getElementById('savedPeriodsList');
-  const card = document.getElementById('savedPeriodsCard');
-  if (!container) return;
-
-  try {
-    const response = await fetch(API_URL, { credentials: 'same-origin' });
-    if (!response.ok) return;
-
-    const payload = await response.json();
-    if (payload.status !== 'success' || !payload.data) return;
-
-    const periods = payload.data.periods || {};
-    const months = ['', 'Led', 'Úno', 'Bře', 'Dub', 'Kvě', 'Čvn',
-                    'Čvc', 'Srp', 'Zář', 'Říj', 'Lis', 'Pro'];
-
-    // Seřadit období sestupně
-    const sortedPeriods = Object.keys(periods).sort().reverse();
-
-    if (sortedPeriods.length === 0) {
-      if (card) card.style.display = 'none';
-      return;
-    }
-
-    // Zobrazit kartu
-    if (card) card.style.display = 'block';
-
-    const periodButtons = sortedPeriods.slice(0, 12).map(key => {
-      const [year, month] = key.split('-');
-      const monthNum = parseInt(month);
-      const label = `${months[monthNum]} ${year}`;
-      const data = periods[key];
-      const hours = data.totalHours || 0;
-      const salary = data.totalSalary ? Math.round(data.totalSalary).toLocaleString('cs-CZ') : '0';
-      return `<button class="saved-period-btn" data-action="loadSavedPeriod" data-period="${key}">
-        <strong>${label}</strong>
-        <span class="saved-period-info">${hours}h / ${salary} Kč</span>
-      </button>`;
-    }).join('');
-
-    container.innerHTML = periodButtons;
-
-  } catch (error) {
-    logger.error('Chyba při načítání seznamu období:', error);
-  }
-}
-
-// === NAČÍST KONKRÉTNÍ ULOŽENÉ OBDOBÍ ===
-async function loadSavedPeriod(periodKey) {
-  // Parsovat období a nastavit selectory
-  const [year, month] = periodKey.split('-');
-  currentPeriod.year = parseInt(year);
-  currentPeriod.month = parseInt(month);
-
-  // Aktualizovat selectory v UI
-  const monthSelect = document.getElementById('monthSelect');
-  const yearSelect = document.getElementById('yearSelect');
-  if (monthSelect) monthSelect.value = currentPeriod.month;
-  if (yearSelect) yearSelect.value = currentPeriod.year;
-
-  updatePeriodDisplay();
-  await loadPeriod();
 }
 
 // === VYČISTIT HODINY (NOVÉ OBDOBÍ) ===
@@ -219,7 +243,8 @@ async function loadData(period = null) {
           ...emp,
           bank: formatBankCode(emp.bank),
           hours: periodEmp ? (periodEmp.hours || 0) : 0,
-          bonusAmount: emp.bonusAmount || 0
+          bonusAmount: emp.bonusAmount || 0,
+          premie: periodEmp ? (periodEmp.premie || 0) : 0
         };
       });
       logger.log(`Loaded period ${period} with ${employees.length} employees`);
@@ -230,7 +255,8 @@ async function loadData(period = null) {
           ...emp,
           bank: formatBankCode(emp.bank),
           hours: emp.hours || 0,
-          bonusAmount: emp.bonusAmount || 0
+          bonusAmount: emp.bonusAmount || 0,
+          premie: emp.premie || 0
         }));
       }
       logger.log(`Loaded ${employees.length} employees`);
@@ -238,7 +264,6 @@ async function loadData(period = null) {
 
     renderTable();
     updateStats();
-    updateSavedPeriodsDisplay();
   } catch (error) {
     logger.error('Error loading data:', error);
     // Try to load from localStorage as fallback
@@ -286,13 +311,20 @@ async function saveToServer() {
   // Spočítat statistiky pro období
   const stats = calculateStats();
 
-  // Připravit data období - pouze hodiny a základní info
-  const periodEmployees = employees.filter(e => e.active !== false && e.hours > 0).map(emp => ({
+  // Připravit data období - hodiny, premie a základní info
+  // Zahrnout: zaměstnance s hodinami > 0 NEBO special zaměstnance s premiemi
+  const periodEmployees = employees.filter(e => {
+    if (e.active === false) return false;
+    if (e.hours > 0) return true;
+    if ((e.type === 'special' || e.type === 'special2') && (e.premie || 0) > 0) return true;
+    return false;
+  }).map(emp => ({
     id: emp.id,
     name: emp.name,
     hours: emp.hours || 0,
     type: emp.type || 'standard',
-    bonusAmount: emp.bonusAmount || 0
+    bonusAmount: emp.bonusAmount || 0,
+    premie: emp.premie || 0
   }));
 
   // Zachovat existující periods a přidat/aktualizovat aktuální
@@ -304,7 +336,9 @@ async function saveToServer() {
     totalInvoice: stats.totalInvoice,
     profit: stats.profit,
     marekBonus: stats.marekBonus || 0,
+    marekPremie: stats.marekPremie || 0,
     radekBonus: stats.radekBonus || 0,
+    radekPremie: stats.radekPremie || 0,
     girlsBonus: stats.girlsBonus || 0,
     radekTotal: stats.radekTotal || 0,
     lastModified: new Date().toISOString()
@@ -348,7 +382,6 @@ async function saveToServer() {
     }
 
     logger.log(`Data pro období ${periodKey} úspěšně uložena`, result);
-    updateSavedPeriodsDisplay();
     return result;
   } catch (error) {
     logger.error('Server save failed:', error);
@@ -389,16 +422,20 @@ function calculateStats() {
     }
   });
 
-  // Marek bonus (special) - 20 Kč za každou hodinu ostatních
+  // Marek bonus (special) - 20 Kč za každou hodinu ostatních + premie
+  const marekEmp = employees.find(e => e.type === 'special');
   const marekBonus = totalHours * 20;
+  const marekPremie = marekEmp ? (marekEmp.premie || 0) : 0;
 
-  // Radek bonus (special2) - 20 Kč za hodinu + bonus od holek (15%)
+  // Radek bonus (special2) - 20 Kč za hodinu + bonus od holek (15%) + premie
+  const radekEmp = employees.find(e => e.type === 'special2');
   const girlsBonus = girlsHours * salaryRate * 0.15;
   const radekBonus = totalHours * 20;
-  const radekTotal = radekBonus + girlsBonus;
+  const radekPremie = radekEmp ? (radekEmp.premie || 0) : 0;
+  const radekTotal = radekBonus + girlsBonus + radekPremie;
 
-  // Přičíst bonusy k výplatě
-  totalSalary += marekBonus + radekTotal;
+  // Přičíst bonusy k výplatě (včetně premií)
+  totalSalary += marekBonus + marekPremie + radekTotal;
 
   return {
     totalHours,
@@ -406,7 +443,9 @@ function calculateStats() {
     totalInvoice,
     profit: totalInvoice - totalSalary,
     marekBonus,
+    marekPremie,
     radekBonus,
+    radekPremie,
     girlsBonus,
     radekTotal
   };
@@ -436,8 +475,6 @@ function loadFromLocalStorage() {
 
       if (data.period) {
         currentPeriod = data.period;
-        document.getElementById('monthSelect').value = currentPeriod.month;
-        document.getElementById('yearSelect').value = currentPeriod.year;
         updatePeriodDisplay();
       }
 
@@ -493,7 +530,7 @@ async function updateEmployee(index, field, value, needConfirm = false) {
     }
   }
 
-  if (field === 'hours' || field === 'bonusAmount') {
+  if (field === 'hours' || field === 'bonusAmount' || field === 'premie') {
     employees[index][field] = parseInt(value) || 0;
   } else if (field === 'bank') {
     employees[index][field] = formatBankCode(value);
@@ -571,7 +608,10 @@ function renderTable() {
       invoice = Math.min(emp.hours * invoiceRate, monthlyRate - monthlyTax);
       displayInfo = '<span class="employee-type-badge">Paušál</span>';
     } else if (emp.type === 'special' || emp.type === 'special2') {
-      salary = totalOtherHours * 20;
+      // Bonus z hodin + volitelné premie
+      const bonus = totalOtherHours * 20;
+      const premie = emp.premie || 0;
+      salary = bonus + premie;
       invoice = 0;
       displayInfo = '<span class="employee-type-badge">Pouze bonus</span>';
     } else {
@@ -604,8 +644,19 @@ function renderTable() {
           ${displayInfo}
         </td>
         <td class="text-center">
-          ${(emp.type === 'special' || emp.type === 'special2' || isLenka) ?
+          ${isLenka ?
             '<span style="color: var(--c-grey);">–</span>' :
+            (emp.type === 'special' || emp.type === 'special2') ?
+              `<input type="number"
+                     value="${emp.premie || 0}"
+                     min="0"
+                     step="100"
+                     class="table-input"
+                     style="width: 100px; text-align: center; font-weight: 600;"
+                     placeholder="Prémie (Kč)"
+                     data-action="updateEmployeeField"
+                     data-index="${index}"
+                     data-field="premie">` :
             emp.type === 'bonus_girls' ?
               `<input type="number"
                      value="${emp.bonusAmount || 0}"
@@ -630,7 +681,8 @@ function renderTable() {
         <td class="text-right" style="font-weight: 600; color: var(--c-success);">
           ${formatCurrency(salary)}
           ${(emp.type === 'special' || emp.type === 'special2') ?
-            '<br><span style="font-size: 0.75rem; color: var(--c-grey);">' + totalOtherHours + 'h × 20 Kč</span>' : ''}
+            '<br><span style="font-size: 0.75rem; color: var(--c-grey);">' + totalOtherHours + 'h × 20 Kč' +
+            ((emp.premie || 0) > 0 ? ' + ' + formatCurrency(emp.premie) + ' prémie' : '') + '</span>' : ''}
         </td>
         <td class="text-right" style="font-weight: 600; color: var(--c-info);">
           ${formatCurrency(invoice)}
@@ -701,9 +753,13 @@ function updateStats() {
       // Bonus pro holky - editovatelná částka (NEPOČÍTÁ SE do zaměstnanců)
       totalSalary += (emp.bonusAmount || 0);
       // activeEmployeesCount++; ← ODSTRANĚNO, bonus_girls se nepočítá
-    } else if ((emp.type === 'special' || emp.type === 'special2') && bonusPerSpecial > 0) {
+    } else if (emp.type === 'special' || emp.type === 'special2') {
       // Special zaměstnanci (Marek, Radek) - NEPOČÍTAJÍ SE do zaměstnanců
-      totalSalary += bonusPerSpecial;
+      // Bonus z hodin + volitelné premie
+      const premie = emp.premie || 0;
+      if (bonusPerSpecial > 0 || premie > 0) {
+        totalSalary += bonusPerSpecial + premie;
+      }
       // activeEmployeesCount++; ← ODSTRANĚNO, special se nepočítají
     } else if (emp.hours > 0) {
       // Ostatní zaměstnanci jen pokud mají hodiny > 0
@@ -820,7 +876,8 @@ function sanitizeMessage(message) {
 let qrLibraryPromise = null;
 
 function ensureQrLibraryLoaded() {
-  if (window.QRCode && typeof QRCode.toCanvas === 'function') {
+  // qrcodejs2 knihovna - kontrola existence konstruktoru
+  if (window.QRCode && typeof window.QRCode === 'function') {
     return Promise.resolve(window.QRCode);
   }
 
@@ -829,7 +886,7 @@ function ensureQrLibraryLoaded() {
       const existing = document.querySelector('script[data-qr-lib]');
 
       if (existing) {
-        if (window.QRCode && typeof QRCode.toCanvas === 'function') {
+        if (window.QRCode && typeof window.QRCode === 'function') {
           resolve(window.QRCode);
           return;
         }
@@ -840,11 +897,11 @@ function ensureQrLibraryLoaded() {
       }
 
       const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+      script.src = 'assets/js/qrcode.min.js';
       script.defer = true;
       script.dataset.qrLib = '1';
       script.onload = () => {
-        if (window.QRCode && typeof QRCode.toCanvas === 'function') {
+        if (window.QRCode && typeof window.QRCode === 'function') {
           resolve(window.QRCode);
         } else {
           reject(new Error('Knihovna QR kódu se načetla, ale neobsahuje očekávané API'));
@@ -894,45 +951,33 @@ function buildSpaydPayload(data) {
 async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
   await ensureQrLibraryLoaded();
 
-  if (!window.QRCode || typeof QRCode.toCanvas !== 'function') {
+  if (!window.QRCode || typeof window.QRCode !== 'function') {
     throw new Error('Knihovna pro QR kódy není načtena');
   }
 
-  const drawWithLevel = (level) => new Promise((resolve, reject) => {
-    const canvas = document.createElement('canvas');
+  return new Promise((resolve, reject) => {
+    try {
+      // Vyčistit element
+      qrElement.innerHTML = '';
 
-    QRCode.toCanvas(
-      canvas,
-      qrText,
-      {
+      // qrcodejs2 API - vytvoří QR kód přímo do elementu
+      new QRCode(qrElement, {
+        text: qrText,
         width: size,
         height: size,
-        margin: 1,
-        errorCorrectionLevel: level
-      },
-      (err) => {
-        if (err) {
-          const isOverflow = /overflow/i.test(err.message || '');
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
 
-          if (level === 'M' && isOverflow) {
-            logger.warn(`QR payload příliš dlouhý${contextLabel ? ' (' + contextLabel + ')' : ''}, zkouším nižší úroveň korekce (L)`);
-            return drawWithLevel('L').then(resolve).catch(reject);
-          }
-
-          logger.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
-          qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
-          reject(err);
-          return;
-        }
-
-        qrElement.innerHTML = '';
-        qrElement.appendChild(canvas);
-        resolve();
-      }
-    );
+      logger.log(`QR code generated${contextLabel ? ' for ' + contextLabel : ''}`);
+      resolve();
+    } catch (err) {
+      logger.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
+      qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
+      reject(err);
+    }
   });
-
-  await drawWithLevel('M');
 }
 
 // === NOTIFICATIONS ===
@@ -1039,8 +1084,31 @@ async function clearAll() {
   }
 }
 
+// === SYNCHRONIZACE VSTUPŮ ===
+// Synchronizovat data z input polí před generováním QR
+function synchronizovatVstupy() {
+  const inputs = document.querySelectorAll('[data-action="updateEmployeeField"]');
+  inputs.forEach(input => {
+    const index = parseInt(input.getAttribute('data-index'));
+    const field = input.getAttribute('data-field');
+    if (!isNaN(index) && field && employees[index]) {
+      if (field === 'hours' || field === 'bonusAmount' || field === 'premie') {
+        employees[index][field] = parseInt(input.value) || 0;
+      } else if (field === 'bank') {
+        employees[index][field] = formatBankCode(input.value);
+      } else {
+        employees[index][field] = input.value;
+      }
+    }
+  });
+  // Aktualizovat statistiky
+  updateStats();
+}
+
 // === QR PAYMENTS ===
 function generatePaymentQR() {
+  // Synchronizovat vstupy před generováním QR
+  synchronizovatVstupy();
   const modal = document.getElementById('qrModal');
   const container = document.getElementById('qrCodesContainer');
   const summaryDiv = document.getElementById('paymentSummary');
@@ -1079,7 +1147,8 @@ function generatePaymentQR() {
       } else if (emp.type === 'pausalni' && emp.pausalni) {
         amount = emp.hours * salaryRate;
       } else if (emp.type === 'special' || emp.type === 'special2') {
-        amount = bonusPerSpecial;
+        // Bonus z hodin + premie
+        amount = bonusPerSpecial + (emp.premie || 0);
       } else {
         amount = emp.hours * salaryRate;
       }
@@ -1281,12 +1350,21 @@ Zpráva: Výplata ${name} ${currentPeriod.month}/${currentPeriod.year}`;
 }
 
 function downloadQR(qrId, employeeName) {
+  // qrcodejs2 vytváří img element (nebo canvas jako fallback)
+  const qrImg = document.querySelector(`#${qrId} img`);
   const qrCanvas = document.querySelector(`#${qrId} canvas`);
-  if (qrCanvas) {
-    const link = document.createElement('a');
-    link.download = `QR_platba_${employeeName}_${currentPeriod.month}_${currentPeriod.year}.png`;
+
+  const link = document.createElement('a');
+  link.download = `QR_platba_${employeeName}_${currentPeriod.month}_${currentPeriod.year}.png`;
+
+  if (qrImg && qrImg.src) {
+    link.href = qrImg.src;
+    link.click();
+  } else if (qrCanvas) {
     link.href = qrCanvas.toDataURL();
     link.click();
+  } else {
+    wgsToast.error('QR kód nenalezen');
   }
 }
 
@@ -1296,6 +1374,9 @@ function closeQRModal() {
 
 // === SINGLE EMPLOYEE QR GENERATION ===
 function generateSingleEmployeeQR(index) {
+  // Synchronizovat vstupy před generováním QR
+  synchronizovatVstupy();
+
   const emp = employees[index];
   if (!emp) {
     wgsToast.error('Zaměstnanec nenalezen');
@@ -1328,7 +1409,8 @@ function generateSingleEmployeeQR(index) {
   } else if (emp.type === 'pausalni' && emp.pausalni) {
     amount = emp.hours * salaryRate;
   } else if (emp.type === 'special' || emp.type === 'special2') {
-    amount = totalOtherHours * 20;
+    // Bonus z hodin + premie
+    amount = (totalOtherHours * 20) + (emp.premie || 0);
   } else {
     amount = emp.hours * salaryRate;
   }
@@ -1557,15 +1639,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
 
       // === OBDOBÍ MANAGEMENT ===
-      case 'loadPeriod':
-        if (typeof loadPeriod === 'function') loadPeriod();
+      case 'togglePeriodOverlay':
+        if (typeof togglePeriodOverlay === 'function') togglePeriodOverlay();
         return;
 
-      case 'loadSavedPeriod':
-        const periodToLoad = target.getAttribute('data-period');
-        if (periodToLoad && typeof loadSavedPeriod === 'function') {
-          loadSavedPeriod(periodToLoad);
+      case 'closePeriodOverlay':
+        if (typeof closePeriodOverlay === 'function') closePeriodOverlay();
+        return;
+
+      case 'selectPeriod':
+        const periodToSelect = target.getAttribute('data-period');
+        if (periodToSelect && typeof selectPeriod === 'function') {
+          selectPeriod(periodToSelect);
         }
+        return;
+
+      case 'loadPeriod':
+        if (typeof loadPeriod === 'function') loadPeriod();
         return;
 
       case 'clearHours':
@@ -1580,9 +1670,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Handle data-action buttons - kliknutí
+  // DŮLEŽITÉ: Vyloučit INPUT pole - ty se zpracují pouze při change eventu
   document.addEventListener('click', (e) => {
     const target = e.target.closest('[data-action]');
     if (!target) return;
+
+    // Přeskočit INPUT a TEXTAREA - tyto elementy se zpracují pouze při change
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
     zpracujDataAction(target);
   });
 
