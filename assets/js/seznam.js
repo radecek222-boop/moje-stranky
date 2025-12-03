@@ -3059,28 +3059,31 @@ function formatDateTime(isoString) {
   const date = new Date(isoString);
   const now = new Date();
   const diff = now - date;
-  
+
   if (diff < 60000) {
     return 'Právě teď';
   }
-  
+
   if (diff < 3600000) {
     const mins = Math.floor(diff / 60000);
     return `Před ${mins} min`;
   }
-  
+
   if (diff < 86400000) {
     const hours = Math.floor(diff / 3600000);
     return `Před ${hours} h`;
   }
-  
-  return date.toLocaleDateString('cs-CZ', {
-    day: 'numeric',
-    month: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+
+  // Zkracene nazvy dnu v tydnu (cesky)
+  const dny = ['ne', 'po', 'ut', 'st', 'ct', 'pa', 'so'];
+  const den = dny[date.getDay()];
+  const datum = date.getDate();
+  const mesic = date.getMonth() + 1;
+  const rok = date.getFullYear();
+  const hodiny = date.getHours().toString().padStart(2, '0');
+  const minuty = date.getMinutes().toString().padStart(2, '0');
+
+  return `${den} ${datum}.${mesic}.${rok} ${hodiny}:${minuty}`;
 }
 
 // === UTILITY ===
@@ -3101,7 +3104,15 @@ function formatDate(dateStr) {
   if (!dateStr) return '—';
   const date = new Date(dateStr);
   if (isNaN(date)) return dateStr;
-  return date.toLocaleDateString('cs-CZ');
+
+  // Zkracene nazvy dnu v tydnu (cesky)
+  const dny = ['ne', 'po', 'ut', 'st', 'ct', 'pa', 'so'];
+  const den = dny[date.getDay()];
+  const datum = date.getDate();
+  const mesic = date.getMonth() + 1;
+  const rok = date.getFullYear();
+
+  return `${den} ${datum}.${mesic}.${rok}`;
 }
 
 function formatAppointment(dateStr, timeStr) {
@@ -3888,10 +3899,18 @@ function vytvorVideoKartu(video, claimId) {
 
   const datum = document.createElement('span');
   datum.style.cssText = `font-size: ${isMobile ? '0.6rem' : '0.7rem'}; color: #666;`;
-  // Na mobilu kratší formát data
-  const datumText = video.uploaded_at ? new Date(video.uploaded_at).toLocaleString('cs-CZ',
-    isMobile ? { day: '2-digit', month: '2-digit' } : { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }
-  ) : '—';
+  // Formatovat datum s dnem v tydnu
+  let datumText = '—';
+  if (video.uploaded_at) {
+    const d = new Date(video.uploaded_at);
+    const dny = ['ne', 'po', 'ut', 'st', 'ct', 'pa', 'so'];
+    const den = dny[d.getDay()];
+    if (isMobile) {
+      datumText = `${den} ${d.getDate()}.${d.getMonth() + 1}.`;
+    } else {
+      datumText = `${den} ${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+    }
+  }
   datum.textContent = datumText;
 
   metaRow.appendChild(velikost);

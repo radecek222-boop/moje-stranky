@@ -93,34 +93,54 @@ function getCSRFTokenFromMeta() {
 }
 
 /**
- * Format date to Czech locale
+ * Format date to Czech locale with abbreviated day name
  * @param {string|Date} date - Date to format
- * @returns {string} - Formatted date or '—' if invalid
+ * @returns {string} - Formatted date like "st 23.1.2025" or '—' if invalid
  */
 function formatDateCZ(date) {
     if (!date) return '—';
 
+    // Zkracene nazvy dnu v tydnu (cesky)
+    const dny = ['ne', 'po', 'ut', 'st', 'ct', 'pa', 'so'];
+
     try {
         const dateObj = typeof date === 'string' ? new Date(date) : date;
         if (isNaN(dateObj.getTime())) return '—';
-        return dateObj.toLocaleDateString('cs-CZ');
+
+        const den = dny[dateObj.getDay()];
+        const datum = dateObj.getDate();
+        const mesic = dateObj.getMonth() + 1;
+        const rok = dateObj.getFullYear();
+
+        return `${den} ${datum}.${mesic}.${rok}`;
     } catch (e) {
         return '—';
     }
 }
 
 /**
- * Format datetime to Czech locale with time
+ * Format datetime to Czech locale with abbreviated day name and time
  * @param {string|Date} date - Date to format
- * @returns {string} - Formatted datetime or '—' if invalid
+ * @returns {string} - Formatted datetime like "st 23.1.2025 14:30" or '—' if invalid
  */
 function formatDateTimeCZ(date) {
     if (!date) return '—';
 
+    // Zkracene nazvy dnu v tydnu (cesky)
+    const dny = ['ne', 'po', 'ut', 'st', 'ct', 'pa', 'so'];
+
     try {
         const dateObj = typeof date === 'string' ? new Date(date) : date;
         if (isNaN(dateObj.getTime())) return '—';
-        return dateObj.toLocaleString('cs-CZ');
+
+        const den = dny[dateObj.getDay()];
+        const datum = dateObj.getDate();
+        const mesic = dateObj.getMonth() + 1;
+        const rok = dateObj.getFullYear();
+        const hodiny = dateObj.getHours().toString().padStart(2, '0');
+        const minuty = dateObj.getMinutes().toString().padStart(2, '0');
+
+        return `${den} ${datum}.${mesic}.${rok} ${hodiny}:${minuty}`;
     } catch (e) {
         return '—';
     }
