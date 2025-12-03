@@ -2529,16 +2529,21 @@ async function deleteNote(noteId, orderId) {
     const csrfToken = await getCSRFToken();
     console.log('[deleteNote] CSRF token:', csrfToken ? 'OK (' + csrfToken.substring(0, 10) + '...)' : 'CHYBI!');
 
-    const formData = new FormData();
-    formData.append('action', 'delete');
-    formData.append('note_id', noteId);
-    formData.append('csrf_token', csrfToken);
+    // FIX: Pouzit URLSearchParams misto FormData - spolehlivejsi pro Safari
+    const params = new URLSearchParams();
+    params.append('action', 'delete');
+    params.append('note_id', noteId);
+    params.append('csrf_token', csrfToken);
 
-    console.log('[deleteNote] FormData pripravena, odesilam POST na /api/notes_api.php...');
+    console.log('[deleteNote] Params pripraveny:', params.toString().substring(0, 50) + '...');
+    console.log('[deleteNote] Odesilam POST na /api/notes_api.php...');
 
     const response = await fetch('/api/notes_api.php', {
       method: 'POST',
-      body: formData
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: params
     });
 
     console.log('[deleteNote] Response status:', response.status, response.statusText);
