@@ -1421,10 +1421,20 @@ async function exportBothPDFs() {
       }
 
       logger.log(`Fotodokumentace přidána (${attachedPhotos.length} fotek)`);
-      showNotif("success", `PDF vytvořeno (protokol + ${attachedPhotos.length} fotek)`);
+      // Neonový toast pro vytvoření PDF
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit(`PDF vytvořeno (protokol + ${attachedPhotos.length} fotek)`, { titulek: 'WGS' });
+      } else {
+        showNotif("success", `PDF vytvořeno (protokol + ${attachedPhotos.length} fotek)`);
+      }
 
     } else {
-      showNotif("success", "Protokol vytvořen (bez fotek)");
+      // Neonový toast pro protokol bez fotek
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit("Protokol vytvořen", { titulek: 'WGS' });
+      } else {
+        showNotif("success", "Protokol vytvořen (bez fotek)");
+      }
     }
 
     // Uložit PDF do databáze (stejně jako při odeslání emailem)
@@ -1894,7 +1904,12 @@ async function potvrditAOdeslat() {
     const result = await response.json();
 
     if (result.status === 'success') {
-      showNotif("success", "Email odeslán zákazníkovi");
+      // Neonový toast pro odeslání emailu
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit('Email odeslán zákazníkovi', { titulek: 'WGS' });
+      } else {
+        showNotif("success", "Email odeslán zákazníkovi");
+      }
       await saveProtokolToDB();
 
       logger.log('[List] Označuji reklamaci jako hotovou...');
@@ -2622,7 +2637,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // Nakreslit podpis
       ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
 
-      if (typeof showNotif === 'function') {
+      // Neonový toast pro přenesení podpisu
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit('Podpis byl přenesen do protokolu', { titulek: 'WGS' });
+      } else if (typeof showNotif === 'function') {
         showNotif('success', 'Podpis byl přenesen do protokolu');
       }
     };

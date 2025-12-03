@@ -172,6 +172,72 @@ If you believe a feature absolutely requires color:
 
 ---
 
+## ✅ OFFICIAL EXCEPTION: WGS Toast Notifications (Neon Green)
+
+**IMPORTANT:** Toast notifikace jsou JEDINÁ schválená výjimka z černobílého designu.
+
+### Neonově zelený toast (`#39ff14`) se MUSÍ použít pro:
+
+| Akce | Příklad zprávy |
+|------|----------------|
+| Odeslání emailu | "Email úspěšně odeslán" |
+| Nahrání fotky | "Fotografie nahrána" |
+| Uložení dat | "Změny uloženy" |
+| Push notifikace | "Nová poznámka k reklamaci" |
+| Úspěšná akce | Jakákoliv potvrzující zpráva |
+
+### Soubory:
+
+| Soubor | Účel |
+|--------|------|
+| `assets/css/wgs-toast.css` | Styling - neonově zelený rámeček s pulzující září |
+| `assets/js/wgs-toast.js` | JavaScript - `WGSToast.zobrazit(zprava, options)` |
+
+### Použití v kódu:
+
+```javascript
+// ✅ SPRÁVNĚ - Použít WGSToast pro důležité akce
+WGSToast.zobrazit('Email úspěšně odeslán', {
+    titulek: 'WGS',
+    trvani: 5000,
+    claimId: 123  // Volitelné - klik přesměruje na reklamaci
+});
+
+// ✅ Pro běžné informace lze použít základní wgsToast
+wgsToast.success('Uloženo');
+wgsToast.error('Chyba při ukládání');
+
+// ❌ ŠPATNĚ - Nepoužívat alert() pro úspěšné akce
+alert('Email odeslán');  // Příliš invazivní
+```
+
+### Proč neonově zelená?
+
+1. **Viditelnost** - Upoutá pozornost uživatele
+2. **Profesionalita** - Moderní, technický vzhled
+3. **Konzistence** - Jednotný styl pro všechny notifikace
+4. **UX** - Neinvazivní, automaticky zmizí
+
+### Design specifikace:
+
+```css
+/* Neonově zelená barva */
+--wgs-neon-green: #39ff14;
+
+/* Box shadow s pulzující září */
+box-shadow:
+    0 0 10px rgba(57, 255, 20, 0.4),
+    0 0 20px rgba(57, 255, 20, 0.2),
+    0 0 30px rgba(57, 255, 20, 0.1);
+
+/* Border */
+border: 2px solid #39ff14;
+```
+
+**TOTO JE JEDINÁ SCHVÁLENÁ BAREVNÁ VÝJIMKA V PROJEKTU.**
+
+---
+
 ## 📋 PROJECT OVERVIEW
 
 **Type:** Luxury furniture service management system

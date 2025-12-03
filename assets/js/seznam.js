@@ -3586,8 +3586,12 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
       // Zavřít detail modal
       closeDetail();
 
-      // Zobrazit toast zprávu
-      showToast('Email odeslán zákazníkovi', 'success');
+      // Zobrazit neonový toast (WGSToast pro důležité akce)
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit('Email odeslán zákazníkovi', { titulek: 'WGS' });
+      } else {
+        showToast('Email odeslán zákazníkovi', 'success');
+      }
 
       // DŮLEŽITÉ: SMS text je nyní generován na serveru ze stejných dat jako email
       // To znamená, že změna v emailové šabloně automaticky ovlivní i SMS
@@ -4273,9 +4277,14 @@ function otevritNahravaniVidea(claimId, parentOverlay) {
         progressFill.style.width = '100%';
         progressFill.textContent = '100%';
         statusText.textContent = 'Hotovo!';
-        progressFill.style.background = '#2D5016';
+        progressFill.style.background = '#333';
 
-        showToast('Video bylo úspěšně nahráno', 'success');
+        // Neonový toast pro úspěšný upload
+        if (typeof WGSToast !== 'undefined') {
+          WGSToast.zobrazit('Video bylo úspěšně nahráno', { titulek: 'WGS' });
+        } else {
+          showToast('Video bylo úspěšně nahráno', 'success');
+        }
 
         // Zavřít upload modal
         setTimeout(() => {
@@ -4405,9 +4414,14 @@ async function nahratVideoDragDrop(file, claimId, parentOverlay) {
       progressBarInner.style.width = '100%';
       progressBarInner.textContent = '100%';
       progressStatus.textContent = 'Hotovo!';
-      progressBarInner.style.background = '#2D5016';
+      progressBarInner.style.background = '#333';
 
-      showToast('Video bylo úspěšně nahráno', 'success');
+      // Neonový toast pro úspěšný upload
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit('Video bylo úspěšně nahráno', { titulek: 'WGS' });
+      } else {
+        showToast('Video bylo úspěšně nahráno', 'success');
+      }
 
       // Zavřít progress a reload videotéky
       setTimeout(() => {

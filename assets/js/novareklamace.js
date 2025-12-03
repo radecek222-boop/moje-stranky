@@ -996,7 +996,12 @@ const WGS = {
         this.photos.push({ data: base64, file: compressed });
       }
       this.renderPhotos();
-      this.toast(`Přidáno ${files.length} fotek`, 'success');
+      // Neonový toast pro přidání fotek
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit(`Přidáno ${files.length} fotek`, { titulek: 'WGS' });
+      } else {
+        this.toast(`Přidáno ${files.length} fotek`, 'success');
+      }
     });
   },
   
