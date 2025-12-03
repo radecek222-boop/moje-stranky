@@ -401,29 +401,11 @@ async function saveData() {
 
 // === SERVER SAVE ===
 async function saveToServer() {
-  // Nejprve načíst existující data ze serveru
-  let existingData = {};
-  try {
-    const loadResponse = await fetch(API_URL, { credentials: 'same-origin' });
-    if (loadResponse.ok) {
-      const loadResult = await loadResponse.json();
-      if (loadResult.status === 'success' && loadResult.data) {
-        existingData = loadResult.data;
-      }
-    }
-  } catch (e) {
-    logger.warn('Nelze načíst existující data, vytvářím nová:', e);
-  }
-
-  // Vytvořit klíč období (YYYY-MM)
-  const periodKey = `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
-
   // Spočítat statistiky pro období
   const stats = calculateStats();
 
   // Připravit data období - hodiny, prémie a základní info
   // Zahrnout VŠECHNY aktivní zaměstnance (ne jen ty s hodinami > 0)
-  // Uživatel může měnit hodiny a účty v každém období
   const periodEmployees = employees.filter(e => {
     return e.active !== false;  // Všichni aktivní zaměstnanci
   }).map(emp => ({
@@ -437,47 +419,35 @@ async function saveToServer() {
     bank: emp.bank || ''
   }));
 
-  // Zachovat existující periods a přidat/aktualizovat aktuální
-  const periods = existingData.periods || {};
-  periods[periodKey] = {
-    employees: periodEmployees,
-    totalHours: stats.totalHours,
-    totalSalary: stats.totalSalary,
-    totalInvoice: stats.totalInvoice,
-    profit: stats.profit,
-    marekBonus: stats.marekBonus || 0,
-    radekBonus: stats.radekBonus || 0,
-    girlsBonus: stats.girlsBonus || 0,
-    radekTotal: stats.radekTotal || 0,
-    premieCelkem: stats.premieCelkem || 0,
-    lastModified: new Date().toISOString()
-  };
-
-  // Kompletní data k uložení
-  // DŮLEŽITÉ: employees musí být celá databáze (allEmployeesDatabase nebo existingData.employees),
+  // Kompletní databáze zaměstnanců k uložení
+  // DŮLEŽITÉ: employees musí být celá databáze (allEmployeesDatabase),
   // NE filtrovaný seznam pro aktuální období (employees)!
   const employeesToSave = allEmployeesDatabase.length > 0
     ? allEmployeesDatabase
-    : (existingData.employees && existingData.employees.length > 0 ? existingData.employees : employees);
+    : employees;
 
+  // Data ve formátu pro SQL API
   const data = {
     config: {
       salaryRate: salaryRate,
-      invoiceRate: invoiceRate,
-      company: 'White Glove Service',
-      currency: 'CZK'
+      invoiceRate: invoiceRate
     },
     employees: employeesToSave,
-    periods: periods,
-    metadata: existingData.metadata || {
-      version: '1.1',
-      lastModified: new Date().toISOString(),
-      createdBy: 'PSA Kalkulátor'
+    periodData: {
+      year: currentPeriod.year,
+      month: currentPeriod.month,
+      employees: periodEmployees,
+      totalHours: stats.totalHours,
+      totalSalary: stats.totalSalary,
+      totalInvoice: stats.totalInvoice,
+      profit: stats.profit,
+      marekBonus: stats.marekBonus || 0,
+      radekBonus: stats.radekBonus || 0,
+      girlsBonus: stats.girlsBonus || 0,
+      radekTotal: stats.radekTotal || 0,
+      premieCelkem: stats.premieCelkem || 0
     }
   };
-
-  // Aktualizovat metadata
-  data.metadata.lastModified = new Date().toISOString();
 
   try {
     const response = await fetch(API_URL, {
@@ -496,7 +466,8 @@ async function saveToServer() {
       throw new Error(result.message || 'Nepodařilo se uložit data na server');
     }
 
-    logger.log(`Data pro období ${periodKey} úspěšně uložena`, result);
+    const periodKey = `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
+    logger.log(`Data pro období ${periodKey} úspěšně uložena do SQL`, result);
     return result;
   } catch (error) {
     logger.error('Server save failed:', error);
