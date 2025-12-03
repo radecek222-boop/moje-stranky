@@ -297,15 +297,21 @@ async function loadData(period = null) {
 
     const data = payload.data;
 
-    // Uložit kompletní databázi zaměstnanců pro výběr
+    console.error('DEBUG loadData: payload.data =', JSON.stringify(data).substring(0, 500));
+    console.error('DEBUG loadData: data.employees type =', typeof data.employees, 'isArray =', Array.isArray(data.employees));
     if (data.employees) {
+      console.error('DEBUG loadData: data.employees.length =', data.employees.length);
+    }
+
+    // Uložit kompletní databázi zaměstnanců pro výběr
+    if (data.employees && data.employees.length > 0) {
       allEmployeesDatabase = data.employees.map(emp => ({
         ...emp,
         bank: formatBankCode(emp.bank)
       }));
       console.error('DEBUG loadData: allEmployeesDatabase loaded with', allEmployeesDatabase.length, 'employees');
     } else {
-      console.error('DEBUG loadData: data.employees is empty or undefined, data =', data);
+      console.error('DEBUG loadData: data.employees is empty or undefined');
     }
 
     // Load configuration
