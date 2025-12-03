@@ -1287,9 +1287,46 @@ document.addEventListener('DOMContentLoaded', () => {
           updateEmployee(empIndex, empField, target.value, empRecalculate);
         }
         return;
+
+      // === PSA HLAVNÍ AKCE ===
+      case 'saveData':
+        if (typeof saveData === 'function') saveData();
+        return;
+
+      case 'addEmployee':
+        if (typeof addEmployee === 'function') addEmployee();
+        return;
+
+      case 'exportToExcel':
+        if (typeof exportToExcel === 'function') exportToExcel();
+        return;
+
+      case 'printReport':
+        if (typeof printReport === 'function') printReport();
+        return;
+
+      case 'clearAll':
+        if (typeof clearAll === 'function') clearAll();
+        return;
+
+      case 'generatePaymentQR':
+        if (typeof generatePaymentQR === 'function') generatePaymentQR();
+        return;
+
+      case 'closeQRModal':
+        if (typeof closeQRModal === 'function') closeQRModal();
+        return;
+
+      case 'updatePeriod':
+        if (typeof updatePeriod === 'function') updatePeriod();
+        return;
+
+      case 'updateRates':
+        if (typeof updateRates === 'function') updateRates();
+        return;
     }
 
-    // Try to call function if it exists
+    // Try to call function if it exists (fallback)
     if (typeof window[action] === 'function') {
       window[action]();
     }
