@@ -941,7 +941,7 @@ async function showHistoryPDF(originalReklamaceId) {
     logger.log(`Otevírám PDF: ${firstDoc.file_path}`);
 
     // Otevřít PDF v modal okně (funguje lépe na mobilu než window.open)
-    zobrazPDFModal(firstDoc.file_path, originalReklamaceId);
+    zobrazPDFModal(firstDoc.file_path, originalReklamaceId, 'historie');
 
   } catch (error) {
     logger.error('Chyba při načítání historie PDF:', error);
@@ -2064,8 +2064,11 @@ async function showCustomerDetail(id) {
 /**
  * Zobrazí PDF v modálním okně s tlačítky Zavřít a Odeslat
  * Univerzální řešení pro desktop, PWA, iOS Safari
+ * @param {string} pdfUrl - URL k PDF souboru
+ * @param {string} claimId - ID zakázky
+ * @param {string} typ - Typ PDF: 'report' (výchozí) nebo 'historie'
  */
-function zobrazPDFModal(pdfUrl, claimId) {
+function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
   // Detekce iOS a mobilních zařízení
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -2084,10 +2087,11 @@ function zobrazPDFModal(pdfUrl, claimId) {
   const header = document.createElement('div');
   header.style.cssText = 'padding: 10px 12px; background: #333; color: white; font-weight: 600; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-shrink: 0;';
 
-  // Levá část - název a ID
+  // Levá část - název a ID (rozlišení podle typu)
   const headerLeft = document.createElement('div');
   headerLeft.style.cssText = 'display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;';
-  headerLeft.innerHTML = '<span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">PDF Report</span><span style="font-size: 0.75rem; opacity: 0.7;">ID: ' + (claimId || '-') + '</span>';
+  const titulek = typ === 'historie' ? 'Historie PDF' : 'PDF Report';
+  headerLeft.innerHTML = '<span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + titulek + '</span><span style="font-size: 0.75rem; opacity: 0.7;">ID: ' + (claimId || '-') + '</span>';
 
   // Pravá část - tlačítka v headeru
   const headerButtons = document.createElement('div');
