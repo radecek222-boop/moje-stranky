@@ -773,15 +773,6 @@ async function updateRates() {
   }
 }
 
-function setQuickRate(value) {
-  if (!value) return;
-
-  const [salary, invoice] = value.split('-').map(Number);
-  document.getElementById('salaryRate').value = salary;
-  document.getElementById('invoiceRate').value = invoice;
-  updateRates();
-}
-
 // === UTILITIES ===
 function formatCurrency(amount) {
   return new Intl.NumberFormat('cs-CZ', {

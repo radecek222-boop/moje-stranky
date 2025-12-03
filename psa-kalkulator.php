@@ -83,16 +83,6 @@ $csrfToken = generateCSRFToken();
           <label class="form-label">Sazba fakturace (Kč/hodina)</label>
           <input type="number" class="form-input" id="invoiceRate" value="250" min="0" data-onchange="updateRates">
         </div>
-        <div class="form-group">
-          <label class="form-label">Rychlé nastavení</label>
-          <select class="form-select" data-onchange="setQuickRate">
-            <option value="">Vyberte sazbu...</option>
-            <option value="100-200">100/200 Kč</option>
-            <option value="150-250">150/250 Kč (výchozí)</option>
-            <option value="200-300">200/300 Kč</option>
-            <option value="250-400">250/400 Kč</option>
-          </select>
-        </div>
       </div>
     </div>
   </div>
