@@ -446,6 +446,12 @@ async function saveToServer() {
   };
 
   // Kompletní data k uložení
+  // DŮLEŽITÉ: employees musí být celá databáze (allEmployeesDatabase nebo existingData.employees),
+  // NE filtrovaný seznam pro aktuální období (employees)!
+  const employeesToSave = allEmployeesDatabase.length > 0
+    ? allEmployeesDatabase
+    : (existingData.employees && existingData.employees.length > 0 ? existingData.employees : employees);
+
   const data = {
     config: {
       salaryRate: salaryRate,
@@ -453,7 +459,7 @@ async function saveToServer() {
       company: 'White Glove Service',
       currency: 'CZK'
     },
-    employees: employees,
+    employees: employeesToSave,
     periods: periods,
     metadata: existingData.metadata || {
       version: '1.1',
