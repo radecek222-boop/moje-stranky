@@ -1040,7 +1040,7 @@ function renderTable() {
         <td class="text-right" style="font-weight: 600; color: var(--c-success);">
           ${formatCurrency(salary)}
           ${(emp.type === 'special' || emp.type === 'special2') ?
-            '<br><span style="font-size: 0.75rem; color: var(--c-grey);">' + totalOtherHours + 'h × 20 Kč</span>' : ''}
+            '<br><span style="font-size: 0.75rem; color: var(--c-grey);">' + totalOtherHours + 'h × 20</span>' : ''}
         </td>
         <td class="text-right" style="font-weight: 600; color: var(--c-info);">
           ${formatCurrency(invoice)}
