@@ -2080,10 +2080,40 @@ function zobrazPDFModal(pdfUrl, claimId) {
   const pdfContainer = document.createElement('div');
   pdfContainer.style.cssText = 'width: 95%; height: calc(100% - 80px); max-width: 900px; background: white; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;';
 
-  // Header s názvem
+  // Header s názvem a tlačítky (pro PWA přístupnost)
   const header = document.createElement('div');
-  header.style.cssText = 'padding: 12px 16px; background: #333; color: white; font-weight: 600; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center;';
-  header.innerHTML = '<span>PDF Report</span><span style="font-size: 0.8rem; opacity: 0.7;">ID: ' + (claimId || '-') + '</span>';
+  header.style.cssText = 'padding: 10px 12px; background: #333; color: white; font-weight: 600; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-shrink: 0;';
+
+  // Levá část - název a ID
+  const headerLeft = document.createElement('div');
+  headerLeft.style.cssText = 'display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;';
+  headerLeft.innerHTML = '<span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">PDF Report</span><span style="font-size: 0.75rem; opacity: 0.7;">ID: ' + (claimId || '-') + '</span>';
+
+  // Pravá část - tlačítka v headeru
+  const headerButtons = document.createElement('div');
+  headerButtons.style.cssText = 'display: flex; gap: 8px; flex-shrink: 0;';
+
+  // Tlačítko Stáhnout v headeru
+  const btnStahnoutHeader = document.createElement('button');
+  btnStahnoutHeader.innerHTML = 'Stáhnout';
+  btnStahnoutHeader.style.cssText = 'padding: 8px 14px; font-size: 0.8rem; font-weight: 600; background: #555; color: white; border: none; border-radius: 5px; cursor: pointer; touch-action: manipulation;';
+  btnStahnoutHeader.onclick = () => {
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = `PDF_Report_${claimId || 'dokument'}.pdf`;
+    link.click();
+  };
+
+  // Tlačítko Zpět (X) v headeru
+  const btnZpetHeader = document.createElement('button');
+  btnZpetHeader.innerHTML = 'Zpět';
+  btnZpetHeader.style.cssText = 'padding: 8px 14px; font-size: 0.8rem; font-weight: 600; background: #777; color: white; border: none; border-radius: 5px; cursor: pointer; touch-action: manipulation;';
+  btnZpetHeader.onclick = () => overlay.remove();
+
+  headerButtons.appendChild(btnStahnoutHeader);
+  headerButtons.appendChild(btnZpetHeader);
+  header.appendChild(headerLeft);
+  header.appendChild(headerButtons);
 
   // PDF náhled - různé přístupy pro různé platformy
   let pdfViewer;
