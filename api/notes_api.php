@@ -572,6 +572,7 @@ try {
     }
 
 } catch (Exception $e) {
+    error_log('[Notes API] CHYBA: ' . $e->getMessage() . ' | Action: ' . ($action ?? 'undefined'));
     http_response_code(400);
     echo json_encode([
         'status' => 'error',
