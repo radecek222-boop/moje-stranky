@@ -1763,56 +1763,96 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('[Seznam] Event delegation V5 nacten - VLASTNI MODAL DIALOG');
 });
 
-// INLINE FIX: Prepis deleteNote funkce - MUSI byt po seznam.js (ktery ma defer)
-// setTimeout(0) zajisti ze se spusti az po vsech deferred scriptech
-setTimeout(function() {
-  window.deleteNote = async function(noteId, orderId) {
-    console.log('[INLINE deleteNote v3] Zacinam mazat poznamku ID:', noteId);
+// DVA-KLIKOVE POTVRZENI - obchazi vsechny problemy s modaly/overlay
+// 1. klik: zmeni tlacitko na "Smazat?"
+// 2. klik: skutecne smaze
+window.potvrditSmazaniPoznamky = function(btn) {
+  const noteId = btn.getAttribute('data-note-id');
+  const orderId = btn.getAttribute('data-order-id');
 
-    // FIX: Pouzit nativni confirm() misto wgsConfirm - obchazi z-index problemy s modaly
-    if (!confirm('Opravdu chcete smazat tuto poznámku?')) {
-      console.log('[INLINE deleteNote v3] Uzivatel zrusil');
-      return;
+  // Uz je v rezimu potvrzeni?
+  if (btn.classList.contains('potvrzeni')) {
+    // Druhy klik - smazat
+    smazatPoznamkuOkamzite(noteId, orderId, btn);
+    return;
+  }
+
+  // Prvni klik - zobrazit potvrzeni
+  btn.classList.add('potvrzeni');
+  btn.textContent = 'Smazat?';
+  btn.style.cssText = 'background:#333 !important; color:#fff !important; padding:2px 8px !important; font-size:11px !important; min-width:50px !important;';
+
+  // Timeout - po 3s vratit zpet
+  setTimeout(function() {
+    if (btn.classList.contains('potvrzeni')) {
+      btn.classList.remove('potvrzeni');
+      btn.textContent = 'x';
+      btn.style.cssText = '';
     }
+  }, 3000);
+};
 
-    console.log('[INLINE deleteNote v3] Uzivatel potvrdil');
+// Skutecne smazani bez potvrzeni
+async function smazatPoznamkuOkamzite(noteId, orderId, btn) {
+  console.log('[smazatPoznamku] Mazu poznamku ID:', noteId);
 
-    try {
-      const csrfToken = await getCSRFToken();
-      console.log('[INLINE deleteNote v3] CSRF:', csrfToken ? 'OK' : 'CHYBI');
+  // Disable tlacitko
+  if (btn) {
+    btn.textContent = '...';
+    btn.disabled = true;
+  }
 
-      const params = new URLSearchParams();
-      params.append('action', 'delete');
-      params.append('note_id', noteId);
-      params.append('csrf_token', csrfToken);
+  try {
+    const csrfToken = await getCSRFToken();
 
-      console.log('[INLINE deleteNote v3] Odesilam request...');
+    const params = new URLSearchParams();
+    params.append('action', 'delete');
+    params.append('note_id', noteId);
+    params.append('csrf_token', csrfToken);
 
-      const response = await fetch('/api/notes_api.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params
-      });
+    const response = await fetch('/api/notes_api.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params
+    });
 
-      console.log('[INLINE deleteNote v3] Status:', response.status);
-      const data = await response.json();
-      console.log('[INLINE deleteNote v3] Data:', JSON.stringify(data));
+    console.log('[smazatPoznamku] Status:', response.status);
+    const data = await response.json();
+    console.log('[smazatPoznamku] Data:', JSON.stringify(data));
 
-      if (data.status === 'success') {
-        const noteEl = document.querySelector('[data-note-id="' + noteId + '"]');
-        if (noteEl) noteEl.remove();
-        if (typeof loadAll === 'function') await loadAll(window.ACTIVE_FILTER || 'all');
-        if (window.wgsToast) wgsToast.success('Poznámka smazána');
-      } else {
-        alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+    if (data.status === 'success') {
+      // Odstranit poznamku z DOM
+      const noteEl = document.querySelector('.note-item[data-note-id="' + noteId + '"]');
+      if (noteEl) {
+        noteEl.style.opacity = '0';
+        noteEl.style.transition = 'opacity 0.3s';
+        setTimeout(() => noteEl.remove(), 300);
       }
-    } catch (e) {
-      console.error('[INLINE deleteNote v3] Error:', e);
-      alert('Chyba: ' + e.message);
+      // Obnovit seznam
+      if (typeof loadAll === 'function') await loadAll(window.ACTIVE_FILTER || 'all');
+      if (window.WGSToast) WGSToast.zobrazit('Poznámka smazána');
+    } else {
+      alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+      // Vratit tlacitko
+      if (btn) {
+        btn.textContent = 'x';
+        btn.disabled = false;
+        btn.classList.remove('potvrzeni');
+        btn.style.cssText = '';
+      }
     }
-  };
-  console.log('[INLINE] deleteNote funkce prepsana - verze 20251203-03 (setTimeout po defer)');
-}, 0);
+  } catch (e) {
+    console.error('[smazatPoznamku] Error:', e);
+    alert('Chyba: ' + e.message);
+    if (btn) {
+      btn.textContent = 'x';
+      btn.disabled = false;
+      btn.classList.remove('potvrzeni');
+      btn.style.cssText = '';
+    }
+  }
+}
+console.log('[INLINE] potvrditSmazaniPoznamky - verze 20251203-04 (dva-klikove potvrzeni)');
 </script>
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
