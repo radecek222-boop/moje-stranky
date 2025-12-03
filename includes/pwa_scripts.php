@@ -17,6 +17,9 @@ $pwaUzivatelPrihlasen = isset($_SESSION['user_id']) || (isset($_SESSION['is_admi
 <!-- PWA Pull-to-Refresh -->
 <script src="/assets/js/pull-to-refresh.min.js"></script>
 <?php if ($pwaUzivatelPrihlasen): ?>
+<!-- WGS Toast Notifikace (in-app) -->
+<link rel="stylesheet" href="/assets/css/wgs-toast.css">
+<script src="/assets/js/wgs-toast.js"></script>
 <!-- PWA Notifications (Badge + Local Notifications) -->
 <script src="/assets/js/pwa-notifications.min.js"></script>
 <?php endif; ?>
