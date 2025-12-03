@@ -297,21 +297,29 @@ async function loadData(period = null) {
 
     const data = payload.data;
 
-    console.error('DEBUG loadData: payload.data =', JSON.stringify(data).substring(0, 500));
-    console.error('DEBUG loadData: data.employees type =', typeof data.employees, 'isArray =', Array.isArray(data.employees));
-    if (data.employees) {
-      console.error('DEBUG loadData: data.employees.length =', data.employees.length);
-    }
-
     // Uložit kompletní databázi zaměstnanců pro výběr
     if (data.employees && data.employees.length > 0) {
       allEmployeesDatabase = data.employees.map(emp => ({
         ...emp,
         bank: formatBankCode(emp.bank)
       }));
-      console.error('DEBUG loadData: allEmployeesDatabase loaded with', allEmployeesDatabase.length, 'employees');
+      logger.log('loadData: allEmployeesDatabase loaded with', allEmployeesDatabase.length, 'employees');
     } else {
-      console.error('DEBUG loadData: data.employees is empty or undefined');
+      // FALLBACK: Pokud employees je prázdné, zkusit načíst z posledního období
+      logger.warn('loadData: data.employees is empty, trying fallback from periods...');
+      if (data.periods) {
+        const sortedPeriods = Object.keys(data.periods).sort().reverse();
+        if (sortedPeriods.length > 0) {
+          const lastPeriod = data.periods[sortedPeriods[0]];
+          if (lastPeriod && lastPeriod.employees && lastPeriod.employees.length > 0) {
+            allEmployeesDatabase = lastPeriod.employees.map(emp => ({
+              ...emp,
+              bank: formatBankCode(emp.bank || '')
+            }));
+            logger.log('loadData: FALLBACK - loaded', allEmployeesDatabase.length, 'employees from period', sortedPeriods[0]);
+          }
+        }
+      }
     }
 
     // Load configuration
@@ -604,16 +612,16 @@ function addEmployee() {
 
 // === EMPLOYEE SELECTOR (checkbox overlay) ===
 async function showEmployeeSelector() {
-  console.error('DEBUG: showEmployeeSelector started, allEmployeesDatabase.length =', allEmployeesDatabase.length);
+  logger.log('showEmployeeSelector started, allEmployeesDatabase.length =', allEmployeesDatabase.length);
 
   // Pokud je databáze prázdná, zkusit načíst data znovu
   if (allEmployeesDatabase.length === 0) {
-    console.error('DEBUG: allEmployeesDatabase is empty, trying to reload data...');
+    logger.log('allEmployeesDatabase is empty, trying to reload data...');
     try {
       await loadData();
-      console.error('DEBUG: After loadData, allEmployeesDatabase.length =', allEmployeesDatabase.length);
+      logger.log('After loadData, allEmployeesDatabase.length =', allEmployeesDatabase.length);
     } catch (err) {
-      console.error('DEBUG: Failed to reload data:', err);
+      logger.error('Failed to reload data:', err);
     }
   }
 
@@ -626,7 +634,7 @@ async function showEmployeeSelector() {
     !excludedTypes.includes(emp.type)
   );
 
-  console.error('DEBUG: Employee selector - allEmployeesDatabase:', allEmployeesDatabase.length, 'allAvailable:', allAvailable.length);
+  logger.log('Employee selector - allEmployeesDatabase:', allEmployeesDatabase.length, 'allAvailable:', allAvailable.length);
 
   if (allAvailable.length === 0) {
     wgsToast.info('Žádní zaměstnanci v databázi - zkontrolujte přihlášení');
