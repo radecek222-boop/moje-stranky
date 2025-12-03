@@ -1246,58 +1246,63 @@ function updateStats() {
   let totalHours = 0;
   let totalSalary = 0;
   let totalInvoice = 0;
-  let totalEmployeeHours = 0;
 
-  // Calculate total hours (excluding special employees and bonus_girls)
+  // Nejprve spočítat celkové hodiny pro bonus special zaměstnanců
+  let totalOtherHours = 0;
   employees.forEach(emp => {
-    if (emp.type !== 'special' && emp.type !== 'special2' && emp.type !== 'bonus_girls') {
-      totalEmployeeHours += emp.hours || 0;
-      totalHours += emp.hours || 0;
+    if (emp.type !== 'special' && emp.type !== 'special2' && emp.type !== 'bonus_girls' && emp.type !== 'premie_polozka') {
+      const isLenka = emp.name === 'Lenka' || emp.name.includes('Lenka');
+      if (!isLenka) {
+        totalOtherHours += emp.hours || 0;
+      }
     }
   });
 
-  // Bonus for special employees
-  const bonusPerSpecial = totalEmployeeHours * 20;
-
-  // Count only active employees with hours in current month
-  // VYLOUČIT: Lenka, Marek, Radek, Bonus pro holky (nepočítají se do zaměstnanců)
+  // Počet aktivních zaměstnanců (jen běžní s hodinami)
   let activeEmployeesCount = 0;
 
-  // Calculate totals - ONLY for employees with hours > 0 or Lenka (paušál)
+  // Projít všechny zaměstnance a sečíst PŘESNĚ jako v tabulce
   employees.forEach(emp => {
     const isLenka = emp.name === 'Lenka' || emp.name.includes('Lenka');
+    let salary = 0;
+    let invoice = 0;
 
-    // Lenka má vždy paušál, ostatní jen pokud mají hodiny > 0
     if (isLenka) {
-      // Lenka má paušální mzdu 8716 Kč (NEPOČÍTÁ SE do zaměstnanců)
-      totalSalary += 8716;
-      totalInvoice += 0;  // Paušál nemá fakturu
-      // activeEmployeesCount++; ← ODSTRANĚNO, Lenka se nepočítá
+      // Lenka má paušální mzdu 8716 Kč
+      salary = 8716;
+      invoice = 0;
     } else if (emp.type === 'bonus_girls') {
-      // Bonus pro holky - editovatelná částka (NEPOČÍTÁ SE do zaměstnanců)
-      totalSalary += (emp.bonusAmount || 0);
-      // activeEmployeesCount++; ← ODSTRANĚNO, bonus_girls se nepočítá
+      // Bonus pro holky - editovatelná částka
+      salary = emp.bonusAmount || 0;
+      invoice = 0;
     } else if (emp.type === 'special' || emp.type === 'special2') {
-      // Special zaměstnanci (Marek, Radek) - NEPOČÍTAJÍ SE do zaměstnanců
-      if (bonusPerSpecial > 0) {
-        totalSalary += bonusPerSpecial;
-      }
-      // activeEmployeesCount++; ← ODSTRANĚNO, special se nepočítají
+      // Special zaměstnanci (Marek, Radek) - bonus z hodin ostatních
+      salary = totalOtherHours * 20;
+      invoice = 0;
     } else if (emp.type === 'premie_polozka') {
-      // Prémie položka - editovatelná částka (NEPOČÍTÁ SE do zaměstnanců)
-      totalSalary += (emp.premieCastka || 0);
-    } else if (emp.hours > 0) {
-      // Ostatní zaměstnanci jen pokud mají hodiny > 0
-      if (emp.type === 'pausalni' && emp.pausalni) {
-        const monthlyRate = emp.pausalni.rate / 12;
-        const monthlyTax = emp.pausalni.tax;
-        totalSalary += emp.hours * salaryRate;
-        totalInvoice += Math.min(emp.hours * invoiceRate, monthlyRate - monthlyTax);
-      } else {
-        totalSalary += emp.hours * salaryRate;
-        totalInvoice += emp.hours * invoiceRate;
-      }
-      activeEmployeesCount++; // ← JEN BĚŽNÍ ZAMĚSTNANCI S HODINAMI
+      // Prémie položka - editovatelná částka
+      salary = emp.premieCastka || 0;
+      invoice = 0;
+    } else if (emp.type === 'pausalni' && emp.pausalni) {
+      // Paušální zaměstnanci
+      const monthlyRate = emp.pausalni.rate / 12;
+      const monthlyTax = emp.pausalni.tax;
+      salary = emp.hours * salaryRate;
+      invoice = Math.min(emp.hours * invoiceRate, monthlyRate - monthlyTax);
+      if (emp.hours > 0) activeEmployeesCount++;
+    } else {
+      // Standardní zaměstnanci
+      salary = (emp.hours || 0) * salaryRate;
+      invoice = (emp.hours || 0) * invoiceRate;
+      if (emp.hours > 0) activeEmployeesCount++;
+    }
+
+    totalSalary += salary;
+    totalInvoice += invoice;
+
+    // Hodiny jen pro běžné zaměstnance
+    if (emp.type !== 'special' && emp.type !== 'special2' && emp.type !== 'bonus_girls' && emp.type !== 'premie_polozka' && !isLenka) {
+      totalHours += emp.hours || 0;
     }
   });
 
@@ -1312,14 +1317,9 @@ function updateStats() {
   document.getElementById('totalProfit').textContent = formatCurrency(totalProfit);
   document.getElementById('profitMargin').textContent = `Marže: ${profitMargin.toFixed(1)}%`;
 
-  // Averages - ONLY from active employees (excluding Lenka, special, bonus_girls)
-  const activeStandardEmployees = employees.filter(e => {
-    const isLenka = e.name === 'Lenka' || e.name.includes('Lenka');
-    return (e.type !== 'special' && e.type !== 'special2' && e.type !== 'bonus_girls' && !isLenka) && e.hours > 0;
-  }).length;
-
-  const avgHours = activeStandardEmployees > 0
-    ? totalHours / activeStandardEmployees
+  // Averages - ONLY from active employees with hours (excluding Lenka, special, bonus_girls, premie)
+  const avgHours = activeEmployeesCount > 0
+    ? totalHours / activeEmployeesCount
     : 0;
   const avgSalary = activeEmployeesCount > 0 ? totalSalary / activeEmployeesCount : 0;
 
