@@ -48,7 +48,14 @@ try {
         // Prevence CSRF útoku přes GET requesty (např. <img src="...?action=delete&...">)
         $readOnlyActions = ['get', 'list', 'count', 'get_unread_counts'];
         if (!in_array($action, $readOnlyActions, true)) {
-            throw new Exception('Tato akce vyžaduje POST metodu s CSRF tokenem. Povolené GET akce: ' . implode(', ', $readOnlyActions));
+            // DEBUG: Vice info o requestu
+            $debugInfo = [
+                'php_sees_method' => $_SERVER['REQUEST_METHOD'] ?? 'UNDEFINED',
+                'action_from_GET' => $action,
+                'POST_data' => $_POST,
+                'php_input' => substr(file_get_contents('php://input'), 0, 500)
+            ];
+            throw new Exception('GET request pro non-read akci. DEBUG: ' . json_encode($debugInfo, JSON_UNESCAPED_UNICODE));
         }
     } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';

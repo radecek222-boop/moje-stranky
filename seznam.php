@@ -1630,7 +1630,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </div>
 
 <!-- External JavaScript -->
-<script src="assets/js/seznam.js?v=20251202" defer></script>
+<script src="assets/js/seznam.js?v=20251203-fix" defer></script>
 <!-- seznam-delete-patch.js odstraněn - delete button je přímo v showCustomerDetail (Step 52) -->
 <!-- WGS Toast Notifikace (in-app) -->
 <link rel="stylesheet" href="assets/css/wgs-toast.css">
@@ -1762,6 +1762,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
   console.log('[Seznam] Event delegation V5 nacten - VLASTNI MODAL DIALOG');
 });
+
+// INLINE FIX: Prepis deleteNote funkce - obchazi cache seznam.js
+window.deleteNote = async function(noteId, orderId) {
+  console.log('[INLINE deleteNote] Zacinam mazat poznamku ID:', noteId);
+
+  if (!await wgsConfirm('Opravdu chcete smazat tuto poznámku?', 'Smazat', 'Zrušit')) {
+    console.log('[INLINE deleteNote] Uzivatel zrusil');
+    return;
+  }
+
+  console.log('[INLINE deleteNote] Uzivatel potvrdil');
+
+  try {
+    const csrfToken = await getCSRFToken();
+    console.log('[INLINE deleteNote] CSRF:', csrfToken ? 'OK' : 'CHYBI');
+
+    const params = new URLSearchParams();
+    params.append('action', 'delete');
+    params.append('note_id', noteId);
+    params.append('csrf_token', csrfToken);
+
+    console.log('[INLINE deleteNote] Odesilam request...');
+
+    const response = await fetch('/api/notes_api.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params
+    });
+
+    console.log('[INLINE deleteNote] Status:', response.status);
+    const data = await response.json();
+    console.log('[INLINE deleteNote] Data:', JSON.stringify(data));
+
+    if (data.status === 'success') {
+      const noteEl = document.querySelector('[data-note-id="' + noteId + '"]');
+      if (noteEl) noteEl.remove();
+      if (typeof loadAll === 'function') await loadAll(window.ACTIVE_FILTER || 'all');
+      if (window.wgsToast) wgsToast.success('Poznámka smazána');
+    } else {
+      alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+    }
+  } catch (e) {
+    console.error('[INLINE deleteNote] Error:', e);
+    alert('Chyba: ' + e.message);
+  }
+};
+console.log('[INLINE] deleteNote funkce prepsana - verze 20251203-01');
 </script>
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
