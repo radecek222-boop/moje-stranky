@@ -565,6 +565,28 @@ try {
     </div>
 
     <script>
+    // Event handler pro tlačítka s data-action
+    document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('click', (e) => {
+            const button = e.target.closest('[data-action]');
+            if (!button) return;
+
+            const action = button.getAttribute('data-action');
+
+            switch (action) {
+                case 'exportAllDDL':
+                    exportAllDDL();
+                    break;
+                case 'printPage':
+                    window.print();
+                    break;
+                case 'reloadPage':
+                    window.location.reload();
+                    break;
+            }
+        });
+    });
+
     // Export všech DDL do jednoho SQL souboru
     function exportAllDDL() {
         const allDDL = <?php echo json_encode(array_map(function($t) {
