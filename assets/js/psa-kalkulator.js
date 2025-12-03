@@ -172,12 +172,16 @@ async function loadPeriod() {
     // Načíst data období
     const periodData = data.periods[periodKey];
 
-    // Aktualizovat hodiny zaměstnanců podle uloženého období
+    // Aktualizovat data zaměstnanců podle uloženého období
+    // Hodiny, prémie a účty se načítají z období (pokud existují)
     employees = data.employees.map(emp => {
       const periodEmp = periodData.employees.find(pe => pe.id === emp.id);
       return {
         ...emp,
-        bank: formatBankCode(emp.bank),
+        // Účet a banka - preferovat hodnotu z období, jinak hlavní
+        account: periodEmp && periodEmp.account ? periodEmp.account : (emp.account || ''),
+        bank: formatBankCode(periodEmp && periodEmp.bank ? periodEmp.bank : (emp.bank || '')),
+        // Hodiny a bonusy z období
         hours: periodEmp ? (periodEmp.hours || 0) : 0,
         bonusAmount: periodEmp ? (periodEmp.bonusAmount || 0) : (emp.bonusAmount || 0),
         premieCastka: periodEmp ? (periodEmp.premieCastka || 0) : 0
@@ -241,9 +245,11 @@ async function loadData(period = null) {
         const periodEmp = periodData.employees.find(pe => pe.id === emp.id);
         return {
           ...emp,
-          bank: formatBankCode(emp.bank),
+          // Účet a banka - preferovat hodnotu z období, jinak hlavní
+          account: periodEmp && periodEmp.account ? periodEmp.account : (emp.account || ''),
+          bank: formatBankCode(periodEmp && periodEmp.bank ? periodEmp.bank : (emp.bank || '')),
           hours: periodEmp ? (periodEmp.hours || 0) : 0,
-          bonusAmount: emp.bonusAmount || 0,
+          bonusAmount: periodEmp ? (periodEmp.bonusAmount || 0) : (emp.bonusAmount || 0),
           premieCastka: periodEmp ? (periodEmp.premieCastka || 0) : 0
         };
       });
@@ -312,19 +318,19 @@ async function saveToServer() {
   const stats = calculateStats();
 
   // Připravit data období - hodiny, prémie a základní info
-  // Zahrnout: zaměstnance s hodinami > 0 NEBO premie_polozka s částkou > 0
+  // Zahrnout VŠECHNY aktivní zaměstnance (ne jen ty s hodinami > 0)
+  // Uživatel může měnit hodiny a účty v každém období
   const periodEmployees = employees.filter(e => {
-    if (e.active === false) return false;
-    if (e.hours > 0) return true;
-    if (e.type === 'premie_polozka' && (e.premieCastka || 0) > 0) return true;
-    return false;
+    return e.active !== false;  // Všichni aktivní zaměstnanci
   }).map(emp => ({
     id: emp.id,
     name: emp.name,
     hours: emp.hours || 0,
     type: emp.type || 'standard',
     bonusAmount: emp.bonusAmount || 0,
-    premieCastka: emp.premieCastka || 0
+    premieCastka: emp.premieCastka || 0,
+    account: emp.account || '',
+    bank: emp.bank || ''
   }));
 
   // Zachovat existující periods a přidat/aktualizovat aktuální
