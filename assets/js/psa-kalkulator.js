@@ -20,8 +20,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // === PERIOD MANAGEMENT ===
 function initializePeriod() {
+  // Vždy pracujeme s MINULÝM měsícem (výplaty za uplynulý měsíc)
   const now = new Date();
-  currentPeriod.month = now.getMonth() + 1;
+  // Posunout o 1 měsíc zpět
+  now.setMonth(now.getMonth() - 1);
+  currentPeriod.month = now.getMonth() + 1;  // getMonth() vrací 0-11
   currentPeriod.year = now.getFullYear();
   updatePeriodDisplay();
 }
