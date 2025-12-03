@@ -629,6 +629,7 @@ function addEmployee() {
     </div>
   `;
   document.body.appendChild(modal);
+  modal.style.display = 'block';  // Zobrazit modal
 }
 
 // Přidat nového prázdného zaměstnance
