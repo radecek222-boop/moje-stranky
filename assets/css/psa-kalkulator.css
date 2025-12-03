@@ -659,6 +659,7 @@ body {
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
+  color: var(--c-black);
   transition: all 0.2s ease;
   user-select: none;
 }
@@ -911,6 +912,86 @@ body {
     min-width: auto;
     max-width: none;
   }
+}
+
+/* === WGS CONFIRM DIALOG === */
+.wgs-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.wgs-confirm-dialog {
+  background: var(--c-white);
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  border: 2px solid var(--c-black);
+}
+
+.wgs-confirm-message {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--c-black);
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.wgs-confirm-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.wgs-confirm-btn {
+  padding: 10px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  min-width: 100px;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.wgs-confirm-btn:hover {
+  transform: translateY(-1px);
+}
+
+.wgs-confirm-btn:active {
+  transform: translateY(0);
+}
+
+.wgs-confirm-btn:focus {
+  outline: 3px solid var(--c-grey);
+  outline-offset: 2px;
+}
+
+.wgs-confirm-cancel {
+  background: var(--c-bg);
+  color: var(--c-black);
+  border: 1px solid var(--c-border);
+}
+
+.wgs-confirm-cancel:hover {
+  background: var(--c-border);
+}
+
+.wgs-confirm-ok {
+  background: var(--c-black);
+  color: var(--c-white);
+}
+
+.wgs-confirm-ok:hover {
+  background: #444;
 }
 
 /* === PRINT STYLES === */
