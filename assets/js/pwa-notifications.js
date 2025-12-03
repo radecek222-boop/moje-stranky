@@ -342,14 +342,20 @@
    * Na iOS PWA pouziva ServiceWorker, jinak klasicky Notification API
    */
   async function zobrazitNotifikaci(titulek, text, data = {}) {
-    if (notificationPermission !== 'granted') {
-      console.log('[Notifikace] Notifikace nejsou povoleny');
+    // Kdyz je stranka viditelna, zobrazit in-app toast
+    if (document.visibilityState === 'visible') {
+      if (window.WGSToast) {
+        window.WGSToast.zobrazit(text, {
+          titulek: titulek,
+          claimId: data.claim_id || null
+        });
+      }
+      console.log('[Notifikace] Stranka viditelna, zobrazen toast');
       return;
     }
 
-    // Nezobrazovat kdyz je stranka videt
-    if (document.visibilityState === 'visible') {
-      console.log('[Notifikace] Stranka je viditelna, preskakuji notifikaci');
+    if (notificationPermission !== 'granted') {
+      console.log('[Notifikace] Notifikace nejsou povoleny');
       return;
     }
 
