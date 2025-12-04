@@ -921,7 +921,7 @@ const WGS = {
             const alertMessage = referenceNumber
               ? t('order_accepted_with_ref').replace('{reference}', referenceNumber)
               : t('order_accepted_no_ref');
-            wgsToast.success(alertMessage, 0); // Nezmizí automaticky
+            this.toast(alertMessage, 'success');
             setTimeout(() => { window.location.href = 'index.php'; }, 3000);
           }
         }, 1500);
