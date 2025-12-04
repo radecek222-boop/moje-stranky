@@ -486,6 +486,31 @@ function zobrazStranku($tokenData, $videa, $token) {
                     zavritVideo();
                 }
             });
+
+            // Event handlery pro data-action atributy
+            document.addEventListener('click', function(e) {
+                const target = e.target.closest('[data-action]');
+                if (!target) return;
+
+                const action = target.getAttribute('data-action');
+                const videoId = target.getAttribute('data-id');
+                const videoName = target.getAttribute('data-name');
+                const href = target.getAttribute('href');
+
+                switch (action) {
+                    case 'prehratVideo':
+                        e.preventDefault();
+                        prehratVideo(videoId, videoName);
+                        break;
+                    case 'zavritVideo':
+                        e.preventDefault();
+                        zavritVideo();
+                        break;
+                    case 'stahnoutAZavrit':
+                        stahnoutAZavrit(e, href);
+                        break;
+                }
+            });
         </script>
     </body>
     </html>
