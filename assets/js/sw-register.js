@@ -111,6 +111,16 @@
 
     document.body.appendChild(toast);
 
+    // FIX: Bezpečnostní timeout - odstranit toast po 10 sekundách pokud reload selhal
+    setTimeout(() => {
+      const existingToast = document.getElementById('pwa-update-toast');
+      if (existingToast) {
+        console.warn('[PWA] Toast timeout - reload pravděpodobně selhal');
+        existingToast.remove();
+        refreshing = false;
+      }
+    }, 10000);
+
     // Callback po delay (dát uživateli čas vidět toast)
     setTimeout(() => {
       if (callback) callback();
@@ -182,9 +192,53 @@
   // SW KOMUNIKACE
   // ============================================
   function aktivovatNovouVerzi() {
+    console.log('[PWA] aktivovatNovouVerzi() volána');
+    console.log('[PWA] swRegistration:', swRegistration ? 'exists' : 'null');
+    console.log('[PWA] waiting:', swRegistration?.waiting ? 'exists' : 'null');
+    console.log('[PWA] installing:', swRegistration?.installing ? 'exists' : 'null');
+    console.log('[PWA] active:', swRegistration?.active ? 'exists' : 'null');
+
     if (swRegistration && swRegistration.waiting) {
+      // Idealni pripad - novy SW ceka na aktivaci
       console.log('[PWA] Odesílám SKIP_WAITING');
       swRegistration.waiting.postMessage('SKIP_WAITING');
+    } else if (swRegistration && swRegistration.installing) {
+      // SW se prave instaluje - pockame a pak aktivujeme
+      console.log('[PWA] SW se instaluje, cekam...');
+      swRegistration.installing.addEventListener('statechange', function() {
+        if (this.state === 'installed') {
+          console.log('[PWA] Instalace dokoncena, aktivuji...');
+          if (swRegistration.waiting) {
+            swRegistration.waiting.postMessage('SKIP_WAITING');
+          }
+        }
+      });
+    } else {
+      // Fallback - zadny waiting SW, vynutit reload s vycistenim cache
+      console.log('[PWA] Zadny waiting SW - vynucuji aktualizaci...');
+      zobrazitUpdateToast(async () => {
+        // Smazat cache
+        try {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+          console.log('[PWA] Cache smazan');
+        } catch (e) {
+          console.warn('[PWA] Chyba pri mazani cache:', e);
+        }
+
+        // Kontrola aktualizaci
+        if (swRegistration) {
+          try {
+            await swRegistration.update();
+          } catch (e) {
+            console.warn('[PWA] Chyba pri update:', e);
+          }
+        }
+
+        // Reload
+        markReload();
+        window.location.reload(true);
+      }, 1000);
     }
   }
 
@@ -302,6 +356,16 @@
     refreshing = true;
 
     console.log('[PWA] Nový SW aktivován');
+
+    // FIX: Zkontrolovat, zda reload je povolen PŘED zobrazením toastu
+    if (!canReload()) {
+      console.log('[PWA] Reload blokován ochranou - aktualizace proběhne při dalším načtení');
+      // Odstranit případný existující toast
+      const existingToast = document.getElementById('pwa-update-toast');
+      if (existingToast) existingToast.remove();
+      refreshing = false; // Reset flag pro příští pokus
+      return;
+    }
 
     // Bezpečný reload s toast notifikací
     zobrazitUpdateToast(() => {
