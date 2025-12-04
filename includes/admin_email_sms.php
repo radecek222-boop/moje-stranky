@@ -159,16 +159,21 @@ $emaily = [];
 try {
     $whereClause = '';
     if ($filterStatus !== 'all') {
-        $whereClause = "WHERE status = :status";
+        $whereClause = "WHERE eq.status = :status";
     }
 
     $sql = "
         SELECT
-            id, to_email, subject, body, status, retry_count,
-            last_error, created_at, updated_at, sent_at
-        FROM wgs_email_queue
+            eq.id, eq.recipient_email, eq.recipient_name, eq.subject, eq.body,
+            eq.status, eq.attempts, eq.error_message,
+            eq.cc_emails, eq.bcc_emails,
+            eq.created_at, eq.scheduled_at, eq.sent_at,
+            eq.notification_id,
+            COALESCE(n.name, eq.notification_id) as template_name
+        FROM wgs_email_queue eq
+        LEFT JOIN wgs_notifications n ON eq.notification_id = n.id
         $whereClause
-        ORDER BY created_at DESC
+        ORDER BY eq.created_at DESC
         LIMIT 100
     ";
 
@@ -336,13 +341,13 @@ try {
             <?php endif; ?>
         </div>
 
-        <!-- EMAIL & SMS ŠABLONY - DVA SLOUPCE -->
+        <!-- EMAIL ŠABLONY -->
         <div id="section-templates" class="cc-section <?= $currentSection === 'templates' ? 'active' : '' ?>">
-            <h3 style="margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">Notifikacni sablony (EMAIL | SMS)</h3>
+            <h3 style="margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">Email sablony</h3>
 
-            <?php if (empty($sablonyParovane)): ?>
+            <?php if (empty($emailSablony)): ?>
                 <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 1rem; font-family: 'Poppins', sans-serif;">
-                    Zadne sablony nenalezeny.
+                    Zadne email sablony nenalezeny.
                 </div>
             <?php else: ?>
                 <?php
@@ -351,99 +356,64 @@ try {
                     'prirazeni_terminu_technician' => 'Prirazeni terminu',
                     'pripominka_terminu_customer' => 'Pripominka terminu',
                     'pokus_o_kontakt_customer' => 'Pokus o kontakt',
-                    'nova_reklamace_admin' => 'Nova reklamace',
-                    'nova_reklamace_customer' => 'Nova reklamace',
+                    'nova_reklamace_admin' => 'Nova reklamace (admin)',
+                    'nova_reklamace_customer' => 'Nova reklamace (zakaznik)',
                     'dokonceno_customer' => 'Dokonceni zakazky',
                     'znovu_otevreno_admin' => 'Znovu otevreno',
                     'pozvanka_seller' => 'Pozvanka pro prodejce',
                     'pozvanka_technician' => 'Pozvanka pro technika'
                 ];
+
+                // Seradit email sablony podle definovaneho poradi
+                $poradiSablon = [
+                    'nova_reklamace_customer',
+                    'nova_reklamace_admin',
+                    'pokus_o_kontakt_customer',
+                    'potvrzeni_terminu_customer',
+                    'pripominka_terminu_customer',
+                    'prirazeni_terminu_technician',
+                    'dokonceno_customer',
+                    'znovu_otevreno_admin',
+                    'pozvanka_seller',
+                    'pozvanka_technician'
+                ];
+
+                // Seradit pole podle poradi
+                uksort($emailSablony, function($a, $b) use ($poradiSablon) {
+                    $indexA = array_search($a, $poradiSablon);
+                    $indexB = array_search($b, $poradiSablon);
+                    if ($indexA === false) $indexA = 999;
+                    if ($indexB === false) $indexB = 999;
+                    return $indexA - $indexB;
+                });
                 ?>
 
-                <!-- Hlavicka sloupcu -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.5rem;">
-                    <div style="background: #000; color: #fff; padding: 0.75rem 1rem; font-family: 'Poppins', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; text-align: center;">
-                        EMAIL
+                <!-- Email sablony - jednodussi seznam -->
+                <?php foreach ($emailSablony as $klic => $email): ?>
+                <div style="border: 2px solid #000; margin-bottom: 1rem; background: #fff;">
+                    <!-- Nadpis -->
+                    <div style="background: #000; color: #fff; padding: 0.5rem 1rem; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;">
+                        <span><?= htmlspecialchars($triggerLabels[$klic] ?? $email['name']) ?></span>
+                        <span data-action="toggleNotifikaceActive" data-id="<?= htmlspecialchars($email['id']) ?>"
+                              style="padding: 0.2rem 0.5rem; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; border: 1px solid #fff; background: <?= $email['active'] ? '#fff' : 'transparent' ?>; color: <?= $email['active'] ? '#000' : '#fff' ?>; cursor: pointer;"
+                              data-active="<?= $email['active'] ? '1' : '0' ?>">
+                            <?= $email['active'] ? 'AKTIVNI' : 'VYPNUTO' ?>
+                        </span>
                     </div>
-                    <div style="background: #000; color: #fff; padding: 0.75rem 1rem; font-family: 'Poppins', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; text-align: center;">
-                        SMS
+                    <!-- Obsah -->
+                    <div style="padding: 1rem;">
+                        <div style="font-size: 0.7rem; color: #666; margin-bottom: 0.5rem;">
+                            Prijemce: <strong><?= htmlspecialchars($email['recipient_type']) ?></strong>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #333; margin-bottom: 0.75rem;">
+                            <strong>Predmet:</strong> <?= htmlspecialchars($email['subject']) ?>
+                        </div>
+                        <button data-action="otevritNotifikace" data-id="<?= $email['id'] ?>"
+                            style="padding: 0.5rem 1rem; background: #333; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; cursor: pointer;">
+                            Upravit sablonu
+                        </button>
                     </div>
                 </div>
-
-                <!-- Parovane sablony -->
-                <?php foreach ($sablonyParovane as $par): ?>
-                <div style="border: 2px solid #000; margin-bottom: 1.5rem; background: #fafafa;">
-                    <!-- Nadpis sekce -->
-                    <div style="background: #000; color: #fff; padding: 0.5rem 1rem; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                        <?= htmlspecialchars($triggerLabels[$par['trigger']] ?? $par['trigger']) ?>
-                    </div>
-                    <!-- Grid s EMAIL a SMS -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
-
-                    <!-- EMAIL sloupec -->
-                    <div style="background: #fff; border-right: 1px solid #ddd; padding: 1rem; min-height: 120px;">
-                        <div style="font-size: 0.6rem; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif;">Email</div>
-                        <?php if ($par['email']): ?>
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                                <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600; color: #000; margin: 0;">
-                                    <?= htmlspecialchars($par['email']['name']) ?>
-                                </h4>
-                                <span data-action="toggleNotifikaceActive" data-id="<?= htmlspecialchars($par['email']['id']) ?>"
-                                      style="padding: 0.2rem 0.4rem; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; border: 1px solid #000; background: <?= $par['email']['active'] ? '#000' : '#fff' ?>; color: <?= $par['email']['active'] ? '#fff' : '#000' ?>; cursor: pointer;"
-                                      data-active="<?= $par['email']['active'] ? '1' : '0' ?>">
-                                    <?= $par['email']['active'] ? 'AKTIVNI' : 'VYPNUTO' ?>
-                                </span>
-                            </div>
-                            <div style="font-size: 0.7rem; color: #666; margin-bottom: 0.5rem;">
-                                Prijemce: <?= htmlspecialchars($par['email']['recipient_type']) ?>
-                            </div>
-                            <div style="font-size: 0.7rem; color: #333; margin-bottom: 0.75rem;">
-                                <strong>Predmet:</strong> <?= htmlspecialchars(substr($par['email']['subject'], 0, 50)) ?><?= strlen($par['email']['subject']) > 50 ? '...' : '' ?>
-                            </div>
-                            <button data-action="otevritNotifikace" data-id="<?= $par['email']['id'] ?>"
-                                style="width: 100%; padding: 0.5rem; background: #333; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; cursor: pointer;">
-                                Upravit
-                            </button>
-                        <?php else: ?>
-                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #ccc; font-family: 'Poppins', sans-serif; font-size: 0.8rem;">
-                                — neni —
-                            </div>
-                        <?php endif; ?>
-                    </div>
-
-                    <!-- SMS sloupec -->
-                    <div style="background: #fff; padding: 1rem; min-height: 120px;">
-                        <div style="font-size: 0.6rem; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif;">SMS</div>
-                        <?php if ($par['sms']): ?>
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                                <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600; color: #000; margin: 0;">
-                                    <?= htmlspecialchars($par['sms']['name']) ?>
-                                </h4>
-                                <span data-action="toggleNotifikaceActive" data-id="<?= htmlspecialchars($par['sms']['id']) ?>"
-                                      style="padding: 0.2rem 0.4rem; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; border: 1px solid #000; background: <?= $par['sms']['active'] ? '#000' : '#fff' ?>; color: <?= $par['sms']['active'] ? '#fff' : '#000' ?>; cursor: pointer;"
-                                      data-active="<?= $par['sms']['active'] ? '1' : '0' ?>">
-                                    <?= $par['sms']['active'] ? 'AKTIVNI' : 'VYPNUTO' ?>
-                                </span>
-                            </div>
-                            <div style="font-size: 0.7rem; color: #666; margin-bottom: 0.5rem;">
-                                Prijemce: <?= htmlspecialchars($par['sms']['recipient_type']) ?>
-                            </div>
-                            <div style="background: #f9f9f9; padding: 0.5rem; font-size: 0.65rem; font-family: monospace; max-height: 50px; overflow: hidden; margin-bottom: 0.5rem; border: 1px solid #eee;">
-                                <?= htmlspecialchars(substr($par['sms']['template'], 0, 100)) ?>...
-                            </div>
-                            <button data-action="editSmsTemplate" data-id="<?= htmlspecialchars($par['sms']['id']) ?>"
-                                style="width: 100%; padding: 0.5rem; background: #333; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; cursor: pointer;">
-                                Upravit
-                            </button>
-                        <?php else: ?>
-                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #ccc; font-family: 'Poppins', sans-serif; font-size: 0.8rem;">
-                                — neni —
-                            </div>
-                        <?php endif; ?>
-                    </div>
-
-                    </div><!-- /grid -->
-                </div><!-- /sekce blok -->
                 <?php endforeach; ?>
 
                 <!-- Promenne -->
@@ -603,6 +573,7 @@ try {
                                 <input type="checkbox" id="select-all-emails-header" data-action="toggleSelectAllEmails">
                             </th>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">ID</th>
+                            <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Šablona</th>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Status</th>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Příjemce</th>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Předmět</th>
@@ -619,6 +590,15 @@ try {
                                 <input type="checkbox" class="email-checkbox-item" value="<?= $email['id'] ?>" data-action="updateSelectedEmailCount">
                             </td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['id'] ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?php
+                                $templateName = $email['template_name'] ?? '-';
+                                // Ošetření případu kdy notification_id bylo uloženo jako "Array"
+                                if ($templateName === 'Array' || empty($templateName)) {
+                                    echo '-';
+                                } else {
+                                    echo htmlspecialchars($templateName);
+                                }
+                            ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
                                 <span style="display: inline-block; padding: 0.25rem 0.5rem; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #000; background: <?= $email['status'] === 'sent' ? '#000' : '#fff' ?>; color: <?= $email['status'] === 'sent' ? '#fff' : '#000' ?>;">
                                     <?php
@@ -628,27 +608,32 @@ try {
                                     ?>
                                 </span>
                             </td>
-                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= htmlspecialchars($email['to_email']) ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= htmlspecialchars($email['recipient_email']) ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= htmlspecialchars(substr($email['subject'], 0, 40)) ?><?= strlen($email['subject']) > 40 ? '...' : '' ?></td>
-                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['retry_count'] ?> / 3</td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['attempts'] ?> / 3</td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= date('d.m.Y H:i', strtotime($email['created_at'])) ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['sent_at'] ? date('d.m.Y H:i', strtotime($email['sent_at'])) : '-' ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
-                                <button class="cc-btn cc-btn-sm cc-btn-link" data-action="toggleEmailDetail" data-id="<?= $email['id'] ?>">
+                                <?php
+                                    $ccEmails = $email['cc_emails'] ? json_decode($email['cc_emails'], true) : [];
+                                    $bccEmails = $email['bcc_emails'] ? json_decode($email['bcc_emails'], true) : [];
+                                ?>
+                                <button class="cc-btn cc-btn-sm cc-btn-link" data-action="openEmailDetailModal"
+                                    data-id="<?= $email['id'] ?>"
+                                    data-recipient="<?= htmlspecialchars($email['recipient_email']) ?>"
+                                    data-recipient-name="<?= htmlspecialchars($email['recipient_name'] ?? '') ?>"
+                                    data-subject="<?= htmlspecialchars($email['subject']) ?>"
+                                    data-cc="<?= htmlspecialchars(is_array($ccEmails) ? implode(', ', $ccEmails) : '') ?>"
+                                    data-bcc="<?= htmlspecialchars(is_array($bccEmails) ? implode(', ', $bccEmails) : '') ?>"
+                                    data-created="<?= date('d.m.Y H:i:s', strtotime($email['created_at'])) ?>"
+                                    data-sent="<?= $email['sent_at'] ? date('d.m.Y H:i:s', strtotime($email['sent_at'])) : '-' ?>"
+                                    data-status="<?= $email['status'] ?>"
+                                    data-template="<?= htmlspecialchars($email['template_name'] ?? '-') ?>"
+                                    data-error="<?= htmlspecialchars($email['error_message'] ?? '') ?>">
                                     Zobrazit
                                 </button>
-                                <div id="email-detail-<?= $email['id'] ?>" style="display: none; margin-top: 0.5rem;">
-                                    <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 0.5rem; font-size: 0.75rem; max-height: 150px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;">
-                                        <strong>Tělo emailu:</strong><br><br>
-                                        <?= htmlspecialchars($email['body']) ?>
-                                    </div>
-                                    <?php if ($email['last_error']): ?>
-                                    <div style="background: #fef2f2; border: 1px solid #ef4444; padding: 0.5rem; margin-top: 0.5rem; font-size: 0.75rem; font-family: monospace; color: #991b1b; white-space: pre-wrap; word-wrap: break-word;">
-                                        <strong>Chyba:</strong><br>
-                                        <?= htmlspecialchars($email['last_error']) ?>
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
+                                <!-- Body uloženo v hidden elementu kvůli délce -->
+                                <div id="email-body-<?= $email['id'] ?>" style="display: none;"><?= htmlspecialchars($email['body']) ?></div>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -683,6 +668,164 @@ try {
         </div>
     </div>
 </div>
+
+<!-- Modal pro detail emailu -->
+<div id="email-detail-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; overflow-y: auto;">
+    <div style="max-width: 700px; margin: 2rem auto; background: #fff; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <!-- Header -->
+        <div style="padding: 1rem 1.5rem; background: #000; color: #fff; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
+            <h2 style="font-family: 'Poppins', sans-serif; font-size: 1.1rem; font-weight: 600; margin: 0;">Detail emailu #<span id="email-modal-id"></span></h2>
+            <button data-action="closeEmailDetailModal" aria-label="Zavřít" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
+        </div>
+
+        <!-- Obsah -->
+        <div style="padding: 1.5rem;">
+            <!-- Info sekce -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; font-size: 0.85rem;">
+                <div>
+                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Příjemce (TO):</strong>
+                    <span id="email-modal-recipient" style="color: #000;"></span>
+                </div>
+                <div>
+                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Stav:</strong>
+                    <span id="email-modal-status" style="display: inline-block; padding: 0.2rem 0.5rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; border: 1px solid #000;"></span>
+                </div>
+                <div>
+                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Kopie (CC):</strong>
+                    <span id="email-modal-cc" style="color: #000;"></span>
+                </div>
+                <div>
+                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Skrytá kopie (BCC):</strong>
+                    <span id="email-modal-bcc" style="color: #000;"></span>
+                </div>
+                <div>
+                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Vytvořeno:</strong>
+                    <span id="email-modal-created" style="color: #000;"></span>
+                </div>
+                <div>
+                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Odesláno:</strong>
+                    <span id="email-modal-sent" style="color: #000;"></span>
+                </div>
+                <div style="grid-column: 1 / -1;">
+                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Šablona:</strong>
+                    <span id="email-modal-template" style="color: #000;"></span>
+                </div>
+            </div>
+
+            <!-- Předmět -->
+            <div style="margin-bottom: 1rem;">
+                <strong style="color: #666; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Předmět:</strong>
+                <div id="email-modal-subject" style="padding: 0.75rem; background: #f5f5f5; border: 1px solid #ddd; font-size: 0.9rem; font-weight: 500;"></div>
+            </div>
+
+            <!-- Tělo emailu -->
+            <div style="margin-bottom: 1rem;">
+                <strong style="color: #666; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Tělo emailu:</strong>
+                <div id="email-modal-body" style="padding: 0.75rem; background: #f5f5f5; border: 1px solid #ddd; max-height: 300px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; font-size: 0.85rem; font-family: 'Courier New', monospace;"></div>
+            </div>
+
+            <!-- Chyba (pokud existuje) -->
+            <div id="email-modal-error-container" style="display: none; margin-bottom: 1rem;">
+                <strong style="color: #991b1b; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Chyba:</strong>
+                <div id="email-modal-error" style="padding: 0.75rem; background: #fef2f2; border: 1px solid #ef4444; color: #991b1b; font-size: 0.8rem; font-family: monospace;"></div>
+            </div>
+
+            <!-- Tlačítko zavřít -->
+            <div style="text-align: right; padding-top: 1rem; border-top: 1px solid #ddd;">
+                <button data-action="closeEmailDetailModal" style="padding: 0.5rem 1.5rem; background: #000; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 500; cursor: pointer;">Zavřít</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Handler pro otevření modalu detailu emailu
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('[data-action="openEmailDetailModal"]');
+    if (btn) {
+        const id = btn.dataset.id;
+        const recipient = btn.dataset.recipient;
+        const recipientName = btn.dataset.recipientName;
+        const subject = btn.dataset.subject;
+        const cc = btn.dataset.cc;
+        const bcc = btn.dataset.bcc;
+        const created = btn.dataset.created;
+        const sent = btn.dataset.sent;
+        const status = btn.dataset.status;
+        const template = btn.dataset.template;
+        const error = btn.dataset.error;
+
+        // Získat tělo emailu z hidden elementu
+        const bodyEl = document.getElementById('email-body-' + id);
+        const body = bodyEl ? bodyEl.textContent : '';
+
+        // Naplnit modal
+        document.getElementById('email-modal-id').textContent = id;
+        document.getElementById('email-modal-recipient').textContent = recipientName ? recipientName + ' <' + recipient + '>' : recipient;
+        document.getElementById('email-modal-subject').textContent = subject;
+        document.getElementById('email-modal-cc').textContent = cc || '-';
+        document.getElementById('email-modal-bcc').textContent = bcc || '-';
+        document.getElementById('email-modal-created').textContent = created;
+        document.getElementById('email-modal-sent').textContent = sent;
+        document.getElementById('email-modal-template').textContent = template === 'Array' ? '-' : template;
+        document.getElementById('email-modal-body').textContent = body;
+
+        // Stav s barvou
+        const statusEl = document.getElementById('email-modal-status');
+        statusEl.textContent = status.toUpperCase();
+        if (status === 'sent') {
+            statusEl.style.background = '#000';
+            statusEl.style.color = '#fff';
+        } else if (status === 'failed') {
+            statusEl.style.background = '#fef2f2';
+            statusEl.style.color = '#991b1b';
+            statusEl.style.borderColor = '#ef4444';
+        } else {
+            statusEl.style.background = '#fff';
+            statusEl.style.color = '#000';
+        }
+
+        // Chyba
+        const errorContainer = document.getElementById('email-modal-error-container');
+        const errorEl = document.getElementById('email-modal-error');
+        if (error) {
+            errorEl.textContent = error;
+            errorContainer.style.display = 'block';
+        } else {
+            errorContainer.style.display = 'none';
+        }
+
+        // Zobrazit modal
+        document.getElementById('email-detail-modal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Zavření modalu
+    if (e.target.closest('[data-action="closeEmailDetailModal"]')) {
+        document.getElementById('email-detail-modal').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+});
+
+// Zavření při kliku mimo modal
+document.getElementById('email-detail-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+});
+
+// Zavření ESC klávesou
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('email-detail-modal');
+        if (modal && modal.style.display !== 'none') {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+});
+</script>
 
 <style>
 .cc-tabs {

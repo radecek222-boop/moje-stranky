@@ -118,8 +118,8 @@ try {
         ':id' => $zakazka['id']
     ]);
 
-    // Získat jméno technika
-    $stmt = $pdo->prepare("SELECT name, email FROM wgs_users WHERE id = :id LIMIT 1");
+    // Získat údaje technika
+    $stmt = $pdo->prepare("SELECT name, email, phone FROM wgs_users WHERE id = :id LIMIT 1");
     $stmt->execute([':id' => $userId]);
     $technik = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -137,7 +137,8 @@ try {
         'message' => 'Technik byl automaticky přiřazen k zakázce',
         'technician_id' => $userId,
         'technician_name' => $technik['name'] ?? '',
-        'technician_email' => $technik['email'] ?? ''
+        'technician_email' => $technik['email'] ?? '',
+        'technician_phone' => $technik['phone'] ?? ''
     ]);
 
 } catch (Exception $e) {

@@ -1216,15 +1216,14 @@ function renderCalendar(m, y) {
       document.querySelectorAll('.cal-day').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
 
-      // PERFORMANCE: Vzdálenosti vypnuty kvůli API problémům
       let displayText = `Vybraný den: ${SELECTED_DATE}`;
       document.getElementById('selectedDateDisplay').textContent = displayText;
 
       // Zobrazit časy okamžitě
       renderTimeGrid();
 
-      // PERFORMANCE: Vypnuto kvůli problémům s get_distance.php
-      // showDayBookingsWithDistances(SELECTED_DATE);
+      // Zobrazit vzdálenost a další termíny na tento den
+      showDayBookingsWithDistances(SELECTED_DATE);
     };
     daysGrid.appendChild(el);
   }
@@ -1245,9 +1244,8 @@ async function getDistance(fromAddress, toAddress) {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    // Načíst CSRF token
     const csrfToken = await fetchCsrfToken();
 
     const response = await fetch('/app/controllers/get_distance.php', {
@@ -1260,9 +1258,9 @@ async function getDistance(fromAddress, toAddress) {
       }),
       signal: controller.signal
     });
-    
+
     clearTimeout(timeoutId);
-    
+
     if (response.ok) {
       const data = await response.json();
       if ((data.status === 'success' || data.success === true) && data.distance) {
@@ -1277,13 +1275,9 @@ async function getDistance(fromAddress, toAddress) {
       }
     }
   } catch (error) {
-    if (error.name === 'AbortError') {
-      logger.log('Request timeout');
-    } else {
-      logger.error('Chyba při výpočtu vzdálenosti:', error);
-    }
+    // Tiché selhání - vzdálenost není kritická funkce
   }
-  
+
   return null;
 }
 
@@ -1295,30 +1289,29 @@ async function getDistancesBatch(pairs) {
 
 // === ZOBRAZENÍ TERMÍNŮ S VZDÁLENOSTMI ===
 async function showDayBookingsWithDistances(date) {
-  // PERFORMANCE: Funkce vypnuta kvůli problémům s get_distance.php API
-  // Vzdálenosti se nezobrazují
   const distanceContainer = document.getElementById('distanceInfo');
   const bookingsContainer = document.getElementById('dayBookings');
 
-  if (distanceContainer) distanceContainer.innerHTML = '';
-  if (bookingsContainer) bookingsContainer.innerHTML = '';
-  return;
+  if (!distanceContainer || !bookingsContainer) return;
 
-  /* VYPNUTO - DISTANCE API NEFUNGUJE
+  // Inicializace cache pokud neexistuje
   if (!Array.isArray(WGS_DATA_CACHE)) {
     WGS_DATA_CACHE = [];
   }
 
+  // Filtrovat ostatní termíny na stejný den (ne aktuální reklamace)
   const bookings = WGS_DATA_CACHE.filter(rec =>
     rec.termin === date && rec.id !== CURRENT_RECORD?.id
   );
 
+  // Seřadit podle času
   bookings.sort((a, b) => {
     const timeA = a.cas_navstevy || '00:00';
     const timeB = b.cas_navstevy || '00:00';
     return timeA.localeCompare(timeB);
   });
 
+  // Získat adresu aktuální reklamace
   let currentAddress = Utils.getAddress(CURRENT_RECORD);
 
   if (!currentAddress || currentAddress === '—') {
@@ -1326,7 +1319,6 @@ async function showDayBookingsWithDistances(date) {
     bookingsContainer.innerHTML = '';
     return;
   }
-  */
   
   currentAddress = Utils.addCountryToAddress(currentAddress);
   
@@ -2343,8 +2335,23 @@ async function autoAssignTechnician(reklamaceId) {
 
     if (result.success && result.assigned) {
       logger.log(`✓ Technik ${result.technician_name} (${result.technician_email}) byl automaticky přiřazen`);
-      // Obnovit data v cache, aby se zobrazilo jméno technika
-      await loadData(ACTIVE_FILTER);
+
+      // Aktualizovat CURRENT_RECORD s daty technika
+      if (CURRENT_RECORD) {
+        CURRENT_RECORD.assigned_to = result.technician_id;
+        CURRENT_RECORD.technik_jmeno = result.technician_name || '';
+        CURRENT_RECORD.technik_email = result.technician_email || '';
+        CURRENT_RECORD.technik_telefon = result.technician_phone || '';
+      }
+
+      // Aktualizovat cache
+      const cacheRecord = WGS_DATA_CACHE.find(x => x.reklamace_id == reklamaceId || x.cislo == reklamaceId || x.id == reklamaceId);
+      if (cacheRecord) {
+        cacheRecord.assigned_to = result.technician_id;
+        cacheRecord.technik_jmeno = result.technician_name || '';
+        cacheRecord.technik_email = result.technician_email || '';
+        cacheRecord.technik_telefon = result.technician_phone || '';
+      }
     } else if (result.success && !result.assigned) {
       // Není technik nebo už má přiřazeného - to je v pořádku
       logger.log('Auto-assign: ' + (result.message || 'Žádné přiřazení'));

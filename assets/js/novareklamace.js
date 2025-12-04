@@ -512,12 +512,16 @@ const WGS = {
         calculatorBox.classList.remove('hidden');
       }
       
+      // POZ číslo se generuje automaticky na serveru - pole zůstává readonly
       if (cisloInput) {
-        cisloInput.removeAttribute('readonly');
-        cisloInput.value = '';
-        cisloInput.placeholder = 'Číslo objednávky/reklamace od prodejce (pokud máte)';
-        cisloInput.style.backgroundColor = '';
-        cisloInput.style.cursor = 'text';
+        cisloInput.setAttribute('readonly', 'readonly');
+        cisloInput.value = 'POZ (automaticky)';
+        cisloInput.style.backgroundColor = '#e9e9e9';
+        cisloInput.style.color = '#666';
+        cisloInput.style.cursor = 'not-allowed';
+        cisloInput.style.fontStyle = 'italic';
+        cisloInput.style.pointerEvents = 'none';
+        cisloInput.setAttribute('tabindex', '-1');
       }
       
       if (datumProdejeInput) {
@@ -921,7 +925,7 @@ const WGS = {
             const alertMessage = referenceNumber
               ? t('order_accepted_with_ref').replace('{reference}', referenceNumber)
               : t('order_accepted_no_ref');
-            wgsToast.success(alertMessage, 0); // Nezmizí automaticky
+            this.toast(alertMessage, 'success');
             setTimeout(() => { window.location.href = 'index.php'; }, 3000);
           }
         }, 1500);
