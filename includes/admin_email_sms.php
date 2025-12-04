@@ -353,7 +353,6 @@ try {
                 <?php
                 $triggerLabels = [
                     'potvrzeni_terminu_customer' => 'Potvrzeni terminu',
-                    'prirazeni_terminu_technician' => 'Prirazeni terminu',
                     'pripominka_terminu_customer' => 'Pripominka terminu',
                     'pokus_o_kontakt_customer' => 'Pokus o kontakt',
                     'nova_reklamace_admin' => 'Nova reklamace (admin)',
@@ -364,6 +363,9 @@ try {
                     'pozvanka_technician' => 'Pozvanka pro technika'
                 ];
 
+                // Sablony k preskoceni (nezobrazovat)
+                $skryteSablony = ['prirazeni_terminu_technician'];
+
                 // Seradit email sablony podle definovaneho poradi
                 $poradiSablon = [
                     'nova_reklamace_customer',
@@ -371,7 +373,6 @@ try {
                     'pokus_o_kontakt_customer',
                     'potvrzeni_terminu_customer',
                     'pripominka_terminu_customer',
-                    'prirazeni_terminu_technician',
                     'dokonceno_customer',
                     'znovu_otevreno_admin',
                     'pozvanka_seller',
@@ -389,7 +390,10 @@ try {
                 ?>
 
                 <!-- Email sablony - jednodussi seznam -->
-                <?php foreach ($emailSablony as $klic => $email): ?>
+                <?php foreach ($emailSablony as $klic => $email):
+                    // Preskocit skryte sablony
+                    if (in_array($klic, $skryteSablony)) continue;
+                ?>
                 <div style="border: 2px solid #000; margin-bottom: 1rem; background: #fff;">
                     <!-- Nadpis -->
                     <div style="background: #000; color: #fff; padding: 0.5rem 1rem; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;">
@@ -434,87 +438,96 @@ try {
 
         <!-- SMS -->
         <div id="section-sms" class="cc-section <?= $currentSection === 'sms' ? 'active' : '' ?>">
-            <?php
-            // Nacist SMS sablony
-            $smsSablony = [];
-            try {
-                $stmt = $pdo->query("
-                    SELECT id, name, description, trigger_event, recipient_type,
-                           type, subject, template, active, created_at, updated_at
-                    FROM wgs_notifications
-                    WHERE type = 'sms'
-                    ORDER BY name ASC
-                ");
-                $smsSablony = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            } catch (PDOException $e) {
-                $smsSablony = [];
-            }
-            ?>
+            <h3 style="margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">SMS sablony</h3>
 
-            <div class="cc-alert info" style="margin-bottom: 1.5rem;">
-                <div class="cc-alert-content">
-                    <div class="cc-alert-title">Jak SMS funguje</div>
-                    <div class="cc-alert-message">
-                        SMS se odesilaji pres nativni aplikaci telefonu (iPhone/Android).
-                        Kdyz technik klikne na "Odeslat SMS", otevre se aplikace Zpravy s predvyplnenym textem.
-                        Technik pak jen potvrdi odeslani.
-                    </div>
-                </div>
+            <!-- Info box -->
+            <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 0.75rem 1rem; margin-bottom: 1rem; font-family: 'Poppins', sans-serif; font-size: 0.75rem; color: #666;">
+                SMS se odesilaji pres nativni aplikaci telefonu. Technik klikne na "Odeslat SMS" a otevre se aplikace Zpravy s predvyplnenym textem.
             </div>
 
-            <?php if (count($smsSablony) === 0): ?>
-                <div class="cc-alert" style="background: #f5f5f5; border: 1px solid #ddd;">
-                    <div class="cc-alert-content">
-                        <div class="cc-alert-title">Zadne SMS sablony</div>
-                        <div class="cc-alert-message">
-                            SMS sablony zatim nebyly vytvoreny.
-                            <a href="/pridej_sms_sablony.php" style="color: #333; text-decoration: underline;">Spustit migraci pro pridani SMS sablon</a>
-                        </div>
-                    </div>
+            <?php
+            // Pouzijeme smsSablonyAll ktere uz mame nactene
+            $smsTriggerLabels = [
+                'potvrzeni_terminu_customer' => 'Potvrzeni terminu',
+                'pripominka_terminu_customer' => 'Pripominka terminu',
+                'pokus_o_kontakt_customer' => 'Pokus o kontakt',
+                'nova_reklamace_admin' => 'Nova reklamace (admin)',
+                'nova_reklamace_customer' => 'Nova reklamace (zakaznik)',
+                'dokonceno_customer' => 'Dokonceni zakazky',
+                'znovu_otevreno_admin' => 'Znovu otevreno'
+            ];
+
+            // Sablony k preskoceni (nezobrazovat)
+            $smsSkryteSablony = ['prirazeni_terminu_technician'];
+
+            // Seradit SMS sablony podle poradi
+            $smsPoradiSablon = [
+                'nova_reklamace_customer',
+                'nova_reklamace_admin',
+                'pokus_o_kontakt_customer',
+                'potvrzeni_terminu_customer',
+                'pripominka_terminu_customer',
+                'dokonceno_customer',
+                'znovu_otevreno_admin'
+            ];
+
+            uksort($smsSablonyAll, function($a, $b) use ($smsPoradiSablon) {
+                $indexA = array_search($a, $smsPoradiSablon);
+                $indexB = array_search($b, $smsPoradiSablon);
+                if ($indexA === false) $indexA = 999;
+                if ($indexB === false) $indexB = 999;
+                return $indexA - $indexB;
+            });
+            ?>
+
+            <?php if (empty($smsSablonyAll)): ?>
+                <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 1rem; font-family: 'Poppins', sans-serif;">
+                    Zadne SMS sablony nenalezeny.
+                    <a href="/pridej_sms_sablony.php" style="color: #333; text-decoration: underline; margin-left: 0.5rem;">Spustit migraci</a>
                 </div>
             <?php else: ?>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1rem;">
-                    <?php foreach ($smsSablony as $sablona): ?>
-                    <div class="sms-card-hover" style="background: #fff; border: 1px solid #ddd; padding: 1.25rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-                            <h4 style="margin: 0; font-size: 0.95rem; font-weight: 600; font-family: 'Poppins', sans-serif;">
-                                <?= htmlspecialchars($sablona['name']) ?>
-                            </h4>
-                            <span data-action="toggleNotifikaceActive" data-id="<?= htmlspecialchars($sablona['id']) ?>"
-                                  style="display: inline-block; padding: 0.2rem 0.5rem; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #000; background: <?= $sablona['active'] ? '#000' : '#fff' ?>; color: <?= $sablona['active'] ? '#fff' : '#000' ?>; cursor: pointer;"
-                                  data-active="<?= $sablona['active'] ? '1' : '0' ?>">
-                                <?= $sablona['active'] ? 'AKTIVNI' : 'VYPNUTO' ?>
-                            </span>
+                <!-- SMS sablony - stejny format jako email -->
+                <?php foreach ($smsSablonyAll as $klic => $sms):
+                    // Preskocit skryte sablony
+                    if (in_array($klic, $smsSkryteSablony)) continue;
+                ?>
+                <div style="border: 2px solid #000; margin-bottom: 1rem; background: #fff;">
+                    <!-- Nadpis -->
+                    <div style="background: #000; color: #fff; padding: 0.5rem 1rem; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;">
+                        <span><?= htmlspecialchars($smsTriggerLabels[$klic] ?? $sms['name']) ?></span>
+                        <span data-action="toggleNotifikaceActive" data-id="<?= htmlspecialchars($sms['id']) ?>"
+                              style="padding: 0.2rem 0.5rem; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; border: 1px solid #fff; background: <?= $sms['active'] ? '#fff' : 'transparent' ?>; color: <?= $sms['active'] ? '#000' : '#fff' ?>; cursor: pointer;"
+                              data-active="<?= $sms['active'] ? '1' : '0' ?>">
+                            <?= $sms['active'] ? 'AKTIVNI' : 'VYPNUTO' ?>
+                        </span>
+                    </div>
+                    <!-- Obsah -->
+                    <div style="padding: 1rem;">
+                        <div style="font-size: 0.7rem; color: #666; margin-bottom: 0.5rem;">
+                            Prijemce: <strong><?= htmlspecialchars($sms['recipient_type']) ?></strong>
                         </div>
-                        <p style="margin: 0 0 0.75rem; font-size: 0.8rem; color: #666; font-family: 'Poppins', sans-serif;">
-                            <?= htmlspecialchars($sablona['description'] ?? '') ?>
-                        </p>
-                        <div style="font-size: 0.75rem; color: #999; margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif;">
-                            Trigger: <code style="background: #f5f5f5; padding: 0.1rem 0.3rem;"><?= htmlspecialchars($sablona['trigger_event']) ?></code>
+                        <div style="background: #f9f9f9; padding: 0.75rem; font-size: 0.75rem; font-family: monospace; border: 1px solid #eee; margin-bottom: 0.75rem; max-height: 60px; overflow: hidden;">
+                            <?= htmlspecialchars(substr($sms['template'], 0, 120)) ?><?= strlen($sms['template']) > 120 ? '...' : '' ?>
                         </div>
-                        <div style="background: #f9f9f9; padding: 0.75rem; font-size: 0.8rem; font-family: monospace; border: 1px solid #eee; margin-bottom: 0.75rem; max-height: 80px; overflow: hidden;">
-                            <?= htmlspecialchars(substr($sablona['template'], 0, 150)) ?><?= strlen($sablona['template']) > 150 ? '...' : '' ?>
-                        </div>
-                        <button data-action="editSmsTemplate" data-id="<?= htmlspecialchars($sablona['id']) ?>"
-                                style="width: 100%; padding: 0.5rem; background: #333; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; font-size: 0.75rem;">
+                        <button data-action="editSmsTemplate" data-id="<?= htmlspecialchars($sms['id']) ?>"
+                            style="padding: 0.5rem 1rem; background: #333; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; cursor: pointer;">
                             Upravit sablonu
                         </button>
                     </div>
-                    <?php endforeach; ?>
                 </div>
+                <?php endforeach; ?>
 
                 <!-- SMS promenne -->
-                <div style="margin-top: 2rem; padding: 1rem; background: #f9f9f9; border: 1px solid #ddd;">
-                    <h4 style="margin: 0 0 0.75rem; font-size: 0.85rem; font-weight: 600; font-family: 'Poppins', sans-serif;">Dostupne promenne pro SMS:</h4>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{customer_name}}</code>
-                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{order_id}}</code>
-                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{product}}</code>
-                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{date}}</code>
-                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{time}}</code>
-                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{address}}</code>
-                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{technician_name}}</code>
-                        <code style="background: #fff; padding: 0.25rem 0.5rem; border: 1px solid #ddd; font-size: 0.75rem;">{{technician_phone}}</code>
+                <div style="margin-top: 1rem; background: #f9f9f9; border: 1px solid #ddd; padding: 1rem;">
+                    <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem;">Dostupne promenne:</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.7rem; font-family: monospace;">
+                        <code style="background: #fff; padding: 0.2rem 0.4rem; border: 1px solid #ddd;">{{customer_name}}</code>
+                        <code style="background: #fff; padding: 0.2rem 0.4rem; border: 1px solid #ddd;">{{order_id}}</code>
+                        <code style="background: #fff; padding: 0.2rem 0.4rem; border: 1px solid #ddd;">{{date}}</code>
+                        <code style="background: #fff; padding: 0.2rem 0.4rem; border: 1px solid #ddd;">{{time}}</code>
+                        <code style="background: #fff; padding: 0.2rem 0.4rem; border: 1px solid #ddd;">{{address}}</code>
+                        <code style="background: #fff; padding: 0.2rem 0.4rem; border: 1px solid #ddd;">{{technician_name}}</code>
+                        <code style="background: #fff; padding: 0.2rem 0.4rem; border: 1px solid #ddd;">{{technician_phone}}</code>
                     </div>
                 </div>
             <?php endif; ?>
@@ -1670,24 +1683,25 @@ async function editSmsTemplate(id) {
 function vytvorSmsModal() {
     const modalHtml = `
     <div id="editSmsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100001; justify-content: center; align-items: center; padding: 1rem;">
-        <div style="background: white; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border-radius: 8px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #ddd;">
-                <h3 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 600;">Upravit SMS sablonu</h3>
-                <button data-action="closeSmsModal" aria-label="Zavřít" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+        <div style="background: white; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border: 2px solid #000;">
+            <!-- Cerny header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background: #000; color: #fff;">
+                <h3 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">Upravit SMS sablonu</h3>
+                <button data-action="closeSmsModal" aria-label="Zavrit" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #fff; line-height: 1;">&times;</button>
             </div>
             <div style="padding: 1.5rem;">
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-weight: 500; margin-bottom: 0.25rem; font-family: 'Poppins', sans-serif; font-size: 0.85rem;">Nazev:</label>
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Nazev:</label>
                     <div id="sms-template-name" style="padding: 0.5rem; background: #f5f5f5; border: 1px solid #ddd; font-family: 'Poppins', sans-serif;"></div>
                 </div>
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-weight: 500; margin-bottom: 0.25rem; font-family: 'Poppins', sans-serif; font-size: 0.85rem;">Popis:</label>
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Popis:</label>
                     <div id="sms-template-description" style="padding: 0.5rem; background: #f5f5f5; border: 1px solid #ddd; font-family: 'Poppins', sans-serif; font-size: 0.85rem; color: #666;"></div>
                 </div>
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-weight: 500; margin-bottom: 0.25rem; font-family: 'Poppins', sans-serif; font-size: 0.85rem;">Text SMS zpravy:</label>
-                    <textarea id="sms-template-content" rows="6" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; font-family: monospace; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"></textarea>
-                    <div style="font-size: 0.75rem; color: #666; margin-top: 0.25rem;">Max 160 znaku pro 1 SMS. Delsi zpravy se rozdeli.</div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Text SMS zpravy:</label>
+                    <textarea id="sms-template-content" rows="6" style="width: 100%; padding: 0.75rem; border: 2px solid #000; font-family: monospace; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"></textarea>
+                    <div style="font-size: 0.7rem; color: #666; margin-top: 0.25rem;">Max 160 znaku pro 1 SMS. Delsi zpravy se rozdeli.</div>
                 </div>
                 <div style="margin-bottom: 1rem;">
                     <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.85rem;">
@@ -1695,10 +1709,23 @@ function vytvorSmsModal() {
                         <span>Sablona je aktivni</span>
                     </label>
                 </div>
+                <!-- Promenne -->
+                <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 0.75rem; margin-bottom: 1rem;">
+                    <div style="font-size: 0.7rem; font-weight: 600; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif; text-transform: uppercase;">Dostupne promenne:</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.25rem; font-size: 0.65rem; font-family: monospace;">
+                        <code style="background: #fff; padding: 0.15rem 0.3rem; border: 1px solid #ddd; cursor: pointer;" onclick="navigator.clipboard.writeText('{{customer_name}}')">{{customer_name}}</code>
+                        <code style="background: #fff; padding: 0.15rem 0.3rem; border: 1px solid #ddd; cursor: pointer;" onclick="navigator.clipboard.writeText('{{order_id}}')">{{order_id}}</code>
+                        <code style="background: #fff; padding: 0.15rem 0.3rem; border: 1px solid #ddd; cursor: pointer;" onclick="navigator.clipboard.writeText('{{date}}')">{{date}}</code>
+                        <code style="background: #fff; padding: 0.15rem 0.3rem; border: 1px solid #ddd; cursor: pointer;" onclick="navigator.clipboard.writeText('{{time}}')">{{time}}</code>
+                        <code style="background: #fff; padding: 0.15rem 0.3rem; border: 1px solid #ddd; cursor: pointer;" onclick="navigator.clipboard.writeText('{{technician_name}}')">{{technician_name}}</code>
+                        <code style="background: #fff; padding: 0.15rem 0.3rem; border: 1px solid #ddd; cursor: pointer;" onclick="navigator.clipboard.writeText('{{technician_phone}}')">{{technician_phone}}</code>
+                    </div>
+                    <div style="font-size: 0.65rem; color: #999; margin-top: 0.25rem;">Klikni pro zkopirovat</div>
+                </div>
             </div>
-            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding: 1rem 1.5rem; border-top: 1px solid #ddd;">
-                <button data-action="closeSmsModal" style="padding: 0.5rem 1rem; background: #fff; border: 1px solid #333; color: #333; font-family: 'Poppins', sans-serif; cursor: pointer;">Zrusit</button>
-                <button data-action="saveSmsTemplate" style="padding: 0.5rem 1rem; background: #333; border: 1px solid #333; color: #fff; font-family: 'Poppins', sans-serif; cursor: pointer; font-weight: 600;">Ulozit</button>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding: 1rem 1.5rem; border-top: 2px solid #000; background: #f5f5f5;">
+                <button data-action="closeSmsModal" style="padding: 0.5rem 1.5rem; background: #fff; border: 2px solid #000; color: #000; font-family: 'Poppins', sans-serif; cursor: pointer; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">Zrusit</button>
+                <button data-action="saveSmsTemplate" style="padding: 0.5rem 1.5rem; background: #000; border: 2px solid #000; color: #fff; font-family: 'Poppins', sans-serif; cursor: pointer; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">Ulozit</button>
             </div>
         </div>
     </div>

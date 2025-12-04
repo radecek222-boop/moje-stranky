@@ -548,6 +548,10 @@ document.addEventListener('alpine:init', () => {
       if (overlay) {
         overlay.classList.add('active');
       }
+      // Scroll lock přes centralizovanou utilitu
+      if (window.scrollLock) {
+        window.scrollLock.enable('remember-me-modal');
+      }
     },
 
     // Potvrdit - ponechat checkbox zaškrtnutý, zavřít modal
@@ -556,6 +560,10 @@ document.addEventListener('alpine:init', () => {
       const overlay = document.getElementById('rememberMeOverlay');
       if (overlay) {
         overlay.classList.remove('active');
+      }
+      // Odemknout scroll
+      if (window.scrollLock) {
+        window.scrollLock.disable('remember-me-modal');
       }
     },
 
@@ -569,6 +577,10 @@ document.addEventListener('alpine:init', () => {
       const overlay = document.getElementById('rememberMeOverlay');
       if (overlay) {
         overlay.classList.remove('active');
+      }
+      // Odemknout scroll
+      if (window.scrollLock) {
+        window.scrollLock.disable('remember-me-modal');
       }
     },
 
