@@ -529,6 +529,9 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <script src="assets/js/logger.min.js" defer></script>
 <script src="assets/js/wgs-map.min.js" defer></script>
 
+<!-- Language Switcher (definuje window.t funkci) -->
+<script src="assets/js/language-switcher.min.js"></script>
+
 <!-- Translations for pricing page -->
 <script src="assets/js/wgs-translations-cenik.min.js"></script>
 
