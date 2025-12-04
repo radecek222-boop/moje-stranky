@@ -681,6 +681,23 @@ const ModalManager = {
   }
 };
 
+// === HELPER: Konzistentní hlavička zákazníka pro všechny modaly ===
+function createCustomerHeader() {
+  if (!CURRENT_RECORD) return '';
+
+  const customerName = Utils.getCustomerName(CURRENT_RECORD);
+  const address = Utils.getAddress(CURRENT_RECORD);
+  const termin = CURRENT_RECORD.termin ? formatDate(CURRENT_RECORD.termin) : '—';
+  const time = CURRENT_RECORD.cas_navstevy || '—';
+  const status = getStatus(CURRENT_RECORD.stav);
+
+  return ModalManager.createHeader(customerName, `
+    <strong>Adresa:</strong> ${address}<br>
+    <strong>Termín:</strong> ${termin} ${time !== '—' ? 'v ' + time : ''}<br>
+    <strong>Stav:</strong> ${status.text}
+  `);
+}
+
 // === DETAIL ===
 async function showDetail(recordOrId) {
   let record;
@@ -765,17 +782,13 @@ async function showDetail(recordOrId) {
   }
   
   const content = `
-    ${ModalManager.createHeader(customerName, `
-      <strong>Adresa:</strong> ${address}<br>
-      <strong>Termín:</strong> ${termin} ${time !== '—' ? 'v ' + time : ''}<br>
-      <strong>Stav:</strong> ${status.text}
-    `)}
-    
+    ${createCustomerHeader()}
+
     <div class="modal-body">
       ${buttonsHtml}
     </div>
   `;
-  
+
   ModalManager.show(content);
 }
 
@@ -1053,12 +1066,10 @@ function showCalendar(id) {
   SELECTED_TIME = null;
   
   const content = `
-    <div class="modal-header">
-      <div id="selectedDateDisplay" style="color: var(--c-grey); font-size: 0.9rem; font-weight: 600; text-align: center;">Zatím nevybráno</div>
-      <button class="modal-close" data-action="closeModal">✕</button>
-    </div>
-    
+    ${createCustomerHeader()}
+
     <div class="modal-body" style="max-height: 80vh; overflow-y: auto; padding: 1rem;">
+      <div id="selectedDateDisplay" style="color: var(--c-grey); font-size: 0.9rem; font-weight: 600; text-align: center; margin-bottom: 1rem; padding: 0.5rem; background: #f5f5f5; border-radius: 4px;">Zatím nevybráno</div>
       <div class="calendar-container">
         <div id="calGrid"></div>
         <div id="distanceInfo"></div>
@@ -1713,25 +1724,12 @@ async function saveSelectedDate() {
 // === KONTAKT ===
 function showContactMenu(id) {
   const phone = CURRENT_RECORD.telefon || '';
-  const email = CURRENT_RECORD.email || '';
-  const customerName = Utils.getCustomerName(CURRENT_RECORD);
   const address = Utils.getAddress(CURRENT_RECORD);
-  
+
   const content = `
-    ${ModalManager.createHeader(customerName, 'Kontaktovat zákazníka')}
+    ${createCustomerHeader()}
 
     <div class="modal-body">
-      <div class="info-grid" style="margin-bottom: 1rem;">
-        <div class="info-label">Telefon:</div>
-        <div class="info-value"><strong>${phone || 'Neuvedeno'}</strong></div>
-
-        <div class="info-label">Email:</div>
-        <div class="info-value"><strong>${email || 'Neuvedeno'}</strong></div>
-
-        <div class="info-label">Adresa:</div>
-        <div class="info-value"><strong>${address || 'Neuvedeno'}</strong></div>
-      </div>
-
       <div class="detail-buttons">
         ${phone ? `<a href="tel:${phone}" class="detail-btn detail-btn-primary" style="text-decoration: none;">Zavolat</a>` : ''}
         <button class="detail-btn detail-btn-primary" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
@@ -1860,7 +1858,7 @@ async function showCustomerDetail(id) {
   }
 
   const content = `
-    ${ModalManager.createHeader('Detail zákazníka', customerName)}
+    ${createCustomerHeader()}
 
     <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
 
@@ -2516,10 +2514,9 @@ async function showNotes(recordOrId) {
   }
 
   CURRENT_RECORD = record;
-  const customerName = Utils.getCustomerName(record);
 
   const loadingContent = `
-    ${ModalManager.createHeader('Poznámky', customerName)}
+    ${createCustomerHeader()}
     <div class="modal-body" style="text-align: center; padding: 3rem;">
       <div class="loading">Načítání poznámek...</div>
     </div>
@@ -2531,7 +2528,7 @@ async function showNotes(recordOrId) {
   notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   const content = `
-    ${ModalManager.createHeader('Poznámky', customerName)}
+    ${createCustomerHeader()}
 
     <div class="modal-body">
       <div class="notes-container">
