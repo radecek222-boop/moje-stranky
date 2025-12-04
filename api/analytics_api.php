@@ -280,6 +280,7 @@ function zpracujIpAkci(string $action): void
  */
 function zajistiTabulkuIgnoredIps(PDO $pdo): void
 {
+    // Vytvořit tabulku pokud neexistuje
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS wgs_analytics_ignored_ips (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -289,4 +290,11 @@ function zajistiTabulkuIgnoredIps(PDO $pdo): void
             UNIQUE KEY unique_ip (ip_address)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
+
+    // Přidat sloupec reason pokud chybí (pro starší verze tabulky)
+    try {
+        $pdo->exec("ALTER TABLE wgs_analytics_ignored_ips ADD COLUMN reason VARCHAR(255) DEFAULT NULL AFTER ip_address");
+    } catch (PDOException $e) {
+        // Sloupec již existuje - ignorovat
+    }
 }
