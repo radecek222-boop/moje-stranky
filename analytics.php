@@ -749,8 +749,10 @@ $zemeNazvy = [
                     <span><?php
                         $zemeNazev = $zemeNazvy[$lok['zeme']] ?? $lok['zeme'];
                         if (!empty($lok['city'])) {
-                            echo htmlspecialchars($lok['city']) . ' <span style="color: #aaa; font-size: 0.7rem;">' . $zemeNazev . '</span>';
+                            // Město + země
+                            echo htmlspecialchars($lok['city']);
                         } else {
+                            // Jen země
                             echo $zemeNazev;
                         }
                     ?></span>
