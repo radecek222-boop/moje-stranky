@@ -1,5 +1,15 @@
 const logger = window.logger || console;
 
+// Globalni funkce pro navigaci zpet
+window.historyBack = function() {
+  if (window.history.length > 1) {
+    window.history.back();
+  } else {
+    // Fallback na homepage pokud neni historie
+    window.location.href = '/';
+  }
+};
+
 // FIX L-2: Konstanty pro magic numbers
 const CONSTANTS = {
   MAX_PHOTOS: 10,              // Max počet fotek na upload
