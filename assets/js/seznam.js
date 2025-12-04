@@ -1069,12 +1069,10 @@ function showCalendar(id) {
     ${createCustomerHeader()}
 
     <!-- Vybraný termín - fixní nad kalendářem -->
-    <div id="selectedDateDisplay" style="display: none; background: #f5f5f5; border: 2px solid #666; color: #333; font-size: 0.85rem; padding: 0.5rem 1rem; margin: 0 1rem; border-radius: 4px; font-weight: 600; text-align: center;"></div>
+    <div id="selectedDateDisplay" style="display: none; background: #f5f5f5; border: 2px solid #666; color: #333; font-size: 0.85rem; padding: 0.5rem 1rem; margin: 0 1rem; border-radius: 4px; font-weight: 600; text-align: center; font-family: inherit;"></div>
 
     <!-- Varování o kolizi - skryté, zobrazí se při výběru obsazeného času -->
-    <div id="collisionWarning" style="display: none; background: #fee; border: 2px solid #c00; color: #900; font-size: 0.85rem; padding: 0.5rem 1rem; margin: 0.5rem 1rem 0; border-radius: 4px; font-weight: 600; text-align: center;">
-      <span id="collisionText"></span>
-    </div>
+    <div id="collisionWarning" style="display: none; background: #fee; border: 2px solid #c00; color: #900; font-size: 0.85rem; padding: 0.5rem 1rem; margin: 0.5rem 1rem 0; border-radius: 4px; font-weight: 600; text-align: center; font-family: inherit;"></div>
 
     <div class="modal-body" style="max-height: 60vh; overflow-y: auto; padding: 1rem;">
       <div class="calendar-container">
@@ -1561,10 +1559,9 @@ function renderTimeGrid() {
 
         // Zobrazit/skrýt varování o kolizi
         const warningEl = document.getElementById('collisionWarning');
-        const warningText = document.getElementById('collisionText');
 
-        if (occupiedTimes[time] && warningEl && warningText) {
-          warningText.textContent = `KOLIZE: ${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}`;
+        if (occupiedTimes[time] && warningEl) {
+          warningEl.textContent = `KOLIZE: ${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}`;
           warningEl.style.display = 'block';
         } else if (warningEl) {
           warningEl.style.display = 'none';
