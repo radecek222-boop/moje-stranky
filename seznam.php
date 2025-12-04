@@ -1685,12 +1685,16 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         }
 
-        console.log('[EMERGENCY] Oteviram PDF:', pdfUrl);
+        console.log('[EMERGENCY] Oteviram PDF v modalu:', pdfUrl);
 
-        // Obejit pop-up blocker: Otevrit v SOUCASNEM okne misto noveho tabu
-        // Uzivatel muze pouzit "Zpet" pro navrat
-        window.location.href = pdfUrl;
-        console.log('[EMERGENCY] Presmerovani na PDF');
+        // Otevrit PDF v modal okne (stejne jako showHistoryPDF)
+        if (typeof zobrazPDFModal === 'function') {
+          zobrazPDFModal(pdfUrl, id, 'report');
+        } else {
+          // Fallback - otevrit v novem tabu
+          console.warn('[EMERGENCY] zobrazPDFModal neni dostupna, otviram v novem tabu');
+          window.open(pdfUrl, '_blank');
+        }
         break;
 
       case 'startVisit':
