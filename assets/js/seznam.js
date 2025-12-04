@@ -1074,7 +1074,7 @@ function showCalendar(id) {
     </div>
 
     <div class="modal-body" style="max-height: 80vh; overflow-y: auto; padding: 1rem;">
-      <div id="selectedDateDisplay" style="color: var(--c-grey); font-size: 0.9rem; font-weight: 600; text-align: center; margin-bottom: 1rem; padding: 0.5rem; background: #f5f5f5; border-radius: 4px;">Zatím nevybráno</div>
+      <div id="selectedDateDisplay" style="color: #333; font-size: 1rem; font-weight: 600; text-align: center; margin-bottom: 1rem; padding: 0.75rem 1rem; background: #f5f5f5; border-radius: 4px;">Zatím nevybráno</div>
       <div class="calendar-container">
         <div id="calGrid"></div>
         <div id="distanceInfo"></div>
