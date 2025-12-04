@@ -505,95 +505,81 @@ $zemeNazvy = [
             border-radius: 3px;
         }
 
-        /* ======== GRAF NÁVŠTĚVNOSTI - VYLEPŠENÝ ======== */
+        /* ======== GRAF NÁVŠTĚVNOSTI - KOMPAKTNÍ BOXY ======== */
         .graf-wrapper {
-            padding: 1rem 0;
+            padding: 0.5rem 0;
         }
-        .graf-container {
-            height: 220px;
-            display: flex;
-            align-items: flex-end;
-            gap: 4px;
-            padding: 0 0.5rem;
-            position: relative;
+        .graf-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(28px, 1fr));
+            gap: 3px;
         }
-        .graf-column {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 20px;
-        }
-        .graf-bar {
-            width: 100%;
-            border-radius: 4px 4px 0 0;
-            transition: all 0.3s ease;
+        .graf-box {
+            aspect-ratio: 1;
+            background: #fafafa;
+            border-radius: 4px;
             cursor: pointer;
+            transition: all 0.2s ease;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.55rem;
+            color: #999;
         }
-        .graf-bar:hover {
-            filter: brightness(1.1);
-            transform: scaleY(1.02);
-            transform-origin: bottom;
+        .graf-box:hover {
+            transform: scale(1.15);
+            z-index: 10;
         }
-        .graf-bar::after {
+        .graf-box::after {
             content: attr(data-tooltip);
             position: absolute;
-            bottom: 100%;
+            bottom: calc(100% + 6px);
             left: 50%;
             transform: translateX(-50%);
-            background: #222;
+            background: #111;
             color: #fff;
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.7rem;
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
             white-space: nowrap;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.2s ease;
-            margin-bottom: 8px;
+            transition: opacity 0.15s ease;
             z-index: 100;
         }
-        .graf-bar:hover::after {
+        .graf-box:hover::after {
             opacity: 1;
         }
-        .graf-datum {
-            font-size: 0.6rem;
-            color: #888;
-            margin-top: 8px;
-            transform: rotate(-45deg);
-            white-space: nowrap;
-            text-align: center;
-        }
+        /* Intenzita - pouze border s neonově zeleným gradientem */
+        .int-0 { border: 2px solid #e0e0e0; }
+        .int-1 { border: 2px solid #aaa; }
+        .int-2 { border: 2px solid #888; }
+        .int-3 { border: 2px solid #666; }
+        .int-4 { border: 2px solid #444; }
+        .int-5 { border: 2px solid #39ff14; box-shadow: 0 0 6px rgba(57, 255, 20, 0.3); }
+        .int-max { border: 3px solid #39ff14; box-shadow: 0 0 12px rgba(57, 255, 20, 0.5); background: rgba(57, 255, 20, 0.05); }
         .graf-legenda {
             display: flex;
             justify-content: center;
-            gap: 2rem;
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid #f0f0f0;
+            gap: 1rem;
+            margin-top: 1rem;
+            font-size: 0.65rem;
+            color: #888;
         }
         .graf-legenda-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.75rem;
-            color: #666;
+            gap: 0.3rem;
         }
-        .graf-legenda-barva {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
+        .graf-legenda-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            background: #fafafa;
         }
-        /* Barevný gradient podle intenzity */
-        .intenzita-1 { background: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 100%); }
-        .intenzita-2 { background: linear-gradient(180deg, #a5d6a7 0%, #81c784 100%); }
-        .intenzita-3 { background: linear-gradient(180deg, #66bb6a 0%, #4caf50 100%); }
-        .intenzita-4 { background: linear-gradient(180deg, #43a047 0%, #388e3c 100%); }
-        .intenzita-5 { background: linear-gradient(180deg, #2e7d32 0%, #1b5e20 100%); }
-        .intenzita-max { background: linear-gradient(180deg, #39ff14 0%, #2d5a27 100%); box-shadow: 0 0 15px rgba(57, 255, 20, 0.4); }
 
-        /* Zařízení ikony - ODSTRANĚNY EMOJI */
+        /* Zařízení */
         .device-label {
             font-weight: 500;
         }
@@ -652,60 +638,41 @@ $zemeNazvy = [
                 $maxNavstev = max(array_column($navstevnostDny, 'navstevy'));
                 $maxNavstev = $maxNavstev > 0 ? $maxNavstev : 1;
 
-                // Funkce pro určení intenzity barvy (1-6)
-                function getIntenzita($hodnota, $max) {
-                    if ($max == 0) return 1;
+                // Funkce pro určení intenzity (0-max)
+                function getInt($hodnota, $max) {
+                    if ($hodnota == 0) return '0';
+                    if ($max == 0) return '0';
                     $procento = ($hodnota / $max) * 100;
                     if ($procento >= 95) return 'max';
-                    if ($procento >= 75) return '5';
-                    if ($procento >= 55) return '4';
-                    if ($procento >= 35) return '3';
-                    if ($procento >= 15) return '2';
+                    if ($procento >= 70) return '5';
+                    if ($procento >= 50) return '4';
+                    if ($procento >= 30) return '3';
+                    if ($procento >= 10) return '2';
                     return '1';
                 }
                 ?>
                 <div class="graf-wrapper">
-                    <div class="graf-container">
-                        <?php foreach ($navstevnostDny as $index => $den):
-                            $vyska = ($den['navstevy'] / $maxNavstev) * 100;
-                            $intenzita = getIntenzita($den['navstevy'], $maxNavstev);
+                    <div class="graf-grid">
+                        <?php foreach ($navstevnostDny as $den):
+                            $intenzita = getInt($den['navstevy'], $maxNavstev);
                             $datum = date('j.n.', strtotime($den['den']));
                             $denVTydnu = ['Ne','Po','Ut','St','Ct','Pa','So'][date('w', strtotime($den['den']))];
-                            $tooltip = $denVTydnu . ' ' . date('j.n.Y', strtotime($den['den'])) . ' - ' . $den['navstevy'] . ' navstev';
+                            $tooltip = $denVTydnu . ' ' . date('j.n.', strtotime($den['den'])) . ': ' . $den['navstevy'];
                         ?>
-                            <div class="graf-column">
-                                <div class="graf-bar intenzita-<?= $intenzita ?>"
-                                     style="height: <?= max(8, $vyska) ?>%;"
-                                     data-tooltip="<?= htmlspecialchars($tooltip) ?>"></div>
-                                <?php if ($index % 3 == 0 || $index == count($navstevnostDny) - 1): ?>
-                                    <div class="graf-datum"><?= $datum ?></div>
-                                <?php else: ?>
-                                    <div class="graf-datum" style="visibility: hidden;"><?= $datum ?></div>
-                                <?php endif; ?>
+                            <div class="graf-box int-<?= $intenzita ?>" data-tooltip="<?= htmlspecialchars($tooltip) ?>">
+                                <?= date('j', strtotime($den['den'])) ?>
                             </div>
                         <?php endforeach; ?>
                     </div>
                     <div class="graf-legenda">
-                        <div class="graf-legenda-item">
-                            <div class="graf-legenda-barva intenzita-1"></div>
-                            <span>Nizka</span>
-                        </div>
-                        <div class="graf-legenda-item">
-                            <div class="graf-legenda-barva intenzita-3"></div>
-                            <span>Stredni</span>
-                        </div>
-                        <div class="graf-legenda-item">
-                            <div class="graf-legenda-barva intenzita-5"></div>
-                            <span>Vysoka</span>
-                        </div>
-                        <div class="graf-legenda-item">
-                            <div class="graf-legenda-barva intenzita-max"></div>
-                            <span>Maximum</span>
-                        </div>
+                        <div class="graf-legenda-item"><div class="graf-legenda-box int-0"></div>0</div>
+                        <div class="graf-legenda-item"><div class="graf-legenda-box int-2"></div>Malo</div>
+                        <div class="graf-legenda-item"><div class="graf-legenda-box int-4"></div>Vice</div>
+                        <div class="graf-legenda-item"><div class="graf-legenda-box int-max"></div>Max</div>
                     </div>
                 </div>
             <?php else: ?>
-                <p style="color: #888; text-align: center; padding: 3rem; font-size: 0.9rem;">Zatim zadna data o navstevnosti</p>
+                <p style="color: #888; text-align: center; padding: 2rem; font-size: 0.85rem;">Zatim zadna data</p>
             <?php endif; ?>
         </div>
     </div>
