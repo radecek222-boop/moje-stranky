@@ -77,7 +77,12 @@ if (!$isLoggedIn && !$isAdmin) {
   <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
   <title>Přehled reklamací | White Glove Service</title>
   <meta name="description" content="Seznam reklamací a servisních zakázek White Glove Service. Správa, filtrování a přehledy všech servisních požadavků.">
-  
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon512.png">
+  <link rel="apple-touch-icon" href="/icon192.png">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -90,7 +95,7 @@ if (!$isLoggedIn && !$isAdmin) {
 <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="preload" href="assets/css/styles.min.css?v=20251121-02" as="style">
-  <link rel="preload" href="assets/css/seznam.min.css?v=20251121-02" as="style">
+  <link rel="preload" href="assets/css/seznam.min.css?v=20251202" as="style">
 
   <link rel="stylesheet" href="assets/css/styles.min.css?v=20251121-02">
   <link rel="stylesheet" href="assets/css/seznam.min.css?v=20251202">
