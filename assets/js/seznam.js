@@ -1072,7 +1072,7 @@ function showCalendar(id) {
     <div id="selectedDateDisplay" style="color: #333; font-size: 0.85rem; font-weight: 600; text-align: center; padding: 0.5rem 1rem; margin: 0 1rem; background: #f5f5f5; border-radius: 4px;">Zatím nevybráno</div>
 
     <!-- Varování o kolizi - skryté, zobrazí se při výběru obsazeného času -->
-    <div id="collisionWarning" style="display: none; background: #fee; border: 2px solid #c00; color: #900; padding: 0.75rem 1rem; margin: 0.5rem 1rem 0; border-radius: 6px; font-weight: 600; text-align: center;">
+    <div id="collisionWarning" style="display: none; background: #fee; border: 2px solid #c00; color: #900; font-size: 0.85rem; padding: 0.5rem 1rem; margin: 0.5rem 1rem 0; border-radius: 4px; font-weight: 600; text-align: center;">
       <span id="collisionText"></span>
     </div>
 
