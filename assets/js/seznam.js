@@ -4496,13 +4496,11 @@ document.addEventListener('click', (e) => {
       break;
 
     case 'openPDF':
+      e.preventDefault();
+      e.stopPropagation();
       console.log('[DEBUG] openPDF action triggered', { url, id });
       if (url) {
-        console.log('[DEBUG] Calling zobrazPDFModal with:', url, id);
         zobrazPDFModal(url, id);
-        console.log('[DEBUG] zobrazPDFModal finished');
-      } else {
-        console.error('[DEBUG] openPDF - URL is empty!');
       }
       break;
 

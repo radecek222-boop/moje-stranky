@@ -1630,7 +1630,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </div>
 
 <!-- External JavaScript -->
-<script src="assets/js/seznam.js?v=20251203-fix" defer></script>
+<script src="assets/js/seznam.min.js?v=20251204-pdf" defer></script>
 <!-- seznam-delete-patch.js odstraněn - delete button je přímo v showCustomerDetail (Step 52) -->
 <!-- WGS Toast Notifikace (in-app) -->
 <link rel="stylesheet" href="assets/css/wgs-toast.css">
