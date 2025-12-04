@@ -1227,9 +1227,11 @@
   transition: all 0.3s;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  align-items: flex-start;
   flex: 1;
   min-height: 0;
+  padding-top: 0.3rem;
 }
 
 .radio-title {

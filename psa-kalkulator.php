@@ -2,9 +2,11 @@
 require_once "init.php";
 require_once __DIR__ . '/includes/csrf_helper.php';
 
-// BEZPEČNOST: Kontrola admin přihlášení
+// BEZPEČNOST: Kontrola přihlášení (admin, technik, prodejce)
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
-if (!$isAdmin) {
+$isLoggedIn = isset($_SESSION['user_id']) || $isAdmin;
+
+if (!$isLoggedIn) {
     header('Location: login.php?redirect=psa-kalkulator.php');
     exit;
 }
