@@ -164,8 +164,10 @@ try {
 
     $sql = "
         SELECT
-            eq.id, eq.recipient_email, eq.subject, eq.body, eq.status, eq.attempts,
-            eq.error_message, eq.created_at, eq.scheduled_at, eq.sent_at,
+            eq.id, eq.recipient_email, eq.recipient_name, eq.subject, eq.body,
+            eq.status, eq.attempts, eq.error_message,
+            eq.cc_emails, eq.bcc_emails,
+            eq.created_at, eq.scheduled_at, eq.sent_at,
             eq.notification_id,
             COALESCE(n.name, eq.notification_id) as template_name
         FROM wgs_email_queue eq
@@ -647,21 +649,26 @@ try {
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= date('d.m.Y H:i', strtotime($email['created_at'])) ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['sent_at'] ? date('d.m.Y H:i', strtotime($email['sent_at'])) : '-' ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
-                                <button class="cc-btn cc-btn-sm cc-btn-link" data-action="toggleEmailDetail" data-id="<?= $email['id'] ?>">
+                                <?php
+                                    $ccEmails = $email['cc_emails'] ? json_decode($email['cc_emails'], true) : [];
+                                    $bccEmails = $email['bcc_emails'] ? json_decode($email['bcc_emails'], true) : [];
+                                ?>
+                                <button class="cc-btn cc-btn-sm cc-btn-link" data-action="openEmailDetailModal"
+                                    data-id="<?= $email['id'] ?>"
+                                    data-recipient="<?= htmlspecialchars($email['recipient_email']) ?>"
+                                    data-recipient-name="<?= htmlspecialchars($email['recipient_name'] ?? '') ?>"
+                                    data-subject="<?= htmlspecialchars($email['subject']) ?>"
+                                    data-cc="<?= htmlspecialchars(is_array($ccEmails) ? implode(', ', $ccEmails) : '') ?>"
+                                    data-bcc="<?= htmlspecialchars(is_array($bccEmails) ? implode(', ', $bccEmails) : '') ?>"
+                                    data-created="<?= date('d.m.Y H:i:s', strtotime($email['created_at'])) ?>"
+                                    data-sent="<?= $email['sent_at'] ? date('d.m.Y H:i:s', strtotime($email['sent_at'])) : '-' ?>"
+                                    data-status="<?= $email['status'] ?>"
+                                    data-template="<?= htmlspecialchars($email['template_name'] ?? '-') ?>"
+                                    data-error="<?= htmlspecialchars($email['error_message'] ?? '') ?>">
                                     Zobrazit
                                 </button>
-                                <div id="email-detail-<?= $email['id'] ?>" style="display: none; margin-top: 0.5rem;">
-                                    <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 0.5rem; font-size: 0.75rem; max-height: 150px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;">
-                                        <strong>Tělo emailu:</strong><br><br>
-                                        <?= htmlspecialchars($email['body']) ?>
-                                    </div>
-                                    <?php if ($email['error_message']): ?>
-                                    <div style="background: #fef2f2; border: 1px solid #ef4444; padding: 0.5rem; margin-top: 0.5rem; font-size: 0.75rem; font-family: monospace; color: #991b1b; white-space: pre-wrap; word-wrap: break-word;">
-                                        <strong>Chyba:</strong><br>
-                                        <?= htmlspecialchars($email['error_message']) ?>
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
+                                <!-- Body uloženo v hidden elementu kvůli délce -->
+                                <div id="email-body-<?= $email['id'] ?>" style="display: none;"><?= htmlspecialchars($email['body']) ?></div>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -696,6 +703,164 @@ try {
         </div>
     </div>
 </div>
+
+<!-- Modal pro detail emailu -->
+<div id="email-detail-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; overflow-y: auto;">
+    <div style="max-width: 700px; margin: 2rem auto; background: #fff; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <!-- Header -->
+        <div style="padding: 1rem 1.5rem; background: #000; color: #fff; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
+            <h2 style="font-family: 'Poppins', sans-serif; font-size: 1.1rem; font-weight: 600; margin: 0;">Detail emailu #<span id="email-modal-id"></span></h2>
+            <button data-action="closeEmailDetailModal" aria-label="Zavřít" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
+        </div>
+
+        <!-- Obsah -->
+        <div style="padding: 1.5rem;">
+            <!-- Info sekce -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; font-size: 0.85rem;">
+                <div>
+                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Příjemce (TO):</strong>
+                    <span id="email-modal-recipient" style="color: #000;"></span>
+                </div>
+                <div>
+                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Stav:</strong>
+                    <span id="email-modal-status" style="display: inline-block; padding: 0.2rem 0.5rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; border: 1px solid #000;"></span>
+                </div>
+                <div>
+                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Kopie (CC):</strong>
+                    <span id="email-modal-cc" style="color: #000;"></span>
+                </div>
+                <div>
+                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Skrytá kopie (BCC):</strong>
+                    <span id="email-modal-bcc" style="color: #000;"></span>
+                </div>
+                <div>
+                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Vytvořeno:</strong>
+                    <span id="email-modal-created" style="color: #000;"></span>
+                </div>
+                <div>
+                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Odesláno:</strong>
+                    <span id="email-modal-sent" style="color: #000;"></span>
+                </div>
+                <div style="grid-column: 1 / -1;">
+                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Šablona:</strong>
+                    <span id="email-modal-template" style="color: #000;"></span>
+                </div>
+            </div>
+
+            <!-- Předmět -->
+            <div style="margin-bottom: 1rem;">
+                <strong style="color: #666; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Předmět:</strong>
+                <div id="email-modal-subject" style="padding: 0.75rem; background: #f5f5f5; border: 1px solid #ddd; font-size: 0.9rem; font-weight: 500;"></div>
+            </div>
+
+            <!-- Tělo emailu -->
+            <div style="margin-bottom: 1rem;">
+                <strong style="color: #666; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Tělo emailu:</strong>
+                <div id="email-modal-body" style="padding: 0.75rem; background: #f5f5f5; border: 1px solid #ddd; max-height: 300px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; font-size: 0.85rem; font-family: 'Courier New', monospace;"></div>
+            </div>
+
+            <!-- Chyba (pokud existuje) -->
+            <div id="email-modal-error-container" style="display: none; margin-bottom: 1rem;">
+                <strong style="color: #991b1b; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Chyba:</strong>
+                <div id="email-modal-error" style="padding: 0.75rem; background: #fef2f2; border: 1px solid #ef4444; color: #991b1b; font-size: 0.8rem; font-family: monospace;"></div>
+            </div>
+
+            <!-- Tlačítko zavřít -->
+            <div style="text-align: right; padding-top: 1rem; border-top: 1px solid #ddd;">
+                <button data-action="closeEmailDetailModal" style="padding: 0.5rem 1.5rem; background: #000; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 500; cursor: pointer;">Zavřít</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Handler pro otevření modalu detailu emailu
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('[data-action="openEmailDetailModal"]');
+    if (btn) {
+        const id = btn.dataset.id;
+        const recipient = btn.dataset.recipient;
+        const recipientName = btn.dataset.recipientName;
+        const subject = btn.dataset.subject;
+        const cc = btn.dataset.cc;
+        const bcc = btn.dataset.bcc;
+        const created = btn.dataset.created;
+        const sent = btn.dataset.sent;
+        const status = btn.dataset.status;
+        const template = btn.dataset.template;
+        const error = btn.dataset.error;
+
+        // Získat tělo emailu z hidden elementu
+        const bodyEl = document.getElementById('email-body-' + id);
+        const body = bodyEl ? bodyEl.textContent : '';
+
+        // Naplnit modal
+        document.getElementById('email-modal-id').textContent = id;
+        document.getElementById('email-modal-recipient').textContent = recipientName ? recipientName + ' <' + recipient + '>' : recipient;
+        document.getElementById('email-modal-subject').textContent = subject;
+        document.getElementById('email-modal-cc').textContent = cc || '-';
+        document.getElementById('email-modal-bcc').textContent = bcc || '-';
+        document.getElementById('email-modal-created').textContent = created;
+        document.getElementById('email-modal-sent').textContent = sent;
+        document.getElementById('email-modal-template').textContent = template === 'Array' ? '-' : template;
+        document.getElementById('email-modal-body').textContent = body;
+
+        // Stav s barvou
+        const statusEl = document.getElementById('email-modal-status');
+        statusEl.textContent = status.toUpperCase();
+        if (status === 'sent') {
+            statusEl.style.background = '#000';
+            statusEl.style.color = '#fff';
+        } else if (status === 'failed') {
+            statusEl.style.background = '#fef2f2';
+            statusEl.style.color = '#991b1b';
+            statusEl.style.borderColor = '#ef4444';
+        } else {
+            statusEl.style.background = '#fff';
+            statusEl.style.color = '#000';
+        }
+
+        // Chyba
+        const errorContainer = document.getElementById('email-modal-error-container');
+        const errorEl = document.getElementById('email-modal-error');
+        if (error) {
+            errorEl.textContent = error;
+            errorContainer.style.display = 'block';
+        } else {
+            errorContainer.style.display = 'none';
+        }
+
+        // Zobrazit modal
+        document.getElementById('email-detail-modal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Zavření modalu
+    if (e.target.closest('[data-action="closeEmailDetailModal"]')) {
+        document.getElementById('email-detail-modal').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+});
+
+// Zavření při kliku mimo modal
+document.getElementById('email-detail-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+});
+
+// Zavření ESC klávesou
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('email-detail-modal');
+        if (modal && modal.style.display !== 'none') {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+});
+</script>
 
 <style>
 .cc-tabs {
