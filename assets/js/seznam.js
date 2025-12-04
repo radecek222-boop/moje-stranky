@@ -3064,8 +3064,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const action = target.getAttribute('data-action');
 
     // Ignorovat akce zpracované EMERGENCY event listenerem v seznam.php
-    const emergencyActions = ['reopenOrder', 'openPDF', 'startVisit', 'showCalendar',
-                               'showContactMenu', 'showCustomerDetail', 'closeDetail', 'deleteReklamace'];
+    const emergencyActions = [
+      'reopenOrder', 'openPDF', 'startVisit', 'showCalendar',
+      'showContactMenu', 'showCustomerDetail', 'closeDetail', 'deleteReklamace',
+      'showDetailById', 'showDetail', 'showNotes', 'closeNotesModal', 'deleteNote',
+      'saveNewNote', 'showHistoryPDF', 'showVideoteka', 'saveSelectedDate',
+      'previousMonth', 'nextMonth', 'showBookingDetail', 'showCalendarBack',
+      'openCalendarFromDetail', 'sendContactAttemptEmail', 'showPhotoFullscreen',
+      'smazatFotku', 'saveAllCustomerData', 'startRecording', 'stopRecording',
+      'deleteAudioPreview', 'closeErrorModal', 'filterUnreadNotes'
+    ];
     if (emergencyActions.includes(action)) {
       return;  // Nechat zpracovat EMERGENCY event listener
     }
