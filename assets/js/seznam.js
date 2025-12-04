@@ -730,15 +730,10 @@ async function showDetail(recordOrId) {
           <button class="detail-btn detail-btn-primary" data-action="reopenOrder" data-id="${record.id}">Znovu otevřít</button>
           <button class="detail-btn detail-btn-secondary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
         ` : ''}
-
         <button class="detail-btn detail-btn-secondary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
-
-        <div class="detail-btn-separator"></div>
-
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-secondary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
-
         ${record.documents && record.documents.length > 0 ? `
           <button class="detail-btn detail-btn-primary" data-action="openPDF" data-url="${record.documents[0].file_path}" data-id="${record.id}">PDF Report</button>
         ` : `
@@ -746,10 +741,7 @@ async function showDetail(recordOrId) {
             <div class="detail-info-box-subtitle">PDF report ještě nebyl vytvořen</div>
           </div>
         `}
-
         <button class="detail-btn detail-btn-secondary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
-
-        <button class="detail-btn detail-btn-close" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   } else {
@@ -763,18 +755,11 @@ async function showDetail(recordOrId) {
           <button class="detail-btn detail-btn-primary" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
           <button class="detail-btn detail-btn-secondary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
         ` : ''}
-
         <button class="detail-btn detail-btn-secondary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
-
-        <div class="detail-btn-separator"></div>
-
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-secondary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie PDF</button>
         ` : ''}
-
         <button class="detail-btn detail-btn-secondary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
-
-        <button class="detail-btn detail-btn-close" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   }
