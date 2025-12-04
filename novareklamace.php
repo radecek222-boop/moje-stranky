@@ -437,7 +437,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         <div class="form-grid form-grid-3">
           <div class="form-group">
             <label class="form-label" for="cislo" data-lang-cs="Číslo objednávky/reklamace" data-lang-en="Order/Claim Number" data-lang-it="Numero Ordine/Reclamo">Číslo objednávky/reklamace<?php if ($isLoggedIn) echo " *"; ?></label>
-            <input type="text" class="form-control" id="cislo" name="cislo"<?php if ($isLoggedIn) { echo " required"; } else { echo " readonly placeholder='nevyplňuje se' style='background-color: #f5f5f5; cursor: not-allowed;'"; } ?>>
+            <input type="text" class="form-control" id="cislo" name="cislo"<?php if ($isLoggedIn) { echo " required"; } else { echo " readonly value='nevyplňuje se' style='background-color: #f5f5f5; color: #999; cursor: not-allowed;'"; } ?>>
             <label for="fakturace_firma" style="display:block; margin-top:0.5rem; font-size:0.85rem; font-weight:600;">Fakturace:</label>
             <select id="fakturace_firma" name="fakturace_firma" style="width:33%; height:2rem; font-size:0.85rem; padding:0.3rem; border:1px solid #ddd; border-radius:4px;" aria-label="Výběr státu pro fakturaci">
               <option value="CZ" selected>🇨🇿 CZ</option>
@@ -465,7 +465,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
       <div class="form-section">
         <h2 class="section-title" data-lang-cs="Kontaktní údaje" data-lang-en="Contact Information" data-lang-it="Informazioni di Contatto">Kontaktní údaje</h2>
 
-        <!-- Typ zákazníka - IČO nebo fyzická osoba (POVINNÉ) -->
+        <?php if ($isLoggedIn): ?>
+        <!-- Typ zákazníka - IČO nebo fyzická osoba (POVINNÉ) - pouze pro přihlášené -->
         <div class="typ-zakaznika-wrapper" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
           <div style="display: flex; flex-direction: column;">
             <label class="typ-zakaznika-label" style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
@@ -479,6 +480,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
             <span data-lang-cs="Objednávka byla na fyzickou osobu *" data-lang-en="Order was on individual *" data-lang-it="Ordine su persona fisica *">Objednávka byla na fyzickou osobu *</span>
           </label>
         </div>
+        <?php endif; ?>
 
         <div class="form-grid form-grid-3">
           <div class="form-group">
