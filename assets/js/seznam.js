@@ -1,5 +1,5 @@
-// VERSION CHECK: 20251202-01 - Step 43: Alpine.js detailModal migrace
-// Step 43: Migrace detailModal na CSP-safe Alpine.js
+// VERSION CHECK: 20251123-03 - Odstraněny duplicitní event listenery
+console.log('🔍 SEZNAM.JS NAČTEN - VERZE: 20251123-03 (event listener cleanup)');
 
 // BEZPEČNOST: Cache CSRF tokenu pro prevenci nekonečné smyčky
 window.csrfTokenCache = window.csrfTokenCache || null;
@@ -762,21 +762,15 @@ async function showDetail(recordOrId) {
       </div>
     `;
   } else {
-    // Tlacitka podle role - prodejce nema pristup k technickim funkcim
-    const jeProdejce = CURRENT_USER && CURRENT_USER.role === 'prodejce';
-
     buttonsHtml = `
-      <div class="detail-buttons">
-        ${!jeProdejce ? `
-          <button class="detail-btn detail-btn-primary" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
-          <button class="detail-btn detail-btn-primary" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
-          <button class="detail-btn detail-btn-secondary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
-        ` : ''}
-        <button class="detail-btn detail-btn-secondary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
-        ${record.original_reklamace_id ? `
-          <button class="detail-btn detail-btn-secondary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie PDF</button>
-        ` : ''}
-        <button class="detail-btn detail-btn-secondary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
+
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
+
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   }
@@ -3064,6 +3058,29 @@ function formatAppointment(dateStr, timeStr) {
 
 document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+
+    const action = target.getAttribute('data-action');
+
+    // Ignorovat akce zpracované EMERGENCY event listenerem v seznam.php
+    const emergencyActions = ['reopenOrder', 'openPDF', 'startVisit', 'showCalendar',
+                               'showContactMenu', 'showCustomerDetail', 'closeDetail', 'deleteReklamace'];
+    if (emergencyActions.includes(action)) {
+      return;  // Nechat zpracovat EMERGENCY event listener
+    }
+
+    if (action === 'reload') {
+      location.reload();
+      return;
+    }
+
+    if (typeof window[action] === 'function') {
+      window[action]();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
     const navigate = e.target.closest('[data-navigate]')?.getAttribute('data-navigate');
     if (navigate) {
       if (typeof navigateTo === 'function') {
@@ -4480,206 +4497,6 @@ async function komprimovatVideo(videoFile, progressCallback) {
 // ========================================
 // EVENT DELEGATION PRO TLAČÍTKA V DETAILU
 // ========================================
-// Zachytává kliknutí na tlačítka s data-action atributem
-// Řeší problém s inline onclick, které CSP blokuje
-document.addEventListener('click', (e) => {
-  const button = e.target.closest('[data-action]');
-  if (!button) return;
-
-  const action = button.getAttribute('data-action');
-  const id = button.getAttribute('data-id');
-  const url = button.getAttribute('data-url');
-  const pdfPath = button.getAttribute('data-pdf-path');
-
-  logger.log(`[Seznam] Tlačítko kliknuto: ${action}`, { id, url, pdfPath });
-
-  switch (action) {
-    case 'reopenOrder':
-      if (id) reopenOrder(id);
-      break;
-
-    case 'showContactMenu':
-      if (id) showContactMenu(id);
-      break;
-
-    case 'showCustomerDetail':
-      if (id) showCustomerDetail(id);
-      break;
-
-    case 'showDetail':
-      if (CURRENT_RECORD) showDetail(CURRENT_RECORD);
-      break;
-
-    case 'openPDF':
-      e.preventDefault();
-      e.stopPropagation();
-      if (pdfPath) zobrazPDFModal(pdfPath, id);
-      break;
-
-    case 'showHistoryPDF':
-      const originalId = button.getAttribute('data-original-id');
-      if (originalId) showHistoryPDF(originalId);
-      break;
-
-    case 'showPhotoFullscreen':
-      if (url) showPhotoFullscreen(url);
-      break;
-
-    case 'smazatFotku':
-      const photoId = button.getAttribute('data-photo-id');
-      if (photoId && url) {
-        e.stopPropagation();
-        smazatFotku(photoId, url);
-      }
-      break;
-
-    case 'deleteReklamace':
-      if (id) deleteReklamace(id);
-      break;
-
-    case 'saveAllCustomerData':
-      if (id) saveAllCustomerData(id);
-      break;
-
-    case 'closeDetail':
-      closeDetail();
-      break;
-
-    case 'showNotes':
-      if (id && typeof showNotes === 'function') {
-        e.stopPropagation();
-        showNotes(id);
-      }
-      break;
-
-    case 'filterUnreadNotes':
-      if (typeof filterUnreadNotes === 'function') {
-        filterUnreadNotes();
-      }
-      break;
-
-    case 'closeNotesModal':
-      if (typeof closeNotesModal === 'function') {
-        closeNotesModal();
-      }
-      break;
-
-    case 'saveNewNote':
-      if (id && typeof saveNewNote === 'function') {
-        saveNewNote(id);
-      }
-      break;
-
-    case 'deleteNote':
-      const noteId = button.getAttribute('data-note-id');
-      const orderId = button.getAttribute('data-order-id');
-      if (noteId && typeof deleteNote === 'function') {
-        e.stopPropagation();
-        deleteNote(noteId, orderId);
-      }
-      break;
-
-    case 'startRecording':
-      if (id && typeof startRecording === 'function') {
-        e.stopPropagation();
-        startRecording(id);
-      }
-      break;
-
-    case 'stopRecording':
-      if (typeof stopRecording === 'function') {
-        e.stopPropagation();
-        stopRecording();
-      }
-      break;
-
-    case 'deleteAudioPreview':
-      if (typeof deleteAudioPreview === 'function') {
-        e.stopPropagation();
-        deleteAudioPreview();
-      }
-      break;
-
-    case 'showVideoteka':
-      if (id && typeof zobrazVideotekaArchiv === 'function') {
-        e.stopPropagation();
-        zobrazVideotekaArchiv(id);
-      }
-      break;
-
-    // Step 114 - Nové akce z migrace onclick
-    case 'showDetailById':
-      if (id && typeof showDetail === 'function') {
-        showDetail(id);
-      }
-      break;
-
-    case 'closeModal':
-      if (typeof ModalManager !== 'undefined' && ModalManager.close) {
-        ModalManager.close();
-      }
-      break;
-
-    case 'saveSelectedDate':
-      if (typeof saveSelectedDate === 'function') {
-        saveSelectedDate();
-      }
-      break;
-
-    case 'previousMonth':
-      if (typeof previousMonth === 'function') {
-        e.stopPropagation();
-        previousMonth();
-      }
-      break;
-
-    case 'nextMonth':
-      if (typeof nextMonth === 'function') {
-        e.stopPropagation();
-        nextMonth(e);
-      }
-      break;
-
-    case 'showBookingDetail':
-      if (id && typeof showBookingDetail === 'function') {
-        showBookingDetail(id);
-      }
-      break;
-
-    case 'showCalendarBack':
-      if (CURRENT_RECORD && typeof showCalendar === 'function') {
-        showCalendar(CURRENT_RECORD.id);
-      }
-      break;
-
-    case 'openCalendarFromDetail':
-      if (id) {
-        closeDetail();
-        setTimeout(() => showCalendar(id), 100);
-      }
-      break;
-
-    case 'sendContactAttemptEmail':
-      const phone = button.getAttribute('data-phone');
-      if (id && phone && typeof sendContactAttemptEmail === 'function') {
-        sendContactAttemptEmail(id, phone);
-      }
-      break;
-
-    case 'openPdfNewWindow':
-      if (url) {
-        window.open(url, '_blank');
-      }
-      break;
-
-    case 'closeErrorModal':
-      const errorModalEl = button.closest('div[style*="position:fixed"]');
-      if (errorModalEl) {
-        errorModalEl.remove();
-      }
-      break;
-
-    default:
-      logger.warn(`[Seznam] Neznámá akce: ${action}`);
-  }
-});
+// POZOR: Tento listener je DEAKTIVOVÁN - event handling se provádí v seznam.php (EMERGENCY event delegation V6)
+// Důvod: Duplicitní event listenery způsobovaly vícenásobné volání funkcí
+// Pokud EMERGENCY listener selže, můžete tento listener znovu aktivovat

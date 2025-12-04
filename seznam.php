@@ -1630,18 +1630,14 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </div>
 
 <!-- External JavaScript -->
-<script src="assets/js/seznam.min.js?v=20251204-collision" defer></script>
-<!-- seznam-delete-patch.js odstraněn - delete button je přímo v showCustomerDetail (Step 52) -->
-<!-- WGS Toast Notifikace (in-app) -->
-<link rel="stylesheet" href="assets/css/wgs-toast.css">
-<script src="assets/js/wgs-toast.js" defer></script>
-<script src="assets/js/pwa-notifications.js" defer></script>
+<script src="assets/js/seznam.js?v=20251123-03" defer></script>
+<script src="assets/js/seznam-delete-patch.js" defer></script>
 
 <!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
 <script>
-// CACHE BUSTER: 2025-11-23-19:35:00 - VLASTNÍ MODAL DIALOG
+// CACHE BUSTER: 2025-11-23-20:15:00 - PŘIDÁNO: startVisit, showCalendar
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('[Seznam] EMERGENCY event delegation V5 se nacita... [2025-11-23-19:35:00 - VLASTNI MODAL]');
+  console.log('🔧 EMERGENCY event delegation V6 se načítá... [2025-11-23-20:15:00 + startVisit/showCalendar]');
 
   document.addEventListener('click', (e) => {
     const button = e.target.closest('[data-action]');
@@ -1680,6 +1676,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // Uzivatel muze pouzit "Zpet" pro navrat
         window.location.href = url;
         console.log('[EMERGENCY] Presmerovani na PDF');
+        break;
+
+      case 'startVisit':
+        if (id && typeof startVisit === 'function') {
+          startVisit(id);
+        }
+        break;
+
+      case 'showCalendar':
+        if (id && typeof showCalendar === 'function') {
+          showCalendar(id);
+        }
         break;
 
       case 'closeDetail':
@@ -1760,7 +1768,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('[Seznam] Event delegation V5 nacten - VLASTNI MODAL DIALOG');
+  console.log('✅ EMERGENCY event delegation V6 načten [2025-11-23-20:15:00] - startVisit + showCalendar');
 });
 
 // DVA-KLIKOVE POTVRZENI - obchazi vsechny problemy s modaly/overlay
