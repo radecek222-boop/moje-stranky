@@ -141,8 +141,30 @@
     return window.scrollY <= 0;
   }
 
+  // Kontrola jestli je otevreny modal (scroll je zamknuty)
+  function jeModalOtevreny() {
+    // Zkontrolovat scrollLock utilitu
+    if (window.scrollLock && window.scrollLock.isLocked && window.scrollLock.isLocked()) {
+      return true;
+    }
+    // Fallback - kontrola CSS tridy na body
+    if (document.body.classList.contains('scroll-locked') ||
+        document.body.classList.contains('modal-open') ||
+        document.body.classList.contains('hamburger-menu-open')) {
+      return true;
+    }
+    // Kontrola aktivniho overlay
+    const aktivniOverlay = document.querySelector('.modal-overlay.active, .cc-modal-overlay.active, #detailOverlay.active');
+    if (aktivniOverlay) {
+      return true;
+    }
+    return false;
+  }
+
   // Touch start
   function onTouchStart(e) {
+    // Ignorovat pokud je otevreny modal
+    if (jeModalOtevreny()) return;
     if (!jeNaVrchu()) return;
 
     touchStartY = e.touches[0].clientY;
@@ -155,6 +177,8 @@
 
   // Touch move
   function onTouchMove(e) {
+    // Ignorovat pokud je otevreny modal
+    if (jeModalOtevreny()) return;
     if (!jeNaVrchu()) return;
 
     touchCurrentY = e.touches[0].clientY;

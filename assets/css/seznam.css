@@ -456,6 +456,15 @@ body {
 }
 .modal-body {
   padding: 2rem;
+  /* PWA FIX: Zabranit propagaci scrollu na stranku */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+/* PWA FIX: Modal overlay scrollovatelny s containment */
+.modal-overlay {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 .modal-section {
   margin-bottom: 2rem;
