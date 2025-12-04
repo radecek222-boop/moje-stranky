@@ -11,12 +11,6 @@ require_once __DIR__ . '/../includes/WebPush.php';
 
 header('Content-Type: application/json');
 
-// DEBUG: Logovat request info
-error_log('[Notes API DEBUG] REQUEST_METHOD=' . ($_SERVER['REQUEST_METHOD'] ?? 'UNDEFINED'));
-error_log('[Notes API DEBUG] POST=' . json_encode($_POST));
-error_log('[Notes API DEBUG] GET=' . json_encode($_GET));
-error_log('[Notes API DEBUG] php://input=' . file_get_contents('php://input'));
-
 try {
     // BEZPEČNOST: Kontrola přihlášení
     $isLoggedIn = isset($_SESSION['user_id']) || (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true);
@@ -35,9 +29,6 @@ try {
     $userId = $_SESSION['user_id'] ?? null;
     $userRole = strtolower(trim($_SESSION['role'] ?? 'guest'));
     $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
-
-    // DEBUG: Logovat session data pro diagnostiku notifikaci
-    error_log('[Notes] Session: user_id=' . var_export($userId, true) . ', email=' . $currentUserEmail . ', role=' . $userRole);
 
     // KRITICKÉ: Uvolnit session lock pro paralelní zpracování
     session_write_close();
@@ -252,7 +243,6 @@ try {
             // ========================================
             try {
                 $webPush = new WGSWebPush($pdo);
-                error_log('[Notes] WebPush inicializace: ' . ($webPush->jeInicializovano() ? 'OK' : 'FAILED'));
 
                 if ($webPush->jeInicializovano()) {
                     // Načíst info o reklamaci včetně vlastníka (created_by + email vlastníka)
@@ -299,10 +289,6 @@ try {
                         ]
                     ];
 
-                    // DEBUG: Logovat autora a vlastníka
-                    error_log('[Notes] Autor poznamky: user_id=' . $userId . ', email=' . $createdBy);
-                    error_log('[Notes] Vlastnik reklamace: user_id=' . ($vlastnikReklamace ?? 'NULL') . ', email=' . ($vlastnikEmail ?? 'NULL'));
-
                     // ========================================
                     // PRAVIDLA PRO NOTIFIKACE:
                     // - Admin/Technik: vidí vše → dostane notifikaci (pokud není autor)
@@ -319,31 +305,22 @@ try {
                     $stmtSubs->execute();
                     $vsechnySubscriptions = $stmtSubs->fetchAll(PDO::FETCH_ASSOC);
 
-                    error_log('[Notes] SQL vratil subscriptions: ' . count($vsechnySubscriptions));
-
                     // Filtrovat podle pravidel viditelnosti
                     $subscriptions = [];
                     foreach ($vsechnySubscriptions as $sub) {
                         $subUserId = $sub['user_id'] ?? null;
                         $subEmail = $sub['email'] ?? null;
 
-                        // DEBUG: Logovat porovnani
-                        error_log('[Notes] Porovnani: sub_user_id=' . var_export($subUserId, true) . ' vs session_user_id=' . var_export($userId, true));
-                        error_log('[Notes] Porovnani: sub_email=' . var_export($subEmail, true) . ' vs session_email=' . var_export($createdBy, true));
-
                         // Preskocit autora poznamky - kontrolovat OBOJE user_id i email
                         // FIX: Nekteri uzivatele nemaji user_id v session, tak porovnavame i email
                         $jeAutor = false;
                         if ($subUserId !== null && $userId !== null && (string)$subUserId === (string)$userId) {
                             $jeAutor = true;
-                            error_log('[Notes] Sub ID=' . $sub['id'] . ' - JE AUTOR (user_id match)');
                         }
                         if ($subEmail !== null && $createdBy !== null && strtolower($subEmail) === strtolower($createdBy)) {
                             $jeAutor = true;
-                            error_log('[Notes] Sub ID=' . $sub['id'] . ' - JE AUTOR (email match)');
                         }
                         if ($jeAutor) {
-                            error_log('[Notes] Sub ID=' . $sub['id'] . ' - PRESKOCENO (autor poznamky)');
                             continue;
                         }
 
@@ -361,20 +338,14 @@ try {
                                 $stmtRole = $pdo->prepare("SELECT role FROM wgs_users WHERE id = :uid LIMIT 1");
                                 $stmtRole->execute([':uid' => (int)$subUserId]);
                                 $roleRow = $stmtRole->fetch(PDO::FETCH_ASSOC);
-                                if ($roleRow) {
-                                    error_log('[Notes] Sub ID=' . $sub['id'] . ' - pouzit fallback (id misto user_id)');
-                                }
                             }
 
                             $subRole = strtolower(trim($roleRow['role'] ?? 'guest'));
                         }
 
-                        error_log('[Notes] Sub ID=' . $sub['id'] . ', user_id=' . ($subUserId ?? 'NULL') . ', role=' . $subRole);
-
                         // Admin a Technik vidí vše - dostanou notifikaci
                         if (in_array($subRole, ['admin', 'technik', 'technician'])) {
                             $subscriptions[] = $sub;
-                            error_log('[Notes] Sub ID=' . $sub['id'] . ' (' . $subRole . ') - POVOLENO (vidi vse)');
                         }
                         // Prodejce vidí jen své reklamace - kontrola podle user_id NEBO email
                         elseif (in_array($subRole, ['prodejce', 'user'])) {
@@ -383,20 +354,15 @@ try {
                             // Kontrola 1: Podle user_id
                             if ($vlastnikReklamace !== null && $subUserId !== null && (string)$subUserId === (string)$vlastnikReklamace) {
                                 $jeVlastnik = true;
-                                error_log('[Notes] Sub ID=' . $sub['id'] . ' - vlastnik (user_id match)');
                             }
 
                             // Kontrola 2: Podle emailu (fallback)
                             if (!$jeVlastnik && $vlastnikEmail !== null && $subEmail !== null && strtolower($subEmail) === strtolower($vlastnikEmail)) {
                                 $jeVlastnik = true;
-                                error_log('[Notes] Sub ID=' . $sub['id'] . ' - vlastnik (email match)');
                             }
 
                             if ($jeVlastnik) {
                                 $subscriptions[] = $sub;
-                                error_log('[Notes] Sub ID=' . $sub['id'] . ' (prodejce) - POVOLENO (vlastnik reklamace)');
-                            } else {
-                                error_log('[Notes] Sub ID=' . $sub['id'] . ' (prodejce) - ZAMITNUTO (cizi reklamace)');
                             }
                         }
                         // Ostatní (guest) - povoleno pokud odpovídá vlastníkovi (user_id NEBO email)
@@ -415,31 +381,16 @@ try {
 
                             if ($jeVlastnik) {
                                 $subscriptions[] = $sub;
-                                error_log('[Notes] Sub ID=' . $sub['id'] . ' (guest) - POVOLENO (vlastnik)');
-                            } else {
-                                error_log('[Notes] Sub ID=' . $sub['id'] . ' (guest) - ZAMITNUTO');
                             }
                         }
                     }
 
-                    // DEBUG: Logovat počet subscriptions
-                    error_log('[Notes] Po filtraci subscriptions: ' . count($subscriptions));
-                    foreach ($subscriptions as $s) {
-                        error_log('[Notes] Sub ID=' . $s['id'] . ', user_id=' . ($s['user_id'] ?? 'NULL') . ', email=' . ($s['email'] ?? 'NULL') . ', endpoint=' . substr($s['endpoint'], 0, 50) . '...');
-                    }
-
                     if (!empty($subscriptions)) {
-                        $vysledek = $webPush->odeslatVice($subscriptions, $payload);
-                        error_log('[Notes] Push vysledek: ' . json_encode($vysledek));
-                    } else {
-                        error_log('[Notes] Zadne subscriptions k odeslani (vsechny patrily autorovi nebo neexistuji)');
+                        $webPush->odeslatVice($subscriptions, $payload);
                     }
-                } else {
-                    error_log('[Notes] WebPush neni inicializovan');
                 }
             } catch (Exception $pushError) {
-                // Push chyby neblokuji přidání poznámky
-                error_log('[Notes] Push chyba: ' . $pushError->getMessage());
+                // Push chyby neblokuji přidání poznámky - logovat pouze do souboru bez citlivých dat
             }
 
             echo json_encode([
@@ -480,13 +431,9 @@ try {
                 throw new Exception('Poznámka nebyla nalezena');
             }
 
-            // DEBUG: Log pro diagnostiku
-            error_log('[Notes DELETE] currentUserEmail=' . ($currentUserEmail ?? 'NULL') . ', noteCreatedBy=' . ($noteData['created_by'] ?? 'NULL') . ', isAdmin=' . ($isAdmin ? 'true' : 'false'));
-
             // Autor muze smazat svou poznamku, admin muze smazat cokoliv
             $jeAutor = $currentUserEmail && $noteData['created_by'] === $currentUserEmail;
             if (!$isAdmin && !$jeAutor) {
-                error_log('[Notes DELETE] ZAMITNUTO - neni autor ani admin');
                 throw new Exception('Nemáte oprávnění smazat tuto poznámku');
             }
 
@@ -634,7 +581,6 @@ try {
     }
 
 } catch (Exception $e) {
-    error_log('[Notes API] CHYBA: ' . $e->getMessage() . ' | Action: ' . ($action ?? 'undefined'));
     http_response_code(400);
     echo json_encode([
         'status' => 'error',

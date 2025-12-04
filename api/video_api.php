@@ -114,8 +114,8 @@ try {
                 'video/mpeg',            // MPEG
                 'video/x-m4v',           // M4V
                 'video/ogg',             // OGG
-                'video/x-ms-asf',        // ASF
-                'application/octet-stream' // Fallback pro neznámé video soubory
+                'video/x-ms-asf'         // ASF
+                // SECURITY: application/octet-stream odstraněn - umožňoval upload škodlivých souborů
             ];
 
             // Povolené přípony souborů
