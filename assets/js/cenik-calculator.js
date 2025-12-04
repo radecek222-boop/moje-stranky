@@ -244,7 +244,7 @@
         const input = document.getElementById('calc-address');
         const dropdown = document.getElementById('address-suggestions');
 
-        if (!input) return;
+        if (!input || !dropdown) return;
 
         let debounceTimer;
 
@@ -253,11 +253,18 @@
             const query = e.target.value.trim();
 
             if (query.length < 3) {
-                dropdown.classList.add('hidden');
+                dropdown.style.display = 'none';
                 return;
             }
 
             debounceTimer = setTimeout(() => hledatAdresy(query, dropdown), 300);
+        });
+
+        // Skryt dropdown pri kliknuti mimo
+        document.addEventListener('click', (e) => {
+            if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
         });
     }
 
@@ -272,11 +279,11 @@
             if (data && data.features && data.features.length > 0) {
                 zobrazitNavrhy(data.features, dropdown);
             } else {
-                dropdown.classList.add('hidden');
+                dropdown.style.display = 'none';
             }
         } catch (error) {
-            console.error('[Kalkulačka] Chyba autocomplete:', error);
-            dropdown.classList.add('hidden');
+            console.error('[Kalkulacka] Chyba autocomplete:', error);
+            dropdown.style.display = 'none';
         }
     }
 
@@ -291,13 +298,13 @@
             item.addEventListener('click', () => {
                 const coords = feature.geometry.coordinates;
                 vybratAdresu(feature.properties.formatted || feature.properties.address_line1, coords[1], coords[0]);
-                dropdown.classList.add('hidden');
+                dropdown.style.display = 'none';
             });
 
             dropdown.appendChild(item);
         });
 
-        dropdown.classList.remove('hidden');
+        dropdown.style.display = 'block';
     }
 
     // ========================================
