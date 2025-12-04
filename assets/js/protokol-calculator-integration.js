@@ -68,8 +68,10 @@
                 modalOverlay.classList.remove('hidden');
             }
 
-            // Načíst HTML kalkulačky z cenik.php
-            const response = await fetch('cenik.php');
+            // Načíst HTML kalkulačky z cenik.php (s credentials pro přihlášeného uživatele)
+            const response = await fetch('cenik.php', {
+                credentials: 'same-origin'
+            });
             if (!response.ok) {
                 throw new Error('Nepodařilo se načíst kalkulačku');
             }
