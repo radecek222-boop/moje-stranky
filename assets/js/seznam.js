@@ -2582,7 +2582,7 @@ async function showNotes(recordOrId) {
           id="newNoteText"
           placeholder="Napiste poznamku..."
         ></textarea>
-        <div class="note-audio-controls">
+        <div class="note-input-controls">
           <button type="button" class="btn-record" id="btnStartRecord" data-action="startRecording" data-id="${record.id}" title="Nahrat hlasovou zpravu">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
