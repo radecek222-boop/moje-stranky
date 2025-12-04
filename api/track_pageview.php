@@ -48,21 +48,26 @@ try {
         exit;
     }
 
-    // Zkontrolovat jestli IP není v ignorovaných
-    $stmtCheck = $pdo->prepare("
-        SELECT id FROM wgs_analytics_ignored_ips
-        WHERE ip_address = :ip
-        LIMIT 1
-    ");
-    $stmtCheck->execute(['ip' => $ipAddress]);
+    // Zkontrolovat jestli IP není v ignorovaných (volitelné - tabulka nemusí existovat)
+    try {
+        $stmtCheck = $pdo->prepare("
+            SELECT id FROM wgs_analytics_ignored_ips
+            WHERE ip_address = :ip
+            LIMIT 1
+        ");
+        $stmtCheck->execute(['ip' => $ipAddress]);
 
-    if ($stmtCheck->fetch()) {
-        // IP je ignorovaná (admin) - neukládat
-        echo json_encode([
-            'status' => 'ignored',
-            'message' => 'IP adresa je v seznamu ignorovaných'
-        ]);
-        exit;
+        if ($stmtCheck->fetch()) {
+            // IP je ignorovaná (admin) - neukládat
+            echo json_encode([
+                'status' => 'ignored',
+                'message' => 'IP adresa je v seznamu ignorovaných'
+            ]);
+            exit;
+        }
+    } catch (PDOException $e) {
+        // Tabulka wgs_analytics_ignored_ips neexistuje - pokračovat bez kontroly
+        // Není to chyba, prostě nefiltrujeme IP adresy
     }
 
     // Získat data z POST požadavku
