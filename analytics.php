@@ -99,7 +99,7 @@ $lokace = [];
 try {
     $stmt = $pdo->query("
         SELECT
-            city as mesto,
+            city,
             COALESCE(country_code, 'CZ') as zeme,
             COUNT(*) as navstevy
         FROM wgs_pageviews
@@ -748,8 +748,8 @@ $zemeNazvy = [
                 <div style="display: flex; justify-content: space-between; padding: 0.4rem 0; font-size: 0.8rem; border-bottom: 1px solid #f5f5f5;">
                     <span><?php
                         $zemeNazev = $zemeNazvy[$lok['zeme']] ?? $lok['zeme'];
-                        if (!empty($lok['mesto'])) {
-                            echo htmlspecialchars($lok['mesto']) . ' <span style="color: #aaa; font-size: 0.7rem;">' . $zemeNazev . '</span>';
+                        if (!empty($lok['city'])) {
+                            echo htmlspecialchars($lok['city']) . ' <span style="color: #aaa; font-size: 0.7rem;">' . $zemeNazev . '</span>';
                         } else {
                             echo $zemeNazev;
                         }
