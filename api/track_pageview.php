@@ -55,6 +55,16 @@ try {
         $ipAddress = trim(explode(',', $ipAddress)[0]);
     }
 
+    // GDPR: Anonymizovat IP adresu (poslední oktet = 0)
+    if (filter_var($ipAddress, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+        $parts = explode('.', $ipAddress);
+        $parts[3] = '0';
+        $ipAddress = implode('.', $parts);
+    } elseif (filter_var($ipAddress, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+        // IPv6 - anonymizovat posledních 64 bitů
+        $ipAddress = preg_replace('/:[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4}$/', ':0:0:0:0', $ipAddress);
+    }
+
     // Pokusit se získat DB spojení
     $pdo = null;
     try {
@@ -129,6 +139,30 @@ try {
     $pageUrl = $data['page_url'] ?? $_SERVER['REQUEST_URI'] ?? '';
     $pageTitle = $data['page_title'] ?? '';
     $referrer = $data['referrer'] ?? $_SERVER['HTTP_REFERER'] ?? '';
+
+    // FILTR: Netrackovat interní/admin stránky
+    $interniStranky = [
+        '/admin', '/seznam', '/statistiky', '/protokol', '/analytics',
+        '/control-center', '/vsechny_tabulky', '/diagnose', '/system_check',
+        '/pridej_', '/oprav_', '/migrace_', '/aktualizuj_', '/test_',
+        '/api/', '/cron/', '/setup/', '/includes/'
+    ];
+
+    $skipTracking = false;
+    foreach ($interniStranky as $pattern) {
+        if (stripos($pageUrl, $pattern) !== false) {
+            $skipTracking = true;
+            break;
+        }
+    }
+
+    if ($skipTracking) {
+        echo json_encode([
+            'status' => 'skipped',
+            'message' => 'Interni stranka - netrackujeme'
+        ]);
+        exit;
+    }
     $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
     // Detekce zařízení (funkce definovány na konci souboru)

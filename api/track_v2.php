@@ -84,22 +84,9 @@ try {
         sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'db_blacklist']);
     }
 
-    // 2. Hardcoded blacklist (včetně IPv6 prefix matchingu)
-    $blacklistedIPs = [
-        '2a00:11b1:10a2:5773:a4d3:7603:899e:d2f3',
-        '2a00:11b1:10a2:5773:',
-        '46.135.89.44',
-        '46.135.14.161',
-        '2a09:bac2:2756:137::1f:ac',
-        '2a09:bac2:2756:',
-        '104.28.114.10',
-    ];
-
-    foreach ($blacklistedIPs as $blacklistedIp) {
-        if ($clientIp === $blacklistedIp || strpos($clientIp, $blacklistedIp) === 0) {
-            sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'hardcoded_blacklist']);
-        }
-    }
+    // 2. Blacklist IP adresy jsou nyní POUZE v databázi (wgs_analytics_ignored_ips)
+    // Pro přidání nové IP použijte Analytics dashboard → Blokace IP
+    // BEZPEČNOST: Žádné hardcoded IP adresy v kódu
 
     // ========================================
     // NAČTENÍ INPUT DAT (pouze jednou!)
