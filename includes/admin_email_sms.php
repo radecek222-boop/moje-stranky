@@ -1615,7 +1615,13 @@ async function saveSmsTemplate() {
 }
 
 // ACTION REGISTRY - Step 113
-if (typeof Utils !== 'undefined' && Utils.registerAction) {
+// Počkat na načtení Utils (defer skripty)
+function initEmailSmsActions() {
+    if (typeof Utils === 'undefined' || !Utils.registerAction) {
+        setTimeout(initEmailSmsActions, 50);
+        return;
+    }
+
     Utils.registerAction('switchEmailSection', (el, data) => {
         if (data.section) switchSection(data.section);
     });
@@ -1653,6 +1659,13 @@ if (typeof Utils !== 'undefined' && Utils.registerAction) {
     Utils.registerAction('ulozitPrijemce', () => ulozitPrijemce());
     Utils.registerAction('closeSmsModal', () => closeSmsModal());
     Utils.registerAction('saveSmsTemplate', () => saveSmsTemplate());
+}
+
+// Spustit po načtení DOM
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEmailSmsActions);
+} else {
+    initEmailSmsActions();
 }
 </script>
 
