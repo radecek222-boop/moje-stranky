@@ -574,3 +574,42 @@ function formatNumber(num) {
 // Export formatNumber
 window.formatNumber = formatNumber;
 window.Utils.formatNumber = formatNumber;
+
+// ========================================
+// GLOBALNI AKCE - Bezne data-action handlery
+// Tyto akce fungují na všech stránkách
+// ========================================
+
+// Navigace zpět v historii
+window.goBack = function() {
+    if (window.history.length > 1) {
+        window.history.back();
+    } else {
+        window.location.href = '/';
+    }
+};
+window.historyBack = window.goBack; // Alias
+
+// Reload stránky
+window.reloadPage = function() {
+    window.location.reload();
+};
+
+// Tisk stránky
+window.printPage = function() {
+    window.print();
+};
+
+// Přesměrování na login
+window.presmerujNaLogin = function() {
+    window.location.href = '/login.php';
+};
+
+// Registrace do ActionRegistry pro data-action atributy
+if (window.Utils && window.Utils.ActionRegistry) {
+    window.Utils.ActionRegistry.register('goBack', window.goBack);
+    window.Utils.ActionRegistry.register('historyBack', window.goBack);
+    window.Utils.ActionRegistry.register('reloadPage', window.reloadPage);
+    window.Utils.ActionRegistry.register('printPage', window.printPage);
+    window.Utils.ActionRegistry.register('presmerujNaLogin', window.presmerujNaLogin);
+}
