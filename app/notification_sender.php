@@ -60,6 +60,12 @@ try {
         throw new Exception('Chybí notification_id');
     }
 
+    // BEZPEČNOST: notification_id musí být string, ne pole
+    if (is_array($notificationId)) {
+        $notificationId = $notificationId[0] ?? 'unknown';
+    }
+    $notificationId = (string)$notificationId;
+
     // ============================================
     // DATABÁZOVÉ PŘIPOJENÍ
     // ============================================

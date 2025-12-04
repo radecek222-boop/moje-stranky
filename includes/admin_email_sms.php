@@ -164,8 +164,8 @@ try {
 
     $sql = "
         SELECT
-            eq.id, eq.to_email, eq.subject, eq.body, eq.status, eq.retry_count,
-            eq.last_error, eq.created_at, eq.updated_at, eq.sent_at,
+            eq.id, eq.recipient_email, eq.subject, eq.body, eq.status, eq.attempts,
+            eq.error_message, eq.created_at, eq.scheduled_at, eq.sent_at,
             eq.notification_id,
             COALESCE(n.name, eq.notification_id) as template_name
         FROM wgs_email_queue eq
@@ -623,7 +623,15 @@ try {
                                 <input type="checkbox" class="email-checkbox-item" value="<?= $email['id'] ?>" data-action="updateSelectedEmailCount">
                             </td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['id'] ?></td>
-                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= htmlspecialchars($email['template_name'] ?? '-') ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?php
+                                $templateName = $email['template_name'] ?? '-';
+                                // Ošetření případu kdy notification_id bylo uloženo jako "Array"
+                                if ($templateName === 'Array' || empty($templateName)) {
+                                    echo '-';
+                                } else {
+                                    echo htmlspecialchars($templateName);
+                                }
+                            ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
                                 <span style="display: inline-block; padding: 0.25rem 0.5rem; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #000; background: <?= $email['status'] === 'sent' ? '#000' : '#fff' ?>; color: <?= $email['status'] === 'sent' ? '#fff' : '#000' ?>;">
                                     <?php
@@ -633,9 +641,9 @@ try {
                                     ?>
                                 </span>
                             </td>
-                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= htmlspecialchars($email['to_email']) ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= htmlspecialchars($email['recipient_email']) ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= htmlspecialchars(substr($email['subject'], 0, 40)) ?><?= strlen($email['subject']) > 40 ? '...' : '' ?></td>
-                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['retry_count'] ?> / 3</td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['attempts'] ?> / 3</td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= date('d.m.Y H:i', strtotime($email['created_at'])) ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['sent_at'] ? date('d.m.Y H:i', strtotime($email['sent_at'])) : '-' ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
@@ -647,10 +655,10 @@ try {
                                         <strong>Tělo emailu:</strong><br><br>
                                         <?= htmlspecialchars($email['body']) ?>
                                     </div>
-                                    <?php if ($email['last_error']): ?>
+                                    <?php if ($email['error_message']): ?>
                                     <div style="background: #fef2f2; border: 1px solid #ef4444; padding: 0.5rem; margin-top: 0.5rem; font-size: 0.75rem; font-family: monospace; color: #991b1b; white-space: pre-wrap; word-wrap: break-word;">
                                         <strong>Chyba:</strong><br>
-                                        <?= htmlspecialchars($email['last_error']) ?>
+                                        <?= htmlspecialchars($email['error_message']) ?>
                                     </div>
                                     <?php endif; ?>
                                 </div>
