@@ -159,16 +159,19 @@ $emaily = [];
 try {
     $whereClause = '';
     if ($filterStatus !== 'all') {
-        $whereClause = "WHERE status = :status";
+        $whereClause = "WHERE eq.status = :status";
     }
 
     $sql = "
         SELECT
-            id, to_email, subject, body, status, retry_count,
-            last_error, created_at, updated_at, sent_at
-        FROM wgs_email_queue
+            eq.id, eq.to_email, eq.subject, eq.body, eq.status, eq.retry_count,
+            eq.last_error, eq.created_at, eq.updated_at, eq.sent_at,
+            eq.notification_id,
+            COALESCE(n.name, eq.notification_id) as template_name
+        FROM wgs_email_queue eq
+        LEFT JOIN wgs_notifications n ON eq.notification_id = n.id
         $whereClause
-        ORDER BY created_at DESC
+        ORDER BY eq.created_at DESC
         LIMIT 100
     ";
 
@@ -603,6 +606,7 @@ try {
                                 <input type="checkbox" id="select-all-emails-header" data-action="toggleSelectAllEmails">
                             </th>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">ID</th>
+                            <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Šablona</th>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Status</th>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Příjemce</th>
                             <th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd; background: #000; color: #fff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem;">Předmět</th>
@@ -619,6 +623,7 @@ try {
                                 <input type="checkbox" class="email-checkbox-item" value="<?= $email['id'] ?>" data-action="updateSelectedEmailCount">
                             </td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= $email['id'] ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;"><?= htmlspecialchars($email['template_name'] ?? '-') ?></td>
                             <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
                                 <span style="display: inline-block; padding: 0.25rem 0.5rem; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #000; background: <?= $email['status'] === 'sent' ? '#000' : '#fff' ?>; color: <?= $email['status'] === 'sent' ? '#fff' : '#000' ?>;">
                                     <?php
