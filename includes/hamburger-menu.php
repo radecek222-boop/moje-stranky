@@ -68,6 +68,9 @@ if ($isAdmin) {
       <?php endif; ?>
       <a href="novareklamace.php" <?php if($current == "novareklamace.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="OBJEDNAT SERVIS" data-lang-en="ORDER SERVICE" data-lang-it="ORDINARE SERVIZIO">OBJEDNAT SERVIS</a>
       <a href="seznam.php" <?php if($current == "seznam.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="MOJE REKLAMACE" data-lang-en="MY CLAIMS" data-lang-it="I MIEI RECLAMI">MOJE REKLAMACE</a>
+      <?php if ($isTechnik): ?>
+        <a href="psa-kalkulator.php" <?php if($current == "psa-kalkulator.php") echo 'class="active" aria-current="page"'; ?> data-lang-cs="KALKULACE CENY" data-lang-en="PRICE CALCULATOR" data-lang-it="CALCOLATORE PREZZO">KALKULACE CENY</a>
+      <?php endif; ?>
       <a href="/logout.php" class="hamburger-logout" data-lang-cs="ODHLÁŠENÍ" data-lang-en="LOGOUT" data-lang-it="DISCONNETTERSI">ODHLÁŠENÍ</a>
       <a href="#" id="notif-enable-btn-user" class="hamburger-notif-btn" role="button" style="display:none;" data-lang-cs="NOTIFY ME ON" data-lang-en="NOTIFY ME ON" data-lang-it="NOTIFY ME ON">NOTIFY ME ON</a>
       <div class="hamburger-lang-switcher">
