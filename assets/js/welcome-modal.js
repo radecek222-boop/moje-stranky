@@ -1,40 +1,76 @@
 /**
- * WGS - Welcome Modal s vtipem
+ * WGS - Welcome Modal - Profesionální uvítání se statistikami
  */
 
-// BEZPEČNOST: HTML escaping pro prevenci XSS
-function escapeHtml(text) {
-  if (!text) return '';
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+// escapeHtml přesunuto do utils.js (Step 107)
+// Funkce je dostupná jako window.escapeHtml() nebo Utils.escapeHtml()
+// Fallback pokud utils.js není načten
+if (typeof escapeHtml === 'undefined') {
+  window.escapeHtml = function(text) {
+    if (text === null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+  };
 }
 
 async function showWelcomeModal(userName, userRole) {
   try {
-    // Získej vtip z API
-    const jokeResponse = await fetch('app/controllers/get_joke.php?t=' + Date.now());
-    const jokeData = await jokeResponse.json();
-    const joke = jokeData.joke || 'Přeji ti krásný den! 😊';
-
-    // BEZPEČNOST: Escape HTML v userName a joke pro XSS protection
+    // BEZPEČNOST: Escape HTML v userName pro XSS protection
     const safeUserName = escapeHtml(userName);
-    const safeJoke = escapeHtml(joke);
 
-    // Vytvoř modal HTML
+    // Načíst statistiky z API
+    const statsResponse = await fetch('api/get_user_stats.php?t=' + Date.now());
+
+    let statsHTML = '';
+    if (statsResponse.ok) {
+      const statsData = await statsResponse.json();
+
+      if (statsData.status === 'success') {
+        const stats = statsData.stats;
+
+        // Přidat řádek s notifikacemi (červeně) pokud existují
+        let notificationsHTML = '';
+        if (stats.notifications && stats.notifications > 0) {
+          notificationsHTML = `
+            <div class="stat-item stat-notifications">
+              <div class="stat-label">NEPŘEČTENÝCH POZNÁMEK</div>
+              <div class="stat-number">${stats.notifications}</div>
+            </div>
+          `;
+        }
+
+        statsHTML = `
+          <div class="welcome-stats">
+            <div class="stat-item">
+              <div class="stat-label">NEVYŘEŠENÝCH REKLAMACÍ</div>
+              <div class="stat-number">${stats.nevyreseno}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">DOKONČENÝCH REKLAMACÍ</div>
+              <div class="stat-number">${stats.hotovo}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">CELKEM REKLAMACÍ</div>
+              <div class="stat-number">${stats.total}</div>
+            </div>
+            ${notificationsHTML}
+          </div>
+        `;
+      }
+    }
+
+    // Vytvoř modal HTML s profesionální uvítací zprávou a statistikami
     const modalHTML = `
       <div class="welcome-modal-overlay" id="welcomeModal">
         <div class="welcome-modal">
           <h1 class="welcome-title">Vítej!</h1>
           <div class="welcome-name">${safeUserName}</div>
           <p class="welcome-message">
-            Přeji ti hezký den a posílám ti něco pro zasmání,
-            protože úsměv dělá den hezčím! 😊
+            Přejeme ti produktivní a příjemný pracovní den.
           </p>
-          <div class="welcome-joke">
-            ${safeJoke}
-          </div>
-          <button class="welcome-close-btn" onclick="closeWelcomeModal('${escapeHtml(userRole || 'user')}')">
+          ${statsHTML}
+          <button class="welcome-close-btn" id="welcomeCloseBtn">
             Začít pracovat
           </button>
         </div>
@@ -44,37 +80,51 @@ async function showWelcomeModal(userName, userRole) {
     // Přidej do stránky
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 
+    // Přidat event listener
+    document.getElementById('welcomeCloseBtn').addEventListener('click', () => {
+      closeWelcomeModal(userRole || 'user');
+    });
+
     // Zobraz modal
     setTimeout(() => {
       document.getElementById('welcomeModal').classList.add('active');
     }, 100);
 
   } catch (error) {
-    console.error('Chyba při načítání vtipu:', error);
-    // Zobraz modal i bez vtipu
-    showFallbackModal(userName, userRole);
+    console.error('Chyba při načítání welcome modalu:', error);
+    // Fallback - zobraz bez statistik
+    zobrazZalohaModal(userName, userRole);
   }
 }
 
-function showFallbackModal(userName, userRole) {
-  // BEZPEČNOST: Escape HTML v userName pro XSS protection
+// Fallback funkce pokud selže načtení statistik
+function zobrazZalohaModal(userName, userRole) {
   const safeUserName = escapeHtml(userName);
 
   const modalHTML = `
-    <div class="welcome-modal-overlay active" id="welcomeModal">
+    <div class="welcome-modal-overlay" id="welcomeModal">
       <div class="welcome-modal">
         <h1 class="welcome-title">Vítej!</h1>
         <div class="welcome-name">${safeUserName}</div>
         <p class="welcome-message">
-          Přeji ti hezký den plný úspěchů! 💪
+          Přejeme ti produktivní a příjemný pracovní den.
         </p>
-        <button class="welcome-close-btn" onclick="closeWelcomeModal('${escapeHtml(userRole || 'user')}')">
+        <button class="welcome-close-btn" id="welcomeCloseBtn">
           Začít pracovat
         </button>
       </div>
     </div>
   `;
+
   document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+  document.getElementById('welcomeCloseBtn').addEventListener('click', () => {
+    closeWelcomeModal(userRole || 'user');
+  });
+
+  setTimeout(() => {
+    document.getElementById('welcomeModal').classList.add('active');
+  }, 100);
 }
 
 function closeWelcomeModal(userRole) {

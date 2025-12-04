@@ -14,7 +14,7 @@ const WGSMap = {
     defaultCenter: [49.8, 15.5],
     defaultZoom: 7,
     maxZoom: 19,
-    // ✅ PERFORMANCE FIX: Přímé OSM tiles místo proxy
+    // PERFORMANCE FIX: Přímé OSM tiles místo proxy
     // Důvod: Proxy pro tiles je extrémně pomalá (stovky PHP requestů)
     // OSM tiles jsou veřejné, zdarma a optimalizované pro rychlé načítání
     tileUrl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -53,13 +53,13 @@ const WGSMap = {
 
     // Kontrola Leaflet
     if (typeof L === 'undefined') {
-      logger.error('❌ Leaflet not loaded');
+      logger.error('Leaflet not loaded');
       return null;
     }
 
     const container = document.getElementById(containerId);
     if (!container) {
-      logger.error(`❌ Map container #${containerId} not found`);
+      logger.error(`Map container #${containerId} not found`);
       return null;
     }
 
@@ -76,7 +76,7 @@ const WGSMap = {
         attribution: this.config.attribution
       }).addTo(this.map);
 
-      logger.log('✅ WGSMap initialized:', containerId);
+      logger.log('WGSMap initialized:', containerId);
 
       // Callback po inicializaci
       if (typeof options.onInit === 'function') {
@@ -86,7 +86,7 @@ const WGSMap = {
       return this.map;
 
     } catch (err) {
-      logger.error('❌ Map init error:', err);
+      logger.error('Map init error:', err);
       return null;
     }
   },
@@ -100,7 +100,7 @@ const WGSMap = {
    */
   addMarker(id, latLng, options = {}) {
     if (!this.map) {
-      console.error('❌ Map not initialized');
+      console.error('Map not initialized');
       return null;
     }
 
@@ -145,7 +145,7 @@ const WGSMap = {
       return marker;
 
     } catch (err) {
-      console.error('❌ Add marker error:', err);
+      console.error('Add marker error:', err);
       return null;
     }
   },
@@ -198,7 +198,7 @@ const WGSMap = {
 
     } catch (err) {
       if (err.name !== 'AbortError') {
-        logger.error('❌ Geocode error:', err);
+        logger.error('Geocode error:', err);
         throw err;
       }
     } finally {
@@ -227,7 +227,7 @@ const WGSMap = {
       const limit = options.limit || 5;
       const country = options.country ? String(options.country).toUpperCase() : '';
 
-      // ✅ ŘEŠENÍ: Direct API call z browseru (obchází serverový firewall)
+      // ŘEŠENÍ: Direct API call z browseru (obchází serverový firewall)
       // API klíč je free tier (3000 req/den), client-side použití je povoleno
       const API_KEY = 'ea590e7e6d3640f9a63ec5a9fb1ff002';
 
@@ -236,7 +236,7 @@ const WGSMap = {
         format: 'geojson',
         limit,
         apiKey: API_KEY,
-        lang: 'cs' // ✅ FIX: České názvy míst (Praha místo Capital city)
+        lang: 'cs' // FIX: České názvy míst (Praha místo Capital city)
       });
 
       // Type filtering
@@ -266,7 +266,7 @@ const WGSMap = {
 
     } catch (err) {
       if (err.name !== 'AbortError') {
-        logger.error('❌ Autocomplete error:', err);
+        logger.error('Autocomplete error:', err);
         throw err;
       }
     } finally {
@@ -314,7 +314,7 @@ const WGSMap = {
 
     } catch (err) {
       if (err.name !== 'AbortError') {
-        logger.error('❌ Route error:', err);
+        logger.error('Route error:', err);
         throw err;
       }
     } finally {
@@ -330,7 +330,7 @@ const WGSMap = {
    */
   drawRoute(coordinates, options = {}) {
     if (!this.map) {
-      console.error('❌ Map not initialized');
+      console.error('Map not initialized');
       return null;
     }
 
@@ -418,12 +418,17 @@ const WGSMap = {
   },
 
   /**
-   * Helper: Debounce funkce
+   * Helper: Debounce funkce - wrapper pro Utils.debounce (Step 108)
    * @param {Function} func - Funkce k debounce
    * @param {number} wait - Čekací doba v ms
    * @returns {Function} - Debounced funkce
    */
   debounce(func, wait) {
+    // Použít globální debounce z utils.js pokud existuje
+    if (typeof window.debounce === 'function') {
+      return window.debounce(func, wait);
+    }
+    // Fallback pro případ že utils.js ještě není načteno
     let timeout;
     return function executedFunction(...args) {
       const later = () => {

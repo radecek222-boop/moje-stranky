@@ -16,38 +16,37 @@
   <title>White Glove Service – Reset Hesla</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet"></noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/login.min.css">
-
-  <!-- Analytics Tracker -->
-  <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
+  <!-- Tmavý styl pro login box -->
+  <link rel="stylesheet" href="assets/css/login-dark-theme.min.css">
 </head>
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
-<main class="main-content">
+<main id="main-content" class="main-content">
 <div class="container">
   <div class="logo">
     <h1>Reset Hesla</h1>
     <div class="subtitle">Obnovte si heslo pomocí registračního klíče</div>
   </div>
 
-  <div id="notification" class="notification"></div>
+  <div id="notification" class="notification" role="alert" aria-live="assertive"></div>
 
   <!-- STEP 1: Verify -->
   <div id="step1-verify">
     <form id="verifyForm">
       <div class="form-group">
         <label for="resetEmail">Email</label>
-        <input type="email" id="resetEmail" name="email" placeholder="vas@email.cz" required>
+        <input type="email" id="resetEmail" name="email" autocomplete="email" placeholder="vas@email.cz" required>
       </div>
 
       <div class="form-group">
         <label for="resetKey">Registrační klíč</label>
-        <input type="password" id="resetKey" name="registration_key" placeholder="Váš registrační klíč" required>
-        <div class="helper-text">Klíč, kterým jste se registrovali</div>
+        <input type="password" id="resetKey" name="registration_key" autocomplete="off" placeholder="Váš registrační klíč" required aria-describedby="resetKeyHelp">
+        <div class="helper-text" id="resetKeyHelp">Klíč, kterým jste se registrovali</div>
       </div>
 
       <button type="submit" class="btn btn-primary" style="width: 100%;">Ověřit identitu</button>
@@ -63,17 +62,17 @@
 
       <div class="form-group">
         <label for="newPassword">Nové heslo</label>
-        <input type="password" id="newPassword" name="new_password" placeholder="••••••••" required minlength="8">
-        <div class="helper-text">Minimálně 8 znaků</div>
+        <input type="password" id="newPassword" name="new_password" placeholder="••••••••" required minlength="8" autocomplete="new-password" aria-describedby="newPasswordHelp">
+        <div class="helper-text" id="newPasswordHelp">Minimálně 8 znaků</div>
       </div>
 
       <div class="form-group">
         <label for="newPasswordConfirm">Potvrzení hesla</label>
-        <input type="password" id="newPasswordConfirm" name="new_password_confirm" placeholder="••••••••" required minlength="8">
+        <input type="password" id="newPasswordConfirm" name="new_password_confirm" placeholder="••••••••" required minlength="8" autocomplete="new-password" enterkeyhint="done">
       </div>
 
       <button type="submit" class="btn btn-success" style="width: 100%;">Nastavit nové heslo</button>
-      <button type="button" class="btn" style="width: 100%; margin-top: 0.5rem;" onclick="goBack()">Zpět</button>
+      <button type="button" class="btn" style="width: 100%; margin-top: 0.5rem;" data-action="goBack">Zpět</button>
     </form>
   </div>
 
@@ -84,9 +83,9 @@
 </div>
 </main>
 
-<script src="assets/js/logger.js" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
 <script src="assets/js/csrf-auto-inject.js" defer></script>
-<script src="assets/js/password-reset.js" defer></script>
+<script src="assets/js/password-reset.min.js" defer></script>
 
 </body>
 </html>

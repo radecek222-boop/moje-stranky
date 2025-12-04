@@ -4,10 +4,15 @@
  * Zachytává všechny PHP chyby a zobrazuje detailní informace pro debugging
  */
 
+// Detekce produkčního prostředí
+if (!defined('IS_PRODUCTION')) {
+    define('IS_PRODUCTION', isset($_SERVER['SERVER_NAME']) && $_SERVER['SERVER_NAME'] === 'www.wgs-service.cz');
+}
+
 // Nastavení error reportingu
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+ini_set('display_errors', IS_PRODUCTION ? 0 : 1);
+ini_set('display_startup_errors', IS_PRODUCTION ? 0 : 1);
 
 // Global error handler
 set_error_handler(function($errno, $errstr, $errfile, $errline) {
@@ -72,15 +77,23 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
     if ($isApiRequest) {
 
         header('Content-Type: application/json');
-        echo json_encode([
+
+        $response = [
             'success' => false,
-            'error' => $errorType,
-            'message' => $errstr,
-            'file' => basename($errfile),
-            'full_path' => $errfile,
-            'line' => $errline,
-            'backtrace' => formatBacktrace($backtrace)
-        ]);
+            'error' => IS_PRODUCTION ? 'Server Error' : $errorType,
+            'message' => IS_PRODUCTION ? 'Došlo k chybě serveru. Kontaktujte podporu.' : $errstr
+        ];
+
+        // Detaily pouze v development režimu
+        if (!IS_PRODUCTION) {
+            $response['debug'] = [
+                'file' => basename($errfile),
+                'line' => $errline,
+                'backtrace' => array_slice(formatBacktrace($backtrace), 0, 5)
+            ];
+        }
+
+        echo json_encode($response);
         exit;
     }
 
@@ -127,16 +140,23 @@ set_exception_handler(function($exception) {
 
         header('Content-Type: application/json');
         http_response_code(500);
-        echo json_encode([
+
+        $response = [
             'success' => false,
-            'error' => 'EXCEPTION',
-            'exception_type' => get_class($exception),
-            'message' => $exception->getMessage(),
-            'file' => basename($exception->getFile()),
-            'full_path' => $exception->getFile(),
-            'line' => $exception->getLine(),
-            'backtrace' => formatBacktrace($backtrace)
-        ]);
+            'error' => IS_PRODUCTION ? 'Exception' : get_class($exception),
+            'message' => IS_PRODUCTION ? 'Došlo k neočekávané chybě. Kontaktujte podporu.' : $exception->getMessage()
+        ];
+
+        // Detaily pouze v development režimu
+        if (!IS_PRODUCTION) {
+            $response['debug'] = [
+                'file' => basename($exception->getFile()),
+                'line' => $exception->getLine(),
+                'backtrace' => array_slice(formatBacktrace($backtrace), 0, 5)
+            ];
+        }
+
+        echo json_encode($response);
         exit;
     }
 
@@ -170,14 +190,22 @@ register_shutdown_function(function() {
 
             header('Content-Type: application/json');
             http_response_code(500);
-            echo json_encode([
+
+            $response = [
                 'success' => false,
                 'error' => 'FATAL ERROR',
-                'message' => $error['message'],
-                'file' => basename($error['file']),
-                'full_path' => $error['file'],
-                'line' => $error['line']
-            ]);
+                'message' => IS_PRODUCTION ? 'Kritická chyba serveru. Kontaktujte podporu.' : $error['message']
+            ];
+
+            // Detaily pouze v development režimu
+            if (!IS_PRODUCTION) {
+                $response['debug'] = [
+                    'file' => basename($error['file']),
+                    'line' => $error['line']
+                ];
+            }
+
+            echo json_encode($response);
             exit;
         }
 
@@ -208,40 +236,42 @@ register_shutdown_function(function() {
  *
  * @param mixed $error Error
  */
-function formatErrorMessage($error) {
-    $message = "\n" . str_repeat('=', 80) . "\n";
-    $message .= "{$error['type']}\n";
-    $message .= str_repeat('=', 80) . "\n";
-    $message .= "Čas: " . date('Y-m-d H:i:s') . "\n";
-    $message .= "Zpráva: {$error['message']}\n";
-    $message .= "Soubor: {$error['file']}\n";
-    $message .= "Řádek: {$error['line']}\n";
+if (!function_exists('formatErrorMessage')) {
+    function formatErrorMessage($error) {
+        $message = "\n" . str_repeat('=', 80) . "\n";
+        $message .= "{$error['type']}\n";
+        $message .= str_repeat('=', 80) . "\n";
+        $message .= "Čas: " . date('Y-m-d H:i:s') . "\n";
+        $message .= "Zpráva: {$error['message']}\n";
+        $message .= "Soubor: {$error['file']}\n";
+        $message .= "Řádek: {$error['line']}\n";
 
-    if (!empty($error['backtrace'])) {
-        $message .= "\nStack Trace:\n";
-        $message .= str_repeat('-', 80) . "\n";
+        if (!empty($error['backtrace'])) {
+            $message .= "\nStack Trace:\n";
+            $message .= str_repeat('-', 80) . "\n";
 
-        foreach ($error['backtrace'] as $i => $trace) {
-            $file = $trace['file'] ?? 'unknown';
-            $line = $trace['line'] ?? 0;
-            $function = $trace['function'] ?? 'unknown';
-            $class = isset($trace['class']) ? $trace['class'] . $trace['type'] : '';
+            foreach ($error['backtrace'] as $i => $trace) {
+                $file = $trace['file'] ?? 'unknown';
+                $line = $trace['line'] ?? 0;
+                $function = $trace['function'] ?? 'unknown';
+                $class = isset($trace['class']) ? $trace['class'] . $trace['type'] : '';
 
-            $message .= sprintf("#%d %s%s() called at [%s:%d]\n",
-                $i, $class, $function, $file, $line
-            );
+                $message .= sprintf("#%d %s%s() called at [%s:%d]\n",
+                    $i, $class, $function, $file, $line
+                );
+            }
         }
+
+        $message .= "\nRequest Info:\n";
+        $message .= str_repeat('-', 80) . "\n";
+        $message .= "URL: " . ($_SERVER['REQUEST_URI'] ?? 'N/A') . "\n";
+        $message .= "Method: " . ($_SERVER['REQUEST_METHOD'] ?? 'N/A') . "\n";
+        $message .= "IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'N/A') . "\n";
+        $message .= "User Agent: " . ($_SERVER['HTTP_USER_AGENT'] ?? 'N/A') . "\n";
+        $message .= str_repeat('=', 80) . "\n\n";
+
+        return $message;
     }
-
-    $message .= "\nRequest Info:\n";
-    $message .= str_repeat('-', 80) . "\n";
-    $message .= "URL: " . ($_SERVER['REQUEST_URI'] ?? 'N/A') . "\n";
-    $message .= "Method: " . ($_SERVER['REQUEST_METHOD'] ?? 'N/A') . "\n";
-    $message .= "IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'N/A') . "\n";
-    $message .= "User Agent: " . ($_SERVER['HTTP_USER_AGENT'] ?? 'N/A') . "\n";
-    $message .= str_repeat('=', 80) . "\n\n";
-
-    return $message;
 }
 
 /**
@@ -262,22 +292,24 @@ function formatErrorMessage($error) {
  *
  * @param mixed $backtrace Backtrace
  */
-function formatBacktrace($backtrace) {
-    $formatted = [];
+if (!function_exists('formatBacktrace')) {
+    function formatBacktrace($backtrace) {
+        $formatted = [];
 
-    foreach ($backtrace as $i => $trace) {
-        $formatted[] = [
-            'number' => $i,
-            'file' => basename($trace['file'] ?? 'unknown'),
-            'full_path' => $trace['file'] ?? 'unknown',
-            'line' => $trace['line'] ?? 0,
-            'function' => $trace['function'] ?? 'unknown',
-            'class' => $trace['class'] ?? null,
-            'type' => $trace['type'] ?? null
-        ];
+        foreach ($backtrace as $i => $trace) {
+            $formatted[] = [
+                'number' => $i,
+                'file' => basename($trace['file'] ?? 'unknown'),
+                'full_path' => $trace['file'] ?? 'unknown',
+                'line' => $trace['line'] ?? 0,
+                'function' => $trace['function'] ?? 'unknown',
+                'class' => $trace['class'] ?? null,
+                'type' => $trace['type'] ?? null
+            ];
+        }
+
+        return $formatted;
     }
-
-    return $formatted;
 }
 
 /**
@@ -296,19 +328,21 @@ function formatBacktrace($backtrace) {
  *
  * @param mixed $message Message
  */
-function logErrorToFile($message) {
-    $logDir = __DIR__ . '/../logs';
+if (!function_exists('logErrorToFile')) {
+    function logErrorToFile($message) {
+        $logDir = __DIR__ . '/../logs';
 
-    if (!is_dir($logDir)) {
-        if (!mkdir($logDir, 0755, true) && !is_dir($logDir)) {
-            error_log('Failed to create log directory: ' . $logDir);
+        if (!is_dir($logDir)) {
+            if (!mkdir($logDir, 0755, true) && !is_dir($logDir)) {
+                error_log('Failed to create log directory: ' . $logDir);
+            }
+        }
+
+        $logFile = $logDir . '/php_errors.log';
+        if (file_put_contents($logFile, $message, FILE_APPEND) === false) {
+            error_log('Failed to write file');
         }
     }
-
-    $logFile = $logDir . '/php_errors.log';
-    if (file_put_contents($logFile, $message, FILE_APPEND) === false) {
-    error_log('Failed to write file');
-}
 }
 
 /**
@@ -331,7 +365,8 @@ function logErrorToFile($message) {
  *
  * @param mixed $error Error
  */
-function displayErrorHTML($error) {
+if (!function_exists('displayErrorHTML')) {
+    function displayErrorHTML($error) {
     ?>
     <!DOCTYPE html>
     <html lang="cs">
@@ -538,11 +573,11 @@ function displayErrorHTML($error) {
 
                 <!-- Copy button -->
                 <div style="text-align: center; margin-top: 20px;">
-                    <button class="copy-btn" onclick="copyErrorReport()">
-                        Kopírovat pro Claude Code nebo Codex
+                    <button class="copy-btn" data-action="copyErrorReport">
+                        Kopírovat chybový report
                     </button>
                     <div id="copyStatus" style="color: #28a745; margin-top: 10px; display: none;">
-                        Zkopírováno! Vložte CTRL+V do zprávy pro Claude/Codex
+                        Zkopírováno do schránky
                     </div>
                 </div>
             </div>
@@ -600,4 +635,5 @@ ${separator}
     </html>
     <?php
     exit;
+    }
 }

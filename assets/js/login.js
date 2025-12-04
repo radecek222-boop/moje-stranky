@@ -8,31 +8,106 @@ const userLoginFields = document.getElementById('userLoginFields');
 const adminLoginFields = document.getElementById('adminLoginFields');
 const loginForm = document.getElementById('loginForm');
 
+// ============================================================
+// FIX: DETEKCE BROWSER AUTOFILL (PWA problem)
+// Browser autofill nespouští input/change eventy
+// ============================================================
+function detekujAutofill() {
+  const emailInput = document.getElementById('userEmail');
+  const passwordInput = document.getElementById('userPassword');
+  const adminKeyInput = document.getElementById('adminKey');
+
+  // Metoda 1: Kontrola :autofill pseudo-class (Chrome/Safari)
+  function jeAutofilled(input) {
+    if (!input) return false;
+    try {
+      // Chrome/Safari autofill detection
+      return input.matches(':-webkit-autofill') ||
+             input.matches(':autofill') ||
+             // Fallback: kontrola computed style (žluté pozadí)
+             getComputedStyle(input).backgroundColor !== 'rgb(255, 255, 255)';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Metoda 2: Kontrola hodnoty přímo
+  function maHodnotu(input) {
+    if (!input) return false;
+    return input.value && input.value.length > 0;
+  }
+
+  // Trigger input event pro autofilled pole
+  function triggerInputEvent(input) {
+    if (!input) return;
+    if (jeAutofilled(input) || maHodnotu(input)) {
+      // Dispatch input event aby JavaScript věděl o hodnotě
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      logger.log('[Autofill] Detekován autofill pro:', input.id);
+    }
+  }
+
+  // Zkontrolovat všechna pole
+  [emailInput, passwordInput, adminKeyInput].forEach(triggerInputEvent);
+}
+
+// Spustit detekci autofill po načtení stránky
+// Musí být s malým zpožděním, protože browser autofill probíhá async
+document.addEventListener('DOMContentLoaded', () => {
+  // Okamžitá kontrola
+  setTimeout(detekujAutofill, 100);
+  // Opakovaná kontrola po 500ms (pro pomalejší autofill)
+  setTimeout(detekujAutofill, 500);
+  // Další kontrola po 1s (pro PWA kde může být zpoždění)
+  setTimeout(detekujAutofill, 1000);
+});
+
+// Metoda 3: Listener na animationstart (Chrome autofill spouští animaci)
+document.addEventListener('animationstart', (e) => {
+  if (e.animationName === 'onAutoFillStart' || e.animationName.includes('autofill')) {
+    detekujAutofill();
+  }
+}, true);
+
+// Metoda 4: Focus na pole spustí kontrolu
+['userEmail', 'userPassword', 'adminKey'].forEach(id => {
+  const input = document.getElementById(id);
+  if (input) {
+    input.addEventListener('focus', () => {
+      // Při focusu zkontrolovat zda má hodnotu z autofill
+      setTimeout(() => {
+        if (input.value && input.value.length > 0) {
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }, 50);
+    });
+  }
+});
+
 async function getCsrfTokenFromForm(form, maxRetries = 3) {
   if (!form) return null;
 
-  // Zkusit získat token z již existujícího inputu
   const tokenInput = form.querySelector('input[name="csrf_token"]');
-  if (tokenInput && tokenInput.value) {
-    logger.log('📋 CSRF token nalezen v formuláři');
-    return tokenInput.value;
-  }
 
+  // FIX: VZDY fetchovat cerstvy token z API (reseni PWA cache problemu)
+  // Token v HTML muze byt stary z PWA cache a neodpovida aktualni session
   // Pokusit se získat token z API s retry mechanikou
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      logger.log(`🔄 Získávám CSRF token (pokus ${attempt}/${maxRetries})...`);
+      logger.log(`[CSRF] Ziskavam CERSTVY token (pokus ${attempt}/${maxRetries})...`);
 
       const response = await fetch('app/controllers/get_csrf_token.php', {
         method: 'GET',
         credentials: 'same-origin',
         headers: {
-          'Cache-Control': 'no-cache'
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
         }
       });
 
       if (!response.ok) {
-        logger.warn(`⚠️ CSRF API vrátilo ${response.status}`);
+        logger.warn(`[CSRF] API vratilo ${response.status}`);
         if (attempt < maxRetries) {
           await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
           continue;
@@ -43,34 +118,42 @@ async function getCsrfTokenFromForm(form, maxRetries = 3) {
       const data = await response.json();
 
       if ((data.status === 'success' || data.success === true) && data.token) {
-        logger.log('✅ CSRF token úspěšně získán');
+        logger.log('[CSRF] Cerstvy token uspesne ziskan');
 
-        // Uložit token do formuláře pro další použití
+        // Aktualizovat token ve formulari
         if (tokenInput) {
           tokenInput.value = data.token;
         }
 
         return data.token;
       } else {
-        logger.warn('⚠️ CSRF API nevrátilo platný token:', data);
+        logger.warn('[CSRF] API nevratilo platny token:', data);
       }
 
     } catch (error) {
-      logger.error(`❌ CSRF fetch pokus ${attempt} selhal:`, error);
+      logger.error(`[CSRF] Fetch pokus ${attempt} selhal:`, error);
 
       if (attempt < maxRetries) {
-        // Exponenciální backoff: 1s, 2s, 3s
+        // Exponencialni backoff: 1s, 2s, 3s
         await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
       }
     }
   }
 
-  logger.error('❌ Nepodařilo se získat CSRF token po ' + maxRetries + ' pokusech');
+  // Fallback: pokud API selhalo, zkusit token z formulare (lepsi nez nic)
+  if (tokenInput && tokenInput.value) {
+    logger.warn('[CSRF] Pouzivam token z formulare jako fallback (API selhalo)');
+    return tokenInput.value;
+  }
+
+  logger.error('[CSRF] Nepodarilo se ziskat token po ' + maxRetries + ' pokusech');
   return null;
 }
 
 // ============================================================
 // FORM SWITCHER
+// FIX: Použít přímou manipulaci style.display místo CSS tříd
+// CSS pravidlo #adminLoginFields { display: none; } přepisovalo .hidden třídu
 // ============================================================
 if (isAdminCheckbox) {
   isAdminCheckbox.addEventListener('change', (e) => {
@@ -79,17 +162,20 @@ if (isAdminCheckbox) {
     const adminKey = document.getElementById('adminKey');
 
     if (e.target.checked) {
-      // Admin mode - skrýt user pole a odstranit required
-      userLoginFields.style.display = 'none';
-      adminLoginFields.style.display = 'block';
+      // Admin mode - skrýt user pole a zobrazit admin pole
+      if (userLoginFields) userLoginFields.style.display = 'none';
+      if (adminLoginFields) adminLoginFields.style.display = 'block';
 
       if (userEmail) userEmail.removeAttribute('required');
       if (userPassword) userPassword.removeAttribute('required');
-      if (adminKey) adminKey.setAttribute('required', 'required');
+      if (adminKey) {
+        adminKey.setAttribute('required', 'required');
+        adminKey.focus(); // Focus na admin key pole
+      }
     } else {
-      // User mode - zobrazit user pole a přidat required
-      userLoginFields.style.display = 'block';
-      adminLoginFields.style.display = 'none';
+      // User mode - zobrazit user pole a skrýt admin pole
+      if (userLoginFields) userLoginFields.style.display = 'block';
+      if (adminLoginFields) adminLoginFields.style.display = 'none';
 
       if (userEmail) userEmail.setAttribute('required', 'required');
       if (userPassword) userPassword.setAttribute('required', 'required');
@@ -128,7 +214,7 @@ async function handleAdminLogin() {
 
   const csrfToken = await getCsrfTokenFromForm(loginForm);
   if (!csrfToken) {
-    showNotification('⚠️ Problém se zabezpečením. Zkontrolujte:\n• Cookies jsou povoleny\n• Používáte HTTPS\n• Nejste v režimu inkognito', 'error');
+    showNotification('Problém se zabezpečením. Zkontrolujte: Cookies jsou povoleny, Používáte HTTPS, Nejste v režimu inkognito', 'error');
     return;
   }
   
@@ -136,7 +222,7 @@ async function handleAdminLogin() {
   attempts++;
   localStorage.setItem('admin_login_attempts', attempts);
   
-  logger.log('🔑 Admin login attempt ' + attempts);
+  logger.log('[ADMIN] Login attempt ' + attempts);
   
   try {
     const response = await fetch('app/controllers/login_controller.php', {
@@ -151,7 +237,7 @@ async function handleAdminLogin() {
     
     if (data.status === 'success') {
       localStorage.removeItem('admin_login_attempts');
-      showNotification('✅ Admin přihlášení úspěšné!', 'success');
+      showNotification('Admin přihlášení úspěšné!', 'success');
       setTimeout(() => {
         window.location.href = 'admin.php';
       }, 1500);
@@ -161,9 +247,9 @@ async function handleAdminLogin() {
       showNotification(msg, 'error');
       
       if (attempts >= 3) {
-        logger.log('🔓 Recovery mode activated!');
+        logger.log('[Login] Recovery mode activated!');
         setTimeout(() => {
-          showNotification('⚠️ Recovery mód aktivován!', 'warning');
+          showNotification('Recovery mód aktivován!', 'warning');
           showRecoveryModal();
           localStorage.removeItem('admin_login_attempts');
         }, 1000);
@@ -179,10 +265,23 @@ async function handleAdminLogin() {
 // USER LOGIN
 // ============================================================
 async function handleUserLogin() {
-  const email = document.getElementById('userEmail').value.trim();
-  const password = document.getElementById('userPassword').value.trim();
+  const emailInput = document.getElementById('userEmail');
+  const passwordInput = document.getElementById('userPassword');
 
-  // ✅ FIX 11: Remember Me checkbox
+  // FIX: Přečíst hodnoty přímo z DOM (autofill fix)
+  // Některé prohlížeče nereportují .value správně pro autofilled pole
+  let email = emailInput ? emailInput.value.trim() : '';
+  let password = passwordInput ? passwordInput.value.trim() : '';
+
+  // FIX: Pokud jsou pole prázdná, zkusit je přečíst znovu po malém zpoždění
+  // (některé prohlížeče potřebují čas na propagaci autofill hodnot)
+  if (!email || !password) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    email = emailInput ? emailInput.value.trim() : '';
+    password = passwordInput ? passwordInput.value.trim() : '';
+  }
+
+  // FIX 11: Remember Me checkbox
   const rememberMe = document.getElementById('rememberMe')?.checked || false;
 
   if (!email || !password) {
@@ -192,7 +291,7 @@ async function handleUserLogin() {
 
   const csrfToken = await getCsrfTokenFromForm(loginForm);
   if (!csrfToken) {
-    showNotification('⚠️ Problém se zabezpečením. Zkontrolujte:\n• Cookies jsou povoleny\n• Používáte HTTPS\n• Nejste v režimu inkognito', 'error');
+    showNotification('Problém se zabezpečením. Zkontrolujte: Cookies jsou povoleny, Používáte HTTPS, Nejste v režimu inkognito', 'error');
     return;
   }
 
@@ -208,7 +307,22 @@ async function handleUserLogin() {
 
     if (data.status === 'success') {
       // Zobraz welcome modal s vtipem a předej roli pro správné přesměrování
-      showWelcomeModal(data.user.name, data.user.role);
+      if (typeof window.showWelcomeModal === 'function') {
+        showWelcomeModal(data.user.name, data.user.role);
+      } else {
+        // Fallback - přímý redirect bez modalu
+        logger.warn('showWelcomeModal není dostupná, přesměruji přímo');
+        showNotification('Přihlášení úspěšné!', 'success');
+
+        setTimeout(() => {
+          const normalizedRole = (data.user.role || '').toLowerCase().trim();
+          if (normalizedRole === 'technik' || normalizedRole === 'technician') {
+            window.location.href = 'seznam.php';
+          } else {
+            window.location.href = 'novareklamace.php';
+          }
+        }, 1000);
+      }
     } else {
       showNotification(data.message || 'Přihlášení selhalo', 'error');
     }
@@ -228,11 +342,11 @@ function showRecoveryModal() {
     .recovery-modal h2 { margin: 0 0 0.5rem 0; color: #1a1a1a; font-size: 1.8rem; font-weight: 600; }
     .recovery-modal p { color: #666; margin: 0.5rem 0 1.5rem 0; font-size: 0.95rem; }
     .recovery-modal input { width: 100%; padding: 0.875rem 1rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; margin-bottom: 1.5rem; transition: all 0.3s; box-sizing: border-box; }
-    .recovery-modal input:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
+    .recovery-modal input:focus { outline: none; border-color: #333; box-shadow: 0 0 0 3px rgba(0,0,0,0.1); }
     .recovery-buttons { display: flex; gap: 1rem; }
     .recovery-btn { flex: 1; padding: 0.875rem 1.5rem; border: none; border-radius: 6px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.3s; }
-    .recovery-btn-primary { background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; }
-    .recovery-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,123,255,0.3); }
+    .recovery-btn-primary { background: linear-gradient(135deg, #333 0%, #555 100%); color: white; }
+    .recovery-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     .recovery-btn-secondary { background: #f0f0f0; color: #333; border: 1px solid #ddd; }
     .recovery-btn-secondary:hover { background: #e8e8e8; }
   `;
@@ -247,8 +361,8 @@ function showRecoveryModal() {
         <input type="password" id="recoveryHighKey" placeholder="High Key" autocomplete="off">
         
         <div class="recovery-buttons">
-          <button class="recovery-btn recovery-btn-primary" onclick="verifyHighKey()">Ověřit</button>
-          <button class="recovery-btn recovery-btn-secondary" onclick="closeRecoveryModal()">Zrušit</button>
+          <button class="recovery-btn recovery-btn-primary" data-action="verifyHighKey">Ověřit</button>
+          <button class="recovery-btn recovery-btn-secondary" data-action="closeRecoveryModal">Zrušit</button>
         </div>
       </div>
     </div>
@@ -288,11 +402,11 @@ async function verifyHighKey() {
     const data = await response.json();
     
     if (data.status === 'success') {
-      showNotification('✅ High key ověřen!', 'success');
+      showNotification('High key ověřen!', 'success');
       closeRecoveryModal();
       setTimeout(() => showCreateNewAdminKeyModal(), 500);
     } else {
-      showNotification('❌ Neplatný high key', 'error');
+      showNotification('Neplatný high key', 'error');
     }
   } catch (error) {
     logger.error('High key error:', error);
@@ -319,7 +433,7 @@ function showCreateNewAdminKeyModal() {
     <style>${styles}</style>
     <div class="newkey-overlay">
       <div class="newkey-modal">
-        <h2>🔑 Nový Admin Klíč</h2>
+        <h2>Novy Admin Klic</h2>
         
         <input type="password" id="newAdminKey" placeholder="Nový klíč (min. 12 znaků)" minlength="12" autocomplete="off">
         <div class="newkey-hint">Minimálně 12 znaků</div>
@@ -327,8 +441,8 @@ function showCreateNewAdminKeyModal() {
         <input type="password" id="newAdminKeyConfirm" placeholder="Potvrzení klíče" minlength="12" autocomplete="off" style="margin-top: 0.5rem;">
         
         <div class="newkey-buttons">
-          <button class="newkey-btn newkey-btn-success" onclick="createNewAdminKey()">Vytvořit Klíč</button>
-          <button class="newkey-btn newkey-btn-cancel" onclick="closeNewAdminKeyModal()">Zrušit</button>
+          <button class="newkey-btn newkey-btn-success" data-action="createNewAdminKey">Vytvořit Klíč</button>
+          <button class="newkey-btn newkey-btn-cancel" data-action="closeNewAdminKeyModal">Zrušit</button>
         </div>
       </div>
     </div>
@@ -379,11 +493,11 @@ async function createNewAdminKey() {
     const data = await response.json();
     
     if (data.status === 'success') {
-      showNotification('✅ Klíč vytvořen! Restartuju...', 'success');
+      showNotification('Klíč vytvořen! Restartuju...', 'success');
       closeNewAdminKeyModal();
       setTimeout(() => location.reload(), 2000);
     } else {
-      showNotification('❌ ' + (data.message || 'Chyba'), 'error');
+      showNotification('' + (data.message || 'Chyba'), 'error');
     }
   } catch (error) {
     logger.error('Create key error:', error);
@@ -396,16 +510,45 @@ async function createNewAdminKey() {
 function showNotification(message, type = 'info') {
   const notification = document.getElementById('notification');
   if (!notification) return;
-  
+
   notification.textContent = message;
-  notification.className = `notification ${type}`;
-  notification.style.display = 'block';
-  
+  // FIX: CSS pouziva tridu 'active' pro zobrazeni, ne 'hidden' pro skryti
+  notification.className = `notification ${type} active`;
+
   if (type !== 'error') {
     setTimeout(() => {
-      notification.style.display = 'none';
+      notification.classList.remove('active');
     }, 3000);
   }
 }
 
-logger.log('✅ Login system loaded');
+logger.log('Login system loaded');
+
+// ============================================================
+// ACTION REGISTRY - Step 115
+// ============================================================
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+  Utils.registerAction('verifyHighKey', () => {
+    if (typeof verifyHighKey === 'function') {
+      verifyHighKey();
+    }
+  });
+
+  Utils.registerAction('closeRecoveryModal', () => {
+    if (typeof closeRecoveryModal === 'function') {
+      closeRecoveryModal();
+    }
+  });
+
+  Utils.registerAction('createNewAdminKey', () => {
+    if (typeof createNewAdminKey === 'function') {
+      createNewAdminKey();
+    }
+  });
+
+  Utils.registerAction('closeNewAdminKeyModal', () => {
+    if (typeof closeNewAdminKeyModal === 'function') {
+      closeNewAdminKeyModal();
+    }
+  });
+}

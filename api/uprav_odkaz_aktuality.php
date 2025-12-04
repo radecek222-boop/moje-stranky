@@ -19,6 +19,9 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     sendJsonError('Přístup odepřen. Pouze administrátor může upravovat odkazy.', 403);
 }
 
+// PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+session_write_close();
+
 try {
     $pdo = getDbConnection();
 

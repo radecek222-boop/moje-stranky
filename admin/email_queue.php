@@ -50,7 +50,7 @@ $stats = $queue->getStats();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Fronta | WGS Admin</title>
     <link rel="stylesheet" href="/assets/css/styles.min.css">
-    <link rel="stylesheet" href="/assets/css/admin-header.css">
+    <link rel="stylesheet" href="/assets/css/admin-header.min.css">
     <style>
         body {
             background: #f5f5f5;
@@ -215,11 +215,11 @@ $stats = $queue->getStats();
             <p>Správa asynchronního odesílání emailů</p>
 
             <?php if ($message): ?>
-                <div class="alert alert-success"><?php echo htmlspecialchars($message); ?></div>
+                <div class="alert alert-success" role="status" aria-live="polite"><?php echo htmlspecialchars($message); ?></div>
             <?php endif; ?>
 
             <?php if ($error): ?>
-                <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+                <div class="alert alert-danger" role="alert" aria-live="assertive"><?php echo htmlspecialchars($error); ?></div>
             <?php endif; ?>
 
             <form method="POST" style="margin-top: 1rem;">
@@ -301,7 +301,7 @@ $stats = $queue->getStats();
 
                             <form method="POST" style="display: inline;">
                                 <input type="hidden" name="id" value="<?php echo $email['id']; ?>">
-                                <button type="submit" name="delete" class="btn-small btn-delete" onclick="return confirm('Opravdu smazat?')">🗑️ Smazat</button>
+                                <button type="submit" name="delete" class="btn-small btn-delete" data-action="confirmDelete" data-confirm="Opravdu smazat?">Smazat</button>
                             </form>
                         </div>
                     </div>

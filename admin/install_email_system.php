@@ -345,7 +345,7 @@ $phpmailerInstalled = file_exists(__DIR__ . '/../vendor/phpmailer/src/PHPMailer.
 
         <?php if ($status === 'success'): ?>
             <div class="status success">
-                <strong>✅ Instalace dokončena!</strong><br>
+                <strong>Instalace dokončena!</strong><br>
                 Email queue systém byl úspěšně nainstalován.
             </div>
             <a href="/admin/email_queue.php" class="btn btn-primary">Přejít na správu email fronty</a>
@@ -353,7 +353,7 @@ $phpmailerInstalled = file_exists(__DIR__ . '/../vendor/phpmailer/src/PHPMailer.
 
         <?php elseif ($error): ?>
             <div class="status error">
-                <strong>❌ Chyba při instalaci:</strong><br>
+                <strong>Chyba při instalaci:</strong><br>
                 <?php echo htmlspecialchars($error); ?>
             </div>
 

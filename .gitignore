@@ -11,6 +11,10 @@ FINALNI_*.php
 *.sh
 *.md
 !CLAUDE.md
+!README.md
+!tests/*.md
+!docs/*.md
+!master_prompt_system*.md
 *.txt
 live_test_pdf.html
 div.
@@ -33,6 +37,9 @@ Thumbs.db
 # Dependencies
 vendor/
 node_modules/
+
+# CA Certificate bundle (download via: wget https://curl.se/ca/cacert.pem)
+cacert.pem
 
 # Logs
 *.log
@@ -59,3 +66,6 @@ phpunit.xml.dist
 # User uploads (keep directory structure but ignore content)
 uploads/*
 !uploads/.gitkeep
+!uploads/videos
+!uploads/videos/
+!uploads/videos/.gitkeep

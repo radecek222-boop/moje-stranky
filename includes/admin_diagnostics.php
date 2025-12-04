@@ -84,7 +84,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
 <div class="control-detail active">
     <!-- Header -->
     <div class="control-detail-header">
-        <button class="control-detail-back" onclick="window.location.href='admin.php'">
+        <button class="control-detail-back" data-href="admin.php">
             <span>‹</span>
             <span>Zpět</span>
         </button>
@@ -203,7 +203,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             <h3 class="setting-group-title">Logy a události</h3>
 
             <!-- PHP Errors -->
-            <div class="setting-item" onclick="viewLog('php_errors')">
+            <div class="setting-item" data-action="viewLog" data-log="php_errors" style="cursor: pointer;">
                 <div class="setting-item-left">
                     <div class="setting-item-label">PHP Error Log</div>
                     <div class="setting-item-description"><?= $errorCount ?> záznamů</div>
@@ -217,7 +217,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             </div>
 
             <!-- Security Log -->
-            <div class="setting-item" onclick="viewLog('security')">
+            <div class="setting-item" data-action="viewLog" data-log="security" style="cursor: pointer;">
                 <div class="setting-item-left">
                     <div class="setting-item-label">Security Log</div>
                     <div class="setting-item-description"><?= $securityCount ?> událostí</div>
@@ -231,7 +231,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
             </div>
 
             <!-- Audit Log -->
-            <div class="setting-item" onclick="viewLog('audit')">
+            <div class="setting-item" data-action="viewLog" data-log="audit" style="cursor: pointer;">
                 <div class="setting-item-left">
                     <div class="setting-item-label">Audit Log</div>
                     <div class="setting-item-description">Historie akcí adminů</div>
@@ -256,7 +256,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
                     <div class="setting-item-description">Smazat dočasné soubory a session data</div>
                 </div>
                 <div class="setting-item-right">
-                    <button class="cc-btn cc-btn-sm cc-btn-secondary" onclick="clearCache()">Vymazat</button>
+                    <button class="cc-btn cc-btn-sm cc-btn-secondary" data-action="clearCache">Vymazat</button>
                 </div>
             </div>
 
@@ -267,7 +267,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
                     <div class="setting-item-description">Přesunout logy starší než 90 dní</div>
                 </div>
                 <div class="setting-item-right">
-                    <button class="cc-btn cc-btn-sm cc-btn-secondary" onclick="archiveLogs()">Archivovat</button>
+                    <button class="cc-btn cc-btn-sm cc-btn-secondary" data-action="archiveLogs">Archivovat</button>
                 </div>
             </div>
 
@@ -278,7 +278,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
                     <div class="setting-item-description">OPTIMIZE TABLE pro všechny tabulky</div>
                 </div>
                 <div class="setting-item-right">
-                    <button class="cc-btn cc-btn-sm cc-btn-secondary" onclick="optimizeDatabase()">Optimalizovat</button>
+                    <button class="cc-btn cc-btn-sm cc-btn-secondary" data-action="optimizeDatabase">Optimalizovat</button>
                 </div>
             </div>
 
@@ -289,7 +289,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
                     <div class="setting-item-description">Automaticky zazálohuje celou databázi (komprimováno .gz)</div>
                 </div>
                 <div class="setting-item-right">
-                    <button class="cc-btn cc-btn-sm cc-btn-success" onclick="createBackup()">Vytvořit backup</button>
+                    <button class="cc-btn cc-btn-sm cc-btn-success" data-action="createBackup">Vytvořit backup</button>
                 </div>
             </div>
 
@@ -300,7 +300,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
                     <div class="setting-item-description">Zobrazit, stáhnout nebo smazat staré zálohy</div>
                 </div>
                 <div class="setting-item-right">
-                    <button class="cc-btn cc-btn-sm cc-btn-secondary" onclick="viewBackups()">Spravovat</button>
+                    <button class="cc-btn cc-btn-sm cc-btn-secondary" data-action="viewBackups">Spravovat</button>
                 </div>
             </div>
 
@@ -311,7 +311,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
                     <div class="setting-item-description">Vytvoří tabulky pro systém akcí a úkolů (pokud neexistují)</div>
                 </div>
                 <div class="setting-item-right">
-                    <button class="cc-btn cc-btn-sm cc-btn-success" onclick="setupActionsSystem()">Spustit setup</button>
+                    <button class="cc-btn cc-btn-sm cc-btn-success" data-action="setupActionsSystem">Spustit setup</button>
                 </div>
             </div>
 
@@ -322,7 +322,7 @@ if ($dbStatus === 'error' || $extensionsStatus === 'error' || $diskStatus === 'e
                     <div class="setting-item-description">Znovu spustit diagnostiku</div>
                 </div>
                 <div class="setting-item-right">
-                    <button class="cc-btn cc-btn-sm cc-btn-primary" onclick="location.reload()">Obnovit</button>
+                    <button class="cc-btn cc-btn-sm cc-btn-primary" data-action="reloadPage">Obnovit</button>
                 </div>
             </div>
         </div>
@@ -524,6 +524,19 @@ function setupActionsSystem() {
 }
 
 console.log('Diagnostics section loaded');
+
+// ACTION REGISTRY - Step 113
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('viewLog', (el, data) => {
+        if (data.log) viewLog(data.log);
+    });
+    Utils.registerAction('clearCache', () => clearCache());
+    Utils.registerAction('archiveLogs', () => archiveLogs());
+    Utils.registerAction('optimizeDatabase', () => optimizeDatabase());
+    Utils.registerAction('createBackup', () => createBackup());
+    Utils.registerAction('viewBackups', () => viewBackups());
+    Utils.registerAction('setupActionsSystem', () => setupActionsSystem());
+}
 </script>
 
 

@@ -1,0 +1,98 @@
+/**
+ * Z-Index Layers - Centralizovaná správa z-index hodnot
+ *
+ * Tento soubor definuje hierarchii z-index vrstev pro celou aplikaci.
+ * Používejte tyto CSS proměnné místo hardkódovaných hodnot.
+ *
+ * HIERARCHIE (od nejnižší po nejvyšší):
+ * -1 ... Pozadí pod obsahem
+ *  1 ... Základní obsah (hero overlay)
+ * 10 ... Sticky elementy, tlačítka v kontextu
+ * 98 ... Mobilní sidebar backdrop (pod topbar)
+ * 99 ... Mobilní sidebar (pod topbar)
+ * 100 ... Navigační lišty (top-bar)
+ * 1000 ... Dropdowny, autocomplete, tooltipy
+ * 1500 ... Toast notifikace
+ * 2000 ... Modální okna (obsahová vrstva)
+ * 9998 ... Backdrop/overlay pro modály
+ * 9999 ... Hamburger menu overlay
+ * 10000 ... Hamburger navigace (mobilní)
+ * 10001 ... Hamburger header + toggle button
+ * 10002 ... Detail overlay (seznam.php)
+ * 10003 ... Nejvyšší vrstva (kritické elementy)
+ *
+ * @author Claude Code
+ * @version 1.0.0
+ */
+
+:root {
+    /* === NEGATIVNÍ VRSTVA === */
+    --z-below: -1;
+
+    /* === ZÁKLADNÍ OBSAH === */
+    --z-background: 1;
+    --z-content: 2;
+
+    /* === STICKY ELEMENTY === */
+    --z-sticky: 10;
+    --z-button-context: 10;
+
+    /* === POD TOPBAR (mobilní sidebary) === */
+    --z-mobile-sidebar-backdrop: 98;
+    --z-mobile-sidebar: 99;
+
+    /* === NAVIGACE === */
+    --z-topbar: 100;
+    --z-navbar: 100;
+
+    /* === DROPDOWNY & TOOLTIPY === */
+    --z-dropdown: 1000;
+    --z-autocomplete: 1000;
+    --z-tooltip: 1000;
+    --z-hamburger-button-alt: 1001;
+    --z-hamburger-button-nova: 1002;
+
+    /* === NOTIFIKACE === */
+    --z-toast: 1500;
+
+    /* === MODÁLNÍ OKNA === */
+    --z-modal: 2000;
+    --z-modal-content: 2001;
+
+    /* === OVERLAY SYSTÉM === */
+    --z-overlay-backdrop: 9998;
+    --z-menu-overlay: 9999;
+    --z-hamburger-overlay: 9999;
+    --z-calendar-overlay: 9999;
+
+    /* === HAMBURGER MENU (MOBILNÍ) === */
+    --z-hamburger-nav: 10000;
+    --z-modal-top: 10000;
+
+    /* === HEADER & TOGGLE === */
+    --z-hamburger-header: 10001;
+    --z-hamburger-toggle: 10001;
+
+    /* === DETAIL OVERLAY === */
+    --z-detail-overlay: 10002;
+
+    /* === NEJVYŠŠÍ VRSTVA === */
+    --z-top-layer: 10003;
+    --z-critical: 10003;
+}
+
+/**
+ * Dokumentace použití:
+ *
+ * PŘED (hardkódované):
+ *   .modal { z-index: 10000; }
+ *
+ * PO (s proměnnými):
+ *   .modal { z-index: var(--z-modal-top); }
+ *
+ * FALLBACK pro starší prohlížeče:
+ *   .modal {
+ *       z-index: 10000;
+ *       z-index: var(--z-modal-top);
+ *   }
+ */

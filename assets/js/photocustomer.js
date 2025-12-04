@@ -1,43 +1,25 @@
-// 🔒 KRITICKÁ BEZPEČNOSTNÍ KONTROLA - MUSÍ BÝT PRVNÍ!
+// [Lock] KRITICKÁ BEZPEČNOSTNÍ KONTROLA - MUSÍ BÝT PRVNÍ!
 (async function() {
   try {
     const response = await fetch("/app/admin_session_check.php");
     const data = await response.json();
 
     if (!data.logged_in) {
-      logger.log("❌ Nepřihlášen - přesměrování na login");
+      logger.log("Nepřihlášen - přesměrování na login");
       window.location.href = "login.php";
       throw new Error("Not authenticated");
     }
 
-    logger.log("✅ Přihlášen jako:", data.email);
+    logger.log("Přihlášen jako:", data.email);
   } catch (err) {
-    logger.error("❌ Chyba kontroly session:", err);
+    logger.error("Chyba kontroly session:", err);
     window.location.href = "login.php";
     throw new Error("Auth check failed");
   }
 })();
 
 // === HAMBURGER MENU ===
-function toggleMenu() {
-  const navMenu = document.getElementById('navMenu');
-  const hamburger = document.querySelector('.hamburger');
-  navMenu.classList.toggle('active');
-  hamburger.classList.toggle('active');
-}
-
-// Zavřít menu při kliknutí na odkaz
-document.addEventListener('DOMContentLoaded', () => {
-  const navLinks = document.querySelectorAll('.nav a');
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      const nav = document.getElementById('navMenu');
-      const hamburger = document.querySelector('.hamburger');
-      nav.classList.remove('active');
-      hamburger.classList.remove('active');
-    });
-  });
-});
+// REMOVED: Mrtvý kód - menu je nyní centrálně v hamburger-menu.php
 
 // === GLOBÁLNÍ PROMĚNNÉ ===
 let currentCustomerData = null;
@@ -52,7 +34,7 @@ let sections = {
 
 // === INICIALIZACE ===
 window.addEventListener('DOMContentLoaded', async () => {
-  logger.log('🚀 INICIALIZACE FOTODOKUMENTACE');
+  logger.log('[Start] INICIALIZACE FOTODOKUMENTACE');
 
   loadCustomerData();
   await loadExistingMedia();
@@ -61,7 +43,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('mediaInput').addEventListener('change', handleMediaSelect);
   document.getElementById('btnSaveToProtocol').addEventListener('click', saveToProtocol);
 
-  logger.log('✅ Inicializace dokončena');
+  logger.log('Inicializace dokončena');
 });
 
 function loadCustomerData() {
@@ -90,7 +72,7 @@ function loadCustomerData() {
   }
   // Admin a technik vidí všechny zakázky - bez kontroly
 
-  // ✅ OPRAVENO: Vylepšené načítání informací o zákazníkovi
+  // OPRAVENO: Vylepšené načítání informací o zákazníkovi
   const customerName = currentCustomerData.jmeno || currentCustomerData.zakaznik || 'N/A';
 
   // Adresa - pokus sestavit z více polí
@@ -102,7 +84,7 @@ function loadCustomerData() {
     if (currentCustomerData.ulice) parts.push(currentCustomerData.ulice);
     if (currentCustomerData.mesto) parts.push(currentCustomerData.mesto);
     if (currentCustomerData.psc) parts.push(currentCustomerData.psc);
-    address = parts.join(', '); // ✅ OPRAVENO: Mezera za čárkou
+    address = parts.join(', '); // OPRAVENO: Mezera za čárkou
   }
 
   // Model
@@ -118,26 +100,26 @@ function loadCustomerData() {
     contact = '-';
   }
 
-  // ✅ VYPLNĚNÍ HLAVIČKY
+  // VYPLNĚNÍ HLAVIČKY
   document.getElementById('customerName').textContent = customerName;
   document.getElementById('customerAddress').textContent = address || 'Adresa neuvedena';
   document.getElementById('customerModel').textContent = model;
   document.getElementById('customerContact').textContent = contact;
 
-  // ✅ VYPLNĚNÍ JMÉNA V ROZBALOVACÍM MENU
+  // VYPLNĚNÍ JMÉNA V ROZBALOVACÍM MENU
   const customerInfoName = document.getElementById('customerInfoName');
   if (customerInfoName) {
     customerInfoName.textContent = customerName;
   }
 
-  logger.log(`✅ Hlavička vyplněna:`, {
+  logger.log(`Hlavička vyplněna:`, {
     jméno: customerName,
     adresa: address,
     model: model,
     kontakt: contact
   });
 
-  logger.log(`✅ Přístup povolen: ${currentUser.role} (${currentUser.name})`);
+  logger.log(`Přístup povolen: ${currentUser.role} (${currentUser.name})`);
 }
 
 async function loadExistingMedia() {
@@ -153,7 +135,7 @@ async function loadExistingMedia() {
       repair: [],
       after: []
     };
-    logger.log('✅ Zahájení nové návštěvy');
+    logger.log('Zahájení nové návštěvy');
     return;
   }
 
@@ -161,7 +143,7 @@ async function loadExistingMedia() {
   if (serverData) {
     sections = serverData;
     renderAllPreviews();
-    logger.log('✅ Načteny rozpracované fotky');
+    logger.log('Načteny rozpracované fotky');
   } else {
     sections = {
       before: [],
@@ -223,7 +205,12 @@ async function handleMediaSelect(e) {
   renderAllPreviews();
   updateProgress();
   showWaitDialog(false);
-  showAlert(`Přidáno ${files.length} soubor(ů)`, 'success');
+  // Neonový toast pro úspěšný upload fotek
+  if (typeof WGSToast !== 'undefined') {
+    WGSToast.zobrazit(`Přidáno ${files.length} soubor(ů)`, { titulek: 'WGS' });
+  } else {
+    showAlert(`Přidáno ${files.length} soubor(ů)`, 'success');
+  }
 
   e.target.value = '';
 }
@@ -263,7 +250,7 @@ async function compressImage(file, maxWidth = 800, maxMB = 0.2) {
           blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
         }
 
-        logger.log(`📸 Fotka zkomprimována: ${(blob.size / 1024).toFixed(0)} KB, kvalita: ${(quality * 100).toFixed(0)}%`);
+        logger.log(`[Photo] Fotka zkomprimována: ${(blob.size / 1024).toFixed(0)} KB, kvalita: ${(quality * 100).toFixed(0)}%`);
         resolve(blob);
       };
 
@@ -388,7 +375,12 @@ function applyExifOrientation(ctx, orientation, width, height) {
   }
 }
 
+// Step 134: Use centralized toBase64 from utils.js if available
 function toBase64(blob) {
+  if (window.Utils && window.Utils.toBase64) {
+    return window.Utils.toBase64(blob);
+  }
+  // Fallback for backwards compatibility
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onloadend = () => resolve(reader.result);
@@ -414,6 +406,7 @@ function renderPreview(section) {
 
     const img = document.createElement('img');
     img.className = 'photo-thumb';
+    img.alt = media.type === 'video' ? 'Náhled videa' : 'Náhled fotky';
     img.src = media.type === 'video' ? media.thumb : media.data;
 
     const deleteBtn = document.createElement('button');
@@ -443,7 +436,12 @@ async function deleteMedia(section, index) {
   await saveToServer();
   renderPreview(section);
   updateProgress();
-  showAlert('Soubor smazán', 'success');
+  // Neonový toast pro smazání souboru
+  if (typeof WGSToast !== 'undefined') {
+    WGSToast.zobrazit('Soubor smazán', { titulek: 'WGS' });
+  } else {
+    showAlert('Soubor smazán', 'success');
+  }
 }
 
 function updateProgress() {
@@ -464,14 +462,14 @@ async function saveToProtocol() {
   showWaitDialog(true, 'Ukládám fotografie...');
 
   try {
-    // ✅ OPRAVENO: Získání CSRF tokenu z meta tagu
+    // OPRAVENO: Získání CSRF tokenu z meta tagu
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
     if (!csrfToken) {
       throw new Error('CSRF token nebyl nalezen');
     }
 
-    // ✅ OPRAVENO: Správná identifikace reklamace
+    // OPRAVENO: Správná identifikace reklamace
     // Backend hledá podle reklamace_id (např. WGS251116-XXX) nebo cislo
     const reklamaceId = currentCustomerData.reklamace_id || currentCustomerData.cislo || currentCustomerData.id;
 
@@ -499,7 +497,7 @@ async function saveToProtocol() {
       // ⏳ ZOBRAZIT PŘESÝPACÍ HODINY S TEXTEM "PŘESMĚROVÁNÍ NA PROTOKOL"
       showWaitDialog(true, 'Přesměrování na protokol...');
 
-      // ✅ Ujistit se, že currentCustomer je v localStorage pro protokol.php
+      // Ujistit se, že currentCustomer je v localStorage pro protokol.php
       localStorage.setItem('currentCustomer', JSON.stringify(currentCustomerData));
 
       setTimeout(() => {
@@ -509,7 +507,7 @@ async function saveToProtocol() {
       showAlert('Chyba při ukládání: ' + result.error, 'error');
     }
   } catch (error) {
-    logger.error('❌ Chyba při odesílání fotek:', error);
+    logger.error('Chyba při odesílání fotek:', error);
     showAlert('Chyba při odesílání: ' + error.message, 'error');
   } finally {
     showWaitDialog(false);
@@ -517,7 +515,7 @@ async function saveToProtocol() {
 }
 
 async function saveToServer() {
-  logger.log('💾 Fotky uloženy lokálně (server-side temp storage vypnut)');
+  logger.log('[Save] Fotky uloženy lokálně (server-side temp storage vypnut)');
   return { success: true };
 }
 
@@ -596,6 +594,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (typeof window[action] === 'function') {
       window[action](value);
+    }
+  });
+
+  // FIX: Event delegation pro photo sections (odstranit inline onclick)
+  document.querySelectorAll('.photo-section').forEach(section => {
+    const captureType = section.getAttribute('data-capture-type');
+
+    if (captureType) {
+      section.addEventListener('click', (e) => {
+        // Neotevírat pokud klikáme na delete button
+        if (e.target.closest('.delete-thumb')) return;
+
+        if (typeof openMediaCapture === 'function') {
+          openMediaCapture(captureType);
+        }
+      });
     }
   });
 });

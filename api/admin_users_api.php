@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
+require_once __DIR__ . '/../includes/email_validator.php';
 
 header('Content-Type: application/json');
 
@@ -20,6 +21,10 @@ try {
         ]);
         exit;
     }
+
+    // PERFORMANCE FIX: Uvolnit session lock pro paralelní zpracování
+    // Audit 2025-11-24: User management operations
+    session_write_close();
 
     $pdo = getDbConnection();
 
@@ -145,9 +150,13 @@ try {
             throw new Exception('Jméno, email a heslo jsou povinné');
         }
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new Exception('Neplatný formát emailu');
+        // SECURITY FIX: Posílená email validace
+        $emailValidation = validateEmailStrong($email, false);
+        if (!$emailValidation['valid']) {
+            throw new Exception($emailValidation['error']);
         }
+        // Použít normalizovaný email (lowercase)
+        $email = $emailValidation['email'];
 
         if (strlen($password) < 8) {
             throw new Exception('Heslo musí mít alespoň 8 znaků');
@@ -369,9 +378,13 @@ try {
             throw new Exception('Jméno a email jsou povinné');
         }
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new Exception('Neplatný formát emailu');
+        // SECURITY FIX: Posílená email validace
+        $emailValidation = validateEmailStrong($email, false);
+        if (!$emailValidation['valid']) {
+            throw new Exception($emailValidation['error']);
         }
+        // Použít normalizovaný email (lowercase)
+        $email = $emailValidation['email'];
 
         // Validace telefonu (pokud je zadán)
         if (!empty($phone)) {

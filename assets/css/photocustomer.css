@@ -1,0 +1,519 @@
+/**
+ * PHOTOCUSTOMER.CSS - Photo Documentation Styles
+ * Expandovaný z photocustomer.min.css s mobilními opravami
+ * Datum: 2025-11-22
+ */
+
+:root {
+  --c-bg: #f5f5f5;
+  --c-white: #ffffff;
+  --c-black: #1a1a1a;
+  --c-grey: #666666;
+  --c-border: #e0e0e0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins';
+  background: var(--c-bg);
+  color: var(--c-black);
+  line-height: 1.6;
+}
+
+.top-bar {
+  background: #000000;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-topbar, 100);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.logo {
+  color: var(--c-white);
+  font-family: 'Poppins';
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+}
+
+.logo span {
+  font-size: 0.75rem;
+  display: block;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  margin-top: -0.2rem;
+}
+
+.nav {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.nav a {
+  color: var(--c-white);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: opacity 0.3s ease;
+}
+
+.nav a:hover {
+  opacity: 0.7;
+}
+
+.main-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.page-title {
+  font-family: 'Poppins';
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 600;
+  color: var(--c-black);
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.05em;
+}
+
+.page-subtitle {
+  font-family: 'Poppins';
+  font-size: 0.8rem;
+  font-weight: 300;
+  color: var(--c-grey);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.info-box {
+  background: var(--c-white);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--c-black);
+  border-radius: 4px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--c-border);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-family: 'Poppins';
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--c-black);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.info-value {
+  font-family: 'Poppins';
+  font-size: 0.85rem;
+  color: var(--c-grey);
+  text-align: right;
+}
+
+.photo-section {
+  background: var(--c-white);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 2px solid var(--c-border);
+  border-radius: 4px;
+}
+
+.photo-section:hover {
+  border-bottom-color: var(--c-black);
+  transform: translateY(-2px);
+}
+
+.section-header {
+  font-family: 'Poppins';
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--c-black);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.photo-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.media-thumb {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--c-bg);
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.photo-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.photo-thumb:hover {
+  transform: scale(1.05);
+}
+
+.delete-thumb {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  background: var(--c-black);
+  color: var(--c-white);
+  border: none;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  border-radius: 4px;
+}
+
+.media-thumb:hover .delete-thumb {
+  opacity: 1;
+}
+
+.video-badge {
+  position: absolute;
+  top: 0.3rem;
+  left: 0.3rem;
+  background: var(--c-black);
+  color: var(--c-white);
+  padding: 0.15rem 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 3px;
+}
+
+.progress-container {
+  background: var(--c-white);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--c-border);
+  border-radius: 4px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--c-border);
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--c-black);
+  width: 0%;
+  transition: width 0.3s;
+}
+
+.progress-text {
+  text-align: center;
+  font-family: 'Poppins';
+  font-size: 0.75rem;
+  color: var(--c-grey);
+  letter-spacing: 0.05em;
+}
+
+.btn-group {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  background: var(--c-black);
+  color: var(--c-white);
+  border: none;
+  font-family: 'Poppins';
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.btn:hover {
+  background: #2a2a2a;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.btn-secondary {
+  background: var(--c-white);
+  color: var(--c-black);
+  border: 2px solid var(--c-black);
+}
+
+.btn-secondary:hover {
+  background: var(--c-black);
+  color: var(--c-white);
+}
+
+.alert {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.75rem 1.5rem;
+  background: var(--c-white);
+  border-left: 4px solid var(--c-black);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+  z-index: var(--z-dropdown, 1000);
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-family: 'Poppins';
+  font-size: 0.85rem;
+  max-width: 350px;
+  border-radius: 4px;
+}
+
+.alert.show {
+  opacity: 1;
+}
+
+.alert.success {
+  border-left-color: #555555;
+  color: #555555;
+}
+
+.alert.error {
+  border-left-color: #990000;
+  color: #990000;
+}
+
+.wait-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal, 2000);
+}
+
+.wait-dialog.show {
+  display: flex;
+}
+
+.wait-content {
+  background: var(--c-white);
+  padding: 2rem;
+  text-align: center;
+  max-width: 350px;
+  border-radius: 8px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--c-border);
+  border-top-color: var(--c-black);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.wait-text {
+  font-family: 'Poppins';
+  font-size: 0.85rem;
+  color: var(--c-grey);
+  letter-spacing: 0.05em;
+}
+
+#mediaInput {
+  display: none;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background: var(--c-white);
+  transition: all 0.3s;
+}
+
+/* ========================================================================
+   MOBILE RESPONSIVE - KRITICKÉ OPRAVY PWA
+   ======================================================================== */
+
+@media (max-width: 768px) {
+  .top-bar {
+    padding: 0.75rem 1rem;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .nav {
+    position: fixed;
+    top: 60px;
+    right: -100%;
+    background: #000000;
+    flex-direction: column;
+    padding: 1.5rem;
+    transition: right 0.3s;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.3);
+    gap: 1rem;
+  }
+
+  .nav.active {
+    right: 0;
+  }
+
+  .main-content {
+    padding: 1rem 0.75rem;
+  }
+
+  .page-header {
+    margin-bottom: 1rem;
+  }
+
+  /* ✅ FIX #2: Photo sections min-height pro touch */
+  .photo-section {
+    padding: 1rem;
+    min-height: 120px; /* ✅ PŘIDÁNO */
+    display: flex;
+    flex-direction: column;
+    touch-action: manipulation; /* ✅ PŘIDÁNO - odstranit 300ms delay */
+  }
+
+  .btn-group {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+
+  .info-row {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .info-value {
+    text-align: left;
+  }
+
+  /* ✅ FIX #4: Media thumbs větší pro touch */
+  .photo-preview {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* z 70px na 100px */
+    gap: 0.5rem;
+  }
+
+  .media-thumb {
+    min-width: 100px; /* ✅ PŘIDÁNO */
+    min-height: 100px; /* ✅ PŘIDÁNO */
+  }
+
+  /* ✅ FIX #1: Delete button - KRITICKY DŮLEŽITÉ */
+  .delete-thumb {
+    width: 44px !important;  /* z 24px */
+    height: 44px !important; /* z 24px */
+    min-width: 44px;
+    min-height: 44px;
+    opacity: 0.95 !important; /* ✅ Vždy viditelný na mobilu */
+    border-radius: 50%; /* ✅ Kulaté = lepší trefitelnost */
+    background: rgba(220, 53, 69, 0.9); /* ✅ Červené pro delete */
+    backdrop-filter: blur(2px); /* ✅ Čitelnost na světlých fotkách */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    top: 0.5rem; /* ✅ Větší odstup od okraje */
+    right: 0.5rem;
+  }
+
+  /* ✅ Hover state neaplikovat na mobilu - delete button vždy viditelný */
+  .media-thumb .delete-thumb {
+    opacity: 0.95;
+  }
+
+  /* ✅ FIX #5: Video badge repositioning */
+  .video-badge {
+    top: 8px;
+    left: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 4px;
+  }
+
+  /* ✅ Touch feedback pro buttons */
+  .btn {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

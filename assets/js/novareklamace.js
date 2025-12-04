@@ -1,6 +1,6 @@
 const logger = window.logger || console;
 
-// ✅ FIX L-2: Konstanty pro magic numbers
+// FIX L-2: Konstanty pro magic numbers
 const CONSTANTS = {
   MAX_PHOTOS: 10,              // Max počet fotek na upload
   MAX_IMAGE_WIDTH: 1200,       // Max šířka obrázku v px
@@ -17,8 +17,8 @@ const WGS = {
   photos: [],
   povereniPDF: null, // PDF soubor s pověřením k reklamaci
   map: null,
-  // ✅ REFACTOR: marker a routeLayer jsou nyní spravovány WGSMap modulem
-  companyLocation: window.WGS_COMPANY_LOCATION || { lat: 50.080312092724114, lon: 14.598113797415476 }, // ✅ FIX M-3: Konfigurovatelná lokace
+  // REFACTOR: marker a routeLayer jsou nyní spravovány WGSMap modulem
+  companyLocation: window.WGS_COMPANY_LOCATION || { lat: 50.080312092724114, lon: 14.598113797415476 }, // FIX M-3: Konfigurovatelná lokace
   isLoggedIn: false,
   calculateRouteTimeout: null,
 
@@ -26,7 +26,7 @@ const WGS = {
   // Všechny geocoding, autocomplete a routing funkce nyní používají WGSMap API
   
   init() {
-    logger.log('🚀 WGS init...');
+    logger.log('[Start] WGS init...');
     this.checkLoginStatus();
     this.initUserMode();
     this.initCalculationDisplay();
@@ -38,18 +38,56 @@ const WGS = {
     this.initProvedeni();
     this.initLanguage();
     this.initCustomCalendar();
+    this.initTypZakaznika(); // Vzájemně výlučné checkboxy IČO/fyzická osoba
+  },
+
+  // Inicializace vzájemně výlučných checkboxů pro typ zákazníka
+  initTypZakaznika() {
+    const icoCheckbox = document.getElementById('objednavkaICO');
+    const fyzickaCheckbox = document.getElementById('objednavkaFyzicka');
+    const typZakaznikaWrapper = document.querySelector('.typ-zakaznika-wrapper');
+
+    if (!icoCheckbox || !fyzickaCheckbox) return;
+
+    // Funkce pro odstranění červeného označení při zaškrtnutí
+    const odstranitCerveneOznaceni = () => {
+      if (typZakaznikaWrapper && (icoCheckbox.checked || fyzickaCheckbox.checked)) {
+        typZakaznikaWrapper.style.border = '';
+        typZakaznikaWrapper.style.backgroundColor = '';
+        typZakaznikaWrapper.style.borderRadius = '';
+        typZakaznikaWrapper.style.padding = '';
+      }
+    };
+
+    // Když zaškrtnu IČO, odškrtnu fyzickou osobu
+    icoCheckbox.addEventListener('change', () => {
+      if (icoCheckbox.checked) {
+        fyzickaCheckbox.checked = false;
+      }
+      odstranitCerveneOznaceni();
+    });
+
+    // Když zaškrtnu fyzickou osobu, odškrtnu IČO
+    fyzickaCheckbox.addEventListener('change', () => {
+      if (fyzickaCheckbox.checked) {
+        icoCheckbox.checked = false;
+      }
+      odstranitCerveneOznaceni();
+    });
+
+    logger.log('[TypZakaznika] Inicializovány vzájemně výlučné checkboxy');
   },
   
   checkLoginStatus() {
     const userToken = localStorage.getItem('wgs_user_token') || sessionStorage.getItem('wgs_user_token');
     this.isLoggedIn = window.WGS_USER_LOGGED_IN !== undefined ? window.WGS_USER_LOGGED_IN : !!userToken;
-    logger.log('👤 Logged in:', this.isLoggedIn);
+    logger.log('[User] Logged in:', this.isLoggedIn);
   },
   
   initMap() {
-    // ✅ REFACTOR: Použití WGSMap modulu místo přímého Leaflet
+    // REFACTOR: Použití WGSMap modulu místo přímého Leaflet
     if (typeof WGSMap === 'undefined') {
-      logger.error('❌ WGSMap module not loaded');
+      logger.error('WGSMap module not loaded');
       return;
     }
 
@@ -57,13 +95,13 @@ const WGS = {
       center: [49.8, 15.5],
       zoom: 7,
       onInit: (mapInstance) => {
-        logger.log('✅ Map initialized via WGSMap');
+        logger.log('Map initialized via WGSMap');
         this.initAddressGeocoding();
       }
     });
 
     if (!this.map) {
-      logger.error('❌ Map initialization failed');
+      logger.error('Map initialization failed');
       return;
     }
   },
@@ -73,19 +111,19 @@ const WGS = {
     const mestoInput = document.getElementById('mesto');
     const pscInput = document.getElementById('psc');
     
-    // ✅ REFACTOR: Použití WGSMap.addMarker() místo přímého L.marker()
+    // REFACTOR: Použití WGSMap.addMarker() místo přímého L.marker()
     const updateMapWithGPS = (lat, lon) => {
       WGSMap.removeMarker('customer'); // Odstranit starý marker pokud existuje
       WGSMap.addMarker('customer', [lat, lon], {
         draggable: false
       });
       WGSMap.flyTo([lat, lon], 15);
-      logger.log(`📍 Map updated to GPS: ${lat}, ${lon}`);
+      logger.log(`[Loc] Map updated to GPS: ${lat}, ${lon}`);
     };
     
     this.updateMapWithGPS = updateMapWithGPS;
     
-    // ✅ REFACTOR: Použití WGSMap.geocode() místo manuálního fetch
+    // REFACTOR: Použití WGSMap.geocode() místo manuálního fetch
     const geocodeAddress = async () => {
       const ulice = uliceInput.value.trim();
       const mesto = mestoInput.value.trim();
@@ -141,7 +179,7 @@ const WGS = {
     const highlightMatch = (text, query) => {
       if (!query) return escapeHtml(text);
 
-      // ✅ SECURITY FIX: Escape HTML PŘED highlightováním
+      // SECURITY FIX: Escape HTML PŘED highlightováním
       const escapedText = escapeHtml(text);
       const escapedQuery = escapeRegex(query);
 
@@ -160,11 +198,11 @@ const WGS = {
       return div.innerHTML;
     };
 
-    // ✅ REFACTOR: Použití WGSMap.autocomplete() a WGSMap.debounce()
+    // REFACTOR: Použití WGSMap.autocomplete() a WGSMap.debounce()
     if (uliceInput && dropdownUlice) {
       const debouncedAutocompleteUlice = WGSMap.debounce(async (query) => {
         if (query.length < CONSTANTS.AUTOCOMPLETE_MIN_CHARS) {
-          dropdownUlice.style.display = 'none';
+          dropdownUlice.classList.add('hidden');
           return;
         }
 
@@ -184,7 +222,7 @@ const WGS = {
 
           if (data && data.features && data.features.length > 0) {
             dropdownUlice.innerHTML = '';
-            dropdownUlice.style.display = 'block';
+            dropdownUlice.classList.remove('hidden');
 
             // Seřadit podle relevance - preferovat úplné adresy
             const sortedFeatures = data.features.sort((a, b) => {
@@ -252,23 +290,23 @@ const WGS = {
                 const [lon, lat] = feature.geometry.coordinates;
                 this.updateMapWithGPS(lat, lon);
 
-                // ✅ PERFORMANCE: Výpočet trasy vypnut kvůli problémům s API
+                // PERFORMANCE: Výpočet trasy vypnut kvůli problémům s API
                 // if (this.calculateRoute) {
                 //   this.calculateRoute(lat, lon);
                 // }
 
-                dropdownUlice.style.display = 'none';
-                this.toast('✓ Adresa vyplněna', 'success');
+                dropdownUlice.classList.add('hidden');
+                this.toast('Adresa vyplněna', 'success');
               });
 
               dropdownUlice.appendChild(div);
             });
           } else {
-            dropdownUlice.style.display = 'none';
+            dropdownUlice.classList.add('hidden');
           }
         } catch (err) {
           logger.error('Autocomplete error:', err);
-          dropdownUlice.style.display = 'none';
+          dropdownUlice.classList.add('hidden');
         }
       }, CONSTANTS.AUTOCOMPLETE_DEBOUNCE);
 
@@ -277,11 +315,11 @@ const WGS = {
       });
     }
     
-    // ✅ REFACTOR: Použití WGSMap.autocomplete() a WGSMap.debounce()
+    // REFACTOR: Použití WGSMap.autocomplete() a WGSMap.debounce()
     if (mestoInput && dropdownMesto) {
       const debouncedAutocompleteMesto = WGSMap.debounce(async (query) => {
         if (query.length < CONSTANTS.AUTOCOMPLETE_MIN_CHARS) {
-          dropdownMesto.style.display = 'none';
+          dropdownMesto.classList.add('hidden');
           return;
         }
 
@@ -290,7 +328,7 @@ const WGS = {
 
           if (data && data.features && data.features.length > 0) {
             dropdownMesto.innerHTML = '';
-            dropdownMesto.style.display = 'block';
+            dropdownMesto.classList.remove('hidden');
 
             // Seřadit podle relevance - preferovat s PSČ
             const sortedFeatures = data.features.sort((a, b) => {
@@ -332,8 +370,8 @@ const WGS = {
                   document.getElementById('psc').value = postcode;
                 }
 
-                dropdownMesto.style.display = 'none';
-                this.toast('✓ Město vybráno', 'success');
+                dropdownMesto.classList.add('hidden');
+                this.toast('Město vybráno', 'success');
 
                 // Pokud je město vybráno, pokus se najít souřadnice
                 if (feature.geometry && feature.geometry.coordinates) {
@@ -345,11 +383,11 @@ const WGS = {
               dropdownMesto.appendChild(div);
             });
           } else {
-            dropdownMesto.style.display = 'none';
+            dropdownMesto.classList.add('hidden');
           }
         } catch (err) {
           logger.error('Autocomplete error:', err);
-          dropdownMesto.style.display = 'none';
+          dropdownMesto.classList.add('hidden');
         }
       }, CONSTANTS.AUTOCOMPLETE_DEBOUNCE);
 
@@ -363,24 +401,24 @@ const WGS = {
       const clickedInsideMesto = dropdownMesto && dropdownMesto.contains(e.target);
 
       if (dropdownUlice && !clickedInsideUlice && e.target !== uliceInput) {
-        dropdownUlice.style.display = 'none';
+        dropdownUlice.classList.add('hidden');
       }
 
       if (dropdownMesto && !clickedInsideMesto && e.target !== mestoInput) {
-        dropdownMesto.style.display = 'none';
+        dropdownMesto.classList.add('hidden');
       }
     });
   },
 
-  // ✅ PERFORMANCE: Funkce vypnuta kvůli problémům s get_distance API
+  // PERFORMANCE: Funkce vypnuta kvůli problémům s get_distance API
   async calculateRoute(destLat, destLon) {
     // Funkce deaktivována - žádný výpočet trasy
-    logger.log('⚠️ Výpočet trasy vypnut (API nefunguje)');
+    logger.log('Výpočet trasy vypnut (API nefunguje)');
     return;
 
     /* VYPNUTO - ROUTING API NEFUNGUJE
     if (!this.map) {
-      logger.warn('⚠️ Mapa není inicializována');
+      logger.warn('Mapa není inicializována');
       return;
     }
 
@@ -410,14 +448,14 @@ const WGS = {
           this.renderRoute(routeData);
         }
       } catch (err) {
-        logger.error('❌ Chyba při výpočtu trasy:', err);
+        logger.error('Chyba při výpočtu trasy:', err);
         // Tiché selhání - trasa není kritická
       }
     }, CONSTANTS.ROUTE_DEBOUNCE);
     */
   },
 
-  // ✅ REFACTOR: Použití WGSMap.drawRoute() a WGSMap.addMarker()
+  // REFACTOR: Použití WGSMap.drawRoute() a WGSMap.addMarker()
   renderRoute(routeData) {
     const { coordinates, distance, duration, start } = routeData;
 
@@ -442,7 +480,7 @@ const WGS = {
     const durationMin = Math.ceil(duration / 60); // sekundy na minuty
 
     this.toast(`🚗 Trasa: ${distanceKm} km, cca ${durationMin} min`, 'info');
-    logger.log(`✅ Trasa vypočítána: ${distanceKm} km, ${durationMin} min`);
+    logger.log(`Trasa vypočítána: ${distanceKm} km, ${durationMin} min`);
 
     // Uložit info o trase pro pozdější použití
     this.routeInfo = { distance: distanceKm, duration: durationMin };
@@ -451,7 +489,7 @@ const WGS = {
   checkAndUpdateMapFromAddress() {
     const uliceInput = document.getElementById('ulice');
     if (uliceInput && uliceInput.value.trim()) {
-      logger.log('🔍 Checking pre-filled address...');
+      logger.log('Checking pre-filled address...');
       if (this.geocodeAddress) {
         this.geocodeAddress();
       }
@@ -471,15 +509,19 @@ const WGS = {
       const doplnujiciInfoTextarea = document.getElementById('doplnujici_info');
       
       if (calculatorBox && !fromCalculator) {
-        calculatorBox.style.display = 'block';
+        calculatorBox.classList.remove('hidden');
       }
       
+      // POZ číslo se generuje automaticky na serveru - pole zůstává readonly
       if (cisloInput) {
-        cisloInput.removeAttribute('readonly');
-        cisloInput.value = '';
-        cisloInput.placeholder = 'Číslo objednávky/reklamace od prodejce (pokud máte)';
-        cisloInput.style.backgroundColor = '';
-        cisloInput.style.cursor = 'text';
+        cisloInput.setAttribute('readonly', 'readonly');
+        cisloInput.value = 'POZ (automaticky)';
+        cisloInput.style.backgroundColor = '#e9e9e9';
+        cisloInput.style.color = '#666';
+        cisloInput.style.cursor = 'not-allowed';
+        cisloInput.style.fontStyle = 'italic';
+        cisloInput.style.pointerEvents = 'none';
+        cisloInput.setAttribute('tabindex', '-1');
       }
       
       if (datumProdejeInput) {
@@ -506,25 +548,25 @@ const WGS = {
       }
       
       if (modeInfo) {
-        modeInfo.style.display = 'block';
+        modeInfo.classList.remove('hidden');
         document.getElementById('modeTitle').textContent = t('mode_customer_title');
         document.getElementById('modeDescription').textContent = t('mode_customer_desc');
       }
       
-      logger.log('📋 Mode: Customer');
+      logger.log('[List] Mode: Customer');
     } else {
       if (calculatorBox) {
-        calculatorBox.style.display = 'none';
+        calculatorBox.classList.add('hidden');
       }
       
       if (modeInfo) {
-        modeInfo.style.display = 'block';
+        modeInfo.classList.remove('hidden');
         modeInfo.style.borderLeftColor = '#006600';
         modeInfo.style.background = '#f0fff0';
         document.getElementById('modeTitle').textContent = t('mode_seller_title');
         document.getElementById('modeDescription').textContent = t('mode_seller_desc');
       }
-      logger.log('📋 Mode: Seller');
+      logger.log('[List] Mode: Seller');
     }
   },
   
@@ -535,7 +577,7 @@ const WGS = {
     if (fromCalculator === 'true') {
       const calculationBox = document.getElementById('calculationBox');
       if (calculationBox) {
-        calculationBox.style.display = 'block';
+        calculationBox.classList.remove('hidden');
         const totalPrice = urlParams.get('calc_total');
         document.getElementById('calculationTotal').textContent = totalPrice;
       }
@@ -548,7 +590,7 @@ const WGS = {
     const menuOverlay = document.getElementById("menuOverlay");
     
     if (!hamburger || !nav || !menuOverlay) {
-      logger.warn("⚠️ initMobileMenu skipped - elements not found");
+      logger.warn("initMobileMenu skipped - elements not found");
       return;
     }
     
@@ -560,32 +602,50 @@ const WGS = {
       hamburger.classList.toggle('active');
       nav.classList.toggle('active');
       menuOverlay.classList.toggle('active');
-      document.body.style.overflow = nav.classList.contains('active') ? 'hidden' : 'auto';
+      // Scroll-lock pres centralizovanou utilitu (iOS kompatibilni)
+      if (window.scrollLock) {
+        if (nav.classList.contains('active')) {
+          window.scrollLock.enable('novareklamace-menu');
+        } else {
+          window.scrollLock.disable('novareklamace-menu');
+        }
+      }
     });
-    
+
     menuOverlay.addEventListener('click', () => {
       hamburger.classList.remove('active');
       nav.classList.remove('active');
       menuOverlay.classList.remove('active');
-      document.body.style.overflow = 'auto';
+      if (window.scrollLock) {
+        window.scrollLock.disable('novareklamace-menu');
+      }
     });
-    
+
     nav.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
         hamburger.classList.remove('active');
         nav.classList.remove('active');
         menuOverlay.classList.remove('active');
-        document.body.style.overflow = 'auto';
+        if (window.scrollLock) {
+          window.scrollLock.disable('novareklamace-menu');
+        }
       });
     });
     
-    logger.log('✅ Mobile menu fully initialized');
+    logger.log('Mobile menu fully initialized');
   },
   
   initForm() {
     const form = document.getElementById('reklamaceForm');
+    if (!form) {
+      logger.error('[initForm] Formulář reklamaceForm nenalezen!');
+      return;
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      e.stopPropagation();
+      logger.log('[initForm] Submit zachycen, spouštím validaci...');
       await this.submitForm();
     });
 
@@ -604,7 +664,7 @@ const WGS = {
       });
     }
 
-    // ✅ Event listenery pro odstranění červeného označení při psaní
+    // Event listenery pro odstranění červeného označení při psaní
     const povinnaPoleIds = ['jmeno', 'email', 'telefon', 'ulice', 'mesto', 'psc', 'popis_problemu'];
     povinnaPoleIds.forEach(poleId => {
       const element = document.getElementById(poleId);
@@ -624,6 +684,7 @@ const WGS = {
    * @returns {Object} { valid: boolean, chybejici: string[] }
    */
   validatePovinnaPole() {
+    // Základní povinná pole pro všechny
     const povinnaPole = [
       { id: 'jmeno', label: 'Jméno a příjmení' },
       { id: 'email', label: 'E-mail' },
@@ -633,6 +694,15 @@ const WGS = {
       { id: 'psc', label: 'PSČ' },
       { id: 'popis_problemu', label: 'Popis problému' }
     ];
+
+    // Přidat pole povinná pouze pro přihlášené uživatele
+    if (this.isLoggedIn) {
+      povinnaPole.unshift(
+        { id: 'cislo', label: 'Číslo zakázky' },
+        { id: 'datum_prodeje', label: 'Datum prodeje' },
+        { id: 'datum_reklamace', label: 'Datum reklamace' }
+      );
+    }
 
     const chybejici = [];
     let prvniPrazdne = null;
@@ -650,7 +720,7 @@ const WGS = {
     povinnaPole.forEach(pole => {
       const element = document.getElementById(pole.id);
       if (!element) {
-        logger.warn(`⚠️ Pole ${pole.id} nebylo nalezeno v DOM`);
+        logger.warn(`Pole ${pole.id} nebylo nalezeno v DOM`);
         return;
       }
 
@@ -675,6 +745,37 @@ const WGS = {
       setTimeout(() => prvniPrazdne.focus(), 500);
     }
 
+    // Validace typu zákazníka - musí být zaškrtnut jeden z checkboxů
+    const icoCheckbox = document.getElementById('objednavkaICO');
+    const fyzickaCheckbox = document.getElementById('objednavkaFyzicka');
+    const typZakaznikaWrapper = document.querySelector('.typ-zakaznika-wrapper');
+
+    if (icoCheckbox && fyzickaCheckbox) {
+      // Odebrat červené označení
+      if (typZakaznikaWrapper) {
+        typZakaznikaWrapper.style.borderColor = '';
+        typZakaznikaWrapper.style.backgroundColor = '';
+      }
+
+      // Zkontrolovat, zda je zaškrtnut alespoň jeden checkbox
+      if (!icoCheckbox.checked && !fyzickaCheckbox.checked) {
+        chybejici.push('Typ zákazníka (IČO nebo Fyzická osoba)');
+
+        // Označit červeně
+        if (typZakaznikaWrapper) {
+          typZakaznikaWrapper.style.border = '2px solid #dc3545';
+          typZakaznikaWrapper.style.backgroundColor = '#fff5f5';
+          typZakaznikaWrapper.style.borderRadius = '8px';
+          typZakaznikaWrapper.style.padding = '0.75rem';
+
+          // Scrollnout na wrapper pokud je první chyba
+          if (!prvniPrazdne) {
+            typZakaznikaWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      }
+    }
+
     return {
       valid: chybejici.length === 0,
       chybejici
@@ -682,10 +783,10 @@ const WGS = {
   },
 
   async submitForm() {
-    // ✅ VALIDACE VŠECH POVINNÝCH POLÍ
+    // VALIDACE VŠECH POVINNÝCH POLÍ
     const validace = this.validatePovinnaPole();
     if (!validace.valid) {
-      this.toast(`❌ Vyplňte prosím všechna povinná pole: ${validace.chybejici.join(', ')}`, 'error');
+      this.toast(`Vyplňte prosím všechna povinná pole: ${validace.chybejici.join(', ')}`, 'error');
       return;
     }
 
@@ -698,7 +799,7 @@ const WGS = {
       return;
     }
 
-    // ✅ FIX H-2: Frontend validace telefonu
+    // FIX H-2: Frontend validace telefonu
     const telefonInput = document.getElementById('telefon');
 
     // PSČ validace odstraněna - autocomplete vrací různé formáty ("110 00", "11000", atd.)
@@ -707,9 +808,9 @@ const WGS = {
     if (telefonInput && telefonInput.value.trim()) {
       const telefon = telefonInput.value.trim();
       const cleanPhone = telefon.replace(/\D/g, '');
-      // ✅ FIX L-2: Použít konstantu PHONE_MIN_LENGTH
+      // FIX L-2: Použít konstantu PHONE_MIN_LENGTH
       if (cleanPhone.length < CONSTANTS.PHONE_MIN_LENGTH) {
-        this.toast(`❌ Neplatné telefonní číslo (minimálně ${CONSTANTS.PHONE_MIN_LENGTH} číslic)`, 'error');
+        this.toast(`Neplatné telefonní číslo (minimálně ${CONSTANTS.PHONE_MIN_LENGTH} číslic)`, 'error');
         telefonInput.focus();
         return;
       }
@@ -717,7 +818,7 @@ const WGS = {
 
     this.toast('Odesílám...', 'info');
     try {
-      // ✅ FIX H-1: Získat CSRF token JEDNOU pro celý submit proces
+      // FIX H-1: Získat CSRF token JEDNOU pro celý submit proces
       const csrfResponse = await fetch('app/controllers/get_csrf_token.php');
       const csrfData = await csrfResponse.json();
       const csrfToken = csrfData.status === 'success' ? csrfData.token : '';
@@ -730,7 +831,23 @@ const WGS = {
       formData.append('datum_reklamace', document.getElementById('datum_reklamace').value || '');
       formData.append('jmeno', document.getElementById('jmeno').value || '');
       formData.append('email', document.getElementById('email').value || '');
-      formData.append('telefon', document.getElementById('telefon').value || '');
+
+      // Typ zákazníka - IČO nebo fyzická osoba
+      const icoCheckbox = document.getElementById('objednavkaICO');
+      const fyzickaCheckbox = document.getElementById('objednavkaFyzicka');
+      let typZakaznika = '';
+      if (icoCheckbox?.checked) {
+        typZakaznika = 'IČO';
+      } else if (fyzickaCheckbox?.checked) {
+        typZakaznika = 'Fyzická osoba';
+      }
+      formData.append('typ_zakaznika', typZakaznika);
+
+      // Spojit předvolbu + telefonní číslo
+      const phonePrefix = document.getElementById('phone-prefix')?.value || '+420';
+      const phoneNumber = document.getElementById('telefon')?.value || '';
+      const fullPhone = phoneNumber ? `${phonePrefix} ${phoneNumber.trim()}` : '';
+      formData.append('telefon', fullPhone);
 
       const ulice = document.getElementById('ulice')?.value || '';
       const mesto = document.getElementById('mesto')?.value || '';
@@ -760,10 +877,10 @@ const WGS = {
       // Přiložení PDF pověření k reklamaci (pokud bylo nahráno)
       if (this.povereniPDF) {
         formData.append('povereni_pdf', this.povereniPDF);
-        logger.log(`📄 Přikládám PDF pověření: ${this.povereniPDF.name}`);
+        logger.log(`[Doc] Přikládám PDF pověření: ${this.povereniPDF.name}`);
       }
 
-      // ✅ FIX H-1: Použít CSRF token získaný výše
+      // FIX H-1: Použít CSRF token získaný výše
       formData.append('csrf_token', csrfToken);
 
       formData.append("action", "create");
@@ -783,7 +900,7 @@ const WGS = {
         const referenceNumber = result.reference || (document.getElementById('cislo')?.value || '').trim();
 
         if (this.photos && this.photos.length > 0) {
-          // ✅ FIX H-1: Předat stejný CSRF token do uploadPhotos
+          // FIX H-1: Předat stejný CSRF token do uploadPhotos
           await this.uploadPhotos(workflowId, csrfToken);
         }
 
@@ -797,10 +914,10 @@ const WGS = {
             statusSpan.textContent = '';
             statusSpan.style.color = '#666';
           }
-          logger.log('🧹 PDF pověření vyčištěno po úspěšném uložení');
+          logger.log('PDF pověření vyčištěno po úspěšném uložení');
         }
 
-        this.toast('✓ Požadavek byl úspěšně odeslán!', 'success');
+        this.toast('Požadavek byl úspěšně odeslán!', 'success');
         setTimeout(() => {
           if (this.isLoggedIn) {
             window.location.href = 'seznam.php';
@@ -808,8 +925,8 @@ const WGS = {
             const alertMessage = referenceNumber
               ? t('order_accepted_with_ref').replace('{reference}', referenceNumber)
               : t('order_accepted_no_ref');
-            alert(alertMessage);
-            window.location.href = 'index.php';
+            this.toast(alertMessage, 'success');
+            setTimeout(() => { window.location.href = 'index.php'; }, 3000);
           }
         }, 1500);
       } else {
@@ -822,20 +939,20 @@ const WGS = {
   },
   
   /**
-   * ✅ FIX H-1: Uploaduje fotky s předaným CSRF tokenem (bez duplicitního fetch)
-   * ✅ FIX L-1: Změna console.log na logger.log
+   * FIX H-1: Uploaduje fotky s předaným CSRF tokenem (bez duplicitního fetch)
+   * FIX L-1: Změna console.log na logger.log
    * @param {string} reklamaceId - ID reklamace
    * @param {string} csrfToken - CSRF token (předaný z submitForm)
    */
   async uploadPhotos(reklamaceId, csrfToken) {
-    logger.log("🚀 uploadPhotos VOLÁNO!", reklamaceId);
+    logger.log("[Start] uploadPhotos VOLÁNO!", reklamaceId);
     if (!this.photos || this.photos.length === 0) return;
-    logger.log("📸 Počet fotek:", this.photos.length);
+    logger.log("[Photo] Počet fotek:", this.photos.length);
     try {
       const formData = new FormData();
       formData.append('reklamace_id', reklamaceId);
       formData.append('photo_type', 'problem');
-      formData.append('csrf_token', csrfToken); // ✅ Použít předaný token
+      formData.append('csrf_token', csrfToken); // Použít předaný token
       this.photos.forEach((photo, index) => {
         formData.append(`photo_${index}`, photo.data);
         formData.append(`filename_${index}`, `photo_${index + 1}.jpg`);
@@ -855,7 +972,7 @@ const WGS = {
       if (result.status !== 'success') {
         throw new Error(result.error || 'Nepodařilo se nahrát fotky');
       }
-      logger.log('✓ Fotky úspěšně nahrány');
+      logger.log('Fotky úspěšně nahrány');
     } catch (error) {
       logger.error('Chyba při nahrávání fotek:', error);
     }
@@ -872,9 +989,9 @@ const WGS = {
     btn.addEventListener('click', () => photoInput.click());
     photoInput.addEventListener('change', async (e) => {
       const files = Array.from(e.target.files);
-      // ✅ FIX L-2 & L-3: Použít konstantu MAX_PHOTOS (sjednocení s backendem)
+      // FIX L-2 & L-3: Použít konstantu MAX_PHOTOS (sjednocení s backendem)
       if (this.photos.length + files.length > CONSTANTS.MAX_PHOTOS) {
-        this.toast(`❌ Maximálně ${CONSTANTS.MAX_PHOTOS} fotografií`, 'error');
+        this.toast(`Maximálně ${CONSTANTS.MAX_PHOTOS} fotografií`, 'error');
         return;
       }
       for (const file of files) {
@@ -883,7 +1000,12 @@ const WGS = {
         this.photos.push({ data: base64, file: compressed });
       }
       this.renderPhotos();
-      this.toast(`✓ Přidáno ${files.length} fotek`, 'success');
+      // Neonový toast pro přidání fotek
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit(`Přidáno ${files.length} fotek`, { titulek: 'WGS' });
+      } else {
+        this.toast(`Přidáno ${files.length} fotek`, 'success');
+      }
     });
   },
   
@@ -894,7 +1016,7 @@ const WGS = {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          // ✅ FIX L-2: Použít konstanty MAX_IMAGE_WIDTH a IMAGE_QUALITY
+          // FIX L-2: Použít konstanty MAX_IMAGE_WIDTH a IMAGE_QUALITY
           const scale = Math.min(1, CONSTANTS.MAX_IMAGE_WIDTH / img.width);
           canvas.width = img.width * scale;
           canvas.height = img.height * scale;
@@ -929,7 +1051,7 @@ const WGS = {
       div.querySelector(".photo-remove").addEventListener("click", () => {
         this.photos.splice(index, 1);
         this.renderPhotos();
-        this.toast("✓ Fotka odstraněna", "info");
+        this.toast("Fotka odstraněna", "info");
       });
       container.appendChild(div);
     });
@@ -942,7 +1064,7 @@ const WGS = {
     const statusSpan = document.getElementById('povereniStatus');
 
     if (!btn || !pdfInput || !statusSpan) {
-      logger.warn('📄 PDF pověření prvky nebyly nalezeny, initPovereniPDF se přeskočí');
+      logger.warn('[Doc] PDF pověření prvky nebyly nalezeny, initPovereniPDF se přeskočí');
       return;
     }
 
@@ -959,7 +1081,7 @@ const WGS = {
 
       // Validace typu souboru
       if (file.type !== 'application/pdf') {
-        this.toast('❌ Pouze PDF soubory jsou povoleny', 'error');
+        this.toast('Pouze PDF soubory jsou povoleny', 'error');
         pdfInput.value = '';
         return;
       }
@@ -967,7 +1089,7 @@ const WGS = {
       // Validace velikosti (max 10MB)
       const maxSize = 10 * 1024 * 1024; // 10MB v bytech
       if (file.size > maxSize) {
-        this.toast('❌ Soubor je příliš velký (max 10MB)', 'error');
+        this.toast('Soubor je příliš velký (max 10MB)', 'error');
         pdfInput.value = '';
         return;
       }
@@ -982,7 +1104,7 @@ const WGS = {
       statusSpan.style.fontWeight = '600';
 
       this.toast(t('processing_file').replace('{filename}', 'PDF pověření'), 'info');
-      logger.log(`📄 PDF pověření připojeno: ${file.name}, velikost: ${velikostMB} MB`);
+      logger.log(`[Doc] PDF pověření připojeno: ${file.name}, velikost: ${velikostMB} MB`);
 
       // Extrakce textu z PDF a parsování dat
       try {
@@ -990,8 +1112,8 @@ const WGS = {
         statusSpan.textContent = t('file_processed_success')
           .replace('{filename}', file.name)
           .replace('{size}', velikostMB);
-        statusSpan.style.color = '#2D5016';
-        this.toast(`✓ Formulář byl předvyplněn z PDF pověření`, 'success');
+        statusSpan.style.color = '#333333';
+        this.toast(`Formulář byl předvyplněn z PDF pověření`, 'success');
       } catch (error) {
         logger.error('Chyba při zpracování PDF:', error);
         statusSpan.textContent = t('file_processing_error')
@@ -1019,7 +1141,7 @@ const WGS = {
     const arrayBuffer = await pdfFile.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
-    logger.log(`📄 PDF má ${pdf.numPages} stránek`);
+    logger.log(`[Doc] PDF má ${pdf.numPages} stránek`);
 
     // Extrakce textu ze všech stránek
     let celkovyText = '';
@@ -1030,7 +1152,7 @@ const WGS = {
       celkovyText += textItems + '\n';
     }
 
-    logger.log(`📄 Extrahovaný text (${celkovyText.length} znaků):`, celkovyText.substring(0, 200) + '...');
+    logger.log(`[Doc] Extrahovaný text (${celkovyText.length} znaků):`, celkovyText.substring(0, 200) + '...');
 
     // Odeslání textu na backend pro parsování
     const csrfResponse = await fetch('app/controllers/get_csrf_token.php');
@@ -1061,7 +1183,7 @@ const WGS = {
     const extrahovanaData = result.data.data || result.data;
     const configName = result.data.config_name || 'Výchozí parser';
 
-    logger.log(`✓ Použita konfigurace: ${configName}`);
+    logger.log(`Použita konfigurace: ${configName}`);
 
     // Předvyplnění formuláře s extrahovanými daty
     this.predvyplnFormularZPDF(extrahovanaData);
@@ -1072,7 +1194,7 @@ const WGS = {
    * @param {Object} data - Extrahovaná data z PDF
    */
   predvyplnFormularZPDF(data) {
-    logger.log('📝 Předvyplňuji formulář daty z PDF:', data);
+    logger.log('[Edit] Předvyplňuji formulář daty z PDF:', data);
 
     // Helper funkce pro bezpečné nastavení hodnoty pole
     const nastavPole = (id, hodnota) => {
@@ -1080,7 +1202,7 @@ const WGS = {
       const element = document.getElementById(id);
       if (element && !element.value) { // Nepřepsat pokud už je vyplněno
         element.value = hodnota;
-        logger.log(`✓ Vyplněno pole ${id}: ${hodnota}`);
+        logger.log(`Vyplněno pole ${id}: ${hodnota}`);
       }
     };
 
@@ -1119,24 +1241,9 @@ const WGS = {
   },
 
   initProvedeni() {
-    const btn = document.getElementById('selectProvedeniBtn');
-    const overlay = document.getElementById('provedeniOverlay');
-    const closeBtn = document.getElementById('closeProvedeni');
-    const cards = document.querySelectorAll('.provedeni-card');
-    
-    btn.addEventListener('click', () => overlay.classList.add('active'));
-    closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) overlay.classList.remove('active');
-    });
-    cards.forEach(card => {
-      card.addEventListener('click', () => {
-        const value = card.dataset.value;
-        document.getElementById('provedeni').value = value;
-        overlay.classList.remove('active');
-        this.toast(`✓ Provedení: ${value}`, 'info');
-      });
-    });
+    // Step 37: Migrace na Alpine.js CSP-safe
+    // Logika open/close/select je nyní řízena přes Alpine komponentu provedeniModal
+    // v hamburger-menu.php. Tato funkce je ponechána prázdná pro zpětnou kompatibilitu.
   },
   
   toast(message, type = 'info') {
@@ -1149,6 +1256,8 @@ const WGS = {
   
 
   initCustomCalendar() {
+    // Step 38: Open/close logika migrována na Alpine.js (calendarModal)
+    // Renderování kalendáře zůstává vanilla JS
     const overlay = document.getElementById('calendarOverlay');
     if (!overlay) return;
     const grid = document.getElementById('calendarGrid');
@@ -1158,6 +1267,25 @@ const WGS = {
     const monthNames = [t('january'), t('february'), t('march'), t('april'), t('may'), t('june'), t('july'), t('august'), t('september'), t('october'), t('november'), t('december')];
     const weekDays = [t('monday'), t('tuesday'), t('wednesday'), t('thursday'), t('friday'), t('saturday'), t('sunday')];
     const self = this;
+
+    // Helper pro zavření modalu (Alpine nebo fallback)
+    const closeModal = () => {
+      if (window.calendarModal && window.calendarModal.close) {
+        window.calendarModal.close();
+      } else {
+        overlay.classList.remove('active');
+      }
+    };
+
+    // Helper pro otevření modalu (Alpine nebo fallback)
+    const openModal = () => {
+      if (window.calendarModal && window.calendarModal.open) {
+        window.calendarModal.open();
+      } else {
+        overlay.classList.add('active');
+      }
+    };
+
     const renderCalendar = () => {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
@@ -1175,7 +1303,7 @@ const WGS = {
         div.addEventListener('click', () => {
           const selected = day.toString().padStart(2, '0') + '.' + (month + 1).toString().padStart(2, '0') + '.' + year;
           if (selectedInput) { selectedInput.value = selected; if (selectedInput.id === 'datum_reklamace') { self.calculateWarranty(); } }
-          overlay.classList.remove('active');
+          closeModal(); // Step 38: Použít Alpine close
         });
         grid.appendChild(div);
       }
@@ -1186,22 +1314,28 @@ const WGS = {
         const wrapper = input.closest('.date-input-wrapper');
         if (wrapper) {
           wrapper.style.cursor = 'pointer';
-          wrapper.addEventListener('click', () => { if (!input.readOnly || self.isLoggedIn) { selectedInput = input; currentDate = new Date(); renderCalendar(); overlay.classList.add('active'); } });
+          wrapper.addEventListener('click', () => {
+            if (!input.readOnly || self.isLoggedIn) {
+              selectedInput = input;
+              currentDate = new Date();
+              renderCalendar();
+              openModal(); // Step 38: Použít Alpine open
+            }
+          });
         }
       }
     });
     document.getElementById('prevMonth').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); });
     document.getElementById('nextMonth').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); });
-    document.getElementById('closeCalendar').addEventListener('click', () => { overlay.classList.remove('active'); });
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
+    // Step 38: Close button a overlay click jsou nyní řízeny Alpine.js
   },
 
   /**
-   * ✅ FIX M-1: Warranty calculation pouze pro přihlášené uživatele
+   * FIX M-1: Warranty calculation pouze pro přihlášené uživatele
    * Nepřihlášení mají datum_prodeje a datum_reklamace = "nevyplňuje se" (readonly)
    */
   calculateWarranty() {
-    // ✅ FIX M-1: Warranty calculation pouze pro přihlášené
+    // FIX M-1: Warranty calculation pouze pro přihlášené
     if (!this.isLoggedIn) {
       return; // Nepřihlášení nemají přístup k těmto datům
     }
@@ -1210,11 +1344,11 @@ const WGS = {
     const datumReklamace = document.getElementById('datum_reklamace').value;
     const warning = document.getElementById('warrantyWarning');
 
-    // ✅ FIX M-1: Zkontrolovat platnost hodnot
+    // FIX M-1: Zkontrolovat platnost hodnot
     if (!datumProdeje || !datumReklamace ||
         datumProdeje === 'nevyplňuje se' ||
         datumReklamace === 'nevyplňuje se') {
-      if (warning) warning.style.display = 'none';
+      if (warning) warning.classList.add('hidden');
       return;
     }
 
@@ -1227,12 +1361,12 @@ const WGS = {
       const prodej = parseCzDate(datumProdeje);
       const reklamace = parseCzDate(datumReklamace);
       const warrantyEnd = new Date(prodej);
-      // ✅ FIX L-2: Použít konstantu WARRANTY_YEARS
+      // FIX L-2: Použít konstantu WARRANTY_YEARS
       warrantyEnd.setFullYear(warrantyEnd.getFullYear() + CONSTANTS.WARRANTY_YEARS);
       const daysRemaining = Math.ceil((warrantyEnd - reklamace) / (1000 * 60 * 60 * 24));
 
       if (warning) {
-        warning.style.display = 'block';
+        warning.classList.remove('hidden');
         if (daysRemaining > 0) {
           warning.className = '';
           warning.innerHTML = t('warranty_valid')
@@ -1247,7 +1381,7 @@ const WGS = {
       }
     } catch (err) {
       logger.error('Chyba při výpočtu záruky:', err);
-      if (warning) warning.style.display = 'none';
+      if (warning) warning.classList.add('hidden');
     }
   },
 

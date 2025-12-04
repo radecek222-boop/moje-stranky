@@ -108,26 +108,29 @@ if ($activeTab === 'dashboard') {
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="WGS Admin">
   <title>Administrace | White Glove Service</title>
+  <link rel="preload" href="/assets/css/styles.min.css?v=<?= filemtime(__DIR__ . '/assets/css/styles.min.css') ?>" as="style">
+  <link rel="preload" href="/assets/css/admin.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin.min.css') ?>" as="style">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- External CSS -->
     <!-- Unified Design System -->
-  <link rel="stylesheet" href="/assets/css/styles.min.css">
-  <link rel="stylesheet" href="/assets/css/admin.css">
-<link rel="stylesheet" href="/assets/css/admin-header.css">
-<link rel="stylesheet" href="/assets/css/admin-notifications.css">
-  <link rel="stylesheet" href="/assets/css/mobile-responsive.css">
+  <link rel="stylesheet" href="/assets/css/styles.min.css?v=<?= filemtime(__DIR__ . '/assets/css/styles.min.css') ?>">
+  <link rel="stylesheet" href="/assets/css/admin.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin.min.css') ?>">
+<link rel="stylesheet" href="/assets/css/admin-header.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin-header.min.css') ?>">
+<link rel="stylesheet" href="/assets/css/admin-notifications.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin-notifications.min.css') ?>">
+  <link rel="stylesheet" href="/assets/css/mobile-responsive.min.css">
+  <!-- admin-mobile-fixes.css sloučen do admin.css (Step 51) -->
+  <link rel="stylesheet" href="/assets/css/button-fixes-global.min.css">
+  <!-- Univerzální tmavý styl pro všechny modály -->
+  <link rel="stylesheet" href="/assets/css/universal-modal-theme.min.css">
 
   <!-- Error Handler - zachytává všechny chyby -->
-  <script src="/assets/js/error-handler.js"></script>
-  <script src="/assets/js/html-sanitizer.js"></script>
-
-  <!-- Analytics Tracker -->
-  <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
+  <script src="/assets/js/error-handler.min.js"></script>
+  <script src="/assets/js/html-sanitizer.min.js"></script>
 </head>
 
 <body<?php
@@ -153,148 +156,82 @@ if (!$embedMode && $activeTab === 'dashboard'):
         <p class="admin-dashboard-subtitle" data-lang-cs="Centrální řídicí panel pro správu celé aplikace" data-lang-en="Central control panel for managing the entire application" data-lang-it="Pannello di controllo centrale per la gestione dell'intera applicazione">Centrální řídicí panel pro správu celé aplikace</p>
         <div class="admin-dashboard-actions">
             <span class="admin-version-info" id="adminVersionInfo" title="Verze Admin - čas poslední úpravy">v<?= date('Y.m.d-Hi', filemtime(__FILE__)) ?></span>
-            <button class="admin-cache-btn" onclick="clearCacheAndReload()" data-lang-cs="Vymazat cache & Reload" data-lang-en="Clear cache & Reload" data-lang-it="Cancella cache & Ricarica">Vymazat cache & Reload</button>
+            <button class="admin-cache-btn" data-action="clearCacheAndReload" data-lang-cs="Vymazat cache & Reload" data-lang-en="Clear cache & Reload" data-lang-it="Cancella cache & Ricarica">Vymazat cache & Reload</button>
         </div>
     </div>
 
-    <!-- HLAVNÍ NAVIGACE -->
-    <div class="admin-kategorie">
-        <h2 class="admin-kategorie-nadpis" data-lang-cs="Hlavní navigace" data-lang-en="Main Navigation" data-lang-it="Navigazione Principale">Hlavní navigace</h2>
-        <div class="cc-grid">
-            <div class="cc-card" onclick="window.location='index.php'">
-                <div class="cc-card-title" data-lang-cs="Domů" data-lang-en="Home" data-lang-it="Home">Domů</div>
-                <div class="cc-card-description" data-lang-cs="Hlavní stránka aplikace" data-lang-en="Main application page" data-lang-it="Pagina principale dell'applicazione">Hlavní stránka aplikace</div>
-            </div>
-
-            <div class="cc-card" onclick="window.location='seznam.php'">
-                <div class="cc-card-title" data-lang-cs="Seznam reklamací" data-lang-en="Claims List" data-lang-it="Elenco Reclami">Seznam reklamací</div>
-                <div class="cc-card-description" data-lang-cs="Přehled všech reklamací a servisních požadavků" data-lang-en="Overview of all claims and service requests" data-lang-it="Panoramica di tutti i reclami e le richieste di servizio">Přehled všech reklamací a servisních požadavků</div>
-            </div>
-
-            <div class="cc-card" onclick="window.location='protokol.php'">
-                <div class="cc-card-title" data-lang-cs="Nový protokol" data-lang-en="New Protocol" data-lang-it="Nuovo Protocollo">Nový protokol</div>
-                <div class="cc-card-description" data-lang-cs="Vytvořit nový servisní protokol" data-lang-en="Create new service protocol" data-lang-it="Crea nuovo protocollo di servizio">Vytvořit nový servisní protokol</div>
-            </div>
-
-            <div class="cc-card" onclick="window.location='statistiky.php'">
-                <div class="cc-card-title" data-lang-cs="Statistiky" data-lang-en="Statistics" data-lang-it="Statistiche">Statistiky</div>
-                <div class="cc-card-description" data-lang-cs="Přehledy, grafy a analytické reporty" data-lang-en="Overviews, charts and analytical reports" data-lang-it="Panoramiche, grafici e report analitici">Přehledy, grafy a analytické reporty</div>
-            </div>
-
-            <div class="cc-card" onclick="window.location='analytics.php'">
-                <div class="cc-card-title" data-lang-cs="Web Analytics" data-lang-en="Web Analytics" data-lang-it="Web Analytics">Web Analytics</div>
-                <div class="cc-card-description" data-lang-cs="Návštěvnost webu, zařízení, konverze" data-lang-en="Website traffic, devices, conversions" data-lang-it="Traffico sito web, dispositivi, conversioni">Návštěvnost webu, zařízení, konverze</div>
-            </div>
-
-            <div class="cc-card" onclick="window.location='aktuality.php'">
-                <div class="cc-card-title" data-lang-cs="Natuzzi Aktuality" data-lang-en="Natuzzi News" data-lang-it="Notizie Natuzzi">Natuzzi Aktuality</div>
-                <div class="cc-card-description" data-lang-cs="Automatické denní aktuality o značce Natuzzi (CZ/EN/IT)" data-lang-en="Automatic daily news about Natuzzi brand (CZ/EN/IT)" data-lang-it="Notizie quotidiane automatiche sul marchio Natuzzi (CZ/EN/IT)">Automatické denní aktuality o značce Natuzzi (CZ/EN/IT)</div>
-            </div>
+    <div class="cc-grid">
+        <div class="cc-card" data-href="seznam.php">
+            <div class="cc-card-title" data-lang-cs="Seznam reklamací" data-lang-en="Claims List" data-lang-it="Elenco Reclami">Seznam reklamací</div>
+            <div class="cc-card-description" data-lang-cs="Přehled všech reklamací a servisních požadavků" data-lang-en="Overview of all claims and service requests" data-lang-it="Panoramica di tutti i reclami e le richieste di servizio">Přehled všech reklamací a servisních požadavků</div>
         </div>
-    </div>
 
-    <!-- SPRÁVA & BEZPEČNOST -->
-    <div class="admin-kategorie">
-        <h2 class="admin-kategorie-nadpis" data-lang-cs="Správa & Bezpečnost" data-lang-en="Management & Security" data-lang-it="Gestione & Sicurezza">Správa & Bezpečnost</h2>
-        <div class="cc-grid">
-            <div class="cc-card" onclick="window.location='admin.php?tab=users'">
-                <div class="cc-card-title" data-lang-cs="Uživatelé" data-lang-en="Users" data-lang-it="Utenti">Uživatelé</div>
-                <div class="cc-card-description" data-lang-cs="Správa uživatelských účtů a oprávnění" data-lang-en="User account and permission management" data-lang-it="Gestione account utente e permessi">Správa uživatelských účtů a oprávnění</div>
-            </div>
-
-            <div class="cc-card" onclick="window.location='admin.php?tab=keys'">
-                <?php if ($activeKeys > 0): ?>
-                    <div class="cc-card-badge"><?= $activeKeys ?></div>
-                <?php endif; ?>
-                <div class="cc-card-title" data-lang-cs="Bezpečnost & Klíče" data-lang-en="Security & Keys" data-lang-it="Sicurezza & Chiavi">Bezpečnost & Klíče</div>
-                <div class="cc-card-description" data-lang-cs="Registrační klíče, API klíče, bezpečnostní nastavení" data-lang-en="Registration keys, API keys, security settings" data-lang-it="Chiavi di registrazione, chiavi API, impostazioni di sicurezza">Registrační klíče, API klíče, bezpečnostní nastavení</div>
-            </div>
-
-            <div class="cc-card" onclick="window.location='admin.php?tab=notifications'">
-                <div class="cc-card-title" data-lang-cs="Email & SMS" data-lang-en="Email & SMS" data-lang-it="Email & SMS">Email & SMS</div>
-                <div class="cc-card-description" data-lang-cs="Správa emailových a SMS notifikací" data-lang-en="Email and SMS notification management" data-lang-it="Gestione notifiche email e SMS">Správa emailových a SMS notifikací</div>
-            </div>
-
-            <div class="cc-card" onclick="window.location='admin.php?tab=online'">
-                <div class="cc-card-title" data-lang-cs="Online uživatelé" data-lang-en="Online Users" data-lang-it="Utenti Online">Online uživatelé</div>
-                <div class="cc-card-description" data-lang-cs="Aktuálně přihlášení uživatelé v systému" data-lang-en="Currently logged in users in the system" data-lang-it="Utenti attualmente connessi al sistema">Aktuálně přihlášení uživatelé v systému</div>
-            </div>
+        <div class="cc-card" data-href="admin.php?tab=zakaznici">
+            <div class="cc-card-title" data-lang-cs="Seznam zákazníků" data-lang-en="Customer List" data-lang-it="Elenco Clienti">Seznam zákazníků</div>
+            <div class="cc-card-description" data-lang-cs="Přehled všech zákazníků s kontaktními údaji a zakázkami" data-lang-en="Overview of all customers with contact information and orders" data-lang-it="Panoramica di tutti i clienti con informazioni di contatto e ordini">Přehled všech zákazníků s kontaktními údaji a zakázkami</div>
         </div>
-    </div>
 
-    <!-- SYSTÉM -->
-    <div class="admin-kategorie">
-        <h2 class="admin-kategorie-nadpis" data-lang-cs="Systém" data-lang-en="System" data-lang-it="Sistema">Systém</h2>
-        <div class="cc-grid">
-            <div class="cc-card" onclick="window.location='admin.php?tab=admin_configuration'">
-                <div class="cc-card-title" data-lang-cs="Konfigurace" data-lang-en="Configuration" data-lang-it="Configurazione">Konfigurace</div>
-                <div class="cc-card-description" data-lang-cs="SMTP, API klíče, systémová nastavení" data-lang-en="SMTP, API keys, system settings" data-lang-it="SMTP, chiavi API, impostazioni di sistema">SMTP, API klíče, systémová nastavení</div>
-            </div>
-
-            <div class="cc-card" onclick="window.location='admin.php?tab=admin_actions'">
-                <?php if ($pendingActions > 0): ?>
-                    <div class="cc-card-badge"><?= $pendingActions ?></div>
-                <?php endif; ?>
-                <div class="cc-card-title" data-lang-cs="Akce & Úkoly" data-lang-en="Actions & Tasks" data-lang-it="Azioni & Compiti">Akce & Úkoly</div>
-                <div class="cc-card-description" data-lang-cs="Nevyřešené úkoly a plánované akce" data-lang-en="Unresolved tasks and scheduled actions" data-lang-it="Compiti non risolti e azioni pianificate">Nevyřešené úkoly a plánované akce</div>
-            </div>
-
-            <div class="cc-card" onclick="window.location='admin.php?tab=tools'">
-                <div class="cc-card-title" data-lang-cs="Nástroje" data-lang-en="Tools" data-lang-it="Strumenti">Nástroje</div>
-                <div class="cc-card-description" data-lang-cs="Diagnostické nástroje a utilities" data-lang-en="Diagnostic tools and utilities" data-lang-it="Strumenti diagnostici e utility">Diagnostické nástroje a utilities</div>
-            </div>
+        <div class="cc-card" data-href="statistiky.php">
+            <div class="cc-card-title" data-lang-cs="Statistiky" data-lang-en="Statistics" data-lang-it="Statistiche">Statistiky</div>
+            <div class="cc-card-description" data-lang-cs="Přehledy, grafy a analytické reporty" data-lang-en="Overviews, charts and analytical reports" data-lang-it="Panoramiche, grafici e report analitici">Přehledy, grafy a analytické reporty</div>
         </div>
-    </div>
 
-    <!-- VÝVOJ & TESTOVÁNÍ -->
-    <div class="admin-kategorie">
-        <h2 class="admin-kategorie-nadpis" data-lang-cs="Vývoj & Testování" data-lang-en="Development & Testing" data-lang-it="Sviluppo & Test">Vývoj & Testování</h2>
-        <div class="cc-grid">
-            <div class="cc-card" onclick="window.location='admin.php?tab=admin_phpunit'">
-                <div class="cc-card-title" data-lang-cs="PHPUnit Testy" data-lang-en="PHPUnit Tests" data-lang-it="Test PHPUnit">PHPUnit Testy</div>
-                <div class="cc-card-description" data-lang-cs="Spuštění automatických testů" data-lang-en="Run automated tests" data-lang-it="Esegui test automatici">Spuštění automatických testů</div>
-            </div>
-
-            <div class="cc-card" onclick="window.location='admin.php?tab=admin_testing_simulator'">
-                <div class="cc-card-title" data-lang-cs="E2E Testing" data-lang-en="E2E Testing" data-lang-it="Test E2E">E2E Testing</div>
-                <div class="cc-card-description" data-lang-cs="End-to-end testování celého workflow" data-lang-en="End-to-end testing of entire workflow" data-lang-it="Test end-to-end dell'intero flusso di lavoro">End-to-end testování celého workflow</div>
-            </div>
-
-            <div class="cc-card" onclick="window.location='admin.php?tab=admin_console'">
-                <div class="cc-card-title" data-lang-cs="Konzole" data-lang-en="Console" data-lang-it="Console">Konzole</div>
-                <div class="cc-card-description" data-lang-cs="Diagnostika HTML/PHP/JS/CSS/SQL" data-lang-en="Diagnostics HTML/PHP/JS/CSS/SQL" data-lang-it="Diagnostica HTML/PHP/JS/CSS/SQL">Diagnostika HTML/PHP/JS/CSS/SQL</div>
-            </div>
+        <div class="cc-card" data-href="analytics.php">
+            <div class="cc-card-title" data-lang-cs="Web Analytics" data-lang-en="Web Analytics" data-lang-it="Web Analytics">Web Analytics</div>
+            <div class="cc-card-description" data-lang-cs="Návštěvnost webu, zařízení, konverze" data-lang-en="Website traffic, devices, conversions" data-lang-it="Traffico sito web, dispositivi, conversioni">Návštěvnost webu, zařízení, konverze</div>
         </div>
-    </div>
 
-    <!-- DESIGN & DATABÁZE -->
-    <div class="admin-kategorie">
-        <h2 class="admin-kategorie-nadpis" data-lang-cs="Design & Databáze" data-lang-en="Design & Database" data-lang-it="Design & Database">Design & Databáze</h2>
-        <div class="cc-grid">
-            <div class="cc-card" onclick="window.location='admin.php?tab=admin_appearance'">
-                <div class="cc-card-title" data-lang-cs="Vzhled & Design" data-lang-en="Appearance & Design" data-lang-it="Aspetto & Design">Vzhled & Design</div>
-                <div class="cc-card-description" data-lang-cs="Barvy, fonty, logo, branding" data-lang-en="Colors, fonts, logo, branding" data-lang-it="Colori, caratteri, logo, branding">Barvy, fonty, logo, branding</div>
-            </div>
+        <div class="cc-card" data-href="aktuality.php">
+            <div class="cc-card-title" data-lang-cs="Natuzzi Aktuality" data-lang-en="Natuzzi News" data-lang-it="Notizie Natuzzi">Natuzzi Aktuality</div>
+            <div class="cc-card-description" data-lang-cs="Automatické denní aktuality o značce Natuzzi (CZ/EN/IT)" data-lang-en="Automatic daily news about Natuzzi brand (CZ/EN/IT)" data-lang-it="Notizie quotidiane automatiche sul marchio Natuzzi (CZ/EN/IT)">Automatické denní aktuality o značce Natuzzi (CZ/EN/IT)</div>
+        </div>
 
-            <div class="cc-card" onclick="window.location='admin.php?tab=admin_content'">
-                <div class="cc-card-title" data-lang-cs="Správa Obsahu" data-lang-en="Content Management" data-lang-it="Gestione Contenuti">Správa Obsahu</div>
-                <div class="cc-card-description" data-lang-cs="Editace textů a obsahových bloků" data-lang-en="Edit texts and content blocks" data-lang-it="Modifica testi e blocchi di contenuto">Editace textů a obsahových bloků</div>
-            </div>
+        <div class="cc-card" data-href="admin.php?tab=users">
+            <div class="cc-card-title" data-lang-cs="Uživatelé" data-lang-en="Users" data-lang-it="Utenti">Uživatelé</div>
+            <div class="cc-card-description" data-lang-cs="Správa uživatelských účtů a oprávnění" data-lang-en="User account and permission management" data-lang-it="Gestione account utente e permessi">Správa uživatelských účtů a oprávnění</div>
+        </div>
 
-            <div class="cc-card" onclick="openSQLPage()">
-                <div class="cc-card-title" data-lang-cs="SQL Databáze" data-lang-en="SQL Database" data-lang-it="Database SQL">SQL Databáze</div>
-                <div class="cc-card-description" data-lang-cs="Zobrazit všechny SQL tabulky (aktuální živá data)" data-lang-en="View all SQL tables (current live data)" data-lang-it="Visualizza tutte le tabelle SQL (dati live attuali)">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
-            </div>
+        <div class="cc-card" data-href="admin.php?tab=keys">
+            <?php if ($activeKeys > 0): ?>
+                <div class="cc-card-badge"><?= $activeKeys ?></div>
+            <?php endif; ?>
+            <div class="cc-card-title" data-lang-cs="Bezpečnost & Klíče" data-lang-en="Security & Keys" data-lang-it="Sicurezza & Chiavi">Bezpečnost & Klíče</div>
+            <div class="cc-card-description" data-lang-cs="Registrační klíče, API klíče, bezpečnostní nastavení" data-lang-en="Registration keys, API keys, security settings" data-lang-it="Chiavi di registrazione, chiavi API, impostazioni di sicurezza">Registrační klíče, API klíče, bezpečnostní nastavení</div>
+        </div>
 
-            <div class="cc-card" onclick="window.location='kontrola_analytics_dat.php'">
-                <div class="cc-card-title" data-lang-cs="Analytics Data" data-lang-en="Analytics Data" data-lang-it="Dati Analytics">Analytics Data</div>
-                <div class="cc-card-description" data-lang-cs="Kontrola trackingu návštěvnosti a ignorovaných IP" data-lang-en="Check visitor tracking and ignored IPs" data-lang-it="Controlla il tracciamento dei visitatori e gli IP ignorati">Kontrola trackingu návštěvnosti a ignorovaných IP</div>
-            </div>
+        <div class="cc-card" data-href="admin.php?tab=notifications">
+            <div class="cc-card-title" data-lang-cs="Email & SMS" data-lang-en="Email & SMS" data-lang-it="Email & SMS">Email & SMS</div>
+            <div class="cc-card-description" data-lang-cs="Správa emailových a SMS notifikací" data-lang-en="Email and SMS notification management" data-lang-it="Gestione notifiche email e SMS">Správa emailových a SMS notifikací</div>
+        </div>
 
-            <div class="cc-card" onclick="window.location='vytvor_tabulku_aktuality.php'">
-                <div class="cc-card-title" data-lang-cs="Migrace: Aktuality" data-lang-en="Migration: News" data-lang-it="Migrazione: Notizie">Migrace: Aktuality</div>
-                <div class="cc-card-description" data-lang-cs="Vytvoření tabulky pro automatické denní aktuality Natuzzi" data-lang-en="Create table for automatic daily Natuzzi news" data-lang-it="Crea tabella per notizie quotidiane automatiche Natuzzi">Vytvoření tabulky pro automatické denní aktuality Natuzzi</div>
-            </div>
+        <div class="cc-card" data-href="admin.php?tab=online">
+            <div class="cc-card-title" data-lang-cs="Online uživatelé" data-lang-en="Online Users" data-lang-it="Utenti Online">Online uživatelé</div>
+            <div class="cc-card-description" data-lang-cs="Aktuálně přihlášení uživatelé v systému" data-lang-en="Currently logged in users in the system" data-lang-it="Utenti attualmente connessi al sistema">Aktuálně přihlášení uživatelé v systému</div>
+        </div>
+
+        <div class="cc-card" data-href="admin.php?tab=admin_configuration">
+            <div class="cc-card-title" data-lang-cs="Konfigurace" data-lang-en="Configuration" data-lang-it="Configurazione">Konfigurace</div>
+            <div class="cc-card-description" data-lang-cs="SMTP, API klíče, systémová nastavení" data-lang-en="SMTP, API keys, system settings" data-lang-it="SMTP, chiavi API, impostazioni di sistema">SMTP, API klíče, systémová nastavení</div>
+        </div>
+
+        <div class="cc-card" data-href="psa-kalkulator.php">
+            <div class="cc-card-title" data-lang-cs="PSA Kalkulátor" data-lang-en="PSA Calculator" data-lang-it="Calcolatore PSA">PSA Kalkulátor</div>
+            <div class="cc-card-description" data-lang-cs="Výpočet mezd a docházky zaměstnanců" data-lang-en="Employee salary and attendance calculation" data-lang-it="Calcolo stipendi e presenze dipendenti">Výpočet mezd a docházky zaměstnanců</div>
+        </div>
+
+        <div class="cc-card" data-href="admin.php?tab=admin_testing_simulator">
+            <div class="cc-card-title" data-lang-cs="E2E Testing" data-lang-en="E2E Testing" data-lang-it="Test E2E">E2E Testing</div>
+            <div class="cc-card-description" data-lang-cs="End-to-end testování celého workflow" data-lang-en="End-to-end testing of entire workflow" data-lang-it="Test end-to-end dell'intero flusso di lavoro">End-to-end testování celého workflow</div>
+        </div>
+
+        <div class="cc-card" data-href="admin.php?tab=admin_console">
+            <div class="cc-card-title" data-lang-cs="Konzole" data-lang-en="Console" data-lang-it="Console">Konzole</div>
+            <div class="cc-card-description" data-lang-cs="Diagnostika HTML/PHP/JS/CSS/SQL" data-lang-en="Diagnostics HTML/PHP/JS/CSS/SQL" data-lang-it="Diagnostica HTML/PHP/JS/CSS/SQL">Diagnostika HTML/PHP/JS/CSS/SQL</div>
+        </div>
+
+        <div class="cc-card" data-action="openSQLPage">
+            <div class="cc-card-title" data-lang-cs="SQL Databáze" data-lang-en="SQL Database" data-lang-it="Database SQL">SQL Databáze</div>
+            <div class="cc-card-description" data-lang-cs="Zobrazit všechny SQL tabulky (aktuální živá data)" data-lang-en="View all SQL tables (current live data)" data-lang-it="Visualizza tutte le tabelle SQL (dati live attuali)">Zobrazit všechny SQL tabulky (aktuální živá data)</div>
         </div>
     </div>
 </div>
@@ -362,7 +299,7 @@ body {
 
 .admin-cache-btn {
     font-family: 'Poppins', sans-serif;
-    background: #2D5016;
+    background: #333333;
     color: white;
     border: none;
     padding: 0.5rem 0.75rem;
@@ -431,13 +368,9 @@ body {
 </style>
 <?php endif; ?>
 
-<?php if (!$embedMode && $activeTab !== 'dashboard'): ?>
-<?php require_once __DIR__ . "/includes/admin_header.php"; ?>
-<?php endif; ?>
-
 <?php if ($activeTab !== 'dashboard'): ?>
 <!-- MAIN CONTENT -->
-<main>
+<main id="main-content">
 <div class="container">
 
   <?php if (!$embedMode && !str_starts_with($activeTab, 'admin_') && $activeTab !== 'dashboard'): ?>
@@ -506,7 +439,7 @@ body {
     .notif-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        border-color: #2D5016;
+        border-color: #333333;
     }
 
     .notif-card-title {
@@ -561,26 +494,36 @@ body {
       <!-- Card Grid -->
       <div class="notif-card-grid">
 
-        <!-- Email šablony -->
-        <div class="notif-card" onclick="openNotifModal('email-templates')">
+        <!-- Email šablony - Step 53: HTMX migrace -->
+        <div class="notif-card"
+             hx-get="/api/notification_list_html.php?type=email"
+             hx-target="#notifModalBody"
+             hx-trigger="click"
+             hx-on::before-request="document.getElementById('notifModalTitle').textContent = 'Email šablony'"
+             hx-on::after-request="if(window.notifModal) window.notifModal.open()">
           <div class="notif-card-title">Email šablony</div>
           <div class="notif-card-description">Editace šablon pro automatické emaily (nová reklamace, změna stavu, dokončení)</div>
           <div class="notif-card-meta">
-            <span class="notif-card-badge active">5 šablon</span>
+            <span class="notif-card-badge active">HTMX</span>
           </div>
         </div>
 
-        <!-- SMS šablony -->
-        <div class="notif-card" onclick="openNotifModal('sms-templates')">
+        <!-- SMS šablony - Step 54: HTMX migrace -->
+        <div class="notif-card"
+             hx-get="/api/notification_list_html.php?type=sms"
+             hx-target="#notifModalBody"
+             hx-trigger="click"
+             hx-on::before-request="document.getElementById('notifModalTitle').textContent = 'SMS šablony'"
+             hx-on::after-request="if(window.notifModal) window.notifModal.open()">
           <div class="notif-card-title">SMS šablony</div>
           <div class="notif-card-description">Nastavení SMS notifikací pro zákazníky a techniky</div>
           <div class="notif-card-meta">
-            <span class="notif-card-badge active">3 šablony</span>
+            <span class="notif-card-badge active">HTMX</span>
           </div>
         </div>
 
         <!-- Příjemci emailů -->
-        <div class="notif-card" onclick="openNotifModal('email-recipients')">
+        <div class="notif-card" data-action="openNotifModal" data-modal="email-recipients">
           <div class="notif-card-title">Příjemci emailů</div>
           <div class="notif-card-description">Správa seznamu příjemců pro různé typy notifikací</div>
           <div class="notif-card-meta">
@@ -589,7 +532,7 @@ body {
         </div>
 
         <!-- Automatické notifikace -->
-        <div class="notif-card" onclick="openNotifModal('auto-notifications')">
+        <div class="notif-card" data-action="openNotifModal" data-modal="auto-notifications">
           <div class="notif-card-title">Automatické notifikace</div>
           <div class="notif-card-description">Nastavení pravidel pro automatické odesílání emailů a SMS</div>
           <div class="notif-card-meta">
@@ -598,7 +541,7 @@ body {
         </div>
 
         <!-- SMTP nastavení -->
-        <div class="notif-card" onclick="openNotifModal('smtp-settings')">
+        <div class="notif-card" data-action="openNotifModal" data-modal="smtp-settings">
           <div class="notif-card-title">SMTP nastavení</div>
           <div class="notif-card-description">Konfigurace SMTP serveru pro odesílání emailů</div>
           <div class="notif-card-meta">
@@ -607,7 +550,7 @@ body {
         </div>
 
         <!-- SMS gateway -->
-        <div class="notif-card" onclick="openNotifModal('sms-gateway')">
+        <div class="notif-card" data-action="openNotifModal" data-modal="sms-gateway">
           <div class="notif-card-title">SMS Gateway</div>
           <div class="notif-card-description">Nastavení SMS brány a API klíčů pro odesílání SMS</div>
           <div class="notif-card-meta">
@@ -616,16 +559,16 @@ body {
         </div>
 
         <!-- Email Management -->
-        <div class="notif-card" onclick="window.location.href='email_management.php'">
+        <div class="notif-card" data-href="email_management.php">
           <div class="notif-card-title">Email Management</div>
           <div class="notif-card-description">Kompletní správa emailů - historie, fronta, selhavší + možnost znovu odeslat</div>
           <div class="notif-card-meta">
-            <span class="notif-card-badge">📧 Historie + Fronta</span>
+            <span class="notif-card-badge">Historie + Fronta</span>
           </div>
         </div>
 
         <!-- Test odesílání -->
-        <div class="notif-card" onclick="openNotifModal('test-sending')">
+        <div class="notif-card" data-action="openNotifModal" data-modal="test-sending">
           <div class="notif-card-title">Test odesílání</div>
           <div class="notif-card-description">Otestujte funkčnost email a SMS notifikací</div>
           <div class="notif-card-meta">
@@ -635,19 +578,21 @@ body {
 
       </div>
 
-      <!-- Hidden container for admin-notifications.js to load real data -->
+      <!-- Step 53: Hidden container DEPRECATED - HTMX nyní načítá přímo do modalu -->
+      <!-- Ponecháno pro zpětnou kompatibilitu s ostatními modal typy -->
       <div id="notifications-container" style="display: none;">
-        <div class="loading">Načítání notifikací...</div>
+        <div class="loading">Používejte HTMX endpoint</div>
       </div>
 
     </div>
 
-    <!-- MODAL OVERLAY -->
-    <div class="cc-modal-overlay" id="notifModalOverlay" onclick="closeNotifModal()">
-        <div class="cc-modal" onclick="event.stopPropagation()">
+    <!-- MODAL OVERLAY - Alpine.js (Step 44) -->
+    <div class="cc-modal-overlay" id="notifModalOverlay" role="dialog" aria-modal="true" aria-labelledby="notifModalTitle"
+         x-data="notifModal" x-init="init" @click="overlayClick">
+        <div class="cc-modal" @click.stop>
             <div class="cc-modal-header">
                 <h2 class="cc-modal-title" id="notifModalTitle">Notifikace</h2>
-                <button class="cc-modal-close" onclick="closeNotifModal()">×</button>
+                <button class="cc-modal-close" @click="close" aria-label="Zavřít">×</button>
             </div>
             <div class="cc-modal-body" id="notifModalBody">
                 <!-- Obsah se načte dynamicky -->
@@ -657,12 +602,11 @@ body {
 
     <script>
     // Modal systém pro notifikace
+    // Step 44: Migrace na Alpine.js - close/overlay click/ESC nyní řeší notifModal komponenta
         /**
      * OpenNotifModal
      */
 function openNotifModal(type) {
-        const overlay = document.getElementById('notifModalOverlay');
-        const modal = overlay.querySelector('.admin-modal');
         const title = document.getElementById('notifModalTitle');
         const body = document.getElementById('notifModalBody');
 
@@ -683,23 +627,34 @@ function openNotifModal(type) {
         // Načíst obsah podle typu
         loadNotifContent(type, body);
 
-        // Zobrazit modal - add active classes
-        overlay.classList.add('active');
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        // Step 44: Zobrazit modal přes Alpine.js API
+        if (window.notifModal && window.notifModal.open) {
+            window.notifModal.open();
+        } else {
+            // Fallback pro zpětnou kompatibilitu
+            const overlay = document.getElementById('notifModalOverlay');
+            const modal = overlay?.querySelector('.cc-modal');
+            overlay?.classList.add('active');
+            modal?.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
     }
 
         /**
      * CloseNotifModal
      */
 function closeNotifModal() {
-        const overlay = document.getElementById('notifModalOverlay');
-        const modal = overlay.querySelector('.admin-modal');
-
-        // Skrýt modal - remove active classes
-        overlay.classList.remove('active');
-        modal.classList.remove('active');
-        document.body.style.overflow = 'auto';
+        // Step 44: Zavřít modal přes Alpine.js API
+        if (window.notifModal && window.notifModal.close) {
+            window.notifModal.close();
+        } else {
+            // Fallback pro zpětnou kompatibilitu
+            const overlay = document.getElementById('notifModalOverlay');
+            const modal = overlay?.querySelector('.cc-modal');
+            overlay?.classList.remove('active');
+            modal?.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
     }
 
         /**
@@ -707,7 +662,7 @@ function closeNotifModal() {
      */
 function loadNotifContent(type, body) {
         // Zobrazit loading
-        body.innerHTML = `<div style="text-align: center; padding: 2rem; color: #666;">${t('loading')}</div>`;
+        body.innerHTML = `<div style="text-align: center; padding: 2rem; color: #ccc;">${t('loading')}</div>`;
 
         // Pro email-templates zkusit použít reálná data z notifications-container
         if (type === 'email-templates') {
@@ -728,22 +683,22 @@ function loadNotifContent(type, body) {
         const content = {
             'email-templates': `
                 <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">${t('notif_edit_email_templates')}</p>
+                    <p style="margin-bottom: 1rem; color: #ccc; font-size: 0.85rem;">${t('notif_edit_email_templates')}</p>
                     <div id="notifications-container-clone"></div>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
                             <div style="font-weight: 600; margin-bottom: 0.5rem;">${t('notif_new_claim')}</div>
-                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">${t('notif_new_claim_desc')}</div>
+                            <div style="font-size: 0.8rem; color: #ccc; margin-bottom: 0.5rem;">${t('notif_new_claim_desc')}</div>
                             <button class="btn btn-sm" style="font-size: 0.7rem;">${t('edit_template')}</button>
                         </div>
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
                             <div style="font-weight: 600; margin-bottom: 0.5rem;">${t('notif_status_change')}</div>
-                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">${t('notif_status_change_desc')}</div>
+                            <div style="font-size: 0.8rem; color: #ccc; margin-bottom: 0.5rem;">${t('notif_status_change_desc')}</div>
                             <button class="btn btn-sm" style="font-size: 0.7rem;">${t('edit_template')}</button>
                         </div>
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
                             <div style="font-weight: 600; margin-bottom: 0.5rem;">${t('notif_claim_completion')}</div>
-                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">${t('notif_claim_completion_desc')}</div>
+                            <div style="font-size: 0.8rem; color: #ccc; margin-bottom: 0.5rem;">${t('notif_claim_completion_desc')}</div>
                             <button class="btn btn-sm" style="font-size: 0.7rem;">${t('edit_template')}</button>
                         </div>
                     </div>
@@ -751,16 +706,16 @@ function loadNotifContent(type, body) {
             `,
             'sms-templates': `
                 <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">${t('sms_templates_desc')}</p>
+                    <p style="margin-bottom: 1rem; color: #ccc; font-size: 0.85rem;">${t('sms_templates_desc')}</p>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
                             <div style="font-weight: 600; margin-bottom: 0.5rem;">${t('sms_for_customer')}</div>
-                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">Text: "Vaše reklamace {cislo} byla přijata"</div>
+                            <div style="font-size: 0.8rem; color: #ccc; margin-bottom: 0.5rem;">Text: "Vaše reklamace {cislo} byla přijata"</div>
                             <button class="btn btn-sm" style="font-size: 0.7rem;">${t('edit')}</button>
                         </div>
                         <div style="border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem;">
                             <div style="font-weight: 600; margin-bottom: 0.5rem;">${t('sms_for_technician')}</div>
-                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">Text: "Nová zakázka {cislo} - {mesto}"</div>
+                            <div style="font-size: 0.8rem; color: #ccc; margin-bottom: 0.5rem;">Text: "Nová zakázka {cislo} - {mesto}"</div>
                             <button class="btn btn-sm" style="font-size: 0.7rem;">${t('edit')}</button>
                         </div>
                     </div>
@@ -768,7 +723,7 @@ function loadNotifContent(type, body) {
             `,
             'email-recipients': `
                 <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">${t('email_recipients_desc')}</p>
+                    <p style="margin-bottom: 1rem; color: #ccc; font-size: 0.85rem;">${t('email_recipients_desc')}</p>
                     <div style="margin-bottom: 1rem;">
                         <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: 600;">${t('administrators')}</label>
                         <input type="text" placeholder="admin@example.com, admin2@example.com" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
@@ -782,7 +737,7 @@ function loadNotifContent(type, body) {
             `,
             'auto-notifications': `
                 <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Nastavení pravidel pro automatické odesílání</p>
+                    <p style="margin-bottom: 1rem; color: #ccc; font-size: 0.85rem;">Nastavení pravidel pro automatické odesílání</p>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; border: 1px solid #e0e0e0; border-radius: 6px;">
                             <input type="checkbox" checked>
@@ -804,19 +759,19 @@ function loadNotifContent(type, body) {
             `,
             'smtp-settings': `
                 <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Konfigurace SMTP serveru</p>
+                    <p style="margin-bottom: 1rem; color: #ccc; font-size: 0.85rem;">Konfigurace SMTP serveru</p>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <div>
-                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">SMTP Server *</label>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">SMTP Server *</label>
                             <input type="text" id="smtp_host" placeholder="smtp.gmail.com" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                             <div>
-                                <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Port</label>
+                                <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">Port</label>
                                 <input type="text" id="smtp_port" placeholder="587" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                             </div>
                             <div>
-                                <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Šifrování</label>
+                                <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">Šifrování</label>
                                 <select id="smtp_encryption" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                                     <option value="tls">TLS</option>
                                     <option value="ssl">SSL</option>
@@ -825,34 +780,34 @@ function loadNotifContent(type, body) {
                             </div>
                         </div>
                         <div>
-                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Uživatelské jméno *</label>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">Uživatelské jméno *</label>
                             <input type="text" id="smtp_username" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                         <div>
-                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Heslo *</label>
-                            <input type="password" id="smtp_password" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">Heslo *</label>
+                            <input type="password" id="smtp_password" autocomplete="off" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                         <div>
-                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">FROM Email</label>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">FROM Email</label>
                             <input type="email" id="smtp_from" placeholder="reklamace@wgs-service.cz" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                         <div>
-                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">FROM Name</label>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">FROM Name</label>
                             <input type="text" id="smtp_from_name" placeholder="White Glove Service" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                     </div>
                     <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-                        <button class="btn btn-sm" id="testSmtpBtn" onclick="testSmtpConnection()" style="font-size: 0.7rem;">Test připojení</button>
-                        <button class="btn btn-sm btn-success" id="saveSmtpBtn" onclick="saveSmtpConfig()" style="font-size: 0.7rem;">Uložit</button>
+                        <button class="btn btn-sm" id="testSmtpBtn" data-action="testSmtpConnection" style="font-size: 0.7rem;">Test připojení</button>
+                        <button class="btn btn-sm btn-success" id="saveSmtpBtn" data-action="saveSmtpConfig" style="font-size: 0.7rem;">Uložit</button>
                     </div>
                 </div>
             `,
             'sms-gateway': `
                 <div style="padding: 1rem;">
-                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.85rem;">Nastavení SMS brány</p>
+                    <p style="margin-bottom: 1rem; color: #ccc; font-size: 0.85rem;">Nastavení SMS brány</p>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <div>
-                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">Poskytovatel</label>
+                            <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #ccc;">Poskytovatel</label>
                             <select style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                                 <option>Twilio</option>
                                 <option>Nexmo</option>
@@ -865,7 +820,7 @@ function loadNotifContent(type, body) {
                         </div>
                         <div>
                             <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem; color: #666;">API Secret</label>
-                            <input type="password" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
+                            <input type="password" autocomplete="off" style="width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.8rem;">
                         </div>
                     </div>
                     <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
@@ -948,27 +903,60 @@ function loadNotifContent(type, body) {
       <div class="table-header">
         <h3 class="table-title" data-lang-cs="Všichni uživatelé" data-lang-en="All Users" data-lang-it="Tutti gli Utenti">Všichni uživatelé</h3>
         <div class="table-actions">
-          <input type="text" class="search-box" id="search-users" data-lang-cs-placeholder="Hledat..." data-lang-en-placeholder="Search..." data-lang-it-placeholder="Cerca..." placeholder="Hledat...">
+          <input type="search" class="search-box" id="search-users" enterkeyhint="search" aria-label="Hledat uživatele" data-lang-cs-placeholder="Hledat..." data-lang-en-placeholder="Search..." data-lang-it-placeholder="Cerca..." placeholder="Hledat...">
           <button class="btn btn-sm btn-success" id="addUserBtn" data-lang-cs="Přidat" data-lang-en="Add" data-lang-it="Aggiungi">Přidat</button>
           <button class="btn btn-sm" id="refreshUsersBtn" data-lang-cs="Obnovit" data-lang-en="Refresh" data-lang-it="Aggiorna">Obnovit</button>
         </div>
       </div>
-      
+
       <table>
         <thead>
           <tr>
-            <th>ID</th>
-            <th data-lang-cs="Jméno" data-lang-en="Name" data-lang-it="Nome">Jméno</th>
-            <th>Email</th>
-            <th data-lang-cs="Role" data-lang-en="Role" data-lang-it="Ruolo">Role</th>
-            <th>Status</th>
-            <th data-lang-cs="Registrace" data-lang-en="Registration" data-lang-it="Registrazione">Registrace</th>
-            <th data-lang-cs="Akce" data-lang-en="Actions" data-lang-it="Azioni">Akce</th>
+            <th scope="col">ID</th>
+            <th scope="col" data-lang-cs="Jméno" data-lang-en="Name" data-lang-it="Nome">Jméno</th>
+            <th scope="col">Email</th>
+            <th scope="col" data-lang-cs="Role" data-lang-en="Role" data-lang-it="Ruolo">Role</th>
+            <th scope="col">Status</th>
+            <th scope="col" data-lang-cs="Registrace" data-lang-en="Registration" data-lang-it="Registrazione">Registrace</th>
+            <th scope="col" data-lang-cs="Akce" data-lang-en="Actions" data-lang-it="Azioni">Akce</th>
           </tr>
         </thead>
-        <tbody id="users-table">
+        <tbody id="users-table" aria-live="polite">
           <tr>
-            <td colspan="7" class="loading" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
+            <td colspan="7" class="loading" role="status" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <?php if ($activeTab === 'zakaznici'): ?>
+  <!-- TAB: ZÁKAZNÍCI -->
+  <div id="tab-zakaznici" class="tab-content">
+    <div class="table-container">
+      <div class="table-header">
+        <h3 class="table-title" data-lang-cs="Všichni zákazníci" data-lang-en="All Customers" data-lang-it="Tutti i Clienti">Všichni zákazníci</h3>
+        <div class="table-actions">
+          <input type="search" class="search-box" id="search-zakaznici" enterkeyhint="search" aria-label="Hledat zákazníky" data-lang-cs-placeholder="Hledat..." data-lang-en-placeholder="Search..." data-lang-it-placeholder="Cerca..." placeholder="Hledat...">
+          <button class="btn btn-sm" id="refreshZakazniciBtn" data-lang-cs="Obnovit" data-lang-en="Refresh" data-lang-it="Aggiorna">Obnovit</button>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th scope="col" data-lang-cs="Jméno" data-lang-en="Name" data-lang-it="Nome">Jméno</th>
+            <th scope="col" data-lang-cs="Adresa" data-lang-en="Address" data-lang-it="Indirizzo">Adresa</th>
+            <th scope="col" data-lang-cs="Telefon" data-lang-en="Phone" data-lang-it="Telefono">Telefon</th>
+            <th scope="col">Email</th>
+            <th scope="col" data-lang-cs="Počet zakázek" data-lang-en="Orders Count" data-lang-it="Numero Ordini">Počet zakázek</th>
+            <th scope="col" data-lang-cs="Akce" data-lang-en="Actions" data-lang-it="Azioni">Akce</th>
+          </tr>
+        </thead>
+        <tbody id="zakaznici-table" aria-live="polite">
+          <tr>
+            <td colspan="6" class="loading" role="status" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
           </tr>
         </tbody>
       </table>
@@ -978,24 +966,22 @@ function loadNotifContent(type, body) {
 
 
   <!-- Overlay & Modal - MUST be outside dashboard condition so it exists in DOM -->
+  <!-- Alpine.js (Step 45) -->
   <?php if (!$embedMode): ?>
-  <div class="cc-overlay" id="adminOverlay" onclick="closeCCModal()"></div>
-  <div class="cc-modal" id="adminModal">
+  <div class="cc-overlay" id="adminOverlay"
+       x-data="adminModal" x-init="init" @click="overlayClick"></div>
+  <div class="cc-modal" id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
       <div class="cc-modal-header">
-          <button class="cc-modal-close" onclick="closeCCModal()" aria-label="Zavřít">×</button>
+          <h2 id="adminModalTitle" class="sr-only">Modal</h2>
+          <button class="cc-modal-close" data-action="closeCCModal" aria-label="Zavřít">×</button>
       </div>
       <div class="cc-modal-body" id="adminModalBody">
           <div class="cc-modal-loading">
-              <div class="cc-modal-spinner"></div>
+              <div class="cc-modal-spinner" aria-hidden="true"></div>
               <div style="margin-top: 1rem;">Načítání...</div>
           </div>
       </div>
   </div>
-  <?php endif; ?>
-
-  <?php if ($activeTab === 'admin_phpunit'): ?>
-  <!-- TAB: PHPUNIT TEST RUNNER -->
-  <?php require_once __DIR__ . '/includes/admin_phpunit.php'; ?>
   <?php endif; ?>
 
   <?php if ($activeTab === 'admin_testing'): ?>
@@ -1011,16 +997,6 @@ function loadNotifContent(type, body) {
   <?php if ($activeTab === 'admin_testing_simulator'): ?>
   <!-- TAB: E2E WORKFLOW SIMULATOR -->
   <?php require_once __DIR__ . '/includes/admin_testing_simulator.php'; ?>
-  <?php endif; ?>
-
-  <?php if ($activeTab === 'admin_appearance'): ?>
-  <!-- TAB: VZHLED & DESIGN -->
-  <?php require_once __DIR__ . '/includes/admin_appearance.php'; ?>
-  <?php endif; ?>
-
-  <?php if ($activeTab === 'admin_content'): ?>
-  <!-- TAB: OBSAH & TEXTY -->
-  <?php require_once __DIR__ . '/includes/admin_content.php'; ?>
   <?php endif; ?>
 
   <?php if ($activeTab === 'admin_console'): ?>
@@ -1039,10 +1015,8 @@ function loadNotifContent(type, body) {
   <?php endif; ?>
 
   <?php if ($activeTab === 'tools'): ?>
-  <!-- TAB: TOOLS & DIAGNOSTICS -->
-  <div id="tab-tools" class="tab-content">
-  <?php require_once __DIR__ . '/includes/admin_tools.php'; ?>
-  </div>
+  <!-- TAB: DIAGNOSTIKA & ÚDRŽBA -->
+  <?php require_once __DIR__ . '/includes/admin_diagnostics.php'; ?>
   <?php endif; ?>
 
   <?php if ($activeTab === 'online'): ?>
@@ -1059,16 +1033,16 @@ function loadNotifContent(type, body) {
       <table>
         <thead>
           <tr>
-            <th>Status</th>
-            <th data-lang-cs="Uživatel" data-lang-en="User" data-lang-it="Utente">Uživatel</th>
-            <th data-lang-cs="Role" data-lang-en="Role" data-lang-it="Ruolo">Role</th>
-            <th>Email</th>
-            <th data-lang-cs="Poslední aktivita" data-lang-en="Last Activity" data-lang-it="Ultima Attività">Poslední aktivita</th>
+            <th scope="col">Status</th>
+            <th scope="col" data-lang-cs="Uživatel" data-lang-en="User" data-lang-it="Utente">Uživatel</th>
+            <th scope="col" data-lang-cs="Role" data-lang-en="Role" data-lang-it="Ruolo">Role</th>
+            <th scope="col">Email</th>
+            <th scope="col" data-lang-cs="Poslední aktivita" data-lang-en="Last Activity" data-lang-it="Ultima Attività">Poslední aktivita</th>
           </tr>
         </thead>
-        <tbody id="online-table">
+        <tbody id="online-table" aria-live="polite">
           <tr>
-            <td colspan="5" class="loading" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
+            <td colspan="5" class="loading" role="status" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
           </tr>
         </tbody>
       </table>
@@ -1081,14 +1055,14 @@ function loadNotifContent(type, body) {
 <?php endif; // Konec MAIN (pokud není dashboard) ?>
 
 <!-- MODAL: Add User -->
-<div class="modal" id="addUserModal">
+<div class="modal" id="addUserModal" role="dialog" aria-modal="true" aria-labelledby="addUserModalTitle">
   <div class="modal-content" style="width: 90vw !important; height: 80vh !important; max-width: 90vw !important; max-height: 80vh !important; display: flex; flex-direction: column;">
     <div class="modal-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #ddd; flex-shrink: 0;">
-      <h3 class="modal-title" data-lang-cs="Přidat uživatele" data-lang-en="Add User" data-lang-it="Aggiungi Utente">Přidat uživatele</h3>
-      <button class="modal-close" id="closeModalBtn">×</button>
+      <h3 class="modal-title" id="addUserModalTitle" data-lang-cs="Přidat uživatele" data-lang-en="Add User" data-lang-it="Aggiungi Utente">Přidat uživatele</h3>
+      <button class="modal-close" id="closeModalBtn" aria-label="Zavřít">×</button>
     </div>
     <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 2rem;">
-      <div id="modal-error" class="error-message hidden"></div>
+      <div id="modal-error" class="error-message hidden" role="alert"></div>
 
       <div class="form-group">
         <label class="form-label" data-lang-cs="Jméno *" data-lang-en="Name *" data-lang-it="Nome *">Jméno *</label>
@@ -1120,7 +1094,7 @@ function loadNotifContent(type, body) {
 
       <div class="form-group">
         <label class="form-label" data-lang-cs="Heslo * (min. 8 znaků)" data-lang-en="Password * (min. 8 characters)" data-lang-it="Password * (min. 8 caratteri)">Heslo * (min. 8 znaků)</label>
-        <input type="password" class="form-input" id="add-password" required minlength="8">
+        <input type="password" class="form-input" id="add-password" required minlength="8" autocomplete="new-password">
       </div>
     </div>
     <div class="modal-footer" style="padding: 1.5rem 2rem; border-top: 1px solid #ddd; flex-shrink: 0;">
@@ -1131,24 +1105,25 @@ function loadNotifContent(type, body) {
 </div>
 
 <!-- External JavaScript -->
-<script src="/assets/js/logger.js"></script>
-<script src="/assets/js/csrf-auto-inject.js"></script>
-<!-- ✅ logout-handler.js je v hamburger-menu.php (načítá se VŠUDE včetně dashboardu) -->
-<script src="/assets/js/utils.js"></script>
-<script src="/assets/js/admin-notifications.js"></script>
-<script src="/assets/js/smtp-config.js"></script>
-<script src="/assets/js/admin.js"></script>
+<script src="/assets/js/logger.min.js?v=<?= filemtime(__DIR__ . '/assets/js/logger.min.js') ?>" defer></script>
+<script src="/assets/js/csrf-auto-inject.min.js?v=<?= filemtime(__DIR__ . '/assets/js/csrf-auto-inject.min.js') ?>" defer></script>
+<!-- logout-handler.js je v hamburger-menu.php (nacita se VSUDE vcetne dashboardu) -->
+<script src="/assets/js/utils.min.js?v=<?= filemtime(__DIR__ . '/assets/js/utils.min.js') ?>" defer></script>
+<script src="/assets/js/admin-notifications.min.js?v=<?= filemtime(__DIR__ . '/assets/js/admin-notifications.min.js') ?>" defer></script>
+<script src="/assets/js/smtp-config.min.js?v=<?= filemtime(__DIR__ . '/assets/js/smtp-config.min.js') ?>" defer></script>
+<script src="/assets/js/admin-actions-registry.js?v=<?= filemtime(__DIR__ . '/assets/js/admin-actions-registry.js') ?>" defer></script>
+<script src="/assets/js/admin.min.js?v=<?= filemtime(__DIR__ . '/assets/js/admin.min.js') ?>" defer></script>
 
 <!-- MODAL: Edit Notification -->
-<div class="wgs-modal" id="editNotificationModal" style="display: none;">
+<div class="wgs-modal" id="editNotificationModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="editNotificationTitle">
   <div class="modal-content" style="width: 1200px; max-width: 90vw; height: 80vh; display: flex; flex-direction: column; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
     <div class="modal-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #ddd; flex-shrink: 0;">
       <h3 class="modal-title" id="editNotificationTitle" data-lang-cs="Editovat notifikaci" data-lang-en="Edit Notification" data-lang-it="Modifica Notifica">Editovat notifikaci</h3>
-      <button class="modal-close" onclick="closeEditNotificationModal()">×</button>
+      <button class="modal-close" data-action="closeEditNotificationModal" aria-label="Zavřít">×</button>
     </div>
     <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 2rem;">
-      <div id="edit-notification-error" class="error-message" style="display: none;"></div>
-      <div id="edit-notification-success" class="success-message" style="display: none;"></div>
+      <div id="edit-notification-error" class="error-message" style="display: none;" role="alert"></div>
+      <div id="edit-notification-success" class="success-message" style="display: none;" role="status"></div>
       <div class="form-group">
         <label class="form-label" data-lang-cs="Příjemce" data-lang-en="Recipient" data-lang-it="Destinatario">Příjemce</label>
         <select class="form-select" id="edit-recipient">
@@ -1175,28 +1150,46 @@ function loadNotifContent(type, body) {
       </div>
       <div class="form-group">
         <label class="form-label" data-lang-cs="Dodatečné kopie emailů (CC)" data-lang-en="Additional Email Copies (CC)" data-lang-it="Copie Email Aggiuntive (CC)">Dodatečné kopie emailů (CC)</label>
+        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;">
+          <strong>Tip:</strong> Můžete použít proměnné jako <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{seller_email}}</code>, <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{technician_email}}</code> atd.
+        </div>
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-          <input type="email" class="form-input" id="new-cc-email" data-lang-cs-placeholder="novy@email.cz" data-lang-en-placeholder="new@email.com" data-lang-it-placeholder="nuovo@email.it" placeholder="novy@email.cz" style="flex: 1;">
-          <button class="btn btn-sm" onclick="addCCEmail()" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
+          <input type="email" class="form-input" id="new-cc-email" data-lang-cs-placeholder="novy@email.cz nebo {{seller_email}}" data-lang-en-placeholder="new@email.com or {{seller_email}}" data-lang-it-placeholder="nuovo@email.it o {{seller_email}}" placeholder="novy@email.cz nebo {{seller_email}}" style="flex: 1;">
+          <button class="btn btn-sm" data-action="addCCEmail" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
         </div>
         <div id="admin-emails-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
       </div>
       <div class="form-group">
         <label class="form-label" data-lang-cs="Skryté kopie (BCC)" data-lang-en="Blind Copies (BCC)" data-lang-it="Copie Nascoste (BCC)">Skryté kopie (BCC)</label>
+        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;">
+          <strong>Tip:</strong> Můžete použít proměnné jako <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{seller_email}}</code>, <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{technician_email}}</code> atd.
+        </div>
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-          <input type="email" class="form-input" id="new-bcc-email" data-lang-cs-placeholder="skryta@email.cz" data-lang-en-placeholder="hidden@email.com" data-lang-it-placeholder="nascosta@email.it" placeholder="skryta@email.cz" style="flex: 1;">
-          <button class="btn btn-sm" onclick="addBCCEmail()" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
+          <input type="email" class="form-input" id="new-bcc-email" data-lang-cs-placeholder="skryta@email.cz nebo {{seller_email}}" data-lang-en-placeholder="hidden@email.com or {{seller_email}}" data-lang-it-placeholder="nascosta@email.it o {{seller_email}}" placeholder="skryta@email.cz nebo {{seller_email}}" style="flex: 1;">
+          <button class="btn btn-sm" data-action="addBCCEmail" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
         </div>
         <div id="bcc-emails-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
       </div>
     </div>
     <div class="modal-footer" style="padding: 1.5rem 2rem; border-top: 1px solid #ddd; flex-shrink: 0;">
-      <button class="btn" onclick="closeEditNotificationModal()" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
-      <button class="btn btn-success" onclick="saveNotificationTemplate()" data-lang-cs="Uložit" data-lang-en="Save" data-lang-it="Salva">Uložit</button>
+      <button class="btn" data-action="closeEditNotificationModal" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
+      <button class="btn btn-success" data-action="saveNotificationTemplate" data-lang-cs="Uložit" data-lang-en="Save" data-lang-it="Salva">Uložit</button>
     </div>
   </div>
 </div>
 
+<?php
+/**
+ * POZNÁMKA: Centralizace registrací JS akcí
+ *
+ * Problém "hluchých" tlačítek byl vyřešen vytvořením statického souboru
+ * /assets/js/admin-actions-registry.js, který se načítá VŽDY (viz řádek 1117)
+ *
+ * Tento soubor obsahuje všechny Utils.registerAction() volání pro všechny admin akce.
+ * Akce jsou zaregistrovány globálně, ale vykonávají se pouze pokud existuje jejich funkce.
+ */
+?>
 
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>

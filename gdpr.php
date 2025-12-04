@@ -227,7 +227,7 @@
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
-<main>
+<main id="main-content">
   <section class="gdpr-hero">
     <h1>Zpracování osobních údajů (GDPR)</h1>
     <p>Transparentně vysvětlujeme, jaké informace při poskytování servisu shromažďujeme, proč je potřebujeme a jak chráníme vaše práva.</p>
@@ -372,6 +372,7 @@
   </div>
 </footer>
 
-<script src="assets/js/logger.js" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>

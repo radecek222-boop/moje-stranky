@@ -11,7 +11,6 @@
  *
  * @version 2.0.0
  * @date 2025-11-19
- * @author Claude Code (AI Assistant)
  */
 
 // Načíst PHPMailer pokud existuje

@@ -17,6 +17,7 @@ echo "<!DOCTYPE html>
 <html lang='cs'>
 <head>
     <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Migrace: Remember Me Tokens</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; max-width: 1000px; margin: 50px auto;
@@ -69,7 +70,7 @@ try {
             $pdo->commit();
 
             echo "<div class='success'>";
-            echo "<strong>✅ MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br>";
+            echo "<strong>MIGRACE ÚSPĚŠNĚ DOKONČENA</strong><br>";
             echo "Tabulka <code>wgs_remember_tokens</code> byla vytvořena.";
             echo "</div>";
 

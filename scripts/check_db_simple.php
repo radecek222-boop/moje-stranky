@@ -14,7 +14,7 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 
-    echo "✅ Připojeno k databázi: wgs-servicecz\n\n";
+    echo "Připojeno k databázi: wgs-servicecz\n\n";
 
     // Zjistit sloupce v wgs_reklamace
     echo "STRUKTURA wgs_reklamace:\n";
@@ -30,6 +30,6 @@ try {
     }
 
 } catch (PDOException $e) {
-    echo "❌ CHYBA: " . $e->getMessage() . "\n";
+    echo "CHYBA: " . $e->getMessage() . "\n";
     echo "\nNAPOVĚDA: Změň přihlašovací údaje v souboru check_db_simple.php\n";
 }

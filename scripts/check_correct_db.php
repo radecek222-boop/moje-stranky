@@ -13,7 +13,7 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 
-    echo "✅ Připojeno k databázi: wgs-servicecz01\n\n";
+    echo "Připojeno k databázi: wgs-servicecz01\n\n";
 
     // Zjistit sloupce v wgs_reklamace
     echo "STRUKTURA wgs_reklamace:\n";
@@ -68,5 +68,5 @@ try {
     echo "  wgs_users: {$count} záznamů\n";
 
 } catch (PDOException $e) {
-    echo "❌ CHYBA: " . $e->getMessage() . "\n";
+    echo "CHYBA: " . $e->getMessage() . "\n";
 }

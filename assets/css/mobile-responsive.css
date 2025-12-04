@@ -6,7 +6,11 @@
  *
  * @author: WGS Service Team
  * @date: 2025-11-20
+ * @updated: 2025-11-27 - Přidán import button-fixes-global.css
  */
+
+/* Import globálních oprav tlačítek */
+@import url('button-fixes-global.css');
 
 /* ============================================
    ZÁKLADNÍ MOBILNÍ OPTIMALIZACE
@@ -189,7 +193,7 @@ body {
     position: sticky;
     top: 0;
     background: white;
-    z-index: 10;
+    z-index: var(--z-sticky, 10);
     padding: 1rem;
   }
 
@@ -327,7 +331,7 @@ body {
     padding: 5rem 2rem 2rem;
     overflow-y: auto;
     transition: right 0.3s ease-in-out;
-    z-index: 9999;
+    z-index: var(--z-menu-overlay, 9999);
     flex-direction: column;
     gap: 0;
   }
@@ -355,7 +359,7 @@ body {
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
-    z-index: 9998;
+    z-index: var(--z-overlay-backdrop, 9998);
   }
 
   .menu-overlay.active {
@@ -772,5 +776,61 @@ body {
 @media screen and (min-width: 768px) {
   html {
     font-size: 16px;
+  }
+}
+
+/* ============================================
+   PWA SCROLL FIX - Prevence pull-to-refresh v modalech
+   ============================================ */
+
+/* Globalni nastaveni pro vsechny modalni overlaye */
+.modal-overlay,
+.cc-modal-overlay,
+#detailOverlay,
+#adminOverlay,
+#pdfPreviewOverlay,
+#calculatorModalOverlay,
+#zakaznikSchvaleniOverlay,
+#calendarOverlay,
+#provedeniOverlay,
+#rememberMeOverlay,
+#notifModalOverlay {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+/* Modal body - scrollovatelny obsah s containment */
+.modal-body,
+.cc-modal-body,
+.detail-content,
+.modal-content {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Body v zamknutem stavu (modal otevreny) */
+body.scroll-locked,
+body.modal-open {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* PWA standalone mode - dodatecne opravy */
+@media all and (display-mode: standalone) {
+  /* Zabranit pull-to-refresh na celem body */
+  body {
+    overscroll-behavior-y: contain;
+  }
+
+  /* Ale povolit uvnitr modalu */
+  .modal-overlay.active .modal-body,
+  .cc-modal-overlay.active .cc-modal-body,
+  #detailOverlay.active .detail-content {
+    overscroll-behavior: contain;
+    overflow-y: auto;
+    max-height: 80vh;
   }
 }

@@ -14,11 +14,13 @@
  *
  * @return string
  */
-function generateCSRFToken() {
-    if (!isset($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+if (!function_exists('generateCSRFToken')) {
+    function generateCSRFToken() {
+        if (!isset($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_token'];
     }
-    return $_SESSION['csrf_token'];
 }
 
 /**
@@ -27,38 +29,42 @@ function generateCSRFToken() {
  * @param string $token Token to validate
  * @return bool
  */
-function validateCSRFToken($token) {
-    if (!isset($_SESSION['csrf_token'])) {
-        return false;
-    }
+if (!function_exists('validateCSRFToken')) {
+    function validateCSRFToken($token) {
+        if (!isset($_SESSION['csrf_token'])) {
+            return false;
+        }
 
-    // SECURITY: Use hash_equals to prevent timing attacks
-    return hash_equals($_SESSION['csrf_token'], $token);
+        // SECURITY: Use hash_equals to prevent timing attacks
+        return hash_equals($_SESSION['csrf_token'], $token);
+    }
 }
 
 /**
  * RequireCSRF
  */
-function requireCSRF() {
-    // SECURITY FIX: Removed admin bypass - all users require CSRF tokens
-    // Even if admin account is compromised, CSRF protection remains active
+if (!function_exists('requireCSRF')) {
+    function requireCSRF() {
+        // SECURITY FIX: Removed admin bypass - all users require CSRF tokens
+        // Even if admin account is compromised, CSRF protection remains active
 
-    // Get token from POST, GET, or HTTP header
-    $token = $_POST['csrf_token'] ?? $_GET['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+        // Get token from POST, GET, or HTTP header
+        $token = $_POST['csrf_token'] ?? $_GET['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
 
-    // SECURITY: Ensure CSRF token is a string, not an array (array injection protection)
-    if (is_array($token)) {
-        $token = '';
-    }
+        // SECURITY: Ensure CSRF token is a string, not an array (array injection protection)
+        if (is_array($token)) {
+            $token = '';
+        }
 
-    if (!validateCSRFToken($token)) {
-        http_response_code(403);
-        header('Content-Type: application/json');
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Neplatný CSRF token. Obnovte stránku a zkuste znovu.'
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
+        if (!validateCSRFToken($token)) {
+            http_response_code(403);
+            header('Content-Type: application/json');
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Neplatný CSRF token. Obnovte stránku a zkuste znovu.'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
     }
 }
 ?>

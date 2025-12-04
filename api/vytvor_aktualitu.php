@@ -20,6 +20,9 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     sendJsonError('Přístup odepřen - pouze pro administrátory', 403);
 }
 
+// PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+session_write_close();
+
 try {
     $pdo = getDbConnection();
 
@@ -83,19 +86,31 @@ try {
     // Projít všechny nahrané soubory
     foreach ($_FILES as $key => $file) {
         if (strpos($key, 'foto_') === 0 && $file['error'] === UPLOAD_ERR_OK) {
-            $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
 
-            if (!in_array($file['type'], $allowedTypes)) {
+            // SECURITY FIX: Použít finfo pro skutečnou detekci MIME typu (ne Content-Type od prohlížeče)
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $realMimeType = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+
+            if (!in_array($realMimeType, $allowedTypes)) {
                 continue; // Přeskočit nepovolené typy
+            }
+
+            // Kontrola přípony
+            $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            if (!in_array($extension, $allowedExtensions)) {
+                continue; // Přeskočit nepovolené přípony
             }
 
             if ($file['size'] > 5 * 1024 * 1024) { // Max 5 MB
                 continue; // Přeskočit příliš velké soubory
             }
 
-            // Generovat unikátní název
-            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-            $newFilename = 'aktualita_' . $datum . '_' . uniqid() . '.' . $extension;
+            // Generovat unikátní název s bezpečnou příponou
+            $safeExtension = $realMimeType === 'image/png' ? 'png' : ($realMimeType === 'image/webp' ? 'webp' : 'jpg');
+            $newFilename = 'aktualita_' . $datum . '_' . uniqid() . '.' . $safeExtension;
             $targetPath = $uploadDir . $newFilename;
 
             if (move_uploaded_file($file['tmp_name'], $targetPath)) {

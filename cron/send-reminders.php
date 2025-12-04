@@ -85,18 +85,23 @@ try {
         exit(0);
     }
 
-    // Načíst šablonu pro připomenutí
+    // Nacist sablonu pro pripomenuti (hledat podle trigger_event)
     $stmtTemplate = $pdo->prepare("
         SELECT subject, template
         FROM wgs_notifications
-        WHERE id = 'appointment_reminder_customer'
+        WHERE trigger_event = 'appointment_reminder' AND type = 'email' AND active = 1
         LIMIT 1
     ");
     $stmtTemplate->execute();
     $template = $stmtTemplate->fetch(PDO::FETCH_ASSOC);
 
+    // Fallback sablona pokud neni v databazi
     if (!$template) {
-        throw new Exception("Šablona 'appointment_reminder_customer' nebyla nalezena v databázi!");
+        logMessage("Sablona 'appointment_reminder' neni v databazi - pouzivam fallback");
+        $template = [
+            'subject' => 'Pripominka: Zitrejsi navsteva technika - WGS Service',
+            'template' => "Dobry den {{customer_name}},\n\npripominame Vam zitrejsi navstevu technika WGS Service.\n\nTermin: {{date}} v {{time}}\nAdresa: {{address}}\nTechnik: {{technician_name}}, tel. {{technician_phone}}\n\nDULEZITE: Prosime, pripravte nabytek pred prichodem technika. Odstrante z nej vsechny osobni veci a luzkoviny, aby technik mohl bez prekazek provest servisni zasah.\n\nV pripade potreby zmeny terminu nas kontaktujte.\n\nS pozdravem,\nWGS Service\nTel: +420 725 965 826\nEmail: reklamace@wgs-service.cz"
+        ];
     }
 
     $uspesneOdeslano = 0;
@@ -161,11 +166,11 @@ try {
             );
 
             $uspesneOdeslano++;
-            logMessage("✓ Email přidán do fronty pro: {$navsteva['email']}");
+            logMessage("[OK] Email pridan do fronty pro: {$navsteva['email']}");
 
         } catch (Exception $e) {
             $chyby++;
-            logMessage("✗ CHYBA při přidávání emailu pro {$navsteva['email']}: " . $e->getMessage());
+            logMessage("[CHYBA] pri pridavani emailu pro {$navsteva['email']}: " . $e->getMessage());
         }
     }
 

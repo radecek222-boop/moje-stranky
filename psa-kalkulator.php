@@ -1,4 +1,16 @@
-<?php require_once "init.php"; ?>
+<?php
+require_once "init.php";
+require_once __DIR__ . '/includes/csrf_helper.php';
+
+// BEZPEČNOST: Kontrola admin přihlášení
+$isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+if (!$isAdmin) {
+    header('Location: login.php?redirect=psa-kalkulator.php');
+    exit;
+}
+
+$csrfToken = generateCSRFToken();
+?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -10,15 +22,13 @@
   <!-- Google Fonts - Poppins -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=optional" rel="stylesheet">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- QR Code Library -->
-  <script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"></script>
-
-  <link rel="stylesheet" href="assets/css/psa-kalkulator.css">
+  <link rel="stylesheet" href="assets/css/psa-kalkulator.min.css?v=<?= filemtime(__DIR__ . '/assets/css/psa-kalkulator.min.css') ?>">
 </head>
 <body>
-<main>
+<main id="main-content">
 
 <!-- TOP BAR -->
 <div class="top-bar">
@@ -40,27 +50,32 @@
       <h1 class="title">Kalkulátor Mezd PSA</h1>
       <p class="subtitle">Výpočet mezd a fakturace pro zaměstnance</p>
     </div>
-    <div class="period-selector">
-      <select id="monthSelect" class="form-select" data-onchange="updatePeriod">
-        <option value="1">Leden</option>
-        <option value="2">Únor</option>
-        <option value="3">Březen</option>
-        <option value="4">Duben</option>
-        <option value="5">Květen</option>
-        <option value="6">Červen</option>
-        <option value="7">Červenec</option>
-        <option value="8">Srpen</option>
-        <option value="9">Září</option>
-        <option value="10">Říjen</option>
-        <option value="11">Listopad</option>
-        <option value="12">Prosinec</option>
-      </select>
-      <select id="yearSelect" class="form-select" data-onchange="updatePeriod">
-        <option value="2024">2024</option>
-        <option value="2025" selected>2025</option>
-        <option value="2026">2026</option>
-      </select>
-      <div class="period-display" id="periodDisplay">Listopad 2025</div>
+  </div>
+
+  <!-- FILTR OBDOBÍ -->
+  <div class="period-filter-card" style="display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <!-- Historie -->
+    <div class="period-display-wrapper">
+      <div class="period-filter-label" style="margin-bottom: 0;">Historie</div>
+      <div class="period-display clickable" id="periodDisplay" data-action="togglePeriodOverlay" role="button" tabindex="0" title="Klikněte pro výběr období">
+        <span id="periodDisplayText">Listopad 2025</span>
+        <span class="period-arrow">▼</span>
+      </div>
+      <!-- Mini-overlay pro výběr období -->
+      <div class="period-overlay" id="periodOverlay">
+        <div class="period-overlay-header">
+          <span>Archiv období</span>
+          <button class="period-overlay-close" data-action="closePeriodOverlay" title="Zavřít">&times;</button>
+        </div>
+        <div class="period-overlay-content" id="periodOverlayContent">
+          <!-- Dynamicky generováno JavaScriptem -->
+          <div class="period-loading">Načítám období...</div>
+        </div>
+        <div class="period-overlay-footer">
+          <button class="btn btn-sm" data-action="showNewPeriodSelector">+ Přidat období</button>
+          <button class="btn btn-sm btn-secondary" data-action="closePeriodOverlay">Zavřít</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -78,16 +93,6 @@
         <div class="form-group">
           <label class="form-label">Sazba fakturace (Kč/hodina)</label>
           <input type="number" class="form-input" id="invoiceRate" value="250" min="0" data-onchange="updateRates">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Rychlé nastavení</label>
-          <select class="form-select" data-onchange="setQuickRate">
-            <option value="">Vyberte sazbu...</option>
-            <option value="100-200">100/200 Kč</option>
-            <option value="150-250">150/250 Kč (výchozí)</option>
-            <option value="200-300">200/300 Kč</option>
-            <option value="250-400">250/400 Kč</option>
-          </select>
         </div>
       </div>
     </div>
@@ -132,31 +137,26 @@
 
   <!-- TABULKA ZAMĚSTNANCŮ -->
   <div class="card">
-    <div class="card-header">
-      <h2 class="card-title">Seznam zaměstnanců</h2>
-      <div class="btn-group">
-        <button class="btn btn-sm" data-action="addEmployee">Přidat</button>
-        <button class="btn btn-sm" data-action="saveData">Uložit</button>
-        <button class="btn btn-sm" data-action="exportToExcel">Export CSV</button>
-        <button class="btn btn-sm" data-action="printReport">Tisk</button>
-      </div>
+    <div class="card-header" style="flex-direction: column; align-items: flex-start; gap: 0.5rem;">
+      <h2 class="card-title" style="margin: 0;">Seznam zaměstnanců</h2>
+      <button class="btn btn-sm" data-action="addEmployee" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">+ Přidat zaměstnance</button>
     </div>
     <div class="table-container">
       <table class="data-table">
         <thead>
           <tr>
-            <th>Jméno</th>
-            <th class="text-center">Hodiny</th>
-            <th class="text-right">Výplata</th>
-            <th class="text-right">Faktura</th>
-            <th>Číslo účtu</th>
-            <th>Kód banky</th>
-            <th class="text-center">Akce</th>
+            <th scope="col">Jméno</th>
+            <th scope="col" class="text-center">Hodiny</th>
+            <th scope="col" class="text-right">Výplata</th>
+            <th scope="col" class="text-right">Faktura</th>
+            <th scope="col">Číslo účtu</th>
+            <th scope="col">Kód banky</th>
+            <th scope="col" class="text-center">Akce</th>
           </tr>
         </thead>
-        <tbody id="employeeTableBody">
+        <tbody id="employeeTableBody" aria-live="polite">
           <tr>
-            <td colspan="7" class="text-center loading-cell">
+            <td colspan="7" class="text-center loading-cell" role="status">
               <div class="loading"></div>
               Načítání dat...
             </td>
@@ -164,7 +164,7 @@
         </tbody>
         <tfoot>
           <tr class="total-row">
-            <td><strong>CELKEM</strong></td>
+            <td><strong id="footerMonthLabel">CELKEM za Listopad</strong></td>
             <td class="text-center"><strong id="footerTotalHours">0</strong></td>
             <td class="text-right"><strong id="footerTotalSalary">0 Kč</strong></td>
             <td class="text-right"><strong id="footerTotalInvoice">0 Kč</strong></td>
@@ -177,16 +177,19 @@
 
   <!-- AKČNÍ TLAČÍTKA -->
   <div class="action-buttons">
-    <button class="btn btn-secondary" data-action="clearAll">Vymazat vše</button>
+    <button class="btn btn-secondary" data-action="clearAll">Vynulovat hodiny</button>
+    <button class="btn" data-action="saveData">Uložit období</button>
     <button class="btn" data-action="generatePaymentQR">Generovat QR platby</button>
+    <button class="btn btn-secondary" data-action="exportToExcel">Export CSV</button>
+    <button class="btn btn-secondary" data-action="printReport">Tisk</button>
   </div>
 
   <!-- QR CODE MODAL -->
-  <div id="qrModal" class="modal">
+  <div id="qrModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="qrModalTitle">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title">QR Kódy pro platby</h2>
-        <span class="close-modal" data-action="closeQRModal">&times;</span>
+        <h2 class="modal-title" id="qrModalTitle">QR Kódy pro platby</h2>
+        <span class="close-modal" data-action="closeQRModal" role="button" tabindex="0" aria-label="Zavřít">&times;</span>
       </div>
 
       <div class="payment-summary">
@@ -201,10 +204,20 @@
 </div>
 
 <!-- Logger Utility (must be loaded first) -->
-<script src="assets/js/logger.js" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
+<!-- Utils (wgsConfirm) -->
+<script src="assets/js/utils.min.js" defer></script>
+<!-- WGS Toast notifikace -->
+<link rel="stylesheet" href="assets/css/wgs-toast.css">
+<script src="assets/js/wgs-toast.js" defer></script>
+<script>
+  window.PSA_CSRF_TOKEN = '<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>';
+</script>
+<!-- QR Code library - lokální kopie -->
+<script src="assets/js/qrcode.min.js" defer data-qr-lib="1"></script>
 
 <!-- Main JavaScript -->
-<script src="assets/js/psa-kalkulator.js" defer></script>
+<script src="assets/js/psa-kalkulator.min.js?v=<?= filemtime(__DIR__ . '/assets/js/psa-kalkulator.min.js') ?>" defer></script>
 
 </body>
 </html>

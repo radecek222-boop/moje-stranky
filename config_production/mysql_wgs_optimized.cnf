@@ -1,0 +1,337 @@
+# ==========================================
+# MariaDB/MySQL Configuration for WGS Service
+# ==========================================
+# Soubor: /etc/mysql/mariadb.conf.d/60-wgs.cnf
+# Nebo: /etc/mysql/conf.d/wgs.cnf
+# Restart: sudo systemctl restart mariadb
+#
+# Optimalizováno pro:
+# - InnoDB engine
+# - 8 GB RAM (4 GB pro MySQL)
+# - SSD storage
+# - 150+ concurrent connections
+# - Read-heavy workload (80% SELECT)
+# ==========================================
+
+[mysqld]
+
+# ==========================================
+# GENERAL SETTINGS
+# ==========================================
+
+# Server ID (for replication)
+server-id = 1
+
+# Default storage engine
+default-storage-engine = InnoDB
+
+# Character set
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+
+# Timezone
+default-time-zone = '+01:00'
+
+# ==========================================
+# CONNECTION SETTINGS
+# ==========================================
+
+# Maximum connections
+# WGS: 150 concurrent users + cron jobs + admin
+max_connections = 200
+
+# Max connect errors before host is blocked
+max_connect_errors = 1000000
+
+# Connection timeout
+connect_timeout = 10
+
+# Interactive timeout (console connections)
+interactive_timeout = 28800
+
+# Wait timeout (application connections)
+# ⚠️ KRITICKÉ: Musí být >= PHP max_execution_time
+wait_timeout = 600
+
+# ==========================================
+# INNODB SETTINGS (CRITICAL!)
+# ==========================================
+
+# InnoDB buffer pool size
+# = Velikost cache pro data a indexy
+# KALKULACE: 60-70% dostupné RAM pro MySQL
+# 4 GB × 70% = 2.8 GB
+innodb_buffer_pool_size = 2G
+
+# InnoDB buffer pool instances
+# Pro buffer pool >1GB doporučeno: instances = size_in_GB
+# Zlepšuje concurrency
+innodb_buffer_pool_instances = 2
+
+# InnoDB log file size
+# = Velikost redo logu pro crash recovery
+# Vyšší = rychlejší zápisy, pomalejší recovery
+# Doporučeno: 25% buffer pool size
+innodb_log_file_size = 512M
+
+# InnoDB log buffer size
+# = Buffer pro redo log před zápisem na disk
+innodb_log_buffer_size = 16M
+
+# InnoDB flush method
+# = Jak zapisovat data na disk
+# O_DIRECT = přímý zápis, bypass OS cache (lepší pro SSD)
+innodb_flush_method = O_DIRECT
+
+# InnoDB flush log at transaction commit
+# 1 = flush při každém COMMIT (nejbezpečnější, pomalejší)
+# 2 = flush každou sekundu (rychlejší, malé riziko ztráty dat)
+# WGS: Vysoká integrita dat je důležitá
+innodb_flush_log_at_trx_commit = 1
+
+# InnoDB file per table
+# = Každá tabulka má vlastní .ibd soubor
+innodb_file_per_table = 1
+
+# InnoDB I/O capacity
+# = Počet IOPS které InnoDB může použít
+# SSD: 2000-5000, HDD: 200-400
+innodb_io_capacity = 2000
+innodb_io_capacity_max = 4000
+
+# InnoDB read/write threads
+# Vyšší číslo = lepší paralelní I/O
+innodb_read_io_threads = 4
+innodb_write_io_threads = 4
+
+# InnoDB adaptive hash index
+# = Automatické vytváření hash indexů v paměti
+innodb_adaptive_hash_index = ON
+
+# ==========================================
+# QUERY CACHE (DEPRECATED v MySQL 8.0!)
+# ==========================================
+
+# ⚠️ POZNÁMKA: Query cache je deprecated a OFF by default v novějších verzích
+# MariaDB 10.6+: Použít SKIP TABLE SCAN místo query cache
+
+# Query cache type
+# 0 = OFF (doporučeno pro write-heavy)
+# 1 = ON (může zpomalit write operace)
+# 2 = DEMAND (pouze s SQL_CACHE hint)
+query_cache_type = 0
+query_cache_size = 0
+
+# ==========================================
+# TABLE CACHE & OPEN FILES
+# ==========================================
+
+# Table open cache
+# = Kolik tabulek může být otevřeno současně
+# WGS: 45 tabulek × 4 connections avg = 180
+table_open_cache = 400
+
+# Table definition cache
+# = Cache pro .frm soubory (table definitions)
+table_definition_cache = 400
+
+# Open files limit
+# = Maximum otevřených souborů
+open_files_limit = 4096
+
+# ==========================================
+# THREAD SETTINGS
+# ==========================================
+
+# Thread cache size
+# = Kolik threadů držet v cache (nemusí se vytvářet nové)
+# Doporučeno: max_connections / 3
+thread_cache_size = 64
+
+# Thread stack size
+thread_stack = 256K
+
+# ==========================================
+# BUFFER & CACHE SIZES
+# ==========================================
+
+# Sort buffer size (per connection)
+# = Buffer pro ORDER BY, GROUP BY
+# Příliš vysoký může způsobit OOM při mnoha connections!
+sort_buffer_size = 2M
+
+# Read buffer size (per connection)
+# = Buffer pro sequential reads
+read_buffer_size = 1M
+
+# Read random buffer size (per connection)
+# = Buffer pro random reads (JOINs)
+read_rnd_buffer_size = 2M
+
+# Join buffer size (per connection)
+# = Buffer pro JOIN operace
+join_buffer_size = 2M
+
+# Max allowed packet
+# = Maximum velikost jednoho SQL dotazu/odpovědi
+# WGS: Large TEXT fields, photo metadata
+max_allowed_packet = 64M
+
+# ==========================================
+# TEMPORARY TABLES
+# ==========================================
+
+# Tmp table size
+# = Maximum size pro in-memory temporary tables
+# Pokud překročí, vytvoří se na disku (pomalejší)
+tmp_table_size = 64M
+max_heap_table_size = 64M
+
+# Tmpdir (kde se vytváří dočasné soubory)
+tmpdir = /tmp
+
+# ==========================================
+# SLOW QUERY LOG (CRITICAL for debugging!)
+# ==========================================
+
+# Enable slow query log
+slow_query_log = 1
+slow_query_log_file = /var/log/mysql/mysql-slow.log
+
+# Long query time (seconds)
+# Dotazy delší než toto se zalogují
+long_query_time = 2
+
+# Log queries not using indexes
+# ⚠️ Velmi užitečné pro identifikaci chybějících indexů!
+log_queries_not_using_indexes = 1
+
+# Log slow admin statements
+log_slow_admin_statements = 1
+
+# ==========================================
+# BINARY LOGGING (pro replication/backup)
+# ==========================================
+
+# Enable binary log
+# ⚠️ Potřebné pro point-in-time recovery
+log_bin = /var/log/mysql/mysql-bin.log
+
+# Binary log format
+# ROW = safest, MIXED = hybrid, STATEMENT = compact
+binlog_format = MIXED
+
+# Expire logs after N days
+expire_logs_days = 7
+
+# Max binlog size (auto rotate)
+max_binlog_size = 100M
+
+# ==========================================
+# ERROR LOGGING
+# ==========================================
+
+log_error = /var/log/mysql/error.log
+log_warnings = 2
+
+# ==========================================
+# PERFORMANCE SCHEMA (monitoring)
+# ==========================================
+
+# Performance schema enabled
+# Pomáhá s diagnostikou výkonu
+performance_schema = ON
+
+# Performance schema max connections
+performance_schema_max_connections = 200
+
+# ==========================================
+# SECURITY
+# ==========================================
+
+# Local infile (disable for security)
+local_infile = 0
+
+# Symbolic links (disable for security)
+symbolic-links = 0
+
+# Skip name resolve (faster connections)
+skip-name-resolve
+
+# ==========================================
+# MARIADB SPECIFIC (pokud používáte MariaDB)
+# ==========================================
+
+# Aria storage engine (MariaDB internal tables)
+aria_pagecache_buffer_size = 128M
+
+# Thread pool (MariaDB feature)
+# Lepší než thread-per-connection pro vysoký concurrent load
+# thread_handling = pool-of-threads
+# thread_pool_size = 4
+# thread_pool_max_threads = 200
+
+# ==========================================
+# MONITORING QUERIES
+# ==========================================
+# Run these to check MySQL performance:
+#
+# 1. Current connections:
+#    SHOW STATUS LIKE 'Threads_connected';
+#
+# 2. Max connections used:
+#    SHOW STATUS LIKE 'Max_used_connections';
+#
+# 3. InnoDB buffer pool usage:
+#    SHOW STATUS LIKE 'Innodb_buffer_pool%';
+#
+# 4. Slow queries:
+#    SHOW STATUS LIKE 'Slow_queries';
+#
+# 5. Table cache hit rate:
+#    SHOW STATUS LIKE 'Open%';
+#
+# 6. Query cache hit rate (if enabled):
+#    SHOW STATUS LIKE 'Qcache%';
+#
+# 7. Current running queries:
+#    SHOW PROCESSLIST;
+#
+# 8. InnoDB status:
+#    SHOW ENGINE INNODB STATUS\G
+#
+# ==========================================
+# TUNING TIPS
+# ==========================================
+#
+# If you see "Too many connections":
+#   → Increase max_connections
+#   → Check for connection leaks in PHP code
+#   → Implement connection pooling
+#
+# If slow queries are high:
+#   → Check /var/log/mysql/mysql-slow.log
+#   → Add missing indexes
+#   → Optimize SELECT * queries
+#
+# If InnoDB buffer pool hit rate is low (<95%):
+#   → Increase innodb_buffer_pool_size
+#
+# If tmp tables are created on disk frequently:
+#   → Increase tmp_table_size and max_heap_table_size
+#   → Optimize queries to use smaller result sets
+#
+# ==========================================
+# RESTART MYSQL AFTER CHANGES
+# ==========================================
+#
+# sudo systemctl restart mariadb
+# nebo
+# sudo systemctl restart mysql
+#
+# Check status:
+# sudo systemctl status mariadb
+#
+# View logs:
+# tail -f /var/log/mysql/error.log
+# tail -f /var/log/mysql/mysql-slow.log

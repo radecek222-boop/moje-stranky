@@ -1,6 +1,6 @@
 # CLAUDE.md - AI Assistant Guide for WGS Service
 
-**Last Updated:** 2025-11-16
+**Last Updated:** 2025-11-23
 **Project:** White Glove Service (WGS) - Natuzzi Furniture Service Management System
 
 ---
@@ -57,17 +57,19 @@ async function saveAppointment(date, time) {
 
 ---
 
-## 🚫 CRITICAL: NO EMOJI POLICY
+## 🚫 CRITICAL: NO EMOJI OR ICONS POLICY
 
-**ABSOLUTELY NO EMOJI IN CODE, UI, OR MESSAGES**
+**ABSOLUTELY NO EMOJI OR ICONS IN CODE, UI, OR MESSAGES**
 
-With the **SOLE EXCEPTION** of language flags (🇨🇿 🇬🇧 🇮🇹), **NO emoji** are allowed anywhere in the codebase:
+With the **SOLE EXCEPTION** of language flags (🇨🇿 🇬🇧 🇮🇹), **NO emoji or decorative icons** are allowed anywhere in the codebase:
 
 - ❌ **NO emoji in button text:** Use "Uložit" NOT "💾 Uložit"
 - ❌ **NO emoji in headings:** Use "Upravit článek" NOT "📝 Upravit článek"
 - ❌ **NO emoji in labels:** Use "Fotografie" NOT "📷 Fotografie"
 - ❌ **NO emoji in alerts:** Use "Chyba" NOT "❌ Chyba"
 - ❌ **NO emoji in placeholders:** Use "Klikněte" NOT "📸 Klikněte"
+- ❌ **NO decorative icons** (Font Awesome, Material Icons, etc.)
+- ❌ **NO icon libraries** unless explicitly approved by project owner
 - ❌ **NO emoji anywhere else**
 - ✅ **ONLY EXCEPTION:** Language flags: 🇨🇿 🇬🇧 🇮🇹
 
@@ -99,7 +101,140 @@ alert('✅ Článek byl uložen');
 <button>🇮🇹 Italiano</button>
 ```
 
-**IMPORTANT:** When generating ANY code, interface, or message, Claude AI must NEVER add emoji. This is a permanent project requirement.
+**IMPORTANT:** When generating ANY code, interface, or message, Claude AI must NEVER add emoji or decorative icons. This is a permanent project requirement.
+
+---
+
+## 🎨 CRITICAL: COLOR SCHEME POLICY
+
+**ONLY BLACK, WHITE, AND SHADES OF GRAY**
+
+All UI elements, buttons, text, backgrounds, and design components **MUST** use only:
+
+- ✅ **Black** (`#000`, `#111`, `#222`, `#333`, etc.)
+- ✅ **White** (`#fff`, `#fefefe`, `#f9f9f9`, etc.)
+- ✅ **Shades of gray** (`#666`, `#999`, `#ccc`, `#ddd`, `#eee`, etc.)
+- ❌ **NO other colors** without explicit approval from project owner
+
+### Examples:
+
+```css
+/* ✅ SPRÁVNĚ (CORRECT) */
+.button-primary {
+  background: #333;  /* Dark gray */
+  color: #fff;       /* White */
+}
+
+.button-secondary {
+  background: #999;  /* Light gray */
+  color: #fff;       /* White */
+}
+
+.alert-error {
+  background: #222;  /* Very dark gray */
+  border: 1px solid #666;  /* Medium gray */
+}
+
+/* ❌ ŠPATNĚ (WRONG) - NO COLORS! */
+.button-primary {
+  background: #2D5016;  /* Green - FORBIDDEN */
+  color: #fff;
+}
+
+.button-danger {
+  background: #ff4444;  /* Red - FORBIDDEN */
+  color: #fff;
+}
+
+.alert-success {
+  background: #4CAF50;  /* Green - FORBIDDEN */
+}
+```
+
+### Why Only Black/White/Gray?
+
+1. **Professional minimalist design** - Clean, modern, timeless
+2. **Accessibility** - High contrast ratios
+3. **Consistency** - No color clashes or confusing visual hierarchy
+4. **User preference** - Explicitly requested by project owner
+5. **Focus on content** - No distracting colors
+
+### When Can Other Colors Be Used?
+
+**ONLY** with explicit written approval from the project owner (Radek Zikmund).
+
+If you believe a feature absolutely requires color:
+1. Ask the user/owner first
+2. Explain why color is necessary
+3. Wait for approval before implementing
+
+**DO NOT** use colors and ask for forgiveness later. Always ask first.
+
+---
+
+## ✅ OFFICIAL EXCEPTION: WGS Toast Notifications (Neon Green)
+
+**IMPORTANT:** Toast notifikace jsou JEDINÁ schválená výjimka z černobílého designu.
+
+### Neonově zelený toast (`#39ff14`) se MUSÍ použít pro:
+
+| Akce | Příklad zprávy |
+|------|----------------|
+| Odeslání emailu | "Email úspěšně odeslán" |
+| Nahrání fotky | "Fotografie nahrána" |
+| Uložení dat | "Změny uloženy" |
+| Push notifikace | "Nová poznámka k reklamaci" |
+| Úspěšná akce | Jakákoliv potvrzující zpráva |
+
+### Soubory:
+
+| Soubor | Účel |
+|--------|------|
+| `assets/css/wgs-toast.css` | Styling - neonově zelený rámeček s pulzující září |
+| `assets/js/wgs-toast.js` | JavaScript - `WGSToast.zobrazit(zprava, options)` |
+
+### Použití v kódu:
+
+```javascript
+// ✅ SPRÁVNĚ - Použít WGSToast pro důležité akce
+WGSToast.zobrazit('Email úspěšně odeslán', {
+    titulek: 'WGS',
+    trvani: 5000,
+    claimId: 123  // Volitelné - klik přesměruje na reklamaci
+});
+
+// ✅ Pro běžné informace lze použít základní wgsToast
+wgsToast.success('Uloženo');
+wgsToast.error('Chyba při ukládání');
+
+// ❌ ŠPATNĚ - Nepoužívat alert() pro úspěšné akce
+alert('Email odeslán');  // Příliš invazivní
+```
+
+### Proč neonově zelená?
+
+1. **Viditelnost** - Upoutá pozornost uživatele
+2. **Profesionalita** - Moderní, technický vzhled
+3. **Konzistence** - Jednotný styl pro všechny notifikace
+4. **UX** - Neinvazivní, automaticky zmizí
+
+### Design specifikace:
+
+```css
+/* Neonově zelená barva */
+--wgs-neon-green: #39ff14;
+
+/* Box shadow s pulzující září */
+box-shadow:
+    0 0 10px rgba(57, 255, 20, 0.4),
+    0 0 20px rgba(57, 255, 20, 0.2),
+    0 0 30px rgba(57, 255, 20, 0.1);
+
+/* Border */
+border: 2px solid #39ff14;
+```
+
+**TOTO JE JEDINÁ SCHVÁLENÁ BAREVNÁ VÝJIMKA V PROJEKTU.**
 
 ---
 
@@ -439,6 +574,160 @@ try {
     sendJsonError('Chyba při zpracování požadavku');
 }
 ?>
+```
+
+---
+
+## 🌍 MULTI-LANGUAGE SUPPORT (CENÍK)
+
+**Stránka ceník (`cenik.php`) plně podporuje 3 jazyky: Čeština (CS), Angličtina (EN), Italština (IT)**
+
+### Architektura překladů
+
+Systém používá **databázově-řízenou architekturu** pro všechny překlady:
+
+| Datový typ | CS (výchozí) | EN | IT |
+|------------|--------------|----|----|
+| **Kategorie** | `category` | `category_en` | `category_it` |
+| **Název služby** | `service_name` | `service_name_en` | `service_name_it` |
+| **Popis** | `description` | `description_en` | `description_it` |
+| **Předpona ceny** | JavaScript: `'Od'` | `'From'` | `'Da'` |
+
+### Klíčové soubory
+
+| Soubor | Účel |
+|--------|------|
+| `/assets/js/cenik.js` | Frontend rendering + překlad prefixu cen |
+| `/api/pricing_api.php` | Backend API - vrací data včetně všech jazykových variant |
+| `/assets/js/language-switcher.js` | Centrální systém přepínání jazyků |
+| `/assets/css/cenik.min.css` | Styling (CSS `content` NESMÍ přidávat text, pouze JS) |
+| `/doplnit_popisy_cenik_sql.php` | Migrační skript - SQL UPDATE pro překlady podle ID |
+
+### Jak funguje překlad cen
+
+**JavaScript (`cenik.js`) kontroluje jazyk a přidává správnou předponu:**
+
+```javascript
+const odPrefix = {
+    cs: 'Od',
+    en: 'From',
+    it: 'Da'
+};
+
+// Pro rozpětí cen (price_from existuje, price_to neexistuje)
+if (item.price_from && !item.price_to) {
+    priceEl.className += ' range';
+    priceEl.innerHTML = `${odPrefix[jazyk] || 'Od'} ${item.price_from} ${item.price_unit}`;
+}
+```
+
+**CSS (`cenik.min.css`) NESMÍ obsahovat `content: 'od '`:**
+
+```css
+/* ✅ SPRÁVNĚ - prázdný content */
+.item-price.range::before {
+    content: '';
+}
+
+/* ❌ ŠPATNĚ - způsobí duplicitní zobrazení "od From 190€" */
+.item-price.range::before {
+    content: 'od ';
+}
+```
+
+### Doplnění překladů do databáze
+
+**Použijte migrační skript `/doplnit_popisy_cenik_sql.php`:**
+
+1. Otevřete v prohlížeči: `https://www.wgs-service.cz/doplnit_popisy_cenik_sql.php`
+2. Zkontrolujte náhled změn
+3. Klikněte "SPUSTIT DOPLNĚNÍ"
+4. Skript provede UPDATE podle ID (ne podle textového matchingu!)
+
+**Struktura skriptu:**
+
+```php
+// Pole s překlady POPISŮ podle ID
+$descriptionUpdates = [
+    58 => [
+        'en' => 'English description...',
+        'it' => 'Italian description...'
+    ],
+    // ... další ID
+];
+
+// Pole s překlady NÁZVŮ SLUŽEB podle ID
+$nameUpdates = [
+    70 => [
+        'en' => 'Transport to workshop...',
+        'it' => 'Trasporto in officina...'
+    ],
+    // ... další ID
+];
+```
+
+### Detekce jazyka
+
+**Frontend používá funkci z `language-switcher.js`:**
+
+```javascript
+// ✅ SPRÁVNĚ
+const jazyk = window.ziskejAktualniJazyk ? window.ziskejAktualniJazyk() : 'cs';
+
+// ❌ ŠPATNĚ - tato proměnná neexistuje
+const jazyk = window.aktualniJazyk || 'cs';
+```
+
+### Fallback mechanismus
+
+**Inteligentní fallback pokud DB překlad chybí:**
+
+```javascript
+// Pokud DB překlad neexistuje NEBO je stejný jako český text
+let dbPreklad = item.service_name_it;
+if (!dbPreklad || dbPreklad === item.service_name) {
+    // Zkusit slovník jako fallback
+    dbPreklad = prelozitText(item.service_name, 'service');
+}
+nameEl.textContent = dbPreklad || item.service_name || '';
+```
+
+### Testování překladů
+
+1. Otevřít stránku: `https://www.wgs-service.cz/cenik.php`
+2. Přepnout jazyk pomocí vlajek: 🇨🇿 🇬🇧 🇮🇹
+3. Zkontrolovat:
+   - ✅ Kategorie přeloženy
+   - ✅ Názvy služeb přeloženy
+   - ✅ Popisy přeloženy
+   - ✅ Předpona ceny ("Od"/"From"/"Da") přeložena
+   - ✅ Žádný text v češtině v EN/IT verzích
+
+### Časté problémy a řešení
+
+| Problém | Příčina | Řešení |
+|---------|---------|--------|
+| Zobrazuje se "od From 190€" | CSS má `content: 'od '` | Změnit na `content: ''` v CSS |
+| Některé popisy v češtině | DB má prázdný nebo český text | Spustit `/doplnit_popisy_cenik_sql.php` |
+| Chyba "undefined function" | Špatná detekce jazyka | Použít `window.ziskejAktualniJazyk()` |
+| Kategorie v češtině | Chybí `category_en`/`_it` | Importovat překlady pomocí migračního skriptu |
+
+### Přidání nové položky ceníku
+
+**Při přidání nové položky VŽDY vyplňte všechny jazykové varianty:**
+
+```sql
+INSERT INTO wgs_pricing (
+    service_name,       service_name_en,          service_name_it,
+    description,        description_en,           description_it,
+    category,           category_en,              category_it,
+    price_from, price_to, price_unit
+) VALUES (
+    'Oprava čalounění', 'Upholstery repair',      'Riparazione tappezzeria',
+    'Popis česky...',   'Description English...', 'Descrizione italiana...',
+    'Čalounění',        'Upholstery',             'Tappezzeria',
+    190, NULL, '€'
+);
 ```
 
 ---
@@ -941,30 +1230,35 @@ async function ulozData(data) {
 ## ⚠️ NEVER DO THIS
 
 1. ❌ **Never use English** in code, comments, or commits
-2. ❌ **Never skip CSRF validation** on POST requests
-3. ❌ **Never concatenate SQL** strings (always use prepared statements)
-4. ❌ **Never expose sensitive data** in error messages
-5. ❌ **Never commit .env file** (it's gitignored)
-6. ❌ **Never push to main/master** directly (always use feature branches)
-7. ❌ **Never modify session config** without understanding security implications
-8. ❌ **Never trust user input** (always sanitize and validate)
-9. ❌ **Never use `SELECT *`** in production queries (specify columns)
-10. ❌ **Never mix Czech and English** in the same file
+2. ❌ **Never use emoji or decorative icons** (except language flags 🇨🇿🇬🇧🇮🇹)
+3. ❌ **Never use colors** other than black/white/gray without approval
+4. ❌ **Never skip CSRF validation** on POST requests
+5. ❌ **Never concatenate SQL** strings (always use prepared statements)
+6. ❌ **Never expose sensitive data** in error messages
+7. ❌ **Never commit .env file** (it's gitignored)
+8. ❌ **Never push to main/master** directly (always use feature branches)
+9. ❌ **Never modify session config** without understanding security implications
+10. ❌ **Never trust user input** (always sanitize and validate)
+11. ❌ **Never use `SELECT *`** in production queries (specify columns)
+12. ❌ **Never mix Czech and English** in the same file
 
 ---
 
 ## ✅ ALWAYS DO THIS
 
 1. ✅ **Always write in Czech** (code, comments, commits)
-2. ✅ **Always validate CSRF tokens** on POST requests
-3. ✅ **Always use PDO prepared statements** for database queries
-4. ✅ **Always sanitize user input** with `htmlspecialchars()` and filters
-5. ✅ **Always check authentication** before sensitive operations
-6. ✅ **Always log errors** securely without exposing details to users
-7. ✅ **Always test locally** before pushing
-8. ✅ **Always use meaningful Czech names** for variables and functions
-9. ✅ **Always commit with descriptive messages** (FIX:, FEATURE:, etc.)
-10. ✅ **Always follow the enum mapping** (Czech frontend ↔ English database)
+2. ✅ **Always use only black/white/gray colors** in UI
+3. ✅ **Always avoid emoji and icons** (except language flags)
+4. ✅ **Always validate CSRF tokens** on POST requests
+5. ✅ **Always use PDO prepared statements** for database queries
+6. ✅ **Always sanitize user input** with `htmlspecialchars()` and filters
+7. ✅ **Always check authentication** before sensitive operations
+8. ✅ **Always log errors** securely without exposing details to users
+9. ✅ **Always test locally** before pushing
+10. ✅ **Always use meaningful Czech names** for variables and functions
+11. ✅ **Always commit with descriptive messages** (FIX:, FEATURE:, etc.)
+12. ✅ **Always follow the enum mapping** (Czech frontend ↔ English database)
+13. ✅ **Always ask for approval** before using any color other than black/white/gray
 
 ---
 

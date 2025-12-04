@@ -23,6 +23,10 @@ if (!function_exists('loadAdminNavigation')) {
                 'href' => 'statistiky.php',
                 'header_label' => 'STATISTIKY',
             ],
+            'analytics' => [
+                'href' => 'analytics.php',
+                'header_label' => 'ANALYTICS',
+            ],
             'aktuality' => [
                 'href' => 'aktuality.php',
                 'header_label' => 'AKTUALITY',
@@ -47,6 +51,11 @@ if (!function_exists('loadAdminNavigation')) {
                 'href' => 'admin.php?tab=users',
                 'tab_label' => 'Uživatelé',
                 'tab' => 'users',
+            ],
+            'zakaznici' => [
+                'href' => 'admin.php?tab=zakaznici',
+                'tab_label' => 'Zákazníci',
+                'tab' => 'zakaznici',
             ],
             'tools' => [
                 'href' => 'admin.php?tab=tools',

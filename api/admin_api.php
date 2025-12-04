@@ -24,9 +24,16 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     exit;
 }
 
+// PERFORMANCE FIX: Načíst session data a uvolnit zámek
+// Audit 2025-11-24: Admin operations - různé délky operací
+$userId = $_SESSION['user_id'] ?? $_SESSION['admin_id'] ?? 'admin';
+$createdBy = $userId; // Pro použití v řádku 217
+
+// KRITICKÉ: Uvolnit session lock pro paralelní zpracování
+session_write_close();
+
 // HIGH PRIORITY FIX: Rate limiting na admin API
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-$userId = $_SESSION['user_id'] ?? $_SESSION['admin_id'] ?? 'admin';
 $identifier = "admin_api_{$ip}_{$userId}";
 
 $rateLimiter = new RateLimiter(getDbConnection());
@@ -139,6 +146,22 @@ try {
             handleUpdateEmailTemplate($pdo, $payload);
             break;
 
+        case 'update_email_recipients':
+            handleUpdateEmailRecipients($pdo, $payload);
+            break;
+
+        case 'send_invitations':
+            handleSendInvitations($pdo, $payload);
+            break;
+
+        case 'get_keys':
+            handleListKeys($pdo);
+            break;
+
+        // Pozvanky nyni pouzivaji sablony z wgs_notifications
+        // (invitation_prodejce, invitation_technik)
+        // Editace sablon je v karce "Email sablony"
+
         default:
             respondError('Neznámá akce.', 400);
     }
@@ -187,7 +210,7 @@ function handleListKeys(PDO $pdo): void
 function handleCreateKey(PDO $pdo, array $payload): void
 {
     $keyType = strtolower(trim($payload['key_type'] ?? ''));
-    $allowedTypes = ['admin', 'technik', 'prodejce', 'partner'];
+    $allowedTypes = ['technik', 'prodejce'];
 
     if (!in_array($keyType, $allowedTypes, true)) {
         throw new InvalidArgumentException('Neplatný typ klíče.');
@@ -214,7 +237,7 @@ function handleCreateKey(PDO $pdo, array $payload): void
         $stmt->bindValue(':max_usage', $maxUsage, PDO::PARAM_INT);
     }
 
-    $createdBy = $_SESSION['user_id'] ?? $_SESSION['admin_id'] ?? null;
+    // $createdBy již načteno výše (řádek 29)
     if ($createdBy !== null && is_numeric($createdBy)) {
         $stmt->bindValue(':created_by', (int) $createdBy, PDO::PARAM_INT);
     } else {
@@ -239,7 +262,7 @@ function handleDeleteKey(PDO $pdo, array $payload): void
         throw new InvalidArgumentException('Chybí kód klíče.');
     }
 
-    // ✅ OPRAVA: Fyzické smazání místo soft delete (is_active = 0)
+    // OPRAVA: Fyzické smazání místo soft delete (is_active = 0)
     // Důvod: UI zobrazuje i neaktivní klíče, ale UPDATE ... SET is_active = 0
     // nefunguje pro klíče které už jsou neaktivní (rowCount = 0)
     // Řešení: DELETE fyzicky odstraní klíč z databáze
@@ -703,8 +726,8 @@ function handleGetReklamaceDetail(PDO $pdo): void
             $fotkyHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px;">';
             foreach ($fotkySekce as $fotka) {
                 $cesta = $fotka['file_path'] ?: $fotka['photo_path'];
-                $fotkyHtml .= '<a href="/' . htmlspecialchars($cesta) . '" target="_blank" style="display: block; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; transition: transform 0.2s;" onmouseover="this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'">';
-                $fotkyHtml .= '<img src="/' . htmlspecialchars($cesta) . '" style="width: 100%; height: 120px; object-fit: cover;" alt="' . htmlspecialchars($fotka['file_name']) . '">';
+                $fotkyHtml .= '<a href="/' . htmlspecialchars($cesta) . '" target="_blank" rel="noopener" class="photo-hover-scale" style="display: block; border: 1px solid #ddd; border-radius: 4px; overflow: hidden;">';
+                $fotkyHtml .= '<img src="/' . htmlspecialchars($cesta) . '" style="width: 100%; height: 120px; object-fit: cover;" alt="' . htmlspecialchars($fotka['file_name']) . '" loading="lazy">';
                 $fotkyHtml .= '</a>';
             }
             $fotkyHtml .= '</div>';
@@ -732,7 +755,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
 
         foreach ($protokoly as $protokol) {
             $protokolyHtml = '<div style="margin-top: 10px;">';
-            $protokolyHtml .= '<a href="/' . htmlspecialchars($protokol['file_path']) . '" target="_blank" style="display: inline-flex; align-items: center; gap: 10px; padding: 10px 15px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #000; transition: background 0.2s;" onmouseover="this.style.background=\'#e5e5e5\'" onmouseout="this.style.background=\'#f5f5f5\'">';
+            $protokolyHtml .= '<a href="/' . htmlspecialchars($protokol['file_path']) . '" target="_blank" rel="noopener" class="protokol-hover-bg" style="display: inline-flex; align-items: center; gap: 10px; padding: 10px 15px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #000;">';
             $protokolyHtml .= '<span style="font-size: 1.5rem; font-weight: 600; color: #dc3545;">PDF</span>';
             $protokolyHtml .= '<div>';
             $protokolyHtml .= '<div style="font-weight: 600;">' . htmlspecialchars($protokol['original_filename']) . '</div>';
@@ -758,7 +781,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
     $emailStmt = $pdo->prepare("
         SELECT subject, created_at, sent_at
         FROM wgs_email_queue
-        WHERE to_email = :email
+        WHERE recipient_email = :email
         ORDER BY created_at ASC
     ");
     $emailStmt->execute(['email' => $reklamace['email']]);
@@ -844,4 +867,237 @@ function handleUpdateEmailTemplate(PDO $pdo, array $payload): void
         'template_id' => $templateId
     ]);
 }
+
+/**
+ * Aktualizovat příjemce email šablony
+ */
+function handleUpdateEmailRecipients(PDO $pdo, array $payload): void
+{
+    $templateId = $payload['template_id'] ?? null;
+    $recipients = $payload['recipients'] ?? null;
+
+    if (!$templateId) {
+        throw new InvalidArgumentException('Chybí ID šablony');
+    }
+
+    if (!is_array($recipients)) {
+        throw new InvalidArgumentException('Příjemci musí být pole');
+    }
+
+    // Validace typu (to/cc/bcc)
+    $validTypes = ['to', 'cc', 'bcc'];
+    $validateType = function($type) use ($validTypes) {
+        return in_array($type, $validTypes) ? $type : 'to';
+    };
+
+    // Validace struktury recipients
+    $validatedRecipients = [
+        'customer' => [
+            'enabled' => isset($recipients['customer']['enabled']) ? (bool)$recipients['customer']['enabled'] : false,
+            'type' => $validateType($recipients['customer']['type'] ?? 'to')
+        ],
+        'seller' => [
+            'enabled' => isset($recipients['seller']['enabled']) ? (bool)$recipients['seller']['enabled'] : false,
+            'type' => $validateType($recipients['seller']['type'] ?? 'cc')
+        ],
+        'technician' => [
+            'enabled' => isset($recipients['technician']['enabled']) ? (bool)$recipients['technician']['enabled'] : false,
+            'type' => $validateType($recipients['technician']['type'] ?? 'cc')
+        ],
+        'importer' => [
+            'enabled' => isset($recipients['importer']['enabled']) ? (bool)$recipients['importer']['enabled'] : false,
+            'email' => isset($recipients['importer']['email']) ? trim($recipients['importer']['email']) : '',
+            'type' => $validateType($recipients['importer']['type'] ?? 'cc')
+        ],
+        'other' => [
+            'enabled' => isset($recipients['other']['enabled']) ? (bool)$recipients['other']['enabled'] : false,
+            'email' => isset($recipients['other']['email']) ? trim($recipients['other']['email']) : '',
+            'type' => $validateType($recipients['other']['type'] ?? 'cc')
+        ]
+    ];
+
+    // Validace emailů pokud jsou enabled
+    if ($validatedRecipients['importer']['enabled'] && !empty($validatedRecipients['importer']['email'])) {
+        if (!filter_var($validatedRecipients['importer']['email'], FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException('Neplatná emailová adresa výrobce');
+        }
+    }
+
+    if ($validatedRecipients['other']['enabled'] && !empty($validatedRecipients['other']['email'])) {
+        if (!filter_var($validatedRecipients['other']['email'], FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException('Neplatná emailová adresa v poli "Jiné"');
+        }
+    }
+
+    // Uložit do databáze jako JSON
+    $recipientsJson = json_encode($validatedRecipients, JSON_UNESCAPED_UNICODE);
+
+    $stmt = $pdo->prepare("
+        UPDATE wgs_notifications
+        SET recipients = :recipients,
+            updated_at = NOW()
+        WHERE id = :id
+    ");
+
+    $stmt->execute([
+        'recipients' => $recipientsJson,
+        'id' => $templateId
+    ]);
+
+    if ($stmt->rowCount() === 0) {
+        throw new InvalidArgumentException('Šablona nebyla nalezena nebo nebyla změněna');
+    }
+
+    respondSuccess([
+        'message' => 'Příjemci byli úspěšně aktualizováni',
+        'template_id' => $templateId,
+        'recipients' => $validatedRecipients
+    ]);
+}
+
+/**
+ * Odeslat pozvánky na registraci
+ */
+function handleSendInvitations(PDO $pdo, array $payload): void
+{
+    $typ = strtolower(trim($payload['typ'] ?? ''));
+    $klic = trim($payload['klic'] ?? '');
+    $emaily = $payload['emaily'] ?? [];
+
+    // Validace typu
+    if (!in_array($typ, ['technik', 'prodejce'], true)) {
+        throw new InvalidArgumentException('Neplatny typ pozvanky');
+    }
+
+    // Validace emailu
+    if (!is_array($emaily) || count($emaily) === 0) {
+        throw new InvalidArgumentException('Zadejte alespon jeden email');
+    }
+
+    if (count($emaily) > 30) {
+        throw new InvalidArgumentException('Maximalne 30 emailu najednou');
+    }
+
+    // Filtrovat a validovat emaily
+    $platneEmaily = [];
+    foreach ($emaily as $email) {
+        $email = trim($email);
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $platneEmaily[] = $email;
+        }
+    }
+
+    if (count($platneEmaily) === 0) {
+        throw new InvalidArgumentException('Zadny z emailu neni platny');
+    }
+
+    // Ziskat nebo vytvorit klic
+    $pouzityKlic = '';
+    if ($klic === 'auto' || $klic === '') {
+        // Vytvorit novy klic
+        $prefix = strtoupper(substr($typ, 0, 3));
+        $pouzityKlic = generateRegistrationKey($prefix);
+
+        $stmt = $pdo->prepare(
+            'INSERT INTO wgs_registration_keys (key_code, key_type, max_usage, usage_count, is_active, created_at)
+             VALUES (:key_code, :key_type, NULL, 0, 1, NOW())'
+        );
+        $stmt->execute([
+            ':key_code' => $pouzityKlic,
+            ':key_type' => $typ
+        ]);
+    } else {
+        // Overit ze klic existuje a je aktivni
+        $stmt = $pdo->prepare('SELECT key_code, key_type, is_active FROM wgs_registration_keys WHERE key_code = :klic');
+        $stmt->execute([':klic' => $klic]);
+        $klicData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$klicData) {
+            throw new InvalidArgumentException('Registracni klic nebyl nalezen');
+        }
+        if (!$klicData['is_active']) {
+            throw new InvalidArgumentException('Registracni klic neni aktivni');
+        }
+
+        $pouzityKlic = $klicData['key_code'];
+    }
+
+    // ============================================
+    // NACIST SABLONU Z WGS_NOTIFICATIONS
+    // ============================================
+    $notificationId = 'invitation_' . $typ; // invitation_prodejce nebo invitation_technik
+
+    $stmt = $pdo->prepare("
+        SELECT subject, template FROM wgs_notifications
+        WHERE id = :id AND active = 1
+        LIMIT 1
+    ");
+    $stmt->execute(['id' => $notificationId]);
+    $sablona = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$sablona) {
+        throw new InvalidArgumentException('Sablona pozvanky nenalezena: ' . $notificationId . '. Spustte migraci add_invitation_templates.sql');
+    }
+
+    // Pripravit promenne pro nahrazeni
+    $appUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'www.wgs-service.cz');
+
+    // Nahradit promenne v sablone
+    $predmet = $sablona['subject'];
+    $telo = $sablona['template'];
+
+    $nahrazeni = [
+        '{{registration_key}}' => $pouzityKlic,
+        '{{app_url}}' => $appUrl
+    ];
+
+    foreach ($nahrazeni as $promenna => $hodnota) {
+        $predmet = str_replace($promenna, $hodnota, $predmet);
+        $telo = str_replace($promenna, $hodnota, $telo);
+    }
+
+    // ============================================
+    // ODESLAT EMAILY
+    // ============================================
+    require_once __DIR__ . '/../includes/EmailQueue.php';
+    $emailQueue = new EmailQueue($pdo);
+
+    $odeslanoPocet = 0;
+    $chyby = [];
+
+    foreach ($platneEmaily as $email) {
+        try {
+            $queueItem = [
+                'recipient_email' => $email,
+                'recipient_name' => null,
+                'subject' => $predmet,
+                'body' => $telo
+            ];
+
+            $result = $emailQueue->sendEmail($queueItem);
+
+            if ($result['success']) {
+                $odeslanoPocet++;
+            } else {
+                $chyby[] = $email . ': ' . ($result['error'] ?? 'Neznama chyba');
+                error_log("Chyba odeslani pozvanky na {$email}: " . ($result['error'] ?? 'Neznama chyba'));
+            }
+        } catch (Exception $e) {
+            $chyby[] = $email . ': ' . $e->getMessage();
+            error_log("Chyba odeslani pozvanky na {$email}: " . $e->getMessage());
+        }
+    }
+
+    respondSuccess([
+        'sent_count' => $odeslanoPocet,
+        'key_code' => $pouzityKlic,
+        'errors' => $chyby
+    ]);
+}
+
+// ============================================
+// POZVANKY NYNI POUZIVAJI SABLONY Z WGS_NOTIFICATIONS
+// (invitation_prodejce, invitation_technik)
+// Editace sablon je v karce "Email sablony" v admin panelu
+// ============================================
 

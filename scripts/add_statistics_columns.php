@@ -29,7 +29,7 @@ try {
         ADD COLUMN IF NOT EXISTS mesto VARCHAR(255) NULL COMMENT 'Město zákazníka' AFTER zeme
     ");
 
-    echo "✅ Sloupce přidány\n\n";
+    echo "Sloupce přidány\n\n";
 
     // 2. Vytvořit indexy
     echo "📊 Vytvářím indexy...\n";
@@ -44,7 +44,7 @@ try {
     foreach ($indexes as $indexName => $column) {
         try {
             $pdo->exec("CREATE INDEX IF NOT EXISTS {$indexName} ON wgs_reklamace({$column})");
-            echo "  ✅ Index {$indexName} vytvořen\n";
+            echo "  Index {$indexName} vytvořen\n";
         } catch (PDOException $e) {
             // Index už existuje, ignorovat
             echo "  ℹ️  Index {$indexName} již existuje\n";
@@ -60,13 +60,13 @@ try {
     $stmt = $pdo->exec("UPDATE wgs_reklamace
         SET castka = cena
         WHERE castka IS NULL OR castka = 0");
-    echo "  ✅ castka: {$stmt} záznamů aktualizováno\n";
+    echo "  castka: {$stmt} záznamů aktualizováno\n";
 
     // zeme = fakturace_firma
     $stmt = $pdo->exec("UPDATE wgs_reklamace
         SET zeme = fakturace_firma
         WHERE (zeme IS NULL OR zeme = '') AND fakturace_firma IS NOT NULL");
-    echo "  ✅ zeme: {$stmt} záznamů aktualizováno\n";
+    echo "  zeme: {$stmt} záznamů aktualizováno\n";
 
     // prodejce = zpracoval
     $stmt = $pdo->exec("UPDATE wgs_reklamace
@@ -74,7 +74,7 @@ try {
         WHERE (prodejce IS NULL OR prodejce = '')
           AND zpracoval IS NOT NULL
           AND zpracoval != ''");
-    echo "  ✅ prodejce: {$stmt} záznamů aktualizováno\n";
+    echo "  prodejce: {$stmt} záznamů aktualizováno\n";
 
     // mesto = extrahovat z adresa
     $stmt = $pdo->exec("UPDATE wgs_reklamace
@@ -84,7 +84,7 @@ try {
           AND adresa != ''
           AND CHAR_LENGTH(TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(adresa, ',', -1), '\\n', 1))) > 0
           AND CHAR_LENGTH(TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(adresa, ',', -1), '\\n', 1))) < 100");
-    echo "  ✅ mesto: {$stmt} záznamů aktualizováno\n";
+    echo "  mesto: {$stmt} záznamů aktualizováno\n";
 
     echo "\n";
 
@@ -128,7 +128,7 @@ try {
 
     echo "\n";
     echo "═══════════════════════════════════════════════════════════════════\n";
-    echo "✅ MIGRACE DOKONČENA ÚSPĚŠNĚ!\n";
+    echo "MIGRACE DOKONČENA ÚSPĚŠNĚ!\n";
     echo "═══════════════════════════════════════════════════════════════════\n";
     echo "\n";
     echo "📊 Statistiky jsou nyní připraveny k použití.\n";
@@ -143,7 +143,7 @@ try {
 
     echo "\n";
     echo "═══════════════════════════════════════════════════════════════════\n";
-    echo "❌ CHYBA PŘI MIGRACI\n";
+    echo "CHYBA PŘI MIGRACI\n";
     echo "═══════════════════════════════════════════════════════════════════\n";
     echo "\n";
     echo "Chyba: " . $e->getMessage() . "\n";

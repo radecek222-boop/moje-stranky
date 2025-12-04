@@ -267,13 +267,13 @@ $csrfToken = generateCSRFToken();
             <div class="install-log" id="installLog"></div>
 
             <div class="install-actions">
-                <button class="btn btn-primary" id="installBtn" onclick="startInstallation()">
+                <button class="btn btn-primary" id="installBtn" data-action="startInstallation">
                     Spustit instalaci
                 </button>
-                <button class="btn btn-secondary" onclick="window.close()" style="display: none;" id="closeBtn">
+                <button class="btn btn-secondary" data-action="closeWindow" style="display: none;" id="closeBtn">
                     Zavřít
                 </button>
-                <button class="btn btn-success" onclick="window.location.href='/admin.php'" style="display: none;" id="goToAdminBtn">
+                <button class="btn btn-success" data-action="navigateToAdmin" style="display: none;" id="goToAdminBtn">
                     Přejít do Control Center
                 </button>
             </div>
@@ -421,6 +421,26 @@ function startInstallation() {
                 setProgress(0);
             }
         }
+
+        // Event delegation pro data-action
+        document.addEventListener('click', function(e) {
+            const target = e.target.closest('[data-action]');
+            if (!target) return;
+
+            const action = target.getAttribute('data-action');
+
+            switch (action) {
+                case 'startInstallation':
+                    startInstallation();
+                    break;
+                case 'closeWindow':
+                    window.close();
+                    break;
+                case 'navigateToAdmin':
+                    window.location.href = '/admin.php';
+                    break;
+            }
+        });
 
         // Auto-check při načtení stránky
         window.addEventListener('load', async () => {

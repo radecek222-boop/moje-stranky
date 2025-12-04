@@ -1,82 +1,46 @@
 <?php
 /**
- * Aktuality o značce Natuzzi
- * Zobrazení všech článků ve 2 sloupcích v náhodném pořadí
+ * Aktuality o znacce Natuzzi
+ * Zobrazeni vsech clanku ve 2 sloupcich v nahodnem poradi
  */
 
 require_once __DIR__ . '/init.php';
 require_once __DIR__ . '/includes/csrf_helper.php';
+require_once __DIR__ . '/includes/seo_meta.php';
 
-// Získat aktuality z databáze
+// Získat VŠECHNY aktuality z databáze
 try {
     $pdo = getDbConnection();
 
-    // Získat datum které má uživatel zobrazit (default = nejnovější)
-    $vybraneDatum = $_GET['datum'] ?? null;
+    // Jazyk
+    $jazyk = $_GET['lang'] ?? 'cz';
+    $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
-    if ($vybraneDatum) {
-        // Pokud je vybrané konkrétní datum, zobrazit články z toho dne
-        $stmt = $pdo->prepare("
-            SELECT * FROM wgs_natuzzi_aktuality
-            WHERE datum = :datum
-            LIMIT 1
-        ");
-        $stmt->execute(['datum' => $vybraneDatum]);
-        $hlavniAktualita = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$hlavniAktualita) {
-            // Pokud datum neexistuje, zobrazit nejnovější
-            $stmt = $pdo->query("
-                SELECT * FROM wgs_natuzzi_aktuality
-                ORDER BY datum DESC
-                LIMIT 1
-            ");
-            $hlavniAktualita = $stmt->fetch(PDO::FETCH_ASSOC);
-        }
-    } else {
-        // Zobrazit nejnovější aktualitu
-        $stmt = $pdo->query("
-            SELECT * FROM wgs_natuzzi_aktuality
-            ORDER BY datum DESC
-            LIMIT 1
-        ");
-        $hlavniAktualita = $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    // Pokud existuje hlavní aktualita, načíst její obsah
-    if ($hlavniAktualita) {
-        $datumAktuality = $hlavniAktualita['datum'];
-
-        // Rozdělit obsah na jednotlivé články podle ## nadpisů
-        $jazyk = $_GET['lang'] ?? 'cz';
-        $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
-
-        $obsahSloupec = 'obsah_' . $jazyk;
-        $celyObsah = $hlavniAktualita[$obsahSloupec] ?? '';
-
-        // Parse článků z markdown obsahu
-        $articles = parseClankyzObsahu($celyObsah, $hlavniAktualita['id'], $jazyk);
-
-        // Články se nemíchají při každém načtení - pořadí je dané obsahem z databáze
-        // Inteligentní rozdělení do sloupců podle délky se provede níže při zobrazování
-    } else {
-        $articles = [];
-        $datumAktuality = null;
-    }
-
-    // Získat seznam posledních 30 aktualit pro archiv
-    $stmtArchiv = $pdo->query("
-        SELECT datum, svatek_cz
-        FROM wgs_natuzzi_aktuality
+    // Načíst VŠECHNY aktuality (seřazené od nejnovějších)
+    $stmt = $pdo->query("
+        SELECT * FROM wgs_natuzzi_aktuality
         ORDER BY datum DESC
-        LIMIT 30
     ");
-    $archiv = $stmtArchiv->fetchAll(PDO::FETCH_ASSOC);
+    $vsechnyAktuality = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $articles = [];
+    $obsahSloupec = 'obsah_' . $jazyk;
+
+    // Pro každou aktualitu parsovat články
+    foreach ($vsechnyAktuality as $aktualita) {
+        $celyObsah = $aktualita[$obsahSloupec] ?? '';
+        if (!empty($celyObsah)) {
+            $clankyzAktuality = parseClankyzObsahu($celyObsah, $aktualita['id'], $jazyk);
+            $articles = array_merge($articles, $clankyzAktuality);
+        }
+    }
+
+    // Datum nejnovější aktuality pro zobrazení
+    $datumAktuality = !empty($vsechnyAktuality) ? $vsechnyAktuality[0]['datum'] : null;
 
 } catch (Exception $e) {
     error_log("Chyba při načítání aktualit: " . $e->getMessage());
     $articles = [];
-    $archiv = [];
     $datumAktuality = null;
 }
 
@@ -112,9 +76,6 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
     return $articles;
 }
-
-$jazyk = $_GET['lang'] ?? 'cz';
-$jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $jazyk; ?>">
@@ -127,8 +88,9 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
   <meta name="apple-mobile-web-app-title" content="WGS">
 
   <!-- SEO Meta Tags -->
-  <meta name="description" content="Denní aktuality o značce Natuzzi - novinky, tipy na péči o luxusní nábytek, showroomy v ČR. White Glove Service - autorizovaný servisní partner.">
-  <meta name="keywords" content="Natuzzi, aktuality, novinky, luxusní nábytek, kožené sedačky, péče o nábytek, White Glove Service">
+  <meta name="description" content="<?php echo getSeoDescription('aktuality'); ?>">
+  <?php renderSeoMeta('aktuality'); ?>
+  <?php renderFaqSchema('aktuality'); ?>
 
   <!-- PWA -->
   <link rel="manifest" href="./manifest.json">
@@ -136,7 +98,8 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
   <link rel="icon" type="image/png" sizes="192x192" href="./icon192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon512.png">
 
-  <title>Aktuality Natuzzi | White Glove Service</title>
+  <title><?php echo getSeoTitle('aktuality'); ?></title>
+  <?php renderSchemaOrg('aktuality'); ?>
 
   <!-- Preload critical resources -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
@@ -145,8 +108,8 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
   <!-- Google Fonts - Natuzzi style -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet"></noscript>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
 
   <!-- External CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
@@ -209,7 +172,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
     .pridat-clanek-btn {
       padding: 12px 30px;
-      background: #2D5016;
+      background: #333333;
       color: white;
       border: none;
       border-radius: 30px;
@@ -425,47 +388,6 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       transform: scale(1.05);
     }
 
-    .archiv-section {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      margin-top: 40px;
-    }
-
-    .archiv-section h3 {
-      color: #1a1a1a;
-      font-size: 1.5em;
-      margin: 0 0 20px 0;
-      font-weight: 600;
-    }
-
-    .archiv-link {
-      display: block;
-      padding: 12px 15px;
-      margin: 8px 0;
-      background: #f5f5f7;
-      border-radius: 8px;
-      text-decoration: none;
-      color: #333;
-      transition: all 0.3s;
-      border-left: 4px solid transparent;
-    }
-
-    .archiv-link:hover {
-      background: #333333;
-      color: white;
-      border-left-color: #1a1a1a;
-      transform: translateX(5px);
-    }
-
-    .archiv-link.active {
-      background: #1a1a1a;
-      color: white;
-      border-left-color: #000000;
-      font-weight: 600;
-    }
-
     @media (max-width: 768px) {
       .hero {
         padding: 60px 20px;
@@ -493,7 +415,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
 <!-- HERO SEKCE S FOTKOU -->
-<main>
+<main id="main-content">
 <section class="hero">
   <div class="hero-content">
     <h1 class="hero-title"
@@ -525,7 +447,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 
       <div class="datum-bar">
         <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-          <button class="pridat-clanek-btn" onclick="pridatNovyClanek()">
+          <button class="pridat-clanek-btn" data-action="pridatNovyClanek">
             Přidat nový článek
           </button>
         <?php endif; ?>
@@ -534,31 +456,18 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
       <!-- GRID SE 2 SLOUPCI VŠECH ČLÁNKŮ S INTELIGENTNÍM VYVÁŽENÍM -->
       <div class="clanky-grid">
         <?php
-        // INTELIGENTNÍ ROZDĚLENÍ ČLÁNKŮ podle délky textu
-        // Spočítat délku každého článku
-        foreach ($articles as $key => $article) {
-            $articles[$key]['delka'] = strlen($article['obsah']);
-        }
+        // NÁHODNÉ POŘADÍ ČLÁNKŮ pro SEO (stránka vypadá aktivně)
+        shuffle($articles);
 
-        // Seřadit podle délky (sestupně) pro lepší rozdělení
-        usort($articles, function($a, $b) {
-            return $b['delka'] - $a['delka'];
-        });
-
-        // Rozdělit na 2 sloupce tak, aby celková délka byla vyrovnaná
+        // Rozdělit na 2 sloupce střídavě (lichý/sudý)
         $levySloupec = [];
         $pravySloupec = [];
-        $levaSuma = 0;
-        $pravaSuma = 0;
 
-        foreach ($articles as $article) {
-            // Přidat do sloupce s menší celkovou délkou
-            if ($levaSuma <= $pravaSuma) {
+        foreach ($articles as $index => $article) {
+            if ($index % 2 === 0) {
                 $levySloupec[] = $article;
-                $levaSuma += $article['delka'];
             } else {
                 $pravySloupec[] = $article;
-                $pravaSuma += $article['delka'];
             }
         }
 
@@ -568,7 +477,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
           <?php foreach ($levySloupec as $clanek): ?>
             <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
               <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-                <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>', <?php echo $clanek['index']; ?>)">
+                <button class="admin-edit-btn" data-action="upravitClanek" data-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
                   Upravit článek
                 </button>
               <?php endif; ?>
@@ -583,7 +492,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
           <?php foreach ($pravySloupec as $clanek): ?>
             <div class="clanek-card" data-aktualita-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
               <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-                <button class="admin-edit-btn" onclick="upravitClanek(<?php echo $clanek['aktualita_id']; ?>, '<?php echo $clanek['jazyk']; ?>', <?php echo $clanek['index']; ?>)">
+                <button class="admin-edit-btn" data-action="upravitClanek" data-id="<?php echo $clanek['aktualita_id']; ?>" data-jazyk="<?php echo $clanek['jazyk']; ?>" data-index="<?php echo $clanek['index']; ?>">
                   Upravit článek
                 </button>
               <?php endif; ?>
@@ -594,24 +503,6 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
           <?php endforeach; ?>
         </div>
       </div>
-
-      <?php if (!empty($archiv) && count($archiv) > 1): ?>
-        <div class="archiv-section">
-          <h3><?php
-            echo $jazyk === 'en' ? 'News Archive' : ($jazyk === 'it' ? 'Archivio Notizie' : 'Archiv aktualit');
-            ?>
-          </h3>
-          <?php foreach (array_slice($archiv, 0, 10) as $polozka): ?>
-            <a href="?datum=<?php echo $polozka['datum']; ?>&lang=<?php echo $jazyk; ?>"
-               class="archiv-link <?php echo $polozka['datum'] === $datumAktuality ? 'active' : ''; ?>">
-              <?php echo date('d.m.Y', strtotime($polozka['datum'])); ?>
-              <?php if ($polozka['svatek_cz']): ?>
-                - <?php echo htmlspecialchars($polozka['svatek_cz']); ?>
-              <?php endif; ?>
-            </a>
-          <?php endforeach; ?>
-        </div>
-      <?php endif; ?>
 
     <?php else: ?>
 
@@ -850,11 +741,11 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
         ">
 
         <div id="fotkaPreview" style="margin-top: 10px; display: none;">
-          <img id="fotkaPreviewImg" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 5px;">
+          <img id="fotkaPreviewImg" alt="Náhled vybrané fotky" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 5px;">
         </div>
         <div id="fotkaExisting" style="margin-top: 10px; display: none;">
           <p style="font-size: 13px; color: #666; margin-bottom: 5px;">Stávající fotka:</p>
-          <img id="fotkaExistingImg" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 5px;">
+          <img id="fotkaExistingImg" alt="Stávající fotka" style="max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 5px;">
           <p style="font-size: 12px; color: #999; margin-top: 5px;">Pokud vyberete novou fotku, nahradí tuto stávající.</p>
         </div>
 
@@ -1197,8 +1088,7 @@ $jazyk = in_array($jazyk, ['cz', 'en', 'it']) ? $jazyk : 'cz';
 </script>
 <?php endif; ?>
 
-<script src="assets/js/hamburger-menu.js" defer></script>
-
+<?php renderHeatmapTracker(); ?>
 </body>
 </html>
 

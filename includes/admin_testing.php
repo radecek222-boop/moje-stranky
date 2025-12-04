@@ -314,24 +314,24 @@ $pdo = getDbConnection();
 
         <!-- Results -->
         <div class="result-box success" id="resultSuccess">
-            <div class="result-icon">✅</div>
+            <div class="result-icon">[OK]</div>
             <div class="result-title">Všechny testy proběhly úspěšně!</div>
             <div class="result-desc">Proběhlo dle potřeb? Potvrďte a test data budou smazána.</div>
             <div class="result-actions">
-                <button class="btn btn-success" onclick="cleanupTestData()">✅ Potvrdit a smazat test data</button>
-                <button class="btn btn-secondary" onclick="viewTestDataInDB()">🔍 Prohlédnout v DB</button>
-                <button class="btn" onclick="copyResults()">📋 Kopírovat</button>
+                <button class="btn btn-success" data-action="cleanupTestData">[OK] Potvrdit a smazat test data</button>
+                <button class="btn btn-secondary" data-action="viewTestDataInDB">Prohlédnout v DB</button>
+                <button class="btn" data-action="copyResults">Kopírovat</button>
             </div>
         </div>
 
         <div class="result-box failed" id="resultFailed">
-            <div class="result-icon">❌</div>
+            <div class="result-icon">[X]</div>
             <div class="result-title">Některé testy selhaly</div>
             <div class="result-desc">Test data NEBYLA smazána. Můžete je prohlédnout pro debug.</div>
             <div class="result-actions">
-                <button class="btn btn-danger" onclick="copyResults()">📋 Kopírovat chyby pro Claude</button>
-                <button class="btn btn-secondary" onclick="viewTestDataInDB()">🔍 Prohlédnout v DB</button>
-                <button class="btn" onclick="cleanupTestData()">🧹 Ručně smazat</button>
+                <button class="btn btn-danger" data-action="copyResults">Kopírovat chyby</button>
+                <button class="btn btn-secondary" data-action="viewTestDataInDB">Prohlédnout v DB</button>
+                <button class="btn" data-action="cleanupTestData">Ručně smazat</button>
             </div>
             <div id="errorDetails" style="margin-top: 1rem; padding: 1rem; background: var(--c-white); border: 1px solid var(--c-border); text-align: left; font-family: 'Courier New', monospace; font-size: 0.85rem;">
                 <!-- Error details will be filled here -->
@@ -416,11 +416,11 @@ async function runWorkflowTest() {
 
         if (result.success) {
             step.classList.add('success');
-            step.querySelector('.workflow-icon').textContent = '✅';
+            step.querySelector('.workflow-icon').textContent = '[OK]';
             passedCount++;
         } else {
             step.classList.add('failed');
-            step.querySelector('.workflow-icon').textContent = '❌';
+            step.querySelector('.workflow-icon').textContent = '[X]';
             failedCount++;
 
             // Stop on first failure
@@ -498,13 +498,13 @@ async function cleanupTestData() {
         const result = await response.json();
 
         if (result.success) {
-            alert('✅ Test data smazána!');
+            alert('[OK] Test data smazána!');
             location.reload();
         } else {
-            alert('❌ Chyba: ' + result.error);
+            alert('[X] Chyba: ' + result.error);
         }
     } catch (error) {
-        alert('❌ Chyba: ' + error.message);
+        alert('[X] Chyba: ' + error.message);
     }
 }
 
@@ -541,9 +541,9 @@ Role: ${selectedRole}
 Datum: ${new Date().toLocaleString('cs-CZ')}
 
 VÝSLEDKY:
-✅ Úspěšné: ${passed}
-❌ Selhání: ${failed}
-📋 Celkem: ${testResults.steps.length}
+[OK] Úspěšné: ${passed}
+[X] Selhání: ${failed}
+Celkem: ${testResults.steps.length}
 
 TEST DATA IDs:
 • User ID: ${testResults.testUserId || 'N/A'}
@@ -555,7 +555,7 @@ ${'-'.repeat(80)}
 `;
 
     testResults.steps.forEach((result, i) => {
-        report += `\nKrok ${i + 1}: ${result.success ? '✅ PASS' : '❌ FAIL'}\n`;
+        report += `\nKrok ${i + 1}: ${result.success ? '[OK] PASS' : '[X] FAIL'}\n`;
         if (!result.success) {
             report += `   Error: ${result.error || 'Unknown'}\n`;
             if (result.file && result.line) {
@@ -567,7 +567,7 @@ ${'-'.repeat(80)}
     report += `\n${'='.repeat(80)}\n`;
 
     navigator.clipboard.writeText(report.trim()).then(() => {
-        alert('✅ Zkopírováno! Vložte CTRL+V do zprávy pro Claude Code');
+        alert('Zkopírováno do schránky');
     });
 }
 
@@ -576,5 +576,12 @@ ${'-'.repeat(80)}
  */
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ACTION REGISTRY - Step 113
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('cleanupTestData', () => cleanupTestData());
+    Utils.registerAction('viewTestDataInDB', () => viewTestDataInDB());
+    Utils.registerAction('copyResults', () => copyResults());
 }
 </script>

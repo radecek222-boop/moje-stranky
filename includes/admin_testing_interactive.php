@@ -302,25 +302,25 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
     <div class="role-selector" id="roleSelector">
         <h3>Vyberte roli pro testování:</h3>
         <div class="role-buttons">
-            <div class="role-btn" onclick="selectRole('admin')" data-role="admin">
+            <div class="role-btn" data-action="selectRole" data-role="admin">
                 <div class="role-name">Admin</div>
                 <div class="role-desc">Plný přístup</div>
             </div>
-            <div class="role-btn" onclick="selectRole('prodejce')" data-role="prodejce">
+            <div class="role-btn" data-action="selectRole" data-role="prodejce">
                 <div class="role-name">Prodejce</div>
                 <div class="role-desc">Vlastní reklamace</div>
             </div>
-            <div class="role-btn" onclick="selectRole('technik')" data-role="technik">
+            <div class="role-btn" data-action="selectRole" data-role="technik">
                 <div class="role-name">Technik</div>
                 <div class="role-desc">Všechny reklamace</div>
             </div>
-            <div class="role-btn" onclick="selectRole('guest')" data-role="guest">
+            <div class="role-btn" data-action="selectRole" data-role="guest">
                 <div class="role-name">Host</div>
                 <div class="role-desc">Základní funkce</div>
             </div>
         </div>
         <div class="btn-group" style="margin-top: 1rem; justify-content: center;">
-            <button type="button" class="btn btn-success" onclick="startTest()" id="startTestBtn" disabled>
+            <button type="button" class="btn btn-success" data-action="startInteractiveTest" id="startTestBtn" disabled>
                 Zahájit test →
             </button>
         </div>
@@ -544,23 +544,23 @@ function loadStep1_Formular(panel) {
 
         <form id="testForm">
             <div class="form-group">
-                <label>Jméno *</label>
+                <label for="jmeno">Jméno *</label>
                 <input type="text" id="jmeno" value="Test Zákazník E2E" required>
             </div>
             <div class="form-group">
-                <label>Email *</label>
-                <input type="email" id="email" value="test-e2e@wgs-service.cz" required>
+                <label for="email">Email *</label>
+                <input type="email" id="email" value="test-e2e@wgs-service.cz" autocomplete="email" required>
             </div>
             <div class="form-group">
-                <label>Telefon *</label>
-                <input type="tel" id="telefon" value="+420777888999" required>
+                <label for="telefon">Telefon *</label>
+                <input type="tel" id="telefon" value="+420777888999" autocomplete="tel" required>
             </div>
             <div class="form-group">
-                <label>Popis problému *</label>
+                <label for="popis_problemu">Popis problému *</label>
                 <textarea id="popis_problemu" rows="3" required>E2E test workflow - kompletní průchod systémem</textarea>
             </div>
             <div class="form-group">
-                <label>Fotografie (volitelné)</label>
+                <label for="photo">Fotografie (volitelné)</label>
                 <input type="file" id="photo" accept="image/*">
                 <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--c-grey);">
                     Pro zjednodušení testu můžete vynechat
@@ -574,10 +574,10 @@ function loadStep1_Formular(panel) {
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-success" onclick="executeStep1()">
+            <button class="btn btn-success" data-action="executeStep1">
                 Validovat a pokračovat →
             </button>
-            <button class="btn btn-secondary" onclick="resetTest()">
+            <button class="btn btn-secondary" data-action="resetInteractiveTest">
                 Reset
             </button>
         </div>
@@ -633,7 +633,7 @@ function loadStep2_APICall(panel) {
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-secondary" onclick="goToStep(1)">
+            <button class="btn btn-secondary" data-action="goToInteractiveStep" data-step="1">
                 ← Zpět
             </button>
         </div>
@@ -726,7 +726,7 @@ function loadStep3_Seznam(panel) {
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-secondary" onclick="goToStep(2)">
+            <button class="btn btn-secondary" data-action="goToInteractiveStep" data-step="2">
                 ← Zpět
             </button>
         </div>
@@ -806,10 +806,10 @@ function loadStep4_Detail(panel) {
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-success" onclick="goToStep(5)">
+            <button class="btn btn-success" data-action="goToInteractiveStep" data-step="5">
                 Zahájit návštěvu → PhotoCustomer
             </button>
-            <button class="btn btn-secondary" onclick="goToStep(3)">
+            <button class="btn btn-secondary" data-action="goToInteractiveStep" data-step="3">
                 ← Zpět
             </button>
         </div>
@@ -843,7 +843,7 @@ async function loadStep5_PhotoCustomer(panel) {
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-secondary" onclick="goToStep(4)">
+            <button class="btn btn-secondary" data-action="goToInteractiveStep" data-step="4">
                 ← Zpět
             </button>
         </div>
@@ -924,7 +924,7 @@ async function loadStep6_Protokol(panel) {
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-secondary" onclick="goToStep(5)">
+            <button class="btn btn-secondary" data-action="goToInteractiveStep" data-step="5">
                 ← Zpět
             </button>
         </div>
@@ -1126,7 +1126,7 @@ function showTestResult(passed, errorMessage = null) {
 
     const successHtml = `
         <div style="background: #e8f5e9; border: 2px solid var(--c-success); padding: 2rem; text-align: center; margin-bottom: 2rem;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+            <div style="font-size: 2rem; margin-bottom: 1rem; font-weight: bold;">OK</div>
             <div style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--c-success);">
                 Test prošel úspěšně!
             </div>
@@ -1138,7 +1138,7 @@ function showTestResult(passed, errorMessage = null) {
 
     const failureHtml = `
         <div style="background: #ffebee; border: 2px solid var(--c-error); padding: 2rem; text-align: center; margin-bottom: 2rem;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
+            <div style="font-size: 2rem; margin-bottom: 1rem; font-weight: bold;">CHYBA</div>
             <div style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--c-error);">
                 Test selhal
             </div>
@@ -1187,11 +1187,11 @@ function showTestResult(passed, errorMessage = null) {
 
         <div class="btn-group" style="justify-content: center;">
             ${testData.claimId ? `
-                <button class="btn btn-danger" onclick="cleanupTestData()">
+                <button class="btn btn-danger" data-action="cleanupInteractiveTestData">
                     SMAZAT TESTOVACÍ DATA
                 </button>
             ` : ''}
-            <button class="btn btn-secondary" onclick="resetTest()">
+            <button class="btn btn-secondary" data-action="resetInteractiveTest">
                 NOVÝ TEST
             </button>
         </div>
@@ -1232,13 +1232,13 @@ async function cleanupTestData() {
         const result = await response.json();
 
         if (result.success) {
-            alert('✅ Testovací data smazána!');
+            alert('Testovací data smazána!');
             resetTest();
         } else {
-            alert('❌ Chyba: ' + (result.error || 'Unknown error'));
+            alert('Chyba: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
-        alert('❌ Chyba: ' + error.message);
+        alert('Chyba: ' + error.message);
     }
 }
 
@@ -1247,5 +1247,19 @@ async function cleanupTestData() {
  */
 function resetTest() {
     location.reload();
+}
+
+// ACTION REGISTRY - Step 113
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('selectRole', (el, data) => {
+        if (data.role) selectRole(data.role);
+    });
+    Utils.registerAction('startInteractiveTest', () => startTest());
+    Utils.registerAction('executeStep1', () => executeStep1());
+    Utils.registerAction('resetInteractiveTest', () => resetTest());
+    Utils.registerAction('goToInteractiveStep', (el, data) => {
+        if (data.step) goToStep(parseInt(data.step));
+    });
+    Utils.registerAction('cleanupInteractiveTestData', () => cleanupTestData());
 }
 </script>

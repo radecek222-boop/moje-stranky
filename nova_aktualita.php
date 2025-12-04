@@ -26,7 +26,7 @@ $csrfToken = generateCSRFToken();
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     body {
@@ -311,14 +311,14 @@ $csrfToken = generateCSRFToken();
         <strong>Důležité:</strong> Vyplňte obsah ve všech třech jazycích. Použijte Markdown formát pro formátování textu.
       </div>
 
-      <div class="language-tabs">
-        <button type="button" class="tab-btn active" data-tab="cz">🇨🇿 Čeština</button>
-        <button type="button" class="tab-btn" data-tab="en">🇬🇧 English</button>
-        <button type="button" class="tab-btn" data-tab="it">🇮🇹 Italiano</button>
+      <div class="language-tabs" role="tablist" aria-label="Jazykové verze obsahu">
+        <button type="button" class="tab-btn active" data-tab="cz" role="tab" id="tab-btn-cz" aria-selected="true" aria-controls="tab-cz">🇨🇿 Čeština</button>
+        <button type="button" class="tab-btn" data-tab="en" role="tab" id="tab-btn-en" aria-selected="false" aria-controls="tab-en">🇬🇧 English</button>
+        <button type="button" class="tab-btn" data-tab="it" role="tab" id="tab-btn-it" aria-selected="false" aria-controls="tab-it">🇮🇹 Italiano</button>
       </div>
 
       <!-- Česká verze -->
-      <div id="tab-cz" class="tab-content active">
+      <div id="tab-cz" class="tab-content active" role="tabpanel" aria-labelledby="tab-btn-cz">
         <div class="markdown-help">
           <strong>Markdown formát:</strong>
           <code># Nadpis</code> = H1 |
@@ -338,7 +338,7 @@ Vítejte u dnešních aktualit o luxusním italském nábytku Natuzzi..."></text
       </div>
 
       <!-- Anglická verze -->
-      <div id="tab-en" class="tab-content">
+      <div id="tab-en" class="tab-content" role="tabpanel" aria-labelledby="tab-btn-en">
         <div class="markdown-help">
           <strong>Markdown format:</strong>
           <code># Heading</code> = H1 |
@@ -358,7 +358,7 @@ Welcome to today's news about luxury Italian furniture Natuzzi..."></textarea>
       </div>
 
       <!-- Italská verze -->
-      <div id="tab-it" class="tab-content">
+      <div id="tab-it" class="tab-content" role="tabpanel" aria-labelledby="tab-btn-it">
         <div class="markdown-help">
           <strong>Formato Markdown:</strong>
           <code># Titolo</code> = H1 |
@@ -397,7 +397,7 @@ Benvenuti alle notizie di oggi sui mobili italiani di lusso Natuzzi..."></textar
     <!-- Tlačítka -->
     <div class="form-card">
       <div class="submit-section">
-        <button type="button" class="btn btn-cancel" onclick="window.location.href='admin.php'">
+        <button type="button" class="btn btn-cancel" data-action="navigateToAdmin">
           Zrušit
         </button>
         <button type="submit" class="btn btn-submit">
@@ -421,11 +421,15 @@ Benvenuti alle notizie di oggi sui mobili italiani di lusso Natuzzi..."></textar
       const tabId = this.dataset.tab;
 
       // Deaktivovat všechny
-      tabBtns.forEach(b => b.classList.remove('active'));
+      tabBtns.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
       tabContents.forEach(c => c.classList.remove('active'));
 
       // Aktivovat vybranou
       this.classList.add('active');
+      this.setAttribute('aria-selected', 'true');
       document.getElementById('tab-' + tabId).classList.add('active');
     });
   });
@@ -477,7 +481,7 @@ Benvenuti alle notizie di oggi sui mobili italiani di lusso Natuzzi..."></textar
         photoItem.className = 'photo-item';
         photoItem.innerHTML = `
           <img src="${e.target.result}" alt="${file.name}">
-          <button type="button" class="remove-btn" data-filename="${file.name}">×</button>
+          <button type="button" class="remove-btn" data-filename="${file.name}" aria-label="Odstranit">×</button>
         `;
 
         photoPreview.appendChild(photoItem);
@@ -533,8 +537,6 @@ Benvenuti alle notizie di oggi sui mobili italiani di lusso Natuzzi..."></textar
   });
 })();
 </script>
-
-<script src="assets/js/hamburger-menu.js" defer></script>
 
 </body>
 </html>

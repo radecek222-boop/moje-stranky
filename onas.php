@@ -28,14 +28,14 @@
   <!-- Google Fonts - Natuzzi style -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet"></noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
   
   <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/onas.min.css">
-  <link rel="stylesheet" href="assets/css/mobile-responsive.css">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
 
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
@@ -46,7 +46,7 @@
 <!-- ČERNÝ HORNÍ PANEL -->
 
 <!-- HERO SEKCE -->
-<main>
+<main id="main-content">
 <section class="hero">
   <div class="hero-content">
     <h1 class="hero-title"
@@ -250,8 +250,8 @@
 
 <!-- External JavaScript -->
 <!-- Logger Utility (must be loaded first) -->
-<script src="assets/js/logger.js" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
 
-<script src="assets/js/onas.js" defer></script>
+<?php renderHeatmapTracker(); ?>
 </body>
 </html>

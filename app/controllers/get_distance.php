@@ -8,19 +8,19 @@ require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
 
 header('Content-Type: application/json');
-// ✅ PERFORMANCE: Cache-Control header (5 minut cache pro distance calculations)
+// PERFORMANCE: Cache-Control header (5 minut cache pro distance calculations)
 // Vzdálenost mezi adresami se nemění často
 header('Cache-Control: private, max-age=300'); // 5 minut
 
 /**
  * Převede adresu na GPS souřadnice pomocí Geoapify geocoding
- * ✅ PERFORMANCE FIX: Přidán APCu cache (TTL 24h)
+ * PERFORMANCE FIX: Přidán APCu cache (TTL 24h)
  * @param string $address Adresa k převodu
  * @return array|null ['lat' => float, 'lon' => float] nebo null při chybě
  */
 function geocodeAddress($address) {
     try {
-        // ✅ CACHE: Kontrola APCu cache (TTL 24 hodin)
+        // CACHE: Kontrola APCu cache (TTL 24 hodin)
         // Adresy se nemění, takže můžeme cachovat dlouho
         $cacheKey = 'geocode_' . md5(strtolower(trim($address)));
 
@@ -73,7 +73,7 @@ function geocodeAddress($address) {
             'lon' => $coords[0]
         ];
 
-        // ✅ CACHE: Uložit do APCu cache (TTL 24 hodin = 86400 sekund)
+        // CACHE: Uložit do APCu cache (TTL 24 hodin = 86400 sekund)
         if (function_exists('apcu_store')) {
             apcu_store($cacheKey, $result, 86400);
             error_log("💾 Cached geocoding result for: $address");
@@ -105,7 +105,7 @@ function geocodeAddress($address) {
  */
 function calculateRoute($startLat, $startLon, $endLat, $endLon) {
     try {
-        // ✅ FIX: Použití action=routing místo action=route
+        // FIX: Použití action=routing místo action=route
         // routing akce používá OSRM (open-source) ZDARMA, nepotřebuje API klíč
         // route akce vyžaduje Geoapify API klíč
         $waypoints = "{$startLat},{$startLon}|{$endLat},{$endLon}";
@@ -199,6 +199,10 @@ try {
     if (strlen($origin) > 500 || strlen($destination) > 500) {
         throw new Exception('Adresy jsou příliš dlouhé');
     }
+
+    // FIX: Uvolnit session PŘED cURL requesty (zabraňuje session locking)
+    // Session již není potřeba - autentizace a CSRF validace proběhly
+    session_write_close();
 
     // Krok 1: Geocoding - převod obou adres na GPS souřadnice
     $originCoords = geocodeAddress($origin);

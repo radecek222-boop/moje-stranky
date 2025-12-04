@@ -342,22 +342,22 @@ endif;
 
     <!-- Tab Navigation -->
     <div class="cc-tabs">
-        <button class="cc-tab <?= $currentSection === 'prehled' ? 'active' : '' ?>" onclick="switchSection('prehled')">
+        <button class="cc-tab <?= $currentSection === 'prehled' ? 'active' : '' ?>" data-action="switchSecuritySection" data-section="prehled">
             Přehled
         </button>
-        <button class="cc-tab <?= $currentSection === 'registracni_klice' ? 'active' : '' ?>" onclick="switchSection('registracni_klice')">
+        <button class="cc-tab <?= $currentSection === 'registracni_klice' ? 'active' : '' ?>" data-action="switchSecuritySection" data-section="registracni_klice">
             Registrační klíče
         </button>
-        <button class="cc-tab <?= $currentSection === 'api_klice' ? 'active' : '' ?>" onclick="switchSection('api_klice')">
+        <button class="cc-tab <?= $currentSection === 'api_klice' ? 'active' : '' ?>" data-action="switchSecuritySection" data-section="api_klice">
             API Klíče
         </button>
-        <button class="cc-tab <?= $currentSection === 'bezpecnost' ? 'active' : '' ?>" onclick="switchSection('bezpecnost')">
+        <button class="cc-tab <?= $currentSection === 'bezpecnost' ? 'active' : '' ?>" data-action="switchSecuritySection" data-section="bezpecnost">
             Bezpečnost
         </button>
-        <button class="cc-tab <?= $currentSection === 'uzivatele' ? 'active' : '' ?>" onclick="switchSection('uzivatele')">
+        <button class="cc-tab <?= $currentSection === 'uzivatele' ? 'active' : '' ?>" data-action="switchSecuritySection" data-section="uzivatele">
             Uživatelé
         </button>
-        <button class="cc-tab <?= $currentSection === 'audit' ? 'active' : '' ?>" onclick="switchSection('audit')">
+        <button class="cc-tab <?= $currentSection === 'audit' ? 'active' : '' ?>" data-action="switchSecuritySection" data-section="audit">
             Audit Log
         </button>
     </div>
@@ -409,16 +409,16 @@ endif;
         <div class="setting-group">
             <h3 class="setting-group-title">Rychlé akce</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem;">
-                <button class="cc-btn cc-btn-primary" onclick="switchSection('registracni_klice')" style="font-size: 0.8rem; padding: 0.5rem;">
+                <button class="cc-btn cc-btn-primary" data-action="switchSecuritySection" data-section="registracni_klice" style="font-size: 0.8rem; padding: 0.5rem;">
                     Spravovat klíče
                 </button>
-                <button class="cc-btn cc-btn-secondary" onclick="switchSection('uzivatele')" style="font-size: 0.8rem; padding: 0.5rem;">
+                <button class="cc-btn cc-btn-secondary" data-action="switchSecuritySection" data-section="uzivatele" style="font-size: 0.8rem; padding: 0.5rem;">
                     Zobrazit uživatele
                 </button>
-                <button class="cc-btn cc-btn-secondary" onclick="switchSection('audit')" style="font-size: 0.8rem; padding: 0.5rem;">
+                <button class="cc-btn cc-btn-secondary" data-action="switchSecuritySection" data-section="audit" style="font-size: 0.8rem; padding: 0.5rem;">
                     Audit Log
                 </button>
-                <button class="cc-btn cc-btn-secondary" onclick="switchSection('api_klice')" style="font-size: 0.8rem; padding: 0.5rem;">
+                <button class="cc-btn cc-btn-secondary" data-action="switchSecuritySection" data-section="api_klice" style="font-size: 0.8rem; padding: 0.5rem;">
                     API Klíče
                 </button>
             </div>
@@ -430,8 +430,9 @@ endif;
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <h2 style="margin: 0; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Registrační klíče</h2>
             <div style="display: flex; gap: 0.5rem;">
-                <button onclick="vytvorNovyKlic()" class="cc-btn cc-btn-success" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">+ Nový</button>
-                <button onclick="nactiRegistracniKlice()" class="cc-btn cc-btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">Obnovit</button>
+                <button data-action="otevritPozvanku" class="cc-btn cc-btn-primary" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">Pozvat</button>
+                <button data-action="vytvorNovyKlic" class="cc-btn cc-btn-success" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">+ Nový</button>
+                <button data-action="nactiRegistracniKlice" class="cc-btn cc-btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">Obnovit</button>
             </div>
         </div>
 
@@ -477,12 +478,12 @@ endif;
                                placeholder="API klíč Geoapify"
                                style="flex: 1; font-family: monospace; font-size: 0.85rem;">
                         <button class="cc-btn cc-btn-sm cc-btn-secondary"
-                                onclick="togglePasswordVisibilitySimple('api-geoapify')"
+                                data-action="togglePasswordVisibilitySimple" data-input="api-geoapify"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Zobrazit
                         </button>
                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                onclick="ulozitApiKlic('GEOAPIFY_API_KEY', 'api-geoapify')"
+                                data-action="ulozitApiKlic" data-key="GEOAPIFY_API_KEY" data-input="api-geoapify"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Uložit
                         </button>
@@ -509,7 +510,7 @@ endif;
                                placeholder="smtp.gmail.com"
                                style="flex: 1; font-size: 0.85rem;">
                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                onclick="ulozitApiKlic('SMTP_HOST', 'api-smtp-host')"
+                                data-action="ulozitApiKlic" data-key="SMTP_HOST" data-input="api-smtp-host"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Uložit
                         </button>
@@ -531,7 +532,7 @@ endif;
                                placeholder="587"
                                style="width: 120px; font-size: 0.85rem;">
                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                onclick="ulozitApiKlic('SMTP_PORT', 'api-smtp-port')"
+                                data-action="ulozitApiKlic" data-key="SMTP_PORT" data-input="api-smtp-port"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Uložit
                         </button>
@@ -553,7 +554,7 @@ endif;
                                placeholder="user@example.com"
                                style="flex: 1; font-size: 0.85rem;">
                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                onclick="ulozitApiKlic('SMTP_USER', 'api-smtp-user')"
+                                data-action="ulozitApiKlic" data-key="SMTP_USER" data-input="api-smtp-user"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Uložit
                         </button>
@@ -575,12 +576,12 @@ endif;
                                placeholder="••••••••"
                                style="flex: 1; font-family: monospace; font-size: 0.85rem;">
                         <button class="cc-btn cc-btn-sm cc-btn-secondary"
-                                onclick="togglePasswordVisibilitySimple('api-smtp-pass')"
+                                data-action="togglePasswordVisibilitySimple" data-input="api-smtp-pass"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Zobrazit
                         </button>
                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                onclick="ulozitApiKlic('SMTP_PASS', 'api-smtp-pass')"
+                                data-action="ulozitApiKlic" data-key="SMTP_PASS" data-input="api-smtp-pass"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Uložit
                         </button>
@@ -617,12 +618,12 @@ endif;
                                            placeholder="<?= $config['config_value_display'] ?>"
                                            style="flex: 1; font-family: monospace; font-size: 0.85rem;">
                                     <button class="cc-btn cc-btn-sm cc-btn-secondary"
-                                            onclick="togglePasswordVisibility(<?= $config['id'] ?>)"
+                                            data-action="togglePasswordVisibility" data-id="<?= $config['id'] ?>"
                                             style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                                         Zobrazit
                                     </button>
                                     <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                            onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')"
+                                            data-action="saveSecurityConfig" data-id="<?= $config['id'] ?>" data-key="<?= htmlspecialchars($config['config_key']) ?>"
                                             style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                                         Uložit
                                     </button>
@@ -675,7 +676,7 @@ endif;
                                placeholder="Nové heslo"
                                style="flex: 1; font-size: 0.85rem;">
                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                onclick="zmenitAdminHeslo()"
+                                data-action="zmenitAdminHeslo"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                             Změnit
                         </button>
@@ -705,7 +706,7 @@ endif;
                                placeholder="Nové heslo"
                                style="flex: 1; font-size: 0.85rem;">
                         <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                onclick="resetovatUzivatelskeHeslo()"
+                                data-action="resetovatUzivatelskeHeslo"
                                 style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                                 Reset
                         </button>
@@ -741,7 +742,7 @@ endif;
                                            value="<?= htmlspecialchars($config['config_value']) ?>"
                                            style="width: 120px;">
                                     <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                            onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')"
+                                            data-action="saveSecurityConfig" data-id="<?= $config['id'] ?>" data-key="<?= htmlspecialchars($config['config_key']) ?>"
                                             style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
                                         Uložit
                                     </button>
@@ -772,13 +773,13 @@ endif;
         <table class="user-access-table" id="security-users-table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Jméno</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Registrace</th>
-                    <th>Poslední přihlášení</th>
+                    <th scope="col">ID</th>
+                    <th scope="col">Jméno</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Registrace</th>
+                    <th scope="col">Poslední přihlášení</th>
                 </tr>
             </thead>
             <tbody>
@@ -806,15 +807,15 @@ endif;
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
                 <div>
                     <label style="display: block; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; color: #000;">Datum od:</label>
-                    <input type="date" id="auditDateFrom" value="<?= date('Y-m-d', strtotime('-7 days')) ?>" style="width: 100%; padding: 0.4rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem;">
+                    <input type="date" id="auditDateFrom" value="<?= date('Y-m-d', strtotime('-7 days')) ?>" style="width: 100%; padding: 0.4rem; border: 1px solid #000; font-family: 'Poppins', sans-serif;">
                 </div>
                 <div>
                     <label style="display: block; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; color: #000;">Datum do:</label>
-                    <input type="date" id="auditDateTo" value="<?= date('Y-m-d') ?>" style="width: 100%; padding: 0.4rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem;">
+                    <input type="date" id="auditDateTo" value="<?= date('Y-m-d') ?>" style="width: 100%; padding: 0.4rem; border: 1px solid #000; font-family: 'Poppins', sans-serif;">
                 </div>
                 <div>
                     <label style="display: block; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; color: #000;">Typ události:</label>
-                    <select id="auditActionFilter" style="width: 100%; padding: 0.4rem; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem;">
+                    <select id="auditActionFilter" style="width: 100%; padding: 0.4rem; border: 1px solid #000; font-family: 'Poppins', sans-serif;">
                         <option value="">Všechny události</option>
                         <option value="admin_login">Přihlášení admina</option>
                         <option value="user_login">Přihlášení uživatele</option>
@@ -829,7 +830,7 @@ endif;
                     </select>
                 </div>
                 <div style="display: flex; align-items: flex-end;">
-                    <button onclick="nactiAuditLogy()" style="width: 100%; padding: 0.5rem 1rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; text-transform: uppercase;">
+                    <button data-action="nactiAuditLogy" style="width: 100%; padding: 0.5rem 1rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; text-transform: uppercase;">
                         Načíst záznamy
                     </button>
                 </div>
@@ -845,7 +846,7 @@ endif;
     </div>
 </div>
 
-<script src="/assets/js/csrf-auto-inject.js"></script>
+<script src="/assets/js/csrf-auto-inject.min.js"></script>
 <script>
 // Section switching
 /**
@@ -968,14 +969,14 @@ async function nactiRegistracniKlice() {
             html += '</tr></thead><tbody>';
 
             data.keys.forEach(klic => {
-                html += '<tr style="border-bottom: 1px solid #e0e0e0;" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'#fff\'">';
+                html += '<tr class="admin-hover-row" style="border-bottom: 1px solid #e0e0e0;">';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><span style="display: inline-block; padding: 0.2rem 0.5rem; background: #000; color: #fff; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 500;">' + escapujHtml(klic.key_type) + '</span></td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><code style="background: #f5f5f5; padding: 0.25rem 0.5rem; font-size: 0.8rem; border: 1px solid #ddd;">' + escapujHtml(klic.key_code) + '</code></td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + klic.usage_count + ' / ' + (klic.max_usage || '∞') + '</td>';
-                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + (klic.is_active ? '<span style="color: #000;">✓ Ano</span>' : '<span style="color: #999;">✗ Ne</span>') + '</td>';
+                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + (klic.is_active ? '<span style="color: #000;">Ano</span>' : '<span style="color: #999;">Ne</span>') + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + new Date(klic.created_at).toLocaleDateString('cs-CZ') + '</td>';
-                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><button onclick="kopirovatDoSchranky(\'' + klic.key_code.replace(/'/g, "\\'") + '\')" style="padding: 0.25rem 0.5rem; background: #000; color: #fff; border: 1px solid #000; font-family: \'Poppins\', sans-serif; font-size: 0.7rem; cursor: pointer; margin-right: 0.25rem;">Kopírovat</button>';
-                html += '<button onclick="smazatKlic(\'' + klic.key_code.replace(/'/g, "\\'") + '\')" style="padding: 0.25rem 0.5rem; background: #fff; color: #000; border: 1px solid #000; font-family: \'Poppins\', sans-serif; font-size: 0.7rem; cursor: pointer;">Smazat</button></td>';
+                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><button data-action="kopirovatDoSchranky" data-code="' + escapujHtml(klic.key_code) + '" class="cc-btn cc-btn-sm cc-btn-primary" style="margin-right: 0.25rem;">Kopírovat</button>';
+                html += '<button data-action="smazatKlic" data-code="' + escapujHtml(klic.key_code) + '" class="cc-btn cc-btn-sm cc-btn-secondary">Smazat</button></td>';
                 html += '</tr>';
             });
 
@@ -990,10 +991,85 @@ async function nactiRegistracniKlice() {
     }
 }
 
-// Vytvořit nový klíč
-async function vytvorNovyKlic() {
-    const typKlice = prompt('Zadejte typ klíče (admin/technik/prodejce/partner):');
-    if (!typKlice) return;
+// Vytvořit nový klíč - zobrazí modal pro výběr typu
+function vytvorNovyKlic() {
+    // Odstranit existující modal pokud existuje
+    const existujici = document.getElementById('modalVytvorKlic');
+    if (existujici) existujici.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'modalVytvorKlic';
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.6); display: flex;
+        align-items: center; justify-content: center; z-index: 10000;
+    `;
+
+    modal.innerHTML = `
+        <div style="background: #1a1a1a; padding: 30px; border-radius: 12px;
+                    max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                    border: 1px solid #333;">
+            <h3 style="margin: 0 0 20px 0; color: #fff; font-size: 1.3rem;">
+                Vytvořit nový registrační klíč
+            </h3>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; padding: 15px;
+                              background: #252525; border-radius: 8px; cursor: pointer;
+                              margin-bottom: 10px; border: 2px solid transparent;">
+                    <input type="radio" name="typKliceVyber" value="technik"
+                           style="width: 20px; height: 20px; margin-right: 15px; accent-color: #fff;">
+                    <div>
+                        <div style="color: #fff; font-weight: 600; font-size: 1.1rem;">TECHNIK</div>
+                        <div style="color: #888; font-size: 0.85rem;">Pro servisní techniky</div>
+                    </div>
+                </label>
+
+                <label style="display: flex; align-items: center; padding: 15px;
+                              background: #252525; border-radius: 8px; cursor: pointer;
+                              border: 2px solid transparent;">
+                    <input type="radio" name="typKliceVyber" value="prodejce"
+                           style="width: 20px; height: 20px; margin-right: 15px; accent-color: #fff;">
+                    <div>
+                        <div style="color: #fff; font-weight: 600; font-size: 1.1rem;">PRODEJCE</div>
+                        <div style="color: #888; font-size: 0.85rem;">Pro prodejce a obchodníky</div>
+                    </div>
+                </label>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button data-action="odeslatVytvoreniKlice" style="flex: 1; padding: 12px;
+                        background: #fff; color: #000; border: none; border-radius: 6px;
+                        font-weight: 600; cursor: pointer; font-size: 1rem;">
+                    Vytvořit klíč
+                </button>
+                <button data-action="zavritModalVytvorKlic"
+                        style="flex: 1; padding: 12px; background: #333; color: #fff;
+                        border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+                    Zrušit
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Zavřít při kliknutí na pozadí
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+// Odeslat požadavek na vytvoření klíče
+async function odeslatVytvoreniKlice() {
+    const vybrany = document.querySelector('input[name="typKliceVyber"]:checked');
+
+    if (!vybrany) {
+        alert('Vyberte typ klíče');
+        return;
+    }
+
+    const typKlice = vybrany.value;
 
     try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -1013,6 +1089,8 @@ async function vytvorNovyKlic() {
 
         const data = await odpoved.json();
 
+        document.getElementById('modalVytvorKlic')?.remove();
+
         if (data.status === 'success') {
             alert('Klíč vytvořen: ' + data.key_code);
             nactiRegistracniKlice();
@@ -1023,6 +1101,269 @@ async function vytvorNovyKlic() {
         alert('Chyba: ' + chyba.message);
         console.error('[Security] Chyba vytváření klíče:', chyba);
     }
+}
+
+// ==========================================
+// POZVANKOVY SYSTEM (ZJEDNODUSENY)
+// Sablony jsou nyni v databazi wgs_notifications
+// ==========================================
+
+// Otevrit modal pro pozvanku
+function otevritPozvanku() {
+    // Odstranit existujici modal
+    const existujici = document.getElementById('modalPozvanka');
+    if (existujici) existujici.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'modalPozvanka';
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.7); display: flex;
+        align-items: center; justify-content: center; z-index: 10000;
+    `;
+
+    modal.innerHTML = `
+        <div style="background: #1a1a1a; padding: 30px; border-radius: 12px;
+                    max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                    border: 1px solid #333;">
+
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3 style="margin: 0; color: #fff; font-size: 1.2rem;">Odeslat pozvanku</h3>
+                <button data-action="zavritModalPozvanka"
+                        aria-label="Zavřít"
+                        style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+
+            <!-- Vyber role -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Typ pozvanky</label>
+                <div style="display: flex; gap: 10px;">
+                    <label style="flex: 1; display: flex; align-items: center; padding: 12px;
+                                  background: #252525; border-radius: 6px; cursor: pointer;
+                                  border: 2px solid transparent;" id="labelTechnik">
+                        <input type="radio" name="typPozvanky" value="technik" data-action="aktualizovatVyber"
+                               style="width: 16px; height: 16px; margin-right: 10px; accent-color: #fff;">
+                        <span style="color: #fff;">Technik</span>
+                    </label>
+                    <label style="flex: 1; display: flex; align-items: center; padding: 12px;
+                                  background: #252525; border-radius: 6px; cursor: pointer;
+                                  border: 2px solid transparent;" id="labelProdejce">
+                        <input type="radio" name="typPozvanky" value="prodejce" data-action="aktualizovatVyber"
+                               style="width: 16px; height: 16px; margin-right: 10px; accent-color: #fff;">
+                        <span style="color: #fff;">Prodejce</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Vyber klice -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">Registracni klic</label>
+                <select id="vyberKlice" style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444;
+                        border-radius: 6px; color: #fff; font-size: 0.9rem;">
+                    <option value="auto">Vytvorit novy klic automaticky</option>
+                </select>
+            </div>
+
+            <!-- Emaily -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">
+                    Emailove adresy (kazdy na novy radek)
+                </label>
+                <textarea id="emailyPozvanky" rows="4" placeholder="jan.novak@example.com"
+                          style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444;
+                          border-radius: 6px; color: #fff; font-size: 0.9rem; resize: vertical; font-family: monospace;"></textarea>
+                <div style="color: #666; font-size: 0.75rem; margin-top: 5px;">
+                    Zadano: <span id="pocetEmailu">0</span> / 30 emailu
+                </div>
+            </div>
+
+            <!-- Info o sablone -->
+            <div style="background: #252525; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
+                <div style="color: #888; font-size: 0.8rem;">
+                    Sablona se nacte z databaze (wgs_notifications).
+                    Editovat ji muzete v karte "Email sablony".
+                </div>
+            </div>
+
+            <!-- Tlacitka -->
+            <div style="display: flex; gap: 10px;">
+                <button data-action="odeslatPozvanky" id="btnOdeslatPozvanky" disabled
+                        style="flex: 1; padding: 12px; background: #fff; color: #000; border: none;
+                        border-radius: 6px; font-weight: 600; cursor: pointer; opacity: 0.5;">
+                    Odeslat
+                </button>
+                <button data-action="zavritModalPozvanka"
+                        style="flex: 1; padding: 12px; background: #333; color: #fff;
+                        border: none; border-radius: 6px; cursor: pointer;">
+                    Zrusit
+                </button>
+            </div>
+
+            <!-- Status -->
+            <div id="statusPozvanky" style="margin-top: 15px; display: none; padding: 12px; border-radius: 6px;"></div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Nacist klice do selectu
+    nacistKliceProPozvanku();
+
+    // Event listener pro pocitani emailu
+    const emailyEl = document.getElementById('emailyPozvanky');
+    if (emailyEl) {
+        emailyEl.addEventListener('input', function() {
+            const emaily = this.value.split('\\n').filter(e => e.trim() !== '');
+            const pocetEl = document.getElementById('pocetEmailu');
+            if (pocetEl) pocetEl.textContent = emaily.length;
+            aktualizovatTlacitkoOdeslat();
+        });
+    }
+
+    // Zavrit pri kliknuti na pozadi
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+// Aktualizovat vyber typu pozvanky (vizualni)
+function aktualizovatVyber() {
+    const typ = document.querySelector('input[name="typPozvanky"]:checked')?.value;
+    const labelTechnik = document.getElementById('labelTechnik');
+    const labelProdejce = document.getElementById('labelProdejce');
+
+    if (labelTechnik) labelTechnik.style.borderColor = typ === 'technik' ? '#fff' : 'transparent';
+    if (labelProdejce) labelProdejce.style.borderColor = typ === 'prodejce' ? '#fff' : 'transparent';
+
+    aktualizovatTlacitkoOdeslat();
+}
+
+// Aktualizovat stav tlacitka odeslat
+function aktualizovatTlacitkoOdeslat() {
+    const typ = document.querySelector('input[name="typPozvanky"]:checked')?.value;
+    const emailyEl = document.getElementById('emailyPozvanky');
+    const emaily = emailyEl ? emailyEl.value.split('\\n').filter(e => e.trim() !== '') : [];
+    const btn = document.getElementById('btnOdeslatPozvanky');
+
+    if (btn) {
+        if (typ && emaily.length > 0 && emaily.length <= 30) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        } else {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+        }
+    }
+}
+
+// Nacist klice pro pozvanku
+async function nacistKliceProPozvanku() {
+    try {
+        const odpoved = await fetch('/api/admin_api.php?action=get_keys');
+        const data = await odpoved.json();
+
+        const select = document.getElementById('vyberKlice');
+        if (select && data.status === 'success' && data.keys) {
+            let options = '<option value="auto">Vytvorit novy klic automaticky</option>';
+            data.keys.forEach(klic => {
+                if (klic.is_active) {
+                    const limit = klic.max_usage === null ? 'neomezeno' : klic.max_usage;
+                    options += `<option value="${klic.key_code}">${klic.key_code} (${klic.key_type.toUpperCase()}) - ${klic.usage_count}/${limit}</option>`;
+                }
+            });
+            select.innerHTML = options;
+        }
+    } catch (e) {
+        console.error('Chyba nacitani klicu:', e);
+    }
+}
+
+// Odeslat pozvánky
+async function odeslatPozvanky() {
+    const typ = document.querySelector('input[name="typPozvanky"]:checked')?.value;
+    const emailyText = document.getElementById('emailyPozvanky').value;
+    const klicSelect = document.getElementById('vyberKlice');
+    const klic = klicSelect.value;
+    const statusEl = document.getElementById('statusPozvanky');
+    const btn = document.getElementById('btnOdeslatPozvanky');
+
+    // Parsovat emaily
+    const emaily = emailyText.split('\\n')
+        .map(e => e.trim())
+        .filter(e => e !== '' && e.includes('@'));
+
+    if (emaily.length === 0) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = '#f8d7da';
+        statusEl.style.color = '#721c24';
+        statusEl.textContent = 'Zadejte alespon jeden platny email';
+        return;
+    }
+
+    if (emaily.length > 30) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = '#f8d7da';
+        statusEl.style.color = '#721c24';
+        statusEl.textContent = 'Maximalne 30 emailu najednou';
+        return;
+    }
+
+    // Disable button
+    btn.disabled = true;
+    btn.textContent = 'Odesilam...';
+    statusEl.style.display = 'block';
+    statusEl.style.background = '#d1ecf1';
+    statusEl.style.color = '#0c5460';
+    statusEl.textContent = `Odesilam pozvanky na ${emaily.length} adres...`;
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (!csrfToken) {
+            throw new Error('CSRF token neni k dispozici');
+        }
+
+        const odpoved = await fetch('/api/admin_api.php?action=send_invitations', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                typ: typ,
+                klic: klic,
+                emaily: emaily,
+                csrf_token: csrfToken
+            })
+        });
+
+        const data = await odpoved.json();
+
+        if (data.status === 'success') {
+            statusEl.style.background = '#d4edda';
+            statusEl.style.color = '#155724';
+            statusEl.innerHTML = `<strong>Uspech!</strong> Odeslano ${data.sent_count} pozvanek.` +
+                (data.key_code ? ` Pouzity klic: <code>${data.key_code}</code>` : '');
+
+            // Refresh klíčů
+            nactiRegistracniKlice();
+
+            // Vyčistit formulář po 3s
+            setTimeout(() => {
+                const emailyEl = document.getElementById('emailyPozvanky');
+                const pocetEl = document.getElementById('pocetEmailu');
+                if (emailyEl) emailyEl.value = '';
+                if (pocetEl) pocetEl.textContent = '0';
+            }, 3000);
+        } else {
+            throw new Error(data.message || 'Nepodarilo se odeslat pozvanky');
+        }
+    } catch (chyba) {
+        statusEl.style.background = '#f8d7da';
+        statusEl.style.color = '#721c24';
+        statusEl.textContent = 'Chyba: ' + chyba.message;
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Odeslat pozvanky';
 }
 
 // Smazat klíč
@@ -1056,7 +1397,7 @@ async function smazatKlic(kodKlice) {
         console.log('[Security] Response status:', odpoved.status);
         console.log('[Security] Response Content-Type:', odpoved.headers.get('content-type'));
 
-        // ✅ OPRAVA: Kontrola HTTP statusu PŘED parsováním JSON
+        // OPRAVA: Kontrola HTTP statusu PŘED parsováním JSON
         if (!odpoved.ok) {
             const errorText = await odpoved.text();
             console.error('[Security] HTTP error response body:', errorText);
@@ -1190,7 +1531,7 @@ async function zmenitAdminHeslo() {
         const data = await odpoved.json();
 
         if (data.status === 'success') {
-            statusEl.innerHTML = '<span style="color: #28a745;">✓ Heslo bylo změněno</span>';
+            statusEl.innerHTML = '<span style="color: #28a745;">Heslo bylo změněno</span>';
             aktualniHeslo.value = '';
             noveHeslo.value = '';
             setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
@@ -1238,7 +1579,7 @@ async function resetovatUzivatelskeHeslo() {
         const data = await odpoved.json();
 
         if (data.status === 'success') {
-            statusEl.innerHTML = '<span style="color: #28a745;">✓ Heslo bylo resetováno</span>';
+            statusEl.innerHTML = '<span style="color: #28a745;">Heslo bylo resetováno</span>';
             noveHeslo.value = '';
             setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
         } else {
@@ -1281,7 +1622,7 @@ async function ulozitApiKlic(nazevKlice, inputId) {
         const data = await odpoved.json();
 
         if (data.status === 'success') {
-            statusEl.innerHTML = '<span style="color: #28a745;">✓ Uloženo</span>';
+            statusEl.innerHTML = '<span style="color: #28a745;">Uloženo</span>';
             setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
         } else {
             throw new Error(data.message || 'Nepodařilo se uložit');
@@ -1466,6 +1807,48 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 console.log('Security centrum načteno');
+
+// ACTION REGISTRY - Step 113
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('switchSecuritySection', (el, data) => {
+        if (data.section) switchSection(data.section);
+    });
+    Utils.registerAction('otevritPozvanku', () => otevritPozvanku());
+    Utils.registerAction('vytvorNovyKlic', () => vytvorNovyKlic());
+    Utils.registerAction('nactiRegistracniKlice', () => nactiRegistracniKlice());
+    Utils.registerAction('togglePasswordVisibilitySimple', (el, data) => {
+        if (data.input) togglePasswordVisibilitySimple(data.input);
+    });
+    Utils.registerAction('ulozitApiKlic', (el, data) => {
+        if (data.key && data.input) ulozitApiKlic(data.key, data.input);
+    });
+    Utils.registerAction('togglePasswordVisibility', (el, data) => {
+        if (data.id) togglePasswordVisibility(parseInt(data.id));
+    });
+    Utils.registerAction('saveSecurityConfig', (el, data) => {
+        if (data.id && data.key) saveConfig(parseInt(data.id), data.key);
+    });
+    Utils.registerAction('zmenitAdminHeslo', () => zmenitAdminHeslo());
+    Utils.registerAction('resetovatUzivatelskeHeslo', () => resetovatUzivatelskeHeslo());
+    Utils.registerAction('nactiAuditLogy', () => nactiAuditLogy());
+    Utils.registerAction('kopirovatDoSchranky', (el, data) => {
+        if (data.code) kopirovatDoSchranky(data.code);
+    });
+    Utils.registerAction('smazatKlic', (el, data) => {
+        if (data.code) smazatKlic(data.code);
+    });
+    Utils.registerAction('odeslatVytvoreniKlice', () => odeslatVytvoreniKlice());
+    Utils.registerAction('zavritModalVytvorKlic', () => {
+        const modal = document.getElementById('modalVytvorKlic');
+        if (modal) modal.remove();
+    });
+    Utils.registerAction('zavritModalPozvanka', () => {
+        const modal = document.getElementById('modalPozvanka');
+        if (modal) modal.remove();
+    });
+    Utils.registerAction('odeslatPozvanky', () => odeslatPozvanky());
+}
+
 </script>
 
 

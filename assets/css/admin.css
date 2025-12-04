@@ -19,13 +19,13 @@
    =========================================================================== */
 
 :root {
-  --cc-primary: #667eea;
-  --cc-primary-dark: #5a67d8;
-  --cc-secondary: #764ba2;
-  --cc-success: #28a745;
-  --cc-warning: #ffc107;
-  --cc-danger: #dc3545;
-  --cc-info: #17a2b8;
+  --cc-primary: #444;
+  --cc-primary-dark: #333;
+  --cc-secondary: #555;
+  --cc-success: #666;
+  --cc-warning: #888;
+  --cc-danger: #444;
+  --cc-info: #777;
 
   --cc-bg-primary: #f5f5f7;
   --cc-bg-secondary: #ffffff;
@@ -48,12 +48,12 @@
   --c-grey: #666666;
   --c-light-grey: #999999;
   --c-border: #e0e0e0;
-  --c-success: #2d5016;
-  --c-error: #8b0000;
-  --c-warning: #b8860b;
-  --c-primary: #667eea;
-  --c-online: #2d5016;
-  --c-info: #1a73e8;
+  --c-success: #333333;
+  --c-error: #333333;
+  --c-warning: #555555;
+  --c-primary: #444;
+  --c-online: #333333;
+  --c-info: #555;
 }
 
 
@@ -110,7 +110,7 @@
 }
 
 .cc-clear-cache-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #333 0%, #555 100%);
     color: white;
     border: none;
     padding: 0.5rem 0.75rem;
@@ -360,6 +360,15 @@
     display: block;
 }
 
+/* Sections - pro Email & SMS karty */
+.cc-section {
+    display: none;
+}
+
+.cc-section.active {
+    display: block;
+}
+
 /* Mini stats grid */
 .cc-mini-stats {
     display: grid;
@@ -402,17 +411,22 @@
 .cc-actions .btn,
 .cc-actions button,
 .cc-actions a.btn {
-    padding: 0.3rem 0.6rem;
-    font-size: 0.7rem;
-    line-height: 1.2;
-    border-radius: 3px;
+    padding: 0.5rem 0.75rem;
+    font-size: clamp(0.75rem, 2vw, 0.875rem); /* 12px - 14px, prizpusobi se */
+    line-height: 1.3;
+    border-radius: 4px;
     font-weight: 500;
     white-space: nowrap;
+    min-height: 36px; /* Desktop mensi, mobile 44px v mobile-fixes */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .cc-actions .btn-sm {
-    padding: 0.3rem 0.6rem;
-    font-size: 0.7rem;
+    padding: 0.4rem 0.6rem;
+    font-size: clamp(0.6875rem, 1.8vw, 0.8125rem); /* 11px - 13px */
+    min-height: 32px;
 }
 
 .cc-actions .search-box {
@@ -431,13 +445,13 @@
    PROMĚNNÉ
    ============================================ */
 :root {
-  --cc-primary: #667eea;
-  --cc-primary-dark: #5a67d8;
-  --cc-secondary: #764ba2;
-  --cc-success: #28a745;
-  --cc-warning: #ffc107;
-  --cc-danger: #dc3545;
-  --cc-info: #17a2b8;
+  --cc-primary: #444;
+  --cc-primary-dark: #333;
+  --cc-secondary: #555;
+  --cc-success: #666;
+  --cc-warning: #888;
+  --cc-danger: #444;
+  --cc-info: #777;
 
   --cc-bg-primary: #f5f5f7;
   --cc-bg-secondary: #ffffff;
@@ -510,7 +524,7 @@
 }
 
 .control-center-search::before {
-  content: '🔍';
+  content: '';
   position: absolute;
   left: 1rem;
   top: 50%;
@@ -683,22 +697,22 @@
 
 .control-card-status-dot.green {
   background: var(--cc-success);
-  box-shadow: 0 0 8px rgba(40, 167, 69, 0.5);
+  box-shadow: 0 0 8px rgba(102, 102, 102, 0.5);
 }
 
 .control-card-status-dot.red {
   background: var(--cc-danger);
-  box-shadow: 0 0 8px rgba(220, 53, 69, 0.5);
+  box-shadow: 0 0 8px rgba(68, 68, 68, 0.5);
 }
 
 .control-card-status-dot.yellow {
   background: var(--cc-warning);
-  box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+  box-shadow: 0 0 8px rgba(136, 136, 136, 0.5);
 }
 
 .control-card-status-dot.blue {
-  background: #0E639C;
-  box-shadow: 0 0 8px rgba(14, 99, 156, 0.5);
+  background: #555;
+  box-shadow: 0 0 8px rgba(85, 85, 85, 0.5);
 }
 
 /* ============================================
@@ -711,7 +725,7 @@
   right: 0;
   bottom: 0;
   background: var(--cc-bg-primary);
-  z-index: 10000;
+  z-index: var(--z-modal-top, 10000);
   overflow-y: auto;
   display: none;
   animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -739,7 +753,7 @@
   gap: 1rem;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: var(--z-sticky, 10);
 }
 
 .control-detail-back {
@@ -1035,27 +1049,27 @@
 }
 
 .cc-alert.success {
-  background: rgba(40, 167, 69, 0.1);
-  color: #155724;
-  border: 1px solid rgba(40, 167, 69, 0.2);
+  background: rgba(102, 102, 102, 0.1);
+  color: #333;
+  border: 1px solid rgba(102, 102, 102, 0.2);
 }
 
 .cc-alert.warning {
-  background: rgba(255, 193, 7, 0.1);
-  color: #856404;
-  border: 1px solid rgba(255, 193, 7, 0.2);
+  background: rgba(136, 136, 136, 0.1);
+  color: #444;
+  border: 1px solid rgba(136, 136, 136, 0.2);
 }
 
 .cc-alert.danger {
-  background: rgba(220, 53, 69, 0.1);
-  color: #721c24;
-  border: 1px solid rgba(220, 53, 69, 0.2);
+  background: rgba(68, 68, 68, 0.1);
+  color: #333;
+  border: 1px solid rgba(68, 68, 68, 0.2);
 }
 
 .cc-alert.info {
-  background: rgba(23, 162, 184, 0.1);
-  color: #0c5460;
-  border: 1px solid rgba(23, 162, 184, 0.2);
+  background: rgba(119, 119, 119, 0.1);
+  color: #444;
+  border: 1px solid rgba(119, 119, 119, 0.2);
 }
 
 /* ============================================
@@ -1148,7 +1162,7 @@
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 9998;
+    z-index: var(--z-overlay-backdrop, 9998);
     backdrop-filter: blur(4px);
 }
 
@@ -1166,7 +1180,7 @@
     width: 90%;
     height: 75%;
     background: var(--c-white, #ffffff);
-    z-index: 9999;
+    z-index: var(--z-menu-overlay, 9999);
     overflow: hidden;
     border-radius: 8px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -1224,7 +1238,7 @@
 }
 
 .admin-modal-back-btn:hover {
-    background: var(--c-success, #2D5016);
+    background: var(--c-success, #333333);
     transform: translateX(-3px);
 }
 
@@ -1301,7 +1315,7 @@
     width: 50px;
     height: 50px;
     border: 4px solid var(--c-border, #dddddd);
-    border-top-color: var(--c-success, #2D5016);
+    border-top-color: var(--c-success, #333333);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 1rem;
@@ -1327,7 +1341,7 @@
     height: 100%;
     padding: 2rem;
     text-align: center;
-    color: var(--c-error, #8B0000);
+    color: var(--c-error, #666);
 }
 
 .admin-modal-error-icon {
@@ -1349,7 +1363,7 @@
 
 .admin-modal-error-btn {
     padding: 0.75rem 1.5rem;
-    background: var(--c-error, #8B0000);
+    background: var(--c-error, #666);
     color: var(--c-white, #ffffff);
     border: none;
     cursor: pointer;
@@ -1423,8 +1437,8 @@ body.admin-modal-open {
     bottom: 5%;
     width: 80%;
     height: 90%;
-    border: 3px solid var(--c-success, #2D5016);
-    box-shadow: 0 0 0 4px rgba(45, 80, 22, 0.1),
+    border: 3px solid var(--c-success, #333333);
+    box-shadow: 0 0 0 4px rgba(51, 51, 51, 0.1),
                 0 20px 60px rgba(0, 0, 0, 0.3);
     border-radius: 8px;
     animation: scaleIn 0.3s ease-out;
@@ -1450,7 +1464,7 @@ body.admin-modal-open {
     position: absolute;
     top: -12px;
     right: 20px;
-    background: var(--c-success, #2D5016);
+    background: var(--c-success, #333333);
     color: white;
     padding: 4px 12px;
     font-size: 0.7rem;
@@ -1678,7 +1692,7 @@ body.admin-modal-open {
     button,
     a,
     .clickable {
-        -webkit-tap-highlight-color: rgba(45, 80, 22, 0.2);
+        -webkit-tap-highlight-color: rgba(51, 51, 51, 0.2);
     }
 }
 
@@ -1893,7 +1907,7 @@ body.admin-modal-open {
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 10;
+    z-index: var(--z-sticky, 10);
     border-radius: 6px;
 }
 
@@ -1905,7 +1919,7 @@ body.admin-modal-open {
     width: 32px;
     height: 32px;
     border: 3px solid var(--c-border, #ddd);
-    border-top-color: var(--c-primary, #667eea);
+    border-top-color: var(--c-primary, #333);
     border-radius: 50%;
     animation: cc-spinner-spin 0.8s linear infinite;
 }
@@ -1935,7 +1949,7 @@ body.admin-modal-open {
     bottom: 0;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
-    z-index: 10002; /* ✅ OPRAVA: Zvýšeno z 9998 na 10002 (nad hamburger menu z-index: 10001) */
+    z-index: var(--z-detail-overlay, 10002);
     display: none;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -1959,7 +1973,7 @@ body.admin-modal-open {
     background: var(--cc-bg-secondary, #ffffff);
     border-radius: var(--cc-radius, 12px);
     box-shadow: var(--cc-shadow-lg, 0 8px 32px rgba(0,0,0,0.16));
-    z-index: 10003; /* ✅ OPRAVA: Zvýšeno z 10000 na 10003 (nad overlay 10002 a hamburger 10001) */
+    z-index: var(--z-top-layer, 10003);
     display: none;
     flex-direction: column;
     opacity: 0;
@@ -2050,14 +2064,14 @@ body.admin-modal-open {
     height: 100%;
     color: var(--cc-text-secondary, #6e6e73);
     background: var(--cc-bg-secondary, #ffffff); /* CRITICAL: Cover content during loading */
-    z-index: 1; /* CRITICAL: Above iframe during loading */
+    z-index: var(--z-background, 1); /* CRITICAL: Above iframe during loading */
 }
 
 .cc-modal-spinner {
     width: 48px;
     height: 48px;
     border: 4px solid var(--cc-border, #d1d1d6);
-    border-top-color: var(--cc-primary, #667eea);
+    border-top-color: var(--cc-primary, #333);
     border-radius: 50%;
     animation: cc-modal-spinner-spin 0.8s linear infinite;
 }
@@ -2639,7 +2653,7 @@ body.admin-dashboard-page {
     bottom: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 9999;
+    z-index: var(--z-menu-overlay, 9999);
     overflow: hidden;
 }
 
@@ -2650,7 +2664,7 @@ body.admin-dashboard-page {
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
-    z-index: 10;
+    z-index: var(--z-sticky, 10);
 }
 
 .admin-landing-title {
@@ -2705,7 +2719,7 @@ body.admin-dashboard-page {
     height: 120px;
     border-radius: 50%;
     background: radial-gradient(circle at 30% 30%, #444, #111, #000);
-    border: 2px solid #00ffff;
+    border: 2px solid #666;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2748,8 +2762,8 @@ body.admin-dashboard-page {
         0 0 50px rgba(0, 255, 255, 0.8),
         0 0 70px rgba(0, 255, 255, 0.5),
         inset 0 0 30px rgba(0, 255, 255, 0.3) !important;
-    z-index: 20;
-    border-color: #00ffff;
+    z-index: var(--z-sticky, 10);
+    border-color: #666;
     border-width: 3px;
     background: radial-gradient(circle at 30% 30%, #555, #222, #111);
 }
@@ -3099,4 +3113,203 @@ body.admin-dashboard-page {
     .planet-title {
         font-size: 0.55rem;
     }
+}
+
+/* ============================================================================
+   MOBILE FIXES - Sloučeno z admin-mobile-fixes.css (Step 51)
+   PWA Responsive opravy pro admin.php
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  /* Admin Dashboard Buttons (36px → 44px) */
+  .admin-cache-btn,
+  .admin-version-info {
+    height: 44px !important;
+    min-height: 44px;
+    padding: 12px 16px !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Control Centre Cards - Touch Optimization */
+  .cc-card {
+    min-height: 100px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+  }
+
+  .cc-card:active {
+    transform: scale(0.98);
+  }
+
+  /* Toggle Switch (28px → 48px) */
+  .toggle-switch,
+  .status-toggle,
+  .stav-toggle,
+  input[type="checkbox"].toggle {
+    min-width: 48px !important;
+    min-height: 48px !important;
+    touch-action: manipulation;
+  }
+
+  .toggle-switch-container {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Modal Back Button (32px → 44px) */
+  .modal-back-btn,
+  .back-btn,
+  .modal .btn-back,
+  button[data-action="back"] {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 50%;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Modal Full Screen (100vw×100vh) */
+  .modal,
+  .modal-overlay,
+  #addUserModal,
+  #editUserModal {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+  }
+
+  .modal-content,
+  .modal-body {
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Search Input iOS Auto-Zoom Prevention */
+  input[type="search"],
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px !important;
+    min-height: 44px;
+    padding: 12px 16px;
+    line-height: 1.4;
+  }
+
+  input[readonly],
+  select[disabled] {
+    font-size: 13px !important;
+  }
+
+  /* Tab Navigation (minimum 48px) */
+  .tab-btn,
+  .tab-navigation button,
+  .admin-tabs button,
+  [role="tab"] {
+    min-height: 48px !important;
+    padding: 12px 20px !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Touch Optimization pro všechny buttons */
+  .btn,
+  button,
+  input[type="submit"],
+  input[type="button"],
+  .action-btn {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+  }
+
+  .btn-sm,
+  .btn-small,
+  table .btn {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    padding: 8px 12px !important;
+  }
+
+  /* Table Row Actions */
+  .table-actions button,
+  .row-actions button,
+  td button {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  /* Dropdowns a Select Menus */
+  select {
+    background-size: 16px;
+    padding-right: 40px;
+  }
+
+  /* Checkboxes a Radio Buttons */
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-width: 24px;
+    min-height: 24px;
+    margin: 10px;
+  }
+
+  label:has(input[type="checkbox"]),
+  label:has(input[type="radio"]) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px;
+    cursor: pointer;
+  }
+}
+
+/* Priority Badge - Conflict resolution with admin.css [class*="-badge"] */
+.priority-badge {
+  color: white;
+  padding: 4px 10px !important;
+  border-radius: 12px !important;
+  font-weight: 600;
+  font-size: 14px !important;
+}
+
+.priority-badge[data-priority="kritické"] {
+  background: #333;
+}
+
+.priority-badge[data-priority="vysoká"] {
+  background: #555;
+}
+
+.priority-badge[data-priority="střední"] {
+  background: #777;
+}
+
+.priority-badge[data-priority="nízká"] {
+  background: #999;
+}
+
+@media (max-width: 768px) {
+  .priority-badge {
+    font-size: 16px !important;
+    padding: 6px 12px !important;
+  }
 }

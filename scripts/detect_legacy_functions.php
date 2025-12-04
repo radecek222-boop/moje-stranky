@@ -144,7 +144,7 @@ echo "Celkem legacy issues: {$totalIssues}\n";
 echo "Souborů s legacy kódem: " . count($findings) . "\n\n";
 
 if (empty($findings)) {
-    echo "✅ Žádné legacy funkce nenalezeny!\n";
+    echo "Žádné legacy funkce nenalezeny!\n";
 } else {
     echo "🕰️  LEGACY FUNKCE:\n";
     echo str_repeat("=", 70) . "\n\n";
