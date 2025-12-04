@@ -383,6 +383,208 @@ body {
   display: none;
 }
 
+#videoInput {
+  display: none;
+}
+
+/* ========================================================================
+   VIDEO SECTION - Nahrání videí do videotéky
+   ======================================================================== */
+
+.video-section {
+  background: var(--c-white);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #333;
+  border-radius: 4px;
+}
+
+.video-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+  min-height: 60px;
+}
+
+.video-preview-empty {
+  color: var(--c-grey);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 1rem;
+  opacity: 0.7;
+}
+
+.video-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f9f9f9;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--c-border);
+}
+
+.video-thumb-container {
+  flex-shrink: 0;
+  width: 100px;
+  height: 60px;
+  background: #1a1a1a;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+}
+
+.video-thumb-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-play-icon {
+  position: absolute;
+  font-size: 1.5rem;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  opacity: 0.9;
+}
+
+.video-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.video-info-name {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--c-black);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.video-info-meta {
+  font-size: 0.7rem;
+  color: var(--c-grey);
+  margin-top: 0.2rem;
+}
+
+.video-delete-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-controls {
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.btn-video {
+  padding: 0.6rem 1.2rem;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Poppins';
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-video:hover {
+  background: #444;
+}
+
+/* ========================================================================
+   VIDEO MODAL - Přehrávání videí
+   ======================================================================== */
+
+.video-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 10005;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-modal-overlay.active {
+  display: flex;
+}
+
+.video-modal-container {
+  width: 95%;
+  max-width: 800px;
+  max-height: 90%;
+  background: #222;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.video-modal-header {
+  padding: 1rem;
+  background: #333;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #444;
+}
+
+.video-modal-header span {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.video-modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  line-height: 1;
+}
+
+.video-modal-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  padding: 1rem;
+}
+
+.video-modal-content video {
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: 4px;
+}
+
 .hamburger {
   display: none;
   flex-direction: column;
