@@ -341,13 +341,13 @@ try {
             <?php endif; ?>
         </div>
 
-        <!-- EMAIL & SMS ŠABLONY - DVA SLOUPCE -->
+        <!-- EMAIL ŠABLONY -->
         <div id="section-templates" class="cc-section <?= $currentSection === 'templates' ? 'active' : '' ?>">
-            <h3 style="margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">Notifikacni sablony (EMAIL | SMS)</h3>
+            <h3 style="margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">Email sablony</h3>
 
-            <?php if (empty($sablonyParovane)): ?>
+            <?php if (empty($emailSablony)): ?>
                 <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 1rem; font-family: 'Poppins', sans-serif;">
-                    Zadne sablony nenalezeny.
+                    Zadne email sablony nenalezeny.
                 </div>
             <?php else: ?>
                 <?php
@@ -356,99 +356,64 @@ try {
                     'prirazeni_terminu_technician' => 'Prirazeni terminu',
                     'pripominka_terminu_customer' => 'Pripominka terminu',
                     'pokus_o_kontakt_customer' => 'Pokus o kontakt',
-                    'nova_reklamace_admin' => 'Nova reklamace',
-                    'nova_reklamace_customer' => 'Nova reklamace',
+                    'nova_reklamace_admin' => 'Nova reklamace (admin)',
+                    'nova_reklamace_customer' => 'Nova reklamace (zakaznik)',
                     'dokonceno_customer' => 'Dokonceni zakazky',
                     'znovu_otevreno_admin' => 'Znovu otevreno',
                     'pozvanka_seller' => 'Pozvanka pro prodejce',
                     'pozvanka_technician' => 'Pozvanka pro technika'
                 ];
+
+                // Seradit email sablony podle definovaneho poradi
+                $poradiSablon = [
+                    'nova_reklamace_customer',
+                    'nova_reklamace_admin',
+                    'pokus_o_kontakt_customer',
+                    'potvrzeni_terminu_customer',
+                    'pripominka_terminu_customer',
+                    'prirazeni_terminu_technician',
+                    'dokonceno_customer',
+                    'znovu_otevreno_admin',
+                    'pozvanka_seller',
+                    'pozvanka_technician'
+                ];
+
+                // Seradit pole podle poradi
+                uksort($emailSablony, function($a, $b) use ($poradiSablon) {
+                    $indexA = array_search($a, $poradiSablon);
+                    $indexB = array_search($b, $poradiSablon);
+                    if ($indexA === false) $indexA = 999;
+                    if ($indexB === false) $indexB = 999;
+                    return $indexA - $indexB;
+                });
                 ?>
 
-                <!-- Hlavicka sloupcu -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.5rem;">
-                    <div style="background: #000; color: #fff; padding: 0.75rem 1rem; font-family: 'Poppins', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; text-align: center;">
-                        EMAIL
+                <!-- Email sablony - jednodussi seznam -->
+                <?php foreach ($emailSablony as $klic => $email): ?>
+                <div style="border: 2px solid #000; margin-bottom: 1rem; background: #fff;">
+                    <!-- Nadpis -->
+                    <div style="background: #000; color: #fff; padding: 0.5rem 1rem; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;">
+                        <span><?= htmlspecialchars($triggerLabels[$klic] ?? $email['name']) ?></span>
+                        <span data-action="toggleNotifikaceActive" data-id="<?= htmlspecialchars($email['id']) ?>"
+                              style="padding: 0.2rem 0.5rem; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; border: 1px solid #fff; background: <?= $email['active'] ? '#fff' : 'transparent' ?>; color: <?= $email['active'] ? '#000' : '#fff' ?>; cursor: pointer;"
+                              data-active="<?= $email['active'] ? '1' : '0' ?>">
+                            <?= $email['active'] ? 'AKTIVNI' : 'VYPNUTO' ?>
+                        </span>
                     </div>
-                    <div style="background: #000; color: #fff; padding: 0.75rem 1rem; font-family: 'Poppins', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; text-align: center;">
-                        SMS
+                    <!-- Obsah -->
+                    <div style="padding: 1rem;">
+                        <div style="font-size: 0.7rem; color: #666; margin-bottom: 0.5rem;">
+                            Prijemce: <strong><?= htmlspecialchars($email['recipient_type']) ?></strong>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #333; margin-bottom: 0.75rem;">
+                            <strong>Predmet:</strong> <?= htmlspecialchars($email['subject']) ?>
+                        </div>
+                        <button data-action="otevritNotifikace" data-id="<?= $email['id'] ?>"
+                            style="padding: 0.5rem 1rem; background: #333; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; cursor: pointer;">
+                            Upravit sablonu
+                        </button>
                     </div>
                 </div>
-
-                <!-- Parovane sablony -->
-                <?php foreach ($sablonyParovane as $par): ?>
-                <div style="border: 2px solid #000; margin-bottom: 1.5rem; background: #fafafa;">
-                    <!-- Nadpis sekce -->
-                    <div style="background: #000; color: #fff; padding: 0.5rem 1rem; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                        <?= htmlspecialchars($triggerLabels[$par['trigger']] ?? $par['trigger']) ?>
-                    </div>
-                    <!-- Grid s EMAIL a SMS -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
-
-                    <!-- EMAIL sloupec -->
-                    <div style="background: #fff; border-right: 1px solid #ddd; padding: 1rem; min-height: 120px;">
-                        <div style="font-size: 0.6rem; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif;">Email</div>
-                        <?php if ($par['email']): ?>
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                                <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600; color: #000; margin: 0;">
-                                    <?= htmlspecialchars($par['email']['name']) ?>
-                                </h4>
-                                <span data-action="toggleNotifikaceActive" data-id="<?= htmlspecialchars($par['email']['id']) ?>"
-                                      style="padding: 0.2rem 0.4rem; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; border: 1px solid #000; background: <?= $par['email']['active'] ? '#000' : '#fff' ?>; color: <?= $par['email']['active'] ? '#fff' : '#000' ?>; cursor: pointer;"
-                                      data-active="<?= $par['email']['active'] ? '1' : '0' ?>">
-                                    <?= $par['email']['active'] ? 'AKTIVNI' : 'VYPNUTO' ?>
-                                </span>
-                            </div>
-                            <div style="font-size: 0.7rem; color: #666; margin-bottom: 0.5rem;">
-                                Prijemce: <?= htmlspecialchars($par['email']['recipient_type']) ?>
-                            </div>
-                            <div style="font-size: 0.7rem; color: #333; margin-bottom: 0.75rem;">
-                                <strong>Predmet:</strong> <?= htmlspecialchars(substr($par['email']['subject'], 0, 50)) ?><?= strlen($par['email']['subject']) > 50 ? '...' : '' ?>
-                            </div>
-                            <button data-action="otevritNotifikace" data-id="<?= $par['email']['id'] ?>"
-                                style="width: 100%; padding: 0.5rem; background: #333; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; cursor: pointer;">
-                                Upravit
-                            </button>
-                        <?php else: ?>
-                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #ccc; font-family: 'Poppins', sans-serif; font-size: 0.8rem;">
-                                — neni —
-                            </div>
-                        <?php endif; ?>
-                    </div>
-
-                    <!-- SMS sloupec -->
-                    <div style="background: #fff; padding: 1rem; min-height: 120px;">
-                        <div style="font-size: 0.6rem; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif;">SMS</div>
-                        <?php if ($par['sms']): ?>
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                                <h4 style="font-family: 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600; color: #000; margin: 0;">
-                                    <?= htmlspecialchars($par['sms']['name']) ?>
-                                </h4>
-                                <span data-action="toggleNotifikaceActive" data-id="<?= htmlspecialchars($par['sms']['id']) ?>"
-                                      style="padding: 0.2rem 0.4rem; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; border: 1px solid #000; background: <?= $par['sms']['active'] ? '#000' : '#fff' ?>; color: <?= $par['sms']['active'] ? '#fff' : '#000' ?>; cursor: pointer;"
-                                      data-active="<?= $par['sms']['active'] ? '1' : '0' ?>">
-                                    <?= $par['sms']['active'] ? 'AKTIVNI' : 'VYPNUTO' ?>
-                                </span>
-                            </div>
-                            <div style="font-size: 0.7rem; color: #666; margin-bottom: 0.5rem;">
-                                Prijemce: <?= htmlspecialchars($par['sms']['recipient_type']) ?>
-                            </div>
-                            <div style="background: #f9f9f9; padding: 0.5rem; font-size: 0.65rem; font-family: monospace; max-height: 50px; overflow: hidden; margin-bottom: 0.5rem; border: 1px solid #eee;">
-                                <?= htmlspecialchars(substr($par['sms']['template'], 0, 100)) ?>...
-                            </div>
-                            <button data-action="editSmsTemplate" data-id="<?= htmlspecialchars($par['sms']['id']) ?>"
-                                style="width: 100%; padding: 0.5rem; background: #333; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; cursor: pointer;">
-                                Upravit
-                            </button>
-                        <?php else: ?>
-                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #ccc; font-family: 'Poppins', sans-serif; font-size: 0.8rem;">
-                                — neni —
-                            </div>
-                        <?php endif; ?>
-                    </div>
-
-                    </div><!-- /grid -->
-                </div><!-- /sekce blok -->
                 <?php endforeach; ?>
 
                 <!-- Promenne -->
