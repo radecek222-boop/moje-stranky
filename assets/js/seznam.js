@@ -1239,15 +1239,19 @@ async function getDistance(fromAddress, toAddress) {
   const cacheKey = `${fromAddress}|${toAddress}`;
 
   if (DISTANCE_CACHE[cacheKey]) {
+    console.log('[Distance] Cache hit:', cacheKey);
     return DISTANCE_CACHE[cacheKey];
   }
 
+  console.log('[Distance] Počítám vzdálenost:', fromAddress, '→', toAddress);
+
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 sekund timeout
 
     // Načíst CSRF token
     const csrfToken = await fetchCsrfToken();
+    console.log('[Distance] CSRF token:', csrfToken ? 'OK' : 'CHYBÍ');
 
     const response = await fetch('/app/controllers/get_distance.php', {
       method: 'POST',
@@ -1259,11 +1263,15 @@ async function getDistance(fromAddress, toAddress) {
       }),
       signal: controller.signal
     });
-    
+
     clearTimeout(timeoutId);
-    
+
+    console.log('[Distance] Response status:', response.status);
+
     if (response.ok) {
       const data = await response.json();
+      console.log('[Distance] Response data:', data);
+
       if ((data.status === 'success' || data.success === true) && data.distance) {
         const result = {
           km: (data.distance.value / 1000).toFixed(1),
@@ -1272,17 +1280,23 @@ async function getDistance(fromAddress, toAddress) {
         };
         DISTANCE_CACHE[cacheKey] = result;
         CacheManager.save();
+        console.log('[Distance] Úspěch:', result);
         return result;
+      } else {
+        console.error('[Distance] API vrátilo chybu:', data.error || data.message || 'Neznámá chyba');
       }
+    } else {
+      const errorText = await response.text();
+      console.error('[Distance] HTTP chyba:', response.status, errorText);
     }
   } catch (error) {
     if (error.name === 'AbortError') {
-      logger.log('Request timeout');
+      console.error('[Distance] Timeout - API neodpovědělo do 15 sekund');
     } else {
-      logger.error('Chyba při výpočtu vzdálenosti:', error);
+      console.error('[Distance] Chyba:', error);
     }
   }
-  
+
   return null;
 }
 
