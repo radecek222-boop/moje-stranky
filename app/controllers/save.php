@@ -28,6 +28,45 @@ function logTiming(string $message): void {
  * @throws Exception Pokud se nepodaří vygenerovat ID po 5 pokusech
  */
 /**
+ * Generuje unikátní číslo pro mimozáruční servis (POZ)
+ * Formát: POZ/YYYY/DD-MM/XX
+ * Příklad: POZ/2025/04-12/01
+ *
+ * @param PDO $pdo Database connection
+ * @return string Vygenerované POZ číslo
+ */
+function generatePozId(PDO $pdo): string
+{
+    $rok = date('Y');        // 2025
+    $denMesic = date('d-m'); // 04-12
+    $prefix = "POZ/{$rok}/{$denMesic}/";
+
+    // Najít nejvyšší číslo pro dnešní den
+    $stmt = $pdo->prepare("
+        SELECT cislo FROM wgs_reklamace
+        WHERE cislo LIKE :prefix
+        ORDER BY cislo DESC
+        LIMIT 1
+        FOR UPDATE
+    ");
+    $stmt->execute([':prefix' => $prefix . '%']);
+    $lastId = $stmt->fetchColumn();
+
+    if ($lastId) {
+        // Extrahovat číslo z konce (POZ/2025/04-12/01 -> 01)
+        $parts = explode('/', $lastId);
+        $cislo = (int)end($parts);
+        $noveCislo = $cislo + 1;
+    } else {
+        // První POZ pro dnešní den
+        $noveCislo = 1;
+    }
+
+    // Formátovat číslo na 2 číslice (01, 02, ...)
+    return sprintf('%s%02d', $prefix, $noveCislo);
+}
+
+/**
  * GenerateWorkflowId
  *
  * @param PDO $pdo Pdo
@@ -735,6 +774,11 @@ try {
         $workflowId = null;
         if ($hasReklamaceId) {
             $workflowId = generateWorkflowId($pdo);
+        }
+
+        // Pro nepřihlášené uživatele automaticky generovat POZ číslo
+        if (!$isLoggedIn) {
+            $cislo = generatePozId($pdo);
         }
 
         $now = date('Y-m-d H:i:s');
