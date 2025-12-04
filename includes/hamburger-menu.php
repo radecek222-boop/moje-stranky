@@ -107,8 +107,9 @@ if ($isAdmin) {
   padding: 1rem 2rem;
   background: var(--c-bg-dark, #000);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  position: relative;
-  z-index: var(--z-hamburger-header, 10001);
+  position: sticky;
+  top: 0;
+  z-index: 10001;
 }
 
 .hamburger-logo {
