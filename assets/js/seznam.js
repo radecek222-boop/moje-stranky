@@ -2013,176 +2013,104 @@ async function showCustomerDetail(id) {
  * @param {string} typ - Typ PDF: 'report' (výchozí) nebo 'historie'
  */
 function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
-  // Detekce iOS a mobilních zařízení
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const titulek = typ === 'historie' ? 'Historie PDF' : 'PDF Report';
 
-  // Vytvořit overlay
+  // Hlavní overlay - flexbox layout s fixní hlavičkou a patičkou
   const overlay = document.createElement('div');
   overlay.id = 'pdfModalOverlay';
-  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10003; display: flex; flex-direction: column; align-items: center; justify-content: center;';
+  overlay.style.cssText = `
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.95); z-index: 10003;
+    display: flex; flex-direction: column;
+  `;
 
-  // Kontejner pro PDF
-  const pdfContainer = document.createElement('div');
-  pdfContainer.style.cssText = 'width: 95%; height: calc(100% - 80px); max-width: 900px; background: white; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;';
-
-  // Header s názvem a tlačítky (pro PWA přístupnost)
+  // === HLAVIČKA (fixní nahoře) ===
   const header = document.createElement('div');
-  header.style.cssText = 'padding: 10px 12px; background: #333; color: white; font-weight: 600; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-shrink: 0;';
+  header.style.cssText = `
+    flex-shrink: 0; padding: 12px 16px;
+    background: #222; color: white;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid #444;
+  `;
+  header.innerHTML = `
+    <div>
+      <div style="font-weight: 600; font-size: 1rem;">${titulek}</div>
+      <div style="font-size: 0.75rem; opacity: 0.7;">ID: ${claimId || '-'}</div>
+    </div>
+    <button id="pdfCloseBtn" style="
+      background: #555; color: white; border: none;
+      padding: 10px 20px; border-radius: 6px;
+      font-weight: 600; font-size: 0.9rem; cursor: pointer;
+    ">Zavřít</button>
+  `;
 
-  // Levá část - název a ID (rozlišení podle typu)
-  const headerLeft = document.createElement('div');
-  headerLeft.style.cssText = 'display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;';
-  const titulek = typ === 'historie' ? 'Historie PDF' : 'PDF Report';
-  headerLeft.innerHTML = '<span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + titulek + '</span><span style="font-size: 0.75rem; opacity: 0.7;">ID: ' + (claimId || '-') + '</span>';
+  // === PDF NÁHLED (zabere zbytek místa) ===
+  const pdfContainer = document.createElement('div');
+  pdfContainer.style.cssText = 'flex: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 16px;';
 
-  // Pravá část - tlačítka v headeru
-  const headerButtons = document.createElement('div');
-  headerButtons.style.cssText = 'display: flex; gap: 8px; flex-shrink: 0;';
+  const iframe = document.createElement('iframe');
+  iframe.src = pdfUrl;
+  iframe.style.cssText = 'width: 100%; height: 100%; max-width: 900px; border: none; background: white; border-radius: 8px;';
+  pdfContainer.appendChild(iframe);
 
-  // Tlačítko Stáhnout v headeru
-  const btnStahnoutHeader = document.createElement('button');
-  btnStahnoutHeader.innerHTML = 'Stáhnout';
-  btnStahnoutHeader.style.cssText = 'padding: 8px 14px; font-size: 0.8rem; font-weight: 600; background: #555; color: white; border: none; border-radius: 5px; cursor: pointer; touch-action: manipulation;';
-  btnStahnoutHeader.onclick = () => {
+  // === PATIČKA S TLAČÍTKY (fixní dole) ===
+  const footer = document.createElement('div');
+  footer.style.cssText = `
+    flex-shrink: 0; padding: 12px 16px;
+    background: #222; border-top: 1px solid #444;
+    display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+  `;
+
+  // Tlačítko Stáhnout
+  const btnStahnout = document.createElement('button');
+  btnStahnout.textContent = 'Stáhnout';
+  btnStahnout.style.cssText = 'padding: 12px 24px; font-size: 0.9rem; font-weight: 600; background: #444; color: white; border: none; border-radius: 6px; cursor: pointer;';
+  btnStahnout.onclick = () => {
     const link = document.createElement('a');
     link.href = pdfUrl;
     link.download = `PDF_Report_${claimId || 'dokument'}.pdf`;
     link.click();
   };
 
-  // Tlačítko Zpět (X) v headeru
-  const btnZpetHeader = document.createElement('button');
-  btnZpetHeader.innerHTML = 'Zpět';
-  btnZpetHeader.style.cssText = 'padding: 8px 14px; font-size: 0.8rem; font-weight: 600; background: #777; color: white; border: none; border-radius: 5px; cursor: pointer; touch-action: manipulation;';
-  btnZpetHeader.onclick = () => overlay.remove();
-
-  headerButtons.appendChild(btnStahnoutHeader);
-  headerButtons.appendChild(btnZpetHeader);
-  header.appendChild(headerLeft);
-  header.appendChild(headerButtons);
-
-  // PDF náhled - různé přístupy pro různé platformy
-  let pdfViewer;
-
-  if (isIOS || (isMobile && isPWA)) {
-    // iOS a PWA mobil: Zobrazit tlačítko pro otevření v novém okně + náhled pomocí object
-    pdfViewer = document.createElement('div');
-    pdfViewer.style.cssText = 'flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f5f5f5; padding: 2rem;';
-
-    // Zkusit zobrazit pomocí <object> (funguje lépe na iOS)
-    const objectEmbed = document.createElement('object');
-    objectEmbed.data = pdfUrl;
-    objectEmbed.type = 'application/pdf';
-    objectEmbed.style.cssText = 'width: 100%; height: 100%; border: none;';
-
-    // Fallback pokud object nefunguje
-    const fallback = document.createElement('div');
-    fallback.style.cssText = 'text-align: center; padding: 2rem;';
-    fallback.innerHTML = `
-      <p style="color: #666; margin-bottom: 1rem;">Náhled PDF není k dispozici na tomto zařízení.</p>
-      <button data-action="openPdfNewWindow" data-url="${pdfUrl}"
-              style="padding: 12px 24px; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600;">
-        Otevřít PDF v novém okně
-      </button>
-    `;
-
-    objectEmbed.appendChild(fallback);
-    pdfViewer.appendChild(objectEmbed);
-  } else {
-    // Desktop a Android: Použít iframe
-    pdfViewer = document.createElement('iframe');
-    pdfViewer.src = pdfUrl;
-    pdfViewer.style.cssText = 'flex: 1; width: 100%; border: none;';
-  }
-
-  pdfContainer.appendChild(header);
-  pdfContainer.appendChild(pdfViewer);
-
-  // Tlačítka
-  const buttonContainer = document.createElement('div');
-  buttonContainer.style.cssText = 'display: flex; gap: 12px; margin-top: 16px; padding: 0 16px; flex-wrap: wrap; justify-content: center;';
-
-  // Tlačítko Uložit (nové)
-  const btnUlozit = document.createElement('button');
-  btnUlozit.textContent = 'Uložit';
-  btnUlozit.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #555; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 110px; touch-action: manipulation;';
-  btnUlozit.onclick = () => {
-    const link = document.createElement('a');
-    link.href = pdfUrl;
-    link.download = `PDF_Report_${claimId || 'dokument'}.pdf`;
-    link.click();
+  // Tlačítko Sdílet
+  const btnSdilet = document.createElement('button');
+  btnSdilet.textContent = 'Sdílet';
+  btnSdilet.style.cssText = 'padding: 12px 24px; font-size: 0.9rem; font-weight: 600; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer;';
+  btnSdilet.onclick = async () => {
+    if (!navigator.share) {
+      wgsToast.info('Sdílení není podporováno. Použijte tlačítko Stáhnout.');
+      return;
+    }
+    try {
+      btnSdilet.textContent = 'Načítám...';
+      const response = await fetch(pdfUrl);
+      const blob = await response.blob();
+      const file = new File([blob], `PDF_Report_${claimId || 'dokument'}.pdf`, { type: 'application/pdf' });
+      await navigator.share({ files: [file], title: titulek });
+    } catch (e) {
+      if (e.name !== 'AbortError') wgsToast.error('Chyba: ' + e.message);
+    } finally {
+      btnSdilet.textContent = 'Sdílet';
+    }
   };
-
-  // Tlačítko Sdílet (původně Odeslat)
-  const btnOdeslat = document.createElement('button');
-  btnOdeslat.textContent = 'Sdílet';
-  btnOdeslat.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 110px; touch-action: manipulation;';
 
   // Tlačítko Zavřít
   const btnZavrit = document.createElement('button');
   btnZavrit.textContent = 'Zavřít';
-  btnZavrit.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 110px; touch-action: manipulation;';
+  btnZavrit.style.cssText = 'padding: 12px 24px; font-size: 0.9rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer;';
   btnZavrit.onclick = () => overlay.remove();
 
-  // Tlačítko Sdílet - Web Share API (nativní systémové sdílení)
-  btnOdeslat.onclick = async () => {
-    try {
-      // Zkontrolovat podporu Web Share API
-      if (!navigator.share && !navigator.canShare) {
-        wgsToast.info('Sdílení není podporováno v tomto prohlížeči.\n\nPoužijte tlačítko "Uložit" a pak sdílejte soubor ručně.');
-        return;
-      }
+  footer.appendChild(btnStahnout);
+  footer.appendChild(btnSdilet);
+  footer.appendChild(btnZavrit);
 
-      btnOdeslat.disabled = true;
-      btnOdeslat.textContent = 'Načítám...';
-
-      // Načíst PDF jako Blob
-      const response = await fetch(pdfUrl);
-      const blob = await response.blob();
-
-      // Vytvořit File objekt z Blobu
-      const fileName = `PDF_Report_${claimId || 'dokument'}.pdf`;
-      const file = new File([blob], fileName, { type: 'application/pdf' });
-
-      // Web Share API
-      const shareData = {
-        title: `PDF Report - ${claimId || 'WGS'}`,
-        text: `PDF dokument zakázky ${claimId || ''}`,
-        files: [file]
-      };
-
-      // Zkontrolovat zda lze sdílet soubory
-      if (navigator.canShare && !navigator.canShare(shareData)) {
-        throw new Error('Sdílení souborů není podporováno');
-      }
-
-      // Sdílet přes systémové menu (email, SMS, WhatsApp, atd.)
-      await navigator.share(shareData);
-
-    } catch (error) {
-      // AbortError = uživatel zrušil sdílení (to není chyba)
-      if (error.name !== 'AbortError') {
-        wgsToast.error('Chyba při sdílení: ' + error.message);
-      }
-    } finally {
-      btnOdeslat.disabled = false;
-      btnOdeslat.textContent = 'Sdílet';
-    }
-  };
-
-  buttonContainer.appendChild(btnUlozit);
-  buttonContainer.appendChild(btnOdeslat);
-  buttonContainer.appendChild(btnZavrit);
-
+  // Sestavení
+  overlay.appendChild(header);
   overlay.appendChild(pdfContainer);
-  overlay.appendChild(buttonContainer);
+  overlay.appendChild(footer);
 
-  // Zavřít při kliknutí mimo
-  overlay.onclick = (e) => {
-    if (e.target === overlay) overlay.remove();
-  };
+  // Event handlery
+  header.querySelector('#pdfCloseBtn').onclick = () => overlay.remove();
 
   // Zavřít při ESC
   const escHandler = (e) => {
