@@ -353,7 +353,6 @@ try {
                 <?php
                 $triggerLabels = [
                     'potvrzeni_terminu_customer' => 'Potvrzeni terminu',
-                    'prirazeni_terminu_technician' => 'Prirazeni terminu',
                     'pripominka_terminu_customer' => 'Pripominka terminu',
                     'pokus_o_kontakt_customer' => 'Pokus o kontakt',
                     'nova_reklamace_admin' => 'Nova reklamace (admin)',
@@ -364,6 +363,9 @@ try {
                     'pozvanka_technician' => 'Pozvanka pro technika'
                 ];
 
+                // Sablony k preskoceni (nezobrazovat)
+                $skryteSablony = ['prirazeni_terminu_technician'];
+
                 // Seradit email sablony podle definovaneho poradi
                 $poradiSablon = [
                     'nova_reklamace_customer',
@@ -371,7 +373,6 @@ try {
                     'pokus_o_kontakt_customer',
                     'potvrzeni_terminu_customer',
                     'pripominka_terminu_customer',
-                    'prirazeni_terminu_technician',
                     'dokonceno_customer',
                     'znovu_otevreno_admin',
                     'pozvanka_seller',
@@ -389,7 +390,10 @@ try {
                 ?>
 
                 <!-- Email sablony - jednodussi seznam -->
-                <?php foreach ($emailSablony as $klic => $email): ?>
+                <?php foreach ($emailSablony as $klic => $email):
+                    // Preskocit skryte sablony
+                    if (in_array($klic, $skryteSablony)) continue;
+                ?>
                 <div style="border: 2px solid #000; margin-bottom: 1rem; background: #fff;">
                     <!-- Nadpis -->
                     <div style="background: #000; color: #fff; padding: 0.5rem 1rem; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;">
@@ -445,7 +449,6 @@ try {
             // Pouzijeme smsSablonyAll ktere uz mame nactene
             $smsTriggerLabels = [
                 'potvrzeni_terminu_customer' => 'Potvrzeni terminu',
-                'prirazeni_terminu_technician' => 'Prirazeni terminu',
                 'pripominka_terminu_customer' => 'Pripominka terminu',
                 'pokus_o_kontakt_customer' => 'Pokus o kontakt',
                 'nova_reklamace_admin' => 'Nova reklamace (admin)',
@@ -454,6 +457,9 @@ try {
                 'znovu_otevreno_admin' => 'Znovu otevreno'
             ];
 
+            // Sablony k preskoceni (nezobrazovat)
+            $smsSkryteSablony = ['prirazeni_terminu_technician'];
+
             // Seradit SMS sablony podle poradi
             $smsPoradiSablon = [
                 'nova_reklamace_customer',
@@ -461,7 +467,6 @@ try {
                 'pokus_o_kontakt_customer',
                 'potvrzeni_terminu_customer',
                 'pripominka_terminu_customer',
-                'prirazeni_terminu_technician',
                 'dokonceno_customer',
                 'znovu_otevreno_admin'
             ];
@@ -482,7 +487,10 @@ try {
                 </div>
             <?php else: ?>
                 <!-- SMS sablony - stejny format jako email -->
-                <?php foreach ($smsSablonyAll as $klic => $sms): ?>
+                <?php foreach ($smsSablonyAll as $klic => $sms):
+                    // Preskocit skryte sablony
+                    if (in_array($klic, $smsSkryteSablony)) continue;
+                ?>
                 <div style="border: 2px solid #000; margin-bottom: 1rem; background: #fff;">
                     <!-- Nadpis -->
                     <div style="background: #000; color: #fff; padding: 0.5rem 1rem; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;">
