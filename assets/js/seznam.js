@@ -720,62 +720,36 @@ async function showDetail(recordOrId) {
     const jeProdejce = CURRENT_USER && CURRENT_USER.role === 'prodejce';
 
     buttonsHtml = `
-      <div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 0.75rem; margin-bottom: 1rem; border-radius: 4px;">
-        <div style="text-align: center;">
-          <div style="font-size: 0.9rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem;">Zakázka dokončena</div>
-          <div style="font-size: 0.75rem; color: #666;">Tato zakázka byla již vyřízena dne ${dokoncenoDatum} v ${dokoncenoCas} hod</div>
-        </div>
+      <div class="detail-info-box">
+        <div class="detail-info-box-title">Zakázka dokončena</div>
+        <div class="detail-info-box-subtitle">Vyřízeno dne ${dokoncenoDatum} v ${dokoncenoCas}</div>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+      <div class="detail-buttons">
         ${!jeProdejce ? `
-          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; background: #333; color: white; font-weight: 600; font-size: 0.9rem;" data-action="reopenOrder" data-id="${record.id}">
-            Znovu otevřít
-          </button>
-
-          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+          <button class="detail-btn detail-btn-primary" data-action="reopenOrder" data-id="${record.id}">Znovu otevřít</button>
+          <button class="detail-btn detail-btn-secondary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
         ` : ''}
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
 
-      <div style="width: 100%; margin-top: 0.25rem;">
+        <button class="detail-btn detail-btn-secondary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+
+        <div class="detail-btn-separator"></div>
+
         ${record.original_reklamace_id ? `
-          <!-- Zakázka je KLON - zobrazit Historie zákazníka + PDF REPORT -->
-          <button class="btn" style="background: #555; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; margin-bottom: 0.5rem;"
-                  data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">
-            Historie zákazníka
-          </button>
-          ${record.documents && record.documents.length > 0 ? `
-            <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; font-weight: 600;"
-                    data-action="openPDF" data-url="${record.documents[0].file_path}" data-id="${record.id}">
-              [Doc] PDF REPORT
-            </button>
-          ` : `
-            <div style="background: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 4px; padding: 0.5rem; text-align: center; color: #666; font-size: 0.75rem;">
-              PDF report ještě nebyl vytvořen
-            </div>
-          `}
+          <button class="detail-btn detail-btn-secondary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
+        ` : ''}
+
+        ${record.documents && record.documents.length > 0 ? `
+          <button class="detail-btn detail-btn-primary" data-action="openPDF" data-url="${record.documents[0].file_path}" data-id="${record.id}">PDF Report</button>
         ` : `
-          <!-- Původní zakázka - standardní PDF tlačítko -->
-          ${record.documents && record.documents.length > 0 ? `
-            <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; font-weight: 600;"
-                    data-action="openPDF" data-url="${record.documents[0].file_path}" data-id="${record.id}">
-              [Doc] PDF REPORT
-            </button>
-          ` : `
-            <div style="background: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 4px; padding: 0.5rem; text-align: center; color: #666; font-size: 0.75rem;">
-              PDF report ještě nebyl vytvořen
-            </div>
-          `}
+          <div class="detail-info-box" style="margin: 0; padding: 0.5rem;">
+            <div class="detail-info-box-subtitle">PDF report ještě nebyl vytvořen</div>
+          </div>
         `}
-      </div>
 
-        <!-- Videotéka - archiv videí zakázky -->
-        <button class="btn" style="background: #444; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; margin-top: 0.5rem;"
-                data-action="showVideoteka" data-id="${record.id}">
-          Videotéka
-        </button>
+        <button class="detail-btn detail-btn-secondary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
 
-        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="closeDetail">Zavřít</button>
+        <button class="detail-btn detail-btn-close" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   } else {
@@ -783,31 +757,24 @@ async function showDetail(recordOrId) {
     const jeProdejce = CURRENT_USER && CURRENT_USER.role === 'prodejce';
 
     buttonsHtml = `
-      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+      <div class="detail-buttons">
         ${!jeProdejce ? `
-          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
-
-          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
-
-          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+          <button class="detail-btn detail-btn-primary" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
+          <button class="detail-btn detail-btn-primary" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
+          <button class="detail-btn detail-btn-secondary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
         ` : ''}
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+
+        <button class="detail-btn detail-btn-secondary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+
+        <div class="detail-btn-separator"></div>
 
         ${record.original_reklamace_id ? `
-          <!-- Nedokončená zakázka s historií - přidat Historie PDF -->
-          <button class="btn" style="background: #555; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;"
-                  data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">
-            Historie PDF
-          </button>
+          <button class="detail-btn detail-btn-secondary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie PDF</button>
         ` : ''}
 
-        <!-- Videotéka - archiv videí zakázky -->
-        <button class="btn" style="background: #444; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; margin-top: 0.5rem;"
-                data-action="showVideoteka" data-id="${record.id}">
-          Videotéka
-        </button>
+        <button class="detail-btn detail-btn-secondary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
 
-        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="closeDetail">Zavřít</button>
+        <button class="detail-btn detail-btn-close" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   }
@@ -1115,12 +1082,14 @@ function showCalendar(id) {
       </div>
     </div>
     
-    ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="showDetail">Zpět</button>',
-      '<button class="btn btn-success" data-action="saveSelectedDate">Uložit termín</button>'
-    ])}
+    <div class="modal-actions">
+      <div class="detail-buttons" style="flex-direction: row; gap: 0.75rem;">
+        <button class="detail-btn detail-btn-close" style="flex: 1;" data-action="showDetail">Zpět</button>
+        <button class="detail-btn detail-btn-success" style="flex: 2;" data-action="saveSelectedDate">Uložit termín</button>
+      </div>
+    </div>
   `;
-  
+
   ModalManager.show(content);
   const today = new Date();
   CAL_MONTH = today.getMonth();
@@ -1543,11 +1512,13 @@ function showBookingDetail(bookingOrId) {
       </div>
     </div>
     
-    ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="showCalendarBack">Zpět na kalendář</button>'
-    ])}
+    <div class="modal-actions">
+      <div class="detail-buttons">
+        <button class="detail-btn detail-btn-close" data-action="showCalendarBack">Zpět na kalendář</button>
+      </div>
+    </div>
   `;
-  
+
   ModalManager.show(content);
 }
 
@@ -1782,18 +1753,16 @@ function showContactMenu(id) {
       
       <div class="modal-section">
         <h3 class="section-title">Rychlé akce</h3>
-        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-          ${phone ? `<a href="tel:${phone}" class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: white; box-sizing: border-box;">Zavolat</a>` : ''}
-          <button class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; background: #1a1a1a; color: white; box-sizing: border-box;" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
-          ${phone ? `<button class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; background: #444; color: white; box-sizing: border-box;" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
-          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; justify-content: center; background: #444; color: white; box-sizing: border-box;" target="_blank">Navigovat (Waze)</a>` : ''}
+        <div class="detail-buttons">
+          ${phone ? `<a href="tel:${phone}" class="detail-btn detail-btn-primary detail-btn-link">Zavolat</a>` : ''}
+          <button class="detail-btn detail-btn-primary" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
+          ${phone ? `<button class="detail-btn detail-btn-secondary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
+          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="detail-btn detail-btn-secondary detail-btn-link" target="_blank">Navigovat (Waze)</a>` : ''}
+          <div class="detail-btn-separator"></div>
+          <button class="detail-btn detail-btn-close" data-action="showDetail">Zpět</button>
         </div>
       </div>
     </div>
-    
-    ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="showDetail">Zpět</button>'
-    ])}
   `;
   
   ModalManager.show(content);
@@ -2030,9 +1999,9 @@ async function showCustomerDetail(id) {
         return `
           <div style="margin-bottom: 1rem;">
             <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF Report:</label>
-            <button data-action="openPDF"
-                    data-url="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}"
-                    style="width: 100%; padding: 0.75rem; background: #333333; color: white; border: none; border-radius: 4px; font-size: 0.9rem; cursor: pointer; font-weight: 600;">
+            <button class="detail-btn detail-btn-secondary"
+                    data-action="openPDF"
+                    data-url="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}">
               Otevřít PDF Report
             </button>
           </div>
@@ -2040,10 +2009,9 @@ async function showCustomerDetail(id) {
       })()}
 
       ${CURRENT_USER.is_admin ? `
-        <div style="border-top: 1px solid #e0e0e0; padding-top: 1rem; margin-top: 1rem;">
-          <button data-action="deleteReklamace"
-                  data-id="${id}"
-                  style="width: 100%; padding: 0.5rem; background: #666; color: white; border: none; border-radius: 3px; font-size: 0.9rem; cursor: pointer; font-weight: 600;">
+        <div class="detail-btn-separator" style="margin-top: 1rem;"></div>
+        <div class="detail-buttons" style="margin-top: 0.5rem;">
+          <button class="detail-btn detail-btn-danger" data-action="deleteReklamace" data-id="${id}">
             Smazat reklamaci
           </button>
           <p style="font-size: 0.7rem; color: #999; margin-top: 0.25rem; text-align: center;">Smaže vše včetně fotek a PDF</p>
@@ -2052,10 +2020,12 @@ async function showCustomerDetail(id) {
 
     </div>
 
-    ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="showDetail" data-id="' + id + '">Zpět</button>',
-      '<button class="btn" style="background: #1a1a1a; color: white;" data-action="saveAllCustomerData" data-id="' + id + '">Uložit změny</button>'
-    ])}
+    <div class="modal-actions">
+      <div class="detail-buttons" style="flex-direction: row; gap: 0.75rem;">
+        <button class="detail-btn detail-btn-close" style="flex: 1;" data-action="showDetail" data-id="${id}">Zpět</button>
+        <button class="detail-btn detail-btn-primary" style="flex: 2;" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
+      </div>
+    </div>
   `;
 
   ModalManager.show(content);
@@ -2719,10 +2689,12 @@ async function showNotes(recordOrId) {
       </div>
     </div>
 
-    ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="closeNotesModal">Zavrit</button>',
-      '<button class="btn btn-success" data-action="saveNewNote" data-id="' + record.id + '">Pridat poznamku</button>'
-    ])}
+    <div class="modal-actions">
+      <div class="detail-buttons" style="flex-direction: row; gap: 0.75rem;">
+        <button class="detail-btn detail-btn-close" style="flex: 1;" data-action="closeNotesModal">Zavřít</button>
+        <button class="detail-btn detail-btn-success" style="flex: 2;" data-action="saveNewNote" data-id="${record.id}">Přidat poznámku</button>
+      </div>
+    </div>
   `;
 
   ModalManager.show(content);

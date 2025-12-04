@@ -1685,3 +1685,203 @@ button,
 .order-status.status-done {
   box-shadow: 0 0 6px 2px rgba(0, 255, 136, 0.6);
 }
+
+/* ============================================
+   DETAIL MODAL - TLAČÍTKA
+   Konzistentní vzhled na desktop i mobilu
+   ============================================ */
+
+/* Container pro tlačítka v detail modalu */
+.detail-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+/* Základní styl tlačítka v detail modalu */
+.detail-btn {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  min-height: 48px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Primární tlačítko - černé */
+.detail-btn-primary {
+  background: #1a1a1a;
+  color: #ffffff;
+}
+
+.detail-btn-primary:hover {
+  background: #333333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.detail-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Sekundární tlačítko - šedé */
+.detail-btn-secondary {
+  background: #444444;
+  color: #ffffff;
+}
+
+.detail-btn-secondary:hover {
+  background: #555555;
+}
+
+/* Terciální tlačítko - průhledné s rámečkem */
+.detail-btn-outline {
+  background: transparent;
+  color: #ffffff;
+  border: 2px solid #555555;
+}
+
+.detail-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #888888;
+}
+
+/* Tlačítko Zavřít - tmavě šedé */
+.detail-btn-close {
+  background: #333333;
+  color: #999999;
+  margin-top: 0.5rem;
+}
+
+.detail-btn-close:hover {
+  background: #444444;
+  color: #ffffff;
+}
+
+/* Speciální tlačítka */
+.detail-btn-success {
+  background: #2a5a2a;
+  color: #ffffff;
+}
+
+.detail-btn-success:hover {
+  background: #3a7a3a;
+}
+
+.detail-btn-danger {
+  background: #5a2a2a;
+  color: #ff8888;
+}
+
+.detail-btn-danger:hover {
+  background: #7a3a3a;
+  color: #ffffff;
+}
+
+/* Odkaz jako tlačítko */
+.detail-btn-link {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Separator mezi skupinami tlačítek */
+.detail-btn-separator {
+  height: 1px;
+  background: #333333;
+  margin: 0.5rem 0;
+}
+
+/* Info box nad tlačítky (např. "Zakázka dokončena") */
+.detail-info-box {
+  background: #222222;
+  border: 1px solid #333333;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.detail-info-box-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 0.25rem;
+}
+
+.detail-info-box-subtitle {
+  font-size: 0.75rem;
+  color: #888888;
+}
+
+/* DESKTOP - větší mezery a padding */
+@media (min-width: 769px) {
+  .detail-buttons {
+    gap: 0.875rem;
+    padding: 0.75rem 0;
+  }
+
+  .detail-btn {
+    padding: 1rem 1.25rem;
+    min-height: 52px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+  }
+}
+
+/* MOBILNÍ - optimalizace pro dotyk */
+@media (max-width: 768px) {
+  .detail-buttons {
+    gap: 0.625rem;
+    padding: 0.25rem 0;
+  }
+
+  .detail-btn {
+    padding: 0.75rem 0.875rem;
+    min-height: 44px;
+    font-size: 0.8rem;
+    border-radius: 5px;
+  }
+
+  .detail-info-box {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .detail-info-box-title {
+    font-size: 0.85rem;
+  }
+
+  .detail-info-box-subtitle {
+    font-size: 0.7rem;
+  }
+}
+
+/* Extra malé displeje */
+@media (max-width: 375px) {
+  .detail-buttons {
+    gap: 0.5rem;
+  }
+
+  .detail-btn {
+    padding: 0.625rem 0.75rem;
+    min-height: 40px;
+    font-size: 0.75rem;
+  }
+}
