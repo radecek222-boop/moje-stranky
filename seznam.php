@@ -1678,16 +1678,18 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
 
       case 'openPDF':
-        if (!url) {
+        // Podpora pro data-url i data-pdf-path
+        const pdfUrl = url || button.getAttribute('data-pdf-path');
+        if (!pdfUrl) {
           console.error('[EMERGENCY] PDF URL chybi!');
           break;
         }
 
-        console.log('[EMERGENCY] Oteviram PDF:', url);
+        console.log('[EMERGENCY] Oteviram PDF:', pdfUrl);
 
         // Obejit pop-up blocker: Otevrit v SOUCASNEM okne misto noveho tabu
         // Uzivatel muze pouzit "Zpet" pro navrat
-        window.location.href = url;
+        window.location.href = pdfUrl;
         console.log('[EMERGENCY] Presmerovani na PDF');
         break;
 
