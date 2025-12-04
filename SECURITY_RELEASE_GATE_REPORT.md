@@ -1,9 +1,9 @@
 # Release Gate Retest & Verification Report
 
 **Datum:** 2025-12-04
-**Verze:** 1.2 (oprava regrese track_pageview)
+**Verze:** 1.3 (kompletni oprava track_pageview a SW redirect)
 **Branch:** `claude/security-audit-endpoints-01Gvg7YwjpuBnaMKFy7puQaU`
-**Commity:** `7e6fffe`, `8245a3e`
+**Commity:** `7e6fffe`, `8245a3e`, `ed8b91c`, `3745a45`
 
 ---
 
@@ -510,6 +510,52 @@ curl -X GET "https://staging.wgs-service.cz/api/get_kalkulace_api.php?reklamace_
 
 ---
 
-*Report verze 1.1 s dukazy*
-*Commity: 7e6fffe, 8245a3e*
+---
+
+## 11. Dodatecne opravy (v1.2-1.3)
+
+### 11.1 Service Worker redirect (commit ed8b91c)
+
+| Polozka | Hodnota |
+|---------|---------|
+| Problem | `.htaccess` presmerovalo `sw.php` na `/sw` (301) |
+| Dopad | SW nefunkcni - "Not allowed to follow redirection" |
+| Oprava | Pridana vyjimka `RewriteCond %{REQUEST_URI} !^/sw\.php$ [NC]` |
+| Status | OPRAVENO |
+
+**Dukaz - .htaccess:**
+```apache
+# FIX: Exclude sw.php - Service Workers CANNOT be redirected
+RewriteCond %{REQUEST_URI} !^/sw\.php$ [NC]
+RewriteRule ^(.+)\.php$ /$1 [R=301,L]
+```
+
+### 11.2 track_pageview.php 500 error (commit 3745a45)
+
+| Polozka | Hodnota |
+|---------|---------|
+| Problem | Endpoint vracel 500 Internal Server Error |
+| Priciny | Chybejici tabulky, selhani DB spojeni, chybejici error handling |
+| Oprava | Kompletni defenzivni error handling |
+| Status | OPRAVENO |
+
+**Zmeny:**
+1. **Graceful fallback** pokud DB spojeni selze - vrati `{"status": "success", "id": 0}`
+2. **Auto-create tabulky** `wgs_pageviews` pokud neexistuje
+3. **Rate limiter obaleny v try-catch** - pokracuje bez nej pri selhani
+4. **CORS preflight** - pridano OPTIONS request handling
+5. **Detailni error logging** pro debugging
+
+**Test case:**
+```bash
+curl -X POST "https://wgs-service.cz/api/track_pageview.php" \
+  -H "Content-Type: application/json" \
+  -d '{"page_url": "/test", "page_title": "Test"}'
+# Ocekavano: 200 OK s {"status": "success", ...}
+```
+
+---
+
+*Report verze 1.3 s dodatecnymi opravami*
+*Commity: 7e6fffe, 8245a3e, ed8b91c, 3745a45*
 *Vygenerovano: 2025-12-04*
