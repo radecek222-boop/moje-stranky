@@ -3,11 +3,11 @@
  * Tracking API - Zaznamenávání pageviews
  * Endpoint pro JavaScript tracking skript
  *
- * SECURITY FIX: Přidán CSRF a rate limiting
+ * SECURITY: Rate limiting chrání proti zneužití
+ * POZOR: CSRF není vyžadováno - veřejný analytics endpoint pro anonymní uživatele
  */
 
 require_once __DIR__ . '/../init.php';
-require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -21,13 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// CSRF validace
-$csrfToken = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
-if (!validateCSRFToken($csrfToken)) {
-    http_response_code(403);
-    echo json_encode(['status' => 'error', 'message' => 'Neplatný CSRF token']);
-    exit;
-}
+// SECURITY: CSRF není vyžadováno pro analytics tracking
+// Důvod: Veřejný endpoint pro anonymní návštěvníky bez session
+// Ochrana: Rate limiting (1000 req/h per IP) brání zneužití
 
 try {
     $pdo = getDbConnection();

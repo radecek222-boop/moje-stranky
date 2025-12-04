@@ -1,7 +1,7 @@
 # Release Gate Retest & Verification Report
 
 **Datum:** 2025-12-04
-**Verze:** 1.1 (s dukazy)
+**Verze:** 1.2 (oprava regrese track_pageview)
 **Branch:** `claude/security-audit-endpoints-01Gvg7YwjpuBnaMKFy7puQaU`
 **Commity:** `7e6fffe`, `8245a3e`
 
@@ -170,17 +170,19 @@ grep "calculateNextRun" api/analytics_reports.php
 
 ## 3. Verifikacni checklist - P1 opravy
 
-### P1-1: CSRF + Rate Limiting v track_pageview.php
+### P1-1: Rate Limiting v track_pageview.php
 | Polozka | Hodnota |
 |---------|---------|
-| Soubor | `api/track_pageview.php:21-50` |
-| Oprava | Pridana CSRF validace + RateLimiter (1000 req/h) |
+| Soubor | `api/track_pageview.php` |
+| Oprava | RateLimiter (1000 req/h per IP) |
 | Status | OVERENO |
+
+**Poznamka:** CSRF bylo odstraneno - verejny analytics endpoint pro anonymni uzivatele.
+Rate limiting je dostatecna ochrana proti zneuziti.
 
 **Dukaz:**
 ```
-L26: if (!validateCSRFToken($csrfToken)) {
-L42: $rateLimiter = new RateLimiter($pdo);
+L29: $rateLimiter = new RateLimiter($pdo);
 ```
 
 ---
@@ -314,7 +316,7 @@ api/notes_api.php:152:  $mimeType = $finfo->file($audioFile['tmp_name']);
 | Zmena | Riziko | Mitigace |
 |-------|--------|----------|
 | video_api.php: octet-stream odstranen | Nizke | Validni videa maji spravny MIME |
-| track_pageview.php: CSRF vyzadovan | Stredni | Token v hlavicce X-CSRF-TOKEN |
+| track_pageview.php: rate limiting | Nizke | 1000 req/h je dostatecne pro bezne pouziti |
 
 ---
 
@@ -466,7 +468,7 @@ P0 - KRITICKE (vse opraveno):
 [x] P0-7: Runtime error fix (analytics_reports)
 
 P1 - VYSOKE (kod opraven):
-[x] P1-1: CSRF + rate limiting (track_pageview)
+[x] P1-1: Rate limiting (track_pageview)
 [x] P1-2: IDOR fix (get_kalkulace_api)
 [x] P1-3: IDOR fix (get_original_documents)
 [x] P1-4: finfo MIME validace (vytvor_aktualitu)
