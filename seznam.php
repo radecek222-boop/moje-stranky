@@ -1641,7 +1641,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 <script>
 // CACHE BUSTER: 2025-11-23-20:15:00 - PŘIDÁNO: startVisit, showCalendar
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('🔧 EMERGENCY event delegation V6 se načítá... [2025-11-23-20:15:00 + startVisit/showCalendar]');
+  console.log('[EMERGENCY] Event delegation V7 se nacita... [2025-12-04] - kompletni handlery');
 
   document.addEventListener('click', (e) => {
     const button = e.target.closest('[data-action]');
@@ -1695,12 +1695,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
       case 'startVisit':
         if (id && typeof startVisit === 'function') {
+          console.log('[EMERGENCY] Zahajuji navstevu ID:', id);
           startVisit(id);
         }
         break;
 
       case 'showCalendar':
         if (id && typeof showCalendar === 'function') {
+          console.log('[EMERGENCY] Oteviram kalendar pro ID:', id);
           showCalendar(id);
         }
         break;
@@ -1711,21 +1713,125 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
-      case 'startVisit':
-        if (id && typeof startVisit === 'function') {
-          console.log('[EMERGENCY] Zahajuji navstevu ID:', id);
-          startVisit(id);
-        } else {
-          console.error('[EMERGENCY] startVisit funkce neni dostupna nebo ID chybi');
+      case 'showDetail':
+        // Tlacitko "Zpet" v ruznych modalech
+        if (id && typeof showDetail === 'function') {
+          showDetail(id);
+        } else if (typeof showDetail === 'function' && typeof CURRENT_RECORD !== 'undefined' && CURRENT_RECORD) {
+          showDetail(CURRENT_RECORD);
         }
         break;
 
-      case 'showCalendar':
+      case 'reopenOrder':
+        if (id && typeof reopenOrder === 'function') {
+          reopenOrder(id);
+        }
+        break;
+
+      case 'saveSelectedDate':
+        if (typeof saveSelectedDate === 'function') {
+          saveSelectedDate();
+        }
+        break;
+
+      case 'previousMonth':
+        if (typeof previousMonth === 'function') {
+          previousMonth();
+        }
+        break;
+
+      case 'nextMonth':
+        if (typeof nextMonth === 'function') {
+          nextMonth();
+        }
+        break;
+
+      case 'showBookingDetail':
+        if (id && typeof showBookingDetail === 'function') {
+          showBookingDetail(id);
+        }
+        break;
+
+      case 'showCalendarBack':
+        if (typeof showCalendar === 'function' && typeof CURRENT_RECORD !== 'undefined' && CURRENT_RECORD) {
+          showCalendar(CURRENT_RECORD.id || CURRENT_RECORD.reklamace_id);
+        }
+        break;
+
+      case 'openCalendarFromDetail':
         if (id && typeof showCalendar === 'function') {
-          console.log('[EMERGENCY] Oteviram kalendar pro ID:', id);
           showCalendar(id);
-        } else {
-          console.error('[EMERGENCY] showCalendar funkce neni dostupna nebo ID chybi');
+        }
+        break;
+
+      case 'sendContactAttemptEmail':
+        if (id && typeof sendContactAttemptEmail === 'function') {
+          const phone = button.getAttribute('data-phone');
+          sendContactAttemptEmail(id, phone);
+        }
+        break;
+
+      case 'showPhotoFullscreen':
+        const photoSrc = button.getAttribute('data-src') || button.src;
+        if (photoSrc && typeof showPhotoFullscreen === 'function') {
+          showPhotoFullscreen(photoSrc);
+        }
+        break;
+
+      case 'smazatFotku':
+        const photoIndex = button.getAttribute('data-index');
+        const sectionId = button.getAttribute('data-section');
+        if (typeof smazatFotku === 'function') {
+          smazatFotku(photoIndex, sectionId);
+        }
+        break;
+
+      case 'deleteReklamace':
+        if (id && typeof deleteReklamace === 'function') {
+          deleteReklamace(id);
+        }
+        break;
+
+      case 'saveAllCustomerData':
+        if (id && typeof saveAllCustomerData === 'function') {
+          saveAllCustomerData(id);
+        }
+        break;
+
+      case 'startRecording':
+        if (id && typeof startRecording === 'function') {
+          startRecording(id);
+        }
+        break;
+
+      case 'stopRecording':
+        if (typeof stopRecording === 'function') {
+          stopRecording();
+        }
+        break;
+
+      case 'deleteAudioPreview':
+        if (typeof deleteAudioPreview === 'function') {
+          deleteAudioPreview();
+        }
+        break;
+
+      case 'saveNewNote':
+        if (id && typeof saveNewNote === 'function') {
+          saveNewNote(id);
+        }
+        break;
+
+      case 'closeErrorModal':
+        const errorModal = document.getElementById('errorModal');
+        if (errorModal) {
+          errorModal.remove();
+        }
+        break;
+
+      case 'filterUnreadNotes':
+        if (typeof filterUnreadNotes === 'function') {
+          filterUnreadNotes();
         }
         break;
 
@@ -1783,7 +1889,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('✅ EMERGENCY event delegation V6 načten [2025-11-23-20:15:00] - startVisit + showCalendar');
+  console.log('[EMERGENCY] Event delegation V7 nacten [2025-12-04] - vsechny handlery aktivni');
 });
 
 // DVA-KLIKOVE POTVRZENI - obchazi vsechny problemy s modaly/overlay
