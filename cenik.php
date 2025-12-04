@@ -357,7 +357,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
     <div class="section-intro">
       <h2 class="section-title" data-lang-cs="Přehled služeb a cen" data-lang-en="Service Overview and Prices" data-lang-it="Panoramica dei Servizi e Prezzi">Přehled služeb a cen</h2>
 
-      <p class="section-text" data-lang-cs="Níže naleznete kompletní ceník našich služeb. Všechny ceny jsou uvedeny v EUR a platí od 1.1.2026. Účtovaná cena bude přepočtena na Kč podle aktuálního kurzu. Primárně přijímáme zakázky v lokalitě 150km od dílny." data-lang-en="Below you will find a complete price list of our services. All prices are in EUR and valid from 1.1.2026. The charged price will be converted to CZK according to the current exchange rate. We primarily accept orders within 150km from our workshop." data-lang-it="Di seguito troverai un listino prezzi completo dei nostri servizi. Tutti i prezzi sono in EUR e validi dal 1.1.2026. Il prezzo addebitato sarà convertito in CZK secondo il tasso di cambio corrente. Accettiamo principalmente ordini entro 150 km dalla nostra officina.">
+      <p class="section-text">
         Níže naleznete kompletní ceník našich služeb. Všechny ceny jsou uvedeny v EUR a platí od 1.1.2026.
         Účtovaná cena bude přepočtena na Kč podle aktuálního kurzu. Primárně přijímáme zakázky v lokalitě 150km od dílny.
       </p>
