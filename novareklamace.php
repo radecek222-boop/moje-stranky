@@ -33,7 +33,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <link rel="preload" href="assets/img/herman-image03.webp" as="image" fetchpriority="high">
 
   <!-- Google Fonts - použít 'optional' pro prevenci CLS (žádný layout shift) -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Critical CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
