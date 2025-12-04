@@ -113,13 +113,14 @@
     position: relative !important;
 }
 
-/* Jednotlive kroky */
+/* Jednotlive kroky - pevna vyska podle prvniho kroku */
 .wizard-step {
     background: #fff !important;
     padding: 12px 16px !important;
-    min-height: auto !important;
     display: none !important;
     flex-direction: column !important;
+    justify-content: flex-start !important;
+    box-sizing: border-box !important;
 }
 
 /* Aktivni krok - VIDET */
@@ -130,6 +131,11 @@
 /* Skryty krok */
 .wizard-step.hidden {
     display: none !important;
+}
+
+/* Tlacitka vzdy dole */
+.wizard-step .wizard-buttons {
+    margin-top: auto !important;
 }
 
 /* Nadpis kroku */

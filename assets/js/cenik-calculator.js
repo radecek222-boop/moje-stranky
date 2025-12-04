@@ -63,6 +63,27 @@
         initAddressAutocomplete();
         initEventListeners();
         aktualizovatProgress();
+        nastavitPevnouVysku();
+    }
+
+    /**
+     * Nastavi pevnou vysku podle prvniho kroku
+     * Ostatni kroky se prizpusobi teto vysce
+     */
+    function nastavitPevnouVysku() {
+        const prvniKrok = document.getElementById('step-address');
+        if (!prvniKrok) return;
+
+        // Pockame az se vse vyrenderuje
+        setTimeout(() => {
+            const vyska = prvniKrok.offsetHeight;
+            if (vyska > 0) {
+                // Nastavit min-height pro vsechny kroky
+                document.querySelectorAll('.wizard-step').forEach(krok => {
+                    krok.style.minHeight = vyska + 'px';
+                });
+            }
+        }, 100);
     }
 
     // Export pro použití z protokolu
