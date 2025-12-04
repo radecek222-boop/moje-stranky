@@ -730,15 +730,10 @@ async function showDetail(recordOrId) {
           <button class="detail-btn detail-btn-primary" data-action="reopenOrder" data-id="${record.id}">Znovu otevřít</button>
           <button class="detail-btn detail-btn-secondary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
         ` : ''}
-
         <button class="detail-btn detail-btn-secondary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
-
-        <div class="detail-btn-separator"></div>
-
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-secondary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
-
         ${record.documents && record.documents.length > 0 ? `
           <button class="detail-btn detail-btn-primary" data-action="openPDF" data-url="${record.documents[0].file_path}" data-id="${record.id}">PDF Report</button>
         ` : `
@@ -746,10 +741,7 @@ async function showDetail(recordOrId) {
             <div class="detail-info-box-subtitle">PDF report ještě nebyl vytvořen</div>
           </div>
         `}
-
         <button class="detail-btn detail-btn-secondary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
-
-        <button class="detail-btn detail-btn-close" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   } else {
@@ -763,18 +755,11 @@ async function showDetail(recordOrId) {
           <button class="detail-btn detail-btn-primary" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
           <button class="detail-btn detail-btn-secondary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
         ` : ''}
-
         <button class="detail-btn detail-btn-secondary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
-
-        <div class="detail-btn-separator"></div>
-
         ${record.original_reklamace_id ? `
           <button class="detail-btn detail-btn-secondary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie PDF</button>
         ` : ''}
-
         <button class="detail-btn detail-btn-secondary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
-
-        <button class="detail-btn detail-btn-close" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   }
@@ -1082,10 +1067,10 @@ function showCalendar(id) {
       </div>
     </div>
 
-    ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="showDetail">Zpět</button>',
-      '<button class="btn btn-success" data-action="saveSelectedDate">Uložit termín</button>'
-    ])}
+    <div class="detail-buttons">
+      <button class="detail-btn detail-btn-primary" data-action="saveSelectedDate">Uložit termín</button>
+      <button class="detail-btn detail-btn-secondary" data-action="showDetail">Zpět</button>
+    </div>
   `;
 
   ModalManager.show(content);
@@ -1510,9 +1495,9 @@ function showBookingDetail(bookingOrId) {
       </div>
     </div>
 
-    ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="showCalendarBack">Zpět na kalendář</button>'
-    ])}
+    <div class="detail-buttons">
+      <button class="detail-btn detail-btn-secondary" data-action="showCalendarBack">Zpět na kalendář</button>
+    </div>
   `;
 
   ModalManager.show(content);
@@ -1734,33 +1719,27 @@ function showContactMenu(id) {
   
   const content = `
     ${ModalManager.createHeader(customerName, 'Kontaktovat zákazníka')}
-    
+
     <div class="modal-body">
       <div class="info-grid" style="margin-bottom: 1rem;">
         <div class="info-label">Telefon:</div>
         <div class="info-value"><strong>${phone || 'Neuvedeno'}</strong></div>
-        
+
         <div class="info-label">Email:</div>
         <div class="info-value"><strong>${email || 'Neuvedeno'}</strong></div>
-        
+
         <div class="info-label">Adresa:</div>
         <div class="info-value"><strong>${address || 'Neuvedeno'}</strong></div>
       </div>
-      
-      <div class="modal-section">
-        <h3 class="section-title">Rychlé akce</h3>
-        <div class="contact-actions">
-          ${phone ? `<a href="tel:${phone}" class="btn contact-action-btn">Zavolat</a>` : ''}
-          <button class="btn contact-action-btn" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
-          ${phone ? `<button class="btn contact-action-btn secondary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
-          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn contact-action-btn secondary" target="_blank">Navigovat (Waze)</a>` : ''}
-        </div>
+
+      <div class="detail-buttons">
+        ${phone ? `<a href="tel:${phone}" class="detail-btn detail-btn-primary" style="text-decoration: none;">Zavolat</a>` : ''}
+        <button class="detail-btn detail-btn-primary" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
+        ${phone ? `<button class="detail-btn detail-btn-secondary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
+        ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="detail-btn detail-btn-secondary" style="text-decoration: none;" target="_blank">Navigovat (Waze)</a>` : ''}
+        <button class="detail-btn detail-btn-secondary" data-action="showDetail">Zpět</button>
       </div>
     </div>
-
-    ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="showDetail">Zpět</button>'
-    ])}
   `;
 
   ModalManager.show(content);
@@ -2017,10 +1996,10 @@ async function showCustomerDetail(id) {
 
     </div>
 
-    ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="showDetail" data-id="' + id + '">Zpět</button>',
-      '<button class="btn" style="background: #1a1a1a; color: white;" data-action="saveAllCustomerData" data-id="' + id + '">Uložit změny</button>'
-    ])}
+    <div class="detail-buttons">
+      <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
+      <button class="detail-btn detail-btn-secondary" data-action="showDetail" data-id="${id}">Zpět</button>
+    </div>
   `;
 
   ModalManager.show(content);
@@ -2684,10 +2663,10 @@ async function showNotes(recordOrId) {
       </div>
     </div>
 
-    ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="closeNotesModal">Zavrit</button>',
-      '<button class="btn btn-success" data-action="saveNewNote" data-id="' + record.id + '">Pridat poznamku</button>'
-    ])}
+    <div class="detail-buttons">
+      <button class="detail-btn detail-btn-primary" data-action="saveNewNote" data-id="${record.id}">Pridat poznamku</button>
+      <button class="detail-btn detail-btn-secondary" data-action="closeNotesModal">Zavrit</button>
+    </div>
   `;
 
   ModalManager.show(content);

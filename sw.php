@@ -87,9 +87,10 @@ self.addEventListener('install', (event) => {
         return cache.addAll(STATIC_ASSETS);
       })
       .then(() => {
-        // KRITICKÉ: Okamžitě aktivovat novou verzi
-        console.log(`[SW ${SW_VERSION}] skipWaiting() - aktivuji ihned`);
-        return self.skipWaiting();
+        // NEPOUŽIVAT skipWaiting() automaticky!
+        // Čekáme na SKIP_WAITING zprávu od klienta,
+        // aby měl kontrolu nad tím kdy se aktualizace provede.
+        console.log(`[SW ${SW_VERSION}] Instalace dokončena - čekám na SKIP_WAITING`);
       })
   );
 });
