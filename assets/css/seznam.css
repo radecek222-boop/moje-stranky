@@ -1232,6 +1232,9 @@ body {
   border: 1px solid var(--c-border);
   margin-top: 0.8rem;
 }
+.audio-preview:not(.hidden) {
+  display: flex;
+}
 .audio-preview audio {
   flex: 1;
   height: 40px;

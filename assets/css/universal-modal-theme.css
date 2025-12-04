@@ -90,6 +90,21 @@
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
+/* Calculator modal header - layout fix */
+.calculator-modal-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 20px !important;
+}
+
+.calculator-modal-header h3 {
+    margin: 0 !important;
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+}
+
 /* ============================================
    MODAL TITULKY - H1, H2, H3
    ============================================ */
@@ -139,6 +154,28 @@ button[onclick*="close"] {
 
     /* Jemné pozadí */
     background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Calculator modal close button - specifický styl */
+.calculator-modal-close {
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 2rem !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+}
+
+.calculator-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
 }
 
 /* ============================================

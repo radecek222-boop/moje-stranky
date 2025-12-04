@@ -2589,12 +2589,12 @@ async function showNotes(recordOrId) {
               <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
             </svg>
           </button>
-          <div class="recording-indicator" id="recordingIndicator" style="display: none;">
+          <div class="recording-indicator" id="recordingIndicator">
             <span class="recording-dot"></span>
             <span class="recording-time" id="recordingTime">0:00</span>
             <button type="button" class="btn-stop-record" id="btnStopRecord" data-action="stopRecording" data-id="${record.id}">Stop</button>
           </div>
-          <div class="audio-preview" id="audioPreview" style="display: none;">
+          <div class="audio-preview hidden" id="audioPreview">
             <audio id="audioPreviewPlayer" controls></audio>
             <button type="button" class="btn-delete-audio" id="btnDeleteAudio" data-action="deleteAudioPreview" title="Smazat nahravku">x</button>
           </div>
@@ -2809,7 +2809,7 @@ async function startRecording(orderId) {
         logger.error('[Audio] Zadna data nebyla nahrana');
         wgsToast.warning('Nahravka je prazdna. Zkuste to prosim znovu.');
         document.getElementById('btnStartRecord').classList.remove('hidden');
-        document.getElementById('recordingIndicator').classList.add('hidden');
+        document.getElementById('recordingIndicator').classList.remove('active');
         return;
       }
 
@@ -2834,7 +2834,7 @@ async function startRecording(orderId) {
 
     // Aktualizovat UI
     document.getElementById('btnStartRecord').classList.add('hidden');
-    document.getElementById('recordingIndicator').classList.remove('hidden');
+    document.getElementById('recordingIndicator').classList.add('active');
 
     // Casovac
     recorder.recordingTimer = setInterval(() => {
@@ -2898,7 +2898,7 @@ function stopRecording() {
   // Aktualizovat UI - skryt recording indicator
   // Pozn: tlacitko startRecord se ukaze az v onstop handleru po zpracovani dat
   const recordingIndicator = document.getElementById('recordingIndicator');
-  if (recordingIndicator) recordingIndicator.classList.add('hidden');
+  if (recordingIndicator) recordingIndicator.classList.remove('active');
 }
 
 // Uvolnit mikrofon - zastavit stream
