@@ -101,10 +101,10 @@ if ($lookupValue !== null) {
             "SELECT r.*, u.name as created_by_name
              FROM wgs_reklamace r
              LEFT JOIN wgs_users u ON r.created_by = u.id
-             WHERE r.reklamace_id = ? OR r.cislo = ? OR r.id = ?
+             WHERE r.reklamace_id = :val1 OR r.cislo = :val2 OR r.id = :val3
              LIMIT 1"
         );
-        $stmt->execute([$lookupValue, $lookupValue, $lookupValue]);
+        $stmt->execute([':val1' => $lookupValue, ':val2' => $lookupValue, ':val3' => $lookupValue]);
         $record = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($record) {
@@ -258,9 +258,9 @@ if ($initialBootstrapData) {
             <tr><td class="label">Adresa<span class="en-label">Address</span></td><td><input type="text" id="address" value="<?= wgs_escape($prefillFields['address']); ?>" readonly></td></tr>
             <tr><td class="label">Telefon<span class="en-label">Phone</span></td><td><input type="tel" id="phone" value="<?= wgs_escape($prefillFields['phone']); ?>" readonly></td></tr>
             <tr><td class="label">Email<span class="en-label">Email</span></td><td><input type="email" id="email" value="<?= wgs_escape($prefillFields['email']); ?>" readonly></td></tr>
-            <tr><td class="label">Typ zákazníka<span class="en-label">Customer type</span></td><td>
+            <tr><td class="label">Typ zákazníka<span class="en-label">Customer type</span></td><td style="position: relative; padding-bottom: 18px;">
               <input type="text" id="typ-zakaznika" value="<?= wgs_escape($prefillFields['typ_zakaznika']); ?>" readonly>
-              <span id="ico-upozorneni" class="ico-upozorneni" style="display: <?= (strpos($prefillFields['typ_zakaznika'] ?? '', 'IČO') !== false) ? 'block' : 'none'; ?>; font-size: 0.7em; color: #c00; margin-top: 2px;" data-lang-cs="Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně" data-lang-en="The buyer has been informed that the 30-day consumer period does not apply; processing will be done promptly" data-lang-it="L'acquirente è stato informato che non si applica il periodo di 30 giorni; l'elaborazione avverrà tempestivamente">Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně</span>
+<span id="ico-upozorneni" class="ico-upozorneni" style="display: <?= (strpos($prefillFields['typ_zakaznika'] ?? '', 'IČO') !== false) ? 'block' : 'none'; ?>; position: absolute; left: 6px; bottom: 2px; font-size: 0.7em; color: #c00; white-space: nowrap;" data-lang-cs="Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně" data-lang-en="The buyer has been informed that the 30-day consumer period does not apply; processing will be done promptly" data-lang-it="L'acquirente è stato informato che non si applica il periodo di 30 giorni; l'elaborazione avverrà tempestivamente">Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně</span>
             </td></tr>
           </table>
         </div>
