@@ -2335,8 +2335,23 @@ async function autoAssignTechnician(reklamaceId) {
 
     if (result.success && result.assigned) {
       logger.log(`✓ Technik ${result.technician_name} (${result.technician_email}) byl automaticky přiřazen`);
-      // Obnovit data v cache, aby se zobrazilo jméno technika
-      await loadData(ACTIVE_FILTER);
+
+      // Aktualizovat CURRENT_RECORD s daty technika
+      if (CURRENT_RECORD) {
+        CURRENT_RECORD.assigned_to = result.technician_id;
+        CURRENT_RECORD.technik_jmeno = result.technician_name || '';
+        CURRENT_RECORD.technik_email = result.technician_email || '';
+        CURRENT_RECORD.technik_telefon = result.technician_phone || '';
+      }
+
+      // Aktualizovat cache
+      const cacheRecord = WGS_DATA_CACHE.find(x => x.reklamace_id == reklamaceId || x.cislo == reklamaceId || x.id == reklamaceId);
+      if (cacheRecord) {
+        cacheRecord.assigned_to = result.technician_id;
+        cacheRecord.technik_jmeno = result.technician_name || '';
+        cacheRecord.technik_email = result.technician_email || '';
+        cacheRecord.technik_telefon = result.technician_phone || '';
+      }
     } else if (result.success && !result.assigned) {
       // Není technik nebo už má přiřazeného - to je v pořádku
       logger.log('Auto-assign: ' + (result.message || 'Žádné přiřazení'));
