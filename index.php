@@ -44,7 +44,8 @@ require_once __DIR__ . '/includes/seo_meta.php';
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/index.min.css">
-  <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="assets/css/mobile-responsive.min.css"></noscript>
 
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
@@ -145,7 +146,7 @@ require_once __DIR__ . '/includes/seo_meta.php';
 <!-- REMOVED: index.js - veškerá funkcionalita přesunuta do hamburger-menu.php a language-switcher.js -->
 
 <!-- PWA Service Worker Registration -->
-<script src="assets/js/sw-register.min.js"></script>
+<script src="assets/js/sw-register.min.js" defer></script>
 
 <?php renderHeatmapTracker(); ?>
 </body>

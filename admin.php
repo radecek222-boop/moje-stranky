@@ -122,7 +122,8 @@ if ($activeTab === 'dashboard') {
   <link rel="stylesheet" href="/assets/css/admin.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin.min.css') ?>">
 <link rel="stylesheet" href="/assets/css/admin-header.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin-header.min.css') ?>">
 <link rel="stylesheet" href="/assets/css/admin-notifications.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin-notifications.min.css') ?>">
-  <link rel="stylesheet" href="/assets/css/mobile-responsive.min.css">
+  <link rel="stylesheet" href="/assets/css/mobile-responsive.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="/assets/css/mobile-responsive.min.css"></noscript>
   <!-- admin-mobile-fixes.css sloučen do admin.css (Step 51) -->
   <link rel="stylesheet" href="/assets/css/button-fixes-global.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->

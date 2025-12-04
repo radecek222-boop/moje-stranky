@@ -25,7 +25,8 @@ if (!$isAdmin) {
 
   <!-- External CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="assets/css/mobile-responsive.min.css"></noscript>
 
   <style>
 /* ==================================================

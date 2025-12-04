@@ -47,7 +47,8 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
   <!-- External CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/cenik.min.css">
-  <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="assets/css/mobile-responsive.min.css"></noscript>
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
   <!-- Oprava kalkulacky - musi byt posledni -->

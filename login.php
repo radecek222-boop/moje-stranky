@@ -54,7 +54,8 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
   <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/login.min.css">
-  <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="assets/css/mobile-responsive.min.css"></noscript>
   <link rel="stylesheet" href="assets/css/welcome-modal.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
