@@ -781,7 +781,7 @@ function handleGetReklamaceDetail(PDO $pdo): void
     $emailStmt = $pdo->prepare("
         SELECT subject, created_at, sent_at
         FROM wgs_email_queue
-        WHERE to_email = :email
+        WHERE recipient_email = :email
         ORDER BY created_at ASC
     ");
     $emailStmt->execute(['email' => $reklamace['email']]);
