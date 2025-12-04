@@ -1216,15 +1216,14 @@ function renderCalendar(m, y) {
       document.querySelectorAll('.cal-day').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
 
-      // PERFORMANCE: Vzdálenosti vypnuty kvůli API problémům
       let displayText = `Vybraný den: ${SELECTED_DATE}`;
       document.getElementById('selectedDateDisplay').textContent = displayText;
 
       // Zobrazit časy okamžitě
       renderTimeGrid();
 
-      // PERFORMANCE: Vypnuto kvůli problémům s get_distance.php
-      // showDayBookingsWithDistances(SELECTED_DATE);
+      // Zobrazit vzdálenost a další termíny na tento den
+      showDayBookingsWithDistances(SELECTED_DATE);
     };
     daysGrid.appendChild(el);
   }
@@ -1295,30 +1294,29 @@ async function getDistancesBatch(pairs) {
 
 // === ZOBRAZENÍ TERMÍNŮ S VZDÁLENOSTMI ===
 async function showDayBookingsWithDistances(date) {
-  // PERFORMANCE: Funkce vypnuta kvůli problémům s get_distance.php API
-  // Vzdálenosti se nezobrazují
   const distanceContainer = document.getElementById('distanceInfo');
   const bookingsContainer = document.getElementById('dayBookings');
 
-  if (distanceContainer) distanceContainer.innerHTML = '';
-  if (bookingsContainer) bookingsContainer.innerHTML = '';
-  return;
+  if (!distanceContainer || !bookingsContainer) return;
 
-  /* VYPNUTO - DISTANCE API NEFUNGUJE
+  // Inicializace cache pokud neexistuje
   if (!Array.isArray(WGS_DATA_CACHE)) {
     WGS_DATA_CACHE = [];
   }
 
+  // Filtrovat ostatní termíny na stejný den (ne aktuální reklamace)
   const bookings = WGS_DATA_CACHE.filter(rec =>
     rec.termin === date && rec.id !== CURRENT_RECORD?.id
   );
 
+  // Seřadit podle času
   bookings.sort((a, b) => {
     const timeA = a.cas_navstevy || '00:00';
     const timeB = b.cas_navstevy || '00:00';
     return timeA.localeCompare(timeB);
   });
 
+  // Získat adresu aktuální reklamace
   let currentAddress = Utils.getAddress(CURRENT_RECORD);
 
   if (!currentAddress || currentAddress === '—') {
@@ -1326,7 +1324,6 @@ async function showDayBookingsWithDistances(date) {
     bookingsContainer.innerHTML = '';
     return;
   }
-  */
   
   currentAddress = Utils.addCountryToAddress(currentAddress);
   
