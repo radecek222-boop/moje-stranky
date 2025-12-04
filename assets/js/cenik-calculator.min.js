@@ -27,6 +27,27 @@
         vyzvednutiSklad: 10 // Vyzvednutí dílu pro reklamaci na skladě
     };
 
+    // Fallback preklady pro tlacitka (kdyz window.t nefunguje)
+    const TLACITKA = {
+        'btn.back': 'Zpět',
+        'btn.addToProtocol': 'Započítat',
+        'btn.exportPDF': 'Export do PDF',
+        'btn.newCalculation': 'Nová kalkulace'
+    };
+
+    // Helper funkce pro preklad s fallbackem
+    function preklad(klic) {
+        // Zkusit window.t, pokud existuje a vrati neco jineho nez klic
+        if (typeof window.t === 'function') {
+            const vysledek = window.t(klic);
+            if (vysledek && vysledek !== klic) {
+                return vysledek;
+            }
+        }
+        // Fallback na lokalni preklady
+        return TLACITKA[klic] || klic;
+    }
+
     // Stav kalkulačky
     let stav = {
         krok: 1,
@@ -556,15 +577,15 @@
         if (kalkulackaRezim === 'protokol') {
             // Protokol režim - zobrazit Zpět a Započítat
             wizardButtons.innerHTML = `
-                <button class="btn-secondary" data-action="previousStep">${window.t('btn.back')}</button>
-                <button class="btn-primary" data-action="zapocitatDoProtokolu">${window.t('btn.addToProtocol')}</button>
+                <button class="btn-secondary" data-action="previousStep">${preklad('btn.back')}</button>
+                <button class="btn-primary" data-action="zapocitatDoProtokolu">${preklad('btn.addToProtocol')}</button>
             `;
         } else {
             // Standalone režim - zobrazit Zpět, Export PDF a Nová kalkulace
             wizardButtons.innerHTML = `
-                <button class="btn-secondary" data-action="previousStep">${window.t('btn.back')}</button>
-                <button class="btn-primary" data-action="exportovatCenikPDF">${window.t('btn.exportPDF')}</button>
-                <button class="btn-primary" data-action="resetovatKalkulacku">${window.t('btn.newCalculation')}</button>
+                <button class="btn-secondary" data-action="previousStep">${preklad('btn.back')}</button>
+                <button class="btn-primary" data-action="exportovatCenikPDF">${preklad('btn.exportPDF')}</button>
+                <button class="btn-primary" data-action="resetovatKalkulacku">${preklad('btn.newCalculation')}</button>
             `;
         }
     }
