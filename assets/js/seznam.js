@@ -735,7 +735,7 @@ async function showDetail(recordOrId) {
           <button class="detail-btn detail-btn-secondary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
         ${record.documents && record.documents.length > 0 ? `
-          <button class="detail-btn detail-btn-primary" data-action="openPDF" data-url="${record.documents[0].file_path}" data-id="${record.id}">PDF Report</button>
+          <button class="detail-btn detail-btn-primary" data-action="openPDF" data-pdf-path="${record.documents[0].file_path}" data-id="${record.id}">PDF Report</button>
         ` : `
           <div class="detail-info-box" style="margin: 0; padding: 0.5rem;">
             <div class="detail-info-box-subtitle">PDF report ještě nebyl vytvořen</div>
@@ -1978,7 +1978,7 @@ async function showCustomerDetail(id) {
             <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF Report:</label>
             <button class="btn customer-detail-btn"
                     data-action="openPDF"
-                    data-url="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}">
+                    data-pdf-path="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}">
               Otevřít PDF Report
             </button>
           </div>
@@ -4475,8 +4475,9 @@ document.addEventListener('click', (e) => {
   const action = button.getAttribute('data-action');
   const id = button.getAttribute('data-id');
   const url = button.getAttribute('data-url');
+  const pdfPath = button.getAttribute('data-pdf-path');
 
-  logger.log(`[Seznam] Tlačítko kliknuto: ${action}`, { id, url });
+  logger.log(`[Seznam] Tlačítko kliknuto: ${action}`, { id, url, pdfPath });
 
   switch (action) {
     case 'reopenOrder':
@@ -4498,9 +4499,10 @@ document.addEventListener('click', (e) => {
     case 'openPDF':
       e.preventDefault();
       e.stopPropagation();
-      console.log('[DEBUG] openPDF action triggered', { url, id });
-      if (url) {
-        zobrazPDFModal(url, id);
+      const pdfUrl = pdfPath || url;
+      console.log('[DEBUG] openPDF action triggered', { pdfUrl, id });
+      if (pdfUrl) {
+        zobrazPDFModal(pdfUrl, id);
       }
       break;
 
