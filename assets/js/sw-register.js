@@ -17,7 +17,7 @@
   // KONFIGURACE
   // ============================================
   const SW_PATH = '/sw.php'; // Dynamicky generovaný SW
-  const RELOAD_COOLDOWN_MS = 10000; // Min. 10 sekund mezi reloady (sníženo z 60s)
+  const RELOAD_COOLDOWN_MS = 30000; // Min. 30 sekund mezi reloady
   const RELOAD_STORAGE_KEY = 'pwa_last_reload';
   const VERSION_STORAGE_KEY = 'pwa_known_version';
   const UPDATE_CHECK_INTERVAL_DEFAULT = 300000; // 5 minut
@@ -39,6 +39,8 @@
   let swRegistration = null;
   let refreshing = false;
   let currentSwVersion = null;
+  let updateBannerShown = false; // Prevence opakovaného zobrazení banneru
+  let lastUpdateCheck = 0; // Debounce pro update check
 
   // ============================================
   // OCHRANA PROTI RELOAD LOOP
@@ -128,9 +130,12 @@
   }
 
   function zobrazitAktualizacniBanner() {
-    if (document.getElementById('pwa-update-banner')) {
+    // Prevence opakovaného zobrazení
+    if (updateBannerShown || document.getElementById('pwa-update-banner')) {
+      console.log('[PWA] Banner již zobrazen nebo existuje');
       return;
     }
+    updateBannerShown = true;
 
     const banner = document.createElement('div');
     banner.id = 'pwa-update-banner';
@@ -272,6 +277,14 @@
   async function zkontrolujAktualizaceTiche() {
     if (!swRegistration) return;
 
+    // Debounce - nekontrolovat častěji než každých 30 sekund
+    const now = Date.now();
+    if (now - lastUpdateCheck < 30000) {
+      console.log('[PWA] Update check přeskočen - debounce');
+      return;
+    }
+    lastUpdateCheck = now;
+
     try {
       await swRegistration.update();
     } catch (e) {
@@ -311,14 +324,8 @@
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
             console.log('[PWA] Nová verze připravena k aktivaci');
-
-            // Pro iOS PWA nebo při prvním načtení: automatická aktivace
-            if (isIOS && isPWA) {
-              console.log('[PWA] iOS PWA - automatická aktivace');
-              aktivovatNovouVerzi();
-            } else {
-              zobrazitAktualizacniBanner();
-            }
+            // Vždy zobrazit banner - uživatel rozhodne kdy aktualizovat
+            zobrazitAktualizacniBanner();
           }
         });
       });
@@ -352,18 +359,24 @@
 
   // Reload při aktivaci nového SW
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (refreshing) return;
+    // Prevence opakovaných pokusů o reload
+    if (refreshing) {
+      console.log('[PWA] Controllerchange - již probíhá refresh');
+      return;
+    }
     refreshing = true;
 
     console.log('[PWA] Nový SW aktivován');
 
-    // FIX: Zkontrolovat, zda reload je povolen PŘED zobrazením toastu
+    // Zkontrolovat, zda reload je povolen
     if (!canReload()) {
       console.log('[PWA] Reload blokován ochranou - aktualizace proběhne při dalším načtení');
-      // Odstranit případný existující toast
+      // Odstranit případné existující elementy
       const existingToast = document.getElementById('pwa-update-toast');
       if (existingToast) existingToast.remove();
-      refreshing = false; // Reset flag pro příští pokus
+      const existingBanner = document.getElementById('pwa-update-banner');
+      if (existingBanner) existingBanner.remove();
+      // NERESETTOVAT refreshing - zabráníme dalším pokusům v této session
       return;
     }
 
