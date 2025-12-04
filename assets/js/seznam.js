@@ -1068,13 +1068,15 @@ function showCalendar(id) {
   const content = `
     ${createCustomerHeader()}
 
+    <!-- Vybraný termín - fixní nad kalendářem -->
+    <div id="selectedDateDisplay" style="color: #333; font-size: 1rem; font-weight: 600; text-align: center; padding: 0.75rem 1rem; margin: 0 1rem; background: #f5f5f5; border-radius: 4px;">Zatím nevybráno</div>
+
     <!-- Varování o kolizi - skryté, zobrazí se při výběru obsazeného času -->
-    <div id="collisionWarning" style="display: none; background: #fee; border: 2px solid #c00; color: #900; padding: 0.75rem 1rem; margin: 0 1rem; border-radius: 6px; font-weight: 600; text-align: center;">
+    <div id="collisionWarning" style="display: none; background: #fee; border: 2px solid #c00; color: #900; padding: 0.75rem 1rem; margin: 0.5rem 1rem 0; border-radius: 6px; font-weight: 600; text-align: center;">
       <span id="collisionText"></span>
     </div>
 
-    <div class="modal-body" style="max-height: 80vh; overflow-y: auto; padding: 1rem;">
-      <div id="selectedDateDisplay" style="color: #333; font-size: 1rem; font-weight: 600; text-align: center; margin-bottom: 1rem; padding: 0.75rem 1rem; background: #f5f5f5; border-radius: 4px;">Zatím nevybráno</div>
+    <div class="modal-body" style="max-height: 60vh; overflow-y: auto; padding: 1rem;">
       <div class="calendar-container">
         <div id="calGrid"></div>
         <div id="distanceInfo"></div>
