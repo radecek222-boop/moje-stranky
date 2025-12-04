@@ -20,12 +20,23 @@ if (!$isAdmin) {
     exit;
 }
 
+// PERFORMANCE FIX: Uvolnit session lock pro paralelní zpracování
+// Audit 2025-11-24: Long-running statistiky queries blokují ostatní requesty
+session_write_close();
+
 $action = $_GET['action'] ?? '';
 
 try {
     $pdo = getDbConnection();
 
     switch ($action) {
+        case 'ping':
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Statistiky API is reachable'
+            ]);
+            break;
+
         case 'summary':
             getSummaryStatistiky($pdo);
             break;
@@ -188,7 +199,7 @@ function getZakazky($pdo) {
             r.created_at as datum_raw
         FROM wgs_reklamace r
         LEFT JOIN wgs_users prodejce ON r.created_by = prodejce.id
-        LEFT JOIN wgs_users technik ON r.zpracoval_id = technik.id AND technik.role = 'technik'
+        LEFT JOIN wgs_users technik ON r.assigned_to = technik.id AND technik.role = 'technik'
         $where
         ORDER BY r.created_at DESC
     ";
@@ -285,7 +296,7 @@ function getCharty($pdo) {
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) * 0.33 as vydelek
         FROM wgs_reklamace r
-        LEFT JOIN wgs_users u ON r.zpracoval_id = u.id AND u.role = 'technik'
+        LEFT JOIN wgs_users u ON r.assigned_to = u.id AND u.role = 'technik'
         $where
         GROUP BY u.name, u.id
         ORDER BY pocet DESC
@@ -362,7 +373,7 @@ function buildFilterWhere() {
         $techniciConditions = [];
         foreach ($technici as $idx => $technik) {
             $key = ":technik_$idx";
-            $techniciConditions[] = "r.zpracoval_id = $key";
+            $techniciConditions[] = "r.assigned_to = $key";
             $params[$key] = (int)$technik;
         }
 

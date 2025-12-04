@@ -4,6 +4,8 @@
  *
  * Načítá kalkulace_data z wgs_reklamace
  * Používá se v protokolu pro generování PDF PRICELIST
+ *
+ * SECURITY FIX: Přidána IDOR ochrana, odstraněny debug logy
  */
 
 require_once __DIR__ . '/../init.php';
@@ -11,7 +13,12 @@ require_once __DIR__ . '/../init.php';
 header('Content-Type: application/json; charset=utf-8');
 
 // Kontrola přihlášení
-if (!isset($_SESSION['user_id'])) {
+$userId = $_SESSION['user_id'] ?? null;
+$userEmail = $_SESSION['user_email'] ?? null;
+$userRole = strtolower(trim($_SESSION['role'] ?? 'guest'));
+$isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+
+if (!$userId && !$isAdmin) {
     http_response_code(401);
     echo json_encode([
         'success' => false,
@@ -20,10 +27,11 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+session_write_close();
+
 try {
     $pdo = getDbConnection();
-
-    // Zapnout error mode pro debugging
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Získat reklamace_id z GET parametru
@@ -36,22 +44,22 @@ try {
     // Sanitizace
     $reklamaceId = trim($reklamaceId);
 
-    // Log pro debugging
-    error_log("GET_KALKULACE: Hledám reklamaci s ID: " . $reklamaceId);
-
-    // Najít reklamaci v databázi
+    // Najít reklamaci v databázi včetně informace o vlastníkovi
     $stmt = $pdo->prepare("
         SELECT
-            id,
-            reklamace_id,
-            jmeno,
-            adresa,
-            telefon,
-            email,
-            model,
-            kalkulace_data
-        FROM wgs_reklamace
-        WHERE reklamace_id = :reklamace_id OR cislo = :cislo OR id = :id
+            r.id,
+            r.reklamace_id,
+            r.jmeno,
+            r.adresa,
+            r.telefon,
+            r.email,
+            r.model,
+            r.kalkulace_data,
+            r.created_by,
+            u.email as vlastnik_email
+        FROM wgs_reklamace r
+        LEFT JOIN wgs_users u ON (u.user_id = r.created_by OR u.id = r.created_by)
+        WHERE r.reklamace_id = :reklamace_id OR r.cislo = :cislo OR r.id = :id
         LIMIT 1
     ");
 
@@ -63,14 +71,34 @@ try {
 
     $reklamace = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Log výsledku
-    error_log("GET_KALKULACE: Nalezeno: " . ($reklamace ? 'ANO' : 'NE'));
-
     if (!$reklamace) {
         echo json_encode([
             'success' => false,
-            'error' => 'Reklamace nenalezena',
-            'reklamace_id' => $reklamaceId
+            'error' => 'Reklamace nenalezena'
+        ]);
+        exit;
+    }
+
+    // SECURITY: IDOR ochrana - kontrola oprávnění k přístupu
+    // Admin a technik vidí vše, prodejce jen své reklamace
+    $maOpravneni = false;
+    if ($isAdmin || in_array($userRole, ['admin', 'technik', 'technician'])) {
+        $maOpravneni = true;
+    } elseif (in_array($userRole, ['prodejce', 'user'])) {
+        // Prodejce vidí jen své reklamace
+        $vlastnikId = $reklamace['created_by'] ?? null;
+        $vlastnikEmail = $reklamace['vlastnik_email'] ?? null;
+        if (($userId && $vlastnikId && (string)$userId === (string)$vlastnikId) ||
+            ($userEmail && $vlastnikEmail && strtolower($userEmail) === strtolower($vlastnikEmail))) {
+            $maOpravneni = true;
+        }
+    }
+
+    if (!$maOpravneni) {
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Nemáte oprávnění k této reklamaci'
         ]);
         exit;
     }

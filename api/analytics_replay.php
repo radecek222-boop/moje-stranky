@@ -41,6 +41,9 @@ try {
         sendJsonError('Neplatný CSRF token', 403);
     }
 
+    // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+    session_write_close();
+
     $pdo = getDbConnection();
 
     // ========================================
@@ -194,15 +197,6 @@ try {
     sendJsonError('Neočekávaná chyba serveru', 500);
 }
 
-/**
- * Pomocná funkce pro sanitizaci vstupu
- */
-function sanitizeInput($input): ?string
-{
-    if ($input === null || $input === '') {
-        return null;
-    }
-
-    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-}
+// POZNÁMKA: sanitizeInput() je definována v config/config.php (loadována přes init.php)
+// NEPOUŽÍVAT lokální definici - způsobí "Cannot redeclare sanitizeInput()" fatal error!
 ?>

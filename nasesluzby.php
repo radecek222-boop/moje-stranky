@@ -30,17 +30,17 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   
   <!-- Google Fonts - Natuzzi style - optimalizované načítání -->
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" media="print" onload="this.media='all'">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'">
   <noscript>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
   </noscript>
   
   <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/nasesluzby.min.css">
-  <link rel="stylesheet" href="assets/css/mobile-responsive.css">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
 
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
@@ -52,7 +52,7 @@
 <!-- ČERNÝ HORNÍ PANEL -->
 
 <!-- Hlavní obsah -->
-<main>
+<main id="main-content">
 
 <!-- HERO SEKCE -->
 <section class="hero">
@@ -287,9 +287,7 @@
 
 <!-- External JavaScript -->
 <!-- Logger Utility (must be loaded first) -->
-<script src="assets/js/logger.js" defer></script>
-
-<script src="assets/js/nasesluzby.js" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
 
 <?php renderHeatmapTracker(); ?>
 </body>

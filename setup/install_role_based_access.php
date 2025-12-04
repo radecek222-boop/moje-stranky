@@ -588,7 +588,7 @@ function updateProgress($percent) {
                         </a>
                     </div>
 
-                    <button onclick="window.close()" class="button button-grey">
+                    <button data-action="closeWindow" class="button button-grey">
                         ZAVŘÍT OKNO
                     </button>
                 <?php else: ?>
@@ -617,31 +617,29 @@ function updateProgress($percent) {
     </div>
 
     <script>
-        // Debug pro formulář
+        // Event delegation pro data-action
+        document.addEventListener('click', function(e) {
+            const target = e.target.closest('[data-action]');
+            if (!target) return;
+
+            const action = target.getAttribute('data-action');
+
+            if (action === 'closeWindow') {
+                window.close();
+            }
+        });
+
+        // Formulář handling
         const form = document.getElementById('installForm');
         const btn = document.getElementById('installBtn');
 
         if (form && btn) {
-            console.log('Formulář nalezen, přidávám event listener');
-
             form.addEventListener('submit', function(e) {
-                console.log('Formulář se odesílá...');
-                console.log('Action:', form.action);
-                console.log('Method:', form.method);
-                console.log('FormData:', new FormData(form));
-
                 // Změň text tlačítka
                 btn.textContent = 'SPOUŠTÍM...';
                 btn.disabled = true;
-
-                // Nech formulář odeslat normálně (nepoužívej e.preventDefault())
+                // Nech formulář odeslat normálně
             });
-
-            btn.addEventListener('click', function(e) {
-                console.log('Tlačítko bylo kliknuto');
-            });
-        } else {
-            console.log('Formulář nebo tlačítko nenalezeno - pravděpodobně již nainstalováno');
         }
     </script>
 </body>

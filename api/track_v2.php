@@ -23,6 +23,7 @@ require_once __DIR__ . '/../includes/SessionMerger.php';
 require_once __DIR__ . '/../includes/BotDetector.php';
 require_once __DIR__ . '/../includes/GeolocationService.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
+require_once __DIR__ . '/../includes/geoip_helper.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -51,8 +52,10 @@ try {
     // FIX P1: PDO musí být inicializováno PŘED vytvořením RateLimiter instance
     $pdo = getDbConnection();
 
+    // Získat skutečnou IP klienta (s podporou Cloudflare/proxy)
+    $clientIp = GeoIPHelper::ziskejKlientIP();
+
     // Rate limiting - 1000 požadavků za hodinu per IP
-    $clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     $rateLimiter = new RateLimiter($pdo);
 
     // FIX P1: checkLimit() vrací pole s klíčem 'allowed', ne boolean
@@ -67,12 +70,120 @@ try {
         sendJsonError($rateLimitResult['message'], 429);
     }
 
-    // Získání JSON dat z request body
-    $inputData = json_decode(file_get_contents('php://input'), true);
+    // ========================================
+    // BLACKLIST IP ADRES (admin/vlastník)
+    // ========================================
+    // 1. Kontrola databázové tabulky wgs_analytics_ignored_ips
+    $stmtIgnored = $pdo->prepare("
+        SELECT id FROM wgs_analytics_ignored_ips
+        WHERE ip_address = :ip
+        LIMIT 1
+    ");
+    $stmtIgnored->execute(['ip' => $clientIp]);
+    if ($stmtIgnored->fetch()) {
+        sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'db_blacklist']);
+    }
+
+    // 2. Blacklist IP adresy jsou nyní POUZE v databázi (wgs_analytics_ignored_ips)
+    // Pro přidání nové IP použijte Analytics dashboard → Blokace IP
+    // BEZPEČNOST: Žádné hardcoded IP adresy v kódu
+
+    // ========================================
+    // NAČTENÍ INPUT DAT (pouze jednou!)
+    // ========================================
+    $rawInput = file_get_contents('php://input');
+    $inputData = json_decode($rawInput, true);
 
     // Fallback na $_POST pokud není JSON
     if (!$inputData) {
         $inputData = $_POST;
+    }
+
+    // ========================================
+    // BLACKLIST REFERRER DOMÉN (GitHub apod.)
+    // ========================================
+    $blacklistedReferrers = [
+        'github.com',
+        'www.github.com',
+        'raw.githubusercontent.com',
+        'gist.github.com',
+        'github.dev',
+        'githubusercontent.com',
+    ];
+
+    // Kontrola HTTP_REFERER hlavičky
+    $referrerHeader = $_SERVER['HTTP_REFERER'] ?? '';
+    if (!empty($referrerHeader)) {
+        $referrerHost = parse_url($referrerHeader, PHP_URL_HOST);
+        if ($referrerHost) {
+            foreach ($blacklistedReferrers as $blacklistedRef) {
+                if ($referrerHost === $blacklistedRef || strpos($referrerHost, $blacklistedRef) !== false) {
+                    sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'referrer_header']);
+                }
+            }
+        }
+    }
+
+    // Kontrola referrer z POST dat (tracker posílá document.referrer)
+    $referrerPost = $inputData['referrer'] ?? '';
+    if (!empty($referrerPost)) {
+        $referrerHostPost = parse_url($referrerPost, PHP_URL_HOST);
+        if ($referrerHostPost) {
+            foreach ($blacklistedReferrers as $blacklistedRef) {
+                if ($referrerHostPost === $blacklistedRef || strpos($referrerHostPost, $blacklistedRef) !== false) {
+                    sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'referrer_post']);
+                }
+            }
+        }
+    }
+
+    // ========================================
+    // BLACKLIST INTERNÍCH/ADMIN STRÁNEK
+    // ========================================
+    // Tyto stránky vyžadují přihlášení nebo jsou admin-only
+    // POZN: Zahrnout i verze bez .php (URL rewrite)
+    $blacklistedPages = [
+        // S příponou .php
+        'admin.php',
+        'seznam.php',
+        'statistiky.php',
+        'protokol.php',
+        'login.php',
+        'registration.php',
+        'analytics.php',
+        'analytics-heatmap.php',
+        'vsechny_tabulky.php',
+        // Bez přípony (URL rewrite)
+        'admin',
+        'seznam',
+        'statistiky',
+        'protokol',
+        'login',
+        'registration',
+        'analytics',
+        'analytics-heatmap',
+        // Prefixy (všechny soubory začínající takto)
+        'kontrola_',
+        'pridej_',
+        'vycisti_',
+        'migrace_',
+        'test_',
+        'doplnit_',
+    ];
+
+    // Kontrola page_url z POST/JSON dat
+    $pageUrlToCheck = $inputData['page_url'] ?? '';
+    if (!empty($pageUrlToCheck)) {
+        $parsedPageUrl = parse_url($pageUrlToCheck);
+        $pagePath = $parsedPageUrl['path'] ?? '';
+        $pageName = basename($pagePath);
+
+        foreach ($blacklistedPages as $blacklistedPage) {
+            // Přesná shoda nebo prefix match (pro kontrola_, pridej_, atd.)
+            if ($pageName === $blacklistedPage || strpos($pageName, $blacklistedPage) === 0) {
+                sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'admin_page']);
+            }
+        }
     }
 
     // ========================================
@@ -332,26 +443,98 @@ try {
         INSERT INTO wgs_pageviews (
             session_id,
             fingerprint_id,
-            url,
-            ip,
+            ip_address,
             user_agent,
-            datum
+            page_url,
+            page_title,
+            referrer,
+            device_type,
+            browser,
+            os,
+            screen_resolution,
+            language,
+            country_code,
+            city,
+            visit_duration,
+            is_bounce,
+            created_at
         ) VALUES (
             :session_id,
             :fingerprint_id,
-            :url,
-            :ip,
+            :ip_address,
             :user_agent,
+            :page_url,
+            :page_title,
+            :referrer,
+            :device_type,
+            :browser,
+            :os,
+            :screen_resolution,
+            :language,
+            :country_code,
+            :city,
+            :visit_duration,
+            :is_bounce,
             NOW()
         )
     ");
 
+    // Výpočet visit_duration z předchozího pageview ve stejné session
+    $visitDuration = 0;
+    $stmtPrevPageview = $pdo->prepare("
+        SELECT created_at FROM wgs_pageviews
+        WHERE session_id = :session_id
+        ORDER BY created_at DESC
+        LIMIT 1
+    ");
+    $stmtPrevPageview->execute(['session_id' => $sessionId]);
+    $prevPageview = $stmtPrevPageview->fetch(PDO::FETCH_ASSOC);
+
+    if ($prevPageview && $prevPageview['created_at']) {
+        $prevTime = strtotime($prevPageview['created_at']);
+        $currentTime = time();
+        $calculatedDuration = $currentTime - $prevTime;
+
+        // Omezit na max 30 minut (1800s) - déle = pravděpodobně nová session
+        if ($calculatedDuration > 0 && $calculatedDuration < 1800) {
+            // Aktualizovat předchozí pageview s vypočtenou dobou
+            $stmtUpdateDuration = $pdo->prepare("
+                UPDATE wgs_pageviews
+                SET visit_duration = :duration
+                WHERE session_id = :session_id
+                ORDER BY created_at DESC
+                LIMIT 1
+            ");
+            $stmtUpdateDuration->execute([
+                'duration' => $calculatedDuration,
+                'session_id' => $sessionId
+            ]);
+        }
+    }
+
+    // Screen resolution z device info
+    $screenResolution = null;
+    if (isset($inputData['screen_width']) && isset($inputData['screen_height'])) {
+        $screenResolution = (int)$inputData['screen_width'] . 'x' . (int)$inputData['screen_height'];
+    }
+
     $stmt->execute([
         'session_id' => $sessionId,
         'fingerprint_id' => $fingerprintId,
-        'url' => $pageUrl,
-        'ip' => $ipAdresaAnonymni,
-        'user_agent' => substr($userAgent, 0, 255)
+        'ip_address' => $ipAdresaAnonymni,
+        'user_agent' => substr($userAgent, 0, 500),
+        'page_url' => substr($pageUrl, 0, 500),
+        'page_title' => substr($sessionData['page_title'], 0, 200),
+        'referrer' => substr($sessionData['referrer'], 0, 500),
+        'device_type' => $sessionData['device_type'],
+        'browser' => substr($sessionData['browser'], 0, 100),
+        'os' => substr($sessionData['os'], 0, 100),
+        'screen_resolution' => $screenResolution,
+        'language' => substr($inputData['language'] ?? '', 0, 10),
+        'country_code' => $geoData['country_code'] ?? null,
+        'city' => $geoData['city'] ?? null,
+        'visit_duration' => 0,  // Bude aktualizováno při dalším pageview
+        'is_bounce' => $pocetPageviews <= 1 ? 1 : 0
     ]);
 
     $pageviewId = $pdo->lastInsertId();
@@ -430,17 +613,5 @@ try {
     sendJsonError('Neočekávaná chyba serveru', 500);
 }
 
-/**
- * Pomocná funkce pro sanitizaci vstupu
- *
- * @param mixed $input
- * @return string|null
- */
-function sanitizeInput($input): ?string
-{
-    if ($input === null || $input === '') {
-        return null;
-    }
-
-    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-}
+// POZNÁMKA: sanitizeInput() je definována v config/config.php (loadována přes init.php)
+// NEPOUŽÍVAT lokální definici - způsobí "Cannot redeclare sanitizeInput()" fatal error!

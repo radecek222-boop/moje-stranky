@@ -59,7 +59,7 @@ try {
  */
 function handleAdminLogin(string $adminKey): void
 {
-    // ✅ FIX 9: Databázový rate limiting místo file-based
+    // FIX 9: Databázový rate limiting místo file-based
     $pdo = getDbConnection();
     $rateLimiter = new RateLimiter($pdo);
     $identifier = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
@@ -76,28 +76,28 @@ function handleAdminLogin(string $adminKey): void
 
     $providedHash = hash('sha256', $adminKey);
     if (!defined('ADMIN_KEY_HASH') || !hash_equals(ADMIN_KEY_HASH, $providedHash)) {
-        // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
+        // FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
         respondError('Neplatný administrátorský klíč.', 401);
     }
 
-    // ✅ FIX 9: Reset rate limit při úspěšném přihlášení
+    // FIX 9: Reset rate limit při úspěšném přihlášení
     $rateLimiter->reset($identifier, 'admin_login');
 
-    // ✅ SECURITY FIX: Session regeneration pro admin login (session fixation protection)
+    // SECURITY FIX: Session regeneration pro admin login (session fixation protection)
     session_regenerate_id(true);
 
-    // ✅ SECURITY FIX: CSRF token rotation po přihlášení
+    // SECURITY FIX: CSRF token rotation po přihlášení
     unset($_SESSION['csrf_token']);
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
     $_SESSION['is_admin'] = true;
-    $_SESSION['admin_id'] = $_SESSION['admin_id'] ?? 'WGS_ADMIN';
-    $_SESSION['user_id'] = $_SESSION['user_id'] ?? 0;
+    $_SESSION['admin_id'] = 'ADMIN001';
+    $_SESSION['user_id'] = 'ADMIN001';
     $_SESSION['user_name'] = 'Administrátor';
     $_SESSION['user_email'] = 'admin@wgs-service.cz';
     $_SESSION['role'] = 'admin';
 
-    // ✅ FIX 6: Inactivity timeout - nastavit initial timestamps při admin login
+    // FIX 6: Inactivity timeout - nastavit initial timestamps při admin login
     $_SESSION['last_activity'] = time();
     $_SESSION['login_time'] = time();
     $_SESSION['login_method'] = 'admin_key';
@@ -131,7 +131,7 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
         throw new InvalidArgumentException('Zadejte platný email.');
     }
 
-    // ✅ FIX 9: Databázový rate limiting místo file-based
+    // FIX 9: Databázový rate limiting místo file-based
     $rateLimiter = new RateLimiter($pdo);
     $identifier = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 
@@ -150,7 +150,7 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user) {
-        // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
+        // FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
         respondError('Uživatel nenalezen.', 401);
     }
 
@@ -163,11 +163,11 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     }
 
     if ($hashField === null || !password_verify($password, $user[$hashField])) {
-        // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
+        // FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
         respondError('Neplatné přihlašovací údaje.', 401);
     }
 
-    // ✅ FIX 9: Reset rate limit při úspěšném přihlášení
+    // FIX 9: Reset rate limit při úspěšném přihlášení
     $rateLimiter->reset($identifier, 'user_login');
 
     if (array_key_exists('is_active', $user) && (int) $user['is_active'] === 0) {
@@ -177,17 +177,15 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     // SECURITY FIX: Regenerovat session ID pro ochranu proti session fixation
     session_regenerate_id(true);
 
-    // ✅ SECURITY FIX: CSRF token rotation po přihlášení
+    // SECURITY FIX: CSRF token rotation po přihlášení
     // Vygenerovat nový CSRF token pro zabránění token reuse
     unset($_SESSION['csrf_token']);
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
-    $userId = $user['id'] ?? $user['user_id'] ?? null;
-    if ($userId === null) {
-        $userId = $user['email'];
-    }
+    // FIX: Preferovat user_id (TCH20250001) pred id (auto-increment)
+    $userId = $user['user_id'] ?? $user['id'] ?? $user['email'] ?? null;
 
-    // ✅ FIX 11: Remember Me token
+    // FIX 11: Remember Me token
     $rememberMe = $_POST['remember_me'] ?? '0';
     if ($rememberMe === '1' || $rememberMe === 'true') {
         createRememberToken($pdo, $userId);
@@ -197,7 +195,7 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     $_SESSION['user_name'] = $user['name'] ?? ($user['email'] ?? 'Uživatel');
     $_SESSION['user_email'] = $user['email'] ?? '';
 
-    // ✅ FIX 6: Inactivity timeout - nastavit initial timestamps při login
+    // FIX 6: Inactivity timeout - nastavit initial timestamps při login
     $_SESSION['last_activity'] = time();
     $_SESSION['login_time'] = time(); // Pro audit trail a session duration tracking
     $_SESSION['login_method'] = 'user_login'; // Pro rozlišení login metod
@@ -357,6 +355,9 @@ function createRememberToken(PDO $pdo, string $userId): void
     // Nastavit cookie (selector:validator)
     $cookieValue = $selector . ':' . $validator;
 
+    // FIX PWA: SameSite='Lax' pro PWA kompatibilitu
+    // 'Strict' způsoboval problémy s Remember Me v PWA módu
+    // 'Lax' je bezpečné - Remember Me cookie není citlivá na CSRF (jen čte data)
     setcookie(
         'remember_me',
         $cookieValue,
@@ -366,7 +367,7 @@ function createRememberToken(PDO $pdo, string $userId): void
             'domain' => '',
             'secure' => true,
             'httponly' => true,
-            'samesite' => 'Strict'  // ✅ SECURITY FIX: Změněno z 'Lax' na 'Strict' pro CSRF ochranu
+            'samesite' => 'Lax'
         ]
     );
 

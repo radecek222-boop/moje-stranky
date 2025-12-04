@@ -1,392 +1,631 @@
 <?php
 /**
- * SEO Meta Tags Helper
- * Centralizovaná správa SEO meta tagů pro všechny stránky
+ * SEO Meta Tags a Schema.org strukturovana data
+ *
+ * Tento soubor obsahuje vsechna SEO klicova slova a meta tagy
+ * pro maximalni viditelnost ve vyhledavacich.
+ *
+ * Pouziti: renderSeoMeta('index'); a renderSchemaOrg('index');
  */
 
+// Kompletni seznam klicovych slov pro WGS - MAXIMALNI POKRYTI
+$seoKlicovaSlova = implode(', ', [
+    // === TYPY NABYTKU - VSECHNY VARIANTY ===
+    'sedacka', 'sedacky', 'pohovka', 'pohovky', 'gauc', 'gauce', 'sofa', 'sofy',
+    'kreslo', 'kresla', 'zidle', 'zidle', 'stul', 'stoly', 'taburet', 'podnozka',
+    'lehatko', 'lenoska', 'lavice', 'ottoman', 'futon',
+
+    // Styly sedacek
+    'moderni sedacka', 'trendy sedacka', 'designova sedacka', 'klasicka sedacka',
+    'luxusni sedacka', 'italska sedacka', 'skandinavska sedacka', 'minimalisticka sedacka',
+    'moderni kreslo', 'designove kreslo', 'retro sedacka', 'vintage sedacka',
+
+    // Typy sedacek
+    'kozena sedacka', 'latkova sedacka', 'rohova sedacka', 'rozkladaci sedacka',
+    'kozene kreslo', 'relaxacni kreslo', 'masazni kreslo', 'houpaci kreslo',
+    'sedaci souprava', 'obyvaci sedacka', 'kancelarska zidle', 'jidelni zidle',
+    'barova zidle', 'konfercni zidle', 'loznicovy nabytek',
+
+    // Tvary a velikosti
+    'mala sedacka', 'velka sedacka', 'dvousedacka', 'trisedak', 'ctyrlocal',
+    'rohova souprava', 'u-sedacka', 'l-sedacka', 'modulova sedacka',
+
+    // === AKCE A SLUZBY ===
+    'oprava sedacky', 'oprava sedacek', 'oprava kresla', 'oprava nabytku',
+    'servis sedacky', 'servis nabytku', 'servis Natuzzi', 'servis kresla',
+    'cisteni sedacky', 'cisteni kozene sedacky', 'cisteni pohovky', 'cisteni kresla',
+    'cisteni koberce', 'cisteni calouneneho nabytku', 'cisteni latkovych sedacek',
+    'reklamace sedacky', 'reklamace nabytku', 'reklamace Natuzzi', 'reklamace kresla',
+    'udrzba sedacky', 'udrzba kozene sedacky', 'udrzba nabytku',
+    'renovace sedacky', 'renovace kresla', 'renovace nabytku', 'renovace pohovky',
+    'precalouneni', 'calouneni', 'precalouneni sedacky', 'precalouneni kresla',
+    'vymena potahu', 'vymena calouneni', 'vymena kuze',
+    'montaz nabytku', 'montaz sedacky', 'demontaz nabytku',
+    'oprava mechanismu', 'oprava relaxu', 'oprava elektriky',
+
+    // === MATERIALY ===
+    'kozena', 'kuze', 'kozene', 'prava kuze', 'umela kuze', 'ekokuze',
+    'textil', 'latka', 'latkova', 'samet', 'mansestr', 'len', 'bavlna',
+    'calouneni', 'calouneny nabytek', 'mikroplyš', 'polyester',
+
+    // === ZNACKA NATUZZI A DALSI ===
+    'Natuzzi', 'Natuzzi servis', 'Natuzzi oprava', 'Natuzzi reklamace',
+    'Natuzzi Ceska republika', 'autorizovany servis Natuzzi', 'Natuzzi Italia',
+    'italsky nabytek', 'luxusni nabytek', 'premiovy nabytek', 'znackovy nabytek',
+    'designovy nabytek', 'kvalitni nabytek',
+
+    // === GEOGRAFICKE ===
+    'Praha', 'Brno', 'Ostrava', 'Plzen', 'Olomouc', 'Liberec', 'Hradec Kralove',
+    'Ceske Budejovice', 'Usti nad Labem', 'Pardubice', 'Zlin', 'Karlovy Vary',
+    'Ceska republika', 'CR', 'Stredocesky kraj', 'Moravskoslezsky kraj',
+    'servis nabytku Praha', 'oprava sedacek Brno', 'cisteni sedacek Praha',
+    'oprava nabytku Ostrava', 'servis sedacek Plzen', 'calouneni Praha',
+
+    // === PROBLEMY A STAV ===
+    'poskozena sedacka', 'rozbita sedacka', 'spinava sedacka', 'stara sedacka',
+    'praskla kuze', 'odrena kuze', 'opotrebovana sedacka', 'roztrhana sedacka',
+    'nefunkcni mechanismus', 'rozbity relax', 'pokousana sedacka', 'poskrabana kuze',
+    'vyboulena sedacka', 'prosezenasedacka', 'zaschlá sedacka',
+
+    // === DOPLNKY A PRISLUSENSTVI ===
+    'koberec', 'koberce', 'kusovy koberec', 'behoun', 'rohozka',
+    'polstar', 'polstare', 'dekoracni polstare', 'prehož', 'deka',
+    'potah na sedacku', 'navlek na kreslo', 'chranič sedacky',
+
+    // === LONG-TAIL FRAZE - OTAZKY ===
+    'kde opravit sedacku', 'kolik stoji oprava sedacky', 'cena opravy sedacky',
+    'jak vycistit kozenou sedacku', 'jak opravit sedacku', 'kam s rozbitou sedackou',
+    'oprava kozene sedacky cena', 'servis luxusniho nabytku',
+    'profesionalni cisteni sedacek', 'oprava mechanismu sedacky',
+    'nejlepsi servis nabytku', 'kvalitni oprava sedacek',
+
+    // === BRANDING ===
+    'White Glove Service', 'WGS servis', 'WGS', 'wgs-service'
+]);
+
+// Konfigurace SEO pro jednotlive stranky - MAXIMALNI POKRYTI KLICOVYCH SLOV
+$seoStranky = [
+    'index' => [
+        'title' => 'Oprava sedacky, kresla, pohovky, gauce | Servis nabytku Natuzzi | Praha, Brno, CR',
+        'description' => 'Profesionalni oprava a servis sedacek, kresel, pohovek znacky Natuzzi. Cisteni kozenych i latkovych sedacek. Precalouneni, renovace, reklamace. Oprava moderni sedacky, designove kreslo, rohova sedacka. Autorizovany servis Praha, Brno, cela CR. Tel: +420 725 965 826',
+        'keywords' => 'oprava sedacky, oprava kresla, oprava pohovky, oprava gauce, servis sedacky, servis nabytku, servis Natuzzi, cisteni sedacky, cisteni kozene sedacky, cisteni latkove sedacky, reklamace sedacky, reklamace nabytku, precalouneni sedacky, renovace sedacky, moderni sedacka, designova sedacka, trendy sedacka, luxusni sedacka, italska sedacka, rohova sedacka, kozena sedacka, latkova sedacka, rozkladaci sedacka, relaxacni kreslo, sedaci souprava, oprava mechanismu, oprava relaxu, cisteni koberce, koberec, polstare, Praha, Brno, Ostrava, Plzen, White Glove Service, WGS',
+        'canonical' => 'https://wgs-service.cz/',
+        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+    ],
+    'novareklamace' => [
+        'title' => 'Objednat opravu sedacky, kresla, pohovky online | Reklamace Natuzzi | Servis nabytku',
+        'description' => 'Objednejte opravu sedacky, kresla nebo pohovky online. Reklamace nabytku Natuzzi. Oprava kozene sedacky, latkove pohovky, designoveho kresla. Cisteni, precalouneni, renovace. Rychle vyrizeni Praha, Brno a okoli.',
+        'keywords' => 'objednat opravu sedacky, objednat servis kresla, reklamace Natuzzi, oprava sedacky online, oprava kresla online, oprava pohovky online, servis nabytku online, formular reklamace, objednat cisteni sedacky, objednat precalouneni, moderni sedacka oprava, designove kreslo servis, rohova sedacka oprava, relaxacni kreslo servis, kozena sedacka cisteni, latkova pohovka oprava, Praha, Brno',
+        'canonical' => 'https://wgs-service.cz/novareklamace.php',
+        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+    ],
+    'cenik' => [
+        'title' => 'Cenik oprav sedacek, kresel, pohovek | Kolik stoji oprava sedacky | Servis Natuzzi ceny',
+        'description' => 'Cenik oprav sedacek, kresel a nabytku Natuzzi. Kolik stoji oprava sedacky? Cena cisteni kozene sedacky, precalouneni, oprava mechanismu. Kalkulacka ceny servisu online. Od 110 EUR. Oprava moderni sedacky cena.',
+        'keywords' => 'cenik oprava sedacky, kolik stoji oprava sedacky, cena opravy kresla, cenik servis Natuzzi, cena cisteni sedacky, cena precalouneni, cena opravy mechanismu, kalkulacka ceny servisu, oprava kozene sedacky cena, oprava latkove pohovky cena, cenik renovace nabytku, moderni sedacka cena opravy, designove kreslo cenik, rohova sedacka oprava cena, relaxacni kreslo servis cena',
+        'canonical' => 'https://wgs-service.cz/cenik.php',
+        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+    ],
+    'seznam' => [
+        'title' => 'Prehled reklamaci a servisnich zakazek | Stav opravy sedacky | WGS Natuzzi',
+        'description' => 'Prehled servisnich zakazek a reklamaci nabytku Natuzzi. Sledovani stavu opravy sedacek, kresel a pohovek. White Glove Service - profesionalni servis luxusniho nabytku.',
+        'keywords' => 'prehled reklamaci, stav opravy sedacky, stav opravy kresla, sledovani servisu, reklamace Natuzzi stav, servisni zakazky, prehled oprav nabytku',
+        'canonical' => 'https://wgs-service.cz/seznam.php',
+        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+    ],
+    'protokol' => [
+        'title' => 'Servisni protokol opravy nabytku | Dokumentace servisu sedacky | White Glove Service',
+        'description' => 'Servisni protokol pro opravy a reklamace nabytku Natuzzi. Dokumentace servisu sedacek, kresel a pohovek. Profesionalni evidence oprav.',
+        'keywords' => 'servisni protokol, protokol opravy sedacky, dokumentace servisu, reklamacni protokol Natuzzi, evidence oprav nabytku',
+        'canonical' => 'https://wgs-service.cz/protokol.php',
+        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+    ],
+    'gdpr' => [
+        'title' => 'Zpracovani osobnich udaju GDPR | White Glove Service',
+        'description' => 'Informace o zpracovani osobnich udaju podle GDPR. White Glove Service - servis nabytku Natuzzi.',
+        'keywords' => 'GDPR, osobni udaje, ochrana udaju, White Glove Service',
+        'canonical' => 'https://wgs-service.cz/gdpr.php',
+        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+    ],
+    'aktuality' => [
+        'title' => 'Aktuality Natuzzi | Novinky o luxusnim nabytku | Pece o sedacky a kresla | WGS',
+        'description' => 'Denne aktuality o znacce Natuzzi. Novinky o luxusnim italskem nabytku, tipy na peci o kozene sedacky a kresla, showroomy v CR. Jak cistit kozenou sedacku, udrzba luxusniho nabytku, trendy v designu sedacek.',
+        'keywords' => 'aktuality Natuzzi, novinky nabytek, luxusni nabytek novinky, pece o kozenou sedacku, jak cistit sedacku, udrzba kozene sedacky, tipy na peci o nabytek, Natuzzi showroom, italsky nabytek aktuality, trendy sedacky, designovy nabytek novinky, kozena sedacka pece, kreslo udrzba, pohovka cisteni, White Glove Service aktuality',
+        'canonical' => 'https://wgs-service.cz/aktuality.php',
+        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+    ]
+];
+
+/**
+ * Vykresli SEO meta tagy pro danou stranku
+ *
+ * @param string $stranka Nazev stranky (index, novareklamace, cenik, seznam, protokol)
+ */
+function renderSeoMeta($stranka = 'index') {
+    global $seoStranky;
+
+    $seo = $seoStranky[$stranka] ?? $seoStranky['index'];
+
+    echo "\n  <!-- SEO Meta Tags -->\n";
+    echo "  <meta name=\"keywords\" content=\"{$seo['keywords']}\">\n";
+    echo "  <meta name=\"author\" content=\"White Glove Service s.r.o.\">\n";
+    echo "  <meta name=\"robots\" content=\"index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1\">\n";
+    echo "  <meta name=\"googlebot\" content=\"index, follow\">\n";
+    echo "  <link rel=\"canonical\" href=\"{$seo['canonical']}\">\n";
+
+    // Open Graph (Facebook, LinkedIn)
+    echo "\n  <!-- Open Graph / Facebook -->\n";
+    echo "  <meta property=\"og:type\" content=\"website\">\n";
+    echo "  <meta property=\"og:url\" content=\"{$seo['canonical']}\">\n";
+    echo "  <meta property=\"og:title\" content=\"{$seo['title']}\">\n";
+    echo "  <meta property=\"og:description\" content=\"{$seo['description']}\">\n";
+    echo "  <meta property=\"og:image\" content=\"{$seo['og_image']}\">\n";
+    echo "  <meta property=\"og:locale\" content=\"cs_CZ\">\n";
+    echo "  <meta property=\"og:site_name\" content=\"White Glove Service\">\n";
+
+    // Twitter Card
+    echo "\n  <!-- Twitter Card -->\n";
+    echo "  <meta name=\"twitter:card\" content=\"summary_large_image\">\n";
+    echo "  <meta name=\"twitter:title\" content=\"{$seo['title']}\">\n";
+    echo "  <meta name=\"twitter:description\" content=\"{$seo['description']}\">\n";
+    echo "  <meta name=\"twitter:image\" content=\"{$seo['og_image']}\">\n";
+
+    // Hreflang pro vicejazycnost (cesky, anglicky, italsky)
+    $pageFile = basename($seo['canonical']);
+    if (empty($pageFile) || $pageFile === 'wgs-service.cz') {
+        $pageFile = '';
+    }
+    echo "\n  <!-- Hreflang - vicejazycna podpora -->\n";
+    echo "  <link rel=\"alternate\" hreflang=\"cs\" href=\"https://wgs-service.cz/{$pageFile}\">\n";
+    echo "  <link rel=\"alternate\" hreflang=\"en\" href=\"https://wgs-service.cz/{$pageFile}?lang=en\">\n";
+    echo "  <link rel=\"alternate\" hreflang=\"it\" href=\"https://wgs-service.cz/{$pageFile}?lang=it\">\n";
+    echo "  <link rel=\"alternate\" hreflang=\"x-default\" href=\"https://wgs-service.cz/{$pageFile}\">\n";
+
+    // Seznam.cz specificke tagy
+    echo "\n  <!-- Seznam.cz -->\n";
+    echo "  <meta name=\"seznam-wmt\" content=\"wgs-service-verified\">\n";
+
+    // Geo lokace pro lokalni vyhledavani
+    echo "\n  <!-- Geo lokace -->\n";
+    echo "  <meta name=\"geo.region\" content=\"CZ\">\n";
+    echo "  <meta name=\"geo.placename\" content=\"Praha, Ceska republika\">\n";
+    echo "  <meta name=\"geo.position\" content=\"50.0755;14.5756\">\n";
+    echo "  <meta name=\"ICBM\" content=\"50.0755, 14.5756\">\n";
+
+    // Doplnkove meta tagy pro prohlizece
+    echo "\n  <!-- Prohlizece a kompatibilita -->\n";
+    echo "  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n";
+    echo "  <meta name=\"format-detection\" content=\"telephone=yes\">\n";
+    echo "  <meta name=\"mobile-web-app-capable\" content=\"yes\">\n";
+}
+
+/**
+ * Vykresli JSON-LD Schema.org strukturovana data
+ *
+ * @param string $stranka Nazev stranky
+ */
+function renderSchemaOrg($stranka = 'index') {
+    // LocalBusiness schema - zakladni info o firme
+    $localBusiness = [
+        "@context" => "https://schema.org",
+        "@type" => "LocalBusiness",
+        "@id" => "https://wgs-service.cz/#organization",
+        "name" => "White Glove Service",
+        "alternateName" => ["WGS", "WGS Service", "Servis Natuzzi"],
+        "description" => "Profesionalni servis a opravy luxusniho nabytku Natuzzi. Opravy sedacek, kresel, pohovek. Cisteni kozenych i latkovych sedacek. Reklamace, precalouneni, montaz, udrzba. Autorizovany servis v Ceske republice.",
+        "url" => "https://wgs-service.cz",
+        "telephone" => "+420725965826",
+        "email" => "reklamace@wgs-service.cz",
+        "image" => "https://wgs-service.cz/assets/img/og-image.png",
+        "logo" => "https://wgs-service.cz/icon512.png",
+        "priceRange" => "110-500 EUR",
+        "currenciesAccepted" => "EUR, CZK",
+        "paymentAccepted" => "Cash, Credit Card, Bank Transfer",
+        "address" => [
+            "@type" => "PostalAddress",
+            "streetAddress" => "Do Dubce 364",
+            "addressLocality" => "Praha - Bechovice",
+            "postalCode" => "190 11",
+            "addressRegion" => "Praha",
+            "addressCountry" => "CZ"
+        ],
+        "geo" => [
+            "@type" => "GeoCoordinates",
+            "latitude" => "50.0755",
+            "longitude" => "14.5756"
+        ],
+        "areaServed" => [
+            [
+                "@type" => "Country",
+                "name" => "Ceska republika"
+            ],
+            [
+                "@type" => "Country",
+                "name" => "Slovensko"
+            ],
+            [
+                "@type" => "City",
+                "name" => "Praha"
+            ],
+            [
+                "@type" => "City",
+                "name" => "Brno"
+            ],
+            [
+                "@type" => "City",
+                "name" => "Ostrava"
+            ],
+            [
+                "@type" => "City",
+                "name" => "Plzen"
+            ]
+        ],
+        "openingHoursSpecification" => [
+            [
+                "@type" => "OpeningHoursSpecification",
+                "dayOfWeek" => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "opens" => "08:00",
+                "closes" => "17:00"
+            ]
+        ],
+        "knowsAbout" => [
+            "Oprava sedacek",
+            "Oprava kresel",
+            "Oprava pohovek",
+            "Cisteni kozenych sedacek",
+            "Cisteni latkovych sedacek",
+            "Precalouneni nabytku",
+            "Reklamace Natuzzi",
+            "Servis luxusniho nabytku",
+            "Oprava mechanismu sedacky",
+            "Renovace nabytku"
+        ],
+        "sameAs" => []
+    ];
+
+    // Service schema - sluzby
+    $services = [
+        "@context" => "https://schema.org",
+        "@type" => "Service",
+        "serviceType" => "Servis a opravy nabytku",
+        "provider" => [
+            "@type" => "LocalBusiness",
+            "name" => "White Glove Service",
+            "url" => "https://wgs-service.cz"
+        ],
+        "areaServed" => [
+            "@type" => "Country",
+            "name" => "Ceska republika"
+        ],
+        "hasOfferCatalog" => [
+            "@type" => "OfferCatalog",
+            "name" => "Servisni sluzby nabytku Natuzzi",
+            "itemListElement" => [
+                [
+                    "@type" => "Offer",
+                    "itemOffered" => [
+                        "@type" => "Service",
+                        "name" => "Oprava sedacky",
+                        "description" => "Profesionalni oprava kozenych a latkovych sedacek Natuzzi. Oprava poskozenych sedacek, rozbite kuze, opotrebovaneho calouneni."
+                    ],
+                    "priceSpecification" => [
+                        "@type" => "PriceSpecification",
+                        "priceCurrency" => "EUR",
+                        "price" => "205",
+                        "minPrice" => "205"
+                    ]
+                ],
+                [
+                    "@type" => "Offer",
+                    "itemOffered" => [
+                        "@type" => "Service",
+                        "name" => "Oprava kresla",
+                        "description" => "Oprava relaxacnich a klasickych kresel Natuzzi. Oprava mechanismu, calouneni, kuze."
+                    ],
+                    "priceSpecification" => [
+                        "@type" => "PriceSpecification",
+                        "priceCurrency" => "EUR",
+                        "price" => "165",
+                        "minPrice" => "165"
+                    ]
+                ],
+                [
+                    "@type" => "Offer",
+                    "itemOffered" => [
+                        "@type" => "Service",
+                        "name" => "Cisteni sedacky",
+                        "description" => "Profesionalni cisteni kozenych i latkovych sedacek. Odstraneni skvrn, renovace povrchu."
+                    ]
+                ],
+                [
+                    "@type" => "Offer",
+                    "itemOffered" => [
+                        "@type" => "Service",
+                        "name" => "Reklamace nabytku Natuzzi",
+                        "description" => "Vyrizeni reklamaci nabytku Natuzzi. Autorizovany servis."
+                    ]
+                ],
+                [
+                    "@type" => "Offer",
+                    "itemOffered" => [
+                        "@type" => "Service",
+                        "name" => "Precalouneni sedacky",
+                        "description" => "Kompletni precalouneni sedacek, kresel a pohovek. Vymena calouneni, latky, kuze."
+                    ],
+                    "priceSpecification" => [
+                        "@type" => "PriceSpecification",
+                        "priceCurrency" => "EUR",
+                        "price" => "205",
+                        "minPrice" => "205"
+                    ]
+                ],
+                [
+                    "@type" => "Offer",
+                    "itemOffered" => [
+                        "@type" => "Service",
+                        "name" => "Oprava mechanismu sedacky",
+                        "description" => "Oprava relax mechanismu a elektrickych dilu. Nefunkcni mechanismus, rozbity relax."
+                    ],
+                    "priceSpecification" => [
+                        "@type" => "PriceSpecification",
+                        "priceCurrency" => "EUR",
+                        "price" => "45",
+                        "minPrice" => "45"
+                    ]
+                ],
+                [
+                    "@type" => "Offer",
+                    "itemOffered" => [
+                        "@type" => "Service",
+                        "name" => "Diagnostika nabytku",
+                        "description" => "Zjisteni rozsahu poskozeni a posouzeni stavu nabytku."
+                    ],
+                    "priceSpecification" => [
+                        "@type" => "PriceSpecification",
+                        "priceCurrency" => "EUR",
+                        "price" => "110"
+                    ]
+                ]
+            ]
+        ]
+    ];
+
+    // WebSite schema
+    $website = [
+        "@context" => "https://schema.org",
+        "@type" => "WebSite",
+        "name" => "White Glove Service - Servis nabytku Natuzzi",
+        "alternateName" => "WGS Service",
+        "url" => "https://wgs-service.cz",
+        "description" => "Profesionalni servis a opravy sedacek, kresel, pohovek znacky Natuzzi. Cisteni, reklamace, precalouneni.",
+        "inLanguage" => "cs-CZ",
+        "potentialAction" => [
+            "@type" => "SearchAction",
+            "target" => [
+                "@type" => "EntryPoint",
+                "urlTemplate" => "https://wgs-service.cz/cenik.php?hledat={search_term_string}"
+            ],
+            "query-input" => "required name=search_term_string"
+        ]
+    ];
+
+    // BreadcrumbList pro specificke stranky
+    $breadcrumbs = null;
+    switch ($stranka) {
+        case 'cenik':
+            $breadcrumbs = [
+                "@context" => "https://schema.org",
+                "@type" => "BreadcrumbList",
+                "itemListElement" => [
+                    ["@type" => "ListItem", "position" => 1, "name" => "Domu", "item" => "https://wgs-service.cz/"],
+                    ["@type" => "ListItem", "position" => 2, "name" => "Cenik oprav sedacek a nabytku", "item" => "https://wgs-service.cz/cenik.php"]
+                ]
+            ];
+            break;
+        case 'novareklamace':
+            $breadcrumbs = [
+                "@context" => "https://schema.org",
+                "@type" => "BreadcrumbList",
+                "itemListElement" => [
+                    ["@type" => "ListItem", "position" => 1, "name" => "Domu", "item" => "https://wgs-service.cz/"],
+                    ["@type" => "ListItem", "position" => 2, "name" => "Objednat servis sedacky", "item" => "https://wgs-service.cz/novareklamace.php"]
+                ]
+            ];
+            break;
+        case 'aktuality':
+            $breadcrumbs = [
+                "@context" => "https://schema.org",
+                "@type" => "BreadcrumbList",
+                "itemListElement" => [
+                    ["@type" => "ListItem", "position" => 1, "name" => "Domu", "item" => "https://wgs-service.cz/"],
+                    ["@type" => "ListItem", "position" => 2, "name" => "Aktuality Natuzzi", "item" => "https://wgs-service.cz/aktuality.php"]
+                ]
+            ];
+            break;
+    }
+
+    // Vystup JSON-LD
+    echo "\n  <!-- Schema.org Structured Data -->\n";
+    echo "  <script type=\"application/ld+json\">\n";
+    echo "  " . json_encode($localBusiness, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+    echo "\n  </script>\n";
+
+    echo "  <script type=\"application/ld+json\">\n";
+    echo "  " . json_encode($services, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+    echo "\n  </script>\n";
+
+    echo "  <script type=\"application/ld+json\">\n";
+    echo "  " . json_encode($website, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+    echo "\n  </script>\n";
+
+    if ($breadcrumbs !== null) {
+        echo "  <script type=\"application/ld+json\">\n";
+        echo "  " . json_encode($breadcrumbs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        echo "\n  </script>\n";
+    }
+}
+
+/**
+ * Vykresli FAQ Schema.org pro zobrazeni v Google vysledcich
+ *
+ * @param string $stranka Nazev stranky
+ */
+function renderFaqSchema($stranka = 'index') {
+    // FAQ otazky a odpovedi pro jednotlive stranky
+    $faqData = [
+        'index' => [
+            [
+                'otazka' => 'Kolik stoji oprava sedacky?',
+                'odpoved' => 'Cena opravy sedacky zacina od 110 EUR za diagnostiku. Konkretni cena zavisi na typu poskozeni a rozsahu opravy. Oprava kozene sedacky stoji od 205 EUR, oprava mechanismu od 45 EUR. Nabizime bezplatnou kalkulaci ceny.'
+            ],
+            [
+                'otazka' => 'Jak dlouho trva oprava sedacky nebo kresla?',
+                'odpoved' => 'Standardni oprava sedacky nebo kresla trva 2-4 tydny. Slozitejsi opravy jako kompletni precalouneni mohou trvat 4-6 tydnu. Expresni opravy jsou mozne za priplatek.'
+            ],
+            [
+                'otazka' => 'Opravujete i jine znacky nez Natuzzi?',
+                'odpoved' => 'Ano, opravujeme vsechny znacky luxusniho nabytku. Specializujeme se na Natuzzi, ale opravujeme take sedacky a kresla jinych vyrobcu - kozene i latkove.'
+            ],
+            [
+                'otazka' => 'Poskytujete servis v celem Cesku?',
+                'odpoved' => 'Ano, poskytujeme servis po cele Ceske republice. Svoz nabytku zajistujeme z Prahy, Brna, Ostravy, Plzne a dalsich mest. Nabidka zahrnuje i Slovensko.'
+            ],
+            [
+                'otazka' => 'Jak objednat opravu sedacky?',
+                'odpoved' => 'Opravu sedacky muzete objednat online pres formular na nasem webu, telefonicky na +420 725 965 826 nebo emailem na reklamace@wgs-service.cz. Odpovime do 24 hodin.'
+            ],
+            [
+                'otazka' => 'Jak vycistit kozenou sedacku doma?',
+                'odpoved' => 'Pro beznou udrzbu kozene sedacky pouzijte vlhky hadrik a specialni pripravek na kuzi. Vyhnete se agresivnim cisticum. Pro hluboke cisteni a renovaci doporucujeme profesionalni servis.'
+            ]
+        ],
+        'cenik' => [
+            [
+                'otazka' => 'Kolik stoji oprava kozene sedacky?',
+                'odpoved' => 'Oprava kozene sedacky zacina od 205 EUR. Cena zahrnuje diagnostiku, opravu a finalni upravu. Presna cena zavisi na rozsahu poskozeni - praskliny, odreni, ci celkova renovace.'
+            ],
+            [
+                'otazka' => 'Kolik stoji cisteni sedacky?',
+                'odpoved' => 'Profesionalni cisteni sedacky stoji od 80 EUR pro latkove sedacky a od 120 EUR pro kozene sedacky. Cena zahrnuje hluboke cisteni, odstraneni skvrn a osetreni materialu.'
+            ],
+            [
+                'otazka' => 'Kolik stoji oprava mechanismu sedacky?',
+                'odpoved' => 'Oprava mechanismu sedacky (relax, vyklapeciho systemu) stoji od 45 EUR za praci. K tomu se prictia naklady na nahradni dily podle typu mechanismu.'
+            ],
+            [
+                'otazka' => 'Kolik stoji precalouneni sedacky?',
+                'odpoved' => 'Precalouneni sedacky zacina od 205 EUR za praci. Celkova cena zahrnuje material (latka nebo kuze), praci a dopravu. Presnou kalkulaci vam pripravime zdarma.'
+            ],
+            [
+                'otazka' => 'Je diagnostika zdarma?',
+                'odpoved' => 'Diagnostika stoji 110 EUR a zahrnuje kompletni posouzeni stavu nabytku a detailni cenovou kalkulaci opravy. Pri realizaci opravy se cena diagnostiky odecita z celkove ceny.'
+            ]
+        ],
+        'novareklamace' => [
+            [
+                'otazka' => 'Jak podat reklamaci na nabytek Natuzzi?',
+                'odpoved' => 'Reklamaci nabytku Natuzzi podejte pres nas online formular. Vyplnte kontaktni udaje, popis problemu a prilozte fotografie. Reklamaci vyridime jako autorizovany servis.'
+            ],
+            [
+                'otazka' => 'Co potrebuji k objednani opravy?',
+                'odpoved' => 'K objednani opravy potrebujete: kontaktni udaje, adresu pro svoz nabytku, popis problemu a idealne fotografie poskozeni. Pomaha take cislo faktury nebo zaruky.'
+            ],
+            [
+                'otazka' => 'Jak rychle odpovite na objednavku?',
+                'odpoved' => 'Na vsechny objednavky odpovidame do 24 hodin v pracovni dny. Obdrzite potvrzeni objednavky a navrh terminu svozu ci navstevy technika.'
+            ],
+            [
+                'otazka' => 'Musim byt doma pri svozu nabytku?',
+                'odpoved' => 'Ano, pri svozu nabytku je nutna pritomnost dospele osoby, ktera preda nabytek a podepise predavaci protokol. Termin svozu si domluvime predem.'
+            ]
+        ],
+        'aktuality' => [
+            [
+                'otazka' => 'Kde najdu showroom Natuzzi v Cesku?',
+                'odpoved' => 'Showroomy Natuzzi najdete v Praze (KARE Design, Centrum nabytku) a v Brne. Aktualni seznam a oteviraci doby najdete v nasich aktualitach nebo na oficialnim webu Natuzzi.'
+            ],
+            [
+                'otazka' => 'Jak casto udrzovat kozenou sedacku?',
+                'odpoved' => 'Kozenou sedacku doporucujeme cistit a osetrit specialnim pripravkem kazdych 3-6 mesicu. Pravidelna udrzba prodluzuje zivotnost kuze a zachovava jeji vzhled.'
+            ],
+            [
+                'otazka' => 'Jake jsou trendy v designu sedacek?',
+                'odpoved' => 'Aktualni trendy zahrnuji modularni sedacky, minimalisticky design, prirodni materialy a neutralni barvy. Natuzzi nabizi kolekce kombinujici italsky design s modernimi trendy.'
+            ]
+        ]
+    ];
+
+    // Ziskat FAQ pro danou stranku
+    $faq = $faqData[$stranka] ?? $faqData['index'];
+
+    // Sestavit FAQ schema
+    $faqSchema = [
+        "@context" => "https://schema.org",
+        "@type" => "FAQPage",
+        "mainEntity" => []
+    ];
+
+    foreach ($faq as $polozka) {
+        $faqSchema['mainEntity'][] = [
+            "@type" => "Question",
+            "name" => $polozka['otazka'],
+            "acceptedAnswer" => [
+                "@type" => "Answer",
+                "text" => $polozka['odpoved']
+            ]
+        ];
+    }
+
+    // Vystup JSON-LD
+    echo "\n  <!-- FAQ Schema.org -->\n";
+    echo "  <script type=\"application/ld+json\">\n";
+    echo "  " . json_encode($faqSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+    echo "\n  </script>\n";
+}
+
+/**
+ * Vrati title pro danou stranku
+ */
+function getSeoTitle($stranka = 'index') {
+    global $seoStranky;
+    return $seoStranky[$stranka]['title'] ?? $seoStranky['index']['title'];
+}
+
+/**
+ * Vrati description pro danou stranku
+ */
+function getSeoDescription($stranka = 'index') {
+    global $seoStranky;
+    return $seoStranky[$stranka]['description'] ?? $seoStranky['index']['description'];
+}
+
+/**
+ * Stara funkce pro zpetnou kompatibilitu
+ */
 if (!function_exists('get_page_seo_meta')) {
-    /**
-     * Vrátí SEO meta data pro konkrétní stránku
-     *
-     * @param string $page Název stránky (basename nebo URI)
-     * @return array ['title' => string, 'description' => string, 'keywords' => string]
-     */
-        /**
-     * Get page seo meta
-     *
-     * @param string $page Page
-     */
-function get_page_seo_meta(string $page = ''): array
-    {
-        // Pokud není zadána stránka, určit z REQUEST_URI
+    function get_page_seo_meta(string $page = ''): array {
+        global $seoStranky;
+
         if (empty($page)) {
             $page = basename($_SERVER['SCRIPT_NAME'] ?? 'index.php');
         }
 
-        // Odstranit .php extension pro snadnější matching
         $pageKey = str_replace('.php', '', $page);
 
-        // Definice SEO meta tagů pro všechny stránky
-        $seoMeta = [
-            // === HLAVNÍ STRÁNKY ===
-            'index' => [
-                'title' => 'White Glove Service | Profesionální správa reklamací',
-                'description' => 'WGS Service - komplexní správa reklamací, protokolů a dokumentace. Moderní řešení pro efektivní workflow.',
-                'keywords' => 'reklamace, správa reklamací, protokoly, WGS, white glove service'
-            ],
-
-            'login' => [
-                'title' => 'Přihlášení | WGS Service',
-                'description' => 'Přihlaste se do systému White Glove Service pro správu reklamací a protokolů.',
-                'keywords' => 'přihlášení, login, WGS'
-            ],
-
-            'admin' => [
-                'title' => 'Administrace | WGS Service',
-                'description' => 'Administrativní rozhraní pro správu systému WGS Service.',
-                'keywords' => 'admin, administrace, správa'
-            ],
-
-            // === PSA KALKULÁTOR ===
-            'psa-kalkulator' => [
-                'title' => 'PSA Kalkulátor | White Glove Service',
-                'description' => 'Online kalkulátor pro výpočet PSA hodnot. Rychlý a přesný nástroj pro profesionály.',
-                'keywords' => 'PSA, kalkulátor, výpočet'
-            ],
-
-            'psa' => [
-                'title' => 'PSA Kalkulátor | White Glove Service',
-                'description' => 'Online kalkulátor pro výpočet PSA hodnot. Rychlý a přesný nástroj pro profesionály.',
-                'keywords' => 'PSA, kalkulátor, výpočet'
-            ],
-
-            // === REKLAMACE ===
-            'reklamace' => [
-                'title' => 'Reklamace | WGS Service',
-                'description' => 'Správa a evidence reklamací v systému White Glove Service.',
-                'keywords' => 'reklamace, evidence, správa'
-            ],
-
-            'seznam' => [
-                'title' => 'Seznam reklamací | WGS Service',
-                'description' => 'Přehled všech reklamací a jejich stavu v systému WGS.',
-                'keywords' => 'reklamace, seznam, přehled'
-            ],
-
-            // === PROTOKOLY ===
-            'protokol' => [
-                'title' => 'Protokol | WGS Service',
-                'description' => 'Správa a tvorba protokolů v systému White Glove Service.',
-                'keywords' => 'protokol, dokumentace, evidence'
-            ],
-
-            // === UTILITY & DIAGNOSTIC (NOINDEX) ===
-            'diagnostic_tool' => [
-                'title' => 'Diagnostic Tool | WGS Service',
-                'description' => 'Internal diagnostic tool for system administrators.',
-                'keywords' => 'diagnostic, admin, tool',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'diagnostic_web' => [
-                'title' => 'Web Diagnostics | WGS Service',
-                'description' => 'Internal web diagnostic tool.',
-                'keywords' => 'diagnostic, web, admin',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'diagnostic_access_control' => [
-                'title' => 'Access Control Diagnostics | WGS Service',
-                'description' => 'Internal access control diagnostic tool.',
-                'keywords' => 'diagnostic, access control, admin',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'quick_debug' => [
-                'title' => 'Quick Debug | WGS Service',
-                'description' => 'Internal debugging tool.',
-                'keywords' => 'debug, admin, tool',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            // === API ENDPOINTS (NOINDEX) ===
-            'admin_api' => [
-                'title' => 'Admin API | WGS Service',
-                'description' => 'Internal API endpoint.',
-                'keywords' => 'api, admin',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'control_center_api' => [
-                'title' => 'Control Center API | WGS Service',
-                'description' => 'Internal API endpoint.',
-                'keywords' => 'api, control center',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'notification_api' => [
-                'title' => 'Notification API | WGS Service',
-                'description' => 'Internal API endpoint.',
-                'keywords' => 'api, notifications',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'protokol_api' => [
-                'title' => 'Protokol API | WGS Service',
-                'description' => 'Internal API endpoint.',
-                'keywords' => 'api, protokol',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'statistiky_api' => [
-                'title' => 'Statistiky API | WGS Service',
-                'description' => 'Internal API endpoint.',
-                'keywords' => 'api, statistiky',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            // === UTILITY PAGES (NOINDEX) ===
-            'phpinfo_test' => [
-                'title' => 'PHP Info | WGS Service',
-                'description' => 'PHP configuration information.',
-                'keywords' => 'php, info, admin',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'health' => [
-                'title' => 'Health Check | WGS Service',
-                'description' => 'System health monitoring endpoint.',
-                'keywords' => 'health, monitoring',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'logout' => [
-                'title' => 'Odhlášení | WGS Service',
-                'description' => 'Odhlášení ze systému WGS Service.',
-                'keywords' => 'logout, odhlášení',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            // === PHOTO UTILITIES (NOINDEX) ===
-            'check_photos_db' => [
-                'title' => 'Photo Database Check | WGS Service',
-                'description' => 'Internal photo database diagnostic tool.',
-                'keywords' => 'photos, database, diagnostic',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'copy_photo' => [
-                'title' => 'Copy Photo Utility | WGS Service',
-                'description' => 'Internal photo copy utility.',
-                'keywords' => 'photos, copy, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'count_photos' => [
-                'title' => 'Photo Counter | WGS Service',
-                'description' => 'Internal photo counting utility.',
-                'keywords' => 'photos, count, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'photos_list' => [
-                'title' => 'Photos List | WGS Service',
-                'description' => 'Internal photo listing utility.',
-                'keywords' => 'photos, list, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'photos_test' => [
-                'title' => 'Photos Test | WGS Service',
-                'description' => 'Internal photo testing utility.',
-                'keywords' => 'photos, test, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            // === DATABASE UTILITIES (NOINDEX) ===
-            'db_test' => [
-                'title' => 'Database Test | WGS Service',
-                'description' => 'Internal database testing utility.',
-                'keywords' => 'database, test, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'create_missing_tables' => [
-                'title' => 'Create Tables | WGS Service',
-                'description' => 'Internal database setup utility.',
-                'keywords' => 'database, tables, setup',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'show_table_structure' => [
-                'title' => 'Table Structure | WGS Service',
-                'description' => 'Internal database structure viewer.',
-                'keywords' => 'database, structure, admin',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            // === SMTP UTILITIES (NOINDEX) ===
-            'add_smtp_task' => [
-                'title' => 'Add SMTP Task | WGS Service',
-                'description' => 'Internal SMTP task utility.',
-                'keywords' => 'smtp, task, admin',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'check_and_add_smtp_task' => [
-                'title' => 'Check SMTP Task | WGS Service',
-                'description' => 'Internal SMTP task checker.',
-                'keywords' => 'smtp, task, check',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'run_add_smtp_task' => [
-                'title' => 'Run SMTP Task | WGS Service',
-                'description' => 'Internal SMTP task runner.',
-                'keywords' => 'smtp, task, run',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            // === FIX UTILITIES (NOINDEX) ===
-            'fix_photo_ids' => [
-                'title' => 'Fix Photo IDs | WGS Service',
-                'description' => 'Internal photo ID repair utility.',
-                'keywords' => 'photos, fix, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'fix_photo_path' => [
-                'title' => 'Fix Photo Paths | WGS Service',
-                'description' => 'Internal photo path repair utility.',
-                'keywords' => 'photos, fix, paths',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'fix_visibility' => [
-                'title' => 'Fix Visibility | WGS Service',
-                'description' => 'Internal visibility repair utility.',
-                'keywords' => 'visibility, fix, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'cleanup_history_record' => [
-                'title' => 'Cleanup History | WGS Service',
-                'description' => 'Internal history cleanup utility.',
-                'keywords' => 'cleanup, history, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'verify_and_cleanup' => [
-                'title' => 'Verify & Cleanup | WGS Service',
-                'description' => 'Internal verification and cleanup utility.',
-                'keywords' => 'verify, cleanup, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            // === TESTING UTILITIES (NOINDEX) ===
-            'api_test' => [
-                'title' => 'API Test | WGS Service',
-                'description' => 'Internal API testing utility.',
-                'keywords' => 'api, test, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'path_test' => [
-                'title' => 'Path Test | WGS Service',
-                'description' => 'Internal path testing utility.',
-                'keywords' => 'path, test, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'role_testing_tool' => [
-                'title' => 'Role Testing Tool | WGS Service',
-                'description' => 'Internal role testing utility.',
-                'keywords' => 'roles, testing, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'whereami' => [
-                'title' => 'Where Am I | WGS Service',
-                'description' => 'Internal location testing utility.',
-                'keywords' => 'location, test, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            // === MIGRATION UTILITIES (NOINDEX) ===
-            'migrate_photos' => [
-                'title' => 'Migrate Photos | WGS Service',
-                'description' => 'Internal photo migration utility.',
-                'keywords' => 'photos, migration, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'insert_photo' => [
-                'title' => 'Insert Photo | WGS Service',
-                'description' => 'Internal photo insertion utility.',
-                'keywords' => 'photos, insert, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'create_upload_dir' => [
-                'title' => 'Create Upload Dir | WGS Service',
-                'description' => 'Internal directory creation utility.',
-                'keywords' => 'upload, directory, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'find_all_photos' => [
-                'title' => 'Find All Photos | WGS Service',
-                'description' => 'Internal photo finder utility.',
-                'keywords' => 'photos, find, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'last_claim_id' => [
-                'title' => 'Last Claim ID | WGS Service',
-                'description' => 'Internal claim ID utility.',
-                'keywords' => 'claim, id, utility',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'diagnostic_reklamace' => [
-                'title' => 'Diagnostika Reklamací | WGS Service',
-                'description' => 'Internal reklamace diagnostic tool.',
-                'keywords' => 'diagnostic, reklamace, admin',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'admin_key_manager' => [
-                'title' => 'Admin Key Manager | WGS Service',
-                'description' => 'Internal admin key management.',
-                'keywords' => 'admin, keys, security',
-                'robots' => 'noindex, nofollow'
-            ],
-
-            'php_copy_http' => [
-                'title' => 'PHP Copy HTTP | WGS Service',
-                'description' => 'Internal HTTP copy utility.',
-                'keywords' => 'php, copy, http',
-                'robots' => 'noindex, nofollow'
-            ],
-        ];
-
-        // Default meta tags pokud stránka není definovaná
-        $default = [
-            'title' => 'White Glove Service | Profesionální správa reklamací',
-            'description' => 'WGS Service - moderní systém pro správu reklamací, protokolů a dokumentace.',
-            'keywords' => 'WGS, reklamace, protokoly, správa',
-            'robots' => 'index, follow'
-        ];
-
-        // Vrátit meta data pro stránku nebo default
-        $meta = $seoMeta[$pageKey] ?? $default;
-
-        // Přidat robots pokud není definováno
-        if (!isset($meta['robots'])) {
-            $meta['robots'] = 'index, follow';
+        if (isset($seoStranky[$pageKey])) {
+            return [
+                'title' => $seoStranky[$pageKey]['title'],
+                'description' => $seoStranky[$pageKey]['description'],
+                'keywords' => $seoStranky[$pageKey]['keywords'],
+                'robots' => 'index, follow'
+            ];
         }
 
-        return $meta;
+        return [
+            'title' => 'White Glove Service | Servis nabytku Natuzzi',
+            'description' => 'Profesionalni servis a opravy luxusniho nabytku Natuzzi.',
+            'keywords' => 'servis Natuzzi, oprava sedacky, oprava nabytku',
+            'robots' => 'index, follow'
+        ];
     }
 }
-

@@ -70,6 +70,7 @@ $prefillFields = [
     'address' => '',
     'phone' => '',
     'email' => '',
+    'typ_zakaznika' => '', // IČO nebo fyzická osoba
     'brand' => '',
     'model' => '',
     'description' => '',
@@ -95,14 +96,15 @@ if (is_string($requestedId)) {
 if ($lookupValue !== null) {
     try {
         $pdo = getDbConnection();
+
         $stmt = $pdo->prepare(
             "SELECT r.*, u.name as created_by_name
              FROM wgs_reklamace r
              LEFT JOIN wgs_users u ON r.created_by = u.id
-             WHERE r.reklamace_id = :value OR r.cislo = :value OR r.id = :value
+             WHERE r.reklamace_id = :val1 OR r.cislo = :val2 OR r.id = :val3
              LIMIT 1"
         );
-        $stmt->execute([':value' => $lookupValue]);
+        $stmt->execute([':val1' => $lookupValue, ':val2' => $lookupValue, ':val3' => $lookupValue]);
         $record = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($record) {
@@ -133,6 +135,7 @@ if ($lookupValue !== null) {
                 'address' => $record['adresa'] ?? $address,
                 'phone' => $record['telefon'] ?? '',
                 'email' => $record['email'] ?? '',
+                'typ_zakaznika' => $record['typ_zakaznika'] ?? '',
 
                 // Produktové údaje
                 'brand' => $record['created_by_name'] ?? $record['prodejce'] ?? '', // Zadavatel = kdo vytvořil zakázku
@@ -176,10 +179,10 @@ if ($initialBootstrapData) {
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <!-- Logger Utility (must be loaded first) -->
-<script src="assets/js/logger.js"></script>
+<script src="assets/js/logger.min.js"></script>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -205,30 +208,31 @@ if ($initialBootstrapData) {
 <!-- Google Fonts - Natuzzi style -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Preload critical CSS -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
-  <link rel="preload" href="assets/css/protokol.css" as="style">
+  <link rel="preload" href="assets/css/protokol.min.css" as="style">
 
   <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/protokol.css">
-  <link rel="stylesheet" href="assets/css/protokol-mobile-fixes.css">
+  <link rel="stylesheet" href="assets/css/protokol.min.css">
+  <!-- protokol-mobile-fixes.css sloučen do protokol.min.css (Step 48) -->
+  <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <link rel="stylesheet" href="assets/css/cenik.min.css">
-  <link rel="stylesheet" href="assets/css/protokol-calculator-modal.css">
-  <!-- mobile-responsive.css odstraněn - protokol.css má vlastní mobilní styly -->
-
-  <!-- Analytics Tracker -->
-  <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
+  <link rel="stylesheet" href="assets/css/protokol-calculator-modal.min.css">
+  <!-- Univerzální tmavý styl pro všechny modály -->
+  <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
+  <!-- mobile-responsive.css odstraněn - protokol.min.css má vlastní mobilní styly -->
 </head>
 
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 <!-- ČERNÁ HORNÍ PANEL -->
 
-<main>
+<main id="main-content">
 <div class="wrapper">
   <div class="header">
     <div>WHITE GLOVE SERVICE</div>
@@ -237,14 +241,14 @@ if ($initialBootstrapData) {
 
   <!-- Rozbalovací sekce zákaznických dat -->
   <div class="customer-info-collapsible">
-    <div class="customer-info-header" id="customerInfoToggle">
+    <div class="customer-info-header" id="customerInfoToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="customerInfoContent" aria-label="Rozbalit informace o zákazníkovi" data-storage-key="customer-info-expanded">
       <span class="customer-info-name" id="customerInfoName"><?= wgs_escape($prefillFields['customer']) ?: 'Zákazník' ?></span>
-      <svg class="customer-info-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg class="customer-info-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <polyline points="6 9 12 15 18 9"></polyline>
       </svg>
     </div>
 
-    <div class="customer-info-content" id="customerInfoContent">
+    <div class="customer-info-content" id="customerInfoContent" role="region" aria-labelledby="customerInfoToggle">
       <div class="two-col-table">
         <div class="col">
           <table>
@@ -254,6 +258,10 @@ if ($initialBootstrapData) {
             <tr><td class="label">Adresa<span class="en-label">Address</span></td><td><input type="text" id="address" value="<?= wgs_escape($prefillFields['address']); ?>" readonly></td></tr>
             <tr><td class="label">Telefon<span class="en-label">Phone</span></td><td><input type="tel" id="phone" value="<?= wgs_escape($prefillFields['phone']); ?>" readonly></td></tr>
             <tr><td class="label">Email<span class="en-label">Email</span></td><td><input type="email" id="email" value="<?= wgs_escape($prefillFields['email']); ?>" readonly></td></tr>
+            <tr><td class="label">Typ zákazníka<span class="en-label">Customer type</span></td><td style="position: relative; padding-bottom: 18px;">
+              <input type="text" id="typ-zakaznika" value="<?= wgs_escape($prefillFields['typ_zakaznika']); ?>" readonly>
+<span id="ico-upozorneni" class="ico-upozorneni" style="display: <?= (strpos($prefillFields['typ_zakaznika'] ?? '', 'IČO') !== false) ? 'block' : 'none'; ?>; position: absolute; left: 6px; bottom: 2px; font-size: 0.7em; color: #c00; white-space: nowrap;" data-lang-cs="Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně" data-lang-en="The buyer has been informed that the 30-day consumer period does not apply; processing will be done promptly" data-lang-it="L'acquirente è stato informato che non si applica il periodo di 30 giorni; l'elaborazione avverrà tempestivamente">Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně</span>
+            </td></tr>
           </table>
         </div>
 
@@ -330,12 +338,19 @@ if ($initialBootstrapData) {
   </div>
 
   <div class="section-title" data-lang-cs="Podpis zákazníka" data-lang-en="Customer signature" data-lang-it="Firma del cliente">Podpis zákazníka<span class="en-label">Customer signature</span></div>
-  <canvas id="signature-pad"></canvas>
-  <div class="signature-actions">
-    <div class="signature-label" data-lang-cs="Podepište se prstem nebo myší" data-lang-en="Sign with finger or mouse" data-lang-it="Firma con dito o mouse">Podepište se prstem nebo myší</div>
-    <button class="btn-clear" type="button" data-action="clearSignaturePad" data-lang-cs="Vymazat podpis" data-lang-en="Clear signature" data-lang-it="Cancella firma">Vymazat podpis</button>
-  </div>
+
+  <!-- Tlačítko pro otevření modalu se souhrnem pro zákazníka -->
+  <button type="button" class="btn-podepsat-protokol" id="btnPodepsatProtokol" data-lang-cs="Podepsat protokol" data-lang-en="Sign protocol" data-lang-it="Firma protocollo">Podepsat protokol</button>
+
+  <!-- Pouze zobrazení podpisu (read-only) -->
+  <canvas id="signature-pad" class="signature-display"></canvas>
   <div class="gdpr-clause" style="margin-top: 10px; padding: 8px; font-size: 8px; line-height: 1.4; color: #666; border-top: 1px solid #ddd; text-align: justify;">
+    <span data-lang-cs="Podpisem stvrzuji, že jsem byl(a) seznámen(a) s obsahem." data-lang-en="By signing, I confirm that I have been informed of the content." data-lang-it="Con la firma confermo di essere stato informato del contenuto.">Podpisem stvrzuji, že jsem byl(a) seznámen(a) s obsahem.</span>
+    <!-- Text prodloužení lhůty - zobrazí se po potvrzení podpisu s checkboxem -->
+    <div class="prodlouzeni-lhuty-hlavni" id="prodlouzeniLhutyHlavni" style="display: none; color: #cc0000; margin-top: 8px;">
+      <span data-lang-cs="K úplnému dořešení reklamace je nezbytné objednat náhradní díly od výrobce. Zákazník je informován, že dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Zákazník tímto výslovně souhlasí s prodloužením lhůty pro vyřízení reklamace nad rámec zákonné lhůty, a to do doby dodání potřebných dílů a provedení opravy. Servis se zavazuje provést opravu a reklamaci uzavřít bez zbytečného odkladu po doručení dílů." data-lang-en="To fully resolve the complaint, it is necessary to order spare parts from the manufacturer. The customer is informed that the delivery time of parts is beyond the control of the service and may be extended (approximately 3-4 weeks, in extreme cases even longer). The customer hereby expressly agrees to extend the complaint resolution deadline beyond the statutory period until the necessary parts are delivered and the repair is completed. The service undertakes to carry out the repair and close the complaint without undue delay after receiving the parts." data-lang-it="Per risolvere completamente il reclamo, è necessario ordinare i pezzi di ricambio dal produttore. Il cliente è informato che i tempi di consegna dei pezzi sono al di fuori del controllo del servizio e possono essere prolungati (circa 3-4 settimane, in casi estremi anche di più). Il cliente accetta espressamente di prorogare il termine per la risoluzione del reclamo oltre il termine legale, fino alla consegna dei pezzi necessari e al completamento della riparazione. Il servizio si impegna a effettuare la riparazione e a chiudere il reclamo senza indebito ritardo dopo la ricezione dei pezzi.">K úplnému dořešení reklamace je nezbytné objednat náhradní díly od výrobce. Zákazník je informován, že dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Zákazník tímto výslovně souhlasí s prodloužením lhůty pro vyřízení reklamace nad rámec zákonné lhůty, a to do doby dodání potřebných dílů a provedení opravy. Servis se zavazuje provést opravu a reklamaci uzavřít bez zbytečného odkladu po doručení dílů.</span>
+    </div>
+    <br><br>
     <strong>Ochrana osobních údajů (GDPR):</strong> Podpisem tohoto protokolu souhlasíte se zpracováním Vašich osobních údajů společností White Glove Service za účelem poskytování servisních služeb, komunikace s výrobcem, prodejcem a dalšími techniky. Vaše údaje budou zpracovávány v souladu s GDPR a budou použity pouze pro účely vyřízení této reklamace. Máte právo na přístup k údajům, jejich opravu nebo výmaz. Více na www.wgs-service.cz/gdpr
   </div>
 
@@ -349,12 +364,13 @@ if ($initialBootstrapData) {
   <div id="notif" class="notif"></div>
 </div>
 
-<!-- Calculator Modal -->
-<div class="calculator-modal-overlay" id="calculatorModalOverlay" style="display: none;">
+<!-- Calculator Modal - Alpine.js (Step 40) -->
+<div class="calculator-modal-overlay" id="calculatorModalOverlay" style="display: none;"
+     x-data="calculatorModal" x-init="init" @click="overlayClick">
   <div class="calculator-modal-container">
     <div class="calculator-modal-header">
       <h3>Kalkulace ceny servisu</h3>
-      <button type="button" class="calculator-modal-close" id="calculatorModalClose">×</button>
+      <button type="button" class="calculator-modal-close" id="calculatorModalClose" @click="close" aria-label="Zavřít">×</button>
     </div>
     <div class="calculator-modal-body" id="calculatorModalBody">
       <!-- Kalkulačka se vloží dynamicky -->
@@ -362,15 +378,16 @@ if ($initialBootstrapData) {
   </div>
 </div>
 
-<!-- PDF Preview Modal -->
-<div class="pdf-preview-overlay" id="pdfPreviewOverlay" style="display: none;">
+<!-- PDF Preview Modal - Alpine.js (Step 42) -->
+<div class="pdf-preview-overlay" id="pdfPreviewOverlay" style="display: none;"
+     x-data="pdfPreviewModal" x-init="init" @click="overlayClick">
   <div class="pdf-preview-container">
     <div class="pdf-preview-header">
       <h3 class="pdf-preview-title" data-lang-cs="Náhled PDF" data-lang-en="PDF Preview" data-lang-it="Anteprima PDF">Náhled PDF</h3>
       <div class="pdf-preview-actions">
         <!-- Tlačítko pro export (sdílení/stažení) -->
         <button class="pdf-action-btn pdf-share-btn" id="pdfShareBtn" data-lang-cs-title="Sdílet / Stáhnout" data-lang-en-title="Share / Download" data-lang-it-title="Condividi / Scarica" title="Sdílet / Stáhnout" style="display: none;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
             <polyline points="16 6 12 2 8 6"></polyline>
             <line x1="12" y1="2" x2="12" y2="15"></line>
@@ -379,15 +396,15 @@ if ($initialBootstrapData) {
 
         <!-- Tlačítko pro odeslání zákazníkovi -->
         <button class="pdf-action-btn pdf-send-btn" id="pdfSendBtn" data-lang-cs-title="Odeslat zákazníkovi" data-lang-en-title="Send to Customer" data-lang-it-title="Invia al Cliente" title="Odeslat zákazníkovi" style="display: none;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <line x1="22" y1="2" x2="11" y2="13"></line>
             <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
           </svg>
         </button>
 
-        <!-- Tlačítko zavřít (vždy viditelné) -->
-        <button class="pdf-action-btn pdf-close-btn" id="pdfCloseBtn" data-lang-cs-title="Zavřít" data-lang-en-title="Close" data-lang-it-title="Chiudi" title="Zavřít">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <!-- Tlačítko zavřít (vždy viditelné) - Alpine.js (Step 42) -->
+        <button class="pdf-action-btn pdf-close-btn" id="pdfCloseBtn" data-lang-cs-title="Zavřít" data-lang-en-title="Close" data-lang-it-title="Chiudi" title="Zavřít" @click="close">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -395,100 +412,115 @@ if ($initialBootstrapData) {
       </div>
     </div>
     <div class="pdf-preview-body">
-      <iframe id="pdfPreviewFrame" class="pdf-preview-frame"></iframe>
+      <iframe id="pdfPreviewFrame" class="pdf-preview-frame" title="Náhled PDF protokolu"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- Modal pro schválení zákazníkem - Alpine.js (Step 39) -->
+<div class="zakaznik-schvaleni-overlay" id="zakaznikSchvaleniOverlay" style="display: none;"
+     x-data="zakaznikSchvaleniModal" x-init="init" @click="overlayClick">
+  <div class="zakaznik-schvaleni-container">
+    <div class="zakaznik-schvaleni-header">
+      <h2 data-lang-cs="Souhrn protokolu" data-lang-en="Protocol Summary" data-lang-it="Riepilogo protocollo">Souhrn protokolu</h2>
+      <button type="button" class="zakaznik-schvaleni-close" id="zakaznikSchvaleniClose" @click="close" aria-label="Zavřít">×</button>
+    </div>
+
+    <div class="zakaznik-schvaleni-body">
+      <!-- Text návrhu opravy -->
+      <div class="zakaznik-schvaleni-sekce">
+        <label data-lang-cs="Návrh opravy:" data-lang-en="Repair proposal:" data-lang-it="Proposta di riparazione:">Návrh opravy:</label>
+        <div class="zakaznik-schvaleni-text" id="zakaznikSchvaleniText">
+          <!-- Text se naplní z repair-cz -->
+        </div>
+      </div>
+
+      <!-- Souhrn důležitých informací -->
+      <div class="zakaznik-schvaleni-sekce">
+        <label data-lang-cs="Informace o servisu:" data-lang-en="Service information:" data-lang-it="Informazioni servizio:">Informace o servisu:</label>
+        <table class="zakaznik-schvaleni-tabulka">
+          <tr>
+            <td class="tabulka-label" data-lang-cs="Platí zákazník?" data-lang-en="Customer pays?" data-lang-it="Paga il cliente?">Platí zákazník?</td>
+            <td class="tabulka-hodnota" id="souhrn-plati-zakaznik">-</td>
+          </tr>
+          <tr>
+            <td class="tabulka-label" data-lang-cs="Datum podpisu" data-lang-en="Signature date" data-lang-it="Data firma">Datum podpisu</td>
+            <td class="tabulka-hodnota" id="souhrn-datum-podpisu">-</td>
+          </tr>
+          <tr>
+            <td class="tabulka-label" data-lang-cs="Vyřešeno?" data-lang-en="Solved?" data-lang-it="Risolto?">Vyřešeno?</td>
+            <td class="tabulka-hodnota" id="souhrn-vyreseno">-</td>
+          </tr>
+          <tr>
+            <td class="tabulka-label" data-lang-cs="Nutné vyjádření prodejce" data-lang-en="Dealer statement needed" data-lang-it="Dichiarazione rivenditore">Nutné vyjádření prodejce</td>
+            <td class="tabulka-hodnota" id="souhrn-prodejce">-</td>
+          </tr>
+          <tr>
+            <td class="tabulka-label" data-lang-cs="Poškození technikem?" data-lang-en="Damage by technician?" data-lang-it="Danno tecnico?">Poškození technikem?</td>
+            <td class="tabulka-hodnota" id="souhrn-poskozeni">-</td>
+          </tr>
+          <tr>
+            <td colspan="2" class="tabulka-checkbox-row">
+              <label class="checkbox-prodlouzeni-lhuty">
+                <input type="checkbox" id="checkboxProdlouzeniLhuty">
+                <span data-lang-cs="Souhlasím s uvedeným prodloužením lhůty pro vyřízení reklamace" data-lang-en="I agree to the stated extension of the complaint resolution deadline" data-lang-it="Accetto la proroga indicata del termine per la risoluzione del reclamo">Souhlasím s uvedeným prodloužením lhůty pro vyřízení reklamace</span>
+              </label>
+            </td>
+          </tr>
+        </table>
+        <!-- Text prodloužení lhůty - zobrazí se při zaškrtnutí checkboxu -->
+        <div class="prodlouzeni-lhuty-text" id="prodlouzeniLhutyText" style="display: none;">
+          <span data-lang-cs="K úplnému dořešení reklamace je nezbytné objednat náhradní díly od výrobce. Zákazník je informován, že dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Zákazník tímto výslovně souhlasí s prodloužením lhůty pro vyřízení reklamace nad rámec zákonné lhůty, a to do doby dodání potřebných dílů a provedení opravy. Servis se zavazuje provést opravu a reklamaci uzavřít bez zbytečného odkladu po doručení dílů." data-lang-en="To fully resolve the complaint, it is necessary to order spare parts from the manufacturer. The customer is informed that the delivery time of parts is beyond the control of the service and may be extended (approximately 3-4 weeks, in extreme cases even longer). The customer hereby expressly agrees to extend the complaint resolution deadline beyond the statutory period until the necessary parts are delivered and the repair is completed. The service undertakes to carry out the repair and close the complaint without undue delay after receiving the parts." data-lang-it="Per risolvere completamente il reclamo, è necessario ordinare i pezzi di ricambio dal produttore. Il cliente è informato che i tempi di consegna dei pezzi sono al di fuori del controllo del servizio e possono essere prolungati (circa 3-4 settimane, in casi estremi anche di più). Il cliente accetta espressamente di prorogare il termine per la risoluzione del reclamo oltre il termine legale, fino alla consegna dei pezzi necessari e al completamento della riparazione. Il servizio si impegna a effettuare la riparazione e a chiudere il reclamo senza indebito ritardo dopo la ricezione dei pezzi.">K úplnému dořešení reklamace je nezbytné objednat náhradní díly od výrobce. Zákazník je informován, že dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Zákazník tímto výslovně souhlasí s prodloužením lhůty pro vyřízení reklamace nad rámec zákonné lhůty, a to do doby dodání potřebných dílů a provedení opravy. Servis se zavazuje provést opravu a reklamaci uzavřít bez zbytečného odkladu po doručení dílů.</span>
+        </div>
+      </div>
+
+      <!-- Podpisové pole -->
+      <div class="zakaznik-schvaleni-sekce zakaznik-schvaleni-podpis-sekce">
+        <label data-lang-cs="Podpis zákazníka:" data-lang-en="Customer signature:" data-lang-it="Firma cliente:">Podpis zákazníka:</label>
+        <canvas id="zakaznikSchvaleniPad"></canvas>
+        <div class="zakaznik-schvaleni-podpis-akce">
+          <span class="zakaznik-schvaleni-hint" data-lang-cs="Podepište se prstem nebo myší" data-lang-en="Sign with finger or mouse" data-lang-it="Firma con dito o mouse">Podepište se prstem nebo myší</span>
+          <button type="button" class="btn-vymazat-podpis" id="zakaznikVymazatPodpis" data-lang-cs="Vymazat" data-lang-en="Clear" data-lang-it="Cancella">Vymazat</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="zakaznik-schvaleni-footer">
+      <button type="button" class="btn-zrusit" id="zakaznikSchvaleniZrusit" @click="close" data-lang-cs="Zrušit" data-lang-en="Cancel" data-lang-it="Annulla">Zrušit</button>
+      <button type="button" class="btn-pouzit" id="zakaznikSchvaleniPouzit" data-lang-cs="Potvrdit podpis" data-lang-en="Confirm signature" data-lang-it="Conferma firma">Potvrdit podpis</button>
     </div>
   </div>
 </div>
 
 <div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-spinner"></div>
+  <div class="loading-spinner" aria-hidden="true"></div>
   <div class="loading-text" id="loadingText">Načítání...</div>
 </div>
 </main>
 
 <!-- Lokální signature-pad (nahrazuje blokovaný CDN) -->
-<script src="assets/js/signature-pad-simple.js"></script>
-<!-- Fix pro globální scope signaturePad -->
-<script src="assets/js/protokol-signature-fix.js"></script>
+<script src="assets/js/signature-pad-simple.min.js"></script>
+<!-- protokol-signature-fix.js odstraněn - window.signaturePad je nyní v protokol.js (Step 110) -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" defer></script>
 
-<script src="assets/js/csrf-auto-inject.js" defer></script>
-
-<!-- EMERGENCY DIAGNOSTIC SCRIPT -->
-<script>
-(function() {
-  console.log('🚨 EMERGENCY DIAGNOSTICS STARTING...');
-
-  // FORCE HIDE LOADING OVERLAY IMMEDIATELY
-  window.addEventListener('DOMContentLoaded', function() {
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay) {
-      overlay.classList.remove('show');
-      overlay.style.display = 'none';
-      console.log('✅ Loading overlay force-hidden');
-    } else {
-      console.error('❌ Loading overlay NOT FOUND');
-    }
-
-    // Check initial data
-    const dataNode = document.getElementById('initialReklamaceData');
-    if (dataNode) {
-      console.log('✅ initialReklamaceData found');
-      const raw = (dataNode.textContent || dataNode.innerText || '').trim();
-      console.log('📦 Raw data length:', raw.length);
-      console.log('📦 Raw data preview:', raw.substring(0, 200));
-
-      try {
-        const parsed = JSON.parse(raw);
-        console.log('✅ JSON parsed successfully');
-        console.log('📋 Parsed data:', parsed);
-      } catch (e) {
-        console.error('❌ JSON parse failed:', e);
-      }
-    } else {
-      console.error('❌ initialReklamaceData NOT FOUND');
-    }
-
-    // Check all form fields
-    const fieldIds = ['order-number', 'claim-number', 'customer', 'address', 'phone', 'email', 'brand', 'model', 'technician'];
-    console.log('🔍 Checking form fields:');
-    fieldIds.forEach(id => {
-      const field = document.getElementById(id);
-      if (field) {
-        console.log(`  ✅ ${id}: "${field.value}"`);
-      } else {
-        console.error(`  ❌ ${id}: NOT FOUND`);
-      }
-    });
-
-    // Check signature pad
-    const canvas = document.getElementById('signature-pad');
-    if (canvas) {
-      console.log('✅ Signature pad canvas found');
-      console.log('  Canvas size:', canvas.offsetWidth, 'x', canvas.offsetHeight);
-    } else {
-      console.error('❌ Signature pad canvas NOT FOUND');
-    }
-
-    console.log('🚨 EMERGENCY DIAGNOSTICS COMPLETE');
-  });
-})();
-</script>
+<script src="assets/js/csrf-auto-inject.min.js" defer></script>
 
 <!-- External JavaScript -->
-<script src="assets/js/protokol-diagnostic.js"></script>
-<script src="assets/js/protokol-pdf-preview.js" defer></script>
-<script src="assets/js/protokol-customer-collapse.js" defer></script>
-<script src="assets/js/protokol-data-patch.js" defer></script>
-<script src="assets/js/protokol.js" defer></script>
-<script src="assets/js/protokol-fakturace-patch.js" defer></script>
-<!-- Fix pro tlačítka (načíst až po protokol.js) -->
-<script src="assets/js/protokol-buttons-fix.js" defer></script>
+<script src="assets/js/protokol-pdf-preview.min.js" defer></script>
+<script src="assets/js/customer-collapse.min.js" defer></script>
+<script src="assets/js/protokol-data-patch.min.js" defer></script>
+<script src="assets/js/protokol.js?v=20251202" defer></script>
+<!-- protokol-fakturace-patch.js byl sloučen do protokol-data-patch.min.js (Step 47) -->
+<!-- protokol-buttons-fix.js odstraněn - handlery jsou již v protokol.js (Step 109) -->
+<!-- Překlady pro kalkulačku -->
+<script src="assets/js/wgs-translations-cenik.min.js" defer></script>
+<script src="assets/js/language-switcher.min.js" defer></script>
 <!-- Kalkulačka integrace -->
-<script src="assets/js/cenik-calculator.js" defer></script>
-<script src="assets/js/protokol-calculator-integration.js" defer></script>
+<script src="assets/js/cenik-calculator.min.js" defer></script>
+<script src="assets/js/protokol-calculator-integration.min.js" defer></script>
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>

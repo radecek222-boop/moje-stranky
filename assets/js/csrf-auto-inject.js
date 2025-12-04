@@ -44,22 +44,22 @@ async function getCSRFToken() {
                     input.value = data.token;
                 });
                 if (typeof logger !== 'undefined') {
-                    logger.log('✅ CSRF tokens injected');
+                    logger.log('CSRF tokens injected');
                 }
             } else {
-                // ✅ FIX 2: Error handling - token nebyl úspěšně získán
+                // FIX 2: Error handling - token nebyl úspěšně získán
                 console.error('CSRF token fetch failed:', data);
                 showCsrfError('Bezpečnostní token se nepodařilo načíst. Zkontrolujte připojení.');
             }
         })
         .catch(err => {
-            // ✅ FIX 2: Error handling - network error nebo server error
+            // FIX 2: Error handling - network error nebo server error
             console.error('CSRF Error:', err);
             showCsrfError('Bezpečnostní token se nepodařilo načíst. Obnovte stránku.');
         });
 })();
 
-// ✅ FIX 2: Helper funkce pro zobrazení CSRF chyby
+// FIX 2: Helper funkce pro zobrazení CSRF chyby
 function showCsrfError(message) {
     // Pokud už existuje warning, neukládat další
     if (document.getElementById('csrf-warning')) return;
@@ -68,9 +68,9 @@ function showCsrfError(message) {
     warning.id = 'csrf-warning';
     warning.className = 'csrf-error-notification';
     warning.innerHTML = `
-        <strong>⚠️ Bezpečnostní upozornění</strong>
+        <strong>Bezpečnostní upozornění</strong>
         <p>${message}</p>
-        <button onclick="location.reload()">Obnovit stránku</button>
+        <button data-action="reloadPage">Obnovit stránku</button>
     `;
 
     // Inline styly pro univerzální zobrazení
@@ -79,8 +79,8 @@ function showCsrfError(message) {
         top: 20px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 999999;
-        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        z-index: 10003;
+        background: linear-gradient(135deg, #333 0%, #555 100%);
         color: white;
         padding: 20px 25px;
         border-radius: 8px;
@@ -143,4 +143,13 @@ function showCsrfError(message) {
     if (typeof logger !== 'undefined') {
         logger.error('CSRF warning displayed to user');
     }
+}
+
+// ============================================
+// ACTION REGISTRY - Step 115
+// ============================================
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('reloadPage', () => {
+        location.reload();
+    });
 }

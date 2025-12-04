@@ -242,7 +242,7 @@ endif;
     <!-- Header -->
     <?php if (!$directAccess): ?>
     <div class="control-detail-header">
-        <button class="control-detail-back" onclick="window.location.href='admin.php'">
+        <button class="control-detail-back" data-href="admin.php">
             <span>&lt;</span>
             <span>Zpět</span>
         </button>
@@ -323,25 +323,25 @@ endif;
         <div class="console-container">
             <div class="console-header">
                 <div class="console-actions">
-                    <button class="console-btn success" id="btn-run-diagnostics" onclick="runDiagnostics()">
+                    <button class="console-btn success" id="btn-run-diagnostics" data-action="runDiagnostics">
                         Spustit diagnostiku
                     </button>
-                    <button class="console-btn" id="btn-clear" onclick="clearConsole()" disabled>
+                    <button class="console-btn" id="btn-clear" data-action="clearConsole" disabled>
                         Vymazat
                     </button>
-                    <button class="console-btn" id="btn-export" onclick="exportLog()" disabled>
+                    <button class="console-btn" id="btn-export" data-action="exportLog" disabled>
                         Export
                     </button>
-                    <button class="console-btn" onclick="clearCacheMaintenance()" title="Vymazat cache">
+                    <button class="console-btn" data-action="clearCacheMaintenance" title="Vymazat cache">
                         Cache
                     </button>
-                    <button class="console-btn" onclick="optimizeDatabaseMaintenance()" title="Optimalizovat databázi">
+                    <button class="console-btn" data-action="optimizeDatabaseMaintenance" title="Optimalizovat databázi">
                         Optimize DB
                     </button>
-                    <button class="console-btn danger" onclick="cleanupLogsMaintenance()" title="Vyčistit logy, cache a spustit backup">
-                        🧹 Cleanup
+                    <button class="console-btn danger" data-action="cleanupLogsMaintenance" title="Vyčistit logy, cache a spustit backup">
+                        Cleanup
                     </button>
-                    <button class="console-btn" onclick="archiveLogsMaintenance()" title="Archivovat staré logy">
+                    <button class="console-btn" data-action="archiveLogsMaintenance" title="Archivovat staré logy">
                         Archive
                     </button>
                 </div>
@@ -616,13 +616,13 @@ async function runDiagnostics() {
 
         log('');
         logHeader('═══════════════════════════════════════════════════');
-        logHeader('📊 SHRNUTÍ DIAGNOSTIKY');
+        logHeader('SHRNUTÍ DIAGNOSTIKY');
         logHeader('═══════════════════════════════════════════════════');
         log('');
 
         // Summary of errors
         if (totalErrors > 0) {
-            logError(`❌ CELKEM ${totalErrors} CHYB${totalErrors === 1 ? 'A' : (totalErrors < 5 ? 'Y' : '')}:`);
+            logError(`CELKEM ${totalErrors} CHYB${totalErrors === 1 ? 'A' : (totalErrors < 5 ? 'Y' : '')}:`);
             log('');
             errorsList.forEach((err, idx) => {
                 logError(`${idx + 1}. [${err.section}] ${err.message}`);
@@ -631,7 +631,7 @@ async function runDiagnostics() {
                 }
             });
         } else {
-            logSuccess('✅ ŽÁDNÉ CHYBY!');
+            logSuccess('ŽÁDNÉ CHYBY!');
         }
 
         log('');
@@ -754,7 +754,7 @@ async function checkPhpFiles() {
             document.getElementById('stat-php').textContent = total;
 
             if (errors.length > 0) {
-                logError(`❌ ${errors.length} PHP chyb`);
+                logError(`${errors.length} PHP chyb`);
                 // Přidat do seznamu chyb
                 errors.forEach(err => {
                     addError('PHP',
@@ -764,7 +764,7 @@ async function checkPhpFiles() {
                 });
                 // totalErrors již zvýšeno v addError()
             } else {
-                logSuccess(`✅ ${total} PHP souborů - OK`);
+                logSuccess(`${total} PHP souborů - OK`);
             }
 
             if (warnings.length > 0) {
@@ -778,7 +778,7 @@ async function checkPhpFiles() {
                 }
             }
         } else {
-            logError('❌ Nepodařilo se zkontrolovat PHP soubory');
+            logError('Nepodařilo se zkontrolovat PHP soubory');
             addError('PHP', 'Kontrola selhala', data.message || 'Unknown error');
         }
     } catch (error) {
@@ -1492,7 +1492,7 @@ async function optimizeDatabaseMaintenance() {
  * CleanupLogsMaintenance
  */
 async function cleanupLogsMaintenance() {
-    logHeader('🧹 CLEANUP LOGS & BACKUP');
+    logHeader('CLEANUP LOGS & BACKUP');
     log('Spouštím kompletní cleanup...');
     log('Toto smaže staré logy (.gz, .20*.log), zkrátí php_errors.log, vyčistí cache a spustí backup...');
     log('');
@@ -1511,9 +1511,9 @@ async function cleanupLogsMaintenance() {
 
         if (data.status === 'success') {
             const r = data.results || {};
-            logSuccess('✅ Cleanup dokončen!');
+            logSuccess('Cleanup dokončen!');
             log('');
-            log(`📊 Výsledky:`);
+            log(`Výsledky:`);
             log(`  🗑️  Smazáno archivů: ${r.deleted_files || 0}`);
             log(`  ✂️  Error log: ${r.log_deleted ? 'SMAZÁN' : 'nenalezen'}`);
             log(`  💾 Cache vymazána: ${r.cache_deleted || 0} souborů`);
@@ -2319,7 +2319,7 @@ async function checkEmailSystem() {
             return;
         }
 
-        logSuccess('✅ PHPMailer nainstalován');
+        logSuccess('PHPMailer nainstalován');
 
         // Kontrola SMTP konfigurace přes API
         try {
@@ -2331,23 +2331,23 @@ async function checkEmailSystem() {
             if (smtpResponse.ok) {
                 const smtpData = await smtpResponse.json();
                 if (smtpData.status === 'success' && smtpData.data && smtpData.data.configured) {
-                    logSuccess('✅ SMTP konfigurace existuje');
+                    logSuccess('SMTP konfigurace existuje');
                 } else {
                     logWarning('⚠️  SMTP konfigurace chybí');
                     addWarning('Email', 'SMTP config chybí', 'Nastavte SMTP v Control Center');
                 }
             } else {
                 // Fallback - zkusit jen základní kontrolu existence souboru
-                logSuccess('✅ Email systém aktivní (základní kontrola)');
+                logSuccess('Email systém aktivní (základní kontrola)');
             }
         } catch (smtpError) {
             // Fallback - pokud API endpoint neexistuje, nepočítat to jako chybu
-            logSuccess('✅ Email systém aktivní (základní kontrola)');
+            logSuccess('Email systém aktivní (základní kontrola)');
         }
 
         log('');
     } catch (error) {
-        logError('❌ Chyba při kontrole email systému');
+        logError('Chyba při kontrole email systému');
         addError('Email', 'Kontrola selhala', error.message);
         log('');
     }
@@ -2375,25 +2375,25 @@ async function checkSessionSecurity() {
                 const { secure, httponly, samesite, lifetime } = data.data;
 
                 if (secure) {
-                    logSuccess('✅ Session cookies jsou secure');
+                    logSuccess('Session cookies jsou secure');
                 } else {
                     issues.push('Session cookies NEJSOU secure (pouze HTTPS)');
                 }
 
                 if (httponly) {
-                    logSuccess('✅ Session cookies jsou httponly');
+                    logSuccess('Session cookies jsou httponly');
                 } else {
                     issues.push('Session cookies NEJSOU httponly (XSS risk)');
                 }
 
                 if (samesite) {
-                    logSuccess(`✅ SameSite: ${samesite}`);
+                    logSuccess(`SameSite: ${samesite}`);
                 } else {
                     issues.push('SameSite cookie atribut není nastaven (CSRF risk)');
                 }
 
                 if (lifetime && lifetime < 86400) {
-                    logSuccess(`✅ Session lifetime: ${Math.floor(lifetime / 3600)}h`);
+                    logSuccess(`Session lifetime: ${Math.floor(lifetime / 3600)}h`);
                 } else if (lifetime) {
                     issues.push(`Session lifetime je dlouhý: ${Math.floor(lifetime / 3600)}h`);
                 }
@@ -2405,18 +2405,18 @@ async function checkSessionSecurity() {
                         addWarning('Session', issue);
                     });
                 } else {
-                    logSuccess('✅ Session security - OK');
+                    logSuccess('Session security - OK');
                 }
             }
         } else {
             // Fallback - basic check
-            logSuccess('✅ Session aktivní (základní kontrola)');
+            logSuccess('Session aktivní (základní kontrola)');
         }
 
         log('');
     } catch (error) {
         // Fallback - pokud API endpoint neexistuje, jen info
-        logSuccess('✅ Session aktivní (základní kontrola)');
+        logSuccess('Session aktivní (základní kontrola)');
         log('');
     }
 }
@@ -2463,7 +2463,7 @@ async function checkSecurityVulnerabilities() {
                 }
 
                 if (exposed_files && exposed_files.length > 0) {
-                    logError(`❌ ${exposed_files.length} exposed souborů (.env, config)`);
+                    logError(`${exposed_files.length} exposed souborů (.env, config)`);
                     exposed_files.forEach(file => {
                         addError('Security', 'Exposed file', file);
                     });
@@ -2471,7 +2471,7 @@ async function checkSecurityVulnerabilities() {
                 }
 
                 if (totalRisks === 0) {
-                    logSuccess('✅ Žádná kritická bezpečnostní rizika');
+                    logSuccess('Žádná kritická bezpečnostní rizika');
                 } else {
                     logWarning(`⚠️  Celkem ${totalRisks} bezpečnostních rizik`);
                 }
@@ -2491,7 +2491,7 @@ async function checkSecurityVulnerabilities() {
  * CheckCodeAnalysis
  */
 async function checkCodeAnalysis() {
-    logHeader('🔍 CODE ANALYSIS - KOMPLEXNÍ KONTROLA');
+    logHeader('CODE ANALYSIS - KOMPLEXNÍ KONTROLA');
     log('Spouštím hloubkovou analýzu kódu...');
     log('Detekuji: syntax chyby, vadné stringy, nezavřené závorky, security rizika, HTTP errors');
     log('═'.repeat(79));
@@ -2503,14 +2503,14 @@ async function checkCodeAnalysis() {
         });
 
         if (!response.ok) {
-            logError(`❌ API vrátilo chybu: HTTP ${response.status}`);
+            logError(`API vrátilo chybu: HTTP ${response.status}`);
             log('');
             return;
         }
 
         const result = await response.json();
         if (result.status !== 'success') {
-            logError('❌ Code analysis selhala: ' + (result.message || 'Unknown error'));
+            logError('Code analysis selhala: ' + (result.message || 'Unknown error'));
             log('');
             return;
         }
@@ -2519,7 +2519,7 @@ async function checkCodeAnalysis() {
         const { php, javascript, css, http_logs, summary } = data;
 
         log('');
-        logHeader('📊 SHRNUTÍ');
+        logHeader('SHRNUTÍ');
         log(`Zkontrolováno:`);
         log(`  • PHP soubory: ${php.files_checked}`);
         log(`  • JavaScript soubory: ${javascript.files_checked}`);
@@ -2541,7 +2541,7 @@ async function checkCodeAnalysis() {
         // 1. PHP ERRORS
         // ============================================
         if (php.errors.length > 0) {
-            logHeader('❌ PHP CHYBY (' + php.errors.length + ')');
+            logHeader('PHP CHYBY (' + php.errors.length + ')');
             log('');
 
             php.errors.forEach((err, index) => {
@@ -2549,7 +2549,7 @@ async function checkCodeAnalysis() {
                 const location = `${err.file}:${err.line}` + (err.column > 0 ? `:${err.column}` : '');
 
                 logError(`${prefix} ${err.type.toUpperCase()}: ${err.message}`);
-                log(`📄 ${location}`);
+                log(`${location}`);
 
                 if (err.context && err.context.trim()) {
                     log(`📝 Kontext:`);
@@ -2574,7 +2574,7 @@ async function checkCodeAnalysis() {
                 const location = `${warn.file}:${warn.line}` + (warn.column > 0 ? `:${warn.column}` : '');
 
                 logWarning(`${prefix} ${warn.type.toUpperCase()}: ${warn.message}`);
-                log(`📄 ${location}`);
+                log(`${location}`);
 
                 if (warn.context && warn.context.trim()) {
                     log(`📝 Kontext:`);
@@ -2596,7 +2596,7 @@ async function checkCodeAnalysis() {
         // 3. JAVASCRIPT ERRORS
         // ============================================
         if (javascript.errors.length > 0) {
-            logHeader('❌ JAVASCRIPT CHYBY (' + javascript.errors.length + ')');
+            logHeader('JAVASCRIPT CHYBY (' + javascript.errors.length + ')');
             log('');
 
             javascript.errors.forEach((err, index) => {
@@ -2604,7 +2604,7 @@ async function checkCodeAnalysis() {
                 const location = `${err.file}:${err.line}` + (err.column > 0 ? `:${err.column}` : '');
 
                 logError(`${prefix} ${err.type.toUpperCase()}: ${err.message}`);
-                log(`📄 ${location}`);
+                log(`${location}`);
 
                 if (err.context && err.context.trim()) {
                     log(`📝 Kontext:`);
@@ -2629,7 +2629,7 @@ async function checkCodeAnalysis() {
                 const location = `${warn.file}:${warn.line}` + (warn.column > 0 ? `:${warn.column}` : '');
 
                 logWarning(`${prefix} ${warn.type.toUpperCase()}: ${warn.message}`);
-                log(`📄 ${location}`);
+                log(`${location}`);
 
                 if (warn.context && warn.context.trim()) {
                     log(`📝 ${warn.context}`);
@@ -2649,7 +2649,7 @@ async function checkCodeAnalysis() {
         // 5. CSS ERRORS
         // ============================================
         if (css.errors.length > 0) {
-            logHeader('❌ CSS CHYBY (' + css.errors.length + ')');
+            logHeader('CSS CHYBY (' + css.errors.length + ')');
             log('');
 
             css.errors.forEach((err, index) => {
@@ -2657,7 +2657,7 @@ async function checkCodeAnalysis() {
                 const location = `${err.file}:${err.line}`;
 
                 logError(`${prefix} ${err.type.toUpperCase()}: ${err.message}`);
-                log(`📄 ${location}`);
+                log(`${location}`);
 
                 if (err.context && err.context.trim()) {
                     log(`📝 ${err.context}`);
@@ -2681,7 +2681,7 @@ async function checkCodeAnalysis() {
                 const location = `${warn.file}:${warn.line}`;
 
                 logWarning(`${prefix} ${warn.message}`);
-                log(`📄 ${location}`);
+                log(`${location}`);
 
                 addWarning('CSS/' + warn.type, location, warn.message);
             });
@@ -2723,7 +2723,7 @@ async function checkCodeAnalysis() {
                     // PHP error from log
                     const location = `${err.file}:${err.line}`;
                     logError(`${prefix} ${err.type.toUpperCase()}: ${err.message}`);
-                    log(`📄 ${location}`);
+                    log(`${location}`);
 
                     addError('PHP/' + err.type, location, err.message);
                 }
@@ -2741,11 +2741,11 @@ async function checkCodeAnalysis() {
         // FINAL SUMMARY
         // ============================================
         log('═'.repeat(79));
-        logHeader('📋 FINÁLNÍ SOUHRN');
+        logHeader('FINÁLNÍ SOUHRN');
         log('');
 
         if (summary.total_errors > 0) {
-            logError(`❌ Celkem chyb: ${summary.total_errors}`);
+            logError(`Celkem chyb: ${summary.total_errors}`);
         }
 
         if (summary.total_warnings > 0) {
@@ -2753,7 +2753,7 @@ async function checkCodeAnalysis() {
         }
 
         if (summary.total_errors === 0 && summary.total_warnings > 0) {
-            logSuccess('✅ Žádné kritické chyby - pouze varování');
+            logSuccess('Žádné kritické chyby - pouze varování');
         } else if (summary.total_errors > 0) {
             logError('🔧 Opravte prosím nalezené chyby');
         }
@@ -2764,7 +2764,7 @@ async function checkCodeAnalysis() {
         log('');
 
     } catch (error) {
-        logError('❌ Code Analysis selhala:');
+        logError('Code Analysis selhala:');
         logError(`   ${error.message}`);
         if (DEBUG_MODE) console.error(error);
         log('');
@@ -2772,6 +2772,17 @@ async function checkCodeAnalysis() {
 }
 
 if (DEBUG_MODE) console.log('Console loaded');
+
+// ACTION REGISTRY - Step 113
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('runDiagnostics', () => runDiagnostics());
+    Utils.registerAction('clearConsole', () => clearConsole());
+    Utils.registerAction('exportLog', () => exportLog());
+    Utils.registerAction('clearCacheMaintenance', () => clearCacheMaintenance());
+    Utils.registerAction('optimizeDatabaseMaintenance', () => optimizeDatabaseMaintenance());
+    Utils.registerAction('cleanupLogsMaintenance', () => cleanupLogsMaintenance());
+    Utils.registerAction('archiveLogsMaintenance', () => archiveLogsMaintenance());
+}
 </script>
 
 

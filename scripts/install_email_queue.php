@@ -42,7 +42,7 @@ try {
         }
     }
 
-    echo "\n✅ Email Queue installation completed successfully!\n\n";
+    echo "\nEmail Queue installation completed successfully!\n\n";
 
     // Verify tables
     $tables = ['wgs_email_queue', 'wgs_smtp_settings'];
@@ -62,6 +62,6 @@ try {
     echo "==========================================\n";
 
 } catch (Exception $e) {
-    echo "\n❌ ERROR: " . $e->getMessage() . "\n";
+    echo "\nERROR: " . $e->getMessage() . "\n";
     exit(1);
 }

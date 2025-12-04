@@ -56,6 +56,11 @@ $analyticsTabs = [
         'label' => 'GDPR',
         'description' => 'Compliance & Privacy'
     ],
+    [
+        'file' => 'sprava_ip_blacklist.php',
+        'label' => 'IP Adresy',
+        'description' => 'Správa blacklistu IP'
+    ],
 ];
 ?>
 

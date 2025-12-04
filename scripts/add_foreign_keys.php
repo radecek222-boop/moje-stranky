@@ -75,12 +75,12 @@ try {
                 ON UPDATE CASCADE
             ");
             $results['success'][] = 'wgs_photos.fk_photos_reklamace';
-            echo "   ✅ FK fk_photos_reklamace přidán\n";
+            echo "   FK fk_photos_reklamace přidán\n";
         }
     }
 } catch (PDOException $e) {
     $results['failed'][] = "wgs_photos.fk_photos_reklamace: " . $e->getMessage();
-    echo "   ❌ Chyba: " . $e->getMessage() . "\n";
+    echo "   Chyba: " . $e->getMessage() . "\n";
 }
 
 echo "\n";
@@ -126,12 +126,12 @@ try {
                 ON UPDATE CASCADE
             ");
             $results['success'][] = 'wgs_documents.fk_documents_claim_id';
-            echo "   ✅ FK fk_documents_claim_id přidán\n";
+            echo "   FK fk_documents_claim_id přidán\n";
         }
     }
 } catch (PDOException $e) {
     $results['failed'][] = "wgs_documents.fk_documents_claim_id: " . $e->getMessage();
-    echo "   ❌ Chyba: " . $e->getMessage() . "\n";
+    echo "   Chyba: " . $e->getMessage() . "\n";
 }
 
 echo "\n";
@@ -176,7 +176,7 @@ try {
     }
 } catch (PDOException $e) {
     $results['failed'][] = "wgs_pending_actions.fk_pending_actions_webhook: " . $e->getMessage();
-    echo "   ❌ Chyba: " . $e->getMessage() . "\n";
+    echo "   Chyba: " . $e->getMessage() . "\n";
 }
 
 echo "\n";
@@ -235,24 +235,24 @@ try {
                     ON UPDATE CASCADE
                 ");
                 $results['success'][] = 'wgs_email_queue.fk_email_queue_notification';
-                echo "   ✅ FK fk_email_queue_notification přidán\n";
+                echo "   FK fk_email_queue_notification přidán\n";
             }
         }
     }
 } catch (PDOException $e) {
     $results['failed'][] = "wgs_email_queue.fk_email_queue_notification: " . $e->getMessage();
-    echo "   ❌ Chyba: " . $e->getMessage() . "\n";
+    echo "   Chyba: " . $e->getMessage() . "\n";
 }
 
 echo "\n";
 echo str_repeat("=", 70) . "\n";
-echo "✅ HOTOVO!\n";
+echo "HOTOVO!\n";
 echo str_repeat("=", 70) . "\n\n";
 
 echo "📊 Výsledky:\n";
-echo "  ✅ Úspěšně přidáno: " . count($results['success']) . " FK constraints\n";
+echo "  Úspěšně přidáno: " . count($results['success']) . " FK constraints\n";
 echo "  ⏭️  Přeskočeno: " . count($results['skipped']) . "\n";
-echo "  ❌ Selhalo: " . count($results['failed']) . "\n";
+echo "  Selhalo: " . count($results['failed']) . "\n";
 
 if (!empty($results['failed'])) {
     echo "\n⚠️  CHYBY/VAROVÁNÍ:\n";

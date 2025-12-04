@@ -23,10 +23,13 @@ try {
         exit;
     }
 
-    // Rate limiting na admin API
+    // Extrakce dat ze session před uvolněním zámku
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     $userId = $_SESSION['user_id'] ?? $_SESSION['admin_id'] ?? 'admin';
     $identifier = "admin_api_{$ip}_{$userId}";
+
+    // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+    session_write_close();
 
     try {
         $pdo = getDbConnection();

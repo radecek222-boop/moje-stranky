@@ -27,6 +27,12 @@ try {
         sendJsonError('Neautorizovaný přístup', 401);
     }
 
+    // Extrakce dat ze session před uvolněním zámku
+    $userId = $_SESSION['user_id'] ?? 'admin';
+
+    // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+    session_write_close();
+
     // BEZPEČNOST: Rate limiting
     require_once __DIR__ . '/../includes/rate_limiter.php';
     $rateLimiter = new RateLimiter(getDbConnection());
@@ -113,7 +119,7 @@ try {
 
             $auditStmt = $pdo->prepare('INSERT INTO wgs_audit_log (user_id, action, details, created_at) VALUES (:user_id, :action, :details, NOW())');
             $auditStmt->execute([
-                ':user_id' => $_SESSION['user_id'] ?? 'admin',
+                ':user_id' => $userId,
                 ':action' => 'delete_photo',
                 ':details' => $details
             ]);

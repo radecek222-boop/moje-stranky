@@ -108,7 +108,7 @@ echo "Celkem funkcí: " . array_sum(array_map('count', $functions)) . "\n";
 echo "Duplicitních funkcí: {$totalDuplicates}\n\n";
 
 if (empty($duplicates)) {
-    echo "✅ Žádné duplicitní funkce nenalezeny!\n";
+    echo "Žádné duplicitní funkce nenalezeny!\n";
 } else {
     echo "🔴 DUPLICITNÍ FUNKCE:\n";
     echo str_repeat("=", 70) . "\n\n";

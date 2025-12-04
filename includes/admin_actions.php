@@ -120,7 +120,7 @@ function getPriorityBadge($priority) {
     <!-- Header -->
     <?php if (!$embedMode): ?>
     <div class="control-detail-header">
-        <button class="control-detail-back" onclick="window.location.href='admin.php'">
+        <button class="control-detail-back" data-href="admin.php">
             <span>‹</span>
             <span>Zpět</span>
         </button>
@@ -159,7 +159,7 @@ function getPriorityBadge($priority) {
                         Tabulka <code>wgs_pending_actions</code> neexistuje. Klikněte na tlačítko níže pro automatické nastavení systému akcí a úkolů.
                     </div>
                     <div style="margin-top: 1rem;">
-                        <button class="cc-btn cc-btn-success" onclick="window.open('/setup_actions_system.php', '_blank', 'width=900,height=700')">
+                        <button class="cc-btn cc-btn-success" data-action="openNewWindow" data-url="/setup_actions_system.php">
                             Spustit setup Actions System
                         </button>
                     </div>
@@ -188,9 +188,9 @@ function getPriorityBadge($priority) {
                         Výborná práce! Všechny úkoly jsou dokončené.
                         <div style="margin-top: 1rem;">
                             <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                    onclick="window.open('add_optimization_tasks.php', '_blank')"
+                                    data-action="openNewWindow" data-url="add_optimization_tasks.php"
                                     style="font-size: 0.85rem; padding: 0.5rem 1rem;">
-                                📦 Přidat úkoly optimalizace
+                                Přidat úkoly optimalizace
                             </button>
                         </div>
                     </div>
@@ -225,15 +225,15 @@ function getPriorityBadge($priority) {
                         </div>
                         <div class="setting-item-right" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                             <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                    onclick="executeAction(event, <?= $action['id'] ?>)">
+                                    data-action="executeAction" data-id="<?= $action['id'] ?>">
                                 Spustit
                             </button>
                             <button class="cc-btn cc-btn-sm cc-btn-success"
-                                    onclick="completeAction(<?= $action['id'] ?>)">
+                                    data-action="completeAction" data-id="<?= $action['id'] ?>">
                                 Hotovo
                             </button>
                             <button class="cc-btn cc-btn-sm cc-btn-secondary"
-                                    onclick="dismissAction(<?= $action['id'] ?>)">
+                                    data-action="dismissAction" data-id="<?= $action['id'] ?>">
                                 Zrušit
                             </button>
                         </div>
@@ -248,7 +248,7 @@ function getPriorityBadge($priority) {
                 <h3 class="setting-group-title">
                     Nedávno dokončené
                     <button class="cc-btn cc-btn-sm cc-btn-secondary"
-                            onclick="window.open('vycisti_akce.php', '_blank')"
+                            data-action="openNewWindow" data-url="vycisti_akce.php"
                             style="margin-left: 1rem;">
                         Vyčistit dokončené
                     </button>
@@ -306,7 +306,7 @@ function getPriorityBadge($priority) {
                 <?php endforeach; ?>
 
                 <div style="text-align: center; margin-top: 1rem;">
-                    <button class="cc-btn cc-btn-sm cc-btn-secondary" onclick="viewAllWebhooks()">
+                    <button class="cc-btn cc-btn-sm cc-btn-secondary" data-action="viewAllWebhooks">
                         Zobrazit všechny události
                     </button>
                 </div>
@@ -321,7 +321,7 @@ function getPriorityBadge($priority) {
                         </div>
                     </div>
                     <div class="setting-item-right">
-                        <button class="cc-btn cc-btn-sm cc-btn-primary" onclick="setupGitHubWebhook()">
+                        <button class="cc-btn cc-btn-sm cc-btn-primary" data-action="setupGitHubWebhook">
                             Nastavit
                         </button>
                     </div>
@@ -335,7 +335,7 @@ function getPriorityBadge($priority) {
 
             <div class="setting-item">
                 <div class="setting-item-left">
-                    <div class="setting-item-label">🧹 Session Cleanup</div>
+                    <div class="setting-item-label">Session Cleanup</div>
                     <div class="setting-item-description">Vymazání starých sessions (každých 24 hodin)</div>
                 </div>
                 <div class="setting-item-right">
@@ -383,7 +383,7 @@ function getPriorityBadge($priority) {
                     <div class="setting-item-description">Načíst aktuální stav</div>
                 </div>
                 <div class="setting-item-right">
-                    <button class="cc-btn cc-btn-sm cc-btn-secondary" onclick="location.reload()">
+                    <button class="cc-btn cc-btn-sm cc-btn-secondary" data-action="reloadPage">
                         Obnovit
                     </button>
                 </div>
@@ -393,7 +393,7 @@ function getPriorityBadge($priority) {
     </div>
 </div>
 
-<script src="/assets/js/csrf-auto-inject.js"></script>
+<script src="/assets/js/csrf-auto-inject.min.js"></script>
 <script>
 // Debug mode - set to false in production
 if (typeof DEBUG_MODE === 'undefined') { var DEBUG_MODE = false; }
@@ -590,6 +590,22 @@ function setupGitHubWebhook() {
 }
 
 if (DEBUG_MODE) console.log('Actions section loaded');
+
+// ACTION REGISTRY - Step 113
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('executeAction', (el, data) => {
+        if (data.id) executeAction(event, data.id);
+    });
+    Utils.registerAction('completeAction', (el, data) => {
+        if (data.id) completeAction(data.id);
+    });
+    Utils.registerAction('dismissAction', (el, data) => {
+        if (data.id) dismissAction(data.id);
+    });
+    Utils.registerAction('viewAllWebhooks', () => viewAllWebhooks());
+    Utils.registerAction('setupGitHubWebhook', () => setupGitHubWebhook());
+    Utils.registerAction('reloadPage', () => location.reload());
+}
 </script>
 
 <?php if ($embedMode && $directAccess): ?>

@@ -20,4 +20,4 @@ if (!isset($_SESSION['csrf_token'])) {
 ?>
 <!-- Heatmap Tracker -->
 <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-<script src="/assets/js/heatmap-tracker.js" defer></script>
+<script src="/assets/js/heatmap-tracker.min.js" defer></script>

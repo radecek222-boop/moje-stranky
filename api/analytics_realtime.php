@@ -21,20 +21,11 @@ require_once __DIR__ . '/../includes/api_response.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-// DEBUG: Log request
-error_log("=== REALTIME API DEBUG ===");
-error_log("Action: " . ($_GET['action'] ?? 'none'));
-error_log("Session ID: " . session_id());
-error_log("Is Admin: " . (isset($_SESSION['is_admin']) ? 'yes' : 'no'));
-error_log("CSRF Token received: " . ($_GET['csrf_token'] ?? 'none'));
-error_log("CSRF Token session: " . ($_SESSION['csrf_token'] ?? 'none'));
-
 try {
     // ========================================
     // AUTHENTICATION CHECK (admin only)
     // ========================================
     if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
-        error_log("AUTH FAILED: Not admin");
         sendJsonError('Přístup odepřen - pouze pro admins', 403);
     }
 
@@ -45,6 +36,9 @@ try {
     if (!validateCSRFToken($csrfToken)) {
         sendJsonError('Neplatný CSRF token', 403);
     }
+
+    // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+    session_write_close();
 
     $pdo = getDbConnection();
 

@@ -13,6 +13,11 @@ require_once __DIR__ . '/../includes/api_response.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
+// BEZPEČNOST: Pouze admin
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+    sendJsonError('Neautorizovaný přístup - pouze administrátor', 403);
+}
+
 // BEZPEČNOST: Rate limiting pro API volání
 require_once __DIR__ . '/../includes/rate_limiter.php';
 $rateLimiter = new RateLimiter($pdo ?? getDbConnection());

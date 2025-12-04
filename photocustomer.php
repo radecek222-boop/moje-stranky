@@ -1,107 +1,15 @@
 <?php
 require_once "init.php";
 
-// 🔍 DEBUG MODE: Zobrazí session data místo redirectu
-if (isset($_GET['debug']) && $_GET['debug'] === '1') {
-    header('Content-Type: text/html; charset=utf-8');
-    echo "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>DEBUG: photocustomer.php</title>";
-    echo "<style>body{font-family:monospace;background:#1a1a1a;color:#00ff88;padding:20px;}";
-    echo "pre{background:#000;padding:15px;border-radius:5px;}</style></head><body>";
-    echo "<h1>🔍 DEBUG MODE: photocustomer.php</h1>";
-    echo "<p>Datum: " . date('Y-m-d H:i:s') . "</p><hr>";
-
-    echo "<h2>📊 \$_SESSION obsah:</h2><pre>";
-    print_r($_SESSION);
-    echo "</pre>";
-
-    echo "<h2>🔑 VŠECHNY SESSION KLÍČE:</h2>";
-    echo "<ul style='background:#000;padding:15px;'>";
-    foreach ($_SESSION as $key => $value) {
-        $displayValue = is_bool($value) ? ($value ? 'TRUE' : 'FALSE') : (is_string($value) || is_numeric($value) ? htmlspecialchars($value) : gettype($value));
-        echo "<li><strong>$key</strong>: $displayValue</li>";
-    }
-    echo "</ul>";
-
-    echo "<h2>🔑 Kontrolní hodnoty:</h2>";
-    echo "<p>isset(\$_SESSION['user_id']): " . (isset($_SESSION['user_id']) ? '✅ TRUE' : '❌ FALSE') . "</p>";
-    echo "<p>\$_SESSION['user_id']: " . ($_SESSION['user_id'] ?? 'NENÍ NASTAVENO') . "</p>";
-    echo "<p>\$_SESSION['role']: " . ($_SESSION['role'] ?? 'NENÍ NASTAVENO') . "</p>";
-    echo "<p>\$_SESSION['used_role']: " . ($_SESSION['used_role'] ?? '❌ NENÍ NASTAVENO') . "</p>";
-    echo "<p>\$_SESSION['user_role']: " . ($_SESSION['user_role'] ?? '❌ NENÍ NASTAVENO') . "</p>";
-    echo "<p>isset(\$_SESSION['is_admin']): " . (isset($_SESSION['is_admin']) ? '✅ TRUE' : '❌ FALSE') . "</p>";
-
-    echo "<h2>🚪 Co by se stalo bez debug režimu:</h2>";
-
-    // SIMULACE KROK 1
-    if (!isset($_SESSION['user_id'])) {
-        echo "<p style='color:#ff4444;'>❌ KROK 1: REDIRECT na login.php (chybí user_id)</p>";
-    } else {
-        echo "<p style='color:#00ff88;'>✅ KROK 1: PASS (user_id existuje)</p>";
-
-        // SIMULACE KROK 2
-        echo "<h3 style='margin-top:20px;'>🔍 KROK 2: Kontrola role</h3>";
-        $rawRole = (string) ($_SESSION['role'] ?? '');
-        $normalizedRole = strtolower(trim($rawRole));
-        $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
-
-        echo "<p>\$rawRole = '" . htmlspecialchars($rawRole) . "'</p>";
-        echo "<p>\$normalizedRole = '" . htmlspecialchars($normalizedRole) . "'</p>";
-        echo "<p>\$isAdmin = " . ($isAdmin ? 'TRUE' : 'FALSE') . "</p>";
-
-        $technikKeywords = ['technik', 'technician'];
-        $isTechnik = in_array($normalizedRole, $technikKeywords, true);
-        echo "<p>in_array('{$normalizedRole}', ['technik', 'technician']): " . ($isTechnik ? 'TRUE' : 'FALSE') . "</p>";
-
-        if (!$isTechnik) {
-            echo "<p>Zkouším partial match...</p>";
-            foreach ($technikKeywords as $keyword) {
-                $found = strpos($normalizedRole, $keyword) !== false;
-                echo "<p>  strpos('{$normalizedRole}', '{$keyword}'): " . ($found ? 'FOUND' : 'NOT FOUND') . "</p>";
-                if ($found) {
-                    $isTechnik = true;
-                    break;
-                }
-            }
-        }
-
-        echo "<p><strong>\$isTechnik (final) = " . ($isTechnik ? 'TRUE' : 'FALSE') . "</strong></p>";
-
-        echo "<h3 style='margin-top:20px;'>🚪 Finální rozhodnutí:</h3>";
-        echo "<p>(!isAdmin && !isTechnik) = (!" . ($isAdmin ? 'TRUE' : 'FALSE') . " && !" . ($isTechnik ? 'TRUE' : 'FALSE') . ")</p>";
-        echo "<p>= (" . ($isAdmin ? 'FALSE' : 'TRUE') . " && " . ($isTechnik ? 'FALSE' : 'TRUE') . ")</p>";
-        echo "<p>= <strong>" . ((!$isAdmin && !$isTechnik) ? 'TRUE' : 'FALSE') . "</strong></p>";
-
-        if (!$isAdmin && !$isTechnik) {
-            echo "<p style='color:#ff4444;font-size:18px;'><strong>❌ KROK 2: REDIRECT na login.php (není admin ANI technik)</strong></p>";
-        } else {
-            echo "<p style='color:#00ff88;font-size:18px;'><strong>✅ KROK 2: PASS (je admin NEBO technik) → PŘÍSTUP POVOLEN!</strong></p>";
-        }
-    }
-
-    echo "<hr><p><a href='photocustomer.php' style='color:#00ff88;'>→ Zkusit bez debug režimu</a></p>";
-    echo "</body></html>";
-    exit;
-}
-
-// ✅ KROK 1: Kontrola, zda je uživatel vůbec přihlášen
-// DŮLEŽITÉ: Musíme zkontrolovat user_id PŘED kontrolou role!
+// KROK 1: Kontrola, zda je uzivatel vubec prihlasen
+// DULEZITE: Musime zkontrolovat user_id PRED kontrolou role!
 if (!isset($_SESSION['user_id'])) {
-    error_log("PHOTOCUSTOMER: Přístup odepřen - uživatel není přihlášen (chybí user_id)");
+    error_log("PHOTOCUSTOMER: Pristup odepren - uzivatel neni prihlasen (chybi user_id)");
     header('Location: login.php?redirect=photocustomer.php');
     exit;
 }
 
-// ✅ DEBUG: Logování session pouze v development režimu
-// BEZPEČNOST: Nelogujeme PII (osobní údaje) v produkci
-if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
-    error_log("=== PHOTOCUSTOMER.PHP DEBUG START ===");
-    error_log("user_id: " . $_SESSION['user_id']);
-    error_log("is_admin isset: " . (isset($_SESSION['is_admin']) ? 'ANO' : 'NE'));
-    error_log("role: " . ($_SESSION['role'] ?? 'NENÍ NASTAVENO'));
-    error_log("=== PHOTOCUSTOMER.PHP DEBUG END ===");
-}
-
-// ✅ KROK 2: Kontrola přístupu - POUZE admin a technik
+// KROK 2: Kontrola pristupu - POUZE admin a technik
 // Prodejci a nepřihlášení uživatelé NEMAJÍ přístup k fotodokumentaci
 $rawRole = (string) ($_SESSION['role'] ?? '');
 $normalizedRole = strtolower(trim($rawRole));
@@ -136,7 +44,7 @@ if (!$isAdmin && !$isTechnik) {
 <html lang="cs">
 <head>
   <!-- Logger Utility (must be loaded first) -->
-<script src="assets/js/logger.js" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -158,16 +66,18 @@ if (!$isAdmin && !$isTechnik) {
   <!-- Google Fonts - Natuzzi style -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
-  <link rel="preload" href="assets/css/photocustomer.css" as="style">
+  <link rel="preload" href="assets/css/photocustomer.min.css" as="style">
 
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/photocustomer.css">
-  <link rel="stylesheet" href="assets/css/photocustomer-collapsible.css">
+  <link rel="stylesheet" href="assets/css/photocustomer.min.css">
+  <link rel="stylesheet" href="assets/css/photocustomer-collapsible.min.css">
+  <!-- Univerzální tmavý styl pro všechny modály -->
+  <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
 </head>
 
 <body>
@@ -179,14 +89,14 @@ if (!$isAdmin && !$isTechnik) {
 
   <!-- ROZBALOVACÍ INFORMACE O ZÁKAZNÍKOVI -->
   <div class="customer-info-collapsible">
-    <div class="customer-info-header" id="customerInfoToggle">
+    <div class="customer-info-header" id="customerInfoToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="customerInfoContent" aria-label="Rozbalit informace o zákazníkovi" data-storage-key="photocustomer-info-expanded">
       <span class="customer-info-name" id="customerInfoName">Zákazník</span>
-      <svg class="customer-info-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg class="customer-info-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <polyline points="6 9 12 15 18 9"></polyline>
       </svg>
     </div>
 
-    <div class="customer-info-content" id="customerInfoContent">
+    <div class="customer-info-content" id="customerInfoContent" role="region" aria-labelledby="customerInfoToggle">
       <div class="info-row">
         <span class="info-label">Zákazník</span>
         <span class="info-value" id="customerName">-</span>
@@ -233,8 +143,8 @@ if (!$isAdmin && !$isTechnik) {
   </div>
   
   <!-- PROGRESS BAR -->
-  <div class="progress-container">
-    <div class="progress-bar">
+  <div class="progress-container" role="status" aria-live="polite">
+    <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Průběh nahrávání">
       <div class="progress-fill" id="progressBar"></div>
     </div>
     <div class="progress-text" id="compressionInfo">Celkem nahráno: 0 souborů (max 30 doporučeno)</div>
@@ -249,22 +159,23 @@ if (!$isAdmin && !$isTechnik) {
 </div>
 
 <!-- WAIT DIALOG -->
-<div class="wait-dialog" id="waitDialog">
+<div class="wait-dialog" id="waitDialog" role="status" aria-live="polite" aria-label="Probíhá operace">
   <div class="wait-content">
-    <div class="spinner"></div>
+    <div class="spinner" aria-hidden="true"></div>
     <div class="wait-text" id="waitMsg">Čekejte...</div>
   </div>
 </div>
 
 <!-- ALERT -->
-<div class="alert" id="alert"></div>
+<div class="alert" id="alert" role="alert" aria-live="assertive"></div>
 
 <!-- HIDDEN FILE INPUT -->
 <!-- OPRAVENO: accept="image/*,video/*" místo špatného "assets/img/*" -->
 <input type="file" id="mediaInput" accept="image/*,video/*" capture="environment" multiple>
 
 <!-- External JavaScript -->
-<script src="assets/js/photocustomer-collapsible.js" defer></script>
-<script src="assets/js/photocustomer.js" defer></script>
+<script src="assets/js/customer-collapse.min.js" defer></script>
+<script src="assets/js/photocustomer.min.js" defer></script>
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>

@@ -1,7 +1,7 @@
 /**
  * Heatmap Tracker - Modul #6
  * Trackuje clicks a scroll depth pro heatmap vizualizaci
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 (function() {
@@ -9,134 +9,87 @@
 
     // Config
     const CONFIG = {
-        apiUrl: '/api/track_heatmap.php',
-        batchInterval: 5000, // Posílat data každých 5 sekund
-        maxBatchSize: 50,    // Max 50 událostí v jednom batchi
+        enabled: true,
+        apiUrl: window.location.origin + '/api/track_heatmap.php',
+        batchInterval: 5000,
+        maxBatchSize: 50,
         scrollBuckets: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     };
 
-    // Data buffer
     let clickBuffer = [];
     let scrollDepths = new Set();
-    let maxScrollDepth = 0;
     let csrfToken = null;
     let deviceType = null;
 
-    // ========================================
-    // CSRF TOKEN
-    // ========================================
+    // ===== CSRF TOKEN =====
     function getCSRFToken() {
-        // Zkusit meta tag
-        const metaTag = document.querySelector('meta[name="csrf-token"]');
-        if (metaTag) {
-            return metaTag.content;
-        }
-
-        // Zkusit hidden input
-        const hiddenInput = document.querySelector('input[name="csrf_token"]');
-        if (hiddenInput) {
-            return hiddenInput.value;
-        }
-
-        // Zkusit z window
-        if (typeof window.csrfToken !== 'undefined') {
-            return window.csrfToken;
-        }
-
-        return null;
+        return (
+            document.querySelector('meta[name="csrf-token"]')?.content ||
+            document.querySelector('input[name="csrf_token"]')?.value ||
+            window.csrfToken ||
+            null
+        );
     }
 
-    // ========================================
-    // DEVICE DETECTION
-    // ========================================
+    // ===== DEVICE DETECTION =====
     function detectDeviceType() {
-        const width = window.innerWidth;
-
-        if (width >= 1024) {
-            return 'desktop';
-        } else if (width >= 768) {
-            return 'tablet';
-        } else {
-            return 'mobile';
-        }
+        const w = window.innerWidth;
+        if (w >= 1024) return 'desktop';
+        if (w >= 768) return 'tablet';
+        return 'mobile';
     }
 
-    // ========================================
-    // CLICK TRACKING
-    // ========================================
+    // ===== CLICK TRACKING =====
     function trackClick(event) {
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
 
-        const clickX = event.clientX;
-        const clickY = event.clientY + window.scrollY; // Přidat scroll offset
-
-        const clickXPercent = (clickX / viewportWidth) * 100;
-        const clickYPercent = (clickY / document.documentElement.scrollHeight) * 100;
+        const x = event.clientX;
+        const y = event.clientY + window.scrollY;
 
         clickBuffer.push({
-            x: Math.round(clickXPercent * 100) / 100,
-            y: Math.round(clickYPercent * 100) / 100,
-            viewport_width: viewportWidth,
-            viewport_height: viewportHeight,
+            x: +( (x / vw) * 100 ).toFixed(2),
+            y: +( (y / document.documentElement.scrollHeight) * 100 ).toFixed(2),
+            viewport_width: vw,
+            viewport_height: vh,
             timestamp: Date.now()
         });
 
-        // Auto-send pokud buffer je plný
         if (clickBuffer.length >= CONFIG.maxBatchSize) {
             sendData();
         }
     }
 
-    // ========================================
-    // SCROLL TRACKING
-    // ========================================
+    // ===== SCROLL TRACKING =====
     let scrollTimeout = null;
     function trackScroll() {
-        if (scrollTimeout) {
-            clearTimeout(scrollTimeout);
-        }
-
+        clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
             const scrollTop = window.scrollY;
-            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-            const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            const docHeight = Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
+            const scrollPercent = docHeight ? (scrollTop / docHeight) * 100 : 0;
 
-            // Zaokrouhlit na nearest bucket
-            const bucket = CONFIG.scrollBuckets.reduce((prev, curr) => {
-                return Math.abs(curr - scrollPercent) < Math.abs(prev - scrollPercent) ? curr : prev;
-            });
+            const bucket = CONFIG.scrollBuckets.reduce((a, b) =>
+                Math.abs(b - scrollPercent) < Math.abs(a - scrollPercent) ? b : a
+            );
 
             scrollDepths.add(bucket);
-
-            if (scrollPercent > maxScrollDepth) {
-                maxScrollDepth = scrollPercent;
-            }
-        }, 100); // Debounce 100ms
+        }, 100);
     }
 
-    // ========================================
-    // SEND DATA TO API
-    // ========================================
+    // ===== SEND DATA =====
     async function sendData() {
-        if (clickBuffer.length === 0 && scrollDepths.size === 0) {
-            return;
-        }
-
-        if (!csrfToken) {
-            console.warn('[Heatmap Tracker] CSRF token not found - skipping send');
-            return;
-        }
+        if (clickBuffer.length === 0 && scrollDepths.size === 0) return;
+        if (!csrfToken) return;
 
         const data = {
             page_url: window.location.href,
             device_type: deviceType,
-            clicks: clickBuffer.splice(0), // Vyprázdnit buffer
+            clicks: clickBuffer.splice(0),
             scrolls: Array.from(scrollDepths),
             csrf_token: csrfToken
         };
 
-        // Vyčistit scrollDepths po odeslání
         scrollDepths.clear();
 
         try {
@@ -149,45 +102,52 @@
                 body: JSON.stringify(data)
             });
 
-            const result = await response.json();
+            // Přečíst tělo pouze jednou
+            const responseText = await response.text();
+
+            if (!response.ok) {
+                console.error('[Heatmap Tracker] API HTTP error:', response.status, responseText.substring(0, 200));
+                clickBuffer.unshift(...data.clicks);
+                data.scrolls.forEach(s => scrollDepths.add(s));
+                return;
+            }
+
+            // Parsovat JSON z textu
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (parseErr) {
+                console.error('[Heatmap Tracker] JSON parse error:', parseErr);
+                return;
+            }
 
             if (result.status !== 'success') {
                 console.error('[Heatmap Tracker] API error:', result.message);
             }
 
-        } catch (error) {
-            console.error('[Heatmap Tracker] Network error:', error);
-            // Vrátit data zpět do bufferu
+        } catch (err) {
+            console.error('[Heatmap Tracker] Network error:', err);
             clickBuffer.unshift(...data.clicks);
             data.scrolls.forEach(s => scrollDepths.add(s));
         }
     }
 
-    // ========================================
-    // INITIALIZATION
-    // ========================================
+    // ===== INIT =====
     function init() {
-        // Získat CSRF token
-        csrfToken = getCSRFToken();
-        if (!csrfToken) {
-            console.warn('[Heatmap Tracker] CSRF token not found - tracking disabled');
-            return;
-        }
+        if (!CONFIG.enabled) return;
 
-        // Detekovat device type
+        csrfToken = getCSRFToken();
+        if (!csrfToken) return;
+
         deviceType = detectDeviceType();
 
-        // Event listeners
         document.addEventListener('click', trackClick, true);
         window.addEventListener('scroll', trackScroll, { passive: true });
 
-        // Batch interval
         setInterval(sendData, CONFIG.batchInterval);
 
-        // Send před unload
         window.addEventListener('beforeunload', () => {
-            if (clickBuffer.length > 0 || scrollDepths.size > 0) {
-                // Použít sendBeacon pro spolehlivé odeslání
+            if (clickBuffer.length || scrollDepths.size) {
                 const data = {
                     page_url: window.location.href,
                     device_type: deviceType,
@@ -196,14 +156,14 @@
                     csrf_token: csrfToken
                 };
 
-                navigator.sendBeacon(CONFIG.apiUrl, JSON.stringify(data));
+                navigator.sendBeacon(
+                    CONFIG.apiUrl,
+                    new Blob([JSON.stringify(data)], { type: 'application/json' })
+                );
             }
         });
-
-        console.log('[Heatmap Tracker] Initialized - device:', deviceType);
     }
 
-    // Auto-init při DOMContentLoaded
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {

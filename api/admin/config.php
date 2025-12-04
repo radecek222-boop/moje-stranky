@@ -216,20 +216,34 @@ switch ($action) {
             throw new Exception($limitCheck['message']);
         }
 
+        // Pouzit EmailQueue s PHPMailer/SMTP
+        require_once __DIR__ . '/../../includes/EmailQueue.php';
+        $emailQueue = new EmailQueue($pdo);
+
         $subject = 'WGS Control Center - Test Email';
-        $message = "Hello!\n\nThis is a test email from WGS Control Center.\n\nTimestamp: " . date('Y-m-d H:i:s');
-        $headers = "From: White Glove Service <reklamace@wgs-service.cz>\r\n";
-        $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+        $body = "Ahoj!\n\nToto je testovaci email z WGS Control Center.\n\n";
+        $body .= "Cas odeslani: " . date('d.m.Y H:i:s') . "\n\n";
+        $body .= "Pokud tento email vidite, SMTP nastaveni funguje spravne.\n\n";
+        $body .= "White Glove Service";
 
-        $sent = mail($email, $subject, $message, $headers);
+        // Vytvorit email polozku pro prime odeslani
+        $queueItem = [
+            'recipient_email' => $email,
+            'recipient_name' => null,
+            'subject' => $subject,
+            'body' => $body
+        ];
 
-        if (!$sent) {
-            throw new Exception('Failed to send email');
+        // Odeslat primo pres PHPMailer (bez fronty)
+        $result = $emailQueue->sendEmail($queueItem);
+
+        if (!$result['success']) {
+            throw new Exception('Odeslani selhalo: ' . ($result['error'] ?? 'Neznama chyba'));
         }
 
         echo json_encode([
             'status' => 'success',
-            'message' => 'Test email sent to ' . $email
+            'message' => 'Test email odeslan na ' . $email . ' (' . ($result['message'] ?? 'OK') . ')'
         ]);
         break;
 

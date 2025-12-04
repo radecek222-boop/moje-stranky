@@ -71,8 +71,8 @@ if (verifyForm) {
         document.getElementById('userNameDisplay').textContent = data.user.name;
         
         // Skrýt step 1, zobrazit step 2
-        document.getElementById('step1-verify').style.display = 'none';
-        document.getElementById('step2-change').style.display = 'block';
+        document.getElementById('step1-verify').classList.add('hidden');
+        document.getElementById('step2-change').classList.remove('hidden');
       } else {
         showNotification(data.message || 'Ověření selhalo', 'error');
       }
@@ -126,7 +126,7 @@ if (changePasswordForm) {
       const data = await response.json();
       
       if (data.status === 'success') {
-        showNotification('✅ Heslo úspěšně změněno! Přesměrovávám na přihlášení...', 'success');
+        showNotification('Heslo úspěšně změněno! Přesměrovávám na přihlášení...', 'success');
         setTimeout(() => {
           window.location.href = 'login.php';
         }, 2000);
@@ -144,8 +144,8 @@ if (changePasswordForm) {
 // GO BACK
 // ============================================================
 function goBack() {
-  document.getElementById('step1-verify').style.display = 'block';
-  document.getElementById('step2-change').style.display = 'none';
+  document.getElementById('step1-verify').classList.remove('hidden');
+  document.getElementById('step2-change').classList.add('hidden');
   document.getElementById('verifyForm').reset();
   document.getElementById('changePasswordForm').reset();
   currentUserData = null;
@@ -160,13 +160,13 @@ function showNotification(message, type = 'info') {
   
   notification.textContent = message;
   notification.className = `notification ${type}`;
-  notification.style.display = 'block';
+  notification.classList.remove('hidden');
   
   if (type !== 'error') {
     setTimeout(() => {
-      notification.style.display = 'none';
+      notification.classList.add('hidden');
     }, 3000);
   }
 }
 
-logger.log('✅ Password reset system loaded');
+logger.log('Password reset system loaded');

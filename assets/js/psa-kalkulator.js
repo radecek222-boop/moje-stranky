@@ -5,10 +5,15 @@
 
 // === GLOBAL VARIABLES ===
 let employees = [];
+let allEmployeesDatabase = [];  // Kompletní seznam zaměstnanců z databáze
 let salaryRate = 150;
 let invoiceRate = 250;
 let currentPeriod = { month: 11, year: 2025 };
-const API_URL = 'data/psa-employees.json';
+const API_URL = 'app/psa_data.php';
+const CSRF_TOKEN = window.PSA_CSRF_TOKEN || '';
+
+// Speciální zaměstnanci - vždy zobrazeni, nelze smazat
+const PERMANENT_EMPLOYEE_IDS = [19, 20, 21, 22];  // Marek, Lenka, Radek, Prémie
 
 // === INITIALIZATION ===
 window.addEventListener('DOMContentLoaded', () => {
@@ -18,39 +23,420 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // === PERIOD MANAGEMENT ===
+const MONTHS_CZ = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
+                   'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
+const MONTHS_CZ_UPPER = ['', 'LEDEN', 'ÚNOR', 'BŘEZEN', 'DUBEN', 'KVĚTEN', 'ČERVEN',
+                         'ČERVENEC', 'SRPEN', 'ZÁŘÍ', 'ŘÍJEN', 'LISTOPAD', 'PROSINEC'];
+
 function initializePeriod() {
+  // Vždy pracujeme s MINULÝM měsícem (výplaty za uplynulý měsíc)
   const now = new Date();
-  currentPeriod.month = now.getMonth() + 1;
+  // Posunout o 1 měsíc zpět
+  now.setMonth(now.getMonth() - 1);
+  currentPeriod.month = now.getMonth() + 1;  // getMonth() vrací 0-11
   currentPeriod.year = now.getFullYear();
-
-  const monthSelect = document.getElementById('monthSelect');
-  const yearSelect = document.getElementById('yearSelect');
-
-  if (monthSelect) {
-    monthSelect.value = currentPeriod.month;
-  }
-  if (yearSelect) {
-    yearSelect.value = currentPeriod.year;
-  }
-
   updatePeriodDisplay();
-}
-
-function updatePeriod() {
-  currentPeriod.month = parseInt(document.getElementById('monthSelect').value);
-  currentPeriod.year = parseInt(document.getElementById('yearSelect').value);
-  updatePeriodDisplay();
-
-  // Load data for the selected period
-  const periodKey = `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
-  loadData(periodKey);
+  updateNewAttendanceMonth();
 }
 
 function updatePeriodDisplay() {
-  const months = ['', 'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
-                  'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
-  const periodText = `${months[currentPeriod.month]} ${currentPeriod.year}`;
-  document.getElementById('periodDisplay').textContent = periodText;
+  const periodText = `${MONTHS_CZ[currentPeriod.month]} ${currentPeriod.year}`;
+  const displayEl = document.getElementById('periodDisplayText');
+  if (displayEl) {
+    displayEl.textContent = periodText;
+  }
+  // Aktualizovat i patičku tabulky
+  updateFooterMonth();
+}
+
+// Aktualizovat měsíc v tlačítku "Nová docházka"
+function updateNewAttendanceMonth() {
+  const now = new Date();
+  // Aktuální měsíc (pro novou docházku) = skutečný aktuální měsíc
+  const nextMonth = now.getMonth() + 1;  // getMonth() vrací 0-11
+  const monthEl = document.getElementById('newAttendanceMonth');
+  if (monthEl) {
+    monthEl.textContent = MONTHS_CZ_UPPER[nextMonth] || 'NOVÝ';
+  }
+}
+
+// Aktualizovat měsíc v patičce tabulky
+function updateFooterMonth() {
+  const footerLabel = document.getElementById('footerMonthLabel');
+  if (footerLabel) {
+    footerLabel.textContent = `CELKEM za ${MONTHS_CZ[currentPeriod.month]}`;
+  }
+}
+
+// === NOVÁ DOCHÁZKA (aktuální měsíc) ===
+async function newAttendance() {
+  const now = new Date();
+  const newMonth = now.getMonth() + 1;  // Aktuální měsíc
+  const newYear = now.getFullYear();
+
+  // Kontrola jestli aktuální měsíc není stejný jako zobrazený
+  if (currentPeriod.month === newMonth && currentPeriod.year === newYear) {
+    wgsToast.info(`Už jste v období ${MONTHS_CZ[newMonth]} ${newYear}`);
+    return;
+  }
+
+  // Přepnout na nový měsíc
+  currentPeriod.month = newMonth;
+  currentPeriod.year = newYear;
+
+  updatePeriodDisplay();
+
+  // Načíst data pro nové období (pokud existuje) nebo zobrazit prázdné
+  await loadData();
+
+  showSuccess(`Nová docházka za ${MONTHS_CZ[newMonth]} ${newYear}`);
+  logger.log(`Switched to new attendance period: ${newMonth}/${newYear}`);
+}
+
+// === PERIOD OVERLAY ===
+function togglePeriodOverlay() {
+  const overlay = document.getElementById('periodOverlay');
+  const periodBtn = document.getElementById('periodDisplay');
+
+  if (overlay.classList.contains('active')) {
+    closePeriodOverlay();
+  } else {
+    overlay.classList.add('active');
+    periodBtn.classList.add('active');
+    naplnitPeriodOverlay();
+  }
+}
+
+function closePeriodOverlay() {
+  const overlay = document.getElementById('periodOverlay');
+  const periodBtn = document.getElementById('periodDisplay');
+  overlay.classList.remove('active');
+  periodBtn.classList.remove('active');
+}
+
+// === NEW PERIOD SELECTOR ===
+function showNewPeriodSelector() {
+  // Zavřít period overlay
+  closePeriodOverlay();
+
+  // Aktuální datum pro výchozí hodnoty
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+
+  // Vytvořit modal
+  const modal = document.createElement('div');
+  modal.className = 'new-period-modal active';
+  modal.id = 'newPeriodModal';
+
+  // Generovat options pro měsíce
+  const monthOptions = MONTHS_CZ.map((name, idx) => {
+    if (idx === 0) return '';  // Přeskočit prázdný první prvek
+    const selected = idx === currentMonth ? 'selected' : '';
+    return `<option value="${idx}" ${selected}>${name}</option>`;
+  }).join('');
+
+  // Generovat options pro roky (aktuální rok + 2 roky dopředu a 3 roky zpět)
+  const yearOptions = [];
+  for (let y = currentYear - 3; y <= currentYear + 2; y++) {
+    const selected = y === currentYear ? 'selected' : '';
+    yearOptions.push(`<option value="${y}" ${selected}>${y}</option>`);
+  }
+
+  modal.innerHTML = `
+    <div class="new-period-dialog">
+      <div class="new-period-header">
+        <span>Přidat nové období</span>
+        <button class="new-period-close" data-action="closeNewPeriodSelector" title="Zavřít">&times;</button>
+      </div>
+      <div class="new-period-body">
+        <div class="new-period-row">
+          <div class="new-period-field">
+            <label for="newPeriodMonth">Měsíc</label>
+            <select id="newPeriodMonth">
+              ${monthOptions}
+            </select>
+          </div>
+          <div class="new-period-field">
+            <label for="newPeriodYear">Rok</label>
+            <select id="newPeriodYear">
+              ${yearOptions.join('')}
+            </select>
+          </div>
+        </div>
+        <div class="new-period-info">
+          Nové období bude obsahovat pouze permanentní zaměstnance (Marek, Lenka, Radek, Prémie). Další zaměstnance můžete přidat ručně.
+        </div>
+      </div>
+      <div class="new-period-footer">
+        <button class="btn btn-secondary" data-action="closeNewPeriodSelector">Zrušit</button>
+        <button class="btn" data-action="confirmNewPeriod">Vytvořit období</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Zavřít při kliknutí mimo dialog
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeNewPeriodSelector();
+    }
+  });
+
+  // Zavřít při Escape
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      closeNewPeriodSelector();
+      document.removeEventListener('keydown', handleEscape);
+    }
+  };
+  document.addEventListener('keydown', handleEscape);
+}
+
+function closeNewPeriodSelector() {
+  const modal = document.getElementById('newPeriodModal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+async function confirmNewPeriod() {
+  const monthSelect = document.getElementById('newPeriodMonth');
+  const yearSelect = document.getElementById('newPeriodYear');
+
+  if (!monthSelect || !yearSelect) {
+    wgsToast.error('Chyba při načítání hodnot');
+    return;
+  }
+
+  const newMonth = parseInt(monthSelect.value);
+  const newYear = parseInt(yearSelect.value);
+
+  if (!newMonth || !newYear) {
+    wgsToast.error('Vyberte měsíc a rok');
+    return;
+  }
+
+  // Zkontrolovat jestli období už existuje
+  const periodKey = `${newYear}-${String(newMonth).padStart(2, '0')}`;
+
+  try {
+    const response = await fetch(API_URL, { credentials: 'same-origin' });
+    const payload = await response.json();
+
+    if (payload.status === 'success' && payload.data && payload.data.periods && payload.data.periods[periodKey]) {
+      // Období už existuje - přepnout na něj
+      if (await wgsConfirm(`Období ${MONTHS_CZ[newMonth]} ${newYear} již existuje. Chcete se na něj přepnout?`, 'Přepnout', 'Zrušit')) {
+        closeNewPeriodSelector();
+        currentPeriod.month = newMonth;
+        currentPeriod.year = newYear;
+        updatePeriodDisplay();
+        await loadPeriod();
+        showSuccess(`Přepnuto na ${MONTHS_CZ[newMonth]} ${newYear}`);
+      }
+      return;
+    }
+  } catch (error) {
+    logger.error('Chyba při kontrole období:', error);
+  }
+
+  // Vytvořit nové období pouze s permanentními zaměstnanci
+  closeNewPeriodSelector();
+
+  // Přepnout na nové období
+  currentPeriod.month = newMonth;
+  currentPeriod.year = newYear;
+  updatePeriodDisplay();
+
+  // Nastavit pouze permanentní zaměstnance s nulovými hodinami
+  employees = allEmployeesDatabase
+    .filter(emp => PERMANENT_EMPLOYEE_IDS.includes(emp.id))
+    .map(emp => ({
+      ...emp,
+      bank: formatBankCode(emp.bank),
+      hours: 0,
+      bonusAmount: 0,
+      premieCastka: 0
+    }));
+
+  renderTable();
+  updateStats();
+
+  // Uložit nové období na server
+  try {
+    saveToLocalStorage();
+    await saveToServer();
+    showSuccess(`Vytvořeno nové období: ${MONTHS_CZ[newMonth]} ${newYear}`);
+    logger.log(`Created new period ${periodKey} with permanent employees only`);
+  } catch (error) {
+    logger.error('Chyba při ukládání nového období:', error);
+    wgsToast.error('Chyba při ukládání období');
+  }
+}
+
+// Zavřít overlay při kliknutí mimo
+document.addEventListener('click', (e) => {
+  const overlay = document.getElementById('periodOverlay');
+  const periodBtn = document.getElementById('periodDisplay');
+
+  if (overlay && overlay.classList.contains('active')) {
+    if (!overlay.contains(e.target) && !periodBtn.contains(e.target)) {
+      closePeriodOverlay();
+    }
+  }
+});
+
+// Naplnit overlay uloženými obdobími
+async function naplnitPeriodOverlay() {
+  const container = document.getElementById('periodOverlayContent');
+  if (!container) return;
+
+  container.innerHTML = '<div class="period-loading">Načítám období...</div>';
+
+  try {
+    const response = await fetch(API_URL, { credentials: 'same-origin' });
+    if (!response.ok) throw new Error('Nepodařilo se načíst data');
+
+    const payload = await response.json();
+    if (payload.status !== 'success' || !payload.data) {
+      throw new Error('Neplatná odpověď serveru');
+    }
+
+    const periods = payload.data.periods || {};
+
+    // Seřadit období sestupně
+    const sortedPeriods = Object.keys(periods).sort().reverse();
+
+    if (sortedPeriods.length === 0) {
+      container.innerHTML = '<div class="period-no-data">Žádná uložená období</div>';
+      return;
+    }
+
+    // Aktuální klíč období
+    const currentKey = `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
+
+    // Generovat položky
+    const html = sortedPeriods.map(key => {
+      const [year, month] = key.split('-');
+      const monthNum = parseInt(month);
+      const label = `${MONTHS_CZ[monthNum]} ${year}`;
+      const data = periods[key];
+      const hours = data.totalHours || 0;
+      const salary = data.totalSalary ? Math.round(data.totalSalary).toLocaleString('cs-CZ') : '0';
+      const isCurrent = key === currentKey;
+
+      return `
+        <div class="period-item${isCurrent ? ' current' : ''}" data-action="selectPeriod" data-period="${key}">
+          <div class="period-item-checkbox"></div>
+          <div class="period-item-info">
+            <div class="period-item-name">${label}</div>
+            <div class="period-item-stats">${hours} hodin / ${salary} Kč</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    container.innerHTML = html;
+
+  } catch (error) {
+    logger.error('Chyba při načítání období pro overlay:', error);
+    container.innerHTML = '<div class="period-no-data">Chyba při načítání období</div>';
+  }
+}
+
+// Vybrat období z overlay
+async function selectPeriod(periodKey) {
+  // Parsovat období
+  const [year, month] = periodKey.split('-');
+  currentPeriod.year = parseInt(year);
+  currentPeriod.month = parseInt(month);
+
+  updatePeriodDisplay();
+  closePeriodOverlay();
+
+  await loadPeriod();
+}
+
+// === NAČÍST OBDOBÍ ===
+async function loadPeriod() {
+  const periodKey = `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
+
+  try {
+    const response = await fetch(API_URL, { credentials: 'same-origin' });
+    if (!response.ok) throw new Error('Nepodařilo se načíst data');
+
+    const payload = await response.json();
+    if (payload.status !== 'success' || !payload.data) {
+      throw new Error('Neplatná odpověď serveru');
+    }
+
+    const data = payload.data;
+
+    // Zkontrolovat jestli období existuje
+    if (!data.periods || !data.periods[periodKey]) {
+      showError(`Období ${MONTHS_CZ[currentPeriod.month]} ${currentPeriod.year} nebylo nalezeno. Nejprve uložte data pro toto období.`);
+      // Vynulovat hodiny
+      employees.forEach(emp => emp.hours = 0);
+      renderTable();
+      updateStats();
+      return;
+    }
+
+    // Načíst data období
+    const periodData = data.periods[periodKey];
+
+    // Aktualizovat databázi zaměstnanců
+    allEmployeesDatabase = data.employees.map(emp => ({
+      ...emp,
+      bank: formatBankCode(emp.bank)
+    }));
+
+    // Filtrovat zaměstnance pro období:
+    // 1. Permanentní zaměstnanci (Marek, Lenka, Radek, Prémie) - vždy
+    // 2. Zaměstnanci kteří mají v období hours > 0
+    employees = data.employees
+      .filter(emp => {
+        const periodEmp = periodData.employees.find(pe => pe.id === emp.id);
+        // Permanentní zaměstnanci vždy
+        if (PERMANENT_EMPLOYEE_IDS.includes(emp.id)) return true;
+        // Ostatní jen pokud mají hodiny v období
+        return periodEmp && periodEmp.hours > 0;
+      })
+      .map(emp => {
+        const periodEmp = periodData.employees.find(pe => pe.id === emp.id);
+        return {
+          ...emp,
+          // Účet a banka - preferovat hodnotu z období, jinak hlavní
+          account: periodEmp && periodEmp.account ? periodEmp.account : (emp.account || ''),
+          bank: formatBankCode(periodEmp && periodEmp.bank ? periodEmp.bank : (emp.bank || '')),
+          // Hodiny a bonusy z období
+          hours: periodEmp ? (periodEmp.hours || 0) : 0,
+          bonusAmount: periodEmp ? (periodEmp.bonusAmount || 0) : (emp.bonusAmount || 0),
+          premieCastka: periodEmp ? (periodEmp.premieCastka || 0) : 0
+        };
+      });
+
+    renderTable();
+    updateStats();
+    showSuccess(`Načteno období: ${MONTHS_CZ[currentPeriod.month]} ${currentPeriod.year} (${periodData.totalHours || 0} hodin)`);
+    logger.log(`Loaded period ${periodKey}:`, periodData);
+
+  } catch (error) {
+    logger.error('Chyba při načítání období:', error);
+    showError('Chyba při načítání období: ' + error.message);
+  }
+}
+
+// === VYČISTIT HODINY (NOVÉ OBDOBÍ) ===
+function clearHours() {
+  employees.forEach(emp => {
+    emp.hours = 0;
+    if (emp.type === 'bonus_girls') emp.bonusAmount = 0;
+  });
+  renderTable();
+  updateStats();
+  showSuccess('Hodiny vynulovány - připraveno pro nové období');
 }
 
 // === DATA LOADING ===
@@ -58,8 +444,44 @@ async function loadData(period = null) {
   try {
     logger.log('Loading data from JSON...', period ? `for period ${period}` : '');
 
-    const response = await fetch(API_URL);
-    const data = await response.json();
+    const response = await fetch(API_URL, { credentials: 'same-origin' });
+
+    if (!response.ok) {
+      throw new Error(`Server responded with ${response.status}`);
+    }
+
+    const payload = await response.json();
+
+    if (payload.status !== 'success' || !payload.data) {
+      throw new Error(payload.message || 'Neplatná odpověď serveru');
+    }
+
+    const data = payload.data;
+
+    // Uložit kompletní databázi zaměstnanců pro výběr
+    if (data.employees && data.employees.length > 0) {
+      allEmployeesDatabase = data.employees.map(emp => ({
+        ...emp,
+        bank: formatBankCode(emp.bank)
+      }));
+      logger.log('loadData: allEmployeesDatabase loaded with', allEmployeesDatabase.length, 'employees');
+    } else {
+      // FALLBACK: Pokud employees je prázdné, zkusit načíst z posledního období
+      logger.warn('loadData: data.employees is empty, trying fallback from periods...');
+      if (data.periods) {
+        const sortedPeriods = Object.keys(data.periods).sort().reverse();
+        if (sortedPeriods.length > 0) {
+          const lastPeriod = data.periods[sortedPeriods[0]];
+          if (lastPeriod && lastPeriod.employees && lastPeriod.employees.length > 0) {
+            allEmployeesDatabase = lastPeriod.employees.map(emp => ({
+              ...emp,
+              bank: formatBankCode(emp.bank || '')
+            }));
+            logger.log('loadData: FALLBACK - loaded', allEmployeesDatabase.length, 'employees from period', sortedPeriods[0]);
+          }
+        }
+      }
+    }
 
     // Load configuration
     if (data.config) {
@@ -69,31 +491,46 @@ async function loadData(period = null) {
       document.getElementById('invoiceRate').value = invoiceRate;
     }
 
-    // Load employees for specific period or current data
-    if (period && data.periods && data.periods[period]) {
-      // Load historical period data
-      const periodData = data.periods[period];
-      employees = data.employees.map(emp => {
-        const periodEmp = periodData.employees.find(pe => pe.id === emp.id);
-        return {
-          ...emp,
-          bank: formatBankCode(emp.bank),
-          hours: periodEmp ? (periodEmp.hours || 0) : 0,
-          bonusAmount: emp.bonusAmount || 0
-        };
-      });
-      logger.log(`Loaded period ${period} with ${employees.length} employees`);
+    // Určit klíč období - buď předaný nebo aktuální
+    const periodKey = period || `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
+
+    // Načíst zaměstnance podle období
+    if (data.periods && data.periods[periodKey]) {
+      // Období existuje - filtrovat zaměstnance
+      const periodData = data.periods[periodKey];
+
+      employees = data.employees
+        .filter(emp => {
+          const periodEmp = periodData.employees.find(pe => pe.id === emp.id);
+          // Permanentní zaměstnanci vždy
+          if (PERMANENT_EMPLOYEE_IDS.includes(emp.id)) return true;
+          // Ostatní jen pokud mají hodiny v období
+          return periodEmp && periodEmp.hours > 0;
+        })
+        .map(emp => {
+          const periodEmp = periodData.employees.find(pe => pe.id === emp.id);
+          return {
+            ...emp,
+            account: periodEmp && periodEmp.account ? periodEmp.account : (emp.account || ''),
+            bank: formatBankCode(periodEmp && periodEmp.bank ? periodEmp.bank : (emp.bank || '')),
+            hours: periodEmp ? (periodEmp.hours || 0) : 0,
+            bonusAmount: periodEmp ? (periodEmp.bonusAmount || 0) : (emp.bonusAmount || 0),
+            premieCastka: periodEmp ? (periodEmp.premieCastka || 0) : 0
+          };
+        });
+      logger.log(`Loaded period ${periodKey} with ${employees.length} employees`);
     } else {
-      // Load current data
-      if (data.employees) {
-        employees = data.employees.map(emp => ({
+      // Období neexistuje - zobrazit pouze permanentní zaměstnance
+      employees = data.employees
+        .filter(emp => PERMANENT_EMPLOYEE_IDS.includes(emp.id))
+        .map(emp => ({
           ...emp,
           bank: formatBankCode(emp.bank),
-          hours: emp.hours || 0,
-          bonusAmount: emp.bonusAmount || 0
+          hours: 0,
+          bonusAmount: 0,
+          premieCastka: 0
         }));
-      }
-      logger.log(`Loaded ${employees.length} employees`);
+      logger.log(`New period ${periodKey} - showing only permanent employees`);
     }
 
     renderTable();
@@ -125,22 +562,62 @@ async function saveData() {
 
 // === SERVER SAVE ===
 async function saveToServer() {
+  // Spočítat statistiky pro období
+  const stats = calculateStats();
+
+  // Připravit data období - hodiny, prémie a základní info
+  // Zahrnout VŠECHNY aktivní zaměstnance (ne jen ty s hodinami > 0)
+  const periodEmployees = employees.filter(e => {
+    return e.active !== false;  // Všichni aktivní zaměstnanci
+  }).map(emp => ({
+    id: emp.id,
+    name: emp.name,
+    hours: emp.hours || 0,
+    type: emp.type || 'standard',
+    bonusAmount: emp.bonusAmount || 0,
+    premieCastka: emp.premieCastka || 0,
+    account: emp.account || '',
+    bank: emp.bank || ''
+  }));
+
+  // Kompletní databáze zaměstnanců k uložení
+  // DŮLEŽITÉ: employees musí být celá databáze (allEmployeesDatabase),
+  // NE filtrovaný seznam pro aktuální období (employees)!
+  const employeesToSave = allEmployeesDatabase.length > 0
+    ? allEmployeesDatabase
+    : employees;
+
+  // Data ve formátu pro SQL API
   const data = {
     config: {
       salaryRate: salaryRate,
-      invoiceRate: invoiceRate,
-      company: 'White Glove Service',
-      currency: 'CZK'
+      invoiceRate: invoiceRate
     },
-    employees: employees
+    employees: employeesToSave,
+    periodData: {
+      year: currentPeriod.year,
+      month: currentPeriod.month,
+      employees: periodEmployees,
+      totalHours: stats.totalHours,
+      totalSalary: stats.totalSalary,
+      totalInvoice: stats.totalInvoice,
+      profit: stats.profit,
+      marekBonus: stats.marekBonus || 0,
+      radekBonus: stats.radekBonus || 0,
+      girlsBonus: stats.girlsBonus || 0,
+      radekTotal: stats.radekTotal || 0,
+      premieCelkem: stats.premieCelkem || 0
+    }
   };
 
   try {
-    const response = await fetch('app/save_psa_data.php', {
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json; charset=utf-8'
+        'Content-Type': 'application/json; charset=utf-8',
+        'X-CSRF-Token': CSRF_TOKEN
       },
+      credentials: 'same-origin',
       body: JSON.stringify(data)
     });
 
@@ -150,12 +627,98 @@ async function saveToServer() {
       throw new Error(result.message || 'Nepodařilo se uložit data na server');
     }
 
-    logger.log('Data saved to server successfully', result);
+    const periodKey = `${currentPeriod.year}-${String(currentPeriod.month).padStart(2, '0')}`;
+    logger.log(`Data pro období ${periodKey} úspěšně uložena do SQL`, result);
     return result;
   } catch (error) {
     logger.error('Server save failed:', error);
     throw error;
   }
+}
+
+// === VÝPOČET STATISTIK ===
+// Používá STEJNOU logiku jako updateStats() - počítá přesně jako v tabulce
+function calculateStats() {
+  let totalHours = 0;
+  let totalSalary = 0;
+  let totalInvoice = 0;
+
+  // Nejprve spočítat celkové hodiny pro bonus special zaměstnanců
+  let totalOtherHours = 0;
+  employees.forEach(emp => {
+    if (emp.active === false) return;
+    if (emp.type !== 'special' && emp.type !== 'special2' && emp.type !== 'bonus_girls' && emp.type !== 'premie_polozka') {
+      const isLenka = emp.name === 'Lenka' || emp.name.includes('Lenka');
+      if (!isLenka) {
+        totalOtherHours += parseFloat(emp.hours) || 0;
+      }
+    }
+  });
+
+  // Projít všechny zaměstnance a sečíst PŘESNĚ jako v tabulce
+  employees.forEach(emp => {
+    if (emp.active === false) return;
+
+    const isLenka = emp.name === 'Lenka' || emp.name.includes('Lenka');
+    let salary = 0;
+    let invoice = 0;
+
+    if (isLenka) {
+      // Lenka má paušální mzdu 8716 Kč
+      salary = 8716;
+      invoice = 0;
+    } else if (emp.type === 'bonus_girls') {
+      // Bonus pro holky - editovatelná částka
+      salary = parseFloat(emp.bonusAmount) || 0;
+      invoice = 0;
+    } else if (emp.type === 'special' || emp.type === 'special2') {
+      // Special zaměstnanci (Marek, Radek) - bonus z hodin ostatních
+      salary = totalOtherHours * 20;
+      invoice = 0;
+    } else if (emp.type === 'premie_polozka') {
+      // Prémie položka - editovatelná částka
+      salary = parseFloat(emp.premieCastka) || 0;
+      invoice = 0;
+    } else if (emp.type === 'pausalni' && emp.pausalni) {
+      // Paušální zaměstnanci
+      const hours = parseFloat(emp.hours) || 0;
+      const monthlyRate = emp.pausalni.rate / 12;
+      const monthlyTax = emp.pausalni.tax;
+      salary = hours * salaryRate;
+      invoice = Math.min(hours * invoiceRate, monthlyRate - monthlyTax);
+    } else {
+      // Standardní zaměstnanci
+      const hours = parseFloat(emp.hours) || 0;
+      salary = hours * salaryRate;
+      invoice = hours * invoiceRate;
+    }
+
+    totalSalary += salary;
+    totalInvoice += invoice;
+
+    // Hodiny jen pro běžné zaměstnance
+    if (emp.type !== 'special' && emp.type !== 'special2' && emp.type !== 'bonus_girls' && emp.type !== 'premie_polozka' && !isLenka) {
+      totalHours += parseFloat(emp.hours) || 0;
+    }
+  });
+
+  // Bonusy pro zpětnou kompatibilitu (používá se při ukládání do DB)
+  const marekBonus = totalOtherHours * 20;
+  const radekBonus = totalOtherHours * 20;
+  const premiePolozky = employees.filter(e => e.type === 'premie_polozka');
+  const premieCelkem = premiePolozky.reduce((sum, e) => sum + (parseFloat(e.premieCastka) || 0), 0);
+
+  return {
+    totalHours,
+    totalSalary,
+    totalInvoice,
+    profit: totalInvoice - totalSalary,
+    marekBonus,
+    radekBonus,
+    girlsBonus: 0,  // Již se nepočítá zvlášť
+    radekTotal: radekBonus,
+    premieCelkem
+  };
 }
 
 // === LOCAL STORAGE (BACKUP) ===
@@ -182,8 +745,6 @@ function loadFromLocalStorage() {
 
       if (data.period) {
         currentPeriod = data.period;
-        document.getElementById('monthSelect').value = currentPeriod.month;
-        document.getElementById('yearSelect').value = currentPeriod.year;
         updatePeriodDisplay();
       }
 
@@ -200,22 +761,271 @@ function loadFromLocalStorage() {
 }
 
 // === EMPLOYEE MANAGEMENT ===
-async function addEmployee() {
-  const name = prompt('Zadejte jméno nového zaměstnance:');
-  if (!name || name.trim() === '') return;
+function addEmployee() {
+  // Použít nový employee selector s checkboxy
+  showEmployeeSelector();
+}
 
-  const newId = employees.length > 0 ? Math.max(...employees.map(e => e.id || 0)) + 1 : 1;
+// === EMPLOYEE SELECTOR (checkbox overlay) ===
+async function showEmployeeSelector() {
+  logger.log('showEmployeeSelector started, allEmployeesDatabase.length =', allEmployeesDatabase.length);
 
+  // Pokud je databáze prázdná, zkusit načíst data znovu
+  if (allEmployeesDatabase.length === 0) {
+    logger.log('allEmployeesDatabase is empty, trying to reload data...');
+    try {
+      await loadData();
+      logger.log('After loadData, allEmployeesDatabase.length =', allEmployeesDatabase.length);
+    } catch (err) {
+      logger.error('Failed to reload data:', err);
+    }
+  }
+
+  const currentIds = employees.map(e => e.id);
+  const excludedTypes = ['special', 'special2', 'pausalni', 'premie_polozka'];
+
+  // Všichni zaměstnanci z databáze (kromě speciálních a permanentních)
+  const allAvailable = allEmployeesDatabase.filter(emp =>
+    !PERMANENT_EMPLOYEE_IDS.includes(emp.id) &&
+    !excludedTypes.includes(emp.type)
+  );
+
+  logger.log('Employee selector - allEmployeesDatabase:', allEmployeesDatabase.length, 'allAvailable:', allAvailable.length);
+
+  if (allAvailable.length === 0) {
+    wgsToast.info('Žádní zaměstnanci v databázi - zkontrolujte přihlášení');
+    return;
+  }
+
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.id = 'employeeSelectorModal';
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Vybrat zaměstnance</h2>
+        <span class="close-modal" data-action="closeEmployeeSelector">&times;</span>
+      </div>
+      <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--c-border); display: flex; gap: 1rem;">
+        <button class="btn btn-sm" data-action="selectAllEmployees">Vybrat vše</button>
+        <button class="btn btn-sm btn-secondary" data-action="deselectAllEmployees">Zrušit výběr</button>
+      </div>
+      <div style="padding: 1rem 1.5rem; max-height: 400px; overflow-y: auto;">
+        ${allAvailable.map(emp => {
+          const isAlreadyAdded = currentIds.includes(emp.id);
+          return `
+            <label style="display: flex; align-items: center; padding: 0.75rem; margin-bottom: 0.5rem; border: 1px solid var(--c-border); border-radius: 4px; cursor: pointer; ${isAlreadyAdded ? 'opacity: 0.5; background: var(--c-bg);' : ''}" ${isAlreadyAdded ? 'title="Už je v seznamu"' : ''}>
+              <input type="checkbox"
+                     name="selectedEmployee"
+                     value="${emp.id}"
+                     ${isAlreadyAdded ? 'disabled checked' : ''}
+                     style="width: 18px; height: 18px; margin-right: 0.75rem; accent-color: var(--c-black);">
+              <div style="flex: 1;">
+                <div style="font-weight: 600;">${emp.name}</div>
+                <div style="font-size: 0.8rem; color: var(--c-grey);">
+                  ${emp.account ? emp.account + '/' + emp.bank : 'Bez účtu'}
+                  ${emp.type === 'swift' ? ' (SWIFT)' : ''}
+                </div>
+              </div>
+              ${isAlreadyAdded ? '<span style="font-size: 0.75rem; color: var(--c-grey);">v seznamu</span>' : ''}
+            </label>
+          `;
+        }).join('')}
+      </div>
+      <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--c-border); display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.85rem; color: var(--c-grey);">Vybráno: <strong id="selectedCount">0</strong></span>
+        <div>
+          <button class="btn btn-secondary" data-action="closeEmployeeSelector">Zrušit</button>
+          <button class="btn" data-action="confirmEmployeeSelection" style="margin-left: 0.5rem;">Přidat vybrané</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.style.display = 'block';
+
+  // Aktualizovat počet vybraných
+  updateSelectedCount();
+
+  // Event listener pro checkboxy
+  modal.querySelectorAll('input[name="selectedEmployee"]').forEach(cb => {
+    cb.addEventListener('change', updateSelectedCount);
+  });
+}
+
+function updateSelectedCount() {
+  const modal = document.getElementById('employeeSelectorModal');
+  if (!modal) return;
+
+  const checked = modal.querySelectorAll('input[name="selectedEmployee"]:checked:not(:disabled)').length;
+  const countEl = modal.querySelector('#selectedCount');
+  if (countEl) countEl.textContent = checked;
+}
+
+function selectAllEmployees() {
+  const modal = document.getElementById('employeeSelectorModal');
+  if (!modal) return;
+
+  modal.querySelectorAll('input[name="selectedEmployee"]:not(:disabled)').forEach(cb => {
+    cb.checked = true;
+  });
+  updateSelectedCount();
+}
+
+function deselectAllEmployees() {
+  const modal = document.getElementById('employeeSelectorModal');
+  if (!modal) return;
+
+  modal.querySelectorAll('input[name="selectedEmployee"]:not(:disabled)').forEach(cb => {
+    cb.checked = false;
+  });
+  updateSelectedCount();
+}
+
+function closeEmployeeSelector() {
+  const modal = document.getElementById('employeeSelectorModal');
+  if (modal) modal.remove();
+}
+
+async function confirmEmployeeSelection() {
+  const modal = document.getElementById('employeeSelectorModal');
+  if (!modal) return;
+
+  const selectedIds = Array.from(modal.querySelectorAll('input[name="selectedEmployee"]:checked:not(:disabled)'))
+    .map(cb => parseInt(cb.value));
+
+  if (selectedIds.length === 0) {
+    wgsToast.warning('Nevybrali jste žádné zaměstnance');
+    return;
+  }
+
+  // Přidat vybrané zaměstnance
+  selectedIds.forEach(id => {
+    const emp = allEmployeesDatabase.find(e => e.id === id);
+    if (emp && !employees.find(e => e.id === id)) {
+      employees.push({
+        ...emp,
+        hours: 0,
+        bonusAmount: 0,
+        premieCastka: 0
+      });
+    }
+  });
+
+  closeEmployeeSelector();
+  renderTable();
+  updateStats();
+
+  // Uložit na server
+  try {
+    saveToLocalStorage();
+    await saveToServer();
+    showSuccess(`Přidáno ${selectedIds.length} zaměstnanců`);
+  } catch (error) {
+    logger.error('Failed to save after adding employees:', error);
+  }
+}
+
+// Přidat nového prázdného zaměstnance
+function addNewBlankEmployee() {
+  // Zavřít modal
+  const modal = document.getElementById('addEmployeeModal');
+  if (modal) modal.remove();
+
+  // Vygenerovat dočasné ID (záporné, aby se nepletlo s existujícími)
+  const tempId = -(Date.now());
+
+  // Přidat prázdného zaměstnance
   employees.push({
-    id: newId,
-    name: name.trim(),
+    id: tempId,
+    name: '',
     hours: 0,
-    bonusAmount: 0,
     account: '',
     bank: '',
     type: 'standard',
+    active: true,
+    isNew: true  // Označit jako nového (ještě není v databázi)
+  });
+
+  renderTable();
+  updateStats();
+
+  // Focus na pole jméno
+  setTimeout(() => {
+    const lastRow = document.querySelector(`[data-index="${employees.length - 1}"][data-field="name"]`);
+    if (lastRow) lastRow.focus();
+  }, 100);
+
+  showSuccess('Vyplňte údaje nového zaměstnance a uložte do databáze');
+}
+
+// Uložit nového zaměstnance do databáze
+async function saveEmployeeToDatabase(index) {
+  const emp = employees[index];
+
+  if (!emp.name || emp.name.trim() === '') {
+    wgsToast.error('Zadejte jméno zaměstnance');
+    return;
+  }
+
+  // Vygenerovat nové ID
+  const maxId = Math.max(...allEmployeesDatabase.map(e => e.id || 0), 0);
+  const newId = maxId + 1;
+
+  // Aktualizovat zaměstnance
+  emp.id = newId;
+  emp.isNew = false;
+  emp.name = emp.name.trim();
+
+  // Přidat do databáze
+  allEmployeesDatabase.push({
+    id: newId,
+    name: emp.name,
+    account: emp.account || '',
+    bank: emp.bank || '',
+    type: 'standard',
     active: true
   });
+
+  renderTable();
+
+  // Uložit na server
+  try {
+    await saveToServer();
+    showSuccess(`Zaměstnanec ${emp.name} uložen do databáze`);
+    logger.log('New employee saved to database:', emp.name);
+  } catch (error) {
+    logger.error('Failed to save new employee:', error);
+    wgsToast.error('Chyba při ukládání do databáze');
+  }
+}
+
+async function confirmAddEmployee() {
+  const select = document.getElementById('selectEmployeeToAdd');
+  const selectedId = parseInt(select.value);
+
+  if (!selectedId) {
+    wgsToast.error('Vyberte zaměstnance');
+    return;
+  }
+
+  // Najít zaměstnance v databázi
+  const empToAdd = allEmployeesDatabase.find(e => e.id === selectedId);
+  if (!empToAdd) {
+    wgsToast.error('Zaměstnanec nenalezen');
+    return;
+  }
+
+  // Přidat do seznamu s nulovými hodinami
+  employees.push({
+    ...empToAdd,
+    hours: 0,
+    bonusAmount: 0,
+    premieCastka: 0
+  });
+
+  // Zavřít modal
+  document.getElementById('addEmployeeModal').remove();
 
   renderTable();
   updateStats();
@@ -224,7 +1034,8 @@ async function addEmployee() {
   try {
     saveToLocalStorage();
     await saveToServer();
-    logger.log('Employee added and saved');
+    logger.log('Employee added and saved:', empToAdd.name);
+    showSuccess(`Zaměstnanec ${empToAdd.name} přidán`);
   } catch (error) {
     logger.error('Failed to save after adding employee:', error);
   }
@@ -233,13 +1044,13 @@ async function addEmployee() {
 async function updateEmployee(index, field, value, needConfirm = false) {
   if (field === 'name' && needConfirm) {
     const oldName = employees[index].name;
-    if (oldName !== value && !confirm(`Opravdu chcete změnit jméno z "${oldName}" na "${value}"?`)) {
+    if (oldName !== value && !await wgsConfirm(`Opravdu chcete změnit jméno z "${oldName}" na "${value}"?`, 'Změnit', 'Zrušit')) {
       renderTable();
       return;
     }
   }
 
-  if (field === 'hours' || field === 'bonusAmount') {
+  if (field === 'hours' || field === 'bonusAmount' || field === 'premieCastka') {
     employees[index][field] = parseInt(value) || 0;
   } else if (field === 'bank') {
     employees[index][field] = formatBankCode(value);
@@ -261,7 +1072,15 @@ async function updateEmployee(index, field, value, needConfirm = false) {
 }
 
 async function removeEmployee(index) {
-  if (confirm(`Opravdu chcete odstranit zaměstnance ${employees[index].name}?`)) {
+  const emp = employees[index];
+
+  // Permanentní zaměstnance nelze odebrat
+  if (PERMANENT_EMPLOYEE_IDS.includes(emp.id)) {
+    wgsToast.error('Tento zaměstnanec je permanentní a nelze ho odebrat');
+    return;
+  }
+
+  if (await wgsConfirm(`Opravdu chcete odebrat zaměstnance ${emp.name} z tohoto období?`, 'Odebrat', 'Zrušit')) {
     employees.splice(index, 1);
     renderTable();
     updateStats();
@@ -270,7 +1089,8 @@ async function removeEmployee(index) {
     try {
       saveToLocalStorage();
       await saveToServer();
-      logger.log('Employee removed and saved');
+      logger.log('Employee removed from period:', emp.name);
+      showSuccess(`${emp.name} odebrán z období`);
     } catch (error) {
       logger.error('Failed to save after removing employee:', error);
     }
@@ -282,7 +1102,19 @@ function renderTable() {
   const tbody = document.getElementById('employeeTableBody');
 
   if (employees.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding: 2rem; color: var(--c-grey);">Žádní zaměstnanci - použijte tlačítko "Přidat"</td></tr>';
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center" style="padding: 3rem;">
+          <div data-action="showEmployeeSelector"
+               style="cursor: pointer; display: inline-block; padding: 1.5rem 2.5rem; border: 2px dashed var(--c-grey); border-radius: 8px; transition: all 0.2s ease;"
+               onmouseover="this.style.borderColor='var(--c-black)'; this.style.background='rgba(0,0,0,0.02)'"
+               onmouseout="this.style.borderColor='var(--c-grey)'; this.style.background='transparent'">
+            <div style="font-size: 2.5rem; font-weight: 300; color: var(--c-grey); line-height: 1;">+</div>
+            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--c-grey);">Přidat zaměstnance</div>
+          </div>
+        </td>
+      </tr>
+    `;
     return;
   }
 
@@ -317,9 +1149,15 @@ function renderTable() {
       invoice = Math.min(emp.hours * invoiceRate, monthlyRate - monthlyTax);
       displayInfo = '<span class="employee-type-badge">Paušál</span>';
     } else if (emp.type === 'special' || emp.type === 'special2') {
+      // Bonus z hodin ostatních
       salary = totalOtherHours * 20;
       invoice = 0;
       displayInfo = '<span class="employee-type-badge">Pouze bonus</span>';
+    } else if (emp.type === 'premie_polozka') {
+      // Samostatná položka pro prémie - editovatelná částka
+      salary = emp.premieCastka || 0;
+      invoice = 0;
+      displayInfo = '<span class="employee-type-badge" style="background: var(--c-black); color: var(--c-white);">Prémie</span>';
     } else {
       salary = emp.hours * salaryRate;
       invoice = emp.hours * invoiceRate;
@@ -343,12 +1181,26 @@ function renderTable() {
                  value="${emp.name}"
                  class="table-input"
                  style="font-weight: 600; min-width: 150px;"
-                 onchange="updateEmployee(${index}, 'name', this.value, true)">
+                 data-action="updateEmployeeField"
+                 data-index="${index}"
+                 data-field="name"
+                 data-recalculate="true">
           ${displayInfo}
         </td>
         <td class="text-center">
-          ${(emp.type === 'special' || emp.type === 'special2' || isLenka) ?
+          ${(isLenka || emp.type === 'special' || emp.type === 'special2') ?
             '<span style="color: var(--c-grey);">–</span>' :
+            emp.type === 'premie_polozka' ?
+              `<input type="number"
+                     value="${emp.premieCastka || 0}"
+                     min="0"
+                     step="100"
+                     class="table-input"
+                     style="width: 100px; text-align: center; font-weight: 600;"
+                     placeholder="Částka (Kč)"
+                     data-action="updateEmployeeField"
+                     data-index="${index}"
+                     data-field="premieCastka">` :
             emp.type === 'bonus_girls' ?
               `<input type="number"
                      value="${emp.bonusAmount || 0}"
@@ -357,19 +1209,23 @@ function renderTable() {
                      class="table-input"
                      style="width: 100px; text-align: center; font-weight: 600; background: #fff3cd;"
                      placeholder="Částka (Kč)"
-                     onchange="updateEmployee(${index}, 'bonusAmount', this.value)">` :
+                     data-action="updateEmployeeField"
+                     data-index="${index}"
+                     data-field="bonusAmount">` :
               `<input type="number"
                      value="${emp.hours}"
                      min="0"
                      class="table-input"
                      style="width: 80px; text-align: center; font-weight: 600;"
-                     onchange="updateEmployee(${index}, 'hours', this.value)">`
+                     data-action="updateEmployeeField"
+                     data-index="${index}"
+                     data-field="hours">`
           }
         </td>
         <td class="text-right" style="font-weight: 600; color: var(--c-success);">
           ${formatCurrency(salary)}
           ${(emp.type === 'special' || emp.type === 'special2') ?
-            '<br><span style="font-size: 0.75rem; color: var(--c-grey);">' + totalOtherHours + 'h × 20 Kč</span>' : ''}
+            '<br><span style="font-size: 0.75rem; color: var(--c-grey);">' + totalOtherHours + 'h × 20</span>' : ''}
         </td>
         <td class="text-right" style="font-weight: 600; color: var(--c-info);">
           ${formatCurrency(invoice)}
@@ -380,7 +1236,9 @@ function renderTable() {
                  placeholder="Číslo účtu"
                  class="table-input"
                  ${emp.type === 'swift' ? 'readonly' : ''}
-                 onchange="updateEmployee(${index}, 'account', this.value)">
+                 data-action="updateEmployeeField"
+                 data-index="${index}"
+                 data-field="account">
         </td>
         <td>
           <input type="text"
@@ -389,11 +1247,18 @@ function renderTable() {
                  class="table-input"
                  style="width: 100px; text-align: center;"
                  ${emp.type === 'swift' ? 'readonly' : ''}
-                 onchange="updateEmployee(${index}, 'bank', this.value)">
+                 data-action="updateEmployeeField"
+                 data-index="${index}"
+                 data-field="bank">
         </td>
-        <td class="text-center">
-          <button class="btn btn-sm" style="background: var(--c-info); color: white; margin-right: 0.25rem;" onclick="generateSingleEmployeeQR(${index})" title="Generovat QR platbu">QR</button>
-          <button class="btn btn-danger btn-sm" onclick="removeEmployee(${index})">×</button>
+        <td class="text-center" style="white-space: nowrap;">
+          ${emp.isNew ?
+            `<button class="btn btn-sm" style="background: var(--c-success); color: white; margin-right: 0.25rem;" data-action="saveEmployeeToDatabase" data-index="${index}" title="Uložit do databáze">Uložit do DB</button>` :
+            `<button class="btn btn-sm" style="background: var(--c-info); color: white; margin-right: 0.25rem;" data-action="generateSingleEmployeeQR" data-index="${index}" title="Generovat QR platbu">QR</button>`
+          }
+          ${PERMANENT_EMPLOYEE_IDS.includes(emp.id) ? '' :
+            `<button class="btn btn-danger btn-sm" data-action="removeEmployee" data-index="${index}" title="Odebrat z období">×</button>`
+          }
         </td>
       </tr>
     `;
@@ -405,53 +1270,63 @@ function updateStats() {
   let totalHours = 0;
   let totalSalary = 0;
   let totalInvoice = 0;
-  let totalEmployeeHours = 0;
 
-  // Calculate total hours (excluding special employees and bonus_girls)
+  // Nejprve spočítat celkové hodiny pro bonus special zaměstnanců
+  let totalOtherHours = 0;
   employees.forEach(emp => {
-    if (emp.type !== 'special' && emp.type !== 'special2' && emp.type !== 'bonus_girls') {
-      totalEmployeeHours += emp.hours || 0;
-      totalHours += emp.hours || 0;
+    if (emp.type !== 'special' && emp.type !== 'special2' && emp.type !== 'bonus_girls' && emp.type !== 'premie_polozka') {
+      const isLenka = emp.name === 'Lenka' || emp.name.includes('Lenka');
+      if (!isLenka) {
+        totalOtherHours += emp.hours || 0;
+      }
     }
   });
 
-  // Bonus for special employees
-  const bonusPerSpecial = totalEmployeeHours * 20;
-
-  // Count only active employees with hours in current month
-  // VYLOUČIT: Lenka, Marek, Radek, Bonus pro holky (nepočítají se do zaměstnanců)
+  // Počet aktivních zaměstnanců (jen běžní s hodinami)
   let activeEmployeesCount = 0;
 
-  // Calculate totals - ONLY for employees with hours > 0 or Lenka (paušál)
+  // Projít všechny zaměstnance a sečíst PŘESNĚ jako v tabulce
   employees.forEach(emp => {
     const isLenka = emp.name === 'Lenka' || emp.name.includes('Lenka');
+    let salary = 0;
+    let invoice = 0;
 
-    // Lenka má vždy paušál, ostatní jen pokud mají hodiny > 0
     if (isLenka) {
-      // Lenka má paušální mzdu 8716 Kč (NEPOČÍTÁ SE do zaměstnanců)
-      totalSalary += 8716;
-      totalInvoice += 0;  // Paušál nemá fakturu
-      // activeEmployeesCount++; ← ODSTRANĚNO, Lenka se nepočítá
+      // Lenka má paušální mzdu 8716 Kč
+      salary = 8716;
+      invoice = 0;
     } else if (emp.type === 'bonus_girls') {
-      // Bonus pro holky - editovatelná částka (NEPOČÍTÁ SE do zaměstnanců)
-      totalSalary += (emp.bonusAmount || 0);
-      // activeEmployeesCount++; ← ODSTRANĚNO, bonus_girls se nepočítá
-    } else if ((emp.type === 'special' || emp.type === 'special2') && bonusPerSpecial > 0) {
-      // Special zaměstnanci (Marek, Radek) - NEPOČÍTAJÍ SE do zaměstnanců
-      totalSalary += bonusPerSpecial;
-      // activeEmployeesCount++; ← ODSTRANĚNO, special se nepočítají
-    } else if (emp.hours > 0) {
-      // Ostatní zaměstnanci jen pokud mají hodiny > 0
-      if (emp.type === 'pausalni' && emp.pausalni) {
-        const monthlyRate = emp.pausalni.rate / 12;
-        const monthlyTax = emp.pausalni.tax;
-        totalSalary += emp.hours * salaryRate;
-        totalInvoice += Math.min(emp.hours * invoiceRate, monthlyRate - monthlyTax);
-      } else {
-        totalSalary += emp.hours * salaryRate;
-        totalInvoice += emp.hours * invoiceRate;
-      }
-      activeEmployeesCount++; // ← JEN BĚŽNÍ ZAMĚSTNANCI S HODINAMI
+      // Bonus pro holky - editovatelná částka
+      salary = emp.bonusAmount || 0;
+      invoice = 0;
+    } else if (emp.type === 'special' || emp.type === 'special2') {
+      // Special zaměstnanci (Marek, Radek) - bonus z hodin ostatních
+      salary = totalOtherHours * 20;
+      invoice = 0;
+    } else if (emp.type === 'premie_polozka') {
+      // Prémie položka - editovatelná částka
+      salary = emp.premieCastka || 0;
+      invoice = 0;
+    } else if (emp.type === 'pausalni' && emp.pausalni) {
+      // Paušální zaměstnanci
+      const monthlyRate = emp.pausalni.rate / 12;
+      const monthlyTax = emp.pausalni.tax;
+      salary = emp.hours * salaryRate;
+      invoice = Math.min(emp.hours * invoiceRate, monthlyRate - monthlyTax);
+      if (emp.hours > 0) activeEmployeesCount++;
+    } else {
+      // Standardní zaměstnanci
+      salary = (emp.hours || 0) * salaryRate;
+      invoice = (emp.hours || 0) * invoiceRate;
+      if (emp.hours > 0) activeEmployeesCount++;
+    }
+
+    totalSalary += salary;
+    totalInvoice += invoice;
+
+    // Hodiny jen pro běžné zaměstnance
+    if (emp.type !== 'special' && emp.type !== 'special2' && emp.type !== 'bonus_girls' && emp.type !== 'premie_polozka' && !isLenka) {
+      totalHours += emp.hours || 0;
     }
   });
 
@@ -466,14 +1341,9 @@ function updateStats() {
   document.getElementById('totalProfit').textContent = formatCurrency(totalProfit);
   document.getElementById('profitMargin').textContent = `Marže: ${profitMargin.toFixed(1)}%`;
 
-  // Averages - ONLY from active employees (excluding Lenka, special, bonus_girls)
-  const activeStandardEmployees = employees.filter(e => {
-    const isLenka = e.name === 'Lenka' || e.name.includes('Lenka');
-    return (e.type !== 'special' && e.type !== 'special2' && e.type !== 'bonus_girls' && !isLenka) && e.hours > 0;
-  }).length;
-
-  const avgHours = activeStandardEmployees > 0
-    ? totalHours / activeStandardEmployees
+  // Averages - ONLY from active employees with hours (excluding Lenka, special, bonus_girls, premie)
+  const avgHours = activeEmployeesCount > 0
+    ? totalHours / activeEmployeesCount
     : 0;
   const avgSalary = activeEmployeesCount > 0 ? totalSalary / activeEmployeesCount : 0;
 
@@ -508,15 +1378,6 @@ async function updateRates() {
   }
 }
 
-function setQuickRate(value) {
-  if (!value) return;
-
-  const [salary, invoice] = value.split('-').map(Number);
-  document.getElementById('salaryRate').value = salary;
-  document.getElementById('invoiceRate').value = invoice;
-  updateRates();
-}
-
 // === UTILITIES ===
 function formatCurrency(amount) {
   return new Intl.NumberFormat('cs-CZ', {
@@ -527,24 +1388,154 @@ function formatCurrency(amount) {
   }).format(amount);
 }
 
+// Step 134: Use centralized formatNumber from utils.js if available
 function formatNumber(num) {
+  if (window.Utils && window.Utils.formatNumber) {
+    return window.Utils.formatNumber(num);
+  }
   return new Intl.NumberFormat('cs-CZ').format(num);
 }
 
 function formatBankCode(code) {
   if (!code) return '';
-  const str = code.toString();
-  if (str.length === 3) return '0' + str;
-  return str;
+  const digits = code.toString().replace(/\D/g, '');
+  if (!digits) return '';
+  return digits.padStart(4, '0').slice(-4);
+}
+
+function normalizeAccount(account) {
+  if (!account) return '';
+  const digits = account.toString().replace(/\D/g, '');
+  if (!digits) return '';
+  const accountPart = digits.slice(-10);
+  const prefixPart = digits.length > 10 ? digits.slice(0, -10) : '';
+  return prefixPart ? `${parseInt(prefixPart, 10)}-${accountPart}` : accountPart;
+}
+
+function sanitizeMessage(message) {
+  if (!message) return '';
+  return message
+    .toString()
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\*/g, ' ')
+    .trim()
+    .slice(0, 60);
+}
+
+let qrLibraryPromise = null;
+
+function ensureQrLibraryLoaded() {
+  // qrcodejs2 knihovna - kontrola existence konstruktoru
+  if (window.QRCode && typeof window.QRCode === 'function') {
+    return Promise.resolve(window.QRCode);
+  }
+
+  if (!qrLibraryPromise) {
+    qrLibraryPromise = new Promise((resolve, reject) => {
+      const existing = document.querySelector('script[data-qr-lib]');
+
+      if (existing) {
+        if (window.QRCode && typeof window.QRCode === 'function') {
+          resolve(window.QRCode);
+          return;
+        }
+
+        existing.addEventListener('load', () => resolve(window.QRCode));
+        existing.addEventListener('error', () => reject(new Error('Nepodařilo se načíst knihovnu QR kódů')));
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'assets/js/qrcode.min.js';
+      script.defer = true;
+      script.dataset.qrLib = '1';
+      script.onload = () => {
+        if (window.QRCode && typeof window.QRCode === 'function') {
+          resolve(window.QRCode);
+        } else {
+          reject(new Error('Knihovna QR kódu se načetla, ale neobsahuje očekávané API'));
+        }
+      };
+      script.onerror = () => reject(new Error('Nepodařilo se načíst knihovnu QR kódů'));
+      document.head.appendChild(script);
+    }).catch((err) => {
+      qrLibraryPromise = null;
+      throw err;
+    });
+  }
+
+  return qrLibraryPromise;
+}
+
+function buildSpaydPayload(data) {
+  const account = normalizeAccount(data.account);
+  const bank = formatBankCode(data.bank);
+  const amount = Number(data.amount);
+
+  if (!account || !bank) {
+    throw new Error('Chybí číslo účtu nebo kód banky');
+  }
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error('Neplatná částka');
+  }
+
+  const vs = data.vs ? String(data.vs).replace(/\D/g, '').slice(0, 10) : '';
+  const message = sanitizeMessage(data.message || '');
+
+  const parts = [
+    'SPD',
+    '1.0',
+    `ACC:${account}/${bank}`,
+    `AM:${amount.toFixed(2)}`,
+    'CC:CZK'
+  ];
+
+  if (vs) parts.push(`X-VS:${vs}`);
+  if (message) parts.push(`MSG:${message}`);
+
+  return parts.join('*');
+}
+
+async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
+  await ensureQrLibraryLoaded();
+
+  if (!window.QRCode || typeof window.QRCode !== 'function') {
+    throw new Error('Knihovna pro QR kódy není načtena');
+  }
+
+  return new Promise((resolve, reject) => {
+    try {
+      // Vyčistit element
+      qrElement.innerHTML = '';
+
+      // qrcodejs2 API - vytvoří QR kód přímo do elementu
+      new QRCode(qrElement, {
+        text: qrText,
+        width: size,
+        height: size,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      logger.log(`QR code generated${contextLabel ? ' for ' + contextLabel : ''}`);
+      resolve();
+    } catch (err) {
+      logger.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
+      qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
+      reject(err);
+    }
+  });
 }
 
 // === NOTIFICATIONS ===
 function showSuccess(message) {
-  alert(message);
+  wgsToast.success(message);
 }
 
 function showError(message) {
-  alert(message);
+  wgsToast.error(message);
 }
 
 // === EXPORT ===
@@ -626,8 +1617,14 @@ function printReport() {
 }
 
 async function clearAll() {
-  if (confirm('Opravdu chcete vymazat všechna data?')) {
-    employees = [];
+  if (await wgsConfirm('Opravdu chcete vynulovat hodiny pro toto období?', 'Vynulovat', 'Zrušit')) {
+    // Pouze vynulovat hodiny a bonusy, NE mazat zaměstnance!
+    employees.forEach(emp => {
+      emp.hours = 0;
+      if (emp.type === 'bonus_girls') emp.bonusAmount = 0;
+      if (emp.type === 'premie_polozka') emp.premieCastka = 0;
+    });
+
     renderTable();
     updateStats();
 
@@ -635,15 +1632,39 @@ async function clearAll() {
     try {
       saveToLocalStorage();
       await saveToServer();
-      logger.log('All data cleared and saved');
+      logger.log('Hours cleared for current period');
+      showSuccess('Hodiny vynulovány pro aktuální období');
     } catch (error) {
-      logger.error('Failed to save after clearing data:', error);
+      logger.error('Failed to save after clearing hours:', error);
     }
   }
 }
 
+// === SYNCHRONIZACE VSTUPŮ ===
+// Synchronizovat data z input polí před generováním QR
+function synchronizovatVstupy() {
+  const inputs = document.querySelectorAll('[data-action="updateEmployeeField"]');
+  inputs.forEach(input => {
+    const index = parseInt(input.getAttribute('data-index'));
+    const field = input.getAttribute('data-field');
+    if (!isNaN(index) && field && employees[index]) {
+      if (field === 'hours' || field === 'bonusAmount' || field === 'premieCastka') {
+        employees[index][field] = parseInt(input.value) || 0;
+      } else if (field === 'bank') {
+        employees[index][field] = formatBankCode(input.value);
+      } else {
+        employees[index][field] = input.value;
+      }
+    }
+  });
+  // Aktualizovat statistiky
+  updateStats();
+}
+
 // === QR PAYMENTS ===
 function generatePaymentQR() {
+  // Synchronizovat vstupy před generováním QR
+  synchronizovatVstupy();
   const modal = document.getElementById('qrModal');
   const container = document.getElementById('qrCodesContainer');
   const summaryDiv = document.getElementById('paymentSummary');
@@ -683,6 +1704,8 @@ function generatePaymentQR() {
         amount = emp.hours * salaryRate;
       } else if (emp.type === 'special' || emp.type === 'special2') {
         amount = bonusPerSpecial;
+      } else if (emp.type === 'premie_polozka') {
+        amount = emp.premieCastka || 0;
       } else {
         amount = emp.hours * salaryRate;
       }
@@ -783,7 +1806,7 @@ function generatePaymentQR() {
             <strong>Poplatky: OUR</strong> (všechny poplatky hradí odesílatel)
           </div>
         </div>
-        <button class="btn btn-sm" onclick="copySWIFTDetails('${payment.name}', '${payment.swiftData.iban}', '${payment.swiftData.swift}', ${payment.amount})">
+        <button class="btn btn-sm" data-action="copySWIFTDetails" data-name="${payment.name}" data-iban="${payment.swiftData.iban}" data-swift="${payment.swiftData.swift}" data-amount="${payment.amount}">
           Kopírovat údaje
         </button>
       `;
@@ -816,7 +1839,7 @@ function generatePaymentQR() {
         ${payment.isSpecial ? '<div style="font-size: 0.75rem; color: var(--c-success);">Včetně prémií</div>' : ''}
         <div class="qr-account">${payment.account}/${payment.bank}</div>
         <div class="qr-code-wrapper" id="qr-${index}"></div>
-        <button class="btn btn-sm" style="margin-top: 1rem;" onclick="downloadQR('qr-${index}', '${payment.name}')">
+        <button class="btn btn-sm" style="margin-top: 1rem;" data-action="downloadQR" data-qrid="qr-${index}" data-name="${payment.name}">
           Stáhnout QR
         </button>
       `;
@@ -824,7 +1847,7 @@ function generatePaymentQR() {
       domesticGrid.appendChild(qrItem);
 
       // Generate QR code
-      setTimeout(() => {
+      setTimeout(async () => {
         const qrElement = document.getElementById(`qr-${index}`);
         if (!qrElement) {
           logger.error(`QR element not found: qr-${index}`);
@@ -834,25 +1857,24 @@ function generatePaymentQR() {
         // BUGFIX: Clear element before generating new QR code
         qrElement.innerHTML = '';
 
-        const qrText = generateCzechPaymentString({
-          account: payment.account,
-          bank: payment.bank,
-          amount: qrAmount,
-          vs: currentPeriod.year * 100 + currentPeriod.month,
-          message: `Výplata ${payment.name} ${currentPeriod.month}/${currentPeriod.year}`
-        });
+        let qrText;
+        try {
+          qrText = generateCzechPaymentString({
+            account: payment.account,
+            bank: payment.bank,
+            amount: qrAmount,
+            vs: currentPeriod.year * 100 + currentPeriod.month,
+            message: `Výplata ${payment.name} ${currentPeriod.month}/${currentPeriod.year}`
+          });
+        } catch (err) {
+          qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err.message}</div>`;
+          return;
+        }
 
         logger.log(`Generating QR for ${payment.name}:`, qrText);
 
         try {
-          new QRCode(qrElement, {
-            text: qrText,
-            width: 180,
-            height: 180,
-            colorDark: "#1a1a1a",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.M
-          });
+          await renderQrCode(qrElement, qrText, 180, payment.name);
         } catch (error) {
           logger.error(`Failed to generate QR code for ${payment.name}:`, error);
           qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
@@ -861,21 +1883,11 @@ function generatePaymentQR() {
     });
   }
 
-  modal.style.display = 'block';
+  modal.classList.remove('hidden');
 }
 
 function generateCzechPaymentString(data) {
-  // Český formát QR platby (Short Payment Descriptor)
-  // Formát: SPD*1.0*ACC:{účet}/{banka}*AM:{částka}*CC:CZK*X-VS:{VS}*MSG:{zpráva}
-  let spayd = 'SPD*1.0*';
-  spayd += `ACC:${data.account}/${data.bank}*`;
-  spayd += `AM:${data.amount.toFixed(2)}*`;
-  spayd += `CC:CZK*`;
-  if (data.vs) {
-    spayd += `X-VS:${data.vs}*`;
-  }
-  spayd += `MSG:${data.message}`;
-  return spayd;
+  return buildSpaydPayload(data);
 }
 
 function copySWIFTDetails(name, iban, swift, amount) {
@@ -887,32 +1899,44 @@ Poplatky: OUR (hradí odesílatel)
 Zpráva: Výplata ${name} ${currentPeriod.month}/${currentPeriod.year}`;
 
   navigator.clipboard.writeText(text).then(() => {
-    alert('SWIFT údaje byly zkopírovány do schránky');
+    wgsToast.success('SWIFT údaje byly zkopírovány do schránky');
   }).catch(err => {
     logger.error('Chyba při kopírování:', err);
-    alert('Nepodařilo se zkopírovat údaje');
+    wgsToast.error('Nepodařilo se zkopírovat údaje');
   });
 }
 
 function downloadQR(qrId, employeeName) {
+  // qrcodejs2 vytváří img element (nebo canvas jako fallback)
+  const qrImg = document.querySelector(`#${qrId} img`);
   const qrCanvas = document.querySelector(`#${qrId} canvas`);
-  if (qrCanvas) {
-    const link = document.createElement('a');
-    link.download = `QR_platba_${employeeName}_${currentPeriod.month}_${currentPeriod.year}.png`;
+
+  const link = document.createElement('a');
+  link.download = `QR_platba_${employeeName}_${currentPeriod.month}_${currentPeriod.year}.png`;
+
+  if (qrImg && qrImg.src) {
+    link.href = qrImg.src;
+    link.click();
+  } else if (qrCanvas) {
     link.href = qrCanvas.toDataURL();
     link.click();
+  } else {
+    wgsToast.error('QR kód nenalezen');
   }
 }
 
 function closeQRModal() {
-  document.getElementById('qrModal').style.display = 'none';
+  document.getElementById('qrModal').classList.add('hidden');
 }
 
 // === SINGLE EMPLOYEE QR GENERATION ===
 function generateSingleEmployeeQR(index) {
+  // Synchronizovat vstupy před generováním QR
+  synchronizovatVstupy();
+
   const emp = employees[index];
   if (!emp) {
-    alert('Zaměstnanec nenalezen');
+    wgsToast.error('Zaměstnanec nenalezen');
     return;
   }
 
@@ -943,13 +1967,15 @@ function generateSingleEmployeeQR(index) {
     amount = emp.hours * salaryRate;
   } else if (emp.type === 'special' || emp.type === 'special2') {
     amount = totalOtherHours * 20;
+  } else if (emp.type === 'premie_polozka') {
+    amount = emp.premieCastka || 0;
   } else {
     amount = emp.hours * salaryRate;
   }
 
   // Check if payment is possible
   if (amount <= 0) {
-    alert('Částka k výplatě je 0 Kč. Zadejte prosím hodiny nebo nastavte mzdu.');
+    wgsToast.warning('Částka k výplatě je 0 Kč. Zadejte prosím hodiny nebo nastavte mzdu.');
     return;
   }
 
@@ -985,19 +2011,19 @@ function generateSingleEmployeeQR(index) {
           <strong>Poplatky: OUR</strong> (všechny poplatky hradí odesílatel)
         </div>
       </div>
-      <button class="btn btn-sm" onclick="copySWIFTDetails('${emp.name}', '${emp.swiftData.iban}', '${emp.swiftData.swift}', ${amount})">
+      <button class="btn btn-sm" data-action="copySWIFTDetails" data-name="${emp.name}" data-iban="${emp.swiftData.iban}" data-swift="${emp.swiftData.swift}" data-amount="${amount}">
         Kopírovat údaje
       </button>
     `;
 
     container.appendChild(swiftItem);
-    modal.style.display = 'block';
+    modal.classList.remove('hidden');
     return;
   }
 
   // For domestic payments - check account and bank
   if (!emp.account || !emp.bank) {
-    alert('Prosím zadejte číslo účtu a kód banky pro ' + emp.name);
+    wgsToast.warning('Prosím zadejte číslo účtu a kód banky pro ' + emp.name);
     return;
   }
 
@@ -1025,7 +2051,7 @@ function generateSingleEmployeeQR(index) {
     ${isLenka ? '<div style="font-size: 0.75rem; color: var(--c-info);">Paušální mzda</div>' : ''}
     <div class="qr-account">${emp.account}/${formatBankCode(emp.bank)}</div>
     <div class="qr-code-wrapper" id="qr-single"></div>
-    <button class="btn btn-sm" style="margin-top: 1rem;" onclick="downloadQR('qr-single', '${emp.name}')">
+    <button class="btn btn-sm" style="margin-top: 1rem;" data-action="downloadQR" data-qrid="qr-single" data-name="${emp.name}">
       Stáhnout QR
     </button>
   `;
@@ -1033,7 +2059,7 @@ function generateSingleEmployeeQR(index) {
   container.appendChild(qrItem);
 
   // Generate QR code
-  setTimeout(() => {
+  setTimeout(async () => {
     const qrElement = document.getElementById('qr-single');
     if (!qrElement) {
       logger.error('QR element not found: qr-single');
@@ -1043,60 +2069,236 @@ function generateSingleEmployeeQR(index) {
     // BUGFIX: Clear element before generating new QR code
     qrElement.innerHTML = '';
 
-    const qrText = generateCzechPaymentString({
-      account: emp.account,
-      bank: formatBankCode(emp.bank),
-      amount: amount,
-      vs: currentPeriod.year * 100 + currentPeriod.month,
-      message: `Výplata ${emp.name} ${currentPeriod.month}/${currentPeriod.year}`
-    });
+    let qrText;
+    try {
+      qrText = generateCzechPaymentString({
+        account: emp.account,
+        bank: formatBankCode(emp.bank),
+        amount: amount,
+        vs: currentPeriod.year * 100 + currentPeriod.month,
+        message: `Výplata ${emp.name} ${currentPeriod.month}/${currentPeriod.year}`
+      });
+    } catch (err) {
+      qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err.message}</div>`;
+      return;
+    }
 
     logger.log(`Generating single QR for ${emp.name}:`, qrText);
 
     try {
-      new QRCode(qrElement, {
-        text: qrText,
-        width: 220,
-        height: 220,
-        colorDark: "#1a1a1a",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.M
-      });
+      await renderQrCode(qrElement, qrText, 220, emp.name);
     } catch (error) {
       logger.error(`Failed to generate QR code for ${emp.name}:`, error);
       qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
     }
   }, 100);
 
-  modal.style.display = 'block';
+  modal.classList.remove('hidden');
 }
 
 // Close modal on outside click
 window.onclick = function(event) {
   const modal = document.getElementById('qrModal');
   if (event.target == modal) {
-    modal.style.display = 'none';
+    modal.classList.add('hidden');
   }
 }
 
 // === UNIVERSAL EVENT DELEGATION FOR REMOVED INLINE HANDLERS ===
 document.addEventListener('DOMContentLoaded', () => {
-  // Handle data-action buttons
-  document.addEventListener('click', (e) => {
-    const target = e.target.closest('[data-action]');
-    if (!target) return;
-    
+  // Společná funkce pro zpracování data-action
+  function zpracujDataAction(target) {
     const action = target.getAttribute('data-action');
-    
+
     // Special cases
     if (action === 'reload') {
       location.reload();
       return;
     }
-    
-    // Try to call function if it exists
+
+    // Step 115 - Podpora parametrů pro onclick migraci
+    switch (action) {
+      case 'generateSingleEmployeeQR':
+        const gIndex = target.getAttribute('data-index');
+        if (gIndex !== null && typeof generateSingleEmployeeQR === 'function') {
+          generateSingleEmployeeQR(parseInt(gIndex));
+        }
+        return;
+
+      case 'saveEmployeeToDatabase':
+        const sIndex = target.getAttribute('data-index');
+        if (sIndex !== null && typeof saveEmployeeToDatabase === 'function') {
+          saveEmployeeToDatabase(parseInt(sIndex));
+        }
+        return;
+
+      case 'removeEmployee':
+        const rIndex = target.getAttribute('data-index');
+        if (rIndex !== null && typeof removeEmployee === 'function') {
+          removeEmployee(parseInt(rIndex));
+        }
+        return;
+
+      case 'copySWIFTDetails':
+        const name = target.getAttribute('data-name');
+        const iban = target.getAttribute('data-iban');
+        const swift = target.getAttribute('data-swift');
+        const amount = parseFloat(target.getAttribute('data-amount'));
+        if (name && iban && swift && typeof copySWIFTDetails === 'function') {
+          copySWIFTDetails(name, iban, swift, amount);
+        }
+        return;
+
+      case 'downloadQR':
+        const qrid = target.getAttribute('data-qrid');
+        const dName = target.getAttribute('data-name');
+        if (qrid && dName && typeof downloadQR === 'function') {
+          downloadQR(qrid, dName);
+        }
+        return;
+
+      case 'updateEmployeeField':
+        const empIndex = parseInt(target.getAttribute('data-index'));
+        const empField = target.getAttribute('data-field');
+        const empRecalculate = target.getAttribute('data-recalculate') === 'true';
+        if (!isNaN(empIndex) && empField && typeof updateEmployee === 'function') {
+          updateEmployee(empIndex, empField, target.value, empRecalculate);
+        }
+        return;
+
+      // === PSA HLAVNÍ AKCE ===
+      case 'saveData':
+        if (typeof saveData === 'function') saveData();
+        return;
+
+      case 'addEmployee':
+        if (typeof addEmployee === 'function') addEmployee();
+        return;
+
+      case 'exportToExcel':
+        if (typeof exportToExcel === 'function') exportToExcel();
+        return;
+
+      case 'printReport':
+        if (typeof printReport === 'function') printReport();
+        return;
+
+      case 'clearAll':
+        if (typeof clearAll === 'function') clearAll();
+        return;
+
+      case 'generatePaymentQR':
+        if (typeof generatePaymentQR === 'function') generatePaymentQR();
+        return;
+
+      case 'closeQRModal':
+        if (typeof closeQRModal === 'function') closeQRModal();
+        return;
+
+      case 'updatePeriod':
+        if (typeof updatePeriod === 'function') updatePeriod();
+        return;
+
+      case 'updateRates':
+        if (typeof updateRates === 'function') updateRates();
+        return;
+
+      // === OBDOBÍ MANAGEMENT ===
+      case 'togglePeriodOverlay':
+        if (typeof togglePeriodOverlay === 'function') togglePeriodOverlay();
+        return;
+
+      case 'closePeriodOverlay':
+        if (typeof closePeriodOverlay === 'function') closePeriodOverlay();
+        return;
+
+      case 'showNewPeriodSelector':
+        if (typeof showNewPeriodSelector === 'function') showNewPeriodSelector();
+        return;
+
+      case 'closeNewPeriodSelector':
+        if (typeof closeNewPeriodSelector === 'function') closeNewPeriodSelector();
+        return;
+
+      case 'confirmNewPeriod':
+        if (typeof confirmNewPeriod === 'function') confirmNewPeriod();
+        return;
+
+      case 'selectPeriod':
+        const periodToSelect = target.getAttribute('data-period');
+        if (periodToSelect && typeof selectPeriod === 'function') {
+          selectPeriod(periodToSelect);
+        }
+        return;
+
+      case 'loadPeriod':
+        if (typeof loadPeriod === 'function') loadPeriod();
+        return;
+
+      case 'clearHours':
+        if (typeof clearHours === 'function') clearHours();
+        return;
+
+      case 'newAttendance':
+        if (typeof newAttendance === 'function') newAttendance();
+        return;
+
+      // === EMPLOYEE SELECTOR ===
+      case 'showEmployeeSelector':
+        if (typeof showEmployeeSelector === 'function') showEmployeeSelector();
+        return;
+
+      case 'closeEmployeeSelector':
+        if (typeof closeEmployeeSelector === 'function') closeEmployeeSelector();
+        return;
+
+      case 'selectAllEmployees':
+        if (typeof selectAllEmployees === 'function') selectAllEmployees();
+        return;
+
+      case 'deselectAllEmployees':
+        if (typeof deselectAllEmployees === 'function') deselectAllEmployees();
+        return;
+
+      case 'confirmEmployeeSelection':
+        if (typeof confirmEmployeeSelection === 'function') confirmEmployeeSelection();
+        return;
+    }
+
+    // Try to call function if it exists (fallback)
     if (typeof window[action] === 'function') {
       window[action]();
+    }
+  }
+
+  // Handle data-action buttons - kliknutí
+  // DŮLEŽITÉ: Vyloučit INPUT pole - ty se zpracují pouze při change eventu
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+
+    // Přeskočit INPUT a TEXTAREA - tyto elementy se zpracují pouze při change
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+    zpracujDataAction(target);
+  });
+
+  // Handle data-action inputs - změna hodnoty (pro onchange migraci)
+  document.addEventListener('change', (e) => {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    zpracujDataAction(target);
+  });
+
+  // Handle data-action buttons - klávesnice (Enter/Space) pro přístupnost
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    // Jen pro elementy s role="button" (ne skutečné buttony, ty to mají automaticky)
+    if (target.tagName !== 'BUTTON' && target.getAttribute('role') === 'button') {
+      e.preventDefault();
+      zpracujDataAction(target);
     }
   });
 

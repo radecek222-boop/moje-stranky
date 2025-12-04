@@ -2,14 +2,14 @@
 /**
  * LOGOUT ENDPOINT
  *
- * ✅ SECURITY FIX: CSRF protection pro logout
- * ✅ OKAMŽITÉ ODHLÁŠENÍ bez potvrzovací stránky
+ * SECURITY FIX: CSRF protection pro logout
+ * OKAMŽITÉ ODHLÁŠENÍ bez potvrzovací stránky
  */
 
 require_once __DIR__ . '/init.php';
 require_once __DIR__ . '/includes/csrf_helper.php';
 
-// ✅ SECURITY: Ochrana proti CSRF útokům
+// SECURITY: Ochrana proti CSRF útokům
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // POST request → validovat CSRF token
     requireCSRF();
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// ✅ OPRAVA: Audit log PRVNÍ (před smazáním session dat)
+// OPRAVA: Audit log PRVNÍ (před smazáním session dat)
 if (function_exists('auditLog')) {
     auditLog('user_logout', [
         'user_id' => $_SESSION['user_id'] ?? 'unknown',
@@ -39,7 +39,7 @@ if (function_exists('auditLog')) {
     ]);
 }
 
-// ✅ OPRAVA: Získat cookie params PŘED smazáním session
+// OPRAVA: Získat cookie params PŘED smazáním session
 $sessionCookieParams = null;
 if (ini_get("session.use_cookies")) {
     $sessionCookieParams = session_get_cookie_params();
@@ -57,7 +57,7 @@ if (isset($_COOKIE['remember_me'])) {
             $stmt->execute([':selector' => $selector]);
         }
 
-        // ✅ OPRAVA: Smazat Remember Me cookie UVNITŘ try-catch
+        // OPRAVA: Smazat Remember Me cookie UVNITŘ try-catch
         setcookie('remember_me', '', time() - 3600, '/', '', true, true);
 
     } catch (Exception $e) {

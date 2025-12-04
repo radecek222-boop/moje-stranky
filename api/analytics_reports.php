@@ -42,6 +42,9 @@ try {
         sendJsonError('Neplatný CSRF token', 403);
     }
 
+    // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+    session_write_close();
+
     $pdo = getDbConnection();
 
     // ========================================
@@ -210,7 +213,7 @@ try {
             }
 
             // Vypočítat next_run_at
-            $nextRunAt = $this->calculateNextRun($frequency, $dayOfWeek, $dayOfMonth, $timeOfDay);
+            $nextRunAt = calculateNextRun($frequency, $dayOfWeek, $dayOfMonth, $timeOfDay);
 
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_analytics_report_schedules (

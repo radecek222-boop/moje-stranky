@@ -44,7 +44,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             margin: 0 auto;
         }
         h1 {
-            color: #2D5016;
+            color: #333333;
             margin-bottom: 10px;
         }
         .subtitle {
@@ -71,11 +71,11 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             transition: all 0.2s;
         }
         .tab:hover {
-            color: #2D5016;
+            color: #333333;
         }
         .tab.active {
-            color: #2D5016;
-            border-bottom-color: #2D5016;
+            color: #333333;
+            border-bottom-color: #333333;
         }
 
         /* Tab Content */
@@ -120,7 +120,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         }
         .btn {
             padding: 10px 20px;
-            background: #2D5016;
+            background: #333333;
             color: white;
             border: none;
             border-radius: 4px;
@@ -206,14 +206,14 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         <p class="subtitle">Automatické generování analytických reportů s AI insights</p>
 
         <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" data-tab="reports">Reporty</button>
-            <button class="tab" data-tab="generate">Generovat nový</button>
-            <button class="tab" data-tab="schedules">Naplánované</button>
+        <div class="tabs" role="tablist" aria-label="Sekce reportů">
+            <button class="tab active" data-tab="reports" role="tab" id="tab-btn-reports" aria-selected="true" aria-controls="tab-reports">Reporty</button>
+            <button class="tab" data-tab="generate" role="tab" id="tab-btn-generate" aria-selected="false" aria-controls="tab-generate">Generovat nový</button>
+            <button class="tab" data-tab="schedules" role="tab" id="tab-btn-schedules" aria-selected="false" aria-controls="tab-schedules">Naplánované</button>
         </div>
 
         <!-- Tab: Reports -->
-        <div class="tab-content active" id="tab-reports">
+        <div class="tab-content active" id="tab-reports" role="tabpanel" aria-labelledby="tab-btn-reports">
             <div class="card">
                 <h3>Vygenerované reporty</h3>
                 <div id="reports-list" class="loading">Načítám reporty...</div>
@@ -221,25 +221,25 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         </div>
 
         <!-- Tab: Generate -->
-        <div class="tab-content" id="tab-generate">
+        <div class="tab-content" id="tab-generate" role="tabpanel" aria-labelledby="tab-btn-generate">
             <div class="card">
                 <h3>Vygenerovat nový report</h3>
                 <form id="generate-form">
                     <div class="form-group">
-                        <label>Typ reportu</label>
-                        <select name="report_type" required>
+                        <label for="report_type">Typ reportu</label>
+                        <select id="report_type" name="report_type" required>
                             <option value="daily">Daily (denní)</option>
                             <option value="weekly">Weekly (týdenní)</option>
                             <option value="monthly">Monthly (měsíční)</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Od data</label>
-                        <input type="date" name="date_from" required>
+                        <label for="date_from">Od data</label>
+                        <input type="date" id="date_from" name="date_from" required>
                     </div>
                     <div class="form-group">
-                        <label>Do data</label>
-                        <input type="date" name="date_to" required>
+                        <label for="date_to">Do data</label>
+                        <input type="date" id="date_to" name="date_to" required>
                     </div>
                     <button type="submit" class="btn">Generovat report</button>
                 </form>
@@ -248,7 +248,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         </div>
 
         <!-- Tab: Schedules -->
-        <div class="tab-content" id="tab-schedules">
+        <div class="tab-content" id="tab-schedules" role="tabpanel" aria-labelledby="tab-btn-schedules">
             <div class="card">
                 <h3>Naplánované reporty</h3>
                 <div id="schedules-list" class="loading">Načítám schedules...</div>
@@ -264,9 +264,13 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             tab.addEventListener('click', () => {
                 const targetTab = tab.dataset.tab;
 
-                // Update tabs
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                // Update tabs - visual and ARIA
+                document.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
                 tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
 
                 // Update content
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -314,12 +318,12 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             }
 
             let html = '<table><thead><tr>';
-            html += '<th>ID</th>';
-            html += '<th>Typ</th>';
-            html += '<th>Perioda</th>';
-            html += '<th>Status</th>';
-            html += '<th>Vygenerováno</th>';
-            html += '<th>Akce</th>';
+            html += '<th scope="col">ID</th>';
+            html += '<th scope="col">Typ</th>';
+            html += '<th scope="col">Perioda</th>';
+            html += '<th scope="col">Status</th>';
+            html += '<th scope="col">Vygenerováno</th>';
+            html += '<th scope="col">Akce</th>';
             html += '</tr></thead><tbody>';
 
             reports.forEach(report => {
@@ -330,7 +334,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 html += `<td>${report.report_period_start} - ${report.report_period_end}</td>`;
                 html += `<td><span class="badge ${statusBadge}">${report.status}</span></td>`;
                 html += `<td>${new Date(report.generated_at).toLocaleString('cs-CZ')}</td>`;
-                html += `<td><button class="btn btn-secondary" onclick="downloadReport(${report.report_id})">Stáhnout</button></td>`;
+                html += `<td><button class="btn btn-secondary" data-action="downloadReport" data-id="${report.report_id}">Stáhnout</button></td>`;
                 html += '</tr>';
             });
 
@@ -412,11 +416,11 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             }
 
             let html = '<table><thead><tr>';
-            html += '<th>Název</th>';
-            html += '<th>Typ</th>';
-            html += '<th>Frekvence</th>';
-            html += '<th>Next Run</th>';
-            html += '<th>Status</th>';
+            html += '<th scope="col">Název</th>';
+            html += '<th scope="col">Typ</th>';
+            html += '<th scope="col">Frekvence</th>';
+            html += '<th scope="col">Next Run</th>';
+            html += '<th scope="col">Status</th>';
             html += '</tr></thead><tbody>';
 
             schedules.forEach(schedule => {

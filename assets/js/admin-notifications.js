@@ -11,14 +11,7 @@ let notificationState = {
 
 const ADMIN_SESSION_EXPIRED_MESSAGE = 'Vaše administrátorská relace vypršela. Přihlaste se prosím znovu.';
 
-function escapeHtml(text) {
-  if (text === null || text === undefined) {
-    return '';
-  }
-  const div = document.createElement('div');
-  div.textContent = String(text);
-  return div.innerHTML;
-}
+// escapeHtml odstraněn - používej Utils.escapeHtml()
 
 function redirectToAdminLogin(tab = '') {
   const redirectTarget = tab ? `admin.php?tab=${tab}` : 'admin.php';
@@ -30,7 +23,7 @@ function handleNotificationsUnauthorized(response, container, tab = 'notificatio
     if (container) {
       container.innerHTML = `<div class="error-message">${ADMIN_SESSION_EXPIRED_MESSAGE}</div>`;
     } else {
-      alert(ADMIN_SESSION_EXPIRED_MESSAGE);
+      wgsToast.error(ADMIN_SESSION_EXPIRED_MESSAGE);
     }
 
     setTimeout(() => redirectToAdminLogin(tab), 800);
@@ -75,12 +68,14 @@ async function loadNotifications() {
       notificationState.notifications = result.data || [];
       renderNotifications();
     } else {
-      container.innerHTML = `<div class="error-message">${result.message || 'Chyba při načítání notifikací'}</div>`;
+      const safeMessage = Utils.escapeHtml(result.message || 'Chyba při načítání notifikací');
+      container.innerHTML = `<div class="error-message">${safeMessage}</div>`;
     }
   } catch (err) {
     console.error('Load notifications failed:', err);
     const message = err && err.message ? err.message : 'Chyba při načítání notifikací';
-    container.innerHTML = `<div class="error-message">${message}</div>`;
+    const safeMessage = Utils.escapeHtml(message);
+    container.innerHTML = `<div class="error-message">${safeMessage}</div>`;
   }
 }
 
@@ -106,22 +101,22 @@ function renderNotifications() {
     const typeName = notif.type === 'both' ? 'Email + SMS' :
                      notif.type === 'email' ? 'Email' : 'SMS';
 
-    const safeName = escapeHtml(notif.name);
-    const safeDescription = escapeHtml(notif.description || 'Bez popisu');
-    const safeTrigger = escapeHtml(notif.trigger_event || '');
-    const safeSubject = escapeHtml(notif.subject || '');
-    const safeTemplate = escapeHtml(notif.template || '').replace(/\n/g, '<br>');
+    const safeName = Utils.escapeHtml(notif.name);
+    const safeDescription = Utils.escapeHtml(notif.description || 'Bez popisu');
+    const safeTrigger = Utils.escapeHtml(notif.trigger_event || '');
+    const safeSubject = Utils.escapeHtml(notif.subject || '');
+    const safeTemplate = Utils.escapeHtml(notif.template || '').replace(/\n/g, '<br>');
 
     return `
       <div class="notification-card">
-        <div class="notification-header" onclick="toggleNotificationBody('${notif.id}')">
+        <div class="notification-header" data-action="toggleNotificationBody" data-id="${notif.id}">
           <div class="notification-title">
             <span class="badge badge-${notif.active ? 'active' : 'inactive'}">${notif.active ? 'Aktivní' : 'Neaktivní'}</span>
             <span>${safeName}</span>
           </div>
           <div class="notification-toggle">
             <div class="toggle-switch ${notif.active ? 'active' : ''}"
-                 onclick="event.stopPropagation(); toggleNotification('${notif.id}')"></div>
+                 data-action="toggleNotification" data-id="${notif.id}"></div>
           </div>
         </div>
         <div class="notification-body" id="notification-body-${notif.id}">
@@ -151,7 +146,7 @@ function renderNotifications() {
             <div class="template-preview">${safeTemplate}</div>
           </div>
 
-          <button class="btn btn-sm" onclick="openEditNotificationModal('${notif.id}')">Editovat šablonu</button>
+          <button class="btn btn-sm" data-action="openEditNotificationModal" data-id="${notif.id}">Editovat šablonu</button>
         </div>
       </div>
     `;
@@ -200,7 +195,7 @@ async function toggleNotification(notificationId) {
     }
   } catch (err) {
     console.error('Toggle failed:', err);
-    alert('Chyba při změně stavu notifikace');
+    wgsToast.error('Chyba při změně stavu notifikace');
   }
 }
 
@@ -223,8 +218,6 @@ if (document.readyState === 'loading') {
   initNotifications();
 }
 
-console.log('✅ admin-notifications.js loaded');
-
 // ============================================
 // MODAL FUNCTIONS
 // ============================================
@@ -242,9 +235,10 @@ function openEditNotificationModal(notificationId) {
   // Render available variables
   const variablesContainer = document.getElementById('available-variables');
   if (variablesContainer && notif.variables) {
-    variablesContainer.innerHTML = notif.variables.map(v => 
-      `<span class="variable-tag" onclick="insertVariable('${v}')">${v}</span>`
-    ).join('');
+    variablesContainer.innerHTML = notif.variables.map(v => {
+      const safeVar = Utils.escapeHtml(v);
+      return `<span class="variable-tag" data-action="insertVariable" data-variable="${safeVar}">${safeVar}</span>`;
+    }).join('');
   }
   
   // Load CC and BCC emails
@@ -256,7 +250,7 @@ function openEditNotificationModal(notificationId) {
   updateTemplatePreview();
   
   const modal = document.getElementById("editNotificationModal");
-  modal.style.display = "flex";
+  modal.classList.remove("hidden");
   modal.style.position = "fixed";
   modal.style.top = "0";
   modal.style.left = "0";
@@ -269,10 +263,10 @@ function openEditNotificationModal(notificationId) {
 }
 
 function closeEditNotificationModal() {
-  document.getElementById('editNotificationModal').style.display = 'none';
+  document.getElementById('editNotificationModal').classList.add('hidden');
   notificationState.currentEditing = null;
-  document.getElementById('edit-notification-error').style.display = 'none';
-  document.getElementById('edit-notification-success').style.display = 'none';
+  document.getElementById('edit-notification-error').classList.add('hidden');
+  document.getElementById('edit-notification-success').classList.add('hidden');
 }
 
 function insertVariable(variable) {
@@ -334,8 +328,8 @@ if (document.readyState === 'loading') {
 async function saveNotificationTemplate() {
   const errorDiv = document.getElementById('edit-notification-error');
   const successDiv = document.getElementById('edit-notification-success');
-  errorDiv.style.display = 'none';
-  successDiv.style.display = 'none';
+  errorDiv.classList.add('hidden');
+  successDiv.classList.add('hidden');
   
   if (!notificationState.currentEditing) return;
   
@@ -349,7 +343,7 @@ async function saveNotificationTemplate() {
   
   if (!data.template.trim()) {
     errorDiv.textContent = 'Text zprávy nesmí být prázdný';
-    errorDiv.style.display = 'block';
+    errorDiv.classList.remove('hidden');
     return;
   }
   
@@ -378,7 +372,7 @@ async function saveNotificationTemplate() {
     const result = await res.json();
     if (result.status === 'success') {
       successDiv.textContent = 'Šablona byla úspěšně uložena!';
-      successDiv.style.display = 'block';
+      successDiv.classList.remove('hidden');
 
       // Update state
       notificationState.notifications = notificationState.notifications.map(n => 
@@ -394,11 +388,11 @@ async function saveNotificationTemplate() {
       }, 1500);
     } else {
       errorDiv.textContent = result.message || 'Chyba při ukládání šablony';
-      errorDiv.style.display = 'block';
+      errorDiv.classList.remove('hidden');
     }
   } catch (err) {
     errorDiv.textContent = 'Chyba při ukládání šablony';
-    errorDiv.style.display = 'block';
+    errorDiv.classList.remove('hidden');
     console.error(err);
   }
 }
@@ -412,14 +406,14 @@ function addCCEmail() {
   
   if (!email) return;
   if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-    alert('Neplatný formát emailu');
+    wgsToast.warning('Neplatný formát emailu');
     return;
   }
   if (notificationState.ccEmails.includes(email)) {
-    alert('Tento email už je přidán');
+    wgsToast.warning('Tento email už je přidán');
     return;
   }
-  
+
   notificationState.ccEmails.push(email);
   input.value = '';
   renderCCEmails();
@@ -433,12 +427,15 @@ function removeCCEmail(email) {
 function renderCCEmails() {
   const container = document.getElementById('cc-emails-list');
   if (!container) return;
-  container.innerHTML = notificationState.ccEmails.map(email => `
+  container.innerHTML = notificationState.ccEmails.map(email => {
+    const safeEmail = Utils.escapeHtml(email);
+    return `
     <div class="email-tag">
-      ${email}
-      <span class="email-tag-remove" onclick="removeCCEmail('${email}')">×</span>
+      ${safeEmail}
+      <span class="email-tag-remove" data-action="removeCCEmail" data-email="${safeEmail}">×</span>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function addBCCEmail() {
@@ -447,14 +444,14 @@ function addBCCEmail() {
   
   if (!email) return;
   if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-    alert('Neplatný formát emailu');
+    wgsToast.warning('Neplatný formát emailu');
     return;
   }
   if (notificationState.bccEmails.includes(email)) {
-    alert('Tento email už je přidán');
+    wgsToast.warning('Tento email už je přidán');
     return;
   }
-  
+
   notificationState.bccEmails.push(email);
   input.value = '';
   renderBCCEmails();
@@ -468,15 +465,16 @@ function removeBCCEmail(email) {
 function renderBCCEmails() {
   const container = document.getElementById('bcc-emails-list');
   if (!container) return;
-  container.innerHTML = notificationState.bccEmails.map(email => `
+  container.innerHTML = notificationState.bccEmails.map(email => {
+    const safeEmail = Utils.escapeHtml(email);
+    return `
     <div class="email-tag">
-      ${email}
-      <span class="email-tag-remove" onclick="removeBCCEmail('${email}')">×</span>
+      ${safeEmail}
+      <span class="email-tag-remove" data-action="removeBCCEmail" data-email="${safeEmail}">×</span>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
-
-console.log('✅ Modal functions loaded');
 
 // Override pro zajištění správné velikosti
 function addModalStyles() {
@@ -510,4 +508,45 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', addModalStyles);
 } else {
   addModalStyles();
+}
+
+// ============================================
+// ACTION REGISTRY - Step 115
+// ============================================
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+  Utils.registerAction('toggleNotificationBody', (el, data) => {
+    if (data.id && typeof toggleNotificationBody === 'function') {
+      toggleNotificationBody(data.id);
+    }
+  });
+
+  Utils.registerAction('toggleNotification', (el, data) => {
+    if (data.id && typeof toggleNotification === 'function') {
+      toggleNotification(data.id);
+    }
+  });
+
+  Utils.registerAction('openEditNotificationModal', (el, data) => {
+    if (data.id && typeof openEditNotificationModal === 'function') {
+      openEditNotificationModal(data.id);
+    }
+  });
+
+  Utils.registerAction('insertVariable', (el, data) => {
+    if (data.variable && typeof insertVariable === 'function') {
+      insertVariable(data.variable);
+    }
+  });
+
+  Utils.registerAction('removeCCEmail', (el, data) => {
+    if (data.email && typeof removeCCEmail === 'function') {
+      removeCCEmail(data.email);
+    }
+  });
+
+  Utils.registerAction('removeBCCEmail', (el, data) => {
+    if (data.email && typeof removeBCCEmail === 'function') {
+      removeBCCEmail(data.email);
+    }
+  });
 }

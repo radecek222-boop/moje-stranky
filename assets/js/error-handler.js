@@ -3,6 +3,16 @@
  * Zachytává všechny JS chyby a zobrazuje detailní informace
  */
 
+// Fallback pro escapeHtml pokud utils.js není načten
+if (typeof escapeHtml === 'undefined') {
+  window.escapeHtml = function(text) {
+    if (text === null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+  };
+}
+
 // Global error handler
 window.addEventListener('error', function(event) {
     const error = {
@@ -17,7 +27,7 @@ window.addEventListener('error', function(event) {
         userAgent: navigator.userAgent
     };
 
-    console.error('🔴 JavaScript Error Caught:', error);
+    console.error('JavaScript Error Caught:', error);
 
     // Zobrazit error v UI
     displayJSError(error);
@@ -37,7 +47,7 @@ window.addEventListener('unhandledrejection', function(event) {
         userAgent: navigator.userAgent
     };
 
-    console.error('🔴 Unhandled Promise Rejection:', error);
+    console.error('Unhandled Promise Rejection:', error);
 
     // Zobrazit error v UI
     displayJSError(error);
@@ -86,7 +96,7 @@ function displayJSError(error) {
         border: 3px solid #dc3545;
         border-radius: 8px;
         box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-        z-index: 999999;
+        z-index: 10003;
         font-family: 'Courier New', monospace;
         color: #f0f0f0;
         overflow: hidden;
@@ -104,8 +114,8 @@ function displayJSError(error) {
         font-size: 14px;
     `;
     header.innerHTML = `
-        <span>🔴 ${error.type}</span>
-        <button onclick="document.getElementById('js-error-container').remove()"
+        <span>${error.type}</span>
+        <button data-action="closeJsErrorContainer"
                 style="background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; line-height: 1;">
             ×
         </button>
@@ -121,7 +131,7 @@ function displayJSError(error) {
 
     let bodyHTML = `
         <div style="margin-bottom: 10px;">
-            <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">📋 ZPRÁVA:</div>
+            <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">[List] ZPRÁVA:</div>
             <div style="color: #ff6b6b; word-break: break-word;">${escapeHtml(error.message)}</div>
         </div>
     `;
@@ -129,7 +139,7 @@ function displayJSError(error) {
     if (error.file) {
         bodyHTML += `
             <div style="margin-bottom: 10px;">
-                <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">📍 SOUBOR:</div>
+                <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">[Loc] SOUBOR:</div>
                 <div style="color: #4dabf7; word-break: break-all;">${escapeHtml(error.file)}</div>
             </div>
         `;
@@ -138,7 +148,7 @@ function displayJSError(error) {
     if (error.line) {
         bodyHTML += `
             <div style="margin-bottom: 10px;">
-                <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">📍 ŘÁDEK:</div>
+                <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">[Loc] ŘÁDEK:</div>
                 <div style="color: #51cf66; font-weight: bold;">
                     ${error.line}${error.column ? ':' + error.column : ''}
                 </div>
@@ -150,7 +160,7 @@ function displayJSError(error) {
         const stackLines = error.stack.split('\n').slice(0, 10);
         bodyHTML += `
             <div style="margin-bottom: 10px;">
-                <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">📚 STACK TRACE:</div>
+                <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">STACK TRACE:</div>
                 <div style="background: #1a1a1a; padding: 10px; border-radius: 4px; overflow-x: auto; max-height: 150px;">
                     <pre style="margin: 0; color: #868e96; font-size: 11px; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(stackLines.join('\n'))}</pre>
                 </div>
@@ -160,13 +170,13 @@ function displayJSError(error) {
 
     bodyHTML += `
         <div style="text-align: center; margin-top: 15px;">
-            <button onclick="copyJSError()"
+            <button data-action="copyJSError"
                     style="background: #28a745; color: white; border: none; padding: 8px 15px;
                            border-radius: 4px; cursor: pointer; font-family: 'Courier New', monospace; font-size: 12px;">
-                📋 Kopírovat pro Claude Code nebo Codex
+                Kopírovat chybový report
             </button>
             <div id="js-copy-status" style="color: #28a745; margin-top: 8px; display: none; font-size: 11px;">
-                ✅ Zkopírováno! Vložte CTRL+V do zprávy pro Claude/Codex
+                Zkopírováno do schránky
             </div>
         </div>
     `;
@@ -189,7 +199,7 @@ window.copyJSError = function() {
     if (!error) return;
 
     const report = `
-🔴 WGS JAVASCRIPT ERROR REPORT
+WGS JAVASCRIPT ERROR REPORT
 ${'='.repeat(80)}
 Type: ${error.type}
 Message: ${error.message}
@@ -284,10 +294,9 @@ const errorLogger = {
             // Pokud dostaneme HTTP 429, přestat logovat na 5 minut
             if (response.status === 429) {
                 this.rateLimited = true;
-                console.warn('⚠️ Error logging rate limited - paused for 5 minutes');
+                console.warn('Error logging rate limited - paused for 5 minutes');
                 setTimeout(() => {
                     this.rateLimited = false;
-                    console.log('✅ Error logging resumed');
                 }, 5 * 60 * 1000);
             }
         } catch (err) {
@@ -309,14 +318,8 @@ function logErrorToServer(error) {
     errorLogger.add(error);
 }
 
-/**
- * Escape HTML pro bezpečné zobrazení
- */
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+// escapeHtml přesunuto do utils.js (Step 107)
+// Funkce je dostupná jako window.escapeHtml() nebo Utils.escapeHtml()
 
 /**
  * Enhanced fetch wrapper s error handlingem
@@ -327,7 +330,7 @@ window.fetch = function(...args) {
         .then(async response => {
             // Pokud je to error response, zkusit extrahovat detaily
             if (!response.ok) {
-                // ✅ OPRAVA: Clone response aby šel přečíst 2x (jako text i JSON)
+                // OPRAVA: Clone response aby šel přečíst 2x (jako text i JSON)
                 const clonedResponse = response.clone();
 
                 try {
@@ -341,7 +344,7 @@ window.fetch = function(...args) {
 
                         // Pokud je to PHP error s detaily, zobrazit
                         if (data.file && data.line) {
-                            console.error('🔴 API Error:', {
+                            console.error('API Error:', {
                                 message: data.message || data.error,
                                 file: data.file,
                                 full_path: data.full_path,
@@ -359,10 +362,10 @@ window.fetch = function(...args) {
                     // JSON je OK, ale nemá error/message → vrátit response
                     throw new Error(`HTTP ${response.status}: ${JSON.stringify(data)}`);
                 } catch (jsonError) {
-                    // ✅ OPRAVA: Pokud JSON parsing selhal, přečíst jako text
+                    // OPRAVA: Pokud JSON parsing selhal, přečíst jako text
                     try {
                         const errorText = await clonedResponse.text();
-                        console.error('🔴 HTTP Error (non-JSON response):', {
+                        console.error('HTTP Error (non-JSON response):', {
                             status: response.status,
                             statusText: response.statusText,
                             body: errorText,
@@ -378,7 +381,7 @@ window.fetch = function(...args) {
             return response;
         })
         .catch(error => {
-            console.error('🔴 Fetch Error:', error);
+            console.error('Fetch Error:', error);
             throw error;
         });
 };
@@ -413,4 +416,18 @@ function formatBacktrace(backtrace) {
     }).join('\n');
 }
 
-console.log('✅ WGS Error Handler loaded - All errors will be caught and displayed');
+// ============================================
+// ACTION REGISTRY - Step 115
+// ============================================
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('closeJsErrorContainer', () => {
+        const container = document.getElementById('js-error-container');
+        if (container) container.remove();
+    });
+
+    Utils.registerAction('copyJSError', () => {
+        if (typeof copyJSError === 'function') {
+            copyJSError();
+        }
+    });
+}

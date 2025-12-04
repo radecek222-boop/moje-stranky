@@ -40,7 +40,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             margin: 0 auto;
         }
         h1 {
-            color: #2D5016;
+            color: #333333;
             margin-bottom: 10px;
         }
         .subtitle {
@@ -67,11 +67,11 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             transition: all 0.2s;
         }
         .tab:hover {
-            color: #2D5016;
+            color: #333333;
         }
         .tab.active {
-            color: #2D5016;
-            border-bottom-color: #2D5016;
+            color: #333333;
+            border-bottom-color: #333333;
         }
 
         /* Tab Content */
@@ -121,7 +121,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         }
         .btn {
             padding: 10px 20px;
-            background: #2D5016;
+            background: #333333;
             color: white;
             border: none;
             border-radius: 4px;
@@ -243,17 +243,17 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         <p class="subtitle">Správa souhlasů a práva subjektů údajů</p>
 
         <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" data-tab="consent">Správa souhlasů</button>
-            <button class="tab" data-tab="requests">Žádosti o data</button>
+        <div class="tabs" role="tablist" aria-label="GDPR sekce">
+            <button class="tab active" data-tab="consent" role="tab" id="tab-btn-consent" aria-selected="true" aria-controls="tab-consent">Správa souhlasů</button>
+            <button class="tab" data-tab="requests" role="tab" id="tab-btn-requests" aria-selected="false" aria-controls="tab-requests">Žádosti o data</button>
             <?php if ($isAdmin): ?>
-            <button class="tab" data-tab="admin">Admin (Zpracování)</button>
-            <button class="tab" data-tab="audit">Audit Log</button>
+            <button class="tab" data-tab="admin" role="tab" id="tab-btn-admin" aria-selected="false" aria-controls="tab-admin">Admin (Zpracování)</button>
+            <button class="tab" data-tab="audit" role="tab" id="tab-btn-audit" aria-selected="false" aria-controls="tab-audit">Audit Log</button>
             <?php endif; ?>
         </div>
 
         <!-- Tab: Consent Management -->
-        <div class="tab-content active" id="tab-consent">
+        <div class="tab-content active" id="tab-consent" role="tabpanel" aria-labelledby="tab-btn-consent">
             <div class="card">
                 <h3>Správa souhlasů</h3>
                 <p>Můžete upravit své preference ohledně zpracování osobních údajů.</p>
@@ -273,23 +273,23 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                     <label for="consent-functional">Funkční cookies (nutné pro provoz webu)</label>
                 </div>
 
-                <button class="btn" onclick="saveConsent()">Uložit preference</button>
-                <button class="btn btn-danger" onclick="withdrawConsent()">Odvolat všechny souhlasy</button>
+                <button class="btn" data-action="saveConsent">Uložit preference</button>
+                <button class="btn btn-danger" data-action="withdrawConsent">Odvolat všechny souhlasy</button>
 
                 <div id="consent-status"></div>
             </div>
         </div>
 
         <!-- Tab: Data Requests -->
-        <div class="tab-content" id="tab-requests">
+        <div class="tab-content" id="tab-requests" role="tabpanel" aria-labelledby="tab-btn-requests">
             <div class="card">
                 <h3>Žádost o export dat</h3>
                 <p>Vyžádejte si kopii všech vašich osobních údajů (GDPR Článek 15).</p>
 
                 <form id="export-form">
                     <div class="form-group">
-                        <label>Email pro zaslání exportu</label>
-                        <input type="email" name="email" required>
+                        <label for="export-email">Email pro zaslání exportu</label>
+                        <input type="email" id="export-email" name="email" autocomplete="email" required>
                     </div>
                     <button type="submit" class="btn">Požádat o export</button>
                 </form>
@@ -303,8 +303,8 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 
                 <form id="deletion-form">
                     <div class="form-group">
-                        <label>Email pro potvrzení</label>
-                        <input type="email" name="email" required>
+                        <label for="deletion-email">Email pro potvrzení</label>
+                        <input type="email" id="deletion-email" name="email" autocomplete="email" required>
                     </div>
                     <button type="submit" class="btn btn-danger">Požádat o smazání</button>
                 </form>
@@ -315,7 +315,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 
         <?php if ($isAdmin): ?>
         <!-- Tab: Admin Processing -->
-        <div class="tab-content" id="tab-admin">
+        <div class="tab-content" id="tab-admin" role="tabpanel" aria-labelledby="tab-btn-admin">
             <div class="card">
                 <h3>Zpracování žádostí (Admin)</h3>
                 <div id="admin-requests-list" class="loading">Načítám žádosti...</div>
@@ -323,7 +323,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         </div>
 
         <!-- Tab: Audit Log -->
-        <div class="tab-content" id="tab-audit">
+        <div class="tab-content" id="tab-audit" role="tabpanel" aria-labelledby="tab-btn-audit">
             <div class="card">
                 <h3>Audit Log</h3>
                 <div id="audit-log-list" class="loading">Načítám audit log...</div>
@@ -344,8 +344,13 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             tab.addEventListener('click', () => {
                 const targetTab = tab.dataset.tab;
 
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                // Update tabs - visual and ARIA
+                document.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
                 tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
 
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 document.getElementById('tab-' + targetTab).classList.add('active');
@@ -381,13 +386,13 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-success">Preference uloženy!</div>';
+                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-success" role="status">Preference uloženy!</div>';
                 } else {
-                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-error">Chyba: ' + result.message + '</div>';
+                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-error" role="alert">Chyba: ' + result.message + '</div>';
                 }
             } catch (error) {
                 console.error(error);
-                document.getElementById('consent-status').innerHTML = '<div class="alert alert-error">Chyba při ukládání</div>';
+                document.getElementById('consent-status').innerHTML = '<div class="alert alert-error" role="alert">Chyba při ukládání</div>';
             }
         }
 
@@ -411,11 +416,11 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-success">Souhlasy odvolány</div>';
+                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-success" role="status">Souhlasy odvolány</div>';
                     document.getElementById('consent-analytics').checked = false;
                     document.getElementById('consent-marketing').checked = false;
                 } else {
-                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-error">Chyba: ' + result.message + '</div>';
+                    document.getElementById('consent-status').innerHTML = '<div class="alert alert-error" role="alert">Chyba: ' + result.message + '</div>';
                 }
             } catch (error) {
                 console.error(error);
@@ -440,10 +445,10 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    document.getElementById('export-status').innerHTML = '<div class="alert alert-success">Žádost odeslána! Request ID: ' + result.request_id + '</div>';
+                    document.getElementById('export-status').innerHTML = '<div class="alert alert-success" role="status">Žádost odeslána! Request ID: ' + result.request_id + '</div>';
                     e.target.reset();
                 } else {
-                    document.getElementById('export-status').innerHTML = '<div class="alert alert-error">Chyba: ' + result.message + '</div>';
+                    document.getElementById('export-status').innerHTML = '<div class="alert alert-error" role="alert">Chyba: ' + result.message + '</div>';
                 }
             } catch (error) {
                 console.error(error);
@@ -472,10 +477,10 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    document.getElementById('deletion-status').innerHTML = '<div class="alert alert-success">Žádost odeslána! Request ID: ' + result.request_id + '</div>';
+                    document.getElementById('deletion-status').innerHTML = '<div class="alert alert-success" role="status">Žádost odeslána! Request ID: ' + result.request_id + '</div>';
                     e.target.reset();
                 } else {
-                    document.getElementById('deletion-status').innerHTML = '<div class="alert alert-error">Chyba: ' + result.message + '</div>';
+                    document.getElementById('deletion-status').innerHTML = '<div class="alert alert-error" role="alert">Chyba: ' + result.message + '</div>';
                 }
             } catch (error) {
                 console.error(error);
@@ -514,7 +519,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             }
 
             let html = '<table><thead><tr>';
-            html += '<th>ID</th><th>Email</th><th>Typ</th><th>Status</th><th>Vytvořeno</th><th>Akce</th>';
+            html += '<th scope="col">ID</th><th scope="col">Email</th><th scope="col">Typ</th><th scope="col">Status</th><th scope="col">Vytvořeno</th><th scope="col">Akce</th>';
             html += '</tr></thead><tbody>';
 
             requests.forEach(req => {
@@ -530,9 +535,9 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 
                 if (req.status === 'pending') {
                     if (req.request_type === 'export') {
-                        html += `<button class="btn btn-secondary" onclick="processExport(${req.request_id})">Zpracovat export</button>`;
+                        html += `<button class="btn btn-secondary" data-action="processExport" data-id="${req.request_id}">Zpracovat export</button>`;
                     } else if (req.request_type === 'delete') {
-                        html += `<button class="btn btn-danger" onclick="processDeletion(${req.request_id})">Zpracovat smazání</button>`;
+                        html += `<button class="btn btn-danger" data-action="processDeletion" data-id="${req.request_id}">Zpracovat smazání</button>`;
                     }
                 } else if (req.status === 'completed' && req.request_type === 'export') {
                     html += `<a href="/api/gdpr_api.php?action=download_export&request_id=${req.request_id}&csrf_token=${csrfToken}" class="btn">Stáhnout</a>`;
@@ -633,7 +638,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             }
 
             let html = '<table><thead><tr>';
-            html += '<th>Datum</th><th>Akce</th><th>Fingerprint</th><th>IP</th>';
+            html += '<th scope="col">Datum</th><th scope="col">Akce</th><th scope="col">Fingerprint</th><th scope="col">IP</th>';
             html += '</tr></thead><tbody>';
 
             logs.forEach(log => {

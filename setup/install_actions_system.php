@@ -381,8 +381,8 @@ foreach ($installationSteps as $step) {
     echo '<div class="step-title">';
 
     $icons = [
-        'success' => '✅',
-        'error' => '❌',
+        'success' => '',
+        'error' => '',
         'warning' => '⚠️',
         'info' => 'ℹ️'
     ];
@@ -424,7 +424,7 @@ if (!$hasErrors && isset($pendingActions) && count($pendingActions) > 0) {
 if (!$hasErrors) {
     echo '<div class="card">';
     echo '<div class="final-box">';
-    echo '<h3>✅ Instalace dokončena úspěšně!</h3>';
+    echo '<h3>Instalace dokončena úspěšně!</h3>';
     echo '<p style="margin-bottom: 1.5rem;">Systém akcí a úkolů je nyní plně funkční.</p>';
     echo '<a href="admin.php" class="btn">→ Přejít do Control Center</a>';
     echo '</div>';
@@ -432,7 +432,7 @@ if (!$hasErrors) {
 } else {
     echo '<div class="card">';
     echo '<div class="final-box" style="background: #dc3545;">';
-    echo '<h3>❌ Instalace se nezdařila</h3>';
+    echo '<h3>Instalace se nezdařila</h3>';
     echo '<p>Kontaktujte vývojáře nebo zkontrolujte logy.</p>';
     echo '</div>';
     echo '</div>';

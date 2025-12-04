@@ -10,7 +10,7 @@ require_once __DIR__ . '/../includes/reklamace_id_validator.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
 
 header('Content-Type: application/json');
-// ✅ PERFORMANCE: Cache-Control header (10 minut)
+// PERFORMANCE: Cache-Control header (10 minut)
 // Protokoly (PDF dokumenty) se nemění často
 header('Cache-Control: private, max-age=600'); // 10 minut
 
@@ -25,6 +25,13 @@ try {
         ]);
         exit;
     }
+
+    // PERFORMANCE FIX: Načíst session data a uvolnit zámek
+    // Audit 2025-11-24: PDF generation (1-3s) blokuje ostatní requesty
+    $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
+
+    // KRITICKÉ: Uvolnit session lock pro paralelní zpracování
+    session_write_close();
 
     // Získání akce
     $isPost = $_SERVER['REQUEST_METHOD'] === 'POST';
@@ -63,7 +70,7 @@ try {
         throw new Exception('Povolena pouze POST nebo GET metoda');
     }
 
-    // ✅ FIX 9: Databázový rate limiting pouze pro POST operace (upload, save, send)
+    // FIX 9: Databázový rate limiting pouze pro POST operace (upload, save, send)
     if ($isPost && in_array($action, ['save_pdf_document', 'save_protokol', 'send_email'])) {
         $pdo = getDbConnection();
         $rateLimiter = new RateLimiter($pdo);
@@ -85,7 +92,7 @@ try {
             exit;
         }
 
-        // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
+        // FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
     }
 
     switch ($action) {
@@ -234,7 +241,7 @@ function savePdfOnly($data) {
                 )
             ");
 
-            $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
+            global $uploadedBy; // Načteno v hlavním scope (řádek 31)
 
             $stmt->execute([
                 ':claim_id' => $reklamace['id'],
@@ -245,7 +252,7 @@ function savePdfOnly($data) {
                 ':uploaded_by' => $uploadedBy
             ]);
 
-            error_log("✅ PDF report uložen přes EXPORT: {$filename} ({$fileSize} bytes)");
+            error_log("PDF report uložen přes EXPORT: {$filename} ({$fileSize} bytes)");
 
             return [
                 'status' => 'success',
@@ -365,7 +372,7 @@ function savePdfDocument($data) {
                 )
             ");
 
-            $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
+            global $uploadedBy; // Načteno v hlavním scope (řádek 31)
 
             $stmt->execute([
                 ':claim_id' => $claimId,
@@ -539,12 +546,17 @@ function sendEmailToCustomer($data) {
         $pdfSize / (1024 * 1024)
     ));
 
-    // Načíst PHPMailer
-    $autoloadPath = __DIR__ . '/../vendor/autoload.php';
-    if (!file_exists($autoloadPath)) {
+    // Načíst PHPMailer - zkusit lib/autoload.php nebo vendor/autoload.php
+    $libAutoload = __DIR__ . '/../lib/autoload.php';
+    $vendorAutoload = __DIR__ . '/../vendor/autoload.php';
+
+    if (file_exists($libAutoload)) {
+        require_once $libAutoload;
+    } elseif (file_exists($vendorAutoload)) {
+        require_once $vendorAutoload;
+    } else {
         throw new Exception('PHPMailer není nainstalován. Spusťte Email System Installer na /admin/install_email_system.php');
     }
-    require_once $autoloadPath;
 
     // Ověřit, že PHPMailer class existuje
     if (!class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
@@ -589,6 +601,36 @@ function sendEmailToCustomer($data) {
         throw new Exception('Neplatná emailová adresa zákazníka');
     }
 
+    // Kontrola jestli existuji videa pro tuto zakazku
+    $videoDownloadUrl = null;
+    $stmt = $pdo->prepare("SELECT COUNT(*) as pocet FROM wgs_videos WHERE claim_id = :claim_id");
+    $stmt->execute([':claim_id' => $reklamace['id']]);
+    $videaCount = $stmt->fetch(PDO::FETCH_ASSOC)['pocet'];
+
+    if ($videaCount > 0) {
+        // Vytvorit token pro stahovani videi
+        $videoToken = bin2hex(random_bytes(32)); // 64 znaku
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+7 days'));
+
+        $stmt = $pdo->prepare("
+            INSERT INTO wgs_video_tokens (token, claim_id, expires_at, customer_email)
+            VALUES (:token, :claim_id, :expires_at, :email)
+        ");
+        $stmt->execute([
+            ':token' => $videoToken,
+            ':claim_id' => $reklamace['id'],
+            ':expires_at' => $expiresAt,
+            ':email' => $customerEmail
+        ]);
+
+        // Sestavit URL pro stahovani
+        $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+                   . '://' . ($_SERVER['HTTP_HOST'] ?? 'www.wgs-service.cz');
+        $videoDownloadUrl = $baseUrl . '/api/video_download.php?token=' . $videoToken;
+
+        error_log("Video token vytvoren pro reklamaci {$reklamaceId}: {$videoToken}");
+    }
+
     // Načtení SMTP nastavení z databáze
     $stmt = $pdo->query("
         SELECT * FROM wgs_smtp_settings
@@ -604,17 +646,71 @@ function sendEmailToCustomer($data) {
 
     // Příprava emailu
     $storageKey = reklamaceStorageKey($reklamaceId);
-    $subject = "Servisní protokol WGS - Reklamace č. {$reklamaceId}";
+    // Pouzit zakaznicke cislo reklamace (cislo), ne interni WGS cislo (reklamace_id)
+    $cisloReklamace = $reklamace['cislo'] ?? $reklamace['reklamace_id'] ?? $reklamaceId;
+    $subject = "Servisní protokol WGS - Reklamace č. {$cisloReklamace}";
     $customerName = $reklamace['jmeno'] ?? $reklamace['zakaznik'] ?? 'Zákazník';
 
-    $message = "
-Dobrý den {$customerName},
+    // Sestavit sekci videodokumentace pokud existuji videa
+    $videoSection = '';
+    if ($videoDownloadUrl) {
+        $videoSection = "
+<br>
+<table cellpadding='0' cellspacing='0' border='0' style='margin: 20px 0; background: #f5f5f5; border-radius: 8px; width: 100%;'>
+    <tr>
+        <td style='padding: 20px;'>
+            <p style='margin: 0 0 12px 0; font-weight: bold; color: #333;'>Videodokumentace</p>
+            <p style='margin: 0 0 12px 0; color: #666;'>K této zakázce je k dispozici videodokumentace ({$videaCount} " . ($videaCount == 1 ? 'video' : 'videí') . ").</p>
+            <a href='{$videoDownloadUrl}' style='display: inline-block; background: #333; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;'>Stáhnout videodokumentaci</a>
+            <p style='margin: 12px 0 0 0; font-size: 12px; color: #999;'>Odkaz je platný 7 dní</p>
+        </td>
+    </tr>
+</table>
+";
+    }
 
-zasíláme Vám kompletní servisní report k reklamaci č. {$reklamaceId}.
+    // HTML email zpráva
+    $message = "
+<!DOCTYPE html>
+<html lang='cs'>
+<head>
+    <meta charset='UTF-8'>
+</head>
+<body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;'>
+    <p>Dobrý den {$customerName},</p>
+
+    <p>zasíláme Vám kompletní servisní report k reklamaci č. <strong>{$cisloReklamace}</strong>.</p>
+
+    <p><strong>V příloze naleznete:</strong></p>
+    <ul>
+        <li>Servisní protokol s fotodokumentací (PDF)</li>
+    </ul>
+    {$videoSection}
+    <p>V případě dotazů nás prosím kontaktujte.</p>
+
+    <p style='margin-top: 30px;'>
+        S pozdravem,<br>
+        <strong>White Glove Service</strong><br>
+        <a href='mailto:reklamace@wgs-service.cz' style='color: #333;'>reklamace@wgs-service.cz</a><br>
+        +420 725 965 826
+    </p>
+</body>
+</html>
+";
+
+    // Textová verze pro klienty bez HTML
+    $messageText = "Dobrý den {$customerName},
+
+zasíláme Vám kompletní servisní report k reklamaci č. {$cisloReklamace}.
 
 V příloze naleznete:
-- Servisní protokol s fotodokumentací (v jednom PDF)
-
+- Servisní protokol s fotodokumentací (PDF)
+" . ($videoDownloadUrl ? "
+VIDEODOKUMENTACE
+K této zakázce je k dispozici videodokumentace ({$videaCount} videí).
+Ke stažení: {$videoDownloadUrl}
+Odkaz je platný 7 dní.
+" : "") . "
 V případě dotazů nás prosím kontaktujte.
 
 S pozdravem,
@@ -656,19 +752,24 @@ reklamace@wgs-service.cz
         $mail->addAddress($customerEmail, $customerName);
         $mail->addReplyTo('reklamace@wgs-service.cz', 'White Glove Service');
 
-        // Obsah emailu
-        $mail->isHTML(false);
+        // Obsah emailu - HTML s textovou alternativou
+        $mail->isHTML(true);
         $mail->Subject = $subject;
         $mail->Body = $message;
+        $mail->AltBody = $messageText; // Textová verze pro klienty bez HTML
 
         // Přiložit kompletní PDF (protokol + fotodokumentace)
+        // Nazev prilohy pouziva zakaznicke cislo reklamace + jmeno zakaznika
         $pdfData = base64_decode($completePdf);
-        $mail->addStringAttachment($pdfData, "WGS_Report_{$storageKey}.pdf", 'base64', 'application/pdf');
+        $safeCustomerName = preg_replace('/[^a-zA-Z0-9_-]/', '-', iconv('UTF-8', 'ASCII//TRANSLIT', $customerName));
+        $safeCustomerName = preg_replace('/-+/', '-', trim($safeCustomerName, '-'));
+        $attachmentName = "Protokol_" . reklamaceStorageKey($cisloReklamace) . "_" . $safeCustomerName . ".pdf";
+        $mail->addStringAttachment($pdfData, $attachmentName, 'base64', 'application/pdf');
 
         // Odeslat
         $mail->send();
 
-        // ✅ Uložit kompletní PDF do databáze (protokol + fotodokumentace)
+        // Uložit kompletní PDF do databáze (protokol + fotodokumentace)
         // Vytvoření uploads/protokoly adresáře
         $uploadsDir = __DIR__ . '/../uploads/protokoly';
         if (!is_dir($uploadsDir)) {
@@ -703,7 +804,7 @@ reklamace@wgs-service.cz
                     )
                 ");
 
-                $uploadedBy = $_SESSION['user_email'] ?? $_SESSION['admin_email'] ?? 'system';
+                global $uploadedBy; // Načteno v hlavním scope (řádek 31)
 
                 $stmt->execute([
                     ':claim_id' => $reklamace['id'],
@@ -714,7 +815,7 @@ reklamace@wgs-service.cz
                     ':uploaded_by' => $uploadedBy
                 ]);
 
-                error_log("✅ Kompletní PDF report uložen: {$filename} ({$fileSize} bytes)");
+                error_log("Kompletní PDF report uložen: {$filename} ({$fileSize} bytes)");
 
             } catch (PDOException $e) {
                 // Logovat chybu ale nepřerušovat odeslání emailu

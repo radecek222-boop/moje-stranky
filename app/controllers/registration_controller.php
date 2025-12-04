@@ -72,7 +72,13 @@ try {
     $now = date('Y-m-d H:i:s');
 
     // CRITICAL: Vygenerovat user_id podle role
-    $rolePrefix = ($role === 'technik') ? 'TCH' : 'PRT';
+    // Mapovani roli na prefixy: technik=TCH, prodejce=PRO, ostatni=USR
+    $rolePrefixMap = [
+        'technik' => 'TCH',
+        'prodejce' => 'PRO',
+        'user' => 'USR'
+    ];
+    $rolePrefix = $rolePrefixMap[$role] ?? 'USR';
     $currentYear = date('Y');
 
     // Najít maximální číslo pro danou roli v tomto roce
@@ -187,7 +193,7 @@ try {
 
     $pdo->commit();
 
-    // ✅ FIX 10: Audit log pro compliance a forensics
+    // FIX 10: Audit log pro compliance a forensics
     auditLog('user_registration', [
         'email' => $email,
         'user_id' => $generatedUserId,
@@ -213,6 +219,7 @@ try {
     if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollBack();
     }
+    error_log('Registration RuntimeException: ' . $e->getMessage() . ' | Email: ' . ($email ?? 'unknown') . ' | Role: ' . ($role ?? 'unknown'));
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
 } catch (Throwable $e) {

@@ -15,9 +15,10 @@
  * 4. Campaign stats aggregation - Daily
  * 5. Generate AI reports - Daily
  * 6. GDPR retention policy (730 dní) - Weekly (pouze v neděli)
+ * 7. Notifikace nepřečtených poznámek - Daily
  *
- * @version 1.0.0
- * @date 2025-11-23
+ * @version 1.1.0
+ * @date 2025-11-24
  * @module Ultra Cron Consolidation
  */
 
@@ -181,6 +182,16 @@ if ($isNedele) {
 }
 
 // ========================================
+// JOB #7: Notifikace nepřečtených poznámek (denně)
+// ========================================
+if (executeScript('scripts/notifikovat_neprecte_poznamky.php', 'Notifikace nepřečtených poznámek')) {
+    $successCount++;
+} else {
+    $errorCount++;
+}
+sleep(1);
+
+// ========================================
 // SUMMARY
 // ========================================
 $totalEndTime = microtime(true);
@@ -195,14 +206,14 @@ logMessage("Celkové trvání: {$totalDuration}s");
 logMessage("==========================================");
 
 if ($errorCount > 0) {
-    logError("ULTRA MASTER CRON DOKONČEN S CHYBAMI ❌");
+    logError("ULTRA MASTER CRON DOKONČEN S CHYBAMI ");
     sendErrorEmail(
         "Ultra Master Cron - Dokončeno s chybami ({$errorCount} errors)",
         "Úspěšné joby: {$successCount}\nNeúspěšné joby: {$errorCount}\nTrvání: {$totalDuration}s\n\nKontrolujte log: {$config['log_file']}"
     );
     exit(1);
 } else {
-    logSuccess("ULTRA MASTER CRON DOKONČEN ÚSPĚŠNĚ ✅");
+    logSuccess("ULTRA MASTER CRON DOKONČEN ÚSPĚŠNĚ ");
     exit(0);
 }
 ?>

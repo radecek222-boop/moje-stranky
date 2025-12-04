@@ -212,7 +212,7 @@ logMessage("Celkové trvání: {$totalDuration}s");
 logMessage("==========================================");
 
 if ($errorCount > 0) {
-    logError("MASTER CRON DOKONČEN S CHYBAMI ❌");
+    logError("MASTER CRON DOKONČEN S CHYBAMI ");
 
     // Odeslat summary email s chybami
     sendErrorEmail(
@@ -222,7 +222,7 @@ if ($errorCount > 0) {
 
     exit(1);
 } else {
-    logSuccess("MASTER CRON DOKONČEN ÚSPĚŠNĚ ✅");
+    logSuccess("MASTER CRON DOKONČEN ÚSPĚŠNĚ ");
     exit(0);
 }
 ?>

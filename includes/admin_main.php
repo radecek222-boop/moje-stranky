@@ -65,9 +65,11 @@ try {
 
     <!-- Search -->
     <div class="control-center-search">
-        <input type="text"
+        <input type="search"
                id="cc-search"
                placeholder="Hledat nastavení..."
+               enterkeyhint="search"
+               aria-label="Hledat nastavení"
                autocomplete="off">
     </div>
 
@@ -75,39 +77,39 @@ try {
     <div class="control-center-grid" id="cc-grid">
 
         <!-- 1. VZHLED & DESIGN -->
-        <div class="control-card" data-section="appearance" onclick="openSection('appearance')">
+        <div class="control-card" data-section="appearance" data-action="openSection">
             <div class="control-card-header">
                 <div>
                     <div class="control-card-icon">🎨</div>
                     <h3 class="control-card-title">Vzhled & Design</h3>
                     <p class="control-card-description">Barvy, fonty, logo a branding</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot green"></span>
+                <span class="control-card-status-dot green" aria-hidden="true"></span>
                 <span>Aktivní</span>
             </div>
         </div>
 
         <!-- 2. SQL DATABÁZE -->
-        <div class="control-card" data-section="sql" onclick="window.open('vsechny_tabulky.php', '_blank')">
+        <div class="control-card" data-section="sql" data-action="openNewWindow" data-url="vsechny_tabulky.php">
             <div class="control-card-header">
                 <div>
                     <div class="control-card-icon">🗄️</div>
                     <h3 class="control-card-title">SQL</h3>
                     <p class="control-card-description">Zobrazit všechny SQL tabulky (aktuální živá data)</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot green"></span>
+                <span class="control-card-status-dot green" aria-hidden="true"></span>
                 <span>Aktivní</span>
             </div>
         </div>
 
         <!-- 3. UŽIVATELÉ & OPRÁVNĚNÍ -->
-        <div class="control-card" data-section="users" onclick="openSection('users')">
+        <div class="control-card" data-section="users" data-action="openSection">
             <?php if ($userCount > 0): ?>
                 <div class="control-card-badge"><?= $userCount ?></div>
             <?php endif; ?>
@@ -117,16 +119,16 @@ try {
                     <h3 class="control-card-title">Uživatelé & Oprávnění</h3>
                     <p class="control-card-description">Technici, prodejci, administrátoři</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot green"></span>
+                <span class="control-card-status-dot green" aria-hidden="true"></span>
                 <span><?= $userCount ?> uživatelů</span>
             </div>
         </div>
 
         <!-- 4. NOTIFIKACE -->
-        <div class="control-card" data-section="notifications" onclick="openSection('notifications')">
+        <div class="control-card" data-section="notifications" data-action="openSection">
             <?php if ($notificationCount > 0): ?>
                 <div class="control-card-badge success"><?= $notificationCount ?></div>
             <?php endif; ?>
@@ -136,16 +138,16 @@ try {
                     <h3 class="control-card-title">Notifikace</h3>
                     <p class="control-card-description">Email & SMS šablony</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot green"></span>
+                <span class="control-card-status-dot green" aria-hidden="true"></span>
                 <span><?= $notificationCount ?> aktivních</span>
             </div>
         </div>
 
         <!-- 5. KONFIGURACE -->
-        <div class="control-card" data-section="configuration" onclick="openSection('configuration')">
+        <div class="control-card" data-section="configuration" data-action="openSection">
             <div class="control-card-badge warning">⚠️</div>
             <div class="control-card-header">
                 <div>
@@ -153,16 +155,16 @@ try {
                     <h3 class="control-card-title">Konfigurace</h3>
                     <p class="control-card-description">SMTP, API klíče, databáze</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot yellow"></span>
+                <span class="control-card-status-dot yellow" aria-hidden="true"></span>
                 <span>Vyžaduje restart</span>
             </div>
         </div>
 
         <!-- 6. DIAGNOSTIKA -->
-        <div class="control-card" data-section="diagnostics" onclick="openSection('diagnostics')">
+        <div class="control-card" data-section="diagnostics" data-action="openSection">
             <div class="control-card-badge <?= $systemStatus === 'healthy' ? 'success' : ($systemStatus === 'warning' ? 'warning' : '') ?>">
                 <?= $systemStatus === 'healthy' ? '✓' : '!' ?>
             </div>
@@ -172,16 +174,16 @@ try {
                     <h3 class="control-card-title">Diagnostika</h3>
                     <p class="control-card-description">Logy, chyby, výkon systému</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot <?= $systemStatus === 'healthy' ? 'green' : ($systemStatus === 'warning' ? 'yellow' : 'red') ?>"></span>
+                <span class="control-card-status-dot <?= $systemStatus === 'healthy' ? 'green' : ($systemStatus === 'warning' ? 'yellow' : 'red') ?>" aria-hidden="true"></span>
                 <span><?= ucfirst($systemStatus) ?></span>
             </div>
         </div>
 
         <!-- 7. AKCE & ÚKOLY -->
-        <div class="control-card" data-section="actions" onclick="openSection('actions')">
+        <div class="control-card" data-section="actions" data-action="openSection">
             <?php if ($pendingCount > 0): ?>
                 <div class="control-card-badge"><?= $pendingCount ?></div>
             <?php endif; ?>
@@ -191,16 +193,16 @@ try {
                     <h3 class="control-card-title">Akce & Úkoly</h3>
                     <p class="control-card-description">GitHub, migrace, pending tasks</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot <?= $pendingCount > 0 ? 'red' : 'green' ?>"></span>
+                <span class="control-card-status-dot <?= $pendingCount > 0 ? 'red' : 'green' ?>" aria-hidden="true"></span>
                 <span><?= $pendingCount ?> nevyřešených</span>
             </div>
         </div>
 
         <!-- 8. KONZOLE -->
-        <div class="control-card" data-section="console" onclick="openSection('console')">
+        <div class="control-card" data-section="console" data-action="openSection">
             <div class="control-card-badge warning">⚡</div>
             <div class="control-card-header">
                 <div>
@@ -208,26 +210,26 @@ try {
                     <h3 class="control-card-title">Konzole</h3>
                     <p class="control-card-description">Diagnostika HTML/PHP/JS/CSS/SQL</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot blue"></span>
+                <span class="control-card-status-dot blue" aria-hidden="true"></span>
                 <span>Developer Tools</span>
             </div>
         </div>
 
         <!-- 9. STATISTIKY & REPORTY -->
-        <div class="control-card" data-section="analytics" onclick="openSection('analytics')">
+        <div class="control-card" data-section="analytics" data-action="openSection">
             <div class="control-card-header">
                 <div>
-                    <div class="control-card-icon">📊</div>
+                    <div class="control-card-icon">[STAT]</div>
                     <h3 class="control-card-title">Statistiky & Reporty</h3>
                     <p class="control-card-description">Dashboard, grafy, exporty</p>
                 </div>
-                <div class="control-card-arrow">›</div>
+                <div class="control-card-arrow" aria-hidden="true">›</div>
             </div>
             <div class="control-card-status">
-                <span class="control-card-status-dot green"></span>
+                <span class="control-card-status-dot green" aria-hidden="true"></span>
                 <span>Real-time data</span>
             </div>
         </div>
@@ -281,7 +283,7 @@ function openSection(section) {
     }
 }
 
-console.log('✅ Admin Control Center loaded');
+console.log('[OK] Admin Control Center loaded');
 </script>
 
 
