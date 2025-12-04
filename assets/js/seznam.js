@@ -1069,7 +1069,7 @@ function showCalendar(id) {
     ${createCustomerHeader()}
 
     <!-- Vybraný termín - fixní nad kalendářem -->
-    <div id="selectedDateDisplay" style="color: #333; font-size: 0.85rem; font-weight: 600; text-align: center; padding: 0.5rem 1rem; margin: 0 1rem; background: #f5f5f5; border-radius: 4px;">Zatím nevybráno</div>
+    <div id="selectedDateDisplay" style="display: none; background: #f5f5f5; border: 2px solid #666; color: #333; font-size: 0.85rem; padding: 0.5rem 1rem; margin: 0 1rem; border-radius: 4px; font-weight: 600; text-align: center;"></div>
 
     <!-- Varování o kolizi - skryté, zobrazí se při výběru obsazeného času -->
     <div id="collisionWarning" style="display: none; background: #fee; border: 2px solid #c00; color: #900; font-size: 0.85rem; padding: 0.5rem 1rem; margin: 0.5rem 1rem 0; border-radius: 4px; font-weight: 600; text-align: center;">
@@ -1555,7 +1555,9 @@ function renderTimeGrid() {
         el.classList.add('selected');
 
         // PERFORMANCE: Zobrazit termín bez vzdálenosti
-        document.getElementById('selectedDateDisplay').textContent = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
+        const displayEl = document.getElementById('selectedDateDisplay');
+        displayEl.textContent = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
+        displayEl.style.display = 'block';
 
         // Zobrazit/skrýt varování o kolizi
         const warningEl = document.getElementById('collisionWarning');
