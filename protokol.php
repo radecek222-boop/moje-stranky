@@ -507,6 +507,8 @@ if ($initialBootstrapData) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" defer></script>
 
 <script src="assets/js/csrf-auto-inject.min.js" defer></script>
+<!-- Utils - obsahuje fetchCsrfToken a další pomocné funkce -->
+<script src="assets/js/utils.min.js" defer></script>
 
 <!-- External JavaScript -->
 <script src="assets/js/protokol-pdf-preview.min.js" defer></script>
@@ -518,6 +520,8 @@ if ($initialBootstrapData) {
 <!-- Překlady pro kalkulačku -->
 <script src="assets/js/wgs-translations-cenik.min.js" defer></script>
 <script src="assets/js/language-switcher.min.js" defer></script>
+<!-- Mapa pro autocomplete adres v kalkulačce -->
+<script src="assets/js/wgs-map.min.js" defer></script>
 <!-- Kalkulačka integrace -->
 <script src="assets/js/cenik-calculator.min.js" defer></script>
 <script src="assets/js/protokol-calculator-integration.min.js" defer></script>
