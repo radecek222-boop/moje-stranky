@@ -370,19 +370,33 @@ $zemeNazvy = [
             text-align: right;
         }
 
-        /* Grid layout */
+        /* Grid layout - sekce pod sebou */
         .grid-2 {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .grid-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-            gap: 1.75rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
         }
         @media (max-width: 900px) {
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
             .container {
                 padding: 1rem;
             }
+        }
+        /* Kompaktnější sekce */
+        .sekce.kompakt .sekce-content {
+            padding: 1rem;
+        }
+        .sekce.kompakt table th,
+        .sekce.kompakt table td {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+        }
+        .sekce.kompakt table th {
+            font-size: 0.65rem;
         }
 
         /* IP blokace */
@@ -677,134 +691,101 @@ $zemeNazvy = [
         </div>
     </div>
 
-    <div class="grid-2">
-        <!-- TOP STRÁNKY -->
-        <div class="sekce">
-            <div class="sekce-header">Nejnavstevovanejsi stranky</div>
-            <div class="sekce-content">
-                <?php if (!empty($topStranky)): ?>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Stranka</th>
-                            <th class="text-right">Navstevy</th>
-                            <th class="text-right">Unikatni</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($topStranky as $stranka): ?>
-                        <tr>
-                            <td title="<?= htmlspecialchars($stranka['page_url']) ?>">
-                                <?= htmlspecialchars($stranka['page_title'] ?: basename($stranka['page_url']) ?: '/') ?>
-                            </td>
-                            <td class="text-right"><?= number_format($stranka['navstevy']) ?></td>
-                            <td class="text-right"><?= number_format($stranka['unikatni']) ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-                <?php else: ?>
-                <p style="color: #999; text-align: center; padding: 1rem;">Zadna data</p>
-                <?php endif; ?>
-            </div>
+    <!-- TOP STRÁNKY - plná šířka -->
+    <div class="sekce kompakt">
+        <div class="sekce-header">Nejnavstevovanejsi stranky</div>
+        <div class="sekce-content">
+            <?php if (!empty($topStranky)): ?>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Stranka</th>
+                        <th class="text-right">Navstevy</th>
+                        <th class="text-right">Unikatni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($topStranky as $stranka): ?>
+                    <tr>
+                        <td title="<?= htmlspecialchars($stranka['page_url']) ?>"><?= htmlspecialchars(mb_substr($stranka['page_title'] ?: basename($stranka['page_url']) ?: '/', 0, 60)) ?><?= mb_strlen($stranka['page_title'] ?: '') > 60 ? '...' : '' ?></td>
+                        <td class="text-right"><?= number_format($stranka['navstevy']) ?></td>
+                        <td class="text-right"><?= number_format($stranka['unikatni']) ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <?php else: ?>
+            <p style="color: #888; text-align: center; padding: 1rem;">Zadna data</p>
+            <?php endif; ?>
         </div>
+    </div>
 
-        <!-- ZDROJE NÁVŠTĚVNOSTI -->
-        <div class="sekce">
+    <!-- Spodní sekce vedle sebe -->
+    <div class="grid-row">
+        <!-- ZDROJE -->
+        <div class="sekce kompakt">
             <div class="sekce-header">Jak se k nam dostali</div>
             <div class="sekce-content">
                 <?php if (!empty($zdroje)): ?>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Zdroj</th>
-                            <th class="text-right">Navstevy</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        $maxZdroj = $zdroje[0]['navstevy'] ?? 1;
-                        foreach ($zdroje as $zdroj):
-                            $procento = ($zdroj['navstevy'] / $maxZdroj) * 100;
-                        ?>
-                        <tr>
-                            <td>
-                                <?= htmlspecialchars($zdroj['zdroj']) ?>
-                                <div class="progress-bar"><div class="progress-fill" style="width: <?= $procento ?>%"></div></div>
-                            </td>
-                            <td class="text-right"><?= number_format($zdroj['navstevy']) ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                <?php $maxZdroj = $zdroje[0]['navstevy'] ?? 1; foreach ($zdroje as $zdroj): $proc = ($zdroj['navstevy'] / $maxZdroj) * 100; ?>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; font-size: 0.8rem; border-bottom: 1px solid #f5f5f5;">
+                    <span style="flex: 1;"><?= htmlspecialchars($zdroj['zdroj']) ?></span>
+                    <span style="color: #666; min-width: 40px; text-align: right;"><?= $zdroj['navstevy'] ?></span>
+                </div>
+                <?php endforeach; ?>
                 <?php else: ?>
-                <p style="color: #999; text-align: center; padding: 1rem;">Zadna data</p>
+                <p style="color: #888; text-align: center;">Zadna data</p>
                 <?php endif; ?>
             </div>
         </div>
 
         <!-- LOKACE -->
-        <div class="sekce">
-            <div class="sekce-header">Odkud jsou navstevnici</div>
+        <div class="sekce kompakt">
+            <div class="sekce-header">Odkud jsou</div>
             <div class="sekce-content">
                 <?php if (!empty($lokace)): ?>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Lokace</th>
-                            <th class="text-right">Navstevy</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($lokace as $lok): ?>
-                        <tr>
-                            <td>
-                                <?= $zemeNazvy[$lok['zeme']] ?? $lok['zeme'] ?>
-                                <?php if ($lok['city']): ?>
-                                    <span style="color: #999;">- <?= htmlspecialchars($lok['city']) ?></span>
-                                <?php endif; ?>
-                            </td>
-                            <td class="text-right"><?= number_format($lok['navstevy']) ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                <?php foreach ($lokace as $lok): ?>
+                <div style="display: flex; justify-content: space-between; padding: 0.4rem 0; font-size: 0.8rem; border-bottom: 1px solid #f5f5f5;">
+                    <span><?= $zemeNazvy[$lok['zeme']] ?? $lok['zeme'] ?><?php if ($lok['city']): ?> <span style="color: #aaa;">- <?= htmlspecialchars($lok['city']) ?></span><?php endif; ?></span>
+                    <span style="color: #666;"><?= $lok['navstevy'] ?></span>
+                </div>
+                <?php endforeach; ?>
                 <?php else: ?>
-                <p style="color: #999; text-align: center; padding: 1rem;">Zadna data</p>
+                <p style="color: #888; text-align: center;">Zadna data</p>
                 <?php endif; ?>
             </div>
         </div>
 
-        <!-- ZAŘÍZENÍ A PROHLÍŽEČE -->
-        <div class="sekce">
-            <div class="sekce-header">Zarizeni a prohlizece</div>
+        <!-- ZAŘÍZENÍ -->
+        <div class="sekce kompakt">
+            <div class="sekce-header">Zarizeni</div>
             <div class="sekce-content">
-                <?php if (!empty($zarizeni) || !empty($prohlizece)): ?>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                    <div>
-                        <h4 style="font-size: 0.7rem; text-transform: uppercase; color: #888; margin-bottom: 0.75rem; letter-spacing: 0.5px;">Zarizeni</h4>
-                        <?php
-                        $deviceNazvy = ['desktop' => 'Pocitac', 'mobile' => 'Mobil', 'tablet' => 'Tablet'];
-                        foreach ($zarizeni as $z):
-                        ?>
-                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 0.85rem; border-bottom: 1px solid #f0f0f0;">
-                            <span class="device-label"><?= $deviceNazvy[$z['device_type']] ?? ucfirst($z['device_type']) ?></span>
-                            <span style="color: #666;"><?= number_format($z['navstevy']) ?></span>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
-                    <div>
-                        <h4 style="font-size: 0.7rem; text-transform: uppercase; color: #888; margin-bottom: 0.75rem; letter-spacing: 0.5px;">Prohlizece</h4>
-                        <?php foreach ($prohlizece as $p): ?>
-                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 0.85rem; border-bottom: 1px solid #f0f0f0;">
-                            <span><?= htmlspecialchars($p['browser'] ?: 'Neznamy') ?></span>
-                            <span style="color: #666;"><?= number_format($p['navstevy']) ?></span>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
+                <?php if (!empty($zarizeni)): ?>
+                <?php $deviceNazvy = ['desktop' => 'Pocitac', 'mobile' => 'Mobil', 'tablet' => 'Tablet']; foreach ($zarizeni as $z): ?>
+                <div style="display: flex; justify-content: space-between; padding: 0.4rem 0; font-size: 0.8rem; border-bottom: 1px solid #f5f5f5;">
+                    <span><?= $deviceNazvy[$z['device_type']] ?? ucfirst($z['device_type']) ?></span>
+                    <span style="color: #666;"><?= $z['navstevy'] ?></span>
                 </div>
+                <?php endforeach; ?>
                 <?php else: ?>
-                <p style="color: #888; text-align: center; padding: 2rem;">Zadna data</p>
+                <p style="color: #888; text-align: center;">Zadna data</p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- PROHLÍŽEČE -->
+        <div class="sekce kompakt">
+            <div class="sekce-header">Prohlizece</div>
+            <div class="sekce-content">
+                <?php if (!empty($prohlizece)): ?>
+                <?php foreach ($prohlizece as $p): ?>
+                <div style="display: flex; justify-content: space-between; padding: 0.4rem 0; font-size: 0.8rem; border-bottom: 1px solid #f5f5f5;">
+                    <span><?= htmlspecialchars($p['browser'] ?: 'Neznamy') ?></span>
+                    <span style="color: #666;"><?= $p['navstevy'] ?></span>
+                </div>
+                <?php endforeach; ?>
+                <?php else: ?>
+                <p style="color: #888; text-align: center;">Zadna data</p>
                 <?php endif; ?>
             </div>
         </div>
