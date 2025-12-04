@@ -30,13 +30,18 @@ $testData = [
     'created_by' => 'Online formulář',
     'completed_at' => date('d.m.Y H:i'),
     'technician_name' => 'Petr Technik',
+    'technician_email' => 'technik@wgs-service.cz',
+    'technician_phone' => '+420 725 965 826',
     'reopened_by' => 'Admin',
     'reopened_at' => date('d.m.Y H:i'),
     'company_email' => 'reklamace@wgs-service.cz',
     'company_phone' => '+420 725 965 826',
     'contact_attempt_date' => date('d.m.Y'),
     'contact_attempt_time' => '14:30',
-    'contact_attempt_note' => 'Zákazník nezvedá telefon'
+    'contact_attempt_note' => 'Zákazník nezvedá telefon',
+    'registration_key' => 'TEST-ABCD-1234-EFGH',
+    'app_url' => 'https://www.wgs-service.cz',
+    'day' => 'zítra'
 ];
 
 // Funkce pro nahrazení proměnných
