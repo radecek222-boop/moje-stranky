@@ -440,7 +440,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
             <?php if ($isLoggedIn): ?>
             <input type="text" class="form-control" id="cislo" name="cislo" required>
             <?php else: ?>
-            <input type="text" class="form-control" id="cislo" name="cislo" value="mimozáruční servis" readonly disabled style="background-color: #e9e9e9; color: #666; cursor: not-allowed; font-style: italic;">
+            <input type="text" class="form-control" id="cislo" name="cislo" value="mimozáruční servis" readonly tabindex="-1" style="background-color: #e9e9e9; color: #666; cursor: not-allowed; font-style: italic; pointer-events: none;">
             <?php endif; ?>
             <label for="fakturace_firma" style="display:block; margin-top:0.5rem; font-size:0.85rem; font-weight:600;">Fakturace:</label>
             <select id="fakturace_firma" name="fakturace_firma" style="width:33%; height:2rem; font-size:0.85rem; padding:0.3rem; border:1px solid #ddd; border-radius:4px;" aria-label="Výběr státu pro fakturaci">
