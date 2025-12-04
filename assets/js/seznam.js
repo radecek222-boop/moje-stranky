@@ -1081,13 +1081,11 @@ function showCalendar(id) {
         <div id="timeGrid"></div>
       </div>
     </div>
-    
-    <div class="modal-actions">
-      <div class="detail-buttons" style="flex-direction: row; gap: 0.75rem;">
-        <button class="detail-btn detail-btn-close" style="flex: 1;" data-action="showDetail">Zpět</button>
-        <button class="detail-btn detail-btn-success" style="flex: 2;" data-action="saveSelectedDate">Uložit termín</button>
-      </div>
-    </div>
+
+    ${ModalManager.createActions([
+      '<button class="btn btn-secondary" data-action="showDetail">Zpět</button>',
+      '<button class="btn btn-success" data-action="saveSelectedDate">Uložit termín</button>'
+    ])}
   `;
 
   ModalManager.show(content);
@@ -1511,12 +1509,10 @@ function showBookingDetail(bookingOrId) {
         </div>
       </div>
     </div>
-    
-    <div class="modal-actions">
-      <div class="detail-buttons">
-        <button class="detail-btn detail-btn-close" data-action="showCalendarBack">Zpět na kalendář</button>
-      </div>
-    </div>
+
+    ${ModalManager.createActions([
+      '<button class="btn btn-secondary" data-action="showCalendarBack">Zpět na kalendář</button>'
+    ])}
   `;
 
   ModalManager.show(content);
@@ -1753,18 +1749,20 @@ function showContactMenu(id) {
       
       <div class="modal-section">
         <h3 class="section-title">Rychlé akce</h3>
-        <div class="detail-buttons">
-          ${phone ? `<a href="tel:${phone}" class="detail-btn detail-btn-primary detail-btn-link">Zavolat</a>` : ''}
-          <button class="detail-btn detail-btn-primary" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
-          ${phone ? `<button class="detail-btn detail-btn-secondary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
-          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="detail-btn detail-btn-secondary detail-btn-link" target="_blank">Navigovat (Waze)</a>` : ''}
-          <div class="detail-btn-separator"></div>
-          <button class="detail-btn detail-btn-close" data-action="showDetail">Zpět</button>
+        <div class="contact-actions">
+          ${phone ? `<a href="tel:${phone}" class="btn contact-action-btn">Zavolat</a>` : ''}
+          <button class="btn contact-action-btn" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
+          ${phone ? `<button class="btn contact-action-btn secondary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
+          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn contact-action-btn secondary" target="_blank">Navigovat (Waze)</a>` : ''}
         </div>
       </div>
     </div>
+
+    ${ModalManager.createActions([
+      '<button class="btn btn-secondary" data-action="showDetail">Zpět</button>'
+    ])}
   `;
-  
+
   ModalManager.show(content);
 }
 
@@ -1999,7 +1997,7 @@ async function showCustomerDetail(id) {
         return `
           <div style="margin-bottom: 1rem;">
             <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF Report:</label>
-            <button class="detail-btn detail-btn-secondary"
+            <button class="btn customer-detail-btn"
                     data-action="openPDF"
                     data-url="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}">
               Otevřít PDF Report
@@ -2009,9 +2007,8 @@ async function showCustomerDetail(id) {
       })()}
 
       ${CURRENT_USER.is_admin ? `
-        <div class="detail-btn-separator" style="margin-top: 1rem;"></div>
-        <div class="detail-buttons" style="margin-top: 0.5rem;">
-          <button class="detail-btn detail-btn-danger" data-action="deleteReklamace" data-id="${id}">
+        <div style="border-top: 1px solid #e0e0e0; padding-top: 1rem; margin-top: 1rem;">
+          <button class="btn customer-detail-btn danger" data-action="deleteReklamace" data-id="${id}">
             Smazat reklamaci
           </button>
           <p style="font-size: 0.7rem; color: #999; margin-top: 0.25rem; text-align: center;">Smaže vše včetně fotek a PDF</p>
@@ -2020,12 +2017,10 @@ async function showCustomerDetail(id) {
 
     </div>
 
-    <div class="modal-actions">
-      <div class="detail-buttons" style="flex-direction: row; gap: 0.75rem;">
-        <button class="detail-btn detail-btn-close" style="flex: 1;" data-action="showDetail" data-id="${id}">Zpět</button>
-        <button class="detail-btn detail-btn-primary" style="flex: 2;" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
-      </div>
-    </div>
+    ${ModalManager.createActions([
+      '<button class="btn btn-secondary" data-action="showDetail" data-id="' + id + '">Zpět</button>',
+      '<button class="btn" style="background: #1a1a1a; color: white;" data-action="saveAllCustomerData" data-id="' + id + '">Uložit změny</button>'
+    ])}
   `;
 
   ModalManager.show(content);
@@ -2689,12 +2684,10 @@ async function showNotes(recordOrId) {
       </div>
     </div>
 
-    <div class="modal-actions">
-      <div class="detail-buttons" style="flex-direction: row; gap: 0.75rem;">
-        <button class="detail-btn detail-btn-close" style="flex: 1;" data-action="closeNotesModal">Zavřít</button>
-        <button class="detail-btn detail-btn-success" style="flex: 2;" data-action="saveNewNote" data-id="${record.id}">Přidat poznámku</button>
-      </div>
-    </div>
+    ${ModalManager.createActions([
+      '<button class="btn btn-secondary" data-action="closeNotesModal">Zavrit</button>',
+      '<button class="btn btn-success" data-action="saveNewNote" data-id="' + record.id + '">Pridat poznamku</button>'
+    ])}
   `;
 
   ModalManager.show(content);
