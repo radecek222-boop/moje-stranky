@@ -45,6 +45,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('mediaInput').addEventListener('change', handleMediaSelect);
   document.getElementById('btnSaveToProtocol').addEventListener('click', saveToProtocol);
 
+  // Video sekce - MUSÍ být po loadCustomerData() aby bylo správné ID zakázky
+  await initVideoSection();
+
   logger.log('Inicializace dokončena');
 });
 
@@ -757,8 +760,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // === VIDEO SECTION INITIALIZATION ===
-  initVideoSection();
+  // POZNÁMKA: initVideoSection() je voláno v hlavní inicializaci výše
+  // aby bylo zajištěno správné pořadí po loadCustomerData()
 });
 
 // ============================================================
@@ -807,13 +810,20 @@ async function initVideoSection() {
 }
 
 async function nactiVidea() {
-  if (!currentCustomerData || !currentCustomerData.id) {
-    logger.log('[Video] Nelze načíst videa - chybí customer data');
+  if (!currentCustomerData) {
+    logger.warn('[Video] Nelze načíst videa - currentCustomerData není nastaveno');
+    renderVideoPreview();
+    return;
+  }
+
+  if (!currentCustomerData.id) {
+    logger.warn('[Video] Nelze načíst videa - chybí ID zakázky v currentCustomerData:', currentCustomerData);
     renderVideoPreview();
     return;
   }
 
   const claimId = currentCustomerData.id;
+  logger.log(`[Video] Načítám videa pro zakázku ID: ${claimId}, zákazník: ${currentCustomerData.jmeno || 'N/A'}`);
 
   try {
     const response = await fetch(`/api/video_api.php?action=list_videos&claim_id=${claimId}`);
