@@ -80,7 +80,7 @@ if (!$isLoggedIn && !$isAdmin) {
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- Logger Utility (must be loaded first) -->
 <script src="assets/js/logger.min.js" defer></script>
@@ -1630,7 +1630,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </div>
 
 <!-- External JavaScript -->
-<script src="assets/js/seznam.js?v=20251203-fix" defer></script>
+<script src="assets/js/seznam.min.js?v=20251204-collision" defer></script>
 <!-- seznam-delete-patch.js odstraněn - delete button je přímo v showCustomerDetail (Step 52) -->
 <!-- WGS Toast Notifikace (in-app) -->
 <link rel="stylesheet" href="assets/css/wgs-toast.css">

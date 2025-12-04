@@ -700,13 +700,7 @@ body {
   font-weight: 600;
   color: var(--c-error);
 }
-#selectedDateDisplay {
-  margin-top: 0.3rem;
-  color: var(--c-grey);
-  font-size: 0.75rem;
-  min-height: 1rem;
-  text-align: center;
-}
+/* #selectedDateDisplay - styly přesunuty do JS inline */
 .distance-info-panel {
   background: var(--c-bg);
   border: 1px solid var(--c-border);

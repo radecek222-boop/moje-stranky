@@ -681,6 +681,23 @@ const ModalManager = {
   }
 };
 
+// === HELPER: Konzistentní hlavička zákazníka pro všechny modaly ===
+function createCustomerHeader() {
+  if (!CURRENT_RECORD) return '';
+
+  const customerName = Utils.getCustomerName(CURRENT_RECORD);
+  const address = Utils.getAddress(CURRENT_RECORD);
+  const termin = CURRENT_RECORD.termin ? formatDate(CURRENT_RECORD.termin) : '—';
+  const time = CURRENT_RECORD.cas_navstevy || '—';
+  const status = getStatus(CURRENT_RECORD.stav);
+
+  return ModalManager.createHeader(customerName, `
+    <strong>Adresa:</strong> ${address}<br>
+    <strong>Termín:</strong> ${termin} ${time !== '—' ? 'v ' + time : ''}<br>
+    <strong>Stav:</strong> ${status.text}
+  `);
+}
+
 // === DETAIL ===
 async function showDetail(recordOrId) {
   let record;
@@ -735,7 +752,7 @@ async function showDetail(recordOrId) {
           <button class="detail-btn detail-btn-secondary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
         ${record.documents && record.documents.length > 0 ? `
-          <button class="detail-btn detail-btn-primary" data-action="openPDF" data-url="${record.documents[0].file_path}" data-id="${record.id}">PDF Report</button>
+          <button class="detail-btn detail-btn-primary" data-action="openPDF" data-pdf-path="${record.documents[0].file_path}" data-id="${record.id}">PDF Report</button>
         ` : `
           <div class="detail-info-box" style="margin: 0; padding: 0.5rem;">
             <div class="detail-info-box-subtitle">PDF report ještě nebyl vytvořen</div>
@@ -765,17 +782,13 @@ async function showDetail(recordOrId) {
   }
   
   const content = `
-    ${ModalManager.createHeader(customerName, `
-      <strong>Adresa:</strong> ${address}<br>
-      <strong>Termín:</strong> ${termin} ${time !== '—' ? 'v ' + time : ''}<br>
-      <strong>Stav:</strong> ${status.text}
-    `)}
-    
+    ${createCustomerHeader()}
+
     <div class="modal-body">
       ${buttonsHtml}
     </div>
   `;
-  
+
   ModalManager.show(content);
 }
 
@@ -1051,14 +1064,17 @@ function showCalendar(id) {
   CURRENT_RECORD = z;
   SELECTED_DATE = null;
   SELECTED_TIME = null;
-  
+
   const content = `
-    <div class="modal-header">
-      <div id="selectedDateDisplay" style="color: var(--c-grey); font-size: 0.9rem; font-weight: 600; text-align: center;">Zatím nevybráno</div>
-      <button class="modal-close" data-action="closeModal">✕</button>
-    </div>
-    
-    <div class="modal-body" style="max-height: 80vh; overflow-y: auto; padding: 1rem;">
+    ${createCustomerHeader()}
+
+    <!-- Vybraný termín - fixní nad kalendářem -->
+    <div id="selectedDateDisplay" style="display: none; background: #f5f5f5; border: 2px solid #666; color: #333; font-size: 0.85rem; padding: 0.5rem 1rem; margin: 0 1rem; border-radius: 4px; font-weight: 600; text-align: center; font-family: inherit;"></div>
+
+    <!-- Varování o kolizi - skryté, zobrazí se při výběru obsazeného času -->
+    <div id="collisionWarning" style="display: none; background: #fee; border: 2px solid #c00; color: #900; font-size: 0.85rem; padding: 0.5rem 1rem; margin: 0.5rem 1rem 0; border-radius: 4px; font-weight: 600; text-align: center; font-family: inherit;"></div>
+
+    <div class="modal-body" style="max-height: 60vh; overflow-y: auto; padding: 1rem;">
       <div class="calendar-container">
         <div id="calGrid"></div>
         <div id="distanceInfo"></div>
@@ -1537,13 +1553,19 @@ function renderTimeGrid() {
         el.classList.add('selected');
 
         // PERFORMANCE: Zobrazit termín bez vzdálenosti
-        let displayText = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
+        const displayEl = document.getElementById('selectedDateDisplay');
+        displayEl.textContent = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
+        displayEl.style.display = 'block';
 
-        if (occupiedTimes[time]) {
-          displayText += ` KOLIZE: ${occupiedTimes[time].zakaznik}`;
+        // Zobrazit/skrýt varování o kolizi
+        const warningEl = document.getElementById('collisionWarning');
+
+        if (occupiedTimes[time] && warningEl) {
+          warningEl.textContent = `KOLIZE: ${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}`;
+          warningEl.style.display = 'block';
+        } else if (warningEl) {
+          warningEl.style.display = 'none';
         }
-
-        document.getElementById('selectedDateDisplay').textContent = displayText;
 
         // PERFORMANCE: getDistance() a showDayBookingsWithDistances() vypnuty
       };
@@ -1713,25 +1735,12 @@ async function saveSelectedDate() {
 // === KONTAKT ===
 function showContactMenu(id) {
   const phone = CURRENT_RECORD.telefon || '';
-  const email = CURRENT_RECORD.email || '';
-  const customerName = Utils.getCustomerName(CURRENT_RECORD);
   const address = Utils.getAddress(CURRENT_RECORD);
-  
+
   const content = `
-    ${ModalManager.createHeader(customerName, 'Kontaktovat zákazníka')}
+    ${createCustomerHeader()}
 
     <div class="modal-body">
-      <div class="info-grid" style="margin-bottom: 1rem;">
-        <div class="info-label">Telefon:</div>
-        <div class="info-value"><strong>${phone || 'Neuvedeno'}</strong></div>
-
-        <div class="info-label">Email:</div>
-        <div class="info-value"><strong>${email || 'Neuvedeno'}</strong></div>
-
-        <div class="info-label">Adresa:</div>
-        <div class="info-value"><strong>${address || 'Neuvedeno'}</strong></div>
-      </div>
-
       <div class="detail-buttons">
         ${phone ? `<a href="tel:${phone}" class="detail-btn detail-btn-primary" style="text-decoration: none;">Zavolat</a>` : ''}
         <button class="detail-btn detail-btn-primary" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
@@ -1860,7 +1869,7 @@ async function showCustomerDetail(id) {
   }
 
   const content = `
-    ${ModalManager.createHeader('Detail zákazníka', customerName)}
+    ${createCustomerHeader()}
 
     <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
 
@@ -1978,7 +1987,7 @@ async function showCustomerDetail(id) {
             <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF Report:</label>
             <button class="btn customer-detail-btn"
                     data-action="openPDF"
-                    data-url="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}">
+                    data-pdf-path="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}">
               Otevřít PDF Report
             </button>
           </div>
@@ -2013,176 +2022,104 @@ async function showCustomerDetail(id) {
  * @param {string} typ - Typ PDF: 'report' (výchozí) nebo 'historie'
  */
 function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
-  // Detekce iOS a mobilních zařízení
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const titulek = typ === 'historie' ? 'Historie PDF' : 'PDF Report';
 
-  // Vytvořit overlay
+  // Hlavní overlay - flexbox layout s fixní hlavičkou a patičkou
   const overlay = document.createElement('div');
   overlay.id = 'pdfModalOverlay';
-  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10003; display: flex; flex-direction: column; align-items: center; justify-content: center;';
+  overlay.style.cssText = `
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.95); z-index: 10003;
+    display: flex; flex-direction: column;
+  `;
 
-  // Kontejner pro PDF
-  const pdfContainer = document.createElement('div');
-  pdfContainer.style.cssText = 'width: 95%; height: calc(100% - 80px); max-width: 900px; background: white; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;';
-
-  // Header s názvem a tlačítky (pro PWA přístupnost)
+  // === HLAVIČKA (fixní nahoře) ===
   const header = document.createElement('div');
-  header.style.cssText = 'padding: 10px 12px; background: #333; color: white; font-weight: 600; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-shrink: 0;';
+  header.style.cssText = `
+    flex-shrink: 0; padding: 12px 16px;
+    background: #222; color: white;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid #444;
+  `;
+  header.innerHTML = `
+    <div>
+      <div style="font-weight: 600; font-size: 1rem;">${titulek}</div>
+      <div style="font-size: 0.75rem; opacity: 0.7;">ID: ${claimId || '-'}</div>
+    </div>
+    <button id="pdfCloseBtn" style="
+      background: #555; color: white; border: none;
+      padding: 10px 20px; border-radius: 6px;
+      font-weight: 600; font-size: 0.9rem; cursor: pointer;
+    ">Zavřít</button>
+  `;
 
-  // Levá část - název a ID (rozlišení podle typu)
-  const headerLeft = document.createElement('div');
-  headerLeft.style.cssText = 'display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;';
-  const titulek = typ === 'historie' ? 'Historie PDF' : 'PDF Report';
-  headerLeft.innerHTML = '<span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + titulek + '</span><span style="font-size: 0.75rem; opacity: 0.7;">ID: ' + (claimId || '-') + '</span>';
+  // === PDF NÁHLED (zabere zbytek místa) ===
+  const pdfContainer = document.createElement('div');
+  pdfContainer.style.cssText = 'flex: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 16px;';
 
-  // Pravá část - tlačítka v headeru
-  const headerButtons = document.createElement('div');
-  headerButtons.style.cssText = 'display: flex; gap: 8px; flex-shrink: 0;';
+  const iframe = document.createElement('iframe');
+  iframe.src = pdfUrl;
+  iframe.style.cssText = 'width: 100%; height: 100%; max-width: 900px; border: none; background: white; border-radius: 8px;';
+  pdfContainer.appendChild(iframe);
 
-  // Tlačítko Stáhnout v headeru
-  const btnStahnoutHeader = document.createElement('button');
-  btnStahnoutHeader.innerHTML = 'Stáhnout';
-  btnStahnoutHeader.style.cssText = 'padding: 8px 14px; font-size: 0.8rem; font-weight: 600; background: #555; color: white; border: none; border-radius: 5px; cursor: pointer; touch-action: manipulation;';
-  btnStahnoutHeader.onclick = () => {
+  // === PATIČKA S TLAČÍTKY (fixní dole) ===
+  const footer = document.createElement('div');
+  footer.style.cssText = `
+    flex-shrink: 0; padding: 12px 16px;
+    background: #222; border-top: 1px solid #444;
+    display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+  `;
+
+  // Tlačítko Stáhnout
+  const btnStahnout = document.createElement('button');
+  btnStahnout.textContent = 'Stáhnout';
+  btnStahnout.style.cssText = 'padding: 12px 24px; font-size: 0.9rem; font-weight: 600; background: #444; color: white; border: none; border-radius: 6px; cursor: pointer;';
+  btnStahnout.onclick = () => {
     const link = document.createElement('a');
     link.href = pdfUrl;
     link.download = `PDF_Report_${claimId || 'dokument'}.pdf`;
     link.click();
   };
 
-  // Tlačítko Zpět (X) v headeru
-  const btnZpetHeader = document.createElement('button');
-  btnZpetHeader.innerHTML = 'Zpět';
-  btnZpetHeader.style.cssText = 'padding: 8px 14px; font-size: 0.8rem; font-weight: 600; background: #777; color: white; border: none; border-radius: 5px; cursor: pointer; touch-action: manipulation;';
-  btnZpetHeader.onclick = () => overlay.remove();
-
-  headerButtons.appendChild(btnStahnoutHeader);
-  headerButtons.appendChild(btnZpetHeader);
-  header.appendChild(headerLeft);
-  header.appendChild(headerButtons);
-
-  // PDF náhled - různé přístupy pro různé platformy
-  let pdfViewer;
-
-  if (isIOS || (isMobile && isPWA)) {
-    // iOS a PWA mobil: Zobrazit tlačítko pro otevření v novém okně + náhled pomocí object
-    pdfViewer = document.createElement('div');
-    pdfViewer.style.cssText = 'flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f5f5f5; padding: 2rem;';
-
-    // Zkusit zobrazit pomocí <object> (funguje lépe na iOS)
-    const objectEmbed = document.createElement('object');
-    objectEmbed.data = pdfUrl;
-    objectEmbed.type = 'application/pdf';
-    objectEmbed.style.cssText = 'width: 100%; height: 100%; border: none;';
-
-    // Fallback pokud object nefunguje
-    const fallback = document.createElement('div');
-    fallback.style.cssText = 'text-align: center; padding: 2rem;';
-    fallback.innerHTML = `
-      <p style="color: #666; margin-bottom: 1rem;">Náhled PDF není k dispozici na tomto zařízení.</p>
-      <button data-action="openPdfNewWindow" data-url="${pdfUrl}"
-              style="padding: 12px 24px; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600;">
-        Otevřít PDF v novém okně
-      </button>
-    `;
-
-    objectEmbed.appendChild(fallback);
-    pdfViewer.appendChild(objectEmbed);
-  } else {
-    // Desktop a Android: Použít iframe
-    pdfViewer = document.createElement('iframe');
-    pdfViewer.src = pdfUrl;
-    pdfViewer.style.cssText = 'flex: 1; width: 100%; border: none;';
-  }
-
-  pdfContainer.appendChild(header);
-  pdfContainer.appendChild(pdfViewer);
-
-  // Tlačítka
-  const buttonContainer = document.createElement('div');
-  buttonContainer.style.cssText = 'display: flex; gap: 12px; margin-top: 16px; padding: 0 16px; flex-wrap: wrap; justify-content: center;';
-
-  // Tlačítko Uložit (nové)
-  const btnUlozit = document.createElement('button');
-  btnUlozit.textContent = 'Uložit';
-  btnUlozit.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #555; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 110px; touch-action: manipulation;';
-  btnUlozit.onclick = () => {
-    const link = document.createElement('a');
-    link.href = pdfUrl;
-    link.download = `PDF_Report_${claimId || 'dokument'}.pdf`;
-    link.click();
+  // Tlačítko Sdílet
+  const btnSdilet = document.createElement('button');
+  btnSdilet.textContent = 'Sdílet';
+  btnSdilet.style.cssText = 'padding: 12px 24px; font-size: 0.9rem; font-weight: 600; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer;';
+  btnSdilet.onclick = async () => {
+    if (!navigator.share) {
+      wgsToast.info('Sdílení není podporováno. Použijte tlačítko Stáhnout.');
+      return;
+    }
+    try {
+      btnSdilet.textContent = 'Načítám...';
+      const response = await fetch(pdfUrl);
+      const blob = await response.blob();
+      const file = new File([blob], `PDF_Report_${claimId || 'dokument'}.pdf`, { type: 'application/pdf' });
+      await navigator.share({ files: [file], title: titulek });
+    } catch (e) {
+      if (e.name !== 'AbortError') wgsToast.error('Chyba: ' + e.message);
+    } finally {
+      btnSdilet.textContent = 'Sdílet';
+    }
   };
-
-  // Tlačítko Sdílet (původně Odeslat)
-  const btnOdeslat = document.createElement('button');
-  btnOdeslat.textContent = 'Sdílet';
-  btnOdeslat.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 110px; touch-action: manipulation;';
 
   // Tlačítko Zavřít
   const btnZavrit = document.createElement('button');
   btnZavrit.textContent = 'Zavřít';
-  btnZavrit.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 110px; touch-action: manipulation;';
+  btnZavrit.style.cssText = 'padding: 12px 24px; font-size: 0.9rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer;';
   btnZavrit.onclick = () => overlay.remove();
 
-  // Tlačítko Sdílet - Web Share API (nativní systémové sdílení)
-  btnOdeslat.onclick = async () => {
-    try {
-      // Zkontrolovat podporu Web Share API
-      if (!navigator.share && !navigator.canShare) {
-        wgsToast.info('Sdílení není podporováno v tomto prohlížeči.\n\nPoužijte tlačítko "Uložit" a pak sdílejte soubor ručně.');
-        return;
-      }
+  footer.appendChild(btnStahnout);
+  footer.appendChild(btnSdilet);
+  footer.appendChild(btnZavrit);
 
-      btnOdeslat.disabled = true;
-      btnOdeslat.textContent = 'Načítám...';
-
-      // Načíst PDF jako Blob
-      const response = await fetch(pdfUrl);
-      const blob = await response.blob();
-
-      // Vytvořit File objekt z Blobu
-      const fileName = `PDF_Report_${claimId || 'dokument'}.pdf`;
-      const file = new File([blob], fileName, { type: 'application/pdf' });
-
-      // Web Share API
-      const shareData = {
-        title: `PDF Report - ${claimId || 'WGS'}`,
-        text: `PDF dokument zakázky ${claimId || ''}`,
-        files: [file]
-      };
-
-      // Zkontrolovat zda lze sdílet soubory
-      if (navigator.canShare && !navigator.canShare(shareData)) {
-        throw new Error('Sdílení souborů není podporováno');
-      }
-
-      // Sdílet přes systémové menu (email, SMS, WhatsApp, atd.)
-      await navigator.share(shareData);
-
-    } catch (error) {
-      // AbortError = uživatel zrušil sdílení (to není chyba)
-      if (error.name !== 'AbortError') {
-        wgsToast.error('Chyba při sdílení: ' + error.message);
-      }
-    } finally {
-      btnOdeslat.disabled = false;
-      btnOdeslat.textContent = 'Sdílet';
-    }
-  };
-
-  buttonContainer.appendChild(btnUlozit);
-  buttonContainer.appendChild(btnOdeslat);
-  buttonContainer.appendChild(btnZavrit);
-
+  // Sestavení
+  overlay.appendChild(header);
   overlay.appendChild(pdfContainer);
-  overlay.appendChild(buttonContainer);
+  overlay.appendChild(footer);
 
-  // Zavřít při kliknutí mimo
-  overlay.onclick = (e) => {
-    if (e.target === overlay) overlay.remove();
-  };
+  // Event handlery
+  header.querySelector('#pdfCloseBtn').onclick = () => overlay.remove();
 
   // Zavřít při ESC
   const escHandler = (e) => {
@@ -2588,10 +2525,9 @@ async function showNotes(recordOrId) {
   }
 
   CURRENT_RECORD = record;
-  const customerName = Utils.getCustomerName(record);
 
   const loadingContent = `
-    ${ModalManager.createHeader('Poznámky', customerName)}
+    ${createCustomerHeader()}
     <div class="modal-body" style="text-align: center; padding: 3rem;">
       <div class="loading">Načítání poznámek...</div>
     </div>
@@ -2603,7 +2539,7 @@ async function showNotes(recordOrId) {
   notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   const content = `
-    ${ModalManager.createHeader('Poznámky', customerName)}
+    ${createCustomerHeader()}
 
     <div class="modal-body">
       <div class="notes-container">
@@ -4546,8 +4482,9 @@ document.addEventListener('click', (e) => {
   const action = button.getAttribute('data-action');
   const id = button.getAttribute('data-id');
   const url = button.getAttribute('data-url');
+  const pdfPath = button.getAttribute('data-pdf-path');
 
-  logger.log(`[Seznam] Tlačítko kliknuto: ${action}`, { id, url });
+  logger.log(`[Seznam] Tlačítko kliknuto: ${action}`, { id, url, pdfPath });
 
   switch (action) {
     case 'reopenOrder':
@@ -4567,7 +4504,9 @@ document.addEventListener('click', (e) => {
       break;
 
     case 'openPDF':
-      if (url) zobrazPDFModal(url, id);
+      e.preventDefault();
+      e.stopPropagation();
+      if (pdfPath) zobrazPDFModal(pdfPath, id);
       break;
 
     case 'showHistoryPDF':
