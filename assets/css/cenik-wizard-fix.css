@@ -1,18 +1,129 @@
 /**
- * OPRAVA KALKULACKY - Zajisteni viditelnosti vsech prvku
+ * OPRAVA KALKULACKY - Kroky v jednom boxu, prepinaji se
  * Tento soubor musi byt nacten JAKO POSLEDNI
  */
 
 /* ========================================
-   WIZARD STEPS - ZAKLADNI VIDITELNOST
+   HLAVNI KONTEJNER KALKULACKY
    ======================================== */
 
-/* Aktivni krok musi byt videt */
-.wizard-step:not(.hidden) {
+.calculator-section {
+    background: #fff !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+    margin-bottom: 40px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+    overflow: hidden !important;
+}
+
+/* Nadpis a popis kalkulacky */
+.calculator-section > .section-title {
+    background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%) !important;
+    color: #fff !important;
+    margin: 0 !important;
+    padding: 20px 25px !important;
+    font-size: 1.3rem !important;
+}
+
+.calculator-section > .section-text {
+    background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%) !important;
+    color: rgba(255,255,255,0.85) !important;
+    margin: 0 !important;
+    padding: 0 25px 20px 25px !important;
+    font-size: 0.95rem !important;
+}
+
+/* ========================================
+   PROGRESS BAR - INDIKATOR KROKU
+   ======================================== */
+
+.wizard-progress {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 20px 25px !important;
+    background: #f8f8f8 !important;
+    border-bottom: 1px solid #eee !important;
+    position: relative !important;
+}
+
+.progress-step {
     display: flex !important;
     flex-direction: column !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    align-items: center !important;
+    position: relative !important;
+    z-index: 1 !important;
+    flex: 1 !important;
+}
+
+.progress-step:not(:last-child)::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 17px !important;
+    left: 50% !important;
+    width: 100% !important;
+    height: 2px !important;
+    background: #ddd !important;
+    z-index: -1 !important;
+}
+
+.progress-step.active:not(:last-child)::after {
+    background: #4a4a4a !important;
+}
+
+.step-number {
+    width: 35px !important;
+    height: 35px !important;
+    border-radius: 50% !important;
+    background: #ddd !important;
+    color: #666 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    margin-bottom: 5px !important;
+    transition: all 0.3s !important;
+}
+
+.progress-step.active .step-number {
+    background: #4a4a4a !important;
+    color: #fff !important;
+}
+
+.step-label {
+    font-size: 0.75rem !important;
+    color: #999 !important;
+    text-align: center !important;
+    transition: color 0.3s !important;
+}
+
+.progress-step.active .step-label {
+    color: #4a4a4a !important;
+    font-weight: 600 !important;
+}
+
+/* ========================================
+   WIZARD STEPS - OBSAH KROKU
+   ======================================== */
+
+/* Kontejner pro vsechny kroky */
+.calculator-section {
+    position: relative !important;
+}
+
+/* Jednotlive kroky */
+.wizard-step {
+    background: #fff !important;
+    padding: 25px !important;
+    min-height: 350px !important;
+    display: none !important;
+    flex-direction: column !important;
+}
+
+/* Aktivni krok - VIDET */
+.wizard-step:not(.hidden) {
+    display: flex !important;
 }
 
 /* Skryty krok */
@@ -20,54 +131,54 @@
     display: none !important;
 }
 
+/* Nadpis kroku */
+.step-title {
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    color: #2a2a2a !important;
+    margin: 0 0 8px 0 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+
+/* Popis kroku */
+.step-desc {
+    color: #666 !important;
+    margin: 0 0 20px 0 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+}
+
 /* ========================================
-   WIZARD BUTTONS - TLACITKA
+   FORMULAROVE PRVKY
    ======================================== */
 
-.wizard-buttons {
-    display: flex !important;
-    gap: 0.75rem !important;
-    justify-content: flex-end !important;
-    margin-top: auto !important;
-    padding-top: 1.5rem !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+.form-group {
+    margin-bottom: 15px !important;
 }
 
-.wizard-buttons .btn-primary,
-.wizard-buttons .btn-secondary {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0.6rem 1.5rem !important;
-    border-radius: 5px !important;
-    font-size: 0.85rem !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    transition: all 0.3s !important;
-    border: none !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    min-height: 44px !important;
+.form-group label {
+    display: block !important;
+    margin-bottom: 8px !important;
+    font-weight: 500 !important;
+    color: #333 !important;
+    font-size: 0.9rem !important;
 }
 
-.wizard-buttons .btn-primary {
-    background: #4a4a4a !important;
-    color: white !important;
+.calc-input {
+    width: 100% !important;
+    padding: 12px 15px !important;
+    font-size: 1rem !important;
+    border: 2px solid #ddd !important;
+    border-radius: 8px !important;
+    transition: border-color 0.3s !important;
+    background: #fff !important;
+    color: #333 !important;
 }
 
-.wizard-buttons .btn-primary:hover {
-    background: #2a2a2a !important;
-}
-
-.wizard-buttons .btn-secondary {
-    background: white !important;
-    color: #4a4a4a !important;
-    border: 2px solid #4a4a4a !important;
-}
-
-.wizard-buttons .btn-secondary:hover {
-    background: #f4f4f4 !important;
+.calc-input:focus {
+    outline: none !important;
+    border-color: #4a4a4a !important;
 }
 
 /* ========================================
@@ -77,60 +188,59 @@
 .radio-group {
     display: flex !important;
     flex-direction: column !important;
-    gap: 0.6rem !important;
-    width: 100% !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    gap: 10px !important;
 }
 
 .radio-card {
     display: flex !important;
-    flex-direction: column !important;
-    border: 2px solid #ddd !important;
-    border-radius: 6px !important;
-    padding: 0.5rem 1.5rem 0.5rem 2.5rem !important;
+    align-items: center !important;
+    border: 2px solid #e0e0e0 !important;
+    border-radius: 10px !important;
+    padding: 15px 15px 15px 50px !important;
     cursor: pointer !important;
-    transition: all 0.3s !important;
+    transition: all 0.2s !important;
     position: relative !important;
-    min-height: 70px !important;
-    width: 100% !important;
-    background: white !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    background: #fff !important;
+    min-height: auto !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
 }
 
 .radio-card:hover {
     border-color: #4a4a4a !important;
-    background: #f9f9f9 !important;
+    background: #fafafa !important;
 }
 
 .radio-card:has(input:checked) {
     border-color: #4a4a4a !important;
-    background: #f4f4f4 !important;
+    background: #f5f5f5 !important;
 }
 
-/* Radio button indicator */
+/* Radio krouzek */
 .radio-card::before {
     content: "" !important;
     position: absolute !important;
-    left: 0.75rem !important;
+    left: 15px !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
-    width: 18px !important;
-    height: 18px !important;
-    border: 2px solid #ddd !important;
+    width: 20px !important;
+    height: 20px !important;
+    border: 2px solid #ccc !important;
     border-radius: 50% !important;
-    background: white !important;
+    background: #fff !important;
+    transition: all 0.2s !important;
 }
 
 .radio-card:has(input:checked)::before {
     border-color: #4a4a4a !important;
 }
 
+/* Radio tecka */
 .radio-card::after {
     content: "" !important;
     position: absolute !important;
-    left: calc(0.75rem + 4px) !important;
+    left: 20px !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
     width: 10px !important;
@@ -138,6 +248,7 @@
     border-radius: 50% !important;
     background: #4a4a4a !important;
     opacity: 0 !important;
+    transition: opacity 0.2s !important;
 }
 
 .radio-card:has(input:checked)::after {
@@ -147,90 +258,87 @@
 .radio-card input[type="radio"] {
     position: absolute !important;
     opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 .radio-content {
+    flex: 1 !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: center !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    gap: 3px !important;
 }
 
 .radio-title {
     font-weight: 600 !important;
     color: #2a2a2a !important;
-    font-size: 0.9rem !important;
-    display: block !important;
-    visibility: visible !important;
+    font-size: 0.95rem !important;
 }
 
 .radio-desc {
-    font-size: 0.75rem !important;
+    font-size: 0.8rem !important;
     color: #666 !important;
-    margin-top: 0.2rem !important;
-    display: block !important;
-    visibility: visible !important;
+    line-height: 1.4 !important;
 }
 
 .radio-price {
     position: absolute !important;
-    right: 1rem !important;
+    right: 15px !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
     font-weight: 700 !important;
     color: #4a4a4a !important;
-    font-size: 0.9rem !important;
-    display: block !important;
-    visibility: visible !important;
+    font-size: 0.95rem !important;
+    white-space: nowrap !important;
 }
 
 /* ========================================
-   CHECKBOX CARDS - DALSI PARAMETRY
+   CHECKBOX CARDS
    ======================================== */
 
 .checkbox-group {
     display: flex !important;
     flex-direction: column !important;
-    gap: 0.6rem !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    gap: 10px !important;
 }
 
 .checkbox-card {
     display: flex !important;
-    border: 2px solid #ddd !important;
-    border-radius: 6px !important;
-    padding: 0.5rem 1.5rem 0.5rem 2.5rem !important;
+    align-items: center !important;
+    border: 2px solid #e0e0e0 !important;
+    border-radius: 10px !important;
+    padding: 15px 15px 15px 50px !important;
     cursor: pointer !important;
+    transition: all 0.2s !important;
     position: relative !important;
-    min-height: 50px !important;
-    background: white !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    background: #fff !important;
+    min-height: auto !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
 }
 
 .checkbox-card:hover {
     border-color: #4a4a4a !important;
-    background: #f9f9f9 !important;
+    background: #fafafa !important;
 }
 
 .checkbox-card:has(input:checked) {
     border-color: #4a4a4a !important;
-    background: #f4f4f4 !important;
+    background: #f5f5f5 !important;
 }
 
 .checkbox-card::before {
     content: "" !important;
     position: absolute !important;
-    left: 0.75rem !important;
+    left: 15px !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
-    width: 18px !important;
-    height: 18px !important;
-    border: 2px solid #ddd !important;
+    width: 20px !important;
+    height: 20px !important;
+    border: 2px solid #ccc !important;
     border-radius: 4px !important;
-    background: white !important;
+    background: #fff !important;
+    transition: all 0.2s !important;
 }
 
 .checkbox-card:has(input:checked)::before {
@@ -238,41 +346,53 @@
     border-color: #4a4a4a !important;
 }
 
+.checkbox-card::after {
+    content: "✓" !important;
+    position: absolute !important;
+    left: 18px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: #fff !important;
+    font-size: 14px !important;
+    font-weight: bold !important;
+    opacity: 0 !important;
+    transition: opacity 0.2s !important;
+}
+
+.checkbox-card:has(input:checked)::after {
+    opacity: 1 !important;
+}
+
 .checkbox-card input[type="checkbox"] {
     display: none !important;
 }
 
 .checkbox-content {
+    flex: 1 !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: center !important;
-    visibility: visible !important;
+    gap: 3px !important;
 }
 
 .checkbox-title {
     font-weight: 600 !important;
     color: #2a2a2a !important;
-    font-size: 0.9rem !important;
-    display: block !important;
-    visibility: visible !important;
+    font-size: 0.95rem !important;
 }
 
 .checkbox-desc {
-    font-size: 0.75rem !important;
+    font-size: 0.8rem !important;
     color: #666 !important;
-    display: block !important;
-    visibility: visible !important;
 }
 
 .checkbox-price {
     position: absolute !important;
-    right: 1rem !important;
+    right: 15px !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
     font-weight: 700 !important;
     color: #4a4a4a !important;
-    display: block !important;
-    visibility: visible !important;
+    font-size: 0.95rem !important;
 }
 
 /* ========================================
@@ -282,62 +402,55 @@
 .counter-group {
     display: flex !important;
     flex-direction: column !important;
-    gap: 0.75rem !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    gap: 12px !important;
 }
 
 .counter-item {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    padding: 0.75rem !important;
-    background: white !important;
-    border-radius: 6px !important;
-    border: 1px solid #ddd !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    padding: 12px 15px !important;
+    background: #f8f8f8 !important;
+    border-radius: 8px !important;
+    border: 1px solid #e0e0e0 !important;
 }
 
 .counter-item label {
     font-weight: 500 !important;
-    color: #2a2a2a !important;
-    font-size: 0.9rem !important;
-    display: block !important;
-    visibility: visible !important;
+    color: #333 !important;
+    font-size: 0.95rem !important;
+    margin: 0 !important;
 }
 
 .counter-controls {
     display: flex !important;
     align-items: center !important;
-    gap: 0.5rem !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    gap: 10px !important;
 }
 
 .btn-counter {
-    width: 44px !important;
-    height: 44px !important;
-    min-width: 44px !important;
-    min-height: 44px !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
     border-radius: 50% !important;
     border: 2px solid #4a4a4a !important;
-    background: white !important;
+    background: #fff !important;
     color: #4a4a4a !important;
-    font-size: 1.5rem !important;
+    font-size: 1.3rem !important;
     font-weight: bold !important;
     cursor: pointer !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     line-height: 1 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    transition: all 0.2s !important;
+    padding: 0 !important;
 }
 
 .btn-counter:hover {
     background: #4a4a4a !important;
-    color: white !important;
+    color: #fff !important;
 }
 
 .counter-controls input[type="number"] {
@@ -348,45 +461,60 @@
     border: none !important;
     background: transparent !important;
     color: #2a2a2a !important;
-    display: block !important;
-    visibility: visible !important;
+    -moz-appearance: textfield !important;
+}
+
+.counter-controls input[type="number"]::-webkit-outer-spin-button,
+.counter-controls input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
 }
 
 .counter-price {
-    font-size: 0.8rem !important;
+    font-size: 0.85rem !important;
     color: #666 !important;
-    display: block !important;
-    visibility: visible !important;
+    margin-left: 10px !important;
+}
+
+/* Souhrn poctu dilu */
+.parts-summary {
+    margin-top: 15px !important;
+    padding: 12px 15px !important;
+    background: #f0f0f0 !important;
+    border-radius: 8px !important;
+    font-size: 0.95rem !important;
+}
+
+.price-breakdown {
+    color: #666 !important;
+    font-size: 0.85rem !important;
+    margin-left: 10px !important;
 }
 
 /* ========================================
-   DISTANCE RESULT - VYSLEDEK VZDALENOSTI
+   VYSLEDEK VZDALENOSTI
    ======================================== */
 
 .calc-result {
-    margin-top: 1rem !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    margin-top: 20px !important;
 }
 
-.calc-result:not(.hidden) {
-    display: block !important;
+.calc-result.hidden,
+.calc-result[style*="display: none"] {
+    display: none !important;
 }
 
 .result-box {
-    background: #f8f9fa !important;
+    background: #f8f8f8 !important;
     border-radius: 8px !important;
-    padding: 1rem !important;
+    padding: 15px !important;
     border-left: 4px solid #4a4a4a !important;
-    visibility: visible !important;
-    opacity: 1 !important;
 }
 
 .result-box p {
-    margin: 0.5rem 0 !important;
-    color: #2a2a2a !important;
-    display: block !important;
-    visibility: visible !important;
+    margin: 8px 0 !important;
+    color: #333 !important;
+    font-size: 0.95rem !important;
 }
 
 .highlight-price {
@@ -396,58 +524,163 @@
 }
 
 /* ========================================
-   SUMMARY - SOUHRN
+   WIZARD BUTTONS - TLACITKA
+   ======================================== */
+
+.wizard-buttons {
+    display: flex !important;
+    gap: 12px !important;
+    justify-content: flex-end !important;
+    margin-top: auto !important;
+    padding-top: 25px !important;
+    border-top: 1px solid #eee !important;
+}
+
+.wizard-buttons .btn-primary,
+.wizard-buttons .btn-secondary {
+    padding: 12px 25px !important;
+    border-radius: 8px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    border: none !important;
+    min-height: 46px !important;
+}
+
+.wizard-buttons .btn-primary {
+    background: #4a4a4a !important;
+    color: #fff !important;
+}
+
+.wizard-buttons .btn-primary:hover {
+    background: #333 !important;
+}
+
+.wizard-buttons .btn-secondary {
+    background: #fff !important;
+    color: #4a4a4a !important;
+    border: 2px solid #4a4a4a !important;
+}
+
+.wizard-buttons .btn-secondary:hover {
+    background: #f5f5f5 !important;
+}
+
+/* ========================================
+   SOUHRN - POSLEDNI KROK
    ======================================== */
 
 .price-summary-box {
-    background: white !important;
-    border-radius: 8px !important;
-    padding: 1.5rem !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    background: #f8f8f8 !important;
+    border-radius: 10px !important;
+    padding: 20px !important;
 }
 
 .summary-line {
-    display: grid !important;
-    grid-template-columns: 1fr auto !important;
-    gap: 2rem !important;
+    display: flex !important;
+    justify-content: space-between !important;
     align-items: baseline !important;
-    padding: 0.75rem 0 !important;
-    border-bottom: 1px solid #eee !important;
-    font-size: 0.85rem !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    padding: 10px 0 !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+    font-size: 0.9rem !important;
 }
 
 .summary-line.total {
     border-bottom: none !important;
     border-top: 2px solid #4a4a4a !important;
-    margin-top: 1rem !important;
-    padding-top: 1rem !important;
+    margin-top: 15px !important;
+    padding-top: 15px !important;
     font-size: 1.1rem !important;
 }
 
 .summary-price {
     font-weight: 600 !important;
     color: #2a2a2a !important;
-    visibility: visible !important;
 }
 
 .total-price {
-    font-size: 1.3rem !important;
+    font-size: 1.4rem !important;
     color: #2a2a2a !important;
 }
 
-.summary-note {
-    margin-top: 1.5rem !important;
-    padding: 1rem !important;
-    background: #fff9e6 !important;
-    border-radius: 6px !important;
+.summary-subline {
     font-size: 0.8rem !important;
+    color: #888 !important;
+    padding: 5px 0 10px 15px !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+}
+
+.summary-note {
+    margin-top: 20px !important;
+    padding: 15px !important;
+    background: #fff !important;
+    border-radius: 8px !important;
+    border-left: 4px solid #ff9800 !important;
+    font-size: 0.85rem !important;
     color: #666 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    line-height: 1.5 !important;
+}
+
+/* ========================================
+   CHECKBOX KONTEJNER (pro prihlasene)
+   ======================================== */
+
+.checkbox-container {
+    display: flex !important;
+    align-items: center !important;
+    cursor: pointer !important;
+    font-size: 0.9rem !important;
+}
+
+.checkbox-container input[type="checkbox"] {
+    margin-right: 10px !important;
+    width: 18px !important;
+    height: 18px !important;
+    cursor: pointer !important;
+}
+
+.checkbox-label {
+    color: #333 !important;
+}
+
+/* ========================================
+   SUGGESTIONS DROPDOWN
+   ======================================== */
+
+.suggestions-dropdown {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #fff !important;
+    border: 1px solid #ddd !important;
+    border-top: none !important;
+    border-radius: 0 0 8px 8px !important;
+    max-height: 200px !important;
+    overflow-y: auto !important;
+    z-index: 100 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+.suggestions-dropdown.hidden {
+    display: none !important;
+}
+
+.suggestion-item {
+    padding: 12px 15px !important;
+    cursor: pointer !important;
+    border-bottom: 1px solid #eee !important;
+    font-size: 0.9rem !important;
+    color: #333 !important;
+}
+
+.suggestion-item:hover {
+    background: #f5f5f5 !important;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none !important;
 }
 
 /* ========================================
@@ -455,6 +688,35 @@
    ======================================== */
 
 @media (max-width: 768px) {
+    .calculator-section > .section-title {
+        font-size: 1.1rem !important;
+        padding: 15px 20px !important;
+    }
+
+    .calculator-section > .section-text {
+        padding: 0 20px 15px 20px !important;
+        font-size: 0.9rem !important;
+    }
+
+    .wizard-progress {
+        padding: 15px !important;
+    }
+
+    .step-number {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .step-label {
+        font-size: 0.65rem !important;
+    }
+
+    .wizard-step {
+        padding: 20px !important;
+        min-height: 300px !important;
+    }
+
     .wizard-buttons {
         flex-direction: column-reverse !important;
     }
@@ -462,40 +724,49 @@
     .wizard-buttons .btn-primary,
     .wizard-buttons .btn-secondary {
         width: 100% !important;
-        padding: 0.85rem 1.25rem !important;
-        font-size: 0.95rem !important;
     }
 
     .radio-card,
     .checkbox-card {
-        min-height: 75px !important;
-        padding: 0.75rem 3.5rem 0.75rem 2.5rem !important;
-    }
-
-    .counter-item {
-        flex-wrap: wrap !important;
-        gap: 0.5rem !important;
-    }
-}
-
-@media (max-width: 480px) {
-    .wizard-buttons .btn-primary,
-    .wizard-buttons .btn-secondary {
-        padding: 0.75rem 1rem !important;
-        font-size: 0.9rem !important;
-        min-height: 48px !important;
+        padding: 12px 12px 12px 45px !important;
     }
 
     .radio-price,
     .checkbox-price {
-        font-size: 0.8rem !important;
-        right: 0.5rem !important;
+        position: static !important;
+        transform: none !important;
+        margin-top: 5px !important;
+    }
+
+    .radio-content,
+    .checkbox-content {
+        padding-right: 0 !important;
+    }
+
+    .counter-item {
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+    }
+
+    .counter-item label {
+        flex: 1 1 100% !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .wizard-step {
+        padding: 15px !important;
     }
 
     .btn-counter {
-        width: 40px !important;
-        height: 40px !important;
-        min-width: 40px !important;
-        min-height: 40px !important;
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        font-size: 1.1rem !important;
+    }
+
+    .step-title {
+        font-size: 1rem !important;
     }
 }
