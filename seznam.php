@@ -1658,6 +1658,8 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
 
       case 'showCustomerDetail':
+      case 'showDetailById':
+        // showDetailById je akce z karet zakazniku - vola stejnou funkci jako showCustomerDetail
         if (id && typeof showCustomerDetail === 'function') {
           showCustomerDetail(id);
         }
