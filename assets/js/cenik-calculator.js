@@ -48,8 +48,8 @@
         return TLACITKA[klic] || klic;
     }
 
-    // Stav kalkulačky
-    let stav = {
+    // Výchozí stav kalkulačky
+    const VYCHOZI_STAV = {
         krok: 1,
         adresa: null,
         vzdalenost: 0,
@@ -73,6 +73,57 @@
         material: false
     };
 
+    // Stav kalkulačky (kopie výchozího stavu)
+    let stav = { ...VYCHOZI_STAV };
+
+    // Reset stavu na výchozí hodnoty
+    function resetovatStav() {
+        stav = { ...VYCHOZI_STAV };
+
+        // Resetovat DOM elementy
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            if (['sedaky', 'operky', 'podrucky', 'panely', 'relax', 'vysuv'].includes(input.id)) {
+                input.value = 0;
+            }
+        });
+
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            if (['tezky-nabytek', 'material', 'reklamace-bez-dopravy', 'vyzvednuti-sklad'].includes(checkbox.id)) {
+                checkbox.checked = false;
+            }
+        });
+
+        // Resetovat radio na výchozí (calouneni)
+        const calouneniRadio = document.querySelector('input[name="service-type"][value="calouneni"]');
+        if (calouneniRadio) {
+            calouneniRadio.checked = true;
+        }
+
+        // Resetovat zobrazení adresy
+        const distanceResult = document.getElementById('distance-result');
+        if (distanceResult) {
+            distanceResult.style.display = 'none';
+        }
+
+        const calcAddress = document.getElementById('calc-address');
+        if (calcAddress) {
+            calcAddress.value = '';
+        }
+
+        // Skrýt všechny kroky kromě prvního
+        document.querySelectorAll('.wizard-step').forEach(step => {
+            if (step.id === 'step-address') {
+                step.classList.remove('hidden');
+                step.style.display = 'flex';
+            } else {
+                step.classList.add('hidden');
+                step.style.display = 'none';
+            }
+        });
+
+        aktualizovatProgress();
+    }
+
     // ========================================
     // INIT KALKULAČKY
     // ========================================
@@ -81,10 +132,20 @@
     });
 
     function initKalkulacka() {
+        // Resetovat stav při každé inicializaci (důležité pro protokol modal)
+        resetovatStav();
         initAddressAutocomplete();
         initEventListeners();
         aktualizovatProgress();
         nastavitPevnouVysku();
+
+        // Ověřit že všechny kroky existují
+        const kroky = ['step-address', 'step-service-type', 'step-upholstery', 'step-mechanics', 'step-extras', 'step-summary'];
+        kroky.forEach(krokId => {
+            if (!document.getElementById(krokId)) {
+                console.warn('[Kalkulačka] Chybí krok:', krokId);
+            }
+        });
     }
 
     /**
