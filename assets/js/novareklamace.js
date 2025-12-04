@@ -1019,6 +1019,8 @@ const WGS = {
     });
   },
   
+  // PRAVIDLO: Zadna rotace, zadna deformace, pouze komprese
+  // Orientace se NIKDY nemeni - prohlizec aplikuje EXIF automaticky
   async compressImage(file) {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -1026,11 +1028,12 @@ const WGS = {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          // FIX L-2: Použít konstanty MAX_IMAGE_WIDTH a IMAGE_QUALITY
-          const scale = Math.min(1, CONSTANTS.MAX_IMAGE_WIDTH / img.width);
+          // Zachovat pomer stran - zadna deformace
+          const scale = Math.min(1, CONSTANTS.MAX_IMAGE_WIDTH / Math.max(img.width, img.height));
           canvas.width = img.width * scale;
           canvas.height = img.height * scale;
           const ctx = canvas.getContext('2d');
+          // Nakreslit bez rotace - orientace se nemeni
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           canvas.toBlob((blob) => {
             resolve(new File([blob], file.name, { type: 'image/jpeg' }));

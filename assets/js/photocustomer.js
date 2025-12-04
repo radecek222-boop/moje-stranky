@@ -225,8 +225,8 @@ async function handleMediaSelect(e) {
 }
 
 async function compressImage(file, maxWidth = 800, maxMB = 0.2) {
-  const orientation = await getImageOrientation(file);
-
+  // PRAVIDLO: Zadna rotace, zadna deformace, pouze komprese
+  // Orientace se NIKDY nemeni - prohlizec aplikuje EXIF automaticky
   return new Promise((resolve) => {
     const reader = new FileReader();
 
@@ -237,18 +237,12 @@ async function compressImage(file, maxWidth = 800, maxMB = 0.2) {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
+        // Zachovat pomer stran - zadna deformace
         const scale = Math.min(1, maxWidth / Math.max(img.width, img.height));
-        const needsRotation = orientation >= 5 && orientation <= 8;
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
 
-        if (needsRotation) {
-          canvas.width = img.height * scale;
-          canvas.height = img.width * scale;
-        } else {
-          canvas.width = img.width * scale;
-          canvas.height = img.height * scale;
-        }
-
-        applyExifOrientation(ctx, orientation, canvas.width, canvas.height);
+        // Nakreslit bez rotace - orientace se nemeni
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
         let quality = 0.6;
