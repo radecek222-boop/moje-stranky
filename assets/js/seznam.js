@@ -1064,9 +1064,14 @@ function showCalendar(id) {
   CURRENT_RECORD = z;
   SELECTED_DATE = null;
   SELECTED_TIME = null;
-  
+
   const content = `
     ${createCustomerHeader()}
+
+    <!-- Varování o kolizi - skryté, zobrazí se při výběru obsazeného času -->
+    <div id="collisionWarning" style="display: none; background: #fee; border: 2px solid #c00; color: #900; padding: 0.75rem 1rem; margin: 0 1rem; border-radius: 6px; font-weight: 600; text-align: center;">
+      <span id="collisionText"></span>
+    </div>
 
     <div class="modal-body" style="max-height: 80vh; overflow-y: auto; padding: 1rem;">
       <div id="selectedDateDisplay" style="color: var(--c-grey); font-size: 0.9rem; font-weight: 600; text-align: center; margin-bottom: 1rem; padding: 0.5rem; background: #f5f5f5; border-radius: 4px;">Zatím nevybráno</div>
@@ -1548,13 +1553,18 @@ function renderTimeGrid() {
         el.classList.add('selected');
 
         // PERFORMANCE: Zobrazit termín bez vzdálenosti
-        let displayText = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
+        document.getElementById('selectedDateDisplay').textContent = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
 
-        if (occupiedTimes[time]) {
-          displayText += ` KOLIZE: ${occupiedTimes[time].zakaznik}`;
+        // Zobrazit/skrýt varování o kolizi
+        const warningEl = document.getElementById('collisionWarning');
+        const warningText = document.getElementById('collisionText');
+
+        if (occupiedTimes[time] && warningEl && warningText) {
+          warningText.textContent = `KOLIZE: ${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}`;
+          warningEl.style.display = 'block';
+        } else if (warningEl) {
+          warningEl.style.display = 'none';
         }
-
-        document.getElementById('selectedDateDisplay').textContent = displayText;
 
         // PERFORMANCE: getDistance() a showDayBookingsWithDistances() vypnuty
       };
