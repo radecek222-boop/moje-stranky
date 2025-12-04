@@ -82,15 +82,24 @@ try {
         $ipAddress = preg_replace('/:[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4}$/', ':0:0:0:0', $ipAddress);
     }
 
-    // Pokusit se získat DB spojení
+    // Pokusit se získat DB spojení BEZPEČNĚ (bez die())
+    // Standardní getDbConnection() volá die() při selhání, což nelze zachytit
     $pdo = null;
     try {
-        if (function_exists('getDbConnection')) {
-            $pdo = getDbConnection();
+        // Zkusit přímé připojení bez die()
+        if (defined('DB_HOST') && defined('DB_NAME') && defined('DB_USER') && defined('DB_PASS')) {
+            $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
+            ];
+            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
         } else {
-            throw new Exception('getDbConnection function not available');
+            throw new Exception('DB konstanty nejsou definovány');
         }
-    } catch (Exception $dbEx) {
+    } catch (Throwable $dbEx) {
         error_log("Track pageview - DB connection failed: " . $dbEx->getMessage());
         // Fallback - vrátit success bez uložení
         echo json_encode([
