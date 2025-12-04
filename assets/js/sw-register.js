@@ -17,7 +17,7 @@
   // KONFIGURACE
   // ============================================
   const SW_PATH = '/sw.php'; // Dynamicky generovaný SW
-  const RELOAD_COOLDOWN_MS = 60000; // Min. 1 minuta mezi reloady
+  const RELOAD_COOLDOWN_MS = 10000; // Min. 10 sekund mezi reloady (sníženo z 60s)
   const RELOAD_STORAGE_KEY = 'pwa_last_reload';
   const VERSION_STORAGE_KEY = 'pwa_known_version';
   const UPDATE_CHECK_INTERVAL_DEFAULT = 300000; // 5 minut
