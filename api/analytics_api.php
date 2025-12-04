@@ -139,11 +139,29 @@ function zpracujIpAkci(string $action): void
             ");
             $stmt->execute([':ip' => $ipAddress, ':reason' => $reason]);
 
-            error_log("Analytics: IP $ipAddress přidána do blacklistu. Důvod: $reason");
+            // Anonymizovat IP pro vyhledávání v pageviews (GDPR - ukládáme anonymizované)
+            $anonymizovanaIp = $ipAddress;
+            if (filter_var($ipAddress, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                $parts = explode('.', $ipAddress);
+                $parts[3] = '0';
+                $anonymizovanaIp = implode('.', $parts);
+            }
+
+            // Smazat existující záznamy z pageviews pro tuto IP (hledat i anonymizovanou verzi)
+            $smazanoZaznamu = 0;
+            try {
+                $deleteStmt = $pdo->prepare("DELETE FROM wgs_pageviews WHERE ip_address = :ip OR ip_address = :anon_ip");
+                $deleteStmt->execute([':ip' => $ipAddress, ':anon_ip' => $anonymizovanaIp]);
+                $smazanoZaznamu = $deleteStmt->rowCount();
+            } catch (PDOException $e) {
+                // Sloupec ip_address nemusí existovat - ignorovat
+            }
+
+            error_log("Analytics: IP $ipAddress přidána do blacklistu. Důvod: $reason. Smazáno záznamů: $smazanoZaznamu");
 
             echo json_encode([
                 'status' => 'success',
-                'message' => "IP adresa $ipAddress byla přidána do blacklistu"
+                'message' => "IP adresa $ipAddress byla přidána do blacklistu" . ($smazanoZaznamu > 0 ? " (smazáno $smazanoZaznamu záznamů)" : "")
             ], JSON_UNESCAPED_UNICODE);
             break;
 
@@ -244,11 +262,30 @@ function zpracujIpAkci(string $action): void
             ");
             $stmt->execute([':ip' => $myIp, ':reason' => 'Vlastní IP administrátora']);
 
-            error_log("Analytics: Vlastní IP $myIp přidána do blacklistu");
+            // Anonymizovat IP pro vyhledávání v pageviews (GDPR - ukládáme anonymizované)
+            $anonymizovanaIp = $myIp;
+            if (filter_var($myIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                $parts = explode('.', $myIp);
+                $parts[3] = '0';
+                $anonymizovanaIp = implode('.', $parts);
+            }
+
+            // Smazat existující záznamy z pageviews pro tuto IP (hledat i anonymizovanou verzi)
+            $smazanoZaznamu = 0;
+            try {
+                $deleteStmt = $pdo->prepare("DELETE FROM wgs_pageviews WHERE ip_address = :ip OR ip_address = :anon_ip");
+                $deleteStmt->execute([':ip' => $myIp, ':anon_ip' => $anonymizovanaIp]);
+                $smazanoZaznamu = $deleteStmt->rowCount();
+            } catch (PDOException $e) {
+                // Sloupec ip_address nemusí existovat - ignorovat
+            }
+
+            error_log("Analytics: Vlastní IP $myIp přidána do blacklistu. Smazáno záznamů: $smazanoZaznamu");
 
             echo json_encode([
                 'status' => 'success',
-                'message' => "Vaše IP adresa $myIp byla přidána do blacklistu"
+                'message' => "Vaše IP adresa $myIp byla přidána do blacklistu" . ($smazanoZaznamu > 0 ? " (smazáno $smazanoZaznamu záznamů)" : ""),
+                'ip' => $myIp
             ], JSON_UNESCAPED_UNICODE);
             break;
 
