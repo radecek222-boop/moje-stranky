@@ -34,6 +34,23 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Důvod: Veřejný endpoint pro anonymní návštěvníky bez session
 // Ochrana: Rate limiting (1000 req/h per IP) brání zneužití
 
+// Vlastní shutdown handler pro zachycení fatálních chyb před načtením error_handler.php
+register_shutdown_function(function() {
+    $error = error_get_last();
+    if ($error !== null && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        // Ujistit se, že hlavičky jsou nastavené
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
+            http_response_code(500);
+        }
+        error_log("Track pageview FATAL: " . $error['message'] . " in " . $error['file'] . ":" . $error['line']);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Chyba serveru'
+        ]);
+    }
+});
+
 try {
     // Načíst init.php s error handlingem
     $initPath = __DIR__ . '/../init.php';
@@ -98,8 +115,8 @@ try {
             echo json_encode(['status' => 'error', 'message' => $rateLimitResult['message']]);
             exit;
         }
-    } catch (Exception $rlEx) {
-        // Rate limiter selhal - pokračovat bez něj
+    } catch (Throwable $rlEx) {
+        // Rate limiter selhal - pokračovat bez něj (Throwable zachytí Exception i Error)
         error_log("Track pageview - Rate limiter failed: " . $rlEx->getMessage());
     }
 
@@ -135,7 +152,8 @@ try {
 
     // Extrahovat potřebná data
     $sessionId = $data['session_id'] ?? (session_status() === PHP_SESSION_ACTIVE ? session_id() : uniqid('anon_'));
-    $userId = $_SESSION['user_id'] ?? null;
+    // Bezpečný přístup k $_SESSION - kontrola jestli session je aktivní
+    $userId = (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['user_id'])) ? $_SESSION['user_id'] : null;
     $pageUrl = $data['page_url'] ?? $_SERVER['REQUEST_URI'] ?? '';
     $pageTitle = $data['page_title'] ?? '';
     $referrer = $data['referrer'] ?? $_SERVER['HTTP_REFERER'] ?? '';
@@ -257,7 +275,8 @@ try {
         'status' => 'error',
         'message' => 'Chyba databáze'
     ]);
-} catch (Exception $e) {
+} catch (Throwable $e) {
+    // Throwable zachytí všechny Exception i Error (TypeError, ArgumentCountError, atd.)
     error_log("Track pageview error: " . $e->getMessage() . " | File: " . $e->getFile() . " | Line: " . $e->getLine());
     http_response_code(500);
     echo json_encode([
