@@ -225,6 +225,8 @@ if ($initialBootstrapData) {
   <link rel="stylesheet" href="assets/css/protokol-calculator-modal.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
+  <!-- Oprava kalkulacky - musi byt posledni -->
+  <link rel="stylesheet" href="assets/css/cenik-wizard-fix.css">
   <!-- mobile-responsive.css odstraněn - protokol.min.css má vlastní mobilní styly -->
 </head>
 

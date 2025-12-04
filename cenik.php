@@ -50,6 +50,8 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
+  <!-- Oprava kalkulacky - musi byt posledni -->
+  <link rel="stylesheet" href="assets/css/cenik-wizard-fix.css">
 
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
@@ -106,7 +108,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
       </div>
 
       <!-- KROK 1: Zadání adresy -->
-      <div class="wizard-step" id="step-address" style="display: block;">
+      <div class="wizard-step" id="step-address" style="display: flex;">
         <h3 class="step-title" data-lang-cs="1. Zadejte adresu zákazníka" data-lang-en="1. Enter Customer Address" data-lang-it="1. Inserisci l'Indirizzo del Cliente">1. Zadejte adresu zákazníka</h3>
         <p class="step-desc" data-lang-cs="Pro výpočet dopravného potřebujeme znát vaši adresu." data-lang-en="We need your address to calculate the transportation cost." data-lang-it="Abbiamo bisogno del tuo indirizzo per calcolare il costo del trasporto.">Pro výpočet dopravného potřebujeme znát vaši adresu.</p>
 

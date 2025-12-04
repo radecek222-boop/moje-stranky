@@ -238,9 +238,10 @@
         }
 
         // Skrýt aktuální krok
-        const currentStep = document.querySelector('.wizard-step[style*="display: block"]');
+        const currentStep = document.querySelector('.wizard-step:not(.hidden)');
         if (currentStep) {
             currentStep.classList.add('hidden');
+            currentStep.style.display = 'none';
         }
 
         stav.krok++;
@@ -281,6 +282,7 @@
         const nextStep = document.getElementById(nextStepId);
         if (nextStep) {
             nextStep.classList.remove('hidden');
+            nextStep.style.display = 'flex';
         }
 
         aktualizovatProgress();
@@ -289,9 +291,10 @@
 
     window.previousStep = function() {
         // Skrýt aktuální krok
-        const currentStep = document.querySelector('.wizard-step[style*="display: block"]');
+        const currentStep = document.querySelector('.wizard-step:not(.hidden)');
         if (currentStep) {
             currentStep.classList.add('hidden');
+            currentStep.style.display = 'none';
         }
 
         stav.krok--;
@@ -324,6 +327,7 @@
         const prevStep = document.getElementById(prevStepId);
         if (prevStep) {
             prevStep.classList.remove('hidden');
+            prevStep.style.display = 'flex';
         }
 
         aktualizovatProgress();
@@ -590,10 +594,13 @@
         // Skrýt všechny kroky
         document.querySelectorAll('.wizard-step').forEach(step => {
             step.classList.add('hidden');
+            step.style.display = 'none';
         });
 
         // Zobrazit první krok
-        document.getElementById('step-address').classList.remove('hidden');
+        const firstStep = document.getElementById('step-address');
+        firstStep.classList.remove('hidden');
+        firstStep.style.display = 'flex';
 
         aktualizovatProgress();
         scrollToTop();
