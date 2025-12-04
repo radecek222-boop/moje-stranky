@@ -1658,10 +1658,17 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
 
       case 'showCustomerDetail':
-      case 'showDetailById':
-        // showDetailById je akce z karet zakazniku - vola stejnou funkci jako showCustomerDetail
+        // Tlacitko v detailu - ukazuje kontaktni info
         if (id && typeof showCustomerDetail === 'function') {
           showCustomerDetail(id);
+        }
+        break;
+
+      case 'showDetailById':
+        // Kliknuti na kartu zakaznika - musi volat showDetail (ne showCustomerDetail!)
+        // showDetail nastavi CURRENT_RECORD a zobrazi hlavni detail modal
+        if (id && typeof showDetail === 'function') {
+          showDetail(id);
         }
         break;
 
