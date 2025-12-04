@@ -68,12 +68,14 @@ async function loadNotifications() {
       notificationState.notifications = result.data || [];
       renderNotifications();
     } else {
-      container.innerHTML = `<div class="error-message">${result.message || 'Chyba při načítání notifikací'}</div>`;
+      const safeMessage = Utils.escapeHtml(result.message || 'Chyba při načítání notifikací');
+      container.innerHTML = `<div class="error-message">${safeMessage}</div>`;
     }
   } catch (err) {
     console.error('Load notifications failed:', err);
     const message = err && err.message ? err.message : 'Chyba při načítání notifikací';
-    container.innerHTML = `<div class="error-message">${message}</div>`;
+    const safeMessage = Utils.escapeHtml(message);
+    container.innerHTML = `<div class="error-message">${safeMessage}</div>`;
   }
 }
 
@@ -233,9 +235,10 @@ function openEditNotificationModal(notificationId) {
   // Render available variables
   const variablesContainer = document.getElementById('available-variables');
   if (variablesContainer && notif.variables) {
-    variablesContainer.innerHTML = notif.variables.map(v => 
-      `<span class="variable-tag" data-action="insertVariable" data-variable="${v}">${v}</span>`
-    ).join('');
+    variablesContainer.innerHTML = notif.variables.map(v => {
+      const safeVar = Utils.escapeHtml(v);
+      return `<span class="variable-tag" data-action="insertVariable" data-variable="${safeVar}">${safeVar}</span>`;
+    }).join('');
   }
   
   // Load CC and BCC emails
@@ -424,12 +427,15 @@ function removeCCEmail(email) {
 function renderCCEmails() {
   const container = document.getElementById('cc-emails-list');
   if (!container) return;
-  container.innerHTML = notificationState.ccEmails.map(email => `
+  container.innerHTML = notificationState.ccEmails.map(email => {
+    const safeEmail = Utils.escapeHtml(email);
+    return `
     <div class="email-tag">
-      ${email}
-      <span class="email-tag-remove" data-action="removeCCEmail" data-email="${email}">×</span>
+      ${safeEmail}
+      <span class="email-tag-remove" data-action="removeCCEmail" data-email="${safeEmail}">×</span>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function addBCCEmail() {
@@ -459,12 +465,15 @@ function removeBCCEmail(email) {
 function renderBCCEmails() {
   const container = document.getElementById('bcc-emails-list');
   if (!container) return;
-  container.innerHTML = notificationState.bccEmails.map(email => `
+  container.innerHTML = notificationState.bccEmails.map(email => {
+    const safeEmail = Utils.escapeHtml(email);
+    return `
     <div class="email-tag">
-      ${email}
-      <span class="email-tag-remove" data-action="removeBCCEmail" data-email="${email}">×</span>
+      ${safeEmail}
+      <span class="email-tag-remove" data-action="removeBCCEmail" data-email="${safeEmail}">×</span>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 // Override pro zajištění správné velikosti

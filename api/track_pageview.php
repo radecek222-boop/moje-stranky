@@ -2,9 +2,13 @@
 /**
  * Tracking API - Zaznamenávání pageviews
  * Endpoint pro JavaScript tracking skript
+ *
+ * SECURITY FIX: Přidán CSRF a rate limiting
  */
 
 require_once __DIR__ . '/../init.php';
+require_once __DIR__ . '/../includes/csrf_helper.php';
+require_once __DIR__ . '/../includes/rate_limiter.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -17,6 +21,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// CSRF validace
+$csrfToken = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+if (!validateCSRFToken($csrfToken)) {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'Neplatný CSRF token']);
+    exit;
+}
+
 try {
     $pdo = getDbConnection();
 
@@ -24,6 +36,20 @@ try {
     $ipAddress = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
     if (strpos($ipAddress, ',') !== false) {
         $ipAddress = trim(explode(',', $ipAddress)[0]);
+    }
+
+    // Rate limiting - 1000 požadavků za hodinu per IP
+    $rateLimiter = new RateLimiter($pdo);
+    $rateLimitResult = $rateLimiter->checkLimit($ipAddress, 'track_pageview', [
+        'max_attempts' => 1000,
+        'window_minutes' => 60,
+        'block_minutes' => 60
+    ]);
+
+    if (!$rateLimitResult['allowed']) {
+        http_response_code(429);
+        echo json_encode(['status' => 'error', 'message' => $rateLimitResult['message']]);
+        exit;
     }
 
     // Zkontrolovat jestli IP není v ignorovaných
