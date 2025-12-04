@@ -16,15 +16,16 @@ if (!$isAdmin) {
   <title>Statistiky a reporty | White Glove Service</title>
   <meta name="description" content="Statistiky a reporty pro vyúčtování - prodejci, technici, zakázky.">
   <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
+  <link rel="preload" href="assets/css/styles.min.css" as="style">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- External CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/mobile-responsive.css">
+  <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
 
   <style>
 /* ==================================================
@@ -54,7 +55,7 @@ body {
 .stats-header h1 {
     margin: 0;
     font-size: 1.8rem;
-    color: #2D5016;
+    color: #333333;
     font-weight: 600;
 }
 
@@ -77,7 +78,7 @@ body {
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    border-left: 4px solid #2D5016;
+    border-left: 4px solid #333333;
 }
 
 .summary-card-label {
@@ -92,7 +93,7 @@ body {
 .summary-card-value {
     font-size: 2rem;
     font-weight: 700;
-    color: #2D5016;
+    color: #333333;
     margin-bottom: 0.25rem;
 }
 
@@ -113,7 +114,7 @@ body {
 .filters-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #2D5016;
+    color: #333333;
     margin-bottom: 1rem;
 }
 
@@ -149,7 +150,7 @@ body {
 
 .filter-select:focus {
     outline: none;
-    border-color: #2D5016;
+    border-color: #333333;
 }
 
 /* Multi-select checkboxy */
@@ -170,7 +171,7 @@ body {
 }
 
 .multiselect-trigger:hover {
-    border-color: #2D5016;
+    border-color: #333333;
 }
 
 .multiselect-dropdown {
@@ -239,13 +240,13 @@ body {
 }
 
 .btn:hover {
-    border-color: #2D5016;
+    border-color: #333333;
 }
 
 .btn-primary {
-    background: #2D5016;
+    background: #333333;
     color: white;
-    border-color: #2D5016;
+    border-color: #333333;
 }
 
 .btn-primary:hover {
@@ -281,7 +282,7 @@ body {
 .table-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #2D5016;
+    color: #333333;
 }
 
 .table-count {
@@ -297,14 +298,14 @@ body {
 
 .stats-table thead {
     background: #f9f9f9;
-    border-bottom: 2px solid #2D5016;
+    border-bottom: 2px solid #333333;
 }
 
 .stats-table th {
     padding: 0.75rem;
     text-align: left;
     font-weight: 600;
-    color: #2D5016;
+    color: #333333;
     text-transform: uppercase;
     font-size: 0.7rem;
     letter-spacing: 0.5px;
@@ -342,7 +343,7 @@ body {
 }
 
 .pagination button:hover:not(:disabled) {
-    border-color: #2D5016;
+    border-color: #333333;
     background: #f9f9f9;
 }
 
@@ -374,7 +375,7 @@ body {
 .chart-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #2D5016;
+    color: #333333;
     margin-bottom: 1rem;
 }
 
@@ -403,7 +404,7 @@ body {
 .chart-item-value {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #2D5016;
+    color: #333333;
 }
 
 /* Loading */
@@ -450,15 +451,12 @@ body {
     }
 }
   </style>
-
-  <!-- Analytics Tracker -->
-  <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
 </head>
 
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
-<main>
+<main id="main-content">
 <div class="stats-container">
 
   <!-- Header -->
@@ -501,7 +499,7 @@ body {
     <div class="filters-grid">
       <!-- Rok -->
       <div class="filter-group">
-        <label class="filter-label">Rok</label>
+        <label class="filter-label" for="filter-year">Rok</label>
         <select class="filter-select" id="filter-year">
           <option value="">Všechny</option>
           <option value="2024">2024</option>
@@ -512,7 +510,7 @@ body {
 
       <!-- Měsíc -->
       <div class="filter-group">
-        <label class="filter-label">Měsíc</label>
+        <label class="filter-label" for="filter-month">Měsíc</label>
         <select class="filter-select" id="filter-month">
           <option value="">Všechny</option>
           <option value="1">Leden</option>
@@ -532,13 +530,13 @@ body {
 
       <!-- Prodejci (multi-select) -->
       <div class="filter-group">
-        <label class="filter-label">Prodejci</label>
+        <label class="filter-label" id="label-prodejci">Prodejci</label>
         <div class="filter-multiselect">
-          <div class="multiselect-trigger" id="prodejci-trigger">
+          <div class="multiselect-trigger" id="prodejci-trigger" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="label-prodejci">
             <span id="prodejci-label">Všichni</span>
-            <span>▼</span>
+            <span aria-hidden="true">▼</span>
           </div>
-          <div class="multiselect-dropdown" id="prodejci-dropdown">
+          <div class="multiselect-dropdown" id="prodejci-dropdown" role="listbox" aria-labelledby="label-prodejci">
             <!-- Načte se dynamicky -->
           </div>
         </div>
@@ -546,13 +544,13 @@ body {
 
       <!-- Technici (multi-select) -->
       <div class="filter-group">
-        <label class="filter-label">Technici</label>
+        <label class="filter-label" id="label-technici">Technici</label>
         <div class="filter-multiselect">
-          <div class="multiselect-trigger" id="technici-trigger">
+          <div class="multiselect-trigger" id="technici-trigger" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="label-technici">
             <span id="technici-label">Všichni</span>
-            <span>▼</span>
+            <span aria-hidden="true">▼</span>
           </div>
-          <div class="multiselect-dropdown" id="technici-dropdown">
+          <div class="multiselect-dropdown" id="technici-dropdown" role="listbox" aria-labelledby="label-technici">
             <!-- Načte se dynamicky -->
           </div>
         </div>
@@ -560,18 +558,18 @@ body {
 
       <!-- Země -->
       <div class="filter-group">
-        <label class="filter-label">Země</label>
+        <label class="filter-label" id="label-zeme">Země</label>
         <div class="filter-multiselect">
-          <div class="multiselect-trigger" id="zeme-trigger">
+          <div class="multiselect-trigger" id="zeme-trigger" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="label-zeme">
             <span id="zeme-label">Všechny</span>
-            <span>▼</span>
+            <span aria-hidden="true">▼</span>
           </div>
-          <div class="multiselect-dropdown" id="zeme-dropdown">
-            <div class="multiselect-option">
+          <div class="multiselect-dropdown" id="zeme-dropdown" role="listbox" aria-labelledby="label-zeme">
+            <div class="multiselect-option" role="option">
               <input type="checkbox" id="zeme-cz" value="cz" checked>
               <label for="zeme-cz">🇨🇿 Česko</label>
             </div>
-            <div class="multiselect-option">
+            <div class="multiselect-option" role="option">
               <input type="checkbox" id="zeme-sk" value="sk" checked>
               <label for="zeme-sk">🇸🇰 Slovensko</label>
             </div>
@@ -585,9 +583,9 @@ body {
         <input type="checkbox" id="zobrazitOdmenu" checked style="cursor: pointer;">
         <label for="zobrazitOdmenu" style="cursor: pointer; font-size: 0.9rem; color: #666;">Zobrazit odměnu technika v PDF</label>
       </div>
-      <button class="btn" onclick="resetovitFiltry()">Reset</button>
-      <button class="btn btn-primary" onclick="aplikovatFiltry()">Aplikovat filtry</button>
-      <button class="btn btn-export" onclick="exportovatPDF()">📄 Exportovat PDF</button>
+      <button class="btn" data-action="resetovitFiltry">Reset</button>
+      <button class="btn btn-primary" data-action="aplikovatFiltry">Aplikovat filtry</button>
+      <button class="btn btn-export" data-action="exportovatPDF">Exportovat PDF</button>
     </div>
   </div>
 
@@ -598,16 +596,16 @@ body {
       <div class="table-count" id="table-count">0 zakázek</div>
     </div>
 
-    <div id="table-container">
-      <div class="loading">Načítání dat...</div>
+    <div id="table-container" aria-live="polite">
+      <div class="loading" role="status">Načítání dat...</div>
     </div>
 
     <!-- Stránkování -->
-    <div class="pagination" id="pagination" style="display: none;">
-      <button id="prev-page" onclick="predchoziStranka()">← Předchozí</button>
-      <span class="page-info" id="page-info">Strana 1 z 1</span>
-      <button id="next-page" onclick="dalsiStranka()">Další →</button>
-    </div>
+    <nav class="pagination" id="pagination" style="display: none;" aria-label="Stránkování">
+      <button id="prev-page" data-action="predchoziStranka" aria-label="Předchozí strana">← Předchozí</button>
+      <span class="page-info" id="page-info" aria-live="polite">Strana 1 z 1</span>
+      <button id="next-page" data-action="dalsiStranka" aria-label="Další strana">Další →</button>
+    </nav>
   </div>
 
   <!-- Grafy a statistiky -->
@@ -615,32 +613,32 @@ body {
     <!-- Nejporuchovější modely -->
     <div class="chart-card">
       <div class="chart-title">Nejporuchovější modely</div>
-      <div class="chart-content" id="chart-models">
-        <div class="loading">Načítání...</div>
+      <div class="chart-content" id="chart-models" aria-live="polite">
+        <div class="loading" role="status">Načítání...</div>
       </div>
     </div>
 
     <!-- Lokality -->
     <div class="chart-card">
       <div class="chart-title">Lokality (města)</div>
-      <div class="chart-content" id="chart-cities">
-        <div class="loading">Načítání...</div>
+      <div class="chart-content" id="chart-cities" aria-live="polite">
+        <div class="loading" role="status">Načítání...</div>
       </div>
     </div>
 
     <!-- Statistiky prodejců -->
     <div class="chart-card">
       <div class="chart-title">Statistiky prodejců</div>
-      <div class="chart-content" id="chart-salespersons">
-        <div class="loading">Načítání...</div>
+      <div class="chart-content" id="chart-salespersons" aria-live="polite">
+        <div class="loading" role="status">Načítání...</div>
       </div>
     </div>
 
     <!-- Statistiky techniků -->
     <div class="chart-card">
       <div class="chart-title">Statistiky techniků</div>
-      <div class="chart-content" id="chart-technicians">
-        <div class="loading">Načítání...</div>
+      <div class="chart-content" id="chart-technicians" aria-live="polite">
+        <div class="loading" role="status">Načítání...</div>
       </div>
     </div>
   </div>
@@ -649,12 +647,13 @@ body {
 </main>
 
 <!-- jsPDF pro PDF export -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 
-<script src="assets/js/logger.js" defer></script>
-<script src="assets/js/statistiky.js?v=2.2" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
+<script src="assets/js/statistiky.min.js?v=2.3" defer></script>
 
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>
 </html>

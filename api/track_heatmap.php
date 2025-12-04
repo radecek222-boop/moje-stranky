@@ -16,6 +16,45 @@ require_once __DIR__ . '/../init.php';
 require_once __DIR__ . '/../includes/csrf_helper.php';
 require_once __DIR__ . '/../includes/api_response.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
+require_once __DIR__ . '/../includes/geoip_helper.php';
+
+// Centrálně zachytit fatální chyby a vrátit JSON místo prázdného těla
+// SECURITY: Detaily logovat, ale NEPOSÍLAT klientovi
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if ($error === null) {
+        return;
+    }
+
+    $fatalTypes = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR];
+    if (!in_array($error['type'], $fatalTypes, true)) {
+        return;
+    }
+
+    // Logovat detaily pro debugging (pouze server-side)
+    error_log(sprintf(
+        '[Track Heatmap FATAL] %s in %s on line %d',
+        $error['message'],
+        $error['file'],
+        $error['line']
+    ));
+
+    // Vyčistit buffery
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+
+    // SECURITY: Pouze generická zpráva klientovi, žádné detaily!
+    $payload = [
+        'status' => 'error',
+        'message' => 'Neočekávaná chyba serveru'
+    ];
+
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+});
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -39,7 +78,8 @@ try {
     $pdo = getDbConnection();
 
     // Rate limiting - 1000 požadavků za hodinu per IP
-    $clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    // OPRAVA: Použít skutečnou IP klienta (s podporou Cloudflare/proxy)
+    $clientIp = GeoIPHelper::ziskejKlientIP();
     $rateLimiter = new RateLimiter($pdo);
 
     $rateLimitResult = $rateLimiter->checkLimit($clientIp, 'track_heatmap', [
@@ -59,10 +99,147 @@ try {
         $inputData = $_POST;
     }
 
-    // CSRF validace
-    $csrfToken = $inputData['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
-    if (!validateCSRFToken($csrfToken)) {
-        sendJsonError('Neplatný CSRF token', 403);
+    // POZNÁMKA: CSRF validace NENÍ potřeba pro heatmap tracking
+    // Důvody:
+    // 1. Je to pasivní tracking (read-only data collection)
+    // 2. Každý návštěvník trackuje své vlastní kliky
+    // 3. Není zde žádná "nežádoucí akce" kterou by CSRF mohlo zneužít
+    // 4. Rate limiting (1000 req/hour) už chrání před abuse
+    // 5. Session cookies nefungují správně při AJAX calls ze stránek
+    //
+    // CSRF je relevantní pro: DELETE, UPDATE, CREATE akcí admin operací
+    // CSRF NENÍ relevantní pro: Pasivní analytics tracking
+
+    // PERFORMANCE FIX: Uvolnit session lock pro paralelní zpracování
+    // Audit 2025-11-24: Heatmap tracking - vysoká frekvence requestů
+    session_write_close();
+
+    // ========================================
+    // BLACKLIST IP ADRES (admin/vlastník)
+    // ========================================
+    // Získat IP klienta
+    $clientIpForBlacklist = GeoIPHelper::ziskejKlientIP();
+
+    // 1. Kontrola databázové tabulky wgs_analytics_ignored_ips
+    $stmtIgnored = $pdo->prepare("
+        SELECT id FROM wgs_analytics_ignored_ips
+        WHERE ip_address = :ip
+        LIMIT 1
+    ");
+    $stmtIgnored->execute(['ip' => $clientIpForBlacklist]);
+    if ($stmtIgnored->fetch()) {
+        sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'db_blacklist']);
+    }
+
+    // 2. Blacklist IP adresy jsou nyní POUZE v databázi (wgs_analytics_ignored_ips)
+    // Pro přidání nové IP použijte Analytics dashboard → Blokace IP
+    // BEZPEČNOST: Žádné hardcoded IP adresy v kódu
+
+    // ========================================
+    // BLACKLIST REFERRER DOMÉN
+    // ========================================
+    // Ignorovat návštěvy z těchto referrer domén (např. GitHub)
+    $blacklistedReferrers = [
+        'github.com',
+        'www.github.com',
+        'raw.githubusercontent.com',
+        'gist.github.com',
+        'github.dev',
+        'githubusercontent.com',
+    ];
+
+    // Kontrola HTTP_REFERER hlavičky
+    $referrer = $_SERVER['HTTP_REFERER'] ?? '';
+    if (!empty($referrer)) {
+        $referrerHost = parse_url($referrer, PHP_URL_HOST);
+        if ($referrerHost) {
+            foreach ($blacklistedReferrers as $blacklistedRef) {
+                if ($referrerHost === $blacklistedRef || strpos($referrerHost, $blacklistedRef) !== false) {
+                    sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'referrer_header']);
+                }
+            }
+        }
+    }
+
+    // Kontrola referrer z POST dat
+    $referrerPost = $inputData['referrer'] ?? '';
+    if (!empty($referrerPost)) {
+        $referrerHostPost = parse_url($referrerPost, PHP_URL_HOST);
+        if ($referrerHostPost) {
+            foreach ($blacklistedReferrers as $blacklistedRef) {
+                if ($referrerHostPost === $blacklistedRef || strpos($referrerHostPost, $blacklistedRef) !== false) {
+                    sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'referrer_post']);
+                }
+            }
+        }
+    }
+
+    // ========================================
+    // BLACKLIST INTERNÍCH/ADMIN STRÁNEK
+    // ========================================
+    // POZN: Zahrnout i verze bez .php (URL rewrite)
+    $blacklistedPages = [
+        // S příponou .php
+        'admin.php',
+        'seznam.php',
+        'statistiky.php',
+        'protokol.php',
+        'login.php',
+        'registration.php',
+        'analytics.php',
+        'analytics-heatmap.php',
+        'vsechny_tabulky.php',
+        // Bez přípony (URL rewrite)
+        'admin',
+        'seznam',
+        'statistiky',
+        'protokol',
+        'login',
+        'registration',
+        'analytics',
+        'analytics-heatmap',
+        // Prefixy
+        'kontrola_',
+        'pridej_',
+        'vycisti_',
+        'migrace_',
+        'test_',
+        'doplnit_',
+    ];
+
+    $pageUrlToCheck = $inputData['page_url'] ?? '';
+    if (!empty($pageUrlToCheck)) {
+        $parsedPageUrl = parse_url($pageUrlToCheck);
+        $pagePath = $parsedPageUrl['path'] ?? '';
+        $pageName = basename($pagePath);
+
+        foreach ($blacklistedPages as $blacklistedPage) {
+            if ($pageName === $blacklistedPage || strpos($pageName, $blacklistedPage) === 0) {
+                sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'admin_page']);
+            }
+        }
+    }
+
+    // ========================================
+    // GEOLOKACE Z IP ADRESY
+    // ========================================
+    $geoData = null;
+    $countryCode = null;
+    $city = null;
+    $latitude = null;
+    $longitude = null;
+
+    // Získat skutečnou IP klienta (s podporou proxy/Cloudflare)
+    $realClientIp = GeoIPHelper::ziskejKlientIP();
+
+    // Získat geolokaci (cached, max 3s timeout)
+    $geoData = GeoIPHelper::ziskejLokaci($realClientIp);
+
+    if ($geoData !== null) {
+        $countryCode = $geoData['country_code'] ?? null;
+        $city = $geoData['city'] ?? null;
+        $latitude = $geoData['lat'] ?? null;
+        $longitude = $geoData['lng'] ?? null;
     }
 
     // ========================================
@@ -79,14 +256,44 @@ try {
     // ========================================
     // SANITIZACE A VALIDACE DAT
     // ========================================
-    $pageUrl = filter_var($inputData['page_url'], FILTER_VALIDATE_URL);
-    if (!$pageUrl) {
-        sendJsonError('Neplatná URL adresa', 400);
+    // Bezpečná URL validace (FILTER_VALIDATE_URL selže na hash/query/diakritice)
+    $pageUrlRaw = trim($inputData['page_url'] ?? '');
+
+    // Kontrola prázdné URL
+    if (empty($pageUrlRaw)) {
+        sendJsonError('Prázdná URL adresa', 400);
     }
 
-    // Normalizace URL (odstranit query params a hash)
-    $parsedUrl = parse_url($pageUrl);
-    $normalizedUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . ($parsedUrl['path'] ?? '/');
+    // Odstranit hash a query parametry před parsováním
+    $pageUrlClean = strtok($pageUrlRaw, '?#');
+
+    // Kontrola před parse_url - musí být neprázdný string
+    if (!is_string($pageUrlClean) || empty($pageUrlClean)) {
+        sendJsonError('Neplatná URL adresa (prázdná)', 400);
+    }
+
+    // Bezpečné parse_url - může vrátit false
+    $parsedUrl = @parse_url($pageUrlClean);
+
+    // Striktní kontrola výsledku parse_url
+    if ($parsedUrl === false || !is_array($parsedUrl)) {
+        sendJsonError('Neplatná URL adresa (nelze parsovat)', 400);
+    }
+
+    if (!isset($parsedUrl['scheme']) || !isset($parsedUrl['host'])) {
+        sendJsonError('Neplatná URL adresa (chybí scheme nebo host)', 400);
+    }
+
+    // Validace scheme
+    $scheme = strtolower($parsedUrl['scheme']);
+    if (!in_array($scheme, ['http', 'https'], true)) {
+        sendJsonError('Neplatná URL adresa (nepovolený protokol)', 400);
+    }
+
+    // Bezpečná normalizace URL
+    $host = $parsedUrl['host'];
+    $path = $parsedUrl['path'] ?? '/';
+    $normalizedUrl = $scheme . '://' . $host . $path;
 
     // Validace device_type
     $deviceType = sanitizeInput($inputData['device_type']);
@@ -103,12 +310,16 @@ try {
     // ========================================
     if (!empty($inputData['clicks']) && is_array($inputData['clicks'])) {
         foreach ($inputData['clicks'] as $click) {
-            if (!isset($click['x_percent']) || !isset($click['y_percent'])) {
+            // Akceptovat oba formáty: x/y (z JS) nebo x_percent/y_percent (starší formát)
+            $xValue = $click['x'] ?? $click['x_percent'] ?? null;
+            $yValue = $click['y'] ?? $click['y_percent'] ?? null;
+
+            if ($xValue === null || $yValue === null) {
                 continue; // Přeskočit neplatné kliky
             }
 
-            $xPercent = round((float)$click['x_percent'], 2);
-            $yPercent = round((float)$click['y_percent'], 2);
+            $xPercent = round((float)$xValue, 2);
+            $yPercent = round((float)$yValue, 2);
 
             // Validace rozsahu (0-100%)
             if ($xPercent < 0 || $xPercent > 100 || $yPercent < 0 || $yPercent > 100) {
@@ -120,6 +331,9 @@ try {
             $viewportHeight = isset($click['viewport_height']) ? (int)$click['viewport_height'] : null;
 
             // UPSERT: INSERT nebo UPDATE click_count
+            // POZN: VALUES() nefunguje v MariaDB 10.3+ - vrací NULL
+            // Řešení: Rolling average pomocí více parametrů
+            // Vzorec: new_avg = (old_avg * count + new_value) / (count + 1)
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_analytics_heatmap_clicks (
                     page_url,
@@ -129,6 +343,10 @@ try {
                     click_count,
                     viewport_width_avg,
                     viewport_height_avg,
+                    country_code,
+                    city,
+                    latitude,
+                    longitude,
                     first_click,
                     last_click
                 ) VALUES (
@@ -139,19 +357,27 @@ try {
                     1,
                     :viewport_width,
                     :viewport_height,
+                    :country_code,
+                    :city,
+                    :latitude,
+                    :longitude,
                     NOW(),
                     NOW()
                 )
                 ON DUPLICATE KEY UPDATE
                     click_count = click_count + 1,
-                    viewport_width_avg = IF(:viewport_width IS NOT NULL,
-                        (viewport_width_avg * click_count + :viewport_width) / (click_count + 1),
+                    viewport_width_avg = IF(:vw_check IS NOT NULL,
+                        (COALESCE(viewport_width_avg, :vw_default) * click_count + :vw_new) / (click_count + 1),
                         viewport_width_avg
                     ),
-                    viewport_height_avg = IF(:viewport_height IS NOT NULL,
-                        (viewport_height_avg * click_count + :viewport_height) / (click_count + 1),
+                    viewport_height_avg = IF(:vh_check IS NOT NULL,
+                        (COALESCE(viewport_height_avg, :vh_default) * click_count + :vh_new) / (click_count + 1),
                         viewport_height_avg
                     ),
+                    country_code = COALESCE(country_code, :country_code_upd),
+                    city = COALESCE(city, :city_upd),
+                    latitude = COALESCE(latitude, :latitude_upd),
+                    longitude = COALESCE(longitude, :longitude_upd),
                     last_click = NOW()
             ");
 
@@ -161,7 +387,21 @@ try {
                 'click_x_percent' => $xPercent,
                 'click_y_percent' => $yPercent,
                 'viewport_width' => $viewportWidth,
-                'viewport_height' => $viewportHeight
+                'viewport_height' => $viewportHeight,
+                'country_code' => $countryCode,
+                'city' => $city,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'vw_check' => $viewportWidth,
+                'vw_default' => $viewportWidth,
+                'vw_new' => $viewportWidth,
+                'vh_check' => $viewportHeight,
+                'vh_default' => $viewportHeight,
+                'vh_new' => $viewportHeight,
+                'country_code_upd' => $countryCode,
+                'city_upd' => $city,
+                'latitude_upd' => $latitude,
+                'longitude_upd' => $longitude
             ]);
 
             $clicksAggregated++;
@@ -171,8 +411,10 @@ try {
     // ========================================
     // AGREGACE SCROLL DATA
     // ========================================
-    if (!empty($inputData['scroll_depths']) && is_array($inputData['scroll_depths'])) {
-        foreach ($inputData['scroll_depths'] as $scrollDepth) {
+    // Akceptovat oba formáty: scrolls (z JS) nebo scroll_depths (starší formát)
+    $scrollData = $inputData['scrolls'] ?? $inputData['scroll_depths'] ?? [];
+    if (!empty($scrollData) && is_array($scrollData)) {
+        foreach ($scrollData as $scrollDepth) {
             $depth = (int)$scrollDepth;
 
             // Validace rozsahu (0-100)
@@ -188,6 +430,8 @@ try {
             $viewportHeight = isset($inputData['viewport_height']) ? (int)$inputData['viewport_height'] : null;
 
             // UPSERT: INSERT nebo UPDATE reach_count
+            // POZN: VALUES() nefunguje v MariaDB 10.3+ - vrací NULL
+            // Řešení: Rolling average pomocí více parametrů
             $stmt = $pdo->prepare("
                 INSERT INTO wgs_analytics_heatmap_scroll (
                     page_url,
@@ -196,6 +440,10 @@ try {
                     reach_count,
                     viewport_width_avg,
                     viewport_height_avg,
+                    country_code,
+                    city,
+                    latitude,
+                    longitude,
                     first_reach,
                     last_reach
                 ) VALUES (
@@ -205,19 +453,27 @@ try {
                     1,
                     :viewport_width,
                     :viewport_height,
+                    :country_code,
+                    :city,
+                    :latitude,
+                    :longitude,
                     NOW(),
                     NOW()
                 )
                 ON DUPLICATE KEY UPDATE
                     reach_count = reach_count + 1,
-                    viewport_width_avg = IF(:viewport_width IS NOT NULL,
-                        (viewport_width_avg * reach_count + :viewport_width) / (reach_count + 1),
+                    viewport_width_avg = IF(:vw_check IS NOT NULL,
+                        (COALESCE(viewport_width_avg, :vw_default) * reach_count + :vw_new) / (reach_count + 1),
                         viewport_width_avg
                     ),
-                    viewport_height_avg = IF(:viewport_height IS NOT NULL,
-                        (viewport_height_avg * reach_count + :viewport_height) / (reach_count + 1),
+                    viewport_height_avg = IF(:vh_check IS NOT NULL,
+                        (COALESCE(viewport_height_avg, :vh_default) * reach_count + :vh_new) / (reach_count + 1),
                         viewport_height_avg
                     ),
+                    country_code = COALESCE(country_code, :country_code_upd),
+                    city = COALESCE(city, :city_upd),
+                    latitude = COALESCE(latitude, :latitude_upd),
+                    longitude = COALESCE(longitude, :longitude_upd),
                     last_reach = NOW()
             ");
 
@@ -226,7 +482,21 @@ try {
                 'device_type' => $deviceType,
                 'scroll_depth_bucket' => $bucket,
                 'viewport_width' => $viewportWidth,
-                'viewport_height' => $viewportHeight
+                'viewport_height' => $viewportHeight,
+                'country_code' => $countryCode,
+                'city' => $city,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'vw_check' => $viewportWidth,
+                'vw_default' => $viewportWidth,
+                'vw_new' => $viewportWidth,
+                'vh_check' => $viewportHeight,
+                'vh_default' => $viewportHeight,
+                'vh_new' => $viewportHeight,
+                'country_code_upd' => $countryCode,
+                'city_upd' => $city,
+                'latitude_upd' => $latitude,
+                'longitude_upd' => $longitude
             ]);
 
             $scrollBucketsUpdated++;
@@ -253,29 +523,33 @@ try {
         'clicks_aggregated' => $clicksAggregated,
         'scroll_buckets_updated' => $scrollBucketsUpdated,
         'page_url' => $normalizedUrl,
-        'device_type' => $deviceType
+        'device_type' => $deviceType,
+        'geo' => $geoData ? [
+            'country' => $countryCode,
+            'city' => $city
+        ] : null
     ]);
 
 } catch (PDOException $e) {
-    error_log('Track Heatmap API Error: ' . $e->getMessage());
+    $errorMsg = $e->getMessage();
+    error_log('Track Heatmap API Error: ' . $errorMsg);
     error_log('Stack trace: ' . $e->getTraceAsString());
 
-    sendJsonError('Chyba při zpracování požadavku', 500);
+    // Detekce specifických chyb pro lepší debugging
+    if (strpos($errorMsg, "doesn't exist") !== false || strpos($errorMsg, 'Base table or view not found') !== false) {
+        // Tabulka neexistuje - spusťte migraci
+        error_log('Track Heatmap: TABULKY NEEXISTUJÍ - spusťte /migrace_module6_heatmaps.php?execute=1');
+        sendJsonError('Heatmap tabulky neexistují. Spusťte migraci.', 500);
+    } else {
+        sendJsonError('Chyba při zpracování požadavku', 500);
+    }
 
 } catch (Exception $e) {
     error_log('Track Heatmap API Unexpected Error: ' . $e->getMessage());
+    error_log('Stack trace: ' . $e->getTraceAsString());
     sendJsonError('Neočekávaná chyba serveru', 500);
 }
 
-/**
- * Pomocná funkce pro sanitizaci vstupu
- */
-function sanitizeInput($input): ?string
-{
-    if ($input === null || $input === '') {
-        return null;
-    }
-
-    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-}
+// POZNÁMKA: sanitizeInput() je definována v config/config.php (loadována přes init.php)
+// NEPOUŽÍVAT lokální definici - způsobí "Cannot redeclare sanitizeInput()" fatal error!
 ?>

@@ -51,7 +51,7 @@ $pageIndex = isset($_GET['page']) ? (int)$_GET['page'] : 0;
         }
 
         h1 {
-            color: #2D5016;
+            color: #333333;
             margin-bottom: 20px;
         }
 
@@ -86,7 +86,7 @@ $pageIndex = isset($_GET['page']) ? (int)$_GET['page'] : 0;
 
         .btn {
             padding: 10px 20px;
-            background: #2D5016;
+            background: #333333;
             color: white;
             border: none;
             border-radius: 4px;
@@ -233,7 +233,7 @@ $pageIndex = isset($_GET['page']) ? (int)$_GET['page'] : 0;
             </div>
 
             <div class="speed-control">
-                <label>Rychlost:</label>
+                <label for="speed-select">Rychlost:</label>
                 <select id="speed-select">
                     <option value="0.5">0.5x</option>
                     <option value="1.0" selected>1.0x</option>
@@ -249,7 +249,7 @@ $pageIndex = isset($_GET['page']) ? (int)$_GET['page'] : 0;
         </div>
     </div>
 
-    <script src="/assets/js/replay-player.js"></script>
+    <script src="/assets/js/replay-player.min.js"></script>
     <script>
         const sessionIdFromUrl = '<?php echo htmlspecialchars($sessionId); ?>';
         const pageIndexFromUrl = <?php echo $pageIndex; ?>;

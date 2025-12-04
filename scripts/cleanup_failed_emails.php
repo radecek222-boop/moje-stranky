@@ -15,7 +15,7 @@ try {
     $tableCheck = $pdo->query("SHOW TABLES LIKE 'wgs_email_queue'");
     if ($tableCheck->rowCount() === 0) {
         echo "ℹ️  Tabulka wgs_email_queue neexistuje - není co čistit\n";
-        echo "✅ OK\n";
+        echo "OK\n";
         exit(0);
     }
 
@@ -30,7 +30,7 @@ try {
     echo "📊 Celkem selhavších emailů: {$totalFailed}\n\n";
 
     if ($totalFailed === 0) {
-        echo "✅ Žádné selhavší emaily ke smazání!\n";
+        echo "Žádné selhavší emaily ke smazání!\n";
         exit(0);
     }
 
@@ -47,7 +47,7 @@ try {
 
     if ($oldFailed === 0) {
         echo "ℹ️  Všechny selhavší emaily jsou mladší než 7 dní - ponecháváme je\n";
-        echo "✅ OK\n";
+        echo "OK\n";
         exit(0);
     }
 
@@ -60,7 +60,7 @@ try {
     $deleteStmt->execute();
     $deleted = $deleteStmt->rowCount();
 
-    echo "✅ Smazáno: {$deleted} selhavších emailů\n";
+    echo "Smazáno: {$deleted} selhavších emailů\n";
 
     // Kontrola zbývajících selhavších emailů
     $remainingStmt = $pdo->query("
@@ -76,9 +76,9 @@ try {
         echo "\n💡 TIP: Zkontrolujte SMTP nastavení pokud selhávání pokračuje\n";
     }
 
-    echo "\n✅ CLEANUP DOKONČEN!\n";
+    echo "\nCLEANUP DOKONČEN!\n";
 
 } catch (Exception $e) {
-    echo "❌ KRITICKÁ CHYBA: " . $e->getMessage() . "\n";
+    echo "KRITICKÁ CHYBA: " . $e->getMessage() . "\n";
     exit(1);
 }

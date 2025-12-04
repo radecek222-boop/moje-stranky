@@ -28,6 +28,8 @@
     RewriteCond %{DOCUMENT_ROOT}/%1 !-d
     # ✅ FIX: Exclude photocustomer.php from redirect (needs to maintain session)
     RewriteCond %{REQUEST_URI} !^/photocustomer\.php$ [NC]
+    # ✅ FIX: Exclude sw.php - Service Workers CANNOT be redirected
+    RewriteCond %{REQUEST_URI} !^/sw\.php$ [NC]
     RewriteRule ^(.+)\.php$ /$1 [R=301,L]
 
     # Serve .php files for extensionless URLs
@@ -55,7 +57,9 @@
     Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 
     # Content Security Policy (CSP)
-    Header always set Content-Security-Policy "default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https:; frame-ancestors 'self'; base-uri 'self'; form-action 'self';"
+    # Synchronizováno se security_headers.php (Step 107)
+    # media-src blob: pro hlasove poznamky, frame-src/worker-src blob: pro PDF preview
+    Header always set Content-Security-Policy "default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: blob: https: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https://api.geoapify.com https://maps.geoapify.com https://fonts.googleapis.com https://fonts.gstatic.com https://router.project-osrm.org https://tile.openstreetmap.org https://*.tile.openstreetmap.org; media-src 'self' blob:; frame-src 'self' blob:; worker-src 'self' blob:; frame-ancestors 'self'; base-uri 'self'; form-action 'self';"
 
     # Cross-Origin Opener Policy (COOP)
     Header always set Cross-Origin-Opener-Policy "same-origin"
@@ -76,7 +80,8 @@
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
 
     # Permissions Policy
-    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    # microphone=(self), camera=(self) - povoleno pro hlasové poznámky a fotky
+    Header always set Permissions-Policy "geolocation=(), microphone=(self), camera=(self)"
 
     # Remove Server signature
     Header unset Server
@@ -104,10 +109,24 @@
     ExpiresByType font/otf "access plus 1 year"
     ExpiresByType text/html "access plus 1 hour"
     ExpiresByType application/manifest+json "access plus 1 week"
+    ExpiresByType application/json "access plus 1 year"
 </IfModule>
 
 # PERFORMANCE FIX: Explicitní Cache-Control pro statické assety
 <IfModule mod_headers.c>
+    # ======================================
+    # PWA CRITICAL: Service Worker NESMÍ být cachován
+    # ======================================
+    <FilesMatch "^sw\.(js|php)$">
+        Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+    </FilesMatch>
+
+    # PWA Manifest - krátký cache (1 hodina) pro rychlejší aktualizace
+    <FilesMatch "^manifest\.json$">
+        Header set Cache-Control "public, max-age=3600"
+    </FilesMatch>
+
     # CSS a JS soubory - cache na 1 rok (s version query string pro invalidaci)
     <FilesMatch "\.(css|js)$">
         Header set Cache-Control "public, max-age=31536000, immutable"
@@ -120,6 +139,11 @@
 
     # Fonty - cache na 1 rok
     <FilesMatch "\.(woff|woff2|ttf|otf|eot)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # Source maps - cache na 1 rok (pro debugování produkce)
+    <FilesMatch "\.map$">
         Header set Cache-Control "public, max-age=31536000, immutable"
     </FilesMatch>
 </IfModule>

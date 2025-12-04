@@ -121,7 +121,7 @@ switch ($action) {
 
                     $executeResult = [
                         'success' => true,
-                        'message' => '✅ PHPMailer byl úspěšně nainstalován',
+                        'message' => 'PHPMailer byl úspěšně nainstalován',
                         'output' => $output
                     ];
                     break;

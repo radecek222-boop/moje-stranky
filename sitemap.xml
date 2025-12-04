@@ -4,55 +4,91 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-    <!-- Homepage -->
+    <!-- Homepage - hlavni stranka -->
     <url>
         <loc>https://wgs-service.cz/</loc>
-        <lastmod>2025-11-13</lastmod>
+        <lastmod>2025-11-24</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
 
-    <!-- Main pages -->
+    <!-- Hlavni stranky webu -->
     <url>
         <loc>https://wgs-service.cz/index.php</loc>
-        <lastmod>2025-11-13</lastmod>
+        <lastmod>2025-11-24</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
 
+    <!-- Cenik - DULEZITA STRANKA PRO SEO -->
+    <url>
+        <loc>https://wgs-service.cz/cenik.php</loc>
+        <lastmod>2025-11-24</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <!-- Nova reklamace / Objednat servis -->
+    <url>
+        <loc>https://wgs-service.cz/novareklamace.php</loc>
+        <lastmod>2025-11-24</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <!-- PSA Kalkulator -->
     <url>
         <loc>https://wgs-service.cz/psa-kalkulator.php</loc>
-        <lastmod>2025-11-13</lastmod>
+        <lastmod>2025-11-24</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
 
     <url>
         <loc>https://wgs-service.cz/psa.php</loc>
-        <lastmod>2025-11-13</lastmod>
+        <lastmod>2025-11-24</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
 
-    <url>
-        <loc>https://wgs-service.cz/reklamace.php</loc>
-        <lastmod>2025-11-13</lastmod>
-        <changefreq>daily</changefreq>
-        <priority>0.9</priority>
-    </url>
-
+    <!-- Seznam reklamaci -->
     <url>
         <loc>https://wgs-service.cz/seznam.php</loc>
-        <lastmod>2025-11-13</lastmod>
+        <lastmod>2025-11-24</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- Protokol -->
+    <url>
+        <loc>https://wgs-service.cz/protokol.php</loc>
+        <lastmod>2025-11-24</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- Aktuality Natuzzi - DULEZITA PRO SEO (denni obsah) -->
+    <url>
+        <loc>https://wgs-service.cz/aktuality.php</loc>
+        <lastmod>2025-11-24</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.9</priority>
     </url>
 
+    <!-- GDPR -->
     <url>
-        <loc>https://wgs-service.cz/protokol.php</loc>
-        <lastmod>2025-11-13</lastmod>
-        <changefreq>daily</changefreq>
-        <priority>0.8</priority>
+        <loc>https://wgs-service.cz/gdpr.php</loc>
+        <lastmod>2025-11-24</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.5</priority>
+    </url>
+
+    <!-- Login -->
+    <url>
+        <loc>https://wgs-service.cz/login.php</loc>
+        <lastmod>2025-11-24</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.4</priority>
     </url>
 
 </urlset>

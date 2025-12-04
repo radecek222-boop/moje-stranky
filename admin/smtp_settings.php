@@ -94,7 +94,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SMTP Nastavení | WGS Admin</title>
     <link rel="stylesheet" href="/assets/css/styles.min.css">
-    <link rel="stylesheet" href="/assets/css/admin-header.css">
+    <link rel="stylesheet" href="/assets/css/admin-header.min.css">
     <style>
         body {
             background: #f5f5f5;
@@ -181,36 +181,36 @@ try {
         <h1>⚙️ SMTP Nastavení</h1>
 
         <?php if ($message): ?>
-            <div class="alert alert-success"><?php echo htmlspecialchars($message); ?></div>
+            <div class="alert alert-success" role="status" aria-live="polite"><?php echo htmlspecialchars($message); ?></div>
         <?php endif; ?>
 
         <?php if ($error): ?>
-            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+            <div class="alert alert-danger" role="alert" aria-live="assertive"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
 
         <?php if (!$settings): ?>
-            <div class="alert alert-danger">
-                <strong>⚠️ Email queue systém není nainstalován!</strong><br>
+            <div class="alert alert-danger" role="alert">
+                <strong>Email queue systém není nainstalován!</strong><br>
                 <a href="/admin/install_email_system.php" style="color: #721c24; text-decoration: underline;">Klikněte zde pro instalaci</a>
             </div>
         <?php endif; ?>
 
         <form method="POST">
             <div class="form-group">
-                <label>SMTP Server (Host)</label>
-                <input type="text" name="smtp_host" value="<?php echo htmlspecialchars($settings['smtp_host'] ?? ''); ?>" required>
+                <label for="smtp_host">SMTP Server (Host)</label>
+                <input type="text" id="smtp_host" name="smtp_host" value="<?php echo htmlspecialchars($settings['smtp_host'] ?? ''); ?>" required>
                 <small>Např: smtp.gmail.com, smtp.seznam.cz, smtp.office365.com</small>
             </div>
 
             <div class="form-group">
-                <label>Port</label>
-                <input type="number" name="smtp_port" value="<?php echo htmlspecialchars($settings['smtp_port'] ?? '587'); ?>" required>
+                <label for="smtp_port">Port</label>
+                <input type="number" id="smtp_port" name="smtp_port" value="<?php echo htmlspecialchars($settings['smtp_port'] ?? '587'); ?>" required>
                 <small>Obvykle 587 (TLS) nebo 465 (SSL)</small>
             </div>
 
             <div class="form-group">
-                <label>Šifrování</label>
-                <select name="smtp_encryption" required>
+                <label for="smtp_encryption">Šifrování</label>
+                <select id="smtp_encryption" name="smtp_encryption" required>
                     <option value="tls" <?php echo ($settings['smtp_encryption'] ?? 'tls') === 'tls' ? 'selected' : ''; ?>>TLS (doporučeno)</option>
                     <option value="ssl" <?php echo ($settings['smtp_encryption'] ?? '') === 'ssl' ? 'selected' : ''; ?>>SSL</option>
                     <option value="none" <?php echo ($settings['smtp_encryption'] ?? '') === 'none' ? 'selected' : ''; ?>>Bez šifrování</option>
@@ -218,25 +218,25 @@ try {
             </div>
 
             <div class="form-group">
-                <label>Uživatelské jméno (Username)</label>
-                <input type="text" name="smtp_username" value="<?php echo htmlspecialchars($settings['smtp_username'] ?? ''); ?>" required>
+                <label for="smtp_username">Uživatelské jméno (Username)</label>
+                <input type="text" id="smtp_username" name="smtp_username" value="<?php echo htmlspecialchars($settings['smtp_username'] ?? ''); ?>" required>
                 <small>Obvykle vaše emailová adresa</small>
             </div>
 
             <div class="form-group">
-                <label>Heslo (Password)</label>
-                <input type="password" name="smtp_password" value="<?php echo htmlspecialchars($settings['smtp_password'] ?? ''); ?>" required>
+                <label for="smtp_password">Heslo (Password)</label>
+                <input type="password" id="smtp_password" name="smtp_password" value="<?php echo htmlspecialchars($settings['smtp_password'] ?? ''); ?>" required>
                 <small>Pro Gmail použijte "App Password"</small>
             </div>
 
             <div class="form-group">
-                <label>Odesílatel - Email</label>
-                <input type="email" name="smtp_from_email" value="<?php echo htmlspecialchars($settings['smtp_from_email'] ?? 'noreply@wgs-service.cz'); ?>" required>
+                <label for="smtp_from_email">Odesílatel - Email</label>
+                <input type="email" id="smtp_from_email" name="smtp_from_email" value="<?php echo htmlspecialchars($settings['smtp_from_email'] ?? 'noreply@wgs-service.cz'); ?>" required>
             </div>
 
             <div class="form-group">
-                <label>Odesílatel - Jméno</label>
-                <input type="text" name="smtp_from_name" value="<?php echo htmlspecialchars($settings['smtp_from_name'] ?? 'White Glove Service'); ?>" required>
+                <label for="smtp_from_name">Odesílatel - Jméno</label>
+                <input type="text" id="smtp_from_name" name="smtp_from_name" value="<?php echo htmlspecialchars($settings['smtp_from_name'] ?? 'White Glove Service'); ?>" required>
             </div>
 
             <button type="submit" name="save" class="btn btn-primary">💾 Uložit nastavení</button>
@@ -248,8 +248,8 @@ try {
             <p>Odešle testovací email pro ověření konfigurace.</p>
             <form method="POST">
                 <div class="form-group">
-                    <label>Testovací emailová adresa</label>
-                    <input type="email" name="test_email" placeholder="vas-email@example.com" required>
+                    <label for="test_email">Testovací emailová adresa</label>
+                    <input type="email" id="test_email" name="test_email" placeholder="vas-email@example.com" required>
                 </div>
                 <button type="submit" name="test" class="btn btn-success">📧 Odeslat testovací email</button>
             </form>

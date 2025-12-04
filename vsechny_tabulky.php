@@ -294,9 +294,9 @@ try {
             <h1>KOMPLETNÍ PŘEHLED VŠECH SQL TABULEK</h1>
             <p style="margin-top: 0.5rem; opacity: 0.9; font-size: 0.95rem;">Databáze: <?php echo htmlspecialchars($_ENV['DB_NAME'] ?? 'wgs-servicecz01'); ?> | Live Production Data</p>
             <div style="margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-                <button onclick="exportAllDDL()" style="padding: 0.75rem 1.5rem; background: #fff; color: #000; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">Stáhnout všechny DDL</button>
-                <button onclick="window.print()" style="padding: 0.75rem 1.5rem; background: transparent; color: #fff; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">Tisk</button>
-                <button onclick="window.location.reload()" style="padding: 0.75rem 1.5rem; background: transparent; color: #fff; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">Obnovit aktuální SQL</button>
+                <button data-action="exportAllDDL" style="padding: 0.75rem 1.5rem; background: #fff; color: #000; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">Stáhnout všechny DDL</button>
+                <button data-action="printPage" style="padding: 0.75rem 1.5rem; background: transparent; color: #fff; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">Tisk</button>
+                <button data-action="reloadPage" style="padding: 0.75rem 1.5rem; background: transparent; color: #fff; border: 2px solid #fff; cursor: pointer; font-family: Poppins; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em;">Obnovit aktuální SQL</button>
             </div>
         </div>
 
@@ -317,7 +317,7 @@ try {
                         Chyba: <?php echo htmlspecialchars($chyba['chyba']); ?>
                     </p>
                     <?php if (strpos($chyba['nazev'], 'provize') !== false): ?>
-                    <a href="oprav_view_provize.php" target="_blank" style="display: inline-block; margin-top: 0.5rem; padding: 0.5rem 1rem; background: #92400e; color: #fff; text-decoration: none; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; border-radius: 3px;">
+                    <a href="oprav_view_provize.php" target="_blank" rel="noopener" style="display: inline-block; margin-top: 0.5rem; padding: 0.5rem 1rem; background: #92400e; color: #fff; text-decoration: none; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; border-radius: 3px;">
                         Opravit VIEW
                     </a>
                     <?php endif; ?>
@@ -360,6 +360,19 @@ try {
                         </p>
                         <a href="vycisti_emailovou_frontu.php" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;">
                             Otevřít nástroj
+                        </a>
+                    </div>
+
+                    <!-- Migrace wgs_videos -->
+                    <div style="background: white; border: 2px solid #000; padding: 1.5rem;">
+                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600;">
+                            Migrace wgs_videos (jen pokud chybí)
+                        </h3>
+                        <p style="margin: 0.5rem 0; font-size: 0.85rem; color: #666;">
+                            Spusťte jen pokud tabulka není v databázi nebo potřebujete znovu založit složku uploads/videos. Na produkci už tabulka existuje.
+                        </p>
+                        <a href="migrations/2025_12_01_pridej_tabulku_wgs_videos.php" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #000; color: #fff; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;">
+                            Otevřít migraci
                         </a>
                     </div>
 
@@ -432,7 +445,15 @@ try {
                 <details style="margin: 1rem 0; border: 2px solid #ddd; padding: 1rem; border-radius: 5px;">
                     <summary style="cursor: pointer; font-weight: 600; user-select: none;">Zobrazit CREATE TABLE příkaz</summary>
                     <pre style="background: #f5f5f5; padding: 1rem; margin-top: 1rem; overflow-x: auto; border: 1px solid #ddd; border-radius: 3px; font-size: 0.85rem; line-height: 1.5;"><code><?php echo htmlspecialchars($detail['ddl']); ?></code></pre>
-                    <button onclick="navigator.clipboard.writeText(<?php echo htmlspecialchars(json_encode($detail['ddl']), ENT_QUOTES); ?>); this.textContent='Zkopírováno!'; setTimeout(() => this.textContent='Kopírovat do schránky', 2000);" style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #000; color: #fff; border: none; cursor: pointer; font-family: Poppins; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Kopírovat do schránky</button>
+                    <!-- Alpine.js: Copy-to-clipboard komponenta (Step 31) -->
+                    <button
+                        x-data="{ zkopirovan: false }"
+                        @click="navigator.clipboard.writeText($el.dataset.ddl); zkopirovan = true; setTimeout(() => zkopirovan = false, 2000)"
+                        x-text="zkopirovan ? 'Zkopírováno!' : 'Kopírovat do schránky'"
+                        :style="zkopirovan ? 'background: #333' : 'background: #000'"
+                        data-ddl="<?php echo htmlspecialchars($detail['ddl'], ENT_QUOTES); ?>"
+                        style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #000; color: #fff; border: none; cursor: pointer; font-family: Poppins; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;"
+                    >Kopírovat do schránky</button>
                 </details>
                 <?php endif; ?>
 
@@ -442,13 +463,13 @@ try {
                     <table>
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>Sloupec</th>
-                                <th>Typ</th>
-                                <th>Null</th>
-                                <th>Key</th>
-                                <th>Default</th>
-                                <th>Extra</th>
+                                <th scope="col">#</th>
+                                <th scope="col">Sloupec</th>
+                                <th scope="col">Typ</th>
+                                <th scope="col">Null</th>
+                                <th scope="col">Key</th>
+                                <th scope="col">Default</th>
+                                <th scope="col">Extra</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -491,8 +512,8 @@ try {
                 <table>
                     <thead>
                         <tr>
-                            <th>Název indexu</th>
-                            <th>Sloupce</th>
+                            <th scope="col">Název indexu</th>
+                            <th scope="col">Sloupce</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -514,7 +535,7 @@ try {
                         <thead>
                             <tr>
                                 <?php foreach (array_keys($detail['ukazka'][0]) as $klic): ?>
-                                <th><?php echo htmlspecialchars($klic); ?></th>
+                                <th scope="col"><?php echo htmlspecialchars($klic); ?></th>
                                 <?php endforeach; ?>
                             </tr>
                         </thead>
@@ -544,6 +565,28 @@ try {
     </div>
 
     <script>
+    // Event handler pro tlačítka s data-action
+    document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('click', (e) => {
+            const button = e.target.closest('[data-action]');
+            if (!button) return;
+
+            const action = button.getAttribute('data-action');
+
+            switch (action) {
+                case 'exportAllDDL':
+                    exportAllDDL();
+                    break;
+                case 'printPage':
+                    window.print();
+                    break;
+                case 'reloadPage':
+                    window.location.reload();
+                    break;
+            }
+        });
+    });
+
     // Export všech DDL do jednoho SQL souboru
     function exportAllDDL() {
         const allDDL = <?php echo json_encode(array_map(function($t) {

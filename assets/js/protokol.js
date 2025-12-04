@@ -5,13 +5,13 @@
         const data = await response.json();
 
         if (!data.logged_in) {
-            alert(t('please_log_in'));
+            wgsToast.error(t('please_log_in'));
             window.location.href = "login.php";
             return;
         }
 
         if (data.role === "prodejce") {
-            alert(t('page_for_techs_admins_only'));
+            wgsToast.error(t('page_for_techs_admins_only'));
             window.location.href = "seznam.php";
         }
     } catch (err) {
@@ -20,58 +20,74 @@
 })();
 
 // === HAMBURGER MENU ===
-function toggleMenu() {
-  const navMenu = document.getElementById('navMenu');
-  const hamburger = document.querySelector('.hamburger');
+// REMOVED: Mrtvý kód - menu je nyní centrálně v hamburger-menu.php
 
-  const isActive = navMenu.classList.contains('active');
+// === DEBOUNCE FALLBACK ===
+// Fallback pokud utils.js není načten
+if (typeof debounce === 'undefined') {
+  window.debounce = function(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  };
+}
 
-  if (!isActive) {
-    // ✅ Otevírání - zamknout scroll (iOS fix)
-    window.menuScrollPosition = window.pageYOffset;
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${window.menuScrollPosition}px`;
-    document.body.style.width = '100%';
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    navMenu.classList.add('active');
-    hamburger.classList.add('active');
-  } else {
-    // ✅ Zavírání - obnovit scroll
-    navMenu.classList.remove('active');
-    hamburger.classList.remove('active');
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    document.body.style.left = '';
-    document.body.style.right = '';
-    window.scrollTo(0, window.menuScrollPosition);
+// === KONTROLA PDF KNIHOVEN ===
+async function zkontrolujPdfKnihovny() {
+  const maxPokusy = 50; // Max 5 sekund (50 * 100ms)
+  let pokusy = 0;
+
+  // Cekej na jsPDF
+  while ((!window.jspdf || !window.jspdf.jsPDF) && pokusy < maxPokusy) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    pokusy++;
   }
+
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    throw new Error('jsPDF knihovna se nepodařila načíst. Zkuste obnovit stránku (F5).');
+  }
+
+  // Cekej na html2canvas
+  pokusy = 0;
+  while (typeof html2canvas === 'undefined' && pokusy < maxPokusy) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    pokusy++;
+  }
+
+  if (typeof html2canvas === 'undefined') {
+    throw new Error('html2canvas knihovna se nepodařila načíst. Zkuste obnovit stránku (F5).');
+  }
+
+  return true;
 }
 
 // === NOTIFIKACE ===
 function showNotification(message, type = 'info') {
   const notification = document.getElementById('notif');
   if (!notification) {
-    console.warn('Notification element not found, falling back to console');
-    console.log(`[${type.toUpperCase()}] ${message}`);
     return;
   }
 
   notification.textContent = message;
   notification.className = `notif ${type}`;
-  notification.style.display = 'block';
+  notification.classList.remove('hidden');
   notification.style.opacity = '1';
 
-  // ✅ Tap-to-dismiss (iOS touch feedback)
+  // Tap-to-dismiss (iOS touch feedback)
   const skryjNotifikaci = () => {
     notification.style.opacity = '0';
     setTimeout(() => {
-      notification.style.display = 'none';
+      notification.classList.add('hidden');
     }, 300);
   };
 
-  // ✅ Click pro okamžité zavření
+  // Click pro okamžité zavření
   notification.onclick = skryjNotifikaci;
 
   // Auto-hide po 3 sekundách (kromě error)
@@ -83,101 +99,76 @@ function showNotification(message, type = 'info') {
   }
 }
 
-// Zavřít menu při kliknutí na odkaz
-document.addEventListener('DOMContentLoaded', () => {
-  const navLinks = document.querySelectorAll('.nav a');
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      const nav = document.getElementById('navMenu');
-      const hamburger = document.querySelector('.hamburger');
-      nav.classList.remove('active');
-      hamburger.classList.remove('active');
-
-      // ✅ Obnovit scroll při zavření menu (iOS fix)
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      if (typeof window.menuScrollPosition !== 'undefined') {
-        window.scrollTo(0, window.menuScrollPosition);
-      }
-    });
-  });
-});
+// REMOVED: Mrtvý kód pro zavírání menu - řešeno centrálně v hamburger-menu.php
 
 let signaturePad;
 let attachedPhotos = [];
 let currentReklamaceId = null;
 let currentReklamace = null;
+window.kalkulaceData = null; // Data kalkulace z databáze pro PDF (globální scope)
 
 // PDF preview kontext
 let pdfPreviewContext = null; // 'export' nebo 'send'
 let cachedPdfDoc = null; // uložený jsPDF document
 let cachedPdfBase64 = null; // uložený base64 pro odeslání
 
-async function fetchCsrfToken() {
-  if (typeof getCSRFToken === 'function') {
-    try {
-      const token = await getCSRFToken();
-      if (token) {
-        return token;
-      }
-    } catch (err) {
-      logger?.warn?.('CSRF token z getCSRFToken selhal:', err);
-    }
-  }
-
-  if (typeof getCSRFTokenFromMeta === 'function') {
-    const metaToken = getCSRFTokenFromMeta();
-    if (metaToken) {
-      return metaToken;
-    }
-  }
-
-  const fallbackMeta = document.querySelector('meta[name="csrf-token"]');
-  if (fallbackMeta) {
-    const token = fallbackMeta.getAttribute('content');
-    if (token) {
-      window.csrfTokenCache = token;
-      return token;
-    }
-  }
-
-  throw new Error('CSRF token není k dispozici. Obnovte stránku a zkuste to znovu.');
-}
+// fetchCsrfToken přesunuto do utils.js (Step 106)
+// Funkce je dostupná jako window.fetchCsrfToken() nebo Utils.fetchCsrfToken()
 
 window.addEventListener("DOMContentLoaded", async () => {
-  logger.log('🚀 Inicializace protokolu...');
+  logger.log('[Start] Inicializace protokolu...');
   initSignaturePad();
 
   const urlParams = new URLSearchParams(window.location.search);
   currentReklamaceId = urlParams.get('id');
 
-  logger.log('📋 ID z URL:', currentReklamaceId);
+  logger.log('[List] ID z URL:', currentReklamaceId);
 
   if (currentReklamaceId) {
-    logger.log('✅ ID nalezeno v URL');
+    logger.log('ID nalezeno v URL');
     await loadReklamace(currentReklamaceId);
     loadPhotosFromDatabase(currentReklamaceId);
+    loadKalkulaceFromDatabase(currentReklamaceId);
   } else {
-    logger.warn('⚠️ Chybí ID v URL - zkusím načíst z localStorage');
+    logger.warn('Chybí ID v URL - zkusím načíst z localStorage');
     await loadReklamace(null);
 
     if (currentReklamace && currentReklamace.id) {
-      logger.log('✅ ID nalezeno v načtených datech:', currentReklamace.id);
+      logger.log('ID nalezeno v načtených datech:', currentReklamace.id);
       currentReklamaceId = currentReklamace.id;
       loadPhotosFromDatabase(currentReklamaceId);
+      loadKalkulaceFromDatabase(currentReklamaceId);
     } else {
-      logger.error('❌ ID se nepodařilo najít!');
+      logger.error('ID se nepodařilo najít!');
     }
   }
 
   const today = new Date().toISOString().split('T')[0];
   document.getElementById("sign-date").value = today;
-  document.getElementById("visit-date").value = today;
 
   setupAutoTranslate();
+  setupTextareaAutoResize();
+
+  // Spustit resize po nacteni dat s malym zpozdenim
+  setTimeout(() => {
+    if (window.triggerTextareaResize) {
+      window.triggerTextareaResize();
+    }
+  }, 300);
+
+  // Propojení polí Vyřešeno? a Nutné vyjádření prodejce
+  const solvedSelect = document.getElementById("solved");
+  const dealerSelect = document.getElementById("dealer");
+
+  if (solvedSelect && dealerSelect) {
+    solvedSelect.addEventListener("change", () => {
+      if (solvedSelect.value === "ANO") {
+        dealerSelect.value = "NE";
+      } else if (solvedSelect.value === "NE") {
+        dealerSelect.value = "ANO";
+      }
+    });
+  }
 });
 
 function setupAutoTranslate() {
@@ -193,9 +184,67 @@ function setupAutoTranslate() {
         if (czField.value.trim().length > 5) {
           translateField(field, true);
         }
-      }, 2500); // ✅ Zvýšeno z 1500ms - prevence lagování na pomalejších mobilech
+      }, 2500); // Zvýšeno z 1500ms - prevence lagování na pomalejších mobilech
     });
   });
+}
+
+/**
+ * Auto-resize textareas podle obsahu
+ * Zajistuje, ze se textarea automaticky zvetsuje podle delky textu
+ * Dulezite pro PDF export - text nebude orezan
+ */
+function setupTextareaAutoResize() {
+  const textareas = document.querySelectorAll('.split-section textarea');
+
+  function autoResize(textarea) {
+    // Ulozit puvodni hodnotu
+    const minHeight = parseInt(window.getComputedStyle(textarea).minHeight) || 60;
+
+    // Reset vysky pro spravny vypocet scrollHeight
+    textarea.style.height = 'auto';
+
+    // Nastavit novou vysku podle obsahu (minimalne minHeight)
+    const newHeight = Math.max(textarea.scrollHeight, minHeight);
+    textarea.style.height = newHeight + 'px';
+  }
+
+  textareas.forEach(textarea => {
+    // Auto-resize pri psani
+    textarea.addEventListener('input', () => autoResize(textarea));
+
+    // Auto-resize pri nacteni obsahu (pro predvyplnena data)
+    textarea.addEventListener('change', () => autoResize(textarea));
+
+    // Pocatecni resize pokud uz je obsah
+    if (textarea.value.trim().length > 0) {
+      // Maly delay pro zajisteni spravneho renderingu
+      setTimeout(() => autoResize(textarea), 100);
+    }
+  });
+
+  // Resize pri zmene orientace obrazovky (mobil)
+  window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+      textareas.forEach(textarea => autoResize(textarea));
+    }, 200);
+  });
+
+  // Resize pri zmene velikosti okna
+  window.addEventListener('resize', () => {
+    textareas.forEach(textarea => autoResize(textarea));
+  });
+
+  logger.log('[AutoResize] Textarea auto-resize aktivovan pro', textareas.length, 'poli');
+
+  // Globalni funkce pro manualni spusteni resize (volana po nacteni dat)
+  window.triggerTextareaResize = function() {
+    textareas.forEach(textarea => {
+      if (textarea.value.trim().length > 0) {
+        autoResize(textarea);
+      }
+    });
+  };
 }
 
 function initSignaturePad() {
@@ -210,17 +259,20 @@ function initSignaturePad() {
     canvas.height = cssHeight * ratio;
     canvas.getContext("2d").scale(ratio, ratio);
   };
-  window.addEventListener("resize", resize, { passive: true }); // ✅ PŘIDÁNO passive
+  window.addEventListener("resize", resize, { passive: true }); // PŘIDÁNO passive
   resize();
   signaturePad = new SignaturePad(canvas, {
     minWidth: 1,
     maxWidth: 2.5,
     penColor: "black",
     backgroundColor: "white",
-    throttle: 8,               // ✅ PŘIDÁNO - throttle pro lepší performance
-    velocityFilterWeight: 0.5, // ✅ PŘIDÁNO - hladší linie
-    minDistance: 2             // ✅ PŘIDÁNO - méně bodů = méně laguje
+    throttle: 8,               // PŘIDÁNO - throttle pro lepší performance
+    velocityFilterWeight: 0.5, // PŘIDÁNO - hladší linie
+    minDistance: 2             // PŘIDÁNO - méně bodů = méně laguje
   });
+
+  // Export do window pro globální funkci clearSignaturePad() (Step 110)
+  window.signaturePad = signaturePad;
 }
 
 async function loadPhotosFromDatabase(customerId) {
@@ -233,20 +285,20 @@ async function loadPhotosFromDatabase(customerId) {
     logger.log('═══════════════════════════════════════');
     logger.log('🖼️ NAČÍTÁM FOTKY Z DATABÁZE');
     logger.log('═══════════════════════════════════════');
-    logger.log('🔑 customerId:', customerId);
+    logger.log('customerId:', customerId);
 
     // Načíst z API
     const response = await fetch(`api/get_photos_api.php?reklamace_id=${customerId}`);
     const data = await response.json();
 
     if (!data.success || data.total_photos === 0) {
-      logger.log('❌ Fotky nenalezeny v databázi');
+      logger.log('Fotky nenalezeny v databázi');
       showNotif("warning", "Nebyly nalezeny fotky");
       logger.log('═══════════════════════════════════════');
       return;
     }
 
-    logger.log('✅ Fotky načteny z databáze!');
+    logger.log('Fotky načteny z databáze!');
     const sections = data.sections;
 
     logger.log('📦 Sekce:', Object.keys(sections));
@@ -287,23 +339,69 @@ async function loadPhotosFromDatabase(customerId) {
       });
     });
 
-    logger.log(`📊 CELKEM: ${totalPhotos} fotek, ${totalVideos} videí`);
+    logger.log(`[Stats] CELKEM: ${totalPhotos} fotek, ${totalVideos} videí`);
 
     if (attachedPhotos.length > 0) {
       const previewPhotos = attachedPhotos.map(p => typeof p === 'string' ? p : p.data);
       renderPhotoPreview(previewPhotos);
-      showNotif("success", `✓ Načteno ${totalPhotos} fotek`);
-      logger.log('✅ Fotky úspěšně načteny s popisky');
+      showNotif("success", `Načteno ${totalPhotos} fotek`);
+      logger.log('Fotky úspěšně načteny s popisky');
     } else {
-      logger.log('⚠️ Žádné fotky k zobrazení');
+      logger.log('Žádné fotky k zobrazení');
       showNotif("info", "Žádné fotky");
     }
 
     logger.log('═══════════════════════════════════════');
 
   } catch (error) {
-    logger.error('❌ Chyba při načítání fotek:', error);
+    logger.error('Chyba při načítání fotek:', error);
     showNotif("error", "Chyba načítání fotek");
+  }
+}
+
+async function loadKalkulaceFromDatabase(customerId) {
+  try {
+    if (!customerId) {
+      logger.warn('ID zákazníka nenalezeno - kalkulace nebude načtena');
+      return;
+    }
+
+    logger.log('═══════════════════════════════════════');
+    logger.log('💶 NAČÍTÁM KALKULACI Z DATABÁZE');
+    logger.log('═══════════════════════════════════════');
+    logger.log('customerId:', customerId);
+
+    // Načíst z API
+    const response = await fetch(`api/get_kalkulace_api.php?reklamace_id=${customerId}`);
+    const data = await response.json();
+
+    if (!data.success) {
+      logger.log('Kalkulace nenalezena v databázi:', data.error);
+      logger.log('═══════════════════════════════════════');
+      return;
+    }
+
+    if (!data.has_kalkulace) {
+      logger.log('ℹ️ Kalkulace nebyla vytvořena pro tuto reklamaci');
+      logger.log('═══════════════════════════════════════');
+      return;
+    }
+
+    logger.log('Kalkulace načtena z databáze!');
+    kalkulaceData = data.kalkulace;
+
+    logger.log('📦 Kalkulace data:', kalkulaceData);
+    logger.log('💰 Celková cena:', kalkulaceData.celkovaCena, '€');
+    logger.log('[Loc] Adresa:', kalkulaceData.adresa);
+    logger.log('📏 Vzdálenost:', kalkulaceData.vzdalenost, 'km');
+    logger.log('═══════════════════════════════════════');
+
+    // Zobrazit notifikaci
+    showNotif("success", `Kalkulace načtena (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
+
+  } catch (error) {
+    logger.error('Chyba při načítání kalkulace:', error);
+    showNotif("error", "Chyba načítání kalkulace");
   }
 }
 
@@ -311,19 +409,19 @@ async function loadReklamace(id) {
   showLoading(true);
 
   try {
-    logger.log('🔍 Načítám data zákazníka...');
-    logger.log('📋 ID z URL:', id);
+    logger.log('Načítám data zákazníka...');
+    logger.log('[List] ID z URL:', id);
 
     const localData = localStorage.getItem('currentCustomer');
 
     if (localData) {
-      logger.log('✅ Data nalezena v localStorage');
+      logger.log('Data nalezena v localStorage');
       const customer = JSON.parse(localData);
       logger.log('📦 Data zákazníka:', customer);
 
-      // ✅ KONTROLA OPRÁVNĚNÍ
+      // KONTROLA OPRÁVNĚNÍ
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-      logger.log('👤 Aktuální uživatel:', currentUser.name, '| Role:', currentUser.role);
+      logger.log('[User] Aktuální uživatel:', currentUser.name, '| Role:', currentUser.role);
 
       if (currentUser.role === 'prodejce') {
         // Prodejce může vidět jen své zakázky
@@ -335,7 +433,7 @@ async function loadReklamace(id) {
         }
       }
       // Admin a technik vidí všechny zakázky - bez kontroly
-      logger.log('✅ Oprávnění potvrzeno');
+      logger.log('Oprávnění potvrzeno');
 
       const customerName = customer.jmeno || customer.zakaznik || '';
       let ulice = '', mesto = '', psc = '';
@@ -345,15 +443,15 @@ async function loadReklamace(id) {
         ulice = parts[0] || '';
         mesto = parts[1] || '';
         psc = parts[2] || '';
-        logger.log('📍 Adresa (nový formát):', { ulice, mesto, psc });
+        logger.log('[Loc] Adresa (nový formát):', { ulice, mesto, psc });
       } else {
         ulice = customer.ulice || '';
         mesto = customer.mesto || '';
         psc = customer.psc || '';
-        logger.log('📍 Adresa (starý formát):', { ulice, mesto, psc });
+        logger.log('[Loc] Adresa (starý formát):', { ulice, mesto, psc });
       }
 
-      logger.log('📝 Vyplňuji formulář...');
+      logger.log('[Edit] Vyplňuji formulář...');
       document.getElementById("order-number").value = customer.reklamace_id || "";
       document.getElementById("claim-number").value = customer.cislo || "";
       document.getElementById("customer").value = customerName;
@@ -367,13 +465,13 @@ async function loadReklamace(id) {
       currentReklamace = customer;
       currentReklamaceId = customer.reklamace_id || customer.cislo || customer.id;
 
-      logger.log('✅ Data zákazníka úspěšně načtena a vyplněna');
-      showNotif("success", "✓ Data načtena");
+      logger.log('Data zákazníka úspěšně načtena a vyplněna');
+      showNotif("success", "Data načtena");
       showLoading(false);
       return;
     }
 
-    logger.warn('⚠️ Data v localStorage nenalezena');
+    logger.warn('Data v localStorage nenalezena');
 
     if (!id) {
       showNotif("error", "Chybí ID reklamace");
@@ -395,10 +493,10 @@ async function loadReklamace(id) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      logger.error('❌ Load reklamace error:', response.status, errorText);
+      logger.error('Load reklamace error:', response.status, errorText);
       try {
         const errorJson = JSON.parse(errorText);
-        logger.error('❌ Load error detail:', errorJson);
+        logger.error('Load error detail:', errorJson);
         throw new Error(errorJson.error || errorJson.message || `Server error ${response.status}`);
       } catch (parseErr) {
         throw new Error(`Server error ${response.status}: ${errorText.substring(0, 200)}`);
@@ -408,7 +506,7 @@ async function loadReklamace(id) {
     const result = await response.json();
 
     if (result.status === 'success') {
-      logger.log('✅ Data načtena z API');
+      logger.log('Data načtena z API');
       currentReklamace = result.reklamace;
 
       const customerName = currentReklamace.jmeno || currentReklamace.zakaznik || '';
@@ -439,7 +537,7 @@ async function loadReklamace(id) {
       showNotif("error", result.message || "Reklamace nenalezena");
     }
   } catch (error) {
-    logger.error('❌ Chyba načítání:', error);
+    logger.error('Chyba načítání:', error);
     showNotif("error", "Chyba načítání");
   } finally {
     showLoading(false);
@@ -454,10 +552,15 @@ function showLoadingWithMessage(show, message = 'Načítání...') {
   const overlay = document.getElementById("loadingOverlay");
   const textElement = document.getElementById("loadingText");
 
-  overlay.classList.toggle("show", show);
-
-  if (textElement && show) {
-    textElement.textContent = message;
+  if (show) {
+    // Odebrat inline style (z EMERGENCY DIAGNOSTIC) aby CSS fungoval
+    overlay.style.display = '';
+    overlay.classList.add("show");
+    if (textElement) {
+      textElement.textContent = message;
+    }
+  } else {
+    overlay.classList.remove("show");
   }
 }
 
@@ -469,22 +572,13 @@ function showNotif(type, message) {
   setTimeout(() => notif.classList.remove("show"), 3000);
 }
 
-function updateTotal() {
-  const work = parseFloat(document.getElementById("price-work").value) || 0;
-  const material = parseFloat(document.getElementById("price-material").value) || 0;
-  const second = parseFloat(document.getElementById("price-second").value) || 0;
-  const transport = parseFloat(document.getElementById("price-transport").value) || 0;
-  const total = work + material + second + transport;
-  document.getElementById("price-total").value = total.toFixed(2);
-}
-
 async function attachPhotos() {
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "image/*";
   input.multiple = true;
   input.capture = "environment";
-  input.style.display = "none";
+  input.classList.add("hidden");
   document.body.appendChild(input);
   input.onchange = async (e) => {
     const files = Array.from(e.target.files || []);
@@ -529,7 +623,12 @@ function loadImage(src) {
   });
 }
 
+// Step 134: Use centralized toBase64 from utils.js if available
 function toBase64(blob) {
+  if (window.Utils && window.Utils.toBase64) {
+    return window.Utils.toBase64(blob);
+  }
+  // Fallback
   return new Promise((r, j) => {
     const fr = new FileReader();
     fr.onload = () => r(fr.result);
@@ -550,14 +649,14 @@ function renderPhotoPreview(arr) {
   arr.forEach(src => {
     const photoData = typeof src === 'string' ? src : src.data;
 
-    // ✅ Wrapper pro touch feedback (scale 0.95 on :active)
+    // Wrapper pro touch feedback (scale 0.95 on :active)
     const wrapper = document.createElement("div");
     wrapper.className = "photo-thumb-wrapper";
 
     const img = document.createElement("img");
     img.src = photoData;
 
-    // ✅ Event delegation místo inline onclick
+    // Event delegation místo inline onclick
     wrapper.addEventListener('click', () => {
       window.open(photoData, "_blank");
     });
@@ -568,12 +667,15 @@ function renderPhotoPreview(arr) {
 }
 
 async function generateProtocolPDF() {
+  // Kontrola dostupnosti PDF knihoven (jsPDF + html2canvas)
+  await zkontrolujPdfKnihovny();
+
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF("p", "mm", "a4");
 
   const wrapper = document.querySelector(".wrapper");
 
-  logger.log('📄 Vytvářím desktop clone pro PDF generování...');
+  logger.log('[Doc] Vytvářím desktop clone pro PDF generování...');
 
   // ❗ CLONE APPROACH: Vytvoření skrytého desktop wrapper mimo viewport
   // Tento přístup zajistí identický PDF na mobilu i desktopu
@@ -584,43 +686,75 @@ async function generateProtocolPDF() {
   // Přidat clone do DOM (mimo viewport, neviditelný)
   document.body.appendChild(clone);
 
-  // ✅ FIX: Odstranit interaktivní prvky z PDF (tlačítka, akce)
+  // FIX: Odstranit interaktivní prvky z PDF (tlačítka, akce)
   // Odstranit celý kontejner signature-actions (tlačítko + label)
   const signatureActions = clone.querySelector('.signature-actions');
   if (signatureActions) {
     signatureActions.remove();
-    logger.log('✅ Signature actions (tlačítko "Vymazat podpis" + label) odstraněny z PDF');
+    logger.log('Signature actions (tlačítko "Vymazat podpis" + label) odstraněny z PDF');
+  }
+
+  // Odstranit tlacitko "Podepsat protokol"
+  const btnPodepsatProtokol = clone.querySelector('.btn-podepsat-protokol');
+  if (btnPodepsatProtokol) {
+    btnPodepsatProtokol.remove();
+    logger.log('Tlacitko "Podepsat protokol" odstraneno z PDF');
   }
 
   // Odstranit dolní tlačítka (Export, Odeslat, Zpět)
   const btnsContainer = clone.querySelector('.btns');
   if (btnsContainer) {
     btnsContainer.remove();
-    logger.log('✅ Dolní tlačítka odstraněna z PDF');
+    logger.log('Dolní tlačítka odstraněna z PDF');
   }
 
   // Odstranit photoPreviewContainer pokud existuje
   const photoPreview = clone.querySelector('#photoPreviewContainer');
   if (photoPreview) {
     photoPreview.remove();
-    logger.log('✅ Photo preview odstraněn z PDF (fotky jsou v samostatné sekci)');
+    logger.log('Photo preview odstraněn z PDF (fotky jsou v samostatné sekci)');
   }
 
   // Odstranit šipku u rozbalovací hlavičky (není interaktivní v PDF)
   const customerInfoArrow = clone.querySelector('.customer-info-arrow');
   if (customerInfoArrow) {
     customerInfoArrow.remove();
-    logger.log('✅ Šipka u zákaznické hlavičky odstraněna z PDF');
+    logger.log('Šipka u zákaznické hlavičky odstraněna z PDF');
   }
 
   // Ujistit se, že customer-info-content je viditelný (není skrytý)
   const customerInfoContent = clone.querySelector('.customer-info-content');
   if (customerInfoContent) {
-    customerInfoContent.style.display = 'block';
+    customerInfoContent.classList.remove('hidden');
     customerInfoContent.style.maxHeight = 'none';
     customerInfoContent.style.overflow = 'visible';
-    logger.log('✅ Zákaznický obsah nastaven jako viditelný v PDF');
+    logger.log('Zákaznický obsah nastaven jako viditelný v PDF');
   }
+
+  // Zkopírovat hodnoty a vysky textarea do clone
+  const originalTextareas = wrapper.querySelectorAll('textarea');
+  const cloneTextareas = clone.querySelectorAll('textarea');
+  originalTextareas.forEach((original, index) => {
+    if (cloneTextareas[index]) {
+      cloneTextareas[index].value = original.value;
+      // Zkopirovat vysku (dulezite pro auto-resize)
+      if (original.style.height) {
+        cloneTextareas[index].style.height = original.style.height;
+      }
+      // Nastavit min-height podle obsahu
+      cloneTextareas[index].style.minHeight = original.scrollHeight + 'px';
+    }
+  });
+  logger.log('Textarea hodnoty a vysky zkopirovany do clone');
+
+  // Zkopírovat hodnoty input a select do clone
+  const originalInputs = wrapper.querySelectorAll('input, select');
+  const cloneInputs = clone.querySelectorAll('input, select');
+  originalInputs.forEach((original, index) => {
+    if (cloneInputs[index]) {
+      cloneInputs[index].value = original.value;
+    }
+  });
 
   // Zkopírovat signature pad canvas obsah do clone
   const originalCanvas = wrapper.querySelector('#signature-pad');
@@ -629,16 +763,16 @@ async function generateProtocolPDF() {
     try {
       const ctx = cloneCanvas.getContext('2d');
       ctx.drawImage(originalCanvas, 0, 0);
-      logger.log('✅ Signature pad zkopírován do clone');
+      logger.log('Signature pad zkopírován do clone');
     } catch (e) {
-      logger.warn('⚠️ Nepodařilo se zkopírovat signature pad:', e);
+      logger.warn('Nepodařilo se zkopírovat signature pad:', e);
     }
   }
 
   // Počkat na reflow clone (desktop layout se aplikuje)
   await new Promise(resolve => setTimeout(resolve, 150));
 
-  logger.log('📸 Renderuji clone pomocí html2canvas...');
+  logger.log('[Photo] Renderuji clone pomocí html2canvas...');
 
   const canvas = await html2canvas(clone, {
     scale: 3,
@@ -676,13 +810,16 @@ async function generateProtocolPDF() {
 
   // ❗ Odstranit clone z DOM
   document.body.removeChild(clone);
-  logger.log('✅ Clone odstraněn, PDF vygenerováno');
+  logger.log('Clone odstraněn, PDF vygenerováno');
 
   return doc;
 }
 
 async function generatePhotosPDF() {
   if (!attachedPhotos.length) return null;
+
+  // Kontrola dostupnosti PDF knihoven
+  await zkontrolujPdfKnihovny();
 
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF("p", "mm", "a4");
@@ -702,7 +839,7 @@ async function generatePhotosPDF() {
   const cellWidth = availableWidth / cols;
   const cellHeight = availableHeight / rows;
 
-  logger.log(`📄 Vytvářím PDF: ${attachedPhotos.length} fotek, ${Math.ceil(attachedPhotos.length / photosPerPage)} stránek`);
+  logger.log(`[Doc] Vytvářím PDF: ${attachedPhotos.length} fotek, ${Math.ceil(attachedPhotos.length / photosPerPage)} stránek`);
 
   for (let i = 0; i < attachedPhotos.length; i++) {
     const photo = attachedPhotos[i];
@@ -712,7 +849,7 @@ async function generatePhotosPDF() {
 
     if (i > 0 && i % photosPerPage === 0) {
       pdf.addPage();
-      logger.log(`📄 Přidána nová stránka (fotka ${i + 1})`);
+      logger.log(`[Doc] Přidána nová stránka (fotka ${i + 1})`);
     }
 
     const indexOnPage = i % photosPerPage;
@@ -721,14 +858,6 @@ async function generatePhotosPDF() {
 
     const x = margin + (col * (cellWidth + gap));
     const y = margin + (row * (cellHeight + gap));
-
-    // Text VŽDY nahoře vlevo na horní hraně fotky
-    if (photoLabel) {
-      pdf.setFontSize(8);
-      pdf.setFont('helvetica', 'bold');
-      pdf.setTextColor(0, 0, 0);
-      pdf.text(photoLabel, x + 1, y + 3);
-    }
 
     const photoY = y + labelHeight;
     const maxPhotoWidth = cellWidth;
@@ -762,17 +891,212 @@ async function generatePhotosPDF() {
       const offsetX = (maxPhotoWidth - finalWidth) / 2;
       const offsetY = (maxPhotoHeight - finalHeight) / 2;
 
+      // Label přesně nad fotkou (ne nad buňkou)
+      if (photoLabel) {
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(photoLabel, x + offsetX, photoY + offsetY - 2);
+      }
+
       pdf.addImage(photoData, "JPEG", x + offsetX, photoY + offsetY, finalWidth, finalHeight, undefined, 'MEDIUM');
 
-      logger.log(`  📸 Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel || 'bez popisku'} (${imgWidth}x${imgHeight} → ${Math.round(finalWidth)}x${Math.round(finalHeight)}mm)`);
+      logger.log(`  [Photo] Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel || 'bez popisku'} (${imgWidth}x${imgHeight} → ${Math.round(finalWidth)}x${Math.round(finalHeight)}mm)`);
 
     } catch (err) {
-      logger.warn(`⚠️ Nelze detekovat velikost fotky ${i + 1}, používám celou buňku`);
+      logger.warn(`Nelze detekovat velikost fotky ${i + 1}, používám celou buňku`);
+
+      // Fallback: label ve středu buňky
+      if (photoLabel) {
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(photoLabel, x, photoY - 2);
+      }
+
       pdf.addImage(photoData, "JPEG", x, photoY, maxPhotoWidth, maxPhotoHeight, undefined, 'MEDIUM');
     }
   }
 
-  logger.log(`✅ PDF s fotkami vytvořeno (${attachedPhotos.length} fotek s popisky)`);
+  logger.log(`PDF s fotkami vytvořeno (${attachedPhotos.length} fotek s popisky)`);
+
+  return pdf;
+}
+
+async function generatePricelistPDF() {
+  if (!kalkulaceData) {
+    logger.log('Kalkulace neexistuje - PRICELIST PDF nebude vygenerovano');
+    return null;
+  }
+
+  logger.log('Generuji PDF PRICELIST...');
+
+  // Kontrola dostupnosti PDF knihoven
+  await zkontrolujPdfKnihovny();
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p", "mm", "a4");
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const margin = 15;
+  let yPos = margin;
+
+  // === HLAVIČKA ===
+  pdf.setFontSize(20);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(0, 0, 0); // Černá
+  pdf.text('PRICELIST', pageWidth / 2, yPos, { align: 'center' });
+  yPos += 15;
+
+  // === ÚDAJE ZÁKAZNÍKA ===
+  const zakaznikJmeno = document.getElementById('customer')?.value || 'N/A';
+  const zakaznikAdresa = kalkulaceData.adresa || document.getElementById('address')?.value || 'N/A';
+  const zakaznikTelefon = document.getElementById('phone')?.value || '';
+  const zakaznikEmail = document.getElementById('email')?.value || '';
+  const reklamaceCislo = document.getElementById('claim-number')?.value || '';
+
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(0, 0, 0);
+
+  if (reklamaceCislo) {
+    pdf.text(`Cislo reklamace: ${reklamaceCislo}`, margin, yPos);
+    yPos += 6;
+  }
+
+  pdf.setFont('helvetica', 'bold');
+  pdf.text(`Zakaznik: ${zakaznikJmeno}`, margin, yPos);
+  yPos += 6;
+
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(`Adresa: ${zakaznikAdresa}`, margin, yPos);
+  yPos += 6;
+
+  if (zakaznikTelefon) {
+    pdf.text(`Telefon: ${zakaznikTelefon}`, margin, yPos);
+    yPos += 6;
+  }
+
+  if (zakaznikEmail) {
+    pdf.text(`Email: ${zakaznikEmail}`, margin, yPos);
+    yPos += 6;
+  }
+
+  yPos += 5;
+
+  // Čára oddělení
+  pdf.setLineWidth(0.5);
+  pdf.setDrawColor(0, 0, 0); // Černá
+  pdf.line(margin, yPos, pageWidth - margin, yPos);
+  yPos += 10;
+
+  // === CENOTVORBA ===
+  pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Rozpis cen', margin, yPos);
+  yPos += 10;
+
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
+
+  // Dopravné
+  if (!kalkulaceData.reklamaceBezDopravy) {
+    const dopravneText = `Dopravne (${kalkulaceData.vzdalenost} km)`;
+    const dopravneCena = kalkulaceData.dopravne.toFixed(2);
+    pdf.text(dopravneText, margin, yPos);
+    pdf.text(`${dopravneCena} EUR`, pageWidth - margin - 30, yPos);
+    yPos += 7;
+  } else {
+    pdf.text('Dopravne (reklamace)', margin, yPos);
+    pdf.text('0.00 EUR', pageWidth - margin - 30, yPos);
+    yPos += 7;
+  }
+
+  // Služby
+  if (kalkulaceData.sluzby && kalkulaceData.sluzby.length > 0) {
+    yPos += 3;
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Sluzby:', margin, yPos);
+    yPos += 7;
+
+    pdf.setFont('helvetica', 'normal');
+    kalkulaceData.sluzby.forEach(sluzba => {
+      const text = `  ${sluzba.nazev}`;
+      const cena = sluzba.cena.toFixed(2);
+      pdf.text(text, margin, yPos);
+      pdf.text(`${cena} EUR`, pageWidth - margin - 30, yPos);
+      yPos += 6;
+    });
+
+    yPos += 3;
+  }
+
+  // Díly a práce
+  if (kalkulaceData.dilyPrace && kalkulaceData.dilyPrace.length > 0) {
+    yPos += 3;
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Dily a prace:', margin, yPos);
+    yPos += 7;
+
+    pdf.setFont('helvetica', 'normal');
+    kalkulaceData.dilyPrace.forEach(polozka => {
+      const text = `  ${polozka.nazev} (${polozka.pocet}x)`;
+      const cena = polozka.cena.toFixed(2);
+      pdf.text(text, margin, yPos);
+      pdf.text(`${cena} EUR`, pageWidth - margin - 30, yPos);
+      yPos += 6;
+    });
+
+    yPos += 3;
+  }
+
+  // Příplatky
+  if (kalkulaceData.tezkyNabytek) {
+    pdf.text('Priplatek: Tezky nabytek (nad 50 kg)', margin, yPos);
+    pdf.text('80.00 EUR', pageWidth - margin - 30, yPos);
+    yPos += 7;
+  }
+
+  if (kalkulaceData.druhaOsoba) {
+    pdf.text('Priplatek: Druha osoba', margin, yPos);
+    pdf.text('80.00 EUR', pageWidth - margin - 30, yPos);
+    yPos += 7;
+  }
+
+  yPos += 5;
+
+  // Čára před celkovou cenou
+  pdf.setLineWidth(0.3);
+  pdf.line(margin, yPos, pageWidth - margin, yPos);
+  yPos += 8;
+
+  // === CELKOVÁ CENA ===
+  pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(0, 0, 0); // Černá
+  pdf.text('CELKEM:', margin, yPos);
+  pdf.text(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
+  yPos += 10;
+
+  // === POZNÁMKY ===
+  if (kalkulaceData.poznamka) {
+    yPos += 5;
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'italic');
+    pdf.setTextColor(100, 100, 100);
+    pdf.text('Poznamka:', margin, yPos);
+    yPos += 6;
+    pdf.setFont('helvetica', 'normal');
+
+    const lines = pdf.splitTextToSize(kalkulaceData.poznamka, pageWidth - 2 * margin);
+    lines.forEach(line => {
+      pdf.text(line, margin, yPos);
+      yPos += 5;
+    });
+  }
+
+  logger.log(`PDF PRICELIST vytvořen (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
 
   return pdf;
 }
@@ -781,14 +1105,154 @@ async function exportBothPDFs() {
   try {
     showLoading(true);
 
-    logger.log('📋 Generuji kompletní PDF (protokol + fotodokumentace)...');
+    logger.log('[List] Generuji kompletní PDF (protokol + PRICELIST + fotodokumentace)...');
+    logger.log('💰 Kontrola kalkulace - kalkulaceData:', kalkulaceData);
 
     // Vytvořit JEDNO PDF s protokolem
     const doc = await generateProtocolPDF();
 
+    // Pokud existuje kalkulace, přidat PRICELIST
+    if (kalkulaceData) {
+      logger.log('Kalkulace nalezena - přidávám PRICELIST...');
+      logger.log('[Stats] Kalkulace data:', kalkulaceData);
+
+      // NOVÁ STRÁNKA: PRICELIST
+      doc.addPage();
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 15;
+      let yPos = margin;
+
+      // === HLAVIČKA ===
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text('PRICELIST', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 15;
+
+      // === ÚDAJE ZÁKAZNÍKA ===
+      const zakaznikJmeno = document.getElementById('customer')?.value || 'N/A';
+      const zakaznikAdresa = kalkulaceData.adresa || document.getElementById('address')?.value || 'N/A';
+      const zakaznikTelefon = document.getElementById('phone')?.value || '';
+      const zakaznikEmail = document.getElementById('email')?.value || '';
+      const reklamaceCislo = document.getElementById('claim-number')?.value || '';
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0, 0, 0);
+
+      if (reklamaceCislo) {
+        doc.text(`Cislo reklamace: ${reklamaceCislo}`, margin, yPos);
+        yPos += 6;
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Zakaznik: ${zakaznikJmeno}`, margin, yPos);
+      yPos += 6;
+
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Adresa: ${zakaznikAdresa}`, margin, yPos);
+      yPos += 6;
+
+      if (zakaznikTelefon) {
+        doc.text(`Telefon: ${zakaznikTelefon}`, margin, yPos);
+        yPos += 6;
+      }
+
+      if (zakaznikEmail) {
+        doc.text(`Email: ${zakaznikEmail}`, margin, yPos);
+        yPos += 6;
+      }
+
+      yPos += 5;
+
+      // Čára oddělení
+      doc.setLineWidth(0.5);
+      doc.setDrawColor(0, 0, 0);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 10;
+
+      // === CENOTVORBA ===
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Rozpis cen', margin, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+
+      // Dopravné
+      if (!kalkulaceData.reklamaceBezDopravy) {
+        const dopravneText = `Dopravne (${kalkulaceData.vzdalenost} km)`;
+        const dopravneCena = kalkulaceData.dopravne.toFixed(2);
+        doc.text(dopravneText, margin, yPos);
+        doc.text(`${dopravneCena} EUR`, pageWidth - margin - 30, yPos);
+        yPos += 7;
+      } else {
+        doc.text('Dopravne (reklamace)', margin, yPos);
+        doc.text('0.00 EUR', pageWidth - margin - 30, yPos);
+        yPos += 7;
+      }
+
+      // Díly a práce
+      if (kalkulaceData.dilyPrace && kalkulaceData.dilyPrace.length > 0) {
+        yPos += 3;
+        doc.setFont('helvetica', 'bold');
+        doc.text('Dily a prace:', margin, yPos);
+        yPos += 7;
+
+        doc.setFont('helvetica', 'normal');
+        kalkulaceData.dilyPrace.forEach(polozka => {
+          const text = `  ${polozka.nazev} (${polozka.pocet}x)`;
+          const cena = polozka.cena.toFixed(2);
+          doc.text(text, margin, yPos);
+          doc.text(`${cena} EUR`, pageWidth - margin - 30, yPos);
+          yPos += 6;
+        });
+
+        yPos += 3;
+      }
+
+      // Příplatky
+      if (kalkulaceData.tezkyNabytek) {
+        doc.text('Priplatek: Tezky nabytek (nad 50 kg)', margin, yPos);
+        doc.text('80.00 EUR', pageWidth - margin - 30, yPos);
+        yPos += 7;
+      }
+
+      if (kalkulaceData.druhaOsoba) {
+        doc.text('Priplatek: Druha osoba', margin, yPos);
+        doc.text('80.00 EUR', pageWidth - margin - 30, yPos);
+        yPos += 7;
+      }
+
+      yPos += 5;
+
+      // Čára před celkovou cenou
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 8;
+
+      // === CELKOVÁ CENA ===
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text('CELKEM:', margin, yPos);
+      doc.text(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
+
+      logger.log(`PRICELIST přidán (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
+    } else {
+      logger.warn('Kalkulace nenalezena - PRICELIST nebude v PDF');
+      logger.warn('   Možné příčiny:');
+      logger.warn('   1. Kalkulace nebyla vytvořena');
+      logger.warn('   2. Kalkulace nebyla uložena do databáze');
+      logger.warn('   3. Chyba při načítání z databáze');
+    }
+
     // Pokud jsou fotky, přidat fotodokumentaci na KONEC protokolu
     if (attachedPhotos.length > 0) {
-      logger.log('📸 Přidávám fotodokumentaci...');
+      logger.log('[Photo] Přidávám fotodokumentaci...');
 
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
@@ -810,7 +1274,7 @@ async function exportBothPDFs() {
 
       const customerInfo = [
         `Cislo reklamace: ${document.getElementById('claim-number')?.value || 'N/A'}`,
-        `Datum: ${document.getElementById('visit-date')?.value || new Date().toLocaleDateString('cs-CZ')}`
+        `Datum: ${document.getElementById('sign-date')?.value || new Date().toLocaleDateString('cs-CZ')}`
       ];
 
       customerInfo.forEach(line => {
@@ -861,11 +1325,11 @@ async function exportBothPDFs() {
           doc.setFontSize(7);
           doc.text(`${i + 1}. ${photoLabel}`, x, y + thumbSize + 3, { maxWidth: thumbSize });
         } catch (err) {
-          logger.warn(`⚠️ Nelze přidat miniaturu ${i + 1}`);
+          logger.warn(`Nelze přidat miniaturu ${i + 1}`);
         }
       }
 
-      logger.log(`✅ Index ${attachedPhotos.length} fotek vytvořen`);
+      logger.log(`Index ${attachedPhotos.length} fotek vytvořen`);
 
       // DALŠÍ STRÁNKY: Velké fotky 4 na stránku
       doc.addPage();
@@ -896,13 +1360,6 @@ async function exportBothPDFs() {
 
         const x = margin + (col * (cellWidth + gap));
         const y = margin + (row * (cellHeight + gap));
-
-        if (photoLabel) {
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'bold');
-          doc.setTextColor(0, 0, 0);
-          doc.text(photoLabel, x + 1, y + 3);
-        }
 
         const photoY = y + labelHeight;
         const maxPhotoWidth = cellWidth;
@@ -936,25 +1393,52 @@ async function exportBothPDFs() {
           const offsetX = (maxPhotoWidth - finalWidth) / 2;
           const offsetY = (maxPhotoHeight - finalHeight) / 2;
 
+          // Label přesně nad fotkou (ne nad buňkou)
+          if (photoLabel) {
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.text(photoLabel, x + offsetX, photoY + offsetY - 2);
+          }
+
           doc.addImage(photoData, "JPEG", x + offsetX, photoY + offsetY, finalWidth, finalHeight, undefined, 'MEDIUM');
 
-          logger.log(`  📸 Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel}`);
+          logger.log(`  [Photo] Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel}`);
 
         } catch (err) {
-          logger.warn(`⚠️ Chyba fotky ${i + 1}`);
+          logger.warn(`Chyba fotky ${i + 1}`);
+
+          // Fallback: label ve středu buňky
+          if (photoLabel) {
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.text(photoLabel, x, photoY - 2);
+          }
+
           doc.addImage(photoData, "JPEG", x, photoY, maxPhotoWidth, maxPhotoHeight, undefined, 'MEDIUM');
         }
       }
 
-      logger.log(`✅ Fotodokumentace přidána (${attachedPhotos.length} fotek)`);
-      showNotif("success", `✓ PDF vytvořeno (protokol + ${attachedPhotos.length} fotek)`);
+      logger.log(`Fotodokumentace přidána (${attachedPhotos.length} fotek)`);
+      // Neonový toast pro vytvoření PDF
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit(`PDF vytvořeno (protokol + ${attachedPhotos.length} fotek)`, { titulek: 'WGS' });
+      } else {
+        showNotif("success", `PDF vytvořeno (protokol + ${attachedPhotos.length} fotek)`);
+      }
 
     } else {
-      showNotif("success", "✓ Protokol vytvořen (bez fotek)");
+      // Neonový toast pro protokol bez fotek
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit("Protokol vytvořen", { titulek: 'WGS' });
+      } else {
+        showNotif("success", "Protokol vytvořen (bez fotek)");
+      }
     }
 
     // Uložit PDF do databáze (stejně jako při odeslání emailem)
-    logger.log('💾 Ukládám PDF do databáze...');
+    logger.log('[Save] Ukládám PDF do databáze...');
     try {
       const csrfToken = await fetchCsrfToken();
       const completePdfBase64 = doc.output("datauristring").split(",")[1];
@@ -973,13 +1457,13 @@ async function exportBothPDFs() {
       if (saveResponse.ok) {
         const saveResult = await saveResponse.json();
         if (saveResult.status === 'success') {
-          logger.log('✅ PDF úspěšně uložen do databáze');
+          logger.log('PDF úspěšně uložen do databáze');
         } else {
-          logger.warn('⚠️ PDF se nepodařilo uložit:', saveResult.message);
+          logger.warn('PDF se nepodařilo uložit:', saveResult.message);
         }
       }
     } catch (err) {
-      logger.error('❌ Chyba při ukládání PDF:', err);
+      logger.error('Chyba při ukládání PDF:', err);
       // Pokračujeme i přes chybu - alespoň zobrazíme PDF
     }
 
@@ -1005,7 +1489,7 @@ async function exportBothPDFs() {
     await saveProtokolToDB();
 
     // Označit jako hotovou
-    logger.log('📋 Označuji reklamaci jako hotovou...');
+    logger.log('[List] Označuji reklamaci jako hotovou...');
     try {
       const csrfToken = await fetchCsrfToken();
       const markResponse = await fetch('app/controllers/save.php', {
@@ -1022,14 +1506,14 @@ async function exportBothPDFs() {
       const markResult = await markResponse.json();
 
       if (markResult.status === 'success') {
-        logger.log('✅ Reklamace označena jako hotová');
+        logger.log('Reklamace označena jako hotová');
       }
     } catch (err) {
-      logger.error('❌ Chyba při označování:', err);
+      logger.error('Chyba při označování:', err);
     }
 
   } catch (error) {
-    logger.error('❌ Chyba při generování PDF:', error);
+    logger.error('Chyba při generování PDF:', error);
     showNotif("error", "Chyba při vytváření PDF");
   } finally {
     showLoading(false);
@@ -1039,16 +1523,154 @@ async function exportBothPDFs() {
 async function sendToCustomer() {
   try {
     // FÁZE 1: Generování kompletního PDF (protokol + fotky) pro NÁHLED
-    showLoadingWithMessage(true, '📄 Generuji náhled PDF...');
-    logger.log('📋 Generuji kompletní PDF pro náhled před odesláním...');
+    showLoadingWithMessage(true, 'Generuji protokol... Prosím čekejte');
+    logger.log('[List] Generuji kompletní PDF pro náhled před odesláním...');
+    logger.log('💰 Kontrola kalkulace - kalkulaceData:', kalkulaceData);
 
     // Vytvořit JEDNO PDF s protokolem
     const doc = await generateProtocolPDF();
 
+    // Pokud existuje kalkulace, přidat PRICELIST
+    if (kalkulaceData) {
+      showLoadingWithMessage(true, `Přidávám PRICELIST (${kalkulaceData.celkovaCena.toFixed(2)} €)... Prosím čekejte`);
+      logger.log('Kalkulace nalezena - přidávám PRICELIST...');
+      logger.log('[Stats] Kalkulace data:', kalkulaceData);
+
+      // NOVÁ STRÁNKA: PRICELIST
+      doc.addPage();
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 15;
+      let yPos = margin;
+
+      // === HLAVIČKA ===
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text('PRICELIST', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 15;
+
+      // === ÚDAJE ZÁKAZNÍKA ===
+      const zakaznikJmeno = document.getElementById('customer')?.value || 'N/A';
+      const zakaznikAdresa = kalkulaceData.adresa || document.getElementById('address')?.value || 'N/A';
+      const zakaznikTelefon = document.getElementById('phone')?.value || '';
+      const zakaznikEmail = document.getElementById('email')?.value || '';
+      const reklamaceCislo = document.getElementById('claim-number')?.value || '';
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0, 0, 0);
+
+      if (reklamaceCislo) {
+        doc.text(`Cislo reklamace: ${reklamaceCislo}`, margin, yPos);
+        yPos += 6;
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Zakaznik: ${zakaznikJmeno}`, margin, yPos);
+      yPos += 6;
+
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Adresa: ${zakaznikAdresa}`, margin, yPos);
+      yPos += 6;
+
+      if (zakaznikTelefon) {
+        doc.text(`Telefon: ${zakaznikTelefon}`, margin, yPos);
+        yPos += 6;
+      }
+
+      if (zakaznikEmail) {
+        doc.text(`Email: ${zakaznikEmail}`, margin, yPos);
+        yPos += 6;
+      }
+
+      yPos += 5;
+
+      // Čára oddělení
+      doc.setLineWidth(0.5);
+      doc.setDrawColor(0, 0, 0);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 10;
+
+      // === CENOTVORBA ===
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Rozpis cen', margin, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+
+      // Dopravné
+      if (!kalkulaceData.reklamaceBezDopravy) {
+        const dopravneText = `Dopravne (${kalkulaceData.vzdalenost} km)`;
+        const dopravneCena = kalkulaceData.dopravne.toFixed(2);
+        doc.text(dopravneText, margin, yPos);
+        doc.text(`${dopravneCena} EUR`, pageWidth - margin - 30, yPos);
+        yPos += 7;
+      } else {
+        doc.text('Dopravne (reklamace)', margin, yPos);
+        doc.text('0.00 EUR', pageWidth - margin - 30, yPos);
+        yPos += 7;
+      }
+
+      // Díly a práce
+      if (kalkulaceData.dilyPrace && kalkulaceData.dilyPrace.length > 0) {
+        yPos += 3;
+        doc.setFont('helvetica', 'bold');
+        doc.text('Dily a prace:', margin, yPos);
+        yPos += 7;
+
+        doc.setFont('helvetica', 'normal');
+        kalkulaceData.dilyPrace.forEach(polozka => {
+          const text = `  ${polozka.nazev} (${polozka.pocet}x)`;
+          const cena = polozka.cena.toFixed(2);
+          doc.text(text, margin, yPos);
+          doc.text(`${cena} EUR`, pageWidth - margin - 30, yPos);
+          yPos += 6;
+        });
+
+        yPos += 3;
+      }
+
+      // Příplatky
+      if (kalkulaceData.tezkyNabytek) {
+        doc.text('Priplatek: Tezky nabytek (nad 50 kg)', margin, yPos);
+        doc.text('80.00 EUR', pageWidth - margin - 30, yPos);
+        yPos += 7;
+      }
+
+      if (kalkulaceData.druhaOsoba) {
+        doc.text('Priplatek: Druha osoba', margin, yPos);
+        doc.text('80.00 EUR', pageWidth - margin - 30, yPos);
+        yPos += 7;
+      }
+
+      yPos += 5;
+
+      // Čára před celkovou cenou
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 8;
+
+      // === CELKOVÁ CENA ===
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text('CELKEM:', margin, yPos);
+      doc.text(`${kalkulaceData.celkovaCena.toFixed(2)} EUR`, pageWidth - margin - 40, yPos);
+
+      logger.log(`PRICELIST přidán (${kalkulaceData.celkovaCena.toFixed(2)} €)`);
+    } else {
+      logger.warn('Kalkulace nenalezena - PRICELIST nebude v emailu');
+      logger.warn('   Zkontrolujte, zda byla kalkulace vytvořena a uložena');
+    }
+
     // Pokud jsou fotky, přidat fotodokumentaci na KONEC protokolu (stejně jako exportBothPDFs)
     if (attachedPhotos.length > 0) {
-      showLoadingWithMessage(true, `📸 Přidávám fotodokumentaci (${attachedPhotos.length} fotek)...`);
-      logger.log('📸 Přidávám fotodokumentaci...');
+      showLoadingWithMessage(true, `Přidávám ${attachedPhotos.length} fotografií... Prosím čekejte`);
+      logger.log('[Photo] Přidávám fotodokumentaci...');
 
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
@@ -1070,7 +1692,7 @@ async function sendToCustomer() {
 
       const customerInfo = [
         `Cislo reklamace: ${document.getElementById('claim-number')?.value || 'N/A'}`,
-        `Datum: ${document.getElementById('visit-date')?.value || new Date().toLocaleDateString('cs-CZ')}`
+        `Datum: ${document.getElementById('sign-date')?.value || new Date().toLocaleDateString('cs-CZ')}`
       ];
 
       customerInfo.forEach(line => {
@@ -1121,11 +1743,11 @@ async function sendToCustomer() {
           doc.setFontSize(7);
           doc.text(`${i + 1}. ${photoLabel}`, x, y + thumbSize + 3, { maxWidth: thumbSize });
         } catch (err) {
-          logger.warn(`⚠️ Nelze přidat miniaturu ${i + 1}`);
+          logger.warn(`Nelze přidat miniaturu ${i + 1}`);
         }
       }
 
-      logger.log(`✅ Index ${attachedPhotos.length} fotek vytvořen`);
+      logger.log(`Index ${attachedPhotos.length} fotek vytvořen`);
 
       // DALŠÍ STRÁNKY: Velké fotky 4 na stránku
       doc.addPage();
@@ -1156,13 +1778,6 @@ async function sendToCustomer() {
 
         const x = margin + (col * (cellWidth + gap));
         const y = margin + (row * (cellHeight + gap));
-
-        if (photoLabel) {
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'bold');
-          doc.setTextColor(0, 0, 0);
-          doc.text(photoLabel, x + 1, y + 3);
-        }
 
         const photoY = y + labelHeight;
         const maxPhotoWidth = cellWidth;
@@ -1196,17 +1811,34 @@ async function sendToCustomer() {
           const offsetX = (maxPhotoWidth - finalWidth) / 2;
           const offsetY = (maxPhotoHeight - finalHeight) / 2;
 
+          // Label přesně nad fotkou (ne nad buňkou)
+          if (photoLabel) {
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.text(photoLabel, x + offsetX, photoY + offsetY - 2);
+          }
+
           doc.addImage(photoData, "JPEG", x + offsetX, photoY + offsetY, finalWidth, finalHeight, undefined, 'MEDIUM');
 
-          logger.log(`  📸 Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel}`);
+          logger.log(`  [Photo] Fotka ${i + 1}/${attachedPhotos.length} - ${photoLabel}`);
 
         } catch (err) {
-          logger.warn(`⚠️ Chyba fotky ${i + 1}`);
+          logger.warn(`Chyba fotky ${i + 1}`);
+
+          // Fallback: label ve středu buňky
+          if (photoLabel) {
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.text(photoLabel, x, photoY - 2);
+          }
+
           doc.addImage(photoData, "JPEG", x, photoY, maxPhotoWidth, maxPhotoHeight, undefined, 'MEDIUM');
         }
       }
 
-      logger.log(`✅ Fotodokumentace přidána (${attachedPhotos.length} fotek)`);
+      logger.log(`Fotodokumentace přidána (${attachedPhotos.length} fotek)`);
     }
 
     // Konverze na base64 a uložení pro odeslání
@@ -1217,12 +1849,12 @@ async function sendToCustomer() {
     cachedPdfBase64 = completePdfBase64;
     pdfPreviewContext = 'send';
 
-    // ✅ PERFORMANCE: Rovnou odeslat bez preview modalu
+    // PERFORMANCE: Rovnou odeslat bez preview modalu
     logger.log('📧 Odesílám email přímo bez náhledu...');
     await potvrditAOdeslat();
 
   } catch (error) {
-    logger.error('❌ Chyba při generování PDF:', error);
+    logger.error('Chyba při generování PDF:', error);
     showNotif("error", "Chyba při vytváření PDF");
     showLoadingWithMessage(false);
   }
@@ -1230,7 +1862,7 @@ async function sendToCustomer() {
 
 /**
  * Potvrzení a odeslání emailu se zákazníkovi
- * ✅ Volá se ROVNOU z sendToCustomer() bez preview modalu
+ * Volá se ROVNOU z sendToCustomer() bez preview modalu
  */
 async function potvrditAOdeslat() {
   if (!cachedPdfBase64) {
@@ -1239,8 +1871,8 @@ async function potvrditAOdeslat() {
   }
 
   try {
-    // ✅ PERFORMANCE: Preview modal vypnut, rovnou odesílání emailu
-    showLoadingWithMessage(true, '📧 Odesílám email zákazníkovi...');
+    // PERFORMANCE: Preview modal vypnut, rovnou odesílání emailu
+    showLoadingWithMessage(true, 'Odesílám email zákazníkovi... Prosím čekejte');
     logger.log('📧 Odesílám PDF zákazníkovi...');
 
     const csrfToken = await fetchCsrfToken();
@@ -1259,10 +1891,10 @@ async function potvrditAOdeslat() {
     // Detailní výpis chyby pokud response není OK
     if (!response.ok) {
       const errorText = await response.text();
-      logger.error('❌ Server error:', response.status, errorText);
+      logger.error('Server error:', response.status, errorText);
       try {
         const errorJson = JSON.parse(errorText);
-        logger.error('❌ Error detail:', errorJson);
+        logger.error('Error detail:', errorJson);
         throw new Error(errorJson.error || errorJson.message || `Server error ${response.status}`);
       } catch (parseErr) {
         throw new Error(`Server error ${response.status}: ${errorText.substring(0, 200)}`);
@@ -1272,10 +1904,15 @@ async function potvrditAOdeslat() {
     const result = await response.json();
 
     if (result.status === 'success') {
-      showNotif("success", "✓ Email odeslán zákazníkovi");
+      // Neonový toast pro odeslání emailu
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit('Email odeslán zákazníkovi', { titulek: 'WGS' });
+      } else {
+        showNotif("success", "Email odeslán zákazníkovi");
+      }
       await saveProtokolToDB();
 
-      logger.log('📋 Označuji reklamaci jako hotovou...');
+      logger.log('[List] Označuji reklamaci jako hotovou...');
       const markResponse = await fetch('app/controllers/save.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -1290,9 +1927,9 @@ async function potvrditAOdeslat() {
       const markResult = await markResponse.json();
 
       if (markResult.status === 'success') {
-        logger.log('✅ Reklamace označena jako hotová');
+        logger.log('Reklamace označena jako hotová');
       } else {
-        logger.warn('⚠️ Nepodařilo se označit jako hotovou:', markResult.message);
+        logger.warn('Nepodařilo se označit jako hotovou:', markResult.message);
       }
 
       if (currentReklamaceId) {
@@ -1302,7 +1939,7 @@ async function potvrditAOdeslat() {
         localStorage.removeItem(pdfKey);
         localStorage.removeItem('photosReadyForProtocol');
         localStorage.removeItem('photosCustomerId');
-        logger.log('✅ Fotky a PDF vymazány z localStorage');
+        logger.log('Fotky a PDF vymazány z localStorage');
       }
 
       setTimeout(() => {
@@ -1325,13 +1962,8 @@ async function saveProtokolToDB() {
   try {
     const csrfToken = await fetchCsrfToken();
 
-    // Získat cenové údaje z formuláře
-    const pocetDilu = parseInt(document.getElementById("parts").value) || 0;
-    const cenaPrace = parseFloat(document.getElementById("price-work").value) || 0;
-    const cenaMaterial = parseFloat(document.getElementById("price-material").value) || 0;
-    const cenaDruhyTechnik = parseFloat(document.getElementById("price-second").value) || 0;
-    const cenaDoprava = parseFloat(document.getElementById("price-transport").value) || 0;
-    const cenaCelkem = cenaPrace + cenaMaterial + cenaDruhyTechnik + cenaDoprava;
+    // Získat celkovou cenu z formuláře
+    const cenaCelkem = parseFloat(document.getElementById("price-total").value) || 0;
 
     const response = await fetch("api/protokol_api.php", {
       method: "POST",
@@ -1343,11 +1975,6 @@ async function saveProtokolToDB() {
         repair_proposal: document.getElementById("repair-cz").value,
         solved: document.getElementById("solved").value,
         technician: document.getElementById("technician").value,
-        pocet_dilu: pocetDilu,
-        cena_prace: cenaPrace,
-        cena_material: cenaMaterial,
-        cena_druhy_technik: cenaDruhyTechnik,
-        cena_doprava: cenaDoprava,
         cena_celkem: cenaCelkem,
         csrf_token: csrfToken
       })
@@ -1363,18 +1990,8 @@ async function saveProtokolToDB() {
   }
 }
 
-// Debounce funkce
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
+// debounce přesunuto do utils.js (Step 108)
+// Funkce je dostupná jako window.debounce() nebo Utils.debounce()
 
 // Funkce pro překlad textu přes Google Translate API
 async function translateTextApi(text, sourceLang = 'cs', targetLang = 'en') {
@@ -1420,13 +2037,13 @@ async function translateText(sourceId, targetId) {
   }
 
   try {
-    logger.log('🔄 Překládám:', text.substring(0, 50) + '...');
+    logger.log('[Sync] Překládám:', text.substring(0, 50) + '...');
     const translated = await translateTextApi(text, 'cs', 'en');
 
     if (translated) {
       targetField.value = translated;
-      logger.log('✅ Přeloženo:', translated.substring(0, 50) + '...');
-      showNotification('✅ Text přeložen', 'success');
+      logger.log('Přeloženo:', translated.substring(0, 50) + '...');
+      showNotification('Text přeložen', 'success');
     } else {
       showNotification('Překlad selhal', 'error');
     }
@@ -1449,7 +2066,7 @@ async function autoTranslateField(fieldId) {
   const text = field.value.trim();
   if (!text) return;
 
-  logger.log('🔄 Překládám pole:', fieldId);
+  logger.log('[Sync] Překládám pole:', fieldId);
 
   let enLabel = field.parentElement.querySelector('.en-label');
 
@@ -1469,7 +2086,7 @@ async function autoTranslateField(fieldId) {
 
   if (translated) {
     enLabel.textContent = translated;
-    logger.log('✅ Přeloženo:', fieldId, '->', translated.substring(0, 50) + '...');
+    logger.log('Přeloženo:', fieldId, '->', translated.substring(0, 50) + '...');
   }
 }
 
@@ -1498,7 +2115,7 @@ function initAutoTranslation() {
       translateText(source, target);
     });
 
-    logger.log('✅ Auto-překlad aktivován pro:', source, '→', target);
+    logger.log('Auto-překlad aktivován pro:', source, '→', target);
   });
 }
 
@@ -1551,6 +2168,64 @@ window.addEventListener('load', () => {
   logger.log('Translate ready');
 });
 
+// ========================================
+// FUNKCE PRO ZNOVUOTEVŘENÍ ZAKÁZKY
+// ========================================
+async function reopenOrder(id) {
+  logger.log('[reopenOrder] Znovuotevírání zakázky ID:', id);
+
+  const confirmed = await wgsConfirm(
+    'Opravdu chcete znovu otevřít tuto dokončenou zakázku? Zakázka bude vrácena do stavu "ČEKÁ" a bude možné ji znovu upravit.',
+    'Otevřít',
+    'Zrušit'
+  );
+
+  if (!confirmed) {
+    logger.log('[reopenOrder] Znovuotevření zrušeno uživatelem');
+    return;
+  }
+
+  try {
+    showLoadingWithMessage(true, 'Otevírám zakázku...');
+
+    // Získat CSRF token
+    const csrfToken = await fetchCsrfToken();
+
+    const formData = new FormData();
+    formData.append('action', 'update');
+    formData.append('id', id);
+    formData.append('stav', 'ČEKÁ');
+    formData.append('termin', '');
+    formData.append('cas_navstevy', '');
+    formData.append('csrf_token', csrfToken);
+
+    const response = await fetch('app/controllers/save.php', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.status === 'success') {
+      logger.log('[reopenOrder] Zakázka úspěšně znovu otevřena');
+      showNotif('success', 'Zakázka byla znovu otevřena');
+
+      // Obnovit stránku po 1 sekundě
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+    } else {
+      throw new Error(result.message || 'Chyba při znovuotevření zakázky');
+    }
+
+  } catch (error) {
+    logger.error('[reopenOrder] Chyba:', error);
+    showNotif('error', 'Chyba při znovuotevření: ' + error.message);
+  } finally {
+    showLoadingWithMessage(false);
+  }
+}
+
 // === UNIVERSAL EVENT DELEGATION FOR REMOVED INLINE HANDLERS ===
 document.addEventListener('DOMContentLoaded', () => {
   // Handle data-action buttons
@@ -1597,3 +2272,424 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// === MODAL PRO SCHVÁLENÍ ZÁKAZNÍKEM ===
+// Step 39: Migrace na Alpine.js - open/close logika přesunuta do zakaznikSchvaleniModal komponenty
+// Business logika (překlad, signature pad, souhrn) zůstává zde
+(function() {
+  let zakaznikSignaturePad = null;
+
+  // Inicializace při načtení stránky
+  document.addEventListener('DOMContentLoaded', () => {
+    const btnPodepsat = document.getElementById('btnPodepsatProtokol');
+    const overlay = document.getElementById('zakaznikSchvaleniOverlay');
+    const btnPouzit = document.getElementById('zakaznikSchvaleniPouzit');
+    const btnVymazat = document.getElementById('zakaznikVymazatPodpis');
+    const canvas = document.getElementById('zakaznikSchvaleniPad');
+
+    if (!btnPodepsat || !overlay || !canvas) {
+      return;
+    }
+
+    // Otevření modalu - async kvuli pojistce prekladu
+    btnPodepsat.addEventListener('click', async () => {
+      // Zobrazit loading behem prekladu
+      btnPodepsat.disabled = true;
+      btnPodepsat.textContent = 'Pripravuji...';
+
+      try {
+        await otevritZakaznikModal();
+      } finally {
+        // Obnovit tlacitko
+        btnPodepsat.disabled = false;
+        btnPodepsat.textContent = 'Podepsat protokol';
+      }
+    });
+
+    // Step 39: Zavírání modalu nyní řeší Alpine.js (btnClose, btnZrusit, overlay click, ESC)
+    // Vanilla JS event listenery pro close/cancel/overlay odstraněny
+
+    // Vymazat podpis
+    btnVymazat?.addEventListener('click', () => {
+      if (zakaznikSignaturePad) {
+        zakaznikSignaturePad.clear();
+      }
+    });
+
+    // Potvrdit podpis
+    btnPouzit?.addEventListener('click', () => {
+      potvrditPodpis();
+    });
+
+    // Checkbox prodloužení lhůty - zobrazit/skrýt text v modalu
+    const checkboxProdlouzeni = document.getElementById('checkboxProdlouzeniLhuty');
+    const textProdlouzeniModal = document.getElementById('prodlouzeniLhutyText');
+
+    if (checkboxProdlouzeni && textProdlouzeniModal) {
+      checkboxProdlouzeni.addEventListener('change', () => {
+        if (checkboxProdlouzeni.checked) {
+          textProdlouzeniModal.style.display = 'block';
+        } else {
+          textProdlouzeniModal.style.display = 'none';
+        }
+      });
+    }
+  });
+
+  async function otevritZakaznikModal() {
+    const canvas = document.getElementById('zakaznikSchvaleniPad');
+
+    // POJISTKA: Vynutit preklad vsech poli pred podpisem
+    // Aby anglicke preklady byly vzdy aktualni v PDF
+    logger.log('[Podpis] Spoustim pojistku prekladu pred podpisem...');
+    const fieldsToTranslate = ['description', 'problem', 'repair'];
+
+    for (const field of fieldsToTranslate) {
+      const czField = document.getElementById(field + '-cz');
+      const enField = document.getElementById(field + '-en');
+
+      if (czField && enField && czField.value.trim().length > 5) {
+        // Pokud anglicke pole je prazdne nebo obsahuje "Prekladam...", vynutit preklad
+        if (!enField.value || enField.value === 'Prekladam...' || enField.value.trim() === '') {
+          logger.log('[Podpis] Prekladam pole:', field);
+          try {
+            await translateField(field, true);
+          } catch (e) {
+            logger.warn('[Podpis] Preklad selhal pro:', field, e);
+          }
+        }
+      }
+    }
+    logger.log('[Podpis] Pojistka prekladu dokoncena');
+
+    // Naplnit souhrn daty z formuláře
+    naplnitSouhrn();
+
+    // Zobrazit/skrýt checkbox prodloužení lhůty podle typu zákazníka
+    // Checkbox se zobrazí pouze pro fyzické osoby (ne pro IČO)
+    const typZakaznika = document.getElementById('typ-zakaznika')?.value || '';
+    const checkboxRow = document.querySelector('.tabulka-checkbox-row');
+    const checkboxProdlouzeni = document.getElementById('checkboxProdlouzeniLhuty');
+    const textProdlouzeniModal = document.getElementById('prodlouzeniLhutyText');
+
+    if (checkboxRow) {
+      // Zobrazit pouze pro fyzické osoby (hodnota obsahuje "Fyzická" nebo je prázdná/jiná než IČO)
+      const jeFyzickaOsoba = typZakaznika.toLowerCase().includes('fyzická') ||
+                            typZakaznika.toLowerCase().includes('fyzicka') ||
+                            typZakaznika === 'Fyzická osoba';
+
+      if (jeFyzickaOsoba) {
+        checkboxRow.style.display = '';
+        logger.log('[ZakaznikSchvaleni] Checkbox prodloužení lhůty zobrazen (fyzická osoba)');
+      } else {
+        checkboxRow.style.display = 'none';
+        // Resetovat checkbox a skrýt text
+        if (checkboxProdlouzeni) checkboxProdlouzeni.checked = false;
+        if (textProdlouzeniModal) textProdlouzeniModal.style.display = 'none';
+        logger.log('[ZakaznikSchvaleni] Checkbox prodloužení lhůty skryt (IČO:', typZakaznika, ')');
+      }
+    }
+
+    // Step 39: Zobrazit modal přes Alpine.js API (scroll lock je v Alpine komponentě)
+    if (window.zakaznikSchvaleniModal && window.zakaznikSchvaleniModal.open) {
+      window.zakaznikSchvaleniModal.open();
+    } else {
+      // Fallback pro zpětnou kompatibilitu
+      const overlay = document.getElementById('zakaznikSchvaleniOverlay');
+      if (overlay) {
+        overlay.classList.remove('hidden');
+      }
+      if (window.scrollLock) {
+        window.scrollLock.enable('zakaznik-schvaleni-overlay');
+      }
+    }
+
+    // Inicializovat signature pad (po zobrazení, aby měl správné rozměry)
+    setTimeout(() => {
+      inicializovatZakaznikPad(canvas);
+    }, 100);
+  }
+
+  function zavritZakaznikModal() {
+    // Step 39: Zavřít modal přes Alpine.js API (scroll lock je v Alpine komponentě)
+    if (window.zakaznikSchvaleniModal && window.zakaznikSchvaleniModal.close) {
+      window.zakaznikSchvaleniModal.close();
+    } else {
+      // Fallback pro zpětnou kompatibilitu
+      const overlay = document.getElementById('zakaznikSchvaleniOverlay');
+      if (overlay) {
+        overlay.classList.add('hidden');
+      }
+      if (window.scrollLock) {
+        window.scrollLock.disable('zakaznik-schvaleni-overlay');
+      }
+    }
+
+    // Vyčistit signature pad
+    if (zakaznikSignaturePad) {
+      zakaznikSignaturePad.clear();
+    }
+  }
+
+  function naplnitSouhrn() {
+    // Návrh opravy
+    const repairText = document.getElementById('repair-cz')?.value || '';
+    const textEl = document.getElementById('zakaznikSchvaleniText');
+    if (textEl) {
+      textEl.textContent = repairText || '(Není vyplněno)';
+    }
+
+    // Platí zákazník?
+    const payment = document.getElementById('payment')?.value || '-';
+    document.getElementById('souhrn-plati-zakaznik').textContent = payment;
+
+    // Datum podpisu
+    const signDate = document.getElementById('sign-date')?.value || '-';
+    let formattedDate = '-';
+    if (signDate && signDate !== '-') {
+      const d = new Date(signDate);
+      if (!isNaN(d.getTime())) {
+        formattedDate = d.toLocaleDateString('cs-CZ');
+      } else {
+        formattedDate = signDate;
+      }
+    }
+    document.getElementById('souhrn-datum-podpisu').textContent = formattedDate;
+
+    // Vyřešeno?
+    const solved = document.getElementById('solved')?.value || '-';
+    document.getElementById('souhrn-vyreseno').textContent = solved;
+
+    // Nutné vyjádření prodejce
+    const dealer = document.getElementById('dealer')?.value || '-';
+    document.getElementById('souhrn-prodejce').textContent = dealer;
+
+    // Poškození technikem?
+    const damage = document.getElementById('damage')?.value || '-';
+    document.getElementById('souhrn-poskozeni').textContent = damage;
+  }
+
+  function inicializovatZakaznikPad(canvas) {
+    if (!canvas) return;
+
+    // Pokud už je inicializován, jen vyčistit
+    if (zakaznikSignaturePad && zakaznikSignaturePad.canvas === canvas) {
+      zakaznikSignaturePad.clear();
+      return;
+    }
+
+    // Nastavit rozměry canvasu - BEZ devicePixelRatio pro jednoduchost
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+
+    const ctx = canvas.getContext('2d');
+
+    // Vyplnit bílou
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Vytvořit jednoduchý signature pad
+    zakaznikSignaturePad = {
+      canvas: canvas,
+      ctx: ctx,
+      isDrawing: false,
+      lastX: 0,
+      lastY: 0,
+
+      clear: function() {
+        this.ctx.fillStyle = 'white';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      },
+
+      isEmpty: function() {
+        const pixelData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height).data;
+        for (let i = 3; i < pixelData.length; i += 4) {
+          if (pixelData[i] > 0) return false;
+        }
+        return true;
+      },
+
+      toDataURL: function() {
+        return this.canvas.toDataURL('image/png');
+      }
+    };
+
+    // Nastavit styl čáry
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Event listenery pro kreslení
+    const getCoords = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      if (e.touches && e.touches.length > 0) {
+        return {
+          x: e.touches[0].clientX - rect.left,
+          y: e.touches[0].clientY - rect.top
+        };
+      }
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    };
+
+    const startDrawing = (e) => {
+      e.preventDefault();
+      zakaznikSignaturePad.isDrawing = true;
+      const coords = getCoords(e);
+      zakaznikSignaturePad.lastX = coords.x;
+      zakaznikSignaturePad.lastY = coords.y;
+    };
+
+    const draw = (e) => {
+      if (!zakaznikSignaturePad.isDrawing) return;
+      e.preventDefault();
+      const coords = getCoords(e);
+
+      ctx.beginPath();
+      ctx.moveTo(zakaznikSignaturePad.lastX, zakaznikSignaturePad.lastY);
+      ctx.lineTo(coords.x, coords.y);
+      ctx.stroke();
+
+      zakaznikSignaturePad.lastX = coords.x;
+      zakaznikSignaturePad.lastY = coords.y;
+    };
+
+    const stopDrawing = () => {
+      zakaznikSignaturePad.isDrawing = false;
+    };
+
+    // Mouse events
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    // Touch events
+    canvas.addEventListener('touchstart', startDrawing, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
+    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('touchcancel', stopDrawing);
+  }
+
+  function potvrditPodpis() {
+    if (!zakaznikSignaturePad || zakaznikSignaturePad.isEmpty()) {
+      if (typeof showNotif === 'function') {
+        showNotif('error', 'Prosím podepište se před potvrzením');
+      } else {
+        wgsToast.warning('Prosím podepište se před potvrzením');
+      }
+      return;
+    }
+
+    // Přenést podpis do hlavního canvasu
+    const mainCanvas = document.getElementById('signature-pad');
+
+    if (!mainCanvas) {
+      console.error('[ZakaznikSchvaleni] Hlavní canvas nenalezen');
+      if (typeof showNotif === 'function') {
+        showNotif('error', 'Chyba při přenosu podpisu');
+      }
+      return;
+    }
+
+    // Získat podpis jako obrázek
+    const signatureDataURL = zakaznikSignaturePad.toDataURL();
+    const img = new Image();
+
+    img.onload = () => {
+      const ctx = mainCanvas.getContext('2d');
+
+      // Reset transformace
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+      // Vyčistit canvas bílou barvou
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
+
+      // Pracovat přímo s fyzickými pixely canvasu
+      const canvasW = mainCanvas.width;
+      const canvasH = mainCanvas.height;
+
+      // Vypočítat škálování - zachovat poměr stran
+      const imgAspect = img.width / img.height;
+      const canvasAspect = canvasW / canvasH;
+
+      let drawWidth, drawHeight, drawX, drawY;
+
+      if (imgAspect > canvasAspect) {
+        // Obrázek je širší - omezit šířkou
+        drawWidth = canvasW * 0.9;
+        drawHeight = drawWidth / imgAspect;
+      } else {
+        // Obrázek je vyšší - omezit výškou
+        drawHeight = canvasH * 0.9;
+        drawWidth = drawHeight * imgAspect;
+      }
+
+      // Centrovat
+      drawX = (canvasW - drawWidth) / 2;
+      drawY = (canvasH - drawHeight) / 2;
+
+      // Nakreslit podpis
+      ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+
+      // Neonový toast pro přenesení podpisu
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit('Podpis byl přenesen do protokolu', { titulek: 'WGS' });
+      } else if (typeof showNotif === 'function') {
+        showNotif('success', 'Podpis byl přenesen do protokolu');
+      }
+    };
+
+    img.onerror = () => {
+      console.error('[ZakaznikSchvaleni] Chyba načtení podpisu');
+      if (typeof showNotif === 'function') {
+        showNotif('error', 'Chyba při přenosu podpisu');
+      }
+    };
+
+    img.src = signatureDataURL;
+
+    // Zkontrolovat checkbox prodloužení lhůty a zobrazit text v hlavním formuláři
+    const checkboxProdlouzeni = document.getElementById('checkboxProdlouzeniLhuty');
+    const textProdlouzeniHlavni = document.getElementById('prodlouzeniLhutyHlavni');
+
+    if (checkboxProdlouzeni && textProdlouzeniHlavni) {
+      if (checkboxProdlouzeni.checked) {
+        textProdlouzeniHlavni.style.display = 'block';
+        logger.log('[ZakaznikSchvaleni] Text prodloužení lhůty zobrazen v hlavním formuláři');
+      } else {
+        textProdlouzeniHlavni.style.display = 'none';
+      }
+    }
+
+    // Zavřít modal
+    zavritZakaznikModal();
+
+    // Vynutit překlad všech textových polí
+    vynutitPreklad();
+  }
+
+  // Funkce pro vynucení překladu všech polí
+  function vynutitPreklad() {
+    const fieldsToTranslate = [
+      { source: 'description-cz', target: 'description-en' },
+      { source: 'problem-cz', target: 'problem-en' },
+      { source: 'repair-cz', target: 'repair-en' }
+    ];
+
+    fieldsToTranslate.forEach(({ source, target }) => {
+      const sourceField = document.getElementById(source);
+      if (sourceField && sourceField.value.trim()) {
+        // Použít globální funkci translateText pokud existuje
+        if (typeof translateText === 'function') {
+          translateText(source, target);
+        }
+      }
+    });
+  }
+})();

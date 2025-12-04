@@ -40,6 +40,9 @@ try {
         sendJsonError('Neplatný CSRF token', 403);
     }
 
+    // PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+    session_write_close();
+
     $pdo = getDbConnection();
 
     // ========================================
@@ -84,7 +87,11 @@ try {
                 click_y_percent AS y,
                 click_count AS count,
                 viewport_width_avg,
-                viewport_height_avg
+                viewport_height_avg,
+                country_code,
+                city,
+                latitude,
+                longitude
             FROM wgs_analytics_heatmap_clicks
             WHERE page_url = :page_url
               AND click_count >= :min_intensity
@@ -117,7 +124,7 @@ try {
             $totalClicks += $count;
         }
 
-        // Přidat normalized intensity (0-100)
+        // Přidat normalized intensity (0-100) a geolokaci
         foreach ($points as &$point) {
             $point['x'] = (float)$point['x'];
             $point['y'] = (float)$point['y'];
@@ -125,7 +132,24 @@ try {
             $point['intensity'] = $maxIntensity > 0 ? round(($point['count'] / $maxIntensity) * 100) : 0;
             $point['viewport_width_avg'] = $point['viewport_width_avg'] ? (int)$point['viewport_width_avg'] : null;
             $point['viewport_height_avg'] = $point['viewport_height_avg'] ? (int)$point['viewport_height_avg'] : null;
+            $point['country_code'] = $point['country_code'] ?? null;
+            $point['city'] = $point['city'] ?? null;
+            $point['latitude'] = $point['latitude'] ? (float)$point['latitude'] : null;
+            $point['longitude'] = $point['longitude'] ? (float)$point['longitude'] : null;
         }
+
+        // Agregovat statistiky geolokace
+        $geoStats = [];
+        $stmtGeo = $pdo->prepare("
+            SELECT country_code, city, SUM(click_count) as total_clicks
+            FROM wgs_analytics_heatmap_clicks
+            WHERE page_url = :page_url AND country_code IS NOT NULL
+            GROUP BY country_code, city
+            ORDER BY total_clicks DESC
+            LIMIT 10
+        ");
+        $stmtGeo->execute(['page_url' => $normalizedUrl]);
+        $geoStats = $stmtGeo->fetchAll(PDO::FETCH_ASSOC);
 
         sendJsonSuccess('Click heatmap data načtena', [
             'type' => 'click',
@@ -134,7 +158,8 @@ try {
             'total_clicks' => $totalClicks,
             'max_intensity' => $maxIntensity,
             'points_count' => count($points),
-            'points' => $points
+            'points' => $points,
+            'geo_stats' => $geoStats
         ]);
     }
 
@@ -147,7 +172,9 @@ try {
                 scroll_depth_bucket AS depth,
                 reach_count,
                 viewport_width_avg,
-                viewport_height_avg
+                viewport_height_avg,
+                country_code,
+                city
             FROM wgs_analytics_heatmap_scroll
             WHERE page_url = :page_url
         ";
@@ -182,7 +209,9 @@ try {
                 'reach_count' => $reachCount,
                 'percentage' => 0, // Vypočteme níže
                 'viewport_width_avg' => $row['viewport_width_avg'] ? (int)$row['viewport_width_avg'] : null,
-                'viewport_height_avg' => $row['viewport_height_avg'] ? (int)$row['viewport_height_avg'] : null
+                'viewport_height_avg' => $row['viewport_height_avg'] ? (int)$row['viewport_height_avg'] : null,
+                'country_code' => $row['country_code'] ?? null,
+                'city' => $row['city'] ?? null
             ];
         }
 
@@ -200,13 +229,27 @@ try {
             }
         }
 
+        // Agregovat statistiky geolokace pro scroll
+        $geoStats = [];
+        $stmtGeo = $pdo->prepare("
+            SELECT country_code, city, SUM(reach_count) as total_views
+            FROM wgs_analytics_heatmap_scroll
+            WHERE page_url = :page_url AND country_code IS NOT NULL
+            GROUP BY country_code, city
+            ORDER BY total_views DESC
+            LIMIT 10
+        ");
+        $stmtGeo->execute(['page_url' => $normalizedUrl]);
+        $geoStats = $stmtGeo->fetchAll(PDO::FETCH_ASSOC);
+
         sendJsonSuccess('Scroll heatmap data načtena', [
             'type' => 'scroll',
             'page_url' => $normalizedUrl,
             'device_type' => $deviceType ?? 'all',
             'total_views' => $totalViews,
             'buckets_count' => count($buckets),
-            'buckets' => $buckets
+            'buckets' => $buckets,
+            'geo_stats' => $geoStats
         ]);
     }
 

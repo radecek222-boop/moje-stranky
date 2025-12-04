@@ -21,12 +21,12 @@
     <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/offline.css">
+  <link rel="stylesheet" href="assets/css/offline.min.css">
 </head>
 <body>
-<main>
+<main id="main-content">
   <div class="offline-container">
-    <div class="offline-icon">
+    <div class="offline-icon" aria-hidden="true">
       <div class="wifi-icon"></div>
     </div>
     
@@ -53,13 +53,13 @@
   <!-- Google Translate Widget -->
   <div id="google_translate_element" style="position:fixed;top:15px;right:15px;z-index:9999;"></div>
   <script type="text/javascript">  </script>
-  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </main>
 
 <!-- External JavaScript -->
 <!-- Logger Utility (must be loaded first) -->
-<script src="assets/js/logger.js" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
 
-<script src="assets/js/offline.js" defer></script>
+<script src="assets/js/offline.min.js" defer></script>
 </body>
 </html>

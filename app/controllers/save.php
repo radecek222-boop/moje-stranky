@@ -8,6 +8,14 @@ require_once __DIR__ . '/../../init.php';
 require_once __DIR__ . '/../../includes/csrf_helper.php';
 require_once __DIR__ . '/../../includes/db_metadata.php';
 require_once __DIR__ . '/../../includes/email_domain_validator.php';
+require_once __DIR__ . '/../../includes/rate_limiter.php';
+
+// Helper pro timing logy - pouze v development rezimu
+function logTiming(string $message): void {
+    if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
+        error_log($message);
+    }
+}
 
 /**
  * Generuje unikátní ID pro reklamaci ve formátu WGSyymmdd-XXXXXX
@@ -19,6 +27,45 @@ require_once __DIR__ . '/../../includes/email_domain_validator.php';
  * @return string Vygenerované unikátní ID (např. "WGS251114-A3F2B1")
  * @throws Exception Pokud se nepodaří vygenerovat ID po 5 pokusech
  */
+/**
+ * Generuje unikátní číslo pro mimozáruční servis (POZ)
+ * Formát: POZ/YYYY/DD-MM/XX
+ * Příklad: POZ/2025/04-12/01
+ *
+ * @param PDO $pdo Database connection
+ * @return string Vygenerované POZ číslo
+ */
+function generatePozId(PDO $pdo): string
+{
+    $rok = date('Y');        // 2025
+    $denMesic = date('d-m'); // 04-12
+    $prefix = "POZ/{$rok}/{$denMesic}/";
+
+    // Najít nejvyšší číslo pro dnešní den
+    $stmt = $pdo->prepare("
+        SELECT cislo FROM wgs_reklamace
+        WHERE cislo LIKE :prefix
+        ORDER BY cislo DESC
+        LIMIT 1
+        FOR UPDATE
+    ");
+    $stmt->execute([':prefix' => $prefix . '%']);
+    $lastId = $stmt->fetchColumn();
+
+    if ($lastId) {
+        // Extrahovat číslo z konce (POZ/2025/04-12/01 -> 01)
+        $parts = explode('/', $lastId);
+        $cislo = (int)end($parts);
+        $noveCislo = $cislo + 1;
+    } else {
+        // První POZ pro dnešní den
+        $noveCislo = 1;
+    }
+
+    // Formátovat číslo na 2 číslice (01, 02, ...)
+    return sprintf('%s%02d', $prefix, $noveCislo);
+}
+
 /**
  * GenerateWorkflowId
  *
@@ -137,9 +184,9 @@ function normalizeDateInput(?string $value): ?string
  */
 function handleUpdate(PDO $pdo, array $input): array
 {
-    // ⏱️ PERFORMANCE: Backend timing
+    // PERFORMANCE: Backend timing
     $t0 = microtime(true);
-    error_log("⏱️ handleUpdate START");
+    logTiming("[TIMING] handleUpdate START");
 
     $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
     $userId = $_SESSION['user_id'] ?? null;
@@ -151,7 +198,7 @@ function handleUpdate(PDO $pdo, array $input): array
     $t1 = microtime(true);
     $columns = db_get_table_columns($pdo, 'wgs_reklamace');
     $t2 = microtime(true);
-    error_log(sprintf("⏱️ db_get_table_columns: %.0fms", ($t2 - $t1) * 1000));
+    logTiming(sprintf("[TIMING] db_get_table_columns: %.0fms", ($t2 - $t1) * 1000));
     if (empty($columns)) {
         throw new Exception('Nelze načíst strukturu tabulky reklamací.');
     }
@@ -185,6 +232,7 @@ function handleUpdate(PDO $pdo, array $input): array
         'jmeno',
         'telefon',
         'email',
+        'typ_zakaznika', // IČO nebo fyzická osoba
         'adresa',
         'ulice',
         'mesto',
@@ -304,7 +352,7 @@ function handleUpdate(PDO $pdo, array $input): array
     $t3 = microtime(true);
     $pdo->beginTransaction();
     $t4 = microtime(true);
-    error_log(sprintf("⏱️ beginTransaction: %.0fms", ($t4 - $t3) * 1000));
+    logTiming(sprintf("[TIMING] beginTransaction: %.0fms", ($t4 - $t3) * 1000));
 
     try {
         $sql = 'UPDATE wgs_reklamace SET ' . implode(', ', $setParts) . ' WHERE `' . $identifierColumn . '` = :identifier';
@@ -316,7 +364,7 @@ function handleUpdate(PDO $pdo, array $input): array
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $t6 = microtime(true);
-        error_log(sprintf("⏱️ SQL UPDATE execute: %.0fms", ($t6 - $t5) * 1000));
+        logTiming(sprintf("[TIMING] SQL UPDATE execute: %.0fms", ($t6 - $t5) * 1000));
 
         if ($stmt->rowCount() === 0) {
             throw new Exception('Reklamace nebyla nalezena nebo nebyla změněna.');
@@ -325,11 +373,11 @@ function handleUpdate(PDO $pdo, array $input): array
         $t7 = microtime(true);
         $pdo->commit();
         $t8 = microtime(true);
-        error_log(sprintf("⏱️ commit: %.0fms", ($t8 - $t7) * 1000));
+        logTiming(sprintf("[TIMING] commit: %.0fms", ($t8 - $t7) * 1000));
 
-        // ⏱️ CELKOVÝ ČAS
+        // CELKOVY CAS
         $tTotal = microtime(true);
-        error_log(sprintf("⏱️ ✅ handleUpdate TOTAL: %.0fms (%.1fs)", ($tTotal - $t0) * 1000, $tTotal - $t0));
+        logTiming(sprintf("[TIMING] handleUpdate TOTAL: %.0fms (%.1fs)", ($tTotal - $t0) * 1000, $tTotal - $t0));
 
         return [
             'status' => 'success',
@@ -339,9 +387,204 @@ function handleUpdate(PDO $pdo, array $input): array
     } catch (Exception $e) {
         $pdo->rollBack();
 
-        // ⏱️ Log času i při chybě
+        // Log casu i pri chybe
         $tError = microtime(true);
-        error_log(sprintf("⏱️ ❌ Čas do chyby: %.0fms", ($tError - $t0) * 1000));
+        logTiming(sprintf("[TIMING] Cas do chyby: %.0fms", ($tError - $t0) * 1000));
+
+        throw $e;
+    }
+}
+
+/**
+ * Znovu otevře zakázku vytvořením klonu původní zakázky
+ *
+ * Funkce vytvoří úplnou kopii zakázky s novým ID a stavem ČEKÁ.
+ * Původní zakázka zůstává HOTOVO pro správné statistiky.
+ *
+ * @param PDO $pdo Database connection
+ * @param array $input Vstupní data (original_id)
+ * @return array Výsledek operace
+ * @throws Exception Při chybě oprávnění nebo DB operace
+ */
+function handleReopen(PDO $pdo, array $input): array
+{
+    logTiming("[TIMING] handleReopen START");
+    $t0 = microtime(true);
+
+    // Kontrola oprávnění
+    $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+    $userId = $_SESSION['user_id'] ?? null;
+
+    if (!$isAdmin && !$userId) {
+        throw new Exception('Neautorizovaný přístup.');
+    }
+
+    // Získat ID původní zakázky
+    $originalId = $input['original_id'] ?? $input['id'] ?? null;
+    if ($originalId === null || $originalId === '') {
+        throw new Exception('Chybí ID původní zakázky.');
+    }
+
+    // Načíst původní zakázku
+    $stmt = $pdo->prepare("SELECT * FROM wgs_reklamace WHERE id = :id LIMIT 1");
+    $stmt->execute(['id' => $originalId]);
+    $original = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$original) {
+        throw new Exception('Původní zakázka nebyla nalezena.');
+    }
+
+    // Kontrola stavu - musí být dokončená
+    if ($original['stav'] !== 'done') {
+        throw new Exception('Lze klonovat pouze dokončené zakázky (stav HOTOVO).');
+    }
+
+    // Kontrola existence sloupců v tabulce
+    $hasReklamaceId = db_table_has_column($pdo, 'wgs_reklamace', 'reklamace_id');
+    $hasOriginalReklamaceId = db_table_has_column($pdo, 'wgs_reklamace', 'original_reklamace_id');
+    $hasCreatedBy = db_table_has_column($pdo, 'wgs_reklamace', 'created_by');
+    $hasCreatedByRole = db_table_has_column($pdo, 'wgs_reklamace', 'created_by_role');
+    $hasZpracovalId = db_table_has_column($pdo, 'wgs_reklamace', 'zpracoval_id');
+    $hasCreatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'created_at');
+    $hasUpdatedAt = db_table_has_column($pdo, 'wgs_reklamace', 'updated_at');
+
+    // Zahájit transakci
+    $pdo->beginTransaction();
+
+    try {
+        // Vygenerovat nové ID
+        $newWorkflowId = $hasReklamaceId ? generateWorkflowId($pdo) : null;
+        $now = date('Y-m-d H:i:s');
+
+        // Připravit data pro klon - pouze sloupce které existují
+        $columns = [
+            'typ' => $original['typ'] ?? 'servis',
+            'cislo' => $original['cislo'],
+            'datum_prodeje' => $original['datum_prodeje'],
+            'datum_reklamace' => null, // Nová reklamace
+            'jmeno' => $original['jmeno'],
+            'email' => $original['email'],
+            'telefon' => $original['telefon'],
+            'adresa' => $original['adresa'],
+            'ulice' => $original['ulice'],
+            'mesto' => $original['mesto'],
+            'psc' => $original['psc'],
+            'model' => $original['model'],
+            'provedeni' => $original['provedeni'],
+            'barva' => $original['barva'],
+            'seriove_cislo' => $original['seriove_cislo'],
+            'popis_problemu' => $original['popis_problemu'],
+            'doplnujici_info' => $original['doplnujici_info'],
+            'fakturace_firma' => $original['fakturace_firma'],
+            'stav' => 'wait', // Nová zakázka
+            'termin' => null,
+            'cas_navstevy' => null,
+            'datum_dokonceni' => null
+        ];
+
+        // Přidat volitelné sloupce pouze pokud existují
+        if ($hasReklamaceId && $newWorkflowId !== null) {
+            $columns['reklamace_id'] = $newWorkflowId;
+        }
+
+        if ($hasOriginalReklamaceId) {
+            $columns['original_reklamace_id'] = $original['reklamace_id'] ?? $original['id'];
+        }
+
+        if ($hasZpracovalId) {
+            $columns['zpracoval_id'] = $userId;
+        }
+
+        if ($hasCreatedBy) {
+            $columns['created_by'] = $userId;
+        }
+
+        if ($hasCreatedByRole) {
+            $columns['created_by_role'] = $_SESSION['role'] ?? 'user';
+        }
+
+        if ($hasCreatedAt) {
+            $columns['created_at'] = $now;
+        }
+
+        if ($hasUpdatedAt) {
+            $columns['updated_at'] = $now;
+        }
+
+        // Sestavit INSERT dotaz
+        $columnNames = array_keys($columns);
+        $placeholders = array_map(fn($col) => ':' . $col, $columnNames);
+
+        $sql = 'INSERT INTO wgs_reklamace (' . implode(', ', $columnNames) . ')
+                VALUES (' . implode(', ', $placeholders) . ')';
+
+        $stmt = $pdo->prepare($sql);
+
+        // Připravit parametry
+        $parameters = [];
+        foreach ($columns as $column => $value) {
+            $parameters[':' . $column] = $value === '' ? null : $value;
+        }
+
+        if (!$stmt->execute($parameters)) {
+            throw new Exception('Chyba při vytváření klonu zakázky');
+        }
+
+        $newId = $pdo->lastInsertId();
+
+        // Přidat poznámku do nové zakázky
+        $noteTextNew = "Zakázka " . ($original['reklamace_id'] ?? $original['id']) . " byla znovu otevřena! " . ($_SESSION['user_name'] ?? 'Uživatel');
+
+        $stmtNote = $pdo->prepare("
+            INSERT INTO wgs_notes (claim_id, note_text, created_by, created_at)
+            VALUES (:claim_id, :note_text, :created_by, :created_at)
+        ");
+        $stmtNote->execute([
+            'claim_id' => $newId,
+            'note_text' => $noteTextNew,
+            'created_by' => $userId ?? 0,
+            'created_at' => $now
+        ]);
+
+        // Přidat poznámku do původní zakázky
+        $noteTextOriginal = "Založena nová zakázka (reklamace)\n\n" .
+                            "Nová zakázka: " . ($newWorkflowId ?? $newId) . "\n" .
+                            "Zákazník znovu nahlásil problém.\n" .
+                            "Vytvořil: " . ($_SESSION['user_name'] ?? 'Uživatel') . "\n" .
+                            "Datum: " . date('d.m.Y H:i');
+
+        $stmtNote2 = $pdo->prepare("
+            INSERT INTO wgs_notes (claim_id, note_text, created_by, created_at)
+            VALUES (:claim_id, :note_text, :created_by, :created_at)
+        ");
+        $stmtNote2->execute([
+            'claim_id' => $originalId,
+            'note_text' => $noteTextOriginal,
+            'created_by' => $userId ?? 0,
+            'created_at' => $now
+        ]);
+
+        // Commit transakce
+        $pdo->commit();
+
+        $t1 = microtime(true);
+        logTiming(sprintf("[TIMING] handleReopen DONE: %.0fms", ($t1 - $t0) * 1000));
+
+        return [
+            'status' => 'success',
+            'message' => 'Nová zakázka vytvořena jako klon',
+            'new_id' => $newId,
+            'new_workflow_id' => $newWorkflowId,
+            'original_id' => $originalId
+        ];
+
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
+        $tError = microtime(true);
+        logTiming(sprintf("[TIMING] handleReopen CHYBA: %.0fms - %s", ($tError - $t0) * 1000, $e->getMessage()));
 
         throw $e;
     }
@@ -382,8 +625,29 @@ try {
         return;
     }
 
+    if ($action === 'reopen') {
+        $response = handleReopen($pdo, $requestData);
+        echo json_encode($response);
+        return;
+    }
+
     if ($action !== 'create') {
         throw new Exception('Neznámá akce.');
+    }
+
+    // BEZPECNOST: Rate limiting pro create akci
+    // Omezeni: max 10 pokusu za 5 minut, blokace na 30 minut
+    $rateLimiter = new RateLimiter($pdo);
+    $clientIdentifier = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $rateLimitResult = $rateLimiter->checkLimit($clientIdentifier, 'create_reklamace', [
+        'max_attempts' => 10,
+        'window_minutes' => 5,
+        'block_minutes' => 30
+    ]);
+
+    if (!$rateLimitResult['allowed']) {
+        http_response_code(429);
+        throw new Exception($rateLimitResult['message']);
     }
 
     $isLoggedIn = isset($_SESSION['user_id']) || (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true);
@@ -417,6 +681,7 @@ try {
     $popisProblemu = sanitizeInput($_POST['popis_problemu'] ?? '');
     $doplnujiciInfo = sanitizeInput($_POST['doplnujici_info'] ?? '');
     $fakturaceFirma = strtolower(trim($_POST['fakturace_firma'] ?? 'cz')); // DB používá lowercase ENUM
+    $typZakaznika = sanitizeInput($_POST['typ_zakaznika'] ?? ''); // IČO nebo Fyzická osoba
     // GDPR souhlas - pouze pro neregistrované uživatele
     // Registrovaní uživatelé (prodejce, technik, admin) mají souhlas ošetřen ve smlouvách
     $gdprConsentRaw = $_POST['gdpr_consent'] ?? null;
@@ -449,11 +714,8 @@ try {
         $gdprNote = "GDPR souhlas ošetřen smluvně (User ID: {$userId}, Role: {$userRole})";
     }
 
-    if (!empty($doplnujiciInfo)) {
-        $doplnujiciInfo = trim($doplnujiciInfo) . "\n\n" . $gdprNote;
-    } else {
-        $doplnujiciInfo = $gdprNote;
-    }
+    // GDPR poznamka se nyni uklada do samostatneho sloupce gdpr_note
+    // a nepridava se do doplnujici_info
 
     // Dodatečná validace emailu - pouze pokud je vyplněn
     if (!empty($email)) {
@@ -514,6 +776,11 @@ try {
             $workflowId = generateWorkflowId($pdo);
         }
 
+        // Pro nepřihlášené uživatele automaticky generovat POZ číslo
+        if (!$isLoggedIn) {
+            $cislo = generatePozId($pdo);
+        }
+
         $now = date('Y-m-d H:i:s');
 
     $columns = [
@@ -534,8 +801,16 @@ try {
         'seriove_cislo' => $serioveCislo,
         'popis_problemu' => $popisProblemu,
         'doplnujici_info' => $doplnujiciInfo,
-        'fakturace_firma' => $fakturaceFirma
+        'fakturace_firma' => $fakturaceFirma,
+        'typ_zakaznika' => $typZakaznika
     ];
+
+    // Pridat gdpr_note pokud sloupec existuje
+    $existingColumns = db_get_table_columns($pdo, 'wgs_reklamace');
+    $hasGdprNote = in_array('gdpr_note', $existingColumns);
+    if ($hasGdprNote && !empty($gdprNote)) {
+        $columns['gdpr_note'] = $gdprNote;
+    }
 
     if ($hasReklamaceId && $workflowId !== null) {
         $columns['reklamace_id'] = $workflowId;
@@ -586,6 +861,123 @@ try {
         $primaryId = $pdo->lastInsertId();
         $identifierForClient = $workflowId ?? $primaryId;
 
+        // ========================================
+        // AUTOMATICKA NOTIFIKACE: Odeslat email zakaznikovi a adminovi
+        // ========================================
+        try {
+            // Nacist email sablonu pro novou reklamaci
+            $stmtNotif = $pdo->prepare("
+                SELECT * FROM wgs_notifications
+                WHERE id = 'order_created' AND type = 'email' AND active = 1
+                LIMIT 1
+            ");
+            $stmtNotif->execute();
+            $notifSablona = $stmtNotif->fetch(PDO::FETCH_ASSOC);
+
+            if ($notifSablona && !empty($email)) {
+                require_once __DIR__ . '/../../includes/EmailQueue.php';
+
+                // Pripravit data pro sablonu
+                $createdBy = $_SESSION['user_name'] ?? 'Online formulář';
+
+                $notifSubject = str_replace([
+                    '{{customer_name}}',
+                    '{{order_id}}',
+                    '{{product}}',
+                    '{{date}}',
+                    '{{created_at}}',
+                    '{{created_by}}'
+                ], [
+                    $jmeno,
+                    $identifierForClient,
+                    $model ?: 'Nabytek Natuzzi',
+                    date('d.m.Y'),
+                    date('d.m.Y H:i'),
+                    $createdBy
+                ], $notifSablona['subject']);
+
+                $notifBody = str_replace([
+                    '{{customer_name}}',
+                    '{{order_id}}',
+                    '{{product}}',
+                    '{{date}}',
+                    '{{created_at}}',
+                    '{{created_by}}',
+                    '{{address}}',
+                    '{{description}}',
+                    '{{customer_email}}',
+                    '{{customer_phone}}',
+                    '{{company_email}}',
+                    '{{company_phone}}'
+                ], [
+                    $jmeno,
+                    $identifierForClient,
+                    $model ?: 'Nabytek Natuzzi',
+                    date('d.m.Y'),
+                    date('d.m.Y H:i'),
+                    $createdBy,
+                    $adresa ?: 'Neuvedena',
+                    $popisProblemu,
+                    $email,
+                    $telefon,
+                    'reklamace@wgs-service.cz',
+                    '+420 725 965 826'
+                ], $notifSablona['template']);
+
+                // Pridat email do fronty
+                $emailQueue = new EmailQueue($pdo);
+                $emailQueue->add(
+                    $email,
+                    $notifSubject,
+                    $notifBody,
+                    [
+                        'notification_id' => $notifSablona['id'],
+                        'reklamace_id' => $primaryId,
+                        'trigger' => 'complaint_created'
+                    ]
+                );
+
+                error_log("[Notifikace] Email o nove reklamaci pridan do fronty: {$email}, Zakazka: {$identifierForClient}");
+            }
+        } catch (Exception $notifError) {
+            // Chyba notifikace nesmí rozbít celý request
+            error_log("[Notifikace] Chyba pri odesilani: " . $notifError->getMessage());
+        }
+
+        // ========================================
+        // PUSH NOTIFIKACE: Odeslat technikům a adminům o nové zakázce
+        // ========================================
+        try {
+            require_once __DIR__ . '/../../includes/WebPush.php';
+
+            $webPush = new WGSWebPush($pdo);
+
+            $notifikacePayload = [
+                'title' => 'Nová zakázka v systému',
+                'body' => "Do systému byla přidána nová objednávka s číslem {$identifierForClient} - {$jmeno}",
+                'icon' => '/assets/img/logo.png',
+                'url' => "/seznam.php?id={$primaryId}",
+                'data' => [
+                    'zakazka_id' => $primaryId,
+                    'reklamace_id' => $identifierForClient,
+                    'jmeno' => $jmeno,
+                    'typ' => 'nova_zakazka'
+                ]
+            ];
+
+            $vysledek = $webPush->odeslatTechnikumAAdminum($notifikacePayload);
+
+            if ($vysledek['uspech']) {
+                error_log("[Push Notifikace] Notifikace o nove zakazce odeslana technikum/adminum: {$identifierForClient}, Odeslano: " . ($vysledek['odeslano'] ?? 0));
+            } else {
+                error_log("[Push Notifikace] Chyba pri odesilani: " . ($vysledek['zprava'] ?? 'Neznama chyba'));
+            }
+        } catch (Exception $pushError) {
+            // Chyba push notifikace nesmí rozbít celý request
+            error_log("[Push Notifikace] Chyba: " . $pushError->getMessage());
+        }
+        // ========================================
+
     } catch (Exception $e) {
         // CRITICAL FIX: ROLLBACK při chybě
         if ($pdo->inTransaction()) {
@@ -608,7 +1000,7 @@ try {
     // Log error for debugging
     error_log('SAVE.PHP ERROR: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ':' . $e->getLine());
 
-    // ✅ SECURITY FIX: Sanitizovat POST data před logováním (odstranit citlivá pole)
+    // SECURITY FIX: Sanitizovat POST data pred logovanim (odstranit citliva pole)
     $safePost = $_POST;
     $sensitiveKeys = ['password', 'csrf_token', 'credit_card', 'pin', 'ssn', 'card_number'];
     foreach ($sensitiveKeys as $key) {

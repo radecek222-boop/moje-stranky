@@ -47,7 +47,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         }
 
         h1 {
-            color: #2D5016;
+            color: #333333;
             margin-bottom: 20px;
         }
 
@@ -91,7 +91,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 
         .btn {
             padding: 10px 20px;
-            background: #2D5016;
+            background: #333333;
             color: white;
             border: none;
             border-radius: 4px;
@@ -136,7 +136,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         .stat-card .value {
             font-size: 28px;
             font-weight: 700;
-            color: #2D5016;
+            color: #333333;
         }
 
         .stat-card .change {
@@ -159,7 +159,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         }
 
         th {
-            background: #2D5016;
+            background: #333333;
             color: white;
             padding: 12px;
             text-align: left;
@@ -259,17 +259,17 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         <div class="filters">
             <div class="filter-row">
                 <div class="filter-group">
-                    <label>Datum od:</label>
+                    <label for="date-from">Datum od:</label>
                     <input type="date" id="date-from" value="<?php echo date('Y-m-d', strtotime('-30 days')); ?>">
                 </div>
 
                 <div class="filter-group">
-                    <label>Datum do:</label>
+                    <label for="date-to">Datum do:</label>
                     <input type="date" id="date-to" value="<?php echo date('Y-m-d'); ?>">
                 </div>
 
                 <div class="filter-group">
-                    <label>UTM Source:</label>
+                    <label for="utm-source">UTM Source:</label>
                     <select id="utm-source">
                         <option value="">Všechny</option>
                         <!-- Dynamically filled -->
@@ -277,7 +277,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 </div>
 
                 <div class="filter-group">
-                    <label>UTM Medium:</label>
+                    <label for="utm-medium">UTM Medium:</label>
                     <select id="utm-medium">
                         <option value="">Všechny</option>
                         <!-- Dynamically filled -->
@@ -285,7 +285,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 </div>
 
                 <div class="filter-group">
-                    <label>Device Type:</label>
+                    <label for="device-type">Device Type:</label>
                     <select id="device-type">
                         <option value="">Všechny</option>
                         <option value="desktop">Desktop</option>
@@ -352,21 +352,21 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             <canvas id="timeline-canvas"></canvas>
         </div>
 
-        <div class="campaigns-table">
-            <div id="loading-message" class="loading">Klikněte na "Načíst data" pro zobrazení campaign statistik</div>
+        <div class="campaigns-table" aria-live="polite">
+            <div id="loading-message" class="loading" role="status">Klikněte na "Načíst data" pro zobrazení campaign statistik</div>
 
             <table id="campaigns-table" style="display: none;">
                 <thead>
                     <tr>
-                        <th class="sortable" data-sort="utm_campaign">Campaign</th>
-                        <th class="sortable" data-sort="utm_source">Source</th>
-                        <th class="sortable" data-sort="utm_medium">Medium</th>
-                        <th class="sortable" data-sort="device_type">Device</th>
-                        <th class="sortable" data-sort="total_sessions">Sessions</th>
-                        <th class="sortable" data-sort="total_conversions">Conversions</th>
-                        <th class="sortable" data-sort="avg_conversion_rate">Conv. Rate</th>
-                        <th class="sortable" data-sort="total_revenue">Revenue</th>
-                        <th class="sortable" data-sort="avg_bounce_rate">Bounce %</th>
+                        <th scope="col" class="sortable" data-sort="utm_campaign">Campaign</th>
+                        <th scope="col" class="sortable" data-sort="utm_source">Source</th>
+                        <th scope="col" class="sortable" data-sort="utm_medium">Medium</th>
+                        <th scope="col" class="sortable" data-sort="device_type">Device</th>
+                        <th scope="col" class="sortable" data-sort="total_sessions">Sessions</th>
+                        <th scope="col" class="sortable" data-sort="total_conversions">Conversions</th>
+                        <th scope="col" class="sortable" data-sort="avg_conversion_rate">Conv. Rate</th>
+                        <th scope="col" class="sortable" data-sort="total_revenue">Revenue</th>
+                        <th scope="col" class="sortable" data-sort="avg_bounce_rate">Bounce %</th>
                     </tr>
                 </thead>
                 <tbody id="campaigns-tbody">

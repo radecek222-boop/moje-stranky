@@ -38,7 +38,7 @@ try {
     $updated = 0;
 
     foreach ($urlMappings as $oldUrl => $newUrl) {
-        // OPRAVA: Update pro PENDING i FAILED actions (Codex fix)
+        // OPRAVA: Update pro PENDING i FAILED actions
         // Opravujeme URL bez ohledu na status, protože failed actions mají špatné URL
         $stmt = $pdo->prepare("
             UPDATE wgs_pending_actions
@@ -54,7 +54,7 @@ try {
 
         $rowsAffected = $stmt->rowCount();
         if ($rowsAffected > 0) {
-            echo "✅ Aktualizováno {$rowsAffected}×: {$oldUrl} → {$newUrl}\n";
+            echo "Aktualizováno {$rowsAffected}×: {$oldUrl} → {$newUrl}\n";
             $updated += $rowsAffected;
         }
     }
@@ -73,7 +73,7 @@ try {
     $reset = $resetStmt->rowCount();
 
     if ($reset > 0) {
-        echo "✅ Resetováno {$reset} failed actions na pending\n";
+        echo "Resetováno {$reset} failed actions na pending\n";
     }
 
     echo "\n=== SHRNUTÍ ===\n";
@@ -81,13 +81,13 @@ try {
     echo "Resetováno failed: {$reset}\n";
 
     if ($updated > 0 || $reset > 0) {
-        echo "\n✅ SUCCESS: Pending actions opraveny!\n";
+        echo "\nSUCCESS: Pending actions opraveny!\n";
         echo "💡 TIP: Nyní můžete spustit úkoly v Control Center → Pending Actions\n";
     } else {
         echo "\nℹ️  INFO: Žádné akce k opravě\n";
     }
 
 } catch (Exception $e) {
-    echo "❌ KRITICKÁ CHYBA: " . $e->getMessage() . "\n";
+    echo "KRITICKÁ CHYBA: " . $e->getMessage() . "\n";
     exit(1);
 }

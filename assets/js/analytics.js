@@ -14,9 +14,41 @@ const ANALYTICS = {
     }
 };
 
+// === SECURITY: escapeHtml helper ===
+const escapeHtml = (str) => {
+    if (typeof Utils !== 'undefined' && Utils.escapeHtml) {
+        return Utils.escapeHtml(str);
+    }
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+};
+
+// ========================================
+// CDN GUARD: Chart.js
+// ========================================
+if (typeof window.Chart === 'undefined') {
+    console.warn('[Analytics] Chart.js není načten (CDN?). Grafy nebudou dostupné.');
+    // Zobrazit upozornění uživateli
+    window.addEventListener('DOMContentLoaded', () => {
+        const canvas = document.getElementById('visits-chart');
+        if (canvas) {
+            const container = canvas.parentElement;
+            if (container) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666; background: #f9f9f9; border-radius: 8px;">
+                        <p style="font-size: 16px; margin-bottom: 10px; font-weight: 600;">Graf se nepodařilo načíst</p>
+                        <p style="font-size: 14px;">Zkuste obnovit stránku (F5) nebo zkontrolujte připojení k internetu.</p>
+                    </div>
+                `;
+            }
+        }
+    });
+}
+
 // === INIT ===
 window.addEventListener('DOMContentLoaded', () => {
-    logger.log('🚀 Analytics dashboard inicialization...');
+    logger.log('[Start] Analytics dashboard inicialization...');
     checkAuth();
     nactiData();
     inicializovatEventListeners();
@@ -34,7 +66,7 @@ function inicializovatEventListeners() {
         });
     });
 
-    logger.log('✅ Event listeners registrovány');
+    logger.log('Event listeners registrovány');
 }
 
 // === AUTH ===
@@ -101,10 +133,10 @@ async function nactiData() {
     try {
         const response = await fetch(`/api/analytics_api.php?period=${ANALYTICS.timePeriod}`);
 
-        logger.log('📊 Response status:', response.status);
+        logger.log('[Stats] Response status:', response.status);
 
         if (!response.ok) {
-            logger.error('❌ Response není OK!');
+            logger.error('Response není OK!');
             return;
         }
 
@@ -118,14 +150,14 @@ async function nactiData() {
             ANALYTICS.data.browsersDevices = data.data.browsersDevices || {browsers: [], devices: []};
             ANALYTICS.data.timeline = data.data.timeline || [];
 
-            logger.log('✅ Data úspěšně načtena');
+            logger.log('Data úspěšně načtena');
             aktualizovatUI();
         } else {
-            logger.error('❌ API error:', data.message);
+            logger.error('API error:', data.message);
         }
 
     } catch (error) {
-        logger.error('❌ Fetch error:', error);
+        logger.error('Fetch error:', error);
     }
 }
 
@@ -134,7 +166,7 @@ function aktualizovatUI() {
     const stats = ANALYTICS.data.stats;
 
     if (!stats) {
-        logger.error('⚠️ Žádná stats data');
+        logger.error('Žádná stats data');
         return;
     }
 
@@ -176,7 +208,7 @@ function aktualizovatUI() {
     zobrazitZarizeni();
     vykreslitGraf();
 
-    logger.log('✅ UI úspěšně aktualizováno');
+    logger.log('UI úspěšně aktualizováno');
 }
 
 function getPeriodText() {
@@ -195,7 +227,11 @@ function getPeriodText() {
 }
 
 // === HELPERS ===
+// Step 134: Use centralized formatNumber from utils.js if available
 function formatNumber(num) {
+    if (window.Utils && window.Utils.formatNumber) {
+        return window.Utils.formatNumber(num);
+    }
     return new Intl.NumberFormat('cs-CZ').format(num);
 }
 
@@ -219,8 +255,8 @@ function zobrazitTopStranky() {
     tbody.innerHTML = pages.map(page => `
         <tr style="border-bottom: 1px solid #e5e7eb;">
             <td style="padding: 0.75rem;">
-                <div style="font-weight: 500; color: #1d1f2c;">${page.page_title || page.page_url}</div>
-                <div style="font-size: 0.75rem; color: #6b7280;">${page.page_url}</div>
+                <div style="font-weight: 500; color: #1d1f2c;">${escapeHtml(page.page_title || page.page_url)}</div>
+                <div style="font-size: 0.75rem; color: #6b7280;">${escapeHtml(page.page_url)}</div>
             </td>
             <td style="padding: 0.75rem;">${formatNumber(page.visits)}</td>
             <td style="padding: 0.75rem;">${formatNumber(page.unique_visitors)}</td>
@@ -240,7 +276,7 @@ function zobrazitReferrery() {
 
     tbody.innerHTML = referrers.map(ref => `
         <tr style="border-bottom: 1px solid #e5e7eb;">
-            <td style="padding: 0.75rem; font-weight: 500;">${ref.referrer_source}</td>
+            <td style="padding: 0.75rem; font-weight: 500;">${escapeHtml(ref.referrer_source)}</td>
             <td style="padding: 0.75rem;">${formatNumber(ref.visits)}</td>
             <td style="padding: 0.75rem;">${formatNumber(ref.unique_visitors)}</td>
         </tr>
@@ -260,7 +296,7 @@ function zobrazitProhlizece() {
         const browserName = parsujUserAgent(browser.user_agent);
         return `
             <tr style="border-bottom: 1px solid #e5e7eb;">
-                <td style="padding: 0.75rem; font-weight: 500;">${browserName}</td>
+                <td style="padding: 0.75rem; font-weight: 500;">${escapeHtml(browserName)}</td>
                 <td style="padding: 0.75rem;">${formatNumber(browser.visits)}</td>
             </tr>
         `;
@@ -278,7 +314,7 @@ function zobrazitZarizeni() {
 
     tbody.innerHTML = devices.map(device => `
         <tr style="border-bottom: 1px solid #e5e7eb;">
-            <td style="padding: 0.75rem; font-weight: 500;">${device.screen_resolution}</td>
+            <td style="padding: 0.75rem; font-weight: 500;">${escapeHtml(device.screen_resolution)}</td>
             <td style="padding: 0.75rem;">${formatNumber(device.visits)}</td>
         </tr>
     `).join('');
@@ -289,6 +325,18 @@ let visitsChart = null;
 function vykreslitGraf() {
     const canvas = document.getElementById('visits-chart');
     if (!canvas) return;
+
+    // CDN Guard: Kontrola dostupnosti Chart.js
+    if (typeof window.Chart === 'undefined') {
+        console.warn('[Analytics] Chart.js není dostupný, graf nebude vykreslen');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = '14px Poppins';
+        ctx.fillStyle = '#999';
+        ctx.textAlign = 'center';
+        ctx.fillText('Graf se nepodařilo načíst. Zkuste obnovit stránku (F5).', canvas.width / 2, canvas.height / 2);
+        return;
+    }
 
     const timeline = ANALYTICS.data.timeline || [];
 
@@ -388,7 +436,7 @@ function exportAnalytics(format) {
     if (format === 'csv') {
         exportToCSV();
     } else if (format === 'pdf') {
-        alert('PDF export - připraveno pro budoucí implementaci');
+        wgsToast.info('PDF export - připraveno pro budoucí implementaci');
     }
 }
 
@@ -425,32 +473,4 @@ function logout() {
 }
 
 // === MOBILE MENU ===
-function toggleMobileMenu() {
-    const hamburger = document.getElementById('hamburger');
-    const mobileMenu = document.getElementById('mobileMenu');
-    const backdrop = document.getElementById('mobileMenuBackdrop');
-
-    if (hamburger) hamburger.classList.toggle('active');
-    if (mobileMenu) mobileMenu.classList.toggle('show');
-    if (backdrop) backdrop.classList.toggle('show');
-
-    // Prevent body scroll when menu is open
-    if (mobileMenu && mobileMenu.classList.contains('show')) {
-        document.body.style.overflow = 'hidden';
-    } else {
-        document.body.style.overflow = '';
-    }
-}
-
-function navigateTo(url) {
-    // Close mobile menu before navigation
-    const mobileMenu = document.getElementById('mobileMenu');
-    if (mobileMenu && mobileMenu.classList.contains('show')) {
-        toggleMobileMenu();
-    }
-
-    // Small delay for smooth transition
-    setTimeout(() => {
-        window.location.href = url;
-    }, 300);
-}
+// REMOVED: Mrtvý kód - menu je nyní centrálně v hamburger-menu.php

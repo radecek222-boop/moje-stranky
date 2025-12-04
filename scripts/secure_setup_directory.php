@@ -13,7 +13,7 @@ try {
     // Kontrola jestli setup/ adresář existuje
     if (!is_dir($setupDir)) {
         echo "ℹ️  Adresář setup/ neexistuje - není co zabezpečovat\n";
-        echo "✅ OK\n";
+        echo "OK\n";
         exit(0);
     }
 
@@ -35,25 +35,25 @@ try {
             $func($fileinfo->getRealPath());
         }
         rmdir($backupDir);
-        echo "✅ Smazán starý setup.bak/\n";
+        echo "Smazán starý setup.bak/\n";
     }
 
     echo "🔄 Přejmenovávám setup/ → setup.bak/...\n";
     rename($setupDir, $backupDir);
-    echo "✅ Přejmenováno\n";
+    echo "Přejmenováno\n";
 
     // Vytvoř .htaccess v setup.bak/ pro extra ochranu
     $htaccess = $backupDir . '/.htaccess';
     $htaccessContent = "# Deny all access to setup backup directory\nOrder deny,allow\nDeny from all\n";
     file_put_contents($htaccess, $htaccessContent);
-    echo "✅ Vytvořen .htaccess ochrana v setup.bak/\n";
+    echo "Vytvořen .htaccess ochrana v setup.bak/\n";
 
-    echo "\n✅ SETUP ADRESÁŘ ZABEZPEČEN!\n";
+    echo "\nSETUP ADRESÁŘ ZABEZPEČEN!\n";
     echo "   • setup/ přejmenován na setup.bak/\n";
     echo "   • Přidán .htaccess deny all\n";
     echo "\n💡 TIP: Pokud potřebujete setup znovu spustit, přejmenujte setup.bak/ zpět na setup/\n";
 
 } catch (Exception $e) {
-    echo "❌ KRITICKÁ CHYBA: " . $e->getMessage() . "\n";
+    echo "KRITICKÁ CHYBA: " . $e->getMessage() . "\n";
     exit(1);
 }

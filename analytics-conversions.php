@@ -35,7 +35,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             padding: 20px;
         }
         .container { max-width: 1600px; margin: 0 auto; }
-        h1 { color: #2D5016; margin-bottom: 20px; }
+        h1 { color: #333333; margin-bottom: 20px; }
         .tabs {
             display: flex;
             gap: 10px;
@@ -53,8 +53,8 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             border-bottom: 3px solid transparent;
         }
         .tab.active {
-            color: #2D5016;
-            border-bottom-color: #2D5016;
+            color: #333333;
+            border-bottom-color: #333333;
         }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -93,7 +93,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         }
         .btn {
             padding: 10px 20px;
-            background: #2D5016;
+            background: #333333;
             color: white;
             border: none;
             border-radius: 4px;
@@ -127,7 +127,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         .stat-card .value {
             font-size: 28px;
             font-weight: 700;
-            color: #2D5016;
+            color: #333333;
         }
         .conversions-table {
             background: white;
@@ -141,7 +141,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             border-collapse: collapse;
         }
         th {
-            background: #2D5016;
+            background: #333333;
             color: white;
             padding: 12px;
             text-align: left;
@@ -180,7 +180,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             margin: 20px 0;
             padding: 20px;
             background: #f8f9fa;
-            border-left: 4px solid #2D5016;
+            border-left: 4px solid #333333;
             border-radius: 4px;
         }
         .funnel-step-header {
@@ -197,11 +197,11 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         .funnel-step-count {
             font-size: 24px;
             font-weight: 700;
-            color: #2D5016;
+            color: #333333;
         }
         .funnel-step-bar {
             height: 30px;
-            background: linear-gradient(90deg, #2D5016 0%, #5a9a2e 100%);
+            background: linear-gradient(90deg, #333333 0%, #5a9a2e 100%);
             border-radius: 4px;
             position: relative;
             overflow: hidden;
@@ -222,8 +222,8 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
         <h1>Conversion Tracking & Funnels</h1>
 
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('conversions')">Konverze</button>
-            <button class="tab" onclick="switchTab('funnels')">Funnels</button>
+            <button class="tab active" data-action="switchTab" data-tab="conversions">Konverze</button>
+            <button class="tab" data-action="switchTab" data-tab="funnels">Funnels</button>
         </div>
 
         <!-- TAB 1: Conversions List -->
@@ -231,15 +231,15 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             <div class="filters">
                 <div class="filter-row">
                     <div class="filter-group">
-                        <label>Datum od:</label>
+                        <label for="date-from">Datum od:</label>
                         <input type="date" id="date-from" value="<?php echo date('Y-m-d', strtotime('-30 days')); ?>">
                     </div>
                     <div class="filter-group">
-                        <label>Datum do:</label>
+                        <label for="date-to">Datum do:</label>
                         <input type="date" id="date-to" value="<?php echo date('Y-m-d'); ?>">
                     </div>
                     <div class="filter-group">
-                        <label>Typ konverze:</label>
+                        <label for="conversion-type">Typ konverze:</label>
                         <select id="conversion-type">
                             <option value="">Všechny</option>
                             <option value="form_submit">Formulář</option>
@@ -277,20 +277,20 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
                 </div>
             </div>
 
-            <div class="conversions-table">
-                <div id="loading-message" class="loading">Klikněte na "Načíst data" pro zobrazení konverzí</div>
+            <div class="conversions-table" aria-live="polite">
+                <div id="loading-message" class="loading" role="status">Klikněte na "Načíst data" pro zobrazení konverzí</div>
 
                 <table id="conversions-table" style="display: none;">
                     <thead>
                         <tr>
-                            <th>Datum</th>
-                            <th>Typ</th>
-                            <th>Label</th>
-                            <th>Hodnota</th>
-                            <th>Čas</th>
-                            <th>Kroky</th>
-                            <th>UTM Campaign</th>
-                            <th>Device</th>
+                            <th scope="col">Datum</th>
+                            <th scope="col">Typ</th>
+                            <th scope="col">Label</th>
+                            <th scope="col">Hodnota</th>
+                            <th scope="col">Čas</th>
+                            <th scope="col">Kroky</th>
+                            <th scope="col">UTM Campaign</th>
+                            <th scope="col">Device</th>
                         </tr>
                     </thead>
                     <tbody id="conversions-tbody"></tbody>
@@ -303,17 +303,17 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             <div class="filters">
                 <div class="filter-row">
                     <div class="filter-group">
-                        <label>Vybrat Funnel:</label>
+                        <label for="funnel-select">Vybrat Funnel:</label>
                         <select id="funnel-select">
                             <option value="">-- Načtěte funnely --</option>
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label>Datum od:</label>
+                        <label for="funnel-date-from">Datum od:</label>
                         <input type="date" id="funnel-date-from" value="<?php echo date('Y-m-d', strtotime('-30 days')); ?>">
                     </div>
                     <div class="filter-group">
-                        <label>Datum do:</label>
+                        <label for="funnel-date-to">Datum do:</label>
                         <input type="date" id="funnel-date-to" value="<?php echo date('Y-m-d'); ?>">
                     </div>
                     <div class="filter-group">
@@ -337,7 +337,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
 
-            document.querySelector(`button[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.querySelector(`button[data-tab="${tabName}"]`).classList.add('active');
             document.getElementById(`${tabName}-tab`).classList.add('active');
 
             if (tabName === 'funnels') {

@@ -71,10 +71,10 @@ try {
                 $minifiedSize = filesize($minPath);
                 $savings = round((1 - ($minifiedSize / $originalSize)) * 100, 1);
 
-                echo "  ✅ " . $file->getFilename() . " → .min.js ({$savings}% úspora)\n";
+                echo "  " . $file->getFilename() . " → .min.js ({$savings}% úspora)\n";
                 $minified++;
             } catch (Exception $e) {
-                echo "  ❌ " . $file->getFilename() . " - CHYBA: " . $e->getMessage() . "\n";
+                echo "  " . $file->getFilename() . " - CHYBA: " . $e->getMessage() . "\n";
                 $errors++;
             }
         }
@@ -107,10 +107,10 @@ try {
                 $minifiedSize = filesize($minPath);
                 $savings = round((1 - ($minifiedSize / $originalSize)) * 100, 1);
 
-                echo "  ✅ " . $file->getFilename() . " → .min.css ({$savings}% úspora)\n";
+                echo "  " . $file->getFilename() . " → .min.css ({$savings}% úspora)\n";
                 $minified++;
             } catch (Exception $e) {
-                echo "  ❌ " . $file->getFilename() . " - CHYBA: " . $e->getMessage() . "\n";
+                echo "  " . $file->getFilename() . " - CHYBA: " . $e->getMessage() . "\n";
                 $errors++;
             }
         }
@@ -122,13 +122,13 @@ try {
     echo "Chyby: {$errors}\n";
 
     if ($minified > 0) {
-        echo "\n✅ SUCCESS: Soubory byly minifikovány!\n";
+        echo "\nSUCCESS: Soubory byly minifikovány!\n";
         echo "💡 TIP: Pro produkci používejte .min.js a .min.css verze\n";
     } else if ($skipped > 0) {
         echo "\nℹ️  INFO: Všechny soubory jsou již aktuální\n";
     }
 
 } catch (Exception $e) {
-    echo "❌ KRITICKÁ CHYBA: " . $e->getMessage() . "\n";
+    echo "KRITICKÁ CHYBA: " . $e->getMessage() . "\n";
     exit(1);
 }

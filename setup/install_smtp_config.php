@@ -76,12 +76,12 @@ try {
     echo "   ✓ Historie notifikací: " . ($exists ? "existuje" : "neexistuje") . "\n\n";
 
     echo "</pre>";
-    echo "<h2 style='color: green;'>✅ Instalace dokončena!</h2>";
+    echo "<h2 style='color: green;'>Instalace dokončena!</h2>";
     echo "<p>Nyní můžete pokračovat na <a href='admin.php?tab=notifications'>Správa Emailů & SMS</a></p>";
 
 } catch (Exception $e) {
     echo "</pre>";
-    echo "<h2 style='color: red;'>❌ Chyba při instalaci</h2>";
+    echo "<h2 style='color: red;'>Chyba při instalaci</h2>";
     echo "<p>ERROR: " . htmlspecialchars($e->getMessage()) . "</p>";
     echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
 }

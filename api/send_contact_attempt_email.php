@@ -123,6 +123,32 @@ try {
         $adresa = implode(', ', $parts);
     }
 
+    // Získání údajů o technikovi, který provádí akci
+    $technicianName = $_SESSION['user_name'] ?? 'White Glove Service';
+    $technicianEmail = $_SESSION['user_email'] ?? 'reklamace@wgs-service.cz';
+
+    // Pokud je přihlášený uživatel (ne admin), zkusit načíst telefon z databáze
+    $technicianPhone = '+420 725 965 826'; // Výchozí firemní telefon
+    if (isset($_SESSION['user_id']) && $_SESSION['user_id'] > 0) {
+        try {
+            $stmtUser = $pdo->prepare("
+                SELECT telefon, phone
+                FROM wgs_users
+                WHERE id = :user_id OR user_id = :user_id
+                LIMIT 1
+            ");
+            $stmtUser->execute(['user_id' => $_SESSION['user_id']]);
+            $userInfo = $stmtUser->fetch(PDO::FETCH_ASSOC);
+
+            if ($userInfo) {
+                $technicianPhone = $userInfo['telefon'] ?: $userInfo['phone'] ?: $technicianPhone;
+            }
+        } catch (PDOException $e) {
+            // Pokud telefon nelze načíst, použije se výchozí firemní telefon
+            error_log('Nepodařilo se načíst telefon technika: ' . $e->getMessage());
+        }
+    }
+
     // Náhrada proměnných v šabloně
     $subject = str_replace([
         '{{customer_name}}',
@@ -141,18 +167,70 @@ try {
         '{{order_id}}',
         '{{product}}',
         '{{date}}',
-        '{{address}}'
+        '{{address}}',
+        '{{technician_name}}',
+        '{{technician_email}}',
+        '{{technician_phone}}',
+        '{{company_email}}',
+        '{{company_phone}}'
     ], [
         $customerName,
         $orderId,
         $product,
         date('d.m.Y H:i'),
-        $adresa ?: 'Neuvedena'
+        $adresa ?: 'Neuvedena',
+        $technicianName,
+        $technicianEmail,
+        $technicianPhone,
+        'reklamace@wgs-service.cz',  // Obecný firemní email
+        '+420 725 965 826'            // Obecný firemní telefon
     ], $notification['template']);
 
-    // Příprava SMS textu (zkrácená verze emailu pro SMS)
-    // Použijeme stejné proměnné jako v emailu pro konzistenci
-    $smsText = "Dobrý den {$customerName}, pokusili jsme se Vás kontaktovat ohledně servisní prohlídky č. {$orderId} ({$product}, " . date('d.m.Y') . "). Prosím zavolejte zpět na +420 725 965 826. Děkujeme, WGS Service";
+    // Nacist SMS sablonu z databaze (pokud existuje)
+    $smsText = null;
+    try {
+        $stmtSms = $pdo->prepare("
+            SELECT template FROM wgs_notifications
+            WHERE trigger_event = 'contact_attempt' AND type = 'sms' AND active = 1
+            LIMIT 1
+        ");
+        $stmtSms->execute();
+        $smsSablona = $stmtSms->fetch(PDO::FETCH_ASSOC);
+
+        if ($smsSablona && !empty($smsSablona['template'])) {
+            // Nahradit promenne v SMS sablone
+            $smsText = str_replace([
+                '{{customer_name}}',
+                '{{order_id}}',
+                '{{product}}',
+                '{{date}}',
+                '{{address}}',
+                '{{technician_name}}',
+                '{{technician_email}}',
+                '{{technician_phone}}',
+                '{{company_email}}',
+                '{{company_phone}}'
+            ], [
+                $customerName,
+                $orderId,
+                $product,
+                date('d.m.Y'),
+                $adresa ?: 'Neuvedena',
+                $technicianName,
+                $technicianEmail,
+                $technicianPhone,
+                'reklamace@wgs-service.cz',
+                '+420 725 965 826'
+            ], $smsSablona['template']);
+        }
+    } catch (PDOException $e) {
+        error_log('Chyba pri nacitani SMS sablony: ' . $e->getMessage());
+    }
+
+    // Fallback pokud SMS sablona neexistuje
+    if (!$smsText) {
+        $smsText = "Dobry den {$customerName}, kontaktujeme Vas v zastoupeni Natuzzi ohledne servisni zakazky c. {$orderId}. Nepodarilo se nam Vas zastihnout. Zavolejte prosim zpet {$technicianName} na tel. {$technicianPhone}. Dekujeme, WGS Service";
+    }
 
     // Přidání emailu do fronty
     $emailQueue = new EmailQueue($pdo);
@@ -173,7 +251,7 @@ try {
     }
 
     // Logování akce
-    error_log("✉️ EMAIL - Pokus o kontakt: Zákazník: {$customerName}, Email: {$customerEmail}, Zakázka: {$orderId}");
+    error_log("[EMAIL] Pokus o kontakt: Zakaznik: {$customerName}, Email: {$customerEmail}, Zakazka: {$orderId}");
 
     // Úspěšná odpověď
     echo json_encode([
@@ -183,7 +261,7 @@ try {
         'recipient' => $customerEmail,
         'customer_name' => $customerName,
         'order_id' => $orderId,
-        'sms_text' => $smsText,  // ✅ SMS text se generuje ze stejných dat jako email
+        'sms_text' => $smsText,  // SMS text se generuje ze stejnych dat jako email
         'product' => $product
     ]);
 

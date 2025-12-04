@@ -67,7 +67,7 @@ function handleRememberMeLogin(): void
         // Přihlásit uživatele
         session_regenerate_id(true);
 
-        // ✅ SECURITY FIX: CSRF token rotation po auto-login
+        // SECURITY FIX: CSRF token rotation po auto-login
         unset($_SESSION['csrf_token']);
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
@@ -77,7 +77,7 @@ function handleRememberMeLogin(): void
         $_SESSION['role'] = $user['role'] ?? 'user';
         $_SESSION['is_admin'] = ($user['is_admin'] ?? 0) == 1;
 
-        // ✅ FIX 6: Inactivity timeout - nastavit initial timestamps při auto-login
+        // FIX 6: Inactivity timeout - nastavit initial timestamps při auto-login
         $_SESSION['last_activity'] = time();
         $_SESSION['login_time'] = time();
         $_SESSION['login_method'] = 'remember_me';

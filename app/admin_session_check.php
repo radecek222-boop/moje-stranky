@@ -4,7 +4,7 @@
  * Kontrola přihlášení admina NEBO technika
  * Vrací JSON pro AJAX kontroly
  *
- * ✅ FIX: Přidána kontrola pro techniky (photocustomer.php vyžaduje admin NEBO technik)
+ * FIX: Přidána kontrola pro techniky (photocustomer.php vyžaduje admin NEBO technik)
  */
 
 header('Content-Type: application/json; charset=utf-8');
@@ -25,7 +25,7 @@ if (!$isLoggedIn) {
 // Kontrola admin session
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 
-// ✅ FIX: Kontrola technik session (photocustomer.php vyžaduje přístup i pro techniky)
+// FIX: Kontrola technik session (photocustomer.php vyžaduje přístup i pro techniky)
 $rawRole = (string) ($_SESSION['role'] ?? '');
 $normalizedRole = strtolower(trim($rawRole));
 

@@ -1,12 +1,13 @@
 <?php
 require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/includes/seo_meta.php';
 
 $isLoggedIn = isset($_SESSION['user_id']);
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 
-// Bezpečnostní kontrola: CSRF token se generuje pouze pokud je session aktivní
+// Bezpecnostni kontrola: CSRF token se generuje pouze pokud je session aktivni
 if (session_status() !== PHP_SESSION_ACTIVE) {
-    die('Session není aktivní. Obnovte stránku.');
+    die('Session neni aktivni. Obnovte stranku.');
 }
 ?>
 <!DOCTYPE html>
@@ -14,10 +15,13 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Reklamace luxusního nábytku Natuzzi. Rychlé a profesionální vyřízení reklamací sedaček a souprav. Autorizovaný servis v Praze, Brně, Bratislavě.">
+  <meta name="description" content="<?php echo getSeoDescription('novareklamace'); ?>">
   <meta name="theme-color" content="#000000">
   <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
-  <title>Objednat servis | WGS</title>
+  <?php renderSeoMeta('novareklamace'); ?>
+  <?php renderSchemaOrg('novareklamace'); ?>
+  <?php renderFaqSchema('novareklamace'); ?>
+  <title><?php echo getSeoTitle('novareklamace'); ?></title>
 
   <!-- Preconnect k CDN pro rychlejší načítání -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,12 +33,15 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <link rel="preload" href="assets/img/herman-image03.webp" as="image" fetchpriority="high">
 
   <!-- Google Fonts - použít 'optional' pro prevenci CLS (žádný layout shift) -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Critical CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
-  <link rel="stylesheet" href="assets/css/novareklamace.css">
-  <link rel="stylesheet" href="assets/css/novareklamace-mobile-fixes.css">
+  <link rel="stylesheet" href="assets/css/novareklamace.min.css">
+  <!-- novareklamace-mobile-fixes.css sloučen do novareklamace.min.css (Step 49) -->
+  <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
+  <!-- Univerzální tmavý styl pro všechny modály -->
+  <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
 
   <!-- Non-critical CSS - defer -->
   <link rel="preload" href="assets/css/mobile-responsive.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -73,12 +80,34 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.8);
-  display: none;              /* <-- PŘIDEJ TENTO ŘÁDEK */
-  align-items: center;         /* <-- PŘIDEJ TENTO ŘÁDEK */
-  justify-content: center;     /* <-- PŘIDEJ TENTO ŘÁDEK */
+  display: none;
+  /* FIX: Začít shora aby byla vidět hlavička - ne center! */
+  align-items: flex-start;
+  justify-content: center;
+  /* FIX: Padding shora aby byl vidět obsah */
+  padding: 2rem 0 0 0;
   z-index: 9999;
 }
 .calendar-overlay.active { display: flex; }
+
+/* FIX: Mobilní optimalizace kalendáře */
+@media (max-width: 768px) {
+  .calendar-overlay {
+    padding: 1rem 0.5rem 0.5rem 0.5rem;
+    /* iOS Safari viewport fix */
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .calendar-box {
+    max-width: 100%;
+    width: 95%;
+    max-height: 90vh;
+    max-height: 90dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
 
 .calendar-box {
   background: white;
@@ -228,11 +257,33 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.4);
   display: none;
-  align-items: center;
+  /* FIX: Začít shora aby byla vidět hlavička - ne center! */
+  align-items: flex-start;
   justify-content: center;
+  /* FIX: Padding shora aby byl vidět obsah */
+  padding: 2rem 0 0 0;
   z-index: 9999;
 }
 .overlay-provedeni.active { display: flex; }
+
+/* FIX: Mobilní optimalizace overlay provedení */
+@media (max-width: 768px) {
+  .overlay-provedeni {
+    padding: 1rem 0.5rem 0.5rem 0.5rem;
+    /* iOS Safari viewport fix */
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .provedeni-box {
+    max-width: 100%;
+    width: 95%;
+    max-height: 90vh;
+    max-height: 90dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
 
 .provedeni-box {
   position: relative;
@@ -305,24 +356,13 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   background: transparent;
 }
 </style>
-
-  <!-- Analytics Tracker -->
-  <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
 </head>
 
 <body>
 <?php require_once __DIR__ . "/includes/hamburger-menu.php"; ?>
 
-<?php
-// Admin a User header jsou zakomentované, protože hamburger-menu.php už poskytuje navigaci
-// if ($isAdmin) {
-//   require_once __DIR__ . "/includes/admin_header.php";
-// } else {
-//   require_once __DIR__ . "/includes/user_header.php";
-// }
-?>
 
-<main>
+<main id="main-content" x-data="provedeniModal" x-init="init">
 <!-- HERO -->
 <section class="hero">
   <div>
@@ -339,7 +379,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     <div id="calculatorBox" style="padding: 1.5rem; margin-bottom: 2rem; border: 2px solid #000000; background: #ffffff; display: none;">
       <h2 style="font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 300; letter-spacing: 0.1em; margin-bottom: 0.8rem; color: #000000; text-transform: uppercase;" data-lang-cs="Orientační cena servisu" data-lang-en="Estimated Service Price" data-lang-it="Prezzo Stimato del Servizio">Orientační cena servisu</h2>
       <p style="color: #666; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;" data-lang-cs="Spočítejte si předběžnou cenu mimozáručního servisu včetně dopravy ještě před odesláním objednávky." data-lang-en="Calculate the preliminary price of out-of-warranty service including shipping before submitting your order." data-lang-it="Calcola il prezzo preliminare del servizio fuori garanzia inclusa la spedizione prima di inviare l'ordine.">Spočítejte si předběžnou cenu mimozáručního servisu včetně dopravy ještě před odesláním objednávky.</p>
-      <a href="mimozarucniceny.php" style="display: inline-block; padding: 0.7rem 2rem; background: #000000; color: white; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; border: 2px solid #000000;" data-lang-cs="Kalkulačka ceny" data-lang-en="Price Calculator" data-lang-it="Calcolatore di Prezzo">Kalkulačka ceny</a>
+      <a href="cenik.php#kalkulacka" style="display: inline-block; padding: 0.7rem 2rem; background: #000000; color: white; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; border: 2px solid #000000;" data-lang-cs="Kalkulačka ceny" data-lang-en="Price Calculator" data-lang-it="Calcolatore di Prezzo">Kalkulačka ceny</a>
     </div>
     <?php endif; ?>
 
@@ -362,14 +402,14 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     </div>
     <?php endif; ?>
     
-    <!-- ✅ FIX M-4: Přidat action attribute pro fallback (pokud JS selže) -->
+    <!-- FIX M-4: Pridat action attribute pro fallback (pokud JS selze) -->
     <form id="reklamaceForm" action="app/controllers/save.php" method="POST">
 
       <!-- PANEL PRO NAHRÁNÍ POVĚŘENÍ - pouze pro přihlášené uživatele -->
       <?php if ($isLoggedIn): ?>
-      <div id="povereniBox" style="padding: 1.5rem; margin-bottom: 1.5rem; border: 2px solid #2D5016; background: #f9fdf7; box-shadow: 0 2px 8px rgba(45,80,22,0.1);">
-        <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 0.8rem; color: #2D5016; text-transform: uppercase; display: flex; align-items: center; gap: 0.5rem;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <div id="povereniBox" style="padding: 1.5rem; margin-bottom: 1.5rem; border: 2px solid #333333; background: #f9fdf7; box-shadow: 0 2px 8px rgba(51,51,51,0.1);">
+        <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 0.8rem; color: #333333; text-transform: uppercase; display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -382,8 +422,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
           Nahrajte pověření od prodejce k této reklamaci ve formátu PDF. Dokument bude připojen k objednávce.
         </p>
         <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-          <button type="button" id="nahrajPovereniBtn" style="display: inline-block; padding: 0.7rem 2rem; background: #2D5016; color: white; border: 2px solid #2D5016; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; cursor: pointer;" data-lang-cs="📄 VYBRAT PDF SOUBOR" data-lang-en="📄 SELECT PDF FILE" data-lang-it="📄 SELEZIONA FILE PDF">
-            📄 VYBRAT PDF SOUBOR
+          <button type="button" id="nahrajPovereniBtn" style="display: inline-block; padding: 0.7rem 2rem; background: #333333; color: white; border: 2px solid #333333; text-decoration: none; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.3s; cursor: pointer;" data-lang-cs="VYBRAT PDF SOUBOR" data-lang-en="SELECT PDF FILE" data-lang-it="SELEZIONA FILE PDF">
+            VYBRAT PDF SOUBOR
           </button>
           <span id="povereniStatus" style="font-size: 0.85rem; color: #666;"></span>
         </div>
@@ -397,7 +437,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         <div class="form-grid form-grid-3">
           <div class="form-group">
             <label class="form-label" for="cislo" data-lang-cs="Číslo objednávky/reklamace" data-lang-en="Order/Claim Number" data-lang-it="Numero Ordine/Reclamo">Číslo objednávky/reklamace<?php if ($isLoggedIn) echo " *"; ?></label>
-            <input type="text" class="form-control" id="cislo" name="cislo"<?php if ($isLoggedIn) { echo " required"; } else { echo " readonly placeholder='nevyplňuje se' style='background-color: #f5f5f5; cursor: not-allowed;'"; } ?>>
+            <?php if ($isLoggedIn): ?>
+            <input type="text" class="form-control" id="cislo" name="cislo" required>
+            <?php else: ?>
+            <input type="text" class="form-control" id="cislo" name="cislo" value="POZ (automaticky)" readonly tabindex="-1" style="background-color: #e9e9e9; color: #666; cursor: not-allowed; font-style: italic; pointer-events: none;" data-lang-cs-value="POZ (automaticky)" data-lang-en-value="POZ (automatic)" data-lang-it-value="POZ (automatico)">
+            <?php endif; ?>
             <label for="fakturace_firma" style="display:block; margin-top:0.5rem; font-size:0.85rem; font-weight:600;">Fakturace:</label>
             <select id="fakturace_firma" name="fakturace_firma" style="width:33%; height:2rem; font-size:0.85rem; padding:0.3rem; border:1px solid #ddd; border-radius:4px;" aria-label="Výběr státu pro fakturaci">
               <option value="CZ" selected>🇨🇿 CZ</option>
@@ -424,18 +468,48 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
       <!-- KONTAKTNÍ ÚDAJE -->
       <div class="form-section">
         <h2 class="section-title" data-lang-cs="Kontaktní údaje" data-lang-en="Contact Information" data-lang-it="Informazioni di Contatto">Kontaktní údaje</h2>
+
+        <?php if ($isLoggedIn): ?>
+        <!-- Typ zákazníka - IČO nebo fyzická osoba (POVINNÉ) - pouze pro přihlášené -->
+        <div class="typ-zakaznika-wrapper" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+          <div style="display: flex; flex-direction: column;">
+            <label class="typ-zakaznika-label" style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
+              <input type="checkbox" id="objednavkaICO" name="objednavka_ico" style="width: auto; margin-right: 0.5rem; cursor: pointer;">
+              <span data-lang-cs="Objednávka byla na IČO *" data-lang-en="Order was on company ID *" data-lang-it="Ordine su partita IVA *">Objednávka byla na IČO *</span>
+            </label>
+            <span style="font-size: 0.65rem; color: #c00; margin-left: 1.35rem; margin-top: 0.15rem; line-height: 1.3;" data-lang-cs="Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně" data-lang-en="The buyer has been informed that the 30-day consumer period does not apply; processing will be done promptly within a reasonable time" data-lang-it="L'acquirente è stato informato che non si applica il periodo di 30 giorni per i consumatori; l'elaborazione avverrà tempestivamente">Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně</span>
+          </div>
+          <label class="typ-zakaznika-label" style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
+            <input type="checkbox" id="objednavkaFyzicka" name="objednavka_fyzicka" style="width: auto; margin-right: 0.5rem; cursor: pointer;">
+            <span data-lang-cs="Objednávka byla na fyzickou osobu *" data-lang-en="Order was on individual *" data-lang-it="Ordine su persona fisica *">Objednávka byla na fyzickou osobu *</span>
+          </label>
+        </div>
+        <?php endif; ?>
+
         <div class="form-grid form-grid-3">
           <div class="form-group">
             <label class="form-label" for="jmeno" data-lang-cs="Jméno zákazníka *" data-lang-en="Customer Name *" data-lang-it="Nome Cliente *">Jméno zákazníka *</label>
-            <input type="text" class="form-control" id="jmeno" name="jmeno" required>
+            <input type="text" class="form-control" id="jmeno" name="jmeno" autocomplete="name" required>
           </div>
           <div class="form-group">
             <label class="form-label" for="email">E-mail *</label>
-            <input type="email" class="form-control" id="email" name="email" required>
+            <input type="email" class="form-control" id="email" name="email" autocomplete="email" required>
           </div>
           <div class="form-group">
             <label class="form-label" for="telefon" data-lang-cs="Telefon *" data-lang-en="Phone *" data-lang-it="Telefono *">Telefon *</label>
-            <input type="tel" class="form-control" id="telefon" name="telefon" required>
+            <div class="phone-input-wrapper">
+              <select class="form-control phone-prefix" id="phone-prefix" name="phone_prefix" aria-label="Telefonní předvolba">
+                <option value="+420" selected>🇨🇿 +420</option>
+                <option value="+421">🇸🇰 +421</option>
+                <option value="+39">🇮🇹 +39</option>
+                <option value="+43">🇦🇹 +43</option>
+                <option value="+49">🇩🇪 +49</option>
+                <option value="+33">🇫🇷 +33</option>
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+48">🇵🇱 +48</option>
+              </select>
+              <input type="tel" class="form-control phone-number" id="telefon" name="telefon" autocomplete="tel-national" placeholder="123 456 789" required>
+            </div>
           </div>
         </div>
       </div>
@@ -445,18 +519,18 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <h2 class="section-title" data-lang-cs="Adresa zákazníka" data-lang-en="Customer Address" data-lang-it="Indirizzo Cliente">Adresa zákazníka</h2>
   <div class="form-grid form-grid-address">
     <div class="form-group" style="position:relative;">
-      <label class="form-label" for="ulice" data-lang-cs="Ulice a číslo popisné" data-lang-en="Street and Number" data-lang-it="Via e Numero">Ulice a číslo popisné</label>
-      <input type="text" class="form-control" id="ulice" name="ulice" data-lang-cs-placeholder="Ulice a číslo popisné" data-lang-en-placeholder="Street and Number" data-lang-it-placeholder="Via e Numero" placeholder="Ulice a číslo popisné">
-      <div id="autocompleteDropdownUlice" style="display:none;position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
+      <label class="form-label" for="ulice" data-lang-cs="Ulice a číslo popisné *" data-lang-en="Street and Number *" data-lang-it="Via e Numero *">Ulice a číslo popisné *</label>
+      <input type="text" class="form-control" id="ulice" name="ulice" autocomplete="address-line1" data-lang-cs-placeholder="Ulice a číslo popisné" data-lang-en-placeholder="Street and Number" data-lang-it-placeholder="Via e Numero" placeholder="Ulice a číslo popisné" required>
+      <div id="autocompleteDropdownUlice" class="hidden" style="position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
     </div>
     <div class="form-group" style="position:relative;">
-      <label class="form-label" for="mesto" data-lang-cs="Město" data-lang-en="City" data-lang-it="Città">Město</label>
-      <input type="text" class="form-control" id="mesto" name="mesto" data-lang-cs-placeholder="Město" data-lang-en-placeholder="City" data-lang-it-placeholder="Città" placeholder="Město">
-      <div id="autocompleteDropdown" style="display:none;position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
+      <label class="form-label" for="mesto" data-lang-cs="Město *" data-lang-en="City *" data-lang-it="Città *">Město *</label>
+      <input type="text" class="form-control" id="mesto" name="mesto" autocomplete="address-level2" data-lang-cs-placeholder="Město" data-lang-en-placeholder="City" data-lang-it-placeholder="Città" placeholder="Město" required>
+      <div id="autocompleteDropdown" class="hidden" style="position:absolute;top:100%;margin-top:4px;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;z-index:1000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;"></div>
     </div>
     <div class="form-group">
-      <label class="form-label" for="psc" data-lang-cs="PSČ" data-lang-en="ZIP Code" data-lang-it="CAP">PSČ</label>
-      <input type="text" class="form-control" id="psc" name="psc" data-lang-cs-placeholder="PSČ" data-lang-en-placeholder="ZIP Code" data-lang-it-placeholder="CAP" placeholder="PSČ">
+      <label class="form-label" for="psc" data-lang-cs="PSČ *" data-lang-en="ZIP Code *" data-lang-it="CAP *">PSČ *</label>
+      <input type="text" class="form-control" id="psc" name="psc" autocomplete="postal-code" data-lang-cs-placeholder="PSČ" data-lang-en-placeholder="ZIP Code" data-lang-it-placeholder="CAP" placeholder="PSČ" required>
     </div>
     <div class="map-container">
       <div id="mapContainer"></div>
@@ -474,9 +548,10 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
           </div>
           <div class="form-group">
             <label class="form-label" for="provedeni" data-lang-cs="Provedení" data-lang-en="Version" data-lang-it="Versione">Provedení</label>
+            <!-- Provedeni - Alpine.js handler (Step 37) -->
             <div class="provedeni-group">
               <input type="text" class="form-control provedeni-input" id="provedeni" name="provedeni" data-lang-cs-placeholder="Vyberte..." data-lang-en-placeholder="Select..." data-lang-it-placeholder="Seleziona..." placeholder="Vyberte..." readonly>
-              <button type="button" class="btn-select" id="selectProvedeniBtn" data-lang-cs="VYBRAT" data-lang-en="SELECT" data-lang-it="SELEZIONA">VYBRAT</button>
+              <button type="button" class="btn-select" id="selectProvedeniBtn" @click="openModal" data-lang-cs="VYBRAT" data-lang-en="SELECT" data-lang-it="SELEZIONA">VYBRAT</button>
             </div>
           </div>
           <div class="form-group">
@@ -530,12 +605,26 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
       <!-- BUTTONS -->
       <div class="form-actions">
         <button type="submit" class="btn" data-lang-cs="ODESLAT POŽADAVEK" data-lang-en="SUBMIT REQUEST" data-lang-it="INVIA RICHIESTA">ODESLAT POŽADAVEK</button>
-        <button type="button" class="btn btn-secondary" onclick="window.history.back()" data-lang-cs="ZPĚT" data-lang-en="BACK" data-lang-it="INDIETRO">ZPĚT</button>
+        <button type="button" class="btn btn-secondary" data-action="historyBack" data-lang-cs="ZPĚT" data-lang-en="BACK" data-lang-it="INDIETRO">ZPĚT</button>
       </div>
       
     </form>
   </div>
 </div>
+
+<!-- PROVEDENI OVERLAY - Alpine.js (Step 37) -->
+<div class="overlay-provedeni" id="provedeniOverlay" @click="overlayClick">
+  <div class="provedeni-box">
+    <h3 data-lang-cs="Provedení" data-lang-en="Version" data-lang-it="Versione">Provedení</h3>
+    <div class="provedeni-grid">
+      <div class="provedeni-card" data-value="Látka" @click="selectProvedeni" data-lang-cs="Látka" data-lang-en="Fabric" data-lang-it="Tessuto">Látka</div>
+      <div class="provedeni-card" data-value="Kůže" @click="selectProvedeni" data-lang-cs="Kůže" data-lang-en="Leather" data-lang-it="Pelle">Kůže</div>
+      <div class="provedeni-card" data-value="Kombinace" @click="selectProvedeni" data-lang-cs="Kombinace" data-lang-en="Combination" data-lang-it="Combinazione">Kombinace</div>
+    </div>
+    <button class="btn btn-secondary" @click="close" aria-label="Zavřít">×</button>
+  </div>
+</div>
+
 </main>
 
 <!-- FOOTER -->
@@ -572,45 +661,33 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   </div>
 </footer>
 
-<!-- PROVEDENI OVERLAY -->
-<div class="overlay-provedeni" id="provedeniOverlay">
-  <div class="provedeni-box">
-    <h3 data-lang-cs="Provedení" data-lang-en="Version" data-lang-it="Versione">Provedení</h3>
-    <div class="provedeni-grid">
-      <div class="provedeni-card" data-value="Látka" data-lang-cs="Látka" data-lang-en="Fabric" data-lang-it="Tessuto">Látka</div>
-      <div class="provedeni-card" data-value="Kůže" data-lang-cs="Kůže" data-lang-en="Leather" data-lang-it="Pelle">Kůže</div>
-      <div class="provedeni-card" data-value="Kombinace" data-lang-cs="Kombinace" data-lang-en="Combination" data-lang-it="Combinazione">Kombinace</div>
-    </div>
-    <button class="btn btn-secondary" id="closeProvedeni">×</button>
-  </div>
-</div>
-
-<!-- CUSTOM CALENDAR -->
-<div class="calendar-overlay" id="calendarOverlay">
+<!-- CUSTOM CALENDAR - Alpine.js (Step 38) -->
+<div class="calendar-overlay" id="calendarOverlay" role="dialog" aria-modal="true" aria-labelledby="calendarTitle" x-data="calendarModal" x-init="init" @click="overlayClick">
   <div class="calendar-box">
     <div class="calendar-header">
       <h3 id="calendarTitle" data-lang-cs="Vyberte datum" data-lang-en="Select Date" data-lang-it="Seleziona Data">Vyberte datum</h3>
       <div class="calendar-nav">
-        <button id="prevMonth">&larr;</button>
-        <button id="nextMonth">&rarr;</button>
+        <button id="prevMonth" aria-label="Předchozí měsíc">&larr;</button>
+        <button id="nextMonth" aria-label="Další měsíc">&rarr;</button>
       </div>
     </div>
     <div id="calendarMonthYear" style="text-align:center;margin-bottom:1rem;font-weight:600;font-size:1.1rem;"></div>
     <div class="calendar-grid" id="calendarGrid"></div>
-    <button class="btn btn-secondary" style="display:block;margin:1.5rem auto 0;width:100%;" id="closeCalendar" data-lang-cs="Zavřít" data-lang-en="Close" data-lang-it="Chiudi">Zavřít</button>
+    <button class="btn btn-secondary" style="display:block;margin:1.5rem auto 0;width:100%;" @click="close" data-lang-cs="Zavřít" data-lang-en="Close" data-lang-it="Chiudi">Zavřít</button>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
   window.WGS_USER_LOGGED_IN = <?php echo $isLoggedIn ? "true" : "false"; ?>;
 </script>
-<script src="assets/js/logger.js" defer></script>
-<script src="assets/js/wgs-map.js" defer></script>
-<script src="assets/js/csrf-auto-inject.js" defer></script>
-<script src="assets/js/novareklamace.min.js?v=1762458261" defer></script>
+<script src="assets/js/logger.min.js" defer></script>
+<script src="assets/js/wgs-map.min.js" defer></script>
+<script src="assets/js/csrf-auto-inject.min.js" defer></script>
+<script src="assets/js/novareklamace.min.js?v=1764635649" defer></script>
 
+<?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 <?php renderHeatmapTracker(); ?>
 </body>
 </html>

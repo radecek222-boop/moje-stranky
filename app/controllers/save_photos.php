@@ -35,7 +35,7 @@ try {
     // Databázové připojení
     $pdo = getDbConnection();
 
-    // ✅ FIX 9: Databázový rate limiting - ochrana proti DoS útokům
+    // FIX 9: Databázový rate limiting - ochrana proti DoS útokům
     $rateLimiter = new RateLimiter($pdo);
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 
@@ -55,7 +55,7 @@ try {
         exit;
     }
 
-    // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
+    // FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
 
     // Získání a validace reklamace ID
     $reklamaceId = sanitizeReklamaceId($_POST['reklamace_id'] ?? null, 'reklamace_id');

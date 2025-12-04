@@ -378,36 +378,36 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         <form id="testForm" class="test-form">
             <div class="form-group">
-                <label>Jméno zákazníka *</label>
-                <input type="text" name="jmeno" value="Test Uživatel" required>
+                <label for="sim-jmeno">Jméno zákazníka *</label>
+                <input type="text" id="sim-jmeno" name="jmeno" value="Test Uživatel" required>
             </div>
 
             <div class="form-group">
-                <label>Email *</label>
-                <input type="email" name="email" value="test@example.com" required>
+                <label for="sim-email">Email *</label>
+                <input type="email" id="sim-email" name="email" value="test@example.com" autocomplete="email" required>
             </div>
 
             <div class="form-group">
-                <label>Telefon *</label>
-                <input type="tel" name="telefon" value="+420 123 456 789" required>
+                <label for="sim-telefon">Telefon *</label>
+                <input type="tel" id="sim-telefon" name="telefon" value="+420 123 456 789" autocomplete="tel" required>
             </div>
 
             <div class="form-group">
-                <label>Fotografie (volitelné)</label>
-                <input type="file" name="photo" accept="image/*">
+                <label for="sim-photo">Fotografie (volitelné)</label>
+                <input type="file" id="sim-photo" name="photo" accept="image/*">
             </div>
 
             <div class="form-group full-width">
-                <label>Popis problému *</label>
-                <textarea name="popis" rows="3" required>Test popis - simulace workflow</textarea>
+                <label for="sim-popis">Popis problému *</label>
+                <textarea id="sim-popis" name="popis" rows="3" required>Test popis - simulace workflow</textarea>
             </div>
         </form>
 
         <div class="test-controls">
-            <button class="btn btn-success" onclick="startTest()">
+            <button class="btn btn-success" data-action="startTest">
                 Spustit test workflow
             </button>
-            <button class="btn btn-secondary" onclick="resetSimulator()">
+            <button class="btn btn-secondary" data-action="resetSimulator">
                 Reset
             </button>
         </div>
@@ -431,7 +431,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         </div>
 
         <div class="test-loading" id="apiLoading">
-            <div class="test-spinner"></div>
+            <div class="test-spinner" aria-hidden="true"></div>
             <div>Odesílám data na server...</div>
         </div>
 
@@ -452,15 +452,15 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         <div class="mini-preview">
             <div class="mini-preview-header">NÁHLED: seznam.php</div>
             <div class="mini-preview-body">
-                <iframe id="seznamPreview" src=""></iframe>
+                <iframe id="seznamPreview" src="" title="Náhled seznamu reklamací"></iframe>
             </div>
         </div>
 
         <div class="test-controls">
-            <button class="btn btn-success" onclick="goToStage(4)">
+            <button class="btn btn-success" data-action="goToStage" data-stage="4">
                 Reklamace nalezena - Pokračovat
             </button>
-            <button class="btn btn-secondary" onclick="flagError(3, 'Reklamace se nezobrazuje v seznamu')">
+            <button class="btn btn-secondary" data-action="flagError" data-stage="3" data-message="Reklamace se nezobrazuje v seznamu">
                 Reklamace chybí
             </button>
         </div>
@@ -480,15 +480,15 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         <div class="mini-preview">
             <div class="mini-preview-header">NÁHLED: protokol.php</div>
             <div class="mini-preview-body">
-                <iframe id="detailPreview" src=""></iframe>
+                <iframe id="detailPreview" src="" title="Náhled detailu reklamace"></iframe>
             </div>
         </div>
 
         <div class="test-controls">
-            <button class="btn btn-success" onclick="goToStage(5)">
+            <button class="btn btn-success" data-action="goToStage" data-stage="5">
                 Detail v pořádku - Pokračovat
             </button>
-            <button class="btn btn-secondary" onclick="flagError(4, 'Detail se nenačetl správně')">
+            <button class="btn btn-secondary" data-action="flagError" data-stage="4" data-message="Detail se nenačetl správně">
                 Chyba v detailu
             </button>
         </div>
@@ -507,7 +507,7 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         <div id="protocolCheck">
             <div class="test-loading">
-                <div class="test-spinner"></div>
+                <div class="test-spinner" aria-hidden="true"></div>
                 <div>Kontroluji protokol...</div>
             </div>
         </div>
@@ -522,10 +522,10 @@ $embedMode = isset($_GET['embed']) && $_GET['embed'] == '1';
         <div class="diagnostics-panel" id="diagnosticsPanel6"></div>
 
         <div class="test-controls">
-            <button class="btn btn-success" onclick="cleanupTest()">
+            <button class="btn btn-success" data-action="cleanupTest">
                 Smazat testovací data
             </button>
-            <button class="btn btn-secondary" onclick="resetSimulator()">
+            <button class="btn btn-secondary" data-action="resetSimulator">
                 Nový test
             </button>
         </div>
@@ -819,5 +819,18 @@ async function cleanupTest() {
  */
 function resetSimulator() {
     location.reload();
+}
+
+// ACTION REGISTRY - Step 113
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('startTest', () => startTest());
+    Utils.registerAction('resetSimulator', () => resetSimulator());
+    Utils.registerAction('cleanupTest', () => cleanupTest());
+    Utils.registerAction('goToStage', (el, data) => {
+        if (data.stage) goToStage(parseInt(data.stage));
+    });
+    Utils.registerAction('flagError', (el, data) => {
+        if (data.stage && data.message) flagError(parseInt(data.stage), data.message);
+    });
 }
 </script>

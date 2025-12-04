@@ -1,7 +1,7 @@
 /**
  * LOGOUT HANDLER - CSRF Protected Logout
  *
- * ✅ SECURITY FIX: Chrání logout proti force-logout útokům
+ * SECURITY FIX: Chrání logout proti force-logout útokům
  * Odchytí všechny logout odkazy a pošle POST request s CSRF tokenem
  */
 
@@ -27,7 +27,7 @@
       // 2. Pokud není, zkusit fetch z API (s timeoutem)
       if (!csrfToken) {
         try {
-          // ✅ OPRAVA: Přidat timeout 5 sekund pro fetch
+          // OPRAVA: Přidat timeout 5 sekund pro fetch
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000);
 
@@ -52,7 +52,7 @@
       }
 
       if (!csrfToken) {
-        alert('Nepodařilo se získat bezpečnostní token. Obnovte stránku a zkuste to znovu.');
+        wgsToast.error('Nepodařilo se získat bezpečnostní token. Obnovte stránku a zkuste to znovu.');
         // Fallback: přesměrovat na potvrzovací logout stránku (bezpečnější než neudělat nic)
         window.location.href = '/logout.php';
         return;
@@ -74,7 +74,7 @@
 
   } catch (error) {
     console.error('Logout error:', error);
-    alert('Chyba při odhlašování. Zkuste to prosím znovu.');
+    wgsToast.error('Chyba při odhlašování. Zkuste to prosím znovu.');
     // Fallback pro nečekané chyby - zobrazit potvrzovací stránku
     window.location.href = '/logout.php';
   }
@@ -106,10 +106,6 @@
     logoutLinks.forEach(link => {
       link.addEventListener('click', handleLogout);
     });
-
-    if (logoutLinks.length > 0) {
-      console.log(`✅ Logout handler: ${logoutLinks.length} logout links protected`);
-    }
   }
 
   // Inicializovat po načtení DOM

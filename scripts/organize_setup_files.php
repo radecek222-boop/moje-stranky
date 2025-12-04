@@ -28,9 +28,9 @@ $setupDir = $projectRoot . '/setup';
 // Vytvořit setup adresář pokud neexistuje
 if (!is_dir($setupDir)) {
     if (!mkdir($setupDir, 0755, true)) {
-        die("❌ Chyba: Nepodařilo se vytvořit {$setupDir}\n");
+        die("Chyba: Nepodařilo se vytvořit {$setupDir}\n");
     }
-    echo "✅ Vytvořen adresář: setup/\n\n";
+    echo "Vytvořen adresář: setup/\n\n";
 } else {
     echo "ℹ️  Adresář setup/ již existuje\n\n";
 }
@@ -71,10 +71,10 @@ foreach ($filesToMove as $pattern) {
         // Přesunout soubor
         if (rename($file, $targetPath)) {
             $moved[] = $filename;
-            echo "✅ {$filename} → setup/\n";
+            echo "{$filename} → setup/\n";
         } else {
             $errors[] = $filename . " (chyba při přesouvání)";
-            echo "❌ {$filename} - chyba!\n";
+            echo "{$filename} - chyba!\n";
         }
     }
 }
@@ -84,9 +84,9 @@ echo str_repeat("=", 70) . "\n";
 echo "📊 VÝSLEDKY:\n";
 echo str_repeat("=", 70) . "\n\n";
 
-echo "✅ Přesunuto: " . count($moved) . " souborů\n";
+echo "Přesunuto: " . count($moved) . " souborů\n";
 echo "⏭️  Přeskočeno: " . count($skipped) . "\n";
-echo "❌ Chyby: " . count($errors) . "\n\n";
+echo "Chyby: " . count($errors) . "\n\n";
 
 if (!empty($moved)) {
     echo "Přesunuté soubory:\n";
@@ -175,7 +175,7 @@ mysql -u username -p database_name < setup/migration_name.sql
 README;
 
     file_put_contents($readmePath, $readme);
-    echo "✅ Vytvořen README.md v setup/\n\n";
+    echo "Vytvořen README.md v setup/\n\n";
 }
 
 // Vytvořit .htaccess pro zabezpečení
@@ -196,7 +196,7 @@ if (!file_exists($htaccessPath)) {
 HTACCESS;
 
     file_put_contents($htaccessPath, $htaccess);
-    echo "✅ Vytvořen .htaccess v setup/ (security připraven)\n\n";
+    echo "Vytvořen .htaccess v setup/ (security připraven)\n\n";
 }
 
 echo str_repeat("=", 70) . "\n";
@@ -208,7 +208,7 @@ echo "2. Update odkazy v dokumentaci (pokud existují)\n";
 echo "3. V PRODUKCI: Zabezpečit setup/ adresář (uncomment .htaccess)\n";
 echo "4. Nebo přesunout setup/ MIMO web root\n\n";
 
-echo "✅ HOTOVO - root adresář je nyní čistší!\n";
+echo "HOTOVO - root adresář je nyní čistší!\n";
 
 // Return JSON pro API
 if (php_sapi_name() !== 'cli') {

@@ -22,6 +22,13 @@ require_once __DIR__ . '/../includes/api_response.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
+    // PERFORMANCE FIX: Načíst admin status a uvolnit zámek
+    // Audit 2025-11-24: Ceník API - vysoký objem GET requestů
+    $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+
+    // KRITICKÉ: Uvolnit session lock pro paralelní zpracování
+    session_write_close();
+
     $pdo = getDbConnection();
 
     // Parametry
@@ -91,12 +98,19 @@ try {
             }
 
             // Admin check
-            if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+            if (!$isAdmin) {
                 sendJsonError('Přístup odepřen', 403);
             }
 
             if (!$itemId) {
                 sendJsonError('Chybí ID položky');
+            }
+
+            // Zjistit v jakém jazyce se edituje - WHITELIST validace proti SQL injection
+            $editLang = $_POST['edit_lang'] ?? 'cs';
+            $povoleneJazyky = ['cs', 'en', 'it', 'sk'];
+            if (!in_array($editLang, $povoleneJazyky, true)) {
+                sendJsonError('Neplatný jazyk', 400);
             }
 
             // Validace vstupů
@@ -112,14 +126,19 @@ try {
                 sendJsonError('Chybí název služby');
             }
 
+            // Určit správné sloupce podle jazyka
+            $nameCol = $editLang === 'cs' ? 'service_name' : "service_name_{$editLang}";
+            $descCol = $editLang === 'cs' ? 'description' : "description_{$editLang}";
+            $catCol = $editLang === 'cs' ? 'category' : "category_{$editLang}";
+
             $sql = "
             UPDATE wgs_pricing
-            SET service_name = :name,
-                description = :desc,
+            SET {$nameCol} = :name,
+                {$descCol} = :desc,
                 price_from = :from,
                 price_to = :to,
                 price_unit = :unit,
-                category = :cat,
+                {$catCol} = :cat,
                 is_active = :active
             WHERE id = :id
             ";
@@ -137,7 +156,7 @@ try {
             ]);
 
             if ($success) {
-                sendJsonSuccess('Položka aktualizována', ['id' => $itemId]);
+                sendJsonSuccess('Položka aktualizována', ['id' => $itemId, 'lang' => $editLang]);
             } else {
                 sendJsonError('Chyba při aktualizaci');
             }
@@ -153,8 +172,15 @@ try {
             }
 
             // Admin check
-            if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+            if (!$isAdmin) {
                 sendJsonError('Přístup odepřen', 403);
+            }
+
+            // Zjistit v jakém jazyce se vytváří - WHITELIST validace proti SQL injection
+            $editLang = $_POST['edit_lang'] ?? 'cs';
+            $povoleneJazyky = ['cs', 'en', 'it', 'sk'];
+            if (!in_array($editLang, $povoleneJazyky, true)) {
+                sendJsonError('Neplatný jazyk', 400);
             }
 
             // Validace vstupů
@@ -170,8 +196,13 @@ try {
                 sendJsonError('Chybí název služby');
             }
 
+            // Určit správné sloupce podle jazyka (již validováno whitelist)
+            $nameCol = $editLang === 'cs' ? 'service_name' : "service_name_{$editLang}";
+            $descCol = $editLang === 'cs' ? 'description' : "description_{$editLang}";
+            $catCol = $editLang === 'cs' ? 'category' : "category_{$editLang}";
+
             $sql = "
-            INSERT INTO wgs_pricing (service_name, description, price_from, price_to, price_unit, category, display_order)
+            INSERT INTO wgs_pricing ({$nameCol}, {$descCol}, price_from, price_to, price_unit, {$catCol}, display_order)
             VALUES (:name, :desc, :from, :to, :unit, :cat, :order)
             ";
 
@@ -188,7 +219,7 @@ try {
 
             if ($success) {
                 $newId = $pdo->lastInsertId();
-                sendJsonSuccess('Položka vytvořena', ['id' => $newId]);
+                sendJsonSuccess('Položka vytvořena', ['id' => $newId, 'lang' => $editLang]);
             } else {
                 sendJsonError('Chyba při vytváření');
             }
@@ -204,7 +235,7 @@ try {
             }
 
             // Admin check
-            if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+            if (!$isAdmin) {
                 sendJsonError('Přístup odepřen', 403);
             }
 
@@ -232,7 +263,7 @@ try {
             }
 
             // Admin check
-            if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+            if (!$isAdmin) {
                 sendJsonError('Přístup odepřen', 403);
             }
 

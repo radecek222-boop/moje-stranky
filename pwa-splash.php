@@ -174,7 +174,7 @@ require_once "init.php";
   </style>
 </head>
 <body>
-  <div class="splash-kontejner" onclick="presmerujNaLogin()">
+  <div class="splash-kontejner" data-action="presmerujNaLogin">
     <div class="wgs-logo">WGS</div>
     <div class="wgs-podtitulek">White Glove Service</div>
     <div class="klik-hint">Klepněte pro vstup</div>
@@ -222,7 +222,7 @@ require_once "init.php";
       e.preventDefault();
     }, { passive: false });
 
-    console.log('✅ PWA Splash Screen loaded');
+    console.log('PWA Splash Screen loaded');
   </script>
 </body>
 </html>

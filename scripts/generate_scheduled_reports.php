@@ -110,12 +110,12 @@ try {
             ]);
 
             echo "   Next run: {$nextRun}\n";
-            echo "   ✅ SUCCESS\n\n";
+            echo "   SUCCESS\n\n";
 
             $successCount++;
 
         } catch (Exception $e) {
-            echo "   ❌ ERROR: " . $e->getMessage() . "\n\n";
+            echo "   ERROR: " . $e->getMessage() . "\n\n";
             error_log("Schedule {$schedule['schedule_id']} failed: " . $e->getMessage());
             $errorCount++;
         }
@@ -130,14 +130,14 @@ try {
     echo "Chyby: {$errorCount}\n\n";
 
     echo "==========================================\n";
-    echo "GENERATE SCHEDULED REPORTS - DOKONČENO ✅\n";
+    echo "GENERATE SCHEDULED REPORTS - DOKONČENO \n";
     echo "==========================================\n";
     echo "Konec: " . date('Y-m-d H:i:s') . "\n";
 
 } catch (PDOException $e) {
     echo "\n";
     echo "==========================================\n";
-    echo "CHYBA DATABÁZE ❌\n";
+    echo "CHYBA DATABÁZE \n";
     echo "==========================================\n";
     echo $e->getMessage() . "\n";
     exit(1);
@@ -145,7 +145,7 @@ try {
 } catch (Exception $e) {
     echo "\n";
     echo "==========================================\n";
-    echo "NEOČEKÁVANÁ CHYBA ❌\n";
+    echo "NEOČEKÁVANÁ CHYBA \n";
     echo "==========================================\n";
     echo $e->getMessage() . "\n";
     exit(1);

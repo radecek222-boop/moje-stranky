@@ -46,7 +46,7 @@ $csrfToken = generateCSRFToken();
         }
 
         h1 {
-            color: #2D5016;
+            color: #333333;
             margin-bottom: 20px;
         }
 
@@ -82,7 +82,7 @@ $csrfToken = generateCSRFToken();
 
         .btn {
             padding: 10px 20px;
-            background: #2D5016;
+            background: #333333;
             color: white;
             border: none;
             border-radius: 4px;
@@ -119,19 +119,29 @@ $csrfToken = generateCSRFToken();
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
             z-index: 10;
             opacity: 0.7;
-            min-width: 100%;
-            min-height: 600px;
-            border: 2px dashed rgba(45, 80, 22, 0.3); /* Debug border */
+            box-sizing: border-box;
+        }
+
+        #page-iframe {
+            width: 100%;
+            height: 800px;
+            border: none;
+            display: block;
         }
 
         #page-mockup {
             width: 100%;
-            min-height: 600px;
-            background: linear-gradient(180deg, #f0f0f0 0%, #ffffff 100%);
-            padding: 20px;
+            min-height: 800px;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
         }
 
         .legend {
@@ -162,7 +172,7 @@ $csrfToken = generateCSRFToken();
 
         .stats h2 {
             font-size: 18px;
-            color: #2D5016;
+            color: #333333;
             margin-bottom: 15px;
         }
 
@@ -188,7 +198,7 @@ $csrfToken = generateCSRFToken();
         .stat-value {
             font-size: 24px;
             font-weight: bold;
-            color: #2D5016;
+            color: #333333;
             margin-top: 5px;
         }
 
@@ -217,17 +227,20 @@ $csrfToken = generateCSRFToken();
 
         <div class="controls">
             <div class="control-group">
-                <label>Stránka:</label>
+                <label for="page-selector">Stránka:</label>
                 <select id="page-selector">
-                    <option value="https://www.wgs-service.cz/">Hlavní stránka</option>
-                    <option value="https://www.wgs-service.cz/novareklamace.php">Nová reklamace</option>
-                    <option value="https://www.wgs-service.cz/seznam.php">Seznam reklamací</option>
-                    <option value="https://www.wgs-service.cz/admin.php">Admin</option>
+                    <option value="https://www.wgs-service.cz/" data-path="/">DOMŮ</option>
+                    <option value="https://www.wgs-service.cz/novareklamace.php" data-path="/novareklamace.php">OBJEDNAT SERVIS</option>
+                    <option value="https://www.wgs-service.cz/nasesluzby.php" data-path="/nasesluzby.php">NAŠE SLUŽBY</option>
+                    <option value="https://www.wgs-service.cz/cenik.php" data-path="/cenik.php">CENÍK</option>
+                    <option value="https://www.wgs-service.cz/onas.php" data-path="/onas.php">O NÁS</option>
+                    <option value="https://www.wgs-service.cz/aktuality.php" data-path="/aktuality.php">AKTUALITY</option>
+                    <option value="https://www.wgs-service.cz/login.php" data-path="/login.php">PŘIHLÁŠENÍ</option>
                 </select>
             </div>
 
             <div class="control-group">
-                <label>Zařízení:</label>
+                <label for="device-selector">Zařízení:</label>
                 <select id="device-selector">
                     <option value="">Všechna zařízení</option>
                     <option value="desktop">Desktop</option>
@@ -237,7 +250,7 @@ $csrfToken = generateCSRFToken();
             </div>
 
             <div class="control-group">
-                <label>Typ heatmap:</label>
+                <label for="type-selector">Typ heatmap:</label>
                 <select id="type-selector">
                     <option value="click">Click Heatmap</option>
                     <option value="scroll">Scroll Heatmap</option>
@@ -246,6 +259,7 @@ $csrfToken = generateCSRFToken();
 
             <div class="control-group" style="display: block; margin-top: 15px;">
                 <button id="load-heatmap" class="btn">Načíst Heatmap</button>
+                <button id="load-demo" class="btn btn-secondary">Načíst Demo Data</button>
                 <button id="export-png" class="btn btn-secondary">Export PNG</button>
             </div>
         </div>
@@ -268,17 +282,36 @@ $csrfToken = generateCSRFToken();
             </div>
         </div>
 
+        <div id="geo-stats-container" class="stats" style="display: none;">
+            <h2>Geolokace návštěvníků</h2>
+            <div id="geo-stats-table" style="margin-top: 15px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #333; color: white;">
+                            <th style="padding: 10px; text-align: left;">Země</th>
+                            <th style="padding: 10px; text-align: left;">Město</th>
+                            <th style="padding: 10px; text-align: right;">Kliků/Zobrazení</th>
+                        </tr>
+                    </thead>
+                    <tbody id="geo-stats-body">
+                        <!-- Dynamicky plněno JavaScriptem -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div id="heatmap-container">
             <div id="page-mockup">
-                <div class="loading">Vyberte parametry a klikněte na "Načíst Heatmap"</div>
+                <div>Vyberte stránku a klikněte na "Načíst Heatmap"</div>
             </div>
+            <iframe id="page-iframe" title="Náhled stránky pro heatmapu" style="display: none;"></iframe>
             <canvas id="heatmap-canvas"></canvas>
         </div>
 
         <div class="legend" id="legend-container"></div>
     </div>
 
-    <script src="/assets/js/heatmap-renderer.js"></script>
+    <script src="/assets/js/heatmap-renderer.min.js"></script>
     <script>
         const csrfToken = '<?php echo htmlspecialchars($csrfToken); ?>';
         let currentData = null;
@@ -289,13 +322,22 @@ $csrfToken = generateCSRFToken();
         // Vykreslit legendu
         HeatmapRenderer.renderLegend('legend-container');
 
-        // Resize canvas podle page-mockup
+        // Resize canvas podle iframe nebo mockup
         function resizeCanvas() {
-            const container = document.getElementById('page-mockup');
+            const iframe = document.getElementById('page-iframe');
+            const mockup = document.getElementById('page-mockup');
             const canvas = document.getElementById('heatmap-canvas');
 
-            canvas.width = container.offsetWidth;
-            canvas.height = container.offsetHeight;
+            // Použít iframe pokud je viditelný, jinak mockup
+            const container = iframe.style.display !== 'none' ? iframe : mockup;
+
+            const width = container.offsetWidth;
+            const height = container.offsetHeight || 800;
+
+            console.log('[Heatmap] Resize canvas:', width, 'x', height, 'px');
+
+            canvas.width = width;
+            canvas.height = height;
 
             // Znovu vykreslit heatmap po resize
             if (currentData) {
@@ -308,6 +350,30 @@ $csrfToken = generateCSRFToken();
             }
         }
 
+        // Načíst stránku do iframe
+        function nacistStranku(url) {
+            const iframe = document.getElementById('page-iframe');
+            const mockup = document.getElementById('page-mockup');
+
+            // Použít relativní cestu pro iframe (stejná doména)
+            const selectedOption = document.querySelector('#page-selector option:checked');
+            const relativePath = selectedOption.dataset.path || '/';
+
+            console.log('[Heatmap] Načítám stránku:', relativePath);
+
+            // Skrýt mockup, zobrazit iframe
+            mockup.style.display = 'none';
+            iframe.style.display = 'block';
+
+            // Přidat parametr pro zakázání trackingu v iframe
+            iframe.src = relativePath + (relativePath.includes('?') ? '&' : '?') + '_heatmap_preview=1';
+
+            iframe.onload = function() {
+                console.log('[Heatmap] Stránka načtena');
+                resizeCanvas();
+            };
+        }
+
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
@@ -317,7 +383,9 @@ $csrfToken = generateCSRFToken();
             const deviceType = document.getElementById('device-selector').value;
             const type = document.getElementById('type-selector').value;
 
-            document.getElementById('page-mockup').innerHTML = '<div class="loading">Načítám data...</div>';
+            // Nejprve načíst stránku do iframe
+            nacistStranku(pageUrl);
+
             document.getElementById('stats-container').style.display = 'none';
 
             try {
@@ -343,25 +411,106 @@ $csrfToken = generateCSRFToken();
                         document.getElementById('stat-max').textContent = currentData.max_intensity;
                         document.getElementById('stat-points').textContent = currentData.points_count.toLocaleString();
 
-                        document.getElementById('page-mockup').innerHTML = '<div style="min-height: 600px; padding: 40px;">Mockup stránky (Click Heatmap)<br>Klikněte na různá místa...</div>';
-                        resizeCanvas();
-                        HeatmapRenderer.renderClickHeatmap(currentData);
+                        // Počkat na načtení iframe a pak vykreslit
+                        setTimeout(() => {
+                            resizeCanvas();
+                            HeatmapRenderer.renderClickHeatmap(currentData);
+                        }, 500);
                     } else {
                         document.getElementById('stat-total').textContent = currentData.total_views.toLocaleString();
                         document.getElementById('stat-max').textContent = '100%';
                         document.getElementById('stat-points').textContent = currentData.buckets_count;
 
-                        document.getElementById('page-mockup').innerHTML = '<div style="min-height: 1000px; padding: 40px;">Mockup stránky (Scroll Heatmap)<br>Scrollujte dolů...</div>';
-                        resizeCanvas();
-                        HeatmapRenderer.renderScrollHeatmap(currentData);
+                        setTimeout(() => {
+                            resizeCanvas();
+                            HeatmapRenderer.renderScrollHeatmap(currentData);
+                        }, 500);
                     }
+
+                    // Zobrazit geolokační statistiky
+                    zobrazitGeoStats(currentData.geo_stats, type);
                 } else {
-                    document.getElementById('page-mockup').innerHTML = `<div class="error">Chyba: ${result.message}</div>`;
+                    // Zobrazit chybu - ale stránka se stále zobrazí v iframe
+                    console.warn('[Heatmap] API chyba:', result.message);
+                    document.getElementById('geo-stats-container').style.display = 'none';
                 }
             } catch (error) {
                 console.error('Chyba při načítání heatmap:', error);
-                document.getElementById('page-mockup').innerHTML = `<div class="error">Síťová chyba: ${error.message}</div>`;
             }
+        });
+
+        // Načtení demo dat pro testování
+        document.getElementById('load-demo').addEventListener('click', () => {
+            const type = document.getElementById('type-selector').value;
+            const pageUrl = document.getElementById('page-selector').value;
+
+            console.log('[Heatmap] Generuji demo data pro typ:', type);
+
+            // Načíst stránku do iframe
+            nacistStranku(pageUrl);
+
+            if (type === 'click') {
+                // Generovat náhodná click data
+                const demoPoints = [];
+                const numPoints = 50;
+
+                for (let i = 0; i < numPoints; i++) {
+                    demoPoints.push({
+                        x: Math.random() * 80 + 10,  // 10-90% rozsah
+                        y: Math.random() * 80 + 10,
+                        count: Math.floor(Math.random() * 100) + 1
+                    });
+                }
+
+                currentData = {
+                    points: demoPoints,
+                    total_clicks: demoPoints.reduce((sum, p) => sum + p.count, 0),
+                    max_intensity: Math.max(...demoPoints.map(p => p.count)),
+                    points_count: demoPoints.length
+                };
+
+                // Zobrazit statistiky
+                document.getElementById('stats-container').style.display = 'block';
+                document.getElementById('stat-total').textContent = currentData.total_clicks.toLocaleString();
+                document.getElementById('stat-max').textContent = currentData.max_intensity;
+                document.getElementById('stat-points').textContent = currentData.points_count.toLocaleString();
+
+                // Počkat na načtení iframe a pak vykreslit
+                setTimeout(() => {
+                    resizeCanvas();
+                    HeatmapRenderer.renderClickHeatmap(currentData);
+                }, 500);
+
+            } else {
+                // Generovat scroll buckets (0, 10, 20, ..., 100)
+                const demoBuckets = [];
+                for (let depth = 0; depth <= 100; depth += 10) {
+                    demoBuckets.push({
+                        depth: depth,
+                        count: Math.max(100 - depth + Math.random() * 20, 10) // Více na začátku, méně dole
+                    });
+                }
+
+                currentData = {
+                    buckets: demoBuckets,
+                    total_views: demoBuckets[0].count,
+                    max_reach: Math.max(...demoBuckets.map(b => b.count)),
+                    buckets_count: demoBuckets.length
+                };
+
+                // Zobrazit statistiky
+                document.getElementById('stats-container').style.display = 'block';
+                document.getElementById('stat-total').textContent = currentData.total_views.toLocaleString();
+                document.getElementById('stat-max').textContent = Math.round(currentData.max_reach);
+                document.getElementById('stat-points').textContent = currentData.buckets_count;
+
+                setTimeout(() => {
+                    resizeCanvas();
+                    HeatmapRenderer.renderScrollHeatmap(currentData);
+                }, 500);
+            }
+
+            console.log('[Heatmap] Demo data načtena:', currentData);
         });
 
         // Export PNG
@@ -372,6 +521,71 @@ $csrfToken = generateCSRFToken();
 
             HeatmapRenderer.exportToPNG(filename);
         });
+
+        /**
+         * Zobrazí geolokační statistiky v tabulce
+         */
+        function zobrazitGeoStats(geoStats, type) {
+            const container = document.getElementById('geo-stats-container');
+            const tbody = document.getElementById('geo-stats-body');
+
+            // Vyčistit předchozí data
+            tbody.innerHTML = '';
+
+            // Pokud nejsou žádná data
+            if (!geoStats || geoStats.length === 0) {
+                container.style.display = 'block';
+                tbody.innerHTML = '<tr><td colspan="3" style="padding: 20px; text-align: center; color: #666;">Žádná geolokační data</td></tr>';
+                return;
+            }
+
+            // Zobrazit container
+            container.style.display = 'block';
+
+            // Mapování kódů zemí na názvy
+            const zemeNazvy = {
+                'CZ': 'Česká republika',
+                'SK': 'Slovensko',
+                'DE': 'Německo',
+                'AT': 'Rakousko',
+                'PL': 'Polsko',
+                'US': 'USA',
+                'GB': 'Velká Británie',
+                'IT': 'Itálie',
+                'FR': 'Francie',
+                'NL': 'Nizozemsko',
+                'BE': 'Belgie',
+                'CH': 'Švýcarsko',
+                'HU': 'Maďarsko',
+                'UA': 'Ukrajina',
+                'RU': 'Rusko'
+            };
+
+            // Vykreslit řádky
+            geoStats.forEach((stat, index) => {
+                const tr = document.createElement('tr');
+                tr.style.cssText = index % 2 === 0 ? 'background: #f9f9f9;' : 'background: white;';
+
+                const zemeKod = stat.country_code || '-';
+                const zemeNazev = zemeNazvy[zemeKod] || zemeKod;
+                const mesto = stat.city || '-';
+                const pocet = type === 'click'
+                    ? (stat.total_clicks || 0).toLocaleString()
+                    : (stat.total_views || 0).toLocaleString();
+
+                tr.innerHTML = `
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">
+                        <strong>${zemeKod}</strong> ${zemeNazev}
+                    </td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${mesto}</td>
+                    <td style="padding: 10px; text-align: right; border-bottom: 1px solid #eee; font-weight: bold;">${pocet}</td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+
+            console.log('[Heatmap] Zobrazeno', geoStats.length, 'geolokačních záznamů');
+        }
     </script>
 </body>
 </html>

@@ -15,6 +15,9 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     die(json_encode(['status' => 'error', 'message' => 'Unauthorized']));
 }
 
+// PERFORMANCE: Uvolnění session zámku pro paralelní požadavky
+session_write_close();
+
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 // BEZPEČNOST: CSRF ochrana pro POST operace (run_migration je nebezpečná operace)

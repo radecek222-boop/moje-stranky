@@ -68,7 +68,6 @@
             // Setup controls
             this.setupControls();
 
-            console.log('[Replay Player] Inicializováno pro session:', sessionId, 'page:', pageIndex);
             return true;
         },
 
@@ -110,11 +109,9 @@
                         pageInfoEl.textContent = `${result.data.page_url} (${result.data.total_frames} framů, ${this.formatTime(totalTimeMs)})`;
                     }
 
-                    console.log('[Replay Player] Data načtena:', this.state.frames.length, 'framů');
-
                     // Hide loading
                     if (loadingEl) {
-                        loadingEl.style.display = 'none';
+                        loadingEl.classList.add('hidden');
                     }
 
                     // Draw first frame
@@ -280,8 +277,8 @@
             ctx.arc(x + 2, y + 2, 8, 0, Math.PI * 2);
             ctx.fill();
 
-            // Inner circle
-            ctx.fillStyle = '#FF6B6B';
+            // Inner circle (grayscale per color policy)
+            ctx.fillStyle = '#666';
             ctx.beginPath();
             ctx.arc(x, y, 8, 0, Math.PI * 2);
             ctx.fill();
@@ -299,8 +296,8 @@
         drawClickAnimation: function(x, y) {
             const ctx = this.state.ctx;
 
-            // Ripple effect
-            ctx.strokeStyle = '#4ECDC4';
+            // Ripple effect (grayscale per color policy)
+            ctx.strokeStyle = '#888';
             ctx.lineWidth = 3;
 
             for (let i = 1; i <= 3; i++) {
@@ -328,7 +325,7 @@
 
             // Filled part (scroll position)
             const filledHeight = (scrollPercent / 100) * barHeight;
-            ctx.fillStyle = 'rgba(45, 80, 22, 0.7)';
+            ctx.fillStyle = 'rgba(51, 51, 51, 0.7)';
             ctx.fillRect(barX, 0, barWidth, filledHeight);
         },
 

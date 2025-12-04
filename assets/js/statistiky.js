@@ -10,14 +10,10 @@ let vybraneProdejci = [];
 let vybraneTechnici = [];
 let vybraneZeme = ['cz', 'sk']; // Defaultně obě země
 
-console.log('📊 Statistiky 2.0 - načítání...');
-
 /**
  * Inicializace při načtení stránky
  */
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('📊 Statistiky 2.0 - inicializace');
-
     // Inicializovat multi-select dropdowny
     inicializujMultiselect();
 
@@ -38,8 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
         aktualniStranka = 1;
         aplikovatFiltry();
     });
-
-    console.log('📊 Statistiky 2.0 - inicializace dokončena');
 });
 
 /**
@@ -86,17 +80,25 @@ function inicializujMultiselect() {
  */
 function toggleDropdown(typ) {
     const dropdown = document.getElementById(`${typ}-dropdown`);
+    const trigger = document.getElementById(`${typ}-trigger`);
     const jineDropdowny = document.querySelectorAll('.multiselect-dropdown');
+    const jineTrigery = document.querySelectorAll('.multiselect-trigger');
 
-    // Zavřít ostatní
-    jineDropdowny.forEach(d => {
+    // Zavřít ostatní a resetovat aria-expanded
+    jineDropdowny.forEach((d, index) => {
         if (d !== dropdown) {
             d.classList.remove('active');
         }
     });
+    jineTrigery.forEach(t => {
+        if (t !== trigger) {
+            t.setAttribute('aria-expanded', 'false');
+        }
+    });
 
     // Toggle aktuální
-    dropdown.classList.toggle('active');
+    const jeOtevreno = dropdown.classList.toggle('active');
+    trigger.setAttribute('aria-expanded', jeOtevreno ? 'true' : 'false');
 }
 
 /**
@@ -298,7 +300,7 @@ function renderTabulka(data) {
     const tableCount = document.getElementById('table-count');
 
     if (!data.zakazky || data.zakazky.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div>Žádné zakázky podle filtrů</div>';
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"></div>Žádné zakázky podle filtrů</div>';
         tableCount.textContent = '0 zakázek';
         return;
     }
@@ -354,11 +356,11 @@ function updateStrankovani(data) {
     const nextBtn = document.getElementById('next-page');
 
     if (data.celkem_stranek <= 1) {
-        pagination.style.display = 'none';
+        pagination.classList.add('hidden');
         return;
     }
 
-    pagination.style.display = 'flex';
+    pagination.classList.remove('hidden');
     pageInfo.textContent = `Strana ${data.stranka} z ${data.celkem_stranek}`;
 
     prevBtn.disabled = data.stranka === 1;
@@ -477,7 +479,6 @@ function renderCharty(data) {
  * Aplikovat filtry
  */
 function aplikovatFiltry() {
-    console.log('Aplikuji filtry...');
     aktualniStranka = 1;
     nactiSummary();
     nactiZakazky();
@@ -488,8 +489,6 @@ function aplikovatFiltry() {
  * Resetovat filtry
  */
 function resetovitFiltry() {
-    console.log('Resetuji filtry...');
-
     // Reset year, month
     document.getElementById('filter-year').value = '2025';
     document.getElementById('filter-month').value = '11';
@@ -524,22 +523,20 @@ function resetovitFiltry() {
  */
 async function exportovatPDF() {
     try {
-        console.log('📄 Exportuji PDF...');
-
         // Načíst VŠECHNA data (bez limitu)
         const filterParams = getFilterParams();
         const response = await fetch(`/api/statistiky_api.php?action=get_zakazky&${filterParams}&pro_export=1`);
         const result = await response.json();
 
         if (result.status !== 'success' || !result.data.zakazky) {
-            alert('Chyba při načítání dat pro export');
+            wgsToast.error('Chyba při načítání dat pro export');
             return;
         }
 
         const zakazky = result.data.zakazky;
 
         if (zakazky.length === 0) {
-            alert('Žádná data k exportu podle filtrů');
+            wgsToast.warning('Žádná data k exportu podle filtrů');
             return;
         }
 
@@ -633,7 +630,6 @@ async function exportovatPDF() {
         document.body.appendChild(pdfContainer);
 
         // Renderovat pomocí html2canvas
-        console.log('📸 Renderuji HTML pomocí html2canvas...');
         const canvas = await html2canvas(pdfContainer, {
             scale: 2,
             backgroundColor: '#fff',
@@ -715,10 +711,8 @@ async function exportovatPDF() {
         const nazevSouboru = `statistiky_${rok}_${mesicValue || 'vsechny'}_${new Date().toISOString().split('T')[0]}.pdf`;
         doc.save(nazevSouboru);
 
-        console.log('✅ PDF exportováno:', nazevSouboru);
-
     } catch (error) {
         console.error('Chyba exportu PDF:', error);
-        alert('Chyba při exportu PDF: ' + error.message);
+        wgsToast.error('Chyba při exportu PDF: ' + error.message);
     }
 }

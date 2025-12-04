@@ -13,7 +13,9 @@
         "php": ">=8.4",
         "ext-pdo": "*",
         "ext-mbstring": "*",
-        "ext-json": "*"
+        "ext-json": "*",
+        "ext-gmp": "*",
+        "minishlink/web-push": "^9.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^11.0",
@@ -22,13 +24,7 @@
     "autoload": {
         "psr-4": {
             "WGS\\": "app/"
-        },
-        "files": [
-            "config/config.php",
-            "includes/csrf_helper.php",
-            "includes/api_response.php",
-            "includes/db_metadata.php"
-        ]
+        }
     },
     "autoload-dev": {
         "psr-4": {

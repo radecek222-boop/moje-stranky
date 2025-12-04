@@ -10,7 +10,7 @@ require_once __DIR__ . '/../includes/rate_limiter.php';
 header('Content-Type: application/json');
 
 try {
-    // ✅ FIX 9: Databázový rate limiting - DoS ochrana pro error logging
+    // FIX 9: Databázový rate limiting - DoS ochrana pro error logging
     $pdo = getDbConnection();
     $rateLimiter = new RateLimiter($pdo);
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
@@ -31,7 +31,7 @@ try {
         exit;
     }
 
-    // ✅ FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
+    // FIX 9: RateLimiter již zaznamenal pokus automaticky v checkLimit()
 
     // Načtení JSON dat
     $jsonData = file_get_contents('php://input');

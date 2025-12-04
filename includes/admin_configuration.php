@@ -74,7 +74,7 @@ $groupNames = [
     <?php if (!$directAccess): ?>
     <!-- Header -->
     <div class="control-detail-header">
-        <button class="control-detail-back" onclick="window.location.href='admin.php'">
+        <button class="control-detail-back" data-href="admin.php">
             <span>‹</span>
             <span>Zpět</span>
         </button>
@@ -130,7 +130,9 @@ $groupNames = [
                                             <input type="checkbox"
                                                    id="config-<?= $config['id'] ?>"
                                                    <?= $config['config_value'] == '1' ? 'checked' : '' ?>
-                                                   onchange="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')">
+                                                   data-action="onChangeConfig"
+                                                   data-id="<?= $config['id'] ?>"
+                                                   data-key="<?= htmlspecialchars($config['config_key']) ?>">
                                             <span class="cc-toggle-slider"></span>
                                         </label>
                                     <?php else: ?>
@@ -140,7 +142,9 @@ $groupNames = [
                                                    id="config-<?= $config['id'] ?>"
                                                    value="<?= htmlspecialchars($config['config_value']) ?>">
                                             <button class="cc-btn cc-btn-sm cc-btn-primary"
-                                                    onclick="saveConfig(<?= $config['id'] ?>, '<?= htmlspecialchars($config['config_key']) ?>')">
+                                                    data-action="saveConfig"
+                                                    data-id="<?= $config['id'] ?>"
+                                                    data-key="<?= htmlspecialchars($config['config_key']) ?>">
                                                 Uložit
                                             </button>
                                         </div>
@@ -174,7 +178,7 @@ $groupNames = [
     </div>
 </div>
 
-<script src="/assets/js/csrf-auto-inject.js"></script>
+<script src="/assets/js/csrf-auto-inject.min.js"></script>
 <script>
 // Toggle password visibility
 /**
@@ -236,6 +240,15 @@ async function saveConfig(configId, configKey) {
 }
 
 console.log('Configuration section loaded (Email/SMTP moved to Email & SMS tab)');
+
+// ACTION REGISTRY - Step 113
+if (typeof Utils !== 'undefined' && Utils.registerAction) {
+    Utils.registerAction('saveConfig', (el, data) => {
+        if (data.id && data.key) {
+            saveConfig(data.id, data.key);
+        }
+    });
+}
 </script>
 
 

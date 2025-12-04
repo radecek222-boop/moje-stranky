@@ -1,75 +1,96 @@
 <?php
 /**
- * PHPUnit Bootstrap File
- * Inicializace testovacího prostředí
+ * PHPUnit Bootstrap
+ * Step 151: Test environment setup
+ *
+ * Tento soubor se načte před každým testem.
+ * Nastavuje autoloading a testovací prostředí.
  */
 
-// Error reporting
+declare(strict_types=1);
+
+// Autoload Composer dependencies
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Definovat konstanty pro testovací prostředí
+define('WGS_TESTING', true);
+define('WGS_ROOT', dirname(__DIR__));
+
+// Nastavit error reporting
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-// Define test mode
-define('TEST_MODE', true);
-
-// Root path
-define('ROOT_PATH', dirname(__DIR__));
-
-// Load environment variables (test .env)
-$envFile = ROOT_PATH . '/.env.testing';
-if (!file_exists($envFile)) {
-    // Fallback na běžný .env pokud neexistuje testing varianta
-    $envFile = ROOT_PATH . '/.env';
+// Fake session pro testy (bez skutečného session_start)
+if (!isset($_SESSION)) {
+    $_SESSION = [];
 }
 
-if (file_exists($envFile)) {
-    require_once ROOT_PATH . '/includes/env_loader.php';
-}
+// Mock funkce pro testování bez skutečné DB
+if (!function_exists('getDbConnection')) {
+    /**
+     * Mock database connection pro unit testy
+     * Integration testy mohou použít skutečnou DB
+     */
+    function getDbConnection(): ?PDO
+    {
+        static $pdo = null;
 
-// Start session for tests
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+        if ($pdo === null) {
+            // SQLite in-memory pro izolované testy
+            $pdo = new PDO('sqlite::memory:', null, null, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false
+            ]);
+        }
 
-// Load init.php (ale bez redirect a některých security headers)
-// Pro testy potřebujeme jen databázové připojení a utility funkce
-require_once ROOT_PATH . '/config/config.php';
-require_once ROOT_PATH . '/config/database.php';
-
-// Helper funkce pro testy
-/**
- * Vyčistí testovací databázi
- */
-function cleanTestDatabase() {
-    if (!defined('TEST_MODE')) {
-        throw new Exception('Nelze vyčistit produkční databázi!');
-    }
-
-    // TODO: Implementovat čištění testovací DB
-}
-
-/**
- * Vytvoří mock PDO připojení pro testy
- */
-function getMockPdo() {
-    // Pro unit testy můžeme použít SQLite in-memory databázi
-    try {
-        $pdo = new PDO('sqlite::memory:');
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $pdo;
-    } catch (PDOException $e) {
-        throw new Exception('Nelze vytvořit mock PDO: ' . $e->getMessage());
     }
 }
 
-/**
- * Sanitizace vstupu - kopie z produkční funkce
- */
-if (!function_exists('sanitizeInput')) {
-    function sanitizeInput($input) {
-        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-    }
+// Helper pro načtení testovacího schématu
+function loadTestSchema(PDO $pdo): void
+{
+    // Základní tabulky pro testy
+    $schema = <<<SQL
+        CREATE TABLE IF NOT EXISTS wgs_users (
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            role TEXT DEFAULT 'user',
+            is_active INTEGER DEFAULT 1,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS wgs_reklamace (
+            reklamace_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            jmeno TEXT NOT NULL,
+            telefon TEXT,
+            email TEXT,
+            adresa TEXT,
+            popis_problemu TEXT,
+            stav TEXT DEFAULT 'wait',
+            datum_vytvoreni TEXT DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS wgs_registration_keys (
+            key_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            key_code TEXT UNIQUE NOT NULL,
+            key_type TEXT DEFAULT 'standard',
+            max_usage INTEGER DEFAULT 1,
+            usage_count INTEGER DEFAULT 0,
+            is_active INTEGER DEFAULT 1
+        );
+SQL;
+
+    $pdo->exec($schema);
 }
 
-echo "\n✓ PHPUnit bootstrap načten\n";
-echo "✓ Test mode: " . (defined('TEST_MODE') ? 'ANO' : 'NE') . "\n";
-echo "✓ Root path: " . ROOT_PATH . "\n\n";
+// Helper pro reset testovací DB
+function resetTestDatabase(): void
+{
+    $pdo = getDbConnection();
+    $pdo->exec('DELETE FROM wgs_users');
+    $pdo->exec('DELETE FROM wgs_reklamace');
+    $pdo->exec('DELETE FROM wgs_registration_keys');
+}

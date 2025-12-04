@@ -37,8 +37,6 @@
 
     // Aktualizovat title stránky (pokud existuje)
     aktualizujTitle(jazyk);
-
-    console.log('Jazyk přepnut na:', jazyk);
   };
 
   /**
@@ -184,6 +182,11 @@
         cs: 'Naše služby | White Glove Service',
         en: 'Our Services | White Glove Service',
         it: 'I Nostri Servizi | White Glove Service'
+      },
+      'cenik': {
+        cs: 'Ceník služeb - White Glove Service | Servis Natuzzi | Praha, Brno',
+        en: 'Price List - White Glove Service | Natuzzi Service | Prague, Brno',
+        it: 'Listino Prezzi - White Glove Service | Servizio Natuzzi | Praga, Brno'
       }
     };
 
@@ -230,17 +233,22 @@
       prepniJazyk(aktualniJazyk);
     }
 
-    // Přidat event listenery na vlajky
+    // Přidat event listenery na vlajky - kliknutí i klávesnice
     document.querySelectorAll('.lang-flag').forEach(vlajka => {
       vlajka.addEventListener('click', () => {
         prepniJazyk(vlajka.dataset.lang);
+      });
+      // Podpora klávesnice (Enter/Space) pro přístupnost
+      vlajka.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          prepniJazyk(vlajka.dataset.lang);
+        }
       });
     });
 
     // Nastavit aktivní vlajku
     aktualizujVlajky(aktualniJazyk);
-
-    console.log('WGS Language Switcher inicializován. Aktuální jazyk:', aktualniJazyk);
   }
 
   // Spustit inicializaci při načtení DOMu

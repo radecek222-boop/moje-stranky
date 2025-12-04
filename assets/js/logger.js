@@ -39,6 +39,15 @@
         return false;
     }
 
+    // V produkci potlacit vsechny console.log a console.info
+    // (console.error a console.warn zustanou aktivni)
+    if (!isDebugMode()) {
+        const noop = function() {};
+        window.console.log = noop;
+        window.console.info = noop;
+        // console.error a console.warn ponechame aktivni
+    }
+
     /**
      * Logger utility object
      */
@@ -98,9 +107,5 @@
         isDebug: isDebugMode
     };
 
-    // Log initialization (only in debug mode)
-    if (isDebugMode()) {
-        console.log('🔧 Logger initialized - Debug mode ENABLED');
-        console.log('💡 To disable debug logs in production, set DEBUG_MODE = false or deploy to non-localhost');
-    }
+    // Inicializace bez logu (logy jsou potlaceny v produkci)
 })();
