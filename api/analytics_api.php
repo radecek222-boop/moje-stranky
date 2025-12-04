@@ -11,33 +11,56 @@
  * toto API slouží pouze pro správu blokovaných IP adres.
  */
 
-require_once __DIR__ . '/../init.php';
-require_once __DIR__ . '/../includes/csrf_helper.php';
+// Error handling - zachytit všechny chyby
+set_error_handler(function($severity, $message, $file, $line) {
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
 
-header('Content-Type: application/json; charset=utf-8');
+try {
+    require_once __DIR__ . '/../init.php';
+    require_once __DIR__ . '/../includes/csrf_helper.php';
 
-// BEZPEČNOST: Kontrola admin přihlášení
-if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
-    http_response_code(403);
+    header('Content-Type: application/json; charset=utf-8');
+
+    // BEZPEČNOST: Kontrola admin přihlášení
+    if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+        http_response_code(403);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Přístup odepřen. Pouze pro administrátory.'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $action = $_GET['action'] ?? '';
+
+    if ($action === '') {
+        http_response_code(400);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Chybí parametr action. Dostupné akce: add_blocked_ip, remove_blocked_ip, add_my_ip'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    zpracujIpAkci($action);
+
+} catch (Throwable $e) {
+    // Zachytit jakoukoliv chybu a vrátit JSON
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
         'status' => 'error',
-        'message' => 'Přístup odepřen. Pouze pro administrátory.'
+        'message' => 'Interní chyba serveru',
+        'debug' => [
+            'error' => $e->getMessage(),
+            'file' => basename($e->getFile()),
+            'line' => $e->getLine()
+        ]
     ], JSON_UNESCAPED_UNICODE);
+    error_log("Analytics API Error: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
     exit;
 }
-
-$action = $_GET['action'] ?? '';
-
-if ($action === '') {
-    http_response_code(400);
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'Chybí parametr action. Dostupné akce: add_blocked_ip, remove_blocked_ip, add_my_ip'
-    ], JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
-zpracujIpAkci($action);
 
 /**
  * Zpracuje akce pro správu blokovaných IP adres
