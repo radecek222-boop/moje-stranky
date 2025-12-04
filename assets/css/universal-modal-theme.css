@@ -20,7 +20,6 @@
 
 .modal-overlay,
 .cc-overlay,
-.calculator-modal-overlay,
 .welcome-modal-overlay,
 .admin-modal-overlay,
 .preview-overlay,
@@ -39,6 +38,8 @@
     -webkit-backdrop-filter: blur(8px) !important;
 }
 
+/* VÝJIMKA: Calculator modal má vlastní světlý design */
+
 /* ============================================
    MODAL CONTAINERY - Tmavé boxy
    ============================================ */
@@ -46,7 +47,6 @@
 .modal-content,
 .cc-modal,
 .welcome-modal,
-.calculator-modal-container,
 .admin-modal,
 .preview-modal,
 .modal,
@@ -78,7 +78,6 @@
 .modal-header,
 .cc-modal-header,
 .admin-modal-header,
-.calculator-modal-header,
 .wgs-modal .modal-header {
     /* Tmavé pozadí hlavičky */
     background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
@@ -97,7 +96,6 @@
 .modal-title,
 .cc-modal-title,
 .admin-modal-title,
-.calculator-modal-header h2,
 .welcome-title,
 .modal-header h2,
 .modal-header h3,
@@ -118,7 +116,6 @@
 .modal-close,
 .cc-modal-close,
 .admin-modal-close,
-.calculator-modal-close,
 .close-modal,
 button[onclick*="zavrit"],
 button[onclick*="close"] {
@@ -132,7 +129,6 @@ button[onclick*="close"] {
 .modal-close:hover,
 .cc-modal-close:hover,
 .admin-modal-close:hover,
-.calculator-modal-close:hover,
 .close-modal:hover {
     /* Světlejší při hover */
     color: #ffffff !important;
@@ -148,7 +144,6 @@ button[onclick*="close"] {
 .modal-body,
 .cc-modal-body,
 .admin-modal-body,
-.calculator-modal-body,
 .wgs-modal .modal-body {
     /* Barva textu */
     color: #cccccc !important;
@@ -383,22 +378,6 @@ button.button:hover {
 /* ============================================
    SPECIFICKÉ MODALY - Speciální případy
    ============================================ */
-
-/* Protokol Calculator Modal - specifické prvky */
-.calculator-item-row,
-.calculator-summary-row {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-}
-
-.calculator-item-label,
-.calculator-item-code {
-    color: #cccccc !important;
-}
-
-.calculator-item-price,
-.calculator-total-price {
-    color: #ffffff !important;
-}
 
 /* QR Modal (PSA kalkulátor) */
 #qrModal .qr-code-container {

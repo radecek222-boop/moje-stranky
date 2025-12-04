@@ -70,15 +70,47 @@ if (session_status() === PHP_SESSION_NONE) {
     // FIX Safari ITP: Explicitní session name
     session_name('WGS_SESSION');
 
+    // FIX PWA: Detekce PWA standalone módu
+    // PWA může poslat custom header nebo použít specific display-mode
+    // iOS Safari v PWA módu nese "Safari" v User-Agent ale nemá "CriOS" nebo "FxiOS"
+    $isPWA = false;
+
+    // Metoda 1: Custom header z PWA (nastaveno v service-worker nebo fetch interceptor)
+    if (isset($_SERVER['HTTP_X_PWA_MODE']) && $_SERVER['HTTP_X_PWA_MODE'] === 'standalone') {
+        $isPWA = true;
+    }
+
+    // Metoda 2: Referer obsahuje ?source=pwa (parametr z manifest.json start_url)
+    $referer = $_SERVER['HTTP_REFERER'] ?? '';
+    if (strpos($referer, 'source=pwa') !== false || strpos($referer, 'utm_source=pwa') !== false) {
+        $isPWA = true;
+    }
+
+    // Metoda 3: Request URI obsahuje pwa parametr
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+    if (strpos($requestUri, 'source=pwa') !== false || strpos($requestUri, 'utm_source=pwa') !== false) {
+        $isPWA = true;
+    }
+
+    // Metoda 4: Cookie flag nastavený z JS při prvním spuštění PWA
+    if (isset($_COOKIE['wgs_pwa_mode']) && $_COOKIE['wgs_pwa_mode'] === '1') {
+        $isPWA = true;
+    }
+
+    // FIX PWA: Delší session lifetime pro PWA mód
+    // Důvod: PWA standalone mode v iOS/Android ruší session cookie při každém "zavření" aplikace
+    // Řešení: Pro PWA nastavit 7 dní, pro browser 0 (do zavření)
+    $sessionLifetime = $isPWA ? (7 * 24 * 60 * 60) : 0;  // 7 dní pro PWA, 0 pro browser
+
     // FIX: Použití session_set_cookie_params() se STAROU syntaxí pro PHP 7.x kompatibilitu
-    // Safari ITP fix: domain = NULL místo prázdného stringu, lifetime = 0 (browser session)
+    // Safari ITP fix: domain = NULL místo prázdného stringu
     // FIX 5: secure flag je nyní environment-based (ne runtime)
     session_set_cookie_params(
-        0,              // lifetime - 0 = do zavření prohlížeče (lepší pro Safari ITP)
-        '/',            // path - celá doména
-        NULL,           // domain - NULL místo '' (Safari compatibility)
-        $secureFlag,    // FIX 5: secure - environment-based (production=true, dev=false)
-        true            // httponly - ochrana proti XSS
+        $sessionLifetime,   // FIX PWA: lifetime - 7 dní pro PWA, 0 pro browser
+        '/',                // path - celá doména
+        NULL,               // domain - NULL místo '' (Safari compatibility)
+        $secureFlag,        // FIX 5: secure - environment-based (production=true, dev=false)
+        true                // httponly - ochrana proti XSS
     );
 
     // SameSite musí být nastaven přes ini_set (není v session_set_cookie_params v PHP 7.2)

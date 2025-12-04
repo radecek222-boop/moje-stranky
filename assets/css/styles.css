@@ -119,6 +119,7 @@ html {
 }
 
 /* wgsConfirm - vlastní potvrzovací dialog */
+/* OPRAVA: z-index musí být vyšší než detail overlay (10002) */
 .wgs-confirm-overlay {
   position: fixed;
   top: 0;
@@ -129,7 +130,7 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: var(--z-modal-top, 10000);
+  z-index: 10005;
   padding: 20px;
 }
 .wgs-confirm-dialog {

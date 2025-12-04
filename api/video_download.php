@@ -288,13 +288,29 @@ function zobrazStranku($tokenData, $videa, $token) {
                 display: flex; align-items: center; gap: 16px;
                 border: 1px solid #444;
             }
-            .video-icon {
-                font-size: 1.5rem; opacity: 0.7; cursor: pointer;
-                width: 48px; height: 48px; display: flex; align-items: center;
-                justify-content: center; background: #333; border-radius: 8px;
+            .video-thumbnail {
+                position: relative; cursor: pointer;
+                width: 120px; height: 68px; min-width: 120px;
+                background: #333; border-radius: 8px;
+                overflow: hidden; transition: all 0.2s;
+            }
+            .video-thumbnail:hover { transform: scale(1.05); }
+            .video-thumbnail video {
+                width: 100%; height: 100%; object-fit: cover;
+                pointer-events: none;
+            }
+            .video-thumbnail .play-overlay {
+                position: absolute; top: 50%; left: 50%;
+                transform: translate(-50%, -50%);
+                width: 36px; height: 36px;
+                background: rgba(0,0,0,0.7); border-radius: 50%;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 1rem; color: #fff;
                 transition: all 0.2s;
             }
-            .video-icon:hover { background: #444; opacity: 1; }
+            .video-thumbnail:hover .play-overlay {
+                background: rgba(255,255,255,0.9); color: #000;
+            }
             .video-info { flex: 1; min-width: 0; }
             .video-name {
                 font-weight: 500; margin-bottom: 4px;
@@ -349,6 +365,7 @@ function zobrazStranku($tokenData, $videa, $token) {
 
             @media (max-width: 600px) {
                 .video-item { flex-direction: column; align-items: stretch; gap: 12px; }
+                .video-thumbnail { width: 100%; height: 180px; min-width: unset; }
                 .video-actions { flex-direction: column; }
                 .video-actions .btn { width: 100%; text-align: center; }
                 .meta { flex-direction: column; gap: 8px; }
@@ -378,7 +395,10 @@ function zobrazStranku($tokenData, $videa, $token) {
             <div class="video-list">
                 <?php foreach ($videa as $index => $video): ?>
                 <div class="video-item">
-                    <div class="video-icon" data-action="prehratVideo" data-id="<?= $video['id'] ?>" data-name="<?= htmlspecialchars($video['video_name']) ?>" title="Prehrat video">&#9658;</div>
+                    <div class="video-thumbnail" data-action="prehratVideo" data-id="<?= $video['id'] ?>" data-name="<?= htmlspecialchars($video['video_name']) ?>" title="Prehrat video">
+                        <video src="?token=<?= htmlspecialchars($token) ?>&video_id=<?= $video['id'] ?>&stream=1#t=0.5" preload="metadata" muted playsinline></video>
+                        <div class="play-overlay">&#9658;</div>
+                    </div>
                     <div class="video-info">
                         <div class="video-name"><?= htmlspecialchars($video['video_name']) ?></div>
                         <div class="video-meta">
@@ -484,6 +504,31 @@ function zobrazStranku($tokenData, $videa, $token) {
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape' && videoModal.classList.contains('active')) {
                     zavritVideo();
+                }
+            });
+
+            // Event handlery pro data-action atributy
+            document.addEventListener('click', function(e) {
+                const target = e.target.closest('[data-action]');
+                if (!target) return;
+
+                const action = target.getAttribute('data-action');
+                const videoId = target.getAttribute('data-id');
+                const videoName = target.getAttribute('data-name');
+                const href = target.getAttribute('href');
+
+                switch (action) {
+                    case 'prehratVideo':
+                        e.preventDefault();
+                        prehratVideo(videoId, videoName);
+                        break;
+                    case 'zavritVideo':
+                        e.preventDefault();
+                        zavritVideo();
+                        break;
+                    case 'stahnoutAZavrit':
+                        stahnoutAZavrit(e, href);
+                        break;
                 }
             });
         </script>

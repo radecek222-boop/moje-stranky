@@ -61,6 +61,18 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(detekujAutofill, 500);
   // Další kontrola po 1s (pro PWA kde může být zpoždění)
   setTimeout(detekujAutofill, 1000);
+
+  // PWA: Automaticky zapnout "Remember Me" pro lepší UX
+  // V PWA modu uzivatel ocekava trvalou session jako nativni appka
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+                window.navigator.standalone === true;
+  if (isPWA) {
+    const rememberMeCheckbox = document.getElementById('rememberMe');
+    if (rememberMeCheckbox && !rememberMeCheckbox.checked) {
+      rememberMeCheckbox.checked = true;
+      logger.log('[PWA] Remember Me automaticky zapnut');
+    }
+  }
 });
 
 // Metoda 3: Listener na animationstart (Chrome autofill spouští animaci)

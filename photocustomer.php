@@ -116,6 +116,17 @@ if (!$isAdmin && !$isTechnik) {
     </div>
   </div>
   
+  <!-- SEKCE VIDEO - Nahrání do videotéky -->
+  <div class="video-section" id="videoSection">
+    <div class="section-header">Video</div>
+    <div id="video-preview" class="video-preview">
+      <!-- Dynamicky generovaný obsah -->
+    </div>
+    <div class="video-controls">
+      <button type="button" class="btn btn-video" id="btnNahratVideo">Nahrát video</button>
+    </div>
+  </div>
+
   <!-- SEKCE FOTOGRAFIÍ -->
   <div class="photo-section" data-capture-type="before">
     <div class="section-header">Before</div>
@@ -130,6 +141,16 @@ if (!$isAdmin && !$isTechnik) {
   <div class="photo-section" data-capture-type="problem">
     <div class="section-header">Detail Bug</div>
     <div id="preview-problem" class="photo-preview"></div>
+  </div>
+
+  <div class="photo-section" data-capture-type="damage_part">
+    <div class="section-header">Damage Part</div>
+    <div id="preview-damage_part" class="photo-preview"></div>
+  </div>
+
+  <div class="photo-section" data-capture-type="new_part">
+    <div class="section-header">New Part</div>
+    <div id="preview-new_part" class="photo-preview"></div>
   </div>
 
   <div class="photo-section" data-capture-type="repair">
@@ -172,6 +193,22 @@ if (!$isAdmin && !$isTechnik) {
 <!-- HIDDEN FILE INPUT -->
 <!-- OPRAVENO: accept="image/*,video/*" místo špatného "assets/img/*" -->
 <input type="file" id="mediaInput" accept="image/*,video/*" capture="environment" multiple>
+
+<!-- HIDDEN VIDEO INPUT - pro videotéku -->
+<input type="file" id="videoInput" accept="video/*" capture="environment">
+
+<!-- VIDEO PLAYBACK MODAL -->
+<div class="video-modal-overlay" id="videoModalOverlay">
+  <div class="video-modal-container">
+    <div class="video-modal-header">
+      <span id="videoModalTitle">Video</span>
+      <button type="button" class="video-modal-close" id="btnCloseVideoModal">×</button>
+    </div>
+    <div class="video-modal-content">
+      <video id="videoPlayer" controls playsinline></video>
+    </div>
+  </div>
+</div>
 
 <!-- External JavaScript -->
 <script src="assets/js/customer-collapse.min.js" defer></script>

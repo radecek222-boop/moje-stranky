@@ -12,6 +12,34 @@
 // Kontrola jestli je uzivatel prihlasen (pro notifikace)
 $pwaUzivatelPrihlasen = isset($_SESSION['user_id']) || (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true);
 ?>
+<!-- PWA Mode Detection - nastaví cookie pro server-side detekci -->
+<script>
+(function() {
+  // Detekce PWA standalone módu
+  var isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+              window.navigator.standalone === true;
+
+  if (isPWA) {
+    // Nastavit cookie pro PHP detekci (7 dní platnost)
+    var expires = new Date();
+    expires.setTime(expires.getTime() + (7 * 24 * 60 * 60 * 1000));
+    document.cookie = 'wgs_pwa_mode=1; path=/; expires=' + expires.toUTCString() + '; SameSite=Lax; Secure';
+
+    // Přidat custom header pro fetch requesty
+    var originalFetch = window.fetch;
+    window.fetch = function(url, options) {
+      options = options || {};
+      options.headers = options.headers || {};
+      if (options.headers instanceof Headers) {
+        options.headers.append('X-PWA-Mode', 'standalone');
+      } else {
+        options.headers['X-PWA-Mode'] = 'standalone';
+      }
+      return originalFetch.call(this, url, options);
+    };
+  }
+})();
+</script>
 <!-- PWA Service Worker Registration -->
 <script src="/assets/js/sw-register.min.js"></script>
 <!-- PWA Pull-to-Refresh -->
