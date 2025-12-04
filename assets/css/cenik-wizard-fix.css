@@ -461,13 +461,16 @@
 }
 
 .counter-controls input[type="number"] {
-    width: 36px !important;
+    width: 40px !important;
+    height: 28px !important;
     text-align: center !important;
-    font-size: 0.9rem !important;
+    font-size: 1rem !important;
     font-weight: 600 !important;
+    line-height: 28px !important;
     border: none !important;
     background: transparent !important;
     color: #2a2a2a !important;
+    padding: 0 !important;
     -moz-appearance: textfield !important;
 }
 
