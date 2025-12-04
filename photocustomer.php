@@ -132,6 +132,16 @@ if (!$isAdmin && !$isTechnik) {
     <div id="preview-problem" class="photo-preview"></div>
   </div>
 
+  <div class="photo-section" data-capture-type="damage_part">
+    <div class="section-header">Damage Part</div>
+    <div id="preview-damage_part" class="photo-preview"></div>
+  </div>
+
+  <div class="photo-section" data-capture-type="new_part">
+    <div class="section-header">New Part</div>
+    <div id="preview-new_part" class="photo-preview"></div>
+  </div>
+
   <div class="photo-section" data-capture-type="repair">
     <div class="section-header">Repair</div>
     <div id="preview-repair" class="photo-preview"></div>

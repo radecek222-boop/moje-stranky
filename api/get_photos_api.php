@@ -65,6 +65,8 @@ try {
         'before' => [],
         'id' => [],
         'problem' => [],
+        'damage_part' => [],
+        'new_part' => [],
         'repair' => [],
         'after' => []
     ];

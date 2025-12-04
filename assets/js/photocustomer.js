@@ -28,6 +28,8 @@ let sections = {
   before: [],
   id: [],
   problem: [],
+  damage_part: [],
+  new_part: [],
   repair: [],
   after: []
 };
@@ -132,6 +134,8 @@ async function loadExistingMedia() {
       before: [],
       id: [],
       problem: [],
+      damage_part: [],
+      new_part: [],
       repair: [],
       after: []
     };
@@ -149,6 +153,8 @@ async function loadExistingMedia() {
       before: [],
       id: [],
       problem: [],
+      damage_part: [],
+      new_part: [],
       repair: [],
       after: []
     };
