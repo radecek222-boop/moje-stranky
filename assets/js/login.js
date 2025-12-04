@@ -163,8 +163,16 @@ if (isAdminCheckbox) {
 
     if (e.target.checked) {
       // Admin mode - skrýt user pole a zobrazit admin pole
-      if (userLoginFields) userLoginFields.style.display = 'none';
-      if (adminLoginFields) adminLoginFields.style.display = 'block';
+      // FIX: Musime odebrat tridu 'hidden' protoze CSS ma .hidden{display:none !important}
+      // ktere prepise inline style.display
+      if (userLoginFields) {
+        userLoginFields.classList.add('hidden');
+        userLoginFields.style.display = 'none';
+      }
+      if (adminLoginFields) {
+        adminLoginFields.classList.remove('hidden');
+        adminLoginFields.style.display = 'block';
+      }
 
       if (userEmail) userEmail.removeAttribute('required');
       if (userPassword) userPassword.removeAttribute('required');
@@ -174,8 +182,14 @@ if (isAdminCheckbox) {
       }
     } else {
       // User mode - zobrazit user pole a skrýt admin pole
-      if (userLoginFields) userLoginFields.style.display = 'block';
-      if (adminLoginFields) adminLoginFields.style.display = 'none';
+      if (userLoginFields) {
+        userLoginFields.classList.remove('hidden');
+        userLoginFields.style.display = 'block';
+      }
+      if (adminLoginFields) {
+        adminLoginFields.classList.add('hidden');
+        adminLoginFields.style.display = 'none';
+      }
 
       if (userEmail) userEmail.setAttribute('required', 'required');
       if (userPassword) userPassword.setAttribute('required', 'required');
