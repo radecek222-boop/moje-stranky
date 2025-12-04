@@ -2863,29 +2863,40 @@ function stopRecording() {
 
   const recorder = window.wgsAudioRecorder;
 
-  if (recorder.mediaRecorder && recorder.isRecording) {
-    // Vyzadat posledni data pred zastavenim (dulezite pro mobilni prohlizece)
-    if (recorder.mediaRecorder.state === 'recording') {
-      try {
-        recorder.mediaRecorder.requestData();
-      } catch (e) {
-        logger.log('[Audio] requestData neni podporovano:', e.message);
-      }
-    }
-    recorder.mediaRecorder.stop();
-  }
-
-  // Zastavit casovac
+  // Zastavit casovac hned
   if (recorder.recordingTimer) {
     clearInterval(recorder.recordingTimer);
     recorder.recordingTimer = null;
   }
 
-  // Aktualizovat UI
+  if (recorder.mediaRecorder && recorder.isRecording) {
+    // Vyzadat posledni data pred zastavenim (dulezite pro mobilni prohlizece)
+    if (recorder.mediaRecorder.state === 'recording') {
+      try {
+        recorder.mediaRecorder.requestData();
+        // FIX: Pridat male zpozdeni aby data stihla dorazit pred stop()
+        // Na nekterych prohlizecich (Safari/iOS) requestData() je asynchronni
+        // a data dorazila az po stop(), coz vedlo k prazdnym nahrávkam
+        setTimeout(() => {
+          if (recorder.mediaRecorder && recorder.mediaRecorder.state === 'recording') {
+            recorder.mediaRecorder.stop();
+            logger.log('[Audio] MediaRecorder zastaven po requestData zpozdeni');
+          }
+        }, 150);
+      } catch (e) {
+        logger.log('[Audio] requestData neni podporovano:', e.message);
+        // Fallback - zavolat stop() primo
+        recorder.mediaRecorder.stop();
+      }
+    } else if (recorder.mediaRecorder.state !== 'inactive') {
+      recorder.mediaRecorder.stop();
+    }
+  }
+
+  // Aktualizovat UI - skryt recording indicator
+  // Pozn: tlacitko startRecord se ukaze az v onstop handleru po zpracovani dat
   const recordingIndicator = document.getElementById('recordingIndicator');
-  const btnStartRecord = document.getElementById('btnStartRecord');
   if (recordingIndicator) recordingIndicator.classList.add('hidden');
-  if (btnStartRecord) btnStartRecord.classList.remove('hidden');
 }
 
 // Uvolnit mikrofon - zastavit stream

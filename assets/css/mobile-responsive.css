@@ -781,6 +781,7 @@ body {
 
 /* ============================================
    PWA SCROLL FIX - Prevence pull-to-refresh v modalech
+   FIX 2024-12: Vylepsena podpora pro PWA a iOS Safari
    ============================================ */
 
 /* Globalni nastaveni pro vsechny modalni overlaye */
@@ -794,28 +795,36 @@ body {
 #calendarOverlay,
 #provedeniOverlay,
 #rememberMeOverlay,
-#notifModalOverlay {
+#notifModalOverlay,
+#notesModal {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
 }
 
 /* Modal body - scrollovatelny obsah s containment */
 .modal-body,
 .cc-modal-body,
 .detail-content,
-.modal-content {
+.modal-content,
+.notes-modal-body,
+.detail-scroll-container {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  /* FIX: Explicitni scroll pro mobilni zarizeni */
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* FIX: touch-action umoznuje scroll ale ne pull-to-refresh */
+  touch-action: pan-y;
 }
 
 /* Body v zamknutem stavu (modal otevreny) */
+/* FIX PWA: Nepoužívat position:fixed na iOS - zpusobuje problemy se scrollem */
 body.scroll-locked,
 body.modal-open {
-  position: fixed;
-  width: 100%;
   overflow: hidden;
   overscroll-behavior: none;
+  touch-action: none;
 }
 
 /* PWA standalone mode - dodatecne opravy */
@@ -825,12 +834,37 @@ body.modal-open {
     overscroll-behavior-y: contain;
   }
 
-  /* Ale povolit uvnitr modalu */
+  /* FIX: V PWA modu NEpoužívat position:fixed - způsobuje zamrznutí scrollu */
+  body.scroll-locked,
+  body.modal-open {
+    position: static !important;
+    overflow: hidden;
+  }
+
+  /* Scrollovatelny obsah v modalu - explicitni nastaveni */
   .modal-overlay.active .modal-body,
   .cc-modal-overlay.active .cc-modal-body,
-  #detailOverlay.active .detail-content {
+  #detailOverlay.active .detail-content,
+  #detailOverlay:not(.hidden) .detail-content,
+  #notesModal:not(.hidden) .notes-modal-body {
     overscroll-behavior: contain;
     overflow-y: auto;
+    overflow-x: hidden;
     max-height: 80vh;
+    /* FIX: Povolit vertikalni scroll gesture */
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* iOS Safari specificke opravy */
+@supports (-webkit-touch-callout: none) {
+  .modal-body,
+  .cc-modal-body,
+  .detail-content,
+  .notes-modal-body {
+    /* iOS potrebuje explicitni -webkit-overflow-scrolling */
+    -webkit-overflow-scrolling: touch;
+    overflow-y: scroll;
   }
 }

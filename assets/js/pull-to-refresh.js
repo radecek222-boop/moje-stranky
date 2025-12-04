@@ -142,29 +142,80 @@
   }
 
   // Kontrola jestli je otevreny modal (scroll je zamknuty)
+  // FIX: Rozsirena detekce - pull-to-refresh se NIKDY nespusti kdyz je modal otevreny
   function jeModalOtevreny() {
-    // Zkontrolovat scrollLock utilitu
+    // 1. Zkontrolovat scrollLock utilitu
     if (window.scrollLock && window.scrollLock.isLocked && window.scrollLock.isLocked()) {
       return true;
     }
-    // Fallback - kontrola CSS tridy na body
+
+    // 2. Kontrola CSS tridy na body
     if (document.body.classList.contains('scroll-locked') ||
         document.body.classList.contains('modal-open') ||
-        document.body.classList.contains('hamburger-menu-open')) {
+        document.body.classList.contains('hamburger-menu-open') ||
+        document.body.classList.contains('detail-open')) {
       return true;
     }
-    // Kontrola aktivniho overlay
-    const aktivniOverlay = document.querySelector('.modal-overlay.active, .cc-modal-overlay.active, #detailOverlay.active');
-    if (aktivniOverlay) {
+
+    // 3. Kontrola overflow na html/body (PWA scroll lock)
+    const htmlStyle = getComputedStyle(document.documentElement);
+    const bodyStyle = getComputedStyle(document.body);
+    if (htmlStyle.overflow === 'hidden' || bodyStyle.overflow === 'hidden') {
       return true;
+    }
+
+    // 4. Kontrola vsech moznych overlays/modalu
+    const overlaySelektory = [
+      '#detailOverlay.active',
+      '#detailOverlay:not(.hidden)',
+      '#calendarOverlay.active',
+      '#calendarOverlay:not(.hidden)',
+      '#notesModal:not(.hidden)',
+      '#pdfPreviewOverlay:not(.hidden)',
+      '.modal-overlay.active',
+      '.cc-modal-overlay.active',
+      '.recovery-overlay',
+      '.newkey-overlay'
+    ];
+
+    for (const selektor of overlaySelektory) {
+      try {
+        const element = document.querySelector(selektor);
+        if (element) {
+          // Zkontrolovat ze element je opravdu viditelny
+          const style = getComputedStyle(element);
+          if (style.display !== 'none' && style.visibility !== 'hidden') {
+            return true;
+          }
+        }
+      } catch (e) {
+        // Ignorovat neplatne selektory
+      }
+    }
+
+    return false;
+  }
+
+  // Kontrola zda touch zacal uvnitr scrollovatelneho kontejneru v modalu
+  function jeUvnitrScrollovatelnehoKontejneru(target) {
+    let element = target;
+    while (element && element !== document.body) {
+      const style = getComputedStyle(element);
+      const isScrollable = (style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+                          element.scrollHeight > element.clientHeight;
+      if (isScrollable) {
+        return true;
+      }
+      element = element.parentElement;
     }
     return false;
   }
 
   // Touch start
   function onTouchStart(e) {
-    // Ignorovat pokud je otevreny modal
+    // Ignorovat pokud je otevreny modal nebo jsme uvnitr scrollovatelneho kontejneru
     if (jeModalOtevreny()) return;
+    if (jeUvnitrScrollovatelnehoKontejneru(e.target)) return;
     if (!jeNaVrchu()) return;
 
     touchStartY = e.touches[0].clientY;
