@@ -27,12 +27,40 @@
         vyzvednutiSklad: 10 // Vyzvednutí dílu pro reklamaci na skladě
     };
 
-    // Fallback preklady pro tlacitka (kdyz window.t nefunguje)
-    const TLACITKA = {
+    // Fallback preklady (kdyz window.t nefunguje)
+    const PREKLADY = {
+        // Tlacitka
         'btn.back': 'Zpět',
         'btn.addToProtocol': 'Započítat',
         'btn.exportPDF': 'Export do PDF',
-        'btn.newCalculation': 'Nová kalkulace'
+        'btn.newCalculation': 'Nová kalkulace',
+
+        // Souhrn
+        'summary.transportation': 'Dopravné',
+        'summary.inspection': 'Inspekce / diagnostika',
+        'summary.upholsteryWork': 'Čalounické práce',
+        'summary.part': 'díl',
+        'summary.parts': 'díly',
+        'summary.firstPart': 'První díl',
+        'summary.additionalParts': 'Další díly',
+        'summary.basicServiceRate': 'Základní servisní sazba',
+        'summary.mechanicalParts': 'Mechanické opravy',
+        'summary.mechanism': 'mechanismus',
+        'summary.relaxMechanisms': 'Relax mechanismy',
+        'summary.slidingMechanisms': 'Výsuvné mechanismy',
+        'summary.secondPerson': 'Druhá osoba (těžký nábytek)',
+        'summary.materialSupplied': 'Materiál od WGS',
+        'summary.warehousePickup': 'Vyzvednutí dílu na skladě',
+        'summary.claim': 'reklamace',
+        'summary.claimNoTransport': 'Reklamace - bez dopravného',
+        'summary.unknownAddress': 'Neznámá adresa',
+
+        // Upozorneni
+        'alert.selectAddress': 'Prosím vyberte adresu ze seznamu',
+        'alert.pdfError': 'Chyba při generování PDF',
+        'alert.distanceError': 'Chyba při výpočtu vzdálenosti',
+        'alert.distanceCalculationError': 'Nelze vypočítat vzdálenost',
+        'alert.pdfLoading': 'Generuji PDF...'
     };
 
     // Helper funkce pro preklad s fallbackem
@@ -45,7 +73,7 @@
             }
         }
         // Fallback na lokalni preklady
-        return TLACITKA[klic] || klic;
+        return PREKLADY[klic] || klic;
     }
 
     // Výchozí stav kalkulačky
@@ -258,7 +286,7 @@
         features.slice(0, 5).forEach(feature => {
             const item = document.createElement('div');
             item.className = 'suggestion-item';
-            item.textContent = feature.properties.formatted || feature.properties.address_line1 || window.t('summary.unknownAddress');
+            item.textContent = feature.properties.formatted || feature.properties.address_line1 || preklad('summary.unknownAddress');
 
             item.addEventListener('click', () => {
                 const coords = feature.geometry.coordinates;
@@ -304,16 +332,16 @@
                 }
 
                 document.getElementById('distance-value').textContent = distanceKm;
-                document.getElementById('transport-cost').textContent = stav.dopravne.toFixed(2) + (jeReklamace ? ' (' + window.t('summary.claim') + ')' : '');
+                document.getElementById('transport-cost').textContent = stav.dopravne.toFixed(2) + (jeReklamace ? ' (' + preklad('summary.claim') + ')' : '');
                 document.getElementById('distance-result').classList.remove('hidden');
 
                 // Uživatel pokračuje ručně tlačítkem "Pokračovat"
             } else {
-                wgsToast.error(window.t('alert.distanceError'));
+                wgsToast.error(preklad('alert.distanceError'));
             }
         } catch (error) {
             console.error('[Kalkulačka] Chyba výpočtu vzdálenosti:', error);
-            wgsToast.error(window.t('alert.distanceCalculationError'));
+            wgsToast.error(preklad('alert.distanceCalculationError'));
         }
     }
 
@@ -329,14 +357,14 @@
 
             if (!jeReklamace) {
                 // Pokud není reklamace, adresa je povinná
-                wgsToast.warning(window.t('alert.selectAddress'));
+                wgsToast.warning(preklad('alert.selectAddress'));
                 return;
             } else {
                 // Pokud je reklamace, nastavit dopravné a vzdálenost na 0
                 stav.dopravne = 0;
                 stav.vzdalenost = 0;
                 stav.reklamaceBezDopravy = true;
-                stav.adresa = window.t('summary.claimNoTransport');
+                stav.adresa = preklad('summary.claimNoTransport');
             }
         }
 
@@ -497,7 +525,7 @@
 
         if (priceBreakdownEl && celkemDilu > 0) {
             let cena = 0;
-            const firstPartText = window.t('summary.firstPart').toLowerCase();
+            const firstPartText = preklad('summary.firstPart').toLowerCase();
             if (celkemDilu === 1) {
                 cena = CENY.prvniDil;
                 priceBreakdownEl.textContent = `(1× ${firstPartText} = ${CENY.prvniDil}€)`;
@@ -522,7 +550,7 @@
 
         // Dopravné
         html += `<div class="summary-line">
-            <span>${window.t('summary.transportation')} (${stav.vzdalenost} km × 2 × ${TRANSPORT_RATE}€):</span>
+            <span>${preklad('summary.transportation')} (${stav.vzdalenost} km × 2 × ${TRANSPORT_RATE}€):</span>
             <span class="summary-price">${stav.dopravne.toFixed(2)} €</span>
         </div>`;
         celkem += stav.dopravne;
@@ -530,7 +558,7 @@
         // Diagnostika
         if (stav.typServisu === 'diagnostika') {
             html += `<div class="summary-line">
-                <span>${window.t('summary.inspection')}:</span>
+                <span>${preklad('summary.inspection')}:</span>
                 <span class="summary-price">${CENY.diagnostika.toFixed(2)} €</span>
             </div>`;
             celkem += CENY.diagnostika;
@@ -545,15 +573,15 @@
                     CENY.prvniDil :
                     CENY.prvniDil + (celkemDilu - 1) * CENY.dalsiDil;
 
-                const partsWord = celkemDilu === 1 ? window.t('summary.part') : window.t('summary.parts');
+                const partsWord = celkemDilu === 1 ? preklad('summary.part') : preklad('summary.parts');
                 html += `<div class="summary-line">
-                    <span>${window.t('summary.upholsteryWork')} (${celkemDilu} ${partsWord}):</span>
+                    <span>${preklad('summary.upholsteryWork')} (${celkemDilu} ${partsWord}):</span>
                     <span class="summary-price">${cenaDilu.toFixed(2)} €</span>
                 </div>`;
 
                 if (celkemDilu > 1) {
                     html += `<div class="summary-subline">
-                        ↳ ${window.t('summary.firstPart')}: ${CENY.prvniDil}€, ${window.t('summary.additionalParts')}: ${celkemDilu - 1}× ${CENY.dalsiDil}€
+                        ↳ ${preklad('summary.firstPart')}: ${CENY.prvniDil}€, ${preklad('summary.additionalParts')}: ${celkemDilu - 1}× ${CENY.dalsiDil}€
                     </div>`;
                 }
 
@@ -568,7 +596,7 @@
             // Pokud je POUZE mechanika, přidat základní sazbu
             if (stav.typServisu === 'mechanika') {
                 html += `<div class="summary-line">
-                    <span>${window.t('summary.basicServiceRate') || 'Základní servisní sazba'}:</span>
+                    <span>${preklad('summary.basicServiceRate')}:</span>
                     <span class="summary-price">${CENY.zakladniSazba.toFixed(2)} €</span>
                 </div>`;
                 celkem += CENY.zakladniSazba;
@@ -578,18 +606,18 @@
                 const cenaMechanismu = celkemMechanismu * CENY.mechanismusPriplatek;
 
                 html += `<div class="summary-line">
-                    <span>${window.t('summary.mechanicalParts')} (${celkemMechanismu}× ${window.t('summary.mechanism')}):</span>
+                    <span>${preklad('summary.mechanicalParts')} (${celkemMechanismu}× ${preklad('summary.mechanism')}):</span>
                     <span class="summary-price">${cenaMechanismu.toFixed(2)} €</span>
                 </div>`;
 
                 if (stav.relax > 0) {
                     html += `<div class="summary-subline">
-                        ↳ ${window.t('summary.relaxMechanisms')}: ${stav.relax}× ${CENY.mechanismusPriplatek}€
+                        ↳ ${preklad('summary.relaxMechanisms')}: ${stav.relax}× ${CENY.mechanismusPriplatek}€
                     </div>`;
                 }
                 if (stav.vysuv > 0) {
                     html += `<div class="summary-subline">
-                        ↳ ${window.t('summary.slidingMechanisms')}: ${stav.vysuv}× ${CENY.mechanismusPriplatek}€
+                        ↳ ${preklad('summary.slidingMechanisms')}: ${stav.vysuv}× ${CENY.mechanismusPriplatek}€
                     </div>`;
                 }
 
@@ -600,7 +628,7 @@
         // Druhá osoba
         if (stav.tezkyNabytek) {
             html += `<div class="summary-line">
-                <span>${window.t('summary.secondPerson')}:</span>
+                <span>${preklad('summary.secondPerson')}:</span>
                 <span class="summary-price">${CENY.druhaOsoba.toFixed(2)} €</span>
             </div>`;
             celkem += CENY.druhaOsoba;
@@ -609,7 +637,7 @@
         // Materiál
         if (stav.material) {
             html += `<div class="summary-line">
-                <span>${window.t('summary.materialSupplied')}:</span>
+                <span>${preklad('summary.materialSupplied')}:</span>
                 <span class="summary-price">${CENY.material.toFixed(2)} €</span>
             </div>`;
             celkem += CENY.material;
@@ -618,7 +646,7 @@
         // Vyzvednutí dílu na skladě
         if (stav.vyzvednutiSklad) {
             html += `<div class="summary-line">
-                <span>${window.t('summary.warehousePickup') || 'Vyzvednutí dílu na skladě'}:</span>
+                <span>${preklad('summary.warehousePickup')}:</span>
                 <span class="summary-price">${CENY.vyzvednutiSklad.toFixed(2)} €</span>
             </div>`;
             celkem += CENY.vyzvednutiSklad;
@@ -716,7 +744,7 @@
         try {
             // Kontrola jestli jsou knihovny načteny
             if (typeof window.jspdf === 'undefined' || typeof html2canvas === 'undefined') {
-                wgsToast.info(window.t('alert.pdfLoading'));
+                wgsToast.info(preklad('alert.pdfLoading'));
                 return;
             }
 
@@ -1062,7 +1090,7 @@
 
         } catch (error) {
             console.error('[Kalkulačka] Chyba při exportu PDF:', error);
-            wgsToast.error(window.t('alert.pdfError'));
+            wgsToast.error(preklad('alert.pdfError'));
         }
     };
 
