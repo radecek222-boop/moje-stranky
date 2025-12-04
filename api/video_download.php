@@ -84,7 +84,16 @@ try {
             exit;
         }
 
-        $filePath = __DIR__ . '/../' . $video['video_path'];
+        // SECURITY: Path traversal ochrana - validace že cesta je v uploads adresáři
+        $uploadsRoot = realpath(__DIR__ . '/../uploads');
+        $filePath = realpath(__DIR__ . '/../' . $video['video_path']);
+
+        // Kontrola: cesta musí existovat a musí být uvnitř uploads adresáře
+        if (!$filePath || !$uploadsRoot || strpos($filePath, $uploadsRoot) !== 0) {
+            zobrazChybu('Neplatná cesta', 'Přístup k souboru byl odmítnut.');
+            exit;
+        }
+
         if (!file_exists($filePath)) {
             zobrazChybu('Soubor nenalezen', 'Video soubor neni k dispozici.');
             exit;
@@ -161,9 +170,11 @@ try {
         }
 
         $celkovaVelikost = 0;
+        $uploadsRootZip = realpath(__DIR__ . '/../uploads');
         foreach ($videa as $video) {
-            $filePath = __DIR__ . '/../' . $video['video_path'];
-            if (file_exists($filePath)) {
+            $filePath = realpath(__DIR__ . '/../' . $video['video_path']);
+            // SECURITY: Path traversal ochrana - přidej jen soubory z uploads adresáře
+            if ($filePath && $uploadsRootZip && strpos($filePath, $uploadsRootZip) === 0 && file_exists($filePath)) {
                 $zip->addFile($filePath, $video['video_name']);
                 $celkovaVelikost += filesize($filePath);
             }

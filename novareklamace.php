@@ -33,7 +33,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   <link rel="preload" href="assets/img/herman-image03.webp" as="image" fetchpriority="high">
 
   <!-- Google Fonts - použít 'optional' pro prevenci CLS (žádný layout shift) -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Critical CSS -->
   <link rel="stylesheet" href="assets/css/styles.min.css">
@@ -437,7 +437,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         <div class="form-grid form-grid-3">
           <div class="form-group">
             <label class="form-label" for="cislo" data-lang-cs="Číslo objednávky/reklamace" data-lang-en="Order/Claim Number" data-lang-it="Numero Ordine/Reclamo">Číslo objednávky/reklamace<?php if ($isLoggedIn) echo " *"; ?></label>
-            <input type="text" class="form-control" id="cislo" name="cislo"<?php if ($isLoggedIn) { echo " required"; } else { echo " readonly placeholder='nevyplňuje se' style='background-color: #f5f5f5; cursor: not-allowed;'"; } ?>>
+            <?php if ($isLoggedIn): ?>
+            <input type="text" class="form-control" id="cislo" name="cislo" required>
+            <?php else: ?>
+            <input type="text" class="form-control" id="cislo" name="cislo" value="POZ (automaticky)" readonly tabindex="-1" style="background-color: #e9e9e9; color: #666; cursor: not-allowed; font-style: italic; pointer-events: none;" data-lang-cs-value="POZ (automaticky)" data-lang-en-value="POZ (automatic)" data-lang-it-value="POZ (automatico)">
+            <?php endif; ?>
             <label for="fakturace_firma" style="display:block; margin-top:0.5rem; font-size:0.85rem; font-weight:600;">Fakturace:</label>
             <select id="fakturace_firma" name="fakturace_firma" style="width:33%; height:2rem; font-size:0.85rem; padding:0.3rem; border:1px solid #ddd; border-radius:4px;" aria-label="Výběr státu pro fakturaci">
               <option value="CZ" selected>🇨🇿 CZ</option>
@@ -465,20 +469,22 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
       <div class="form-section">
         <h2 class="section-title" data-lang-cs="Kontaktní údaje" data-lang-en="Contact Information" data-lang-it="Informazioni di Contatto">Kontaktní údaje</h2>
 
-        <!-- Typ zákazníka - IČO nebo fyzická osoba -->
+        <?php if ($isLoggedIn): ?>
+        <!-- Typ zákazníka - IČO nebo fyzická osoba (POVINNÉ) - pouze pro přihlášené -->
         <div class="typ-zakaznika-wrapper" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
           <div style="display: flex; flex-direction: column;">
             <label class="typ-zakaznika-label" style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
               <input type="checkbox" id="objednavkaICO" name="objednavka_ico" style="width: auto; margin-right: 0.5rem; cursor: pointer;">
-              <span data-lang-cs="Objednávka byla na IČO" data-lang-en="Order was on company ID" data-lang-it="Ordine su partita IVA">Objednávka byla na IČO</span>
+              <span data-lang-cs="Objednávka byla na IČO *" data-lang-en="Order was on company ID *" data-lang-it="Ordine su partita IVA *">Objednávka byla na IČO *</span>
             </label>
             <span style="font-size: 0.65rem; color: #c00; margin-left: 1.35rem; margin-top: 0.15rem; line-height: 1.3;" data-lang-cs="Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně" data-lang-en="The buyer has been informed that the 30-day consumer period does not apply; processing will be done promptly within a reasonable time" data-lang-it="L'acquirente è stato informato che non si applica il periodo di 30 giorni per i consumatori; l'elaborazione avverrà tempestivamente">Kupující byl seznámen, že se neuplatní spotřebitelská 30denní lhůta; vyřízení proběhne v přiměřené době neodkladně</span>
           </div>
           <label class="typ-zakaznika-label" style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
             <input type="checkbox" id="objednavkaFyzicka" name="objednavka_fyzicka" style="width: auto; margin-right: 0.5rem; cursor: pointer;">
-            <span data-lang-cs="Objednávka byla na fyzickou osobu" data-lang-en="Order was on individual" data-lang-it="Ordine su persona fisica">Objednávka byla na fyzickou osobu</span>
+            <span data-lang-cs="Objednávka byla na fyzickou osobu *" data-lang-en="Order was on individual *" data-lang-it="Ordine su persona fisica *">Objednávka byla na fyzickou osobu *</span>
           </label>
         </div>
+        <?php endif; ?>
 
         <div class="form-grid form-grid-3">
           <div class="form-group">

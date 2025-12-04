@@ -1,148 +1,105 @@
 <?php
 /**
- * Setup Web Push - Automatická konfigurace VAPID klíčů
+ * Setup Web Push - Generování VAPID klíčů
  *
- * Tento skript:
- * 1. Zkontroluje závislosti (composer, knihovna web-push)
- * 2. Vygeneruje VAPID klíče
- * 3. Automaticky je přidá do .env souboru
+ * Tento skript vygeneruje VAPID klíče pro Web Push notifikace
+ * a přidá je do .env souboru.
  *
- * POUŽITÍ: Otevřete v prohlížeči a klikněte na tlačítko
+ * SPOUŠTĚNÍ:
+ * 1. Ujistěte se, že jste admin
+ * 2. Otevřete: https://www.wgs-service.cz/setup_web_push.php
+ * 3. Klikněte na "Generovat VAPID klíče"
  */
 
 require_once __DIR__ . '/init.php';
 
 // Bezpečnostní kontrola - pouze admin
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
-    die("PRISTUP ODEPREN: Pouze administrator muze spustit setup.");
+    die("PŘÍSTUP ODEPŘEN: Pouze administrátor může spustit tento setup.");
 }
 
-$envSoubor = __DIR__ . '/.env';
-$zpravy = [];
-$vapidVePrivate = '';
-$vapidVePublic = '';
-$uspech = false;
+// Kontrola zda uz jsou klice v .env
+function zkontrolovatVapidKlice() {
+    $envSoubor = __DIR__ . '/.env';
 
-// Kontrola a generování klíčů
-if (isset($_GET['generovat']) && $_GET['generovat'] === '1') {
-
-    // Kontrola knihovny web-push
-    if (!class_exists('Minishlink\WebPush\VAPID')) {
-        // Zkusit autoload
-        $autoloadSoubor = __DIR__ . '/vendor/autoload.php';
-        if (file_exists($autoloadSoubor)) {
-            require_once $autoloadSoubor;
-        }
+    if (!file_exists($envSoubor)) {
+        return ['existuje' => false, 'public' => null, 'private' => null];
     }
 
-    if (class_exists('Minishlink\WebPush\VAPID')) {
-        // Generovat VAPID klíče pomocí knihovny
-        try {
-            $klice = \Minishlink\WebPush\VAPID::createVapidKeys();
-            $vapidVePublic = $klice['publicKey'];
-            $vapidVePrivate = $klice['privateKey'];
-            $zpravy[] = ['typ' => 'success', 'text' => 'VAPID klice uspesne vygenerovany pomoci knihovny web-push'];
-        } catch (Exception $e) {
-            $zpravy[] = ['typ' => 'error', 'text' => 'Chyba pri generovani klicu: ' . $e->getMessage()];
-        }
-    } else {
-        // Fallback - generovat pomocí openssl
-        if (extension_loaded('openssl')) {
-            try {
-                // Generovat EC klíč
-                $config = [
-                    'curve_name' => 'prime256v1',
-                    'private_key_type' => OPENSSL_KEYTYPE_EC,
-                ];
+    $obsah = file_get_contents($envSoubor);
 
-                $klicRes = openssl_pkey_new($config);
-                if ($klicRes === false) {
-                    throw new Exception('Nelze vygenerovat EC klic');
-                }
+    preg_match('/VAPID_PUBLIC_KEY=(.+)/', $obsah, $publicMatch);
+    preg_match('/VAPID_PRIVATE_KEY=(.+)/', $obsah, $privateMatch);
 
-                $detaily = openssl_pkey_get_details($klicRes);
+    $hasPublic = !empty($publicMatch[1]);
+    $hasPrivate = !empty($privateMatch[1]);
 
-                // Získat raw klíče
-                $privateKeyRaw = $detaily['ec']['d'];
-                $publicKeyX = $detaily['ec']['x'];
-                $publicKeyY = $detaily['ec']['y'];
-
-                // Public key = 0x04 + X + Y (uncompressed point format)
-                $publicKeyRaw = chr(4) . $publicKeyX . $publicKeyY;
-
-                // Base64url encoding
-                $vapidVePrivate = rtrim(strtr(base64_encode($privateKeyRaw), '+/', '-_'), '=');
-                $vapidVePublic = rtrim(strtr(base64_encode($publicKeyRaw), '+/', '-_'), '=');
-
-                $zpravy[] = ['typ' => 'success', 'text' => 'VAPID klice uspesne vygenerovany pomoci OpenSSL'];
-            } catch (Exception $e) {
-                $zpravy[] = ['typ' => 'error', 'text' => 'Chyba OpenSSL: ' . $e->getMessage()];
-            }
-        } else {
-            $zpravy[] = ['typ' => 'error', 'text' => 'Neni dostupna knihovna web-push ani OpenSSL extension'];
-        }
-    }
-
-    // Uložit do .env pokud máme klíče
-    if (!empty($vapidVePrivate) && !empty($vapidVePublic)) {
-        if (file_exists($envSoubor)) {
-            $envObsah = file_get_contents($envSoubor);
-
-            // Kontrola zda už VAPID klíče existují
-            if (strpos($envObsah, 'VAPID_PUBLIC_KEY=') !== false) {
-                // Aktualizovat existující
-                $envObsah = preg_replace('/VAPID_PUBLIC_KEY=.*/', 'VAPID_PUBLIC_KEY=' . $vapidVePublic, $envObsah);
-                $envObsah = preg_replace('/VAPID_PRIVATE_KEY=.*/', 'VAPID_PRIVATE_KEY=' . $vapidVePrivate, $envObsah);
-                $zpravy[] = ['typ' => 'info', 'text' => 'Existujici VAPID klice byly aktualizovany'];
-            } else {
-                // Přidat nové
-                $pridatText = "\n# ========================================\n";
-                $pridatText .= "# WEB PUSH NOTIFICATIONS (VAPID)\n";
-                $pridatText .= "# ========================================\n";
-                $pridatText .= "VAPID_PUBLIC_KEY=" . $vapidVePublic . "\n";
-                $pridatText .= "VAPID_PRIVATE_KEY=" . $vapidVePrivate . "\n";
-                $pridatText .= "VAPID_SUBJECT=mailto:info@wgs-service.cz\n";
-
-                $envObsah .= $pridatText;
-                $zpravy[] = ['typ' => 'info', 'text' => 'VAPID klice pridany na konec .env souboru'];
-            }
-
-            // Zapsat zpět
-            if (file_put_contents($envSoubor, $envObsah) !== false) {
-                $zpravy[] = ['typ' => 'success', 'text' => '.env soubor uspesne ulozen'];
-                $uspech = true;
-            } else {
-                $zpravy[] = ['typ' => 'error', 'text' => 'Nelze zapsat do .env souboru - zkontrolujte opravneni'];
-            }
-        } else {
-            $zpravy[] = ['typ' => 'error', 'text' => '.env soubor neexistuje'];
-        }
-    }
+    return [
+        'existuje' => $hasPublic && $hasPrivate,
+        'public' => $hasPublic ? substr($publicMatch[1], 0, 30) . '...' : null,
+        'private' => $hasPrivate ? substr($privateMatch[1], 0, 30) . '...' : null
+    ];
 }
 
-// Zkontrolovat aktuální stav
-$maKlice = false;
-$aktualniPublic = '';
-$aktualniPrivate = '';
+// Vygenerovat VAPID klice pomoci OpenSSL
+function vygenerovratVapidKlice() {
+    // VAPID klice jsou EC keypair (Elliptic Curve P-256)
 
-if (file_exists($envSoubor)) {
-    $envObsah = file_get_contents($envSoubor);
-    if (preg_match('/VAPID_PUBLIC_KEY=(.+)/', $envObsah, $matches)) {
-        $aktualniPublic = trim($matches[1]);
+    // Vygenerovat private key
+    $privateKey = openssl_pkey_new([
+        'curve_name' => 'prime256v1',
+        'private_key_type' => OPENSSL_KEYTYPE_EC,
+    ]);
+
+    if (!$privateKey) {
+        throw new Exception('Chyba generování private key: ' . openssl_error_string());
     }
-    if (preg_match('/VAPID_PRIVATE_KEY=(.+)/', $envObsah, $matches)) {
-        $aktualniPrivate = trim($matches[1]);
-    }
-    $maKlice = !empty($aktualniPublic) && !empty($aktualniPrivate);
+
+    // Export private key jako PEM
+    openssl_pkey_export($privateKey, $pemPrivate);
+
+    // Ziskat public key
+    $details = openssl_pkey_get_details($privateKey);
+    $pemPublic = $details['key'];
+
+    // Konverze PEM na base64url format (VAPID standard)
+    $privateBase64 = rtrim(strtr(base64_encode(base64_decode(preg_replace(['/\r/', '/\n/', '/-----.*?-----/'], '', $pemPrivate))), '+/', '-_'), '=');
+    $publicBase64 = rtrim(strtr(base64_encode(base64_decode(preg_replace(['/\r/', '/\n/', '/-----.*?-----/'], '', $pemPublic))), '+/', '-_'), '=');
+
+    return [
+        'public' => $publicBase64,
+        'private' => $privateBase64
+    ];
 }
 
-// Kontrola knihovny
-$maKnihovnu = false;
-$autoloadSoubor = __DIR__ . '/vendor/autoload.php';
-if (file_exists($autoloadSoubor)) {
-    require_once $autoloadSoubor;
-    $maKnihovnu = class_exists('Minishlink\WebPush\WebPush');
+// Ulozit VAPID klice do .env
+function ulozitVapidDoEnv($publicKey, $privateKey) {
+    $envSoubor = __DIR__ . '/.env';
+
+    if (!file_exists($envSoubor)) {
+        throw new Exception('.env soubor nenalezen');
+    }
+
+    $obsah = file_get_contents($envSoubor);
+
+    // Odstranit existujici VAPID klice
+    $obsah = preg_replace('/VAPID_PUBLIC_KEY=.*\n?/', '', $obsah);
+    $obsah = preg_replace('/VAPID_PRIVATE_KEY=.*\n?/', '', $obsah);
+    $obsah = preg_replace('/VAPID_SUBJECT=.*\n?/', '', $obsah);
+
+    // Pridat nove klice na konec souboru
+    $obsah = trim($obsah) . "\n\n# Web Push VAPID Keys (vygenerovano " . date('Y-m-d H:i:s') . ")\n";
+    $obsah .= "VAPID_PUBLIC_KEY={$publicKey}\n";
+    $obsah .= "VAPID_PRIVATE_KEY={$privateKey}\n";
+    $obsah .= "VAPID_SUBJECT=mailto:reklamace@wgs-service.cz\n";
+
+    file_put_contents($envSoubor, $obsah);
+
+    return true;
 }
+
+$akce = $_GET['akce'] ?? '';
+$stavKlicu = zkontrolovatVapidKlice();
 
 ?>
 <!DOCTYPE html>
@@ -152,249 +109,228 @@ if (file_exists($autoloadSoubor)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Setup Web Push - WGS</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 900px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
             margin: 50px auto;
             padding: 20px;
             background: #f5f5f5;
-            color: #333;
         }
         .container {
             background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         h1 {
-            color: #222;
-            border-bottom: 3px solid #333;
-            padding-bottom: 15px;
-            margin-top: 0;
+            color: #000;
+            border-bottom: 3px solid #000;
+            padding-bottom: 10px;
         }
         .success {
-            background: #e8e8e8;
-            border: 1px solid #ccc;
-            color: #222;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-        .success::before {
-            content: "OK: ";
-            font-weight: bold;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 10px 0;
         }
         .error {
-            background: #f5f5f5;
-            border: 2px solid #333;
-            color: #222;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-        .error::before {
-            content: "CHYBA: ";
-            font-weight: bold;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 10px 0;
         }
         .warning {
-            background: #fafafa;
-            border: 1px dashed #666;
-            color: #333;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-        .warning::before {
-            content: "POZOR: ";
-            font-weight: bold;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 10px 0;
         }
         .info {
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            color: #444;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 10px 0;
         }
         .btn {
             display: inline-block;
-            padding: 15px 30px;
-            background: #333;
+            padding: 10px 20px;
+            background: #000;
             color: white;
             text-decoration: none;
-            border-radius: 8px;
-            margin: 15px 10px 15px 0;
-            font-size: 1rem;
-            font-weight: 600;
+            border-radius: 5px;
+            margin: 10px 5px 10px 0;
             border: none;
             cursor: pointer;
-            transition: background 0.3s;
+            font-size: 1rem;
         }
         .btn:hover {
-            background: #555;
+            background: #333;
         }
         .btn-secondary {
-            background: #777;
-        }
-        .btn-secondary:hover {
-            background: #999;
-        }
-        .status-box {
-            background: #fafafa;
-            border: 1px solid #ddd;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        .status-box h3 {
-            margin-top: 0;
-            color: #333;
-        }
-        .status-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .status-item:last-child {
-            border-bottom: none;
-        }
-        .status-ok {
-            color: #333;
-            font-weight: bold;
-        }
-        .status-ok::before {
-            content: "[OK] ";
-        }
-        .status-fail {
-            color: #666;
-            font-weight: bold;
-        }
-        .status-fail::before {
-            content: "[X] ";
-        }
-        pre {
-            background: #1a1a1a;
-            color: #eee;
-            padding: 20px;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-size: 0.9rem;
+            background: #666;
         }
         code {
-            background: #eee;
+            background: #f0f0f0;
             padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'Consolas', monospace;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #ddd;
         }
         .key-display {
-            background: #f5f5f5;
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 8px;
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
             word-break: break-all;
-            font-family: 'Consolas', monospace;
-            font-size: 0.85rem;
-            margin: 10px 0;
-        }
-        .next-steps {
-            background: #fafafa;
-            border-left: 4px solid #333;
-            padding: 20px;
-            margin: 20px 0;
-        }
-        .next-steps h3 {
-            margin-top: 0;
-        }
-        .next-steps ol {
-            margin-bottom: 0;
-            padding-left: 20px;
-        }
-        .next-steps li {
             margin: 10px 0;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>Setup Web Push Notifikaci</h1>
 
-    <?php foreach ($zpravy as $zprava): ?>
-        <div class="<?php echo htmlspecialchars($zprava['typ']); ?>">
-            <?php echo htmlspecialchars($zprava['text']); ?>
-        </div>
-    <?php endforeach; ?>
+<?php
+if ($akce === 'generovat') {
+    echo "<h1>Generování VAPID klíčů</h1>";
 
-    <?php if ($uspech && !empty($vapidVePublic)): ?>
-        <div class="success">
-            <strong>VAPID klice byly uspesne vygenerovany a ulozeny!</strong>
-        </div>
+    try {
+        $klice = vygenerovratVapidKlice();
+        ulozitVapidDoEnv($klice['public'], $klice['private']);
 
-        <h3>Vygenerovane klice:</h3>
-        <p><strong>Public Key (pro frontend):</strong></p>
-        <div class="key-display"><?php echo htmlspecialchars($vapidVePublic); ?></div>
+        echo "<div class='success'>";
+        echo "<strong>✓ VAPID KLÍČE ÚSPĚŠNĚ VYGENEROVÁNY</strong><br><br>";
+        echo "Klíče byly uloženy do .env souboru.";
+        echo "</div>";
 
-        <p><strong>Private Key (pouze backend):</strong></p>
-        <div class="key-display"><?php echo htmlspecialchars($vapidVePrivate); ?></div>
+        echo "<h2>Vygenerované klíče</h2>";
+        echo "<p><strong>Public Key:</strong></p>";
+        echo "<div class='key-display'>{$klice['public']}</div>";
 
-        <div class="next-steps">
-            <h3>Dalsi kroky:</h3>
-            <ol>
-                <li>Spustte <a href="pridej_push_subscriptions_tabulku.php">migracni skript pro databazi</a></li>
-                <li>Spustte <code>composer update</code> na serveru (pokud jeste neni)</li>
-                <li>Otestujte notifikace v PWA aplikaci</li>
-            </ol>
-        </div>
-    <?php endif; ?>
+        echo "<p><strong>Private Key:</strong></p>";
+        echo "<div class='key-display'>{$klice['private']}</div>";
 
-    <div class="status-box">
-        <h3>Aktualni stav:</h3>
+        echo "<div class='info'>";
+        echo "<strong>Co dál?</strong><br>";
+        echo "1. VAPID klíče jsou teď nakonfigurovány<br>";
+        echo "2. Spusťte <code>composer install</code> pro instalaci web-push knihovny<br>";
+        echo "3. Push notifikace budou fungovat po nahrání na server";
+        echo "</div>";
 
-        <div class="status-item">
-            <span>Knihovna web-push</span>
-            <span class="<?php echo $maKnihovnu ? 'status-ok' : 'status-fail'; ?>">
-                <?php echo $maKnihovnu ? 'Nainstalovana' : 'Chybi - spustte composer update'; ?>
-            </span>
-        </div>
+        echo "<a href='admin.php' class='btn'>← Zpět do Admin Panelu</a>";
 
-        <div class="status-item">
-            <span>VAPID klice v .env</span>
-            <span class="<?php echo $maKlice ? 'status-ok' : 'status-fail'; ?>">
-                <?php echo $maKlice ? 'Nakonfigurovany' : 'Chybi'; ?>
-            </span>
-        </div>
+    } catch (Exception $e) {
+        echo "<div class='error'>";
+        echo "<strong>CHYBA:</strong><br>";
+        echo htmlspecialchars($e->getMessage());
+        echo "</div>";
+        echo "<a href='setup_web_push.php' class='btn btn-secondary'>Zkusit znovu</a>";
+    }
 
-        <?php if ($maKlice): ?>
-        <div class="status-item">
-            <span>Public Key</span>
-            <span style="font-size: 0.8rem; max-width: 300px; overflow: hidden; text-overflow: ellipsis;">
-                <?php echo htmlspecialchars(substr($aktualniPublic, 0, 30) . '...'); ?>
-            </span>
-        </div>
-        <?php endif; ?>
-    </div>
+} else {
+    // Zobrazit status a moznost generovat
+    echo "<h1>Setup Web Push Notifikací</h1>";
 
-    <?php if (!$maKnihovnu): ?>
-        <div class="warning">
-            Knihovna <code>minishlink/web-push</code> neni nainstalovana. Spustte na serveru:
-        </div>
-        <pre>cd /cesta/k/projektu
-composer update</pre>
-        <p>Skript bude fungovat i bez knihovny (pouzije OpenSSL), ale pro odesilani push zprav je knihovna potreba.</p>
-    <?php endif; ?>
+    echo "<div class='info'>";
+    echo "<strong>O Web Push notifikacích:</strong><br>";
+    echo "Web Push umožňuje posílat notifikace do prohlížeče i když uživatel nemá web otevřený.<br>";
+    echo "Funguje na iOS 16.4+ (PWA), Android a desktopu.";
+    echo "</div>";
 
-    <?php if (!$maKlice || !$uspech): ?>
-        <a href="?generovat=1" class="btn">Generovat VAPID Klice</a>
-    <?php else: ?>
-        <a href="?generovat=1" class="btn btn-secondary">Pregenerovat Klice</a>
-    <?php endif; ?>
+    echo "<h2>1. Aktuální stav VAPID klíčů</h2>";
 
-    <a href="pridej_push_subscriptions_tabulku.php" class="btn btn-secondary">Vytvorit DB Tabulku</a>
-    <a href="/admin.php" class="btn btn-secondary">Zpet do Admin</a>
+    if ($stavKlicu['existuje']) {
+        echo "<div class='success'>";
+        echo "<strong>✓ VAPID klíče jsou nakonfigurovány</strong><br><br>";
+        echo "Public Key: <code>{$stavKlicu['public']}</code><br>";
+        echo "Private Key: <code>{$stavKlicu['private']}</code>";
+        echo "</div>";
+
+        echo "<div class='warning'>";
+        echo "<strong>⚠️ UPOZORNĚNÍ:</strong><br>";
+        echo "Pokud vygenerujete nové klíče, všichni uživatelé se budou muset znovu přihlásit k odběru notifikací.";
+        echo "</div>";
+
+        echo "<a href='?akce=generovat' class='btn btn-secondary'>Vygenerovat nové klíče</a>";
+
+    } else {
+        echo "<div class='warning'>";
+        echo "<strong>⚠️ VAPID klíče nejsou nakonfigurovány</strong><br><br>";
+        echo "Push notifikace nebudou fungovat, dokud nevygenerujete VAPID klíče.";
+        echo "</div>";
+
+        echo "<a href='?akce=generovat' class='btn'>Vygenerovat VAPID klíče</a>";
+    }
+
+    echo "<h2>2. Composer knihovna</h2>";
+
+    $vendorExists = file_exists(__DIR__ . '/vendor/autoload.php');
+
+    if ($vendorExists) {
+        echo "<div class='success'>";
+        echo "<strong>✓ Composer vendor složka existuje</strong><br>";
+        echo "Knihovna minishlink/web-push je pravděpodobně nainstalovaná.";
+        echo "</div>";
+    } else {
+        echo "<div class='warning'>";
+        echo "<strong>⚠️ Composer vendor složka nenalezena</strong><br><br>";
+        echo "Musíte spustit: <code>composer install</code>";
+        echo "</div>";
+
+        echo "<h3>Instalace composer balíčků</h3>";
+        echo "<pre>cd " . __DIR__ . "\ncomposer install</pre>";
+    }
+
+    echo "<h2>3. Databázová tabulka</h2>";
+
+    try {
+        $pdo = getDbConnection();
+        $stmt = $pdo->query("SHOW TABLES LIKE 'wgs_push_subscriptions'");
+        $tabulkaExistuje = $stmt->rowCount() > 0;
+
+        if ($tabulkaExistuje) {
+            echo "<div class='success'>";
+            echo "<strong>✓ Tabulka wgs_push_subscriptions existuje</strong>";
+            echo "</div>";
+
+            // Pocet subscriptions
+            $stmt = $pdo->query("SELECT COUNT(*) as pocet FROM wgs_push_subscriptions");
+            $pocet = $stmt->fetch(PDO::FETCH_ASSOC)['pocet'];
+
+            echo "<p>Počet registrovaných zařízení: <strong>{$pocet}</strong></p>";
+
+        } else {
+            echo "<div class='warning'>";
+            echo "<strong>⚠️ Tabulka wgs_push_subscriptions neexistuje</strong><br><br>";
+            echo "Spusťte migraci: <code>migrations/create_push_subscriptions_table.sql</code>";
+            echo "</div>";
+        }
+
+    } catch (Exception $e) {
+        echo "<div class='error'>";
+        echo "Chyba připojení k databázi: " . htmlspecialchars($e->getMessage());
+        echo "</div>";
+    }
+
+    echo "<hr style='margin: 30px 0;'>";
+    echo "<a href='admin.php' class='btn btn-secondary'>← Zpět do Admin Panelu</a>";
+}
+?>
+
 </div>
 </body>
 </html>

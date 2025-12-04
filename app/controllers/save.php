@@ -28,6 +28,45 @@ function logTiming(string $message): void {
  * @throws Exception Pokud se nepodaří vygenerovat ID po 5 pokusech
  */
 /**
+ * Generuje unikátní číslo pro mimozáruční servis (POZ)
+ * Formát: POZ/YYYY/DD-MM/XX
+ * Příklad: POZ/2025/04-12/01
+ *
+ * @param PDO $pdo Database connection
+ * @return string Vygenerované POZ číslo
+ */
+function generatePozId(PDO $pdo): string
+{
+    $rok = date('Y');        // 2025
+    $denMesic = date('d-m'); // 04-12
+    $prefix = "POZ/{$rok}/{$denMesic}/";
+
+    // Najít nejvyšší číslo pro dnešní den
+    $stmt = $pdo->prepare("
+        SELECT cislo FROM wgs_reklamace
+        WHERE cislo LIKE :prefix
+        ORDER BY cislo DESC
+        LIMIT 1
+        FOR UPDATE
+    ");
+    $stmt->execute([':prefix' => $prefix . '%']);
+    $lastId = $stmt->fetchColumn();
+
+    if ($lastId) {
+        // Extrahovat číslo z konce (POZ/2025/04-12/01 -> 01)
+        $parts = explode('/', $lastId);
+        $cislo = (int)end($parts);
+        $noveCislo = $cislo + 1;
+    } else {
+        // První POZ pro dnešní den
+        $noveCislo = 1;
+    }
+
+    // Formátovat číslo na 2 číslice (01, 02, ...)
+    return sprintf('%s%02d', $prefix, $noveCislo);
+}
+
+/**
  * GenerateWorkflowId
  *
  * @param PDO $pdo Pdo
@@ -737,6 +776,11 @@ try {
             $workflowId = generateWorkflowId($pdo);
         }
 
+        // Pro nepřihlášené uživatele automaticky generovat POZ číslo
+        if (!$isLoggedIn) {
+            $cislo = generatePozId($pdo);
+        }
+
         $now = date('Y-m-d H:i:s');
 
     $columns = [
@@ -824,7 +868,7 @@ try {
             // Nacist email sablonu pro novou reklamaci
             $stmtNotif = $pdo->prepare("
                 SELECT * FROM wgs_notifications
-                WHERE trigger_event = 'complaint_created' AND type = 'email' AND active = 1
+                WHERE id = 'order_created' AND type = 'email' AND active = 1
                 LIMIT 1
             ");
             $stmtNotif->execute();
@@ -834,16 +878,22 @@ try {
                 require_once __DIR__ . '/../../includes/EmailQueue.php';
 
                 // Pripravit data pro sablonu
+                $createdBy = $_SESSION['user_name'] ?? 'Online formulář';
+
                 $notifSubject = str_replace([
                     '{{customer_name}}',
                     '{{order_id}}',
                     '{{product}}',
-                    '{{date}}'
+                    '{{date}}',
+                    '{{created_at}}',
+                    '{{created_by}}'
                 ], [
                     $jmeno,
                     $identifierForClient,
                     $model ?: 'Nabytek Natuzzi',
-                    date('d.m.Y')
+                    date('d.m.Y'),
+                    date('d.m.Y H:i'),
+                    $createdBy
                 ], $notifSablona['subject']);
 
                 $notifBody = str_replace([
@@ -851,6 +901,8 @@ try {
                     '{{order_id}}',
                     '{{product}}',
                     '{{date}}',
+                    '{{created_at}}',
+                    '{{created_by}}',
                     '{{address}}',
                     '{{description}}',
                     '{{customer_email}}',
@@ -861,7 +913,9 @@ try {
                     $jmeno,
                     $identifierForClient,
                     $model ?: 'Nabytek Natuzzi',
+                    date('d.m.Y'),
                     date('d.m.Y H:i'),
+                    $createdBy,
                     $adresa ?: 'Neuvedena',
                     $popisProblemu,
                     $email,

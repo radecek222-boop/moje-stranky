@@ -205,7 +205,12 @@ async function handleMediaSelect(e) {
   renderAllPreviews();
   updateProgress();
   showWaitDialog(false);
-  showAlert(`Přidáno ${files.length} soubor(ů)`, 'success');
+  // Neonový toast pro úspěšný upload fotek
+  if (typeof WGSToast !== 'undefined') {
+    WGSToast.zobrazit(`Přidáno ${files.length} soubor(ů)`, { titulek: 'WGS' });
+  } else {
+    showAlert(`Přidáno ${files.length} soubor(ů)`, 'success');
+  }
 
   e.target.value = '';
 }
@@ -431,7 +436,12 @@ async function deleteMedia(section, index) {
   await saveToServer();
   renderPreview(section);
   updateProgress();
-  showAlert('Soubor smazán', 'success');
+  // Neonový toast pro smazání souboru
+  if (typeof WGSToast !== 'undefined') {
+    WGSToast.zobrazit('Soubor smazán', { titulek: 'WGS' });
+  } else {
+    showAlert('Soubor smazán', 'success');
+  }
 }
 
 function updateProgress() {

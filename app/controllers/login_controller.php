@@ -182,10 +182,8 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     unset($_SESSION['csrf_token']);
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
-    $userId = $user['id'] ?? $user['user_id'] ?? null;
-    if ($userId === null) {
-        $userId = $user['email'];
-    }
+    // FIX: Preferovat user_id (TCH20250001) pred id (auto-increment)
+    $userId = $user['user_id'] ?? $user['id'] ?? $user['email'] ?? null;
 
     // FIX 11: Remember Me token
     $rememberMe = $_POST['remember_me'] ?? '0';
@@ -357,6 +355,9 @@ function createRememberToken(PDO $pdo, string $userId): void
     // Nastavit cookie (selector:validator)
     $cookieValue = $selector . ':' . $validator;
 
+    // FIX PWA: SameSite='Lax' pro PWA kompatibilitu
+    // 'Strict' způsoboval problémy s Remember Me v PWA módu
+    // 'Lax' je bezpečné - Remember Me cookie není citlivá na CSRF (jen čte data)
     setcookie(
         'remember_me',
         $cookieValue,
@@ -366,7 +367,7 @@ function createRememberToken(PDO $pdo, string $userId): void
             'domain' => '',
             'secure' => true,
             'httponly' => true,
-            'samesite' => 'Strict'  // SECURITY FIX: Změněno z 'Lax' na 'Strict' pro CSRF ochranu
+            'samesite' => 'Lax'
         ]
     );
 

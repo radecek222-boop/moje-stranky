@@ -42,7 +42,14 @@ try {
         // Prevence CSRF útoku přes GET requesty (např. <img src="...?action=delete&...">)
         $readOnlyActions = ['get', 'list', 'count', 'get_unread_counts'];
         if (!in_array($action, $readOnlyActions, true)) {
-            throw new Exception('Tato akce vyžaduje POST metodu s CSRF tokenem. Povolené GET akce: ' . implode(', ', $readOnlyActions));
+            // DEBUG: Vice info o requestu
+            $debugInfo = [
+                'php_sees_method' => $_SERVER['REQUEST_METHOD'] ?? 'UNDEFINED',
+                'action_from_GET' => $action,
+                'POST_data' => $_POST,
+                'php_input' => substr(file_get_contents('php://input'), 0, 500)
+            ];
+            throw new Exception('GET request pro non-read akci. DEBUG: ' . json_encode($debugInfo, JSON_UNESCAPED_UNICODE));
         }
     } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
@@ -236,25 +243,41 @@ try {
             // ========================================
             try {
                 $webPush = new WGSWebPush($pdo);
-                error_log('[Notes] WebPush inicializace: ' . ($webPush->jeInicializovano() ? 'OK' : 'FAILED'));
 
                 if ($webPush->jeInicializovano()) {
-                    // Načíst info o reklamaci včetně vlastníka (created_by)
+                    // Načíst info o reklamaci včetně vlastníka (created_by + email vlastníka)
                     $stmtInfo = $pdo->prepare("
-                        SELECT reklamace_id, jmeno, cislo, created_by
-                        FROM wgs_reklamace
-                        WHERE id = :id
+                        SELECT r.reklamace_id, r.jmeno, r.cislo, r.created_by,
+                               u.email as vlastnik_email
+                        FROM wgs_reklamace r
+                        LEFT JOIN wgs_users u ON (
+                            u.user_id = r.created_by OR u.id = r.created_by
+                        )
+                        WHERE r.id = :id
                     ");
                     $stmtInfo->execute([':id' => $claimId]);
                     $infoReklamace = $stmtInfo->fetch(PDO::FETCH_ASSOC);
 
                     // Vlastník reklamace (prodejce který ji vytvořil)
                     $vlastnikReklamace = $infoReklamace['created_by'] ?? null;
+                    $vlastnikEmail = $infoReklamace['vlastnik_email'] ?? null;
+
+                    // Zjistit jmeno autora poznamky
+                    $jmenoAutora = $createdBy; // fallback na email
+                    $stmtAutor = $pdo->prepare("SELECT name FROM wgs_users WHERE email = :email LIMIT 1");
+                    $stmtAutor->execute([':email' => $createdBy]);
+                    $autorRow = $stmtAutor->fetch(PDO::FETCH_ASSOC);
+                    if ($autorRow && !empty($autorRow['name'])) {
+                        $jmenoAutora = $autorRow['name'];
+                    }
+
+                    // Cislo reklamace
+                    $cisloReklamace = $infoReklamace['cislo'] ?? $infoReklamace['reklamace_id'] ?? '';
 
                     // Sestavit payload
                     $payload = [
-                        'title' => 'Nova poznamka',
-                        'body' => 'Zakazka ' . ($infoReklamace['cislo'] ?? $infoReklamace['reklamace_id']) . ' - ' . ($infoReklamace['jmeno'] ?? 'bez jmena'),
+                        'title' => 'WGS',
+                        'body' => $jmenoAutora . ' prave pridal poznamku k ' . $cisloReklamace,
                         'icon' => '/icon192.png',
                         'tag' => 'wgs-note-' . $noteId,
                         'typ' => 'nova_poznamka',
@@ -266,73 +289,108 @@ try {
                         ]
                     ];
 
-                    // DEBUG: Logovat autora a vlastníka
-                    error_log('[Notes] Autor poznamky: user_id=' . $userId . ', email=' . $createdBy);
-                    error_log('[Notes] Vlastnik reklamace: ' . ($vlastnikReklamace ?? 'NULL'));
-
                     // ========================================
                     // PRAVIDLA PRO NOTIFIKACE:
                     // - Admin/Technik: vidí vše → dostane notifikaci (pokud není autor)
                     // - Prodejce: vidí jen své → dostane notifikaci jen pokud je vlastník reklamace
                     // - Autor poznámky NIKDY nedostane notifikaci
                     // ========================================
-                    // COLLATE pro reseni rozdilnych kolaci mezi tabulkami
+                    // OPRAVA: Zjednoduseny dotaz - nacist VSE a filtrovat v PHP
+                    // (reseni problemu s datovymi typy user_id mezi tabulkami)
                     $stmtSubs = $pdo->prepare("
-                        SELECT ps.id, ps.endpoint, ps.p256dh, ps.auth, ps.user_id, ps.email, u.role
+                        SELECT ps.id, ps.endpoint, ps.p256dh, ps.auth, ps.user_id, ps.email
                         FROM wgs_push_subscriptions ps
-                        LEFT JOIN wgs_users u ON ps.user_id COLLATE utf8mb4_unicode_ci = u.user_id
                         WHERE ps.aktivni = 1
-                          AND (ps.user_id IS NULL OR ps.user_id != :author_user_id)
                     ");
-                    $stmtSubs->execute([':author_user_id' => $userId]);
+                    $stmtSubs->execute();
                     $vsechnySubscriptions = $stmtSubs->fetchAll(PDO::FETCH_ASSOC);
 
                     // Filtrovat podle pravidel viditelnosti
                     $subscriptions = [];
                     foreach ($vsechnySubscriptions as $sub) {
-                        $subRole = strtolower(trim($sub['role'] ?? 'guest'));
                         $subUserId = $sub['user_id'] ?? null;
+                        $subEmail = $sub['email'] ?? null;
 
-                        // Admin a Technik vidí vše
+                        // Preskocit autora poznamky - kontrolovat OBOJE user_id i email
+                        // FIX: Nekteri uzivatele nemaji user_id v session, tak porovnavame i email
+                        $jeAutor = false;
+                        if ($subUserId !== null && $userId !== null && (string)$subUserId === (string)$userId) {
+                            $jeAutor = true;
+                        }
+                        if ($subEmail !== null && $createdBy !== null && strtolower($subEmail) === strtolower($createdBy)) {
+                            $jeAutor = true;
+                        }
+                        if ($jeAutor) {
+                            continue;
+                        }
+
+                        // Nacist roli uzivatele z wgs_users
+                        // Zkusit nejdrive podle user_id, pak podle id (zpetna kompatibilita)
+                        $subRole = 'guest';
+                        if ($subUserId !== null) {
+                            // Zkusit podle user_id (spravny zpusob)
+                            $stmtRole = $pdo->prepare("SELECT role FROM wgs_users WHERE user_id = :uid LIMIT 1");
+                            $stmtRole->execute([':uid' => $subUserId]);
+                            $roleRow = $stmtRole->fetch(PDO::FETCH_ASSOC);
+
+                            // Fallback: zkusit podle id (pro stare subscriptions s auto-increment id)
+                            if (!$roleRow && is_numeric($subUserId)) {
+                                $stmtRole = $pdo->prepare("SELECT role FROM wgs_users WHERE id = :uid LIMIT 1");
+                                $stmtRole->execute([':uid' => (int)$subUserId]);
+                                $roleRow = $stmtRole->fetch(PDO::FETCH_ASSOC);
+                            }
+
+                            $subRole = strtolower(trim($roleRow['role'] ?? 'guest'));
+                        }
+
+                        // Admin a Technik vidí vše - dostanou notifikaci
                         if (in_array($subRole, ['admin', 'technik', 'technician'])) {
                             $subscriptions[] = $sub;
-                            error_log('[Notes] Sub ID=' . $sub['id'] . ' (' . $subRole . ') - POVOLENO (vidi vse)');
                         }
-                        // Prodejce vidí jen své reklamace
+                        // Prodejce vidí jen své reklamace - kontrola podle user_id NEBO email
                         elseif (in_array($subRole, ['prodejce', 'user'])) {
-                            if ($vlastnikReklamace !== null && $subUserId === $vlastnikReklamace) {
-                                $subscriptions[] = $sub;
-                                error_log('[Notes] Sub ID=' . $sub['id'] . ' (prodejce) - POVOLENO (vlastnik reklamace)');
-                            } else {
-                                error_log('[Notes] Sub ID=' . $sub['id'] . ' (prodejce) - ZAMITNUTO (cizi reklamace)');
-                            }
-                        }
-                        // Ostatní (guest apod.) - povoleno pokud odpovídá vlastníkovi
-                        else {
-                            if ($vlastnikReklamace !== null && $subUserId === $vlastnikReklamace) {
-                                $subscriptions[] = $sub;
-                            }
-                        }
-                    }
+                            $jeVlastnik = false;
 
-                    // DEBUG: Logovat počet subscriptions
-                    error_log('[Notes] Nalezeno subscriptions: ' . count($subscriptions));
-                    foreach ($subscriptions as $s) {
-                        error_log('[Notes] Sub ID=' . $s['id'] . ', user_id=' . ($s['user_id'] ?? 'NULL') . ', email=' . ($s['email'] ?? 'NULL') . ', endpoint=' . substr($s['endpoint'], 0, 50) . '...');
+                            // Kontrola 1: Podle user_id
+                            if ($vlastnikReklamace !== null && $subUserId !== null && (string)$subUserId === (string)$vlastnikReklamace) {
+                                $jeVlastnik = true;
+                            }
+
+                            // Kontrola 2: Podle emailu (fallback)
+                            if (!$jeVlastnik && $vlastnikEmail !== null && $subEmail !== null && strtolower($subEmail) === strtolower($vlastnikEmail)) {
+                                $jeVlastnik = true;
+                            }
+
+                            if ($jeVlastnik) {
+                                $subscriptions[] = $sub;
+                            }
+                        }
+                        // Ostatní (guest) - povoleno pokud odpovídá vlastníkovi (user_id NEBO email)
+                        else {
+                            $jeVlastnik = false;
+
+                            // Kontrola 1: Podle user_id
+                            if ($vlastnikReklamace !== null && $subUserId !== null && (string)$subUserId === (string)$vlastnikReklamace) {
+                                $jeVlastnik = true;
+                            }
+
+                            // Kontrola 2: Podle emailu (fallback)
+                            if (!$jeVlastnik && $vlastnikEmail !== null && $subEmail !== null && strtolower($subEmail) === strtolower($vlastnikEmail)) {
+                                $jeVlastnik = true;
+                            }
+
+                            if ($jeVlastnik) {
+                                $subscriptions[] = $sub;
+                            }
+                        }
                     }
 
                     if (!empty($subscriptions)) {
-                        $vysledek = $webPush->odeslatVice($subscriptions, $payload);
-                        error_log('[Notes] Push vysledek: ' . json_encode($vysledek));
-                    } else {
-                        error_log('[Notes] Zadne subscriptions k odeslani (vsechny patrily autorovi nebo neexistuji)');
+                        $webPush->odeslatVice($subscriptions, $payload);
                     }
-                } else {
-                    error_log('[Notes] WebPush neni inicializovan');
                 }
             } catch (Exception $pushError) {
-                // Push chyby neblokuji přidání poznámky
-                error_log('[Notes] Push chyba: ' . $pushError->getMessage());
+                // Push chyby neblokuji přidání poznámky - logovat pouze do souboru bez citlivých dat
             }
 
             echo json_encode([
@@ -373,7 +431,9 @@ try {
                 throw new Exception('Poznámka nebyla nalezena');
             }
 
-            if (!$isAdmin && $noteData['created_by'] !== $currentUserEmail) {
+            // Autor muze smazat svou poznamku, admin muze smazat cokoliv
+            $jeAutor = $currentUserEmail && $noteData['created_by'] === $currentUserEmail;
+            if (!$isAdmin && !$jeAutor) {
                 throw new Exception('Nemáte oprávnění smazat tuto poznámku');
             }
 

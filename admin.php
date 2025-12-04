@@ -108,20 +108,20 @@ if ($activeTab === 'dashboard') {
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="WGS Admin">
   <title>Administrace | White Glove Service</title>
-  <link rel="preload" href="/assets/css/styles.min.css" as="style">
-  <link rel="preload" href="/assets/css/admin.min.css" as="style">
+  <link rel="preload" href="/assets/css/styles.min.css?v=<?= filemtime(__DIR__ . '/assets/css/styles.min.css') ?>" as="style">
+  <link rel="preload" href="/assets/css/admin.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin.min.css') ?>" as="style">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- External CSS -->
     <!-- Unified Design System -->
-  <link rel="stylesheet" href="/assets/css/styles.min.css">
-  <link rel="stylesheet" href="/assets/css/admin.min.css">
-<link rel="stylesheet" href="/assets/css/admin-header.min.css">
-<link rel="stylesheet" href="/assets/css/admin-notifications.min.css">
+  <link rel="stylesheet" href="/assets/css/styles.min.css?v=<?= filemtime(__DIR__ . '/assets/css/styles.min.css') ?>">
+  <link rel="stylesheet" href="/assets/css/admin.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin.min.css') ?>">
+<link rel="stylesheet" href="/assets/css/admin-header.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin-header.min.css') ?>">
+<link rel="stylesheet" href="/assets/css/admin-notifications.min.css?v=<?= filemtime(__DIR__ . '/assets/css/admin-notifications.min.css') ?>">
   <link rel="stylesheet" href="/assets/css/mobile-responsive.min.css">
   <!-- admin-mobile-fixes.css sloučen do admin.css (Step 51) -->
   <link rel="stylesheet" href="/assets/css/button-fixes-global.min.css">
@@ -214,12 +214,9 @@ if (!$embedMode && $activeTab === 'dashboard'):
             <div class="cc-card-description" data-lang-cs="SMTP, API klíče, systémová nastavení" data-lang-en="SMTP, API keys, system settings" data-lang-it="SMTP, chiavi API, impostazioni di sistema">SMTP, API klíče, systémová nastavení</div>
         </div>
 
-        <div class="cc-card" data-href="admin.php?tab=admin_actions">
-            <?php if ($pendingActions > 0): ?>
-                <div class="cc-card-badge"><?= $pendingActions ?></div>
-            <?php endif; ?>
-            <div class="cc-card-title" data-lang-cs="Akce & Úkoly" data-lang-en="Actions & Tasks" data-lang-it="Azioni & Compiti">Akce & Úkoly</div>
-            <div class="cc-card-description" data-lang-cs="Nevyřešené úkoly a plánované akce" data-lang-en="Unresolved tasks and scheduled actions" data-lang-it="Compiti non risolti e azioni pianificate">Nevyřešené úkoly a plánované akce</div>
+        <div class="cc-card" data-href="psa-kalkulator.php">
+            <div class="cc-card-title" data-lang-cs="PSA Kalkulátor" data-lang-en="PSA Calculator" data-lang-it="Calcolatore PSA">PSA Kalkulátor</div>
+            <div class="cc-card-description" data-lang-cs="Výpočet mezd a docházky zaměstnanců" data-lang-en="Employee salary and attendance calculation" data-lang-it="Calcolo stipendi e presenze dipendenti">Výpočet mezd a docházky zaměstnanců</div>
         </div>
 
         <div class="cc-card" data-href="admin.php?tab=admin_testing_simulator">
@@ -1017,6 +1014,10 @@ function loadNotifContent(type, body) {
   <?php require_once __DIR__ . '/includes/admin_configuration.php'; ?>
   <?php endif; ?>
 
+  <?php if ($activeTab === 'tools'): ?>
+  <!-- TAB: DIAGNOSTIKA & ÚDRŽBA -->
+  <?php require_once __DIR__ . '/includes/admin_diagnostics.php'; ?>
+  <?php endif; ?>
 
   <?php if ($activeTab === 'online'): ?>
   <!-- TAB: ONLINE -->
@@ -1104,13 +1105,14 @@ function loadNotifContent(type, body) {
 </div>
 
 <!-- External JavaScript -->
-<script src="/assets/js/logger.min.js" defer></script>
-<script src="/assets/js/csrf-auto-inject.min.js" defer></script>
+<script src="/assets/js/logger.min.js?v=<?= filemtime(__DIR__ . '/assets/js/logger.min.js') ?>" defer></script>
+<script src="/assets/js/csrf-auto-inject.min.js?v=<?= filemtime(__DIR__ . '/assets/js/csrf-auto-inject.min.js') ?>" defer></script>
 <!-- logout-handler.js je v hamburger-menu.php (nacita se VSUDE vcetne dashboardu) -->
-<script src="/assets/js/utils.min.js" defer></script>
-<script src="/assets/js/admin-notifications.min.js" defer></script>
-<script src="/assets/js/smtp-config.min.js" defer></script>
-<script src="/assets/js/admin.min.js" defer></script>
+<script src="/assets/js/utils.min.js?v=<?= filemtime(__DIR__ . '/assets/js/utils.min.js') ?>" defer></script>
+<script src="/assets/js/admin-notifications.min.js?v=<?= filemtime(__DIR__ . '/assets/js/admin-notifications.min.js') ?>" defer></script>
+<script src="/assets/js/smtp-config.min.js?v=<?= filemtime(__DIR__ . '/assets/js/smtp-config.min.js') ?>" defer></script>
+<script src="/assets/js/admin-actions-registry.js?v=<?= filemtime(__DIR__ . '/assets/js/admin-actions-registry.js') ?>" defer></script>
+<script src="/assets/js/admin.min.js?v=<?= filemtime(__DIR__ . '/assets/js/admin.min.js') ?>" defer></script>
 
 <!-- MODAL: Edit Notification -->
 <div class="wgs-modal" id="editNotificationModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="editNotificationTitle">
@@ -1148,16 +1150,22 @@ function loadNotifContent(type, body) {
       </div>
       <div class="form-group">
         <label class="form-label" data-lang-cs="Dodatečné kopie emailů (CC)" data-lang-en="Additional Email Copies (CC)" data-lang-it="Copie Email Aggiuntive (CC)">Dodatečné kopie emailů (CC)</label>
+        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;">
+          <strong>Tip:</strong> Můžete použít proměnné jako <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{seller_email}}</code>, <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{technician_email}}</code> atd.
+        </div>
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-          <input type="email" class="form-input" id="new-cc-email" data-lang-cs-placeholder="novy@email.cz" data-lang-en-placeholder="new@email.com" data-lang-it-placeholder="nuovo@email.it" placeholder="novy@email.cz" style="flex: 1;">
+          <input type="email" class="form-input" id="new-cc-email" data-lang-cs-placeholder="novy@email.cz nebo {{seller_email}}" data-lang-en-placeholder="new@email.com or {{seller_email}}" data-lang-it-placeholder="nuovo@email.it o {{seller_email}}" placeholder="novy@email.cz nebo {{seller_email}}" style="flex: 1;">
           <button class="btn btn-sm" data-action="addCCEmail" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
         </div>
         <div id="admin-emails-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
       </div>
       <div class="form-group">
         <label class="form-label" data-lang-cs="Skryté kopie (BCC)" data-lang-en="Blind Copies (BCC)" data-lang-it="Copie Nascoste (BCC)">Skryté kopie (BCC)</label>
+        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;">
+          <strong>Tip:</strong> Můžete použít proměnné jako <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{seller_email}}</code>, <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{technician_email}}</code> atd.
+        </div>
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-          <input type="email" class="form-input" id="new-bcc-email" data-lang-cs-placeholder="skryta@email.cz" data-lang-en-placeholder="hidden@email.com" data-lang-it-placeholder="nascosta@email.it" placeholder="skryta@email.cz" style="flex: 1;">
+          <input type="email" class="form-input" id="new-bcc-email" data-lang-cs-placeholder="skryta@email.cz nebo {{seller_email}}" data-lang-en-placeholder="hidden@email.com or {{seller_email}}" data-lang-it-placeholder="nascosta@email.it o {{seller_email}}" placeholder="skryta@email.cz nebo {{seller_email}}" style="flex: 1;">
           <button class="btn btn-sm" data-action="addBCCEmail" data-lang-cs="+ Přidat" data-lang-en="+ Add" data-lang-it="+ Aggiungi">+ Přidat</button>
         </div>
         <div id="bcc-emails-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
@@ -1169,6 +1177,18 @@ function loadNotifContent(type, body) {
     </div>
   </div>
 </div>
+
+<?php
+/**
+ * POZNÁMKA: Centralizace registrací JS akcí
+ *
+ * Problém "hluchých" tlačítek byl vyřešen vytvořením statického souboru
+ * /assets/js/admin-actions-registry.js, který se načítá VŽDY (viz řádek 1117)
+ *
+ * Tento soubor obsahuje všechny Utils.registerAction() volání pro všechny admin akce.
+ * Akce jsou zaregistrovány globálně, ale vykonávají se pouze pokud existuje jejich funkce.
+ */
+?>
 
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>

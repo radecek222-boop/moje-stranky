@@ -2031,6 +2031,33 @@ window.addEventListener('message', function(event) {
   }
 });
 
+// ============================================================
+// EMAIL & SMS SECTION SWITCHING
+// ============================================================
+function switchEmailSection(sectionName) {
+  // Odstranit aktivní třídu ze všech tabů
+  document.querySelectorAll('.cc-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+
+  // Skrýt všechny sekce
+  document.querySelectorAll('.cc-section').forEach(section => {
+    section.classList.remove('active');
+  });
+
+  // Přidat aktivní třídu na kliknutý tab
+  const activeTab = document.querySelector(`.cc-tab[data-section="${sectionName}"]`);
+  if (activeTab) {
+    activeTab.classList.add('active');
+  }
+
+  // Zobrazit odpovídající sekci
+  const activeSection = document.getElementById(`section-${sectionName}`);
+  if (activeSection) {
+    activeSection.classList.add('active');
+  }
+}
+
 // === ACTION REGISTRY - Registrace akcí pro event delegation (Step 110-111) ===
 if (typeof Utils !== 'undefined' && Utils.registerAction) {
   // Navigace na SQL stránku
@@ -2207,6 +2234,13 @@ if (typeof Utils !== 'undefined' && Utils.registerAction) {
   Utils.registerAction('aktualizovatVyber', () => {
     if (typeof aktualizovatVyber === 'function') {
       aktualizovatVyber();
+    }
+  });
+
+  // Přepínání sekcí v Email & SMS kartě
+  Utils.registerAction('switchEmailSection', (el, data) => {
+    if (data.section && typeof switchEmailSection === 'function') {
+      switchEmailSection(data.section);
     }
   });
 }

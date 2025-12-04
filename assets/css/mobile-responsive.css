@@ -778,3 +778,59 @@ body {
     font-size: 16px;
   }
 }
+
+/* ============================================
+   PWA SCROLL FIX - Prevence pull-to-refresh v modalech
+   ============================================ */
+
+/* Globalni nastaveni pro vsechny modalni overlaye */
+.modal-overlay,
+.cc-modal-overlay,
+#detailOverlay,
+#adminOverlay,
+#pdfPreviewOverlay,
+#calculatorModalOverlay,
+#zakaznikSchvaleniOverlay,
+#calendarOverlay,
+#provedeniOverlay,
+#rememberMeOverlay,
+#notifModalOverlay {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+/* Modal body - scrollovatelny obsah s containment */
+.modal-body,
+.cc-modal-body,
+.detail-content,
+.modal-content {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Body v zamknutem stavu (modal otevreny) */
+body.scroll-locked,
+body.modal-open {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* PWA standalone mode - dodatecne opravy */
+@media all and (display-mode: standalone) {
+  /* Zabranit pull-to-refresh na celem body */
+  body {
+    overscroll-behavior-y: contain;
+  }
+
+  /* Ale povolit uvnitr modalu */
+  .modal-overlay.active .modal-body,
+  .cc-modal-overlay.active .cc-modal-body,
+  #detailOverlay.active .detail-content {
+    overscroll-behavior: contain;
+    overflow-y: auto;
+    max-height: 80vh;
+  }
+}

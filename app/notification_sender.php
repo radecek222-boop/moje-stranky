@@ -60,6 +60,12 @@ try {
         throw new Exception('Chybí notification_id');
     }
 
+    // BEZPEČNOST: notification_id musí být string, ne pole
+    if (is_array($notificationId)) {
+        $notificationId = $notificationId[0] ?? 'unknown';
+    }
+    $notificationId = (string)$notificationId;
+
     // ============================================
     // DATABÁZOVÉ PŘIPOJENÍ
     // ============================================
@@ -123,42 +129,101 @@ try {
     $bccEmails = !empty($notification['bcc_emails']) ? json_decode($notification['bcc_emails'], true) : [];
 
     // ============================================
-    // URČENÍ PŘÍJEMCE
+    // URČENÍ PŘÍJEMCŮ (role-based)
     // ============================================
-    $to = null;
 
-    switch ($notification['recipient_type']) {
-        case 'customer':
-            $to = $notificationData['customer_email'] ?? null;
-            break;
+    /**
+     * Převede roli na email adresu
+     * @param string $role Role (customer, admin, technician, seller)
+     * @param array $data Data s emaily
+     * @return string|null Email nebo null
+     */
+    $resolveRoleToEmail = function($role, $data) use ($pdo) {
+        switch ($role) {
+            case 'customer':
+                return $data['customer_email'] ?? null;
 
-        case 'admin':
-            $to = 'reklamace@wgs-service.cz';
-            break;
+            case 'admin':
+                // Načíst admin email z konfigurace
+                $stmt = $pdo->prepare("SELECT config_value FROM wgs_system_config WHERE config_key = 'admin_email' LIMIT 1");
+                $stmt->execute();
+                $adminEmail = $stmt->fetchColumn();
+                return $adminEmail ?: 'reklamace@wgs-service.cz'; // Fallback
 
-        case 'technician':
-            $to = $notificationData['technician_email'] ?? null;
-            break;
+            case 'technician':
+                return $data['technician_email'] ?? null;
 
-        case 'seller':
-            $to = $notificationData['seller_email'] ?? null;
-            break;
+            case 'seller':
+                return $data['seller_email'] ?? null;
 
-        default:
-            throw new Exception('Neznámý typ příjemce: ' . $notification['recipient_type']);
+            default:
+                return null;
+        }
+    };
+
+    // TO příjemci - z to_recipients nebo fallback na recipient_type
+    $toRecipients = [];
+    $toRoles = !empty($notification['to_recipients'])
+        ? json_decode($notification['to_recipients'], true)
+        : [$notification['recipient_type']]; // Fallback pro zpětnou kompatibilitu
+
+    if (is_array($toRoles)) {
+        foreach ($toRoles as $role) {
+            $email = $resolveRoleToEmail($role, $notificationData);
+            if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $toRecipients[] = $email;
+            }
+        }
     }
 
-    // Validace emailu
-    if (!$to || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
-        // Pokud není validní email, nepošleme (možná někdy email chybí)
+    // CC příjemci - z cc_recipients (role) + cc_emails (konkrétní adresy)
+    $ccRecipients = [];
+    $ccRoles = !empty($notification['cc_recipients'])
+        ? json_decode($notification['cc_recipients'], true)
+        : [];
+
+    if (is_array($ccRoles)) {
+        foreach ($ccRoles as $role) {
+            $email = $resolveRoleToEmail($role, $notificationData);
+            if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $ccRecipients[] = $email;
+            }
+        }
+    }
+
+    // BCC příjemci - z bcc_recipients (role) + bcc_emails (konkrétní adresy)
+    $bccRecipients = [];
+    $bccRoles = !empty($notification['bcc_recipients'])
+        ? json_decode($notification['bcc_recipients'], true)
+        : [];
+
+    if (is_array($bccRoles)) {
+        foreach ($bccRoles as $role) {
+            $email = $resolveRoleToEmail($role, $notificationData);
+            if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $bccRecipients[] = $email;
+            }
+        }
+    }
+
+    // Validace - musí být alespoň jeden TO příjemce
+    if (empty($toRecipients)) {
+        // Pokud není validní email, nepošleme
         echo json_encode([
             'success' => true,
             'message' => 'Email nebyl odeslán (chybí validní adresa příjemce)',
             'sent' => false,
             'notification_id' => $notificationId,
-            'recipient_type' => $notification['recipient_type']
+            'to_roles' => $toRoles
         ]);
         exit;
+    }
+
+    // Hlavní příjemce (první v seznamu)
+    $to = $toRecipients[0];
+    // Ostatní TO příjemci jdou do CC
+    if (count($toRecipients) > 1) {
+        $ccRecipients = array_merge(array_slice($toRecipients, 1), $ccRecipients);
     }
 
     // ============================================
@@ -184,6 +249,7 @@ try {
         '{{technician_email}}' => $notificationData['technician_email'] ?? '',
         '{{technician_phone}}' => $notificationData['technician_phone'] ?? '',
         '{{seller_name}}' => $notificationData['seller_name'] ?? '',
+        '{{seller_email}}' => $notificationData['seller_email'] ?? '',
         '{{created_at}}' => $notificationData['created_at'] ?? date('d.m.Y H:i'),
         '{{completed_at}}' => $notificationData['completed_at'] ?? '',
         '{{company_email}}' => 'reklamace@wgs-service.cz',
@@ -197,30 +263,40 @@ try {
     }
 
     // ============================================
-    // PŘÍPRAVA A ODESLÁNÍ EMAILU
+    // SPOJENÍ ROLE-BASED A EXPLICITNÍCH CC/BCC
     // ============================================
-    $headers = "From: White Glove Service <reklamace@wgs-service.cz>\r\n";
-    $headers .= "Reply-To: reklamace@wgs-service.cz\r\n";
 
-    // Přidání CC emailů
+    // Explicitní CC emaily (z cc_emails) - s podporou proměnných
     if (!empty($ccEmails) && is_array($ccEmails)) {
-        $validCcEmails = array_filter($ccEmails, function($email) {
-            return filter_var($email, FILTER_VALIDATE_EMAIL);
-        });
-        if (!empty($validCcEmails)) {
-            $headers .= "Cc: " . implode(', ', $validCcEmails) . "\r\n";
-        }
+        $ccEmails = array_map(function($email) use ($variableMap) {
+            foreach ($variableMap as $variable => $value) {
+                $email = str_replace($variable, $value, $email);
+            }
+            return trim($email);
+        }, $ccEmails);
+        // Spojit s role-based CC
+        $ccRecipients = array_merge($ccRecipients, $ccEmails);
     }
 
-    // Přidání BCC emailů
+    // Explicitní BCC emaily (z bcc_emails) - s podporou proměnných
     if (!empty($bccEmails) && is_array($bccEmails)) {
-        $validBccEmails = array_filter($bccEmails, function($email) {
-            return filter_var($email, FILTER_VALIDATE_EMAIL);
-        });
-        if (!empty($validBccEmails)) {
-            $headers .= "Bcc: " . implode(', ', $validBccEmails) . "\r\n";
-        }
+        $bccEmails = array_map(function($email) use ($variableMap) {
+            foreach ($variableMap as $variable => $value) {
+                $email = str_replace($variable, $value, $email);
+            }
+            return trim($email);
+        }, $bccEmails);
+        // Spojit s role-based BCC
+        $bccRecipients = array_merge($bccRecipients, $bccEmails);
     }
+
+    // Filtrovat validní emaily a odstranit duplicity
+    $finalCcEmails = array_unique(array_filter($ccRecipients, function($email) {
+        return filter_var($email, FILTER_VALIDATE_EMAIL);
+    }));
+    $finalBccEmails = array_unique(array_filter($bccRecipients, function($email) {
+        return filter_var($email, FILTER_VALIDATE_EMAIL);
+    }));
 
     // ============================================
     // EMAIL QUEUE - ASYNCHRONNÍ ODESLÁNÍ
@@ -237,8 +313,8 @@ try {
         'to_name' => $notificationData['customer_name'] ?? null,
         'subject' => $subject,
         'body' => $message,
-        'cc' => $ccEmails ?? [],
-        'bcc' => $bccEmails ?? [],
+        'cc' => array_values($finalCcEmails),
+        'bcc' => array_values($finalBccEmails),
         'priority' => 'normal'
     ]);
 
@@ -261,8 +337,9 @@ try {
         'sent' => true,
         'notification_id' => $notificationId,
         'to' => $to,
-        'cc' => $ccEmails ?? [],
-        'bcc_count' => count($bccEmails ?? []),
+        'to_roles' => $toRoles,
+        'cc' => array_values($finalCcEmails),
+        'bcc_count' => count($finalBccEmails),
         'queued' => true
     ]);
 

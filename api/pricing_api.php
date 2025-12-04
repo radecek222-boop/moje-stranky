@@ -106,8 +106,12 @@ try {
                 sendJsonError('Chybí ID položky');
             }
 
-            // Zjistit v jakém jazyce se edituje
+            // Zjistit v jakém jazyce se edituje - WHITELIST validace proti SQL injection
             $editLang = $_POST['edit_lang'] ?? 'cs';
+            $povoleneJazyky = ['cs', 'en', 'it', 'sk'];
+            if (!in_array($editLang, $povoleneJazyky, true)) {
+                sendJsonError('Neplatný jazyk', 400);
+            }
 
             // Validace vstupů
             $serviceName = $_POST['service_name'] ?? null;
@@ -172,8 +176,12 @@ try {
                 sendJsonError('Přístup odepřen', 403);
             }
 
-            // Zjistit v jakém jazyce se vytváří
+            // Zjistit v jakém jazyce se vytváří - WHITELIST validace proti SQL injection
             $editLang = $_POST['edit_lang'] ?? 'cs';
+            $povoleneJazyky = ['cs', 'en', 'it', 'sk'];
+            if (!in_array($editLang, $povoleneJazyky, true)) {
+                sendJsonError('Neplatný jazyk', 400);
+            }
 
             // Validace vstupů
             $serviceName = $_POST['service_name'] ?? null;
@@ -188,7 +196,7 @@ try {
                 sendJsonError('Chybí název služby');
             }
 
-            // Určit správné sloupce podle jazyka
+            // Určit správné sloupce podle jazyka (již validováno whitelist)
             $nameCol = $editLang === 'cs' ? 'service_name' : "service_name_{$editLang}";
             $descCol = $editLang === 'cs' ? 'description' : "description_{$editLang}";
             $catCol = $editLang === 'cs' ? 'category' : "category_{$editLang}";

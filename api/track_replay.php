@@ -289,13 +289,16 @@ try {
 
 /**
  * Pomocná funkce pro sanitizaci vstupu
+ * SECURITY FIX: Zabaleno do function_exists pro prevenci konfliktu s globální definicí
  */
-function sanitizeInput($input): ?string
-{
-    if ($input === null || $input === '') {
-        return null;
-    }
+if (!function_exists('sanitizeInput')) {
+    function sanitizeInput($input): ?string
+    {
+        if ($input === null || $input === '') {
+            return null;
+        }
 
-    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+    }
 }
 ?>

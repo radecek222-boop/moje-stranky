@@ -45,14 +45,26 @@ const WGS = {
   initTypZakaznika() {
     const icoCheckbox = document.getElementById('objednavkaICO');
     const fyzickaCheckbox = document.getElementById('objednavkaFyzicka');
+    const typZakaznikaWrapper = document.querySelector('.typ-zakaznika-wrapper');
 
     if (!icoCheckbox || !fyzickaCheckbox) return;
+
+    // Funkce pro odstranění červeného označení při zaškrtnutí
+    const odstranitCerveneOznaceni = () => {
+      if (typZakaznikaWrapper && (icoCheckbox.checked || fyzickaCheckbox.checked)) {
+        typZakaznikaWrapper.style.border = '';
+        typZakaznikaWrapper.style.backgroundColor = '';
+        typZakaznikaWrapper.style.borderRadius = '';
+        typZakaznikaWrapper.style.padding = '';
+      }
+    };
 
     // Když zaškrtnu IČO, odškrtnu fyzickou osobu
     icoCheckbox.addEventListener('change', () => {
       if (icoCheckbox.checked) {
         fyzickaCheckbox.checked = false;
       }
+      odstranitCerveneOznaceni();
     });
 
     // Když zaškrtnu fyzickou osobu, odškrtnu IČO
@@ -60,6 +72,7 @@ const WGS = {
       if (fyzickaCheckbox.checked) {
         icoCheckbox.checked = false;
       }
+      odstranitCerveneOznaceni();
     });
 
     logger.log('[TypZakaznika] Inicializovány vzájemně výlučné checkboxy');
@@ -499,12 +512,16 @@ const WGS = {
         calculatorBox.classList.remove('hidden');
       }
       
+      // POZ číslo se generuje automaticky na serveru - pole zůstává readonly
       if (cisloInput) {
-        cisloInput.removeAttribute('readonly');
-        cisloInput.value = '';
-        cisloInput.placeholder = 'Číslo objednávky/reklamace od prodejce (pokud máte)';
-        cisloInput.style.backgroundColor = '';
-        cisloInput.style.cursor = 'text';
+        cisloInput.setAttribute('readonly', 'readonly');
+        cisloInput.value = 'POZ (automaticky)';
+        cisloInput.style.backgroundColor = '#e9e9e9';
+        cisloInput.style.color = '#666';
+        cisloInput.style.cursor = 'not-allowed';
+        cisloInput.style.fontStyle = 'italic';
+        cisloInput.style.pointerEvents = 'none';
+        cisloInput.setAttribute('tabindex', '-1');
       }
       
       if (datumProdejeInput) {
@@ -620,8 +637,15 @@ const WGS = {
   
   initForm() {
     const form = document.getElementById('reklamaceForm');
+    if (!form) {
+      logger.error('[initForm] Formulář reklamaceForm nenalezen!');
+      return;
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      e.stopPropagation();
+      logger.log('[initForm] Submit zachycen, spouštím validaci...');
       await this.submitForm();
     });
 
@@ -719,6 +743,37 @@ const WGS = {
     if (prvniPrazdne) {
       prvniPrazdne.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setTimeout(() => prvniPrazdne.focus(), 500);
+    }
+
+    // Validace typu zákazníka - musí být zaškrtnut jeden z checkboxů
+    const icoCheckbox = document.getElementById('objednavkaICO');
+    const fyzickaCheckbox = document.getElementById('objednavkaFyzicka');
+    const typZakaznikaWrapper = document.querySelector('.typ-zakaznika-wrapper');
+
+    if (icoCheckbox && fyzickaCheckbox) {
+      // Odebrat červené označení
+      if (typZakaznikaWrapper) {
+        typZakaznikaWrapper.style.borderColor = '';
+        typZakaznikaWrapper.style.backgroundColor = '';
+      }
+
+      // Zkontrolovat, zda je zaškrtnut alespoň jeden checkbox
+      if (!icoCheckbox.checked && !fyzickaCheckbox.checked) {
+        chybejici.push('Typ zákazníka (IČO nebo Fyzická osoba)');
+
+        // Označit červeně
+        if (typZakaznikaWrapper) {
+          typZakaznikaWrapper.style.border = '2px solid #dc3545';
+          typZakaznikaWrapper.style.backgroundColor = '#fff5f5';
+          typZakaznikaWrapper.style.borderRadius = '8px';
+          typZakaznikaWrapper.style.padding = '0.75rem';
+
+          // Scrollnout na wrapper pokud je první chyba
+          if (!prvniPrazdne) {
+            typZakaznikaWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      }
     }
 
     return {
@@ -870,7 +925,7 @@ const WGS = {
             const alertMessage = referenceNumber
               ? t('order_accepted_with_ref').replace('{reference}', referenceNumber)
               : t('order_accepted_no_ref');
-            wgsToast.success(alertMessage, 0); // Nezmizí automaticky
+            this.toast(alertMessage, 'success');
             setTimeout(() => { window.location.href = 'index.php'; }, 3000);
           }
         }, 1500);
@@ -945,7 +1000,12 @@ const WGS = {
         this.photos.push({ data: base64, file: compressed });
       }
       this.renderPhotos();
-      this.toast(`Přidáno ${files.length} fotek`, 'success');
+      // Neonový toast pro přidání fotek
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit(`Přidáno ${files.length} fotek`, { titulek: 'WGS' });
+      } else {
+        this.toast(`Přidáno ${files.length} fotek`, 'success');
+      }
     });
   },
   

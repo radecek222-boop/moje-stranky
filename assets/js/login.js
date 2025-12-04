@@ -152,6 +152,8 @@ async function getCsrfTokenFromForm(form, maxRetries = 3) {
 
 // ============================================================
 // FORM SWITCHER
+// FIX: Použít přímou manipulaci style.display místo CSS tříd
+// CSS pravidlo #adminLoginFields { display: none; } přepisovalo .hidden třídu
 // ============================================================
 if (isAdminCheckbox) {
   isAdminCheckbox.addEventListener('change', (e) => {
@@ -160,17 +162,20 @@ if (isAdminCheckbox) {
     const adminKey = document.getElementById('adminKey');
 
     if (e.target.checked) {
-      // Admin mode - skrýt user pole a odstranit required
-      userLoginFields.classList.add('hidden');
-      adminLoginFields.classList.remove('hidden');
+      // Admin mode - skrýt user pole a zobrazit admin pole
+      if (userLoginFields) userLoginFields.style.display = 'none';
+      if (adminLoginFields) adminLoginFields.style.display = 'block';
 
       if (userEmail) userEmail.removeAttribute('required');
       if (userPassword) userPassword.removeAttribute('required');
-      if (adminKey) adminKey.setAttribute('required', 'required');
+      if (adminKey) {
+        adminKey.setAttribute('required', 'required');
+        adminKey.focus(); // Focus na admin key pole
+      }
     } else {
-      // User mode - zobrazit user pole a přidat required
-      userLoginFields.classList.remove('hidden');
-      adminLoginFields.classList.add('hidden');
+      // User mode - zobrazit user pole a skrýt admin pole
+      if (userLoginFields) userLoginFields.style.display = 'block';
+      if (adminLoginFields) adminLoginFields.style.display = 'none';
 
       if (userEmail) userEmail.setAttribute('required', 'required');
       if (userPassword) userPassword.setAttribute('required', 'required');

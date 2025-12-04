@@ -102,7 +102,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Všechny SQL Tabulky | WGS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=optional" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -565,6 +565,28 @@ try {
     </div>
 
     <script>
+    // Event handler pro tlačítka s data-action
+    document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('click', (e) => {
+            const button = e.target.closest('[data-action]');
+            if (!button) return;
+
+            const action = button.getAttribute('data-action');
+
+            switch (action) {
+                case 'exportAllDDL':
+                    exportAllDDL();
+                    break;
+                case 'printPage':
+                    window.print();
+                    break;
+                case 'reloadPage':
+                    window.location.reload();
+                    break;
+            }
+        });
+    });
+
     // Export všech DDL do jednoho SQL souboru
     function exportAllDDL() {
         const allDDL = <?php echo json_encode(array_map(function($t) {

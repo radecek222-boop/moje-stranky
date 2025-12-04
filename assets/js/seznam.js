@@ -568,12 +568,13 @@ async function renderOrders(items = null) {
   const unreadIndicator = document.getElementById('unreadNotesIndicator');
   const unreadCountSpan = document.getElementById('unreadNotesCount');
 
-
-  if (totalUnreadCount > 0) {
-    unreadCountSpan.textContent = totalUnreadCount;
-    unreadIndicator.classList.remove('hidden');
-  } else {
-    unreadIndicator.classList.add('hidden');
+  if (unreadIndicator && unreadCountSpan) {
+    if (totalUnreadCount > 0) {
+      unreadCountSpan.textContent = totalUnreadCount;
+      unreadIndicator.style.display = 'block';
+    } else {
+      unreadIndicator.style.display = 'none';
+    }
   }
 
   // Uložit unreadCountsMap pro filtrování
@@ -680,6 +681,23 @@ const ModalManager = {
   }
 };
 
+// === HELPER: Konzistentní hlavička zákazníka pro všechny modaly ===
+function createCustomerHeader() {
+  if (!CURRENT_RECORD) return '';
+
+  const customerName = Utils.getCustomerName(CURRENT_RECORD);
+  const address = Utils.getAddress(CURRENT_RECORD);
+  const termin = CURRENT_RECORD.termin ? formatDate(CURRENT_RECORD.termin) : '—';
+  const time = CURRENT_RECORD.cas_navstevy || '—';
+  const status = getStatus(CURRENT_RECORD.stav);
+
+  return ModalManager.createHeader(customerName, `
+    <strong>Adresa:</strong> ${address}<br>
+    <strong>Termín:</strong> ${termin} ${time !== '—' ? 'v ' + time : ''}<br>
+    <strong>Stav:</strong> ${status.text}
+  `);
+}
+
 // === DETAIL ===
 async function showDetail(recordOrId) {
   let record;
@@ -694,7 +712,11 @@ async function showDetail(recordOrId) {
   }
   
   CURRENT_RECORD = record;
-  
+
+  // Automatické přiřazení technika (fire-and-forget)
+  autoAssignTechnician(record.reklamace_id || record.cislo || record.id)
+    .catch(err => logger.warn('Auto-assign technika se nezdařilo:', err.message));
+
   const customerName = Utils.getCustomerName(record);
   const address = Utils.getAddress(record);
   const termin = record.termin ? formatDate(record.termin) : '—';
@@ -715,62 +737,28 @@ async function showDetail(recordOrId) {
     const jeProdejce = CURRENT_USER && CURRENT_USER.role === 'prodejce';
 
     buttonsHtml = `
-      <div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 0.75rem; margin-bottom: 1rem; border-radius: 4px;">
-        <div style="text-align: center;">
-          <div style="font-size: 0.9rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem;">Zakázka dokončena</div>
-          <div style="font-size: 0.75rem; color: #666;">Tato zakázka byla již vyřízena dne ${dokoncenoDatum} v ${dokoncenoCas} hod</div>
-        </div>
+      <div class="detail-info-box">
+        <div class="detail-info-box-title">Zakázka dokončena</div>
+        <div class="detail-info-box-subtitle">Vyřízeno dne ${dokoncenoDatum} v ${dokoncenoCas}</div>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+      <div class="detail-buttons">
         ${!jeProdejce ? `
-          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; background: #333; color: white; font-weight: 600; font-size: 0.9rem;" data-action="reopenOrder" data-id="${record.id}">
-            Znovu otevřít
-          </button>
-
-          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+          <button class="detail-btn detail-btn-primary" data-action="reopenOrder" data-id="${record.id}">Znovu otevřít</button>
+          <button class="detail-btn detail-btn-secondary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
         ` : ''}
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
-
-      <div style="width: 100%; margin-top: 0.25rem;">
+        <button class="detail-btn detail-btn-secondary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         ${record.original_reklamace_id ? `
-          <!-- Zakázka je KLON - zobrazit Historie zákazníka + PDF REPORT -->
-          <button class="btn" style="background: #555; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; margin-bottom: 0.5rem;"
-                  data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">
-            Historie zákazníka
-          </button>
-          ${record.documents && record.documents.length > 0 ? `
-            <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; font-weight: 600;"
-                    data-action="openPDF" data-url="${record.documents[0].file_path}" data-id="${record.id}">
-              [Doc] PDF REPORT
-            </button>
-          ` : `
-            <div style="background: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 4px; padding: 0.5rem; text-align: center; color: #666; font-size: 0.75rem;">
-              PDF report ještě nebyl vytvořen
-            </div>
-          `}
+          <button class="detail-btn detail-btn-secondary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
+        ` : ''}
+        ${record.documents && record.documents.length > 0 ? `
+          <button class="detail-btn detail-btn-primary" data-action="openPDF" data-pdf-path="${record.documents[0].file_path}" data-id="${record.id}">PDF Report</button>
         ` : `
-          <!-- Původní zakázka - standardní PDF tlačítko -->
-          ${record.documents && record.documents.length > 0 ? `
-            <button class="btn" style="background: #333333; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; font-weight: 600;"
-                    data-action="openPDF" data-url="${record.documents[0].file_path}" data-id="${record.id}">
-              [Doc] PDF REPORT
-            </button>
-          ` : `
-            <div style="background: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 4px; padding: 0.5rem; text-align: center; color: #666; font-size: 0.75rem;">
-              PDF report ještě nebyl vytvořen
-            </div>
-          `}
+          <div class="detail-info-box" style="margin: 0; padding: 0.5rem;">
+            <div class="detail-info-box-subtitle">PDF report ještě nebyl vytvořen</div>
+          </div>
         `}
-      </div>
-
-        <!-- Videotéka - archiv videí zakázky -->
-        <button class="btn" style="background: #444; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; margin-top: 0.5rem;"
-                data-action="showVideoteka" data-id="${record.id}">
-          Videotéka
-        </button>
-
-        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="closeDetail">Zavřít</button>
+        <button class="detail-btn detail-btn-secondary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
       </div>
     `;
   } else {
@@ -778,47 +766,29 @@ async function showDetail(recordOrId) {
     const jeProdejce = CURRENT_USER && CURRENT_USER.role === 'prodejce';
 
     buttonsHtml = `
-      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+      <div class="detail-buttons">
         ${!jeProdejce ? `
-          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
-
-          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
-
-          <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+          <button class="detail-btn detail-btn-primary" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
+          <button class="detail-btn detail-btn-primary" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
+          <button class="detail-btn detail-btn-secondary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
         ` : ''}
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
-
+        <button class="detail-btn detail-btn-secondary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         ${record.original_reklamace_id ? `
-          <!-- Nedokončená zakázka s historií - přidat Historie PDF -->
-          <button class="btn" style="background: #555; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;"
-                  data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">
-            Historie PDF
-          </button>
+          <button class="detail-btn detail-btn-secondary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie PDF</button>
         ` : ''}
-
-        <!-- Videotéka - archiv videí zakázky -->
-        <button class="btn" style="background: #444; color: white; width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem; margin-top: 0.5rem;"
-                data-action="showVideoteka" data-id="${record.id}">
-          Videotéka
-        </button>
-
-        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; font-size: 0.9rem;" data-action="closeDetail">Zavřít</button>
+        <button class="detail-btn detail-btn-secondary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
       </div>
     `;
   }
   
   const content = `
-    ${ModalManager.createHeader(customerName, `
-      <strong>Adresa:</strong> ${address}<br>
-      <strong>Termín:</strong> ${termin} ${time !== '—' ? 'v ' + time : ''}<br>
-      <strong>Stav:</strong> ${status.text}
-    `)}
-    
+    ${createCustomerHeader()}
+
     <div class="modal-body">
       ${buttonsHtml}
     </div>
   `;
-  
+
   ModalManager.show(content);
 }
 
@@ -936,7 +906,7 @@ async function showHistoryPDF(originalReklamaceId) {
     logger.log(`Otevírám PDF: ${firstDoc.file_path}`);
 
     // Otevřít PDF v modal okně (funguje lépe na mobilu než window.open)
-    zobrazPDFModal(firstDoc.file_path, originalReklamaceId);
+    zobrazPDFModal(firstDoc.file_path, originalReklamaceId, 'historie');
 
   } catch (error) {
     logger.error('Chyba při načítání historie PDF:', error);
@@ -1094,14 +1064,17 @@ function showCalendar(id) {
   CURRENT_RECORD = z;
   SELECTED_DATE = null;
   SELECTED_TIME = null;
-  
+
   const content = `
-    <div class="modal-header">
-      <div id="selectedDateDisplay" style="color: var(--c-grey); font-size: 0.9rem; font-weight: 600; text-align: center;">Zatím nevybráno</div>
-      <button class="modal-close" data-action="closeModal">✕</button>
-    </div>
-    
-    <div class="modal-body" style="max-height: 80vh; overflow-y: auto; padding: 1rem;">
+    ${createCustomerHeader()}
+
+    <!-- Vybraný termín - fixní nad kalendářem -->
+    <div id="selectedDateDisplay" style="display: none; background: #f5f5f5; border: 2px solid #666; color: #333; font-size: 0.85rem; padding: 0.5rem 1rem; margin: 0 1rem; border-radius: 4px; font-weight: 600; text-align: center; font-family: inherit;"></div>
+
+    <!-- Varování o kolizi - skryté, zobrazí se při výběru obsazeného času -->
+    <div id="collisionWarning" style="display: none; background: #fee; border: 2px solid #c00; color: #900; font-size: 0.85rem; padding: 0.5rem 1rem; margin: 0.5rem 1rem 0; border-radius: 4px; font-weight: 600; text-align: center; font-family: inherit;"></div>
+
+    <div class="modal-body" style="max-height: 60vh; overflow-y: auto; padding: 1rem;">
       <div class="calendar-container">
         <div id="calGrid"></div>
         <div id="distanceInfo"></div>
@@ -1109,13 +1082,13 @@ function showCalendar(id) {
         <div id="timeGrid"></div>
       </div>
     </div>
-    
-    ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="showDetail">Zpět</button>',
-      '<button class="btn btn-success" data-action="saveSelectedDate">Uložit termín</button>'
-    ])}
+
+    <div class="detail-buttons">
+      <button class="detail-btn detail-btn-primary" data-action="saveSelectedDate">Uložit termín</button>
+      <button class="detail-btn detail-btn-secondary" data-action="showDetail">Zpět</button>
+    </div>
   `;
-  
+
   ModalManager.show(content);
   const today = new Date();
   CAL_MONTH = today.getMonth();
@@ -1243,15 +1216,14 @@ function renderCalendar(m, y) {
       document.querySelectorAll('.cal-day').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
 
-      // PERFORMANCE: Vzdálenosti vypnuty kvůli API problémům
       let displayText = `Vybraný den: ${SELECTED_DATE}`;
       document.getElementById('selectedDateDisplay').textContent = displayText;
 
       // Zobrazit časy okamžitě
       renderTimeGrid();
 
-      // PERFORMANCE: Vypnuto kvůli problémům s get_distance.php
-      // showDayBookingsWithDistances(SELECTED_DATE);
+      // Zobrazit vzdálenost a další termíny na tento den
+      showDayBookingsWithDistances(SELECTED_DATE);
     };
     daysGrid.appendChild(el);
   }
@@ -1272,9 +1244,8 @@ async function getDistance(fromAddress, toAddress) {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    // Načíst CSRF token
     const csrfToken = await fetchCsrfToken();
 
     const response = await fetch('/app/controllers/get_distance.php', {
@@ -1287,9 +1258,9 @@ async function getDistance(fromAddress, toAddress) {
       }),
       signal: controller.signal
     });
-    
+
     clearTimeout(timeoutId);
-    
+
     if (response.ok) {
       const data = await response.json();
       if ((data.status === 'success' || data.success === true) && data.distance) {
@@ -1304,13 +1275,9 @@ async function getDistance(fromAddress, toAddress) {
       }
     }
   } catch (error) {
-    if (error.name === 'AbortError') {
-      logger.log('Request timeout');
-    } else {
-      logger.error('Chyba při výpočtu vzdálenosti:', error);
-    }
+    // Tiché selhání - vzdálenost není kritická funkce
   }
-  
+
   return null;
 }
 
@@ -1322,30 +1289,29 @@ async function getDistancesBatch(pairs) {
 
 // === ZOBRAZENÍ TERMÍNŮ S VZDÁLENOSTMI ===
 async function showDayBookingsWithDistances(date) {
-  // PERFORMANCE: Funkce vypnuta kvůli problémům s get_distance.php API
-  // Vzdálenosti se nezobrazují
   const distanceContainer = document.getElementById('distanceInfo');
   const bookingsContainer = document.getElementById('dayBookings');
 
-  if (distanceContainer) distanceContainer.innerHTML = '';
-  if (bookingsContainer) bookingsContainer.innerHTML = '';
-  return;
+  if (!distanceContainer || !bookingsContainer) return;
 
-  /* VYPNUTO - DISTANCE API NEFUNGUJE
+  // Inicializace cache pokud neexistuje
   if (!Array.isArray(WGS_DATA_CACHE)) {
     WGS_DATA_CACHE = [];
   }
 
+  // Filtrovat ostatní termíny na stejný den (ne aktuální reklamace)
   const bookings = WGS_DATA_CACHE.filter(rec =>
     rec.termin === date && rec.id !== CURRENT_RECORD?.id
   );
 
+  // Seřadit podle času
   bookings.sort((a, b) => {
     const timeA = a.cas_navstevy || '00:00';
     const timeB = b.cas_navstevy || '00:00';
     return timeA.localeCompare(timeB);
   });
 
+  // Získat adresu aktuální reklamace
   let currentAddress = Utils.getAddress(CURRENT_RECORD);
 
   if (!currentAddress || currentAddress === '—') {
@@ -1353,7 +1319,6 @@ async function showDayBookingsWithDistances(date) {
     bookingsContainer.innerHTML = '';
     return;
   }
-  */
   
   currentAddress = Utils.addCountryToAddress(currentAddress);
   
@@ -1537,12 +1502,12 @@ function showBookingDetail(bookingOrId) {
         </div>
       </div>
     </div>
-    
-    ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="showCalendarBack">Zpět na kalendář</button>'
-    ])}
+
+    <div class="detail-buttons">
+      <button class="detail-btn detail-btn-secondary" data-action="showCalendarBack">Zpět na kalendář</button>
+    </div>
   `;
-  
+
   ModalManager.show(content);
 }
 
@@ -1580,13 +1545,19 @@ function renderTimeGrid() {
         el.classList.add('selected');
 
         // PERFORMANCE: Zobrazit termín bez vzdálenosti
-        let displayText = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
+        const displayEl = document.getElementById('selectedDateDisplay');
+        displayEl.textContent = `Vybraný termín: ${SELECTED_DATE} — ${SELECTED_TIME}`;
+        displayEl.style.display = 'block';
 
-        if (occupiedTimes[time]) {
-          displayText += ` KOLIZE: ${occupiedTimes[time].zakaznik}`;
+        // Zobrazit/skrýt varování o kolizi
+        const warningEl = document.getElementById('collisionWarning');
+
+        if (occupiedTimes[time] && warningEl) {
+          warningEl.textContent = `KOLIZE: ${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}`;
+          warningEl.style.display = 'block';
+        } else if (warningEl) {
+          warningEl.style.display = 'none';
         }
-
-        document.getElementById('selectedDateDisplay').textContent = displayText;
 
         // PERFORMANCE: getDistance() a showDayBookingsWithDistances() vypnuty
       };
@@ -1756,41 +1727,22 @@ async function saveSelectedDate() {
 // === KONTAKT ===
 function showContactMenu(id) {
   const phone = CURRENT_RECORD.telefon || '';
-  const email = CURRENT_RECORD.email || '';
-  const customerName = Utils.getCustomerName(CURRENT_RECORD);
   const address = Utils.getAddress(CURRENT_RECORD);
-  
+
   const content = `
-    ${ModalManager.createHeader(customerName, 'Kontaktovat zákazníka')}
-    
+    ${createCustomerHeader()}
+
     <div class="modal-body">
-      <div class="info-grid" style="margin-bottom: 1rem;">
-        <div class="info-label">Telefon:</div>
-        <div class="info-value"><strong>${phone || 'Neuvedeno'}</strong></div>
-        
-        <div class="info-label">Email:</div>
-        <div class="info-value"><strong>${email || 'Neuvedeno'}</strong></div>
-        
-        <div class="info-label">Adresa:</div>
-        <div class="info-value"><strong>${address || 'Neuvedeno'}</strong></div>
-      </div>
-      
-      <div class="modal-section">
-        <h3 class="section-title">Rychlé akce</h3>
-        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-          ${phone ? `<a href="tel:${phone}" class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: white; box-sizing: border-box;">Zavolat</a>` : ''}
-          <button class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; background: #1a1a1a; color: white; box-sizing: border-box;" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
-          ${phone ? `<button class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; background: #444; color: white; box-sizing: border-box;" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
-          ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="btn" style="width: 100%; min-height: 48px; padding: 0.75rem 1rem; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; justify-content: center; background: #444; color: white; box-sizing: border-box;" target="_blank">Navigovat (Waze)</a>` : ''}
-        </div>
+      <div class="detail-buttons">
+        ${phone ? `<a href="tel:${phone}" class="detail-btn detail-btn-primary" style="text-decoration: none;">Zavolat</a>` : ''}
+        <button class="detail-btn detail-btn-primary" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
+        ${phone ? `<button class="detail-btn detail-btn-secondary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
+        ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="detail-btn detail-btn-secondary" style="text-decoration: none;" target="_blank">Navigovat (Waze)</a>` : ''}
+        <button class="detail-btn detail-btn-secondary" data-action="showDetail">Zpět</button>
       </div>
     </div>
-    
-    ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="showDetail">Zpět</button>'
-    ])}
   `;
-  
+
   ModalManager.show(content);
 }
 
@@ -1909,7 +1861,7 @@ async function showCustomerDetail(id) {
   }
 
   const content = `
-    ${ModalManager.createHeader('Detail zákazníka', customerName)}
+    ${createCustomerHeader()}
 
     <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
 
@@ -2025,9 +1977,9 @@ async function showCustomerDetail(id) {
         return `
           <div style="margin-bottom: 1rem;">
             <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF Report:</label>
-            <button data-action="openPDF"
-                    data-url="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}"
-                    style="width: 100%; padding: 0.75rem; background: #333333; color: white; border: none; border-radius: 4px; font-size: 0.9rem; cursor: pointer; font-weight: 600;">
+            <button class="btn customer-detail-btn"
+                    data-action="openPDF"
+                    data-pdf-path="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}">
               Otevřít PDF Report
             </button>
           </div>
@@ -2036,9 +1988,7 @@ async function showCustomerDetail(id) {
 
       ${CURRENT_USER.is_admin ? `
         <div style="border-top: 1px solid #e0e0e0; padding-top: 1rem; margin-top: 1rem;">
-          <button data-action="deleteReklamace"
-                  data-id="${id}"
-                  style="width: 100%; padding: 0.5rem; background: #666; color: white; border: none; border-radius: 3px; font-size: 0.9rem; cursor: pointer; font-weight: 600;">
+          <button class="btn customer-detail-btn danger" data-action="deleteReklamace" data-id="${id}">
             Smazat reklamaci
           </button>
           <p style="font-size: 0.7rem; color: #999; margin-top: 0.25rem; text-align: center;">Smaže vše včetně fotek a PDF</p>
@@ -2047,10 +1997,10 @@ async function showCustomerDetail(id) {
 
     </div>
 
-    ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="showDetail" data-id="' + id + '">Zpět</button>',
-      '<button class="btn" style="background: #1a1a1a; color: white;" data-action="saveAllCustomerData" data-id="' + id + '">Uložit změny</button>'
-    ])}
+    <div class="detail-buttons">
+      <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
+      <button class="detail-btn detail-btn-secondary" data-action="showDetail" data-id="${id}">Zpět</button>
+    </div>
   `;
 
   ModalManager.show(content);
@@ -2059,147 +2009,109 @@ async function showCustomerDetail(id) {
 /**
  * Zobrazí PDF v modálním okně s tlačítky Zavřít a Odeslat
  * Univerzální řešení pro desktop, PWA, iOS Safari
+ * @param {string} pdfUrl - URL k PDF souboru
+ * @param {string} claimId - ID zakázky
+ * @param {string} typ - Typ PDF: 'report' (výchozí) nebo 'historie'
  */
-function zobrazPDFModal(pdfUrl, claimId) {
-  // Detekce iOS a mobilních zařízení
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
+  const titulek = typ === 'historie' ? 'Historie PDF' : 'PDF Report';
 
-  // Vytvořit overlay
+  // Hlavní overlay - flexbox layout s fixní hlavičkou a patičkou
   const overlay = document.createElement('div');
   overlay.id = 'pdfModalOverlay';
-  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10003; display: flex; flex-direction: column; align-items: center; justify-content: center;';
+  overlay.style.cssText = `
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.95); z-index: 10003;
+    display: flex; flex-direction: column;
+  `;
 
-  // Kontejner pro PDF
-  const pdfContainer = document.createElement('div');
-  pdfContainer.style.cssText = 'width: 95%; height: calc(100% - 80px); max-width: 900px; background: white; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;';
-
-  // Header s názvem
+  // === HLAVIČKA (fixní nahoře) ===
   const header = document.createElement('div');
-  header.style.cssText = 'padding: 12px 16px; background: #333; color: white; font-weight: 600; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center;';
-  header.innerHTML = '<span>PDF Report</span><span style="font-size: 0.8rem; opacity: 0.7;">ID: ' + (claimId || '-') + '</span>';
+  header.style.cssText = `
+    flex-shrink: 0; padding: 12px 16px;
+    background: #222; color: white;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid #444;
+  `;
+  header.innerHTML = `
+    <div>
+      <div style="font-weight: 600; font-size: 1rem;">${titulek}</div>
+      <div style="font-size: 0.75rem; opacity: 0.7;">ID: ${claimId || '-'}</div>
+    </div>
+    <button id="pdfCloseBtn" style="
+      background: #555; color: white; border: none;
+      padding: 10px 20px; border-radius: 6px;
+      font-weight: 600; font-size: 0.9rem; cursor: pointer;
+    ">Zavřít</button>
+  `;
 
-  // PDF náhled - různé přístupy pro různé platformy
-  let pdfViewer;
+  // === PDF NÁHLED (zabere zbytek místa) ===
+  const pdfContainer = document.createElement('div');
+  pdfContainer.style.cssText = 'flex: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 16px;';
 
-  if (isIOS || (isMobile && isPWA)) {
-    // iOS a PWA mobil: Zobrazit tlačítko pro otevření v novém okně + náhled pomocí object
-    pdfViewer = document.createElement('div');
-    pdfViewer.style.cssText = 'flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f5f5f5; padding: 2rem;';
+  const iframe = document.createElement('iframe');
+  iframe.src = pdfUrl;
+  iframe.style.cssText = 'width: 100%; height: 100%; max-width: 900px; border: none; background: white; border-radius: 8px;';
+  pdfContainer.appendChild(iframe);
 
-    // Zkusit zobrazit pomocí <object> (funguje lépe na iOS)
-    const objectEmbed = document.createElement('object');
-    objectEmbed.data = pdfUrl;
-    objectEmbed.type = 'application/pdf';
-    objectEmbed.style.cssText = 'width: 100%; height: 100%; border: none;';
+  // === PATIČKA S TLAČÍTKY (fixní dole) ===
+  const footer = document.createElement('div');
+  footer.style.cssText = `
+    flex-shrink: 0; padding: 12px 16px;
+    background: #222; border-top: 1px solid #444;
+    display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+  `;
 
-    // Fallback pokud object nefunguje
-    const fallback = document.createElement('div');
-    fallback.style.cssText = 'text-align: center; padding: 2rem;';
-    fallback.innerHTML = `
-      <p style="color: #666; margin-bottom: 1rem;">Náhled PDF není k dispozici na tomto zařízení.</p>
-      <button data-action="openPdfNewWindow" data-url="${pdfUrl}"
-              style="padding: 12px 24px; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600;">
-        Otevřít PDF v novém okně
-      </button>
-    `;
-
-    objectEmbed.appendChild(fallback);
-    pdfViewer.appendChild(objectEmbed);
-  } else {
-    // Desktop a Android: Použít iframe
-    pdfViewer = document.createElement('iframe');
-    pdfViewer.src = pdfUrl;
-    pdfViewer.style.cssText = 'flex: 1; width: 100%; border: none;';
-  }
-
-  pdfContainer.appendChild(header);
-  pdfContainer.appendChild(pdfViewer);
-
-  // Tlačítka
-  const buttonContainer = document.createElement('div');
-  buttonContainer.style.cssText = 'display: flex; gap: 12px; margin-top: 16px; padding: 0 16px; flex-wrap: wrap; justify-content: center;';
-
-  // Tlačítko Uložit (nové)
-  const btnUlozit = document.createElement('button');
-  btnUlozit.textContent = 'Uložit';
-  btnUlozit.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #555; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 110px; touch-action: manipulation;';
-  btnUlozit.onclick = () => {
+  // Tlačítko Stáhnout
+  const btnStahnout = document.createElement('button');
+  btnStahnout.textContent = 'Stáhnout';
+  btnStahnout.style.cssText = 'padding: 12px 24px; font-size: 0.9rem; font-weight: 600; background: #444; color: white; border: none; border-radius: 6px; cursor: pointer;';
+  btnStahnout.onclick = () => {
     const link = document.createElement('a');
     link.href = pdfUrl;
     link.download = `PDF_Report_${claimId || 'dokument'}.pdf`;
     link.click();
   };
 
-  // Tlačítko Sdílet (původně Odeslat)
-  const btnOdeslat = document.createElement('button');
-  btnOdeslat.textContent = 'Sdílet';
-  btnOdeslat.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 110px; touch-action: manipulation;';
+  // Tlačítko Sdílet
+  const btnSdilet = document.createElement('button');
+  btnSdilet.textContent = 'Sdílet';
+  btnSdilet.style.cssText = 'padding: 12px 24px; font-size: 0.9rem; font-weight: 600; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer;';
+  btnSdilet.onclick = async () => {
+    if (!navigator.share) {
+      wgsToast.info('Sdílení není podporováno. Použijte tlačítko Stáhnout.');
+      return;
+    }
+    try {
+      btnSdilet.textContent = 'Načítám...';
+      const response = await fetch(pdfUrl);
+      const blob = await response.blob();
+      const file = new File([blob], `PDF_Report_${claimId || 'dokument'}.pdf`, { type: 'application/pdf' });
+      await navigator.share({ files: [file], title: titulek });
+    } catch (e) {
+      if (e.name !== 'AbortError') wgsToast.error('Chyba: ' + e.message);
+    } finally {
+      btnSdilet.textContent = 'Sdílet';
+    }
+  };
 
   // Tlačítko Zavřít
   const btnZavrit = document.createElement('button');
   btnZavrit.textContent = 'Zavřít';
-  btnZavrit.style.cssText = 'padding: 12px 24px; font-size: 0.95rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 110px; touch-action: manipulation;';
+  btnZavrit.style.cssText = 'padding: 12px 24px; font-size: 0.9rem; font-weight: 600; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer;';
   btnZavrit.onclick = () => overlay.remove();
 
-  // Tlačítko Sdílet - Web Share API (nativní systémové sdílení)
-  btnOdeslat.onclick = async () => {
-    try {
-      // Zkontrolovat podporu Web Share API
-      if (!navigator.share && !navigator.canShare) {
-        wgsToast.info('Sdílení není podporováno v tomto prohlížeči.\n\nPoužijte tlačítko "Uložit" a pak sdílejte soubor ručně.');
-        return;
-      }
+  footer.appendChild(btnStahnout);
+  footer.appendChild(btnSdilet);
+  footer.appendChild(btnZavrit);
 
-      btnOdeslat.disabled = true;
-      btnOdeslat.textContent = 'Načítám...';
-
-      // Načíst PDF jako Blob
-      const response = await fetch(pdfUrl);
-      const blob = await response.blob();
-
-      // Vytvořit File objekt z Blobu
-      const fileName = `PDF_Report_${claimId || 'dokument'}.pdf`;
-      const file = new File([blob], fileName, { type: 'application/pdf' });
-
-      // Web Share API
-      const shareData = {
-        title: `PDF Report - ${claimId || 'WGS'}`,
-        text: `PDF dokument zakázky ${claimId || ''}`,
-        files: [file]
-      };
-
-      // Zkontrolovat zda lze sdílet soubory
-      if (navigator.canShare && !navigator.canShare(shareData)) {
-        throw new Error('Sdílení souborů není podporováno');
-      }
-
-      // Sdílet přes systémové menu (email, SMS, WhatsApp, atd.)
-      await navigator.share(shareData);
-
-    } catch (error) {
-      // AbortError = uživatel zrušil sdílení (to není chyba)
-      if (error.name !== 'AbortError') {
-        wgsToast.error('Chyba při sdílení: ' + error.message);
-      }
-    } finally {
-      btnOdeslat.disabled = false;
-      btnOdeslat.textContent = 'Sdílet';
-    }
-  };
-
-  buttonContainer.appendChild(btnUlozit);
-  buttonContainer.appendChild(btnOdeslat);
-  buttonContainer.appendChild(btnZavrit);
-
+  // Sestavení
+  overlay.appendChild(header);
   overlay.appendChild(pdfContainer);
-  overlay.appendChild(buttonContainer);
+  overlay.appendChild(footer);
 
-  // Zavřít při kliknutí mimo
-  overlay.onclick = (e) => {
-    if (e.target === overlay) overlay.remove();
-  };
+  // Event handlery
+  header.querySelector('#pdfCloseBtn').onclick = () => overlay.remove();
 
   // Zavřít při ESC
   const escHandler = (e) => {
@@ -2357,6 +2269,9 @@ async function sendAppointmentConfirmation(customer, date, time) {
   const technikEmail = customer.technik_email || '';
   const technikTelefon = customer.technik_telefon || '';
 
+  // Email prodejce (vytvořil zakázku)
+  const prodejceEmail = customer.created_by_email || 'admin@wgs-service.cz';
+
   try {
     // Get CSRF token
     const csrfToken = await getCSRFToken();
@@ -2371,7 +2286,7 @@ async function sendAppointmentConfirmation(customer, date, time) {
           customer_name: customerName,
           customer_email: email,
           customer_phone: phone,
-          seller_email: "admin@wgs-service.cz",
+          seller_email: prodejceEmail,
           date: date,
           time: time,
           order_id: orderId,
@@ -2399,6 +2314,52 @@ async function sendAppointmentConfirmation(customer, date, time) {
     }
   } catch (error) {
     logger.error('Chyba při odesílání potvrzení:', error);
+  }
+}
+
+// === AUTOMATICKÉ PŘIŘAZENÍ TECHNIKA ===
+async function autoAssignTechnician(reklamaceId) {
+  try {
+    const csrfToken = await getCSRFToken();
+
+    const response = await fetch('api/auto_assign_technician.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reklamace_id: reklamaceId,
+        csrf_token: csrfToken
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success && result.assigned) {
+      logger.log(`✓ Technik ${result.technician_name} (${result.technician_email}) byl automaticky přiřazen`);
+
+      // Aktualizovat CURRENT_RECORD s daty technika
+      if (CURRENT_RECORD) {
+        CURRENT_RECORD.assigned_to = result.technician_id;
+        CURRENT_RECORD.technik_jmeno = result.technician_name || '';
+        CURRENT_RECORD.technik_email = result.technician_email || '';
+        CURRENT_RECORD.technik_telefon = result.technician_phone || '';
+      }
+
+      // Aktualizovat cache
+      const cacheRecord = WGS_DATA_CACHE.find(x => x.reklamace_id == reklamaceId || x.cislo == reklamaceId || x.id == reklamaceId);
+      if (cacheRecord) {
+        cacheRecord.assigned_to = result.technician_id;
+        cacheRecord.technik_jmeno = result.technician_name || '';
+        cacheRecord.technik_email = result.technician_email || '';
+        cacheRecord.technik_telefon = result.technician_phone || '';
+      }
+    } else if (result.success && !result.assigned) {
+      // Není technik nebo už má přiřazeného - to je v pořádku
+      logger.log('Auto-assign: ' + (result.message || 'Žádné přiřazení'));
+    } else {
+      logger.warn('Auto-assign selhalo:', result.error);
+    }
+  } catch (error) {
+    logger.error('Chyba při auto-assign technika:', error);
   }
 }
 
@@ -2478,22 +2439,37 @@ async function addNote(orderId, text, audioBlob = null) {
 }
 
 async function deleteNote(noteId, orderId) {
+  console.log('[deleteNote] Zacinam mazat poznamku ID:', noteId);
+
   if (!await wgsConfirm('Opravdu chcete smazat tuto poznámku?', 'Smazat', 'Zrušit')) {
+    console.log('[deleteNote] Uzivatel zrusil');
     return;
   }
 
+  console.log('[deleteNote] Uzivatel potvrdil, pripravuji request...');
+
   try {
     const csrfToken = await getCSRFToken();
+    console.log('[deleteNote] CSRF token:', csrfToken ? 'OK (' + csrfToken.substring(0, 10) + '...)' : 'CHYBI!');
 
-    const formData = new FormData();
-    formData.append('action', 'delete');
-    formData.append('note_id', noteId);
-    formData.append('csrf_token', csrfToken);
+    // FIX: Pouzit URLSearchParams misto FormData - spolehlivejsi pro Safari
+    const params = new URLSearchParams();
+    params.append('action', 'delete');
+    params.append('note_id', noteId);
+    params.append('csrf_token', csrfToken);
 
-    const response = await fetch('api/notes_api.php', {
+    console.log('[deleteNote] Params pripraveny:', params.toString().substring(0, 50) + '...');
+    console.log('[deleteNote] Odesilam POST na /api/notes_api.php...');
+
+    const response = await fetch('/api/notes_api.php', {
       method: 'POST',
-      body: formData
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: params
     });
+
+    console.log('[deleteNote] Response status:', response.status, response.statusText);
 
     const data = await response.json();
 
@@ -2556,10 +2532,9 @@ async function showNotes(recordOrId) {
   }
 
   CURRENT_RECORD = record;
-  const customerName = Utils.getCustomerName(record);
 
   const loadingContent = `
-    ${ModalManager.createHeader('Poznámky', customerName)}
+    ${createCustomerHeader()}
     <div class="modal-body" style="text-align: center; padding: 3rem;">
       <div class="loading">Načítání poznámek...</div>
     </div>
@@ -2571,7 +2546,7 @@ async function showNotes(recordOrId) {
   notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   const content = `
-    ${ModalManager.createHeader('Poznámky', customerName)}
+    ${createCustomerHeader()}
 
     <div class="modal-body">
       <div class="notes-container">
@@ -2585,7 +2560,7 @@ async function showNotes(recordOrId) {
                 <div class="note-header">
                   <span class="note-author">${note.author_name || note.author}</span>
                   <span class="note-time">${formatDateTime(note.timestamp)}</span>
-                  ${canDelete ? `<button class="note-delete-btn" data-action="deleteNote" data-note-id="${note.id}" data-order-id="${record.id}" title="Smazat poznamku">x</button>` : ''}
+                  ${canDelete ? `<button class="note-delete-btn" data-note-id="${note.id}" data-order-id="${record.id}" onclick="event.stopPropagation(); potvrditSmazaniPoznamky(this);" title="Smazat poznamku">x</button>` : ''}
                 </div>
                 ${!isVoiceNote ? `<div class="note-text">${Utils.escapeHtml(note.text)}</div>` : ''}
                 ${hasAudio ? `
@@ -2631,10 +2606,10 @@ async function showNotes(recordOrId) {
       </div>
     </div>
 
-    ${ModalManager.createActions([
-      '<button class="btn btn-secondary" data-action="closeNotesModal">Zavrit</button>',
-      '<button class="btn btn-success" data-action="saveNewNote" data-id="' + record.id + '">Pridat poznamku</button>'
-    ])}
+    <div class="detail-buttons">
+      <button class="detail-btn detail-btn-primary" data-action="saveNewNote" data-id="${record.id}">Pridat poznamku</button>
+      <button class="detail-btn detail-btn-secondary" data-action="closeNotesModal">Zavrit</button>
+    </div>
   `;
 
   ModalManager.show(content);
@@ -3006,28 +2981,31 @@ function formatDateTime(isoString) {
   const date = new Date(isoString);
   const now = new Date();
   const diff = now - date;
-  
+
   if (diff < 60000) {
     return 'Právě teď';
   }
-  
+
   if (diff < 3600000) {
     const mins = Math.floor(diff / 60000);
     return `Před ${mins} min`;
   }
-  
+
   if (diff < 86400000) {
     const hours = Math.floor(diff / 3600000);
     return `Před ${hours} h`;
   }
-  
-  return date.toLocaleDateString('cs-CZ', {
-    day: 'numeric',
-    month: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+
+  // Zkracene nazvy dnu v tydnu (cesky)
+  const dny = ['ne', 'po', 'ut', 'st', 'ct', 'pa', 'so'];
+  const den = dny[date.getDay()];
+  const datum = date.getDate();
+  const mesic = date.getMonth() + 1;
+  const rok = date.getFullYear();
+  const hodiny = date.getHours().toString().padStart(2, '0');
+  const minuty = date.getMinutes().toString().padStart(2, '0');
+
+  return `${den} ${datum}.${mesic}.${rok} ${hodiny}:${minuty}`;
 }
 
 // === UTILITY ===
@@ -3048,7 +3026,15 @@ function formatDate(dateStr) {
   if (!dateStr) return '—';
   const date = new Date(dateStr);
   if (isNaN(date)) return dateStr;
-  return date.toLocaleDateString('cs-CZ');
+
+  // Zkracene nazvy dnu v tydnu (cesky)
+  const dny = ['ne', 'po', 'ut', 'st', 'ct', 'pa', 'so'];
+  const den = dny[date.getDay()];
+  const datum = date.getDate();
+  const mesic = date.getMonth() + 1;
+  const rok = date.getFullYear();
+
+  return `${den} ${datum}.${mesic}.${rok}`;
 }
 
 function formatAppointment(dateStr, timeStr) {
@@ -3487,8 +3473,12 @@ async function sendContactAttemptEmail(reklamaceId, telefon) {
       // Zavřít detail modal
       closeDetail();
 
-      // Zobrazit toast zprávu
-      showToast('Email odeslán zákazníkovi', 'success');
+      // Zobrazit neonový toast (WGSToast pro důležité akce)
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit('Email odeslán zákazníkovi', { titulek: 'WGS' });
+      } else {
+        showToast('Email odeslán zákazníkovi', 'success');
+      }
 
       // DŮLEŽITÉ: SMS text je nyní generován na serveru ze stejných dat jako email
       // To znamená, že změna v emailové šabloně automaticky ovlivní i SMS
@@ -3699,11 +3689,11 @@ async function zobrazVideotekaArchiv(claimId) {
 /**
  * Generuje náhled (thumbnail) z videa pomocí HTML5 video + canvas
  * @param {string} videoPath - Cesta k videu
- * @param {number} sirka - Šířka náhledu
- * @param {number} vyska - Výška náhledu
+ * @param {number} maxSirka - Maximální šířka náhledu
+ * @param {number} maxVyska - Maximální výška náhledu
  * @returns {Promise<string|null>} Data URL obrázku nebo null při chybě
  */
-function generujNahledVidea(videoPath, sirka, vyska) {
+function generujNahledVidea(videoPath, maxSirka, maxVyska) {
   return new Promise((resolve) => {
     const video = document.createElement('video');
     video.crossOrigin = 'anonymous';
@@ -3726,8 +3716,15 @@ function generujNahledVidea(videoPath, sirka, vyska) {
       clearTimeout(timeout);
       try {
         const canvas = document.createElement('canvas');
-        canvas.width = sirka * 2; // 2x rozlišení pro ostrost
-        canvas.height = vyska * 2;
+
+        // FIX: Zachovat pomer stran - nikdy nedeformovat video
+        const videoWidth = video.videoWidth;
+        const videoHeight = video.videoHeight;
+        const scale = Math.min(maxSirka / videoWidth, maxVyska / videoHeight, 1);
+
+        canvas.width = Math.round(videoWidth * scale * 2); // 2x pro ostrost
+        canvas.height = Math.round(videoHeight * scale * 2);
+
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
@@ -3835,10 +3832,18 @@ function vytvorVideoKartu(video, claimId) {
 
   const datum = document.createElement('span');
   datum.style.cssText = `font-size: ${isMobile ? '0.6rem' : '0.7rem'}; color: #666;`;
-  // Na mobilu kratší formát data
-  const datumText = video.uploaded_at ? new Date(video.uploaded_at).toLocaleString('cs-CZ',
-    isMobile ? { day: '2-digit', month: '2-digit' } : { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }
-  ) : '—';
+  // Formatovat datum s dnem v tydnu
+  let datumText = '—';
+  if (video.uploaded_at) {
+    const d = new Date(video.uploaded_at);
+    const dny = ['ne', 'po', 'ut', 'st', 'ct', 'pa', 'so'];
+    const den = dny[d.getDay()];
+    if (isMobile) {
+      datumText = `${den} ${d.getDate()}.${d.getMonth() + 1}.`;
+    } else {
+      datumText = `${den} ${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+    }
+  }
   datum.textContent = datumText;
 
   metaRow.appendChild(velikost);
@@ -3878,15 +3883,40 @@ function vytvorVideoKartu(video, claimId) {
     link.click();
   };
 
-  // Tlačítko Smazat - ikona vždy
+  // Tlačítko Smazat - dva-klikove potvrzeni (obchazi z-index problemy s wgsConfirm)
   const btnSmazat = document.createElement('button');
-  btnSmazat.innerHTML = '&#10005;'; // × křížek
-  btnSmazat.title = 'Smazat video';
-  btnSmazat.style.cssText = isMobile
+  const origBtnStyle = isMobile
     ? ikonaBtnStyle + ' background: #442222; color: #c66; font-size: 0.85rem; font-weight: bold;'
     : 'min-height: 36px; width: 36px; padding: 0; font-size: 1.1rem; font-weight: bold; background: #553333; color: #c66; border: 1px solid #664444; border-radius: 4px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center;';
-  btnSmazat.onclick = async () => {
-    if (!await wgsConfirm(`Opravdu smazat video "${video.video_name}"?`, 'Smazat', 'Zrušit')) return;
+  btnSmazat.innerHTML = '&#10005;'; // × křížek
+  btnSmazat.title = 'Smazat video';
+  btnSmazat.style.cssText = origBtnStyle;
+
+  let potvrzeniTimeout = null;
+  btnSmazat.onclick = async (e) => {
+    e.stopPropagation();
+
+    // Prvni klik - zobrazit potvrzeni
+    if (!btnSmazat.classList.contains('potvrzeni-video')) {
+      btnSmazat.classList.add('potvrzeni-video');
+      btnSmazat.innerHTML = 'Smazat?';
+      btnSmazat.style.cssText = isMobile
+        ? ikonaBtnStyle + ' background: #662222; color: #fff; font-size: 0.7rem; font-weight: bold; min-width: 50px;'
+        : 'min-height: 36px; padding: 0 8px; font-size: 0.75rem; font-weight: bold; background: #662222; color: #fff; border: 1px solid #884444; border-radius: 4px; cursor: pointer; touch-action: manipulation; white-space: nowrap;';
+
+      // Reset po 3s
+      potvrzeniTimeout = setTimeout(() => {
+        btnSmazat.classList.remove('potvrzeni-video');
+        btnSmazat.innerHTML = '&#10005;';
+        btnSmazat.style.cssText = origBtnStyle;
+      }, 3000);
+      return;
+    }
+
+    // Druhy klik - smazat
+    clearTimeout(potvrzeniTimeout);
+    btnSmazat.innerHTML = '...';
+    btnSmazat.disabled = true;
 
     try {
       const formData = new FormData();
@@ -3910,6 +3940,11 @@ function vytvorVideoKartu(video, claimId) {
     } catch (error) {
       logger.error('[Videotéka] Chyba při mazání videa:', error);
       showToast('Chyba při mazání videa: ' + error.message, 'error');
+      // Vratit tlacitko
+      btnSmazat.classList.remove('potvrzeni-video');
+      btnSmazat.innerHTML = '&#10005;';
+      btnSmazat.style.cssText = origBtnStyle;
+      btnSmazat.disabled = false;
     }
   };
 
@@ -4129,9 +4164,14 @@ function otevritNahravaniVidea(claimId, parentOverlay) {
         progressFill.style.width = '100%';
         progressFill.textContent = '100%';
         statusText.textContent = 'Hotovo!';
-        progressFill.style.background = '#2D5016';
+        progressFill.style.background = '#333';
 
-        showToast('Video bylo úspěšně nahráno', 'success');
+        // Neonový toast pro úspěšný upload
+        if (typeof WGSToast !== 'undefined') {
+          WGSToast.zobrazit('Video bylo úspěšně nahráno', { titulek: 'WGS' });
+        } else {
+          showToast('Video bylo úspěšně nahráno', 'success');
+        }
 
         // Zavřít upload modal
         setTimeout(() => {
@@ -4261,9 +4301,14 @@ async function nahratVideoDragDrop(file, claimId, parentOverlay) {
       progressBarInner.style.width = '100%';
       progressBarInner.textContent = '100%';
       progressStatus.textContent = 'Hotovo!';
-      progressBarInner.style.background = '#2D5016';
+      progressBarInner.style.background = '#333';
 
-      showToast('Video bylo úspěšně nahráno', 'success');
+      // Neonový toast pro úspěšný upload
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit('Video bylo úspěšně nahráno', { titulek: 'WGS' });
+      } else {
+        showToast('Video bylo úspěšně nahráno', 'success');
+      }
 
       // Zavřít progress a reload videotéky
       setTimeout(() => {
@@ -4444,8 +4489,9 @@ document.addEventListener('click', (e) => {
   const action = button.getAttribute('data-action');
   const id = button.getAttribute('data-id');
   const url = button.getAttribute('data-url');
+  const pdfPath = button.getAttribute('data-pdf-path');
 
-  logger.log(`[Seznam] Tlačítko kliknuto: ${action}`, { id, url });
+  logger.log(`[Seznam] Tlačítko kliknuto: ${action}`, { id, url, pdfPath });
 
   switch (action) {
     case 'reopenOrder':
@@ -4465,7 +4511,9 @@ document.addEventListener('click', (e) => {
       break;
 
     case 'openPDF':
-      if (url) zobrazPDFModal(url, id);
+      e.preventDefault();
+      e.stopPropagation();
+      if (pdfPath) zobrazPDFModal(pdfPath, id);
       break;
 
     case 'showHistoryPDF':

@@ -131,27 +131,9 @@ try {
         sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'db_blacklist']);
     }
 
-    // 2. Hardcoded blacklist (včetně IPv6 prefix matchingu)
-    $blacklistedIPs = [
-        // IPv6 - Radek domácí
-        '2a00:11b1:10a2:5773:a4d3:7603:899e:d2f3',
-        '2a00:11b1:10a2:5773:',  // IPv6 prefix pro celou síť
-        // IPv4 - Radek domácí
-        '46.135.89.44',
-        '46.135.14.161',
-        // IPv6 - VPN/proxy
-        '2a09:bac2:2756:137::1f:ac',
-        '2a09:bac2:2756:',  // IPv6 prefix
-        // IPv4 - VPN/proxy
-        '104.28.114.10',
-    ];
-
-    // Kontrola blacklistu (přesná shoda nebo prefix match pro IPv6)
-    foreach ($blacklistedIPs as $blacklistedIp) {
-        if ($clientIpForBlacklist === $blacklistedIp || strpos($clientIpForBlacklist, $blacklistedIp) === 0) {
-            sendJsonSuccess('OK', ['ignored' => true, 'reason' => 'hardcoded_blacklist']);
-        }
-    }
+    // 2. Blacklist IP adresy jsou nyní POUZE v databázi (wgs_analytics_ignored_ips)
+    // Pro přidání nové IP použijte Analytics dashboard → Blokace IP
+    // BEZPEČNOST: Žádné hardcoded IP adresy v kódu
 
     // ========================================
     // BLACKLIST REFERRER DOMÉN

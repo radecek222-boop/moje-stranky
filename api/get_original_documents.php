@@ -4,6 +4,8 @@
  *
  * Slouží k zobrazení historie PDF z původní zakázky,
  * když je aktuální zakázka klonem (má original_reklamace_id).
+ *
+ * SECURITY FIX: Přidána IDOR ochrana
  */
 
 require_once __DIR__ . '/../init.php';
@@ -11,8 +13,12 @@ require_once __DIR__ . '/../init.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
-    // Kontrola přihlášení
-    $isLoggedIn = isset($_SESSION['user_id']) || (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true);
+    // Kontrola přihlášení a získání uživatelských dat
+    $userId = $_SESSION['user_id'] ?? null;
+    $userEmail = $_SESSION['user_email'] ?? null;
+    $userRole = strtolower(trim($_SESSION['role'] ?? 'guest'));
+    $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+    $isLoggedIn = $userId || $isAdmin;
 
     if (!$isLoggedIn) {
         http_response_code(401);
@@ -39,11 +45,12 @@ try {
     // Připojení k databázi
     $pdo = getDbConnection();
 
-    // Nejprve najít interní ID zakázky podle reklamace_id
-    // (frontend posílá reklamace_id = workflow ID, ale wgs_documents používá claim_id = interní ID)
+    // Nejprve najít interní ID zakázky podle reklamace_id včetně informace o vlastníkovi
     $stmtClaim = $pdo->prepare("
-        SELECT id FROM wgs_reklamace
-        WHERE reklamace_id = :reklamace_id OR id = :id
+        SELECT r.id, r.created_by, u.email as vlastnik_email
+        FROM wgs_reklamace r
+        LEFT JOIN wgs_users u ON (u.user_id = r.created_by OR u.id = r.created_by)
+        WHERE r.reklamace_id = :reklamace_id OR r.id = :id
         LIMIT 1
     ");
     $stmtClaim->execute([
@@ -57,6 +64,27 @@ try {
         die(json_encode([
             'status' => 'error',
             'message' => 'Zakázka nebyla nalezena'
+        ]));
+    }
+
+    // SECURITY: IDOR ochrana - kontrola oprávnění k přístupu
+    $maOpravneni = false;
+    if ($isAdmin || in_array($userRole, ['admin', 'technik', 'technician'])) {
+        $maOpravneni = true;
+    } elseif (in_array($userRole, ['prodejce', 'user'])) {
+        $vlastnikId = $claim['created_by'] ?? null;
+        $vlastnikEmail = $claim['vlastnik_email'] ?? null;
+        if (($userId && $vlastnikId && (string)$userId === (string)$vlastnikId) ||
+            ($userEmail && $vlastnikEmail && strtolower($userEmail) === strtolower($vlastnikEmail))) {
+            $maOpravneni = true;
+        }
+    }
+
+    if (!$maOpravneni) {
+        http_response_code(403);
+        die(json_encode([
+            'status' => 'error',
+            'message' => 'Nemáte oprávnění k této zakázce'
         ]));
     }
 

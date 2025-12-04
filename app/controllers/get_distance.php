@@ -200,6 +200,10 @@ try {
         throw new Exception('Adresy jsou příliš dlouhé');
     }
 
+    // FIX: Uvolnit session PŘED cURL requesty (zabraňuje session locking)
+    // Session již není potřeba - autentizace a CSRF validace proběhly
+    session_write_close();
+
     // Krok 1: Geocoding - převod obou adres na GPS souřadnice
     $originCoords = geocodeAddress($origin);
     $destCoords = geocodeAddress($destination);

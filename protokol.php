@@ -179,7 +179,7 @@ if ($initialBootstrapData) {
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <!-- Logger Utility (must be loaded first) -->
 <script src="assets/js/logger.min.js"></script>
@@ -209,7 +209,7 @@ if ($initialBootstrapData) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Preload critical CSS -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">
@@ -345,7 +345,12 @@ if ($initialBootstrapData) {
   <!-- Pouze zobrazení podpisu (read-only) -->
   <canvas id="signature-pad" class="signature-display"></canvas>
   <div class="gdpr-clause" style="margin-top: 10px; padding: 8px; font-size: 8px; line-height: 1.4; color: #666; border-top: 1px solid #ddd; text-align: justify;">
-    <span data-lang-cs="Podpisem stvrzuji, že jsem byl(a) seznámen(a) s obsahem." data-lang-en="By signing, I confirm that I have been informed of the content." data-lang-it="Con la firma confermo di essere stato informato del contenuto.">Podpisem stvrzuji, že jsem byl(a) seznámen(a) s obsahem.</span><br><br>
+    <span data-lang-cs="Podpisem stvrzuji, že jsem byl(a) seznámen(a) s obsahem." data-lang-en="By signing, I confirm that I have been informed of the content." data-lang-it="Con la firma confermo di essere stato informato del contenuto.">Podpisem stvrzuji, že jsem byl(a) seznámen(a) s obsahem.</span>
+    <!-- Text prodloužení lhůty - zobrazí se po potvrzení podpisu s checkboxem -->
+    <div class="prodlouzeni-lhuty-hlavni" id="prodlouzeniLhutyHlavni" style="display: none; color: #cc0000; margin-top: 8px;">
+      <span data-lang-cs="K úplnému dořešení reklamace je nezbytné objednat náhradní díly od výrobce. Zákazník je informován, že dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Zákazník tímto výslovně souhlasí s prodloužením lhůty pro vyřízení reklamace nad rámec zákonné lhůty, a to do doby dodání potřebných dílů a provedení opravy. Servis se zavazuje provést opravu a reklamaci uzavřít bez zbytečného odkladu po doručení dílů." data-lang-en="To fully resolve the complaint, it is necessary to order spare parts from the manufacturer. The customer is informed that the delivery time of parts is beyond the control of the service and may be extended (approximately 3-4 weeks, in extreme cases even longer). The customer hereby expressly agrees to extend the complaint resolution deadline beyond the statutory period until the necessary parts are delivered and the repair is completed. The service undertakes to carry out the repair and close the complaint without undue delay after receiving the parts." data-lang-it="Per risolvere completamente il reclamo, è necessario ordinare i pezzi di ricambio dal produttore. Il cliente è informato che i tempi di consegna dei pezzi sono al di fuori del controllo del servizio e possono essere prolungati (circa 3-4 settimane, in casi estremi anche di più). Il cliente accetta espressamente di prorogare il termine per la risoluzione del reclamo oltre il termine legale, fino alla consegna dei pezzi necessari e al completamento della riparazione. Il servizio si impegna a effettuare la riparazione e a chiudere il reclamo senza indebito ritardo dopo la ricezione dei pezzi.">K úplnému dořešení reklamace je nezbytné objednat náhradní díly od výrobce. Zákazník je informován, že dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Zákazník tímto výslovně souhlasí s prodloužením lhůty pro vyřízení reklamace nad rámec zákonné lhůty, a to do doby dodání potřebných dílů a provedení opravy. Servis se zavazuje provést opravu a reklamaci uzavřít bez zbytečného odkladu po doručení dílů.</span>
+    </div>
+    <br><br>
     <strong>Ochrana osobních údajů (GDPR):</strong> Podpisem tohoto protokolu souhlasíte se zpracováním Vašich osobních údajů společností White Glove Service za účelem poskytování servisních služeb, komunikace s výrobcem, prodejcem a dalšími techniky. Vaše údaje budou zpracovávány v souladu s GDPR a budou použity pouze pro účely vyřízení této reklamace. Máte právo na přístup k údajům, jejich opravu nebo výmaz. Více na www.wgs-service.cz/gdpr
   </div>
 
@@ -454,7 +459,19 @@ if ($initialBootstrapData) {
             <td class="tabulka-label" data-lang-cs="Poškození technikem?" data-lang-en="Damage by technician?" data-lang-it="Danno tecnico?">Poškození technikem?</td>
             <td class="tabulka-hodnota" id="souhrn-poskozeni">-</td>
           </tr>
+          <tr>
+            <td colspan="2" class="tabulka-checkbox-row">
+              <label class="checkbox-prodlouzeni-lhuty">
+                <input type="checkbox" id="checkboxProdlouzeniLhuty">
+                <span data-lang-cs="Souhlasím s uvedeným prodloužením lhůty pro vyřízení reklamace" data-lang-en="I agree to the stated extension of the complaint resolution deadline" data-lang-it="Accetto la proroga indicata del termine per la risoluzione del reclamo">Souhlasím s uvedeným prodloužením lhůty pro vyřízení reklamace</span>
+              </label>
+            </td>
+          </tr>
         </table>
+        <!-- Text prodloužení lhůty - zobrazí se při zaškrtnutí checkboxu -->
+        <div class="prodlouzeni-lhuty-text" id="prodlouzeniLhutyText" style="display: none;">
+          <span data-lang-cs="K úplnému dořešení reklamace je nezbytné objednat náhradní díly od výrobce. Zákazník je informován, že dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Zákazník tímto výslovně souhlasí s prodloužením lhůty pro vyřízení reklamace nad rámec zákonné lhůty, a to do doby dodání potřebných dílů a provedení opravy. Servis se zavazuje provést opravu a reklamaci uzavřít bez zbytečného odkladu po doručení dílů." data-lang-en="To fully resolve the complaint, it is necessary to order spare parts from the manufacturer. The customer is informed that the delivery time of parts is beyond the control of the service and may be extended (approximately 3-4 weeks, in extreme cases even longer). The customer hereby expressly agrees to extend the complaint resolution deadline beyond the statutory period until the necessary parts are delivered and the repair is completed. The service undertakes to carry out the repair and close the complaint without undue delay after receiving the parts." data-lang-it="Per risolvere completamente il reclamo, è necessario ordinare i pezzi di ricambio dal produttore. Il cliente è informato che i tempi di consegna dei pezzi sono al di fuori del controllo del servizio e possono essere prolungati (circa 3-4 settimane, in casi estremi anche di più). Il cliente accetta espressamente di prorogare il termine per la risoluzione del reclamo oltre il termine legale, fino alla consegna dei pezzi necessari e al completamento della riparazione. Il servizio si impegna a effettuare la riparazione e a chiudere il reclamo senza indebito ritardo dopo la ricezione dei pezzi.">K úplnému dořešení reklamace je nezbytné objednat náhradní díly od výrobce. Zákazník je informován, že dodací lhůta dílů je mimo kontrolu servisu a může se prodloužit (orientačně 3–4 týdny, v krajním případě i déle). Zákazník tímto výslovně souhlasí s prodloužením lhůty pro vyřízení reklamace nad rámec zákonné lhůty, a to do doby dodání potřebných dílů a provedení opravy. Servis se zavazuje provést opravu a reklamaci uzavřít bez zbytečného odkladu po doručení dílů.</span>
+        </div>
       </div>
 
       <!-- Podpisové pole -->
@@ -490,67 +507,6 @@ if ($initialBootstrapData) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" defer></script>
 
 <script src="assets/js/csrf-auto-inject.min.js" defer></script>
-
-<!-- EMERGENCY DIAGNOSTIC SCRIPT -->
-<script>
-(function() {
-  console.log('🚨 EMERGENCY DIAGNOSTICS STARTING...');
-
-  // FORCE HIDE LOADING OVERLAY IMMEDIATELY
-  window.addEventListener('DOMContentLoaded', function() {
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay) {
-      overlay.classList.remove('show');
-      overlay.style.display = 'none';
-      console.log('[OK] Loading overlay force-hidden');
-    } else {
-      console.error('[ERROR] Loading overlay NOT FOUND');
-    }
-
-    // Check initial data
-    const dataNode = document.getElementById('initialReklamaceData');
-    if (dataNode) {
-      console.log('[OK] initialReklamaceData found');
-      const raw = (dataNode.textContent || dataNode.innerText || '').trim();
-      console.log('[DATA] Raw data length:', raw.length);
-      console.log('[DATA] Raw data preview:', raw.substring(0, 200));
-
-      try {
-        const parsed = JSON.parse(raw);
-        console.log('[OK] JSON parsed successfully');
-        console.log('[DATA] Parsed data:', parsed);
-      } catch (e) {
-        console.error('[ERROR] JSON parse failed:', e);
-      }
-    } else {
-      console.error('[ERROR] initialReklamaceData NOT FOUND');
-    }
-
-    // Check all form fields
-    const fieldIds = ['order-number', 'claim-number', 'customer', 'address', 'phone', 'email', 'brand', 'model', 'technician'];
-    console.log('[CHECK] Checking form fields:');
-    fieldIds.forEach(id => {
-      const field = document.getElementById(id);
-      if (field) {
-        console.log(`  [OK] ${id}: "${field.value}"`);
-      } else {
-        console.error(`  [ERROR] ${id}: NOT FOUND`);
-      }
-    });
-
-    // Check signature pad
-    const canvas = document.getElementById('signature-pad');
-    if (canvas) {
-      console.log('[OK] Signature pad canvas found');
-      console.log('  Canvas size:', canvas.offsetWidth, 'x', canvas.offsetHeight);
-    } else {
-      console.error('[ERROR] Signature pad canvas NOT FOUND');
-    }
-
-    console.log('[DIAGNOSTICS] EMERGENCY DIAGNOSTICS COMPLETE');
-  });
-})();
-</script>
 
 <!-- External JavaScript -->
 <script src="assets/js/protokol-pdf-preview.min.js" defer></script>

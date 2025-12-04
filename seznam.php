@@ -80,7 +80,7 @@ if (!$isLoggedIn && !$isAdmin) {
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- Logger Utility (must be loaded first) -->
 <script src="assets/js/logger.min.js" defer></script>
@@ -1630,9 +1630,12 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </div>
 
 <!-- External JavaScript -->
-<script src="assets/js/seznam.js?v=20251202" defer></script>
+<script src="assets/js/seznam.min.js?v=20251204-collision" defer></script>
 <!-- seznam-delete-patch.js odstraněn - delete button je přímo v showCustomerDetail (Step 52) -->
-<script src="assets/js/pwa-notifications.min.js" defer></script>
+<!-- WGS Toast Notifikace (in-app) -->
+<link rel="stylesheet" href="assets/css/wgs-toast.css">
+<script src="assets/js/wgs-toast.js" defer></script>
+<script src="assets/js/pwa-notifications.js" defer></script>
 
 <!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
 <script>
@@ -1737,9 +1740,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         break;
 
-      // Audio nahravani a poznamky - ODEBRANO, nyni v seznam.js
-      // Tyto akce zpracovava seznam.js: showNotes, startRecording, stopRecording,
-      // deleteAudioPreview, saveNewNote, closeNotesModal, deleteNote
+      case 'deleteNote':
+        e.preventDefault();
+        e.stopPropagation();
+        const noteId = button.getAttribute('data-note-id');
+        const orderId = button.getAttribute('data-order-id');
+        console.log('[EMERGENCY] deleteNote - noteId:', noteId, 'orderId:', orderId, 'funkce dostupna:', typeof deleteNote === 'function');
+        if (noteId && typeof deleteNote === 'function') {
+          console.log('[EMERGENCY] Mazu poznamku ID:', noteId);
+          deleteNote(noteId, orderId);
+        } else {
+          console.error('[EMERGENCY] deleteNote funkce neni dostupna nebo note ID chybi');
+          alert('Chyba: Funkce pro mazání není dostupná. Zkuste obnovit stránku.');
+        }
+        break;
 
       default:
         console.warn(`[EMERGENCY] Neznámá akce: ${action}`);
@@ -1748,6 +1762,97 @@ document.addEventListener('DOMContentLoaded', () => {
 
   console.log('[Seznam] Event delegation V5 nacten - VLASTNI MODAL DIALOG');
 });
+
+// DVA-KLIKOVE POTVRZENI - obchazi vsechny problemy s modaly/overlay
+// 1. klik: zmeni tlacitko na "Smazat?"
+// 2. klik: skutecne smaze
+window.potvrditSmazaniPoznamky = function(btn) {
+  const noteId = btn.getAttribute('data-note-id');
+  const orderId = btn.getAttribute('data-order-id');
+
+  // Uz je v rezimu potvrzeni?
+  if (btn.classList.contains('potvrzeni')) {
+    // Druhy klik - smazat
+    smazatPoznamkuOkamzite(noteId, orderId, btn);
+    return;
+  }
+
+  // Prvni klik - zobrazit potvrzeni
+  btn.classList.add('potvrzeni');
+  btn.textContent = 'Smazat?';
+  btn.style.cssText = 'background:#333 !important; color:#fff !important; padding:2px 8px !important; font-size:11px !important; min-width:50px !important;';
+
+  // Timeout - po 3s vratit zpet
+  setTimeout(function() {
+    if (btn.classList.contains('potvrzeni')) {
+      btn.classList.remove('potvrzeni');
+      btn.textContent = 'x';
+      btn.style.cssText = '';
+    }
+  }, 3000);
+};
+
+// Skutecne smazani bez potvrzeni
+async function smazatPoznamkuOkamzite(noteId, orderId, btn) {
+  console.log('[smazatPoznamku] Mazu poznamku ID:', noteId);
+
+  // Disable tlacitko
+  if (btn) {
+    btn.textContent = '...';
+    btn.disabled = true;
+  }
+
+  try {
+    const csrfToken = await getCSRFToken();
+
+    const params = new URLSearchParams();
+    params.append('action', 'delete');
+    params.append('note_id', noteId);
+    params.append('csrf_token', csrfToken);
+
+    const response = await fetch('/api/notes_api.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params
+    });
+
+    console.log('[smazatPoznamku] Status:', response.status);
+    const data = await response.json();
+    console.log('[smazatPoznamku] Data:', JSON.stringify(data));
+
+    if (data.status === 'success') {
+      // Odstranit poznamku z DOM
+      const noteEl = document.querySelector('.note-item[data-note-id="' + noteId + '"]');
+      if (noteEl) {
+        noteEl.style.opacity = '0';
+        noteEl.style.transition = 'opacity 0.3s';
+        setTimeout(() => noteEl.remove(), 300);
+      }
+      // Obnovit seznam
+      if (typeof loadAll === 'function') await loadAll(window.ACTIVE_FILTER || 'all');
+      if (window.WGSToast) WGSToast.zobrazit('Poznámka smazána');
+    } else {
+      alert('Chyba: ' + (data.error || data.message || 'Neznámá chyba'));
+      // Vratit tlacitko
+      if (btn) {
+        btn.textContent = 'x';
+        btn.disabled = false;
+        btn.classList.remove('potvrzeni');
+        btn.style.cssText = '';
+      }
+    }
+  } catch (e) {
+    console.error('[smazatPoznamku] Error:', e);
+    alert('Chyba: ' + e.message);
+    if (btn) {
+      btn.textContent = 'x';
+      btn.disabled = false;
+      btn.classList.remove('potvrzeni');
+      btn.style.cssText = '';
+    }
+  }
+}
+console.log('[INLINE] potvrditSmazaniPoznamky - verze 20251203-04 (dva-klikove potvrzeni)');
 </script>
 <?php require_once __DIR__ . '/includes/pwa_scripts.php'; ?>
 </body>

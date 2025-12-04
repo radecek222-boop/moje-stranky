@@ -1421,10 +1421,20 @@ async function exportBothPDFs() {
       }
 
       logger.log(`Fotodokumentace přidána (${attachedPhotos.length} fotek)`);
-      showNotif("success", `PDF vytvořeno (protokol + ${attachedPhotos.length} fotek)`);
+      // Neonový toast pro vytvoření PDF
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit(`PDF vytvořeno (protokol + ${attachedPhotos.length} fotek)`, { titulek: 'WGS' });
+      } else {
+        showNotif("success", `PDF vytvořeno (protokol + ${attachedPhotos.length} fotek)`);
+      }
 
     } else {
-      showNotif("success", "Protokol vytvořen (bez fotek)");
+      // Neonový toast pro protokol bez fotek
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit("Protokol vytvořen", { titulek: 'WGS' });
+      } else {
+        showNotif("success", "Protokol vytvořen (bez fotek)");
+      }
     }
 
     // Uložit PDF do databáze (stejně jako při odeslání emailem)
@@ -1894,7 +1904,12 @@ async function potvrditAOdeslat() {
     const result = await response.json();
 
     if (result.status === 'success') {
-      showNotif("success", "Email odeslán zákazníkovi");
+      // Neonový toast pro odeslání emailu
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit('Email odeslán zákazníkovi', { titulek: 'WGS' });
+      } else {
+        showNotif("success", "Email odeslán zákazníkovi");
+      }
       await saveProtokolToDB();
 
       logger.log('[List] Označuji reklamaci jako hotovou...');
@@ -2305,6 +2320,20 @@ document.addEventListener('DOMContentLoaded', () => {
     btnPouzit?.addEventListener('click', () => {
       potvrditPodpis();
     });
+
+    // Checkbox prodloužení lhůty - zobrazit/skrýt text v modalu
+    const checkboxProdlouzeni = document.getElementById('checkboxProdlouzeniLhuty');
+    const textProdlouzeniModal = document.getElementById('prodlouzeniLhutyText');
+
+    if (checkboxProdlouzeni && textProdlouzeniModal) {
+      checkboxProdlouzeni.addEventListener('change', () => {
+        if (checkboxProdlouzeni.checked) {
+          textProdlouzeniModal.style.display = 'block';
+        } else {
+          textProdlouzeniModal.style.display = 'none';
+        }
+      });
+    }
   });
 
   async function otevritZakaznikModal() {
@@ -2335,6 +2364,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Naplnit souhrn daty z formuláře
     naplnitSouhrn();
+
+    // Zobrazit/skrýt checkbox prodloužení lhůty podle typu zákazníka
+    // Checkbox se zobrazí pouze pro fyzické osoby (ne pro IČO)
+    const typZakaznika = document.getElementById('typ-zakaznika')?.value || '';
+    const checkboxRow = document.querySelector('.tabulka-checkbox-row');
+    const checkboxProdlouzeni = document.getElementById('checkboxProdlouzeniLhuty');
+    const textProdlouzeniModal = document.getElementById('prodlouzeniLhutyText');
+
+    if (checkboxRow) {
+      // Zobrazit pouze pro fyzické osoby (hodnota obsahuje "Fyzická" nebo je prázdná/jiná než IČO)
+      const jeFyzickaOsoba = typZakaznika.toLowerCase().includes('fyzická') ||
+                            typZakaznika.toLowerCase().includes('fyzicka') ||
+                            typZakaznika === 'Fyzická osoba';
+
+      if (jeFyzickaOsoba) {
+        checkboxRow.style.display = '';
+        logger.log('[ZakaznikSchvaleni] Checkbox prodloužení lhůty zobrazen (fyzická osoba)');
+      } else {
+        checkboxRow.style.display = 'none';
+        // Resetovat checkbox a skrýt text
+        if (checkboxProdlouzeni) checkboxProdlouzeni.checked = false;
+        if (textProdlouzeniModal) textProdlouzeniModal.style.display = 'none';
+        logger.log('[ZakaznikSchvaleni] Checkbox prodloužení lhůty skryt (IČO:', typZakaznika, ')');
+      }
+    }
 
     // Step 39: Zobrazit modal přes Alpine.js API (scroll lock je v Alpine komponentě)
     if (window.zakaznikSchvaleniModal && window.zakaznikSchvaleniModal.open) {
@@ -2583,7 +2637,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // Nakreslit podpis
       ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
 
-      if (typeof showNotif === 'function') {
+      // Neonový toast pro přenesení podpisu
+      if (typeof WGSToast !== 'undefined') {
+        WGSToast.zobrazit('Podpis byl přenesen do protokolu', { titulek: 'WGS' });
+      } else if (typeof showNotif === 'function') {
         showNotif('success', 'Podpis byl přenesen do protokolu');
       }
     };
@@ -2596,6 +2653,19 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     img.src = signatureDataURL;
+
+    // Zkontrolovat checkbox prodloužení lhůty a zobrazit text v hlavním formuláři
+    const checkboxProdlouzeni = document.getElementById('checkboxProdlouzeniLhuty');
+    const textProdlouzeniHlavni = document.getElementById('prodlouzeniLhutyHlavni');
+
+    if (checkboxProdlouzeni && textProdlouzeniHlavni) {
+      if (checkboxProdlouzeni.checked) {
+        textProdlouzeniHlavni.style.display = 'block';
+        logger.log('[ZakaznikSchvaleni] Text prodloužení lhůty zobrazen v hlavním formuláři');
+      } else {
+        textProdlouzeniHlavni.style.display = 'none';
+      }
+    }
 
     // Zavřít modal
     zavritZakaznikModal();

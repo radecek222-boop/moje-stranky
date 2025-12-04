@@ -50,8 +50,8 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
   <link rel="preload" href="assets/css/login.min.css" as="style">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=optional" rel="stylesheet"></noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="assets/css/styles.min.css">
   <link rel="stylesheet" href="assets/css/login.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
@@ -65,8 +65,6 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
     .admin-checkbox-group { margin-bottom: 1.5rem; padding: 1rem; border-radius: 4px; }
     .admin-checkbox-group input[type="checkbox"] { margin-right: 0.5rem; }
     .admin-checkbox-group label { font-weight: 500; cursor: pointer; }
-    #userLoginFields { display: block; }
-    #adminLoginFields { display: none; }
   </style>
 
   <!-- Analytics Tracker -->
@@ -131,7 +129,7 @@ if (isset($_SESSION['user_id']) && isset($_GET['redirect'])) {
     </div>
 
     <!-- ADMIN LOGIN (ADMIN KEY ONLY) -->
-    <div id="adminLoginFields">
+    <div id="adminLoginFields" class="hidden">
       <div class="form-group">
         <label for="adminKey" data-lang-cs="Administrátorský klíč" data-lang-en="Administrator key" data-lang-it="Chiave amministratore">Administrátorský klíč</label>
         <input type="password" id="adminKey" name="admin_key"

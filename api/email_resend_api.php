@@ -60,14 +60,13 @@ try {
     // Připravit placeholders pro IN clause
     $placeholders = implode(',', array_fill(0, count($emailIds), '?'));
 
-    // Update emailů - změní status na 'pending', resetuje retry_count a vymaže last_error
+    // Update emailů - změní status na 'pending', resetuje attempts a vymaže error_message
     $sql = "
         UPDATE wgs_email_queue
         SET
             status = 'pending',
-            retry_count = 0,
-            last_error = NULL,
-            updated_at = NOW()
+            attempts = 0,
+            error_message = NULL
         WHERE id IN ($placeholders)
     ";
 
