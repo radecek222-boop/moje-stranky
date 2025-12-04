@@ -2013,7 +2013,6 @@ async function showCustomerDetail(id) {
  * @param {string} typ - Typ PDF: 'report' (výchozí) nebo 'historie'
  */
 function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
-  console.log('[DEBUG] zobrazPDFModal called:', { pdfUrl, claimId, typ });
   const titulek = typ === 'historie' ? 'Historie PDF' : 'PDF Report';
 
   // Hlavní overlay - flexbox layout s fixní hlavičkou a patičkou
@@ -4499,11 +4498,7 @@ document.addEventListener('click', (e) => {
     case 'openPDF':
       e.preventDefault();
       e.stopPropagation();
-      const pdfUrl = pdfPath || url;
-      console.log('[DEBUG] openPDF action triggered', { pdfUrl, id });
-      if (pdfUrl) {
-        zobrazPDFModal(pdfUrl, id);
-      }
+      if (pdfPath) zobrazPDFModal(pdfPath, id);
       break;
 
     case 'showHistoryPDF':
