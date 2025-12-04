@@ -268,8 +268,146 @@ async function compressImage(file, maxWidth = 800, maxMB = 0.2) {
 }
 
 async function compressVideo(file, targetMB = 1.5) {
-  // Zjednodušená verze - v produkci použít plnou komprimaci
-  return file;
+  // Pokud je video menší než target, vrátit bez komprese
+  const fileSizeMB = file.size / (1024 * 1024);
+  if (fileSizeMB <= targetMB) {
+    logger.log(`[Video] Video ${fileSizeMB.toFixed(1)} MB je menší než limit ${targetMB} MB - bez komprese`);
+    return file;
+  }
+
+  logger.log(`[Video] Komprimuji video ${fileSizeMB.toFixed(1)} MB na cca ${targetMB} MB...`);
+
+  return new Promise((resolve, reject) => {
+    try {
+      // Vytvořit video element
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.muted = true;
+      video.playsInline = true; // Důležité pro iOS
+
+      video.onloadedmetadata = () => {
+        const width = video.videoWidth;
+        const height = video.videoHeight;
+
+        // Maximální rozlišení 1280x720 pro photocustomer (menší než videotéka)
+        let targetWidth = width;
+        let targetHeight = height;
+
+        if (width > 1280 || height > 720) {
+          const ratio = Math.min(1280 / width, 720 / height);
+          targetWidth = Math.round(width * ratio);
+          targetHeight = Math.round(height * ratio);
+        }
+
+        // Vytvořit canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext('2d');
+
+        // Vytvořit stream z canvasu
+        const stream = canvas.captureStream(24); // 24 FPS pro menší velikost
+
+        // Najít podporovaný MIME typ
+        const mimeTypy = [
+          'video/webm;codecs=vp9',
+          'video/webm;codecs=vp8',
+          'video/webm',
+          'video/mp4'
+        ];
+
+        let vybranyMime = '';
+        for (const mime of mimeTypy) {
+          if (MediaRecorder.isTypeSupported(mime)) {
+            vybranyMime = mime;
+            break;
+          }
+        }
+
+        if (!vybranyMime) {
+          logger.warn('[Video] Žádný video kodek není podporován, vracím originál');
+          resolve(file);
+          return;
+        }
+
+        logger.log(`[Video] Používám kodek: ${vybranyMime}`);
+
+        // MediaRecorder s kompresí - nižší bitrate pro menší soubory
+        const options = {
+          mimeType: vybranyMime,
+          videoBitsPerSecond: 1500000 // 1.5 Mbps - dobrá komprese
+        };
+
+        let mediaRecorder;
+        try {
+          mediaRecorder = new MediaRecorder(stream, options);
+        } catch (e) {
+          // Fallback bez specifikace bitrate
+          mediaRecorder = new MediaRecorder(stream, { mimeType: vybranyMime });
+        }
+
+        const chunks = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) {
+            chunks.push(e.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(chunks, { type: vybranyMime });
+          const compressedSizeMB = blob.size / (1024 * 1024);
+          logger.log(`[Video] Komprese dokončena: ${fileSizeMB.toFixed(1)} MB → ${compressedSizeMB.toFixed(1)} MB`);
+          resolve(blob);
+        };
+
+        mediaRecorder.onerror = (e) => {
+          logger.error('[Video] Chyba při kompresi:', e);
+          resolve(file); // Fallback na originál
+        };
+
+        // Spustit záznam
+        mediaRecorder.start(1000);
+
+        // Přehrát video a renderovat do canvasu
+        video.play().catch(e => {
+          logger.error('[Video] Nelze přehrát video pro kompresi:', e);
+          resolve(file);
+        });
+
+        const renderFrame = () => {
+          if (!video.paused && !video.ended) {
+            ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
+            requestAnimationFrame(renderFrame);
+          } else {
+            // Video skončilo
+            setTimeout(() => mediaRecorder.stop(), 100);
+          }
+        };
+
+        video.onplay = () => {
+          renderFrame();
+        };
+
+        video.onerror = () => {
+          logger.error('[Video] Chyba při načítání videa pro kompresi');
+          resolve(file);
+        };
+      };
+
+      video.onerror = () => {
+        logger.error('[Video] Video soubor nelze načíst');
+        resolve(file);
+      };
+
+      // Načíst video
+      video.src = URL.createObjectURL(file);
+
+    } catch (error) {
+      logger.error('[Video] Chyba komprese:', error);
+      resolve(file); // Fallback na originál
+    }
+  });
 }
 
 async function generateVideoThumbnail(file) {
