@@ -771,6 +771,7 @@ async function showDetail(recordOrId) {
 
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
         <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="closeDetail">Zavřít</button>
       </div>
     `;
