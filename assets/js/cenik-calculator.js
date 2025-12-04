@@ -27,6 +27,27 @@
         vyzvednutiSklad: 10 // Vyzvednutí dílu pro reklamaci na skladě
     };
 
+    // Fallback preklady pro tlacitka (kdyz window.t nefunguje)
+    const TLACITKA = {
+        'btn.back': 'Zpět',
+        'btn.addToProtocol': 'Započítat',
+        'btn.exportPDF': 'Export do PDF',
+        'btn.newCalculation': 'Nová kalkulace'
+    };
+
+    // Helper funkce pro preklad s fallbackem
+    function preklad(klic) {
+        // Zkusit window.t, pokud existuje a vrati neco jineho nez klic
+        if (typeof window.t === 'function') {
+            const vysledek = window.t(klic);
+            if (vysledek && vysledek !== klic) {
+                return vysledek;
+            }
+        }
+        // Fallback na lokalni preklady
+        return TLACITKA[klic] || klic;
+    }
+
     // Stav kalkulačky
     let stav = {
         krok: 1,
@@ -63,6 +84,27 @@
         initAddressAutocomplete();
         initEventListeners();
         aktualizovatProgress();
+        nastavitPevnouVysku();
+    }
+
+    /**
+     * Nastavi pevnou vysku podle prvniho kroku
+     * Ostatni kroky se prizpusobi teto vysce
+     */
+    function nastavitPevnouVysku() {
+        const prvniKrok = document.getElementById('step-address');
+        if (!prvniKrok) return;
+
+        // Pockame az se vse vyrenderuje
+        setTimeout(() => {
+            const vyska = prvniKrok.offsetHeight;
+            if (vyska > 0) {
+                // Nastavit min-height pro vsechny kroky
+                document.querySelectorAll('.wizard-step').forEach(krok => {
+                    krok.style.minHeight = vyska + 'px';
+                });
+            }
+        }, 100);
     }
 
     // Export pro použití z protokolu
@@ -238,9 +280,10 @@
         }
 
         // Skrýt aktuální krok
-        const currentStep = document.querySelector('.wizard-step[style*="display: block"]');
+        const currentStep = document.querySelector('.wizard-step:not(.hidden)');
         if (currentStep) {
             currentStep.classList.add('hidden');
+            currentStep.style.display = 'none';
         }
 
         stav.krok++;
@@ -281,6 +324,7 @@
         const nextStep = document.getElementById(nextStepId);
         if (nextStep) {
             nextStep.classList.remove('hidden');
+            nextStep.style.display = 'flex';
         }
 
         aktualizovatProgress();
@@ -289,9 +333,10 @@
 
     window.previousStep = function() {
         // Skrýt aktuální krok
-        const currentStep = document.querySelector('.wizard-step[style*="display: block"]');
+        const currentStep = document.querySelector('.wizard-step:not(.hidden)');
         if (currentStep) {
             currentStep.classList.add('hidden');
+            currentStep.style.display = 'none';
         }
 
         stav.krok--;
@@ -324,6 +369,7 @@
         const prevStep = document.getElementById(prevStepId);
         if (prevStep) {
             prevStep.classList.remove('hidden');
+            prevStep.style.display = 'flex';
         }
 
         aktualizovatProgress();
@@ -531,15 +577,15 @@
         if (kalkulackaRezim === 'protokol') {
             // Protokol režim - zobrazit Zpět a Započítat
             wizardButtons.innerHTML = `
-                <button class="btn-secondary" data-action="previousStep">${window.t('btn.back')}</button>
-                <button class="btn-primary" data-action="zapocitatDoProtokolu">${window.t('btn.addToProtocol')}</button>
+                <button class="btn-secondary" data-action="previousStep">${preklad('btn.back')}</button>
+                <button class="btn-primary" data-action="zapocitatDoProtokolu">${preklad('btn.addToProtocol')}</button>
             `;
         } else {
             // Standalone režim - zobrazit Zpět, Export PDF a Nová kalkulace
             wizardButtons.innerHTML = `
-                <button class="btn-secondary" data-action="previousStep">${window.t('btn.back')}</button>
-                <button class="btn-primary" data-action="exportovatCenikPDF">${window.t('btn.exportPDF')}</button>
-                <button class="btn-primary" data-action="resetovatKalkulacku">${window.t('btn.newCalculation')}</button>
+                <button class="btn-secondary" data-action="previousStep">${preklad('btn.back')}</button>
+                <button class="btn-primary" data-action="exportovatCenikPDF">${preklad('btn.exportPDF')}</button>
+                <button class="btn-primary" data-action="resetovatKalkulacku">${preklad('btn.newCalculation')}</button>
             `;
         }
     }
@@ -590,10 +636,13 @@
         // Skrýt všechny kroky
         document.querySelectorAll('.wizard-step').forEach(step => {
             step.classList.add('hidden');
+            step.style.display = 'none';
         });
 
         // Zobrazit první krok
-        document.getElementById('step-address').classList.remove('hidden');
+        const firstStep = document.getElementById('step-address');
+        firstStep.classList.remove('hidden');
+        firstStep.style.display = 'flex';
 
         aktualizovatProgress();
         scrollToTop();

@@ -50,6 +50,8 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css">
+  <!-- Oprava kalkulacky - musi byt posledni -->
+  <link rel="stylesheet" href="assets/css/cenik-wizard-fix.css">
 
   <!-- Analytics Tracker -->
   <?php require_once __DIR__ . '/includes/analytics_tracker.php'; ?>
@@ -106,7 +108,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
       </div>
 
       <!-- KROK 1: Zadání adresy -->
-      <div class="wizard-step" id="step-address" style="display: block;">
+      <div class="wizard-step" id="step-address">
         <h3 class="step-title" data-lang-cs="1. Zadejte adresu zákazníka" data-lang-en="1. Enter Customer Address" data-lang-it="1. Inserisci l'Indirizzo del Cliente">1. Zadejte adresu zákazníka</h3>
         <p class="step-desc" data-lang-cs="Pro výpočet dopravného potřebujeme znát vaši adresu." data-lang-en="We need your address to calculate the transportation cost." data-lang-it="Abbiamo bisogno del tuo indirizzo per calcolare il costo del trasporto.">Pro výpočet dopravného potřebujeme znát vaši adresu.</p>
 
@@ -157,7 +159,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
       </div>
 
       <!-- KROK 2: Typ servisu -->
-      <div class="wizard-step" id="step-service-type" style="display: none;">
+      <div class="wizard-step hidden" id="step-service-type">
         <h3 class="step-title" data-lang-cs="2. Jaký typ servisu potřebujete?" data-lang-en="2. What type of service do you need?" data-lang-it="2. Che tipo di servizio ti serve?">2. Jaký typ servisu potřebujete?</h3>
         <p class="step-desc" data-lang-cs="Vyberte, co u vás potřebujeme udělat." data-lang-en="Select what we need to do for you." data-lang-it="Seleziona cosa dobbiamo fare per te.">Vyberte, co u vás potřebujeme udělat.</p>
 
@@ -206,7 +208,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
       </div>
 
       <!-- KROK 3A: Čalounické práce - počet dílů -->
-      <div class="wizard-step" id="step-upholstery" style="display: none;">
+      <div class="wizard-step hidden" id="step-upholstery">
         <h3 class="step-title" data-lang-cs="3. Kolik dílů potřebuje přečalounit?" data-lang-en="3. How many parts need reupholstering?" data-lang-it="3. Quante parti necessitano di ritappezzatura?">3. Kolik dílů potřebuje přečalounit?</h3>
         <p class="step-desc" data-lang-cs="Jeden díl = sedák NEBO opěrka NEBO područka NEBO panel. První díl stojí 205€, každý další 70€." data-lang-en="One part = seat OR backrest OR armrest OR panel. First part costs 205€, each additional 70€." data-lang-it="Una parte = sedile O schienale O bracciolo O pannello. La prima parte costa 205€, ogni aggiuntiva 70€.">Jeden díl = sedák NEBO opěrka NEBO područka NEBO panel. První díl stojí 205€, každý další 70€.</p>
 
@@ -260,7 +262,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
       </div>
 
       <!-- KROK 3B: Mechanické práce -->
-      <div class="wizard-step" id="step-mechanics" style="display: none;">
+      <div class="wizard-step hidden" id="step-mechanics">
         <h3 class="step-title" data-lang-cs="3. Mechanické části" data-lang-en="3. Mechanical Parts" data-lang-it="3. Parti Meccaniche">3. Mechanické části</h3>
         <p class="step-desc" data-lang-cs="Vyberte, které mechanické části potřebují opravu." data-lang-en="Select which mechanical parts need repair." data-lang-it="Seleziona quali parti meccaniche necessitano di riparazione.">Vyberte, které mechanické části potřebují opravu.</p>
 
@@ -293,7 +295,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
       </div>
 
       <!-- KROK 4: Další parametry -->
-      <div class="wizard-step" id="step-extras" style="display: none;">
+      <div class="wizard-step hidden" id="step-extras">
         <h3 class="step-title" data-lang-cs="4. Další parametry" data-lang-en="4. Additional Parameters" data-lang-it="4. Parametri Aggiuntivi">4. Další parametry</h3>
         <p class="step-desc" data-lang-cs="Poslední detaily pro přesný výpočet ceny." data-lang-en="Last details for accurate price calculation." data-lang-it="Ultimi dettagli per un calcolo preciso del prezzo.">Poslední detaily pro přesný výpočet ceny.</p>
 
@@ -324,7 +326,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
       </div>
 
       <!-- KROK 5: Cenový souhrn -->
-      <div class="wizard-step" id="step-summary" style="display: none;">
+      <div class="wizard-step hidden" id="step-summary">
         <h3 class="step-title" data-lang-cs="Orientační cena servisu" data-lang-en="Estimated Service Price" data-lang-it="Prezzo Stimato del Servizio">Orientační cena servisu</h3>
 
         <div class="price-summary-box">
@@ -526,6 +528,9 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
 <script src="assets/js/utils.min.js" defer></script>
 <script src="assets/js/logger.min.js" defer></script>
 <script src="assets/js/wgs-map.min.js" defer></script>
+
+<!-- Language Switcher (definuje window.t funkci) -->
+<script src="assets/js/language-switcher.min.js"></script>
 
 <!-- Translations for pricing page -->
 <script src="assets/js/wgs-translations-cenik.min.js"></script>
