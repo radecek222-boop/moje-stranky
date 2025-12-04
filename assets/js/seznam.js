@@ -666,6 +666,7 @@ const ModalManager = {
   createHeader: (title, subtitle) => {
     return `
       <div class="modal-header">
+        <button class="modal-close-btn" data-action="closeDetail" aria-label="Zavřít" title="Zavřít">×</button>
         <h2 class="modal-title">${title}</h2>
         ${subtitle ? `<p class="modal-subtitle">${subtitle}</p>` : ''}
       </div>

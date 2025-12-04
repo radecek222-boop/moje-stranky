@@ -438,6 +438,40 @@ body.modal-open {
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
+  position: relative !important; /* Pro absolutní pozici close tlačítka */
+}
+
+/* Tlačítko zavřít (X) v hlavičce - vždy viditelné */
+#detailOverlay .modal-close-btn {
+  position: absolute !important;
+  top: 0.75rem !important;
+  right: 0.75rem !important;
+  width: 36px !important;
+  height: 36px !important;
+  border: none !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #cccccc !important;
+  font-size: 1.5rem !important;
+  font-weight: 300 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+  z-index: 10 !important;
+  padding: 0 !important;
+}
+
+#detailOverlay .modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+#detailOverlay .modal-close-btn:active {
+  background: rgba(255, 255, 255, 0.3) !important;
+  transform: scale(0.95) !important;
 }
 
 #detailOverlay .modal-title {
@@ -456,9 +490,9 @@ body.modal-open {
   width: 100% !important;
 }
 
-/* Tlačítka v hlavičce - centrované */
+/* Tlačítka v hlavičce - centrované (kromě close button) */
 #detailOverlay .modal-header .btn,
-#detailOverlay .modal-header button {
+#detailOverlay .modal-header button:not(.modal-close-btn) {
   margin: 0 auto !important;
 }
 
