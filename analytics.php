@@ -94,12 +94,12 @@ try {
     $zdroje = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {}
 
-// 4. Lokace (město jako primární)
+// 4. Lokace (město jako primární, fallback na zemi)
 $lokace = [];
 try {
     $stmt = $pdo->query("
         SELECT
-            COALESCE(NULLIF(city, ''), 'Neznama lokace') as mesto,
+            city as mesto,
             COALESCE(country_code, 'CZ') as zeme,
             COUNT(*) as navstevy
         FROM wgs_pageviews
@@ -746,7 +746,14 @@ $zemeNazvy = [
                 <?php if (!empty($lokace)): ?>
                 <?php foreach ($lokace as $lok): ?>
                 <div style="display: flex; justify-content: space-between; padding: 0.4rem 0; font-size: 0.8rem; border-bottom: 1px solid #f5f5f5;">
-                    <span><?= htmlspecialchars($lok['mesto']) ?> <span style="color: #aaa; font-size: 0.7rem;"><?= $zemeNazvy[$lok['zeme']] ?? $lok['zeme'] ?></span></span>
+                    <span><?php
+                        $zemeNazev = $zemeNazvy[$lok['zeme']] ?? $lok['zeme'];
+                        if (!empty($lok['mesto'])) {
+                            echo htmlspecialchars($lok['mesto']) . ' <span style="color: #aaa; font-size: 0.7rem;">' . $zemeNazev . '</span>';
+                        } else {
+                            echo $zemeNazev;
+                        }
+                    ?></span>
                     <span style="color: #666;"><?= $lok['navstevy'] ?></span>
                 </div>
                 <?php endforeach; ?>
