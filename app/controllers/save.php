@@ -824,7 +824,7 @@ try {
             // Nacist email sablonu pro novou reklamaci
             $stmtNotif = $pdo->prepare("
                 SELECT * FROM wgs_notifications
-                WHERE trigger_event = 'complaint_created' AND type = 'email' AND active = 1
+                WHERE id = 'order_created' AND type = 'email' AND active = 1
                 LIMIT 1
             ");
             $stmtNotif->execute();
@@ -834,16 +834,22 @@ try {
                 require_once __DIR__ . '/../../includes/EmailQueue.php';
 
                 // Pripravit data pro sablonu
+                $createdBy = $_SESSION['user_name'] ?? 'Online formulář';
+
                 $notifSubject = str_replace([
                     '{{customer_name}}',
                     '{{order_id}}',
                     '{{product}}',
-                    '{{date}}'
+                    '{{date}}',
+                    '{{created_at}}',
+                    '{{created_by}}'
                 ], [
                     $jmeno,
                     $identifierForClient,
                     $model ?: 'Nabytek Natuzzi',
-                    date('d.m.Y')
+                    date('d.m.Y'),
+                    date('d.m.Y H:i'),
+                    $createdBy
                 ], $notifSablona['subject']);
 
                 $notifBody = str_replace([
@@ -851,6 +857,8 @@ try {
                     '{{order_id}}',
                     '{{product}}',
                     '{{date}}',
+                    '{{created_at}}',
+                    '{{created_by}}',
                     '{{address}}',
                     '{{description}}',
                     '{{customer_email}}',
@@ -861,7 +869,9 @@ try {
                     $jmeno,
                     $identifierForClient,
                     $model ?: 'Nabytek Natuzzi',
+                    date('d.m.Y'),
                     date('d.m.Y H:i'),
+                    $createdBy,
                     $adresa ?: 'Neuvedena',
                     $popisProblemu,
                     $email,
