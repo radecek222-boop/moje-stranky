@@ -38,7 +38,7 @@
     -webkit-backdrop-filter: blur(8px) !important;
 }
 
-/* VÝJIMKA: Calculator modal overlay má vlastní styling v protokol-calculator-modal.css */
+/* VÝJIMKA: Calculator modal má vlastní světlý design */
 
 /* ============================================
    MODAL CONTAINERY - Tmavé boxy
@@ -71,8 +71,6 @@
                 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
 }
 
-/* VÝJIMKA: Calculator modal container má vlastní světlý styling v protokol-calculator-modal.css */
-
 /* ============================================
    MODAL HLAVIČKY - Header s titulkem
    ============================================ */
@@ -89,23 +87,6 @@
 
     /* Jemný stín */
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3) !important;
-}
-
-/* VÝJIMKA: Calculator modal header má vlastní styling v protokol-calculator-modal.css */
-
-/* Calculator modal header - layout fix */
-.calculator-modal-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 20px !important;
-}
-
-.calculator-modal-header h3 {
-    margin: 0 !important;
-    font-size: 1.5rem !important;
-    font-weight: 600 !important;
-    color: #ffffff !important;
 }
 
 /* ============================================
@@ -127,8 +108,6 @@
     /* Jemný text-shadow */
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
 }
-
-/* VÝJIMKA: Calculator modal titulky mají vlastní styling */
 
 /* ============================================
    MODAL ZAVÍRACÍ TLAČÍTKA - × Close buttons
@@ -158,132 +137,6 @@ button[onclick*="close"] {
     background: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* VÝJIMKA: Calculator modal close button má vlastní styling v protokol-calculator-modal.css */
-
-/* ============================================
-   CALCULATOR MODAL - VÝJIMKA Z TMAVÉHO THEME
-   Kalkulačka potřebuje světlé pozadí pro čitelnost
-   ============================================ */
-
-/* Calculator modal overlay */
-.calculator-modal-overlay {
-    background: rgba(0, 0, 0, 0.7) !important;
-}
-
-/* Calculator modal container */
-.calculator-modal-container {
-    background: #ffffff !important;
-    border: none !important;
-    border-radius: 12px !important;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
-}
-
-/* Calculator modal header - tmavošedý gradient */
-.calculator-modal-header {
-    background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%) !important;
-    color: #ffffff !important;
-    padding: 20px !important;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    border-bottom: none !important;
-    box-shadow: none !important;
-}
-
-.calculator-modal-header h3 {
-    margin: 0 !important;
-    font-size: 1.5rem !important;
-    font-weight: 600 !important;
-    color: #ffffff !important;
-}
-
-/* Calculator modal close button */
-.calculator-modal-close {
-    background: transparent !important;
-    border: none !important;
-    color: #ffffff !important;
-    font-size: 2rem !important;
-    line-height: 1 !important;
-    cursor: pointer !important;
-    width: 44px !important;
-    height: 44px !important;
-    min-width: 44px !important;
-    min-height: 44px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 50% !important;
-    transition: background 0.3s !important;
-}
-
-.calculator-modal-close:hover {
-    background: rgba(255, 255, 255, 0.2) !important;
-}
-
-/* Calculator modal body */
-.calculator-modal-body {
-    background: #f5f5f5 !important;
-    color: #333333 !important;
-    overflow-y: auto !important;
-    max-height: calc(90vh - 80px) !important;
-    padding: 20px !important;
-}
-
-/* Opravit barvy textu v kalkulačce */
-.calculator-modal-body p,
-.calculator-modal-body label,
-.calculator-modal-body span,
-.calculator-modal-body div {
-    color: inherit !important;
-}
-
-.calculator-modal-body h1,
-.calculator-modal-body h2,
-.calculator-modal-body h3,
-.calculator-modal-body h4 {
-    color: #333333 !important;
-}
-
-.calculator-modal-body input,
-.calculator-modal-body select,
-.calculator-modal-body textarea {
-    color: #333333 !important;
-    background: #ffffff !important;
-    border: 2px solid #ddd !important;
-}
-
-.calculator-modal-body input:focus,
-.calculator-modal-body select:focus,
-.calculator-modal-body textarea:focus {
-    border-color: #4a4a4a !important;
-    outline: none !important;
-}
-
-/* Calculator modal buttons - přepsat tmavý styl */
-.calculator-modal-body button,
-.calculator-modal-body .btn-primary,
-.calculator-modal-body .btn-secondary {
-    background: #4a4a4a !important;
-    color: #ffffff !important;
-    border: none !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
-}
-
-.calculator-modal-body button:hover,
-.calculator-modal-body .btn-primary:hover {
-    background: #2a2a2a !important;
-}
-
-.calculator-modal-body .btn-secondary {
-    background: #ffffff !important;
-    color: #4a4a4a !important;
-    border: 2px solid #4a4a4a !important;
-}
-
-.calculator-modal-body .btn-secondary:hover {
-    background: #f4f4f4 !important;
-}
-
 /* ============================================
    MODAL TĚLA - Body content
    ============================================ */
@@ -295,8 +148,6 @@ button[onclick*="close"] {
     /* Barva textu */
     color: #cccccc !important;
 }
-
-/* VÝJIMKA: Calculator modal body má vlastní světlý styling */
 
 /* ============================================
    TEXTY A ODSTAVCE
@@ -527,22 +378,6 @@ button.button:hover {
 /* ============================================
    SPECIFICKÉ MODALY - Speciální případy
    ============================================ */
-
-/* Protokol Calculator Modal - specifické prvky */
-.calculator-item-row,
-.calculator-summary-row {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-}
-
-.calculator-item-label,
-.calculator-item-code {
-    color: #cccccc !important;
-}
-
-.calculator-item-price,
-.calculator-total-price {
-    color: #ffffff !important;
-}
 
 /* QR Modal (PSA kalkulátor) */
 #qrModal .qr-code-container {
