@@ -31,6 +31,10 @@ if (!function_exists('loadAdminNavigation')) {
                 'href' => 'aktuality.php',
                 'header_label' => 'AKTUALITY',
             ],
+            'psa_kalkulator' => [
+                'href' => 'psa-kalkulator.php',
+                'header_label' => 'PSA MZDY',
+            ],
             'dashboard' => [
                 'href' => 'admin.php',
                 'header_label' => 'ADMIN',
