@@ -82,6 +82,13 @@ function handleRememberMeLogin(): void
         $_SESSION['login_time'] = time();
         $_SESSION['login_method'] = 'remember_me';
 
+        // Aktualizovat posledni prihlaseni
+        require_once __DIR__ . '/db_metadata.php';
+        if (db_table_has_column($pdo, 'wgs_users', 'last_login')) {
+            $updateLogin = $pdo->prepare('UPDATE wgs_users SET last_login = NOW() WHERE user_id = :user_id');
+            $updateLogin->execute([':user_id' => $user['user_id']]);
+        }
+
         // Audit log
         require_once __DIR__ . '/audit_logger.php';
         auditLog('auto_login_remember_me', [
