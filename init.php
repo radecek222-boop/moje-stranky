@@ -171,8 +171,26 @@ if (session_status() === PHP_SESSION_NONE) {
             if ((time() - $posledniDbAktualizace) >= 60) {
                 try {
                     $pdo = getDbConnection();
+                    $userId = $_SESSION['user_id'];
+
+                    // Pokusit se aktualizovat existujiciho uzivatele
                     $stmt = $pdo->prepare("UPDATE wgs_users SET last_activity = NOW() WHERE user_id = :user_id");
-                    $stmt->execute([':user_id' => $_SESSION['user_id']]);
+                    $stmt->execute([':user_id' => $userId]);
+
+                    // Pokud se nic neaktualizovalo (admin bez zaznamu v DB), vytvorit zaznam
+                    if ($stmt->rowCount() === 0 && isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
+                        $stmt = $pdo->prepare("
+                            INSERT INTO wgs_users (user_id, name, email, role, is_active, last_activity, created_at)
+                            VALUES (:user_id, :name, :email, 'admin', 1, NOW(), NOW())
+                            ON DUPLICATE KEY UPDATE last_activity = NOW()
+                        ");
+                        $stmt->execute([
+                            ':user_id' => $userId,
+                            ':name' => $_SESSION['user_name'] ?? 'Administrator',
+                            ':email' => $_SESSION['user_email'] ?? 'admin@wgs-service.cz'
+                        ]);
+                    }
+
                     $_SESSION['last_db_activity_update'] = time();
                 } catch (Exception $e) {
                     // Ignorovat chyby - nechceme blokovat požadavek kvůli online sledování
