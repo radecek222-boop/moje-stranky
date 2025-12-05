@@ -152,7 +152,8 @@ AFTER last_login;</pre>";
         if (isset($_GET['execute']) && $_GET['execute'] === '1') {
             echo "<div class='info'><strong>SPOUSTIM MIGRACI...</strong></div>";
 
-            $pdo->beginTransaction();
+            // POZNAMKA: ALTER TABLE v MySQL automaticky commituje transakci
+            // Proto nepouzivame beginTransaction/commit pro DDL prikazy
 
             try {
                 // Pridat sloupec last_activity
@@ -161,12 +162,14 @@ AFTER last_login;</pre>";
                     ADD COLUMN last_activity DATETIME NULL DEFAULT NULL
                     COMMENT 'Cas posledni aktivity uzivatele (aktualizuje se automaticky)'
                 ");
+                echo "<div class='info'>Sloupec <code>last_activity</code> pridan.</div>";
 
                 // Pridat index pro rychle vyhledavani online uzivatelu
                 $pdo->exec("
                     ALTER TABLE wgs_users
                     ADD INDEX idx_last_activity (last_activity)
                 ");
+                echo "<div class='info'>Index <code>idx_last_activity</code> pridan.</div>";
 
                 // Nastavit last_activity pro vsechny uzivatele kteri maji last_login
                 $pdo->exec("
@@ -174,8 +177,7 @@ AFTER last_login;</pre>";
                     SET last_activity = last_login
                     WHERE last_login IS NOT NULL
                 ");
-
-                $pdo->commit();
+                echo "<div class='info'>Pocatecni hodnoty nastaveny z <code>last_login</code>.</div>";
 
                 echo "<div class='success'>";
                 echo "<strong>MIGRACE USPESNE DOKONCENA!</strong><br><br>";
@@ -201,7 +203,6 @@ AFTER last_login;</pre>";
                 echo "</pre>";
 
             } catch (PDOException $e) {
-                $pdo->rollBack();
                 echo "<div class='error'>";
                 echo "<strong>CHYBA PRI MIGRACI:</strong><br>";
                 echo htmlspecialchars($e->getMessage());
