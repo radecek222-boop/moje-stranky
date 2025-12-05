@@ -51,6 +51,26 @@ try {
 
     echo "<h1>Zpetne doplneni emailu ke klicum</h1>";
 
+    // Kontrola existence tabulek
+    $maAuditLog = false;
+    $maEmailQueue = false;
+
+    try {
+        $pdo->query("SELECT 1 FROM wgs_audit_log LIMIT 1");
+        $maAuditLog = true;
+    } catch (PDOException $e) {}
+
+    try {
+        $pdo->query("SELECT 1 FROM wgs_email_queue LIMIT 1");
+        $maEmailQueue = true;
+    } catch (PDOException $e) {}
+
+    echo "<div class='info'>";
+    echo "<strong>Dostupne zdroje dat:</strong><br>";
+    echo "- wgs_email_queue: " . ($maEmailQueue ? "ANO" : "NE") . "<br>";
+    echo "- wgs_audit_log: " . ($maAuditLog ? "ANO" : "NE");
+    echo "</div>";
+
     // 1. Nacist vsechny klice bez sent_to_email
     $stmt = $pdo->query("
         SELECT key_code, key_type, created_at
@@ -69,35 +89,84 @@ try {
         exit;
     }
 
-    // 2. Pro kazdy klic hledat v email_queue
+    // 2. Pro kazdy klic hledat v dostupnych zdrojich
     $nalezeno = [];
     $nenalezeno = [];
 
     foreach ($kliceBezEmailu as $klic) {
         $keyCode = $klic['key_code'];
+        $nalezenEmail = null;
+        $nalezenCas = null;
+        $zdroj = null;
 
-        // Hledat v email_queue - klic muze byt v subject nebo body
-        $stmt = $pdo->prepare("
-            SELECT recipient_email, sent_at, created_at
-            FROM wgs_email_queue
-            WHERE (body LIKE :klic1 OR subject LIKE :klic2)
-            AND status = 'sent'
-            ORDER BY sent_at DESC
-            LIMIT 10
-        ");
-        $stmt->execute([
-            ':klic1' => '%' . $keyCode . '%',
-            ':klic2' => '%' . $keyCode . '%'
-        ]);
-        $emaily = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // 2a. Hledat v email_queue
+        if ($maEmailQueue && !$nalezenEmail) {
+            $stmt = $pdo->prepare("
+                SELECT recipient_email, sent_at, created_at
+                FROM wgs_email_queue
+                WHERE (body LIKE :klic1 OR subject LIKE :klic2)
+                AND status = 'sent'
+                ORDER BY sent_at DESC
+                LIMIT 10
+            ");
+            $stmt->execute([
+                ':klic1' => '%' . $keyCode . '%',
+                ':klic2' => '%' . $keyCode . '%'
+            ]);
+            $emaily = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if (count($emaily) > 0) {
-            // Spojit vsechny unikatni emaily
-            $unikatniEmaily = array_unique(array_column($emaily, 'recipient_email'));
+            if (count($emaily) > 0) {
+                $unikatniEmaily = array_unique(array_column($emaily, 'recipient_email'));
+                $nalezenEmail = implode(', ', $unikatniEmaily);
+                $nalezenCas = $emaily[0]['sent_at'] ?? $emaily[0]['created_at'];
+                $zdroj = 'email_queue';
+            }
+        }
+
+        // 2b. Hledat v audit_log
+        if ($maAuditLog && !$nalezenEmail) {
+            $stmt = $pdo->prepare("
+                SELECT details, created_at
+                FROM wgs_audit_log
+                WHERE (details LIKE :klic1 OR action LIKE :klic2)
+                ORDER BY created_at DESC
+                LIMIT 10
+            ");
+            $stmt->execute([
+                ':klic1' => '%' . $keyCode . '%',
+                ':klic2' => '%invitation%'
+            ]);
+            $auditZaznamy = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($auditZaznamy as $zaznam) {
+                // Zkusit najit email v details (JSON nebo text)
+                $details = $zaznam['details'];
+                if (strpos($details, $keyCode) !== false) {
+                    // Zkusit extrahovat email z JSON
+                    $decoded = json_decode($details, true);
+                    if ($decoded && isset($decoded['email'])) {
+                        $nalezenEmail = $decoded['email'];
+                        $nalezenCas = $zaznam['created_at'];
+                        $zdroj = 'audit_log';
+                        break;
+                    }
+                    // Zkusit regex pro email
+                    if (preg_match('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', $details, $matches)) {
+                        $nalezenEmail = $matches[0];
+                        $nalezenCas = $zaznam['created_at'];
+                        $zdroj = 'audit_log';
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ($nalezenEmail) {
             $nalezeno[$keyCode] = [
-                'emaily' => implode(', ', $unikatniEmaily),
-                'sent_at' => $emaily[0]['sent_at'] ?? $emaily[0]['created_at'],
-                'key_type' => $klic['key_type']
+                'emaily' => $nalezenEmail,
+                'sent_at' => $nalezenCas,
+                'key_type' => $klic['key_type'],
+                'zdroj' => $zdroj
             ];
         } else {
             $nenalezeno[] = $klic;
@@ -109,13 +178,14 @@ try {
 
     if (count($nalezeno) > 0) {
         echo "<table>";
-        echo "<tr><th>Typ</th><th>Klic</th><th>Nalezeny email</th><th>Odeslano</th></tr>";
+        echo "<tr><th>Typ</th><th>Klic</th><th>Nalezeny email</th><th>Odeslano</th><th>Zdroj</th></tr>";
         foreach ($nalezeno as $keyCode => $data) {
             echo "<tr class='found'>";
             echo "<td>" . htmlspecialchars(strtoupper($data['key_type'])) . "</td>";
             echo "<td><code>" . htmlspecialchars($keyCode) . "</code></td>";
             echo "<td>" . htmlspecialchars($data['emaily']) . "</td>";
             echo "<td>" . htmlspecialchars($data['sent_at'] ?? '-') . "</td>";
+            echo "<td>" . htmlspecialchars($data['zdroj'] ?? '-') . "</td>";
             echo "</tr>";
         }
         echo "</table>";
