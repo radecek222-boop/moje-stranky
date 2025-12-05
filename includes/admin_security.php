@@ -1288,6 +1288,15 @@ async function odeslatPozvanky() {
     const statusEl = document.getElementById('statusPozvanky');
     const btn = document.getElementById('btnOdeslatPozvanky');
 
+    // Validace typu
+    if (!typ) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = '#f8d7da';
+        statusEl.style.color = '#721c24';
+        statusEl.textContent = 'Vyberte typ pozvanky (Technik nebo Prodejce)';
+        return;
+    }
+
     // Parsovat emaily
     const emaily = emailyText.split('\\n')
         .map(e => e.trim())
