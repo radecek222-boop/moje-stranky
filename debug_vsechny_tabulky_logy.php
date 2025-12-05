@@ -198,7 +198,7 @@ try {
     echo "<h2>6. Posledni registrace uzivatelu</h2>";
     if (in_array('wgs_users', $tabulky)) {
         $stmt = $pdo->query("
-            SELECT user_id, name, email, role, registration_key, created_at
+            SELECT user_id, name, email, role, registration_key_code, created_at
             FROM wgs_users
             ORDER BY created_at DESC
             LIMIT 20
@@ -210,7 +210,7 @@ try {
             foreach ($users as $u) {
                 $rowClass = '';
                 foreach ($klice as $k) {
-                    if ($u['registration_key'] === $k) {
+                    if ($u['registration_key_code'] === $k) {
                         $rowClass = 'found';
                         break;
                     }
@@ -220,7 +220,7 @@ try {
                 echo "<td>" . htmlspecialchars($u['name'] ?? '') . "</td>";
                 echo "<td>" . htmlspecialchars($u['email'] ?? '') . "</td>";
                 echo "<td>" . htmlspecialchars($u['role'] ?? '') . "</td>";
-                echo "<td><code>" . htmlspecialchars($u['registration_key'] ?? '-') . "</code></td>";
+                echo "<td><code>" . htmlspecialchars($u['registration_key_code'] ?? '-') . "</code></td>";
                 echo "<td>" . htmlspecialchars($u['created_at'] ?? '') . "</td>";
                 echo "</tr>";
             }
