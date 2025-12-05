@@ -1080,6 +1080,19 @@ function handleSendInvitations(PDO $pdo, array $payload): void
 
             if ($result['success']) {
                 $odeslanoPocet++;
+
+                // HISTORIE: Ulozit zaznam o odeslane pozvance do email_queue
+                $stmtLog = $pdo->prepare("
+                    INSERT INTO wgs_email_queue
+                    (notification_id, recipient_email, subject, body, status, sent_at, created_at, scheduled_at)
+                    VALUES (:notif_id, :email, :subject, :body, 'sent', NOW(), NOW(), NOW())
+                ");
+                $stmtLog->execute([
+                    ':notif_id' => 'invitation_' . $typ,
+                    ':email' => $email,
+                    ':subject' => $predmet,
+                    ':body' => $telo
+                ]);
             } else {
                 $chyby[] = $email . ': ' . ($result['error'] ?? 'Neznama chyba');
                 error_log("Chyba odeslani pozvanky na {$email}: " . ($result['error'] ?? 'Neznama chyba'));
