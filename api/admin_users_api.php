@@ -108,26 +108,49 @@ try {
         ]);
 
     } elseif ($method === 'GET' && $action === 'online') {
-        // Online uživatelé (aktivní tokeny za posledních 15 minut)
-        // POZNÁMKA: wgs_sessions tabulka byla odstraněna, používáme wgs_tokens
+        // Online uživatelé (aktivní za posledních 5 minut)
+        // FIX: Používáme wgs_users.last_activity místo wgs_tokens.created_at
+        // last_activity se aktualizuje v init.php při každém requestu (throttle 60s)
         try {
-            $stmt = $pdo->query("
-                SELECT DISTINCT
-                    u.user_id as id,
-                    u.name,
-                    u.email,
-                    u.role,
-                    MAX(t.created_at) as last_activity
-                FROM wgs_tokens t
-                JOIN wgs_users u ON t.user_id = u.user_id
-                WHERE t.expires_at > NOW()
-                AND t.created_at >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)
-                GROUP BY u.user_id, u.name, u.email, u.role
-                ORDER BY last_activity DESC
-            ");
-            $onlineUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // Nejdřív zkontrolovat zda sloupec last_activity existuje
+            $checkCol = $pdo->query("SHOW COLUMNS FROM wgs_users LIKE 'last_activity'");
+            $maSloupec = $checkCol->rowCount() > 0;
+
+            if ($maSloupec) {
+                // Nový způsob - používá last_activity z wgs_users
+                $stmt = $pdo->query("
+                    SELECT
+                        u.user_id as id,
+                        u.name,
+                        u.email,
+                        u.role,
+                        u.last_activity
+                    FROM wgs_users u
+                    WHERE u.last_activity IS NOT NULL
+                    AND u.last_activity >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+                    ORDER BY u.last_activity DESC
+                ");
+                $onlineUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } else {
+                // Fallback - starý způsob přes tokeny (pokud migrace ještě neproběhla)
+                $stmt = $pdo->query("
+                    SELECT DISTINCT
+                        u.user_id as id,
+                        u.name,
+                        u.email,
+                        u.role,
+                        MAX(t.created_at) as last_activity
+                    FROM wgs_tokens t
+                    JOIN wgs_users u ON t.user_id = u.user_id
+                    WHERE t.expires_at > NOW()
+                    AND t.created_at >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)
+                    GROUP BY u.user_id, u.name, u.email, u.role
+                    ORDER BY last_activity DESC
+                ");
+                $onlineUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
         } catch (PDOException $e) {
-            error_log("wgs_tokens query failed: " . $e->getMessage());
+            error_log("Online users query failed: " . $e->getMessage());
             $onlineUsers = [];
         }
 
