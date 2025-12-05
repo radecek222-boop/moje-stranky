@@ -164,6 +164,21 @@ if (session_status() === PHP_SESSION_NONE) {
         } else {
             // Session je aktivní - aktualizovat last_activity
             $_SESSION['last_activity'] = time();
+
+            // FIX: Aktualizovat last_activity v databázi pro online sledování
+            // Throttle: aktualizovat max jednou za minutu aby se nezatěžovala DB
+            $posledniDbAktualizace = $_SESSION['last_db_activity_update'] ?? 0;
+            if ((time() - $posledniDbAktualizace) >= 60) {
+                try {
+                    $pdo = getDbConnection();
+                    $stmt = $pdo->prepare("UPDATE wgs_users SET last_activity = NOW() WHERE user_id = :user_id");
+                    $stmt->execute([':user_id' => $_SESSION['user_id']]);
+                    $_SESSION['last_db_activity_update'] = time();
+                } catch (Exception $e) {
+                    // Ignorovat chyby - nechceme blokovat požadavek kvůli online sledování
+                    error_log("Online tracking update failed: " . $e->getMessage());
+                }
+            }
         }
     }
 
