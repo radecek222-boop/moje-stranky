@@ -50,4 +50,6 @@ $pwaUzivatelPrihlasen = isset($_SESSION['user_id']) || (isset($_SESSION['is_admi
 <script src="/assets/js/wgs-toast.js"></script>
 <!-- PWA Notifications (Badge + Local Notifications) -->
 <script src="/assets/js/pwa-notifications.min.js"></script>
+<!-- Online Heartbeat - aktualizace online stavu kazdych 30 sekund -->
+<script src="/assets/js/online-heartbeat.js"></script>
 <?php endif; ?>
