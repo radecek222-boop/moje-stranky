@@ -1142,14 +1142,14 @@ function otevritPozvanku() {
                     <label style="flex: 1; display: flex; align-items: center; padding: 12px;
                                   background: #252525; border-radius: 6px; cursor: pointer;
                                   border: 2px solid transparent;" id="labelTechnik">
-                        <input type="radio" name="typPozvanky" value="technik" data-action="aktualizovatVyber"
+                        <input type="radio" name="typPozvanky" value="technik" onchange="aktualizovatVyber()"
                                style="width: 16px; height: 16px; margin-right: 10px; accent-color: #fff;">
                         <span style="color: #fff;">Technik</span>
                     </label>
                     <label style="flex: 1; display: flex; align-items: center; padding: 12px;
                                   background: #252525; border-radius: 6px; cursor: pointer;
                                   border: 2px solid transparent;" id="labelProdejce">
-                        <input type="radio" name="typPozvanky" value="prodejce" data-action="aktualizovatVyber"
+                        <input type="radio" name="typPozvanky" value="prodejce" onchange="aktualizovatVyber()"
                                style="width: 16px; height: 16px; margin-right: 10px; accent-color: #fff;">
                         <span style="color: #fff;">Prodejce</span>
                     </label>
@@ -1287,6 +1287,15 @@ async function odeslatPozvanky() {
     const klic = klicSelect.value;
     const statusEl = document.getElementById('statusPozvanky');
     const btn = document.getElementById('btnOdeslatPozvanky');
+
+    // Validace typu
+    if (!typ) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = '#f8d7da';
+        statusEl.style.color = '#721c24';
+        statusEl.textContent = 'Vyberte typ pozvanky (Technik nebo Prodejce)';
+        return;
+    }
 
     // Parsovat emaily
     const emaily = emailyText.split('\\n')
@@ -1847,6 +1856,7 @@ if (typeof Utils !== 'undefined' && Utils.registerAction) {
         if (modal) modal.remove();
     });
     Utils.registerAction('odeslatPozvanky', () => odeslatPozvanky());
+    Utils.registerAction('aktualizovatVyber', () => aktualizovatVyber());
 }
 
 </script>
