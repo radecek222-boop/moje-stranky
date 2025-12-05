@@ -181,7 +181,7 @@ try {
 function handleListKeys(PDO $pdo): void
 {
     $stmt = $pdo->prepare(
-        'SELECT id, key_code, key_type, max_usage, usage_count, is_active, created_at
+        'SELECT id, key_code, key_type, max_usage, usage_count, is_active, created_at, sent_to_email, sent_at
          FROM wgs_registration_keys
          ORDER BY created_at DESC'
     );
@@ -199,6 +199,8 @@ function handleListKeys(PDO $pdo): void
                 'usage_count' => isset($key['usage_count']) ? (int) $key['usage_count'] : 0,
                 'is_active' => isset($key['is_active']) ? (bool) $key['is_active'] : true,
                 'created_at' => $key['created_at'] ?? null,
+                'sent_to_email' => $key['sent_to_email'] ?? null,
+                'sent_at' => $key['sent_at'] ?? null,
             ];
         }, $keys)
     ]);
@@ -1078,6 +1080,19 @@ function handleSendInvitations(PDO $pdo, array $payload): void
 
             if ($result['success']) {
                 $odeslanoPocet++;
+
+                // HISTORIE: Ulozit zaznam o odeslane pozvance do email_queue
+                $stmtLog = $pdo->prepare("
+                    INSERT INTO wgs_email_queue
+                    (notification_id, recipient_email, subject, body, status, sent_at, created_at, scheduled_at)
+                    VALUES (:notif_id, :email, :subject, :body, 'sent', NOW(), NOW(), NOW())
+                ");
+                $stmtLog->execute([
+                    ':notif_id' => 'invitation_' . $typ,
+                    ':email' => $email,
+                    ':subject' => $predmet,
+                    ':body' => $telo
+                ]);
             } else {
                 $chyby[] = $email . ': ' . ($result['error'] ?? 'Neznama chyba');
                 error_log("Chyba odeslani pozvanky na {$email}: " . ($result['error'] ?? 'Neznama chyba'));
@@ -1086,6 +1101,24 @@ function handleSendInvitations(PDO $pdo, array $payload): void
             $chyby[] = $email . ': ' . $e->getMessage();
             error_log("Chyba odeslani pozvanky na {$email}: " . $e->getMessage());
         }
+    }
+
+    // ============================================
+    // ULOZIT EMAIL PRIJEMCE DO KLICE
+    // ============================================
+    if ($odeslanoPocet > 0) {
+        // Spojit vsechny uspesne odeslane emaily
+        $emailyString = implode(', ', $platneEmaily);
+
+        $stmt = $pdo->prepare('
+            UPDATE wgs_registration_keys
+            SET sent_to_email = :email, sent_at = NOW()
+            WHERE key_code = :key_code
+        ');
+        $stmt->execute([
+            ':email' => $emailyString,
+            ':key_code' => $pouzityKlic
+        ]);
     }
 
     respondSuccess([

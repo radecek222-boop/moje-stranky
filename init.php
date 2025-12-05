@@ -226,6 +226,25 @@ function load_model($filename) {
 }
 
 /**
+ * Online Heartbeat - vlozit na vsechny stranky pro prihlasene uzivatele
+ * Volat pred </body> tag
+ */
+function renderOnlineHeartbeat() {
+    // Pouze pro prihlasene uzivatele
+    if (!isset($_SESSION['user_id'])) {
+        return;
+    }
+
+    // Skip API stranky
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    if (strpos($uri, '/api/') !== false) {
+        return;
+    }
+
+    echo '<script src="/assets/js/online-heartbeat.js" defer></script>' . "\n";
+}
+
+/**
  * Heatmap Tracker - vložit na všechny veřejné stránky
  * Volat před </body> tag
  */
