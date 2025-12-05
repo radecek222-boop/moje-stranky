@@ -220,9 +220,10 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
         $_SESSION['admin_name'] = $_SESSION['user_name'];
     }
 
-    // Aktualizovat posledni prihlaseni
+    // Aktualizovat posledni prihlaseni a online aktivitu
     if (db_table_has_column($pdo, 'wgs_users', 'last_login')) {
-        $update = $pdo->prepare('UPDATE wgs_users SET last_login = NOW() WHERE email = :email');
+        // FIX: Aktualizovat take last_activity pro online sledovani
+        $update = $pdo->prepare('UPDATE wgs_users SET last_login = NOW(), last_activity = NOW() WHERE email = :email');
         $update->execute([':email' => $email]);
     }
 
