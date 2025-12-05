@@ -13,6 +13,49 @@ header('Content-Type: text/html; charset=utf-8');
 
 echo "<h1>Diagnostika Online Uzivatelu</h1>";
 
+// PRIMY TEST - aktualizovat last_activity ihned
+if (isset($_SESSION['user_id'])) {
+    try {
+        $pdo = getDbConnection();
+        $userId = $_SESSION['user_id'];
+
+        echo "<div style='background:#efe;padding:10px;margin:10px 0;border:1px solid #0a0'>";
+        echo "<b>PRIMY TEST AKTUALIZACE:</b><br>";
+        echo "user_id z session: " . htmlspecialchars($userId) . "<br>";
+
+        // Zkusit UPDATE
+        $stmt = $pdo->prepare("UPDATE wgs_users SET last_activity = NOW() WHERE user_id = :user_id");
+        $stmt->execute([':user_id' => $userId]);
+        $affected = $stmt->rowCount();
+
+        echo "UPDATE affected rows: {$affected}<br>";
+
+        if ($affected === 0) {
+            echo "Zadny radek neaktualizovan - zkousim INSERT...<br>";
+            $stmt = $pdo->prepare("
+                INSERT INTO wgs_users (user_id, name, email, role, is_active, last_activity, created_at)
+                VALUES (:user_id, :name, :email, 'admin', 1, NOW(), NOW())
+                ON DUPLICATE KEY UPDATE last_activity = NOW()
+            ");
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':name' => $_SESSION['user_name'] ?? 'Administrator',
+                ':email' => $_SESSION['user_email'] ?? 'admin@wgs-service.cz'
+            ]);
+            echo "INSERT/UPDATE proveden<br>";
+        }
+
+        $_SESSION['last_db_activity_update'] = time();
+        echo "<b style='color:green'>USPECH - last_activity aktualizovano!</b>";
+        echo "</div>";
+
+    } catch (Exception $e) {
+        echo "<div style='background:#fee;padding:10px;margin:10px 0;border:1px solid #a00'>";
+        echo "<b>CHYBA:</b> " . htmlspecialchars($e->getMessage());
+        echo "</div>";
+    }
+}
+
 try {
     $pdo = getDbConnection();
 
