@@ -166,9 +166,9 @@ if (session_status() === PHP_SESSION_NONE) {
             $_SESSION['last_activity'] = time();
 
             // FIX: Aktualizovat last_activity v databázi pro online sledování
-            // Throttle: aktualizovat max jednou za minutu aby se nezatěžovala DB
+            // Throttle: aktualizovat max jednou za 10 sekund aby se nezatěžovala DB
             $posledniDbAktualizace = $_SESSION['last_db_activity_update'] ?? 0;
-            if ((time() - $posledniDbAktualizace) >= 60) {
+            if ((time() - $posledniDbAktualizace) >= 10) {
                 try {
                     $pdo = getDbConnection();
                     $userId = $_SESSION['user_id'];
