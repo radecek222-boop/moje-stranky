@@ -962,6 +962,7 @@ async function nactiRegistracniKlice() {
             html += '<thead><tr>';
             html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Typ</th>';
             html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Kód</th>';
+            html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Odesláno na</th>';
             html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Použití</th>';
             html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Aktivní</th>';
             html += '<th style="padding: 0.5rem; text-align: left; background: #000; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ddd;">Vytvořen</th>';
@@ -969,9 +970,21 @@ async function nactiRegistracniKlice() {
             html += '</tr></thead><tbody>';
 
             data.keys.forEach(klic => {
+                // Formatovat email - pokud je vice emailu, zobrazit prvni a pocet dalsich
+                let emailZobrazeni = '-';
+                if (klic.sent_to_email) {
+                    const emaily = klic.sent_to_email.split(', ');
+                    if (emaily.length === 1) {
+                        emailZobrazeni = escapujHtml(emaily[0]);
+                    } else {
+                        emailZobrazeni = escapujHtml(emaily[0]) + ' <span style="color: #666; font-size: 0.7rem;">(+' + (emaily.length - 1) + ')</span>';
+                    }
+                }
+
                 html += '<tr class="admin-hover-row" style="border-bottom: 1px solid #e0e0e0;">';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><span style="display: inline-block; padding: 0.2rem 0.5rem; background: #000; color: #fff; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 500;">' + escapujHtml(klic.key_type) + '</span></td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><code style="background: #f5f5f5; padding: 0.25rem 0.5rem; font-size: 0.8rem; border: 1px solid #ddd;">' + escapujHtml(klic.key_code) + '</code></td>';
+                html += '<td style="padding: 0.5rem; border: 1px solid #ddd; max-width: 200px; overflow: hidden; text-overflow: ellipsis;" title="' + escapujHtml(klic.sent_to_email || '') + '">' + emailZobrazeni + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + klic.usage_count + ' / ' + (klic.max_usage || '∞') + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + (klic.is_active ? '<span style="color: #000;">Ano</span>' : '<span style="color: #999;">Ne</span>') + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + new Date(klic.created_at).toLocaleDateString('cs-CZ') + '</td>';
