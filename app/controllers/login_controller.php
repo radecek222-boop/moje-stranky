@@ -220,8 +220,9 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
         $_SESSION['admin_name'] = $_SESSION['user_name'];
     }
 
-    if (db_table_has_column($pdo, 'wgs_users', 'last_login_at')) {
-        $update = $pdo->prepare('UPDATE wgs_users SET last_login_at = NOW() WHERE email = :email');
+    // Aktualizovat posledni prihlaseni
+    if (db_table_has_column($pdo, 'wgs_users', 'last_login')) {
+        $update = $pdo->prepare('UPDATE wgs_users SET last_login = NOW() WHERE email = :email');
         $update->execute([':email' => $email]);
     }
 
