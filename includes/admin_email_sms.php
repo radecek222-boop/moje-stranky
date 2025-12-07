@@ -666,86 +666,86 @@ try {
     </div>
 </div>
 
-<!-- Modal pro editaci email šablony -->
-<div id="sablona-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; overflow-y: auto;">
-    <div style="max-width: 800px; margin: 2rem auto; background: #fff; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+<!-- Modal pro editaci email šablony - DARK THEME -->
+<div id="sablona-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; overflow-y: auto;">
+    <div style="max-width: 800px; margin: 2rem auto; background: #1a1a1a; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid #333;">
         <!-- Header -->
-        <div style="padding: 1.5rem; background: #000; color: #fff; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
-            <h2 id="sablona-modal-title" style="font-family: 'Poppins', sans-serif; font-size: 1.2rem; font-weight: 600; margin: 0;">Editace email šablony</h2>
-            <button data-action="zavritSablonaModal" aria-label="Zavřít" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
+        <div style="padding: 1.5rem; background: #333; color: #fff; display: flex; justify-content: center; align-items: center; border-radius: 8px 8px 0 0; position: relative; border-bottom: 1px solid #444;">
+            <h2 id="sablona-modal-title" style="font-family: 'Poppins', sans-serif; font-size: 1.2rem; font-weight: 600; margin: 0; color: #fff;">Editace email šablony</h2>
+            <button data-action="zavritSablonaModal" aria-label="Zavřít" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1; position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); opacity: 0.7;">&times;</button>
         </div>
 
         <!-- Obsah -->
-        <div id="sablona-modal-content" style="padding: 1.5rem;">
-            <div style="text-align: center; padding: 2rem; color: #999;">Načítám...</div>
+        <div id="sablona-modal-content" style="padding: 1.5rem; color: #ccc;">
+            <div style="text-align: center; padding: 2rem; color: #888;">Načítám...</div>
         </div>
     </div>
 </div>
 
-<!-- Modal pro detail emailu -->
-<div id="email-detail-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; overflow-y: auto;">
-    <div style="max-width: 700px; margin: 2rem auto; background: #fff; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+<!-- Modal pro detail emailu - DARK THEME -->
+<div id="email-detail-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; overflow-y: auto;">
+    <div style="max-width: 700px; margin: 2rem auto; background: #1a1a1a; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid #333;">
         <!-- Header -->
-        <div style="padding: 1rem 1.5rem; background: #000; color: #fff; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
-            <h2 style="font-family: 'Poppins', sans-serif; font-size: 1.1rem; font-weight: 600; margin: 0;">Detail emailu #<span id="email-modal-id"></span></h2>
-            <button data-action="closeEmailDetailModal" aria-label="Zavřít" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
+        <div style="padding: 1rem 1.5rem; background: #333; color: #fff; display: flex; justify-content: center; align-items: center; border-radius: 8px 8px 0 0; position: relative; border-bottom: 1px solid #444;">
+            <h2 style="font-family: 'Poppins', sans-serif; font-size: 1.1rem; font-weight: 600; margin: 0; color: #fff;">Detail emailu #<span id="email-modal-id"></span></h2>
+            <button data-action="closeEmailDetailModal" aria-label="Zavřít" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1; position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); opacity: 0.7;">&times;</button>
         </div>
 
         <!-- Obsah -->
-        <div style="padding: 1.5rem;">
+        <div style="padding: 1.5rem; color: #ccc;">
             <!-- Info sekce -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; font-size: 0.85rem;">
                 <div>
-                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Příjemce (TO):</strong>
-                    <span id="email-modal-recipient" style="color: #000;"></span>
+                    <strong style="color: #aaa; display: block; margin-bottom: 0.25rem;">Příjemce (TO):</strong>
+                    <span id="email-modal-recipient" style="color: #fff;"></span>
                 </div>
                 <div>
-                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Stav:</strong>
-                    <span id="email-modal-status" style="display: inline-block; padding: 0.2rem 0.5rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; border: 1px solid #000;"></span>
+                    <strong style="color: #aaa; display: block; margin-bottom: 0.25rem;">Stav:</strong>
+                    <span id="email-modal-status" style="display: inline-block; padding: 0.2rem 0.5rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; border: 1px solid #444;"></span>
                 </div>
                 <div>
-                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Kopie (CC):</strong>
-                    <span id="email-modal-cc" style="color: #000;"></span>
+                    <strong style="color: #aaa; display: block; margin-bottom: 0.25rem;">Kopie (CC):</strong>
+                    <span id="email-modal-cc" style="color: #fff;"></span>
                 </div>
                 <div>
-                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Skrytá kopie (BCC):</strong>
-                    <span id="email-modal-bcc" style="color: #000;"></span>
+                    <strong style="color: #aaa; display: block; margin-bottom: 0.25rem;">Skrytá kopie (BCC):</strong>
+                    <span id="email-modal-bcc" style="color: #fff;"></span>
                 </div>
                 <div>
-                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Vytvořeno:</strong>
-                    <span id="email-modal-created" style="color: #000;"></span>
+                    <strong style="color: #aaa; display: block; margin-bottom: 0.25rem;">Vytvořeno:</strong>
+                    <span id="email-modal-created" style="color: #fff;"></span>
                 </div>
                 <div>
-                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Odesláno:</strong>
-                    <span id="email-modal-sent" style="color: #000;"></span>
+                    <strong style="color: #aaa; display: block; margin-bottom: 0.25rem;">Odesláno:</strong>
+                    <span id="email-modal-sent" style="color: #fff;"></span>
                 </div>
                 <div style="grid-column: 1 / -1;">
-                    <strong style="color: #666; display: block; margin-bottom: 0.25rem;">Šablona:</strong>
-                    <span id="email-modal-template" style="color: #000;"></span>
+                    <strong style="color: #aaa; display: block; margin-bottom: 0.25rem;">Šablona:</strong>
+                    <span id="email-modal-template" style="color: #fff;"></span>
                 </div>
             </div>
 
             <!-- Předmět -->
             <div style="margin-bottom: 1rem;">
-                <strong style="color: #666; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Předmět:</strong>
-                <div id="email-modal-subject" style="padding: 0.75rem; background: #f5f5f5; border: 1px solid #ddd; font-size: 0.9rem; font-weight: 500;"></div>
+                <strong style="color: #aaa; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Předmět:</strong>
+                <div id="email-modal-subject" style="padding: 0.75rem; background: #222; border: 1px solid #444; font-size: 0.9rem; font-weight: 500; color: #fff;"></div>
             </div>
 
             <!-- Tělo emailu -->
             <div style="margin-bottom: 1rem;">
-                <strong style="color: #666; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Tělo emailu:</strong>
-                <div id="email-modal-body" style="padding: 0.75rem; background: #f5f5f5; border: 1px solid #ddd; max-height: 300px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; font-size: 0.85rem; font-family: 'Courier New', monospace;"></div>
+                <strong style="color: #aaa; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Tělo emailu:</strong>
+                <div id="email-modal-body" style="padding: 0.75rem; background: #222; border: 1px solid #444; max-height: 300px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; font-size: 0.85rem; font-family: 'Courier New', monospace; color: #ccc;"></div>
             </div>
 
             <!-- Chyba (pokud existuje) -->
             <div id="email-modal-error-container" style="display: none; margin-bottom: 1rem;">
-                <strong style="color: #991b1b; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Chyba:</strong>
-                <div id="email-modal-error" style="padding: 0.75rem; background: #fef2f2; border: 1px solid #ef4444; color: #991b1b; font-size: 0.8rem; font-family: monospace;"></div>
+                <strong style="color: #dc3545; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Chyba:</strong>
+                <div id="email-modal-error" style="padding: 0.75rem; background: #2a1a1a; border: 1px solid #dc3545; color: #ff8888; font-size: 0.8rem; font-family: monospace;"></div>
             </div>
 
             <!-- Tlačítko zavřít -->
-            <div style="text-align: right; padding-top: 1rem; border-top: 1px solid #ddd;">
-                <button data-action="closeEmailDetailModal" style="padding: 0.5rem 1.5rem; background: #000; color: #fff; border: none; font-family: 'Poppins', sans-serif; font-weight: 500; cursor: pointer;">Zavřít</button>
+            <div style="text-align: right; padding-top: 1rem; border-top: 1px solid #444;">
+                <button data-action="closeEmailDetailModal" style="padding: 0.5rem 1.5rem; background: #333; color: #fff; border: 1px solid #444; font-family: 'Poppins', sans-serif; font-weight: 500; cursor: pointer;">Zavřít</button>
             </div>
         </div>
     </div>

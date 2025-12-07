@@ -1084,6 +1084,27 @@ function parseClankyzObsahu($obsah, $aktualitaId, $jazyk) {
 
     return await response.json();
   }
+
+  // Event delegation pro data-action tlačítka
+  document.addEventListener('click', function(e) {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+
+    const action = target.getAttribute('data-action');
+
+    if (action === 'upravitClanek') {
+      const id = target.getAttribute('data-id');
+      const jazyk = target.getAttribute('data-jazyk');
+      const index = target.getAttribute('data-index');
+      if (id && jazyk && index !== null) {
+        window.upravitClanek(parseInt(id), jazyk, parseInt(index));
+      }
+    }
+
+    if (action === 'pridatNovyClanek') {
+      window.pridatNovyClanek();
+    }
+  });
 })();
 </script>
 <?php endif; ?>
