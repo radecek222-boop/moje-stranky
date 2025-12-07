@@ -1887,25 +1887,12 @@ function generatePaymentQR() {
     });
   }
 
-  // Summary
+  // Summary - pouze celkem
   summaryDiv.innerHTML = `
     <div class="summary-row">
-      <span>Počet domácích plateb:</span>
-      <span>${paymentData.length}</span>
+      <span>Počet plateb:</span>
+      <span>${paymentData.length + swiftPayments.length}</span>
     </div>
-    <div class="summary-row">
-      <span>Počet SWIFT plateb:</span>
-      <span>${swiftPayments.length}</span>
-    </div>
-    <div class="summary-row">
-      <span>Základní výplaty:</span>
-      <span>${formatCurrency(totalPayments)}</span>
-    </div>
-    ${femaleBonus > 0 ? `
-    <div class="summary-row" style="color: var(--c-grey); font-size: 0.85rem;">
-      <span>Skryté prémie (→ Radek):</span>
-      <span>${formatCurrency(femaleBonus)}</span>
-    </div>` : ''}
     <div class="summary-row">
       <span>CELKEM K VÝPLATĚ:</span>
       <span>${formatCurrency(totalPayments + femaleBonus)}</span>
