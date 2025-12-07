@@ -1000,6 +1000,35 @@ async function saveEmployeeToDatabase(index) {
   }
 }
 
+// Uložit změny jednotlivého zaměstnance (např. číslo účtu)
+async function saveEmployeeChanges(index) {
+  const emp = employees[index];
+  if (!emp) {
+    wgsToast.error('Zaměstnanec nenalezen');
+    return;
+  }
+
+  // Aktualizovat v databázi zaměstnanců
+  const dbIndex = allEmployeesDatabase.findIndex(e => e.id === emp.id);
+  if (dbIndex !== -1) {
+    allEmployeesDatabase[dbIndex].name = emp.name;
+    allEmployeesDatabase[dbIndex].account = emp.account || '';
+    allEmployeesDatabase[dbIndex].bank = emp.bank || '';
+    allEmployeesDatabase[dbIndex].type = emp.type || 'standard';
+  }
+
+  // Uložit na server
+  try {
+    saveToLocalStorage();
+    await saveToServer();
+    showSuccess(`Změny u ${emp.name} uloženy`);
+    logger.log('Employee changes saved:', emp.name);
+  } catch (error) {
+    logger.error('Failed to save employee changes:', error);
+    wgsToast.error('Chyba při ukládání změn');
+  }
+}
+
 async function confirmAddEmployee() {
   const select = document.getElementById('selectEmployeeToAdd');
   const selectedId = parseInt(select.value);
@@ -1180,7 +1209,7 @@ function renderTable() {
           <input type="text"
                  value="${emp.name}"
                  class="table-input"
-                 style="font-weight: 600; min-width: 150px;"
+                 style="font-weight: 600; min-width: 100px;"
                  data-action="updateEmployeeField"
                  data-index="${index}"
                  data-field="name"
@@ -1252,8 +1281,9 @@ function renderTable() {
                  data-field="bank">
         </td>
         <td class="text-center" style="white-space: nowrap;">
+          <button class="btn btn-sm" style="margin-right: 0.25rem;" data-action="saveEmployeeChanges" data-index="${index}" title="Uložit změny">Uložit</button>
           ${emp.isNew ?
-            `<button class="btn btn-sm" style="background: var(--c-success); color: white; margin-right: 0.25rem;" data-action="saveEmployeeToDatabase" data-index="${index}" title="Uložit do databáze">Uložit do DB</button>` :
+            `<button class="btn btn-sm" style="background: var(--c-success); color: white; margin-right: 0.25rem;" data-action="saveEmployeeToDatabase" data-index="${index}" title="Uložit do databáze">DB</button>` :
             `<button class="btn btn-sm qr-btn" style="background: var(--c-info); color: white; margin-right: 0.25rem;" data-action="generateSingleEmployeeQR" data-index="${index}" title="Generovat QR platbu">QR</button>`
           }
           ${PERMANENT_EMPLOYEE_IDS.includes(emp.id) ? '' :
@@ -1890,15 +1920,18 @@ function generatePaymentQR() {
 
   // Summary - seznam všech zaměstnanců
   let summaryRows = '';
+  let visibleTotal = 0;
 
-  // Domácí platby
+  // Domácí platby - použít realAmount (skutečnou částku včetně bonusů) pro správný součet
   paymentData.forEach(payment => {
-    const amount = payment.displayAmount || payment.amount;
+    const amount = payment.realAmount || payment.amount;
+    visibleTotal += amount;
     summaryRows += `<div class="summary-row"><span>${payment.name}</span><span>${formatCurrency(amount)}</span></div>`;
   });
 
   // SWIFT platby
   swiftPayments.forEach(payment => {
+    visibleTotal += payment.amount;
     summaryRows += `<div class="summary-row"><span>${payment.name} (SWIFT)</span><span>${formatCurrency(payment.amount)}</span></div>`;
   });
 
@@ -1906,7 +1939,7 @@ function generatePaymentQR() {
     ${summaryRows}
     <div class="summary-row summary-total">
       <span>CELKEM:</span>
-      <span>${formatCurrency(totalPayments + femaleBonus)}</span>
+      <span>${formatCurrency(visibleTotal)}</span>
     </div>
   `;
 
@@ -2311,6 +2344,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const sIndex = target.getAttribute('data-index');
         if (sIndex !== null && typeof saveEmployeeToDatabase === 'function') {
           saveEmployeeToDatabase(parseInt(sIndex, 10));
+        }
+        return;
+      }
+
+      case 'saveEmployeeChanges': {
+        const scIndex = parseInt(target.getAttribute('data-index'), 10);
+        if (!isNaN(scIndex) && typeof saveEmployeeChanges === 'function') {
+          saveEmployeeChanges(scIndex);
         }
         return;
       }
