@@ -1911,7 +1911,11 @@ button,
 }
 
 .customer-detail-btn.danger {
-  background: #666;
+  background: #dc3545;
+}
+
+.customer-detail-btn.danger:hover {
+  background: #c82333;
 }
 
 /* ============================================

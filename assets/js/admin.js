@@ -250,7 +250,7 @@ async function loadUsers() {
         html += '<td><span class="badge ' + statusClass + '">' + statusText.toUpperCase() + '</span></td>';
         html += '<td>' + createdDate + '</td>';
         html += '<td data-action="stopPropagation">';
-        html += '<button class="btn btn-sm btn-danger" data-action="deleteUser" data-id="' + user.id + '">Smazat</button>';
+        html += '<button class="cc-btn cc-btn-sm cc-btn-danger" data-action="deleteUser" data-id="' + user.id + '">Smazat</button>';
         html += '</td>';
         html += '</tr>';
       });

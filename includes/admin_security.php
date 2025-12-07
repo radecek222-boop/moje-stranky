@@ -1040,7 +1040,7 @@ async function nactiRegistracniKlice() {
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + (klic.is_active ? '<span style="color: #000;">Ano</span>' : '<span style="color: #999;">Ne</span>') + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + new Date(klic.created_at).toLocaleDateString('cs-CZ') + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><button data-action="kopirovatDoSchranky" data-code="' + escapujHtml(klic.key_code) + '" class="cc-btn cc-btn-sm cc-btn-primary" style="margin-right: 0.25rem;">Kopírovat</button>';
-                html += '<button data-action="smazatKlic" data-code="' + escapujHtml(klic.key_code) + '" class="cc-btn cc-btn-sm cc-btn-secondary">Smazat</button></td>';
+                html += '<button data-action="smazatKlic" data-code="' + escapujHtml(klic.key_code) + '" class="cc-btn cc-btn-sm cc-btn-danger">Smazat</button></td>';
                 html += '</tr>';
             });
 

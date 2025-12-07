@@ -275,6 +275,81 @@ border: 2px solid #39ff14;
 
 ---
 
+## ✅ OFFICIAL EXCEPTION: Danger/Delete Buttons (Red)
+
+**IMPORTANT:** Červená barva je TŘETÍ schválená výjimka pro destruktivní akce.
+
+### Kdy se použije červená (`#dc3545`):
+
+| Akce | Příklad |
+|------|---------|
+| Smazání záznamu | Tlačítko "Smazat", "Odstranit" |
+| Zrušení klíče | Tlačítko "Smazat klíč" |
+| Reset hesla | Potvrzovací tlačítko v modalu |
+| Deaktivace uživatele | Tlačítko "Deaktivovat" |
+| Vymazání cache | Potvrzovací tlačítko |
+| Jakákoliv nevratná akce | Destruktivní operace |
+
+### Kde se používá:
+
+| Místo | Popis |
+|-------|-------|
+| `wgsConfirm()` modal | Potvrzovací tlačítko s `nebezpecne: true` |
+| Admin tabulky | Tlačítka pro mazání záznamů |
+| Formuláře | Tlačítka pro odstranění dat |
+
+### CSS specifikace:
+
+```css
+/* Červená pro nebezpečné akce */
+--wgs-danger: #dc3545;
+--wgs-danger-hover: #c82333;
+
+/* Tlačítko */
+.btn-danger {
+    background: #dc3545;
+    color: #fff;
+    border: none;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+/* V potvrzovacím modalu */
+.wgs-confirm-btn-potvrdit.nebezpecne {
+    background: #dc3545;
+}
+```
+
+### Použití v kódu:
+
+```javascript
+// ✅ SPRÁVNĚ - Použít wgsConfirm s nebezpecne: true
+const potvrdit = await wgsConfirm('Opravdu chcete smazat tento záznam?', {
+    titulek: 'Smazat záznam',
+    btnPotvrdit: 'Smazat',
+    nebezpecne: true  // Červené tlačítko
+});
+
+// ✅ SPRÁVNĚ - HTML tlačítko pro mazání
+<button class="btn-danger" onclick="smazat(id)">Smazat</button>
+
+// ❌ ŠPATNĚ - Červená pro běžné akce
+<button style="background: #dc3545">Uložit</button>  // Uložit NENÍ destruktivní!
+```
+
+### Proč červená pro destruktivní akce?
+
+1. **UX standard** - Uživatelé očekávají červenou pro nebezpečné akce
+2. **Prevence chyb** - Jasné vizuální varování před nevratnou akcí
+3. **Konzistence** - Jednotný styl pro všechny destruktivní operace
+4. **Přístupnost** - Červená je univerzálně spojována s "stop/pozor"
+
+**TOTO JE TŘETÍ SCHVÁLENÁ BAREVNÁ VÝJIMKA V PROJEKTU.**
+
+---
+
 ## 📋 PROJECT OVERVIEW
 
 **Type:** Luxury furniture service management system
