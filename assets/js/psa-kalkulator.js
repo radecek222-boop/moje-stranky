@@ -1794,6 +1794,15 @@ function generatePaymentQR() {
   container.innerHTML = '';
   summaryDiv.innerHTML = '';
 
+  // Zobrazit souhrn pro hromadné QR
+  const summarySection = summaryDiv.closest('.payment-summary');
+  if (summarySection) {
+    summarySection.style.display = '';
+  }
+
+  // Odstranit třídu pro menší modal
+  modal.classList.remove('single-qr-mode');
+
   let totalPayments = 0;
   let femaleBonus = 0;
   let radekPayment = 0;
@@ -2142,6 +2151,15 @@ function generateSingleEmployeeQR(index) {
   container.innerHTML = '';
   summaryDiv.innerHTML = '';
 
+  // Skrýt souhrn pro jednotlivý QR
+  const summarySection = summaryDiv.closest('.payment-summary');
+  if (summarySection) {
+    summarySection.style.display = 'none';
+  }
+
+  // Přidat třídu pro menší modal (jednotlivý QR)
+  modal.classList.add('single-qr-mode');
+
   // Calculate total hours for bonus calculation
   let totalOtherHours = 0;
   employees.forEach(e => {
@@ -2176,18 +2194,6 @@ function generateSingleEmployeeQR(index) {
 
   // For SWIFT payments
   if (emp.type === 'swift' && emp.swiftData) {
-    summaryDiv.innerHTML = `
-      <h3>SWIFT platba</h3>
-      <div class="summary-row">
-        <span>Zaměstnanec:</span>
-        <span>${emp.name}</span>
-      </div>
-      <div class="summary-row">
-        <span>Částka:</span>
-        <span>${formatCurrency(amount)}</span>
-      </div>
-    `;
-
     const swiftItem = document.createElement('div');
     swiftItem.className = 'qr-item';
     swiftItem.style.background = 'rgba(0,0,0,0.02)';
@@ -2221,20 +2227,6 @@ function generateSingleEmployeeQR(index) {
     wgsToast.warning('Prosím zadejte číslo účtu a kód banky pro ' + emp.name);
     return;
   }
-
-  // Summary
-  summaryDiv.innerHTML = `
-    <h3>Platba pro zaměstnance</h3>
-    <div class="summary-row">
-      <span>Zaměstnanec:</span>
-      <span>${emp.name}</span>
-    </div>
-    <div class="summary-row">
-      <span>Částka k výplatě:</span>
-      <span>${formatCurrency(amount)}</span>
-    </div>
-    ${isLenka ? '<div class="summary-row" style="color: var(--c-info); font-size: 0.85rem;"><span>Paušální mzda</span><span>8716 Kč/měsíc</span></div>' : ''}
-  `;
 
   // Generate unique QR element ID (future-proof pro více QR najednou)
   const qrId = `qr-single-${Date.now()}-${index}`;
