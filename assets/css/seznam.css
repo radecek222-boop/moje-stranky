@@ -1551,14 +1551,13 @@ body {
 .order-appointment {
   font-size: 0.75rem;
   font-weight: 500;
-  color: #1a1a1a;
-  background: rgba(0, 0, 0, 0.05);
+  color: #000;
+  background: #fff;
   padding: 0.15rem 0.4rem;
   border-radius: 3px;
   white-space: nowrap;
   display: inline-block;
-  border: 1px solid rgba(0, 191, 255, 0.4);
-  box-shadow: 0 0 4px rgba(0, 191, 255, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.3);
 }
 
 .order-status-text {
