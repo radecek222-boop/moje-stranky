@@ -200,11 +200,31 @@ body {
   flex-direction: column;
   justify-content: space-between;
 }
+/* Neonovy obrys podle stavu reklamace */
+.order-box.status-bg-wait {
+  border-color: var(--c-neon-yellow);
+  box-shadow: 0 0 8px rgba(255, 225, 0, 0.3), inset 0 0 0 1px rgba(255, 225, 0, 0.1);
+}
+.order-box.status-bg-open {
+  border-color: var(--c-neon-blue);
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.3), inset 0 0 0 1px rgba(0, 212, 255, 0.1);
+}
+.order-box.status-bg-done {
+  border-color: var(--c-neon-green);
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.3), inset 0 0 0 1px rgba(0, 255, 136, 0.1);
+}
 .order-box:hover {
   background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
-  border-color: #000000;
+}
+.order-box.status-bg-wait:hover {
+  box-shadow: 0 0 15px rgba(255, 225, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.order-box.status-bg-open:hover {
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.order-box.status-bg-done:hover {
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.5), 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .order-box.search-match {
   border-color: var(--c-neon-blue);
