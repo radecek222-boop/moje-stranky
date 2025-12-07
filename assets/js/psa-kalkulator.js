@@ -1482,45 +1482,97 @@ function sanitizeMessage(message) {
 
 let qrLibraryPromise = null;
 
+/**
+ * Robustni loader pro QR knihovnu
+ * - resi "load uz probehl"
+ * - resi "script je v DOM, ale byl pridan mimo vas loader"
+ * - resi "neco se pokazilo a uz se nic nestane" (timeout)
+ * - po failu resetuje qrLibraryPromise
+ */
 function ensureQrLibraryLoaded() {
-  // qrcodejs2 knihovna - kontrola existence konstruktoru
+  // Uz je k dispozici
   if (window.QRCode && typeof window.QRCode === 'function') {
     return Promise.resolve(window.QRCode);
   }
 
-  if (!qrLibraryPromise) {
-    qrLibraryPromise = new Promise((resolve, reject) => {
-      const existing = document.querySelector('script[data-qr-lib]');
+  if (qrLibraryPromise) return qrLibraryPromise;
 
-      if (existing) {
-        if (window.QRCode && typeof window.QRCode === 'function') {
-          resolve(window.QRCode);
-          return;
+  qrLibraryPromise = new Promise((resolve, reject) => {
+    const src = 'assets/js/qrcode.min.js';
+    const existing =
+      document.querySelector('script[data-qr-lib]') ||
+      Array.from(document.scripts).find(s => (s.src || '').includes(src));
+
+    const fail = (msg) => reject(new Error(msg));
+
+    const tryResolve = () => {
+      if (window.QRCode && typeof window.QRCode === 'function') {
+        resolve(window.QRCode);
+        return true;
+      }
+      return false;
+    };
+
+    // Timeout proti "cekani navěky"
+    const t = setTimeout(() => {
+      if (!tryResolve()) fail('Timeout načítání knihovny QR kódů (8s)');
+    }, 8000);
+
+    const cleanup = () => clearTimeout(t);
+
+    const attachWaiters = (scriptEl) => {
+      // kdyby load uz probehl driv nez pridame listener
+      queueMicrotask(() => {
+        if (tryResolve()) {
+          cleanup();
+        } else if (scriptEl.dataset.qrLoaded === '1') {
+          cleanup();
+          fail('QR script načten, ale QRCode API chybí');
         }
+      });
 
-        existing.addEventListener('load', () => resolve(window.QRCode));
-        existing.addEventListener('error', () => reject(new Error('Nepodařilo se načíst knihovnu QR kódů')));
+      scriptEl.addEventListener('load', () => {
+        scriptEl.dataset.qrLoaded = '1';
+        if (tryResolve()) {
+          cleanup();
+        } else {
+          cleanup();
+          fail('Knihovna QR kódu se načetla, ale neobsahuje očekávané API');
+        }
+      }, { once: true });
+
+      scriptEl.addEventListener('error', () => {
+        cleanup();
+        fail('Nepodařilo se načíst knihovnu QR kódů');
+      }, { once: true });
+    };
+
+    if (existing) {
+      // Pokud uz existuje a nahodou uz je "oznaceny jako loaded", rovnou vyhodnot stav
+      if (tryResolve()) {
+        cleanup();
         return;
       }
+      if (existing.dataset.qrLoaded === '1') {
+        cleanup();
+        fail('QR script načten, ale QRCode API chybí');
+        return;
+      }
+      attachWaiters(existing);
+      return;
+    }
 
-      const script = document.createElement('script');
-      script.src = 'assets/js/qrcode.min.js';
-      script.defer = true;
-      script.dataset.qrLib = '1';
-      script.onload = () => {
-        if (window.QRCode && typeof window.QRCode === 'function') {
-          resolve(window.QRCode);
-        } else {
-          reject(new Error('Knihovna QR kódu se načetla, ale neobsahuje očekávané API'));
-        }
-      };
-      script.onerror = () => reject(new Error('Nepodařilo se načíst knihovnu QR kódů'));
-      document.head.appendChild(script);
-    }).catch((err) => {
-      qrLibraryPromise = null;
-      throw err;
-    });
-  }
+    // Vytvorit script
+    const script = document.createElement('script');
+    script.src = src;
+    script.defer = true;
+    script.dataset.qrLib = '1';
+    attachWaiters(script);
+    document.head.appendChild(script);
+  }).catch((err) => {
+    qrLibraryPromise = null; // Reset pro retry
+    throw err;
+  });
 
   return qrLibraryPromise;
 }
@@ -1549,11 +1601,29 @@ function buildSpaydPayload(data) {
   return spayd;
 }
 
+// Maximalni delky QR textu podle urovne korekce (bezpecne limity)
+const QR_MAX_LENGTH = {
+  L: 800,   // Low correction - vice dat, mene odolnosti
+  M: 600,   // Medium
+  Q: 450,   // Quartile
+  H: 350    // High correction - mene dat, vice odolnosti
+};
+
 async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
   await ensureQrLibraryLoaded();
 
   if (!window.QRCode || typeof window.QRCode !== 'function') {
     throw new Error('Knihovna pro QR kódy není načtena');
+  }
+
+  // Validace delky QR textu
+  const maxLen = QR_MAX_LENGTH.L; // Pouzivame Level L
+  if (!qrText || typeof qrText !== 'string') {
+    throw new Error('QR text je prázdný nebo neplatný');
+  }
+  if (qrText.length > maxLen) {
+    console.error(`QR text příliš dlouhý: ${qrText.length} > ${maxLen}`, qrText);
+    throw new Error(`QR data příliš dlouhá (${qrText.length} znaků, max ${maxLen})`);
   }
 
   return new Promise((resolve, reject) => {
@@ -1571,11 +1641,11 @@ async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
         correctLevel: QRCode.CorrectLevel.L  // Nizsi uroven korekce = vice dat
       });
 
-      logger.log(`QR code generated${contextLabel ? ' for ' + contextLabel : ''}`);
+      console.log(`QR code generated${contextLabel ? ' for ' + contextLabel : ''} (${qrText.length} chars)`);
       resolve();
     } catch (err) {
-      logger.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
-      qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
+      console.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
+      qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err?.message || 'Chyba QR'}</div>`;
       reject(err);
     }
   });
