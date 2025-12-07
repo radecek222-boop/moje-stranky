@@ -835,6 +835,18 @@ body.modal-open {
   color: #ffffff !important;
 }
 
+#detailOverlay .route-item-left {
+  color: #ffffff !important;
+}
+
+#detailOverlay .route-item-left span {
+  color: #ffffff !important;
+}
+
+#detailOverlay .route-arrow {
+  color: #888888 !important;
+}
+
 #detailOverlay .route-distance {
   background: #333333 !important;
   border-color: #444444 !important;
