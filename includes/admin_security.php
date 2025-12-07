@@ -1135,6 +1135,12 @@ function switchSection(section) {
         loadUzivateleProSecurity();
     } else if (section === 'online') {
         nactiOnlineUzivatele();
+    } else if (section === 'bezpecnost') {
+        nactiUzivateleProDropdown();
+    } else if (section === 'api_klice') {
+        nactiApiKlice();
+    } else if (section === 'audit') {
+        nactiAuditLogy();
     }
 }
 
@@ -1248,16 +1254,16 @@ async function nactiRegistracniKlice() {
                 html += '<tr class="admin-hover-row" style="border-bottom: 1px solid #e0e0e0;">';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><span style="display: inline-block; padding: 0.2rem 0.5rem; background: #000; color: #fff; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 500;">' + escapujHtml(klic.key_type) + '</span></td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><code style="background: #f5f5f5; padding: 0.25rem 0.5rem; font-size: 0.8rem; border: 1px solid #ddd;">' + escapujHtml(klic.key_code) + '</code></td>';
-                html += '<td style="padding: 0.5rem; border: 1px solid #ddd; max-width: 200px; overflow: hidden; text-overflow: ellipsis;" title="' + escapujHtml(klic.sent_to_email || '') + '">';
-                html += '<span style="cursor: pointer;" data-action="upravitEmailKlice" data-code="' + escapujHtml(klic.key_code) + '" data-email="' + escapujHtml(klic.sent_to_email || '') + '">';
-                html += emailZobrazeni;
-                html += ' <span style="color: #666; font-size: 0.65rem;">[upravit]</span>';
-                html += '</span></td>';
+                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;" title="' + escapujHtml(klic.sent_to_email || '') + '">';
+                html += '<div style="display: flex; align-items: center; gap: 0.5rem;">';
+                html += '<span style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + emailZobrazeni + '</span>';
+                html += '<span style="cursor: pointer; color: #333; font-size: 0.7rem; white-space: nowrap; text-decoration: underline;" data-action="upravitEmailKlice" data-code="' + escapujHtml(klic.key_code) + '" data-email="' + escapujHtml(klic.sent_to_email || '') + '">[upravit]</span>';
+                html += '</div></td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + klic.usage_count + ' / ' + (klic.max_usage || '∞') + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + (klic.is_active ? '<span style="color: #000;">Ano</span>' : '<span style="color: #999;">Ne</span>') + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + new Date(klic.created_at).toLocaleDateString('cs-CZ') + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><button data-action="kopirovatDoSchranky" data-code="' + escapujHtml(klic.key_code) + '" class="cc-btn cc-btn-sm cc-btn-primary" style="margin-right: 0.25rem;">Kopírovat</button>';
-                html += '<button data-action="smazatKlic" data-code="' + escapujHtml(klic.key_code) + '" class="cc-btn cc-btn-sm cc-btn-secondary">Smazat</button></td>';
+                html += '<button data-action="smazatKlic" data-code="' + escapujHtml(klic.key_code) + '" class="cc-btn cc-btn-sm cc-btn-danger">Smazat</button></td>';
                 html += '</tr>';
             });
 
@@ -1658,9 +1664,12 @@ async function odeslatPozvanky() {
 
 // Smazat klíč
 async function smazatKlic(kodKlice) {
-    if (!confirm('Opravdu chcete smazat klíč ' + kodKlice + '?')) {
-        return;
-    }
+    const potvrdit = await wgsConfirm('Opravdu chcete smazat klíč ' + kodKlice + '?', {
+        titulek: 'Smazat klíč',
+        btnPotvrdit: 'Smazat',
+        nebezpecne: true
+    });
+    if (!potvrdit) return;
 
     try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -1845,9 +1854,12 @@ async function resetovatUzivatelskeHeslo() {
         return;
     }
 
-    if (!confirm(`Opravdu chcete resetovat heslo pro uživatele ${userSelect.options[userSelect.selectedIndex].text}?`)) {
-        return;
-    }
+    const potvrdit = await wgsConfirm(`Opravdu chcete resetovat heslo pro uživatele ${userSelect.options[userSelect.selectedIndex].text}?`, {
+        titulek: 'Reset hesla',
+        btnPotvrdit: 'Resetovat',
+        nebezpecne: true
+    });
+    if (!potvrdit) return;
 
     statusEl.style.display = 'block';
     statusEl.innerHTML = 'Ukládám...';
@@ -2108,20 +2120,17 @@ async function nactiOnlineUzivatele() {
     tbody.innerHTML = '<tr><td colspan="5" style="padding: 2rem; text-align: center; color: #666;">Načítání...</td></tr>';
 
     try {
-        const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() : null;
-        const formData = new FormData();
-        formData.append('action', 'get_online_users');
-        if (csrfToken) formData.append('csrf_token', csrfToken);
-
-        const response = await fetch('/api/control_center_api.php', {
-            method: 'POST',
-            body: formData
+        // FIX: Použití správného API endpointu (GET, ne POST)
+        const response = await fetch('/api/admin_users_api.php?action=online', {
+            method: 'GET',
+            credentials: 'same-origin'
         });
 
         const data = await response.json();
 
-        if (data.status === 'success' && data.data) {
-            const users = data.data;
+        // FIX: API vrací data.users, ne data.data
+        if (data.status === 'success' && data.users) {
+            const users = data.users;
 
             if (users.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" style="padding: 2rem; text-align: center; color: #666;">Žádní online uživatelé</td></tr>';
@@ -2129,10 +2138,8 @@ async function nactiOnlineUzivatele() {
             }
 
             tbody.innerHTML = users.map(user => {
-                const isOnline = user.is_online;
-                const statusDot = isOnline
-                    ? '<span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #39ff14; box-shadow: 0 0 5px rgba(57, 255, 20, 0.5);"></span>'
-                    : '<span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ccc;"></span>';
+                // Všichni vrácení uživatelé jsou online (filtrováno v API)
+                const statusDot = '<span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #39ff14; box-shadow: 0 0 5px rgba(57, 255, 20, 0.5);"></span>';
 
                 const roleLabel = {
                     'admin': 'Admin',
@@ -2162,7 +2169,14 @@ async function nactiOnlineUzivatele() {
 console.log('Security centrum načteno');
 
 // ACTION REGISTRY - Step 113
-if (typeof Utils !== 'undefined' && Utils.registerAction) {
+// FIX: Počkat na načtení Utils (defer script)
+function registerSecurityActions() {
+    if (typeof Utils === 'undefined' || !Utils.registerAction) {
+        // Utils ještě není načten, zkusit znovu za 50ms
+        setTimeout(registerSecurityActions, 50);
+        return;
+    }
+
     Utils.registerAction('switchSecuritySection', (el, data) => {
         if (data.section) switchSection(data.section);
     });
@@ -2202,7 +2216,146 @@ if (typeof Utils !== 'undefined' && Utils.registerAction) {
     Utils.registerAction('odeslatPozvanky', () => odeslatPozvanky());
     Utils.registerAction('aktualizovatVyber', () => aktualizovatVyber());
     Utils.registerAction('refreshOnlineUzivatele', () => nactiOnlineUzivatele());
+
+    // Upravit email u registračního klíče - mini overlay
+    Utils.registerAction('upravitEmailKlice', (el, data) => {
+        const keyCode = data.code;
+        const currentEmail = data.email || '';
+
+        // Odstranit existující modal
+        const existujici = document.getElementById('modalUpravitEmail');
+        if (existujici) existujici.remove();
+
+        const modal = document.createElement('div');
+        modal.id = 'modalUpravitEmail';
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7); display: flex;
+            align-items: center; justify-content: center; z-index: 10000;
+        `;
+
+        modal.innerHTML = `
+            <div style="background: #1a1a1a; padding: 25px; border-radius: 12px;
+                        max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                        border: 1px solid #333;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0; color: #fff; font-size: 1.1rem;">Upravit email</h3>
+                    <button id="btnZavritEmailModal" style="background: none; border: none; color: #888;
+                            font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: #999; font-size: 0.85rem; margin-bottom: 8px;">
+                        Email pro klíč <code style="background: #333; padding: 2px 6px; border-radius: 3px; color: #fff;">${escapujHtml(keyCode)}</code>
+                    </label>
+                    <input type="email" id="inputNovyEmail" value="${escapujHtml(currentEmail)}"
+                           placeholder="email@example.com"
+                           style="width: 100%; padding: 12px; border: 1px solid #444; border-radius: 8px;
+                                  background: #252525; color: #fff; font-size: 1rem; box-sizing: border-box;">
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button id="btnZrusitEmail" style="padding: 10px 20px; border: 1px solid #444;
+                            border-radius: 6px; background: transparent; color: #ccc; cursor: pointer;
+                            font-size: 0.9rem;">Zrušit</button>
+                    <button id="btnUlozitEmail" style="padding: 10px 20px; border: none;
+                            border-radius: 6px; background: #fff; color: #000; cursor: pointer;
+                            font-size: 0.9rem; font-weight: 500;">Uložit</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Focus na input
+        const inputEl = document.getElementById('inputNovyEmail');
+        inputEl?.focus();
+        inputEl?.select();
+
+        // Zavřít modal
+        const zavritModal = () => modal.remove();
+
+        document.getElementById('btnZavritEmailModal')?.addEventListener('click', zavritModal);
+        document.getElementById('btnZrusitEmail')?.addEventListener('click', zavritModal);
+
+        // Klik na overlay zavře modal
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) zavritModal();
+        });
+
+        // ESC zavře modal
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                zavritModal();
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+
+        // Uložit email
+        document.getElementById('btnUlozitEmail')?.addEventListener('click', async () => {
+            const novyEmail = inputEl?.value?.trim() || '';
+
+            const btnUlozit = document.getElementById('btnUlozitEmail');
+            if (btnUlozit) {
+                btnUlozit.textContent = 'Ukládám...';
+                btnUlozit.disabled = true;
+            }
+
+            try {
+                const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() :
+                                 document.querySelector('meta[name="csrf-token"]')?.content;
+
+                const response = await fetch('/api/admin_api.php?action=update_key_email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        key_code: keyCode,
+                        email: novyEmail,
+                        csrf_token: csrfToken
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    zavritModal();
+                    if (typeof wgsToast !== 'undefined' && wgsToast.success) {
+                        wgsToast.success(result.message || 'Email uložen');
+                    }
+                    if (typeof nactiRegistracniKlice === 'function') {
+                        nactiRegistracniKlice();
+                    }
+                } else {
+                    throw new Error(result.message || 'Chyba při ukládání');
+                }
+            } catch (err) {
+                console.error('[upravitEmailKlice] Chyba:', err);
+                if (typeof wgsToast !== 'undefined' && wgsToast.error) {
+                    wgsToast.error(err.message || 'Chyba při ukládání emailu');
+                } else {
+                    alert('Chyba: ' + (err.message || 'Chyba při ukládání emailu'));
+                }
+                if (btnUlozit) {
+                    btnUlozit.textContent = 'Uložit';
+                    btnUlozit.disabled = false;
+                }
+            }
+        });
+
+        // Enter uloží
+        inputEl?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('btnUlozitEmail')?.click();
+            }
+        });
+    });
+
+    console.log('[Security] Akce zaregistrovány');
 }
+
+// Spustit registraci akcí
+registerSecurityActions();
 
 </script>
 

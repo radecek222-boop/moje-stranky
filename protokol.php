@@ -424,7 +424,7 @@ if ($initialBootstrapData) {
      x-data="zakaznikSchvaleniModal" x-init="init" @click="overlayClick">
   <div class="zakaznik-schvaleni-container">
     <div class="zakaznik-schvaleni-header">
-      <h2 data-lang-cs="Souhrn protokolu" data-lang-en="Protocol Summary" data-lang-it="Riepilogo protocollo">Souhrn protokolu</h2>
+      <h2 data-lang-cs="PODPIS ZÁKAZNÍKA" data-lang-en="CUSTOMER SIGNATURE" data-lang-it="FIRMA DEL CLIENTE">PODPIS ZÁKAZNÍKA</h2>
       <button type="button" class="zakaznik-schvaleni-close" id="zakaznikSchvaleniClose" @click="close" aria-label="Zavřít">×</button>
     </div>
 

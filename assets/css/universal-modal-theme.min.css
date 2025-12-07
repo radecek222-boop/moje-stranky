@@ -1,1 +1,680 @@
-/** * WGS - Univerzální Tmavý Styl pro VŠECHNY Modály * * Tento CSS soubor aplikuje jednotný tmavý profesionální design * (inspirovaný welcome-modal.css) na VŠECHNY modální okna v projektu. * * ⚠️ BEZPEČNOSTNÍ PRAVIDLA:* - POUZE vizuální změny (barvy,stíny,bordery) * - ŽÁDNÉ změny funkčních vlastností (display,position,z-index) * - NERUŠÍ JavaScript řízení modalů * - NEZMĚNÍ žádnou funkčnost * * @version 1.0.0 * @date 2025-11-24 */.modal-overlay,.cc-overlay,.welcome-modal-overlay,.admin-modal-overlay,.preview-overlay,.menu-overlay,.overlay-provedeni,.calendar-overlay,.loading-overlay,.hamburger-overlay,.pdf-preview-overlay,.cc-modal-overlay{background:rgba(0,0,0,0.92) !important;backdrop-filter:blur(8px) !important;-webkit-backdrop-filter:blur(8px) !important;}.modal-content,.cc-modal,.welcome-modal,.admin-modal,.preview-modal,.modal,.wgs-modal,#detail-reklamace-modal > div:first-child,#sablona-modal > div:first-child,#edit-modal .modal-content,#addUserModal .modal-content,#editNotificationModal .modal-content,#qrModal .modal-content,#notifModalOverlay .cc-modal,#adminModal,#detailOverlay .modal-content{background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%) !important;border:1px solid rgba(255,255,255,0.08) !important;box-shadow:0 25px 80px rgba(0,0,0,0.6),0 0 1px rgba(255,255,255,0.1) inset !important;}.modal-header,.cc-modal-header,.admin-modal-header,.wgs-modal .modal-header{background:linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 100%) !important;border-bottom:1px solid rgba(255,255,255,0.08) !important;box-shadow:0 2px 12px rgba(0,0,0,0.3) !important;}.modal-title,.cc-modal-title,.admin-modal-title,.welcome-title,.modal-header h2,.modal-header h3,#sablona-modal-title,#notifModalTitle,#editNotificationTitle{color:#ffffff !important;text-shadow:0 2px 8px rgba(0,0,0,0.3) !important;}.modal-close,.cc-modal-close,.admin-modal-close,.close-modal,button[onclick*="zavrit"],button[onclick*="close"]{color:#cccccc !important;transition:all 0.2s ease !important;}.modal-close:hover,.cc-modal-close:hover,.admin-modal-close:hover,.close-modal:hover{color:#ffffff !important;background:rgba(255,255,255,0.08) !important;}.modal-body,.cc-modal-body,.admin-modal-body,.wgs-modal .modal-body{color:#cccccc !important;}.modal-content p,.modal-body p,.cc-modal p,.admin-modal p{color:#999999 !important;}.modal-content label,.modal-body label,.cc-modal label,.admin-modal label{color:#cccccc !important;}.modal-content input[type="text"],.modal-content input[type="email"],.modal-content input[type="number"],.modal-content input[type="tel"],.modal-content textarea,.modal-content select,.modal-body input,.modal-body textarea,.modal-body select,.cc-modal input,.cc-modal textarea,.cc-modal select,.admin-modal input,.admin-modal textarea,.admin-modal select{background:#2a2a2a !important;color:#ffffff !important;border:1px solid rgba(255,255,255,0.12) !important;}.modal-content input:focus,.modal-content textarea:focus,.modal-content select:focus,.modal-body input:focus,.modal-body textarea:focus,.modal-body select:focus,.cc-modal input:focus,.cc-modal textarea:focus,.cc-modal select:focus{border-color:rgba(255,255,255,0.3) !important;outline:1px solid rgba(255,255,255,0.1) !important;}.modal-content input::placeholder,.modal-content textarea::placeholder,.modal-body input::placeholder,.modal-body textarea::placeholder{color:#666666 !important;}.modal-footer button,.modal-body button,.cc-modal button,.admin-modal button,button.btn,button.button{background:#000000 !important;color:#ffffff !important;border:1px solid rgba(255,255,255,0.1) !important;box-shadow:0 4px 16px rgba(0,0,0,0.4) !important;}.modal-footer button:hover,.modal-body button:hover,.cc-modal button:hover,.admin-modal button:hover,button.btn:hover,button.button:hover{background:#1a1a1a !important;border-color:rgba(255,255,255,0.2) !important;box-shadow:0 6px 24px rgba(0,0,0,0.6) !important;}.modal-footer,.wgs-modal .modal-footer{background:linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 100%) !important;border-top:1px solid rgba(255,255,255,0.08) !important;}.modal-content table,.modal-body table,.cc-modal table,.admin-modal table{color:#cccccc !important;}.modal-content th,.modal-body th,.cc-modal th,.admin-modal th{background:#1a1a1a !important;color:#ffffff !important;border-bottom:1px solid rgba(255,255,255,0.1) !important;}.modal-content td,.modal-body td,.cc-modal td,.admin-modal td{border-bottom:1px solid rgba(255,255,255,0.05) !important;}.modal-content tr:hover,.modal-body tr:hover,.cc-modal tr:hover,.admin-modal tr:hover{background:rgba(255,255,255,0.02) !important;}.modal-body::-webkit-scrollbar,.cc-modal-body::-webkit-scrollbar,.admin-modal-body::-webkit-scrollbar{width:8px;}.modal-body::-webkit-scrollbar-track,.cc-modal-body::-webkit-scrollbar-track,.admin-modal-body::-webkit-scrollbar-track{background:#1a1a1a;}.modal-body::-webkit-scrollbar-thumb,.cc-modal-body::-webkit-scrollbar-thumb,.admin-modal-body::-webkit-scrollbar-thumb{background:#444444;border-radius:4px;}.modal-body::-webkit-scrollbar-thumb:hover,.cc-modal-body::-webkit-scrollbar-thumb:hover,.admin-modal-body::-webkit-scrollbar-thumb:hover{background:#666666;}.cc-modal-loading,.admin-modal-loading,.loading-overlay{background:rgba(26,26,26,0.95) !important;}.cc-modal-loading-text,.admin-modal-loading-text{color:#cccccc !important;}.cc-modal-spinner,.admin-modal-spinner{border-color:rgba(255,255,255,0.1) !important;border-top-color:#ffffff !important;}#qrModal .qr-code-container{background:#ffffff !important;padding:1rem;border-radius:8px;}#gdpr-consent-banner,#gdpr-customize-modal{}.admin-modal-back-btn,.cc-back-btn,button[onclick*="history.back"]{background:#000000 !important;color:#ffffff !important;border:1px solid rgba(255,255,255,0.1) !important;}.admin-modal-back-btn:hover,.cc-back-btn:hover{background:#1a1a1a !important;border-color:rgba(255,255,255,0.2) !important;}.modal-content .alert,.modal-body .alert,.cc-modal .alert,.admin-modal .alert{background:rgba(255,255,255,0.05) !important;border:1px solid rgba(255,255,255,0.1) !important;color:#cccccc !important;}.modal-content .alert-error,.modal-body .alert-error{background:rgba(100,100,100,0.2) !important;border-color:rgba(100,100,100,0.3) !important;color:#aaa !important;}.modal-content .alert-success,.modal-body .alert-success{background:rgba(100,100,100,0.2) !important;border-color:rgba(150,150,150,0.3) !important;color:#cccccc !important;}.modal-body .notes-container,.modal-content .notes-container{background:transparent !important;}.modal-body .note-item,.modal-content .note-item{background:rgba(255,255,255,0.05) !important;border:1px solid rgba(255,255,255,0.1) !important;border-radius:8px;margin-bottom:12px !important;}.modal-body .note-item.unread,.modal-content .note-item.unread{background:rgba(255,255,255,0.08) !important;border-left:4px solid #999 !important;}.modal-body .note-header,.modal-content .note-header{border-bottom:1px solid rgba(255,255,255,0.05);margin-bottom:0.5rem;padding-bottom:0.5rem;}.modal-body .note-author,.modal-content .note-author{color:#ffffff !important;font-weight:600;}.modal-body .note-time,.modal-content .note-time{color:#888888 !important;font-size:0.7rem !important;}.modal-body .note-delete-btn,.modal-content .note-delete-btn,.notes-container .note-delete-btn,button.note-delete-btn{background:none !important;border:none !important;color:#cc0000 !important;width:auto !important;height:auto !important;min-width:0 !important;min-height:0 !important;border-radius:0 !important;cursor:pointer !important;font-size:1.2rem !important;font-weight:700 !important;line-height:1 !important;padding:4px !important;margin-left:auto !important;opacity:0.9 !important;box-shadow:none !important;outline:none !important;pointer-events:auto !important;-webkit-appearance:none !important;appearance:none !important;}.modal-body .note-delete-btn:hover,.modal-content .note-delete-btn:hover,.notes-container .note-delete-btn:hover,button.note-delete-btn:hover{background:none !important;border:none !important;color:#ff0000 !important;opacity:1 !important;box-shadow:none !important;}.modal-body .note-delete-btn:focus,.modal-content .note-delete-btn:focus,.notes-container .note-delete-btn:focus,button.note-delete-btn:focus{outline:2px solid rgba(0,0,0,0.5) !important;outline-offset:2px !important;}.modal-body .note-header,.modal-content .note-header{display:flex;align-items:center;gap:0.3rem;flex-wrap:nowrap;}.modal-body .note-header .note-author,.modal-content .note-header .note-author{flex-shrink:0;}.modal-body .note-header .note-time,.modal-content .note-header .note-time{flex-shrink:0;margin-right:auto;}.modal-body .note-header .note-delete-btn,.modal-content .note-header .note-delete-btn{flex-shrink:0 !important;display:inline-block !important;visibility:visible !important;min-width:24px !important;min-height:24px !important;text-align:center !important;}.modal-body .note-text,.modal-content .note-text{color:#cccccc !important;line-height:1.6;}.modal-body .empty-notes,.modal-content .empty-notes{color:#666666 !important;font-style:italic;text-align:center;padding:2rem;}.modal-body .note-textarea,.modal-content .note-textarea{background:#2a2a2a !important;color:#ffffff !important;border:1px solid rgba(255,255,255,0.12) !important;border-radius:6px;}.modal-body .note-textarea::placeholder,.modal-content .note-textarea::placeholder{color:#666666 !important;}.modal-body .note-textarea:focus,.modal-content .note-textarea:focus{border-color:rgba(255,255,255,0.3) !important;outline:none;box-shadow:0 0 0 2px rgba(255,255,255,0.2) !important;}.modal-body .note-input-area,.modal-content .note-input-area{margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.08);}@media (max-width:768px){.modal-content,.cc-modal,.admin-modal{border-radius:12px !important;}}/** * Pokud některý modal nefunguje správně po aplikaci tohoto stylu:* * 1. Přidejte specifický selektor zde s komentářem * 2. Případně přidejte class="no-dark-theme" na modal * 3. Neměňte funkční vlastnosti (display,position,z-index) * * Kontakt:radek@wgs-service.cz */.no-dark-theme,.no-dark-theme .modal-content,.no-dark-theme .modal-body{background:#ffffff !important;color:#000000 !important;}
+/**
+ * WGS - Univerzální Tmavý Styl pro VŠECHNY Modály
+ *
+ * Tento CSS soubor aplikuje jednotný tmavý profesionální design
+ * (inspirovaný welcome-modal.css) na VŠECHNY modální okna v projektu.
+ *
+ * ⚠️ BEZPEČNOSTNÍ PRAVIDLA:
+ * - POUZE vizuální změny (barvy, stíny, bordery)
+ * - ŽÁDNÉ změny funkčních vlastností (display, position, z-index)
+ * - NERUŠÍ JavaScript řízení modalů
+ * - NEZMĚNÍ žádnou funkčnost
+ *
+ * @version 1.0.0
+ * @date 2025-11-24
+ */
+
+/* ============================================
+   OVERLAY - Všechny tmavé pozadí modalů
+   ============================================ */
+
+.modal-overlay,
+.cc-overlay,
+.welcome-modal-overlay,
+.admin-modal-overlay,
+.preview-overlay,
+.menu-overlay,
+.overlay-provedeni,
+.calendar-overlay,
+.loading-overlay,
+.hamburger-overlay,
+.pdf-preview-overlay,
+.cc-modal-overlay {
+    /* Tmavší pozadí s vyšší průhledností */
+    background: rgba(0, 0, 0, 0.92) !important;
+
+    /* Blur efekt pro elegantní vzhled */
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* VÝJIMKA: Calculator modal má vlastní světlý design */
+
+/* ============================================
+   MODAL CONTAINERY - Tmavé boxy
+   ============================================ */
+
+.modal-content,
+.cc-modal,
+.welcome-modal,
+.admin-modal,
+.preview-modal,
+.modal,
+.wgs-modal,
+#detail-reklamace-modal > div:first-child,
+#sablona-modal > div:first-child,
+#edit-modal .modal-content,
+#addUserModal .modal-content,
+#editNotificationModal .modal-content,
+#qrModal .modal-content,
+#notifModalOverlay .cc-modal,
+#adminModal,
+#detailOverlay .modal-content {
+    /* Tmavý gradient pozadí (jako welcome modal) */
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%) !important;
+
+    /* Jemný border */
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+
+    /* Elegantní stín */
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6),
+                0 0 1px rgba(255, 255, 255, 0.1) inset !important;
+}
+
+/* ============================================
+   MODAL HLAVIČKY - Header s titulkem
+   ============================================ */
+
+.modal-header,
+.cc-modal-header,
+.admin-modal-header,
+.wgs-modal .modal-header {
+    /* Tmavé pozadí hlavičky */
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
+
+    /* Jemný spodní border */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+
+    /* Jemný stín */
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ============================================
+   MODAL TITULKY - H1, H2, H3
+   ============================================ */
+
+.modal-title,
+.cc-modal-title,
+.admin-modal-title,
+.welcome-title,
+.modal-header h2,
+.modal-header h3,
+#sablona-modal-title,
+#notifModalTitle,
+#editNotificationTitle {
+    /* Jednotný styl titulku (jako wgsConfirm) */
+    color: #fff !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    margin: 0 0 15px 0 !important;
+    line-height: 1.3 !important;
+}
+
+/* ============================================
+   MODAL ZAVÍRACÍ TLAČÍTKA - × Close buttons
+   ============================================ */
+
+.modal-close,
+.cc-modal-close,
+.admin-modal-close,
+.close-modal,
+button[onclick*="zavrit"],
+button[onclick*="close"] {
+    /* Barva zavírací ikony */
+    color: #cccccc !important;
+
+    /* Hover efekt */
+    transition: all 0.2s ease !important;
+}
+
+.modal-close:hover,
+.cc-modal-close:hover,
+.admin-modal-close:hover,
+.close-modal:hover {
+    /* Světlejší při hover */
+    color: #ffffff !important;
+
+    /* Jemné pozadí */
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ============================================
+   MODAL TĚLA - Body content
+   ============================================ */
+
+.modal-body,
+.cc-modal-body,
+.admin-modal-body,
+.wgs-modal .modal-body {
+    /* Jednotný styl textu (jako wgsConfirm) */
+    color: #ccc !important;
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+}
+
+/* ============================================
+   TEXTY A ODSTAVCE
+   ============================================ */
+
+.modal-content p,
+.modal-body p,
+.cc-modal p,
+.admin-modal p {
+    /* Jednotný styl odstavců (jako wgsConfirm) */
+    color: #ccc !important;
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+    margin: 0 0 20px 0 !important;
+}
+
+/* Labels */
+.modal-content label,
+.modal-body label,
+.cc-modal label,
+.admin-modal label {
+    /* Jednotný styl labelů */
+    color: #aaa !important;
+    font-size: 0.85rem !important;
+    margin-bottom: 8px !important;
+    display: block !important;
+}
+
+/* ============================================
+   INPUTY A FORMULÁŘOVÉ PRVKY
+   ============================================ */
+
+.modal-content input[type="text"],
+.modal-content input[type="email"],
+.modal-content input[type="number"],
+.modal-content input[type="tel"],
+.modal-content textarea,
+.modal-content select,
+.modal-body input,
+.modal-body textarea,
+.modal-body select,
+.cc-modal input,
+.cc-modal textarea,
+.cc-modal select,
+.admin-modal input,
+.admin-modal textarea,
+.admin-modal select {
+    /* Tmavé pozadí inputů */
+    background: #2a2a2a !important;
+
+    /* Světlý text */
+    color: #ffffff !important;
+
+    /* Jemný border */
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Focus state */
+.modal-content input:focus,
+.modal-content textarea:focus,
+.modal-content select:focus,
+.modal-body input:focus,
+.modal-body textarea:focus,
+.modal-body select:focus,
+.cc-modal input:focus,
+.cc-modal textarea:focus,
+.cc-modal select:focus {
+    /* Světlejší border při focusu */
+    border-color: rgba(255, 255, 255, 0.3) !important;
+
+    /* Jemný outline */
+    outline: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Placeholder text */
+.modal-content input::placeholder,
+.modal-content textarea::placeholder,
+.modal-body input::placeholder,
+.modal-body textarea::placeholder {
+    color: #666666 !important;
+}
+
+/* ============================================
+   TLAČÍTKA V MODALECH (styl jako wgsConfirm)
+   ============================================ */
+
+.modal-footer button,
+.modal-body button,
+.cc-modal button,
+.admin-modal button {
+    /* Základní styl tlačítek */
+    padding: 10px 20px !important;
+    border-radius: 6px !important;
+    font-size: 0.9rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Sekundární/zrušit tlačítko */
+.modal-footer button.btn-secondary,
+.modal-footer button.btn-cancel,
+.modal-footer button[data-action*="zavrit"],
+.modal-footer button[data-action*="zrusit"] {
+    background: transparent !important;
+    color: #ccc !important;
+    border: 1px solid #444 !important;
+}
+
+.modal-footer button.btn-secondary:hover,
+.modal-footer button.btn-cancel:hover,
+.modal-footer button[data-action*="zavrit"]:hover,
+.modal-footer button[data-action*="zrusit"]:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: #666 !important;
+}
+
+/* Primární tlačítko */
+.modal-footer button.btn-primary,
+.modal-footer button[type="submit"] {
+    background: #fff !important;
+    color: #000 !important;
+    border: none !important;
+    font-weight: 500 !important;
+}
+
+.modal-footer button.btn-primary:hover,
+.modal-footer button[type="submit"]:hover {
+    background: #e0e0e0 !important;
+}
+
+/* Danger/smazat tlačítko */
+.modal-footer button.btn-danger,
+.modal-footer button[data-action*="smazat"],
+.modal-footer button[data-action*="delete"] {
+    background: #dc3545 !important;
+    color: #fff !important;
+    border: none !important;
+    font-weight: 500 !important;
+}
+
+.modal-footer button.btn-danger:hover,
+.modal-footer button[data-action*="smazat"]:hover,
+.modal-footer button[data-action*="delete"]:hover {
+    background: #c82333 !important;
+}
+
+/* ============================================
+   MODAL PATIČKY - Footer
+   ============================================ */
+
+.modal-footer,
+.wgs-modal .modal-footer {
+    /* Tmavé pozadí patičky */
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
+
+    /* Horní border */
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ============================================
+   TABULKY V MODALECH
+   ============================================ */
+
+.modal-content table,
+.modal-body table,
+.cc-modal table,
+.admin-modal table {
+    /* Barva textu */
+    color: #cccccc !important;
+}
+
+/* Table headers */
+.modal-content th,
+.modal-body th,
+.cc-modal th,
+.admin-modal th {
+    /* Tmavé pozadí hlavičky */
+    background: #1a1a1a !important;
+
+    /* Bílý text */
+    color: #ffffff !important;
+
+    /* Spodní border */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Table cells */
+.modal-content td,
+.modal-body td,
+.cc-modal td,
+.admin-modal td {
+    /* Spodní border */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Table rows hover */
+.modal-content tr:hover,
+.modal-body tr:hover,
+.cc-modal tr:hover,
+.admin-modal tr:hover {
+    /* Jemné zvýraznění */
+    background: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* ============================================
+   SCROLLBARS - Vlastní scrollbary
+   ============================================ */
+
+.modal-body::-webkit-scrollbar,
+.cc-modal-body::-webkit-scrollbar,
+.admin-modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track,
+.cc-modal-body::-webkit-scrollbar-track,
+.admin-modal-body::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+.modal-body::-webkit-scrollbar-thumb,
+.cc-modal-body::-webkit-scrollbar-thumb,
+.admin-modal-body::-webkit-scrollbar-thumb {
+    background: #444444;
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover,
+.cc-modal-body::-webkit-scrollbar-thumb:hover,
+.admin-modal-body::-webkit-scrollbar-thumb:hover {
+    background: #666666;
+}
+
+/* ============================================
+   LOADING STATES
+   ============================================ */
+
+.cc-modal-loading,
+.admin-modal-loading,
+.loading-overlay {
+    /* Tmavé pozadí loadingu */
+    background: rgba(26, 26, 26, 0.95) !important;
+}
+
+.cc-modal-loading-text,
+.admin-modal-loading-text {
+    /* Světlý text */
+    color: #cccccc !important;
+}
+
+/* Loading spinner */
+.cc-modal-spinner,
+.admin-modal-spinner {
+    /* Barva spinneru */
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    border-top-color: #ffffff !important;
+}
+
+/* ============================================
+   SPECIFICKÉ MODALY - Speciální případy
+   ============================================ */
+
+/* QR Modal (PSA kalkulátor) */
+#qrModal .qr-code-container {
+    background: #ffffff !important; /* QR kódy musí být na bílém */
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+/* GDPR Consent - zachovat původní vzhled */
+#gdpr-consent-banner,
+#gdpr-customize-modal {
+    /* GDPR modaly mají vlastní specifický design - neměnit */
+}
+
+/* ============================================
+   BACK BUTTONS - Zpět tlačítka
+   ============================================ */
+
+.admin-modal-back-btn,
+.cc-back-btn,
+button[onclick*="history.back"] {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.admin-modal-back-btn:hover,
+.cc-back-btn:hover {
+    background: #1a1a1a !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ============================================
+   ALERT / NOTIFICATION BOXES
+   ============================================ */
+
+.modal-content .alert,
+.modal-body .alert,
+.cc-modal .alert,
+.admin-modal .alert {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #cccccc !important;
+}
+
+/* Error alerts */
+.modal-content .alert-error,
+.modal-body .alert-error {
+    background: rgba(100, 100, 100, 0.2) !important;
+    border-color: rgba(100, 100, 100, 0.3) !important;
+    color: #aaa !important;
+}
+
+/* Success alerts - zelené (ale tmavé) */
+.modal-content .alert-success,
+.modal-body .alert-success {
+    background: rgba(100, 100, 100, 0.2) !important;
+    border-color: rgba(150, 150, 150, 0.3) !important;
+    color: #cccccc !important;
+}
+
+/* ============================================
+   POZNÁMKY V MODÁLECH - Notes styling
+   ============================================ */
+
+/* Kontejner poznámek */
+.modal-body .notes-container,
+.modal-content .notes-container {
+    background: transparent !important;
+}
+
+/* Jednotlivé poznámky - tmavé pozadí */
+.modal-body .note-item,
+.modal-content .note-item {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px;
+    margin-bottom: 12px !important;
+}
+
+/* Nepřečtené poznámky */
+.modal-body .note-item.unread,
+.modal-content .note-item.unread {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-left: 4px solid #999 !important;
+}
+
+/* Header poznámky */
+.modal-body .note-header,
+.modal-content .note-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+/* Autor poznámky - světlý text */
+.modal-body .note-author,
+.modal-content .note-author {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* Čas poznámky - šedý text, menší */
+.modal-body .note-time,
+.modal-content .note-time {
+    color: #888888 !important;
+    font-size: 0.7rem !important;
+}
+
+/* Tlacitko smazani poznamky - pouze cerveny krizek */
+.modal-body .note-delete-btn,
+.modal-content .note-delete-btn,
+.notes-container .note-delete-btn,
+button.note-delete-btn {
+    background: none !important;
+    border: none !important;
+    color: #cc0000 !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    border-radius: 0 !important;
+    cursor: pointer !important;
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    padding: 4px !important;
+    margin-left: auto !important;
+    opacity: 0.9 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    pointer-events: auto !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+}
+
+.modal-body .note-delete-btn:hover,
+.modal-content .note-delete-btn:hover,
+.notes-container .note-delete-btn:hover,
+button.note-delete-btn:hover {
+    background: none !important;
+    border: none !important;
+    color: #ff0000 !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+}
+
+.modal-body .note-delete-btn:focus,
+.modal-content .note-delete-btn:focus,
+.notes-container .note-delete-btn:focus,
+button.note-delete-btn:focus {
+    outline: 2px solid rgba(0, 0, 0, 0.5) !important;
+    outline-offset: 2px !important;
+}
+
+/* Note header flexbox pro tlacitko */
+.modal-body .note-header,
+.modal-content .note-header {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-wrap: nowrap;
+}
+
+/* Autor a cas na jednom radku, tlacitko vpravo */
+.modal-body .note-header .note-author,
+.modal-content .note-header .note-author {
+    flex-shrink: 0;
+}
+
+.modal-body .note-header .note-time,
+.modal-content .note-header .note-time {
+    flex-shrink: 0;
+    margin-right: auto;
+}
+
+/* Delete button v headeru - vzdy viditelne */
+.modal-body .note-header .note-delete-btn,
+.modal-content .note-header .note-delete-btn {
+    flex-shrink: 0 !important;
+    display: inline-block !important;
+    visibility: visible !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    text-align: center !important;
+}
+
+/* Text poznámky - světle šedý */
+.modal-body .note-text,
+.modal-content .note-text {
+    color: #cccccc !important;
+    line-height: 1.6;
+}
+
+/* Prázdné poznámky */
+.modal-body .empty-notes,
+.modal-content .empty-notes {
+    color: #666666 !important;
+    font-style: italic;
+    text-align: center;
+    padding: 2rem;
+}
+
+/* Textarea pro novou poznámku */
+.modal-body .note-textarea,
+.modal-content .note-textarea {
+    background: #2a2a2a !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 6px;
+}
+
+.modal-body .note-textarea::placeholder,
+.modal-content .note-textarea::placeholder {
+    color: #666666 !important;
+}
+
+.modal-body .note-textarea:focus,
+.modal-content .note-textarea:focus {
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Input area pro poznámky */
+.modal-body .note-input-area,
+.modal-content .note-input-area {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================
+   RESPONSIVE - Mobilní zařízení
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Na mobilu zachovat stejný vzhled */
+    .modal-content,
+    .cc-modal,
+    .admin-modal {
+        border-radius: 12px !important;
+    }
+}
+
+/* ============================================
+   POZNÁMKA: Výjimky a debug
+   ============================================ */
+
+/**
+ * Pokud některý modal nefunguje správně po aplikaci tohoto stylu:
+ *
+ * 1. Přidejte specifický selektor zde s komentářem
+ * 2. Případně přidejte class="no-dark-theme" na modal
+ * 3. Neměňte funkční vlastnosti (display, position, z-index)
+ *
+ * Kontakt: radek@wgs-service.cz
+ */
+
+/* Výjimka - modaly bez tmavého motivu */
+.no-dark-theme,
+.no-dark-theme .modal-content,
+.no-dark-theme .modal-body {
+    background: #ffffff !important;
+    color: #000000 !important;
+}

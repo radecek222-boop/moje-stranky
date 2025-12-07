@@ -1248,7 +1248,7 @@ body.pdf-export-mode #signature-pad {
 }
 
 .zakaznik-schvaleni-container {
-  background: #ffffff;
+  background: #1a1a1a;
   border-radius: 12px;
   width: 100%;
   max-width: 600px;
@@ -1257,21 +1257,26 @@ body.pdf-export-mode #signature-pad {
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid #333;
 }
 
 .zakaznik-schvaleni-header {
-  background: #1a1a1a;
+  background: #333;
   color: #ffffff;
   padding: 1rem 1.5rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+  border-bottom: 1px solid #444;
+  position: relative;
 }
 
 .zakaznik-schvaleni-header h2 {
   margin: 0;
   font-size: 1.3rem;
   font-weight: 600;
+  color: #fff;
+  text-align: center;
 }
 
 .zakaznik-schvaleni-close {
@@ -1284,6 +1289,10 @@ body.pdf-export-mode #signature-pad {
   line-height: 1;
   opacity: 0.7;
   transition: opacity 0.2s;
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .zakaznik-schvaleni-close:hover {
@@ -1297,20 +1306,21 @@ body.pdf-export-mode #signature-pad {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  color: #ccc;
 }
 
 .zakaznik-schvaleni-text-sekce label,
 .zakaznik-schvaleni-podpis-sekce label {
   display: block;
   font-weight: 600;
-  color: #333333;
+  color: #aaa;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
 
 .zakaznik-schvaleni-text {
-  background: #f5f5f5;
-  border: 1px solid #e0e0e0;
+  background: #fff;
+  border: 1px solid #333;
   border-radius: 8px;
   padding: 1rem;
   min-height: 120px;
@@ -1318,7 +1328,7 @@ body.pdf-export-mode #signature-pad {
   overflow-y: auto;
   font-size: 1rem;
   line-height: 1.5;
-  color: #1a1a1a;
+  color: #000;
   white-space: pre-wrap;
 }
 
@@ -1347,37 +1357,38 @@ body.pdf-export-mode #signature-pad {
 
 .zakaznik-schvaleni-hint {
   font-size: 0.8rem;
-  color: #666666;
+  color: #888;
 }
 
 .btn-vymazat-podpis {
-  background: #666666;
-  color: #ffffff;
-  border: none;
+  background: transparent;
+  color: #dc3545;
+  border: 1px solid #dc3545;
   padding: 0.5rem 1rem;
   border-radius: 6px;
   font-size: 0.85rem;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
 
 .btn-vymazat-podpis:hover {
-  background: #555555;
+  background: #dc3545;
+  color: #fff;
 }
 
 .zakaznik-schvaleni-footer {
-  background: #f5f5f5;
+  background: #222;
   padding: 1rem 1.5rem;
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid #333;
 }
 
 .btn-zrusit {
-  background: #999999;
-  color: #ffffff;
-  border: none;
+  background: transparent;
+  color: #ccc;
+  border: 1px solid #444;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 1rem;
@@ -1387,13 +1398,13 @@ body.pdf-export-mode #signature-pad {
 }
 
 .btn-zrusit:hover {
-  background: #888888;
+  background: #333;
 }
 
 .btn-pouzit {
-  background: #1a1a1a;
+  background: #333;
   color: #ffffff;
-  border: none;
+  border: 1px solid #444;
   padding: 0.75rem 2rem;
   border-radius: 8px;
   font-size: 1rem;
@@ -1403,7 +1414,7 @@ body.pdf-export-mode #signature-pad {
 }
 
 .btn-pouzit:hover {
-  background: #333333;
+  background: #444;
 }
 
 /* Tlačítko Podepsat protokol */
@@ -1434,23 +1445,23 @@ body.pdf-export-mode #signature-pad {
 .zakaznik-schvaleni-sekce label {
   display: block;
   font-weight: 600;
-  color: #333333;
+  color: #fff;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
 
-/* Tabulka souhrnu */
+/* Tabulka souhrnu - DARK THEME */
 .zakaznik-schvaleni-tabulka {
   width: 100%;
   border-collapse: collapse;
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
+  background: #222;
+  border: 1px solid #444;
   border-radius: 8px;
   overflow: hidden;
 }
 
 .zakaznik-schvaleni-tabulka tr {
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: none;
 }
 
 .zakaznik-schvaleni-tabulka tr:last-child {
@@ -1460,18 +1471,19 @@ body.pdf-export-mode #signature-pad {
 .zakaznik-schvaleni-tabulka td {
   padding: 0.75rem 1rem;
   font-size: 0.95rem;
+  border-bottom: none;
 }
 
 .zakaznik-schvaleni-tabulka .tabulka-label {
-  background: #f5f5f5;
-  color: #333333;
+  background: #2a2a2a;
+  color: #aaa;
   font-weight: 500;
   width: 55%;
 }
 
 .zakaznik-schvaleni-tabulka .tabulka-hodnota {
-  background: #ffffff;
-  color: #1a1a1a;
+  background: #222;
+  color: #fff;
   font-weight: 600;
   text-align: center;
 }
@@ -1479,7 +1491,7 @@ body.pdf-export-mode #signature-pad {
 /* Checkbox prodloužení lhůty */
 .zakaznik-schvaleni-tabulka .tabulka-checkbox-row {
   padding: 0.75rem 1rem;
-  background: #f5f5f5;
+  background: #2a2a2a;
 }
 
 .checkbox-prodlouzeni-lhuty {

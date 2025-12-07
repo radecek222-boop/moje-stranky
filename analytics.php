@@ -402,7 +402,7 @@ $zemeNazvy = [
             font-size: 0.65rem;
         }
 
-        /* IP blokace */
+        /* IP blokace - DARK THEME */
         .ip-form {
             display: flex;
             gap: 0.75rem;
@@ -411,15 +411,20 @@ $zemeNazvy = [
         .ip-form input {
             flex: 1;
             padding: 0.75rem 1rem;
-            border: 1px solid #ddd;
+            border: 1px solid #444;
             border-radius: 8px;
             font-family: 'Poppins', sans-serif;
             font-size: 0.85rem;
             transition: border-color 0.3s ease;
+            background: #222;
+            color: #fff;
         }
         .ip-form input:focus {
             outline: none;
-            border-color: #333;
+            border-color: #666;
+        }
+        .ip-form input::placeholder {
+            color: #888;
         }
         .ip-list {
             max-height: 250px;
@@ -430,28 +435,29 @@ $zemeNazvy = [
             justify-content: space-between;
             align-items: center;
             padding: 0.75rem 1rem;
-            border-bottom: 1px solid #f0f0f0;
+            border: 1px solid #333;
             font-size: 0.85rem;
             border-radius: 8px;
             margin-bottom: 0.5rem;
-            background: #fafafa;
+            background: #222;
+            color: #fff;
         }
         .ip-item:hover {
-            background: #f0f0f0;
+            background: #2a2a2a;
         }
         .ip-remove {
             background: none;
             border: none;
             cursor: pointer;
             font-size: 1.25rem;
-            color: #999;
+            color: #888;
             transition: color 0.2s ease;
         }
         .ip-remove:hover {
-            color: #333;
+            color: #dc3545;
         }
 
-        /* Modal */
+        /* Modal - DARK THEME */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -459,7 +465,7 @@ $zemeNazvy = [
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.8);
             backdrop-filter: blur(4px);
             z-index: 10000;
             justify-content: center;
@@ -469,32 +475,34 @@ $zemeNazvy = [
             display: flex;
         }
         .modal {
-            background: #fff;
-            border: none;
-            border-radius: 20px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
             width: 90%;
             max-width: 550px;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
         .modal-header {
-            background: linear-gradient(135deg, #333 0%, #111 100%);
+            background: #333;
             color: #fff;
             padding: 1.25rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-radius: 20px 20px 0 0;
+            border-radius: 12px 12px 0 0;
+            border-bottom: 1px solid #444;
         }
         .modal-header h3 {
-            font-size: 1rem;
-            font-weight: 500;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
         }
         .modal-close {
             background: none;
             border: none;
-            color: #fff;
+            color: #ccc;
             font-size: 1.75rem;
             cursor: pointer;
             line-height: 1;
@@ -506,6 +514,7 @@ $zemeNazvy = [
         }
         .modal-body {
             padding: 2rem;
+            color: #ccc;
         }
 
         /* Progress bar */
@@ -814,7 +823,7 @@ $zemeNazvy = [
             <button class="modal-close" onclick="zavritModal('ip-modal')">&times;</button>
         </div>
         <div class="modal-body">
-            <p style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;">
+            <p style="font-size: 0.8rem; color: #888; margin-bottom: 1rem;">
                 IP adresy v tomto seznamu nebudou zahrnuty do analytics (napr. vase vlastni IP).
             </p>
 
@@ -825,14 +834,14 @@ $zemeNazvy = [
 
             <div class="ip-list">
                 <?php if (empty($blokovaneIP)): ?>
-                    <p style="color: #999; text-align: center; padding: 1rem;">Zadne blokovane IP</p>
+                    <p style="color: #666; text-align: center; padding: 1rem;">Zadne blokovane IP</p>
                 <?php else: ?>
                     <?php foreach ($blokovaneIP as $ip): ?>
                     <div class="ip-item" data-id="<?= $ip['id'] ?>">
                         <div>
                             <strong><?= htmlspecialchars($ip['ip_address']) ?></strong>
                             <?php if ($ip['reason']): ?>
-                                <span style="color: #999; font-size: 0.7rem;"> - <?= htmlspecialchars($ip['reason']) ?></span>
+                                <span style="color: #888; font-size: 0.7rem;"> - <?= htmlspecialchars($ip['reason']) ?></span>
                             <?php endif; ?>
                         </div>
                         <button class="ip-remove" onclick="odebratIP(<?= $ip['id'] ?>)" title="Odebrat">&times;</button>
@@ -841,7 +850,7 @@ $zemeNazvy = [
                 <?php endif; ?>
             </div>
 
-            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #333;">
                 <button class="btn" onclick="pridatMojiIP()">Pridat moji aktualni IP</button>
             </div>
         </div>

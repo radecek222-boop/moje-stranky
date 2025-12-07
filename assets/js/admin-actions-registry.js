@@ -274,12 +274,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('CSRF token není dostupný');
             }
 
-            const res = await fetch('/api/control_center_api.php', {
+            // FIX: Použití správného API endpointu
+            const res = await fetch('/api/admin.php?action=test_smtp_connection', {
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    action: 'test_smtp_connection',
                     csrf_token: csrf
                 })
             });
@@ -332,12 +332,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 smtp_from_name: document.getElementById('smtp_from_name')?.value?.trim() || ''
             };
 
-            const res = await fetch('/api/control_center_api.php', {
+            // FIX: Použití správného API endpointu
+            const res = await fetch('/api/admin.php?action=save_smtp_config', {
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    action: 'save_smtp_config',
                     ...payload,
                     csrf_token: csrf
                 })

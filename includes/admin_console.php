@@ -60,9 +60,9 @@ endif;
 }
 
 .console-btn {
-    background: #ffffff;
-    color: #1d1d1f;
-    border: 1px solid #d1d1d6;
+    background: #333;
+    color: #ccc;
+    border: 1px solid #444;
     padding: 0.5rem 1rem;
     border-radius: 8px;
     font-size: 0.875rem;
@@ -76,13 +76,13 @@ endif;
 }
 
 .console-btn:hover {
-    background: #f5f5f7;
-    border-color: #667eea;
-    color: #667eea;
+    background: #444;
+    border-color: #555;
+    color: #fff;
 }
 
 .console-btn.danger {
-    background: #ffffff;
+    background: #333;
     color: #dc3545;
     border: 1px solid #dc3545;
 }
@@ -93,20 +93,20 @@ endif;
 }
 
 .console-btn.success {
-    background: #667eea;
-    color: white;
-    border: 1px solid #667eea;
+    background: #333;
+    color: #39ff14;
+    border: 1px solid #39ff14;
 }
 
 .console-btn.success:hover {
-    background: #5a67d8;
-    border-color: #5a67d8;
+    background: #39ff14;
+    color: #000;
 }
 
 .console-btn:disabled {
-    background: #f5f5f7;
-    color: #86868b;
-    border-color: #e5e5ea;
+    background: #222;
+    color: #666;
+    border-color: #333;
     cursor: not-allowed;
     opacity: 0.6;
 }

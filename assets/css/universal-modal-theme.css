@@ -102,11 +102,12 @@
 #sablona-modal-title,
 #notifModalTitle,
 #editNotificationTitle {
-    /* Bílá barva textu */
-    color: #ffffff !important;
-
-    /* Jemný text-shadow */
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    /* Jednotný styl titulku (jako wgsConfirm) */
+    color: #fff !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    margin: 0 0 15px 0 !important;
+    line-height: 1.3 !important;
 }
 
 /* ============================================
@@ -145,8 +146,10 @@ button[onclick*="close"] {
 .cc-modal-body,
 .admin-modal-body,
 .wgs-modal .modal-body {
-    /* Barva textu */
-    color: #cccccc !important;
+    /* Jednotný styl textu (jako wgsConfirm) */
+    color: #ccc !important;
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
 }
 
 /* ============================================
@@ -157,8 +160,11 @@ button[onclick*="close"] {
 .modal-body p,
 .cc-modal p,
 .admin-modal p {
-    /* Šedá barva pro běžný text */
-    color: #999999 !important;
+    /* Jednotný styl odstavců (jako wgsConfirm) */
+    color: #ccc !important;
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+    margin: 0 0 20px 0 !important;
 }
 
 /* Labels */
@@ -166,7 +172,11 @@ button[onclick*="close"] {
 .modal-body label,
 .cc-modal label,
 .admin-modal label {
-    color: #cccccc !important;
+    /* Jednotný styl labelů */
+    color: #aaa !important;
+    font-size: 0.85rem !important;
+    margin-bottom: 8px !important;
+    display: block !important;
 }
 
 /* ============================================
@@ -224,43 +234,67 @@ button[onclick*="close"] {
 }
 
 /* ============================================
-   TLAČÍTKA V MODALECH
+   TLAČÍTKA V MODALECH (styl jako wgsConfirm)
    ============================================ */
 
 .modal-footer button,
 .modal-body button,
 .cc-modal button,
-.admin-modal button,
-button.btn,
-button.button {
-    /* Tmavé pozadí tlačítek */
-    background: #000000 !important;
-
-    /* Bílý text */
-    color: #ffffff !important;
-
-    /* Jemný border */
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-
-    /* Stín */
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+.admin-modal button {
+    /* Základní styl tlačítek */
+    padding: 10px 20px !important;
+    border-radius: 6px !important;
+    font-size: 0.9rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
 }
 
-/* Hover state */
-.modal-footer button:hover,
-.modal-body button:hover,
-.cc-modal button:hover,
-.admin-modal button:hover,
-button.btn:hover,
-button.button:hover {
-    /* Světlejší při hover */
-    background: #1a1a1a !important;
+/* Sekundární/zrušit tlačítko */
+.modal-footer button.btn-secondary,
+.modal-footer button.btn-cancel,
+.modal-footer button[data-action*="zavrit"],
+.modal-footer button[data-action*="zrusit"] {
+    background: transparent !important;
+    color: #ccc !important;
+    border: 1px solid #444 !important;
+}
 
-    /* Světlejší border */
-    border-color: rgba(255, 255, 255, 0.2) !important;
+.modal-footer button.btn-secondary:hover,
+.modal-footer button.btn-cancel:hover,
+.modal-footer button[data-action*="zavrit"]:hover,
+.modal-footer button[data-action*="zrusit"]:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: #666 !important;
+}
 
-    /* Silnější stín */
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6) !important;
+/* Primární tlačítko */
+.modal-footer button.btn-primary,
+.modal-footer button[type="submit"] {
+    background: #fff !important;
+    color: #000 !important;
+    border: none !important;
+    font-weight: 500 !important;
+}
+
+.modal-footer button.btn-primary:hover,
+.modal-footer button[type="submit"]:hover {
+    background: #e0e0e0 !important;
+}
+
+/* Danger/smazat tlačítko */
+.modal-footer button.btn-danger,
+.modal-footer button[data-action*="smazat"],
+.modal-footer button[data-action*="delete"] {
+    background: #dc3545 !important;
+    color: #fff !important;
+    border: none !important;
+    font-weight: 500 !important;
+}
+
+.modal-footer button.btn-danger:hover,
+.modal-footer button[data-action*="smazat"]:hover,
+.modal-footer button[data-action*="delete"]:hover {
+    background: #c82333 !important;
 }
 
 /* ============================================

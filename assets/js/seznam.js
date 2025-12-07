@@ -746,11 +746,11 @@ async function showDetail(recordOrId) {
       <div class="detail-buttons">
         ${!jeProdejce ? `
           <button class="detail-btn detail-btn-primary" data-action="reopenOrder" data-id="${record.id}">Znovu otevřít</button>
-          <button class="detail-btn detail-btn-secondary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+          <button class="detail-btn detail-btn-primary" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
         ` : ''}
-        <button class="detail-btn detail-btn-secondary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+        <button class="detail-btn detail-btn-primary" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
         ${record.original_reklamace_id ? `
-          <button class="detail-btn detail-btn-secondary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
+          <button class="detail-btn detail-btn-primary" data-action="showHistoryPDF" data-original-id="${record.original_reklamace_id}">Historie zákazníka</button>
         ` : ''}
         ${record.documents && record.documents.length > 0 ? `
           <button class="detail-btn detail-btn-primary" data-action="openPDF" data-pdf-path="${record.documents[0].file_path}" data-id="${record.id}">PDF Report</button>
@@ -759,20 +759,18 @@ async function showDetail(recordOrId) {
             <div class="detail-info-box-subtitle">PDF report ještě nebyl vytvořen</div>
           </div>
         `}
-        <button class="detail-btn detail-btn-secondary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
+        <button class="detail-btn detail-btn-primary" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
       </div>
     `;
   } else {
     buttonsHtml = `
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="startVisit" data-id="${record.id}">Zahájit návštěvu</button>
-
         <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCalendar" data-id="${record.id}">Naplánovat termín</button>
-
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
-        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
-        <button class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem;" data-action="closeDetail">Zavřít</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showContactMenu" data-id="${record.id}">Kontaktovat</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showCustomerDetail" data-id="${record.id}">Detail zákazníka</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="showVideoteka" data-id="${record.id}">Videotéka</button>
+        <button class="btn" style="width: 100%; padding: 0.5rem 0.75rem; min-height: 38px; font-size: 0.85rem; background: #1a1a1a; color: white;" data-action="closeDetail">Zavřít</button>
       </div>
     `;
   }
@@ -1510,32 +1508,36 @@ function showBookingDetail(bookingOrId) {
 function renderTimeGrid() {
   const t = document.getElementById('timeGrid');
   t.innerHTML = '';
-  
+
+  // Najít všechny zákazníky na daný den, seřazené podle času
+  const dayBookings = WGS_DATA_CACHE
+    .filter(rec => rec.termin === SELECTED_DATE && rec.cas_navstevy && rec.id !== CURRENT_RECORD?.id)
+    .sort((a, b) => a.cas_navstevy.localeCompare(b.cas_navstevy));
+
   const occupiedTimes = {};
-  WGS_DATA_CACHE.forEach(rec => {
-    if (rec.termin === SELECTED_DATE && rec.cas_navstevy && rec.id !== CURRENT_RECORD?.id) {
-      const customerName = Utils.getCustomerName(rec);
-      occupiedTimes[rec.cas_navstevy] = {
-        zakaznik: customerName,
-        model: Utils.getProduct(rec)
-      };
-    }
+  dayBookings.forEach(rec => {
+    const customerName = Utils.getCustomerName(rec);
+    occupiedTimes[rec.cas_navstevy] = {
+      zakaznik: customerName,
+      model: Utils.getProduct(rec),
+      record: rec
+    };
   });
-  
+
   // Časový rozsah: 8:00 - 19:00 (místo původního 7:00 - 20:30)
   for (let h = 8; h <= 19; h++) {
     for (const mm of [0, 30]) {
       const time = `${String(h).padStart(2, '0')}:${mm === 0 ? '00' : '30'}`;
       const el = document.createElement('div');
       el.className = 'time-slot';
-      
+
       if (occupiedTimes[time]) {
         el.classList.add('occupied');
         el.title = `${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}`;
       }
-      
+
       el.textContent = time;
-      el.onclick = () => {
+      el.onclick = async () => {
         SELECTED_TIME = time;
         document.querySelectorAll('.time-slot').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
@@ -1549,13 +1551,73 @@ function renderTimeGrid() {
         const warningEl = document.getElementById('collisionWarning');
 
         if (occupiedTimes[time] && warningEl) {
-          warningEl.textContent = `KOLIZE: ${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}`;
+          // Základní info o kolizi
+          warningEl.innerHTML = `KOLIZE: ${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}<br><span style="font-size: 0.75rem; opacity: 0.8;">Počítám vzdálenost...</span>`;
           warningEl.style.display = 'block';
+
+          // Spočítat vzdálenost mezi aktuálním a kolizním zákazníkem
+          const kolizniZakaznik = occupiedTimes[time].record;
+          const currentAddress = Utils.getAddress(CURRENT_RECORD);
+          const kolizniAddress = Utils.getAddress(kolizniZakaznik);
+
+          if (currentAddress && currentAddress !== '—' && kolizniAddress && kolizniAddress !== '—') {
+            try {
+              // Najít pozici v denním plánu
+              const kolizniIndex = dayBookings.findIndex(b => b.id === kolizniZakaznik.id);
+              const predchozi = kolizniIndex > 0 ? dayBookings[kolizniIndex - 1] : null;
+              const nasledujici = kolizniIndex < dayBookings.length - 1 ? dayBookings[kolizniIndex + 1] : null;
+
+              // Vzdálenost mezi aktuálním a kolizním
+              const vzdalenost = await getDistance(
+                Utils.addCountryToAddress(currentAddress),
+                Utils.addCountryToAddress(kolizniAddress)
+              );
+
+              let infoHtml = `KOLIZE: ${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}`;
+
+              if (vzdalenost) {
+                infoHtml += `<div class="collision-distance-box">Vzdálenost mezi zákazníky: <strong>${vzdalenost.km} km</strong></div>`;
+              }
+
+              // Pokud jsou další zákazníci na ten den, ukázat kontext
+              if (predchozi || nasledujici) {
+                infoHtml += `<div class="collision-context">`;
+                if (predchozi) {
+                  const predchoziAddr = Utils.getAddress(predchozi);
+                  if (predchoziAddr && predchoziAddr !== '—') {
+                    const vzdalOdPredchoziho = await getDistance(
+                      Utils.addCountryToAddress(predchoziAddr),
+                      Utils.addCountryToAddress(currentAddress)
+                    );
+                    if (vzdalOdPredchoziho) {
+                      infoHtml += `<span class="collision-route">Od ${Utils.getCustomerName(predchozi)} (${predchozi.cas_navstevy}): <strong>${vzdalOdPredchoziho.km} km</strong></span>`;
+                    }
+                  }
+                }
+                if (nasledujici) {
+                  const nasledujiciAddr = Utils.getAddress(nasledujici);
+                  if (nasledujiciAddr && nasledujiciAddr !== '—') {
+                    const vzdalKNasledujicimu = await getDistance(
+                      Utils.addCountryToAddress(currentAddress),
+                      Utils.addCountryToAddress(nasledujiciAddr)
+                    );
+                    if (vzdalKNasledujicimu) {
+                      infoHtml += `<span class="collision-route">K ${Utils.getCustomerName(nasledujici)} (${nasledujici.cas_navstevy}): <strong>${vzdalKNasledujicimu.km} km</strong></span>`;
+                    }
+                  }
+                }
+                infoHtml += `</div>`;
+              }
+
+              warningEl.innerHTML = infoHtml;
+            } catch (err) {
+              logger.error('Chyba při výpočtu vzdálenosti kolize:', err);
+              warningEl.innerHTML = `KOLIZE: ${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}`;
+            }
+          }
         } else if (warningEl) {
           warningEl.style.display = 'none';
         }
-
-        // PERFORMANCE: getDistance() a showDayBookingsWithDistances() vypnuty
       };
       t.appendChild(el);
     }
@@ -1732,9 +1794,9 @@ function showContactMenu(id) {
       <div class="detail-buttons">
         ${phone ? `<a href="tel:${phone}" class="detail-btn detail-btn-primary" style="text-decoration: none;">Zavolat</a>` : ''}
         <button class="detail-btn detail-btn-primary" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
-        ${phone ? `<button class="detail-btn detail-btn-secondary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
-        ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="detail-btn detail-btn-secondary" style="text-decoration: none;" target="_blank">Navigovat (Waze)</a>` : ''}
-        <button class="detail-btn detail-btn-secondary" data-action="showDetail">Zpět</button>
+        ${phone ? `<button class="detail-btn detail-btn-primary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
+        ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="detail-btn detail-btn-primary" style="text-decoration: none;" target="_blank">Navigovat (Waze)</a>` : ''}
+        <button class="detail-btn detail-btn-primary" data-action="showDetail">Zpět</button>
       </div>
     </div>
   `;
@@ -1862,69 +1924,69 @@ async function showCustomerDetail(id) {
     <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
 
       <!-- KOMPAKTNÍ INFO BLOK -->
-      <div style="background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
+      <div style="background: #1a1a1a; border: none; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
         <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; font-size: 0.9rem;">
-          <span style="color: #666; font-weight: 600;">Číslo objednávky:</span>
-          <input type="text" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: white;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
+          <span style="color: #aaa; font-weight: 600;">Číslo objednávky:</span>
+          <input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
 
-          <span style="color: #666; font-weight: 600;">Zadavatel:</span>
-          <input type="text" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #f8f9fa;" value="${Utils.escapeHtml(zadavatel)}" readonly placeholder="Prodejce/Uživatel">
+          <span style="color: #aaa; font-weight: 600;">Zadavatel:</span>
+          <input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #eee; color: #000;" value="${Utils.escapeHtml(zadavatel)}" readonly placeholder="Prodejce/Uživatel">
 
-          <span style="color: #666; font-weight: 600;">Číslo reklamace:</span>
-          <input type="text" id="edit_cislo" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${Utils.escapeHtml(cislo)}">
+          <span style="color: #aaa; font-weight: 600;">Číslo reklamace:</span>
+          <input type="text" id="edit_cislo" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(cislo)}">
 
-          <span style="color: #666; font-weight: 600;">Fakturace:</span>
-          <span style="color: #1a1a1a; font-weight: 600; padding: 0.25rem 0;">${fakturace_firma.toUpperCase() === 'SK' ? 'Slovensko (SK)' : 'Česká republika (CZ)'}</span>
+          <span style="color: #aaa; font-weight: 600;">Fakturace:</span>
+          <span style="color: #fff; font-weight: 600; padding: 0.25rem 0;">${fakturace_firma.toUpperCase() === 'SK' ? 'Slovensko (SK)' : 'Česká republika (CZ)'}</span>
 
-          <span style="color: #666; font-weight: 600;">Datum prodeje:</span>
-          <input type="text" id="edit_datum_prodeje" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${Utils.escapeHtml(datum_prodeje)}" placeholder="DD.MM.RRRR">
+          <span style="color: #aaa; font-weight: 600;">Datum prodeje:</span>
+          <input type="text" id="edit_datum_prodeje" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(datum_prodeje)}" placeholder="DD.MM.RRRR">
 
-          <span style="color: #666; font-weight: 600;">Datum reklamace:</span>
-          <input type="text" id="edit_datum_reklamace" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${Utils.escapeHtml(datum_reklamace)}" placeholder="DD.MM.RRRR">
+          <span style="color: #aaa; font-weight: 600;">Datum reklamace:</span>
+          <input type="text" id="edit_datum_reklamace" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(datum_reklamace)}" placeholder="DD.MM.RRRR">
 
-          <span style="color: #666; font-weight: 600;">Jméno:</span>
-          <input type="text" id="edit_jmeno" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${customerName}">
+          <span style="color: #aaa; font-weight: 600;">Jméno:</span>
+          <input type="text" id="edit_jmeno" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${customerName}">
 
-          <span style="color: #666; font-weight: 600;">Telefon:</span>
-          <input type="tel" id="edit_telefon" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${phone}">
+          <span style="color: #aaa; font-weight: 600;">Telefon:</span>
+          <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${phone}">
 
-          <span style="color: #666; font-weight: 600;">Email:</span>
-          <input type="email" id="edit_email" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${email}">
+          <span style="color: #aaa; font-weight: 600;">Email:</span>
+          <input type="email" id="edit_email" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
 
-          <span style="color: #666; font-weight: 600;">Adresa:</span>
-          <input type="text" id="edit_adresa" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${address}">
+          <span style="color: #aaa; font-weight: 600;">Adresa:</span>
+          <input type="text" id="edit_adresa" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${address}">
 
-          <span style="color: #666; font-weight: 600;">Model:</span>
-          <input type="text" id="edit_model" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${product}">
+          <span style="color: #aaa; font-weight: 600;">Model:</span>
+          <input type="text" id="edit_model" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${product}">
 
-          <span style="color: #666; font-weight: 600;">Provedení:</span>
-          <input type="text" id="edit_provedeni" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${Utils.escapeHtml(provedeni)}" placeholder="Látka / Kůže">
+          <span style="color: #aaa; font-weight: 600;">Provedení:</span>
+          <input type="text" id="edit_provedeni" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(provedeni)}" placeholder="Látka / Kůže">
 
-          <span style="color: #666; font-weight: 600;">Barva:</span>
-          <input type="text" id="edit_barva" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${Utils.escapeHtml(barva)}">
+          <span style="color: #aaa; font-weight: 600;">Barva:</span>
+          <input type="text" id="edit_barva" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(barva)}">
         </div>
       </div>
 
       <!-- DOPLŇUJÍCÍ INFORMACE OD PRODEJCE -->
       <div style="margin-bottom: 1rem;">
-        <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace od prodejce:</label>
+        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace od prodejce:</label>
         <textarea id="edit_doplnujici_info"
-                  style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 60px; background: white; resize: vertical; font-family: inherit;"
+                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 60px; background: #fff; color: #000; resize: vertical; font-family: inherit;"
                   placeholder="Zadejte doplňující informace od prodejce">${Utils.escapeHtml(doplnujici_info)}</textarea>
       </div>
 
       <!-- POPIS PROBLÉMU OD ZÁKAZNÍKA -->
       <div style="margin-bottom: 2rem;">
-        <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému od zákazníka:</label>
+        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému od zákazníka:</label>
         <textarea id="edit_popis_problemu"
-                  style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 80px; background: white; resize: vertical; font-family: inherit;"
+                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 80px; background: #fff; color: #000; resize: vertical; font-family: inherit;"
                   placeholder="Zadejte popis problému od zákazníka">${Utils.escapeHtml(description)}</textarea>
       </div>
 
       <!-- FOTOGRAFIE -->
       ${fotky.length > 0 ? `
         <div style="margin-bottom: 1rem;">
-          <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">Fotografie (${fotky.length}):</label>
+          <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">Fotografie (${fotky.length}):</label>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem;">
             ${fotky.map((f, i) => {
               const photoPath = typeof f === 'object' ? f.photo_path : f;
@@ -1934,7 +1996,7 @@ async function showCustomerDetail(id) {
               return `
                 <div class="foto-wrapper" style="position: relative;">
                   <img src='${photoPath}'
-                       style='width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid #ddd; cursor: pointer; border-radius: 3px;'
+                       style='width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid #333; cursor: pointer; border-radius: 3px;'
                        alt='Fotka ${i+1}'
                        data-action="showPhotoFullscreen"
                        data-url="${escapedUrl}">
@@ -1964,15 +2026,15 @@ async function showCustomerDetail(id) {
 
         if (!pdfDoc) {
           return `
-            <div style="padding: 0.75rem; text-align: center; background: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 4px; margin-bottom: 1rem;">
-              <p style="margin: 0; color: #6c757d; font-size: 0.8rem;">PDF report ještě nebyl vytvořen</p>
+            <div style="padding: 0.75rem; text-align: center; background: #222; border: 1px dashed #444; border-radius: 4px; margin-bottom: 1rem;">
+              <p style="margin: 0; color: #888; font-size: 0.8rem;">PDF report ještě nebyl vytvořen</p>
             </div>
           `;
         }
 
         return `
           <div style="margin-bottom: 1rem;">
-            <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF Report:</label>
+            <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF Report:</label>
             <button class="btn customer-detail-btn"
                     data-action="openPDF"
                     data-pdf-path="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}">
@@ -1983,19 +2045,19 @@ async function showCustomerDetail(id) {
       })()}
 
       ${CURRENT_USER.is_admin ? `
-        <div style="border-top: 1px solid #e0e0e0; padding-top: 1rem; margin-top: 1rem;">
+        <div style="border-top: 1px solid #333; padding-top: 1rem; margin-top: 1rem;">
           <button class="btn customer-detail-btn danger" data-action="deleteReklamace" data-id="${id}">
             Smazat reklamaci
           </button>
-          <p style="font-size: 0.7rem; color: #999; margin-top: 0.25rem; text-align: center;">Smaže vše včetně fotek a PDF</p>
+          <p style="font-size: 0.7rem; color: #666; margin-top: 0.25rem; text-align: center;">Smaže vše včetně fotek a PDF</p>
         </div>
       ` : ''}
 
-    </div>
+      <div class="detail-buttons">
+        <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
+        <button class="detail-btn detail-btn-primary" data-action="showDetail" data-id="${id}">Zpět</button>
+      </div>
 
-    <div class="detail-buttons">
-      <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
-      <button class="detail-btn detail-btn-secondary" data-action="showDetail" data-id="${id}">Zpět</button>
     </div>
   `;
 
@@ -3135,24 +3197,24 @@ function showDeleteConfirmModal(reklamaceNumber) {
     modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10003;display:flex;align-items:center;justify-content:center;';
 
     const modalContent = document.createElement('div');
-    modalContent.style.cssText = 'background:white;padding:30px;border-radius:8px;max-width:450px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+    modalContent.style.cssText = 'background:#1a1a1a;padding:25px;border-radius:12px;max-width:400px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);border:1px solid #333;';
 
     modalContent.innerHTML = `
-      <h2 style="margin:0 0 20px 0;color:#666;font-size:1.3rem;font-weight:700;">Smazat reklamaci?</h2>
-      <p style="margin:0 0 15px 0;color:#555;line-height:1.6;font-size:1rem;">
-        Opravdu chcete <strong>TRVALE SMAZAT</strong> reklamaci<br>
-        <strong style="color:#666;font-size:1.1rem;">${reklamaceNumber}</strong>?
+      <h3 style="margin:0 0 15px 0;color:#fff;font-size:1.1rem;font-weight:600;">Smazat reklamaci?</h3>
+      <p style="margin:0 0 15px 0;color:#ccc;line-height:1.5;font-size:0.95rem;">
+        Opravdu chcete <strong style="color:#fff;">TRVALE SMAZAT</strong> reklamaci<br>
+        <strong style="color:#fff;font-size:1rem;">${reklamaceNumber}</strong>?
       </p>
-      <p style="margin:0 0 25px 0;color:#666;font-size:0.9rem;font-weight:600;">
+      <p style="margin:0 0 20px 0;color:#999;font-size:0.85rem;">
         Tato akce smaže VŠE včetně fotek a PDF!<br>
         Tuto akci NELZE vrátit zpět!
       </p>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <button id="deleteConfirmYes" style="padding:14px 28px;background:#666;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700;">
-          Ano, pokračovat →
-        </button>
-        <button id="deleteConfirmNo" style="padding:14px 28px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:600;">
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="deleteConfirmNo" style="padding:10px 20px;background:transparent;color:#ccc;border:1px solid #444;border-radius:6px;cursor:pointer;font-size:0.9rem;">
           Zrušit
+        </button>
+        <button id="deleteConfirmYes" style="padding:10px 20px;background:#dc3545;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;font-weight:500;">
+          Smazat
         </button>
       </div>
     `;
@@ -3178,25 +3240,25 @@ function showDeleteInputModal(reklamaceNumber) {
     modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10003;display:flex;align-items:center;justify-content:center;';
 
     const modalContent = document.createElement('div');
-    modalContent.style.cssText = 'background:white;padding:30px;border-radius:8px;max-width:450px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+    modalContent.style.cssText = 'background:#1a1a1a;padding:25px;border-radius:12px;max-width:400px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);border:1px solid #333;';
 
     modalContent.innerHTML = `
-      <h2 style="margin:0 0 20px 0;color:#666;font-size:1.3rem;font-weight:700;">Poslední ověření</h2>
-      <p style="margin:0 0 15px 0;color:#555;line-height:1.6;font-size:1rem;">
+      <h3 style="margin:0 0 15px 0;color:#fff;font-size:1.1rem;font-weight:600;">Poslední ověření</h3>
+      <p style="margin:0 0 15px 0;color:#ccc;line-height:1.5;font-size:0.95rem;">
         Pro potvrzení smazání zadejte přesně číslo reklamace:
       </p>
-      <p style="margin:0 0 15px 0;color:#666;font-size:1.2rem;font-weight:700;">
+      <p style="margin:0 0 15px 0;color:#fff;font-size:1rem;font-weight:600;">
         ${reklamaceNumber}
       </p>
       <input type="text" id="deleteInputField"
              placeholder="Zadejte číslo reklamace"
-             style="width:100%;padding:12px;border:2px solid #666;border-radius:6px;font-size:1rem;text-align:center;margin-bottom:20px;">
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <button id="deleteInputConfirm" style="padding:14px 28px;background:#666;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700;">
-          SMAZAT NAVŽDY
-        </button>
-        <button id="deleteInputCancel" style="padding:14px 28px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:600;">
+             style="width:100%;padding:10px;background:#252525;border:1px solid #444;border-radius:6px;font-size:0.9rem;text-align:center;margin-bottom:20px;color:#fff;box-sizing:border-box;">
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="deleteInputCancel" style="padding:10px 20px;background:transparent;color:#ccc;border:1px solid #444;border-radius:6px;cursor:pointer;font-size:0.9rem;">
           Zrušit
+        </button>
+        <button id="deleteInputConfirm" style="padding:10px 20px;background:#dc3545;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;font-weight:500;">
+          Smazat
         </button>
       </div>
     `;
@@ -3249,12 +3311,13 @@ async function deleteReklamace(reklamaceId) {
 
     // Zobrazit chybovou hlášku
     const errorModal = document.createElement('div');
+    errorModal.id = 'errorModal';
     errorModal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10003;display:flex;align-items:center;justify-content:center;';
     errorModal.innerHTML = `
-      <div style="background:white;padding:30px;border-radius:8px;max-width:400px;width:90%;text-align:center;">
-        <h2 style="margin:0 0 20px 0;color:#666;">Nesprávné číslo!</h2>
-        <p style="margin:0 0 25px 0;color:#555;">Zadali jste nesprávné číslo reklamace.<br>Mazání bylo zrušeno.</p>
-        <button data-action="closeErrorModal" style="padding:12px 24px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;">
+      <div style="background:#1a1a1a;padding:25px;border-radius:12px;max-width:400px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);border:1px solid #333;">
+        <h3 style="margin:0 0 15px 0;color:#fff;font-size:1.1rem;font-weight:600;">Nesprávné číslo!</h3>
+        <p style="margin:0 0 20px 0;color:#ccc;font-size:0.95rem;line-height:1.5;">Zadali jste nesprávné číslo reklamace.<br>Mazání bylo zrušeno.</p>
+        <button onclick="document.getElementById('errorModal').remove();" style="padding:10px 20px;background:#fff;color:#000;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;font-weight:500;">
           OK
         </button>
       </div>
@@ -3311,20 +3374,20 @@ async function smazatFotku(photoId, photoUrl) {
     modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10003;display:flex;align-items:center;justify-content:center;';
 
     const modalContent = document.createElement('div');
-    modalContent.style.cssText = 'background:white;padding:30px;border-radius:8px;max-width:400px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+    modalContent.style.cssText = 'background:#1a1a1a;padding:25px;border-radius:12px;max-width:400px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);border:1px solid #333;';
 
     modalContent.innerHTML = `
-      <h2 style="margin:0 0 20px 0;color:#333;font-size:1.2rem;font-weight:700;">Smazat fotku?</h2>
-      <p style="margin:0 0 25px 0;color:#555;line-height:1.6;font-size:1rem;">
-        Opravdu chcete smazat tuto fotografii?<br><br>
-        <strong>Tato akce je nevratná!</strong>
+      <h3 style="margin:0 0 15px 0;color:#fff;font-size:1.1rem;font-weight:600;">Smazat fotku?</h3>
+      <p style="margin:0 0 20px 0;color:#ccc;line-height:1.5;font-size:0.95rem;">
+        Opravdu chcete smazat tuto fotografii?<br>
+        <strong style="color:#999;">Tato akce je nevratná!</strong>
       </p>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <button id="deleteFotoYes" style="padding:14px 28px;background:#666;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700;">
-          Ano, smazat
-        </button>
-        <button id="deleteFotoNo" style="padding:14px 28px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:600;">
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="deleteFotoNo" style="padding:10px 20px;background:transparent;color:#ccc;border:1px solid #444;border-radius:6px;cursor:pointer;font-size:0.9rem;">
           Zrušit
+        </button>
+        <button id="deleteFotoYes" style="padding:10px 20px;background:#dc3545;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;font-weight:500;">
+          Smazat
         </button>
       </div>
     `;

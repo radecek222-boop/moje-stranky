@@ -1047,8 +1047,8 @@ function loadNotifContent(type, body) {
 
 <!-- MODAL: Edit Notification -->
 <div class="wgs-modal" id="editNotificationModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="editNotificationTitle">
-  <div class="modal-content" style="width: 1200px; max-width: 90vw; height: 80vh; display: flex; flex-direction: column; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-    <div class="modal-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #ddd; flex-shrink: 0;">
+  <div class="modal-content" style="width: 1200px; max-width: 90vw; height: 80vh; display: flex; flex-direction: column; background: #1a1a1a; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid #333;">
+    <div class="modal-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid #444; flex-shrink: 0; background: #333;">
       <h3 class="modal-title" id="editNotificationTitle" data-lang-cs="Editovat notifikaci" data-lang-en="Edit Notification" data-lang-it="Modifica Notifica">Editovat notifikaci</h3>
       <button class="modal-close" data-action="closeEditNotificationModal" aria-label="Zavřít">×</button>
     </div>
@@ -1070,19 +1070,19 @@ function loadNotifContent(type, body) {
       </div>
       <div class="form-group">
         <label class="form-label" data-lang-cs="Šablona zprávy" data-lang-en="Message Template" data-lang-it="Modello di Messaggio">Šablona zprávy</label>
-        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;"><strong data-lang-cs="Dostupné proměnné:" data-lang-en="Available variables:" data-lang-it="Variabili disponibili:">Dostupné proměnné:</strong>
+        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #aaa;"><strong data-lang-cs="Dostupné proměnné:" data-lang-en="Available variables:" data-lang-it="Variabili disponibili:">Dostupné proměnné:</strong>
           <div id="available-variables" style="display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem;"></div>
         </div>
         <textarea class="form-input" id="edit-template" rows="8"></textarea>
       </div>
       <div class="form-group">
         <label class="form-label" data-lang-cs="Náhled" data-lang-en="Preview" data-lang-it="Anteprima">Náhled</label>
-        <div id="template-preview" style="background: #f5f5f5; padding: 1rem; border: 1px solid #ddd; white-space: pre-wrap; font-family: monospace; font-size: 0.9rem;">Začněte psát...</div>
+        <div id="template-preview" style="background: #222; padding: 1rem; border: 1px solid #444; white-space: pre-wrap; font-family: monospace; font-size: 0.9rem; color: #ccc;">Začněte psát...</div>
       </div>
       <div class="form-group">
         <label class="form-label" data-lang-cs="Dodatečné kopie emailů (CC)" data-lang-en="Additional Email Copies (CC)" data-lang-it="Copie Email Aggiuntive (CC)">Dodatečné kopie emailů (CC)</label>
-        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;">
-          <strong>Tip:</strong> Můžete použít proměnné jako <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{seller_email}}</code>, <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{technician_email}}</code> atd.
+        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #888;">
+          <strong style="color: #aaa;">Tip:</strong> Můžete použít proměnné jako <code style="background: #333; padding: 2px 6px; border-radius: 3px; color: #ccc;">{{seller_email}}</code>, <code style="background: #333; padding: 2px 6px; border-radius: 3px; color: #ccc;">{{technician_email}}</code> atd.
         </div>
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
           <input type="email" class="form-input" id="new-cc-email" data-lang-cs-placeholder="novy@email.cz nebo {{seller_email}}" data-lang-en-placeholder="new@email.com or {{seller_email}}" data-lang-it-placeholder="nuovo@email.it o {{seller_email}}" placeholder="novy@email.cz nebo {{seller_email}}" style="flex: 1;">
@@ -1092,8 +1092,8 @@ function loadNotifContent(type, body) {
       </div>
       <div class="form-group">
         <label class="form-label" data-lang-cs="Skryté kopie (BCC)" data-lang-en="Blind Copies (BCC)" data-lang-it="Copie Nascoste (BCC)">Skryté kopie (BCC)</label>
-        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #666;">
-          <strong>Tip:</strong> Můžete použít proměnné jako <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{seller_email}}</code>, <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{technician_email}}</code> atd.
+        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: #888;">
+          <strong style="color: #aaa;">Tip:</strong> Můžete použít proměnné jako <code style="background: #333; padding: 2px 6px; border-radius: 3px; color: #ccc;">{{seller_email}}</code>, <code style="background: #333; padding: 2px 6px; border-radius: 3px; color: #ccc;">{{technician_email}}</code> atd.
         </div>
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
           <input type="email" class="form-input" id="new-bcc-email" data-lang-cs-placeholder="skryta@email.cz nebo {{seller_email}}" data-lang-en-placeholder="hidden@email.com or {{seller_email}}" data-lang-it-placeholder="nascosta@email.it o {{seller_email}}" placeholder="skryta@email.cz nebo {{seller_email}}" style="flex: 1;">
