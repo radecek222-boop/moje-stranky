@@ -233,7 +233,7 @@ async function confirmNewPeriod() {
 
     if (payload.status === 'success' && payload.data && payload.data.periods && payload.data.periods[periodKey]) {
       // Období už existuje - přepnout na něj
-      if (await wgsConfirm(`Období ${MONTHS_CZ[newMonth]} ${newYear} již existuje. Chcete se na něj přepnout?`, 'Přepnout', 'Zrušit')) {
+      if (await wgsConfirm(`Období ${MONTHS_CZ[newMonth]} ${newYear} již existuje. Chcete se na něj přepnout?`, { titulek: 'Období existuje', btnPotvrdit: 'Přepnout' })) {
         closeNewPeriodSelector();
         currentPeriod.month = newMonth;
         currentPeriod.year = newYear;
@@ -1112,7 +1112,7 @@ async function confirmAddEmployee() {
 async function updateEmployee(index, field, value, needConfirm = false) {
   if (field === 'name' && needConfirm) {
     const oldName = employees[index].name;
-    if (oldName !== value && !await wgsConfirm(`Opravdu chcete změnit jméno z "${oldName}" na "${value}"?`, 'Změnit', 'Zrušit')) {
+    if (oldName !== value && !await wgsConfirm(`Opravdu chcete změnit jméno z "${oldName}" na "${value}"?`, { titulek: 'Změnit jméno', btnPotvrdit: 'Změnit' })) {
       renderTable();
       return;
     }
@@ -1148,7 +1148,7 @@ async function removeEmployee(index) {
     return;
   }
 
-  if (await wgsConfirm(`Opravdu chcete odebrat zaměstnance ${emp.name} z tohoto období?`, 'Odebrat', 'Zrušit')) {
+  if (await wgsConfirm(`Opravdu chcete odebrat zaměstnance ${emp.name} z tohoto období?`, { titulek: 'Odebrat zaměstnance', btnPotvrdit: 'Odebrat', nebezpecne: true })) {
     employees.splice(index, 1);
     renderTable();
     updateStats();
@@ -1805,7 +1805,7 @@ function printReport() {
 }
 
 async function clearAll() {
-  if (await wgsConfirm('Opravdu chcete vynulovat hodiny pro toto období?', 'Vynulovat', 'Zrušit')) {
+  if (await wgsConfirm('Opravdu chcete vynulovat hodiny pro toto období?', { titulek: 'Vynulovat hodiny', btnPotvrdit: 'Vynulovat', nebezpecne: true })) {
     // Pouze vynulovat hodiny a bonusy, NE mazat zaměstnance!
     employees.forEach(emp => {
       emp.hours = 0;
