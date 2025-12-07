@@ -912,6 +912,12 @@ function switchSection(section) {
         loadUzivateleProSecurity();
     } else if (section === 'online') {
         nactiOnlineUzivatele();
+    } else if (section === 'bezpecnost') {
+        nactiUzivateleProDropdown();
+    } else if (section === 'api_klice') {
+        nactiApiKlice();
+    } else if (section === 'audit') {
+        nactiAuditLogy();
     }
 }
 
@@ -1934,7 +1940,14 @@ async function nactiOnlineUzivatele() {
 console.log('Security centrum načteno');
 
 // ACTION REGISTRY - Step 113
-if (typeof Utils !== 'undefined' && Utils.registerAction) {
+// FIX: Počkat na načtení Utils (defer script)
+function registerSecurityActions() {
+    if (typeof Utils === 'undefined' || !Utils.registerAction) {
+        // Utils ještě není načten, zkusit znovu za 50ms
+        setTimeout(registerSecurityActions, 50);
+        return;
+    }
+
     Utils.registerAction('switchSecuritySection', (el, data) => {
         if (data.section) switchSection(data.section);
     });
@@ -2024,7 +2037,12 @@ if (typeof Utils !== 'undefined' && Utils.registerAction) {
             }
         }
     });
+
+    console.log('[Security] Akce zaregistrovány');
 }
+
+// Spustit registraci akcí
+registerSecurityActions();
 
 </script>
 
