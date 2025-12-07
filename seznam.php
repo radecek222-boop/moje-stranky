@@ -1683,7 +1683,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </div>
 
 <!-- External JavaScript -->
-<script src="assets/js/seznam.js?v=20251207-03" defer></script>
+<script src="assets/js/seznam.js?v=20251207-04" defer></script>
 
 <!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
 <script>
