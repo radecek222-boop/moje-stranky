@@ -95,6 +95,7 @@ try {
 } catch (PDOException $e) {}
 
 // 4. Lokace (město jako primární, fallback na zemi)
+// Zobrazit POUZE záznamy s městem, bez města nezobrazovat (jsou to staré záznamy)
 $lokace = [];
 try {
     $stmt = $pdo->query("
@@ -104,6 +105,8 @@ try {
             COUNT(*) as navstevy
         FROM wgs_pageviews
         WHERE $whereObdobi
+          AND city IS NOT NULL
+          AND city != ''
         GROUP BY city, country_code
         ORDER BY navstevy DESC
         LIMIT 10
