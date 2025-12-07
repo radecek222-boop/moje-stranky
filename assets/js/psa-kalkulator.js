@@ -2,6 +2,7 @@
  * PSA Kalkulátor - JavaScript
  * WGS Payroll Calculator
  */
+console.log('PSA Kalkulátor script loading...');
 
 // === GLOBAL VARIABLES ===
 let employees = [];
@@ -17,9 +18,14 @@ const PERMANENT_EMPLOYEE_IDS = [19, 20, 21, 22];  // Marek, Lenka, Radek, Prémi
 
 // === INITIALIZATION ===
 window.addEventListener('DOMContentLoaded', () => {
-  logger.log('PSA Kalkulátor initialized');
-  initializePeriod();
-  loadData();
+  console.log('DOMContentLoaded fired');
+  try {
+    logger.log('PSA Kalkulátor initialized');
+    initializePeriod();
+    loadData();
+  } catch (e) {
+    console.error('Init error:', e);
+  }
 });
 
 // === PERIOD MANAGEMENT ===
@@ -2320,7 +2326,11 @@ window.onclick = function(event) {
 
 // === UNIVERSAL EVENT DELEGATION FOR REMOVED INLINE HANDLERS ===
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Event delegation initialized');
+  try {
+    console.log('Event delegation initialized');
+  } catch (e) {
+    console.error('Event delegation init error:', e);
+  }
 
   // Společná funkce pro zpracování data-action
   function zpracujDataAction(target) {
