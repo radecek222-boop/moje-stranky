@@ -1974,6 +1974,56 @@ if (typeof Utils !== 'undefined' && Utils.registerAction) {
     Utils.registerAction('odeslatPozvanky', () => odeslatPozvanky());
     Utils.registerAction('aktualizovatVyber', () => aktualizovatVyber());
     Utils.registerAction('refreshOnlineUzivatele', () => nactiOnlineUzivatele());
+
+    // Upravit email u registračního klíče
+    Utils.registerAction('upravitEmailKlice', async (el, data) => {
+        const keyCode = data.code;
+        const currentEmail = data.email || '';
+
+        const novyEmail = prompt('Zadejte email pro klíč ' + keyCode + ':', currentEmail);
+
+        // Uživatel zrušil dialog
+        if (novyEmail === null) return;
+
+        try {
+            const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() :
+                             document.querySelector('meta[name="csrf-token"]')?.content;
+
+            const response = await fetch('/api/admin_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'update_key_email',
+                    key_code: keyCode,
+                    email: novyEmail.trim(),
+                    csrf_token: csrfToken
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                if (typeof wgsToast !== 'undefined' && wgsToast.success) {
+                    wgsToast.success(result.message || 'Email uložen');
+                } else {
+                    alert(result.message || 'Email uložen');
+                }
+                // Obnovit seznam klíčů
+                if (typeof nactiRegistracniKlice === 'function') {
+                    nactiRegistracniKlice();
+                }
+            } else {
+                throw new Error(result.message || 'Chyba při ukládání');
+            }
+        } catch (err) {
+            console.error('[upravitEmailKlice] Chyba:', err);
+            if (typeof wgsToast !== 'undefined' && wgsToast.error) {
+                wgsToast.error(err.message || 'Chyba při ukládání emailu');
+            } else {
+                alert('Chyba: ' + (err.message || 'Chyba při ukládání emailu'));
+            }
+        }
+    });
 }
 
 </script>
