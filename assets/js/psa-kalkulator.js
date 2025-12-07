@@ -1002,6 +1002,26 @@ async function saveEmployeeToDatabase(index) {
 
 // Uložit změny jednotlivého zaměstnance (např. číslo účtu)
 async function saveEmployeeChanges(index) {
+  // Nejprve synchronizovat hodnoty z inputů do employees pole
+  const row = document.querySelector(`tr[data-index="${index}"]`) ||
+              document.querySelectorAll('tbody tr')[index];
+
+  if (row) {
+    const inputs = row.querySelectorAll('[data-action="updateEmployeeField"]');
+    inputs.forEach(input => {
+      const field = input.getAttribute('data-field');
+      if (field && employees[index]) {
+        if (field === 'hours' || field === 'bonusAmount' || field === 'premieCastka') {
+          employees[index][field] = parseInt(input.value) || 0;
+        } else if (field === 'bank') {
+          employees[index][field] = formatBankCode(input.value);
+        } else {
+          employees[index][field] = input.value;
+        }
+      }
+    });
+  }
+
   const emp = employees[index];
   if (!emp) {
     wgsToast.error('Zaměstnanec nenalezen');
