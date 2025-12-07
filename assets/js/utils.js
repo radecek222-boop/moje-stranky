@@ -437,10 +437,10 @@ function wgsConfirm(zprava, optionsOrOkText = {}, cancelTextLegacy) {
         modal.innerHTML = `
             <div class="wgs-confirm-dialog" style="background: #1a1a1a; padding: 25px; border-radius: 12px;
                         max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-                        border: 1px solid #333;">
+                        border: 1px solid #333; text-align: center;">
                 <h3 id="wgs-confirm-title" style="margin: 0 0 15px 0; color: #fff; font-size: 1.1rem; font-weight: 600;">${escapeHtml(titulek)}</h3>
                 <p id="wgs-confirm-message" class="wgs-confirm-message" style="margin: 0 0 20px 0; color: #ccc; font-size: 0.95rem; line-height: 1.5;">${escapeHtml(zprava)}</p>
-                <div class="wgs-confirm-buttons" style="display: flex; gap: 10px; justify-content: flex-end;">
+                <div class="wgs-confirm-buttons" style="display: flex; gap: 10px; justify-content: center;">
                     <button type="button" id="wgsConfirmBtnZrusit" class="wgs-confirm-btn wgs-confirm-cancel"
                             style="padding: 10px 20px; border: 1px solid #444; border-radius: 6px;
                                    background: transparent; color: #ccc; cursor: pointer; font-size: 0.9rem;">${escapeHtml(btnZrusit)}</button>
