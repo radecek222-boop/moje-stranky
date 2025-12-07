@@ -1519,7 +1519,8 @@ function buildSpaydPayload(data) {
   }
 
   const vs = data.vs ? String(data.vs).replace(/\D/g, '').slice(0, 10) : '';
-  const message = sanitizeMessage(data.message || '');
+  // Zkratit zpravu na max 60 znaku pro QR kod
+  const message = sanitizeMessage(data.message || '').slice(0, 60);
 
   // Konverze na IBAN format pro SPAYD
   const iban = convertToIBAN(account, bank);
@@ -1557,7 +1558,7 @@ async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
         height: size,
         colorDark: '#000000',
         colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
+        correctLevel: QRCode.CorrectLevel.L  // Nizsi uroven korekce = vice dat
       });
 
       logger.log(`QR code generated${contextLabel ? ' for ' + contextLabel : ''}`);
