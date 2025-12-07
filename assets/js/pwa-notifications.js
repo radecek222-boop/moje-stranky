@@ -535,7 +535,7 @@
         border-radius: 12px;
         box-shadow: 0 4px 24px rgba(0,0,0,0.2);
         z-index: 10002;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: 'Poppins', sans-serif;
         font-size: 14px;
         max-width: 320px;
         text-align: center;

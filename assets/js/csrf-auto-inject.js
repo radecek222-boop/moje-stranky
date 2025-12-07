@@ -88,7 +88,7 @@ function showCsrfError(message) {
         max-width: 400px;
         width: 90%;
         text-align: center;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: 'Poppins', sans-serif;
         animation: slideDown 0.3s ease-out;
     `;
 
