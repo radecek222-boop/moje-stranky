@@ -96,10 +96,10 @@ if (!$isLoggedIn && !$isAdmin) {
 <!-- External CSS -->
     <!-- Unified Design System -->
   <link rel="preload" href="assets/css/styles.min.css?v=20251121-02" as="style">
-  <link rel="preload" href="assets/css/seznam.min.css?v=20251207-01" as="style">
+  <link rel="preload" href="assets/css/seznam.min.css?v=20251207-03" as="style">
 
   <link rel="stylesheet" href="assets/css/styles.min.css?v=20251121-02">
-  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20251207-01">
+  <link rel="stylesheet" href="assets/css/seznam.min.css?v=20251207-03">
   <!-- seznam-mobile-fixes.css sloučen do seznam.css (Step 50) -->
   <link rel="stylesheet" href="assets/css/button-fixes-global.min.css">
   <link rel="stylesheet" href="assets/css/mobile-responsive.min.css?v=20251121-02">
@@ -867,6 +867,19 @@ body.modal-open {
 #detailOverlay .btn:hover {
   background: #333333 !important;
   border: none !important;
+}
+
+/* Detail tlačítka - černá bez rámečku */
+#detailOverlay .detail-btn,
+#detailOverlay .detail-btn-primary {
+  background: #1a1a1a !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+#detailOverlay .detail-btn:hover,
+#detailOverlay .detail-btn-primary:hover {
+  background: #333333 !important;
 }
 
 #detailOverlay .btn-success {
@@ -1670,7 +1683,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </div>
 
 <!-- External JavaScript -->
-<script src="assets/js/seznam.js?v=20251207-02" defer></script>
+<script src="assets/js/seznam.js?v=20251207-03" defer></script>
 
 <!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
 <script>

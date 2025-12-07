@@ -1860,7 +1860,7 @@ async function showCustomerDetail(id) {
     <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
 
       <!-- KOMPAKTNÍ INFO BLOK -->
-      <div style="background: #1a1a1a; border: 1px solid #333; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
+      <div style="background: #1a1a1a; border: none; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
         <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; font-size: 0.9rem;">
           <span style="color: #aaa; font-weight: 600;">Číslo objednávky:</span>
           <input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
