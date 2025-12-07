@@ -857,16 +857,16 @@ body.modal-open {
   color: #ffffff !important;
 }
 
-/* Tlačítka v detailu - tmavá */
+/* Tlačítka v detailu - černá bez rámečku */
 #detailOverlay .btn {
-  background: #333333 !important;
-  border-color: #555555 !important;
+  background: #1a1a1a !important;
+  border: none !important;
   color: #ffffff !important;
 }
 
 #detailOverlay .btn:hover {
-  background: #444444 !important;
-  border-color: #666666 !important;
+  background: #333333 !important;
+  border: none !important;
 }
 
 #detailOverlay .btn-success {
@@ -1670,7 +1670,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </div>
 
 <!-- External JavaScript -->
-<script src="assets/js/seznam.js?v=20251207-01" defer></script>
+<script src="assets/js/seznam.js?v=20251207-02" defer></script>
 
 <!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
 <script>
