@@ -1921,30 +1921,39 @@ function generatePaymentQR() {
 
   // Domestic payments with QR codes
   paymentData.forEach((payment, index) => {
-    // Přeskočit zaměstnance bez účtu (nezobrazovat v QR gridu)
-    if (payment.missingAccount) return;
-
     const qrItem = document.createElement('div');
     qrItem.className = 'qr-item';
+
+    // Pokud chybí účet, zobrazit prázdný čtverec místo QR
+    const hasAccount = !payment.missingAccount;
+    const accountText = hasAccount ? `${payment.account}/${payment.bank}` : 'Chybí účet';
 
     qrItem.innerHTML = `
       <div class="qr-employee-name">${payment.name}</div>
       <div class="qr-amount">${formatCurrency(payment.amount)}</div>
-      <div class="qr-account">${payment.account}/${payment.bank}</div>
+      <div class="qr-account">${accountText}</div>
       <div class="qr-code-wrapper" id="qr-${index}"></div>
-      <div class="qr-item-buttons">
-        <button class="btn btn-sm" data-action="downloadQR" data-qrid="qr-${index}" data-name="${payment.name}">Stáhnout</button>
-        <button class="btn btn-sm btn-secondary" data-action="shareQR" data-qrid="qr-${index}" data-name="${payment.name}" data-amount="${payment.amount}">Sdílet</button>
-      </div>
+      ${hasAccount ? `
+        <div class="qr-item-buttons">
+          <button class="btn btn-sm" data-action="downloadQR" data-qrid="qr-${index}" data-name="${payment.name}">Stáhnout</button>
+          <button class="btn btn-sm btn-secondary" data-action="shareQR" data-qrid="qr-${index}" data-name="${payment.name}" data-amount="${payment.amount}">Sdílet</button>
+        </div>
+      ` : ''}
     `;
 
     paymentsGrid.appendChild(qrItem);
 
-    // Generate QR code
+    // Generate QR code nebo prázdný bílý čtverec
     setTimeout(async () => {
       const qrElement = document.getElementById(`qr-${index}`);
       if (!qrElement) {
         logger.error(`QR element not found: qr-${index}`);
+        return;
+      }
+
+      // Pokud chybí účet, zobrazit prázdný bílý čtverec
+      if (!hasAccount) {
+        qrElement.innerHTML = '<div style="width: 160px; height: 160px; background: white; border: 1px solid #ddd; margin: 0 auto;"></div>';
         return;
       }
 
