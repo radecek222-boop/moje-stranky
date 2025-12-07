@@ -158,6 +158,10 @@ try {
             handleListKeys($pdo);
             break;
 
+        case 'update_key_email':
+            handleUpdateKeyEmail($pdo, $payload);
+            break;
+
         // Pozvanky nyni pouzivaji sablony z wgs_notifications
         // (invitation_prodejce, invitation_technik)
         // Editace sablon je v karce "Email sablony"
@@ -203,6 +207,48 @@ function handleListKeys(PDO $pdo): void
                 'sent_at' => $key['sent_at'] ?? null,
             ];
         }, $keys)
+    ]);
+}
+
+/**
+ * Aktualizuje email u registracniho klice
+ */
+function handleUpdateKeyEmail(PDO $pdo, array $payload): void
+{
+    $keyCode = trim($payload['key_code'] ?? '');
+    $email = trim($payload['email'] ?? '');
+
+    if (empty($keyCode)) {
+        throw new InvalidArgumentException('Chybí kód klíče.');
+    }
+
+    // Validace emailu (prazdny email je povoleny - smazani)
+    if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        throw new InvalidArgumentException('Neplatný formát emailu.');
+    }
+
+    // Kontrola zda klic existuje
+    $stmt = $pdo->prepare('SELECT id FROM wgs_registration_keys WHERE key_code = :key_code LIMIT 1');
+    $stmt->execute([':key_code' => $keyCode]);
+    if (!$stmt->fetch()) {
+        throw new InvalidArgumentException('Klíč nebyl nalezen.');
+    }
+
+    // Aktualizace emailu
+    $stmt = $pdo->prepare('
+        UPDATE wgs_registration_keys
+        SET sent_to_email = :email
+        WHERE key_code = :key_code
+    ');
+    $stmt->execute([
+        ':email' => $email ?: null,
+        ':key_code' => $keyCode
+    ]);
+
+    respondSuccess([
+        'message' => $email ? 'Email byl uložen.' : 'Email byl odstraněn.',
+        'key_code' => $keyCode,
+        'email' => $email ?: null
     ]);
 }
 

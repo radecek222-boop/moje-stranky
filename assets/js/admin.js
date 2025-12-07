@@ -2268,4 +2268,47 @@ if (typeof Utils !== 'undefined' && Utils.registerAction) {
       switchEmailSection(data.section);
     }
   });
+
+  // Upravit email u registracniho klice
+  Utils.registerAction('upravitEmailKlice', async (el, data) => {
+    const keyCode = data.code;
+    const currentEmail = data.email || '';
+
+    const novyEmail = prompt('Zadejte email pro klíč ' + keyCode + ':', currentEmail);
+
+    // Uzivatel zrusil dialog
+    if (novyEmail === null) return;
+
+    try {
+      const csrfToken = await getCSRFToken();
+      const response = await fetch('/api/admin_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_key_email',
+          key_code: keyCode,
+          email: novyEmail.trim(),
+          csrf_token: csrfToken
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        wgsToast.success(result.message || 'Email uložen');
+        // Obnovit seznam klicu
+        if (typeof nactiKlice === 'function') {
+          nactiKlice();
+        } else {
+          // Fallback - reload stranky
+          location.reload();
+        }
+      } else {
+        wgsToast.error(result.message || 'Chyba při ukládání');
+      }
+    } catch (err) {
+      console.error('Chyba:', err);
+      wgsToast.error('Chyba při komunikaci se serverem');
+    }
+  });
 }
