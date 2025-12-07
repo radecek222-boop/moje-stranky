@@ -404,10 +404,12 @@ function wgsConfirm(zprava, optionsOrOkText = {}, cancelTextLegacy) {
 
         const {
             titulek = 'Potvrzení',
-            btnPotvrdit = 'Potvrdit',
             btnZrusit = 'Zrušit',
             nebezpecne = false
         } = options;
+
+        // Výchozí text tlačítka: "Smazat" pro nebezpečné akce, jinak "Potvrdit"
+        const btnPotvrdit = options.btnPotvrdit || (nebezpecne ? 'Smazat' : 'Potvrdit');
 
         // Odstranit existující modal
         const existujici = document.getElementById('wgsConfirmModal');
@@ -436,8 +438,8 @@ function wgsConfirm(zprava, optionsOrOkText = {}, cancelTextLegacy) {
             <div class="wgs-confirm-dialog" style="background: #1a1a1a; padding: 25px; border-radius: 12px;
                         max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
                         border: 1px solid #333; font-family: 'Poppins', sans-serif;">
-                <h3 id="wgs-confirm-title" style="margin: 0 0 15px 0; color: #fff; font-size: 1.1rem; font-weight: 600;">${escapeHtml(titulek)}</h3>
-                <p id="wgs-confirm-message" class="wgs-confirm-message" style="margin: 0 0 20px 0; color: #ccc; font-size: 0.95rem; line-height: 1.5;">${escapeHtml(zprava)}</p>
+                <h3 id="wgs-confirm-title" style="margin: 0 0 15px 0; color: #fff; font-size: 1.1rem; font-weight: 600; font-family: 'Poppins', sans-serif;">${escapeHtml(titulek)}</h3>
+                <p id="wgs-confirm-message" class="wgs-confirm-message" style="margin: 0 0 20px 0; color: #ccc; font-size: 0.95rem; line-height: 1.5; font-family: 'Poppins', sans-serif;">${escapeHtml(zprava)}</p>
                 <div class="wgs-confirm-buttons" style="display: flex; gap: 10px; justify-content: flex-end;">
                     <button type="button" id="wgsConfirmBtnZrusit" class="wgs-confirm-btn wgs-confirm-cancel"
                             style="padding: 10px 20px; border: 1px solid #444; border-radius: 6px;
