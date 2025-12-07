@@ -1449,13 +1449,25 @@ function convertToIBAN(account, bankCode) {
   // BBAN = kod banky + predcisli + cislo uctu
   const bban = bankCode + predcisli + cisloUctu;
 
+  // Kontrola BBAN delky (4 + 6 + 10 = 20 znaku)
+  if (bban.length !== 20) {
+    throw new Error(`Neplatná délka BBAN: ${bban.length} (očekáváno 20)`);
+  }
+
   // Vypocet kontrolnich cislic (ISO 7064 Mod 97-10)
   // Presunout CZ00 na konec a nahradit pismena cisly (C=12, Z=35)
   const checkString = bban + '123500'; // CZ = 12 35, 00 = placeholder
   let remainder = BigInt(checkString) % 97n;
   const checkDigits = String(98n - remainder).padStart(2, '0');
 
-  return 'CZ' + checkDigits + bban;
+  const iban = 'CZ' + checkDigits + bban;
+
+  // Kontrola IBAN delky (CZ ma vzdy 24 znaku)
+  if (iban.length !== 24) {
+    throw new Error(`Neplatná délka IBAN: ${iban.length} (očekáváno 24)`);
+  }
+
+  return iban;
 }
 
 function sanitizeMessage(message) {
@@ -2090,6 +2102,9 @@ function generateSingleEmployeeQR(index) {
     ${isLenka ? '<div class="summary-row" style="color: var(--c-info); font-size: 0.85rem;"><span>Paušální mzda</span><span>8716 Kč/měsíc</span></div>' : ''}
   `;
 
+  // Generate unique QR element ID (future-proof pro více QR najednou)
+  const qrId = `qr-single-${Date.now()}-${index}`;
+
   // Generate QR code
   const qrItem = document.createElement('div');
   qrItem.className = 'qr-item';
@@ -2099,23 +2114,24 @@ function generateSingleEmployeeQR(index) {
     <div class="qr-amount">${formatCurrency(amount)}</div>
     ${isLenka ? '<div style="font-size: 0.75rem; color: var(--c-info);">Paušální mzda</div>' : ''}
     <div class="qr-account">${emp.account}/${formatBankCode(emp.bank)}</div>
-    <div class="qr-code-wrapper" id="qr-single"></div>
-    <button class="btn btn-sm" style="margin-top: 1rem;" data-action="downloadQR" data-qrid="qr-single" data-name="${emp.name}">
+    <div class="qr-code-wrapper" id="${qrId}"></div>
+    <button class="btn btn-sm" style="margin-top: 1rem;" data-action="downloadQR" data-qrid="${qrId}" data-name="${emp.name}">
       Stáhnout QR
     </button>
   `;
 
   container.appendChild(qrItem);
 
-  // Generate QR code
+  // Generate QR code asynchronně
   setTimeout(async () => {
-    const qrElement = document.getElementById('qr-single');
+    const qrElement = document.getElementById(qrId);
     if (!qrElement) {
-      logger.error('QR element not found: qr-single');
+      console.error('QR element not found:', qrId);
+      wgsToast.error('QR element nenalezen v DOM');
       return;
     }
 
-    // BUGFIX: Clear element before generating new QR code
+    // Vyčistit element před generováním
     qrElement.innerHTML = '';
 
     let qrText;
@@ -2128,17 +2144,18 @@ function generateSingleEmployeeQR(index) {
         message: `Výplata ${emp.name} ${currentPeriod.month}/${currentPeriod.year}`
       });
     } catch (err) {
+      console.error('QR generateCzechPaymentString failed:', err);
       qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err.message}</div>`;
       return;
     }
 
-    logger.log(`Generating single QR for ${emp.name}:`, qrText);
+    console.log(`Generating QR for ${emp.name}:`, qrText);
 
     try {
       await renderQrCode(qrElement, qrText, 220, emp.name);
     } catch (error) {
-      logger.error(`Failed to generate QR code for ${emp.name}:`, error);
-      qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
+      console.error(`QR render failed for ${emp.name}:`, error);
+      qrElement.innerHTML = `<div style="color: red; padding: 20px;">${error?.message || 'Chyba QR'}</div>`;
     }
   }, 100);
 
@@ -2168,10 +2185,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Step 115 - Podpora parametrů pro onclick migraci
     switch (action) {
       case 'generateSingleEmployeeQR': {
-        const gIndex = target.getAttribute('data-index');
-        if (gIndex !== null && typeof generateSingleEmployeeQR === 'function') {
-          generateSingleEmployeeQR(parseInt(gIndex, 10));
+        const gIndexStr = target.getAttribute('data-index');
+        const gIndex = Number.parseInt(gIndexStr, 10);
+
+        if (!Number.isInteger(gIndex) || gIndex < 0) {
+          console.warn('QR: invalid data-index', gIndexStr, target);
+          wgsToast.error('Neplatný index zaměstnance');
+          return;
         }
+
+        if (typeof generateSingleEmployeeQR !== 'function') {
+          console.error('generateSingleEmployeeQR is not a function');
+          wgsToast.error('QR modul není načten');
+          return;
+        }
+
+        generateSingleEmployeeQR(gIndex);
         return;
       }
 
