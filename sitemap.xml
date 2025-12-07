@@ -91,4 +91,62 @@
         <priority>0.4</priority>
     </url>
 
+    <!-- Nase sluzby -->
+    <url>
+        <loc>https://wgs-service.cz/nasesluzby.php</loc>
+        <lastmod>2025-12-07</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- O nas -->
+    <url>
+        <loc>https://wgs-service.cz/onas.php</loc>
+        <lastmod>2025-12-07</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- === SEO LANDING PAGES === -->
+
+    <!-- Oprava sedacky - hlavni SEO stranka -->
+    <url>
+        <loc>https://wgs-service.cz/oprava-sedacky.php</loc>
+        <lastmod>2025-12-07</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <!-- Oprava kresla -->
+    <url>
+        <loc>https://wgs-service.cz/oprava-kresla.php</loc>
+        <lastmod>2025-12-07</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <!-- Servis Natuzzi - autorizovany servis -->
+    <url>
+        <loc>https://wgs-service.cz/servis-natuzzi.php</loc>
+        <lastmod>2025-12-07</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <!-- Pozarucni servis -->
+    <url>
+        <loc>https://wgs-service.cz/pozarucni-servis.php</loc>
+        <lastmod>2025-12-07</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Neuznana reklamace -->
+    <url>
+        <loc>https://wgs-service.cz/neuznana-reklamace.php</loc>
+        <lastmod>2025-12-07</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
 </urlset>

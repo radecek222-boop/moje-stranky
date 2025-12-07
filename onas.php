@@ -1,4 +1,7 @@
-<?php require_once "init.php"; ?>
+<?php
+require_once "init.php";
+require_once __DIR__ . '/includes/seo_meta.php';
+?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -8,17 +11,19 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="WGS">
-  
+
   <!-- SEO Meta Tags -->
-  <meta name="description" content="White Glove Service - profesionální servis luxusního nábytku Natuzzi v ČR a SR. Autorizovaný partner s více než 5 letou zkušeností. Certifikovaní technici, originální díly, garance kvality. ☎ +420 725 965 826">
-  
+  <meta name="description" content="<?php echo getSeoDescription('onas'); ?>">
+  <?php renderSeoMeta('onas'); ?>
+  <?php renderSchemaOrg('onas'); ?>
+
   <!-- PWA -->
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="./icon192.png">
   <link rel="icon" type="image/png" sizes="192x192" href="./icon192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon512.png">
-  
-  <title>O nás - White Glove Service | Autorizovaný servis Natuzzi | Praha, Brno</title>
+
+  <title><?php echo getSeoTitle('onas'); ?></title>
 
   <!-- Preload critical resources -->
   <link rel="preload" href="assets/css/styles.min.css" as="style">

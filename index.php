@@ -77,6 +77,87 @@ require_once __DIR__ . '/includes/seo_meta.php';
 
     <!-- Background image je nyní v CSS (.hero background-image) -->
   </section>
+
+  <!-- SEKCE SLUZEB - SEO interní prolinkování -->
+  <section class="services-links-section" style="background: #f5f5f5; padding: 60px 20px;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+      <h2 style="text-align: center; font-size: 1.8rem; margin-bottom: 40px; color: #000;"
+          data-lang-cs="Nase sluzby"
+          data-lang-en="Our Services"
+          data-lang-it="I Nostri Servizi">Nase sluzby</h2>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+
+        <a href="oprava-sedacky.php" style="background: #fff; padding: 30px; text-decoration: none; color: inherit; border: 1px solid #e0e0e0; transition: box-shadow 0.3s;">
+          <h3 style="font-size: 1.2rem; margin-bottom: 10px; color: #000;"
+              data-lang-cs="Oprava sedacky"
+              data-lang-en="Sofa Repair"
+              data-lang-it="Riparazione Divano">Oprava sedacky</h3>
+          <p style="color: #666; font-size: 0.95rem; line-height: 1.5;"
+             data-lang-cs="Profesionalni opravy sedacek, gaucu a pohovek. Kozene i latkove."
+             data-lang-en="Professional sofa, couch and settee repairs. Leather and fabric."
+             data-lang-it="Riparazioni professionali di divani e sofà. Pelle e tessuto.">Profesionalni opravy sedacek, gaucu a pohovek. Kozene i latkove.</p>
+        </a>
+
+        <a href="oprava-kresla.php" style="background: #fff; padding: 30px; text-decoration: none; color: inherit; border: 1px solid #e0e0e0; transition: box-shadow 0.3s;">
+          <h3 style="font-size: 1.2rem; margin-bottom: 10px; color: #000;"
+              data-lang-cs="Oprava kresla"
+              data-lang-en="Armchair Repair"
+              data-lang-it="Riparazione Poltrona">Oprava kresla</h3>
+          <p style="color: #666; font-size: 0.95rem; line-height: 1.5;"
+             data-lang-cs="Servis relaxacnich a klasickych kresel. Oprava mechanismu."
+             data-lang-en="Service for recliners and classic armchairs. Mechanism repair."
+             data-lang-it="Servizio per poltrone relax e classiche. Riparazione meccanismo.">Servis relaxacnich a klasickych kresel. Oprava mechanismu.</p>
+        </a>
+
+        <a href="servis-natuzzi.php" style="background: #fff; padding: 30px; text-decoration: none; color: inherit; border: 1px solid #e0e0e0; transition: box-shadow 0.3s;">
+          <h3 style="font-size: 1.2rem; margin-bottom: 10px; color: #000;"
+              data-lang-cs="Servis Natuzzi"
+              data-lang-en="Natuzzi Service"
+              data-lang-it="Servizio Natuzzi">Servis Natuzzi</h3>
+          <p style="color: #666; font-size: 0.95rem; line-height: 1.5;"
+             data-lang-cs="Autorizovany servis Natuzzi. Reklamace, opravy, originalni dily."
+             data-lang-en="Authorized Natuzzi service. Warranty claims, repairs, original parts."
+             data-lang-it="Servizio Natuzzi autorizzato. Reclami, riparazioni, ricambi originali.">Autorizovany servis Natuzzi. Reklamace, opravy, originalni dily.</p>
+        </a>
+
+        <a href="pozarucni-servis.php" style="background: #fff; padding: 30px; text-decoration: none; color: inherit; border: 1px solid #e0e0e0; transition: box-shadow 0.3s;">
+          <h3 style="font-size: 1.2rem; margin-bottom: 10px; color: #000;"
+              data-lang-cs="Pozarucni servis"
+              data-lang-en="Out-of-Warranty Service"
+              data-lang-it="Servizio Fuori Garanzia">Pozarucni servis</h3>
+          <p style="color: #666; font-size: 0.95rem; line-height: 1.5;"
+             data-lang-cs="Opravime vas nabytek i po skonceni zaruky. Fer ceny."
+             data-lang-en="We repair your furniture even after the warranty expires. Fair prices."
+             data-lang-it="Ripariamo i vostri mobili anche dopo la scadenza della garanzia. Prezzi equi.">Opravime vas nabytek i po skonceni zaruky. Fer ceny.</p>
+        </a>
+
+        <a href="neuznana-reklamace.php" style="background: #fff; padding: 30px; text-decoration: none; color: inherit; border: 1px solid #e0e0e0; transition: box-shadow 0.3s;">
+          <h3 style="font-size: 1.2rem; margin-bottom: 10px; color: #000;"
+              data-lang-cs="Neuznana reklamace?"
+              data-lang-en="Rejected Claim?"
+              data-lang-it="Reclamo Rifiutato?">Neuznana reklamace?</h3>
+          <p style="color: #666; font-size: 0.95rem; line-height: 1.5;"
+             data-lang-cs="Poradime co delat, kdyz vam neuznali reklamaci."
+             data-lang-en="We advise what to do if your warranty claim was rejected."
+             data-lang-it="Ti consigliamo cosa fare se il tuo reclamo è stato rifiutato.">Poradime co delat, kdyz vam neuznali reklamaci.</p>
+        </a>
+
+        <a href="cenik.php" style="background: #fff; padding: 30px; text-decoration: none; color: inherit; border: 1px solid #e0e0e0; transition: box-shadow 0.3s;">
+          <h3 style="font-size: 1.2rem; margin-bottom: 10px; color: #000;"
+              data-lang-cs="Cenik sluzeb"
+              data-lang-en="Price List"
+              data-lang-it="Listino Prezzi">Cenik sluzeb</h3>
+          <p style="color: #666; font-size: 0.95rem; line-height: 1.5;"
+             data-lang-cs="Prehled cen a online kalkulacka ceny opravy."
+             data-lang-en="Price overview and online repair cost calculator."
+             data-lang-it="Panoramica prezzi e calcolatore online del costo di riparazione.">Prehled cen a online kalkulacka ceny opravy.</p>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <!-- FOOTER -->
