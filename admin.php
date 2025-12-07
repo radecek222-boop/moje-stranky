@@ -127,6 +127,8 @@ if ($activeTab === 'dashboard') {
   <link rel="stylesheet" href="/assets/css/button-fixes-global.min.css">
   <!-- Univerzální tmavý styl pro všechny modály -->
   <link rel="stylesheet" href="/assets/css/universal-modal-theme.min.css">
+  <!-- PWA optimalizace pro admin -->
+  <link rel="stylesheet" href="/assets/css/admin-pwa.min.css">
 
   <!-- Error Handler - zachytává všechny chyby -->
   <script src="/assets/js/error-handler.min.js"></script>
