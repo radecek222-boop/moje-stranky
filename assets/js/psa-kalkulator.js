@@ -1000,6 +1000,35 @@ async function saveEmployeeToDatabase(index) {
   }
 }
 
+// Uložit změny jednotlivého zaměstnance (např. číslo účtu)
+async function saveEmployeeChanges(index) {
+  const emp = employees[index];
+  if (!emp) {
+    wgsToast.error('Zaměstnanec nenalezen');
+    return;
+  }
+
+  // Aktualizovat v databázi zaměstnanců
+  const dbIndex = allEmployeesDatabase.findIndex(e => e.id === emp.id);
+  if (dbIndex !== -1) {
+    allEmployeesDatabase[dbIndex].name = emp.name;
+    allEmployeesDatabase[dbIndex].account = emp.account || '';
+    allEmployeesDatabase[dbIndex].bank = emp.bank || '';
+    allEmployeesDatabase[dbIndex].type = emp.type || 'standard';
+  }
+
+  // Uložit na server
+  try {
+    saveToLocalStorage();
+    await saveToServer();
+    showSuccess(`Změny u ${emp.name} uloženy`);
+    logger.log('Employee changes saved:', emp.name);
+  } catch (error) {
+    logger.error('Failed to save employee changes:', error);
+    wgsToast.error('Chyba při ukládání změn');
+  }
+}
+
 async function confirmAddEmployee() {
   const select = document.getElementById('selectEmployeeToAdd');
   const selectedId = parseInt(select.value);
@@ -1180,7 +1209,7 @@ function renderTable() {
           <input type="text"
                  value="${emp.name}"
                  class="table-input"
-                 style="font-weight: 600; min-width: 150px;"
+                 style="font-weight: 600; min-width: 100px;"
                  data-action="updateEmployeeField"
                  data-index="${index}"
                  data-field="name"
@@ -1252,8 +1281,9 @@ function renderTable() {
                  data-field="bank">
         </td>
         <td class="text-center" style="white-space: nowrap;">
+          <button class="btn btn-sm" style="margin-right: 0.25rem;" data-action="saveEmployeeChanges" data-index="${index}" title="Uložit změny">Uložit</button>
           ${emp.isNew ?
-            `<button class="btn btn-sm" style="background: var(--c-success); color: white; margin-right: 0.25rem;" data-action="saveEmployeeToDatabase" data-index="${index}" title="Uložit do databáze">Uložit do DB</button>` :
+            `<button class="btn btn-sm" style="background: var(--c-success); color: white; margin-right: 0.25rem;" data-action="saveEmployeeToDatabase" data-index="${index}" title="Uložit do databáze">DB</button>` :
             `<button class="btn btn-sm qr-btn" style="background: var(--c-info); color: white; margin-right: 0.25rem;" data-action="generateSingleEmployeeQR" data-index="${index}" title="Generovat QR platbu">QR</button>`
           }
           ${PERMANENT_EMPLOYEE_IDS.includes(emp.id) ? '' :
@@ -1804,8 +1834,6 @@ function generatePaymentQR() {
   modal.classList.remove('single-qr-mode');
 
   let totalPayments = 0;
-  let femaleBonus = 0;
-  let radekPayment = 0;
   let paymentData = [];
   let swiftPayments = [];
 
@@ -1823,79 +1851,66 @@ function generatePaymentQR() {
   employees.forEach(emp => {
     const isLenka = emp.name === 'Lenka' || emp.name.includes('Lenka');
 
-    // Lenka má vždy paušální mzdu bez ohledu na hodiny
-    if (isLenka || emp.type === 'bonus_girls' || (emp.type === 'special' || emp.type === 'special2') || emp.hours > 0) {
-      let amount = 0;
+    let amount = 0;
 
-      if (isLenka) {
-        amount = 8716;  // Paušální mzda pro Lenku
-      } else if (emp.type === 'bonus_girls') {
-        amount = emp.bonusAmount || 0;  // Manuální bonus pro holky
-      } else if (emp.type === 'pausalni' && emp.pausalni) {
-        amount = emp.hours * salaryRate;
-      } else if (emp.type === 'special' || emp.type === 'special2') {
-        amount = bonusPerSpecial;
-      } else if (emp.type === 'premie_polozka') {
-        amount = emp.premieCastka || 0;
-      } else {
-        amount = emp.hours * salaryRate;
-      }
-
-      // Female bonus calculation (hidden) - Lenka už má paušál, nemá bonus
-      const femaleNames = ['Stana', 'Anastasia', 'Maryna', 'Ivana', 'Olha', 'Piven Tetiana',
-                          'Vitalina', 'Tetiana', 'Kataryna', 'Ruslana'];
-
-      if (!isLenka && emp.hours > 0 && femaleNames.some(name => emp.name.includes(name))) {
-        const bonus = (emp.hours * salaryRate) * 0.1;
-        femaleBonus += bonus;
-      }
-
-      // Process by payment type
-      if (emp.type === 'swift' && emp.swiftData) {
-        swiftPayments.push({
-          name: emp.name,
-          amount: amount,
-          swiftData: emp.swiftData
-        });
-      } else if (emp.name === 'Radek') {
-        radekPayment = amount;
-      } else if (emp.account && emp.bank) {
-        paymentData.push({
-          name: emp.name,
-          amount: amount,
-          account: emp.account,
-          bank: formatBankCode(emp.bank)
-        });
-      }
-
-      totalPayments += amount;
+    // Výpočet částky podle typu
+    if (isLenka) {
+      amount = 8716;  // Paušální mzda pro Lenku
+    } else if (emp.type === 'bonus_girls') {
+      amount = emp.bonusAmount || 0;
+    } else if (emp.type === 'special' || emp.type === 'special2') {
+      amount = bonusPerSpecial;
+    } else if (emp.type === 'premie_polozka') {
+      amount = emp.premieCastka || 0;
+    } else {
+      amount = (emp.hours || 0) * salaryRate;
     }
+
+    // Přeskočit pouze pokud je částka 0
+    if (amount <= 0) return;
+
+    // Process by payment type
+    if (emp.type === 'swift' && emp.swiftData) {
+      swiftPayments.push({
+        name: emp.name,
+        amount: amount,
+        swiftData: emp.swiftData
+      });
+    } else {
+      // Přidat všechny zaměstnance s částkou > 0
+      paymentData.push({
+        name: emp.name,
+        amount: amount,
+        account: emp.account || '',
+        bank: emp.bank ? formatBankCode(emp.bank) : '',
+        missingAccount: !emp.account || !emp.bank
+      });
+    }
+
+    totalPayments += amount;
   });
 
-  // Add Radek with hidden bonus
-  const radekData = employees.find(emp => emp.name === 'Radek');
-  if (radekData && radekData.account && radekData.bank) {
-    const radekTotalAmount = radekPayment + femaleBonus;
-    paymentData.push({
-      name: 'Radek',
-      amount: radekTotalAmount,
-      displayAmount: radekPayment,
-      realAmount: radekTotalAmount,
-      account: radekData.account,
-      bank: formatBankCode(radekData.bank),
-      isSpecial: true
-    });
-  }
+  // Summary - seznam všech zaměstnanců
+  let summaryRows = '';
+  let visibleTotal = 0;
 
-  // Summary - pouze celkem
+  // Domácí platby
+  paymentData.forEach(payment => {
+    visibleTotal += payment.amount;
+    summaryRows += `<div class="summary-row"><span>${payment.name}</span><span>${formatCurrency(payment.amount)}</span></div>`;
+  });
+
+  // SWIFT platby
+  swiftPayments.forEach(payment => {
+    visibleTotal += payment.amount;
+    summaryRows += `<div class="summary-row"><span>${payment.name} (SWIFT)</span><span>${formatCurrency(payment.amount)}</span></div>`;
+  });
+
   summaryDiv.innerHTML = `
-    <div class="summary-row">
-      <span>Počet plateb:</span>
-      <span>${paymentData.length + swiftPayments.length}</span>
-    </div>
-    <div class="summary-row">
-      <span>CELKEM K VÝPLATĚ:</span>
-      <span>${formatCurrency(totalPayments + femaleBonus)}</span>
+    ${summaryRows}
+    <div class="summary-row summary-total">
+      <span>CELKEM:</span>
+      <span>${formatCurrency(visibleTotal)}</span>
     </div>
   `;
 
@@ -1909,28 +1924,36 @@ function generatePaymentQR() {
     const qrItem = document.createElement('div');
     qrItem.className = 'qr-item';
 
-    const displayAmount = payment.displayAmount || payment.amount;
-    const qrAmount = payment.realAmount || payment.amount;
+    // Pokud chybí účet, zobrazit prázdný čtverec místo QR
+    const hasAccount = !payment.missingAccount;
+    const accountText = hasAccount ? `${payment.account}/${payment.bank}` : 'Chybí účet';
 
     qrItem.innerHTML = `
       <div class="qr-employee-name">${payment.name}</div>
-      <div class="qr-amount">${formatCurrency(displayAmount)}</div>
-      ${payment.isSpecial ? '<div class="qr-special-note">Včetně prémií</div>' : ''}
-      <div class="qr-account">${payment.account}/${payment.bank}</div>
+      <div class="qr-amount">${formatCurrency(payment.amount)}</div>
+      <div class="qr-account">${accountText}</div>
       <div class="qr-code-wrapper" id="qr-${index}"></div>
-      <div class="qr-item-buttons">
-        <button class="btn btn-sm" data-action="downloadQR" data-qrid="qr-${index}" data-name="${payment.name}">Stáhnout</button>
-        <button class="btn btn-sm btn-secondary" data-action="shareQR" data-qrid="qr-${index}" data-name="${payment.name}" data-amount="${displayAmount}">Sdílet</button>
-      </div>
+      ${hasAccount ? `
+        <div class="qr-item-buttons">
+          <button class="btn btn-sm" data-action="downloadQR" data-qrid="qr-${index}" data-name="${payment.name}">Stáhnout</button>
+          <button class="btn btn-sm btn-secondary" data-action="shareQR" data-qrid="qr-${index}" data-name="${payment.name}" data-amount="${payment.amount}">Sdílet</button>
+        </div>
+      ` : ''}
     `;
 
     paymentsGrid.appendChild(qrItem);
 
-    // Generate QR code
+    // Generate QR code nebo prázdný bílý čtverec
     setTimeout(async () => {
       const qrElement = document.getElementById(`qr-${index}`);
       if (!qrElement) {
         logger.error(`QR element not found: qr-${index}`);
+        return;
+      }
+
+      // Pokud chybí účet, zobrazit prázdný bílý čtverec
+      if (!hasAccount) {
+        qrElement.innerHTML = '<div style="width: 160px; height: 160px; background: white; border: 1px solid #ddd; margin: 0 auto;"></div>';
         return;
       }
 
@@ -1941,12 +1964,12 @@ function generatePaymentQR() {
         qrText = generateCzechPaymentString({
           account: payment.account,
           bank: payment.bank,
-          amount: qrAmount,
+          amount: payment.amount,
           vs: currentPeriod.year * 100 + currentPeriod.month,
           message: `Výplata ${payment.name} ${currentPeriod.month}/${currentPeriod.year}`
         });
       } catch (err) {
-        qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err.message}</div>`;
+        qrElement.innerHTML = `<div style="color: #999; font-size: 0.8rem;">${err.message}</div>`;
         return;
       }
 
@@ -1956,7 +1979,7 @@ function generatePaymentQR() {
         await renderQrCode(qrElement, qrText, 160, payment.name);
       } catch (error) {
         logger.error(`Failed to generate QR code for ${payment.name}:`, error);
-        qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
+        qrElement.innerHTML = '<div style="color: #999; font-size: 0.8rem;">Chyba QR</div>';
       }
     }, 100 * index);
   });
@@ -2297,6 +2320,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const sIndex = target.getAttribute('data-index');
         if (sIndex !== null && typeof saveEmployeeToDatabase === 'function') {
           saveEmployeeToDatabase(parseInt(sIndex, 10));
+        }
+        return;
+      }
+
+      case 'saveEmployeeChanges': {
+        const scIndex = parseInt(target.getAttribute('data-index'), 10);
+        if (!isNaN(scIndex) && typeof saveEmployeeChanges === 'function') {
+          saveEmployeeChanges(scIndex);
         }
         return;
       }
