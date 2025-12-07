@@ -1885,20 +1885,17 @@ async function nactiOnlineUzivatele() {
     tbody.innerHTML = '<tr><td colspan="5" style="padding: 2rem; text-align: center; color: #666;">Načítání...</td></tr>';
 
     try {
-        const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() : null;
-        const formData = new FormData();
-        formData.append('action', 'get_online_users');
-        if (csrfToken) formData.append('csrf_token', csrfToken);
-
-        const response = await fetch('/api/control_center_api.php', {
-            method: 'POST',
-            body: formData
+        // FIX: Použití správného API endpointu (GET, ne POST)
+        const response = await fetch('/api/admin_users_api.php?action=online', {
+            method: 'GET',
+            credentials: 'same-origin'
         });
 
         const data = await response.json();
 
-        if (data.status === 'success' && data.data) {
-            const users = data.data;
+        // FIX: API vrací data.users, ne data.data
+        if (data.status === 'success' && data.users) {
+            const users = data.users;
 
             if (users.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" style="padding: 2rem; text-align: center; color: #666;">Žádní online uživatelé</td></tr>';
@@ -1906,10 +1903,8 @@ async function nactiOnlineUzivatele() {
             }
 
             tbody.innerHTML = users.map(user => {
-                const isOnline = user.is_online;
-                const statusDot = isOnline
-                    ? '<span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #39ff14; box-shadow: 0 0 5px rgba(57, 255, 20, 0.5);"></span>'
-                    : '<span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ccc;"></span>';
+                // Všichni vrácení uživatelé jsou online (filtrováno v API)
+                const statusDot = '<span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #39ff14; box-shadow: 0 0 5px rgba(57, 255, 20, 0.5);"></span>';
 
                 const roleLabel = {
                     'admin': 'Admin',

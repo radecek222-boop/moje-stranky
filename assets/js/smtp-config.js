@@ -33,7 +33,8 @@ function showNotification(type, message) {
 // Načíst SMTP konfiguraci
 async function loadSmtpConfig() {
     try {
-        const response = await fetch('api/control_center_api.php?action=get_smtp_config', {
+        // FIX: Použití správného API endpointu
+        const response = await fetch('api/admin.php?action=get_smtp_config', {
             credentials: 'same-origin'
         });
 
@@ -97,7 +98,8 @@ async function saveSmtpConfig() {
     saveBtn.textContent = 'Ukládání...';
 
     try {
-        const response = await fetch('api/control_center_api.php?action=save_smtp_config', {
+        // FIX: Použití správného API endpointu
+        const response = await fetch('api/admin.php?action=save_smtp_config', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -142,7 +144,8 @@ async function testSmtpConnection() {
             throw new Error('CSRF token nebyl nalezen');
         }
 
-        const response = await fetch('api/control_center_api.php?action=test_smtp_connection', {
+        // FIX: Použití správného API endpointu
+        const response = await fetch('api/admin.php?action=test_smtp_connection', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
