@@ -464,6 +464,11 @@ textarea::placeholder {
   overflow-y: auto;
 }
 
+/* Modal zobrazení - když NEMÁ třídu .hidden */
+.modal:not(.hidden) {
+  display: block;
+}
+
 .modal-content {
   background: var(--c-white);
   margin: 50px auto;
