@@ -1682,50 +1682,50 @@ async function editSmsTemplate(id) {
 // Vytvorit SMS modal (pokud neexistuje)
 function vytvorSmsModal() {
     const modalHtml = `
-    <div id="editSmsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100001; justify-content: center; align-items: center; padding: 1rem;">
-        <div style="background: white; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border: 2px solid #000;">
-            <!-- Cerny header -->
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background: #000; color: #fff;">
-                <h3 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">Upravit SMS sablonu</h3>
-                <button data-action="closeSmsModal" aria-label="Zavrit" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #fff; line-height: 1;">&times;</button>
+    <div id="editSmsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100001; justify-content: center; align-items: center; padding: 1rem;">
+        <div style="background: #1a1a1a; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border: 1px solid #333; border-radius: 12px;">
+            <!-- Tmavý header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background: #333; color: #fff; border-bottom: 1px solid #444; border-radius: 12px 12px 0 0;">
+                <h3 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.1rem;">Upravit SMS sablonu</h3>
+                <button data-action="closeSmsModal" aria-label="Zavrit" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #ccc; line-height: 1;">&times;</button>
             </div>
             <div style="padding: 1.5rem;">
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Nazev:</label>
-                    <div id="sms-template-name" style="padding: 0.5rem; background: #f5f5f5; border: 1px solid #ddd; font-family: 'Poppins', sans-serif;"></div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #aaa;">Nazev:</label>
+                    <div id="sms-template-name" style="padding: 0.5rem; background: #222; border: 1px solid #444; font-family: 'Poppins', sans-serif; color: #fff;"></div>
                 </div>
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Popis:</label>
-                    <div id="sms-template-description" style="padding: 0.5rem; background: #f5f5f5; border: 1px solid #ddd; font-family: 'Poppins', sans-serif; font-size: 0.85rem; color: #666;"></div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #aaa;">Popis:</label>
+                    <div id="sms-template-description" style="padding: 0.5rem; background: #222; border: 1px solid #444; font-family: 'Poppins', sans-serif; font-size: 0.85rem; color: #888;"></div>
                 </div>
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Text SMS zpravy:</label>
-                    <textarea id="sms-template-content" rows="6" style="width: 100%; padding: 0.75rem; border: 2px solid #000; font-family: monospace; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"></textarea>
-                    <div style="font-size: 0.7rem; color: #666; margin-top: 0.25rem;">Max 160 znaku pro 1 SMS. Delsi zpravy se rozdeli.</div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-family: 'Poppins', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #aaa;">Text SMS zpravy:</label>
+                    <textarea id="sms-template-content" rows="6" style="width: 100%; padding: 0.75rem; border: 1px solid #444; font-family: monospace; font-size: 0.9rem; resize: vertical; box-sizing: border-box; background: #222; color: #fff;"></textarea>
+                    <div style="font-size: 0.7rem; color: #888; margin-top: 0.25rem;">Max 160 znaku pro 1 SMS. Delsi zpravy se rozdeli.</div>
                 </div>
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.85rem;">
-                        <input type="checkbox" id="sms-template-active">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.85rem; color: #ccc;">
+                        <input type="checkbox" id="sms-template-active" style="accent-color: #39ff14;">
                         <span>Sablona je aktivni</span>
                     </label>
                 </div>
                 <!-- Promenne -->
-                <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 0.75rem; margin-bottom: 1rem;">
-                    <div style="font-size: 0.7rem; font-weight: 600; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif; text-transform: uppercase;">Dostupne promenne:</div>
+                <div style="background: #222; border: 1px solid #444; padding: 0.75rem; margin-bottom: 1rem; border-radius: 6px;">
+                    <div style="font-size: 0.7rem; font-weight: 600; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif; text-transform: uppercase; color: #aaa;">Dostupne promenne:</div>
                     <div style="display: flex; flex-wrap: wrap; gap: 0.25rem; font-size: 0.65rem; font-family: monospace;">
-                        <code style="background: #fff; padding: 0.15rem 0.3rem; border: 1px solid #ddd; cursor: pointer;" onclick="navigator.clipboard.writeText('{{customer_name}}')">{{customer_name}}</code>
-                        <code style="background: #fff; padding: 0.15rem 0.3rem; border: 1px solid #ddd; cursor: pointer;" onclick="navigator.clipboard.writeText('{{order_id}}')">{{order_id}}</code>
-                        <code style="background: #fff; padding: 0.15rem 0.3rem; border: 1px solid #ddd; cursor: pointer;" onclick="navigator.clipboard.writeText('{{date}}')">{{date}}</code>
-                        <code style="background: #fff; padding: 0.15rem 0.3rem; border: 1px solid #ddd; cursor: pointer;" onclick="navigator.clipboard.writeText('{{time}}')">{{time}}</code>
-                        <code style="background: #fff; padding: 0.15rem 0.3rem; border: 1px solid #ddd; cursor: pointer;" onclick="navigator.clipboard.writeText('{{technician_name}}')">{{technician_name}}</code>
-                        <code style="background: #fff; padding: 0.15rem 0.3rem; border: 1px solid #ddd; cursor: pointer;" onclick="navigator.clipboard.writeText('{{technician_phone}}')">{{technician_phone}}</code>
+                        <code style="background: #333; padding: 0.15rem 0.3rem; border: 1px solid #444; cursor: pointer; color: #ccc;" onclick="navigator.clipboard.writeText('{{customer_name}}')">{{customer_name}}</code>
+                        <code style="background: #333; padding: 0.15rem 0.3rem; border: 1px solid #444; cursor: pointer; color: #ccc;" onclick="navigator.clipboard.writeText('{{order_id}}')">{{order_id}}</code>
+                        <code style="background: #333; padding: 0.15rem 0.3rem; border: 1px solid #444; cursor: pointer; color: #ccc;" onclick="navigator.clipboard.writeText('{{date}}')">{{date}}</code>
+                        <code style="background: #333; padding: 0.15rem 0.3rem; border: 1px solid #444; cursor: pointer; color: #ccc;" onclick="navigator.clipboard.writeText('{{time}}')">{{time}}</code>
+                        <code style="background: #333; padding: 0.15rem 0.3rem; border: 1px solid #444; cursor: pointer; color: #ccc;" onclick="navigator.clipboard.writeText('{{technician_name}}')">{{technician_name}}</code>
+                        <code style="background: #333; padding: 0.15rem 0.3rem; border: 1px solid #444; cursor: pointer; color: #ccc;" onclick="navigator.clipboard.writeText('{{technician_phone}}')">{{technician_phone}}</code>
                     </div>
-                    <div style="font-size: 0.65rem; color: #999; margin-top: 0.25rem;">Klikni pro zkopirovat</div>
+                    <div style="font-size: 0.65rem; color: #666; margin-top: 0.25rem;">Klikni pro zkopirovat</div>
                 </div>
             </div>
-            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding: 1rem 1.5rem; border-top: 2px solid #000; background: #f5f5f5;">
-                <button data-action="closeSmsModal" style="padding: 0.5rem 1.5rem; background: #fff; border: 2px solid #000; color: #000; font-family: 'Poppins', sans-serif; cursor: pointer; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">Zrusit</button>
-                <button data-action="saveSmsTemplate" style="padding: 0.5rem 1.5rem; background: #000; border: 2px solid #000; color: #fff; font-family: 'Poppins', sans-serif; cursor: pointer; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">Ulozit</button>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding: 1rem 1.5rem; border-top: 1px solid #333; background: #222;">
+                <button data-action="closeSmsModal" style="padding: 0.5rem 1.5rem; background: transparent; border: 1px solid #444; color: #ccc; font-family: 'Poppins', sans-serif; cursor: pointer; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; border-radius: 6px;">Zrusit</button>
+                <button data-action="saveSmsTemplate" style="padding: 0.5rem 1.5rem; background: #333; border: 1px solid #444; color: #fff; font-family: 'Poppins', sans-serif; cursor: pointer; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; border-radius: 6px;">Ulozit</button>
             </div>
         </div>
     </div>
