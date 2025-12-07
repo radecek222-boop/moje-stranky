@@ -116,4 +116,19 @@ try {
 }
 
 echo "<hr><p><a href='analytics.php'>Zpět na Analytics</a></p>";
+
+// 7. Akce - vymazat cache
+echo "<h2>7. Akce</h2>";
+
+if (isset($_GET['clear_cache'])) {
+    try {
+        $pdo->exec("TRUNCATE TABLE wgs_analytics_geolocation_cache");
+        echo "<p class='ok'>Cache byla vymazána! Nové návštěvy budou mít čerstvá data z API.</p>";
+    } catch (PDOException $e) {
+        echo "<p class='error'>Chyba: " . $e->getMessage() . "</p>";
+    }
+}
+
+echo "<p><a href='?clear_cache=1' style='padding:10px 20px;background:#333;color:#fff;text-decoration:none;display:inline-block;'>Vymazat geolokační cache</a></p>";
+echo "<p style='color:#666;font-size:12px;'>Po vymazání cache se při dalších návštěvách zavolá API znovu a měla by se získat města.</p>";
 ?>
