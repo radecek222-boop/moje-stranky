@@ -360,6 +360,9 @@ endif;
         <button class="cc-tab <?= $currentSection === 'audit' ? 'active' : '' ?>" data-action="switchSecuritySection" data-section="audit">
             Audit Log
         </button>
+        <button class="cc-tab <?= $currentSection === 'online' ? 'active' : '' ?>" data-action="switchSecuritySection" data-section="online">
+            Online
+        </button>
     </div>
 
     <!-- SEKCE: PŘEHLED -->
@@ -844,6 +847,42 @@ endif;
             </div>
         </div>
     </div>
+
+    <!-- SEKCE: ONLINE UŽIVATELÉ -->
+    <div id="section-online" class="cc-section <?= $currentSection === 'online' ? 'active' : '' ?>">
+        <h2 style="margin-bottom: 0.75rem; color: #000; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Online uživatelé</h2>
+
+        <div class="security-alert">
+            <div>
+                <strong>Aktuálně přihlášení</strong> - Přehled všech aktivních uživatelů v systému
+            </div>
+        </div>
+
+        <div style="margin: 1rem 0; display: flex; justify-content: flex-end;">
+            <button data-action="refreshOnlineUzivatele" style="padding: 0.5rem 1rem; background: #000; color: #fff; border: 1px solid #000; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; text-transform: uppercase;">
+                Obnovit
+            </button>
+        </div>
+
+        <div style="background: #fff; border: 1px solid #000; overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-family: 'Poppins', sans-serif; font-size: 0.8rem;">
+                <thead>
+                    <tr style="background: #000; color: #fff;">
+                        <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Status</th>
+                        <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Uživatel</th>
+                        <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Role</th>
+                        <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Email</th>
+                        <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Poslední aktivita</th>
+                    </tr>
+                </thead>
+                <tbody id="online-uzivatele-table">
+                    <tr>
+                        <td colspan="5" style="padding: 2rem; text-align: center; color: #666;">Načítání...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script src="/assets/js/csrf-auto-inject.min.js"></script>
@@ -871,6 +910,8 @@ function switchSection(section) {
         nactiRegistracniKlice();
     } else if (section === 'uzivatele') {
         loadUzivateleProSecurity();
+    } else if (section === 'online') {
+        nactiOnlineUzivatele();
     }
 }
 
@@ -1829,8 +1870,71 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (aktualniSekce === 'audit') {
         // Automaticky načíst audit logy při otevření sekce
         setTimeout(() => nactiAuditLogy(), 500);
+    } else if (aktualniSekce === 'online') {
+        nactiOnlineUzivatele();
     }
 });
+
+/**
+ * Načtení online uživatelů
+ */
+async function nactiOnlineUzivatele() {
+    const tbody = document.getElementById('online-uzivatele-table');
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="5" style="padding: 2rem; text-align: center; color: #666;">Načítání...</td></tr>';
+
+    try {
+        const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() : null;
+        const formData = new FormData();
+        formData.append('action', 'get_online_users');
+        if (csrfToken) formData.append('csrf_token', csrfToken);
+
+        const response = await fetch('/api/control_center_api.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success' && data.data) {
+            const users = data.data;
+
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="padding: 2rem; text-align: center; color: #666;">Žádní online uživatelé</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = users.map(user => {
+                const isOnline = user.is_online;
+                const statusDot = isOnline
+                    ? '<span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #39ff14; box-shadow: 0 0 5px rgba(57, 255, 20, 0.5);"></span>'
+                    : '<span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ccc;"></span>';
+
+                const roleLabel = {
+                    'admin': 'Admin',
+                    'technik': 'Technik',
+                    'prodejce': 'Prodejce'
+                }[user.role] || user.role;
+
+                return `
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 0.75rem;">${statusDot}</td>
+                        <td style="padding: 0.75rem; font-weight: 500;">${user.name || '-'}</td>
+                        <td style="padding: 0.75rem;">${roleLabel}</td>
+                        <td style="padding: 0.75rem;">${user.email || '-'}</td>
+                        <td style="padding: 0.75rem;">${user.last_activity || '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+        } else {
+            tbody.innerHTML = `<tr><td colspan="5" style="padding: 2rem; text-align: center; color: #c00;">${data.message || 'Chyba při načítání'}</td></tr>`;
+        }
+    } catch (err) {
+        console.error('Chyba načítání online uživatelů:', err);
+        tbody.innerHTML = '<tr><td colspan="5" style="padding: 2rem; text-align: center; color: #c00;">Chyba při načítání</td></tr>';
+    }
+}
 
 console.log('Security centrum načteno');
 
@@ -1874,6 +1978,7 @@ if (typeof Utils !== 'undefined' && Utils.registerAction) {
     });
     Utils.registerAction('odeslatPozvanky', () => odeslatPozvanky());
     Utils.registerAction('aktualizovatVyber', () => aktualizovatVyber());
+    Utils.registerAction('refreshOnlineUzivatele', () => nactiOnlineUzivatele());
 }
 
 </script>

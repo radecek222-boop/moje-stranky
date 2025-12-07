@@ -179,11 +179,6 @@ if (!$embedMode && $activeTab === 'dashboard'):
             <div class="cc-card-description" data-lang-cs="Správa emailových a SMS notifikací" data-lang-en="Email and SMS notification management" data-lang-it="Gestione notifiche email e SMS">Správa emailových a SMS notifikací</div>
         </div>
 
-        <div class="cc-card" data-href="admin.php?tab=online">
-            <div class="cc-card-title" data-lang-cs="Online uživatelé" data-lang-en="Online Users" data-lang-it="Utenti Online">Online uživatelé</div>
-            <div class="cc-card-description" data-lang-cs="Aktuálně přihlášení uživatelé v systému" data-lang-en="Currently logged in users in the system" data-lang-it="Utenti attualmente connessi al sistema">Aktuálně přihlášení uživatelé v systému</div>
-        </div>
-
         <div class="cc-card" data-href="psa-kalkulator.php">
             <div class="cc-card-title" data-lang-cs="PSA Kalkulátor" data-lang-en="PSA Calculator" data-lang-it="Calcolatore PSA">PSA Kalkulátor</div>
             <div class="cc-card-description" data-lang-cs="Výpočet mezd a docházky zaměstnanců" data-lang-en="Employee salary and attendance calculation" data-lang-it="Calcolo stipendi e presenze dipendenti">Výpočet mezd a docházky zaměstnanců</div>
@@ -982,37 +977,6 @@ function loadNotifContent(type, body) {
   <?php if ($activeTab === 'tools'): ?>
   <!-- TAB: DIAGNOSTIKA & ÚDRŽBA -->
   <?php require_once __DIR__ . '/includes/admin_diagnostics.php'; ?>
-  <?php endif; ?>
-
-  <?php if ($activeTab === 'online'): ?>
-  <!-- TAB: ONLINE -->
-  <div id="tab-online" class="tab-content">
-    <div class="table-container">
-      <div class="table-header">
-        <h3 class="table-title" data-lang-cs="Online uživatelé" data-lang-en="Online Users" data-lang-it="Utenti Online">Online uživatelé</h3>
-        <div class="table-actions">
-          <button class="btn btn-sm" id="refreshOnlineBtn" data-lang-cs="Obnovit" data-lang-en="Refresh" data-lang-it="Aggiorna">Obnovit</button>
-        </div>
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">Status</th>
-            <th scope="col" data-lang-cs="Uživatel" data-lang-en="User" data-lang-it="Utente">Uživatel</th>
-            <th scope="col" data-lang-cs="Role" data-lang-en="Role" data-lang-it="Ruolo">Role</th>
-            <th scope="col">Email</th>
-            <th scope="col" data-lang-cs="Poslední aktivita" data-lang-en="Last Activity" data-lang-it="Ultima Attività">Poslední aktivita</th>
-          </tr>
-        </thead>
-        <tbody id="online-table" aria-live="polite">
-          <tr>
-            <td colspan="5" class="loading" role="status" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
   <?php endif; ?>
 
 </div>
