@@ -1265,15 +1265,18 @@ body.pdf-export-mode #signature-pad {
   color: #ffffff;
   padding: 1rem 1.5rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   border-bottom: 1px solid #444;
+  position: relative;
 }
 
 .zakaznik-schvaleni-header h2 {
   margin: 0;
   font-size: 1.3rem;
   font-weight: 600;
+  color: #fff;
+  text-align: center;
 }
 
 .zakaznik-schvaleni-close {
@@ -1286,6 +1289,10 @@ body.pdf-export-mode #signature-pad {
   line-height: 1;
   opacity: 0.7;
   transition: opacity 0.2s;
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .zakaznik-schvaleni-close:hover {
