@@ -2260,10 +2260,12 @@ async function sendAppointmentConfirmation(customer, date, time) {
   const address = Utils.getAddress(customer) || '';
   const product = customer.nazev_produktu || customer.produkt || customer.popis_produktu || '';
 
-  // Data technika
-  const technikJmeno = customer.technik_jmeno || customer.assigned_technician || '';
-  const technikEmail = customer.technik_email || '';
-  const technikTelefon = customer.technik_telefon || '';
+  // Data technika - VZDY ten, kdo provadi akci (prihlaseny uzivatel)
+  // Pokud akci provadi technik/admin, jeho udaje jdou do emailu jako kontakt
+  const aktualnUzivatel = typeof CURRENT_USER !== 'undefined' ? CURRENT_USER : {};
+  const technikJmeno = aktualnUzivatel.name || customer.technik_jmeno || customer.assigned_technician || '';
+  const technikEmail = aktualnUzivatel.email || customer.technik_email || '';
+  const technikTelefon = aktualnUzivatel.phone || customer.technik_telefon || '';
 
   // Email prodejce (vytvořil zakázku) - BEZ FALLBACKU
   // Pokud neni nastaven, neposlat CC prodejci
