@@ -124,11 +124,12 @@ try {
         'pokus_o_kontakt_customer',     // 3. Pokus o kontakt
         'potvrzeni_terminu_customer',   // 4. Potvrzeni terminu
         'pripominka_terminu_customer',  // 5. Pripominka terminu
-        'prirazeni_terminu_technician', // 6. Prirazeni terminu technikovi
-        'dokonceno_customer',           // 7. Dokonceni zakazky
-        'znovu_otevreno_admin',         // 8. Znovu otevreno
-        'pozvanka_seller',              // 9. Pozvanka pro prodejce (na konci)
-        'pozvanka_technician'           // 10. Pozvanka pro technika (na konci)
+        'waiting_dealer_customer',      // 6. Cekani na vyjadreni prodejce
+        'prirazeni_terminu_technician', // 7. Prirazeni terminu technikovi
+        'dokonceno_customer',           // 8. Dokonceni zakazky
+        'znovu_otevreno_admin',         // 9. Znovu otevreno
+        'pozvanka_seller',              // 10. Pozvanka pro prodejce (na konci)
+        'pozvanka_technician'           // 11. Pozvanka pro technika (na konci)
     ];
 
     // Seradit podle definovaneho poradi
@@ -354,6 +355,7 @@ try {
                 $triggerLabels = [
                     'potvrzeni_terminu_customer' => 'Potvrzeni terminu',
                     'pripominka_terminu_customer' => 'Pripominka terminu',
+                    'waiting_dealer_customer' => 'Cekani na prodejce',
                     'pokus_o_kontakt_customer' => 'Pokus o kontakt',
                     'nova_reklamace_admin' => 'Nova reklamace (admin)',
                     'nova_reklamace_customer' => 'Nova reklamace (zakaznik)',
@@ -373,6 +375,7 @@ try {
                     'pokus_o_kontakt_customer',
                     'potvrzeni_terminu_customer',
                     'pripominka_terminu_customer',
+                    'waiting_dealer_customer',
                     'dokonceno_customer',
                     'znovu_otevreno_admin',
                     'pozvanka_seller',

@@ -445,6 +445,7 @@ function saveProtokolData($data) {
     $repairProposal = $data['repair_proposal'] ?? '';
     $solved = $data['solved'] ?? '';
     $technik = $data['technician'] ?? null;
+    $dealer = $data['dealer'] ?? 'NE'; // Nutné vyjádření prodejce
 
     // Cenové údaje
     $pocetDilu = isset($data['pocet_dilu']) ? (int)$data['pocet_dilu'] : null;
@@ -472,6 +473,10 @@ function saveProtokolData($data) {
         throw new Exception('Reklamace nebyla nalezena');
     }
 
+    // Kontrola zda sloupec ceka_na_prodejce existuje
+    $stmt = $pdo->query("SHOW COLUMNS FROM wgs_reklamace LIKE 'ceka_na_prodejce'");
+    $maSloupecDealer = $stmt->fetch(PDO::FETCH_ASSOC) ? true : false;
+
     // Aktualizovat protokol data (včetně technika a cenových údajů)
     $updateFields = [
         'popis_problemu = :problem_description',
@@ -486,6 +491,12 @@ function saveProtokolData($data) {
         ':solved' => $solved,
         ':id' => $reklamace['id']
     ];
+
+    // Přidat ceka_na_prodejce pokud sloupec existuje
+    if ($maSloupecDealer) {
+        $updateFields[] = 'ceka_na_prodejce = :ceka_na_prodejce';
+        $params[':ceka_na_prodejce'] = ($dealer === 'ANO') ? 1 : 0;
+    }
 
     // Přidat technika pokud je zadán
     if ($technik !== null) {
@@ -527,9 +538,66 @@ function saveProtokolData($data) {
 
     $stmt->execute($params);
 
+    // Odeslat notifikaci pokud dealer = ANO (nutné vyjádření prodejce)
+    $notifikaceOdeslana = false;
+    if ($dealer === 'ANO' && $maSloupecDealer) {
+        try {
+            // Načíst data reklamace pro šablonu
+            $stmtRekl = $pdo->prepare("
+                SELECT jmeno, email, telefon, prodejce, reklamace_id
+                FROM wgs_reklamace WHERE id = :id
+            ");
+            $stmtRekl->execute([':id' => $reklamace['id']]);
+            $reklData = $stmtRekl->fetch(PDO::FETCH_ASSOC);
+
+            if ($reklData && !empty($reklData['email'])) {
+                // Načíst emailovou šablonu
+                $stmtSablona = $pdo->prepare("
+                    SELECT * FROM wgs_notifications
+                    WHERE id = 'waiting_dealer_response' AND active = 1
+                ");
+                $stmtSablona->execute();
+                $sablona = $stmtSablona->fetch(PDO::FETCH_ASSOC);
+
+                if ($sablona) {
+                    // Nahradit proměnné v šabloně
+                    $predmet = str_replace(
+                        ['{{order_id}}'],
+                        [$reklData['reklamace_id']],
+                        $sablona['subject']
+                    );
+                    $telo = str_replace(
+                        ['{{customer_name}}', '{{order_id}}', '{{dealer_name}}'],
+                        [$reklData['jmeno'], $reklData['reklamace_id'], $reklData['prodejce'] ?? 'Prodejce'],
+                        $sablona['template']
+                    );
+
+                    // Vložit do email fronty
+                    $stmtQueue = $pdo->prepare("
+                        INSERT INTO wgs_email_queue
+                        (recipient_email, recipient_name, subject, body, status, notification_id, created_at)
+                        VALUES (:email, :name, :subject, :body, 'pending', :notification_id, NOW())
+                    ");
+                    $stmtQueue->execute([
+                        ':email' => $reklData['email'],
+                        ':name' => $reklData['jmeno'],
+                        ':subject' => $predmet,
+                        ':body' => $telo,
+                        ':notification_id' => 'waiting_dealer_response'
+                    ]);
+                    $notifikaceOdeslana = true;
+
+                    error_log("Protokol API: Email 'ceka_na_prodejce' zařazen do fronty pro {$reklData['email']}");
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Protokol API: Chyba při odesílání notifikace ceka_na_prodejce: " . $e->getMessage());
+        }
+    }
+
     return [
         'status' => 'success',
-        'message' => 'Protokol uložen'
+        'message' => 'Protokol uložen' . ($notifikaceOdeslana ? ' (email zařazen do fronty)' : '')
     ];
 }
 
