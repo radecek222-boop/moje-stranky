@@ -569,34 +569,25 @@ textarea::placeholder {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.payment-summary h3 {
-  font-size: 1rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  padding: 1rem;
   margin-bottom: 1rem;
-  color: #ffffff;
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 0.9rem;
-  color: #cccccc;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.85rem;
+  color: #bbbbbb;
 }
 
-.summary-row:last-child {
+.summary-row.summary-total {
   border-bottom: none;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1rem;
   margin-top: 0.5rem;
-  padding-top: 1rem;
+  padding-top: 0.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   color: #ffffff;
 }

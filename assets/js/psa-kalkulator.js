@@ -1823,53 +1823,54 @@ function generatePaymentQR() {
   employees.forEach(emp => {
     const isLenka = emp.name === 'Lenka' || emp.name.includes('Lenka');
 
-    // Lenka má vždy paušální mzdu bez ohledu na hodiny
-    if (isLenka || emp.type === 'bonus_girls' || (emp.type === 'special' || emp.type === 'special2') || emp.hours > 0) {
-      let amount = 0;
+    let amount = 0;
 
-      if (isLenka) {
-        amount = 8716;  // Paušální mzda pro Lenku
-      } else if (emp.type === 'bonus_girls') {
-        amount = emp.bonusAmount || 0;  // Manuální bonus pro holky
-      } else if (emp.type === 'pausalni' && emp.pausalni) {
-        amount = emp.hours * salaryRate;
-      } else if (emp.type === 'special' || emp.type === 'special2') {
-        amount = bonusPerSpecial;
-      } else if (emp.type === 'premie_polozka') {
-        amount = emp.premieCastka || 0;
-      } else {
-        amount = emp.hours * salaryRate;
-      }
-
-      // Female bonus calculation (hidden) - Lenka už má paušál, nemá bonus
-      const femaleNames = ['Stana', 'Anastasia', 'Maryna', 'Ivana', 'Olha', 'Piven Tetiana',
-                          'Vitalina', 'Tetiana', 'Kataryna', 'Ruslana'];
-
-      if (!isLenka && emp.hours > 0 && femaleNames.some(name => emp.name.includes(name))) {
-        const bonus = (emp.hours * salaryRate) * 0.1;
-        femaleBonus += bonus;
-      }
-
-      // Process by payment type
-      if (emp.type === 'swift' && emp.swiftData) {
-        swiftPayments.push({
-          name: emp.name,
-          amount: amount,
-          swiftData: emp.swiftData
-        });
-      } else if (emp.name === 'Radek') {
-        radekPayment = amount;
-      } else if (emp.account && emp.bank) {
-        paymentData.push({
-          name: emp.name,
-          amount: amount,
-          account: emp.account,
-          bank: formatBankCode(emp.bank)
-        });
-      }
-
-      totalPayments += amount;
+    // Výpočet částky podle typu
+    if (isLenka) {
+      amount = 8716;  // Paušální mzda pro Lenku
+    } else if (emp.type === 'bonus_girls') {
+      amount = emp.bonusAmount || 0;
+    } else if (emp.type === 'special' || emp.type === 'special2') {
+      amount = bonusPerSpecial;
+    } else if (emp.type === 'premie_polozka') {
+      amount = emp.premieCastka || 0;
+    } else {
+      amount = (emp.hours || 0) * salaryRate;
     }
+
+    // Přeskočit pouze pokud je částka 0
+    if (amount <= 0) return;
+
+    // Female bonus calculation (hidden)
+    const femaleNames = ['Stana', 'Anastasia', 'Maryna', 'Ivana', 'Olha', 'Piven Tetiana',
+                        'Vitalina', 'Tetiana', 'Kataryna', 'Ruslana'];
+
+    if (!isLenka && emp.hours > 0 && femaleNames.some(name => emp.name.includes(name))) {
+      const bonus = (emp.hours * salaryRate) * 0.1;
+      femaleBonus += bonus;
+    }
+
+    // Process by payment type
+    if (emp.type === 'swift' && emp.swiftData) {
+      swiftPayments.push({
+        name: emp.name,
+        amount: amount,
+        swiftData: emp.swiftData
+      });
+    } else if (emp.name === 'Radek') {
+      radekPayment = amount;
+    } else {
+      // Přidat všechny zaměstnance s částkou > 0
+      paymentData.push({
+        name: emp.name,
+        amount: amount,
+        account: emp.account || '',
+        bank: emp.bank ? formatBankCode(emp.bank) : '',
+        missingAccount: !emp.account || !emp.bank
+      });
+    }
+
+    totalPayments += amount;
   });
 
   // Add Radek with hidden bonus
@@ -1887,14 +1888,24 @@ function generatePaymentQR() {
     });
   }
 
-  // Summary - pouze celkem
+  // Summary - seznam všech zaměstnanců
+  let summaryRows = '';
+
+  // Domácí platby
+  paymentData.forEach(payment => {
+    const amount = payment.displayAmount || payment.amount;
+    summaryRows += `<div class="summary-row"><span>${payment.name}</span><span>${formatCurrency(amount)}</span></div>`;
+  });
+
+  // SWIFT platby
+  swiftPayments.forEach(payment => {
+    summaryRows += `<div class="summary-row"><span>${payment.name} (SWIFT)</span><span>${formatCurrency(payment.amount)}</span></div>`;
+  });
+
   summaryDiv.innerHTML = `
-    <div class="summary-row">
-      <span>Počet plateb:</span>
-      <span>${paymentData.length + swiftPayments.length}</span>
-    </div>
-    <div class="summary-row">
-      <span>CELKEM K VÝPLATĚ:</span>
+    ${summaryRows}
+    <div class="summary-row summary-total">
+      <span>CELKEM:</span>
       <span>${formatCurrency(totalPayments + femaleBonus)}</span>
     </div>
   `;
@@ -1906,6 +1917,9 @@ function generatePaymentQR() {
 
   // Domestic payments with QR codes
   paymentData.forEach((payment, index) => {
+    // Přeskočit zaměstnance bez účtu (nezobrazovat v QR gridu)
+    if (payment.missingAccount) return;
+
     const qrItem = document.createElement('div');
     qrItem.className = 'qr-item';
 
@@ -1946,7 +1960,7 @@ function generatePaymentQR() {
           message: `Výplata ${payment.name} ${currentPeriod.month}/${currentPeriod.year}`
         });
       } catch (err) {
-        qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err.message}</div>`;
+        qrElement.innerHTML = `<div style="color: #999; font-size: 0.8rem;">${err.message}</div>`;
         return;
       }
 
@@ -1956,7 +1970,7 @@ function generatePaymentQR() {
         await renderQrCode(qrElement, qrText, 160, payment.name);
       } catch (error) {
         logger.error(`Failed to generate QR code for ${payment.name}:`, error);
-        qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
+        qrElement.innerHTML = '<div style="color: #999; font-size: 0.8rem;">Chyba QR</div>';
       }
     }, 100 * index);
   });
