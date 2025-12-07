@@ -1319,7 +1319,7 @@ function renderTable() {
                  data-index="${index}"
                  data-field="bank">
         </td>
-        <td class="text-center" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.25rem; min-width: 120px;">
+        <td class="text-center" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.25rem; min-width: 120px; align-items: center; vertical-align: middle;">
           <button class="btn btn-sm" onclick="saveEmployeeChanges(${index})" title="Uložit změny">Uložit</button>
           ${emp.isNew ?
             `<button class="btn btn-sm" style="background: var(--c-success); color: white;" onclick="saveEmployeeToDatabase(${index})" title="Uložit do databáze">DB</button>` :
