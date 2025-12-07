@@ -137,6 +137,9 @@ try {
      * @param string $role Role (customer, admin, technician, seller)
      * @param array $data Data s emaily
      * @return string|null Email nebo null
+     *
+     * DULEZITE: Zadny fallback! Pokud email neni nastaven, vrati null.
+     * Emaily se posilaji POUZE na adresy explicitne nastavene v sablone.
      */
     $resolveRoleToEmail = function($role, $data) use ($pdo) {
         switch ($role) {
@@ -144,11 +147,12 @@ try {
                 return $data['customer_email'] ?? null;
 
             case 'admin':
-                // Načíst admin email z konfigurace
+                // Načíst admin email z konfigurace - BEZ FALLBACKU
                 $stmt = $pdo->prepare("SELECT config_value FROM wgs_system_config WHERE config_key = 'admin_email' LIMIT 1");
                 $stmt->execute();
                 $adminEmail = $stmt->fetchColumn();
-                return $adminEmail ?: 'reklamace@wgs-service.cz'; // Fallback
+                // Pokud neni nastaven, vratime null (zadny fallback!)
+                return $adminEmail ?: null;
 
             case 'technician':
                 return $data['technician_email'] ?? null;

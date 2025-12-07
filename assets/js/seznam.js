@@ -2265,8 +2265,9 @@ async function sendAppointmentConfirmation(customer, date, time) {
   const technikEmail = customer.technik_email || '';
   const technikTelefon = customer.technik_telefon || '';
 
-  // Email prodejce (vytvořil zakázku)
-  const prodejceEmail = customer.created_by_email || 'admin@wgs-service.cz';
+  // Email prodejce (vytvořil zakázku) - BEZ FALLBACKU
+  // Pokud neni nastaven, neposlat CC prodejci
+  const prodejceEmail = customer.created_by_email || '';
 
   try {
     // Get CSRF token
