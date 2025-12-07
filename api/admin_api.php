@@ -208,6 +208,7 @@ function handleListKeys(PDO $pdo): void
 
 /**
  * Vytvoří nový registrační klíč
+ * Volitelne: email - prirazeny email (bez odeslani pozvanky)
  */
 function handleCreateKey(PDO $pdo, array $payload): void
 {
@@ -223,12 +224,21 @@ function handleCreateKey(PDO $pdo, array $payload): void
         $maxUsage = max(1, (int) $payload['max_usage']);
     }
 
+    // Volitelny email - prirazeni bez odeslani pozvanky
+    $email = null;
+    if (isset($payload['email']) && trim($payload['email']) !== '') {
+        $emailInput = trim($payload['email']);
+        if (filter_var($emailInput, FILTER_VALIDATE_EMAIL)) {
+            $email = $emailInput;
+        }
+    }
+
     $prefix = strtoupper(substr($keyType, 0, 3));
     $keyCode = generateRegistrationKey($prefix);
 
     $stmt = $pdo->prepare(
-        'INSERT INTO wgs_registration_keys (key_code, key_type, max_usage, usage_count, is_active, created_at, created_by)
-         VALUES (:key_code, :key_type, :max_usage, 0, 1, NOW(), :created_by)'
+        'INSERT INTO wgs_registration_keys (key_code, key_type, max_usage, usage_count, is_active, created_at, created_by, sent_to_email)
+         VALUES (:key_code, :key_type, :max_usage, 0, 1, NOW(), :created_by, :sent_to_email)'
     );
 
     $stmt->bindValue(':key_code', $keyCode, PDO::PARAM_STR);
@@ -246,11 +256,19 @@ function handleCreateKey(PDO $pdo, array $payload): void
         $stmt->bindValue(':created_by', null, PDO::PARAM_NULL);
     }
 
+    // Prirazeny email (volitelny)
+    if ($email !== null) {
+        $stmt->bindValue(':sent_to_email', $email, PDO::PARAM_STR);
+    } else {
+        $stmt->bindValue(':sent_to_email', null, PDO::PARAM_NULL);
+    }
+
     $stmt->execute();
 
     respondSuccess([
         'key_code' => $keyCode,
         'key_type' => $keyType,
+        'email' => $email
     ]);
 }
 

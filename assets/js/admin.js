@@ -1172,6 +1172,18 @@ function createKey() {
                 </label>
             </div>
 
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 8px;">
+                    Prirazeny email (volitelne)
+                </label>
+                <input type="email" id="createKeyEmail" placeholder="jan@example.com"
+                       style="width: 100%; padding: 10px; background: #252525; border: 1px solid #444;
+                       border-radius: 6px; color: #fff; font-size: 0.9rem; box-sizing: border-box;">
+                <div style="color: #666; font-size: 0.75rem; margin-top: 5px;">
+                    Email se ulozi ke klici, ale pozvanka se NEODESLE. Pro odeslani pouzijte "Pozvat".
+                </div>
+            </div>
+
             <div style="display: flex; gap: 10px;">
                 <button data-action="vytvorKlicZModalu" style="flex: 1; padding: 12px;
                         background: #fff; color: #000; border: none; border-radius: 6px;
@@ -1216,6 +1228,8 @@ function vytvorKlicZModalu() {
     }
 
     const keyType = vybranyTyp.value;
+    const emailInput = document.getElementById('createKeyEmail');
+    const email = emailInput ? emailInput.value.trim() : '';
     const csrfToken = getCSRFToken();
 
     if (!csrfToken) {
@@ -1223,20 +1237,31 @@ function vytvorKlicZModalu() {
         return;
     }
 
+    const payload = {
+        key_type: keyType,
+        csrf_token: csrfToken
+    };
+
+    // Pridat email pouze pokud je vyplnen
+    if (email !== '') {
+        payload.email = email;
+    }
+
     fetch('api/admin_api.php?action=create_key', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            key_type: keyType,
-            csrf_token: csrfToken
-        })
+        body: JSON.stringify(payload)
     })
     .then(r => r.json())
     .then(data => {
         document.getElementById('createKeyModal')?.remove();
 
         if (isSuccess(data)) {
-            alert(t('key_created').replace('{key}', data.key_code));
+            let zprava = t('key_created').replace('{key}', data.key_code);
+            if (data.email) {
+                zprava += '\nPrirazeny email: ' + data.email;
+            }
+            alert(zprava);
             loadKeysModal(); // Reload
         } else {
             alert(t('error') + ': ' + (data.error || data.message || t('unknown_error')));
