@@ -28,6 +28,7 @@ $csrfToken = generateCSRFToken();
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="assets/css/psa-kalkulator.min.css?v=<?= filemtime(__DIR__ . '/assets/css/psa-kalkulator.min.css') ?>">
+  <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css?v=<?= filemtime(__DIR__ . '/assets/css/universal-modal-theme.min.css') ?>">
 </head>
 <body>
 <main id="main-content">
@@ -187,15 +188,9 @@ $csrfToken = generateCSRFToken();
   </div>
 
   <!-- QR CODE MODAL -->
-  <div id="qrModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="qrModalTitle">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 class="modal-title" id="qrModalTitle">QR Kódy pro platby</h2>
-        <span class="close-modal" data-action="closeQRModal" role="button" tabindex="0" aria-label="Zavřít">&times;</span>
-      </div>
-
+  <div id="qrModal" class="modal hidden" role="dialog" aria-modal="true" data-action="closeQRModal">
+    <div class="modal-content" onclick="event.stopPropagation()">
       <div class="payment-summary">
-        <h3>Souhrn plateb</h3>
         <div id="paymentSummary"></div>
       </div>
 

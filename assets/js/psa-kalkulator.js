@@ -1254,7 +1254,7 @@ function renderTable() {
         <td class="text-center" style="white-space: nowrap;">
           ${emp.isNew ?
             `<button class="btn btn-sm" style="background: var(--c-success); color: white; margin-right: 0.25rem;" data-action="saveEmployeeToDatabase" data-index="${index}" title="Uložit do databáze">Uložit do DB</button>` :
-            `<button class="btn btn-sm" style="background: var(--c-info); color: white; margin-right: 0.25rem;" data-action="generateSingleEmployeeQR" data-index="${index}" title="Generovat QR platbu">QR</button>`
+            `<button class="btn btn-sm qr-btn" style="background: var(--c-info); color: white; margin-right: 0.25rem;" data-action="generateSingleEmployeeQR" data-index="${index}" title="Generovat QR platbu">QR</button>`
           }
           ${PERMANENT_EMPLOYEE_IDS.includes(emp.id) ? '' :
             `<button class="btn btn-danger btn-sm" data-action="removeEmployee" data-index="${index}" title="Odebrat z období">×</button>`
@@ -1417,29 +1417,42 @@ function normalizeAccount(account) {
  * Format: CZ + 2 kontrolni cislice + 4 kod banky + 6 predcisli + 10 cislo uctu
  */
 function convertToIBAN(account, bankCode) {
-  // Odstranit pomlcky a mezery
-  account = (account || '').toString().replace(/[\s-]/g, '');
+  // Nejprve odstranit jen mezery (pomlcku zatim nechat pro split)
+  let rawAccount = (account || '').toString().replace(/\s/g, '');
   bankCode = (bankCode || '').toString().replace(/\D/g, '').padStart(4, '0');
 
   // Rozdelit predcisli a cislo uctu
   let predcisli = '';
-  let cisloUctu = account;
+  let cisloUctu = '';
 
-  if (account.includes('-')) {
-    const parts = account.split('-');
-    predcisli = parts[0] || '';
-    cisloUctu = parts[1] || '';
-  } else if (account.length > 10) {
-    predcisli = account.slice(0, -10);
-    cisloUctu = account.slice(-10);
+  if (rawAccount.includes('-')) {
+    // Format: predcisli-cislo (napr. 19-123456789)
+    const parts = rawAccount.split('-');
+    predcisli = (parts[0] || '').replace(/\D/g, '');
+    cisloUctu = (parts[1] || '').replace(/\D/g, '');
+  } else {
+    // Bez pomlcky - jen cisla
+    const digits = rawAccount.replace(/\D/g, '');
+    if (digits.length > 10) {
+      predcisli = digits.slice(0, -10);
+      cisloUctu = digits.slice(-10);
+    } else {
+      predcisli = '';
+      cisloUctu = digits;
+    }
   }
 
   // Doplnit na spravnou delku
-  predcisli = predcisli.replace(/\D/g, '').padStart(6, '0');
-  cisloUctu = cisloUctu.replace(/\D/g, '').padStart(10, '0');
+  predcisli = predcisli.padStart(6, '0');
+  cisloUctu = cisloUctu.padStart(10, '0');
 
   // BBAN = kod banky + predcisli + cislo uctu
   const bban = bankCode + predcisli + cisloUctu;
+
+  // Kontrola BBAN delky (4 + 6 + 10 = 20 znaku)
+  if (bban.length !== 20) {
+    throw new Error(`Neplatná délka BBAN: ${bban.length} (očekáváno 20)`);
+  }
 
   // Vypocet kontrolnich cislic (ISO 7064 Mod 97-10)
   // Presunout CZ00 na konec a nahradit pismena cisly (C=12, Z=35)
@@ -1447,7 +1460,14 @@ function convertToIBAN(account, bankCode) {
   let remainder = BigInt(checkString) % 97n;
   const checkDigits = String(98n - remainder).padStart(2, '0');
 
-  return 'CZ' + checkDigits + bban;
+  const iban = 'CZ' + checkDigits + bban;
+
+  // Kontrola IBAN delky (CZ ma vzdy 24 znaku)
+  if (iban.length !== 24) {
+    throw new Error(`Neplatná délka IBAN: ${iban.length} (očekáváno 24)`);
+  }
+
+  return iban;
 }
 
 function sanitizeMessage(message) {
@@ -1462,45 +1482,97 @@ function sanitizeMessage(message) {
 
 let qrLibraryPromise = null;
 
+/**
+ * Robustni loader pro QR knihovnu
+ * - resi "load uz probehl"
+ * - resi "script je v DOM, ale byl pridan mimo vas loader"
+ * - resi "neco se pokazilo a uz se nic nestane" (timeout)
+ * - po failu resetuje qrLibraryPromise
+ */
 function ensureQrLibraryLoaded() {
-  // qrcodejs2 knihovna - kontrola existence konstruktoru
+  // Uz je k dispozici
   if (window.QRCode && typeof window.QRCode === 'function') {
     return Promise.resolve(window.QRCode);
   }
 
-  if (!qrLibraryPromise) {
-    qrLibraryPromise = new Promise((resolve, reject) => {
-      const existing = document.querySelector('script[data-qr-lib]');
+  if (qrLibraryPromise) return qrLibraryPromise;
 
-      if (existing) {
-        if (window.QRCode && typeof window.QRCode === 'function') {
-          resolve(window.QRCode);
-          return;
+  qrLibraryPromise = new Promise((resolve, reject) => {
+    const src = 'assets/js/qrcode.min.js';
+    const existing =
+      document.querySelector('script[data-qr-lib]') ||
+      Array.from(document.scripts).find(s => (s.src || '').includes(src));
+
+    const fail = (msg) => reject(new Error(msg));
+
+    const tryResolve = () => {
+      if (window.QRCode && typeof window.QRCode === 'function') {
+        resolve(window.QRCode);
+        return true;
+      }
+      return false;
+    };
+
+    // Timeout proti "cekani navěky"
+    const t = setTimeout(() => {
+      if (!tryResolve()) fail('Timeout načítání knihovny QR kódů (8s)');
+    }, 8000);
+
+    const cleanup = () => clearTimeout(t);
+
+    const attachWaiters = (scriptEl) => {
+      // kdyby load uz probehl driv nez pridame listener
+      queueMicrotask(() => {
+        if (tryResolve()) {
+          cleanup();
+        } else if (scriptEl.dataset.qrLoaded === '1') {
+          cleanup();
+          fail('QR script načten, ale QRCode API chybí');
         }
+      });
 
-        existing.addEventListener('load', () => resolve(window.QRCode));
-        existing.addEventListener('error', () => reject(new Error('Nepodařilo se načíst knihovnu QR kódů')));
+      scriptEl.addEventListener('load', () => {
+        scriptEl.dataset.qrLoaded = '1';
+        if (tryResolve()) {
+          cleanup();
+        } else {
+          cleanup();
+          fail('Knihovna QR kódu se načetla, ale neobsahuje očekávané API');
+        }
+      }, { once: true });
+
+      scriptEl.addEventListener('error', () => {
+        cleanup();
+        fail('Nepodařilo se načíst knihovnu QR kódů');
+      }, { once: true });
+    };
+
+    if (existing) {
+      // Pokud uz existuje a nahodou uz je "oznaceny jako loaded", rovnou vyhodnot stav
+      if (tryResolve()) {
+        cleanup();
         return;
       }
+      if (existing.dataset.qrLoaded === '1') {
+        cleanup();
+        fail('QR script načten, ale QRCode API chybí');
+        return;
+      }
+      attachWaiters(existing);
+      return;
+    }
 
-      const script = document.createElement('script');
-      script.src = 'assets/js/qrcode.min.js';
-      script.defer = true;
-      script.dataset.qrLib = '1';
-      script.onload = () => {
-        if (window.QRCode && typeof window.QRCode === 'function') {
-          resolve(window.QRCode);
-        } else {
-          reject(new Error('Knihovna QR kódu se načetla, ale neobsahuje očekávané API'));
-        }
-      };
-      script.onerror = () => reject(new Error('Nepodařilo se načíst knihovnu QR kódů'));
-      document.head.appendChild(script);
-    }).catch((err) => {
-      qrLibraryPromise = null;
-      throw err;
-    });
-  }
+    // Vytvorit script
+    const script = document.createElement('script');
+    script.src = src;
+    script.defer = true;
+    script.dataset.qrLib = '1';
+    attachWaiters(script);
+    document.head.appendChild(script);
+  }).catch((err) => {
+    qrLibraryPromise = null; // Reset pro retry
+    throw err;
+  });
 
   return qrLibraryPromise;
 }
@@ -1518,31 +1590,40 @@ function buildSpaydPayload(data) {
     throw new Error('Neplatná částka');
   }
 
-  const vs = data.vs ? String(data.vs).replace(/\D/g, '').slice(0, 10) : '';
-  const message = sanitizeMessage(data.message || '');
-
   // Konverze na IBAN format pro SPAYD
   const iban = convertToIBAN(account, bank);
 
-  const parts = [
-    'SPD',
-    '1.0',
-    `ACC:${iban}`,
-    `AM:${amount.toFixed(2)}`,
-    'CC:CZK'
-  ];
+  // Minimalni SPAYD - pouze ucet, castka, mena
+  const spayd = `SPD*1.0*ACC:${iban}*AM:${amount.toFixed(2)}*CC:CZK`;
 
-  if (vs) parts.push(`X-VS:${vs}`);
-  if (message) parts.push(`MSG:${message}`);
+  console.log('SPAYD delka:', spayd.length, 'text:', spayd);
 
-  return parts.join('*');
+  return spayd;
 }
+
+// Maximalni delky QR textu podle urovne korekce (bezpecne limity)
+const QR_MAX_LENGTH = {
+  L: 800,   // Low correction - vice dat, mene odolnosti
+  M: 600,   // Medium
+  Q: 450,   // Quartile
+  H: 350    // High correction - mene dat, vice odolnosti
+};
 
 async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
   await ensureQrLibraryLoaded();
 
   if (!window.QRCode || typeof window.QRCode !== 'function') {
     throw new Error('Knihovna pro QR kódy není načtena');
+  }
+
+  // Validace delky QR textu
+  const maxLen = QR_MAX_LENGTH.L; // Pouzivame Level L
+  if (!qrText || typeof qrText !== 'string') {
+    throw new Error('QR text je prázdný nebo neplatný');
+  }
+  if (qrText.length > maxLen) {
+    console.error(`QR text příliš dlouhý: ${qrText.length} > ${maxLen}`, qrText);
+    throw new Error(`QR data příliš dlouhá (${qrText.length} znaků, max ${maxLen})`);
   }
 
   return new Promise((resolve, reject) => {
@@ -1557,14 +1638,14 @@ async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
         height: size,
         colorDark: '#000000',
         colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
+        correctLevel: QRCode.CorrectLevel.L  // Nizsi uroven korekce = vice dat
       });
 
-      logger.log(`QR code generated${contextLabel ? ' for ' + contextLabel : ''}`);
+      console.log(`QR code generated${contextLabel ? ' for ' + contextLabel : ''} (${qrText.length} chars)`);
       resolve();
     } catch (err) {
-      logger.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
-      qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
+      console.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
+      qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err?.message || 'Chyba QR'}</div>`;
       reject(err);
     }
   });
@@ -1713,6 +1794,15 @@ function generatePaymentQR() {
   container.innerHTML = '';
   summaryDiv.innerHTML = '';
 
+  // Zobrazit souhrn pro hromadné QR
+  const summarySection = summaryDiv.closest('.payment-summary');
+  if (summarySection) {
+    summarySection.style.display = '';
+  }
+
+  // Odstranit třídu pro menší modal
+  modal.classList.remove('single-qr-mode');
+
   let totalPayments = 0;
   let femaleBonus = 0;
   let radekPayment = 0;
@@ -1797,132 +1887,101 @@ function generatePaymentQR() {
     });
   }
 
-  // Summary
+  // Summary - pouze celkem
   summaryDiv.innerHTML = `
     <div class="summary-row">
-      <span>Počet domácích plateb:</span>
-      <span>${paymentData.length}</span>
+      <span>Počet plateb:</span>
+      <span>${paymentData.length + swiftPayments.length}</span>
     </div>
-    <div class="summary-row">
-      <span>Počet SWIFT plateb:</span>
-      <span>${swiftPayments.length}</span>
-    </div>
-    <div class="summary-row">
-      <span>Základní výplaty:</span>
-      <span>${formatCurrency(totalPayments)}</span>
-    </div>
-    ${femaleBonus > 0 ? `
-    <div class="summary-row" style="color: var(--c-grey); font-size: 0.85rem;">
-      <span>Skryté prémie (→ Radek):</span>
-      <span>${formatCurrency(femaleBonus)}</span>
-    </div>` : ''}
     <div class="summary-row">
       <span>CELKEM K VÝPLATĚ:</span>
       <span>${formatCurrency(totalPayments + femaleBonus)}</span>
     </div>
   `;
 
-  // SWIFT payments section
-  if (swiftPayments.length > 0) {
-    const swiftSection = document.createElement('div');
-    swiftSection.innerHTML = `<h3 style="margin: 2rem 0 1rem; padding-top: 1rem; border-top: 1px solid var(--c-border);">SWIFT platby (poplatky: OUR)</h3>`;
-    container.appendChild(swiftSection);
-
-    swiftPayments.forEach((payment, index) => {
-      const swiftItem = document.createElement('div');
-      swiftItem.className = 'qr-item';
-      swiftItem.style.background = 'rgba(0,0,0,0.02)';
-
-      swiftItem.innerHTML = `
-        <div class="qr-employee-name">${payment.name}</div>
-        <div class="qr-amount">${formatCurrency(payment.amount)}</div>
-        <div style="font-size: 0.75rem; color: var(--c-grey); margin: 0.5rem 0;">Mezinárodní SWIFT platba</div>
-        <div style="text-align: left; font-size: 0.8rem; padding: 1rem; background: white; border: 1px solid var(--c-border); margin: 1rem 0;">
-          <div><strong>IBAN:</strong> ${payment.swiftData.iban}</div>
-          <div><strong>SWIFT/BIC:</strong> ${payment.swiftData.swift}</div>
-          <div><strong>Banka:</strong> ${payment.swiftData.bankName}</div>
-          <div><strong>Adresa banky:</strong> ${payment.swiftData.bankAddress}</div>
-          <div><strong>Příjemce:</strong> ${payment.swiftData.beneficiary}</div>
-          <div style="color: var(--c-error); margin-top: 0.5rem;">
-            <strong>Poplatky: OUR</strong> (všechny poplatky hradí odesílatel)
-          </div>
-        </div>
-        <button class="btn btn-sm" data-action="copySWIFTDetails" data-name="${payment.name}" data-iban="${payment.swiftData.iban}" data-swift="${payment.swiftData.swift}" data-amount="${payment.amount}">
-          Kopírovat údaje
-        </button>
-      `;
-
-      container.appendChild(swiftItem);
-    });
-  }
+  // Vytvoříme jeden grid pro všechny platby
+  const paymentsGrid = document.createElement('div');
+  paymentsGrid.className = 'qr-grid';
+  container.appendChild(paymentsGrid);
 
   // Domestic payments with QR codes
-  if (paymentData.length > 0) {
-    const domesticSection = document.createElement('div');
-    domesticSection.innerHTML = `
-      <h3 style="margin: 2rem 0 1rem; padding-top: 1rem; border-top: 1px solid var(--c-border);">Domácí platby (QR kódy)</h3>
-      <div class="qr-grid" id="domesticPaymentsGrid"></div>
+  paymentData.forEach((payment, index) => {
+    const qrItem = document.createElement('div');
+    qrItem.className = 'qr-item';
+
+    const displayAmount = payment.displayAmount || payment.amount;
+    const qrAmount = payment.realAmount || payment.amount;
+
+    qrItem.innerHTML = `
+      <div class="qr-employee-name">${payment.name}</div>
+      <div class="qr-amount">${formatCurrency(displayAmount)}</div>
+      ${payment.isSpecial ? '<div class="qr-special-note">Včetně prémií</div>' : ''}
+      <div class="qr-account">${payment.account}/${payment.bank}</div>
+      <div class="qr-code-wrapper" id="qr-${index}"></div>
+      <div class="qr-item-buttons">
+        <button class="btn btn-sm" data-action="downloadQR" data-qrid="qr-${index}" data-name="${payment.name}">Stáhnout</button>
+        <button class="btn btn-sm btn-secondary" data-action="shareQR" data-qrid="qr-${index}" data-name="${payment.name}" data-amount="${displayAmount}">Sdílet</button>
+      </div>
     `;
-    container.appendChild(domesticSection);
 
-    const domesticGrid = domesticSection.querySelector('#domesticPaymentsGrid');
+    paymentsGrid.appendChild(qrItem);
 
-    paymentData.forEach((payment, index) => {
-      const qrItem = document.createElement('div');
-      qrItem.className = 'qr-item';
+    // Generate QR code
+    setTimeout(async () => {
+      const qrElement = document.getElementById(`qr-${index}`);
+      if (!qrElement) {
+        logger.error(`QR element not found: qr-${index}`);
+        return;
+      }
 
-      const displayAmount = payment.displayAmount || payment.amount;
-      const qrAmount = payment.realAmount || payment.amount;
+      qrElement.innerHTML = '';
 
-      qrItem.innerHTML = `
-        <div class="qr-employee-name">${payment.name}</div>
-        <div class="qr-amount">${formatCurrency(displayAmount)}</div>
-        ${payment.isSpecial ? '<div style="font-size: 0.75rem; color: var(--c-success);">Včetně prémií</div>' : ''}
-        <div class="qr-account">${payment.account}/${payment.bank}</div>
-        <div class="qr-code-wrapper" id="qr-${index}"></div>
-        <button class="btn btn-sm" style="margin-top: 1rem;" data-action="downloadQR" data-qrid="qr-${index}" data-name="${payment.name}">
-          Stáhnout QR
-        </button>
-      `;
+      let qrText;
+      try {
+        qrText = generateCzechPaymentString({
+          account: payment.account,
+          bank: payment.bank,
+          amount: qrAmount,
+          vs: currentPeriod.year * 100 + currentPeriod.month,
+          message: `Výplata ${payment.name} ${currentPeriod.month}/${currentPeriod.year}`
+        });
+      } catch (err) {
+        qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err.message}</div>`;
+        return;
+      }
 
-      domesticGrid.appendChild(qrItem);
+      logger.log(`Generating QR for ${payment.name}:`, qrText);
 
-      // Generate QR code
-      setTimeout(async () => {
-        const qrElement = document.getElementById(`qr-${index}`);
-        if (!qrElement) {
-          logger.error(`QR element not found: qr-${index}`);
-          return;
-        }
+      try {
+        await renderQrCode(qrElement, qrText, 160, payment.name);
+      } catch (error) {
+        logger.error(`Failed to generate QR code for ${payment.name}:`, error);
+        qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
+      }
+    }, 100 * index);
+  });
 
-        // BUGFIX: Clear element before generating new QR code
-        qrElement.innerHTML = '';
+  // SWIFT payments
+  swiftPayments.forEach((payment, index) => {
+    const swiftItem = document.createElement('div');
+    swiftItem.className = 'qr-item swift-item';
 
-        let qrText;
-        try {
-          qrText = generateCzechPaymentString({
-            account: payment.account,
-            bank: payment.bank,
-            amount: qrAmount,
-            vs: currentPeriod.year * 100 + currentPeriod.month,
-            message: `Výplata ${payment.name} ${currentPeriod.month}/${currentPeriod.year}`
-          });
-        } catch (err) {
-          qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err.message}</div>`;
-          return;
-        }
+    swiftItem.innerHTML = `
+      <div class="qr-employee-name">${payment.name}</div>
+      <div class="qr-amount">${formatCurrency(payment.amount)}</div>
+      <div class="swift-label">SWIFT</div>
+      <div class="swift-details">
+        <div><strong>IBAN:</strong> ${payment.swiftData.iban}</div>
+        <div><strong>SWIFT:</strong> ${payment.swiftData.swift}</div>
+        <div class="swift-our">Poplatky: OUR</div>
+      </div>
+      <div class="qr-item-buttons">
+        <button class="btn btn-sm" data-action="copySWIFTDetails" data-name="${payment.name}" data-iban="${payment.swiftData.iban}" data-swift="${payment.swiftData.swift}" data-amount="${payment.amount}">Kopírovat</button>
+      </div>
+    `;
 
-        logger.log(`Generating QR for ${payment.name}:`, qrText);
-
-        try {
-          await renderQrCode(qrElement, qrText, 180, payment.name);
-        } catch (error) {
-          logger.error(`Failed to generate QR code for ${payment.name}:`, error);
-          qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
-        }
-      }, 100 * index);
-    });
-  }
+    paymentsGrid.appendChild(swiftItem);
+  });
 
   modal.classList.remove('hidden');
 }
@@ -1966,12 +2025,73 @@ function downloadQR(qrId, employeeName) {
   }
 }
 
+async function shareQRCode(qrId, employeeName, amount) {
+  // Získat QR kód jako blob
+  const qrImg = document.querySelector(`#${qrId} img`);
+  const qrCanvas = document.querySelector(`#${qrId} canvas`);
+
+  let imageUrl;
+  if (qrImg && qrImg.src) {
+    imageUrl = qrImg.src;
+  } else if (qrCanvas) {
+    imageUrl = qrCanvas.toDataURL('image/png');
+  } else {
+    wgsToast.error('QR kód nenalezen');
+    return;
+  }
+
+  // Konverze data URL na blob
+  const response = await fetch(imageUrl);
+  const blob = await response.blob();
+
+  const shareData = {
+    title: `QR platba - ${employeeName}`,
+    text: `Platba pro ${employeeName}: ${amount} Kč (${currentPeriod.month}/${currentPeriod.year})`,
+    files: [new File([blob], `QR_platba_${employeeName}.png`, { type: 'image/png' })]
+  };
+
+  // Zkontrolovat podporu Web Share API
+  if (navigator.canShare && navigator.canShare(shareData)) {
+    try {
+      await navigator.share(shareData);
+      wgsToast.success('QR kód byl sdílen');
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Chyba při sdílení:', err);
+        // Fallback: zkopírovat do schránky
+        fallbackCopyQR(imageUrl, employeeName, amount);
+      }
+    }
+  } else {
+    // Fallback pro prohlížeče bez podpory sdílení
+    fallbackCopyQR(imageUrl, employeeName, amount);
+  }
+}
+
+async function fallbackCopyQR(imageUrl, employeeName, amount) {
+  try {
+    // Zkusit zkopírovat obrázek do schránky
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    await navigator.clipboard.write([
+      new ClipboardItem({ 'image/png': blob })
+    ]);
+    wgsToast.success('QR kód byl zkopírován do schránky');
+  } catch (err) {
+    // Poslední fallback - stáhnout soubor
+    console.warn('Nelze zkopírovat do schránky, stahuji soubor:', err);
+    downloadQR(imageUrl.split('#')[0].split('?')[0], employeeName);
+  }
+}
+
 function closeQRModal() {
   document.getElementById('qrModal').classList.add('hidden');
 }
 
 // === SINGLE EMPLOYEE QR GENERATION ===
 function generateSingleEmployeeQR(index) {
+  console.log('generateSingleEmployeeQR called with index:', index);
+
   // Synchronizovat vstupy před generováním QR
   synchronizovatVstupy();
 
@@ -1985,8 +2105,24 @@ function generateSingleEmployeeQR(index) {
   const container = document.getElementById('qrCodesContainer');
   const summaryDiv = document.getElementById('paymentSummary');
 
+  // Guard - kontrola existence elementů
+  if (!modal || !container || !summaryDiv) {
+    console.error('QR Modal: chybí elementy', { modal, container, summaryDiv });
+    wgsToast.error('Chybí QR modal v HTML (qrModal/qrCodesContainer/paymentSummary)');
+    return;
+  }
+
   container.innerHTML = '';
   summaryDiv.innerHTML = '';
+
+  // Skrýt souhrn pro jednotlivý QR
+  const summarySection = summaryDiv.closest('.payment-summary');
+  if (summarySection) {
+    summarySection.style.display = 'none';
+  }
+
+  // Přidat třídu pro menší modal (jednotlivý QR)
+  modal.classList.add('single-qr-mode');
 
   // Calculate total hours for bonus calculation
   let totalOtherHours = 0;
@@ -2022,39 +2158,21 @@ function generateSingleEmployeeQR(index) {
 
   // For SWIFT payments
   if (emp.type === 'swift' && emp.swiftData) {
-    summaryDiv.innerHTML = `
-      <h3>SWIFT platba</h3>
-      <div class="summary-row">
-        <span>Zaměstnanec:</span>
-        <span>${emp.name}</span>
-      </div>
-      <div class="summary-row">
-        <span>Částka:</span>
-        <span>${formatCurrency(amount)}</span>
-      </div>
-    `;
-
     const swiftItem = document.createElement('div');
-    swiftItem.className = 'qr-item';
-    swiftItem.style.background = 'rgba(0,0,0,0.02)';
+    swiftItem.className = 'qr-item swift-item';
 
     swiftItem.innerHTML = `
       <div class="qr-employee-name">${emp.name}</div>
       <div class="qr-amount">${formatCurrency(amount)}</div>
-      <div style="font-size: 0.75rem; color: var(--c-grey); margin: 0.5rem 0;">Mezinárodní SWIFT platba</div>
-      <div style="text-align: left; font-size: 0.8rem; padding: 1rem; background: white; border: 1px solid var(--c-border); margin: 1rem 0;">
+      <div class="swift-label">SWIFT</div>
+      <div class="swift-details">
         <div><strong>IBAN:</strong> ${emp.swiftData.iban}</div>
-        <div><strong>SWIFT/BIC:</strong> ${emp.swiftData.swift}</div>
-        <div><strong>Banka:</strong> ${emp.swiftData.bankName}</div>
-        <div><strong>Adresa banky:</strong> ${emp.swiftData.bankAddress}</div>
-        <div><strong>Příjemce:</strong> ${emp.swiftData.beneficiary}</div>
-        <div style="color: var(--c-error); margin-top: 0.5rem;">
-          <strong>Poplatky: OUR</strong> (všechny poplatky hradí odesílatel)
-        </div>
+        <div><strong>SWIFT:</strong> ${emp.swiftData.swift}</div>
+        <div class="swift-our">Poplatky: OUR</div>
       </div>
-      <button class="btn btn-sm" data-action="copySWIFTDetails" data-name="${emp.name}" data-iban="${emp.swiftData.iban}" data-swift="${emp.swiftData.swift}" data-amount="${amount}">
-        Kopírovat údaje
-      </button>
+      <div class="qr-item-buttons">
+        <button class="btn btn-sm" data-action="copySWIFTDetails" data-name="${emp.name}" data-iban="${emp.swiftData.iban}" data-swift="${emp.swiftData.swift}" data-amount="${amount}">Kopírovat</button>
+      </div>
     `;
 
     container.appendChild(swiftItem);
@@ -2068,19 +2186,8 @@ function generateSingleEmployeeQR(index) {
     return;
   }
 
-  // Summary
-  summaryDiv.innerHTML = `
-    <h3>Platba pro zaměstnance</h3>
-    <div class="summary-row">
-      <span>Zaměstnanec:</span>
-      <span>${emp.name}</span>
-    </div>
-    <div class="summary-row">
-      <span>Částka k výplatě:</span>
-      <span>${formatCurrency(amount)}</span>
-    </div>
-    ${isLenka ? '<div class="summary-row" style="color: var(--c-info); font-size: 0.85rem;"><span>Paušální mzda</span><span>8716 Kč/měsíc</span></div>' : ''}
-  `;
+  // Generate unique QR element ID (future-proof pro více QR najednou)
+  const qrId = `qr-single-${Date.now()}-${index}`;
 
   // Generate QR code
   const qrItem = document.createElement('div');
@@ -2091,23 +2198,29 @@ function generateSingleEmployeeQR(index) {
     <div class="qr-amount">${formatCurrency(amount)}</div>
     ${isLenka ? '<div style="font-size: 0.75rem; color: var(--c-info);">Paušální mzda</div>' : ''}
     <div class="qr-account">${emp.account}/${formatBankCode(emp.bank)}</div>
-    <div class="qr-code-wrapper" id="qr-single"></div>
-    <button class="btn btn-sm" style="margin-top: 1rem;" data-action="downloadQR" data-qrid="qr-single" data-name="${emp.name}">
-      Stáhnout QR
-    </button>
+    <div class="qr-code-wrapper" id="${qrId}"></div>
+    <div class="qr-item-buttons">
+      <button class="btn btn-sm" data-action="downloadQR" data-qrid="${qrId}" data-name="${emp.name}">
+        Stáhnout
+      </button>
+      <button class="btn btn-sm btn-secondary" data-action="shareQR" data-qrid="${qrId}" data-name="${emp.name}" data-amount="${amount}">
+        Sdílet
+      </button>
+    </div>
   `;
 
   container.appendChild(qrItem);
 
-  // Generate QR code
+  // Generate QR code asynchronně
   setTimeout(async () => {
-    const qrElement = document.getElementById('qr-single');
+    const qrElement = document.getElementById(qrId);
     if (!qrElement) {
-      logger.error('QR element not found: qr-single');
+      console.error('QR element not found:', qrId);
+      wgsToast.error('QR element nenalezen v DOM');
       return;
     }
 
-    // BUGFIX: Clear element before generating new QR code
+    // Vyčistit element před generováním
     qrElement.innerHTML = '';
 
     let qrText;
@@ -2120,17 +2233,18 @@ function generateSingleEmployeeQR(index) {
         message: `Výplata ${emp.name} ${currentPeriod.month}/${currentPeriod.year}`
       });
     } catch (err) {
+      console.error('QR generateCzechPaymentString failed:', err);
       qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err.message}</div>`;
       return;
     }
 
-    logger.log(`Generating single QR for ${emp.name}:`, qrText);
+    console.log(`Generating QR for ${emp.name}:`, qrText);
 
     try {
       await renderQrCode(qrElement, qrText, 220, emp.name);
     } catch (error) {
-      logger.error(`Failed to generate QR code for ${emp.name}:`, error);
-      qrElement.innerHTML = '<div style="color: red; padding: 20px;">Chyba generování QR kódu</div>';
+      console.error(`QR render failed for ${emp.name}:`, error);
+      qrElement.innerHTML = `<div style="color: red; padding: 20px;">${error?.message || 'Chyba QR'}</div>`;
     }
   }, 100);
 
@@ -2159,28 +2273,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Step 115 - Podpora parametrů pro onclick migraci
     switch (action) {
-      case 'generateSingleEmployeeQR':
-        const gIndex = target.getAttribute('data-index');
-        if (gIndex !== null && typeof generateSingleEmployeeQR === 'function') {
-          generateSingleEmployeeQR(parseInt(gIndex));
-        }
-        return;
+      case 'generateSingleEmployeeQR': {
+        const gIndexStr = target.getAttribute('data-index');
+        const gIndex = Number.parseInt(gIndexStr, 10);
 
-      case 'saveEmployeeToDatabase':
+        if (!Number.isInteger(gIndex) || gIndex < 0) {
+          console.warn('QR: invalid data-index', gIndexStr, target);
+          wgsToast.error('Neplatný index zaměstnance');
+          return;
+        }
+
+        if (typeof generateSingleEmployeeQR !== 'function') {
+          console.error('generateSingleEmployeeQR is not a function');
+          wgsToast.error('QR modul není načten');
+          return;
+        }
+
+        generateSingleEmployeeQR(gIndex);
+        return;
+      }
+
+      case 'saveEmployeeToDatabase': {
         const sIndex = target.getAttribute('data-index');
         if (sIndex !== null && typeof saveEmployeeToDatabase === 'function') {
-          saveEmployeeToDatabase(parseInt(sIndex));
+          saveEmployeeToDatabase(parseInt(sIndex, 10));
         }
         return;
+      }
 
-      case 'removeEmployee':
+      case 'removeEmployee': {
         const rIndex = target.getAttribute('data-index');
         if (rIndex !== null && typeof removeEmployee === 'function') {
-          removeEmployee(parseInt(rIndex));
+          removeEmployee(parseInt(rIndex, 10));
         }
         return;
+      }
 
-      case 'copySWIFTDetails':
+      case 'copySWIFTDetails': {
         const name = target.getAttribute('data-name');
         const iban = target.getAttribute('data-iban');
         const swift = target.getAttribute('data-swift');
@@ -2189,23 +2318,36 @@ document.addEventListener('DOMContentLoaded', () => {
           copySWIFTDetails(name, iban, swift, amount);
         }
         return;
+      }
 
-      case 'downloadQR':
+      case 'downloadQR': {
         const qrid = target.getAttribute('data-qrid');
         const dName = target.getAttribute('data-name');
         if (qrid && dName && typeof downloadQR === 'function') {
           downloadQR(qrid, dName);
         }
         return;
+      }
 
-      case 'updateEmployeeField':
-        const empIndex = parseInt(target.getAttribute('data-index'));
+      case 'shareQR': {
+        const shareQrid = target.getAttribute('data-qrid');
+        const shareName = target.getAttribute('data-name');
+        const shareAmount = target.getAttribute('data-amount');
+        if (shareQrid && shareName && typeof shareQRCode === 'function') {
+          shareQRCode(shareQrid, shareName, shareAmount);
+        }
+        return;
+      }
+
+      case 'updateEmployeeField': {
+        const empIndex = parseInt(target.getAttribute('data-index'), 10);
         const empField = target.getAttribute('data-field');
         const empRecalculate = target.getAttribute('data-recalculate') === 'true';
         if (!isNaN(empIndex) && empField && typeof updateEmployee === 'function') {
           updateEmployee(empIndex, empField, target.value, empRecalculate);
         }
         return;
+      }
 
       // === PSA HLAVNÍ AKCE ===
       case 'saveData':
@@ -2265,12 +2407,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof confirmNewPeriod === 'function') confirmNewPeriod();
         return;
 
-      case 'selectPeriod':
+      case 'selectPeriod': {
         const periodToSelect = target.getAttribute('data-period');
         if (periodToSelect && typeof selectPeriod === 'function') {
           selectPeriod(periodToSelect);
         }
         return;
+      }
 
       case 'loadPeriod':
         if (typeof loadPeriod === 'function') loadPeriod();
