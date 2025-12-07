@@ -1025,11 +1025,11 @@ async function nactiRegistracniKlice() {
                 html += '<tr class="admin-hover-row" style="border-bottom: 1px solid #e0e0e0;">';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><span style="display: inline-block; padding: 0.2rem 0.5rem; background: #000; color: #fff; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 500;">' + escapujHtml(klic.key_type) + '</span></td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;"><code style="background: #f5f5f5; padding: 0.25rem 0.5rem; font-size: 0.8rem; border: 1px solid #ddd;">' + escapujHtml(klic.key_code) + '</code></td>';
-                html += '<td style="padding: 0.5rem; border: 1px solid #ddd; max-width: 200px; overflow: hidden; text-overflow: ellipsis;" title="' + escapujHtml(klic.sent_to_email || '') + '">';
-                html += '<span style="cursor: pointer;" data-action="upravitEmailKlice" data-code="' + escapujHtml(klic.key_code) + '" data-email="' + escapujHtml(klic.sent_to_email || '') + '">';
-                html += emailZobrazeni;
-                html += ' <span style="color: #666; font-size: 0.65rem;">[upravit]</span>';
-                html += '</span></td>';
+                html += '<td style="padding: 0.5rem; border: 1px solid #ddd;" title="' + escapujHtml(klic.sent_to_email || '') + '">';
+                html += '<div style="display: flex; align-items: center; gap: 0.5rem;">';
+                html += '<span style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + emailZobrazeni + '</span>';
+                html += '<span style="cursor: pointer; color: #333; font-size: 0.7rem; white-space: nowrap; text-decoration: underline;" data-action="upravitEmailKlice" data-code="' + escapujHtml(klic.key_code) + '" data-email="' + escapujHtml(klic.sent_to_email || '') + '">[upravit]</span>';
+                html += '</div></td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + klic.usage_count + ' / ' + (klic.max_usage || '∞') + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + (klic.is_active ? '<span style="color: #000;">Ano</span>' : '<span style="color: #999;">Ne</span>') + '</td>';
                 html += '<td style="padding: 0.5rem; border: 1px solid #ddd;">' + new Date(klic.created_at).toLocaleDateString('cs-CZ') + '</td>';
