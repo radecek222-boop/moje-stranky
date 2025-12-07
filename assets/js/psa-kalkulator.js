@@ -1319,14 +1319,14 @@ function renderTable() {
                  data-index="${index}"
                  data-field="bank">
         </td>
-        <td class="text-center" style="white-space: nowrap;">
-          <button class="btn btn-sm" style="margin-right: 0.25rem;" onclick="saveEmployeeChanges(${index})" title="Uložit změny">Uložit</button>
+        <td class="text-center" style="display: flex; flex-direction: column; gap: 0.25rem; align-items: center;">
+          <button class="btn btn-sm" style="width: 100%;" onclick="saveEmployeeChanges(${index})" title="Uložit změny">Uložit</button>
           ${emp.isNew ?
-            `<button class="btn btn-sm" style="background: var(--c-success); color: white; margin-right: 0.25rem;" onclick="saveEmployeeToDatabase(${index})" title="Uložit do databáze">DB</button>` :
-            `<button class="btn btn-sm qr-btn" style="background: var(--c-info); color: white; margin-right: 0.25rem;" onclick="generateSingleEmployeeQR(${index})" title="Generovat QR platbu">QR</button>`
+            `<button class="btn btn-sm" style="background: var(--c-success); color: white; width: 100%;" onclick="saveEmployeeToDatabase(${index})" title="Uložit do databáze">DB</button>` :
+            `<button class="btn btn-sm qr-btn" style="background: var(--c-info); color: white; width: 100%;" onclick="generateSingleEmployeeQR(${index})" title="Generovat QR platbu">QR</button>`
           }
           ${PERMANENT_EMPLOYEE_IDS.includes(emp.id) ? '' :
-            `<button class="btn btn-danger btn-sm" onclick="removeEmployee(${index})" title="Odebrat z období">×</button>`
+            `<button class="btn btn-danger btn-sm" style="width: 100%;" onclick="removeEmployee(${index})" title="Odebrat z období">×</button>`
           }
         </td>
       </tr>
