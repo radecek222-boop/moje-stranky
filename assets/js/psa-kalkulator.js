@@ -1518,25 +1518,15 @@ function buildSpaydPayload(data) {
     throw new Error('Neplatná částka');
   }
 
-  const vs = data.vs ? String(data.vs).replace(/\D/g, '').slice(0, 10) : '';
-  // Zkratit zpravu na max 60 znaku pro QR kod
-  const message = sanitizeMessage(data.message || '').slice(0, 60);
-
   // Konverze na IBAN format pro SPAYD
   const iban = convertToIBAN(account, bank);
 
-  const parts = [
-    'SPD',
-    '1.0',
-    `ACC:${iban}`,
-    `AM:${amount.toFixed(2)}`,
-    'CC:CZK'
-  ];
+  // Minimalni SPAYD - pouze ucet, castka, mena
+  const spayd = `SPD*1.0*ACC:${iban}*AM:${amount.toFixed(2)}*CC:CZK`;
 
-  if (vs) parts.push(`X-VS:${vs}`);
-  if (message) parts.push(`MSG:${message}`);
+  console.log('SPAYD delka:', spayd.length, 'text:', spayd);
 
-  return parts.join('*');
+  return spayd;
 }
 
 async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
