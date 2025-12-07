@@ -1860,69 +1860,69 @@ async function showCustomerDetail(id) {
     <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
 
       <!-- KOMPAKTNÍ INFO BLOK -->
-      <div style="background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
+      <div style="background: #1a1a1a; border: 1px solid #333; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
         <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; font-size: 0.9rem;">
-          <span style="color: #666; font-weight: 600;">Číslo objednávky:</span>
-          <input type="text" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: white;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
+          <span style="color: #aaa; font-weight: 600;">Číslo objednávky:</span>
+          <input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
 
-          <span style="color: #666; font-weight: 600;">Zadavatel:</span>
-          <input type="text" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #f8f9fa;" value="${Utils.escapeHtml(zadavatel)}" readonly placeholder="Prodejce/Uživatel">
+          <span style="color: #aaa; font-weight: 600;">Zadavatel:</span>
+          <input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #eee; color: #000;" value="${Utils.escapeHtml(zadavatel)}" readonly placeholder="Prodejce/Uživatel">
 
-          <span style="color: #666; font-weight: 600;">Číslo reklamace:</span>
-          <input type="text" id="edit_cislo" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${Utils.escapeHtml(cislo)}">
+          <span style="color: #aaa; font-weight: 600;">Číslo reklamace:</span>
+          <input type="text" id="edit_cislo" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(cislo)}">
 
-          <span style="color: #666; font-weight: 600;">Fakturace:</span>
-          <span style="color: #1a1a1a; font-weight: 600; padding: 0.25rem 0;">${fakturace_firma.toUpperCase() === 'SK' ? 'Slovensko (SK)' : 'Česká republika (CZ)'}</span>
+          <span style="color: #aaa; font-weight: 600;">Fakturace:</span>
+          <span style="color: #fff; font-weight: 600; padding: 0.25rem 0;">${fakturace_firma.toUpperCase() === 'SK' ? 'Slovensko (SK)' : 'Česká republika (CZ)'}</span>
 
-          <span style="color: #666; font-weight: 600;">Datum prodeje:</span>
-          <input type="text" id="edit_datum_prodeje" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${Utils.escapeHtml(datum_prodeje)}" placeholder="DD.MM.RRRR">
+          <span style="color: #aaa; font-weight: 600;">Datum prodeje:</span>
+          <input type="text" id="edit_datum_prodeje" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(datum_prodeje)}" placeholder="DD.MM.RRRR">
 
-          <span style="color: #666; font-weight: 600;">Datum reklamace:</span>
-          <input type="text" id="edit_datum_reklamace" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${Utils.escapeHtml(datum_reklamace)}" placeholder="DD.MM.RRRR">
+          <span style="color: #aaa; font-weight: 600;">Datum reklamace:</span>
+          <input type="text" id="edit_datum_reklamace" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(datum_reklamace)}" placeholder="DD.MM.RRRR">
 
-          <span style="color: #666; font-weight: 600;">Jméno:</span>
-          <input type="text" id="edit_jmeno" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${customerName}">
+          <span style="color: #aaa; font-weight: 600;">Jméno:</span>
+          <input type="text" id="edit_jmeno" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${customerName}">
 
-          <span style="color: #666; font-weight: 600;">Telefon:</span>
-          <input type="tel" id="edit_telefon" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${phone}">
+          <span style="color: #aaa; font-weight: 600;">Telefon:</span>
+          <input type="tel" id="edit_telefon" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${phone}">
 
-          <span style="color: #666; font-weight: 600;">Email:</span>
-          <input type="email" id="edit_email" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${email}">
+          <span style="color: #aaa; font-weight: 600;">Email:</span>
+          <input type="email" id="edit_email" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${email}">
 
-          <span style="color: #666; font-weight: 600;">Adresa:</span>
-          <input type="text" id="edit_adresa" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${address}">
+          <span style="color: #aaa; font-weight: 600;">Adresa:</span>
+          <input type="text" id="edit_adresa" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${address}">
 
-          <span style="color: #666; font-weight: 600;">Model:</span>
-          <input type="text" id="edit_model" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${product}">
+          <span style="color: #aaa; font-weight: 600;">Model:</span>
+          <input type="text" id="edit_model" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${product}">
 
-          <span style="color: #666; font-weight: 600;">Provedení:</span>
-          <input type="text" id="edit_provedeni" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${Utils.escapeHtml(provedeni)}" placeholder="Látka / Kůže">
+          <span style="color: #aaa; font-weight: 600;">Provedení:</span>
+          <input type="text" id="edit_provedeni" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(provedeni)}" placeholder="Látka / Kůže">
 
-          <span style="color: #666; font-weight: 600;">Barva:</span>
-          <input type="text" id="edit_barva" style="border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;" value="${Utils.escapeHtml(barva)}">
+          <span style="color: #aaa; font-weight: 600;">Barva:</span>
+          <input type="text" id="edit_barva" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(barva)}">
         </div>
       </div>
 
       <!-- DOPLŇUJÍCÍ INFORMACE OD PRODEJCE -->
       <div style="margin-bottom: 1rem;">
-        <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace od prodejce:</label>
+        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Doplňující informace od prodejce:</label>
         <textarea id="edit_doplnujici_info"
-                  style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 60px; background: white; resize: vertical; font-family: inherit;"
+                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 60px; background: #fff; color: #000; resize: vertical; font-family: inherit;"
                   placeholder="Zadejte doplňující informace od prodejce">${Utils.escapeHtml(doplnujici_info)}</textarea>
       </div>
 
       <!-- POPIS PROBLÉMU OD ZÁKAZNÍKA -->
       <div style="margin-bottom: 2rem;">
-        <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému od zákazníka:</label>
+        <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Popis problému od zákazníka:</label>
         <textarea id="edit_popis_problemu"
-                  style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 80px; background: white; resize: vertical; font-family: inherit;"
+                  style="width: 100%; border: 1px solid #333; padding: 0.5rem; border-radius: 3px; font-size: 0.9rem; min-height: 80px; background: #fff; color: #000; resize: vertical; font-family: inherit;"
                   placeholder="Zadejte popis problému od zákazníka">${Utils.escapeHtml(description)}</textarea>
       </div>
 
       <!-- FOTOGRAFIE -->
       ${fotky.length > 0 ? `
         <div style="margin-bottom: 1rem;">
-          <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">Fotografie (${fotky.length}):</label>
+          <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">Fotografie (${fotky.length}):</label>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem;">
             ${fotky.map((f, i) => {
               const photoPath = typeof f === 'object' ? f.photo_path : f;
@@ -1932,7 +1932,7 @@ async function showCustomerDetail(id) {
               return `
                 <div class="foto-wrapper" style="position: relative;">
                   <img src='${photoPath}'
-                       style='width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid #ddd; cursor: pointer; border-radius: 3px;'
+                       style='width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid #333; cursor: pointer; border-radius: 3px;'
                        alt='Fotka ${i+1}'
                        data-action="showPhotoFullscreen"
                        data-url="${escapedUrl}">
@@ -1962,15 +1962,15 @@ async function showCustomerDetail(id) {
 
         if (!pdfDoc) {
           return `
-            <div style="padding: 0.75rem; text-align: center; background: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 4px; margin-bottom: 1rem;">
-              <p style="margin: 0; color: #6c757d; font-size: 0.8rem;">PDF report ještě nebyl vytvořen</p>
+            <div style="padding: 0.75rem; text-align: center; background: #222; border: 1px dashed #444; border-radius: 4px; margin-bottom: 1rem;">
+              <p style="margin: 0; color: #888; font-size: 0.8rem;">PDF report ještě nebyl vytvořen</p>
             </div>
           `;
         }
 
         return `
           <div style="margin-bottom: 1rem;">
-            <label style="display: block; color: #666; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF Report:</label>
+            <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">PDF Report:</label>
             <button class="btn customer-detail-btn"
                     data-action="openPDF"
                     data-pdf-path="${pdfDoc.file_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}">
@@ -1981,11 +1981,11 @@ async function showCustomerDetail(id) {
       })()}
 
       ${CURRENT_USER.is_admin ? `
-        <div style="border-top: 1px solid #e0e0e0; padding-top: 1rem; margin-top: 1rem;">
+        <div style="border-top: 1px solid #333; padding-top: 1rem; margin-top: 1rem;">
           <button class="btn customer-detail-btn danger" data-action="deleteReklamace" data-id="${id}">
             Smazat reklamaci
           </button>
-          <p style="font-size: 0.7rem; color: #999; margin-top: 0.25rem; text-align: center;">Smaže vše včetně fotek a PDF</p>
+          <p style="font-size: 0.7rem; color: #666; margin-top: 0.25rem; text-align: center;">Smaže vše včetně fotek a PDF</p>
         </div>
       ` : ''}
 
@@ -1993,7 +1993,7 @@ async function showCustomerDetail(id) {
 
     <div class="detail-buttons">
       <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
-      <button class="detail-btn detail-btn-secondary" data-action="showDetail" data-id="${id}">Zpět</button>
+      <button class="detail-btn detail-btn-primary" data-action="showDetail" data-id="${id}">Zpět</button>
     </div>
   `;
 
