@@ -1576,12 +1576,12 @@ function renderTimeGrid() {
               let infoHtml = `KOLIZE: ${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}`;
 
               if (vzdalenost) {
-                infoHtml += `<br><span style="font-size: 0.85rem; color: #ff6; margin-top: 4px; display: inline-block;">Vzdálenost mezi zákazníky: <strong>${vzdalenost.km} km</strong></span>`;
+                infoHtml += `<div class="collision-distance-box">Vzdálenost mezi zákazníky: <strong>${vzdalenost.km} km</strong></div>`;
               }
 
               // Pokud jsou další zákazníci na ten den, ukázat kontext
               if (predchozi || nasledujici) {
-                infoHtml += `<br><span style="font-size: 0.75rem; opacity: 0.9; margin-top: 4px; display: inline-block;">`;
+                infoHtml += `<div class="collision-context">`;
                 if (predchozi) {
                   const predchoziAddr = Utils.getAddress(predchozi);
                   if (predchoziAddr && predchoziAddr !== '—') {
@@ -1590,7 +1590,7 @@ function renderTimeGrid() {
                       Utils.addCountryToAddress(currentAddress)
                     );
                     if (vzdalOdPredchoziho) {
-                      infoHtml += `Od ${Utils.getCustomerName(predchozi)} (${predchozi.cas_navstevy}): ${vzdalOdPredchoziho.km} km`;
+                      infoHtml += `<span class="collision-route">Od ${Utils.getCustomerName(predchozi)} (${predchozi.cas_navstevy}): <strong>${vzdalOdPredchoziho.km} km</strong></span>`;
                     }
                   }
                 }
@@ -1602,12 +1602,11 @@ function renderTimeGrid() {
                       Utils.addCountryToAddress(nasledujiciAddr)
                     );
                     if (vzdalKNasledujicimu) {
-                      if (predchozi) infoHtml += ' | ';
-                      infoHtml += `K ${Utils.getCustomerName(nasledujici)} (${nasledujici.cas_navstevy}): ${vzdalKNasledujicimu.km} km`;
+                      infoHtml += `<span class="collision-route">K ${Utils.getCustomerName(nasledujici)} (${nasledujici.cas_navstevy}): <strong>${vzdalKNasledujicimu.km} km</strong></span>`;
                     }
                   }
                 }
-                infoHtml += `</span>`;
+                infoHtml += `</div>`;
               }
 
               warningEl.innerHTML = infoHtml;

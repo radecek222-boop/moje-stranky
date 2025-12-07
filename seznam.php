@@ -968,6 +968,68 @@ body.modal-open {
   color: #ffffff !important;
 }
 
+/* Neonově zelený box pro vzdálenost při kolizi */
+.collision-distance-box {
+  background: #1a1a1a;
+  border: 2px solid #39ff14;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #39ff14;
+  text-align: center;
+  font-weight: 600;
+  animation: collision-pulse 2s ease-in-out infinite;
+  box-shadow:
+    0 0 10px rgba(57, 255, 20, 0.4),
+    0 0 20px rgba(57, 255, 20, 0.2),
+    0 0 30px rgba(57, 255, 20, 0.1);
+}
+
+.collision-distance-box strong {
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+@keyframes collision-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 10px rgba(57, 255, 20, 0.4),
+      0 0 20px rgba(57, 255, 20, 0.2),
+      0 0 30px rgba(57, 255, 20, 0.1);
+    border-color: #39ff14;
+  }
+  50% {
+    box-shadow:
+      0 0 15px rgba(57, 255, 20, 0.6),
+      0 0 30px rgba(57, 255, 20, 0.4),
+      0 0 45px rgba(57, 255, 20, 0.2);
+    border-color: #5fff3a;
+  }
+}
+
+/* Kontext vzdáleností od/k sousedům */
+.collision-context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  justify-content: center;
+}
+
+.collision-route {
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem;
+  color: #aaa;
+}
+
+.collision-route strong {
+  color: #fff;
+}
+
 /* Skrýt pull-to-refresh když je modal otevřený */
 .modal-overlay.active ~ #pull-refresh-indicator,
 #detailOverlay.active ~ #pull-refresh-indicator,
@@ -1695,7 +1757,7 @@ const CURRENT_USER = <?php echo json_encode($currentUserData ?? [
 </div>
 
 <!-- External JavaScript -->
-<script src="assets/js/seznam.js?v=20251207-04" defer></script>
+<script src="assets/js/seznam.js?v=20251207-05" defer></script>
 
 <!-- EMERGENCY FIX: Event delegation pro tlačítka v detailu -->
 <script>
