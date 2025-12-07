@@ -1002,8 +1002,11 @@ async function saveEmployeeToDatabase(index) {
 
 // Uložit změny jednotlivého zaměstnance (např. číslo účtu)
 async function saveEmployeeChanges(index) {
+  console.log('saveEmployeeChanges called with index:', index);
+
   // Najít všechny inputy s daným indexem
   const inputs = document.querySelectorAll(`[data-action="updateEmployeeField"][data-index="${index}"]`);
+  console.log('Found inputs:', inputs.length);
 
   if (inputs.length > 0 && employees[index]) {
     inputs.forEach(input => {
@@ -2358,7 +2361,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       case 'saveEmployeeChanges': {
+        console.log('saveEmployeeChanges action triggered');
         const scIndex = parseInt(target.getAttribute('data-index'), 10);
+        console.log('scIndex:', scIndex);
         if (!isNaN(scIndex) && typeof saveEmployeeChanges === 'function') {
           saveEmployeeChanges(scIndex);
         }
