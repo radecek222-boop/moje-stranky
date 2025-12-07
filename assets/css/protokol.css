@@ -1354,18 +1354,19 @@ body.pdf-export-mode #signature-pad {
 }
 
 .btn-vymazat-podpis {
-  background: #666666;
-  color: #ffffff;
-  border: none;
+  background: transparent;
+  color: #dc3545;
+  border: 1px solid #dc3545;
   padding: 0.5rem 1rem;
   border-radius: 6px;
   font-size: 0.85rem;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
 
 .btn-vymazat-podpis:hover {
-  background: #555555;
+  background: #dc3545;
+  color: #fff;
 }
 
 .zakaznik-schvaleni-footer {
