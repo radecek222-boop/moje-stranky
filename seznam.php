@@ -53,7 +53,8 @@ if ($currentUserId && !$isAdmin) {
 $currentUserData = [
     "id" => $currentUserId,
     "name" => $_SESSION["user_name"] ?? "Admin",
-    "email" => $_SESSION["user_email"] ?? "admin@wgs-service.cz",
+    "email" => $_SESSION["user_email"] ?? "",  // BEZ FALLBACKU - pokud neni, je prazdny
+    "phone" => $_SESSION["user_phone"] ?? "",  // Telefon uzivatele pro notifikace
     "role" => $_SESSION["role"] ?? "admin",
     "is_admin" => $isAdmin,
     "supervised_user_ids" => $supervisedUserIds
