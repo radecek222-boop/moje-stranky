@@ -1319,14 +1319,15 @@ function renderTable() {
                  data-index="${index}"
                  data-field="bank">
         </td>
-        <td class="text-center" style="display: flex; flex-direction: column; gap: 0.25rem; align-items: center;">
-          <button class="btn btn-sm" style="width: 100%;" onclick="saveEmployeeChanges(${index})" title="Uložit změny">Uložit</button>
+        <td class="text-center" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.25rem; min-width: 120px;">
+          <button class="btn btn-sm" onclick="saveEmployeeChanges(${index})" title="Uložit změny">Uložit</button>
           ${emp.isNew ?
-            `<button class="btn btn-sm" style="background: var(--c-success); color: white; width: 100%;" onclick="saveEmployeeToDatabase(${index})" title="Uložit do databáze">DB</button>` :
-            `<button class="btn btn-sm qr-btn" style="background: var(--c-info); color: white; width: 100%;" onclick="generateSingleEmployeeQR(${index})" title="Generovat QR platbu">QR</button>`
+            `<button class="btn btn-sm" style="background: var(--c-success); color: white;" onclick="saveEmployeeToDatabase(${index})" title="Uložit do databáze">DB</button>` :
+            `<button class="btn btn-sm qr-btn" style="background: var(--c-info); color: white;" onclick="generateSingleEmployeeQR(${index})" title="Generovat QR platbu">QR</button>`
           }
-          ${PERMANENT_EMPLOYEE_IDS.includes(emp.id) ? '' :
-            `<button class="btn btn-danger btn-sm" style="width: 100%;" onclick="removeEmployee(${index})" title="Odebrat z období">×</button>`
+          ${PERMANENT_EMPLOYEE_IDS.includes(emp.id) ?
+            `<span></span>` :
+            `<button class="btn btn-danger btn-sm" onclick="removeEmployee(${index})" title="Odebrat z období">×</button>`
           }
         </td>
       </tr>
@@ -1711,7 +1712,7 @@ async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
       resolve();
     } catch (err) {
       console.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
-      qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err?.message || 'Chyba QR'}</div>`;
+      qrElement.innerHTML = `<div style="color: #dc3545; padding: 20px;">${err?.message || 'Chyba QR'}</div>`;
       reject(err);
     }
   });
@@ -2291,7 +2292,7 @@ function generateSingleEmployeeQR(index) {
       });
     } catch (err) {
       console.error('QR generateCzechPaymentString failed:', err);
-      qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err.message}</div>`;
+      qrElement.innerHTML = `<div style="color: #dc3545; padding: 20px;">${err.message}</div>`;
       return;
     }
 
@@ -2299,7 +2300,7 @@ function generateSingleEmployeeQR(index) {
       await renderQrCode(qrElement, qrText, 220, emp.name);
     } catch (error) {
       console.error(`QR render failed for ${emp.name}:`, error);
-      qrElement.innerHTML = `<div style="color: red; padding: 20px;">${error?.message || 'Chyba QR'}</div>`;
+      qrElement.innerHTML = `<div style="color: #dc3545; padding: 20px;">${error?.message || 'Chyba QR'}</div>`;
     }
   }, 100);
 
