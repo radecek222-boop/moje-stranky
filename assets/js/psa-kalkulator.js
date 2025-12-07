@@ -2320,8 +2320,11 @@ window.onclick = function(event) {
 
 // === UNIVERSAL EVENT DELEGATION FOR REMOVED INLINE HANDLERS ===
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('Event delegation initialized');
+
   // Společná funkce pro zpracování data-action
   function zpracujDataAction(target) {
+    console.log('zpracujDataAction called with action:', target.getAttribute('data-action'));
     const action = target.getAttribute('data-action');
 
     // Special cases
@@ -2528,6 +2531,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // DŮLEŽITÉ: Vyloučit INPUT pole - ty se zpracují pouze při change eventu
   document.addEventListener('click', (e) => {
     const target = e.target.closest('[data-action]');
+    if (target) {
+      console.log('Click on data-action element:', target.tagName, target.getAttribute('data-action'));
+    }
     if (!target) return;
 
     // Přeskočit INPUT a TEXTAREA - tyto elementy se zpracují pouze při change
