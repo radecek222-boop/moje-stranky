@@ -2002,11 +2002,11 @@ function registerSecurityActions() {
             const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() :
                              document.querySelector('meta[name="csrf-token"]')?.content;
 
-            const response = await fetch('/api/admin_api.php', {
+            // FIX: Akce musí být v URL, ne v body
+            const response = await fetch('/api/admin_api.php?action=update_key_email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    action: 'update_key_email',
                     key_code: keyCode,
                     email: novyEmail.trim(),
                     csrf_token: csrfToken
