@@ -1668,105 +1668,105 @@ async function zobrazDetailUzivatele(userId) {
     // Vytvoření modalu s detailem
     const modalHTML = `
       <div class="user-detail-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; display: flex; align-items: center; justify-content: center;">
-        <div style="background: white; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <div style="background: #1a1a1a; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid #333;">
           <!-- Header -->
-          <div style="background: #333333; color: white; padding: 1.5rem; border-radius: 12px 12px 0 0; position: relative;">
-            <h2 style="margin: 0; font-size: 1.3rem; font-weight: 600;">Detail uživatele #${user.id}</h2>
-            <button data-action="zavritDetailUzivatele" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; line-height: 1; padding: 0; width: 32px; height: 32px;">&times;</button>
+          <div style="background: #333; color: #fff; padding: 1.5rem; border-radius: 12px 12px 0 0; position: relative; border-bottom: 1px solid #444;">
+            <h2 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #fff;">Detail uživatele #${user.id}</h2>
+            <button data-action="zavritDetailUzivatele" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #ccc; font-size: 2rem; cursor: pointer; line-height: 1; padding: 0; width: 32px; height: 32px;">&times;</button>
           </div>
 
           <!-- Body -->
           <div style="padding: 2rem;">
             <!-- Základní informace -->
             <div style="margin-bottom: 2rem;">
-              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #333333; border-bottom: 2px solid #333333; padding-bottom: 0.5rem;">Základní údaje</h3>
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #fff; border-bottom: 1px solid #444; padding-bottom: 0.5rem;">Základní údaje</h3>
 
               <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Jméno a příjmení</label>
-                <input type="text" id="edit-user-name" value="${escapeHtml(user.name)}" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: #aaa;">Jméno a příjmení</label>
+                <input type="text" id="edit-user-name" value="${escapeHtml(user.name)}" style="width: 100%; padding: 0.6rem; border: 1px solid #444; border-radius: 6px; font-size: 1rem; background: #222; color: #fff;">
               </div>
 
               <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Email</label>
-                <input type="email" id="edit-user-email" value="${escapeHtml(user.email)}" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: #aaa;">Email</label>
+                <input type="email" id="edit-user-email" value="${escapeHtml(user.email)}" style="width: 100%; padding: 0.6rem; border: 1px solid #444; border-radius: 6px; font-size: 1rem; background: #222; color: #fff;">
               </div>
 
               <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Telefon</label>
-                <input type="tel" id="edit-user-phone" value="${escapeHtml(user.phone || '')}" placeholder="+420123456789" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: #aaa;">Telefon</label>
+                <input type="tel" id="edit-user-phone" value="${escapeHtml(user.phone || '')}" placeholder="+420123456789" style="width: 100%; padding: 0.6rem; border: 1px solid #444; border-radius: 6px; font-size: 1rem; background: #222; color: #fff;">
               </div>
 
               <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Adresa</label>
-                <input type="text" id="edit-user-address" value="${escapeHtml(user.address || '')}" placeholder="Ulice 123, Město" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: #aaa;">Adresa</label>
+                <input type="text" id="edit-user-address" value="${escapeHtml(user.address || '')}" placeholder="Ulice 123, Město" style="width: 100%; padding: 0.6rem; border: 1px solid #444; border-radius: 6px; font-size: 1rem; background: #222; color: #fff;">
               </div>
 
               <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Role</label>
-                <select id="edit-user-role" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: #aaa;">Role</label>
+                <select id="edit-user-role" style="width: 100%; padding: 0.6rem; border: 1px solid #444; border-radius: 6px; font-size: 1rem; background: #222; color: #fff;">
                   <option value="prodejce" ${user.role === 'prodejce' ? 'selected' : ''}>Prodejce</option>
                   <option value="technik" ${user.role === 'technik' ? 'selected' : ''}>Technik</option>
                   <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Administrátor</option>
                 </select>
               </div>
 
-              <button data-action="ulozitZmenyUzivatele" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #333333; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
-                [Save] Uložit změny
+              <button data-action="ulozitZmenyUzivatele" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #333; color: #fff; border: 1px solid #444; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+                Uložit změny
               </button>
             </div>
 
             <!-- Změna hesla -->
-            <div style="margin-bottom: 2rem; padding: 1rem; background: #f9f9f9; border-radius: 8px;">
-              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #d97706;">[Lock] Změna hesla</h3>
+            <div style="margin-bottom: 2rem; padding: 1rem; background: #222; border-radius: 8px; border: 1px solid #444;">
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #ccc;">Změna hesla</h3>
 
               <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Nové heslo (min. 8 znaků)</label>
-                <input type="password" id="edit-user-password" placeholder="••••••••" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: #aaa;">Nové heslo (min. 8 znaků)</label>
+                <input type="password" id="edit-user-password" placeholder="••••••••" style="width: 100%; padding: 0.6rem; border: 1px solid #444; border-radius: 6px; font-size: 1rem; background: #1a1a1a; color: #fff;">
               </div>
 
-              <button data-action="zmenitHesloUzivatele" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #d97706; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+              <button data-action="zmenitHesloUzivatele" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #444; color: #fff; border: 1px solid #555; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
                 Změnit heslo
               </button>
             </div>
 
             <!-- Status a akce -->
-            <div style="padding: 1rem; background: ${user.status === 'active' ? '#d1fae5' : '#fee2e2'}; border-radius: 8px;">
-              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">Stav účtu</h3>
+            <div style="padding: 1rem; background: #222; border-radius: 8px; border: 1px solid ${user.status === 'active' ? '#333' : '#dc3545'};">
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #fff;">Stav účtu</h3>
 
-              <div style="margin-bottom: 1rem;">
+              <div style="margin-bottom: 1rem; color: #ccc;">
                 <strong>Aktuální stav:</strong>
-                <span style="font-weight: bold; color: ${user.status === 'active' ? '#059669' : '#dc2626'};">
+                <span style="font-weight: bold; color: ${user.status === 'active' ? '#39ff14' : '#dc3545'};">
                   ${user.status === 'active' ? 'AKTIVNÍ' : 'NEAKTIVNÍ'}
                 </span>
               </div>
 
               ${user.created_at ? `
-                <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
-                  <strong>Vytvořen:</strong> ${new Date(user.created_at).toLocaleString('cs-CZ')}
+                <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #888;">
+                  <strong style="color: #aaa;">Vytvořen:</strong> ${new Date(user.created_at).toLocaleString('cs-CZ')}
                 </div>
               ` : ''}
 
               ${user.last_login ? `
-                <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
-                  <strong>Poslední přihlášení:</strong> ${new Date(user.last_login).toLocaleString('cs-CZ')}
+                <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #888;">
+                  <strong style="color: #aaa;">Poslední přihlášení:</strong> ${new Date(user.last_login).toLocaleString('cs-CZ')}
                 </div>
               ` : ''}
 
-              <button data-action="prepnoutStatusUzivatele" data-id="${user.id}" data-status="${user.status === 'active' ? 'inactive' : 'active'}" style="width: 100%; padding: 0.8rem; background: ${user.status === 'active' ? '#dc2626' : '#059669'}; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer;">
+              <button data-action="prepnoutStatusUzivatele" data-id="${user.id}" data-status="${user.status === 'active' ? 'inactive' : 'active'}" style="width: 100%; padding: 0.8rem; background: ${user.status === 'active' ? '#dc3545' : '#333'}; color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer;">
                 ${user.status === 'active' ? 'Deaktivovat uživatele' : 'Aktivovat uživatele'}
               </button>
             </div>
 
             <!-- Supervizor sekce -->
-            <div style="margin-top: 2rem; padding: 1rem; background: #f0f4ff; border-radius: 8px; border: 2px solid #6366f1;">
-              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #4f46e5;">Supervizor</h3>
-              <p style="font-size: 0.85rem; color: #666; margin-bottom: 1rem;">
+            <div style="margin-top: 2rem; padding: 1rem; background: #222; border-radius: 8px; border: 1px solid #444;">
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #fff;">Supervizor</h3>
+              <p style="font-size: 0.85rem; color: #888; margin-bottom: 1rem;">
                 Jako supervizor tento uživatel uvidí zakázky vybraných prodejců.
               </p>
-              <div id="supervisorAssignmentsPreview" style="margin-bottom: 1rem; font-size: 0.9rem; color: #333;">
+              <div id="supervisorAssignmentsPreview" style="margin-bottom: 1rem; font-size: 0.9rem; color: #ccc;">
                 Načítám přiřazení...
               </div>
-              <button data-action="otevritSpravuSupervize" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #4f46e5; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+              <button data-action="otevritSpravuSupervize" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #333; color: #fff; border: 1px solid #444; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
                 Spravovat přiřazení
               </button>
             </div>
@@ -2025,29 +2025,29 @@ async function otevritSpravuSupervize(userId) {
     // Používáme numeric_id (INT) pro checkbox value, protože supervisor_assignments ukládá INT
     const overlayHTML = `
       <div id="supervisorOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10001; display: flex; align-items: center; justify-content: center;">
-        <div style="background: white; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
-          <div style="background: #4f46e5; color: white; padding: 1.5rem; position: relative;">
-            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">Správa supervize</h3>
-            <p style="margin: 0.5rem 0 0; font-size: 0.85rem; opacity: 0.9;">Vyberte prodejce, jejichž zakázky bude supervizor vidět</p>
-            <button data-action="zavritSupervizorOverlay" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
+        <div style="background: #1a1a1a; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid #333;">
+          <div style="background: #333; color: #fff; padding: 1.5rem; position: relative; border-bottom: 1px solid #444;">
+            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #fff;">Správa supervize</h3>
+            <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: #aaa;">Vyberte prodejce, jejichž zakázky bude supervizor vidět</p>
+            <button data-action="zavritSupervizorOverlay" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #ccc; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
           </div>
           <div style="padding: 1.5rem; max-height: 50vh; overflow-y: auto;">
-            ${salespersons.length === 0 ? '<p style="color: #999; text-align: center;">Žádní další uživatelé v systému</p>' : ''}
+            ${salespersons.length === 0 ? '<p style="color: #888; text-align: center;">Žádní další uživatelé v systému</p>' : ''}
             ${salespersons.map(s => `
-              <label style="display: flex; align-items: center; padding: 0.8rem; margin-bottom: 0.5rem; background: #f9f9f9; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
-                <input type="checkbox" class="supervisor-checkbox" value="${s.numeric_id}" ${assignedIds.includes(parseInt(s.numeric_id)) ? 'checked' : ''} style="width: 20px; height: 20px; margin-right: 1rem; accent-color: #4f46e5;">
+              <label style="display: flex; align-items: center; padding: 0.8rem; margin-bottom: 0.5rem; background: #222; border-radius: 8px; cursor: pointer; transition: background 0.2s; border: 1px solid #333;">
+                <input type="checkbox" class="supervisor-checkbox" value="${s.numeric_id}" ${assignedIds.includes(parseInt(s.numeric_id)) ? 'checked' : ''} style="width: 20px; height: 20px; margin-right: 1rem; accent-color: #39ff14;">
                 <div style="flex: 1;">
-                  <div style="font-weight: 600; color: #333;">${escapeHtml(s.jmeno || 'Bez jména')}</div>
-                  <div style="font-size: 0.85rem; color: #666;">${escapeHtml(s.email)} - ${escapeHtml(s.role || 'prodejce')}</div>
+                  <div style="font-weight: 600; color: #fff;">${escapeHtml(s.jmeno || 'Bez jména')}</div>
+                  <div style="font-size: 0.85rem; color: #888;">${escapeHtml(s.email)} - ${escapeHtml(s.role || 'prodejce')}</div>
                 </div>
               </label>
             `).join('')}
           </div>
-          <div style="padding: 1rem 1.5rem; border-top: 1px solid #eee; display: flex; gap: 1rem;">
-            <button data-action="zavritSupervizorOverlay" style="flex: 1; padding: 0.8rem; background: #e5e7eb; color: #333; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+          <div style="padding: 1rem 1.5rem; border-top: 1px solid #333; display: flex; gap: 1rem;">
+            <button data-action="zavritSupervizorOverlay" style="flex: 1; padding: 0.8rem; background: transparent; color: #ccc; border: 1px solid #444; border-radius: 6px; font-weight: 600; cursor: pointer;">
               Zrušit
             </button>
-            <button data-action="ulozitSupervizorPrirazeni" data-id="${userId}" style="flex: 1; padding: 0.8rem; background: #4f46e5; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+            <button data-action="ulozitSupervizorPrirazeni" data-id="${userId}" style="flex: 1; padding: 0.8rem; background: #333; color: #fff; border: 1px solid #444; border-radius: 6px; font-weight: 600; cursor: pointer;">
               Uložit
             </button>
           </div>
