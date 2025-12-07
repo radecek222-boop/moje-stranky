@@ -174,7 +174,7 @@ If you believe a feature absolutely requires color:
 
 ## ✅ OFFICIAL EXCEPTION: WGS Toast Notifications (Neon Green)
 
-**IMPORTANT:** Toast notifikace jsou JEDINÁ schválená výjimka z černobílého designu.
+**IMPORTANT:** Toast notifikace jsou schválená výjimka z černobílého designu.
 
 ### Neonově zelený toast (`#39ff14`) se MUSÍ použít pro:
 
@@ -234,7 +234,44 @@ box-shadow:
 border: 2px solid #39ff14;
 ```
 
-**TOTO JE JEDINÁ SCHVÁLENÁ BAREVNÁ VÝJIMKA V PROJEKTU.**
+---
+
+## ✅ OFFICIAL EXCEPTION: NOTIFY ME Button (Neon Green)
+
+**IMPORTANT:** Tlačítko "NOTIFY ME OFF" v hamburger menu je DRUHÁ schválená výjimka z černobílého designu.
+
+### Kdy se použije neonově zelená:
+
+| Stav | Text | Barva |
+|------|------|-------|
+| Notifikace zapnuty | "NOTIFY ME OFF" | Neonově zelená (#39ff14) s pulzující září |
+| Notifikace vypnuty | "NOTIFY ME ON" | Šedá (#ccc) |
+| Notifikace zablokovány | "NOTIFY ME OFF" | Šedá s opacity 0.5 |
+
+### Soubor:
+
+| Soubor | Účel |
+|--------|------|
+| `includes/hamburger-menu.php` | CSS třídy `.hamburger-notif-btn` a `.notif-active` |
+
+### Design specifikace:
+
+```css
+/* Neonově zelená barva pro aktivní notifikace */
+.hamburger-notif-btn.notif-active {
+  color: #39ff14 !important;
+  text-shadow: 0 0 10px rgba(57, 255, 20, 0.6), 0 0 20px rgba(57, 255, 20, 0.3);
+  animation: notif-pulse 2s ease-in-out infinite;
+}
+```
+
+### Proč neonově zelená?
+
+1. **Konzistence** - Stejná barva jako toast notifikace
+2. **Viditelnost** - Uživatel okamžitě vidí, že má notifikace zapnuté
+3. **Feedback** - Jasná vizuální odezva na aktivní stav
+
+**TOTO JE DRUHÁ SCHVÁLENÁ BAREVNÁ VÝJIMKA V PROJEKTU (společně s WGS Toast).**
 
 ---
 

@@ -209,8 +209,16 @@ if ($isAdmin) {
   background: transparent !important;
 }
 
+/* VYJIMKA: Neonove zelene tlacitko NOTIFY ME OFF - schvaleno */
 .hamburger-notif-btn.notif-active {
-  color: #fff !important;
+  color: #39ff14 !important;
+  text-shadow: 0 0 10px rgba(57, 255, 20, 0.6), 0 0 20px rgba(57, 255, 20, 0.3);
+  animation: notif-pulse 2s ease-in-out infinite;
+}
+
+@keyframes notif-pulse {
+  0%, 100% { text-shadow: 0 0 10px rgba(57, 255, 20, 0.6), 0 0 20px rgba(57, 255, 20, 0.3); }
+  50% { text-shadow: 0 0 15px rgba(57, 255, 20, 0.8), 0 0 30px rgba(57, 255, 20, 0.5); }
 }
 
 /* Provize technika - šedá barva konzistentní s UI */
