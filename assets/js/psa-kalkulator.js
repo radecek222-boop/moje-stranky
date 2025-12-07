@@ -9,7 +9,7 @@ let allEmployeesDatabase = [];  // Kompletní seznam zaměstnanců z databáze
 let salaryRate = 150;
 let invoiceRate = 250;
 let currentPeriod = { month: 11, year: 2025 };
-const API_URL = 'app/psa_data.php';
+const API_URL = '/app/psa_data.php';
 const CSRF_TOKEN = window.PSA_CSRF_TOKEN || '';
 
 // Speciální zaměstnanci - vždy zobrazeni, nelze smazat
