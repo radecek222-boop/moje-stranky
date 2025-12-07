@@ -161,34 +161,9 @@ if (!$embedMode && $activeTab === 'dashboard'):
     </div>
 
     <div class="cc-grid">
-        <div class="cc-card" data-href="seznam.php">
-            <div class="cc-card-title" data-lang-cs="Seznam reklamací" data-lang-en="Claims List" data-lang-it="Elenco Reclami">Seznam reklamací</div>
-            <div class="cc-card-description" data-lang-cs="Přehled všech reklamací a servisních požadavků" data-lang-en="Overview of all claims and service requests" data-lang-it="Panoramica di tutti i reclami e le richieste di servizio">Přehled všech reklamací a servisních požadavků</div>
-        </div>
-
         <div class="cc-card" data-href="admin.php?tab=zakaznici">
             <div class="cc-card-title" data-lang-cs="Seznam zákazníků" data-lang-en="Customer List" data-lang-it="Elenco Clienti">Seznam zákazníků</div>
             <div class="cc-card-description" data-lang-cs="Přehled všech zákazníků s kontaktními údaji a zakázkami" data-lang-en="Overview of all customers with contact information and orders" data-lang-it="Panoramica di tutti i clienti con informazioni di contatto e ordini">Přehled všech zákazníků s kontaktními údaji a zakázkami</div>
-        </div>
-
-        <div class="cc-card" data-href="statistiky.php">
-            <div class="cc-card-title" data-lang-cs="Statistiky" data-lang-en="Statistics" data-lang-it="Statistiche">Statistiky</div>
-            <div class="cc-card-description" data-lang-cs="Přehledy, grafy a analytické reporty" data-lang-en="Overviews, charts and analytical reports" data-lang-it="Panoramiche, grafici e report analitici">Přehledy, grafy a analytické reporty</div>
-        </div>
-
-        <div class="cc-card" data-href="analytics.php">
-            <div class="cc-card-title" data-lang-cs="Web Analytics" data-lang-en="Web Analytics" data-lang-it="Web Analytics">Web Analytics</div>
-            <div class="cc-card-description" data-lang-cs="Návštěvnost webu, zařízení, konverze" data-lang-en="Website traffic, devices, conversions" data-lang-it="Traffico sito web, dispositivi, conversioni">Návštěvnost webu, zařízení, konverze</div>
-        </div>
-
-        <div class="cc-card" data-href="aktuality.php">
-            <div class="cc-card-title" data-lang-cs="Natuzzi Aktuality" data-lang-en="Natuzzi News" data-lang-it="Notizie Natuzzi">Natuzzi Aktuality</div>
-            <div class="cc-card-description" data-lang-cs="Automatické denní aktuality o značce Natuzzi (CZ/EN/IT)" data-lang-en="Automatic daily news about Natuzzi brand (CZ/EN/IT)" data-lang-it="Notizie quotidiane automatiche sul marchio Natuzzi (CZ/EN/IT)">Automatické denní aktuality o značce Natuzzi (CZ/EN/IT)</div>
-        </div>
-
-        <div class="cc-card" data-href="admin.php?tab=users">
-            <div class="cc-card-title" data-lang-cs="Uživatelé" data-lang-en="Users" data-lang-it="Utenti">Uživatelé</div>
-            <div class="cc-card-description" data-lang-cs="Správa uživatelských účtů a oprávnění" data-lang-en="User account and permission management" data-lang-it="Gestione account utente e permessi">Správa uživatelských účtů a oprávnění</div>
         </div>
 
         <div class="cc-card" data-href="admin.php?tab=keys">
@@ -204,24 +179,9 @@ if (!$embedMode && $activeTab === 'dashboard'):
             <div class="cc-card-description" data-lang-cs="Správa emailových a SMS notifikací" data-lang-en="Email and SMS notification management" data-lang-it="Gestione notifiche email e SMS">Správa emailových a SMS notifikací</div>
         </div>
 
-        <div class="cc-card" data-href="admin.php?tab=online">
-            <div class="cc-card-title" data-lang-cs="Online uživatelé" data-lang-en="Online Users" data-lang-it="Utenti Online">Online uživatelé</div>
-            <div class="cc-card-description" data-lang-cs="Aktuálně přihlášení uživatelé v systému" data-lang-en="Currently logged in users in the system" data-lang-it="Utenti attualmente connessi al sistema">Aktuálně přihlášení uživatelé v systému</div>
-        </div>
-
-        <div class="cc-card" data-href="admin.php?tab=admin_configuration">
-            <div class="cc-card-title" data-lang-cs="Konfigurace" data-lang-en="Configuration" data-lang-it="Configurazione">Konfigurace</div>
-            <div class="cc-card-description" data-lang-cs="SMTP, API klíče, systémová nastavení" data-lang-en="SMTP, API keys, system settings" data-lang-it="SMTP, chiavi API, impostazioni di sistema">SMTP, API klíče, systémová nastavení</div>
-        </div>
-
         <div class="cc-card" data-href="psa-kalkulator.php">
             <div class="cc-card-title" data-lang-cs="PSA Kalkulátor" data-lang-en="PSA Calculator" data-lang-it="Calcolatore PSA">PSA Kalkulátor</div>
             <div class="cc-card-description" data-lang-cs="Výpočet mezd a docházky zaměstnanců" data-lang-en="Employee salary and attendance calculation" data-lang-it="Calcolo stipendi e presenze dipendenti">Výpočet mezd a docházky zaměstnanců</div>
-        </div>
-
-        <div class="cc-card" data-href="admin.php?tab=admin_testing_simulator">
-            <div class="cc-card-title" data-lang-cs="E2E Testing" data-lang-en="E2E Testing" data-lang-it="Test E2E">E2E Testing</div>
-            <div class="cc-card-description" data-lang-cs="End-to-end testování celého workflow" data-lang-en="End-to-end testing of entire workflow" data-lang-it="Test end-to-end dell'intero flusso di lavoro">End-to-end testování celého workflow</div>
         </div>
 
         <div class="cc-card" data-href="admin.php?tab=admin_console">
@@ -1017,37 +977,6 @@ function loadNotifContent(type, body) {
   <?php if ($activeTab === 'tools'): ?>
   <!-- TAB: DIAGNOSTIKA & ÚDRŽBA -->
   <?php require_once __DIR__ . '/includes/admin_diagnostics.php'; ?>
-  <?php endif; ?>
-
-  <?php if ($activeTab === 'online'): ?>
-  <!-- TAB: ONLINE -->
-  <div id="tab-online" class="tab-content">
-    <div class="table-container">
-      <div class="table-header">
-        <h3 class="table-title" data-lang-cs="Online uživatelé" data-lang-en="Online Users" data-lang-it="Utenti Online">Online uživatelé</h3>
-        <div class="table-actions">
-          <button class="btn btn-sm" id="refreshOnlineBtn" data-lang-cs="Obnovit" data-lang-en="Refresh" data-lang-it="Aggiorna">Obnovit</button>
-        </div>
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">Status</th>
-            <th scope="col" data-lang-cs="Uživatel" data-lang-en="User" data-lang-it="Utente">Uživatel</th>
-            <th scope="col" data-lang-cs="Role" data-lang-en="Role" data-lang-it="Ruolo">Role</th>
-            <th scope="col">Email</th>
-            <th scope="col" data-lang-cs="Poslední aktivita" data-lang-en="Last Activity" data-lang-it="Ultima Attività">Poslední aktivita</th>
-          </tr>
-        </thead>
-        <tbody id="online-table" aria-live="polite">
-          <tr>
-            <td colspan="5" class="loading" role="status" data-lang-cs="Načítání..." data-lang-en="Loading..." data-lang-it="Caricamento...">Načítání...</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
   <?php endif; ?>
 
 </div>

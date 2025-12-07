@@ -200,11 +200,49 @@ body {
   flex-direction: column;
   justify-content: space-between;
 }
+/* Neonovy obrys podle stavu reklamace - JASNE BARVY */
+.order-box.status-bg-wait {
+  border: 3px solid #ffdd00;
+  box-shadow:
+    0 0 10px rgba(255, 221, 0, 0.6),
+    0 0 20px rgba(255, 221, 0, 0.3),
+    inset 0 0 8px rgba(255, 221, 0, 0.1);
+}
+.order-box.status-bg-open {
+  border: 3px solid #00e5ff;
+  box-shadow:
+    0 0 10px rgba(0, 229, 255, 0.6),
+    0 0 20px rgba(0, 229, 255, 0.3),
+    inset 0 0 8px rgba(0, 229, 255, 0.1);
+}
+.order-box.status-bg-done {
+  border: 3px solid #39ff14;
+  box-shadow:
+    0 0 10px rgba(57, 255, 20, 0.6),
+    0 0 20px rgba(57, 255, 20, 0.3),
+    inset 0 0 8px rgba(57, 255, 20, 0.1);
+}
 .order-box:hover {
   background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
-  border-color: #000000;
+}
+.order-box.status-bg-wait:hover {
+  box-shadow:
+    0 0 15px rgba(255, 221, 0, 0.8),
+    0 0 30px rgba(255, 221, 0, 0.5),
+    0 0 45px rgba(255, 221, 0, 0.2);
+}
+.order-box.status-bg-open:hover {
+  box-shadow:
+    0 0 15px rgba(0, 229, 255, 0.8),
+    0 0 30px rgba(0, 229, 255, 0.5),
+    0 0 45px rgba(0, 229, 255, 0.2);
+}
+.order-box.status-bg-done:hover {
+  box-shadow:
+    0 0 15px rgba(57, 255, 20, 0.8),
+    0 0 30px rgba(57, 255, 20, 0.5),
+    0 0 45px rgba(57, 255, 20, 0.2);
 }
 .order-box.search-match {
   border-color: var(--c-neon-blue);
@@ -1635,61 +1673,17 @@ button,
   }
 }
 
-/* ============================================================================
-   BAREVNÉ POZADÍ KARET PODLE STAVU (Step 171)
-   Výrazné barvy pro lepší vizuální rozlišení stavů zakázek
-   ============================================================================ */
-
-/* ČEKÁ - Žlutá */
-.order-box.status-bg-wait {
-  background: linear-gradient(135deg, #fff9cc 0%, #fff3a0 100%);
-  border-color: #d4a600;
-  box-shadow: 0 2px 8px rgba(255, 225, 0, 0.25);
-}
-
-.order-box.status-bg-wait:hover {
-  background: linear-gradient(135deg, #fff3a0 0%, #ffec6e 100%);
-  box-shadow: 0 4px 12px rgba(255, 225, 0, 0.35);
-  border-color: #b38f00;
-}
-
-/* DOMLUVENÁ - Modrá */
-.order-box.status-bg-open {
-  background: linear-gradient(135deg, #e0f7ff 0%, #b8ecff 100%);
-  border-color: #00a8cc;
-  box-shadow: 0 2px 8px rgba(0, 212, 255, 0.25);
-}
-
-.order-box.status-bg-open:hover {
-  background: linear-gradient(135deg, #b8ecff 0%, #8de3ff 100%);
-  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.35);
-  border-color: #0090b3;
-}
-
-/* HOTOVO - Zelená */
-.order-box.status-bg-done {
-  background: linear-gradient(135deg, #d4ffd4 0%, #a8ffb8 100%);
-  border-color: #00b347;
-  box-shadow: 0 2px 8px rgba(0, 255, 136, 0.25);
-}
-
-.order-box.status-bg-done:hover {
-  background: linear-gradient(135deg, #a8ffb8 0%, #7aff9a 100%);
-  box-shadow: 0 4px 12px rgba(0, 255, 136, 0.35);
-  border-color: #009938;
-}
-
 /* Status tečka - výraznější stíny */
 .order-status.status-wait {
-  box-shadow: 0 0 6px 2px rgba(255, 225, 0, 0.6);
+  box-shadow: 0 0 6px 2px rgba(255, 221, 0, 0.8);
 }
 
 .order-status.status-open {
-  box-shadow: 0 0 6px 2px rgba(0, 212, 255, 0.6);
+  box-shadow: 0 0 6px 2px rgba(0, 229, 255, 0.8);
 }
 
 .order-status.status-done {
-  box-shadow: 0 0 6px 2px rgba(0, 255, 136, 0.6);
+  box-shadow: 0 0 6px 2px rgba(57, 255, 20, 0.8);
 }
 
 /* ============================================
