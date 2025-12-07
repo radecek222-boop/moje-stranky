@@ -1733,8 +1733,8 @@ function showContactMenu(id) {
         ${phone ? `<a href="tel:${phone}" class="detail-btn detail-btn-primary" style="text-decoration: none;">Zavolat</a>` : ''}
         <button class="detail-btn detail-btn-primary" data-action="openCalendarFromDetail" data-id="${id}">Termín návštěvy</button>
         ${phone ? `<button class="detail-btn detail-btn-primary" data-action="sendContactAttemptEmail" data-id="${id}" data-phone="${phone}">Odeslat SMS</button>` : ''}
-        ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="detail-btn detail-btn-secondary" style="text-decoration: none;" target="_blank">Navigovat (Waze)</a>` : ''}
-        <button class="detail-btn detail-btn-secondary" data-action="showDetail">Zpět</button>
+        ${address && address !== '—' ? `<a href="https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes" class="detail-btn detail-btn-primary" style="text-decoration: none;" target="_blank">Navigovat (Waze)</a>` : ''}
+        <button class="detail-btn detail-btn-primary" data-action="showDetail">Zpět</button>
       </div>
     </div>
   `;
