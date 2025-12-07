@@ -19,72 +19,12 @@ const SESSION_EXPIRED_MESSAGE = () => t('session_expired');
 
 // ============================================================
 // UNIVERSAL CONFIRMATION MODAL
-// Nahrazuje nativní confirm() hezčím tmavým modalem
+// Definice přesunuta do utils.js pro globální použití
+// Funkce wgsConfirm je nyní dostupná přes window.wgsConfirm
 // ============================================================
-function wgsConfirm(zprava, options = {}) {
-  return new Promise((resolve) => {
-    const {
-      titulek = 'Potvrzení',
-      btnPotvrdit = 'Potvrdit',
-      btnZrusit = 'Zrušit',
-      nebezpecne = false
-    } = options;
-
-    // Odstranit existující modal
-    const existujici = document.getElementById('wgsConfirmModal');
-    if (existujici) existujici.remove();
-
-    const modal = document.createElement('div');
-    modal.id = 'wgsConfirmModal';
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7); display: flex;
-      align-items: center; justify-content: center; z-index: 10001;
-    `;
-
-    const btnPotvrditStyle = nebezpecne
-      ? 'background: #dc3545; color: #fff;'
-      : 'background: #fff; color: #000;';
-
-    modal.innerHTML = `
-      <div style="background: #1a1a1a; padding: 25px; border-radius: 12px;
-                  max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-                  border: 1px solid #333;">
-        <h3 style="margin: 0 0 15px 0; color: #fff; font-size: 1.1rem;">${titulek}</h3>
-        <p style="margin: 0 0 20px 0; color: #ccc; font-size: 0.95rem; line-height: 1.5;">${zprava}</p>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="wgsConfirmBtnZrusit" style="padding: 10px 20px; border: 1px solid #444;
-                  border-radius: 6px; background: transparent; color: #ccc; cursor: pointer;
-                  font-size: 0.9rem;">${btnZrusit}</button>
-          <button id="wgsConfirmBtnPotvrdit" style="padding: 10px 20px; border: none;
-                  border-radius: 6px; ${btnPotvrditStyle} cursor: pointer;
-                  font-size: 0.9rem; font-weight: 500;">${btnPotvrdit}</button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    const zavrit = (vysledek) => {
-      modal.remove();
-      document.removeEventListener('keydown', escHandler);
-      resolve(vysledek);
-    };
-
-    document.getElementById('wgsConfirmBtnZrusit')?.addEventListener('click', () => zavrit(false));
-    document.getElementById('wgsConfirmBtnPotvrdit')?.addEventListener('click', () => zavrit(true));
-    modal.addEventListener('click', (e) => { if (e.target === modal) zavrit(false); });
-
-    const escHandler = (e) => { if (e.key === 'Escape') zavrit(false); };
-    document.addEventListener('keydown', escHandler);
-
-    // Focus na tlačítko zrušit (bezpečnější default)
-    document.getElementById('wgsConfirmBtnZrusit')?.focus();
-  });
-}
-
-// Export pro globální použití
-window.wgsConfirm = wgsConfirm;
+// POZNÁMKA: wgsConfirm() je definována v utils.js a podporuje:
+// - Staré volání: wgsConfirm('zpráva', 'OK', 'Zrušit')
+// - Nové volání: wgsConfirm('zpráva', { titulek, btnPotvrdit, btnZrusit, nebezpecne })
 
 function isUnauthorizedStatus(status) {
   return status === 401 || status === 403;
