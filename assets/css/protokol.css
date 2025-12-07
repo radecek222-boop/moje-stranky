@@ -1438,7 +1438,7 @@ body.pdf-export-mode #signature-pad {
 .zakaznik-schvaleni-sekce label {
   display: block;
   font-weight: 600;
-  color: #aaa;
+  color: #fff;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
