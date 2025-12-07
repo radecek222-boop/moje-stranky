@@ -857,16 +857,16 @@ body.modal-open {
   color: #ffffff !important;
 }
 
-/* Tlačítka v detailu - tmavá */
+/* Tlačítka v detailu - černá */
 #detailOverlay .btn {
-  background: #333333 !important;
-  border-color: #555555 !important;
+  background: #1a1a1a !important;
+  border-color: #333333 !important;
   color: #ffffff !important;
 }
 
 #detailOverlay .btn:hover {
-  background: #444444 !important;
-  border-color: #666666 !important;
+  background: #333333 !important;
+  border-color: #444444 !important;
 }
 
 #detailOverlay .btn-success {
