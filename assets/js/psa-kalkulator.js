@@ -1417,26 +1417,34 @@ function normalizeAccount(account) {
  * Format: CZ + 2 kontrolni cislice + 4 kod banky + 6 predcisli + 10 cislo uctu
  */
 function convertToIBAN(account, bankCode) {
-  // Odstranit pomlcky a mezery
-  account = (account || '').toString().replace(/[\s-]/g, '');
+  // Nejprve odstranit jen mezery (pomlcku zatim nechat pro split)
+  let rawAccount = (account || '').toString().replace(/\s/g, '');
   bankCode = (bankCode || '').toString().replace(/\D/g, '').padStart(4, '0');
 
   // Rozdelit predcisli a cislo uctu
   let predcisli = '';
-  let cisloUctu = account;
+  let cisloUctu = '';
 
-  if (account.includes('-')) {
-    const parts = account.split('-');
-    predcisli = parts[0] || '';
-    cisloUctu = parts[1] || '';
-  } else if (account.length > 10) {
-    predcisli = account.slice(0, -10);
-    cisloUctu = account.slice(-10);
+  if (rawAccount.includes('-')) {
+    // Format: predcisli-cislo (napr. 19-123456789)
+    const parts = rawAccount.split('-');
+    predcisli = (parts[0] || '').replace(/\D/g, '');
+    cisloUctu = (parts[1] || '').replace(/\D/g, '');
+  } else {
+    // Bez pomlcky - jen cisla
+    const digits = rawAccount.replace(/\D/g, '');
+    if (digits.length > 10) {
+      predcisli = digits.slice(0, -10);
+      cisloUctu = digits.slice(-10);
+    } else {
+      predcisli = '';
+      cisloUctu = digits;
+    }
   }
 
   // Doplnit na spravnou delku
-  predcisli = predcisli.replace(/\D/g, '').padStart(6, '0');
-  cisloUctu = cisloUctu.replace(/\D/g, '').padStart(10, '0');
+  predcisli = predcisli.padStart(6, '0');
+  cisloUctu = cisloUctu.padStart(10, '0');
 
   // BBAN = kod banky + predcisli + cislo uctu
   const bban = bankCode + predcisli + cisloUctu;
@@ -1963,6 +1971,8 @@ function closeQRModal() {
 
 // === SINGLE EMPLOYEE QR GENERATION ===
 function generateSingleEmployeeQR(index) {
+  console.log('generateSingleEmployeeQR called with index:', index);
+
   // Synchronizovat vstupy před generováním QR
   synchronizovatVstupy();
 
@@ -1975,6 +1985,13 @@ function generateSingleEmployeeQR(index) {
   const modal = document.getElementById('qrModal');
   const container = document.getElementById('qrCodesContainer');
   const summaryDiv = document.getElementById('paymentSummary');
+
+  // Guard - kontrola existence elementů
+  if (!modal || !container || !summaryDiv) {
+    console.error('QR Modal: chybí elementy', { modal, container, summaryDiv });
+    wgsToast.error('Chybí QR modal v HTML (qrModal/qrCodesContainer/paymentSummary)');
+    return;
+  }
 
   container.innerHTML = '';
   summaryDiv.innerHTML = '';
@@ -2150,28 +2167,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Step 115 - Podpora parametrů pro onclick migraci
     switch (action) {
-      case 'generateSingleEmployeeQR':
+      case 'generateSingleEmployeeQR': {
         const gIndex = target.getAttribute('data-index');
         if (gIndex !== null && typeof generateSingleEmployeeQR === 'function') {
-          generateSingleEmployeeQR(parseInt(gIndex));
+          generateSingleEmployeeQR(parseInt(gIndex, 10));
         }
         return;
+      }
 
-      case 'saveEmployeeToDatabase':
+      case 'saveEmployeeToDatabase': {
         const sIndex = target.getAttribute('data-index');
         if (sIndex !== null && typeof saveEmployeeToDatabase === 'function') {
-          saveEmployeeToDatabase(parseInt(sIndex));
+          saveEmployeeToDatabase(parseInt(sIndex, 10));
         }
         return;
+      }
 
-      case 'removeEmployee':
+      case 'removeEmployee': {
         const rIndex = target.getAttribute('data-index');
         if (rIndex !== null && typeof removeEmployee === 'function') {
-          removeEmployee(parseInt(rIndex));
+          removeEmployee(parseInt(rIndex, 10));
         }
         return;
+      }
 
-      case 'copySWIFTDetails':
+      case 'copySWIFTDetails': {
         const name = target.getAttribute('data-name');
         const iban = target.getAttribute('data-iban');
         const swift = target.getAttribute('data-swift');
@@ -2180,23 +2200,26 @@ document.addEventListener('DOMContentLoaded', () => {
           copySWIFTDetails(name, iban, swift, amount);
         }
         return;
+      }
 
-      case 'downloadQR':
+      case 'downloadQR': {
         const qrid = target.getAttribute('data-qrid');
         const dName = target.getAttribute('data-name');
         if (qrid && dName && typeof downloadQR === 'function') {
           downloadQR(qrid, dName);
         }
         return;
+      }
 
-      case 'updateEmployeeField':
-        const empIndex = parseInt(target.getAttribute('data-index'));
+      case 'updateEmployeeField': {
+        const empIndex = parseInt(target.getAttribute('data-index'), 10);
         const empField = target.getAttribute('data-field');
         const empRecalculate = target.getAttribute('data-recalculate') === 'true';
         if (!isNaN(empIndex) && empField && typeof updateEmployee === 'function') {
           updateEmployee(empIndex, empField, target.value, empRecalculate);
         }
         return;
+      }
 
       // === PSA HLAVNÍ AKCE ===
       case 'saveData':
@@ -2256,12 +2279,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof confirmNewPeriod === 'function') confirmNewPeriod();
         return;
 
-      case 'selectPeriod':
+      case 'selectPeriod': {
         const periodToSelect = target.getAttribute('data-period');
         if (periodToSelect && typeof selectPeriod === 'function') {
           selectPeriod(periodToSelect);
         }
         return;
+      }
 
       case 'loadPeriod':
         if (typeof loadPeriod === 'function') loadPeriod();
