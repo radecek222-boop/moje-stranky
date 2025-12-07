@@ -1312,8 +1312,8 @@ body.pdf-export-mode #signature-pad {
 }
 
 .zakaznik-schvaleni-text {
-  background: #222;
-  border: 1px solid #444;
+  background: #fff;
+  border: 1px solid #333;
   border-radius: 8px;
   padding: 1rem;
   min-height: 120px;
@@ -1321,7 +1321,7 @@ body.pdf-export-mode #signature-pad {
   overflow-y: auto;
   font-size: 1rem;
   line-height: 1.5;
-  color: #ccc;
+  color: #000;
   white-space: pre-wrap;
 }
 
@@ -1454,7 +1454,7 @@ body.pdf-export-mode #signature-pad {
 }
 
 .zakaznik-schvaleni-tabulka tr {
-  border-bottom: 1px solid #333;
+  border-bottom: none;
 }
 
 .zakaznik-schvaleni-tabulka tr:last-child {
