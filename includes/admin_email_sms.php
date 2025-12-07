@@ -727,14 +727,14 @@ try {
 
             <!-- Předmět -->
             <div style="margin-bottom: 1rem;">
-                <strong style="color: #aaa; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Předmět:</strong>
-                <div id="email-modal-subject" style="padding: 0.75rem; background: #222; border: 1px solid #444; font-size: 0.9rem; font-weight: 500; color: #fff;"></div>
+                <strong style="color: #fff; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Předmět:</strong>
+                <div id="email-modal-subject" style="padding: 0.75rem; background: #fff; border: 1px solid #333; font-size: 0.9rem; font-weight: 500; color: #000;"></div>
             </div>
 
             <!-- Tělo emailu -->
             <div style="margin-bottom: 1rem;">
-                <strong style="color: #aaa; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Tělo emailu:</strong>
-                <div id="email-modal-body" style="padding: 0.75rem; background: #222; border: 1px solid #444; max-height: 300px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; font-size: 0.85rem; font-family: 'Courier New', monospace; color: #ccc;"></div>
+                <strong style="color: #fff; display: block; margin-bottom: 0.25rem; font-size: 0.85rem;">Tělo emailu:</strong>
+                <div id="email-modal-body" style="padding: 0.75rem; background: #fff; border: 1px solid #333; max-height: 300px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; font-size: 0.85rem; font-family: 'Courier New', monospace; color: #000;"></div>
             </div>
 
             <!-- Chyba (pokud existuje) -->
