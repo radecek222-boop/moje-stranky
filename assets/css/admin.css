@@ -3661,3 +3661,231 @@ hr {
     box-shadow: 0 0 25px rgba(57, 255, 20, 0.8);
   }
 }
+
+/* ===========================================================================
+   ADMIN DARK THEME - KOMPLETNÍ TEXT COLOR OVERRIDE
+   Zajistí bílé písmo všude v admin rozhraní
+   =========================================================================== */
+
+/* Všechny textové elementy */
+.admin-page,
+.admin-page *,
+.control-center,
+.control-center *,
+.cc-section,
+.cc-section *,
+.admin-section,
+.admin-section * {
+  color: #ffffff !important;
+}
+
+/* Specifické elementy které mohly zůstat tmavé */
+.admin-page h1,
+.admin-page h2,
+.admin-page h3,
+.admin-page h4,
+.admin-page h5,
+.admin-page h6,
+.admin-page p,
+.admin-page span,
+.admin-page div,
+.admin-page a,
+.admin-page li,
+.admin-page td,
+.admin-page th,
+.admin-page label,
+.admin-page input,
+.admin-page textarea,
+.admin-page select,
+.admin-page button {
+  color: #ffffff !important;
+}
+
+/* Výjimky - speciální barvy */
+.admin-page .cc-tab.active,
+.admin-page .admin-card-title,
+.admin-page .cc-card-title,
+.admin-page .cc-stat-number,
+.admin-page .stat-number,
+.admin-page .cc-btn-primary,
+.admin-page .admin-btn-primary,
+.admin-page .admin-mode-indicator {
+  color: #000000 !important;
+}
+
+.admin-page .cc-table th {
+  color: #39ff14 !important;
+}
+
+/* Sekundární text - šedý */
+.admin-page .cc-card-description,
+.admin-page .admin-card-description,
+.admin-page .cc-text-secondary,
+.admin-page .text-muted,
+.admin-page small,
+.admin-page .help-text {
+  color: #aaaaaa !important;
+}
+
+/* Danger text */
+.admin-page .text-danger,
+.admin-page .cc-btn-danger,
+.admin-page .admin-btn-danger,
+.admin-page .error-text {
+  color: #ff4444 !important;
+}
+
+/* Success text */
+.admin-page .text-success,
+.admin-page .success-text {
+  color: #39ff14 !important;
+}
+
+/* Warning text */
+.admin-page .text-warning,
+.admin-page .warning-text {
+  color: #ffd700 !important;
+}
+
+/* Placeholdery */
+.admin-page input::placeholder,
+.admin-page textarea::placeholder {
+  color: #666666 !important;
+}
+
+/* Linky */
+.admin-page a:not(.cc-btn):not(.admin-btn) {
+  color: #39ff14 !important;
+}
+
+.admin-page a:not(.cc-btn):not(.admin-btn):hover {
+  color: #5fff3a !important;
+}
+
+/* Vstupy - text uvnitř */
+.admin-page input,
+.admin-page textarea,
+.admin-page select {
+  color: #ffffff !important;
+  background: #1a1a1a !important;
+}
+
+/* Option v selectu */
+.admin-page select option {
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+/* Code bloky */
+.admin-page code,
+.admin-page pre {
+  background: #0a0a0a !important;
+  color: #39ff14 !important;
+  border: 1px solid #333 !important;
+}
+
+/* Všechny kontejnery tmavé */
+.admin-page .container,
+.admin-page .wrapper,
+.admin-page .content,
+.admin-page .panel,
+.admin-page .box,
+.admin-page .card,
+.admin-page .section,
+.admin-page main,
+.admin-page aside,
+.admin-page header,
+.admin-page footer {
+  background: #0a0a0a !important;
+}
+
+/* CC specifické komponenty */
+.admin-page .cc-version-info {
+  color: #888888 !important;
+}
+
+.admin-page .cc-clear-cache-btn {
+  background: linear-gradient(135deg, #1a1a1a 0%, #222 100%) !important;
+  border: 2px solid #39ff14 !important;
+  color: #39ff14 !important;
+}
+
+.admin-page .cc-clear-cache-btn:hover {
+  background: #39ff14 !important;
+  color: #000000 !important;
+}
+
+/* Dropdowny a selecty */
+.admin-page .dropdown-menu,
+.admin-page .select-dropdown {
+  background: #1a1a1a !important;
+  border: 1px solid #39ff14 !important;
+}
+
+.admin-page .dropdown-item {
+  color: #ffffff !important;
+}
+
+.admin-page .dropdown-item:hover {
+  background: #222 !important;
+  color: #39ff14 !important;
+}
+
+/* Tooltips */
+.admin-page .tooltip {
+  background: #1a1a1a !important;
+  border: 1px solid #39ff14 !important;
+  color: #ffffff !important;
+}
+
+/* Alerts a notifikace */
+.admin-page .alert,
+.admin-page .notification {
+  background: #1a1a1a !important;
+  border: 1px solid #333 !important;
+  color: #ffffff !important;
+}
+
+.admin-page .alert-success {
+  border-color: #39ff14 !important;
+}
+
+.admin-page .alert-danger {
+  border-color: #ff4444 !important;
+}
+
+.admin-page .alert-warning {
+  border-color: #ffd700 !important;
+}
+
+/* Progress bary */
+.admin-page .progress {
+  background: #333 !important;
+}
+
+.admin-page .progress-bar {
+  background: #39ff14 !important;
+}
+
+/* Listy */
+.admin-page ul,
+.admin-page ol {
+  color: #ffffff !important;
+}
+
+/* Breadcrumbs */
+.admin-page .breadcrumb {
+  background: transparent !important;
+}
+
+.admin-page .breadcrumb-item {
+  color: #aaaaaa !important;
+}
+
+.admin-page .breadcrumb-item.active {
+  color: #ffffff !important;
+}
+
+.admin-page .breadcrumb-item a {
+  color: #39ff14 !important;
+}
