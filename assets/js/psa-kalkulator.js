@@ -1834,8 +1834,6 @@ function generatePaymentQR() {
   modal.classList.remove('single-qr-mode');
 
   let totalPayments = 0;
-  let femaleBonus = 0;
-  let radekPayment = 0;
   let paymentData = [];
   let swiftPayments = [];
 
@@ -1871,15 +1869,6 @@ function generatePaymentQR() {
     // Přeskočit pouze pokud je částka 0
     if (amount <= 0) return;
 
-    // Female bonus calculation (hidden)
-    const femaleNames = ['Stana', 'Anastasia', 'Maryna', 'Ivana', 'Olha', 'Piven Tetiana',
-                        'Vitalina', 'Tetiana', 'Kataryna', 'Ruslana'];
-
-    if (!isLenka && emp.hours > 0 && femaleNames.some(name => emp.name.includes(name))) {
-      const bonus = (emp.hours * salaryRate) * 0.1;
-      femaleBonus += bonus;
-    }
-
     // Process by payment type
     if (emp.type === 'swift' && emp.swiftData) {
       swiftPayments.push({
@@ -1887,8 +1876,6 @@ function generatePaymentQR() {
         amount: amount,
         swiftData: emp.swiftData
       });
-    } else if (emp.name === 'Radek') {
-      radekPayment = amount;
     } else {
       // Přidat všechny zaměstnance s částkou > 0
       paymentData.push({
@@ -1903,30 +1890,14 @@ function generatePaymentQR() {
     totalPayments += amount;
   });
 
-  // Add Radek with hidden bonus
-  const radekData = employees.find(emp => emp.name === 'Radek');
-  if (radekData && radekData.account && radekData.bank) {
-    const radekTotalAmount = radekPayment + femaleBonus;
-    paymentData.push({
-      name: 'Radek',
-      amount: radekTotalAmount,
-      displayAmount: radekPayment,
-      realAmount: radekTotalAmount,
-      account: radekData.account,
-      bank: formatBankCode(radekData.bank),
-      isSpecial: true
-    });
-  }
-
   // Summary - seznam všech zaměstnanců
   let summaryRows = '';
   let visibleTotal = 0;
 
-  // Domácí platby - použít realAmount (skutečnou částku včetně bonusů) pro správný součet
+  // Domácí platby
   paymentData.forEach(payment => {
-    const amount = payment.realAmount || payment.amount;
-    visibleTotal += amount;
-    summaryRows += `<div class="summary-row"><span>${payment.name}</span><span>${formatCurrency(amount)}</span></div>`;
+    visibleTotal += payment.amount;
+    summaryRows += `<div class="summary-row"><span>${payment.name}</span><span>${formatCurrency(payment.amount)}</span></div>`;
   });
 
   // SWIFT platby
@@ -1956,18 +1927,14 @@ function generatePaymentQR() {
     const qrItem = document.createElement('div');
     qrItem.className = 'qr-item';
 
-    const displayAmount = payment.displayAmount || payment.amount;
-    const qrAmount = payment.realAmount || payment.amount;
-
     qrItem.innerHTML = `
       <div class="qr-employee-name">${payment.name}</div>
-      <div class="qr-amount">${formatCurrency(displayAmount)}</div>
-      ${payment.isSpecial ? '<div class="qr-special-note">Včetně prémií</div>' : ''}
+      <div class="qr-amount">${formatCurrency(payment.amount)}</div>
       <div class="qr-account">${payment.account}/${payment.bank}</div>
       <div class="qr-code-wrapper" id="qr-${index}"></div>
       <div class="qr-item-buttons">
         <button class="btn btn-sm" data-action="downloadQR" data-qrid="qr-${index}" data-name="${payment.name}">Stáhnout</button>
-        <button class="btn btn-sm btn-secondary" data-action="shareQR" data-qrid="qr-${index}" data-name="${payment.name}" data-amount="${displayAmount}">Sdílet</button>
+        <button class="btn btn-sm btn-secondary" data-action="shareQR" data-qrid="qr-${index}" data-name="${payment.name}" data-amount="${payment.amount}">Sdílet</button>
       </div>
     `;
 
@@ -1988,7 +1955,7 @@ function generatePaymentQR() {
         qrText = generateCzechPaymentString({
           account: payment.account,
           bank: payment.bank,
-          amount: qrAmount,
+          amount: payment.amount,
           vs: currentPeriod.year * 100 + currentPeriod.month,
           message: `Výplata ${payment.name} ${currentPeriod.month}/${currentPeriod.year}`
         });
