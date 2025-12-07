@@ -1988,54 +1988,138 @@ function registerSecurityActions() {
     Utils.registerAction('aktualizovatVyber', () => aktualizovatVyber());
     Utils.registerAction('refreshOnlineUzivatele', () => nactiOnlineUzivatele());
 
-    // Upravit email u registračního klíče
-    Utils.registerAction('upravitEmailKlice', async (el, data) => {
+    // Upravit email u registračního klíče - mini overlay
+    Utils.registerAction('upravitEmailKlice', (el, data) => {
         const keyCode = data.code;
         const currentEmail = data.email || '';
 
-        const novyEmail = prompt('Zadejte email pro klíč ' + keyCode + ':', currentEmail);
+        // Odstranit existující modal
+        const existujici = document.getElementById('modalUpravitEmail');
+        if (existujici) existujici.remove();
 
-        // Uživatel zrušil dialog
-        if (novyEmail === null) return;
+        const modal = document.createElement('div');
+        modal.id = 'modalUpravitEmail';
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7); display: flex;
+            align-items: center; justify-content: center; z-index: 10000;
+        `;
 
-        try {
-            const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() :
-                             document.querySelector('meta[name="csrf-token"]')?.content;
+        modal.innerHTML = `
+            <div style="background: #1a1a1a; padding: 25px; border-radius: 12px;
+                        max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                        border: 1px solid #333;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0; color: #fff; font-size: 1.1rem;">Upravit email</h3>
+                    <button id="btnZavritEmailModal" style="background: none; border: none; color: #888;
+                            font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
+                </div>
 
-            // FIX: Akce musí být v URL, ne v body
-            const response = await fetch('/api/admin_api.php?action=update_key_email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    key_code: keyCode,
-                    email: novyEmail.trim(),
-                    csrf_token: csrfToken
-                })
-            });
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: #999; font-size: 0.85rem; margin-bottom: 8px;">
+                        Email pro klíč <code style="background: #333; padding: 2px 6px; border-radius: 3px; color: #fff;">${escapujHtml(keyCode)}</code>
+                    </label>
+                    <input type="email" id="inputNovyEmail" value="${escapujHtml(currentEmail)}"
+                           placeholder="email@example.com"
+                           style="width: 100%; padding: 12px; border: 1px solid #444; border-radius: 8px;
+                                  background: #252525; color: #fff; font-size: 1rem; box-sizing: border-box;">
+                </div>
 
-            const result = await response.json();
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button id="btnZrusitEmail" style="padding: 10px 20px; border: 1px solid #444;
+                            border-radius: 6px; background: transparent; color: #ccc; cursor: pointer;
+                            font-size: 0.9rem;">Zrušit</button>
+                    <button id="btnUlozitEmail" style="padding: 10px 20px; border: none;
+                            border-radius: 6px; background: #fff; color: #000; cursor: pointer;
+                            font-size: 0.9rem; font-weight: 500;">Uložit</button>
+                </div>
+            </div>
+        `;
 
-            if (result.status === 'success') {
-                if (typeof wgsToast !== 'undefined' && wgsToast.success) {
-                    wgsToast.success(result.message || 'Email uložen');
+        document.body.appendChild(modal);
+
+        // Focus na input
+        const inputEl = document.getElementById('inputNovyEmail');
+        inputEl?.focus();
+        inputEl?.select();
+
+        // Zavřít modal
+        const zavritModal = () => modal.remove();
+
+        document.getElementById('btnZavritEmailModal')?.addEventListener('click', zavritModal);
+        document.getElementById('btnZrusitEmail')?.addEventListener('click', zavritModal);
+
+        // Klik na overlay zavře modal
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) zavritModal();
+        });
+
+        // ESC zavře modal
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                zavritModal();
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+
+        // Uložit email
+        document.getElementById('btnUlozitEmail')?.addEventListener('click', async () => {
+            const novyEmail = inputEl?.value?.trim() || '';
+
+            const btnUlozit = document.getElementById('btnUlozitEmail');
+            if (btnUlozit) {
+                btnUlozit.textContent = 'Ukládám...';
+                btnUlozit.disabled = true;
+            }
+
+            try {
+                const csrfToken = typeof getCSRFToken === 'function' ? await getCSRFToken() :
+                                 document.querySelector('meta[name="csrf-token"]')?.content;
+
+                const response = await fetch('/api/admin_api.php?action=update_key_email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        key_code: keyCode,
+                        email: novyEmail,
+                        csrf_token: csrfToken
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    zavritModal();
+                    if (typeof wgsToast !== 'undefined' && wgsToast.success) {
+                        wgsToast.success(result.message || 'Email uložen');
+                    }
+                    if (typeof nactiRegistracniKlice === 'function') {
+                        nactiRegistracniKlice();
+                    }
                 } else {
-                    alert(result.message || 'Email uložen');
+                    throw new Error(result.message || 'Chyba při ukládání');
                 }
-                // Obnovit seznam klíčů
-                if (typeof nactiRegistracniKlice === 'function') {
-                    nactiRegistracniKlice();
+            } catch (err) {
+                console.error('[upravitEmailKlice] Chyba:', err);
+                if (typeof wgsToast !== 'undefined' && wgsToast.error) {
+                    wgsToast.error(err.message || 'Chyba při ukládání emailu');
+                } else {
+                    alert('Chyba: ' + (err.message || 'Chyba při ukládání emailu'));
                 }
-            } else {
-                throw new Error(result.message || 'Chyba při ukládání');
+                if (btnUlozit) {
+                    btnUlozit.textContent = 'Uložit';
+                    btnUlozit.disabled = false;
+                }
             }
-        } catch (err) {
-            console.error('[upravitEmailKlice] Chyba:', err);
-            if (typeof wgsToast !== 'undefined' && wgsToast.error) {
-                wgsToast.error(err.message || 'Chyba při ukládání emailu');
-            } else {
-                alert('Chyba: ' + (err.message || 'Chyba při ukládání emailu'));
+        });
+
+        // Enter uloží
+        inputEl?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('btnUlozitEmail')?.click();
             }
-        }
+        });
     });
 
     console.log('[Security] Akce zaregistrovány');
