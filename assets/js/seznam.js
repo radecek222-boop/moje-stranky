@@ -1989,11 +1989,11 @@ async function showCustomerDetail(id) {
         </div>
       ` : ''}
 
-    </div>
+      <div class="detail-buttons">
+        <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
+        <button class="detail-btn detail-btn-primary" data-action="showDetail" data-id="${id}">Zpět</button>
+      </div>
 
-    <div class="detail-buttons">
-      <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
-      <button class="detail-btn detail-btn-primary" data-action="showDetail" data-id="${id}">Zpět</button>
     </div>
   `;
 
