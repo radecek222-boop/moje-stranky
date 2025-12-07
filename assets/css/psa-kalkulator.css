@@ -470,14 +470,16 @@ textarea::placeholder {
 }
 
 .modal-content {
-  background: var(--c-white);
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   margin: 50px auto;
   padding: 2rem;
-  border: 1px solid var(--c-border);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
   max-width: 90%;
   max-height: 90vh;
   overflow-y: auto;
   animation: slideIn 0.3s ease;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
 }
 
 @keyframes slideIn {
@@ -491,31 +493,49 @@ textarea::placeholder {
   align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--c-border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .modal-title {
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--c-black);
+  color: #ffffff;
 }
 
 .close-modal {
   font-size: 2rem;
   cursor: pointer;
-  color: var(--c-grey);
-  transition: color 0.3s;
+  color: #cccccc;
+  transition: all 0.2s ease;
   line-height: 1;
 }
 
 .close-modal:hover {
-  color: var(--c-error);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* === MODAL FOOTER === */
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem 0 0;
+  margin-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-footer .btn {
+  min-width: 150px;
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
 }
 
 /* === PAYMENT SUMMARY === */
 .payment-summary {
-  background: var(--c-bg);
-  border: 1px solid var(--c-border);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -526,15 +546,16 @@ textarea::placeholder {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 1rem;
-  color: var(--c-black);
+  color: #ffffff;
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
   padding: 0.6rem 0;
-  border-bottom: 1px solid var(--c-border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 0.9rem;
+  color: #cccccc;
 }
 
 .summary-row:last-child {
@@ -543,55 +564,94 @@ textarea::placeholder {
   font-size: 1.1rem;
   margin-top: 0.5rem;
   padding-top: 1rem;
-  border-top: 2px solid var(--c-black);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
 }
 
 /* === QR GRID === */
 .qr-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  padding: 1rem 0;
 }
 
 .qr-item {
-  background: var(--c-white);
-  border: 1px solid var(--c-border);
-  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 2rem;
   text-align: center;
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 400px;
 }
 
 .qr-item:hover {
-  box-shadow: var(--shadow-md);
-  border-color: var(--c-grey);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .qr-employee-name {
-  font-weight: 700;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  color: var(--c-black);
+  font-weight: 600;
+  font-size: 1.4rem;
+  margin-bottom: 0.75rem;
+  color: #ffffff;
+  letter-spacing: 0.02em;
 }
 
 .qr-amount {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--c-success);
-  margin: 0.5rem 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0.75rem 0;
+  letter-spacing: -0.02em;
 }
 
 .qr-account {
-  font-size: 0.85rem;
-  color: var(--c-grey);
-  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: #bbbbbb;
+  margin-bottom: 1.25rem;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.05em;
 }
 
 .qr-code-wrapper {
-  background: white;
-  padding: 1rem;
-  border: 1px solid var(--c-border);
-  display: inline-block;
-  margin: 1rem auto;
+  background: #ffffff;
+  padding: 1.25rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem auto;
+  width: 200px;
+  height: 200px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.qr-code-wrapper canvas,
+.qr-code-wrapper img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto !important;
+  height: auto !important;
+}
+
+/* === QR ITEM BUTTONS === */
+.qr-item-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.qr-item-buttons .btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
 }
 
 /* === SPECIAL EMPLOYEE TYPES === */

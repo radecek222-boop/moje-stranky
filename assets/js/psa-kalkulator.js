@@ -1961,9 +1961,14 @@ function generatePaymentQR() {
         ${payment.isSpecial ? '<div style="font-size: 0.75rem; color: var(--c-success);">Včetně prémií</div>' : ''}
         <div class="qr-account">${payment.account}/${payment.bank}</div>
         <div class="qr-code-wrapper" id="qr-${index}"></div>
-        <button class="btn btn-sm" style="margin-top: 1rem;" data-action="downloadQR" data-qrid="qr-${index}" data-name="${payment.name}">
-          Stáhnout QR
-        </button>
+        <div class="qr-item-buttons">
+          <button class="btn btn-sm" data-action="downloadQR" data-qrid="qr-${index}" data-name="${payment.name}">
+            Stáhnout
+          </button>
+          <button class="btn btn-sm btn-secondary" data-action="shareQR" data-qrid="qr-${index}" data-name="${payment.name}" data-amount="${displayAmount}">
+            Sdílet
+          </button>
+        </div>
       `;
 
       domesticGrid.appendChild(qrItem);
@@ -2044,6 +2049,65 @@ function downloadQR(qrId, employeeName) {
     link.click();
   } else {
     wgsToast.error('QR kód nenalezen');
+  }
+}
+
+async function shareQRCode(qrId, employeeName, amount) {
+  // Získat QR kód jako blob
+  const qrImg = document.querySelector(`#${qrId} img`);
+  const qrCanvas = document.querySelector(`#${qrId} canvas`);
+
+  let imageUrl;
+  if (qrImg && qrImg.src) {
+    imageUrl = qrImg.src;
+  } else if (qrCanvas) {
+    imageUrl = qrCanvas.toDataURL('image/png');
+  } else {
+    wgsToast.error('QR kód nenalezen');
+    return;
+  }
+
+  // Konverze data URL na blob
+  const response = await fetch(imageUrl);
+  const blob = await response.blob();
+
+  const shareData = {
+    title: `QR platba - ${employeeName}`,
+    text: `Platba pro ${employeeName}: ${amount} Kč (${currentPeriod.month}/${currentPeriod.year})`,
+    files: [new File([blob], `QR_platba_${employeeName}.png`, { type: 'image/png' })]
+  };
+
+  // Zkontrolovat podporu Web Share API
+  if (navigator.canShare && navigator.canShare(shareData)) {
+    try {
+      await navigator.share(shareData);
+      wgsToast.success('QR kód byl sdílen');
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Chyba při sdílení:', err);
+        // Fallback: zkopírovat do schránky
+        fallbackCopyQR(imageUrl, employeeName, amount);
+      }
+    }
+  } else {
+    // Fallback pro prohlížeče bez podpory sdílení
+    fallbackCopyQR(imageUrl, employeeName, amount);
+  }
+}
+
+async function fallbackCopyQR(imageUrl, employeeName, amount) {
+  try {
+    // Zkusit zkopírovat obrázek do schránky
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    await navigator.clipboard.write([
+      new ClipboardItem({ 'image/png': blob })
+    ]);
+    wgsToast.success('QR kód byl zkopírován do schránky');
+  } catch (err) {
+    // Poslední fallback - stáhnout soubor
+    console.warn('Nelze zkopírovat do schránky, stahuji soubor:', err);
+    downloadQR(imageUrl.split('#')[0].split('?')[0], employeeName);
   }
 }
 
@@ -2185,9 +2249,14 @@ function generateSingleEmployeeQR(index) {
     ${isLenka ? '<div style="font-size: 0.75rem; color: var(--c-info);">Paušální mzda</div>' : ''}
     <div class="qr-account">${emp.account}/${formatBankCode(emp.bank)}</div>
     <div class="qr-code-wrapper" id="${qrId}"></div>
-    <button class="btn btn-sm" style="margin-top: 1rem;" data-action="downloadQR" data-qrid="${qrId}" data-name="${emp.name}">
-      Stáhnout QR
-    </button>
+    <div class="qr-item-buttons">
+      <button class="btn btn-sm" data-action="downloadQR" data-qrid="${qrId}" data-name="${emp.name}">
+        Stáhnout
+      </button>
+      <button class="btn btn-sm btn-secondary" data-action="shareQR" data-qrid="${qrId}" data-name="${emp.name}" data-amount="${amount}">
+        Sdílet
+      </button>
+    </div>
   `;
 
   container.appendChild(qrItem);
@@ -2306,6 +2375,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const dName = target.getAttribute('data-name');
         if (qrid && dName && typeof downloadQR === 'function') {
           downloadQR(qrid, dName);
+        }
+        return;
+      }
+
+      case 'shareQR': {
+        const shareQrid = target.getAttribute('data-qrid');
+        const shareName = target.getAttribute('data-name');
+        const shareAmount = target.getAttribute('data-amount');
+        if (shareQrid && shareName && typeof shareQRCode === 'function') {
+          shareQRCode(shareQrid, shareName, shareAmount);
         }
         return;
       }

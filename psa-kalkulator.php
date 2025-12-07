@@ -28,6 +28,7 @@ $csrfToken = generateCSRFToken();
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="assets/css/psa-kalkulator.min.css?v=<?= filemtime(__DIR__ . '/assets/css/psa-kalkulator.min.css') ?>">
+  <link rel="stylesheet" href="assets/css/universal-modal-theme.min.css?v=<?= filemtime(__DIR__ . '/assets/css/universal-modal-theme.min.css') ?>">
 </head>
 <body>
 <main id="main-content">
@@ -200,6 +201,10 @@ $csrfToken = generateCSRFToken();
       </div>
 
       <div id="qrCodesContainer" class="qr-grid"></div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-action="closeQRModal">Zavřít</button>
+      </div>
     </div>
   </div>
 
