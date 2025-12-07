@@ -1,0 +1,366 @@
+/**
+ * Admin PWA - Kompaktní responzivní design pro mobilní zařízení
+ * Optimalizováno pro PWA a malé displeje
+ */
+
+/* ============================================
+   PWA DETEKCE - standalone mode
+   ============================================ */
+@media (display-mode: standalone),
+       (display-mode: fullscreen),
+       (max-width: 480px) {
+
+  /* === DASHBOARD WRAPPER === */
+  .admin-dashboard-wrapper {
+    padding: 0.75rem 0.5rem;
+    max-width: 100%;
+  }
+
+  /* === HEADER - Kompaktní === */
+  .admin-dashboard-header {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    text-align: left;
+  }
+
+  .admin-dashboard-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .admin-dashboard-subtitle {
+    font-size: 0.75rem;
+    display: none; /* Skrýt na PWA */
+  }
+
+  .admin-dashboard-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    justify-content: flex-start;
+  }
+
+  .admin-version-info {
+    font-size: 0.65rem;
+    padding: 0.35rem 0.5rem;
+    height: 32px;
+    min-width: auto;
+    flex: 0 0 auto;
+  }
+
+  .admin-cache-btn {
+    font-size: 0.7rem;
+    padding: 0.35rem 0.75rem;
+    height: 32px;
+    min-width: auto;
+    flex: 1;
+  }
+
+  /* === GRID - 2 sloupce na mobilu === */
+  .cc-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  /* === KARTY - Kompaktní === */
+  .cc-card {
+    padding: 0.6rem;
+    min-height: 70px;
+    border-radius: 8px;
+  }
+
+  .cc-card:active {
+    transform: scale(0.98);
+    background: #f5f5f5;
+  }
+
+  /* Vypnout hover efekty na touch */
+  .cc-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .cc-card-title {
+    font-size: 0.75rem;
+    line-height: 1.2;
+    margin-bottom: 0.15rem;
+  }
+
+  .cc-card-description {
+    font-size: 0.6rem;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .cc-card-badge {
+    top: 4px;
+    right: 4px;
+    font-size: 0.55rem;
+    padding: 1px 4px;
+    min-width: 14px;
+  }
+
+  /* === PAGE TITLE === */
+  .page-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.7rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* === CONTAINER === */
+  .container {
+    padding: 0.5rem;
+    max-width: 100%;
+  }
+
+  /* === HLAVNÍ OBSAH === */
+  #main-content {
+    padding-top: 0.5rem;
+  }
+
+  /* === TABULKY === */
+  .table-responsive {
+    margin: 0 -0.5rem;
+    width: calc(100% + 1rem);
+  }
+
+  table {
+    font-size: 0.75rem;
+  }
+
+  th, td {
+    padding: 0.5rem 0.35rem;
+  }
+
+  /* === FORMULÁŘE === */
+  .form-group {
+    margin-bottom: 0.75rem;
+  }
+
+  .form-group label {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  select,
+  textarea {
+    padding: 0.5rem;
+    font-size: 16px; /* Prevent iOS zoom */
+  }
+
+  /* === TLAČÍTKA === */
+  .btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    min-height: 40px;
+  }
+
+  .btn-sm {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.7rem;
+    min-height: 32px;
+  }
+
+  /* === SEKCE === */
+  .section,
+  .card,
+  .panel {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-radius: 8px;
+  }
+
+  .section-title,
+  .card-title,
+  .panel-title {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* === NOTIFIKACE SEKCE === */
+  .notif-container {
+    padding: 0.5rem;
+  }
+
+  .notif-header {
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .notif-title {
+    font-size: 1rem;
+  }
+
+  .notif-card-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .notif-card {
+    padding: 0.75rem;
+  }
+
+  .notif-card-title {
+    font-size: 0.85rem;
+  }
+
+  .notif-card-description {
+    font-size: 0.7rem;
+  }
+
+  /* === ADMIN TABS === */
+  .admin-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .admin-tabs .tab {
+    font-size: 0.7rem;
+    padding: 0.5rem 0.75rem;
+    white-space: nowrap;
+  }
+
+  /* === MODÁLY === */
+  .modal-content {
+    width: 95% !important;
+    max-width: 95% !important;
+    padding: 0.75rem;
+    margin: 0.5rem;
+  }
+
+  .modal-header {
+    padding: 0.5rem 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-header h2,
+  .modal-header h3 {
+    font-size: 1rem;
+  }
+
+  .modal-body {
+    padding: 0;
+  }
+
+  .modal-footer {
+    padding: 0.5rem 0 0 0;
+    gap: 0.5rem;
+  }
+}
+
+/* ============================================
+   EXTRA MALÉ DISPLEJE (< 360px)
+   ============================================ */
+@media (max-width: 360px) {
+  .cc-grid {
+    grid-template-columns: 1fr; /* Jeden sloupec */
+  }
+
+  .cc-card {
+    min-height: 60px;
+  }
+
+  .admin-dashboard-title {
+    font-size: 1.1rem;
+  }
+
+  .cc-card-title {
+    font-size: 0.8rem;
+  }
+
+  .cc-card-description {
+    font-size: 0.65rem;
+  }
+}
+
+/* ============================================
+   LANDSCAPE MODE NA MOBILU
+   ============================================ */
+@media (max-height: 500px) and (orientation: landscape) {
+  .admin-dashboard-wrapper {
+    padding: 0.5rem;
+  }
+
+  .admin-dashboard-header {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .admin-dashboard-title {
+    font-size: 1rem;
+  }
+
+  .cc-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+  }
+
+  .cc-card {
+    min-height: 50px;
+    padding: 0.4rem;
+  }
+
+  .cc-card-title {
+    font-size: 0.7rem;
+  }
+
+  .cc-card-description {
+    display: none;
+  }
+}
+
+/* ============================================
+   SAFE AREA PRO NOTCH
+   ============================================ */
+@supports(padding: max(0px)) {
+  @media (display-mode: standalone) {
+    .admin-dashboard-wrapper {
+      padding-left: max(0.5rem, env(safe-area-inset-left));
+      padding-right: max(0.5rem, env(safe-area-inset-right));
+      padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
+  }
+}
+
+/* ============================================
+   TOUCH FEEDBACK
+   ============================================ */
+@media (hover: none) and (pointer: coarse) {
+  .cc-card {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .cc-card:active {
+    background: #e8e8e8;
+    transform: scale(0.97);
+    transition: transform 0.1s ease;
+  }
+
+  /* Odstranit hover efekty */
+  .cc-card:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--c-border);
+  }
+
+  .btn:active,
+  .admin-cache-btn:active {
+    transform: scale(0.95);
+    opacity: 0.9;
+  }
+}
