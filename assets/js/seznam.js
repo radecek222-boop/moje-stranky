@@ -1508,32 +1508,36 @@ function showBookingDetail(bookingOrId) {
 function renderTimeGrid() {
   const t = document.getElementById('timeGrid');
   t.innerHTML = '';
-  
+
+  // Najít všechny zákazníky na daný den, seřazené podle času
+  const dayBookings = WGS_DATA_CACHE
+    .filter(rec => rec.termin === SELECTED_DATE && rec.cas_navstevy && rec.id !== CURRENT_RECORD?.id)
+    .sort((a, b) => a.cas_navstevy.localeCompare(b.cas_navstevy));
+
   const occupiedTimes = {};
-  WGS_DATA_CACHE.forEach(rec => {
-    if (rec.termin === SELECTED_DATE && rec.cas_navstevy && rec.id !== CURRENT_RECORD?.id) {
-      const customerName = Utils.getCustomerName(rec);
-      occupiedTimes[rec.cas_navstevy] = {
-        zakaznik: customerName,
-        model: Utils.getProduct(rec)
-      };
-    }
+  dayBookings.forEach(rec => {
+    const customerName = Utils.getCustomerName(rec);
+    occupiedTimes[rec.cas_navstevy] = {
+      zakaznik: customerName,
+      model: Utils.getProduct(rec),
+      record: rec
+    };
   });
-  
+
   // Časový rozsah: 8:00 - 19:00 (místo původního 7:00 - 20:30)
   for (let h = 8; h <= 19; h++) {
     for (const mm of [0, 30]) {
       const time = `${String(h).padStart(2, '0')}:${mm === 0 ? '00' : '30'}`;
       const el = document.createElement('div');
       el.className = 'time-slot';
-      
+
       if (occupiedTimes[time]) {
         el.classList.add('occupied');
         el.title = `${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}`;
       }
-      
+
       el.textContent = time;
-      el.onclick = () => {
+      el.onclick = async () => {
         SELECTED_TIME = time;
         document.querySelectorAll('.time-slot').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
@@ -1547,13 +1551,73 @@ function renderTimeGrid() {
         const warningEl = document.getElementById('collisionWarning');
 
         if (occupiedTimes[time] && warningEl) {
-          warningEl.textContent = `KOLIZE: ${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}`;
+          // Základní info o kolizi
+          warningEl.innerHTML = `KOLIZE: ${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}<br><span style="font-size: 0.75rem; opacity: 0.8;">Počítám vzdálenost...</span>`;
           warningEl.style.display = 'block';
+
+          // Spočítat vzdálenost mezi aktuálním a kolizním zákazníkem
+          const kolizniZakaznik = occupiedTimes[time].record;
+          const currentAddress = Utils.getAddress(CURRENT_RECORD);
+          const kolizniAddress = Utils.getAddress(kolizniZakaznik);
+
+          if (currentAddress && currentAddress !== '—' && kolizniAddress && kolizniAddress !== '—') {
+            try {
+              // Najít pozici v denním plánu
+              const kolizniIndex = dayBookings.findIndex(b => b.id === kolizniZakaznik.id);
+              const predchozi = kolizniIndex > 0 ? dayBookings[kolizniIndex - 1] : null;
+              const nasledujici = kolizniIndex < dayBookings.length - 1 ? dayBookings[kolizniIndex + 1] : null;
+
+              // Vzdálenost mezi aktuálním a kolizním
+              const vzdalenost = await getDistance(
+                Utils.addCountryToAddress(currentAddress),
+                Utils.addCountryToAddress(kolizniAddress)
+              );
+
+              let infoHtml = `KOLIZE: ${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}`;
+
+              if (vzdalenost) {
+                infoHtml += `<div class="collision-distance-box">Vzdálenost mezi zákazníky: <strong>${vzdalenost.km} km</strong></div>`;
+              }
+
+              // Pokud jsou další zákazníci na ten den, ukázat kontext
+              if (predchozi || nasledujici) {
+                infoHtml += `<div class="collision-context">`;
+                if (predchozi) {
+                  const predchoziAddr = Utils.getAddress(predchozi);
+                  if (predchoziAddr && predchoziAddr !== '—') {
+                    const vzdalOdPredchoziho = await getDistance(
+                      Utils.addCountryToAddress(predchoziAddr),
+                      Utils.addCountryToAddress(currentAddress)
+                    );
+                    if (vzdalOdPredchoziho) {
+                      infoHtml += `<span class="collision-route">Od ${Utils.getCustomerName(predchozi)} (${predchozi.cas_navstevy}): <strong>${vzdalOdPredchoziho.km} km</strong></span>`;
+                    }
+                  }
+                }
+                if (nasledujici) {
+                  const nasledujiciAddr = Utils.getAddress(nasledujici);
+                  if (nasledujiciAddr && nasledujiciAddr !== '—') {
+                    const vzdalKNasledujicimu = await getDistance(
+                      Utils.addCountryToAddress(currentAddress),
+                      Utils.addCountryToAddress(nasledujiciAddr)
+                    );
+                    if (vzdalKNasledujicimu) {
+                      infoHtml += `<span class="collision-route">K ${Utils.getCustomerName(nasledujici)} (${nasledujici.cas_navstevy}): <strong>${vzdalKNasledujicimu.km} km</strong></span>`;
+                    }
+                  }
+                }
+                infoHtml += `</div>`;
+              }
+
+              warningEl.innerHTML = infoHtml;
+            } catch (err) {
+              logger.error('Chyba při výpočtu vzdálenosti kolize:', err);
+              warningEl.innerHTML = `KOLIZE: ${occupiedTimes[time].zakaznik} — ${occupiedTimes[time].model}`;
+            }
+          }
         } else if (warningEl) {
           warningEl.style.display = 'none';
         }
-
-        // PERFORMANCE: getDistance() a showDayBookingsWithDistances() vypnuty
       };
       t.appendChild(el);
     }
@@ -1860,7 +1924,7 @@ async function showCustomerDetail(id) {
     <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 1rem;">
 
       <!-- KOMPAKTNÍ INFO BLOK -->
-      <div style="background: #1a1a1a; border: 1px solid #333; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
+      <div style="background: #1a1a1a; border: none; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
         <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; font-size: 0.9rem;">
           <span style="color: #aaa; font-weight: 600;">Číslo objednávky:</span>
           <input type="text" style="border: 1px solid #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem; background: #fff; color: #000;" value="${Utils.escapeHtml(reklamaceId)}" readonly>
@@ -1989,11 +2053,11 @@ async function showCustomerDetail(id) {
         </div>
       ` : ''}
 
-    </div>
+      <div class="detail-buttons">
+        <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
+        <button class="detail-btn detail-btn-primary" data-action="showDetail" data-id="${id}">Zpět</button>
+      </div>
 
-    <div class="detail-buttons">
-      <button class="detail-btn detail-btn-primary" data-action="saveAllCustomerData" data-id="${id}">Uložit změny</button>
-      <button class="detail-btn detail-btn-primary" data-action="showDetail" data-id="${id}">Zpět</button>
     </div>
   `;
 
