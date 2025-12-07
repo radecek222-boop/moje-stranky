@@ -109,7 +109,7 @@ function showCsrfError(message) {
     if (button) {
         button.style.cssText = `
             background: white;
-            color: #d32f2f;
+            color: #dc3545;
             border: none;
             padding: 10px 20px;
             border-radius: 5px;

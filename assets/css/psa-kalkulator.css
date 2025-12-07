@@ -11,7 +11,7 @@
   --c-light-grey: #999999;
   --c-border: #e0e0e0;
   --c-success: #333333;
-  --c-error: #8b0000;
+  --c-error: #dc3545;
   --c-warning: #b8860b;
   --c-info: #555555;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
@@ -1187,7 +1187,8 @@ textarea::placeholder {
   }
 }
 
-/* === WGS CONFIRM DIALOG === */
+/* === WGS CONFIRM DIALOG (tmavé téma) === */
+/* Styly jsou definovány inline v utils.js pro garantovanou konzistenci */
 .wgs-confirm-overlay {
   position: fixed;
   top: 0;
@@ -1198,44 +1199,49 @@ textarea::placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10000;
+  z-index: 10001;
   padding: 20px;
 }
 
 .wgs-confirm-dialog {
-  background: var(--c-white);
-  padding: 24px;
+  background: #1a1a1a;
+  padding: 25px;
   max-width: 400px;
-  width: 100%;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  border: 2px solid var(--c-black);
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid #333;
+  border-radius: 12px;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
 }
 
 .wgs-confirm-message {
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.5;
-  color: var(--c-black);
+  color: #ccc;
   margin: 0 0 20px 0;
   text-align: center;
 }
 
 .wgs-confirm-buttons {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: center;
 }
 
 .wgs-confirm-btn {
-  padding: 10px 24px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border: none;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 6px;
   cursor: pointer;
-  min-width: 100px;
-  transition: background 0.2s, transform 0.1s;
+  min-width: 80px;
+  transition: opacity 0.2s, transform 0.1s;
+  font-family: 'Poppins', sans-serif;
 }
 
 .wgs-confirm-btn:hover {
+  opacity: 0.9;
   transform: translateY(-1px);
 }
 
@@ -1244,27 +1250,27 @@ textarea::placeholder {
 }
 
 .wgs-confirm-btn:focus {
-  outline: 3px solid var(--c-grey);
-  outline-offset: 2px;
+  outline: none;
 }
 
 .wgs-confirm-cancel {
-  background: var(--c-bg);
-  color: var(--c-black);
-  border: 1px solid var(--c-border);
+  background: transparent;
+  color: #ccc;
+  border: 1px solid #444;
 }
 
 .wgs-confirm-cancel:hover {
-  background: var(--c-border);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .wgs-confirm-ok {
-  background: var(--c-black);
-  color: var(--c-white);
+  background: #28a745;
+  color: #fff;
+  border: none;
 }
 
 .wgs-confirm-ok:hover {
-  background: #444;
+  background: #218838;
 }
 
 /* === PRINT STYLES === */

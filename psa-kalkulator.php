@@ -47,14 +47,6 @@ $csrfToken = generateCSRFToken();
 <!-- MAIN CONTENT -->
 <div class="container">
 
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-    <div>
-      <h1 class="title">Kalkulátor Mezd PSA</h1>
-      <p class="subtitle">Výpočet mezd a fakturace pro zaměstnance</p>
-    </div>
-  </div>
-
   <!-- FILTR OBDOBÍ -->
   <div class="period-filter-card" style="display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 1rem;">
     <!-- Historie -->

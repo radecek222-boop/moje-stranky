@@ -233,7 +233,7 @@ async function confirmNewPeriod() {
 
     if (payload.status === 'success' && payload.data && payload.data.periods && payload.data.periods[periodKey]) {
       // Období už existuje - přepnout na něj
-      if (await wgsConfirm(`Období ${MONTHS_CZ[newMonth]} ${newYear} již existuje. Chcete se na něj přepnout?`, 'Přepnout', 'Zrušit')) {
+      if (await wgsConfirm(`Období ${MONTHS_CZ[newMonth]} ${newYear} již existuje. Chcete se na něj přepnout?`, { titulek: 'Období existuje', btnPotvrdit: 'Přepnout' })) {
         closeNewPeriodSelector();
         currentPeriod.month = newMonth;
         currentPeriod.year = newYear;
@@ -1112,7 +1112,7 @@ async function confirmAddEmployee() {
 async function updateEmployee(index, field, value, needConfirm = false) {
   if (field === 'name' && needConfirm) {
     const oldName = employees[index].name;
-    if (oldName !== value && !await wgsConfirm(`Opravdu chcete změnit jméno z "${oldName}" na "${value}"?`, 'Změnit', 'Zrušit')) {
+    if (oldName !== value && !await wgsConfirm(`Opravdu chcete změnit jméno z "${oldName}" na "${value}"?`, { titulek: 'Změnit jméno', btnPotvrdit: 'Změnit' })) {
       renderTable();
       return;
     }
@@ -1148,7 +1148,7 @@ async function removeEmployee(index) {
     return;
   }
 
-  if (await wgsConfirm(`Opravdu chcete odebrat zaměstnance ${emp.name} z tohoto období?`, 'Odebrat', 'Zrušit')) {
+  if (await wgsConfirm(`Opravdu chcete odebrat zaměstnance ${emp.name} z tohoto období?`, { titulek: 'Odebrat zaměstnance', btnPotvrdit: 'Odebrat', nebezpecne: true })) {
     employees.splice(index, 1);
     renderTable();
     updateStats();
@@ -1319,13 +1319,14 @@ function renderTable() {
                  data-index="${index}"
                  data-field="bank">
         </td>
-        <td class="text-center" style="white-space: nowrap;">
-          <button class="btn btn-sm" style="margin-right: 0.25rem;" onclick="saveEmployeeChanges(${index})" title="Uložit změny">Uložit</button>
+        <td class="text-center" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.25rem; min-width: 120px;">
+          <button class="btn btn-sm" onclick="saveEmployeeChanges(${index})" title="Uložit změny">Uložit</button>
           ${emp.isNew ?
-            `<button class="btn btn-sm" style="background: var(--c-success); color: white; margin-right: 0.25rem;" onclick="saveEmployeeToDatabase(${index})" title="Uložit do databáze">DB</button>` :
-            `<button class="btn btn-sm qr-btn" style="background: var(--c-info); color: white; margin-right: 0.25rem;" onclick="generateSingleEmployeeQR(${index})" title="Generovat QR platbu">QR</button>`
+            `<button class="btn btn-sm" style="background: var(--c-success); color: white;" onclick="saveEmployeeToDatabase(${index})" title="Uložit do databáze">DB</button>` :
+            `<button class="btn btn-sm qr-btn" style="background: var(--c-info); color: white;" onclick="generateSingleEmployeeQR(${index})" title="Generovat QR platbu">QR</button>`
           }
-          ${PERMANENT_EMPLOYEE_IDS.includes(emp.id) ? '' :
+          ${PERMANENT_EMPLOYEE_IDS.includes(emp.id) ?
+            `<span></span>` :
             `<button class="btn btn-danger btn-sm" onclick="removeEmployee(${index})" title="Odebrat z období">×</button>`
           }
         </td>
@@ -1711,7 +1712,7 @@ async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
       resolve();
     } catch (err) {
       console.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
-      qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err?.message || 'Chyba QR'}</div>`;
+      qrElement.innerHTML = `<div style="color: #dc3545; padding: 20px;">${err?.message || 'Chyba QR'}</div>`;
       reject(err);
     }
   });
@@ -1805,7 +1806,7 @@ function printReport() {
 }
 
 async function clearAll() {
-  if (await wgsConfirm('Opravdu chcete vynulovat hodiny pro toto období?', 'Vynulovat', 'Zrušit')) {
+  if (await wgsConfirm('Opravdu chcete vynulovat hodiny pro toto období?', { titulek: 'Vynulovat hodiny', btnPotvrdit: 'Vynulovat', nebezpecne: true })) {
     // Pouze vynulovat hodiny a bonusy, NE mazat zaměstnance!
     employees.forEach(emp => {
       emp.hours = 0;
@@ -2291,7 +2292,7 @@ function generateSingleEmployeeQR(index) {
       });
     } catch (err) {
       console.error('QR generateCzechPaymentString failed:', err);
-      qrElement.innerHTML = `<div style="color: red; padding: 20px;">${err.message}</div>`;
+      qrElement.innerHTML = `<div style="color: #dc3545; padding: 20px;">${err.message}</div>`;
       return;
     }
 
@@ -2299,7 +2300,7 @@ function generateSingleEmployeeQR(index) {
       await renderQrCode(qrElement, qrText, 220, emp.name);
     } catch (error) {
       console.error(`QR render failed for ${emp.name}:`, error);
-      qrElement.innerHTML = `<div style="color: red; padding: 20px;">${error?.message || 'Chyba QR'}</div>`;
+      qrElement.innerHTML = `<div style="color: #dc3545; padding: 20px;">${error?.message || 'Chyba QR'}</div>`;
     }
   }, 100);
 

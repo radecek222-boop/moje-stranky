@@ -350,6 +350,77 @@ const potvrdit = await wgsConfirm('Opravdu chcete smazat tento záznam?', {
 
 ---
 
+## ✅ OFFICIAL EXCEPTION: Confirm Buttons (Green)
+
+**IMPORTANT:** Zelená barva je ČTVRTÁ schválená výjimka pro potvrzovací tlačítka.
+
+### Kdy se použije zelená (`#28a745`):
+
+| Akce | Příklad |
+|------|---------|
+| Potvrzení akce | Tlačítko "Potvrdit", "Ano" v dialogu |
+| Uložení dat | Potvrzovací tlačítko v modalu (ne mazání) |
+| Přijetí změny | Tlačítko "Přijmout", "Schválit" |
+| Kladná odpověď | Jakékoliv potvrzení které NENÍ destruktivní |
+
+### Kde se používá:
+
+| Místo | Popis |
+|-------|-------|
+| `wgsConfirm()` modal | Potvrzovací tlačítko bez `nebezpecne: true` |
+| Potvrzovací dialogy | Tlačítka pro schválení akce |
+
+### CSS specifikace:
+
+```css
+/* Zelená pro potvrzovací akce */
+--wgs-success: #28a745;
+--wgs-success-hover: #218838;
+
+/* Tlačítko v wgsConfirm */
+.wgs-confirm-btn-potvrdit {
+    background: #28a745;
+    color: #fff;
+}
+```
+
+### Použití v kódu:
+
+```javascript
+// ✅ SPRÁVNĚ - wgsConfirm bez nebezpecne = zelené tlačítko
+const potvrdit = await wgsConfirm('Opravdu chcete změnit nastavení?', {
+    titulek: 'Změnit nastavení',
+    btnPotvrdit: 'Změnit'
+    // nebezpecne NENÍ nastaveno = zelené tlačítko
+});
+
+// ✅ SPRÁVNĚ - S nebezpecne: true = červené tlačítko
+const smazat = await wgsConfirm('Opravdu smazat?', {
+    titulek: 'Smazat',
+    btnPotvrdit: 'Smazat',
+    nebezpecne: true  // Červené tlačítko
+});
+```
+
+### Proč zelená pro potvrzovací akce?
+
+1. **UX standard** - Zelená = pozitivní/bezpečná akce
+2. **Kontrast k červené** - Jasné rozlišení destruktivních vs. bezpečných akcí
+3. **Konzistence** - Jednotný styl pro všechny potvrzovací operace
+4. **Přístupnost** - Zelená je univerzálně spojována s "ano/pokračovat"
+
+**TOTO JE ČTVRTÁ SCHVÁLENÁ BAREVNÁ VÝJIMKA V PROJEKTU.**
+
+### Shrnutí barevných výjimek:
+
+| Barva | Hex kód | Použití |
+|-------|---------|---------|
+| Neonově zelená | `#39ff14` | WGS Toast notifikace, NOTIFY ME tlačítko |
+| Zelená | `#28a745` | Potvrzovací tlačítka (wgsConfirm bez nebezpecne) |
+| Červená | `#dc3545` | Destruktivní tlačítka (wgsConfirm s nebezpecne: true) |
+
+---
+
 ## 📋 PROJECT OVERVIEW
 
 **Type:** Luxury furniture service management system
