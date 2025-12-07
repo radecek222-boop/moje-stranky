@@ -2,6 +2,7 @@
  * PSA Kalkulátor - JavaScript
  * WGS Payroll Calculator
  */
+console.log('PSA Kalkulátor script loading...');
 
 // === GLOBAL VARIABLES ===
 let employees = [];
@@ -17,9 +18,14 @@ const PERMANENT_EMPLOYEE_IDS = [19, 20, 21, 22];  // Marek, Lenka, Radek, Prémi
 
 // === INITIALIZATION ===
 window.addEventListener('DOMContentLoaded', () => {
-  logger.log('PSA Kalkulátor initialized');
-  initializePeriod();
-  loadData();
+  console.log('DOMContentLoaded fired');
+  try {
+    logger.log('PSA Kalkulátor initialized');
+    initializePeriod();
+    loadData();
+  } catch (e) {
+    console.error('Init error:', e);
+  }
 });
 
 // === PERIOD MANAGEMENT ===
@@ -1317,13 +1323,13 @@ function renderTable() {
                  data-field="bank">
         </td>
         <td class="text-center" style="white-space: nowrap;">
-          <button class="btn btn-sm" style="margin-right: 0.25rem;" data-action="saveEmployeeChanges" data-index="${index}" title="Uložit změny">Uložit</button>
+          <button class="btn btn-sm" style="margin-right: 0.25rem;" onclick="saveEmployeeChanges(${index})" title="Uložit změny">Uložit</button>
           ${emp.isNew ?
-            `<button class="btn btn-sm" style="background: var(--c-success); color: white; margin-right: 0.25rem;" data-action="saveEmployeeToDatabase" data-index="${index}" title="Uložit do databáze">DB</button>` :
-            `<button class="btn btn-sm qr-btn" style="background: var(--c-info); color: white; margin-right: 0.25rem;" data-action="generateSingleEmployeeQR" data-index="${index}" title="Generovat QR platbu">QR</button>`
+            `<button class="btn btn-sm" style="background: var(--c-success); color: white; margin-right: 0.25rem;" onclick="saveEmployeeToDatabase(${index})" title="Uložit do databáze">DB</button>` :
+            `<button class="btn btn-sm qr-btn" style="background: var(--c-info); color: white; margin-right: 0.25rem;" onclick="generateSingleEmployeeQR(${index})" title="Generovat QR platbu">QR</button>`
           }
           ${PERMANENT_EMPLOYEE_IDS.includes(emp.id) ? '' :
-            `<button class="btn btn-danger btn-sm" data-action="removeEmployee" data-index="${index}" title="Odebrat z období">×</button>`
+            `<button class="btn btn-danger btn-sm" onclick="removeEmployee(${index})" title="Odebrat z období">×</button>`
           }
         </td>
       </tr>
@@ -2320,7 +2326,11 @@ window.onclick = function(event) {
 
 // === UNIVERSAL EVENT DELEGATION FOR REMOVED INLINE HANDLERS ===
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Event delegation initialized');
+  try {
+    console.log('Event delegation initialized');
+  } catch (e) {
+    console.error('Event delegation init error:', e);
+  }
 
   // Společná funkce pro zpracování data-action
   function zpracujDataAction(target) {
