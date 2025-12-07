@@ -17,6 +17,75 @@ const safeLogger = {
 
 const SESSION_EXPIRED_MESSAGE = () => t('session_expired');
 
+// ============================================================
+// UNIVERSAL CONFIRMATION MODAL
+// Nahrazuje nativní confirm() hezčím tmavým modalem
+// ============================================================
+function wgsConfirm(zprava, options = {}) {
+  return new Promise((resolve) => {
+    const {
+      titulek = 'Potvrzení',
+      btnPotvrdit = 'Potvrdit',
+      btnZrusit = 'Zrušit',
+      nebezpecne = false
+    } = options;
+
+    // Odstranit existující modal
+    const existujici = document.getElementById('wgsConfirmModal');
+    if (existujici) existujici.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'wgsConfirmModal';
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7); display: flex;
+      align-items: center; justify-content: center; z-index: 10001;
+    `;
+
+    const btnPotvrditStyle = nebezpecne
+      ? 'background: #dc3545; color: #fff;'
+      : 'background: #fff; color: #000;';
+
+    modal.innerHTML = `
+      <div style="background: #1a1a1a; padding: 25px; border-radius: 12px;
+                  max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                  border: 1px solid #333;">
+        <h3 style="margin: 0 0 15px 0; color: #fff; font-size: 1.1rem;">${titulek}</h3>
+        <p style="margin: 0 0 20px 0; color: #ccc; font-size: 0.95rem; line-height: 1.5;">${zprava}</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="wgsConfirmBtnZrusit" style="padding: 10px 20px; border: 1px solid #444;
+                  border-radius: 6px; background: transparent; color: #ccc; cursor: pointer;
+                  font-size: 0.9rem;">${btnZrusit}</button>
+          <button id="wgsConfirmBtnPotvrdit" style="padding: 10px 20px; border: none;
+                  border-radius: 6px; ${btnPotvrditStyle} cursor: pointer;
+                  font-size: 0.9rem; font-weight: 500;">${btnPotvrdit}</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const zavrit = (vysledek) => {
+      modal.remove();
+      document.removeEventListener('keydown', escHandler);
+      resolve(vysledek);
+    };
+
+    document.getElementById('wgsConfirmBtnZrusit')?.addEventListener('click', () => zavrit(false));
+    document.getElementById('wgsConfirmBtnPotvrdit')?.addEventListener('click', () => zavrit(true));
+    modal.addEventListener('click', (e) => { if (e.target === modal) zavrit(false); });
+
+    const escHandler = (e) => { if (e.key === 'Escape') zavrit(false); };
+    document.addEventListener('keydown', escHandler);
+
+    // Focus na tlačítko zrušit (bezpečnější default)
+    document.getElementById('wgsConfirmBtnZrusit')?.focus();
+  });
+}
+
+// Export pro globální použití
+window.wgsConfirm = wgsConfirm;
+
 function isUnauthorizedStatus(status) {
   return status === 401 || status === 403;
 }
@@ -350,7 +419,12 @@ async function addUser() {
 }
 
 async function deleteUser(userId) {
-  if (!confirm('Opravdu smazat tohoto uživatele?')) return;
+  const potvrdit = await wgsConfirm('Opravdu chcete smazat tohoto uživatele?', {
+    titulek: 'Smazat uživatele',
+    btnPotvrdit: 'Smazat',
+    nebezpecne: true
+  });
+  if (!potvrdit) return;
 
   try {
     const csrfToken = await getCSRFToken();
@@ -1088,10 +1162,15 @@ async function loadConfigModal() {
 /**
  * DeleteKey
  */
-function deleteKey(keyCode) {
-    if (!confirm('Opravdu chcete smazat tento klíč?')) return;
+async function deleteKey(keyCode) {
+    const potvrdit = await wgsConfirm('Opravdu chcete smazat tento klíč?', {
+        titulek: 'Smazat klíč',
+        btnPotvrdit: 'Smazat',
+        nebezpecne: true
+    });
+    if (!potvrdit) return;
 
-    const csrfToken = getCSRFToken();
+    const csrfToken = await getCSRFToken();
     if (!csrfToken) {
         alert(t('csrf_token_not_found'));
         return;
@@ -1287,9 +1366,11 @@ async function executeAction(actionId) {
         return;
     }
 
-    if (!confirm('Spustit tuto akci? Bude provedena automaticky.')) {
-        return;
-    }
+    const potvrdit = await wgsConfirm('Spustit tuto akci? Bude provedena automaticky.', {
+        titulek: 'Spustit akci',
+        btnPotvrdit: 'Spustit'
+    });
+    if (!potvrdit) return;
 
     btn.disabled = true;
     btn.textContent = 'Provádění...';
@@ -1414,9 +1495,12 @@ function dismissAction(actionId) {
  * ClearCacheAndReload
  */
 async function clearCacheAndReload() {
-    if (!confirm('Vymazat lokální cache a načíst nejnovější verzi? Stránka se znovu načte.')) {
-        return;
-    }
+    const potvrdit = await wgsConfirm('Vymazat lokální cache a načíst nejnovější verzi? Stránka se znovu načte.', {
+        titulek: 'Vymazat cache',
+        btnPotvrdit: 'Vymazat',
+        nebezpecne: true
+    });
+    if (!potvrdit) return;
 
     try {
         // Vymazat localStorage
@@ -1788,8 +1872,12 @@ async function zmenitHesloUzivatele(userId) {
       return;
     }
 
-    const confirmed = confirm('Opravdu chcete změnit heslo tohoto uživatele?');
-    if (!confirmed) return;
+    const potvrdit = await wgsConfirm('Opravdu chcete změnit heslo tohoto uživatele?', {
+        titulek: 'Změna hesla',
+        btnPotvrdit: 'Změnit heslo',
+        nebezpecne: true
+    });
+    if (!potvrdit) return;
 
     const csrfToken = await getCSRFToken();
     if (!csrfToken) {
@@ -1831,8 +1919,12 @@ async function zmenitHesloUzivatele(userId) {
 async function prepnoutStatusUzivatele(userId, newStatus) {
   try {
     const statusText = newStatus === 'active' ? 'aktivovat' : 'deaktivovat';
-    const confirmed = confirm(`Opravdu chcete ${statusText} tohoto uživatele?`);
-    if (!confirmed) return;
+    const potvrdit = await wgsConfirm(`Opravdu chcete ${statusText} tohoto uživatele?`, {
+        titulek: newStatus === 'active' ? 'Aktivovat uživatele' : 'Deaktivovat uživatele',
+        btnPotvrdit: newStatus === 'active' ? 'Aktivovat' : 'Deaktivovat',
+        nebezpecne: newStatus !== 'active'
+    });
+    if (!potvrdit) return;
 
     const csrfToken = await getCSRFToken();
     if (!csrfToken) {

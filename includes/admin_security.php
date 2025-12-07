@@ -1441,9 +1441,12 @@ async function odeslatPozvanky() {
 
 // Smazat klíč
 async function smazatKlic(kodKlice) {
-    if (!confirm('Opravdu chcete smazat klíč ' + kodKlice + '?')) {
-        return;
-    }
+    const potvrdit = await wgsConfirm('Opravdu chcete smazat klíč ' + kodKlice + '?', {
+        titulek: 'Smazat klíč',
+        btnPotvrdit: 'Smazat',
+        nebezpecne: true
+    });
+    if (!potvrdit) return;
 
     try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -1628,9 +1631,12 @@ async function resetovatUzivatelskeHeslo() {
         return;
     }
 
-    if (!confirm(`Opravdu chcete resetovat heslo pro uživatele ${userSelect.options[userSelect.selectedIndex].text}?`)) {
-        return;
-    }
+    const potvrdit = await wgsConfirm(`Opravdu chcete resetovat heslo pro uživatele ${userSelect.options[userSelect.selectedIndex].text}?`, {
+        titulek: 'Reset hesla',
+        btnPotvrdit: 'Resetovat',
+        nebezpecne: true
+    });
+    if (!potvrdit) return;
 
     statusEl.style.display = 'block';
     statusEl.innerHTML = 'Ukládám...';
