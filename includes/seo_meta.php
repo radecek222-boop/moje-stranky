@@ -133,6 +133,56 @@ $seoStranky = [
         'keywords' => 'aktuality Natuzzi, novinky nabytek, luxusni nabytek novinky, pece o kozenou sedacku, jak cistit sedacku, udrzba kozene sedacky, tipy na peci o nabytek, Natuzzi showroom, italsky nabytek aktuality, trendy sedacky, designovy nabytek novinky, kozena sedacka pece, kreslo udrzba, pohovka cisteni, White Glove Service aktuality',
         'canonical' => 'https://wgs-service.cz/aktuality.php',
         'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+    ],
+    // === NOVE SEO STRANKY PRO ORGANICKE VYHLEDAVANI ===
+    'nasesluzby' => [
+        'title' => 'Servis a opravy Natuzzi | Reklamace sedacek, montaz | White Glove Service',
+        'description' => 'Autorizovany servis sedacek Natuzzi v CR a SR. Opravy kozenych i latkovych sedacek, reklamace, montaz, calouneni, renovace. Spoluprace s prednimi ceskymi prodejci. Tel: +420 725 965 826',
+        'keywords' => 'servis Natuzzi, opravy sedacek, reklamace sedacky, montaz sedacky, calouneni, renovace sedacky, oprava kozene sedacky, oprava latkove sedacky, Natuzzi oprava, autorizovany servis',
+        'canonical' => 'https://wgs-service.cz/nasesluzby.php',
+        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+    ],
+    'onas' => [
+        'title' => 'O nas - White Glove Service | Autorizovany servis Natuzzi | Praha, Brno',
+        'description' => 'White Glove Service - autorizovany servisni partner Natuzzi s vice nez 5 letou zkusenosti. Certifikovani technici, originalni dily, garance kvality. Servis po cele CR a SR.',
+        'keywords' => 'White Glove Service, WGS, autorizovany servis Natuzzi, servis nabytku Praha, servis nabytku Brno, certifikovani technici, originalni dily Natuzzi',
+        'canonical' => 'https://wgs-service.cz/onas.php',
+        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+    ],
+    'pozarucni-servis' => [
+        'title' => 'Pozarucni servis sedacky | Mimozarucni oprava nabytku | Servis po zaruce',
+        'description' => 'Pozarucni a mimozarucni servis sedacek, kresel a pohovek. Opravime vas nabytek i po skonceni zaruky. Profesionalni oprava, puvodni kvalita, dostupne ceny. Cela CR a SR.',
+        'keywords' => 'pozarucni servis, mimozarucni servis, servis po zaruce, oprava po zaruce, pozarucni oprava sedacky, mimozarucni oprava kresla, servis nabytku po zaruce, oprava stare sedacky, renovace sedacky',
+        'canonical' => 'https://wgs-service.cz/pozarucni-servis.php',
+        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+    ],
+    'neuznana-reklamace' => [
+        'title' => 'Neuznana reklamace sedacky? | Co delat kdyz vam neuznali reklamaci | WGS',
+        'description' => 'Neuznali vam reklamaci sedacky nebo kresla? Poradime co delat dal. Nabizime nezavisle posouzeni, odborny posudek a moznost opravy za fer cenu. Nezoufejte, reseni existuje.',
+        'keywords' => 'neuznana reklamace, zamitnuta reklamace, reklamace sedacky neuznana, co delat kdyz neuznali reklamaci, odvolani reklamace, posudek sedacky, nezavisly posudek nabytku, oprava po neuznane reklamaci',
+        'canonical' => 'https://wgs-service.cz/neuznana-reklamace.php',
+        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+    ],
+    'oprava-sedacky' => [
+        'title' => 'Oprava sedacky, gauce, pohovky | Profesionalni servis sedacich souprav',
+        'description' => 'Profesionalni oprava sedacek, gaucu a pohovek vsech znacek. Opravujeme kozene i latkove sedacky, vymena mechanismu, calouneni, renovace. Svoz z cele CR. Od 205 EUR.',
+        'keywords' => 'oprava sedacky, oprava gauce, oprava pohovky, oprava sedaci soupravy, oprava kozene sedacky, oprava latkove sedacky, servis sedacky, renovace sedacky Praha, oprava mechanismu sedacky',
+        'canonical' => 'https://wgs-service.cz/oprava-sedacky.php',
+        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+    ],
+    'oprava-kresla' => [
+        'title' => 'Oprava kresla | Servis relaxacnich a klasickych kresel | WGS',
+        'description' => 'Profesionalni oprava kresel - relaxacnich, klasickych i designovych. Oprava mechanismu, vymena calouneni, renovace kuze. Specializace na Natuzzi. Svoz z cele CR.',
+        'keywords' => 'oprava kresla, oprava relaxacniho kresla, servis kresla, oprava mechanismu kresla, renovace kresla, oprava kozeneho kresla, oprava latkoveho kresla, oprava Natuzzi kresla',
+        'canonical' => 'https://wgs-service.cz/oprava-kresla.php',
+        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
+    ],
+    'servis-natuzzi' => [
+        'title' => 'Servis Natuzzi | Autorizovane opravy a reklamace Natuzzi | WGS',
+        'description' => 'Autorizovany servis Natuzzi v Ceske republice a na Slovensku. Opravy, reklamace, montaz a udrzba nabytku Natuzzi Italia, Editions a Softaly. Originalni dily, certifikovani technici.',
+        'keywords' => 'servis Natuzzi, Natuzzi servis, Natuzzi oprava, Natuzzi reklamace, autorizovany servis Natuzzi, Natuzzi Italia servis, Natuzzi Editions oprava, Natuzzi Softaly, oprava Natuzzi sedacky',
+        'canonical' => 'https://wgs-service.cz/servis-natuzzi.php',
+        'og_image' => 'https://wgs-service.cz/assets/img/og-image.png'
     ]
 ];
 
@@ -170,27 +220,23 @@ function renderSeoMeta($stranka = 'index') {
     echo "  <meta name=\"twitter:description\" content=\"{$seo['description']}\">\n";
     echo "  <meta name=\"twitter:image\" content=\"{$seo['og_image']}\">\n";
 
-    // Hreflang pro vicejazycnost (cesky, anglicky, italsky)
-    $pageFile = basename($seo['canonical']);
-    if (empty($pageFile) || $pageFile === 'wgs-service.cz') {
-        $pageFile = '';
-    }
-    echo "\n  <!-- Hreflang - vicejazycna podpora -->\n";
-    echo "  <link rel=\"alternate\" hreflang=\"cs\" href=\"https://wgs-service.cz/{$pageFile}\">\n";
-    echo "  <link rel=\"alternate\" hreflang=\"en\" href=\"https://wgs-service.cz/{$pageFile}?lang=en\">\n";
-    echo "  <link rel=\"alternate\" hreflang=\"it\" href=\"https://wgs-service.cz/{$pageFile}?lang=it\">\n";
-    echo "  <link rel=\"alternate\" hreflang=\"x-default\" href=\"https://wgs-service.cz/{$pageFile}\">\n";
+    // POZNAMKA: Hreflang tagy docasne deaktivovany
+    // Web pouziva klientsky JavaScript pro prepinani jazyku (data-lang-* atributy),
+    // ne serverove generovane jazykove verze. Hreflang s ?lang= parametry by zpusobil
+    // problemy s duplicitnim obsahem (Google by videl cesky obsah na vsech URL).
+    // Aktivovat az pri implementaci skutecnych jazykovych verzi (/en/, /it/).
 
     // Seznam.cz specificke tagy
     echo "\n  <!-- Seznam.cz -->\n";
     echo "  <meta name=\"seznam-wmt\" content=\"wgs-service-verified\">\n";
 
     // Geo lokace pro lokalni vyhledavani
+    // Souradnice pro Do Dubce 364, Praha-Bechovice (vychodni Praha)
     echo "\n  <!-- Geo lokace -->\n";
     echo "  <meta name=\"geo.region\" content=\"CZ\">\n";
-    echo "  <meta name=\"geo.placename\" content=\"Praha, Ceska republika\">\n";
-    echo "  <meta name=\"geo.position\" content=\"50.0755;14.5756\">\n";
-    echo "  <meta name=\"ICBM\" content=\"50.0755, 14.5756\">\n";
+    echo "  <meta name=\"geo.placename\" content=\"Praha-Bechovice, Ceska republika\">\n";
+    echo "  <meta name=\"geo.position\" content=\"50.0839;14.5991\">\n";
+    echo "  <meta name=\"ICBM\" content=\"50.0839, 14.5991\">\n";
 
     // Doplnkove meta tagy pro prohlizece
     echo "\n  <!-- Prohlizece a kompatibilita -->\n";
@@ -231,8 +277,8 @@ function renderSchemaOrg($stranka = 'index') {
         ],
         "geo" => [
             "@type" => "GeoCoordinates",
-            "latitude" => "50.0755",
-            "longitude" => "14.5756"
+            "latitude" => "50.0839",
+            "longitude" => "14.5991"
         ],
         "areaServed" => [
             [
@@ -551,6 +597,105 @@ function renderFaqSchema($stranka = 'index') {
             [
                 'otazka' => 'Jake jsou trendy v designu sedacek?',
                 'odpoved' => 'Aktualni trendy zahrnuji modularni sedacky, minimalisticky design, prirodni materialy a neutralni barvy. Natuzzi nabizi kolekce kombinujici italsky design s modernimi trendy.'
+            ]
+        ],
+        // === FAQ PRO NOVE SEO LANDING PAGES ===
+        'pozarucni-servis' => [
+            [
+                'otazka' => 'Co je pozarucni servis nabytku?',
+                'odpoved' => 'Pozarucni servis je oprava nabytku po skonceni zaruky. Opravujeme sedacky, kresla a pohovky vsech znacek vcetne Natuzzi i po letech pouzivani. Pouzivame originalni dily a profesionalni techniky.'
+            ],
+            [
+                'otazka' => 'Kolik stoji pozarucni oprava sedacky?',
+                'odpoved' => 'Cena pozarucni opravy zacina od 205 EUR za praci. Konecna cena zavisi na typu poskozeni a potrebnych dilech. Diagnostika stoji 110 EUR a pripoctete se k cene opravy.'
+            ],
+            [
+                'otazka' => 'Opravujete nabytek po zaruce od vsech vyrobcu?',
+                'odpoved' => 'Ano, poskytujeme pozarucni servis pro vsechny znacky nabytku. Specializujeme se na Natuzzi, ale opravujeme i sedacky jinych vyrobcu - kozene, latkove i kombinovane.'
+            ],
+            [
+                'otazka' => 'Jak dlouho trva pozarucni oprava?',
+                'odpoved' => 'Bezna pozarucni oprava trva 2-4 tydny. Slozitejsi zasahy jako kompletni precalouneni mohou trvat 4-6 tydnu. Termin zavisi i na dostupnosti nahradnich dilu.'
+            ]
+        ],
+        'neuznana-reklamace' => [
+            [
+                'otazka' => 'Co delat kdyz mi neuznali reklamaci sedacky?',
+                'odpoved' => 'Pokud vam byla reklamace zamitnuta, mate vice moznosti: 1) Pozadat o prezkum ci nezavisle posouzeni, 2) Obratit se na Ceskou obchodni inspekci, 3) Nechat si nabytek opravit u nas za fer cenu. Poradime vam s dalsim postupem.'
+            ],
+            [
+                'otazka' => 'Muzete posoudit oprávnenost zamitnuté reklamace?',
+                'odpoved' => 'Ano, nabizime odborne posouzeni stavu nabytku. Na zaklade prohlídky vam sdelíme, zda bylo zamitnutí reklamace opravnene a jake mate moznosti. Posouzení stoji 110 EUR.'
+            ],
+            [
+                'otazka' => 'Kolik stoji oprava po neuznane reklamaci?',
+                'odpoved' => 'Ceny oprav zacinaji od 205 EUR za praci. Nabizime fer ceny a kvalitni provedení. Pred opravou vzdy obdrzite presnou kalkulaci, aby vás cena nepřekvapila.'
+            ],
+            [
+                'otazka' => 'Jak postupovat pri odvolani proti zamitnute reklamaci?',
+                'odpoved' => 'Doporucujeme: 1) Zdokumentovat stav nabytku fotografiemi, 2) Piscemne pozadat prodejce o prezkum, 3) Pripadne se obratit na COI nebo soudniho znalce. Muzeme vam pripravit odborny posudek.'
+            ]
+        ],
+        'oprava-sedacky' => [
+            [
+                'otazka' => 'Kolik stoji oprava sedacky nebo pohovky?',
+                'odpoved' => 'Oprava sedacky zacina od 205 EUR za jeden dil (sedak, operka, podrucka). Kazdy dalsi dil stoji 70 EUR. Celkova cena zavisi na poctu dilu a typu opravy. Nabizime online kalkulacku.'
+            ],
+            [
+                'otazka' => 'Opravujete latkove i kozene sedacky?',
+                'odpoved' => 'Ano, opravujeme vsechny typy sedacek - kozene, latkove, semisove i kombinovane. Pracujeme s originálními materiály od vyrobce i kvalitnymi alternativami.'
+            ],
+            [
+                'otazka' => 'Jak probiha oprava sedacky?',
+                'odpoved' => 'Proces opravy: 1) Objednate servis online nebo telefonicky, 2) Domluvime termin svozu, 3) Sedacku prevezeme do dilny, 4) Provedeme opravu, 5) Vracime opravenou sedacku. Celý proces trva 2-4 tydny.'
+            ],
+            [
+                'otazka' => 'Svazite sedacku k oprave i z jineho mesta?',
+                'odpoved' => 'Ano, zajistujeme svoz sedacek z cele Ceske republiky a Slovenska. Dopravne se pocita podle vzdalenosti od nasi dilny v Praze - pouzijte nasi kalkulacku pro presny vypocet.'
+            ],
+            [
+                'otazka' => 'Opravujete i mechanismy sedacky (relax, vysuv)?',
+                'odpoved' => 'Ano, opravujeme vsechny typy mechanismu - manualni relax, elektricke polohovani, vysuvne podnozky i naklápeci operadla. Cena opravy mechanismu zacina od 45 EUR plus dily.'
+            ]
+        ],
+        'oprava-kresla' => [
+            [
+                'otazka' => 'Kolik stoji oprava kresla?',
+                'odpoved' => 'Oprava kresla zacina od 165 EUR za mechanicke opravy bez calouneni. Kompletni oprava vcetne calouneni stoji od 205 EUR. Presnou cenu urcime po diagnostice.'
+            ],
+            [
+                'otazka' => 'Opravujete relaxacni kresla s elektrickym pohonem?',
+                'odpoved' => 'Ano, specializujeme se na opravy relaxacnich kresel vcetne elektrickych. Opravujeme motory, ovladace, transformatory i mechanicke casti. Pouzivame originalni i alternativní nahradni dily.'
+            ],
+            [
+                'otazka' => 'Muzete opravit prasklou kuzi na kresle?',
+                'odpoved' => 'Ano, opravujeme prasklou, odrenou i jinou poskozenou kuzi na kreslech. Podle rozsahu poskozeni provedeme lokalní opravu nebo kompletni precalouneni. Pouzivame kvalitni materialy.'
+            ],
+            [
+                'otazka' => 'Jak dlouho trva oprava kresla?',
+                'odpoved' => 'Bezna oprava kresla trva 1-3 tydny podle slozitosti. Opravy mechanismu jsou rychlejsi (1-2 tydny), precalouneni trva dele (3-4 tydny). Pri objednávce vas informujeme o predpokladanem terminu.'
+            ]
+        ],
+        'servis-natuzzi' => [
+            [
+                'otazka' => 'Jste autorizovany servis Natuzzi?',
+                'odpoved' => 'Ano, jsme autorizovany servisni partner znacky Natuzzi pro Ceskou republiku a Slovensko. Pouzivame originalni dily a postupy schvalene vyrobcem.'
+            ],
+            [
+                'otazka' => 'Opravujete vsechny rady Natuzzi?',
+                'odpoved' => 'Ano, opravujeme nabytek vsech rad - Natuzzi Italia, Natuzzi Editions i Natuzzi Softaly. Mame zkusenosti se vsemi typy sedacek, kresel a doplnku.'
+            ],
+            [
+                'otazka' => 'Jak vyridit reklamaci Natuzzi?',
+                'odpoved' => 'Reklamaci Natuzzi podejte pres nas online formular. Jako autorizovany servis vyrizujeme reklamace primo s vyrobcem. Potrebujete doklad o koupi a fotografie problemu.'
+            ],
+            [
+                'otazka' => 'Kde sehnat nahradni dily Natuzzi?',
+                'odpoved' => 'Originalni nahradni dily Natuzzi objednavame primo od vyrobce z Italie. Dodaci lhuta je obvykle 2-4 tydny. Jako autorizovany servis mame pristup ke kompletnimu sortimentu dilu.'
+            ],
+            [
+                'otazka' => 'Poskytujete zaruku na opravy Natuzzi?',
+                'odpoved' => 'Ano, na vsechny opravy poskytujeme zaruku 12 mesicu. Zaruka se vztahuje na provedenou praci i pouzite originalni dily.'
             ]
         ]
     ];
