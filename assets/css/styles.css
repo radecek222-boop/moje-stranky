@@ -118,8 +118,9 @@ html {
   border: 0;
 }
 
-/* wgsConfirm - vlastní potvrzovací dialog */
-/* OPRAVA: z-index musí být vyšší než detail overlay (10002) */
+/* wgsConfirm - vlastní potvrzovací dialog (tmavé téma) */
+/* Styly jsou definovány inline v utils.js pro garantovanou konzistenci */
+/* Toto CSS slouží pouze jako fallback a pro hover/focus efekty */
 .wgs-confirm-overlay {
   position: fixed;
   top: 0;
@@ -134,58 +135,63 @@ html {
   padding: 20px;
 }
 .wgs-confirm-dialog {
-  background: #fff;
+  background: #1a1a1a;
   border-radius: 12px;
-  padding: 24px;
+  padding: 25px;
   max-width: 400px;
-  width: 100%;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid #333;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
 }
 .wgs-confirm-message {
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.5;
-  color: #222;
+  color: #ccc;
   margin: 0 0 20px 0;
   text-align: center;
 }
 .wgs-confirm-buttons {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: center;
 }
 .wgs-confirm-btn {
-  padding: 10px 24px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border: none;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
   border-radius: 6px;
   cursor: pointer;
-  min-width: 100px;
-  transition: background 0.2s, transform 0.1s;
+  min-width: 80px;
+  transition: opacity 0.2s, transform 0.1s;
+  font-family: 'Poppins', sans-serif;
 }
 .wgs-confirm-btn:hover {
+  opacity: 0.9;
   transform: translateY(-1px);
 }
 .wgs-confirm-btn:active {
   transform: translateY(0);
 }
 .wgs-confirm-btn:focus {
-  outline: 3px solid #666;
-  outline-offset: 2px;
+  outline: none;
 }
 .wgs-confirm-cancel {
-  background: #e0e0e0;
-  color: #333;
+  background: transparent;
+  color: #ccc;
+  border: 1px solid #444;
 }
 .wgs-confirm-cancel:hover {
-  background: #d0d0d0;
+  background: rgba(255, 255, 255, 0.05);
 }
 .wgs-confirm-ok {
-  background: #333;
+  background: #28a745;
   color: #fff;
+  border: none;
 }
 .wgs-confirm-ok:hover {
-  background: #444;
+  background: #218838;
 }
 
 /* wgsToast - toast notifikační systém */

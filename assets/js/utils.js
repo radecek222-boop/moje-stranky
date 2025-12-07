@@ -428,10 +428,10 @@ function wgsConfirm(zprava, optionsOrOkText = {}, cancelTextLegacy) {
             align-items: center; justify-content: center; z-index: 10001;
         `;
 
-        // Styl tlačítka potvrzení
+        // Styl tlačítka potvrzení: zelená pro potvrzení, červená pro destruktivní akce
         const btnPotvrditStyle = nebezpecne
-            ? 'background: #dc3545; color: #fff;'
-            : 'background: #fff; color: #000;';
+            ? 'background: #dc3545; color: #fff;'  // Červená pro mazání/odebírání
+            : 'background: #28a745; color: #fff;'; // Zelená pro potvrzení
 
         // Vytvořit dialog HTML
         modal.innerHTML = `
@@ -443,10 +443,10 @@ function wgsConfirm(zprava, optionsOrOkText = {}, cancelTextLegacy) {
                 <div class="wgs-confirm-buttons" style="display: flex; gap: 10px; justify-content: center;">
                     <button type="button" id="wgsConfirmBtnZrusit" class="wgs-confirm-btn wgs-confirm-cancel"
                             style="padding: 10px 20px; border: 1px solid #444; border-radius: 6px;
-                                   background: transparent; color: #ccc; cursor: pointer; font-size: 0.9rem;">${escapeHtml(btnZrusit)}</button>
+                                   background: transparent; color: #ccc; cursor: pointer; font-size: 0.9rem; outline: none;">${escapeHtml(btnZrusit)}</button>
                     <button type="button" id="wgsConfirmBtnPotvrdit" class="wgs-confirm-btn wgs-confirm-ok"
                             style="padding: 10px 20px; border: none; border-radius: 6px; ${btnPotvrditStyle}
-                                   cursor: pointer; font-size: 0.9rem; font-weight: 500;">${escapeHtml(btnPotvrdit)}</button>
+                                   cursor: pointer; font-size: 0.9rem; font-weight: 500; outline: none;">${escapeHtml(btnPotvrdit)}</button>
                 </div>
             </div>
         `;
