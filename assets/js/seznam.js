@@ -3135,24 +3135,24 @@ function showDeleteConfirmModal(reklamaceNumber) {
     modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10003;display:flex;align-items:center;justify-content:center;';
 
     const modalContent = document.createElement('div');
-    modalContent.style.cssText = 'background:white;padding:30px;border-radius:8px;max-width:450px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+    modalContent.style.cssText = 'background:#1a1a1a;padding:25px;border-radius:12px;max-width:400px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);border:1px solid #333;';
 
     modalContent.innerHTML = `
-      <h2 style="margin:0 0 20px 0;color:#666;font-size:1.3rem;font-weight:700;">Smazat reklamaci?</h2>
-      <p style="margin:0 0 15px 0;color:#555;line-height:1.6;font-size:1rem;">
-        Opravdu chcete <strong>TRVALE SMAZAT</strong> reklamaci<br>
-        <strong style="color:#666;font-size:1.1rem;">${reklamaceNumber}</strong>?
+      <h3 style="margin:0 0 15px 0;color:#fff;font-size:1.1rem;font-weight:600;">Smazat reklamaci?</h3>
+      <p style="margin:0 0 15px 0;color:#ccc;line-height:1.5;font-size:0.95rem;">
+        Opravdu chcete <strong style="color:#fff;">TRVALE SMAZAT</strong> reklamaci<br>
+        <strong style="color:#fff;font-size:1rem;">${reklamaceNumber}</strong>?
       </p>
-      <p style="margin:0 0 25px 0;color:#666;font-size:0.9rem;font-weight:600;">
+      <p style="margin:0 0 20px 0;color:#999;font-size:0.85rem;">
         Tato akce smaže VŠE včetně fotek a PDF!<br>
         Tuto akci NELZE vrátit zpět!
       </p>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <button id="deleteConfirmYes" style="padding:14px 28px;background:#666;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700;">
-          Ano, pokračovat →
-        </button>
-        <button id="deleteConfirmNo" style="padding:14px 28px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:600;">
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="deleteConfirmNo" style="padding:10px 20px;background:transparent;color:#ccc;border:1px solid #444;border-radius:6px;cursor:pointer;font-size:0.9rem;">
           Zrušit
+        </button>
+        <button id="deleteConfirmYes" style="padding:10px 20px;background:#dc3545;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;font-weight:500;">
+          Smazat
         </button>
       </div>
     `;
@@ -3178,25 +3178,25 @@ function showDeleteInputModal(reklamaceNumber) {
     modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10003;display:flex;align-items:center;justify-content:center;';
 
     const modalContent = document.createElement('div');
-    modalContent.style.cssText = 'background:white;padding:30px;border-radius:8px;max-width:450px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+    modalContent.style.cssText = 'background:#1a1a1a;padding:25px;border-radius:12px;max-width:400px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);border:1px solid #333;';
 
     modalContent.innerHTML = `
-      <h2 style="margin:0 0 20px 0;color:#666;font-size:1.3rem;font-weight:700;">Poslední ověření</h2>
-      <p style="margin:0 0 15px 0;color:#555;line-height:1.6;font-size:1rem;">
+      <h3 style="margin:0 0 15px 0;color:#fff;font-size:1.1rem;font-weight:600;">Poslední ověření</h3>
+      <p style="margin:0 0 15px 0;color:#ccc;line-height:1.5;font-size:0.95rem;">
         Pro potvrzení smazání zadejte přesně číslo reklamace:
       </p>
-      <p style="margin:0 0 15px 0;color:#666;font-size:1.2rem;font-weight:700;">
+      <p style="margin:0 0 15px 0;color:#fff;font-size:1rem;font-weight:600;">
         ${reklamaceNumber}
       </p>
       <input type="text" id="deleteInputField"
              placeholder="Zadejte číslo reklamace"
-             style="width:100%;padding:12px;border:2px solid #666;border-radius:6px;font-size:1rem;text-align:center;margin-bottom:20px;">
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <button id="deleteInputConfirm" style="padding:14px 28px;background:#666;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700;">
-          SMAZAT NAVŽDY
-        </button>
-        <button id="deleteInputCancel" style="padding:14px 28px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:600;">
+             style="width:100%;padding:10px;background:#252525;border:1px solid #444;border-radius:6px;font-size:0.9rem;text-align:center;margin-bottom:20px;color:#fff;box-sizing:border-box;">
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="deleteInputCancel" style="padding:10px 20px;background:transparent;color:#ccc;border:1px solid #444;border-radius:6px;cursor:pointer;font-size:0.9rem;">
           Zrušit
+        </button>
+        <button id="deleteInputConfirm" style="padding:10px 20px;background:#dc3545;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;font-weight:500;">
+          Smazat
         </button>
       </div>
     `;
@@ -3251,10 +3251,10 @@ async function deleteReklamace(reklamaceId) {
     const errorModal = document.createElement('div');
     errorModal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10003;display:flex;align-items:center;justify-content:center;';
     errorModal.innerHTML = `
-      <div style="background:white;padding:30px;border-radius:8px;max-width:400px;width:90%;text-align:center;">
-        <h2 style="margin:0 0 20px 0;color:#666;">Nesprávné číslo!</h2>
-        <p style="margin:0 0 25px 0;color:#555;">Zadali jste nesprávné číslo reklamace.<br>Mazání bylo zrušeno.</p>
-        <button data-action="closeErrorModal" style="padding:12px 24px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;">
+      <div style="background:#1a1a1a;padding:25px;border-radius:12px;max-width:400px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);border:1px solid #333;">
+        <h3 style="margin:0 0 15px 0;color:#fff;font-size:1.1rem;font-weight:600;">Nesprávné číslo!</h3>
+        <p style="margin:0 0 20px 0;color:#ccc;font-size:0.95rem;line-height:1.5;">Zadali jste nesprávné číslo reklamace.<br>Mazání bylo zrušeno.</p>
+        <button data-action="closeErrorModal" style="padding:10px 20px;background:#fff;color:#000;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;font-weight:500;">
           OK
         </button>
       </div>
@@ -3311,20 +3311,20 @@ async function smazatFotku(photoId, photoUrl) {
     modalDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10003;display:flex;align-items:center;justify-content:center;';
 
     const modalContent = document.createElement('div');
-    modalContent.style.cssText = 'background:white;padding:30px;border-radius:8px;max-width:400px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+    modalContent.style.cssText = 'background:#1a1a1a;padding:25px;border-radius:12px;max-width:400px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);border:1px solid #333;';
 
     modalContent.innerHTML = `
-      <h2 style="margin:0 0 20px 0;color:#333;font-size:1.2rem;font-weight:700;">Smazat fotku?</h2>
-      <p style="margin:0 0 25px 0;color:#555;line-height:1.6;font-size:1rem;">
-        Opravdu chcete smazat tuto fotografii?<br><br>
-        <strong>Tato akce je nevratná!</strong>
+      <h3 style="margin:0 0 15px 0;color:#fff;font-size:1.1rem;font-weight:600;">Smazat fotku?</h3>
+      <p style="margin:0 0 20px 0;color:#ccc;line-height:1.5;font-size:0.95rem;">
+        Opravdu chcete smazat tuto fotografii?<br>
+        <strong style="color:#999;">Tato akce je nevratná!</strong>
       </p>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <button id="deleteFotoYes" style="padding:14px 28px;background:#666;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:700;">
-          Ano, smazat
-        </button>
-        <button id="deleteFotoNo" style="padding:14px 28px;background:#999;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:600;">
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="deleteFotoNo" style="padding:10px 20px;background:transparent;color:#ccc;border:1px solid #444;border-radius:6px;cursor:pointer;font-size:0.9rem;">
           Zrušit
+        </button>
+        <button id="deleteFotoYes" style="padding:10px 20px;background:#dc3545;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;font-weight:500;">
+          Smazat
         </button>
       </div>
     `;
