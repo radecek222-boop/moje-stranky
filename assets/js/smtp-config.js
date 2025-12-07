@@ -7,8 +7,6 @@ let smtpConfigData = {};
 
 // Helper pro zobrazení notifikací
 function showNotification(type, message) {
-    console.log(`[${type.toUpperCase()}] ${message}`);
-
     // Vytvořit toast notifikaci
     const toast = document.createElement('div');
     toast.style.cssText = `

@@ -1002,11 +1002,8 @@ async function saveEmployeeToDatabase(index) {
 
 // Uložit změny jednotlivého zaměstnance (např. číslo účtu)
 async function saveEmployeeChanges(index) {
-  console.log('saveEmployeeChanges called with index:', index);
-
   // Najít všechny inputy s daným indexem
   const inputs = document.querySelectorAll(`[data-action="updateEmployeeField"][data-index="${index}"]`);
-  console.log('Found inputs:', inputs.length);
 
   if (inputs.length > 0 && employees[index]) {
     inputs.forEach(input => {
@@ -1662,8 +1659,6 @@ function buildSpaydPayload(data) {
   // Minimalni SPAYD - pouze ucet, castka, mena
   const spayd = `SPD*1.0*ACC:${iban}*AM:${amount.toFixed(2)}*CC:CZK`;
 
-  console.log('SPAYD delka:', spayd.length, 'text:', spayd);
-
   return spayd;
 }
 
@@ -1707,7 +1702,6 @@ async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
         correctLevel: QRCode.CorrectLevel.L  // Nizsi uroven korekce = vice dat
       });
 
-      console.log(`QR code generated${contextLabel ? ' for ' + contextLabel : ''} (${qrText.length} chars)`);
       resolve();
     } catch (err) {
       console.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
@@ -2149,8 +2143,6 @@ function closeQRModal() {
 
 // === SINGLE EMPLOYEE QR GENERATION ===
 function generateSingleEmployeeQR(index) {
-  console.log('generateSingleEmployeeQR called with index:', index);
-
   // Synchronizovat vstupy před generováním QR
   synchronizovatVstupy();
 
@@ -2297,8 +2289,6 @@ function generateSingleEmployeeQR(index) {
       return;
     }
 
-    console.log(`Generating QR for ${emp.name}:`, qrText);
-
     try {
       await renderQrCode(qrElement, qrText, 220, emp.name);
     } catch (error) {
@@ -2320,11 +2310,8 @@ window.onclick = function(event) {
 
 // === UNIVERSAL EVENT DELEGATION FOR REMOVED INLINE HANDLERS ===
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Event delegation initialized');
-
   // Společná funkce pro zpracování data-action
   function zpracujDataAction(target) {
-    console.log('zpracujDataAction called with action:', target.getAttribute('data-action'));
     const action = target.getAttribute('data-action');
 
     // Special cases
@@ -2364,9 +2351,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       case 'saveEmployeeChanges': {
-        console.log('saveEmployeeChanges action triggered');
         const scIndex = parseInt(target.getAttribute('data-index'), 10);
-        console.log('scIndex:', scIndex);
         if (!isNaN(scIndex) && typeof saveEmployeeChanges === 'function') {
           saveEmployeeChanges(scIndex);
         }
@@ -2531,9 +2516,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // DŮLEŽITÉ: Vyloučit INPUT pole - ty se zpracují pouze při change eventu
   document.addEventListener('click', (e) => {
     const target = e.target.closest('[data-action]');
-    if (target) {
-      console.log('Click on data-action element:', target.tagName, target.getAttribute('data-action'));
-    }
     if (!target) return;
 
     // Přeskočit INPUT a TEXTAREA - tyto elementy se zpracují pouze při change
