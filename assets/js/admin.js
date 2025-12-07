@@ -17,6 +17,75 @@ const safeLogger = {
 
 const SESSION_EXPIRED_MESSAGE = () => t('session_expired');
 
+// ============================================================
+// UNIVERSAL CONFIRMATION MODAL
+// Nahrazuje nativní confirm() hezčím tmavým modalem
+// ============================================================
+function wgsConfirm(zprava, options = {}) {
+  return new Promise((resolve) => {
+    const {
+      titulek = 'Potvrzení',
+      btnPotvrdit = 'Potvrdit',
+      btnZrusit = 'Zrušit',
+      nebezpecne = false
+    } = options;
+
+    // Odstranit existující modal
+    const existujici = document.getElementById('wgsConfirmModal');
+    if (existujici) existujici.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'wgsConfirmModal';
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7); display: flex;
+      align-items: center; justify-content: center; z-index: 10001;
+    `;
+
+    const btnPotvrditStyle = nebezpecne
+      ? 'background: #dc3545; color: #fff;'
+      : 'background: #fff; color: #000;';
+
+    modal.innerHTML = `
+      <div style="background: #1a1a1a; padding: 25px; border-radius: 12px;
+                  max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                  border: 1px solid #333;">
+        <h3 style="margin: 0 0 15px 0; color: #fff; font-size: 1.1rem;">${titulek}</h3>
+        <p style="margin: 0 0 20px 0; color: #ccc; font-size: 0.95rem; line-height: 1.5;">${zprava}</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="wgsConfirmBtnZrusit" style="padding: 10px 20px; border: 1px solid #444;
+                  border-radius: 6px; background: transparent; color: #ccc; cursor: pointer;
+                  font-size: 0.9rem;">${btnZrusit}</button>
+          <button id="wgsConfirmBtnPotvrdit" style="padding: 10px 20px; border: none;
+                  border-radius: 6px; ${btnPotvrditStyle} cursor: pointer;
+                  font-size: 0.9rem; font-weight: 500;">${btnPotvrdit}</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const zavrit = (vysledek) => {
+      modal.remove();
+      document.removeEventListener('keydown', escHandler);
+      resolve(vysledek);
+    };
+
+    document.getElementById('wgsConfirmBtnZrusit')?.addEventListener('click', () => zavrit(false));
+    document.getElementById('wgsConfirmBtnPotvrdit')?.addEventListener('click', () => zavrit(true));
+    modal.addEventListener('click', (e) => { if (e.target === modal) zavrit(false); });
+
+    const escHandler = (e) => { if (e.key === 'Escape') zavrit(false); };
+    document.addEventListener('keydown', escHandler);
+
+    // Focus na tlačítko zrušit (bezpečnější default)
+    document.getElementById('wgsConfirmBtnZrusit')?.focus();
+  });
+}
+
+// Export pro globální použití
+window.wgsConfirm = wgsConfirm;
+
 function isUnauthorizedStatus(status) {
   return status === 401 || status === 403;
 }
@@ -181,7 +250,7 @@ async function loadUsers() {
         html += '<td><span class="badge ' + statusClass + '">' + statusText.toUpperCase() + '</span></td>';
         html += '<td>' + createdDate + '</td>';
         html += '<td data-action="stopPropagation">';
-        html += '<button class="btn btn-sm btn-danger" data-action="deleteUser" data-id="' + user.id + '">Smazat</button>';
+        html += '<button class="cc-btn cc-btn-sm cc-btn-danger" data-action="deleteUser" data-id="' + user.id + '">Smazat</button>';
         html += '</td>';
         html += '</tr>';
       });
@@ -350,7 +419,12 @@ async function addUser() {
 }
 
 async function deleteUser(userId) {
-  if (!confirm('Opravdu smazat tohoto uživatele?')) return;
+  const potvrdit = await wgsConfirm('Opravdu chcete smazat tohoto uživatele?', {
+    titulek: 'Smazat uživatele',
+    btnPotvrdit: 'Smazat',
+    nebezpecne: true
+  });
+  if (!potvrdit) return;
 
   try {
     const csrfToken = await getCSRFToken();
@@ -1088,10 +1162,15 @@ async function loadConfigModal() {
 /**
  * DeleteKey
  */
-function deleteKey(keyCode) {
-    if (!confirm('Opravdu chcete smazat tento klíč?')) return;
+async function deleteKey(keyCode) {
+    const potvrdit = await wgsConfirm('Opravdu chcete smazat tento klíč?', {
+        titulek: 'Smazat klíč',
+        btnPotvrdit: 'Smazat',
+        nebezpecne: true
+    });
+    if (!potvrdit) return;
 
-    const csrfToken = getCSRFToken();
+    const csrfToken = await getCSRFToken();
     if (!csrfToken) {
         alert(t('csrf_token_not_found'));
         return;
@@ -1287,9 +1366,11 @@ async function executeAction(actionId) {
         return;
     }
 
-    if (!confirm('Spustit tuto akci? Bude provedena automaticky.')) {
-        return;
-    }
+    const potvrdit = await wgsConfirm('Spustit tuto akci? Bude provedena automaticky.', {
+        titulek: 'Spustit akci',
+        btnPotvrdit: 'Spustit'
+    });
+    if (!potvrdit) return;
 
     btn.disabled = true;
     btn.textContent = 'Provádění...';
@@ -1414,9 +1495,12 @@ function dismissAction(actionId) {
  * ClearCacheAndReload
  */
 async function clearCacheAndReload() {
-    if (!confirm('Vymazat lokální cache a načíst nejnovější verzi? Stránka se znovu načte.')) {
-        return;
-    }
+    const potvrdit = await wgsConfirm('Vymazat lokální cache a načíst nejnovější verzi? Stránka se znovu načte.', {
+        titulek: 'Vymazat cache',
+        btnPotvrdit: 'Vymazat',
+        nebezpecne: true
+    });
+    if (!potvrdit) return;
 
     try {
         // Vymazat localStorage
@@ -1584,105 +1668,105 @@ async function zobrazDetailUzivatele(userId) {
     // Vytvoření modalu s detailem
     const modalHTML = `
       <div class="user-detail-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; display: flex; align-items: center; justify-content: center;">
-        <div style="background: white; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <div style="background: #1a1a1a; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid #333;">
           <!-- Header -->
-          <div style="background: #333333; color: white; padding: 1.5rem; border-radius: 12px 12px 0 0; position: relative;">
-            <h2 style="margin: 0; font-size: 1.3rem; font-weight: 600;">Detail uživatele #${user.id}</h2>
-            <button data-action="zavritDetailUzivatele" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; line-height: 1; padding: 0; width: 32px; height: 32px;">&times;</button>
+          <div style="background: #333; color: #fff; padding: 1.5rem; border-radius: 12px 12px 0 0; position: relative; border-bottom: 1px solid #444;">
+            <h2 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #fff;">Detail uživatele #${user.id}</h2>
+            <button data-action="zavritDetailUzivatele" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #ccc; font-size: 2rem; cursor: pointer; line-height: 1; padding: 0; width: 32px; height: 32px;">&times;</button>
           </div>
 
           <!-- Body -->
           <div style="padding: 2rem;">
             <!-- Základní informace -->
             <div style="margin-bottom: 2rem;">
-              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #333333; border-bottom: 2px solid #333333; padding-bottom: 0.5rem;">Základní údaje</h3>
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #fff; border-bottom: 1px solid #444; padding-bottom: 0.5rem;">Základní údaje</h3>
 
               <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Jméno a příjmení</label>
-                <input type="text" id="edit-user-name" value="${escapeHtml(user.name)}" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: #aaa;">Jméno a příjmení</label>
+                <input type="text" id="edit-user-name" value="${escapeHtml(user.name)}" style="width: 100%; padding: 0.6rem; border: 1px solid #444; border-radius: 6px; font-size: 1rem; background: #222; color: #fff;">
               </div>
 
               <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Email</label>
-                <input type="email" id="edit-user-email" value="${escapeHtml(user.email)}" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: #aaa;">Email</label>
+                <input type="email" id="edit-user-email" value="${escapeHtml(user.email)}" style="width: 100%; padding: 0.6rem; border: 1px solid #444; border-radius: 6px; font-size: 1rem; background: #222; color: #fff;">
               </div>
 
               <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Telefon</label>
-                <input type="tel" id="edit-user-phone" value="${escapeHtml(user.phone || '')}" placeholder="+420123456789" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: #aaa;">Telefon</label>
+                <input type="tel" id="edit-user-phone" value="${escapeHtml(user.phone || '')}" placeholder="+420123456789" style="width: 100%; padding: 0.6rem; border: 1px solid #444; border-radius: 6px; font-size: 1rem; background: #222; color: #fff;">
               </div>
 
               <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Adresa</label>
-                <input type="text" id="edit-user-address" value="${escapeHtml(user.address || '')}" placeholder="Ulice 123, Město" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: #aaa;">Adresa</label>
+                <input type="text" id="edit-user-address" value="${escapeHtml(user.address || '')}" placeholder="Ulice 123, Město" style="width: 100%; padding: 0.6rem; border: 1px solid #444; border-radius: 6px; font-size: 1rem; background: #222; color: #fff;">
               </div>
 
               <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Role</label>
-                <select id="edit-user-role" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: #aaa;">Role</label>
+                <select id="edit-user-role" style="width: 100%; padding: 0.6rem; border: 1px solid #444; border-radius: 6px; font-size: 1rem; background: #222; color: #fff;">
                   <option value="prodejce" ${user.role === 'prodejce' ? 'selected' : ''}>Prodejce</option>
                   <option value="technik" ${user.role === 'technik' ? 'selected' : ''}>Technik</option>
                   <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Administrátor</option>
                 </select>
               </div>
 
-              <button data-action="ulozitZmenyUzivatele" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #333333; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
-                [Save] Uložit změny
+              <button data-action="ulozitZmenyUzivatele" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #333; color: #fff; border: 1px solid #444; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+                Uložit změny
               </button>
             </div>
 
             <!-- Změna hesla -->
-            <div style="margin-bottom: 2rem; padding: 1rem; background: #f9f9f9; border-radius: 8px;">
-              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #d97706;">[Lock] Změna hesla</h3>
+            <div style="margin-bottom: 2rem; padding: 1rem; background: #222; border-radius: 8px; border: 1px solid #444;">
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #ccc;">Změna hesla</h3>
 
               <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Nové heslo (min. 8 znaků)</label>
-                <input type="password" id="edit-user-password" placeholder="••••••••" style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.85rem; color: #aaa;">Nové heslo (min. 8 znaků)</label>
+                <input type="password" id="edit-user-password" placeholder="••••••••" style="width: 100%; padding: 0.6rem; border: 1px solid #444; border-radius: 6px; font-size: 1rem; background: #1a1a1a; color: #fff;">
               </div>
 
-              <button data-action="zmenitHesloUzivatele" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #d97706; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+              <button data-action="zmenitHesloUzivatele" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #444; color: #fff; border: 1px solid #555; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
                 Změnit heslo
               </button>
             </div>
 
             <!-- Status a akce -->
-            <div style="padding: 1rem; background: ${user.status === 'active' ? '#d1fae5' : '#fee2e2'}; border-radius: 8px;">
-              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">Stav účtu</h3>
+            <div style="padding: 1rem; background: #222; border-radius: 8px; border: 1px solid ${user.status === 'active' ? '#333' : '#dc3545'};">
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #fff;">Stav účtu</h3>
 
-              <div style="margin-bottom: 1rem;">
+              <div style="margin-bottom: 1rem; color: #ccc;">
                 <strong>Aktuální stav:</strong>
-                <span style="font-weight: bold; color: ${user.status === 'active' ? '#059669' : '#dc2626'};">
+                <span style="font-weight: bold; color: ${user.status === 'active' ? '#39ff14' : '#dc3545'};">
                   ${user.status === 'active' ? 'AKTIVNÍ' : 'NEAKTIVNÍ'}
                 </span>
               </div>
 
               ${user.created_at ? `
-                <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
-                  <strong>Vytvořen:</strong> ${new Date(user.created_at).toLocaleString('cs-CZ')}
+                <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #888;">
+                  <strong style="color: #aaa;">Vytvořen:</strong> ${new Date(user.created_at).toLocaleString('cs-CZ')}
                 </div>
               ` : ''}
 
               ${user.last_login ? `
-                <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
-                  <strong>Poslední přihlášení:</strong> ${new Date(user.last_login).toLocaleString('cs-CZ')}
+                <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #888;">
+                  <strong style="color: #aaa;">Poslední přihlášení:</strong> ${new Date(user.last_login).toLocaleString('cs-CZ')}
                 </div>
               ` : ''}
 
-              <button data-action="prepnoutStatusUzivatele" data-id="${user.id}" data-status="${user.status === 'active' ? 'inactive' : 'active'}" style="width: 100%; padding: 0.8rem; background: ${user.status === 'active' ? '#dc2626' : '#059669'}; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer;">
+              <button data-action="prepnoutStatusUzivatele" data-id="${user.id}" data-status="${user.status === 'active' ? 'inactive' : 'active'}" style="width: 100%; padding: 0.8rem; background: ${user.status === 'active' ? '#dc3545' : '#333'}; color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer;">
                 ${user.status === 'active' ? 'Deaktivovat uživatele' : 'Aktivovat uživatele'}
               </button>
             </div>
 
             <!-- Supervizor sekce -->
-            <div style="margin-top: 2rem; padding: 1rem; background: #f0f4ff; border-radius: 8px; border: 2px solid #6366f1;">
-              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #4f46e5;">Supervizor</h3>
-              <p style="font-size: 0.85rem; color: #666; margin-bottom: 1rem;">
+            <div style="margin-top: 2rem; padding: 1rem; background: #222; border-radius: 8px; border: 1px solid #444;">
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #fff;">Supervizor</h3>
+              <p style="font-size: 0.85rem; color: #888; margin-bottom: 1rem;">
                 Jako supervizor tento uživatel uvidí zakázky vybraných prodejců.
               </p>
-              <div id="supervisorAssignmentsPreview" style="margin-bottom: 1rem; font-size: 0.9rem; color: #333;">
+              <div id="supervisorAssignmentsPreview" style="margin-bottom: 1rem; font-size: 0.9rem; color: #ccc;">
                 Načítám přiřazení...
               </div>
-              <button data-action="otevritSpravuSupervize" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #4f46e5; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+              <button data-action="otevritSpravuSupervize" data-id="${user.id}" style="width: 100%; padding: 0.8rem; background: #333; color: #fff; border: 1px solid #444; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
                 Spravovat přiřazení
               </button>
             </div>
@@ -1788,8 +1872,12 @@ async function zmenitHesloUzivatele(userId) {
       return;
     }
 
-    const confirmed = confirm('Opravdu chcete změnit heslo tohoto uživatele?');
-    if (!confirmed) return;
+    const potvrdit = await wgsConfirm('Opravdu chcete změnit heslo tohoto uživatele?', {
+        titulek: 'Změna hesla',
+        btnPotvrdit: 'Změnit heslo',
+        nebezpecne: true
+    });
+    if (!potvrdit) return;
 
     const csrfToken = await getCSRFToken();
     if (!csrfToken) {
@@ -1831,8 +1919,12 @@ async function zmenitHesloUzivatele(userId) {
 async function prepnoutStatusUzivatele(userId, newStatus) {
   try {
     const statusText = newStatus === 'active' ? 'aktivovat' : 'deaktivovat';
-    const confirmed = confirm(`Opravdu chcete ${statusText} tohoto uživatele?`);
-    if (!confirmed) return;
+    const potvrdit = await wgsConfirm(`Opravdu chcete ${statusText} tohoto uživatele?`, {
+        titulek: newStatus === 'active' ? 'Aktivovat uživatele' : 'Deaktivovat uživatele',
+        btnPotvrdit: newStatus === 'active' ? 'Aktivovat' : 'Deaktivovat',
+        nebezpecne: newStatus !== 'active'
+    });
+    if (!potvrdit) return;
 
     const csrfToken = await getCSRFToken();
     if (!csrfToken) {
@@ -1933,29 +2025,29 @@ async function otevritSpravuSupervize(userId) {
     // Používáme numeric_id (INT) pro checkbox value, protože supervisor_assignments ukládá INT
     const overlayHTML = `
       <div id="supervisorOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10001; display: flex; align-items: center; justify-content: center;">
-        <div style="background: white; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
-          <div style="background: #4f46e5; color: white; padding: 1.5rem; position: relative;">
-            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">Správa supervize</h3>
-            <p style="margin: 0.5rem 0 0; font-size: 0.85rem; opacity: 0.9;">Vyberte prodejce, jejichž zakázky bude supervizor vidět</p>
-            <button data-action="zavritSupervizorOverlay" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
+        <div style="background: #1a1a1a; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid #333;">
+          <div style="background: #333; color: #fff; padding: 1.5rem; position: relative; border-bottom: 1px solid #444;">
+            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #fff;">Správa supervize</h3>
+            <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: #aaa;">Vyberte prodejce, jejichž zakázky bude supervizor vidět</p>
+            <button data-action="zavritSupervizorOverlay" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #ccc; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
           </div>
           <div style="padding: 1.5rem; max-height: 50vh; overflow-y: auto;">
-            ${salespersons.length === 0 ? '<p style="color: #999; text-align: center;">Žádní další uživatelé v systému</p>' : ''}
+            ${salespersons.length === 0 ? '<p style="color: #888; text-align: center;">Žádní další uživatelé v systému</p>' : ''}
             ${salespersons.map(s => `
-              <label style="display: flex; align-items: center; padding: 0.8rem; margin-bottom: 0.5rem; background: #f9f9f9; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
-                <input type="checkbox" class="supervisor-checkbox" value="${s.numeric_id}" ${assignedIds.includes(parseInt(s.numeric_id)) ? 'checked' : ''} style="width: 20px; height: 20px; margin-right: 1rem; accent-color: #4f46e5;">
+              <label style="display: flex; align-items: center; padding: 0.8rem; margin-bottom: 0.5rem; background: #222; border-radius: 8px; cursor: pointer; transition: background 0.2s; border: 1px solid #333;">
+                <input type="checkbox" class="supervisor-checkbox" value="${s.numeric_id}" ${assignedIds.includes(parseInt(s.numeric_id)) ? 'checked' : ''} style="width: 20px; height: 20px; margin-right: 1rem; accent-color: #39ff14;">
                 <div style="flex: 1;">
-                  <div style="font-weight: 600; color: #333;">${escapeHtml(s.jmeno || 'Bez jména')}</div>
-                  <div style="font-size: 0.85rem; color: #666;">${escapeHtml(s.email)} - ${escapeHtml(s.role || 'prodejce')}</div>
+                  <div style="font-weight: 600; color: #fff;">${escapeHtml(s.jmeno || 'Bez jména')}</div>
+                  <div style="font-size: 0.85rem; color: #888;">${escapeHtml(s.email)} - ${escapeHtml(s.role || 'prodejce')}</div>
                 </div>
               </label>
             `).join('')}
           </div>
-          <div style="padding: 1rem 1.5rem; border-top: 1px solid #eee; display: flex; gap: 1rem;">
-            <button data-action="zavritSupervizorOverlay" style="flex: 1; padding: 0.8rem; background: #e5e7eb; color: #333; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+          <div style="padding: 1rem 1.5rem; border-top: 1px solid #333; display: flex; gap: 1rem;">
+            <button data-action="zavritSupervizorOverlay" style="flex: 1; padding: 0.8rem; background: transparent; color: #ccc; border: 1px solid #444; border-radius: 6px; font-weight: 600; cursor: pointer;">
               Zrušit
             </button>
-            <button data-action="ulozitSupervizorPrirazeni" data-id="${userId}" style="flex: 1; padding: 0.8rem; background: #4f46e5; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+            <button data-action="ulozitSupervizorPrirazeni" data-id="${userId}" style="flex: 1; padding: 0.8rem; background: #333; color: #fff; border: 1px solid #444; border-radius: 6px; font-weight: 600; cursor: pointer;">
               Uložit
             </button>
           </div>
@@ -2269,46 +2361,121 @@ if (typeof Utils !== 'undefined' && Utils.registerAction) {
     }
   });
 
-  // Upravit email u registracniho klice
-  Utils.registerAction('upravitEmailKlice', async (el, data) => {
+  // Upravit email u registracniho klice - mini overlay
+  Utils.registerAction('upravitEmailKlice', (el, data) => {
     const keyCode = data.code;
     const currentEmail = data.email || '';
 
-    const novyEmail = prompt('Zadejte email pro klíč ' + keyCode + ':', currentEmail);
+    // Odstranit existujici modal
+    const existujici = document.getElementById('modalUpravitEmail');
+    if (existujici) existujici.remove();
 
-    // Uzivatel zrusil dialog
-    if (novyEmail === null) return;
+    const modal = document.createElement('div');
+    modal.id = 'modalUpravitEmail';
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7); display: flex;
+      align-items: center; justify-content: center; z-index: 10000;
+    `;
 
-    try {
-      const csrfToken = await getCSRFToken();
-      const response = await fetch('/api/admin_api.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update_key_email',
-          key_code: keyCode,
-          email: novyEmail.trim(),
-          csrf_token: csrfToken
-        })
-      });
+    // Escapovat HTML
+    const esc = (str) => String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
-      const result = await response.json();
+    modal.innerHTML = `
+      <div style="background: #1a1a1a; padding: 25px; border-radius: 12px;
+                  max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                  border: 1px solid #333;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h3 style="margin: 0; color: #fff; font-size: 1.1rem;">Upravit email</h3>
+          <button id="btnZavritEmailModal" style="background: none; border: none; color: #888;
+                  font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; color: #999; font-size: 0.85rem; margin-bottom: 8px;">
+            Email pro klíč <code style="background: #333; padding: 2px 6px; border-radius: 3px; color: #fff;">${esc(keyCode)}</code>
+          </label>
+          <input type="email" id="inputNovyEmail" value="${esc(currentEmail)}"
+                 placeholder="email@example.com"
+                 style="width: 100%; padding: 12px; border: 1px solid #444; border-radius: 8px;
+                        background: #252525; color: #fff; font-size: 1rem; box-sizing: border-box;">
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="btnZrusitEmail" style="padding: 10px 20px; border: 1px solid #444;
+                  border-radius: 6px; background: transparent; color: #ccc; cursor: pointer;
+                  font-size: 0.9rem;">Zrušit</button>
+          <button id="btnUlozitEmail" style="padding: 10px 20px; border: none;
+                  border-radius: 6px; background: #fff; color: #000; cursor: pointer;
+                  font-size: 0.9rem; font-weight: 500;">Uložit</button>
+        </div>
+      </div>
+    `;
 
-      if (result.status === 'success') {
-        wgsToast.success(result.message || 'Email uložen');
-        // Obnovit seznam klicu
-        if (typeof nactiKlice === 'function') {
-          nactiKlice();
-        } else {
-          // Fallback - reload stranky
-          location.reload();
-        }
-      } else {
-        wgsToast.error(result.message || 'Chyba při ukládání');
+    document.body.appendChild(modal);
+
+    const inputEl = document.getElementById('inputNovyEmail');
+    inputEl?.focus();
+    inputEl?.select();
+
+    const zavritModal = () => modal.remove();
+
+    document.getElementById('btnZavritEmailModal')?.addEventListener('click', zavritModal);
+    document.getElementById('btnZrusitEmail')?.addEventListener('click', zavritModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) zavritModal(); });
+
+    const escHandler = (e) => {
+      if (e.key === 'Escape') {
+        zavritModal();
+        document.removeEventListener('keydown', escHandler);
       }
-    } catch (err) {
-      console.error('Chyba:', err);
-      wgsToast.error('Chyba při komunikaci se serverem');
-    }
+    };
+    document.addEventListener('keydown', escHandler);
+
+    document.getElementById('btnUlozitEmail')?.addEventListener('click', async () => {
+      const novyEmail = inputEl?.value?.trim() || '';
+      const btnUlozit = document.getElementById('btnUlozitEmail');
+
+      if (btnUlozit) {
+        btnUlozit.textContent = 'Ukládám...';
+        btnUlozit.disabled = true;
+      }
+
+      try {
+        const csrfToken = await getCSRFToken();
+        const response = await fetch('/api/admin_api.php?action=update_key_email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            key_code: keyCode,
+            email: novyEmail,
+            csrf_token: csrfToken
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          zavritModal();
+          wgsToast.success(result.message || 'Email uložen');
+          if (typeof nactiKlice === 'function') {
+            nactiKlice();
+          } else {
+            location.reload();
+          }
+        } else {
+          throw new Error(result.message || 'Chyba při ukládání');
+        }
+      } catch (err) {
+        console.error('Chyba:', err);
+        wgsToast.error(err.message || 'Chyba při komunikaci se serverem');
+        if (btnUlozit) {
+          btnUlozit.textContent = 'Uložit';
+          btnUlozit.disabled = false;
+        }
+      }
+    });
+
+    inputEl?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btnUlozitEmail')?.click();
+    });
   });
 }

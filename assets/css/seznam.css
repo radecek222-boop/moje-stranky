@@ -1551,12 +1551,13 @@ body {
 .order-appointment {
   font-size: 0.75rem;
   font-weight: 500;
-  color: #1a1a1a;
-  background: rgba(0, 0, 0, 0.05);
+  color: #000;
+  background: #fff;
   padding: 0.15rem 0.4rem;
   border-radius: 3px;
   white-space: nowrap;
   display: inline-block;
+  border: 1px solid rgba(0, 0, 0, 0.3);
 }
 
 .order-status-text {
@@ -1705,7 +1706,11 @@ button,
 }
 
 /* Primární tlačítko - černé */
-.detail-btn-primary {
+.detail-btn-primary,
+a.detail-btn-primary,
+a.detail-btn-primary:visited,
+a.detail-btn-primary:hover,
+a.detail-btn-primary:active {
   background: #1a1a1a;
   color: #ffffff;
 }
@@ -1911,7 +1916,11 @@ button,
 }
 
 .customer-detail-btn.danger {
-  background: #666;
+  background: #dc3545;
+}
+
+.customer-detail-btn.danger:hover {
+  background: #c82333;
 }
 
 /* ============================================

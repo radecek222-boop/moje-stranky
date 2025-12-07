@@ -24,7 +24,8 @@
   --cc-secondary: #555;
   --cc-success: #666;
   --cc-warning: #888;
-  --cc-danger: #444;
+  --cc-danger: #dc3545;
+  --cc-danger-hover: #c82333;
   --cc-info: #777;
 
   --cc-bg-primary: #f5f5f7;
@@ -450,7 +451,8 @@
   --cc-secondary: #555;
   --cc-success: #666;
   --cc-warning: #888;
-  --cc-danger: #444;
+  --cc-danger: #dc3545;
+  --cc-danger-hover: #c82333;
   --cc-info: #777;
 
   --cc-bg-primary: #f5f5f7;
@@ -1004,6 +1006,10 @@
 .cc-btn-danger {
   background: var(--cc-danger);
   color: white;
+}
+
+.cc-btn-danger:hover {
+  background: var(--cc-danger-hover);
 }
 
 .cc-btn-sm {

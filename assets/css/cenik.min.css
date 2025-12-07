@@ -364,12 +364,12 @@
 }
 
 .btn-danger {
-  background: #666;
+  background: #dc3545;
   color: white;
 }
 
 .btn-danger:hover {
-  background: #555;
+  background: #c82333;
 }
 
 /* Admin Actions */

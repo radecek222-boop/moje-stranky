@@ -242,7 +242,7 @@ try {
                     <button data-action="smazatReklamaci"
                             data-id="<?= htmlspecialchars($rek['reklamace_id']) ?>"
                             data-cislo="<?= htmlspecialchars($rek['cislo'] ?? $rek['reklamace_id']) ?>"
-                            style="padding: 0.05rem 0.5rem; background: #dc3545; color: #fff; border: 1px solid #dc3545; font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; border-radius: 2px; text-transform: uppercase;">
+                            class="cc-btn cc-btn-sm cc-btn-danger">
                         Smazat
                     </button>
 

@@ -807,42 +807,42 @@ async function showEmployeeSelector() {
   modal.className = 'modal';
   modal.id = 'employeeSelectorModal';
   modal.innerHTML = `
-    <div class="modal-content" style="max-width: 500px;">
-      <div class="modal-header">
-        <h2 class="modal-title">Vybrat zaměstnance</h2>
-        <span class="close-modal" data-action="closeEmployeeSelector">&times;</span>
+    <div class="modal-content" style="max-width: 500px; background: #1a1a1a; border: 1px solid #333; color: #ccc;">
+      <div style="background: #333; padding: 1rem 1.5rem; display: flex; justify-content: center; align-items: center; position: relative; border-bottom: 1px solid #444;">
+        <h2 style="margin: 0; font-size: 1.2rem; font-weight: 600; color: #fff;">Vybrat zaměstnance</h2>
+        <span class="close-modal" data-action="closeEmployeeSelector" style="position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); font-size: 2rem; cursor: pointer; color: #fff; opacity: 0.7;">&times;</span>
       </div>
-      <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--c-border); display: flex; gap: 1rem;">
-        <button class="btn btn-sm" data-action="selectAllEmployees">Vybrat vše</button>
-        <button class="btn btn-sm btn-secondary" data-action="deselectAllEmployees">Zrušit výběr</button>
+      <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #444; display: flex; gap: 1rem;">
+        <button class="btn btn-sm" data-action="selectAllEmployees" style="background: #333; color: #ccc; border: 1px solid #444;">Vybrat vše</button>
+        <button class="btn btn-sm" data-action="deselectAllEmployees" style="background: transparent; color: #ccc; border: 1px solid #444;">Zrušit výběr</button>
       </div>
       <div style="padding: 1rem 1.5rem; max-height: 400px; overflow-y: auto;">
         ${allAvailable.map(emp => {
           const isAlreadyAdded = currentIds.includes(emp.id);
           return `
-            <label style="display: flex; align-items: center; padding: 0.75rem; margin-bottom: 0.5rem; border: 1px solid var(--c-border); border-radius: 4px; cursor: pointer; ${isAlreadyAdded ? 'opacity: 0.5; background: var(--c-bg);' : ''}" ${isAlreadyAdded ? 'title="Už je v seznamu"' : ''}>
+            <label style="display: flex; align-items: center; padding: 0.75rem; margin-bottom: 0.5rem; border: 1px solid #444; border-radius: 4px; cursor: pointer; background: ${isAlreadyAdded ? '#2a2a2a' : '#222'}; ${isAlreadyAdded ? 'opacity: 0.5;' : ''}" ${isAlreadyAdded ? 'title="Už je v seznamu"' : ''}>
               <input type="checkbox"
                      name="selectedEmployee"
                      value="${emp.id}"
                      ${isAlreadyAdded ? 'disabled checked' : ''}
-                     style="width: 18px; height: 18px; margin-right: 0.75rem; accent-color: var(--c-black);">
+                     style="width: 18px; height: 18px; margin-right: 0.75rem; accent-color: #fff;">
               <div style="flex: 1;">
-                <div style="font-weight: 600;">${emp.name}</div>
-                <div style="font-size: 0.8rem; color: var(--c-grey);">
+                <div style="font-weight: 600; color: #fff;">${emp.name}</div>
+                <div style="font-size: 0.8rem; color: #888;">
                   ${emp.account ? emp.account + '/' + emp.bank : 'Bez účtu'}
                   ${emp.type === 'swift' ? ' (SWIFT)' : ''}
                 </div>
               </div>
-              ${isAlreadyAdded ? '<span style="font-size: 0.75rem; color: var(--c-grey);">v seznamu</span>' : ''}
+              ${isAlreadyAdded ? '<span style="font-size: 0.75rem; color: #666;">v seznamu</span>' : ''}
             </label>
           `;
         }).join('')}
       </div>
-      <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--c-border); display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 0.85rem; color: var(--c-grey);">Vybráno: <strong id="selectedCount">0</strong></span>
+      <div style="padding: 1rem 1.5rem; border-top: 1px solid #444; display: flex; justify-content: space-between; align-items: center; background: #222;">
+        <span style="font-size: 0.85rem; color: #888;">Vybráno: <strong id="selectedCount" style="color: #fff;">0</strong></span>
         <div>
-          <button class="btn btn-secondary" data-action="closeEmployeeSelector">Zrušit</button>
-          <button class="btn" data-action="confirmEmployeeSelection" style="margin-left: 0.5rem;">Přidat vybrané</button>
+          <button class="btn" data-action="closeEmployeeSelector" style="background: transparent; color: #ccc; border: 1px solid #444;">Zrušit</button>
+          <button class="btn" data-action="confirmEmployeeSelection" style="margin-left: 0.5rem; background: #333; color: #fff; border: 1px solid #444;">Přidat vybrané</button>
         </div>
       </div>
     </div>
@@ -1008,11 +1008,8 @@ async function saveEmployeeToDatabase(index) {
 
 // Uložit změny jednotlivého zaměstnance (např. číslo účtu)
 async function saveEmployeeChanges(index) {
-  console.log('saveEmployeeChanges called with index:', index);
-
   // Najít všechny inputy s daným indexem
   const inputs = document.querySelectorAll(`[data-action="updateEmployeeField"][data-index="${index}"]`);
-  console.log('Found inputs:', inputs.length);
 
   if (inputs.length > 0 && employees[index]) {
     inputs.forEach(input => {
@@ -1668,8 +1665,6 @@ function buildSpaydPayload(data) {
   // Minimalni SPAYD - pouze ucet, castka, mena
   const spayd = `SPD*1.0*ACC:${iban}*AM:${amount.toFixed(2)}*CC:CZK`;
 
-  console.log('SPAYD delka:', spayd.length, 'text:', spayd);
-
   return spayd;
 }
 
@@ -1713,7 +1708,6 @@ async function renderQrCode(qrElement, qrText, size, contextLabel = '') {
         correctLevel: QRCode.CorrectLevel.L  // Nizsi uroven korekce = vice dat
       });
 
-      console.log(`QR code generated${contextLabel ? ' for ' + contextLabel : ''} (${qrText.length} chars)`);
       resolve();
     } catch (err) {
       console.error(`Failed to generate QR code${contextLabel ? ' for ' + contextLabel : ''}:`, err);
@@ -2155,8 +2149,6 @@ function closeQRModal() {
 
 // === SINGLE EMPLOYEE QR GENERATION ===
 function generateSingleEmployeeQR(index) {
-  console.log('generateSingleEmployeeQR called with index:', index);
-
   // Synchronizovat vstupy před generováním QR
   synchronizovatVstupy();
 
@@ -2303,8 +2295,6 @@ function generateSingleEmployeeQR(index) {
       return;
     }
 
-    console.log(`Generating QR for ${emp.name}:`, qrText);
-
     try {
       await renderQrCode(qrElement, qrText, 220, emp.name);
     } catch (error) {
@@ -2326,15 +2316,8 @@ window.onclick = function(event) {
 
 // === UNIVERSAL EVENT DELEGATION FOR REMOVED INLINE HANDLERS ===
 document.addEventListener('DOMContentLoaded', () => {
-  try {
-    console.log('Event delegation initialized');
-  } catch (e) {
-    console.error('Event delegation init error:', e);
-  }
-
   // Společná funkce pro zpracování data-action
   function zpracujDataAction(target) {
-    console.log('zpracujDataAction called with action:', target.getAttribute('data-action'));
     const action = target.getAttribute('data-action');
 
     // Special cases
@@ -2374,9 +2357,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       case 'saveEmployeeChanges': {
-        console.log('saveEmployeeChanges action triggered');
         const scIndex = parseInt(target.getAttribute('data-index'), 10);
-        console.log('scIndex:', scIndex);
         if (!isNaN(scIndex) && typeof saveEmployeeChanges === 'function') {
           saveEmployeeChanges(scIndex);
         }
@@ -2541,9 +2522,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // DŮLEŽITÉ: Vyloučit INPUT pole - ty se zpracují pouze při change eventu
   document.addEventListener('click', (e) => {
     const target = e.target.closest('[data-action]');
-    if (target) {
-      console.log('Click on data-action element:', target.tagName, target.getAttribute('data-action'));
-    }
     if (!target) return;
 
     // Přeskočit INPUT a TEXTAREA - tyto elementy se zpracují pouze při change
