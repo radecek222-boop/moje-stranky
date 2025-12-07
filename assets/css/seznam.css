@@ -1706,7 +1706,11 @@ button,
 }
 
 /* Primární tlačítko - černé */
-.detail-btn-primary {
+.detail-btn-primary,
+a.detail-btn-primary,
+a.detail-btn-primary:visited,
+a.detail-btn-primary:hover,
+a.detail-btn-primary:active {
   background: #1a1a1a;
   color: #ffffff;
 }
