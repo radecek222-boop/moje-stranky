@@ -27,7 +27,7 @@ if ($isAdmin) {
   <button class="hamburger-toggle" id="hamburger-toggle" aria-label="Otevřít menu" aria-expanded="false" @click.stop="prepnout">
     <span></span><span></span><span></span>
   </button>
-  <nav class="hamburger-nav" id="hamburger-nav" aria-label="Hlavní navigace">
+  <nav class="hamburger-nav <?php echo $isAdmin ? 'admin-nav-active' : ''; ?>" id="hamburger-nav" aria-label="Hlavní navigace">
     <?php
     if ($isAdmin):
     ?>
@@ -170,6 +170,27 @@ if ($isAdmin) {
   position: relative;
   padding-bottom: 0.2rem;
   white-space: nowrap;
+}
+
+/* ADMIN - neonově zelené písmo v menu */
+.hamburger-nav.admin-nav-active a {
+  color: #39ff14 !important;
+  text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+}
+
+.hamburger-nav.admin-nav-active a:hover {
+  color: #5fff3a !important;
+  text-shadow: 0 0 15px rgba(57, 255, 20, 0.7);
+}
+
+.hamburger-nav.admin-nav-active a.active::after {
+  background: #39ff14;
+  box-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
+}
+
+.hamburger-nav.admin-nav-active .hamburger-logout {
+  color: #ff6666 !important;
+  text-shadow: none;
 }
 
 .hamburger-nav a:hover,

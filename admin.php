@@ -134,7 +134,7 @@ if ($activeTab === 'dashboard') {
 </head>
 
 <body<?php
-    $bodyClasses = ['admin-page'];
+    $bodyClasses = [];
     if ($embedMode) $bodyClasses[] = 'embed-mode';
     if (!empty($bodyClasses)) echo ' class="' . implode(' ', $bodyClasses) . '"';
 ?>>
