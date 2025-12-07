@@ -9,7 +9,7 @@ let allEmployeesDatabase = [];  // Kompletní seznam zaměstnanců z databáze
 let salaryRate = 150;
 let invoiceRate = 250;
 let currentPeriod = { month: 11, year: 2025 };
-const API_URL = 'app/psa_data.php';
+const API_URL = '/app/psa_data.php';
 const CSRF_TOKEN = window.PSA_CSRF_TOKEN || '';
 
 // Speciální zaměstnanci - vždy zobrazeni, nelze smazat
@@ -1002,15 +1002,16 @@ async function saveEmployeeToDatabase(index) {
 
 // Uložit změny jednotlivého zaměstnance (např. číslo účtu)
 async function saveEmployeeChanges(index) {
-  // Nejprve synchronizovat hodnoty z inputů do employees pole
-  const row = document.querySelector(`tr[data-index="${index}"]`) ||
-              document.querySelectorAll('tbody tr')[index];
+  console.log('saveEmployeeChanges called with index:', index);
 
-  if (row) {
-    const inputs = row.querySelectorAll('[data-action="updateEmployeeField"]');
+  // Najít všechny inputy s daným indexem
+  const inputs = document.querySelectorAll(`[data-action="updateEmployeeField"][data-index="${index}"]`);
+  console.log('Found inputs:', inputs.length);
+
+  if (inputs.length > 0 && employees[index]) {
     inputs.forEach(input => {
       const field = input.getAttribute('data-field');
-      if (field && employees[index]) {
+      if (field) {
         if (field === 'hours' || field === 'bonusAmount' || field === 'premieCastka') {
           employees[index][field] = parseInt(input.value) || 0;
         } else if (field === 'bank') {
@@ -1018,6 +1019,7 @@ async function saveEmployeeChanges(index) {
         } else {
           employees[index][field] = input.value;
         }
+        logger.log(`Synced field ${field} = "${employees[index][field]}" for employee ${employees[index].name}`);
       }
     });
   }
@@ -1028,6 +1030,8 @@ async function saveEmployeeChanges(index) {
     return;
   }
 
+  logger.log('Saving employee changes:', emp.name, 'account:', emp.account, 'bank:', emp.bank);
+
   // Aktualizovat v databázi zaměstnanců
   const dbIndex = allEmployeesDatabase.findIndex(e => e.id === emp.id);
   if (dbIndex !== -1) {
@@ -1035,6 +1039,18 @@ async function saveEmployeeChanges(index) {
     allEmployeesDatabase[dbIndex].account = emp.account || '';
     allEmployeesDatabase[dbIndex].bank = emp.bank || '';
     allEmployeesDatabase[dbIndex].type = emp.type || 'standard';
+    logger.log('Updated allEmployeesDatabase at index', dbIndex);
+  } else {
+    // Zaměstnanec není v databázi - přidat ho
+    logger.warn('Employee not found in allEmployeesDatabase, adding:', emp.name, emp.id);
+    allEmployeesDatabase.push({
+      id: emp.id,
+      name: emp.name,
+      account: emp.account || '',
+      bank: emp.bank || '',
+      type: emp.type || 'standard',
+      active: true
+    });
   }
 
   // Uložit na server
@@ -2304,8 +2320,11 @@ window.onclick = function(event) {
 
 // === UNIVERSAL EVENT DELEGATION FOR REMOVED INLINE HANDLERS ===
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('Event delegation initialized');
+
   // Společná funkce pro zpracování data-action
   function zpracujDataAction(target) {
+    console.log('zpracujDataAction called with action:', target.getAttribute('data-action'));
     const action = target.getAttribute('data-action');
 
     // Special cases
@@ -2345,7 +2364,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       case 'saveEmployeeChanges': {
+        console.log('saveEmployeeChanges action triggered');
         const scIndex = parseInt(target.getAttribute('data-index'), 10);
+        console.log('scIndex:', scIndex);
         if (!isNaN(scIndex) && typeof saveEmployeeChanges === 'function') {
           saveEmployeeChanges(scIndex);
         }
@@ -2510,6 +2531,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // DŮLEŽITÉ: Vyloučit INPUT pole - ty se zpracují pouze při change eventu
   document.addEventListener('click', (e) => {
     const target = e.target.closest('[data-action]');
+    if (target) {
+      console.log('Click on data-action element:', target.tagName, target.getAttribute('data-action'));
+    }
     if (!target) return;
 
     // Přeskočit INPUT a TEXTAREA - tyto elementy se zpracují pouze při change
