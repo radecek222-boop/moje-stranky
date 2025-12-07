@@ -161,34 +161,9 @@ if (!$embedMode && $activeTab === 'dashboard'):
     </div>
 
     <div class="cc-grid">
-        <div class="cc-card" data-href="seznam.php">
-            <div class="cc-card-title" data-lang-cs="Seznam reklamací" data-lang-en="Claims List" data-lang-it="Elenco Reclami">Seznam reklamací</div>
-            <div class="cc-card-description" data-lang-cs="Přehled všech reklamací a servisních požadavků" data-lang-en="Overview of all claims and service requests" data-lang-it="Panoramica di tutti i reclami e le richieste di servizio">Přehled všech reklamací a servisních požadavků</div>
-        </div>
-
         <div class="cc-card" data-href="admin.php?tab=zakaznici">
             <div class="cc-card-title" data-lang-cs="Seznam zákazníků" data-lang-en="Customer List" data-lang-it="Elenco Clienti">Seznam zákazníků</div>
             <div class="cc-card-description" data-lang-cs="Přehled všech zákazníků s kontaktními údaji a zakázkami" data-lang-en="Overview of all customers with contact information and orders" data-lang-it="Panoramica di tutti i clienti con informazioni di contatto e ordini">Přehled všech zákazníků s kontaktními údaji a zakázkami</div>
-        </div>
-
-        <div class="cc-card" data-href="statistiky.php">
-            <div class="cc-card-title" data-lang-cs="Statistiky" data-lang-en="Statistics" data-lang-it="Statistiche">Statistiky</div>
-            <div class="cc-card-description" data-lang-cs="Přehledy, grafy a analytické reporty" data-lang-en="Overviews, charts and analytical reports" data-lang-it="Panoramiche, grafici e report analitici">Přehledy, grafy a analytické reporty</div>
-        </div>
-
-        <div class="cc-card" data-href="analytics.php">
-            <div class="cc-card-title" data-lang-cs="Web Analytics" data-lang-en="Web Analytics" data-lang-it="Web Analytics">Web Analytics</div>
-            <div class="cc-card-description" data-lang-cs="Návštěvnost webu, zařízení, konverze" data-lang-en="Website traffic, devices, conversions" data-lang-it="Traffico sito web, dispositivi, conversioni">Návštěvnost webu, zařízení, konverze</div>
-        </div>
-
-        <div class="cc-card" data-href="aktuality.php">
-            <div class="cc-card-title" data-lang-cs="Natuzzi Aktuality" data-lang-en="Natuzzi News" data-lang-it="Notizie Natuzzi">Natuzzi Aktuality</div>
-            <div class="cc-card-description" data-lang-cs="Automatické denní aktuality o značce Natuzzi (CZ/EN/IT)" data-lang-en="Automatic daily news about Natuzzi brand (CZ/EN/IT)" data-lang-it="Notizie quotidiane automatiche sul marchio Natuzzi (CZ/EN/IT)">Automatické denní aktuality o značce Natuzzi (CZ/EN/IT)</div>
-        </div>
-
-        <div class="cc-card" data-href="admin.php?tab=users">
-            <div class="cc-card-title" data-lang-cs="Uživatelé" data-lang-en="Users" data-lang-it="Utenti">Uživatelé</div>
-            <div class="cc-card-description" data-lang-cs="Správa uživatelských účtů a oprávnění" data-lang-en="User account and permission management" data-lang-it="Gestione account utente e permessi">Správa uživatelských účtů a oprávnění</div>
         </div>
 
         <div class="cc-card" data-href="admin.php?tab=keys">

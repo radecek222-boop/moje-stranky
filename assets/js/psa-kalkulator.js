@@ -1412,6 +1412,44 @@ function normalizeAccount(account) {
   return prefixPart ? `${parseInt(prefixPart, 10)}-${accountPart}` : accountPart;
 }
 
+/**
+ * Konverze ceskeho cisla uctu na IBAN
+ * Format: CZ + 2 kontrolni cislice + 4 kod banky + 6 predcisli + 10 cislo uctu
+ */
+function convertToIBAN(account, bankCode) {
+  // Odstranit pomlcky a mezery
+  account = (account || '').toString().replace(/[\s-]/g, '');
+  bankCode = (bankCode || '').toString().replace(/\D/g, '').padStart(4, '0');
+
+  // Rozdelit predcisli a cislo uctu
+  let predcisli = '';
+  let cisloUctu = account;
+
+  if (account.includes('-')) {
+    const parts = account.split('-');
+    predcisli = parts[0] || '';
+    cisloUctu = parts[1] || '';
+  } else if (account.length > 10) {
+    predcisli = account.slice(0, -10);
+    cisloUctu = account.slice(-10);
+  }
+
+  // Doplnit na spravnou delku
+  predcisli = predcisli.replace(/\D/g, '').padStart(6, '0');
+  cisloUctu = cisloUctu.replace(/\D/g, '').padStart(10, '0');
+
+  // BBAN = kod banky + predcisli + cislo uctu
+  const bban = bankCode + predcisli + cisloUctu;
+
+  // Vypocet kontrolnich cislic (ISO 7064 Mod 97-10)
+  // Presunout CZ00 na konec a nahradit pismena cisly (C=12, Z=35)
+  const checkString = bban + '123500'; // CZ = 12 35, 00 = placeholder
+  let remainder = BigInt(checkString) % 97n;
+  const checkDigits = String(98n - remainder).padStart(2, '0');
+
+  return 'CZ' + checkDigits + bban;
+}
+
 function sanitizeMessage(message) {
   if (!message) return '';
   return message
@@ -1483,10 +1521,13 @@ function buildSpaydPayload(data) {
   const vs = data.vs ? String(data.vs).replace(/\D/g, '').slice(0, 10) : '';
   const message = sanitizeMessage(data.message || '');
 
+  // Konverze na IBAN format pro SPAYD
+  const iban = convertToIBAN(account, bank);
+
   const parts = [
     'SPD',
     '1.0',
-    `ACC:${account}/${bank}`,
+    `ACC:${iban}`,
     `AM:${amount.toFixed(2)}`,
     'CC:CZK'
   ];
