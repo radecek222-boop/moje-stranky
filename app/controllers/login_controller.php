@@ -94,7 +94,8 @@ function handleAdminLogin(string $adminKey): void
     $_SESSION['admin_id'] = 'ADMIN001';
     $_SESSION['user_id'] = 'ADMIN001';
     $_SESSION['user_name'] = 'Administrátor';
-    $_SESSION['user_email'] = 'admin@wgs-service.cz';
+    $_SESSION['user_email'] = 'reklamace@wgs-service.cz';  // Hlavni kontaktni email
+    $_SESSION['user_phone'] = '+420 725 965 826';  // Hlavni kontaktni telefon
     $_SESSION['role'] = 'admin';
 
     // FIX 6: Inactivity timeout - nastavit initial timestamps při admin login
@@ -113,7 +114,7 @@ function handleAdminLogin(string $adminKey): void
         'user' => [
             'name' => 'Administrátor',
             'role' => 'admin',
-            'email' => 'admin@wgs-service.cz'
+            'email' => 'reklamace@wgs-service.cz'
         ]
     ]);
 }
@@ -194,6 +195,7 @@ function handleUserLogin(PDO $pdo, string $email, string $password): void
     $_SESSION['user_id'] = $userId;
     $_SESSION['user_name'] = $user['name'] ?? ($user['email'] ?? 'Uživatel');
     $_SESSION['user_email'] = $user['email'] ?? '';
+    $_SESSION['user_phone'] = $user['phone'] ?? '';  // Telefon uzivatele pro notifikace
 
     // FIX 6: Inactivity timeout - nastavit initial timestamps při login
     $_SESSION['last_activity'] = time();
