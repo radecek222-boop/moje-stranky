@@ -1190,13 +1190,13 @@ body.pdf-export-mode #signature-pad {
 
 /* IČO upozornění - malý text pod typem zákazníka */
 .ico-upozorneni {
-  font-size: 9px !important;
+  font-size: 10px !important;
   color: #c00 !important;
   white-space: nowrap;
 }
 
 .pdf-clone-desktop .ico-upozorneni {
-  font-size: 8px !important;
+  font-size: 10px !important;
 }
 
 /* ========================================================================
