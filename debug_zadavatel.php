@@ -34,11 +34,15 @@ try {
             r.jmeno,
             r.created_by,
             r.created_by_role,
+            r.assigned_to,
             r.technik,
-            u.name as created_by_name,
-            u.email as created_by_email
+            zadavatel.name as zadavatel_jmeno,
+            zadavatel.email as zadavatel_email,
+            technik_user.name as technik_jmeno,
+            technik_user.email as technik_email
         FROM wgs_reklamace r
-        LEFT JOIN wgs_users u ON r.created_by = u.id
+        LEFT JOIN wgs_users zadavatel ON r.created_by = zadavatel.id
+        LEFT JOIN wgs_users technik_user ON r.assigned_to = technik_user.id
         WHERE r.reklamace_id = :val1 OR r.cislo = :val2 OR r.id = :val3
         LIMIT 1
     ");
@@ -59,23 +63,27 @@ try {
         echo "Číslo:               " . ($record['cislo'] ?? 'NULL') . "\n";
         echo "Zákazník:            " . ($record['jmeno'] ?? 'NULL') . "\n";
         echo "─────────────────────────────────────────\n";
-        echo "created_by (user_id): " . ($record['created_by'] ?? 'NULL') . "\n";
-        echo "created_by_role:      " . ($record['created_by_role'] ?? 'NULL') . "\n";
-        echo "created_by_name:      " . ($record['created_by_name'] ?? 'NULL (žádný JOIN)') . "\n";
-        echo "created_by_email:     " . ($record['created_by_email'] ?? 'NULL') . "\n";
-        echo "─────────────────────────────────────────\n";
-        echo "technik:              " . ($record['technik'] ?? 'NULL') . "\n";
+        echo "\n=== ZADAVATEL (kdo vytvořil zakázku) ===\n";
+        echo "created_by (ID):     " . ($record['created_by'] ?? 'NULL') . "\n";
+        echo "created_by_role:     " . ($record['created_by_role'] ?? 'NULL') . "\n";
+        echo "JMÉNO:               " . ($record['zadavatel_jmeno'] ?? 'NULL') . "\n";
+        echo "EMAIL:               " . ($record['zadavatel_email'] ?? 'NULL') . "\n";
+        echo "\n=== TECHNIK (kdo pracuje se zakázkou) ===\n";
+        echo "assigned_to (ID):    " . ($record['assigned_to'] ?? 'NULL') . "\n";
+        echo "JMÉNO:               " . ($record['technik_jmeno'] ?? $record['technik'] ?? 'NULL') . "\n";
+        echo "EMAIL:               " . ($record['technik_email'] ?? 'NULL') . "\n";
+        echo "technik (legacy):    " . ($record['technik'] ?? 'NULL') . "\n";
         echo "─────────────────────────────────────────\n\n";
 
-        // Co se zobrazí v protokolu
-        $zobrazeno = $record['created_by_name'] ?? '(prázdné)';
-        echo "V PROTOKOLU SE ZOBRAZÍ JAKO ZADAVATEL: $zobrazeno\n";
+        // Shrnutí
+        echo "=== SHRNUTÍ PRO PROTOKOL ===\n";
+        echo "Zadavatel: " . ($record['zadavatel_jmeno'] ?? '(NENÍ VYPLNĚNO)') . "\n";
+        echo "Technik:   " . ($record['technik_jmeno'] ?? $record['technik'] ?? '(NENÍ VYPLNĚNO)') . "\n";
 
         // Pokud created_by je NULL nebo 0, ukázat info
         if (empty($record['created_by']) || $record['created_by'] == 0) {
             echo "\n⚠️  POZOR: created_by je prázdný/nulový!\n";
             echo "   Tato reklamace byla pravděpodobně vytvořena před implementací RBAC.\n";
-            echo "   Zadavatel nelze určit automaticky.\n";
         }
 
     } else {
