@@ -186,146 +186,228 @@ h6 {
   text-transform: uppercase;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
 }
-.services-section {
+/* ========== CONTENT PAGES ========== */
+.services-section,
+.content-section {
   background: var(--c-white);
-  padding: 5rem 2rem;
+  padding: 2.5rem 1.5rem;
 }
 .container {
-  max-width: 1200px;
+  max-width: 800px;
   margin: 0 auto;
 }
 .cta-section .container {
   background: transparent;
+  max-width: 600px;
 }
+
+/* Section intro */
 .section-intro {
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto 4rem;
+  text-align: left;
+  max-width: 100%;
+  margin: 0 0 2rem;
 }
 .section-title {
   font-family: "Poppins";
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 300;
+  font-size: 1.1rem;
+  font-weight: 600;
   color: var(--c-black);
-  margin-bottom: 1.5rem;
-  letter-spacing: 0.02em;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+.section-text,
 .section-description {
-  font-size: 1.1rem;
+  font-size: 0.85rem;
   color: var(--c-grey);
-  line-height: 1.8;
-  margin-bottom: 1rem;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
 }
+
+/* Services grid */
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  justify-content: center;
-  align-items: stretch;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 .service-card {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-  padding: 20px 25px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  padding: 1rem 1.25rem;
+  border-radius: 4px;
+  transition: border-color 0.2s ease;
 }
 .service-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-color: #000;
 }
 .service-title {
   font-family: "Poppins";
-  font-size: 1.8rem;
-  font-weight: 400;
+  font-size: 0.8rem;
+  font-weight: 600;
   color: var(--c-black);
-  margin-bottom: 1rem;
-  letter-spacing: 0.02em;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 .service-description {
-  font-size: 1rem;
+  font-size: 0.8rem;
   color: var(--c-grey);
-  line-height: 1.7;
-  margin-bottom: 1.5rem;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
 }
 .service-list {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 .service-list li {
-  font-size: 0.95rem;
-  color: var(--c-grey);
-  padding: 0.5rem 0;
-  padding-left: 1.5rem;
+  font-size: 0.75rem;
+  color: #555;
+  padding: 0.25rem 0;
+  padding-left: 1rem;
   position: relative;
+  line-height: 1.4;
 }
 .service-list li::before {
   content: "•";
   position: absolute;
   left: 0;
-  color: var(--c-black);
+  color: #000;
   font-weight: bold;
+}
+
+/* Pricing info */
+.pricing-info {
+  background: #f8f8f8;
+  border: 1px solid #e5e5e5;
+  padding: 1.25rem;
+  border-radius: 4px;
+  margin-bottom: 2rem;
+}
+.pricing-info h3 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.pricing-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+}
+.pricing-info li {
+  font-size: 0.75rem;
+  padding: 0.2rem 0;
+  color: #555;
+}
+.pricing-info li strong {
+  color: #000;
+}
+.pricing-info p {
+  margin: 0;
+}
+.link-cenik {
+  font-size: 0.75rem;
+  color: #000;
+  text-decoration: underline;
+}
+.link-cenik:hover {
+  text-decoration: none;
+}
+
+/* FAQ section */
+.faq-section {
+  margin-top: 2rem;
+}
+.faq-section .section-title {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.faq-item {
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  padding: 0.875rem 1rem;
+  border-radius: 4px;
+}
+.faq-question {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 0.4rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.faq-answer {
+  font-size: 0.75rem;
+  color: #555;
+  line-height: 1.5;
+  margin: 0;
 }
 .cta-section {
   background: var(--c-black);
   color: var(--c-white);
-  padding: 4rem 2rem;
+  padding: 2rem 1.5rem;
   text-align: center;
 }
 .cta-title {
   font-family: "Poppins";
-  font-size: clamp(2rem, 4vw, 2.8rem);
-  font-weight: 300;
-  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
   text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: #ffffff !important;
 }
 .cta-text {
-  font-size: 1.1rem;
-  color: #ffffff !important;
-  margin-bottom: 2.5rem;
-  max-width: 600px;
+  font-size: 0.8rem;
+  color: #ccc !important;
+  margin-bottom: 1rem;
+  max-width: 500px;
   margin-left: auto;
   margin-right: auto;
+  line-height: 1.5;
 }
 .cta-button {
   display: inline-block;
-  padding: 1rem 3rem;
+  padding: 0.6rem 2rem;
   background: #ffffff !important;
   color: #000000 !important;
   text-decoration: none;
   font-family: "Poppins";
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   border: none;
+  border-radius: 4px;
   cursor: pointer;
 }
 .cta-button:hover {
-  background: #f5f5f5 !important;
-  box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
+  background: #f0f0f0 !important;
+  transform: translateY(-1px);
 }
-@media (min-width: 1200px) {
-  .services-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-@media (min-width: 768px) and (max-width: 1199px) {
-  .services-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-@media (max-width: 767px) {
+/* Responsivní grid - 2 sloupce na desktopu, 1 na mobilu */
+@media (max-width: 600px) {
   .services-grid {
     grid-template-columns: 1fr;
+  }
+  .services-section,
+  .content-section {
+    padding: 2rem 1rem;
+  }
+  .section-title {
+    font-size: 1rem;
+  }
+  .faq-item {
+    padding: 0.75rem;
   }
 }
 @media (max-width: 768px) {
@@ -394,10 +476,6 @@ h6 {
     opacity: 1;
     pointer-events: auto;
   }
-  .services-grid {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
   .hero {
     background-attachment: scroll;
   }
@@ -413,7 +491,10 @@ h6 {
     font-size: 1.4rem;
   }
   .service-card {
-    padding: 2rem 1.5rem;
+    padding: 0.875rem 1rem;
+  }
+  .cta-section {
+    padding: 1.5rem 1rem;
   }
 }
 .footer {
