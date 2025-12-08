@@ -69,10 +69,11 @@ try {
         echo "</table>";
 
         if ($execute) {
-            // Přiřadit výchozího technika (Radek Zikmund - TCH20250002)
+            // Přiřadit výchozího technika (Radek Zikmund)
+            // Pouze sloupec technik (jméno), assigned_to se nepoužívá
             $stmt = $pdo->prepare("
                 UPDATE wgs_reklamace
-                SET technik = 'Radek Zikmund', assigned_to = 'TCH20250002'
+                SET technik = 'Radek Zikmund'
                 WHERE (termin IS NOT NULL AND termin != '')
                 AND (technik IS NULL OR technik = '')
             ");
