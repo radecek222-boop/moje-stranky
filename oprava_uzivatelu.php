@@ -84,8 +84,9 @@ try {
         echo "<div class='info'>Žádné reklamace s termínem bez technika.</div>";
     }
 
-    // 3. Reklamace bez zadavatele (created_by)
-    echo "<h2>3. Reklamace bez zadavatele (created_by)</h2>";
+    // 3. Reklamace bez zadavatele (created_by) - POUZE INFORMATIVNÍ
+    // Prázdné created_by = zákazník si objednal sám bez přihlášení (správné chování)
+    echo "<h2>3. Objednávky od zákazníků bez přihlášení (created_by prázdné)</h2>";
     $stmt = $pdo->query("
         SELECT id, reklamace_id, cislo, jmeno, created_by, stav, created_at
         FROM wgs_reklamace
@@ -94,6 +95,7 @@ try {
     $bezZadavatele = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (count($bezZadavatele) > 0) {
+        echo "<div class='info'>Tyto reklamace vytvořili zákazníci bez přihlášení - toto je správné chování.</div>";
         echo "<table><tr><th>ID</th><th>Reklamace ID</th><th>Zákazník</th><th>Stav</th><th>Vytvořeno</th></tr>";
         foreach ($bezZadavatele as $r) {
             echo "<tr>";
@@ -105,20 +107,8 @@ try {
             echo "</tr>";
         }
         echo "</table>";
-
-        if ($execute) {
-            // Přiřadit admina jako zadavatele (starší záznamy)
-            $stmt = $pdo->prepare("
-                UPDATE wgs_reklamace
-                SET created_by = 'ADMIN001', created_by_role = 'admin'
-                WHERE created_by IS NULL OR created_by = ''
-            ");
-            $stmt->execute();
-            $count = $stmt->rowCount();
-            echo "<div class='success'>OPRAVENO: {$count} reklamací přiřazeno zadavateli ADMIN001</div>";
-        }
     } else {
-        echo "<div class='info'>Žádné reklamace bez zadavatele.</div>";
+        echo "<div class='info'>Žádné objednávky od nepřihlášených zákazníků.</div>";
     }
 
     // 4. Všechny reklamace bez technika (informativní)
