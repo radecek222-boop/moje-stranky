@@ -463,6 +463,11 @@ async function loadReklamace(id) {
       document.getElementById("brand").value = customer.zadavatel_jmeno || customer.created_by_name || "";
       document.getElementById("model").value = customer.model || "";
       document.getElementById("description-cz").value = customer.popis_problemu || "";
+      // Nastavit technika v SELECT - buď uložený technik, nebo přihlášený uživatel
+      const technikValue = customer.technik || customer.prihlaseny_technik || "";
+      if (technikValue) {
+        document.getElementById("technician").value = technikValue;
+      }
 
       currentReklamace = customer;
       currentReklamaceId = customer.reklamace_id || customer.cislo || customer.id;
@@ -534,6 +539,11 @@ async function loadReklamace(id) {
       document.getElementById("brand").value = currentReklamace.zadavatel_jmeno || currentReklamace.created_by_name || "";
       document.getElementById("model").value = currentReklamace.model || "";
       document.getElementById("description-cz").value = currentReklamace.popis_problemu || "";
+      // Nastavit technika v SELECT - buď uložený technik, nebo přihlášený uživatel
+      const technikValueApi = currentReklamace.technik || currentReklamace.prihlaseny_technik || "";
+      if (technikValueApi) {
+        document.getElementById("technician").value = technikValueApi;
+      }
       showNotif("success", "Reklamace načtena");
     } else {
       showNotif("error", result.message || "Reklamace nenalezena");
