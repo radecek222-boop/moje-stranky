@@ -830,12 +830,12 @@ $zemeNazvy = [
                     <label style="display: block; font-size: 0.75rem; color: #888; margin-bottom: 0.3rem;">Stranka</label>
                     <select id="heatmap-page" style="width: 100%; padding: 0.6rem; background: #222; border: 1px solid #444; color: #fff; border-radius: 6px;">
                         <option value="https://www.wgs-service.cz/" data-path="/">DOMU</option>
-                        <option value="https://www.wgs-service.cz/novareklamace.php" data-path="/novareklamace.php">OBJEDNAT SERVIS</option>
-                        <option value="https://www.wgs-service.cz/nasesluzby.php" data-path="/nasesluzby.php">NASE SLUZBY</option>
-                        <option value="https://www.wgs-service.cz/cenik.php" data-path="/cenik.php">CENIK</option>
-                        <option value="https://www.wgs-service.cz/onas.php" data-path="/onas.php">O NAS</option>
-                        <option value="https://www.wgs-service.cz/aktuality.php" data-path="/aktuality.php">AKTUALITY</option>
-                        <option value="https://www.wgs-service.cz/login.php" data-path="/login.php">PRIHLASENI</option>
+                        <option value="https://www.wgs-service.cz/novareklamace" data-path="/novareklamace">OBJEDNAT SERVIS</option>
+                        <option value="https://www.wgs-service.cz/nasesluzby" data-path="/nasesluzby">NASE SLUZBY</option>
+                        <option value="https://www.wgs-service.cz/cenik" data-path="/cenik">CENIK</option>
+                        <option value="https://www.wgs-service.cz/onas" data-path="/onas">O NAS</option>
+                        <option value="https://www.wgs-service.cz/aktuality" data-path="/aktuality">AKTUALITY</option>
+                        <option value="https://www.wgs-service.cz/login" data-path="/login">PRIHLASENI</option>
                     </select>
                 </div>
                 <div style="min-width: 120px;">
