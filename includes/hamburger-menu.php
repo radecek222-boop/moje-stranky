@@ -1199,20 +1199,60 @@ document.addEventListener('alpine:init', () => {
 
             // Registrovat subscription pokud je k dispozici service worker
             if ('serviceWorker' in navigator && 'PushManager' in window) {
-              const registration = await navigator.serviceWorker.ready;
-              const subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: window.VAPID_PUBLIC_KEY || null
-              });
+              try {
+                // 1. Načíst VAPID public key z API
+                const vapidResponse = await fetch('/api/push_subscription_api.php?action=vapid-key');
+                const vapidData = await vapidResponse.json();
 
-              // Odeslat na server
-              if (subscription) {
-                const response = await fetch('/api/push_subscribe.php', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(subscription)
+                if (!vapidData.vapidPublicKey) {
+                  throw new Error('VAPID klíč není k dispozici');
+                }
+
+                // 2. Konvertovat VAPID key na Uint8Array
+                const urlBase64ToUint8Array = (base64String) => {
+                  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+                  const rawData = window.atob(base64);
+                  const outputArray = new Uint8Array(rawData.length);
+                  for (let i = 0; i < rawData.length; ++i) {
+                    outputArray[i] = rawData.charCodeAt(i);
+                  }
+                  return outputArray;
+                };
+
+                const applicationServerKey = urlBase64ToUint8Array(vapidData.vapidPublicKey);
+
+                // 3. Registrovat push subscription
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.subscribe({
+                  userVisibleOnly: true,
+                  applicationServerKey: applicationServerKey
                 });
-                console.log('Subscription odeslána na server');
+
+                // 4. Odeslat subscription na server s CSRF tokenem
+                if (subscription) {
+                  const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
+                  const formData = new FormData();
+                  formData.append('action', 'subscribe');
+                  formData.append('csrf_token', csrfToken);
+                  formData.append('subscription', JSON.stringify(subscription));
+                  formData.append('platforma', /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'ios' :
+                                               /Android/.test(navigator.userAgent) ? 'android' : 'desktop');
+
+                  const response = await fetch('/api/push_subscription_api.php', {
+                    method: 'POST',
+                    body: formData
+                  });
+
+                  if (response.ok) {
+                    console.log('Push subscription úspěšně uložena na server');
+                  } else {
+                    console.warn('Subscription uložena lokálně, server vrátil chybu');
+                  }
+                }
+              } catch (pushError) {
+                console.warn('Push subscription se nepodařila:', pushError);
+                // Notifikace jsou povoleny, ale push nemusí fungovat
               }
             }
           } else if (permission === 'denied') {
