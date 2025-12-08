@@ -1957,10 +1957,10 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
 
       case 'smazatFotku':
-        const photoIndex = button.getAttribute('data-index');
-        const sectionId = button.getAttribute('data-section');
-        if (typeof smazatFotku === 'function') {
-          smazatFotku(photoIndex, sectionId);
+        const photoId = button.getAttribute('data-photo-id');
+        const photoUrl = button.getAttribute('data-url');
+        if (typeof smazatFotku === 'function' && photoId) {
+          smazatFotku(photoId, photoUrl);
         }
         break;
 
