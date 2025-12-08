@@ -1379,17 +1379,13 @@ const WGS = {
       const daysRemaining = Math.ceil((warrantyEnd - reklamace) / (1000 * 60 * 60 * 24));
 
       if (warning) {
-        warning.classList.remove('hidden');
+        warning.style.display = 'block';
         if (daysRemaining > 0) {
           warning.className = '';
-          warning.innerHTML = t('warranty_valid')
-            .replace('{days}', daysRemaining)
-            .replace('{date}', warrantyEnd.toLocaleDateString('cs-CZ'));
+          warning.innerHTML = `V záruce - zbývá ${daysRemaining} dní (do ${warrantyEnd.toLocaleDateString('cs-CZ')})`;
         } else {
           warning.className = 'expired';
-          warning.innerHTML = t('warranty_expired')
-            .replace('{days}', Math.abs(daysRemaining))
-            .replace('{date}', warrantyEnd.toLocaleDateString('cs-CZ'));
+          warning.innerHTML = `Po záruce - ${Math.abs(daysRemaining)} dní po vypršení (${warrantyEnd.toLocaleDateString('cs-CZ')})`;
         }
       }
     } catch (err) {
