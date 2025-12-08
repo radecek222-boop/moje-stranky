@@ -1816,7 +1816,7 @@ async function showCustomerDetail(id) {
 
   const cislo = CURRENT_RECORD.cislo || '';
   const reklamaceId = CURRENT_RECORD.reklamace_id || '';
-  const zadavatel = CURRENT_RECORD.created_by_name || CURRENT_RECORD.prodejce || '';
+  const zadavatel = CURRENT_RECORD.zadavatel_jmeno || CURRENT_RECORD.created_by_name || CURRENT_RECORD.prodejce || '';
   const datum_prodeje = CURRENT_RECORD.datum_prodeje || '';
   const datum_reklamace = CURRENT_RECORD.datum_reklamace || '';
   const provedeni = CURRENT_RECORD.provedeni || '';

@@ -115,20 +115,21 @@ try {
             r.*,
             r.id as claim_id,
             CASE
-                WHEN r.created_by = 0 OR r.created_by IS NULL THEN
+                WHEN r.created_by IS NULL OR r.created_by = '' THEN
                     CASE r.created_by_role
                         WHEN 'admin' THEN 'Administrátor'
                         WHEN 'technik' THEN COALESCE(r.technik, 'Technik')
-                        ELSE 'Neznámý'
+                        ELSE NULL
                     END
                 ELSE u.name
             END as created_by_name,
+            u.name as zadavatel_jmeno,
             u.email as created_by_email,
             t.name as technik_jmeno,
             t.email as technik_email,
             t.phone as technik_telefon
         FROM wgs_reklamace r
-        LEFT JOIN wgs_users u ON r.created_by = u.id AND r.created_by > 0
+        LEFT JOIN wgs_users u ON r.created_by = u.user_id
         LEFT JOIN wgs_users t ON r.assigned_to = t.id
         $whereClause
         ORDER BY r.created_at DESC
