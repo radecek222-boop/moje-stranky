@@ -34,7 +34,6 @@ try {
             r.jmeno,
             r.created_by,
             r.created_by_role,
-            r.zpracoval,
             r.technik,
             u.name as created_by_name,
             u.email as created_by_email
@@ -65,19 +64,18 @@ try {
         echo "created_by_name:      " . ($record['created_by_name'] ?? 'NULL (žádný JOIN)') . "\n";
         echo "created_by_email:     " . ($record['created_by_email'] ?? 'NULL') . "\n";
         echo "─────────────────────────────────────────\n";
-        echo "zpracoval:            " . ($record['zpracoval'] ?? 'NULL') . "\n";
         echo "technik:              " . ($record['technik'] ?? 'NULL') . "\n";
         echo "─────────────────────────────────────────\n\n";
 
         // Co se zobrazí v protokolu
-        $zobrazeno = $record['created_by_name'] ?? $record['zpracoval'] ?? '(prázdné)';
-        echo "V PROTOKOLU SE ZOBRAZÍ: $zobrazeno\n";
+        $zobrazeno = $record['created_by_name'] ?? '(prázdné)';
+        echo "V PROTOKOLU SE ZOBRAZÍ JAKO ZADAVATEL: $zobrazeno\n";
 
-        echo "\nMOŽNÉ KANDIDÁTY PRO ZADAVATELE:\n";
-        foreach (['created_by_name', 'zpracoval', 'technik'] as $col) {
-            if (isset($record[$col]) && !empty($record[$col])) {
-                echo "  - $col: " . $record[$col] . "\n";
-            }
+        // Pokud created_by je NULL nebo 0, ukázat info
+        if (empty($record['created_by']) || $record['created_by'] == 0) {
+            echo "\n⚠️  POZOR: created_by je prázdný/nulový!\n";
+            echo "   Tato reklamace byla pravděpodobně vytvořena před implementací RBAC.\n";
+            echo "   Zadavatel nelze určit automaticky.\n";
         }
 
     } else {
