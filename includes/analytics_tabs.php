@@ -13,18 +13,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 $analyticsTabs = [
     [
         'file' => 'analytics.php',
-        'label' => 'Overview',
-        'description' => 'Hlavní dashboard'
-    ],
-    [
-        'file' => 'analytics-heatmap.php',
-        'label' => 'Heatmapy',
-        'description' => 'Click & Scroll mapy'
+        'label' => 'Analytics',
+        'description' => 'Prehled navstevnosti a heatmapy'
     ],
     [
         'file' => 'sprava_ip_blacklist.php',
-        'label' => 'IP Adresy',
-        'description' => 'Správa blacklistu IP'
+        'label' => 'IP Blacklist',
+        'description' => 'Sprava blokovanych IP'
     ],
 ];
 ?>

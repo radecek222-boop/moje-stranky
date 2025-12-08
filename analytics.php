@@ -621,6 +621,7 @@ $zemeNazvy = [
     <div class="header">
         <h1>Analytics</h1>
         <div class="header-actions">
+            <button class="btn" onclick="otevritModal('heatmap-modal')">Heatmapy</button>
             <button class="btn" onclick="otevritModal('ip-modal')">Blokace IP</button>
             <a href="admin.php" class="btn">Zpet do admin</a>
         </div>
@@ -815,6 +816,88 @@ $zemeNazvy = [
 </div>
 </main>
 
+<!-- MODAL: HEATMAPY -->
+<div class="modal-overlay" id="heatmap-modal">
+    <div class="modal" style="max-width: 1200px; width: 95%;">
+        <div class="modal-header">
+            <h3>Heatmap Viewer</h3>
+            <button class="modal-close" onclick="zavritModal('heatmap-modal')">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 1.5rem;">
+            <!-- Ovladaci prvky -->
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                <div style="flex: 1; min-width: 180px;">
+                    <label style="display: block; font-size: 0.75rem; color: #888; margin-bottom: 0.3rem;">Stranka</label>
+                    <select id="heatmap-page" style="width: 100%; padding: 0.6rem; background: #222; border: 1px solid #444; color: #fff; border-radius: 6px;">
+                        <option value="https://www.wgs-service.cz/" data-path="/">DOMU</option>
+                        <option value="https://www.wgs-service.cz/novareklamace.php" data-path="/novareklamace.php">OBJEDNAT SERVIS</option>
+                        <option value="https://www.wgs-service.cz/nasesluzby.php" data-path="/nasesluzby.php">NASE SLUZBY</option>
+                        <option value="https://www.wgs-service.cz/cenik.php" data-path="/cenik.php">CENIK</option>
+                        <option value="https://www.wgs-service.cz/onas.php" data-path="/onas.php">O NAS</option>
+                        <option value="https://www.wgs-service.cz/aktuality.php" data-path="/aktuality.php">AKTUALITY</option>
+                        <option value="https://www.wgs-service.cz/login.php" data-path="/login.php">PRIHLASENI</option>
+                    </select>
+                </div>
+                <div style="min-width: 120px;">
+                    <label style="display: block; font-size: 0.75rem; color: #888; margin-bottom: 0.3rem;">Zarizeni</label>
+                    <select id="heatmap-device" style="width: 100%; padding: 0.6rem; background: #222; border: 1px solid #444; color: #fff; border-radius: 6px;">
+                        <option value="">Vsechna</option>
+                        <option value="desktop">Desktop</option>
+                        <option value="mobile">Mobile</option>
+                        <option value="tablet">Tablet</option>
+                    </select>
+                </div>
+                <div style="min-width: 120px;">
+                    <label style="display: block; font-size: 0.75rem; color: #888; margin-bottom: 0.3rem;">Typ</label>
+                    <select id="heatmap-type" style="width: 100%; padding: 0.6rem; background: #222; border: 1px solid #444; color: #fff; border-radius: 6px;">
+                        <option value="click">Kliky</option>
+                        <option value="scroll">Scroll</option>
+                    </select>
+                </div>
+                <div style="display: flex; align-items: flex-end; gap: 0.5rem;">
+                    <button class="btn" onclick="nacistHeatmap()">Nacist</button>
+                    <button class="btn" style="background: #444;" onclick="nacistHeatmapDemo()">Demo</button>
+                </div>
+            </div>
+
+            <!-- Statistiky -->
+            <div id="heatmap-stats" style="display: none; margin-bottom: 1rem;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div style="background: #222; padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div id="hm-stat-total" style="font-size: 1.5rem; font-weight: 700; color: #39ff14;">0</div>
+                        <div style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Celkem</div>
+                    </div>
+                    <div style="background: #222; padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div id="hm-stat-max" style="font-size: 1.5rem; font-weight: 700; color: #fff;">0</div>
+                        <div style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Max intenzita</div>
+                    </div>
+                    <div style="background: #222; padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div id="hm-stat-points" style="font-size: 1.5rem; font-weight: 700; color: #fff;">0</div>
+                        <div style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Bodu</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kontejner pro heatmapu -->
+            <div id="heatmap-container" style="position: relative; background: #111; border-radius: 8px; overflow: hidden; min-height: 500px;">
+                <div id="heatmap-placeholder" style="display: flex; align-items: center; justify-content: center; height: 500px; color: #666;">
+                    Vyberte stranku a kliknete na "Nacist"
+                </div>
+                <iframe id="heatmap-iframe" title="Nahled stranky" style="display: none; width: 100%; height: 600px; border: none;"></iframe>
+                <canvas id="heatmap-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; opacity: 0.7;"></canvas>
+            </div>
+
+            <!-- Legenda -->
+            <div style="display: flex; justify-content: center; gap: 1.5rem; margin-top: 1rem; font-size: 0.75rem; color: #888;">
+                <div style="display: flex; align-items: center; gap: 0.3rem;"><div style="width: 16px; height: 16px; background: rgba(0,0,255,0.7); border-radius: 50%;"></div> Malo</div>
+                <div style="display: flex; align-items: center; gap: 0.3rem;"><div style="width: 16px; height: 16px; background: rgba(0,255,0,0.7); border-radius: 50%;"></div> Stredne</div>
+                <div style="display: flex; align-items: center; gap: 0.3rem;"><div style="width: 16px; height: 16px; background: rgba(255,255,0,0.8); border-radius: 50%;"></div> Vice</div>
+                <div style="display: flex; align-items: center; gap: 0.3rem;"><div style="width: 16px; height: 16px; background: rgba(255,0,0,0.9); border-radius: 50%;"></div> Max</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL: BLOKACE IP -->
 <div class="modal-overlay" id="ip-modal">
     <div class="modal">
@@ -945,6 +1028,180 @@ async function pridatMojiIP() {
     } catch (err) {
         alert('Chyba: ' + err.message);
     }
+}
+
+// ========== HEATMAP FUNKCE ==========
+let heatmapData = null;
+
+function nacistHeatmapStranku(url) {
+    const iframe = document.getElementById('heatmap-iframe');
+    const placeholder = document.getElementById('heatmap-placeholder');
+    const selectedOption = document.querySelector('#heatmap-page option:checked');
+    const relativePath = selectedOption.dataset.path || '/';
+
+    placeholder.style.display = 'none';
+    iframe.style.display = 'block';
+    iframe.src = relativePath + (relativePath.includes('?') ? '&' : '?') + '_heatmap_preview=1';
+
+    iframe.onload = function() {
+        resizeHeatmapCanvas();
+    };
+}
+
+function resizeHeatmapCanvas() {
+    const iframe = document.getElementById('heatmap-iframe');
+    const canvas = document.getElementById('heatmap-canvas');
+    const container = document.getElementById('heatmap-container');
+
+    canvas.width = iframe.offsetWidth || container.offsetWidth;
+    canvas.height = iframe.offsetHeight || 600;
+
+    if (heatmapData) {
+        const type = document.getElementById('heatmap-type').value;
+        if (type === 'click') {
+            vykresliClickHeatmap(heatmapData);
+        } else {
+            vykresliScrollHeatmap(heatmapData);
+        }
+    }
+}
+
+async function nacistHeatmap() {
+    const pageUrl = document.getElementById('heatmap-page').value;
+    const deviceType = document.getElementById('heatmap-device').value;
+    const type = document.getElementById('heatmap-type').value;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    nacistHeatmapStranku(pageUrl);
+    document.getElementById('heatmap-stats').style.display = 'none';
+
+    try {
+        const url = `/api/analytics_heatmap.php?page_url=${encodeURIComponent(pageUrl)}&device_type=${deviceType}&type=${type}&csrf_token=${csrfToken}`;
+        const response = await fetch(url);
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            heatmapData = result;
+            document.getElementById('heatmap-stats').style.display = 'block';
+
+            if (type === 'click') {
+                document.getElementById('hm-stat-total').textContent = (result.total_clicks || 0).toLocaleString();
+                document.getElementById('hm-stat-max').textContent = result.max_intensity || 0;
+                document.getElementById('hm-stat-points').textContent = (result.points_count || 0).toLocaleString();
+                setTimeout(() => { resizeHeatmapCanvas(); vykresliClickHeatmap(result); }, 500);
+            } else {
+                document.getElementById('hm-stat-total').textContent = (result.total_views || 0).toLocaleString();
+                document.getElementById('hm-stat-max').textContent = '100%';
+                document.getElementById('hm-stat-points').textContent = result.buckets_count || 0;
+                setTimeout(() => { resizeHeatmapCanvas(); vykresliScrollHeatmap(result); }, 500);
+            }
+        } else {
+            console.warn('Heatmap API:', result.message);
+        }
+    } catch (err) {
+        console.error('Heatmap error:', err);
+    }
+}
+
+function nacistHeatmapDemo() {
+    const type = document.getElementById('heatmap-type').value;
+    const pageUrl = document.getElementById('heatmap-page').value;
+
+    nacistHeatmapStranku(pageUrl);
+
+    if (type === 'click') {
+        const demoPoints = [];
+        for (let i = 0; i < 50; i++) {
+            demoPoints.push({ x: Math.random() * 80 + 10, y: Math.random() * 80 + 10, count: Math.floor(Math.random() * 100) + 1 });
+        }
+        heatmapData = { points: demoPoints, total_clicks: demoPoints.reduce((s,p) => s + p.count, 0), max_intensity: Math.max(...demoPoints.map(p => p.count)), points_count: demoPoints.length };
+
+        document.getElementById('heatmap-stats').style.display = 'block';
+        document.getElementById('hm-stat-total').textContent = heatmapData.total_clicks.toLocaleString();
+        document.getElementById('hm-stat-max').textContent = heatmapData.max_intensity;
+        document.getElementById('hm-stat-points').textContent = heatmapData.points_count;
+
+        setTimeout(() => { resizeHeatmapCanvas(); vykresliClickHeatmap(heatmapData); }, 500);
+    } else {
+        const demoBuckets = [];
+        for (let d = 0; d <= 100; d += 10) {
+            demoBuckets.push({ depth: d, count: Math.max(100 - d + Math.random() * 20, 10) });
+        }
+        heatmapData = { buckets: demoBuckets, total_views: demoBuckets[0].count, buckets_count: demoBuckets.length };
+
+        document.getElementById('heatmap-stats').style.display = 'block';
+        document.getElementById('hm-stat-total').textContent = Math.round(heatmapData.total_views);
+        document.getElementById('hm-stat-max').textContent = '100%';
+        document.getElementById('hm-stat-points').textContent = heatmapData.buckets_count;
+
+        setTimeout(() => { resizeHeatmapCanvas(); vykresliScrollHeatmap(heatmapData); }, 500);
+    }
+}
+
+function vykresliClickHeatmap(data) {
+    const canvas = document.getElementById('heatmap-canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (!data.points || data.points.length === 0) return;
+
+    const maxCount = data.max_intensity || Math.max(...data.points.map(p => p.count));
+
+    data.points.forEach(point => {
+        const x = (point.x / 100) * canvas.width;
+        const y = (point.y / 100) * canvas.height;
+        const intensity = point.count / maxCount;
+        const radius = 20 + intensity * 30;
+
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        if (intensity < 0.25) {
+            gradient.addColorStop(0, 'rgba(0, 0, 255, 0.8)');
+            gradient.addColorStop(1, 'rgba(0, 0, 255, 0)');
+        } else if (intensity < 0.5) {
+            gradient.addColorStop(0, 'rgba(0, 255, 0, 0.8)');
+            gradient.addColorStop(1, 'rgba(0, 255, 0, 0)');
+        } else if (intensity < 0.75) {
+            gradient.addColorStop(0, 'rgba(255, 255, 0, 0.9)');
+            gradient.addColorStop(1, 'rgba(255, 255, 0, 0)');
+        } else {
+            gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');
+            gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+        }
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+    });
+}
+
+function vykresliScrollHeatmap(data) {
+    const canvas = document.getElementById('heatmap-canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (!data.buckets || data.buckets.length === 0) return;
+
+    const maxCount = Math.max(...data.buckets.map(b => b.count));
+
+    data.buckets.forEach(bucket => {
+        const yStart = (bucket.depth / 100) * canvas.height;
+        const height = canvas.height / data.buckets.length;
+        const intensity = bucket.count / maxCount;
+
+        let r, g, b;
+        if (intensity > 0.75) { r = 0; g = 255; b = 0; }
+        else if (intensity > 0.5) { r = 255; g = 255; b = 0; }
+        else if (intensity > 0.25) { r = 255; g = 165; b = 0; }
+        else { r = 255; g = 0; b = 0; }
+
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.4)`;
+        ctx.fillRect(0, yStart, canvas.width, height);
+
+        ctx.fillStyle = '#fff';
+        ctx.font = '12px Poppins';
+        ctx.fillText(`${bucket.depth}% - ${Math.round(intensity * 100)}%`, 10, yStart + height / 2 + 4);
+    });
 }
 </script>
 
