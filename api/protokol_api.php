@@ -544,8 +544,10 @@ function saveProtokolData($data) {
         try {
             // Načíst data reklamace pro šablonu
             $stmtRekl = $pdo->prepare("
-                SELECT jmeno, email, telefon, prodejce, reklamace_id
-                FROM wgs_reklamace WHERE id = :id
+                SELECT r.jmeno, r.email, r.telefon, COALESCE(u.name, r.prodejce) as prodejce, r.reklamace_id
+                FROM wgs_reklamace r
+                LEFT JOIN wgs_users u ON r.created_by = u.user_id
+                WHERE r.id = :id
             ");
             $stmtRekl->execute([':id' => $reklamace['id']]);
             $reklData = $stmtRekl->fetch(PDO::FETCH_ASSOC);

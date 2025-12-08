@@ -723,14 +723,16 @@ function handleGetReklamaceDetail(PDO $pdo): void
     // Načíst detail reklamace
     $stmt = $pdo->prepare("
         SELECT
-            reklamace_id, cislo, jmeno, telefon, email,
-            ulice, mesto, psc, adresa, model, provedeni, barva,
-            popis_problemu, doplnujici_info, termin, cas_navstevy,
-            stav, created_at as datum_vytvoreni, datum_dokonceni, prodejce as jmeno_prodejce,
-            typ, technik, castka, fakturace_firma,
-            pocet_dilu, cena_prace, cena_material, cena_druhy_technik, cena_doprava, cena_celkem
-        FROM wgs_reklamace
-        WHERE reklamace_id = :reklamace_id
+            r.reklamace_id, r.cislo, r.jmeno, r.telefon, r.email,
+            r.ulice, r.mesto, r.psc, r.adresa, r.model, r.provedeni, r.barva,
+            r.popis_problemu, r.doplnujici_info, r.termin, r.cas_navstevy,
+            r.stav, r.created_at as datum_vytvoreni, r.datum_dokonceni,
+            COALESCE(u.name, r.prodejce) as jmeno_prodejce,
+            r.typ, r.technik, r.castka, r.fakturace_firma,
+            r.pocet_dilu, r.cena_prace, r.cena_material, r.cena_druhy_technik, r.cena_doprava, r.cena_celkem
+        FROM wgs_reklamace r
+        LEFT JOIN wgs_users u ON r.created_by = u.user_id
+        WHERE r.reklamace_id = :reklamace_id
         LIMIT 1
     ");
 

@@ -198,7 +198,7 @@ function getZakazky($pdo) {
             DATE_FORMAT(r.created_at, '%d.%m.%Y') as datum,
             r.created_at as datum_raw
         FROM wgs_reklamace r
-        LEFT JOIN wgs_users prodejce ON r.created_by = prodejce.id
+        LEFT JOIN wgs_users prodejce ON r.created_by = prodejce.user_id
         LEFT JOIN wgs_users technik ON r.assigned_to = technik.id AND technik.role = 'technik'
         $where
         ORDER BY r.created_at DESC
@@ -279,9 +279,9 @@ function getCharty($pdo) {
             COUNT(*) as pocet,
             SUM(CAST(COALESCE(r.cena_celkem, r.cena, 0) AS DECIMAL(10,2))) as celkem
         FROM wgs_reklamace r
-        LEFT JOIN wgs_users u ON r.created_by = u.id
+        LEFT JOIN wgs_users u ON r.created_by = u.user_id
         $where
-        GROUP BY u.name, u.id
+        GROUP BY u.name, u.user_id
         ORDER BY pocet DESC
         LIMIT 10
     ");
@@ -352,12 +352,12 @@ function buildFilterWhere() {
         $prodejciConditions = [];
         foreach ($prodejci as $idx => $prodejce) {
             if ($prodejce === 'mimozarucni') {
-                // Mimozáruční může být NULL nebo 0
-                $prodejciConditions[] = "(r.created_by IS NULL OR r.created_by = 0)";
+                // Mimozáruční = prázdné created_by (zákazník bez přihlášení)
+                $prodejciConditions[] = "(r.created_by IS NULL OR r.created_by = '')";
             } else {
                 $key = ":prodejce_$idx";
                 $prodejciConditions[] = "r.created_by = $key";
-                $params[$key] = (int)$prodejce;
+                $params[$key] = $prodejce;  // VARCHAR, ne INT
             }
         }
 
