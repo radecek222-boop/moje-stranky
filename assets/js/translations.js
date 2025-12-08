@@ -50,6 +50,16 @@ window.WGS_TRANSLATIONS = {
     en: 'No',
     it: 'No'
   },
+  'confirm_yes': {
+    cs: 'Ano',
+    en: 'Yes',
+    it: 'Sì'
+  },
+  'confirm_no': {
+    cs: 'Ne',
+    en: 'No',
+    it: 'No'
+  },
   'error': {
     cs: 'Chyba',
     en: 'Error',
