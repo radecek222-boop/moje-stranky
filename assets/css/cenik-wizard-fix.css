@@ -200,6 +200,7 @@
 
 .radio-card {
     display: flex !important;
+    flex-direction: row !important;
     align-items: center !important;
     border: 1px solid #e0e0e0 !important;
     border-radius: 5px !important;
@@ -212,6 +213,11 @@
     max-height: none !important;
     height: auto !important;
     overflow: visible !important;
+    margin-bottom: 0 !important;
+    font-size: inherit !important;
+    font-weight: normal !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
 }
 
 .radio-card:hover {
