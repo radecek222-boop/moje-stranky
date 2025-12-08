@@ -1188,6 +1188,17 @@ body.pdf-export-mode #signature-pad {
   height: 180px !important;
 }
 
+/* IČO upozornění - malý text pod typem zákazníka */
+.ico-upozorneni {
+  font-size: 9px !important;
+  color: #c00 !important;
+  white-space: nowrap;
+}
+
+.pdf-clone-desktop .ico-upozorneni {
+  font-size: 8px !important;
+}
+
 /* ========================================================================
    VELMI MALÉ OBRAZOVKY - Oprava tlačítek pro malé telefony
    ======================================================================== */
