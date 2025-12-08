@@ -28,7 +28,14 @@ try {
 
     $stmt = $pdo->prepare("
         SELECT
-            r.*,
+            r.id,
+            r.reklamace_id,
+            r.cislo,
+            r.jmeno,
+            r.created_by,
+            r.created_by_role,
+            r.zpracoval,
+            r.technik,
             u.name as created_by_name,
             u.email as created_by_email
         FROM wgs_reklamace r
