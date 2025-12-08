@@ -1847,6 +1847,18 @@ if (document.readyState === 'loading') {
 } else {
     initEmailSmsActions();
 }
+
+// EXPLICITNÍ EXPORT na window objekt pro onclick handlery
+window.resendVybraneEmaily = resendVybraneEmaily;
+window.toggleSelectAllEmails = toggleSelectAllEmails;
+window.updateSelectedEmailCount = updateSelectedEmailCount;
+window.filterEmaily = filterEmaily;
+window.switchSection = switchSection;
+window.toggleNotifikaceActive = toggleNotifikaceActive;
+window.otevritNotifikace = otevritNotifikace;
+window.editSmsTemplate = editSmsTemplate;
+
+console.log('[Email/SMS] Funkce exportovány na window objekt');
 </script>
 
 
