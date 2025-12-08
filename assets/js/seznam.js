@@ -2112,13 +2112,23 @@ function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
 
 function showPhotoFullscreen(photoUrl) {
   const overlay = document.createElement('div');
-  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; align-items: center; justify-content: center; cursor: pointer;';
+  // z-index 10010 - vyšší než detailOverlay (10002)
+  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10010; display: flex; align-items: center; justify-content: center; cursor: pointer;';
   overlay.onclick = () => overlay.remove();
 
   const img = document.createElement('img');
   img.alt = 'Zvětšená fotka reklamace';
   img.src = photoUrl;
-  img.style.cssText = 'max-width: 95%; max-height: 95%; object-fit: contain;';
+  img.style.cssText = 'max-width: 95%; max-height: 95%; object-fit: contain; border-radius: 4px;';
+
+  // Zavřít klávesou Escape
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      overlay.remove();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
 
   overlay.appendChild(img);
   document.body.appendChild(overlay);
