@@ -27,7 +27,6 @@ try {
             r.jmeno,
             r.created_by,
             r.created_by_role,
-            r.prodejce,
             r.email_zadavatele,
             u.name as created_by_name,
             u.email as created_by_email
@@ -58,12 +57,11 @@ try {
         echo "created_by_name:      " . ($record['created_by_name'] ?? 'NULL (žádný JOIN)') . "\n";
         echo "created_by_email:     " . ($record['created_by_email'] ?? 'NULL') . "\n";
         echo "─────────────────────────────────────────\n";
-        echo "prodejce (legacy):    " . ($record['prodejce'] ?? 'NULL') . "\n";
         echo "email_zadavatele:     " . ($record['email_zadavatele'] ?? 'NULL') . "\n";
         echo "─────────────────────────────────────────\n\n";
 
         // Co se zobrazí v protokolu
-        $zobrazeno = $record['created_by_name'] ?? $record['prodejce'] ?? '(prázdné)';
+        $zobrazeno = $record['created_by_name'] ?? '(prázdné)';
         echo "V PROTOKOLU SE ZOBRAZÍ: $zobrazeno\n";
 
     } else {

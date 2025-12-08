@@ -138,7 +138,7 @@ if ($lookupValue !== null) {
                 'typ_zakaznika' => $record['typ_zakaznika'] ?? '',
 
                 // Produktové údaje
-                'brand' => $record['created_by_name'] ?? $record['prodejce'] ?? '', // Zadavatel = kdo vytvořil zakázku
+                'brand' => $record['created_by_name'] ?? '', // Zadavatel = kdo vytvořil zakázku
                 'model' => $record['model'] ?? '',
                 'typ' => $record['typ'] ?? '',
                 'provedeni' => $record['provedeni'] ?? '',
