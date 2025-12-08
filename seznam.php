@@ -278,55 +278,74 @@ body.modal-open {
   opacity: 0.6;
 }
 
-/* MAZÁNÍ FOTEK: Křížek na miniatuře */
-.foto-wrapper {
-  position: relative;
-  isolation: isolate;
+/* MINIATURY FOTEK v detailu */
+#detailOverlay .foto-wrapper {
+  position: relative !important;
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  min-height: 60px !important;
+  max-width: 60px !important;
+  max-height: 60px !important;
+  flex-shrink: 0 !important;
+  display: inline-block !important;
+  overflow: hidden !important;
+  border-radius: 4px !important;
 }
 
-/* Vysoká specificita pro přepsání obecných button stylů */
+#detailOverlay .foto-wrapper img {
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  min-height: 60px !important;
+  max-width: 60px !important;
+  max-height: 60px !important;
+  object-fit: cover !important;
+  border: 1px solid #444 !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  display: block !important;
+}
+
+#detailOverlay .foto-wrapper img:hover {
+  opacity: 0.8;
+  border-color: #666;
+}
+
+/* MAZÁNÍ FOTEK: Malý křížek na miniatuře */
 #detailOverlay .foto-wrapper button.foto-delete-btn {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  min-height: 28px;
-  max-width: 28px;
-  max-height: 28px;
-  background: rgba(220, 38, 38, 0.95);
-  color: white;
-  border: 2px solid white;
-  border-radius: 50%;
-  font-size: 20px;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  z-index: 100;
-  padding: 0;
-  margin: 0;
-  font-weight: bold;
-  white-space: nowrap;
-  overflow: visible;
+  position: absolute !important;
+  top: 2px !important;
+  right: 2px !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  max-width: 18px !important;
+  max-height: 18px !important;
+  background: rgba(220, 38, 38, 0.9) !important;
+  color: white !important;
+  border: 1px solid white !important;
+  border-radius: 50% !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  z-index: 10 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
 }
 
 #detailOverlay .foto-wrapper button.foto-delete-btn:hover {
-  background: rgba(185, 28, 28, 1);
+  background: rgba(185, 28, 28, 1) !important;
   transform: scale(1.1);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
 }
 
 #detailOverlay .foto-wrapper button.foto-delete-btn:active {
   transform: scale(0.95);
-}
-
-#detailOverlay .foto-wrapper:hover button.foto-delete-btn {
-  opacity: 1;
 }
 
 /* MINIMALISTICKÝ REDESIGN: Zmenšení info panelů a nadpisů */

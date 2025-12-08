@@ -1914,16 +1914,16 @@ async function showCustomerDetail(id) {
       ${fotky.length > 0 ? `
         <div style="margin-bottom: 1rem;">
           <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">Fotografie (${fotky.length}):</label>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem;">
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
             ${fotky.map((f, i) => {
               const photoPath = typeof f === 'object' ? f.photo_path : f;
               const photoId = typeof f === 'object' ? f.id : null;
               const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
 
               return `
-                <div class="foto-wrapper" style="position: relative;">
+                <div class="foto-wrapper" style="position: relative; width: 60px; height: 60px; flex-shrink: 0;">
                   <img src='${photoPath}'
-                       style='width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid #333; cursor: pointer; border-radius: 3px;'
+                       style='width: 60px; height: 60px; object-fit: cover; border: 1px solid #444; cursor: pointer; border-radius: 4px;'
                        alt='Fotka ${i+1}'
                        data-action="showPhotoFullscreen"
                        data-url="${escapedUrl}">
