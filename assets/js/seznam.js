@@ -1827,6 +1827,22 @@ async function showCustomerDetail(id) {
   const dbPhotos = await loadPhotosFromDB(reklamaceId);
   let fotky = dbPhotos.length > 0 ? dbPhotos : [];
 
+  // DEBUG: Výpis fotek do konzole
+  console.log('=== DEBUG FOTKY ===');
+  console.log('reklamaceId:', reklamaceId);
+  console.log('dbPhotos z API:', dbPhotos);
+  console.log('CURRENT_RECORD.photos:', CURRENT_RECORD.photos);
+  console.log('fotky pole (použité):', fotky);
+  console.log('Počet fotek:', fotky.length);
+  fotky.forEach((f, i) => {
+    console.log(`Fotka ${i}:`, {
+      id: f.id,
+      photo_path: f.photo_path,
+      section: f.section_name
+    });
+  });
+  console.log('===================');
+
   if (fotky.length === 0) {
     const photoKey = 'photoSections_' + id;
     const photosData = localStorage.getItem(photoKey);
