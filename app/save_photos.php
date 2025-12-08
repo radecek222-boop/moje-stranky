@@ -122,14 +122,14 @@ try {
         throw new Exception('Reklamace nebyla nalezena');
     }
 
-    // Vytvoření uploads/photos adresáře
-    $uploadsDir = __DIR__ . '/../uploads/photos';
+    // Vytvoření uploads adresáře (sjednoceno s controllers/save_photos.php)
+    $uploadsDir = __DIR__ . '/../uploads';
     if (!is_dir($uploadsDir)) {
         mkdir($uploadsDir, 0755, true);
     }
 
-    // Vytvoření podadresáře pro konkrétní reklamaci (bezpečný klíč bez lomítek)
-    $reklamaceDir = $uploadsDir . '/' . $reklamaceStorageKey;
+    // Vytvoření podadresáře pro konkrétní reklamaci (sjednoceno: uploads/reklamace_XXX/)
+    $reklamaceDir = $uploadsDir . '/reklamace_' . $reklamaceStorageKey;
     if (!is_dir($reklamaceDir)) {
         mkdir($reklamaceDir, 0755, true);
     }
@@ -202,8 +202,8 @@ try {
                 throw new Exception("Nepodařilo se uložit fotku $sectionName/$index");
             }
 
-            // Relativní cesta pro databázi
-            $relativePathForDb = "uploads/photos/{$reklamaceStorageKey}/{$filename}";
+            // Relativní cesta pro databázi (sjednoceno: uploads/reklamace_XXX/)
+            $relativePathForDb = "uploads/reklamace_{$reklamaceStorageKey}/{$filename}";
 
             // Vložení do databáze (podle PHOTOS_FIX_REPORT.md musí obsahovat file_path a file_name)
             $stmt = $pdo->prepare("

@@ -1816,7 +1816,7 @@ async function showCustomerDetail(id) {
 
   const cislo = CURRENT_RECORD.cislo || '';
   const reklamaceId = CURRENT_RECORD.reklamace_id || '';
-  const zadavatel = CURRENT_RECORD.created_by_name || CURRENT_RECORD.prodejce || '';
+  const zadavatel = CURRENT_RECORD.zadavatel_jmeno || CURRENT_RECORD.created_by_name || CURRENT_RECORD.prodejce || '';
   const datum_prodeje = CURRENT_RECORD.datum_prodeje || '';
   const datum_reklamace = CURRENT_RECORD.datum_reklamace || '';
   const provedeni = CURRENT_RECORD.provedeni || '';
@@ -1914,16 +1914,16 @@ async function showCustomerDetail(id) {
       ${fotky.length > 0 ? `
         <div style="margin-bottom: 1rem;">
           <label style="display: block; color: #aaa; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.5rem;">Fotografie (${fotky.length}):</label>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem;">
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
             ${fotky.map((f, i) => {
               const photoPath = typeof f === 'object' ? f.photo_path : f;
               const photoId = typeof f === 'object' ? f.id : null;
               const escapedUrl = photoPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
 
               return `
-                <div class="foto-wrapper" style="position: relative;">
+                <div class="foto-wrapper" style="position: relative; width: 60px; height: 60px; flex-shrink: 0;">
                   <img src='${photoPath}'
-                       style='width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid #333; cursor: pointer; border-radius: 3px;'
+                       style='width: 60px; height: 60px; object-fit: cover; border: 1px solid #444; cursor: pointer; border-radius: 4px;'
                        alt='Fotka ${i+1}'
                        data-action="showPhotoFullscreen"
                        data-url="${escapedUrl}">
@@ -2112,13 +2112,23 @@ function zobrazPDFModal(pdfUrl, claimId, typ = 'report') {
 
 function showPhotoFullscreen(photoUrl) {
   const overlay = document.createElement('div');
-  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; align-items: center; justify-content: center; cursor: pointer;';
+  // z-index 10010 - vyšší než detailOverlay (10002)
+  overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10010; display: flex; align-items: center; justify-content: center; cursor: pointer;';
   overlay.onclick = () => overlay.remove();
 
   const img = document.createElement('img');
   img.alt = 'Zvětšená fotka reklamace';
   img.src = photoUrl;
-  img.style.cssText = 'max-width: 95%; max-height: 95%; object-fit: contain;';
+  img.style.cssText = 'max-width: 95%; max-height: 95%; object-fit: contain; border-radius: 4px;';
+
+  // Zavřít klávesou Escape
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      overlay.remove();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
 
   overlay.appendChild(img);
   document.body.appendChild(overlay);

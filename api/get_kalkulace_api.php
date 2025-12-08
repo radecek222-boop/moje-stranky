@@ -58,7 +58,7 @@ try {
             r.created_by,
             u.email as vlastnik_email
         FROM wgs_reklamace r
-        LEFT JOIN wgs_users u ON (u.user_id = r.created_by OR u.id = r.created_by)
+        LEFT JOIN wgs_users u ON u.user_id = r.created_by
         WHERE r.reklamace_id = :reklamace_id OR r.cislo = :cislo OR r.id = :id
         LIMIT 1
     ");

@@ -260,7 +260,7 @@ function analyzeSQLAdvanced($pdo) {
     // 2. ORPHANED RECORDS - Hledání záznamů bez parent
     $orphanedQueries = [
         'wgs_reklamace' => [
-            'check' => "SELECT COUNT(*) as count FROM wgs_reklamace WHERE created_by NOT IN (SELECT id FROM wgs_users) AND created_by IS NOT NULL",
+            'check' => "SELECT COUNT(*) as count FROM wgs_reklamace WHERE created_by NOT IN (SELECT user_id FROM wgs_users) AND created_by IS NOT NULL AND created_by != ''",
             'description' => 'Reklamace bez existujícího uživatele'
         ],
         'wgs_photos' => [
