@@ -281,14 +281,20 @@ body.modal-open {
 /* MAZÁNÍ FOTEK: Křížek na miniatuře */
 .foto-wrapper {
   position: relative;
+  isolation: isolate;
 }
 
-.foto-delete-btn {
+/* Vysoká specificita pro přepsání obecných button stylů */
+#detailOverlay .foto-wrapper button.foto-delete-btn {
   position: absolute;
   top: 4px;
   right: 4px;
   width: 28px;
   height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  max-width: 28px;
+  max-height: 28px;
   background: rgba(220, 38, 38, 0.95);
   color: white;
   border: 2px solid white;
@@ -301,22 +307,25 @@ body.modal-open {
   justify-content: center;
   transition: all 0.2s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  z-index: var(--z-sticky, 10);
+  z-index: 100;
   padding: 0;
+  margin: 0;
   font-weight: bold;
+  white-space: nowrap;
+  overflow: visible;
 }
 
-.foto-delete-btn:hover {
+#detailOverlay .foto-wrapper button.foto-delete-btn:hover {
   background: rgba(185, 28, 28, 1);
   transform: scale(1.1);
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
 }
 
-.foto-delete-btn:active {
+#detailOverlay .foto-wrapper button.foto-delete-btn:active {
   transform: scale(0.95);
 }
 
-.foto-wrapper:hover .foto-delete-btn {
+#detailOverlay .foto-wrapper:hover button.foto-delete-btn {
   opacity: 1;
 }
 
