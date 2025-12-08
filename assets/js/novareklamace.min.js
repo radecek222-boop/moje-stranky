@@ -1315,7 +1315,7 @@ const WGS = {
         div.textContent = day;
         div.addEventListener('click', () => {
           const selected = day.toString().padStart(2, '0') + '.' + (month + 1).toString().padStart(2, '0') + '.' + year;
-          if (selectedInput) { selectedInput.value = selected; if (selectedInput.id === 'datum_reklamace') { self.calculateWarranty(); } }
+          if (selectedInput) { selectedInput.value = selected; self.calculateWarranty(); }
           closeModal(); // Step 38: Použít Alpine close
         });
         grid.appendChild(div);

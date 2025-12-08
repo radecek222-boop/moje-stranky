@@ -124,7 +124,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
             data-lang-placeholder-it="Inizia a digitare l'indirizzo (via, città)..."
             autocomplete="off"
           >
-          <div id="address-suggestions" class="suggestions-dropdown" style="display: none;"></div>
+          <div id="address-suggestions" class="suggestions-dropdown hidden"></div>
         </div>
 
         <?php
