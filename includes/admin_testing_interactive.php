@@ -553,7 +553,7 @@ function loadStep1_Formular(panel) {
             </div>
             <div class="form-group">
                 <label for="telefon">Telefon *</label>
-                <input type="tel" id="telefon" value="+420777888999" autocomplete="tel" required>
+                <input type="tel" id="telefon" value="+420725965826" autocomplete="tel" required>
             </div>
             <div class="form-group">
                 <label for="popis_problemu">Popis problému *</label>
@@ -656,7 +656,7 @@ async function executeStep2() {
         const formData = new FormData();
         formData.append('jmeno', document.getElementById('jmeno')?.value || 'Test Zákazník E2E');
         formData.append('email', document.getElementById('email')?.value || 'test-e2e@wgs-service.cz');
-        formData.append('telefon', document.getElementById('telefon')?.value || '+420777888999');
+        formData.append('telefon', document.getElementById('telefon')?.value || '+420725965826');
         formData.append('popis_problemu', document.getElementById('popis_problemu')?.value || 'E2E test workflow');
 
         const response = await fetch('api/create_test_claim.php', {
