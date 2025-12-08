@@ -255,7 +255,7 @@ try {
         '{{created_at}}' => $notificationData['created_at'] ?? date('d.m.Y H:i'),
         '{{completed_at}}' => $notificationData['completed_at'] ?? '',
         '{{company_email}}' => 'reklamace@wgs-service.cz',
-        '{{company_phone}}' => '+420 777 888 999',
+        '{{company_phone}}' => '+420 725 965 826',
     ];
 
     // Replace variables in subject and message
