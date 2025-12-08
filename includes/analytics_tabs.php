@@ -22,41 +22,6 @@ $analyticsTabs = [
         'description' => 'Click & Scroll mapy'
     ],
     [
-        'file' => 'analytics-replay.php',
-        'label' => 'Session Replay',
-        'description' => 'Záznamy návštěv'
-    ],
-    [
-        'file' => 'analytics-campaigns.php',
-        'label' => 'Kampaně',
-        'description' => 'UTM tracking'
-    ],
-    [
-        'file' => 'analytics-conversions.php',
-        'label' => 'Konverze',
-        'description' => 'Conversion funnels'
-    ],
-    [
-        'file' => 'analytics-user-scores.php',
-        'label' => 'User Scoring',
-        'description' => 'AI analýza chování'
-    ],
-    [
-        'file' => 'analytics-realtime.php',
-        'label' => 'Real-time',
-        'description' => 'Live dashboard'
-    ],
-    [
-        'file' => 'analytics-reports.php',
-        'label' => 'AI Reporty',
-        'description' => 'Automatické reporty'
-    ],
-    [
-        'file' => 'gdpr-portal.php',
-        'label' => 'GDPR',
-        'description' => 'Compliance & Privacy'
-    ],
-    [
         'file' => 'sprava_ip_blacklist.php',
         'label' => 'IP Adresy',
         'description' => 'Správa blacklistu IP'
